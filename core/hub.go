@@ -3,6 +3,14 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"net"
+	"os"
+	"runtime"
+	"runtime/debug"
+	"sort"
+	"strconv"
+	"time"
+
 	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
 	"github.com/metacubex/mihomo/common/observable"
@@ -12,18 +20,13 @@ import (
 	"github.com/metacubex/mihomo/component/updater"
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/constant/features"
 	cp "github.com/metacubex/mihomo/constant/provider"
 	"github.com/metacubex/mihomo/hub/executor"
 	"github.com/metacubex/mihomo/listener"
 	"github.com/metacubex/mihomo/log"
 	"github.com/metacubex/mihomo/tunnel"
 	"github.com/metacubex/mihomo/tunnel/statistic"
-	"net"
-	"os"
-	"runtime"
-	"sort"
-	"strconv"
-	"time"
 )
 
 var (
@@ -33,6 +36,8 @@ var (
 )
 
 func handleInitClash(paramsString string) bool {
+	runLock.Lock()
+	defer runLock.Unlock()
 	var params = InitParams{}
 	err := json.Unmarshal([]byte(paramsString), &params)
 	if err != nil {
@@ -69,16 +74,17 @@ func handleGetIsInit() bool {
 }
 
 func handleForceGC() {
-	go func() {
-		log.Infoln("[APP] request force GC")
-		runtime.GC()
-	}()
+	log.Infoln("[APP] request force GC")
+	runtime.GC()
+	if features.Android {
+		debug.FreeOSMemory()
+	}
 }
 
 func handleShutdown() bool {
 	stopListeners()
 	executor.Shutdown()
-	runtime.GC()
+	handleForceGC()
 	isInit = false
 	return true
 }
@@ -201,8 +207,14 @@ func handleAsyncTestDelay(paramsString string, fn func(string)) {
 			return false, nil
 		}
 
-		testUrl := constant.DefaultTestURL
+		if proxyType := proxy.Type(); proxyType == constant.Direct || proxyType == constant.Compatible {
+			delayData.Value = -1
+			data, _ := json.Marshal(delayData)
+			fn(string(data))
+			return false, nil
+		}
 
+		testUrl := constant.DefaultTestURL
 		if params.TestUrl != "" {
 			testUrl = params.TestUrl
 		}

@@ -6,6 +6,7 @@
   "proxies": "Proxies",
   "profile": "Profile",
   "profiles": "Profiles",
+  "dlerCloud": "Dler Cloud",
   "tools": "Tools",
   "logs": "Logs",
   "logsDesc": "Log capture records",
@@ -121,7 +122,6 @@
   "project": "Project",
   "core": "Core",
   "tabAnimation": "Tab animation",
-  "desc": "A multi-platform proxy client based on ClashMeta, simple and easy to use, open-source and ad-free.",
   "startVpn": "Starting VPN...",
   "stopVpn": "Stopping VPN...",
   "discovery": "Discovery a new version",
@@ -208,7 +208,6 @@
   "proxyGroup": "Proxy group",
   "go": "Go",
   "externalLink": "External link",
-  "otherContributors": "Other contributors",
   "autoCloseConnections": "Auto close connections",
   "autoCloseConnectionsDesc": "Auto close connections after change node",
   "onlyStatisticsProxy": "Only statistics proxy",
@@ -429,8 +428,6 @@
   "forceRestartCoreTip": "Are you sure you want to force restart the core?",
   "dnsHijacking": "DNS hijacking",
   "coreStatus": "Core status",
-  "dataCollectionTip": "Data Collection Notice",
-  "dataCollectionContent": "This app uses Firebase Crashlytics to collect crash information to improve app stability.\nThe collected data includes device information and crash details, but does not contain personal sensitive data.\nYou can disable this feature in settings.",
-  "crashlytics": "Crash Analysis",
-  "crashlyticsTip": "When enabled, automatically uploads crash logs without sensitive information when the app crashes"
+  "appendSystemDns": "Append System DNS",
+  "appendSystemDnsTip": "Forcefully append system DNS to the configuration"
 }

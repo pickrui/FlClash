@@ -9,6 +9,11 @@ import 'package:path/path.dart';
 
 enum Target { windows, linux, android, macos }
 
+// 构建产物文件名模板常量
+const String _defaultArtifactNameTemplate = 'flclash-{{platform}}{{#description}}-{{description}}{{/description}}.{{ext}}';
+const String _windowsArtifactNameTemplate = 'flclash-windows-x86_64{{#ext}}.{{ext}}{{/ext}}';
+const String _androidArtifactNameTemplate = 'flclash-{{platform}}.{{ext}}';
+
 extension TargetExt on Target {
   String get os {
     if (this == Target.macos) {
@@ -132,6 +137,155 @@ class Build {
 
   static String get tags => 'with_gvisor';
 
+  /// 自动更新 pubspec.yaml 中的构建号
+  static Future<void> updateVersion() async {
+    final pubspecFile = File(join(current, 'pubspec.yaml'));
+    if (!await pubspecFile.exists()) {
+      return;
+    }
+
+    final content = await pubspecFile.readAsString();
+    final lines = content.split('\n');
+    
+    // 查找 version 行
+    final versionIndex = lines.indexWhere((line) => line.trim().startsWith('version:'));
+    if (versionIndex == -1) {
+      return;
+    }
+
+    final versionLine = lines[versionIndex];
+    final versionMatch = RegExp(r'version:\s*([\d.]+)\+(\d+)').firstMatch(versionLine);
+    if (versionMatch == null) {
+      return;
+    }
+
+    final versionNumber = versionMatch.group(1)!; // 例如: 0.8.90
+    final oldBuildNumber = versionMatch.group(2)!; // 例如: 2025100801
+
+    final nowUtc = DateTime.now().toUtc();
+    final now = nowUtc.add(const Duration(hours: 8));
+    
+    // 确保日期有效，处理跨月/跨年情况
+    final year = now.year;
+    final month = now.month;
+    final day = now.day;
+    final hour = now.hour;
+    
+    // 验证日期有效性
+    if (month < 1 || month > 12) {
+      throw 'Invalid month value: $month (from DateTime: ${now.toString()})';
+    }
+    if (day < 1 || day > 31) {
+      throw 'Invalid day value: $day (from DateTime: ${now.toString()})';
+    }
+    if (hour < 0 || hour > 23) {
+      throw 'Invalid hour value: $hour (from DateTime: ${now.toString()})';
+    }
+    
+    // 使用 DateTime.utc 验证日期是否有效
+    try {
+      final testDate = DateTime.utc(year, month, day, hour);
+      if (testDate.year != year || testDate.month != month || testDate.day != day || testDate.hour != hour) {
+        throw 'Date validation failed: constructed date does not match input';
+      }
+    } catch (e) {
+      throw 'Invalid date: $year-$month-$day $hour:00 (from ${now.toString()}). Error: $e';
+    }
+    
+    // 分别生成字符串，避免任何可能的类型转换问题
+    final yearStr = year.toString();
+    final monthStr = month.toString();
+    final dayStr = day.toString();
+    final hourStr = hour.toString();
+    
+    // 确保每个组件都是正确的格式
+    final yearStrPadded = yearStr.padLeft(4, '0');
+    final monthStrPadded = monthStr.padLeft(2, '0');
+    final dayStrPadded = dayStr.padLeft(2, '0');
+    final hourStrPadded = hourStr.padLeft(2, '0');
+    
+    // 验证每个组件的长度
+    if (yearStrPadded.length != 4) {
+      throw 'Invalid year format: "$yearStrPadded" (expected 4 digits)';
+    }
+    if (monthStrPadded.length != 2) {
+      throw 'Invalid month format: "$monthStrPadded" (expected 2 digits)';
+    }
+    if (dayStrPadded.length != 2) {
+      throw 'Invalid day format: "$dayStrPadded" (expected 2 digits)';
+    }
+    if (hourStrPadded.length != 2) {
+      throw 'Invalid hour format: "$hourStrPadded" (expected 2 digits)';
+    }
+    
+    final finalBuildNumber = '$yearStrPadded$monthStrPadded$dayStrPadded$hourStrPadded';
+    
+    // 最终验证构建号格式
+    if (finalBuildNumber.length != 10 || !RegExp(r'^\d{10}$').hasMatch(finalBuildNumber)) {
+      throw 'Invalid build number format: "$finalBuildNumber" (length: ${finalBuildNumber.length}, expected YYYYMMDDHH). Components: year=$yearStrPadded, month=$monthStrPadded, day=$dayStrPadded, hour=$hourStrPadded';
+    }
+    
+    // 再次验证日期有效性（双重检查）
+    try {
+      final parsedYear = int.parse(finalBuildNumber.substring(0, 4));
+      final parsedMonth = int.parse(finalBuildNumber.substring(4, 6));
+      final parsedDay = int.parse(finalBuildNumber.substring(6, 8));
+      final parsedHour = int.parse(finalBuildNumber.substring(8, 10));
+      
+      if (parsedYear != year || parsedMonth != month || parsedDay != day || parsedHour != hour) {
+        throw 'Parsed components do not match: year=$parsedYear vs $year, month=$parsedMonth vs $month, day=$parsedDay vs $day, hour=$parsedHour vs $hour';
+      }
+      
+      final testDate = DateTime.utc(parsedYear, parsedMonth, parsedDay, parsedHour);
+      if (testDate.year != parsedYear || testDate.month != parsedMonth || testDate.day != parsedDay || testDate.hour != parsedHour) {
+        throw 'Date validation failed: constructed date does not match parsed components';
+      }
+    } catch (e) {
+      throw 'Invalid date in build number: "$finalBuildNumber". Error: $e';
+    }
+
+    lines[versionIndex] = 'version: $versionNumber+$finalBuildNumber';
+    
+    await pubspecFile.writeAsString(lines.join('\n'));
+    print('Updated version: $versionNumber+$oldBuildNumber -> $versionNumber+$finalBuildNumber');
+
+    final androidDir = Directory(join(current, 'android'));
+    if (!await androidDir.exists()) {
+      return;
+    }
+    
+    final localPropertiesFile = File(join(current, 'android', 'local.properties'));
+    List<String> localPropertiesLines = [];
+    
+    if (await localPropertiesFile.exists()) {
+      final localPropertiesContent = await localPropertiesFile.readAsString();
+      localPropertiesLines = localPropertiesContent.split('\n');
+    }
+    
+    bool versionNameFound = false;
+    bool versionCodeFound = false;
+    
+    for (int i = 0; i < localPropertiesLines.length; i++) {
+      if (localPropertiesLines[i].startsWith('flutter.versionName=')) {
+        localPropertiesLines[i] = 'flutter.versionName=$versionNumber';
+        versionNameFound = true;
+      } else if (localPropertiesLines[i].startsWith('flutter.versionCode=')) {
+        localPropertiesLines[i] = 'flutter.versionCode=$finalBuildNumber';
+        versionCodeFound = true;
+      }
+    }
+    
+    if (!versionNameFound) {
+      localPropertiesLines.add('flutter.versionName=$versionNumber');
+    }
+    if (!versionCodeFound) {
+      localPropertiesLines.add('flutter.versionCode=$finalBuildNumber');
+    }
+    
+    await localPropertiesFile.writeAsString(localPropertiesLines.join('\n'));
+    print('Updated android/local.properties: versionName=$versionNumber, versionCode=$finalBuildNumber');
+  }
+
   static Future<void> exec(
     List<String> executable, {
     String? name,
@@ -140,6 +294,8 @@ class Build {
     bool runInShell = true,
   }) async {
     if (name != null) print('run $name');
+    print('exec: ${executable.join(' ')}');
+    print('env: ${environment.toString()}');
     final process = await Process.start(
       executable[0],
       executable.sublist(1),
@@ -405,12 +561,14 @@ class BuildCommand extends Command {
     required String targets,
     String args = '',
     required String env,
+    String? artifactName,
   }) async {
     await Build.getDistributor();
+    final artifactNameArg = artifactName != null ? ' --artifact-name $artifactName' : '';
     await Build.exec(
       name: name,
       Build.getExecutable(
-        'flutter_distributor package --skip-clean --platform ${target.name} --targets $targets --flutter-build-args=verbose$args --build-dart-define=APP_ENV=$env',
+        'flutter_distributor package --skip-clean --platform ${target.name} --targets $targets --flutter-build-args=verbose$args --build-dart-define=APP_ENV=$env$artifactNameArg',
       ),
     );
   }
@@ -427,10 +585,13 @@ class BuildCommand extends Command {
 
   @override
   Future<void> run() async {
+    // 自动更新版本号
+    await Build.updateVersion();
+    
     final mode = target == Target.android ? Mode.lib : Mode.core;
     final String out = argResults?['out'] ?? (target.same ? 'app' : 'core');
     final archName = argResults?['arch'];
-    final env = argResults?['env'] ?? 'pre';
+    final env = argResults?['env'] ?? 'stable';
     final currentArches = arches
         .where((element) => element.name == archName)
         .toList();
@@ -456,12 +617,13 @@ class BuildCommand extends Command {
             ? await Build.calcSha256(corePaths.first)
             : null;
         Build.buildHelper(target, token!);
-        _buildDistributor(
+        await _buildDistributor(
           target: target,
-          targets: 'exe,zip',
+          targets: 'exe',
           args:
               ' --description $archName --build-dart-define=CORE_SHA256=$token',
           env: env,
+          artifactName: _windowsArtifactNameTemplate,
         );
         return;
       case Target.linux:
@@ -473,12 +635,13 @@ class BuildCommand extends Command {
         ].join(',');
         final defaultTarget = targetMap[arch];
         await _getLinuxDependencies(arch!);
-        _buildDistributor(
+        await _buildDistributor(
           target: target,
           targets: targets,
           args:
               ' --description $archName --build-target-platform $defaultTarget',
           env: env,
+          artifactName: _defaultArtifactNameTemplate,
         );
         return;
       case Target.android:
@@ -492,21 +655,22 @@ class BuildCommand extends Command {
             .where((element) => arch == null ? true : element == arch)
             .map((e) => targetMap[e])
             .toList();
-        _buildDistributor(
+        await _buildDistributor(
           target: target,
           targets: 'apk',
-          args:
-              ",split-per-abi --build-target-platform ${defaultTargets.join(",")}",
+          args: ",split-per-abi --build-target-platform ${defaultTargets.join(",")}",
           env: env,
+          artifactName: _androidArtifactNameTemplate,
         );
         return;
       case Target.macos:
         await _getMacosDependencies();
-        _buildDistributor(
+        await _buildDistributor(
           target: target,
           targets: 'dmg',
-          args: ' --description $archName',
+          args: archName != null ? ' --description $archName' : '',
           env: env,
+          artifactName: _defaultArtifactNameTemplate,
         );
         return;
     }

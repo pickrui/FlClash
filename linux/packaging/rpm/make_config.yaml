@@ -1,13 +1,8 @@
-display_name: FlClash
+display_name: FlClash for Dler Cloud
+package_name: flclash
 
-packager: chen08209
-packagerEmail: chen08209@gmail.com
-license: Other
-
-priority: optional
-section: x11
-installed_size: 6604
-essential: false
+packager: Dler Inc.
+license: GPL-3.0
 icon: ./assets/images/icon.png
 
 keywords:
@@ -16,7 +11,7 @@ keywords:
   - ClashMeta
   - Proxy
 
-generic_name: FlClash
+generic_name: FlClash for Dler Cloud
 
 group: Applications/Internet
 

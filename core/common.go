@@ -5,6 +5,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
+	"runtime"
+	"sync"
+
 	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/adapter/inbound"
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
@@ -22,9 +28,6 @@ import (
 	"github.com/metacubex/mihomo/log"
 	rp "github.com/metacubex/mihomo/rules/provider"
 	"github.com/metacubex/mihomo/tunnel"
-	"os"
-	"path/filepath"
-	"sync"
 )
 
 var (
@@ -164,7 +167,7 @@ func patchSelectGroup(mapping map[string]string) {
 
 func defaultSetupParams() *SetupParams {
 	return &SetupParams{
-		TestURL:     "https://www.gstatic.com/generate_204",
+		TestURL:     "http://www.gstatic.com/generate_204",
 		SelectedMap: map[string]string{},
 	}
 }
@@ -262,13 +265,50 @@ func setupConfig(params *SetupParams) error {
 	defer runLock.Unlock()
 	var err error
 	constant.DefaultTestURL = params.TestURL
-	currentConfig, err = parseWithPath(filepath.Join(constant.Path.HomeDir(), "config.json"))
+
+	configPath := params.ConfigPath
+	if configPath == "" {
+		configPath = filepath.Join(constant.Path.HomeDir(), "config.json")
+	}
+
+	// Encryption key must be provided
+	if params.EncryptionKey == "" {
+		return fmt.Errorf("encryption key is required")
+	}
+
+	// Read encrypted config file
+	encryptedData, readErr := os.ReadFile(configPath)
+	if readErr != nil {
+		// File doesn't exist or can't be read, use default config
+		currentConfig, _ = config.ParseRawConfig(config.DefaultRawConfig())
+		hub.ApplyConfig(currentConfig)
+		patchSelectGroup(params.SelectedMap)
+		updateListeners()
+		runtime.GC()
+		return readErr
+	}
+
+	// Decrypt config
+	decryptedData, decryptErr := decryptAES(encryptedData, params.EncryptionKey)
+	if decryptErr != nil {
+		return fmt.Errorf("failed to decrypt config.json: %w", decryptErr)
+	}
+
+	// Parse decrypted data
+	rawConfig := config.DefaultRawConfig()
+	if unmarshalErr := json.Unmarshal(decryptedData, rawConfig); unmarshalErr != nil {
+		return fmt.Errorf("failed to parse config.json: %w", unmarshalErr)
+	}
+
+	currentConfig, err = config.ParseRawConfig(rawConfig)
 	if err != nil {
 		currentConfig, _ = config.ParseRawConfig(config.DefaultRawConfig())
 	}
+
 	hub.ApplyConfig(currentConfig)
 	patchSelectGroup(params.SelectedMap)
 	updateListeners()
+	runtime.GC()
 	return err
 }
 

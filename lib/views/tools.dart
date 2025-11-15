@@ -4,7 +4,6 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/about.dart';
 import 'package:fl_clash/views/access.dart';
 import 'package:fl_clash/views/application_setting.dart';
@@ -31,12 +30,12 @@ class _ToolViewState extends ConsumerState<ToolsView> {
   Widget _buildNavigationMenuItem(NavigationItem navigationItem) {
     return ListItem.open(
       leading: navigationItem.icon,
-      title: Text(Intl.message(navigationItem.label.name)),
+      title: Text(navigationItem.getDisplayLabel(context)),
       subtitle: navigationItem.description != null
           ? Text(Intl.message(navigationItem.description!))
           : null,
       delegate: OpenDelegate(
-        title: Intl.message(navigationItem.label.name),
+        title: navigationItem.getDisplayLabel(context),
         widget: navigationItem.builder(context),
         wrap: false,
       ),
@@ -60,7 +59,6 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     return generateSection(
       title: appLocalizations.other,
       items: [
-        _DisclaimerItem(),
         if (enableDeveloperMode) _DeveloperItem(),
         _InfoItem(),
       ],
@@ -273,25 +271,6 @@ class _SettingItem extends StatelessWidget {
         title: appLocalizations.application,
         widget: const ApplicationSettingView(),
       ),
-    );
-  }
-}
-
-class _DisclaimerItem extends StatelessWidget {
-  const _DisclaimerItem();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListItem(
-      leading: const Icon(Icons.gavel),
-      title: Text(appLocalizations.disclaimer),
-      onTap: () async {
-        final isDisclaimerAccepted = await globalState.appController
-            .showDisclaimer();
-        if (!isDisclaimerAccepted) {
-          globalState.appController.handleExit();
-        }
-      },
     );
   }
 }

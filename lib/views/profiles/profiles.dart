@@ -157,6 +157,10 @@ class _ProfilesViewState extends State<ProfilesView> {
                     i++
                   )
                     GridItem(
+                      crossAxisCellCount: profilesSelectorState.profiles[i].type == ProfileType.url &&
+                          profilesSelectorState.profiles[i].url.toLowerCase().contains('dler.cloud')
+                          ? 2
+                          : 1,
                       child: ProfileItem(
                         key: Key(profilesSelectorState.profiles[i].id),
                         profile: profilesSelectorState.profiles[i],
@@ -177,7 +181,7 @@ class _ProfilesViewState extends State<ProfilesView> {
   }
 }
 
-class ProfileItem extends StatelessWidget {
+class ProfileItem extends ConsumerStatefulWidget {
   final Profile profile;
   final String? groupValue;
   final void Function(String? value) onChanged;
@@ -189,6 +193,35 @@ class ProfileItem extends StatelessWidget {
     required this.onChanged,
   });
 
+  @override
+  ConsumerState<ProfileItem> createState() => _ProfileItemState();
+}
+
+class _ProfileItemState extends ConsumerState<ProfileItem> {
+  late TextEditingController _paramsController;
+
+  @override
+  void initState() {
+    super.initState();
+    _paramsController = TextEditingController(text: widget.profile.urlParams);
+  }
+
+  @override
+  void didUpdateWidget(ProfileItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.profile.urlParams != widget.profile.urlParams) {
+      if (_paramsController.text != widget.profile.urlParams) {
+        _paramsController.text = widget.profile.urlParams;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _paramsController.dispose();
+    super.dispose();
+  }
+
   Future<void> _handleDeleteProfile(BuildContext context) async {
     final res = await globalState.showMessage(
       title: appLocalizations.tip,
@@ -196,47 +229,59 @@ class ProfileItem extends StatelessWidget {
         text: appLocalizations.deleteTip(appLocalizations.profile),
       ),
     );
-    if (res != true) {
-      return;
-    }
-    await globalState.appController.deleteProfile(profile.id);
+    if (res != true) return;
+    await globalState.appController.deleteProfile(widget.profile.id);
   }
 
-  Future updateProfile() async {
+  Future<void> _updateProfile() async {
+    if (widget.profile.type == ProfileType.file) return;
+    
+    Profile profileToUpdate = widget.profile;
+    if (_isDlerCloudProfile) {
+      _saveUrlParamsIfChanged();
+      final updatedProfile = globalState.config.profiles.getProfile(widget.profile.id);
+      if (updatedProfile != null) {
+        profileToUpdate = updatedProfile;
+      }
+    }
+    
     final appController = globalState.appController;
-    if (profile.type == ProfileType.file) return;
-    await globalState.appController.safeRun(silence: false, () async {
+    final result = await appController.safeRun(silence: false, () async {
       try {
-        appController.setProfile(profile.copyWith(isUpdating: true));
-        await appController.updateProfile(profile);
+        appController.setProfile(profileToUpdate.copyWith(isUpdating: true));
+        await appController.updateProfile(profileToUpdate);
+        return true;
       } catch (e) {
-        appController.setProfile(profile.copyWith(isUpdating: false));
+        appController.setProfile(profileToUpdate.copyWith(isUpdating: false));
         rethrow;
       }
     });
+    
+    if (result == true && mounted && context.mounted) {
+      context.showNotifier('同步成功');
+    }
   }
+
 
   void _handleShowEditExtendPage(BuildContext context) {
     showExtend(
       context,
-      builder: (_, type) {
-        return AdaptiveSheetScaffold(
+      builder: (_, type) => AdaptiveSheetScaffold(
           type: type,
-          body: EditProfileView(profile: profile, context: context),
+        body: EditProfileView(profile: widget.profile, context: context),
           title: '${appLocalizations.edit}${appLocalizations.profile}',
-        );
-      },
+      ),
     );
   }
 
   List<Widget> _buildUrlProfileInfo(BuildContext context) {
-    final subscriptionInfo = profile.subscriptionInfo;
+    final subscriptionInfo = widget.profile.subscriptionInfo;
     return [
       const SizedBox(height: 8),
       if (subscriptionInfo != null)
         SubscriptionInfoView(subscriptionInfo: subscriptionInfo),
       Text(
-        profile.lastUpdateDate?.lastUpdateTimeDesc ?? '',
+        widget.profile.lastUpdateDate?.lastUpdateTimeDesc ?? '',
         style: context.textTheme.labelMedium?.toLighter,
       ),
     ];
@@ -246,24 +291,15 @@ class ProfileItem extends StatelessWidget {
     return [
       const SizedBox(height: 8),
       Text(
-        profile.lastUpdateDate?.lastUpdateTimeDesc ?? '',
+        widget.profile.lastUpdateDate?.lastUpdateTimeDesc ?? '',
         style: context.textTheme.labelMedium?.toLight,
       ),
     ];
   }
 
-  // _handleCopyLink(BuildContext context) async {
-  //   await Clipboard.setData(
-  //     ClipboardData(
-  //       text: profile.url,
-  //     ),
-  //   );
-  //   if (context.mounted) {
-  //     context.showNotifier(appLocalizations.copySuccess);
-  //   }
-  // }
 
   Future<void> _handleExportFile(BuildContext context) async {
+    final profile = widget.profile;
     final res = await globalState.appController.safeRun<bool>(
       () async {
         final file = await profile.getFile();
@@ -271,8 +307,7 @@ class ProfileItem extends StatelessWidget {
           profile.label ?? profile.id,
           file.readAsBytesSync(),
         );
-        if (value == null) return false;
-        return true;
+        return value != null;
       },
       needLoading: true,
       title: appLocalizations.tip,
@@ -283,17 +318,63 @@ class ProfileItem extends StatelessWidget {
   }
 
   void _handlePushGenProfilePage(BuildContext context, String id) {
-    final overrideProfileView = OverrideProfileView(profileId: id);
-    BaseNavigator.push(context, overrideProfileView);
+    BaseNavigator.push(context, OverrideProfileView(profileId: id));
+  }
+
+  bool get _isDlerCloudProfile =>
+      widget.profile.type == ProfileType.url &&
+      widget.profile.url.toLowerCase().contains('dler.cloud');
+
+  void _saveUrlParamsIfChanged() {
+    if (_paramsController.text != widget.profile.urlParams) {
+      globalState.appController.setProfile(
+        widget.profile.copyWith(urlParams: _paramsController.text),
+      );
+    }
+  }
+
+  Widget _buildDlerCloudParamsInput(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        color: context.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.tune,
+            size: 16,
+            color: context.colorScheme.onSurface.withValues(alpha: 0.6),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: TextField(
+              controller: _paramsController,
+              decoration: InputDecoration(
+                hintText: '可选参数 (如: &type=love)',
+                hintStyle: context.textTheme.bodySmall?.copyWith(
+                  color: context.colorScheme.onSurface.withValues(alpha: 0.5),
+                ),
+                border: InputBorder.none,
+                isDense: true,
+                contentPadding: EdgeInsets.zero,
+              ),
+              style: context.textTheme.bodySmall,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final profile = widget.profile;
     return CommonCard(
-      isSelected: profile.id == groupValue,
-      onPressed: () {
-        onChanged(profile.id);
-      },
+      isSelected: profile.id == widget.groupValue,
+      onPressed: () => widget.onChanged(profile.id),
       child: ListItem(
         key: Key(profile.id),
         horizontalTitleGap: 16,
@@ -308,58 +389,50 @@ class ProfileItem extends StatelessWidget {
                     padding: EdgeInsets.all(8),
                     child: CircularProgressIndicator(),
                   )
+                : _isDlerCloudProfile
+                    ? IconButton(
+                        key: const ValueKey('sync'),
+                        onPressed: _updateProfile,
+                        icon: const Icon(Icons.sync_alt_sharp),
+                        tooltip: appLocalizations.sync,
+                  )
                 : CommonPopupBox(
-                    key: ValueKey('menu'),
+                        key: const ValueKey('menu'),
                     popup: CommonPopupMenu(
                       items: [
                         PopupMenuItemData(
                           icon: Icons.edit_outlined,
                           label: appLocalizations.edit,
-                          onPressed: () {
-                            _handleShowEditExtendPage(context);
-                          },
+                              onPressed: () => _handleShowEditExtendPage(context),
                         ),
-                        if (profile.type == ProfileType.url) ...[
+                            if (profile.type == ProfileType.url)
                           PopupMenuItemData(
                             icon: Icons.sync_alt_sharp,
                             label: appLocalizations.sync,
-                            onPressed: () {
-                              updateProfile();
-                            },
+                                onPressed: _updateProfile,
                           ),
-                        ],
                         PopupMenuItemData(
                           icon: Icons.extension_outlined,
                           label: appLocalizations.override,
-                          onPressed: () {
-                            _handlePushGenProfilePage(context, profile.id);
-                          },
+                              onPressed: () => _handlePushGenProfilePage(context, profile.id),
                         ),
                         PopupMenuItemData(
                           icon: Icons.file_copy_outlined,
                           label: appLocalizations.exportFile,
-                          onPressed: () {
-                            _handleExportFile(context);
-                          },
+                              onPressed: () => _handleExportFile(context),
                         ),
                         PopupMenuItemData(
                           danger: true,
                           icon: Icons.delete_outlined,
                           label: appLocalizations.delete,
-                          onPressed: () {
-                            _handleDeleteProfile(context);
-                          },
+                              onPressed: () => _handleDeleteProfile(context),
                         ),
                       ],
                     ),
-                    targetBuilder: (open) {
-                      return IconButton(
-                        onPressed: () {
-                          open();
-                        },
-                        icon: Icon(Icons.more_vert),
-                      );
-                    },
+                        targetBuilder: (open) => IconButton(
+                          onPressed: open,
+                          icon: const Icon(Icons.more_vert),
+                        ),
                   ),
           ),
         ),
@@ -384,6 +457,7 @@ class ProfileItem extends StatelessWidget {
                     ProfileType.file => _buildFileProfileInfo(context),
                     ProfileType.url => _buildUrlProfileInfo(context),
                   },
+                  if (_isDlerCloudProfile) _buildDlerCloudParamsInput(context),
                 ],
               ),
             ],
@@ -452,11 +526,11 @@ class _ReorderableProfilesSheetState extends State<ReorderableProfilesSheet> {
             Navigator.of(context).pop();
             globalState.appController.setProfiles(profiles);
           },
-          icon: Icon(Icons.save),
+          icon: const Icon(Icons.save),
         ),
       ],
       body: Padding(
-        padding: EdgeInsets.only(bottom: 32, top: 16),
+        padding: const EdgeInsets.only(bottom: 32, top: 16),
         child: ReorderableListView.builder(
           buildDefaultDragHandles: false,
           padding: const EdgeInsets.symmetric(horizontal: 12),

@@ -6,6 +6,7 @@
   "proxies": "代理",
   "profile": "配置",
   "profiles": "配置",
+  "dlerCloud": "Dler Cloud",
   "tools": "工具",
   "logs": "日志",
   "logsDesc": "日志捕获记录",
@@ -121,7 +122,6 @@
   "project": "项目",
   "core": "内核",
   "tabAnimation": "选项卡动画",
-  "desc": "基于ClashMeta的多平台代理客户端，简单易用，开源无广告。",
   "startVpn": "正在启动VPN...",
   "stopVpn": "正在停止VPN...",
   "discovery": "发现新版本",
@@ -208,7 +208,6 @@
   "proxyGroup": "代理组",
   "go": "前往",
   "externalLink": "外部链接",
-  "otherContributors": "其他贡献者",
   "autoCloseConnections": "自动关闭连接",
   "autoCloseConnectionsDesc": "切换节点后自动关闭连接",
   "onlyStatisticsProxy": "仅统计代理",
@@ -430,8 +429,6 @@
   "forceRestartCoreTip": "您确定要强制重启核心吗？",
   "dnsHijacking": "DNS劫持",
   "coreStatus": "核心状态",
-  "dataCollectionTip": "数据收集说明",
-  "dataCollectionContent": "本应用使用 Firebase Crashlytics 收集崩溃信息以改进应用稳定性。\n收集的数据包括设备信息和崩溃详情，不包含个人敏感数据。\n您可以在设置中关闭此功能。",
-  "crashlytics": "崩溃分析",
-  "crashlyticsTip": "开启后，应用崩溃时自动上传不包含敏感信息的崩溃日志"
+  "appendSystemDns": "追加系统DNS",
+  "appendSystemDnsTip": "强制为配置附加系统DNS"
 }

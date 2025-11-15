@@ -9,12 +9,16 @@ part of '../core.dart';
 _SetupParams _$SetupParamsFromJson(Map<String, dynamic> json) => _SetupParams(
   selectedMap: Map<String, String>.from(json['selected-map'] as Map),
   testUrl: json['test-url'] as String,
+  configPath: json['config-path'] as String?,
+  encryptionKey: json['encryption-key'] as String?,
 );
 
 Map<String, dynamic> _$SetupParamsToJson(_SetupParams instance) =>
     <String, dynamic>{
       'selected-map': instance.selectedMap,
       'test-url': instance.testUrl,
+      'config-path': instance.configPath,
+      'encryption-key': instance.encryptionKey,
     };
 
 _UpdateParams _$UpdateParamsFromJson(Map<String, dynamic> json) =>

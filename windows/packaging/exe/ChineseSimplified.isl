@@ -380,7 +380,7 @@ ShutdownBlockReasonUninstallingApp=正在卸载 %1。
 
 [CustomMessages]
 
-NameAndVersion=%1 版本 %2
+NameAndVersion=%1
 AdditionalIcons=附加快捷方式：
 CreateDesktopIcon=创建桌面快捷方式(&D)
 CreateQuickLaunchIcon=创建快速运行栏快捷方式(&Q)

@@ -1,124 +1,247 @@
-name: build
+name: Build and Release
 
 on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Version tag (e.g., v0.8.90)'
+        required: false
+        type: string
+      is_stable:
+        description: 'Is stable release'
+        required: false
+        type: boolean
+        default: true
+      create_release:
+        description: 'Create GitHub release'
+        required: false
+        type: boolean
+        default: false
+
 env:
-  IS_STABLE: ${{ !contains(github.ref, '-') }}
+  IS_STABLE: ${{ github.event_name == 'workflow_dispatch' && inputs.is_stable == true || (github.event_name == 'push' && !contains(github.ref, '-')) }}
+  GO_VERSION: '1.25'
+  FLUTTER_CHANNEL: 'stable'
 
 jobs:
   build:
+    name: Build ${{ matrix.platform }}-${{ matrix.arch || 'all' }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    continue-on-error: true
     strategy:
+      fail-fast: false
       matrix:
         include:
           - platform: android
-            os: ubuntu-latest
+            os: macos-latest
+            arch: null
           - platform: windows
-            os: Windows-2022
+            os: windows-2022
             arch: amd64
           - platform: linux
             os: ubuntu-22.04
             arch: amd64
+          - platform: linux
+            os: ubuntu-24.04-arm
+            arch: arm64
           - platform: macos
-            os: macos-13
+            os: macos-15-intel
             arch: amd64
           - platform: macos
             os: macos-latest
             arch: arm64
-          #          - platform: windows
-          #            os: windows-11-arm
-          #            arch: arm64
-          - platform: linux
-            os: ubuntu-24.04-arm
-            arch: arm64
 
     steps:
-      - name: Setup rust
-        if: startsWith(matrix.os, 'windows-11-arm')
-        run: |
-          Invoke-WebRequest -Uri "https://win.rustup.rs/aarch64" -OutFile rustup-init.exe
-          .\rustup-init.exe -y --default-toolchain stable
-          $cargoPath = "$env:USERPROFILE\.cargo\bin"
-          Add-Content $env:GITHUB_PATH $cargoPath
-
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          ref: ${{ github.ref }}
+
+      - name: Create Tag (if provided)
+        if: github.event_name == 'workflow_dispatch' && inputs.tag != ''
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git rev-parse "${{ inputs.tag }}" >/dev/null 2>&1; then
+            git checkout "${{ inputs.tag }}"
+          else
+            git tag "${{ inputs.tag }}"
+            git push origin "${{ inputs.tag }}"
+            git checkout "${{ inputs.tag }}"
+          fi
+
+      - name: Install Linux Dependencies
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang cmake ninja-build pkg-config \
+            libgtk-3-dev liblzma-dev libstdc++-12-dev \
+            libayatana-appindicator3-dev \
+            libsecret-1-dev libjsoncpp-dev
+
+      - name: Setup Linux Build Cache
+        if: matrix.platform == 'linux'
+        uses: actions/cache@v4
+        with:
+          path: |
+            build/linux
+            ~/.cache
+          key: ${{ runner.os }}-linux-${{ matrix.arch }}-${{ hashFiles('**/CMakeLists.txt', '**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-linux-${{ matrix.arch }}-
+            ${{ runner.os }}-linux-
+
+      - name: Setup Windows Build Cache
+        if: matrix.platform == 'windows'
+        uses: actions/cache@v4
+        with:
+          path: |
+            build/windows
+            ~/AppData/Local/Temp/chocolatey
+          key: ${{ runner.os }}-windows-${{ matrix.arch }}-${{ hashFiles('**/CMakeLists.txt', '**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-windows-${{ matrix.arch }}-
+            ${{ runner.os }}-windows-
+
+      - name: Setup Gradle Cache
+        if: matrix.platform == 'android'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.android/build-cache
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Setup Pub Cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Setup CocoaPods Cache
+        if: matrix.platform == 'macos'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/CocoaPods
+            ~/.cocoapods
+            macos/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
+      - name: Setup Xcode DerivedData Cache
+        if: matrix.platform == 'macos'
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Developer/Xcode/DerivedData
+          key: ${{ runner.os }}-xcode-${{ matrix.arch }}-${{ hashFiles('macos/**/*.pbxproj', 'macos/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-xcode-${{ matrix.arch }}-
+            ${{ runner.os }}-xcode-
 
       - name: Setup Android Signing
-        if: startsWith(matrix.platform,'android')
+        if: matrix.platform == 'android'
         run: |
+          set -e
           echo "${{ secrets.KEYSTORE }}" | base64 --decode > android/app/keystore.jks
-          echo "${{ secrets.SERVICE_JSON }}" | base64 --decode > android/app/google-services.json
-          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/local.properties
-          echo "storePassword=${{ secrets.STORE_PASSWORD }}" >> android/local.properties
-          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/local.properties
-
+          if [ ! -s android/app/keystore.jks ]; then
+            echo "Error: keystore.jks is empty or failed to decode"
+            exit 1
+          fi
+          cat > android/local.properties << EOF
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          EOF
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.24.0'
-          cache-dependency-path: |
-            core/go.sum
-
-      - name: Setup Flutter Master
-        if: startsWith(matrix.os, 'windows-11-arm') || startsWith(matrix.os, 'ubuntu-24.04-arm')
-        uses: subosito/flutter-action@v2
-        with:
-          channel: 'master'
+          go-version: ${{ env.GO_VERSION }}
           cache: true
+          cache-dependency-path: core/go.sum
+
       - name: Setup Flutter
-        if: ${{ !(startsWith(matrix.os, 'windows-11-arm') || startsWith(matrix.os, 'ubuntu-24.04-arm')) }}
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          channel: ${{ startsWith(matrix.os, 'ubuntu-24.04-arm') && 'master' || env.FLUTTER_CHANNEL }}
+          architecture: ${{ (matrix.platform == 'android' || (matrix.platform == 'macos' && matrix.os == 'macos-latest')) && 'x64' || '' }}
           cache: true
-      #          flutter-version: 3.29.3
 
-      - name: Get Flutter Dependency
+      - name: Install Flutter Dependencies
         run: flutter pub get
 
-      - name: Setup
-        run: dart setup.dart ${{ matrix.platform }} ${{ matrix.arch && format('--arch {0}', matrix.arch) }} ${{ env.IS_STABLE == 'true' && '--env stable' || '' }}
+      - name: Build Application
+        id: build
+        shell: bash
+        env:
+          TZ: UTC
+        run: |
+          set -e
+          BUILD_ARGS="${{ matrix.platform }}"
+          [ -n "${{ matrix.arch }}" ] && BUILD_ARGS="$BUILD_ARGS --arch ${{ matrix.arch }}"
+          BUILD_ARGS="$BUILD_ARGS --out app"
+          [ "${{ env.IS_STABLE }}" == "true" ] && BUILD_ARGS="$BUILD_ARGS --env stable"
+          dart setup.dart $BUILD_ARGS
 
-      - name: Upload
+      - name: Verify Build Output
+        id: check_output
+        shell: bash
+        run: |
+          if [ -d "./dist" ] && [ -n "$(ls -A ./dist 2>/dev/null)" ]; then
+            echo "has_files=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_files=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload Build Artifacts
+        if: steps.build.outcome == 'success' && steps.check_output.outputs.has_files == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: artifact-${{ matrix.platform }}${{ matrix.arch && format('-{0}', matrix.arch) }}
+          name: artifact-${{ matrix.platform }}-${{ matrix.arch || 'default' }}-${{ github.run_number }}
           path: ./dist
-          overwrite: true
+          retention-days: 7
+          compression-level: 6
+
+      - name: Cleanup Sensitive Files
+        if: always() && matrix.platform == 'android'
+        run: |
+          rm -f android/app/keystore.jks android/local.properties
 
   changelog:
+    name: Update Changelog
     runs-on: ubuntu-latest
-    needs: [ build ]
+    needs: [build]
+    if: success() && github.event_name == 'push' && !contains(github.ref, '-')
+    timeout-minutes: 10
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
-        if: ${{ env.IS_STABLE == 'true' }}
         with:
           fetch-depth: 0
           ref: refs/heads/main
-      - name: Generate
-        if: ${{ env.IS_STABLE == 'true' }}
+
+      - name: Generate Changelog
         run: |
-          tags=($(git tag --merged $(git rev-parse HEAD) --sort=-creatordate))
-          preTag=$(grep -oP '^## \K.*' CHANGELOG.md | head -n 1)
+          set -e
+          mapfile -t tags < <(git tag --merged HEAD --sort=-creatordate)
+          preTag=$(grep -oP '^## \K.*' CHANGELOG.md | head -n 1 || echo "")
           currentTag=""
           for ((i = 0; i <= ${#tags[@]}; i++)); do
-            if (( i < ${#tags[@]} )); then
-              tag=${tags[$i]}
-            else
-              tag=""
-            fi
+            tag=$([ $i -lt ${#tags[@]} ] && echo "${tags[$i]}" || echo "")
             if [ -n "$currentTag" ]; then
-              if [ "$(echo -e "$currentTag\n$preTag" | sort -V | head -n 1)" == "$currentTag" ]; then
-                break
-              fi
-            fi
-            if [ -n "$currentTag" ]; then
+              [ "$(echo -e "$currentTag\n$preTag" | sort -V | head -n 1)" == "$currentTag" ] && break
               echo "## $currentTag" >> NEW_CHANGELOG.md
               echo "" >> NEW_CHANGELOG.md
               if [ -n "$tag" ]; then
@@ -131,130 +254,103 @@ jobs:
             currentTag=$tag
           done
           cat CHANGELOG.md >> NEW_CHANGELOG.md
-          cat NEW_CHANGELOG.md > CHANGELOG.md
+          mv NEW_CHANGELOG.md CHANGELOG.md
 
-      - name: Commit
-        if: ${{ env.IS_STABLE == 'true' }}
+      - name: Commit and Push Changelog
         run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add CHANGELOG.md
           if ! git diff --cached --quiet; then
-            echo "Commit pushing"
-            git config --local user.email "chen08209@gmail.com"
-            git config --local user.name "chen08209"
-            git commit -m "Update changelog"
+            git commit -m "docs: update changelog for ${{ github.ref_name }}"
             git push
-            if [ $? -eq 0 ]; then
-              echo "Push succeeded"
-            else
-              echo "Push failed"
-              exit 1
-            fi
           fi
 
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  upload:
-    permissions: write-all
-    needs: [ build ]
+  release:
+    name: Create GitHub Release
     runs-on: ubuntu-latest
-    services:
-      telegram-bot-api:
-        image: aiogram/telegram-bot-api:latest
-        env:
-          TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
-          TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
-        ports:
-          - 8081:8081
+    needs: [build]
+    if: success() && ((github.event_name == 'workflow_dispatch' && inputs.is_stable == true) || (github.event_name == 'push' && !contains(github.ref, '-')) || (github.event_name == 'workflow_dispatch' && inputs.create_release == true))
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      discussions: write
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
 
-      - name: Download
+      - name: Download All Artifacts
         uses: actions/download-artifact@v4
         with:
           path: ./dist/
           pattern: artifact-*
           merge-multiple: true
 
-      - name: Generate release.md
+      - name: Generate Release Notes
         run: |
-          tags=($(git tag --merged $(git rev-parse HEAD) --sort=-creatordate))
-          preTag=$(curl --silent "https://api.github.com/repos/chen08209/FlClash/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")' || echo "")
+          set -e
+          VERSION_TAG="${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}"
+          mapfile -t tags < <(git tag --merged HEAD --sort=-creatordate)
+          preTag=$(curl -sf "https://api.github.com/repos/${{ github.repository }}/releases/latest" | \
+                   grep -Po '"tag_name": "\K.*?(?=")' || echo "")
           currentTag=""
           for ((i = 0; i <= ${#tags[@]}; i++)); do
-            if (( i < ${#tags[@]} )); then
-              tag=${tags[$i]}
-            else
-              tag=""
-            fi
+            tag=$([ $i -lt ${#tags[@]} ] && echo "${tags[$i]}" || echo "")
             if [ -n "$currentTag" ]; then
-              if [ "$(echo -e "$currentTag\n$preTag" | sort -V | head -n 1)" == "$currentTag" ]; then
+              [ "$(echo -e "$currentTag\n$preTag" | sort -V | head -n 1)" == "$currentTag" ] && break
+              if [ "$currentTag" == "$VERSION_TAG" ]; then
+                if [ -n "$tag" ]; then
+                  git log --pretty=format:"%B" "$tag..$currentTag" | awk 'NF {print "- " $0} !NF {print ""}' >> release.md
+                else
+                  git log --pretty=format:"%B" "$currentTag" | awk 'NF {print "- " $0} !NF {print ""}' >> release.md
+                fi
+                echo "" >> release.md
                 break
               fi
-            fi
-            if [ -n "$currentTag" ]; then
-              if [ -n "$tag" ]; then
-                git log --pretty=format:"%B" "$tag..$currentTag" | awk 'NF {print "- " $0} !NF {print ""}' >> release.md
-              else
-                git log --pretty=format:"%B" "$currentTag" | awk 'NF {print "- " $0} !NF {print ""}' >> release.md
-              fi
-              echo "" >> release.md
             fi
             currentTag=$tag
           done
 
-      - name: Push to telegram
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TAG: ${{ github.ref_name }}
-          RUN_ID: ${{ github.run_id }}
+      - name: Append Release Template
         run: |
-          python -m pip install --upgrade pip
-          pip install requests
-          python release_telegram.py
+          VERSION_TAG="${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}"
+          version=$(echo "$VERSION_TAG" | sed 's/^v//')
+          if [ -f "./.github/release_template.md" ]; then
+            sed "s|VERSION|$version|g" ./.github/release_template.md >> release.md
+          fi
 
-      - name: Patch release.md
+      - name: Publish Previous Draft
+        if: (github.event_name == 'workflow_dispatch' && inputs.is_stable == true) || (github.event_name == 'push' && !contains(github.ref, '-'))
+        continue-on-error: true
         run: |
-          version=$(echo "${{ github.ref_name }}" | sed 's/^v//')
-          sed "s|VERSION|$version|g" ./.github/release_template.md >> release.md
+          RELEASE_TAG="${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}"
+          release_info=$(curl -sf -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/tags/$RELEASE_TAG" || echo "")
+          if [ -z "$release_info" ]; then
+            exit 0
+          fi
+          is_draft=$(echo "$release_info" | grep -o '"draft":[^,]*' | grep -o '[^:]*$' || echo "false")
+          if [ "$is_draft" = "true" ]; then
+            release_id=$(echo "$release_info" | grep -o '"id":[0-9]*' | grep -o '[0-9]*' | head -1)
+            curl -sf -X PATCH \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              "https://api.github.com/repos/${{ github.repository }}/releases/$release_id" \
+              -d '{"draft":false,"prerelease":false}'
+          fi
 
-      - name: Generate sha256
-        if: env.IS_STABLE == 'true'
-        run: |
-          cd ./dist
-          for file in $(find . -type f -not -name "*.sha256"); do
-            sha256sum "$file" > "${file}.sha256"
-          done  
-
-      - name: Release
-        if: ${{ env.IS_STABLE == 'true' }}
+      - name: Create GitHub Release
+        if: (github.event_name == 'workflow_dispatch' && inputs.is_stable == true) || (github.event_name == 'push' && !contains(github.ref, '-')) || (github.event_name == 'workflow_dispatch' && inputs.create_release == true)
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
           files: ./dist/*
           body_path: './release.md'
-
-      - name: Create Fdroid Source Dir
-        if: ${{ env.IS_STABLE == 'true' }}
-        run: |
-          mkdir -p ./tmp
-          cp ./dist/*android-arm64-v8a* ./tmp/ || true
-          echo "Files copied successfully"
-
-      - name: Push to fdroid repo
-        if: ${{ env.IS_STABLE == 'true' }}
-        uses: cpina/github-action-push-to-another-repository@v1.7.2
-        env:
-          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
-        with:
-          source-directory: ./tmp/
-          destination-github-username: chen08209
-          destination-repository-name: FlClash-fdroid-repo
-          user-name: 'github-actions[bot]'
-          user-email: 'github-actions[bot]@users.noreply.github.com'
-          target-branch: main
-          commit-message: Update from ${{ github.ref_name }}
-          target-directory: /tmp/
-
+          draft: false
+          prerelease: ${{ !((github.event_name == 'workflow_dispatch' && inputs.is_stable == true) || (github.event_name == 'push' && !contains(github.ref, '-'))) }}
+          make_latest: legacy
+          generate_release_notes: false
+          fail_on_unmatched_files: false

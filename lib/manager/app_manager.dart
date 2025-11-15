@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/manager/window_manager.dart';
+import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 class AppStateManager extends ConsumerStatefulWidget {
   final Widget child;
@@ -71,16 +71,16 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     commonPrint.log('$state');
-    if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.inactive) {
-      globalState.appController.savePreferences();
-    } else {
+    if (state == AppLifecycleState.resumed) {
       render?.resume();
     }
-    if (state == AppLifecycleState.inactive) {
+    if (state == AppLifecycleState.resumed) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         detectionState.tryStartCheck();
       });
+      if (system.isAndroid) {
+        globalState.appController.tryStartCore();
+      }
     }
   }
 
@@ -207,7 +207,6 @@ class AppSidebarContainer extends ConsumerWidget {
                           children: [
                             Expanded(
                               child: NavigationRail(
-                                scrollable: true,
                                 minExtendedWidth: 200,
                                 backgroundColor: Colors.transparent,
                                 selectedLabelTextStyle: context
@@ -226,7 +225,7 @@ class AppSidebarContainer extends ConsumerWidget {
                                     .map(
                                       (e) => NavigationRailDestination(
                                         icon: e.icon,
-                                        label: Text(Intl.message(e.label.name)),
+                                        label: Text(e.getDisplayLabel(context)),
                                       ),
                                     )
                                     .toList(),

@@ -1,18 +1,17 @@
-display_name: FlClash
-package_name: FlClash
+display_name: FlClash for Dler Cloud
+package_name: flclash
 maintainer:
-  name: chen08209
-  email: chen08209@gmail.com
+  name: Dler Inc.
+  email: support@dler.io
 
 priority: optional
-section: x11
-installed_size: 6604
-essential: false
+section: net
+installed_size: 0
 icon: ./assets/images/icon.png
 
 dependencies:
-  - libayatana-appindicator3-dev
-  - libkeybinder-3.0-dev
+  - libayatana-appindicator3-1
+  - libkeybinder-3.0-0
 
 keywords:
   - FlClash
@@ -20,7 +19,7 @@ keywords:
   - ClashMeta
   - Proxy
 
-generic_name: FlClash
+generic_name: FlClash for Dler Cloud
 
 categories:
   - Network

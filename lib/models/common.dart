@@ -1,7 +1,10 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/l10n/l10n.dart';
+import 'package:fl_clash/state.dart';
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:intl/intl.dart';
 
 part 'generated/common.freezed.dart';
 part 'generated/common.g.dart';
@@ -18,6 +21,18 @@ abstract class NavigationItem with _$NavigationItem {
     @Default([NavigationItemMode.mobile, NavigationItemMode.desktop])
     List<NavigationItemMode> modes,
   }) = _NavigationItem;
+}
+
+extension NavigationItemExt on NavigationItem {
+  String getDisplayLabel(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    switch (label) {
+      case PageLabel.dlerCloud:
+        return l10n.dlerCloud;
+      default:
+        return Intl.message(label.name, name: label.name);
+    }
+  }
 }
 
 @freezed
@@ -142,10 +157,23 @@ abstract class LogsState with _$LogsState {
 extension LogsStateExt on LogsState {
   List<Log> get list {
     final lowQuery = query.toLowerCase();
+    final filteredDomains = globalState.logFilteredDomains;
+    
     return logs.where((log) {
       final logLevelName = log.logLevel.name;
+      final payloadLower = log.payload.toLowerCase();
+      
+      // 动态过滤配置的服务器域名相关的日志
+      if (filteredDomains.isNotEmpty) {
+        for (final domain in filteredDomains) {
+          if (payloadLower.contains(domain.toLowerCase())) {
+            return false;
+          }
+        }
+      }
+      
       return {logLevelName}.containsAll(keywords) &&
-          ((log.payload.toLowerCase().contains(lowQuery)) ||
+          ((payloadLower.contains(lowQuery)) ||
               logLevelName.contains(lowQuery));
     }).toList();
   }
@@ -165,6 +193,8 @@ extension TrackerInfosStateExt on TrackerInfosState {
   List<TrackerInfo> get list {
     final lowerQuery = query.toLowerCase().trim();
     final lowQuery = query.toLowerCase();
+    final filteredDomains = globalState.logFilteredDomains;
+    
     return trackerInfos.where((trackerInfo) {
       final chains = trackerInfo.chains;
       final process = trackerInfo.metadata.process;
@@ -174,6 +204,19 @@ extension TrackerInfosStateExt on TrackerInfosState {
           .toLowerCase();
       final processText = trackerInfo.metadata.process.toLowerCase();
       final chainsText = chains.join('').toLowerCase();
+      
+      // 动态过滤配置的服务器域名相关的连接记录
+      if (filteredDomains.isNotEmpty) {
+        for (final domain in filteredDomains) {
+          final lowerDomain = domain.toLowerCase();
+          if (hostText.contains(lowerDomain) || 
+              destinationIPText.contains(lowerDomain) ||
+              chainsText.contains(lowerDomain)) {
+            return false;
+          }
+        }
+      }
+      
       return {...chains, process}.containsAll(keywords) &&
           (networkText.contains(lowerQuery) ||
               hostText.contains(lowerQuery) ||
@@ -445,7 +488,6 @@ abstract class AndroidState with _$AndroidState {
     required String currentProfileName,
     required String stopText,
     required bool onlyStatisticsProxy,
-    required bool crashlytics,
   }) = _AndroidState;
 
   factory AndroidState.fromJson(Map<String, Object?> json) =>

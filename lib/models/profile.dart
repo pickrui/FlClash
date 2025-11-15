@@ -13,6 +13,19 @@ part 'generated/profile.g.dart';
 
 typedef SelectedMap = Map<String, String>;
 
+String _encryptUrl(String url) {
+  if (url.isEmpty || !url.contains('dler.cloud')) return url;
+  return profileCrypto.encryptString(url);
+}
+
+String _decryptUrl(Object? encrypted) {
+  if (encrypted == null || encrypted.toString().isEmpty) return '';
+  final encryptedStr = encrypted.toString();
+  if (encryptedStr.startsWith('http')) return encryptedStr;
+  final decrypted = profileCrypto.decryptString(encryptedStr);
+  return decrypted;
+}
+
 @freezed
 abstract class SubscriptionInfo with _$SubscriptionInfo {
   const factory SubscriptionInfo({
@@ -48,7 +61,8 @@ abstract class Profile with _$Profile {
     required String id,
     String? label,
     String? currentGroupName,
-    @Default('') String url,
+    @JsonKey(fromJson: _decryptUrl, toJson: _encryptUrl) @Default('') String url,
+    @Default('') String urlParams,
     DateTime? lastUpdateDate,
     required Duration autoUpdateDuration,
     SubscriptionInfo? subscriptionInfo,
@@ -133,6 +147,8 @@ extension ProfileExtension on Profile {
 
   bool get realAutoUpdate => url.isEmpty == true ? false : autoUpdate;
 
+  bool get isDlerCloudProfile => url.contains('dler.cloud');
+
   Future<void> checkAndUpdate() async {
     final isExists = await check();
     if (!isExists) {
@@ -163,7 +179,47 @@ extension ProfileExtension on Profile {
   }
 
   Future<Profile> update() async {
-    final response = await request.getFileResponseForUrl(url);
+    String fullUrl;
+    if (isDlerCloudProfile) {
+      final questionMarkIndex = url.indexOf('?');
+      
+      if (questionMarkIndex == -1) {
+        fullUrl = url;
+      } else {
+        final baseUrl = url.substring(0, questionMarkIndex);
+        String queryString = url.substring(questionMarkIndex + 1);
+        
+        final lastDotIndex = queryString.lastIndexOf('.');
+        String extension = '';
+        if (lastDotIndex != -1) {
+          extension = queryString.substring(lastDotIndex);
+          queryString = queryString.substring(0, lastDotIndex);
+        }
+        
+        final ampersandIndex = queryString.indexOf('&');
+        String requiredParams;
+        if (ampersandIndex == -1) {
+          requiredParams = queryString;
+        } else {
+          requiredParams = queryString.substring(0, ampersandIndex);
+        }
+        
+        if (urlParams.isNotEmpty) {
+          String params = urlParams;
+          final paramsDotIndex = params.lastIndexOf('.');
+          if (paramsDotIndex != -1) {
+            params = params.substring(0, paramsDotIndex);
+          }
+          fullUrl = '$baseUrl?$requiredParams$params$extension';
+        } else {
+          fullUrl = '$baseUrl?$requiredParams$extension';
+        }
+      }
+    } else {
+      fullUrl = url;
+    }
+    
+    final response = await request.getFileResponseForUrl(fullUrl);
     final disposition = response.headers.value('content-disposition');
     final userinfo = response.headers.value('subscription-userinfo');
     return await copyWith(
@@ -174,11 +230,17 @@ extension ProfileExtension on Profile {
 
   Future<Profile> saveFile(Uint8List bytes) async {
     final message = await coreController.validateConfigFormBytes(bytes);
-    if (message.isNotEmpty) {
-      throw message;
-    }
+    if (message.isNotEmpty) throw message;
+    
     final file = await getFile();
-    await file.writeAsBytes(bytes);
+    final dataToWrite = isDlerCloudProfile ? profileCrypto.encrypt(bytes) : bytes;
+    await file.writeAsBytes(dataToWrite);
     return copyWith(lastUpdateDate: DateTime.now());
+  }
+
+  Future<Uint8List> readEncryptedFile() async {
+    final file = await getFile();
+    final fileData = await file.readAsBytes();
+    return isDlerCloudProfile ? profileCrypto.decrypt(fileData) : fileData;
   }
 }

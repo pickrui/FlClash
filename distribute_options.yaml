@@ -1,2 +1,3 @@
-app_name: 'FlClash'
-output: 'dist/'
+app_name: flclash
+output: dist/
+artifact_name: flclash-{{platform}}{{#description}}-{{description}}{{/description}}.{{ext}}

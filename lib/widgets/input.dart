@@ -30,7 +30,7 @@ class OptionsDialog<T> extends StatelessWidget {
     return CommonDialog(
       title: title,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-      child: RadioGroup(
+      child: ClashRadioGroup(
         onChanged: (value) {
           Navigator.of(context).pop(value);
         },

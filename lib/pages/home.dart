@@ -1,13 +1,13 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/manager/app_manager.dart';
+import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 typedef OnSelected = void Function(int index);
 
@@ -49,7 +49,7 @@ class HomePage extends StatelessWidget {
                       .map(
                         (e) => NavigationDestination(
                           icon: e.icon,
-                          label: Intl.message(e.label.name),
+                          label: e.getDisplayLabel(context),
                         ),
                       )
                       .toList(),

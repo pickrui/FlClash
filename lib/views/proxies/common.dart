@@ -21,6 +21,9 @@ double getItemHeight(ProxyCardType proxyCardType) {
 }
 
 Future<void> proxyDelayTest(Proxy proxy, [String? testUrl]) async {
+  if (proxy.type.toUpperCase() == 'DIRECT' || proxy.type.toUpperCase() == 'COMPATIBLE') {
+    return;
+  }
   final appController = globalState.appController;
   final groups = globalState.appState.groups;
   final selectedMap = globalState.config.currentProfile?.selectedMap ?? {};
@@ -45,7 +48,11 @@ Future<void> proxyDelayTest(Proxy proxy, [String? testUrl]) async {
 
 Future<void> delayTest(List<Proxy> proxies, [String? testUrl]) async {
   final appController = globalState.appController;
-  final proxyNames = proxies.map((proxy) => proxy.name).toSet().toList();
+  final filteredProxies = proxies.where((proxy) {
+    final type = proxy.type.toUpperCase();
+    return type != 'DIRECT' && type != 'COMPATIBLE';
+  }).toList();
+  final proxyNames = filteredProxies.map((proxy) => proxy.name).toSet().toList();
 
   final delayProxies = proxyNames.map<Future>((proxyName) async {
     final groups = globalState.appState.groups;

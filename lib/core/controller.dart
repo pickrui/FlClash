@@ -29,6 +29,8 @@ class CoreController {
     return _instance!;
   }
 
+  bool get isCompleted => _interface.completer.isCompleted;
+
   Future<String> preload() {
     return _interface.preload();
   }
@@ -91,10 +93,17 @@ class CoreController {
     return await _interface.updateConfig(updateParams);
   }
 
-  Future<String> setupConfig(ClashConfig clashConfig) async {
+  Future<String> setupConfig(
+    ClashConfig clashConfig, {
+    VoidCallback? preloadInvoke,
+  }) async {
     await globalState.genConfigFile(clashConfig);
     final params = await globalState.getSetupParams();
-    return await _interface.setupConfig(params);
+    final res = _interface.setupConfig(params);
+    if (preloadInvoke != null) {
+      preloadInvoke();
+    }
+    return res;
   }
 
   Future<List<Group>> getProxiesGroups({
@@ -214,11 +223,20 @@ class CoreController {
 
   Future<Map<String, dynamic>> getConfig(String id) async {
     final profilePath = await appPath.getProfilePath(id);
-    final res = await _interface.getConfig(profilePath);
-    if (res.isSuccess) {
-      return res.data;
-    } else {
-      throw res.message;
+    final encryptedFile = File(profilePath);
+    
+    if (!await encryptedFile.exists()) throw 'Profile file not found';
+    
+    final decryptedBytes = profileCrypto.decrypt(await encryptedFile.readAsBytes());
+    final tempFilePath = join(await appPath.tempPath, '$id-decrypted.yaml');
+    await File(tempFilePath).writeAsBytes(decryptedBytes);
+    
+    try {
+      final res = await _interface.getConfig(tempFilePath);
+      return res.isSuccess ? res.data : throw res.message;
+    } finally {
+      final tempFile = File(tempFilePath);
+      if (await tempFile.exists()) await tempFile.delete();
     }
   }
 

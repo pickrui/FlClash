@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/time_checker.dart';
 import 'package:fl_clash/core/core.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/manager/hotkey_manager.dart';
@@ -56,7 +57,22 @@ class ApplicationState extends ConsumerState<Application> {
       await globalState.appController.init();
       globalState.appController.initLink();
       app?.initShortcuts();
+      _checkSystemTimeOnStartup();
     });
+  }
+
+  void _checkSystemTimeOnStartup() async {
+    try {
+      final result = await TimeChecker.checkSystemTime();
+      if (!result.isAccurate && result.message != null) {
+        globalState.showMessage(
+          title: '系统时间异常',
+          message: TextSpan(text: result.message!),
+        );
+      }
+    } catch (_) {
+      // Ignore time check errors
+    }
   }
 
   void _autoUpdateProfilesTask() {

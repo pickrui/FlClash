@@ -403,7 +403,7 @@ class MacOS {
       if (originDns == null) {
         return;
       }
-      final needAddDns = '223.5.5.5';
+      final needAddDns = '119.29.29.29';
       if (originDns.contains(needAddDns)) {
         return;
       }

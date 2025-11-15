@@ -89,6 +89,11 @@ class AppLocalizations {
     return Intl.message('Profiles', name: 'profiles', desc: '', args: []);
   }
 
+  /// `Dler Cloud`
+  String get dlerCloud {
+    return Intl.message('Dler Cloud', name: 'dlerCloud', desc: '', args: []);
+  }
+
   /// `Tools`
   String get tools {
     return Intl.message('Tools', name: 'tools', desc: '', args: []);
@@ -929,16 +934,6 @@ class AppLocalizations {
     );
   }
 
-  /// `A multi-platform proxy client based on ClashMeta, simple and easy to use, open-source and ad-free.`
-  String get desc {
-    return Intl.message(
-      'A multi-platform proxy client based on ClashMeta, simple and easy to use, open-source and ad-free.',
-      name: 'desc',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Starting VPN...`
   String get startVpn {
     return Intl.message(
@@ -1589,16 +1584,6 @@ class AppLocalizations {
     return Intl.message(
       'External link',
       name: 'externalLink',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Other contributors`
-  String get otherContributors {
-    return Intl.message(
-      'Other contributors',
-      name: 'otherContributors',
       desc: '',
       args: [],
     );
@@ -3354,6 +3339,26 @@ class AppLocalizations {
     return Intl.message(
       'When enabled, automatically uploads crash logs without sensitive information when the app crashes',
       name: 'crashlyticsTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Append System DNS`
+  String get appendSystemDns {
+    return Intl.message(
+      'Append System DNS',
+      name: 'appendSystemDns',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Forcefully append system DNS to the configuration`
+  String get appendSystemDnsTip {
+    return Intl.message(
+      'Forcefully append system DNS to the configuration',
+      name: 'appendSystemDnsTip',
       desc: '',
       args: [],
     );

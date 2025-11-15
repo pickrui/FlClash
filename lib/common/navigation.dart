@@ -34,6 +34,13 @@ class Navigation {
             const ProfilesView(key: GlobalObjectKey(PageLabel.profiles)),
       ),
       NavigationItem(
+        icon: Icon(Icons.cloud),
+        label: PageLabel.dlerCloud,
+        builder: (_) =>
+            const DlerCloudView(key: GlobalObjectKey(PageLabel.dlerCloud)),
+        modes: [NavigationItemMode.desktop, NavigationItemMode.mobile],
+      ),
+      NavigationItem(
         icon: Icon(Icons.view_timeline),
         label: PageLabel.requests,
         builder: (_) =>

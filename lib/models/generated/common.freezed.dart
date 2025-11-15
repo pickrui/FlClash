@@ -4973,7 +4973,7 @@ as Validator?,
 /// @nodoc
 mixin _$AndroidState {
 
- String get currentProfileName; String get stopText; bool get onlyStatisticsProxy; bool get crashlytics;
+ String get currentProfileName; String get stopText; bool get onlyStatisticsProxy;
 /// Create a copy of AndroidState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -4986,16 +4986,16 @@ $AndroidStateCopyWith<AndroidState> get copyWith => _$AndroidStateCopyWithImpl<A
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AndroidState&&(identical(other.currentProfileName, currentProfileName) || other.currentProfileName == currentProfileName)&&(identical(other.stopText, stopText) || other.stopText == stopText)&&(identical(other.onlyStatisticsProxy, onlyStatisticsProxy) || other.onlyStatisticsProxy == onlyStatisticsProxy)&&(identical(other.crashlytics, crashlytics) || other.crashlytics == crashlytics));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AndroidState&&(identical(other.currentProfileName, currentProfileName) || other.currentProfileName == currentProfileName)&&(identical(other.stopText, stopText) || other.stopText == stopText)&&(identical(other.onlyStatisticsProxy, onlyStatisticsProxy) || other.onlyStatisticsProxy == onlyStatisticsProxy));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,currentProfileName,stopText,onlyStatisticsProxy,crashlytics);
+int get hashCode => Object.hash(runtimeType,currentProfileName,stopText,onlyStatisticsProxy);
 
 @override
 String toString() {
-  return 'AndroidState(currentProfileName: $currentProfileName, stopText: $stopText, onlyStatisticsProxy: $onlyStatisticsProxy, crashlytics: $crashlytics)';
+  return 'AndroidState(currentProfileName: $currentProfileName, stopText: $stopText, onlyStatisticsProxy: $onlyStatisticsProxy)';
 }
 
 
@@ -5006,7 +5006,7 @@ abstract mixin class $AndroidStateCopyWith<$Res>  {
   factory $AndroidStateCopyWith(AndroidState value, $Res Function(AndroidState) _then) = _$AndroidStateCopyWithImpl;
 @useResult
 $Res call({
- String currentProfileName, String stopText, bool onlyStatisticsProxy, bool crashlytics
+ String currentProfileName, String stopText, bool onlyStatisticsProxy
 });
 
 
@@ -5023,12 +5023,11 @@ class _$AndroidStateCopyWithImpl<$Res>
 
 /// Create a copy of AndroidState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? currentProfileName = null,Object? stopText = null,Object? onlyStatisticsProxy = null,Object? crashlytics = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? currentProfileName = null,Object? stopText = null,Object? onlyStatisticsProxy = null,}) {
   return _then(_self.copyWith(
 currentProfileName: null == currentProfileName ? _self.currentProfileName : currentProfileName // ignore: cast_nullable_to_non_nullable
 as String,stopText: null == stopText ? _self.stopText : stopText // ignore: cast_nullable_to_non_nullable
 as String,onlyStatisticsProxy: null == onlyStatisticsProxy ? _self.onlyStatisticsProxy : onlyStatisticsProxy // ignore: cast_nullable_to_non_nullable
-as bool,crashlytics: null == crashlytics ? _self.crashlytics : crashlytics // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -5114,10 +5113,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String currentProfileName,  String stopText,  bool onlyStatisticsProxy,  bool crashlytics)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String currentProfileName,  String stopText,  bool onlyStatisticsProxy)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AndroidState() when $default != null:
-return $default(_that.currentProfileName,_that.stopText,_that.onlyStatisticsProxy,_that.crashlytics);case _:
+return $default(_that.currentProfileName,_that.stopText,_that.onlyStatisticsProxy);case _:
   return orElse();
 
 }
@@ -5135,10 +5134,10 @@ return $default(_that.currentProfileName,_that.stopText,_that.onlyStatisticsProx
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String currentProfileName,  String stopText,  bool onlyStatisticsProxy,  bool crashlytics)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String currentProfileName,  String stopText,  bool onlyStatisticsProxy)  $default,) {final _that = this;
 switch (_that) {
 case _AndroidState():
-return $default(_that.currentProfileName,_that.stopText,_that.onlyStatisticsProxy,_that.crashlytics);case _:
+return $default(_that.currentProfileName,_that.stopText,_that.onlyStatisticsProxy);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -5155,10 +5154,10 @@ return $default(_that.currentProfileName,_that.stopText,_that.onlyStatisticsProx
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String currentProfileName,  String stopText,  bool onlyStatisticsProxy,  bool crashlytics)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String currentProfileName,  String stopText,  bool onlyStatisticsProxy)?  $default,) {final _that = this;
 switch (_that) {
 case _AndroidState() when $default != null:
-return $default(_that.currentProfileName,_that.stopText,_that.onlyStatisticsProxy,_that.crashlytics);case _:
+return $default(_that.currentProfileName,_that.stopText,_that.onlyStatisticsProxy);case _:
   return null;
 
 }
@@ -5170,13 +5169,12 @@ return $default(_that.currentProfileName,_that.stopText,_that.onlyStatisticsProx
 @JsonSerializable()
 
 class _AndroidState implements AndroidState {
-  const _AndroidState({required this.currentProfileName, required this.stopText, required this.onlyStatisticsProxy, required this.crashlytics});
+  const _AndroidState({required this.currentProfileName, required this.stopText, required this.onlyStatisticsProxy});
   factory _AndroidState.fromJson(Map<String, dynamic> json) => _$AndroidStateFromJson(json);
 
 @override final  String currentProfileName;
 @override final  String stopText;
 @override final  bool onlyStatisticsProxy;
-@override final  bool crashlytics;
 
 /// Create a copy of AndroidState
 /// with the given fields replaced by the non-null parameter values.
@@ -5191,16 +5189,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AndroidState&&(identical(other.currentProfileName, currentProfileName) || other.currentProfileName == currentProfileName)&&(identical(other.stopText, stopText) || other.stopText == stopText)&&(identical(other.onlyStatisticsProxy, onlyStatisticsProxy) || other.onlyStatisticsProxy == onlyStatisticsProxy)&&(identical(other.crashlytics, crashlytics) || other.crashlytics == crashlytics));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AndroidState&&(identical(other.currentProfileName, currentProfileName) || other.currentProfileName == currentProfileName)&&(identical(other.stopText, stopText) || other.stopText == stopText)&&(identical(other.onlyStatisticsProxy, onlyStatisticsProxy) || other.onlyStatisticsProxy == onlyStatisticsProxy));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,currentProfileName,stopText,onlyStatisticsProxy,crashlytics);
+int get hashCode => Object.hash(runtimeType,currentProfileName,stopText,onlyStatisticsProxy);
 
 @override
 String toString() {
-  return 'AndroidState(currentProfileName: $currentProfileName, stopText: $stopText, onlyStatisticsProxy: $onlyStatisticsProxy, crashlytics: $crashlytics)';
+  return 'AndroidState(currentProfileName: $currentProfileName, stopText: $stopText, onlyStatisticsProxy: $onlyStatisticsProxy)';
 }
 
 
@@ -5211,7 +5209,7 @@ abstract mixin class _$AndroidStateCopyWith<$Res> implements $AndroidStateCopyWi
   factory _$AndroidStateCopyWith(_AndroidState value, $Res Function(_AndroidState) _then) = __$AndroidStateCopyWithImpl;
 @override @useResult
 $Res call({
- String currentProfileName, String stopText, bool onlyStatisticsProxy, bool crashlytics
+ String currentProfileName, String stopText, bool onlyStatisticsProxy
 });
 
 
@@ -5228,12 +5226,11 @@ class __$AndroidStateCopyWithImpl<$Res>
 
 /// Create a copy of AndroidState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? currentProfileName = null,Object? stopText = null,Object? onlyStatisticsProxy = null,Object? crashlytics = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? currentProfileName = null,Object? stopText = null,Object? onlyStatisticsProxy = null,}) {
   return _then(_AndroidState(
 currentProfileName: null == currentProfileName ? _self.currentProfileName : currentProfileName // ignore: cast_nullable_to_non_nullable
 as String,stopText: null == stopText ? _self.stopText : stopText // ignore: cast_nullable_to_non_nullable
 as String,onlyStatisticsProxy: null == onlyStatisticsProxy ? _self.onlyStatisticsProxy : onlyStatisticsProxy // ignore: cast_nullable_to_non_nullable
-as bool,crashlytics: null == crashlytics ? _self.crashlytics : crashlytics // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
