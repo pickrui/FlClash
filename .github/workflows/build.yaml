@@ -117,7 +117,7 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/wrapper
             ~/.android/build-cache
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', 'pubspec.yaml') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
 
@@ -160,7 +160,7 @@ jobs:
             echo "Error: keystore.jks is empty or failed to decode"
             exit 1
           fi
-          cat > android/local.properties << EOF
+          cat >> android/local.properties << EOF
           keyAlias=${{ secrets.KEY_ALIAS }}
           storePassword=${{ secrets.KEYSTORE_PASSWORD }}
           keyPassword=${{ secrets.KEY_PASSWORD }}

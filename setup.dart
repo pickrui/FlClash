@@ -162,14 +162,18 @@ class Build {
     final versionNumber = versionMatch.group(1)!; // 例如: 0.8.90
     final oldBuildNumber = versionMatch.group(2)!; // 例如: 2025100801
 
+    // 获取当前 UTC 时间并转换为 UTC+8
     final nowUtc = DateTime.now().toUtc();
     final now = nowUtc.add(const Duration(hours: 8));
     
-    // 确保日期有效，处理跨月/跨年情况
+    // 提取日期组件
     final year = now.year;
     final month = now.month;
     final day = now.day;
     final hour = now.hour;
+    
+    // 调试信息：输出原始时间值
+    print('Build number generation: UTC=${nowUtc.toString()}, UTC+8=${now.toString()}, year=$year, month=$month, day=$day, hour=$hour');
     
     // 验证日期有效性
     if (month < 1 || month > 12) {
@@ -182,63 +186,88 @@ class Build {
       throw 'Invalid hour value: $hour (from DateTime: ${now.toString()})';
     }
     
-    // 使用 DateTime.utc 验证日期是否有效
+    // 使用 DateTime.utc 验证日期是否有效（这会自动处理无效日期）
+    DateTime testDate;
     try {
-      final testDate = DateTime.utc(year, month, day, hour);
+      testDate = DateTime.utc(year, month, day, hour);
+      // 检查日期是否被自动调整（例如 11月31日会被调整为12月1日）
       if (testDate.year != year || testDate.month != month || testDate.day != day || testDate.hour != hour) {
-        throw 'Date validation failed: constructed date does not match input';
+        throw 'Date validation failed: constructed date ($testDate) does not match input ($year-$month-$day $hour:00). This indicates an invalid date (e.g., day 31 in a month with only 30 days).';
       }
     } catch (e) {
       throw 'Invalid date: $year-$month-$day $hour:00 (from ${now.toString()}). Error: $e';
     }
     
-    // 分别生成字符串，避免任何可能的类型转换问题
+    // 分别生成字符串，确保类型安全
     final yearStr = year.toString();
     final monthStr = month.toString();
     final dayStr = day.toString();
     final hourStr = hour.toString();
     
-    // 确保每个组件都是正确的格式
+    // 确保每个组件都是正确的格式（补零）
     final yearStrPadded = yearStr.padLeft(4, '0');
     final monthStrPadded = monthStr.padLeft(2, '0');
     final dayStrPadded = dayStr.padLeft(2, '0');
     final hourStrPadded = hourStr.padLeft(2, '0');
     
-    // 验证每个组件的长度
-    if (yearStrPadded.length != 4) {
+    // 验证每个组件的长度和格式
+    if (yearStrPadded.length != 4 || !RegExp(r'^\d{4}$').hasMatch(yearStrPadded)) {
       throw 'Invalid year format: "$yearStrPadded" (expected 4 digits)';
     }
-    if (monthStrPadded.length != 2) {
+    if (monthStrPadded.length != 2 || !RegExp(r'^\d{2}$').hasMatch(monthStrPadded)) {
       throw 'Invalid month format: "$monthStrPadded" (expected 2 digits)';
     }
-    if (dayStrPadded.length != 2) {
+    if (dayStrPadded.length != 2 || !RegExp(r'^\d{2}$').hasMatch(dayStrPadded)) {
       throw 'Invalid day format: "$dayStrPadded" (expected 2 digits)';
     }
-    if (hourStrPadded.length != 2) {
+    if (hourStrPadded.length != 2 || !RegExp(r'^\d{2}$').hasMatch(hourStrPadded)) {
       throw 'Invalid hour format: "$hourStrPadded" (expected 2 digits)';
     }
     
+    // 拼接构建号
     final finalBuildNumber = '$yearStrPadded$monthStrPadded$dayStrPadded$hourStrPadded';
+    
+    // 调试信息：输出构建号组件
+    print('Build number components: year="$yearStrPadded", month="$monthStrPadded", day="$dayStrPadded", hour="$hourStrPadded", final="$finalBuildNumber"');
     
     // 最终验证构建号格式
     if (finalBuildNumber.length != 10 || !RegExp(r'^\d{10}$').hasMatch(finalBuildNumber)) {
       throw 'Invalid build number format: "$finalBuildNumber" (length: ${finalBuildNumber.length}, expected YYYYMMDDHH). Components: year=$yearStrPadded, month=$monthStrPadded, day=$dayStrPadded, hour=$hourStrPadded';
     }
     
-    // 再次验证日期有效性（双重检查）
+    // 再次验证日期有效性（双重检查）- 这是最关键的验证
     try {
       final parsedYear = int.parse(finalBuildNumber.substring(0, 4));
       final parsedMonth = int.parse(finalBuildNumber.substring(4, 6));
       final parsedDay = int.parse(finalBuildNumber.substring(6, 8));
       final parsedHour = int.parse(finalBuildNumber.substring(8, 10));
       
+      // 验证解析后的值是否与原始值匹配
       if (parsedYear != year || parsedMonth != month || parsedDay != day || parsedHour != hour) {
-        throw 'Parsed components do not match: year=$parsedYear vs $year, month=$parsedMonth vs $month, day=$parsedDay vs $day, hour=$parsedHour vs $hour';
+        throw 'Parsed components do not match: year=$parsedYear vs $year, month=$parsedMonth vs $month, day=$parsedDay vs $day, hour=$parsedHour vs $hour. Build number: "$finalBuildNumber"';
       }
       
+      // 验证月份范围
+      if (parsedMonth < 1 || parsedMonth > 12) {
+        throw 'Invalid month in build number: $parsedMonth (from "$finalBuildNumber")';
+      }
+      
+      // 验证日期范围（根据月份）
+      final daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      final maxDay = parsedMonth == 2 && _isLeapYear(parsedYear) ? 29 : daysInMonth[parsedMonth - 1];
+      if (parsedDay < 1 || parsedDay > maxDay) {
+        throw 'Invalid day in build number: $parsedDay (month $parsedMonth has max $maxDay days, from "$finalBuildNumber")';
+      }
+      
+      // 验证小时范围
+      if (parsedHour < 0 || parsedHour > 23) {
+        throw 'Invalid hour in build number: $parsedHour (from "$finalBuildNumber")';
+      }
+      
+      // 使用 DateTime.utc 验证日期是否有效（这会自动处理无效日期）
       final testDate = DateTime.utc(parsedYear, parsedMonth, parsedDay, parsedHour);
       if (testDate.year != parsedYear || testDate.month != parsedMonth || testDate.day != parsedDay || testDate.hour != parsedHour) {
-        throw 'Date validation failed: constructed date does not match parsed components';
+        throw 'Date validation failed: constructed date ($testDate) does not match parsed components (year=$parsedYear, month=$parsedMonth, day=$parsedDay, hour=$parsedHour) from "$finalBuildNumber"';
       }
     } catch (e) {
       throw 'Invalid date in build number: "$finalBuildNumber". Error: $e';
