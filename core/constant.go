@@ -17,8 +17,10 @@ type InitParams struct {
 }
 
 type SetupParams struct {
-	SelectedMap map[string]string `json:"selected-map"`
-	TestURL     string            `json:"test-url"`
+	SelectedMap   map[string]string `json:"selected-map"`
+	TestURL       string            `json:"test-url"`
+	ConfigPath    string            `json:"config-path"`
+	EncryptionKey string            `json:"encryption-key"`
 }
 
 type UpdateParams struct {

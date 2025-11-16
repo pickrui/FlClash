@@ -49,6 +49,7 @@ class GlobalState {
   bool isInit = false;
   bool isUserDisconnected = false;
   bool isService = false;
+  Set<String> logFilteredDomains = {};
 
   bool get isStart => startTime != null && startTime!.isBeforeNow;
 
@@ -79,6 +80,7 @@ class GlobalState {
       totalTraffic: Traffic(),
       systemUiOverlayStyle: const SystemUiOverlayStyle(),
     );
+    await profileCrypto.initialize();
     await _initDynamicColor();
     await init();
     await window?.init(version);
@@ -295,24 +297,35 @@ class GlobalState {
   }
 
   Future<SetupParams> getSetupParams() async {
+    final deviceId = await profileCrypto.getDeviceId();
     final params = SetupParams(
       selectedMap: config.currentProfile?.selectedMap ?? {},
       testUrl: config.appSetting.testUrl,
+      encryptionKey: deviceId,
     );
     return params;
   }
 
   Future<void> genConfigFile(ClashConfig pathConfig) async {
     final configFilePath = await appPath.configFilePath;
-    final config = await patchRawConfig(patchConfig: pathConfig);
+    var config = {};
+    try {
+      config = await patchRawConfig(patchConfig: pathConfig);
+    } catch (e) {
+      globalState.showNotifier(e.toString());
+      config = {};
+    }
+    
+    final jsonStr = json.encode(config);
+    final encryptedBytes = profileCrypto.encrypt(utf8.encode(jsonStr));
+    
     final res = await Isolate.run<String>(() async {
       try {
-        final res = json.encode(config);
         final file = File(configFilePath);
         if (!await file.exists()) {
           await file.create(recursive: true);
         }
-        await file.writeAsString(res);
+        await file.writeAsBytes(encryptedBytes);
         return '';
       } catch (e) {
         return e.toString();
@@ -322,6 +335,7 @@ class GlobalState {
       throw res;
     }
   }
+
 
   Future<void> genValidateFile(String path, String data) async {
     final res = await Isolate.run<String>(() async {
@@ -364,7 +378,6 @@ class GlobalState {
       currentProfileName: config.currentProfile?.label ?? '',
       onlyStatisticsProxy: config.appSetting.onlyStatisticsProxy,
       stopText: appLocalizations.stop,
-      crashlytics: config.appSetting.crashlytics,
     );
   }
 
@@ -469,10 +482,11 @@ class GlobalState {
     }
     final isEnableDns = rawConfig['dns']['enable'] == true;
     final overrideDns = globalState.config.overrideDns;
+    final systemDns = 'system://';
     if (overrideDns || !isEnableDns) {
       final dns = switch (!isEnableDns) {
         true => realPatchConfig.dns.copyWith(
-          nameserver: [...realPatchConfig.dns.nameserver, 'system://'],
+          nameserver: [...realPatchConfig.dns.nameserver, systemDns],
         ),
         false => realPatchConfig.dns,
       };
@@ -481,6 +495,12 @@ class GlobalState {
       for (final entry in dns.nameserverPolicy.entries) {
         rawConfig['dns']['nameserver-policy'][entry.key] =
             entry.value.splitByMultipleSeparators;
+      }
+    }
+    if (config.networkProps.appendSystemDns) {
+      final List<dynamic> nameserver = rawConfig['dns']['nameserver'] ?? [];
+      if (!nameserver.contains(systemDns)) {
+        rawConfig['dns']['nameserver'] = [...nameserver, systemDns];
       }
     }
     List rules = [];

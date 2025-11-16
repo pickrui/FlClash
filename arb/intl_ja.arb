@@ -6,6 +6,7 @@
   "proxies": "プロキシ",
   "profile": "プロファイル",
   "profiles": "プロファイル一覧",
+  "dlerCloud": "Dler Cloud",
   "tools": "ツール",
   "logs": "ログ",
   "logsDesc": "ログキャプチャ記録",
@@ -121,7 +122,6 @@
   "project": "プロジェクト",
   "core": "コア",
   "tabAnimation": "タブアニメーション",
-  "desc": "ClashMetaベースのマルチプラットフォームプロキシクライアント。シンプルで使いやすく、オープンソースで広告なし。",
   "startVpn": "VPNを開始中...",
   "stopVpn": "VPNを停止中...",
   "discovery": "新しいバージョンを発見",
@@ -208,7 +208,6 @@
   "proxyGroup": "プロキシグループ",
   "go": "移動",
   "externalLink": "外部リンク",
-  "otherContributors": "その他の貢献者",
   "autoCloseConnections": "接続を自動閉じる",
   "autoCloseConnectionsDesc": "ノード変更後に接続を自動閉じる",
   "onlyStatisticsProxy": "プロキシのみ統計",
@@ -372,7 +371,6 @@
   "developerModeEnableTip": "デベロッパーモードが有効になりました。",
   "messageTest": "メッセージテスト",
   "messageTestTip": "これはメッセージです。",
-  "crashTest": "クラッシュテスト",
   "clearData": "データを消去",
   "zoom": "ズーム",
   "textScale": "テキストスケーリング",
@@ -430,8 +428,6 @@
   "forceRestartCoreTip": "コアを強制再起動してもよろしいですか？",
   "dnsHijacking": "DNSハイジャッキング",
   "coreStatus": "コアステータス",
-  "dataCollectionTip": "データ収集説明",
-  "dataCollectionContent": "本アプリはFirebase Crashlyticsを使用してクラッシュ情報を収集し、アプリの安定性を向上させます。\n収集されるデータにはデバイス情報とクラッシュ詳細が含まれますが、個人の機密データは含まれません。\n設定でこの機能を無効にすることができます。",
-  "crashlytics": "クラッシュ分析",
-  "crashlyticsTip": "有効にすると、アプリがクラッシュした際に機密情報を含まないクラッシュログを自動的にアップロードします"
+  "appendSystemDns": "システムDNSを追加",
+  "appendSystemDnsTip": "設定にシステムDNSを強制的に追加します"
 }

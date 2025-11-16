@@ -13,6 +13,12 @@ import (
 	t "core/tun"
 	"encoding/json"
 	"errors"
+	"net"
+	"strings"
+	"sync"
+	"syscall"
+	"unsafe"
+
 	"github.com/metacubex/mihomo/component/dialer"
 	"github.com/metacubex/mihomo/component/process"
 	"github.com/metacubex/mihomo/constant"
@@ -20,11 +26,6 @@ import (
 	"github.com/metacubex/mihomo/listener/sing_tun"
 	"github.com/metacubex/mihomo/log"
 	"golang.org/x/sync/semaphore"
-	"net"
-	"strings"
-	"sync"
-	"syscall"
-	"unsafe"
 )
 
 var eventListener unsafe.Pointer
@@ -37,6 +38,8 @@ type TunHandler struct {
 }
 
 func (th *TunHandler) start(fd int, stack, address, dns string) {
+	runLock.Lock()
+	defer runLock.Unlock()
 	_ = th.limit.Acquire(context.TODO(), 4)
 	defer th.limit.Release(4)
 	th.initHook()

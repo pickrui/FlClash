@@ -13,7 +13,7 @@ const defaultTun = Tun();
 const defaultDns = Dns();
 const defaultGeoXUrl = GeoXUrl();
 
-const defaultMixedPort = 7890;
+const defaultMixedPort = 8899;
 const defaultKeepAliveInterval = 30;
 
 const defaultBypassPrivateRouteAddress = [
@@ -233,7 +233,7 @@ abstract class Dns with _$Dns {
     @Default(true) @JsonKey(name: 'use-system-hosts') bool useSystemHosts,
     @Default(false) @JsonKey(name: 'respect-rules') bool respectRules,
     @Default(false) bool ipv6,
-    @Default(['223.5.5.5'])
+    @Default(['119.29.29.29'])
     @JsonKey(name: 'default-nameserver')
     List<String> defaultNameserver,
     @Default(DnsMode.fakeIp)

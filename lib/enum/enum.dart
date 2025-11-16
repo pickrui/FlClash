@@ -323,6 +323,7 @@ enum PageLabel {
   dashboard,
   proxies,
   profiles,
+  dlerCloud,
   tools,
   logs,
   requests,

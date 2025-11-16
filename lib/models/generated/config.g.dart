@@ -22,9 +22,6 @@ _AppSettingProps _$AppSettingPropsFromJson(Map<String, dynamic> json) =>
       isAnimateToPage: json['isAnimateToPage'] as bool? ?? true,
       autoCheckUpdate: json['autoCheckUpdate'] as bool? ?? true,
       showLabel: json['showLabel'] as bool? ?? false,
-      disclaimerAccepted: json['disclaimerAccepted'] as bool? ?? false,
-      crashlyticsTip: json['crashlyticsTip'] as bool? ?? false,
-      crashlytics: json['crashlytics'] as bool? ?? false,
       minimizeOnExit: json['minimizeOnExit'] as bool? ?? true,
       hidden: json['hidden'] as bool? ?? false,
       developerMode: json['developerMode'] as bool? ?? false,
@@ -52,9 +49,6 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'isAnimateToPage': instance.isAnimateToPage,
       'autoCheckUpdate': instance.autoCheckUpdate,
       'showLabel': instance.showLabel,
-      'disclaimerAccepted': instance.disclaimerAccepted,
-      'crashlyticsTip': instance.crashlyticsTip,
-      'crashlytics': instance.crashlytics,
       'minimizeOnExit': instance.minimizeOnExit,
       'hidden': instance.hidden,
       'developerMode': instance.developerMode,
@@ -171,6 +165,7 @@ _NetworkProps _$NetworkPropsFromJson(Map<String, dynamic> json) =>
           $enumDecodeNullable(_$RouteModeEnumMap, json['routeMode']) ??
           RouteMode.config,
       autoSetSystemDns: json['autoSetSystemDns'] as bool? ?? true,
+      appendSystemDns: json['appendSystemDns'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$NetworkPropsToJson(_NetworkProps instance) =>
@@ -179,6 +174,7 @@ Map<String, dynamic> _$NetworkPropsToJson(_NetworkProps instance) =>
       'bypassDomain': instance.bypassDomain,
       'routeMode': _$RouteModeEnumMap[instance.routeMode]!,
       'autoSetSystemDns': instance.autoSetSystemDns,
+      'appendSystemDns': instance.appendSystemDns,
     };
 
 const _$RouteModeEnumMap = {

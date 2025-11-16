@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AppSettingProps {
 
- String? get locale;@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> get dashboardWidgets; bool get onlyStatisticsProxy; bool get autoLaunch; bool get silentLaunch; bool get autoRun; bool get openLogs; bool get closeConnections; String get testUrl; bool get isAnimateToPage; bool get autoCheckUpdate; bool get showLabel; bool get disclaimerAccepted; bool get crashlyticsTip; bool get crashlytics; bool get minimizeOnExit; bool get hidden; bool get developerMode; RecoveryStrategy get recoveryStrategy;
+ String? get locale;@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> get dashboardWidgets; bool get onlyStatisticsProxy; bool get autoLaunch; bool get silentLaunch; bool get autoRun; bool get openLogs; bool get closeConnections; String get testUrl; bool get isAnimateToPage; bool get autoCheckUpdate; bool get showLabel; bool get minimizeOnExit; bool get hidden; bool get developerMode; RecoveryStrategy get recoveryStrategy;
 /// Create a copy of AppSettingProps
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $AppSettingPropsCopyWith<AppSettingProps> get copyWith => _$AppSettingPropsCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppSettingProps&&(identical(other.locale, locale) || other.locale == locale)&&const DeepCollectionEquality().equals(other.dashboardWidgets, dashboardWidgets)&&(identical(other.onlyStatisticsProxy, onlyStatisticsProxy) || other.onlyStatisticsProxy == onlyStatisticsProxy)&&(identical(other.autoLaunch, autoLaunch) || other.autoLaunch == autoLaunch)&&(identical(other.silentLaunch, silentLaunch) || other.silentLaunch == silentLaunch)&&(identical(other.autoRun, autoRun) || other.autoRun == autoRun)&&(identical(other.openLogs, openLogs) || other.openLogs == openLogs)&&(identical(other.closeConnections, closeConnections) || other.closeConnections == closeConnections)&&(identical(other.testUrl, testUrl) || other.testUrl == testUrl)&&(identical(other.isAnimateToPage, isAnimateToPage) || other.isAnimateToPage == isAnimateToPage)&&(identical(other.autoCheckUpdate, autoCheckUpdate) || other.autoCheckUpdate == autoCheckUpdate)&&(identical(other.showLabel, showLabel) || other.showLabel == showLabel)&&(identical(other.disclaimerAccepted, disclaimerAccepted) || other.disclaimerAccepted == disclaimerAccepted)&&(identical(other.crashlyticsTip, crashlyticsTip) || other.crashlyticsTip == crashlyticsTip)&&(identical(other.crashlytics, crashlytics) || other.crashlytics == crashlytics)&&(identical(other.minimizeOnExit, minimizeOnExit) || other.minimizeOnExit == minimizeOnExit)&&(identical(other.hidden, hidden) || other.hidden == hidden)&&(identical(other.developerMode, developerMode) || other.developerMode == developerMode)&&(identical(other.recoveryStrategy, recoveryStrategy) || other.recoveryStrategy == recoveryStrategy));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppSettingProps&&(identical(other.locale, locale) || other.locale == locale)&&const DeepCollectionEquality().equals(other.dashboardWidgets, dashboardWidgets)&&(identical(other.onlyStatisticsProxy, onlyStatisticsProxy) || other.onlyStatisticsProxy == onlyStatisticsProxy)&&(identical(other.autoLaunch, autoLaunch) || other.autoLaunch == autoLaunch)&&(identical(other.silentLaunch, silentLaunch) || other.silentLaunch == silentLaunch)&&(identical(other.autoRun, autoRun) || other.autoRun == autoRun)&&(identical(other.openLogs, openLogs) || other.openLogs == openLogs)&&(identical(other.closeConnections, closeConnections) || other.closeConnections == closeConnections)&&(identical(other.testUrl, testUrl) || other.testUrl == testUrl)&&(identical(other.isAnimateToPage, isAnimateToPage) || other.isAnimateToPage == isAnimateToPage)&&(identical(other.autoCheckUpdate, autoCheckUpdate) || other.autoCheckUpdate == autoCheckUpdate)&&(identical(other.showLabel, showLabel) || other.showLabel == showLabel)&&(identical(other.minimizeOnExit, minimizeOnExit) || other.minimizeOnExit == minimizeOnExit)&&(identical(other.hidden, hidden) || other.hidden == hidden)&&(identical(other.developerMode, developerMode) || other.developerMode == developerMode)&&(identical(other.recoveryStrategy, recoveryStrategy) || other.recoveryStrategy == recoveryStrategy));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,locale,const DeepCollectionEquality().hash(dashboardWidgets),onlyStatisticsProxy,autoLaunch,silentLaunch,autoRun,openLogs,closeConnections,testUrl,isAnimateToPage,autoCheckUpdate,showLabel,disclaimerAccepted,crashlyticsTip,crashlytics,minimizeOnExit,hidden,developerMode,recoveryStrategy]);
+int get hashCode => Object.hash(runtimeType,locale,const DeepCollectionEquality().hash(dashboardWidgets),onlyStatisticsProxy,autoLaunch,silentLaunch,autoRun,openLogs,closeConnections,testUrl,isAnimateToPage,autoCheckUpdate,showLabel,minimizeOnExit,hidden,developerMode,recoveryStrategy);
 
 @override
 String toString() {
-  return 'AppSettingProps(locale: $locale, dashboardWidgets: $dashboardWidgets, onlyStatisticsProxy: $onlyStatisticsProxy, autoLaunch: $autoLaunch, silentLaunch: $silentLaunch, autoRun: $autoRun, openLogs: $openLogs, closeConnections: $closeConnections, testUrl: $testUrl, isAnimateToPage: $isAnimateToPage, autoCheckUpdate: $autoCheckUpdate, showLabel: $showLabel, disclaimerAccepted: $disclaimerAccepted, crashlyticsTip: $crashlyticsTip, crashlytics: $crashlytics, minimizeOnExit: $minimizeOnExit, hidden: $hidden, developerMode: $developerMode, recoveryStrategy: $recoveryStrategy)';
+  return 'AppSettingProps(locale: $locale, dashboardWidgets: $dashboardWidgets, onlyStatisticsProxy: $onlyStatisticsProxy, autoLaunch: $autoLaunch, silentLaunch: $silentLaunch, autoRun: $autoRun, openLogs: $openLogs, closeConnections: $closeConnections, testUrl: $testUrl, isAnimateToPage: $isAnimateToPage, autoCheckUpdate: $autoCheckUpdate, showLabel: $showLabel, minimizeOnExit: $minimizeOnExit, hidden: $hidden, developerMode: $developerMode, recoveryStrategy: $recoveryStrategy)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $AppSettingPropsCopyWith<$Res>  {
   factory $AppSettingPropsCopyWith(AppSettingProps value, $Res Function(AppSettingProps) _then) = _$AppSettingPropsCopyWithImpl;
 @useResult
 $Res call({
- String? locale,@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> dashboardWidgets, bool onlyStatisticsProxy, bool autoLaunch, bool silentLaunch, bool autoRun, bool openLogs, bool closeConnections, String testUrl, bool isAnimateToPage, bool autoCheckUpdate, bool showLabel, bool disclaimerAccepted, bool crashlyticsTip, bool crashlytics, bool minimizeOnExit, bool hidden, bool developerMode, RecoveryStrategy recoveryStrategy
+ String? locale,@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> dashboardWidgets, bool onlyStatisticsProxy, bool autoLaunch, bool silentLaunch, bool autoRun, bool openLogs, bool closeConnections, String testUrl, bool isAnimateToPage, bool autoCheckUpdate, bool showLabel, bool minimizeOnExit, bool hidden, bool developerMode, RecoveryStrategy recoveryStrategy
 });
 
 
@@ -65,7 +65,7 @@ class _$AppSettingPropsCopyWithImpl<$Res>
 
 /// Create a copy of AppSettingProps
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? locale = freezed,Object? dashboardWidgets = null,Object? onlyStatisticsProxy = null,Object? autoLaunch = null,Object? silentLaunch = null,Object? autoRun = null,Object? openLogs = null,Object? closeConnections = null,Object? testUrl = null,Object? isAnimateToPage = null,Object? autoCheckUpdate = null,Object? showLabel = null,Object? disclaimerAccepted = null,Object? crashlyticsTip = null,Object? crashlytics = null,Object? minimizeOnExit = null,Object? hidden = null,Object? developerMode = null,Object? recoveryStrategy = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? locale = freezed,Object? dashboardWidgets = null,Object? onlyStatisticsProxy = null,Object? autoLaunch = null,Object? silentLaunch = null,Object? autoRun = null,Object? openLogs = null,Object? closeConnections = null,Object? testUrl = null,Object? isAnimateToPage = null,Object? autoCheckUpdate = null,Object? showLabel = null,Object? minimizeOnExit = null,Object? hidden = null,Object? developerMode = null,Object? recoveryStrategy = null,}) {
   return _then(_self.copyWith(
 locale: freezed == locale ? _self.locale : locale // ignore: cast_nullable_to_non_nullable
 as String?,dashboardWidgets: null == dashboardWidgets ? _self.dashboardWidgets : dashboardWidgets // ignore: cast_nullable_to_non_nullable
@@ -79,9 +79,6 @@ as bool,testUrl: null == testUrl ? _self.testUrl : testUrl // ignore: cast_nulla
 as String,isAnimateToPage: null == isAnimateToPage ? _self.isAnimateToPage : isAnimateToPage // ignore: cast_nullable_to_non_nullable
 as bool,autoCheckUpdate: null == autoCheckUpdate ? _self.autoCheckUpdate : autoCheckUpdate // ignore: cast_nullable_to_non_nullable
 as bool,showLabel: null == showLabel ? _self.showLabel : showLabel // ignore: cast_nullable_to_non_nullable
-as bool,disclaimerAccepted: null == disclaimerAccepted ? _self.disclaimerAccepted : disclaimerAccepted // ignore: cast_nullable_to_non_nullable
-as bool,crashlyticsTip: null == crashlyticsTip ? _self.crashlyticsTip : crashlyticsTip // ignore: cast_nullable_to_non_nullable
-as bool,crashlytics: null == crashlytics ? _self.crashlytics : crashlytics // ignore: cast_nullable_to_non_nullable
 as bool,minimizeOnExit: null == minimizeOnExit ? _self.minimizeOnExit : minimizeOnExit // ignore: cast_nullable_to_non_nullable
 as bool,hidden: null == hidden ? _self.hidden : hidden // ignore: cast_nullable_to_non_nullable
 as bool,developerMode: null == developerMode ? _self.developerMode : developerMode // ignore: cast_nullable_to_non_nullable
@@ -171,10 +168,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets,  bool onlyStatisticsProxy,  bool autoLaunch,  bool silentLaunch,  bool autoRun,  bool openLogs,  bool closeConnections,  String testUrl,  bool isAnimateToPage,  bool autoCheckUpdate,  bool showLabel,  bool disclaimerAccepted,  bool crashlyticsTip,  bool crashlytics,  bool minimizeOnExit,  bool hidden,  bool developerMode,  RecoveryStrategy recoveryStrategy)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets,  bool onlyStatisticsProxy,  bool autoLaunch,  bool silentLaunch,  bool autoRun,  bool openLogs,  bool closeConnections,  String testUrl,  bool isAnimateToPage,  bool autoCheckUpdate,  bool showLabel,  bool minimizeOnExit,  bool hidden,  bool developerMode,  RecoveryStrategy recoveryStrategy)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AppSettingProps() when $default != null:
-return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_that.autoLaunch,_that.silentLaunch,_that.autoRun,_that.openLogs,_that.closeConnections,_that.testUrl,_that.isAnimateToPage,_that.autoCheckUpdate,_that.showLabel,_that.disclaimerAccepted,_that.crashlyticsTip,_that.crashlytics,_that.minimizeOnExit,_that.hidden,_that.developerMode,_that.recoveryStrategy);case _:
+return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_that.autoLaunch,_that.silentLaunch,_that.autoRun,_that.openLogs,_that.closeConnections,_that.testUrl,_that.isAnimateToPage,_that.autoCheckUpdate,_that.showLabel,_that.minimizeOnExit,_that.hidden,_that.developerMode,_that.recoveryStrategy);case _:
   return orElse();
 
 }
@@ -192,10 +189,10 @@ return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets,  bool onlyStatisticsProxy,  bool autoLaunch,  bool silentLaunch,  bool autoRun,  bool openLogs,  bool closeConnections,  String testUrl,  bool isAnimateToPage,  bool autoCheckUpdate,  bool showLabel,  bool disclaimerAccepted,  bool crashlyticsTip,  bool crashlytics,  bool minimizeOnExit,  bool hidden,  bool developerMode,  RecoveryStrategy recoveryStrategy)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets,  bool onlyStatisticsProxy,  bool autoLaunch,  bool silentLaunch,  bool autoRun,  bool openLogs,  bool closeConnections,  String testUrl,  bool isAnimateToPage,  bool autoCheckUpdate,  bool showLabel,  bool minimizeOnExit,  bool hidden,  bool developerMode,  RecoveryStrategy recoveryStrategy)  $default,) {final _that = this;
 switch (_that) {
 case _AppSettingProps():
-return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_that.autoLaunch,_that.silentLaunch,_that.autoRun,_that.openLogs,_that.closeConnections,_that.testUrl,_that.isAnimateToPage,_that.autoCheckUpdate,_that.showLabel,_that.disclaimerAccepted,_that.crashlyticsTip,_that.crashlytics,_that.minimizeOnExit,_that.hidden,_that.developerMode,_that.recoveryStrategy);case _:
+return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_that.autoLaunch,_that.silentLaunch,_that.autoRun,_that.openLogs,_that.closeConnections,_that.testUrl,_that.isAnimateToPage,_that.autoCheckUpdate,_that.showLabel,_that.minimizeOnExit,_that.hidden,_that.developerMode,_that.recoveryStrategy);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -212,10 +209,10 @@ return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets,  bool onlyStatisticsProxy,  bool autoLaunch,  bool silentLaunch,  bool autoRun,  bool openLogs,  bool closeConnections,  String testUrl,  bool isAnimateToPage,  bool autoCheckUpdate,  bool showLabel,  bool disclaimerAccepted,  bool crashlyticsTip,  bool crashlytics,  bool minimizeOnExit,  bool hidden,  bool developerMode,  RecoveryStrategy recoveryStrategy)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets,  bool onlyStatisticsProxy,  bool autoLaunch,  bool silentLaunch,  bool autoRun,  bool openLogs,  bool closeConnections,  String testUrl,  bool isAnimateToPage,  bool autoCheckUpdate,  bool showLabel,  bool minimizeOnExit,  bool hidden,  bool developerMode,  RecoveryStrategy recoveryStrategy)?  $default,) {final _that = this;
 switch (_that) {
 case _AppSettingProps() when $default != null:
-return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_that.autoLaunch,_that.silentLaunch,_that.autoRun,_that.openLogs,_that.closeConnections,_that.testUrl,_that.isAnimateToPage,_that.autoCheckUpdate,_that.showLabel,_that.disclaimerAccepted,_that.crashlyticsTip,_that.crashlytics,_that.minimizeOnExit,_that.hidden,_that.developerMode,_that.recoveryStrategy);case _:
+return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_that.autoLaunch,_that.silentLaunch,_that.autoRun,_that.openLogs,_that.closeConnections,_that.testUrl,_that.isAnimateToPage,_that.autoCheckUpdate,_that.showLabel,_that.minimizeOnExit,_that.hidden,_that.developerMode,_that.recoveryStrategy);case _:
   return null;
 
 }
@@ -227,7 +224,7 @@ return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_t
 @JsonSerializable()
 
 class _AppSettingProps implements AppSettingProps {
-  const _AppSettingProps({this.locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson) final  List<DashboardWidget> dashboardWidgets = defaultDashboardWidgets, this.onlyStatisticsProxy = false, this.autoLaunch = false, this.silentLaunch = false, this.autoRun = false, this.openLogs = false, this.closeConnections = true, this.testUrl = defaultTestUrl, this.isAnimateToPage = true, this.autoCheckUpdate = true, this.showLabel = false, this.disclaimerAccepted = false, this.crashlyticsTip = false, this.crashlytics = false, this.minimizeOnExit = true, this.hidden = false, this.developerMode = false, this.recoveryStrategy = RecoveryStrategy.compatible}): _dashboardWidgets = dashboardWidgets;
+  const _AppSettingProps({this.locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson) final  List<DashboardWidget> dashboardWidgets = defaultDashboardWidgets, this.onlyStatisticsProxy = false, this.autoLaunch = false, this.silentLaunch = false, this.autoRun = false, this.openLogs = false, this.closeConnections = true, this.testUrl = defaultTestUrl, this.isAnimateToPage = true, this.autoCheckUpdate = true, this.showLabel = false, this.minimizeOnExit = true, this.hidden = false, this.developerMode = false, this.recoveryStrategy = RecoveryStrategy.compatible}): _dashboardWidgets = dashboardWidgets;
   factory _AppSettingProps.fromJson(Map<String, dynamic> json) => _$AppSettingPropsFromJson(json);
 
 @override final  String? locale;
@@ -248,9 +245,6 @@ class _AppSettingProps implements AppSettingProps {
 @override@JsonKey() final  bool isAnimateToPage;
 @override@JsonKey() final  bool autoCheckUpdate;
 @override@JsonKey() final  bool showLabel;
-@override@JsonKey() final  bool disclaimerAccepted;
-@override@JsonKey() final  bool crashlyticsTip;
-@override@JsonKey() final  bool crashlytics;
 @override@JsonKey() final  bool minimizeOnExit;
 @override@JsonKey() final  bool hidden;
 @override@JsonKey() final  bool developerMode;
@@ -269,16 +263,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppSettingProps&&(identical(other.locale, locale) || other.locale == locale)&&const DeepCollectionEquality().equals(other._dashboardWidgets, _dashboardWidgets)&&(identical(other.onlyStatisticsProxy, onlyStatisticsProxy) || other.onlyStatisticsProxy == onlyStatisticsProxy)&&(identical(other.autoLaunch, autoLaunch) || other.autoLaunch == autoLaunch)&&(identical(other.silentLaunch, silentLaunch) || other.silentLaunch == silentLaunch)&&(identical(other.autoRun, autoRun) || other.autoRun == autoRun)&&(identical(other.openLogs, openLogs) || other.openLogs == openLogs)&&(identical(other.closeConnections, closeConnections) || other.closeConnections == closeConnections)&&(identical(other.testUrl, testUrl) || other.testUrl == testUrl)&&(identical(other.isAnimateToPage, isAnimateToPage) || other.isAnimateToPage == isAnimateToPage)&&(identical(other.autoCheckUpdate, autoCheckUpdate) || other.autoCheckUpdate == autoCheckUpdate)&&(identical(other.showLabel, showLabel) || other.showLabel == showLabel)&&(identical(other.disclaimerAccepted, disclaimerAccepted) || other.disclaimerAccepted == disclaimerAccepted)&&(identical(other.crashlyticsTip, crashlyticsTip) || other.crashlyticsTip == crashlyticsTip)&&(identical(other.crashlytics, crashlytics) || other.crashlytics == crashlytics)&&(identical(other.minimizeOnExit, minimizeOnExit) || other.minimizeOnExit == minimizeOnExit)&&(identical(other.hidden, hidden) || other.hidden == hidden)&&(identical(other.developerMode, developerMode) || other.developerMode == developerMode)&&(identical(other.recoveryStrategy, recoveryStrategy) || other.recoveryStrategy == recoveryStrategy));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppSettingProps&&(identical(other.locale, locale) || other.locale == locale)&&const DeepCollectionEquality().equals(other._dashboardWidgets, _dashboardWidgets)&&(identical(other.onlyStatisticsProxy, onlyStatisticsProxy) || other.onlyStatisticsProxy == onlyStatisticsProxy)&&(identical(other.autoLaunch, autoLaunch) || other.autoLaunch == autoLaunch)&&(identical(other.silentLaunch, silentLaunch) || other.silentLaunch == silentLaunch)&&(identical(other.autoRun, autoRun) || other.autoRun == autoRun)&&(identical(other.openLogs, openLogs) || other.openLogs == openLogs)&&(identical(other.closeConnections, closeConnections) || other.closeConnections == closeConnections)&&(identical(other.testUrl, testUrl) || other.testUrl == testUrl)&&(identical(other.isAnimateToPage, isAnimateToPage) || other.isAnimateToPage == isAnimateToPage)&&(identical(other.autoCheckUpdate, autoCheckUpdate) || other.autoCheckUpdate == autoCheckUpdate)&&(identical(other.showLabel, showLabel) || other.showLabel == showLabel)&&(identical(other.minimizeOnExit, minimizeOnExit) || other.minimizeOnExit == minimizeOnExit)&&(identical(other.hidden, hidden) || other.hidden == hidden)&&(identical(other.developerMode, developerMode) || other.developerMode == developerMode)&&(identical(other.recoveryStrategy, recoveryStrategy) || other.recoveryStrategy == recoveryStrategy));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,locale,const DeepCollectionEquality().hash(_dashboardWidgets),onlyStatisticsProxy,autoLaunch,silentLaunch,autoRun,openLogs,closeConnections,testUrl,isAnimateToPage,autoCheckUpdate,showLabel,disclaimerAccepted,crashlyticsTip,crashlytics,minimizeOnExit,hidden,developerMode,recoveryStrategy]);
+int get hashCode => Object.hash(runtimeType,locale,const DeepCollectionEquality().hash(_dashboardWidgets),onlyStatisticsProxy,autoLaunch,silentLaunch,autoRun,openLogs,closeConnections,testUrl,isAnimateToPage,autoCheckUpdate,showLabel,minimizeOnExit,hidden,developerMode,recoveryStrategy);
 
 @override
 String toString() {
-  return 'AppSettingProps(locale: $locale, dashboardWidgets: $dashboardWidgets, onlyStatisticsProxy: $onlyStatisticsProxy, autoLaunch: $autoLaunch, silentLaunch: $silentLaunch, autoRun: $autoRun, openLogs: $openLogs, closeConnections: $closeConnections, testUrl: $testUrl, isAnimateToPage: $isAnimateToPage, autoCheckUpdate: $autoCheckUpdate, showLabel: $showLabel, disclaimerAccepted: $disclaimerAccepted, crashlyticsTip: $crashlyticsTip, crashlytics: $crashlytics, minimizeOnExit: $minimizeOnExit, hidden: $hidden, developerMode: $developerMode, recoveryStrategy: $recoveryStrategy)';
+  return 'AppSettingProps(locale: $locale, dashboardWidgets: $dashboardWidgets, onlyStatisticsProxy: $onlyStatisticsProxy, autoLaunch: $autoLaunch, silentLaunch: $silentLaunch, autoRun: $autoRun, openLogs: $openLogs, closeConnections: $closeConnections, testUrl: $testUrl, isAnimateToPage: $isAnimateToPage, autoCheckUpdate: $autoCheckUpdate, showLabel: $showLabel, minimizeOnExit: $minimizeOnExit, hidden: $hidden, developerMode: $developerMode, recoveryStrategy: $recoveryStrategy)';
 }
 
 
@@ -289,7 +283,7 @@ abstract mixin class _$AppSettingPropsCopyWith<$Res> implements $AppSettingProps
   factory _$AppSettingPropsCopyWith(_AppSettingProps value, $Res Function(_AppSettingProps) _then) = __$AppSettingPropsCopyWithImpl;
 @override @useResult
 $Res call({
- String? locale,@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> dashboardWidgets, bool onlyStatisticsProxy, bool autoLaunch, bool silentLaunch, bool autoRun, bool openLogs, bool closeConnections, String testUrl, bool isAnimateToPage, bool autoCheckUpdate, bool showLabel, bool disclaimerAccepted, bool crashlyticsTip, bool crashlytics, bool minimizeOnExit, bool hidden, bool developerMode, RecoveryStrategy recoveryStrategy
+ String? locale,@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> dashboardWidgets, bool onlyStatisticsProxy, bool autoLaunch, bool silentLaunch, bool autoRun, bool openLogs, bool closeConnections, String testUrl, bool isAnimateToPage, bool autoCheckUpdate, bool showLabel, bool minimizeOnExit, bool hidden, bool developerMode, RecoveryStrategy recoveryStrategy
 });
 
 
@@ -306,7 +300,7 @@ class __$AppSettingPropsCopyWithImpl<$Res>
 
 /// Create a copy of AppSettingProps
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? locale = freezed,Object? dashboardWidgets = null,Object? onlyStatisticsProxy = null,Object? autoLaunch = null,Object? silentLaunch = null,Object? autoRun = null,Object? openLogs = null,Object? closeConnections = null,Object? testUrl = null,Object? isAnimateToPage = null,Object? autoCheckUpdate = null,Object? showLabel = null,Object? disclaimerAccepted = null,Object? crashlyticsTip = null,Object? crashlytics = null,Object? minimizeOnExit = null,Object? hidden = null,Object? developerMode = null,Object? recoveryStrategy = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? locale = freezed,Object? dashboardWidgets = null,Object? onlyStatisticsProxy = null,Object? autoLaunch = null,Object? silentLaunch = null,Object? autoRun = null,Object? openLogs = null,Object? closeConnections = null,Object? testUrl = null,Object? isAnimateToPage = null,Object? autoCheckUpdate = null,Object? showLabel = null,Object? minimizeOnExit = null,Object? hidden = null,Object? developerMode = null,Object? recoveryStrategy = null,}) {
   return _then(_AppSettingProps(
 locale: freezed == locale ? _self.locale : locale // ignore: cast_nullable_to_non_nullable
 as String?,dashboardWidgets: null == dashboardWidgets ? _self._dashboardWidgets : dashboardWidgets // ignore: cast_nullable_to_non_nullable
@@ -320,9 +314,6 @@ as bool,testUrl: null == testUrl ? _self.testUrl : testUrl // ignore: cast_nulla
 as String,isAnimateToPage: null == isAnimateToPage ? _self.isAnimateToPage : isAnimateToPage // ignore: cast_nullable_to_non_nullable
 as bool,autoCheckUpdate: null == autoCheckUpdate ? _self.autoCheckUpdate : autoCheckUpdate // ignore: cast_nullable_to_non_nullable
 as bool,showLabel: null == showLabel ? _self.showLabel : showLabel // ignore: cast_nullable_to_non_nullable
-as bool,disclaimerAccepted: null == disclaimerAccepted ? _self.disclaimerAccepted : disclaimerAccepted // ignore: cast_nullable_to_non_nullable
-as bool,crashlyticsTip: null == crashlyticsTip ? _self.crashlyticsTip : crashlyticsTip // ignore: cast_nullable_to_non_nullable
-as bool,crashlytics: null == crashlytics ? _self.crashlytics : crashlytics // ignore: cast_nullable_to_non_nullable
 as bool,minimizeOnExit: null == minimizeOnExit ? _self.minimizeOnExit : minimizeOnExit // ignore: cast_nullable_to_non_nullable
 as bool,hidden: null == hidden ? _self.hidden : hidden // ignore: cast_nullable_to_non_nullable
 as bool,developerMode: null == developerMode ? _self.developerMode : developerMode // ignore: cast_nullable_to_non_nullable
@@ -1199,7 +1190,7 @@ $AccessControlCopyWith<$Res> get accessControl {
 /// @nodoc
 mixin _$NetworkProps {
 
- bool get systemProxy; List<String> get bypassDomain; RouteMode get routeMode; bool get autoSetSystemDns;
+ bool get systemProxy; List<String> get bypassDomain; RouteMode get routeMode; bool get autoSetSystemDns; bool get appendSystemDns;
 /// Create a copy of NetworkProps
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1212,16 +1203,16 @@ $NetworkPropsCopyWith<NetworkProps> get copyWith => _$NetworkPropsCopyWithImpl<N
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NetworkProps&&(identical(other.systemProxy, systemProxy) || other.systemProxy == systemProxy)&&const DeepCollectionEquality().equals(other.bypassDomain, bypassDomain)&&(identical(other.routeMode, routeMode) || other.routeMode == routeMode)&&(identical(other.autoSetSystemDns, autoSetSystemDns) || other.autoSetSystemDns == autoSetSystemDns));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NetworkProps&&(identical(other.systemProxy, systemProxy) || other.systemProxy == systemProxy)&&const DeepCollectionEquality().equals(other.bypassDomain, bypassDomain)&&(identical(other.routeMode, routeMode) || other.routeMode == routeMode)&&(identical(other.autoSetSystemDns, autoSetSystemDns) || other.autoSetSystemDns == autoSetSystemDns)&&(identical(other.appendSystemDns, appendSystemDns) || other.appendSystemDns == appendSystemDns));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,systemProxy,const DeepCollectionEquality().hash(bypassDomain),routeMode,autoSetSystemDns);
+int get hashCode => Object.hash(runtimeType,systemProxy,const DeepCollectionEquality().hash(bypassDomain),routeMode,autoSetSystemDns,appendSystemDns);
 
 @override
 String toString() {
-  return 'NetworkProps(systemProxy: $systemProxy, bypassDomain: $bypassDomain, routeMode: $routeMode, autoSetSystemDns: $autoSetSystemDns)';
+  return 'NetworkProps(systemProxy: $systemProxy, bypassDomain: $bypassDomain, routeMode: $routeMode, autoSetSystemDns: $autoSetSystemDns, appendSystemDns: $appendSystemDns)';
 }
 
 
@@ -1232,7 +1223,7 @@ abstract mixin class $NetworkPropsCopyWith<$Res>  {
   factory $NetworkPropsCopyWith(NetworkProps value, $Res Function(NetworkProps) _then) = _$NetworkPropsCopyWithImpl;
 @useResult
 $Res call({
- bool systemProxy, List<String> bypassDomain, RouteMode routeMode, bool autoSetSystemDns
+ bool systemProxy, List<String> bypassDomain, RouteMode routeMode, bool autoSetSystemDns, bool appendSystemDns
 });
 
 
@@ -1249,12 +1240,13 @@ class _$NetworkPropsCopyWithImpl<$Res>
 
 /// Create a copy of NetworkProps
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? systemProxy = null,Object? bypassDomain = null,Object? routeMode = null,Object? autoSetSystemDns = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? systemProxy = null,Object? bypassDomain = null,Object? routeMode = null,Object? autoSetSystemDns = null,Object? appendSystemDns = null,}) {
   return _then(_self.copyWith(
 systemProxy: null == systemProxy ? _self.systemProxy : systemProxy // ignore: cast_nullable_to_non_nullable
 as bool,bypassDomain: null == bypassDomain ? _self.bypassDomain : bypassDomain // ignore: cast_nullable_to_non_nullable
 as List<String>,routeMode: null == routeMode ? _self.routeMode : routeMode // ignore: cast_nullable_to_non_nullable
 as RouteMode,autoSetSystemDns: null == autoSetSystemDns ? _self.autoSetSystemDns : autoSetSystemDns // ignore: cast_nullable_to_non_nullable
+as bool,appendSystemDns: null == appendSystemDns ? _self.appendSystemDns : appendSystemDns // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -1340,10 +1332,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool systemProxy,  List<String> bypassDomain,  RouteMode routeMode,  bool autoSetSystemDns)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool systemProxy,  List<String> bypassDomain,  RouteMode routeMode,  bool autoSetSystemDns,  bool appendSystemDns)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _NetworkProps() when $default != null:
-return $default(_that.systemProxy,_that.bypassDomain,_that.routeMode,_that.autoSetSystemDns);case _:
+return $default(_that.systemProxy,_that.bypassDomain,_that.routeMode,_that.autoSetSystemDns,_that.appendSystemDns);case _:
   return orElse();
 
 }
@@ -1361,10 +1353,10 @@ return $default(_that.systemProxy,_that.bypassDomain,_that.routeMode,_that.autoS
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool systemProxy,  List<String> bypassDomain,  RouteMode routeMode,  bool autoSetSystemDns)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool systemProxy,  List<String> bypassDomain,  RouteMode routeMode,  bool autoSetSystemDns,  bool appendSystemDns)  $default,) {final _that = this;
 switch (_that) {
 case _NetworkProps():
-return $default(_that.systemProxy,_that.bypassDomain,_that.routeMode,_that.autoSetSystemDns);case _:
+return $default(_that.systemProxy,_that.bypassDomain,_that.routeMode,_that.autoSetSystemDns,_that.appendSystemDns);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1381,10 +1373,10 @@ return $default(_that.systemProxy,_that.bypassDomain,_that.routeMode,_that.autoS
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool systemProxy,  List<String> bypassDomain,  RouteMode routeMode,  bool autoSetSystemDns)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool systemProxy,  List<String> bypassDomain,  RouteMode routeMode,  bool autoSetSystemDns,  bool appendSystemDns)?  $default,) {final _that = this;
 switch (_that) {
 case _NetworkProps() when $default != null:
-return $default(_that.systemProxy,_that.bypassDomain,_that.routeMode,_that.autoSetSystemDns);case _:
+return $default(_that.systemProxy,_that.bypassDomain,_that.routeMode,_that.autoSetSystemDns,_that.appendSystemDns);case _:
   return null;
 
 }
@@ -1396,7 +1388,7 @@ return $default(_that.systemProxy,_that.bypassDomain,_that.routeMode,_that.autoS
 @JsonSerializable()
 
 class _NetworkProps implements NetworkProps {
-  const _NetworkProps({this.systemProxy = true, final  List<String> bypassDomain = defaultBypassDomain, this.routeMode = RouteMode.config, this.autoSetSystemDns = true}): _bypassDomain = bypassDomain;
+  const _NetworkProps({this.systemProxy = true, final  List<String> bypassDomain = defaultBypassDomain, this.routeMode = RouteMode.config, this.autoSetSystemDns = true, this.appendSystemDns = false}): _bypassDomain = bypassDomain;
   factory _NetworkProps.fromJson(Map<String, dynamic> json) => _$NetworkPropsFromJson(json);
 
 @override@JsonKey() final  bool systemProxy;
@@ -1409,6 +1401,7 @@ class _NetworkProps implements NetworkProps {
 
 @override@JsonKey() final  RouteMode routeMode;
 @override@JsonKey() final  bool autoSetSystemDns;
+@override@JsonKey() final  bool appendSystemDns;
 
 /// Create a copy of NetworkProps
 /// with the given fields replaced by the non-null parameter values.
@@ -1423,16 +1416,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NetworkProps&&(identical(other.systemProxy, systemProxy) || other.systemProxy == systemProxy)&&const DeepCollectionEquality().equals(other._bypassDomain, _bypassDomain)&&(identical(other.routeMode, routeMode) || other.routeMode == routeMode)&&(identical(other.autoSetSystemDns, autoSetSystemDns) || other.autoSetSystemDns == autoSetSystemDns));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NetworkProps&&(identical(other.systemProxy, systemProxy) || other.systemProxy == systemProxy)&&const DeepCollectionEquality().equals(other._bypassDomain, _bypassDomain)&&(identical(other.routeMode, routeMode) || other.routeMode == routeMode)&&(identical(other.autoSetSystemDns, autoSetSystemDns) || other.autoSetSystemDns == autoSetSystemDns)&&(identical(other.appendSystemDns, appendSystemDns) || other.appendSystemDns == appendSystemDns));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,systemProxy,const DeepCollectionEquality().hash(_bypassDomain),routeMode,autoSetSystemDns);
+int get hashCode => Object.hash(runtimeType,systemProxy,const DeepCollectionEquality().hash(_bypassDomain),routeMode,autoSetSystemDns,appendSystemDns);
 
 @override
 String toString() {
-  return 'NetworkProps(systemProxy: $systemProxy, bypassDomain: $bypassDomain, routeMode: $routeMode, autoSetSystemDns: $autoSetSystemDns)';
+  return 'NetworkProps(systemProxy: $systemProxy, bypassDomain: $bypassDomain, routeMode: $routeMode, autoSetSystemDns: $autoSetSystemDns, appendSystemDns: $appendSystemDns)';
 }
 
 
@@ -1443,7 +1436,7 @@ abstract mixin class _$NetworkPropsCopyWith<$Res> implements $NetworkPropsCopyWi
   factory _$NetworkPropsCopyWith(_NetworkProps value, $Res Function(_NetworkProps) _then) = __$NetworkPropsCopyWithImpl;
 @override @useResult
 $Res call({
- bool systemProxy, List<String> bypassDomain, RouteMode routeMode, bool autoSetSystemDns
+ bool systemProxy, List<String> bypassDomain, RouteMode routeMode, bool autoSetSystemDns, bool appendSystemDns
 });
 
 
@@ -1460,12 +1453,13 @@ class __$NetworkPropsCopyWithImpl<$Res>
 
 /// Create a copy of NetworkProps
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? systemProxy = null,Object? bypassDomain = null,Object? routeMode = null,Object? autoSetSystemDns = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? systemProxy = null,Object? bypassDomain = null,Object? routeMode = null,Object? autoSetSystemDns = null,Object? appendSystemDns = null,}) {
   return _then(_NetworkProps(
 systemProxy: null == systemProxy ? _self.systemProxy : systemProxy // ignore: cast_nullable_to_non_nullable
 as bool,bypassDomain: null == bypassDomain ? _self._bypassDomain : bypassDomain // ignore: cast_nullable_to_non_nullable
 as List<String>,routeMode: null == routeMode ? _self.routeMode : routeMode // ignore: cast_nullable_to_non_nullable
 as RouteMode,autoSetSystemDns: null == autoSetSystemDns ? _self.autoSetSystemDns : autoSetSystemDns // ignore: cast_nullable_to_non_nullable
+as bool,appendSystemDns: null == appendSystemDns ? _self.appendSystemDns : appendSystemDns // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }

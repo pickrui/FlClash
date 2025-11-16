@@ -10,6 +10,8 @@ abstract class SetupParams with _$SetupParams {
   const factory SetupParams({
     @JsonKey(name: 'selected-map') required Map<String, String> selectedMap,
     @JsonKey(name: 'test-url') required String testUrl,
+    @JsonKey(name: 'config-path') String? configPath,
+    @JsonKey(name: 'encryption-key') String? encryptionKey,
   }) = _SetupParams;
 
   factory SetupParams.fromJson(Map<String, dynamic> json) =>
@@ -192,7 +194,7 @@ extension ActionResultExt on ActionResult {
     if (code == ResultType.success) {
       return Result.success(data);
     } else {
-      return Result.error(data);
+      return Result.error('$data');
     }
   }
 }

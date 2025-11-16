@@ -10,7 +10,6 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/plugins/app.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/widgets/dialog.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -82,9 +81,39 @@ class AppController {
     }
   }
 
+  Future<void> tryStartCore() async {
+    if (coreController.isCompleted) {
+      return;
+    }
+    globalState.isUserDisconnected = true;
+    await _connectCore();
+    await _initCore();
+    _ref.read(initProvider.notifier).value = true;
+    if (_ref.read(isStartProvider)) {
+      await globalState.handleStart();
+    }
+  }
+
   Future<void> updateStatus(bool isStart) async {
     if (isStart) {
+      await globalState.appController.tryStartCore();
       await globalState.handleStart([updateRunTime, updateTraffic]);
+      
+      final autoRun = _ref.read(appSettingProvider).autoRun;
+      if (!autoRun) {
+        final shouldEnableAutoRun = await globalState.showMessage(
+          title: '提示',
+          message: const TextSpan(text: '是否开启自动运行？开启后应用启动时会自动运行'),
+          confirmText: '开启',
+        );
+        
+        if (shouldEnableAutoRun == true) {
+          _ref.read(appSettingProvider.notifier).updateState(
+            (state) => state.copyWith(autoRun: true),
+          );
+        }
+      }
+      
       final currentLastModified = await _ref
           .read(currentProfileProvider)
           ?.profileLastModified;
@@ -309,7 +338,6 @@ class AppController {
   }
 
   Future _applyProfile() async {
-    await coreController.requestGc();
     await setupClashConfig();
     await updateGroups();
     await updateProviders();
@@ -466,31 +494,26 @@ class AppController {
     Map<String, dynamic>? data,
     bool handleError = false,
   }) async {
-    if (globalState.isPre) {
-      return;
-    }
     if (data != null) {
-      final tagName = data['tag_name'];
-      final body = data['body'];
-      final submits = utils.parseReleaseBody(body);
+      final version = data['version'];
+      final downloadUrl = data['downloadUrl'];
       final textTheme = context.textTheme;
+      
       final res = await globalState.showMessage(
         title: appLocalizations.discoverNewVersion,
         message: TextSpan(
-          text: '$tagName \n',
+          text: '$version',
           style: textTheme.headlineSmall,
-          children: [
-            TextSpan(text: '\n', style: textTheme.bodyMedium),
-            for (final submit in submits)
-              TextSpan(text: '- $submit \n', style: textTheme.bodyMedium),
-          ],
         ),
         confirmText: appLocalizations.goDownload,
       );
       if (res != true) {
         return;
       }
-      launchUrl(Uri.parse('https://github.com/$repository/releases/latest'));
+      
+      if (downloadUrl != null) {
+        launchUrl(Uri.parse(downloadUrl));
+      }
     } else if (handleError) {
       globalState.showMessage(
         title: appLocalizations.checkUpdate,
@@ -542,8 +565,6 @@ class AppController {
       window?.hide();
     }
     await _handlePreference();
-    await _handlerDisclaimer();
-    await _showCrashlyticsTip();
     await _connectCore();
     await _initCore();
     await _initStatus();
@@ -557,7 +578,6 @@ class AppController {
       if (!globalState.isService) Future.delayed(Duration(milliseconds: 300)),
     ]);
     final String message = result[0];
-    await Future.delayed(commonDuration);
     if (message.isNotEmpty) {
       _ref.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
       if (context.mounted) {
@@ -623,63 +643,6 @@ class AppController {
     });
   }
 
-  Future<bool> showDisclaimer() async {
-    return await globalState.showCommonDialog<bool>(
-          dismissible: false,
-          child: CommonDialog(
-            title: appLocalizations.disclaimer,
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop<bool>(false);
-                },
-                child: Text(appLocalizations.exit),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop<bool>(true);
-                },
-                child: Text(appLocalizations.agree),
-              ),
-            ],
-            child: Text(appLocalizations.disclaimerDesc),
-          ),
-        ) ??
-        false;
-  }
-
-  Future<void> _showCrashlyticsTip() async {
-    if (!system.isAndroid) {
-      return;
-    }
-    if (_ref.read(appSettingProvider.select((state) => state.crashlyticsTip))) {
-      return;
-    }
-    await globalState.showMessage(
-      title: appLocalizations.dataCollectionTip,
-      cancelable: false,
-      message: TextSpan(text: appLocalizations.dataCollectionContent),
-    );
-    _ref
-        .read(appSettingProvider.notifier)
-        .updateState((state) => state.copyWith(crashlyticsTip: true));
-  }
-
-  Future<void> _handlerDisclaimer() async {
-    if (_ref.read(
-      appSettingProvider.select((state) => state.disclaimerAccepted),
-    )) {
-      return;
-    }
-    final isDisclaimerAccepted = await showDisclaimer();
-    if (!isDisclaimerAccepted) {
-      await handleExit();
-    }
-    _ref
-        .read(appSettingProvider.notifier)
-        .updateState((state) => state.copyWith(disclaimerAccepted: true));
-    return;
-  }
 
   Future<void> addProfileFormURL(String url) async {
     if (globalState.navigatorKey.currentState?.canPop() ?? false) {
@@ -962,7 +925,7 @@ class AppController {
       final res = await futureFunction();
       return res;
     } catch (e) {
-      commonPrint.log('$futureFunction ===> $e', logLevel: LogLevel.warning);
+      commonPrint.log('$title===> $e', logLevel: LogLevel.warning);
       if (realSilence) {
         globalState.showNotifier(e.toString());
       } else {

@@ -37,15 +37,6 @@ class DeveloperView extends ConsumerWidget {
           },
         ),
         ListItem(
-          title: Text(appLocalizations.crashTest),
-          minVerticalPadding: 14,
-          onTap: () {
-            if (kDebugMode) {
-              coreController.crash();
-            }
-          },
-        ),
-        ListItem(
           title: Text(appLocalizations.clearData),
           minVerticalPadding: 14,
           onTap: () async {

@@ -34,7 +34,7 @@ class OutboundMode extends StatelessWidget {
               ),
               child: Padding(
                 padding: const EdgeInsets.only(top: 12, bottom: 16),
-                child: RadioGroup<Mode>(
+                child: ClashRadioGroup<Mode>(
                   groupValue: mode,
                   onChanged: (value) {
                     if (value == null) {

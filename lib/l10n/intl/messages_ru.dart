@@ -97,6 +97,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "appDesc": MessageLookupByLibrary.simpleMessage(
       "Обработка настроек, связанных с приложением",
     ),
+    "appendSystemDns": MessageLookupByLibrary.simpleMessage(
+      "Добавить системный DNS",
+    ),
+    "appendSystemDnsTip": MessageLookupByLibrary.simpleMessage(
+      "Принудительно добавить системный DNS к конфигурации",
+    ),
     "application": MessageLookupByLibrary.simpleMessage("Приложение"),
     "applicationDesc": MessageLookupByLibrary.simpleMessage(
       "Изменение настроек, связанных с приложением",
@@ -203,22 +209,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "coreInfo": MessageLookupByLibrary.simpleMessage("Информация о ядре"),
     "coreStatus": MessageLookupByLibrary.simpleMessage("Основной статус"),
     "country": MessageLookupByLibrary.simpleMessage("Страна"),
-    "crashTest": MessageLookupByLibrary.simpleMessage("Тест на сбои"),
-    "crashlytics": MessageLookupByLibrary.simpleMessage("Анализ сбоев"),
-    "crashlyticsTip": MessageLookupByLibrary.simpleMessage(
-      "При включении автоматически загружает журналы сбоев без конфиденциальной информации, когда приложение выходит из строя",
-    ),
     "create": MessageLookupByLibrary.simpleMessage("Создать"),
     "creationTime": MessageLookupByLibrary.simpleMessage("Время создания"),
     "cut": MessageLookupByLibrary.simpleMessage("Вырезать"),
     "dark": MessageLookupByLibrary.simpleMessage("Темный"),
     "dashboard": MessageLookupByLibrary.simpleMessage("Панель управления"),
-    "dataCollectionContent": MessageLookupByLibrary.simpleMessage(
-      "Это приложение использует Firebase Crashlytics для сбора информации о сбоях nhằm улучшения стабильности приложения.\nСобираемые данные включают информацию об устройстве и подробности о сбоях, но не содержат персональных конфиденциальных данных.\nВы можете отключить эту функцию в настройках.",
-    ),
-    "dataCollectionTip": MessageLookupByLibrary.simpleMessage(
-      "Уведомление о сборе данных",
-    ),
     "days": MessageLookupByLibrary.simpleMessage("Дней"),
     "defaultNameserver": MessageLookupByLibrary.simpleMessage(
       "Сервер имен по умолчанию",
@@ -235,9 +230,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "delete": MessageLookupByLibrary.simpleMessage("Удалить"),
     "deleteMultipTip": m0,
     "deleteTip": m1,
-    "desc": MessageLookupByLibrary.simpleMessage(
-      "Многоплатформенный прокси-клиент на основе ClashMeta, простой и удобный в использовании, с открытым исходным кодом и без рекламы.",
-    ),
     "destination": MessageLookupByLibrary.simpleMessage("Назначение"),
     "destinationGeoIP": MessageLookupByLibrary.simpleMessage(
       "Геолокация назначения",
@@ -508,9 +500,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "options": MessageLookupByLibrary.simpleMessage("Опции"),
     "other": MessageLookupByLibrary.simpleMessage("Другое"),
-    "otherContributors": MessageLookupByLibrary.simpleMessage(
-      "Другие участники",
-    ),
     "outboundMode": MessageLookupByLibrary.simpleMessage(
       "Режим исходящего трафика",
     ),

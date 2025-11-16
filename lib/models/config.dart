@@ -76,9 +76,6 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(true) bool isAnimateToPage,
     @Default(true) bool autoCheckUpdate,
     @Default(false) bool showLabel,
-    @Default(false) bool disclaimerAccepted,
-    @Default(false) bool crashlyticsTip,
-    @Default(false) bool crashlytics,
     @Default(true) bool minimizeOnExit,
     @Default(false) bool hidden,
     @Default(false) bool developerMode,
@@ -153,6 +150,7 @@ abstract class NetworkProps with _$NetworkProps {
     @Default(defaultBypassDomain) List<String> bypassDomain,
     @Default(RouteMode.config) RouteMode routeMode,
     @Default(true) bool autoSetSystemDns,
+    @Default(false) bool appendSystemDns,
   }) = _NetworkProps;
 
   factory NetworkProps.fromJson(Map<String, Object?>? json) =>

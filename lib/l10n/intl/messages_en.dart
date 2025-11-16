@@ -100,6 +100,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "appDesc": MessageLookupByLibrary.simpleMessage(
       "Processing app related settings",
     ),
+    "appendSystemDns": MessageLookupByLibrary.simpleMessage(
+      "Append System DNS",
+    ),
+    "appendSystemDnsTip": MessageLookupByLibrary.simpleMessage(
+      "Forcefully append system DNS to the configuration",
+    ),
     "application": MessageLookupByLibrary.simpleMessage("Application"),
     "applicationDesc": MessageLookupByLibrary.simpleMessage(
       "Modify application related settings",
@@ -198,22 +204,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "coreInfo": MessageLookupByLibrary.simpleMessage("Core info"),
     "coreStatus": MessageLookupByLibrary.simpleMessage("Core status"),
     "country": MessageLookupByLibrary.simpleMessage("Country"),
-    "crashTest": MessageLookupByLibrary.simpleMessage("Crash test"),
-    "crashlytics": MessageLookupByLibrary.simpleMessage("Crash Analysis"),
-    "crashlyticsTip": MessageLookupByLibrary.simpleMessage(
-      "When enabled, automatically uploads crash logs without sensitive information when the app crashes",
-    ),
     "create": MessageLookupByLibrary.simpleMessage("Create"),
     "creationTime": MessageLookupByLibrary.simpleMessage("Creation time"),
     "cut": MessageLookupByLibrary.simpleMessage("Cut"),
     "dark": MessageLookupByLibrary.simpleMessage("Dark"),
     "dashboard": MessageLookupByLibrary.simpleMessage("Dashboard"),
-    "dataCollectionContent": MessageLookupByLibrary.simpleMessage(
-      "This app uses Firebase Crashlytics to collect crash information to improve app stability.\nThe collected data includes device information and crash details, but does not contain personal sensitive data.\nYou can disable this feature in settings.",
-    ),
-    "dataCollectionTip": MessageLookupByLibrary.simpleMessage(
-      "Data Collection Notice",
-    ),
     "days": MessageLookupByLibrary.simpleMessage("Days"),
     "defaultNameserver": MessageLookupByLibrary.simpleMessage(
       "Default nameserver",
@@ -228,9 +223,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "delete": MessageLookupByLibrary.simpleMessage("Delete"),
     "deleteMultipTip": m0,
     "deleteTip": m1,
-    "desc": MessageLookupByLibrary.simpleMessage(
-      "A multi-platform proxy client based on ClashMeta, simple and easy to use, open-source and ad-free.",
-    ),
     "destination": MessageLookupByLibrary.simpleMessage("Destination"),
     "destinationGeoIP": MessageLookupByLibrary.simpleMessage(
       "Destination GeoIP",
@@ -483,9 +475,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "options": MessageLookupByLibrary.simpleMessage("Options"),
     "other": MessageLookupByLibrary.simpleMessage("Other"),
-    "otherContributors": MessageLookupByLibrary.simpleMessage(
-      "Other contributors",
-    ),
     "outboundMode": MessageLookupByLibrary.simpleMessage("Outbound mode"),
     "override": MessageLookupByLibrary.simpleMessage("Override"),
     "overrideDesc": MessageLookupByLibrary.simpleMessage(

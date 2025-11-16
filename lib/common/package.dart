@@ -10,4 +10,11 @@ extension PackageInfoExtension on PackageInfo {
         'clash-verge',
         'Platform/${Platform.operatingSystem}',
       ].join(' ');
+  
+  String get fullVersion {
+    if (buildNumber.isNotEmpty && buildNumber != '0') {
+      return '$version+$buildNumber';
+    }
+    return version;
+  }
 }

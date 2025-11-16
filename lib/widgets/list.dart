@@ -6,6 +6,7 @@ import 'package:fl_clash/widgets/open_container.dart';
 import 'package:flutter/material.dart';
 
 import 'card.dart';
+import 'effect.dart';
 import 'input.dart';
 import 'scaffold.dart';
 import 'sheet.dart';
@@ -409,12 +410,15 @@ class ListItem<T> extends StatelessWidget {
     }
     if (delegate is RadioDelegate) {
       final radioDelegate = delegate as RadioDelegate<T>;
+      final radioGroup = context.findAncestorWidgetOfExactType<ClashRadioGroup<T>>();
       return _buildListTile(
         onTap: radioDelegate.onTab,
         leading: Radio<T>(
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           value: radioDelegate.value,
+          groupValue: radioGroup?.groupValue,
           toggleable: true,
+          onChanged: radioGroup?.onChanged,
         ),
         trailing: trailing,
       );

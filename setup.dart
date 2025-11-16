@@ -9,6 +9,10 @@ import 'package:path/path.dart';
 
 enum Target { windows, linux, android, macos }
 
+const String _defaultArtifactNameTemplate = 'flclash-{{platform}}{{#description}}-{{description}}{{/description}}.{{ext}}';
+const String _windowsArtifactNameTemplate = 'flclash-windows-x86_64{{#ext}}.{{ext}}{{/ext}}';
+const String _androidArtifactNameTemplate = 'flclash-{{platform}}.{{ext}}';
+
 extension TargetExt on Target {
   String get os {
     if (this == Target.macos) {
@@ -132,6 +136,79 @@ class Build {
 
   static String get tags => 'with_gvisor';
 
+  static Future<void> updateVersion() async {
+    final pubspecFile = File(join(current, 'pubspec.yaml'));
+    if (!await pubspecFile.exists()) {
+      return;
+    }
+
+    final content = await pubspecFile.readAsString();
+    final lines = content.split('\n');
+    
+    final versionIndex = lines.indexWhere((line) => line.trim().startsWith('version:'));
+    if (versionIndex == -1) {
+      return;
+    }
+
+    final versionLine = lines[versionIndex];
+    final versionMatch = RegExp(r'version:\s*([\d.]+)\+(\d+)').firstMatch(versionLine);
+    if (versionMatch == null) {
+      return;
+    }
+
+    final versionNumber = versionMatch.group(1)!;
+    final oldBuildNumber = versionMatch.group(2)!;
+
+    final utcNow = DateTime.now().toUtc();
+    final utc8Now = utcNow.add(const Duration(hours: 8));
+    final year = utc8Now.year.toString().padLeft(4, '0');
+    final month = utc8Now.month.toString().padLeft(2, '0');
+    final day = utc8Now.day.toString().padLeft(2, '0');
+    final hour = utc8Now.hour.toString().padLeft(2, '0');
+    final finalBuildNumber = '$year$month$day$hour';
+
+    lines[versionIndex] = 'version: $versionNumber+$finalBuildNumber';
+    
+    await pubspecFile.writeAsString(lines.join('\n'));
+    print('Updated version: $versionNumber+$oldBuildNumber -> $versionNumber+$finalBuildNumber');
+
+    final androidDir = Directory(join(current, 'android'));
+    if (!await androidDir.exists()) {
+      return;
+    }
+    
+    final localPropertiesFile = File(join(current, 'android', 'local.properties'));
+    List<String> localPropertiesLines = [];
+    
+    if (await localPropertiesFile.exists()) {
+      final localPropertiesContent = await localPropertiesFile.readAsString();
+      localPropertiesLines = localPropertiesContent.split('\n');
+    }
+    
+    bool versionNameFound = false;
+    bool versionCodeFound = false;
+    
+    for (int i = 0; i < localPropertiesLines.length; i++) {
+      if (localPropertiesLines[i].startsWith('flutter.versionName=')) {
+        localPropertiesLines[i] = 'flutter.versionName=$versionNumber';
+        versionNameFound = true;
+      } else if (localPropertiesLines[i].startsWith('flutter.versionCode=')) {
+        localPropertiesLines[i] = 'flutter.versionCode=$finalBuildNumber';
+        versionCodeFound = true;
+      }
+    }
+    
+    if (!versionNameFound) {
+      localPropertiesLines.add('flutter.versionName=$versionNumber');
+    }
+    if (!versionCodeFound) {
+      localPropertiesLines.add('flutter.versionCode=$finalBuildNumber');
+    }
+    
+    await localPropertiesFile.writeAsString(localPropertiesLines.join('\n'));
+    print('Updated android/local.properties: versionName=$versionNumber, versionCode=$finalBuildNumber');
+  }
+
   static Future<void> exec(
     List<String> executable, {
     String? name,
@@ -140,6 +217,8 @@ class Build {
     bool runInShell = true,
   }) async {
     if (name != null) print('run $name');
+    print('exec: ${executable.join(' ')}');
+    print('env: ${environment.toString()}');
     final process = await Process.start(
       executable[0],
       executable.sublist(1),
@@ -405,32 +484,29 @@ class BuildCommand extends Command {
     required String targets,
     String args = '',
     required String env,
+    String? artifactName,
   }) async {
     await Build.getDistributor();
+    final artifactNameArg = artifactName != null ? ' --artifact-name $artifactName' : '';
     await Build.exec(
       name: name,
       Build.getExecutable(
-        'flutter_distributor package --skip-clean --platform ${target.name} --targets $targets --flutter-build-args=verbose$args --build-dart-define=APP_ENV=$env',
+        'flutter_distributor package --skip-clean --platform ${target.name} --targets $targets --flutter-build-args=verbose$args --build-dart-define=APP_ENV=$env$artifactNameArg',
       ),
     );
   }
 
-  Future<String?> get systemArch async {
-    if (Platform.isWindows) {
-      return Platform.environment['PROCESSOR_ARCHITECTURE'];
-    } else if (Platform.isLinux || Platform.isMacOS) {
-      final result = await Process.run('uname', ['-m']);
-      return result.stdout.toString().trim();
-    }
-    return null;
-  }
-
   @override
   Future<void> run() async {
-    final mode = target == Target.android ? Mode.lib : Mode.core;
     final String out = argResults?['out'] ?? (target.same ? 'app' : 'core');
+    
+    if (out == 'app') {
+      await Build.updateVersion();
+    }
+    
+    final mode = target == Target.android ? Mode.lib : Mode.core;
     final archName = argResults?['arch'];
-    final env = argResults?['env'] ?? 'pre';
+    final env = argResults?['env'] ?? 'stable';
     final currentArches = arches
         .where((element) => element.name == archName)
         .toList();
@@ -456,12 +532,13 @@ class BuildCommand extends Command {
             ? await Build.calcSha256(corePaths.first)
             : null;
         Build.buildHelper(target, token!);
-        _buildDistributor(
+        await _buildDistributor(
           target: target,
-          targets: 'exe,zip',
+          targets: 'exe',
           args:
               ' --description $archName --build-dart-define=CORE_SHA256=$token',
           env: env,
+          artifactName: _windowsArtifactNameTemplate,
         );
         return;
       case Target.linux:
@@ -473,12 +550,13 @@ class BuildCommand extends Command {
         ].join(',');
         final defaultTarget = targetMap[arch];
         await _getLinuxDependencies(arch!);
-        _buildDistributor(
+        await _buildDistributor(
           target: target,
           targets: targets,
           args:
               ' --description $archName --build-target-platform $defaultTarget',
           env: env,
+          artifactName: _defaultArtifactNameTemplate,
         );
         return;
       case Target.android:
@@ -492,21 +570,22 @@ class BuildCommand extends Command {
             .where((element) => arch == null ? true : element == arch)
             .map((e) => targetMap[e])
             .toList();
-        _buildDistributor(
+        await _buildDistributor(
           target: target,
           targets: 'apk',
-          args:
-              ",split-per-abi --build-target-platform ${defaultTargets.join(",")}",
+          args: ",split-per-abi --build-target-platform ${defaultTargets.join(",")}",
           env: env,
+          artifactName: _androidArtifactNameTemplate,
         );
         return;
       case Target.macos:
         await _getMacosDependencies();
-        _buildDistributor(
+        await _buildDistributor(
           target: target,
           targets: 'dmg',
-          args: ' --description $archName',
+          args: archName != null ? ' --description $archName' : '',
           env: env,
+          artifactName: _defaultArtifactNameTemplate,
         );
         return;
     }

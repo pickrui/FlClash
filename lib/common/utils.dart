@@ -335,6 +335,37 @@ class Utils {
     }
     return await function();
   }
+
+  String removeUrlParams(String url) {
+    try {
+      final uri = Uri.parse(url);
+      return '${uri.scheme}://${uri.host}${uri.path}';
+    } catch (_) {
+      return url;
+    }
+  }
+
+  String extractUrlParams(String url) {
+    try {
+      final questionMarkIndex = url.indexOf('?');
+      if (questionMarkIndex == -1) return '';
+
+      final queryString = url.substring(questionMarkIndex + 1);
+      final ampersandIndex = queryString.indexOf('&');
+      if (ampersandIndex == -1) return '';
+
+      String params = queryString.substring(ampersandIndex);
+      
+      final lastDotIndex = params.lastIndexOf('.');
+      if (lastDotIndex != -1) {
+        params = params.substring(0, lastDotIndex);
+      }
+      
+      return params;
+    } catch (_) {
+      return '';
+    }
+  }
 }
 
 final utils = Utils();

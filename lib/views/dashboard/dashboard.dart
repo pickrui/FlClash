@@ -53,7 +53,6 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
     if (res != true) {
       return;
     }
-    await Future.delayed(commonDuration);
     globalState.appController.restartCore();
   }
 
@@ -84,7 +83,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                           },
                         ),
                         onPressed: _handleConnection,
-                        icon: Icon(Icons.check, fontWeight: FontWeight.w900),
+                        icon: Icon(Icons.check),
                       )
                     : FilledButton.icon(
                         key: ValueKey(coreStatus),
@@ -125,11 +124,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                             ),
                             CoreStatus.connected => Icon(
                               Icons.check_sharp,
-                              fontWeight: FontWeight.w900,
                             ),
                             CoreStatus.disconnected => Icon(
                               Icons.restart_alt_sharp,
-                              fontWeight: FontWeight.w900,
                             ),
                           },
                         ),

@@ -14,7 +14,7 @@ PODS:
   - flutter_js (0.0.1):
     - FlutterMacOS
   - FlutterMacOS (1.0.0)
-  - HotKey (0.2.0)
+  - HotKey (0.2.1)
   - hotkey_manager_macos (0.0.1):
     - FlutterMacOS
     - HotKey
@@ -116,8 +116,8 @@ SPEC CHECKSUMS:
   file_picker: 7584aae6fa07a041af2b36a2655122d42f578c1a
   file_selector_macos: 6280b52b459ae6c590af5d78fc35c7267a3c4b31
   flutter_js: 79c3c70d33ba464c67d8eb88639a61aa718cd8b8
-  FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
-  HotKey: e96d8a2ddbf4591131e2bb3f54e69554d90cdca6
+  FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
+  HotKey: 400beb7caa29054ea8d864c96f5ba7e5b4852277
   hotkey_manager_macos: a4317849af96d2430fa89944d3c58977ca089fbe
   mobile_scanner: 9157936403f5a0644ca3779a38ff8404c5434a93
   package_info_plus: f0052d280d17aa382b932f399edf32507174e870
@@ -130,6 +130,6 @@ SPEC CHECKSUMS:
   window_ext: 4afef727fe428b30c68ce800ba92e890fd329f63
   window_manager: b729e31d38fb04905235df9ea896128991cad99e
 
-PODFILE CHECKSUM: 16208599a12443d53889ba2270a4985981cfb204
+PODFILE CHECKSUM: 22965f442688b9c33de17d208b2806b8c4118476
 
 COCOAPODS: 1.16.2

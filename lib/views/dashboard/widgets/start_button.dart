@@ -17,6 +17,7 @@ class _StartButtonState extends ConsumerState<StartButton>
   AnimationController? _controller;
   late Animation<double> _animation;
   bool isStart = false;
+  final _focusNode = FocusNode();
 
   @override
   void initState() {
@@ -40,10 +41,17 @@ class _StartButtonState extends ConsumerState<StartButton>
         updateController();
       }
     }, fireImmediately: true);
+    
+    ref.listenManual(currentPageLabelProvider, (prev, next) {
+      if (next == PageLabel.dashboard && prev != next) {
+        _tryRequestFocus();
+      }
+    });
   }
 
   @override
   void dispose() {
+    _focusNode.dispose();
     _controller?.dispose();
     _controller = null;
     super.dispose();
@@ -67,12 +75,27 @@ class _StartButtonState extends ConsumerState<StartButton>
     });
   }
 
+  void _tryRequestFocus() {
+    if (!mounted) return;
+    final hasProxies = ref.read(
+      currentGroupsStateProvider.select((state) => state.value.isNotEmpty),
+    );
+    if (hasProxies) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _focusNode.canRequestFocus) {
+          _focusNode.requestFocus();
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(startButtonSelectorStateProvider);
     if (!state.isInit || !state.hasProfile) {
       return Container();
     }
+    
     return Theme(
       data: Theme.of(context).copyWith(
         floatingActionButtonTheme: Theme.of(context).floatingActionButtonTheme
@@ -93,27 +116,30 @@ class _StartButtonState extends ConsumerState<StartButton>
                   )
                   .width +
               16;
-          return FloatingActionButton(
-            clipBehavior: Clip.antiAlias,
-            materialTapTargetSize: MaterialTapTargetSize.padded,
-            heroTag: null,
-            onPressed: () {
-              handleSwitchStart();
-            },
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  height: 56,
-                  width: 56,
-                  alignment: Alignment.center,
-                  child: AnimatedIcon(
-                    icon: AnimatedIcons.play_pause,
-                    progress: _animation,
+          return Focus(
+            focusNode: _focusNode,
+            child: FloatingActionButton(
+              clipBehavior: Clip.antiAlias,
+              materialTapTargetSize: MaterialTapTargetSize.padded,
+              heroTag: null,
+              onPressed: () {
+                handleSwitchStart();
+              },
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    height: 56,
+                    width: 56,
+                    alignment: Alignment.center,
+                    child: AnimatedIcon(
+                      icon: AnimatedIcons.play_pause,
+                      progress: _animation,
+                    ),
                   ),
-                ),
-                SizedBox(width: textWidth * _animation.value, child: child!),
-              ],
+                  SizedBox(width: textWidth * _animation.value, child: child!),
+                ],
+              ),
             ),
           );
         },
