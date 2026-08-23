@@ -78,7 +78,11 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       _oixParamsController.text,
     ).copyWith(tfo: _tfo, simplerules: _minimalConfig);
     await CloudParamsStorage.save(edited);
-    await appController.updateProfile(currentProfile, showLoading: true);
+    await appController.updateProfile(
+      currentProfile,
+      showLoading: true,
+      forceApplyIfCurrent: true,
+    );
   }
 
   Future<void> _updateFileInfo() async {
@@ -111,12 +115,13 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     );
 
     if (widget.profile.isoixCloudProfile) {
-      if (mounted) {
+      final saved = await appController.safeRun<bool>(() async {
+        await _saveoixParams(profile);
+        return true;
+      }, silence: false);
+      if (saved == true && mounted) {
         Navigator.of(context).pop();
       }
-      appController.safeRun(() async {
-        await _saveoixParams(profile);
-      });
       return;
     }
 

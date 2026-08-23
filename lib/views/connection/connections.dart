@@ -53,20 +53,16 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
   }
 
   @override
-  Future<void> poll(PollGuard isCurrent) async {
-    final trackerInfos = await _readConnections();
-    if (trackerInfos == null || !isCurrent()) {
-      return;
-    }
-    _applyConnections(trackerInfos);
-  }
+  Future<void> poll(PollGuard isCurrent) => _refreshConnections(isCurrent);
 
-  Future<void> _refreshConnections() async {
+  Future<void> _refreshConnections([bool Function()? isCurrent]) async {
     final trackerInfos = await _readConnections();
-    if (trackerInfos == null || !mounted) {
+    if (trackerInfos == null || !(isCurrent?.call() ?? mounted)) {
       return;
     }
-    _applyConnections(trackerInfos);
+    _connectionsStateNotifier.value = _connectionsStateNotifier.value.copyWith(
+      trackerInfos: trackerInfos,
+    );
   }
 
   Future<List<TrackerInfo>?> _readConnections() async {
@@ -82,12 +78,6 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
       );
       return null;
     }
-  }
-
-  void _applyConnections(List<TrackerInfo> trackerInfos) {
-    _connectionsStateNotifier.value = _connectionsStateNotifier.value.copyWith(
-      trackerInfos: trackerInfos,
-    );
   }
 
   Future<void> _handleBlockConnection(String id) async {

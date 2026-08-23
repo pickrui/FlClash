@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -293,6 +294,61 @@ void main() {
     expect(merged.autoUpdate, false);
     expect(merged.lastUpdateDate, refreshed.lastUpdateDate);
     expect(merged.subscriptionInfo, refreshed.subscriptionInfo);
+  });
+
+  group('applyProfileAfterRefresh', () {
+    test('awaits an immediate forced apply for the current profile', () async {
+      final applyCompleter = Completer<void>();
+      var immediateCalls = 0;
+      var debounceCalls = 0;
+
+      final applying = applyProfileAfterRefresh(
+        isCurrent: true,
+        force: true,
+        applyImmediately: () async {
+          immediateCalls++;
+          await applyCompleter.future;
+        },
+        applyDebounced: () => debounceCalls++,
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      expect(immediateCalls, 1);
+      expect(debounceCalls, 0);
+
+      applyCompleter.complete();
+      await applying;
+    });
+
+    test('keeps ordinary current profile refreshes debounced', () async {
+      var immediateCalls = 0;
+      var debounceCalls = 0;
+
+      await applyProfileAfterRefresh(
+        isCurrent: true,
+        force: false,
+        applyImmediately: () => immediateCalls++,
+        applyDebounced: () => debounceCalls++,
+      );
+
+      expect(immediateCalls, 0);
+      expect(debounceCalls, 1);
+    });
+
+    test('does not apply a refreshed inactive profile', () async {
+      var immediateCalls = 0;
+      var debounceCalls = 0;
+
+      await applyProfileAfterRefresh(
+        isCurrent: false,
+        force: true,
+        applyImmediately: () => immediateCalls++,
+        applyDebounced: () => debounceCalls++,
+      );
+
+      expect(immediateCalls, 0);
+      expect(debounceCalls, 0);
+    });
   });
 
   test(

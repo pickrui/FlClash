@@ -173,6 +173,21 @@ Profile mergeRefreshedProfile(Profile current, Profile refreshed) {
   );
 }
 
+@visibleForTesting
+Future<void> applyProfileAfterRefresh({
+  required bool isCurrent,
+  required bool force,
+  required FutureOr<void> Function() applyImmediately,
+  required void Function() applyDebounced,
+}) async {
+  if (!isCurrent) return;
+  if (force) {
+    await applyImmediately();
+    return;
+  }
+  applyDebounced();
+}
+
 class ProfileApplyIntent {
   bool _requiresForce = false;
   FutureOr<void> Function()? _preloadInvoke;
@@ -935,6 +950,7 @@ extension ProfilesControllerExt on AppController {
     Profile profile, {
     bool showLoading = false,
     bool applyIfCurrent = true,
+    bool forceApplyIfCurrent = false,
   }) async {
     try {
       await ensureCoreReadyOrThrow();
@@ -943,9 +959,13 @@ extension ProfilesControllerExt on AppController {
             true;
       }
       final newProfile = await _updateProfileWithCertificateRetry(profile);
-      if (applyIfCurrent && profile.id == _ref.read(currentProfileIdProvider)) {
-        applyProfileDebounce(silence: true);
-      }
+      await applyProfileAfterRefresh(
+        isCurrent:
+            applyIfCurrent && profile.id == _ref.read(currentProfileIdProvider),
+        force: forceApplyIfCurrent,
+        applyImmediately: () => applyProfile(silence: true, force: true),
+        applyDebounced: () => applyProfileDebounce(silence: true),
+      );
       return newProfile;
     } finally {
       _ref.read(isUpdatingProvider(profile.updatingKey).notifier).value = false;
