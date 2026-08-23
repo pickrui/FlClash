@@ -35,6 +35,9 @@ var (
 	version       = 0
 	isRunning     = false
 	runLock       sync.Mutex
+	// Selector writes and proxySnapshot use this lock. The fixed order is
+	// runLock -> selectionLock; proxy changes must never wait for runLock.
+	selectionLock sync.Mutex
 	delaySem      = semaphore.NewWeighted(50)
 )
 
@@ -130,7 +133,11 @@ func updateListeners() {
 }
 
 func patchSelectGroup(mapping map[string]string) {
-	for name, proxy := range tunnel.AllProxies() {
+	selectionLock.Lock()
+	defer selectionLock.Unlock()
+
+	proxies := tunnel.AllProxies()
+	for name, proxy := range proxies {
 		outbound, ok := proxy.(*adapter.Proxy)
 		if !ok {
 			continue
@@ -152,6 +159,7 @@ func patchSelectGroup(mapping map[string]string) {
 		}
 		selector.ForceSet(selected)
 	}
+	publishProxySnapshotLocked(proxies)
 }
 
 type selectorState interface {
@@ -170,6 +178,9 @@ func normalizeSelectorSelection(selector selectorState) {
 }
 
 func normalizeSelectorSelections() {
+	selectionLock.Lock()
+	defer selectionLock.Unlock()
+
 	for _, proxy := range tunnel.AllProxies() {
 		outbound, ok := proxy.(*adapter.Proxy)
 		if !ok {

@@ -33,7 +33,18 @@ var (
 	isInit          atomic.Bool
 	logSubscriber   observable.Subscription[log.Event]
 	logSubscriberMu sync.Mutex
+	proxySnapshot   = map[string]constant.Proxy{}
 )
+
+func publishProxySnapshot(proxies map[string]constant.Proxy) {
+	selectionLock.Lock()
+	defer selectionLock.Unlock()
+	publishProxySnapshotLocked(proxies)
+}
+
+func publishProxySnapshotLocked(proxies map[string]constant.Proxy) {
+	proxySnapshot = proxies
+}
 
 func handleInitClash(params *InitParams) bool {
 	runLock.Lock()
@@ -131,6 +142,7 @@ func closeCurrentProviders() {
 		map[string]cp.ProxyProvider{},
 	)
 	tunnel.UpdateRules(nil, nil, map[string]cp.RuleProvider{})
+	publishProxySnapshot(map[string]constant.Proxy{})
 }
 
 func closeProvider(provider any) {
@@ -174,6 +186,7 @@ func handleGetProxies() ProxiesData {
 			proxies[proxy.Name()] = proxy
 		}
 	}
+	publishProxySnapshot(proxies)
 
 	hasGlobal := false
 	allNames := make([]string, 0, len(nameList)+1)
@@ -206,41 +219,32 @@ func handleGetProxies() ProxiesData {
 	}
 }
 
-func handleChangeProxy(params *ChangeProxyParams, fn func(string string)) {
-	go func() {
-		runLock.Lock()
-		defer runLock.Unlock()
-		if params.GroupName == nil || params.ProxyName == nil {
-			fn("Missing group-name or proxy-name")
-			return
-		}
-		groupName := *params.GroupName
-		proxyName := *params.ProxyName
-		proxies := tunnel.AllProxies()
-		group, ok := proxies[groupName]
-		if !ok {
-			fn("Not found group")
-			return
-		}
-		adapterProxy, ok := group.(*adapter.Proxy)
-		if !ok {
-			fn("Group is not adapter proxy")
-			return
-		}
-		selector, ok := adapterProxy.ProxyAdapter.(outboundgroup.SelectAble)
-		if !ok {
-			fn("Group is not selectable")
-			return
-		}
-		if proxyName == "" {
-			selector.ForceSet(proxyName)
-		} else if err := selector.Set(proxyName); err != nil {
-			fn(err.Error())
-			return
-		}
-
-		fn("")
-	}()
+func handleChangeProxy(params *ChangeProxyParams) string {
+	if params.GroupName == nil || params.ProxyName == nil {
+		return "Missing group-name or proxy-name"
+	}
+	selectionLock.Lock()
+	defer selectionLock.Unlock()
+	groupName := *params.GroupName
+	proxyName := *params.ProxyName
+	group := proxySnapshot[groupName]
+	if group == nil {
+		return "Not found group"
+	}
+	adapterProxy, ok := group.(*adapter.Proxy)
+	if !ok {
+		return "Group is not adapter proxy"
+	}
+	selector, ok := adapterProxy.ProxyAdapter.(outboundgroup.SelectAble)
+	if !ok {
+		return "Group is not selectable"
+	}
+	if proxyName == "" {
+		selector.ForceSet(proxyName)
+	} else if err := selector.Set(proxyName); err != nil {
+		return err.Error()
+	}
+	return ""
 }
 
 func handleGetTraffic(onlyStatisticsProxy bool) Traffic {

@@ -152,6 +152,19 @@ bool canChangeProxyForProfile({
       canPublishGroupsForProfile(requestedProfileId, appliedState);
 }
 
+@visibleForTesting
+Future<bool> ensureInteractiveCoreReady({
+  required Future<bool> Function() probe,
+  required Future<bool> Function() recover,
+}) async {
+  try {
+    if (await probe()) {
+      return true;
+    }
+  } catch (_) {}
+  return recover();
+}
+
 Profile mergeRefreshedProfile(Profile current, Profile refreshed) {
   return current.copyWith(
     label: current.label.isNotEmpty ? current.label : refreshed.label,
@@ -1348,45 +1361,91 @@ extension ProxiesControllerExt on AppController {
     required int profileId,
     required String groupName,
     required String proxyName,
-  }) {
-    return _serializeCoreLifecycle(() async {
-      bool isCurrentProfile() => canChangeProxyForProfile(
-        requestedProfileId: profileId,
-        currentProfileId: _ref.read(currentProfileIdProvider),
-        appliedState: globalState.lastSetupState,
+  }) async {
+    bool isCurrentProfile() => canChangeProxyForProfile(
+      requestedProfileId: profileId,
+      currentProfileId: _ref.read(currentProfileIdProvider),
+      appliedState: globalState.lastSetupState,
+    );
+    if (!isCurrentProfile() || !await _ensureCoreReadyForInteractiveAction()) {
+      return false;
+    }
+    if (!isCurrentProfile()) {
+      return false;
+    }
+    final applyGeneration = _profileApplyGeneration;
+    final profileApplyWasPending = _pendingProfileApplies > 0;
+    try {
+      await coreController.changeProxy(
+        ChangeProxyParams(groupName: groupName, proxyName: proxyName),
       );
-      if (!isCurrentProfile() || !await ensureCoreReady()) {
-        return false;
+    } catch (error) {
+      commonPrint.log('changeProxy error: $error', logLevel: LogLevel.warning);
+      if (isCurrentProfile()) {
+        globalState.showNotifier(error.toString());
       }
-      if (!isCurrentProfile()) {
-        return false;
-      }
-      try {
-        await coreController.changeProxy(
-          ChangeProxyParams(groupName: groupName, proxyName: proxyName),
-        );
-      } catch (error) {
-        commonPrint.log(
-          'changeProxy error: $error',
-          logLevel: LogLevel.warning,
-        );
-        if (isCurrentProfile()) {
-          globalState.showNotifier(error.toString());
+      return false;
+    }
+    if (!isCurrentProfile()) {
+      return false;
+    }
+    updateCurrentSelectedMap(groupName, proxyName);
+    if (profileApplyWasPending ||
+        _pendingProfileApplies > 0 ||
+        applyGeneration != _profileApplyGeneration) {
+      _reconcileProxyChange(profileId, groupName, proxyName);
+    }
+    _handleProxyChangeApplied();
+    return true;
+  }
+
+  void _handleProxyChangeApplied() {
+    if (_ref.read(appSettingProvider).closeConnections) {
+      coreController.closeConnections();
+    } else {
+      coreController.resetConnections();
+    }
+    addCheckIp();
+  }
+
+  void _reconcileProxyChange(
+    int profileId,
+    String groupName,
+    String proxyName,
+  ) {
+    unawaited(
+      _serializeCoreLifecycle(() async {
+        try {
+          bool isCurrentSelection() {
+            final currentProfile = _ref.read(currentProfileProvider);
+            return canChangeProxyForProfile(
+                  requestedProfileId: profileId,
+                  currentProfileId: _ref.read(currentProfileIdProvider),
+                  appliedState: globalState.lastSetupState,
+                ) &&
+                currentProfile?.selectedMap[groupName] == proxyName;
+          }
+
+          if (!isCurrentSelection() ||
+              !await _ensureCoreReadyForInteractiveAction()) {
+            return;
+          }
+          if (!isCurrentSelection()) {
+            return;
+          }
+          await coreController.changeProxy(
+            ChangeProxyParams(groupName: groupName, proxyName: proxyName),
+          );
+          _handleProxyChangeApplied();
+          updateGroupsDebounce();
+        } catch (error) {
+          commonPrint.log(
+            'reconcile changeProxy error: $error',
+            logLevel: LogLevel.warning,
+          );
         }
-        return false;
-      }
-      if (!isCurrentProfile()) {
-        return false;
-      }
-      updateCurrentSelectedMap(groupName, proxyName);
-      if (_ref.read(appSettingProvider).closeConnections) {
-        coreController.closeConnections();
-      } else {
-        coreController.resetConnections();
-      }
-      addCheckIp();
-      return true;
-    });
+      }),
+    );
   }
 
   void setProvider(ExternalProvider? provider) {
@@ -1913,6 +1972,13 @@ extension SetupControllerExt on AppController {
 
 extension CoreControllerExt on AppController {
   String get coreDisconnectedMessage => _coreDisconnectedMessage;
+
+  Future<bool> _ensureCoreReadyForInteractiveAction() {
+    return ensureInteractiveCoreReady(
+      probe: _isCoreInitialized,
+      recover: ensureCoreReady,
+    );
+  }
 
   Future<void> _initCore({bool refreshGroups = true}) async {
     final isInit = await coreController.isInit;

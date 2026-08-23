@@ -141,7 +141,7 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 		if !decodeMethodArguments(call, response, &params) {
 			return
 		}
-		handleChangeProxy(&params, func(value string) { response.success(value) })
+		response.success(handleChangeProxy(&params))
 	case getTrafficMethod, getTotalTrafficMethod:
 		onlyStatisticsProxy := false
 		if !decodeMethodArguments(call, response, &onlyStatisticsProxy) {

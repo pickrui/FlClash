@@ -12,6 +12,33 @@ import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 void main() {
+  test('interactive core readiness recovers only when needed', () async {
+    var recoveryCalls = 0;
+
+    final ready = await ensureInteractiveCoreReady(
+      probe: () async => true,
+      recover: () async {
+        recoveryCalls++;
+        return false;
+      },
+    );
+
+    expect(ready, true);
+    expect(recoveryCalls, 0);
+
+    expect(
+      await ensureInteractiveCoreReady(
+        probe: () async => false,
+        recover: () async {
+          recoveryCalls++;
+          return true;
+        },
+      ),
+      true,
+    );
+    expect(recoveryCalls, 1);
+  });
+
   test('persistent log rotation keeps only complete UTF-8 lines', () {
     final bytes = Uint8List.fromList(utf8.encode('超长中文行\n保留内容\n'));
 
