@@ -441,12 +441,7 @@ class AutoIpv6Item extends ConsumerWidget {
       delegate: SwitchDelegate(
         value: autoSetIpv6,
         onChanged: (bool value) async {
-          ref
-              .read(networkSettingProvider.notifier)
-              .update((state) => state.copyWith(autoSetIpv6: value));
-          if (value) {
-            await appController.autoUpdateIpv6();
-          }
+          await appController.setAutoIpv6(value);
         },
       ),
     );

@@ -174,7 +174,8 @@ _NetworkProps _$NetworkPropsFromJson(Map<String, dynamic> json) =>
           RouteMode.config,
       autoSetSystemDns: json['autoSetSystemDns'] as bool? ?? true,
       appendSystemDns: json['appendSystemDns'] as bool? ?? false,
-      autoSetIpv6: json['autoSetIpv6'] as bool? ?? true,
+      autoSetIpv6: json['autoSetIpv6'] as bool? ?? false,
+      manualIpv6: json['manualIpv6'] as bool?,
       blockQuic: json['blockQuic'] as bool? ?? false,
       blockWebRtc: json['blockWebRtc'] as bool? ?? false,
     );
@@ -187,6 +188,7 @@ Map<String, dynamic> _$NetworkPropsToJson(_NetworkProps instance) =>
       'autoSetSystemDns': instance.autoSetSystemDns,
       'appendSystemDns': instance.appendSystemDns,
       'autoSetIpv6': instance.autoSetIpv6,
+      'manualIpv6': ?instance.manualIpv6,
       'blockQuic': instance.blockQuic,
       'blockWebRtc': instance.blockWebRtc,
     };

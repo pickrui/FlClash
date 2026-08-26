@@ -70,6 +70,8 @@ void main() {
       final value = container.read(networkSettingProvider);
       expect(value.systemProxy, true);
       expect(value.bypassDomain, defaultBypassDomain);
+      expect(value.autoSetIpv6, false);
+      expect(value.manualIpv6, null);
     });
 
     test('can update state', () {
@@ -77,6 +79,21 @@ void main() {
           .read(networkSettingProvider.notifier)
           .update((_) => const NetworkProps(systemProxy: false));
       expect(container.read(networkSettingProvider).systemProxy, false);
+    });
+
+    test('records manual IPv6 state only when auto IPv6 is enabled', () {
+      final notifier = container.read(networkSettingProvider.notifier);
+
+      notifier.setAutoIpv6Enabled(true, currentIpv6: true);
+      expect(container.read(networkSettingProvider).autoSetIpv6, true);
+      expect(container.read(networkSettingProvider).manualIpv6, true);
+
+      notifier.setAutoIpv6Enabled(true, currentIpv6: false);
+      expect(container.read(networkSettingProvider).manualIpv6, true);
+
+      notifier.setAutoIpv6Enabled(false, currentIpv6: false);
+      expect(container.read(networkSettingProvider).autoSetIpv6, false);
+      expect(container.read(networkSettingProvider).manualIpv6, true);
     });
   });
 

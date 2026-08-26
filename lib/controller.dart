@@ -497,6 +497,7 @@ class AppController {
   Object? _activeCoreLifecycleToken;
   bool _preferencesWritesSuspended = false;
   bool _preferencesWriteRequestedWhileSuspended = false;
+  int _autoIpv6CheckGeneration = 0;
   int _groupsUpdateGeneration = 0;
   int _profileApplyGeneration = 0;
   int _pendingProfileApplies = 0;
@@ -1620,13 +1621,29 @@ extension SetupControllerExt on AppController {
   }
 
   Future<void> autoUpdateIpv6() async {
-    final autoSetIpv6 = _ref.read(
-      networkSettingProvider.select((state) => state.autoSetIpv6),
-    );
-    if (!autoSetIpv6) {
+    final networkSetting = _ref.read(networkSettingProvider);
+    if (!networkSetting.autoSetIpv6) {
       return;
     }
+    final generation = ++_autoIpv6CheckGeneration;
+    if (networkSetting.manualIpv6 == null) {
+      final currentIpv6 = _ref.read(
+        patchClashConfigProvider.select((state) => state.ipv6),
+      );
+      _ref
+          .read(networkSettingProvider.notifier)
+          .update((state) => state.copyWith(manualIpv6: currentIpv6));
+    }
     final supported = await utils.hasGlobalIpv6();
+    if (generation != _autoIpv6CheckGeneration) {
+      return;
+    }
+    final stillAutoSetIpv6 = _ref.read(
+      networkSettingProvider.select((state) => state.autoSetIpv6),
+    );
+    if (!stillAutoSetIpv6) {
+      return;
+    }
     final current = _ref.read(
       patchClashConfigProvider.select((state) => state.ipv6),
     );
@@ -1636,6 +1653,28 @@ extension SetupControllerExt on AppController {
     _ref
         .read(patchClashConfigProvider.notifier)
         .update((state) => state.copyWith(ipv6: supported));
+  }
+
+  Future<void> setAutoIpv6(bool value) async {
+    final currentIpv6 = _ref.read(
+      patchClashConfigProvider.select((state) => state.ipv6),
+    );
+    final manualIpv6 = _ref.read(
+      networkSettingProvider.select((state) => state.manualIpv6),
+    );
+    _ref
+        .read(networkSettingProvider.notifier)
+        .setAutoIpv6Enabled(value, currentIpv6: currentIpv6);
+    if (value) {
+      await autoUpdateIpv6();
+      return;
+    }
+    if (manualIpv6 == null || manualIpv6 == currentIpv6) {
+      return;
+    }
+    _ref
+        .read(patchClashConfigProvider.notifier)
+        .update((state) => state.copyWith(ipv6: manualIpv6));
   }
 
   void addCheckIp() {

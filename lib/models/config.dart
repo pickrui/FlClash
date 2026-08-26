@@ -170,7 +170,8 @@ abstract class NetworkProps with _$NetworkProps {
     @Default(RouteMode.config) RouteMode routeMode,
     @Default(true) bool autoSetSystemDns,
     @Default(false) bool appendSystemDns,
-    @Default(true) bool autoSetIpv6,
+    @Default(false) bool autoSetIpv6,
+    @JsonKey(includeIfNull: false) bool? manualIpv6,
     @Default(false) bool blockQuic,
     @Default(false) bool blockWebRtc,
   }) = _NetworkProps;

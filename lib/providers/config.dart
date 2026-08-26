@@ -36,6 +36,17 @@ class NetworkSetting extends _$NetworkSetting with AutoDisposeNotifierMixin {
   NetworkProps build() {
     return const NetworkProps();
   }
+
+  void setAutoIpv6Enabled(bool value, {required bool currentIpv6}) {
+    update(
+      (state) => state.copyWith(
+        autoSetIpv6: value,
+        manualIpv6: value && !state.autoSetIpv6
+            ? currentIpv6
+            : state.manualIpv6,
+      ),
+    );
+  }
 }
 
 @riverpod

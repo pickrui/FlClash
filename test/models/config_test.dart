@@ -164,6 +164,9 @@ void main() {
       expect(props.routeMode, RouteMode.config);
       expect(props.autoSetSystemDns, true);
       expect(props.appendSystemDns, false);
+      expect(props.autoSetIpv6, false);
+      expect(props.manualIpv6, null);
+      expect(props.toJson(), isNot(contains('manualIpv6')));
       expect(props.blockQuic, false);
       expect(props.blockWebRtc, false);
     });
@@ -173,6 +176,8 @@ void main() {
         systemProxy: false,
         bypassDomain: ['example.com'],
         routeMode: RouteMode.bypassPrivate,
+        autoSetIpv6: true,
+        manualIpv6: true,
         blockQuic: true,
         blockWebRtc: true,
       );
@@ -180,6 +185,9 @@ void main() {
       expect(restored.systemProxy, false);
       expect(restored.bypassDomain, ['example.com']);
       expect(restored.routeMode, RouteMode.bypassPrivate);
+      expect(restored.autoSetIpv6, true);
+      expect(restored.manualIpv6, true);
+      expect(restored.toJson()['manualIpv6'], true);
       expect(restored.blockQuic, true);
       expect(restored.blockWebRtc, true);
     });

@@ -196,7 +196,7 @@ final class NetworkSettingProvider
   }
 }
 
-String _$networkSettingHash() => r'54bd68084a1eb1b68650e353089c240d4a07f3a5';
+String _$networkSettingHash() => r'ac61954afe80be13219f07a4a9a0b9c5102f8795';
 
 abstract class _$NetworkSetting extends $Notifier<NetworkProps> {
   NetworkProps build();
