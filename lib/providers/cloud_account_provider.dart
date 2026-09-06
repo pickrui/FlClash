@@ -321,8 +321,12 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
     final future = () async {
       state = state.copyWith(isLoading: true, error: null);
       try {
+        await ensureReady();
+        // Bootstrap may clear an expired session and reset the loading flag.
+        state = state.copyWith(isLoading: true, error: null);
         await action();
       } catch (e) {
+        if (CloudApiException.isHandledUnauthorized(e)) rethrow;
         await _rollbackFailedSignIn(e);
         rethrow;
       } finally {
@@ -582,6 +586,7 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
       try {
         await logoutRequest();
       } catch (e) {
+        if (CloudApiException.isHandledUnauthorized(e)) return false;
         state = state.copyWith(
           isLoading: false,
           error: CloudApiException.clean(e),
@@ -618,9 +623,9 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
         twoFactorCode: twoFactorCode,
       );
     } catch (e) {
+      if (CloudApiException.isHandledUnauthorized(e)) return false;
       final error = CloudApiException.clean(e);
-      if (CloudApiException.isHandledUnauthorized(e) ||
-          CloudApiException.isUnauthorized(e)) {
+      if (CloudApiException.isUnauthorized(e)) {
         await clearSession();
         state = state.copyWith(error: error);
         return false;
@@ -689,15 +694,36 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
       if (cleanupError != null) {
         state = state.copyWith(error: cleanupError);
       }
-      if (appController.isAttach) {
-        await appController.openCloudLogin();
-      }
     }();
 
-    _unauthorizedFuture = future.whenComplete(() {
+    // Callers may hold the managed-profile queue while handling a 401. Release
+    // them after cleanup so signing in can enqueue a fresh profile import.
+    final cleanup = future.whenComplete(() {
       _unauthorizedFuture = null;
     });
-    return _unauthorizedFuture!;
+    _unauthorizedFuture = cleanup;
+    unawaited(
+      cleanup.then((_) => showUnauthorizedLogin()).catchError((
+        Object error,
+        StackTrace stack,
+      ) {
+        commonPrint.log(
+          'failed to show cloud login: $error\n$stack',
+          logLevel: LogLevel.warning,
+        );
+        if (ref.mounted && !state.isLoggedIn && state.error == null) {
+          state = state.copyWith(error: CloudApiException.clean(error));
+        }
+      }),
+    );
+    return cleanup;
+  }
+
+  @protected
+  Future<void> showUnauthorizedLogin() async {
+    if (appController.isAttach) {
+      await appController.openCloudLogin();
+    }
   }
 }
 

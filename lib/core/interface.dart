@@ -108,8 +108,22 @@ abstract class CoreHandlerInterface with CoreInterface {
     Duration? timeout,
   });
 
+  Future<T> _invokeRequiredMethod<T>({
+    required CoreMethod method,
+    Object? arguments,
+  }) async {
+    final result = await _invokeMethod<T>(method: method, arguments: arguments);
+    if (result == null) {
+      throw CoreMethodException(
+        code: 'empty_result',
+        message: 'Core returned no response for ${method.name}',
+      );
+    }
+    return result;
+  }
+
   Future<bool> shutdownCore() async {
-    return await _invokeMethod<bool>(method: CoreMethod.shutdown) ?? false;
+    return _invokeRequiredMethod<bool>(method: CoreMethod.shutdown);
   }
 
   @override
@@ -133,37 +147,25 @@ abstract class CoreHandlerInterface with CoreInterface {
 
   @override
   Future<String> validateConfig(String path) async {
-    return await _invokeMethod<String>(
-          method: CoreMethod.validateConfig,
-          arguments: path,
-        ) ??
-        '';
+    return _invokeRequiredMethod<String>(
+      method: CoreMethod.validateConfig,
+      arguments: path,
+    );
   }
 
   @override
   Future<String> validateConfigWithBytes(String data) async {
-    return await _invokeMethod<String>(
-          method: CoreMethod.validateConfigWithBytes,
-          arguments: data,
-        ) ??
-        '';
+    return _invokeRequiredMethod<String>(
+      method: CoreMethod.validateConfigWithBytes,
+      arguments: data,
+    );
   }
 
-  Future<Map<String, dynamic>> _getConfig(
-    CoreMethod method,
-    String source,
-  ) async {
-    final result = await _invokeMethod<Map<String, dynamic>>(
+  Future<Map<String, dynamic>> _getConfig(CoreMethod method, String source) {
+    return _invokeRequiredMethod<Map<String, dynamic>>(
       method: method,
       arguments: source,
     );
-    if (result == null) {
-      throw CoreMethodException(
-        code: 'empty_result',
-        message: 'Core returned an empty result for ${method.name}',
-      );
-    }
-    return result;
   }
 
   @override
@@ -178,20 +180,18 @@ abstract class CoreHandlerInterface with CoreInterface {
 
   @override
   Future<String> updateConfig(UpdateParams updateParams) async {
-    return await _invokeMethod<String>(
-          method: CoreMethod.updateConfig,
-          arguments: updateParams.toJson(),
-        ) ??
-        '';
+    return _invokeRequiredMethod<String>(
+      method: CoreMethod.updateConfig,
+      arguments: updateParams.toJson(),
+    );
   }
 
   @override
   Future<String> setupConfig(SetupParams setupParams) async {
-    return await _invokeMethod<String>(
-          method: CoreMethod.setupConfig,
-          arguments: setupParams.toJson(),
-        ) ??
-        '';
+    return _invokeRequiredMethod<String>(
+      method: CoreMethod.setupConfig,
+      arguments: setupParams.toJson(),
+    );
   }
 
   @override
@@ -354,12 +354,12 @@ abstract class CoreHandlerInterface with CoreInterface {
 
   @override
   Future<bool> startListener() async {
-    return await _invokeMethod<bool>(method: CoreMethod.startListener) ?? false;
+    return _invokeRequiredMethod<bool>(method: CoreMethod.startListener);
   }
 
   @override
   Future<bool> stopListener() async {
-    return await _invokeMethod<bool>(method: CoreMethod.stopListener) ?? false;
+    return _invokeRequiredMethod<bool>(method: CoreMethod.stopListener);
   }
 
   @override

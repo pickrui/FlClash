@@ -4,10 +4,203 @@ import 'package:fl_clash/common/oix_cloud.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/cloud_account_provider.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  test(
+    'a superseded sign-in still fails without clearing the new session',
+    () async {
+      final api = CloudApiService()..setToken('new-session');
+      addTearDown(() => api.setToken(null));
+      final revision = api.sessionRevision;
+      final notifier = _SupersededSignInNotifier();
+      final container = ProviderContainer(
+        overrides: [cloudAccountProvider.overrideWith(() => notifier)],
+      );
+      addTearDown(container.dispose);
+      container.read(cloudAccountProvider);
+
+      await expectLater(
+        notifier.signInWithToken('old-session'),
+        throwsA(isA<CloudApiStaleSessionException>()),
+      );
+
+      expect(api.sessionRevision, revision);
+      expect(container.read(cloudAccountProvider).isLoggedIn, isTrue);
+      expect(container.read(cloudAccountProvider).isLoading, isFalse);
+    },
+  );
+
+  for (final deleteAccount in [false, true]) {
+    test(
+      'an obsolete ${deleteAccount ? 'deletion' : 'logout'} does not clear the current session',
+      () async {
+        final notifier = _DeleteNotifier(
+          requestError: const CloudApiStaleSessionException(),
+          logoutError: const CloudApiStaleSessionException(),
+        );
+        final container = ProviderContainer(
+          overrides: [cloudAccountProvider.overrideWith(() => notifier)],
+        );
+        addTearDown(container.dispose);
+        container.read(cloudAccountProvider);
+
+        final success = deleteAccount
+            ? await notifier.deleteAccount(password: 'test-password')
+            : await notifier.signOut(revokeToken: true);
+
+        expect(success, isFalse);
+        expect(notifier.didClearSession, isFalse);
+        expect(container.read(cloudAccountProvider).isLoggedIn, isTrue);
+        expect(container.read(cloudAccountProvider).error, isNull);
+      },
+    );
+  }
+
+  test(
+    'token sign-in waits for bootstrap before beginning its action',
+    () async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
+      SharedPreferences.setMockInitialValues({});
+      final ready = Completer<void>();
+      final notifier = _InitializingNotifier(ready.future);
+      final container = ProviderContainer(
+        overrides: [cloudAccountProvider.overrideWith(() => notifier)],
+      );
+      addTearDown(container.dispose);
+      container.read(cloudAccountProvider);
+      final loadingStates = <bool>[];
+      container.listen(cloudAccountProvider, (_, next) {
+        loadingStates.add(next.isLoading);
+      });
+      var completed = false;
+
+      // Invalid input fails as soon as the sign-in action begins, without HTTP.
+      final signIn = notifier.signInWithToken('');
+      final failure = expectLater(
+        signIn,
+        throwsA(
+          predicate<Object>(
+            (error) => error.toString().contains('Access token is empty'),
+          ),
+        ),
+      ).then((_) => completed = true);
+      await pumpEventQueue();
+      expect(completed, isFalse);
+      expect(container.read(cloudAccountProvider).isLoading, isTrue);
+      ready.complete();
+      await failure;
+      expect(container.read(cloudAccountProvider).isLoading, isFalse);
+      expect(loadingStates, [true, false, true, false]);
+    },
+  );
+
+  test(
+    'unauthorized cleanup completes while the login dialog remains open',
+    () async {
+      final cleanup = Completer<void>();
+      final loginClosed = Completer<void>();
+      final loginOpened = Completer<void>();
+      final notifier = _UnauthorizedNotifier(
+        cleanup: cleanup.future,
+        showLogin: () {
+          loginOpened.complete();
+          return loginClosed.future;
+        },
+      );
+      final container = ProviderContainer(
+        overrides: [cloudAccountProvider.overrideWith(() => notifier)],
+      );
+      addTearDown(container.dispose);
+      container.read(cloudAccountProvider);
+
+      final first = notifier.handleUnauthorized();
+      expect(identical(notifier.handleUnauthorized(), first), isTrue);
+      expect(notifier.cleanupCount, 1);
+      cleanup.complete();
+      await loginOpened.future;
+      await first.timeout(const Duration(seconds: 1));
+      expect(loginClosed.isCompleted, isFalse);
+      loginClosed.complete();
+      await pumpEventQueue();
+    },
+  );
+
+  test(
+    'a new unauthorized session is cleared while the old dialog is open',
+    () async {
+      final loginClosed = Completer<void>();
+      final notifier = _UnauthorizedNotifier(
+        showLogin: () => loginClosed.future,
+      );
+      final container = ProviderContainer(
+        overrides: [cloudAccountProvider.overrideWith(() => notifier)],
+      );
+      addTearDown(container.dispose);
+      container.read(cloudAccountProvider);
+
+      await notifier.handleUnauthorized();
+      await notifier.handleUnauthorized();
+      expect(notifier.cleanupCount, 2);
+      loginClosed.complete();
+      await pumpEventQueue();
+    },
+  );
+
+  test(
+    're-login can wait for the unauthorized managed task to release',
+    () async {
+      late Future<void> managedTask;
+      final loginCompleted = Completer<void>();
+      final notifier = _UnauthorizedNotifier(
+        showLogin: () async {
+          // Importing the new account's profile waits on the old sync task.
+          await managedTask;
+          loginCompleted.complete();
+        },
+      );
+      final container = ProviderContainer(
+        overrides: [cloudAccountProvider.overrideWith(() => notifier)],
+      );
+      addTearDown(container.dispose);
+      container.read(cloudAccountProvider);
+
+      managedTask = notifier.handleUnauthorized();
+      await loginCompleted.future.timeout(const Duration(seconds: 1));
+      expect(notifier.cleanupCount, 1);
+      expect(container.read(cloudAccountProvider).isLoggedIn, isFalse);
+    },
+  );
+
+  for (final cleanupError in [null, 'Failed to remove cached credentials']) {
+    test(
+      'login display failure preserves cleanup error: $cleanupError',
+      () async {
+        final notifier = _UnauthorizedNotifier(
+          cleanupError: cleanupError,
+          showLogin: () async => throw StateError('login dialog failed'),
+        );
+        final container = ProviderContainer(
+          overrides: [cloudAccountProvider.overrideWith(() => notifier)],
+        );
+        addTearDown(container.dispose);
+        container.read(cloudAccountProvider);
+
+        await notifier.handleUnauthorized();
+        await pumpEventQueue();
+        expect(
+          container.read(cloudAccountProvider).error,
+          cleanupError ?? 'Bad state: login dialog failed',
+        );
+      },
+    );
+  }
+
   test('managed profile activates before any core start request', () async {
     final events = <String>[];
 
@@ -226,19 +419,22 @@ void main() {
     expect(notifier.didClearSession, false);
   });
 
-  test('managed subscription refresh reloads the plan before syncing', () async {
-    final notifier = _OrderNotifier();
-    final container = ProviderContainer(
-      overrides: [cloudAccountProvider.overrideWith(() => notifier)],
-    );
-    addTearDown(container.dispose);
+  test(
+    'managed subscription refresh reloads the plan before syncing',
+    () async {
+      final notifier = _OrderNotifier();
+      final container = ProviderContainer(
+        overrides: [cloudAccountProvider.overrideWith(() => notifier)],
+      );
+      addTearDown(container.dispose);
 
-    await container
-        .read(cloudAccountProvider.notifier)
-        .refreshManagedSubscription();
+      await container
+          .read(cloudAccountProvider.notifier)
+          .refreshManagedSubscription();
 
-    expect(notifier.calls, ['refresh:true', 'sync']);
-  });
+      expect(notifier.calls, ['refresh:true', 'sync']);
+    },
+  );
 
   test('a failed plan refresh never regenerates the subscription', () async {
     final notifier = _OrderNotifier(refreshError: 'Network unavailable');
@@ -276,6 +472,60 @@ class _OrderNotifier extends CloudAccountNotifier {
   @override
   Future<void> syncManagedConfig() async {
     calls.add('sync');
+  }
+}
+
+class _UnauthorizedNotifier extends CloudAccountNotifier {
+  final Future<void>? cleanup;
+  final String? cleanupError;
+  final Future<void> Function() showLogin;
+  int cleanupCount = 0;
+
+  _UnauthorizedNotifier({
+    this.cleanup,
+    this.cleanupError,
+    required this.showLogin,
+  });
+
+  @override
+  CloudAccountState build() => const CloudAccountState(isLoggedIn: true);
+
+  @override
+  Future<String?> clearSession() async {
+    cleanupCount++;
+    await cleanup;
+    state = const CloudAccountState();
+    return cleanupError;
+  }
+
+  @override
+  Future<void> showUnauthorizedLogin() => showLogin();
+}
+
+class _InitializingNotifier extends CloudAccountNotifier {
+  final Future<void> ready;
+
+  _InitializingNotifier(this.ready);
+
+  @override
+  CloudAccountState build() => const CloudAccountState();
+
+  @override
+  Future<void> ensureReady() async {
+    await ready;
+    // An expired bootstrap token causes clearSession to reset the account.
+    state = const CloudAccountState();
+  }
+}
+
+class _SupersededSignInNotifier extends CloudAccountNotifier {
+  @override
+  CloudAccountState build() => const CloudAccountState();
+
+  @override
+  Future<void> ensureReady() async {
+    state = const CloudAccountState(isLoggedIn: true);
+    throw const CloudApiStaleSessionException();
   }
 }
 

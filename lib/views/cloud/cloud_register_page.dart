@@ -131,6 +131,7 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
       await _submitRegister();
       if (mounted) navigator.popUntil((route) => route.isFirst);
     } catch (error) {
+      if (CloudApiException.isHandledUnauthorized(error)) return;
       final retry = await CloudApiService().confirmInsecureTlsRetry(error);
       if (!retry) {
         _showError(error);
@@ -140,6 +141,7 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
         await CloudApiService().runWithInsecureTls(_submitRegister);
         if (mounted) navigator.popUntil((route) => route.isFirst);
       } catch (retryError) {
+        if (CloudApiException.isHandledUnauthorized(retryError)) return;
         _showError(retryError);
       }
     } finally {
@@ -154,7 +156,9 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
   Future<void> _submitRegister() {
     final config = _config;
     final invite = _inviteCodeController.text.trim();
-    return ref.read(cloudAccountProvider.notifier).signUp(
+    return ref
+        .read(cloudAccountProvider.notifier)
+        .signUp(
           name: _nicknameController.text.trim(),
           email: _emailController.text.trim(),
           password: _passwordController.text,
@@ -372,8 +376,9 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
                     decoration: InputDecoration(
                       labelText: AppLocalizations.current.inviteCodeLabel,
                       hintText: AppLocalizations.current.inviteCodeHint,
-                      prefixIcon:
-                          const Icon(Icons.confirmation_number_outlined),
+                      prefixIcon: const Icon(
+                        Icons.confirmation_number_outlined,
+                      ),
                       border: const OutlineInputBorder(),
                     ),
                     validator: (v) => v?.trim().isEmpty == true
@@ -401,8 +406,7 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
             children: [
               Text(AppLocalizations.current.haveAccountAlready),
               TextButton(
-                onPressed:
-                    isLoading ? null : () => Navigator.of(context).pop(),
+                onPressed: isLoading ? null : () => Navigator.of(context).pop(),
                 child: Text(AppLocalizations.current.goLogin),
               ),
             ],
@@ -447,7 +451,9 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
                   )
                 : Text(
                     _resendCountdown > 0
-                        ? AppLocalizations.current.resendCodeIn(_resendCountdown)
+                        ? AppLocalizations.current.resendCodeIn(
+                            _resendCountdown,
+                          )
                         : AppLocalizations.current.sendCode,
                   ),
           ),

@@ -111,10 +111,25 @@ class CloudApiException implements Exception {
   const CloudApiException(this.message);
 
   static bool isHandledUnauthorized(Object error) {
-    return error is CloudApiUnauthorizedHandledException;
+    final cause = error is DioException ? error.error : error;
+    if (cause is _CloudSessionUnauthorizedException) {
+      return !cause.isCurrentSession();
+    }
+    return error is CloudApiUnauthorizedHandledException ||
+        (error is DioException &&
+            error.error is CloudApiUnauthorizedHandledException);
+  }
+
+  static bool isStaleSession(Object error) {
+    return error is CloudApiStaleSessionException ||
+        (error is DioException && error.error is CloudApiStaleSessionException);
   }
 
   static bool isUnauthorized(Object error) {
+    final cause = error is DioException ? error.error : error;
+    if (cause is _CloudSessionUnauthorizedException) {
+      return cause.isCurrentSession();
+    }
     if (isHandledUnauthorized(error)) {
       return false;
     }
@@ -138,6 +153,9 @@ class CloudApiException implements Exception {
   }
 
   static String _cleanDioException(DioException error) {
+    if (error.error is _CloudSessionUnauthorizedException) {
+      return 'Unauthorized';
+    }
     if (FlClashTemporaryTls.isCertificateVerifyFailed(error)) {
       return appLocalizations.invalidCertificateTitle;
     }
@@ -196,9 +214,24 @@ class CloudApiUnauthorizedHandledException implements Exception {
   String toString() => 'Unauthorized';
 }
 
+/// A response from an account session that has already been replaced.
+class CloudApiStaleSessionException
+    extends CloudApiUnauthorizedHandledException {
+  const CloudApiStaleSessionException();
+}
+
+class _CloudSessionUnauthorizedException extends CloudApiException {
+  final bool Function() isCurrentSession;
+
+  const _CloudSessionUnauthorizedException(this.isCurrentSession)
+    : super('Unauthorized');
+}
+
 class CloudApiService {
   Dio? _dio;
   String? _cachedToken;
+  int _sessionRevision = 0;
+  static const _sessionRevisionKey = 'flclash_cloud_session_revision';
 
   static final RegExp _bearerTokenPattern = RegExp(
     r'^Bearer\s+(.+)$',
@@ -207,8 +240,19 @@ class CloudApiService {
 
   CloudApiService._();
 
+  @visibleForTesting
+  CloudApiService.forTesting({required Dio client}) : _dio = client {
+    _installInterceptors(client);
+  }
+
+  int get sessionRevision => _sessionRevision;
+
   Dio get _client {
-    return _dio ??= _createDio();
+    final client = _dio ??= _createDio();
+    // Dio copies BaseOptions.extra when request() is called, before its
+    // asynchronous interceptors run. Bind the originating account now.
+    client.options.extra[_sessionRevisionKey] = _sessionRevision;
+    return client;
   }
 
   Dio _createDio() {
@@ -226,29 +270,83 @@ class CloudApiService {
       ),
     );
     dio.httpClientAdapter = HedgedApiAdapter(_createCloudApiAdapter());
+    _installInterceptors(dio);
+    return dio;
+  }
+
+  DioException _staleSessionError(RequestOptions request) => DioException(
+    requestOptions: request,
+    error: const CloudApiStaleSessionException(),
+  );
+
+  DioException _unauthorizedError(
+    RequestOptions request,
+    Response<dynamic>? response,
+  ) {
+    setToken(null);
+    final invalidatedRevision = _sessionRevision;
+    return DioException(
+      requestOptions: request,
+      response: response,
+      error: _CloudSessionUnauthorizedException(
+        () => _sessionRevision == invalidatedRevision,
+      ),
+    );
+  }
+
+  bool _isStaleRequest(RequestOptions request) =>
+      request.extra['skipAuth'] != true &&
+      request.extra[_sessionRevisionKey] != _sessionRevision;
+
+  void _installInterceptors(Dio dio) {
     dio.interceptors.addAll([
       // Authorization interceptor
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          if (options.extra['skipAuth'] != true &&
-              _cachedToken != null &&
-              _cachedToken!.isNotEmpty) {
-            final token = _cachedToken!;
-            options.headers['Authorization'] = 'Bearer $token';
+          if (options.extra['skipAuth'] != true) {
+            final revision = options.extra[_sessionRevisionKey];
+            if (revision != null && revision != _sessionRevision) {
+              handler.reject(_staleSessionError(options));
+              return;
+            }
+            options.extra[_sessionRevisionKey] = _sessionRevision;
+            options.headers.remove('Authorization');
+            if (_cachedToken case final token?) {
+              options.headers['Authorization'] = 'Bearer $token';
+            }
           }
 
           handler.next(options);
         },
         onResponse: (response, handler) {
-          if (response.statusCode == 401 ||
-              (response.data is Map && response.data['ret'] == 401)) {
-            _cachedToken = null;
+          if (_isStaleRequest(response.requestOptions)) {
+            handler.reject(_staleSessionError(response.requestOptions));
+            return;
+          }
+          if (response.requestOptions.extra['skipAuth'] != true &&
+              (response.statusCode == 401 ||
+                  CloudApiResponse<dynamic>.fromJson(response.data).ret ==
+                      401)) {
+            handler.reject(
+              _unauthorizedError(response.requestOptions, response),
+            );
+            return;
           }
           handler.next(response);
         },
         onError: (DioException e, handler) {
-          if (e.response?.statusCode == 401) {
-            _cachedToken = null;
+          if (e.error is _CloudSessionUnauthorizedException) {
+            handler.next(e);
+            return;
+          }
+          if (_isStaleRequest(e.requestOptions)) {
+            handler.next(_staleSessionError(e.requestOptions));
+            return;
+          }
+          if (e.requestOptions.extra['skipAuth'] != true &&
+              e.response?.statusCode == 401) {
+            handler.next(_unauthorizedError(e.requestOptions, e.response));
+            return;
           }
           handler.next(e);
         },
@@ -256,7 +354,6 @@ class CloudApiService {
       // Retry Interceptor
       RetryInterceptor(dio: dio),
     ]);
-    return dio;
   }
 
   static final CloudApiService _instance = CloudApiService._();
@@ -312,9 +409,8 @@ class CloudApiService {
 
   void setToken(String? token) {
     final normalizedToken = normalizeToken(token);
-    if (normalizedToken == null || normalizedToken.isEmpty) {
-      _cachedToken = null;
-    } else {
+    if (_cachedToken != normalizedToken) {
+      _sessionRevision++;
       _cachedToken = normalizedToken;
     }
   }
@@ -635,11 +731,6 @@ class CloudApiService {
       res.data,
     );
 
-    if (res.statusCode == 401 || responseDto.ret == 401) {
-      setToken(null);
-      throw const CloudApiException('Unauthorized');
-    }
-
     if (!responseDto.isSuccess || responseDto.data == null) {
       throw Exception(responseDto.msg ?? 'Failed to parse user info');
     }
@@ -649,12 +740,14 @@ class CloudApiService {
 
   Future<void> logout() async {
     if (_cachedToken == null || _cachedToken!.isEmpty) return;
-    final res = await _client.post('/logout');
-    final responseDto = CloudApiResponse<dynamic>.fromJson(res.data);
-    if (res.statusCode == 401 || responseDto.ret == 401) {
-      setToken(null);
-      return;
+    final Response<dynamic> res;
+    try {
+      res = await _client.post('/logout');
+    } catch (error) {
+      if (CloudApiException.isUnauthorized(error)) return;
+      rethrow;
     }
+    final responseDto = CloudApiResponse<dynamic>.fromJson(res.data);
     if (!responseDto.isSuccess) {
       throw CloudApiException(responseDto.msg ?? 'Failed to revoke token');
     }
@@ -678,7 +771,6 @@ class CloudApiService {
       options: _writeOptions(),
     );
     final responseDto = CloudApiResponse<dynamic>.fromJson(res.data);
-    _ensureAuthorized(res.statusCode, responseDto.ret);
     if (!responseDto.isSuccess) {
       throw CloudApiException(
         responseDto.msg ?? appLocalizations.deleteAccountFailed,
@@ -708,6 +800,7 @@ class CloudApiService {
   }
 
   Future<(Uint8List, String?)> fetchManagedConfig(String paramString) async {
+    final revision = _sessionRevision;
     try {
       final queryParameters = <String, dynamic>{};
       final cleaned = paramString.startsWith('&')
@@ -733,13 +826,12 @@ class CloudApiService {
       final res = await _client.get<Map<String, dynamic>>(
         '/managed/flclash/direct',
         queryParameters: queryParameters,
-        options: Options(headers: headers, responseType: ResponseType.json),
+        options: Options(
+          headers: headers,
+          responseType: ResponseType.json,
+          extra: {_sessionRevisionKey: revision},
+        ),
       );
-
-      if (res.statusCode == 401 || res.data?['ret'] == 401) {
-        setToken(null);
-        throw const CloudApiException('Unauthorized');
-      }
 
       if (res.statusCode != 200) {
         throw CloudApiException('Config request failed (${res.statusCode})');
@@ -772,13 +864,24 @@ class CloudApiService {
       if (!AgeCrypto.isArmored(configBytes)) {
         throw const CloudApiException('Server returned invalid config');
       }
+      final Uint8List plaintext;
       try {
-        final plaintext = await AgeCrypto.decrypt(configBytes, identity);
-        return (plaintext, userinfo);
+        plaintext = await AgeCrypto.decrypt(configBytes, identity);
       } catch (_) {
         throw const CloudApiException('Server returned invalid config');
       }
+      if (revision != _sessionRevision) {
+        throw const CloudApiStaleSessionException();
+      }
+      return (plaintext, userinfo);
     } catch (e) {
+      if (CloudApiException.isStaleSession(e)) {
+        throw const CloudApiStaleSessionException();
+      }
+      if (CloudApiException.isHandledUnauthorized(e) ||
+          CloudApiException.isUnauthorized(e)) {
+        rethrow;
+      }
       if (e is DioException) {
         throw CloudApiException(
           'Unable to get oixCloud config: ${_formatHealthCheckError(e)}',
@@ -800,17 +903,9 @@ class CloudApiService {
     return options.copyWith(extra: extra);
   }
 
-  void _ensureAuthorized(int? statusCode, int ret) {
-    if (statusCode == 401 || ret == 401) {
-      setToken(null);
-      throw const CloudApiException('Unauthorized');
-    }
-  }
-
   Future<List<StorePlan>> fetchPlans() async {
     final res = await _client.post('/shop/list');
     final dto = CloudApiResponse<Map<dynamic, dynamic>>.fromJson(res.data);
-    _ensureAuthorized(res.statusCode, dto.ret);
     if (!dto.isSuccess || dto.data == null) {
       throw CloudApiException(dto.msg ?? appLocalizations.fetchPlansFailed);
     }
@@ -820,7 +915,6 @@ class CloudApiService {
   Future<List<BoughtRecord>> fetchBought() async {
     final res = await _client.post('/shop/bought');
     final dto = CloudApiResponse<Map<dynamic, dynamic>>.fromJson(res.data);
-    _ensureAuthorized(res.statusCode, dto.ret);
     if (!dto.isSuccess || dto.data == null) {
       throw CloudApiException(dto.msg ?? appLocalizations.fetchOrdersFailed);
     }
@@ -834,10 +928,6 @@ class CloudApiService {
       try {
         data = jsonDecode(data);
       } catch (_) {}
-    }
-    if (data is Map && data['ret'] == 401) {
-      setToken(null);
-      throw const CloudApiException('Unauthorized');
     }
     final list = (data is Map ? data['result'] : null) as List? ?? const [];
     return list
@@ -856,7 +946,6 @@ class CloudApiService {
       options: _writeOptions(),
     );
     final dto = CloudApiResponse<dynamic>.fromJson(res.data);
-    _ensureAuthorized(res.statusCode, dto.ret);
     return (
       success: dto.isSuccess,
       message:
@@ -963,10 +1052,6 @@ class CloudApiService {
         ),
       ),
     );
-    if (res.statusCode == 401 || (res.data is Map && res.data['ret'] == 401)) {
-      setToken(null);
-      throw const CloudApiException('Unauthorized');
-    }
     return PaymentInitiation.parse(
       res.data,
       statusCode: res.statusCode,
@@ -983,8 +1068,6 @@ class CloudApiService {
       '/pay/status',
       data: FormData.fromMap({'pid': pid, 'payment': payment}),
     );
-    final dto = CloudApiResponse<dynamic>.fromJson(res.data);
-    _ensureAuthorized(res.statusCode, dto.ret);
     dynamic data = res.data;
     if (data is String) {
       try {

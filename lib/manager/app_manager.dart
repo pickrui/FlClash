@@ -47,14 +47,20 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     if (window == null) {
       return;
     }
-    ref.listenManual(autoSetSystemDnsStateProvider, (prev, next) async {
+    ref.listenManual(autoSetSystemDnsStateProvider, (prev, next) {
       if (prev == next) {
         return;
       }
-      if (next.a == true && next.b == true) {
-        macOS?.updateDns(false);
-      } else {
-        macOS?.updateDns(true);
+      final update = macOS?.updateDns(!(next.a && next.b));
+      if (update != null) {
+        unawaited(
+          update.catchError((Object error, StackTrace stackTrace) {
+            commonPrint.log(
+              'system DNS update failed: $error\n$stackTrace',
+              logLevel: LogLevel.warning,
+            );
+          }),
+        );
       }
     });
   }
@@ -74,12 +80,12 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
         (state == AppLifecycleState.inactive && !system.isDesktop);
     if (isBackgroundState) {
       if (!_isBackground) {
-        await appController.savePreferences();
+        _isBackground = true;
         if (system.isAndroid) {
           globalState.stopUpdateTasks();
         }
+        await appController.savePreferences();
       }
-      _isBackground = true;
     }
     if (state == AppLifecycleState.resumed) {
       final wasBackground = _isBackground;
@@ -89,6 +95,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
         globalState.startUpdateTasks();
       }
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || _isBackground) return;
         if (wasBackground) {
           appController.clearDelay();
         }

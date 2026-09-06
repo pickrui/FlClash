@@ -3,9 +3,63 @@ import 'dart:io';
 
 import 'package:fl_clash/core/desktop/launcher.dart';
 import 'package:fl_clash/core/desktop/model.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('decodes stderr across UTF-8 chunk boundaries', () async {
+    final messages = <String?>[];
+    final previousDebugPrint = debugPrint;
+    debugPrint = (message, {wrapWidth}) => messages.add(message);
+    addTearDown(() => debugPrint = previousDebugPrint);
+    final stderr = StreamController<List<int>>();
+    final process = _FakeProcess(
+      pid: 42,
+      exitCode: Future.value(0),
+      stderr: stderr.stream,
+    );
+    final launcher = DirectCoreLauncher(
+      startProcess: (_, _) async => process,
+      corePath: 'FlClashCore',
+    );
+
+    await launcher.start(sessionId: 'test', address: 'test-address');
+    stderr.add([0xe4]);
+    stderr.add([0xb8, 0xad]);
+    await stderr.close();
+
+    expect(messages, ['[APP] 中']);
+  });
+
+  test(
+    'malformed stderr and stream errors do not escape the listener',
+    () async {
+      final messages = <String?>[];
+      final previousDebugPrint = debugPrint;
+      debugPrint = (message, {wrapWidth}) => messages.add(message);
+      addTearDown(() => debugPrint = previousDebugPrint);
+      final stderr = StreamController<List<int>>();
+      final process = _FakeProcess(
+        pid: 42,
+        exitCode: Future.value(0),
+        stderr: stderr.stream,
+      );
+      final launcher = DirectCoreLauncher(
+        startProcess: (_, _) async => process,
+        corePath: 'FlClashCore',
+      );
+
+      await launcher.start(sessionId: 'test', address: 'test-address');
+      stderr.add([0xff]);
+      stderr.addError(StateError('read failed'));
+      await stderr.close();
+
+      expect(messages, hasLength(2));
+      expect(messages.first, '[APP] \uFFFD');
+      expect(messages.last, contains('Unable to read Core stderr:'));
+    },
+  );
+
   test('createCoreSessionId returns lowercase 128-bit hex', () {
     expect(createCoreSessionId(), matches(RegExp(r'^[0-9a-f]{32}$')));
   });
@@ -89,11 +143,15 @@ class _FakeProcess implements Process {
   final Stream<List<int>> stdout = const Stream.empty();
 
   @override
-  final Stream<List<int>> stderr = const Stream.empty();
+  final Stream<List<int>> stderr;
 
   bool killed = false;
 
-  _FakeProcess({required this.pid, required this.exitCode});
+  _FakeProcess({
+    required this.pid,
+    required this.exitCode,
+    this.stderr = const Stream.empty(),
+  });
 
   @override
   bool kill([ProcessSignal signal = ProcessSignal.sigterm]) {

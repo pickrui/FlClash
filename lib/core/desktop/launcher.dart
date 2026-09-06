@@ -36,12 +36,21 @@ final class DirectCoreLauncher implements CoreProcessLauncher {
   }) async {
     final process = await _startProcess(corePath, [address]);
     process.stdout.listen((_) {});
-    process.stderr.listen((data) {
-      final error = utf8.decode(data);
-      if (error.isNotEmpty) {
-        commonPrint.log(error, logLevel: LogLevel.warning);
-      }
-    });
+    process.stderr
+        .transform(const Utf8Decoder(allowMalformed: true))
+        .listen(
+          (error) {
+            if (error.isNotEmpty) {
+              commonPrint.log(error, logLevel: LogLevel.warning);
+            }
+          },
+          onError: (Object error) {
+            commonPrint.log(
+              'Unable to read Core stderr: $error',
+              logLevel: LogLevel.warning,
+            );
+          },
+        );
     return DirectCoreLease(sessionId: sessionId, process: process);
   }
 }

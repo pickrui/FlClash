@@ -58,6 +58,7 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
         navigator.popUntil((route) => route.isFirst);
       }
     } catch (error) {
+      if (CloudApiException.isHandledUnauthorized(error)) return;
       final retry = await CloudApiService().confirmInsecureTlsRetry(error);
       if (!retry) {
         _showLoginError(error);
@@ -70,6 +71,7 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
           navigator.popUntil((route) => route.isFirst);
         }
       } catch (retryError) {
+        if (CloudApiException.isHandledUnauthorized(retryError)) return;
         _showLoginError(retryError);
       }
     } finally {
@@ -295,9 +297,7 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
   }
 
   String _extractToken(String value) {
-    final match = RegExp(
-      r'/password/token/([A-Za-z0-9]+)',
-    ).firstMatch(value);
+    final match = RegExp(r'/password/token/([A-Za-z0-9]+)').firstMatch(value);
     return match?.group(1) ?? value.trim();
   }
 

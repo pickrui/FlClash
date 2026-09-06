@@ -4,6 +4,7 @@ import 'dart:ffi' as ffi;
 
 import 'package:animations/animations.dart';
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:fl_clash/common/periodic_task_runner.dart';
 import 'package:fl_clash/common/theme.dart';
 import 'package:fl_clash/core/core.dart';
 import 'package:fl_clash/plugins/service.dart';
@@ -24,12 +25,16 @@ import 'database/database.dart';
 import 'l10n/l10n.dart';
 import 'models/models.dart';
 
-typedef UpdateTasks = List<FutureOr Function()>;
+typedef UpdateTasks = List<PeriodicTask>;
 
 class GlobalState {
   static GlobalState? _instance;
   final navigatorKey = GlobalKey<NavigatorState>();
-  Timer? timer;
+  final _updateTasks = PeriodicTaskRunner(
+    onError: (error, stackTrace) {
+      commonPrint.log('update task failed: $error\n$stackTrace');
+    },
+  );
   bool isPre = true;
   late final PackageInfo packageInfo;
   Function? updateCurrentDelayDebounce;
@@ -41,7 +46,6 @@ class GlobalState {
   ColorScheme? darkDynamicColorScheme;
   bool needInitStatus = true;
   DateTime? startTime;
-  UpdateTasks tasks = [];
   SetupState? lastSetupState;
   VpnState? lastVpnState;
   List<String> launchArguments = const [];
@@ -150,31 +154,12 @@ class GlobalState {
     return container;
   }
 
-  Future<void> startUpdateTasks([UpdateTasks? tasks]) async {
-    if (timer != null && timer!.isActive == true) return;
-    if (tasks != null) {
-      this.tasks = tasks;
-    }
-    if (this.tasks.isEmpty) {
-      return;
-    }
-    await executorUpdateTask();
-    timer = Timer(const Duration(seconds: 1), () async {
-      startUpdateTasks();
-    });
-  }
-
-  Future<void> executorUpdateTask() async {
-    for (final task in tasks) {
-      await task();
-    }
-    timer = null;
+  Future<void> startUpdateTasks([UpdateTasks? tasks]) {
+    return _updateTasks.start(tasks);
   }
 
   void stopUpdateTasks() {
-    if (timer == null || timer?.isActive == false) return;
-    timer?.cancel();
-    timer = null;
+    _updateTasks.stop();
   }
 
   Future<void> handleStart([UpdateTasks? tasks]) async {
@@ -201,11 +186,14 @@ class GlobalState {
 
   Future handleStop() async {
     startTime = null;
-    if (coreController.isCompleted) {
-      await coreController.stopListener();
-    }
-    await service?.stop();
     stopUpdateTasks();
+    try {
+      if (coreController.isCompleted) {
+        await coreController.stopListener();
+      }
+    } finally {
+      await service?.stop();
+    }
   }
 
   Future<bool?> showMessage({

@@ -34,14 +34,18 @@ class SingleInstanceLock {
 final singleInstanceLock = SingleInstanceLock();
 
 class AsyncStorageLock {
-  static final Object _zoneKey = Object();
+  final Object _zoneKey = Object();
   Future<void> _tail = Future.value();
 
-  Future<T> synchronized<T>(Future<T> Function() action) {
+  bool get isActiveInCurrentZone {
     final parentContext = Zone.current[_zoneKey];
-    if (parentContext is _StorageLockContext &&
+    return parentContext is _StorageLockContext &&
         parentContext.lock == this &&
-        parentContext.active) {
+        parentContext.active;
+  }
+
+  Future<T> synchronized<T>(Future<T> Function() action) {
+    if (isActiveInCurrentZone) {
       return action();
     }
     final context = _StorageLockContext(this);

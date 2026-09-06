@@ -14,6 +14,8 @@ final class _MockLifecycle extends Mock
 
 final class _MockRpcClient extends Mock implements CoreRpcChannel {}
 
+final class _MockProcessLease extends Mock implements CoreProcessLease {}
+
 void main() {
   late _MockLifecycle lifecycle;
   late _MockRpcClient rpcClient;
@@ -89,6 +91,37 @@ void main() {
 
     expect(listener.messages, ['core done']);
     coreEventManager.removeListener(listener);
+  });
+
+  test('missing shutdown response still stops the owned process', () async {
+    when(() => lifecycle.state).thenReturn(
+      DesktopCoreRunning(
+        DesktopCoreSession(
+          sessionId: 'test-session',
+          lease: _MockProcessLease(),
+          connectionGeneration: 1,
+        ),
+      ),
+    );
+    when(
+      () => rpcClient.invoke<bool>(
+        method: CoreMethod.shutdown,
+        arguments: null,
+        timeout: null,
+      ),
+    ).thenAnswer((_) async => null);
+
+    await expectLater(
+      service.shutdown(true),
+      throwsA(
+        isA<CoreMethodException>().having(
+          (error) => error.code,
+          'code',
+          'empty_result',
+        ),
+      ),
+    );
+    verify(() => lifecycle.stop()).called(1);
   });
 
   test('close coalesces lifecycle and RPC cleanup', () async {

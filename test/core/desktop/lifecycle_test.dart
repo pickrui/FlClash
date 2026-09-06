@@ -10,6 +10,46 @@ import 'fakes.dart';
 const _sessionId = '0123456789abcdef0123456789abcdef';
 
 void main() {
+  for (final failTransport in [false, true]) {
+    test(
+      '${failTransport ? 'transport failure' : 'disconnect'} before launcher returns rejects the session',
+      () async {
+        final transport = FakeDesktopCoreTransport();
+        final launcher = FakeLauncher(
+          owner: CoreProcessOwner.windowsHelper,
+          pid: 42,
+        )..startGate = Completer<void>();
+        final lifecycle = _createLifecycle(
+          transport: transport,
+          resolver: MutableLauncherResolver(launcher),
+        );
+        addTearDown(lifecycle.close);
+        final states = <DesktopCoreState>[];
+        final subscription = lifecycle.states.listen(states.add);
+        addTearDown(subscription.cancel);
+
+        final start = lifecycle.start();
+        final result = expectLater(start, throwsA(_hasCode('start_failed')));
+        transport.ready();
+        await launcher.started;
+        transport.connect(pid: 42, generation: 1);
+        await pumpEventQueue();
+        if (failTransport) {
+          transport.fail(StateError('IPC reader failed'));
+        } else {
+          transport.disconnect(1);
+        }
+        await pumpEventQueue();
+        launcher.startGate!.complete();
+
+        await result;
+        expect(lifecycle.state, isA<DesktopCoreFailed>());
+        expect(states.whereType<DesktopCoreRunning>(), isEmpty);
+        expect(launcher.lease.stopCount, 1);
+      },
+    );
+  }
+
   test(
     'publishes running only after ready, launch, connection, and PID match',
     () async {

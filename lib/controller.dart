@@ -519,15 +519,13 @@ class AppController {
   File? _persistentLogFile;
   int _persistentLogLength = 0;
   bool _persistentLogWritesSuspended = false;
-  Future<bool>? _coreReadyFuture;
   Future<bool>? _listenerStartFuture;
   int _startIntentGeneration = 0;
-  Future<void> _coreLifecycleTail = Future.value();
-  final Object _coreLifecycleZoneKey = Object();
-  Object? _activeCoreLifecycleToken;
+  final _coreLifecycleOperations = CoreLifecycleOperations();
   bool _preferencesWritesSuspended = false;
   bool _preferencesWriteRequestedWhileSuspended = false;
   int _autoIpv6CheckGeneration = 0;
+  int _configUpdateGeneration = 0;
   int _groupsUpdateGeneration = 0;
   int _profileApplyGeneration = 0;
   int _pendingProfileApplies = 0;
@@ -563,27 +561,7 @@ class AppController {
   }
 
   Future<T> _serializeCoreLifecycle<T>(Future<T> Function() action) {
-    final inheritedToken = Zone.current[_coreLifecycleZoneKey];
-    if (inheritedToken != null &&
-        identical(inheritedToken, _activeCoreLifecycleToken)) {
-      return action();
-    }
-    final token = Object();
-    final operation = _coreLifecycleTail.then((_) async {
-      _activeCoreLifecycleToken = token;
-      try {
-        return await runZoned(
-          action,
-          zoneValues: {_coreLifecycleZoneKey: token},
-        );
-      } finally {
-        if (identical(_activeCoreLifecycleToken, token)) {
-          _activeCoreLifecycleToken = null;
-        }
-      }
-    });
-    _coreLifecycleTail = operation.then<void>((_) {}, onError: (_, _) {});
-    return operation;
+    return _coreLifecycleOperations.run(action);
   }
 
   void _synchronizeRestoredState({
@@ -931,17 +909,10 @@ extension ProfilesControllerExt on AppController {
     Future<Profile> Function() update,
   ) {
     return storageLock.synchronized(() async {
-      final previousProfileId = _ref.read(currentProfileIdProvider);
       Future<Profile> persist() async {
-        try {
-          final updatedProfile = await update();
-          await putProfile(updatedProfile, reportOnWait: false);
-          return updatedProfile;
-        } catch (_) {
-          _ref.read(currentProfileIdProvider.notifier).value =
-              previousProfileId;
-          rethrow;
-        }
+        final updatedProfile = await update();
+        await putProfile(updatedProfile, reportOnWait: false);
+        return updatedProfile;
       }
 
       return withFileRollback(
@@ -1614,14 +1585,17 @@ extension SetupControllerExt on AppController {
       }
     } else {
       _startIntentGeneration++;
-      await globalState.handleStop();
-      if (coreController.isCompleted) {
-        coreController.resetTraffic();
+      try {
+        await globalState.handleStop();
+      } finally {
+        _ref.read(trafficsProvider.notifier).clear();
+        _ref.read(totalTrafficProvider.notifier).value = const Traffic();
+        _ref.read(runTimeProvider.notifier).value = null;
+        addCheckIp();
+        if (coreController.isCompleted) {
+          coreController.resetTraffic();
+        }
       }
-      _ref.read(trafficsProvider.notifier).clear();
-      _ref.read(totalTrafficProvider.notifier).value = const Traffic();
-      _ref.read(runTimeProvider.notifier).value = null;
-      addCheckIp();
     }
   }
 
@@ -1665,14 +1639,19 @@ extension SetupControllerExt on AppController {
   }
 
   Future<void> updateConfigDebounce() async {
+    final generation = ++_configUpdateGeneration;
     debouncer.call(FunctionTag.updateConfig, () async {
       await safeRun(() async {
         final updateParams = _ref.read(updateParamsProvider);
         final authorization = await _requestAdmin(updateParams.tun.enable);
-        if (authorization == AuthorizeCode.success) {
+        if (authorization == AuthorizeCode.success ||
+            generation != _configUpdateGeneration) {
           return;
         }
         if (!await ensureCoreReady()) {
+          return;
+        }
+        if (generation != _configUpdateGeneration) {
           return;
         }
         final realTunEnable = _ref.read(realTunEnableProvider);
@@ -2138,9 +2117,7 @@ extension CoreControllerExt on AppController {
   }
 
   Future<bool> ensureCoreReady() {
-    return _coreReadyFuture ??= _ensureCoreReady().whenComplete(() {
-      _coreReadyFuture = null;
-    });
+    return _coreLifecycleOperations.ensureReady(_ensureCoreReady);
   }
 
   Future<void> ensureCoreReadyOrThrow() async {
@@ -2150,28 +2127,26 @@ extension CoreControllerExt on AppController {
   }
 
   Future<bool> _ensureCoreReady() async {
-    return _serializeCoreLifecycle(() async {
-      try {
-        if (await _isCoreInitialized()) return true;
-      } catch (error) {
-        commonPrint.log(
-          'Core initialization probe failed: $error',
-          logLevel: LogLevel.warning,
-        );
-        await coreController.shutdown(false);
-      }
-      if (coreController.isCompleted) {
-        await _initCore(refreshGroups: false);
-        return _isCoreInitialized();
-      }
-      commonPrint.log('Core disconnected, reconnecting');
-      _ref.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
+    try {
+      if (await _isCoreInitialized()) return true;
+    } catch (error) {
+      commonPrint.log(
+        'Core initialization probe failed: $error',
+        logLevel: LogLevel.warning,
+      );
       await coreController.shutdown(false);
-      await _connectCore();
-      if (!coreController.isCompleted) return false;
+    }
+    if (coreController.isCompleted) {
       await _initCore(refreshGroups: false);
       return _isCoreInitialized();
-    });
+    }
+    commonPrint.log('Core disconnected, reconnecting');
+    _ref.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
+    await coreController.shutdown(false);
+    await _connectCore();
+    if (!coreController.isCompleted) return false;
+    await _initCore(refreshGroups: false);
+    return _isCoreInitialized();
   }
 
   Future<bool> _isCoreInitialized() async {
@@ -3013,6 +2988,9 @@ extension CommonControllerExt on AppController {
   }
 
   Future<void> updateTraffic() async {
+    final startTime = globalState.startTime;
+    if (startTime == null) return;
+    bool isCurrentRun() => globalState.startTime == startTime;
     if (!coreController.isCompleted) {
       _ref.read(trafficsProvider.notifier).addTraffic(const Traffic());
       _ref.read(totalTrafficProvider.notifier).value = const Traffic();
@@ -3022,9 +3000,13 @@ extension CommonControllerExt on AppController {
       appSettingProvider.select((state) => state.onlyStatisticsProxy),
     );
     final traffic = await coreController.getTraffic(onlyStatisticsProxy);
+    if (!isCurrentRun()) return;
+    final totalTraffic = await coreController.getTotalTraffic(
+      onlyStatisticsProxy,
+    );
+    if (!isCurrentRun()) return;
     _ref.read(trafficsProvider.notifier).addTraffic(traffic);
-    _ref.read(totalTrafficProvider.notifier).value = await coreController
-        .getTotalTraffic(onlyStatisticsProxy);
+    _ref.read(totalTrafficProvider.notifier).value = totalTraffic;
   }
 
   Future<T?> loadingRun<T>(

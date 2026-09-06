@@ -34,6 +34,24 @@ void main() {
     expect(result, 42);
   });
 
+  test('nested locks preserve reentrancy of the outer lock', () async {
+    final lifecycleLock = AsyncStorageLock();
+    final storageLock = AsyncStorageLock();
+    final result = await lifecycleLock
+        .synchronized(() {
+          return storageLock.synchronized(() {
+            expect(lifecycleLock.isActiveInCurrentZone, isTrue);
+            expect(storageLock.isActiveInCurrentZone, isTrue);
+            return lifecycleLock.synchronized(() async => 42);
+          });
+        })
+        .timeout(const Duration(seconds: 1));
+
+    expect(result, 42);
+    expect(lifecycleLock.isActiveInCurrentZone, isFalse);
+    expect(storageLock.isActiveInCurrentZone, isFalse);
+  });
+
   test('detached nested operations queue after the parent releases', () async {
     final lock = AsyncStorageLock();
     final runDetached = Completer<void>();

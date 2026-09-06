@@ -8,7 +8,171 @@ import 'package:fl_clash/common/secrets.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../support/cloud_api_adapter.dart';
+
 void main() {
+  test(
+    'a 401 invalidation becomes obsolete before its caller handles it',
+    () async {
+      final adapter = QueuedCloudAdapter();
+      final client = adapter.createClient();
+      final service = CloudApiService.forTesting(client: client);
+      final invalidated = Completer<void>();
+      final releaseError = Completer<void>();
+      service.setToken('account-a');
+      final oldRequest = service.fetchBought().catchError((Object error) async {
+        expect(CloudApiException.isUnauthorized(error), isTrue);
+        invalidated.complete();
+        await releaseError.future;
+        throw error;
+      });
+      final pending = await adapter.takeRequest();
+      pending.respond({'ret': 401}, statusCode: 401);
+      await invalidated.future;
+      service.setToken('account-b');
+      final rejected = expectLater(
+        oldRequest,
+        throwsA(
+          predicate<Object>(
+            (error) =>
+                CloudApiException.isHandledUnauthorized(error) &&
+                !CloudApiException.isUnauthorized(error),
+          ),
+        ),
+      );
+      releaseError.complete();
+      await rejected;
+
+      final currentRequest = service.fetchBought();
+      final current = await adapter.takeRequest();
+      expect(current.options.headers['Authorization'], 'Bearer account-b');
+      current.respond({
+        'ret': 200,
+        'data': {'boughts': []},
+      });
+      await currentRequest;
+    },
+  );
+
+  test(
+    'an account switch before dispatch cannot send an old write as the new account',
+    () async {
+      final adapter = QueuedCloudAdapter();
+      final service = CloudApiService.forTesting(
+        client: adapter.createClient(),
+      );
+      service.setToken('account-a');
+      final request = service.deleteAccount(password: 'test-password');
+      service.setToken('account-b');
+
+      await expectLater(
+        request,
+        throwsA(predicate<Object>(CloudApiException.isStaleSession)),
+      );
+      expect(adapter.requestCount, 0);
+
+      final next = service.fetchBought();
+      final current = await adapter.takeRequest();
+      expect(current.options.headers['Authorization'], 'Bearer account-b');
+      current.respond({
+        'ret': 200,
+        'data': {'boughts': []},
+      });
+      await next;
+    },
+  );
+
+  for (final statusCode in [200, 401]) {
+    test(
+      'a late $statusCode/401 response cannot invalidate a new account',
+      () async {
+        final adapter = QueuedCloudAdapter();
+        final service = CloudApiService.forTesting(
+          client: adapter.createClient(),
+        );
+        service.setToken('account-a');
+        final oldRequest = service.fetchBought();
+        final pending = await adapter.takeRequest();
+        service.setToken(null);
+        service.setToken('account-b');
+        final revision = service.sessionRevision;
+        final rejected = expectLater(
+          oldRequest,
+          throwsA(
+            predicate<Object>(
+              (error) =>
+                  CloudApiException.isHandledUnauthorized(error) &&
+                  !CloudApiException.isUnauthorized(error),
+            ),
+          ),
+        );
+        pending.respond({'ret': 401}, statusCode: statusCode);
+        await rejected;
+
+        expect(service.sessionRevision, revision);
+        final currentRequest = service.fetchBought();
+        final current = await adapter.takeRequest();
+        expect(current.options.headers['Authorization'], 'Bearer account-b');
+        current.respond({
+          'ret': 200,
+          'data': {'boughts': []},
+        });
+        expect(await currentRequest, isEmpty);
+      },
+    );
+  }
+
+  test('a current-session 401 still clears its credentials', () async {
+    final adapter = QueuedCloudAdapter();
+    final service = CloudApiService.forTesting(client: adapter.createClient());
+    service.setToken('account-a');
+    final request = service.fetchBought();
+    final pending = await adapter.takeRequest();
+    final rejected = expectLater(
+      request,
+      throwsA(predicate<Object>(CloudApiException.isUnauthorized)),
+    );
+    pending.respond({'ret': 401}, statusCode: 401);
+    await rejected;
+
+    final next = service.fetchPlans();
+    final withoutToken = await adapter.takeRequest();
+    expect(withoutToken.options.headers.containsKey('Authorization'), isFalse);
+    withoutToken.respond({
+      'ret': 200,
+      'data': {'shops': []},
+    });
+    await next;
+  });
+
+  test(
+    'an unauthenticated endpoint cannot clear the signed-in token',
+    () async {
+      final adapter = QueuedCloudAdapter();
+      final service = CloudApiService.forTesting(
+        client: adapter.createClient(),
+      );
+      service.setToken('account-b');
+      final registration = service.fetchRegisterConfig();
+      final pending = await adapter.takeRequest();
+      final rejected = expectLater(registration, throwsException);
+      pending.respond({
+        'ret': 401,
+        'msg': 'registration unavailable',
+      }, statusCode: 401);
+      await rejected;
+
+      final next = service.fetchBought();
+      final current = await adapter.takeRequest();
+      expect(current.options.headers['Authorization'], 'Bearer account-b');
+      current.respond({
+        'ret': 200,
+        'data': {'boughts': []},
+      });
+      await next;
+    },
+  );
+
   test('certificate classifier ignores generic TLS handshake failures', () {
     expect(
       FlClashTemporaryTls.isCertificateVerifyFailed(

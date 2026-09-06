@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:ffi/ffi.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/macos_dns.dart';
 import 'package:fl_clash/core/desktop/helper_client.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/plugins/app.dart';
@@ -371,100 +372,14 @@ class Windows {
 
 final windows = system.isWindows ? Windows() : null;
 
-class MacOS {
+class MacOS extends MacosDnsController {
   static MacOS? _instance;
-
-  List<String>? originDns;
 
   MacOS._internal();
 
   factory MacOS() {
     _instance ??= MacOS._internal();
     return _instance!;
-  }
-
-  Future<String?> get defaultServiceName async {
-    final result = await Process.run('route', ['-n', 'get', 'default']);
-    final output = result.stdout.toString();
-    final deviceLine = output
-        .split('\n')
-        .firstWhere((s) => s.contains('interface:'), orElse: () => '');
-    final lineSplits = deviceLine.trim().split(' ');
-    if (lineSplits.length != 2) {
-      return null;
-    }
-    final device = lineSplits[1];
-    final serviceResult = await Process.run('networksetup', [
-      '-listnetworkserviceorder',
-    ]);
-    final serviceResultOutput = serviceResult.stdout.toString();
-    final currentService = serviceResultOutput
-        .split('\n\n')
-        .firstWhere((s) => s.contains('Device: $device'), orElse: () => '');
-    if (currentService.isEmpty) {
-      return null;
-    }
-    final currentServiceNameLine = currentService
-        .split('\n')
-        .firstWhere(
-          (line) => RegExp(r'^\(\d+\).*').hasMatch(line),
-          orElse: () => '',
-        );
-    final currentServiceNameLineSplits = currentServiceNameLine.trim().split(
-      ' ',
-    );
-    if (currentServiceNameLineSplits.length < 2) {
-      return null;
-    }
-    return currentServiceNameLineSplits[1];
-  }
-
-  Future<List<String>?> get systemDns async {
-    final deviceServiceName = await defaultServiceName;
-    if (deviceServiceName == null) {
-      return null;
-    }
-    final result = await Process.run('networksetup', [
-      '-getdnsservers',
-      deviceServiceName,
-    ]);
-    final output = result.stdout.toString().trim();
-    if (output.startsWith("There aren't any DNS Servers set on")) {
-      originDns = [];
-    } else {
-      originDns = output.split('\n');
-    }
-    return originDns;
-  }
-
-  Future<void> updateDns(bool restore) async {
-    final serviceName = await defaultServiceName;
-    if (serviceName == null) {
-      return;
-    }
-    List<String>? nextDns;
-    if (restore) {
-      nextDns = originDns;
-    } else {
-      final originDns = await systemDns;
-      if (originDns == null) {
-        return;
-      }
-      const needAddDns = '223.5.5.5';
-      if (originDns.contains(needAddDns)) {
-        return;
-      }
-      nextDns = List.from(originDns)..add(needAddDns);
-    }
-    if (nextDns == null) {
-      return;
-    }
-    await Process.run('networksetup', [
-      '-setdnsservers',
-      serviceName,
-      if (nextDns.isNotEmpty) ...nextDns,
-      if (nextDns.isEmpty) 'Empty',
-    ]);
   }
 }
 

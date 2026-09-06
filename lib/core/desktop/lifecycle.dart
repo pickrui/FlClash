@@ -79,21 +79,23 @@ final class _TransportConnectionWaiter {
               _settled.complete();
             }
           case TransportFailed(:final error, :final stackTrace):
-            if (!_settled.isCompleted) {
-              _error = error;
-              _stackTrace = stackTrace;
-              _settled.complete();
+            _recordFailure(error, stackTrace);
+          case TransportDisconnected(:final generation):
+            if (generation == _connection?.generation) {
+              _recordFailure(
+                StateError('Core disconnected before startup completed'),
+                StackTrace.current,
+              );
             }
-          case TransportReady() || TransportDisconnected():
+          case TransportReady():
             break;
         }
       },
       onDone: () {
-        if (!_settled.isCompleted) {
-          _error = StateError('Core transport closed before connection');
-          _stackTrace = StackTrace.current;
-          _settled.complete();
-        }
+        _recordFailure(
+          StateError('Core transport closed before startup completed'),
+          StackTrace.current,
+        );
       },
     );
     _timer = Timer(timeout, () {
@@ -110,11 +112,23 @@ final class _TransportConnectionWaiter {
 
   Future<TransportConnected> get future async {
     await _settled.future;
+    throwIfFailed();
+    return _connection!;
+  }
+
+  void _recordFailure(Object error, StackTrace stackTrace) {
+    _error ??= error;
+    _stackTrace ??= stackTrace;
+    if (!_settled.isCompleted) {
+      _settled.complete();
+    }
+  }
+
+  void throwIfFailed() {
     final error = _error;
     if (error != null) {
       Error.throwWithStackTrace(error, _stackTrace ?? StackTrace.current);
     }
-    return _connection!;
   }
 
   Future<void> cancel() async {
@@ -438,6 +452,12 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
       if (connected == null || !_wantsRunning) {
         await releaseLease();
         return false;
+      }
+      // A Core may connect and exit while the launcher is still returning its
+      // lease. Keep observing that connection until ownership is published.
+      connectionWaiter.throwIfFailed();
+      if (_transport.state != DesktopTransportState.connected) {
+        throw StateError('Core disconnected before startup completed');
       }
       if (verifyPeerPid && connected.pid != lease.pid) {
         await releaseLease();
