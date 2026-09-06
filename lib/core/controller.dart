@@ -7,6 +7,7 @@ import 'package:fl_clash/core/interface.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/services/config_key_store.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 
@@ -14,6 +15,15 @@ class ConfigValidationException implements Exception {
   final String message;
 
   const ConfigValidationException(this.message);
+
+  @override
+  String toString() => message;
+}
+
+class PortConflictException implements Exception {
+  final String message;
+
+  const PortConflictException(this.message);
 
   @override
   String toString() => message;
@@ -31,6 +41,10 @@ class CoreController {
       _interface = coreService!;
     }
   }
+
+  @visibleForTesting
+  CoreController.forTesting({required CoreHandlerInterface handler})
+    : _interface = handler;
 
   factory CoreController() {
     _instance ??= CoreController._internal();

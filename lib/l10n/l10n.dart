@@ -2189,6 +2189,16 @@ class AppLocalizations {
     );
   }
 
+  /// `TUN could not be enabled because administrator authorization was denied. Allow the system permission prompt and try again.`
+  String get tunAuthorizationFailed {
+    return Intl.message(
+      'TUN could not be enabled because administrator authorization was denied. Allow the system permission prompt and try again.',
+      name: 'tunAuthorizationFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Copying environment variables`
   String get copyEnvVar {
     return Intl.message(
@@ -2744,6 +2754,36 @@ class AppLocalizations {
     return Intl.message(
       'Please enter a different port',
       name: 'portConflictTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Port unavailable`
+  String get portUnavailableTitle {
+    return Intl.message(
+      'Port unavailable',
+      name: 'portUnavailableTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The mixed port {port} could not start listening and may be in use by another application. Change the port to retry immediately.`
+  String portUnavailableMessage(Object port) {
+    return Intl.message(
+      'The mixed port $port could not start listening and may be in use by another application. Change the port to retry immediately.',
+      name: 'portUnavailableMessage',
+      desc: '',
+      args: [port],
+    );
+  }
+
+  /// `Save and retry`
+  String get saveAndRetry {
+    return Intl.message(
+      'Save and retry',
+      name: 'saveAndRetry',
       desc: '',
       args: [],
     );

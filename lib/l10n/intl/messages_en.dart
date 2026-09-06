@@ -75,29 +75,32 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m22(label) => "${label} must be between 1024 and 49151";
 
-  static String m23(name) =>
+  static String m23(port) =>
+      "The mixed port ${port} could not start listening and may be in use by another application. Change the port to retry immediately.";
+
+  static String m24(name) =>
       "Node ${name} is already used by another enabled chain or has a proxy chain relation conflict";
 
-  static String m24(name) => "Node ${name} is not available in this position";
+  static String m25(name) => "Node ${name} is not available in this position";
 
-  static String m25(time) => "Purchased ${time}";
+  static String m26(time) => "Purchased ${time}";
 
-  static String m26(name, path) =>
+  static String m27(name, path) =>
       "${name} is referenced by the original configuration at ${path}";
 
-  static String m27(value) => "Remaining: ${value}";
+  static String m28(value) => "Remaining: ${value}";
 
-  static String m28(count) => "Only ${count} left";
+  static String m29(count) => "Only ${count} left";
 
-  static String m29(seconds) => "Resend in ${seconds}s";
+  static String m30(seconds) => "Resend in ${seconds}s";
 
-  static String m30(count) => "${count} seconds";
+  static String m31(count) => "${count} seconds";
 
-  static String m31(count) => "${count} items have been selected";
+  static String m32(count) => "${count} items have been selected";
 
-  static String m32(label) => "${label} must be a url";
+  static String m33(label) => "${label} must be a url";
 
-  static String m33(count) =>
+  static String m34(count) =>
       "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -809,6 +812,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Please enter a different port",
     ),
     "portTip": m22,
+    "portUnavailableMessage": m23,
+    "portUnavailableTitle": MessageLookupByLibrary.simpleMessage(
+      "Port unavailable",
+    ),
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
       "Prioritize the use of DOH\'s http/3",
     ),
@@ -849,7 +856,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyChainAvailableNodes": MessageLookupByLibrary.simpleMessage(
       "Available nodes",
     ),
-    "proxyChainConflictTip": m23,
+    "proxyChainConflictTip": m24,
     "proxyChainCustomNode": MessageLookupByLibrary.simpleMessage("Custom node"),
     "proxyChainCustomNodes": MessageLookupByLibrary.simpleMessage(
       "Custom nodes",
@@ -881,7 +888,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyChainSelectedNodes": MessageLookupByLibrary.simpleMessage(
       "Proxy chain",
     ),
-    "proxyChainUnavailableNodeTip": m24,
+    "proxyChainUnavailableNodeTip": m25,
     "proxyChainUriNodeSupportedFormats": MessageLookupByLibrary.simpleMessage(
       "Supported formats: ss://, ssr://, vmess://, vless://, trojan://, anytls://, hysteria:// / hy://, hysteria2:// / hy2://, tuic://, wireguard:// / wg://, http(s)://, socks(5)://",
     ),
@@ -907,7 +914,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyPort": MessageLookupByLibrary.simpleMessage("ProxyPort"),
     "proxyProviders": MessageLookupByLibrary.simpleMessage("Proxy providers"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("Prune cache"),
-    "purchaseTime": m25,
+    "purchaseTime": m26,
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("Pure black mode"),
     "qrcode": MessageLookupByLibrary.simpleMessage("QR code"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
@@ -915,7 +922,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "quickFill": MessageLookupByLibrary.simpleMessage("Quick fill"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("Rainbow"),
-    "rawOutboundInUse": m26,
+    "rawOutboundInUse": m27,
     "receivingAddress": MessageLookupByLibrary.simpleMessage(
       "Receiving address",
     ),
@@ -940,8 +947,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "relayGroupUnsupported": MessageLookupByLibrary.simpleMessage(
       "Relay groups were removed by the core. Choose another type.",
     ),
-    "remaining": m27,
-    "remainingStock": m28,
+    "remaining": m28,
+    "remainingStock": m29,
     "remote": MessageLookupByLibrary.simpleMessage("Remote"),
     "remoteBackupDesc": MessageLookupByLibrary.simpleMessage(
       "Backup local data to WebDAV",
@@ -956,7 +963,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "requestsDesc": MessageLookupByLibrary.simpleMessage(
       "View recently request records",
     ),
-    "resendCodeIn": m29,
+    "resendCodeIn": m30,
     "reset": MessageLookupByLibrary.simpleMessage("Reset"),
     "resetEmailSent": MessageLookupByLibrary.simpleMessage(
       "Reset email sent. Paste the reset link or code from the email below.",
@@ -1031,6 +1038,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "ruleProviders": MessageLookupByLibrary.simpleMessage("Rule providers"),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("Rule target"),
     "save": MessageLookupByLibrary.simpleMessage("Save"),
+    "saveAndRetry": MessageLookupByLibrary.simpleMessage("Save and retry"),
     "saveChanges": MessageLookupByLibrary.simpleMessage(
       "Do you want to save the changes?",
     ),
@@ -1046,13 +1054,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "search": MessageLookupByLibrary.simpleMessage("Search"),
     "seconds": MessageLookupByLibrary.simpleMessage("Seconds"),
-    "secondsCount": m30,
+    "secondsCount": m31,
     "selectAll": MessageLookupByLibrary.simpleMessage("Select all"),
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage(
       "Select upgrade target",
     ),
     "selected": MessageLookupByLibrary.simpleMessage("Selected"),
-    "selectedCountTitle": m31,
+    "selectedCountTitle": m32,
     "sendCode": MessageLookupByLibrary.simpleMessage("Send Code"),
     "sendResetEmail": MessageLookupByLibrary.simpleMessage("Send reset email"),
     "serviceCheckFailed": MessageLookupByLibrary.simpleMessage(
@@ -1153,6 +1161,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "The system will confirm automatically after the transfer is completed, and the selected plan will be activated.",
     ),
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
+    "tunAuthorizationFailed": MessageLookupByLibrary.simpleMessage(
+      "TUN could not be enabled because administrator authorization was denied. Allow the system permission prompt and try again.",
+    ),
     "tunDesc": MessageLookupByLibrary.simpleMessage(
       "only effective in administrator mode",
     ),
@@ -1178,7 +1189,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Obtain profile through URL",
     ),
-    "urlTip": m32,
+    "urlTip": m33,
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),
     "userAgent": MessageLookupByLibrary.simpleMessage("User-Agent"),
@@ -1202,7 +1213,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "WebDAV configuration",
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Whitelist mode"),
-    "yearsAgo": m33,
+    "yearsAgo": m34,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };
 }

@@ -8,7 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class StartButton extends ConsumerStatefulWidget {
-  const StartButton({super.key});
+  final Future<void> Function(bool isStart)? statusUpdater;
+
+  const StartButton({super.key, this.statusUpdater});
 
   @override
   ConsumerState<StartButton> createState() => _StartButtonState();
@@ -19,6 +21,7 @@ class _StartButtonState extends ConsumerState<StartButton>
   AnimationController? _controller;
   late Animation<double> _animation;
   bool isStart = false;
+  int _toggleGeneration = 0;
 
   @override
   void initState() {
@@ -50,9 +53,27 @@ class _StartButtonState extends ConsumerState<StartButton>
 
   void handleSwitchStart() {
     isStart = !isStart;
+    final requestedStart = isStart;
+    final generation = ++_toggleGeneration;
     updateController();
-    debouncer.call(FunctionTag.updateStatus, () {
-      appController.updateStatus(isStart, isInit: !ref.read(initProvider));
+    debouncer.call(FunctionTag.updateStatus, () async {
+      if (!mounted) return;
+      try {
+        final statusUpdater = widget.statusUpdater;
+        if (statusUpdater != null) {
+          await statusUpdater(requestedStart);
+        } else {
+          await appController.updateStatus(
+            requestedStart,
+            isInit: !ref.read(initProvider),
+          );
+        }
+      } finally {
+        if (mounted && generation == _toggleGeneration) {
+          setState(() => isStart = ref.read(isStartProvider));
+          updateController();
+        }
+      }
     }, duration: commonDuration);
   }
 

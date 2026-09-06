@@ -14,6 +14,7 @@ import 'package:fl_clash/services/config_key_store.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/utils/safe_storage.dart';
 import 'package:fl_clash/views/cloud/cloud_login_page.dart';
+import 'package:fl_clash/widgets/port_conflict_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
@@ -59,6 +60,30 @@ Uint8List limitLogLine(Uint8List bytes, int maxBytes) {
 
 class CandidateConfigValidationException extends ConfigValidationException {
   const CandidateConfigValidationException(super.message);
+}
+
+class _CoreStartCancelledException implements Exception {
+  const _CoreStartCancelledException();
+}
+
+/// Keeps listener recovery inside the original action, so cancelling a start
+/// does not turn an otherwise successful sign-in into an authentication error.
+Future<bool> startCoreWithPortRecovery({
+  required Future<void> Function() start,
+  required Future<bool> Function() resolveConflict,
+  required bool Function() shouldContinue,
+}) async {
+  while (shouldContinue()) {
+    try {
+      await start();
+      return shouldContinue();
+    } on PortConflictException {
+      if (!shouldContinue() || !await resolveConflict()) {
+        return false;
+      }
+    }
+  }
+  return false;
 }
 
 String formatConfigValidationMessage(
@@ -205,7 +230,10 @@ class ProfileApplyIntent {
 
   void merge({required bool force, FutureOr<void> Function()? preloadInvoke}) {
     _requiresForce = _requiresForce || force;
-    _preloadInvoke ??= preloadInvoke;
+    if (preloadInvoke != null) {
+      _preloadInvoke = preloadInvoke;
+      _preloadFuture = null;
+    }
   }
 
   void clear() {
@@ -492,6 +520,8 @@ class AppController {
   int _persistentLogLength = 0;
   bool _persistentLogWritesSuspended = false;
   Future<bool>? _coreReadyFuture;
+  Future<bool>? _listenerStartFuture;
+  int _startIntentGeneration = 0;
   Future<void> _coreLifecycleTail = Future.value();
   final Object _coreLifecycleZoneKey = Object();
   Object? _activeCoreLifecycleToken;
@@ -1512,6 +1542,44 @@ extension ProxiesControllerExt on AppController {
 }
 
 extension SetupControllerExt on AppController {
+  Future<bool> _startWithPortRecovery(int generation) {
+    bool shouldContinue() => generation == _startIntentGeneration;
+    if (!shouldContinue()) return Future.value(false);
+    return _listenerStartFuture ??= startCoreWithPortRecovery(
+      shouldContinue: shouldContinue,
+      start: () => globalState.handleStart([updateRunTime, updateTraffic]),
+      resolveConflict: () async {
+        final patchConfig = _ref.read(patchClashConfigProvider);
+        final port = await globalState.showCommonDialog<int>(
+          child: PortConflictDialog(
+            port: patchConfig.mixedPort,
+            otherPorts: [
+              patchConfig.port,
+              patchConfig.socksPort,
+              patchConfig.redirPort,
+              patchConfig.tproxyPort,
+            ],
+          ),
+        );
+        if (port == null || !shouldContinue()) {
+          return false;
+        }
+        _ref
+            .read(patchClashConfigProvider.notifier)
+            .update((state) => state.copyWith(mixedPort: port));
+        // The normal provider listener is debounced. Apply the new port before
+        // retrying, including when we are inside setupConfig's preload callback.
+        final updateParams = _ref.read(updateParamsProvider);
+        final message = await coreController.updateConfig(
+          updateParams.copyWith.tun(enable: _ref.read(realTunEnableProvider)),
+        );
+        if (message.isNotEmpty) throw message;
+        await savePreferences();
+        return true;
+      },
+    ).whenComplete(() => _listenerStartFuture = null);
+  }
+
   void fullSetup() {
     if (!_ref.read(initProvider)) {
       return;
@@ -1524,31 +1592,28 @@ extension SetupControllerExt on AppController {
 
   Future<void> updateStatus(bool isStart, {bool isInit = false}) async {
     if (isStart) {
-      if (!isInit) {
-        final res = await tryStartCore(true);
-        if (res) {
-          return;
-        }
-        if (!_ref.read(initProvider)) {
-          return;
-        }
-        await globalState.handleStart([updateRunTime, updateTraffic]);
-        if (!await applyProfile(force: true, silence: true)) {
-          await updateStatus(false);
-        }
-      } else {
+      final generation = _startIntentGeneration;
+      if (isInit) {
         globalState.needInitStatus = false;
-        final started = await applyProfile(
-          force: true,
-          preloadInvoke: () async {
-            await globalState.handleStart([updateRunTime, updateTraffic]);
-          },
-        );
-        if (!started && _ref.read(isStartProvider)) {
-          await updateStatus(false);
-        }
+      } else if (!_ref.read(initProvider)) {
+        return;
+      }
+      // Load the selected profile before opening listeners. A freshly initialized
+      // Core also rejects startListener when no config has been applied yet.
+      final started = await applyProfile(
+        force: true,
+        silence: !isInit,
+        preloadInvoke: () async {
+          if (!await _startWithPortRecovery(generation)) {
+            throw const _CoreStartCancelledException();
+          }
+        },
+      );
+      if (!started && _ref.read(isStartProvider)) {
+        await updateStatus(false);
       }
     } else {
+      _startIntentGeneration++;
       await globalState.handleStop();
       if (coreController.isCompleted) {
         coreController.resetTraffic();
@@ -1603,8 +1668,8 @@ extension SetupControllerExt on AppController {
     debouncer.call(FunctionTag.updateConfig, () async {
       await safeRun(() async {
         final updateParams = _ref.read(updateParamsProvider);
-        final res = await _requestAdmin(updateParams.tun.enable);
-        if (res.isError) {
+        final authorization = await _requestAdmin(updateParams.tun.enable);
+        if (authorization == AuthorizeCode.success) {
           return;
         }
         if (!await ensureCoreReady()) {
@@ -1957,8 +2022,8 @@ extension SetupControllerExt on AppController {
       return false;
     }
     final patchConfig = _ref.read(patchClashConfigProvider);
-    final res = await _requestAdmin(patchConfig.tun.enable);
-    if (res.isError) {
+    final authorization = await _requestAdmin(patchConfig.tun.enable);
+    if (authorization == AuthorizeCode.success) {
       return false;
     }
     if (!await ensureCoreReady()) {
@@ -2009,10 +2074,15 @@ extension SetupControllerExt on AppController {
       '====== Sending rawConfig to Go: ${updatedSetupParams.rawConfig.length}',
     );
 
-    final message = await coreController.setupConfig(
-      params: updatedSetupParams,
-      preloadInvoke: preloadInvoke,
-    );
+    final String message;
+    try {
+      message = await coreController.setupConfig(
+        params: updatedSetupParams,
+        preloadInvoke: preloadInvoke,
+      );
+    } on _CoreStartCancelledException {
+      return false;
+    }
     if (message.isNotEmpty) {
       throw message;
     }
@@ -2121,7 +2191,7 @@ extension CoreControllerExt on AppController {
     );
   }
 
-  Future<Result<bool>> _requestAdmin(bool enableTun) async {
+  Future<AuthorizeCode> _requestAdmin(bool enableTun) async {
     final realTunEnable = _ref.read(realTunEnableProvider);
     if (enableTun != realTunEnable && realTunEnable == false) {
       final code = await system.authorizeCore();
@@ -2129,17 +2199,16 @@ extension CoreControllerExt on AppController {
         case AuthorizeCode.success:
           _ref.read(realTunEnableProvider.notifier).value = enableTun;
           await restartCore();
-          return Result.error('');
+          return code;
         case AuthorizeCode.none:
           break;
         case AuthorizeCode.error:
-          enableTun = false;
           _setPatchTunEnable(false);
-          break;
+          throw appLocalizations.tunAuthorizationFailed;
       }
     }
     _ref.read(realTunEnableProvider.notifier).value = enableTun;
-    return Result.success(enableTun);
+    return AuthorizeCode.none;
   }
 
   void _setPatchTunEnable(bool enable) {

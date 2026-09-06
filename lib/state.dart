@@ -179,14 +179,20 @@ class GlobalState {
 
   Future<void> handleStart([UpdateTasks? tasks]) async {
     startTime ??= DateTime.now();
-    if (coreController.isCompleted) {
-      if (!await coreController.startListener()) {
-        startTime = null;
-        throw appLocalizations.portConflictTip;
+    try {
+      if (coreController.isCompleted) {
+        if (!await coreController.startListener()) {
+          throw PortConflictException(appLocalizations.portConflictTip);
+        }
+      } else if (system.isDesktop) {
+        throw StateError('Core is not connected');
       }
+      await service?.start();
+      startUpdateTasks(tasks);
+    } catch (_) {
+      startTime = null;
+      rethrow;
     }
-    await service?.start();
-    startUpdateTasks(tasks);
   }
 
   Future updateStartTime() async {

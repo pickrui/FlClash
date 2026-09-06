@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:fl_clash/controller.dart';
+import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/common/preferences.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/l10n/l10n.dart';
@@ -13,6 +14,152 @@ import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 void main() {
+  group('port conflict recovery', () {
+    test('waits for the new port to be applied before retrying', () async {
+      var activePort = 7890;
+      final applyPort = Completer<void>();
+      final editingPort = Completer<void>();
+      final attempts = <int>[];
+      final result = startCoreWithPortRecovery(
+        shouldContinue: () => true,
+        start: () async {
+          attempts.add(activePort);
+          if (activePort == 7890) {
+            throw const PortConflictException('occupied');
+          }
+        },
+        resolveConflict: () async {
+          editingPort.complete();
+          await applyPort.future;
+          activePort = 7891;
+          return true;
+        },
+      );
+
+      await editingPort.future;
+      expect(attempts, [7890]);
+      applyPort.complete();
+      expect(await result, isTrue);
+      expect(attempts, [7890, 7891]);
+    });
+
+    test(
+      'reopens editing when the replacement port is also occupied',
+      () async {
+        var attempts = 0;
+        var edits = 0;
+        final started = await startCoreWithPortRecovery(
+          shouldContinue: () => true,
+          start: () async {
+            if (++attempts < 3) {
+              throw const PortConflictException('occupied');
+            }
+          },
+          resolveConflict: () async {
+            edits++;
+            return true;
+          },
+        );
+
+        expect(started, isTrue);
+        expect(attempts, 3);
+        expect(edits, 2);
+      },
+    );
+
+    test('cancelling returns normally without retrying', () async {
+      var attempts = 0;
+      final started = await startCoreWithPortRecovery(
+        shouldContinue: () => true,
+        start: () async {
+          attempts++;
+          throw const PortConflictException('occupied');
+        },
+        resolveConflict: () async => false,
+      );
+
+      expect(started, isFalse);
+      expect(attempts, 1);
+    });
+
+    test(
+      'successful starts and unrelated errors never open port editing',
+      () async {
+        Future<bool> unexpectedEdit() async {
+          fail('port editor should not open');
+        }
+
+        expect(
+          await startCoreWithPortRecovery(
+            shouldContinue: () => true,
+            start: () async {},
+            resolveConflict: unexpectedEdit,
+          ),
+          isTrue,
+        );
+        final error = StateError('core disconnected');
+        await expectLater(
+          startCoreWithPortRecovery(
+            shouldContinue: () => true,
+            start: () async => throw error,
+            resolveConflict: unexpectedEdit,
+          ),
+          throwsA(same(error)),
+        );
+      },
+    );
+    test('a stop request during editing prevents another start', () async {
+      var shouldStart = true;
+      var attempts = 0;
+      expect(
+        await startCoreWithPortRecovery(
+          shouldContinue: () => shouldStart,
+          start: () async {
+            attempts++;
+            throw const PortConflictException('occupied');
+          },
+          resolveConflict: () async {
+            shouldStart = false;
+            return true;
+          },
+        ),
+        isFalse,
+      );
+      expect(attempts, 1);
+    });
+
+    test('an obsolete start never opens listeners or the editor', () async {
+      expect(
+        await startCoreWithPortRecovery(
+          shouldContinue: () => false,
+          start: () async => fail('start is obsolete'),
+          resolveConflict: () async => fail('start is obsolete'),
+        ),
+        isFalse,
+      );
+    });
+
+    test(
+      'failure to apply the edited port does not retry the listener',
+      () async {
+        var attempts = 0;
+        final error = StateError('port update failed');
+        await expectLater(
+          startCoreWithPortRecovery(
+            shouldContinue: () => true,
+            start: () async {
+              attempts++;
+              throw const PortConflictException('occupied');
+            },
+            resolveConflict: () async => throw error,
+          ),
+          throwsA(same(error)),
+        );
+        expect(attempts, 1);
+      },
+    );
+  });
+
   test('interactive core readiness recovers only when needed', () async {
     var recoveryCalls = 0;
 
@@ -376,6 +523,24 @@ void main() {
       expect(intent.preloadInvoke, isNull);
     },
   );
+
+  test('a new start replaces a pending cancelled preload', () async {
+    final cancelledStart = Completer<void>();
+    final intent = ProfileApplyIntent()
+      ..merge(force: true, preloadInvoke: () => cancelledStart.future);
+    final previous = Future.sync(intent.preloadInvoke!);
+    final previousResult = expectLater(previous, throwsStateError);
+
+    var newStarts = 0;
+    intent.merge(force: true, preloadInvoke: () => newStarts++);
+    await intent.preloadInvoke!();
+    expect(newStarts, 1);
+
+    cancelledStart.completeError(StateError('start cancelled'));
+    await previousResult;
+    await intent.preloadInvoke!();
+    expect(newStarts, 1);
+  });
 
   group('commitRestoredFiles', () {
     test('commits staged files before database commit', () async {
