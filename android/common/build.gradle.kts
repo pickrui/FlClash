@@ -39,4 +39,5 @@ kotlin {
 dependencies {
     implementation(libs.androidx.core)
     implementation(libs.gson)
+    testImplementation("junit:junit:4.13.2")
 }

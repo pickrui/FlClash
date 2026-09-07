@@ -84,6 +84,8 @@ jobs:
         run: |
           go vet -tags with_gvisor ./...
           go test -tags with_gvisor ./...
+          cd Clash.Meta
+          go test -tags with_gvisor ./component/mmdb ./component/updater
 
       - name: Validate Rust components
         run: |
@@ -301,7 +303,7 @@ jobs:
       - name: Run Android unit tests
         if: matrix.platform == 'android' && matrix.arch == 'arm64'
         working-directory: android
-        run: ./gradlew :app:testDebugUnitTest :service:testDebugUnitTest --no-daemon
+        run: ./gradlew :app:testDebugUnitTest :service:testDebugUnitTest :common:testDebugUnitTest --no-daemon
 
       - name: Upload
         uses: actions/upload-artifact@v4

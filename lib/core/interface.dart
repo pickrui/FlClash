@@ -246,11 +246,10 @@ abstract class CoreHandlerInterface with CoreInterface {
 
   @override
   Future<String> updateGeoData(UpdateGeoDataParams params) async {
-    return await _invokeMethod<String>(
-          method: CoreMethod.updateGeoData,
-          arguments: params.toJson(),
-        ) ??
-        '';
+    return _invokeRequiredMethod<String>(
+      method: CoreMethod.updateGeoData,
+      arguments: params.toJson(),
+    );
   }
 
   @override

@@ -45,6 +45,31 @@ void main() {
   });
 
   test(
+    'Geo updates distinguish missing responses from success and rejection',
+    () async {
+      final handler = _FakeCoreHandler();
+      for (final type in GeoResource.values) {
+        final params = UpdateGeoDataParams(
+          geoType: type.name,
+          geoName: '${type.name.toLowerCase()}.dat',
+          url: 'https://example.com/${type.name}',
+        );
+
+        handler.response = null;
+        await expectLater(
+          handler.updateGeoData(params),
+          throwsA(_missingResponse(CoreMethod.updateGeoData)),
+        );
+
+        handler.response = '';
+        expect(await handler.updateGeoData(params), isEmpty);
+        handler.response = 'GEO download failed';
+        expect(await handler.updateGeoData(params), 'GEO download failed');
+      }
+    },
+  );
+
+  test(
     'listener and shutdown operations distinguish no response from false',
     () async {
       final handler = _FakeCoreHandler();

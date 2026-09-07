@@ -12,11 +12,11 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/metacubex/mihomo/component/geodata"
 	mihomoHttp "github.com/metacubex/mihomo/component/http"
+	"github.com/metacubex/mihomo/component/mmdb"
 	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/constant/features"
 	"github.com/metacubex/mihomo/hub/route"
@@ -42,7 +42,6 @@ var (
 	geoUpdateGate   = make(chan struct{}, 1)
 	geoSchedulerMu  sync.Mutex
 	geoScheduler    *geoSchedulerState
-	geoReloadNeeded atomic.Bool
 	geoLifecycleMu  sync.Mutex
 	geoLifecycleCtx context.Context
 	geoLifecycleEnd context.CancelFunc
@@ -109,13 +108,6 @@ func sendGeoUpdate(geoType string, updating bool, skipped bool, err error) {
 		data.Error = err.Error()
 	}
 	sendMessage(Message{Type: GeoUpdateMessage, Data: data})
-}
-
-func sendGeoReload() {
-	sendMessage(Message{
-		Type: GeoUpdateMessage,
-		Data: GeoUpdateStatus{Reload: true},
-	})
 }
 
 func getFileHash(path string) ([sha256.Size]byte, error) {
@@ -343,8 +335,10 @@ func replaceGeoData(geoType string, path string, data []byte) (err error) {
 		return err
 	}
 	switch geoType {
-	case "MMDB", "ASN":
-		geoReloadNeeded.Store(true)
+	case "MMDB":
+		mmdb.ReloadIP()
+	case "ASN":
+		mmdb.ReloadASN()
 	case "GEOIP":
 		geodata.ClearGeoIPCache()
 	case "GEOSITE":
@@ -382,19 +376,11 @@ func updateEnabledGeoDataAction(ctx context.Context) error {
 }
 
 func updateEnabledGeoData(ctx context.Context) error {
-	err := runGeoUpdate(ctx, updateEnabledGeoDataAction)
-	if geoReloadNeeded.Swap(false) {
-		sendGeoReload()
-	}
-	return err
+	return runGeoUpdate(ctx, updateEnabledGeoDataAction)
 }
 
 func tryUpdateEnabledGeoData(ctx context.Context) error {
-	err := tryRunGeoUpdate(ctx, updateEnabledGeoDataAction)
-	if geoReloadNeeded.Swap(false) {
-		sendGeoReload()
-	}
-	return err
+	return tryRunGeoUpdate(ctx, updateEnabledGeoDataAction)
 }
 
 func handleGeoUpdateRequest(w http.ResponseWriter, request *http.Request) {

@@ -31,10 +31,10 @@ class ResourcesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const geoItems = <GeoItem>[
-      GeoItem(type: GeoResource.GEOIP, fileName: GEOIP),
-      GeoItem(type: GeoResource.GEOSITE, fileName: GEOSITE),
       GeoItem(type: GeoResource.MMDB, fileName: MMDB),
       GeoItem(type: GeoResource.ASN, fileName: ASN),
+      GeoItem(type: GeoResource.GEOIP, fileName: GEOIP),
+      GeoItem(type: GeoResource.GEOSITE, fileName: GEOSITE),
     ];
 
     return CommonScaffold(

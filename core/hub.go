@@ -384,9 +384,6 @@ func handleUpdateGeoData(
 			return
 		}
 		fn("")
-		if geoReloadNeeded.Swap(false) {
-			sendGeoReload()
-		}
 	}) {
 		fn(context.Canceled.Error())
 	}
