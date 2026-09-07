@@ -284,10 +284,25 @@ void main() {
       expect(normalizeGeoUpdateInterval(2562048), defaultGeoUpdateInterval);
     });
 
-    test('uses backward-compatible defaults', () {
-      final config = ClashConfig.fromJson({});
+    test('enables automatic updates for new or missing settings', () {
+      for (final config in [
+        defaultClashConfig,
+        ClashConfig.fromJson({}),
+        ClashConfig.safeFormJson(null),
+      ]) {
+        expect(config.geoAutoUpdate, true);
+        expect(config.geoUpdateInterval, 24);
+        expect(config.toJson()['geo-auto-update'], true);
+      }
+    });
+
+    test('preserves an explicitly disabled automatic update setting', () {
+      final config = ClashConfig.fromJson({'geo-auto-update': false});
+      final restored = roundTrip(() => config.toJson(), ClashConfig.fromJson);
+
       expect(config.geoAutoUpdate, false);
-      expect(config.geoUpdateInterval, 24);
+      expect(restored.geoAutoUpdate, false);
+      expect(restored.toJson()['geo-auto-update'], false);
     });
 
     test('custom values survive round-trip', () {
@@ -309,11 +324,28 @@ void main() {
       expect(restored.networkProps.systemProxy, true);
       expect(restored.vpnProps.enable, true);
       expect(restored.hotKeyActions, isEmpty);
+      expect(restored.patchClashConfig.geoAutoUpdate, true);
     });
 
     test('realFromJson handles null', () {
       final result = Config.realFromJson(null);
       expect(result.appSettingProps.onlyStatisticsProxy, false);
+      expect(result.patchClashConfig.geoAutoUpdate, true);
+    });
+
+    test('missing Geo settings default on while saved opt-out survives', () {
+      expect(Config.fromJson({}).patchClashConfig.geoAutoUpdate, true);
+      expect(
+        Config.fromJson(
+          jsonDecode('{"patchClashConfig":{}}'),
+        ).patchClashConfig.geoAutoUpdate,
+        true,
+      );
+      final config = Config.fromJson({
+        'patchClashConfig': {'geo-auto-update': false},
+      });
+      final restored = roundTrip(() => config.toJson(), Config.fromJson);
+      expect(restored.patchClashConfig.geoAutoUpdate, false);
     });
 
     test('full config round-trip', () {

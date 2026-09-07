@@ -612,7 +612,7 @@ abstract class ClashConfig with _$ClashConfig {
     String externalControllerAddress,
     @Default(defaultExternalControllerSecret) String secret,
     @Default({}) Map<String, String> hosts,
-    @Default(false) @JsonKey(name: 'geo-auto-update') bool geoAutoUpdate,
+    @Default(true) @JsonKey(name: 'geo-auto-update') bool geoAutoUpdate,
     @Default(defaultGeoUpdateInterval)
     @JsonKey(name: 'geo-update-interval')
     int geoUpdateInterval,

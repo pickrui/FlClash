@@ -85,37 +85,44 @@ void main() {
       expect(params.allowLan, true);
       expect(params.mode, Mode.rule);
       expect(params.logLevel, LogLevel.info);
-      expect(params.geoAutoUpdate, false);
+      expect(params.geoAutoUpdate, true);
       expect(params.geoUpdateInterval, 24);
       expect(params.suspendOnIdle, false);
     });
 
-    test('toJson uses geo update keys', () {
-      const params = UpdateParams(
-        tun: Tun(),
-        mixedPort: 7890,
-        allowLan: false,
-        findProcessMode: FindProcessMode.off,
-        mode: Mode.rule,
-        logLevel: LogLevel.error,
-        ipv6: false,
-        tcpConcurrent: true,
-        externalController: '',
-        secret: '',
-        unifiedDelay: true,
-        geoAutoUpdate: true,
-        geoUpdateInterval: 12,
-        suspendOnIdle: true,
-      );
-      final json = params.toJson();
-      expect(json['geo-auto-update'], true);
-      expect(json['geo-update-interval'], 12);
-      expect(json['suspend-on-idle'], true);
-      expect(
-        UpdateParams.fromJson(jsonDecode(jsonEncode(json))).suspendOnIdle,
-        true,
-      );
-    });
+    test(
+      'serializes enabled Geo defaults and preserves an explicit opt-out',
+      () {
+        const params = UpdateParams(
+          tun: Tun(),
+          mixedPort: 7890,
+          allowLan: false,
+          findProcessMode: FindProcessMode.off,
+          mode: Mode.rule,
+          logLevel: LogLevel.error,
+          ipv6: false,
+          tcpConcurrent: true,
+          externalController: '',
+          secret: '',
+          unifiedDelay: true,
+          geoUpdateInterval: 12,
+          suspendOnIdle: true,
+        );
+        final json = params.toJson();
+        expect(json['geo-auto-update'], true);
+        expect(json['geo-update-interval'], 12);
+        expect(json['suspend-on-idle'], true);
+        final restored = UpdateParams.fromJson(jsonDecode(jsonEncode(json)));
+        expect(restored.geoAutoUpdate, true);
+        expect(restored.suspendOnIdle, true);
+
+        final disabledJson = jsonDecode(
+          jsonEncode(params.copyWith(geoAutoUpdate: false).toJson()),
+        );
+        expect(disabledJson['geo-auto-update'], false);
+        expect(UpdateParams.fromJson(disabledJson).geoAutoUpdate, false);
+      },
+    );
   });
 
   group('InitParams', () {

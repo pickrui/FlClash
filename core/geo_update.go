@@ -347,44 +347,47 @@ func replaceGeoData(geoType string, path string, data []byte) (err error) {
 	return nil
 }
 
-func updateEnabledGeoDataAction(ctx context.Context) error {
+type geoResource struct {
+	geoType string
+	path    string
+}
+
+func allGeoResources() []geoResource {
+	return []geoResource{
+		{"MMDB", constant.Path.MMDB()},
+		{"ASN", constant.Path.ASN()},
+		{"GEOIP", constant.Path.GeoIP()},
+		{"GEOSITE", constant.Path.GeoSite()},
+	}
+}
+
+func updateAllGeoDataAction(ctx context.Context) error {
 	var updateErr error
-	if geodata.GeoIpEnable() {
-		if geodata.GeodataMode() {
-			if err := updateGeoDataLocked(ctx, "GEOIP", constant.Path.GeoIP()); err != nil {
-				log.Errorln("[GEO] Failed to update GEOIP: %s", err.Error())
-				updateErr = errors.Join(updateErr, err)
+	for _, resource := range allGeoResources() {
+		if err := ctx.Err(); err != nil {
+			if errors.Is(updateErr, err) {
+				return updateErr
 			}
-		} else if err := updateGeoDataLocked(ctx, "MMDB", constant.Path.MMDB()); err != nil {
-			log.Errorln("[GEO] Failed to update MMDB: %s", err.Error())
-			updateErr = errors.Join(updateErr, err)
+			return errors.Join(updateErr, err)
 		}
-	}
-	if geodata.ASNEnable() {
-		if err := updateGeoDataLocked(ctx, "ASN", constant.Path.ASN()); err != nil {
-			log.Errorln("[GEO] Failed to update ASN: %s", err.Error())
-			updateErr = errors.Join(updateErr, err)
-		}
-	}
-	if geodata.GeoSiteEnable() {
-		if err := updateGeoDataLocked(ctx, "GEOSITE", constant.Path.GeoSite()); err != nil {
-			log.Errorln("[GEO] Failed to update GEOSITE: %s", err.Error())
-			updateErr = errors.Join(updateErr, err)
+		if err := updateGeoDataLocked(ctx, resource.geoType, resource.path); err != nil {
+			log.Errorln("[GEO] Failed to update %s: %s", resource.geoType, err.Error())
+			updateErr = errors.Join(updateErr, fmt.Errorf("%s: %w", resource.geoType, err))
 		}
 	}
 	return updateErr
 }
 
-func updateEnabledGeoData(ctx context.Context) error {
-	return runGeoUpdate(ctx, updateEnabledGeoDataAction)
+func updateAllGeoData(ctx context.Context) error {
+	return runGeoUpdate(ctx, updateAllGeoDataAction)
 }
 
-func tryUpdateEnabledGeoData(ctx context.Context) error {
-	return tryRunGeoUpdate(ctx, updateEnabledGeoDataAction)
+func tryUpdateAllGeoData(ctx context.Context) error {
+	return tryRunGeoUpdate(ctx, updateAllGeoDataAction)
 }
 
 func handleGeoUpdateRequest(w http.ResponseWriter, request *http.Request) {
-	if err := tryUpdateEnabledGeoData(request.Context()); err != nil {
+	if err := tryUpdateAllGeoData(request.Context()); err != nil {
 		if errors.Is(err, errGeoUpdateBusy) {
 			http.Error(w, err.Error(), http.StatusConflict)
 			return
@@ -427,7 +430,7 @@ func restartGeoScheduler() {
 	go func() {
 		defer close(state.done)
 		if shouldUpdateGeoData(duration) {
-			_ = updateEnabledGeoData(ctx)
+			_ = updateAllGeoData(ctx)
 		}
 		if ctx.Err() != nil {
 			return
@@ -437,7 +440,7 @@ func restartGeoScheduler() {
 		for {
 			select {
 			case <-ticker.C:
-				_ = updateEnabledGeoData(ctx)
+				_ = updateAllGeoData(ctx)
 			case <-ctx.Done():
 				return
 			}
@@ -446,19 +449,10 @@ func restartGeoScheduler() {
 }
 
 func shouldUpdateGeoData(interval time.Duration) bool {
-	paths := make([]string, 0, 3)
-	if geodata.GeoIpEnable() {
-		if geodata.GeodataMode() {
-			paths = append(paths, constant.Path.GeoIP())
-		} else {
-			paths = append(paths, constant.Path.MMDB())
-		}
-	}
-	if geodata.ASNEnable() {
-		paths = append(paths, constant.Path.ASN())
-	}
-	if geodata.GeoSiteEnable() {
-		paths = append(paths, constant.Path.GeoSite())
+	resources := allGeoResources()
+	paths := make([]string, 0, len(resources))
+	for _, resource := range resources {
+		paths = append(paths, resource.path)
 	}
 	return shouldUpdateGeoFiles(paths, interval)
 }

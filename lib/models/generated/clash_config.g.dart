@@ -398,7 +398,7 @@ _ClashConfig _$ClashConfigFromJson(Map<String, dynamic> json) => _ClashConfig(
         (k, e) => MapEntry(k, e as String),
       ) ??
       const {},
-  geoAutoUpdate: json['geo-auto-update'] as bool? ?? false,
+  geoAutoUpdate: json['geo-auto-update'] as bool? ?? true,
   geoUpdateInterval:
       (json['geo-update-interval'] as num?)?.toInt() ??
       defaultGeoUpdateInterval,

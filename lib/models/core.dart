@@ -33,7 +33,7 @@ abstract class UpdateParams with _$UpdateParams {
     @JsonKey(name: 'external-controller') required String externalController,
     required String secret,
     @JsonKey(name: 'unified-delay') required bool unifiedDelay,
-    @Default(false) @JsonKey(name: 'geo-auto-update') bool geoAutoUpdate,
+    @Default(true) @JsonKey(name: 'geo-auto-update') bool geoAutoUpdate,
     @Default(24) @JsonKey(name: 'geo-update-interval') int geoUpdateInterval,
     @Default(false) @JsonKey(name: 'suspend-on-idle') bool suspendOnIdle,
   }) = _UpdateParams;

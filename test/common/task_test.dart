@@ -679,35 +679,55 @@ void main() {
     await restoredDatabase.close();
   });
 
-  test('makeRealProfileTask applies Geo update preferences', () async {
-    final result = await makeRealProfileTask(
-      const MakeRealProfileState(
-        profilesPath: '/profiles',
-        profileId: 1,
-        overwriteType: OverwriteType.standard,
-        rawConfig: {
-          'geo-auto-update': true,
-          'geo-update-interval': 99,
-          'rules': <String>[],
-        },
-        realPatchConfig: ClashConfig(
-          geoAutoUpdate: false,
-          geoUpdateInterval: 2562048,
-        ),
-        overrideDns: false,
-        appendSystemDns: false,
-        addedRules: [],
-        proxyChains: [],
-        profileProxies: [],
-        customProxyGroups: [],
-        customRules: [],
-        defaultUA: 'FlClash',
-      ),
-    );
+  test(
+    'makeRealProfileTask enables automatic Geo updates by default',
+    () async {
+      for (final rawConfig in <Map<String, dynamic>>[
+        {'rules': <String>[]},
+        {'geo-auto-update': false, 'rules': <String>[]},
+      ]) {
+        final result = await makeRealProfileTask(
+          _makeRealProfileState(rawConfig: rawConfig),
+        );
 
-    expect(result['geo-auto-update'], false);
-    expect(result['geo-update-interval'], defaultGeoUpdateInterval);
-  });
+        expect(result['geo-auto-update'], true);
+        expect(result['geo-update-interval'], defaultGeoUpdateInterval);
+      }
+    },
+  );
+
+  test(
+    'makeRealProfileTask preserves an explicit Geo update opt-out',
+    () async {
+      final result = await makeRealProfileTask(
+        const MakeRealProfileState(
+          profilesPath: '/profiles',
+          profileId: 1,
+          overwriteType: OverwriteType.standard,
+          rawConfig: {
+            'geo-auto-update': true,
+            'geo-update-interval': 99,
+            'rules': <String>[],
+          },
+          realPatchConfig: ClashConfig(
+            geoAutoUpdate: false,
+            geoUpdateInterval: 2562048,
+          ),
+          overrideDns: false,
+          appendSystemDns: false,
+          addedRules: [],
+          proxyChains: [],
+          profileProxies: [],
+          customProxyGroups: [],
+          customRules: [],
+          defaultUA: 'FlClash',
+        ),
+      );
+
+      expect(result['geo-auto-update'], false);
+      expect(result['geo-update-interval'], defaultGeoUpdateInterval);
+    },
+  );
 
   test(
     'disabled profile DNS ignores custom DNS when override is off',

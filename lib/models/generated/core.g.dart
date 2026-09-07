@@ -37,7 +37,7 @@ _UpdateParams _$UpdateParamsFromJson(Map<String, dynamic> json) =>
       externalController: json['external-controller'] as String,
       secret: json['secret'] as String,
       unifiedDelay: json['unified-delay'] as bool,
-      geoAutoUpdate: json['geo-auto-update'] as bool? ?? false,
+      geoAutoUpdate: json['geo-auto-update'] as bool? ?? true,
       geoUpdateInterval: (json['geo-update-interval'] as num?)?.toInt() ?? 24,
       suspendOnIdle: json['suspend-on-idle'] as bool? ?? false,
     );
