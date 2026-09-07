@@ -239,11 +239,6 @@ jobs:
           flutter --version
           flutter pub get
 
-      - name: Run Android unit tests
-        if: matrix.platform == 'android' && matrix.arch == 'arm64'
-        working-directory: android
-        run: ./gradlew :app:testDebugUnitTest :service:testDebugUnitTest --no-daemon
-
       - name: Setup macOS Signing
         if: matrix.platform == 'macos'
         env:
@@ -300,6 +295,13 @@ jobs:
           
           find ./dist -name "*.exe" -type f -exec sh -c 'mv "$1" "${1%.exe}-setup.exe"' _ {} \;
           find ./dist -name "*.appimage" -type f -exec sh -c 'mv "$1" "${1%.appimage}.AppImage"' _ {} \;
+
+      # Flutter build provisions the ignored Gradle wrapper. Keep these tests
+      # after that setup and before publishing the artifacts.
+      - name: Run Android unit tests
+        if: matrix.platform == 'android' && matrix.arch == 'arm64'
+        working-directory: android
+        run: ./gradlew :app:testDebugUnitTest :service:testDebugUnitTest --no-daemon
 
       - name: Upload
         uses: actions/upload-artifact@v4
