@@ -66,7 +66,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m22(label) => "${label} 必须在 1024 到 49151 之间";
 
-  static String m23(port) => "混合端口 ${port} 无法监听，可能已被其他程序占用。修改后可立即重试。";
+  static String m23(port) => "混合端口 ${port} 无法监听，可能已被其他程序占用。修改后可立即重试";
 
   static String m24(name) => "节点 ${name} 已处于其他启用链路中，或存在链式代理关系冲突";
 
@@ -206,6 +206,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "compatible": MessageLookupByLibrary.simpleMessage("兼容模式"),
     "configDataDetected": MessageLookupByLibrary.simpleMessage("检测到配置中存在数据"),
     "configParseErrorAtLine": m1,
+    "configRecoveryMessage": MessageLookupByLibrary.simpleMessage(
+      "暂时无法读取本地配置，原有数据已保留。请解锁设备后重试，或稍后重新打开应用",
+    ),
+    "configRecoveryRetry": MessageLookupByLibrary.simpleMessage("重试"),
+    "configRecoveryTitle": MessageLookupByLibrary.simpleMessage("恢复本地配置"),
     "configTypeMismatch": m2,
     "configValueTypeBoolean": MessageLookupByLibrary.simpleMessage("布尔值"),
     "configValueTypeInteger": MessageLookupByLibrary.simpleMessage("整数"),
@@ -772,6 +777,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "style": MessageLookupByLibrary.simpleMessage("风格"),
     "subRule": MessageLookupByLibrary.simpleMessage("子规则"),
     "submit": MessageLookupByLibrary.simpleMessage("提交"),
+    "suspendOnIdle": MessageLookupByLibrary.simpleMessage("空闲时暂停代理"),
+    "suspendOnIdleDesc": MessageLookupByLibrary.simpleMessage(
+      "熄屏并进入系统空闲状态时暂停流量转发以节省电量，可能导致语音通话和实时音频断开",
+    ),
     "sync": MessageLookupByLibrary.simpleMessage("同步"),
     "system": MessageLookupByLibrary.simpleMessage("系统"),
     "systemApp": MessageLookupByLibrary.simpleMessage("系统应用"),

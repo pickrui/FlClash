@@ -178,6 +178,7 @@ _NetworkProps _$NetworkPropsFromJson(Map<String, dynamic> json) =>
       manualIpv6: json['manualIpv6'] as bool?,
       blockQuic: json['blockQuic'] as bool? ?? false,
       blockWebRtc: json['blockWebRtc'] as bool? ?? false,
+      suspendOnIdle: json['suspendOnIdle'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$NetworkPropsToJson(_NetworkProps instance) =>
@@ -191,6 +192,7 @@ Map<String, dynamic> _$NetworkPropsToJson(_NetworkProps instance) =>
       'manualIpv6': ?instance.manualIpv6,
       'blockQuic': instance.blockQuic,
       'blockWebRtc': instance.blockWebRtc,
+      'suspendOnIdle': instance.suspendOnIdle,
     };
 
 const _$RouteModeEnumMap = {

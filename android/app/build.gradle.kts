@@ -126,9 +126,11 @@ flutter {
 dependencies {
     implementation(project(":service"))
     implementation(project(":common"))
+    implementation(project(":flutter_secure_storage"))
     implementation(libs.core.splashscreen)
     implementation(libs.gson)
     implementation(libs.smali.dexlib2) {
         exclude(group = "com.google.guava", module = "guava")
     }
+    testImplementation("junit:junit:4.13.2")
 }

@@ -366,6 +366,8 @@
   "importFile": "Import from file",
   "importUrl": "Import from URL",
   "autoSetSystemDns": "Auto set system DNS",
+  "suspendOnIdle": "Pause proxy when idle",
+  "suspendOnIdleDesc": "Pause traffic forwarding to save power when the screen is off and the system becomes idle. This may disconnect calls and live audio.",
   "details": "{label} details",
   "creationTime": "Creation time",
   "process": "Process",
@@ -638,5 +640,8 @@
   "configValueTypeBoolean": "a boolean",
   "configValueTypeInteger": "an integer",
   "configValueTypeNumber": "a number",
-  "configValueTypeNull": "an empty value"
+  "configValueTypeNull": "an empty value",
+  "configRecoveryTitle": "Recover local configuration",
+  "configRecoveryMessage": "Local configuration is temporarily unavailable. Your existing data has been kept. Unlock your device and retry, or reopen the app later.",
+  "configRecoveryRetry": "Retry"
 }

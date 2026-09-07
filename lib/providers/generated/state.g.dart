@@ -187,7 +187,7 @@ final class UpdateParamsProvider
   }
 }
 
-String _$updateParamsHash() => r'c4275918fa4d05b3ab017a9664df27f83b2dcc0d';
+String _$updateParamsHash() => r'5da8502dfc28f26385d2d145a0a31fe998381fd5';
 
 @ProviderFor(proxyState)
 final proxyStateProvider = ProxyStateProvider._();
@@ -310,7 +310,7 @@ final class TrayTitleStateProvider
   }
 }
 
-String _$trayTitleStateHash() => r'5f868aaf70480b00bfdc2de18684ee646a93fd12';
+String _$trayTitleStateHash() => r'aacf3779c879f7f1144484a80043679020bf8424';
 
 @ProviderFor(vpnState)
 final vpnStateProvider = VpnStateProvider._();
@@ -1896,7 +1896,7 @@ final class SharedStateProvider
   }
 }
 
-String _$sharedStateHash() => r'43eb9cc5115307b63c4303756937c5b928dc786e';
+String _$sharedStateHash() => r'932992f41a98e8e818bc65760fe74a08a1d64985';
 
 @ProviderFor(overlayTopOffset)
 final overlayTopOffsetProvider = OverlayTopOffsetProvider._();
@@ -2269,7 +2269,7 @@ final class AccessControlStateProvider
 }
 
 String _$accessControlStateHash() =>
-    r'08fda2e342d027c1bdd49c1ef9a13f2e775db204';
+    r'a496770f99975b1bcd7f3f50c55f50726971c749';
 
 abstract class _$AccessControlState extends $Notifier<AccessControlProps> {
   AccessControlProps build();

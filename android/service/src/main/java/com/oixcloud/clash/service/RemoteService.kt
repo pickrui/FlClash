@@ -4,9 +4,11 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import com.oixcloud.clash.common.GlobalState
+import com.oixcloud.clash.common.BroadcastAction
 import com.oixcloud.clash.common.ServiceDelegate
 import com.oixcloud.clash.common.chunkedForAidl
 import com.oixcloud.clash.common.intent
+import com.oixcloud.clash.common.sendBroadcast
 import com.oixcloud.clash.core.Core
 import com.oixcloud.clash.service.State.delegate
 import com.oixcloud.clash.service.State.intent
@@ -27,47 +29,97 @@ class RemoteService : Service(),
     private fun handleStopService(result: IResultInterface) {
         launch {
             runLock.withLock {
-                delegate?.useService { service ->
-                    service.stop()
-                    delegate?.unbind()
+                val currentDelegate = delegate
+                val stopped = when {
+                    currentDelegate != null -> currentDelegate.useService { it.stop() }
+                    State.runTime == 0L -> Result.success(Unit)
+                    else -> Result.failure(IllegalStateException("Background service is unavailable"))
                 }
-                State.runTime = 0
-                result.onResult(0)
+                stopped.onSuccess {
+                    clearBinding(currentDelegate)
+                    State.runTime = 0
+                }.onFailure {
+                    GlobalState.log("Background service stop failed: $it")
+                }
+                result.onResult(State.runTime)
             }
         }
     }
 
-    private fun handleServiceDisconnected(message: String) {
-        GlobalState.log("Background service disconnected: $message")
-        intent = null
+    private fun clearBinding(currentDelegate: ServiceDelegate<IBaseService>?) {
+        if (delegate !== currentDelegate) return
         delegate = null
+        intent = null
+        currentDelegate?.unbind()
     }
 
-    private fun handleStartService(runTime: Long, result: IResultInterface) {
+    private fun handleServiceDisconnected(
+        currentDelegate: ServiceDelegate<IBaseService>,
+        message: String,
+    ) {
+        GlobalState.log("Background service disconnected: $message")
         launch {
             runLock.withLock {
-                val nextIntent = when (State.options?.enable == true) {
-                    true -> VpnService::class.intent
-                    false -> CommonService::class.intent
-                }
-                if (intent != nextIntent) {
-                    delegate?.unbind()
-                    delegate = ServiceDelegate(nextIntent, ::handleServiceDisconnected) { binder ->
-                        when (binder) {
-                            is VpnService.LocalBinder -> binder.getService()
-                            is CommonService.LocalBinder -> binder.getService()
-                            else -> throw IllegalArgumentException("Invalid binder type")
-                        }
+                if (delegate !== currentDelegate) return@withLock
+                clearBinding(currentDelegate)
+                State.runTime = 0L
+                BroadcastAction.SERVICE_DESTROYED.sendBroadcast()
+            }
+        }
+    }
+
+    private fun handleStartService(options: VpnOptions, runTime: Long, result: IResultInterface) {
+        launch {
+            runLock.withLock {
+                var startingService: IBaseService? = null
+                val started = runCatching {
+                    State.options = options
+                    val nextIntent = when (options.enable) {
+                        true -> VpnService::class.intent
+                        false -> CommonService::class.intent
                     }
-                    intent = nextIntent
-                    delegate?.bind()
+                    if (delegate == null || intent?.filterEquals(nextIntent) != true) {
+                        // Finish the previous service before its replacement can
+                        // install modules or take ownership of the TUN interface.
+                        delegate?.useService {
+                            startingService = it
+                            it.stop()
+                        }?.getOrThrow()
+                        startingService = null
+                        clearBinding(delegate)
+                        lateinit var nextDelegate: ServiceDelegate<IBaseService>
+                        nextDelegate = ServiceDelegate(
+                            nextIntent,
+                            { message -> handleServiceDisconnected(nextDelegate, message) },
+                        ) { binder ->
+                            when (binder) {
+                                is VpnService.LocalBinder -> binder.getService()
+                                is CommonService.LocalBinder -> binder.getService()
+                                else -> throw IllegalArgumentException("Invalid binder type")
+                            }
+                        }
+                        delegate = nextDelegate
+                        intent = nextIntent
+                        nextDelegate.bind()
+                    }
+                    checkNotNull(delegate).useService { service ->
+                        startingService = service
+                        service.start()
+                    }.getOrThrow()
+                    when (runTime != 0L) {
+                        true -> runTime
+                        false -> System.currentTimeMillis()
+                    }
                 }
-                delegate?.useService { service ->
-                    service.start()
-                }
-                State.runTime = when (runTime != 0L) {
-                    true -> runTime
-                    false -> System.currentTimeMillis()
+                State.runTime = started.getOrElse { error ->
+                    // A synchronous JNI start can finish after useService's
+                    // timeout. Roll it back before unbinding or returning zero.
+                    runCatching { startingService?.stop() }.onFailure {
+                        if (it !== error) error.addSuppressed(it)
+                    }
+                    GlobalState.log("Background service start failed: $error")
+                    clearBinding(delegate)
+                    0L
                 }
                 result.onResult(State.runTime)
             }
@@ -138,8 +190,7 @@ class RemoteService : Service(),
             result: IResultInterface,
         ) {
             GlobalState.log("remote startService")
-            State.options = options
-            handleStartService(runtime, result)
+            handleStartService(options, runtime, result)
         }
 
         override fun stopService(result: IResultInterface) {

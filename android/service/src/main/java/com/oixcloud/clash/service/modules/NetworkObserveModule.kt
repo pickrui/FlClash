@@ -24,6 +24,8 @@ private data class NetworkInfo(
 
 class NetworkObserveModule(private val service: Service) : Module() {
 
+    private val lock = Any()
+    private var installed = false
     private val networkInfos = ConcurrentHashMap<Network, NetworkInfo>()
     private val connectivity by lazy {
         service.getSystemService<ConnectivityManager>()
@@ -70,6 +72,7 @@ class NetworkObserveModule(private val service: Service) : Module() {
 
 
     override fun onInstall() {
+        synchronized(lock) { installed = true }
         onUpdateNetwork()
         connectivity?.registerNetworkCallback(request, callback)
     }
@@ -95,7 +98,8 @@ class NetworkObserveModule(private val service: Service) : Module() {
         } + (if (entry.value.isAvailable()) 0 else 10)
     }
 
-    fun onUpdateNetwork() {
+    private fun onUpdateNetwork() = synchronized(lock) {
+        if (!installed) return
         val dnsList = (networkInfos.asSequence().minByOrNull { networkToInt(it) }?.value?.dnsList
             ?: emptyList()).map { x -> x.asSocketAddressText(53) }
         if (dnsList == preDnsList) {
@@ -111,10 +115,17 @@ class NetworkObserveModule(private val service: Service) : Module() {
 //        }
     }
 
-    override fun onUninstall() {
-        connectivity?.unregisterNetworkCallback(callback)
-        networkInfos.clear()
-        onUpdateNetwork()
+    override fun onUninstall(): Unit = synchronized(lock) {
+        installed = false
+        try {
+            connectivity?.unregisterNetworkCallback(callback)
+        } finally {
+            networkInfos.clear()
+            if (preDnsList.isNotEmpty()) {
+                preDnsList = emptyList()
+                Core.updateDNS("")
+            }
+        }
     }
 }
 

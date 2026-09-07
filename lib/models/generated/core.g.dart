@@ -10,6 +10,7 @@ _SetupParams _$SetupParamsFromJson(Map<String, dynamic> json) => _SetupParams(
   selectedMap: Map<String, String>.from(json['selected-map'] as Map),
   testUrl: json['test-url'] as String,
   rawConfig: json['raw-config'] as String? ?? '',
+  suspendOnIdle: json['suspend-on-idle'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$SetupParamsToJson(_SetupParams instance) =>
@@ -17,6 +18,7 @@ Map<String, dynamic> _$SetupParamsToJson(_SetupParams instance) =>
       'selected-map': instance.selectedMap,
       'test-url': instance.testUrl,
       'raw-config': instance.rawConfig,
+      'suspend-on-idle': instance.suspendOnIdle,
     };
 
 _UpdateParams _$UpdateParamsFromJson(Map<String, dynamic> json) =>
@@ -37,6 +39,7 @@ _UpdateParams _$UpdateParamsFromJson(Map<String, dynamic> json) =>
       unifiedDelay: json['unified-delay'] as bool,
       geoAutoUpdate: json['geo-auto-update'] as bool? ?? false,
       geoUpdateInterval: (json['geo-update-interval'] as num?)?.toInt() ?? 24,
+      suspendOnIdle: json['suspend-on-idle'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$UpdateParamsToJson(_UpdateParams instance) =>
@@ -54,6 +57,7 @@ Map<String, dynamic> _$UpdateParamsToJson(_UpdateParams instance) =>
       'unified-delay': instance.unifiedDelay,
       'geo-auto-update': instance.geoAutoUpdate,
       'geo-update-interval': instance.geoUpdateInterval,
+      'suspend-on-idle': instance.suspendOnIdle,
     };
 
 const _$FindProcessModeEnumMap = {

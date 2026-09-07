@@ -174,6 +174,30 @@ class AutoSetSystemDnsItem extends ConsumerWidget {
   }
 }
 
+class SuspendOnIdleItem extends ConsumerWidget {
+  const SuspendOnIdleItem({super.key});
+
+  @override
+  Widget build(BuildContext context, ref) {
+    final appLocalizations = context.appLocalizations;
+    final suspendOnIdle = ref.watch(
+      networkSettingProvider.select((state) => state.suspendOnIdle),
+    );
+    return ListItem.switchItem(
+      title: Text(appLocalizations.suspendOnIdle),
+      subtitle: Text(appLocalizations.suspendOnIdleDesc),
+      delegate: SwitchDelegate(
+        value: suspendOnIdle,
+        onChanged: (bool value) {
+          ref
+              .read(networkSettingProvider.notifier)
+              .update((state) => state.copyWith(suspendOnIdle: value));
+        },
+      ),
+    );
+  }
+}
+
 class TunStackItem extends ConsumerWidget {
   const TunStackItem({super.key});
 
@@ -410,6 +434,7 @@ class NetworkListView extends StatelessWidget {
         items: [
           if (system.isDesktop) const TUNItem(),
           if (system.isMacOS) const AutoSetSystemDnsItem(),
+          if (system.isAndroid) const SuspendOnIdleItem(),
           const TunStackItem(),
           const BlockQuicItem(),
           const BlockWebRtcItem(),

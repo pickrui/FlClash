@@ -78,6 +78,9 @@ UpdateParams updateParams(Ref ref) {
   final routeMode = ref.watch(
     networkSettingProvider.select((state) => state.routeMode),
   );
+  final suspendOnIdle = ref.watch(
+    networkSettingProvider.select((state) => state.suspendOnIdle),
+  );
   return ref.watch(
     patchClashConfigProvider.select(
       (state) => UpdateParams(
@@ -97,6 +100,7 @@ UpdateParams updateParams(Ref ref) {
         mixedPort: state.mixedPort,
         geoAutoUpdate: state.geoAutoUpdate,
         geoUpdateInterval: normalizeGeoUpdateInterval(state.geoUpdateInterval),
+        suspendOnIdle: suspendOnIdle,
       ),
     ),
   );
@@ -537,6 +541,9 @@ SharedState sharedState(Ref ref) {
     ),
   );
   final vpnSetting = ref.watch(vpnSettingProvider);
+  final suspendOnIdle = ref.watch(
+    networkSettingProvider.select((state) => state.suspendOnIdle),
+  );
   final currentProfileName = currentProfileVM2.a;
   final selectedMap = currentProfileVM2.b;
   final onlyStatisticsProxy = appSettingVM3.a;
@@ -549,7 +556,11 @@ SharedState sharedState(Ref ref) {
     stopText: appLocalizations.stop,
     stopTip: appLocalizations.stopVpn,
     startTip: appLocalizations.startVpn,
-    setupParams: SetupParams(selectedMap: selectedMap, testUrl: testUrl),
+    setupParams: SetupParams(
+      selectedMap: selectedMap,
+      testUrl: testUrl,
+      suspendOnIdle: suspendOnIdle,
+    ),
     vpnOptions: VpnOptions(
       enable: vpnSetting.enable,
       stack: stack,

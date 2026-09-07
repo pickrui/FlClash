@@ -139,7 +139,7 @@ class $ProfilesTable extends Profiles
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-    defaultValue: Constant('[]'),
+    defaultValue: const Constant('[]'),
   ).withConverter<List<ProxyChain>>($ProfilesTable.$converterproxyChains);
   @override
   late final GeneratedColumnWithTypeConverter<List<ProfileProxy>, String>
@@ -149,7 +149,7 @@ class $ProfilesTable extends Profiles
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-    defaultValue: Constant('[]'),
+    defaultValue: const Constant('[]'),
   ).withConverter<List<ProfileProxy>>($ProfilesTable.$converterprofileProxies);
   @override
   late final GeneratedColumnWithTypeConverter<List<ProxyGroup>, String>
@@ -159,7 +159,7 @@ class $ProfilesTable extends Profiles
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-    defaultValue: Constant('[]'),
+    defaultValue: const Constant('[]'),
   ).withConverter<List<ProxyGroup>>($ProfilesTable.$convertercustomProxyGroups);
   @override
   late final GeneratedColumnWithTypeConverter<List<Rule>, String> customRules =
@@ -169,7 +169,7 @@ class $ProfilesTable extends Profiles
         false,
         type: DriftSqlType.string,
         requiredDuringInsert: false,
-        defaultValue: Constant('[]'),
+        defaultValue: const Constant('[]'),
       ).withConverter<List<Rule>>($ProfilesTable.$convertercustomRules);
   static const VerificationMeta _orderMeta = const VerificationMeta('order');
   @override

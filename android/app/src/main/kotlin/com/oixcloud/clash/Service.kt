@@ -267,6 +267,19 @@ object Service {
         }
     }
 
+    suspend fun stopListener() {
+        val completion = CompletableDeferred<String>()
+        val request = JsonObject().apply {
+            addProperty("id", "shortcut-stop-listener")
+            addProperty("method", "stopListener")
+        }
+        invokeMethod(request.toString()) { completion.complete(it) }.getOrThrow()
+        val response = JsonParser.parseString(completion.await()).asJsonObject
+        check(!response.has("error") && response.get("result")?.asBoolean == true) {
+            "Core listener cleanup failed"
+        }
+    }
+
     suspend fun setEventListener(
         cb: ((result: String?) -> Unit)?
     ): Result<Unit> {
@@ -330,7 +343,7 @@ object Service {
             awaitIResultInterface { callback ->
                 it.startService(options, runTime, callback)
             }
-        }.getOrNull() ?: 0L
+        }.getOrThrow()
     }
 
     suspend fun stopService(): Long {
@@ -338,12 +351,12 @@ object Service {
             awaitIResultInterface { callback ->
                 it.stopService(callback)
             }
-        }.getOrNull() ?: 0L
+        }.getOrThrow()
     }
 
     suspend fun getRunTime(): Long {
         return delegate.useService {
             it.runTime
-        }.getOrNull() ?: 0L
+        }.getOrThrow()
     }
 }

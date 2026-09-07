@@ -45,4 +45,5 @@ dependencies {
     implementation(project(":common"))
     implementation(libs.gson)
     implementation(libs.androidx.core)
+    testImplementation("junit:junit:4.13.2")
 }

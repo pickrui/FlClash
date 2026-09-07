@@ -62,11 +62,12 @@ class GlobalState {
   Future<ProviderContainer> init(
     int version, {
     List<String> arguments = const [],
+    Future<Map<String, Object?>?> Function()? loadConfig,
   }) async {
     launchArguments = List.unmodifiable(arguments);
     isPre = const String.fromEnvironment('APP_ENV') != 'stable';
     await _initDynamicColor();
-    return _initData(version);
+    return _initData(version, loadConfig: loadConfig);
   }
 
   Future<void> _initDynamicColor() async {
@@ -86,7 +87,10 @@ class GlobalState {
     }
   }
 
-  Future<ProviderContainer> _initData(int version) async {
+  Future<ProviderContainer> _initData(
+    int version, {
+    Future<Map<String, Object?>?> Function()? loadConfig,
+  }) async {
     final appState = AppState(
       brightness: WidgetsBinding.instance.platformDispatcher.platformBrightness,
       version: version,
@@ -105,12 +109,12 @@ class GlobalState {
       databasePath: await appPath.databasePath,
       durableConfigPath: await appPath.durableConfigPath,
     );
+    final configMap = await (loadConfig ?? preferences.getConfigMap)();
     await recoverPendingScriptDeletions(
       scriptsPath: await appPath.scriptsDirPath,
       scriptExists: (scriptId) async =>
           await database.scriptsDao.get(scriptId).getSingleOrNull() != null,
     );
-    final configMap = await preferences.getConfigMap();
     final config = await migration.migrationIfNeeded(
       configMap,
       sync: (data) async {

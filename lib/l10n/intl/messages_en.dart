@@ -275,6 +275,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Data detected in configuration",
     ),
     "configParseErrorAtLine": m1,
+    "configRecoveryMessage": MessageLookupByLibrary.simpleMessage(
+      "Local configuration is temporarily unavailable. Your existing data has been kept. Unlock your device and retry, or reopen the app later.",
+    ),
+    "configRecoveryRetry": MessageLookupByLibrary.simpleMessage("Retry"),
+    "configRecoveryTitle": MessageLookupByLibrary.simpleMessage(
+      "Recover local configuration",
+    ),
     "configTypeMismatch": m2,
     "configValueTypeBoolean": MessageLookupByLibrary.simpleMessage("a boolean"),
     "configValueTypeInteger": MessageLookupByLibrary.simpleMessage(
@@ -1111,6 +1118,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "style": MessageLookupByLibrary.simpleMessage("Style"),
     "subRule": MessageLookupByLibrary.simpleMessage("Sub rule"),
     "submit": MessageLookupByLibrary.simpleMessage("Submit"),
+    "suspendOnIdle": MessageLookupByLibrary.simpleMessage(
+      "Pause proxy when idle",
+    ),
+    "suspendOnIdleDesc": MessageLookupByLibrary.simpleMessage(
+      "Pause traffic forwarding to save power when the screen is off and the system becomes idle. This may disconnect calls and live audio.",
+    ),
     "sync": MessageLookupByLibrary.simpleMessage("Sync"),
     "system": MessageLookupByLibrary.simpleMessage("System"),
     "systemApp": MessageLookupByLibrary.simpleMessage("System APP"),

@@ -9,13 +9,14 @@ import com.oixcloud.clash.core.Core
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 
 class SuspendModule(private val service: Service) : Module() {
     private val scope = CoroutineScope(Dispatchers.Default)
+    private val lock = Any()
+    private var installed = false
 
     private fun isScreenOn(): Boolean {
         val pm = service.getSystemService<PowerManager>()
@@ -30,7 +31,8 @@ class SuspendModule(private val service: Service) : Module() {
             return service.getSystemService<PowerManager>()?.isDeviceIdleMode ?: true
         }
 
-    private fun onUpdate(isScreenOn: Boolean) {
+    private fun onUpdate(isScreenOn: Boolean) = synchronized(lock) {
+        if (!installed) return
         if (isScreenOn) {
             Core.suspended(false)
             return
@@ -39,6 +41,7 @@ class SuspendModule(private val service: Service) : Module() {
     }
 
     override fun onInstall() {
+        synchronized(lock) { installed = true }
         scope.launch {
             service.receiveBroadcastFlow {
                 addAction(Intent.ACTION_SCREEN_ON)
@@ -48,7 +51,7 @@ class SuspendModule(private val service: Service) : Module() {
                 emit(Intent())
             }.collect { intent ->
                 if (intent.action == Intent.ACTION_SCREEN_ON) {
-                    Core.suspended(false)
+                    onUpdate(true)
                 } else {
                     onUpdate(isScreenOn())
                 }
@@ -56,7 +59,8 @@ class SuspendModule(private val service: Service) : Module() {
         }
     }
 
-    override fun onUninstall() {
+    override fun onUninstall() = synchronized(lock) {
+        installed = false
         scope.cancel()
         Core.suspended(false)
     }

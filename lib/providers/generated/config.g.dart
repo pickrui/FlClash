@@ -41,7 +41,7 @@ final class AppSettingProvider
   }
 }
 
-String _$appSettingHash() => r'0efd340a05a5be1b1190b3f2e9465bdfc6182046';
+String _$appSettingHash() => r'520a3125e1d0baca1fb65abb2110ad4419f8b2d9';
 
 abstract class _$AppSetting extends $Notifier<AppSettingProps> {
   AppSettingProps build();
@@ -93,7 +93,7 @@ final class WindowSettingProvider
   }
 }
 
-String _$windowSettingHash() => r'd245796233fec671722ebed58e39c967d9a12142';
+String _$windowSettingHash() => r'563249378a248ed631ade7157b3a0c5289186d10';
 
 abstract class _$WindowSetting extends $Notifier<WindowProps> {
   WindowProps build();
@@ -144,7 +144,7 @@ final class VpnSettingProvider extends $NotifierProvider<VpnSetting, VpnProps> {
   }
 }
 
-String _$vpnSettingHash() => r'051f90f388a52678052b655827c48947150b7ca1';
+String _$vpnSettingHash() => r'dd0ff8720c2c4f22fc973305de8c87bcbee4536e';
 
 abstract class _$VpnSetting extends $Notifier<VpnProps> {
   VpnProps build();
@@ -248,7 +248,7 @@ final class ThemeSettingProvider
   }
 }
 
-String _$themeSettingHash() => r'5b64a2e3968a60967534805b4bef3adf3712e77a';
+String _$themeSettingHash() => r'47c656bdac6ea1320d54c4599ce1fde993e989a1';
 
 abstract class _$ThemeSetting extends $Notifier<ThemeProps> {
   ThemeProps build();
@@ -508,7 +508,7 @@ final class ProxiesStyleSettingProvider
 }
 
 String _$proxiesStyleSettingHash() =>
-    r'b785ed2e71d74384150d80456d2b852e80629b8e';
+    r'af5e94bbe4145170f8a8c4771830b115a89e8c3c';
 
 abstract class _$ProxiesStyleSetting extends $Notifier<ProxiesStyleProps> {
   ProxiesStyleProps build();
@@ -560,7 +560,7 @@ final class PatchClashConfigProvider
   }
 }
 
-String _$patchClashConfigHash() => r'ff92f991ccb3a3d13a938affc006d7e2cb85fecd';
+String _$patchClashConfigHash() => r'720e3d9004c5b762590dd80eb478645f90e5786f';
 
 abstract class _$PatchClashConfig extends $Notifier<ClashConfig> {
   ClashConfig build();

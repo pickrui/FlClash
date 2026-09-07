@@ -20,9 +20,10 @@ type InitParams struct {
 }
 
 type SetupParams struct {
-	SelectedMap map[string]string `json:"selected-map"`
-	TestURL     string            `json:"test-url"`
-	RawConfig   string            `json:"raw-config"`
+	SelectedMap   map[string]string `json:"selected-map"`
+	TestURL       string            `json:"test-url"`
+	RawConfig     string            `json:"raw-config"`
+	SuspendOnIdle bool              `json:"suspend-on-idle"`
 }
 
 type UpdateParams struct {
@@ -41,6 +42,7 @@ type UpdateParams struct {
 	UnifiedDelay       *bool              `json:"unified-delay"`
 	GeoAutoUpdate      *bool              `json:"geo-auto-update"`
 	GeoUpdateInterval  *int               `json:"geo-update-interval"`
+	SuspendOnIdle      *bool              `json:"suspend-on-idle"`
 }
 
 type tunSchema struct {

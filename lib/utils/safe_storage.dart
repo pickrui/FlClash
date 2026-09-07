@@ -22,8 +22,9 @@ String? legacySecureStorageValue(String? payload, String key) {
 bool shouldReadLegacyMacStorage({
   required bool migrationMarked,
   required bool identityMigrated,
+  bool legacyEvidence = false,
 }) {
-  return migrationMarked || identityMigrated;
+  return migrationMarked || identityMigrated || legacyEvidence;
 }
 
 class SafeStorage {
@@ -36,25 +37,73 @@ class SafeStorage {
   static const _legacyLinuxStorage = MethodChannel(
     'com.oixcloud.clash/legacy_secure_storage',
   );
-  static bool _legacyMacStorageAvailable = true;
+  static final Set<String> _failedLegacyMacKeys = {};
+  static final Map<String, _StorageMutationState> _states = {};
 
   static bool get _isMacOS =>
       !kIsWeb && defaultTargetPlatform == TargetPlatform.macOS;
 
-  static Future<String?> read(String key) async {
+  static Future<String?> read(
+    String key, {
+    bool retry = false,
+    bool legacyEvidence = false,
+    bool Function(String?)? isValid,
+  }) async {
+    final state = _states.putIfAbsent(key, _StorageMutationState.new);
+    final revision = state.revision;
+    await state.pending;
     final prefs = await SharedPreferences.getInstance();
+    if (retry) {
+      await prefs.reload();
+    }
     final migrationKey = _migrationKey(key);
     final deletionKey = _deletionKey(key);
+    bool isCurrent() => identical(state.revision, revision);
+    bool canMigrate() => isCurrent() && prefs.getBool(deletionKey) != true;
+    if (!isCurrent()) return null;
     if (prefs.getBool(deletionKey) == true) {
-      await _deleteLegacyValue(prefs, key);
-      if (!_isMacOS) {
-        try {
-          await _secureStorage.delete(key: key);
-        } catch (_) {}
-      }
+      await state.mutate(() async {
+        if (!isCurrent()) return;
+        await _deleteLegacyValue(prefs, key);
+        if (!_isMacOS) {
+          try {
+            await _secureStorage.delete(key: key);
+          } catch (_) {}
+        }
+      });
       return null;
     }
-    final legacyValue = prefs.getString(key);
+    bool accepts(String? value) =>
+        value != null && (isValid?.call(value) ?? true);
+
+    Future<String?> migrate(String value, {bool fromSecure = false}) async {
+      await state.mutate(() async {
+        if (!canMigrate()) return;
+        if (_isMacOS) {
+          await _writeFallback(
+            prefs,
+            key,
+            value,
+            migrationKey,
+            clearDeletionMarker: false,
+          );
+        } else {
+          try {
+            if (!fromSecure) await _writeSecure(key, value);
+            await _markMigratedAndDeleteLegacy(prefs, key, migrationKey);
+          } catch (_) {
+            // Keep a readable legacy value when migration storage is locked.
+            if (fromSecure) rethrow;
+          }
+        }
+      });
+      return canMigrate() ? value : null;
+    }
+
+    final storedValue = prefs.get(key);
+    final legacyValue = storedValue is String && accepts(storedValue)
+        ? storedValue
+        : null;
     final migrated = prefs.getBool(migrationKey) ?? false;
     if (_isMacOS) {
       if (legacyValue != null) {
@@ -63,49 +112,38 @@ class SafeStorage {
       final legacySecureValue = await _readLegacyMacValue(
         key,
         migrationMarked: migrated,
+        retry: retry,
+        legacyEvidence: legacyEvidence,
       );
-      if (legacySecureValue != null) {
-        await _writeFallback(prefs, key, legacySecureValue, migrationKey);
+      if (!accepts(legacySecureValue)) {
+        return null;
       }
-      return legacySecureValue;
+      return migrate(legacySecureValue!);
     }
     if (!migrated && legacyValue != null) {
-      try {
-        await _writeSecure(key, legacyValue);
-      } catch (_) {
-        return legacyValue;
-      }
-      await _markMigratedAndDeleteLegacy(prefs, key, migrationKey);
-      return legacyValue;
+      return migrate(legacyValue);
     }
     final secureValue = await _secureStorage.read(key: key);
-    if (secureValue != null) {
-      await _markMigratedAndDeleteLegacy(prefs, key, migrationKey);
-      return secureValue;
+    if (accepts(secureValue)) {
+      return migrate(secureValue!, fromSecure: true);
     }
     if (legacyValue != null) {
-      try {
-        await _writeSecure(key, legacyValue);
-        await _markMigratedAndDeleteLegacy(prefs, key, migrationKey);
-      } catch (_) {
-        return legacyValue;
-      }
-      return legacyValue;
+      return migrate(legacyValue);
     }
     final legacySecureValue = await _readLegacyLinuxValue(key);
-    if (legacySecureValue != null) {
-      try {
-        await _writeSecure(key, legacySecureValue);
-        await _markMigratedAndDeleteLegacy(prefs, key, migrationKey);
-      } catch (_) {
-        return legacySecureValue;
-      }
-      return legacySecureValue;
+    if (accepts(legacySecureValue)) {
+      return migrate(legacySecureValue!);
     }
     return null;
   }
 
-  static Future<void> write(String key, String value) async {
+  static Future<void> write(String key, String value) {
+    final state = _states.putIfAbsent(key, _StorageMutationState.new);
+    state.revision = Object();
+    return state.mutate(() => _write(key, value));
+  }
+
+  static Future<void> _write(String key, String value) async {
     final prefs = await SharedPreferences.getInstance();
     if (_isMacOS) {
       await _writeFallback(prefs, key, value, _migrationKey(key));
@@ -116,7 +154,13 @@ class SafeStorage {
     await _clearDeletionMarker(prefs, key);
   }
 
-  static Future<void> delete(String key) async {
+  static Future<void> delete(String key) {
+    final state = _states.putIfAbsent(key, _StorageMutationState.new);
+    state.revision = Object();
+    return state.mutate(() => _delete(key));
+  }
+
+  static Future<void> _delete(String key) async {
     final prefs = await SharedPreferences.getInstance();
     if (!await prefs.setBool(_deletionKey(key), true) ||
         prefs.getBool(_deletionKey(key)) != true) {
@@ -140,24 +184,30 @@ class SafeStorage {
   static Future<String?> _readLegacyMacValue(
     String key, {
     required bool migrationMarked,
+    required bool retry,
+    required bool legacyEvidence,
   }) async {
-    if (!_isMacOS || !_legacyMacStorageAvailable) {
+    if (!_isMacOS || (!retry && _failedLegacyMacKeys.contains(key))) {
       return null;
     }
     if (!shouldReadLegacyMacStorage(
       migrationMarked: migrationMarked,
-      identityMigrated: await File(
-        await appPath.identityMigrationMarkerPath,
-      ).exists(),
+      legacyEvidence: legacyEvidence,
+      identityMigrated:
+          !migrationMarked &&
+          !legacyEvidence &&
+          await File(await appPath.identityMigrationMarkerPath).exists(),
     )) {
       return null;
     }
     try {
-      return await _secureStorage
+      final value = await _secureStorage
           .read(key: key, mOptions: _legacyMacOptions)
           .timeout(_legacyMacTimeout);
+      _failedLegacyMacKeys.remove(key);
+      return value;
     } catch (_) {
-      _legacyMacStorageAvailable = false;
+      _failedLegacyMacKeys.add(key);
       return null;
     }
   }
@@ -196,8 +246,9 @@ class SafeStorage {
     SharedPreferences prefs,
     String key,
     String value,
-    String migrationKey,
-  ) async {
+    String migrationKey, {
+    bool clearDeletionMarker = true,
+  }) async {
     if (!await prefs.setString(key, value) || prefs.getString(key) != value) {
       throw StateError('secure storage fallback write failed');
     }
@@ -205,7 +256,9 @@ class SafeStorage {
         prefs.getBool(migrationKey) != true) {
       throw StateError('secure storage migration marker failed');
     }
-    await _clearDeletionMarker(prefs, key);
+    if (clearDeletionMarker) {
+      await _clearDeletionMarker(prefs, key);
+    }
   }
 
   static Future<void> _clearDeletionMarker(
@@ -229,5 +282,18 @@ class SafeStorage {
       throw StateError('secure storage migration marker failed');
     }
     await _deleteLegacyValue(prefs, key);
+  }
+}
+
+/// Reads can wait on a keychain independently, while mutations stay ordered.
+/// Explicit writes/deletes invalidate older reads before they can migrate data.
+class _StorageMutationState {
+  Object revision = Object();
+  Future<void> pending = Future.value();
+
+  Future<void> mutate(Future<void> Function() action) {
+    final operation = pending.then((_) => action());
+    pending = operation.then<void>((_) {}, onError: (_, _) {});
+    return operation;
   }
 }

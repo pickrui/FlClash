@@ -40,6 +40,7 @@ void main() {
       final params = SetupParams.fromJson(json);
       expect(params.selectedMap, {'G1': 'P1'});
       expect(params.testUrl, 'http://test.com');
+      expect(params.suspendOnIdle, false);
     });
 
     test('toJson uses snake-case keys', () {
@@ -50,6 +51,17 @@ void main() {
       final json = params.toJson();
       expect(json['selected-map'], {'G1': 'P1'});
       expect(json['test-url'], 'http://t.com');
+    });
+
+    test('preserves idle suspension in background startup parameters', () {
+      const params = SetupParams(
+        selectedMap: {'G1': 'P1'},
+        testUrl: 'http://t.com',
+        suspendOnIdle: true,
+      );
+      final json = jsonDecode(jsonEncode(params.toJson()));
+      expect(json['suspend-on-idle'], true);
+      expect(SetupParams.fromJson(json).suspendOnIdle, true);
     });
   });
 
@@ -75,6 +87,7 @@ void main() {
       expect(params.logLevel, LogLevel.info);
       expect(params.geoAutoUpdate, false);
       expect(params.geoUpdateInterval, 24);
+      expect(params.suspendOnIdle, false);
     });
 
     test('toJson uses geo update keys', () {
@@ -92,10 +105,16 @@ void main() {
         unifiedDelay: true,
         geoAutoUpdate: true,
         geoUpdateInterval: 12,
+        suspendOnIdle: true,
       );
       final json = params.toJson();
       expect(json['geo-auto-update'], true);
       expect(json['geo-update-interval'], 12);
+      expect(json['suspend-on-idle'], true);
+      expect(
+        UpdateParams.fromJson(jsonDecode(jsonEncode(json))).suspendOnIdle,
+        true,
+      );
     });
   });
 

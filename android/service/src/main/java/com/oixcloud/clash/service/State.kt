@@ -14,6 +14,7 @@ object State {
     )
 
     val runLock = Mutex()
+    @Volatile
     var runTime: Long = 0L
 
     var delegate: ServiceDelegate<IBaseService>? = null

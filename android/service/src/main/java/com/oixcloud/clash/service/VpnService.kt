@@ -22,13 +22,15 @@ import com.oixcloud.clash.service.modules.NetworkObserveModule
 import com.oixcloud.clash.service.modules.NotificationModule
 import com.oixcloud.clash.service.modules.SuspendModule
 import com.oixcloud.clash.service.modules.moduleLoader
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.withLock
 import java.net.InetSocketAddress
 import android.net.VpnService as SystemVpnService
 
-class VpnService : SystemVpnService(), IBaseService,
-    CoroutineScope by CoroutineScope(Dispatchers.Default) {
+class VpnService : SystemVpnService(), IBaseService {
+
+    private val lifecycleLock = Any()
+    private var tunStarted = false
 
     private val self: VpnService
         get() = this
@@ -45,6 +47,9 @@ class VpnService : SystemVpnService(), IBaseService,
     }
 
     override fun onDestroy() {
+        runCatching { stop() }.onFailure {
+            GlobalState.log("VPN service cleanup failed: $it")
+        }
         handleDestroy()
         super.onDestroy()
     }
@@ -233,31 +238,58 @@ class VpnService : SystemVpnService(), IBaseService,
             establish()?.detachFd()
                 ?: throw NullPointerException("Establish VPN rejected by system")
         }
-        Core.startTun(
+        check(Core.startTun(
             fd,
             protect = this::protect,
             resolverProcess = this::resolverProcess,
             options.stack,
             options.address,
             options.dns
-        )
+        )) { "Core TUN initialization failed" }
     }
 
-    override fun start() {
-        try {
+    override fun start() = synchronized(lifecycleLock) {
+        if (tunStarted) return
+        startWithCleanup(start = {
             loader.load()
-            State.options?.let {
-                handleStart(it)
+            handleStart(checkNotNull(State.options) { "VPN options are missing" })
+            tunStarted = true
+        }, cleanup = ::stop)
+    }
+
+    override fun stop() = synchronized(lifecycleLock) {
+        try {
+            loader.cancel()
+        } finally {
+            try {
+                if (tunStarted) {
+                    tunStarted = false
+                    Core.stopTun()
+                }
+            } finally {
+                stopSelf()
             }
-        } catch (_: Exception) {
-            stop()
         }
     }
 
-    override fun stop() {
-        loader.cancel()
-        Core.stopTun()
-        stopSelf()
+    override fun onRevoke() {
+        GlobalState.launch {
+            State.runLock.withLock {
+                runCatching { stop() }.onFailure {
+                    GlobalState.log("Revoked VPN cleanup failed: $it")
+                }
+                // stopSelf does not destroy a service while RemoteService is
+                // still bound, so release that binding and publish STOP here.
+                val currentDelegate = State.delegate
+                if (currentDelegate?.serviceState?.value?.first === this@VpnService) {
+                    State.delegate = null
+                    State.intent = null
+                    State.runTime = 0L
+                    currentDelegate.unbind()
+                    handleDestroy()
+                }
+            }
+        }
     }
 
     companion object {

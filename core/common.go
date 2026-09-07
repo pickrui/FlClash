@@ -130,6 +130,7 @@ func updateListeners() {
 		general.Tun.Device = normalizeTunDeviceName(general.Tun.Device, runtime.GOOS)
 		listener.ReCreateTun(general.Tun, tunnel.Tunnel)
 	}
+	reconcileIdleSuspendLocked()
 }
 
 func patchSelectGroup(mapping map[string]string) {
@@ -246,6 +247,10 @@ func readFile(path string) ([]byte, error) {
 func updateConfig(params *UpdateParams) {
 	runLock.Lock()
 	defer runLock.Unlock()
+	if params.SuspendOnIdle != nil {
+		suspendOnIdle = *params.SuspendOnIdle
+		reconcileIdleSuspendLocked()
+	}
 	if currentConfig == nil || currentConfig.General == nil {
 		return
 	}
@@ -347,6 +352,9 @@ func applyConfig(params *SetupParams) error {
 		currentConfig, _ = config.ParseRawConfig(config.DefaultRawConfig())
 	}
 	setMaskedAddrs(isoixConfig)
+	// Config loading owns all tunnel status transitions until ApplyConfig returns.
+	idleOwnsTunnelSuspend = false
+	suspendOnIdle = params.SuspendOnIdle
 	hub.ApplyConfig(currentConfig)
 	installDNSAuthResolver()
 	patchSelectGroup(params.SelectedMap)

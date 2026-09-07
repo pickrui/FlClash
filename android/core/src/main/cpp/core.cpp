@@ -1,4 +1,5 @@
 #include <jni.h>
+#include <unistd.h>
 
 #ifdef LIBCLASH
 
@@ -7,11 +8,12 @@
 #include "bride.h"
 
 extern "C"
-JNIEXPORT void JNICALL
+JNIEXPORT jboolean JNICALL
 Java_com_oixcloud_clash_core_Core_startTun(JNIEnv *env, jobject thiz, jint fd, jobject cb,
                                          jstring stack, jstring address, jstring dns) {
     const auto interface = new_global(cb);
-    startTUN(interface, fd, get_string(stack), get_string(address), get_string(dns));
+    return startTUN(interface, fd, get_string(stack), get_string(address), get_string(dns))
+        ? JNI_TRUE : JNI_FALSE;
 }
 
 extern "C"
@@ -160,9 +162,11 @@ JNI_OnLoad(JavaVM *vm, void *) {
 }
 #else
 extern "C"
-JNIEXPORT void JNICALL
+JNIEXPORT jboolean JNICALL
 Java_com_oixcloud_clash_core_Core_startTun(JNIEnv *env, jobject thiz, jint fd, jobject cb,
                                          jstring stack, jstring address, jstring dns) {
+    close(fd);
+    return JNI_FALSE;
 }
 
 extern "C"

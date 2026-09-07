@@ -425,12 +425,11 @@ func handleSideLoadExternalProvider(providerName string, data []byte, fn func(va
 }
 
 func handleSuspend(suspended bool) bool {
-	if suspended {
-		tunnel.OnSuspend()
-	} else {
-		tunnel.OnRunning()
-	}
+	runLock.Lock()
+	defer runLock.Unlock()
+	deviceIdle = suspended
 	provider.SetHealthCheckSuspended(suspended)
+	reconcileIdleSuspendLocked()
 	return true
 }
 

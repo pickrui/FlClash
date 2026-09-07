@@ -2824,6 +2824,26 @@ class AppLocalizations {
     );
   }
 
+  /// `Pause proxy when idle`
+  String get suspendOnIdle {
+    return Intl.message(
+      'Pause proxy when idle',
+      name: 'suspendOnIdle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pause traffic forwarding to save power when the screen is off and the system becomes idle. This may disconnect calls and live audio.`
+  String get suspendOnIdleDesc {
+    return Intl.message(
+      'Pause traffic forwarding to save power when the screen is off and the system becomes idle. This may disconnect calls and live audio.',
+      name: 'suspendOnIdleDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{label} details`
   String details(Object label) {
     return Intl.message(
@@ -5259,6 +5279,36 @@ class AppLocalizations {
     return Intl.message(
       'an empty value',
       name: 'configValueTypeNull',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Recover local configuration`
+  String get configRecoveryTitle {
+    return Intl.message(
+      'Recover local configuration',
+      name: 'configRecoveryTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Local configuration is temporarily unavailable. Your existing data has been kept. Unlock your device and retry, or reopen the app later.`
+  String get configRecoveryMessage {
+    return Intl.message(
+      'Local configuration is temporarily unavailable. Your existing data has been kept. Unlock your device and retry, or reopen the app later.',
+      name: 'configRecoveryMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Retry`
+  String get configRecoveryRetry {
+    return Intl.message(
+      'Retry',
+      name: 'configRecoveryRetry',
       desc: '',
       args: [],
     );

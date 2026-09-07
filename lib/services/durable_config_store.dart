@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:fl_clash/common/durable_file.dart';
 import 'package:fl_clash/services/age_crypto.dart';
+import 'package:fl_clash/services/config_key_store.dart';
 
 class DurableConfigStore {
   final Future<AgeIdentity> Function() _identityProvider;
@@ -24,40 +25,44 @@ class DurableConfigStore {
     late final AgeIdentity identity;
     try {
       identity = await _identityProvider();
-    } catch (_) {
-      return null;
+    } on ConfigKeyUnavailableException {
+      rethrow;
+    } catch (error) {
+      throw ConfigKeyUnavailableException(error);
     }
     for (final candidate in candidates) {
       if (!await candidate.exists()) {
         continue;
       }
+      final Map<String, Object?> value;
       try {
         final plaintext = await AgeCrypto.decrypt(
           await candidate.readAsBytes(),
           identity,
         );
-        final value = Map<String, Object?>.from(
+        value = Map<String, Object?>.from(
           jsonDecode(utf8.decode(plaintext)) as Map,
         );
-        if (!identical(candidate, target)) {
-          if (await target.exists()) {
-            await target.delete();
-          }
-          await durableRename(candidate.path, target.path);
-        }
-        for (final stale in [temporary, backup]) {
-          if (await stale.exists()) {
-            try {
-              await stale.delete();
-            } catch (_) {}
-          }
-        }
-        return value;
       } catch (_) {
         continue;
       }
+      // A readable candidate is authoritative. A failed repair must not fall
+      // through to an older config or be reported as an unavailable key.
+      if (!identical(candidate, target)) {
+        await durableRename(candidate.path, target.path);
+      }
+      for (final stale in [temporary, backup]) {
+        try {
+          if (await stale.exists()) {
+            await stale.delete();
+          }
+        } catch (_) {}
+      }
+      return value;
     }
-    return null;
+    // Existing ciphertext must never be replaced by a sanitized preference
+    // fallback just because its key is inaccessible or does not match.
+    throw const ConfigKeyUnavailableException();
   }
 
   Future<void> write(String path, Object config) async {

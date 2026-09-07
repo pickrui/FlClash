@@ -839,7 +839,11 @@ extension StateControllerExt on AppController {
     final testUrl = _ref.read(
       appSettingProvider.select((state) => state.testUrl),
     );
-    return SetupParams(selectedMap: selectedMap, testUrl: testUrl);
+    return SetupParams(
+      selectedMap: selectedMap,
+      testUrl: testUrl,
+      suspendOnIdle: _ref.read(networkSettingProvider).suspendOnIdle,
+    );
   }
 
   List<Group> getCurrentGroups() {
@@ -2041,6 +2045,7 @@ extension SetupControllerExt on AppController {
       selectedMap: latestProfile?.selectedMap ?? const {},
       testUrl: _ref.read(appSettingProvider).testUrl,
       rawConfig: isoixCloud ? yamlString : '',
+      suspendOnIdle: _ref.read(networkSettingProvider).suspendOnIdle,
     );
 
     if (!isCurrentApply()) {

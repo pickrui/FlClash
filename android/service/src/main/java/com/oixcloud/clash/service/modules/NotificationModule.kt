@@ -45,8 +45,16 @@ val NotificationParams.extended: ExtendedNotificationParams
 
 class NotificationModule(private val service: Service) : Module() {
     private val scope = CoroutineScope(Dispatchers.Default)
+    private val lock = Any()
+    private var installed = false
 
     override fun onInstall() {
+        synchronized(lock) {
+            installed = true
+            // Foreground promotion is part of startup, including while the
+            // screen is off, and a failure must reach service rollback.
+            update((State.notificationParamsFlow.value ?: NotificationParams()).extended)
+        }
         scope.launch {
             val screenFlow = service.receiveBroadcastFlow {
                 addAction(Intent.ACTION_SCREEN_ON)
@@ -67,11 +75,6 @@ class NotificationModule(private val service: Service) : Module() {
                     update(params!!)
                 }
 
-            State.notificationParamsFlow.value?.let {
-                update(it.extended)
-            } ?: run {
-                update(NotificationParams().extended)
-            }
         }
     }
 
@@ -106,7 +109,8 @@ class NotificationModule(private val service: Service) : Module() {
         }
     }
 
-    private fun update(params: ExtendedNotificationParams) {
+    private fun update(params: ExtendedNotificationParams) = synchronized(lock) {
+        if (!installed) return
         service.startForeground(
             with(notificationBuilder) {
                 setContentTitle(params.title)
@@ -118,12 +122,13 @@ class NotificationModule(private val service: Service) : Module() {
             })
     }
 
-    override fun onUninstall() {
+    override fun onUninstall() = synchronized(lock) {
+        installed = false
+        scope.cancel()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             service.stopForeground(STOP_FOREGROUND_REMOVE)
         } else {
             service.stopForeground(true)
         }
-        scope.cancel()
     }
 }

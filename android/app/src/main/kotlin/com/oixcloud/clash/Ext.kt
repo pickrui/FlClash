@@ -31,7 +31,7 @@ val Application.sharedState: SharedState
         try {
             val sp = getSharedPreferences("FlutterSharedPreferences", MODE_PRIVATE)
             val res = sp.getString("flutter.sharedState", "")
-            return Gson().fromJson(res, SharedState::class.java)
+            return Gson().fromJson(res, SharedState::class.java) ?: SharedState()
         } catch (_: Exception) {
             return SharedState()
         }

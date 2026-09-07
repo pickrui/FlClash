@@ -82,6 +82,25 @@ void main() {
   });
 
   test(
+    'failed recovery promotion preserves the candidate and reports IO',
+    () async {
+      final directory = await Directory.systemTemp.createTemp('config_store_');
+      addTearDown(() => directory.delete(recursive: true));
+      final path = p.join(directory.path, 'config.age');
+      await store.write(path, {'value': 'recoverable'});
+      final candidate = await File(path).rename('$path.old');
+      final ciphertext = await candidate.readAsBytes();
+      // A conflicting directory makes promotion fail on every platform.
+      await Directory(path).create();
+
+      await expectLater(store.read(path), throwsA(isA<FileSystemException>()));
+
+      expect(await candidate.readAsBytes(), ciphertext);
+      expect(await Directory(path).exists(), isTrue);
+    },
+  );
+
+  test(
     'identity provider failure makes encrypted config unavailable',
     () async {
       final directory = await Directory.systemTemp.createTemp('config_store_');
@@ -92,7 +111,10 @@ void main() {
         identityProvider: () => throw StateError('invalid seed'),
       );
 
-      expect(await unavailableStore.read(path), isNull);
+      await expectLater(
+        unavailableStore.read(path),
+        throwsA(isA<ConfigKeyUnavailableException>()),
+      );
     },
   );
 
@@ -106,5 +128,44 @@ void main() {
       isNull,
     );
     expect(ConfigKeyStore.decodeSeed('$valid\n'), isNull);
+  });
+
+  test('missing key preserves every encrypted recovery candidate', () async {
+    final directory = await Directory.systemTemp.createTemp('config_store_');
+    addTearDown(() => directory.delete(recursive: true));
+    final path = p.join(directory.path, 'config.age');
+    final unavailable = DurableConfigStore(
+      identityProvider: () async => throw const ConfigKeyUnavailableException(),
+    );
+    for (final suffix in ['', '.tmp', '.old']) {
+      await File('$path$suffix').writeAsString('encrypted$suffix');
+    }
+
+    await expectLater(
+      unavailable.read(path),
+      throwsA(isA<ConfigKeyUnavailableException>()),
+    );
+    for (final suffix in ['', '.tmp', '.old']) {
+      expect(await File('$path$suffix').readAsString(), 'encrypted$suffix');
+    }
+  });
+
+  test('a different valid key cannot trigger a plaintext fallback', () async {
+    final directory = await Directory.systemTemp.createTemp('config_store_');
+    addTearDown(() => directory.delete(recursive: true));
+    final path = p.join(directory.path, 'config.age');
+    await store.write(path, {'password': 'original secret'});
+    final ciphertext = await File(path).readAsBytes();
+    final otherIdentity = await AgeCrypto.identityFromSeed(List.filled(32, 99));
+    final mismatched = DurableConfigStore(
+      identityProvider: () async => otherIdentity,
+    );
+
+    await expectLater(
+      mismatched.read(path),
+      throwsA(isA<ConfigKeyUnavailableException>()),
+    );
+    expect(await File(path).readAsBytes(), ciphertext);
+    expect(await store.read(path), {'password': 'original secret'});
   });
 }

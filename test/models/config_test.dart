@@ -169,6 +169,7 @@ void main() {
       expect(props.toJson(), isNot(contains('manualIpv6')));
       expect(props.blockQuic, false);
       expect(props.blockWebRtc, false);
+      expect(props.suspendOnIdle, false);
     });
 
     test('round-trip with custom values', () {
@@ -180,6 +181,7 @@ void main() {
         manualIpv6: true,
         blockQuic: true,
         blockWebRtc: true,
+        suspendOnIdle: true,
       );
       final restored = roundTrip(() => props.toJson(), NetworkProps.fromJson);
       expect(restored.systemProxy, false);
@@ -190,6 +192,12 @@ void main() {
       expect(restored.toJson()['manualIpv6'], true);
       expect(restored.blockQuic, true);
       expect(restored.blockWebRtc, true);
+      expect(restored.suspendOnIdle, true);
+    });
+
+    test('older settings keep idle suspension disabled', () {
+      expect(NetworkProps.fromJson(null).suspendOnIdle, false);
+      expect(NetworkProps.fromJson({'systemProxy': true}).suspendOnIdle, false);
     });
   });
 

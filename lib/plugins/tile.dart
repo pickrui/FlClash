@@ -6,11 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 abstract mixin class TileListener {
-  void onStart() {}
+  FutureOr<bool> onStart() => false;
 
-  void onStop() {}
-
-  void onDetached() {}
+  FutureOr<bool> onStop() => false;
 }
 
 class Tile {
@@ -23,25 +21,25 @@ class Tile {
   static final Tile instance = Tile._();
 
   final ObserverList<TileListener> _listeners = ObserverList<TileListener>();
+  bool _ready = false;
 
-  Future<void> _methodCallHandler(MethodCall call) async {
-    for (final TileListener listener in _listeners) {
-      switch (call.method) {
-        case 'start':
-          listener.onStart();
-          break;
-        case 'stop':
-          listener.onStop();
-          break;
-        case 'detached':
-          listener.onDetached();
-          break;
+  Future<bool> _methodCallHandler(MethodCall call) async {
+    if (call.method == 'start' || call.method == 'stop') {
+      if (!_ready) return false;
+      for (final listener in _listeners.toList()) {
+        final handled = await (call.method == 'start'
+            ? listener.onStart()
+            : listener.onStop());
+        if (handled) return true;
       }
+      return false;
     }
+    throw MissingPluginException();
   }
 
-  bool get hasListeners {
-    return _listeners.isNotEmpty;
+  Future<void> setReady(bool ready) async {
+    _ready = ready && _listeners.isNotEmpty;
+    await _channel.invokeMethod<void>('setReady', _ready);
   }
 
   void addListener(TileListener listener) {
@@ -50,6 +48,9 @@ class Tile {
 
   void removeListener(TileListener listener) {
     _listeners.remove(listener);
+    if (_listeners.isEmpty) {
+      setReady(false).ignore();
+    }
   }
 }
 

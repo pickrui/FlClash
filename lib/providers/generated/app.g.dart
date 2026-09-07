@@ -406,7 +406,7 @@ final class TotalTrafficProvider
   }
 }
 
-String _$totalTrafficHash() => r'358413d1830038ac65cc7a1552867adf7dfdcfa6';
+String _$totalTrafficHash() => r'9d5f0b8be22ec76c66be635b2a70916971fd7153';
 
 abstract class _$TotalTraffic extends $Notifier<Traffic> {
   Traffic build();
@@ -1183,7 +1183,7 @@ final class DelayDataSourceProvider
   }
 }
 
-String _$delayDataSourceHash() => r'66bd4173dea145fefd67401b911dba26d378e97c';
+String _$delayDataSourceHash() => r'e8cd5c36835299e020a9fdca55f1ca867ce997ff';
 
 abstract class _$DelayDataSource extends $Notifier<DelayMap> {
   DelayMap build();
@@ -1741,7 +1741,7 @@ final class NetworkDetectionProvider
   }
 }
 
-String _$networkDetectionHash() => r'5e1de6a5d5835c6cf70aa9734ae8099787cd41bc';
+String _$networkDetectionHash() => r'7121e02ec26c0ffbe95c3c75c000c7dc37d70479';
 
 abstract class _$NetworkDetection extends $Notifier<NetworkDetectionState> {
   NetworkDetectionState build();

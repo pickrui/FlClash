@@ -15,10 +15,57 @@ bool shouldPreserveConfigSeed({
   return !hasValidSeed && durableConfigExists;
 }
 
+/// Storage can be retried without discarding the existing encrypted data.
+class ConfigKeyUnavailableException implements Exception {
+  final Object? cause;
+
+  const ConfigKeyUnavailableException([this.cause]);
+
+  @override
+  String toString() => 'Config encryption key is temporarily unavailable';
+}
+
+@visibleForTesting
+Future<String> loadConfigSeed({
+  required bool durableConfigExists,
+  required Future<String?> Function(bool retry) readSeed,
+  required Future<void> Function(String seed) writeSeed,
+}) async {
+  Object? readError;
+  for (var attempt = 0; attempt < 2; attempt++) {
+    try {
+      final stored = await readSeed(attempt > 0);
+      readError = null;
+      if (ConfigKeyStore.decodeSeed(stored) != null) {
+        return stored!;
+      }
+      if (!durableConfigExists) {
+        break;
+      }
+    } catch (error) {
+      readError = error;
+    }
+  }
+  if (readError != null ||
+      shouldPreserveConfigSeed(
+        hasValidSeed: false,
+        durableConfigExists: durableConfigExists,
+      )) {
+    throw ConfigKeyUnavailableException(readError);
+  }
+  final generated = base64Encode(ConfigKeyStore._randomSeed());
+  try {
+    await writeSeed(generated);
+  } catch (error) {
+    throw ConfigKeyUnavailableException(error);
+  }
+  return generated;
+}
+
 /// Per-device X25519 identity used to encrypt oixCloud configs at rest.
 ///
-/// The 32-byte seed is kept in platform secure storage (Keychain / DPAPI /
-/// libsecret via [SafeStorage]) and injected into the core at init so the core
+/// The 32-byte seed is persisted via [SafeStorage] (preferences on macOS,
+/// platform secure storage elsewhere) and injected into the core so the core
 /// can decrypt the same age blobs. This replaces the shared compile-time
 /// profile key for at-rest encryption, so extracting the binary no longer
 /// yields a key that decrypts every install's stored config.
@@ -36,7 +83,7 @@ class ConfigKeyStore {
 
   /// Base64 of the 32-byte seed, generating and persisting one on first use.
   /// Injected into the core via `InitParams.configAgeSecretKey`.
-  static Future<String> seedBase64() async {
+  static Future<String> seedBase64({bool retry = false}) async {
     if (_cleared) {
       throw StateError('config encryption key store was cleared');
     }
@@ -51,7 +98,7 @@ class ConfigKeyStore {
     if (pending != null) return pending;
 
     final generation = _generation;
-    final load = _loadOrCreateSeed(generation);
+    final load = _loadOrCreateSeed(generation, retry: retry);
     _seedLoad = load;
     try {
       return await load;
@@ -62,29 +109,46 @@ class ConfigKeyStore {
     }
   }
 
-  static Future<String> _loadOrCreateSeed(int generation) async {
-    final stored = await SafeStorage.read(_seedKey);
-    final hasValidSeed = decodeSeed(stored) != null;
-    if (hasValidSeed) {
-      if (generation != _generation) {
-        throw StateError('config encryption seed load was invalidated');
-      }
-      _cachedSeedBase64 = stored;
-      return stored!;
+  /// Retry startup after the user has restored access to their stored key.
+  /// Pending loads are allowed to settle before invalidating their caches.
+  static Future<void> reload() async {
+    for (final pending in [_seedLoad, _identityLoad]) {
+      if (pending == null) continue;
+      try {
+        await pending;
+      } catch (_) {}
     }
-    if (shouldPreserveConfigSeed(
-      hasValidSeed: hasValidSeed,
-      durableConfigExists: await _durableConfigExists(),
-    )) {
-      throw StateError('config encryption seed is unavailable');
+    _generation++;
+    _cachedSeedBase64 = null;
+    _cachedIdentity = null;
+    await seedBase64(retry: true);
+  }
+
+  static Future<String> _loadOrCreateSeed(
+    int generation, {
+    required bool retry,
+  }) async {
+    final bool durableConfigExists;
+    try {
+      durableConfigExists = await _durableConfigExists();
+    } catch (error) {
+      throw ConfigKeyUnavailableException(error);
     }
-    final generated = base64Encode(_randomSeed());
-    await SafeStorage.write(_seedKey, generated);
+    final seed = await loadConfigSeed(
+      durableConfigExists: durableConfigExists,
+      readSeed: (retryRead) => SafeStorage.read(
+        _seedKey,
+        retry: retry || retryRead,
+        legacyEvidence: durableConfigExists,
+        isValid: (value) => decodeSeed(value) != null,
+      ),
+      writeSeed: (seed) => SafeStorage.write(_seedKey, seed),
+    );
     if (generation != _generation) {
       throw StateError('config encryption seed load was invalidated');
     }
-    _cachedSeedBase64 = generated;
-    return generated;
+    _cachedSeedBase64 = seed;
+    return seed;
   }
 
   static Future<bool> _durableConfigExists() async {

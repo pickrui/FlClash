@@ -11,6 +11,7 @@ abstract class SetupParams with _$SetupParams {
     @JsonKey(name: 'selected-map') required Map<String, String> selectedMap,
     @JsonKey(name: 'test-url') required String testUrl,
     @Default('') @JsonKey(name: 'raw-config') String rawConfig,
+    @Default(false) @JsonKey(name: 'suspend-on-idle') bool suspendOnIdle,
   }) = _SetupParams;
 
   factory SetupParams.fromJson(Map<String, dynamic> json) =>
@@ -34,6 +35,7 @@ abstract class UpdateParams with _$UpdateParams {
     @JsonKey(name: 'unified-delay') required bool unifiedDelay,
     @Default(false) @JsonKey(name: 'geo-auto-update') bool geoAutoUpdate,
     @Default(24) @JsonKey(name: 'geo-update-interval') int geoUpdateInterval,
+    @Default(false) @JsonKey(name: 'suspend-on-idle') bool suspendOnIdle,
   }) = _UpdateParams;
 
   factory UpdateParams.fromJson(Map<String, dynamic> json) =>

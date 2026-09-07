@@ -174,6 +174,7 @@ abstract class NetworkProps with _$NetworkProps {
     @JsonKey(includeIfNull: false) bool? manualIpv6,
     @Default(false) bool blockQuic,
     @Default(false) bool blockWebRtc,
+    @Default(false) bool suspendOnIdle,
   }) = _NetworkProps;
 
   factory NetworkProps.fromJson(Map<String, Object?>? json) =>

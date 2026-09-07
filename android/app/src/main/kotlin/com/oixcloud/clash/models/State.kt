@@ -18,4 +18,6 @@ data class SetupParams(
     val testUrl: String,
     @SerializedName("selected-map")
     val selectedMap: Map<String, String>,
+    @SerializedName("suspend-on-idle")
+    val suspendOnIdle: Boolean = false,
 )

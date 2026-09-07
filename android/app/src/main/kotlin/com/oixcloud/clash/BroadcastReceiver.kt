@@ -10,19 +10,18 @@ import kotlinx.coroutines.launch
 
 class BroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
-        when (intent?.action) {
-            BroadcastAction.SERVICE_CREATED.action -> {
-                GlobalState.log("Receiver service created")
-                GlobalState.launch {
-                    State.handleStartServiceAction()
-                }
-            }
+        if (intent?.action != BroadcastAction.SERVICE_CREATED.action &&
+            intent?.action != BroadcastAction.SERVICE_DESTROYED.action
+        ) return
 
-            BroadcastAction.SERVICE_DESTROYED.action -> {
-                GlobalState.log("Receiver service destroyed")
-                GlobalState.launch {
-                    State.handleStopServiceAction()
-                }
+        // Creation is announced before VPN establishment succeeds. Treat these
+        // as state notifications; replaying START here can loop after a failure.
+        val pending = goAsync()
+        GlobalState.launch {
+            try {
+                State.handleSyncState()
+            } finally {
+                pending.finish()
             }
         }
     }

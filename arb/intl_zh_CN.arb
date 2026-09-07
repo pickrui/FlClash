@@ -360,12 +360,14 @@
   "portTip": "{label} 必须在 1024 到 49151 之间",
   "portConflictTip": "请输入不同的端口",
   "portUnavailableTitle": "端口不可用",
-  "portUnavailableMessage": "混合端口 {port} 无法监听，可能已被其他程序占用。修改后可立即重试。",
+  "portUnavailableMessage": "混合端口 {port} 无法监听，可能已被其他程序占用。修改后可立即重试",
   "saveAndRetry": "保存并重试",
   "import": "导入",
   "importFile": "通过文件导入",
   "importUrl": "通过URL导入",
   "autoSetSystemDns": "自动设置系统DNS",
+  "suspendOnIdle": "空闲时暂停代理",
+  "suspendOnIdleDesc": "熄屏并进入系统空闲状态时暂停流量转发以节省电量，可能导致语音通话和实时音频断开",
   "details": "{label}详情",
   "creationTime": "创建时间",
   "process": "进程",
@@ -638,5 +640,8 @@
   "configValueTypeBoolean": "布尔值",
   "configValueTypeInteger": "整数",
   "configValueTypeNumber": "数字",
-  "configValueTypeNull": "空值"
+  "configValueTypeNull": "空值",
+  "configRecoveryTitle": "恢复本地配置",
+  "configRecoveryMessage": "暂时无法读取本地配置，原有数据已保留。请解锁设备后重试，或稍后重新打开应用",
+  "configRecoveryRetry": "重试"
 }

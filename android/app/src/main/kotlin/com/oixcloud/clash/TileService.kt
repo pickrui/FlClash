@@ -29,7 +29,7 @@ class TileService : TileService() {
     override fun onStartListening() {
         super.onStartListening()
         scope?.cancel()
-        scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
         scope?.launch {
             State.handleSyncState()
             State.runStateFlow.collect {
@@ -56,6 +56,13 @@ class TileService : TileService() {
 
     override fun onStopListening() {
         scope?.cancel()
+        scope = null
         super.onStopListening()
+    }
+
+    override fun onDestroy() {
+        scope?.cancel()
+        scope = null
+        super.onDestroy()
     }
 }

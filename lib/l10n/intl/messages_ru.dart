@@ -287,6 +287,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Данные обнаружены в конфигурации",
     ),
     "configParseErrorAtLine": m1,
+    "configRecoveryMessage": MessageLookupByLibrary.simpleMessage(
+      "Локальные настройки временно недоступны. Ваши данные сохранены. Разблокируйте устройство и повторите попытку или откройте приложение позже.",
+    ),
+    "configRecoveryRetry": MessageLookupByLibrary.simpleMessage("Повторить"),
+    "configRecoveryTitle": MessageLookupByLibrary.simpleMessage(
+      "Восстановление локальных настроек",
+    ),
     "configTypeMismatch": m2,
     "configValueTypeBoolean": MessageLookupByLibrary.simpleMessage(
       "логическое значение",
@@ -1177,6 +1184,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "style": MessageLookupByLibrary.simpleMessage("Стиль"),
     "subRule": MessageLookupByLibrary.simpleMessage("Подправило"),
     "submit": MessageLookupByLibrary.simpleMessage("Отправить"),
+    "suspendOnIdle": MessageLookupByLibrary.simpleMessage(
+      "Приостанавливать прокси при бездействии",
+    ),
+    "suspendOnIdleDesc": MessageLookupByLibrary.simpleMessage(
+      "Приостанавливать передачу трафика для экономии энергии, когда экран выключен и система переходит в режим бездействия. Звонки и прямые аудиотрансляции могут прерываться.",
+    ),
     "sync": MessageLookupByLibrary.simpleMessage("Синхронизация"),
     "system": MessageLookupByLibrary.simpleMessage("Система"),
     "systemApp": MessageLookupByLibrary.simpleMessage("Системное приложение"),
