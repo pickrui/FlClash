@@ -543,6 +543,14 @@ String? getAppUpdateDownloadUrl(Abi abi) {
   return name == null ? null : 'https://dl.dler.io/flclash-$name';
 }
 
+String getAppUpdateFallbackDownloadUrl(String downloadUrl) {
+  final fileName = Uri.parse(downloadUrl).pathSegments.last;
+  return Uri.https(
+    'github.com',
+    '/$releaseRepository/releases/latest/download/$fileName',
+  ).toString();
+}
+
 /// A dismissed download cancels the entire action, including browser fallback.
 Future<void> openAppUpdateDownload({
   required UpdateDownloadResult? result,
@@ -832,6 +840,7 @@ extension InitControllerExt on AppController {
             return await downloadAppUpdate(
               client: client,
               url: downloadUrl,
+              fallbackUrls: [getAppUpdateFallbackDownloadUrl(downloadUrl)],
               directory: await appPath.tempDir.future,
               cancelToken: token,
               onProgress: onProgress,

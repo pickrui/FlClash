@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -25,6 +26,7 @@ void main() {
   Future<File> download({
     CancelToken? token,
     ProgressCallback? progress,
+    List<String> fallbackUrls = const [],
     int maxBytes = 1024 * 1024 * 1024,
   }) => downloadAppUpdate(
     client: client,
@@ -32,6 +34,7 @@ void main() {
     directory: directory,
     cancelToken: token ?? CancelToken(),
     onProgress: progress ?? (_, _) {},
+    fallbackUrls: fallbackUrls,
     maxBytes: maxBytes,
   );
 
@@ -72,27 +75,39 @@ void main() {
     expect(await directory.list().toList(), isEmpty);
   });
 
-  test('cancellation removes the partial download', () async {
-    final token = CancelToken();
-    server.listen((request) async {
-      request.response.headers.contentType = ContentType.binary;
-      request.response.bufferOutput = false;
-      request.response.contentLength = 1000000;
-      request.response.add(List.filled(65536, 1));
-      await request.response.flush();
-    });
-    await expectLater(
-      download(token: token, progress: (_, _) => token.cancel()),
-      throwsA(
-        isA<DioException>().having(
-          (error) => error.type,
-          'type',
-          DioExceptionType.cancel,
+  test(
+    'cancellation removes the partial download without trying another source',
+    () async {
+      final token = CancelToken();
+      final paths = <String>[];
+      server.listen((request) async {
+        paths.add(request.uri.path);
+        request.response.headers.contentType = ContentType.binary;
+        request.response.bufferOutput = false;
+        request.response.contentLength = 1000000;
+        request.response.add(List.filled(65536, 1));
+        await request.response.flush();
+      });
+      await expectLater(
+        download(
+          token: token,
+          progress: (_, _) => token.cancel(),
+          fallbackUrls: [
+            'http://${server.address.address}:${server.port}/backup.apk',
+          ],
         ),
-      ),
-    );
-    expect(await directory.list().toList(), isEmpty);
-  });
+        throwsA(
+          isA<DioException>().having(
+            (error) => error.type,
+            'type',
+            DioExceptionType.cancel,
+          ),
+        ),
+      );
+      expect(await directory.list().toList(), isEmpty);
+      expect(paths, ['/update.apk']);
+    },
+  );
 
   test(
     'cancellation on the final chunk never publishes an installer',
@@ -157,6 +172,161 @@ void main() {
         download(),
         throwsA(predicate((error) => identical(error, failure))),
       );
+    },
+  );
+
+  test(
+    'a forbidden source falls back after cleanup and resets progress',
+    () async {
+      final paths = <String>[];
+      final progress = <(int, int)>[];
+      late String firstStaging;
+      server.listen((request) async {
+        paths.add(request.uri.path);
+        if (request.uri.path == '/update.apk') {
+          firstStaging = directory.listSync().single.path;
+          request.response.statusCode = HttpStatus.forbidden;
+        } else {
+          expect(Directory(firstStaging).existsSync(), isFalse);
+          request.response.headers.contentType = ContentType.binary;
+          request.response.contentLength = 3;
+          request.response.add([1, 2, 3]);
+        }
+        await request.response.close();
+      });
+      final file = await download(
+        fallbackUrls: [
+          'http://${server.address.address}:${server.port}/backup.apk',
+        ],
+        progress: (received, total) => progress.add((received, total)),
+      );
+      expect(paths, ['/update.apk', '/backup.apk']);
+      expect(progress.first, (0, -1));
+      expect(progress.last, (3, 3));
+      expect(await file.readAsBytes(), [1, 2, 3]);
+      expect(await directory.list().length, 1);
+    },
+  );
+
+  test(
+    'all sources failing preserves the last error and removes staging files',
+    () async {
+      final paths = <String>[];
+      server.listen((request) async {
+        paths.add(request.uri.path);
+        request.response.statusCode = request.uri.path == '/update.apk'
+            ? HttpStatus.forbidden
+            : HttpStatus.badGateway;
+        await request.response.close();
+      });
+      await expectLater(
+        download(
+          fallbackUrls: [
+            'http://${server.address.address}:${server.port}/backup.apk',
+          ],
+        ),
+        throwsA(
+          isA<DioException>()
+              .having(
+                (error) => error.response?.statusCode,
+                'status',
+                HttpStatus.badGateway,
+              )
+              .having(
+                (error) => error.requestOptions.uri.path,
+                'source',
+                '/backup.apk',
+              ),
+        ),
+      );
+      expect(paths, ['/update.apk', '/backup.apk']);
+      expect(await directory.list().toList(), isEmpty);
+    },
+  );
+
+  test(
+    'a malformed partial body is cleaned before another source starts',
+    () async {
+      final progress = <(int, int)>[];
+      final firstChunk = Completer<void>();
+      late String firstStaging;
+      server.listen((request) async {
+        request.response.headers.contentType = ContentType.binary;
+        if (request.uri.path == '/update.apk') {
+          firstStaging = directory.listSync().single.path;
+          request.response.bufferOutput = false;
+          request.response.add(List.filled(60, 1));
+          await request.response.flush();
+          await firstChunk.future;
+          request.response.add(List.filled(60, 2));
+        } else {
+          expect(Directory(firstStaging).existsSync(), isFalse);
+          request.response.contentLength = 3;
+          request.response.add([1, 2, 3]);
+        }
+        await request.response.close();
+      });
+      final file = await download(
+        maxBytes: 100,
+        fallbackUrls: [
+          'http://${server.address.address}:${server.port}/backup.apk',
+        ],
+        progress: (received, total) {
+          progress.add((received, total));
+          if (received > 0 && !firstChunk.isCompleted) firstChunk.complete();
+        },
+      );
+      expect(progress, [(60, -1), (0, -1), (3, 3)]);
+      expect(await file.readAsBytes(), [1, 2, 3]);
+      expect(await directory.list().length, 1);
+    },
+  );
+
+  test('local filesystem errors do not retry another source', () async {
+    await directory.delete(recursive: true);
+    final blocker = await File(directory.path).writeAsString('occupied');
+    addTearDown(blocker.delete);
+    var resets = 0;
+    await expectLater(
+      download(
+        fallbackUrls: [
+          'http://${server.address.address}:${server.port}/backup.apk',
+        ],
+        progress: (_, _) => resets++,
+      ),
+      throwsA(isA<FileSystemException>()),
+    );
+    expect(resets, 0);
+  });
+
+  test(
+    'cancelling between sources does not start the fallback request',
+    () async {
+      final token = CancelToken();
+      final paths = <String>[];
+      server.listen((request) async {
+        paths.add(request.uri.path);
+        request.response.statusCode = HttpStatus.forbidden;
+        await request.response.close();
+      });
+      await expectLater(
+        download(
+          token: token,
+          fallbackUrls: [
+            'http://${server.address.address}:${server.port}/backup.apk',
+          ],
+          progress: (_, _) => token.cancel(),
+        ),
+        throwsA(
+          isA<DioException>().having(
+            (error) => error.type,
+            'type',
+            DioExceptionType.cancel,
+          ),
+        ),
+      );
+      expect(paths, ['/update.apk']);
+      expect(await directory.list().toList(), isEmpty);
     },
   );
 

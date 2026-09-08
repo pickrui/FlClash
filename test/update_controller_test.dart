@@ -1,6 +1,7 @@
 import 'dart:ffi';
 import 'dart:io';
 
+import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/controller.dart';
 import 'package:fl_clash/widgets/update_download_dialog.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -19,9 +20,16 @@ void main() {
       Abi.linuxArm64: 'linux-arm64.deb',
     };
     for (final entry in installers.entries) {
+      final downloadUrl = getAppUpdateDownloadUrl(entry.key);
       expect(
-        getAppUpdateDownloadUrl(entry.key),
+        downloadUrl,
         'https://dl.dler.io/flclash-${entry.value}',
+        reason: entry.key.toString(),
+      );
+      expect(
+        getAppUpdateFallbackDownloadUrl(downloadUrl!),
+        'https://github.com/$releaseRepository/releases/latest/download/'
+        'flclash-${entry.value}',
         reason: entry.key.toString(),
       );
     }

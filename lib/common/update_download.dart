@@ -11,9 +11,57 @@ Future<File> downloadAppUpdate({
   required Directory directory,
   required CancelToken cancelToken,
   required ProgressCallback onProgress,
+  List<String> fallbackUrls = const [],
   int maxBytes = 1024 * 1024 * 1024,
 }) async {
   if (maxBytes <= 0) throw ArgumentError.value(maxBytes, 'maxBytes');
+  final sources = <String>{url, ...fallbackUrls}.toList();
+  var sourceIndex = 0;
+  while (true) {
+    try {
+      return await _downloadAppUpdateFromSource(
+        client: client,
+        url: sources[sourceIndex],
+        directory: directory,
+        cancelToken: cancelToken,
+        onProgress: onProgress,
+        maxBytes: maxBytes,
+      );
+    } catch (error) {
+      if (cancelToken.isCancelled) throw cancelToken.cancelError!;
+      if (sourceIndex == sources.length - 1 || !_isUpdateSourceFailure(error)) {
+        rethrow;
+      }
+      sourceIndex++;
+    }
+    onProgress(0, -1);
+  }
+}
+
+bool _isUpdateSourceFailure(Object? error) {
+  if (error is DioException) {
+    if (error.type == DioExceptionType.cancel ||
+        error.error is FileSystemException) {
+      return false;
+    }
+    return error.type != DioExceptionType.unknown ||
+        _isUpdateSourceFailure(error.error);
+  }
+  return error is FormatException ||
+      error is SocketException ||
+      error is HttpException ||
+      error is TlsException ||
+      error is TimeoutException;
+}
+
+Future<File> _downloadAppUpdateFromSource({
+  required Dio client,
+  required String url,
+  required Directory directory,
+  required CancelToken cancelToken,
+  required ProgressCallback onProgress,
+  required int maxBytes,
+}) async {
   final uri = Uri.parse(url);
   final name = uri.pathSegments.lastOrNull ?? '';
   if ((!uri.isScheme('https') && !uri.isScheme('http')) ||
@@ -105,16 +153,19 @@ Future<File> downloadAppUpdate({
     if (cancelToken.isCancelled) throw cancelToken.cancelError!;
     return file;
   } catch (_) {
+    FileSystemException? cleanupError;
     try {
       await output?.close();
-    } on FileSystemException {
-      // Cleanup must preserve the original download or cancellation error.
+    } on FileSystemException catch (error) {
+      cleanupError = error;
     }
     try {
       await staging.delete(recursive: true);
-    } on FileSystemException {
-      // The OS may have already removed the temporary directory.
+    } on FileSystemException catch (error) {
+      // An already removed directory is clean; other failures must stop retries.
+      if (await staging.exists()) cleanupError ??= error;
     }
+    if (cleanupError != null) throw cleanupError;
     rethrow;
   } finally {
     transferToken.cancel();
