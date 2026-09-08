@@ -14,14 +14,18 @@ import (
 	"sync"
 	"time"
 
+	"github.com/metacubex/mihomo/component/dialer"
 	"github.com/metacubex/mihomo/component/geodata"
 	"github.com/metacubex/mihomo/component/geodata/router"
 	mihomoHttp "github.com/metacubex/mihomo/component/http"
 	"github.com/metacubex/mihomo/component/mmdb"
+	"github.com/metacubex/mihomo/component/resolver"
 	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/constant/features"
 	"github.com/metacubex/mihomo/hub/route"
+	"github.com/metacubex/mihomo/listener/inner"
 	"github.com/metacubex/mihomo/log"
+	"github.com/metacubex/mihomo/tunnel"
 	"github.com/oschwald/maxminddb-golang"
 
 	"github.com/metacubex/chi"
@@ -183,19 +187,26 @@ func updateGeoDataLockedFromURL(
 	sendGeoUpdate(geoType, true, false, nil)
 	oldHash, oldHashErr := getFileHash(path)
 
-	data, err := downloadGeoData(ctx, geoURL)
+	data, err := downloadGeoData(ctx, geoURL, func(data []byte) error {
+		return validateGeoData(geoType, data)
+	})
 	if err != nil {
-		err = fmt.Errorf("GEO download failed: %w", err)
-	} else if err = validateGeoData(geoType, data); err != nil {
-		err = fmt.Errorf("invalid %s database file: %w", geoType, err)
+		var validationError *geoDownloadValidationError
+		if errors.As(err, &validationError) {
+			err = fmt.Errorf("invalid %s database file: %w", geoType, err)
+		} else {
+			err = fmt.Errorf("GEO download failed: %w", err)
+		}
 	}
 	if err == nil {
 		newHash := sha256.Sum256(data)
-		if oldHashErr == nil && oldHash == newHash {
-			sendGeoUpdate(geoType, false, true, nil)
-			return nil
+		if err = ctx.Err(); err == nil {
+			if oldHashErr == nil && oldHash == newHash {
+				sendGeoUpdate(geoType, false, true, nil)
+				return nil
+			}
+			err = replaceGeoData(ctx, geoType, path, data)
 		}
-		err = replaceGeoData(geoType, path, data)
 	}
 	if err != nil {
 		sendGeoUpdate(geoType, false, false, err)
@@ -249,7 +260,46 @@ func geoResourcePath(geoType string, geoName string) (string, error) {
 	return path, nil
 }
 
-func downloadGeoData(ctx context.Context, url string) ([]byte, error) {
+type geoDownloadRoute struct {
+	name    string
+	options []mihomoHttp.Option
+}
+
+type geoDownloadValidationError struct {
+	err error
+}
+
+func (e *geoDownloadValidationError) Error() string { return e.err.Error() }
+func (e *geoDownloadValidationError) Unwrap() error { return e.err }
+
+type geoDownloadHTTPError int
+
+func (e geoDownloadHTTPError) Error() string {
+	return fmt.Sprintf("unexpected HTTP status: %d %s", e, http.StatusText(int(e)))
+}
+
+func downloadGeoData(ctx context.Context, url string, validate func([]byte) error) ([]byte, error) {
+	routes := []geoDownloadRoute{{
+		name: "direct",
+		options: []mihomoHttp.Option{mihomoHttp.WithDialer(
+			dialer.NewDialer(dialer.WithResolver(resolver.DirectHostResolver)),
+		)},
+	}}
+	// Keep the configured routing and selected proxy groups for the other
+	// attempt. Forcing GLOBAL or an arbitrary node would change user choices.
+	// A stopped/uninitialized tunnel has only a usable direct route.
+	if inner.GetTunnel() != nil && tunnel.Status() != tunnel.Suspend {
+		routes = append([]geoDownloadRoute{{name: "configured route"}}, routes...)
+	}
+	return downloadGeoDataWithRoutes(ctx, url, validate, routes)
+}
+
+func downloadGeoDataWithRoutes(
+	ctx context.Context,
+	url string,
+	validate func([]byte) error,
+	routes []geoDownloadRoute,
+) ([]byte, error) {
 	if url == "" {
 		return nil, errors.New("unsupported GEO resource")
 	}
@@ -258,15 +308,96 @@ func downloadGeoData(ctx context.Context, url string) ([]byte, error) {
 		(parsedURL.Scheme != "http" && parsedURL.Scheme != "https") {
 		return nil, errors.New("invalid GEO download URL")
 	}
-	ctx, cancel := context.WithTimeout(ctx, geoDownloadTimeout)
-	defer cancel()
-	response, err := mihomoHttp.HttpRequest(ctx, parsedURL.String(), http.MethodGet, nil, nil)
+	ctx, cancelDeadline := context.WithTimeout(ctx, geoDownloadTimeout)
+	defer cancelDeadline()
+	ctx, cancel := context.WithCancelCause(ctx)
+	defer cancel(nil)
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if len(routes) == 0 {
+		return nil, errors.New("no GEO download route")
+	}
+	type result struct {
+		name string
+		data []byte
+		err  error
+	}
+	results := make(chan result, len(routes))
+	for _, route := range routes {
+		go func() {
+			data, err := downloadGeoDataAttempt(ctx, parsedURL.String(), route.options)
+			// Account refusals remain authoritative. An anonymous CDN 403 may
+			// only block this egress, so keep the other public route running.
+			var statusError geoDownloadHTTPError
+			privateURL := parsedURL.User != nil || parsedURL.RawQuery != "" || parsedURL.ForceQuery
+			if errors.As(err, &statusError) &&
+				(statusError == http.StatusUnauthorized || (statusError == http.StatusForbidden && privateURL)) {
+				cancel(fmt.Errorf("%s: %w", route.name, err))
+			}
+			results <- result{name: route.name, data: data, err: err}
+		}()
+	}
+	var failures []error
+	for range routes {
+		select {
+		case <-ctx.Done():
+			return nil, context.Cause(ctx)
+		case result := <-results:
+			// Validate completed candidates serially to bound parser memory.
+			// An HTTP 200 carrying an error page must not cancel a valid route.
+			result.err = validateGeoDownload(ctx, result.data, result.err, validate)
+			if ctx.Err() != nil {
+				return nil, context.Cause(ctx)
+			}
+			if result.err == nil {
+				return result.data, nil
+			}
+			failures = append(failures, fmt.Errorf("%s: %w", result.name, result.err))
+		}
+	}
+	return nil, errors.Join(failures...)
+}
+
+func validateGeoDownload(ctx context.Context, data []byte, err error, validate func([]byte) error) error {
+	if ctx.Err() != nil {
+		return ctx.Err()
+	}
+	if err == nil && validate != nil {
+		if validationError := validate(data); validationError != nil {
+			err = &geoDownloadValidationError{err: validationError}
+		}
+	}
+	if ctx.Err() != nil {
+		return ctx.Err()
+	}
+	return err
+}
+
+func downloadGeoDataAttempt(ctx context.Context, url string, options []mihomoHttp.Option) ([]byte, error) {
+	// HttpRequest creates a transport for each attempt. Its idle connections
+	// cannot be reused by another download, so close them with the response.
+	headers := map[string][]string{"Connection": {"close"}}
+	response, err := mihomoHttp.HttpRequest(ctx, url, http.MethodGet, headers, nil, options...)
 	if err != nil {
+		if requestErr, ok := err.(*urlpkg.Error); ok {
+			// UI/status errors must not reveal custom URL credentials or tokens.
+			redacted := *requestErr
+			if safeURL, parseErr := urlpkg.Parse(redacted.URL); parseErr == nil {
+				safeURL.User = nil
+				safeURL.RawQuery = ""
+				safeURL.Fragment = ""
+				redacted.URL = safeURL.String()
+			} else {
+				redacted.URL = ""
+			}
+			err = &redacted
+		}
 		return nil, err
 	}
 	defer response.Body.Close()
 	if response.StatusCode < 200 || response.StatusCode > 299 {
-		return nil, fmt.Errorf("unexpected HTTP status: %s", response.Status)
+		return nil, geoDownloadHTTPError(response.StatusCode)
 	}
 	if response.ContentLength > maxGeoDownloadBytes {
 		return nil, errors.New("GEO download exceeds size limit")
@@ -385,7 +516,10 @@ func validateMMDBGeoData(geoType string, database *maxminddb.Reader) error {
 	return errors.New("MMDB database has no usable country records")
 }
 
-func replaceGeoData(geoType string, path string, data []byte) (err error) {
+func replaceGeoData(ctx context.Context, geoType string, path string, data []byte) (err error) {
+	if err = ctx.Err(); err != nil {
+		return err
+	}
 	directory := filepath.Dir(path)
 	if err = os.MkdirAll(directory, 0o755); err != nil {
 		return err
@@ -409,6 +543,10 @@ func replaceGeoData(geoType string, path string, data []byte) (err error) {
 		return err
 	}
 	if err = temp.Close(); err != nil {
+		return err
+	}
+	// Cancellation during staging must not publish the candidate database.
+	if err = ctx.Err(); err != nil {
 		return err
 	}
 	if err = replaceFileAtomic(tempPath, path); err != nil {

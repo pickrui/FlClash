@@ -6,10 +6,12 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/controller.dart';
+import 'package:fl_clash/core/controller.dart' show ConfigValidationException;
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
-import 'package:flutter/cupertino.dart';
+import 'bounded_http_client_adapter.dart';
+import 'http_read_race.dart';
 
 class AppUpdateInfo {
   const AppUpdateInfo({this.releaseNotes});
@@ -162,22 +164,39 @@ String? extractReleaseNotesFromChangelog(String source, String tagName) {
 
 class Request {
   late final Dio dio;
-  late final Dio _clashDio;
-  late final Dio _apiDio;
-  String? userAgent;
+  final List<String> Function(Uri uri)? _readRoutes;
+  final bool Function(String host) _isApiDomain;
+  final Duration _readTimeout;
+  static const _maxReadBytes = 64 * 1024 * 1024;
+  final _apiOptions = BaseOptions(
+    headers: {'User-Agent': browserUa},
+    connectTimeout: const Duration(seconds: 10),
+    sendTimeout: const Duration(seconds: 15),
+    receiveTimeout: const Duration(seconds: 15),
+  );
+  final _resourceOptions = BaseOptions(
+    connectTimeout: const Duration(seconds: 10),
+    sendTimeout: const Duration(seconds: 30),
+    receiveTimeout: const Duration(seconds: 30),
+  );
 
-  Request() {
-    dio = Dio(BaseOptions(headers: {'User-Agent': browserUa}));
-    _apiDio = Dio(BaseOptions(headers: {'User-Agent': browserUa}));
-    _apiDio.httpClientAdapter = createFlClashHttpClientAdapter(
-      findProxy: FlClashHttpOverrides.handleCloudApiFindProxy,
-      allowBadCertificate: () => FlClashTemporaryTls.allowBadCertificate,
+  Request({
+    List<String> Function(Uri uri)? readRoutes,
+    bool Function(String host)? isApiDomain,
+    Duration readTimeout = const Duration(seconds: 30),
+  }) : _readRoutes = readRoutes,
+       _isApiDomain = isApiDomain ?? Secrets.isApiDomain,
+       _readTimeout = readTimeout {
+    // IP detection must report the selected exit, even if that exit fails.
+    dio = Dio(
+      BaseOptions(
+        headers: {'User-Agent': browserUa},
+        connectTimeout: const Duration(seconds: 10),
+      ),
     );
-    _clashDio = Dio();
-    _clashDio.httpClientAdapter = createFlClashHttpClientAdapter(
+    dio.httpClientAdapter = createFlClashHttpClientAdapter(
       findProxy: FlClashHttpOverrides.handleFindProxy,
       allowBadCertificate: () => FlClashTemporaryTls.allowBadCertificate,
-      userAgent: () => appController.ua,
     );
   }
 
@@ -237,9 +256,65 @@ class Request {
   Future<Response<T>> _getWithRedirect<T>(
     String url, {
     required Options options,
-    Dio? client,
+    bool isApiRequest = false,
+    FutureOr<void> Function(Response<T> response)? validate,
   }) async {
-    final dio = client ?? _clashDio;
+    final clientOptions = isApiRequest ? _apiOptions : _resourceOptions;
+    final uri = Uri.parse(url);
+    final paths =
+        _readRoutes?.call(uri).toSet() ??
+        (isApiRequest
+                ? FlClashHttpOverrides.handleCloudApiFindProxy(uri)
+                : FlClashHttpOverrides.handleResourceFindProxy(uri))
+            .split(';')
+            .map((path) => path.trim())
+            .toSet();
+    return raceHttpReads<Response<T>>(
+      paths.map(
+        (path) => (token) async {
+          final routed = Dio(clientOptions.copyWith());
+          routed.httpClientAdapter = BoundedHttpClientAdapter(
+            createFlClashHttpClientAdapter(
+              findProxy: (target) =>
+                  target.host.toLowerCase() == 'localhost' ||
+                      (InternetAddress.tryParse(target.host)?.isLoopback ??
+                          false)
+                  ? 'DIRECT'
+                  : path,
+              allowBadCertificate: () =>
+                  FlClashTemporaryTls.allowBadCertificate,
+              userAgent: isApiRequest
+                  ? null
+                  : () => appController.isAttach ? appController.ua : null,
+            ),
+            maxBytes: _maxReadBytes,
+          );
+          try {
+            final response = await _getWithRedirectOnRoute<T>(
+              url,
+              options: options,
+              client: routed,
+              cancelToken: token,
+            );
+            if (token.isCancelled) throw token.cancelError!;
+            await validate?.call(response);
+            if (token.isCancelled) throw token.cancelError!;
+            return response;
+          } finally {
+            routed.close(force: true);
+          }
+        },
+      ),
+      timeout: _readTimeout,
+    );
+  }
+
+  Future<Response<T>> _getWithRedirectOnRoute<T>(
+    String url, {
+    required Options options,
+    required Dio client,
+    required CancelToken cancelToken,
+  }) async {
     final request = _resolveBasicAuth(url, options.headers);
     final opts = options.copyWith(
       followRedirects: false,
@@ -248,7 +323,11 @@ class Request {
     );
 
     var requestUrl = request.url;
-    var response = await dio.get<T>(requestUrl, options: opts);
+    var response = await client.get<T>(
+      requestUrl,
+      options: opts,
+      cancelToken: cancelToken,
+    );
     int redirectCount = 0;
     while ([
           HttpStatus.movedTemporarily,
@@ -261,15 +340,17 @@ class Request {
       final location = response.headers.value(HttpHeaders.locationHeader);
       if (location == null || location.isEmpty) break;
       final redirectUrl = Uri.parse(requestUrl).resolve(location).toString();
-      response = await dio.get<T>(
+      response = await client.get<T>(
         redirectUrl,
+        cancelToken: cancelToken,
         options: _getOptionsForUrl(opts, request.authOrigin, redirectUrl),
       );
       requestUrl = redirectUrl;
       redirectCount++;
     }
 
-    if (response.statusCode != null && response.statusCode! >= 400) {
+    final status = response.statusCode;
+    if (status == null || status < 200 || status >= 300) {
       throw DioException(
         requestOptions: response.requestOptions,
         response: response,
@@ -279,13 +360,23 @@ class Request {
     return response;
   }
 
-  Future<Response<Uint8List>> getFileResponseForUrl(String url) async {
+  Future<Response<Uint8List>> getFileResponseForUrl(
+    String url, {
+    FutureOr<void> Function(Uint8List bytes)? validate,
+  }) async {
     final uri = Uri.tryParse(url);
-    final isApiDomain = uri != null && Secrets.isApiDomain(uri.host);
+    final isApiDomain = uri != null && _isApiDomain(uri.host);
     try {
       return await _getWithRedirect<Uint8List>(
         url,
-        client: isApiDomain ? _apiDio : null,
+        isApiRequest: isApiDomain,
+        validate: (response) async {
+          final bytes = response.data;
+          if (bytes == null || bytes.isEmpty) {
+            throw const FormatException('Subscription response is empty');
+          }
+          await validate?.call(bytes);
+        },
         options: Options(
           headers: _flclashIdentityHeaders,
           responseType: ResponseType.bytes,
@@ -295,8 +386,9 @@ class Request {
       commonPrint.log(
         isApiDomain
             ? 'oixCloud profile request failed: ${e is DioException ? e.type.name : e.runtimeType}'
-            : 'getFileResponseForUrl error ${e.toString()}',
+            : 'Profile request failed: ${e is DioException ? '${e.type.name}, HTTP ${e.response?.statusCode ?? 0}' : e.runtimeType}',
       );
+      if (e is ConfigValidationException) rethrow;
       if (e is DioException) {
         if (FlClashTemporaryTls.isCertificateVerifyFailed(e)) {
           rethrow;
@@ -325,56 +417,33 @@ class Request {
     );
   }
 
-  Future<void> downloadFile(String url, String savePath) async {
-    try {
-      final saveFile = File(savePath);
-      await saveFile.parent.create(recursive: true);
-      await dio.download(
-        url,
-        savePath,
-        options: Options(
-          responseType: ResponseType.bytes,
-          validateStatus: (status) => status != null && status < 400,
-        ),
-      );
-    } catch (error) {
-      commonPrint.log('downloadFile error ${error.toString()}');
-      if (error is DioException) {
-        if (error.type == DioExceptionType.unknown) {
-          throw appLocalizations.unknownNetworkError;
-        } else if (error.type == DioExceptionType.badResponse) {
-          throw appLocalizations.networkException;
-        }
-        rethrow;
-      }
-      throw appLocalizations.unknownNetworkError;
-    }
-  }
-
-  Future<MemoryImage?> getImage(String url) async {
-    if (url.isEmpty) return null;
-    final response = await dio.get<Uint8List>(
-      url,
-      options: Options(responseType: ResponseType.bytes),
-    );
-    final data = response.data;
-    if (data == null) return null;
-    return MemoryImage(data);
-  }
-
   Future<AppUpdateInfo?> checkForUpdate() async {
     for (final domain in Secrets.apiDomains) {
       try {
-        final response = await _apiDio.get(
-          'https://$domain/api/v1/version/get',
-          queryParameters: {
+        final response = await _getWithRedirect<String>(
+          Uri.https(domain, '/api/v1/version/get', {
             't': DateTime.now().millisecondsSinceEpoch.toString(),
+          }).toString(),
+          isApiRequest: true,
+          // Redirect pages may be HTML; decode only the final response as JSON.
+          options: Options(responseType: ResponseType.plain),
+          validate: (response) {
+            final data = jsonDecode(response.data ?? '');
+            if (data is! Map<String, dynamic> || data['ret'] != 200) {
+              throw const FormatException('Invalid version response');
+            }
+            final value = data['data'];
+            final version = value is Map<String, dynamic>
+                ? value['version']
+                : value;
+            if (version is! String || version.trim().isEmpty) {
+              throw const FormatException('Missing version');
+            }
           },
-          options: Options(responseType: ResponseType.json),
         );
         if (response.statusCode != 200) continue;
-        final data = response.data as Map<String, dynamic>?;
-        if (data == null || (data['ret'] as int?) != 200) continue;
+        final data = jsonDecode(response.data ?? '');
+        if (data is! Map<String, dynamic> || data['ret'] != 200) continue;
 
         final versionData = data['data'];
         final String? remoteVersion = versionData is Map<String, dynamic>
@@ -426,14 +495,65 @@ class Request {
             : extractReleaseNotesFromChangelog(changelog, currentTagName));
   }
 
+  // GitHub metadata and user subscriptions share the read-race policy.
+  // Keep release lookups restricted to these fixed public endpoints.
+  Future<Response<T>> _getPublicGitHub<T>(
+    String url,
+    ResponseType type, {
+    required bool Function(T? data) validate,
+  }) async {
+    final uri = Uri.parse(url);
+    if (uri.userInfo.isNotEmpty ||
+        uri.hasQuery ||
+        !const {
+          'api.github.com',
+          'raw.githubusercontent.com',
+        }.contains(uri.host)) {
+      throw ArgumentError('Expected a public GitHub release URL');
+    }
+    final routes = FlClashHttpOverrides.handleCloudApiFindProxy(
+      uri,
+    ).split(';').map((route) => route.trim()).toSet();
+    final clients = <Dio>[];
+    try {
+      return await raceHttpReads<Response<T>>(
+        routes.map(
+          (route) => (token) async {
+            final client = Dio(_apiOptions.copyWith());
+            client.httpClientAdapter = BoundedHttpClientAdapter(
+              createFlClashHttpClientAdapter(findProxy: (_) => route),
+              maxBytes: _maxReadBytes,
+            );
+            clients.add(client);
+            final response = await client.get<T>(
+              url,
+              cancelToken: token,
+              options: Options(responseType: type),
+            );
+            if (!validate(response.data)) {
+              throw const FormatException('Invalid public release data');
+            }
+            return response;
+          },
+        ),
+        timeout: httpTimeoutDuration,
+        isTerminalError: isTerminalPublicHttpReadError,
+      );
+    } finally {
+      for (final client in clients) {
+        client.close(force: true);
+      }
+    }
+  }
+
   Future<({String? body, String tagName})?> _fetchLatestGitHubRelease() async {
     try {
-      final response = await _apiDio
-          .get<Map<String, dynamic>>(
-            'https://api.github.com/repos/$releaseRepository/releases/latest',
-            options: Options(responseType: ResponseType.json),
-          )
-          .timeout(httpTimeoutDuration);
+      final response = await _getPublicGitHub<Map<String, dynamic>>(
+        'https://api.github.com/repos/$releaseRepository/releases/latest',
+        ResponseType.json,
+        validate: (data) =>
+            normalizeReleaseTagName(data?['tag_name'] as String?) != null,
+      );
       final data = response.data;
       final tagName = normalizeReleaseTagName(data?['tag_name'] as String?);
       if (tagName == null) return null;
@@ -449,12 +569,12 @@ class Request {
 
   Future<String?> _fetchGitHubChangelog() async {
     try {
-      final response = await _apiDio
-          .get<String>(
-            'https://raw.githubusercontent.com/$releaseRepository/main/CHANGELOG.md',
-            options: Options(responseType: ResponseType.plain),
-          )
-          .timeout(httpTimeoutDuration);
+      final response = await _getPublicGitHub<String>(
+        'https://raw.githubusercontent.com/$releaseRepository/main/CHANGELOG.md',
+        ResponseType.plain,
+        validate: (data) =>
+            data != null && latestReleaseTagNameFromChangelog(data) != null,
+      );
       return response.data;
     } catch (error) {
       commonPrint.log(
@@ -476,44 +596,57 @@ class Request {
   };
 
   Future<Result<IpInfo?>> checkIp({CancelToken? cancelToken}) async {
-    var failureCount = 0;
     final token = cancelToken ?? CancelToken();
-    final futures = _ipInfoSources.entries.map((source) async {
-      final Completer<Result<IpInfo?>> completer = Completer();
-      void handleFailRes() {
-        if (!completer.isCompleted && failureCount == _ipInfoSources.length) {
-          completer.complete(Result.success(null));
+    final result = Completer<Result<IpInfo?>>();
+    var remaining = _ipInfoSources.length;
+    final deadline = Timer(const Duration(seconds: 10), () {
+      if (!result.isCompleted) result.complete(Result.success(null));
+    });
+    unawaited(
+      token.whenCancel.then((_) {
+        if (!result.isCompleted) result.complete(Result.error('cancelled'));
+      }),
+    );
+
+    Future<void> checkSource(
+      MapEntry<String, IpInfo Function(Map<String, dynamic>)> source,
+    ) async {
+      try {
+        final response = await dio.get<Map<String, dynamic>>(
+          source.key,
+          cancelToken: token,
+          options: Options(
+            responseType: ResponseType.json,
+            // A connection from the previous VPN route must not be reused.
+            persistentConnection: false,
+          ),
+        );
+        if (response.statusCode == HttpStatus.ok && response.data != null) {
+          final info = source.value(response.data!);
+          if (InternetAddress.tryParse(info.ip) != null &&
+              RegExp(r'^[a-zA-Z]{2}$').hasMatch(info.countryCode) &&
+              !result.isCompleted) {
+            result.complete(Result.success(info));
+          }
+        }
+      } catch (_) {
+        // One failed or malformed source must not win the race.
+      } finally {
+        if (--remaining == 0 && !result.isCompleted) {
+          result.complete(Result.success(null));
         }
       }
+    }
 
-      final future = dio
-          .get<Map<String, dynamic>>(
-            source.key,
-            cancelToken: token,
-            options: Options(responseType: ResponseType.json),
-          )
-          .timeout(const Duration(seconds: 10));
-      future
-          .then((res) {
-            if (res.statusCode == HttpStatus.ok && res.data != null) {
-              completer.complete(Result.success(source.value(res.data!)));
-              return;
-            }
-            failureCount++;
-            handleFailRes();
-          })
-          .catchError((e) {
-            failureCount++;
-            if (e is DioException && e.type == DioExceptionType.cancel) {
-              completer.complete(Result.error('cancelled'));
-            }
-            handleFailRes();
-          });
-      return completer.future;
-    });
-    final res = await Future.any(futures);
-    token.cancel();
-    return res;
+    for (final source in _ipInfoSources.entries) {
+      unawaited(checkSource(source));
+    }
+    try {
+      return await result.future;
+    } finally {
+      deadline.cancel();
+      token.cancel();
+    }
   }
 }
 

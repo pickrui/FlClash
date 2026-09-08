@@ -5,6 +5,7 @@ import 'package:fl_clash/plugins/app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:fl_clash/common/icon_file_service.dart';
 
 class CommonTargetIcon extends StatelessWidget {
   final String src;
@@ -41,7 +42,9 @@ class CommonTargetIcon extends StatelessWidget {
   }
 }
 
-final _cacheMange = DefaultCacheManager();
+final _cacheMange = CacheManager(
+  Config(DefaultCacheManager.key, fileService: IconFileService()),
+);
 
 class ImageCacheWidget extends StatefulWidget {
   final String src;
@@ -117,7 +120,7 @@ class _ImageCacheWidgetState extends State<ImageCacheWidget> {
         if (data == null) {
           return widget.defaultWidget;
         }
-        return widget.src.isSvg
+        return isSvgIconUrl(widget.src)
             ? SvgPicture.file(
                 data,
                 errorBuilder: (_, _, _) => widget.defaultWidget,

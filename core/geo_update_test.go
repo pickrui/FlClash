@@ -240,7 +240,7 @@ func TestDownloadGeoDataRejectsDeclaredOversize(t *testing.T) {
 	}))
 	defer server.Close()
 
-	if _, err := downloadGeoData(context.Background(), server.URL); err == nil {
+	if _, err := downloadGeoData(context.Background(), server.URL, nil); err == nil {
 		t.Fatal("downloadGeoData() accepted an oversized response")
 	}
 }
@@ -257,7 +257,7 @@ func TestDownloadGeoDataRejectsStreamBeyondLimit(t *testing.T) {
 	}))
 	defer server.Close()
 
-	if _, err := downloadGeoData(context.Background(), server.URL); err == nil {
+	if _, err := downloadGeoData(context.Background(), server.URL, nil); err == nil {
 		t.Fatal("downloadGeoData() accepted a stream beyond the size limit")
 	}
 }
@@ -460,7 +460,7 @@ func TestGeoResourcePathRejectsUnexpectedNames(t *testing.T) {
 }
 
 func TestDownloadGeoDataRejectsNonHTTPURL(t *testing.T) {
-	if _, err := downloadGeoData(context.Background(), "file:///tmp/geo.dat"); err == nil {
+	if _, err := downloadGeoData(context.Background(), "file:///tmp/geo.dat", nil); err == nil {
 		t.Fatal("downloadGeoData() accepted a non-HTTP URL")
 	}
 }
@@ -495,7 +495,7 @@ func TestManualGeoUpdateRefreshesReadersWithoutRestart(t *testing.T) {
 		{"ASN", constant.Path.ASN(), "asn-64512.mmdb", "asn-64513.mmdb"},
 	} {
 		t.Run(test.geoType, func(t *testing.T) {
-			if err := replaceGeoData(test.geoType, test.path, readFixture(test.oldFile)); err != nil {
+			if err := replaceGeoData(context.Background(), test.geoType, test.path, readFixture(test.oldFile)); err != nil {
 				t.Fatal(err)
 			}
 			ip := net.IPv4(1, 2, 3, 4)
@@ -561,5 +561,99 @@ func TestManualGeoUpdateRefreshesReadersWithoutRestart(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestGeoFileReplacementCleansTemporaryFiles(t *testing.T) {
+	for _, fail := range []bool{false, true} {
+		t.Run(map[bool]string{false: "success", true: "install failure"}[fail], func(t *testing.T) {
+			directory := t.TempDir()
+			path := filepath.Join(directory, "GEOIP.dat")
+			if fail {
+				if err := os.Mkdir(path, 0o700); err != nil {
+					t.Fatal(err)
+				}
+			}
+			data := geoTestIPData(t)
+			err := replaceGeoData(context.Background(), "GEOIP", path, data)
+			if (err != nil) != fail {
+				t.Fatalf("replaceGeoData() error = %v, want failure %v", err, fail)
+			}
+			entries, err := os.ReadDir(directory)
+			if err != nil || len(entries) != 1 || entries[0].Name() != "GEOIP.dat" {
+				t.Fatalf("replacement leaked a temporary file: %v, %v", entries, err)
+			}
+			if !fail {
+				actual, err := os.ReadFile(path)
+				if err != nil || !bytes.Equal(actual, data) {
+					t.Fatalf("installed data = %x, %v", actual, err)
+				}
+			}
+		})
+	}
+}
+
+func TestCanceledGeoUpdatePreservesExistingFile(t *testing.T) {
+	started := make(chan struct{})
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("partial download"))
+		w.(http.Flusher).Flush()
+		close(started)
+		<-r.Context().Done()
+	}))
+	defer server.Close()
+	path := filepath.Join(t.TempDir(), "GEOIP.dat")
+	original := geoTestIPData(t)
+	if err := os.WriteFile(path, original, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	result := make(chan error, 1)
+	go func() { result <- updateGeoDataLockedFromURL(ctx, "GEOIP", path, server.URL) }()
+	select {
+	case <-started:
+	case <-time.After(5 * time.Second):
+		t.Fatal("download did not start")
+	}
+	cancel()
+	select {
+	case err := <-result:
+		if !errors.Is(err, context.Canceled) {
+			t.Fatalf("update did not preserve cancellation: %v", err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("update did not stop after cancellation")
+	}
+	current, err := os.ReadFile(path)
+	if err != nil || !bytes.Equal(current, original) {
+		t.Fatalf("canceled update changed the original file: %x, %v", current, err)
+	}
+	entries, err := os.ReadDir(filepath.Dir(path))
+	if err != nil || len(entries) != 1 || entries[0].Name() != "GEOIP.dat" {
+		t.Fatalf("canceled update leaked a temporary file: %v, %v", entries, err)
+	}
+}
+
+func TestCanceledGeoReplacementPreservesExistingFile(t *testing.T) {
+	directory := t.TempDir()
+	path := filepath.Join(directory, "GEOIP.dat")
+	original := []byte("previous database")
+	if err := os.WriteFile(path, original, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if err := replaceGeoData(ctx, "GEOIP", path, geoTestIPData(t)); !errors.Is(err, context.Canceled) {
+		t.Fatalf("canceled replacement = %v, want context cancellation", err)
+	}
+	current, err := os.ReadFile(path)
+	if err != nil || !bytes.Equal(current, original) {
+		t.Fatalf("canceled replacement changed the previous database: %x, %v", current, err)
+	}
+	entries, err := os.ReadDir(directory)
+	if err != nil || len(entries) != 1 || entries[0].Name() != "GEOIP.dat" {
+		t.Fatalf("canceled replacement leaked staging files: %v, %v", entries, err)
 	}
 }

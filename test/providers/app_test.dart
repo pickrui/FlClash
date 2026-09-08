@@ -420,6 +420,103 @@ void main() {
       request.dio.httpClientAdapter = originalAdapter;
     });
 
+    test('all failed sources stop loading and permit a later retry', () async {
+      final adapter = _ControlledIpAdapter();
+      request.dio.httpClientAdapter = adapter;
+      final notifier = container.read(networkDetectionProvider.notifier);
+      container.read(initProvider.notifier).value = true;
+      notifier.startCheck();
+      await Future.delayed(commonDuration + const Duration(milliseconds: 50));
+      for (final pending in adapter.pending) {
+        pending.complete(ResponseBody.fromString('{}', 200));
+      }
+      await pumpEventQueue();
+      expect(container.read(networkDetectionProvider).isLoading, false);
+      expect(container.read(networkDetectionProvider).ipInfo, isNull);
+      adapter.pending.clear();
+      notifier.startCheck();
+      await Future.delayed(commonDuration + const Duration(milliseconds: 50));
+      adapter.succeed('1.1.1.1');
+      await pumpEventQueue();
+      expect(container.read(networkDetectionProvider).ipInfo?.ip, '1.1.1.1');
+    });
+
+    test(
+      'stopping clears the old IP before checking the direct route',
+      () async {
+        final adapter = _ControlledIpAdapter();
+        request.dio.httpClientAdapter = adapter;
+        container.read(initProvider.notifier).value = true;
+        container.read(runTimeProvider.notifier).value = 1;
+        final notifier = container.read(networkDetectionProvider.notifier);
+        notifier.startCheck();
+        await Future.delayed(commonDuration + const Duration(milliseconds: 50));
+        adapter.succeed('2.2.2.2');
+        await pumpEventQueue();
+        expect(container.read(networkDetectionProvider).ipInfo?.ip, '2.2.2.2');
+        adapter.pending.clear();
+        container.read(runTimeProvider.notifier).value = null;
+        await container.pump();
+        expect(container.read(networkDetectionProvider).ipInfo, isNull);
+        expect(container.read(networkDetectionProvider).isLoading, true);
+        await Future.delayed(commonDuration + const Duration(milliseconds: 50));
+        adapter.succeed('1.1.1.1');
+        await pumpEventQueue();
+        expect(container.read(networkDetectionProvider).ipInfo?.ip, '1.1.1.1');
+        // Another refresh while stopped must not reuse the cached carrier IP.
+        adapter.pending.clear();
+        notifier.startCheck();
+        await Future.delayed(commonDuration + const Duration(milliseconds: 50));
+        adapter.succeed('3.3.3.3');
+        await pumpEventQueue();
+        expect(container.read(networkDetectionProvider).ipInfo?.ip, '3.3.3.3');
+        expect(adapter.usedPersistentConnection, false);
+      },
+    );
+
+    test('invalid IP data cannot win over another valid source', () async {
+      final adapter = _ControlledIpAdapter();
+      request.dio.httpClientAdapter = adapter;
+      final checking = request.checkIp();
+      await pumpEventQueue();
+      adapter.succeed('invalid');
+      await pumpEventQueue();
+      adapter.pending[1].complete(
+        ResponseBody.fromString(
+          '{"ip":"1.1.1.1","cc":"US"}',
+          200,
+          headers: {
+            Headers.contentTypeHeader: ['application/json'],
+          },
+        ),
+      );
+      expect((await checking).data?.ip, '1.1.1.1');
+    });
+
+    test('disposing cancels a pending check', () async {
+      final adapter = _ControlledIpAdapter();
+      request.dio.httpClientAdapter = adapter;
+      final owner = ProviderContainer();
+      owner.read(initProvider.notifier).value = true;
+      owner.read(networkDetectionProvider.notifier).startCheck();
+      await Future.delayed(commonDuration + const Duration(milliseconds: 50));
+      owner.dispose();
+      await pumpEventQueue();
+      expect(adapter.cancellations, 7);
+    });
+
+    test(
+      'a stalled request reaches its deadline and cancels all sources',
+      () async {
+        final adapter = _ControlledIpAdapter();
+        request.dio.httpClientAdapter = adapter;
+        final result = await request.checkIp();
+        expect(result.data, isNull);
+        await pumpEventQueue();
+        expect(adapter.cancellations, 7);
+      },
+    );
+
     test(
       'ignores a canceled stale check after a newer check succeeds',
       () async {
@@ -515,4 +612,37 @@ class _FakePathProvider extends PathProviderPlatform {
 
   @override
   Future<String?> getDownloadsPath() async => path;
+}
+
+class _ControlledIpAdapter implements HttpClientAdapter {
+  final pending = <Completer<ResponseBody>>[];
+  int cancellations = 0;
+  bool usedPersistentConnection = false;
+  void succeed(String ip) {
+    pending.first.complete(
+      ResponseBody.fromString(
+        '{"ip":"$ip","country_code":"US"}',
+        200,
+        headers: {
+          Headers.contentTypeHeader: ['application/json'],
+        },
+      ),
+    );
+  }
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) {
+    usedPersistentConnection |= options.persistentConnection;
+    final completer = Completer<ResponseBody>();
+    pending.add(completer);
+    cancelFuture?.then((_) => cancellations++);
+    return completer.future;
+  }
+
+  @override
+  void close({bool force = false}) {}
 }

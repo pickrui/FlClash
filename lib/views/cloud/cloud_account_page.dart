@@ -163,21 +163,30 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
   }
 
   Widget _buildLoggedIn(CloudAccountState state) {
+    final busy = state.isLoading || state.isRefreshing || state.isSyncing;
     if (state.profile == null) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const CircularProgressIndicator(),
+            if (busy)
+              const CircularProgressIndicator()
+            else ...[
+              Icon(Icons.cloud_off, color: context.colorScheme.error),
+              const SizedBox(height: 16),
+              Text(state.error ?? AppLocalizations.current.noInfo),
+            ],
             const SizedBox(height: 16),
             TextButton.icon(
               icon: const Icon(Icons.refresh),
               label: Text(AppLocalizations.current.refresh),
-              onPressed: () {
-                ref
-                    .read(cloudAccountProvider.notifier)
-                    .refreshProfile(force: true);
-              },
+              onPressed: busy
+                  ? null
+                  : () {
+                      ref
+                          .read(cloudAccountProvider.notifier)
+                          .refreshProfile(force: true);
+                    },
             ),
           ],
         ),
@@ -187,6 +196,31 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
+          if (state.error case final error?) ...[
+            CommonCard(
+              isError: true,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Icon(Icons.error_outline, color: context.colorScheme.error),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(error)),
+                    IconButton(
+                      onPressed: busy
+                          ? null
+                          : () => ref
+                                .read(cloudAccountProvider.notifier)
+                                .refreshManagedSubscription(),
+                      icon: const Icon(Icons.refresh),
+                      tooltip: AppLocalizations.current.refresh,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
           CloudProfileCard(profile: state.profile!),
           const SizedBox(height: 16),
           CommonCard(

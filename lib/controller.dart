@@ -675,7 +675,6 @@ extension InitControllerExt on AppController {
     await _connectCore();
     await _initCore();
     await _initStatus();
-    autoUpdateProfiles();
     _ref.read(initProvider.notifier).value = true;
   }
 
@@ -914,7 +913,11 @@ extension ProfilesControllerExt on AppController {
   Future<Profile> persistProfile(
     Profile profile,
     Future<Profile> Function() update,
-  ) {
+  ) async {
+    // Account bootstrap may remove expired profiles using this same lock.
+    if (profile.isoixCloudProfile) {
+      await _ref.read(cloudAccountProvider.notifier).ensureReady();
+    }
     return storageLock.synchronized(() async {
       Future<Profile> persist() async {
         final updatedProfile = await update();
@@ -983,6 +986,11 @@ extension ProfilesControllerExt on AppController {
 
   Future<Profile> _updateProfileWithCertificateRetry(Profile profile) {
     return _runWithCertificateRetry(() async {
+      if (profile.isoixCloudProfile) {
+        await _ref
+            .read(cloudAccountProvider.notifier)
+            .prepareManagedConfigUpdate();
+      }
       return persistProfile(profile, profile.update);
     }, handleCloudUnauthorized: profile.isoixCloudProfile);
   }

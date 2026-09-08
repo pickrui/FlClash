@@ -7,6 +7,8 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/bounded_http_client_adapter.dart';
+import 'package:fl_clash/common/http_read_race.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/services/age_crypto.dart';
 import 'package:fl_clash/state.dart';
@@ -24,6 +26,11 @@ const int _httpServerError = 500;
 // sequential domain failover only when the connection was never established.
 @visibleForTesting
 const String cloudNonIdempotentExtraKey = 'flclash_non_idempotent';
+
+@visibleForTesting
+const String cloudReadRouteExtraKey = 'flclash_cloud_read_route';
+const String _cloudReadRaceExtraKey = 'flclash_cloud_read_race';
+const String _cloudReadDomainExtraKey = 'flclash_cloud_read_domain';
 
 @visibleForTesting
 const String cloudSequentialFailoverExtraKey =
@@ -67,11 +74,137 @@ String _apiRootUrl(String domain) {
 
 String _apiV1BaseUrl(String domain) => '${_apiRootUrl(domain)}/api/v1';
 
-HttpClientAdapter _createCloudApiAdapter() {
-  return createFlClashHttpClientAdapter(
+@visibleForTesting
+bool canReplayCloudRequest(RequestOptions options) {
+  if (options.extra[cloudNonIdempotentExtraKey] == true) return false;
+  final method = options.method.toUpperCase();
+  if (method == 'GET' || method == 'HEAD') return true;
+  if (method != 'POST') return false;
+  return const {
+    '/api/v1/register/config',
+    '/api/v1/information',
+    '/api/v1/shop/list',
+    '/api/v1/shop/bought',
+    '/api/v1/pay/methods',
+    '/api/v1/pay/status',
+  }.contains(options.uri.path);
+}
+
+List<String> _cloudReadRoutes(Uri uri) {
+  final routes = FlClashHttpOverrides.handleCloudApiFindProxy(uri)
+      .split(';')
+      .map((route) => route.trim())
+      .where((route) => route == 'DIRECT' || route.startsWith('PROXY '))
+      .toList();
+  return routes.isEmpty ? const ['DIRECT'] : routes;
+}
+
+HttpClientAdapter _createCloudApiAdapter() => CloudReadRouteAdapter(
+  fallback: createFlClashHttpClientAdapter(
     findProxy: FlClashHttpOverrides.handleCloudApiFindProxy,
     allowBadCertificate: () => FlClashTemporaryTls.allowBadCertificate,
-  );
+  ),
+  createRouteAdapter: (route) => createFlClashHttpClientAdapter(
+    findProxy: (uri) {
+      final host = uri.host.toLowerCase();
+      return host == 'localhost' ||
+              (InternetAddress.tryParse(host)?.isLoopback ?? false)
+          ? 'DIRECT'
+          : route;
+    },
+    allowBadCertificate: () => FlClashTemporaryTls.allowBadCertificate,
+  ),
+);
+
+// Each explicit read attempt uses a separate connection pool for its route.
+// This adapter owns each transport; _syncRead selects the winning route.
+@visibleForTesting
+class CloudReadRouteAdapter implements HttpClientAdapter {
+  CloudReadRouteAdapter({
+    required HttpClientAdapter fallback,
+    required HttpClientAdapter Function(String route) createRouteAdapter,
+  }) : _fallback = fallback,
+       _createRouteAdapter = createRouteAdapter;
+
+  final HttpClientAdapter _fallback;
+  final HttpClientAdapter Function(String route) _createRouteAdapter;
+  final _active = <HttpClientAdapter>{};
+  bool _closed = false;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    if (_closed) throw StateError('Cloud route adapter is closed');
+    final route = options.extra[cloudReadRouteExtraKey];
+    if (!canReplayCloudRequest(options) || route is! String) {
+      return _fallback.fetch(options, requestStream, cancelFuture);
+    }
+    final adapter = _createRouteAdapter(route);
+    _active.add(adapter);
+    var released = false;
+    StreamSubscription<void>? cancellation;
+    void release() {
+      if (released) return;
+      released = true;
+      final subscription = cancellation;
+      if (subscription != null) unawaited(subscription.cancel());
+      _active.remove(adapter);
+      adapter.close(force: true);
+    }
+
+    cancellation = cancelFuture?.asStream().listen((_) => release());
+    try {
+      final response = await adapter.fetch(
+        options,
+        requestStream,
+        cancelFuture,
+      );
+      if (released) {
+        await response.stream.listen(null).cancel();
+        throw DioException.requestCancelled(
+          requestOptions: options,
+          reason: 'Cloud read route canceled',
+        );
+      }
+      final stream = response.stream;
+      response.stream = () async* {
+        try {
+          yield* stream;
+        } finally {
+          release();
+        }
+      }();
+      return response;
+    } catch (_) {
+      release();
+      rethrow;
+    }
+  }
+
+  @override
+  void close({bool force = false}) {
+    if (_closed) return;
+    _closed = true;
+    _fallback.close(force: force);
+    for (final adapter in _active.toList()) {
+      adapter.close(force: force);
+    }
+    _active.clear();
+  }
+}
+
+class _CloudReadOperation {
+  DioException? unauthorizedError;
+}
+
+class _CloudReadResponseException extends CloudApiException {
+  final int status;
+
+  const _CloudReadResponseException(this.status, String message)
+    : super(message);
 }
 
 // -- DTOs --
@@ -231,6 +364,7 @@ class CloudApiService {
   Dio? _dio;
   String? _cachedToken;
   int _sessionRevision = 0;
+  final _activeSyncReads = <CancelToken, _CloudReadOperation>{};
   static const _sessionRevisionKey = 'flclash_cloud_session_revision';
 
   static final RegExp _bearerTokenPattern = RegExp(
@@ -238,10 +372,21 @@ class CloudApiService {
     caseSensitive: false,
   );
 
-  CloudApiService._();
+  final Duration _syncRequestTimeout;
+  final List<String> Function(Uri uri) _readRoutes;
+
+  CloudApiService._()
+    : _syncRequestTimeout = const Duration(seconds: 30),
+      _readRoutes = _cloudReadRoutes;
 
   @visibleForTesting
-  CloudApiService.forTesting({required Dio client}) : _dio = client {
+  CloudApiService.forTesting({
+    required Dio client,
+    Duration syncRequestTimeout = const Duration(seconds: 30),
+    List<String> readRoutes = const ['DIRECT'],
+  }) : _dio = client,
+       _syncRequestTimeout = syncRequestTimeout,
+       _readRoutes = ((_) => List<String>.of(readRoutes)) {
     _installInterceptors(client);
   }
 
@@ -269,7 +414,7 @@ class CloudApiService {
         },
       ),
     );
-    dio.httpClientAdapter = HedgedApiAdapter(_createCloudApiAdapter());
+    dio.httpClientAdapter = CloudApiAdapter(_createCloudApiAdapter());
     _installInterceptors(dio);
     return dio;
   }
@@ -283,15 +428,22 @@ class CloudApiService {
     RequestOptions request,
     Response<dynamic>? response,
   ) {
-    setToken(null);
+    // Preserve this authoritative error while canceling the other reads from
+    // the invalidated session; canceling this token would mask its 401.
+    final operation = _activeSyncReads[request.cancelToken];
+    _setToken(null, authoritativeRequest: request.cancelToken);
     final invalidatedRevision = _sessionRevision;
-    return DioException(
+    final error = DioException(
       requestOptions: request,
       response: response,
       error: _CloudSessionUnauthorizedException(
         () => _sessionRevision == invalidatedRevision,
       ),
     );
+    // A sibling route may observe cancellation before this interceptor returns
+    // the 401. Preserve the cause for the operation, not just this branch.
+    operation?.unauthorizedError = error;
+    return error;
   }
 
   bool _isStaleRequest(RequestOptions request) =>
@@ -407,24 +559,40 @@ class CloudApiService {
     return normalized;
   }
 
-  void setToken(String? token) {
+  void setToken(String? token) => _setToken(token);
+
+  void _setToken(String? token, {CancelToken? authoritativeRequest}) {
     final normalizedToken = normalizeToken(token);
     if (_cachedToken != normalizedToken) {
       _sessionRevision++;
       _cachedToken = normalizedToken;
+      for (final read in _activeSyncReads.keys.toList()) {
+        if (!identical(read, authoritativeRequest)) {
+          read.cancel('Cloud account session changed');
+        }
+      }
     }
   }
 
   Future<void> checkServiceHealth() async {
     try {
-      final res = await _client.get(
-        '${_apiRootUrl(Secrets.primaryApiDomain)}/check',
-        options: Options(extra: {'skipAuth': true}),
+      await _syncRead(
+        (token, options) => _client.get(
+          '${_apiRootUrl(Secrets.primaryApiDomain)}/check',
+          cancelToken: token,
+          options: options.copyWith(
+            responseType: ResponseType.plain,
+            extra: {...?options.extra, 'skipAuth': true},
+          ),
+        ),
+        validate: (response) {
+          if (response.statusCode != _httpOk) {
+            throw CloudApiException(
+              'Service unavailable (Status: ${response.statusCode ?? 'unknown'})',
+            );
+          }
+        },
       );
-      if (res.statusCode != _httpOk) {
-        final statusCode = res.statusCode?.toString() ?? 'unknown';
-        throw CloudApiException('Service unavailable (Status: $statusCode)');
-      }
     } on DioException catch (e) {
       throw CloudApiException(_formatHealthCheckError(e));
     }
@@ -597,8 +765,8 @@ class CloudApiService {
         final tokenStr = info['token']?.toString() ?? '';
         if (tokenStr.isEmpty) throw Exception('API returned empty token');
 
-        setToken(tokenStr);
         final parsed = _parseUserInfo(info);
+        setToken(tokenStr);
         return (
           token: tokenStr,
           profile: parsed.profile,
@@ -611,9 +779,16 @@ class CloudApiService {
   }
 
   Future<CloudRegisterConfig> fetchRegisterConfig() async {
-    final res = await _client.post(
-      '/register/config',
-      options: Options(extra: {'skipAuth': true}),
+    final res = await _syncRead(
+      (token, options) => _client.post(
+        '/register/config',
+        cancelToken: token,
+        options: options.copyWith(extra: {...?options.extra, 'skipAuth': true}),
+      ),
+      validate: (response) {
+        final dto = _requireReadData(response.data);
+        CloudRegisterConfig.fromJson(Map<String, dynamic>.from(dto));
+      },
     );
     final responseDto = CloudApiResponse<Map<dynamic, dynamic>>.fromJson(
       res.data,
@@ -708,8 +883,8 @@ class CloudApiService {
       final info = responseDto.data!;
       final tokenStr = info['token']?.toString() ?? '';
       if (tokenStr.isEmpty) throw Exception('API returned empty token');
-      setToken(tokenStr);
       final parsed = _parseUserInfo(info);
+      setToken(tokenStr);
       return (
         token: tokenStr,
         profile: parsed.profile,
@@ -719,6 +894,126 @@ class CloudApiService {
     throw Exception(responseDto.msg ?? 'Request failed');
   }
 
+  Map<dynamic, dynamic> _requireReadData(dynamic data) {
+    final dto = CloudApiResponse<Map<dynamic, dynamic>>.fromJson(data);
+    if (!dto.isSuccess || dto.data == null) {
+      throw CloudApiException(dto.msg ?? 'Invalid cloud response data');
+    }
+    return dto.data!;
+  }
+
+  // Read routes share one deadline and one account revision. Write operations
+  // never call this helper; the adapter also checks the read-only POST allowlist.
+  Future<Response<T>> _syncRead<T>(
+    Future<Response<T>> Function(CancelToken token, Options options) read, {
+    FutureOr<void> Function(Response<T> response)? validate,
+  }) async {
+    final revision = _sessionRevision;
+    final client = _client;
+    final uri = Uri.parse(client.options.baseUrl);
+    final routes = _readRoutes(uri).toSet();
+    final adapter = client.httpClientAdapter;
+    final domains = adapter is CloudApiAdapter
+        ? adapter._readDomainsFor(uri)
+        : [uri.host];
+    final candidates = [
+      for (var index = 0; index < domains.length; index++)
+        for (final route in routes)
+          (domain: domains[index], route: route, delayed: index > 0),
+    ];
+    final operation = _CloudReadOperation();
+    try {
+      final response = await raceHttpReads<Response<T>>(
+        candidates.map(
+          (candidate) => (token) async {
+            if (candidate.delayed) {
+              await Future<void>.delayed(CloudApiAdapter._hedgeDelay);
+            }
+            if (token.cancelError case final error?) throw error;
+            if (revision != _sessionRevision) {
+              throw const CloudApiStaleSessionException();
+            }
+            _activeSyncReads[token] = operation;
+            try {
+              final response = await read(
+                token,
+                Options(
+                  // Malformed authentication error bodies cannot become an
+                  // ordinary parse failure and let another route hide the error.
+                  validateStatus: (status) => status != null && status < 400,
+                  receiveDataWhenStatusError: false,
+                  extra: {
+                    _sessionRevisionKey: revision,
+                    cloudReadRouteExtraKey: candidate.route,
+                    _cloudReadDomainExtraKey: candidate.domain,
+                    _cloudReadRaceExtraKey: candidates.length > 1,
+                  },
+                ),
+              );
+              if (token.cancelError case final error?) throw error;
+              if (revision != _sessionRevision) {
+                throw const CloudApiStaleSessionException();
+              }
+              Object? data = response.data;
+              if (response.requestOptions.responseType == ResponseType.json) {
+                if (data is String) data = jsonDecode(data);
+                if (data is! Map) {
+                  throw const FormatException('Invalid cloud response format');
+                }
+              }
+              if (data is Map) {
+                final code = data['ret'];
+                final status = code is num
+                    ? code.toInt()
+                    : int.tryParse('$code');
+                if (status != null && status != _httpOk) {
+                  throw _CloudReadResponseException(
+                    status,
+                    data['msg']?.toString() ?? 'Cloud service unavailable',
+                  );
+                }
+              }
+              await validate?.call(response);
+              if (token.cancelError case final error?) throw error;
+              if (revision != _sessionRevision) {
+                throw const CloudApiStaleSessionException();
+              }
+              return response;
+            } finally {
+              _activeSyncReads.remove(token);
+            }
+          },
+        ),
+        timeout: _syncRequestTimeout,
+        isTerminalError: (error) =>
+            isTerminalHttpReadError(error) ||
+            CloudApiException.isUnauthorized(error) ||
+            CloudApiException.isHandledUnauthorized(error) ||
+            CloudApiException.isStaleSession(error) ||
+            (error is _CloudReadResponseException &&
+                (error.status == 401 || error.status == 403)),
+      );
+      final unauthorized = operation.unauthorizedError;
+      if (unauthorized != null) throw unauthorized;
+      if (revision != _sessionRevision) {
+        throw const CloudApiStaleSessionException();
+      }
+      return response;
+    } catch (error, stack) {
+      final unauthorized = operation.unauthorizedError;
+      if (unauthorized != null) {
+        Error.throwWithStackTrace(unauthorized, stack);
+      }
+      if (revision != _sessionRevision) {
+        throw const CloudApiStaleSessionException();
+      }
+      if (error is TimeoutException) {
+        throw const CloudApiException('Cloud request timed out');
+      }
+      rethrow;
+    }
+  }
+
   Future<({CloudProfile profile, CloudNotification? announcement})>
   getUserInfo() async {
     final token = _cachedToken;
@@ -726,7 +1021,11 @@ class CloudApiService {
       throw Exception('Missing access token');
     }
 
-    final res = await _client.post('/information');
+    final res = await _syncRead(
+      (token, options) =>
+          _client.post('/information', cancelToken: token, options: options),
+      validate: (response) => _parseUserInfo(_requireReadData(response.data)),
+    );
     final responseDto = CloudApiResponse<Map<dynamic, dynamic>>.fromJson(
       res.data,
     );
@@ -742,7 +1041,7 @@ class CloudApiService {
     if (_cachedToken == null || _cachedToken!.isEmpty) return;
     final Response<dynamic> res;
     try {
-      res = await _client.post('/logout');
+      res = await _client.post('/logout', options: _writeOptions());
     } catch (error) {
       if (CloudApiException.isUnauthorized(error)) return;
       rethrow;
@@ -799,7 +1098,10 @@ class CloudApiService {
     return result == 0;
   }
 
-  Future<(Uint8List, String?)> fetchManagedConfig(String paramString) async {
+  Future<(Uint8List, String?)> fetchManagedConfig(
+    String paramString, {
+    Future<void> Function(Uint8List bytes)? validate,
+  }) async {
     final revision = _sessionRevision;
     try {
       final queryParameters = <String, dynamic>{};
@@ -823,57 +1125,64 @@ class CloudApiService {
         'X-Flclash-Age-Pubkey': identity.recipient,
       };
 
-      final res = await _client.get<Map<String, dynamic>>(
-        '/managed/flclash/direct',
-        queryParameters: queryParameters,
-        options: Options(
-          headers: headers,
-          responseType: ResponseType.json,
-          extra: {_sessionRevisionKey: revision},
+      final decoded = <Response<Map<String, dynamic>>, (Uint8List, String?)>{};
+      final res = await _syncRead<Map<String, dynamic>>(
+        (token, options) => _client.get<Map<String, dynamic>>(
+          '/managed/flclash/direct',
+          cancelToken: token,
+          queryParameters: queryParameters,
+          options: options.copyWith(
+            headers: headers,
+            responseType: ResponseType.json,
+            extra: {...?options.extra, _sessionRevisionKey: revision},
+          ),
         ),
+        validate: (res) async {
+          if (res.statusCode != 200) {
+            throw CloudApiException(
+              'Config request failed (${res.statusCode})',
+            );
+          }
+
+          final configB64 = res.data?['config'] as String?;
+          final userinfo = res.data?['userinfo'] as String?;
+
+          if (configB64 == null || configB64.isEmpty) {
+            throw const CloudApiException('Server returned empty config');
+          }
+          Uint8List configBytes;
+          try {
+            configBytes = base64Decode(configB64);
+          } on FormatException {
+            throw const CloudApiException('Server returned invalid config');
+          }
+
+          final responseSignature = res.headers.value(
+            'X-Flclash-Response-Signature',
+          );
+          if (responseSignature == null || responseSignature.isEmpty) {
+            throw const CloudApiException('Missing response signature');
+          }
+          final expected = _flclashHmac('$timestamp.$configB64');
+          if (!_constantTimeEquals(responseSignature, expected)) {
+            throw const CloudApiException('Response signature mismatch');
+          }
+
+          if (!AgeCrypto.isArmored(configBytes)) {
+            throw const CloudApiException('Server returned invalid config');
+          }
+          final Uint8List plaintext;
+          try {
+            plaintext = await AgeCrypto.decrypt(configBytes, identity);
+          } catch (_) {
+            throw const CloudApiException('Server returned invalid config');
+          }
+
+          await validate?.call(plaintext);
+          decoded[res] = (plaintext, userinfo);
+        },
       );
-
-      if (res.statusCode != 200) {
-        throw CloudApiException('Config request failed (${res.statusCode})');
-      }
-
-      final configB64 = res.data?['config'] as String?;
-      final userinfo = res.data?['userinfo'] as String?;
-
-      if (configB64 == null || configB64.isEmpty) {
-        throw const CloudApiException('Server returned empty config');
-      }
-      Uint8List configBytes;
-      try {
-        configBytes = base64Decode(configB64);
-      } on FormatException {
-        throw const CloudApiException('Server returned invalid config');
-      }
-
-      final responseSignature = res.headers.value(
-        'X-Flclash-Response-Signature',
-      );
-      if (responseSignature == null || responseSignature.isEmpty) {
-        throw const CloudApiException('Missing response signature');
-      }
-      final expected = _flclashHmac('$timestamp.$configB64');
-      if (!_constantTimeEquals(responseSignature, expected)) {
-        throw const CloudApiException('Response signature mismatch');
-      }
-
-      if (!AgeCrypto.isArmored(configBytes)) {
-        throw const CloudApiException('Server returned invalid config');
-      }
-      final Uint8List plaintext;
-      try {
-        plaintext = await AgeCrypto.decrypt(configBytes, identity);
-      } catch (_) {
-        throw const CloudApiException('Server returned invalid config');
-      }
-      if (revision != _sessionRevision) {
-        throw const CloudApiStaleSessionException();
-      }
-      return (plaintext, userinfo);
+      return decoded[res]!;
     } catch (e) {
       if (CloudApiException.isStaleSession(e)) {
         throw const CloudApiStaleSessionException();
@@ -904,7 +1213,12 @@ class CloudApiService {
   }
 
   Future<List<StorePlan>> fetchPlans() async {
-    final res = await _client.post('/shop/list');
+    final res = await _syncRead(
+      (token, options) =>
+          _client.post('/shop/list', cancelToken: token, options: options),
+      validate: (response) =>
+          decodeStorePlans(_requireReadData(response.data)['shops']),
+    );
     final dto = CloudApiResponse<Map<dynamic, dynamic>>.fromJson(res.data);
     if (!dto.isSuccess || dto.data == null) {
       throw CloudApiException(dto.msg ?? appLocalizations.fetchPlansFailed);
@@ -913,7 +1227,12 @@ class CloudApiService {
   }
 
   Future<List<BoughtRecord>> fetchBought() async {
-    final res = await _client.post('/shop/bought');
+    final res = await _syncRead(
+      (token, options) =>
+          _client.post('/shop/bought', cancelToken: token, options: options),
+      validate: (response) =>
+          decodeBoughtRecords(_requireReadData(response.data)['boughts']),
+    );
     final dto = CloudApiResponse<Map<dynamic, dynamic>>.fromJson(res.data);
     if (!dto.isSuccess || dto.data == null) {
       throw CloudApiException(dto.msg ?? appLocalizations.fetchOrdersFailed);
@@ -922,7 +1241,10 @@ class CloudApiService {
   }
 
   Future<List<PaymentMethodOption>> fetchPaymentMethods() async {
-    final res = await _client.post('/pay/methods');
+    final res = await _syncRead(
+      (token, options) =>
+          _client.post('/pay/methods', cancelToken: token, options: options),
+    );
     dynamic data = res.data;
     if (data is String) {
       try {
@@ -1064,9 +1386,13 @@ class CloudApiService {
     String pid, {
     String payment = 'cryptapi',
   }) async {
-    final res = await _client.post(
-      '/pay/status',
-      data: FormData.fromMap({'pid': pid, 'payment': payment}),
+    final res = await _syncRead(
+      (token, options) => _client.post(
+        '/pay/status',
+        data: FormData.fromMap({'pid': pid, 'payment': payment}),
+        cancelToken: token,
+        options: options,
+      ),
     );
     dynamic data = res.data;
     if (data is String) {
@@ -1083,16 +1409,30 @@ class CloudApiService {
   }
 }
 
-// -- Hedged reads and sequential login failover for the oixCloud API --
+// -- Explicit read routes and sequential login failover for the oixCloud API --
 @visibleForTesting
-class HedgedApiAdapter implements HttpClientAdapter {
-  HedgedApiAdapter(this._inner, {List<String> Function()? domains})
-    : _domains = domains ?? (() => Secrets.apiDomains);
+class CloudApiAdapter implements HttpClientAdapter {
+  CloudApiAdapter(
+    this._inner, {
+    List<String> Function()? domains,
+    int maxResponseBytes = 64 * 1024 * 1024,
+  }) : assert(maxResponseBytes > 0),
+       _domains = domains ?? (() => Secrets.apiDomains),
+       _maxResponseBytes = maxResponseBytes;
 
   final HttpClientAdapter _inner;
   final List<String> Function() _domains;
+  final int _maxResponseBytes;
 
   static const Duration _hedgeDelay = Duration(milliseconds: 250);
+
+  List<String> _readDomainsFor(Uri uri) {
+    final domains = _domains().toSet().toList();
+    return domains.length > 1 &&
+            domains.first.toLowerCase() == uri.host.toLowerCase()
+        ? domains
+        : [uri.host];
+  }
 
   @override
   void close({bool force = false}) => _inner.close(force: force);
@@ -1103,17 +1443,25 @@ class HedgedApiAdapter implements HttpClientAdapter {
     Stream<Uint8List>? requestStream,
     Future<void>? cancelFuture,
   ) async {
-    final domains = _domains();
-    final host = options.uri.host.toLowerCase();
-    if (domains.length < 2 || domains.first.toLowerCase() != host) {
-      return _inner.fetch(options, requestStream, cancelFuture);
+    final explicitDomain = options.extra[_cloudReadDomainExtraKey];
+    if (explicitDomain is String && canReplayCloudRequest(options)) {
+      // The service races complete domain/route candidates through DTO and
+      // signature validation. Selecting a domain here would cancel a usable
+      // sibling before the service had checked this response's contents.
+      return BoundedHttpClientAdapter(
+        _inner,
+        maxBytes: _maxResponseBytes,
+      ).fetch(
+        _requestForDomain(options, explicitDomain),
+        requestStream,
+        cancelFuture,
+      );
     }
-
-    final isNonIdempotent = options.extra[cloudNonIdempotentExtraKey] == true;
+    final domains = _readDomainsFor(options.uri);
     final useSequentialFailover =
-        isNonIdempotent &&
+        options.extra[cloudNonIdempotentExtraKey] == true &&
         options.extra[cloudSequentialFailoverExtraKey] == true;
-    if (isNonIdempotent && !useSequentialFailover) {
+    if (domains.length < 2 || !useSequentialFailover) {
       return _inner.fetch(options, requestStream, cancelFuture);
     }
 
@@ -1125,92 +1473,7 @@ class HedgedApiAdapter implements HttpClientAdapter {
       }
       body = builder.takeBytes();
     }
-
-    if (useSequentialFailover) {
-      return _fetchSequentially(options, domains, body, cancelFuture);
-    }
-
-    final completer = Completer<ResponseBody>();
-    final cancellers = <Completer<void>>[];
-    var settled = false;
-    var failures = 0;
-    var launched = 0;
-    var allLaunched = false;
-    Object? lastError;
-    StackTrace? lastStack;
-
-    void maybeFail() {
-      if (settled || !allLaunched || failures < launched) {
-        return;
-      }
-      settled = true;
-      completer.completeError(
-        lastError ?? Exception('All API endpoints failed'),
-        lastStack ?? StackTrace.current,
-      );
-    }
-
-    void launch(String domain) {
-      if (settled) {
-        return;
-      }
-      launched++;
-      final canceller = Completer<void>();
-      cancellers.add(canceller);
-      final perHost = _requestForDomain(options, domain);
-      final cancelSignal = cancelFuture == null
-          ? canceller.future
-          : Future.any<void>([cancelFuture, canceller.future]);
-      unawaited(
-        _inner
-            .fetch(
-              perHost,
-              body == null ? null : Stream<Uint8List>.value(body),
-              cancelSignal,
-            )
-            .then(
-              (response) {
-                if (settled) {
-                  unawaited(_drainResponse(response));
-                  return;
-                }
-                settled = true;
-                for (final other in cancellers) {
-                  if (!identical(other, canceller) && !other.isCompleted) {
-                    other.complete();
-                  }
-                }
-                completer.complete(response);
-              },
-              onError: (Object error, StackTrace stack) {
-                if (canceller.isCompleted) {
-                  return;
-                }
-                failures++;
-                lastError = error;
-                lastStack = stack;
-                maybeFail();
-              },
-            ),
-      );
-    }
-
-    launch(host);
-
-    unawaited(
-      Future<void>.delayed(_hedgeDelay).then((_) {
-        if (settled) {
-          return;
-        }
-        for (final domain in domains.skip(1)) {
-          launch(domain);
-        }
-        allLaunched = true;
-        maybeFail();
-      }),
-    );
-
-    return completer.future;
+    return _fetchSequentially(options, domains, body, cancelFuture);
   }
 
   Future<ResponseBody> _fetchSequentially(
@@ -1221,8 +1484,18 @@ class HedgedApiAdapter implements HttpClientAdapter {
   ) async {
     Object? lastError;
     StackTrace? lastStack;
+    var cancelled = options.cancelToken?.isCancelled == true;
+    if (cancelFuture != null) {
+      unawaited(cancelFuture.then((_) => cancelled = true));
+    }
 
     for (var index = 0; index < domains.length; index++) {
+      if (cancelled) {
+        throw DioException.requestCancelled(
+          requestOptions: options,
+          reason: 'Cloud request cancelled',
+        );
+      }
       final perHost = _requestForDomain(options, domains[index]);
       try {
         return await _inner.fetch(
@@ -1259,12 +1532,6 @@ class HedgedApiAdapter implements HttpClientAdapter {
         (error.type == DioExceptionType.connectionTimeout ||
             error.type == DioExceptionType.connectionError);
   }
-
-  Future<void> _drainResponse(ResponseBody response) async {
-    try {
-      await response.stream.drain<void>();
-    } catch (_) {}
-  }
 }
 
 // -- Interceptor to handle Retries --
@@ -1281,9 +1548,11 @@ class RetryInterceptor extends Interceptor {
     DioException err,
     ErrorInterceptorHandler handler,
   ) async {
-    if (!_shouldRetry(err) ||
+    if (err.requestOptions.cancelToken?.isCancelled == true ||
+        !_shouldRetry(err) ||
         err.requestOptions.extra[_retryHandledKey] == true ||
-        err.requestOptions.extra[cloudNonIdempotentExtraKey] == true) {
+        err.requestOptions.extra[_cloudReadRaceExtraKey] == true ||
+        !canReplayCloudRequest(err.requestOptions)) {
       return super.onError(err, handler);
     }
 
@@ -1295,6 +1564,10 @@ class RetryInterceptor extends Interceptor {
       await Future.delayed(
         Duration(milliseconds: 500 * pow(2, attempt).toInt()),
       );
+      final cancellation = err.requestOptions.cancelToken?.cancelError;
+      if (cancellation != null) {
+        return handler.next(cancellation);
+      }
       try {
         final response = await dio.fetch(
           _copyRequestOptionsForRetry(err.requestOptions, retryExtra),

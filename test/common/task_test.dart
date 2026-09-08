@@ -267,11 +267,63 @@ void main() {
       await File(zipPath).writeAsBytes(ZipEncoder().encode(archive));
 
       await expectLater(
-        validateBackupArchiveDirectory(zipPath, '${root.path}/restore'),
+        validateBackupArchiveDirectory(
+          zipPath,
+          '${root.path}/restore',
+          verifyPayload: true,
+        ),
         completes,
       );
       expect(await Directory('${root.path}/restore').exists(), false);
     });
+
+    for (final limitFile in [false, true]) {
+      test('payload validation enforces the ${limitFile ? 'file' : 'total'} '
+          'budget when the ZIP directory understates its size', () async {
+        final root = await Directory.systemTemp.createTemp(
+          'zip_payload_limit_',
+        );
+        addTearDown(() => root.delete(recursive: true));
+        final bytes = ZipEncoder().encode(
+          Archive()
+            ..add(ArchiveFile.string('file.txt', 'payload exceeds budget')),
+        );
+        var central = -1;
+        for (var index = 0; index < bytes.length - 4; index++) {
+          if (bytes[index] == 0x50 &&
+              bytes[index + 1] == 0x4b &&
+              bytes[index + 2] == 0x01 &&
+              bytes[index + 3] == 0x02) {
+            central = index;
+            break;
+          }
+        }
+        expect(central, greaterThanOrEqualTo(0));
+        bytes[central + 24] = 1;
+        for (var offset = 25; offset < 28; offset++) {
+          bytes[central + offset] = 0;
+        }
+        final path = '${root.path}/backup.zip';
+        await File(path).writeAsBytes(bytes);
+        await expectLater(
+          validateBackupArchiveDirectory(
+            path,
+            '${root.path}/restore',
+            maxFileBytes: limitFile ? 8 : 64,
+            maxTotalBytes: limitFile ? 64 : 8,
+            verifyPayload: true,
+          ),
+          throwsA(
+            isA<FormatException>().having(
+              (error) => error.message,
+              'message',
+              contains('write exceeds limit'),
+            ),
+          ),
+        );
+        expect(root.listSync().map((file) => file.path), [path]);
+      });
+    }
 
     test(
       'rejects symbolic links before ZipDecoder reads their content',

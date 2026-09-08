@@ -77,6 +77,10 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     final edited = CloudParams.parse(
       _oixParamsController.text,
     ).copyWith(tfo: _tfo, simplerules: _minimalConfig);
+    final previous = await CloudParamsStorage.load();
+    await appController.putProfile(currentProfile, reportOnWait: false);
+    // Scheduling preferences are local and can be saved while offline.
+    if (previous.encodeWithTfo() == edited.encodeWithTfo()) return;
     await CloudParamsStorage.save(edited);
     await appController.updateProfile(
       currentProfile,
@@ -110,7 +114,9 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
           : _labelController.text,
       autoUpdate: _autoUpdate,
       autoUpdateDuration: Duration(
-        minutes: int.parse(_autoUpdateDurationController.text),
+        minutes: _autoUpdate
+            ? int.parse(_autoUpdateDurationController.text)
+            : widget.profile.autoUpdateDuration.inMinutes,
       ),
     );
 
@@ -277,7 +283,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     _fileInfoNotifier.dispose();
     _autoUpdateDurationController.dispose();
     _oixParamsController.dispose();
-    appController.autoApplyProfile();
+    if (appController.isAttach) appController.autoApplyProfile();
     super.dispose();
   }
 
@@ -333,6 +339,8 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
             },
           ),
         ),
+      ],
+      if (widget.profile.type == ProfileType.url || isoixCloud) ...[
         ListItem.switchItem(
           title: Text(appLocalizations.autoUpdate),
           delegate: SwitchDelegate<bool>(
@@ -358,9 +366,8 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
                   return appLocalizations
                       .profileAutoUpdateIntervalNullValidationDesc;
                 }
-                try {
-                  int.parse(value);
-                } catch (_) {
+                final minutes = int.tryParse(value);
+                if (minutes == null || minutes <= 0) {
                   return appLocalizations
                       .profileAutoUpdateIntervalInvalidValidationDesc;
                 }

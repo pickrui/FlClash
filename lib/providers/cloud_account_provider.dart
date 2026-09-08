@@ -69,6 +69,18 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
   /// race where `_init()` hasn't yet pushed the token into [CloudApiService].
   Future<void> ensureReady() => _initFuture ?? Future.value();
 
+  /// Recheck access after an offline bootstrap, before the caller takes the
+  /// profile storage lock: account refresh can remove expired profiles.
+  Future<void> prepareManagedConfigUpdate() async {
+    await ensureReady();
+    await refreshProfile(force: !_canFetchManagedConfig);
+    if (!_canFetchManagedConfig) {
+      throw CloudApiException(
+        state.error ?? 'Managed subscription is unavailable',
+      );
+    }
+  }
+
   @override
   CloudAccountState build() {
     _initFuture = _init();
@@ -388,6 +400,10 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
     return _refreshFuture!;
   }
 
+  @protected
+  Future<({CloudProfile profile, CloudNotification? announcement})> Function()
+  get userInfoRequest => CloudApiService().getUserInfo;
+
   Future<void> _runRefreshProfile({bool force = false}) async {
     if (!state.isLoggedIn || state.isLoading || state.isSyncing) return;
     if (!force && _lastRefreshTime != null) {
@@ -399,7 +415,7 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
 
     state = state.copyWith(isRefreshing: true, error: null);
     try {
-      final userInfo = await CloudApiService().getUserInfo();
+      final userInfo = await userInfoRequest();
       _lastRefreshTime = DateTime.now();
       await _saveCache(
         userInfo.profile,
@@ -408,7 +424,6 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
       await _injectDefaultParams(userInfo.profile);
 
       state = state.copyWith(
-        isRefreshing: false,
         profile: userInfo.profile,
         latestNotification: userInfo.announcement ?? state.latestNotification,
       );
@@ -424,11 +439,11 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
         await handleUnauthorized();
         return;
       }
-      state = state.copyWith(
-        isRefreshing: false,
-        isLoggedIn: state.isLoggedIn,
-        error: CloudApiException.clean(e),
-      );
+      state = state.copyWith(error: CloudApiException.clean(e));
+    } finally {
+      // refreshProfile shares one in-flight request, so this run owns the flag
+      // even when a new session supersedes its network response.
+      if (ref.mounted) state = state.copyWith(isRefreshing: false);
     }
   }
 

@@ -16,7 +16,10 @@ part 'generated/profile.freezed.dart';
 part 'generated/profile.g.dart';
 
 typedef FetchManagedConfigCallback =
-    Future<(Uint8List, String?)> Function(String paramString);
+    Future<(Uint8List, String?)> Function(
+      String paramString, {
+      Future<void> Function(Uint8List bytes)? validate,
+    });
 FetchManagedConfigCallback? _fetchManagedConfigCallback;
 bool Function()? _canFetchManagedConfigCallback;
 
@@ -26,6 +29,13 @@ Future<void> Function()? _ensureCloudReady;
 
 const _flclashEncryptedVersion = 0x02;
 
+Future<void> _validateProfileBytes(Uint8List bytes) async {
+  final message = await coreController.validateConfigWithBytes(
+    base64Encode(bytes),
+  );
+  if (message.isNotEmpty) throw ConfigValidationException(message);
+}
+
 const reservedOutboundNames = {
   'DIRECT',
   'REJECT',
@@ -34,11 +44,6 @@ const reservedOutboundNames = {
   'COMPATIBLE',
   'GLOBAL',
 };
-
-bool _isUnauthorizedError(Object error) {
-  final message = error.toString().toLowerCase();
-  return message.contains('unauthorized') || message.contains('401');
-}
 
 bool isEncryptedProfileBytes(Uint8List bytes) {
   if (AgeCrypto.isArmored(bytes)) {
@@ -1127,45 +1132,34 @@ extension ProfileExtension on Profile {
 
   Future<Profile> update() async {
     if (isoixCloudProfile) {
-      try {
-        final fetch = _fetchManagedConfigCallback;
-        if (fetch == null) throw Exception('fetchManagedConfig not registered');
+      final fetch = _fetchManagedConfigCallback;
+      if (fetch == null) throw Exception('fetchManagedConfig not registered');
 
-        // Wait for cloud-account bootstrap so the API client has its token.
-        await _ensureCloudReady?.call();
-        if (!(_canFetchManagedConfigCallback?.call() ?? true)) {
-          return this;
-        }
-
-        final params = await CloudParamsStorage.load();
-        final paramWithTfo = params.encodeWithTfo();
-        final (bytes, userinfo) = await fetch(paramWithTfo);
-        final profileWithLabel = copyWith(
-          label: label.isNotEmpty ? label : 'oixCloud',
-          url: oixCloudManagedProfileUrl,
-        );
-        return profileWithLabel
-            .copyWith(subscriptionInfo: SubscriptionInfo.formHString(userinfo))
-            .saveFile(bytes);
-      } catch (e) {
-        if (_isUnauthorizedError(e)) {
-          rethrow;
-        }
-        if (FlClashTemporaryTls.isCertificateVerifyFailed(e)) {
-          rethrow;
-        }
-        if (await hasLocalConfigSnapshot()) {
-          commonPrint.log(
-            'oixCloud config update failed, keeping local snapshot: $e',
-            logLevel: LogLevel.warning,
-          );
-          return this;
-        }
-        rethrow;
+      // Wait for cloud-account bootstrap so the API client has its token.
+      await _ensureCloudReady?.call();
+      if (!(_canFetchManagedConfigCallback?.call() ?? true)) {
+        return this;
       }
+
+      final params = await CloudParamsStorage.load();
+      final paramWithTfo = params.encodeWithTfo();
+      final (bytes, userinfo) = await fetch(
+        paramWithTfo,
+        validate: _validateProfileBytes,
+      );
+      final profileWithLabel = copyWith(
+        label: label.isNotEmpty ? label : 'oixCloud',
+        url: oixCloudManagedProfileUrl,
+      );
+      return profileWithLabel
+          .copyWith(subscriptionInfo: SubscriptionInfo.formHString(userinfo))
+          ._saveValidatedFile(bytes);
     }
 
-    final response = await request.getFileResponseForUrl(url);
+    final response = await request.getFileResponseForUrl(
+      url,
+      validate: _validateProfileBytes,
+    );
     final disposition = response.headers.value('content-disposition');
     final userinfo = response.headers.value('subscription-userinfo');
     return copyWith(
@@ -1174,24 +1168,22 @@ extension ProfileExtension on Profile {
         id.toString(),
       ]),
       subscriptionInfo: SubscriptionInfo.formHString(userinfo),
-    ).saveFile(response.data ?? Uint8List.fromList([]));
+    )._saveValidatedFile(response.data!);
   }
 
   Future<Profile> saveFile(Uint8List bytes) async {
     return storageLock.synchronized(() => _saveFileUnlocked(bytes));
   }
 
-  Future<Profile> _saveFileUnlocked(Uint8List bytes) async {
+  Future<Profile> _saveValidatedFile(Uint8List bytes) => storageLock
+      .synchronized(() => _saveFileUnlocked(bytes, alreadyValidated: true));
+
+  Future<Profile> _saveFileUnlocked(
+    Uint8List bytes, {
+    bool alreadyValidated = false,
+  }) async {
     if (isoixCloudProfile) {
-      final base64String = base64Encode(bytes);
-      final message = await coreController.validateConfigWithBytes(
-        base64String,
-      );
-      commonPrint.log('validateConfigWithBytes result: "$message"');
-      if (message.isNotEmpty) {
-        commonPrint.log('validateConfig failed', logLevel: LogLevel.warning);
-        throw ConfigValidationException(message);
-      }
+      if (!alreadyValidated) await _validateProfileBytes(bytes);
 
       await _replaceWithEncryptedSnapshot(bytes);
 
@@ -1203,10 +1195,12 @@ extension ProfileExtension on Profile {
     try {
       await tempFile.safeWriteAsBytes(bytes);
       commonPrint.log('====== saveFile bytes length: ${bytes.length}');
-      final message = await coreController.validateConfig(path);
-      if (message.isNotEmpty) {
-        commonPrint.log('====== validateConfig Message: $message');
-        throw ConfigValidationException(message);
+      if (!alreadyValidated) {
+        final message = await coreController.validateConfig(path);
+        if (message.isNotEmpty) {
+          commonPrint.log('====== validateConfig Message: $message');
+          throw ConfigValidationException(message);
+        }
       }
       final mFile = await file;
       await tempFile.copy(mFile.path);

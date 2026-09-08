@@ -1,7 +1,5 @@
-import 'dart:async';
 import 'dart:io';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/core/core.dart';
 import 'package:fl_clash/l10n/l10n.dart';
@@ -24,11 +22,7 @@ class Application extends ConsumerStatefulWidget {
   ConsumerState<Application> createState() => ApplicationState();
 }
 
-class ApplicationState extends ConsumerState<Application>
-    with WidgetsBindingObserver {
-  Timer? _autoUpdateProfilesTaskTimer;
-  bool _preHasVpn = false;
-
+class ApplicationState extends ConsumerState<Application> {
   final _pageTransitionsTheme = const PageTransitionsTheme(
     builders: <TargetPlatform, PageTransitionsBuilder>{
       TargetPlatform.android: commonSharedXPageTransitions,
@@ -48,7 +42,6 @@ class ApplicationState extends ConsumerState<Application>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       final currentContext = globalState.navigatorKey.currentContext;
@@ -58,37 +51,9 @@ class ApplicationState extends ConsumerState<Application>
         exit(0);
       }
       if (!mounted) return;
-      _syncAutoUpdateProfilesTask();
       appController.initLink();
       app?.initShortcuts();
     });
-  }
-
-  bool get _shouldRunAutoUpdateProfilesTask {
-    final lifecycleState = WidgetsBinding.instance.lifecycleState;
-    return lifecycleState == null ||
-        lifecycleState == AppLifecycleState.resumed ||
-        (system.isDesktop && lifecycleState == AppLifecycleState.inactive);
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-    _syncAutoUpdateProfilesTask();
-  }
-
-  void _syncAutoUpdateProfilesTask() {
-    if (!_shouldRunAutoUpdateProfilesTask) {
-      _autoUpdateProfilesTaskTimer?.cancel();
-      _autoUpdateProfilesTaskTimer = null;
-      return;
-    }
-    _autoUpdateProfilesTaskTimer ??= Timer.periodic(
-      const Duration(minutes: 20),
-      (timer) async {
-        await appController.autoUpdateProfiles();
-      },
-    );
   }
 
   Widget _buildPlatformState({required Widget child}) {
@@ -110,11 +75,7 @@ class ApplicationState extends ConsumerState<Application>
             commonPrint.log('connectivityChanged ${results.toString()}');
             appController.updateLocalIp();
             appController.autoUpdateIpv6();
-            final hasVpn = results.contains(ConnectivityResult.vpn);
-            if (_preHasVpn == hasVpn) {
-              appController.addCheckIp();
-            }
-            _preHasVpn = hasVpn;
+            appController.addCheckIp();
           },
           child: child,
         ),
@@ -241,9 +202,7 @@ class ApplicationState extends ConsumerState<Application>
 
   @override
   Future<void> dispose() async {
-    WidgetsBinding.instance.removeObserver(this);
     linkManager.destroy();
-    _autoUpdateProfilesTaskTimer?.cancel();
     await coreController.destroy();
     await appController.handleExit();
     super.dispose();

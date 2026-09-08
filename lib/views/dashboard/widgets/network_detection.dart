@@ -6,14 +6,9 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class NetworkDetection extends ConsumerStatefulWidget {
+class NetworkDetection extends ConsumerWidget {
   const NetworkDetection({super.key});
 
-  @override
-  ConsumerState<NetworkDetection> createState() => _NetworkDetectionState();
-}
-
-class _NetworkDetectionState extends ConsumerState<NetworkDetection> {
   String _countryCodeToEmoji(String countryCode) {
     final String code = countryCode.toUpperCase();
     if (code.length != 2) {
@@ -25,7 +20,7 @@ class _NetworkDetectionState extends ConsumerState<NetworkDetection> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     final networkDetection = ref.watch(networkDetectionProvider);
     final ipInfo = networkDetection.ipInfo;
@@ -40,7 +35,8 @@ class _NetworkDetectionState extends ConsumerState<NetworkDetection> {
     return SizedBox(
       height: getWidgetHeight(1),
       child: CommonCard(
-        onPressed: () {},
+        onPressed: () =>
+            ref.read(networkDetectionProvider.notifier).startCheck(),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -107,7 +103,7 @@ class _NetworkDetectionState extends ConsumerState<NetworkDetection> {
                             overflow: TextOverflow.ellipsis,
                           ),
                         )
-                      : isLoading == false && ipInfo == null
+                      : !isLoading
                       ? Text(
                           'Timeout',
                           style: context.textTheme.bodyMedium

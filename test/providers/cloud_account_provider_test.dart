@@ -436,6 +436,62 @@ void main() {
     },
   );
 
+  test(
+    'managed updates retry account access after an offline bootstrap',
+    () async {
+      final notifier = _OrderNotifier(refreshError: 'Network unavailable');
+      final container = ProviderContainer(
+        overrides: [cloudAccountProvider.overrideWith(() => notifier)],
+      );
+      addTearDown(container.dispose);
+      container.read(cloudAccountProvider);
+
+      for (var attempt = 0; attempt < 2; attempt++) {
+        await expectLater(
+          notifier.prepareManagedConfigUpdate(),
+          throwsA(
+            isA<CloudApiException>().having(
+              (error) => error.message,
+              'message',
+              'Network unavailable',
+            ),
+          ),
+        );
+      }
+      expect(notifier.calls, ['refresh:true', 'refresh:true']);
+    },
+  );
+
+  test(
+    'superseded account refresh releases its busy state for retry',
+    () async {
+      final notifier = _StaleRefreshNotifier();
+      final container = ProviderContainer(
+        overrides: [cloudAccountProvider.overrideWith(() => notifier)],
+      );
+      addTearDown(container.dispose);
+      container.read(cloudAccountProvider);
+
+      final first = notifier.refreshProfile(force: true);
+      expect(container.read(cloudAccountProvider).isRefreshing, isTrue);
+      final duplicate = notifier.refreshProfile(force: true);
+      expect(notifier.requests, 1);
+      notifier.pending.completeError(const CloudApiStaleSessionException());
+      await Future.wait([first, duplicate]);
+      expect(container.read(cloudAccountProvider).isRefreshing, isFalse);
+      expect(container.read(cloudAccountProvider).isLoggedIn, isTrue);
+      expect(container.read(cloudAccountProvider).error, isNull);
+
+      notifier.pending = Completer();
+      final retry = notifier.refreshProfile(force: true);
+      expect(container.read(cloudAccountProvider).isRefreshing, isTrue);
+      expect(notifier.requests, 2);
+      notifier.pending.completeError(const CloudApiStaleSessionException());
+      await retry;
+      expect(container.read(cloudAccountProvider).isRefreshing, isFalse);
+    },
+  );
+
   test('a failed plan refresh never regenerates the subscription', () async {
     final notifier = _OrderNotifier(refreshError: 'Network unavailable');
     final container = ProviderContainer(
@@ -569,4 +625,20 @@ class _DeleteNotifier extends CloudAccountNotifier {
     state = const CloudAccountState();
     return cleanupError;
   }
+}
+
+class _StaleRefreshNotifier extends CloudAccountNotifier {
+  var pending =
+      Completer<({CloudProfile profile, CloudNotification? announcement})>();
+  var requests = 0;
+
+  @override
+  CloudAccountState build() => const CloudAccountState(isLoggedIn: true);
+
+  @override
+  Future<({CloudProfile profile, CloudNotification? announcement})> Function()
+  get userInfoRequest => () {
+    requests++;
+    return pending.future;
+  };
 }

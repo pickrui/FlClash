@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/periodic_task_runner.dart';
 import 'package:fl_clash/controller.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/manager/window_manager.dart';
@@ -24,11 +25,36 @@ class AppStateManager extends ConsumerStatefulWidget {
 class _AppStateManagerState extends ConsumerState<AppStateManager>
     with WidgetsBindingObserver {
   bool _isBackground = false;
+  late final _profileUpdates = PeriodicTaskRunner(
+    interval: const Duration(minutes: 1),
+    onError: (error, _) => commonPrint.log(
+      'Automatic profile update failed: $error',
+      logLevel: LogLevel.warning,
+    ),
+  );
+
+  bool _isBackgroundState(AppLifecycleState? state) =>
+      state == AppLifecycleState.paused ||
+      state == AppLifecycleState.hidden ||
+      (state == AppLifecycleState.inactive && !system.isDesktop);
+
+  void _startProfileUpdates() {
+    if (!mounted || _isBackground || !ref.read(initProvider)) return;
+    unawaited(_profileUpdates.start([appController.autoUpdateProfiles]));
+  }
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _isBackground = _isBackgroundState(WidgetsBinding.instance.lifecycleState);
+    ref.listenManual(initProvider, (_, ready) {
+      if (ready) {
+        _startProfileUpdates();
+      } else {
+        _profileUpdates.stop();
+      }
+    }, fireImmediately: true);
     ref.listenManual(checkIpProvider, (prev, next) {
       if (prev != next && next.a && next.c) {
         ref.read(networkDetectionProvider.notifier).startCheck();
@@ -67,6 +93,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
 
   @override
   void dispose() {
+    _profileUpdates.stop();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -74,13 +101,10 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     commonPrint.log('$state');
-    final isBackgroundState =
-        state == AppLifecycleState.paused ||
-        state == AppLifecycleState.hidden ||
-        (state == AppLifecycleState.inactive && !system.isDesktop);
-    if (isBackgroundState) {
+    if (_isBackgroundState(state)) {
       if (!_isBackground) {
         _isBackground = true;
+        _profileUpdates.stop();
         if (system.isAndroid) {
           globalState.stopUpdateTasks();
         }
@@ -90,6 +114,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     if (state == AppLifecycleState.resumed) {
       final wasBackground = _isBackground;
       _isBackground = false;
+      _startProfileUpdates();
       render?.resume();
       if (system.isAndroid && wasBackground && globalState.isStart) {
         globalState.startUpdateTasks();

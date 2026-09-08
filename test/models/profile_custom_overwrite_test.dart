@@ -3,28 +3,31 @@ import 'package:fl_clash/models/models.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('managed profile skips fetch when account has no config access', () async {
-    var fetched = false;
-    registerEnsureCloudReady(() async {});
-    registerCanFetchManagedConfig(() => false);
-    registerFetchManagedConfig((_) async {
-      fetched = true;
-      throw StateError('fetch must not run');
-    });
+  test(
+    'managed profile skips fetch when account has no config access',
+    () async {
+      var fetched = false;
+      registerEnsureCloudReady(() async {});
+      registerCanFetchManagedConfig(() => false);
+      registerFetchManagedConfig((_, {validate}) async {
+        fetched = true;
+        throw StateError('fetch must not run');
+      });
 
-    const profile = Profile(
-      id: 1,
-      label: 'Managed',
-      url: 'oixcloud://managed',
-      autoUpdateDuration: Duration(hours: 1),
-    );
+      const profile = Profile(
+        id: 1,
+        label: 'Managed',
+        url: 'oixcloud://managed',
+        autoUpdateDuration: Duration(hours: 1),
+      );
 
-    final result = await profile.update();
+      final result = await profile.update();
 
-    expect(result, profile);
-    expect(fetched, false);
-    registerCanFetchManagedConfig(() => true);
-  });
+      expect(result, profile);
+      expect(fetched, false);
+      registerCanFetchManagedConfig(() => true);
+    },
+  );
 
   test(
     'managed profiles exclude device-bound snapshots from portable backup',

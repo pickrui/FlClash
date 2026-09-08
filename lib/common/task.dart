@@ -943,6 +943,7 @@ Future<void> validateBackupArchiveDirectory(
   int maxEntries = maxBackupEntries,
   int maxFileBytes = maxBackupFileBytes,
   int maxTotalBytes = maxBackupTotalBytes,
+  bool verifyPayload = false,
 }) async {
   final input = InputFileStream(archivePath);
   try {
@@ -981,6 +982,22 @@ Future<void> validateBackupArchiveDirectory(
       totalBytes += header.uncompressedSize;
       if (totalBytes > maxTotalBytes) {
         throw const FormatException('archive expands beyond limit');
+      }
+    }
+    if (verifyPayload) {
+      // A complete ZIP directory does not prove its payload arrived intact.
+      // Verify candidates without retaining or writing the expanded files.
+      final budget = _ExtractionBudget(maxTotalBytes);
+      for (final header in directory.fileHeaders) {
+        budget.reserve(header.uncompressedSize);
+        final output = _LimitedOutputStream.discard(maxFileBytes, budget);
+        header.file!.decompress(output);
+        if (output.written != header.uncompressedSize ||
+            output.crc32 != header.crc32) {
+          throw const FormatException(
+            'archive entry checksum or size mismatch',
+          );
+        }
       }
     }
   } finally {
@@ -1090,7 +1107,7 @@ class _ExtractionBudget {
 }
 
 class _LimitedOutputStream extends OutputStream {
-  final OutputFileStream _delegate;
+  final OutputFileStream? _delegate;
   final int _maxFileBytes;
   final _ExtractionBudget _budget;
   int _written = 0;
@@ -1099,8 +1116,16 @@ class _LimitedOutputStream extends OutputStream {
   int get written => _written;
   int get crc32 => _crc32;
 
-  _LimitedOutputStream(this._delegate, this._maxFileBytes, this._budget)
-    : super(byteOrder: _delegate.byteOrder);
+  _LimitedOutputStream(
+    OutputFileStream delegate,
+    this._maxFileBytes,
+    this._budget,
+  ) : _delegate = delegate,
+      super(byteOrder: delegate.byteOrder);
+
+  _LimitedOutputStream.discard(this._maxFileBytes, this._budget)
+    : _delegate = null,
+      super(byteOrder: ByteOrder.littleEndian);
 
   void _add(int bytes) {
     _written += bytes;
@@ -1111,36 +1136,39 @@ class _LimitedOutputStream extends OutputStream {
   }
 
   @override
-  int get length => _delegate.length;
+  int get length => _delegate?.length ?? _written;
 
   @override
-  bool get isOpen => _delegate.isOpen;
+  bool get isOpen => _delegate?.isOpen ?? true;
 
   @override
-  void clear() => _delegate.clear();
+  void clear() => _delegate?.clear();
 
   @override
-  Future<void> close() => _delegate.close();
+  Future<void> close() async => _delegate?.close();
 
   @override
-  void closeSync() => _delegate.closeSync();
+  void closeSync() => _delegate?.closeSync();
 
   @override
-  void flush() => _delegate.flush();
+  void flush() => _delegate?.flush();
 
   @override
   void writeByte(int value) {
     _add(1);
     _crc32 = getCrc32([value], _crc32);
-    _delegate.writeByte(value);
+    _delegate?.writeByte(value);
   }
 
   @override
   void writeBytes(List<int> bytes, {int? length}) {
     final writeLength = length ?? bytes.length;
     _add(writeLength);
-    _crc32 = getCrc32(bytes.take(writeLength).toList(), _crc32);
-    _delegate.writeBytes(bytes, length: writeLength);
+    _crc32 = getCrc32(
+      writeLength == bytes.length ? bytes : bytes.take(writeLength).toList(),
+      _crc32,
+    );
+    _delegate?.writeBytes(bytes, length: writeLength);
   }
 
   @override
@@ -1156,7 +1184,11 @@ class _LimitedOutputStream extends OutputStream {
   }
 
   @override
-  Uint8List subset(int start, [int? end]) => _delegate.subset(start, end);
+  Uint8List subset(int start, [int? end]) {
+    final delegate = _delegate;
+    if (delegate == null) throw UnsupportedError('Discarded archive contents');
+    return delegate.subset(start, end);
+  }
 }
 
 Future<MigrationData> _restoreTask(VM3<String, String, String> paths) async {

@@ -376,49 +376,55 @@ class IsUpdating extends _$IsUpdating with NotifierMixin<bool> {
 @Riverpod(keepAlive: true)
 class NetworkDetection extends _$NetworkDetection
     with NotifierMixin<NetworkDetectionState> {
-  bool? _preIsStart;
   CancelToken? _cancelToken;
-  int _startMillisecondsEpoch = 0;
+  Timer? _checkTimer;
+  int _generation = 0;
 
   @override
   NetworkDetectionState build() {
+    ref.listen(isStartProvider, (previous, next) {
+      if (previous != next) startCheck();
+    });
+    ref.onDispose(() {
+      _generation++;
+      _checkTimer?.cancel();
+      _cancelToken?.cancel();
+    });
     return const NetworkDetectionState(isLoading: true, ipInfo: null);
   }
 
   void startCheck() {
-    debouncer.call(FunctionTag.checkIp, () {
-      _checkIp();
-    }, duration: commonDuration);
+    final generation = ++_generation;
+    _checkTimer?.cancel();
+    _cancelToken?.cancel();
+    // Invalidate the old route immediately, before the debounce delay.
+    state = const NetworkDetectionState(isLoading: true, ipInfo: null);
+    _checkTimer = Timer(commonDuration, () => _checkIp(generation));
   }
 
-  Future<void> _checkIp() async {
-    final isInit = ref.read(initProvider);
-    if (!isInit) {
+  Future<void> _checkIp(int generation) async {
+    if (!ref.mounted || generation != _generation) return;
+    if (!ref.read(initProvider)) {
+      state = const NetworkDetectionState(isLoading: false, ipInfo: null);
       return;
     }
-    final isStart = ref.read(isStartProvider);
-    if (!isStart && _preIsStart == false && state.ipInfo != null) {
-      return;
+    final token = CancelToken();
+    _cancelToken = token;
+    IpInfo? ipInfo;
+    try {
+      final result = await request.checkIp(cancelToken: token);
+      ipInfo = result.data;
+    } catch (error) {
+      commonPrint.log(
+        'IP detection failed: $error',
+        logLevel: LogLevel.warning,
+      );
+    } finally {
+      if (ref.mounted && generation == _generation) {
+        state = NetworkDetectionState(isLoading: false, ipInfo: ipInfo);
+        _cancelToken = null;
+      }
     }
-    final millisecondsEpoch = DateTime.now().millisecondsSinceEpoch;
-    _startMillisecondsEpoch = millisecondsEpoch;
-    final runTime = millisecondsEpoch + 1;
-    _cancelToken?.cancel();
-    _cancelToken = CancelToken();
-    commonPrint.log('checkIp start');
-    state = state.copyWith(isLoading: true, ipInfo: null);
-    _preIsStart = isStart;
-    final res = await request.checkIp(cancelToken: _cancelToken);
-    commonPrint.log('checkIp res: $res');
-    if (res.isError && runTime > _startMillisecondsEpoch) {
-      state = state.copyWith(isLoading: true, ipInfo: null);
-      return;
-    }
-    final ipInfo = res.data;
-    if (ipInfo == null) {
-      return;
-    }
-    state = state.copyWith(isLoading: false, ipInfo: ipInfo);
   }
 }
 
