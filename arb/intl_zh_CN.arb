@@ -649,5 +649,20 @@
   "geoOriginalSource": "当前地址",
   "geoBackupSource": "备用 CDN",
   "geoDownloadUrl": "下载地址",
-  "geoInvalidDownloadUrl": "请输入有效的 HTTP 或 HTTPS 地址"
+  "geoInvalidDownloadUrl": "请输入有效的 HTTP 或 HTTPS 地址",
+  "purchasedAtLabel": "购买时间",
+  "purchasePriceLabel": "购买价格",
+  "billingPeriodLabel": "计费周期",
+  "remainingTimeLabel": "剩余时间",
+  "remainingTrafficLabel": "剩余流量",
+  "expiresAtLabel": "到期时间",
+  "usedTrafficLabel": "已用流量",
+  "purchaseTotalTrafficLabel": "总流量",
+  "purchaseRenewalPriceLabel": "续费价格",
+  "purchaseAutoRenewLabel": "自动续费",
+  "purchaseDays": "{count}天",
+  "purchaseHours": "{count}小时",
+  "purchaseMinutes": "{count}分钟",
+  "purchaseRenewOn": "开启",
+  "purchaseRenewOff": "关闭"
 }

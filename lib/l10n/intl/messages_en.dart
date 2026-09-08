@@ -83,24 +83,30 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m25(name) => "Node ${name} is not available in this position";
 
-  static String m26(time) => "Purchased ${time}";
+  static String m26(count) => "${count}d";
 
-  static String m27(name, path) =>
+  static String m27(count) => "${count}h";
+
+  static String m28(count) => "${count}m";
+
+  static String m29(time) => "Purchased ${time}";
+
+  static String m30(name, path) =>
       "${name} is referenced by the original configuration at ${path}";
 
-  static String m28(value) => "Remaining: ${value}";
+  static String m31(value) => "Remaining: ${value}";
 
-  static String m29(count) => "Only ${count} left";
+  static String m32(count) => "Only ${count} left";
 
-  static String m30(seconds) => "Resend in ${seconds}s";
+  static String m33(seconds) => "Resend in ${seconds}s";
 
-  static String m31(count) => "${count} seconds";
+  static String m34(count) => "${count} seconds";
 
-  static String m32(count) => "${count} items have been selected";
+  static String m35(count) => "${count} items have been selected";
 
-  static String m33(label) => "${label} must be a url";
+  static String m36(label) => "${label} must be a url";
 
-  static String m34(count) =>
+  static String m37(count) =>
       "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -225,6 +231,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "basicConfig": MessageLookupByLibrary.simpleMessage("Basic configuration"),
     "basicConfigDesc": MessageLookupByLibrary.simpleMessage(
       "Modify the basic configuration globally",
+    ),
+    "billingPeriodLabel": MessageLookupByLibrary.simpleMessage(
+      "Billing period",
     ),
     "bind": MessageLookupByLibrary.simpleMessage("Bind"),
     "blacklistMode": MessageLookupByLibrary.simpleMessage("Blacklist mode"),
@@ -457,6 +466,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "expand": MessageLookupByLibrary.simpleMessage("Standard"),
     "expectedStatus": MessageLookupByLibrary.simpleMessage("Expected status"),
     "expireDate": m11,
+    "expiresAtLabel": MessageLookupByLibrary.simpleMessage("Expires at"),
     "exportFile": MessageLookupByLibrary.simpleMessage("Export file"),
     "exportLogs": MessageLookupByLibrary.simpleMessage("Export logs"),
     "exportSuccess": MessageLookupByLibrary.simpleMessage("Export Success"),
@@ -935,7 +945,25 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyPort": MessageLookupByLibrary.simpleMessage("ProxyPort"),
     "proxyProviders": MessageLookupByLibrary.simpleMessage("Proxy providers"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("Prune cache"),
-    "purchaseTime": m26,
+    "purchaseAutoRenewLabel": MessageLookupByLibrary.simpleMessage(
+      "Auto-renew",
+    ),
+    "purchaseDays": m26,
+    "purchaseHours": m27,
+    "purchaseMinutes": m28,
+    "purchasePriceLabel": MessageLookupByLibrary.simpleMessage(
+      "Purchase price",
+    ),
+    "purchaseRenewOff": MessageLookupByLibrary.simpleMessage("Off"),
+    "purchaseRenewOn": MessageLookupByLibrary.simpleMessage("On"),
+    "purchaseRenewalPriceLabel": MessageLookupByLibrary.simpleMessage(
+      "Renewal price",
+    ),
+    "purchaseTime": m29,
+    "purchaseTotalTrafficLabel": MessageLookupByLibrary.simpleMessage(
+      "Total traffic",
+    ),
+    "purchasedAtLabel": MessageLookupByLibrary.simpleMessage("Purchase time"),
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("Pure black mode"),
     "qrcode": MessageLookupByLibrary.simpleMessage("QR code"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
@@ -943,7 +971,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "quickFill": MessageLookupByLibrary.simpleMessage("Quick fill"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("Rainbow"),
-    "rawOutboundInUse": m27,
+    "rawOutboundInUse": m30,
     "receivingAddress": MessageLookupByLibrary.simpleMessage(
       "Receiving address",
     ),
@@ -968,8 +996,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "relayGroupUnsupported": MessageLookupByLibrary.simpleMessage(
       "Relay groups were removed by the core. Choose another type.",
     ),
-    "remaining": m28,
-    "remainingStock": m29,
+    "remaining": m31,
+    "remainingStock": m32,
+    "remainingTimeLabel": MessageLookupByLibrary.simpleMessage(
+      "Remaining time",
+    ),
+    "remainingTrafficLabel": MessageLookupByLibrary.simpleMessage(
+      "Remaining traffic",
+    ),
     "remote": MessageLookupByLibrary.simpleMessage("Remote"),
     "remoteBackupDesc": MessageLookupByLibrary.simpleMessage(
       "Backup local data to WebDAV",
@@ -984,7 +1018,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "requestsDesc": MessageLookupByLibrary.simpleMessage(
       "View recently request records",
     ),
-    "resendCodeIn": m30,
+    "resendCodeIn": m33,
     "reset": MessageLookupByLibrary.simpleMessage("Reset"),
     "resetEmailSent": MessageLookupByLibrary.simpleMessage(
       "Reset email sent. Paste the reset link or code from the email below.",
@@ -1075,13 +1109,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "search": MessageLookupByLibrary.simpleMessage("Search"),
     "seconds": MessageLookupByLibrary.simpleMessage("Seconds"),
-    "secondsCount": m31,
+    "secondsCount": m34,
     "selectAll": MessageLookupByLibrary.simpleMessage("Select all"),
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage(
       "Select upgrade target",
     ),
     "selected": MessageLookupByLibrary.simpleMessage("Selected"),
-    "selectedCountTitle": m32,
+    "selectedCountTitle": m35,
     "sendCode": MessageLookupByLibrary.simpleMessage("Send Code"),
     "sendResetEmail": MessageLookupByLibrary.simpleMessage("Send reset email"),
     "serviceCheckFailed": MessageLookupByLibrary.simpleMessage(
@@ -1216,9 +1250,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Obtain profile through URL",
     ),
-    "urlTip": m33,
+    "urlTip": m36,
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),
+    "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("Used traffic"),
     "userAgent": MessageLookupByLibrary.simpleMessage("User-Agent"),
     "userCenter": MessageLookupByLibrary.simpleMessage("User Center"),
     "userCenterFallback": MessageLookupByLibrary.simpleMessage(
@@ -1240,7 +1275,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "WebDAV configuration",
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Whitelist mode"),
-    "yearsAgo": m34,
+    "yearsAgo": m37,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };
 }

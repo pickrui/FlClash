@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'purchased_plan_details.dart';
+
 import 'package:collection/collection.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -48,9 +50,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
   Future<void> _refresh() async {
     if (!await _loadStore() || !mounted) return;
     // Plan changes must regenerate the managed subscription, not just the card.
-    await ref
-        .read(cloudAccountProvider.notifier)
-        .refreshManagedSubscription();
+    await ref.read(cloudAccountProvider.notifier).refreshManagedSubscription();
   }
 
   Future<void> _runGuarded(Future<void> Function() action) async {
@@ -178,21 +178,6 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
   String _priceText(double price) {
     final decimals = price == price.roundToDouble() ? 0 : 2;
     return '¥ ${price.toStringAsFixed(decimals)}';
-  }
-
-  Widget _orderMetadata(IconData icon, String text, {Color? color}) {
-    final foreground = color ?? context.colorScheme.onSurfaceVariant;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 14, color: foreground),
-        const SizedBox(width: 4),
-        Text(
-          text,
-          style: context.textTheme.bodySmall?.copyWith(color: foreground),
-        ),
-      ],
-    );
   }
 
   Widget _buildErrorCard(String error) {
@@ -509,30 +494,17 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
                 ],
               ),
               const SizedBox(height: 8),
-              Wrap(
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 12,
-                runSpacing: 6,
-                children: [
-                  if (bought.buyTime.isNotEmpty)
-                    _orderMetadata(
-                      Icons.calendar_today_outlined,
-                      appLocalizations.purchaseTime(bought.buyTime),
-                    ),
-                  if (bought.billingPeriodText.isNotEmpty)
-                    _orderMetadata(
-                      Icons.date_range_outlined,
-                      bought.billingPeriodText,
-                    ),
-                  if (bought.isActive)
-                    _orderMetadata(
-                      bought.autoRenew ? Icons.autorenew : Icons.sync_disabled,
-                      bought.autoRenew
-                          ? appLocalizations.autoRenewOn
-                          : appLocalizations.autoRenewOff,
-                      color: bought.autoRenew ? Colors.green : null,
-                    ),
-                ],
+              PurchasedPlanDetails(
+                bought: bought,
+                profile:
+                    ref
+                            .watch(storeProvider)
+                            .bought
+                            .where((record) => record.isActive)
+                            .length ==
+                        1
+                    ? ref.watch(cloudAccountProvider).profile
+                    : null,
               ),
               if (actions.isNotEmpty) ...[
                 const SizedBox(height: 14),

@@ -649,5 +649,20 @@
   "geoOriginalSource": "現在の URL",
   "geoBackupSource": "予備 CDN",
   "geoDownloadUrl": "ダウンロード URL",
-  "geoInvalidDownloadUrl": "有効な HTTP または HTTPS URL を入力してください"
+  "geoInvalidDownloadUrl": "有効な HTTP または HTTPS URL を入力してください",
+  "purchasedAtLabel": "購入日時",
+  "purchasePriceLabel": "購入価格",
+  "billingPeriodLabel": "請求期間",
+  "remainingTimeLabel": "残り時間",
+  "remainingTrafficLabel": "残りデータ量",
+  "expiresAtLabel": "有効期限",
+  "usedTrafficLabel": "使用済みデータ量",
+  "purchaseTotalTrafficLabel": "合計データ量",
+  "purchaseRenewalPriceLabel": "更新価格",
+  "purchaseAutoRenewLabel": "自動更新",
+  "purchaseDays": "{count}日",
+  "purchaseHours": "{count}時間",
+  "purchaseMinutes": "{count}分",
+  "purchaseRenewOn": "オン",
+  "purchaseRenewOff": "オフ"
 }

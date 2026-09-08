@@ -5373,6 +5373,146 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Purchase time`
+  String get purchasedAtLabel {
+    return Intl.message(
+      'Purchase time',
+      name: 'purchasedAtLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Purchase price`
+  String get purchasePriceLabel {
+    return Intl.message(
+      'Purchase price',
+      name: 'purchasePriceLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Billing period`
+  String get billingPeriodLabel {
+    return Intl.message(
+      'Billing period',
+      name: 'billingPeriodLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remaining time`
+  String get remainingTimeLabel {
+    return Intl.message(
+      'Remaining time',
+      name: 'remainingTimeLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remaining traffic`
+  String get remainingTrafficLabel {
+    return Intl.message(
+      'Remaining traffic',
+      name: 'remainingTrafficLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Expires at`
+  String get expiresAtLabel {
+    return Intl.message(
+      'Expires at',
+      name: 'expiresAtLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Used traffic`
+  String get usedTrafficLabel {
+    return Intl.message(
+      'Used traffic',
+      name: 'usedTrafficLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Total traffic`
+  String get purchaseTotalTrafficLabel {
+    return Intl.message(
+      'Total traffic',
+      name: 'purchaseTotalTrafficLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Renewal price`
+  String get purchaseRenewalPriceLabel {
+    return Intl.message(
+      'Renewal price',
+      name: 'purchaseRenewalPriceLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Auto-renew`
+  String get purchaseAutoRenewLabel {
+    return Intl.message(
+      'Auto-renew',
+      name: 'purchaseAutoRenewLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count}d`
+  String purchaseDays(Object count) {
+    return Intl.message(
+      '${count}d',
+      name: 'purchaseDays',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count}h`
+  String purchaseHours(Object count) {
+    return Intl.message(
+      '${count}h',
+      name: 'purchaseHours',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count}m`
+  String purchaseMinutes(Object count) {
+    return Intl.message(
+      '${count}m',
+      name: 'purchaseMinutes',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `On`
+  String get purchaseRenewOn {
+    return Intl.message('On', name: 'purchaseRenewOn', desc: '', args: []);
+  }
+
+  /// `Off`
+  String get purchaseRenewOff {
+    return Intl.message('Off', name: 'purchaseRenewOff', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

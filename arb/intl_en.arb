@@ -649,5 +649,20 @@
   "geoOriginalSource": "Current address",
   "geoBackupSource": "Backup CDN",
   "geoDownloadUrl": "Download URL",
-  "geoInvalidDownloadUrl": "Enter a valid HTTP or HTTPS URL"
+  "geoInvalidDownloadUrl": "Enter a valid HTTP or HTTPS URL",
+  "purchasedAtLabel": "Purchase time",
+  "purchasePriceLabel": "Purchase price",
+  "billingPeriodLabel": "Billing period",
+  "remainingTimeLabel": "Remaining time",
+  "remainingTrafficLabel": "Remaining traffic",
+  "expiresAtLabel": "Expires at",
+  "usedTrafficLabel": "Used traffic",
+  "purchaseTotalTrafficLabel": "Total traffic",
+  "purchaseRenewalPriceLabel": "Renewal price",
+  "purchaseAutoRenewLabel": "Auto-renew",
+  "purchaseDays": "{count}d",
+  "purchaseHours": "{count}h",
+  "purchaseMinutes": "{count}m",
+  "purchaseRenewOn": "On",
+  "purchaseRenewOff": "Off"
 }

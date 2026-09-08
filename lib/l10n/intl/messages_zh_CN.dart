@@ -72,23 +72,29 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m25(name) => "节点 ${name} 当前不可用于此位置";
 
-  static String m26(time) => "购买于 ${time}";
+  static String m26(count) => "${count}天";
 
-  static String m27(name, path) => "${name} 仍被原始配置中的 ${path} 引用";
+  static String m27(count) => "${count}小时";
 
-  static String m28(value) => "剩余: ${value}";
+  static String m28(count) => "${count}分钟";
 
-  static String m29(count) => "仅剩 ${count}";
+  static String m29(time) => "购买于 ${time}";
 
-  static String m30(seconds) => "${seconds} 秒后重发";
+  static String m30(name, path) => "${name} 仍被原始配置中的 ${path} 引用";
 
-  static String m31(count) => "${count} 秒";
+  static String m31(value) => "剩余: ${value}";
 
-  static String m32(count) => "已选择 ${count} 项";
+  static String m32(count) => "仅剩 ${count}";
 
-  static String m33(label) => "${label}必须为URL";
+  static String m33(seconds) => "${seconds} 秒后重发";
 
-  static String m34(count) => "${count} 年前";
+  static String m34(count) => "${count} 秒";
+
+  static String m35(count) => "已选择 ${count} 项";
+
+  static String m36(label) => "${label}必须为URL";
+
+  static String m37(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -169,6 +175,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "balance": MessageLookupByLibrary.simpleMessage("余额"),
     "basicConfig": MessageLookupByLibrary.simpleMessage("基本配置"),
     "basicConfigDesc": MessageLookupByLibrary.simpleMessage("全局修改基本配置"),
+    "billingPeriodLabel": MessageLookupByLibrary.simpleMessage("计费周期"),
     "bind": MessageLookupByLibrary.simpleMessage("绑定"),
     "blacklistMode": MessageLookupByLibrary.simpleMessage("黑名单模式"),
     "blockQuic": MessageLookupByLibrary.simpleMessage("禁用 QUIC"),
@@ -324,6 +331,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "expand": MessageLookupByLibrary.simpleMessage("标准"),
     "expectedStatus": MessageLookupByLibrary.simpleMessage("预期状态"),
     "expireDate": m11,
+    "expiresAtLabel": MessageLookupByLibrary.simpleMessage("到期时间"),
     "exportFile": MessageLookupByLibrary.simpleMessage("导出文件"),
     "exportLogs": MessageLookupByLibrary.simpleMessage("导出日志"),
     "exportSuccess": MessageLookupByLibrary.simpleMessage("导出成功"),
@@ -646,13 +654,23 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyPort": MessageLookupByLibrary.simpleMessage("代理端口"),
     "proxyProviders": MessageLookupByLibrary.simpleMessage("代理提供者"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("修剪缓存"),
-    "purchaseTime": m26,
+    "purchaseAutoRenewLabel": MessageLookupByLibrary.simpleMessage("自动续费"),
+    "purchaseDays": m26,
+    "purchaseHours": m27,
+    "purchaseMinutes": m28,
+    "purchasePriceLabel": MessageLookupByLibrary.simpleMessage("购买价格"),
+    "purchaseRenewOff": MessageLookupByLibrary.simpleMessage("关闭"),
+    "purchaseRenewOn": MessageLookupByLibrary.simpleMessage("开启"),
+    "purchaseRenewalPriceLabel": MessageLookupByLibrary.simpleMessage("续费价格"),
+    "purchaseTime": m29,
+    "purchaseTotalTrafficLabel": MessageLookupByLibrary.simpleMessage("总流量"),
+    "purchasedAtLabel": MessageLookupByLibrary.simpleMessage("购买时间"),
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("纯黑模式"),
     "qrcode": MessageLookupByLibrary.simpleMessage("二维码"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage("扫描二维码获取配置文件"),
     "quickFill": MessageLookupByLibrary.simpleMessage("一键填入"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("彩虹"),
-    "rawOutboundInUse": m27,
+    "rawOutboundInUse": m30,
     "receivingAddress": MessageLookupByLibrary.simpleMessage("收款地址"),
     "recharge": MessageLookupByLibrary.simpleMessage("充值"),
     "rechargeAmount": MessageLookupByLibrary.simpleMessage("充值金额（¥）"),
@@ -669,8 +687,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "relayGroupUnsupported": MessageLookupByLibrary.simpleMessage(
       "核心已移除 Relay 策略组，请选择其他类型",
     ),
-    "remaining": m28,
-    "remainingStock": m29,
+    "remaining": m31,
+    "remainingStock": m32,
+    "remainingTimeLabel": MessageLookupByLibrary.simpleMessage("剩余时间"),
+    "remainingTrafficLabel": MessageLookupByLibrary.simpleMessage("剩余流量"),
     "remote": MessageLookupByLibrary.simpleMessage("远程"),
     "remoteBackupDesc": MessageLookupByLibrary.simpleMessage("备份数据到WebDAV"),
     "remoteDestination": MessageLookupByLibrary.simpleMessage("远程目标"),
@@ -679,7 +699,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "request": MessageLookupByLibrary.simpleMessage("请求"),
     "requests": MessageLookupByLibrary.simpleMessage("请求"),
     "requestsDesc": MessageLookupByLibrary.simpleMessage("查看最近请求记录"),
-    "resendCodeIn": m30,
+    "resendCodeIn": m33,
     "reset": MessageLookupByLibrary.simpleMessage("重置"),
     "resetEmailSent": MessageLookupByLibrary.simpleMessage(
       "重置邮件已发送，请将邮件中的重置链接或代码粘贴到下方",
@@ -742,11 +762,11 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "search": MessageLookupByLibrary.simpleMessage("搜索"),
     "seconds": MessageLookupByLibrary.simpleMessage("秒"),
-    "secondsCount": m31,
+    "secondsCount": m34,
     "selectAll": MessageLookupByLibrary.simpleMessage("全选"),
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage("选择升级目标套餐"),
     "selected": MessageLookupByLibrary.simpleMessage("已选择"),
-    "selectedCountTitle": m32,
+    "selectedCountTitle": m35,
     "sendCode": MessageLookupByLibrary.simpleMessage("获取验证码"),
     "sendResetEmail": MessageLookupByLibrary.simpleMessage("发送重置邮件"),
     "serviceCheckFailed": MessageLookupByLibrary.simpleMessage("服务检测失败"),
@@ -851,9 +871,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("上传"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("通过URL获取配置文件"),
-    "urlTip": m33,
+    "urlTip": m36,
     "useHosts": MessageLookupByLibrary.simpleMessage("使用Hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("使用系统Hosts"),
+    "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("已用流量"),
     "userAgent": MessageLookupByLibrary.simpleMessage("用户代理"),
     "userCenter": MessageLookupByLibrary.simpleMessage("用户中心"),
     "userCenterFallback": MessageLookupByLibrary.simpleMessage("用户中心（备用）"),
@@ -869,7 +890,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "vpnTip": MessageLookupByLibrary.simpleMessage("重启VPN后改变生效"),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV配置"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("白名单模式"),
-    "yearsAgo": m34,
+    "yearsAgo": m37,
     "zh_CN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };
 }

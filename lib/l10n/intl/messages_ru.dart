@@ -81,24 +81,30 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m25(name) => "Узел ${name} недоступен для этой позиции";
 
-  static String m26(time) => "Куплено: ${time}";
+  static String m26(count) => "${count}д";
 
-  static String m27(name, path) =>
+  static String m27(count) => "${count}ч";
+
+  static String m28(count) => "${count}мин";
+
+  static String m29(time) => "Куплено: ${time}";
+
+  static String m30(name, path) =>
       "${name} используется исходной конфигурацией в ${path}";
 
-  static String m28(value) => "Осталось: ${value}";
+  static String m31(value) => "Осталось: ${value}";
 
-  static String m29(count) => "Осталось ${count}";
+  static String m32(count) => "Осталось ${count}";
 
-  static String m30(seconds) => "Повтор через ${seconds} с";
+  static String m33(seconds) => "Повтор через ${seconds} с";
 
-  static String m31(count) => "${count} секунд";
+  static String m34(count) => "${count} секунд";
 
-  static String m32(count) => "Выбрано ${count} элементов";
+  static String m35(count) => "Выбрано ${count} элементов";
 
-  static String m33(label) => "${label} должен быть URL";
+  static String m36(label) => "${label} должен быть URL";
 
-  static String m34(count) =>
+  static String m37(count) =>
       "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -228,6 +234,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "basicConfigDesc": MessageLookupByLibrary.simpleMessage(
       "Глобальное изменение базовых настроек",
     ),
+    "billingPeriodLabel": MessageLookupByLibrary.simpleMessage("Период оплаты"),
     "bind": MessageLookupByLibrary.simpleMessage("Привязать"),
     "blacklistMode": MessageLookupByLibrary.simpleMessage(
       "Режим черного списка",
@@ -479,6 +486,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "expand": MessageLookupByLibrary.simpleMessage("Стандартный"),
     "expectedStatus": MessageLookupByLibrary.simpleMessage("Ожидаемый статус"),
     "expireDate": m11,
+    "expiresAtLabel": MessageLookupByLibrary.simpleMessage("Истекает"),
     "exportFile": MessageLookupByLibrary.simpleMessage("Экспорт файла"),
     "exportLogs": MessageLookupByLibrary.simpleMessage("Экспорт логов"),
     "exportSuccess": MessageLookupByLibrary.simpleMessage("Экспорт успешен"),
@@ -987,7 +995,23 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyPort": MessageLookupByLibrary.simpleMessage("Порт прокси"),
     "proxyProviders": MessageLookupByLibrary.simpleMessage("Провайдеры прокси"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("Очистить кэш"),
-    "purchaseTime": m26,
+    "purchaseAutoRenewLabel": MessageLookupByLibrary.simpleMessage(
+      "Автопродление",
+    ),
+    "purchaseDays": m26,
+    "purchaseHours": m27,
+    "purchaseMinutes": m28,
+    "purchasePriceLabel": MessageLookupByLibrary.simpleMessage("Цена покупки"),
+    "purchaseRenewOff": MessageLookupByLibrary.simpleMessage("Выкл."),
+    "purchaseRenewOn": MessageLookupByLibrary.simpleMessage("Вкл."),
+    "purchaseRenewalPriceLabel": MessageLookupByLibrary.simpleMessage(
+      "Стоимость продления",
+    ),
+    "purchaseTime": m29,
+    "purchaseTotalTrafficLabel": MessageLookupByLibrary.simpleMessage(
+      "Общий трафик",
+    ),
+    "purchasedAtLabel": MessageLookupByLibrary.simpleMessage("Время покупки"),
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("Чисто черный режим"),
     "qrcode": MessageLookupByLibrary.simpleMessage("QR-код"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
@@ -995,7 +1019,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "quickFill": MessageLookupByLibrary.simpleMessage("Быстрое заполнение"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("Радужные"),
-    "rawOutboundInUse": m27,
+    "rawOutboundInUse": m30,
     "receivingAddress": MessageLookupByLibrary.simpleMessage(
       "Адрес получателя",
     ),
@@ -1020,8 +1044,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "relayGroupUnsupported": MessageLookupByLibrary.simpleMessage(
       "Группы Relay удалены из ядра. Выберите другой тип.",
     ),
-    "remaining": m28,
-    "remainingStock": m29,
+    "remaining": m31,
+    "remainingStock": m32,
+    "remainingTimeLabel": MessageLookupByLibrary.simpleMessage(
+      "Оставшееся время",
+    ),
+    "remainingTrafficLabel": MessageLookupByLibrary.simpleMessage(
+      "Оставшийся трафик",
+    ),
     "remote": MessageLookupByLibrary.simpleMessage("Удаленный"),
     "remoteBackupDesc": MessageLookupByLibrary.simpleMessage(
       "Резервное копирование локальных данных на WebDAV",
@@ -1036,7 +1066,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "requestsDesc": MessageLookupByLibrary.simpleMessage(
       "Просмотр последних записей запросов",
     ),
-    "resendCodeIn": m30,
+    "resendCodeIn": m33,
     "reset": MessageLookupByLibrary.simpleMessage("Сброс"),
     "resetEmailSent": MessageLookupByLibrary.simpleMessage(
       "Письмо отправлено. Вставьте ссылку или код из письма ниже.",
@@ -1137,13 +1167,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "search": MessageLookupByLibrary.simpleMessage("Поиск"),
     "seconds": MessageLookupByLibrary.simpleMessage("Секунд"),
-    "secondsCount": m31,
+    "secondsCount": m34,
     "selectAll": MessageLookupByLibrary.simpleMessage("Выбрать все"),
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage(
       "Выберите тариф для улучшения",
     ),
     "selected": MessageLookupByLibrary.simpleMessage("Выбрано"),
-    "selectedCountTitle": m32,
+    "selectedCountTitle": m35,
     "sendCode": MessageLookupByLibrary.simpleMessage("Отправить код"),
     "sendResetEmail": MessageLookupByLibrary.simpleMessage(
       "Отправить письмо для сброса",
@@ -1284,10 +1314,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Получить профиль через URL",
     ),
-    "urlTip": m33,
+    "urlTip": m36,
     "useHosts": MessageLookupByLibrary.simpleMessage("Использовать hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Использовать системные hosts",
+    ),
+    "usedTrafficLabel": MessageLookupByLibrary.simpleMessage(
+      "Использованный трафик",
     ),
     "userAgent": MessageLookupByLibrary.simpleMessage("User-Agent"),
     "userCenter": MessageLookupByLibrary.simpleMessage("Центр пользователя"),
@@ -1312,7 +1345,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "whitelistMode": MessageLookupByLibrary.simpleMessage(
       "Режим белого списка",
     ),
-    "yearsAgo": m34,
+    "yearsAgo": m37,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Упрощенный китайский"),
   };
 }

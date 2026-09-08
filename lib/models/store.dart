@@ -117,6 +117,10 @@ class BoughtRecord {
   final int? planRank;
   final bool autoRenew;
   final int status;
+  final double? buyPrice;
+  final double? renewPrice;
+  final int? bandwidthGiB;
+  final int? durationMinutes;
   final String buyTime;
   final String billingPeriodText;
   final bool canActivate;
@@ -130,6 +134,10 @@ class BoughtRecord {
     required this.planRank,
     required this.autoRenew,
     required this.status,
+    this.buyPrice,
+    this.renewPrice,
+    this.bandwidthGiB,
+    this.durationMinutes,
     required this.buyTime,
     required this.billingPeriodText,
     required this.canActivate,
@@ -148,6 +156,10 @@ class BoughtRecord {
       planRank: json['plan_rank'] == null ? null : _asInt(json['plan_rank']),
       autoRenew: _asBool(json['auto_renew']),
       status: _asInt(json['status']),
+      buyPrice: _nonnegativeNumber(json['buy_price']),
+      renewPrice: _nonnegativeNumber(json['renew_price']),
+      bandwidthGiB: _nonnegativeNumber(json['bandwidth'])?.toInt(),
+      durationMinutes: _nonnegativeNumber(json['duration_minutes'])?.toInt(),
       buyTime: json['buy_time']?.toString() ?? '',
       billingPeriodText: json['billing_period_text']?.toString() ?? '',
       canActivate: json['can_activate'] == null
@@ -161,6 +173,13 @@ class BoughtRecord {
           : null,
     );
   }
+}
+
+double? _nonnegativeNumber(dynamic value) {
+  final number = value is num
+      ? value.toDouble()
+      : double.tryParse(value?.toString() ?? '');
+  return number != null && number.isFinite && number >= 0 ? number : null;
 }
 
 List<StorePlan> decodeStorePlans(dynamic value) {

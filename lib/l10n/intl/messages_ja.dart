@@ -75,23 +75,29 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m25(name) => "ノード ${name} はこの位置では使用できません";
 
-  static String m26(time) => "${time} に購入";
+  static String m26(count) => "${count}日";
 
-  static String m27(name, path) => "${name} は元の設定の ${path} で参照されています";
+  static String m27(count) => "${count}時間";
 
-  static String m28(value) => "残り: ${value}";
+  static String m28(count) => "${count}分";
 
-  static String m29(count) => "残り${count}";
+  static String m29(time) => "${time} に購入";
 
-  static String m30(seconds) => "${seconds}秒後に再送信";
+  static String m30(name, path) => "${name} は元の設定の ${path} で参照されています";
 
-  static String m31(count) => "${count} 秒";
+  static String m31(value) => "残り: ${value}";
 
-  static String m32(count) => "${count} 項目が選択されています";
+  static String m32(count) => "残り${count}";
 
-  static String m33(label) => "${label}はURLである必要があります";
+  static String m33(seconds) => "${seconds}秒後に再送信";
 
-  static String m34(count) => "${count}年前";
+  static String m34(count) => "${count} 秒";
+
+  static String m35(count) => "${count} 項目が選択されています";
+
+  static String m36(label) => "${label}はURLである必要があります";
+
+  static String m37(count) => "${count}年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -178,6 +184,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "balance": MessageLookupByLibrary.simpleMessage("残高"),
     "basicConfig": MessageLookupByLibrary.simpleMessage("基本設定"),
     "basicConfigDesc": MessageLookupByLibrary.simpleMessage("基本設定をグローバルに変更"),
+    "billingPeriodLabel": MessageLookupByLibrary.simpleMessage("請求期間"),
     "bind": MessageLookupByLibrary.simpleMessage("バインド"),
     "blacklistMode": MessageLookupByLibrary.simpleMessage("ブラックリストモード"),
     "blockQuic": MessageLookupByLibrary.simpleMessage("QUICをブロック"),
@@ -361,6 +368,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "expand": MessageLookupByLibrary.simpleMessage("標準"),
     "expectedStatus": MessageLookupByLibrary.simpleMessage("期待されるステータス"),
     "expireDate": m11,
+    "expiresAtLabel": MessageLookupByLibrary.simpleMessage("有効期限"),
     "exportFile": MessageLookupByLibrary.simpleMessage("ファイルをエクスポート"),
     "exportLogs": MessageLookupByLibrary.simpleMessage("ログをエクスポート"),
     "exportSuccess": MessageLookupByLibrary.simpleMessage("エクスポート成功"),
@@ -749,13 +757,23 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyPort": MessageLookupByLibrary.simpleMessage("プロキシポート"),
     "proxyProviders": MessageLookupByLibrary.simpleMessage("プロキシプロバイダー"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("キャッシュの削除"),
-    "purchaseTime": m26,
+    "purchaseAutoRenewLabel": MessageLookupByLibrary.simpleMessage("自動更新"),
+    "purchaseDays": m26,
+    "purchaseHours": m27,
+    "purchaseMinutes": m28,
+    "purchasePriceLabel": MessageLookupByLibrary.simpleMessage("購入価格"),
+    "purchaseRenewOff": MessageLookupByLibrary.simpleMessage("オフ"),
+    "purchaseRenewOn": MessageLookupByLibrary.simpleMessage("オン"),
+    "purchaseRenewalPriceLabel": MessageLookupByLibrary.simpleMessage("更新価格"),
+    "purchaseTime": m29,
+    "purchaseTotalTrafficLabel": MessageLookupByLibrary.simpleMessage("合計データ量"),
+    "purchasedAtLabel": MessageLookupByLibrary.simpleMessage("購入日時"),
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("純黒モード"),
     "qrcode": MessageLookupByLibrary.simpleMessage("QRコード"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage("QRコードをスキャンしてプロファイルを取得"),
     "quickFill": MessageLookupByLibrary.simpleMessage("クイック入力"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("レインボー"),
-    "rawOutboundInUse": m27,
+    "rawOutboundInUse": m30,
     "receivingAddress": MessageLookupByLibrary.simpleMessage("受取アドレス"),
     "recharge": MessageLookupByLibrary.simpleMessage("チャージ"),
     "rechargeAmount": MessageLookupByLibrary.simpleMessage("チャージ金額（¥）"),
@@ -772,8 +790,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "relayGroupUnsupported": MessageLookupByLibrary.simpleMessage(
       "Relay グループはコアから削除されました。別のタイプを選択してください",
     ),
-    "remaining": m28,
-    "remainingStock": m29,
+    "remaining": m31,
+    "remainingStock": m32,
+    "remainingTimeLabel": MessageLookupByLibrary.simpleMessage("残り時間"),
+    "remainingTrafficLabel": MessageLookupByLibrary.simpleMessage("残りデータ量"),
     "remote": MessageLookupByLibrary.simpleMessage("リモート"),
     "remoteBackupDesc": MessageLookupByLibrary.simpleMessage(
       "WebDAVにデータをバックアップ",
@@ -784,7 +804,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "request": MessageLookupByLibrary.simpleMessage("リクエスト"),
     "requests": MessageLookupByLibrary.simpleMessage("リクエスト"),
     "requestsDesc": MessageLookupByLibrary.simpleMessage("最近のリクエスト記録を表示"),
-    "resendCodeIn": m30,
+    "resendCodeIn": m33,
     "reset": MessageLookupByLibrary.simpleMessage("リセット"),
     "resetEmailSent": MessageLookupByLibrary.simpleMessage(
       "リセットメールを送信しました。メール内のリセットリンクまたはコードを下に貼り付けてください",
@@ -853,11 +873,11 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "search": MessageLookupByLibrary.simpleMessage("検索"),
     "seconds": MessageLookupByLibrary.simpleMessage("秒"),
-    "secondsCount": m31,
+    "secondsCount": m34,
     "selectAll": MessageLookupByLibrary.simpleMessage("すべて選択"),
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage("アップグレード対象を選択"),
     "selected": MessageLookupByLibrary.simpleMessage("選択済み"),
-    "selectedCountTitle": m32,
+    "selectedCountTitle": m35,
     "sendCode": MessageLookupByLibrary.simpleMessage("コードを送信"),
     "sendResetEmail": MessageLookupByLibrary.simpleMessage("リセットメールを送信"),
     "serviceCheckFailed": MessageLookupByLibrary.simpleMessage("サービスチェック失敗"),
@@ -970,9 +990,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("アップロード"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("URL経由でプロファイルを取得"),
-    "urlTip": m33,
+    "urlTip": m36,
     "useHosts": MessageLookupByLibrary.simpleMessage("ホストを使用"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("システムホストを使用"),
+    "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("使用済みデータ量"),
     "userAgent": MessageLookupByLibrary.simpleMessage("ユーザーエージェント"),
     "userCenter": MessageLookupByLibrary.simpleMessage("ユーザーセンター"),
     "userCenterFallback": MessageLookupByLibrary.simpleMessage("ユーザーセンター（予備）"),
@@ -988,7 +1009,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "vpnTip": MessageLookupByLibrary.simpleMessage("変更はVPN再起動後に有効"),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV設定"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("ホワイトリストモード"),
-    "yearsAgo": m34,
+    "yearsAgo": m37,
     "zh_CN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };
 }

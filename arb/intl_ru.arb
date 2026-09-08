@@ -649,5 +649,20 @@
   "geoOriginalSource": "Текущий адрес",
   "geoBackupSource": "Резервный CDN",
   "geoDownloadUrl": "URL загрузки",
-  "geoInvalidDownloadUrl": "Введите корректный HTTP или HTTPS URL"
+  "geoInvalidDownloadUrl": "Введите корректный HTTP или HTTPS URL",
+  "purchasedAtLabel": "Время покупки",
+  "purchasePriceLabel": "Цена покупки",
+  "billingPeriodLabel": "Период оплаты",
+  "remainingTimeLabel": "Оставшееся время",
+  "remainingTrafficLabel": "Оставшийся трафик",
+  "expiresAtLabel": "Истекает",
+  "usedTrafficLabel": "Использованный трафик",
+  "purchaseTotalTrafficLabel": "Общий трафик",
+  "purchaseRenewalPriceLabel": "Стоимость продления",
+  "purchaseAutoRenewLabel": "Автопродление",
+  "purchaseDays": "{count}д",
+  "purchaseHours": "{count}ч",
+  "purchaseMinutes": "{count}мин",
+  "purchaseRenewOn": "Вкл.",
+  "purchaseRenewOff": "Выкл."
 }

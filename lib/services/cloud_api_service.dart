@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/cloud_panel_time.dart';
 import 'package:fl_clash/common/bounded_http_client_adapter.dart';
 import 'package:fl_clash/common/http_read_race.dart';
 import 'package:fl_clash/models/models.dart';
@@ -658,13 +659,9 @@ class CloudApiService {
       );
     }
 
-    DateTime expireTime;
-    try {
-      final pt = info['plan_time']?.toString() ?? '';
-      expireTime = DateTime.tryParse(pt) ?? DateTime.now();
-    } catch (_) {
-      expireTime = DateTime.now();
-    }
+    final expireTime =
+        parseCloudPanelTime(info['plan_time']?.toString() ?? '') ??
+        DateTime.fromMillisecondsSinceEpoch(0, isUtc: true);
 
     final usedBytes = _parseTraffic(info['used']?.toString());
     final totalBytes = _parseTraffic(info['traffic']?.toString());
