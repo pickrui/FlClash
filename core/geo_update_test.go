@@ -18,6 +18,7 @@ import (
 	"github.com/metacubex/mihomo/component/geodata/router"
 	"github.com/metacubex/mihomo/component/mmdb"
 	"github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/log"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -138,6 +139,90 @@ func assertGeoRequests(t *testing.T, requests chan string, expected []string) {
 	}
 }
 
+func captureGeoUpdateEvents(t *testing.T) chan Message {
+	t.Helper()
+	// The batcher retains its original queue; capture actual events without
+	// attaching a transport or changing the sender.
+	previousQueue := priorityMessageQueue
+	events := make(chan Message, messageQueueSize)
+	priorityMessageQueue = events
+	t.Cleanup(func() { priorityMessageQueue = previousQueue })
+	return events
+}
+
+func TestScheduledGeoUpdatesRemainSilent(t *testing.T) {
+	_, _ = setupGeoUpdateServer(t, nil)
+	events := captureGeoUpdateEvents(t)
+	ctx := context.Background()
+
+	for _, skipped := range []bool{false, true} {
+		if err := updateAllGeoData(ctx); err != nil {
+			t.Fatal(err)
+		}
+		if len(events) != 8 {
+			t.Fatalf("got %d events, want start and completion for four resources", len(events))
+		}
+		for len(events) > 0 {
+			status := (<-events).Data.(GeoUpdateStatus)
+			if !status.Silent || status.Error != "" || (!status.Updating && status.Skipped != skipped) {
+				t.Fatalf("unexpected scheduled update status: %+v", status)
+			}
+		}
+	}
+
+	geodata.SetMmdbUrl(":invalid")
+	logs := log.Subscribe()
+	defer log.UnSubscribe(logs)
+	// Reusing the caller context must not make a subsequent manual update
+	// silent. Error-level logs also produce notifications independently of
+	// the GEO status events, so verify both outputs.
+	for _, test := range []struct {
+		name     string
+		update   func(context.Context) error
+		silent   bool
+		logLevel log.LogLevel
+	}{
+		{"scheduled", updateAllGeoData, true, log.WARNING},
+		{"manual", tryUpdateAllGeoData, false, log.ERROR},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			if err := test.update(ctx); err == nil {
+				t.Fatal("expected a download failure")
+			}
+			if len(events) != 8 {
+				t.Fatalf("got %d events, want start and completion for four resources", len(events))
+			}
+			foundError := false
+			for len(events) > 0 {
+				status := (<-events).Data.(GeoUpdateStatus)
+				if status.Silent != test.silent {
+					t.Fatalf("unexpected notification mode: %+v", status)
+				}
+				foundError = foundError || status.Error != ""
+			}
+			if !foundError {
+				t.Fatal("missing failure event")
+			}
+			timer := time.NewTimer(time.Second)
+			defer timer.Stop()
+			for {
+				select {
+				case event := <-logs:
+					if !strings.HasPrefix(event.Payload, "[GEO] Failed to update MMDB:") {
+						continue
+					}
+					if event.LogLevel != test.logLevel {
+						t.Fatalf("failure log level = %v, want %v", event.LogLevel, test.logLevel)
+					}
+					return
+				case <-timer.C:
+					t.Fatal("missing resource failure log")
+				}
+			}
+		})
+	}
+}
+
 func TestUpdateAllGeoDataDownloadsEveryResource(t *testing.T) {
 	data, requests := setupGeoUpdateServer(t, nil)
 	if err := updateAllGeoData(context.Background()); err != nil {
@@ -182,6 +267,7 @@ func TestUpdateAllGeoDataContinuesAfterResourceFailure(t *testing.T) {
 }
 
 func TestUpdateAllGeoDataStopsAfterCancellation(t *testing.T) {
+	events := captureGeoUpdateEvents(t)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	_, requests := setupGeoUpdateServer(t, func(http.ResponseWriter, *http.Request) bool {
@@ -192,10 +278,23 @@ func TestUpdateAllGeoDataStopsAfterCancellation(t *testing.T) {
 		t.Fatalf("canceled update error = %v", err)
 	}
 	assertGeoRequests(t, requests, []string{"MMDB"})
+	if len(events) != 2 {
+		t.Fatalf("canceled update emitted %d events, want start and failure", len(events))
+	}
+	for _, updating := range []bool{true, false} {
+		status := (<-events).Data.(GeoUpdateStatus)
+		if status.Type != "MMDB" || !status.Silent || status.Updating != updating ||
+			(!updating && !strings.Contains(status.Error, context.Canceled.Error())) {
+			t.Fatalf("unexpected canceled update status: %+v", status)
+		}
+	}
 	if err := updateAllGeoData(ctx); !errors.Is(err, context.Canceled) {
 		t.Fatalf("already canceled update error = %v", err)
 	}
 	assertGeoRequests(t, requests, nil)
+	if len(events) != 0 {
+		t.Fatal("already canceled update emitted events")
+	}
 }
 
 func TestShouldUpdateGeoDataChecksEveryResource(t *testing.T) {
@@ -511,12 +610,7 @@ func TestManualGeoUpdateRefreshesReadersWithoutRestart(t *testing.T) {
 				_, _ = w.Write(data)
 			}))
 			defer server.Close()
-			// The batcher retains its original queue; capture this operation's
-			// actual events without attaching a transport or changing the sender.
-			previousQueue := priorityMessageQueue
-			events := make(chan Message, messageQueueSize)
-			priorityMessageQueue = events
-			defer func() { priorityMessageQueue = previousQueue }()
+			events := captureGeoUpdateEvents(t)
 			running, initialized := isRunning, isInit.Load()
 			done := make(chan string, 1)
 			handleUpdateGeoData(test.geoType, filepath.Base(test.path), server.URL, func(value string) {
@@ -541,7 +635,7 @@ func TestManualGeoUpdateRefreshesReadersWithoutRestart(t *testing.T) {
 				event := <-events
 				status, ok := event.Data.(GeoUpdateStatus)
 				if event.Type != GeoUpdateMessage || !ok || status.Type != test.geoType ||
-					status.Updating != updating || status.Reload || status.Skipped || status.Error != "" {
+					status.Updating != updating || status.Silent || status.Reload || status.Skipped || status.Error != "" {
 					t.Fatalf("unexpected update event: %+v", event)
 				}
 			}

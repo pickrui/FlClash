@@ -37,8 +37,9 @@ abstract mixin class CoreEventListener {
     bool updating,
     bool skipped,
     bool reload,
-    String? error,
-  ) {}
+    String? error, {
+    bool silent = false,
+  }) {}
 
   void onModeChanged(String mode) {}
 }
@@ -75,6 +76,7 @@ class CoreEventManager {
                     data['skipped'] as bool? ?? false,
                     data['reload'] as bool? ?? false,
                     data['error'] as String?,
+                    silent: data['silent'] as bool? ?? false,
                   );
                   break;
                 case CoreEventType.mode:

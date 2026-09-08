@@ -3,9 +3,41 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/http.dart';
+import 'package:fl_clash/controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('installer downloads reject temporary certificate exemptions', () async {
+    final context = SecurityContext()
+      ..useCertificateChainBytes(utf8.encode(_certificate))
+      ..usePrivateKeyBytes(utf8.encode(_privateKey));
+    final origin = await HttpServer.bindSecure(
+      InternetAddress.loopbackIPv4,
+      0,
+      context,
+    );
+    addTearDown(() => origin.close(force: true));
+    var acceptedRequests = 0;
+    origin.listen((request) async {
+      acceptedRequests++;
+      request.response.write('untrusted installer');
+      await request.response.close();
+    }, onError: (_) {});
+
+    await FlClashTemporaryTls.runWithBadCertificateAllowed(() async {
+      await HttpOverrides.runWithHttpOverrides(() async {
+        final client = createAppUpdateDownloadClient();
+        addTearDown(() => client.close(force: true));
+        expect(FlClashTemporaryTls.allowBadCertificate, isTrue);
+        await expectLater(
+          client.get<String>('https://localhost:${origin.port}/update.apk'),
+          throwsA(predicate(FlClashTemporaryTls.isCertificateVerifyFailed)),
+        );
+      }, FlClashHttpOverrides());
+    });
+    expect(acceptedRequests, 0);
+  });
+
   for (final fallback in [false, true]) {
     test(
       fallback

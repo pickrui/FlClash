@@ -4,7 +4,9 @@ import 'dart:ffi' hide Size;
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:dio/dio.dart';
 import 'package:fl_clash/common/geo_recovery.dart';
+import 'package:fl_clash/common/update_download.dart';
 import 'package:fl_clash/core/core.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/l10n/l10n.dart';
@@ -17,6 +19,7 @@ import 'package:fl_clash/utils/safe_storage.dart';
 import 'package:fl_clash/views/cloud/cloud_login_page.dart';
 import 'package:fl_clash/widgets/geo_recovery_dialog.dart';
 import 'package:fl_clash/widgets/port_conflict_dialog.dart';
+import 'package:fl_clash/widgets/update_download_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
@@ -513,6 +516,51 @@ Future<void> runCleanupActions(
   }
 }
 
+Dio createAppUpdateDownloadClient() =>
+    Dio(
+        BaseOptions(
+          headers: {'User-Agent': browserUa},
+          connectTimeout: const Duration(seconds: 10),
+        ),
+      )
+      ..httpClientAdapter = createFlClashHttpClientAdapter(
+        findProxy: FlClashHttpOverrides.handleResourceFindProxy,
+      );
+
+String? getAppUpdateDownloadUrl(Abi abi) {
+  final name = switch (abi) {
+    Abi.windowsX64 => 'windows-amd64-setup.exe',
+    Abi.windowsArm64 => 'windows-arm64-setup.exe',
+    Abi.macosX64 => 'macos-amd64.dmg',
+    Abi.macosArm64 => 'macos-arm64.dmg',
+    Abi.androidArm => 'android-armeabi-v7a.apk',
+    Abi.androidArm64 => 'android-arm64-v8a.apk',
+    Abi.androidX64 => 'android-x86_64.apk',
+    Abi.linuxX64 => 'linux-amd64.deb',
+    Abi.linuxArm64 => 'linux-arm64.deb',
+    _ => null,
+  };
+  return name == null ? null : 'https://dl.dler.io/flclash-$name';
+}
+
+/// A dismissed download cancels the entire action, including browser fallback.
+Future<void> openAppUpdateDownload({
+  required UpdateDownloadResult? result,
+  required Future<bool> Function(File file) openFile,
+  required Future<void> Function() openBrowser,
+  required void Function(Object error) onError,
+}) async {
+  if (result == null) return;
+  try {
+    if (result.error != null) throw result.error!;
+    if (await openFile(result.file!)) return;
+    throw StateError('Unable to open downloaded update');
+  } catch (error) {
+    onError(error);
+    await openBrowser();
+  }
+}
+
 class AppController {
   late final BuildContext _context;
   late final WidgetRef _ref;
@@ -522,6 +570,7 @@ class AppController {
   int _persistentLogLength = 0;
   bool _persistentLogWritesSuspended = false;
   final _geoRecoveryLock = AsyncStorageLock();
+  bool _checkingUpdate = false;
   Future<bool>? _listenerStartFuture;
   int _startIntentGeneration = 0;
   final _coreLifecycleOperations = CoreLifecycleOperations();
@@ -714,6 +763,16 @@ extension InitControllerExt on AppController {
   }
 
   Future<void> checkUpdate({bool isUser = false}) async {
+    if (_checkingUpdate) return;
+    _checkingUpdate = true;
+    try {
+      await _checkUpdate(isUser: isUser);
+    } finally {
+      _checkingUpdate = false;
+    }
+  }
+
+  Future<void> _checkUpdate({required bool isUser}) async {
     AppUpdateInfo? updateInfo;
     try {
       updateInfo = await request.checkForUpdate();
@@ -723,7 +782,7 @@ extension InitControllerExt on AppController {
         logLevel: LogLevel.warning,
       );
       if (isUser) {
-        globalState.showMessage(
+        await globalState.showMessage(
           title: appLocalizations.checkUpdate,
           message: TextSpan(text: appLocalizations.checkUpdateFailed),
           cancelable: false,
@@ -733,7 +792,7 @@ extension InitControllerExt on AppController {
     }
     if (updateInfo == null) {
       if (isUser) {
-        globalState.showMessage(
+        await globalState.showMessage(
           title: appLocalizations.checkUpdate,
           message: TextSpan(text: appLocalizations.checkUpdateError),
           cancelable: false,
@@ -751,47 +810,61 @@ extension InitControllerExt on AppController {
     if (res != true) {
       return;
     }
-    final downloadUrl = _getUpdateDownloadUrl() ?? 'https://dl.dler.io';
+    final downloadUrl = getAppUpdateDownloadUrl(Abi.current());
     await safeRun<void>(
-      () => _openUpdateDownloadUrl(downloadUrl),
+      () => _downloadAppUpdate(downloadUrl),
       title: appLocalizations.checkUpdate,
       silence: !isUser,
     );
   }
 
-  Future<void> _openUpdateDownloadUrl(String downloadUrl) async {
-    await launchUrl(Uri.parse(downloadUrl));
+  Future<void> _downloadAppUpdate(String? downloadUrl) async {
+    if (downloadUrl == null) {
+      await _openUpdateDownloadUrl('https://dl.dler.io');
+      return;
+    }
+    final result = await globalState.showCommonDialog<UpdateDownloadResult>(
+      dismissible: false,
+      child: UpdateDownloadDialog(
+        download: (token, onProgress) async {
+          final client = createAppUpdateDownloadClient();
+          try {
+            return await downloadAppUpdate(
+              client: client,
+              url: downloadUrl,
+              directory: await appPath.tempDir.future,
+              cancelToken: token,
+              onProgress: onProgress,
+            );
+          } finally {
+            client.close(force: true);
+          }
+        },
+      ),
+    );
+    await openAppUpdateDownload(
+      result: result,
+      openFile: (file) => system.isAndroid
+          ? app!.openFile(file.path)
+          : launchUrl(
+              Uri.file(file.path),
+              mode: LaunchMode.externalApplication,
+            ),
+      openBrowser: () => _openUpdateDownloadUrl(downloadUrl),
+      onError: (error) => commonPrint.log(
+        'Built-in update download failed: $error',
+        logLevel: LogLevel.warning,
+      ),
+    );
   }
 
-  String? _getUpdateDownloadUrl() {
-    if (system.isWindows) {
-      return 'https://dl.dler.io/flclash-windows-amd64-setup.exe';
+  Future<void> _openUpdateDownloadUrl(String downloadUrl) async {
+    if (!await launchUrl(
+      Uri.parse(downloadUrl),
+      mode: LaunchMode.externalApplication,
+    )) {
+      throw StateError('Unable to open update download URL');
     }
-    if (system.isMacOS) {
-      final isArm = Abi.current() == Abi.macosArm64;
-      final arch = isArm ? 'arm64' : 'amd64';
-      return 'https://dl.dler.io/flclash-macos-$arch.dmg';
-    }
-    if (system.isAndroid) {
-      final abi = Abi.current();
-      String arch;
-      if (abi == Abi.androidArm64) {
-        arch = 'arm64-v8a';
-      } else if (abi == Abi.androidArm) {
-        arch = 'armeabi-v7a';
-      } else if (abi == Abi.androidX64) {
-        arch = 'x86_64';
-      } else {
-        arch = 'arm64-v8a';
-      }
-      return 'https://dl.dler.io/flclash-android-$arch.apk';
-    }
-    if (Platform.isLinux) {
-      final isArm = Abi.current() == Abi.linuxArm64;
-      final arch = isArm ? 'arm64' : 'amd64';
-      return 'https://dl.dler.io/flclash-linux-$arch.deb';
-    }
-    return null;
   }
 }
 

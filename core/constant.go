@@ -139,6 +139,7 @@ type Delay struct {
 }
 
 type GeoUpdateStatus struct {
+	Silent   bool   `json:"silent,omitempty"`
 	Type     string `json:"type"`
 	Updating bool   `json:"updating"`
 	Skipped  bool   `json:"skipped,omitempty"`

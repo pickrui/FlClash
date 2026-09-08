@@ -139,8 +139,9 @@ class _CoreContainerState extends ConsumerState<CoreManager>
     bool updating,
     bool skipped,
     bool reload,
-    String? error,
-  ) {
+    String? error, {
+    bool silent = false,
+  }) {
     if (reload) {
       if (ref.read(isStartProvider)) {
         debouncer.call(
@@ -153,6 +154,9 @@ class _CoreContainerState extends ConsumerState<CoreManager>
     final geoResource = GeoResource.fromJson(geoType.toLowerCase());
     ref.read(isUpdatingProvider(geoResource.updatingKey).notifier).value =
         updating;
+    if (silent) {
+      return;
+    }
     if (updating) {
       globalState.showNotifier(appLocalizations.geoUpdating(geoResource.name));
     } else if (error != null && error.isNotEmpty) {

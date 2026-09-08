@@ -1,6 +1,6 @@
 <div align=center>
 
-[![Release Downloads](https://img.shields.io/github/downloads/chen08209/FlClash/vVERSION/total?style=flat-square&logo=github)](https://img.shields.io/github/downloads/chen08209/FlClash/vVERSION/)
+[![Release Downloads](https://img.shields.io/github/downloads/pickrui/FlClash/vVERSION/total?style=flat-square&logo=github)](https://img.shields.io/github/downloads/pickrui/FlClash/vVERSION/)
 
 </div>
 
@@ -62,6 +62,6 @@
 
 <div dir="ltr">
 
-**List of all changes:** [ChangeLog](https://github.com/chen08209/FlClash/blob/main/CHANGELOG.md)
+**List of all changes:** [ChangeLog](https://github.com/pickrui/FlClash/blob/main/CHANGELOG.md)
 
 </div>

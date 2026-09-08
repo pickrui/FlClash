@@ -103,8 +103,12 @@ func runLifecycleGeoTask(action func(context.Context)) bool {
 	return true
 }
 
-func sendGeoUpdate(geoType string, updating bool, skipped bool, err error) {
+type silentGeoUpdateKey struct{}
+
+func sendGeoUpdate(ctx context.Context, geoType string, updating bool, skipped bool, err error) {
+	silent, _ := ctx.Value(silentGeoUpdateKey{}).(bool)
 	data := GeoUpdateStatus{
+		Silent:   silent,
 		Type:     geoType,
 		Updating: updating,
 		Skipped:  skipped,
@@ -184,7 +188,7 @@ func updateGeoDataLockedFromURL(
 	path string,
 	geoURL string,
 ) error {
-	sendGeoUpdate(geoType, true, false, nil)
+	sendGeoUpdate(ctx, geoType, true, false, nil)
 	oldHash, oldHashErr := getFileHash(path)
 
 	data, err := downloadGeoData(ctx, geoURL, func(data []byte) error {
@@ -202,17 +206,17 @@ func updateGeoDataLockedFromURL(
 		newHash := sha256.Sum256(data)
 		if err = ctx.Err(); err == nil {
 			if oldHashErr == nil && oldHash == newHash {
-				sendGeoUpdate(geoType, false, true, nil)
+				sendGeoUpdate(ctx, geoType, false, true, nil)
 				return nil
 			}
 			err = replaceGeoData(ctx, geoType, path, data)
 		}
 	}
 	if err != nil {
-		sendGeoUpdate(geoType, false, false, err)
+		sendGeoUpdate(ctx, geoType, false, false, err)
 		return err
 	}
-	sendGeoUpdate(geoType, false, false, nil)
+	sendGeoUpdate(ctx, geoType, false, false, nil)
 	return nil
 }
 
@@ -589,7 +593,12 @@ func updateAllGeoDataAction(ctx context.Context) error {
 			return errors.Join(updateErr, err)
 		}
 		if err := updateGeoDataLocked(ctx, resource.geoType, resource.path); err != nil {
-			log.Errorln("[GEO] Failed to update %s: %s", resource.geoType, err.Error())
+			if silent, _ := ctx.Value(silentGeoUpdateKey{}).(bool); silent {
+				// Error-level logs also trigger UI notifications.
+				log.Warnln("[GEO] Failed to update %s: %s", resource.geoType, err.Error())
+			} else {
+				log.Errorln("[GEO] Failed to update %s: %s", resource.geoType, err.Error())
+			}
 			updateErr = errors.Join(updateErr, fmt.Errorf("%s: %w", resource.geoType, err))
 		}
 	}
@@ -597,6 +606,8 @@ func updateAllGeoDataAction(ctx context.Context) error {
 }
 
 func updateAllGeoData(ctx context.Context) error {
+	// Scheduled updates keep status events but suppress user notifications.
+	ctx = context.WithValue(ctx, silentGeoUpdateKey{}, true)
 	return runGeoUpdate(ctx, updateAllGeoDataAction)
 }
 
