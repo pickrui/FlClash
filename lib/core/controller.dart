@@ -32,7 +32,7 @@ class PortConflictException implements Exception {
 class CoreController {
   static CoreController? _instance;
   late CoreHandlerInterface _interface;
-  final Map<String, Future<String>> _geoUpdates = {};
+  final Map<UpdateGeoDataParams, Future<String>> _geoUpdates = {};
 
   CoreController._internal() {
     if (system.isAndroid) {
@@ -194,10 +194,11 @@ class CoreController {
   }
 
   Future<String> updateGeoData(UpdateGeoDataParams params) {
-    final key = '${params.geoType}:${params.geoName}';
-    return _geoUpdates[key] ??= _interface
+    return _geoUpdates[params] ??= _interface
         .updateGeoData(params)
-        .whenComplete(() => _geoUpdates.remove(key));
+        .whenComplete(() {
+          _geoUpdates.remove(params);
+        });
   }
 
   Future<String> sideLoadExternalProvider({

@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/geo_recovery.dart';
 import 'package:fl_clash/controller.dart';
-import 'package:fl_clash/core/core.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
@@ -16,9 +16,9 @@ import 'package:path/path.dart' hide context;
 @immutable
 class GeoItem {
   final GeoResource type;
-  final String fileName;
+  const GeoItem({required this.type});
 
-  const GeoItem({required this.type, required this.fileName});
+  String get fileName => geoFileName(type);
 
   String get label => type.name;
 
@@ -31,10 +31,10 @@ class ResourcesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const geoItems = <GeoItem>[
-      GeoItem(type: GeoResource.MMDB, fileName: MMDB),
-      GeoItem(type: GeoResource.ASN, fileName: ASN),
-      GeoItem(type: GeoResource.GEOIP, fileName: GEOIP),
-      GeoItem(type: GeoResource.GEOSITE, fileName: GEOSITE),
+      GeoItem(type: GeoResource.MMDB),
+      GeoItem(type: GeoResource.ASN),
+      GeoItem(type: GeoResource.GEOIP),
+      GeoItem(type: GeoResource.GEOSITE),
     ];
 
     return CommonScaffold(
@@ -127,6 +127,7 @@ class GeoDataListItem extends ConsumerStatefulWidget {
 
 class _GeoDataListItemState extends ConsumerState<GeoDataListItem> {
   GeoItem get geoItem => widget.geoItem;
+  bool _updating = false;
 
   Future<void> _updateUrl(String url, WidgetRef ref) async {
     final defaultMap = defaultGeoXUrl.toJson();
@@ -173,7 +174,8 @@ class _GeoDataListItemState extends ConsumerState<GeoDataListItem> {
     if (url == null) {
       return const SizedBox();
     }
-    final isUpdating = ref.watch(isUpdatingProvider(geoItem.type.updatingKey));
+    final isUpdating =
+        ref.watch(isUpdatingProvider(geoItem.type.updatingKey)) || _updating;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -232,23 +234,19 @@ class _GeoDataListItemState extends ConsumerState<GeoDataListItem> {
   }
 
   Future<void> _handleUpdateGeoDataItem(String url) async {
-    await appController.safeRun<void>(() async {
-      await updateGeoDateItem(url);
-    }, silence: false);
-    if (mounted) {
-      setState(() {});
+    if (_updating) return;
+    setState(() => _updating = true);
+    try {
+      await appController.safeRun<void>(() async {
+        await appController.updateGeoResource(
+          geoItem.type,
+          url,
+          shouldContinue: () => mounted,
+        );
+      }, silence: false);
+    } finally {
+      if (mounted) setState(() => _updating = false);
     }
-  }
-
-  Future<void> updateGeoDateItem(String url) async {
-    final message = await coreController.updateGeoData(
-      UpdateGeoDataParams(
-        geoName: geoItem.fileName,
-        geoType: geoItem.label,
-        url: url,
-      ),
-    );
-    if (message.isNotEmpty) throw message;
   }
 
   @override

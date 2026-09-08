@@ -4,6 +4,7 @@ import 'dart:ffi' hide Size;
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:fl_clash/common/geo_recovery.dart';
 import 'package:fl_clash/core/core.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/l10n/l10n.dart';
@@ -14,6 +15,7 @@ import 'package:fl_clash/services/config_key_store.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/utils/safe_storage.dart';
 import 'package:fl_clash/views/cloud/cloud_login_page.dart';
+import 'package:fl_clash/widgets/geo_recovery_dialog.dart';
 import 'package:fl_clash/widgets/port_conflict_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -519,6 +521,7 @@ class AppController {
   File? _persistentLogFile;
   int _persistentLogLength = 0;
   bool _persistentLogWritesSuspended = false;
+  final _geoRecoveryLock = AsyncStorageLock();
   Future<bool>? _listenerStartFuture;
   int _startIntentGeneration = 0;
   final _coreLifecycleOperations = CoreLifecycleOperations();
@@ -1517,6 +1520,47 @@ extension ProxiesControllerExt on AppController {
 }
 
 extension SetupControllerExt on AppController {
+  /// Serializes interactive downloads and recovery dialogs across resources.
+  /// Offline validation dependencies first use the configured download URL.
+  Future<bool> updateGeoResource(
+    GeoResource resource,
+    String url, {
+    Object? initialError,
+    required bool Function() shouldContinue,
+  }) => _geoRecoveryLock.synchronized(() async {
+    if (!shouldContinue()) return false;
+    Future<String> download(String selected) => coreController.updateGeoData(
+      UpdateGeoDataParams(
+        geoName: geoFileName(resource),
+        geoType: resource.name,
+        url: selected,
+      ),
+    );
+
+    return downloadGeoWithRecovery(
+      initialError: initialError,
+      download: () => download(url),
+      shouldContinue: shouldContinue,
+      recover: (failure) async =>
+          await globalState.showCommonDialog<bool>(
+            child: GeoRecoveryDialog(
+              resource: resource,
+              url: url,
+              error: Secrets.redactApiDomains(failure.toString()),
+              shouldContinue: shouldContinue,
+              download: (selected) async {
+                try {
+                  return Secrets.redactApiDomains(await download(selected));
+                } catch (error) {
+                  return Secrets.redactApiDomains(error.toString());
+                }
+              },
+            ),
+          ) ==
+          true,
+    );
+  });
+
   Future<bool> _startWithPortRecovery(int generation) {
     bool shouldContinue() => generation == _startIntentGeneration;
     if (!shouldContinue()) return Future.value(false);
@@ -1802,15 +1846,46 @@ extension SetupControllerExt on AppController {
     if (!isCurrentApply()) {
       return true;
     }
+    final startGeneration = _startIntentGeneration;
+    bool canRecover() =>
+        isCurrentApply() && startGeneration == _startIntentGeneration;
     var keepCurrentCore = false;
+    var setupAttempted = false;
     final res = await loadingRun<bool>(
       () async {
         try {
-          if (!await _setupConfig(profileId, generation, preloadInvoke)) {
+          if (!await withGeoRecovery(
+            action: () => _setupConfig(
+              profileId,
+              generation,
+              preloadInvoke: preloadInvoke,
+              onApply: () => setupAttempted = true,
+              shouldContinue: canRecover,
+            ),
+            shouldContinue: canRecover,
+            recover: (resource, error) async {
+              keepCurrentCore =
+                  !setupAttempted &&
+                  error is CandidateConfigValidationException;
+              final recovered = await updateGeoResource(
+                resource,
+                failedGeoDownloadUrl(error) ??
+                    _ref
+                            .read(patchClashConfigProvider)
+                            .geoXUrl
+                            .toJson()[resource.key]
+                        as String,
+                initialError: error,
+                shouldContinue: canRecover,
+              );
+              if (recovered) keepCurrentCore = false;
+              return recovered;
+            },
+          )) {
             return !isCurrentApply();
           }
         } on CandidateConfigValidationException {
-          keepCurrentCore = true;
+          keepCurrentCore = !setupAttempted;
           rethrow;
         }
         if (!isCurrentApply()) {
@@ -1971,11 +2046,14 @@ extension SetupControllerExt on AppController {
 
   Future<bool> _setupConfig(
     int? profileId,
-    int generation, [
+    int generation, {
     FutureOr<void> Function()? preloadInvoke,
-  ]) async {
+    required VoidCallback onApply,
+    required bool Function() shouldContinue,
+  }) async {
     bool isCurrentApply() {
-      return generation == _profileApplyGeneration &&
+      return shouldContinue() &&
+          generation == _profileApplyGeneration &&
           profileId == _ref.read(currentProfileIdProvider);
     }
 
@@ -2021,6 +2099,7 @@ extension SetupControllerExt on AppController {
     );
     final configFilePath = await appPath.configFilePath;
     final yamlString = await encodeYamlTask(config);
+    if (!isCurrentApply()) return false;
     final validationMessage = await coreController.validateConfigWithBytes(
       base64Encode(utf8.encode(yamlString)),
     );
@@ -2060,6 +2139,7 @@ extension SetupControllerExt on AppController {
 
     final String message;
     try {
+      onApply();
       message = await coreController.setupConfig(
         params: updatedSetupParams,
         preloadInvoke: preloadInvoke,

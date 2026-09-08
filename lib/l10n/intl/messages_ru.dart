@@ -531,7 +531,19 @@ class MessageLookup extends MessageLookupByLibrary {
     "geoAutoUpdateIntervalTip": MessageLookupByLibrary.simpleMessage(
       "Интервал автообновления должен быть от 1 до 8760 часов",
     ),
+    "geoBackupSource": MessageLookupByLibrary.simpleMessage("Резервный CDN"),
+    "geoDownloadFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось загрузить GEO",
+    ),
+    "geoDownloadRecoveryHint": MessageLookupByLibrary.simpleMessage(
+      "Загрузка использует текущие правила сети или прямое соединение, если прокси ещё не запущен. Повторите попытку, выберите другой источник или введите URL. После проверки операция продолжится.",
+    ),
+    "geoDownloadUrl": MessageLookupByLibrary.simpleMessage("URL загрузки"),
+    "geoInvalidDownloadUrl": MessageLookupByLibrary.simpleMessage(
+      "Введите корректный HTTP или HTTPS URL",
+    ),
     "geoOptions": MessageLookupByLibrary.simpleMessage("Настройки Geo"),
+    "geoOriginalSource": MessageLookupByLibrary.simpleMessage("Текущий адрес"),
     "geoResources": MessageLookupByLibrary.simpleMessage("Ресурсы Geo"),
     "geoSkipped": m12,
     "geoUpdated": m13,

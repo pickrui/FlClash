@@ -643,5 +643,11 @@
   "configValueTypeNull": "пустое значение",
   "configRecoveryTitle": "Восстановление локальных настроек",
   "configRecoveryMessage": "Локальные настройки временно недоступны. Ваши данные сохранены. Разблокируйте устройство и повторите попытку или откройте приложение позже.",
-  "configRecoveryRetry": "Повторить"
+  "configRecoveryRetry": "Повторить",
+  "geoDownloadFailed": "Не удалось загрузить GEO",
+  "geoDownloadRecoveryHint": "Загрузка использует текущие правила сети или прямое соединение, если прокси ещё не запущен. Повторите попытку, выберите другой источник или введите URL. После проверки операция продолжится.",
+  "geoOriginalSource": "Текущий адрес",
+  "geoBackupSource": "Резервный CDN",
+  "geoDownloadUrl": "URL загрузки",
+  "geoInvalidDownloadUrl": "Введите корректный HTTP или HTTPS URL"
 }

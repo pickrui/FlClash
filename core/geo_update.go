@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/metacubex/mihomo/component/geodata"
+	"github.com/metacubex/mihomo/component/geodata/router"
 	mihomoHttp "github.com/metacubex/mihomo/component/http"
 	"github.com/metacubex/mihomo/component/mmdb"
 	"github.com/metacubex/mihomo/constant"
@@ -183,8 +184,10 @@ func updateGeoDataLockedFromURL(
 	oldHash, oldHashErr := getFileHash(path)
 
 	data, err := downloadGeoData(ctx, geoURL)
-	if err == nil {
-		err = validateGeoData(geoType, data)
+	if err != nil {
+		err = fmt.Errorf("GEO download failed: %w", err)
+	} else if err = validateGeoData(geoType, data); err != nil {
+		err = fmt.Errorf("invalid %s database file: %w", geoType, err)
 	}
 	if err == nil {
 		newHash := sha256.Sum256(data)
@@ -219,25 +222,28 @@ func geoDataURL(geoType string) string {
 
 func geoResourcePath(geoType string, geoName string) (string, error) {
 	var path string
-	var expectedName string
+	var validName bool
+	name := strings.ToLower(geoName)
 	switch geoType {
 	case "MMDB":
+		// The app uses GEOIP.metadb even when the core has selected a legacy
+		// Country.mmdb or geoip.db file. Names identify the resource; only the
+		// core's path resolver selects the destination to replace.
 		path = constant.Path.MMDB()
-		expectedName = filepath.Base(path)
+		validName = name == "geoip.metadb" || name == "country.mmdb" || name == "geoip.db"
 	case "ASN":
 		path = constant.Path.ASN()
-		expectedName = filepath.Base(path)
+		validName = name == "asn.mmdb"
 	case "GEOIP":
 		path = constant.Path.GeoIP()
-		expectedName = filepath.Base(path)
+		validName = name == "geoip.dat"
 	case "GEOSITE":
 		path = constant.Path.GeoSite()
-		expectedName = filepath.Base(path)
+		validName = name == "geosite.dat"
 	default:
 		return "", errors.New("unsupported GEO resource")
 	}
-	if !strings.EqualFold(filepath.Base(geoName), expectedName) ||
-		filepath.Base(geoName) != geoName {
+	if !validName {
 		return "", errors.New("invalid GEO resource name")
 	}
 	return path, nil
@@ -260,7 +266,7 @@ func downloadGeoData(ctx context.Context, url string) ([]byte, error) {
 	}
 	defer response.Body.Close()
 	if response.StatusCode < 200 || response.StatusCode > 299 {
-		return nil, fmt.Errorf("GEO download failed: %s", response.Status)
+		return nil, fmt.Errorf("unexpected HTTP status: %s", response.Status)
 	}
 	if response.ContentLength > maxGeoDownloadBytes {
 		return nil, errors.New("GEO download exceeds size limit")
@@ -283,26 +289,100 @@ func validateGeoData(geoType string, data []byte) error {
 	case "MMDB", "ASN":
 		instance, err := maxminddb.FromBytes(data)
 		if err != nil {
-			return fmt.Errorf("invalid %s database file: %w", geoType, err)
+			return err
 		}
-		return instance.Close()
+		defer instance.Close()
+		return validateMMDBGeoData(geoType, instance)
 	case "GEOIP":
 		loader, err := geodata.GetGeoDataLoader("standard")
 		if err != nil {
 			return err
 		}
-		_, err = loader.LoadIPByBytes(data, "cn")
+		cidrs, err := loader.LoadIPByBytes(data, "cn")
+		if err != nil {
+			return err
+		}
+		if len(cidrs) == 0 {
+			return errors.New("GEOIP database has no CN IP records")
+		}
+		_, err = router.NewGeoIPMatcher(cidrs)
 		return err
 	case "GEOSITE":
 		loader, err := geodata.GetGeoDataLoader("standard")
 		if err != nil {
 			return err
 		}
-		_, err = loader.LoadSiteByBytes(data, "cn")
+		domains, err := loader.LoadSiteByBytes(data, "cn")
+		if err != nil {
+			return err
+		}
+		if len(domains) == 0 {
+			return errors.New("GEOSITE database has no CN domain records")
+		}
+		for _, domain := range domains {
+			if domain == nil || domain.Value == "" ||
+				domain.Type < router.Domain_Plain || domain.Type > router.Domain_Full {
+				return errors.New("GEOSITE database contains an invalid CN domain record")
+			}
+		}
+		_, err = router.NewSuccinctMatcherGroup(domains)
 		return err
 	default:
 		return errors.New("unsupported GEO resource")
 	}
+}
+
+// Match the reader's supported layouts, including custom MaxMind databases
+// whose metadata names differ but whose records still contain country.iso_code.
+func validateMMDBGeoData(geoType string, database *maxminddb.Reader) error {
+	databaseType := database.Metadata.DatabaseType
+	switch databaseType {
+	case "GeoLite2-ASN", "DBIP-ASN-Lite (compat=GeoLite2-ASN)", "ipinfo generic_asn_free.mmdb":
+		if geoType == "ASN" {
+			return nil
+		}
+		return fmt.Errorf("invalid MMDB database type: %s", databaseType)
+	default:
+		if geoType == "ASN" {
+			return fmt.Errorf("unsupported ASN database type: %s", databaseType)
+		}
+	}
+
+	networks := database.Networks(maxminddb.SkipAliasedNetworks)
+	for networks.Next() {
+		var record any
+		if _, err := networks.Network(&record); err != nil {
+			return fmt.Errorf("invalid MMDB country record: %w", err)
+		}
+		var valid bool
+		switch databaseType {
+		case "sing-geoip", "Meta-geoip0":
+			switch value := record.(type) {
+			case string:
+				valid = value != ""
+			case []any:
+				valid = databaseType == "Meta-geoip0" && len(value) > 0
+				for _, item := range value {
+					if code, ok := item.(string); !ok || code == "" {
+						valid = false
+						break
+					}
+				}
+			}
+		default:
+			value, _ := record.(map[string]any)
+			country, _ := value["country"].(map[string]any)
+			code, _ := country["iso_code"].(string)
+			valid = code != ""
+		}
+		if valid {
+			return nil
+		}
+	}
+	if err := networks.Err(); err != nil {
+		return fmt.Errorf("invalid MMDB search tree: %w", err)
+	}
+	return errors.New("MMDB database has no usable country records")
 }
 
 func replaceGeoData(geoType string, path string, data []byte) (err error) {

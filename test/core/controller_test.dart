@@ -157,4 +157,81 @@ void main() {
     verify(() => handler.startListener()).called(2);
     verifyNoMoreInteractions(handler);
   });
+
+  group('GEO update requests', () {
+    const params = UpdateGeoDataParams(
+      geoType: 'GEOIP',
+      geoName: 'GEOIP.dat',
+      url: 'https://example.com/geoip.dat',
+    );
+
+    test('coalesces identical requests while downloading', () async {
+      final completed = Completer<String>();
+      when(
+        () => handler.updateGeoData(params),
+      ).thenAnswer((_) => completed.future);
+
+      final first = controller.updateGeoData(params);
+      final duplicate = controller.updateGeoData(params.copyWith());
+
+      expect(duplicate, same(first));
+      completed.complete('');
+      expect(await first, isEmpty);
+      expect(await duplicate, isEmpty);
+      verify(() => handler.updateGeoData(params)).called(1);
+      verifyNoMoreInteractions(handler);
+    });
+
+    test('a different source does not reuse a pending download', () async {
+      final fallback = params.copyWith(
+        url: 'https://backup.example.com/geoip.dat',
+      );
+      final originalCompleted = Completer<String>();
+      final fallbackCompleted = Completer<String>();
+      when(
+        () => handler.updateGeoData(params),
+      ).thenAnswer((_) => originalCompleted.future);
+      when(
+        () => handler.updateGeoData(fallback),
+      ).thenAnswer((_) => fallbackCompleted.future);
+
+      final original = controller.updateGeoData(params);
+      final recovery = controller.updateGeoData(fallback);
+
+      expect(recovery, isNot(same(original)));
+      originalCompleted.complete('TLS handshake timeout');
+      expect(await original, 'TLS handshake timeout');
+      expect(controller.updateGeoData(fallback.copyWith()), same(recovery));
+      fallbackCompleted.complete('');
+      expect(await recovery, isEmpty);
+      verify(() => handler.updateGeoData(params)).called(1);
+      verify(() => handler.updateGeoData(fallback)).called(1);
+      verifyNoMoreInteractions(handler);
+    });
+
+    test('completion releases the request for another download', () async {
+      when(() => handler.updateGeoData(params)).thenAnswer((_) async => '');
+
+      expect(await controller.updateGeoData(params), isEmpty);
+      expect(await controller.updateGeoData(params.copyWith()), isEmpty);
+
+      verify(() => handler.updateGeoData(params)).called(2);
+      verifyNoMoreInteractions(handler);
+    });
+
+    test('transport failure releases the request for retry', () async {
+      final error = StateError('core disconnected');
+      var attempts = 0;
+      when(() => handler.updateGeoData(params)).thenAnswer((_) async {
+        if (++attempts == 1) throw error;
+        return '';
+      });
+
+      await expectLater(controller.updateGeoData(params), throwsA(same(error)));
+      expect(await controller.updateGeoData(params.copyWith()), isEmpty);
+
+      verify(() => handler.updateGeoData(params)).called(2);
+      verifyNoMoreInteractions(handler);
+    });
+  });
 }

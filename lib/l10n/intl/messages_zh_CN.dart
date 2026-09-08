@@ -356,7 +356,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "geoAutoUpdateIntervalTip": MessageLookupByLibrary.simpleMessage(
       "自动更新间隔必须为 1 至 8760 小时",
     ),
+    "geoBackupSource": MessageLookupByLibrary.simpleMessage("备用 CDN"),
+    "geoDownloadFailed": MessageLookupByLibrary.simpleMessage("GEO 数据下载失败"),
+    "geoDownloadRecoveryHint": MessageLookupByLibrary.simpleMessage(
+      "下载默认使用当前网络规则，代理尚未可用时直连。可重试当前地址、选择其他来源或输入自定义地址，下载校验成功后自动继续。",
+    ),
+    "geoDownloadUrl": MessageLookupByLibrary.simpleMessage("下载地址"),
+    "geoInvalidDownloadUrl": MessageLookupByLibrary.simpleMessage(
+      "请输入有效的 HTTP 或 HTTPS 地址",
+    ),
     "geoOptions": MessageLookupByLibrary.simpleMessage("Geo 选项"),
+    "geoOriginalSource": MessageLookupByLibrary.simpleMessage("当前地址"),
     "geoResources": MessageLookupByLibrary.simpleMessage("Geo 资源"),
     "geoSkipped": m12,
     "geoUpdated": m13,

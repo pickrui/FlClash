@@ -285,12 +285,177 @@ func TestInvalidGeoUpdatePreservesExistingFile(t *testing.T) {
 	}
 }
 
-func TestGeoResourcePathRejectsUnexpectedNames(t *testing.T) {
-	if _, err := geoResourcePath("GEOIP", "../GEOIP.dat"); err == nil {
-		t.Fatal("geoResourcePath() accepted a path")
+func TestMismatchedGeoUpdatePreservesExistingFile(t *testing.T) {
+	for geoType, wrongType := range map[string]string{
+		"MMDB": "ASN", "ASN": "MMDB", "GEOIP": "GEOSITE", "GEOSITE": "GEOIP",
+	} {
+		t.Run(geoType, func(t *testing.T) {
+			var data map[string][]byte
+			data, _ = setupGeoUpdateServer(t, func(w http.ResponseWriter, _ *http.Request) bool {
+				_, _ = w.Write(data[wrongType])
+				return true
+			})
+			path := geoTestPaths()[geoType]
+			if err := os.WriteFile(path, data[geoType], 0o600); err != nil {
+				t.Fatal(err)
+			}
+			if err := updateGeoDataLocked(context.Background(), geoType, path); err == nil {
+				t.Fatalf("accepted %s data as %s", wrongType, geoType)
+			}
+			current, err := os.ReadFile(path)
+			if err != nil || !bytes.Equal(current, data[geoType]) {
+				t.Fatalf("existing %s database changed: %v", geoType, err)
+			}
+		})
 	}
-	if _, err := geoResourcePath("GEOIP", "GEOSITE.dat"); err == nil {
-		t.Fatal("geoResourcePath() accepted the wrong resource name")
+}
+
+func TestValidateMMDBKeepsSupportedCountryLayouts(t *testing.T) {
+	fixture, err := os.ReadFile(filepath.Join("Clash.Meta", "component", "mmdb", "testdata", "geoip-cn.mmdb"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	encodeString := func(value string) []byte {
+		// Every synthetic string here fits in the DB format's one-byte size.
+		return append([]byte{0x40 | byte(len(value))}, []byte(value)...)
+	}
+	countryRecord := append([]byte{0xe1}, encodeString("country")...)
+	countryRecord = append(countryRecord, 0xe1)
+	countryRecord = append(countryRecord, encodeString("iso_code")...)
+	countryRecord = append(countryRecord, encodeString("CN")...)
+	metaList := append([]byte{0x02, 0x04}, encodeString("cn")...)
+	metaList = append(metaList, encodeString("private")...)
+	for _, test := range []struct {
+		name, databaseType string
+		record             []byte
+	}{
+		{"sing string", "sing-geoip", encodeString("cn")},
+		{"meta string", "Meta-geoip0", encodeString("cn")},
+		{"meta list", "Meta-geoip0", metaList},
+		{"MaxMind country", "GeoLite2-Country", countryRecord},
+		{"custom MaxMind country", "Custom-Country", countryRecord},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			data := bytes.Replace(fixture, encodeString("cn"), test.record, 1)
+			data = bytes.Replace(data, encodeString("sing-geoip"), encodeString(test.databaseType), 1)
+			if err := validateGeoData("MMDB", data); err != nil {
+				t.Fatalf("supported MMDB layout rejected: %v", err)
+			}
+		})
+	}
+}
+
+func TestGeoUpdateErrorsIdentifyRecoverableStage(t *testing.T) {
+	data, _ := setupGeoUpdateServer(t, nil)
+	t.Run("download", func(t *testing.T) {
+		ctx, cancel := context.WithCancel(context.Background())
+		cancel()
+		err := updateGeoDataLocked(ctx, "GEOIP", constant.Path.GeoIP())
+		if err == nil || !strings.HasPrefix(err.Error(), "GEO download failed: ") || !errors.Is(err, context.Canceled) {
+			t.Fatalf("download failure lost its stage or cancellation cause: %v", err)
+		}
+	})
+	t.Run("validation", func(t *testing.T) {
+		err := updateGeoDataLockedFromURL(context.Background(), "GEOIP", constant.Path.GeoIP(), geodata.GeoSiteUrl())
+		if err == nil || !strings.HasPrefix(err.Error(), "invalid GEOIP database file: ") {
+			t.Fatalf("validation failure lost its stage: %v", err)
+		}
+	})
+	t.Run("file installation", func(t *testing.T) {
+		parent := filepath.Join(t.TempDir(), "file")
+		if err := os.WriteFile(parent, data["GEOIP"], 0o600); err != nil {
+			t.Fatal(err)
+		}
+		err := updateGeoDataLocked(context.Background(), "GEOIP", filepath.Join(parent, "GEOIP.dat"))
+		var pathError *os.PathError
+		if !errors.As(err, &pathError) || strings.HasPrefix(err.Error(), "GEO download failed: ") || strings.HasPrefix(err.Error(), "invalid GEOIP database file: ") {
+			t.Fatalf("file installation error was classified as a source failure: %v", err)
+		}
+	})
+}
+
+func TestValidateBundledGeoData(t *testing.T) {
+	for geoType, name := range map[string]string{
+		"MMDB": "GEOIP.metadb", "ASN": "ASN.mmdb", "GEOIP": "GEOIP.dat", "GEOSITE": "GEOSITE.dat",
+	} {
+		t.Run(geoType, func(t *testing.T) {
+			data, err := os.ReadFile(filepath.Join("..", "assets", "data", name))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := validateGeoData(geoType, data); err != nil {
+				t.Fatalf("bundled %s database rejected: %v", geoType, err)
+			}
+		})
+	}
+}
+
+func TestValidateGeoDataRejectsInvalidCNRecords(t *testing.T) {
+	for _, test := range []struct {
+		name, geoType string
+		message       proto.Message
+	}{
+		{"empty CIDRs", "GEOIP", &router.GeoIPList{Entry: []*router.GeoIP{{CountryCode: "CN"}}}},
+		{"invalid prefix", "GEOIP", &router.GeoIPList{Entry: []*router.GeoIP{{CountryCode: "CN", Cidr: []*router.CIDR{{Ip: []byte{1, 0, 0, 0}, Prefix: 33}}}}}},
+		{"empty domains", "GEOSITE", &router.GeoSiteList{Entry: []*router.GeoSite{{CountryCode: "CN"}}}},
+		{"empty domain value", "GEOSITE", &router.GeoSiteList{Entry: []*router.GeoSite{{CountryCode: "CN", Domain: []*router.Domain{{Type: router.Domain_Domain}}}}}},
+		{"invalid domain type", "GEOSITE", &router.GeoSiteList{Entry: []*router.GeoSite{{CountryCode: "CN", Domain: []*router.Domain{{Type: 100, Value: "example.cn"}}}}}},
+		{"invalid regex", "GEOSITE", &router.GeoSiteList{Entry: []*router.GeoSite{{CountryCode: "CN", Domain: []*router.Domain{{Type: router.Domain_Regex, Value: "["}}}}}},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			data, err := proto.Marshal(test.message)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := validateGeoData(test.geoType, data); err == nil {
+				t.Fatal("invalid CN records were accepted")
+			}
+		})
+	}
+}
+
+func TestGeoResourcePathAcceptsMMDBAliases(t *testing.T) {
+	previousHome := constant.Path.HomeDir()
+	previousGeoipName := constant.GeoipName
+	t.Cleanup(func() {
+		constant.SetHomeDir(previousHome)
+		constant.GeoipName = previousGeoipName
+	})
+	aliases := []string{"Country.mmdb", "geoip.db", "geoip.metadb", "GEOIP.metadb"}
+	for _, existingName := range aliases {
+		t.Run(existingName, func(t *testing.T) {
+			constant.SetHomeDir(t.TempDir())
+			existingPath := filepath.Join(constant.Path.HomeDir(), existingName)
+			if err := os.WriteFile(existingPath, []byte("database"), 0o600); err != nil {
+				t.Fatal(err)
+			}
+			for _, requestedName := range aliases {
+				path, err := geoResourcePath("MMDB", requestedName)
+				if err != nil || path != existingPath {
+					t.Errorf("geoResourcePath(MMDB, %q) = %q, %v; want %q", requestedName, path, err, existingPath)
+				}
+			}
+		})
+	}
+}
+
+func TestGeoResourcePathRejectsUnexpectedNames(t *testing.T) {
+	for _, test := range []struct{ geoType, name string }{
+		{"GEOIP", "../GEOIP.dat"},
+		{"GEOIP", "GEOSITE.dat"},
+		{"MMDB", "../Country.mmdb"},
+		{"MMDB", `..\Country.mmdb`},
+		{"MMDB", "folder/geoip.metadb"},
+		{"MMDB", "GEOIP.dat"},
+		{"ASN", "Country.mmdb"},
+		{"GEOSITE", "GEOIP.dat"},
+		{"OTHER", "GEOIP.dat"},
+	} {
+		t.Run(test.geoType+"/"+test.name, func(t *testing.T) {
+			if path, err := geoResourcePath(test.geoType, test.name); err == nil || path != "" {
+				t.Fatalf("geoResourcePath() accepted an unexpected resource name: %q, %v", path, err)
+			}
+		})
 	}
 }
 

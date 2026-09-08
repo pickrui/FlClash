@@ -643,5 +643,11 @@
   "configValueTypeNull": "an empty value",
   "configRecoveryTitle": "Recover local configuration",
   "configRecoveryMessage": "Local configuration is temporarily unavailable. Your existing data has been kept. Unlock your device and retry, or reopen the app later.",
-  "configRecoveryRetry": "Retry"
+  "configRecoveryRetry": "Retry",
+  "geoDownloadFailed": "GEO download failed",
+  "geoDownloadRecoveryHint": "Download uses the current network rules, or a direct connection when the proxy is unavailable. Retry the current address, choose another source, or enter a custom URL. After validation, the operation will continue automatically.",
+  "geoOriginalSource": "Current address",
+  "geoBackupSource": "Backup CDN",
+  "geoDownloadUrl": "Download URL",
+  "geoInvalidDownloadUrl": "Enter a valid HTTP or HTTPS URL"
 }

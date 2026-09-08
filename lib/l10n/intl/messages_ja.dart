@@ -399,7 +399,19 @@ class MessageLookup extends MessageLookupByLibrary {
     "geoAutoUpdateIntervalTip": MessageLookupByLibrary.simpleMessage(
       "自動更新間隔は1〜8760時間で入力してください",
     ),
+    "geoBackupSource": MessageLookupByLibrary.simpleMessage("予備 CDN"),
+    "geoDownloadFailed": MessageLookupByLibrary.simpleMessage(
+      "GEO データのダウンロードに失敗しました",
+    ),
+    "geoDownloadRecoveryHint": MessageLookupByLibrary.simpleMessage(
+      "現在のネットワークルールで取得し、プロキシが未起動の場合は直接接続します。再試行するか、別の配信元または URL を選択してください。検証後に自動で続行します。",
+    ),
+    "geoDownloadUrl": MessageLookupByLibrary.simpleMessage("ダウンロード URL"),
+    "geoInvalidDownloadUrl": MessageLookupByLibrary.simpleMessage(
+      "有効な HTTP または HTTPS URL を入力してください",
+    ),
     "geoOptions": MessageLookupByLibrary.simpleMessage("Geoオプション"),
+    "geoOriginalSource": MessageLookupByLibrary.simpleMessage("現在の URL"),
     "geoResources": MessageLookupByLibrary.simpleMessage("Geoリソース"),
     "geoSkipped": m12,
     "geoUpdated": m13,

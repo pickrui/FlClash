@@ -5313,6 +5313,66 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `GEO download failed`
+  String get geoDownloadFailed {
+    return Intl.message(
+      'GEO download failed',
+      name: 'geoDownloadFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Download uses the current network rules, or a direct connection when the proxy is unavailable. Retry the current address, choose another source, or enter a custom URL. After validation, the operation will continue automatically.`
+  String get geoDownloadRecoveryHint {
+    return Intl.message(
+      'Download uses the current network rules, or a direct connection when the proxy is unavailable. Retry the current address, choose another source, or enter a custom URL. After validation, the operation will continue automatically.',
+      name: 'geoDownloadRecoveryHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Current address`
+  String get geoOriginalSource {
+    return Intl.message(
+      'Current address',
+      name: 'geoOriginalSource',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Backup CDN`
+  String get geoBackupSource {
+    return Intl.message(
+      'Backup CDN',
+      name: 'geoBackupSource',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Download URL`
+  String get geoDownloadUrl {
+    return Intl.message(
+      'Download URL',
+      name: 'geoDownloadUrl',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter a valid HTTP or HTTPS URL`
+  String get geoInvalidDownloadUrl {
+    return Intl.message(
+      'Enter a valid HTTP or HTTPS URL',
+      name: 'geoInvalidDownloadUrl',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

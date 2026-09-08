@@ -643,5 +643,11 @@
   "configValueTypeNull": "空の値",
   "configRecoveryTitle": "ローカル設定の復元",
   "configRecoveryMessage": "現在、ローカル設定を読み込めません。既存のデータは保持されています。端末のロックを解除して再試行するか、後でアプリを開き直してください",
-  "configRecoveryRetry": "再試行"
+  "configRecoveryRetry": "再試行",
+  "geoDownloadFailed": "GEO データのダウンロードに失敗しました",
+  "geoDownloadRecoveryHint": "現在のネットワークルールで取得し、プロキシが未起動の場合は直接接続します。再試行するか、別の配信元または URL を選択してください。検証後に自動で続行します。",
+  "geoOriginalSource": "現在の URL",
+  "geoBackupSource": "予備 CDN",
+  "geoDownloadUrl": "ダウンロード URL",
+  "geoInvalidDownloadUrl": "有効な HTTP または HTTPS URL を入力してください"
 }
