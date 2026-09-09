@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:fl_clash/controller.dart';
+import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/core/interface.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -35,6 +36,97 @@ void main() {
   setUp(() {
     handler = _MockCoreHandler();
     controller = CoreController.forTesting(handler: handler);
+  });
+
+  test('delay RPCs share a budget and release slots after failure', () async {
+    final pending = <Completer<Delay>>[];
+    when(() => handler.asyncTestDelay(any(), any())).thenAnswer((_) {
+      final result = Completer<Delay>();
+      pending.add(result);
+      return result.future;
+    });
+    final requests = List.generate(
+      maxConcurrentDelayTests + 2,
+      (i) => controller.getDelay('https://example.com', 'node$i'),
+    );
+    final firstFailure = expectLater(requests.first, throwsStateError);
+    await pumpEventQueue();
+    expect(pending.length, maxConcurrentDelayTests);
+    pending.first.completeError(StateError('disconnected'));
+    await firstFailure;
+    await pumpEventQueue();
+    expect(pending.length, maxConcurrentDelayTests + 1);
+    pending[1].complete(
+      const Delay(name: 'node1', url: 'https://example.com', value: 20),
+    );
+    await pumpEventQueue();
+    expect(pending.length, maxConcurrentDelayTests + 2);
+    for (final result in pending.skip(2)) {
+      result.complete(
+        const Delay(name: 'node', url: 'https://example.com', value: 30),
+      );
+    }
+    await Future.wait(requests.skip(1));
+    final last = controller.getDelay('https://example.com', 'last');
+    await pumpEventQueue();
+    pending.last.complete(
+      const Delay(name: 'last', url: 'https://example.com', value: 40),
+    );
+    expect((await last).value, 40);
+  });
+
+  test('obsolete queued probes never reach the Core or hold a slot', () async {
+    final pending = <Completer<Delay>>[];
+    when(() => handler.asyncTestDelay(any(), any())).thenAnswer((_) {
+      final result = Completer<Delay>();
+      pending.add(result);
+      return result.future;
+    });
+    final running = List.generate(
+      maxConcurrentDelayTests,
+      (i) => controller.getDelay('https://example.com', 'running$i'),
+    );
+    var current = true;
+    final obsolete = List.generate(
+      3,
+      (i) => controller.getDelay(
+        'https://example.com',
+        'obsolete$i',
+        isCurrent: () => current,
+      ),
+    );
+    final replacement = controller.getDelay(
+      'https://example.com',
+      'replacement',
+    );
+    current = false;
+    pending.first.complete(
+      const Delay(name: 'running0', url: 'https://example.com', value: 10),
+    );
+    final skipped = await Future.wait(obsolete);
+    await pumpEventQueue();
+    expect(skipped.map((delay) => delay.value), everyElement(isNull));
+    verifyNever(() => handler.asyncTestDelay(any(), 'obsolete0'));
+    verifyNever(() => handler.asyncTestDelay(any(), 'obsolete1'));
+    verifyNever(() => handler.asyncTestDelay(any(), 'obsolete2'));
+    verify(() => handler.asyncTestDelay(any(), 'replacement')).called(1);
+    expect(pending.length, maxConcurrentDelayTests + 1);
+    for (final result in pending.skip(1)) {
+      result.complete(
+        const Delay(name: 'node', url: 'https://example.com', value: 20),
+      );
+    }
+    await Future.wait([...running, replacement]);
+  });
+
+  test('already obsolete probes do not consume a Core request', () async {
+    final delay = await controller.getDelay(
+      'https://example.com',
+      'node',
+      isCurrent: () => false,
+    );
+    expect(delay.value, isNull);
+    verifyNoMoreInteractions(handler);
   });
 
   test(

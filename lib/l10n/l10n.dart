@@ -764,6 +764,36 @@ class AppLocalizations {
     return Intl.message('User-Agent', name: 'userAgent', desc: '', args: []);
   }
 
+  /// `Custom (enter manually)`
+  String get customUserAgent {
+    return Intl.message(
+      'Custom (enter manually)',
+      name: 'customUserAgent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter the full User-Agent value`
+  String get customUserAgentHint {
+    return Intl.message(
+      'Enter the full User-Agent value',
+      name: 'customUserAgentHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use only English letters, numbers, spaces, and standard punctuation`
+  String get customUserAgentInvalid {
+    return Intl.message(
+      'Use only English letters, numbers, spaces, and standard punctuation',
+      name: 'customUserAgentInvalid',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Custom`
   String get custom {
     return Intl.message('Custom', name: 'custom', desc: '', args: []);

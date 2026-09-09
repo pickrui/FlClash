@@ -366,6 +366,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "creationTime": MessageLookupByLibrary.simpleMessage("Время создания"),
     "custom": MessageLookupByLibrary.simpleMessage("Пользовательский"),
     "customOutboundInUse": m3,
+    "customUserAgent": MessageLookupByLibrary.simpleMessage(
+      "Свой вариант (ввести вручную)",
+    ),
+    "customUserAgentHint": MessageLookupByLibrary.simpleMessage(
+      "Введите полное значение User-Agent",
+    ),
+    "customUserAgentInvalid": MessageLookupByLibrary.simpleMessage(
+      "Используйте только латинские буквы, цифры, пробелы и стандартные знаки препинания",
+    ),
     "cut": MessageLookupByLibrary.simpleMessage("Вырезать"),
     "dark": MessageLookupByLibrary.simpleMessage("Темный"),
     "dashboard": MessageLookupByLibrary.simpleMessage("Панель управления"),

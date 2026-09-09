@@ -257,6 +257,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "creationTime": MessageLookupByLibrary.simpleMessage("创建时间"),
     "custom": MessageLookupByLibrary.simpleMessage("自定义"),
     "customOutboundInUse": m3,
+    "customUserAgent": MessageLookupByLibrary.simpleMessage("自定义（手动输入）"),
+    "customUserAgentHint": MessageLookupByLibrary.simpleMessage(
+      "请输入完整的 User-Agent 值",
+    ),
+    "customUserAgentInvalid": MessageLookupByLibrary.simpleMessage(
+      "仅支持半角英文字母、数字、空格和标点符号",
+    ),
     "cut": MessageLookupByLibrary.simpleMessage("剪切"),
     "dark": MessageLookupByLibrary.simpleMessage("深色"),
     "dashboard": MessageLookupByLibrary.simpleMessage("仪表盘"),

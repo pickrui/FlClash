@@ -280,6 +280,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "creationTime": MessageLookupByLibrary.simpleMessage("作成時間"),
     "custom": MessageLookupByLibrary.simpleMessage("カスタム"),
     "customOutboundInUse": m3,
+    "customUserAgent": MessageLookupByLibrary.simpleMessage("カスタム（手動入力）"),
+    "customUserAgentHint": MessageLookupByLibrary.simpleMessage(
+      "User-Agentの値を省略せずに入力",
+    ),
+    "customUserAgentInvalid": MessageLookupByLibrary.simpleMessage(
+      "半角英数字、スペース、標準的な記号のみ使用できます",
+    ),
     "cut": MessageLookupByLibrary.simpleMessage("切り取り"),
     "dark": MessageLookupByLibrary.simpleMessage("ダーク"),
     "dashboard": MessageLookupByLibrary.simpleMessage("ダッシュボード"),

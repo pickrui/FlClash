@@ -16,7 +16,9 @@ typedef ProxyGroupViewKeyMap =
     Map<String, GlobalObjectKey<_ProxyGroupViewState>>;
 
 class ProxiesTabView extends ConsumerStatefulWidget {
-  const ProxiesTabView({super.key});
+  final ValueChanged<String>? onGroupChanged;
+
+  const ProxiesTabView({super.key, this.onGroupChanged});
 
   static Map<String, PageStorageKey> pageListStoreMap = {};
 
@@ -38,11 +40,15 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
         return;
       }
       if (!stringListEquality.equals(prev?.a, next.a)) {
-        _destroyTabController();
         final groupNames = next.a;
         final currentGroupName = next.b;
         final index = groupNames.indexWhere((item) => item == currentGroupName);
         _updateTabController(groupNames.length, index);
+      } else if (prev?.b != next.b) {
+        final index = next.a.indexOf(next.b ?? '');
+        if (index >= 0 && _tabController?.index != index) {
+          _tabController?.animateTo(index);
+        }
       }
     }, fireImmediately: true);
   }
@@ -50,18 +56,28 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
   @override
   void dispose() {
     _destroyTabController();
+    _hasMoreButtonNotifier.dispose();
     super.dispose();
   }
 
+  Group? get _currentGroup {
+    final index = _tabController?.index;
+    final groups = ref.read(proxiesTabStateProvider).groups;
+    if (index == null || index < 0 || index >= groups.length) {
+      return null;
+    }
+    return groups[index];
+  }
+
   void scrollToGroupSelected() {
-    final currentGroupName = appController.getCurrentGroupName();
-    _keyMap[currentGroupName]?.currentState?.scrollToSelected();
+    _keyMap[_currentGroup?.name]?.currentState?.scrollToSelected();
   }
 
   Future<void> delayTestCurrentGroup() async {
-    final currentGroupName = appController.getCurrentGroupName();
-    final currentState = _keyMap[currentGroupName]?.currentState;
-    await delayTest(currentState?.currentProxies ?? [], currentState?.testUrl);
+    final group = _currentGroup;
+    if (group != null) {
+      await delayTest(group.all, group.testUrl);
+    }
   }
 
   Widget _buildMoreButton() {
@@ -108,7 +124,7 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
                             );
                             if (index == -1) return;
                             _tabController?.animateTo(index);
-                            appController.updateCurrentGroupName(groupName);
+                            _updateCurrentGroupName(groupName);
                             Navigator.of(context).pop();
                           },
                           isSelected: groupName == currentGroupName,
@@ -125,22 +141,20 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
     );
   }
 
-  void _tabControllerListener([int? index]) {
+  void _updateCurrentGroupName(String groupName) {
+    (widget.onGroupChanged ?? appController.updateCurrentGroupName)(groupName);
+  }
+
+  void _tabControllerListener() {
+    final controller = _tabController;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      int? groupIndex = index;
-      if (groupIndex == -1) {
+      if (!mounted || controller == null || controller != _tabController) {
         return;
       }
-      if (groupIndex == null) {
-        final currentIndex = _tabController?.index;
-        groupIndex = currentIndex;
+      final currentGroup = _currentGroup;
+      if (currentGroup != null) {
+        _updateCurrentGroupName(currentGroup.name);
       }
-      final currentGroups = appController.getCurrentGroups();
-      if (groupIndex == null || groupIndex > currentGroups.length) {
-        return;
-      }
-      final currentGroup = currentGroups[groupIndex];
-      appController.updateCurrentGroupName(currentGroup.name);
     });
   }
 
@@ -161,14 +175,14 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
       initialIndex: realIndex,
       vsync: this,
     );
-    _tabControllerListener(realIndex);
+    _tabControllerListener();
     _tabController?.addListener(_tabControllerListener);
   }
 
   @override
   Widget build(BuildContext context) {
     ref.watch(themeSettingProvider.select((state) => state.textScale));
-    final state = ref.watch(proxiesTabStateProvider.select((state) => state));
+    final state = ref.watch(proxiesTabStateProvider);
     final groups = state.groups;
     if (groups.isEmpty || _tabController == null) {
       return NullStatus(
@@ -292,9 +306,6 @@ class ProxyGroupView extends ConsumerStatefulWidget {
 class _ProxyGroupViewState extends ConsumerState<ProxyGroupView> {
   late final ScrollController _controller;
 
-  List<Proxy> currentProxies = [];
-  String? testUrl;
-
   @override
   void initState() {
     super.initState();
@@ -302,7 +313,7 @@ class _ProxyGroupViewState extends ConsumerState<ProxyGroupView> {
   }
 
   PageStorageKey _getPageStorageKey() {
-    final profile = appController.currentProfile;
+    final profile = ref.read(currentProfileProvider);
     final key =
         '${profile?.id}_${ScrollPositionCacheKey.proxiesTabList.name}_${widget.group.name}';
     return ProxiesTabView.pageListStoreMap.updateCacheValue(
@@ -318,7 +329,7 @@ class _ProxyGroupViewState extends ConsumerState<ProxyGroupView> {
   }
 
   void scrollToSelected() {
-    if (_controller.position.maxScrollExtent == 0) {
+    if (!_controller.hasClients || _controller.position.maxScrollExtent == 0) {
       return;
     }
     _controller.animateTo(
@@ -326,7 +337,7 @@ class _ProxyGroupViewState extends ConsumerState<ProxyGroupView> {
         16 +
             getScrollToSelectedOffset(
               groupName: widget.group.name,
-              proxies: currentProxies,
+              proxies: widget.group.all,
             ),
         _controller.position.maxScrollExtent,
       ),
@@ -339,8 +350,6 @@ class _ProxyGroupViewState extends ConsumerState<ProxyGroupView> {
   Widget build(BuildContext context) {
     final group = widget.group;
     final proxies = group.all;
-    testUrl = group.testUrl;
-    currentProxies = proxies;
     return CommonScrollBar(
       controller: _controller,
       child: GridView.builder(
@@ -358,9 +367,9 @@ class _ProxyGroupViewState extends ConsumerState<ProxyGroupView> {
           crossAxisSpacing: 8,
           mainAxisExtent: getItemHeight(widget.cardType),
         ),
-        itemCount: currentProxies.length,
+        itemCount: proxies.length,
         itemBuilder: (_, index) {
-          final proxy = currentProxies[index];
+          final proxy = proxies[index];
           return ProxyCard(
             testUrl: group.testUrl,
             groupType: group.type,
@@ -375,7 +384,7 @@ class _ProxyGroupViewState extends ConsumerState<ProxyGroupView> {
 }
 
 class DelayTestButton extends StatefulWidget {
-  final Future Function() onClick;
+  final Future<void> Function() onClick;
 
   const DelayTestButton({super.key, required this.onClick});
 
@@ -387,15 +396,18 @@ class _DelayTestButtonState extends State<DelayTestButton>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
+  bool _isRunning = false;
 
   Future<void> _healthcheck() async {
-    if (_controller.isAnimating) {
+    if (_isRunning || _controller.isAnimating) {
       return;
     }
+    _isRunning = true;
     _controller.forward();
     try {
       await widget.onClick();
     } finally {
+      _isRunning = false;
       if (mounted) {
         _controller.reverse();
       }

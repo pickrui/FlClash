@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
@@ -33,6 +34,8 @@ class CoreController {
   static CoreController? _instance;
   late CoreHandlerInterface _interface;
   final Map<UpdateGeoDataParams, Future<String>> _geoUpdates = {};
+  final Queue<Completer<void>> _delayWaiters = Queue();
+  int _activeDelayTests = 0;
 
   CoreController._internal() {
     if (system.isAndroid) {
@@ -223,9 +226,34 @@ class CoreController {
     return _interface.stopListener();
   }
 
-  Future<Delay> getDelay(String url, String proxyName) async {
+  Future<Delay> getDelay(
+    String url,
+    String proxyName, {
+    bool Function()? isCurrent,
+  }) async {
     final testUrl = getDelayTestUrl(proxyName: proxyName, testUrl: url);
-    return _interface.asyncTestDelay(testUrl, proxyName);
+    Delay canceled() => Delay(url: testUrl, name: proxyName, value: null);
+    if (isCurrent?.call() == false) return canceled();
+    // Acquire before invoking the RPC so local queue time cannot consume its
+    // timeout. This budget is shared by individual and batch tests.
+    if (_activeDelayTests >= maxConcurrentDelayTests) {
+      final ready = Completer<void>();
+      _delayWaiters.add(ready);
+      await ready.future;
+    } else {
+      _activeDelayTests++;
+    }
+    try {
+      // The generation can change while waiting behind in-flight probes.
+      if (isCurrent?.call() == false) return canceled();
+      return await _interface.asyncTestDelay(testUrl, proxyName);
+    } finally {
+      if (_delayWaiters.isNotEmpty) {
+        _delayWaiters.removeFirst().complete();
+      } else {
+        _activeDelayTests--;
+      }
+    }
   }
 
   Future<Map<String, dynamic>> getConfig(String path) async {

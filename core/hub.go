@@ -263,7 +263,9 @@ func handleResetTraffic() {
 
 func handleAsyncTestDelay(params *TestDelayParams, fn func(*Delay)) {
 	go func() {
+		testUrl := cmp.Or(params.TestUrl, constant.DefaultTestURL)
 		delayData := &Delay{
+			Url:   testUrl,
 			Name:  params.ProxyName,
 			Value: -1,
 		}
@@ -279,18 +281,16 @@ func handleAsyncTestDelay(params *TestDelayParams, fn func(*Delay)) {
 			return
 		}
 
-		testUrl := constant.DefaultTestURL
-		if params.TestUrl != "" {
-			testUrl = params.TestUrl
-		}
-		delayData.Url = testUrl
-
 		ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*time.Duration(params.Timeout))
 		defer cancel()
 
+		finish := manualDelayEvents.begin(proxy.Name(), testUrl)
 		delay, err := proxy.URLTest(ctx, testUrl, nil)
-		if err == nil && delay > 0 {
-			delayData.Value = int32(delay)
+		finish()
+		if err == nil {
+			// URLTest truncates sub-millisecond successes to zero. Reserve zero
+			// for pending UI state without reporting a successful probe as failed.
+			delayData.Value = max(int32(delay), 1)
 		}
 		fn(delayData)
 	}()
@@ -525,14 +525,9 @@ func init() {
 		})
 	}
 	adapter.UrlTestHook = func(url string, name string, delay uint16) {
-		delayData := &Delay{
-			Url:  url,
-			Name: name,
-		}
-		if delay == 0 {
-			delayData.Value = -1
-		} else {
-			delayData.Value = int32(delay)
+		delayData := manualDelayEvents.message(url, name, delay)
+		if delayData == nil {
+			return
 		}
 		sendMessage(Message{
 			Type: DelayMessage,

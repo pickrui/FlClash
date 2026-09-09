@@ -280,7 +280,12 @@ class DelayDataSource extends _$DelayDataSource with NotifierMixin<DelayMap> {
     final copiedUrls = <String>{};
     var changed = false;
     for (final delay in delays) {
-      if (state[delay.url]?[delay.name] == delay.value) {
+      // A manual probe (including its retry) owns a pending target. Background
+      // health checks must not replace its spinner with an unrelated result.
+      if (generation == null && state[delay.url]?[delay.name] == 0) {
+        continue;
+      }
+      if (nextState[delay.url]?[delay.name] == delay.value) {
         continue;
       }
       if (copiedUrls.add(delay.url)) {

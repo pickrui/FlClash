@@ -7,6 +7,7 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -14,7 +15,9 @@ import 'card.dart';
 import 'common.dart';
 
 class ProxiesListView extends StatefulWidget {
-  const ProxiesListView({super.key});
+  final ValueChanged<Set<String>>? onUnfoldChanged;
+
+  const ProxiesListView({super.key, this.onUnfoldChanged});
 
   @override
   State<ProxiesListView> createState() => _ProxiesListViewState();
@@ -26,6 +29,7 @@ class _ProxiesListViewState extends State<ProxiesListView> {
     null,
   );
   List<double> _headerOffset = [];
+  List<Group> _groups = [];
   double containerHeight = 0;
 
   @override
@@ -57,6 +61,7 @@ class _ProxiesListViewState extends State<ProxiesListView> {
   }
 
   void _adjustHeader() {
+    if (!mounted) return;
     _headerStateNotifier.value = _getProxiesListHeaderSelectorState(
       !_controller.hasClients ? 0 : _controller.offset,
     );
@@ -86,7 +91,9 @@ class _ProxiesListViewState extends State<ProxiesListView> {
     } else {
       tempUnfoldSet.add(groupName);
     }
-    appController.updateCurrentUnfoldSet(tempUnfoldSet);
+    (widget.onUnfoldChanged ?? appController.updateCurrentUnfoldSet)(
+      tempUnfoldSet,
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _adjustHeader();
     });
@@ -107,7 +114,10 @@ class _ProxiesListViewState extends State<ProxiesListView> {
       itemHeightList.add(itemHeight);
       currentHeight = currentHeight + itemHeight;
     }
-    _headerOffset = headerOffset;
+    if (!listEquals(_headerOffset, headerOffset)) {
+      _headerOffset = headerOffset;
+      WidgetsBinding.instance.addPostFrameCallback((_) => _adjustHeader());
+    }
     return itemHeightList;
   }
 
@@ -191,15 +201,11 @@ class _ProxiesListViewState extends State<ProxiesListView> {
     );
   }
 
-  double _getGroupOffset(String groupName) {
-    if (_controller.position.maxScrollExtent == 0) {
-      return 0;
+  double? _getGroupOffset(String groupName) {
+    final index = _groups.indexWhere((item) => item.name == groupName);
+    if (index < 0 || index >= _headerOffset.length) {
+      return null;
     }
-    final currentGroups = appController.getCurrentGroups();
-    final findIndex = currentGroups.indexWhere(
-      (item) => item.name == groupName,
-    );
-    final index = findIndex != -1 ? findIndex : 0;
     return _headerOffset[index];
   }
 
@@ -243,8 +249,10 @@ class _ProxiesListViewState extends State<ProxiesListView> {
   }
 
   void _autoScrollToGroup(String groupName) {
+    if (!_controller.hasClients) return;
     final pixels = _controller.position.pixels;
     final offset = _getGroupOffset(groupName);
+    if (offset == null) return;
     _scrollToMakeVisibleWithPadding(
       containerHeight: containerHeight,
       pixels: pixels,
@@ -255,8 +263,8 @@ class _ProxiesListViewState extends State<ProxiesListView> {
 
   void _scrollToGroupSelected(String groupName) {
     final currentInitOffset = _getGroupOffset(groupName);
-    final currentGroups = appController.getCurrentGroups();
-    final proxies = currentGroups.getGroup(groupName)?.all;
+    if (currentInitOffset == null) return;
+    final proxies = _groups.getGroup(groupName)?.all;
     _jumpTo(
       currentInitOffset +
           8 +
@@ -285,8 +293,10 @@ class _ProxiesListViewState extends State<ProxiesListView> {
     return Consumer(
       builder: (_, ref, _) {
         final state = ref.watch(proxiesListStateProvider);
+        _groups = state.groups;
         ref.watch(themeSettingProvider.select((state) => state.textScale));
         if (state.groups.isEmpty) {
+          _headerOffset = [];
           return NullStatus(
             illustration: const ProxyEmptyIllustration(),
             label: appLocalizations.nullTip(appLocalizations.proxies),

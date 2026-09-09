@@ -354,6 +354,44 @@ void main() {
       });
     });
 
+    test('background events cannot replace a pending manual probe', () {
+      final notifier = container.read(delayDataSourceProvider.notifier);
+      final generation = notifier.begin();
+      const url = 'https://test.example';
+      notifier.setDelay(
+        const Delay(name: 'Proxy', url: url, value: 0),
+        generation: generation,
+      );
+      notifier.setDelays(const [
+        Delay(name: 'Proxy', url: url, value: -1),
+        Delay(name: 'Other', url: url, value: 30),
+      ]);
+      expect(container.read(delayDataSourceProvider)[url], {
+        'Proxy': 0,
+        'Other': 30,
+      });
+      notifier.setDelay(
+        const Delay(name: 'Proxy', url: url, value: 50),
+        generation: generation,
+      );
+      expect(container.read(delayDataSourceProvider)[url]?['Proxy'], 50);
+      notifier.setDelay(const Delay(name: 'Proxy', url: url, value: 60));
+      expect(container.read(delayDataSourceProvider)[url]?['Proxy'], 60);
+    });
+
+    test('duplicate targets in one update use the last value', () {
+      final notifier = container.read(delayDataSourceProvider.notifier);
+      const url = 'https://test.example';
+      notifier.setDelay(const Delay(name: 'Proxy', url: url, value: 40));
+      final previous = container.read(delayDataSourceProvider);
+      notifier.setDelays(const [
+        Delay(name: 'Proxy', url: url, value: 90),
+        Delay(name: 'Proxy', url: url, value: 40),
+      ]);
+      expect(container.read(delayDataSourceProvider)[url]?['Proxy'], 40);
+      expect(previous[url]?['Proxy'], 40);
+    });
+
     test('does not mutate the previous nested delay map', () {
       final notifier = container.read(delayDataSourceProvider.notifier);
       notifier.setDelay(

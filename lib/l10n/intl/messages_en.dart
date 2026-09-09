@@ -352,6 +352,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "creationTime": MessageLookupByLibrary.simpleMessage("Creation time"),
     "custom": MessageLookupByLibrary.simpleMessage("Custom"),
     "customOutboundInUse": m3,
+    "customUserAgent": MessageLookupByLibrary.simpleMessage(
+      "Custom (enter manually)",
+    ),
+    "customUserAgentHint": MessageLookupByLibrary.simpleMessage(
+      "Enter the full User-Agent value",
+    ),
+    "customUserAgentInvalid": MessageLookupByLibrary.simpleMessage(
+      "Use only English letters, numbers, spaces, and standard punctuation",
+    ),
     "cut": MessageLookupByLibrary.simpleMessage("Cut"),
     "dark": MessageLookupByLibrary.simpleMessage("Dark"),
     "dashboard": MessageLookupByLibrary.simpleMessage("Dashboard"),

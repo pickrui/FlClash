@@ -1,4 +1,5 @@
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/delay_test.dart';
 import 'package:fl_clash/controller.dart';
 import 'package:fl_clash/core/core.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -21,9 +22,13 @@ double getItemHeight(ProxyCardType proxyCardType) {
   };
 }
 
-Future<Delay> _testDelayTarget(DelayTestTarget target) async {
+Future<Delay> _testDelayTarget(DelayTestTarget target, int generation) async {
   try {
-    return await coreController.getDelay(target.url, target.name);
+    return await coreController.getDelay(
+      target.url,
+      target.name,
+      isCurrent: () => appController.isCurrentDelayGeneration(generation),
+    );
   } catch (_) {
     return Delay(url: target.url, name: target.name, value: -1);
   }
@@ -45,9 +50,12 @@ Future<void> proxyDelayTest(Proxy proxy, [String? testUrl]) async {
     generation: generation,
   );
   appController.setDelay(
-    await _testDelayTarget(target),
+    await _testDelayTarget(target, generation),
     generation: generation,
   );
+  if (appController.isCurrentDelayGeneration(generation)) {
+    appController.updateGroupsDebounce();
+  }
 }
 
 Future<void> delayTest(List<Proxy> proxies, [String? testUrl]) async {
@@ -68,15 +76,16 @@ Future<void> delayTest(List<Proxy> proxies, [String? testUrl]) async {
     generation: generation,
   );
 
-  for (final batch in delayTargets.batch(maxConcurrentDelayTests)) {
-    if (!appController.isCurrentDelayGeneration(generation)) {
-      return;
-    }
-    final delays = await Future.wait(batch.map(_testDelayTarget));
-    appController.setDelays(delays, generation: generation);
-  }
+  await runDelayTestBatch(
+    targets: delayTargets,
+    concurrency: maxConcurrentDelayTests,
+    probe: (target) => _testDelayTarget(target, generation),
+    isCurrent: () => appController.isCurrentDelayGeneration(generation),
+    onResult: (delay) => appController.setDelay(delay, generation: generation),
+  );
   if (appController.isCurrentDelayGeneration(generation)) {
     appController.addSortNum();
+    appController.updateGroupsDebounce();
   }
 }
 
