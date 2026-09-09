@@ -107,7 +107,7 @@ void main() {
         client: adapter.createClient(),
       );
       service.setToken('account-a');
-      final request = service.deleteAccount(password: 'test-password');
+      final request = service.activatePlan(1);
       service.setToken('account-b');
 
       await expectLater(
@@ -303,21 +303,6 @@ void main() {
     expect(CloudApiException.isUnauthorized(error), true);
   });
 
-  test('delete account request includes confirmation and optional TOTP', () {
-    expect(
-      buildDeleteAccountRequestData(
-        password: 'secret',
-        twoFactorCode: ' 123456 ',
-      ),
-      {'passwd': 'secret', 'confirmation': 'DELETE', 'code': '123456'},
-    );
-
-    expect(buildDeleteAccountRequestData(password: 'secret'), {
-      'passwd': 'secret',
-      'confirmation': 'DELETE',
-    });
-  });
-
   test('managed config offers both routes as soon as the core runs', () {
     expect(
       resolveCloudApiProxy(isCoreRunning: true, port: 7890),
@@ -450,7 +435,12 @@ void main() {
         reason: path,
       );
     }
-    for (final path in ['/login', '/logout', '/pay/order', '/new-action']) {
+    for (final path in [
+      '/login',
+      '/shop/activate',
+      '/pay/order',
+      '/new-action',
+    ]) {
       expect(
         canReplayCloudRequest(
           RequestOptions(
@@ -500,15 +490,15 @@ void main() {
     });
   }
 
-  test('logout is marked non-idempotent', () async {
+  test('plan activation is marked non-idempotent', () async {
     final adapter = QueuedCloudAdapter();
     final service = CloudApiService.forTesting(client: adapter.createClient())
       ..setToken('session');
-    final logout = service.logout();
+    final activation = service.activatePlan(1);
     final pending = await adapter.takeRequest();
     expect(pending.options.extra[cloudNonIdempotentExtraKey], isTrue);
-    pending.respond({'ret': 200});
-    await logout;
+    pending.respond({'ret': 200, 'msg': 'Activated'});
+    expect((await activation).success, isTrue);
   });
 
   for (final failure in <String, ResponseBody Function()>{

@@ -47,20 +47,6 @@ Options buildCloudLoginOptions() => Options(
   },
 );
 
-@visibleForTesting
-Map<String, dynamic> buildDeleteAccountRequestData({
-  required String password,
-  String? twoFactorCode,
-}) {
-  final normalizedCode = twoFactorCode?.trim();
-  return {
-    'passwd': password,
-    'confirmation': 'DELETE',
-    if (normalizedCode != null && normalizedCode.isNotEmpty)
-      'code': normalizedCode,
-  };
-}
-
 String _apiRootUrl(String domain) {
   final normalizedDomain = domain.trim();
   if (normalizedDomain.isEmpty) {
@@ -1032,46 +1018,6 @@ class CloudApiService {
     }
 
     return _parseUserInfo(responseDto.data!);
-  }
-
-  Future<void> logout() async {
-    if (_cachedToken == null || _cachedToken!.isEmpty) return;
-    final Response<dynamic> res;
-    try {
-      res = await _client.post('/logout', options: _writeOptions());
-    } catch (error) {
-      if (CloudApiException.isUnauthorized(error)) return;
-      rethrow;
-    }
-    final responseDto = CloudApiResponse<dynamic>.fromJson(res.data);
-    if (!responseDto.isSuccess) {
-      throw CloudApiException(responseDto.msg ?? 'Failed to revoke token');
-    }
-  }
-
-  Future<void> deleteAccount({
-    required String password,
-    String? twoFactorCode,
-  }) async {
-    if (_cachedToken == null || _cachedToken!.isEmpty) {
-      throw const CloudApiException('Unauthorized');
-    }
-    final res = await _client.post(
-      '/delete',
-      data: FormData.fromMap(
-        buildDeleteAccountRequestData(
-          password: password,
-          twoFactorCode: twoFactorCode,
-        ),
-      ),
-      options: _writeOptions(),
-    );
-    final responseDto = CloudApiResponse<dynamic>.fromJson(res.data);
-    if (!responseDto.isSuccess) {
-      throw CloudApiException(
-        responseDto.msg ?? appLocalizations.deleteAccountFailed,
-      );
-    }
   }
 
   String _flclashTimestamp() {

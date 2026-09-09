@@ -375,19 +375,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "delay": MessageLookupByLibrary.simpleMessage("Delay"),
     "delayTest": MessageLookupByLibrary.simpleMessage("Delay Test"),
     "delete": MessageLookupByLibrary.simpleMessage("Delete"),
-    "deleteAccount": MessageLookupByLibrary.simpleMessage("Delete account"),
-    "deleteAccountAcknowledgement": MessageLookupByLibrary.simpleMessage(
-      "I understand that this permanently deletes my account",
-    ),
-    "deleteAccountFailed": MessageLookupByLibrary.simpleMessage(
-      "Failed to delete account",
-    ),
-    "deleteAccountSuccess": MessageLookupByLibrary.simpleMessage(
-      "Account deleted",
-    ),
-    "deleteAccountWarning": MessageLookupByLibrary.simpleMessage(
-      "Permanently deleting your account removes the account, active plans, balance, purchase history, and associated cloud data. This action cannot be undone.",
-    ),
     "deleteMultipTip": m5,
     "deleteTip": m6,
     "desc": MessageLookupByLibrary.simpleMessage(
@@ -663,13 +650,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "loginFailed": MessageLookupByLibrary.simpleMessage("Login Failed"),
     "loginSuccess": MessageLookupByLibrary.simpleMessage("Login Successful"),
     "loginTitle": MessageLookupByLibrary.simpleMessage("Login"),
-    "logoutAndDeleteToken": MessageLookupByLibrary.simpleMessage(
-      "Sign Out and Delete Token",
-    ),
-    "logoutContent": MessageLookupByLibrary.simpleMessage(
-      "The token is removed from this device either way. Deleting it from oixCloud may sign out other devices using the same token.",
-    ),
-    "logoutLocalOnly": MessageLookupByLibrary.simpleMessage("Sign Out Only"),
+    "logoutContent": MessageLookupByLibrary.simpleMessage("Sign out?"),
     "logoutTitle": MessageLookupByLibrary.simpleMessage("Logout"),
     "logs": MessageLookupByLibrary.simpleMessage("Logs"),
     "logsDesc": MessageLookupByLibrary.simpleMessage("Log capture records"),
@@ -1239,9 +1220,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "turnOff": MessageLookupByLibrary.simpleMessage("Turn Off"),
     "turnOn": MessageLookupByLibrary.simpleMessage("Turn On"),
-    "twoFactorCodeOptional": MessageLookupByLibrary.simpleMessage(
-      "Two-factor code (if enabled)",
-    ),
     "undo": MessageLookupByLibrary.simpleMessage("undo"),
     "unifiedDelay": MessageLookupByLibrary.simpleMessage("Unified delay"),
     "unifiedDelayDesc": MessageLookupByLibrary.simpleMessage(

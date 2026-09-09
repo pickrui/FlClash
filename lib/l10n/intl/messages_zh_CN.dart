@@ -274,15 +274,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "delay": MessageLookupByLibrary.simpleMessage("延迟"),
     "delayTest": MessageLookupByLibrary.simpleMessage("延迟测试"),
     "delete": MessageLookupByLibrary.simpleMessage("删除"),
-    "deleteAccount": MessageLookupByLibrary.simpleMessage("删除账户"),
-    "deleteAccountAcknowledgement": MessageLookupByLibrary.simpleMessage(
-      "我了解此操作将永久删除我的账户",
-    ),
-    "deleteAccountFailed": MessageLookupByLibrary.simpleMessage("删除账户失败"),
-    "deleteAccountSuccess": MessageLookupByLibrary.simpleMessage("账户已删除"),
-    "deleteAccountWarning": MessageLookupByLibrary.simpleMessage(
-      "永久删除账户将移除你的账户、有效套餐、余额、购买记录及相关云端数据。此操作无法撤销",
-    ),
     "deleteMultipTip": m5,
     "deleteTip": m6,
     "desc": MessageLookupByLibrary.simpleMessage(
@@ -374,7 +365,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "geoBackupSource": MessageLookupByLibrary.simpleMessage("备用 CDN"),
     "geoDownloadFailed": MessageLookupByLibrary.simpleMessage("GEO 数据下载失败"),
     "geoDownloadRecoveryHint": MessageLookupByLibrary.simpleMessage(
-      "下载默认使用当前网络规则，代理尚未可用时直连。可重试当前地址、选择其他来源或输入自定义地址，下载校验成功后自动继续。",
+      "下载默认使用当前网络规则，代理尚未可用时直连。可重试当前地址、选择其他来源或输入自定义地址，下载校验成功后自动继续",
     ),
     "geoDownloadUrl": MessageLookupByLibrary.simpleMessage("下载地址"),
     "geoInvalidDownloadUrl": MessageLookupByLibrary.simpleMessage(
@@ -460,11 +451,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "loginFailed": MessageLookupByLibrary.simpleMessage("登录失败"),
     "loginSuccess": MessageLookupByLibrary.simpleMessage("登录成功"),
     "loginTitle": MessageLookupByLibrary.simpleMessage("登录"),
-    "logoutAndDeleteToken": MessageLookupByLibrary.simpleMessage("退出并删除 Token"),
-    "logoutContent": MessageLookupByLibrary.simpleMessage(
-      "无论选择哪种方式，都会从本机移除 Token。从 oixCloud 删除 Token 可能会让使用同一 Token 的其他设备退出登录",
-    ),
-    "logoutLocalOnly": MessageLookupByLibrary.simpleMessage("仅退出登录"),
+    "logoutContent": MessageLookupByLibrary.simpleMessage("确定退出登录？"),
     "logoutTitle": MessageLookupByLibrary.simpleMessage("退出登录"),
     "logs": MessageLookupByLibrary.simpleMessage("日志"),
     "logsDesc": MessageLookupByLibrary.simpleMessage("日志捕获记录"),
@@ -864,9 +851,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "tunDesc": MessageLookupByLibrary.simpleMessage("仅在管理员模式生效"),
     "turnOff": MessageLookupByLibrary.simpleMessage("关闭"),
     "turnOn": MessageLookupByLibrary.simpleMessage("开启"),
-    "twoFactorCodeOptional": MessageLookupByLibrary.simpleMessage(
-      "双重验证码（如已启用）",
-    ),
     "undo": MessageLookupByLibrary.simpleMessage("撤销"),
     "unifiedDelay": MessageLookupByLibrary.simpleMessage("统一延迟"),
     "unifiedDelayDesc": MessageLookupByLibrary.simpleMessage("去除握手等额外延迟"),

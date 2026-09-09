@@ -389,19 +389,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "delay": MessageLookupByLibrary.simpleMessage("Задержка"),
     "delayTest": MessageLookupByLibrary.simpleMessage("Тест задержки"),
     "delete": MessageLookupByLibrary.simpleMessage("Удалить"),
-    "deleteAccount": MessageLookupByLibrary.simpleMessage("Удалить аккаунт"),
-    "deleteAccountAcknowledgement": MessageLookupByLibrary.simpleMessage(
-      "Я понимаю, что мой аккаунт будет удалён безвозвратно",
-    ),
-    "deleteAccountFailed": MessageLookupByLibrary.simpleMessage(
-      "Не удалось удалить аккаунт",
-    ),
-    "deleteAccountSuccess": MessageLookupByLibrary.simpleMessage(
-      "Аккаунт удалён",
-    ),
-    "deleteAccountWarning": MessageLookupByLibrary.simpleMessage(
-      "Безвозвратное удаление аккаунта удалит аккаунт, активные тарифы, баланс, историю покупок и связанные облачные данные. Это действие нельзя отменить.",
-    ),
     "deleteMultipTip": m5,
     "deleteTip": m6,
     "desc": MessageLookupByLibrary.simpleMessage(
@@ -693,13 +680,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Вход выполнен успешно",
     ),
     "loginTitle": MessageLookupByLibrary.simpleMessage("Вход"),
-    "logoutAndDeleteToken": MessageLookupByLibrary.simpleMessage(
-      "Выйти и удалить токен",
-    ),
-    "logoutContent": MessageLookupByLibrary.simpleMessage(
-      "В любом случае токен будет удален с этого устройства. Его удаление из oixCloud может привести к выходу на других устройствах, использующих тот же токен.",
-    ),
-    "logoutLocalOnly": MessageLookupByLibrary.simpleMessage("Только выйти"),
+    "logoutContent": MessageLookupByLibrary.simpleMessage("Выйти из аккаунта?"),
     "logoutTitle": MessageLookupByLibrary.simpleMessage("Выход"),
     "logs": MessageLookupByLibrary.simpleMessage("Логи"),
     "logsDesc": MessageLookupByLibrary.simpleMessage("Записи захвата логов"),
@@ -1301,9 +1282,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "turnOff": MessageLookupByLibrary.simpleMessage("Выключить"),
     "turnOn": MessageLookupByLibrary.simpleMessage("Включить"),
-    "twoFactorCodeOptional": MessageLookupByLibrary.simpleMessage(
-      "Код двухфакторной аутентификации (если включена)",
-    ),
     "undo": MessageLookupByLibrary.simpleMessage("Отменить"),
     "unifiedDelay": MessageLookupByLibrary.simpleMessage(
       "Унифицированная задержка",

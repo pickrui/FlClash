@@ -4,7 +4,6 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/cloud_account_provider.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/views/cloud/cloud_account_page.dart';
 import 'package:fl_clash/views/cloud/cloud_login_page.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -113,76 +112,11 @@ void main() {
 
     expect(changedValue, '12345');
   });
-
-  testWidgets('account deletion requires password and acknowledgement', (
-    tester,
-  ) async {
-    await tester.pumpWidget(const _TestApp(child: _DeleteDialogHarness()));
-
-    await tester.tap(find.byKey(const Key('open-delete-dialog')));
-    await tester.pumpAndSettle();
-
-    final submitFinder = find.widgetWithText(FilledButton, 'Delete account');
-    expect(tester.widget<FilledButton>(submitFinder).onPressed, isNull);
-
-    final fields = find.byType(TextField);
-    expect(fields, findsNWidgets(2));
-    expect(tester.widget<TextField>(fields.first).obscureText, true);
-
-    await tester.enterText(fields.first, 'secret');
-    await tester.enterText(fields.last, '1');
-    await tester.tap(find.byType(Checkbox));
-    await tester.pump();
-
-    expect(tester.widget<FilledButton>(submitFinder).onPressed, isNull);
-    await tester.enterText(fields.last, '123456');
-    await tester.pump();
-
-    expect(tester.widget<FilledButton>(submitFinder).onPressed, isNotNull);
-    await tester.tap(submitFinder);
-    await tester.pumpAndSettle();
-
-    expect(find.text('secret|123456'), findsOneWidget);
-  });
 }
 
 class _TestCloudAccountNotifier extends CloudAccountNotifier {
   @override
   CloudAccountState build() => const CloudAccountState();
-}
-
-class _DeleteDialogHarness extends StatefulWidget {
-  const _DeleteDialogHarness();
-
-  @override
-  State<_DeleteDialogHarness> createState() => _DeleteDialogHarnessState();
-}
-
-class _DeleteDialogHarnessState extends State<_DeleteDialogHarness> {
-  DeleteAccountRequest? request;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          FilledButton(
-            key: const Key('open-delete-dialog'),
-            onPressed: () async {
-              final result = await showDialog<DeleteAccountRequest>(
-                context: context,
-                builder: (_) => const DeleteAccountDialog(),
-              );
-              if (mounted) setState(() => request = result);
-            },
-            child: const Text('Open'),
-          ),
-          if (request != null)
-            Text('${request!.password}|${request!.twoFactorCode}'),
-        ],
-      ),
-    );
-  }
 }
 
 class _TestApp extends StatelessWidget {

@@ -299,19 +299,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "delay": MessageLookupByLibrary.simpleMessage("遅延"),
     "delayTest": MessageLookupByLibrary.simpleMessage("遅延テスト"),
     "delete": MessageLookupByLibrary.simpleMessage("削除"),
-    "deleteAccount": MessageLookupByLibrary.simpleMessage("アカウントを削除"),
-    "deleteAccountAcknowledgement": MessageLookupByLibrary.simpleMessage(
-      "この操作でアカウントが完全に削除されることを理解しました",
-    ),
-    "deleteAccountFailed": MessageLookupByLibrary.simpleMessage(
-      "アカウントを削除できませんでした",
-    ),
-    "deleteAccountSuccess": MessageLookupByLibrary.simpleMessage(
-      "アカウントを削除しました",
-    ),
-    "deleteAccountWarning": MessageLookupByLibrary.simpleMessage(
-      "アカウントを完全に削除すると、アカウント、有効なプラン、残高、購入履歴、関連するクラウドデータが削除されます。この操作は取り消せません",
-    ),
     "deleteMultipTip": m5,
     "deleteTip": m6,
     "desc": MessageLookupByLibrary.simpleMessage(
@@ -419,7 +406,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "GEO データのダウンロードに失敗しました",
     ),
     "geoDownloadRecoveryHint": MessageLookupByLibrary.simpleMessage(
-      "現在のネットワークルールで取得し、プロキシが未起動の場合は直接接続します。再試行するか、別の配信元または URL を選択してください。検証後に自動で続行します。",
+      "現在のネットワークルールで取得し、プロキシが未起動の場合は直接接続します。再試行するか、別の配信元または URL を選択してください。検証後に自動で続行します",
     ),
     "geoDownloadUrl": MessageLookupByLibrary.simpleMessage("ダウンロード URL"),
     "geoInvalidDownloadUrl": MessageLookupByLibrary.simpleMessage(
@@ -523,13 +510,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "loginFailed": MessageLookupByLibrary.simpleMessage("ログイン失敗"),
     "loginSuccess": MessageLookupByLibrary.simpleMessage("ログイン成功"),
     "loginTitle": MessageLookupByLibrary.simpleMessage("ログイン"),
-    "logoutAndDeleteToken": MessageLookupByLibrary.simpleMessage(
-      "ログアウトしてトークンを削除",
-    ),
-    "logoutContent": MessageLookupByLibrary.simpleMessage(
-      "どちらを選んでも、このデバイスからトークンは削除されます。oixCloudからトークンを削除すると、同じトークンを使用している他のデバイスでもログアウトする場合があります",
-    ),
-    "logoutLocalOnly": MessageLookupByLibrary.simpleMessage("ログアウトのみ"),
+    "logoutContent": MessageLookupByLibrary.simpleMessage("ログアウトしますか？"),
     "logoutTitle": MessageLookupByLibrary.simpleMessage("ログアウト"),
     "logs": MessageLookupByLibrary.simpleMessage("ログ"),
     "logsDesc": MessageLookupByLibrary.simpleMessage("ログキャプチャ記録"),
@@ -981,9 +962,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "tunDesc": MessageLookupByLibrary.simpleMessage("管理者モードでのみ有効"),
     "turnOff": MessageLookupByLibrary.simpleMessage("オフ"),
     "turnOn": MessageLookupByLibrary.simpleMessage("オン"),
-    "twoFactorCodeOptional": MessageLookupByLibrary.simpleMessage(
-      "2段階認証コード（有効な場合）",
-    ),
     "undo": MessageLookupByLibrary.simpleMessage("元に戻す"),
     "unifiedDelay": MessageLookupByLibrary.simpleMessage("統一遅延"),
     "unifiedDelayDesc": MessageLookupByLibrary.simpleMessage(

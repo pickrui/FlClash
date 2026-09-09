@@ -4244,34 +4244,9 @@ class AppLocalizations {
     return Intl.message('Logout', name: 'logoutTitle', desc: '', args: []);
   }
 
-  /// `The token is removed from this device either way. Deleting it from oixCloud may sign out other devices using the same token.`
+  /// `Sign out?`
   String get logoutContent {
-    return Intl.message(
-      'The token is removed from this device either way. Deleting it from oixCloud may sign out other devices using the same token.',
-      name: 'logoutContent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Sign Out Only`
-  String get logoutLocalOnly {
-    return Intl.message(
-      'Sign Out Only',
-      name: 'logoutLocalOnly',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Sign Out and Delete Token`
-  String get logoutAndDeleteToken {
-    return Intl.message(
-      'Sign Out and Delete Token',
-      name: 'logoutAndDeleteToken',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Sign out?', name: 'logoutContent', desc: '', args: []);
   }
 
   /// `Login Successful`
@@ -5149,66 +5124,6 @@ class AppLocalizations {
     return Intl.message(
       'Payment endpoint returned an unknown format',
       name: 'paymentUnknownResponse',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Delete account`
-  String get deleteAccount {
-    return Intl.message(
-      'Delete account',
-      name: 'deleteAccount',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Permanently deleting your account removes the account, active plans, balance, purchase history, and associated cloud data. This action cannot be undone.`
-  String get deleteAccountWarning {
-    return Intl.message(
-      'Permanently deleting your account removes the account, active plans, balance, purchase history, and associated cloud data. This action cannot be undone.',
-      name: 'deleteAccountWarning',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `I understand that this permanently deletes my account`
-  String get deleteAccountAcknowledgement {
-    return Intl.message(
-      'I understand that this permanently deletes my account',
-      name: 'deleteAccountAcknowledgement',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Two-factor code (if enabled)`
-  String get twoFactorCodeOptional {
-    return Intl.message(
-      'Two-factor code (if enabled)',
-      name: 'twoFactorCodeOptional',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Failed to delete account`
-  String get deleteAccountFailed {
-    return Intl.message(
-      'Failed to delete account',
-      name: 'deleteAccountFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Account deleted`
-  String get deleteAccountSuccess {
-    return Intl.message(
-      'Account deleted',
-      name: 'deleteAccountSuccess',
       desc: '',
       args: [],
     );

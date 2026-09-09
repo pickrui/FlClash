@@ -8,7 +8,6 @@ import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -17,8 +16,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'cloud_profile_card.dart';
 import 'cloud_register_page.dart';
 import 'store_page.dart';
-
-enum _LogoutChoice { localOnly, deleteToken }
 
 class CloudAccountPage extends ConsumerStatefulWidget {
   const CloudAccountPage({super.key});
@@ -304,22 +301,6 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
               ),
             ),
           ],
-          const SizedBox(height: 16),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: OutlinedButton.icon(
-              onPressed:
-                  state.isLoading || state.isRefreshing || state.isSyncing
-                  ? null
-                  : _handleDeleteAccount,
-              icon: const Icon(Icons.person_remove_outlined),
-              label: Text(AppLocalizations.current.deleteAccount),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: context.colorScheme.error,
-                side: BorderSide(color: context.colorScheme.error),
-              ),
-            ),
-          ),
         ],
       ),
     );
@@ -393,7 +374,7 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
   }
 
   Future<void> _handleLogout() async {
-    final choice = await showDialog<_LogoutChoice>(
+    final choice = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.current.logoutTitle),
@@ -404,21 +385,15 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
             child: Text(AppLocalizations.current.cancel),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, _LogoutChoice.localOnly),
-            child: Text(AppLocalizations.current.logoutLocalOnly),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, _LogoutChoice.deleteToken),
-            child: Text(AppLocalizations.current.logoutAndDeleteToken),
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(AppLocalizations.current.logoutTitle),
           ),
         ],
       ),
     );
     if (!mounted) return;
-    if (choice == null) return;
-    final success = await ref
-        .read(cloudAccountProvider.notifier)
-        .signOut(revokeToken: choice == _LogoutChoice.deleteToken);
+    if (choice != true) return;
+    final success = await ref.read(cloudAccountProvider.notifier).signOut();
     if (!mounted) return;
     if (!success) {
       final error = ref.read(cloudAccountProvider).error;
@@ -429,157 +404,5 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
         ),
       );
     }
-  }
-
-  Future<void> _handleDeleteAccount() async {
-    final request = await showDialog<DeleteAccountRequest>(
-      context: context,
-      builder: (_) => const DeleteAccountDialog(),
-    );
-    if (!mounted) return;
-    if (request == null) return;
-
-    final success = await ref
-        .read(cloudAccountProvider.notifier)
-        .deleteAccount(
-          password: request.password,
-          twoFactorCode: request.twoFactorCode,
-        );
-    if (!mounted) return;
-    if (success) {
-      globalState.showNotifier(AppLocalizations.current.deleteAccountSuccess);
-      return;
-    }
-    final error = ref.read(cloudAccountProvider).error;
-    globalState.showMessage(
-      title: AppLocalizations.current.deleteAccountFailed,
-      message: TextSpan(
-        text: error ?? AppLocalizations.current.deleteAccountFailed,
-      ),
-    );
-  }
-}
-
-class DeleteAccountRequest {
-  final String password;
-  final String? twoFactorCode;
-
-  const DeleteAccountRequest({required this.password, this.twoFactorCode});
-}
-
-class DeleteAccountDialog extends StatefulWidget {
-  const DeleteAccountDialog({super.key});
-
-  @override
-  State<DeleteAccountDialog> createState() => _DeleteAccountDialogState();
-}
-
-class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
-  final _passwordController = TextEditingController();
-  final _twoFactorController = TextEditingController();
-  var _acknowledged = false;
-  var _obscurePassword = true;
-
-  bool get _canSubmit =>
-      _acknowledged &&
-      _passwordController.text.trim().isNotEmpty &&
-      (_twoFactorController.text.isEmpty ||
-          _twoFactorController.text.length == 6);
-
-  @override
-  void dispose() {
-    _passwordController.dispose();
-    _twoFactorController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.current;
-    return AlertDialog(
-      title: Text(l10n.deleteAccount),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.deleteAccountWarning,
-              style: TextStyle(color: context.colorScheme.error),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _passwordController,
-              obscureText: _obscurePassword,
-              autofocus: true,
-              autocorrect: false,
-              enableSuggestions: false,
-              textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                labelText: l10n.passwordLabel,
-                suffixIcon: IconButton(
-                  onPressed: () =>
-                      setState(() => _obscurePassword = !_obscurePassword),
-                  icon: Icon(
-                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                  ),
-                ),
-              ),
-              onChanged: (_) => setState(() {}),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _twoFactorController,
-              keyboardType: TextInputType.number,
-              textInputAction: TextInputAction.done,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(6),
-              ],
-              onChanged: (_) => setState(() {}),
-              decoration: InputDecoration(
-                labelText: l10n.twoFactorCodeOptional,
-              ),
-            ),
-            const SizedBox(height: 8),
-            CheckboxListTile(
-              value: _acknowledged,
-              contentPadding: EdgeInsets.zero,
-              controlAffinity: ListTileControlAffinity.leading,
-              title: Text(l10n.deleteAccountAcknowledgement),
-              onChanged: (value) =>
-                  setState(() => _acknowledged = value ?? false),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(l10n.cancel),
-        ),
-        FilledButton(
-          onPressed: _canSubmit
-              ? () {
-                  final twoFactorCode = _twoFactorController.text.trim();
-                  Navigator.pop(
-                    context,
-                    DeleteAccountRequest(
-                      password: _passwordController.text,
-                      twoFactorCode: twoFactorCode.isEmpty
-                          ? null
-                          : twoFactorCode,
-                    ),
-                  );
-                }
-              : null,
-          style: FilledButton.styleFrom(
-            backgroundColor: context.colorScheme.error,
-            foregroundColor: context.colorScheme.onError,
-          ),
-          child: Text(l10n.deleteAccount),
-        ),
-      ],
-    );
   }
 }

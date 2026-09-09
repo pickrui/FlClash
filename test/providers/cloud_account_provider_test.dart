@@ -34,32 +34,6 @@ void main() {
     },
   );
 
-  for (final deleteAccount in [false, true]) {
-    test(
-      'an obsolete ${deleteAccount ? 'deletion' : 'logout'} does not clear the current session',
-      () async {
-        final notifier = _DeleteNotifier(
-          requestError: const CloudApiStaleSessionException(),
-          logoutError: const CloudApiStaleSessionException(),
-        );
-        final container = ProviderContainer(
-          overrides: [cloudAccountProvider.overrideWith(() => notifier)],
-        );
-        addTearDown(container.dispose);
-        container.read(cloudAccountProvider);
-
-        final success = deleteAccount
-            ? await notifier.deleteAccount(password: 'test-password')
-            : await notifier.signOut(revokeToken: true);
-
-        expect(success, isFalse);
-        expect(notifier.didClearSession, isFalse);
-        expect(container.read(cloudAccountProvider).isLoggedIn, isTrue);
-        expect(container.read(cloudAccountProvider).error, isNull);
-      },
-    );
-  }
-
   test(
     'token sign-in waits for bootstrap before beginning its action',
     () async {
@@ -232,38 +206,15 @@ void main() {
     expect(activated, false);
   });
 
-  test('failed token revocation preserves the signed-in session', () async {
-    final notifier = _DeleteNotifier(
-      logoutError: const CloudApiException('Revocation failed'),
-    );
-    final container = ProviderContainer(
-      overrides: [cloudAccountProvider.overrideWith(() => notifier)],
-    );
-    addTearDown(container.dispose);
-
-    final success = await container
-        .read(cloudAccountProvider.notifier)
-        .signOut(revokeToken: true);
-    final state = container.read(cloudAccountProvider);
-
-    expect(success, false);
-    expect(state.isLoggedIn, true);
-    expect(state.isLoading, false);
-    expect(state.error, 'Revocation failed');
-    expect(notifier.didClearSession, false);
-  });
-
-  test('token revocation keeps the account busy until it completes', () async {
+  test('sign out stays busy until local cleanup completes', () async {
     final completer = Completer<void>();
-    final notifier = _DeleteNotifier(logoutCompleter: completer);
+    final notifier = _SessionCleanupNotifier(cleanupCompleter: completer);
     final container = ProviderContainer(
       overrides: [cloudAccountProvider.overrideWith(() => notifier)],
     );
     addTearDown(container.dispose);
 
-    final signOut = container
-        .read(cloudAccountProvider.notifier)
-        .signOut(revokeToken: true);
+    final signOut = container.read(cloudAccountProvider.notifier).signOut();
 
     expect(container.read(cloudAccountProvider).isLoading, true);
     completer.complete();
@@ -272,7 +223,9 @@ void main() {
   });
 
   test('local cleanup failure is reported after signing out', () async {
-    final notifier = _DeleteNotifier(cleanupError: 'Secure storage failed');
+    final notifier = _SessionCleanupNotifier(
+      cleanupError: 'Secure storage failed',
+    );
     final container = ProviderContainer(
       overrides: [cloudAccountProvider.overrideWith(() => notifier)],
     );
@@ -289,7 +242,7 @@ void main() {
   });
 
   test('sign out does not race an active managed profile sync', () async {
-    final notifier = _DeleteNotifier(
+    final notifier = _SessionCleanupNotifier(
       initialState: const CloudAccountState(isLoggedIn: true, isSyncing: true),
     );
     final container = ProviderContainer(
@@ -307,7 +260,7 @@ void main() {
   });
 
   test('unauthorized cleanup is not blocked by active sync state', () async {
-    final notifier = _DeleteNotifier(
+    final notifier = _SessionCleanupNotifier(
       initialState: const CloudAccountState(isLoggedIn: true, isSyncing: true),
     );
     final container = ProviderContainer(
@@ -321,85 +274,8 @@ void main() {
     expect(container.read(cloudAccountProvider).isLoggedIn, false);
   });
 
-  test('failed account deletion preserves the signed-in session', () async {
-    final notifier = _DeleteNotifier(
-      requestError: const CloudApiException('Incorrect password'),
-    );
-    final container = ProviderContainer(
-      overrides: [cloudAccountProvider.overrideWith(() => notifier)],
-    );
-    addTearDown(container.dispose);
-
-    final success = await container
-        .read(cloudAccountProvider.notifier)
-        .deleteAccount(password: 'wrong');
-    final state = container.read(cloudAccountProvider);
-
-    expect(success, false);
-    expect(state.isLoggedIn, true);
-    expect(state.isLoading, false);
-    expect(state.error, 'Incorrect password');
-    expect(notifier.didClearSession, false);
-  });
-
-  test('unauthorized account deletion clears the invalid session', () async {
-    final notifier = _DeleteNotifier(
-      requestError: const CloudApiException('Unauthorized'),
-    );
-    final container = ProviderContainer(
-      overrides: [cloudAccountProvider.overrideWith(() => notifier)],
-    );
-    addTearDown(container.dispose);
-
-    final success = await container
-        .read(cloudAccountProvider.notifier)
-        .deleteAccount(password: 'secret');
-    final state = container.read(cloudAccountProvider);
-
-    expect(success, false);
-    expect(state.isLoggedIn, false);
-    expect(state.isLoading, false);
-    expect(state.error, 'Unauthorized');
-    expect(notifier.didClearSession, true);
-  });
-
-  test('successful account deletion clears the local session', () async {
-    final notifier = _DeleteNotifier();
-    final container = ProviderContainer(
-      overrides: [cloudAccountProvider.overrideWith(() => notifier)],
-    );
-    addTearDown(container.dispose);
-
-    final success = await container
-        .read(cloudAccountProvider.notifier)
-        .deleteAccount(password: 'secret', twoFactorCode: '123456');
-
-    expect(success, true);
-    expect(container.read(cloudAccountProvider).isLoggedIn, false);
-    expect(notifier.requestCount, 1);
-    expect(notifier.didClearSession, true);
-  });
-
-  test('account deletion reports a local cleanup failure', () async {
-    final notifier = _DeleteNotifier(cleanupError: 'Secure storage failed');
-    final container = ProviderContainer(
-      overrides: [cloudAccountProvider.overrideWith(() => notifier)],
-    );
-    addTearDown(container.dispose);
-
-    final success = await container
-        .read(cloudAccountProvider.notifier)
-        .deleteAccount(password: 'secret');
-    final state = container.read(cloudAccountProvider);
-
-    expect(success, false);
-    expect(state.isLoggedIn, false);
-    expect(state.error, 'Secure storage failed');
-    expect(notifier.didClearSession, true);
-  });
-
-  test('account deletion does not race an active refresh', () async {
-    final notifier = _DeleteNotifier(
+  test('sign out does not race an active refresh', () async {
+    final notifier = _SessionCleanupNotifier(
       initialState: const CloudAccountState(
         isLoggedIn: true,
         isRefreshing: true,
@@ -412,10 +288,9 @@ void main() {
 
     final success = await container
         .read(cloudAccountProvider.notifier)
-        .deleteAccount(password: 'secret');
+        .signOut();
 
     expect(success, false);
-    expect(notifier.requestCount, 0);
     expect(notifier.didClearSession, false);
   });
 
@@ -585,20 +460,15 @@ class _SupersededSignInNotifier extends CloudAccountNotifier {
   }
 }
 
-class _DeleteNotifier extends CloudAccountNotifier {
+class _SessionCleanupNotifier extends CloudAccountNotifier {
   final CloudAccountState initialState;
-  final Object? requestError;
-  final Object? logoutError;
-  final Completer<void>? logoutCompleter;
+  final Completer<void>? cleanupCompleter;
   final String? cleanupError;
-  var requestCount = 0;
   var didClearSession = false;
 
-  _DeleteNotifier({
+  _SessionCleanupNotifier({
     this.initialState = const CloudAccountState(isLoggedIn: true),
-    this.requestError,
-    this.logoutError,
-    this.logoutCompleter,
+    this.cleanupCompleter,
     this.cleanupError,
   });
 
@@ -606,21 +476,8 @@ class _DeleteNotifier extends CloudAccountNotifier {
   CloudAccountState build() => initialState;
 
   @override
-  Future<void> Function({required String password, String? twoFactorCode})
-  get deleteAccountRequest =>
-      ({required String password, String? twoFactorCode}) async {
-        requestCount++;
-        if (requestError != null) throw requestError!;
-      };
-
-  @override
-  Future<void> Function() get logoutRequest => () async {
-    if (logoutError != null) throw logoutError!;
-    await logoutCompleter?.future;
-  };
-
-  @override
   Future<String?> clearSession() async {
+    await cleanupCompleter?.future;
     didClearSession = true;
     state = const CloudAccountState();
     return cleanupError;

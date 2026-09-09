@@ -589,7 +589,7 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
     }
   }
 
-  Future<bool> signOut({bool revokeToken = false}) async {
+  Future<bool> signOut() async {
     if (state.isLoading ||
         state.isRefreshing ||
         state.isSyncing ||
@@ -597,18 +597,6 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
       return false;
     }
     state = state.copyWith(isLoading: true, error: null);
-    if (revokeToken) {
-      try {
-        await logoutRequest();
-      } catch (e) {
-        if (CloudApiException.isHandledUnauthorized(e)) return false;
-        state = state.copyWith(
-          isLoading: false,
-          error: CloudApiException.clean(e),
-        );
-        return false;
-      }
-    }
     final cleanupError = await clearSession();
     if (cleanupError != null) {
       state = state.copyWith(error: cleanupError);
@@ -616,49 +604,6 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
     }
     return true;
   }
-
-  @protected
-  Future<void> Function() get logoutRequest => CloudApiService().logout;
-
-  Future<bool> deleteAccount({
-    required String password,
-    String? twoFactorCode,
-  }) async {
-    if (!state.isLoggedIn ||
-        state.isLoading ||
-        state.isRefreshing ||
-        state.isSyncing ||
-        _managedProfileFuture != null) {
-      return false;
-    }
-    state = state.copyWith(isLoading: true, error: null);
-    try {
-      await deleteAccountRequest(
-        password: password,
-        twoFactorCode: twoFactorCode,
-      );
-    } catch (e) {
-      if (CloudApiException.isHandledUnauthorized(e)) return false;
-      final error = CloudApiException.clean(e);
-      if (CloudApiException.isUnauthorized(e)) {
-        await clearSession();
-        state = state.copyWith(error: error);
-        return false;
-      }
-      state = state.copyWith(isLoading: false, error: error);
-      return false;
-    }
-    final cleanupError = await clearSession();
-    if (cleanupError != null) {
-      state = state.copyWith(error: cleanupError);
-      return false;
-    }
-    return true;
-  }
-
-  @protected
-  Future<void> Function({required String password, String? twoFactorCode})
-  get deleteAccountRequest => CloudApiService().deleteAccount;
 
   @protected
   Future<String?> clearSession() async {
