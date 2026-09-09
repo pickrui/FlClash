@@ -203,6 +203,30 @@ Profile mergeRefreshedProfile(Profile current, Profile refreshed) {
   );
 }
 
+/// Apply only the fields owned by the metadata editor to the latest profile.
+/// Refresh results and personal routing may have changed while it was open.
+@visibleForTesting
+Profile mergeProfileMetadata(Profile current, Profile edited) {
+  return current.copyWith(
+    label: edited.label,
+    url: edited.url,
+    autoUpdate: edited.autoUpdate,
+    autoUpdateDuration: edited.autoUpdateDuration,
+  );
+}
+
+/// Preserve runtime and personal settings even when an explicit metadata edit
+/// downloads or validates new profile content before it is saved.
+@visibleForTesting
+Profile mergePersistedProfile(
+  Profile current,
+  Profile updated, {
+  required bool preserveCurrentState,
+}) {
+  final merged = mergeRefreshedProfile(current, updated);
+  return preserveCurrentState ? merged : mergeProfileMetadata(merged, updated);
+}
+
 @visibleForTesting
 Future<void> applyProfileAfterRefresh({
   required bool isCurrent,
@@ -992,10 +1016,23 @@ extension ProfilesControllerExt on AppController {
     _ref.read(currentProfileIdProvider.notifier).value = profile.id;
   }
 
+  Future<Profile> saveProfileMetadata(Profile edited) {
+    return storageLock.synchronized(() async {
+      final current = _ref.read(profilesProvider).getProfile(edited.id);
+      if (current == null) {
+        throw StateError('profile is no longer available');
+      }
+      final profile = mergeProfileMetadata(current, edited);
+      await putProfile(profile, reportOnWait: false);
+      return profile;
+    });
+  }
+
   Future<Profile> persistProfile(
     Profile profile,
-    Future<Profile> Function() update,
-  ) async {
+    Future<Profile> Function() update, {
+    bool preserveCurrentState = false,
+  }) async {
     // Account bootstrap may remove expired profiles using this same lock.
     if (profile.isoixCloudProfile) {
       await _ref.read(cloudAccountProvider.notifier).ensureReady();
@@ -1003,8 +1040,18 @@ extension ProfilesControllerExt on AppController {
     return storageLock.synchronized(() async {
       Future<Profile> persist() async {
         final updatedProfile = await update();
-        await putProfile(updatedProfile, reportOnWait: false);
-        return updatedProfile;
+        final currentProfile = _ref
+            .read(profilesProvider)
+            .getProfile(profile.id);
+        final profileToSave = currentProfile == null
+            ? updatedProfile
+            : mergePersistedProfile(
+                currentProfile,
+                updatedProfile,
+                preserveCurrentState: preserveCurrentState,
+              );
+        await putProfile(profileToSave, reportOnWait: false);
+        return profileToSave;
       }
 
       return withFileRollback(
@@ -1045,6 +1092,7 @@ extension ProfilesControllerExt on AppController {
     bool showLoading = false,
     bool applyIfCurrent = true,
     bool forceApplyIfCurrent = false,
+    bool preserveCurrentState = true,
   }) async {
     try {
       await ensureCoreReadyOrThrow();
@@ -1052,7 +1100,10 @@ extension ProfilesControllerExt on AppController {
         _ref.read(isUpdatingProvider(profile.updatingKey).notifier).value =
             true;
       }
-      final newProfile = await _updateProfileWithCertificateRetry(profile);
+      final newProfile = await _updateProfileWithCertificateRetry(
+        profile,
+        preserveCurrentState: preserveCurrentState,
+      );
       await applyProfileAfterRefresh(
         isCurrent:
             applyIfCurrent && profile.id == _ref.read(currentProfileIdProvider),
@@ -1066,14 +1117,25 @@ extension ProfilesControllerExt on AppController {
     }
   }
 
-  Future<Profile> _updateProfileWithCertificateRetry(Profile profile) {
+  Future<Profile> _updateProfileWithCertificateRetry(
+    Profile profile, {
+    bool preserveCurrentState = true,
+  }) {
     return _runWithCertificateRetry(() async {
       if (profile.isoixCloudProfile) {
         await _ref
             .read(cloudAccountProvider.notifier)
             .prepareManagedConfigUpdate();
       }
-      return persistProfile(profile, profile.update);
+      return persistProfile(profile, () {
+        // A queued refresh must download the current URL after a metadata
+        // edit, otherwise its content would be saved under the new URL.
+        final current = _ref.read(profilesProvider).getProfile(profile.id);
+        if (current == null) {
+          throw StateError('profile is no longer available');
+        }
+        return (preserveCurrentState ? current : profile).update();
+      }, preserveCurrentState: preserveCurrentState);
     }, handleCloudUnauthorized: profile.isoixCloudProfile);
   }
 
@@ -1758,12 +1820,14 @@ extension SetupControllerExt on AppController {
     int profileId,
     String name, {
     required bool includeTopLevelRules,
+    bool includeProxyGroups = true,
   }) async {
     final rawConfig = await getRawProfileConfig(profileId);
     return findRawOutboundReference(
       rawConfig,
       name,
       includeTopLevelRules: includeTopLevelRules,
+      includeProxyGroups: includeProxyGroups,
     );
   }
 
@@ -2062,11 +2126,16 @@ extension SetupControllerExt on AppController {
     final proxyChains = List<ProxyChain>.from(setupState.proxyChains);
     if (setupState.overwriteType == OverwriteType.script) {
       scriptContent = await setupState.script?.content;
-    } else if (setupState.overwriteType == OverwriteType.custom) {
-      customProxyGroups.addAll(setupState.customProxyGroups);
-      customRules.addAll(setupState.customRules);
     } else {
-      addedRules.addAll(setupState.addedRules);
+      if (setupState.overwriteType == OverwriteType.custom ||
+          setupState.overwriteType == OverwriteType.merge) {
+        customProxyGroups.addAll(setupState.customProxyGroups);
+        customRules.addAll(setupState.customRules);
+      }
+      if (setupState.overwriteType == OverwriteType.standard ||
+          setupState.overwriteType == OverwriteType.merge) {
+        addedRules.addAll(setupState.addedRules);
+      }
     }
     final realPatchConfig = patchConfig.copyWith(
       tun: patchConfig.tun.getRealTun(routeMode),
@@ -2107,7 +2176,11 @@ extension SetupControllerExt on AppController {
         blockWebRtc: setupState.blockWebRtc,
       ),
     );
-    return res;
+    try {
+      return await res;
+    } on OverlayNameConflictException catch (error) {
+      throw FormatException(appLocalizations.overlayNameConflict(error.name));
+    }
   }
 
   Future<Map<String, dynamic>> getProxyChainProfileConfig(int profileId) async {
@@ -2183,10 +2256,17 @@ extension SetupControllerExt on AppController {
     final realTunEnable = _ref.read(realTunEnableProvider);
     final realPatchConfig = patchConfig.copyWith.tun(enable: realTunEnable);
     final setupState = await _ref.read(setupStateProvider(profile?.id).future);
-    final config = await getProfile(
-      setupState: setupState,
-      patchConfig: realPatchConfig,
-    );
+    final Map<String, dynamic> config;
+    try {
+      config = await getProfile(
+        setupState: setupState,
+        patchConfig: realPatchConfig,
+      );
+    } on FormatException catch (error) {
+      // Composition errors have not touched the active core configuration.
+      // Handle them like core validation failures to keep the connection alive.
+      throw CandidateConfigValidationException(error.message);
+    }
     final configFilePath = await appPath.configFilePath;
     final yamlString = await encodeYamlTask(config);
     if (!isCurrentApply()) return false;

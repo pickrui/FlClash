@@ -58,6 +58,9 @@ void main() {
       );
       expect(await dav.pingCompleter.future, true);
       final path = await dav.restore();
+      // The winning read returns as soon as it is validated. Cancelled
+      // branches may still be deleting their temporary files before closing.
+      await Future.wait(clients.map((client) => client.whenClosed));
       expect(await File(path).readAsBytes(), archive);
       expect(directory.listSync().map((file) => file.path), [path]);
       expect(
@@ -278,7 +281,9 @@ ResponseBody _challenge() => ResponseBody.fromString(
 class _Adapter implements HttpClientAdapter {
   _Adapter(this.respond);
   final Future<ResponseBody> Function(RequestOptions) respond;
-  var closed = false;
+  final _closed = Completer<void>();
+  bool get closed => _closed.isCompleted;
+  Future<void> get whenClosed => _closed.future;
   @override
   Future<ResponseBody> fetch(
     RequestOptions options,
@@ -290,7 +295,9 @@ class _Adapter implements HttpClientAdapter {
   }
 
   @override
-  void close({bool force = false}) => closed = true;
+  void close({bool force = false}) {
+    if (!_closed.isCompleted) _closed.complete();
+  }
 }
 
 class _Paths extends PathProviderPlatform {

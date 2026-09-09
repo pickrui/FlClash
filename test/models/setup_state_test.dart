@@ -6,14 +6,16 @@ void main() {
   SetupState buildState({
     List<ProxyGroup> customProxyGroups = const [],
     List<Rule> customRules = const [],
+    List<Rule> addedRules = const [],
+    OverwriteType overwriteType = OverwriteType.custom,
     bool blockQuic = false,
     bool blockWebRtc = false,
   }) {
     return SetupState(
       profileId: 1,
       profileLastUpdateDate: 1,
-      overwriteType: OverwriteType.custom,
-      addedRules: const [],
+      overwriteType: overwriteType,
+      addedRules: addedRules,
       proxyChains: const [],
       profileProxies: const [],
       customProxyGroups: customProxyGroups,
@@ -25,6 +27,52 @@ void main() {
       blockWebRtc: blockWebRtc,
     );
   }
+
+  group('SetupState personal overlay changes', () {
+    final previous = buildState(overwriteType: OverwriteType.merge);
+
+    test('unchanged overlay does not require setup', () {
+      expect(
+        buildState(overwriteType: OverwriteType.merge).needSetup(previous),
+        false,
+      );
+    });
+
+    test('existing added rules continue to trigger setup', () {
+      expect(
+        buildState(
+          overwriteType: OverwriteType.merge,
+          addedRules: const [Rule(id: 1, value: 'DOMAIN,local.example,DIRECT')],
+        ).needSetup(previous),
+        true,
+      );
+    });
+
+    test('personal group and rule changes each trigger setup', () {
+      expect(
+        buildState(
+          overwriteType: OverwriteType.merge,
+          customProxyGroups: const [
+            ProxyGroup(name: 'Personal', type: GroupType.URLTest),
+          ],
+        ).needSetup(previous),
+        true,
+      );
+      expect(
+        buildState(
+          overwriteType: OverwriteType.merge,
+          customRules: const [
+            Rule(id: 1, value: 'DOMAIN,video.example,Personal'),
+          ],
+        ).needSetup(previous),
+        true,
+      );
+    });
+
+    test('switching from replace mode requires setup', () {
+      expect(previous.needSetup(buildState()), true);
+    });
+  });
 
   group('SetupState custom overwrite changes', () {
     test('unchanged custom data does not require setup', () {

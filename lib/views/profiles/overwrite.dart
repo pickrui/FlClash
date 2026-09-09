@@ -5,6 +5,7 @@ import 'package:fl_clash/controller.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/overwrite/proxy_chain.dart';
 import 'package:fl_clash/features/overwrite/rule.dart';
+import 'package:fl_clash/features/overwrite/routing_draft.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
@@ -26,18 +27,83 @@ class OverwriteView extends ConsumerStatefulWidget {
 }
 
 class _OverwriteViewState extends ConsumerState<OverwriteView> {
-  @override
-  void initState() {
-    super.initState();
+  bool _checking = false;
+
+  Future<void> _checkAndApply() async {
+    final profile = ref.read(profileProvider(widget.profileId));
+    if (profile == null || _checking) return;
+    setState(() => _checking = true);
+    try {
+      final error = await validateCustomRoutingDraft(ref, profile);
+      if (!mounted) return;
+      if (error.isNotEmpty) {
+        globalState.showMessage(message: TextSpan(text: error));
+        return;
+      }
+      if (ref.read(currentProfileIdProvider) == profile.id) {
+        final applied = await appController.applyProfile(force: true);
+        if (!mounted || ref.read(currentProfileIdProvider) != profile.id) {
+          return;
+        }
+        final latest = await ref.read(setupStateProvider(profile.id).future);
+        if (!mounted || ref.read(currentProfileIdProvider) != profile.id) {
+          return;
+        }
+        final lastApplied = globalState.lastSetupState;
+        final isApplied =
+            applied && lastApplied != null && !latest.needSetup(lastApplied);
+        if (!mounted) return;
+        context.showNotifier(
+          isApplied
+              ? appLocalizations.routingApplied
+              : appLocalizations.routingApplyFailed,
+        );
+      } else {
+        context.showNotifier(appLocalizations.routingChecked);
+      }
+    } catch (error) {
+      if (mounted) context.showNotifier(error.toString());
+    } finally {
+      if (mounted) setState(() => _checking = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return CommonScaffold(
       title: appLocalizations.override,
+      actions: [
+        IconButton(
+          tooltip: appLocalizations.checkRouting,
+          onPressed: _checking ? null : _checkAndApply,
+          icon: _checking
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.fact_check_outlined),
+        ),
+      ],
       body: CustomScrollView(
         slivers: [
           _Title(widget.profileId),
+          if (ref.watch(
+                patchClashConfigProvider.select((config) => config.mode),
+              ) !=
+              Mode.rule)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: Text(
+                  appLocalizations.rulesRequireRuleMode,
+                  style: TextStyle(color: context.colorScheme.error),
+                ),
+              ),
+            ),
           ProfileProxyChainsContent(profileId: widget.profileId),
           _Content(widget.profileId),
         ],
@@ -62,6 +128,7 @@ class _Title extends ConsumerWidget {
       OverwriteType.standard => appLocalizations.standard,
       OverwriteType.script => appLocalizations.script,
       OverwriteType.custom => appLocalizations.overwriteTypeCustom,
+      OverwriteType.merge => appLocalizations.overwriteTypeMerge,
     };
   }
 
@@ -70,6 +137,7 @@ class _Title extends ConsumerWidget {
       OverwriteType.standard => Icons.stars,
       OverwriteType.script => Icons.rocket,
       OverwriteType.custom => Icons.dashboard_customize,
+      OverwriteType.merge => Icons.layers_outlined,
     };
   }
 
@@ -78,10 +146,12 @@ class _Title extends ConsumerWidget {
       OverwriteType.standard => appLocalizations.standardModeDesc,
       OverwriteType.script => appLocalizations.scriptModeDesc,
       OverwriteType.custom => appLocalizations.overwriteTypeCustomDesc,
+      OverwriteType.merge => appLocalizations.overwriteTypeMergeDesc,
     };
   }
 
   void _handleChangeType(WidgetRef ref, OverwriteType type) {
+    if (ref.read(overwriteTypeProvider(profileId)) == type) return;
     ref.read(profilesProvider.notifier).updateProfile(profileId, (state) {
       return state.copyWith(overwriteType: type);
     });
@@ -101,7 +171,12 @@ class _Title extends ConsumerWidget {
             child: Wrap(
               spacing: 16,
               children: [
-                for (final type in OverwriteType.values)
+                for (final type in [
+                  OverwriteType.standard,
+                  OverwriteType.merge,
+                  OverwriteType.custom,
+                  OverwriteType.script,
+                ])
                   CommonCard(
                     isSelected: overwriteType == type,
                     onPressed: () {
@@ -151,6 +226,12 @@ class _Content extends ConsumerWidget {
       OverwriteType.standard => _StandardContent(profileId),
       OverwriteType.script => _ScriptContent(profileId),
       OverwriteType.custom => CustomOverwriteContent(profileId: profileId),
+      OverwriteType.merge => SliverMainAxisGroup(
+        slivers: [
+          CustomOverwriteContent(profileId: profileId, merge: true),
+          _StandardContent(profileId),
+        ],
+      ),
     };
   }
 }

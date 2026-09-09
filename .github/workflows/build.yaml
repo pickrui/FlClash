@@ -68,14 +68,25 @@ jobs:
       - name: Analyze
         run: flutter analyze --no-fatal-infos
 
-      - name: Run tests
-        run: flutter test --reporter expanded test plugins/proxy/test/proxy_test.dart
-
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
           cache-dependency-path: core/go.sum
+
+      - name: Build routing test tools
+        working-directory: core
+        env:
+          CGO_ENABLED: '0'
+        run: |
+          go build -tags with_gvisor -trimpath -o "$RUNNER_TEMP/FlClashCore" .
+          go test -tags with_gvisor -c -o "$RUNNER_TEMP/flclash-routing-checker" .
+
+      - name: Run tests
+        env:
+          FLCLASH_TEST_CORE: ${{ runner.temp }}/FlClashCore
+          FLCLASH_TEST_ROUTING_CHECKER: ${{ runner.temp }}/flclash-routing-checker
+        run: flutter test --reporter expanded test plugins/proxy/test/proxy_test.dart
 
       - name: Validate Go core
         working-directory: core

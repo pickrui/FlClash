@@ -248,6 +248,88 @@ void main() {
     );
   });
 
+  test('raw group members report exact outbound reference paths', () {
+    final rawConfig = <String, dynamic>{
+      'proxy-groups': [
+        {
+          'name': 'First',
+          'proxies': ['DIRECT'],
+        },
+        {
+          'name': 'Second',
+          'proxies': ['REJECT', 'Target'],
+        },
+      ],
+    };
+
+    expect(
+      findRawOutboundReference(rawConfig, 'Target'),
+      'proxy-groups[1].proxies[1]',
+    );
+    expect(
+      findRawOutboundReference(rawConfig, 'Target', includeProxyGroups: false),
+      isNull,
+    );
+  });
+
+  test('raw group references only match exact proxy members', () {
+    expect(
+      findRawOutboundReference({
+        'proxy-groups': [
+          {
+            'name': 'Target',
+            'use': ['Target'],
+            'filter': 'Target',
+            'proxies': ['Target suffix', 'prefix Target', ' Target '],
+          },
+          {
+            'name': 'Provider group',
+            'use': ['Target'],
+          },
+        ],
+      }, 'Target'),
+      isNull,
+    );
+  });
+
+  test('excluding raw groups still detects retained outbound references', () {
+    expect(
+      findRawOutboundReference(
+        {
+          'proxy-groups': [
+            {
+              'name': 'Group',
+              'proxies': ['Target'],
+            },
+          ],
+          'rules': ['MATCH,Target'],
+        },
+        'Target',
+        includeProxyGroups: false,
+      ),
+      'rules[0]',
+    );
+    expect(
+      findRawOutboundReference(
+        {
+          'proxy-groups': [
+            {
+              'name': 'Group',
+              'proxies': ['Target'],
+            },
+          ],
+          'rule-providers': {
+            'Rules': {'proxy': 'Target'},
+          },
+        },
+        'Target',
+        includeProxyGroups: false,
+        includeTopLevelRules: false,
+      ),
+      'rule-providers.Rules.proxy',
+    );
+  });
+
   test('findProxyGroupCycle detects self and indirect cycles', () {
     expect(
       findProxyGroupCycle(const [
@@ -291,6 +373,70 @@ void main() {
         },
       }, 'Target'),
       'dns.nameserver[0]',
+    );
+  });
+
+  test('DNS outbound references preserve fragment option semantics', () {
+    for (final server in [
+      'https://dns.example/dns-query#Target&h3=true',
+      'https://dns.example/dns-query#h3=true&Target',
+      'tls://dns.example#ecs=1.1.1.1&Target&disable-ipv6=true',
+      '1.1.1.1#Target&ecs=1.1.1.1',
+      'https://dns.example/dns-query#%54arget&h3=true',
+    ]) {
+      expect(
+        findRawOutboundReference({
+          'dns': {
+            'nameserver': [server],
+          },
+        }, 'Target'),
+        'dns.nameserver[0]',
+        reason: server,
+      );
+    }
+    for (final server in [
+      'https://dns.example/dns-query#Target=true',
+      'https://dns.example/dns-query#proxy=Target',
+      'https://dns.example/dns-query#Target&Other',
+      'https://dns.example/dns-query#Target&',
+      'https://dns.example/dns-query#Target%26Other',
+    ]) {
+      expect(
+        findRawOutboundReference({
+          'dns': {
+            'nameserver': [server],
+          },
+        }, 'Target'),
+        isNull,
+        reason: server,
+      );
+    }
+  });
+
+  test('DNS policy references identify the exact policy entry', () {
+    expect(
+      findRawOutboundReference({
+        'dns': {
+          'nameserver-policy': {
+            'example.org': 'https://dns.example/dns-query#Other',
+            'example.com': [
+              'https://dns.example/dns-query#Other',
+              'https://dns.example/dns-query#Target&h3=true',
+            ],
+          },
+        },
+      }, 'Target'),
+      'dns.nameserver-policy.example.com[1]',
+    );
+    expect(
+      findRawOutboundReference({
+        'dns': {
+          'proxy-server-nameserver-policy': {
+            'example.com': 'https://dns.example/dns-query#Target&h3=true',
+          },
+        },
+      }, 'Target'),
+      'dns.proxy-server-nameserver-policy.example.com',
     );
   });
 

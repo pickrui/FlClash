@@ -293,17 +293,13 @@ class Build {
     final List<String> corePaths = [];
 
     final targetOutFilePath = join(outDir, target.name);
-    final targetOutFile = File(targetOutFilePath);
-    if (await targetOutFile.exists()) {
-      await targetOutFile.delete(recursive: true);
-      await Directory(targetOutFilePath).create(recursive: true);
+    final targetOutDirectory = Directory(targetOutFilePath);
+    if (await targetOutDirectory.exists()) {
+      await targetOutDirectory.delete(recursive: true);
     }
+    await targetOutDirectory.create(recursive: true);
     for (final item in items) {
       final outFilePath = join(targetOutFilePath, item.archName);
-      final file = File(outFilePath);
-      if (file.existsSync()) {
-        file.deleteSync(recursive: true);
-      }
 
       final fileName = isLib
           ? '$libName${item.target.dynamicLibExtensionName}'
@@ -631,7 +627,7 @@ class BuildCommand extends Command {
     await Build.exec(
       name: name,
       Build.getExecutable(
-        'flutter build apk --no-pub --obfuscate --split-debug-info=build/debug-symbols/android --target-platform $targetPlatform $dartDefines',
+        'flutter build apk --no-pub --obfuscate --split-debug-info=build/debug-symbols/android --split-per-abi --target-platform $targetPlatform $dartDefines',
       ),
     );
 
@@ -647,7 +643,7 @@ class BuildCommand extends Command {
         'app',
         'outputs',
         'flutter-apk',
-        'app-release.apk',
+        'app-$archName-release.apk',
       ),
     );
     if (await sourceApk.exists()) {

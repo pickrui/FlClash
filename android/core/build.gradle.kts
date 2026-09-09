@@ -12,6 +12,20 @@ android {
 
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
+        // Match the Flutter build target so JNI never compiles against headers
+        // for an architecture that setup.dart did not build.
+        val flutterAbis = mapOf(
+            "android-arm" to "armeabi-v7a",
+            "android-arm64" to "arm64-v8a",
+            "android-x64" to "x86_64"
+        )
+        val targets = providers.gradleProperty("target-platform")
+            .orElse(flutterAbis.keys.joinToString(",")).get().split(",")
+        ndk {
+            abiFilters += targets.map { target ->
+                requireNotNull(flutterAbis[target]) { "Unsupported Flutter target: $target" }
+            }
+        }
     }
 
 

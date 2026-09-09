@@ -5458,6 +5458,436 @@ class AppLocalizations {
   String get purchaseRenewOff {
     return Intl.message('Off', name: 'purchaseRenewOff', desc: '', args: []);
   }
+
+  /// `Overlay`
+  String get overwriteTypeMerge {
+    return Intl.message(
+      'Overlay',
+      name: 'overwriteTypeMerge',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Keep subscription rules and groups, then add your own. Personal rules take priority over subscription rules; existing added rules keep their priority.`
+  String get overwriteTypeMergeDesc {
+    return Intl.message(
+      'Keep subscription rules and groups, then add your own. Personal rules take priority over subscription rules; existing added rules keep their priority.',
+      name: 'overwriteTypeMergeDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Personal routing`
+  String get personalRouting {
+    return Intl.message(
+      'Personal routing',
+      name: 'personalRouting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Saved separately from the subscription and reapplied after updates. New groups block connections when no members match.`
+  String get overlayHint {
+    return Intl.message(
+      'Saved separately from the subscription and reapplied after updates. New groups block connections when no members match.',
+      name: 'overlayHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The name "{name}" is already used. Rename the personal group to keep both.`
+  String overlayNameConflict(Object name) {
+    return Intl.message(
+      'The name "$name" is already used. Rename the personal group to keep both.',
+      name: 'overlayNameConflict',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Unavailable in this configuration. Remove or replace it.`
+  String get outboundUnavailable {
+    return Intl.message(
+      'Unavailable in this configuration. Remove or replace it.',
+      name: 'outboundUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose members`
+  String get chooseMembers {
+    return Intl.message(
+      'Choose members',
+      name: 'chooseMembers',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Selection order is the fallback order. Remove and reselect a member to move it to the end.`
+  String get memberOrderHint {
+    return Intl.message(
+      'Selection order is the fallback order. Remove and reselect a member to move it to the end.',
+      name: 'memberOrderHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Automatically include nodes from this configuration as the subscription updates. Use a name filter, such as Japan|JP.`
+  String get dynamicMembersHint {
+    return Intl.message(
+      'Automatically include nodes from this configuration as the subscription updates. Use a name filter, such as Japan|JP.',
+      name: 'dynamicMembersHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No matching results`
+  String get noSearchResult {
+    return Intl.message(
+      'No matching results',
+      name: 'noSearchResult',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Circular group reference: {name}. Choose a different member.`
+  String groupCycleError(Object name) {
+    return Intl.message(
+      'Circular group reference: $name. Choose a different member.',
+      name: 'groupCycleError',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Personal routing rules take effect in Rule mode.`
+  String get rulesRequireRuleMode {
+    return Intl.message(
+      'Personal routing rules take effect in Rule mode.',
+      name: 'rulesRequireRuleMode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check configuration`
+  String get checkRouting {
+    return Intl.message(
+      'Check configuration',
+      name: 'checkRouting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Configuration is valid. Personal settings are saved for this profile.`
+  String get routingChecked {
+    return Intl.message(
+      'Configuration is valid. Personal settings are saved for this profile.',
+      name: 'routingChecked',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Personal settings applied.`
+  String get routingApplied {
+    return Intl.message(
+      'Personal settings applied.',
+      name: 'routingApplied',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Changes were saved but could not be applied. Check the configuration and retry.`
+  String get routingApplyFailed {
+    return Intl.message(
+      'Changes were saved but could not be applied. Check the configuration and retry.',
+      name: 'routingApplyFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Form`
+  String get customRuleForm {
+    return Intl.message('Form', name: 'customRuleForm', desc: '', args: []);
+  }
+
+  /// `Rule text`
+  String get customRuleRaw {
+    return Intl.message('Rule text', name: 'customRuleRaw', desc: '', args: []);
+  }
+
+  /// `Enter one complete rule. Advanced expressions are preserved.`
+  String get customRuleRawHint {
+    return Intl.message(
+      'Enter one complete rule. Advanced expressions are preserved.',
+      name: 'customRuleRawHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This rule uses advanced syntax. Edit the rule text to preserve all options.`
+  String get customRuleFormUnavailable {
+    return Intl.message(
+      'This rule uses advanced syntax. Edit the rule text to preserve all options.',
+      name: 'customRuleFormUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter one complete rule with a valid type, content and target.`
+  String get customRuleInvalidSyntax {
+    return Intl.message(
+      'Enter one complete rule with a valid type, content and target.',
+      name: 'customRuleInvalidSyntax',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check the content for this rule type. Example: {example}`
+  String customRuleInvalidContent(Object example) {
+    return Intl.message(
+      'Check the content for this rule type. Example: $example',
+      name: 'customRuleInvalidContent',
+      desc: '',
+      args: [example],
+    );
+  }
+
+  /// `{name} is unavailable. Choose a target from this configuration.`
+  String customRuleUnavailableTarget(Object name) {
+    return Intl.message(
+      '$name is unavailable. Choose a target from this configuration.',
+      name: 'customRuleUnavailableTarget',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `{name} is unavailable. Choose an existing rule provider.`
+  String customRuleUnavailableProvider(Object name) {
+    return Intl.message(
+      '$name is unavailable. Choose an existing rule provider.',
+      name: 'customRuleUnavailableProvider',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Choose a target`
+  String get customRuleChooseTarget {
+    return Intl.message(
+      'Choose a target',
+      name: 'customRuleChooseTarget',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose a rule provider`
+  String get customRuleChooseProvider {
+    return Intl.message(
+      'Choose a rule provider',
+      name: 'customRuleChooseProvider',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Matches all remaining traffic. Rules below it will not be reached.`
+  String get customRuleMatchHint {
+    return Intl.message(
+      'Matches all remaining traffic. Rules below it will not be reached.',
+      name: 'customRuleMatchHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Matches this domain and its subdomains. Enter a domain without https:// or a path.`
+  String get customRuleDomainSuffixHint {
+    return Intl.message(
+      'Matches this domain and its subdomains. Enter a domain without https:// or a path.',
+      name: 'customRuleDomainSuffixHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose a policy group, proxy or built-in action.`
+  String get customRuleTargetHint {
+    return Intl.message(
+      'Choose a policy group, proxy or built-in action.',
+      name: 'customRuleTargetHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match known IP addresses without resolving domain names.`
+  String get customRuleNoResolveHint {
+    return Intl.message(
+      'Match known IP addresses without resolving domain names.',
+      name: 'customRuleNoResolveHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save draft`
+  String get saveRoutingDraft {
+    return Intl.message(
+      'Save draft',
+      name: 'saveRoutingDraft',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save a draft to fix other items. Settings are applied only after the full configuration passes validation.`
+  String get routingDraftHint {
+    return Intl.message(
+      'Save a draft to fix other items. Settings are applied only after the full configuration passes validation.',
+      name: 'routingDraftHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Filters automatically included and provider nodes. Manually selected members are always kept.`
+  String get groupFilterHint {
+    return Intl.message(
+      'Filters automatically included and provider nodes. Manually selected members are always kept.',
+      name: 'groupFilterHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Manual selection`
+  String get groupTypeSelect {
+    return Intl.message(
+      'Manual selection',
+      name: 'groupTypeSelect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Automatic selection`
+  String get groupTypeUrlTest {
+    return Intl.message(
+      'Automatic selection',
+      name: 'groupTypeUrlTest',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failover`
+  String get groupTypeFallback {
+    return Intl.message(
+      'Failover',
+      name: 'groupTypeFallback',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Load balancing`
+  String get groupTypeLoadBalance {
+    return Intl.message(
+      'Load balancing',
+      name: 'groupTypeLoadBalance',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose the active member on the Proxies page.`
+  String get groupTypeSelectHint {
+    return Intl.message(
+      'Choose the active member on the Proxies page.',
+      name: 'groupTypeSelectHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Periodically test members and select a low-latency node.`
+  String get groupTypeUrlTestHint {
+    return Intl.message(
+      'Periodically test members and select a low-latency node.',
+      name: 'groupTypeUrlTestHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Try members in order and switch when the current member fails.`
+  String get groupTypeFallbackHint {
+    return Intl.message(
+      'Try members in order and switch when the current member fails.',
+      name: 'groupTypeFallbackHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Distribute connections across available members.`
+  String get groupTypeLoadBalanceHint {
+    return Intl.message(
+      'Distribute connections across available members.',
+      name: 'groupTypeLoadBalanceHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Group type`
+  String get routingGroupType {
+    return Intl.message(
+      'Group type',
+      name: 'routingGroupType',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rule type`
+  String get customRuleType {
+    return Intl.message(
+      'Rule type',
+      name: 'customRuleType',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This configuration changed while it was being edited or checked. Reopen the editor or check it again.`
+  String get routingChanged {
+    return Intl.message(
+      'This configuration changed while it was being edited or checked. Reopen the editor or check it again.',
+      name: 'routingChanged',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

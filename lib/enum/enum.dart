@@ -362,7 +362,7 @@ extension RuleActionExt on RuleAction {
   ].contains(this);
 }
 
-enum OverwriteType { standard, script, custom }
+enum OverwriteType { standard, script, custom, merge }
 
 enum RuleTarget { DIRECT, REJECT, MATCH }
 

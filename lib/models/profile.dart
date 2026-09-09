@@ -41,6 +41,7 @@ const reservedOutboundNames = {
   'REJECT',
   'REJECT-DROP',
   'PASS',
+  'PASS-RULE',
   'COMPATIBLE',
   'GLOBAL',
 };
@@ -750,6 +751,7 @@ String? findRawOutboundReference(
   Map<String, dynamic> rawConfig,
   String name, {
   bool includeTopLevelRules = true,
+  bool includeProxyGroups = true,
 }) {
   String? scanMapField(Object? value, String key, String path) {
     if (value is Map && value[key]?.toString() == name) {
@@ -772,29 +774,50 @@ String? findRawOutboundReference(
   }
 
   String? scanDnsServers(Object? value, String path) {
-    Iterable<Object?> values;
-    if (value is List) {
-      values = value;
-    } else if (value is Map) {
-      values = value.values.expand(
-        (item) => item is List ? item : <Object?>[item],
-      );
-    } else {
-      return null;
-    }
-    var index = 0;
-    for (final item in values) {
-      if (item is String) {
-        final fragment = Uri.tryParse(item)?.fragment;
-        if (fragment != null &&
-            fragment.isNotEmpty &&
-            Uri.decodeComponent(fragment) == name) {
-          return '$path[$index]';
-        }
+    if (value is String) {
+      final fragment = Uri.tryParse(value)?.fragment;
+      if (fragment == null || fragment.isEmpty) return null;
+      // Match mihomo's DNS fragment parser: key=value entries are options,
+      // while the last bare entry selects the outbound (after URI decoding).
+      String? outbound;
+      for (final part in Uri.decodeComponent(fragment).split('&')) {
+        if (!part.contains('=')) outbound = part;
       }
-      index++;
+      return outbound == name ? path : null;
+    }
+    if (value is List) {
+      for (var index = 0; index < value.length; index++) {
+        final reference = scanDnsServers(value[index], '$path[$index]');
+        if (reference != null) return reference;
+      }
+    } else if (value is Map) {
+      for (final entry in value.entries) {
+        final reference = scanDnsServers(entry.value, '$path.${entry.key}');
+        if (reference != null) return reference;
+      }
     }
     return null;
+  }
+
+  if (includeProxyGroups) {
+    final groups = rawConfig['proxy-groups'];
+    if (groups is List) {
+      for (var groupIndex = 0; groupIndex < groups.length; groupIndex++) {
+        final group = groups[groupIndex];
+        if (group is! Map) {
+          continue;
+        }
+        final members = group['proxies'];
+        if (members is! List) {
+          continue;
+        }
+        for (var memberIndex = 0; memberIndex < members.length; memberIndex++) {
+          if (members[memberIndex] == name) {
+            return 'proxy-groups[$groupIndex].proxies[$memberIndex]';
+          }
+        }
+      }
+    }
   }
 
   final proxies = rawConfig['proxies'];

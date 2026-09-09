@@ -131,6 +131,7 @@ const _$OverwriteTypeEnumMap = {
   OverwriteType.standard: 'standard',
   OverwriteType.script: 'script',
   OverwriteType.custom: 'custom',
+  OverwriteType.merge: 'merge',
 };
 
 _StandardOverwrite _$StandardOverwriteFromJson(Map<String, dynamic> json) =>

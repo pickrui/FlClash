@@ -37,6 +37,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
   late bool _autoUpdate;
   bool _tfo = true;
   bool _minimalConfig = false;
+  bool _saving = false;
   String? _rawText;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final _fileInfoNotifier = ValueNotifier<FileInfo?>(null);
@@ -78,15 +79,24 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       _oixParamsController.text,
     ).copyWith(tfo: _tfo, simplerules: _minimalConfig);
     final previous = await CloudParamsStorage.load();
-    await appController.putProfile(currentProfile, reportOnWait: false);
+    final savedProfile = await appController.saveProfileMetadata(
+      currentProfile,
+    );
     // Scheduling preferences are local and can be saved while offline.
     if (previous.encodeWithTfo() == edited.encodeWithTfo()) return;
     await CloudParamsStorage.save(edited);
-    await appController.updateProfile(
-      currentProfile,
-      showLoading: true,
-      forceApplyIfCurrent: true,
-    );
+    try {
+      await appController.updateProfile(
+        savedProfile,
+        showLoading: true,
+        forceApplyIfCurrent: true,
+      );
+    } catch (_) {
+      // Keep retrying the edited parameters after a failed download instead of
+      // treating them as already applied on the next press of Save.
+      await CloudParamsStorage.save(previous);
+      rethrow;
+    }
   }
 
   Future<void> _updateFileInfo() async {
@@ -104,7 +114,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
   }
 
   Future<void> _handleConfirm() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (_saving || !_formKey.currentState!.validate()) return;
     var profile = widget.profile.copyWith(
       url: widget.profile.isoixCloudProfile
           ? widget.profile.url
@@ -119,42 +129,41 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
             : widget.profile.autoUpdateDuration.inMinutes,
       ),
     );
-
-    if (widget.profile.isoixCloudProfile) {
+    setState(() => _saving = true);
+    try {
       final saved = await appController.safeRun<bool>(() async {
-        await _saveoixParams(profile);
+        if (widget.profile.isoixCloudProfile) {
+          await _saveoixParams(profile);
+          return true;
+        }
+        if (_fileData != null) {
+          if (profile.type == ProfileType.url && _autoUpdate) {
+            final res = await globalState.showMessage(
+              title: appLocalizations.tip,
+              message: TextSpan(text: appLocalizations.profileHasUpdate),
+            );
+            if (res == true) {
+              profile = profile.copyWith(autoUpdate: false);
+            }
+          }
+          await appController.saveProfileFile(profile, _fileData!);
+        } else if (widget.profile.url == profile.url) {
+          await appController.saveProfileMetadata(profile);
+        } else {
+          await appController.updateProfile(
+            profile,
+            preserveCurrentState: false,
+          );
+        }
         return true;
       }, silence: false);
-      if (saved == true && mounted) {
+      if (saved == true &&
+          mounted &&
+          (ModalRoute.of(context)?.isCurrent ?? false)) {
         Navigator.of(context).pop();
       }
-      return;
-    }
-
-    final hasUpdate = widget.profile.url != profile.url;
-    if (_fileData != null) {
-      if (profile.type == ProfileType.url && _autoUpdate) {
-        final res = await globalState.showMessage(
-          title: appLocalizations.tip,
-          message: TextSpan(text: appLocalizations.profileHasUpdate),
-        );
-        if (res == true) {
-          profile = profile.copyWith(autoUpdate: false);
-        }
-      }
-      await appController.saveProfileFile(profile, _fileData!);
-    } else if (!hasUpdate) {
-      await appController.putProfile(profile, reportOnWait: false);
-    } else {
-      appController.safeRun(() async {
-        await Future.delayed(commonDuration);
-        if (hasUpdate) {
-          await appController.updateProfile(profile);
-        }
-      });
-    }
-    if (mounted) {
-      Navigator.of(context).pop();
+    } finally {
+      if (mounted) setState(() => _saving = false);
     }
   }
 
@@ -187,7 +196,8 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       final message = await coreController.validateConfigWithData(data);
       return message;
     }, silence: false);
-    if (message?.isNotEmpty == true) {
+    if (message == null) return;
+    if (message.isNotEmpty) {
       globalState.showMessage(
         title: appLocalizations.tip,
         message: TextSpan(text: message),
@@ -464,6 +474,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     ];
     return CommonPopScope(
       onPop: (context) {
+        if (_saving) return false;
         if (_fileData == null) {
           return true;
         }
@@ -474,24 +485,35 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
         floatingWidget: FloatWrapper(
           child: FloatingActionButton.extended(
             heroTag: null,
-            onPressed: _handleConfirm,
+            onPressed: _saving ? null : _handleConfirm,
             label: Text(appLocalizations.save),
-            icon: const Icon(Icons.save),
+            icon: _saving
+                ? const SizedBox.square(
+                    dimension: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.save),
           ),
         ),
-        child: Form(
-          key: _formKey,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: ListView.separated(
-              padding: kMaterialListPadding.copyWith(bottom: 72),
-              itemBuilder: (_, index) {
-                return items[index];
-              },
-              separatorBuilder: (_, _) {
-                return const SizedBox(height: 24);
-              },
-              itemCount: items.length,
+        child: ExcludeFocus(
+          excluding: _saving,
+          child: AbsorbPointer(
+            absorbing: _saving,
+            child: Form(
+              key: _formKey,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: ListView.separated(
+                  padding: kMaterialListPadding.copyWith(bottom: 72),
+                  itemBuilder: (_, index) {
+                    return items[index];
+                  },
+                  separatorBuilder: (_, _) {
+                    return const SizedBox(height: 24);
+                  },
+                  itemCount: items.length,
+                ),
+              ),
             ),
           ),
         ),

@@ -89,6 +89,58 @@ Future<Map<String, dynamic>> makeRealProfileTask(
   );
 }
 
+/// A personal group would shadow another outbound in the combined config.
+/// Kept separate so the UI can translate the error outside the worker isolate.
+class OverlayNameConflictException extends FormatException {
+  final String name;
+
+  OverlayNameConflictException(this.name)
+    : super('personal proxy group name is already in use: $name');
+}
+
+void _mergeCustomProxyGroups(
+  Map<String, dynamic> rawConfig,
+  List<ProxyGroup> customProxyGroups,
+) {
+  if (customProxyGroups.isEmpty) return;
+
+  final groups = rawConfig['proxy-groups'];
+  final proxies = rawConfig['proxies'];
+  final providers = rawConfig['proxy-providers'];
+  final occupiedNames = <String>{
+    ...reservedOutboundNames,
+    if (groups is List)
+      ...groups
+          .whereType<Map>()
+          .map((group) => group['name'])
+          .whereType<String>(),
+    if (proxies is List)
+      ...proxies
+          .whereType<Map>()
+          .map((proxy) => proxy['name'])
+          .whereType<String>(),
+    if (providers is Map) ...providers.keys.whereType<String>(),
+  };
+  for (final group in customProxyGroups) {
+    if (group.name.trim().isEmpty) {
+      throw const FormatException('personal proxy group name is empty');
+    }
+    if (!occupiedNames.add(group.name)) {
+      throw OverlayNameConflictException(group.name);
+    }
+  }
+  rawConfig['proxy-groups'] = [
+    if (groups is List) ...groups,
+    ...customProxyGroups.map(
+      (group) => group.toJson()
+        ..removeWhere((_, value) => value == null)
+        // Provider updates and filters may leave a personal group empty.
+        // Keep its traffic blocked instead of falling back to a direct route.
+        ..['empty-fallback'] = 'REJECT',
+    ),
+  ];
+}
+
 void _preserveProxyDnsBootstrap(
   Map<String, dynamic> targetDns,
   Map<dynamic, dynamic> sourceDns,
@@ -275,6 +327,11 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
     }).toList();
   }
   _applyProfileProxies(rawConfig, profileProxies);
+  if (data.overwriteType == OverwriteType.merge) {
+    // Personal selectors keep their explicit member selection; the automatic
+    // insertion of personal nodes above only applies to subscription groups.
+    _mergeCustomProxyGroups(rawConfig, customProxyGroups);
+  }
   _applyProxyChains(rawConfig, proxyChains);
   rawConfig['geox-url'] = realPatchConfig.geoXUrl.toJson();
   rawConfig['global-ua'] = realPatchConfig.globalUa ?? defaultUA;
@@ -316,11 +373,14 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
       rawConfig['dns']['nameserver'] = [...nameserver, systemDns];
     }
   }
-  List<String> rules = customRules.map((rule) => rule.value).toList();
-  if (data.overwriteType != OverwriteType.custom &&
-      rawConfig['rules'] != null) {
-    rules = List<String>.from(rawConfig['rules']);
-  }
+  List<String> rules = [
+    if (data.overwriteType == OverwriteType.custom ||
+        data.overwriteType == OverwriteType.merge)
+      ...customRules.map((rule) => rule.value),
+    if (data.overwriteType != OverwriteType.custom &&
+        rawConfig['rules'] != null)
+      ...List<String>.from(rawConfig['rules']),
+  ];
   rawConfig.remove('rules');
   if (addedRules.isNotEmpty) {
     final parsedNewRules = addedRules
@@ -409,8 +469,9 @@ void _appendProfileProxyNamesToSelectorGroups(
   if (proxyGroups is! List) {
     return;
   }
-  for (var i = 0; i < proxyGroups.length; i++) {
-    final group = proxyGroups[i];
+  final nextGroups = List<dynamic>.from(proxyGroups);
+  for (var i = 0; i < nextGroups.length; i++) {
+    final group = nextGroups[i];
     if (group is! Map) {
       continue;
     }
@@ -424,8 +485,9 @@ void _appendProfileProxyNamesToSelectorGroups(
         proxies.add(name);
       }
     }
-    group['proxies'] = proxies;
+    nextGroups[i] = Map<dynamic, dynamic>.from(group)..['proxies'] = proxies;
   }
+  rawConfig['proxy-groups'] = nextGroups;
 }
 
 void _applyProxyChains(Map rawConfig, List<ProxyChain> proxyChains) {

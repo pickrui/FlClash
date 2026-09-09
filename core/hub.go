@@ -519,6 +519,9 @@ func handleSetupConfig(params *SetupParams) string {
 
 func init() {
 	tunnel.ModeChangeHook = func(m tunnel.TunnelMode) {
+		if configValidationInProgress.Load() {
+			return
+		}
 		sendMessage(Message{
 			Type: ModeMessage,
 			Data: m.String(),

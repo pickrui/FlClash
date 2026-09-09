@@ -443,6 +443,91 @@ void main() {
     expect(merged.subscriptionInfo, refreshed.subscriptionInfo);
   });
 
+  test('metadata edits preserve newer subscription and personal state', () {
+    final original = Profile.normal(label: 'Subscription', url: 'original-url');
+    final current = original.copyWith(
+      lastUpdateDate: DateTime(2026, 9, 9),
+      subscriptionInfo: const SubscriptionInfo(total: 200),
+      overwriteType: OverwriteType.merge,
+      customProxyGroups: const [
+        ProxyGroup(name: 'Personal', type: GroupType.URLTest),
+      ],
+      customRules: const [Rule(id: 1, value: 'DOMAIN,video.example,Personal')],
+      selectedMap: const {'Subscription': 'Japan'},
+      unfoldSet: const {'Personal'},
+      currentGroupName: 'Personal',
+    );
+    final edited = original.copyWith(
+      label: 'Edited subscription',
+      autoUpdate: false,
+      autoUpdateDuration: const Duration(hours: 12),
+    );
+
+    final result = mergeProfileMetadata(current, edited);
+
+    expect(result.label, edited.label);
+    expect(result.url, edited.url);
+    expect(result.autoUpdate, edited.autoUpdate);
+    expect(result.autoUpdateDuration, edited.autoUpdateDuration);
+    expect(result.lastUpdateDate, current.lastUpdateDate);
+    expect(result.subscriptionInfo, current.subscriptionInfo);
+    expect(result.overwriteType, OverwriteType.merge);
+    expect(result.customProxyGroups, current.customProxyGroups);
+    expect(result.customRules, current.customRules);
+    expect(result.selectedMap, current.selectedMap);
+    expect(result.unfoldSet, current.unfoldSet);
+    expect(result.currentGroupName, current.currentGroupName);
+  });
+
+  group('profile persistence keeps personal settings', () {
+    final original = Profile.normal(label: 'Subscription', url: 'original-url');
+    final edited = original.copyWith(
+      label: 'Edited subscription',
+      url: 'edited-url',
+      autoUpdate: false,
+      autoUpdateDuration: const Duration(hours: 12),
+      lastUpdateDate: DateTime(2026, 9, 9),
+      subscriptionInfo: const SubscriptionInfo(total: 200),
+    );
+    final concurrent = original.copyWith(
+      overwriteType: OverwriteType.merge,
+      customProxyGroups: const [
+        ProxyGroup(name: 'Personal', type: GroupType.URLTest),
+      ],
+      customRules: const [Rule(id: 1, value: 'DOMAIN,video.example,Personal')],
+      selectedMap: const {'Subscription': 'Japan'},
+    );
+
+    for (final preserve in [true, false]) {
+      test(
+        'preserves concurrent overlay with preserveCurrentState=$preserve',
+        () {
+          final result = mergePersistedProfile(
+            concurrent,
+            edited,
+            preserveCurrentState: preserve,
+          );
+          expect(result.overwriteType, OverwriteType.merge);
+          expect(result.customProxyGroups, concurrent.customProxyGroups);
+          expect(result.customRules, concurrent.customRules);
+          expect(result.selectedMap, concurrent.selectedMap);
+          expect(result.lastUpdateDate, edited.lastUpdateDate);
+          expect(result.subscriptionInfo, edited.subscriptionInfo);
+          expect(result.label, preserve ? original.label : edited.label);
+          expect(result.url, preserve ? original.url : edited.url);
+          expect(
+            result.autoUpdate,
+            preserve ? original.autoUpdate : edited.autoUpdate,
+          );
+          expect(
+            result.autoUpdateDuration,
+            preserve ? original.autoUpdateDuration : edited.autoUpdateDuration,
+          );
+        },
+      );
+    }
+  });
+
   group('applyProfileAfterRefresh', () {
     test('awaits an immediate forced apply for the current profile', () async {
       final applyCompleter = Completer<void>();

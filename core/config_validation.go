@@ -6,9 +6,11 @@ import (
 	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	adapterProvider "github.com/metacubex/mihomo/adapter/provider"
 	mihomoYaml "github.com/metacubex/mihomo/common/yaml"
@@ -23,17 +25,27 @@ import (
 	metaTLS "github.com/metacubex/tls"
 )
 
-var configValidationMutex sync.Mutex
+var (
+	configValidationMutex      sync.Mutex
+	configValidationInProgress atomic.Bool
+)
 
 func parseAndValidateConfigData(data []byte) error {
 	configValidationMutex.Lock()
 	defer configValidationMutex.Unlock()
+	previousNames := slices.Clone(config.GetProxyNameList())
+	defer config.SetProxyNameList(previousNames)
+	configValidationInProgress.Store(true)
+	defer configValidationInProgress.Store(false)
 	previousForceSafePathCheck := constant.SetForceSafePathCheck(true)
 	defer constant.SetForceSafePathCheck(previousForceSafePathCheck)
 	rawConfig, err := prepareValidationConfig(data)
 	if err != nil {
 		return err
 	}
+	// Parsing a candidate must not open or initialize the live fake-IP cache.
+	// Persistence changes storage behavior, not configuration validity.
+	rawConfig.Profile.StoreFakeIP = false
 	rawConfig.GeoXUrl.GeoIp = "validator://disabled"
 	rawConfig.GeoXUrl.Mmdb = "validator://disabled"
 	rawConfig.GeoXUrl.ASN = "validator://disabled"

@@ -358,12 +358,14 @@ extension SetupStateExt on SetupState {
           return true;
         }
       }
-      if (overwriteType == OverwriteType.standard) {
+      if (overwriteType == OverwriteType.standard ||
+          overwriteType == OverwriteType.merge) {
         if (!ruleListEquality.equals(addedRules, lastSetupState.addedRules)) {
           return true;
         }
       }
-      if (overwriteType == OverwriteType.custom) {
+      if (overwriteType == OverwriteType.custom ||
+          overwriteType == OverwriteType.merge) {
         if (!proxyGroupsEquality.equals(
           customProxyGroups,
           lastSetupState.customProxyGroups,

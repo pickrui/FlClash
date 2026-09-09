@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:fl_clash/database/database.dart';
+import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/common/migration.dart';
 import 'package:test/test.dart';
 
@@ -39,6 +41,41 @@ void main() {
     expect(profile.customProxyGroups, isEmpty);
     expect(profile.customRules, isEmpty);
     expect(await database.select(database.profileRuleLinks).get(), isEmpty);
+  });
+
+  test('migrated v2 profiles retain personal routing after reopen', () async {
+    final tempDir = await Directory.systemTemp.createTemp(
+      'flclash_overlay_upgrade_',
+    );
+    addTearDown(() => tempDir.delete(recursive: true));
+    final file = File('${tempDir.path}/database.sqlite');
+    await _createV2Database(file);
+
+    final migrated = Database(NativeDatabase(file));
+    late final Profile edited;
+    try {
+      final legacy = await migrated.profilesDao.all().getSingle();
+      edited = legacy.copyWith(
+        overwriteType: OverwriteType.merge,
+        customProxyGroups: const [
+          ProxyGroup(
+            name: 'Personal',
+            type: GroupType.URLTest,
+            includeAllProxies: true,
+            filter: 'Japan|JP',
+            interval: 300,
+          ),
+        ],
+        customRules: const [Rule(id: 2, value: 'DOMAIN,example.com,Personal')],
+      );
+      await migrated.profiles.put(edited.toCompanion());
+    } finally {
+      await migrated.close();
+    }
+
+    final reopened = Database(NativeDatabase(file));
+    addTearDown(reopened.close);
+    expect(await reopened.profilesDao.all().getSingle(), edited);
   });
 
   for (final existingColumns in [

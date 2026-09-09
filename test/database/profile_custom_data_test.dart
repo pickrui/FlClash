@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/native.dart';
@@ -13,9 +14,19 @@ void main() {
     const profile = Profile(
       id: 1,
       label: 'Custom',
+      overwriteType: OverwriteType.merge,
       autoUpdateDuration: Duration(hours: 1),
       customProxyGroups: [
-        ProxyGroup(name: 'Auto', type: GroupType.URLTest, proxies: ['Proxy A']),
+        ProxyGroup(
+          name: 'Auto',
+          type: GroupType.URLTest,
+          proxies: ['Proxy A'],
+          use: ['Subscription'],
+          includeAllProxies: true,
+          filter: 'Japan|JP',
+          excludeFilter: 'expired',
+          interval: 300,
+        ),
       ],
       customRules: [Rule(id: 2, value: 'MATCH,Auto')],
     );
@@ -23,6 +34,8 @@ void main() {
     await database.profiles.put(profile.toCompanion());
     final restored = await database.profilesDao.all().getSingle();
 
+    expect(restored.overwriteType, OverwriteType.merge);
+    expect(Profile.fromJson(jsonDecode(jsonEncode(profile))), profile);
     expect(restored.customProxyGroups, profile.customProxyGroups);
     expect(restored.customRules, profile.customRules);
   });
@@ -47,8 +60,17 @@ void main() {
     const profile = Profile(
       id: 1,
       label: 'Snapshot',
+      overwriteType: OverwriteType.merge,
       autoUpdateDuration: Duration(hours: 1),
-      customRules: [Rule(id: 1, value: 'MATCH,DIRECT')],
+      customProxyGroups: [
+        ProxyGroup(
+          name: 'Japan',
+          type: GroupType.URLTest,
+          includeAllProxies: true,
+          filter: 'Japan|JP',
+        ),
+      ],
+      customRules: [Rule(id: 1, value: 'DOMAIN-SUFFIX,example.com,Japan')],
     );
     await source.profiles.put(profile.toCompanion());
 
@@ -58,8 +80,58 @@ void main() {
     addTearDown(snapshot.close);
 
     final restored = await snapshot.profilesDao.all().getSingle();
+    expect(restored.overwriteType, OverwriteType.merge);
+    expect(restored.customProxyGroups, profile.customProxyGroups);
     expect(restored.customRules, profile.customRules);
   });
+
+  for (final isOverride in [false, true]) {
+    test(
+      'portable overlay backup restores with override=$isOverride',
+      () async {
+        final database = Database(NativeDatabase.memory());
+        addTearDown(database.close);
+        const original = Profile(
+          id: 1,
+          label: 'Portable overlay',
+          autoUpdateDuration: Duration(hours: 1),
+          overwriteType: OverwriteType.merge,
+          selectedMap: {'Personal': 'Node'},
+          customProxyGroups: [
+            ProxyGroup(
+              name: 'Personal',
+              type: GroupType.URLTest,
+              proxies: ['Node'],
+              use: ['Subscription'],
+              includeAllProxies: true,
+              filter: 'Japan|JP',
+              interval: 300,
+            ),
+          ],
+          customRules: [Rule(id: 2, value: 'DOMAIN,example.com,Personal')],
+        );
+        final portable = Profile.fromJson(jsonDecode(jsonEncode(original)));
+        await database.profiles.put(
+          original
+              .copyWith(
+                label: 'Stale local version',
+                overwriteType: OverwriteType.standard,
+                customProxyGroups: [],
+                customRules: [],
+              )
+              .toCompanion(),
+        );
+
+        await database.restore([portable], [], [], [], isOverride: isOverride);
+
+        // An override restore rebuilds profile ordering from backup order.
+        expect(
+          await database.profilesDao.all().getSingle(),
+          isOverride ? original.copyWith(order: 0) : original,
+        );
+      },
+    );
+  }
 
   test('empty override restore clears existing data', () async {
     final database = Database(NativeDatabase.memory());

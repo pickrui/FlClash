@@ -1057,6 +1057,7 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
       widget.profileId,
       name,
       includeTopLevelRules: profile?.overwriteType != OverwriteType.custom,
+      includeProxyGroups: profile?.overwriteType != OverwriteType.custom,
     );
   }
 
