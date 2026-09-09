@@ -3554,6 +3554,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Custom override is empty. Use Quick fill or add rules and proxy groups first. To keep subscription content, use Overlay mode.`
+  String get emptyCustomOverwrite {
+    return Intl.message(
+      'Custom override is empty. Use Quick fill or add rules and proxy groups first. To keep subscription content, use Overlay mode.',
+      name: 'emptyCustomOverwrite',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Proxy group is empty`
   String get proxyGroupEmpty {
     return Intl.message(
@@ -3602,6 +3612,26 @@ class AppLocalizations {
   /// `Quick fill`
   String get quickFill {
     return Intl.message('Quick fill', name: 'quickFill', desc: '', args: []);
+  }
+
+  /// `Clear all`
+  String get clearCustomRouting {
+    return Intl.message(
+      'Clear all',
+      name: 'clearCustomRouting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clear this profile’s custom proxy groups and rules? Subscription content, added rules, proxy chains, and custom nodes will be kept.`
+  String get confirmClearCustomRouting {
+    return Intl.message(
+      'Clear this profile’s custom proxy groups and rules? Subscription content, added rules, proxy chains, and custom nodes will be kept.',
+      name: 'confirmClearCustomRouting',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Add proxy group`
@@ -5884,6 +5914,26 @@ class AppLocalizations {
     return Intl.message(
       'This configuration changed while it was being edited or checked. Reopen the editor or check it again.',
       name: 'routingChanged',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Edit custom routing`
+  String get editCustomRouting {
+    return Intl.message(
+      'Edit custom routing',
+      name: 'editCustomRouting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Fill in your custom routing, then switch to Custom mode. Editing this draft does not change the current mode.`
+  String get customRoutingDraftHint {
+    return Intl.message(
+      'Fill in your custom routing, then switch to Custom mode. Editing this draft does not change the current mode.',
+      name: 'customRoutingDraftHint',
       desc: '',
       args: [],
     );

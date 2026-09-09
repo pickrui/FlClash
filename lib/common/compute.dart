@@ -91,15 +91,23 @@ SelectedProxyState _getRealSelectedProxyState(
   }
   final groupTestUrl = group.testUrl?.trim();
   final inheritedTestUrl = newState.testUrl?.trim();
+  final selectedState = newState.copyWith(
+    proxyName: currentSelectedName,
+    testUrl: groupTestUrl != null && groupTestUrl.isNotEmpty
+        ? groupTestUrl
+        : (inheritedTestUrl != null && inheritedTestUrl.isNotEmpty
+              ? inheritedTestUrl
+              : null),
+  );
+  final memberIndex = group.all.indexWhere(
+    (proxy) => proxy.name == currentSelectedName,
+  );
+  if (memberIndex != -1 &&
+      !GroupTypeExtension.valueList.contains(group.all[memberIndex].type)) {
+    return selectedState;
+  }
   return _getRealSelectedProxyState(
-    newState.copyWith(
-      proxyName: currentSelectedName,
-      testUrl: groupTestUrl != null && groupTestUrl.isNotEmpty
-          ? groupTestUrl
-          : (inheritedTestUrl != null && inheritedTestUrl.isNotEmpty
-                ? inheritedTestUrl
-                : null),
-    ),
+    selectedState,
     groups: groups,
     selectedMap: selectedMap,
     visited: visited,

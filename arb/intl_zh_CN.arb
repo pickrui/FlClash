@@ -448,12 +448,15 @@
   "resetPageChangesTip": "当前页面存在更改，确定重置吗？",
   "overwriteTypeCustom": "自定义",
   "overwriteTypeCustomDesc": "自定义模式，支持完全自定义修改代理组以及规则",
+  "emptyCustomOverwrite": "自定义覆写内容为空，请先一键填入或添加规则和策略组；如需保留订阅内容，请使用叠加模式",
   "proxyGroupEmpty": "策略组为空",
   "proxyGroupNameEmpty": "策略组名称不能为空",
   "ruleEmpty": "规则为空",
   "confirmOverwriteTip": "确定后将会覆盖已有数据",
   "configDataDetected": "检测到配置中存在数据",
   "quickFill": "一键填入",
+  "clearCustomRouting": "一键清空",
+  "confirmClearCustomRouting": "清空当前配置的自定义策略组和规则？订阅内容、附加规则、链式代理和自定义节点将保留",
   "addProxyGroup": "添加策略组",
   "editProxyGroup": "编辑策略组",
   "lazy": "延迟加载",
@@ -703,5 +706,7 @@
   "groupTypeLoadBalanceHint": "将连接分配到可用成员",
   "routingGroupType": "策略组类型",
   "customRuleType": "规则类型",
-  "routingChanged": "编辑或检查期间配置发生变化，请重新打开编辑器或再次检查"
+  "routingChanged": "编辑或检查期间配置发生变化，请重新打开编辑器或再次检查",
+  "editCustomRouting": "编辑自定义",
+  "customRoutingDraftHint": "先填写自定义内容，再切换至自定义模式。编辑草稿不会切换当前模式"
 }

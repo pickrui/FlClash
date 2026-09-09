@@ -63,8 +63,9 @@ Future<List<Group>> _toGroupsTask(ComputeGroupsState state) async {
       })
       .map((groupName) {
         final group = Map<String, dynamic>.from(proxies[groupName]);
+        final members = proxiesData.groupMembers[groupName];
         group['all'] = ((group['all'] ?? []) as List)
-            .map((name) => proxies[name])
+            .map((name) => members?[name]?.toJson() ?? proxies[name])
             .where((proxy) => proxy != null)
             .toList();
         return group;
@@ -96,6 +97,13 @@ class OverlayNameConflictException extends FormatException {
 
   OverlayNameConflictException(this.name)
     : super('personal proxy group name is already in use: $name');
+}
+
+/// An unconfigured replacement would discard the subscription's routing.
+/// The core accepts empty groups and rules, so check this before validation.
+class EmptyCustomOverwriteException extends FormatException {
+  const EmptyCustomOverwriteException()
+    : super('custom overwrite has no proxy groups or rules');
 }
 
 void _mergeCustomProxyGroups(
@@ -230,6 +238,15 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
   final profileProxies = data.profileProxies;
   final customProxyGroups = data.customProxyGroups;
   final customRules = data.customRules;
+  if (data.overwriteType == OverwriteType.custom &&
+      customProxyGroups.isEmpty &&
+      customRules.isEmpty &&
+      ['proxy-groups', 'rules'].any((key) {
+        final value = rawConfig[key];
+        return value is List && value.isNotEmpty;
+      })) {
+    throw const EmptyCustomOverwriteException();
+  }
   final appendSystemDns = data.appendSystemDns;
   final defaultUA = data.defaultUA;
   final blockQuic = data.blockQuic;

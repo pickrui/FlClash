@@ -1,6 +1,10 @@
 package main
 
-import "time"
+import (
+	"time"
+
+	"github.com/metacubex/mihomo/tunnel/statistic"
+)
 
 const (
 	messageBatchInterval = 16 * time.Millisecond
@@ -16,6 +20,11 @@ var (
 
 func init() {
 	go runMessageBatcher(priorityMessageQueue, bulkMessageQueue, sendMessageBatch)
+}
+
+// Request events need metadata and live counters, not the underlying connection.
+func requestMessage(tracker statistic.Tracker) Message {
+	return Message{Type: RequestMessage, Data: tracker.Info()}
 }
 
 func sendMessage(message Message) {
@@ -55,6 +64,8 @@ func runMessageBatcher(
 			return
 		}
 		send(append([]Message(nil), batch...))
+		// Reslicing alone keeps payloads reachable while the batcher is idle.
+		clear(batch)
 		batch = batch[:0]
 	}
 	appendMessage := func(message Message) {

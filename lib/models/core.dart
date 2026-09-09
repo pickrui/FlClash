@@ -181,6 +181,7 @@ abstract class ProxiesData with _$ProxiesData {
   const factory ProxiesData({
     required Map<String, dynamic> proxies,
     required List<String> all,
+    @Default({}) Map<String, Map<String, Proxy>> groupMembers,
   }) = _ProxiesData;
 
   factory ProxiesData.fromJson(Map<String, Object?> json) =>

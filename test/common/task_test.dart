@@ -114,6 +114,61 @@ void main() {
     ]);
   });
 
+  test(
+    'toGroupsTask uses scoped members when provider nodes share group names',
+    () async {
+      final groups = await toGroupsTask(
+        ComputeGroupsState(
+          proxiesData: ProxiesData.fromJson({
+            'proxies': {
+              'Personal': {
+                'name': 'Personal',
+                'type': 'Selector',
+                'now': 'Personal',
+                'all': ['Personal'],
+                'hidden': false,
+                'icon': 'custom-icon',
+                'testUrl': 'https://example.test/check',
+              },
+              'Nested': {
+                'name': 'Nested',
+                'type': 'Selector',
+                'now': 'Personal',
+                'all': ['Personal'],
+              },
+            },
+            'all': ['Personal', 'Nested'],
+            'groupMembers': {
+              'Personal': {
+                'Personal': {'name': 'Personal', 'type': 'Shadowsocks'},
+              },
+            },
+          }),
+          sortType: ProxiesSortType.none,
+          delayMap: {},
+          selectedMap: {},
+          defaultTestUrl: '',
+        ),
+      );
+
+      final personal = groups.first;
+      expect(personal.name, 'Personal');
+      expect(personal.type, GroupType.Selector);
+      expect(personal.now, 'Personal');
+      expect(personal.hidden, false);
+      expect(personal.icon, 'custom-icon');
+      expect(personal.testUrl, 'https://example.test/check');
+      expect(
+        personal.all.single,
+        const Proxy(name: 'Personal', type: 'Shadowsocks'),
+      );
+      expect(
+        groups.last.all.single,
+        const Proxy(name: 'Personal', type: 'Selector', now: 'Personal'),
+      );
+    },
+  );
+
   group('extractBackupArchive', () {
     test('extracts regular files inside the staging directory', () async {
       final tempDir = await Directory.systemTemp.createTemp('extract_safe_');
@@ -1154,8 +1209,8 @@ void main() {
     },
   );
 
-  test('custom mode can explicitly clear proxy groups and rules', () async {
-    final result = await makeRealProfileTask(
+  test('an empty custom draft cannot erase subscription routing', () async {
+    final result = makeRealProfileTask(
       const MakeRealProfileState(
         profilesPath: '/profiles',
         profileId: 1,
@@ -1182,8 +1237,7 @@ void main() {
       ),
     );
 
-    expect(result['proxy-groups'], isEmpty);
-    expect(result['rules'], isEmpty);
+    await expectLater(result, throwsA(isA<EmptyCustomOverwriteException>()));
   });
 }
 

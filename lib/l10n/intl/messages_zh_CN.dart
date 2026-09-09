@@ -211,6 +211,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "checkingPayment": MessageLookupByLibrary.simpleMessage("检测中..."),
     "chooseMembers": MessageLookupByLibrary.simpleMessage("选择成员"),
+    "clearCustomRouting": MessageLookupByLibrary.simpleMessage("一键清空"),
     "clearData": MessageLookupByLibrary.simpleMessage("清除数据"),
     "clearProxyChain": MessageLookupByLibrary.simpleMessage("删除链式配置"),
     "clipboardExport": MessageLookupByLibrary.simpleMessage("导出剪贴板"),
@@ -243,6 +244,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "confirm": MessageLookupByLibrary.simpleMessage("确定"),
     "confirmClearAllData": MessageLookupByLibrary.simpleMessage("确定要清除所有数据？"),
+    "confirmClearCustomRouting": MessageLookupByLibrary.simpleMessage(
+      "清空当前配置的自定义策略组和规则？订阅内容、附加规则、链式代理和自定义节点将保留",
+    ),
     "confirmForceCrashCore": MessageLookupByLibrary.simpleMessage("确定要强制崩溃核心？"),
     "confirmOverwriteTip": MessageLookupByLibrary.simpleMessage("确定后将会覆盖已有数据"),
     "confirmPasswordHint": MessageLookupByLibrary.simpleMessage("请再次输入密码"),
@@ -269,6 +273,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "creationTime": MessageLookupByLibrary.simpleMessage("创建时间"),
     "custom": MessageLookupByLibrary.simpleMessage("自定义"),
     "customOutboundInUse": m3,
+    "customRoutingDraftHint": MessageLookupByLibrary.simpleMessage(
+      "先填写自定义内容，再切换至自定义模式。编辑草稿不会切换当前模式",
+    ),
     "customRuleChooseProvider": MessageLookupByLibrary.simpleMessage("选择规则集"),
     "customRuleChooseTarget": MessageLookupByLibrary.simpleMessage("选择目标策略"),
     "customRuleDomainSuffixHint": MessageLookupByLibrary.simpleMessage(
@@ -344,6 +351,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "earlyRenew": MessageLookupByLibrary.simpleMessage("提前续费"),
     "edit": MessageLookupByLibrary.simpleMessage("编辑"),
+    "editCustomRouting": MessageLookupByLibrary.simpleMessage("编辑自定义"),
     "editGlobalRules": MessageLookupByLibrary.simpleMessage("编辑全局规则"),
     "editProxyGroup": MessageLookupByLibrary.simpleMessage("编辑策略组"),
     "editRule": MessageLookupByLibrary.simpleMessage("编辑规则"),
@@ -358,6 +366,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "emergencyMode": MessageLookupByLibrary.simpleMessage("应急模式"),
     "emergencyModeDesc": MessageLookupByLibrary.simpleMessage(
       "当常规线路不可用时，请开启此选项切换备用节点",
+    ),
+    "emptyCustomOverwrite": MessageLookupByLibrary.simpleMessage(
+      "自定义覆写内容为空，请先一键填入或添加规则和策略组；如需保留订阅内容，请使用叠加模式",
     ),
     "emptyTip": m11,
     "en": MessageLookupByLibrary.simpleMessage("英语"),

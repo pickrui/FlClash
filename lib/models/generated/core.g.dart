@@ -259,7 +259,21 @@ Map<String, dynamic> _$ExternalProviderToJson(_ExternalProvider instance) =>
 _ProxiesData _$ProxiesDataFromJson(Map<String, dynamic> json) => _ProxiesData(
   proxies: json['proxies'] as Map<String, dynamic>,
   all: (json['all'] as List<dynamic>).map((e) => e as String).toList(),
+  groupMembers:
+      (json['groupMembers'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(
+          k,
+          (e as Map<String, dynamic>).map(
+            (k, e) => MapEntry(k, Proxy.fromJson(e as Map<String, dynamic>)),
+          ),
+        ),
+      ) ??
+      const {},
 );
 
 Map<String, dynamic> _$ProxiesDataToJson(_ProxiesData instance) =>
-    <String, dynamic>{'proxies': instance.proxies, 'all': instance.all};
+    <String, dynamic>{
+      'proxies': instance.proxies,
+      'all': instance.all,
+      'groupMembers': instance.groupMembers,
+    };

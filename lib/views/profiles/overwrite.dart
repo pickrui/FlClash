@@ -87,7 +87,7 @@ class _OverwriteViewState extends ConsumerState<OverwriteView> {
       ],
       body: CustomScrollView(
         slivers: [
-          _Title(widget.profileId),
+          OverwriteModeSelector(profileId: widget.profileId),
           if (ref.watch(
                 patchClashConfigProvider.select((config) => config.mode),
               ) !=
@@ -118,10 +118,35 @@ class _OverwriteViewState extends ConsumerState<OverwriteView> {
   }
 }
 
-class _Title extends ConsumerWidget {
+class OverwriteModeSelector extends ConsumerStatefulWidget {
   final int profileId;
 
-  const _Title(this.profileId);
+  @visibleForTesting
+  final Future<String> Function(WidgetRef, Profile) validator;
+
+  const OverwriteModeSelector({
+    super.key,
+    required this.profileId,
+    this.validator = validateCustomRoutingDraft,
+  });
+
+  @override
+  ConsumerState<OverwriteModeSelector> createState() =>
+      _OverwriteModeSelectorState();
+}
+
+class _OverwriteModeSelectorState extends ConsumerState<OverwriteModeSelector> {
+  OverwriteType? _checkingType;
+  int _validationId = 0;
+
+  @override
+  void didUpdateWidget(covariant OverwriteModeSelector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.profileId != widget.profileId) {
+      _validationId++;
+      _checkingType = null;
+    }
+  }
 
   String _getTitle(OverwriteType type) {
     return switch (type) {
@@ -150,16 +175,57 @@ class _Title extends ConsumerWidget {
     };
   }
 
-  void _handleChangeType(WidgetRef ref, OverwriteType type) {
-    if (ref.read(overwriteTypeProvider(profileId)) == type) return;
+  void _showError(String error) {
+    globalState.showMessage(
+      context: context,
+      message: TextSpan(text: error),
+    );
+  }
+
+  Future<void> _handleChangeType(OverwriteType type) async {
+    final profileId = widget.profileId;
+    final original = ref.read(profileProvider(profileId));
+    if (_checkingType != null ||
+        original == null ||
+        original.overwriteType == type) {
+      return;
+    }
+    final validationId = ++_validationId;
+    if (type == OverwriteType.custom || type == OverwriteType.merge) {
+      setState(() => _checkingType = type);
+      try {
+        final error = await widget.validator(
+          ref,
+          original.copyWith(overwriteType: type),
+        );
+        if (!mounted || validationId != _validationId) return;
+        if (ref.read(profileProvider(profileId)) != original) {
+          _showError(appLocalizations.routingChanged);
+          return;
+        }
+        if (error.isNotEmpty) {
+          _showError(error);
+          return;
+        }
+      } catch (error) {
+        if (mounted && validationId == _validationId) {
+          _showError(error.toString());
+        }
+        return;
+      } finally {
+        if (mounted && validationId == _validationId) {
+          setState(() => _checkingType = null);
+        }
+      }
+    }
     ref.read(profilesProvider.notifier).updateProfile(profileId, (state) {
       return state.copyWith(overwriteType: type);
     });
   }
 
   @override
-  Widget build(context, ref) {
-    final overwriteType = ref.watch(overwriteTypeProvider(profileId));
+  Widget build(BuildContext context) {
+    final overwriteType = ref.watch(overwriteTypeProvider(widget.profileId));
     return SliverToBoxAdapter(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -178,17 +244,25 @@ class _Title extends ConsumerWidget {
                   OverwriteType.script,
                 ])
                   CommonCard(
+                    key: ValueKey('overwrite-mode-${type.name}'),
                     isSelected: overwriteType == type,
-                    onPressed: () {
-                      _handleChangeType(ref, type);
-                    },
+                    onPressed: _checkingType != null
+                        ? null
+                        : () => _handleChangeType(type),
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          Icon(_getIcon(type)),
+                          if (_checkingType == type)
+                            const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          else
+                            Icon(_getIcon(type)),
                           const SizedBox(width: 8),
                           Flexible(child: Text(_getTitle(type))),
                         ],
@@ -208,6 +282,21 @@ class _Title extends ConsumerWidget {
               ),
             ),
           ),
+          if (overwriteType != OverwriteType.custom)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextButton.icon(
+                key: const Key('edit-custom-routing'),
+                onPressed: _checkingType != null
+                    ? null
+                    : () => BaseNavigator.push(
+                        context,
+                        CustomOverwriteDraftView(profileId: widget.profileId),
+                      ),
+                icon: const Icon(Icons.edit_outlined),
+                label: Text(appLocalizations.editCustomRouting),
+              ),
+            ),
         ],
       ),
     );

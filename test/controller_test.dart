@@ -344,6 +344,17 @@ void main() {
       );
     });
 
+    test('keeps forwarding when a refresh fails after successful setup', () {
+      expect(
+        shouldStopCoreAfterApplyFailure(
+          isRunning: true,
+          candidateValidationFailed: false,
+          coreSetupSucceeded: true,
+        ),
+        false,
+      );
+    });
+
     test('stops a running core after an actual setup failure', () {
       expect(
         shouldStopCoreAfterApplyFailure(

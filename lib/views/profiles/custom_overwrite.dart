@@ -13,6 +13,30 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+class CustomOverwriteDraftView extends StatelessWidget {
+  final int profileId;
+
+  const CustomOverwriteDraftView({super.key, required this.profileId});
+
+  @override
+  Widget build(BuildContext context) {
+    return CommonScaffold(
+      title: context.appLocalizations.editCustomRouting,
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: Text(context.appLocalizations.customRoutingDraftHint),
+            ),
+          ),
+          CustomOverwriteContent(profileId: profileId),
+        ],
+      ),
+    );
+  }
+}
+
 class CustomOverwriteContent extends ConsumerWidget {
   final int profileId;
 
@@ -24,15 +48,53 @@ class CustomOverwriteContent extends ConsumerWidget {
     this.merge = false,
   });
 
-  Future<void> _quickFill(BuildContext context, WidgetRef ref) async {
+  bool _hasSameRouting(Profile original, Profile? latest) {
+    return latest != null &&
+        latest.overwriteType == original.overwriteType &&
+        latest.lastUpdateDate == original.lastUpdateDate &&
+        latest.url == original.url &&
+        proxyGroupsEquality.equals(
+          latest.customProxyGroups,
+          original.customProxyGroups,
+        ) &&
+        ruleListEquality.equals(latest.customRules, original.customRules);
+  }
+
+  Future<void> _clear(BuildContext context, WidgetRef ref) async {
+    final original = ref.read(profileProvider(profileId));
+    if (original == null ||
+        (original.customProxyGroups.isEmpty && original.customRules.isEmpty)) {
+      return;
+    }
     final confirmed = await globalState.showMessage(
+      context: context,
+      message: TextSpan(text: appLocalizations.confirmClearCustomRouting),
+      confirmText: appLocalizations.clearCustomRouting,
+    );
+    if (confirmed != true || !context.mounted) return;
+    if (!_hasSameRouting(original, ref.read(profileProvider(profileId)))) {
+      context.showNotifier(appLocalizations.routingChanged);
+      return;
+    }
+    ref.read(profilesProvider.notifier).updateProfile(profileId, (profile) {
+      return profile.copyWith(customProxyGroups: [], customRules: []);
+    });
+  }
+
+  Future<void> _quickFill(BuildContext context, WidgetRef ref) async {
+    final original = ref.read(profileProvider(profileId));
+    if (original == null) return;
+    final confirmed = await globalState.showMessage(
+      context: context,
       message: TextSpan(text: appLocalizations.confirmOverwriteTip),
     );
     if (confirmed != true || !context.mounted) {
       return;
     }
-    final original = ref.read(profileProvider(profileId));
-    if (original == null) return;
+    if (!_hasSameRouting(original, ref.read(profileProvider(profileId)))) {
+      context.showNotifier(appLocalizations.routingChanged);
+      return;
+    }
     await appController.safeRun<void>(() async {
       final rawConfig = await appController.getRawProfileConfig(profileId);
       if (!context.mounted) {
@@ -55,15 +117,7 @@ class CustomOverwriteContent extends ConsumerWidget {
         }
       }
       final latest = ref.read(profileProvider(profileId));
-      if (latest == null ||
-          latest.overwriteType != original.overwriteType ||
-          latest.lastUpdateDate != original.lastUpdateDate ||
-          latest.url != original.url ||
-          !proxyGroupsEquality.equals(
-            latest.customProxyGroups,
-            original.customProxyGroups,
-          ) ||
-          !ruleListEquality.equals(latest.customRules, original.customRules)) {
+      if (!_hasSameRouting(original, latest)) {
         globalState.showNotifier(appLocalizations.routingChanged);
         return;
       }
@@ -85,11 +139,35 @@ class CustomOverwriteContent extends ConsumerWidget {
       slivers: [
         const SliverToBoxAdapter(child: SizedBox(height: 24)),
         SliverToBoxAdapter(
-          child: InfoHeader(
-            info: Info(
-              label: merge
-                  ? appLocalizations.personalRouting
-                  : appLocalizations.custom,
+          child: LayoutBuilder(
+            builder: (context, constraints) => InfoHeader(
+              info: Info(
+                label: merge
+                    ? appLocalizations.personalRouting
+                    : appLocalizations.custom,
+              ),
+              actions: [
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: constraints.maxWidth / 2,
+                  ),
+                  child: Tooltip(
+                    message: appLocalizations.clearCustomRouting,
+                    child: TextButton.icon(
+                      key: const Key('clear-custom-routing'),
+                      onPressed: groups.isEmpty && rules.isEmpty
+                          ? null
+                          : () => _clear(context, ref),
+                      icon: const Icon(Icons.delete_sweep_outlined),
+                      label: Text(
+                        appLocalizations.clearCustomRouting,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),

@@ -181,9 +181,19 @@ func handleGetProxies() ProxiesData {
 	for name, proxy := range tunnel.Proxies() {
 		proxies[name] = proxy
 	}
-	for _, p := range tunnel.Providers() {
-		for _, proxy := range p.Proxies() {
-			proxies[proxy.Name()] = proxy
+	providers := tunnel.Providers()
+	providerNames := make([]string, 0, len(providers))
+	for name := range providers {
+		providerNames = append(providerNames, name)
+	}
+	slices.Sort(providerNames)
+	for _, name := range providerNames {
+		for _, proxy := range providers[name].Proxies() {
+			// Provider nodes have their own namespace. They must not replace a
+			// top-level group (including GLOBAL) or its selectable snapshot.
+			if _, exists := proxies[proxy.Name()]; !exists {
+				proxies[proxy.Name()] = proxy
+			}
 		}
 	}
 	publishProxySnapshot(proxies)
@@ -213,9 +223,53 @@ func handleGetProxies() ProxiesData {
 		}
 	}
 
+	var groupMembers map[string]map[string]ProxyGroupMember
+	for _, name := range allNames {
+		group, ok := proxies[name].Adapter().(interface{ Proxies() []constant.Proxy })
+		if !ok {
+			continue
+		}
+		// Resolve ambiguous names from each live group, after its provider
+		// ordering and filters. Keep ordinary snapshots flat and compact.
+		members := group.Proxies()
+		hasAmbiguousMember := false
+		for _, member := range members {
+			if proxies[member.Name()] != member {
+				hasAmbiguousMember = true
+				break
+			}
+		}
+		if !hasAmbiguousMember {
+			continue
+		}
+		seen := make(map[string]struct{})
+		for _, member := range members {
+			memberName := member.Name()
+			if _, exists := seen[memberName]; exists {
+				continue
+			}
+			seen[memberName] = struct{}{}
+			if proxies[memberName] == member {
+				continue
+			}
+			data := ProxyGroupMember{Name: memberName, Type: member.Type().String()}
+			if selected, ok := member.Adapter().(interface{ Now() string }); ok {
+				data.Now = selected.Now()
+			}
+			if groupMembers == nil {
+				groupMembers = make(map[string]map[string]ProxyGroupMember)
+			}
+			if groupMembers[name] == nil {
+				groupMembers[name] = make(map[string]ProxyGroupMember)
+			}
+			groupMembers[name][memberName] = data
+		}
+	}
+
 	return ProxiesData{
-		All:     allNames,
-		Proxies: proxies,
+		All:          allNames,
+		Proxies:      proxies,
+		GroupMembers: groupMembers,
 	}
 }
 
@@ -538,10 +592,7 @@ func init() {
 		})
 	}
 	statistic.DefaultRequestNotify = func(c statistic.Tracker) {
-		sendMessage(Message{
-			Type: RequestMessage,
-			Data: c,
-		})
+		sendMessage(requestMessage(c))
 	}
 	executor.DefaultProviderLoadedHook = func(providerName string) {
 		sendMessage(Message{

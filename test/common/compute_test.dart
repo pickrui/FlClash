@@ -55,7 +55,7 @@ void main() {
           type: GroupType.Selector,
           testUrl: 'http://test-a.com',
           all: [
-            Proxy(name: 'group-b', type: 'ss'),
+            Proxy(name: 'group-b', type: 'URLTest'),
             Proxy(name: 'proxy-x', type: 'ss'),
           ],
         ),
@@ -160,6 +160,27 @@ void main() {
       );
       expect(state.proxyName, 'proxy-b');
     });
+
+    for (final type in ['Shadowsocks', 'Selector']) {
+      test('distinguishes a same-name $type member from a group cycle', () {
+        final state = computeRealSelectedProxyState(
+          'Personal',
+          groups: [
+            Group(
+              name: 'Personal',
+              type: GroupType.Selector,
+              testUrl: 'https://example.test/check',
+              now: 'Personal',
+              all: [Proxy(name: 'Personal', type: type)],
+            ),
+          ],
+          selectedMap: const {'Personal': 'Personal'},
+        );
+
+        expect(state.proxyName, type == 'Shadowsocks' ? 'Personal' : '');
+        expect(state.testUrl, 'https://example.test/check');
+      });
+    }
 
     test('returns an empty target for a cyclic selection chain', () {
       final state = computeRealSelectedProxyState(

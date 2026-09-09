@@ -292,6 +292,92 @@ void main() {
     expect((rawConfig['proxy-groups'] as List).single['proxies'], ['DIRECT']);
   });
 
+  for (final raw in <Map<String, dynamic>>[
+    {
+      'proxy-groups': [
+        {
+          'name': 'Subscription',
+          'type': 'select',
+          'proxies': ['DIRECT'],
+        },
+      ],
+      'rules': ['MATCH,Subscription'],
+    },
+    {
+      'rules': ['MATCH,REJECT'],
+    },
+    {
+      'proxy-groups': [
+        {
+          'name': 'Subscription',
+          'type': 'select',
+          'proxies': ['DIRECT'],
+        },
+      ],
+    },
+  ]) {
+    test('empty replacement rejects existing routing: ${raw.keys}', () async {
+      await expectLater(
+        makeRealProfileTask(
+          overlayState(rawConfig: raw, overwriteType: OverwriteType.custom),
+        ),
+        throwsA(isA<EmptyCustomOverwriteException>()),
+      );
+    });
+  }
+
+  test('an empty replacement accepts an already empty profile', () async {
+    final result = await makeRealProfileTask(
+      overlayState(
+        rawConfig: const {'proxy-groups': [], 'rules': []},
+        overwriteType: OverwriteType.custom,
+      ),
+    );
+    expect(result['proxy-groups'], isEmpty);
+    expect(result['rules'], isEmpty);
+  });
+
+  test('rule-only replacement keeps its intentional routing', () async {
+    final result = await makeRealProfileTask(
+      overlayState(
+        rawConfig: const {
+          'proxy-groups': [
+            {
+              'name': 'Subscription',
+              'type': 'select',
+              'proxies': ['DIRECT'],
+            },
+          ],
+          'rules': ['MATCH,Subscription'],
+        },
+        overwriteType: OverwriteType.custom,
+        rules: const [Rule(id: 1, value: 'MATCH,REJECT')],
+      ),
+    );
+    expect(result['proxy-groups'], isEmpty);
+    expect(result['rules'], ['MATCH,REJECT']);
+  });
+
+  test('group-only replacement keeps its intentional routing', () async {
+    final result = await makeRealProfileTask(
+      overlayState(
+        rawConfig: const {
+          'rules': ['MATCH,DIRECT'],
+        },
+        overwriteType: OverwriteType.custom,
+        groups: const [
+          ProxyGroup(
+            name: 'Personal',
+            type: GroupType.Selector,
+            proxies: ['REJECT'],
+          ),
+        ],
+      ),
+    );
+    expect((result['proxy-groups'] as List).single['name'], 'Personal');
+    expect(result['rules'], isEmpty);
+  });
+
   test('replace mode still replaces subscription groups and rules', () async {
     const replacement = ProxyGroup(
       name: 'Subscription',

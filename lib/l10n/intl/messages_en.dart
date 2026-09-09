@@ -283,6 +283,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "checkingPayment": MessageLookupByLibrary.simpleMessage("Checking..."),
     "chooseMembers": MessageLookupByLibrary.simpleMessage("Choose members"),
+    "clearCustomRouting": MessageLookupByLibrary.simpleMessage("Clear all"),
     "clearData": MessageLookupByLibrary.simpleMessage("Clear Data"),
     "clearProxyChain": MessageLookupByLibrary.simpleMessage(
       "Clear chain config",
@@ -327,6 +328,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "confirmClearAllData": MessageLookupByLibrary.simpleMessage(
       "Are you sure you want to clear all data?",
     ),
+    "confirmClearCustomRouting": MessageLookupByLibrary.simpleMessage(
+      "Clear this profile’s custom proxy groups and rules? Subscription content, added rules, proxy chains, and custom nodes will be kept.",
+    ),
     "confirmForceCrashCore": MessageLookupByLibrary.simpleMessage(
       "Are you sure you want to force crash the core?",
     ),
@@ -369,6 +373,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "creationTime": MessageLookupByLibrary.simpleMessage("Creation time"),
     "custom": MessageLookupByLibrary.simpleMessage("Custom"),
     "customOutboundInUse": m3,
+    "customRoutingDraftHint": MessageLookupByLibrary.simpleMessage(
+      "Fill in your custom routing, then switch to Custom mode. Editing this draft does not change the current mode.",
+    ),
     "customRuleChooseProvider": MessageLookupByLibrary.simpleMessage(
       "Choose a rule provider",
     ),
@@ -470,6 +477,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "earlyRenew": MessageLookupByLibrary.simpleMessage("Early renewal"),
     "edit": MessageLookupByLibrary.simpleMessage("Edit"),
+    "editCustomRouting": MessageLookupByLibrary.simpleMessage(
+      "Edit custom routing",
+    ),
     "editGlobalRules": MessageLookupByLibrary.simpleMessage(
       "Edit global rules",
     ),
@@ -494,6 +504,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "emergencyMode": MessageLookupByLibrary.simpleMessage("Emergency Mode"),
     "emergencyModeDesc": MessageLookupByLibrary.simpleMessage(
       "Enable this option to switch to backup nodes when regular lines are unavailable",
+    ),
+    "emptyCustomOverwrite": MessageLookupByLibrary.simpleMessage(
+      "Custom override is empty. Use Quick fill or add rules and proxy groups first. To keep subscription content, use Overlay mode.",
     ),
     "emptyTip": m11,
     "en": MessageLookupByLibrary.simpleMessage("English"),

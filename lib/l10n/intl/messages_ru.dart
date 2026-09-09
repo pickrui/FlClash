@@ -289,6 +289,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "checkingPayment": MessageLookupByLibrary.simpleMessage("Проверка..."),
     "chooseMembers": MessageLookupByLibrary.simpleMessage("Выбрать участников"),
+    "clearCustomRouting": MessageLookupByLibrary.simpleMessage("Очистить всё"),
     "clearData": MessageLookupByLibrary.simpleMessage("Очистить данные"),
     "clearProxyChain": MessageLookupByLibrary.simpleMessage(
       "Удалить настройку цепочки",
@@ -341,6 +342,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "confirmClearAllData": MessageLookupByLibrary.simpleMessage(
       "Вы уверены, что хотите очистить все данные?",
     ),
+    "confirmClearCustomRouting": MessageLookupByLibrary.simpleMessage(
+      "Очистить пользовательские группы прокси и правила текущего профиля? Содержимое подписки, добавленные правила, цепочки прокси и пользовательские узлы сохранятся.",
+    ),
     "confirmForceCrashCore": MessageLookupByLibrary.simpleMessage(
       "Вы уверены, что хотите принудительно аварийно завершить работу ядра?",
     ),
@@ -385,6 +389,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "creationTime": MessageLookupByLibrary.simpleMessage("Время создания"),
     "custom": MessageLookupByLibrary.simpleMessage("Пользовательский"),
     "customOutboundInUse": m3,
+    "customRoutingDraftHint": MessageLookupByLibrary.simpleMessage(
+      "Заполните свои настройки маршрутизации, затем выберите режим «Пользовательский». Редактирование черновика не меняет текущий режим.",
+    ),
     "customRuleChooseProvider": MessageLookupByLibrary.simpleMessage(
       "Выберите источник правил",
     ),
@@ -486,6 +493,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "earlyRenew": MessageLookupByLibrary.simpleMessage("Досрочное продление"),
     "edit": MessageLookupByLibrary.simpleMessage("Редактировать"),
+    "editCustomRouting": MessageLookupByLibrary.simpleMessage(
+      "Изменить свои настройки",
+    ),
     "editGlobalRules": MessageLookupByLibrary.simpleMessage(
       "Редактировать глобальные правила",
     ),
@@ -514,6 +524,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "emergencyMode": MessageLookupByLibrary.simpleMessage("Аварийный режим"),
     "emergencyModeDesc": MessageLookupByLibrary.simpleMessage(
       "Включите эту опцию для переключения на резервные узлы, когда обычные линии недоступны",
+    ),
+    "emptyCustomOverwrite": MessageLookupByLibrary.simpleMessage(
+      "Пользовательское переопределение пусто. Используйте быстрое заполнение или добавьте правила и группы прокси. Чтобы сохранить содержимое подписки, выберите режим «Дополнение».",
     ),
     "emptyTip": m11,
     "en": MessageLookupByLibrary.simpleMessage("Английский"),

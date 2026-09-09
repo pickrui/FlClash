@@ -86,9 +86,16 @@ type ExternalProvider struct {
 	SubscriptionInfo *provider.SubscriptionInfo `json:"subscription-info"`
 }
 
+type ProxyGroupMember struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
+	Now  string `json:"now,omitempty"`
+}
+
 type ProxiesData struct {
-	Proxies map[string]constant.Proxy `json:"proxies"`
-	All     []string                  `json:"all"`
+	Proxies      map[string]constant.Proxy              `json:"proxies"`
+	All          []string                               `json:"all"`
+	GroupMembers map[string]map[string]ProxyGroupMember `json:"groupMembers,omitempty"`
 }
 
 const (

@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"sync"
 
 	"github.com/metacubex/mihomo/adapter"
@@ -338,19 +339,26 @@ func updateConfig(params *UpdateParams) {
 func applyConfig(params *SetupParams) error {
 	runLock.Lock()
 	defer runLock.Unlock()
-	stopGeoScheduler()
 	var err error
+	var candidate *config.Config
+	previousNames := slices.Clone(config.GetProxyNameList())
+	previousTestURL := constant.DefaultTestURL
 	isoixConfig := params.RawConfig != ""
 	constant.DefaultTestURL = params.TestURL
 	if isoixConfig {
 		applyDNSAuth()
-		currentConfig, err = executor.ParseWithBytes([]byte(params.RawConfig))
+		candidate, err = executor.ParseWithBytes([]byte(params.RawConfig))
 	} else {
-		currentConfig, isoixConfig, err = parseConfigPath(filepath.Join(constant.Path.HomeDir(), "config.yaml"))
+		candidate, isoixConfig, err = parseConfigPath(filepath.Join(constant.Path.HomeDir(), "config.yaml"))
 	}
 	if err != nil {
-		currentConfig, _ = config.ParseRawConfig(config.DefaultRawConfig())
+		config.SetProxyNameList(previousNames)
+		constant.DefaultTestURL = previousTestURL
+		return err
 	}
+	// Commit only a fully parsed candidate; failed edits leave live routing intact.
+	stopGeoScheduler()
+	currentConfig = candidate
 	setMaskedAddrs(isoixConfig)
 	// Config loading owns all tunnel status transitions until ApplyConfig returns.
 	idleOwnsTunnelSuspend = false

@@ -165,8 +165,9 @@ String? _configValueTypeLabel(String rawType, AppLocalizations localizations) {
 bool shouldStopCoreAfterApplyFailure({
   required bool isRunning,
   required bool candidateValidationFailed,
+  bool coreSetupSucceeded = false,
 }) {
-  return isRunning && !candidateValidationFailed;
+  return isRunning && !candidateValidationFailed && !coreSetupSucceeded;
 }
 
 bool canPublishGroupsForProfile(int? profileId, SetupState? appliedState) {
@@ -2003,8 +2004,10 @@ extension SetupControllerExt on AppController {
     final startGeneration = _startIntentGeneration;
     bool canRecover() =>
         isCurrentApply() && startGeneration == _startIntentGeneration;
+    final previouslyAppliedState = globalState.lastSetupState;
     var keepCurrentCore = false;
     var setupAttempted = false;
+    var coreSetupSucceeded = false;
     final res = await loadingRun<bool>(
       () async {
         try {
@@ -2042,6 +2045,9 @@ extension SetupControllerExt on AppController {
           keepCurrentCore = !setupAttempted;
           rethrow;
         }
+        // The running config is valid now. A later UI/provider refresh failure
+        // must not turn off forwarding or discard this profile's usable groups.
+        coreSetupSucceeded = true;
         if (!isCurrentApply()) {
           return true;
         }
@@ -2049,7 +2055,10 @@ extension SetupControllerExt on AppController {
           if (!isCurrentApply()) {
             return true;
           }
-          _ref.read(groupsProvider.notifier).value = [];
+          if (!canPublishGroupsForProfile(profileId, previouslyAppliedState)) {
+            // Groups from another subscription must not be shown as current.
+            _ref.read(groupsProvider.notifier).value = [];
+          }
           if (!_ref.read(initProvider)) return false;
           throw appLocalizations.noProxy;
         }
@@ -2095,10 +2104,13 @@ extension SetupControllerExt on AppController {
         shouldStopCoreAfterApplyFailure(
           isRunning: _ref.read(isStartProvider),
           candidateValidationFailed: keepCurrentCore,
+          coreSetupSucceeded: coreSetupSucceeded,
         )) {
       await updateStatus(false);
     }
-    return res == true;
+    // Callers such as updateStatus also stop on false. Refreshing UI metadata
+    // is best-effort once setup (including listener startup) has succeeded.
+    return res == true || coreSetupSucceeded;
   }
 
   Future<Map<String, dynamic>> getProfile({
@@ -2180,6 +2192,8 @@ extension SetupControllerExt on AppController {
       return await res;
     } on OverlayNameConflictException catch (error) {
       throw FormatException(appLocalizations.overlayNameConflict(error.name));
+    } on EmptyCustomOverwriteException {
+      throw FormatException(appLocalizations.emptyCustomOverwrite);
     }
   }
 

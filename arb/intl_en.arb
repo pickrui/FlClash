@@ -448,12 +448,15 @@
   "resetPageChangesTip": "The current page has changes. Are you sure you want to reset?",
   "overwriteTypeCustom": "Custom",
   "overwriteTypeCustomDesc": "Custom mode, fully customize proxy groups and rules",
+  "emptyCustomOverwrite": "Custom override is empty. Use Quick fill or add rules and proxy groups first. To keep subscription content, use Overlay mode.",
   "proxyGroupEmpty": "Proxy group is empty",
   "proxyGroupNameEmpty": "Proxy group name cannot be empty",
   "ruleEmpty": "Rule is empty",
   "confirmOverwriteTip": "Existing data will be overwritten after confirmation",
   "configDataDetected": "Data detected in configuration",
   "quickFill": "Quick fill",
+  "clearCustomRouting": "Clear all",
+  "confirmClearCustomRouting": "Clear this profile’s custom proxy groups and rules? Subscription content, added rules, proxy chains, and custom nodes will be kept.",
   "addProxyGroup": "Add proxy group",
   "editProxyGroup": "Edit proxy group",
   "lazy": "Lazy loading",
@@ -703,5 +706,7 @@
   "groupTypeLoadBalanceHint": "Distribute connections across available members.",
   "routingGroupType": "Group type",
   "customRuleType": "Rule type",
-  "routingChanged": "This configuration changed while it was being edited or checked. Reopen the editor or check it again."
+  "routingChanged": "This configuration changed while it was being edited or checked. Reopen the editor or check it again.",
+  "editCustomRouting": "Edit custom routing",
+  "customRoutingDraftHint": "Fill in your custom routing, then switch to Custom mode. Editing this draft does not change the current mode."
 }

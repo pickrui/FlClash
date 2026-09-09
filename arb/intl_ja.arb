@@ -448,12 +448,15 @@
   "resetPageChangesTip": "現在のページに変更があります。リセットしてもよろしいですか？",
   "overwriteTypeCustom": "カスタム",
   "overwriteTypeCustomDesc": "カスタムモード、プロキシグループとルールを完全にカスタマイズ可能",
+  "emptyCustomOverwrite": "カスタム上書きが空です。クイック入力を使うか、ルールとプロキシグループを追加してください。サブスクリプションの内容を保つには、追加モードを使ってください",
   "proxyGroupEmpty": "プロキシグループが空です",
   "proxyGroupNameEmpty": "プロキシグループ名は空にできません",
   "ruleEmpty": "ルールが空です",
   "confirmOverwriteTip": "確認後、既存のデータは上書きされます",
   "configDataDetected": "設定内にデータが検出されました",
   "quickFill": "クイック入力",
+  "clearCustomRouting": "一括クリア",
+  "confirmClearCustomRouting": "このプロファイルのカスタムプロキシグループとルールを消去しますか？サブスクリプションの内容、追加ルール、プロキシチェーン、カスタムノードは保持されます",
   "addProxyGroup": "プロキシグループを追加",
   "editProxyGroup": "プロキシグループを編集",
   "lazy": "遅延読み込み",
@@ -703,5 +706,7 @@
   "groupTypeLoadBalanceHint": "接続を利用可能なメンバーに分散します",
   "routingGroupType": "グループの種類",
   "customRuleType": "ルールの種類",
-  "routingChanged": "編集中または確認中に設定が変更されました。エディターを開き直すか、再度確認してください"
+  "routingChanged": "編集中または確認中に設定が変更されました。エディターを開き直すか、再度確認してください",
+  "editCustomRouting": "カスタム設定を編集",
+  "customRoutingDraftHint": "カスタム設定を入力してから、カスタムモードに切り替えてください。下書きの編集では現在のモードは変わりません"
 }

@@ -33,7 +33,7 @@ GroupsState currentGroupsState(Ref ref) {
       Mode.global => groups.toList(),
       Mode.rule =>
         groups
-            .where((item) => item.hidden == false)
+            .where((item) => item.hidden != true)
             .where((element) => element.name != GroupName.GLOBAL.name)
             .toList(),
     },

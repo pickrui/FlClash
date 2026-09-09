@@ -3384,7 +3384,7 @@ $SubscriptionInfoCopyWith<$Res>? get subscriptionInfo {
 /// @nodoc
 mixin _$ProxiesData {
 
- Map<String, dynamic> get proxies; List<String> get all;
+ Map<String, dynamic> get proxies; List<String> get all; Map<String, Map<String, Proxy>> get groupMembers;
 /// Create a copy of ProxiesData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -3397,16 +3397,16 @@ $ProxiesDataCopyWith<ProxiesData> get copyWith => _$ProxiesDataCopyWithImpl<Prox
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProxiesData&&const DeepCollectionEquality().equals(other.proxies, proxies)&&const DeepCollectionEquality().equals(other.all, all));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProxiesData&&const DeepCollectionEquality().equals(other.proxies, proxies)&&const DeepCollectionEquality().equals(other.all, all)&&const DeepCollectionEquality().equals(other.groupMembers, groupMembers));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(proxies),const DeepCollectionEquality().hash(all));
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(proxies),const DeepCollectionEquality().hash(all),const DeepCollectionEquality().hash(groupMembers));
 
 @override
 String toString() {
-  return 'ProxiesData(proxies: $proxies, all: $all)';
+  return 'ProxiesData(proxies: $proxies, all: $all, groupMembers: $groupMembers)';
 }
 
 
@@ -3417,7 +3417,7 @@ abstract mixin class $ProxiesDataCopyWith<$Res>  {
   factory $ProxiesDataCopyWith(ProxiesData value, $Res Function(ProxiesData) _then) = _$ProxiesDataCopyWithImpl;
 @useResult
 $Res call({
- Map<String, dynamic> proxies, List<String> all
+ Map<String, dynamic> proxies, List<String> all, Map<String, Map<String, Proxy>> groupMembers
 });
 
 
@@ -3434,11 +3434,12 @@ class _$ProxiesDataCopyWithImpl<$Res>
 
 /// Create a copy of ProxiesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? proxies = null,Object? all = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? proxies = null,Object? all = null,Object? groupMembers = null,}) {
   return _then(_self.copyWith(
 proxies: null == proxies ? _self.proxies : proxies // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>,all: null == all ? _self.all : all // ignore: cast_nullable_to_non_nullable
-as List<String>,
+as List<String>,groupMembers: null == groupMembers ? _self.groupMembers : groupMembers // ignore: cast_nullable_to_non_nullable
+as Map<String, Map<String, Proxy>>,
   ));
 }
 
@@ -3523,10 +3524,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Map<String, dynamic> proxies,  List<String> all)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Map<String, dynamic> proxies,  List<String> all,  Map<String, Map<String, Proxy>> groupMembers)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ProxiesData() when $default != null:
-return $default(_that.proxies,_that.all);case _:
+return $default(_that.proxies,_that.all,_that.groupMembers);case _:
   return orElse();
 
 }
@@ -3544,10 +3545,10 @@ return $default(_that.proxies,_that.all);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Map<String, dynamic> proxies,  List<String> all)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Map<String, dynamic> proxies,  List<String> all,  Map<String, Map<String, Proxy>> groupMembers)  $default,) {final _that = this;
 switch (_that) {
 case _ProxiesData():
-return $default(_that.proxies,_that.all);case _:
+return $default(_that.proxies,_that.all,_that.groupMembers);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -3564,10 +3565,10 @@ return $default(_that.proxies,_that.all);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Map<String, dynamic> proxies,  List<String> all)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Map<String, dynamic> proxies,  List<String> all,  Map<String, Map<String, Proxy>> groupMembers)?  $default,) {final _that = this;
 switch (_that) {
 case _ProxiesData() when $default != null:
-return $default(_that.proxies,_that.all);case _:
+return $default(_that.proxies,_that.all,_that.groupMembers);case _:
   return null;
 
 }
@@ -3579,7 +3580,7 @@ return $default(_that.proxies,_that.all);case _:
 @JsonSerializable()
 
 class _ProxiesData implements ProxiesData {
-  const _ProxiesData({required final  Map<String, dynamic> proxies, required final  List<String> all}): _proxies = proxies,_all = all;
+  const _ProxiesData({required final  Map<String, dynamic> proxies, required final  List<String> all, final  Map<String, Map<String, Proxy>> groupMembers = const {}}): _proxies = proxies,_all = all,_groupMembers = groupMembers;
   factory _ProxiesData.fromJson(Map<String, dynamic> json) => _$ProxiesDataFromJson(json);
 
  final  Map<String, dynamic> _proxies;
@@ -3596,6 +3597,13 @@ class _ProxiesData implements ProxiesData {
   return EqualUnmodifiableListView(_all);
 }
 
+ final  Map<String, Map<String, Proxy>> _groupMembers;
+@override@JsonKey() Map<String, Map<String, Proxy>> get groupMembers {
+  if (_groupMembers is EqualUnmodifiableMapView) return _groupMembers;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_groupMembers);
+}
+
 
 /// Create a copy of ProxiesData
 /// with the given fields replaced by the non-null parameter values.
@@ -3610,16 +3618,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProxiesData&&const DeepCollectionEquality().equals(other._proxies, _proxies)&&const DeepCollectionEquality().equals(other._all, _all));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProxiesData&&const DeepCollectionEquality().equals(other._proxies, _proxies)&&const DeepCollectionEquality().equals(other._all, _all)&&const DeepCollectionEquality().equals(other._groupMembers, _groupMembers));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_proxies),const DeepCollectionEquality().hash(_all));
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_proxies),const DeepCollectionEquality().hash(_all),const DeepCollectionEquality().hash(_groupMembers));
 
 @override
 String toString() {
-  return 'ProxiesData(proxies: $proxies, all: $all)';
+  return 'ProxiesData(proxies: $proxies, all: $all, groupMembers: $groupMembers)';
 }
 
 
@@ -3630,7 +3638,7 @@ abstract mixin class _$ProxiesDataCopyWith<$Res> implements $ProxiesDataCopyWith
   factory _$ProxiesDataCopyWith(_ProxiesData value, $Res Function(_ProxiesData) _then) = __$ProxiesDataCopyWithImpl;
 @override @useResult
 $Res call({
- Map<String, dynamic> proxies, List<String> all
+ Map<String, dynamic> proxies, List<String> all, Map<String, Map<String, Proxy>> groupMembers
 });
 
 
@@ -3647,11 +3655,12 @@ class __$ProxiesDataCopyWithImpl<$Res>
 
 /// Create a copy of ProxiesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? proxies = null,Object? all = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? proxies = null,Object? all = null,Object? groupMembers = null,}) {
   return _then(_ProxiesData(
 proxies: null == proxies ? _self._proxies : proxies // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>,all: null == all ? _self._all : all // ignore: cast_nullable_to_non_nullable
-as List<String>,
+as List<String>,groupMembers: null == groupMembers ? _self._groupMembers : groupMembers // ignore: cast_nullable_to_non_nullable
+as Map<String, Map<String, Proxy>>,
   ));
 }
 

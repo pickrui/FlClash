@@ -36,6 +36,18 @@ Future<String> validateCustomRoutingDraft(
   Profile profile,
 ) async {
   try {
+    if (profile.overwriteType == OverwriteType.custom &&
+        profile.customProxyGroups.isEmpty &&
+        profile.customRules.isEmpty) {
+      return appLocalizations.emptyCustomOverwrite;
+    }
+    if ((profile.overwriteType == OverwriteType.custom ||
+            profile.overwriteType == OverwriteType.merge) &&
+        profile.customProxyGroups.any(
+          (group) => group.type == GroupType.Relay,
+        )) {
+      return appLocalizations.relayGroupUnsupported;
+    }
     // Capture the editor's configuration before yielding: its WidgetRef may
     // already be disposed when the core finishes connecting.
     final context = ref.context;

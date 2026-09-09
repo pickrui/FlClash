@@ -222,6 +222,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "checkingPayment": MessageLookupByLibrary.simpleMessage("確認中..."),
     "chooseMembers": MessageLookupByLibrary.simpleMessage("メンバーを選択"),
+    "clearCustomRouting": MessageLookupByLibrary.simpleMessage("一括クリア"),
     "clearData": MessageLookupByLibrary.simpleMessage("データを消去"),
     "clearProxyChain": MessageLookupByLibrary.simpleMessage("チェーン設定を削除"),
     "clipboardExport": MessageLookupByLibrary.simpleMessage("クリップボードにエクスポート"),
@@ -258,6 +259,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "confirmClearAllData": MessageLookupByLibrary.simpleMessage(
       "すべてのデータをクリアしてもよろしいですか？",
     ),
+    "confirmClearCustomRouting": MessageLookupByLibrary.simpleMessage(
+      "このプロファイルのカスタムプロキシグループとルールを消去しますか？サブスクリプションの内容、追加ルール、プロキシチェーン、カスタムノードは保持されます",
+    ),
     "confirmForceCrashCore": MessageLookupByLibrary.simpleMessage(
       "コアを強制的にクラッシュさせてもよろしいですか？",
     ),
@@ -292,6 +296,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "creationTime": MessageLookupByLibrary.simpleMessage("作成時間"),
     "custom": MessageLookupByLibrary.simpleMessage("カスタム"),
     "customOutboundInUse": m3,
+    "customRoutingDraftHint": MessageLookupByLibrary.simpleMessage(
+      "カスタム設定を入力してから、カスタムモードに切り替えてください。下書きの編集では現在のモードは変わりません",
+    ),
     "customRuleChooseProvider": MessageLookupByLibrary.simpleMessage(
       "ルールプロバイダーを選択",
     ),
@@ -373,6 +380,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "earlyRenew": MessageLookupByLibrary.simpleMessage("早期更新"),
     "edit": MessageLookupByLibrary.simpleMessage("編集"),
+    "editCustomRouting": MessageLookupByLibrary.simpleMessage("カスタム設定を編集"),
     "editGlobalRules": MessageLookupByLibrary.simpleMessage("グローバルルールを編集"),
     "editProxyGroup": MessageLookupByLibrary.simpleMessage("プロキシグループを編集"),
     "editRule": MessageLookupByLibrary.simpleMessage("ルールを編集"),
@@ -391,6 +399,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "emergencyMode": MessageLookupByLibrary.simpleMessage("緊急モード"),
     "emergencyModeDesc": MessageLookupByLibrary.simpleMessage(
       "通常の回線が利用できないときに、このオプションを有効にしてバックアップノードに切り替えてください",
+    ),
+    "emptyCustomOverwrite": MessageLookupByLibrary.simpleMessage(
+      "カスタム上書きが空です。クイック入力を使うか、ルールとプロキシグループを追加してください。サブスクリプションの内容を保つには、追加モードを使ってください",
     ),
     "emptyTip": m11,
     "en": MessageLookupByLibrary.simpleMessage("英語"),

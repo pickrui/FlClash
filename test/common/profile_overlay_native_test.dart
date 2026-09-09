@@ -53,6 +53,7 @@ void main() {
       }
 
       Future<Map<String, dynamic>> candidate({
+        OverwriteType overwriteType = OverwriteType.merge,
         List<ProxyGroup> groups = const [],
         List<Rule> rules = const [],
         List<Rule> addedRules = const [],
@@ -81,6 +82,7 @@ void main() {
             ],
             'rules': ['MATCH,Subscription'],
           },
+          overwriteType: overwriteType,
           groups: groups,
           rules: rules,
           addedRules: addedRules,
@@ -236,6 +238,56 @@ void main() {
         skip: routingChecker == null
             ? 'Set FLCLASH_TEST_ROUTING_CHECKER to a compiled core test binary'
             : false,
+      );
+
+      test(
+        'validates the complete replacement before entering custom mode',
+        () async {
+          final config = await candidate(
+            overwriteType: OverwriteType.custom,
+            groups: const [
+              ProxyGroup(
+                name: 'Personal',
+                type: GroupType.Selector,
+                proxies: ['Japan fixture'],
+              ),
+            ],
+            rules: const [Rule(id: 1, value: 'MATCH,Personal')],
+          );
+          expect(
+            (config['proxy-groups'] as List).map((group) => group['name']),
+            ['Personal'],
+          );
+          expect(config['rules'], ['MATCH,Personal']);
+          final (exitCode, error) = await validate(config);
+          expect(exitCode, 0, reason: error);
+        },
+      );
+
+      test(
+        'custom mode rejects targets that only exist in the original mode',
+        () async {
+          const rules = [Rule(id: 1, value: 'MATCH,Subscription')];
+          final original = await candidate(rules: rules);
+          final (originalCode, originalError) = await validate(original);
+          expect(originalCode, 0, reason: originalError);
+
+          final replacement = await candidate(
+            overwriteType: OverwriteType.custom,
+            groups: const [
+              ProxyGroup(
+                name: 'Personal',
+                type: GroupType.Selector,
+                proxies: ['Japan fixture'],
+              ),
+            ],
+            rules: rules,
+          );
+          final (exitCode, error) = await validate(replacement);
+          expect(exitCode, 2);
+          expect(error, contains('Subscription'));
+          expect(error, contains('not found'));
+        },
       );
 
       test('rejects a personal group with an unavailable member', () async {

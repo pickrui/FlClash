@@ -2,9 +2,12 @@ package main
 
 import (
 	"errors"
+	"slices"
 	"testing"
 
+	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/tunnel"
 )
 
 type testSelectable struct {
@@ -116,5 +119,47 @@ func TestLogSubscriptionLifecycle(t *testing.T) {
 	handleStopLog()
 	if logSubscriber != nil {
 		t.Fatal("log subscription was not cleared")
+	}
+}
+
+func TestApplyConfigRejectsCandidateWithoutReplacingLiveRouting(t *testing.T) {
+	setValidationTestHome(t)
+	previousConfig, previousURL := currentConfig, constant.DefaultTestURL
+	previousNames := slices.Clone(config.GetProxyNameList())
+	t.Cleanup(func() {
+		currentConfig = previousConfig
+		constant.DefaultTestURL = previousURL
+		config.SetProxyNameList(previousNames)
+	})
+	active := &config.Config{General: &config.General{}}
+	active.General.MixedPort = 12345
+	currentConfig = active
+	activeNames := []string{"Active"}
+	config.SetProxyNameList(activeNames)
+	activeProxies := tunnel.Proxies()
+	for _, candidate := range []string{
+		"proxy-groups: [",
+		"proxy-groups: [{name: Candidate, type: select, proxies: [DIRECT]}]\nrules: ['MATCH,Missing']",
+	} {
+		params := defaultSetupParams()
+		params.RawConfig = candidate
+		params.TestURL = "https://candidate.invalid/check"
+		if err := applyConfig(params); err == nil {
+			t.Fatal("invalid candidate accepted")
+		}
+		if currentConfig != active {
+			t.Fatal("failed candidate replaced active config")
+		}
+		if constant.DefaultTestURL != previousURL {
+			t.Fatal("failed candidate changed test URL")
+		}
+		if !slices.Equal(config.GetProxyNameList(), activeNames) {
+			t.Fatal("failed candidate changed group order")
+		}
+		for name, proxy := range activeProxies {
+			if tunnel.Proxies()[name] != proxy {
+				t.Fatalf("failed candidate replaced proxy %s", name)
+			}
+		}
 	}
 }
