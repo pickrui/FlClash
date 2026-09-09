@@ -627,7 +627,7 @@ class BuildCommand extends Command {
     await Build.exec(
       name: name,
       Build.getExecutable(
-        'flutter build apk --no-pub --obfuscate --split-debug-info=build/debug-symbols/android --split-per-abi --target-platform $targetPlatform $dartDefines',
+        'flutter build apk --no-pub --obfuscate --split-debug-info=build/debug-symbols/android --target-platform $targetPlatform $dartDefines',
       ),
     );
 
@@ -643,7 +643,7 @@ class BuildCommand extends Command {
         'app',
         'outputs',
         'flutter-apk',
-        'app-$archName-release.apk',
+        'app-release.apk',
       ),
     );
     if (await sourceApk.exists()) {
@@ -788,7 +788,7 @@ class BuildCommand extends Command {
             target: target,
             targets: 'apk',
             args:
-                ",split-per-abi --build-target-platform ${defaultTargets.join(",")}",
+                " --build-target-platform ${defaultTargets.join(",")}",
             env: env,
           );
         }
