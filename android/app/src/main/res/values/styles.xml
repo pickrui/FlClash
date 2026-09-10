@@ -15,9 +15,7 @@
         <item name="android:windowBackground">?android:colorBackground</item>
         <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="o_mr1">shortEdges</item>
     </style>
-    <style name="TransparentTheme" parent="Theme.AppCompat.NoActionBar">
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowIsTranslucent">true</item>
-    </style>
+    <!-- Quick actions finish in onCreate; they must not show a window, preview,
+         or transition, including when launched from an existing pinned shortcut. -->
+    <style name="QuickActionTheme" parent="@android:style/Theme.NoDisplay" />
 </resources>
