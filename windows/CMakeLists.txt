@@ -57,6 +57,18 @@ add_subdirectory("runner")
 # them to the application.
 include(flutter/generated_plugins.cmake)
 
+include(window_manager_patch.cmake)
+get_target_property(WINDOW_MANAGER_SOURCE_DIR window_manager_plugin SOURCE_DIR)
+set(WINDOW_MANAGER_PATCH_DIR "${CMAKE_CURRENT_BINARY_DIR}/window_manager_patched")
+flclash_patch_window_manager(
+  "${WINDOW_MANAGER_SOURCE_DIR}" "${WINDOW_MANAGER_PATCH_DIR}")
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+  "${WINDOW_MANAGER_SOURCE_DIR}/window_manager.cpp")
+set_property(TARGET window_manager_plugin PROPERTY SOURCES
+  "${WINDOW_MANAGER_PATCH_DIR}/window_manager.cpp"
+  "${WINDOW_MANAGER_PATCH_DIR}/window_manager_plugin.cpp")
+target_include_directories(window_manager_plugin PRIVATE "${WINDOW_MANAGER_SOURCE_DIR}")
+
 # === Installation ===
 # Support files are copied into place next to the executable, so that it can
 # run in place. This is done instead of making a separate bundle (as on Linux)
