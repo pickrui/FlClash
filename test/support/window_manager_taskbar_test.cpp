@@ -7,12 +7,52 @@
 
 using HRESULT = int32_t;
 using HWND = void*;
+using DWORD = uint32_t;
 constexpr HRESULT kSuccess = 0;
 constexpr HRESULT kFailure = -1;
 constexpr int CLSID_TaskbarList = 1;
 constexpr int CLSCTX_INPROC_SERVER = 1;
 constexpr int TBPF_INDETERMINATE = 1;
 constexpr int TBPF_NOPROGRESS = 0;
+constexpr int SW_HIDE = 0;
+constexpr int SW_SHOWNORMAL = 1;
+constexpr int SW_SHOWMINIMIZED = 2;
+constexpr int SW_SHOW = 5;
+constexpr int GWL_STYLE = -16;
+constexpr DWORD WS_VISIBLE = 0x10000000;
+constexpr int SWP_NOSIZE = 0x0001;
+constexpr int SWP_NOMOVE = 0x0002;
+constexpr int SWP_NOZORDER = 0x0004;
+constexpr int SWP_NOACTIVATE = 0x0010;
+constexpr int SWP_SHOWWINDOW = 0x0040;
+constexpr int SWP_HIDEWINDOW = 0x0080;
+const HWND HWND_TOP = nullptr;
+
+bool window_visible = false;
+bool window_minimized = false;
+bool first_show = true;
+int launcher_show_command = SW_SHOWNORMAL;
+int activation_calls = 0;
+
+DWORD GetWindowLong(HWND, int) { return window_visible ? WS_VISIBLE : 0; }
+void SetWindowLong(HWND, int, DWORD style) {
+  window_visible = (style & WS_VISIBLE) != 0;
+}
+void SetWindowPos(HWND, HWND, int, int, int, int, int flags) {
+  if ((flags & SWP_SHOWWINDOW) != 0) window_visible = true;
+  if ((flags & SWP_HIDEWINDOW) != 0) window_visible = false;
+  if ((flags & SWP_NOACTIVATE) == 0) ++activation_calls;
+}
+void ShowWindow(HWND, int command) {
+  if (first_show) {
+    command = launcher_show_command;
+    first_show = false;
+  }
+  window_visible = command != SW_HIDE;
+  window_minimized = command == SW_SHOWMINIMIZED;
+}
+void ShowWindowAsync(HWND window, int command) { ShowWindow(window, command); }
+void SetForegroundWindow(HWND) { ++activation_calls; }
 
 bool FAILED(HRESULT result) { return result < 0; }
 #define IID_PPV_ARGS(pointer) pointer
@@ -68,6 +108,8 @@ class WindowManager {
   void WaitUntilReadyToShow();
   void SetSkipTaskbar(const flutter::EncodableMap& args);
   void SetProgressBar(const flutter::EncodableMap& args);
+  void Show();
+  void Hide();
 };
 
 #include "window_manager_methods.inc"
@@ -142,6 +184,22 @@ int main(int argument_count, char** arguments) {
     manager.WaitUntilReadyToShow();
     Require(creation_calls == 1 && taskbar.initialization_calls == 1,
             "Ready interface was initialized more than once");
+  } else if (scenario == "startup_hide") {
+    manager.Hide();
+    Require(!window_visible, "First hide must not use the launcher show command");
+    Require(activation_calls == 0, "Silent startup must not activate the window");
+    manager.Show();
+    Require(window_visible, "Manual opening after silent startup must show");
+    manager.Hide();
+    Require(!window_visible, "Closing must hide the visible window");
+  } else if (scenario == "startup_show_hidden" ||
+             scenario == "startup_show_minimized") {
+    launcher_show_command = scenario == "startup_show_hidden"
+                                ? SW_HIDE
+                                : SW_SHOWMINIMIZED;
+    manager.Show();
+    Require(window_visible, "Manual opening must ignore launcher hiding");
+    Require(!window_minimized, "Manual opening must ignore launcher minimization");
   } else {
     Require(false, "Unknown test scenario");
   }

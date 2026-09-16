@@ -51,7 +51,43 @@ void WindowManager::WaitUntilReadyToShow() {
   taskbar_->SetProgressState(hWnd, TBPF_INDETERMINATE);
 ]=])
 
-  foreach(patch initialization visibility progress)
+  set(show_window_before [=[
+void WindowManager::Show() {
+  HWND hWnd = GetMainWindow();
+  DWORD gwlStyle = GetWindowLong(hWnd, GWL_STYLE);
+  gwlStyle = gwlStyle | WS_VISIBLE;
+  if ((gwlStyle & WS_VISIBLE) == 0) {
+    SetWindowLong(hWnd, GWL_STYLE, gwlStyle);
+    ::SetWindowPos(hWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+  }
+
+  ShowWindowAsync(GetMainWindow(), SW_SHOW);
+  SetForegroundWindow(GetMainWindow());
+}
+]=])
+  set(show_window_after [=[
+void WindowManager::Show() {
+  HWND hWnd = GetMainWindow();
+  ::SetWindowPos(hWnd, HWND_TOP, 0, 0, 0, 0,
+                 SWP_NOSIZE | SWP_NOMOVE | SWP_SHOWWINDOW);
+  ::SetForegroundWindow(hWnd);
+}
+]=])
+
+  set(hide_window_before [=[
+void WindowManager::Hide() {
+  ShowWindow(GetMainWindow(), SW_HIDE);
+}
+]=])
+  set(hide_window_after [=[
+void WindowManager::Hide() {
+  ::SetWindowPos(GetMainWindow(), nullptr, 0, 0, 0, 0,
+                 SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE |
+                     SWP_HIDEWINDOW);
+}
+]=])
+
+  foreach(patch initialization visibility progress show_window hide_window)
     string(FIND "${source}" "${${patch}_before}" match_position)
     if(match_position EQUAL -1)
       message(FATAL_ERROR

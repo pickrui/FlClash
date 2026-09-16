@@ -65,6 +65,9 @@ void main() {
       final definition = method.single.group(0)!;
       if (visibilityNames.contains(name)) {
         visibilityMethods.add(definition);
+        if (name == 'Show' || name == 'Hide') {
+          methods.add(definition);
+        }
       } else {
         methods.add(definition);
       }
@@ -120,6 +123,9 @@ endif()
     'early_visibility',
     'early_progress',
     'repeated_initialization',
+    'startup_hide',
+    'startup_show_hidden',
+    'startup_show_minimized',
   ]) {
     test('Windows window manager: $scenario', () async {
       await run(executable, [scenario]);

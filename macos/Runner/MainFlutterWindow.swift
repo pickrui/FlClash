@@ -17,6 +17,12 @@ class MainFlutterWindow: NSWindow {
             switch call.method {
             case "launchAtStartupIsEnabled":
                 result(LaunchAtLogin.isEnabled)
+            case "launchAtStartupWasLaunchedAtLogin":
+                guard let delegate = NSApp.delegate as? AppDelegate else {
+                    result(false)
+                    return
+                }
+                delegate.resolveLaunchAtLogin(result)
             case "launchAtStartupSetEnabled":
                 if let arguments = call.arguments as? [String: Any] {
                     LaunchAtLogin.isEnabled = arguments["setEnabledValue"] as! Bool

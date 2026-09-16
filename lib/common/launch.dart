@@ -2,12 +2,29 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:launch_at_startup/launch_at_startup.dart';
 
 import 'constant.dart';
 import 'system.dart';
 
 const silentLaunchArgument = '--silent-launch';
+
+Future<List<String>> resolveLaunchArguments({
+  required List<String> arguments,
+  required bool isMacOS,
+}) async {
+  if (!isMacOS || arguments.contains(silentLaunchArgument)) {
+    return List.unmodifiable(arguments);
+  }
+  final launchedAtLogin = await const MethodChannel(
+    'launch_at_startup',
+  ).invokeMethod<bool>('launchAtStartupWasLaunchedAtLogin');
+  return List.unmodifiable([
+    ...arguments,
+    if (launchedAtLogin == true) silentLaunchArgument,
+  ]);
+}
 
 bool shouldLaunchSilently({
   required bool enabled,

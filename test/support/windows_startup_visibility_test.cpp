@@ -58,6 +58,7 @@ void CheckChild(int show_command) {
 
   WindowManager manager(window);
   manager.Hide();
+  Require(!IsWindowVisible(window), "First silent hide became visible");
   manager.Hide();
   Require(!IsWindowVisible(window), "Silent launch became visible");
   // Match Window._showWindow and window_manager's Dart show wrapper.

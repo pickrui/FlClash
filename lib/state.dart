@@ -88,7 +88,10 @@ class GlobalState {
     List<String> arguments = const [],
     Future<Map<String, Object?>?> Function()? loadConfig,
   }) async {
-    launchArguments = List.unmodifiable(arguments);
+    launchArguments = await resolveLaunchArguments(
+      arguments: arguments,
+      isMacOS: system.isMacOS,
+    );
     isPre = const String.fromEnvironment('APP_ENV') != 'stable';
     await _initDynamicColor();
     return _initData(version, loadConfig: loadConfig);

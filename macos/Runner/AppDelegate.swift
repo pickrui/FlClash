@@ -5,6 +5,8 @@ import window_manager
 
 @main
 class AppDelegate: FlutterAppDelegate {
+    private var wasLaunchedAtLogin: Bool?
+    private var launchResultCallbacks: [FlutterResult] = []
     private let currentIdentifierPrefix = "com.oixcloud.clash"
     private let legacyIdentifierPrefix = "com.follow.clash"
     private let identityMigrationKey = "com.oixcloud.clash.identityMigrationCompleted"
@@ -63,6 +65,26 @@ class AppDelegate: FlutterAppDelegate {
         }
         migrateLegacyDefaultsIfNeeded()
         super.applicationWillFinishLaunching(notification)
+    }
+
+    override func applicationDidFinishLaunching(_ notification: Notification) {
+        let event = NSAppleEventManager.shared().currentAppleEvent
+        wasLaunchedAtLogin = event?.eventID == kAEOpenApplication &&
+            event?.paramDescriptor(forKeyword: keyAEPropData)?.enumCodeValue == keyAELaunchedAsLogInItem
+        super.applicationDidFinishLaunching(notification)
+        let callbacks = launchResultCallbacks
+        launchResultCallbacks.removeAll()
+        for callback in callbacks {
+            callback(wasLaunchedAtLogin)
+        }
+    }
+
+    func resolveLaunchAtLogin(_ result: @escaping FlutterResult) {
+        if let wasLaunchedAtLogin = wasLaunchedAtLogin {
+            result(wasLaunchedAtLogin)
+        } else {
+            launchResultCallbacks.append(result)
+        }
     }
 
     override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
