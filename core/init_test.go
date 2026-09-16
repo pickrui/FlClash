@@ -15,17 +15,22 @@ func TestHandleInitClashInitializesApplicationHome(t *testing.T) {
 	oldSourceHome := GlobalValidationSourceHome
 	oldIsInit := isInit.Load()
 	oldVersion := version
+	oldCloudDomains := cloudOutputDomains.Load()
 	t.Cleanup(func() {
 		constant.SetHomeDir(oldHome)
 		GlobalValidationSourceHome = oldSourceHome
 		isInit.Store(oldIsInit)
 		version = oldVersion
+		cloudOutputDomains.Store(oldCloudDomains)
 	})
 
 	home := filepath.Join(t.TempDir(), "nested", "app-home")
-	initParams := InitParams{HomeDir: home, Version: 7}
+	initParams := InitParams{HomeDir: home, Version: 7, CloudDomains: []string{"api.example"}}
 	if !handleInitClash(&initParams) {
 		t.Fatal("handleInitClash() = false")
+	}
+	if !shouldSuppressCloudOutput("Get https://api.example/account") {
+		t.Fatal("initialized API domain was not filtered")
 	}
 	if _, err := os.Stat(home); err != nil {
 		t.Fatalf("application home was not created: %v", err)

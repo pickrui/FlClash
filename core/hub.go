@@ -3,6 +3,7 @@ package main
 import (
 	"cmp"
 	"context"
+	"encoding/json"
 	"net"
 	"os"
 	"runtime"
@@ -49,6 +50,7 @@ func publishProxySnapshotLocked(proxies map[string]constant.Proxy) {
 func handleInitClash(params *InitParams) bool {
 	runLock.Lock()
 	defer runLock.Unlock()
+	setCloudOutputDomains(params.CloudDomains)
 	if params.HomeDir == "" {
 		return false
 	}
@@ -186,6 +188,41 @@ func validateConfigData(data []byte) string {
 		return "not initialized"
 	}
 	return isolatedValidateConfigData(data)
+}
+
+func (data ProxiesData) MarshalJSON() ([]byte, error) {
+	proxies := make(map[string]any, len(data.Proxies))
+	for name, proxy := range data.Proxies {
+		if proxy == nil {
+			continue
+		}
+		member := ProxyGroupMember{Name: proxy.Name(), Type: proxy.Type().String()}
+		switch proxy.Type() {
+		case constant.Selector, constant.URLTest, constant.Fallback, constant.Relay, constant.LoadBalance:
+			encoded, err := proxy.Adapter().MarshalJSON()
+			if err != nil {
+				return nil, err
+			}
+			var metadata map[string]any
+			if err := json.Unmarshal(encoded, &metadata); err != nil {
+				return nil, err
+			}
+			group := map[string]any{"name": member.Name, "type": member.Type}
+			for _, key := range []string{"now", "all", "fixed", "hidden", "testUrl", "icon"} {
+				if value, exists := metadata[key]; exists {
+					group[key] = value
+				}
+			}
+			proxies[name] = group
+		default:
+			proxies[name] = member
+		}
+	}
+	return json.Marshal(struct {
+		Proxies      map[string]any                         `json:"proxies"`
+		All          []string                               `json:"all"`
+		GroupMembers map[string]map[string]ProxyGroupMember `json:"groupMembers,omitempty"`
+	}{Proxies: proxies, All: data.All, GroupMembers: data.GroupMembers})
 }
 
 func handleGetProxies() ProxiesData {

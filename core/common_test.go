@@ -1,7 +1,11 @@
 package main
 
 import (
+	"bytes"
+	"encoding/base64"
 	"errors"
+	"os"
+	"path/filepath"
 	"slices"
 	"testing"
 
@@ -14,6 +18,50 @@ type testSelectable struct {
 	selected string
 	valid    map[string]bool
 	fallback string
+}
+
+func TestEncryptedRuntimeConfigFromDisk(t *testing.T) {
+	fixture := os.Getenv("FLCLASH_RUNTIME_CONFIG_FIXTURE")
+	if fixture == "" {
+		t.Skip("requires the Dart-generated encrypted runtime fixture")
+	}
+	setValidationTestHome(t)
+	ciphertext, err := os.ReadFile(fixture)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !isAgeArmored(ciphertext) {
+		t.Fatal("runtime fixture is not Age encrypted")
+	}
+	path := filepath.Join(constant.Path.HomeDir(), "config.yaml")
+	if err := os.WriteFile(path, ciphertext, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	previousKey := GlobalConfigAgeSecretKey
+	GlobalConfigAgeSecretKey = os.Getenv("FLCLASH_RUNTIME_CONFIG_TEST_KEY")
+	t.Cleanup(func() { GlobalConfigAgeSecretKey = previousKey })
+	params := defaultSetupParams()
+	if params.RawConfig != "" {
+		t.Fatal("runtime startup unexpectedly contains plaintext configuration")
+	}
+	if err := applyConfig(params); err != nil {
+		t.Fatal(err)
+	}
+	if currentConfig.General.MixedPort != 17890 || len(currentConfig.Rules) != 1 {
+		t.Fatal("encrypted runtime file was not applied")
+	}
+	active := currentConfig
+	GlobalConfigAgeSecretKey = base64.StdEncoding.EncodeToString(bytes.Repeat([]byte{9}, 32))
+	if err := applyConfig(params); err == nil {
+		t.Fatal("runtime file loaded with a different device key")
+	}
+	if currentConfig != active {
+		t.Fatal("failed decryption replaced live configuration")
+	}
+	stored, err := os.ReadFile(path)
+	if err != nil || !bytes.Equal(stored, ciphertext) {
+		t.Fatal("core loading changed the encrypted file")
+	}
 }
 
 func TestDefaultTestURLUsesCloudflare(t *testing.T) {

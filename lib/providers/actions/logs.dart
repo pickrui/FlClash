@@ -19,6 +19,7 @@ class LogsAction extends _$LogsAction {
 
 extension LogsControllerExt on AppController {
   void addLog(Log log, {bool persist = true}) {
+    if (Secrets.shouldSuppressOutput(log.payload)) return;
     _ref.read(logsProvider).add(log);
     if (persist) {
       writePersistentLog(log);
@@ -26,7 +27,13 @@ extension LogsControllerExt on AppController {
   }
 
   Future<bool> exportLogs() async {
-    final logString = await encodeLogsTask(_ref.read(logsProvider).list);
+    final logString = await encodeLogsTask(
+      _ref
+          .read(logsProvider)
+          .list
+          .where((log) => !Secrets.shouldSuppressOutput(log.payload))
+          .toList(),
+    );
     final tempFilePath = await appPath.tempFilePath;
     final file = File(tempFilePath);
     await file.safeWriteAsString(logString);
@@ -36,7 +43,8 @@ extension LogsControllerExt on AppController {
   }
 
   void writePersistentLog(Log log) {
-    if (_persistentLogWritesSuspended) {
+    if (_persistentLogWritesSuspended ||
+        Secrets.shouldSuppressOutput(log.payload)) {
       return;
     }
     _logFileWrite = _logFileWrite

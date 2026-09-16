@@ -72,6 +72,7 @@ abstract class InitParams with _$InitParams {
     @Default('')
     @JsonKey(name: 'config-age-secret-key')
     String configAgeSecretKey,
+    @Default([]) @JsonKey(name: 'cloud-domains') List<String> cloudDomains,
   }) = _InitParams;
 
   factory InitParams.fromJson(Map<String, Object?> json) =>

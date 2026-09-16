@@ -372,7 +372,7 @@ func applyConfig(params *SetupParams) error {
 	// Commit only a fully parsed candidate; failed edits leave live routing intact.
 	stopGeoScheduler()
 	currentConfig = candidate
-	setMaskedAddrs(isoixConfig)
+	resetCloudIPs()
 	// Config loading owns all tunnel status transitions until ApplyConfig returns.
 	idleOwnsTunnelSuspend = false
 	suspendOnIdle = params.SuspendOnIdle

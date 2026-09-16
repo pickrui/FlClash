@@ -94,6 +94,7 @@ class CoreController {
         version: version,
         profileKey: Secrets.profileKey,
         configAgeSecretKey: configAgeSecretKey,
+        cloudDomains: Secrets.cloudDomains,
       ),
     );
   }

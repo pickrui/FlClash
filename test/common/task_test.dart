@@ -154,6 +154,11 @@ void main() {
       GroupType.Selector,
       GroupType.URLTest,
     ]);
+    expect(
+      identical(groups.first.all.single, groups.last.all.single),
+      isTrue,
+      reason: 'A shared node should be parsed only once per snapshot',
+    );
   });
 
   test(

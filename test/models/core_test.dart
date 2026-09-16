@@ -126,6 +126,24 @@ void main() {
   });
 
   group('InitParams', () {
+    test('round-trips cloud domains for Core output suppression', () {
+      const params = InitParams(
+        homeDir: '/data/clash',
+        version: 3,
+        cloudDomains: ['api.example', 'backup.example'],
+      );
+      final encoded = jsonDecode(jsonEncode(params.toJson()));
+      expect(encoded['cloud-domains'], params.cloudDomains);
+      expect(InitParams.fromJson(encoded).cloudDomains, params.cloudDomains);
+      expect(
+        InitParams.fromJson({
+          'home-dir': '/data/clash',
+          'version': 3,
+        }).cloudDomains,
+        isEmpty,
+      );
+    });
+
     test('fromJson and toJson', () {
       final json = {'home-dir': '/data/clash', 'version': 3};
       final params = InitParams.fromJson(json);

@@ -74,6 +74,7 @@ class _CoreContainerState extends ConsumerState<CoreManager>
 
   @override
   void onLog(Log log) {
+    if (Secrets.shouldSuppressOutput(log.payload)) return;
     appController.addLog(log);
     if (log.logLevel == LogLevel.error) {
       globalState.showNotifier(log.payload);

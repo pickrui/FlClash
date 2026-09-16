@@ -47,7 +47,7 @@ extension CoreControllerExt on AppController {
     _ref.read(coreStatusProvider.notifier).value = CoreStatus.connecting;
     final result = await Future.wait([
       coreController.preload(),
-      Future.delayed(const Duration(milliseconds: 300)),
+      if (!system.isAndroid) Future.delayed(const Duration(milliseconds: 300)),
     ]);
     final String message = result[0];
     if (message.isNotEmpty) {

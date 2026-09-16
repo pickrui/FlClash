@@ -216,9 +216,14 @@ extension SetupControllerExt on AppController {
     }
   }
 
-  Future<Map<String, dynamic>> getRawProfileConfig(int profileId) async {
+  Future<Map<String, dynamic>> getRawProfileConfig(
+    int profileId, {
+    bool validateSnapshot = true,
+  }) async {
     var profile = _ref.read(profilesProvider).getProfile(profileId);
-    var existingPath = await profile?.getExistingFilePath();
+    var existingPath = await profile?.getExistingFilePath(
+      validate: validateSnapshot,
+    );
 
     if (profile != null && profile.isoixCloudProfile && existingPath == null) {
       profile = await _updateProfileWithCertificateRetry(profile);
@@ -526,8 +531,6 @@ extension SetupControllerExt on AppController {
         if (!isCurrentApply()) {
           return true;
         }
-        await updateProviders();
-
         final groups = _ref.read(groupsProvider);
         if (groups.isEmpty) {
           if (!_ref.read(initProvider)) return false;
@@ -552,6 +555,11 @@ extension SetupControllerExt on AppController {
           if (!_ref.read(initProvider)) return false;
           throw appLocalizations.noProxy;
         }
+        unawaited(
+          updateProviders().catchError((Object error) {
+            commonPrint.log('Provider refresh failed: $error');
+          }),
+        );
         return true;
       },
       silence: true,
@@ -577,6 +585,7 @@ extension SetupControllerExt on AppController {
   Future<Map<String, dynamic>> getProfile({
     required SetupState setupState,
     required ClashConfig patchConfig,
+    bool validateSnapshot = true,
   }) async {
     final profileId = setupState.profileId;
     if (profileId == null) {
@@ -591,7 +600,10 @@ extension SetupControllerExt on AppController {
     final overrideDns = _ref.read(overrideDnsProvider);
     final appendSystemDns = networkVM2.a;
     final routeMode = networkVM2.b;
-    final configMap = await getRawProfileConfig(profileId);
+    final configMap = await getRawProfileConfig(
+      profileId,
+      validateSnapshot: validateSnapshot,
+    );
     String? scriptContent;
     final List<Rule> addedRules = [];
     final List<ProxyGroup> customProxyGroups = [];
@@ -673,6 +685,10 @@ extension SetupControllerExt on AppController {
   }
 
   Future<Map> getProfileWithId(int profileId) async {
+    if (_ref.read(profilesProvider).getProfile(profileId)?.isoixCloudProfile ==
+        true) {
+      return {};
+    }
     var res = {};
     try {
       final setupState = await _ref.read(setupStateProvider(profileId).future);
@@ -741,6 +757,7 @@ extension SetupControllerExt on AppController {
       config = await getProfile(
         setupState: setupState,
         patchConfig: realPatchConfig,
+        validateSnapshot: false,
       );
     } on FormatException catch (error) {
       // Composition errors have not touched the active core configuration.
@@ -761,10 +778,11 @@ extension SetupControllerExt on AppController {
     }
     final isoixCloud = profile?.isoixCloudProfile ?? false;
     if (isoixCloud && system.isAndroid) {
-      final encryptedBytes = await ensureEncryptedProfileBytes(
+      final encryptedBytes = await encryptProfileBytes(
         Uint8List.fromList(utf8.encode(yamlString)),
       );
-      await File(configFilePath).safeWriteAsBytes(encryptedBytes);
+      if (!isCurrentApply()) return false;
+      await writeEncryptedProfileSnapshot(configFilePath, encryptedBytes);
     } else if (!isoixCloud) {
       await File(configFilePath).safeWriteAsString(yamlString);
     }
@@ -773,19 +791,13 @@ extension SetupControllerExt on AppController {
     final updatedSetupParams = SetupParams(
       selectedMap: latestProfile?.selectedMap ?? const {},
       testUrl: _ref.read(appSettingProvider).testUrl,
-      rawConfig: isoixCloud ? yamlString : '',
+      rawConfig: isoixCloud && !system.isAndroid ? yamlString : '',
       suspendOnIdle: _ref.read(networkSettingProvider).suspendOnIdle,
     );
 
     if (!isCurrentApply()) {
       return false;
     }
-
-    // WARNING: Do not print `updatedSetupParams.rawConfig` directly here.
-    // It contains the full YAML plaintext and logging it would leak sensitive node information.
-    commonPrint.log(
-      '====== Sending rawConfig to Go: ${updatedSetupParams.rawConfig.length}',
-    );
 
     final String message;
     try {

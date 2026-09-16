@@ -56,7 +56,8 @@ Future<List<Group>> _toGroupsTask(ComputeGroupsState state) async {
   final defaultTestUrl = state.defaultTestUrl;
   final proxies = proxiesData.proxies;
   if (proxies.isEmpty) return [];
-  final groupsRaw = all
+  final parsedProxies = <String, Proxy>{};
+  final groups = all
       .where((name) {
         final proxy = proxies[name] ?? {};
         return GroupTypeExtension.valueList.contains(proxy['type']);
@@ -64,14 +65,23 @@ Future<List<Group>> _toGroupsTask(ComputeGroupsState state) async {
       .map((groupName) {
         final group = Map<String, dynamic>.from(proxies[groupName]);
         final members = proxiesData.groupMembers[groupName];
-        group['all'] = ((group['all'] ?? []) as List)
-            .map((name) => members?[name]?.toJson() ?? proxies[name])
-            .where((proxy) => proxy != null)
-            .toList();
-        return group;
+        final nodes = <Proxy>[];
+        for (final name in (group['all'] ?? []) as List) {
+          final scoped = members?[name];
+          if (scoped != null) {
+            nodes.add(scoped);
+            continue;
+          }
+          final data = proxies[name];
+          if (data == null) continue;
+          nodes.add(
+            parsedProxies.putIfAbsent(name, () => Proxy.fromJson(data)),
+          );
+        }
+        group['all'] = const [];
+        return Group.fromJson(group).copyWith(all: nodes);
       })
       .toList();
-  final groups = groupsRaw.map((e) => Group.fromJson(e)).toList();
   return computeSort(
     groups: groups,
     sortType: sortType,

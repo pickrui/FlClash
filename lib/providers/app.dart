@@ -49,6 +49,7 @@ class Logs extends _$Logs with NotifierMixin<FixedList<Log>> {
   }
 
   void addLog(Log value) {
+    if (Secrets.shouldSuppressOutput(value.payload)) return;
     state = state.copyWith()..add(value);
   }
 }
@@ -61,6 +62,7 @@ class Requests extends _$Requests with NotifierMixin<FixedList<TrackerInfo>> {
   }
 
   void addRequest(TrackerInfo value) {
+    if (value.shouldSuppressOutput) return;
     state = state.copyWith()..add(value);
   }
 }

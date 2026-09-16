@@ -15,7 +15,8 @@ class CommonPrint {
   }
 
   void log(String? text, {LogLevel logLevel = LogLevel.info}) {
-    final payload = '[APP] ${Secrets.redactApiDomains(text ?? 'null')}';
+    if (Secrets.shouldSuppressOutput(text ?? 'null')) return;
+    final payload = '[APP] ${text ?? 'null'}';
     final log = Log.app(payload).copyWith(logLevel: logLevel);
     debugPrint(payload);
     if (!appController.isAttach) {

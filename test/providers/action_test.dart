@@ -1,5 +1,7 @@
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/action.dart';
+import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/views/profiles/add.dart';
 import 'package:fl_clash/widgets/pop_scope.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,6 +42,65 @@ class _WindowPort implements WindowPort {
 }
 
 void main() {
+  test('cloud application logs never reach debug output', () {
+    final previous = debugPrint;
+    final messages = <String?>[];
+    debugPrint = (message, {wrapWidth}) => messages.add(message);
+    addTearDown(() => debugPrint = previous);
+
+    commonPrint.log('oixCloud account request failed');
+    commonPrint.log('[oixCloud API] request failed');
+    commonPrint.log('CloudApiException: request failed');
+    for (final domain in Secrets.cloudDomains) {
+      commonPrint.log('GET https://$domain/account?token=private failed');
+    }
+
+    expect(messages, isEmpty);
+  });
+
+  test('cloud logs are discarded by log actions', () {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    container.read(logsProvider.notifier).value = FixedList<Log>(10);
+    final action = container.read(logsActionProvider.notifier);
+    for (final payload in [
+      'oixCloud account error',
+      ...Secrets.cloudDomains.map((domain) => 'GET https://$domain/account'),
+    ]) {
+      action.addLog(Log.app(payload));
+      action.writePersistentLog(Log.app(payload));
+    }
+    container
+        .read(logsProvider.notifier)
+        .addLog(Log.app('ordinary connection'));
+
+    expect(
+      container.read(logsProvider).list.single.payload,
+      'ordinary connection',
+    );
+  });
+
+  test('cloud requests never enter recent request history', () {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    final notifier = container.read(requestsProvider.notifier);
+    notifier.value = FixedList<TrackerInfo>(10);
+    final ordinary = TrackerInfo(
+      id: 'ordinary',
+      start: DateTime(2026),
+      metadata: const Metadata(host: 'public.example'),
+      chains: const ['DIRECT'],
+      rule: 'MATCH',
+      rulePayload: '',
+    );
+    for (final domain in ['api.oixcloud.example', ...Secrets.cloudDomains]) {
+      notifier.addRequest(ordinary.copyWith(metadata: Metadata(host: domain)));
+    }
+    notifier.addRequest(ordinary);
+
+    expect(container.read(requestsProvider).list, [ordinary]);
+  });
+
   test('visibility actions use the serialized window toggle', () async {
     final previous = windowPort;
     final port = _WindowPort();

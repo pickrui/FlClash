@@ -289,6 +289,7 @@ abstract class CoreHandlerInterface with CoreInterface {
     return connections
         .whereType<Map>()
         .map((item) => TrackerInfo.fromJson(Map<String, Object?>.from(item)))
+        .where((tracker) => !tracker.shouldSuppressOutput)
         .toList();
   }
 

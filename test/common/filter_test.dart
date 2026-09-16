@@ -1,8 +1,40 @@
+import 'package:fl_clash/common/secrets.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:test/test.dart';
 
 void main() {
+  group('cloud output suppression', () {
+    const hosts = [' api.example ', 'backup.example', 'site.example', ''];
+
+    for (final value in [
+      'failed to load OIXCLOUD profile',
+      '[oixCloud API]',
+      'CloudApiException: authentication failed',
+      '[DNS-Auth] enabled',
+      'GET https://API.EXAMPLE:443/account?token=private failed',
+      'lookup backup.example. failed',
+      'dial node.site.example:443 failed',
+      'request "api.example" failed',
+    ]) {
+      test('suppresses the complete record: $value', () {
+        expect(containsCloudInformation(value, hosts), isTrue);
+      });
+    }
+
+    for (final value in [
+      '',
+      'connection established',
+      'GET https://public.example/account',
+      'lookup notapi.example failed',
+      'lookup api.example.other failed',
+    ]) {
+      test('preserves unrelated record: $value', () {
+        expect(containsCloudInformation(value, hosts), isFalse);
+      });
+    }
+  });
+
   group('LogsState.list', () {
     Log log(LogLevel level, String payload) =>
         Log(logLevel: level, payload: payload, dateTime: '2024-01-01');
@@ -92,6 +124,28 @@ void main() {
       rule: 'MATCH',
       rulePayload: '',
     );
+
+    test('cloud destinations, chains and rule details are suppressed', () {
+      for (final metadata in [
+        meta(host: 'api.oixcloud.example'),
+        const Metadata(remoteDestination: 'node.oixcloud.example:443'),
+        const Metadata(specialProxy: 'oixCloud'),
+      ]) {
+        expect(
+          tracker('cloud', metadata: metadata).shouldSuppressOutput,
+          isTrue,
+        );
+      }
+      expect(
+        tracker('cloud', chains: ['oixCloud']).shouldSuppressOutput,
+        isTrue,
+      );
+      expect(
+        tracker('cloud').copyWith(rulePayload: 'oixCloud').shouldSuppressOutput,
+        isTrue,
+      );
+      expect(tracker('ordinary').shouldSuppressOutput, isFalse);
+    });
 
     test('returns all when no keywords and empty query', () {
       final state = TrackerInfosState(trackerInfos: [tracker('1')]);

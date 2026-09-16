@@ -75,6 +75,26 @@ Future<Uint8List> ensureEncryptedProfileBytes(Uint8List bytes) async {
   return encryptProfileBytes(bytes);
 }
 
+Future<void> writeEncryptedProfileSnapshot(
+  String path,
+  Uint8List encryptedBytes,
+) async {
+  if (!isEncryptedProfileBytes(encryptedBytes)) {
+    throw ArgumentError('Encrypted profile bytes are required');
+  }
+  final target = File(path);
+  final temporary = File('$path.${utils.id}.tmp');
+  await durableCreateDirectory(target.parent.path);
+  try {
+    await temporary.writeAsBytes(encryptedBytes, flush: true);
+    await durableRename(temporary.path, target.path);
+  } finally {
+    try {
+      await temporary.safeDelete();
+    } catch (_) {}
+  }
+}
+
 void registerFetchManagedConfig(FetchManagedConfigCallback callback) {
   _fetchManagedConfigCallback = callback;
 }
@@ -1088,11 +1108,11 @@ extension ProfileExtension on Profile {
     return await getExistingFilePath() != null;
   }
 
-  Future<String?> getExistingFilePath() async {
+  Future<String?> getExistingFilePath({bool validate = true}) async {
     final mFile = await _getFile(false);
     if (!await mFile.exists()) return null;
 
-    if (!isoixCloudProfile) {
+    if (!validate || !isoixCloudProfile) {
       return mFile.path;
     }
 
@@ -1145,18 +1165,7 @@ extension ProfileExtension on Profile {
   Future<void> _replaceWithEncryptedSnapshot(Uint8List bytes) async {
     final encryptedBytes = await ensureEncryptedProfileBytes(bytes);
     final mFile = await _getFile(false);
-    final tempFile = File(await appPath.getProfilePath('.$id'));
-
-    try {
-      await tempFile.create(recursive: true);
-      await tempFile.writeAsBytes(encryptedBytes, flush: true);
-      await durableRename(tempFile.path, mFile.path);
-    } catch (error, stackTrace) {
-      try {
-        await tempFile.safeDelete();
-      } catch (_) {}
-      Error.throwWithStackTrace(error, stackTrace);
-    }
+    await writeEncryptedProfileSnapshot(mFile.path, encryptedBytes);
   }
 
   Future<Profile> update() async {
@@ -1245,8 +1254,12 @@ extension ProfileExtension on Profile {
       if (message.isNotEmpty) {
         throw ConfigValidationException(message);
       }
-      final mFile = await file;
-      await File(path).copy(mFile.path);
+      if (isoixCloudProfile) {
+        await _replaceWithEncryptedSnapshot(await File(path).readAsBytes());
+      } else {
+        final mFile = await file;
+        await File(path).copy(mFile.path);
+      }
       return copyWith(lastUpdateDate: DateTime.now());
     });
   }

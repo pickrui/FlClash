@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"slices"
 	"testing"
 	"time"
@@ -39,6 +40,66 @@ func TestPatchSelectGroupPublishesAppliedProxySnapshot(t *testing.T) {
 	selectionLock.Unlock()
 	if got != newProxy {
 		t.Fatalf("proxy snapshot = %p, want applied proxy %p", got, newProxy)
+	}
+}
+
+func proxyListPayloadFixture() ProxiesData {
+	proxies := make(map[string]constant.Proxy, 1000)
+	for index := range 1000 {
+		proxies[fmt.Sprintf("node-%04d", index)] = adapter.NewProxy(outbound.NewDirect())
+	}
+	return ProxiesData{Proxies: proxies}
+}
+
+func TestProxyListPayloadOmitsUnusedNodeMetadata(t *testing.T) {
+	data := proxyListPayloadFixture()
+	type fullProxiesData ProxiesData
+	full, err := json.Marshal(fullProxiesData(data))
+	if err != nil {
+		t.Fatal(err)
+	}
+	compact, err := json.Marshal(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var wire struct {
+		Proxies map[string]map[string]any `json:"proxies"`
+	}
+	if err := json.Unmarshal(compact, &wire); err != nil {
+		t.Fatal(err)
+	}
+	if len(wire.Proxies) != len(data.Proxies) {
+		t.Fatal("compact snapshot dropped nodes")
+	}
+	for _, node := range wire.Proxies {
+		if len(node) != 2 || node["name"] != "DIRECT" || node["type"] != "Direct" {
+			t.Fatalf("unexpected node payload: %#v", node)
+		}
+	}
+	if len(compact)*2 >= len(full) {
+		t.Fatalf("compact snapshot is not substantially smaller: %d vs %d bytes", len(compact), len(full))
+	}
+	t.Logf("1000-node payload: %d -> %d bytes", len(full), len(compact))
+}
+
+func BenchmarkProxyListSnapshot(b *testing.B) {
+	data := proxyListPayloadFixture()
+	type fullProxiesData ProxiesData
+	for _, test := range []struct {
+		name string
+		data any
+	}{
+		{name: "full", data: fullProxiesData(data)},
+		{name: "compact", data: data},
+	} {
+		b.Run(test.name, func(b *testing.B) {
+			b.ReportAllocs()
+			for b.Loop() {
+				if _, err := json.Marshal(test.data); err != nil {
+					b.Fatal(err)
+				}
+			}
+		})
 	}
 }
 

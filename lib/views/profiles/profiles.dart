@@ -188,6 +188,7 @@ class ProfileItem extends StatelessWidget {
   }
 
   Future<void> _handlePreview(BuildContext context) async {
+    if (profile.isoixCloudProfile) return;
     final setupAction = context.setupAction;
 
     final configMap = await setupAction.getProfileWithId(profile.id);

@@ -351,12 +351,21 @@ extension ProxiesControllerExt on AppController {
   }
 
   Future<void> updateProviders() async {
+    final profileId = _ref.read(currentProfileIdProvider);
+    final generation = _profileApplyGeneration;
+    bool isCurrent() =>
+        generation == _profileApplyGeneration &&
+        profileId == _ref.read(currentProfileIdProvider);
     if (!await ensureCoreReady()) {
-      _ref.read(providersProvider.notifier).value = [];
+      if (isCurrent()) {
+        _ref.read(providersProvider.notifier).value = [];
+      }
       return;
     }
-    _ref.read(providersProvider.notifier).value = await coreController
-        .getExternalProviders();
+    if (!isCurrent()) return;
+    final providers = await coreController.getExternalProviders();
+    if (!isCurrent()) return;
+    _ref.read(providersProvider.notifier).value = providers;
   }
 
   Future<String> updateProvider(

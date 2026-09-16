@@ -12,11 +12,12 @@ import (
 )
 
 type InitParams struct {
-	HomeDir              string `json:"home-dir"`
-	ValidationSourceHome string `json:"validation-source-home"`
-	Version              int    `json:"version"`
-	ProfileKey           string `json:"profile-key"`
-	ConfigAgeSecretKey   string `json:"config-age-secret-key"`
+	HomeDir              string   `json:"home-dir"`
+	ValidationSourceHome string   `json:"validation-source-home"`
+	Version              int      `json:"version"`
+	ProfileKey           string   `json:"profile-key"`
+	ConfigAgeSecretKey   string   `json:"config-age-secret-key"`
+	CloudDomains         []string `json:"cloud-domains"`
 }
 
 type SetupParams struct {

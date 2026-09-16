@@ -3,32 +3,115 @@ package main
 import (
 	"net"
 	"net/netip"
+	"strings"
 	"sync"
 	"sync/atomic"
 
-	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/hub/route"
+	"github.com/metacubex/mihomo/log"
 	"github.com/metacubex/mihomo/tunnel/statistic"
 )
 
 var (
-	isoixCloud atomic.Bool
-	cloudIPs   sync.Map
+	cloudIPs           sync.Map
+	cloudOutputDomains atomic.Pointer[[]string]
 )
 
 func init() {
-	statistic.MetadataProcessor = maskMetadata
+	statistic.TrackerInfoFilter = func(info *statistic.TrackerInfo) bool {
+		return !shouldSuppressCloudTracker(info)
+	}
 	route.DNSQueryObfuscated = matchManagedSuffix
+	log.EventFilter = func(event log.Event) bool {
+		return !shouldSuppressCloudOutput(event.Payload)
+	}
 }
 
-func setMaskedAddrs(isoix bool) {
-	isoixCloud.Store(isoix)
+func setCloudOutputDomains(domains []string) {
+	normalized := make([]string, 0, len(domains))
+	for _, domain := range domains {
+		domain = strings.TrimSuffix(strings.ToLower(strings.TrimSpace(domain)), ".")
+		if domain != "" {
+			normalized = append(normalized, domain)
+		}
+	}
+	cloudOutputDomains.Store(&normalized)
+}
+
+func isCloudHost(host string) bool {
+	if parsed, _, err := net.SplitHostPort(host); err == nil {
+		host = parsed
+	}
+	host = strings.TrimSuffix(strings.Trim(host, "[]"), ".")
+	if matchManagedSuffix(host) || isCloudIP(host) {
+		return true
+	}
+	if domains := cloudOutputDomains.Load(); domains != nil {
+		for _, domain := range *domains {
+			if host == domain || strings.HasSuffix(host, "."+domain) {
+				return true
+			}
+		}
+	}
+	for _, domain := range dnsAuthSuffixes() {
+		if host == domain || strings.HasSuffix(host, "."+domain) {
+			return true
+		}
+	}
+	return false
+}
+
+func shouldSuppressCloudOutput(value string) bool {
+	value = strings.ToLower(value)
+	if strings.Contains(value, "oixcloud") || strings.Contains(value, "[dns-auth]") || strings.Contains(value, "cloudapi") {
+		return true
+	}
+	for _, host := range strings.FieldsFunc(value, func(char rune) bool {
+		return !(char >= 'a' && char <= 'z' || char >= '0' && char <= '9' || strings.ContainsRune(".-:[]", char))
+	}) {
+		host = strings.Trim(host, ".")
+		if isCloudHost(host) || isCloudHost(strings.TrimSuffix(host, ":")) {
+			return true
+		}
+	}
+	return false
+}
+
+func shouldSuppressCloudTracker(info *statistic.TrackerInfo) bool {
+	if info == nil {
+		return false
+	}
+	if metadata := info.Metadata; metadata != nil {
+		if shouldSuppressCloudOutput(metadata.Host) || shouldSuppressCloudOutput(metadata.SniffHost) {
+			if metadata.DstIP.IsValid() {
+				markCloudIP(metadata.DstIP.String())
+			}
+			return true
+		}
+		if shouldSuppressCloudOutput(metadata.RemoteDst) || isCloudIP(metadata.DstIP.String()) {
+			return true
+		}
+		for _, value := range []string{metadata.SpecialRules, metadata.SpecialProxy, metadata.Process, metadata.ProcessPath} {
+			if shouldSuppressCloudOutput(value) {
+				return true
+			}
+		}
+	}
+	for _, value := range append(append([]string{info.Rule, info.RulePayload}, info.Chain...), info.ProviderChain...) {
+		if shouldSuppressCloudOutput(value) {
+			return true
+		}
+	}
+	return false
+}
+
+func resetCloudIPs() {
 	cloudIPs.Clear()
 }
 
 func markCloudIP(ip string) {
-	if ip != "" {
-		cloudIPs.Store(ip, true)
+	if parsed, err := netip.ParseAddr(ip); err == nil {
+		cloudIPs.Store(parsed.Unmap().String(), true)
 	}
 }
 
@@ -42,39 +125,10 @@ func isCloudIP(host string) bool {
 	if h, _, err := net.SplitHostPort(host); err == nil {
 		host = h
 	}
-	if _, err := netip.ParseAddr(host); err != nil {
+	ip, err := netip.ParseAddr(host)
+	if err != nil {
 		return false
 	}
-	_, ok := cloudIPs.Load(host)
+	_, ok := cloudIPs.Load(ip.Unmap().String())
 	return ok
-}
-
-func maskMetadata(m *constant.Metadata) {
-	if m == nil || !isoixCloud.Load() {
-		return
-	}
-	m.RemoteDst = maskAddr(m.RemoteDst)
-	m.Host = maskAddr(m.Host)
-	m.SniffHost = maskAddr(m.SniffHost)
-	if m.DstIP.IsValid() && isCloudIP(m.DstIP.String()) {
-		m.DstIP = netip.Addr{}
-		m.DstGeoIP = nil
-		m.DstIPASN = ""
-	}
-}
-
-func maskAddr(host string) string {
-	if host == "" {
-		return host
-	}
-	if masked, ok := maskManagedDomain(host); ok {
-		return masked
-	}
-	if isCloudIP(host) {
-		if _, port, err := net.SplitHostPort(host); err == nil {
-			return "***.***.***.***:" + port
-		}
-		return "***.***.***.***"
-	}
-	return host
 }

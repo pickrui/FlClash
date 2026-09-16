@@ -3,6 +3,26 @@ import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 
+bool containsCloudInformation(String value, Iterable<String> hosts) {
+  final normalized = value.toLowerCase();
+  if (normalized.contains('oixcloud') ||
+      normalized.contains('[dns-auth]') ||
+      normalized.contains('cloudapi')) {
+    return true;
+  }
+  for (final host in hosts) {
+    final domain = host.trim().toLowerCase().replaceFirst(RegExp(r'\.$'), '');
+    if (domain.isEmpty) continue;
+    if (RegExp(
+      '(^|[^a-z0-9_.-])(?:[a-z0-9_-]+\\.)*${RegExp.escape(domain)}\\.?(\$|[^a-z0-9_.-])',
+      caseSensitive: false,
+    ).hasMatch(value)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 String redactHostnames(String value, Iterable<String> hosts) {
   var redacted = value;
   final normalizedHosts = hosts
@@ -48,6 +68,16 @@ class Secrets {
   static String get primarySiteDomain => baseDomain.trim();
 
   static String get spareSiteDomain => spareDomain.trim();
+
+  static List<String> get cloudDomains => {
+    baseDomain.trim().toLowerCase(),
+    spareDomain.trim().toLowerCase(),
+    apiDomain.trim().toLowerCase(),
+    spareApiDomain.trim().toLowerCase(),
+  }.where((domain) => domain.isNotEmpty).toList();
+
+  static bool shouldSuppressOutput(String value) =>
+      containsCloudInformation(value, cloudDomains);
 
   static String get primaryApiDomain => _requireDomain(apiDomain, 'API_DOMAIN');
 
