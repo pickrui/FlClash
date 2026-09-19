@@ -4,18 +4,19 @@ import (
 	"cmp"
 	"context"
 	"encoding/json"
+	"iter"
 	"net"
 	"os"
 	"runtime"
 	"runtime/debug"
 	"sync"
 	"sync/atomic"
-	"time"
 
 	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
 	"github.com/metacubex/mihomo/adapter/provider"
 	"github.com/metacubex/mihomo/common/observable"
+	"github.com/metacubex/mihomo/common/utils"
 	"github.com/metacubex/mihomo/component/mmdb"
 	"github.com/metacubex/mihomo/component/resolver"
 	"github.com/metacubex/mihomo/config"
@@ -371,6 +372,10 @@ func handleResetTraffic() {
 	statistic.DefaultManager.ResetStatistic()
 }
 
+// A manual probe accepts any response status; it reports reachability rather
+// than a group's expected-status policy.
+var anyDelayTestStatus utils.IntRanges[uint16]
+
 func handleAsyncTestDelay(params *TestDelayParams, fn func(*Delay)) {
 	go func() {
 		testUrl := cmp.Or(params.TestUrl, constant.DefaultTestURL)
@@ -379,7 +384,22 @@ func handleAsyncTestDelay(params *TestDelayParams, fn func(*Delay)) {
 			Name:  params.ProxyName,
 			Value: -1,
 		}
-		if err := delaySem.Acquire(context.Background(), 1); err != nil {
+		timeout := delayTestTimeout(params.Timeout)
+		// One cancel for the whole probe: a superseded run must release the
+		// probes still queueing for a slot as well as the ones on the wire.
+		runCtx, cancelRun := context.WithCancel(context.Background())
+		defer cancelRun()
+		probe := manualDelayProbes.begin(params.Generation, cancelRun)
+		defer manualDelayProbes.end(probe)
+
+		// Queueing for a slot and probing the node each get the full budget.
+		// Sharing one deadline leaves whatever waited behind a saturated
+		// semaphore too little time to connect, so a bulk test of a large
+		// subscription reports Timeout for the back of the queue.
+		queueCtx, cancelQueue := context.WithTimeout(runCtx, timeout)
+		granted := delaySem.Acquire(queueCtx, 1) == nil
+		cancelQueue()
+		if !granted {
 			fn(delayData)
 			return
 		}
@@ -391,19 +411,50 @@ func handleAsyncTestDelay(params *TestDelayParams, fn func(*Delay)) {
 			return
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*time.Duration(params.Timeout))
+		ctx, cancel := context.WithTimeout(runCtx, timeout)
 		defer cancel()
 
+		// Accept any status, as upstream does: a manual test answers whether
+		// the node is reachable, not whether it satisfies a group's policy.
 		finish := manualDelayEvents.begin(proxy.Name(), testUrl)
-		delay, err := proxy.URLTest(ctx, testUrl, nil)
+		delay, err := proxy.URLTest(ctx, testUrl, anyDelayTestStatus)
 		finish()
 		if err == nil {
-			// URLTest truncates sub-millisecond successes to zero. Reserve zero
-			// for pending UI state without reporting a successful probe as failed.
-			delayData.Value = max(int32(delay), 1)
+			delayData.Value = delayValue(delay)
 		}
+		// Groups cache their fastest member for a while; a probe that changed a
+		// member's health must be visible in the next groups snapshot.
+		resetURLTestSelections(testUrl)
 		fn(delayData)
 	}()
+}
+
+// resetURLTestSelections drops the cached choice of every url-test group that
+// selects on testUrl, so Now() reflects a probe of one of its members.
+func resetURLTestSelections(testUrl string) {
+	for group := range urlTestGroups(testUrl) {
+		group.ResetSelection()
+	}
+}
+
+// urlTestGroups iterates the url-test groups whose own test URL is testUrl;
+// only those read the per-URL health a probe of that URL stored.
+func urlTestGroups(testUrl string) iter.Seq[*outboundgroup.URLTest] {
+	return func(yield func(*outboundgroup.URLTest) bool) {
+		for _, proxy := range tunnel.Proxies() {
+			adapterProxy, ok := proxy.(*adapter.Proxy)
+			if !ok {
+				continue
+			}
+			group, ok := adapterProxy.ProxyAdapter.(*outboundgroup.URLTest)
+			if !ok || group.TestURL() != testUrl {
+				continue
+			}
+			if !yield(group) {
+				return
+			}
+		}
+	}
 }
 
 func handleGetConnections() any {
@@ -640,8 +691,8 @@ func init() {
 			Data: m.String(),
 		})
 	}
-	adapter.UrlTestHook = func(url string, name string, delay uint16) {
-		delayData := manualDelayEvents.message(url, name, delay)
+	adapter.UrlTestHook = func(url string, name string, delay uint16, alive bool) {
+		delayData := manualDelayEvents.message(url, name, delay, alive)
 		if delayData == nil {
 			return
 		}

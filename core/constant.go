@@ -65,6 +65,9 @@ type TestDelayParams struct {
 	ProxyName string `json:"proxy-name"`
 	TestUrl   string `json:"test-url"`
 	Timeout   int64  `json:"timeout"`
+	// Generation groups the probes of one app-side test run. A probe from a
+	// newer generation supersedes the running ones; zero means unscoped.
+	Generation int64 `json:"generation"`
 }
 
 type UpdateGeoDataParams struct {

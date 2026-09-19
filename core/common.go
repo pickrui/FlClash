@@ -40,8 +40,12 @@ var (
 	// Selector writes and proxySnapshot use this lock. The fixed order is
 	// runLock -> selectionLock; proxy changes must never wait for runLock.
 	selectionLock sync.Mutex
-	delaySem      = semaphore.NewWeighted(50)
+	delaySem      = semaphore.NewWeighted(delayTestConcurrency)
 )
+
+// Probes the Core runs at once. The app keeps its own batch width at or below
+// this (maxConcurrentDelayTests in lib/common/constant.dart).
+const delayTestConcurrency = 50
 
 const defaultTestURL = "http://cp.cloudflare.com/generate_204"
 
