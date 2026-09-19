@@ -176,6 +176,32 @@ void main() {
       );
     },
   );
+  for (final entry in {
+    'timestamp_expired':
+        'The device clock is too far from the server. Turn on automatic date and time, then retry.',
+    'signature_mismatch':
+        'The server rejected this app’s signature. Reinstall the latest official build.',
+    'server_unconfigured':
+        'The server has no key configured for this app. Contact support.',
+  }.entries) {
+    test('a rejected managed config names ${entry.key}', () {
+      expect(
+        CloudApiException.clean(_forbidden(reason: entry.key)),
+        'Direct: ${entry.value}',
+      );
+    });
+  }
+
+  test('a 403 without a known reason keeps the plain status', () {
+    expect(
+      CloudApiException.clean(_forbidden()),
+      'Direct: Server returned HTTP 403',
+    );
+    expect(
+      CloudApiException.clean(_forbidden(reason: 'something_else')),
+      'Direct: Server returned HTTP 403',
+    );
+  });
 }
 
 RequestOptions _options({String route = 'DIRECT'}) => RequestOptions(
@@ -195,4 +221,16 @@ DioException _networkError(
   type: type,
   error: cause,
   message: 'private-api.example secret-token',
+);
+
+DioException _forbidden({String? reason}) => DioException(
+  requestOptions: _options(),
+  type: DioExceptionType.badResponse,
+  response: Response(
+    requestOptions: _options(),
+    statusCode: HttpStatus.forbidden,
+    headers: Headers.fromMap({
+      if (reason != null) 'x-managed-auth-error': [reason],
+    }),
+  ),
 );

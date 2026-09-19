@@ -351,6 +351,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "cloudApiAccessDenied": MessageLookupByLibrary.simpleMessage(
       "Доступ к сети запрещён",
     ),
+    "cloudApiClockSkew": MessageLookupByLibrary.simpleMessage(
+      "Часы устройства слишком расходятся с сервером. Включите автоматическую установку времени и повторите.",
+    ),
     "cloudApiConnectTimeout": MessageLookupByLibrary.simpleMessage(
       "Время ожидания подключения истекло",
     ),
@@ -389,6 +392,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "cloudApiRouteProxy": m2,
     "cloudApiSendTimeout": MessageLookupByLibrary.simpleMessage(
       "Время отправки запроса истекло",
+    ),
+    "cloudApiServerUnconfigured": MessageLookupByLibrary.simpleMessage(
+      "На сервере не настроен ключ для этого приложения. Обратитесь в поддержку.",
+    ),
+    "cloudApiSignatureRejected": MessageLookupByLibrary.simpleMessage(
+      "Сервер отклонил подпись приложения. Переустановите последнюю официальную сборку.",
     ),
     "cloudApiSystemError": m3,
     "cloudApiTimeout": MessageLookupByLibrary.simpleMessage(
@@ -1763,9 +1772,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "themeMode": MessageLookupByLibrary.simpleMessage("Режим темы"),
     "tight": MessageLookupByLibrary.simpleMessage("Плотный"),
     "time": MessageLookupByLibrary.simpleMessage("Время"),
-    "timeSyncTip": MessageLookupByLibrary.simpleMessage(
-      "Протокол прокси требует, чтобы время устройства не отличалось от времени UTC более чем на 30 секунд. Пожалуйста, убедитесь, что время на вашем устройстве точное.",
-    ),
     "timeout": MessageLookupByLibrary.simpleMessage("Таймаут"),
     "tip": MessageLookupByLibrary.simpleMessage("подсказка"),
     "todayUsed": MessageLookupByLibrary.simpleMessage("Использовано сегодня"),

@@ -274,6 +274,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "cloudApiAccessDenied": MessageLookupByLibrary.simpleMessage(
       "ネットワークへのアクセスが拒否されました",
     ),
+    "cloudApiClockSkew": MessageLookupByLibrary.simpleMessage(
+      "端末の時計がサーバーとずれすぎています。日時の自動設定をオンにして再試行してください。",
+    ),
     "cloudApiConnectTimeout": MessageLookupByLibrary.simpleMessage(
       "接続がタイムアウトしました",
     ),
@@ -312,6 +315,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "cloudApiRouteProxy": m2,
     "cloudApiSendTimeout": MessageLookupByLibrary.simpleMessage(
       "リクエスト送信がタイムアウトしました",
+    ),
+    "cloudApiServerUnconfigured": MessageLookupByLibrary.simpleMessage(
+      "サーバーにこのアプリの鍵が設定されていません。サポートにご連絡ください。",
+    ),
+    "cloudApiSignatureRejected": MessageLookupByLibrary.simpleMessage(
+      "サーバーがこのアプリの署名を拒否しました。公式の最新版を再インストールしてください。",
     ),
     "cloudApiSystemError": m3,
     "cloudApiTimeout": MessageLookupByLibrary.simpleMessage("リクエストがタイムアウトしました"),
@@ -1363,9 +1372,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "themeMode": MessageLookupByLibrary.simpleMessage("テーマモード"),
     "tight": MessageLookupByLibrary.simpleMessage("密"),
     "time": MessageLookupByLibrary.simpleMessage("時間"),
-    "timeSyncTip": MessageLookupByLibrary.simpleMessage(
-      "プロキシプロトコルは、デバイスの時刻が世界標準時（UTC）と30秒以内の誤差である必要があります。デバイスの時刻が正確であることを確認してください",
-    ),
     "timeout": MessageLookupByLibrary.simpleMessage("タイムアウト"),
     "tip": MessageLookupByLibrary.simpleMessage("ヒント"),
     "todayUsed": MessageLookupByLibrary.simpleMessage("今日の使用量"),

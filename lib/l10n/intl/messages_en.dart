@@ -339,6 +339,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "cloudApiAccessDenied": MessageLookupByLibrary.simpleMessage(
       "Network access denied",
     ),
+    "cloudApiClockSkew": MessageLookupByLibrary.simpleMessage(
+      "The device clock is too far from the server. Turn on automatic date and time, then retry.",
+    ),
     "cloudApiConnectTimeout": MessageLookupByLibrary.simpleMessage(
       "Connection timed out",
     ),
@@ -377,6 +380,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "cloudApiRouteProxy": m2,
     "cloudApiSendTimeout": MessageLookupByLibrary.simpleMessage(
       "Sending the request timed out",
+    ),
+    "cloudApiServerUnconfigured": MessageLookupByLibrary.simpleMessage(
+      "The server has no key configured for this app. Contact support.",
+    ),
+    "cloudApiSignatureRejected": MessageLookupByLibrary.simpleMessage(
+      "The server rejected this app’s signature. Reinstall the latest official build.",
     ),
     "cloudApiSystemError": m3,
     "cloudApiTimeout": MessageLookupByLibrary.simpleMessage(
@@ -1680,9 +1689,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "themeMode": MessageLookupByLibrary.simpleMessage("Theme mode"),
     "tight": MessageLookupByLibrary.simpleMessage("Tight"),
     "time": MessageLookupByLibrary.simpleMessage("Time"),
-    "timeSyncTip": MessageLookupByLibrary.simpleMessage(
-      "The proxy protocol requires the device time and UTC time to be synchronized within a 30-second error margin. Please ensure your device time is accurate.",
-    ),
     "timeout": MessageLookupByLibrary.simpleMessage("Timeout"),
     "tip": MessageLookupByLibrary.simpleMessage("tip"),
     "todayUsed": MessageLookupByLibrary.simpleMessage("Today\'s Usage"),

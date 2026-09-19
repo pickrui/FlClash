@@ -259,6 +259,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "clipboardImport": MessageLookupByLibrary.simpleMessage("剪贴板导入"),
     "close": MessageLookupByLibrary.simpleMessage("关闭"),
     "cloudApiAccessDenied": MessageLookupByLibrary.simpleMessage("系统拒绝网络访问"),
+    "cloudApiClockSkew": MessageLookupByLibrary.simpleMessage(
+      "设备时间与服务器相差过大，请开启自动设置时间后重试",
+    ),
     "cloudApiConnectTimeout": MessageLookupByLibrary.simpleMessage("连接超时"),
     "cloudApiConnectionFailed": MessageLookupByLibrary.simpleMessage("连接失败"),
     "cloudApiConnectionRefused": MessageLookupByLibrary.simpleMessage("连接被拒绝"),
@@ -278,6 +281,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "cloudApiRouteDirect": m1,
     "cloudApiRouteProxy": m2,
     "cloudApiSendTimeout": MessageLookupByLibrary.simpleMessage("发送请求超时"),
+    "cloudApiServerUnconfigured": MessageLookupByLibrary.simpleMessage(
+      "服务端未配置本应用的密钥，请联系客服",
+    ),
+    "cloudApiSignatureRejected": MessageLookupByLibrary.simpleMessage(
+      "服务器拒绝了本应用的签名，请从官方渠道重新安装最新版本",
+    ),
     "cloudApiSystemError": m3,
     "cloudApiTimeout": MessageLookupByLibrary.simpleMessage("请求超时"),
     "cloudApiTlsFailed": MessageLookupByLibrary.simpleMessage("TLS 握手失败"),
@@ -1204,9 +1213,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "themeMode": MessageLookupByLibrary.simpleMessage("主题模式"),
     "tight": MessageLookupByLibrary.simpleMessage("紧凑"),
     "time": MessageLookupByLibrary.simpleMessage("时间"),
-    "timeSyncTip": MessageLookupByLibrary.simpleMessage(
-      "代理协议要求设备时间与世界标准时间误差不得超过 30 秒，请确保您的设备时间准确",
-    ),
     "timeout": MessageLookupByLibrary.simpleMessage("超时"),
     "tip": MessageLookupByLibrary.simpleMessage("提示"),
     "todayUsed": MessageLookupByLibrary.simpleMessage("今日使用"),

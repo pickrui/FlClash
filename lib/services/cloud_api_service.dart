@@ -305,9 +305,10 @@ class CloudApiException implements Exception {
             DioExceptionType.badResponse =>
               error.response?.statusCode == 407
                   ? appLocalizations.cloudApiProxyAuthFailed
-                  : appLocalizations.cloudApiHttpError(
-                      error.response?.statusCode ?? '?',
-                    ),
+                  : _managedAuthError(error.response) ??
+                        appLocalizations.cloudApiHttpError(
+                          error.response?.statusCode ?? '?',
+                        ),
             DioExceptionType.cancel => appLocalizations.cloudApiRequestCanceled,
             DioExceptionType.connectionError ||
             DioExceptionType.unknown => _transportError(
@@ -321,6 +322,22 @@ class CloudApiException implements Exception {
       return appLocalizations.cloudApiRouteProxy(reason);
     }
     return reason;
+  }
+
+  /// The panel names why it rejected a signed managed-config request; a bare
+  /// 403 cannot tell a device-clock problem from a key or build mismatch.
+  static String? _managedAuthError(Response? response) {
+    if (response?.statusCode != HttpStatus.forbidden) return null;
+    return switch (response?.headers.value('x-managed-auth-error')) {
+      'timestamp_expired' => appLocalizations.cloudApiClockSkew,
+      'timestamp_missing' ||
+      'timestamp_invalid' ||
+      'signature_missing' ||
+      'signature_mismatch' ||
+      'age_pubkey_missing' => appLocalizations.cloudApiSignatureRejected,
+      'server_unconfigured' => appLocalizations.cloudApiServerUnconfigured,
+      _ => null,
+    };
   }
 
   // Only emit known categories and numeric codes. Raw transport messages may

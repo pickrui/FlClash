@@ -4259,16 +4259,6 @@ class AppLocalizations {
     );
   }
 
-  /// `The proxy protocol requires the device time and UTC time to be synchronized within a 30-second error margin. Please ensure your device time is accurate.`
-  String get timeSyncTip {
-    return Intl.message(
-      'The proxy protocol requires the device time and UTC time to be synchronized within a 30-second error margin. Please ensure your device time is accurate.',
-      name: 'timeSyncTip',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Logout`
   String get logoutTitle {
     return Intl.message('Logout', name: 'logoutTitle', desc: '', args: []);
@@ -6571,6 +6561,36 @@ class AppLocalizations {
       name: 'cloudApiHttpError',
       desc: '',
       args: [status],
+    );
+  }
+
+  /// `The device clock is too far from the server. Turn on automatic date and time, then retry.`
+  String get cloudApiClockSkew {
+    return Intl.message(
+      'The device clock is too far from the server. Turn on automatic date and time, then retry.',
+      name: 'cloudApiClockSkew',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The server rejected this app’s signature. Reinstall the latest official build.`
+  String get cloudApiSignatureRejected {
+    return Intl.message(
+      'The server rejected this app’s signature. Reinstall the latest official build.',
+      name: 'cloudApiSignatureRejected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The server has no key configured for this app. Contact support.`
+  String get cloudApiServerUnconfigured {
+    return Intl.message(
+      'The server has no key configured for this app. Contact support.',
+      name: 'cloudApiServerUnconfigured',
+      desc: '',
+      args: [],
     );
   }
 

@@ -281,16 +281,7 @@ extension ProfilesControllerExt on AppController {
     if (!this.isStart) {
       final res = await globalState.showMessage(
         title: appLocalizations.startCorePromptTitle,
-        message: TextSpan(
-          children: [
-            TextSpan(text: appLocalizations.startCorePromptContent),
-            const TextSpan(text: '\n\n', style: TextStyle(fontSize: 12)),
-            TextSpan(
-              text: appLocalizations.timeSyncTip,
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-          ],
-        ),
+        message: TextSpan(text: appLocalizations.startCorePromptContent),
       );
       if (res == true) {
         await updateStatus(true);
