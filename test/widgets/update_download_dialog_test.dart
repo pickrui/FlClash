@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:fl_clash/common/request.dart';
 import 'package:fl_clash/common/update_download_task.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/providers/app.dart';
@@ -154,6 +155,44 @@ void main() {
       expect(task.value.file, isNotNull);
     },
   );
+  testWidgets('a discovered release reports the download it started', (
+    tester,
+  ) async {
+    final pending = Completer<File>();
+    final task = AppUpdateDownloadTask();
+    addTearDown(task.dispose);
+    unawaited(task.start((_, _) => pending.future, url: 'fixture'));
+    final notice = await pumpAvailableNotice(tester, task);
+    expect(find.text('Discovery a new version'), findsOneWidget);
+    expect(find.text('0.8.98+2026091910'), findsOneWidget);
+    expect(find.text('Downloading update'), findsOneWidget);
+    expect(find.text(AppLocalizations.current.download), findsNothing);
+    // A finished transfer is reported by the ready notice instead.
+    pending.complete(File('/tmp/update.exe'));
+    await tester.pumpAndSettle();
+    expect(find.text('Discovery a new version'), findsNothing);
+    expect(notice.value, isNotNull);
+  });
+  testWidgets('a release an earlier launch downloaded is offered again', (
+    tester,
+  ) async {
+    final task = AppUpdateDownloadTask();
+    addTearDown(task.dispose);
+    var started = 0;
+    task.addListener(() => started++);
+    final notice = await pumpAvailableNotice(tester, task);
+    await tester.pump(const Duration(minutes: 1));
+    expect(find.text('0.8.98+2026091910'), findsOneWidget);
+    expect(find.text('Downloading update'), findsNothing);
+    expect(find.text(AppLocalizations.current.download), findsOneWidget);
+    expect(task.value.phase, AppUpdateDownloadPhase.idle);
+    expect(started, 0);
+    await tester.tap(find.text(AppLocalizations.current.close));
+    await tester.pumpAndSettle();
+    expect(find.text('Discovery a new version'), findsNothing);
+    expect(notice.value, isNull);
+    expect(task.value.phase, AppUpdateDownloadPhase.idle);
+  });
   testWidgets('background action and ready notice fit a narrow window', (
     tester,
   ) async {
@@ -233,4 +272,28 @@ class _DownloadedFile extends Fake implements File {
     deleted = true;
     return this;
   }
+}
+
+Future<ValueNotifier<AppUpdateInfo?>> pumpAvailableNotice(
+  WidgetTester tester,
+  AppUpdateDownloadTask task,
+) async {
+  final notice = ValueNotifier<AppUpdateInfo?>(
+    const AppUpdateInfo(
+      version: '0.8.98+2026091910',
+      remoteBuildNumber: 2026091910,
+    ),
+  );
+  addTearDown(notice.dispose);
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        appUpdateDownloadProvider.overrideWithValue(task),
+        appUpdateNoticeProvider.overrideWithValue(notice),
+      ],
+      child: _app(const Scaffold(body: AppUpdateAvailableNotice())),
+    ),
+  );
+  await tester.pumpAndSettle();
+  return notice;
 }

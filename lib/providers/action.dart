@@ -24,6 +24,7 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/utils/safe_storage.dart';
 import 'package:fl_clash/views/cloud/cloud_login_page.dart';
 import 'package:fl_clash/widgets/geo_recovery_dialog.dart';
+import 'package:fl_clash/widgets/linux_package_format_dialog.dart';
 import 'package:fl_clash/widgets/port_conflict_dialog.dart';
 import 'package:fl_clash/widgets/update_download_dialog.dart';
 import 'package:material_ui/material_ui.dart';
@@ -632,7 +633,12 @@ Dio createAppUpdateDownloadClient() =>
         findProxy: FlClashHttpOverrides.handleResourceFindProxy,
       );
 
-String? getAppUpdateDownloadUrl(Abi abi) {
+/// [linuxFormat] picks the Linux package; every other platform publishes one
+/// installer per ABI, and arm64 Linux only ships a Debian package.
+String? getAppUpdateDownloadUrl(
+  Abi abi, {
+  LinuxPackageFormat linuxFormat = LinuxPackageFormat.deb,
+}) {
   final name = switch (abi) {
     Abi.windowsX64 => 'windows-amd64-setup.exe',
     Abi.windowsArm64 => 'windows-arm64-setup.exe',
@@ -641,12 +647,17 @@ String? getAppUpdateDownloadUrl(Abi abi) {
     Abi.androidArm => 'android-armeabi-v7a.apk',
     Abi.androidArm64 => 'android-arm64-v8a.apk',
     Abi.androidX64 => 'android-x86_64.apk',
-    Abi.linuxX64 => 'linux-amd64.deb',
-    Abi.linuxArm64 => 'linux-arm64.deb',
+    Abi.linuxX64 => 'linux-amd64.${linuxFormat.extension}',
+    Abi.linuxArm64 => 'linux-arm64.${LinuxPackageFormat.deb.extension}',
     _ => null,
   };
   return name == null ? null : 'https://dl.dler.io/flclash-$name';
 }
+
+/// An AppImage is not installed by a package manager: running the download
+/// would only start a second copy, so the user replaces the image themselves.
+bool isAppImageInstaller(File file) =>
+    p.extension(file.path) == '.${LinuxPackageFormat.appImage.extension}';
 
 String getAppUpdateFallbackDownloadUrl(String downloadUrl) {
   final fileName = Uri.parse(downloadUrl).pathSegments.last;
@@ -656,13 +667,11 @@ String getAppUpdateFallbackDownloadUrl(String downloadUrl) {
   ).toString();
 }
 
-/// Automatic checks start a silent download without opening a prompt.
+/// The window has to be up before the release notes can be confirmed.
 Future<bool?> promptForAppUpdate({
-  required bool isUser,
   required Future<void> Function()? showWindow,
   required Future<bool?> Function() prompt,
 }) async {
-  if (!isUser) return true;
   await showWindow?.call();
   return prompt();
 }

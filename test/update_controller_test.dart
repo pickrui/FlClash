@@ -3,33 +3,15 @@ import 'dart:ffi';
 import 'dart:io';
 
 import 'package:fl_clash/common/constant.dart';
+import 'package:fl_clash/common/linux_package_format.dart';
 import 'package:fl_clash/controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test(
-    'automatic update skips the prompt and keeps a silent launch hidden',
-    () async {
-      var prompted = false;
-      final result = await promptForAppUpdate(
-        isUser: false,
-        showWindow: () async =>
-            fail('background checks must not show the window'),
-        prompt: () async {
-          prompted = true;
-          return true;
-        },
-      );
-      expect(prompted, isFalse);
-      expect(result, isTrue);
-    },
-  );
-
   test('manual update waits for the window before prompting', () async {
     final shown = Completer<void>();
     final events = <String>[];
     final result = promptForAppUpdate(
-      isUser: true,
       showWindow: () {
         events.add('show');
         return shown.future;
@@ -48,11 +30,7 @@ void main() {
 
   test('mobile update prompts without a desktop window', () async {
     expect(
-      await promptForAppUpdate(
-        isUser: true,
-        showWindow: null,
-        prompt: () async => null,
-      ),
+      await promptForAppUpdate(showWindow: null, prompt: () async => null),
       isNull,
     );
   });
@@ -85,6 +63,44 @@ void main() {
     }
     for (final abi in Abi.values.where((abi) => !installers.containsKey(abi))) {
       expect(getAppUpdateDownloadUrl(abi), isNull, reason: abi.toString());
+    }
+  });
+
+  test('every published Linux package format has a download', () {
+    const names = {
+      LinuxPackageFormat.deb: 'linux-amd64.deb',
+      LinuxPackageFormat.rpm: 'linux-amd64.rpm',
+      LinuxPackageFormat.appImage: 'linux-amd64.AppImage',
+    };
+    for (final format in linuxPackageFormatsFor(Abi.linuxX64)) {
+      expect(
+        getAppUpdateDownloadUrl(Abi.linuxX64, linuxFormat: format),
+        'https://dl.dler.io/flclash-${names[format]}',
+        reason: format.name,
+      );
+    }
+    // arm64 publishes a Debian package only, whatever is asked for.
+    for (final format in LinuxPackageFormat.values) {
+      expect(
+        getAppUpdateDownloadUrl(Abi.linuxArm64, linuxFormat: format),
+        'https://dl.dler.io/flclash-linux-arm64.deb',
+        reason: format.name,
+      );
+    }
+  });
+
+  test('only an AppImage download is left to the user to install', () {
+    expect(
+      isAppImageInstaller(File('/tmp/flclash-linux-amd64.AppImage')),
+      isTrue,
+    );
+    for (final name in const [
+      'flclash-linux-amd64.deb',
+      'flclash-linux-amd64.rpm',
+      'flclash-windows-amd64-setup.exe',
+      'AppImage',
+    ]) {
+      expect(isAppImageInstaller(File('/tmp/$name')), isFalse, reason: name);
     }
   });
 

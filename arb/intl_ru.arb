@@ -770,6 +770,8 @@
   "pinWindow": "Закрепить поверх всех окон",
   "minimize": "Свернуть",
   "cloudApiDnsFailed": "Ошибка разрешения DNS",
+  "cloudApiDnsEmpty": "DNS вернул пустой ответ: возможны помехи или сбой системного DNS",
+  "cloudApiDnsUnknownHost": "DNS не нашёл этот домен",
   "cloudApiConnectTimeout": "Время ожидания подключения истекло",
   "cloudApiSendTimeout": "Время отправки запроса истекло",
   "cloudApiReceiveTimeout": "Время ожидания ответа истекло",
@@ -870,5 +872,8 @@
   "updateInstall": "Установить обновление",
   "updateDownloading": "Загрузка обновления",
   "updateDownloadFailed": "Не удалось скачать обновление",
-  "updateDownloadBrowser": "Скачать в браузере"
+  "updateDownloadBrowser": "Скачать в браузере",
+  "updatePackageFormat": "Выберите формат пакета",
+  "updatePackageFormatTip": "Не удалось определить способ установки. Выберите подходящий формат.",
+  "updateAppImageTip": "AppImage нельзя установить автоматически. Замените текущую программу скачанным файлом; его папка открыта."
 }

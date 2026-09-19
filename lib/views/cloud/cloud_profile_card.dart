@@ -165,8 +165,10 @@ class _CloudProfileCardState extends ConsumerState<CloudProfileCard> {
               profile.points,
             ),
             if (clashProfile != null && _paramsLoaded) ...[
-              if (tier != SubscriptionTier.none) ...[
-                const Divider(height: 16),
+              // These options are one choice each way, so a single rule
+              // closes the account figures and none divides the block.
+              const Divider(height: 16),
+              if (tier != SubscriptionTier.none)
                 ListItem.switchItem(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 0,
@@ -188,8 +190,6 @@ class _CloudProfileCardState extends ConsumerState<CloudProfileCard> {
                     },
                   ),
                 ),
-              ],
-              const Divider(height: 16),
               ListItem.switchItem(
                 padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
                 title: Text(
@@ -209,8 +209,7 @@ class _CloudProfileCardState extends ConsumerState<CloudProfileCard> {
                   },
                 ),
               ),
-              if (tier.canSelectEmergency) ...[
-                const Divider(height: 16),
+              if (tier.canSelectEmergency)
                 ListItem.switchItem(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 0,
@@ -231,7 +230,6 @@ class _CloudProfileCardState extends ConsumerState<CloudProfileCard> {
                     },
                   ),
                 ),
-              ],
             ],
           ],
         ),

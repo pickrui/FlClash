@@ -770,6 +770,8 @@
   "pinWindow": "Pin window",
   "minimize": "Minimize",
   "cloudApiDnsFailed": "DNS lookup failed",
+  "cloudApiDnsEmpty": "DNS returned no address, possibly blocked or a broken system resolver",
+  "cloudApiDnsUnknownHost": "DNS could not find this domain",
   "cloudApiConnectTimeout": "Connection timed out",
   "cloudApiSendTimeout": "Sending the request timed out",
   "cloudApiReceiveTimeout": "Waiting for the response timed out",
@@ -870,5 +872,8 @@
   "updateInstall": "Install update",
   "updateDownloading": "Downloading update",
   "updateDownloadFailed": "Update download failed",
-  "updateDownloadBrowser": "Download in browser"
+  "updateDownloadBrowser": "Download in browser",
+  "updatePackageFormat": "Choose the package format",
+  "updatePackageFormatTip": "How this build was installed could not be determined. Pick the format that matches it.",
+  "updateAppImageTip": "An AppImage cannot be installed automatically. Replace the running program with the downloaded file; its folder has been opened."
 }

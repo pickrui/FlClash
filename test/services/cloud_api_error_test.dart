@@ -10,10 +10,11 @@ void main() {
   setUpAll(() => AppLocalizations.load(const Locale('en')));
 
   for (final entry in {
-    11001: 'DNS lookup failed',
+    11001: 'DNS could not find this domain',
     11002: 'DNS lookup failed',
     11003: 'DNS lookup failed',
-    11004: 'DNS lookup failed',
+    11004:
+        'DNS returned no address, possibly blocked or a broken system resolver',
     10061: 'Connection refused',
     10054: 'Connection reset',
     10060: 'Connection timed out',
@@ -67,10 +68,38 @@ void main() {
             ),
           ),
         ),
-        'Direct: DNS lookup failed',
+        'Direct: DNS could not find this domain',
       );
     },
   );
+
+  // An empty answer means the name resolved to nothing, which points at
+  // interference or a broken resolver rather than at the domain.
+  for (final entry in {
+    (7, 'No address associated with hostname'):
+        'DNS returned no address, possibly blocked or a broken system '
+        'resolver (System error 7)',
+    (-5, 'No address associated with hostname'):
+        'DNS returned no address, possibly blocked or a broken system resolver',
+    (8, 'nodename nor servname provided, or not known'):
+        'DNS could not find this domain (System error 8)',
+    (-3, 'Temporary failure in name resolution'): 'DNS lookup failed',
+  }.entries) {
+    final (code, systemMessage) = entry.key;
+    test('host lookup code $code is diagnosed on its own', () {
+      expect(
+        CloudApiException.clean(
+          _networkError(
+            SocketException(
+              "Failed host lookup: 'private-api.example'",
+              osError: OSError(systemMessage, code),
+            ),
+          ),
+        ),
+        'Direct: ${entry.value}',
+      );
+    });
+  }
 
   test(
     'TLS interruption is distinct from certificate verification failure',

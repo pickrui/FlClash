@@ -6444,6 +6444,26 @@ class AppLocalizations {
     );
   }
 
+  /// `DNS returned no address, possibly blocked or a broken system resolver`
+  String get cloudApiDnsEmpty {
+    return Intl.message(
+      'DNS returned no address, possibly blocked or a broken system resolver',
+      name: 'cloudApiDnsEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `DNS could not find this domain`
+  String get cloudApiDnsUnknownHost {
+    return Intl.message(
+      'DNS could not find this domain',
+      name: 'cloudApiDnsUnknownHost',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Connection timed out`
   String get cloudApiConnectTimeout {
     return Intl.message(
@@ -7419,6 +7439,36 @@ class AppLocalizations {
     return Intl.message(
       'Download in browser',
       name: 'updateDownloadBrowser',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose the package format`
+  String get updatePackageFormat {
+    return Intl.message(
+      'Choose the package format',
+      name: 'updatePackageFormat',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `How this build was installed could not be determined. Pick the format that matches it.`
+  String get updatePackageFormatTip {
+    return Intl.message(
+      'How this build was installed could not be determined. Pick the format that matches it.',
+      name: 'updatePackageFormatTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `An AppImage cannot be installed automatically. Replace the running program with the downloaded file; its folder has been opened.`
+  String get updateAppImageTip {
+    return Intl.message(
+      'An AppImage cannot be installed automatically. Replace the running program with the downloaded file; its folder has been opened.',
+      name: 'updateAppImageTip',
       desc: '',
       args: [],
     );

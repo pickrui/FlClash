@@ -116,40 +116,112 @@ class AppUpdateReadyNotice extends ConsumerWidget {
             task.hasForegroundView) {
           return const SizedBox.shrink();
         }
-        return Align(
-          alignment: Alignment.centerRight,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 500),
-            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(l.updateReady, style: context.textTheme.titleSmall),
-                    const SizedBox(height: 4),
-                    Text(l.updateReadyHint),
-                    Wrap(
-                      spacing: 8,
-                      children: [
-                        FilledButton(
-                          onPressed: () => appController.installAppUpdate(),
-                          child: Text(l.updateInstall),
-                        ),
-                        TextButton(
-                          onPressed: task.dismissNotice,
-                          child: Text(l.close),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+        return _UpdateNoticeCard(
+          title: l.updateReady,
+          message: l.updateReadyHint,
+          actions: [
+            FilledButton(
+              onPressed: () => appController.installAppUpdate(),
+              child: Text(l.updateInstall),
             ),
-          ),
+            TextButton(onPressed: task.dismissNotice, child: Text(l.close)),
+          ],
         );
       },
+    );
+  }
+}
+
+/// Reports what an automatic check found. The installer is already on its way,
+/// so this only names the release; the ready notice takes over once it lands.
+/// A release downloaded by an earlier launch is offered here instead.
+class AppUpdateAvailableNotice extends ConsumerWidget {
+  const AppUpdateAvailableNotice({super.key});
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final notice = ref.watch(appUpdateNoticeProvider);
+    final task = ref.watch(appUpdateDownloadProvider);
+    final l = context.appLocalizations;
+    return ValueListenableBuilder(
+      valueListenable: notice,
+      builder: (context, info, _) {
+        if (info == null) return const SizedBox.shrink();
+        return ValueListenableBuilder(
+          valueListenable: task,
+          builder: (context, state, _) {
+            final downloading =
+                state.phase == AppUpdateDownloadPhase.downloading;
+            // A finished or failed transfer is reported by its own notice and
+            // by the About entry; two cards would say the same thing twice.
+            if (!downloading && task.hasDownload) {
+              return const SizedBox.shrink();
+            }
+            return _UpdateNoticeCard(
+              title: l.discovery,
+              message: info.version.isEmpty ? l.noInfo : info.version,
+              detail: downloading ? l.updateDownloading : null,
+              actions: [
+                if (!downloading)
+                  FilledButton(
+                    onPressed: () => appController.acceptUpdateNotice(),
+                    child: Text(l.download),
+                  ),
+                TextButton(
+                  onPressed: () => notice.value = null,
+                  child: Text(l.close),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _UpdateNoticeCard extends StatelessWidget {
+  const _UpdateNoticeCard({
+    required this.title,
+    required this.message,
+    required this.actions,
+    this.detail,
+  });
+
+  final String title;
+  final String message;
+  final String? detail;
+  final List<Widget> actions;
+
+  @override
+  Widget build(BuildContext context) {
+    final detail = this.detail;
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 500),
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: context.textTheme.titleSmall),
+                const SizedBox(height: 4),
+                Text(message),
+                if (detail != null)
+                  Text(
+                    detail,
+                    style: context.textTheme.bodySmall?.copyWith(
+                      color: context.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                Wrap(spacing: 8, children: actions),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -31,7 +31,8 @@ extension InitControllerExt on AppController {
       return false;
     };
     updateTray();
-    checkUpdate();
+    // Clear last launch's installers before a check can download a new one.
+    unawaited(_sweepUpdateDownloads().then((_) => checkUpdate()));
     await autoLaunch?.updateStatus(_ref.read(appSettingProvider).autoLaunch);
     final silentLaunch = shouldLaunchSilently(
       enabled: _ref.read(appSettingProvider).silentLaunch,
@@ -74,6 +75,22 @@ extension InitControllerExt on AppController {
         title: appLocalizations.startupRecoveryTitle,
         message: TextSpan(text: appLocalizations.startupRecoveryTip),
         cancelable: false,
+      );
+    }
+  }
+
+  /// An installer handed to the system outlives the launch that downloaded it,
+  /// and a ready download does not survive a restart, so nothing in this launch
+  /// can reach what an earlier one left behind.
+  Future<void> _sweepUpdateDownloads() async {
+    final task = _ref.read(appUpdateDownloadProvider);
+    if (task.hasDownload) return;
+    try {
+      await sweepStaleUpdateDownloads(await appPath.tempDir.future);
+    } catch (error) {
+      commonPrint.log(
+        'update download sweep failed: $error',
+        logLevel: LogLevel.warning,
       );
     }
   }
@@ -170,15 +187,23 @@ extension InitControllerExt on AppController {
       }
       return;
     }
-    if (!isUser &&
-        updateInfo.remoteBuildNumber <=
-            await preferences.getLastSilentUpdateBuild()) {
-      // Already downloaded once and not installed; a manual check still
-      // offers it, but every launch must not fetch the installer again.
+    if (!isUser) {
+      // Name the release the automatic check found. The transfer starts on its
+      // own, so the notice reports it instead of asking for a decision.
+      _ref.read(appUpdateNoticeProvider).value = updateInfo;
+      if (updateInfo.remoteBuildNumber <=
+          await preferences.getLastSilentUpdateBuild()) {
+        // Already downloaded once and not installed. The notice offers it
+        // again rather than fetching the same installer on every launch.
+        return;
+      }
+      await _startAppUpdateDownload(
+        foreground: false,
+        remoteBuildNumber: updateInfo.remoteBuildNumber,
+      );
       return;
     }
     final res = await promptForAppUpdate(
-      isUser: isUser,
       showWindow: window?.show,
       prompt: () => globalState.showMessage(
         title: appLocalizations.discovery,
@@ -190,18 +215,74 @@ extension InitControllerExt on AppController {
     if (res != true) {
       return;
     }
-    final downloadUrl = getAppUpdateDownloadUrl(Abi.current());
-    // Download errors live in the task state (dialog / About); only opening a
-    // browser or the dialog can throw here.
-    await safeRun<void>(
-      () => _downloadAppUpdate(
-        downloadUrl,
-        foreground: isUser,
-        remoteBuildNumber: updateInfo!.remoteBuildNumber,
-      ),
-      title: appLocalizations.checkUpdate,
-      silence: !isUser,
+    await _startAppUpdateDownload(
+      foreground: true,
+      remoteBuildNumber: updateInfo.remoteBuildNumber,
     );
+  }
+
+  /// Fetches a release the notice reported but did not download itself.
+  Future<void> acceptUpdateNotice() async {
+    final updateInfo = _ref.read(appUpdateNoticeProvider).value;
+    if (updateInfo == null) return;
+    await _startAppUpdateDownload(
+      foreground: true,
+      remoteBuildNumber: updateInfo.remoteBuildNumber,
+    );
+  }
+
+  Future<void> _startAppUpdateDownload({
+    required bool foreground,
+    required int remoteBuildNumber,
+  }) async {
+    // Download errors live in the task state (notice / dialog / About); only
+    // choosing a package, opening a browser or the dialog can throw here.
+    await safeRun<void>(
+      () async {
+        var linuxFormat = LinuxPackageFormat.deb;
+        if (system.isLinux) {
+          final format = await _resolveLinuxPackageFormat(
+            foreground: foreground,
+          );
+          // Only the user can settle this, and only with the window in front.
+          // The notice keeps offering the release until they answer.
+          if (format == null) return;
+          linuxFormat = format;
+        }
+        await _downloadAppUpdate(
+          getAppUpdateDownloadUrl(Abi.current(), linuxFormat: linuxFormat),
+          foreground: foreground,
+          remoteBuildNumber: remoteBuildNumber,
+        );
+      },
+      title: appLocalizations.checkUpdate,
+      silence: !foreground,
+    );
+  }
+
+  /// Picks the package to download: a stored answer, then detection, then the
+  /// user. Returns null while the question is still open.
+  Future<LinuxPackageFormat?> _resolveLinuxPackageFormat({
+    required bool foreground,
+  }) async {
+    final formats = linuxPackageFormatsFor(Abi.current());
+    // An ABI that publishes no Linux package at all (32-bit ARM, riscv) keeps
+    // falling through to the download page rather than asking about formats.
+    if (formats.isEmpty) return LinuxPackageFormat.deb;
+    if (formats.length == 1) return formats.first;
+    final stored = LinuxPackageFormat.fromName(
+      await preferences.getLinuxPackageFormat(),
+    );
+    if (stored != null && formats.contains(stored)) return stored;
+    final detected = await detectLinuxPackageFormat();
+    if (detected != null && formats.contains(detected)) return detected;
+    if (!foreground) return null;
+    await window?.show();
+    final picked = await globalState.showCommonDialog<LinuxPackageFormat>(
+      child: LinuxPackageFormatDialog(formats: formats),
+    );
+    if (picked != null) await preferences.setLinuxPackageFormat(picked.name);
+    return picked;
   }
 
   Future<void> _downloadAppUpdate(
@@ -291,6 +372,11 @@ extension InitControllerExt on AppController {
     _openingUpdateInstaller = true;
     try {
       await safeRun(() async {
+        if (isAppImageInstaller(file)) {
+          await _revealAppImageUpdate(file);
+          task.dismissNotice();
+          return;
+        }
         await openAppUpdateDownload(
           file: file,
           openFile: (file) => system.isAndroid
@@ -310,6 +396,19 @@ extension InitControllerExt on AppController {
     } finally {
       _openingUpdateInstaller = false;
     }
+  }
+
+  /// An AppImage replaces itself by hand, so the download is only shown.
+  Future<void> _revealAppImageUpdate(File file) async {
+    await launchUrl(
+      Uri.file(file.parent.path),
+      mode: LaunchMode.externalApplication,
+    );
+    await globalState.showMessage(
+      title: appLocalizations.updateReady,
+      message: TextSpan(text: appLocalizations.updateAppImageTip),
+      cancelable: false,
+    );
   }
 
   Future<void> _openUpdateDownloadUrl(String downloadUrl) async {

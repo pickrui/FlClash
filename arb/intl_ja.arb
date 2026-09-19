@@ -770,6 +770,8 @@
   "pinWindow": "最前面に固定",
   "minimize": "最小化",
   "cloudApiDnsFailed": "DNS 名前解決に失敗しました",
+  "cloudApiDnsEmpty": "DNS が空の応答を返しました。妨害またはシステム DNS の異常の可能性があります",
+  "cloudApiDnsUnknownHost": "DNS がこのドメインを見つけられませんでした",
   "cloudApiConnectTimeout": "接続がタイムアウトしました",
   "cloudApiSendTimeout": "リクエスト送信がタイムアウトしました",
   "cloudApiReceiveTimeout": "サーバー応答がタイムアウトしました",
@@ -870,5 +872,8 @@
   "updateInstall": "更新をインストール",
   "updateDownloading": "更新をダウンロード中",
   "updateDownloadFailed": "更新のダウンロードに失敗しました",
-  "updateDownloadBrowser": "ブラウザーでダウンロード"
+  "updateDownloadBrowser": "ブラウザーでダウンロード",
+  "updatePackageFormat": "パッケージ形式を選択",
+  "updatePackageFormatTip": "インストール方法を判別できませんでした。一致する形式を選んでください。",
+  "updateAppImageTip": "AppImage は自動インストールできません。ダウンロードしたファイルで現在のプログラムを置き換えてください。保存先のフォルダーを開きました。"
 }

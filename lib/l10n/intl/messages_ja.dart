@@ -289,8 +289,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "cloudApiConnectionReset": MessageLookupByLibrary.simpleMessage(
       "接続がリセットされました",
     ),
+    "cloudApiDnsEmpty": MessageLookupByLibrary.simpleMessage(
+      "DNS が空の応答を返しました。妨害またはシステム DNS の異常の可能性があります",
+    ),
     "cloudApiDnsFailed": MessageLookupByLibrary.simpleMessage(
       "DNS 名前解決に失敗しました",
+    ),
+    "cloudApiDnsUnknownHost": MessageLookupByLibrary.simpleMessage(
+      "DNS がこのドメインを見つけられませんでした",
     ),
     "cloudApiHttpError": m0,
     "cloudApiInvalidResponse": MessageLookupByLibrary.simpleMessage(
@@ -1406,6 +1412,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("無題"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("固定を解除"),
     "update": MessageLookupByLibrary.simpleMessage("更新"),
+    "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
+      "AppImage は自動インストールできません。ダウンロードしたファイルで現在のプログラムを置き換えてください。保存先のフォルダーを開きました。",
+    ),
     "updateDownloadBackground": MessageLookupByLibrary.simpleMessage(
       "バックグラウンドでダウンロード",
     ),
@@ -1417,6 +1426,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "updateDownloading": MessageLookupByLibrary.simpleMessage("更新をダウンロード中"),
     "updateInstall": MessageLookupByLibrary.simpleMessage("更新をインストール"),
+    "updatePackageFormat": MessageLookupByLibrary.simpleMessage("パッケージ形式を選択"),
+    "updatePackageFormatTip": MessageLookupByLibrary.simpleMessage(
+      "インストール方法を判別できませんでした。一致する形式を選んでください。",
+    ),
     "updateReady": MessageLookupByLibrary.simpleMessage("更新の準備ができました"),
     "updateReadyHint": MessageLookupByLibrary.simpleMessage(
       "更新のダウンロードが完了しました。都合のよいときにインストールできます",

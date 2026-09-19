@@ -354,8 +354,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "cloudApiConnectionReset": MessageLookupByLibrary.simpleMessage(
       "Connection reset",
     ),
+    "cloudApiDnsEmpty": MessageLookupByLibrary.simpleMessage(
+      "DNS returned no address, possibly blocked or a broken system resolver",
+    ),
     "cloudApiDnsFailed": MessageLookupByLibrary.simpleMessage(
       "DNS lookup failed",
+    ),
+    "cloudApiDnsUnknownHost": MessageLookupByLibrary.simpleMessage(
+      "DNS could not find this domain",
     ),
     "cloudApiHttpError": m0,
     "cloudApiInvalidResponse": MessageLookupByLibrary.simpleMessage(
@@ -1727,6 +1733,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("Unnamed"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("Unpin window"),
     "update": MessageLookupByLibrary.simpleMessage("Update"),
+    "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
+      "An AppImage cannot be installed automatically. Replace the running program with the downloaded file; its folder has been opened.",
+    ),
     "updateDownloadBackground": MessageLookupByLibrary.simpleMessage(
       "Download in background",
     ),
@@ -1740,6 +1749,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Downloading update",
     ),
     "updateInstall": MessageLookupByLibrary.simpleMessage("Install update"),
+    "updatePackageFormat": MessageLookupByLibrary.simpleMessage(
+      "Choose the package format",
+    ),
+    "updatePackageFormatTip": MessageLookupByLibrary.simpleMessage(
+      "How this build was installed could not be determined. Pick the format that matches it.",
+    ),
     "updateReady": MessageLookupByLibrary.simpleMessage(
       "Update ready to install",
     ),

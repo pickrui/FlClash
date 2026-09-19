@@ -55,6 +55,7 @@ IOHttpClientAdapter createFlClashHttpClientAdapter({
   required String Function(Uri uri) findProxy,
   bool Function()? allowBadCertificate,
   String? Function()? userAgent,
+  HostResolver? resolver,
 }) {
   return _FlClashHttpClientAdapter(
     createHttpClient: () {
@@ -64,6 +65,16 @@ IOHttpClientAdapter createFlClashHttpClientAdapter({
       );
       client.badCertificateCallback = (_, _, _) =>
           allowBadCertificate?.call() ?? false;
+      if (resolver != null) {
+        client.connectionFactory = (uri, proxyHost, proxyPort) =>
+            connectWithResolver(
+              uri,
+              proxyHost,
+              proxyPort,
+              resolver: resolver,
+              allowBadCertificate: allowBadCertificate,
+            );
+      }
       client.findProxy = (uri) {
         final ua = userAgent?.call();
         if (ua != null && ua.isNotEmpty) {
@@ -74,6 +85,66 @@ IOHttpClientAdapter createFlClashHttpClientAdapter({
       return client;
     },
   );
+}
+
+/// Opens the connection over an address [resolver] chose. A direct HTTPS
+/// request is secured here, because a client with a connection factory hands
+/// the socket to the request untouched; the handshake still names the URL's
+/// host, so the certificate is checked against the domain and not the address.
+/// Proxied requests keep Dart's own path: it opens the tunnel and secures it.
+Future<ConnectionTask<Socket>> connectWithResolver(
+  Uri uri,
+  String? proxyHost,
+  int? proxyPort, {
+  required HostResolver resolver,
+  bool Function()? allowBadCertificate,
+}) async {
+  if (proxyHost != null) {
+    // Never fall through to a direct connection for a proxied request.
+    return Socket.startConnect(proxyHost, proxyPort!);
+  }
+  final secure = uri.isScheme('https');
+  final port = uri.hasPort ? uri.port : (secure ? 443 : 80);
+  final addresses = await resolver.resolve(uri.host);
+  ConnectionTask<Socket>? pending;
+  var canceled = false;
+  Future<Socket> connect() async {
+    Object? lastError;
+    StackTrace? lastStackTrace;
+    for (final address in addresses) {
+      if (canceled) throw const SocketException('Connection attempt cancelled');
+      try {
+        final task = pending = await Socket.startConnect(address, port);
+        final socket = await task.socket;
+        if (canceled) {
+          socket.destroy();
+          throw const SocketException('Connection attempt cancelled');
+        }
+        final connected = secure
+            ? await SecureSocket.secure(
+                socket,
+                host: uri.host,
+                onBadCertificate: (_) => allowBadCertificate?.call() ?? false,
+              )
+            : socket;
+        resolver.confirm(uri.host, address);
+        return connected;
+      } catch (error, stackTrace) {
+        if (canceled) rethrow;
+        lastError = error;
+        lastStackTrace = stackTrace;
+      }
+    }
+    if (lastError != null) {
+      Error.throwWithStackTrace(lastError, lastStackTrace!);
+    }
+    throw SocketException('No address for \'${uri.host}\'');
+  }
+
+  return ConnectionTask.fromSocket<Socket>(connect(), () {
+    canceled = true;
+    pending?.cancel();
+  });
 }
 
 class _FlClashHttpClientAdapter extends IOHttpClientAdapter {

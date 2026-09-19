@@ -78,6 +78,29 @@ class Preferences {
     await preferences?.setInt('last_silent_update_build', buildNumber);
   }
 
+  /// The Linux package format the user picked when detection came up empty.
+  Future<String?> getLinuxPackageFormat() async {
+    final preferences = await _loadSharedPreferences();
+    return preferences?.getString('linux_package_format');
+  }
+
+  Future<void> setLinuxPackageFormat(String format) async {
+    final preferences = await _loadSharedPreferences();
+    await preferences?.setString('linux_package_format', format);
+  }
+
+  /// Addresses that recently carried a connection, so a resolver answering
+  /// with nothing cannot cut the app off from a host it just reached.
+  Future<String?> getHostAddressCache() async {
+    final preferences = await _loadSharedPreferences();
+    return preferences?.getString('host_address_cache');
+  }
+
+  Future<void> setHostAddressCache(String value) async {
+    final preferences = await _loadSharedPreferences();
+    await preferences?.setString('host_address_cache', value);
+  }
+
   Future<void> saveShareState(SharedState shareState) async {
     final preferences = await _loadSharedPreferences();
     await preferences?.setString('sharedState', json.encode(shareState));

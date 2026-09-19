@@ -266,7 +266,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "cloudApiConnectionFailed": MessageLookupByLibrary.simpleMessage("连接失败"),
     "cloudApiConnectionRefused": MessageLookupByLibrary.simpleMessage("连接被拒绝"),
     "cloudApiConnectionReset": MessageLookupByLibrary.simpleMessage("连接被重置"),
+    "cloudApiDnsEmpty": MessageLookupByLibrary.simpleMessage(
+      "DNS 返回空结果，可能被拦截或系统 DNS 异常",
+    ),
     "cloudApiDnsFailed": MessageLookupByLibrary.simpleMessage("DNS 解析失败"),
+    "cloudApiDnsUnknownHost": MessageLookupByLibrary.simpleMessage(
+      "DNS 未找到该域名",
+    ),
     "cloudApiHttpError": m0,
     "cloudApiInvalidResponse": MessageLookupByLibrary.simpleMessage(
       "服务器响应格式无效",
@@ -1243,11 +1249,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("未命名"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("取消置顶"),
     "update": MessageLookupByLibrary.simpleMessage("更新"),
+    "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
+      "AppImage 无法自动安装，请用下载的文件替换当前程序，已打开文件所在目录",
+    ),
     "updateDownloadBackground": MessageLookupByLibrary.simpleMessage("移到后台下载"),
     "updateDownloadBrowser": MessageLookupByLibrary.simpleMessage("使用浏览器下载"),
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage("更新下载失败"),
     "updateDownloading": MessageLookupByLibrary.simpleMessage("正在下载更新"),
     "updateInstall": MessageLookupByLibrary.simpleMessage("安装更新"),
+    "updatePackageFormat": MessageLookupByLibrary.simpleMessage("选择安装包格式"),
+    "updatePackageFormatTip": MessageLookupByLibrary.simpleMessage(
+      "无法确定当前的安装方式，请选择与之匹配的格式",
+    ),
     "updateReady": MessageLookupByLibrary.simpleMessage("更新已就绪"),
     "updateReadyHint": MessageLookupByLibrary.simpleMessage("更新已下载完成，可在方便时安装"),
     "upgradePlan": MessageLookupByLibrary.simpleMessage("升级套餐"),

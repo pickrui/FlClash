@@ -88,10 +88,21 @@ List<String> _cloudReadRoutes(Uri uri) {
   return routes.isEmpty ? const ['DIRECT'] : routes;
 }
 
+/// The direct route resolves through whatever the tunnel left in place, which
+/// answers with nothing while the core restarts and for a family it does not
+/// serve. One resolver across both adapters keeps what worked.
+final _cloudHostResolver = HostResolver(
+  store: (
+    read: preferences.getHostAddressCache,
+    write: preferences.setHostAddressCache,
+  ),
+);
+
 HttpClientAdapter _createCloudApiAdapter() => CloudReadRouteAdapter(
   fallback: createFlClashHttpClientAdapter(
     findProxy: FlClashHttpOverrides.handleCloudApiFindProxy,
     allowBadCertificate: () => FlClashTemporaryTls.allowBadCertificate,
+    resolver: _cloudHostResolver,
   ),
   createRouteAdapter: (route) => createFlClashHttpClientAdapter(
     findProxy: (uri) {
@@ -102,6 +113,7 @@ HttpClientAdapter _createCloudApiAdapter() => CloudReadRouteAdapter(
           : route;
     },
     allowBadCertificate: () => FlClashTemporaryTls.allowBadCertificate,
+    resolver: _cloudHostResolver,
   ),
 );
 
@@ -370,15 +382,14 @@ class CloudApiException implements Exception {
 
   static String _socketError(SocketException error) {
     final code = error.osError?.errorCode;
-    final message = error.message.toLowerCase();
+    // The resolver's own wording only reaches the system error, while the
+    // socket message names the stage. Both are matched, neither is shown.
+    final message = '${error.message} ${error.osError?.message ?? ''}'
+        .toLowerCase();
     final String reason;
-    if (const {11001, 11002, 11003, 11004}.contains(code) ||
-        message.contains('failed host lookup') ||
-        message.contains('name or service not known') ||
-        message.contains('nodename nor servname') ||
-        message.contains('no address associated') ||
-        message.contains('name resolution')) {
-      reason = appLocalizations.cloudApiDnsFailed;
+    final dns = _dnsError(code, message);
+    if (dns != null) {
+      reason = dns;
     } else if (code == 10061 || message.contains('connection refused')) {
       reason = appLocalizations.cloudApiConnectionRefused;
     } else if (code == 10054 ||
@@ -399,6 +410,39 @@ class CloudApiException implements Exception {
     return code == null || code < 0
         ? reason
         : '$reason (${appLocalizations.cloudApiSystemError(code)})';
+  }
+
+  /// The lookup diagnosis, or null when the failure was not a lookup at all.
+  /// An answer without an address is not an unknown name: the first points at
+  /// interference or a resolver that cannot answer, the second at the domain.
+  /// Resolver codes are positive on macOS, Android and the BSDs, negative in
+  /// glibc, and five digits on Windows, so a code alone never decides.
+  static String? _dnsError(int? code, String message) {
+    const empty = {11004, 7, -5};
+    const unknownHost = {11001, 8, -2};
+    final emptyAnswer =
+        message.contains('no address associated') ||
+        message.contains('no data record');
+    final unknownName =
+        message.contains('name or service not known') ||
+        message.contains('nodename nor servname') ||
+        message.contains('no such host');
+    final lookup =
+        emptyAnswer ||
+        unknownName ||
+        const {11002, 11003}.contains(code) ||
+        empty.contains(code) ||
+        unknownHost.contains(code) ||
+        message.contains('failed host lookup') ||
+        message.contains('name resolution');
+    if (!lookup) return null;
+    if (emptyAnswer || empty.contains(code)) {
+      return appLocalizations.cloudApiDnsEmpty;
+    }
+    if (unknownName || unknownHost.contains(code)) {
+      return appLocalizations.cloudApiDnsUnknownHost;
+    }
+    return appLocalizations.cloudApiDnsFailed;
   }
 
   static bool isCertificateVerifyFailed(Object error) {

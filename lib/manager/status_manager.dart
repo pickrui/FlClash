@@ -186,6 +186,7 @@ class StatusManagerState extends State<StatusManager> {
                   ),
                 ),
               ),
+              const AppUpdateAvailableNotice(),
               const AppUpdateReadyNotice(),
             ],
           ),

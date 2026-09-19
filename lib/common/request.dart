@@ -14,11 +14,18 @@ import 'bounded_http_client_adapter.dart';
 import 'http_read_race.dart';
 
 class AppUpdateInfo {
-  const AppUpdateInfo({this.releaseNotes, this.remoteBuildNumber = 0});
+  const AppUpdateInfo({
+    this.releaseNotes,
+    this.version = '',
+    this.remoteBuildNumber = 0,
+  });
 
   final String? releaseNotes;
 
-  /// Build number of the offered release, used to download it silently once.
+  /// Full version of the offered release, shown by the discovery notice.
+  final String version;
+
+  /// Build number of the offered release.
   final int remoteBuildNumber;
 }
 
@@ -475,6 +482,7 @@ class Request {
                   await _fetchReleaseNotes(tagName);
         return AppUpdateInfo(
           releaseNotes: releaseNotes,
+          version: remoteVersion.trim(),
           remoteBuildNumber: remoteBuildNumber,
         );
       } catch (_) {

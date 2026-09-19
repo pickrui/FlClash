@@ -366,8 +366,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "cloudApiConnectionReset": MessageLookupByLibrary.simpleMessage(
       "Соединение сброшено",
     ),
+    "cloudApiDnsEmpty": MessageLookupByLibrary.simpleMessage(
+      "DNS вернул пустой ответ: возможны помехи или сбой системного DNS",
+    ),
     "cloudApiDnsFailed": MessageLookupByLibrary.simpleMessage(
       "Ошибка разрешения DNS",
+    ),
+    "cloudApiDnsUnknownHost": MessageLookupByLibrary.simpleMessage(
+      "DNS не нашёл этот домен",
     ),
     "cloudApiHttpError": m0,
     "cloudApiInvalidResponse": MessageLookupByLibrary.simpleMessage(
@@ -1814,6 +1820,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("Без имени"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("Открепить окно"),
     "update": MessageLookupByLibrary.simpleMessage("Обновить"),
+    "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
+      "AppImage нельзя установить автоматически. Замените текущую программу скачанным файлом; его папка открыта.",
+    ),
     "updateDownloadBackground": MessageLookupByLibrary.simpleMessage(
       "Скачать в фоне",
     ),
@@ -1828,6 +1837,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "updateInstall": MessageLookupByLibrary.simpleMessage(
       "Установить обновление",
+    ),
+    "updatePackageFormat": MessageLookupByLibrary.simpleMessage(
+      "Выберите формат пакета",
+    ),
+    "updatePackageFormatTip": MessageLookupByLibrary.simpleMessage(
+      "Не удалось определить способ установки. Выберите подходящий формат.",
     ),
     "updateReady": MessageLookupByLibrary.simpleMessage(
       "Обновление готово к установке",

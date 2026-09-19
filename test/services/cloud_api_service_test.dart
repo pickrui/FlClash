@@ -396,7 +396,7 @@ void main() {
           throwsA(
             predicate<Object>((error) {
               final message = CloudApiException.clean(error);
-              expect(message, contains('DNS lookup failed'));
+              expect(message, contains('DNS could not find this domain'));
               expect(message, contains('11001'));
               expect(message, isNot(contains('private-api')));
               expect(message, isNot(contains('private-token')));

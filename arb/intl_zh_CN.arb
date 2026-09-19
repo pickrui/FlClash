@@ -770,6 +770,8 @@
   "pinWindow": "窗口置顶",
   "minimize": "最小化",
   "cloudApiDnsFailed": "DNS 解析失败",
+  "cloudApiDnsEmpty": "DNS 返回空结果，可能被拦截或系统 DNS 异常",
+  "cloudApiDnsUnknownHost": "DNS 未找到该域名",
   "cloudApiConnectTimeout": "连接超时",
   "cloudApiSendTimeout": "发送请求超时",
   "cloudApiReceiveTimeout": "等待服务器响应超时",
@@ -870,5 +872,8 @@
   "updateInstall": "安装更新",
   "updateDownloading": "正在下载更新",
   "updateDownloadFailed": "更新下载失败",
-  "updateDownloadBrowser": "使用浏览器下载"
+  "updateDownloadBrowser": "使用浏览器下载",
+  "updatePackageFormat": "选择安装包格式",
+  "updatePackageFormatTip": "无法确定当前的安装方式，请选择与之匹配的格式",
+  "updateAppImageTip": "AppImage 无法自动安装，请用下载的文件替换当前程序，已打开文件所在目录"
 }
