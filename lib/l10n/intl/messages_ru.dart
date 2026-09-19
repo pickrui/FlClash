@@ -638,6 +638,34 @@ class MessageLookup extends MessageLookupByLibrary {
       "Проверка ядра, системного прокси, TUN и DNS",
     ),
     "diagFailed": MessageLookupByLibrary.simpleMessage("Ошибка"),
+    "diagFixApplyProfile": MessageLookupByLibrary.simpleMessage(
+      "Применить конфигурацию",
+    ),
+    "diagFixEnableSystemProxy": MessageLookupByLibrary.simpleMessage(
+      "Включить системный прокси",
+    ),
+    "diagFixFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось применить исправление. Следуйте рекомендации выше",
+    ),
+    "diagFixRestartConnection": MessageLookupByLibrary.simpleMessage(
+      "Переподключиться",
+    ),
+    "diagFixRestartCore": MessageLookupByLibrary.simpleMessage(
+      "Перезапустить ядро",
+    ),
+    "diagFixRetest": MessageLookupByLibrary.simpleMessage(
+      "Повторить тест узлов",
+    ),
+    "diagFixStart": MessageLookupByLibrary.simpleMessage(
+      "Запустить подключение",
+    ),
+    "diagFixSystemProxy": MessageLookupByLibrary.simpleMessage(
+      "Переустановить системный прокси",
+    ),
+    "diagFixTun": MessageLookupByLibrary.simpleMessage("Включить TUN заново"),
+    "diagFixing": MessageLookupByLibrary.simpleMessage(
+      "Применяется исправление, затем проверка повторится",
+    ),
     "diagListener": MessageLookupByLibrary.simpleMessage(
       "Локальный вход прокси",
     ),

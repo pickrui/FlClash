@@ -38,6 +38,28 @@ Future<File> downloadAppUpdate({
   }
 }
 
+/// Removes staging directories left by earlier downloads. [keep] is the file
+/// of a download the app still owns; its directory is left alone.
+Future<void> sweepStaleUpdateDownloads(
+  Directory directory, {
+  File? keep,
+}) async {
+  if (!await directory.exists()) return;
+  final keepDir = keep == null ? null : p.normalize(keep.parent.path);
+  await for (final entry in directory.list(followLinks: false)) {
+    if (entry is! Directory ||
+        !p.basename(entry.path).startsWith('flclash-update-') ||
+        p.normalize(entry.path) == keepDir) {
+      continue;
+    }
+    try {
+      await entry.delete(recursive: true);
+    } on FileSystemException {
+      /* Still in use (an installer being opened) or already removed. */
+    }
+  }
+}
+
 bool _isUpdateSourceFailure(Object? error) {
   if (error is DioException) {
     if (error.type == DioExceptionType.cancel ||

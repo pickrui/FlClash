@@ -1089,6 +1089,10 @@ extension ProfilesExt on List<Profile> {
   }
 }
 
+/// oixCloud snapshot paths already validated by the core, keyed to the file's
+/// (modified, size) at validation time.
+final _validatedSnapshots = <String, (int, int)>{};
+
 extension ProfileExtension on Profile {
   ProfileType get type => url.isEmpty ? ProfileType.file : ProfileType.url;
 
@@ -1120,8 +1124,16 @@ extension ProfileExtension on Profile {
       return mFile.path;
     }
 
+    // Every apply asks for a validated snapshot; validating spawns a core
+    // process, so remember the verdict until the file changes.
+    final stat = await mFile.stat();
+    final signature = (stat.modified.millisecondsSinceEpoch, stat.size);
+    if (_validatedSnapshots[mFile.path] == signature) {
+      return mFile.path;
+    }
     final message = await coreController.validateConfig(mFile.path);
     if (message.isEmpty) {
+      _validatedSnapshots[mFile.path] = signature;
       return mFile.path;
     }
 

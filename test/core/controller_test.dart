@@ -47,6 +47,7 @@ void main() {
           any(),
           any(),
           timeout: any(named: 'timeout'),
+          generation: any(named: 'generation'),
         ),
       ).thenAnswer(
         (_) async => const Delay(name: 'node', url: 'url', value: 6000),
@@ -62,6 +63,7 @@ void main() {
           'https://example.com',
           'node',
           timeout: const Duration(seconds: 15),
+          generation: any(named: 'generation'),
         ),
       ).called(1);
     },
@@ -70,29 +72,33 @@ void main() {
   test('delay RPCs share a budget and release slots after failure', () async {
     final pending = <Completer<Delay>>[];
     when(
-      () =>
-          handler.asyncTestDelay(any(), any(), timeout: any(named: 'timeout')),
+      () => handler.asyncTestDelay(
+        any(),
+        any(),
+        timeout: any(named: 'timeout'),
+        generation: any(named: 'generation'),
+      ),
     ).thenAnswer((_) {
       final result = Completer<Delay>();
       pending.add(result);
       return result.future;
     });
     final requests = List.generate(
-      maxConcurrentDelayTests + 2,
+      maxInFlightDelayTests + 2,
       (i) => controller.getDelay('https://example.com', 'node$i'),
     );
     final firstFailure = expectLater(requests.first, throwsStateError);
     await pumpEventQueue();
-    expect(pending.length, maxConcurrentDelayTests);
+    expect(pending.length, maxInFlightDelayTests);
     pending.first.completeError(StateError('disconnected'));
     await firstFailure;
     await pumpEventQueue();
-    expect(pending.length, maxConcurrentDelayTests + 1);
+    expect(pending.length, maxInFlightDelayTests + 1);
     pending[1].complete(
       const Delay(name: 'node1', url: 'https://example.com', value: 20),
     );
     await pumpEventQueue();
-    expect(pending.length, maxConcurrentDelayTests + 2);
+    expect(pending.length, maxInFlightDelayTests + 2);
     for (final result in pending.skip(2)) {
       result.complete(
         const Delay(name: 'node', url: 'https://example.com', value: 30),
@@ -112,29 +118,34 @@ void main() {
   ) async {
     final pending = <Completer<Delay>>[];
     when(
-      () =>
-          handler.asyncTestDelay(any(), any(), timeout: any(named: 'timeout')),
+      () => handler.asyncTestDelay(
+        any(),
+        any(),
+        timeout: any(named: 'timeout'),
+        generation: any(named: 'generation'),
+      ),
     ).thenAnswer((_) {
       final result = Completer<Delay>();
       pending.add(result);
       return result.future;
     });
     final requests = List.generate(
-      maxConcurrentDelayTests + 1,
+      maxInFlightDelayTests + 1,
       (i) => controller.getDelay('https://example.com', 'node$i'),
     );
     await tester.pump(const Duration(seconds: 20));
-    expect(pending.length, maxConcurrentDelayTests);
+    expect(pending.length, maxInFlightDelayTests);
     pending.first.complete(
       const Delay(name: 'node0', url: 'https://example.com', value: 20),
     );
     await tester.pump();
-    expect(pending.length, maxConcurrentDelayTests + 1);
+    expect(pending.length, maxInFlightDelayTests + 1);
     verify(
       () => handler.asyncTestDelay(
         'https://example.com',
-        'node$maxConcurrentDelayTests',
+        'node$maxInFlightDelayTests',
         timeout: const Duration(seconds: 8),
+        generation: any(named: 'generation'),
       ),
     ).called(1);
     for (final result in pending.skip(1)) {
@@ -148,15 +159,19 @@ void main() {
   test('obsolete queued probes never reach the Core or hold a slot', () async {
     final pending = <Completer<Delay>>[];
     when(
-      () =>
-          handler.asyncTestDelay(any(), any(), timeout: any(named: 'timeout')),
+      () => handler.asyncTestDelay(
+        any(),
+        any(),
+        timeout: any(named: 'timeout'),
+        generation: any(named: 'generation'),
+      ),
     ).thenAnswer((_) {
       final result = Completer<Delay>();
       pending.add(result);
       return result.future;
     });
     final running = List.generate(
-      maxConcurrentDelayTests,
+      maxInFlightDelayTests,
       (i) => controller.getDelay('https://example.com', 'running$i'),
     );
     var current = true;
@@ -184,6 +199,7 @@ void main() {
         any(),
         'obsolete0',
         timeout: any(named: 'timeout'),
+        generation: any(named: 'generation'),
       ),
     );
     verifyNever(
@@ -191,6 +207,7 @@ void main() {
         any(),
         'obsolete1',
         timeout: any(named: 'timeout'),
+        generation: any(named: 'generation'),
       ),
     );
     verifyNever(
@@ -198,6 +215,7 @@ void main() {
         any(),
         'obsolete2',
         timeout: any(named: 'timeout'),
+        generation: any(named: 'generation'),
       ),
     );
     verify(
@@ -205,9 +223,10 @@ void main() {
         any(),
         'replacement',
         timeout: any(named: 'timeout'),
+        generation: any(named: 'generation'),
       ),
     ).called(1);
-    expect(pending.length, maxConcurrentDelayTests + 1);
+    expect(pending.length, maxInFlightDelayTests + 1);
     for (final result in pending.skip(1)) {
       result.complete(
         const Delay(name: 'node', url: 'https://example.com', value: 20),

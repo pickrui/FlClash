@@ -620,6 +620,28 @@ class MessageLookup extends MessageLookupByLibrary {
       "Check the core, system proxy, TUN and DNS",
     ),
     "diagFailed": MessageLookupByLibrary.simpleMessage("Failed"),
+    "diagFixApplyProfile": MessageLookupByLibrary.simpleMessage(
+      "Apply configuration",
+    ),
+    "diagFixEnableSystemProxy": MessageLookupByLibrary.simpleMessage(
+      "Enable system proxy",
+    ),
+    "diagFixFailed": MessageLookupByLibrary.simpleMessage(
+      "The fix could not be applied. Follow the suggestion above.",
+    ),
+    "diagFixRestartConnection": MessageLookupByLibrary.simpleMessage(
+      "Reconnect",
+    ),
+    "diagFixRestartCore": MessageLookupByLibrary.simpleMessage("Restart core"),
+    "diagFixRetest": MessageLookupByLibrary.simpleMessage("Retest nodes"),
+    "diagFixStart": MessageLookupByLibrary.simpleMessage("Start connection"),
+    "diagFixSystemProxy": MessageLookupByLibrary.simpleMessage(
+      "Reapply system proxy",
+    ),
+    "diagFixTun": MessageLookupByLibrary.simpleMessage("Re-enable TUN"),
+    "diagFixing": MessageLookupByLibrary.simpleMessage(
+      "Applying the fix, then checking again",
+    ),
     "diagListener": MessageLookupByLibrary.simpleMessage("Local proxy entry"),
     "diagListenerFailed": MessageLookupByLibrary.simpleMessage(
       "The expected proxy port did not respond or differs from the core port",

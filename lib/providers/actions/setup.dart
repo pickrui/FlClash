@@ -443,7 +443,12 @@ extension SetupControllerExt on AppController {
         silence: silence,
         preloadInvoke: _profileApplyIntent.preloadInvoke,
       ),
-    ).whenComplete(() => _pendingProfileApplies--);
+    ).whenComplete(() {
+      _pendingProfileApplies--;
+      if (_pendingProfileApplies == 0 && _groupsRefreshRequested) {
+        updateGroupsDebounce();
+      }
+    });
   }
 
   Future<bool> _applyProfileUnlocked({
@@ -525,30 +530,19 @@ extension SetupControllerExt on AppController {
             // Groups from another subscription must not be shown as current.
             _ref.read(groupsProvider.notifier).value = [];
           }
+          // The core runs this profile; a transient snapshot failure must not
+          // leave the Proxies tab empty until some unrelated refresh.
+          updateGroupsDebounce();
           if (!_ref.read(initProvider)) return false;
           throw appLocalizations.noProxy;
         }
         if (!isCurrentApply()) {
           return true;
         }
+        // A published group list is never empty (see _updateGroups).
         final groups = _ref.read(groupsProvider);
-        if (groups.isEmpty) {
-          if (!_ref.read(initProvider)) return false;
-          throw appLocalizations.noProxy;
-        }
-
         final hasProxy = groups.any(
-          (g) => g.all.any((p) {
-            return ![
-              'Selector',
-              'URLTest',
-              'Fallback',
-              'LoadBalance',
-              'Direct',
-              'Reject',
-              'Pass',
-            ].contains(p.type);
-          }),
+          (g) => g.all.any((p) => !_groupOnlyProxyTypes.contains(p.type)),
         );
 
         if (!hasProxy) {

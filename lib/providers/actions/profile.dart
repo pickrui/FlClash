@@ -138,28 +138,29 @@ extension ProfilesControllerExt on AppController {
     if (profile.isoixCloudProfile) {
       await _ref.read(cloudAccountProvider.notifier).ensureReady();
     }
-    return storageLock.synchronized(() async {
-      Future<Profile> persist() async {
+    // The download runs outside the storage lock: the file write inside
+    // update() and the profile-list merge below take it briefly, so a slow
+    // subscription no longer blocks applying or saving other profiles.
+    return withFileRollback(
+      await appPath.getProfilePath(profile.id.toString()),
+      () async {
         final updatedProfile = await update();
-        final currentProfile = _ref
-            .read(profilesProvider)
-            .getProfile(profile.id);
-        final profileToSave = currentProfile == null
-            ? updatedProfile
-            : mergePersistedProfile(
-                currentProfile,
-                updatedProfile,
-                preserveCurrentState: preserveCurrentState,
-              );
-        await putProfile(profileToSave, reportOnWait: false);
-        return profileToSave;
-      }
-
-      return withFileRollback(
-        await appPath.getProfilePath(profile.id.toString()),
-        persist,
-      );
-    });
+        return storageLock.synchronized(() async {
+          final currentProfile = _ref
+              .read(profilesProvider)
+              .getProfile(profile.id);
+          final profileToSave = currentProfile == null
+              ? updatedProfile
+              : mergePersistedProfile(
+                  currentProfile,
+                  updatedProfile,
+                  preserveCurrentState: preserveCurrentState,
+                );
+          await putProfile(profileToSave, reportOnWait: false);
+          return profileToSave;
+        });
+      },
+    );
   }
 
   Future<Profile> saveProfileFile(Profile profile, Uint8List bytes) {

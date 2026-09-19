@@ -11,32 +11,72 @@ import 'network_diagnostic_platform.dart';
 
 enum DiagnosticStatus { passed, warning, failed, unknown, skipped }
 
+/// A repair the app can perform itself for a failed check. The page maps each
+/// value to an existing app action and re-runs the self-check afterwards.
+enum DiagnosticFix {
+  /// Load the selected profile into the core (and start when stopped).
+  applyProfile,
+
+  /// Start traffic forwarding through the normal connection switch path.
+  startConnection,
+
+  /// Restart an unresponsive core and reapply the current state.
+  restartCore,
+
+  /// Restart the core and reopen listeners; port conflicts prompt for a port.
+  restartConnection,
+
+  /// Rewrite the OS proxy settings to the expected local port.
+  applySystemProxy,
+
+  /// Turn the system proxy on when nothing captures traffic.
+  enableSystemProxy,
+
+  /// Restart with TUN so the interface is created and authorized again.
+  applyTun,
+
+  /// Re-run the delay test of the current group so a working node is chosen.
+  retestProxies,
+}
+
 class NetworkDiagnosticCheck {
   final String id;
   final String title;
   final DiagnosticStatus status;
   final String detail;
   final String? suggestion;
+  final DiagnosticFix? fix;
   const NetworkDiagnosticCheck(
     this.id,
     this.title,
     this.status,
     this.detail, [
     this.suggestion,
+    this.fix,
   ]);
 }
 
 class NetworkDiagnosticSnapshot {
   final bool profileApplied, running, suspended, systemProxy, tun, oixCloud;
   final int port;
+
+  /// Whether a profile is selected at all. Applying a profile can only be
+  /// offered as a fix when one exists.
+  final bool profileSelected;
+
+  /// Proxy authentication disables the system proxy, so enabling it cannot
+  /// be offered as a fix.
+  final bool authenticated;
   const NetworkDiagnosticSnapshot({
     required this.profileApplied,
+    required this.profileSelected,
     required this.running,
     required this.suspended,
     required this.systemProxy,
     required this.tun,
     required this.oixCloud,
     required this.port,
+    this.authenticated = false,
   });
 }
 
@@ -232,6 +272,9 @@ class NetworkDiagnosticService {
             : DiagnosticStatus.failed,
         state.profileApplied ? l.diagProfileReady : l.diagProfileMissing,
         state.profileApplied ? null : l.diagProfileHint,
+        !state.profileApplied && state.profileSelected
+            ? DiagnosticFix.applyProfile
+            : null,
       ),
     );
     Map<String, dynamic>? core;
@@ -274,8 +317,27 @@ class NetworkDiagnosticService {
                 state.suspended
             ? l.diagCoreHint
             : null,
+        !validCore
+            // Only a core that did not answer at all warrants a restart; a
+            // busy or stale reply is transient and often caused by re-running.
+            ? (core == null ? DiagnosticFix.restartCore : null)
+            // A Wi-Fi exclusion is a deliberate setting, not a fault.
+            : state.suspended
+            ? null
+            : core['configured'] != true
+            ? (state.profileSelected ? DiagnosticFix.applyProfile : null)
+            : core['running'] != true
+            ? DiagnosticFix.startConnection
+            : null,
       ),
     );
+    final coreRunning = validCore && core['running'] == true;
+    final coreStopped = validCore && core['running'] != true;
+    // A stopped connection only needs starting, and never while a Wi-Fi
+    // exclusion suspends forwarding on purpose.
+    final DiagnosticFix? startFix = state.suspended || !coreStopped
+        ? null
+        : DiagnosticFix.startConnection;
     final localReady = await backend.listener(state.port, token);
     if (token.isCancelled) return results;
     final portMatches = !validCore || core['mixedPort'] == state.port;
@@ -288,6 +350,13 @@ class NetworkDiagnosticService {
             : DiagnosticStatus.failed,
         localReady && portMatches ? l.diagListenerReady : l.diagListenerFailed,
         localReady && portMatches ? null : l.diagListenerHint,
+        localReady && portMatches
+            ? null
+            // Reopening listeners (which offers a new port on conflict) only
+            // helps a running core; an unknown core reply gets no fix here.
+            : coreRunning && !state.suspended
+            ? DiagnosticFix.restartConnection
+            : startFix,
       ),
     );
     final os = await backend.system(
@@ -322,6 +391,16 @@ class NetworkDiagnosticService {
         state.systemProxy && proxy != DiagnosticProxyState.matching
             ? l.diagProxyHint
             : null,
+        // A PAC or unknown state may be an organization policy; only rewrite
+        // settings the app itself is expected to own, and only while the
+        // connection runs (the app removes the OS proxy when stopped).
+        state.systemProxy &&
+                (proxy == DiagnosticProxyState.disabled ||
+                    proxy == DiagnosticProxyState.different)
+            ? (state.running && !state.suspended
+                  ? DiagnosticFix.applySystemProxy
+                  : startFix)
+            : null,
       ),
     );
     emit(
@@ -351,6 +430,14 @@ class NetworkDiagnosticService {
         state.tun && (core?['tunInterfaceUp'] != true || os.tunRoute != true)
             ? l.diagTunHint
             : null,
+        // A route through another interface points at a competing VPN, which
+        // restarting cannot resolve. A stopped connection has no interface
+        // yet; starting it is the lighter fix.
+        state.tun && validCore && core['tunInterfaceUp'] != true
+            ? (coreRunning && !state.suspended
+                  ? DiagnosticFix.applyTun
+                  : startFix)
+            : null,
       ),
     );
     if (!state.systemProxy && !state.tun) {
@@ -361,6 +448,7 @@ class NetworkDiagnosticService {
           DiagnosticStatus.warning,
           l.diagNoCapture,
           l.diagCaptureHint,
+          state.authenticated ? null : DiagnosticFix.enableSystemProxy,
         ),
       );
     }
@@ -485,6 +573,7 @@ class NetworkDiagnosticService {
             l.diagProxyPath,
             proxyWeb!,
             l.diagProxyPathHint,
+            fix: DiagnosticFix.retestProxies,
           ),
         );
       }(),
@@ -524,8 +613,9 @@ class NetworkDiagnosticService {
     String id,
     String title,
     DiagnosticWebResult result,
-    String hint,
-  ) {
+    String hint, {
+    DiagnosticFix? fix,
+  }) {
     final l = AppLocalizations.current;
     return NetworkDiagnosticCheck(
       id,
@@ -537,6 +627,7 @@ class NetworkDiagnosticService {
           : DiagnosticStatus.failed,
       '${l.diagWebResult(result.passed)}${result.errors.isEmpty ? '' : '\n${result.errors.toSet().join('\n')}'}',
       result.passed == 2 ? null : hint,
+      result.passed == 2 ? null : fix,
     );
   }
 }

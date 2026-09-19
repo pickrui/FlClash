@@ -50,11 +50,19 @@ final defaultTextScaleFactor =
     WidgetsBinding.instance.platformDispatcher.textScaleFactor;
 const httpTimeoutDuration = Duration(milliseconds: 5000);
 
-/// Match upstream's probe budget and bounded concurrency. Queue time is not
-/// part of a node's network measurement; RPC gets a separate dispatch guard.
+/// How long the Core may spend on one delay test. It spends this twice in the
+/// worst case, once queueing for a slot and once on the probe itself, so the
+/// guard has to outlast twice this value.
 const delayTestTimeoutDuration = Duration(seconds: 8);
 const delayTestGuardDuration = Duration(seconds: 30);
+
+/// Probes one test run sends at once.
 const maxConcurrentDelayTests = 16;
+
+/// Probes kept in flight at the Core across runs. Twice the batch width lets a
+/// new run start while a superseded one still drains, and stays at or below
+/// the Core's own concurrency (`delayTestConcurrency` in core/common.go).
+const maxInFlightDelayTests = maxConcurrentDelayTests * 2;
 const animateDuration = Duration(milliseconds: 100);
 const midDuration = Duration(milliseconds: 200);
 const commonDuration = Duration(milliseconds: 300);

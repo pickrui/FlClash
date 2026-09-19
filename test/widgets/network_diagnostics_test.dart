@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:fl_clash/l10n/l10n.dart';
+import 'package:fl_clash/providers/network_diagnostic_fix.dart';
 import 'package:fl_clash/services/network_diagnostics.dart';
 import 'package:fl_clash/views/network_diagnostics.dart';
 import 'package:flutter/services.dart';
@@ -11,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 const _snapshot = NetworkDiagnosticSnapshot(
   profileApplied: true,
+  profileSelected: true,
   running: true,
   suspended: false,
   systemProxy: true,
@@ -40,6 +42,16 @@ class _ControlledService extends NetworkDiagnosticService {
         'Check DNS settings and system time',
       ),
     );
+    onResult(
+      const NetworkDiagnosticCheck(
+        'tun',
+        'TUN',
+        DiagnosticStatus.failed,
+        'TUN interface missing',
+        'Turn TUN off and on',
+        DiagnosticFix.applyTun,
+      ),
+    );
     await completion.future;
     onResult(
       const NetworkDiagnosticCheck(
@@ -55,8 +67,9 @@ class _ControlledService extends NetworkDiagnosticService {
 
 Future<ProviderContainer> _pump(
   WidgetTester tester,
-  _ControlledService service,
-) async {
+  _ControlledService service, {
+  NetworkDiagnosticFixHandler? onFix,
+}) async {
   SharedPreferences.setMockInitialValues({});
   await tester.pumpWidget(
     ProviderScope(
@@ -66,6 +79,9 @@ Future<ProviderContainer> _pump(
         ),
         networkDiagnosticServiceProvider.overrideWithValue(service),
         networkDiagnosticSnapshotProvider.overrideWithValue(_snapshot),
+        networkDiagnosticFixHandlerProvider.overrideWithValue(
+          onFix ?? (fix) async => fail('unexpected fix $fix'),
+        ),
       ],
       child: MaterialApp(
         locale: const Locale('en'),
@@ -151,9 +167,13 @@ void main() {
         'FlClash 0.8.97+fixture (windows)',
       ),
       networkDiagnosticServiceProvider.overrideWithValue(service),
+      networkDiagnosticFixHandlerProvider.overrideWithValue(
+        (fix) async => fail('unexpected fix $fix'),
+      ),
       networkDiagnosticSnapshotProvider.overrideWithValue(
         const NetworkDiagnosticSnapshot(
           profileApplied: true,
+          profileSelected: true,
           running: true,
           suspended: false,
           systemProxy: true,
@@ -181,6 +201,73 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+  Finder fixButton() => find.ancestor(
+    of: find.text(AppLocalizations.current.diagFixTun),
+    matching: find.byWidgetPredicate((widget) => widget is FilledButton),
+  );
+  testWidgets('a fix runs the mapped action, then re-checks', (tester) async {
+    final service = _ControlledService();
+    final fixes = <DiagnosticFix>[];
+    await _pump(tester, service, onFix: (fix) async => fixes.add(fix));
+    // Fixes wait until the current run has finished.
+    expect(tester.widget<FilledButton>(fixButton()).onPressed, isNull);
+    service.completion.complete();
+    await tester.pumpAndSettle();
+    expect(tester.widget<FilledButton>(fixButton()).onPressed, isNotNull);
+    await tester.tap(fixButton());
+    await tester.pump();
+    expect(fixes, [DiagnosticFix.applyTun]);
+    expect(find.text(AppLocalizations.current.diagFixing), findsOneWidget);
+    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    expect(tester.widget<FilledButton>(fixButton()).onPressed, isNull);
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+    expect(service.runs, 2);
+    expect(find.text(AppLocalizations.current.diagFixing), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+  testWidgets('a failing fix still re-checks without crashing', (tester) async {
+    final service = _ControlledService()..completion.complete();
+    await _pump(
+      tester,
+      service,
+      onFix: (fix) async => throw StateError('system proxy restore failed'),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(fixButton());
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+    expect(service.runs, 2);
+    expect(find.text(AppLocalizations.current.diagFixing), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+  testWidgets('the report lists suggestions but no fix buttons', (
+    tester,
+  ) async {
+    final service = _ControlledService()..completion.complete();
+    String? clipboard;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async {
+        if (call.method == 'Clipboard.setData') {
+          clipboard = (call.arguments as Map)['text'] as String;
+        }
+        return null;
+      },
+    );
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      ),
+    );
+    await _pump(tester, service);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip(AppLocalizations.current.diagCopy));
+    await tester.pump();
+    expect(clipboard, contains('Turn TUN off and on'));
+    expect(clipboard, isNot(contains(AppLocalizations.current.diagFixTun)));
+  });
   testWidgets('results fit a narrow window and large text', (tester) async {
     tester.view.physicalSize = const Size(360, 760);
     tester.view.devicePixelRatio = 1;

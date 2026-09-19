@@ -6569,6 +6569,106 @@ class AppLocalizations {
     );
   }
 
+  /// `Applying the fix, then checking again`
+  String get diagFixing {
+    return Intl.message(
+      'Applying the fix, then checking again',
+      name: 'diagFixing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The fix could not be applied. Follow the suggestion above.`
+  String get diagFixFailed {
+    return Intl.message(
+      'The fix could not be applied. Follow the suggestion above.',
+      name: 'diagFixFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Apply configuration`
+  String get diagFixApplyProfile {
+    return Intl.message(
+      'Apply configuration',
+      name: 'diagFixApplyProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Start connection`
+  String get diagFixStart {
+    return Intl.message(
+      'Start connection',
+      name: 'diagFixStart',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restart core`
+  String get diagFixRestartCore {
+    return Intl.message(
+      'Restart core',
+      name: 'diagFixRestartCore',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reconnect`
+  String get diagFixRestartConnection {
+    return Intl.message(
+      'Reconnect',
+      name: 'diagFixRestartConnection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reapply system proxy`
+  String get diagFixSystemProxy {
+    return Intl.message(
+      'Reapply system proxy',
+      name: 'diagFixSystemProxy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enable system proxy`
+  String get diagFixEnableSystemProxy {
+    return Intl.message(
+      'Enable system proxy',
+      name: 'diagFixEnableSystemProxy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Re-enable TUN`
+  String get diagFixTun {
+    return Intl.message(
+      'Re-enable TUN',
+      name: 'diagFixTun',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Retest nodes`
+  String get diagFixRetest {
+    return Intl.message(
+      'Retest nodes',
+      name: 'diagFixRetest',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Passed`
   String get diagPassed {
     return Intl.message('Passed', name: 'diagPassed', desc: '', args: []);

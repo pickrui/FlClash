@@ -12,8 +12,15 @@ void main() {
       'proxy-name': 'node',
       'timeout': 8000,
       'test-url': 'https://example.com',
+      'generation': 0,
     });
     expect(handler.timeout, const Duration(seconds: 30));
+  });
+
+  test('the probe carries its test run so the Core can supersede it', () async {
+    final handler = _FakeCoreHandler();
+    await handler.asyncTestDelay('https://example.com', 'node', generation: 7);
+    expect((handler.arguments as Map)['generation'], 7);
   });
 
   test('a custom network budget always fits inside the RPC guard', () async {

@@ -30,11 +30,18 @@ class _CoreContainerState extends ConsumerState<CoreManager>
   void initState() {
     super.initState();
     coreEventManager.addListener(this);
-    ref.listenManual(currentSetupStateProvider, (prev, next) {
-      if (!ref.read(initProvider) || prev == next) {
+    // The async setup state passes through null while a newly selected
+    // profile loads. Compare against the last loaded state instead, or every
+    // profile switch would run a full setup twice.
+    SetupState? lastSetupState = ref.read(currentSetupStateProvider);
+    ref.listenManual(currentSetupStateProvider, (_, next) {
+      if (next == null) return;
+      final previous = lastSetupState;
+      lastSetupState = next;
+      if (!ref.read(initProvider) || previous == next) {
         return;
       }
-      if (prev?.profileId != next?.profileId) {
+      if (previous?.profileId != next.profileId) {
         appController.fullSetup();
         return;
       }

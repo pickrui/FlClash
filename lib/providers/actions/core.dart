@@ -32,14 +32,10 @@ extension CoreControllerExt on AppController {
     );
   }
 
-  Future<void> _initCore({bool refreshGroups = true}) async {
-    final isInit = await coreController.isInit;
+  Future<void> _initCore() async {
     final version = _ref.read(versionProvider);
     if (!await coreController.init(version)) {
       throw _coreDisconnectedMessage;
-    }
-    if (isInit && refreshGroups) {
-      await updateGroups();
     }
   }
 
@@ -81,7 +77,7 @@ extension CoreControllerExt on AppController {
       await coreController.shutdown(false);
     }
     if (coreController.isCompleted) {
-      await _initCore(refreshGroups: false);
+      await _initCore();
       return _isCoreInitialized();
     }
     commonPrint.log('Core disconnected, reconnecting');
@@ -89,7 +85,7 @@ extension CoreControllerExt on AppController {
     await coreController.shutdown(false);
     await _connectCore();
     if (!coreController.isCompleted) return false;
-    await _initCore(refreshGroups: false);
+    await _initCore();
     return _isCoreInitialized();
   }
 

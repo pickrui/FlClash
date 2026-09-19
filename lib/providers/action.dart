@@ -7,6 +7,8 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/geo_recovery.dart';
 import 'package:fl_clash/common/core_launch_error.dart';
+import 'package:fl_clash/common/delay_test.dart';
+import 'package:fl_clash/common/network_failure_prompt.dart';
 import 'package:fl_clash/common/update_download.dart';
 import 'package:fl_clash/common/update_download_task.dart';
 import 'package:fl_clash/providers/update_download.dart';
@@ -691,7 +693,8 @@ class AppController {
   bool _persistentLogWritesSuspended = false;
   final _geoRecoveryLock = AsyncStorageLock();
   final _proxyAuthenticationLock = AsyncStorageLock();
-  bool _checkingUpdate = false;
+  Future<void>? _checkUpdateFuture;
+  bool _checkUpdateForUser = false;
   bool _updateDialogOpen = false;
   bool _openingUpdateInstaller = false;
   Future<bool>? _listenerStartFuture;
@@ -702,6 +705,8 @@ class AppController {
   int _autoIpv6CheckGeneration = 0;
   int _configUpdateGeneration = 0;
   int _groupsUpdateGeneration = 0;
+  bool _groupsRefreshRequested = false;
+  int? _activeDelayBatchGeneration;
   int _profileApplyGeneration = 0;
   int _pendingProfileApplies = 0;
   final ProfileApplyIntent _profileApplyIntent = ProfileApplyIntent();

@@ -41,6 +41,9 @@ class SystemProxyController {
 
   bool get startedByFlClash => _startedByFlClash;
 
+  /// Completes when every queued start/stop has finished.
+  Future<void> get idle => _task;
+
   Future<SystemProxyStartResult> start(int port, List<String> bypassDomain) {
     final startProxy = _startProxy;
     if (startProxy == null) {

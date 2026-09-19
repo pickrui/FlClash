@@ -121,12 +121,19 @@ extension InitControllerExt on AppController {
   }
 
   Future<void> checkUpdate({bool isUser = false}) async {
-    if (_checkingUpdate) return;
-    _checkingUpdate = true;
+    final inFlight = _checkUpdateFuture;
+    if (inFlight != null) {
+      // A manual check must answer the user: let the background check finish
+      // and run again, unless a manual check is already showing its result.
+      if (!isUser || _checkUpdateForUser) return inFlight;
+      await inFlight;
+    }
+    final run = _checkUpdateFuture = _checkUpdate(isUser: isUser);
+    _checkUpdateForUser = isUser;
     try {
-      await _checkUpdate(isUser: isUser);
+      await run;
     } finally {
-      _checkingUpdate = false;
+      if (identical(_checkUpdateFuture, run)) _checkUpdateFuture = null;
     }
   }
 
@@ -138,7 +145,7 @@ extension InitControllerExt on AppController {
     }
     AppUpdateInfo? updateInfo;
     try {
-      updateInfo = await request.checkForUpdate();
+      updateInfo = await request.checkForUpdate(includeReleaseNotes: isUser);
     } catch (error) {
       commonPrint.log(
         'check update failed: $error',
@@ -163,6 +170,13 @@ extension InitControllerExt on AppController {
       }
       return;
     }
+    if (!isUser &&
+        updateInfo.remoteBuildNumber <=
+            await preferences.getLastSilentUpdateBuild()) {
+      // Already downloaded once and not installed; a manual check still
+      // offers it, but every launch must not fetch the installer again.
+      return;
+    }
     final res = await promptForAppUpdate(
       isUser: isUser,
       showWindow: window?.show,
@@ -177,8 +191,14 @@ extension InitControllerExt on AppController {
       return;
     }
     final downloadUrl = getAppUpdateDownloadUrl(Abi.current());
+    // Download errors live in the task state (dialog / About); only opening a
+    // browser or the dialog can throw here.
     await safeRun<void>(
-      () => _downloadAppUpdate(downloadUrl, foreground: isUser),
+      () => _downloadAppUpdate(
+        downloadUrl,
+        foreground: isUser,
+        remoteBuildNumber: updateInfo!.remoteBuildNumber,
+      ),
       title: appLocalizations.checkUpdate,
       silence: !isUser,
     );
@@ -187,30 +207,58 @@ extension InitControllerExt on AppController {
   Future<void> _downloadAppUpdate(
     String? downloadUrl, {
     required bool foreground,
+    required int remoteBuildNumber,
   }) async {
     if (downloadUrl == null) {
       if (foreground) await _openUpdateDownloadUrl('https://dl.dler.io');
       return;
     }
     final task = _ref.read(appUpdateDownloadProvider);
+    if (!foreground) {
+      // Let startup finish so the transfer uses the proxy once it is up,
+      // instead of deciding the route before the core has started.
+      await _waitForStartup();
+    }
+    final directory = await appPath.tempDir.future;
+    await sweepStaleUpdateDownloads(directory, keep: task.value.file);
     unawaited(
-      task.start((token, onProgress) async {
-        final client = createAppUpdateDownloadClient();
-        try {
-          return await downloadAppUpdate(
-            client: client,
-            url: downloadUrl,
-            fallbackUrls: [getAppUpdateFallbackDownloadUrl(downloadUrl)],
-            directory: await appPath.tempDir.future,
-            cancelToken: token,
-            onProgress: onProgress,
-          );
-        } finally {
-          client.close(force: true);
-        }
-      }, url: downloadUrl),
+      task
+          .start((token, onProgress) async {
+            final client = createAppUpdateDownloadClient();
+            try {
+              return await downloadAppUpdate(
+                client: client,
+                url: downloadUrl,
+                fallbackUrls: [getAppUpdateFallbackDownloadUrl(downloadUrl)],
+                directory: directory,
+                cancelToken: token,
+                onProgress: onProgress,
+              );
+            } catch (error) {
+              commonPrint.log(
+                'update download failed: '
+                '${Secrets.redactApiDomains(error.toString())}',
+                logLevel: LogLevel.warning,
+              );
+              rethrow;
+            } finally {
+              client.close(force: true);
+            }
+          }, url: downloadUrl)
+          .then((_) async {
+            if (!foreground &&
+                task.value.phase == AppUpdateDownloadPhase.ready) {
+              await preferences.setLastSilentUpdateBuild(remoteBuildNumber);
+            }
+          }),
     );
     if (foreground) await _showAppUpdateDownload(task);
+  }
+
+  Future<void> _waitForStartup() async {
+    for (var i = 0; i < 120 && !_ref.read(initProvider); i++) {
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+    }
   }
 
   Future<void> _showAppUpdateDownload(AppUpdateDownloadTask task) async {

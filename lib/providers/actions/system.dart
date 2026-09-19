@@ -27,7 +27,9 @@ class SystemAction extends _$SystemAction {
 
   void updateTun() => _controller.updateTun();
 
-  void updateSystemProxy() => _controller.updateSystemProxy();
+  /// Toggles the system proxy, or sets it to [enable] when given.
+  void updateSystemProxy([bool? enable]) =>
+      _controller.updateSystemProxy(enable);
 
   void updateAutoLaunch() => _controller.updateAutoLaunch();
 
@@ -134,14 +136,16 @@ extension SystemControllerExt on AppController {
         .update((state) => state.copyWith.tun(enable: !state.tun.enable));
   }
 
-  void updateSystemProxy() {
+  void updateSystemProxy([bool? enable]) {
     if (_ref.read(networkSettingProvider).authentication.enable) {
       globalState.showNotifier(appLocalizations.authenticationSystemProxyDesc);
       return;
     }
     _ref
         .read(networkSettingProvider.notifier)
-        .update((state) => state.copyWith(systemProxy: !state.systemProxy));
+        .update(
+          (state) => state.copyWith(systemProxy: enable ?? !state.systemProxy),
+        );
   }
 
   void updateAutoLaunch() {

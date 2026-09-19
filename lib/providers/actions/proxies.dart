@@ -1,5 +1,18 @@
 part of '../action.dart';
 
+final _delayTestFailurePrompt = NetworkFailurePromptGate();
+
+/// Group and built-in types that never count as a usable proxy node.
+const _groupOnlyProxyTypes = {
+  'Selector',
+  'URLTest',
+  'Fallback',
+  'LoadBalance',
+  'Direct',
+  'Reject',
+  'Pass',
+};
+
 @Riverpod(keepAlive: true)
 class ProxiesAction extends _$ProxiesAction {
   @override
@@ -9,8 +22,7 @@ class ProxiesAction extends _$ProxiesAction {
 
   late AppController _controller;
 
-  void updateGroupsDebounce([Duration? duration]) =>
-      _controller.updateGroupsDebounce(duration);
+  void updateGroupsDebounce() => _controller.updateGroupsDebounce();
 
   void changeProxyDebounce(String groupName, String proxyName) =>
       _controller.changeProxyDebounce(groupName, proxyName);
@@ -39,6 +51,12 @@ class ProxiesAction extends _$ProxiesAction {
 
   void clearDelay() => _controller.clearDelay();
 
+  Future<bool> delayTest(List<Proxy> proxies, [String? testUrl]) =>
+      _controller.delayTest(proxies, testUrl);
+
+  Future<void> proxyDelayTest(Proxy proxy, [String? testUrl]) =>
+      _controller.proxyDelayTest(proxy, testUrl);
+
   Future<bool> changeProxy({
     required int profileId,
     required String groupName,
@@ -63,8 +81,8 @@ class ProxiesAction extends _$ProxiesAction {
 }
 
 extension ProxiesControllerExt on AppController {
-  void updateGroupsDebounce([Duration? duration]) {
-    debouncer.call(FunctionTag.updateGroups, updateGroups, duration: duration);
+  void updateGroupsDebounce() {
+    debouncer.call(FunctionTag.updateGroups, updateGroups);
   }
 
   bool _isCurrentGroupsUpdate(int? profileId, int generation) {
@@ -147,8 +165,12 @@ extension ProxiesControllerExt on AppController {
 
   Future<void> updateGroups() async {
     if (_pendingProfileApplies > 0) {
+      // The apply refreshes groups itself unless it turns out to be a no-op;
+      // remember the request so applyProfile can replay it afterwards.
+      _groupsRefreshRequested = true;
       return;
     }
+    _groupsRefreshRequested = false;
     await _updateGroups(_ref.read(currentProfileIdProvider));
   }
 
@@ -187,6 +209,7 @@ extension ProxiesControllerExt on AppController {
         return false;
       }
       _ref.read(groupsProvider.notifier).value = groups;
+      _groupsRefreshRequested = false;
       try {
         await _syncCurrentProfileSelectedMap(groups, profileId, generation);
       } catch (e) {
@@ -253,6 +276,97 @@ extension ProxiesControllerExt on AppController {
 
   void clearDelay() {
     _ref.read(delayDataSourceProvider.notifier).clear();
+  }
+
+  /// Tests one node. While a group test runs, the probe joins that batch
+  /// instead of cancelling it, and a node already queued there is left alone.
+  Future<void> proxyDelayTest(Proxy proxy, [String? testUrl]) async {
+    final target = computeDelayTestTarget(
+      proxy: proxy,
+      groups: groups,
+      selectedMap: this.currentProfile?.selectedMap ?? {},
+      defaultTestUrl: getRealTestUrl(testUrl),
+    );
+    if (target == null) return;
+    final batch = _activeDelayBatchGeneration;
+    final joinsBatch = batch != null && isCurrentDelayGeneration(batch);
+    if (joinsBatch &&
+        _ref.read(delayDataSourceProvider)[target.url]?[target.name] == 0) {
+      return;
+    }
+    final generation = joinsBatch ? batch : beginDelayTest();
+    await _probeDelayTargets([target], generation);
+    if (isCurrentDelayGeneration(generation)) updateGroupsDebounce();
+  }
+
+  /// Tests a group and returns whether every node failed, so the caller can
+  /// offer the network self-check. Results are sorted and regrouped.
+  Future<bool> delayTest(List<Proxy> proxies, [String? testUrl]) async {
+    final targets = computeDelayTestTargets(
+      proxies: proxies,
+      groups: groups,
+      selectedMap: this.currentProfile?.selectedMap ?? {},
+      defaultTestUrl: getRealTestUrl(testUrl),
+    );
+    if (targets.isEmpty) return false;
+    final profileId = this.currentProfile?.id;
+    final runSession = globalState.startTime;
+    final generation = beginDelayTest();
+    _activeDelayBatchGeneration = generation;
+    final completed = await _probeDelayTargets(targets, generation);
+    if (_activeDelayBatchGeneration == generation) {
+      _activeDelayBatchGeneration = null;
+    }
+    if (!isCurrentDelayGeneration(generation)) return false;
+    addSortNum();
+    updateGroupsDebounce();
+    if (!system.isWindows && !system.isMacOS) return false;
+    final nodeTargets = targets
+        .where(
+          (target) =>
+              !const {'DIRECT', 'REJECT', 'COMPATIBLE'}.contains(target.name),
+        )
+        .toList();
+    return _delayTestFailurePrompt.observe(
+      session: (profileId, runSession),
+      expected: nodeTargets.length,
+      results: nodeTargets.map(
+        (target) => completed[(target.name, target.url)],
+      ),
+      current:
+          profileId == this.currentProfile?.id &&
+          runSession == globalState.startTime,
+      running: isProxyActive,
+    );
+  }
+
+  Future<Map<(String, String), int?>> _probeDelayTargets(
+    List<DelayTestTarget> targets,
+    int generation,
+  ) async {
+    final completed = <(String, String), int?>{};
+    setDelays(
+      targets.map(
+        (target) => Delay(url: target.url, name: target.name, value: 0),
+      ),
+      generation: generation,
+    );
+    await runDelayTestBatch(
+      targets: targets,
+      concurrency: maxConcurrentDelayTests,
+      probe: (target) => coreController.getDelay(
+        target.url,
+        target.name,
+        isCurrent: () => isCurrentDelayGeneration(generation),
+        generation: generation,
+      ),
+      isCurrent: () => isCurrentDelayGeneration(generation),
+      onResult: (delay) {
+        completed[(delay.name, delay.url)] = delay.value;
+        setDelay(delay, generation: generation);
+      },
+    );
+    return completed;
   }
 
   Future<bool> changeProxy({

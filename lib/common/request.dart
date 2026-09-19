@@ -14,9 +14,12 @@ import 'bounded_http_client_adapter.dart';
 import 'http_read_race.dart';
 
 class AppUpdateInfo {
-  const AppUpdateInfo({this.releaseNotes});
+  const AppUpdateInfo({this.releaseNotes, this.remoteBuildNumber = 0});
 
   final String? releaseNotes;
+
+  /// Build number of the offered release, used to download it silently once.
+  final int remoteBuildNumber;
 }
 
 final _releaseVersionPattern = RegExp(
@@ -415,7 +418,11 @@ class Request {
     );
   }
 
-  Future<AppUpdateInfo?> checkForUpdate() async {
+  /// Release notes need extra GitHub requests; silent checks that never show
+  /// them pass [includeReleaseNotes] false.
+  Future<AppUpdateInfo?> checkForUpdate({
+    bool includeReleaseNotes = true,
+  }) async {
     for (final domain in Secrets.apiDomains) {
       try {
         final response = await _getWithRedirect<String>(
@@ -462,10 +469,14 @@ class Request {
         final tagName =
             releaseTagNameFromVersionData(versionData) ??
             'v${globalState.packageInfo.version.trim()}';
-        final releaseNotes =
-            extractEmbeddedReleaseNotes(versionData, tagName) ??
-            await _fetchReleaseNotes(tagName);
-        return AppUpdateInfo(releaseNotes: releaseNotes);
+        final releaseNotes = !includeReleaseNotes
+            ? null
+            : extractEmbeddedReleaseNotes(versionData, tagName) ??
+                  await _fetchReleaseNotes(tagName);
+        return AppUpdateInfo(
+          releaseNotes: releaseNotes,
+          remoteBuildNumber: remoteBuildNumber,
+        );
       } catch (_) {
         commonPrint.log(
           'checkForUpdate failed for $domain',

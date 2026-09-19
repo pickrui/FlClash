@@ -517,6 +517,20 @@ class MessageLookup extends MessageLookupByLibrary {
       "コア、システムプロキシ、TUN、DNS を確認",
     ),
     "diagFailed": MessageLookupByLibrary.simpleMessage("失敗"),
+    "diagFixApplyProfile": MessageLookupByLibrary.simpleMessage("構成を適用"),
+    "diagFixEnableSystemProxy": MessageLookupByLibrary.simpleMessage(
+      "システムプロキシを有効化",
+    ),
+    "diagFixFailed": MessageLookupByLibrary.simpleMessage(
+      "修復を適用できませんでした。上記の提案に従って手動で対処してください",
+    ),
+    "diagFixRestartConnection": MessageLookupByLibrary.simpleMessage("再接続"),
+    "diagFixRestartCore": MessageLookupByLibrary.simpleMessage("コアを再起動"),
+    "diagFixRetest": MessageLookupByLibrary.simpleMessage("ノードを再テスト"),
+    "diagFixStart": MessageLookupByLibrary.simpleMessage("接続を開始"),
+    "diagFixSystemProxy": MessageLookupByLibrary.simpleMessage("システムプロキシを再設定"),
+    "diagFixTun": MessageLookupByLibrary.simpleMessage("TUN を再有効化"),
+    "diagFixing": MessageLookupByLibrary.simpleMessage("修復を適用しています。完了後に再確認します"),
     "diagListener": MessageLookupByLibrary.simpleMessage("ローカルプロキシ入口"),
     "diagListenerFailed": MessageLookupByLibrary.simpleMessage(
       "指定プロキシポートが応答しないか、コアのポートと一致しません",

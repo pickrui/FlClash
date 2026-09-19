@@ -32,6 +32,7 @@ mixin CoreInterface {
     String url,
     String proxyName, {
     Duration timeout = delayTestTimeoutDuration,
+    int generation = 0,
   });
 
   Future<String> updateConfig(UpdateParams updateParams);
@@ -371,6 +372,7 @@ abstract class CoreHandlerInterface with CoreInterface {
     String url,
     String proxyName, {
     Duration timeout = delayTestTimeoutDuration,
+    int generation = 0,
   }) async {
     final minimumGuard = timeout + const Duration(seconds: 2);
     final data = await _invokeMethod<Map<String, dynamic>>(
@@ -379,6 +381,9 @@ abstract class CoreHandlerInterface with CoreInterface {
         'proxy-name': proxyName,
         'timeout': timeout.inMilliseconds,
         'test-url': url,
+        // The Core cancels probes of an older run instead of letting them
+        // occupy its budget after this app has discarded their results.
+        'generation': generation,
       },
       // Match upstream's dispatch guard without capping a custom probe budget.
       timeout: minimumGuard > delayTestGuardDuration

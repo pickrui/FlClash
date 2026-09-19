@@ -232,13 +232,16 @@ class CoreController {
     String proxyName, {
     bool Function()? isCurrent,
     Duration timeout = delayTestTimeoutDuration,
+    int generation = 0,
   }) async {
-    final testUrl = getDelayTestUrl(proxyName: proxyName, testUrl: url);
-    Delay canceled() => Delay(url: testUrl, name: proxyName, value: null);
+    // Callers resolve the final URL (including the DIRECT special case) so the
+    // pending marker and the published result share one key.
+    Delay canceled() => Delay(url: url, name: proxyName, value: null);
     if (isCurrent?.call() == false) return canceled();
     // Acquire before invoking the RPC so local queue time cannot consume its
-    // timeout. This budget is shared by individual and batch tests.
-    if (_activeDelayTests >= maxConcurrentDelayTests) {
+    // timeout. The bound leaves room for a superseded batch's in-flight
+    // probes, so a new batch does not wait for them to time out.
+    if (_activeDelayTests >= maxInFlightDelayTests) {
       final ready = Completer<void>();
       _delayWaiters.add(ready);
       await ready.future;
@@ -249,9 +252,10 @@ class CoreController {
       // The generation can change while waiting behind in-flight probes.
       if (isCurrent?.call() == false) return canceled();
       return await _interface.asyncTestDelay(
-        testUrl,
+        url,
         proxyName,
         timeout: timeout,
+        generation: generation,
       );
     } finally {
       if (_delayWaiters.isNotEmpty) {

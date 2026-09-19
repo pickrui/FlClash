@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 const snapshot = NetworkDiagnosticSnapshot(
   profileApplied: true,
+  profileSelected: true,
   running: true,
   suspended: false,
   systemProxy: true,
@@ -94,6 +95,26 @@ void main() {
     return {for (final check in checks) check.id: check};
   }
 
+  NetworkDiagnosticSnapshot snap({
+    bool profileApplied = true,
+    bool profileSelected = true,
+    bool running = true,
+    bool suspended = false,
+    bool systemProxy = true,
+    bool tun = true,
+    bool authenticated = false,
+  }) => NetworkDiagnosticSnapshot(
+    profileApplied: profileApplied,
+    profileSelected: profileSelected,
+    running: running,
+    suspended: suspended,
+    systemProxy: systemProxy,
+    tun: tun,
+    oixCloud: true,
+    port: 7890,
+    authenticated: authenticated,
+  );
+
   test('healthy evidence passes each applicable layer', () async {
     final checks = await run(FakeBackend());
     expect(
@@ -116,6 +137,156 @@ void main() {
       checks.values.every((check) => check.status == DiagnosticStatus.passed),
       isTrue,
     );
+    expect(checks.values.every((check) => check.fix == null), isTrue);
+  });
+  test(
+    'an unapplied profile offers loading it only when one is selected',
+    () async {
+      var checks = await run(FakeBackend(), input: snap(profileApplied: false));
+      expect(checks['profile']!.status, DiagnosticStatus.failed);
+      expect(checks['profile']!.fix, DiagnosticFix.applyProfile);
+      checks = await run(
+        FakeBackend(),
+        input: snap(profileApplied: false, profileSelected: false),
+      );
+      expect(checks['profile']!.fix, isNull);
+      checks = await run(
+        FakeBackend()..state['configured'] = false,
+        input: snap(),
+      );
+      expect(checks['core']!.fix, DiagnosticFix.applyProfile);
+      checks = await run(
+        FakeBackend()..state['configured'] = false,
+        input: snap(profileSelected: false),
+      );
+      expect(checks['core']!.fix, isNull);
+    },
+  );
+  test('core fixes distinguish stopped, unresponsive and suspended', () async {
+    var checks = await run(FakeBackend()..state['running'] = false);
+    expect(checks['core']!.fix, DiagnosticFix.startConnection);
+    checks = await run(FakeBackend()..throwCore = true);
+    expect(checks['core']!.fix, DiagnosticFix.restartCore);
+    checks = await run(FakeBackend(), input: snap(suspended: true));
+    expect(checks['core']!.status, DiagnosticStatus.failed);
+    expect(checks['core']!.fix, isNull);
+  });
+  test(
+    'a busy or stale core reply never offers a disruptive restart',
+    () async {
+      for (final key in ['busy', 'stale']) {
+        final checks = await run(
+          FakeBackend()
+            ..state[key] = true
+            ..listening = false,
+        );
+        expect(checks['core']!.fix, isNull, reason: key);
+        expect(checks['listener']!.fix, isNull, reason: key);
+        expect(checks['tun']!.fix, isNull, reason: key);
+      }
+    },
+  );
+  test('listener fixes start a stopped core or reconnect otherwise', () async {
+    var checks = await run(
+      FakeBackend()
+        ..listening = false
+        ..state['running'] = false,
+    );
+    expect(checks['listener']!.fix, DiagnosticFix.startConnection);
+    checks = await run(FakeBackend()..state['mixedPort'] = 7891);
+    expect(checks['listener']!.fix, DiagnosticFix.restartConnection);
+    checks = await run(
+      FakeBackend()
+        ..listening = false
+        ..throwCore = true,
+    );
+    expect(checks['listener']!.fix, isNull);
+    checks = await run(
+      FakeBackend()..listening = false,
+      input: snap(suspended: true),
+    );
+    expect(checks['listener']!.fix, isNull);
+  });
+  test(
+    'a stopped connection is started instead of rewriting the OS proxy',
+    () async {
+      final backend = FakeBackend()
+        ..state['running'] = false
+        ..os = const DiagnosticSystemState(
+          proxy: DiagnosticProxyState.disabled,
+          tunRoute: true,
+        );
+      var checks = await run(backend, input: snap(running: false));
+      expect(checks['systemProxy']!.fix, DiagnosticFix.startConnection);
+      checks = await run(backend, input: snap(running: false, suspended: true));
+      expect(checks['systemProxy']!.fix, isNull);
+    },
+  );
+  test('only app-owned OS proxy states are rewritten by a fix', () async {
+    for (final proxy in [
+      DiagnosticProxyState.disabled,
+      DiagnosticProxyState.different,
+    ]) {
+      final checks = await run(
+        FakeBackend()..os = DiagnosticSystemState(proxy: proxy, tunRoute: true),
+      );
+      expect(checks['systemProxy']!.fix, DiagnosticFix.applySystemProxy);
+    }
+    for (final proxy in [
+      DiagnosticProxyState.automatic,
+      DiagnosticProxyState.unknown,
+    ]) {
+      final checks = await run(
+        FakeBackend()..os = DiagnosticSystemState(proxy: proxy, tunRoute: true),
+      );
+      expect(checks['systemProxy']!.fix, isNull, reason: proxy.name);
+    }
+  });
+  test(
+    'a missing TUN interface is re-applied; a foreign route is not',
+    () async {
+      var checks = await run(FakeBackend()..state['tunInterfaceUp'] = false);
+      expect(checks['tun']!.fix, DiagnosticFix.applyTun);
+      checks = await run(
+        FakeBackend()
+          ..state['tunInterfaceUp'] = false
+          ..state['running'] = false,
+        input: snap(running: false),
+      );
+      expect(checks['tun']!.fix, DiagnosticFix.startConnection);
+      checks = await run(
+        FakeBackend()..os = const DiagnosticSystemState(tunRoute: false),
+      );
+      expect(checks['tun']!.fix, isNull);
+      checks = await run(FakeBackend()..throwCore = true);
+      expect(checks['tun']!.fix, isNull);
+    },
+  );
+  test('no capture method offers enabling the system proxy', () async {
+    var checks = await run(
+      FakeBackend(),
+      input: snap(systemProxy: false, tun: false),
+    );
+    expect(checks['capture']!.fix, DiagnosticFix.enableSystemProxy);
+    checks = await run(
+      FakeBackend(),
+      input: snap(systemProxy: false, tun: false, authenticated: true),
+    );
+    expect(checks['capture']!.fix, isNull);
+  });
+  test('a failing local proxy path offers retesting nodes', () async {
+    var checks = await run(
+      FakeBackend()..proxyWeb = const DiagnosticWebResult(0, ['timeout']),
+    );
+    expect(checks['proxyPath']!.fix, DiagnosticFix.retestProxies);
+    expect(checks['systemPath']!.fix, isNull);
+    checks = await run(
+      FakeBackend()..systemWeb = const DiagnosticWebResult(0, ['timeout']),
+    );
+    expect(checks['proxyPath']!.fix, isNull);
+    checks = await run(FakeBackend()..listening = false);
+    expect(checks['proxyPath']!.status, DiagnosticStatus.skipped);
+    expect(checks['proxyPath']!.fix, isNull);
   });
   test(
     'a mismatched core port prevents testing the wrong local proxy',
@@ -190,6 +361,7 @@ void main() {
         FakeBackend(),
         input: const NetworkDiagnosticSnapshot(
           profileApplied: true,
+          profileSelected: true,
           running: true,
           suspended: false,
           systemProxy: false,
