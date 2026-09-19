@@ -175,11 +175,6 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
     );
   }
 
-  String _priceText(double price) {
-    final decimals = price == price.roundToDouble() ? 0 : 2;
-    return '¥ ${price.toStringAsFixed(decimals)}';
-  }
-
   Widget _buildErrorCard(String error) {
     return CommonCard(
       isError: true,
@@ -544,6 +539,18 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
       );
     }
 
+    if (bought.canBindCoupon) {
+      actions.add(
+        OutlinedButton.icon(
+          onPressed: _busy
+              ? null
+              : () => _runGuarded(() => _bindCouponFlow(bought)),
+          icon: const Icon(Icons.sell_outlined),
+          label: Text(appLocalizations.bindCoupon),
+        ),
+      );
+    }
+
     if (storeUpgradeTargets(bought, ref.read(storeProvider).plans).isNotEmpty) {
       actions.add(
         OutlinedButton.icon(
@@ -627,11 +634,44 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
   }
 
   Future<void> _earlyRenewFlow(BoughtRecord bought) async {
-    final coupon = await _promptCoupon(appLocalizations.earlyRenew);
-    if (coupon == null) return;
+    final choice = await globalState.showCommonDialog<_QuoteChoice>(
+      child: _QuoteDialog(
+        title: appLocalizations.earlyRenew,
+        loadQuote: (coupon) async => _shopQuoteView(
+          await CloudApiService().previewEarlyRenew(
+            bought.id,
+            bought.shopId,
+            coupon: coupon,
+          ),
+        ),
+      ),
+    );
+    if (choice == null) return;
     final res = await CloudApiService().earlyRenewPlan(
       bought.id,
-      coupon: coupon.isEmpty ? null : coupon,
+      coupon: choice.coupon.isEmpty ? null : choice.coupon,
+      authorizedPrice: choice.authorizedPrice,
+    );
+    _showResultHtml(res.success, res.message);
+    if (res.success) await _refresh();
+  }
+
+  Future<void> _bindCouponFlow(BoughtRecord bought) async {
+    final choice = await globalState.showCommonDialog<_QuoteChoice>(
+      child: _QuoteDialog(
+        title: appLocalizations.bindCoupon,
+        couponRequired: true,
+        hint: appLocalizations.bindCouponIntro,
+        loadQuote: (coupon) async => _bindCouponQuoteView(
+          await CloudApiService().bindCouponCheck(bought.id, coupon),
+        ),
+      ),
+    );
+    if (choice == null) return;
+    final res = await CloudApiService().bindCoupon(
+      bought.id,
+      coupon: choice.coupon,
+      authorizedPrice: choice.authorizedPrice,
     );
     _showResultHtml(res.success, res.message);
     if (res.success) await _refresh();
@@ -651,7 +691,26 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
     );
     if (target == null) return;
 
-    final res = await CloudApiService().upgradePlan(bought.id, target.id);
+    final choice = await globalState.showCommonDialog<_QuoteChoice>(
+      child: _QuoteDialog(
+        title: appLocalizations.upgradePlan,
+        loadQuote: (coupon) async => _shopQuoteView(
+          await CloudApiService().previewUpgrade(
+            bought.id,
+            target.id,
+            coupon: coupon,
+          ),
+        ),
+      ),
+    );
+    if (choice == null) return;
+
+    final res = await CloudApiService().upgradePlan(
+      bought.id,
+      target.id,
+      coupon: choice.coupon.isEmpty ? null : choice.coupon,
+      authorizedPrice: choice.authorizedPrice,
+    );
     _showResultHtml(res.success, res.message);
     if (res.success) await _refresh();
   }
@@ -1026,40 +1085,6 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
     );
   }
 
-  Future<String?> _promptCoupon(String title) async {
-    final controller = TextEditingController();
-    return globalState.showCommonDialog<String>(
-      child: CommonDialog(
-        title: title,
-        actions: [
-          TextButton(
-            onPressed: () =>
-                Navigator.pop(globalState.navigatorKey.currentContext!),
-            child: Text(appLocalizations.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(
-              globalState.navigatorKey.currentContext!,
-              controller.text.trim(),
-            ),
-            child: Text(appLocalizations.confirm),
-          ),
-        ],
-        child: SizedBox(
-          width: 300,
-          child: TextField(
-            controller: controller,
-            decoration: InputDecoration(
-              labelText: appLocalizations.discountCodeOptional,
-              border: const OutlineInputBorder(),
-              isDense: true,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   void _showResultHtml(bool success, String message) {
     final plain = message.replaceAll(RegExp(r'<[^>]*>'), ' ').trim();
     globalState.showNotifier(
@@ -1100,6 +1125,250 @@ class _RechargeChoice {
     required this.method,
     required this.coin,
   });
+}
+
+String _priceText(double price) {
+  final decimals = price == price.roundToDouble() ? 0 : 2;
+  return '¥ ${price.toStringAsFixed(decimals)}';
+}
+
+List<_QuoteRow> _renewalRows(bool available, double? price) {
+  return available && price != null
+      ? [_QuoteRow(appLocalizations.renewalPriceLabel, price)]
+      : const [];
+}
+
+_Quote _bindCouponQuoteView(BindCouponQuote quote) {
+  return _Quote(
+    authorizedPrice: quote.authorizedPrice,
+    sufficientBalance: quote.hasSufficientBalance,
+    recurring: quote.isRecurring,
+    rows: [
+      _QuoteRow(appLocalizations.discountedPriceLabel, quote.discountedPrice),
+      _QuoteRow(
+        quote.requiresPayment
+            ? appLocalizations.amountDueLabel
+            : appLocalizations.refundAmountLabel,
+        quote.requiresPayment ? quote.charge : quote.refund,
+      ),
+      ..._renewalRows(quote.renewalAvailable, quote.renewalPrice),
+    ],
+  );
+}
+
+_Quote _shopQuoteView(ShopQuote quote) {
+  return _Quote(
+    authorizedPrice: quote.price,
+    sufficientBalance: quote.hasSufficientBalance,
+    recurring: quote.isRecurring,
+    rows: [
+      _QuoteRow(appLocalizations.amountPayable, quote.price),
+      ..._renewalRows(quote.renewalAvailable, quote.renewalPrice),
+    ],
+  );
+}
+
+class _QuoteChoice {
+  final String coupon;
+  final double authorizedPrice;
+
+  const _QuoteChoice({required this.coupon, required this.authorizedPrice});
+}
+
+class _QuoteRow {
+  final String label;
+  final double amount;
+
+  const _QuoteRow(this.label, this.amount);
+}
+
+/// 报价的展示形态：各接口的原始返回由调用方折算成金额行与提交金额，
+/// 弹窗只负责展示、失效重验和余额门槛。
+class _Quote {
+  final double authorizedPrice;
+  final bool sufficientBalance;
+  final bool recurring;
+  final List<_QuoteRow> rows;
+
+  const _Quote({
+    required this.authorizedPrice,
+    required this.sufficientBalance,
+    required this.recurring,
+    required this.rows,
+  });
+}
+
+typedef _QuoteLoader = Future<_Quote> Function(String coupon);
+
+/// 购买类操作的报价确认：提前续费、升级/更换与绑定折扣共用。
+///
+/// [couponRequired] 为真时必须输入折扣代码（绑定折扣），否则打开即取一次
+/// 无券报价。改动折扣代码后原报价立即失效，必须重新验证才能提交。
+class _QuoteDialog extends ConsumerStatefulWidget {
+  final String title;
+  final _QuoteLoader loadQuote;
+  final bool couponRequired;
+  final String? hint;
+
+  const _QuoteDialog({
+    required this.title,
+    required this.loadQuote,
+    this.couponRequired = false,
+    this.hint,
+  });
+
+  @override
+  ConsumerState<_QuoteDialog> createState() => _QuoteDialogState();
+}
+
+class _QuoteDialogState extends ConsumerState<_QuoteDialog> {
+  final TextEditingController _controller = TextEditingController();
+  _Quote? _quote;
+  String _quotedCoupon = '';
+  bool _loading = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.couponRequired) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _load();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _load() async {
+    if (_loading) return;
+    final coupon = _controller.text.trim();
+    if (widget.couponRequired && coupon.isEmpty) {
+      globalState.showNotifier(appLocalizations.discountCodeRequired);
+      return;
+    }
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final quote = await widget.loadQuote(coupon);
+      if (!mounted) return;
+      setState(() {
+        _quote = quote;
+        _quotedCoupon = coupon;
+      });
+    } catch (e) {
+      if (CloudApiException.isUnauthorized(e)) {
+        if (mounted) Navigator.of(context).pop();
+        await ref.read(cloudAccountProvider.notifier).handleUnauthorized();
+        return;
+      }
+      if (!mounted) return;
+      setState(() {
+        _quote = null;
+        _quotedCoupon = '';
+        _error = CloudApiException.clean(e);
+      });
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Widget _summaryRow(_QuoteRow row) {
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(row.label, style: theme.textTheme.bodyMedium),
+        Text(_priceText(row.amount), style: theme.textTheme.titleSmall),
+      ],
+    );
+  }
+
+  Widget _note(String text, {bool isError = false}) {
+    final theme = Theme.of(context);
+    return Text(
+      text,
+      style: isError
+          ? theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)
+          : theme.textTheme.bodySmall,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final coupon = _controller.text.trim();
+    final quote = _quote;
+    final quoted = quote != null && coupon == _quotedCoupon;
+    return CommonDialog(
+      title: widget.title,
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(appLocalizations.cancel),
+        ),
+        TextButton(
+          onPressed: _loading ? null : _load,
+          child: Text(appLocalizations.verifyCoupon),
+        ),
+        TextButton(
+          onPressed: quoted && !_loading && quote.sufficientBalance
+              ? () => Navigator.of(context).pop(
+                  _QuoteChoice(
+                    coupon: coupon,
+                    authorizedPrice: quote.authorizedPrice,
+                  ),
+                )
+              : null,
+          child: Text(appLocalizations.confirm),
+        ),
+      ],
+      child: SizedBox(
+        width: 320,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: _controller,
+              onChanged: (_) => setState(() {}),
+              decoration: InputDecoration(
+                labelText: widget.couponRequired
+                    ? appLocalizations.discountCode
+                    : appLocalizations.discountCodeOptional,
+                border: const OutlineInputBorder(),
+                isDense: true,
+              ),
+            ),
+            const SizedBox(height: 12),
+            if (_loading)
+              _note(appLocalizations.calculatingQuote)
+            else if (_error != null)
+              _note(_error!, isError: true)
+            else if (quoted) ...[
+              for (var i = 0; i < quote.rows.length; i++) ...[
+                if (i > 0) const SizedBox(height: 4),
+                _summaryRow(quote.rows[i]),
+              ],
+              if (quote.recurring) ...[
+                const SizedBox(height: 8),
+                _note(appLocalizations.recurringRenewalHint),
+              ],
+              if (!quote.sufficientBalance) ...[
+                const SizedBox(height: 8),
+                _note(appLocalizations.insufficientBalanceHint, isError: true),
+              ],
+            ] else if (widget.hint != null)
+              _note(widget.hint!),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _CryptoPaymentDialog extends ConsumerStatefulWidget {

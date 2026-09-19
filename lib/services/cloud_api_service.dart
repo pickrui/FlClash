@@ -1276,6 +1276,28 @@ class CloudApiService {
         .toList();
   }
 
+  Future<Map<dynamic, dynamic>> _postQuote(
+    String path,
+    Map<String, dynamic> body,
+  ) async {
+    final res = await _client.post(
+      path,
+      data: FormData.fromMap(body),
+      options: _writeOptions(),
+    );
+    dynamic data = res.data;
+    if (data is String) {
+      try {
+        data = jsonDecode(data);
+      } catch (_) {}
+    }
+    final dto = CloudApiResponse<dynamic>.fromJson(data);
+    if (!dto.isSuccess || data is! Map) {
+      throw CloudApiException(dto.msg ?? appLocalizations.operationFailed);
+    }
+    return data;
+  }
+
   Future<({bool success, String message})> _postShopAction(
     String path,
     Map<String, dynamic> body,
@@ -1311,14 +1333,31 @@ class CloudApiService {
     });
   }
 
+  Future<ShopQuote> previewUpgrade(
+    int boughtId,
+    int targetShopId, {
+    String? coupon,
+  }) async {
+    final data = await _postQuote('/shop/upgrade', {
+      'bought_id': boughtId,
+      'target_shop_id': targetShopId,
+      'preview': 1,
+      if (coupon != null && coupon.isNotEmpty) 'coupon_code': coupon,
+    });
+    return ShopQuote.fromJson(data);
+  }
+
+  /// [authorizedPrice] 取 [previewUpgrade] 返回的报价；更换到更低档套餐时可为负。
   Future<({bool success, String message})> upgradePlan(
     int boughtId,
     int targetShopId, {
     String? coupon,
+    required double authorizedPrice,
   }) {
     return _postShopAction('/shop/upgrade', {
       'bought_id': boughtId,
       'target_shop_id': targetShopId,
+      'authorized_price': authorizedPrice.toStringAsFixed(2),
       if (coupon != null && coupon.isNotEmpty) 'coupon_code': coupon,
     });
   }
@@ -1327,13 +1366,53 @@ class CloudApiService {
     return _postShopAction('/shop/activate', {'id': boughtId});
   }
 
+  Future<ShopQuote> previewEarlyRenew(
+    int boughtId,
+    int shopId, {
+    String? coupon,
+  }) async {
+    final data = await _postQuote('/shop/coupon_check', {
+      'shop': shopId,
+      'bought_id': boughtId,
+      'early_renew': 1,
+      if (coupon != null && coupon.isNotEmpty) 'coupon_code': coupon,
+    });
+    return ShopQuote.fromJson(data);
+  }
+
+  /// [authorizedPrice] 取 [previewEarlyRenew] 返回的报价。
   Future<({bool success, String message})> earlyRenewPlan(
     int boughtId, {
     String? coupon,
+    required double authorizedPrice,
   }) {
     return _postShopAction('/shop/early_renew', {
       'id': boughtId,
+      'authorized_price': authorizedPrice.toStringAsFixed(2),
       if (coupon != null && coupon.isNotEmpty) 'coupon_code': coupon,
+    });
+  }
+
+  /// 预览绑定折扣代码后的折后价与差价，不产生扣款或退款。
+  Future<BindCouponQuote> bindCouponCheck(int boughtId, String coupon) async {
+    final data = await _postQuote('/shop/bind_coupon_check', {
+      'id': boughtId,
+      'coupon_code': coupon,
+    });
+    return BindCouponQuote.fromJson(data);
+  }
+
+  /// 绑定折扣代码并结算差价；[authorizedPrice] 取预览返回的结算金额，
+  /// 补差价为正、退差价为负，服务端据此校验报价未变化。
+  Future<({bool success, String message})> bindCoupon(
+    int boughtId, {
+    required String coupon,
+    required double authorizedPrice,
+  }) {
+    return _postShopAction('/shop/bind_coupon', {
+      'id': boughtId,
+      'coupon_code': coupon,
+      'authorized_price': authorizedPrice.toStringAsFixed(2),
     });
   }
 

@@ -176,6 +176,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "allowLan": MessageLookupByLibrary.simpleMessage("LANを許可"),
     "allowLanDesc": MessageLookupByLibrary.simpleMessage("LAN経由でのプロキシアクセスを許可"),
     "allowTemporarily": MessageLookupByLibrary.simpleMessage("一時的に許可"),
+    "amountDueLabel": MessageLookupByLibrary.simpleMessage("追加支払額"),
+    "amountPayable": MessageLookupByLibrary.simpleMessage("今回のお支払い"),
     "announcement": MessageLookupByLibrary.simpleMessage("お知らせ"),
     "apiAvailable": MessageLookupByLibrary.simpleMessage("APIサービスは正常です"),
     "app": MessageLookupByLibrary.simpleMessage("アプリ"),
@@ -232,6 +234,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "basicConfigDesc": MessageLookupByLibrary.simpleMessage("基本設定をグローバルに変更"),
     "billingPeriodLabel": MessageLookupByLibrary.simpleMessage("請求期間"),
     "bind": MessageLookupByLibrary.simpleMessage("バインド"),
+    "bindCoupon": MessageLookupByLibrary.simpleMessage("クーポンを適用"),
+    "bindCouponIntro": MessageLookupByLibrary.simpleMessage(
+      "公式のクーポンコードを入力してください。残りの期間に応じて差額を精算し、継続割引のコードは更新価格も変更します。",
+    ),
     "blacklistMode": MessageLookupByLibrary.simpleMessage("ブラックリストモード"),
     "blockQuic": MessageLookupByLibrary.simpleMessage("QUICをブロック"),
     "blockQuicDesc": MessageLookupByLibrary.simpleMessage(
@@ -247,6 +253,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "cacheCorrupt": MessageLookupByLibrary.simpleMessage(
       "キャッシュが破損しています。クリアしますか？",
     ),
+    "calculatingQuote": MessageLookupByLibrary.simpleMessage("計算中…"),
     "cancel": MessageLookupByLibrary.simpleMessage("キャンセル"),
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage("全選択解除"),
     "checkApi": MessageLookupByLibrary.simpleMessage("APIをチェック"),
@@ -618,7 +625,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "direct": MessageLookupByLibrary.simpleMessage("ダイレクト"),
     "disableUDP": MessageLookupByLibrary.simpleMessage("UDPを無効化"),
     "disconnected": MessageLookupByLibrary.simpleMessage("切断済み"),
+    "discountCode": MessageLookupByLibrary.simpleMessage("クーポンコード"),
     "discountCodeOptional": MessageLookupByLibrary.simpleMessage("割引コード（任意）"),
+    "discountCodeRequired": MessageLookupByLibrary.simpleMessage(
+      "クーポンコードを入力してください",
+    ),
+    "discountedPriceLabel": MessageLookupByLibrary.simpleMessage("割引後の価格"),
     "discovery": MessageLookupByLibrary.simpleMessage("新しいバージョンを発見"),
     "dnsDesc": MessageLookupByLibrary.simpleMessage("DNS関連設定の更新"),
     "dnsHijacking": MessageLookupByLibrary.simpleMessage("DNSハイジャッキング"),
@@ -812,6 +824,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "installedAppsPermissionRequired": MessageLookupByLibrary.simpleMessage(
       "アプリ一覧へのアクセス許可が必要です",
+    ),
+    "insufficientBalanceHint": MessageLookupByLibrary.simpleMessage(
+      "残高が不足しています。チャージしてから適用してください。",
     ),
     "intelligentSelected": MessageLookupByLibrary.simpleMessage("インテリジェント選択"),
     "internet": MessageLookupByLibrary.simpleMessage("インターネット"),
@@ -1147,12 +1162,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "receivingAddress": MessageLookupByLibrary.simpleMessage("受取アドレス"),
     "recharge": MessageLookupByLibrary.simpleMessage("チャージ"),
     "rechargeAmount": MessageLookupByLibrary.simpleMessage("チャージ金額（¥）"),
+    "recurringRenewalHint": MessageLookupByLibrary.simpleMessage(
+      "以降の自動更新にも割引が適用されます",
+    ),
     "redirPort": MessageLookupByLibrary.simpleMessage("Redirポート"),
     "redo": MessageLookupByLibrary.simpleMessage("やり直す"),
     "refresh": MessageLookupByLibrary.simpleMessage("更新"),
     "refreshAfterPayment": MessageLookupByLibrary.simpleMessage(
       "支払い完了後、下にスワイプして結果を確認してください",
     ),
+    "refundAmountLabel": MessageLookupByLibrary.simpleMessage("返金額"),
     "register": MessageLookupByLibrary.simpleMessage("登録"),
     "registerClosed": MessageLookupByLibrary.simpleMessage("現在、新規登録は停止しています"),
     "registerFailed": MessageLookupByLibrary.simpleMessage("登録に失敗しました"),
@@ -1171,6 +1190,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "remoteDestination": MessageLookupByLibrary.simpleMessage("リモート宛先"),
     "remove": MessageLookupByLibrary.simpleMessage("削除"),
     "rename": MessageLookupByLibrary.simpleMessage("リネーム"),
+    "renewalPriceLabel": MessageLookupByLibrary.simpleMessage("以降の更新料金"),
     "request": MessageLookupByLibrary.simpleMessage("リクエスト"),
     "requests": MessageLookupByLibrary.simpleMessage("リクエスト"),
     "requestsDesc": MessageLookupByLibrary.simpleMessage("最近のリクエスト記録を表示"),
@@ -1407,6 +1427,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "userCenter": MessageLookupByLibrary.simpleMessage("ユーザーセンター"),
     "userCenterFallback": MessageLookupByLibrary.simpleMessage("ユーザーセンター（予備）"),
     "value": MessageLookupByLibrary.simpleMessage("値"),
+    "verifyCoupon": MessageLookupByLibrary.simpleMessage("確認"),
     "vibrantScheme": MessageLookupByLibrary.simpleMessage("ビブラント"),
     "view": MessageLookupByLibrary.simpleMessage("表示"),
     "vpnConfigChangeDetected": MessageLookupByLibrary.simpleMessage(

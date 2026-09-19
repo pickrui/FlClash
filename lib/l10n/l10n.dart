@@ -4949,6 +4949,126 @@ class AppLocalizations {
     );
   }
 
+  /// `Apply coupon`
+  String get bindCoupon {
+    return Intl.message('Apply coupon', name: 'bindCoupon', desc: '', args: []);
+  }
+
+  /// `Enter an official coupon code. The difference is settled for the remaining plan duration, and a recurring coupon also updates the renewal price.`
+  String get bindCouponIntro {
+    return Intl.message(
+      'Enter an official coupon code. The difference is settled for the remaining plan duration, and a recurring coupon also updates the renewal price.',
+      name: 'bindCouponIntro',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Verify`
+  String get verifyCoupon {
+    return Intl.message('Verify', name: 'verifyCoupon', desc: '', args: []);
+  }
+
+  /// `Discount code`
+  String get discountCode {
+    return Intl.message(
+      'Discount code',
+      name: 'discountCode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter a discount code`
+  String get discountCodeRequired {
+    return Intl.message(
+      'Enter a discount code',
+      name: 'discountCodeRequired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Discounted price`
+  String get discountedPriceLabel {
+    return Intl.message(
+      'Discounted price',
+      name: 'discountedPriceLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Amount due`
+  String get amountDueLabel {
+    return Intl.message(
+      'Amount due',
+      name: 'amountDueLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Refund`
+  String get refundAmountLabel {
+    return Intl.message(
+      'Refund',
+      name: 'refundAmountLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Future automatic renewals keep this discount`
+  String get recurringRenewalHint {
+    return Intl.message(
+      'Future automatic renewals keep this discount',
+      name: 'recurringRenewalHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Insufficient balance. Top up before applying the coupon.`
+  String get insufficientBalanceHint {
+    return Intl.message(
+      'Insufficient balance. Top up before applying the coupon.',
+      name: 'insufficientBalanceHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Amount payable`
+  String get amountPayable {
+    return Intl.message(
+      'Amount payable',
+      name: 'amountPayable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Renewal price`
+  String get renewalPriceLabel {
+    return Intl.message(
+      'Renewal price',
+      name: 'renewalPriceLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Calculating…`
+  String get calculatingQuote {
+    return Intl.message(
+      'Calculating…',
+      name: 'calculatingQuote',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Enable auto-renew`
   String get enableAutoRenew {
     return Intl.message(

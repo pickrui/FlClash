@@ -209,6 +209,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "allowTemporarily": MessageLookupByLibrary.simpleMessage(
       "Временно разрешить",
     ),
+    "amountDueLabel": MessageLookupByLibrary.simpleMessage("К доплате"),
+    "amountPayable": MessageLookupByLibrary.simpleMessage("К оплате"),
     "announcement": MessageLookupByLibrary.simpleMessage("Объявление"),
     "apiAvailable": MessageLookupByLibrary.simpleMessage(
       "API-сервис работает нормально",
@@ -291,6 +293,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "billingPeriodLabel": MessageLookupByLibrary.simpleMessage("Период оплаты"),
     "bind": MessageLookupByLibrary.simpleMessage("Привязать"),
+    "bindCoupon": MessageLookupByLibrary.simpleMessage("Применить купон"),
+    "bindCouponIntro": MessageLookupByLibrary.simpleMessage(
+      "Введите официальный код купона. Разница рассчитывается за оставшийся срок, а повторяющийся купон также меняет цену продления.",
+    ),
     "blacklistMode": MessageLookupByLibrary.simpleMessage(
       "Режим черного списка",
     ),
@@ -312,6 +318,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "cacheCorrupt": MessageLookupByLibrary.simpleMessage(
       "Кэш поврежден. Хотите очистить его?",
     ),
+    "calculatingQuote": MessageLookupByLibrary.simpleMessage("Расчёт…"),
     "cancel": MessageLookupByLibrary.simpleMessage("Отмена"),
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage(
       "Отменить выбор всего",
@@ -771,8 +778,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "direct": MessageLookupByLibrary.simpleMessage("Прямой"),
     "disableUDP": MessageLookupByLibrary.simpleMessage("Отключить UDP"),
     "disconnected": MessageLookupByLibrary.simpleMessage("Отключено"),
+    "discountCode": MessageLookupByLibrary.simpleMessage("Код купона"),
     "discountCodeOptional": MessageLookupByLibrary.simpleMessage(
       "Промокод (необязательно)",
+    ),
+    "discountCodeRequired": MessageLookupByLibrary.simpleMessage(
+      "Введите код купона",
+    ),
+    "discountedPriceLabel": MessageLookupByLibrary.simpleMessage(
+      "Цена со скидкой",
     ),
     "discovery": MessageLookupByLibrary.simpleMessage(
       "Обнаружена новая версия",
@@ -1034,6 +1048,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "installedAppsPermissionRequired": MessageLookupByLibrary.simpleMessage(
       "Нужно разрешение на доступ к списку приложений",
+    ),
+    "insufficientBalanceHint": MessageLookupByLibrary.simpleMessage(
+      "Недостаточно средств. Пополните баланс перед применением.",
     ),
     "intelligentSelected": MessageLookupByLibrary.simpleMessage(
       "Интеллектуальный выбор",
@@ -1475,12 +1492,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "rechargeAmount": MessageLookupByLibrary.simpleMessage(
       "Сумма пополнения (¥)",
     ),
+    "recurringRenewalHint": MessageLookupByLibrary.simpleMessage(
+      "Скидка сохранится при автопродлении",
+    ),
     "redirPort": MessageLookupByLibrary.simpleMessage("Redir-порт"),
     "redo": MessageLookupByLibrary.simpleMessage("Повторить"),
     "refresh": MessageLookupByLibrary.simpleMessage("Обновить"),
     "refreshAfterPayment": MessageLookupByLibrary.simpleMessage(
       "После оплаты потяните вниз, чтобы обновить и проверить результат",
     ),
+    "refundAmountLabel": MessageLookupByLibrary.simpleMessage("Возврат"),
     "register": MessageLookupByLibrary.simpleMessage("Регистрация"),
     "registerClosed": MessageLookupByLibrary.simpleMessage(
       "Регистрация в настоящее время закрыта",
@@ -1509,6 +1530,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "remove": MessageLookupByLibrary.simpleMessage("Удалить"),
     "rename": MessageLookupByLibrary.simpleMessage("Переименовать"),
+    "renewalPriceLabel": MessageLookupByLibrary.simpleMessage("Цена продления"),
     "request": MessageLookupByLibrary.simpleMessage("Запрос"),
     "requests": MessageLookupByLibrary.simpleMessage("Запросы"),
     "requestsDesc": MessageLookupByLibrary.simpleMessage(
@@ -1827,6 +1849,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Центр пользователя (резервный)",
     ),
     "value": MessageLookupByLibrary.simpleMessage("Значение"),
+    "verifyCoupon": MessageLookupByLibrary.simpleMessage("Проверить"),
     "vibrantScheme": MessageLookupByLibrary.simpleMessage("Яркие"),
     "view": MessageLookupByLibrary.simpleMessage("Просмотр"),
     "vpnConfigChangeDetected": MessageLookupByLibrary.simpleMessage(

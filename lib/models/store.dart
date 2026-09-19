@@ -125,6 +125,7 @@ class BoughtRecord {
   final String billingPeriodText;
   final bool canActivate;
   final bool canEarlyRenew;
+  final bool canBindCoupon;
   final List<int>? upgradeShopIds;
 
   const BoughtRecord({
@@ -142,6 +143,7 @@ class BoughtRecord {
     required this.billingPeriodText,
     required this.canActivate,
     required this.canEarlyRenew,
+    required this.canBindCoupon,
     required this.upgradeShopIds,
   });
 
@@ -168,9 +170,88 @@ class BoughtRecord {
       canEarlyRenew: json['can_early_renew'] == null
           ? _asInt(json['status']) != -1 && _asBool(json['auto_renew'])
           : _asBool(json['can_early_renew']),
+      canBindCoupon: _asBool(json['can_bind_coupon']),
       upgradeShopIds: json.containsKey('upgrade_shop_ids')
           ? _asIntList(json['upgrade_shop_ids'])
           : null,
+    );
+  }
+}
+
+/// 购买类操作的报价：提前续费与升级/更换在提交前必须先取得，
+/// 服务端按 `authorized_price` 校验报价未变化。
+class ShopQuote {
+  final double price;
+  final bool isRecurring;
+  final double? renewalPrice;
+  final bool renewalAvailable;
+  final double balanceShortage;
+
+  const ShopQuote({
+    required this.price,
+    required this.isRecurring,
+    required this.renewalPrice,
+    required this.renewalAvailable,
+    required this.balanceShortage,
+  });
+
+  bool get hasSufficientBalance => balanceShortage <= 0;
+
+  factory ShopQuote.fromJson(Map<dynamic, dynamic> json) {
+    return ShopQuote(
+      // 更换到更低档套餐时报价可能为负，表示退回余额
+      price: _asDouble(json['price']),
+      isRecurring: _asBool(json['is_recurring']),
+      renewalPrice: _nonnegativeNumber(json['renewal_price']),
+      renewalAvailable: _asBool(json['renewal_available']),
+      balanceShortage: _nonnegativeNumber(json['balance_shortage']) ?? 0,
+    );
+  }
+}
+
+/// `/shop/bind_coupon_check` 的预览结果：折后价与本次应结算的差价。
+///
+/// [charge] 与 [refund] 至多一个大于 0；[authorizedPrice] 为提交时要回传的
+/// 结算金额，补差价为正、退差价为负。
+class BindCouponQuote {
+  final double discountedPrice;
+  final double refund;
+  final double charge;
+  final double authorizedPrice;
+  final double balanceShortage;
+  final bool isRecurring;
+  final double? renewalPrice;
+  final bool renewalAvailable;
+
+  const BindCouponQuote({
+    required this.discountedPrice,
+    required this.refund,
+    required this.charge,
+    required this.authorizedPrice,
+    required this.balanceShortage,
+    required this.isRecurring,
+    required this.renewalPrice,
+    required this.renewalAvailable,
+  });
+
+  bool get requiresPayment => charge > 0;
+
+  bool get hasSufficientBalance => !requiresPayment || balanceShortage <= 0;
+
+  factory BindCouponQuote.fromJson(Map<dynamic, dynamic> json) {
+    final charge = _nonnegativeNumber(json['charge']) ?? 0;
+    final refund = _nonnegativeNumber(json['refund']) ?? 0;
+    return BindCouponQuote(
+      discountedPrice: _nonnegativeNumber(json['discounted_price']) ?? 0,
+      refund: refund,
+      charge: charge,
+      authorizedPrice: json.containsKey('authorized_price')
+          ? _asDouble(json['authorized_price'])
+          : (charge > 0 ? charge : -refund),
+      balanceShortage: _nonnegativeNumber(json['balance_shortage']) ?? 0,
+      isRecurring: _asBool(json['is_recurring']),
+      renewalPrice: _nonnegativeNumber(json['renewal_price']),
+      renewalAvailable: _asBool(json['renewal_available']),
     );
   }
 }

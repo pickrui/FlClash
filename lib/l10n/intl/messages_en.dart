@@ -207,6 +207,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "allowTemporarily": MessageLookupByLibrary.simpleMessage(
       "Allow Temporarily",
     ),
+    "amountDueLabel": MessageLookupByLibrary.simpleMessage("Amount due"),
+    "amountPayable": MessageLookupByLibrary.simpleMessage("Amount payable"),
     "announcement": MessageLookupByLibrary.simpleMessage("Announcement"),
     "apiAvailable": MessageLookupByLibrary.simpleMessage(
       "API service is operational",
@@ -289,6 +291,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Billing period",
     ),
     "bind": MessageLookupByLibrary.simpleMessage("Bind"),
+    "bindCoupon": MessageLookupByLibrary.simpleMessage("Apply coupon"),
+    "bindCouponIntro": MessageLookupByLibrary.simpleMessage(
+      "Enter an official coupon code. The difference is settled for the remaining plan duration, and a recurring coupon also updates the renewal price.",
+    ),
     "blacklistMode": MessageLookupByLibrary.simpleMessage("Blacklist mode"),
     "blockQuic": MessageLookupByLibrary.simpleMessage("Block QUIC"),
     "blockQuicDesc": MessageLookupByLibrary.simpleMessage(
@@ -306,6 +312,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "cacheCorrupt": MessageLookupByLibrary.simpleMessage(
       "The cache is corrupt. Do you want to clear it?",
     ),
+    "calculatingQuote": MessageLookupByLibrary.simpleMessage("Calculating…"),
     "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage(
       "Cancel select all",
@@ -743,8 +750,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "direct": MessageLookupByLibrary.simpleMessage("Direct"),
     "disableUDP": MessageLookupByLibrary.simpleMessage("Disable UDP"),
     "disconnected": MessageLookupByLibrary.simpleMessage("Disconnected"),
+    "discountCode": MessageLookupByLibrary.simpleMessage("Discount code"),
     "discountCodeOptional": MessageLookupByLibrary.simpleMessage(
       "Discount code (optional)",
+    ),
+    "discountCodeRequired": MessageLookupByLibrary.simpleMessage(
+      "Enter a discount code",
+    ),
+    "discountedPriceLabel": MessageLookupByLibrary.simpleMessage(
+      "Discounted price",
     ),
     "discovery": MessageLookupByLibrary.simpleMessage(
       "Discovery a new version",
@@ -989,6 +1003,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "installedAppsPermissionRequired": MessageLookupByLibrary.simpleMessage(
       "Installed apps permission required",
+    ),
+    "insufficientBalanceHint": MessageLookupByLibrary.simpleMessage(
+      "Insufficient balance. Top up before applying the coupon.",
     ),
     "intelligentSelected": MessageLookupByLibrary.simpleMessage(
       "Intelligent selection",
@@ -1406,12 +1423,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "rechargeAmount": MessageLookupByLibrary.simpleMessage(
       "Recharge amount (¥)",
     ),
+    "recurringRenewalHint": MessageLookupByLibrary.simpleMessage(
+      "Future automatic renewals keep this discount",
+    ),
     "redirPort": MessageLookupByLibrary.simpleMessage("Redir Port"),
     "redo": MessageLookupByLibrary.simpleMessage("redo"),
     "refresh": MessageLookupByLibrary.simpleMessage("Refresh"),
     "refreshAfterPayment": MessageLookupByLibrary.simpleMessage(
       "After payment, pull down to refresh and check the result",
     ),
+    "refundAmountLabel": MessageLookupByLibrary.simpleMessage("Refund"),
     "register": MessageLookupByLibrary.simpleMessage("Register"),
     "registerClosed": MessageLookupByLibrary.simpleMessage(
       "Registration is currently closed",
@@ -1440,6 +1461,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "remove": MessageLookupByLibrary.simpleMessage("Remove"),
     "rename": MessageLookupByLibrary.simpleMessage("Rename"),
+    "renewalPriceLabel": MessageLookupByLibrary.simpleMessage("Renewal price"),
     "request": MessageLookupByLibrary.simpleMessage("Request"),
     "requests": MessageLookupByLibrary.simpleMessage("Requests"),
     "requestsDesc": MessageLookupByLibrary.simpleMessage(
@@ -1734,6 +1756,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "User Center (Backup)",
     ),
     "value": MessageLookupByLibrary.simpleMessage("Value"),
+    "verifyCoupon": MessageLookupByLibrary.simpleMessage("Verify"),
     "vibrantScheme": MessageLookupByLibrary.simpleMessage("Vibrant"),
     "view": MessageLookupByLibrary.simpleMessage("View"),
     "vpnConfigChangeDetected": MessageLookupByLibrary.simpleMessage(
