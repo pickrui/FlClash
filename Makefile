@@ -35,7 +35,7 @@ test:
 	dart tool/run_tests.dart $(FLUTTER_TEST_ARGS)
 
 test-go:
-	cd core && CGO_ENABLED=0 go test -tags with_gvisor ./...
+	cd core && CGO_ENABLED=0 go test -tags with_gvisor,with_mips_low_memory ./...
 
 test-rust:
 	cargo test --manifest-path plugins/rust_api/rust/Cargo.toml

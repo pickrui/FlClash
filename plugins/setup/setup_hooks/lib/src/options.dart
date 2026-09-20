@@ -43,7 +43,7 @@ class BuildConfig {
   final String helperName;
 
   static const _defaults = BuildConfig(
-    tags: 'with_gvisor',
+    tags: 'with_gvisor,with_mips_low_memory',
     goLdflags: '-w -s -buildid=',
     coreDir: 'core',
     coreName: 'FlClashCore',

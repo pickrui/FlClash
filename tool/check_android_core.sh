@@ -31,8 +31,8 @@ cp "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$host_tag/sysroot/usr/include/jni
   "$repo_dir/android/core/src/main/cpp/jni_helper.cpp" -o "$output_dir/jni_helper_test"
 "$output_dir/jni_helper_test"
 cd "$repo_dir/core"
-go vet -tags with_gvisor . ./tun ./platform
-go build -tags with_gvisor -buildmode=c-shared -trimpath -o "$output_dir/libclash.so" .
+go vet -tags with_gvisor,with_mips_low_memory . ./tun ./platform
+go build -tags with_gvisor,with_mips_low_memory -buildmode=c-shared -trimpath -o "$output_dir/libclash.so" .
 cp bride.h "$output_dir/bride.h"
 "$CXX" -std=c++17 -DLIBCLASH -fPIC -shared -Wl,--no-undefined \
   -I"$output_dir" "$repo_dir/android/core/src/main/cpp/core.cpp" \
