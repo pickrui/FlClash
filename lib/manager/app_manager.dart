@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:fl_clash/common/app_update_scheduler.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/periodic_task_runner.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -24,6 +25,14 @@ class AppStateManager extends ConsumerStatefulWidget {
 class _AppStateManagerState extends ConsumerState<AppStateManager>
     with WidgetsBindingObserver {
   bool _isBackground = false;
+  late final _appUpdates = AppUpdateScheduler(
+    checkForUpdates: () =>
+        ref.read(updateActionProvider.notifier).checkUpdate(),
+    onError: (error, _) => commonPrint.log(
+      'Automatic app update check failed: $error',
+      logLevel: LogLevel.warning,
+    ),
+  );
   late final _profileUpdates = PeriodicTaskRunner(
     interval: const Duration(minutes: 1),
     onError: (error, _) => commonPrint.log(
@@ -49,8 +58,10 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     _isBackground = _isBackgroundState(WidgetsBinding.instance.lifecycleState);
     ref.listenManual(initProvider, (_, ready) {
       if (ready) {
+        _appUpdates.start();
         _startProfileUpdates();
       } else {
+        _appUpdates.stop();
         _profileUpdates.stop();
       }
     }, fireImmediately: true);
@@ -101,6 +112,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
 
   @override
   void dispose() {
+    _appUpdates.stop();
     _profileUpdates.stop();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();

@@ -702,6 +702,7 @@ class AppController {
   bool _persistentLogWritesSuspended = false;
   final _geoRecoveryLock = AsyncStorageLock();
   final _proxyAuthenticationLock = AsyncStorageLock();
+  Future<void>? _updateDownloadsSweep;
   Future<void>? _checkUpdateFuture;
   bool _checkUpdateForUser = false;
   bool _updateDialogOpen = false;

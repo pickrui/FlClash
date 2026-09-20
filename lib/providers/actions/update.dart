@@ -31,8 +31,7 @@ extension InitControllerExt on AppController {
       return false;
     };
     updateTray();
-    // Clear last launch's installers before a check can download a new one.
-    unawaited(_sweepUpdateDownloads().then((_) => checkUpdate()));
+    unawaited(checkUpdate());
     await autoLaunch?.updateStatus(_ref.read(appSettingProvider).autoLaunch);
     final silentLaunch = shouldLaunchSilently(
       enabled: _ref.read(appSettingProvider).silentLaunch,
@@ -155,6 +154,8 @@ extension InitControllerExt on AppController {
   }
 
   Future<void> _checkUpdate({required bool isUser}) async {
+    // Every trigger waits for the one-time cleanup before starting a download.
+    await (_updateDownloadsSweep ??= _sweepUpdateDownloads());
     final task = _ref.read(appUpdateDownloadProvider);
     if (task.hasDownload) {
       if (isUser) await _showAppUpdateDownload(task);
