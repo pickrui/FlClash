@@ -158,7 +158,9 @@ jobs:
         run: |
           go vet -tags with_gvisor ./hub/route ./listener/hysteria2_realm
           go test -race -tags with_gvisor -timeout=180s ./hub/route ./listener/hysteria2_realm
-          go test -race -count=1 -timeout=180s github.com/metacubex/chi/... github.com/ajg/form
+          go test -race -count=1 -timeout=180s github.com/metacubex/chi/...
+      - name: Check form decoder dependency regressions
+        run: python3 tool/check_form_dependencies.py
       - name: Check Mieru dependency regressions
         run: python3 tool/check_mieru_dependencies.py
       - name: Check Mieru inbound integration
