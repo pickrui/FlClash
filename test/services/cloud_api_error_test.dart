@@ -46,7 +46,6 @@ void main() {
     DioExceptionType.connectionTimeout: 'Connection timed out',
     DioExceptionType.sendTimeout: 'Sending the request timed out',
     DioExceptionType.receiveTimeout: 'Waiting for the response timed out',
-    DioExceptionType.transformTimeout: 'Request timed out',
     DioExceptionType.cancel: 'Request canceled',
   }.entries) {
     test('${entry.key} retains its failure stage', () {

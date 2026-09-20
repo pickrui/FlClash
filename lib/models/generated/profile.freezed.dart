@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
+// ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of '../profile.dart';
@@ -9,7 +9,6 @@ part of '../profile.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -29,21 +28,16 @@ $SubscriptionInfoCopyWith<SubscriptionInfo> get copyWith => _$SubscriptionInfoCo
 
 @override
 bool operator ==(Object other) {
-  final _this = this as SubscriptionInfo;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SubscriptionInfo&&(identical(other.upload, _this.upload) || other.upload == _this.upload)&&(identical(other.download, _this.download) || other.download == _this.download)&&(identical(other.total, _this.total) || other.total == _this.total)&&(identical(other.expire, _this.expire) || other.expire == _this.expire));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SubscriptionInfo&&(identical(other.upload, upload) || other.upload == upload)&&(identical(other.download, download) || other.download == download)&&(identical(other.total, total) || other.total == total)&&(identical(other.expire, expire) || other.expire == expire));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode {
-  final _this = this as SubscriptionInfo;
-  return Object.hash(runtimeType,_this.upload,_this.download,_this.total,_this.expire);
-}
+int get hashCode => Object.hash(runtimeType,upload,download,total,expire);
 
 @override
 String toString() {
-  final _this = this as SubscriptionInfo;
-  return 'SubscriptionInfo(upload: ${_this.upload}, download: ${_this.download}, total: ${_this.total}, expire: ${_this.expire})';
+  return 'SubscriptionInfo(upload: $upload, download: $download, total: $total, expire: $expire)';
 }
 
 
@@ -72,7 +66,7 @@ class _$SubscriptionInfoCopyWithImpl<$Res>
 /// Create a copy of SubscriptionInfo
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? upload = null,Object? download = null,Object? total = null,Object? expire = null,}) {
-  return _then(SubscriptionInfo(
+  return _then(_self.copyWith(
 upload: null == upload ? _self.upload : upload // ignore: cast_nullable_to_non_nullable
 as int,download: null == download ? _self.download : download // ignore: cast_nullable_to_non_nullable
 as int,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
@@ -239,18 +233,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SubscriptionInfo&&(identical(other.upload, upload) || other.upload == upload)&&(identical(other.download, download) || other.download == download)&&(identical(other.total, total) || other.total == total)&&(identical(other.expire, expire) || other.expire == expire));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SubscriptionInfo&&(identical(other.upload, upload) || other.upload == upload)&&(identical(other.download, download) || other.download == download)&&(identical(other.total, total) || other.total == total)&&(identical(other.expire, expire) || other.expire == expire));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode {
-    return Object.hash(runtimeType,upload,download,total,expire);
-}
+int get hashCode => Object.hash(runtimeType,upload,download,total,expire);
 
 @override
 String toString() {
-    return 'SubscriptionInfo(upload: $upload, download: $download, total: $total, expire: $expire)';
+  return 'SubscriptionInfo(upload: $upload, download: $download, total: $total, expire: $expire)';
 }
 
 
@@ -308,21 +300,16 @@ $ProxyChainCopyWith<ProxyChain> get copyWith => _$ProxyChainCopyWithImpl<ProxyCh
 
 @override
 bool operator ==(Object other) {
-  final _this = this as ProxyChain;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProxyChain&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.enable, _this.enable) || other.enable == _this.enable)&&(identical(other.name, _this.name) || other.name == _this.name)&&const DeepCollectionEquality().equals(other.proxies, _this.proxies));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProxyChain&&(identical(other.id, id) || other.id == id)&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.name, name) || other.name == name)&&const DeepCollectionEquality().equals(other.proxies, proxies));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode {
-  final _this = this as ProxyChain;
-  return Object.hash(runtimeType,_this.id,_this.enable,_this.name,const DeepCollectionEquality().hash(_this.proxies));
-}
+int get hashCode => Object.hash(runtimeType,id,enable,name,const DeepCollectionEquality().hash(proxies));
 
 @override
 String toString() {
-  final _this = this as ProxyChain;
-  return 'ProxyChain(id: ${_this.id}, enable: ${_this.enable}, name: ${_this.name}, proxies: ${_this.proxies})';
+  return 'ProxyChain(id: $id, enable: $enable, name: $name, proxies: $proxies)';
 }
 
 
@@ -351,7 +338,7 @@ class _$ProxyChainCopyWithImpl<$Res>
 /// Create a copy of ProxyChain
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? enable = null,Object? name = null,Object? proxies = null,}) {
-  return _then(ProxyChain(
+  return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,enable: null == enable ? _self.enable : enable // ignore: cast_nullable_to_non_nullable
 as bool,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -497,7 +484,7 @@ return $default(_that.id,_that.enable,_that.name,_that.proxies);case _:
 @JsonSerializable()
 
 class _ProxyChain implements ProxyChain {
-  const _ProxyChain({required this.id, this.enable = true, this.name = '',  List<String> proxies = const []}): _proxies = proxies;
+  const _ProxyChain({required this.id, this.enable = true, this.name = '', final  List<String> proxies = const []}): _proxies = proxies;
   factory _ProxyChain.fromJson(Map<String, dynamic> json) => _$ProxyChainFromJson(json);
 
 @override final  int id;
@@ -524,18 +511,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProxyChain&&(identical(other.id, id) || other.id == id)&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.name, name) || other.name == name)&&const DeepCollectionEquality().equals(other.proxies, _proxies));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProxyChain&&(identical(other.id, id) || other.id == id)&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.name, name) || other.name == name)&&const DeepCollectionEquality().equals(other._proxies, _proxies));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode {
-    return Object.hash(runtimeType,id,enable,name,const DeepCollectionEquality().hash(_proxies));
-}
+int get hashCode => Object.hash(runtimeType,id,enable,name,const DeepCollectionEquality().hash(_proxies));
 
 @override
 String toString() {
-    return 'ProxyChain(id: $id, enable: $enable, name: $name, proxies: $proxies)';
+  return 'ProxyChain(id: $id, enable: $enable, name: $name, proxies: $proxies)';
 }
 
 
@@ -593,21 +578,16 @@ $ProfileProxyCopyWith<ProfileProxy> get copyWith => _$ProfileProxyCopyWithImpl<P
 
 @override
 bool operator ==(Object other) {
-  final _this = this as ProfileProxy;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProfileProxy&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.enable, _this.enable) || other.enable == _this.enable)&&(identical(other.uri, _this.uri) || other.uri == _this.uri)&&const DeepCollectionEquality().equals(other.proxy, _this.proxy));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProfileProxy&&(identical(other.id, id) || other.id == id)&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.uri, uri) || other.uri == uri)&&const DeepCollectionEquality().equals(other.proxy, proxy));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode {
-  final _this = this as ProfileProxy;
-  return Object.hash(runtimeType,_this.id,_this.enable,_this.uri,const DeepCollectionEquality().hash(_this.proxy));
-}
+int get hashCode => Object.hash(runtimeType,id,enable,uri,const DeepCollectionEquality().hash(proxy));
 
 @override
 String toString() {
-  final _this = this as ProfileProxy;
-  return 'ProfileProxy(id: ${_this.id}, enable: ${_this.enable}, uri: ${_this.uri}, proxy: ${_this.proxy})';
+  return 'ProfileProxy(id: $id, enable: $enable, uri: $uri, proxy: $proxy)';
 }
 
 
@@ -636,7 +616,7 @@ class _$ProfileProxyCopyWithImpl<$Res>
 /// Create a copy of ProfileProxy
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? enable = null,Object? uri = null,Object? proxy = null,}) {
-  return _then(ProfileProxy(
+  return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,enable: null == enable ? _self.enable : enable // ignore: cast_nullable_to_non_nullable
 as bool,uri: null == uri ? _self.uri : uri // ignore: cast_nullable_to_non_nullable
@@ -782,7 +762,7 @@ return $default(_that.id,_that.enable,_that.uri,_that.proxy);case _:
 @JsonSerializable()
 
 class _ProfileProxy implements ProfileProxy {
-  const _ProfileProxy({required this.id, this.enable = true, this.uri = '',  Map<String, Object?> proxy = const {}}): _proxy = proxy;
+  const _ProfileProxy({required this.id, this.enable = true, this.uri = '', final  Map<String, Object?> proxy = const {}}): _proxy = proxy;
   factory _ProfileProxy.fromJson(Map<String, dynamic> json) => _$ProfileProxyFromJson(json);
 
 @override final  int id;
@@ -809,18 +789,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProfileProxy&&(identical(other.id, id) || other.id == id)&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.uri, uri) || other.uri == uri)&&const DeepCollectionEquality().equals(other.proxy, _proxy));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProfileProxy&&(identical(other.id, id) || other.id == id)&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.uri, uri) || other.uri == uri)&&const DeepCollectionEquality().equals(other._proxy, _proxy));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode {
-    return Object.hash(runtimeType,id,enable,uri,const DeepCollectionEquality().hash(_proxy));
-}
+int get hashCode => Object.hash(runtimeType,id,enable,uri,const DeepCollectionEquality().hash(_proxy));
 
 @override
 String toString() {
-    return 'ProfileProxy(id: $id, enable: $enable, uri: $uri, proxy: $proxy)';
+  return 'ProfileProxy(id: $id, enable: $enable, uri: $uri, proxy: $proxy)';
 }
 
 
@@ -878,21 +856,16 @@ $ProfileCopyWith<Profile> get copyWith => _$ProfileCopyWithImpl<Profile>(this as
 
 @override
 bool operator ==(Object other) {
-  final _this = this as Profile;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Profile&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.label, _this.label) || other.label == _this.label)&&(identical(other.currentGroupName, _this.currentGroupName) || other.currentGroupName == _this.currentGroupName)&&(identical(other.url, _this.url) || other.url == _this.url)&&(identical(other.lastUpdateDate, _this.lastUpdateDate) || other.lastUpdateDate == _this.lastUpdateDate)&&(identical(other.autoUpdateDuration, _this.autoUpdateDuration) || other.autoUpdateDuration == _this.autoUpdateDuration)&&(identical(other.subscriptionInfo, _this.subscriptionInfo) || other.subscriptionInfo == _this.subscriptionInfo)&&(identical(other.autoUpdate, _this.autoUpdate) || other.autoUpdate == _this.autoUpdate)&&const DeepCollectionEquality().equals(other.selectedMap, _this.selectedMap)&&const DeepCollectionEquality().equals(other.unfoldSet, _this.unfoldSet)&&(identical(other.overwriteType, _this.overwriteType) || other.overwriteType == _this.overwriteType)&&const DeepCollectionEquality().equals(other.proxyChains, _this.proxyChains)&&const DeepCollectionEquality().equals(other.profileProxies, _this.profileProxies)&&const DeepCollectionEquality().equals(other.customProxyGroups, _this.customProxyGroups)&&const DeepCollectionEquality().equals(other.customRules, _this.customRules)&&(identical(other.scriptId, _this.scriptId) || other.scriptId == _this.scriptId)&&(identical(other.matchTarget, _this.matchTarget) || other.matchTarget == _this.matchTarget)&&(identical(other.order, _this.order) || other.order == _this.order));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Profile&&(identical(other.id, id) || other.id == id)&&(identical(other.label, label) || other.label == label)&&(identical(other.currentGroupName, currentGroupName) || other.currentGroupName == currentGroupName)&&(identical(other.url, url) || other.url == url)&&(identical(other.lastUpdateDate, lastUpdateDate) || other.lastUpdateDate == lastUpdateDate)&&(identical(other.autoUpdateDuration, autoUpdateDuration) || other.autoUpdateDuration == autoUpdateDuration)&&(identical(other.subscriptionInfo, subscriptionInfo) || other.subscriptionInfo == subscriptionInfo)&&(identical(other.autoUpdate, autoUpdate) || other.autoUpdate == autoUpdate)&&const DeepCollectionEquality().equals(other.selectedMap, selectedMap)&&const DeepCollectionEquality().equals(other.unfoldSet, unfoldSet)&&(identical(other.overwriteType, overwriteType) || other.overwriteType == overwriteType)&&const DeepCollectionEquality().equals(other.proxyChains, proxyChains)&&const DeepCollectionEquality().equals(other.profileProxies, profileProxies)&&const DeepCollectionEquality().equals(other.customProxyGroups, customProxyGroups)&&const DeepCollectionEquality().equals(other.customRules, customRules)&&(identical(other.scriptId, scriptId) || other.scriptId == scriptId)&&(identical(other.matchTarget, matchTarget) || other.matchTarget == matchTarget)&&(identical(other.order, order) || other.order == order));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode {
-  final _this = this as Profile;
-  return Object.hash(runtimeType,_this.id,_this.label,_this.currentGroupName,_this.url,_this.lastUpdateDate,_this.autoUpdateDuration,_this.subscriptionInfo,_this.autoUpdate,const DeepCollectionEquality().hash(_this.selectedMap),const DeepCollectionEquality().hash(_this.unfoldSet),_this.overwriteType,const DeepCollectionEquality().hash(_this.proxyChains),const DeepCollectionEquality().hash(_this.profileProxies),const DeepCollectionEquality().hash(_this.customProxyGroups),const DeepCollectionEquality().hash(_this.customRules),_this.scriptId,_this.matchTarget,_this.order);
-}
+int get hashCode => Object.hash(runtimeType,id,label,currentGroupName,url,lastUpdateDate,autoUpdateDuration,subscriptionInfo,autoUpdate,const DeepCollectionEquality().hash(selectedMap),const DeepCollectionEquality().hash(unfoldSet),overwriteType,const DeepCollectionEquality().hash(proxyChains),const DeepCollectionEquality().hash(profileProxies),const DeepCollectionEquality().hash(customProxyGroups),const DeepCollectionEquality().hash(customRules),scriptId,matchTarget,order);
 
 @override
 String toString() {
-  final _this = this as Profile;
-  return 'Profile(id: ${_this.id}, label: ${_this.label}, currentGroupName: ${_this.currentGroupName}, url: ${_this.url}, lastUpdateDate: ${_this.lastUpdateDate}, autoUpdateDuration: ${_this.autoUpdateDuration}, subscriptionInfo: ${_this.subscriptionInfo}, autoUpdate: ${_this.autoUpdate}, selectedMap: ${_this.selectedMap}, unfoldSet: ${_this.unfoldSet}, overwriteType: ${_this.overwriteType}, proxyChains: ${_this.proxyChains}, profileProxies: ${_this.profileProxies}, customProxyGroups: ${_this.customProxyGroups}, customRules: ${_this.customRules}, scriptId: ${_this.scriptId}, matchTarget: ${_this.matchTarget}, order: ${_this.order})';
+  return 'Profile(id: $id, label: $label, currentGroupName: $currentGroupName, url: $url, lastUpdateDate: $lastUpdateDate, autoUpdateDuration: $autoUpdateDuration, subscriptionInfo: $subscriptionInfo, autoUpdate: $autoUpdate, selectedMap: $selectedMap, unfoldSet: $unfoldSet, overwriteType: $overwriteType, proxyChains: $proxyChains, profileProxies: $profileProxies, customProxyGroups: $customProxyGroups, customRules: $customRules, scriptId: $scriptId, matchTarget: $matchTarget, order: $order)';
 }
 
 
@@ -921,7 +894,7 @@ class _$ProfileCopyWithImpl<$Res>
 /// Create a copy of Profile
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? label = null,Object? currentGroupName = freezed,Object? url = null,Object? lastUpdateDate = freezed,Object? autoUpdateDuration = null,Object? subscriptionInfo = freezed,Object? autoUpdate = null,Object? selectedMap = null,Object? unfoldSet = null,Object? overwriteType = null,Object? proxyChains = null,Object? profileProxies = null,Object? customProxyGroups = null,Object? customRules = null,Object? scriptId = freezed,Object? matchTarget = freezed,Object? order = freezed,}) {
-  return _then(Profile(
+  return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,label: null == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
 as String,currentGroupName: freezed == currentGroupName ? _self.currentGroupName : currentGroupName // ignore: cast_nullable_to_non_nullable
@@ -1093,7 +1066,7 @@ return $default(_that.id,_that.label,_that.currentGroupName,_that.url,_that.last
 @JsonSerializable()
 
 class _Profile implements Profile {
-  const _Profile({required this.id, this.label = '', this.currentGroupName, this.url = '', this.lastUpdateDate, required this.autoUpdateDuration, this.subscriptionInfo, this.autoUpdate = true,  Map<String, String> selectedMap = const {},  Set<String> unfoldSet = const {}, this.overwriteType = OverwriteType.standard,  List<ProxyChain> proxyChains = const [],  List<ProfileProxy> profileProxies = const [],  List<ProxyGroup> customProxyGroups = const [],  List<Rule> customRules = const [], this.scriptId, this.matchTarget, this.order}): _selectedMap = selectedMap,_unfoldSet = unfoldSet,_proxyChains = proxyChains,_profileProxies = profileProxies,_customProxyGroups = customProxyGroups,_customRules = customRules;
+  const _Profile({required this.id, this.label = '', this.currentGroupName, this.url = '', this.lastUpdateDate, required this.autoUpdateDuration, this.subscriptionInfo, this.autoUpdate = true, final  Map<String, String> selectedMap = const {}, final  Set<String> unfoldSet = const {}, this.overwriteType = OverwriteType.standard, final  List<ProxyChain> proxyChains = const [], final  List<ProfileProxy> profileProxies = const [], final  List<ProxyGroup> customProxyGroups = const [], final  List<Rule> customRules = const [], this.scriptId, this.matchTarget, this.order}): _selectedMap = selectedMap,_unfoldSet = unfoldSet,_proxyChains = proxyChains,_profileProxies = profileProxies,_customProxyGroups = customProxyGroups,_customRules = customRules;
   factory _Profile.fromJson(Map<String, dynamic> json) => _$ProfileFromJson(json);
 
 @override final  int id;
@@ -1164,18 +1137,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Profile&&(identical(other.id, id) || other.id == id)&&(identical(other.label, label) || other.label == label)&&(identical(other.currentGroupName, currentGroupName) || other.currentGroupName == currentGroupName)&&(identical(other.url, url) || other.url == url)&&(identical(other.lastUpdateDate, lastUpdateDate) || other.lastUpdateDate == lastUpdateDate)&&(identical(other.autoUpdateDuration, autoUpdateDuration) || other.autoUpdateDuration == autoUpdateDuration)&&(identical(other.subscriptionInfo, subscriptionInfo) || other.subscriptionInfo == subscriptionInfo)&&(identical(other.autoUpdate, autoUpdate) || other.autoUpdate == autoUpdate)&&const DeepCollectionEquality().equals(other.selectedMap, _selectedMap)&&const DeepCollectionEquality().equals(other.unfoldSet, _unfoldSet)&&(identical(other.overwriteType, overwriteType) || other.overwriteType == overwriteType)&&const DeepCollectionEquality().equals(other.proxyChains, _proxyChains)&&const DeepCollectionEquality().equals(other.profileProxies, _profileProxies)&&const DeepCollectionEquality().equals(other.customProxyGroups, _customProxyGroups)&&const DeepCollectionEquality().equals(other.customRules, _customRules)&&(identical(other.scriptId, scriptId) || other.scriptId == scriptId)&&(identical(other.matchTarget, matchTarget) || other.matchTarget == matchTarget)&&(identical(other.order, order) || other.order == order));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Profile&&(identical(other.id, id) || other.id == id)&&(identical(other.label, label) || other.label == label)&&(identical(other.currentGroupName, currentGroupName) || other.currentGroupName == currentGroupName)&&(identical(other.url, url) || other.url == url)&&(identical(other.lastUpdateDate, lastUpdateDate) || other.lastUpdateDate == lastUpdateDate)&&(identical(other.autoUpdateDuration, autoUpdateDuration) || other.autoUpdateDuration == autoUpdateDuration)&&(identical(other.subscriptionInfo, subscriptionInfo) || other.subscriptionInfo == subscriptionInfo)&&(identical(other.autoUpdate, autoUpdate) || other.autoUpdate == autoUpdate)&&const DeepCollectionEquality().equals(other._selectedMap, _selectedMap)&&const DeepCollectionEquality().equals(other._unfoldSet, _unfoldSet)&&(identical(other.overwriteType, overwriteType) || other.overwriteType == overwriteType)&&const DeepCollectionEquality().equals(other._proxyChains, _proxyChains)&&const DeepCollectionEquality().equals(other._profileProxies, _profileProxies)&&const DeepCollectionEquality().equals(other._customProxyGroups, _customProxyGroups)&&const DeepCollectionEquality().equals(other._customRules, _customRules)&&(identical(other.scriptId, scriptId) || other.scriptId == scriptId)&&(identical(other.matchTarget, matchTarget) || other.matchTarget == matchTarget)&&(identical(other.order, order) || other.order == order));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode {
-    return Object.hash(runtimeType,id,label,currentGroupName,url,lastUpdateDate,autoUpdateDuration,subscriptionInfo,autoUpdate,const DeepCollectionEquality().hash(_selectedMap),const DeepCollectionEquality().hash(_unfoldSet),overwriteType,const DeepCollectionEquality().hash(_proxyChains),const DeepCollectionEquality().hash(_profileProxies),const DeepCollectionEquality().hash(_customProxyGroups),const DeepCollectionEquality().hash(_customRules),scriptId,matchTarget,order);
-}
+int get hashCode => Object.hash(runtimeType,id,label,currentGroupName,url,lastUpdateDate,autoUpdateDuration,subscriptionInfo,autoUpdate,const DeepCollectionEquality().hash(_selectedMap),const DeepCollectionEquality().hash(_unfoldSet),overwriteType,const DeepCollectionEquality().hash(_proxyChains),const DeepCollectionEquality().hash(_profileProxies),const DeepCollectionEquality().hash(_customProxyGroups),const DeepCollectionEquality().hash(_customRules),scriptId,matchTarget,order);
 
 @override
 String toString() {
-    return 'Profile(id: $id, label: $label, currentGroupName: $currentGroupName, url: $url, lastUpdateDate: $lastUpdateDate, autoUpdateDuration: $autoUpdateDuration, subscriptionInfo: $subscriptionInfo, autoUpdate: $autoUpdate, selectedMap: $selectedMap, unfoldSet: $unfoldSet, overwriteType: $overwriteType, proxyChains: $proxyChains, profileProxies: $profileProxies, customProxyGroups: $customProxyGroups, customRules: $customRules, scriptId: $scriptId, matchTarget: $matchTarget, order: $order)';
+  return 'Profile(id: $id, label: $label, currentGroupName: $currentGroupName, url: $url, lastUpdateDate: $lastUpdateDate, autoUpdateDuration: $autoUpdateDuration, subscriptionInfo: $subscriptionInfo, autoUpdate: $autoUpdate, selectedMap: $selectedMap, unfoldSet: $unfoldSet, overwriteType: $overwriteType, proxyChains: $proxyChains, profileProxies: $profileProxies, customProxyGroups: $customProxyGroups, customRules: $customRules, scriptId: $scriptId, matchTarget: $matchTarget, order: $order)';
 }
 
 
@@ -1256,21 +1227,16 @@ $ProfileRuleLinkCopyWith<ProfileRuleLink> get copyWith => _$ProfileRuleLinkCopyW
 
 @override
 bool operator ==(Object other) {
-  final _this = this as ProfileRuleLink;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProfileRuleLink&&(identical(other.profileId, _this.profileId) || other.profileId == _this.profileId)&&(identical(other.ruleId, _this.ruleId) || other.ruleId == _this.ruleId)&&(identical(other.scene, _this.scene) || other.scene == _this.scene)&&(identical(other.order, _this.order) || other.order == _this.order));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProfileRuleLink&&(identical(other.profileId, profileId) || other.profileId == profileId)&&(identical(other.ruleId, ruleId) || other.ruleId == ruleId)&&(identical(other.scene, scene) || other.scene == scene)&&(identical(other.order, order) || other.order == order));
 }
 
 
 @override
-int get hashCode {
-  final _this = this as ProfileRuleLink;
-  return Object.hash(runtimeType,_this.profileId,_this.ruleId,_this.scene,_this.order);
-}
+int get hashCode => Object.hash(runtimeType,profileId,ruleId,scene,order);
 
 @override
 String toString() {
-  final _this = this as ProfileRuleLink;
-  return 'ProfileRuleLink(profileId: ${_this.profileId}, ruleId: ${_this.ruleId}, scene: ${_this.scene}, order: ${_this.order})';
+  return 'ProfileRuleLink(profileId: $profileId, ruleId: $ruleId, scene: $scene, order: $order)';
 }
 
 
@@ -1299,7 +1265,7 @@ class _$ProfileRuleLinkCopyWithImpl<$Res>
 /// Create a copy of ProfileRuleLink
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? profileId = freezed,Object? ruleId = null,Object? scene = freezed,Object? order = freezed,}) {
-  return _then(ProfileRuleLink(
+  return _then(_self.copyWith(
 profileId: freezed == profileId ? _self.profileId : profileId // ignore: cast_nullable_to_non_nullable
 as int?,ruleId: null == ruleId ? _self.ruleId : ruleId // ignore: cast_nullable_to_non_nullable
 as int,scene: freezed == scene ? _self.scene : scene // ignore: cast_nullable_to_non_nullable
@@ -1446,7 +1412,7 @@ return $default(_that.profileId,_that.ruleId,_that.scene,_that.order);case _:
 
 class _ProfileRuleLink implements ProfileRuleLink {
   const _ProfileRuleLink({this.profileId, required this.ruleId, this.scene, this.order});
-  
+
 
 @override final  int? profileId;
 @override final  int ruleId;
@@ -1463,18 +1429,16 @@ _$ProfileRuleLinkCopyWith<_ProfileRuleLink> get copyWith => __$ProfileRuleLinkCo
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProfileRuleLink&&(identical(other.profileId, profileId) || other.profileId == profileId)&&(identical(other.ruleId, ruleId) || other.ruleId == ruleId)&&(identical(other.scene, scene) || other.scene == scene)&&(identical(other.order, order) || other.order == order));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProfileRuleLink&&(identical(other.profileId, profileId) || other.profileId == profileId)&&(identical(other.ruleId, ruleId) || other.ruleId == ruleId)&&(identical(other.scene, scene) || other.scene == scene)&&(identical(other.order, order) || other.order == order));
 }
 
 
 @override
-int get hashCode {
-    return Object.hash(runtimeType,profileId,ruleId,scene,order);
-}
+int get hashCode => Object.hash(runtimeType,profileId,ruleId,scene,order);
 
 @override
 String toString() {
-    return 'ProfileRuleLink(profileId: $profileId, ruleId: $ruleId, scene: $scene, order: $order)';
+  return 'ProfileRuleLink(profileId: $profileId, ruleId: $ruleId, scene: $scene, order: $order)';
 }
 
 
@@ -1532,21 +1496,16 @@ $StandardOverwriteCopyWith<StandardOverwrite> get copyWith => _$StandardOverwrit
 
 @override
 bool operator ==(Object other) {
-  final _this = this as StandardOverwrite;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is StandardOverwrite&&const DeepCollectionEquality().equals(other.addedRules, _this.addedRules)&&const DeepCollectionEquality().equals(other.disabledRuleIds, _this.disabledRuleIds));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is StandardOverwrite&&const DeepCollectionEquality().equals(other.addedRules, addedRules)&&const DeepCollectionEquality().equals(other.disabledRuleIds, disabledRuleIds));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode {
-  final _this = this as StandardOverwrite;
-  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.addedRules),const DeepCollectionEquality().hash(_this.disabledRuleIds));
-}
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(addedRules),const DeepCollectionEquality().hash(disabledRuleIds));
 
 @override
 String toString() {
-  final _this = this as StandardOverwrite;
-  return 'StandardOverwrite(addedRules: ${_this.addedRules}, disabledRuleIds: ${_this.disabledRuleIds})';
+  return 'StandardOverwrite(addedRules: $addedRules, disabledRuleIds: $disabledRuleIds)';
 }
 
 
@@ -1575,7 +1534,7 @@ class _$StandardOverwriteCopyWithImpl<$Res>
 /// Create a copy of StandardOverwrite
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? addedRules = null,Object? disabledRuleIds = null,}) {
-  return _then(StandardOverwrite(
+  return _then(_self.copyWith(
 addedRules: null == addedRules ? _self.addedRules : addedRules // ignore: cast_nullable_to_non_nullable
 as List<Rule>,disabledRuleIds: null == disabledRuleIds ? _self.disabledRuleIds : disabledRuleIds // ignore: cast_nullable_to_non_nullable
 as List<int>,
@@ -1719,7 +1678,7 @@ return $default(_that.addedRules,_that.disabledRuleIds);case _:
 @JsonSerializable()
 
 class _StandardOverwrite implements StandardOverwrite {
-  const _StandardOverwrite({ List<Rule> addedRules = const [],  List<int> disabledRuleIds = const []}): _addedRules = addedRules,_disabledRuleIds = disabledRuleIds;
+  const _StandardOverwrite({final  List<Rule> addedRules = const [], final  List<int> disabledRuleIds = const []}): _addedRules = addedRules,_disabledRuleIds = disabledRuleIds;
   factory _StandardOverwrite.fromJson(Map<String, dynamic> json) => _$StandardOverwriteFromJson(json);
 
  final  List<Rule> _addedRules;
@@ -1750,18 +1709,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _StandardOverwrite&&const DeepCollectionEquality().equals(other.addedRules, _addedRules)&&const DeepCollectionEquality().equals(other.disabledRuleIds, _disabledRuleIds));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _StandardOverwrite&&const DeepCollectionEquality().equals(other._addedRules, _addedRules)&&const DeepCollectionEquality().equals(other._disabledRuleIds, _disabledRuleIds));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode {
-    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_addedRules),const DeepCollectionEquality().hash(_disabledRuleIds));
-}
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_addedRules),const DeepCollectionEquality().hash(_disabledRuleIds));
 
 @override
 String toString() {
-    return 'StandardOverwrite(addedRules: $addedRules, disabledRuleIds: $disabledRuleIds)';
+  return 'StandardOverwrite(addedRules: $addedRules, disabledRuleIds: $disabledRuleIds)';
 }
 
 
@@ -1817,21 +1774,16 @@ $ScriptOverwriteCopyWith<ScriptOverwrite> get copyWith => _$ScriptOverwriteCopyW
 
 @override
 bool operator ==(Object other) {
-  final _this = this as ScriptOverwrite;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ScriptOverwrite&&(identical(other.scriptId, _this.scriptId) || other.scriptId == _this.scriptId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ScriptOverwrite&&(identical(other.scriptId, scriptId) || other.scriptId == scriptId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode {
-  final _this = this as ScriptOverwrite;
-  return Object.hash(runtimeType,_this.scriptId);
-}
+int get hashCode => Object.hash(runtimeType,scriptId);
 
 @override
 String toString() {
-  final _this = this as ScriptOverwrite;
-  return 'ScriptOverwrite(scriptId: ${_this.scriptId})';
+  return 'ScriptOverwrite(scriptId: $scriptId)';
 }
 
 
@@ -1860,7 +1812,7 @@ class _$ScriptOverwriteCopyWithImpl<$Res>
 /// Create a copy of ScriptOverwrite
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? scriptId = freezed,}) {
-  return _then(ScriptOverwrite(
+  return _then(_self.copyWith(
 scriptId: freezed == scriptId ? _self.scriptId : scriptId // ignore: cast_nullable_to_non_nullable
 as int?,
   ));
@@ -2021,18 +1973,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ScriptOverwrite&&(identical(other.scriptId, scriptId) || other.scriptId == scriptId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ScriptOverwrite&&(identical(other.scriptId, scriptId) || other.scriptId == scriptId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode {
-    return Object.hash(runtimeType,scriptId);
-}
+int get hashCode => Object.hash(runtimeType,scriptId);
 
 @override
 String toString() {
-    return 'ScriptOverwrite(scriptId: $scriptId)';
+  return 'ScriptOverwrite(scriptId: $scriptId)';
 }
 
 

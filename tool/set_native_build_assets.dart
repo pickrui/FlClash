@@ -15,8 +15,18 @@ void main(List<String> args) {
   }
   final file = File('pubspec.yaml');
   final source = file.readAsStringSync();
+  file.writeAsStringSync(
+    configureBuildAssets(
+      source,
+      args.first == 'true',
+      package: args.length == 2 ? args[1] : null,
+    ),
+  );
+}
+
+String configureBuildAssets(String source, bool enabled, {String? package}) {
   final pattern = RegExp(
-    r'^(    (?:setup|rust_api):\r?\n      build_assets: )(true|false)$',
+    r'^(    (?:setup|rust_api):\r?\n      build_assets: )(true|false)(\r?)$',
     multiLine: true,
   );
   if (pattern.allMatches(source).length != 2) {
@@ -24,13 +34,10 @@ void main(List<String> args) {
       'Expected exactly two native build switches in pubspec.yaml',
     );
   }
-  file.writeAsStringSync(
-    source.replaceAllMapped(
-      pattern,
-      (match) =>
-          args.length == 1 || match[1]!.trimLeft().startsWith('${args[1]}:')
-          ? '${match[1]}${args.first}'
-          : match[0]!,
-    ),
+  return source.replaceAllMapped(
+    pattern,
+    (match) => package == null || match[1]!.trimLeft().startsWith('$package:')
+        ? '${match[1]}$enabled${match[3]}'
+        : match[0]!,
   );
 }

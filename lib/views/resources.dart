@@ -128,6 +128,13 @@ class GeoDataListItem extends ConsumerStatefulWidget {
 class _GeoDataListItemState extends ConsumerState<GeoDataListItem> {
   GeoItem get geoItem => widget.geoItem;
   bool _updating = false;
+  late Future<FileInfo> _fileInfoFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _fileInfoFuture = _getGeoFileLastModified(geoItem.fileName);
+  }
 
   Future<void> _updateUrl(String url, WidgetRef ref) async {
     final defaultMap = defaultGeoXUrl.toJson();
@@ -165,6 +172,15 @@ class _GeoDataListItemState extends ConsumerState<GeoDataListItem> {
     return FileInfo(size: size, lastModified: lastModified);
   }
 
+  void _refreshFileInfo() {
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _fileInfoFuture = _getGeoFileLastModified(geoItem.fileName);
+    });
+  }
+
   Widget _buildSubtitle() {
     final url = ref.watch(
       patchClashConfigProvider.select(
@@ -181,7 +197,7 @@ class _GeoDataListItemState extends ConsumerState<GeoDataListItem> {
       children: [
         const SizedBox(height: 6),
         FutureBuilder<FileInfo>(
-          future: _getGeoFileLastModified(geoItem.fileName),
+          future: _fileInfoFuture,
           builder: (_, snapshot) {
             final height = globalState.measure.bodyMediumHeight;
             return SizedBox(
@@ -249,11 +265,18 @@ class _GeoDataListItemState extends ConsumerState<GeoDataListItem> {
       }, silence: false);
     } finally {
       if (mounted) setState(() => _updating = false);
+      _refreshFileInfo();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // The Core clears the updating key only once the new file is on disk.
+    ref.listen(isUpdatingProvider(geoItem.type.updatingKey), (previous, next) {
+      if (previous == true && !next) {
+        _refreshFileInfo();
+      }
+    });
     return ListItem(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       title: Text(geoItem.label),

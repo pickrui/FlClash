@@ -1,5 +1,5 @@
 import 'package:fl_clash/l10n/l10n.dart';
-import 'package:fl_clash/manager/manager.dart';
+import 'package:fl_clash/manager/status_manager.dart';
 import 'package:fl_clash/models/state.dart';
 import 'package:fl_clash/widgets/inherited.dart';
 import 'package:fl_clash/widgets/scaffold.dart';

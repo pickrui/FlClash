@@ -37,6 +37,7 @@ func main() {
 		fmt.Println("Arguments error")
 		os.Exit(1)
 	}
+	watchTermination()
 	startServer(args[1])
 }
 

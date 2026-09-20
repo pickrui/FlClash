@@ -133,6 +133,13 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
   }
 
   @override
+  void dispose() {
+    _ruleTargetController.dispose();
+    _contentController.dispose();
+    super.dispose();
+  }
+
+  @override
   void didUpdateWidget(AddOrEditRuleDialog oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.rule != widget.rule) {

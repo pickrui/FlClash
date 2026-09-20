@@ -43,7 +43,7 @@ jobs:
           # Use the same tagged SDK checkout as release builds; this also
           # supports Windows ARM without a prebuilt stable SDK archive.
           channel: master
-          flutter-version: '3.47.5'
+          flutter-version: '3.44.6'
           cache: ${{ inputs.platform != 'windows' }}
       - run: flutter pub get
       - name: Prepare isolated Core settings

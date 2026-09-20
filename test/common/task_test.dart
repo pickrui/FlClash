@@ -759,7 +759,7 @@ void main() {
 
       final schemaLess = sqlite.sqlite3.open('${root.path}/schema-less.sqlite');
       schemaLess.execute('CREATE TABLE unrelated (id INTEGER)');
-      schemaLess.close();
+      schemaLess.dispose();
       expect(
         await validateBackupDatabase('${root.path}/schema-less.sqlite'),
         false,
@@ -794,7 +794,7 @@ void main() {
         futureSqlite.execute(
           'PRAGMA user_version = ${currentDatabaseSchemaVersion + 1}',
         );
-        futureSqlite.close();
+        futureSqlite.dispose();
         expect(await validateBackupDatabase(futurePath), false);
 
         final orphanPath = '${root.path}/orphan.sqlite';
@@ -805,7 +805,7 @@ void main() {
         orphanSqlite.execute(
           "INSERT INTO profile_rule_mapping (id, rule_id) VALUES ('orphan', 999)",
         );
-        orphanSqlite.close();
+        orphanSqlite.dispose();
         expect(await validateBackupDatabase(orphanPath), true);
       },
     );
@@ -824,7 +824,7 @@ void main() {
       "INSERT INTO profile_rule_mapping (id, rule_id) VALUES ('orphan', 999)",
     );
     legacyDatabase.execute('PRAGMA user_version = 2');
-    legacyDatabase.close();
+    legacyDatabase.dispose();
 
     expect(await validateBackupDatabase(databasePath), true);
     final restoredDatabase = Database(NativeDatabase(File(databasePath)));

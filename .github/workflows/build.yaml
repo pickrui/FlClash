@@ -7,16 +7,24 @@ on:
 
 env:
   IS_STABLE: ${{ !contains(github.ref, '-') }}
-  FLUTTER_VERSION: '3.47.5'
+  FLUTTER_VERSION: '3.44.6'
   GO_VERSION: '1.26.8'
   MSYS_NO_PATHCONV: 1
+
+permissions:
+  contents: read
 
 jobs:
   version:
     name: Generate Version
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
     outputs:
+      deep_tests: ${{ steps.scope.outputs.deep_tests }}
+      go_version: ${{ env.GO_VERSION }}
       full_version: ${{ steps.version.outputs.full_version }}
       flutter_version: ${{ env.FLUTTER_VERSION }}
       version_number: ${{ steps.version.outputs.version_number }}
@@ -24,6 +32,17 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine required Go test scope
+        id: scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 tool/release_checks.py scope
+
+      - name: Validate release checks
+        run: python3 -m unittest discover -s test/ci -v
 
       - name: Generate Version
         id: version
@@ -83,6 +102,17 @@ jobs:
           go build -tags with_gvisor -trimpath -o "$RUNNER_TEMP/FlClashCore" .
           go test -tags with_gvisor -c -o "$RUNNER_TEMP/flclash-routing-checker" .
 
+      - name: Cache Rust test library
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            plugins/rust_api/rust/target
+          key: ${{ runner.os }}-${{ runner.arch }}-script-test-cargo-${{ hashFiles('plugins/rust_api/rust/Cargo.lock', 'plugins/rust_api/rust/rust-toolchain.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-script-test-cargo-
+
       - name: Build native script test library
         run: cargo build --locked --manifest-path plugins/rust_api/rust/Cargo.toml
 
@@ -124,92 +154,19 @@ jobs:
           go test -tags with_gvisor ./...
           cd Clash.Meta
           go test -tags with_gvisor ./component/mmdb ./component/updater
-      - name: Validate integrated mihomo core
-        working-directory: core/Clash.Meta
-        run: |
-          go vet -tags with_gvisor ./...
-          # Full Sudoku and MKCP/Mekya matrices have separate required jobs below.
-          go test -race -tags with_gvisor -p=2 -parallel=2 -timeout=900s -skip '^(TestInboundSudoku|TestInboundVMess_(MKCP|Mekya)$)' ./...
-
-      - name: Check retained transport dependency fixes
-        working-directory: core/Clash.Meta
-        run: |
-          go test -race -run '^TestKeyUpdateSpamPostHandshakeTLS13$' github.com/metacubex/tls
-          go test -race -count=1 -timeout=180s -run '^(TestRestls|TestHandshakeMessageReaderAcrossRecords|TestNewRateLimitedConnDisabled|TestRateLimitedConn|TestBitRateLimiter)' github.com/metacubex/restls-client-go
-          go vet github.com/metacubex/sing-mux github.com/metacubex/smux github.com/metacubex/sing-shadowsocks2/...
-          go test -race -count=1 -timeout=120s github.com/metacubex/sing-shadowsocks2/...
-          go test -race -count=1 -timeout=120s github.com/metacubex/sing-mux
-          go test -race -count=1 -timeout=120s -skip '^(Test8GBTransfer|TestRandomLengthRandomDataTransfer)' github.com/metacubex/smux
-      - name: Check persistent cache regressions
-        working-directory: core/Clash.Meta
-        run: |
-          go vet -tags with_gvisor ./component/profile/cachefile ./component/fakeip
-          go test -race -tags with_gvisor -timeout=180s ./component/profile/cachefile ./component/fakeip
-          go test -short -race -count=1 -timeout=300s github.com/metacubex/bbolt/...
-          TEST_CONCURRENT_CASE_DURATION=3s go test -race -count=1 -timeout=300s -run '^(TestConcurrentGenericReadAndWrite|TestConcurrentRepeatableRead|TestOpen_MultipleGoroutines|TestSimulate_1000op_10p|TestSimulateNoFreeListSync_1000op_10p)$' github.com/metacubex/bbolt
-      - name: Check interface prefix lookup regressions
-        working-directory: core/Clash.Meta
-        run: |
-          go vet -tags with_gvisor ./component/iface/... ./component/dialer ./listener/sing_tun
-          go test -race -tags with_gvisor -timeout=180s ./component/iface/... ./component/dialer ./listener/sing_tun
-          go test -race -count=1 -timeout=300s github.com/metacubex/bart/...
-      - name: Check controller routing regressions
-        working-directory: core/Clash.Meta
-        run: |
-          go vet -tags with_gvisor ./hub/route ./listener/hysteria2_realm
-          go test -race -tags with_gvisor -timeout=180s ./hub/route ./listener/hysteria2_realm
-          go test -race -count=1 -timeout=180s github.com/metacubex/chi/...
-      - name: Check form decoder dependency regressions
-        run: python3 tool/check_form_dependencies.py
-      - name: Check Mieru dependency regressions
-        run: python3 tool/check_mieru_dependencies.py
-      - name: Check Mieru inbound integration
-        working-directory: core/Clash.Meta
-        run: go test -race -tags with_gvisor -timeout=180s -run '^(TestNewMieru|TestInboundMieru)$' ./listener/inbound
-      - name: Check QUIC dependency regressions
-        run: python3 tool/check_quic_dependencies.py
       - name: Check native callback and file ownership races
         working-directory: core
         run: |
           go test -race tun_callbacks.go tun_callbacks_test.go
           go test -race ownership_unix.go ownership_test.go ownership_stat_linux_test.go
 
-  mkcp-test:
-    name: MKCP and Mekya integration
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache-dependency-path: core/go.sum
-      - name: Validate all MKCP and Mekya variants
-        working-directory: core/Clash.Meta
-        run: |
-          # Retain each variant's 128 concurrent transfers and race detection.
-          # Serialize variants and packages, but let Go use the runner's available
-          # CPUs: capping GOMAXPROCS can starve UDP/H2 handshakes under -race.
-          echo "Available CPUs: $(nproc)"
-          go test -v -race -tags with_gvisor -p=1 -parallel=1 -count=2 -timeout=300s -run '^TestInboundVMess_(MKCP|Mekya)$' ./listener/inbound
-
-  sudoku-test:
-    name: Sudoku inbound integration
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache-dependency-path: core/go.sum
-      - name: Validate all Sudoku inbound variants
-        working-directory: core/Clash.Meta
-        run: go test -race -tags with_gvisor -p=2 -parallel=2 -timeout=900s -run '^TestInboundSudoku' ./listener/inbound
+  deep-tests:
+    name: Deep Go checks
+    needs: version
+    if: needs.version.outputs.deep_tests == 'true'
+    uses: ./.github/workflows/go-deep-tests.yaml
+    with:
+      go-version: ${{ needs.version.outputs.go_version }}
 
   android-core-test:
     name: Android core (${{ matrix.arch }})
@@ -252,11 +209,6 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: r28c
-      - name: Install script binding dependencies
-        run: sudo apt-get update && sudo apt-get install -y libclang-dev
       - name: Cache Gradle
         uses: actions/cache@v4
         with:
@@ -266,14 +218,6 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('android/**/*.gradle*', 'android/gradle/libs.versions.toml', 'android/gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-      - name: Compile Android Native Assets for all supported ABIs
-        run: |
-          dart tool/set_native_build_assets.dart false
-          dart tool/set_native_build_assets.dart true rust_api
-          for target in android-arm64 android-arm android-x64; do
-            flutter build bundle --debug --target-platform "$target"
-          done
-
       - name: Run Android unit tests
         working-directory: android
         run: |
@@ -288,6 +232,45 @@ jobs:
           chmod +x gradlew
           ./gradlew :app:testDebugUnitTest :service:testDebugUnitTest :common:testDebugUnitTest \
             -x :app:compileFlutterBuildDebug -x :app:copyFlutterAssetsDebug --no-daemon
+
+  android-native-test:
+    name: Android Native Assets
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - run: flutter pub get
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r28c
+      - name: Install script binding dependencies
+        run: sudo apt-get update && sudo apt-get install -y libclang-dev
+      - name: Cache Android Rust build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            .dart_tool/hooks_runner/shared/rust_api/build/*/target
+          key: ${{ runner.os }}-android-native-${{ env.FLUTTER_VERSION }}-${{ hashFiles('plugins/rust_api/rust/Cargo.lock', 'plugins/rust_api/rust/rust-toolchain.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-android-native-${{ env.FLUTTER_VERSION }}-
+      - name: Compile Android Native Assets for all supported ABIs
+        run: |
+          dart tool/set_native_build_assets.dart false
+          dart tool/set_native_build_assets.dart true rust_api
+          for target in android-arm64 android-arm android-x64; do
+            flutter build bundle --debug --target-platform "$target"
+          done
 
   rust-test:
     name: Rust components
@@ -319,7 +302,7 @@ jobs:
 
   build:
     name: "Build ${{ matrix.name }}"
-    needs: [version, test, go-test, mkcp-test, sudoku-test, android-core-test, android-test, rust-test, windows-helper-test]
+    needs: [version, go-test]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     strategy:
@@ -412,7 +395,6 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Cache Cargo
-        if: matrix.platform == 'windows'
         uses: actions/cache@v4
         with:
           path: |
@@ -420,9 +402,10 @@ jobs:
             ~/.cargo/git
             plugins/rust_api/rust/target
             services/helper/target
-          key: ${{ runner.os }}-${{ matrix.arch }}-cargo-${{ hashFiles('plugins/rust_api/rust/Cargo.lock', 'services/helper/Cargo.lock') }}
+            .dart_tool/hooks_runner/shared/rust_api/build/*/target
+          key: ${{ runner.os }}-${{ matrix.platform }}-${{ matrix.arch }}-cargo-v2-${{ env.FLUTTER_VERSION }}-${{ hashFiles('plugins/rust_api/rust/Cargo.lock', 'services/helper/Cargo.lock', '**/rust-toolchain.toml') }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.arch }}-cargo-
+            ${{ runner.os }}-${{ matrix.platform }}-${{ matrix.arch }}-cargo-v2-${{ env.FLUTTER_VERSION }}-
 
       - name: Cache CocoaPods
         if: matrix.platform == 'macos'
@@ -511,6 +494,13 @@ jobs:
           find ./dist -name "*.exe" -type f -exec sh -c 'mv "$1" "${1%.exe}-setup.exe"' _ {} \;
           find ./dist -name "*.appimage" -type f -exec sh -c 'mv "$1" "${1%.appimage}.AppImage"' _ {} \;
 
+      - name: Verify final Android APK version
+        if: matrix.platform == 'android'
+        env:
+          RELEASE_VERSION: ${{ needs.version.outputs.version_number }}
+          RELEASE_BUILD: ${{ needs.version.outputs.build_number }}
+        run: python3 tool/check_apk_version.py --version "$RELEASE_VERSION" --build "$RELEASE_BUILD" dist/*.apk
+
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
@@ -519,11 +509,24 @@ jobs:
           overwrite: true
           if-no-files-found: error
 
+  checks:
+    name: Required release checks
+    if: ${{ always() }}
+    needs: [version, test, go-test, deep-tests, android-core-test, android-test, android-native-test, rust-test, windows-helper-test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require every applicable check to pass
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: python3 tool/release_checks.py gate
+
   upload:
     permissions:
       actions: read
       contents: write
-    needs: [ version, build ]
+    needs: [ version, build, checks ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

@@ -764,7 +764,6 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
     StorePlan plan, {
     required bool withPayment,
   }) async {
-    final couponController = TextEditingController();
     final periods = plan.enabledBillingPeriods;
     var selectedPeriodKey = plan.defaultPeriod?.key ?? '';
     var autoRenew = false;
@@ -782,6 +781,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
 
     if (!mounted) return null;
 
+    var coupon = '';
     return showModalBottomSheet<_PurchaseChoice>(
       context: context,
       isScrollControlled: true,
@@ -874,7 +874,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
                     ],
                     const SizedBox(height: 16),
                     TextField(
-                      controller: couponController,
+                      onChanged: (value) => coupon = value,
                       decoration: InputDecoration(
                         labelText: appLocalizations.discountCodeOptional,
                         border: const OutlineInputBorder(),
@@ -923,7 +923,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
                                       selectedPeriodKey == 'legacy'
                                   ? null
                                   : selectedPeriodKey,
-                              coupon: couponController.text.trim(),
+                              coupon: coupon.trim(),
                               autoRenew: autoRenew,
                               method: withPayment ? method : null,
                               coin: null,
@@ -955,7 +955,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
   Future<_RechargeChoice?> _showRechargeSheet(
     List<PaymentMethodOption> methods,
   ) async {
-    final amountController = TextEditingController();
+    var amountText = '';
     PaymentMethodOption method = methods.first;
 
     return showModalBottomSheet<_RechargeChoice>(
@@ -986,7 +986,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
                     ),
                     const SizedBox(height: 16),
                     TextField(
-                      controller: amountController,
+                      onChanged: (value) => amountText = value,
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
@@ -1023,8 +1023,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
                       child: FilledButton.icon(
                         onPressed: () {
                           final amount =
-                              double.tryParse(amountController.text.trim()) ??
-                              0;
+                              double.tryParse(amountText.trim()) ?? 0;
                           if (amount <= 0) {
                             globalState.showNotifier(
                               appLocalizations.invalidAmount,

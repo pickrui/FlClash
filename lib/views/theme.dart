@@ -325,6 +325,7 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
               ),
             if (_removablePrimaryColor == null && !isEquals)
               IconButton.filledTonal(
+                tooltip: appLocalizations.reset,
                 iconSize: 20,
                 padding: const EdgeInsets.all(4),
                 visualDensity: VisualDensity.compact,
@@ -382,6 +383,7 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
                                 color: Colors.white.opacity0,
                                 padding: const EdgeInsets.all(8),
                                 child: IconButton.filledTonal(
+                                  tooltip: appLocalizations.remove,
                                   onPressed: _handleDel,
                                   padding: const EdgeInsets.all(12),
                                   iconSize: 30,
@@ -400,6 +402,7 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
                         height: itemWidth,
                         padding: const EdgeInsets.all(4),
                         child: IconButton.filledTonal(
+                          tooltip: appLocalizations.add,
                           onPressed: _handleAdd,
                           iconSize: 32,
                           icon: Icon(
@@ -572,6 +575,7 @@ class _PaletteDialogState extends State<_PaletteDialog> {
   @override
   void dispose() {
     _controller.removeListener(_syncFromPalette);
+    _controller.dispose();
     _hexController.dispose();
     super.dispose();
   }

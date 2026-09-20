@@ -150,6 +150,12 @@ class _CommonPopupBoxState extends State<CommonPopupBox> {
   }
 
   @override
+  void dispose() {
+    _targetOffsetValueNotifier.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (_, _) {
@@ -344,6 +350,7 @@ class _CommonPopupMenuItemsState extends State<_CommonPopupMenuItems> {
             spacing: 4,
             children: [
               IconButton(
+                tooltip: MaterialLocalizations.of(context).backButtonTooltip,
                 icon: Icon(
                   Icons.arrow_back_outlined,
                   color: context.colorScheme.onSurfaceVariant.opacity80,

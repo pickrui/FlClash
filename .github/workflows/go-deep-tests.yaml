@@ -1,0 +1,114 @@
+name: Deep Go checks
+
+on:
+  workflow_call:
+    inputs:
+      go-version:
+        type: string
+        required: true
+  workflow_dispatch:
+  schedule:
+    - cron: '23 3 * * 1'
+
+permissions:
+  contents: read
+
+env:
+  GO_VERSION: ${{ inputs.go-version || '1.26.8' }}
+
+jobs:
+  go-deep-test:
+    name: Full core and dependency regressions
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: |
+            core/go.sum
+            core/Clash.Meta/go.sum
+      - name: Validate integrated mihomo core
+        working-directory: core/Clash.Meta
+        run: |
+          go vet -tags with_gvisor ./...
+          # Full Sudoku and MKCP/Mekya matrices have separate required jobs below.
+          go test -race -tags with_gvisor -p=2 -parallel=2 -timeout=900s -skip '^(TestInboundSudoku|TestInboundVMess_(MKCP|Mekya)$)' ./...
+
+      - name: Check retained transport dependency fixes
+        working-directory: core/Clash.Meta
+        run: |
+          go test -race -run '^TestKeyUpdateSpamPostHandshakeTLS13$' github.com/metacubex/tls
+          go test -race -count=1 -timeout=180s -run '^(TestRestls|TestHandshakeMessageReaderAcrossRecords|TestNewRateLimitedConnDisabled|TestRateLimitedConn|TestBitRateLimiter)' github.com/metacubex/restls-client-go
+          go vet github.com/metacubex/sing-mux github.com/metacubex/smux github.com/metacubex/sing-shadowsocks2/...
+          go test -race -count=1 -timeout=120s github.com/metacubex/sing-shadowsocks2/...
+          go test -race -count=1 -timeout=120s github.com/metacubex/sing-mux
+          go test -race -count=1 -timeout=120s -skip '^(Test8GBTransfer|TestRandomLengthRandomDataTransfer)' github.com/metacubex/smux
+      - name: Check persistent cache regressions
+        working-directory: core/Clash.Meta
+        run: |
+          go vet -tags with_gvisor ./component/profile/cachefile ./component/fakeip
+          go test -race -tags with_gvisor -timeout=180s ./component/profile/cachefile ./component/fakeip
+          go test -short -race -count=1 -timeout=300s github.com/metacubex/bbolt/...
+          TEST_CONCURRENT_CASE_DURATION=3s go test -race -count=1 -timeout=300s -run '^(TestConcurrentGenericReadAndWrite|TestConcurrentRepeatableRead|TestOpen_MultipleGoroutines|TestSimulate_1000op_10p|TestSimulateNoFreeListSync_1000op_10p)$' github.com/metacubex/bbolt
+      - name: Check interface prefix lookup regressions
+        working-directory: core/Clash.Meta
+        run: |
+          go vet -tags with_gvisor ./component/iface/... ./component/dialer ./listener/sing_tun
+          go test -race -tags with_gvisor -timeout=180s ./component/iface/... ./component/dialer ./listener/sing_tun
+          go test -race -count=1 -timeout=300s github.com/metacubex/bart/...
+      - name: Check controller routing regressions
+        working-directory: core/Clash.Meta
+        run: |
+          go vet -tags with_gvisor ./hub/route ./listener/hysteria2_realm
+          go test -race -tags with_gvisor -timeout=180s ./hub/route ./listener/hysteria2_realm
+          go test -race -count=1 -timeout=180s github.com/metacubex/chi/...
+      - name: Check form decoder dependency regressions
+        run: python3 tool/check_form_dependencies.py
+      - name: Check Mieru dependency regressions
+        run: python3 tool/check_mieru_dependencies.py
+      - name: Check Mieru inbound integration
+        working-directory: core/Clash.Meta
+        run: go test -race -tags with_gvisor -timeout=180s -run '^(TestNewMieru|TestInboundMieru)$' ./listener/inbound
+      - name: Check QUIC dependency regressions
+        run: python3 tool/check_quic_dependencies.py
+
+  mkcp-test:
+    name: MKCP and Mekya integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: core/go.sum
+      - name: Validate all MKCP and Mekya variants
+        working-directory: core/Clash.Meta
+        run: |
+          # Retain each variant's 128 concurrent transfers and race detection.
+          # Serialize variants and packages, but let Go use the runner's available
+          # CPUs: capping GOMAXPROCS can starve UDP/H2 handshakes under -race.
+          echo "Available CPUs: $(nproc)"
+          go test -v -race -tags with_gvisor -p=1 -parallel=1 -count=2 -timeout=300s -run '^TestInboundVMess_(MKCP|Mekya)$' ./listener/inbound
+
+  sudoku-test:
+    name: Sudoku inbound integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: core/go.sum
+      - name: Validate all Sudoku inbound variants
+        working-directory: core/Clash.Meta
+        run: go test -race -tags with_gvisor -p=2 -parallel=2 -timeout=900s -run '^TestInboundSudoku' ./listener/inbound

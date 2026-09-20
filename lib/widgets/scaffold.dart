@@ -154,6 +154,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
     _textController.dispose();
     _isFabExtendedNotifier.dispose();
     _loadingNotifier.dispose();
+    _keywordsNotifier.dispose();
     super.dispose();
   }
 

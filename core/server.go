@@ -97,16 +97,19 @@ func send(data []byte) {
 }
 
 func startServer(address string) {
-	var err error
-	conn, err = dial(address)
+	dialed, err := dial(address)
 	if err != nil {
 		panic(err.Error())
 	}
-	defer func() {
-		_ = conn.Close()
-	}()
+	serve(dialed)
+}
+
+func serve(dialed io.ReadWriteCloser) {
+	conn = dialed
+	defer releaseOnExit()
+	defer dialed.Close()
 	for {
-		data, err := readFrame(conn)
+		data, err := readFrame(dialed)
 		if err != nil {
 			if err != io.EOF {
 				log.Printf("server read error: %v", err)
