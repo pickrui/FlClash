@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -99,4 +100,49 @@ void main() {
     addTearDown(() => socket.destroy());
     expect(socket.remotePort, server.port);
   });
+
+  test(
+    'cancel during TLS handshake closes the established TCP socket',
+    () async {
+      final stalled = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
+      final accepted = Completer<Socket>();
+      final received = Completer<void>();
+      final closed = Completer<void>();
+      stalled.listen((socket) {
+        accepted.complete(socket);
+        socket.listen(
+          (_) {
+            if (!received.isCompleted) received.complete();
+          },
+          onDone: closed.complete,
+          onError: (Object _) {},
+        );
+      });
+      final resolver = HostResolver(
+        lookup: (host, {type = InternetAddressType.any}) async => [
+          InternetAddress.loopbackIPv4,
+        ],
+      );
+      final task = await connectWithResolver(
+        Uri.parse('https://api.test:${stalled.port}'),
+        null,
+        null,
+        resolver: resolver,
+      );
+      final completion = task.socket.then<void>((socket) {
+        socket.destroy();
+        fail('cancelled handshake returned a connection');
+      }, onError: (Object _) {});
+      final socket = await accepted.future;
+      addTearDown(() async {
+        socket.destroy();
+        await stalled.close();
+        await completion;
+      });
+      await received.future;
+      task.cancel();
+      await closed.future.timeout(const Duration(seconds: 2));
+      await completion.timeout(const Duration(seconds: 2));
+    },
+  );
 }

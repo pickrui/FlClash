@@ -267,10 +267,11 @@ func TestManualProbeSupersededByNewerGeneration(t *testing.T) {
 	defer close(release)
 	previousProxies, previousProviders := tunnel.Proxies(), tunnel.Providers()
 	t.Cleanup(func() { tunnel.UpdateProxies(previousProxies, previousProviders) })
-	tunnel.UpdateProxies(
-		map[string]constant.Proxy{"node": adapter.NewProxy(outbound.NewDirect())},
-		nil,
-	)
+	node := adapter.NewProxy(outbound.NewDirect())
+	tunnel.UpdateProxies(map[string]constant.Proxy{"node": node}, nil)
+	if !node.AliveForTestUrl(server.URL) {
+		t.Fatal("new node should be available before a health failure")
+	}
 
 	superseded := make(chan *Delay, 1)
 	handleAsyncTestDelay(&TestDelayParams{
@@ -294,6 +295,9 @@ func TestManualProbeSupersededByNewerGeneration(t *testing.T) {
 		}
 	case <-time.After(5 * time.Second):
 		t.Fatal("a superseded probe kept running until its own deadline")
+	}
+	if !node.AliveForTestUrl(server.URL) || len(node.DelayHistory()) != 0 {
+		t.Fatal("superseded probe overwrote health/history with a false failure")
 	}
 	select {
 	case delay := <-current:

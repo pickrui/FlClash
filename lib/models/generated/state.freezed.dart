@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of '../state.dart';
@@ -9,6 +9,7 @@ part of '../state.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 /// @nodoc
@@ -25,16 +26,21 @@ $VM2CopyWith<A, B, VM2<A, B>> get copyWith => _$VM2CopyWithImpl<A, B, VM2<A, B>>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VM2<A, B>&&const DeepCollectionEquality().equals(other.a, a)&&const DeepCollectionEquality().equals(other.b, b));
+  final _this = this as VM2<A, B>;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is VM2<A, B>&&const DeepCollectionEquality().equals(other.a, _this.a)&&const DeepCollectionEquality().equals(other.b, _this.b));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(a),const DeepCollectionEquality().hash(b));
+int get hashCode {
+  final _this = this as VM2<A, B>;
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.a),const DeepCollectionEquality().hash(_this.b));
+}
 
 @override
 String toString() {
-  return 'VM2<$A, $B>(a: $a, b: $b)';
+  final _this = this as VM2<A, B>;
+  return 'VM2<$A, $B>(a: ${_this.a}, b: ${_this.b})';
 }
 
 
@@ -63,9 +69,9 @@ class _$VM2CopyWithImpl<A,B,$Res>
 /// Create a copy of VM2
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? a = freezed,Object? b = freezed,}) {
-  return _then(_self.copyWith(
-a: freezed == a ? _self.a : a // ignore: cast_nullable_to_non_nullable
-as A,b: freezed == b ? _self.b : b // ignore: cast_nullable_to_non_nullable
+  return _then(VM2(
+freezed == a ? _self.a : a // ignore: cast_nullable_to_non_nullable
+as A,freezed == b ? _self.b : b // ignore: cast_nullable_to_non_nullable
 as B,
   ));
 }
@@ -223,16 +229,18 @@ _$VM2CopyWith<A, B, _VM2<A, B>> get copyWith => __$VM2CopyWithImpl<A, B, _VM2<A,
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VM2<A, B>&&const DeepCollectionEquality().equals(other.a, a)&&const DeepCollectionEquality().equals(other.b, b));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _VM2<A, B>&&const DeepCollectionEquality().equals(other.a, a)&&const DeepCollectionEquality().equals(other.b, b));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(a),const DeepCollectionEquality().hash(b));
+int get hashCode {
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(a),const DeepCollectionEquality().hash(b));
+}
 
 @override
 String toString() {
-  return 'VM2<$A, $B>(a: $a, b: $b)';
+    return 'VM2<$A, $B>(a: $a, b: $b)';
 }
 
 
@@ -285,16 +293,21 @@ $VM3CopyWith<A, B, C, VM3<A, B, C>> get copyWith => _$VM3CopyWithImpl<A, B, C, V
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VM3<A, B, C>&&const DeepCollectionEquality().equals(other.a, a)&&const DeepCollectionEquality().equals(other.b, b)&&const DeepCollectionEquality().equals(other.c, c));
+  final _this = this as VM3<A, B, C>;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is VM3<A, B, C>&&const DeepCollectionEquality().equals(other.a, _this.a)&&const DeepCollectionEquality().equals(other.b, _this.b)&&const DeepCollectionEquality().equals(other.c, _this.c));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(a),const DeepCollectionEquality().hash(b),const DeepCollectionEquality().hash(c));
+int get hashCode {
+  final _this = this as VM3<A, B, C>;
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.a),const DeepCollectionEquality().hash(_this.b),const DeepCollectionEquality().hash(_this.c));
+}
 
 @override
 String toString() {
-  return 'VM3<$A, $B, $C>(a: $a, b: $b, c: $c)';
+  final _this = this as VM3<A, B, C>;
+  return 'VM3<$A, $B, $C>(a: ${_this.a}, b: ${_this.b}, c: ${_this.c})';
 }
 
 
@@ -323,10 +336,10 @@ class _$VM3CopyWithImpl<A,B,C,$Res>
 /// Create a copy of VM3
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? a = freezed,Object? b = freezed,Object? c = freezed,}) {
-  return _then(_self.copyWith(
-a: freezed == a ? _self.a : a // ignore: cast_nullable_to_non_nullable
-as A,b: freezed == b ? _self.b : b // ignore: cast_nullable_to_non_nullable
-as B,c: freezed == c ? _self.c : c // ignore: cast_nullable_to_non_nullable
+  return _then(VM3(
+freezed == a ? _self.a : a // ignore: cast_nullable_to_non_nullable
+as A,freezed == b ? _self.b : b // ignore: cast_nullable_to_non_nullable
+as B,freezed == c ? _self.c : c // ignore: cast_nullable_to_non_nullable
 as C,
   ));
 }
@@ -485,16 +498,18 @@ _$VM3CopyWith<A, B, C, _VM3<A, B, C>> get copyWith => __$VM3CopyWithImpl<A, B, C
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VM3<A, B, C>&&const DeepCollectionEquality().equals(other.a, a)&&const DeepCollectionEquality().equals(other.b, b)&&const DeepCollectionEquality().equals(other.c, c));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _VM3<A, B, C>&&const DeepCollectionEquality().equals(other.a, a)&&const DeepCollectionEquality().equals(other.b, b)&&const DeepCollectionEquality().equals(other.c, c));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(a),const DeepCollectionEquality().hash(b),const DeepCollectionEquality().hash(c));
+int get hashCode {
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(a),const DeepCollectionEquality().hash(b),const DeepCollectionEquality().hash(c));
+}
 
 @override
 String toString() {
-  return 'VM3<$A, $B, $C>(a: $a, b: $b, c: $c)';
+    return 'VM3<$A, $B, $C>(a: $a, b: $b, c: $c)';
 }
 
 
@@ -548,16 +563,21 @@ $VM4CopyWith<A, B, C, D, VM4<A, B, C, D>> get copyWith => _$VM4CopyWithImpl<A, B
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VM4<A, B, C, D>&&const DeepCollectionEquality().equals(other.a, a)&&const DeepCollectionEquality().equals(other.b, b)&&const DeepCollectionEquality().equals(other.c, c)&&const DeepCollectionEquality().equals(other.d, d));
+  final _this = this as VM4<A, B, C, D>;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is VM4<A, B, C, D>&&const DeepCollectionEquality().equals(other.a, _this.a)&&const DeepCollectionEquality().equals(other.b, _this.b)&&const DeepCollectionEquality().equals(other.c, _this.c)&&const DeepCollectionEquality().equals(other.d, _this.d));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(a),const DeepCollectionEquality().hash(b),const DeepCollectionEquality().hash(c),const DeepCollectionEquality().hash(d));
+int get hashCode {
+  final _this = this as VM4<A, B, C, D>;
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.a),const DeepCollectionEquality().hash(_this.b),const DeepCollectionEquality().hash(_this.c),const DeepCollectionEquality().hash(_this.d));
+}
 
 @override
 String toString() {
-  return 'VM4<$A, $B, $C, $D>(a: $a, b: $b, c: $c, d: $d)';
+  final _this = this as VM4<A, B, C, D>;
+  return 'VM4<$A, $B, $C, $D>(a: ${_this.a}, b: ${_this.b}, c: ${_this.c}, d: ${_this.d})';
 }
 
 
@@ -586,11 +606,11 @@ class _$VM4CopyWithImpl<A,B,C,D,$Res>
 /// Create a copy of VM4
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? a = freezed,Object? b = freezed,Object? c = freezed,Object? d = freezed,}) {
-  return _then(_self.copyWith(
-a: freezed == a ? _self.a : a // ignore: cast_nullable_to_non_nullable
-as A,b: freezed == b ? _self.b : b // ignore: cast_nullable_to_non_nullable
-as B,c: freezed == c ? _self.c : c // ignore: cast_nullable_to_non_nullable
-as C,d: freezed == d ? _self.d : d // ignore: cast_nullable_to_non_nullable
+  return _then(VM4(
+freezed == a ? _self.a : a // ignore: cast_nullable_to_non_nullable
+as A,freezed == b ? _self.b : b // ignore: cast_nullable_to_non_nullable
+as B,freezed == c ? _self.c : c // ignore: cast_nullable_to_non_nullable
+as C,freezed == d ? _self.d : d // ignore: cast_nullable_to_non_nullable
 as D,
   ));
 }
@@ -750,16 +770,18 @@ _$VM4CopyWith<A, B, C, D, _VM4<A, B, C, D>> get copyWith => __$VM4CopyWithImpl<A
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VM4<A, B, C, D>&&const DeepCollectionEquality().equals(other.a, a)&&const DeepCollectionEquality().equals(other.b, b)&&const DeepCollectionEquality().equals(other.c, c)&&const DeepCollectionEquality().equals(other.d, d));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _VM4<A, B, C, D>&&const DeepCollectionEquality().equals(other.a, a)&&const DeepCollectionEquality().equals(other.b, b)&&const DeepCollectionEquality().equals(other.c, c)&&const DeepCollectionEquality().equals(other.d, d));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(a),const DeepCollectionEquality().hash(b),const DeepCollectionEquality().hash(c),const DeepCollectionEquality().hash(d));
+int get hashCode {
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(a),const DeepCollectionEquality().hash(b),const DeepCollectionEquality().hash(c),const DeepCollectionEquality().hash(d));
+}
 
 @override
 String toString() {
-  return 'VM4<$A, $B, $C, $D>(a: $a, b: $b, c: $c, d: $d)';
+    return 'VM4<$A, $B, $C, $D>(a: $a, b: $b, c: $c, d: $d)';
 }
 
 
@@ -814,16 +836,21 @@ $VM5CopyWith<A, B, C, D, E, VM5<A, B, C, D, E>> get copyWith => _$VM5CopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VM5<A, B, C, D, E>&&const DeepCollectionEquality().equals(other.a, a)&&const DeepCollectionEquality().equals(other.b, b)&&const DeepCollectionEquality().equals(other.c, c)&&const DeepCollectionEquality().equals(other.d, d)&&const DeepCollectionEquality().equals(other.e, e));
+  final _this = this as VM5<A, B, C, D, E>;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is VM5<A, B, C, D, E>&&const DeepCollectionEquality().equals(other.a, _this.a)&&const DeepCollectionEquality().equals(other.b, _this.b)&&const DeepCollectionEquality().equals(other.c, _this.c)&&const DeepCollectionEquality().equals(other.d, _this.d)&&const DeepCollectionEquality().equals(other.e, _this.e));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(a),const DeepCollectionEquality().hash(b),const DeepCollectionEquality().hash(c),const DeepCollectionEquality().hash(d),const DeepCollectionEquality().hash(e));
+int get hashCode {
+  final _this = this as VM5<A, B, C, D, E>;
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.a),const DeepCollectionEquality().hash(_this.b),const DeepCollectionEquality().hash(_this.c),const DeepCollectionEquality().hash(_this.d),const DeepCollectionEquality().hash(_this.e));
+}
 
 @override
 String toString() {
-  return 'VM5<$A, $B, $C, $D, $E>(a: $a, b: $b, c: $c, d: $d, e: $e)';
+  final _this = this as VM5<A, B, C, D, E>;
+  return 'VM5<$A, $B, $C, $D, $E>(a: ${_this.a}, b: ${_this.b}, c: ${_this.c}, d: ${_this.d}, e: ${_this.e})';
 }
 
 
@@ -852,12 +879,12 @@ class _$VM5CopyWithImpl<A,B,C,D,E,$Res>
 /// Create a copy of VM5
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? a = freezed,Object? b = freezed,Object? c = freezed,Object? d = freezed,Object? e = freezed,}) {
-  return _then(_self.copyWith(
-a: freezed == a ? _self.a : a // ignore: cast_nullable_to_non_nullable
-as A,b: freezed == b ? _self.b : b // ignore: cast_nullable_to_non_nullable
-as B,c: freezed == c ? _self.c : c // ignore: cast_nullable_to_non_nullable
-as C,d: freezed == d ? _self.d : d // ignore: cast_nullable_to_non_nullable
-as D,e: freezed == e ? _self.e : e // ignore: cast_nullable_to_non_nullable
+  return _then(VM5(
+freezed == a ? _self.a : a // ignore: cast_nullable_to_non_nullable
+as A,freezed == b ? _self.b : b // ignore: cast_nullable_to_non_nullable
+as B,freezed == c ? _self.c : c // ignore: cast_nullable_to_non_nullable
+as C,freezed == d ? _self.d : d // ignore: cast_nullable_to_non_nullable
+as D,freezed == e ? _self.e : e // ignore: cast_nullable_to_non_nullable
 as E,
   ));
 }
@@ -1018,16 +1045,18 @@ _$VM5CopyWith<A, B, C, D, E, _VM5<A, B, C, D, E>> get copyWith => __$VM5CopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VM5<A, B, C, D, E>&&const DeepCollectionEquality().equals(other.a, a)&&const DeepCollectionEquality().equals(other.b, b)&&const DeepCollectionEquality().equals(other.c, c)&&const DeepCollectionEquality().equals(other.d, d)&&const DeepCollectionEquality().equals(other.e, e));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _VM5<A, B, C, D, E>&&const DeepCollectionEquality().equals(other.a, a)&&const DeepCollectionEquality().equals(other.b, b)&&const DeepCollectionEquality().equals(other.c, c)&&const DeepCollectionEquality().equals(other.d, d)&&const DeepCollectionEquality().equals(other.e, e));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(a),const DeepCollectionEquality().hash(b),const DeepCollectionEquality().hash(c),const DeepCollectionEquality().hash(d),const DeepCollectionEquality().hash(e));
+int get hashCode {
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(a),const DeepCollectionEquality().hash(b),const DeepCollectionEquality().hash(c),const DeepCollectionEquality().hash(d),const DeepCollectionEquality().hash(e));
+}
 
 @override
 String toString() {
-  return 'VM5<$A, $B, $C, $D, $E>(a: $a, b: $b, c: $c, d: $d, e: $e)';
+    return 'VM5<$A, $B, $C, $D, $E>(a: $a, b: $b, c: $c, d: $d, e: $e)';
 }
 
 
@@ -1083,16 +1112,21 @@ $ActivateStateCopyWith<ActivateState> get copyWith => _$ActivateStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ActivateState&&(identical(other.active, active) || other.active == active));
+  final _this = this as ActivateState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ActivateState&&(identical(other.active, _this.active) || other.active == _this.active));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,active);
+int get hashCode {
+  final _this = this as ActivateState;
+  return Object.hash(runtimeType,_this.active);
+}
 
 @override
 String toString() {
-  return 'ActivateState(active: $active)';
+  final _this = this as ActivateState;
+  return 'ActivateState(active: ${_this.active})';
 }
 
 
@@ -1121,7 +1155,7 @@ class _$ActivateStateCopyWithImpl<$Res>
 /// Create a copy of ActivateState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? active = null,}) {
-  return _then(_self.copyWith(
+  return _then(ActivateState(
 active: null == active ? _self.active : active // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
@@ -1279,16 +1313,18 @@ _$ActivateStateCopyWith<_ActivateState> get copyWith => __$ActivateStateCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ActivateState&&(identical(other.active, active) || other.active == active));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ActivateState&&(identical(other.active, active) || other.active == active));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,active);
+int get hashCode {
+    return Object.hash(runtimeType,active);
+}
 
 @override
 String toString() {
-  return 'ActivateState(active: $active)';
+    return 'ActivateState(active: $active)';
 }
 
 
@@ -1340,16 +1376,21 @@ $InitStateCopyWith<InitState> get copyWith => _$InitStateCopyWithImpl<InitState>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is InitState&&(identical(other.config, config) || other.config == config)&&const DeepCollectionEquality().equals(other.profiles, profiles));
+  final _this = this as InitState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is InitState&&(identical(other.config, _this.config) || other.config == _this.config)&&const DeepCollectionEquality().equals(other.profiles, _this.profiles));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,config,const DeepCollectionEquality().hash(profiles));
+int get hashCode {
+  final _this = this as InitState;
+  return Object.hash(runtimeType,_this.config,const DeepCollectionEquality().hash(_this.profiles));
+}
 
 @override
 String toString() {
-  return 'InitState(config: $config, profiles: $profiles)';
+  final _this = this as InitState;
+  return 'InitState(config: ${_this.config}, profiles: ${_this.profiles})';
 }
 
 
@@ -1378,7 +1419,7 @@ class _$InitStateCopyWithImpl<$Res>
 /// Create a copy of InitState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? config = null,Object? profiles = null,}) {
-  return _then(_self.copyWith(
+  return _then(InitState(
 config: null == config ? _self.config : config // ignore: cast_nullable_to_non_nullable
 as Config,profiles: null == profiles ? _self.profiles : profiles // ignore: cast_nullable_to_non_nullable
 as List<Profile>,
@@ -1531,7 +1572,7 @@ return $default(_that.config,_that.profiles);case _:
 
 
 class _InitState implements InitState {
-  const _InitState({required this.config, required final  List<Profile> profiles}): _profiles = profiles;
+  const _InitState({required this.config, required  List<Profile> profiles}): _profiles = profiles;
   
 
 @override final  Config config;
@@ -1553,16 +1594,18 @@ _$InitStateCopyWith<_InitState> get copyWith => __$InitStateCopyWithImpl<_InitSt
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _InitState&&(identical(other.config, config) || other.config == config)&&const DeepCollectionEquality().equals(other._profiles, _profiles));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _InitState&&(identical(other.config, config) || other.config == config)&&const DeepCollectionEquality().equals(other.profiles, _profiles));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,config,const DeepCollectionEquality().hash(_profiles));
+int get hashCode {
+    return Object.hash(runtimeType,config,const DeepCollectionEquality().hash(_profiles));
+}
 
 @override
 String toString() {
-  return 'InitState(config: $config, profiles: $profiles)';
+    return 'InitState(config: $config, profiles: $profiles)';
 }
 
 
@@ -1624,16 +1667,21 @@ $CommonMessageCopyWith<CommonMessage> get copyWith => _$CommonMessageCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CommonMessage&&(identical(other.id, id) || other.id == id)&&(identical(other.text, text) || other.text == text)&&(identical(other.duration, duration) || other.duration == duration)&&(identical(other.actionState, actionState) || other.actionState == actionState));
+  final _this = this as CommonMessage;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CommonMessage&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.text, _this.text) || other.text == _this.text)&&(identical(other.duration, _this.duration) || other.duration == _this.duration)&&(identical(other.actionState, _this.actionState) || other.actionState == _this.actionState));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,text,duration,actionState);
+int get hashCode {
+  final _this = this as CommonMessage;
+  return Object.hash(runtimeType,_this.id,_this.text,_this.duration,_this.actionState);
+}
 
 @override
 String toString() {
-  return 'CommonMessage(id: $id, text: $text, duration: $duration, actionState: $actionState)';
+  final _this = this as CommonMessage;
+  return 'CommonMessage(id: ${_this.id}, text: ${_this.text}, duration: ${_this.duration}, actionState: ${_this.actionState})';
 }
 
 
@@ -1662,7 +1710,7 @@ class _$CommonMessageCopyWithImpl<$Res>
 /// Create a copy of CommonMessage
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? text = null,Object? duration = null,Object? actionState = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(CommonMessage(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
 as String,duration: null == duration ? _self.duration : duration // ignore: cast_nullable_to_non_nullable
@@ -1838,16 +1886,18 @@ _$CommonMessageCopyWith<_CommonMessage> get copyWith => __$CommonMessageCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CommonMessage&&(identical(other.id, id) || other.id == id)&&(identical(other.text, text) || other.text == text)&&(identical(other.duration, duration) || other.duration == duration)&&(identical(other.actionState, actionState) || other.actionState == actionState));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CommonMessage&&(identical(other.id, id) || other.id == id)&&(identical(other.text, text) || other.text == text)&&(identical(other.duration, duration) || other.duration == duration)&&(identical(other.actionState, actionState) || other.actionState == actionState));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,text,duration,actionState);
+int get hashCode {
+    return Object.hash(runtimeType,id,text,duration,actionState);
+}
 
 @override
 String toString() {
-  return 'CommonMessage(id: $id, text: $text, duration: $duration, actionState: $actionState)';
+    return 'CommonMessage(id: $id, text: $text, duration: $duration, actionState: $actionState)';
 }
 
 
@@ -1914,16 +1964,21 @@ $MessageActionStateCopyWith<MessageActionState> get copyWith => _$MessageActionS
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MessageActionState&&(identical(other.actionText, actionText) || other.actionText == actionText)&&(identical(other.action, action) || other.action == action));
+  final _this = this as MessageActionState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MessageActionState&&(identical(other.actionText, _this.actionText) || other.actionText == _this.actionText)&&(identical(other.action, _this.action) || other.action == _this.action));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,actionText,action);
+int get hashCode {
+  final _this = this as MessageActionState;
+  return Object.hash(runtimeType,_this.actionText,_this.action);
+}
 
 @override
 String toString() {
-  return 'MessageActionState(actionText: $actionText, action: $action)';
+  final _this = this as MessageActionState;
+  return 'MessageActionState(actionText: ${_this.actionText}, action: ${_this.action})';
 }
 
 
@@ -1952,7 +2007,7 @@ class _$MessageActionStateCopyWithImpl<$Res>
 /// Create a copy of MessageActionState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? actionText = null,Object? action = null,}) {
-  return _then(_self.copyWith(
+  return _then(MessageActionState(
 actionText: null == actionText ? _self.actionText : actionText // ignore: cast_nullable_to_non_nullable
 as String,action: null == action ? _self.action : action // ignore: cast_nullable_to_non_nullable
 as VoidCallback,
@@ -2112,16 +2167,18 @@ _$MessageActionStateCopyWith<_MessageActionState> get copyWith => __$MessageActi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MessageActionState&&(identical(other.actionText, actionText) || other.actionText == actionText)&&(identical(other.action, action) || other.action == action));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MessageActionState&&(identical(other.actionText, actionText) || other.actionText == actionText)&&(identical(other.action, action) || other.action == action));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,actionText,action);
+int get hashCode {
+    return Object.hash(runtimeType,actionText,action);
+}
 
 @override
 String toString() {
-  return 'MessageActionState(actionText: $actionText, action: $action)';
+    return 'MessageActionState(actionText: $actionText, action: $action)';
 }
 
 
@@ -2174,16 +2231,21 @@ $AppBarStateCopyWith<AppBarState> get copyWith => _$AppBarStateCopyWithImpl<AppB
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppBarState&&const DeepCollectionEquality().equals(other.actions, actions)&&(identical(other.searchState, searchState) || other.searchState == searchState)&&(identical(other.editState, editState) || other.editState == editState));
+  final _this = this as AppBarState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppBarState&&const DeepCollectionEquality().equals(other.actions, _this.actions)&&(identical(other.searchState, _this.searchState) || other.searchState == _this.searchState)&&(identical(other.editState, _this.editState) || other.editState == _this.editState));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(actions),searchState,editState);
+int get hashCode {
+  final _this = this as AppBarState;
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.actions),_this.searchState,_this.editState);
+}
 
 @override
 String toString() {
-  return 'AppBarState(actions: $actions, searchState: $searchState, editState: $editState)';
+  final _this = this as AppBarState;
+  return 'AppBarState(actions: ${_this.actions}, searchState: ${_this.searchState}, editState: ${_this.editState})';
 }
 
 
@@ -2212,7 +2274,7 @@ class _$AppBarStateCopyWithImpl<$Res>
 /// Create a copy of AppBarState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? actions = null,Object? searchState = freezed,Object? editState = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(AppBarState(
 actions: null == actions ? _self.actions : actions // ignore: cast_nullable_to_non_nullable
 as List<Widget>,searchState: freezed == searchState ? _self.searchState : searchState // ignore: cast_nullable_to_non_nullable
 as AppBarSearchState?,editState: freezed == editState ? _self.editState : editState // ignore: cast_nullable_to_non_nullable
@@ -2381,7 +2443,7 @@ return $default(_that.actions,_that.searchState,_that.editState);case _:
 
 
 class _AppBarState implements AppBarState {
-  const _AppBarState({final  List<Widget> actions = const [], this.searchState, this.editState}): _actions = actions;
+  const _AppBarState({ List<Widget> actions = const [], this.searchState, this.editState}): _actions = actions;
   
 
  final  List<Widget> _actions;
@@ -2404,16 +2466,18 @@ _$AppBarStateCopyWith<_AppBarState> get copyWith => __$AppBarStateCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppBarState&&const DeepCollectionEquality().equals(other._actions, _actions)&&(identical(other.searchState, searchState) || other.searchState == searchState)&&(identical(other.editState, editState) || other.editState == editState));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppBarState&&const DeepCollectionEquality().equals(other.actions, _actions)&&(identical(other.searchState, searchState) || other.searchState == searchState)&&(identical(other.editState, editState) || other.editState == editState));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_actions),searchState,editState);
+int get hashCode {
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_actions),searchState,editState);
+}
 
 @override
 String toString() {
-  return 'AppBarState(actions: $actions, searchState: $searchState, editState: $editState)';
+    return 'AppBarState(actions: $actions, searchState: $searchState, editState: $editState)';
 }
 
 
@@ -2480,7 +2544,7 @@ $AppBarEditStateCopyWith<$Res>? get editState {
 /// @nodoc
 mixin _$AppBarSearchState {
 
-  Function(String) get onSearch; bool get autoAddSearch; String? get query;
+ dynamic Function(String) get onSearch; bool get autoAddSearch; String? get query;
 /// Create a copy of AppBarSearchState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2491,16 +2555,21 @@ $AppBarSearchStateCopyWith<AppBarSearchState> get copyWith => _$AppBarSearchStat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppBarSearchState&&(identical(other.onSearch, onSearch) || other.onSearch == onSearch)&&(identical(other.autoAddSearch, autoAddSearch) || other.autoAddSearch == autoAddSearch)&&(identical(other.query, query) || other.query == query));
+  final _this = this as AppBarSearchState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppBarSearchState&&(identical(other.onSearch, _this.onSearch) || other.onSearch == _this.onSearch)&&(identical(other.autoAddSearch, _this.autoAddSearch) || other.autoAddSearch == _this.autoAddSearch)&&(identical(other.query, _this.query) || other.query == _this.query));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,onSearch,autoAddSearch,query);
+int get hashCode {
+  final _this = this as AppBarSearchState;
+  return Object.hash(runtimeType,_this.onSearch,_this.autoAddSearch,_this.query);
+}
 
 @override
 String toString() {
-  return 'AppBarSearchState(onSearch: $onSearch, autoAddSearch: $autoAddSearch, query: $query)';
+  final _this = this as AppBarSearchState;
+  return 'AppBarSearchState(onSearch: ${_this.onSearch}, autoAddSearch: ${_this.autoAddSearch}, query: ${_this.query})';
 }
 
 
@@ -2511,7 +2580,7 @@ abstract mixin class $AppBarSearchStateCopyWith<$Res>  {
   factory $AppBarSearchStateCopyWith(AppBarSearchState value, $Res Function(AppBarSearchState) _then) = _$AppBarSearchStateCopyWithImpl;
 @useResult
 $Res call({
-  Function(String) onSearch, bool autoAddSearch, String? query
+ dynamic Function(String) onSearch, bool autoAddSearch, String? query
 });
 
 
@@ -2529,9 +2598,9 @@ class _$AppBarSearchStateCopyWithImpl<$Res>
 /// Create a copy of AppBarSearchState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? onSearch = null,Object? autoAddSearch = null,Object? query = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(AppBarSearchState(
 onSearch: null == onSearch ? _self.onSearch : onSearch // ignore: cast_nullable_to_non_nullable
-as  Function(String),autoAddSearch: null == autoAddSearch ? _self.autoAddSearch : autoAddSearch // ignore: cast_nullable_to_non_nullable
+as dynamic Function(String),autoAddSearch: null == autoAddSearch ? _self.autoAddSearch : autoAddSearch // ignore: cast_nullable_to_non_nullable
 as bool,query: freezed == query ? _self.query : query // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
@@ -2618,7 +2687,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(  Function(String) onSearch,  bool autoAddSearch,  String? query)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( dynamic Function(String) onSearch,  bool autoAddSearch,  String? query)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AppBarSearchState() when $default != null:
 return $default(_that.onSearch,_that.autoAddSearch,_that.query);case _:
@@ -2639,7 +2708,7 @@ return $default(_that.onSearch,_that.autoAddSearch,_that.query);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(  Function(String) onSearch,  bool autoAddSearch,  String? query)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( dynamic Function(String) onSearch,  bool autoAddSearch,  String? query)  $default,) {final _that = this;
 switch (_that) {
 case _AppBarSearchState():
 return $default(_that.onSearch,_that.autoAddSearch,_that.query);case _:
@@ -2659,7 +2728,7 @@ return $default(_that.onSearch,_that.autoAddSearch,_that.query);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(  Function(String) onSearch,  bool autoAddSearch,  String? query)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( dynamic Function(String) onSearch,  bool autoAddSearch,  String? query)?  $default,) {final _that = this;
 switch (_that) {
 case _AppBarSearchState() when $default != null:
 return $default(_that.onSearch,_that.autoAddSearch,_that.query);case _:
@@ -2677,7 +2746,7 @@ class _AppBarSearchState implements AppBarSearchState {
   const _AppBarSearchState({required this.onSearch, this.autoAddSearch = true, this.query = null});
   
 
-@override final   Function(String) onSearch;
+@override final  dynamic Function(String) onSearch;
 @override@JsonKey() final  bool autoAddSearch;
 @override@JsonKey() final  String? query;
 
@@ -2691,16 +2760,18 @@ _$AppBarSearchStateCopyWith<_AppBarSearchState> get copyWith => __$AppBarSearchS
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppBarSearchState&&(identical(other.onSearch, onSearch) || other.onSearch == onSearch)&&(identical(other.autoAddSearch, autoAddSearch) || other.autoAddSearch == autoAddSearch)&&(identical(other.query, query) || other.query == query));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppBarSearchState&&(identical(other.onSearch, onSearch) || other.onSearch == onSearch)&&(identical(other.autoAddSearch, autoAddSearch) || other.autoAddSearch == autoAddSearch)&&(identical(other.query, query) || other.query == query));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,onSearch,autoAddSearch,query);
+int get hashCode {
+    return Object.hash(runtimeType,onSearch,autoAddSearch,query);
+}
 
 @override
 String toString() {
-  return 'AppBarSearchState(onSearch: $onSearch, autoAddSearch: $autoAddSearch, query: $query)';
+    return 'AppBarSearchState(onSearch: $onSearch, autoAddSearch: $autoAddSearch, query: $query)';
 }
 
 
@@ -2711,7 +2782,7 @@ abstract mixin class _$AppBarSearchStateCopyWith<$Res> implements $AppBarSearchS
   factory _$AppBarSearchStateCopyWith(_AppBarSearchState value, $Res Function(_AppBarSearchState) _then) = __$AppBarSearchStateCopyWithImpl;
 @override @useResult
 $Res call({
-  Function(String) onSearch, bool autoAddSearch, String? query
+ dynamic Function(String) onSearch, bool autoAddSearch, String? query
 });
 
 
@@ -2731,7 +2802,7 @@ class __$AppBarSearchStateCopyWithImpl<$Res>
 @override @pragma('vm:prefer-inline') $Res call({Object? onSearch = null,Object? autoAddSearch = null,Object? query = freezed,}) {
   return _then(_AppBarSearchState(
 onSearch: null == onSearch ? _self.onSearch : onSearch // ignore: cast_nullable_to_non_nullable
-as  Function(String),autoAddSearch: null == autoAddSearch ? _self.autoAddSearch : autoAddSearch // ignore: cast_nullable_to_non_nullable
+as dynamic Function(String),autoAddSearch: null == autoAddSearch ? _self.autoAddSearch : autoAddSearch // ignore: cast_nullable_to_non_nullable
 as bool,query: freezed == query ? _self.query : query // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
@@ -2743,7 +2814,7 @@ as String?,
 /// @nodoc
 mixin _$AppBarEditState {
 
- int get editCount;  Function() get onExit;
+ int get editCount; dynamic Function() get onExit;
 /// Create a copy of AppBarEditState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2754,16 +2825,21 @@ $AppBarEditStateCopyWith<AppBarEditState> get copyWith => _$AppBarEditStateCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppBarEditState&&(identical(other.editCount, editCount) || other.editCount == editCount)&&(identical(other.onExit, onExit) || other.onExit == onExit));
+  final _this = this as AppBarEditState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppBarEditState&&(identical(other.editCount, _this.editCount) || other.editCount == _this.editCount)&&(identical(other.onExit, _this.onExit) || other.onExit == _this.onExit));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,editCount,onExit);
+int get hashCode {
+  final _this = this as AppBarEditState;
+  return Object.hash(runtimeType,_this.editCount,_this.onExit);
+}
 
 @override
 String toString() {
-  return 'AppBarEditState(editCount: $editCount, onExit: $onExit)';
+  final _this = this as AppBarEditState;
+  return 'AppBarEditState(editCount: ${_this.editCount}, onExit: ${_this.onExit})';
 }
 
 
@@ -2774,7 +2850,7 @@ abstract mixin class $AppBarEditStateCopyWith<$Res>  {
   factory $AppBarEditStateCopyWith(AppBarEditState value, $Res Function(AppBarEditState) _then) = _$AppBarEditStateCopyWithImpl;
 @useResult
 $Res call({
- int editCount,  Function() onExit
+ int editCount, dynamic Function() onExit
 });
 
 
@@ -2792,10 +2868,10 @@ class _$AppBarEditStateCopyWithImpl<$Res>
 /// Create a copy of AppBarEditState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? editCount = null,Object? onExit = null,}) {
-  return _then(_self.copyWith(
+  return _then(AppBarEditState(
 editCount: null == editCount ? _self.editCount : editCount // ignore: cast_nullable_to_non_nullable
 as int,onExit: null == onExit ? _self.onExit : onExit // ignore: cast_nullable_to_non_nullable
-as  Function(),
+as dynamic Function(),
   ));
 }
 
@@ -2880,7 +2956,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int editCount,   Function() onExit)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int editCount,  dynamic Function() onExit)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AppBarEditState() when $default != null:
 return $default(_that.editCount,_that.onExit);case _:
@@ -2901,7 +2977,7 @@ return $default(_that.editCount,_that.onExit);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int editCount,   Function() onExit)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int editCount,  dynamic Function() onExit)  $default,) {final _that = this;
 switch (_that) {
 case _AppBarEditState():
 return $default(_that.editCount,_that.onExit);case _:
@@ -2921,7 +2997,7 @@ return $default(_that.editCount,_that.onExit);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int editCount,   Function() onExit)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int editCount,  dynamic Function() onExit)?  $default,) {final _that = this;
 switch (_that) {
 case _AppBarEditState() when $default != null:
 return $default(_that.editCount,_that.onExit);case _:
@@ -2940,7 +3016,7 @@ class _AppBarEditState implements AppBarEditState {
   
 
 @override@JsonKey() final  int editCount;
-@override final   Function() onExit;
+@override final  dynamic Function() onExit;
 
 /// Create a copy of AppBarEditState
 /// with the given fields replaced by the non-null parameter values.
@@ -2952,16 +3028,18 @@ _$AppBarEditStateCopyWith<_AppBarEditState> get copyWith => __$AppBarEditStateCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppBarEditState&&(identical(other.editCount, editCount) || other.editCount == editCount)&&(identical(other.onExit, onExit) || other.onExit == onExit));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppBarEditState&&(identical(other.editCount, editCount) || other.editCount == editCount)&&(identical(other.onExit, onExit) || other.onExit == onExit));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,editCount,onExit);
+int get hashCode {
+    return Object.hash(runtimeType,editCount,onExit);
+}
 
 @override
 String toString() {
-  return 'AppBarEditState(editCount: $editCount, onExit: $onExit)';
+    return 'AppBarEditState(editCount: $editCount, onExit: $onExit)';
 }
 
 
@@ -2972,7 +3050,7 @@ abstract mixin class _$AppBarEditStateCopyWith<$Res> implements $AppBarEditState
   factory _$AppBarEditStateCopyWith(_AppBarEditState value, $Res Function(_AppBarEditState) _then) = __$AppBarEditStateCopyWithImpl;
 @override @useResult
 $Res call({
- int editCount,  Function() onExit
+ int editCount, dynamic Function() onExit
 });
 
 
@@ -2993,7 +3071,7 @@ class __$AppBarEditStateCopyWithImpl<$Res>
   return _then(_AppBarEditState(
 editCount: null == editCount ? _self.editCount : editCount // ignore: cast_nullable_to_non_nullable
 as int,onExit: null == onExit ? _self.onExit : onExit // ignore: cast_nullable_to_non_nullable
-as  Function(),
+as dynamic Function(),
   ));
 }
 
@@ -3014,16 +3092,21 @@ $StartButtonStateCopyWith<StartButtonState> get copyWith => _$StartButtonStateCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is StartButtonState&&(identical(other.isPreload, isPreload) || other.isPreload == isPreload)&&(identical(other.hasProfile, hasProfile) || other.hasProfile == hasProfile));
+  final _this = this as StartButtonState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is StartButtonState&&(identical(other.isPreload, _this.isPreload) || other.isPreload == _this.isPreload)&&(identical(other.hasProfile, _this.hasProfile) || other.hasProfile == _this.hasProfile));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,isPreload,hasProfile);
+int get hashCode {
+  final _this = this as StartButtonState;
+  return Object.hash(runtimeType,_this.isPreload,_this.hasProfile);
+}
 
 @override
 String toString() {
-  return 'StartButtonState(isPreload: $isPreload, hasProfile: $hasProfile)';
+  final _this = this as StartButtonState;
+  return 'StartButtonState(isPreload: ${_this.isPreload}, hasProfile: ${_this.hasProfile})';
 }
 
 
@@ -3052,7 +3135,7 @@ class _$StartButtonStateCopyWithImpl<$Res>
 /// Create a copy of StartButtonState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? isPreload = null,Object? hasProfile = null,}) {
-  return _then(_self.copyWith(
+  return _then(StartButtonState(
 isPreload: null == isPreload ? _self.isPreload : isPreload // ignore: cast_nullable_to_non_nullable
 as bool,hasProfile: null == hasProfile ? _self.hasProfile : hasProfile // ignore: cast_nullable_to_non_nullable
 as bool,
@@ -3212,16 +3295,18 @@ _$StartButtonStateCopyWith<_StartButtonState> get copyWith => __$StartButtonStat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _StartButtonState&&(identical(other.isPreload, isPreload) || other.isPreload == isPreload)&&(identical(other.hasProfile, hasProfile) || other.hasProfile == hasProfile));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _StartButtonState&&(identical(other.isPreload, isPreload) || other.isPreload == isPreload)&&(identical(other.hasProfile, hasProfile) || other.hasProfile == hasProfile));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,isPreload,hasProfile);
+int get hashCode {
+    return Object.hash(runtimeType,isPreload,hasProfile);
+}
 
 @override
 String toString() {
-  return 'StartButtonState(isPreload: $isPreload, hasProfile: $hasProfile)';
+    return 'StartButtonState(isPreload: $isPreload, hasProfile: $hasProfile)';
 }
 
 
@@ -3274,16 +3359,21 @@ $ProfilesStateCopyWith<ProfilesState> get copyWith => _$ProfilesStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProfilesState&&const DeepCollectionEquality().equals(other.profiles, profiles)&&(identical(other.currentProfileId, currentProfileId) || other.currentProfileId == currentProfileId)&&(identical(other.columns, columns) || other.columns == columns));
+  final _this = this as ProfilesState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProfilesState&&const DeepCollectionEquality().equals(other.profiles, _this.profiles)&&(identical(other.currentProfileId, _this.currentProfileId) || other.currentProfileId == _this.currentProfileId)&&(identical(other.columns, _this.columns) || other.columns == _this.columns));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(profiles),currentProfileId,columns);
+int get hashCode {
+  final _this = this as ProfilesState;
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.profiles),_this.currentProfileId,_this.columns);
+}
 
 @override
 String toString() {
-  return 'ProfilesState(profiles: $profiles, currentProfileId: $currentProfileId, columns: $columns)';
+  final _this = this as ProfilesState;
+  return 'ProfilesState(profiles: ${_this.profiles}, currentProfileId: ${_this.currentProfileId}, columns: ${_this.columns})';
 }
 
 
@@ -3312,7 +3402,7 @@ class _$ProfilesStateCopyWithImpl<$Res>
 /// Create a copy of ProfilesState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? profiles = null,Object? currentProfileId = freezed,Object? columns = null,}) {
-  return _then(_self.copyWith(
+  return _then(ProfilesState(
 profiles: null == profiles ? _self.profiles : profiles // ignore: cast_nullable_to_non_nullable
 as List<Profile>,currentProfileId: freezed == currentProfileId ? _self.currentProfileId : currentProfileId // ignore: cast_nullable_to_non_nullable
 as int?,columns: null == columns ? _self.columns : columns // ignore: cast_nullable_to_non_nullable
@@ -3457,7 +3547,7 @@ return $default(_that.profiles,_that.currentProfileId,_that.columns);case _:
 
 
 class _ProfilesState implements ProfilesState {
-  const _ProfilesState({required final  List<Profile> profiles, required this.currentProfileId, required this.columns}): _profiles = profiles;
+  const _ProfilesState({required  List<Profile> profiles, required this.currentProfileId, required this.columns}): _profiles = profiles;
   
 
  final  List<Profile> _profiles;
@@ -3480,16 +3570,18 @@ _$ProfilesStateCopyWith<_ProfilesState> get copyWith => __$ProfilesStateCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProfilesState&&const DeepCollectionEquality().equals(other._profiles, _profiles)&&(identical(other.currentProfileId, currentProfileId) || other.currentProfileId == currentProfileId)&&(identical(other.columns, columns) || other.columns == columns));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProfilesState&&const DeepCollectionEquality().equals(other.profiles, _profiles)&&(identical(other.currentProfileId, currentProfileId) || other.currentProfileId == currentProfileId)&&(identical(other.columns, columns) || other.columns == columns));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_profiles),currentProfileId,columns);
+int get hashCode {
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_profiles),currentProfileId,columns);
+}
 
 @override
 String toString() {
-  return 'ProfilesState(profiles: $profiles, currentProfileId: $currentProfileId, columns: $columns)';
+    return 'ProfilesState(profiles: $profiles, currentProfileId: $currentProfileId, columns: $columns)';
 }
 
 
@@ -3543,16 +3635,21 @@ $NetworkDetectionStateCopyWith<NetworkDetectionState> get copyWith => _$NetworkD
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NetworkDetectionState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.ipInfo, ipInfo) || other.ipInfo == ipInfo));
+  final _this = this as NetworkDetectionState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NetworkDetectionState&&(identical(other.isLoading, _this.isLoading) || other.isLoading == _this.isLoading)&&(identical(other.ipInfo, _this.ipInfo) || other.ipInfo == _this.ipInfo));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,isLoading,ipInfo);
+int get hashCode {
+  final _this = this as NetworkDetectionState;
+  return Object.hash(runtimeType,_this.isLoading,_this.ipInfo);
+}
 
 @override
 String toString() {
-  return 'NetworkDetectionState(isLoading: $isLoading, ipInfo: $ipInfo)';
+  final _this = this as NetworkDetectionState;
+  return 'NetworkDetectionState(isLoading: ${_this.isLoading}, ipInfo: ${_this.ipInfo})';
 }
 
 
@@ -3581,7 +3678,7 @@ class _$NetworkDetectionStateCopyWithImpl<$Res>
 /// Create a copy of NetworkDetectionState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? isLoading = null,Object? ipInfo = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(NetworkDetectionState(
 isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,ipInfo: freezed == ipInfo ? _self.ipInfo : ipInfo // ignore: cast_nullable_to_non_nullable
 as IpInfo?,
@@ -3753,16 +3850,18 @@ _$NetworkDetectionStateCopyWith<_NetworkDetectionState> get copyWith => __$Netwo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NetworkDetectionState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.ipInfo, ipInfo) || other.ipInfo == ipInfo));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _NetworkDetectionState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.ipInfo, ipInfo) || other.ipInfo == ipInfo));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,isLoading,ipInfo);
+int get hashCode {
+    return Object.hash(runtimeType,isLoading,ipInfo);
+}
 
 @override
 String toString() {
-  return 'NetworkDetectionState(isLoading: $isLoading, ipInfo: $ipInfo)';
+    return 'NetworkDetectionState(isLoading: $isLoading, ipInfo: $ipInfo)';
 }
 
 
@@ -3827,16 +3926,21 @@ $TrayStateCopyWith<TrayState> get copyWith => _$TrayStateCopyWithImpl<TrayState>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TrayState&&(identical(other.mode, mode) || other.mode == mode)&&(identical(other.port, port) || other.port == port)&&(identical(other.autoLaunch, autoLaunch) || other.autoLaunch == autoLaunch)&&(identical(other.systemProxy, systemProxy) || other.systemProxy == systemProxy)&&(identical(other.tunEnable, tunEnable) || other.tunEnable == tunEnable)&&(identical(other.isStart, isStart) || other.isStart == isStart)&&(identical(other.locale, locale) || other.locale == locale)&&(identical(other.brightness, brightness) || other.brightness == brightness)&&const DeepCollectionEquality().equals(other.groups, groups)&&const DeepCollectionEquality().equals(other.selectedMap, selectedMap)&&(identical(other.showTrayTitle, showTrayTitle) || other.showTrayTitle == showTrayTitle));
+  final _this = this as TrayState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TrayState&&(identical(other.mode, _this.mode) || other.mode == _this.mode)&&(identical(other.port, _this.port) || other.port == _this.port)&&(identical(other.autoLaunch, _this.autoLaunch) || other.autoLaunch == _this.autoLaunch)&&(identical(other.systemProxy, _this.systemProxy) || other.systemProxy == _this.systemProxy)&&(identical(other.tunEnable, _this.tunEnable) || other.tunEnable == _this.tunEnable)&&(identical(other.isStart, _this.isStart) || other.isStart == _this.isStart)&&(identical(other.locale, _this.locale) || other.locale == _this.locale)&&(identical(other.brightness, _this.brightness) || other.brightness == _this.brightness)&&const DeepCollectionEquality().equals(other.groups, _this.groups)&&const DeepCollectionEquality().equals(other.selectedMap, _this.selectedMap)&&(identical(other.showTrayTitle, _this.showTrayTitle) || other.showTrayTitle == _this.showTrayTitle));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,mode,port,autoLaunch,systemProxy,tunEnable,isStart,locale,brightness,const DeepCollectionEquality().hash(groups),const DeepCollectionEquality().hash(selectedMap),showTrayTitle);
+int get hashCode {
+  final _this = this as TrayState;
+  return Object.hash(runtimeType,_this.mode,_this.port,_this.autoLaunch,_this.systemProxy,_this.tunEnable,_this.isStart,_this.locale,_this.brightness,const DeepCollectionEquality().hash(_this.groups),const DeepCollectionEquality().hash(_this.selectedMap),_this.showTrayTitle);
+}
 
 @override
 String toString() {
-  return 'TrayState(mode: $mode, port: $port, autoLaunch: $autoLaunch, systemProxy: $systemProxy, tunEnable: $tunEnable, isStart: $isStart, locale: $locale, brightness: $brightness, groups: $groups, selectedMap: $selectedMap, showTrayTitle: $showTrayTitle)';
+  final _this = this as TrayState;
+  return 'TrayState(mode: ${_this.mode}, port: ${_this.port}, autoLaunch: ${_this.autoLaunch}, systemProxy: ${_this.systemProxy}, tunEnable: ${_this.tunEnable}, isStart: ${_this.isStart}, locale: ${_this.locale}, brightness: ${_this.brightness}, groups: ${_this.groups}, selectedMap: ${_this.selectedMap}, showTrayTitle: ${_this.showTrayTitle})';
 }
 
 
@@ -3865,7 +3969,7 @@ class _$TrayStateCopyWithImpl<$Res>
 /// Create a copy of TrayState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? mode = null,Object? port = null,Object? autoLaunch = null,Object? systemProxy = null,Object? tunEnable = null,Object? isStart = null,Object? locale = freezed,Object? brightness = freezed,Object? groups = null,Object? selectedMap = null,Object? showTrayTitle = null,}) {
-  return _then(_self.copyWith(
+  return _then(TrayState(
 mode: null == mode ? _self.mode : mode // ignore: cast_nullable_to_non_nullable
 as Mode,port: null == port ? _self.port : port // ignore: cast_nullable_to_non_nullable
 as int,autoLaunch: null == autoLaunch ? _self.autoLaunch : autoLaunch // ignore: cast_nullable_to_non_nullable
@@ -4018,7 +4122,7 @@ return $default(_that.mode,_that.port,_that.autoLaunch,_that.systemProxy,_that.t
 
 
 class _TrayState implements TrayState {
-  const _TrayState({required this.mode, required this.port, required this.autoLaunch, required this.systemProxy, required this.tunEnable, required this.isStart, required this.locale, required this.brightness, required final  List<Group> groups, required final  Map<String, String> selectedMap, required this.showTrayTitle}): _groups = groups,_selectedMap = selectedMap;
+  const _TrayState({required this.mode, required this.port, required this.autoLaunch, required this.systemProxy, required this.tunEnable, required this.isStart, required this.locale, required this.brightness, required  List<Group> groups, required  Map<String, String> selectedMap, required this.showTrayTitle}): _groups = groups,_selectedMap = selectedMap;
   
 
 @override final  Mode mode;
@@ -4055,16 +4159,18 @@ _$TrayStateCopyWith<_TrayState> get copyWith => __$TrayStateCopyWithImpl<_TraySt
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TrayState&&(identical(other.mode, mode) || other.mode == mode)&&(identical(other.port, port) || other.port == port)&&(identical(other.autoLaunch, autoLaunch) || other.autoLaunch == autoLaunch)&&(identical(other.systemProxy, systemProxy) || other.systemProxy == systemProxy)&&(identical(other.tunEnable, tunEnable) || other.tunEnable == tunEnable)&&(identical(other.isStart, isStart) || other.isStart == isStart)&&(identical(other.locale, locale) || other.locale == locale)&&(identical(other.brightness, brightness) || other.brightness == brightness)&&const DeepCollectionEquality().equals(other._groups, _groups)&&const DeepCollectionEquality().equals(other._selectedMap, _selectedMap)&&(identical(other.showTrayTitle, showTrayTitle) || other.showTrayTitle == showTrayTitle));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _TrayState&&(identical(other.mode, mode) || other.mode == mode)&&(identical(other.port, port) || other.port == port)&&(identical(other.autoLaunch, autoLaunch) || other.autoLaunch == autoLaunch)&&(identical(other.systemProxy, systemProxy) || other.systemProxy == systemProxy)&&(identical(other.tunEnable, tunEnable) || other.tunEnable == tunEnable)&&(identical(other.isStart, isStart) || other.isStart == isStart)&&(identical(other.locale, locale) || other.locale == locale)&&(identical(other.brightness, brightness) || other.brightness == brightness)&&const DeepCollectionEquality().equals(other.groups, _groups)&&const DeepCollectionEquality().equals(other.selectedMap, _selectedMap)&&(identical(other.showTrayTitle, showTrayTitle) || other.showTrayTitle == showTrayTitle));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,mode,port,autoLaunch,systemProxy,tunEnable,isStart,locale,brightness,const DeepCollectionEquality().hash(_groups),const DeepCollectionEquality().hash(_selectedMap),showTrayTitle);
+int get hashCode {
+    return Object.hash(runtimeType,mode,port,autoLaunch,systemProxy,tunEnable,isStart,locale,brightness,const DeepCollectionEquality().hash(_groups),const DeepCollectionEquality().hash(_selectedMap),showTrayTitle);
+}
 
 @override
 String toString() {
-  return 'TrayState(mode: $mode, port: $port, autoLaunch: $autoLaunch, systemProxy: $systemProxy, tunEnable: $tunEnable, isStart: $isStart, locale: $locale, brightness: $brightness, groups: $groups, selectedMap: $selectedMap, showTrayTitle: $showTrayTitle)';
+    return 'TrayState(mode: $mode, port: $port, autoLaunch: $autoLaunch, systemProxy: $systemProxy, tunEnable: $tunEnable, isStart: $isStart, locale: $locale, brightness: $brightness, groups: $groups, selectedMap: $selectedMap, showTrayTitle: $showTrayTitle)';
 }
 
 
@@ -4126,16 +4232,21 @@ $TrayTitleStateCopyWith<TrayTitleState> get copyWith => _$TrayTitleStateCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TrayTitleState&&(identical(other.traffic, traffic) || other.traffic == traffic)&&(identical(other.showTrayTitle, showTrayTitle) || other.showTrayTitle == showTrayTitle));
+  final _this = this as TrayTitleState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TrayTitleState&&(identical(other.traffic, _this.traffic) || other.traffic == _this.traffic)&&(identical(other.showTrayTitle, _this.showTrayTitle) || other.showTrayTitle == _this.showTrayTitle));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,traffic,showTrayTitle);
+int get hashCode {
+  final _this = this as TrayTitleState;
+  return Object.hash(runtimeType,_this.traffic,_this.showTrayTitle);
+}
 
 @override
 String toString() {
-  return 'TrayTitleState(traffic: $traffic, showTrayTitle: $showTrayTitle)';
+  final _this = this as TrayTitleState;
+  return 'TrayTitleState(traffic: ${_this.traffic}, showTrayTitle: ${_this.showTrayTitle})';
 }
 
 
@@ -4164,7 +4275,7 @@ class _$TrayTitleStateCopyWithImpl<$Res>
 /// Create a copy of TrayTitleState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? traffic = null,Object? showTrayTitle = null,}) {
-  return _then(_self.copyWith(
+  return _then(TrayTitleState(
 traffic: null == traffic ? _self.traffic : traffic // ignore: cast_nullable_to_non_nullable
 as Traffic,showTrayTitle: null == showTrayTitle ? _self.showTrayTitle : showTrayTitle // ignore: cast_nullable_to_non_nullable
 as bool,
@@ -4333,16 +4444,18 @@ _$TrayTitleStateCopyWith<_TrayTitleState> get copyWith => __$TrayTitleStateCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TrayTitleState&&(identical(other.traffic, traffic) || other.traffic == traffic)&&(identical(other.showTrayTitle, showTrayTitle) || other.showTrayTitle == showTrayTitle));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _TrayTitleState&&(identical(other.traffic, traffic) || other.traffic == traffic)&&(identical(other.showTrayTitle, showTrayTitle) || other.showTrayTitle == showTrayTitle));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,traffic,showTrayTitle);
+int get hashCode {
+    return Object.hash(runtimeType,traffic,showTrayTitle);
+}
 
 @override
 String toString() {
-  return 'TrayTitleState(traffic: $traffic, showTrayTitle: $showTrayTitle)';
+    return 'TrayTitleState(traffic: $traffic, showTrayTitle: $showTrayTitle)';
 }
 
 
@@ -4404,16 +4517,21 @@ $NavigationStateCopyWith<NavigationState> get copyWith => _$NavigationStateCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NavigationState&&(identical(other.pageLabel, pageLabel) || other.pageLabel == pageLabel)&&const DeepCollectionEquality().equals(other.navigationItems, navigationItems)&&(identical(other.viewMode, viewMode) || other.viewMode == viewMode)&&(identical(other.locale, locale) || other.locale == locale)&&(identical(other.currentIndex, currentIndex) || other.currentIndex == currentIndex));
+  final _this = this as NavigationState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NavigationState&&(identical(other.pageLabel, _this.pageLabel) || other.pageLabel == _this.pageLabel)&&const DeepCollectionEquality().equals(other.navigationItems, _this.navigationItems)&&(identical(other.viewMode, _this.viewMode) || other.viewMode == _this.viewMode)&&(identical(other.locale, _this.locale) || other.locale == _this.locale)&&(identical(other.currentIndex, _this.currentIndex) || other.currentIndex == _this.currentIndex));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,pageLabel,const DeepCollectionEquality().hash(navigationItems),viewMode,locale,currentIndex);
+int get hashCode {
+  final _this = this as NavigationState;
+  return Object.hash(runtimeType,_this.pageLabel,const DeepCollectionEquality().hash(_this.navigationItems),_this.viewMode,_this.locale,_this.currentIndex);
+}
 
 @override
 String toString() {
-  return 'NavigationState(pageLabel: $pageLabel, navigationItems: $navigationItems, viewMode: $viewMode, locale: $locale, currentIndex: $currentIndex)';
+  final _this = this as NavigationState;
+  return 'NavigationState(pageLabel: ${_this.pageLabel}, navigationItems: ${_this.navigationItems}, viewMode: ${_this.viewMode}, locale: ${_this.locale}, currentIndex: ${_this.currentIndex})';
 }
 
 
@@ -4442,7 +4560,7 @@ class _$NavigationStateCopyWithImpl<$Res>
 /// Create a copy of NavigationState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? pageLabel = null,Object? navigationItems = null,Object? viewMode = null,Object? locale = freezed,Object? currentIndex = null,}) {
-  return _then(_self.copyWith(
+  return _then(NavigationState(
 pageLabel: null == pageLabel ? _self.pageLabel : pageLabel // ignore: cast_nullable_to_non_nullable
 as PageLabel,navigationItems: null == navigationItems ? _self.navigationItems : navigationItems // ignore: cast_nullable_to_non_nullable
 as List<NavigationItem>,viewMode: null == viewMode ? _self.viewMode : viewMode // ignore: cast_nullable_to_non_nullable
@@ -4589,7 +4707,7 @@ return $default(_that.pageLabel,_that.navigationItems,_that.viewMode,_that.local
 
 
 class _NavigationState implements NavigationState {
-  const _NavigationState({required this.pageLabel, required final  List<NavigationItem> navigationItems, required this.viewMode, required this.locale, required this.currentIndex}): _navigationItems = navigationItems;
+  const _NavigationState({required this.pageLabel, required  List<NavigationItem> navigationItems, required this.viewMode, required this.locale, required this.currentIndex}): _navigationItems = navigationItems;
   
 
 @override final  PageLabel pageLabel;
@@ -4614,16 +4732,18 @@ _$NavigationStateCopyWith<_NavigationState> get copyWith => __$NavigationStateCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NavigationState&&(identical(other.pageLabel, pageLabel) || other.pageLabel == pageLabel)&&const DeepCollectionEquality().equals(other._navigationItems, _navigationItems)&&(identical(other.viewMode, viewMode) || other.viewMode == viewMode)&&(identical(other.locale, locale) || other.locale == locale)&&(identical(other.currentIndex, currentIndex) || other.currentIndex == currentIndex));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _NavigationState&&(identical(other.pageLabel, pageLabel) || other.pageLabel == pageLabel)&&const DeepCollectionEquality().equals(other.navigationItems, _navigationItems)&&(identical(other.viewMode, viewMode) || other.viewMode == viewMode)&&(identical(other.locale, locale) || other.locale == locale)&&(identical(other.currentIndex, currentIndex) || other.currentIndex == currentIndex));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,pageLabel,const DeepCollectionEquality().hash(_navigationItems),viewMode,locale,currentIndex);
+int get hashCode {
+    return Object.hash(runtimeType,pageLabel,const DeepCollectionEquality().hash(_navigationItems),viewMode,locale,currentIndex);
+}
 
 @override
 String toString() {
-  return 'NavigationState(pageLabel: $pageLabel, navigationItems: $navigationItems, viewMode: $viewMode, locale: $locale, currentIndex: $currentIndex)';
+    return 'NavigationState(pageLabel: $pageLabel, navigationItems: $navigationItems, viewMode: $viewMode, locale: $locale, currentIndex: $currentIndex)';
 }
 
 
@@ -4679,16 +4799,21 @@ $GroupsStateCopyWith<GroupsState> get copyWith => _$GroupsStateCopyWithImpl<Grou
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is GroupsState&&const DeepCollectionEquality().equals(other.value, value));
+  final _this = this as GroupsState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GroupsState&&const DeepCollectionEquality().equals(other.value, _this.value));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(value));
+int get hashCode {
+  final _this = this as GroupsState;
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.value));
+}
 
 @override
 String toString() {
-  return 'GroupsState(value: $value)';
+  final _this = this as GroupsState;
+  return 'GroupsState(value: ${_this.value})';
 }
 
 
@@ -4717,7 +4842,7 @@ class _$GroupsStateCopyWithImpl<$Res>
 /// Create a copy of GroupsState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? value = null,}) {
-  return _then(_self.copyWith(
+  return _then(GroupsState(
 value: null == value ? _self.value : value // ignore: cast_nullable_to_non_nullable
 as List<Group>,
   ));
@@ -4860,7 +4985,7 @@ return $default(_that.value);case _:
 
 
 class _GroupsState implements GroupsState {
-  const _GroupsState({required final  List<Group> value}): _value = value;
+  const _GroupsState({required  List<Group> value}): _value = value;
   
 
  final  List<Group> _value;
@@ -4881,16 +5006,18 @@ _$GroupsStateCopyWith<_GroupsState> get copyWith => __$GroupsStateCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GroupsState&&const DeepCollectionEquality().equals(other._value, _value));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _GroupsState&&const DeepCollectionEquality().equals(other.value, _value));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_value));
+int get hashCode {
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_value));
+}
 
 @override
 String toString() {
-  return 'GroupsState(value: $value)';
+    return 'GroupsState(value: $value)';
 }
 
 
@@ -4942,16 +5069,21 @@ $NavigationItemsStateCopyWith<NavigationItemsState> get copyWith => _$Navigation
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NavigationItemsState&&const DeepCollectionEquality().equals(other.value, value));
+  final _this = this as NavigationItemsState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NavigationItemsState&&const DeepCollectionEquality().equals(other.value, _this.value));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(value));
+int get hashCode {
+  final _this = this as NavigationItemsState;
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.value));
+}
 
 @override
 String toString() {
-  return 'NavigationItemsState(value: $value)';
+  final _this = this as NavigationItemsState;
+  return 'NavigationItemsState(value: ${_this.value})';
 }
 
 
@@ -4980,7 +5112,7 @@ class _$NavigationItemsStateCopyWithImpl<$Res>
 /// Create a copy of NavigationItemsState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? value = null,}) {
-  return _then(_self.copyWith(
+  return _then(NavigationItemsState(
 value: null == value ? _self.value : value // ignore: cast_nullable_to_non_nullable
 as List<NavigationItem>,
   ));
@@ -5123,7 +5255,7 @@ return $default(_that.value);case _:
 
 
 class _NavigationItemsState implements NavigationItemsState {
-  const _NavigationItemsState({required final  List<NavigationItem> value}): _value = value;
+  const _NavigationItemsState({required  List<NavigationItem> value}): _value = value;
   
 
  final  List<NavigationItem> _value;
@@ -5144,16 +5276,18 @@ _$NavigationItemsStateCopyWith<_NavigationItemsState> get copyWith => __$Navigat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NavigationItemsState&&const DeepCollectionEquality().equals(other._value, _value));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _NavigationItemsState&&const DeepCollectionEquality().equals(other.value, _value));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_value));
+int get hashCode {
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_value));
+}
 
 @override
 String toString() {
-  return 'NavigationItemsState(value: $value)';
+    return 'NavigationItemsState(value: $value)';
 }
 
 
@@ -5205,16 +5339,21 @@ $ProxiesListStateCopyWith<ProxiesListState> get copyWith => _$ProxiesListStateCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProxiesListState&&const DeepCollectionEquality().equals(other.groups, groups)&&const DeepCollectionEquality().equals(other.currentUnfoldSet, currentUnfoldSet)&&(identical(other.proxyCardType, proxyCardType) || other.proxyCardType == proxyCardType)&&(identical(other.columns, columns) || other.columns == columns));
+  final _this = this as ProxiesListState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProxiesListState&&const DeepCollectionEquality().equals(other.groups, _this.groups)&&const DeepCollectionEquality().equals(other.currentUnfoldSet, _this.currentUnfoldSet)&&(identical(other.proxyCardType, _this.proxyCardType) || other.proxyCardType == _this.proxyCardType)&&(identical(other.columns, _this.columns) || other.columns == _this.columns));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(groups),const DeepCollectionEquality().hash(currentUnfoldSet),proxyCardType,columns);
+int get hashCode {
+  final _this = this as ProxiesListState;
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.groups),const DeepCollectionEquality().hash(_this.currentUnfoldSet),_this.proxyCardType,_this.columns);
+}
 
 @override
 String toString() {
-  return 'ProxiesListState(groups: $groups, currentUnfoldSet: $currentUnfoldSet, proxyCardType: $proxyCardType, columns: $columns)';
+  final _this = this as ProxiesListState;
+  return 'ProxiesListState(groups: ${_this.groups}, currentUnfoldSet: ${_this.currentUnfoldSet}, proxyCardType: ${_this.proxyCardType}, columns: ${_this.columns})';
 }
 
 
@@ -5243,7 +5382,7 @@ class _$ProxiesListStateCopyWithImpl<$Res>
 /// Create a copy of ProxiesListState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? groups = null,Object? currentUnfoldSet = null,Object? proxyCardType = null,Object? columns = null,}) {
-  return _then(_self.copyWith(
+  return _then(ProxiesListState(
 groups: null == groups ? _self.groups : groups // ignore: cast_nullable_to_non_nullable
 as List<Group>,currentUnfoldSet: null == currentUnfoldSet ? _self.currentUnfoldSet : currentUnfoldSet // ignore: cast_nullable_to_non_nullable
 as Set<String>,proxyCardType: null == proxyCardType ? _self.proxyCardType : proxyCardType // ignore: cast_nullable_to_non_nullable
@@ -5389,7 +5528,7 @@ return $default(_that.groups,_that.currentUnfoldSet,_that.proxyCardType,_that.co
 
 
 class _ProxiesListState implements ProxiesListState {
-  const _ProxiesListState({required final  List<Group> groups, required final  Set<String> currentUnfoldSet, required this.proxyCardType, required this.columns}): _groups = groups,_currentUnfoldSet = currentUnfoldSet;
+  const _ProxiesListState({required  List<Group> groups, required  Set<String> currentUnfoldSet, required this.proxyCardType, required this.columns}): _groups = groups,_currentUnfoldSet = currentUnfoldSet;
   
 
  final  List<Group> _groups;
@@ -5419,16 +5558,18 @@ _$ProxiesListStateCopyWith<_ProxiesListState> get copyWith => __$ProxiesListStat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProxiesListState&&const DeepCollectionEquality().equals(other._groups, _groups)&&const DeepCollectionEquality().equals(other._currentUnfoldSet, _currentUnfoldSet)&&(identical(other.proxyCardType, proxyCardType) || other.proxyCardType == proxyCardType)&&(identical(other.columns, columns) || other.columns == columns));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProxiesListState&&const DeepCollectionEquality().equals(other.groups, _groups)&&const DeepCollectionEquality().equals(other.currentUnfoldSet, _currentUnfoldSet)&&(identical(other.proxyCardType, proxyCardType) || other.proxyCardType == proxyCardType)&&(identical(other.columns, columns) || other.columns == columns));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_groups),const DeepCollectionEquality().hash(_currentUnfoldSet),proxyCardType,columns);
+int get hashCode {
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_groups),const DeepCollectionEquality().hash(_currentUnfoldSet),proxyCardType,columns);
+}
 
 @override
 String toString() {
-  return 'ProxiesListState(groups: $groups, currentUnfoldSet: $currentUnfoldSet, proxyCardType: $proxyCardType, columns: $columns)';
+    return 'ProxiesListState(groups: $groups, currentUnfoldSet: $currentUnfoldSet, proxyCardType: $proxyCardType, columns: $columns)';
 }
 
 
@@ -5483,16 +5624,21 @@ $ProxiesTabStateCopyWith<ProxiesTabState> get copyWith => _$ProxiesTabStateCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProxiesTabState&&const DeepCollectionEquality().equals(other.groups, groups)&&(identical(other.currentGroupName, currentGroupName) || other.currentGroupName == currentGroupName)&&(identical(other.proxyCardType, proxyCardType) || other.proxyCardType == proxyCardType)&&(identical(other.columns, columns) || other.columns == columns));
+  final _this = this as ProxiesTabState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProxiesTabState&&const DeepCollectionEquality().equals(other.groups, _this.groups)&&(identical(other.currentGroupName, _this.currentGroupName) || other.currentGroupName == _this.currentGroupName)&&(identical(other.proxyCardType, _this.proxyCardType) || other.proxyCardType == _this.proxyCardType)&&(identical(other.columns, _this.columns) || other.columns == _this.columns));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(groups),currentGroupName,proxyCardType,columns);
+int get hashCode {
+  final _this = this as ProxiesTabState;
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.groups),_this.currentGroupName,_this.proxyCardType,_this.columns);
+}
 
 @override
 String toString() {
-  return 'ProxiesTabState(groups: $groups, currentGroupName: $currentGroupName, proxyCardType: $proxyCardType, columns: $columns)';
+  final _this = this as ProxiesTabState;
+  return 'ProxiesTabState(groups: ${_this.groups}, currentGroupName: ${_this.currentGroupName}, proxyCardType: ${_this.proxyCardType}, columns: ${_this.columns})';
 }
 
 
@@ -5521,7 +5667,7 @@ class _$ProxiesTabStateCopyWithImpl<$Res>
 /// Create a copy of ProxiesTabState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? groups = null,Object? currentGroupName = freezed,Object? proxyCardType = null,Object? columns = null,}) {
-  return _then(_self.copyWith(
+  return _then(ProxiesTabState(
 groups: null == groups ? _self.groups : groups // ignore: cast_nullable_to_non_nullable
 as List<Group>,currentGroupName: freezed == currentGroupName ? _self.currentGroupName : currentGroupName // ignore: cast_nullable_to_non_nullable
 as String?,proxyCardType: null == proxyCardType ? _self.proxyCardType : proxyCardType // ignore: cast_nullable_to_non_nullable
@@ -5667,7 +5813,7 @@ return $default(_that.groups,_that.currentGroupName,_that.proxyCardType,_that.co
 
 
 class _ProxiesTabState implements ProxiesTabState {
-  const _ProxiesTabState({required final  List<Group> groups, required this.currentGroupName, required this.proxyCardType, required this.columns}): _groups = groups;
+  const _ProxiesTabState({required  List<Group> groups, required this.currentGroupName, required this.proxyCardType, required this.columns}): _groups = groups;
   
 
  final  List<Group> _groups;
@@ -5691,16 +5837,18 @@ _$ProxiesTabStateCopyWith<_ProxiesTabState> get copyWith => __$ProxiesTabStateCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProxiesTabState&&const DeepCollectionEquality().equals(other._groups, _groups)&&(identical(other.currentGroupName, currentGroupName) || other.currentGroupName == currentGroupName)&&(identical(other.proxyCardType, proxyCardType) || other.proxyCardType == proxyCardType)&&(identical(other.columns, columns) || other.columns == columns));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProxiesTabState&&const DeepCollectionEquality().equals(other.groups, _groups)&&(identical(other.currentGroupName, currentGroupName) || other.currentGroupName == currentGroupName)&&(identical(other.proxyCardType, proxyCardType) || other.proxyCardType == proxyCardType)&&(identical(other.columns, columns) || other.columns == columns));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_groups),currentGroupName,proxyCardType,columns);
+int get hashCode {
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_groups),currentGroupName,proxyCardType,columns);
+}
 
 @override
 String toString() {
-  return 'ProxiesTabState(groups: $groups, currentGroupName: $currentGroupName, proxyCardType: $proxyCardType, columns: $columns)';
+    return 'ProxiesTabState(groups: $groups, currentGroupName: $currentGroupName, proxyCardType: $proxyCardType, columns: $columns)';
 }
 
 
@@ -5755,16 +5903,21 @@ $MoreToolsSelectorStateCopyWith<MoreToolsSelectorState> get copyWith => _$MoreTo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MoreToolsSelectorState&&const DeepCollectionEquality().equals(other.navigationItems, navigationItems));
+  final _this = this as MoreToolsSelectorState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MoreToolsSelectorState&&const DeepCollectionEquality().equals(other.navigationItems, _this.navigationItems));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(navigationItems));
+int get hashCode {
+  final _this = this as MoreToolsSelectorState;
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.navigationItems));
+}
 
 @override
 String toString() {
-  return 'MoreToolsSelectorState(navigationItems: $navigationItems)';
+  final _this = this as MoreToolsSelectorState;
+  return 'MoreToolsSelectorState(navigationItems: ${_this.navigationItems})';
 }
 
 
@@ -5793,7 +5946,7 @@ class _$MoreToolsSelectorStateCopyWithImpl<$Res>
 /// Create a copy of MoreToolsSelectorState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? navigationItems = null,}) {
-  return _then(_self.copyWith(
+  return _then(MoreToolsSelectorState(
 navigationItems: null == navigationItems ? _self.navigationItems : navigationItems // ignore: cast_nullable_to_non_nullable
 as List<NavigationItem>,
   ));
@@ -5936,7 +6089,7 @@ return $default(_that.navigationItems);case _:
 
 
 class _MoreToolsSelectorState implements MoreToolsSelectorState {
-  const _MoreToolsSelectorState({required final  List<NavigationItem> navigationItems}): _navigationItems = navigationItems;
+  const _MoreToolsSelectorState({required  List<NavigationItem> navigationItems}): _navigationItems = navigationItems;
   
 
  final  List<NavigationItem> _navigationItems;
@@ -5957,16 +6110,18 @@ _$MoreToolsSelectorStateCopyWith<_MoreToolsSelectorState> get copyWith => __$Mor
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MoreToolsSelectorState&&const DeepCollectionEquality().equals(other._navigationItems, _navigationItems));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MoreToolsSelectorState&&const DeepCollectionEquality().equals(other.navigationItems, _navigationItems));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_navigationItems));
+int get hashCode {
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_navigationItems));
+}
 
 @override
 String toString() {
-  return 'MoreToolsSelectorState(navigationItems: $navigationItems)';
+    return 'MoreToolsSelectorState(navigationItems: $navigationItems)';
 }
 
 
@@ -6018,16 +6173,21 @@ $ProxiesListHeaderSelectorStateCopyWith<ProxiesListHeaderSelectorState> get copy
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProxiesListHeaderSelectorState&&(identical(other.offset, offset) || other.offset == offset)&&(identical(other.currentIndex, currentIndex) || other.currentIndex == currentIndex));
+  final _this = this as ProxiesListHeaderSelectorState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProxiesListHeaderSelectorState&&(identical(other.offset, _this.offset) || other.offset == _this.offset)&&(identical(other.currentIndex, _this.currentIndex) || other.currentIndex == _this.currentIndex));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,offset,currentIndex);
+int get hashCode {
+  final _this = this as ProxiesListHeaderSelectorState;
+  return Object.hash(runtimeType,_this.offset,_this.currentIndex);
+}
 
 @override
 String toString() {
-  return 'ProxiesListHeaderSelectorState(offset: $offset, currentIndex: $currentIndex)';
+  final _this = this as ProxiesListHeaderSelectorState;
+  return 'ProxiesListHeaderSelectorState(offset: ${_this.offset}, currentIndex: ${_this.currentIndex})';
 }
 
 
@@ -6056,7 +6216,7 @@ class _$ProxiesListHeaderSelectorStateCopyWithImpl<$Res>
 /// Create a copy of ProxiesListHeaderSelectorState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? offset = null,Object? currentIndex = null,}) {
-  return _then(_self.copyWith(
+  return _then(ProxiesListHeaderSelectorState(
 offset: null == offset ? _self.offset : offset // ignore: cast_nullable_to_non_nullable
 as double,currentIndex: null == currentIndex ? _self.currentIndex : currentIndex // ignore: cast_nullable_to_non_nullable
 as int,
@@ -6216,16 +6376,18 @@ _$ProxiesListHeaderSelectorStateCopyWith<_ProxiesListHeaderSelectorState> get co
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProxiesListHeaderSelectorState&&(identical(other.offset, offset) || other.offset == offset)&&(identical(other.currentIndex, currentIndex) || other.currentIndex == currentIndex));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProxiesListHeaderSelectorState&&(identical(other.offset, offset) || other.offset == offset)&&(identical(other.currentIndex, currentIndex) || other.currentIndex == currentIndex));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,offset,currentIndex);
+int get hashCode {
+    return Object.hash(runtimeType,offset,currentIndex);
+}
 
 @override
 String toString() {
-  return 'ProxiesListHeaderSelectorState(offset: $offset, currentIndex: $currentIndex)';
+    return 'ProxiesListHeaderSelectorState(offset: $offset, currentIndex: $currentIndex)';
 }
 
 
@@ -6278,16 +6440,21 @@ $ProxyStateCopyWith<ProxyState> get copyWith => _$ProxyStateCopyWithImpl<ProxySt
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProxyState&&(identical(other.isStart, isStart) || other.isStart == isStart)&&(identical(other.systemProxy, systemProxy) || other.systemProxy == systemProxy)&&const DeepCollectionEquality().equals(other.bassDomain, bassDomain)&&(identical(other.port, port) || other.port == port));
+  final _this = this as ProxyState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProxyState&&(identical(other.isStart, _this.isStart) || other.isStart == _this.isStart)&&(identical(other.systemProxy, _this.systemProxy) || other.systemProxy == _this.systemProxy)&&const DeepCollectionEquality().equals(other.bassDomain, _this.bassDomain)&&(identical(other.port, _this.port) || other.port == _this.port));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,isStart,systemProxy,const DeepCollectionEquality().hash(bassDomain),port);
+int get hashCode {
+  final _this = this as ProxyState;
+  return Object.hash(runtimeType,_this.isStart,_this.systemProxy,const DeepCollectionEquality().hash(_this.bassDomain),_this.port);
+}
 
 @override
 String toString() {
-  return 'ProxyState(isStart: $isStart, systemProxy: $systemProxy, bassDomain: $bassDomain, port: $port)';
+  final _this = this as ProxyState;
+  return 'ProxyState(isStart: ${_this.isStart}, systemProxy: ${_this.systemProxy}, bassDomain: ${_this.bassDomain}, port: ${_this.port})';
 }
 
 
@@ -6316,7 +6483,7 @@ class _$ProxyStateCopyWithImpl<$Res>
 /// Create a copy of ProxyState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? isStart = null,Object? systemProxy = null,Object? bassDomain = null,Object? port = null,}) {
-  return _then(_self.copyWith(
+  return _then(ProxyState(
 isStart: null == isStart ? _self.isStart : isStart // ignore: cast_nullable_to_non_nullable
 as bool,systemProxy: null == systemProxy ? _self.systemProxy : systemProxy // ignore: cast_nullable_to_non_nullable
 as bool,bassDomain: null == bassDomain ? _self.bassDomain : bassDomain // ignore: cast_nullable_to_non_nullable
@@ -6462,7 +6629,7 @@ return $default(_that.isStart,_that.systemProxy,_that.bassDomain,_that.port);cas
 
 
 class _ProxyState implements ProxyState {
-  const _ProxyState({required this.isStart, required this.systemProxy, required final  List<String> bassDomain, required this.port}): _bassDomain = bassDomain;
+  const _ProxyState({required this.isStart, required this.systemProxy, required  List<String> bassDomain, required this.port}): _bassDomain = bassDomain;
   
 
 @override final  bool isStart;
@@ -6486,16 +6653,18 @@ _$ProxyStateCopyWith<_ProxyState> get copyWith => __$ProxyStateCopyWithImpl<_Pro
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProxyState&&(identical(other.isStart, isStart) || other.isStart == isStart)&&(identical(other.systemProxy, systemProxy) || other.systemProxy == systemProxy)&&const DeepCollectionEquality().equals(other._bassDomain, _bassDomain)&&(identical(other.port, port) || other.port == port));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProxyState&&(identical(other.isStart, isStart) || other.isStart == isStart)&&(identical(other.systemProxy, systemProxy) || other.systemProxy == systemProxy)&&const DeepCollectionEquality().equals(other.bassDomain, _bassDomain)&&(identical(other.port, port) || other.port == port));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,isStart,systemProxy,const DeepCollectionEquality().hash(_bassDomain),port);
+int get hashCode {
+    return Object.hash(runtimeType,isStart,systemProxy,const DeepCollectionEquality().hash(_bassDomain),port);
+}
 
 @override
 String toString() {
-  return 'ProxyState(isStart: $isStart, systemProxy: $systemProxy, bassDomain: $bassDomain, port: $port)';
+    return 'ProxyState(isStart: $isStart, systemProxy: $systemProxy, bassDomain: $bassDomain, port: $port)';
 }
 
 
@@ -6550,16 +6719,21 @@ $ClashConfigStateCopyWith<ClashConfigState> get copyWith => _$ClashConfigStateCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ClashConfigState&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&(identical(other.clashConfig, clashConfig) || other.clashConfig == clashConfig)&&(identical(other.routeMode, routeMode) || other.routeMode == routeMode));
+  final _this = this as ClashConfigState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ClashConfigState&&(identical(other.overrideDns, _this.overrideDns) || other.overrideDns == _this.overrideDns)&&(identical(other.clashConfig, _this.clashConfig) || other.clashConfig == _this.clashConfig)&&(identical(other.routeMode, _this.routeMode) || other.routeMode == _this.routeMode));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,overrideDns,clashConfig,routeMode);
+int get hashCode {
+  final _this = this as ClashConfigState;
+  return Object.hash(runtimeType,_this.overrideDns,_this.clashConfig,_this.routeMode);
+}
 
 @override
 String toString() {
-  return 'ClashConfigState(overrideDns: $overrideDns, clashConfig: $clashConfig, routeMode: $routeMode)';
+  final _this = this as ClashConfigState;
+  return 'ClashConfigState(overrideDns: ${_this.overrideDns}, clashConfig: ${_this.clashConfig}, routeMode: ${_this.routeMode})';
 }
 
 
@@ -6588,7 +6762,7 @@ class _$ClashConfigStateCopyWithImpl<$Res>
 /// Create a copy of ClashConfigState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? overrideDns = null,Object? clashConfig = null,Object? routeMode = null,}) {
-  return _then(_self.copyWith(
+  return _then(ClashConfigState(
 overrideDns: null == overrideDns ? _self.overrideDns : overrideDns // ignore: cast_nullable_to_non_nullable
 as bool,clashConfig: null == clashConfig ? _self.clashConfig : clashConfig // ignore: cast_nullable_to_non_nullable
 as ClashConfig,routeMode: null == routeMode ? _self.routeMode : routeMode // ignore: cast_nullable_to_non_nullable
@@ -6759,16 +6933,18 @@ _$ClashConfigStateCopyWith<_ClashConfigState> get copyWith => __$ClashConfigStat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ClashConfigState&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&(identical(other.clashConfig, clashConfig) || other.clashConfig == clashConfig)&&(identical(other.routeMode, routeMode) || other.routeMode == routeMode));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ClashConfigState&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&(identical(other.clashConfig, clashConfig) || other.clashConfig == clashConfig)&&(identical(other.routeMode, routeMode) || other.routeMode == routeMode));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,overrideDns,clashConfig,routeMode);
+int get hashCode {
+    return Object.hash(runtimeType,overrideDns,clashConfig,routeMode);
+}
 
 @override
 String toString() {
-  return 'ClashConfigState(overrideDns: $overrideDns, clashConfig: $clashConfig, routeMode: $routeMode)';
+    return 'ClashConfigState(overrideDns: $overrideDns, clashConfig: $clashConfig, routeMode: $routeMode)';
 }
 
 
@@ -6831,16 +7007,21 @@ $DashboardStateCopyWith<DashboardState> get copyWith => _$DashboardStateCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DashboardState&&const DeepCollectionEquality().equals(other.dashboardWidgets, dashboardWidgets)&&(identical(other.contentWidth, contentWidth) || other.contentWidth == contentWidth));
+  final _this = this as DashboardState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DashboardState&&const DeepCollectionEquality().equals(other.dashboardWidgets, _this.dashboardWidgets)&&(identical(other.contentWidth, _this.contentWidth) || other.contentWidth == _this.contentWidth));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(dashboardWidgets),contentWidth);
+int get hashCode {
+  final _this = this as DashboardState;
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.dashboardWidgets),_this.contentWidth);
+}
 
 @override
 String toString() {
-  return 'DashboardState(dashboardWidgets: $dashboardWidgets, contentWidth: $contentWidth)';
+  final _this = this as DashboardState;
+  return 'DashboardState(dashboardWidgets: ${_this.dashboardWidgets}, contentWidth: ${_this.contentWidth})';
 }
 
 
@@ -6869,7 +7050,7 @@ class _$DashboardStateCopyWithImpl<$Res>
 /// Create a copy of DashboardState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? dashboardWidgets = null,Object? contentWidth = null,}) {
-  return _then(_self.copyWith(
+  return _then(DashboardState(
 dashboardWidgets: null == dashboardWidgets ? _self.dashboardWidgets : dashboardWidgets // ignore: cast_nullable_to_non_nullable
 as List<DashboardWidget>,contentWidth: null == contentWidth ? _self.contentWidth : contentWidth // ignore: cast_nullable_to_non_nullable
 as double,
@@ -7013,7 +7194,7 @@ return $default(_that.dashboardWidgets,_that.contentWidth);case _:
 
 
 class _DashboardState implements DashboardState {
-  const _DashboardState({required final  List<DashboardWidget> dashboardWidgets, required this.contentWidth}): _dashboardWidgets = dashboardWidgets;
+  const _DashboardState({required  List<DashboardWidget> dashboardWidgets, required this.contentWidth}): _dashboardWidgets = dashboardWidgets;
   
 
  final  List<DashboardWidget> _dashboardWidgets;
@@ -7035,16 +7216,18 @@ _$DashboardStateCopyWith<_DashboardState> get copyWith => __$DashboardStateCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DashboardState&&const DeepCollectionEquality().equals(other._dashboardWidgets, _dashboardWidgets)&&(identical(other.contentWidth, contentWidth) || other.contentWidth == contentWidth));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DashboardState&&const DeepCollectionEquality().equals(other.dashboardWidgets, _dashboardWidgets)&&(identical(other.contentWidth, contentWidth) || other.contentWidth == contentWidth));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_dashboardWidgets),contentWidth);
+int get hashCode {
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_dashboardWidgets),contentWidth);
+}
 
 @override
 String toString() {
-  return 'DashboardState(dashboardWidgets: $dashboardWidgets, contentWidth: $contentWidth)';
+    return 'DashboardState(dashboardWidgets: $dashboardWidgets, contentWidth: $contentWidth)';
 }
 
 
@@ -7097,16 +7280,21 @@ $SelectedProxyStateCopyWith<SelectedProxyState> get copyWith => _$SelectedProxyS
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SelectedProxyState&&(identical(other.proxyName, proxyName) || other.proxyName == proxyName)&&(identical(other.group, group) || other.group == group)&&(identical(other.testUrl, testUrl) || other.testUrl == testUrl));
+  final _this = this as SelectedProxyState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SelectedProxyState&&(identical(other.proxyName, _this.proxyName) || other.proxyName == _this.proxyName)&&(identical(other.group, _this.group) || other.group == _this.group)&&(identical(other.testUrl, _this.testUrl) || other.testUrl == _this.testUrl));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,proxyName,group,testUrl);
+int get hashCode {
+  final _this = this as SelectedProxyState;
+  return Object.hash(runtimeType,_this.proxyName,_this.group,_this.testUrl);
+}
 
 @override
 String toString() {
-  return 'SelectedProxyState(proxyName: $proxyName, group: $group, testUrl: $testUrl)';
+  final _this = this as SelectedProxyState;
+  return 'SelectedProxyState(proxyName: ${_this.proxyName}, group: ${_this.group}, testUrl: ${_this.testUrl})';
 }
 
 
@@ -7135,7 +7323,7 @@ class _$SelectedProxyStateCopyWithImpl<$Res>
 /// Create a copy of SelectedProxyState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? proxyName = null,Object? group = null,Object? testUrl = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(SelectedProxyState(
 proxyName: null == proxyName ? _self.proxyName : proxyName // ignore: cast_nullable_to_non_nullable
 as String,group: null == group ? _self.group : group // ignore: cast_nullable_to_non_nullable
 as bool,testUrl: freezed == testUrl ? _self.testUrl : testUrl // ignore: cast_nullable_to_non_nullable
@@ -7297,16 +7485,18 @@ _$SelectedProxyStateCopyWith<_SelectedProxyState> get copyWith => __$SelectedPro
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SelectedProxyState&&(identical(other.proxyName, proxyName) || other.proxyName == proxyName)&&(identical(other.group, group) || other.group == group)&&(identical(other.testUrl, testUrl) || other.testUrl == testUrl));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SelectedProxyState&&(identical(other.proxyName, proxyName) || other.proxyName == proxyName)&&(identical(other.group, group) || other.group == group)&&(identical(other.testUrl, testUrl) || other.testUrl == testUrl));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,proxyName,group,testUrl);
+int get hashCode {
+    return Object.hash(runtimeType,proxyName,group,testUrl);
+}
 
 @override
 String toString() {
-  return 'SelectedProxyState(proxyName: $proxyName, group: $group, testUrl: $testUrl)';
+    return 'SelectedProxyState(proxyName: $proxyName, group: $group, testUrl: $testUrl)';
 }
 
 
@@ -7360,16 +7550,21 @@ $VpnStateCopyWith<VpnState> get copyWith => _$VpnStateCopyWithImpl<VpnState>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VpnState&&(identical(other.stack, stack) || other.stack == stack)&&(identical(other.vpnProps, vpnProps) || other.vpnProps == vpnProps));
+  final _this = this as VpnState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is VpnState&&(identical(other.stack, _this.stack) || other.stack == _this.stack)&&(identical(other.vpnProps, _this.vpnProps) || other.vpnProps == _this.vpnProps));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,stack,vpnProps);
+int get hashCode {
+  final _this = this as VpnState;
+  return Object.hash(runtimeType,_this.stack,_this.vpnProps);
+}
 
 @override
 String toString() {
-  return 'VpnState(stack: $stack, vpnProps: $vpnProps)';
+  final _this = this as VpnState;
+  return 'VpnState(stack: ${_this.stack}, vpnProps: ${_this.vpnProps})';
 }
 
 
@@ -7398,7 +7593,7 @@ class _$VpnStateCopyWithImpl<$Res>
 /// Create a copy of VpnState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? stack = null,Object? vpnProps = null,}) {
-  return _then(_self.copyWith(
+  return _then(VpnState(
 stack: null == stack ? _self.stack : stack // ignore: cast_nullable_to_non_nullable
 as TunStack,vpnProps: null == vpnProps ? _self.vpnProps : vpnProps // ignore: cast_nullable_to_non_nullable
 as VpnProps,
@@ -7567,16 +7762,18 @@ _$VpnStateCopyWith<_VpnState> get copyWith => __$VpnStateCopyWithImpl<_VpnState>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VpnState&&(identical(other.stack, stack) || other.stack == stack)&&(identical(other.vpnProps, vpnProps) || other.vpnProps == vpnProps));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _VpnState&&(identical(other.stack, stack) || other.stack == stack)&&(identical(other.vpnProps, vpnProps) || other.vpnProps == vpnProps));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,stack,vpnProps);
+int get hashCode {
+    return Object.hash(runtimeType,stack,vpnProps);
+}
 
 @override
 String toString() {
-  return 'VpnState(stack: $stack, vpnProps: $vpnProps)';
+    return 'VpnState(stack: $stack, vpnProps: $vpnProps)';
 }
 
 
@@ -7641,16 +7838,21 @@ $SharedStateCopyWith<SharedState> get copyWith => _$SharedStateCopyWithImpl<Shar
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SharedState&&(identical(other.setupParams, setupParams) || other.setupParams == setupParams)&&(identical(other.vpnOptions, vpnOptions) || other.vpnOptions == vpnOptions)&&(identical(other.stopTip, stopTip) || other.stopTip == stopTip)&&(identical(other.startTip, startTip) || other.startTip == startTip)&&(identical(other.currentProfileName, currentProfileName) || other.currentProfileName == currentProfileName)&&(identical(other.stopText, stopText) || other.stopText == stopText)&&(identical(other.onlyStatisticsProxy, onlyStatisticsProxy) || other.onlyStatisticsProxy == onlyStatisticsProxy));
+  final _this = this as SharedState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SharedState&&(identical(other.setupParams, _this.setupParams) || other.setupParams == _this.setupParams)&&(identical(other.vpnOptions, _this.vpnOptions) || other.vpnOptions == _this.vpnOptions)&&(identical(other.stopTip, _this.stopTip) || other.stopTip == _this.stopTip)&&(identical(other.startTip, _this.startTip) || other.startTip == _this.startTip)&&(identical(other.currentProfileName, _this.currentProfileName) || other.currentProfileName == _this.currentProfileName)&&(identical(other.stopText, _this.stopText) || other.stopText == _this.stopText)&&(identical(other.onlyStatisticsProxy, _this.onlyStatisticsProxy) || other.onlyStatisticsProxy == _this.onlyStatisticsProxy));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,setupParams,vpnOptions,stopTip,startTip,currentProfileName,stopText,onlyStatisticsProxy);
+int get hashCode {
+  final _this = this as SharedState;
+  return Object.hash(runtimeType,_this.setupParams,_this.vpnOptions,_this.stopTip,_this.startTip,_this.currentProfileName,_this.stopText,_this.onlyStatisticsProxy);
+}
 
 @override
 String toString() {
-  return 'SharedState(setupParams: $setupParams, vpnOptions: $vpnOptions, stopTip: $stopTip, startTip: $startTip, currentProfileName: $currentProfileName, stopText: $stopText, onlyStatisticsProxy: $onlyStatisticsProxy)';
+  final _this = this as SharedState;
+  return 'SharedState(setupParams: ${_this.setupParams}, vpnOptions: ${_this.vpnOptions}, stopTip: ${_this.stopTip}, startTip: ${_this.startTip}, currentProfileName: ${_this.currentProfileName}, stopText: ${_this.stopText}, onlyStatisticsProxy: ${_this.onlyStatisticsProxy})';
 }
 
 
@@ -7679,7 +7881,7 @@ class _$SharedStateCopyWithImpl<$Res>
 /// Create a copy of SharedState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? setupParams = freezed,Object? vpnOptions = freezed,Object? stopTip = null,Object? startTip = null,Object? currentProfileName = null,Object? stopText = null,Object? onlyStatisticsProxy = null,}) {
-  return _then(_self.copyWith(
+  return _then(SharedState(
 setupParams: freezed == setupParams ? _self.setupParams : setupParams // ignore: cast_nullable_to_non_nullable
 as SetupParams?,vpnOptions: freezed == vpnOptions ? _self.vpnOptions : vpnOptions // ignore: cast_nullable_to_non_nullable
 as VpnOptions?,stopTip: null == stopTip ? _self.stopTip : stopTip // ignore: cast_nullable_to_non_nullable
@@ -7876,16 +8078,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SharedState&&(identical(other.setupParams, setupParams) || other.setupParams == setupParams)&&(identical(other.vpnOptions, vpnOptions) || other.vpnOptions == vpnOptions)&&(identical(other.stopTip, stopTip) || other.stopTip == stopTip)&&(identical(other.startTip, startTip) || other.startTip == startTip)&&(identical(other.currentProfileName, currentProfileName) || other.currentProfileName == currentProfileName)&&(identical(other.stopText, stopText) || other.stopText == stopText)&&(identical(other.onlyStatisticsProxy, onlyStatisticsProxy) || other.onlyStatisticsProxy == onlyStatisticsProxy));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SharedState&&(identical(other.setupParams, setupParams) || other.setupParams == setupParams)&&(identical(other.vpnOptions, vpnOptions) || other.vpnOptions == vpnOptions)&&(identical(other.stopTip, stopTip) || other.stopTip == stopTip)&&(identical(other.startTip, startTip) || other.startTip == startTip)&&(identical(other.currentProfileName, currentProfileName) || other.currentProfileName == currentProfileName)&&(identical(other.stopText, stopText) || other.stopText == stopText)&&(identical(other.onlyStatisticsProxy, onlyStatisticsProxy) || other.onlyStatisticsProxy == onlyStatisticsProxy));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,setupParams,vpnOptions,stopTip,startTip,currentProfileName,stopText,onlyStatisticsProxy);
+int get hashCode {
+    return Object.hash(runtimeType,setupParams,vpnOptions,stopTip,startTip,currentProfileName,stopText,onlyStatisticsProxy);
+}
 
 @override
 String toString() {
-  return 'SharedState(setupParams: $setupParams, vpnOptions: $vpnOptions, stopTip: $stopTip, startTip: $startTip, currentProfileName: $currentProfileName, stopText: $stopText, onlyStatisticsProxy: $onlyStatisticsProxy)';
+    return 'SharedState(setupParams: $setupParams, vpnOptions: $vpnOptions, stopTip: $stopTip, startTip: $startTip, currentProfileName: $currentProfileName, stopText: $stopText, onlyStatisticsProxy: $onlyStatisticsProxy)';
 }
 
 
@@ -7967,16 +8171,21 @@ $ComputeGroupsStateCopyWith<ComputeGroupsState> get copyWith => _$ComputeGroupsS
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ComputeGroupsState&&(identical(other.proxiesData, proxiesData) || other.proxiesData == proxiesData)&&(identical(other.sortType, sortType) || other.sortType == sortType)&&const DeepCollectionEquality().equals(other.delayMap, delayMap)&&const DeepCollectionEquality().equals(other.selectedMap, selectedMap)&&(identical(other.defaultTestUrl, defaultTestUrl) || other.defaultTestUrl == defaultTestUrl));
+  final _this = this as ComputeGroupsState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ComputeGroupsState&&(identical(other.proxiesData, _this.proxiesData) || other.proxiesData == _this.proxiesData)&&(identical(other.sortType, _this.sortType) || other.sortType == _this.sortType)&&const DeepCollectionEquality().equals(other.delayMap, _this.delayMap)&&const DeepCollectionEquality().equals(other.selectedMap, _this.selectedMap)&&(identical(other.defaultTestUrl, _this.defaultTestUrl) || other.defaultTestUrl == _this.defaultTestUrl));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,proxiesData,sortType,const DeepCollectionEquality().hash(delayMap),const DeepCollectionEquality().hash(selectedMap),defaultTestUrl);
+int get hashCode {
+  final _this = this as ComputeGroupsState;
+  return Object.hash(runtimeType,_this.proxiesData,_this.sortType,const DeepCollectionEquality().hash(_this.delayMap),const DeepCollectionEquality().hash(_this.selectedMap),_this.defaultTestUrl);
+}
 
 @override
 String toString() {
-  return 'ComputeGroupsState(proxiesData: $proxiesData, sortType: $sortType, delayMap: $delayMap, selectedMap: $selectedMap, defaultTestUrl: $defaultTestUrl)';
+  final _this = this as ComputeGroupsState;
+  return 'ComputeGroupsState(proxiesData: ${_this.proxiesData}, sortType: ${_this.sortType}, delayMap: ${_this.delayMap}, selectedMap: ${_this.selectedMap}, defaultTestUrl: ${_this.defaultTestUrl})';
 }
 
 
@@ -8005,7 +8214,7 @@ class _$ComputeGroupsStateCopyWithImpl<$Res>
 /// Create a copy of ComputeGroupsState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? proxiesData = null,Object? sortType = null,Object? delayMap = null,Object? selectedMap = null,Object? defaultTestUrl = null,}) {
-  return _then(_self.copyWith(
+  return _then(ComputeGroupsState(
 proxiesData: null == proxiesData ? _self.proxiesData : proxiesData // ignore: cast_nullable_to_non_nullable
 as ProxiesData,sortType: null == sortType ? _self.sortType : sortType // ignore: cast_nullable_to_non_nullable
 as ProxiesSortType,delayMap: null == delayMap ? _self.delayMap : delayMap // ignore: cast_nullable_to_non_nullable
@@ -8161,7 +8370,7 @@ return $default(_that.proxiesData,_that.sortType,_that.delayMap,_that.selectedMa
 
 
 class _ComputeGroupsState implements ComputeGroupsState {
-  const _ComputeGroupsState({required this.proxiesData, required this.sortType, required final  DelayMap delayMap, required final  Map<String, String> selectedMap, required this.defaultTestUrl}): _delayMap = delayMap,_selectedMap = selectedMap;
+  const _ComputeGroupsState({required this.proxiesData, required this.sortType, required  DelayMap delayMap, required  Map<String, String> selectedMap, required this.defaultTestUrl}): _delayMap = delayMap,_selectedMap = selectedMap;
   
 
 @override final  ProxiesData proxiesData;
@@ -8192,16 +8401,18 @@ _$ComputeGroupsStateCopyWith<_ComputeGroupsState> get copyWith => __$ComputeGrou
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ComputeGroupsState&&(identical(other.proxiesData, proxiesData) || other.proxiesData == proxiesData)&&(identical(other.sortType, sortType) || other.sortType == sortType)&&const DeepCollectionEquality().equals(other._delayMap, _delayMap)&&const DeepCollectionEquality().equals(other._selectedMap, _selectedMap)&&(identical(other.defaultTestUrl, defaultTestUrl) || other.defaultTestUrl == defaultTestUrl));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ComputeGroupsState&&(identical(other.proxiesData, proxiesData) || other.proxiesData == proxiesData)&&(identical(other.sortType, sortType) || other.sortType == sortType)&&const DeepCollectionEquality().equals(other.delayMap, _delayMap)&&const DeepCollectionEquality().equals(other.selectedMap, _selectedMap)&&(identical(other.defaultTestUrl, defaultTestUrl) || other.defaultTestUrl == defaultTestUrl));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,proxiesData,sortType,const DeepCollectionEquality().hash(_delayMap),const DeepCollectionEquality().hash(_selectedMap),defaultTestUrl);
+int get hashCode {
+    return Object.hash(runtimeType,proxiesData,sortType,const DeepCollectionEquality().hash(_delayMap),const DeepCollectionEquality().hash(_selectedMap),defaultTestUrl);
+}
 
 @override
 String toString() {
-  return 'ComputeGroupsState(proxiesData: $proxiesData, sortType: $sortType, delayMap: $delayMap, selectedMap: $selectedMap, defaultTestUrl: $defaultTestUrl)';
+    return 'ComputeGroupsState(proxiesData: $proxiesData, sortType: $sortType, delayMap: $delayMap, selectedMap: $selectedMap, defaultTestUrl: $defaultTestUrl)';
 }
 
 
@@ -8266,16 +8477,21 @@ $MakeRealProfileStateCopyWith<MakeRealProfileState> get copyWith => _$MakeRealPr
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MakeRealProfileState&&(identical(other.profilesPath, profilesPath) || other.profilesPath == profilesPath)&&(identical(other.profileId, profileId) || other.profileId == profileId)&&const DeepCollectionEquality().equals(other.rawConfig, rawConfig)&&(identical(other.overwriteType, overwriteType) || other.overwriteType == overwriteType)&&(identical(other.realPatchConfig, realPatchConfig) || other.realPatchConfig == realPatchConfig)&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&(identical(other.appendSystemDns, appendSystemDns) || other.appendSystemDns == appendSystemDns)&&const DeepCollectionEquality().equals(other.addedRules, addedRules)&&const DeepCollectionEquality().equals(other.proxyChains, proxyChains)&&const DeepCollectionEquality().equals(other.profileProxies, profileProxies)&&const DeepCollectionEquality().equals(other.customProxyGroups, customProxyGroups)&&const DeepCollectionEquality().equals(other.customRules, customRules)&&(identical(other.matchTarget, matchTarget) || other.matchTarget == matchTarget)&&(identical(other.defaultUA, defaultUA) || other.defaultUA == defaultUA)&&(identical(other.dockerMode, dockerMode) || other.dockerMode == dockerMode)&&(identical(other.blockQuic, blockQuic) || other.blockQuic == blockQuic)&&(identical(other.blockWebRtc, blockWebRtc) || other.blockWebRtc == blockWebRtc)&&const DeepCollectionEquality().equals(other.authentication, authentication));
+  final _this = this as MakeRealProfileState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MakeRealProfileState&&(identical(other.profilesPath, _this.profilesPath) || other.profilesPath == _this.profilesPath)&&(identical(other.profileId, _this.profileId) || other.profileId == _this.profileId)&&const DeepCollectionEquality().equals(other.rawConfig, _this.rawConfig)&&(identical(other.overwriteType, _this.overwriteType) || other.overwriteType == _this.overwriteType)&&(identical(other.realPatchConfig, _this.realPatchConfig) || other.realPatchConfig == _this.realPatchConfig)&&(identical(other.overrideDns, _this.overrideDns) || other.overrideDns == _this.overrideDns)&&(identical(other.appendSystemDns, _this.appendSystemDns) || other.appendSystemDns == _this.appendSystemDns)&&const DeepCollectionEquality().equals(other.addedRules, _this.addedRules)&&const DeepCollectionEquality().equals(other.proxyChains, _this.proxyChains)&&const DeepCollectionEquality().equals(other.profileProxies, _this.profileProxies)&&const DeepCollectionEquality().equals(other.customProxyGroups, _this.customProxyGroups)&&const DeepCollectionEquality().equals(other.customRules, _this.customRules)&&(identical(other.matchTarget, _this.matchTarget) || other.matchTarget == _this.matchTarget)&&(identical(other.defaultUA, _this.defaultUA) || other.defaultUA == _this.defaultUA)&&(identical(other.dockerMode, _this.dockerMode) || other.dockerMode == _this.dockerMode)&&(identical(other.blockQuic, _this.blockQuic) || other.blockQuic == _this.blockQuic)&&(identical(other.blockWebRtc, _this.blockWebRtc) || other.blockWebRtc == _this.blockWebRtc)&&const DeepCollectionEquality().equals(other.authentication, _this.authentication));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,profilesPath,profileId,const DeepCollectionEquality().hash(rawConfig),overwriteType,realPatchConfig,overrideDns,appendSystemDns,const DeepCollectionEquality().hash(addedRules),const DeepCollectionEquality().hash(proxyChains),const DeepCollectionEquality().hash(profileProxies),const DeepCollectionEquality().hash(customProxyGroups),const DeepCollectionEquality().hash(customRules),matchTarget,defaultUA,dockerMode,blockQuic,blockWebRtc,const DeepCollectionEquality().hash(authentication));
+int get hashCode {
+  final _this = this as MakeRealProfileState;
+  return Object.hash(runtimeType,_this.profilesPath,_this.profileId,const DeepCollectionEquality().hash(_this.rawConfig),_this.overwriteType,_this.realPatchConfig,_this.overrideDns,_this.appendSystemDns,const DeepCollectionEquality().hash(_this.addedRules),const DeepCollectionEquality().hash(_this.proxyChains),const DeepCollectionEquality().hash(_this.profileProxies),const DeepCollectionEquality().hash(_this.customProxyGroups),const DeepCollectionEquality().hash(_this.customRules),_this.matchTarget,_this.defaultUA,_this.dockerMode,_this.blockQuic,_this.blockWebRtc,const DeepCollectionEquality().hash(_this.authentication));
+}
 
 @override
 String toString() {
-  return 'MakeRealProfileState(profilesPath: $profilesPath, profileId: $profileId, rawConfig: $rawConfig, overwriteType: $overwriteType, realPatchConfig: $realPatchConfig, overrideDns: $overrideDns, appendSystemDns: $appendSystemDns, addedRules: $addedRules, proxyChains: $proxyChains, profileProxies: $profileProxies, customProxyGroups: $customProxyGroups, customRules: $customRules, matchTarget: $matchTarget, defaultUA: $defaultUA, dockerMode: $dockerMode, blockQuic: $blockQuic, blockWebRtc: $blockWebRtc, authentication: $authentication)';
+  final _this = this as MakeRealProfileState;
+  return 'MakeRealProfileState(profilesPath: ${_this.profilesPath}, profileId: ${_this.profileId}, rawConfig: ${_this.rawConfig}, overwriteType: ${_this.overwriteType}, realPatchConfig: ${_this.realPatchConfig}, overrideDns: ${_this.overrideDns}, appendSystemDns: ${_this.appendSystemDns}, addedRules: ${_this.addedRules}, proxyChains: ${_this.proxyChains}, profileProxies: ${_this.profileProxies}, customProxyGroups: ${_this.customProxyGroups}, customRules: ${_this.customRules}, matchTarget: ${_this.matchTarget}, defaultUA: ${_this.defaultUA}, dockerMode: ${_this.dockerMode}, blockQuic: ${_this.blockQuic}, blockWebRtc: ${_this.blockWebRtc}, authentication: ${_this.authentication})';
 }
 
 
@@ -8304,7 +8520,7 @@ class _$MakeRealProfileStateCopyWithImpl<$Res>
 /// Create a copy of MakeRealProfileState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? profilesPath = null,Object? profileId = null,Object? rawConfig = null,Object? overwriteType = null,Object? realPatchConfig = null,Object? overrideDns = null,Object? appendSystemDns = null,Object? addedRules = null,Object? proxyChains = null,Object? profileProxies = null,Object? customProxyGroups = null,Object? customRules = null,Object? matchTarget = freezed,Object? defaultUA = null,Object? dockerMode = null,Object? blockQuic = null,Object? blockWebRtc = null,Object? authentication = null,}) {
-  return _then(_self.copyWith(
+  return _then(MakeRealProfileState(
 profilesPath: null == profilesPath ? _self.profilesPath : profilesPath // ignore: cast_nullable_to_non_nullable
 as String,profileId: null == profileId ? _self.profileId : profileId // ignore: cast_nullable_to_non_nullable
 as int,rawConfig: null == rawConfig ? _self.rawConfig : rawConfig // ignore: cast_nullable_to_non_nullable
@@ -8473,7 +8689,7 @@ return $default(_that.profilesPath,_that.profileId,_that.rawConfig,_that.overwri
 
 
 class _MakeRealProfileState implements MakeRealProfileState {
-  const _MakeRealProfileState({required this.profilesPath, required this.profileId, required final  Map<String, dynamic> rawConfig, required this.overwriteType, required this.realPatchConfig, required this.overrideDns, required this.appendSystemDns, required final  List<Rule> addedRules, required final  List<ProxyChain> proxyChains, required final  List<ProfileProxy> profileProxies, required final  List<ProxyGroup> customProxyGroups, required final  List<Rule> customRules, this.matchTarget, required this.defaultUA, this.dockerMode = false, this.blockQuic = false, this.blockWebRtc = false, final  List<String> authentication = const []}): _rawConfig = rawConfig,_addedRules = addedRules,_proxyChains = proxyChains,_profileProxies = profileProxies,_customProxyGroups = customProxyGroups,_customRules = customRules,_authentication = authentication;
+  const _MakeRealProfileState({required this.profilesPath, required this.profileId, required  Map<String, dynamic> rawConfig, required this.overwriteType, required this.realPatchConfig, required this.overrideDns, required this.appendSystemDns, required  List<Rule> addedRules, required  List<ProxyChain> proxyChains, required  List<ProfileProxy> profileProxies, required  List<ProxyGroup> customProxyGroups, required  List<Rule> customRules, this.matchTarget, required this.defaultUA, this.dockerMode = false, this.blockQuic = false, this.blockWebRtc = false,  List<String> authentication = const []}): _rawConfig = rawConfig,_addedRules = addedRules,_proxyChains = proxyChains,_profileProxies = profileProxies,_customProxyGroups = customProxyGroups,_customRules = customRules,_authentication = authentication;
   
 
 @override final  String profilesPath;
@@ -8547,16 +8763,18 @@ _$MakeRealProfileStateCopyWith<_MakeRealProfileState> get copyWith => __$MakeRea
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MakeRealProfileState&&(identical(other.profilesPath, profilesPath) || other.profilesPath == profilesPath)&&(identical(other.profileId, profileId) || other.profileId == profileId)&&const DeepCollectionEquality().equals(other._rawConfig, _rawConfig)&&(identical(other.overwriteType, overwriteType) || other.overwriteType == overwriteType)&&(identical(other.realPatchConfig, realPatchConfig) || other.realPatchConfig == realPatchConfig)&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&(identical(other.appendSystemDns, appendSystemDns) || other.appendSystemDns == appendSystemDns)&&const DeepCollectionEquality().equals(other._addedRules, _addedRules)&&const DeepCollectionEquality().equals(other._proxyChains, _proxyChains)&&const DeepCollectionEquality().equals(other._profileProxies, _profileProxies)&&const DeepCollectionEquality().equals(other._customProxyGroups, _customProxyGroups)&&const DeepCollectionEquality().equals(other._customRules, _customRules)&&(identical(other.matchTarget, matchTarget) || other.matchTarget == matchTarget)&&(identical(other.defaultUA, defaultUA) || other.defaultUA == defaultUA)&&(identical(other.dockerMode, dockerMode) || other.dockerMode == dockerMode)&&(identical(other.blockQuic, blockQuic) || other.blockQuic == blockQuic)&&(identical(other.blockWebRtc, blockWebRtc) || other.blockWebRtc == blockWebRtc)&&const DeepCollectionEquality().equals(other._authentication, _authentication));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MakeRealProfileState&&(identical(other.profilesPath, profilesPath) || other.profilesPath == profilesPath)&&(identical(other.profileId, profileId) || other.profileId == profileId)&&const DeepCollectionEquality().equals(other.rawConfig, _rawConfig)&&(identical(other.overwriteType, overwriteType) || other.overwriteType == overwriteType)&&(identical(other.realPatchConfig, realPatchConfig) || other.realPatchConfig == realPatchConfig)&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&(identical(other.appendSystemDns, appendSystemDns) || other.appendSystemDns == appendSystemDns)&&const DeepCollectionEquality().equals(other.addedRules, _addedRules)&&const DeepCollectionEquality().equals(other.proxyChains, _proxyChains)&&const DeepCollectionEquality().equals(other.profileProxies, _profileProxies)&&const DeepCollectionEquality().equals(other.customProxyGroups, _customProxyGroups)&&const DeepCollectionEquality().equals(other.customRules, _customRules)&&(identical(other.matchTarget, matchTarget) || other.matchTarget == matchTarget)&&(identical(other.defaultUA, defaultUA) || other.defaultUA == defaultUA)&&(identical(other.dockerMode, dockerMode) || other.dockerMode == dockerMode)&&(identical(other.blockQuic, blockQuic) || other.blockQuic == blockQuic)&&(identical(other.blockWebRtc, blockWebRtc) || other.blockWebRtc == blockWebRtc)&&const DeepCollectionEquality().equals(other.authentication, _authentication));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,profilesPath,profileId,const DeepCollectionEquality().hash(_rawConfig),overwriteType,realPatchConfig,overrideDns,appendSystemDns,const DeepCollectionEquality().hash(_addedRules),const DeepCollectionEquality().hash(_proxyChains),const DeepCollectionEquality().hash(_profileProxies),const DeepCollectionEquality().hash(_customProxyGroups),const DeepCollectionEquality().hash(_customRules),matchTarget,defaultUA,dockerMode,blockQuic,blockWebRtc,const DeepCollectionEquality().hash(_authentication));
+int get hashCode {
+    return Object.hash(runtimeType,profilesPath,profileId,const DeepCollectionEquality().hash(_rawConfig),overwriteType,realPatchConfig,overrideDns,appendSystemDns,const DeepCollectionEquality().hash(_addedRules),const DeepCollectionEquality().hash(_proxyChains),const DeepCollectionEquality().hash(_profileProxies),const DeepCollectionEquality().hash(_customProxyGroups),const DeepCollectionEquality().hash(_customRules),matchTarget,defaultUA,dockerMode,blockQuic,blockWebRtc,const DeepCollectionEquality().hash(_authentication));
+}
 
 @override
 String toString() {
-  return 'MakeRealProfileState(profilesPath: $profilesPath, profileId: $profileId, rawConfig: $rawConfig, overwriteType: $overwriteType, realPatchConfig: $realPatchConfig, overrideDns: $overrideDns, appendSystemDns: $appendSystemDns, addedRules: $addedRules, proxyChains: $proxyChains, profileProxies: $profileProxies, customProxyGroups: $customProxyGroups, customRules: $customRules, matchTarget: $matchTarget, defaultUA: $defaultUA, dockerMode: $dockerMode, blockQuic: $blockQuic, blockWebRtc: $blockWebRtc, authentication: $authentication)';
+    return 'MakeRealProfileState(profilesPath: $profilesPath, profileId: $profileId, rawConfig: $rawConfig, overwriteType: $overwriteType, realPatchConfig: $realPatchConfig, overrideDns: $overrideDns, appendSystemDns: $appendSystemDns, addedRules: $addedRules, proxyChains: $proxyChains, profileProxies: $profileProxies, customProxyGroups: $customProxyGroups, customRules: $customRules, matchTarget: $matchTarget, defaultUA: $defaultUA, dockerMode: $dockerMode, blockQuic: $blockQuic, blockWebRtc: $blockWebRtc, authentication: $authentication)';
 }
 
 
@@ -8634,16 +8852,21 @@ $MigrationDataCopyWith<MigrationData> get copyWith => _$MigrationDataCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MigrationData&&const DeepCollectionEquality().equals(other.configMap, configMap)&&const DeepCollectionEquality().equals(other.rules, rules)&&const DeepCollectionEquality().equals(other.scripts, scripts)&&const DeepCollectionEquality().equals(other.profiles, profiles)&&const DeepCollectionEquality().equals(other.links, links)&&const DeepCollectionEquality().equals(other.fileMigrations, fileMigrations));
+  final _this = this as MigrationData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MigrationData&&const DeepCollectionEquality().equals(other.configMap, _this.configMap)&&const DeepCollectionEquality().equals(other.rules, _this.rules)&&const DeepCollectionEquality().equals(other.scripts, _this.scripts)&&const DeepCollectionEquality().equals(other.profiles, _this.profiles)&&const DeepCollectionEquality().equals(other.links, _this.links)&&const DeepCollectionEquality().equals(other.fileMigrations, _this.fileMigrations));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(configMap),const DeepCollectionEquality().hash(rules),const DeepCollectionEquality().hash(scripts),const DeepCollectionEquality().hash(profiles),const DeepCollectionEquality().hash(links),const DeepCollectionEquality().hash(fileMigrations));
+int get hashCode {
+  final _this = this as MigrationData;
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.configMap),const DeepCollectionEquality().hash(_this.rules),const DeepCollectionEquality().hash(_this.scripts),const DeepCollectionEquality().hash(_this.profiles),const DeepCollectionEquality().hash(_this.links),const DeepCollectionEquality().hash(_this.fileMigrations));
+}
 
 @override
 String toString() {
-  return 'MigrationData(configMap: $configMap, rules: $rules, scripts: $scripts, profiles: $profiles, links: $links, fileMigrations: $fileMigrations)';
+  final _this = this as MigrationData;
+  return 'MigrationData(configMap: ${_this.configMap}, rules: ${_this.rules}, scripts: ${_this.scripts}, profiles: ${_this.profiles}, links: ${_this.links}, fileMigrations: ${_this.fileMigrations})';
 }
 
 
@@ -8672,7 +8895,7 @@ class _$MigrationDataCopyWithImpl<$Res>
 /// Create a copy of MigrationData
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? configMap = freezed,Object? rules = null,Object? scripts = null,Object? profiles = null,Object? links = null,Object? fileMigrations = null,}) {
-  return _then(_self.copyWith(
+  return _then(MigrationData(
 configMap: freezed == configMap ? _self.configMap : configMap // ignore: cast_nullable_to_non_nullable
 as Map<String, Object?>?,rules: null == rules ? _self.rules : rules // ignore: cast_nullable_to_non_nullable
 as List<Rule>,scripts: null == scripts ? _self.scripts : scripts // ignore: cast_nullable_to_non_nullable
@@ -8820,7 +9043,7 @@ return $default(_that.configMap,_that.rules,_that.scripts,_that.profiles,_that.l
 
 
 class _MigrationData implements MigrationData {
-  const _MigrationData({final  Map<String, Object?>? configMap, final  List<Rule> rules = const [], final  List<Script> scripts = const [], final  List<Profile> profiles = const [], final  List<ProfileRuleLink> links = const [], final  List<VM2<String, String>> fileMigrations = const []}): _configMap = configMap,_rules = rules,_scripts = scripts,_profiles = profiles,_links = links,_fileMigrations = fileMigrations;
+  const _MigrationData({ Map<String, Object?>? configMap,  List<Rule> rules = const [],  List<Script> scripts = const [],  List<Profile> profiles = const [],  List<ProfileRuleLink> links = const [],  List<VM2<String, String>> fileMigrations = const []}): _configMap = configMap,_rules = rules,_scripts = scripts,_profiles = profiles,_links = links,_fileMigrations = fileMigrations;
   
 
  final  Map<String, Object?>? _configMap;
@@ -8878,16 +9101,18 @@ _$MigrationDataCopyWith<_MigrationData> get copyWith => __$MigrationDataCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MigrationData&&const DeepCollectionEquality().equals(other._configMap, _configMap)&&const DeepCollectionEquality().equals(other._rules, _rules)&&const DeepCollectionEquality().equals(other._scripts, _scripts)&&const DeepCollectionEquality().equals(other._profiles, _profiles)&&const DeepCollectionEquality().equals(other._links, _links)&&const DeepCollectionEquality().equals(other._fileMigrations, _fileMigrations));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MigrationData&&const DeepCollectionEquality().equals(other.configMap, _configMap)&&const DeepCollectionEquality().equals(other.rules, _rules)&&const DeepCollectionEquality().equals(other.scripts, _scripts)&&const DeepCollectionEquality().equals(other.profiles, _profiles)&&const DeepCollectionEquality().equals(other.links, _links)&&const DeepCollectionEquality().equals(other.fileMigrations, _fileMigrations));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_configMap),const DeepCollectionEquality().hash(_rules),const DeepCollectionEquality().hash(_scripts),const DeepCollectionEquality().hash(_profiles),const DeepCollectionEquality().hash(_links),const DeepCollectionEquality().hash(_fileMigrations));
+int get hashCode {
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_configMap),const DeepCollectionEquality().hash(_rules),const DeepCollectionEquality().hash(_scripts),const DeepCollectionEquality().hash(_profiles),const DeepCollectionEquality().hash(_links),const DeepCollectionEquality().hash(_fileMigrations));
+}
 
 @override
 String toString() {
-  return 'MigrationData(configMap: $configMap, rules: $rules, scripts: $scripts, profiles: $profiles, links: $links, fileMigrations: $fileMigrations)';
+    return 'MigrationData(configMap: $configMap, rules: $rules, scripts: $scripts, profiles: $profiles, links: $links, fileMigrations: $fileMigrations)';
 }
 
 
@@ -8944,16 +9169,21 @@ $SetupStateCopyWith<SetupState> get copyWith => _$SetupStateCopyWithImpl<SetupSt
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SetupState&&(identical(other.profileId, profileId) || other.profileId == profileId)&&(identical(other.profileLastUpdateDate, profileLastUpdateDate) || other.profileLastUpdateDate == profileLastUpdateDate)&&(identical(other.overwriteType, overwriteType) || other.overwriteType == overwriteType)&&const DeepCollectionEquality().equals(other.addedRules, addedRules)&&const DeepCollectionEquality().equals(other.proxyChains, proxyChains)&&const DeepCollectionEquality().equals(other.profileProxies, profileProxies)&&const DeepCollectionEquality().equals(other.customProxyGroups, customProxyGroups)&&const DeepCollectionEquality().equals(other.customRules, customRules)&&(identical(other.matchTarget, matchTarget) || other.matchTarget == matchTarget)&&(identical(other.script, script) || other.script == script)&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&(identical(other.dns, dns) || other.dns == dns)&&(identical(other.blockQuic, blockQuic) || other.blockQuic == blockQuic)&&(identical(other.blockWebRtc, blockWebRtc) || other.blockWebRtc == blockWebRtc));
+  final _this = this as SetupState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SetupState&&(identical(other.profileId, _this.profileId) || other.profileId == _this.profileId)&&(identical(other.profileLastUpdateDate, _this.profileLastUpdateDate) || other.profileLastUpdateDate == _this.profileLastUpdateDate)&&(identical(other.overwriteType, _this.overwriteType) || other.overwriteType == _this.overwriteType)&&const DeepCollectionEquality().equals(other.addedRules, _this.addedRules)&&const DeepCollectionEquality().equals(other.proxyChains, _this.proxyChains)&&const DeepCollectionEquality().equals(other.profileProxies, _this.profileProxies)&&const DeepCollectionEquality().equals(other.customProxyGroups, _this.customProxyGroups)&&const DeepCollectionEquality().equals(other.customRules, _this.customRules)&&(identical(other.matchTarget, _this.matchTarget) || other.matchTarget == _this.matchTarget)&&(identical(other.script, _this.script) || other.script == _this.script)&&(identical(other.overrideDns, _this.overrideDns) || other.overrideDns == _this.overrideDns)&&(identical(other.dns, _this.dns) || other.dns == _this.dns)&&(identical(other.blockQuic, _this.blockQuic) || other.blockQuic == _this.blockQuic)&&(identical(other.blockWebRtc, _this.blockWebRtc) || other.blockWebRtc == _this.blockWebRtc));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,profileId,profileLastUpdateDate,overwriteType,const DeepCollectionEquality().hash(addedRules),const DeepCollectionEquality().hash(proxyChains),const DeepCollectionEquality().hash(profileProxies),const DeepCollectionEquality().hash(customProxyGroups),const DeepCollectionEquality().hash(customRules),matchTarget,script,overrideDns,dns,blockQuic,blockWebRtc);
+int get hashCode {
+  final _this = this as SetupState;
+  return Object.hash(runtimeType,_this.profileId,_this.profileLastUpdateDate,_this.overwriteType,const DeepCollectionEquality().hash(_this.addedRules),const DeepCollectionEquality().hash(_this.proxyChains),const DeepCollectionEquality().hash(_this.profileProxies),const DeepCollectionEquality().hash(_this.customProxyGroups),const DeepCollectionEquality().hash(_this.customRules),_this.matchTarget,_this.script,_this.overrideDns,_this.dns,_this.blockQuic,_this.blockWebRtc);
+}
 
 @override
 String toString() {
-  return 'SetupState(profileId: $profileId, profileLastUpdateDate: $profileLastUpdateDate, overwriteType: $overwriteType, addedRules: $addedRules, proxyChains: $proxyChains, profileProxies: $profileProxies, customProxyGroups: $customProxyGroups, customRules: $customRules, matchTarget: $matchTarget, script: $script, overrideDns: $overrideDns, dns: $dns, blockQuic: $blockQuic, blockWebRtc: $blockWebRtc)';
+  final _this = this as SetupState;
+  return 'SetupState(profileId: ${_this.profileId}, profileLastUpdateDate: ${_this.profileLastUpdateDate}, overwriteType: ${_this.overwriteType}, addedRules: ${_this.addedRules}, proxyChains: ${_this.proxyChains}, profileProxies: ${_this.profileProxies}, customProxyGroups: ${_this.customProxyGroups}, customRules: ${_this.customRules}, matchTarget: ${_this.matchTarget}, script: ${_this.script}, overrideDns: ${_this.overrideDns}, dns: ${_this.dns}, blockQuic: ${_this.blockQuic}, blockWebRtc: ${_this.blockWebRtc})';
 }
 
 
@@ -8982,7 +9212,7 @@ class _$SetupStateCopyWithImpl<$Res>
 /// Create a copy of SetupState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? profileId = freezed,Object? profileLastUpdateDate = freezed,Object? overwriteType = null,Object? addedRules = null,Object? proxyChains = null,Object? profileProxies = null,Object? customProxyGroups = null,Object? customRules = null,Object? matchTarget = freezed,Object? script = freezed,Object? overrideDns = null,Object? dns = null,Object? blockQuic = null,Object? blockWebRtc = null,}) {
-  return _then(_self.copyWith(
+  return _then(SetupState(
 profileId: freezed == profileId ? _self.profileId : profileId // ignore: cast_nullable_to_non_nullable
 as int?,profileLastUpdateDate: freezed == profileLastUpdateDate ? _self.profileLastUpdateDate : profileLastUpdateDate // ignore: cast_nullable_to_non_nullable
 as int?,overwriteType: null == overwriteType ? _self.overwriteType : overwriteType // ignore: cast_nullable_to_non_nullable
@@ -9159,7 +9389,7 @@ return $default(_that.profileId,_that.profileLastUpdateDate,_that.overwriteType,
 
 
 class _SetupState implements SetupState {
-  const _SetupState({required this.profileId, required this.profileLastUpdateDate, required this.overwriteType, required final  List<Rule> addedRules, required final  List<ProxyChain> proxyChains, required final  List<ProfileProxy> profileProxies, required final  List<ProxyGroup> customProxyGroups, required final  List<Rule> customRules, this.matchTarget, required this.script, required this.overrideDns, required this.dns, this.blockQuic = false, this.blockWebRtc = false}): _addedRules = addedRules,_proxyChains = proxyChains,_profileProxies = profileProxies,_customProxyGroups = customProxyGroups,_customRules = customRules;
+  const _SetupState({required this.profileId, required this.profileLastUpdateDate, required this.overwriteType, required  List<Rule> addedRules, required  List<ProxyChain> proxyChains, required  List<ProfileProxy> profileProxies, required  List<ProxyGroup> customProxyGroups, required  List<Rule> customRules, this.matchTarget, required this.script, required this.overrideDns, required this.dns, this.blockQuic = false, this.blockWebRtc = false}): _addedRules = addedRules,_proxyChains = proxyChains,_profileProxies = profileProxies,_customProxyGroups = customProxyGroups,_customRules = customRules;
   
 
 @override final  int? profileId;
@@ -9217,16 +9447,18 @@ _$SetupStateCopyWith<_SetupState> get copyWith => __$SetupStateCopyWithImpl<_Set
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SetupState&&(identical(other.profileId, profileId) || other.profileId == profileId)&&(identical(other.profileLastUpdateDate, profileLastUpdateDate) || other.profileLastUpdateDate == profileLastUpdateDate)&&(identical(other.overwriteType, overwriteType) || other.overwriteType == overwriteType)&&const DeepCollectionEquality().equals(other._addedRules, _addedRules)&&const DeepCollectionEquality().equals(other._proxyChains, _proxyChains)&&const DeepCollectionEquality().equals(other._profileProxies, _profileProxies)&&const DeepCollectionEquality().equals(other._customProxyGroups, _customProxyGroups)&&const DeepCollectionEquality().equals(other._customRules, _customRules)&&(identical(other.matchTarget, matchTarget) || other.matchTarget == matchTarget)&&(identical(other.script, script) || other.script == script)&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&(identical(other.dns, dns) || other.dns == dns)&&(identical(other.blockQuic, blockQuic) || other.blockQuic == blockQuic)&&(identical(other.blockWebRtc, blockWebRtc) || other.blockWebRtc == blockWebRtc));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SetupState&&(identical(other.profileId, profileId) || other.profileId == profileId)&&(identical(other.profileLastUpdateDate, profileLastUpdateDate) || other.profileLastUpdateDate == profileLastUpdateDate)&&(identical(other.overwriteType, overwriteType) || other.overwriteType == overwriteType)&&const DeepCollectionEquality().equals(other.addedRules, _addedRules)&&const DeepCollectionEquality().equals(other.proxyChains, _proxyChains)&&const DeepCollectionEquality().equals(other.profileProxies, _profileProxies)&&const DeepCollectionEquality().equals(other.customProxyGroups, _customProxyGroups)&&const DeepCollectionEquality().equals(other.customRules, _customRules)&&(identical(other.matchTarget, matchTarget) || other.matchTarget == matchTarget)&&(identical(other.script, script) || other.script == script)&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&(identical(other.dns, dns) || other.dns == dns)&&(identical(other.blockQuic, blockQuic) || other.blockQuic == blockQuic)&&(identical(other.blockWebRtc, blockWebRtc) || other.blockWebRtc == blockWebRtc));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,profileId,profileLastUpdateDate,overwriteType,const DeepCollectionEquality().hash(_addedRules),const DeepCollectionEquality().hash(_proxyChains),const DeepCollectionEquality().hash(_profileProxies),const DeepCollectionEquality().hash(_customProxyGroups),const DeepCollectionEquality().hash(_customRules),matchTarget,script,overrideDns,dns,blockQuic,blockWebRtc);
+int get hashCode {
+    return Object.hash(runtimeType,profileId,profileLastUpdateDate,overwriteType,const DeepCollectionEquality().hash(_addedRules),const DeepCollectionEquality().hash(_proxyChains),const DeepCollectionEquality().hash(_profileProxies),const DeepCollectionEquality().hash(_customProxyGroups),const DeepCollectionEquality().hash(_customRules),matchTarget,script,overrideDns,dns,blockQuic,blockWebRtc);
+}
 
 @override
 String toString() {
-  return 'SetupState(profileId: $profileId, profileLastUpdateDate: $profileLastUpdateDate, overwriteType: $overwriteType, addedRules: $addedRules, proxyChains: $proxyChains, profileProxies: $profileProxies, customProxyGroups: $customProxyGroups, customRules: $customRules, matchTarget: $matchTarget, script: $script, overrideDns: $overrideDns, dns: $dns, blockQuic: $blockQuic, blockWebRtc: $blockWebRtc)';
+    return 'SetupState(profileId: $profileId, profileLastUpdateDate: $profileLastUpdateDate, overwriteType: $overwriteType, addedRules: $addedRules, proxyChains: $proxyChains, profileProxies: $profileProxies, customProxyGroups: $customProxyGroups, customRules: $customRules, matchTarget: $matchTarget, script: $script, overrideDns: $overrideDns, dns: $dns, blockQuic: $blockQuic, blockWebRtc: $blockWebRtc)';
 }
 
 

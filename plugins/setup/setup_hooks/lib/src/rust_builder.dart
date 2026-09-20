@@ -10,6 +10,7 @@ import 'target.dart';
 import 'util.dart';
 
 final _log = Logger('rust_builder');
+const _helperToolchain = '1.98.1';
 
 class RustBuilder {
   RustBuilder({
@@ -69,8 +70,8 @@ class RustBuilder {
         _log.info('Building Rust helper: $target');
 
         await runCommandStream(
-          'cargo',
-          args,
+          'rustup',
+          ['run', '--install', _helperToolchain, 'cargo', ...args],
           workingDirectory: _helperPath,
           environment: env,
         );
@@ -92,17 +93,26 @@ class RustBuilder {
     final builder = FingerprintBuilder(rootDir: rootDir)
       ..addValue('cache_schema', BuildCache.schemaVersion)
       ..addValue('kind', 'helper')
+      ..addValue('toolchain', _helperToolchain)
       ..addValue('target', {'goos': target.goos, 'goarch': target.goarch})
       ..addValue('arguments', args)
       ..addValue('core_sha256', coreSha256)
       ..addValue('environment', _rustEnvironment())
       ..addValue('config', config.toFingerprintMap());
 
-    final cargoVersion = runCommand('cargo', [
+    final cargoVersion = runCommand('rustup', [
+      'run',
+      '--install',
+      _helperToolchain,
+      'cargo',
       '--version',
     ], workingDirectory: _helperPath);
     builder.addValue('cargo_version', (cargoVersion.stdout as String).trim());
-    final rustVersion = runCommand('rustc', [
+    final rustVersion = runCommand('rustup', [
+      'run',
+      '--install',
+      _helperToolchain,
+      'rustc',
       '-Vv',
     ], workingDirectory: _helperPath);
     builder.addValue('rustc_version', (rustVersion.stdout as String).trim());
@@ -121,6 +131,7 @@ class RustBuilder {
       'CARGO_ENCODED_RUSTFLAGS',
       'RUSTFLAGS',
       'RUSTUP_TOOLCHAIN',
+      'RUSTC',
       'RUSTC_WRAPPER',
       'RUSTC_WORKSPACE_WRAPPER',
     };

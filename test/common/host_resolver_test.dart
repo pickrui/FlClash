@@ -177,11 +177,12 @@ void main() {
   });
 
   test(
-    'confirming the same address twice does not rewrite the store',
+    'a repeated confirmation at the same instant does not rewrite the store',
     () async {
       final store = _store();
       final resolver = HostResolver(
         lookup: _FakeLookup([]).call,
+        now: () => DateTime.utc(2026, 9, 19),
         store: store.store,
       );
       resolver.confirm('api.test', _address);
@@ -192,4 +193,29 @@ void main() {
       expect(store.value(), first);
     },
   );
+
+  test('same-IP success refreshes TTL in memory and across launches', () async {
+    final store = _store();
+    var now = DateTime.utc(2026, 9, 1);
+    final resolver = HostResolver(
+      lookup: _FakeLookup([]).call,
+      store: store.store,
+      now: () => now,
+    );
+    resolver.confirm('api.test', _address);
+    await pumpEventQueue();
+    now = now.add(const Duration(days: 6));
+    resolver.confirm('API.test', _address);
+    await pumpEventQueue();
+    now = now.add(const Duration(days: 2));
+    expect(await resolver.resolve('api.test'), [_address]);
+    final restarted = HostResolver(
+      lookup: _FakeLookup([]).call,
+      store: store.store,
+      now: () => now,
+    );
+    expect(await restarted.resolve('api.test'), [_address]);
+    now = now.add(const Duration(days: 6));
+    await expectLater(restarted.resolve('api.test'), throwsA(same(_noData)));
+  });
 }

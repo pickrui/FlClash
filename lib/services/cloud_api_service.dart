@@ -312,6 +312,8 @@ class CloudApiException implements Exception {
               appLocalizations.cloudApiSendTimeout,
             DioExceptionType.receiveTimeout =>
               appLocalizations.cloudApiReceiveTimeout,
+            DioExceptionType.transformTimeout =>
+              appLocalizations.cloudApiTimeout,
             DioExceptionType.badCertificate =>
               appLocalizations.invalidCertificateTitle,
             DioExceptionType.badResponse =>

@@ -110,6 +110,13 @@ void main() {
       final first = await buildPlatform(request);
       expect(first.rebuilt, isTrue);
       expect(File(first.outputs.single).existsSync(), isTrue);
+      final buildInfo = Process.runSync('go', [
+        'version',
+        '-m',
+        first.outputs.single,
+      ]);
+      expect(buildInfo.exitCode, 0, reason: buildInfo.stderr.toString());
+      expect(buildInfo.stdout, contains('go1.26.8'));
       expect(first.inputs, contains(core.path));
       expect(first.inputs, isNot(contains(root.path)));
       expect(first.inputs, isNot(contains(p.join(root.path, '.dart_tool'))));

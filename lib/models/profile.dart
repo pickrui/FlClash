@@ -1093,6 +1093,22 @@ extension ProfilesExt on List<Profile> {
 /// (modified, size) at validation time.
 final _validatedSnapshots = <String, (int, int)>{};
 
+/// Downloaded and validated bytes, not yet installed as the profile snapshot.
+/// The action layer commits this together with profile metadata under its lock.
+class PreparedProfileUpdate {
+  const PreparedProfileUpdate._(this.profile, this._bytes);
+
+  final Profile profile;
+  final Uint8List? _bytes;
+
+  Future<Profile> save() {
+    final bytes = _bytes;
+    return bytes == null
+        ? Future.value(profile)
+        : profile._saveValidatedFile(bytes);
+  }
+}
+
 extension ProfileExtension on Profile {
   ProfileType get type => url.isEmpty ? ProfileType.file : ProfileType.url;
 
@@ -1180,7 +1196,10 @@ extension ProfileExtension on Profile {
     await writeEncryptedProfileSnapshot(mFile.path, encryptedBytes);
   }
 
-  Future<Profile> update() async {
+  Future<Profile> update() async => (await prepareUpdate()).save();
+
+  /// Network failures must happen before the file rollback transaction starts.
+  Future<PreparedProfileUpdate> prepareUpdate() async {
     if (isoixCloudProfile) {
       final fetch = _fetchManagedConfigCallback;
       if (fetch == null) throw Exception('fetchManagedConfig not registered');
@@ -1188,7 +1207,7 @@ extension ProfileExtension on Profile {
       // Wait for cloud-account bootstrap so the API client has its token.
       await _ensureCloudReady?.call();
       if (!(_canFetchManagedConfigCallback?.call() ?? true)) {
-        return this;
+        return PreparedProfileUpdate._(this, null);
       }
 
       final params = await CloudParamsStorage.load();
@@ -1201,9 +1220,12 @@ extension ProfileExtension on Profile {
         label: label.isNotEmpty ? label : 'oixCloud',
         url: oixCloudManagedProfileUrl,
       );
-      return profileWithLabel
-          .copyWith(subscriptionInfo: SubscriptionInfo.formHString(userinfo))
-          ._saveValidatedFile(bytes);
+      return PreparedProfileUpdate._(
+        profileWithLabel.copyWith(
+          subscriptionInfo: SubscriptionInfo.formHString(userinfo),
+        ),
+        bytes,
+      );
     }
 
     final response = await request.getFileResponseForUrl(
@@ -1212,13 +1234,16 @@ extension ProfileExtension on Profile {
     );
     final disposition = response.headers.value('content-disposition');
     final userinfo = response.headers.value('subscription-userinfo');
-    return copyWith(
-      label: label.takeFirstValid([
-        utils.getFileNameForDisposition(disposition),
-        id.toString(),
-      ]),
-      subscriptionInfo: SubscriptionInfo.formHString(userinfo),
-    )._saveValidatedFile(response.data!);
+    return PreparedProfileUpdate._(
+      copyWith(
+        label: label.takeFirstValid([
+          utils.getFileNameForDisposition(disposition),
+          id.toString(),
+        ]),
+        subscriptionInfo: SubscriptionInfo.formHString(userinfo),
+      ),
+      response.data!,
+    );
   }
 
   Future<Profile> saveFile(Uint8List bytes) async {

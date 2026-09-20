@@ -160,7 +160,7 @@ abstract class _$Profiles extends $Notifier<List<Profile>> {
   List<Profile> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<List<Profile>, List<Profile>>;
     final element =
         ref.element
@@ -170,7 +170,7 @@ abstract class _$Profiles extends $Notifier<List<Profile>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -204,7 +204,7 @@ abstract class _$Scripts extends $StreamNotifier<List<Script>> {
   Stream<List<Script>> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<List<Script>>, List<Script>>;
     final element =
         ref.element
@@ -214,7 +214,7 @@ abstract class _$Scripts extends $StreamNotifier<List<Script>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -248,7 +248,7 @@ abstract class _$GlobalRules extends $StreamNotifier<List<Rule>> {
   Stream<List<Rule>> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<List<Rule>>, List<Rule>>;
     final element =
         ref.element
@@ -258,7 +258,7 @@ abstract class _$GlobalRules extends $StreamNotifier<List<Rule>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -337,7 +337,7 @@ abstract class _$ProfileAddedRules extends $StreamNotifier<List<Rule>> {
   Stream<List<Rule>> build(int profileId);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<List<Rule>>, List<Rule>>;
     final element =
         ref.element
@@ -347,7 +347,7 @@ abstract class _$ProfileAddedRules extends $StreamNotifier<List<Rule>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(ref, () => build(_$args));
   }
 }
 
@@ -428,7 +428,7 @@ abstract class _$ProfileDisabledRuleIds extends $StreamNotifier<List<int>> {
   Stream<List<int>> build(int profileId);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<List<int>>, List<int>>;
     final element =
         ref.element
@@ -438,6 +438,6 @@ abstract class _$ProfileDisabledRuleIds extends $StreamNotifier<List<int>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(ref, () => build(_$args));
   }
 }

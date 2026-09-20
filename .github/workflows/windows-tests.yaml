@@ -11,7 +11,7 @@ on:
       flutter-version:
         description: Flutter SDK version
         required: true
-        default: '3.44.6'
+        default: '3.47.5'
         type: string
 
 env:
@@ -42,7 +42,7 @@ jobs:
       - name: Setup Go for hook regressions
         uses: actions/setup-go@v5
         with:
-          go-version: '1.26'
+          go-version: '1.26.8'
           cache: false
       - name: Check Windows Go hook and build cache
         working-directory: plugins/setup/setup_hooks

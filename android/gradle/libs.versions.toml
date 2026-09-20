@@ -4,12 +4,12 @@ minSdk = "23"
 targetSdk = "36"
 compileSdk = "36"
 ndkVersion = "28.2.13676358"
-coreKtx = "1.17.0"
-annotationJvm = "1.9.1"
-coreSplashscreen = "1.0.1"
-gson = "2.13.1"
-kotlin = "2.2.10"
-smaliDexlib2 = "3.0.9"
+coreKtx = "1.18.0"
+annotationJvm = "1.10.0"
+coreSplashscreen = "1.2.0"
+gson = "2.14.0"
+kotlin = "2.2.21"
+smaliDexlib2 = "3.0.10"
 
 [libraries]
 build-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }

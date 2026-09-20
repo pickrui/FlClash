@@ -5,6 +5,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 
+import 'update_download.dart';
+
 enum AppUpdateDownloadPhase { idle, downloading, ready, failed, canceled }
 
 typedef AppUpdateDownloader =
@@ -34,6 +36,7 @@ class AppUpdateDownloadTask extends ValueNotifier<AppUpdateDownloadState> {
   CancelToken? _token;
   AppUpdateDownloader? _download;
   Future<void>? _operation;
+  Future<void> _stagingTail = Future.value();
   bool _disposed = false;
   int _views = 0;
   String? downloadUrl;
@@ -54,6 +57,34 @@ class AppUpdateDownloadTask extends ValueNotifier<AppUpdateDownloadState> {
     final token = _token = CancelToken();
     value = const AppUpdateDownloadState(AppUpdateDownloadPhase.downloading);
     return _operation = _run(download, token);
+  }
+
+  /// Cleanup and transfer belong to the same new task. Reopening an active
+  /// download reuses start() and never touches its staging directory.
+  Future<void> startDownload(
+    AppUpdateDownloader download, {
+    required String url,
+    required Directory directory,
+  }) => start((token, onProgress) async {
+    await _serializeStaging(() => sweepStaleUpdateDownloads(directory));
+    if (token.isCancelled) throw token.cancelError!;
+    return download(token, onProgress);
+  }, url: url);
+
+  /// Startup cleanup is serialized with the preparation of new downloads.
+  Future<void> cleanStaleDownloads(Directory directory) =>
+      _serializeStaging(() async {
+        if (_disposed || hasDownload) return;
+        await sweepStaleUpdateDownloads(directory);
+      });
+
+  Future<void> _serializeStaging(Future<void> Function() action) {
+    final operation = _stagingTail.then((_) => action());
+    _stagingTail = operation.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace _) {},
+    );
+    return operation;
   }
 
   Future<void> retry() {

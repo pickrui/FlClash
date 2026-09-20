@@ -138,14 +138,13 @@ extension ProfilesControllerExt on AppController {
     if (profile.isoixCloudProfile) {
       await _ref.read(cloudAccountProvider.notifier).ensureReady();
     }
-    // The download runs outside the storage lock: the file write inside
-    // update() and the profile-list merge below take it briefly, so a slow
-    // subscription no longer blocks applying or saving other profiles.
-    return withFileRollback(
-      await appPath.getProfilePath(profile.id.toString()),
-      () async {
-        final updatedProfile = await update();
-        return storageLock.synchronized(() async {
+    // Callers prepare downloads first. Snapshot backup, replacement, metadata
+    // commit and rollback must all hold the same lock as other profile edits.
+    return storageLock.synchronized(() async {
+      return withFileRollback(
+        await appPath.getProfilePath(profile.id.toString()),
+        () async {
+          final updatedProfile = await update();
           final currentProfile = _ref
               .read(profilesProvider)
               .getProfile(profile.id);
@@ -158,9 +157,9 @@ extension ProfilesControllerExt on AppController {
                 );
           await putProfile(profileToSave, reportOnWait: false);
           return profileToSave;
-        });
-      },
-    );
+        },
+      );
+    });
   }
 
   Future<Profile> saveProfileFile(Profile profile, Uint8List bytes) {
@@ -229,14 +228,23 @@ extension ProfilesControllerExt on AppController {
             .read(cloudAccountProvider.notifier)
             .prepareManagedConfigUpdate();
       }
+      final current = _ref.read(profilesProvider).getProfile(profile.id);
+      if (current == null) {
+        throw StateError('profile is no longer available');
+      }
+      final source = preserveCurrentState ? current : profile;
+      final prepared = await source.prepareUpdate();
       return persistProfile(profile, () {
-        // A queued refresh must download the current URL after a metadata
-        // edit, otherwise its content would be saved under the new URL.
-        final current = _ref.read(profilesProvider).getProfile(profile.id);
-        if (current == null) {
+        final latest = _ref.read(profilesProvider).getProfile(profile.id);
+        if (latest == null) {
           throw StateError('profile is no longer available');
         }
-        return (preserveCurrentState ? current : profile).update();
+        // A URL edit during the download invalidates its content; never save
+        // an old subscription under the newly edited URL or revive a deletion.
+        if (latest.url != current.url) {
+          throw StateError('profile URL changed during download');
+        }
+        return prepared.save();
       }, preserveCurrentState: preserveCurrentState);
     }, handleCloudUnauthorized: profile.isoixCloudProfile);
   }
@@ -301,9 +309,10 @@ extension ProfilesControllerExt on AppController {
     }
     toProfiles();
     final profile = await loadingRun(tag: LoadingTag.profiles, () async {
-      return _runWithCertificateRetry(() {
+      return _runWithCertificateRetry(() async {
         final profile = Profile.normal(url: url);
-        return persistProfile(profile, profile.update);
+        final prepared = await profile.prepareUpdate();
+        return persistProfile(profile, prepared.save);
       }, handleCloudUnauthorized: isoixCloudProfileUrl(url));
     }, title: appLocalizations.addProfile);
     if (profile != null) {

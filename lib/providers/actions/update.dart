@@ -84,9 +84,9 @@ extension InitControllerExt on AppController {
   /// can reach what an earlier one left behind.
   Future<void> _sweepUpdateDownloads() async {
     final task = _ref.read(appUpdateDownloadProvider);
-    if (task.hasDownload) return;
     try {
-      await sweepStaleUpdateDownloads(await appPath.tempDir.future);
+      final directory = await appPath.tempDir.future;
+      await task.cleanStaleDownloads(directory);
     } catch (error) {
       commonPrint.log(
         'update download sweep failed: $error',
@@ -301,31 +301,34 @@ extension InitControllerExt on AppController {
       await _waitForStartup();
     }
     final directory = await appPath.tempDir.future;
-    await sweepStaleUpdateDownloads(directory, keep: task.value.file);
     unawaited(
       task
-          .start((token, onProgress) async {
-            final client = createAppUpdateDownloadClient();
-            try {
-              return await downloadAppUpdate(
-                client: client,
-                url: downloadUrl,
-                fallbackUrls: [getAppUpdateFallbackDownloadUrl(downloadUrl)],
-                directory: directory,
-                cancelToken: token,
-                onProgress: onProgress,
-              );
-            } catch (error) {
-              commonPrint.log(
-                'update download failed: '
-                '${Secrets.redactApiDomains(error.toString())}',
-                logLevel: LogLevel.warning,
-              );
-              rethrow;
-            } finally {
-              client.close(force: true);
-            }
-          }, url: downloadUrl)
+          .startDownload(
+            (token, onProgress) async {
+              final client = createAppUpdateDownloadClient();
+              try {
+                return await downloadAppUpdate(
+                  client: client,
+                  url: downloadUrl,
+                  fallbackUrls: [getAppUpdateFallbackDownloadUrl(downloadUrl)],
+                  directory: directory,
+                  cancelToken: token,
+                  onProgress: onProgress,
+                );
+              } catch (error) {
+                commonPrint.log(
+                  'update download failed: '
+                  '${Secrets.redactApiDomains(error.toString())}',
+                  logLevel: LogLevel.warning,
+                );
+                rethrow;
+              } finally {
+                client.close(force: true);
+              }
+            },
+            url: downloadUrl,
+            directory: directory,
+          )
           .then((_) async {
             if (!foreground &&
                 task.value.phase == AppUpdateDownloadPhase.ready) {

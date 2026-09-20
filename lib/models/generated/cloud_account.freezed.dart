@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of '../cloud_account.dart';
@@ -9,6 +9,7 @@ part of '../cloud_account.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -28,16 +29,21 @@ $CloudProfileCopyWith<CloudProfile> get copyWith => _$CloudProfileCopyWithImpl<C
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CloudProfile&&(identical(other.subscription, subscription) || other.subscription == subscription)&&(identical(other.planCode, planCode) || other.planCode == planCode)&&(identical(other.planRank, planRank) || other.planRank == planRank)&&const DeepCollectionEquality().equals(other.nodeAccess, nodeAccess)&&(identical(other.expireTime, expireTime) || other.expireTime == expireTime)&&(identical(other.todayUsed, todayUsed) || other.todayUsed == todayUsed)&&(identical(other.totalUsed, totalUsed) || other.totalUsed == totalUsed)&&(identical(other.totalTraffic, totalTraffic) || other.totalTraffic == totalTraffic)&&(identical(other.usageProgress, usageProgress) || other.usageProgress == usageProgress)&&(identical(other.remaining, remaining) || other.remaining == remaining)&&(identical(other.balance, balance) || other.balance == balance)&&(identical(other.commission, commission) || other.commission == commission)&&(identical(other.points, points) || other.points == points));
+  final _this = this as CloudProfile;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CloudProfile&&(identical(other.subscription, _this.subscription) || other.subscription == _this.subscription)&&(identical(other.planCode, _this.planCode) || other.planCode == _this.planCode)&&(identical(other.planRank, _this.planRank) || other.planRank == _this.planRank)&&const DeepCollectionEquality().equals(other.nodeAccess, _this.nodeAccess)&&(identical(other.expireTime, _this.expireTime) || other.expireTime == _this.expireTime)&&(identical(other.todayUsed, _this.todayUsed) || other.todayUsed == _this.todayUsed)&&(identical(other.totalUsed, _this.totalUsed) || other.totalUsed == _this.totalUsed)&&(identical(other.totalTraffic, _this.totalTraffic) || other.totalTraffic == _this.totalTraffic)&&(identical(other.usageProgress, _this.usageProgress) || other.usageProgress == _this.usageProgress)&&(identical(other.remaining, _this.remaining) || other.remaining == _this.remaining)&&(identical(other.balance, _this.balance) || other.balance == _this.balance)&&(identical(other.commission, _this.commission) || other.commission == _this.commission)&&(identical(other.points, _this.points) || other.points == _this.points));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,subscription,planCode,planRank,const DeepCollectionEquality().hash(nodeAccess),expireTime,todayUsed,totalUsed,totalTraffic,usageProgress,remaining,balance,commission,points);
+int get hashCode {
+  final _this = this as CloudProfile;
+  return Object.hash(runtimeType,_this.subscription,_this.planCode,_this.planRank,const DeepCollectionEquality().hash(_this.nodeAccess),_this.expireTime,_this.todayUsed,_this.totalUsed,_this.totalTraffic,_this.usageProgress,_this.remaining,_this.balance,_this.commission,_this.points);
+}
 
 @override
 String toString() {
-  return 'CloudProfile(subscription: $subscription, planCode: $planCode, planRank: $planRank, nodeAccess: $nodeAccess, expireTime: $expireTime, todayUsed: $todayUsed, totalUsed: $totalUsed, totalTraffic: $totalTraffic, usageProgress: $usageProgress, remaining: $remaining, balance: $balance, commission: $commission, points: $points)';
+  final _this = this as CloudProfile;
+  return 'CloudProfile(subscription: ${_this.subscription}, planCode: ${_this.planCode}, planRank: ${_this.planRank}, nodeAccess: ${_this.nodeAccess}, expireTime: ${_this.expireTime}, todayUsed: ${_this.todayUsed}, totalUsed: ${_this.totalUsed}, totalTraffic: ${_this.totalTraffic}, usageProgress: ${_this.usageProgress}, remaining: ${_this.remaining}, balance: ${_this.balance}, commission: ${_this.commission}, points: ${_this.points})';
 }
 
 
@@ -66,7 +72,7 @@ class _$CloudProfileCopyWithImpl<$Res>
 /// Create a copy of CloudProfile
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? subscription = null,Object? planCode = null,Object? planRank = freezed,Object? nodeAccess = null,Object? expireTime = null,Object? todayUsed = null,Object? totalUsed = null,Object? totalTraffic = null,Object? usageProgress = null,Object? remaining = null,Object? balance = null,Object? commission = null,Object? points = null,}) {
-  return _then(_self.copyWith(
+  return _then(CloudProfile(
 subscription: null == subscription ? _self.subscription : subscription // ignore: cast_nullable_to_non_nullable
 as String,planCode: null == planCode ? _self.planCode : planCode // ignore: cast_nullable_to_non_nullable
 as String,planRank: freezed == planRank ? _self.planRank : planRank // ignore: cast_nullable_to_non_nullable
@@ -221,7 +227,7 @@ return $default(_that.subscription,_that.planCode,_that.planRank,_that.nodeAcces
 @JsonSerializable()
 
 class _CloudProfile implements CloudProfile {
-  const _CloudProfile({required this.subscription, this.planCode = '', this.planRank, final  List<String> nodeAccess = const <String>[], required this.expireTime, required this.todayUsed, required this.totalUsed, required this.totalTraffic, required this.usageProgress, required this.remaining, required this.balance, required this.commission, required this.points}): _nodeAccess = nodeAccess;
+  const _CloudProfile({required this.subscription, this.planCode = '', this.planRank,  List<String> nodeAccess = const <String>[], required this.expireTime, required this.todayUsed, required this.totalUsed, required this.totalTraffic, required this.usageProgress, required this.remaining, required this.balance, required this.commission, required this.points}): _nodeAccess = nodeAccess;
   factory _CloudProfile.fromJson(Map<String, dynamic> json) => _$CloudProfileFromJson(json);
 
 @override final  String subscription;
@@ -257,16 +263,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CloudProfile&&(identical(other.subscription, subscription) || other.subscription == subscription)&&(identical(other.planCode, planCode) || other.planCode == planCode)&&(identical(other.planRank, planRank) || other.planRank == planRank)&&const DeepCollectionEquality().equals(other._nodeAccess, _nodeAccess)&&(identical(other.expireTime, expireTime) || other.expireTime == expireTime)&&(identical(other.todayUsed, todayUsed) || other.todayUsed == todayUsed)&&(identical(other.totalUsed, totalUsed) || other.totalUsed == totalUsed)&&(identical(other.totalTraffic, totalTraffic) || other.totalTraffic == totalTraffic)&&(identical(other.usageProgress, usageProgress) || other.usageProgress == usageProgress)&&(identical(other.remaining, remaining) || other.remaining == remaining)&&(identical(other.balance, balance) || other.balance == balance)&&(identical(other.commission, commission) || other.commission == commission)&&(identical(other.points, points) || other.points == points));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CloudProfile&&(identical(other.subscription, subscription) || other.subscription == subscription)&&(identical(other.planCode, planCode) || other.planCode == planCode)&&(identical(other.planRank, planRank) || other.planRank == planRank)&&const DeepCollectionEquality().equals(other.nodeAccess, _nodeAccess)&&(identical(other.expireTime, expireTime) || other.expireTime == expireTime)&&(identical(other.todayUsed, todayUsed) || other.todayUsed == todayUsed)&&(identical(other.totalUsed, totalUsed) || other.totalUsed == totalUsed)&&(identical(other.totalTraffic, totalTraffic) || other.totalTraffic == totalTraffic)&&(identical(other.usageProgress, usageProgress) || other.usageProgress == usageProgress)&&(identical(other.remaining, remaining) || other.remaining == remaining)&&(identical(other.balance, balance) || other.balance == balance)&&(identical(other.commission, commission) || other.commission == commission)&&(identical(other.points, points) || other.points == points));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,subscription,planCode,planRank,const DeepCollectionEquality().hash(_nodeAccess),expireTime,todayUsed,totalUsed,totalTraffic,usageProgress,remaining,balance,commission,points);
+int get hashCode {
+    return Object.hash(runtimeType,subscription,planCode,planRank,const DeepCollectionEquality().hash(_nodeAccess),expireTime,todayUsed,totalUsed,totalTraffic,usageProgress,remaining,balance,commission,points);
+}
 
 @override
 String toString() {
-  return 'CloudProfile(subscription: $subscription, planCode: $planCode, planRank: $planRank, nodeAccess: $nodeAccess, expireTime: $expireTime, todayUsed: $todayUsed, totalUsed: $totalUsed, totalTraffic: $totalTraffic, usageProgress: $usageProgress, remaining: $remaining, balance: $balance, commission: $commission, points: $points)';
+    return 'CloudProfile(subscription: $subscription, planCode: $planCode, planRank: $planRank, nodeAccess: $nodeAccess, expireTime: $expireTime, todayUsed: $todayUsed, totalUsed: $totalUsed, totalTraffic: $totalTraffic, usageProgress: $usageProgress, remaining: $remaining, balance: $balance, commission: $commission, points: $points)';
 }
 
 
@@ -333,16 +341,21 @@ $CloudNotificationCopyWith<CloudNotification> get copyWith => _$CloudNotificatio
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CloudNotification&&(identical(other.cleanMessage, cleanMessage) || other.cleanMessage == cleanMessage)&&(identical(other.publishTime, publishTime) || other.publishTime == publishTime));
+  final _this = this as CloudNotification;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CloudNotification&&(identical(other.cleanMessage, _this.cleanMessage) || other.cleanMessage == _this.cleanMessage)&&(identical(other.publishTime, _this.publishTime) || other.publishTime == _this.publishTime));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,cleanMessage,publishTime);
+int get hashCode {
+  final _this = this as CloudNotification;
+  return Object.hash(runtimeType,_this.cleanMessage,_this.publishTime);
+}
 
 @override
 String toString() {
-  return 'CloudNotification(cleanMessage: $cleanMessage, publishTime: $publishTime)';
+  final _this = this as CloudNotification;
+  return 'CloudNotification(cleanMessage: ${_this.cleanMessage}, publishTime: ${_this.publishTime})';
 }
 
 
@@ -371,7 +384,7 @@ class _$CloudNotificationCopyWithImpl<$Res>
 /// Create a copy of CloudNotification
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? cleanMessage = null,Object? publishTime = null,}) {
-  return _then(_self.copyWith(
+  return _then(CloudNotification(
 cleanMessage: null == cleanMessage ? _self.cleanMessage : cleanMessage // ignore: cast_nullable_to_non_nullable
 as String,publishTime: null == publishTime ? _self.publishTime : publishTime // ignore: cast_nullable_to_non_nullable
 as DateTime,
@@ -534,16 +547,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CloudNotification&&(identical(other.cleanMessage, cleanMessage) || other.cleanMessage == cleanMessage)&&(identical(other.publishTime, publishTime) || other.publishTime == publishTime));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CloudNotification&&(identical(other.cleanMessage, cleanMessage) || other.cleanMessage == cleanMessage)&&(identical(other.publishTime, publishTime) || other.publishTime == publishTime));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,cleanMessage,publishTime);
+int get hashCode {
+    return Object.hash(runtimeType,cleanMessage,publishTime);
+}
 
 @override
 String toString() {
-  return 'CloudNotification(cleanMessage: $cleanMessage, publishTime: $publishTime)';
+    return 'CloudNotification(cleanMessage: $cleanMessage, publishTime: $publishTime)';
 }
 
 
@@ -596,16 +611,21 @@ $CloudAccountStateCopyWith<CloudAccountState> get copyWith => _$CloudAccountStat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CloudAccountState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isRefreshing, isRefreshing) || other.isRefreshing == isRefreshing)&&(identical(other.isSyncing, isSyncing) || other.isSyncing == isSyncing)&&(identical(other.isLoggedIn, isLoggedIn) || other.isLoggedIn == isLoggedIn)&&(identical(other.profile, profile) || other.profile == profile)&&(identical(other.latestNotification, latestNotification) || other.latestNotification == latestNotification)&&(identical(other.error, error) || other.error == error));
+  final _this = this as CloudAccountState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CloudAccountState&&(identical(other.isLoading, _this.isLoading) || other.isLoading == _this.isLoading)&&(identical(other.isRefreshing, _this.isRefreshing) || other.isRefreshing == _this.isRefreshing)&&(identical(other.isSyncing, _this.isSyncing) || other.isSyncing == _this.isSyncing)&&(identical(other.isLoggedIn, _this.isLoggedIn) || other.isLoggedIn == _this.isLoggedIn)&&(identical(other.profile, _this.profile) || other.profile == _this.profile)&&(identical(other.latestNotification, _this.latestNotification) || other.latestNotification == _this.latestNotification)&&(identical(other.error, _this.error) || other.error == _this.error));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,isLoading,isRefreshing,isSyncing,isLoggedIn,profile,latestNotification,error);
+int get hashCode {
+  final _this = this as CloudAccountState;
+  return Object.hash(runtimeType,_this.isLoading,_this.isRefreshing,_this.isSyncing,_this.isLoggedIn,_this.profile,_this.latestNotification,_this.error);
+}
 
 @override
 String toString() {
-  return 'CloudAccountState(isLoading: $isLoading, isRefreshing: $isRefreshing, isSyncing: $isSyncing, isLoggedIn: $isLoggedIn, profile: $profile, latestNotification: $latestNotification, error: $error)';
+  final _this = this as CloudAccountState;
+  return 'CloudAccountState(isLoading: ${_this.isLoading}, isRefreshing: ${_this.isRefreshing}, isSyncing: ${_this.isSyncing}, isLoggedIn: ${_this.isLoggedIn}, profile: ${_this.profile}, latestNotification: ${_this.latestNotification}, error: ${_this.error})';
 }
 
 
@@ -634,7 +654,7 @@ class _$CloudAccountStateCopyWithImpl<$Res>
 /// Create a copy of CloudAccountState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? isLoading = null,Object? isRefreshing = null,Object? isSyncing = null,Object? isLoggedIn = null,Object? profile = freezed,Object? latestNotification = freezed,Object? error = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(CloudAccountState(
 isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,isRefreshing: null == isRefreshing ? _self.isRefreshing : isRefreshing // ignore: cast_nullable_to_non_nullable
 as bool,isSyncing: null == isSyncing ? _self.isSyncing : isSyncing // ignore: cast_nullable_to_non_nullable
@@ -828,16 +848,18 @@ _$CloudAccountStateCopyWith<_CloudAccountState> get copyWith => __$CloudAccountS
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CloudAccountState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isRefreshing, isRefreshing) || other.isRefreshing == isRefreshing)&&(identical(other.isSyncing, isSyncing) || other.isSyncing == isSyncing)&&(identical(other.isLoggedIn, isLoggedIn) || other.isLoggedIn == isLoggedIn)&&(identical(other.profile, profile) || other.profile == profile)&&(identical(other.latestNotification, latestNotification) || other.latestNotification == latestNotification)&&(identical(other.error, error) || other.error == error));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CloudAccountState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isRefreshing, isRefreshing) || other.isRefreshing == isRefreshing)&&(identical(other.isSyncing, isSyncing) || other.isSyncing == isSyncing)&&(identical(other.isLoggedIn, isLoggedIn) || other.isLoggedIn == isLoggedIn)&&(identical(other.profile, profile) || other.profile == profile)&&(identical(other.latestNotification, latestNotification) || other.latestNotification == latestNotification)&&(identical(other.error, error) || other.error == error));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,isLoading,isRefreshing,isSyncing,isLoggedIn,profile,latestNotification,error);
+int get hashCode {
+    return Object.hash(runtimeType,isLoading,isRefreshing,isSyncing,isLoggedIn,profile,latestNotification,error);
+}
 
 @override
 String toString() {
-  return 'CloudAccountState(isLoading: $isLoading, isRefreshing: $isRefreshing, isSyncing: $isSyncing, isLoggedIn: $isLoggedIn, profile: $profile, latestNotification: $latestNotification, error: $error)';
+    return 'CloudAccountState(isLoading: $isLoading, isRefreshing: $isRefreshing, isSyncing: $isSyncing, isLoggedIn: $isLoggedIn, profile: $profile, latestNotification: $latestNotification, error: $error)';
 }
 
 

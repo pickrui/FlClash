@@ -189,7 +189,9 @@ void main() {
       var cancelled = 0;
       final dav = DAVClient(
         _props,
-        readTimeout: const Duration(milliseconds: 30),
+        // This also covers the initial ping; allow normal scheduling under
+        // the full suite while still bounding an idle download.
+        readTimeout: const Duration(seconds: 1),
         resolveRoutes: (_) => ['direct', 'proxy'],
         createAdapter: (_) => _Adapter((options) async {
           if (options.method != 'GET') return ResponseBody.fromBytes([], 200);

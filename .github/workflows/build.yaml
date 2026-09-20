@@ -7,8 +7,8 @@ on:
 
 env:
   IS_STABLE: ${{ !contains(github.ref, '-') }}
-  FLUTTER_VERSION: '3.44.6'
-  GO_VERSION: '1.26'
+  FLUTTER_VERSION: '3.47.5'
+  GO_VERSION: '1.26.8'
   MSYS_NO_PATHCONV: 1
 
 jobs:
@@ -492,7 +492,7 @@ jobs:
           FLCLASH_APP_SECRET: ${{ secrets.FLCLASH_APP_SECRET }}
           DNS_AUTH_PRIVATE_KEY: ${{ secrets.DNS_AUTH_PRIVATE_KEY }}
           DNS_AUTH_DOMAINS: ${{ secrets.DNS_AUTH_DOMAINS }}
-          MACOSX_DEPLOYMENT_TARGET: ${{ matrix.platform == 'macos' && '11.0' || '' }}
+          MACOSX_DEPLOYMENT_TARGET: ${{ matrix.platform == 'macos' && '12.0' || '' }}
         run: |
           set -e
           BUILD_ARGS="${{ matrix.platform }}"

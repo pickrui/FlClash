@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:fl_clash/common/update_download.dart';
 import 'package:fl_clash/common/update_download_task.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -121,6 +122,68 @@ void main() {
       await operation;
       expect(task.value.phase, AppUpdateDownloadPhase.canceled);
       expect(task.value.error, isNull);
+    },
+  );
+
+  test(
+    'foreground reuse and startup cleanup preserve a streaming download',
+    () async {
+      final directory = await Directory.systemTemp.createTemp(
+        'updater-stream-test-',
+      );
+      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final client = Dio();
+      final started = Completer<void>();
+      final finish = Completer<void>();
+      addTearDown(() async {
+        if (!finish.isCompleted) finish.complete();
+        client.close(force: true);
+        await server.close(force: true);
+        await directory.delete(recursive: true);
+      });
+      final stale = await directory.createTemp('flclash-update-');
+      await File('${stale.path}/old.apk').writeAsString('old');
+      server.listen((request) async {
+        request.response.headers.contentType = ContentType.binary;
+        request.response.bufferOutput = false;
+        request.response.contentLength = 65536;
+        request.response.add(List.filled(32768, 1));
+        await request.response.flush();
+        await finish.future;
+        request.response.add(List.filled(32768, 2));
+        await request.response.close();
+      });
+      final url = 'http://127.0.0.1:${server.port}/update.apk';
+      final running = task.startDownload(
+        (token, progress) => downloadAppUpdate(
+          client: client,
+          url: url,
+          directory: directory,
+          cancelToken: token,
+          onProgress: (received, total) {
+            progress(received, total);
+            if (!started.isCompleted) started.complete();
+          },
+        ),
+        url: url,
+        directory: directory,
+      );
+      await started.future;
+      expect(await stale.exists(), isFalse);
+      expect(task.value.file, isNull);
+      await task.cleanStaleDownloads(directory);
+      final joined = task.startDownload(
+        (_, _) async => throw StateError('must reuse task'),
+        url: url,
+        directory: directory,
+      );
+      expect(joined, same(running));
+      finish.complete();
+      await running;
+      expect(task.value.phase, AppUpdateDownloadPhase.ready);
+      expect(await task.value.file!.length(), 65536);
+      await task.cleanStaleDownloads(directory);
+      expect(await task.value.file!.exists(), isTrue);
     },
   );
 }

@@ -78,11 +78,16 @@ class HostResolver {
   void confirm(String host, InternetAddress address) {
     if (address.type == InternetAddressType.unix) return;
     final key = _key(host);
-    final existing = _cache[key]?.addresses ?? const <InternetAddress>[];
-    if (existing.length == 1 && existing.first.address == address.address) {
+    final now = _now();
+    final existing = _cache[key];
+    if (existing != null &&
+        existing.addresses.length == 1 &&
+        existing.addresses.first.address == address.address &&
+        existing.at == now) {
       return;
     }
-    _cache[key] = (addresses: [address], at: _now());
+    // A stable address is still fresh when a new connection succeeds.
+    _cache[key] = (addresses: [address], at: now);
     _persist();
   }
 

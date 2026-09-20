@@ -6,6 +6,7 @@ import 'package:dio/io.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/controller.dart';
 import 'package:fl_clash/common/proxy_auth.dart';
+import 'tls_connection.dart';
 
 String resolveCloudApiProxy({required bool isCoreRunning, required int port}) {
   if (!isCoreRunning || port <= 0 || port > 65535) {
@@ -107,6 +108,7 @@ Future<ConnectionTask<Socket>> connectWithResolver(
   final port = uri.hasPort ? uri.port : (secure ? 443 : 80);
   final addresses = await resolver.resolve(uri.host);
   ConnectionTask<Socket>? pending;
+  Socket? activeSocket;
   var canceled = false;
   Future<Socket> connect() async {
     Object? lastError;
@@ -114,22 +116,28 @@ Future<ConnectionTask<Socket>> connectWithResolver(
     for (final address in addresses) {
       if (canceled) throw const SocketException('Connection attempt cancelled');
       try {
-        final task = pending = await Socket.startConnect(address, port);
-        final socket = await task.socket;
+        final task = pending = await (secure
+            ? startTlsConnection(
+                address,
+                port,
+                host: uri.host,
+                onBadCertificate: (_) => allowBadCertificate?.call() ?? false,
+              )
+            : Socket.startConnect(address, port));
+        if (canceled) {
+          task.cancel();
+          throw const SocketException('Connection attempt cancelled');
+        }
+        final socket = activeSocket = await task.socket;
         if (canceled) {
           socket.destroy();
           throw const SocketException('Connection attempt cancelled');
         }
-        final connected = secure
-            ? await SecureSocket.secure(
-                socket,
-                host: uri.host,
-                onBadCertificate: (_) => allowBadCertificate?.call() ?? false,
-              )
-            : socket;
         resolver.confirm(uri.host, address);
-        return connected;
+        return socket;
       } catch (error, stackTrace) {
+        activeSocket?.destroy();
+        activeSocket = null;
         if (canceled) rethrow;
         lastError = error;
         lastStackTrace = stackTrace;
@@ -144,6 +152,9 @@ Future<ConnectionTask<Socket>> connectWithResolver(
   return ConnectionTask.fromSocket<Socket>(connect(), () {
     canceled = true;
     pending?.cancel();
+    // A completed TCP task no longer owns its socket. Keep ownership through
+    // the TLS handshake so cancellation also releases that connection.
+    activeSocket?.destroy();
   });
 }
 

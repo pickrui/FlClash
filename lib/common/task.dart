@@ -1206,7 +1206,7 @@ Future<bool> validateBackupDatabase(String path) async {
   } catch (_) {
     return false;
   } finally {
-    backupDatabase?.dispose();
+    backupDatabase?.close();
   }
 }
 

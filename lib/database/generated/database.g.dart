@@ -3923,48 +3923,46 @@ abstract class _$Database extends GeneratedDatabase {
   ]);
 }
 
-typedef $$ProfilesTableCreateCompanionBuilder =
-    ProfilesCompanion Function({
-      Value<int> id,
-      required String label,
-      Value<String?> currentGroupName,
-      required String url,
-      Value<DateTime?> lastUpdateDate,
-      required OverwriteType overwriteType,
-      Value<int?> scriptId,
-      Value<String?> matchTarget,
-      required int autoUpdateDurationMillis,
-      Value<SubscriptionInfo?> subscriptionInfo,
-      required bool autoUpdate,
-      required Map<String, String> selectedMap,
-      required Set<String> unfoldSet,
-      Value<List<ProxyChain>> proxyChains,
-      Value<List<ProfileProxy>> profileProxies,
-      Value<List<ProxyGroup>> customProxyGroups,
-      Value<List<Rule>> customRules,
-      Value<int?> order,
-    });
-typedef $$ProfilesTableUpdateCompanionBuilder =
-    ProfilesCompanion Function({
-      Value<int> id,
-      Value<String> label,
-      Value<String?> currentGroupName,
-      Value<String> url,
-      Value<DateTime?> lastUpdateDate,
-      Value<OverwriteType> overwriteType,
-      Value<int?> scriptId,
-      Value<String?> matchTarget,
-      Value<int> autoUpdateDurationMillis,
-      Value<SubscriptionInfo?> subscriptionInfo,
-      Value<bool> autoUpdate,
-      Value<Map<String, String>> selectedMap,
-      Value<Set<String>> unfoldSet,
-      Value<List<ProxyChain>> proxyChains,
-      Value<List<ProfileProxy>> profileProxies,
-      Value<List<ProxyGroup>> customProxyGroups,
-      Value<List<Rule>> customRules,
-      Value<int?> order,
-    });
+typedef $$ProfilesTableCreateCompanionBuilder = ProfilesCompanion Function({
+  Value<int> id,
+  required String label,
+  Value<String?> currentGroupName,
+  required String url,
+  Value<DateTime?> lastUpdateDate,
+  required OverwriteType overwriteType,
+  Value<int?> scriptId,
+  Value<String?> matchTarget,
+  required int autoUpdateDurationMillis,
+  Value<SubscriptionInfo?> subscriptionInfo,
+  required bool autoUpdate,
+  required Map<String, String> selectedMap,
+  required Set<String> unfoldSet,
+  Value<List<ProxyChain>> proxyChains,
+  Value<List<ProfileProxy>> profileProxies,
+  Value<List<ProxyGroup>> customProxyGroups,
+  Value<List<Rule>> customRules,
+  Value<int?> order,
+});
+typedef $$ProfilesTableUpdateCompanionBuilder = ProfilesCompanion Function({
+  Value<int> id,
+  Value<String> label,
+  Value<String?> currentGroupName,
+  Value<String> url,
+  Value<DateTime?> lastUpdateDate,
+  Value<OverwriteType> overwriteType,
+  Value<int?> scriptId,
+  Value<String?> matchTarget,
+  Value<int> autoUpdateDurationMillis,
+  Value<SubscriptionInfo?> subscriptionInfo,
+  Value<bool> autoUpdate,
+  Value<Map<String, String>> selectedMap,
+  Value<Set<String>> unfoldSet,
+  Value<List<ProxyChain>> proxyChains,
+  Value<List<ProfileProxy>> profileProxies,
+  Value<List<ProxyGroup>> customProxyGroups,
+  Value<List<Rule>> customRules,
+  Value<int?> order,
+});
 
 final class $$ProfilesTableReferences
     extends BaseReferences<_$Database, $ProfilesTable, RawProfile> {
@@ -3973,10 +3971,7 @@ final class $$ProfilesTableReferences
   static MultiTypedResultKey<$ProfileRuleLinksTable, List<RawProfileRuleLink>>
   _profileRuleLinksRefsTable(_$Database db) => MultiTypedResultKey.fromTable(
     db.profileRuleLinks,
-    aliasName: $_aliasNameGenerator(
-      db.profiles.id,
-      db.profileRuleLinks.profileId,
-    ),
+    aliasName: 'profiles__id__profile_rule_mapping__profile_id',
   );
 
   $$ProfileRuleLinksTableProcessedTableManager get profileRuleLinksRefs {
@@ -3996,7 +3991,7 @@ final class $$ProfilesTableReferences
   static MultiTypedResultKey<$ProxyGroupsTable, List<RawProxyGroup>>
   _proxyGroupsRefsTable(_$Database db) => MultiTypedResultKey.fromTable(
     db.proxyGroups,
-    aliasName: $_aliasNameGenerator(db.profiles.id, db.proxyGroups.profileId),
+    aliasName: 'profiles__id__proxy_groups__profile_id',
   );
 
   $$ProxyGroupsTableProcessedTableManager get proxyGroupsRefs {
@@ -4535,7 +4530,7 @@ class $$ProfilesTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$ProfilesTable, RawProfile>(table),
                   $$ProfilesTableReferences(db, table, e),
                 ),
               )
@@ -4615,18 +4610,16 @@ typedef $$ProfilesTableProcessedTableManager =
       RawProfile,
       PrefetchHooks Function({bool profileRuleLinksRefs, bool proxyGroupsRefs})
     >;
-typedef $$ScriptsTableCreateCompanionBuilder =
-    ScriptsCompanion Function({
-      Value<int> id,
-      required String label,
-      required DateTime lastUpdateTime,
-    });
-typedef $$ScriptsTableUpdateCompanionBuilder =
-    ScriptsCompanion Function({
-      Value<int> id,
-      Value<String> label,
-      Value<DateTime> lastUpdateTime,
-    });
+typedef $$ScriptsTableCreateCompanionBuilder = ScriptsCompanion Function({
+  Value<int> id,
+  required String label,
+  required DateTime lastUpdateTime,
+});
+typedef $$ScriptsTableUpdateCompanionBuilder = ScriptsCompanion Function({
+  Value<int> id,
+  Value<String> label,
+  Value<DateTime> lastUpdateTime,
+});
 
 class $$ScriptsTableFilterComposer extends Composer<_$Database, $ScriptsTable> {
   $$ScriptsTableFilterComposer({
@@ -4745,7 +4738,16 @@ class $$ScriptsTableTableManager
                 lastUpdateTime: lastUpdateTime,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$ScriptsTable, RawScript>(table),
+                  BaseReferences<_$Database, $ScriptsTable, RawScript>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -4766,30 +4768,28 @@ typedef $$ScriptsTableProcessedTableManager =
       RawScript,
       PrefetchHooks Function()
     >;
-typedef $$RulesTableCreateCompanionBuilder =
-    RulesCompanion Function({
-      Value<int> id,
-      required String value,
-      Value<RuleAction?> ruleAction,
-      Value<String?> content,
-      Value<String?> ruleTarget,
-      Value<String?> ruleProvider,
-      Value<String?> subRule,
-      Value<bool> noResolve,
-      Value<bool> src,
-    });
-typedef $$RulesTableUpdateCompanionBuilder =
-    RulesCompanion Function({
-      Value<int> id,
-      Value<String> value,
-      Value<RuleAction?> ruleAction,
-      Value<String?> content,
-      Value<String?> ruleTarget,
-      Value<String?> ruleProvider,
-      Value<String?> subRule,
-      Value<bool> noResolve,
-      Value<bool> src,
-    });
+typedef $$RulesTableCreateCompanionBuilder = RulesCompanion Function({
+  Value<int> id,
+  required String value,
+  Value<RuleAction?> ruleAction,
+  Value<String?> content,
+  Value<String?> ruleTarget,
+  Value<String?> ruleProvider,
+  Value<String?> subRule,
+  Value<bool> noResolve,
+  Value<bool> src,
+});
+typedef $$RulesTableUpdateCompanionBuilder = RulesCompanion Function({
+  Value<int> id,
+  Value<String> value,
+  Value<RuleAction?> ruleAction,
+  Value<String?> content,
+  Value<String?> ruleTarget,
+  Value<String?> ruleProvider,
+  Value<String?> subRule,
+  Value<bool> noResolve,
+  Value<bool> src,
+});
 
 final class $$RulesTableReferences
     extends BaseReferences<_$Database, $RulesTable, RawRule> {
@@ -4798,7 +4798,7 @@ final class $$RulesTableReferences
   static MultiTypedResultKey<$ProfileRuleLinksTable, List<RawProfileRuleLink>>
   _profileRuleLinksRefsTable(_$Database db) => MultiTypedResultKey.fromTable(
     db.profileRuleLinks,
-    aliasName: $_aliasNameGenerator(db.rules.id, db.profileRuleLinks.ruleId),
+    aliasName: 'rules__id__profile_rule_mapping__rule_id',
   );
 
   $$ProfileRuleLinksTableProcessedTableManager get profileRuleLinksRefs {
@@ -5090,8 +5090,10 @@ class $$RulesTableTableManager
               ),
           withReferenceMapper: (p0) => p0
               .map(
-                (e) =>
-                    (e.readTable(table), $$RulesTableReferences(db, table, e)),
+                (e) => (
+                  e.readTable<$RulesTable, RawRule>(table),
+                  $$RulesTableReferences(db, table, e),
+                ),
               )
               .toList(),
           prefetchHooksCallback: ({profileRuleLinksRefs = false}) {
@@ -5174,9 +5176,7 @@ final class $$ProfileRuleLinksTableReferences
   );
 
   static $ProfilesTable _profileIdTable(_$Database db) =>
-      db.profiles.createAlias(
-        $_aliasNameGenerator(db.profileRuleLinks.profileId, db.profiles.id),
-      );
+      db.profiles.createAlias('profile_rule_mapping__profile_id__profiles__id');
 
   $$ProfilesTableProcessedTableManager? get profileId {
     final $_column = $_itemColumn<int>('profile_id');
@@ -5192,9 +5192,8 @@ final class $$ProfileRuleLinksTableReferences
     );
   }
 
-  static $RulesTable _ruleIdTable(_$Database db) => db.rules.createAlias(
-    $_aliasNameGenerator(db.profileRuleLinks.ruleId, db.rules.id),
-  );
+  static $RulesTable _ruleIdTable(_$Database db) =>
+      db.rules.createAlias('profile_rule_mapping__rule_id__rules__id');
 
   $$RulesTableProcessedTableManager get ruleId {
     final $_column = $_itemColumn<int>('rule_id')!;
@@ -5499,7 +5498,9 @@ class $$ProfileRuleLinksTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$ProfileRuleLinksTable, RawProfileRuleLink>(
+                    table,
+                  ),
                   $$ProfileRuleLinksTableReferences(db, table, e),
                 ),
               )
@@ -5525,34 +5526,26 @@ class $$ProfileRuleLinksTableTableManager
                     >
                   >(state) {
                     if (profileId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.profileId,
-                                referencedTable:
-                                    $$ProfileRuleLinksTableReferences
-                                        ._profileIdTable(db),
-                                referencedColumn:
-                                    $$ProfileRuleLinksTableReferences
-                                        ._profileIdTable(db)
-                                        .id,
-                              )
-                              as T;
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.profileId,
+                        referencedTable: $$ProfileRuleLinksTableReferences
+                            ._profileIdTable(db),
+                        referencedColumn: $$ProfileRuleLinksTableReferences
+                            ._profileIdTable(db)
+                            .id,
+                      ) as T;
                     }
                     if (ruleId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.ruleId,
-                                referencedTable:
-                                    $$ProfileRuleLinksTableReferences
-                                        ._ruleIdTable(db),
-                                referencedColumn:
-                                    $$ProfileRuleLinksTableReferences
-                                        ._ruleIdTable(db)
-                                        .id,
-                              )
-                              as T;
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.ruleId,
+                        referencedTable: $$ProfileRuleLinksTableReferences
+                            ._ruleIdTable(db),
+                        referencedColumn: $$ProfileRuleLinksTableReferences
+                            ._ruleIdTable(db)
+                            .id,
+                      ) as T;
                     }
 
                     return state;
@@ -5640,9 +5633,7 @@ final class $$ProxyGroupsTableReferences
   $$ProxyGroupsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $ProfilesTable _profileIdTable(_$Database db) =>
-      db.profiles.createAlias(
-        $_aliasNameGenerator(db.proxyGroups.profileId, db.profiles.id),
-      );
+      db.profiles.createAlias('proxy_groups__profile_id__profiles__id');
 
   $$ProfilesTableProcessedTableManager? get profileId {
     final $_column = $_itemColumn<int>('profile_id');
@@ -6210,7 +6201,7 @@ class $$ProxyGroupsTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$ProxyGroupsTable, RawProxyGroup>(table),
                   $$ProxyGroupsTableReferences(db, table, e),
                 ),
               )
@@ -6236,17 +6227,15 @@ class $$ProxyGroupsTableTableManager
                     >
                   >(state) {
                     if (profileId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.profileId,
-                                referencedTable: $$ProxyGroupsTableReferences
-                                    ._profileIdTable(db),
-                                referencedColumn: $$ProxyGroupsTableReferences
-                                    ._profileIdTable(db)
-                                    .id,
-                              )
-                              as T;
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.profileId,
+                        referencedTable: $$ProxyGroupsTableReferences
+                            ._profileIdTable(db),
+                        referencedColumn: $$ProxyGroupsTableReferences
+                            ._profileIdTable(db)
+                            .id,
+                      ) as T;
                     }
 
                     return state;
@@ -6395,7 +6384,16 @@ class $$IconRecordsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$IconRecordsTable, IconRecord>(table),
+                  BaseReferences<_$Database, $IconRecordsTable, IconRecord>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),

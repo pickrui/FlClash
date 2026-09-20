@@ -26,7 +26,7 @@ void main(List<String> args) async {
           libclangPath: Platform.environment['LIBCLANG_PATH'],
         ),
         if (input.config.code.targetOS == OS.macOS)
-          'MACOSX_DEPLOYMENT_TARGET': '11.0',
+          'MACOSX_DEPLOYMENT_TARGET': '12.0',
       },
     ).run(input: input, output: output);
   });

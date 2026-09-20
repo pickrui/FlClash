@@ -3,8 +3,8 @@ description: A multi-platform proxy client based on ClashMeta, simple and easy t
 publish_to: 'none'
 version: 0.8.97+2026091521
 environment:
-  sdk: '>=3.12.0 <4.0.0'
-  flutter: '>=3.44.0'
+  sdk: '>=3.13.0 <4.0.0'
+  flutter: '>=3.47.0'
 
 dependencies:
   setup:
@@ -16,7 +16,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: any
-  path_provider: ^2.1.5
+  path_provider: ^2.1.6
   path: ^1.9.0
   shared_preferences: ^2.5.3
   window_manager:
@@ -24,77 +24,79 @@ dependencies:
       url: https://github.com/chen08209/window_manager.git
       path: packages/window_manager
       ref: v0.5.1-flclash.3
-  dynamic_color: ^1.8.1
+  dynamic_color: ^2.1.0
   proxy:
     path: plugins/proxy
   rust_api:
     path: plugins/rust_api
   launch_at_startup: ^0.5.1
-  json_annotation: ^4.11.0
-  file_picker: ^11.0.2
-  mobile_scanner: ^7.0.1
+  json_annotation: ^4.12.0
+  file_picker: ^11.0.3
+  mobile_scanner: ^7.4.2
   qr_flutter: ^4.1.0
-  app_links: ^7.0.0
+  app_links: ^7.2.1
   win32_registry: ^2.0.0
   tray:
     path: plugins/tray
   collection: ^1.19.1
-  animations: ^2.1.1
+  animations: ^3.0.0
   package_info_plus: ^9.0.0
   url_launcher: ^6.3.2
   freezed_annotation: ^3.1.0
-  image_picker: ^1.2.0
+  image_picker: ^1.2.3
   ffi: ^2.1.4
   webdav_client: ^1.2.2
-  dio: ^5.8.0+1
+  dio: ^5.11.1
   http: ^1.6.0
   win32: ^5.5.1
-  re_editor: ^0.9.0
+  re_editor: ^0.10.0
   re_highlight: ^0.0.3
-  archive: ^4.0.7
+  archive: ^4.3.0
   emoji_regex: ^0.0.5
   uni_platform: ^0.1.3
   device_info_plus: ^12.2.0
   wifi_ssid:
     path: plugins/wifi_ssid
-  connectivity_plus: 7.0.0
-  screen_retriever: ^0.2.0
+  connectivity_plus: ^7.3.1
+  screen_retriever: ^0.2.2
   defer_pointer: ^0.0.2
-  flutter_riverpod: ^3.0.0
-  riverpod_annotation: ^4.0.2
-  riverpod: ^3.0.0
+  flutter_riverpod: ^3.4.3
+  riverpod_annotation: ^4.0.7
+  riverpod: ^3.4.3
   material_color_utilities: ^0.13.0
-  material_ui: 1.0.1
+  material_ui: ^1.3.0
   material_new_shapes: 1.0.0
   flutter_svg: ^2.1.0
-  flutter_cache_manager: ^3.4.1
+  flutter_cache_manager: ^3.4.5
   crypto: ^3.0.3
   cryptography: ^2.7.0
-  yaml: ^3.1.3
+  yaml: ^3.1.4
   yaml_writer: 2.1.0
   super_sliver_list: ^0.4.1
 
-  drift: ^2.29.0
-  drift_flutter: ^0.2.7
-  sqlite3: ^2.9.4
+  drift: ^2.35.0
+  drift_flutter: ^0.3.1
+  sqlite3: ^3.5.2
   flutter_html: ^3.0.0
-  flutter_secure_storage: ^10.0.0
+  # flutter_html 3.0.0 imports an internal selector removed in html 0.15.7.
+  html: 0.15.6
+  flutter_secure_storage: ^10.3.4
 dev_dependencies:
   flutter_rust_bridge: 2.13.0
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  json_serializable: ^6.7.1
-  build_runner: ^2.7.1
+  json_serializable: ^6.14.1
+  build_runner: ^2.16.1
   args: ^2.4.2
-  freezed: ^3.2.0
-  riverpod_generator: ^4.0.3
-  riverpod_lint: ^3.0.0
+  freezed: ^4.0.1
+  riverpod_generator: ^4.0.9
+  riverpod_lint: ^3.1.9
 
-  drift_dev: ^2.29.0
-  intl_utils: ^2.8.11
-  path_provider_platform_interface: ^2.1.2
-  test: ^1.30.0
+  drift_dev: ^2.35.0
+  intl_utils: ^2.8.16
+  path_provider_platform_interface: ^2.1.3
+  test: ^1.31.1
   mocktail: ^1.0.4
 
 flutter:
