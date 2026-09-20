@@ -1,12 +1,40 @@
 package tun
 
 import (
+	"context"
 	"net/netip"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/metacubex/mihomo/constant"
+	T "github.com/metacubex/sing-tun"
 )
+
+// The stack name crosses three repositories, so build it the way listener/sing_tun does.
+func TestParseOptionsSelectsMipsStack(t *testing.T) {
+	options, err := parseOptions(42, "MIPS", "172.19.0.1/30", "172.19.0.2", 1480)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if options.Stack != constant.TunMips {
+		t.Fatalf("stack = %v, want mips", options.Stack)
+	}
+	stack, err := T.NewStack(strings.ToLower(options.Stack.String()), T.StackOptions{
+		Context: context.Background(),
+		TunOptions: T.Options{
+			MTU:          options.MTU,
+			Inet4Address: options.Inet4Address,
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = stack.Close() })
+	if _, ok := stack.(*T.Mipstack); !ok {
+		t.Fatalf("constructed %T instead of Mipstack", stack)
+	}
+}
 
 func TestParseOptionsPreservesDualStackConfiguration(t *testing.T) {
 	options, err := parseOptions(42, "Mixed", "172.19.0.1/30, fdfe:dcba:9876::1/126", "172.19.0.2, fdfe:dcba:9876::2", 9000)

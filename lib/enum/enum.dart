@@ -109,7 +109,7 @@ enum Network { tcp, udp }
 
 enum ProxiesSortType { none, delay, name }
 
-enum TunStack { gvisor, system, mixed }
+enum TunStack { gvisor, system, mixed, mips }
 
 enum AccessControlMode { acceptSelected, rejectSelected }
 

@@ -1,9 +1,43 @@
 import 'dart:convert';
 
+import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:test/test.dart';
 
 void main() {
+  group('TUN stack configuration', () {
+    test('keeps mixed as the default for existing configurations', () {
+      expect(const Tun().stack, TunStack.mixed);
+      expect(ClashConfig.fromJson({}).tun.stack, TunStack.mixed);
+      expect(
+        ClashConfig.fromJson(jsonDecode('{"tun":{}}')).tun.stack,
+        TunStack.mixed,
+      );
+    });
+
+    for (final stack in TunStack.values) {
+      test(
+        'preserves ${stack.name} and its TUN settings across persistence',
+        () {
+          final source = {
+            'enable': true,
+            'device': 'test-tun',
+            'auto-route': true,
+            'stack': stack.name,
+            'dns-hijack': ['any:53'],
+            'route-address': ['0.0.0.0/0'],
+            'mtu': 1480,
+          };
+          final config = ClashConfig.fromJson({'tun': source});
+          final saved = jsonDecode(jsonEncode(config)) as Map<String, dynamic>;
+          expect(saved['tun'], source);
+          expect(config.tun.stack, stack);
+          expect(ClashConfig.fromJson(saved).tun, config.tun);
+        },
+      );
+    }
+  });
+
   group('DNS fallback query policy', () {
     test('defaults to parallel queries', () {
       expect(const Dns().toJson()['fallback-lazy-query'], false);

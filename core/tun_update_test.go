@@ -5,13 +5,45 @@ import (
 	"testing"
 
 	"github.com/metacubex/mihomo/config"
+	C "github.com/metacubex/mihomo/constant"
 )
 
+func TestTunStackUpdateReachesLiveConfig(t *testing.T) {
+	stubLiveConfig(t)
+
+	for _, test := range []struct {
+		name string
+		want C.TUNStack
+	}{
+		{"gvisor", C.TunGvisor},
+		{"system", C.TunSystem},
+		{"mixed", C.TunMixed},
+		{"mips", C.TunMips},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			raw, err := config.UnmarshalRawConfig([]byte("tun:\n  stack: " + test.name + "\n"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if raw.Tun.Stack != test.want {
+				t.Fatalf("YAML stack = %v, want %v", raw.Tun.Stack, test.want)
+			}
+			var params UpdateParams
+			if err := json.Unmarshal([]byte(`{"tun":{"stack":"`+test.name+`"}}`), &params); err != nil {
+				t.Fatal(err)
+			}
+			if err := updateConfig(&params); err != nil {
+				t.Fatal(err)
+			}
+			if got := currentConfig.General.Tun.Stack; got != test.want {
+				t.Fatalf("live stack = %v, want %v", got, test.want)
+			}
+		})
+	}
+}
+
 func TestTunMTUUpdateReachesLiveConfig(t *testing.T) {
-	previous, running := currentConfig, isRunning
-	currentConfig = &config.Config{General: &config.General{}}
-	isRunning = false
-	t.Cleanup(func() { currentConfig, isRunning = previous, running })
+	stubLiveConfig(t)
 
 	for _, mtu := range []int{1280, 1480, 4064, 9000, 65535, 0, -1, 65536} {
 		currentConfig.General.Tun.MTU = 9000
@@ -40,10 +72,7 @@ func TestTunMTUUpdateReachesLiveConfig(t *testing.T) {
 }
 
 func TestTunPatchPreservesOmittedFields(t *testing.T) {
-	previous, running := currentConfig, isRunning
-	currentConfig = &config.Config{General: &config.General{}}
-	isRunning = false
-	t.Cleanup(func() { currentConfig, isRunning = previous, running })
+	stubLiveConfig(t)
 	currentConfig.General.Tun.MTU = 1480
 	currentConfig.General.Tun.Device = "existing-tun"
 	currentConfig.General.Tun.AutoRoute = true

@@ -21,12 +21,9 @@ import (
 
 func authenticationTestState(t *testing.T) {
 	t.Helper()
-	previous, running := currentConfig, isRunning
 	authenticator, prefixes := authStore.Default.Authenticator(), inbound.SkipAuthPrefixes()
-	currentConfig = &config.Config{General: &config.General{}}
-	isRunning = false
+	stubLiveConfig(t)
 	t.Cleanup(func() {
-		currentConfig, isRunning = previous, running
 		authStore.Default.SetAuthenticator(authenticator)
 		inbound.SetSkipAuthPrefixes(prefixes)
 	})

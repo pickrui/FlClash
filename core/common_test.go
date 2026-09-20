@@ -20,6 +20,14 @@ type testSelectable struct {
 	fallback string
 }
 
+func stubLiveConfig(t *testing.T) {
+	t.Helper()
+	previous, running := currentConfig, isRunning
+	currentConfig = &config.Config{General: &config.General{}}
+	isRunning = false
+	t.Cleanup(func() { currentConfig, isRunning = previous, running })
+}
+
 func TestEncryptedRuntimeConfigFromDisk(t *testing.T) {
 	fixture := os.Getenv("FLCLASH_RUNTIME_CONFIG_FIXTURE")
 	if fixture == "" {
