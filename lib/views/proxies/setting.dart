@@ -257,33 +257,7 @@ class ProxiesSetting extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Consumer(
-            builder: (context, ref, _) {
-              final value = normalizeDelayTestConcurrency(
-                ref.watch(proxiesStyleSettingProvider).concurrencyLimit,
-              );
-              return ListItem<int>.options(
-                title: Text(context.appLocalizations.delayConcurrency),
-                subtitle: Text(
-                  '$value · ${context.appLocalizations.delayConcurrencyDesc}',
-                ),
-                delegate: OptionsDelegate<int>(
-                  title: context.appLocalizations.delayConcurrency,
-                  options: delayTestConcurrencyOptions,
-                  value: value,
-                  textBuilder: (value) => '$value',
-                  onChanged: (value) {
-                    if (value == null) return;
-                    ref
-                        .read(proxiesStyleSettingProvider.notifier)
-                        .update(
-                          (state) => state.copyWith(concurrencyLimit: value),
-                        );
-                  },
-                ),
-              );
-            },
-          ),
+          DelayConcurrencySetting(isAndroid: system.isAndroid),
           ..._buildStyleSetting(context),
           ..._buildSortSetting(context),
           ..._buildLayoutSetting(context),
@@ -307,6 +281,42 @@ class ProxiesSetting extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class DelayConcurrencySetting extends ConsumerWidget {
+  const DelayConcurrencySetting({super.key, required this.isAndroid});
+
+  final bool isAndroid;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final value = ref
+        .watch(proxiesStyleSettingProvider)
+        .delayTestConcurrency(isAndroid: isAndroid);
+    final l = context.appLocalizations;
+    return ListItem<int>.options(
+      title: Text(l.delayConcurrency),
+      subtitle: Text(
+        '$value · ${isAndroid ? l.delayConcurrencyAndroidDesc : l.delayConcurrencyDesc}',
+      ),
+      delegate: OptionsDelegate<int>(
+        title: l.delayConcurrency,
+        options: delayTestConcurrencyOptions,
+        value: value,
+        textBuilder: (value) => '$value',
+        onChanged: (value) {
+          if (value == null) return;
+          ref
+              .read(proxiesStyleSettingProvider.notifier)
+              .update(
+                (state) => isAndroid
+                    ? state.copyWith(androidConcurrencyLimit: value)
+                    : state.copyWith(concurrencyLimit: value),
+              );
+        },
       ),
     );
   }

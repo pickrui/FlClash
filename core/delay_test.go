@@ -2,11 +2,18 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"net"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"sync"
 	"sync/atomic"
+	"syscall"
 	"testing"
 	"time"
 
@@ -137,7 +144,7 @@ func TestHandleAsyncTestDelayPreservesURLForMissingProxy(t *testing.T) {
 		}
 		select {
 		case got := <-result:
-			if got.Name != "missing" || got.Url != wantURL || got.Value != -1 {
+			if got.Name != "missing" || got.Url != wantURL || got.Value != -1 || got.Failure != "missingProxy" {
 				t.Fatalf("missing proxy response = %+v, want missing, %q, -1", got, wantURL)
 			}
 		case <-time.After(time.Second):
@@ -168,7 +175,7 @@ func TestDelayProbeHonorsItsNetworkBudget(t *testing.T) {
 		}, func(delay *Delay) { result <- delay })
 		select {
 		case delay := <-result:
-			if timeout == 30 && delay.Value != -1 {
+			if timeout == 30 && (delay.Value != -1 || delay.Failure != "timeout") {
 				t.Fatalf("short deadline reported success: %+v", delay)
 			}
 			if timeout == 2000 && delay.Value <= 0 {
@@ -541,5 +548,39 @@ func TestDelayProbeSupports150ConcurrentReachableNodes(t *testing.T) {
 		case <-time.After(5 * time.Second):
 			t.Fatal("concurrent probe did not complete")
 		}
+	}
+}
+
+func TestDelayFailureReasonsKeepSensitiveErrorsInsideCore(t *testing.T) {
+	for _, test := range []struct {
+		err  error
+		want string
+	}{
+		{context.DeadlineExceeded, "timeout"},
+		{context.Canceled, "canceled"},
+		{errTunNotReady, "vpnNotReady"},
+		{errProtectRefused, "vpnProtect"},
+		{&net.DNSError{Name: "private-host", Err: "private-error", IsTimeout: true}, "dns"},
+		{&tls.CertificateVerificationError{Err: errors.New("private-error")}, "tls"},
+		{x509.UnknownAuthorityError{}, "tls"},
+		{x509.HostnameError{Host: "private-host"}, "tls"},
+		{&net.OpError{Op: "dial", Err: syscall.ECONNREFUSED}, "connect"},
+		{&net.OpError{Op: "read", Err: errors.New("private-error")}, "transport"},
+		{errors.New("private-error"), "other"},
+	} {
+		reason := delayFailureReason(fmt.Errorf("private-wrapper: %w", test.err))
+		if reason != test.want {
+			t.Fatalf("reason = %q, want %q", reason, test.want)
+		}
+		encoded, err := json.Marshal(Delay{Value: -1, Failure: reason})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if strings.Contains(string(encoded), "private") {
+			t.Fatalf("sensitive error escaped: %s", encoded)
+		}
+	}
+	if delayFailureReason(nil) != "" {
+		t.Fatal("successful probe has a failure reason")
 	}
 }

@@ -227,6 +227,21 @@ abstract class NetworkProps with _$NetworkProps {
 
 @freezed
 abstract class ProxiesStyleProps with _$ProxiesStyleProps {
+  const ProxiesStyleProps._();
+
+  int delayTestConcurrency({required bool isAndroid}) {
+    final configured = normalizeDelayTestConcurrency(concurrencyLimit);
+    if (!isAndroid) return configured;
+    final android = normalizeOptionalDelayTestConcurrency(
+      androidConcurrencyLimit,
+    );
+    if (android != null) return android;
+    // Legacy 50 cannot distinguish the old default from an explicit choice.
+    return configured == defaultDelayTestConcurrency
+        ? defaultAndroidDelayTestConcurrency
+        : configured;
+  }
+
   const factory ProxiesStyleProps({
     @Default(ProxiesType.tab) ProxiesType type,
     @Default(ProxiesSortType.none) ProxiesSortType sortType,
@@ -236,6 +251,8 @@ abstract class ProxiesStyleProps with _$ProxiesStyleProps {
     @Default(defaultDelayTestConcurrency)
     @JsonKey(fromJson: normalizeDelayTestConcurrency)
     int concurrencyLimit,
+    @JsonKey(fromJson: normalizeOptionalDelayTestConcurrency)
+    int? androidConcurrencyLimit,
   }) = _ProxiesStyleProps;
 
   factory ProxiesStyleProps.fromJson(Map<String, Object?>? json) => json == null

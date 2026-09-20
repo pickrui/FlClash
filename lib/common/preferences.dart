@@ -66,18 +66,6 @@ class Preferences {
     await preferences?.setInt('version', version);
   }
 
-  /// Build number of the last update downloaded in the background, so each
-  /// release is fetched once instead of on every launch.
-  Future<int> getLastSilentUpdateBuild() async {
-    final preferences = await _loadSharedPreferences();
-    return preferences?.getInt('last_silent_update_build') ?? 0;
-  }
-
-  Future<void> setLastSilentUpdateBuild(int buildNumber) async {
-    final preferences = await _loadSharedPreferences();
-    await preferences?.setInt('last_silent_update_build', buildNumber);
-  }
-
   /// The Linux package format the user picked when detection came up empty.
   Future<String?> getLinuxPackageFormat() async {
     final preferences = await _loadSharedPreferences();

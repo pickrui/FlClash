@@ -1801,7 +1801,7 @@ $AuthenticationPropsCopyWith<$Res> get authentication {
 /// @nodoc
 mixin _$ProxiesStyleProps {
 
- ProxiesType get type; ProxiesSortType get sortType; ProxiesLayout get layout; ProxiesIconStyle get iconStyle; ProxyCardType get cardType;@JsonKey(fromJson: normalizeDelayTestConcurrency) int get concurrencyLimit;
+ ProxiesType get type; ProxiesSortType get sortType; ProxiesLayout get layout; ProxiesIconStyle get iconStyle; ProxyCardType get cardType;@JsonKey(fromJson: normalizeDelayTestConcurrency) int get concurrencyLimit;@JsonKey(fromJson: normalizeOptionalDelayTestConcurrency) int? get androidConcurrencyLimit;
 /// Create a copy of ProxiesStyleProps
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1814,16 +1814,16 @@ $ProxiesStylePropsCopyWith<ProxiesStyleProps> get copyWith => _$ProxiesStyleProp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProxiesStyleProps&&(identical(other.type, type) || other.type == type)&&(identical(other.sortType, sortType) || other.sortType == sortType)&&(identical(other.layout, layout) || other.layout == layout)&&(identical(other.iconStyle, iconStyle) || other.iconStyle == iconStyle)&&(identical(other.cardType, cardType) || other.cardType == cardType)&&(identical(other.concurrencyLimit, concurrencyLimit) || other.concurrencyLimit == concurrencyLimit));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProxiesStyleProps&&(identical(other.type, type) || other.type == type)&&(identical(other.sortType, sortType) || other.sortType == sortType)&&(identical(other.layout, layout) || other.layout == layout)&&(identical(other.iconStyle, iconStyle) || other.iconStyle == iconStyle)&&(identical(other.cardType, cardType) || other.cardType == cardType)&&(identical(other.concurrencyLimit, concurrencyLimit) || other.concurrencyLimit == concurrencyLimit)&&(identical(other.androidConcurrencyLimit, androidConcurrencyLimit) || other.androidConcurrencyLimit == androidConcurrencyLimit));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,type,sortType,layout,iconStyle,cardType,concurrencyLimit);
+int get hashCode => Object.hash(runtimeType,type,sortType,layout,iconStyle,cardType,concurrencyLimit,androidConcurrencyLimit);
 
 @override
 String toString() {
-  return 'ProxiesStyleProps(type: $type, sortType: $sortType, layout: $layout, iconStyle: $iconStyle, cardType: $cardType, concurrencyLimit: $concurrencyLimit)';
+  return 'ProxiesStyleProps(type: $type, sortType: $sortType, layout: $layout, iconStyle: $iconStyle, cardType: $cardType, concurrencyLimit: $concurrencyLimit, androidConcurrencyLimit: $androidConcurrencyLimit)';
 }
 
 
@@ -1834,7 +1834,7 @@ abstract mixin class $ProxiesStylePropsCopyWith<$Res>  {
   factory $ProxiesStylePropsCopyWith(ProxiesStyleProps value, $Res Function(ProxiesStyleProps) _then) = _$ProxiesStylePropsCopyWithImpl;
 @useResult
 $Res call({
- ProxiesType type, ProxiesSortType sortType, ProxiesLayout layout, ProxiesIconStyle iconStyle, ProxyCardType cardType,@JsonKey(fromJson: normalizeDelayTestConcurrency) int concurrencyLimit
+ ProxiesType type, ProxiesSortType sortType, ProxiesLayout layout, ProxiesIconStyle iconStyle, ProxyCardType cardType,@JsonKey(fromJson: normalizeDelayTestConcurrency) int concurrencyLimit,@JsonKey(fromJson: normalizeOptionalDelayTestConcurrency) int? androidConcurrencyLimit
 });
 
 
@@ -1851,7 +1851,7 @@ class _$ProxiesStylePropsCopyWithImpl<$Res>
 
 /// Create a copy of ProxiesStyleProps
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? type = null,Object? sortType = null,Object? layout = null,Object? iconStyle = null,Object? cardType = null,Object? concurrencyLimit = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? type = null,Object? sortType = null,Object? layout = null,Object? iconStyle = null,Object? cardType = null,Object? concurrencyLimit = null,Object? androidConcurrencyLimit = freezed,}) {
   return _then(_self.copyWith(
 type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as ProxiesType,sortType: null == sortType ? _self.sortType : sortType // ignore: cast_nullable_to_non_nullable
@@ -1859,7 +1859,8 @@ as ProxiesSortType,layout: null == layout ? _self.layout : layout // ignore: cas
 as ProxiesLayout,iconStyle: null == iconStyle ? _self.iconStyle : iconStyle // ignore: cast_nullable_to_non_nullable
 as ProxiesIconStyle,cardType: null == cardType ? _self.cardType : cardType // ignore: cast_nullable_to_non_nullable
 as ProxyCardType,concurrencyLimit: null == concurrencyLimit ? _self.concurrencyLimit : concurrencyLimit // ignore: cast_nullable_to_non_nullable
-as int,
+as int,androidConcurrencyLimit: freezed == androidConcurrencyLimit ? _self.androidConcurrencyLimit : androidConcurrencyLimit // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 
@@ -1944,10 +1945,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ProxiesType type,  ProxiesSortType sortType,  ProxiesLayout layout,  ProxiesIconStyle iconStyle,  ProxyCardType cardType, @JsonKey(fromJson: normalizeDelayTestConcurrency)  int concurrencyLimit)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ProxiesType type,  ProxiesSortType sortType,  ProxiesLayout layout,  ProxiesIconStyle iconStyle,  ProxyCardType cardType, @JsonKey(fromJson: normalizeDelayTestConcurrency)  int concurrencyLimit, @JsonKey(fromJson: normalizeOptionalDelayTestConcurrency)  int? androidConcurrencyLimit)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ProxiesStyleProps() when $default != null:
-return $default(_that.type,_that.sortType,_that.layout,_that.iconStyle,_that.cardType,_that.concurrencyLimit);case _:
+return $default(_that.type,_that.sortType,_that.layout,_that.iconStyle,_that.cardType,_that.concurrencyLimit,_that.androidConcurrencyLimit);case _:
   return orElse();
 
 }
@@ -1965,10 +1966,10 @@ return $default(_that.type,_that.sortType,_that.layout,_that.iconStyle,_that.car
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ProxiesType type,  ProxiesSortType sortType,  ProxiesLayout layout,  ProxiesIconStyle iconStyle,  ProxyCardType cardType, @JsonKey(fromJson: normalizeDelayTestConcurrency)  int concurrencyLimit)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ProxiesType type,  ProxiesSortType sortType,  ProxiesLayout layout,  ProxiesIconStyle iconStyle,  ProxyCardType cardType, @JsonKey(fromJson: normalizeDelayTestConcurrency)  int concurrencyLimit, @JsonKey(fromJson: normalizeOptionalDelayTestConcurrency)  int? androidConcurrencyLimit)  $default,) {final _that = this;
 switch (_that) {
 case _ProxiesStyleProps():
-return $default(_that.type,_that.sortType,_that.layout,_that.iconStyle,_that.cardType,_that.concurrencyLimit);case _:
+return $default(_that.type,_that.sortType,_that.layout,_that.iconStyle,_that.cardType,_that.concurrencyLimit,_that.androidConcurrencyLimit);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1985,10 +1986,10 @@ return $default(_that.type,_that.sortType,_that.layout,_that.iconStyle,_that.car
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ProxiesType type,  ProxiesSortType sortType,  ProxiesLayout layout,  ProxiesIconStyle iconStyle,  ProxyCardType cardType, @JsonKey(fromJson: normalizeDelayTestConcurrency)  int concurrencyLimit)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ProxiesType type,  ProxiesSortType sortType,  ProxiesLayout layout,  ProxiesIconStyle iconStyle,  ProxyCardType cardType, @JsonKey(fromJson: normalizeDelayTestConcurrency)  int concurrencyLimit, @JsonKey(fromJson: normalizeOptionalDelayTestConcurrency)  int? androidConcurrencyLimit)?  $default,) {final _that = this;
 switch (_that) {
 case _ProxiesStyleProps() when $default != null:
-return $default(_that.type,_that.sortType,_that.layout,_that.iconStyle,_that.cardType,_that.concurrencyLimit);case _:
+return $default(_that.type,_that.sortType,_that.layout,_that.iconStyle,_that.cardType,_that.concurrencyLimit,_that.androidConcurrencyLimit);case _:
   return null;
 
 }
@@ -1999,8 +2000,8 @@ return $default(_that.type,_that.sortType,_that.layout,_that.iconStyle,_that.car
 /// @nodoc
 @JsonSerializable()
 
-class _ProxiesStyleProps implements ProxiesStyleProps {
-  const _ProxiesStyleProps({this.type = ProxiesType.tab, this.sortType = ProxiesSortType.none, this.layout = ProxiesLayout.standard, this.iconStyle = ProxiesIconStyle.standard, this.cardType = ProxyCardType.expand, @JsonKey(fromJson: normalizeDelayTestConcurrency) this.concurrencyLimit = defaultDelayTestConcurrency});
+class _ProxiesStyleProps extends ProxiesStyleProps {
+  const _ProxiesStyleProps({this.type = ProxiesType.tab, this.sortType = ProxiesSortType.none, this.layout = ProxiesLayout.standard, this.iconStyle = ProxiesIconStyle.standard, this.cardType = ProxyCardType.expand, @JsonKey(fromJson: normalizeDelayTestConcurrency) this.concurrencyLimit = defaultDelayTestConcurrency, @JsonKey(fromJson: normalizeOptionalDelayTestConcurrency) this.androidConcurrencyLimit}): super._();
   factory _ProxiesStyleProps.fromJson(Map<String, dynamic> json) => _$ProxiesStylePropsFromJson(json);
 
 @override@JsonKey() final  ProxiesType type;
@@ -2009,6 +2010,7 @@ class _ProxiesStyleProps implements ProxiesStyleProps {
 @override@JsonKey() final  ProxiesIconStyle iconStyle;
 @override@JsonKey() final  ProxyCardType cardType;
 @override@JsonKey(fromJson: normalizeDelayTestConcurrency) final  int concurrencyLimit;
+@override@JsonKey(fromJson: normalizeOptionalDelayTestConcurrency) final  int? androidConcurrencyLimit;
 
 /// Create a copy of ProxiesStyleProps
 /// with the given fields replaced by the non-null parameter values.
@@ -2023,16 +2025,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProxiesStyleProps&&(identical(other.type, type) || other.type == type)&&(identical(other.sortType, sortType) || other.sortType == sortType)&&(identical(other.layout, layout) || other.layout == layout)&&(identical(other.iconStyle, iconStyle) || other.iconStyle == iconStyle)&&(identical(other.cardType, cardType) || other.cardType == cardType)&&(identical(other.concurrencyLimit, concurrencyLimit) || other.concurrencyLimit == concurrencyLimit));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProxiesStyleProps&&(identical(other.type, type) || other.type == type)&&(identical(other.sortType, sortType) || other.sortType == sortType)&&(identical(other.layout, layout) || other.layout == layout)&&(identical(other.iconStyle, iconStyle) || other.iconStyle == iconStyle)&&(identical(other.cardType, cardType) || other.cardType == cardType)&&(identical(other.concurrencyLimit, concurrencyLimit) || other.concurrencyLimit == concurrencyLimit)&&(identical(other.androidConcurrencyLimit, androidConcurrencyLimit) || other.androidConcurrencyLimit == androidConcurrencyLimit));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,type,sortType,layout,iconStyle,cardType,concurrencyLimit);
+int get hashCode => Object.hash(runtimeType,type,sortType,layout,iconStyle,cardType,concurrencyLimit,androidConcurrencyLimit);
 
 @override
 String toString() {
-  return 'ProxiesStyleProps(type: $type, sortType: $sortType, layout: $layout, iconStyle: $iconStyle, cardType: $cardType, concurrencyLimit: $concurrencyLimit)';
+  return 'ProxiesStyleProps(type: $type, sortType: $sortType, layout: $layout, iconStyle: $iconStyle, cardType: $cardType, concurrencyLimit: $concurrencyLimit, androidConcurrencyLimit: $androidConcurrencyLimit)';
 }
 
 
@@ -2043,7 +2045,7 @@ abstract mixin class _$ProxiesStylePropsCopyWith<$Res> implements $ProxiesStyleP
   factory _$ProxiesStylePropsCopyWith(_ProxiesStyleProps value, $Res Function(_ProxiesStyleProps) _then) = __$ProxiesStylePropsCopyWithImpl;
 @override @useResult
 $Res call({
- ProxiesType type, ProxiesSortType sortType, ProxiesLayout layout, ProxiesIconStyle iconStyle, ProxyCardType cardType,@JsonKey(fromJson: normalizeDelayTestConcurrency) int concurrencyLimit
+ ProxiesType type, ProxiesSortType sortType, ProxiesLayout layout, ProxiesIconStyle iconStyle, ProxyCardType cardType,@JsonKey(fromJson: normalizeDelayTestConcurrency) int concurrencyLimit,@JsonKey(fromJson: normalizeOptionalDelayTestConcurrency) int? androidConcurrencyLimit
 });
 
 
@@ -2060,7 +2062,7 @@ class __$ProxiesStylePropsCopyWithImpl<$Res>
 
 /// Create a copy of ProxiesStyleProps
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? type = null,Object? sortType = null,Object? layout = null,Object? iconStyle = null,Object? cardType = null,Object? concurrencyLimit = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? type = null,Object? sortType = null,Object? layout = null,Object? iconStyle = null,Object? cardType = null,Object? concurrencyLimit = null,Object? androidConcurrencyLimit = freezed,}) {
   return _then(_ProxiesStyleProps(
 type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as ProxiesType,sortType: null == sortType ? _self.sortType : sortType // ignore: cast_nullable_to_non_nullable
@@ -2068,7 +2070,8 @@ as ProxiesSortType,layout: null == layout ? _self.layout : layout // ignore: cas
 as ProxiesLayout,iconStyle: null == iconStyle ? _self.iconStyle : iconStyle // ignore: cast_nullable_to_non_nullable
 as ProxiesIconStyle,cardType: null == cardType ? _self.cardType : cardType // ignore: cast_nullable_to_non_nullable
 as ProxyCardType,concurrencyLimit: null == concurrencyLimit ? _self.concurrencyLimit : concurrencyLimit // ignore: cast_nullable_to_non_nullable
-as int,
+as int,androidConcurrencyLimit: freezed == androidConcurrencyLimit ? _self.androidConcurrencyLimit : androidConcurrencyLimit // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 

@@ -9,11 +9,52 @@ final appUpdateDownloadProvider = Provider<AppUpdateDownloadTask>((ref) {
   return task;
 });
 
-/// A release an automatic check found, reported while its download runs. It
-/// also holds a release an earlier launch already fetched, which this one
-/// downloads again only if the user asks.
-final appUpdateNoticeProvider = Provider<ValueNotifier<AppUpdateInfo?>>((ref) {
-  final notice = ValueNotifier<AppUpdateInfo?>(null);
+final appUpdateNoticeProvider = Provider<AppUpdateNotice>((ref) {
+  final notice = AppUpdateNotice();
   ref.onDispose(notice.dispose);
   return notice;
 });
+
+class AppUpdateCheck {
+  AppUpdateCheck({required this.checkForUpdates});
+
+  final Future<void> Function(bool isUser) checkForUpdates;
+  Future<void>? _inFlight;
+  bool _forUser = false;
+
+  Future<void> run({bool isUser = false}) async {
+    while (_inFlight != null) {
+      final inFlight = _inFlight!;
+      if (!isUser || _forUser) return inFlight;
+      await inFlight;
+    }
+    _forUser = isUser;
+    final run = _inFlight = Future<void>.sync(() => checkForUpdates(isUser));
+    try {
+      await run;
+    } finally {
+      if (identical(_inFlight, run)) _inFlight = null;
+    }
+  }
+}
+
+class AppUpdateNotice extends ValueNotifier<AppUpdateInfo?> {
+  AppUpdateNotice() : super(null);
+
+  int? _declinedBuildNumber;
+  int? get declinedBuildNumber => _declinedBuildNumber;
+
+  void decline(int buildNumber) {
+    if (_declinedBuildNumber == null || buildNumber > _declinedBuildNumber!) {
+      _declinedBuildNumber = buildNumber;
+    }
+    if (value != null && value!.remoteBuildNumber <= _declinedBuildNumber!) {
+      value = null;
+    }
+  }
+
+  void dismiss() {
+    final info = value;
+    if (info != null) decline(info.remoteBuildNumber);
+  }
+}

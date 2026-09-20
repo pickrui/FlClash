@@ -124,10 +124,28 @@ abstract class InvokeMessage with _$InvokeMessage {
       _$InvokeMessageFromJson(json);
 }
 
+enum DelayFailure {
+  timeout,
+  dns,
+  tls,
+  connect,
+  transport,
+  vpnNotReady,
+  vpnProtect,
+  queueTimeout,
+  missingProxy,
+  canceled,
+  other,
+}
+
 @freezed
 abstract class Delay with _$Delay {
-  const factory Delay({required String name, required String url, int? value}) =
-      _Delay;
+  const factory Delay({
+    required String name,
+    required String url,
+    int? value,
+    @JsonKey(unknownEnumValue: DelayFailure.other) DelayFailure? failure,
+  }) = _Delay;
 
   factory Delay.fromJson(Map<String, Object?> json) => _$DelayFromJson(json);
 }

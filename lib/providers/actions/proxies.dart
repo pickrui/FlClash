@@ -345,6 +345,10 @@ extension ProxiesControllerExt on AppController {
     int generation,
   ) async {
     final completed = <(String, String), int?>{};
+    final failures = <(String, String), String>{};
+    final concurrency = _ref
+        .read(proxiesStyleSettingProvider)
+        .delayTestConcurrency(isAndroid: system.isAndroid);
     setDelays(
       targets.map(
         (target) => Delay(url: target.url, name: target.name, value: 0),
@@ -353,9 +357,7 @@ extension ProxiesControllerExt on AppController {
     );
     await runDelayTestBatch(
       targets: targets,
-      concurrency: normalizeDelayTestConcurrency(
-        _ref.read(proxiesStyleSettingProvider).concurrencyLimit,
-      ),
+      concurrency: concurrency,
       probe: (target) => coreController.getDelay(
         target.url,
         target.name,
@@ -364,10 +366,28 @@ extension ProxiesControllerExt on AppController {
       ),
       isCurrent: () => isCurrentDelayGeneration(generation),
       onResult: (delay) {
-        completed[(delay.name, delay.url)] = delay.value;
+        final key = (delay.name, delay.url);
+        completed[key] = delay.value;
+        if (delay.value == null || delay.value! < 0) {
+          failures[key] = delay.value == null
+              ? 'coreUnavailable'
+              : (delay.failure ?? DelayFailure.other).name;
+        } else {
+          failures.remove(key);
+        }
         setDelay(delay, generation: generation);
       },
     );
+    if (isCurrentDelayGeneration(generation)) {
+      final counts = <String, int>{};
+      for (final reason in failures.values) {
+        counts.update(reason, (count) => count + 1, ifAbsent: () => 1);
+      }
+      commonPrint.log(
+        'delay test: targets=${targets.length}, concurrency=$concurrency, '
+        'failures=$counts',
+      );
+    }
     return completed;
   }
 

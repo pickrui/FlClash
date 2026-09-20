@@ -582,10 +582,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "delayConcurrency": MessageLookupByLibrary.simpleMessage(
       "Параллельные проверки в группе",
     ),
+    "delayConcurrencyAndroidDesc": MessageLookupByLibrary.simpleMessage(
+      "По умолчанию 16 на Android. Уменьшите при перегрузке сети; действует со следующей групповой проверки",
+    ),
     "delayConcurrencyDesc": MessageLookupByLibrary.simpleMessage(
       "По умолчанию 50. Уменьшите при перегрузке сети; действует со следующей групповой проверки",
     ),
     "delayTest": MessageLookupByLibrary.simpleMessage("Тест задержки"),
+    "delayTestFailed": MessageLookupByLibrary.simpleMessage("Ошибка проверки"),
     "delete": MessageLookupByLibrary.simpleMessage("Удалить"),
     "deleteMultipTip": m13,
     "deleteTip": m14,

@@ -884,5 +884,7 @@
   "excludeNetworksDesc": "匹配 Wi-Fi 或以太网的 IPv4 地址、网段或网关时暂停，离开后恢复；用逗号分隔，例如 192.168.1.0/24,gateway:192.168.1.1",
   "excludeNetworksInvalid": "最多 16 条规则，请输入有效的 IPv4、网段或 gateway:地址",
   "delayConcurrency": "批量测速并发数",
-  "delayConcurrencyDesc": "默认 50，网络拥堵时可降低；下一轮批量测速生效"
+  "delayConcurrencyDesc": "默认 50，网络拥堵时可降低；下一轮批量测速生效",
+  "delayConcurrencyAndroidDesc": "Android 默认 16，网络拥堵时可降低；下一轮批量测速生效",
+  "delayTestFailed": "测试失败"
 }

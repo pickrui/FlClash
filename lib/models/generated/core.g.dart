@@ -226,12 +226,32 @@ _Delay _$DelayFromJson(Map<String, dynamic> json) => _Delay(
   name: json['name'] as String,
   url: json['url'] as String,
   value: (json['value'] as num?)?.toInt(),
+  failure: $enumDecodeNullable(
+    _$DelayFailureEnumMap,
+    json['failure'],
+    unknownValue: DelayFailure.other,
+  ),
 );
 
 Map<String, dynamic> _$DelayToJson(_Delay instance) => <String, dynamic>{
   'name': instance.name,
   'url': instance.url,
   'value': instance.value,
+  'failure': _$DelayFailureEnumMap[instance.failure],
+};
+
+const _$DelayFailureEnumMap = {
+  DelayFailure.timeout: 'timeout',
+  DelayFailure.dns: 'dns',
+  DelayFailure.tls: 'tls',
+  DelayFailure.connect: 'connect',
+  DelayFailure.transport: 'transport',
+  DelayFailure.vpnNotReady: 'vpnNotReady',
+  DelayFailure.vpnProtect: 'vpnProtect',
+  DelayFailure.queueTimeout: 'queueTimeout',
+  DelayFailure.missingProxy: 'missingProxy',
+  DelayFailure.canceled: 'canceled',
+  DelayFailure.other: 'other',
 };
 
 _Now _$NowFromJson(Map<String, dynamic> json) =>

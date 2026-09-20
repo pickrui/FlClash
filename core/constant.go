@@ -149,9 +149,10 @@ type CoreMethod string
 type MessageType string
 
 type Delay struct {
-	Url   string `json:"url"`
-	Name  string `json:"name"`
-	Value int32  `json:"value"`
+	Url     string `json:"url"`
+	Name    string `json:"name"`
+	Value   int32  `json:"value"`
+	Failure string `json:"failure,omitempty"`
 }
 
 type GeoUpdateStatus struct {

@@ -2,6 +2,10 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
+	"errors"
+	"net"
 	"sync"
 	"time"
 )
@@ -15,6 +19,45 @@ func delayTestTimeout(milliseconds int64) time.Duration {
 		return defaultDelayTestTimeout
 	}
 	return time.Duration(milliseconds) * time.Millisecond
+}
+
+func delayFailureReason(err error) string {
+	if err == nil {
+		return ""
+	}
+	switch {
+	case errors.Is(err, context.Canceled):
+		return "canceled"
+	case errors.Is(err, errTunNotReady):
+		return "vpnNotReady"
+	case errors.Is(err, errProtectRefused):
+		return "vpnProtect"
+	}
+	var dnsError *net.DNSError
+	if errors.As(err, &dnsError) {
+		return "dns"
+	}
+	var certificateError *tls.CertificateVerificationError
+	var unknownAuthority x509.UnknownAuthorityError
+	var invalidCertificate x509.CertificateInvalidError
+	var hostnameError x509.HostnameError
+	var recordError tls.RecordHeaderError
+	if errors.As(err, &certificateError) || errors.As(err, &unknownAuthority) ||
+		errors.As(err, &invalidCertificate) || errors.As(err, &hostnameError) || errors.As(err, &recordError) {
+		return "tls"
+	}
+	var networkError net.Error
+	if errors.Is(err, context.DeadlineExceeded) || (errors.As(err, &networkError) && networkError.Timeout()) {
+		return "timeout"
+	}
+	var operationError *net.OpError
+	if errors.As(err, &operationError) {
+		if operationError.Op == "dial" {
+			return "connect"
+		}
+		return "transport"
+	}
+	return "other"
 }
 
 type delayTestTarget struct {

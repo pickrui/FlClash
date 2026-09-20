@@ -10,12 +10,51 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/proxies/card.dart';
 import 'package:fl_clash/views/proxies/list.dart';
 import 'package:fl_clash/views/proxies/tab.dart';
+import 'package:fl_clash/views/proxies/setting.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  for (final isAndroid in [true, false]) {
+    testWidgets(
+      'concurrency setting shows and saves the effective platform value: Android=$isAndroid',
+      (tester) async {
+        final container = ProviderContainer(
+          overrides: [
+            viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 600)),
+          ],
+        );
+        addTearDown(container.dispose);
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: _TestApp(
+              child: DelayConcurrencySetting(isAndroid: isAndroid),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          find.textContaining(
+            isAndroid ? '16 · Default: 16' : '50 · Default: 50',
+          ),
+          findsOneWidget,
+        );
+        await tester.tap(find.text('Concurrent batch latency tests'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('32').last);
+        await tester.pumpAndSettle();
+        final saved = container.read(proxiesStyleSettingProvider);
+        expect(saved.delayTestConcurrency(isAndroid: isAndroid), 32);
+        expect(saved.concurrencyLimit, isAndroid ? 50 : 32);
+        expect(saved.androidConcurrencyLimit, isAndroid ? 32 : null);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   testWidgets(
     'node cards distinguish pending, interrupted, failed and measured results',
     (tester) async {
@@ -55,7 +94,7 @@ void main() {
       );
       await tester.pump(const Duration(milliseconds: 300));
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      expect(find.text('Timeout'), findsNothing);
+      expect(find.text('Failed'), findsNothing);
 
       for (final value in <int?>[null, -1, 6000]) {
         delays.setDelay(
@@ -65,7 +104,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.byType(CircularProgressIndicator), findsNothing);
         expect(
-          find.text('Timeout'),
+          find.text('Failed'),
           value == -1 ? findsOneWidget : findsNothing,
         );
         expect(
@@ -251,6 +290,7 @@ class _TestApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: globalState.navigatorKey,
       locale: const Locale('en'),
       localizationsDelegates: const [
         AppLocalizations.delegate,

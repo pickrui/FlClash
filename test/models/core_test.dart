@@ -6,6 +6,32 @@ import 'package:fl_clash/models/models.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test(
+    'delay failure categories round-trip and preserve older core responses',
+    () {
+      final old = Delay.fromJson({'name': 'node', 'url': 'url', 'value': -1});
+      expect(old.failure, isNull);
+      for (final failure in DelayFailure.values) {
+        final delay = Delay(
+          name: 'node',
+          url: 'url',
+          value: -1,
+          failure: failure,
+        );
+        expect(Delay.fromJson(jsonDecode(jsonEncode(delay))), delay);
+      }
+      expect(
+        Delay.fromJson({
+          'name': 'node',
+          'url': 'url',
+          'value': -1,
+          'failure': 'future-category',
+        }).failure,
+        DelayFailure.other,
+      );
+    },
+  );
+
   test('normalizeCoreRawConfig normalizes tunnel JSON field names', () {
     final normalized = normalizeCoreRawConfig({
       'rule': ['MATCH,DIRECT'],

@@ -261,6 +261,9 @@ _ProxiesStyleProps _$ProxiesStylePropsFromJson(Map<String, dynamic> json) =>
           : normalizeDelayTestConcurrency(
               (json['concurrencyLimit'] as num?)?.toInt(),
             ),
+      androidConcurrencyLimit: normalizeOptionalDelayTestConcurrency(
+        (json['androidConcurrencyLimit'] as num?)?.toInt(),
+      ),
     );
 
 Map<String, dynamic> _$ProxiesStylePropsToJson(_ProxiesStyleProps instance) =>
@@ -271,6 +274,7 @@ Map<String, dynamic> _$ProxiesStylePropsToJson(_ProxiesStyleProps instance) =>
       'iconStyle': _$ProxiesIconStyleEnumMap[instance.iconStyle]!,
       'cardType': _$ProxyCardTypeEnumMap[instance.cardType]!,
       'concurrencyLimit': instance.concurrencyLimit,
+      'androidConcurrencyLimit': instance.androidConcurrencyLimit,
     };
 
 const _$ProxiesTypeEnumMap = {ProxiesType.tab: 'tab', ProxiesType.list: 'list'};

@@ -132,9 +132,7 @@ class AppUpdateReadyNotice extends ConsumerWidget {
   }
 }
 
-/// Reports what an automatic check found. The installer is already on its way,
-/// so this only names the release; the ready notice takes over once it lands.
-/// A release downloaded by an earlier launch is offered here instead.
+/// Hidden windows retain the offer without starting a download.
 class AppUpdateAvailableNotice extends ConsumerWidget {
   const AppUpdateAvailableNotice({super.key});
   @override
@@ -166,10 +164,7 @@ class AppUpdateAvailableNotice extends ConsumerWidget {
                     onPressed: () => appController.acceptUpdateNotice(),
                     child: Text(l.download),
                   ),
-                TextButton(
-                  onPressed: () => notice.value = null,
-                  child: Text(l.close),
-                ),
+                TextButton(onPressed: notice.dismiss, child: Text(l.close)),
               ],
             );
           },

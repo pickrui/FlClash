@@ -31,7 +31,6 @@ extension InitControllerExt on AppController {
       return false;
     };
     updateTray();
-    unawaited(checkUpdate());
     await autoLaunch?.updateStatus(_ref.read(appSettingProvider).autoLaunch);
     final silentLaunch = shouldLaunchSilently(
       enabled: _ref.read(appSettingProvider).silentLaunch,
@@ -47,6 +46,7 @@ extension InitControllerExt on AppController {
     } else {
       await window?.hide();
     }
+    unawaited(checkUpdate());
     await _handleFailedPreference();
     final bootAttempt = await startupRecovery.begin(
       profileId: _ref.read(currentProfileIdProvider),
@@ -136,34 +136,25 @@ extension InitControllerExt on AppController {
     }
   }
 
-  Future<void> checkUpdate({bool isUser = false}) async {
-    final inFlight = _checkUpdateFuture;
-    if (inFlight != null) {
-      // A manual check must answer the user: let the background check finish
-      // and run again, unless a manual check is already showing its result.
-      if (!isUser || _checkUpdateForUser) return inFlight;
-      await inFlight;
-    }
-    final run = _checkUpdateFuture = _checkUpdate(isUser: isUser);
-    _checkUpdateForUser = isUser;
-    try {
-      await run;
-    } finally {
-      if (identical(_checkUpdateFuture, run)) _checkUpdateFuture = null;
-    }
+  Future<void> checkUpdate({bool isUser = false}) =>
+      _appUpdateCheck.run(isUser: isUser);
+
+  Future<bool> _reuseAppUpdateDownload({required bool isUser}) async {
+    final preparing = _startUpdateDownloadFuture;
+    final task = _ref.read(appUpdateDownloadProvider);
+    if (preparing == null && !task.hasDownload) return false;
+    if (isUser) await (preparing ?? _showAppUpdateDownload(task));
+    return true;
   }
 
   Future<void> _checkUpdate({required bool isUser}) async {
     // Every trigger waits for the one-time cleanup before starting a download.
     await (_updateDownloadsSweep ??= _sweepUpdateDownloads());
-    final task = _ref.read(appUpdateDownloadProvider);
-    if (task.hasDownload) {
-      if (isUser) await _showAppUpdateDownload(task);
-      return;
-    }
+    if (await _reuseAppUpdateDownload(isUser: isUser)) return;
+    final notice = _ref.read(appUpdateNoticeProvider);
     AppUpdateInfo? updateInfo;
     try {
-      updateInfo = await request.checkForUpdate(includeReleaseNotes: isUser);
+      updateInfo = await request.checkForUpdate();
     } catch (error) {
       commonPrint.log(
         'check update failed: $error',
@@ -178,6 +169,7 @@ extension InitControllerExt on AppController {
       }
       return;
     }
+    if (await _reuseAppUpdateDownload(isUser: isUser)) return;
     if (updateInfo == null) {
       if (isUser) {
         await globalState.showMessage(
@@ -188,84 +180,82 @@ extension InitControllerExt on AppController {
       }
       return;
     }
-    if (!isUser) {
-      // Name the release the automatic check found. The transfer starts on its
-      // own, so the notice reports it instead of asking for a decision.
+    final offer = resolveAppUpdateOffer(
+      isUser: isUser,
+      isUiVisible: await canPromptForAppUpdate(
+        isUiVisible: globalState.isUiVisible,
+        isWindowVisible: window == null ? null : () => window!.isVisible,
+      ),
+      remoteBuildNumber: updateInfo.remoteBuildNumber,
+      declinedBuildNumber: notice.declinedBuildNumber,
+    );
+    if (await _reuseAppUpdateDownload(isUser: isUser)) return;
+    if (offer == AppUpdateOffer.ignore) return;
+    if (offer == AppUpdateOffer.notice) {
+      // A hidden window is never brought forward; the notice holds the offer.
       _ref.read(appUpdateNoticeProvider).value = updateInfo;
-      if (updateInfo.remoteBuildNumber <=
-          await preferences.getLastSilentUpdateBuild()) {
-        // Already downloaded once and not installed. The notice offers it
-        // again rather than fetching the same installer on every launch.
-        return;
-      }
-      await _startAppUpdateDownload(
-        foreground: false,
-        remoteBuildNumber: updateInfo.remoteBuildNumber,
-      );
       return;
     }
     final res = await promptForAppUpdate(
-      showWindow: window?.show,
+      showWindow: isUser ? window?.show : null,
       prompt: () => globalState.showMessage(
         title: appLocalizations.discovery,
         message: TextSpan(
           text: updateInfo!.releaseNotes ?? appLocalizations.noInfo,
         ),
+        confirmText: appLocalizations.update,
       ),
     );
     if (res != true) {
+      notice.decline(updateInfo.remoteBuildNumber);
       return;
     }
-    await _startAppUpdateDownload(
-      foreground: true,
-      remoteBuildNumber: updateInfo.remoteBuildNumber,
-    );
+    _ref.read(appUpdateNoticeProvider).value = updateInfo;
+    await _startAppUpdateDownload();
   }
 
   /// Fetches a release the notice reported but did not download itself.
   Future<void> acceptUpdateNotice() async {
-    final updateInfo = _ref.read(appUpdateNoticeProvider).value;
-    if (updateInfo == null) return;
-    await _startAppUpdateDownload(
-      foreground: true,
-      remoteBuildNumber: updateInfo.remoteBuildNumber,
-    );
+    if (_ref.read(appUpdateNoticeProvider).value == null) return;
+    await _startAppUpdateDownload();
   }
 
-  Future<void> _startAppUpdateDownload({
-    required bool foreground,
-    required int remoteBuildNumber,
-  }) async {
+  Future<void> _startAppUpdateDownload() async {
+    final pending = _startUpdateDownloadFuture;
+    if (pending != null) return pending;
+    final run = _startUpdateDownloadFuture = _prepareAppUpdateDownload();
+    try {
+      await run;
+    } finally {
+      if (identical(_startUpdateDownloadFuture, run)) {
+        _startUpdateDownloadFuture = null;
+      }
+    }
+  }
+
+  Future<void> _prepareAppUpdateDownload() async {
     // Download errors live in the task state (notice / dialog / About); only
     // choosing a package, opening a browser or the dialog can throw here.
     await safeRun<void>(
       () async {
         var linuxFormat = LinuxPackageFormat.deb;
         if (system.isLinux) {
-          final format = await _resolveLinuxPackageFormat(
-            foreground: foreground,
-          );
-          // Only the user can settle this, and only with the window in front.
-          // The notice keeps offering the release until they answer.
+          final format = await _resolveLinuxPackageFormat();
           if (format == null) return;
           linuxFormat = format;
         }
         await _downloadAppUpdate(
           getAppUpdateDownloadUrl(Abi.current(), linuxFormat: linuxFormat),
-          foreground: foreground,
-          remoteBuildNumber: remoteBuildNumber,
         );
       },
       title: appLocalizations.checkUpdate,
-      silence: !foreground,
+      silence: false,
     );
   }
 
   /// Picks the package to download: a stored answer, then detection, then the
   /// user. Returns null while the question is still open.
-  Future<LinuxPackageFormat?> _resolveLinuxPackageFormat({
-    required bool foreground,
-  }) async {
+  Future<LinuxPackageFormat?> _resolveLinuxPackageFormat() async {
     final formats = linuxPackageFormatsFor(Abi.current());
     // An ABI that publishes no Linux package at all (32-bit ARM, riscv) keeps
     // falling through to the download page rather than asking about formats.
@@ -277,7 +267,6 @@ extension InitControllerExt on AppController {
     if (stored != null && formats.contains(stored)) return stored;
     final detected = await detectLinuxPackageFormat();
     if (detected != null && formats.contains(detected)) return detected;
-    if (!foreground) return null;
     await window?.show();
     final picked = await globalState.showCommonDialog<LinuxPackageFormat>(
       child: LinuxPackageFormatDialog(formats: formats),
@@ -286,64 +275,47 @@ extension InitControllerExt on AppController {
     return picked;
   }
 
-  Future<void> _downloadAppUpdate(
-    String? downloadUrl, {
-    required bool foreground,
-    required int remoteBuildNumber,
-  }) async {
+  Future<void> _downloadAppUpdate(String? downloadUrl) async {
     if (downloadUrl == null) {
-      if (foreground) await _openUpdateDownloadUrl('https://dl.dler.io');
+      await _openUpdateDownloadUrl('https://dl.dler.io');
       return;
     }
     final task = _ref.read(appUpdateDownloadProvider);
-    if (!foreground) {
-      // Let startup finish so the transfer uses the proxy once it is up,
-      // instead of deciding the route before the core has started.
-      await _waitForStartup();
-    }
     final directory = await appPath.tempDir.future;
     unawaited(
-      task
-          .startDownload(
-            (token, onProgress) async {
-              final client = createAppUpdateDownloadClient();
-              try {
-                return await downloadAppUpdate(
-                  client: client,
-                  url: downloadUrl,
-                  fallbackUrls: [getAppUpdateFallbackDownloadUrl(downloadUrl)],
-                  directory: directory,
-                  cancelToken: token,
-                  onProgress: onProgress,
-                );
-              } catch (error) {
-                commonPrint.log(
-                  'update download failed: '
-                  '${Secrets.redactApiDomains(error.toString())}',
-                  logLevel: LogLevel.warning,
-                );
-                rethrow;
-              } finally {
-                client.close(force: true);
-              }
-            },
-            url: downloadUrl,
-            directory: directory,
-          )
-          .then((_) async {
-            if (!foreground &&
-                task.value.phase == AppUpdateDownloadPhase.ready) {
-              await preferences.setLastSilentUpdateBuild(remoteBuildNumber);
-            }
-          }),
+      task.startDownload(
+        (token, onProgress) async {
+          // Route the transfer through the proxy once the core has started.
+          await waitForAppUpdateStartup(
+            isReady: () => _ref.read(initProvider),
+            cancelToken: token,
+          );
+          final client = createAppUpdateDownloadClient();
+          try {
+            return await downloadAppUpdate(
+              client: client,
+              url: downloadUrl,
+              fallbackUrls: [getAppUpdateFallbackDownloadUrl(downloadUrl)],
+              directory: directory,
+              cancelToken: token,
+              onProgress: onProgress,
+            );
+          } catch (error) {
+            commonPrint.log(
+              'update download failed: '
+              '${Secrets.redactApiDomains(error.toString())}',
+              logLevel: LogLevel.warning,
+            );
+            rethrow;
+          } finally {
+            client.close(force: true);
+          }
+        },
+        url: downloadUrl,
+        directory: directory,
+      ),
     );
-    if (foreground) await _showAppUpdateDownload(task);
-  }
-
-  Future<void> _waitForStartup() async {
-    for (var i = 0; i < 120 && !_ref.read(initProvider); i++) {
-      await Future<void>.delayed(const Duration(milliseconds: 500));
-    }
+    await _showAppUpdateDownload(task);
   }
 
   Future<void> _showAppUpdateDownload(AppUpdateDownloadTask task) async {

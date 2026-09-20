@@ -1018,7 +1018,7 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
           );
         }
         return Text(
-          delay > 0 ? '$delay ms' : 'Timeout',
+          delay > 0 ? '$delay ms' : context.appLocalizations.delayTestFailed,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: context.textTheme.labelSmall?.copyWith(

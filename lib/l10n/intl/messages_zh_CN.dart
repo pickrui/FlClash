@@ -420,10 +420,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "defaultText": MessageLookupByLibrary.simpleMessage("默认"),
     "delay": MessageLookupByLibrary.simpleMessage("延迟"),
     "delayConcurrency": MessageLookupByLibrary.simpleMessage("批量测速并发数"),
+    "delayConcurrencyAndroidDesc": MessageLookupByLibrary.simpleMessage(
+      "Android 默认 16，网络拥堵时可降低；下一轮批量测速生效",
+    ),
     "delayConcurrencyDesc": MessageLookupByLibrary.simpleMessage(
       "默认 50，网络拥堵时可降低；下一轮批量测速生效",
     ),
     "delayTest": MessageLookupByLibrary.simpleMessage("延迟测试"),
+    "delayTestFailed": MessageLookupByLibrary.simpleMessage("测试失败"),
     "delete": MessageLookupByLibrary.simpleMessage("删除"),
     "deleteMultipTip": m13,
     "deleteTip": m14,

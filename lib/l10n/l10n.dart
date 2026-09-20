@@ -7563,6 +7563,21 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Default: 16 on Android. Reduce on congested networks; applies to the next batch`
+  String get delayConcurrencyAndroidDesc {
+    return Intl.message(
+      'Default: 16 on Android. Reduce on congested networks; applies to the next batch',
+      name: 'delayConcurrencyAndroidDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed`
+  String get delayTestFailed {
+    return Intl.message('Failed', name: 'delayTestFailed', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

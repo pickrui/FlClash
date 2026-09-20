@@ -173,26 +173,28 @@ void main() {
     expect(find.text('Discovery a new version'), findsNothing);
     expect(notice.value, isNotNull);
   });
-  testWidgets('a release an earlier launch downloaded is offered again', (
-    tester,
-  ) async {
-    final task = AppUpdateDownloadTask();
-    addTearDown(task.dispose);
-    var started = 0;
-    task.addListener(() => started++);
-    final notice = await pumpAvailableNotice(tester, task);
-    await tester.pump(const Duration(minutes: 1));
-    expect(find.text('0.8.98+2026091910'), findsOneWidget);
-    expect(find.text('Downloading update'), findsNothing);
-    expect(find.text(AppLocalizations.current.download), findsOneWidget);
-    expect(task.value.phase, AppUpdateDownloadPhase.idle);
-    expect(started, 0);
-    await tester.tap(find.text(AppLocalizations.current.close));
-    await tester.pumpAndSettle();
-    expect(find.text('Discovery a new version'), findsNothing);
-    expect(notice.value, isNull);
-    expect(task.value.phase, AppUpdateDownloadPhase.idle);
-  });
+  testWidgets(
+    'a hidden-window offer waits for consent and dismissal suppresses it',
+    (tester) async {
+      final task = AppUpdateDownloadTask();
+      addTearDown(task.dispose);
+      var started = 0;
+      task.addListener(() => started++);
+      final notice = await pumpAvailableNotice(tester, task);
+      await tester.pump(const Duration(minutes: 1));
+      expect(find.text('0.8.98+2026091910'), findsOneWidget);
+      expect(find.text('Downloading update'), findsNothing);
+      expect(find.text(AppLocalizations.current.download), findsOneWidget);
+      expect(task.value.phase, AppUpdateDownloadPhase.idle);
+      expect(started, 0);
+      await tester.tap(find.text(AppLocalizations.current.close));
+      await tester.pumpAndSettle();
+      expect(find.text('Discovery a new version'), findsNothing);
+      expect(notice.value, isNull);
+      expect(notice.declinedBuildNumber, 2026091910);
+      expect(task.value.phase, AppUpdateDownloadPhase.idle);
+    },
+  );
   testWidgets('background action and ready notice fit a narrow window', (
     tester,
   ) async {
@@ -274,16 +276,15 @@ class _DownloadedFile extends Fake implements File {
   }
 }
 
-Future<ValueNotifier<AppUpdateInfo?>> pumpAvailableNotice(
+Future<AppUpdateNotice> pumpAvailableNotice(
   WidgetTester tester,
   AppUpdateDownloadTask task,
 ) async {
-  final notice = ValueNotifier<AppUpdateInfo?>(
-    const AppUpdateInfo(
+  final notice = AppUpdateNotice()
+    ..value = const AppUpdateInfo(
       version: '0.8.98+2026091910',
       remoteBuildNumber: 2026091910,
-    ),
-  );
+    );
   addTearDown(notice.dispose);
   await tester.pumpWidget(
     ProviderScope(

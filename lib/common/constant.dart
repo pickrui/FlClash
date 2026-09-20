@@ -58,12 +58,16 @@ const delayTestGuardDuration = Duration(seconds: 30);
 
 /// Probes one test run sends at once.
 const defaultDelayTestConcurrency = 50;
+const defaultAndroidDelayTestConcurrency = 16;
 const maxConcurrentDelayTests = 150;
 const delayTestConcurrencyOptions = [8, 16, 32, 50, 100, 150];
 int normalizeDelayTestConcurrency(int? value) =>
     delayTestConcurrencyOptions.contains(value)
     ? value!
     : defaultDelayTestConcurrency;
+
+int? normalizeOptionalDelayTestConcurrency(int? value) =>
+    delayTestConcurrencyOptions.contains(value) ? value : null;
 
 /// Mirrored by NormalizeMTU (core/tun/options.go) and normalizeTunMtu (Kotlin).
 const minTunMtu = 1280;

@@ -6,6 +6,41 @@ import 'package:fl_clash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  for (final concurrency in [16, 50]) {
+    test(
+      'partially failed batches probe each target once at $concurrency',
+      () async {
+        final attempts = <String, int>{};
+        final results = <Delay>[];
+        await runDelayTestBatch(
+          targets: List.generate(100, (i) => (name: '$i', url: 'url')),
+          concurrency: concurrency,
+          isCurrent: () => true,
+          probe: (target) async {
+            attempts.update(
+              target.name,
+              (count) => count + 1,
+              ifAbsent: () => 1,
+            );
+            final failed = int.parse(target.name).isOdd;
+            return Delay(
+              name: target.name,
+              url: target.url,
+              value: failed ? -1 : 25,
+              failure: failed ? DelayFailure.timeout : null,
+            );
+          },
+          onResult: results.add,
+        );
+        expect(attempts, hasLength(100));
+        expect(attempts.values, everyElement(1));
+        expect(results, hasLength(100));
+        expect(results.where((delay) => delay.value == -1), hasLength(50));
+        expect(results.where((delay) => delay.value == 25), hasLength(50));
+      },
+    );
+  }
+
   test(
     'a lower configured concurrency avoids saturating a constrained link',
     () async {

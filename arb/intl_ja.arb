@@ -884,5 +884,7 @@
   "excludeNetworksDesc": "Wi-Fi／イーサネットの IPv4、サブネット、ゲートウェイに一致すると一時停止し、離れると再開。カンマ区切り、例: 192.168.1.0/24,gateway:192.168.1.1",
   "excludeNetworksInvalid": "最大 16 件。有効な IPv4、CIDR または gateway:アドレスを入力",
   "delayConcurrency": "一括測定の同時実行数",
-  "delayConcurrencyDesc": "既定値は 50、回線が混雑する場合は減らしてください。次回の一括測定から適用"
+  "delayConcurrencyDesc": "既定値は 50、回線が混雑する場合は減らしてください。次回の一括測定から適用",
+  "delayConcurrencyAndroidDesc": "Android の既定値は 16、回線が混雑する場合は減らしてください。次回の一括測定から適用",
+  "delayTestFailed": "測定失敗"
 }

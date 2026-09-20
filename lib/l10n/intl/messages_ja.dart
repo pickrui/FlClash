@@ -473,10 +473,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "defaultText": MessageLookupByLibrary.simpleMessage("デフォルト"),
     "delay": MessageLookupByLibrary.simpleMessage("遅延"),
     "delayConcurrency": MessageLookupByLibrary.simpleMessage("一括測定の同時実行数"),
+    "delayConcurrencyAndroidDesc": MessageLookupByLibrary.simpleMessage(
+      "Android の既定値は 16、回線が混雑する場合は減らしてください。次回の一括測定から適用",
+    ),
     "delayConcurrencyDesc": MessageLookupByLibrary.simpleMessage(
       "既定値は 50、回線が混雑する場合は減らしてください。次回の一括測定から適用",
     ),
     "delayTest": MessageLookupByLibrary.simpleMessage("遅延テスト"),
+    "delayTestFailed": MessageLookupByLibrary.simpleMessage("測定失敗"),
     "delete": MessageLookupByLibrary.simpleMessage("削除"),
     "deleteMultipTip": m13,
     "deleteTip": m14,

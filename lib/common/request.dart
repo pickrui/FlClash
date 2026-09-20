@@ -425,11 +425,7 @@ class Request {
     );
   }
 
-  /// Release notes need extra GitHub requests; silent checks that never show
-  /// them pass [includeReleaseNotes] false.
-  Future<AppUpdateInfo?> checkForUpdate({
-    bool includeReleaseNotes = true,
-  }) async {
+  Future<AppUpdateInfo?> checkForUpdate() async {
     for (final domain in Secrets.apiDomains) {
       try {
         final response = await _getWithRedirect<String>(
@@ -476,10 +472,9 @@ class Request {
         final tagName =
             releaseTagNameFromVersionData(versionData) ??
             'v${globalState.packageInfo.version.trim()}';
-        final releaseNotes = !includeReleaseNotes
-            ? null
-            : extractEmbeddedReleaseNotes(versionData, tagName) ??
-                  await _fetchReleaseNotes(tagName);
+        final releaseNotes =
+            extractEmbeddedReleaseNotes(versionData, tagName) ??
+            await _fetchReleaseNotes(tagName);
         return AppUpdateInfo(
           releaseNotes: releaseNotes,
           version: remoteVersion.trim(),

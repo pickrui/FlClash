@@ -400,6 +400,10 @@ func handleAsyncTestDelay(params *TestDelayParams, fn func(*Delay)) {
 		granted := delaySem.Acquire(queueCtx, 1) == nil
 		cancelQueue()
 		if !granted {
+			delayData.Failure = "queueTimeout"
+			if runCtx.Err() != nil {
+				delayData.Failure = delayFailureReason(runCtx.Err())
+			}
 			fn(delayData)
 			return
 		}
@@ -407,6 +411,7 @@ func handleAsyncTestDelay(params *TestDelayParams, fn func(*Delay)) {
 
 		proxy := tunnel.AllProxies()[params.ProxyName]
 		if proxy == nil {
+			delayData.Failure = "missingProxy"
 			fn(delayData)
 			return
 		}
@@ -421,6 +426,8 @@ func handleAsyncTestDelay(params *TestDelayParams, fn func(*Delay)) {
 		finish()
 		if err == nil {
 			delayData.Value = delayValue(delay)
+		} else {
+			delayData.Failure = delayFailureReason(err)
 		}
 		// Groups cache their fastest member for a while; a probe that changed a
 		// member's health must be visible in the next groups snapshot.

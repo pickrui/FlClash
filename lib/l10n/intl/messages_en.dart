@@ -564,10 +564,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "delayConcurrency": MessageLookupByLibrary.simpleMessage(
       "Concurrent batch latency tests",
     ),
+    "delayConcurrencyAndroidDesc": MessageLookupByLibrary.simpleMessage(
+      "Default: 16 on Android. Reduce on congested networks; applies to the next batch",
+    ),
     "delayConcurrencyDesc": MessageLookupByLibrary.simpleMessage(
       "Default: 50. Reduce on congested networks; applies to the next batch",
     ),
     "delayTest": MessageLookupByLibrary.simpleMessage("Delay Test"),
+    "delayTestFailed": MessageLookupByLibrary.simpleMessage("Failed"),
     "delete": MessageLookupByLibrary.simpleMessage("Delete"),
     "deleteMultipTip": m13,
     "deleteTip": m14,

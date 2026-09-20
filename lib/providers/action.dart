@@ -667,6 +667,39 @@ String getAppUpdateFallbackDownloadUrl(String downloadUrl) {
   ).toString();
 }
 
+enum AppUpdateOffer { prompt, notice, ignore }
+
+AppUpdateOffer resolveAppUpdateOffer({
+  required bool isUser,
+  required bool isUiVisible,
+  required int remoteBuildNumber,
+  required int? declinedBuildNumber,
+}) {
+  if (isUser) return AppUpdateOffer.prompt;
+  if (declinedBuildNumber != null && remoteBuildNumber <= declinedBuildNumber) {
+    return AppUpdateOffer.ignore;
+  }
+  return isUiVisible ? AppUpdateOffer.prompt : AppUpdateOffer.notice;
+}
+
+/// A silent launch must never be woken; a window that cannot answer is hidden.
+Future<bool> canPromptForAppUpdate({
+  required bool isUiVisible,
+  required Future<bool> Function()? isWindowVisible,
+}) async {
+  if (!isUiVisible) return false;
+  if (isWindowVisible == null) return true;
+  try {
+    return await isWindowVisible();
+  } catch (error) {
+    commonPrint.log(
+      'window visibility check failed: $error',
+      logLevel: LogLevel.warning,
+    );
+    return false;
+  }
+}
+
 /// The window has to be up before the release notes can be confirmed.
 Future<bool?> promptForAppUpdate({
   required Future<void> Function()? showWindow,
@@ -703,8 +736,10 @@ class AppController {
   final _geoRecoveryLock = AsyncStorageLock();
   final _proxyAuthenticationLock = AsyncStorageLock();
   Future<void>? _updateDownloadsSweep;
-  Future<void>? _checkUpdateFuture;
-  bool _checkUpdateForUser = false;
+  late final _appUpdateCheck = AppUpdateCheck(
+    checkForUpdates: (isUser) => _checkUpdate(isUser: isUser),
+  );
+  Future<void>? _startUpdateDownloadFuture;
   bool _updateDialogOpen = false;
   bool _openingUpdateInstaller = false;
   Future<bool>? _listenerStartFuture;

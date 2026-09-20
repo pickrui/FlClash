@@ -10,6 +10,53 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() async => AppLocalizations.load(const Locale('en')));
+  test(
+    'Android adopts 16 while other platforms retain their saved concurrency',
+    () {
+      for (final legacy in delayTestConcurrencyOptions) {
+        final props = ProxiesStyleProps.fromJson({'concurrencyLimit': legacy});
+        expect(
+          props.delayTestConcurrency(isAndroid: true),
+          legacy == 50 ? 16 : legacy,
+        );
+        expect(props.delayTestConcurrency(isAndroid: false), legacy);
+        expect(props.concurrencyLimit, legacy);
+      }
+      expect(
+        ProxiesStyleProps.fromJson({}).delayTestConcurrency(isAndroid: true),
+        16,
+      );
+      expect(
+        ProxiesStyleProps.fromJson({}).delayTestConcurrency(isAndroid: false),
+        50,
+      );
+    },
+  );
+
+  test('an explicit Android setting round-trips independently of desktop', () {
+    for (final limit in delayTestConcurrencyOptions) {
+      final restored = ProxiesStyleProps.fromJson(
+        jsonDecode(
+          jsonEncode(
+            ProxiesStyleProps(
+              concurrencyLimit: 100,
+              androidConcurrencyLimit: limit,
+            ),
+          ),
+        ),
+      );
+      expect(restored.delayTestConcurrency(isAndroid: true), limit);
+      expect(restored.delayTestConcurrency(isAndroid: false), 100);
+    }
+    for (final invalid in [0, -1, 250]) {
+      final props = ProxiesStyleProps.fromJson({
+        'androidConcurrencyLimit': invalid,
+      });
+      expect(props.androidConcurrencyLimit, isNull);
+      expect(props.delayTestConcurrency(isAndroid: true), 16);
+    }
+  });
+
   test('old preferences retain MTU and no new automatic policy', () {
     expect(Tun.fromJson({}).mtu, 9000);
     expect(NetworkProps.fromJson({}).excludeNetworks, isEmpty);

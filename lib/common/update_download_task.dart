@@ -12,6 +12,18 @@ enum AppUpdateDownloadPhase { idle, downloading, ready, failed, canceled }
 typedef AppUpdateDownloader =
     Future<File> Function(CancelToken token, ProgressCallback onProgress);
 
+Future<void> waitForAppUpdateStartup({
+  required bool Function() isReady,
+  required CancelToken cancelToken,
+}) async {
+  for (var i = 0; i < 120; i++) {
+    if (cancelToken.isCancelled) throw cancelToken.cancelError!;
+    if (isReady()) return;
+    await Future<void>.delayed(const Duration(milliseconds: 500));
+  }
+  if (cancelToken.isCancelled) throw cancelToken.cancelError!;
+}
+
 @immutable
 class AppUpdateDownloadState {
   final AppUpdateDownloadPhase phase;
