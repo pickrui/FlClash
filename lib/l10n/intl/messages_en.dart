@@ -1765,11 +1765,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
       "An AppImage cannot be installed automatically. Replace the running program with the downloaded file; its folder has been opened.",
     ),
+    "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
+      "Cancel download",
+    ),
     "updateDownloadBackground": MessageLookupByLibrary.simpleMessage(
       "Download in background",
     ),
     "updateDownloadBrowser": MessageLookupByLibrary.simpleMessage(
       "Download in browser",
+    ),
+    "updateDownloadConfirm": MessageLookupByLibrary.simpleMessage(
+      "Download update",
     ),
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
       "Update download failed",
@@ -1778,6 +1784,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Downloading update",
     ),
     "updateInstall": MessageLookupByLibrary.simpleMessage("Install update"),
+    "updateLater": MessageLookupByLibrary.simpleMessage("Later"),
     "updatePackageFormat": MessageLookupByLibrary.simpleMessage(
       "Choose the package format",
     ),
@@ -1790,6 +1797,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReadyHint": MessageLookupByLibrary.simpleMessage(
       "The update has been downloaded. Install when convenient.",
     ),
+    "updateReleaseNotes": MessageLookupByLibrary.simpleMessage("Release notes"),
+    "updateViewDetails": MessageLookupByLibrary.simpleMessage("View update"),
     "upgradePlan": MessageLookupByLibrary.simpleMessage("Upgrade plan"),
     "upload": MessageLookupByLibrary.simpleMessage("Upload"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),

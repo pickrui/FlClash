@@ -75,6 +75,9 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Load shared Go build tags
+        run: grep '^GO_TAGS=' tool/go_build_tags.env >> "$GITHUB_ENV"
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -99,8 +102,8 @@ jobs:
         env:
           CGO_ENABLED: '0'
         run: |
-          go build -tags with_gvisor,with_mips_low_memory -trimpath -o "$RUNNER_TEMP/FlClashCore" .
-          go test -tags with_gvisor,with_mips_low_memory -c -o "$RUNNER_TEMP/flclash-routing-checker" .
+          go build -tags "$GO_TAGS" -trimpath -o "$RUNNER_TEMP/FlClashCore" .
+          go test -tags "$GO_TAGS" -c -o "$RUNNER_TEMP/flclash-routing-checker" .
 
       - name: Cache Rust test library
         uses: actions/cache@v4
@@ -141,6 +144,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+      - name: Load shared Go build tags
+        run: grep '^GO_TAGS=' tool/go_build_tags.env >> "$GITHUB_ENV"
       - uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
@@ -150,10 +155,10 @@ jobs:
         env:
           CGO_ENABLED: '0'
         run: |
-          go vet -tags with_gvisor,with_mips_low_memory ./...
-          go test -tags with_gvisor,with_mips_low_memory ./...
+          go vet -tags "$GO_TAGS" ./...
+          go test -tags "$GO_TAGS" ./...
           cd Clash.Meta
-          go test -tags with_gvisor,with_mips_low_memory ./component/mmdb ./component/updater
+          go test -tags "$GO_TAGS" ./component/mmdb ./component/updater
       - name: Check native callback and file ownership races
         working-directory: core
         run: |

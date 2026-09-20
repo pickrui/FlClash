@@ -6,8 +6,8 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/widgets/fade_box.dart';
+import 'package:fl_clash/widgets/app_update.dart';
 import 'package:fl_clash/widgets/theme.dart';
-import 'package:fl_clash/widgets/update_download_dialog.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -187,7 +187,6 @@ class StatusManagerState extends State<StatusManager> {
                 ),
               ),
               const AppUpdateAvailableNotice(),
-              const AppUpdateReadyNotice(),
             ],
           ),
         ),

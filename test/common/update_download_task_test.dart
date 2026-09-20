@@ -28,29 +28,11 @@ void main() {
       pending.complete(File('/tmp/fixture-update.exe'));
       await first;
       expect(task.value.phase, AppUpdateDownloadPhase.ready);
-      expect(task.value.showReadyNotice, isTrue);
       await task.start(download, url: 'https://fixture/update.exe');
       expect(downloads, 1);
-      task.dismissNotice();
-      expect(task.value.showReadyNotice, isFalse);
       expect(task.value.file, isNotNull);
     },
   );
-  test('detaching a progress view keeps the transfer alive', () async {
-    final pending = Completer<File>();
-    late CancelToken token;
-    final operation = task.start((value, _) {
-      token = value;
-      return pending.future;
-    }, url: 'fixture');
-    task.attachView();
-    task.detachView();
-    expect(token.isCancelled, isFalse);
-    expect(task.hasForegroundView, isFalse);
-    pending.complete(File('/tmp/fixture-update.exe'));
-    await operation;
-    expect(task.value.phase, AppUpdateDownloadPhase.ready);
-  });
   test(
     'cancel cleans late output without overwriting a newer transfer',
     () async {

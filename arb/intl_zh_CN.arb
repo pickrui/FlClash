@@ -886,5 +886,10 @@
   "delayConcurrency": "批量测速并发数",
   "delayConcurrencyDesc": "默认 50，网络拥堵时可降低；下一轮批量测速生效",
   "delayConcurrencyAndroidDesc": "Android 默认 16，网络拥堵时可降低；下一轮批量测速生效",
-  "delayTestFailed": "测试失败"
+  "delayTestFailed": "测试失败",
+  "updateViewDetails": "查看更新",
+  "updateReleaseNotes": "更新日志",
+  "updateDownloadConfirm": "下载更新",
+  "updateLater": "稍后",
+  "updateCancelDownload": "取消下载"
 }

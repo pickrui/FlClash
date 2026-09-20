@@ -886,5 +886,10 @@
   "delayConcurrency": "一括測定の同時実行数",
   "delayConcurrencyDesc": "既定値は 50、回線が混雑する場合は減らしてください。次回の一括測定から適用",
   "delayConcurrencyAndroidDesc": "Android の既定値は 16、回線が混雑する場合は減らしてください。次回の一括測定から適用",
-  "delayTestFailed": "測定失敗"
+  "delayTestFailed": "測定失敗",
+  "updateViewDetails": "更新を確認",
+  "updateReleaseNotes": "更新内容",
+  "updateDownloadConfirm": "更新をダウンロード",
+  "updateLater": "後で",
+  "updateCancelDownload": "ダウンロードを中止"
 }

@@ -50,6 +50,27 @@ void main() {
   }
 
   test(
+    'preserves a lockfile edit made while tests run and reports it',
+    () async {
+      const lockText = 'packages:\n  meta:\n    version: "1.18.0"\n';
+      final lock = File('${temp.path}/pubspec.lock')
+        ..writeAsStringSync(lockText);
+      await stub('echo "    version: 1.19.0" >> pubspec.lock');
+      final result = await Process.run(
+        dart,
+        [runner, '--no-pub'],
+        workingDirectory: temp.path,
+        environment: environment(),
+      );
+      expect(result.exitCode, 1, reason: result.stderr.toString());
+      expect(result.stderr, contains('pubspec.lock changed during tests'));
+      expect(lock.readAsStringSync(), '$lockText    version: 1.19.0\n');
+      expect(pubspec.readAsBytesSync(), utf8.encode(original));
+    },
+    skip: Platform.isWindows,
+  );
+
+  test(
     'preserves edits made while tests run and restores both original switches',
     () async {
       await stub('echo "description: concurrent edit" >> pubspec.yaml');

@@ -11,6 +11,12 @@ class UpdateAction extends _$UpdateAction {
 
   Future<void> checkUpdate({bool isUser = false}) =>
       _controller.checkUpdate(isUser: isUser);
+
+  Future<void> showDetails(AppUpdateInfo info) =>
+      _controller.showAppUpdateDetails(info);
+
+  void dismissNotice(AppUpdateInfo info) =>
+      _controller.dismissAppUpdateNotice(info);
 }
 
 extension InitControllerExt on AppController {
@@ -140,6 +146,11 @@ extension InitControllerExt on AppController {
       _appUpdateCheck.run(isUser: isUser);
 
   Future<bool> _reuseAppUpdateDownload({required bool isUser}) async {
+    final details = _updateDetailsFuture;
+    if (details != null) {
+      if (isUser) await details;
+      return true;
+    }
     final preparing = _startUpdateDownloadFuture;
     final task = _ref.read(appUpdateDownloadProvider);
     if (preparing == null && !task.hasDownload) return false;
@@ -151,7 +162,6 @@ extension InitControllerExt on AppController {
     // Every trigger waits for the one-time cleanup before starting a download.
     await (_updateDownloadsSweep ??= _sweepUpdateDownloads());
     if (await _reuseAppUpdateDownload(isUser: isUser)) return;
-    final notice = _ref.read(appUpdateNoticeProvider);
     AppUpdateInfo? updateInfo;
     try {
       updateInfo = await request.checkForUpdate();
@@ -182,41 +192,58 @@ extension InitControllerExt on AppController {
     }
     final offer = resolveAppUpdateOffer(
       isUser: isUser,
-      isUiVisible: await canPromptForAppUpdate(
-        isUiVisible: globalState.isUiVisible,
-        isWindowVisible: window == null ? null : () => window!.isVisible,
-      ),
       remoteBuildNumber: updateInfo.remoteBuildNumber,
-      declinedBuildNumber: notice.declinedBuildNumber,
+      declinedBuildNumber: _appUpdateCheck.declinedBuildNumber,
     );
     if (await _reuseAppUpdateDownload(isUser: isUser)) return;
     if (offer == AppUpdateOffer.ignore) return;
     if (offer == AppUpdateOffer.notice) {
-      // A hidden window is never brought forward; the notice holds the offer.
       _ref.read(appUpdateNoticeProvider).value = updateInfo;
       return;
     }
-    final res = await promptForAppUpdate(
-      showWindow: isUser ? window?.show : null,
-      prompt: () => globalState.showMessage(
-        title: appLocalizations.discovery,
-        message: TextSpan(
-          text: updateInfo!.releaseNotes ?? appLocalizations.noInfo,
-        ),
-        confirmText: appLocalizations.update,
-      ),
-    );
-    if (res != true) {
-      notice.decline(updateInfo.remoteBuildNumber);
-      return;
-    }
-    _ref.read(appUpdateNoticeProvider).value = updateInfo;
-    await _startAppUpdateDownload();
+    await showAppUpdateDetails(updateInfo);
   }
 
-  /// Fetches a release the notice reported but did not download itself.
-  Future<void> acceptUpdateNotice() async {
-    if (_ref.read(appUpdateNoticeProvider).value == null) return;
+  void dismissAppUpdateNotice(AppUpdateInfo info) {
+    _appUpdateCheck.decline(info.remoteBuildNumber);
+    final notice = _ref.read(appUpdateNoticeProvider);
+    if ((notice.value?.remoteBuildNumber ?? 0) <= info.remoteBuildNumber) {
+      notice.value = null;
+    }
+  }
+
+  Future<void> showAppUpdateDetails(AppUpdateInfo info) async {
+    final pending = _updateDetailsFuture;
+    if (pending != null) return pending;
+    // A tapped notice never awaits this; a window or route failure would escape.
+    final run = _updateDetailsFuture = safeRun<void>(
+      () => _confirmAppUpdateDownload(info),
+      title: appLocalizations.checkUpdate,
+    );
+    try {
+      await run;
+    } finally {
+      if (identical(_updateDetailsFuture, run)) _updateDetailsFuture = null;
+    }
+  }
+
+  Future<void> _confirmAppUpdateDownload(AppUpdateInfo info) async {
+    _ref.read(appUpdateNoticeProvider).value = null;
+    final preparing = _startUpdateDownloadFuture;
+    final task = _ref.read(appUpdateDownloadProvider);
+    if (preparing != null || task.hasDownload) {
+      await (preparing ?? _showAppUpdateDownload(task));
+      return;
+    }
+    final res = await promptForAppUpdate(
+      showWindow: window?.show,
+      prompt: () =>
+          BaseNavigator.push<bool>(_context, AppUpdatePage(info: info)),
+    );
+    if (res != true) {
+      _appUpdateCheck.decline(info.remoteBuildNumber);
+      return;
+    }
     await _startAppUpdateDownload();
   }
 
@@ -234,7 +261,7 @@ extension InitControllerExt on AppController {
   }
 
   Future<void> _prepareAppUpdateDownload() async {
-    // Download errors live in the task state (notice / dialog / About); only
+    // Download errors live in the task state (dialog / About); only
     // choosing a package, opening a browser or the dialog can throw here.
     await safeRun<void>(
       () async {
@@ -350,7 +377,6 @@ extension InitControllerExt on AppController {
       await safeRun(() async {
         if (isAppImageInstaller(file)) {
           await _revealAppImageUpdate(file);
-          task.dismissNotice();
           return;
         }
         await openAppUpdateDownload(
@@ -367,7 +393,6 @@ extension InitControllerExt on AppController {
             logLevel: LogLevel.warning,
           ),
         );
-        task.dismissNotice();
       }, title: appLocalizations.checkUpdate);
     } finally {
       _openingUpdateInstaller = false;

@@ -1442,17 +1442,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
       "AppImage は自動インストールできません。ダウンロードしたファイルで現在のプログラムを置き換えてください。保存先のフォルダーを開きました。",
     ),
+    "updateCancelDownload": MessageLookupByLibrary.simpleMessage("ダウンロードを中止"),
     "updateDownloadBackground": MessageLookupByLibrary.simpleMessage(
       "バックグラウンドでダウンロード",
     ),
     "updateDownloadBrowser": MessageLookupByLibrary.simpleMessage(
       "ブラウザーでダウンロード",
     ),
+    "updateDownloadConfirm": MessageLookupByLibrary.simpleMessage("更新をダウンロード"),
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
       "更新のダウンロードに失敗しました",
     ),
     "updateDownloading": MessageLookupByLibrary.simpleMessage("更新をダウンロード中"),
     "updateInstall": MessageLookupByLibrary.simpleMessage("更新をインストール"),
+    "updateLater": MessageLookupByLibrary.simpleMessage("後で"),
     "updatePackageFormat": MessageLookupByLibrary.simpleMessage("パッケージ形式を選択"),
     "updatePackageFormatTip": MessageLookupByLibrary.simpleMessage(
       "インストール方法を判別できませんでした。一致する形式を選んでください。",
@@ -1461,6 +1464,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReadyHint": MessageLookupByLibrary.simpleMessage(
       "更新のダウンロードが完了しました。都合のよいときにインストールできます",
     ),
+    "updateReleaseNotes": MessageLookupByLibrary.simpleMessage("更新内容"),
+    "updateViewDetails": MessageLookupByLibrary.simpleMessage("更新を確認"),
     "upgradePlan": MessageLookupByLibrary.simpleMessage("プランをアップグレード"),
     "upload": MessageLookupByLibrary.simpleMessage("アップロード"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),

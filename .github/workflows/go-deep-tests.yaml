@@ -25,6 +25,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+      - name: Load shared Go build tags
+        run: grep '^GO_TAGS=' tool/go_build_tags.env >> "$GITHUB_ENV"
       - uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
@@ -34,15 +36,15 @@ jobs:
       - name: Validate integrated mihomo core
         working-directory: core/Clash.Meta
         run: |
-          go vet -tags with_gvisor,with_mips_low_memory ./...
+          go vet -tags "$GO_TAGS" ./...
           # Full Sudoku and MKCP/Mekya matrices have separate required jobs below.
-          go test -race -tags with_gvisor,with_mips_low_memory -p=2 -parallel=2 -timeout=900s -skip '^(TestInboundSudoku|TestInboundVMess_(MKCP|Mekya)$)' ./...
+          go test -race -tags "$GO_TAGS" -p=2 -parallel=2 -timeout=900s -skip '^(TestInboundSudoku|TestInboundVMess_(MKCP|Mekya)$)' ./...
 
       - name: Check mips storage and TUN integration
         working-directory: core
         run: |
-          go vet -tags with_gvisor,with_mips_low_memory github.com/metacubex/mipstack github.com/metacubex/sing-tun
-          go test -race -count=1 -timeout=300s -tags with_gvisor,with_mips_low_memory github.com/metacubex/mipstack github.com/metacubex/sing-tun
+          go vet -tags "$GO_TAGS" github.com/metacubex/mipstack github.com/metacubex/sing-tun
+          go test -race -count=1 -timeout=300s -tags "$GO_TAGS" github.com/metacubex/mipstack github.com/metacubex/sing-tun
           go test -race -count=1 -timeout=300s -tags with_gvisor github.com/metacubex/mipstack github.com/metacubex/sing-tun
           go test -count=1 -tags with_low_memory -run '^TestLowMemory' github.com/metacubex/mipstack
       - name: Check retained transport dependency fixes
@@ -57,21 +59,21 @@ jobs:
       - name: Check persistent cache regressions
         working-directory: core/Clash.Meta
         run: |
-          go vet -tags with_gvisor,with_mips_low_memory ./component/profile/cachefile ./component/fakeip
-          go test -race -tags with_gvisor,with_mips_low_memory -timeout=180s ./component/profile/cachefile ./component/fakeip
+          go vet -tags "$GO_TAGS" ./component/profile/cachefile ./component/fakeip
+          go test -race -tags "$GO_TAGS" -timeout=180s ./component/profile/cachefile ./component/fakeip
           go test -short -race -count=1 -timeout=300s github.com/metacubex/bbolt/...
           TEST_CONCURRENT_CASE_DURATION=3s go test -race -count=1 -timeout=300s -run '^(TestConcurrentGenericReadAndWrite|TestConcurrentRepeatableRead|TestOpen_MultipleGoroutines|TestSimulate_1000op_10p|TestSimulateNoFreeListSync_1000op_10p)$' github.com/metacubex/bbolt
       - name: Check interface prefix lookup regressions
         working-directory: core/Clash.Meta
         run: |
-          go vet -tags with_gvisor,with_mips_low_memory ./component/iface/... ./component/dialer ./listener/sing_tun
-          go test -race -tags with_gvisor,with_mips_low_memory -timeout=180s ./component/iface/... ./component/dialer ./listener/sing_tun
+          go vet -tags "$GO_TAGS" ./component/iface/... ./component/dialer ./listener/sing_tun
+          go test -race -tags "$GO_TAGS" -timeout=180s ./component/iface/... ./component/dialer ./listener/sing_tun
           go test -race -count=1 -timeout=300s github.com/metacubex/bart/...
       - name: Check controller routing regressions
         working-directory: core/Clash.Meta
         run: |
-          go vet -tags with_gvisor,with_mips_low_memory ./hub/route ./listener/hysteria2_realm
-          go test -race -tags with_gvisor,with_mips_low_memory -timeout=180s ./hub/route ./listener/hysteria2_realm
+          go vet -tags "$GO_TAGS" ./hub/route ./listener/hysteria2_realm
+          go test -race -tags "$GO_TAGS" -timeout=180s ./hub/route ./listener/hysteria2_realm
           go test -race -count=1 -timeout=180s github.com/metacubex/chi/...
       - name: Check form decoder dependency regressions
         run: python3 tool/check_form_dependencies.py
@@ -79,7 +81,7 @@ jobs:
         run: python3 tool/check_mieru_dependencies.py
       - name: Check Mieru inbound integration
         working-directory: core/Clash.Meta
-        run: go test -race -tags with_gvisor,with_mips_low_memory -timeout=180s -run '^(TestNewMieru|TestInboundMieru)$' ./listener/inbound
+        run: go test -race -tags "$GO_TAGS" -timeout=180s -run '^(TestNewMieru|TestInboundMieru)$' ./listener/inbound
       - name: Check QUIC dependency regressions
         run: python3 tool/check_quic_dependencies.py
 
@@ -91,6 +93,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+      - name: Load shared Go build tags
+        run: grep '^GO_TAGS=' tool/go_build_tags.env >> "$GITHUB_ENV"
       - uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
@@ -102,7 +106,7 @@ jobs:
           # Serialize variants and packages, but let Go use the runner's available
           # CPUs: capping GOMAXPROCS can starve UDP/H2 handshakes under -race.
           echo "Available CPUs: $(nproc)"
-          go test -v -race -tags with_gvisor,with_mips_low_memory -p=1 -parallel=1 -count=2 -timeout=300s -run '^TestInboundVMess_(MKCP|Mekya)$' ./listener/inbound
+          go test -v -race -tags "$GO_TAGS" -p=1 -parallel=1 -count=2 -timeout=300s -run '^TestInboundVMess_(MKCP|Mekya)$' ./listener/inbound
 
   sudoku-test:
     name: Sudoku inbound integration
@@ -112,10 +116,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+      - name: Load shared Go build tags
+        run: grep '^GO_TAGS=' tool/go_build_tags.env >> "$GITHUB_ENV"
       - uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
           cache-dependency-path: core/go.sum
       - name: Validate all Sudoku inbound variants
         working-directory: core/Clash.Meta
-        run: go test -race -tags with_gvisor,with_mips_low_memory -p=2 -parallel=2 -timeout=900s -run '^TestInboundSudoku' ./listener/inbound
+        run: go test -race -tags "$GO_TAGS" -p=2 -parallel=2 -timeout=900s -run '^TestInboundSudoku' ./listener/inbound

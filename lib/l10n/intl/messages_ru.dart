@@ -1852,11 +1852,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
       "AppImage нельзя установить автоматически. Замените текущую программу скачанным файлом; его папка открыта.",
     ),
+    "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
+      "Отменить загрузку",
+    ),
     "updateDownloadBackground": MessageLookupByLibrary.simpleMessage(
       "Скачать в фоне",
     ),
     "updateDownloadBrowser": MessageLookupByLibrary.simpleMessage(
       "Скачать в браузере",
+    ),
+    "updateDownloadConfirm": MessageLookupByLibrary.simpleMessage(
+      "Скачать обновление",
     ),
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось скачать обновление",
@@ -1867,6 +1873,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateInstall": MessageLookupByLibrary.simpleMessage(
       "Установить обновление",
     ),
+    "updateLater": MessageLookupByLibrary.simpleMessage("Позже"),
     "updatePackageFormat": MessageLookupByLibrary.simpleMessage(
       "Выберите формат пакета",
     ),
@@ -1879,6 +1886,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReadyHint": MessageLookupByLibrary.simpleMessage(
       "Обновление скачано. Установите его в удобное время.",
     ),
+    "updateReleaseNotes": MessageLookupByLibrary.simpleMessage("Что нового"),
+    "updateViewDetails": MessageLookupByLibrary.simpleMessage("Подробнее"),
     "upgradePlan": MessageLookupByLibrary.simpleMessage("Улучшить тариф"),
     "upload": MessageLookupByLibrary.simpleMessage("Загрузка"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),

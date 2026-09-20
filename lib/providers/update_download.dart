@@ -9,8 +9,8 @@ final appUpdateDownloadProvider = Provider<AppUpdateDownloadTask>((ref) {
   return task;
 });
 
-final appUpdateNoticeProvider = Provider<AppUpdateNotice>((ref) {
-  final notice = AppUpdateNotice();
+final appUpdateNoticeProvider = Provider<ValueNotifier<AppUpdateInfo?>>((ref) {
+  final notice = ValueNotifier<AppUpdateInfo?>(null);
   ref.onDispose(notice.dispose);
   return notice;
 });
@@ -21,12 +21,24 @@ class AppUpdateCheck {
   final Future<void> Function(bool isUser) checkForUpdates;
   Future<void>? _inFlight;
   bool _forUser = false;
+  int? _declinedBuildNumber;
+  int? get declinedBuildNumber => _declinedBuildNumber;
+
+  void decline(int buildNumber) {
+    if (_declinedBuildNumber == null || buildNumber > _declinedBuildNumber!) {
+      _declinedBuildNumber = buildNumber;
+    }
+  }
 
   Future<void> run({bool isUser = false}) async {
     while (_inFlight != null) {
       final inFlight = _inFlight!;
       if (!isUser || _forUser) return inFlight;
-      await inFlight;
+      try {
+        await inFlight;
+      } catch (_) {
+        // The automatic caller receives its error; the queued user still checks.
+      }
     }
     _forUser = isUser;
     final run = _inFlight = Future<void>.sync(() => checkForUpdates(isUser));
@@ -35,26 +47,5 @@ class AppUpdateCheck {
     } finally {
       if (identical(_inFlight, run)) _inFlight = null;
     }
-  }
-}
-
-class AppUpdateNotice extends ValueNotifier<AppUpdateInfo?> {
-  AppUpdateNotice() : super(null);
-
-  int? _declinedBuildNumber;
-  int? get declinedBuildNumber => _declinedBuildNumber;
-
-  void decline(int buildNumber) {
-    if (_declinedBuildNumber == null || buildNumber > _declinedBuildNumber!) {
-      _declinedBuildNumber = buildNumber;
-    }
-    if (value != null && value!.remoteBuildNumber <= _declinedBuildNumber!) {
-      value = null;
-    }
-  }
-
-  void dismiss() {
-    final info = value;
-    if (info != null) decline(info.remoteBuildNumber);
   }
 }

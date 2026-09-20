@@ -23,10 +23,10 @@ import 'package:fl_clash/services/startup_recovery.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/utils/safe_storage.dart';
 import 'package:fl_clash/views/cloud/cloud_login_page.dart';
+import 'package:fl_clash/widgets/app_update.dart';
 import 'package:fl_clash/widgets/geo_recovery_dialog.dart';
 import 'package:fl_clash/widgets/linux_package_format_dialog.dart';
 import 'package:fl_clash/widgets/port_conflict_dialog.dart';
-import 'package:fl_clash/widgets/update_download_dialog.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
@@ -671,7 +671,6 @@ enum AppUpdateOffer { prompt, notice, ignore }
 
 AppUpdateOffer resolveAppUpdateOffer({
   required bool isUser,
-  required bool isUiVisible,
   required int remoteBuildNumber,
   required int? declinedBuildNumber,
 }) {
@@ -679,25 +678,7 @@ AppUpdateOffer resolveAppUpdateOffer({
   if (declinedBuildNumber != null && remoteBuildNumber <= declinedBuildNumber) {
     return AppUpdateOffer.ignore;
   }
-  return isUiVisible ? AppUpdateOffer.prompt : AppUpdateOffer.notice;
-}
-
-/// A silent launch must never be woken; a window that cannot answer is hidden.
-Future<bool> canPromptForAppUpdate({
-  required bool isUiVisible,
-  required Future<bool> Function()? isWindowVisible,
-}) async {
-  if (!isUiVisible) return false;
-  if (isWindowVisible == null) return true;
-  try {
-    return await isWindowVisible();
-  } catch (error) {
-    commonPrint.log(
-      'window visibility check failed: $error',
-      logLevel: LogLevel.warning,
-    );
-    return false;
-  }
+  return AppUpdateOffer.notice;
 }
 
 /// The window has to be up before the release notes can be confirmed.
@@ -739,6 +720,7 @@ class AppController {
   late final _appUpdateCheck = AppUpdateCheck(
     checkForUpdates: (isUser) => _checkUpdate(isUser: isUser),
   );
+  Future<void>? _updateDetailsFuture;
   Future<void>? _startUpdateDownloadFuture;
   bool _updateDialogOpen = false;
   bool _openingUpdateInstaller = false;

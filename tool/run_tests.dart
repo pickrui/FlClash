@@ -7,6 +7,8 @@ import 'set_native_build_assets.dart';
 Future<void> main(List<String> args) async {
   final pubspec = File('pubspec.yaml');
   final original = pubspec.readAsBytesSync();
+  final lock = File('pubspec.lock');
+  final originalLock = lock.existsSync() ? lock.readAsStringSync() : null;
   final source = utf8.decode(original);
   final disabled = configureBuildAssets(source, false);
   final signals = <StreamSubscription<ProcessSignal>>[];
@@ -59,6 +61,11 @@ Future<void> main(List<String> args) async {
       stderr.writeln(
         'pubspec.yaml changed during tests; kept those edits and restored its native build switches',
       );
+      status = 1;
+    }
+    final currentLock = lock.existsSync() ? lock.readAsStringSync() : null;
+    if (currentLock != originalLock) {
+      stderr.writeln('pubspec.lock changed during tests; kept those edits');
       status = 1;
     }
     exitCode = interrupted ?? status;

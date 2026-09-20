@@ -886,5 +886,10 @@
   "delayConcurrency": "Параллельные проверки в группе",
   "delayConcurrencyDesc": "По умолчанию 50. Уменьшите при перегрузке сети; действует со следующей групповой проверки",
   "delayConcurrencyAndroidDesc": "По умолчанию 16 на Android. Уменьшите при перегрузке сети; действует со следующей групповой проверки",
-  "delayTestFailed": "Ошибка проверки"
+  "delayTestFailed": "Ошибка проверки",
+  "updateViewDetails": "Подробнее",
+  "updateReleaseNotes": "Что нового",
+  "updateDownloadConfirm": "Скачать обновление",
+  "updateLater": "Позже",
+  "updateCancelDownload": "Отменить загрузку"
 }

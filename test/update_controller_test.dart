@@ -8,7 +8,6 @@ import 'package:fl_clash/common/update_download_task.dart';
 import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/common/linux_package_format.dart';
 import 'package:fl_clash/controller.dart';
-import 'package:fl_clash/common/request.dart';
 import 'package:fl_clash/providers/update_download.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -37,6 +36,31 @@ void main() {
       expect(calls, [false, true]);
       await check.run();
       expect(calls, [false, true, false]);
+    },
+  );
+
+  test(
+    'a queued manual check retries after an automatic check fails',
+    () async {
+      final automatic = Completer<void>();
+      final manual = Completer<void>();
+      final calls = <bool>[];
+      final check = AppUpdateCheck(
+        checkForUpdates: (isUser) {
+          calls.add(isUser);
+          return isUser ? manual.future : automatic.future;
+        },
+      );
+      final first = check.run();
+      final failure = expectLater(first, throwsStateError);
+      final waiters = List.generate(3, (_) => check.run(isUser: true));
+      final completed = Future.wait(waiters);
+      automatic.completeError(StateError('automatic check failed'));
+      await failure;
+      await pumpEventQueue();
+      expect(calls, [false, true]);
+      manual.complete();
+      await completed;
     },
   );
 
@@ -123,38 +147,32 @@ void main() {
   );
 
   test(
-    'dismissed notices suppress older automatic offers but allow manual checks',
+    'declined prompts suppress older automatic offers but allow manual checks',
     () {
-      final notice = AppUpdateNotice()
-        ..value = const AppUpdateInfo(remoteBuildNumber: 12);
-      addTearDown(notice.dispose);
-      notice.dismiss();
-      notice.decline(10);
-      expect(notice.value, isNull);
-      expect(notice.declinedBuildNumber, 12);
+      final check = AppUpdateCheck(checkForUpdates: (_) async {});
+      check.decline(12);
+      check.decline(10);
+      expect(check.declinedBuildNumber, 12);
       expect(
         resolveAppUpdateOffer(
           isUser: false,
-          isUiVisible: true,
           remoteBuildNumber: 12,
-          declinedBuildNumber: notice.declinedBuildNumber,
+          declinedBuildNumber: check.declinedBuildNumber,
         ),
         AppUpdateOffer.ignore,
       );
       expect(
         resolveAppUpdateOffer(
           isUser: true,
-          isUiVisible: true,
           remoteBuildNumber: 12,
-          declinedBuildNumber: notice.declinedBuildNumber,
+          declinedBuildNumber: check.declinedBuildNumber,
         ),
         AppUpdateOffer.prompt,
       );
-      notice.value = const AppUpdateInfo(remoteBuildNumber: 13);
-      notice.decline(12);
-      expect(notice.value?.remoteBuildNumber, 13);
-      final nextLaunch = AppUpdateNotice();
-      addTearDown(nextLaunch.dispose);
+      check.decline(13);
+      check.decline(12);
+      expect(check.declinedBuildNumber, 13);
+      final nextLaunch = AppUpdateCheck(checkForUpdates: (_) async {});
       expect(nextLaunch.declinedBuildNumber, isNull);
     },
   );
@@ -179,38 +197,21 @@ void main() {
     expect(events, ['show', 'prompt']);
   });
 
-  test('a manual check always asks, whatever a run already answered', () {
-    for (final visible in [true, false]) {
-      expect(
-        resolveAppUpdateOffer(
-          isUser: true,
-          isUiVisible: visible,
-          remoteBuildNumber: 2026092010,
-          declinedBuildNumber: 2026092010,
-        ),
-        AppUpdateOffer.prompt,
-        reason: 'visible=$visible',
-      );
-    }
-  });
-
-  test('an automatic check asks the user before anything is fetched', () {
+  test('a manual check opens details even after declining that release', () {
     expect(
       resolveAppUpdateOffer(
-        isUser: false,
-        isUiVisible: true,
+        isUser: true,
         remoteBuildNumber: 2026092010,
-        declinedBuildNumber: null,
+        declinedBuildNumber: 2026092010,
       ),
       AppUpdateOffer.prompt,
     );
   });
 
-  test('a hidden window keeps the offer in the notice', () {
+  test('an automatic check only offers an in-app notice', () {
     expect(
       resolveAppUpdateOffer(
         isUser: false,
-        isUiVisible: false,
         remoteBuildNumber: 2026092010,
         declinedBuildNumber: null,
       ),
@@ -223,7 +224,6 @@ void main() {
       expect(
         resolveAppUpdateOffer(
           isUser: false,
-          isUiVisible: true,
           remoteBuildNumber: build,
           declinedBuildNumber: 2026092010,
         ),
@@ -234,76 +234,11 @@ void main() {
     expect(
       resolveAppUpdateOffer(
         isUser: false,
-        isUiVisible: true,
         remoteBuildNumber: 2026092011,
         declinedBuildNumber: 2026092010,
       ),
-      AppUpdateOffer.prompt,
+      AppUpdateOffer.notice,
     );
-  });
-
-  test('a hidden window is never asked to show an automatic prompt', () async {
-    for (final visible in [false, true]) {
-      expect(
-        await canPromptForAppUpdate(
-          isUiVisible: visible,
-          isWindowVisible: () async => false,
-        ),
-        isFalse,
-        reason: 'bookkeeping=$visible',
-      );
-    }
-  });
-
-  test('a window reporting itself visible may be prompted', () async {
-    expect(
-      await canPromptForAppUpdate(
-        isUiVisible: true,
-        isWindowVisible: () async => true,
-      ),
-      isTrue,
-    );
-  });
-
-  test('a window that cannot answer counts as hidden', () async {
-    var queried = false;
-    expect(
-      await canPromptForAppUpdate(
-        isUiVisible: true,
-        isWindowVisible: () async {
-          queried = true;
-          throw StateError('window unavailable');
-        },
-      ),
-      isFalse,
-    );
-    expect(queried, isTrue);
-  });
-
-  test(
-    'a background app is not prompted without querying its window',
-    () async {
-      expect(
-        await canPromptForAppUpdate(
-          isUiVisible: false,
-          isWindowVisible: () async => fail('must not query a background app'),
-        ),
-        isFalse,
-      );
-    },
-  );
-
-  test('a platform without windows follows the app state alone', () async {
-    for (final visible in [false, true]) {
-      expect(
-        await canPromptForAppUpdate(
-          isUiVisible: visible,
-          isWindowVisible: null,
-        ),
-        visible,
-        reason: 'visible=$visible',
-      );
-    }
   });
 
   test('mobile update prompts without a desktop window', () async {

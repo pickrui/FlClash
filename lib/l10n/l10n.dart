@@ -7578,6 +7578,51 @@ class AppLocalizations {
   String get delayTestFailed {
     return Intl.message('Failed', name: 'delayTestFailed', desc: '', args: []);
   }
+
+  /// `View update`
+  String get updateViewDetails {
+    return Intl.message(
+      'View update',
+      name: 'updateViewDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Release notes`
+  String get updateReleaseNotes {
+    return Intl.message(
+      'Release notes',
+      name: 'updateReleaseNotes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Download update`
+  String get updateDownloadConfirm {
+    return Intl.message(
+      'Download update',
+      name: 'updateDownloadConfirm',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Later`
+  String get updateLater {
+    return Intl.message('Later', name: 'updateLater', desc: '', args: []);
+  }
+
+  /// `Cancel download`
+  String get updateCancelDownload {
+    return Intl.message(
+      'Cancel download',
+      name: 'updateCancelDownload',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

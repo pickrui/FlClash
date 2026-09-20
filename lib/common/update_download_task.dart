@@ -30,13 +30,11 @@ class AppUpdateDownloadState {
   final double? progress;
   final File? file;
   final Object? error;
-  final bool showReadyNotice;
   const AppUpdateDownloadState(
     this.phase, {
     this.progress,
     this.file,
     this.error,
-    this.showReadyNotice = false,
   });
 }
 
@@ -50,13 +48,11 @@ class AppUpdateDownloadTask extends ValueNotifier<AppUpdateDownloadState> {
   Future<void>? _operation;
   Future<void> _stagingTail = Future.value();
   bool _disposed = false;
-  int _views = 0;
   String? downloadUrl;
 
   bool get hasDownload =>
       value.phase != AppUpdateDownloadPhase.idle &&
       value.phase != AppUpdateDownloadPhase.canceled;
-  bool get hasForegroundView => _views > 0;
 
   Future<void> start(AppUpdateDownloader download, {required String url}) {
     if (_disposed) return Future.value();
@@ -130,11 +126,7 @@ class AppUpdateDownloadTask extends ValueNotifier<AppUpdateDownloadState> {
         await _discard(file);
         return;
       }
-      value = AppUpdateDownloadState(
-        AppUpdateDownloadPhase.ready,
-        file: file,
-        showReadyNotice: true,
-      );
+      value = AppUpdateDownloadState(AppUpdateDownloadPhase.ready, file: file);
     } catch (error) {
       if (current()) {
         value = AppUpdateDownloadState(
@@ -151,29 +143,6 @@ class AppUpdateDownloadTask extends ValueNotifier<AppUpdateDownloadState> {
     final file = value.file;
     value = const AppUpdateDownloadState(AppUpdateDownloadPhase.canceled);
     if (file != null) unawaited(_discard(file));
-  }
-
-  void attachView() {
-    if (_disposed) return;
-    _views++;
-    // Route construction can happen during a frame. Consumers will observe the
-    // attachment on the next task state change; avoid notifying during build.
-  }
-
-  void detachView() {
-    if (_disposed) return;
-    if (_views > 0) _views--;
-    scheduleMicrotask(() {
-      if (!_disposed) notifyListeners();
-    });
-  }
-
-  void dismissNotice() {
-    if (_disposed || value.phase != AppUpdateDownloadPhase.ready) return;
-    value = AppUpdateDownloadState(
-      AppUpdateDownloadPhase.ready,
-      file: value.file,
-    );
   }
 
   static Future<void> _discard(File file) async {

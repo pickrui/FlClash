@@ -886,5 +886,10 @@
   "delayConcurrency": "Concurrent batch latency tests",
   "delayConcurrencyDesc": "Default: 50. Reduce on congested networks; applies to the next batch",
   "delayConcurrencyAndroidDesc": "Default: 16 on Android. Reduce on congested networks; applies to the next batch",
-  "delayTestFailed": "Failed"
+  "delayTestFailed": "Failed",
+  "updateViewDetails": "View update",
+  "updateReleaseNotes": "Release notes",
+  "updateDownloadConfirm": "Download update",
+  "updateLater": "Later",
+  "updateCancelDownload": "Cancel download"
 }

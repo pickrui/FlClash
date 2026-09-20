@@ -40,7 +40,7 @@ final class UpdateActionProvider extends $NotifierProvider<UpdateAction, void> {
   }
 }
 
-String _$updateActionHash() => r'e599173e0a7b0ab87a953b1e63a0391bfe18ac73';
+String _$updateActionHash() => r'6799be5c2ba3288efd8f993f3971c5e3b800ca79';
 
 abstract class _$UpdateAction extends $Notifier<void> {
   void build();

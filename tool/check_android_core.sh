@@ -3,6 +3,7 @@
 # Output stays in a temporary directory; no signing keys or packaged binaries.
 set -euo pipefail
 repo_dir="$(cd "$(dirname "$0")/.." && pwd)"
+. "$repo_dir/tool/go_build_tags.env"
 : "${ANDROID_NDK_HOME:?Set ANDROID_NDK_HOME to the Android NDK directory}"
 case "$(uname -s)" in
   Darwin) host_tag=darwin-x86_64 ;;
@@ -31,8 +32,8 @@ cp "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$host_tag/sysroot/usr/include/jni
   "$repo_dir/android/core/src/main/cpp/jni_helper.cpp" -o "$output_dir/jni_helper_test"
 "$output_dir/jni_helper_test"
 cd "$repo_dir/core"
-go vet -tags with_gvisor,with_mips_low_memory . ./tun ./platform
-go build -tags with_gvisor,with_mips_low_memory -buildmode=c-shared -trimpath -o "$output_dir/libclash.so" .
+go vet -tags "$GO_TAGS" . ./tun ./platform
+go build -tags "$GO_TAGS" -buildmode=c-shared -trimpath -o "$output_dir/libclash.so" .
 cp bride.h "$output_dir/bride.h"
 "$CXX" -std=c++17 -DLIBCLASH -fPIC -shared -Wl,--no-undefined \
   -I"$output_dir" "$repo_dir/android/core/src/main/cpp/core.cpp" \

@@ -14,6 +14,7 @@ class TestApp extends StatelessWidget {
   final List<Override> overrides;
   final Widget Function(Widget child) homeBuilder;
   final Locale? locale;
+  final TextScaler? textScaler;
 
   const TestApp({
     super.key,
@@ -24,6 +25,7 @@ class TestApp extends StatelessWidget {
     this.overrides = const [],
     this.homeBuilder = _identity,
     this.locale,
+    this.textScaler,
   });
 
   static Widget _identity(Widget child) => child;
@@ -44,9 +46,16 @@ class TestApp extends StatelessWidget {
           globalState.theme = CommonTheme.of(context, 1);
         }
         // ignore: deprecated_member_use
-        return MaterialUiCompatibilityBridge(
+        Widget wrapped = MaterialUiCompatibilityBridge(
           child: IconTheme(data: Theme.of(context).iconTheme, child: child!),
         );
+        if (textScaler != null) {
+          wrapped = MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+            child: wrapped,
+          );
+        }
+        return wrapped;
       },
       home: homeBuilder(child),
     );

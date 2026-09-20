@@ -9,6 +9,9 @@ FlClash selects the optimized mips implementation when users choose `mips`; the 
 - Select the upstream cache policy using `with_mips_low_memory`, without enabling mihomo's unrelated global `with_low_memory` behavior
 - Configure the TUN adapter with the reference workload's 32 KiB initial and 128 KiB maximum send and receive buffers
 - Enable the dedicated tag in the shared release/Native Assets harness, local Go tests, Android compilation checks and CI
+- Keep that tag list in `tool/go_build_tags.env`: CI jobs load it into `$GITHUB_ENV`, the Makefile includes it and
+  `tool/check_android_core.sh` sources it, while `BuildConfig` in `plugins/setup/setup_hooks` mirrors it for packaging.
+  `test/lint/go_build_tags_test.dart` fails if the two drift apart or if a caller spells the tags out again
 
 | TCP storage policy | Ordinary mips | Optimized mips |
 | --- | ---: | ---: |

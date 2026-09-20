@@ -1,4 +1,5 @@
 SHELL := /bin/bash
+include tool/go_build_tags.env
 
 .PHONY: help submodules hooks analyze format lint test test-go test-rust test-all
 
@@ -35,7 +36,7 @@ test:
 	dart tool/run_tests.dart $(FLUTTER_TEST_ARGS)
 
 test-go:
-	cd core && CGO_ENABLED=0 go test -tags with_gvisor,with_mips_low_memory ./...
+	cd core && CGO_ENABLED=0 go test -tags $(GO_TAGS) ./...
 
 test-rust:
 	cargo test --manifest-path plugins/rust_api/rust/Cargo.toml
