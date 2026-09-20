@@ -257,6 +257,33 @@ class ProxiesSetting extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Consumer(
+            builder: (context, ref, _) {
+              final value = normalizeDelayTestConcurrency(
+                ref.watch(proxiesStyleSettingProvider).concurrencyLimit,
+              );
+              return ListItem<int>.options(
+                title: Text(context.appLocalizations.delayConcurrency),
+                subtitle: Text(
+                  '$value · ${context.appLocalizations.delayConcurrencyDesc}',
+                ),
+                delegate: OptionsDelegate<int>(
+                  title: context.appLocalizations.delayConcurrency,
+                  options: delayTestConcurrencyOptions,
+                  value: value,
+                  textBuilder: (value) => '$value',
+                  onChanged: (value) {
+                    if (value == null) return;
+                    ref
+                        .read(proxiesStyleSettingProvider.notifier)
+                        .update(
+                          (state) => state.copyWith(concurrencyLimit: value),
+                        );
+                  },
+                ),
+              );
+            },
+          ),
           ..._buildStyleSetting(context),
           ..._buildSortSetting(context),
           ..._buildLayoutSetting(context),

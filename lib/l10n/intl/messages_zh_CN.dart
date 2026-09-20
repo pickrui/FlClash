@@ -419,6 +419,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "defaultNameserverDesc": MessageLookupByLibrary.simpleMessage("用于解析DNS服务器"),
     "defaultText": MessageLookupByLibrary.simpleMessage("默认"),
     "delay": MessageLookupByLibrary.simpleMessage("延迟"),
+    "delayConcurrency": MessageLookupByLibrary.simpleMessage("批量测速并发数"),
+    "delayConcurrencyDesc": MessageLookupByLibrary.simpleMessage(
+      "默认 50，网络拥堵时可降低；下一轮批量测速生效",
+    ),
     "delayTest": MessageLookupByLibrary.simpleMessage("延迟测试"),
     "delete": MessageLookupByLibrary.simpleMessage("删除"),
     "deleteMultipTip": m13,
@@ -610,6 +614,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "entriesCount": m18,
     "exclude": MessageLookupByLibrary.simpleMessage("从最近任务中隐藏"),
     "excludeDesc": MessageLookupByLibrary.simpleMessage("应用在后台时,从最近任务中隐藏应用"),
+    "excludeNetworks": MessageLookupByLibrary.simpleMessage("按 IP 或网关暂停代理"),
+    "excludeNetworksDesc": MessageLookupByLibrary.simpleMessage(
+      "匹配 Wi-Fi 或以太网的 IPv4 地址、网段或网关时暂停，离开后恢复；用逗号分隔，例如 192.168.1.0/24,gateway:192.168.1.1",
+    ),
+    "excludeNetworksInvalid": MessageLookupByLibrary.simpleMessage(
+      "最多 16 条规则，请输入有效的 IPv4、网段或 gateway:地址",
+    ),
     "excludeProxyFilter": MessageLookupByLibrary.simpleMessage("排除节点过滤器"),
     "excludeSsids": MessageLookupByLibrary.simpleMessage("排除SSIDs"),
     "excludeSsidsDesc": MessageLookupByLibrary.simpleMessage(
@@ -1139,6 +1150,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "scriptModeDesc": MessageLookupByLibrary.simpleMessage(
       "脚本模式，使用外部扩展脚本，提供一键覆写配置的能力",
     ),
+    "scriptOptions": MessageLookupByLibrary.simpleMessage("脚本选项"),
+    "scriptOptionsEmpty": MessageLookupByLibrary.simpleMessage("此脚本没有提供可配置的开关"),
     "search": MessageLookupByLibrary.simpleMessage("搜索"),
     "seconds": MessageLookupByLibrary.simpleMessage("秒"),
     "secondsCount": m46,
@@ -1238,6 +1251,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "无法启用 TUN：管理员授权被拒绝，请允许系统权限请求后重试",
     ),
     "tunDesc": MessageLookupByLibrary.simpleMessage("仅在管理员模式生效"),
+    "tunMtuDesc": MessageLookupByLibrary.simpleMessage(
+      "默认 9000，可尝试 1480 或 4064；Android VPN 需重启后生效",
+    ),
+    "tunMtuInvalid": MessageLookupByLibrary.simpleMessage(
+      "请输入 1280–65535 之间的整数",
+    ),
     "turnOff": MessageLookupByLibrary.simpleMessage("关闭"),
     "turnOn": MessageLookupByLibrary.simpleMessage("开启"),
     "undo": MessageLookupByLibrary.simpleMessage("撤销"),

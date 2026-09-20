@@ -77,38 +77,40 @@ func delayValue(delay uint16) int32 {
 	return max(int32(delay), 1)
 }
 
-// Manual probes carry the generation of the test run that started them. When a
-// newer run begins, the probes still running belong to a result the app has
-// already discarded, so they are cancelled instead of occupying the network,
-// the probe semaphore and the app's request budget until their own deadline.
+// Generations belong to one frontend session; the Android Core can outlive it.
+// Only active probes participate, so a completed session retains no high-water mark.
 type delayProbeRegistry struct {
-	mu      sync.Mutex
-	highest int64
-	lastID  int64
-	active  map[int64]delayProbe
+	mu     sync.Mutex
+	lastID int64
+	active map[int64]delayProbe
 }
 
 type delayProbe struct {
+	session    string
 	generation int64
 	cancel     context.CancelFunc
 }
 
 var manualDelayProbes delayProbeRegistry
 
-// begin registers a probe and cancels every probe of an older generation. It
-// returns the id that end takes.
 func (r *delayProbeRegistry) begin(
+	session string,
 	generation int64,
 	cancel context.CancelFunc,
 ) int64 {
 	r.mu.Lock()
-	if generation > r.highest {
-		r.highest = generation
+	if generation > 0 {
+		for _, probe := range r.active {
+			if probe.session == session && probe.generation > generation {
+				r.mu.Unlock()
+				cancel()
+				return 0 // Superseded before it started; end ignores the zero id.
+			}
+		}
 	}
 	var superseded []context.CancelFunc
 	for id, probe := range r.active {
-		// Generation zero is unscoped: no run owns it, so nothing supersedes it.
-		if probe.generation > 0 && probe.generation < r.highest {
+		if probe.session == session && probe.generation > 0 && probe.generation < generation {
 			superseded = append(superseded, probe.cancel)
 			delete(r.active, id)
 		}
@@ -118,7 +120,7 @@ func (r *delayProbeRegistry) begin(
 	if r.active == nil {
 		r.active = make(map[int64]delayProbe)
 	}
-	r.active[id] = delayProbe{generation: generation, cancel: cancel}
+	r.active[id] = delayProbe{session: session, generation: generation, cancel: cancel}
 	r.mu.Unlock()
 	for _, cancel := range superseded {
 		cancel()

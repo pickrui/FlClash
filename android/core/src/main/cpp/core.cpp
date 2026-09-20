@@ -10,9 +10,9 @@
 extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_oixcloud_clash_core_Core_startTun(JNIEnv *env, jobject thiz, jint fd, jobject cb,
-                                         jstring stack, jstring address, jstring dns) {
+                                         jstring stack, jstring address, jstring dns, jint mtu) {
     const auto interface = new_global(cb);
-    return startTUN(interface, fd, get_string(stack), get_string(address), get_string(dns))
+    return startTUN(interface, fd, mtu, get_string(stack), get_string(address), get_string(dns))
         ? JNI_TRUE : JNI_FALSE;
 }
 
@@ -183,7 +183,7 @@ JNI_OnLoad(JavaVM *vm, void *) {
 extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_oixcloud_clash_core_Core_startTun(JNIEnv *env, jobject thiz, jint fd, jobject cb,
-                                         jstring stack, jstring address, jstring dns) {
+                                         jstring stack, jstring address, jstring dns, jint mtu) {
     close(fd);
     return JNI_FALSE;
 }

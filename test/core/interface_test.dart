@@ -19,8 +19,14 @@ void main() {
 
   test('the probe carries its test run so the Core can supersede it', () async {
     final handler = _FakeCoreHandler();
-    await handler.asyncTestDelay('https://example.com', 'node', generation: 7);
+    await handler.asyncTestDelay(
+      'https://example.com',
+      'node',
+      generation: 7,
+      session: 'frontend-session',
+    );
     expect((handler.arguments as Map)['generation'], 7);
+    expect((handler.arguments as Map)['session'], 'frontend-session');
   });
 
   test('a custom network budget always fits inside the RPC guard', () async {

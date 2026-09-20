@@ -28,9 +28,8 @@ class LineChart extends StatefulWidget {
   State<LineChart> createState() => _LineChartState();
 }
 
-class _LineChartState extends State<LineChart>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+class _LineChartState extends State<LineChart> with TickerProviderStateMixin {
+  AnimationController? _controller;
   List<Point> _points = [];
 
   List<Point> _prevRenderPoints = [];
@@ -39,26 +38,47 @@ class _LineChartState extends State<LineChart>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: widget.duration);
+    _syncAnimation();
     _points = widget.points;
     _currentRenderPoints = _getRenderPoints(_points);
     _prevRenderPoints = _currentRenderPoints;
   }
 
+  void _syncAnimation() {
+    if (widget.duration == Duration.zero) {
+      _controller?.dispose();
+      _controller = null;
+    } else {
+      _controller ??= AnimationController(vsync: this, value: 1);
+      _controller!.duration = widget.duration;
+    }
+  }
+
+  bool _samePoints(List<Point> other) {
+    if (_points.length != other.length) return false;
+    for (var i = 0; i < other.length; i++) {
+      if (_points[i].x != other[i].x || _points[i].y != other[i].y) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   @override
   void didUpdateWidget(LineChart oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.points != _points) {
+    _syncAnimation();
+    if (!_samePoints(widget.points)) {
       _points = widget.points;
       _prevRenderPoints = _currentRenderPoints;
       _currentRenderPoints = _getRenderPoints(_points);
-      _controller.forward(from: 0);
+      _controller?.forward(from: 0);
     }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
@@ -89,23 +109,24 @@ class _LineChartState extends State<LineChart>
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (_, container) {
+        Widget paint(double progress) => CustomPaint(
+          painter: LineChartPainter(
+            prevRenderPoints: _prevRenderPoints,
+            currentRenderPoints: _currentRenderPoints,
+            progress: progress,
+            gradient: widget.gradient,
+            color: widget.color,
+          ),
+          child: SizedBox(
+            height: container.maxHeight,
+            width: container.maxWidth,
+          ),
+        );
+        final controller = _controller;
+        if (controller == null) return paint(1);
         return AnimatedBuilder(
-          animation: _controller.view,
-          builder: (_, _) {
-            return CustomPaint(
-              painter: LineChartPainter(
-                prevRenderPoints: _prevRenderPoints,
-                currentRenderPoints: _currentRenderPoints,
-                progress: _controller.value,
-                gradient: widget.gradient,
-                color: widget.color,
-              ),
-              child: SizedBox(
-                height: container.maxHeight,
-                width: container.maxWidth,
-              ),
-            );
-          },
+          animation: controller.view,
+          builder: (_, _) => paint(controller.value),
         );
       },
     );
@@ -193,7 +214,9 @@ class LineChartPainter extends CustomPainter {
   }
 
   Path _getAnimatedPath(Size size) {
-    final interpolatedPoints = _getInterpolatePoints(progress);
+    final interpolatedPoints = progress >= 1
+        ? currentRenderPoints
+        : _getInterpolatePoints(progress);
     return _getPath(interpolatedPoints, size);
   }
 

@@ -7473,6 +7473,96 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Default: 9000; alternatives: 1480 or 4064. Restart the Android VPN to apply`
+  String get tunMtuDesc {
+    return Intl.message(
+      'Default: 9000; alternatives: 1480 or 4064. Restart the Android VPN to apply',
+      name: 'tunMtuDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter an integer from 1280 to 65535`
+  String get tunMtuInvalid {
+    return Intl.message(
+      'Enter an integer from 1280 to 65535',
+      name: 'tunMtuInvalid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Script options`
+  String get scriptOptions {
+    return Intl.message(
+      'Script options',
+      name: 'scriptOptions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This script does not expose configurable switches`
+  String get scriptOptionsEmpty {
+    return Intl.message(
+      'This script does not expose configurable switches',
+      name: 'scriptOptionsEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pause proxy by IP or gateway`
+  String get excludeNetworks {
+    return Intl.message(
+      'Pause proxy by IP or gateway',
+      name: 'excludeNetworks',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pause on matching Wi-Fi/Ethernet IPv4 addresses, subnets or gateways; resume after leaving. Comma-separated, e.g. 192.168.1.0/24,gateway:192.168.1.1`
+  String get excludeNetworksDesc {
+    return Intl.message(
+      'Pause on matching Wi-Fi/Ethernet IPv4 addresses, subnets or gateways; resume after leaving. Comma-separated, e.g. 192.168.1.0/24,gateway:192.168.1.1',
+      name: 'excludeNetworksDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Up to 16 rules; enter valid IPv4, CIDR or gateway:address`
+  String get excludeNetworksInvalid {
+    return Intl.message(
+      'Up to 16 rules; enter valid IPv4, CIDR or gateway:address',
+      name: 'excludeNetworksInvalid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Concurrent batch latency tests`
+  String get delayConcurrency {
+    return Intl.message(
+      'Concurrent batch latency tests',
+      name: 'delayConcurrency',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Default: 50. Reduce on congested networks; applies to the next batch`
+  String get delayConcurrencyDesc {
+    return Intl.message(
+      'Default: 50. Reduce on congested networks; applies to the next batch',
+      name: 'delayConcurrencyDesc',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

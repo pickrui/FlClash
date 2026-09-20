@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test(
-    'a constrained link stays below the upstream concurrency limit',
+    'a lower configured concurrency avoids saturating a constrained link',
     () async {
       var active = 0;
       var peak = 0;
@@ -15,7 +15,7 @@ void main() {
       final results = <Delay>[];
       await runDelayTestBatch(
         targets: List.generate(100, (i) => (name: '$i', url: 'url')),
-        concurrency: maxConcurrentDelayTests,
+        concurrency: 16,
         isCurrent: () => true,
         probe: (target) async {
           attempts.update(target.name, (n) => n + 1, ifAbsent: () => 1);
@@ -46,7 +46,7 @@ void main() {
     var finished = false;
     final run = runDelayTestBatch(
       targets: List.generate(48, (i) => (name: '$i', url: 'url')),
-      concurrency: maxConcurrentDelayTests,
+      concurrency: 16,
       isCurrent: () => true,
       probe: (target) async {
         const needed = Duration(seconds: 6);
@@ -89,13 +89,15 @@ void main() {
         onResult: results.add,
       ).then((_) => finished = true);
       expect(delayTestTimeoutDuration, const Duration(seconds: 8));
-      for (var wave = 1; wave <= 6; wave++) {
+      final waves = (100 / maxConcurrentDelayTests).ceil();
+      for (var wave = 1; wave <= waves; wave++) {
         await tester.pump(const Duration(seconds: 8));
-        expect(results, hasLength(wave * 16));
-        expect(finished, isFalse);
+        expect(
+          results,
+          hasLength((wave * maxConcurrentDelayTests).clamp(0, 100)),
+        );
+        expect(finished, wave == waves);
       }
-      await tester.pump(const Duration(seconds: 8));
-      expect(finished, isTrue);
       expect(calls, 100);
       expect(results, hasLength(100));
       expect(results.map((delay) => delay.value), everyElement(-1));

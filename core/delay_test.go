@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -264,7 +265,9 @@ func TestManualProbeSupersededByNewerGeneration(t *testing.T) {
 		}
 	}))
 	defer server.Close()
-	defer close(release)
+	var once sync.Once
+	unblock := func() { once.Do(func() { close(release) }) }
+	defer unblock()
 	previousProxies, previousProviders := tunnel.Proxies(), tunnel.Providers()
 	t.Cleanup(func() { tunnel.UpdateProxies(previousProxies, previousProviders) })
 	node := adapter.NewProxy(outbound.NewDirect())
@@ -303,6 +306,15 @@ func TestManualProbeSupersededByNewerGeneration(t *testing.T) {
 	case delay := <-current:
 		t.Fatalf("the current run was cancelled with its predecessor: %+v", delay)
 	case <-time.After(300 * time.Millisecond):
+	}
+	unblock()
+	select {
+	case delay := <-current:
+		if delay.Value <= 0 {
+			t.Fatalf("replacement probe failed: %+v", delay)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("replacement probe did not complete")
 	}
 }
 
@@ -361,5 +373,173 @@ func TestQueuedProbeKeepsItsFullBudget(t *testing.T) {
 		}
 	case <-time.After(budget + serverDelay + time.Second):
 		t.Fatal("queued probe never finished")
+	}
+}
+
+func TestDelayProbeBatchAfterFrontendRestart(t *testing.T) {
+	var hold atomic.Bool
+	started := make(chan struct{}, 2)
+	release := make(chan struct{})
+	var releaseOnce sync.Once
+	unblock := func() { releaseOnce.Do(func() { close(release) }) }
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if hold.Load() {
+			started <- struct{}{}
+			select {
+			case <-r.Context().Done():
+				return
+			case <-release:
+			}
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer server.Close()
+	defer unblock()
+	previousProxies, previousProviders := tunnel.Proxies(), tunnel.Providers()
+	previousUnified := adapter.UnifiedDelay.Load()
+	adapter.UnifiedDelay.Store(false)
+	t.Cleanup(func() {
+		tunnel.UpdateProxies(previousProxies, previousProviders)
+		adapter.UnifiedDelay.Store(previousUnified)
+	})
+	tunnel.UpdateProxies(map[string]constant.Proxy{"node": adapter.NewProxy(outbound.NewDirect())}, nil)
+
+	probe := func(generation int64) <-chan *Delay {
+		result := make(chan *Delay, 1)
+		handleAsyncTestDelay(&TestDelayParams{
+			ProxyName: "node", TestUrl: server.URL, Timeout: 2000, Generation: generation,
+		}, func(delay *Delay) { result <- delay })
+		return result
+	}
+	awaitSuccess := func(result <-chan *Delay) {
+		t.Helper()
+		select {
+		case delay := <-result:
+			if delay.Value <= 0 {
+				t.Fatalf("reachable node reported a false failure: %+v", delay)
+			}
+		case <-time.After(3 * time.Second):
+			t.Fatal("local probe did not finish")
+		}
+	}
+	awaitSuccess(probe(100))
+	hold.Store(true)
+	first := probe(1)
+	select {
+	case <-started:
+	case <-time.After(3 * time.Second):
+		t.Fatal("first restarted probe never reached the server")
+	}
+	second := probe(1)
+	select {
+	case <-started:
+	case <-time.After(3 * time.Second):
+		t.Fatal("second restarted probe never reached the server")
+	}
+	unblock()
+	awaitSuccess(first)
+	awaitSuccess(second)
+}
+
+func TestDelayProbeRegistryScopesOverlappingFrontends(t *testing.T) {
+	var registry delayProbeRegistry
+	old, cancelOld := context.WithCancel(context.Background())
+	defer cancelOld()
+	oldID := registry.begin("old", 100, cancelOld)
+	defer registry.end(oldID)
+	first, cancelFirst := context.WithCancel(context.Background())
+	defer cancelFirst()
+	firstID := registry.begin("new", 1, cancelFirst)
+	second, cancelSecond := context.WithCancel(context.Background())
+	defer cancelSecond()
+	secondID := registry.begin("new", 1, cancelSecond)
+	if old.Err() != nil || first.Err() != nil || second.Err() != nil {
+		t.Fatal("independent frontends or members of one batch cancelled each other")
+	}
+	current, cancelCurrent := context.WithCancel(context.Background())
+	defer cancelCurrent()
+	currentID := registry.begin("new", 2, cancelCurrent)
+	if first.Err() != context.Canceled || second.Err() != context.Canceled || old.Err() != nil || current.Err() != nil {
+		t.Fatal("a newer batch must cancel only its own frontend's older probes")
+	}
+	registry.end(firstID)
+	registry.end(secondID)
+	registry.end(currentID)
+	registry.end(oldID)
+	if len(registry.active) != 0 {
+		t.Fatal("completed probes remain registered")
+	}
+}
+
+func TestDelayProbeRegistryRejectsLateOlderBatch(t *testing.T) {
+	var registry delayProbeRegistry
+	current, cancelCurrent := context.WithCancel(context.Background())
+	defer cancelCurrent()
+	currentID := registry.begin("session", 2, cancelCurrent)
+	defer registry.end(currentID)
+	late, cancelLate := context.WithCancel(context.Background())
+	defer cancelLate()
+	lateID := registry.begin("session", 1, cancelLate)
+	if lateID != 0 || late.Err() != context.Canceled || current.Err() != nil || len(registry.active) != 1 {
+		t.Fatal("late stale probe was admitted or cancelled the current batch")
+	}
+	unscoped, cancelUnscoped := context.WithCancel(context.Background())
+	defer cancelUnscoped()
+	unscopedID := registry.begin("session", 0, cancelUnscoped)
+	defer registry.end(unscopedID)
+	if unscoped.Err() != nil || current.Err() != nil {
+		t.Fatal("legacy unscoped probes must remain independent of batch cancellation")
+	}
+}
+
+func TestDelayProbeSupports150ConcurrentReachableNodes(t *testing.T) {
+	const count = 150
+	started := make(chan struct{}, count)
+	release := make(chan struct{})
+	var once sync.Once
+	unblock := func() { once.Do(func() { close(release) }) }
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		started <- struct{}{}
+		select {
+		case <-release:
+			w.WriteHeader(http.StatusNoContent)
+		case <-r.Context().Done():
+		}
+	}))
+	defer server.Close()
+	defer unblock()
+	previousProxies, previousProviders := tunnel.Proxies(), tunnel.Providers()
+	previousUnified := adapter.UnifiedDelay.Load()
+	adapter.UnifiedDelay.Store(false)
+	t.Cleanup(func() {
+		tunnel.UpdateProxies(previousProxies, previousProviders)
+		adapter.UnifiedDelay.Store(previousUnified)
+	})
+	tunnel.UpdateProxies(map[string]constant.Proxy{"node": adapter.NewProxy(outbound.NewDirect())}, nil)
+	results := make(chan *Delay, count)
+	for range count {
+		handleAsyncTestDelay(&TestDelayParams{
+			Session: "parallel-150", Generation: 1, ProxyName: "node", TestUrl: server.URL, Timeout: 5000,
+		}, func(delay *Delay) { results <- delay })
+	}
+	deadline := time.NewTimer(4 * time.Second)
+	defer deadline.Stop()
+	for index := range count {
+		select {
+		case <-started:
+		case <-deadline.C:
+			t.Fatalf("only %d of 150 probes could reach the server concurrently", index)
+		}
+	}
+	unblock()
+	for range count {
+		select {
+		case delay := <-results:
+			if delay.Value <= 0 {
+				t.Fatalf("reachable probe failed at 150 concurrency: %+v", delay)
+			}
+		case <-time.After(5 * time.Second):
+			t.Fatal("concurrent probe did not complete")
+		}
 	}
 }

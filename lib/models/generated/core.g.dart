@@ -109,6 +109,14 @@ _VpnOptions _$VpnOptionsFromJson(Map<String, dynamic> json) => _VpnOptions(
           ?.map((e) => e as String)
           .toList() ??
       const [],
+  excludeNetworks:
+      (json['excludeNetworks'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  mtu: json['mtu'] == null
+      ? defaultTunMtu
+      : normalizeTunMtu((json['mtu'] as num?)?.toInt()),
 );
 
 Map<String, dynamic> _$VpnOptionsToJson(_VpnOptions instance) =>
@@ -124,6 +132,8 @@ Map<String, dynamic> _$VpnOptionsToJson(_VpnOptions instance) =>
       'stack': instance.stack,
       'routeAddress': instance.routeAddress,
       'excludeSSIDs': instance.excludeSSIDs,
+      'excludeNetworks': instance.excludeNetworks,
+      'mtu': instance.mtu,
     };
 
 _InitParams _$InitParamsFromJson(Map<String, dynamic> json) => _InitParams(

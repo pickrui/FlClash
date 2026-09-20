@@ -38,6 +38,24 @@ class GlobalState {
     },
   );
   int _runRequest = 0;
+  bool _appVisible = true;
+  bool _windowVisible = !system.isDesktop;
+  bool _trayTrafficEnabled = false;
+
+  bool get isUiVisible => _appVisible && _windowVisible;
+  bool get needsTrayTraffic => _trayTrafficEnabled;
+
+  void setUpdateVisibility({
+    bool? appVisible,
+    bool? windowVisible,
+    bool? trayTraffic,
+  }) {
+    if (appVisible != null) _appVisible = appVisible;
+    if (windowVisible != null) _windowVisible = windowVisible;
+    if (trayTraffic != null) _trayTrafficEnabled = trayTraffic;
+    unawaited(_updateTasks.setPaused(!isUiVisible && !needsTrayTraffic));
+  }
+
   late final _listeners = ListenerStateScheduler((running) async {
     if (coreController.isCompleted) {
       if (running) {
@@ -189,6 +207,13 @@ class GlobalState {
   }
 
   Future<void> startUpdateTasks([UpdateTasks? tasks]) {
+    // Running state must reach the tray even when statistics have no consumer.
+    final started = startTime;
+    if (started != null) {
+      container.read(runTimeProvider.notifier).value = DateTime.now()
+          .difference(started)
+          .inMilliseconds;
+    }
     return _updateTasks.start(tasks);
   }
 
@@ -363,8 +388,14 @@ class GlobalState {
     String scriptContent,
     Map<String, dynamic> config, {
     void Function(String level, String output)? onConsole,
+    Map<String, bool> options = const {},
   }) async {
-    return evaluateProfileScript(scriptContent, config, onConsole: onConsole);
+    return evaluateProfileScript(
+      scriptContent,
+      config,
+      onConsole: onConsole,
+      options: options,
+    );
   }
 }
 

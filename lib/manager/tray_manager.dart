@@ -39,16 +39,6 @@ class _TrayContainerState extends ConsumerState<TrayManager> {
         appController.updateTray();
       }
     });
-    if (system.isMacOS) {
-      ref.listenManual(trayTitleStateProvider, (prev, next) {
-        if (prev != next) {
-          tray?.updateTrayTitle(
-            showTrayTitle: next.showTrayTitle,
-            traffic: next.traffic,
-          );
-        }
-      });
-    }
   }
 
   @override

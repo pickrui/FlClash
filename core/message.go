@@ -56,10 +56,19 @@ func runMessageBatcher(
 	bulkMessages <-chan Message,
 	send func([]Message),
 ) {
-	ticker := time.NewTicker(messageBatchInterval)
-	defer ticker.Stop()
+	var timer *time.Timer
+	var deadline <-chan time.Time
+	defer func() {
+		if timer != nil {
+			timer.Stop()
+		}
+	}()
 	batch := make([]Message, 0, messageBatchSize)
 	flush := func() {
+		if timer != nil {
+			timer.Stop()
+		}
+		deadline = nil
 		if len(batch) == 0 {
 			return
 		}
@@ -69,6 +78,14 @@ func runMessageBatcher(
 		batch = batch[:0]
 	}
 	appendMessage := func(message Message) {
+		if len(batch) == 0 {
+			if timer == nil {
+				timer = time.NewTimer(messageBatchInterval)
+			} else {
+				timer.Reset(messageBatchInterval)
+			}
+			deadline = timer.C
+		}
 		batch = append(batch, message)
 		if len(batch) >= messageBatchSize {
 			flush()
@@ -116,7 +133,7 @@ func runMessageBatcher(
 				appendMessage(message)
 			}
 			priorityBurst = 0
-		case <-ticker.C:
+		case <-deadline:
 			flush()
 		}
 	}

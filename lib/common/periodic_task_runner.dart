@@ -9,6 +9,7 @@ class PeriodicTaskRunner {
   Timer? _timer;
   Future<void>? _inFlight;
   bool _enabled = false;
+  bool _paused = false;
   int _generation = 0;
 
   PeriodicTaskRunner({
@@ -24,7 +25,7 @@ class PeriodicTaskRunner {
     }
     if (_enabled) return _inFlight ?? Future.value();
     _enabled = true;
-    return _run(++_generation);
+    return _paused ? Future.value() : _run(++_generation);
   }
 
   void stop() {
@@ -34,7 +35,17 @@ class PeriodicTaskRunner {
     _timer = null;
   }
 
-  bool _isCurrent(int generation) => _enabled && generation == _generation;
+  Future<void> setPaused(bool paused) {
+    if (_paused == paused) return Future.value();
+    _paused = paused;
+    _generation++;
+    _timer?.cancel();
+    _timer = null;
+    return !paused && _enabled ? _run(_generation) : Future.value();
+  }
+
+  bool _isCurrent(int generation) =>
+      _enabled && !_paused && generation == _generation;
 
   Future<void> _run(int generation) async {
     final previous = _inFlight;

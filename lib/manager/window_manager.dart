@@ -4,6 +4,7 @@ import 'dart:ui' show ClipOp;
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/config.dart';
+import 'package:fl_clash/state.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:material_ui/material_ui.dart';
@@ -57,6 +58,7 @@ class _WindowContainerState extends ConsumerState<WindowManager>
   void onWindowFocus() {
     super.onWindowFocus();
     commonPrint.log('focus');
+    globalState.setUpdateVisibility(windowVisible: true);
     render?.resume();
   }
 
@@ -170,6 +172,7 @@ class _WindowContainerState extends ConsumerState<WindowManager>
     _invalidateWindowGeometryCapture();
     ref.read(storeActionProvider.notifier).savePreferencesDebounce();
     commonPrint.log('minimize');
+    globalState.setUpdateVisibility(windowVisible: false);
     render?.pause();
     super.onWindowMinimize();
   }
@@ -177,6 +180,7 @@ class _WindowContainerState extends ConsumerState<WindowManager>
   @override
   void onWindowRestore() {
     commonPrint.log('restore');
+    globalState.setUpdateVisibility(windowVisible: true);
     render?.resume();
     super.onWindowRestore();
     _scheduleWindowGeometryCapture();

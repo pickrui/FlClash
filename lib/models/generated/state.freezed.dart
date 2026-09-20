@@ -4113,284 +4113,6 @@ as bool,
 }
 
 /// @nodoc
-mixin _$TrayTitleState {
-
- Traffic get traffic; bool get showTrayTitle;
-/// Create a copy of TrayTitleState
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$TrayTitleStateCopyWith<TrayTitleState> get copyWith => _$TrayTitleStateCopyWithImpl<TrayTitleState>(this as TrayTitleState, _$identity);
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TrayTitleState&&(identical(other.traffic, traffic) || other.traffic == traffic)&&(identical(other.showTrayTitle, showTrayTitle) || other.showTrayTitle == showTrayTitle));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,traffic,showTrayTitle);
-
-@override
-String toString() {
-  return 'TrayTitleState(traffic: $traffic, showTrayTitle: $showTrayTitle)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class $TrayTitleStateCopyWith<$Res>  {
-  factory $TrayTitleStateCopyWith(TrayTitleState value, $Res Function(TrayTitleState) _then) = _$TrayTitleStateCopyWithImpl;
-@useResult
-$Res call({
- Traffic traffic, bool showTrayTitle
-});
-
-
-$TrafficCopyWith<$Res> get traffic;
-
-}
-/// @nodoc
-class _$TrayTitleStateCopyWithImpl<$Res>
-    implements $TrayTitleStateCopyWith<$Res> {
-  _$TrayTitleStateCopyWithImpl(this._self, this._then);
-
-  final TrayTitleState _self;
-  final $Res Function(TrayTitleState) _then;
-
-/// Create a copy of TrayTitleState
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? traffic = null,Object? showTrayTitle = null,}) {
-  return _then(_self.copyWith(
-traffic: null == traffic ? _self.traffic : traffic // ignore: cast_nullable_to_non_nullable
-as Traffic,showTrayTitle: null == showTrayTitle ? _self.showTrayTitle : showTrayTitle // ignore: cast_nullable_to_non_nullable
-as bool,
-  ));
-}
-/// Create a copy of TrayTitleState
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$TrafficCopyWith<$Res> get traffic {
-
-  return $TrafficCopyWith<$Res>(_self.traffic, (value) {
-    return _then(_self.copyWith(traffic: value));
-  });
-}
-}
-
-
-/// Adds pattern-matching-related methods to [TrayTitleState].
-extension TrayTitleStatePatterns on TrayTitleState {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _TrayTitleState value)?  $default,{required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _TrayTitleState() when $default != null:
-return $default(_that);case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _TrayTitleState value)  $default,){
-final _that = this;
-switch (_that) {
-case _TrayTitleState():
-return $default(_that);case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _TrayTitleState value)?  $default,){
-final _that = this;
-switch (_that) {
-case _TrayTitleState() when $default != null:
-return $default(_that);case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Traffic traffic,  bool showTrayTitle)?  $default,{required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _TrayTitleState() when $default != null:
-return $default(_that.traffic,_that.showTrayTitle);case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Traffic traffic,  bool showTrayTitle)  $default,) {final _that = this;
-switch (_that) {
-case _TrayTitleState():
-return $default(_that.traffic,_that.showTrayTitle);case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Traffic traffic,  bool showTrayTitle)?  $default,) {final _that = this;
-switch (_that) {
-case _TrayTitleState() when $default != null:
-return $default(_that.traffic,_that.showTrayTitle);case _:
-  return null;
-
-}
-}
-
-}
-
-/// @nodoc
-
-
-class _TrayTitleState implements TrayTitleState {
-  const _TrayTitleState({required this.traffic, required this.showTrayTitle});
-
-
-@override final  Traffic traffic;
-@override final  bool showTrayTitle;
-
-/// Create a copy of TrayTitleState
-/// with the given fields replaced by the non-null parameter values.
-@override @JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-_$TrayTitleStateCopyWith<_TrayTitleState> get copyWith => __$TrayTitleStateCopyWithImpl<_TrayTitleState>(this, _$identity);
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TrayTitleState&&(identical(other.traffic, traffic) || other.traffic == traffic)&&(identical(other.showTrayTitle, showTrayTitle) || other.showTrayTitle == showTrayTitle));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,traffic,showTrayTitle);
-
-@override
-String toString() {
-  return 'TrayTitleState(traffic: $traffic, showTrayTitle: $showTrayTitle)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class _$TrayTitleStateCopyWith<$Res> implements $TrayTitleStateCopyWith<$Res> {
-  factory _$TrayTitleStateCopyWith(_TrayTitleState value, $Res Function(_TrayTitleState) _then) = __$TrayTitleStateCopyWithImpl;
-@override @useResult
-$Res call({
- Traffic traffic, bool showTrayTitle
-});
-
-
-@override $TrafficCopyWith<$Res> get traffic;
-
-}
-/// @nodoc
-class __$TrayTitleStateCopyWithImpl<$Res>
-    implements _$TrayTitleStateCopyWith<$Res> {
-  __$TrayTitleStateCopyWithImpl(this._self, this._then);
-
-  final _TrayTitleState _self;
-  final $Res Function(_TrayTitleState) _then;
-
-/// Create a copy of TrayTitleState
-/// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? traffic = null,Object? showTrayTitle = null,}) {
-  return _then(_TrayTitleState(
-traffic: null == traffic ? _self.traffic : traffic // ignore: cast_nullable_to_non_nullable
-as Traffic,showTrayTitle: null == showTrayTitle ? _self.showTrayTitle : showTrayTitle // ignore: cast_nullable_to_non_nullable
-as bool,
-  ));
-}
-
-/// Create a copy of TrayTitleState
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$TrafficCopyWith<$Res> get traffic {
-
-  return $TrafficCopyWith<$Res>(_self.traffic, (value) {
-    return _then(_self.copyWith(traffic: value));
-  });
-}
-}
-
-/// @nodoc
 mixin _$NavigationState {
 
  PageLabel get pageLabel; List<NavigationItem> get navigationItems; ViewMode get viewMode; String? get locale; int get currentIndex;
@@ -7349,7 +7071,7 @@ as String?,
 /// @nodoc
 mixin _$VpnState {
 
- TunStack get stack; VpnProps get vpnProps;
+ TunStack get stack; int get mtu; VpnProps get vpnProps;
 /// Create a copy of VpnState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -7360,16 +7082,16 @@ $VpnStateCopyWith<VpnState> get copyWith => _$VpnStateCopyWithImpl<VpnState>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VpnState&&(identical(other.stack, stack) || other.stack == stack)&&(identical(other.vpnProps, vpnProps) || other.vpnProps == vpnProps));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is VpnState&&(identical(other.stack, stack) || other.stack == stack)&&(identical(other.mtu, mtu) || other.mtu == mtu)&&(identical(other.vpnProps, vpnProps) || other.vpnProps == vpnProps));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,stack,vpnProps);
+int get hashCode => Object.hash(runtimeType,stack,mtu,vpnProps);
 
 @override
 String toString() {
-  return 'VpnState(stack: $stack, vpnProps: $vpnProps)';
+  return 'VpnState(stack: $stack, mtu: $mtu, vpnProps: $vpnProps)';
 }
 
 
@@ -7380,7 +7102,7 @@ abstract mixin class $VpnStateCopyWith<$Res>  {
   factory $VpnStateCopyWith(VpnState value, $Res Function(VpnState) _then) = _$VpnStateCopyWithImpl;
 @useResult
 $Res call({
- TunStack stack, VpnProps vpnProps
+ TunStack stack, int mtu, VpnProps vpnProps
 });
 
 
@@ -7397,10 +7119,11 @@ class _$VpnStateCopyWithImpl<$Res>
 
 /// Create a copy of VpnState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? stack = null,Object? vpnProps = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? stack = null,Object? mtu = null,Object? vpnProps = null,}) {
   return _then(_self.copyWith(
 stack: null == stack ? _self.stack : stack // ignore: cast_nullable_to_non_nullable
-as TunStack,vpnProps: null == vpnProps ? _self.vpnProps : vpnProps // ignore: cast_nullable_to_non_nullable
+as TunStack,mtu: null == mtu ? _self.mtu : mtu // ignore: cast_nullable_to_non_nullable
+as int,vpnProps: null == vpnProps ? _self.vpnProps : vpnProps // ignore: cast_nullable_to_non_nullable
 as VpnProps,
   ));
 }
@@ -7495,10 +7218,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( TunStack stack,  VpnProps vpnProps)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( TunStack stack,  int mtu,  VpnProps vpnProps)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _VpnState() when $default != null:
-return $default(_that.stack,_that.vpnProps);case _:
+return $default(_that.stack,_that.mtu,_that.vpnProps);case _:
   return orElse();
 
 }
@@ -7516,10 +7239,10 @@ return $default(_that.stack,_that.vpnProps);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( TunStack stack,  VpnProps vpnProps)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( TunStack stack,  int mtu,  VpnProps vpnProps)  $default,) {final _that = this;
 switch (_that) {
 case _VpnState():
-return $default(_that.stack,_that.vpnProps);case _:
+return $default(_that.stack,_that.mtu,_that.vpnProps);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -7536,10 +7259,10 @@ return $default(_that.stack,_that.vpnProps);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( TunStack stack,  VpnProps vpnProps)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( TunStack stack,  int mtu,  VpnProps vpnProps)?  $default,) {final _that = this;
 switch (_that) {
 case _VpnState() when $default != null:
-return $default(_that.stack,_that.vpnProps);case _:
+return $default(_that.stack,_that.mtu,_that.vpnProps);case _:
   return null;
 
 }
@@ -7551,10 +7274,11 @@ return $default(_that.stack,_that.vpnProps);case _:
 
 
 class _VpnState implements VpnState {
-  const _VpnState({required this.stack, required this.vpnProps});
+  const _VpnState({required this.stack, this.mtu = defaultTunMtu, required this.vpnProps});
 
 
 @override final  TunStack stack;
+@override@JsonKey() final  int mtu;
 @override final  VpnProps vpnProps;
 
 /// Create a copy of VpnState
@@ -7567,16 +7291,16 @@ _$VpnStateCopyWith<_VpnState> get copyWith => __$VpnStateCopyWithImpl<_VpnState>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VpnState&&(identical(other.stack, stack) || other.stack == stack)&&(identical(other.vpnProps, vpnProps) || other.vpnProps == vpnProps));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VpnState&&(identical(other.stack, stack) || other.stack == stack)&&(identical(other.mtu, mtu) || other.mtu == mtu)&&(identical(other.vpnProps, vpnProps) || other.vpnProps == vpnProps));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,stack,vpnProps);
+int get hashCode => Object.hash(runtimeType,stack,mtu,vpnProps);
 
 @override
 String toString() {
-  return 'VpnState(stack: $stack, vpnProps: $vpnProps)';
+  return 'VpnState(stack: $stack, mtu: $mtu, vpnProps: $vpnProps)';
 }
 
 
@@ -7587,7 +7311,7 @@ abstract mixin class _$VpnStateCopyWith<$Res> implements $VpnStateCopyWith<$Res>
   factory _$VpnStateCopyWith(_VpnState value, $Res Function(_VpnState) _then) = __$VpnStateCopyWithImpl;
 @override @useResult
 $Res call({
- TunStack stack, VpnProps vpnProps
+ TunStack stack, int mtu, VpnProps vpnProps
 });
 
 
@@ -7604,10 +7328,11 @@ class __$VpnStateCopyWithImpl<$Res>
 
 /// Create a copy of VpnState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? stack = null,Object? vpnProps = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? stack = null,Object? mtu = null,Object? vpnProps = null,}) {
   return _then(_VpnState(
 stack: null == stack ? _self.stack : stack // ignore: cast_nullable_to_non_nullable
-as TunStack,vpnProps: null == vpnProps ? _self.vpnProps : vpnProps // ignore: cast_nullable_to_non_nullable
+as TunStack,mtu: null == mtu ? _self.mtu : mtu // ignore: cast_nullable_to_non_nullable
+as int,vpnProps: null == vpnProps ? _self.vpnProps : vpnProps // ignore: cast_nullable_to_non_nullable
 as VpnProps,
   ));
 }

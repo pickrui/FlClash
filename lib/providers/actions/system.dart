@@ -155,14 +155,11 @@ extension SystemControllerExt on AppController {
   }
 
   Future<void> updateTray() async {
-    tray?.update(
-      trayState: _ref.read(trayStateProvider),
-      traffic: _ref.read(
-        trafficsProvider.select(
-          (state) => state.list.safeLast(const Traffic()),
-        ),
-      ),
-    );
+    try {
+      await tray?.update(trayState: _ref.read(trayStateProvider));
+    } catch (error) {
+      commonPrint.log('Tray update failed: $error', logLevel: LogLevel.warning);
+    }
   }
 
   Future<void> updateLocalIp() async {

@@ -472,6 +472,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "defaultText": MessageLookupByLibrary.simpleMessage("デフォルト"),
     "delay": MessageLookupByLibrary.simpleMessage("遅延"),
+    "delayConcurrency": MessageLookupByLibrary.simpleMessage("一括測定の同時実行数"),
+    "delayConcurrencyDesc": MessageLookupByLibrary.simpleMessage(
+      "既定値は 50、回線が混雑する場合は減らしてください。次回の一括測定から適用",
+    ),
     "delayTest": MessageLookupByLibrary.simpleMessage("遅延テスト"),
     "delete": MessageLookupByLibrary.simpleMessage("削除"),
     "deleteMultipTip": m13,
@@ -690,6 +694,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "exclude": MessageLookupByLibrary.simpleMessage("最近のタスクから非表示"),
     "excludeDesc": MessageLookupByLibrary.simpleMessage(
       "アプリがバックグラウンド時に最近のタスクから非表示",
+    ),
+    "excludeNetworks": MessageLookupByLibrary.simpleMessage(
+      "IP またはゲートウェイでプロキシを一時停止",
+    ),
+    "excludeNetworksDesc": MessageLookupByLibrary.simpleMessage(
+      "Wi-Fi／イーサネットの IPv4、サブネット、ゲートウェイに一致すると一時停止し、離れると再開。カンマ区切り、例: 192.168.1.0/24,gateway:192.168.1.1",
+    ),
+    "excludeNetworksInvalid": MessageLookupByLibrary.simpleMessage(
+      "最大 16 件。有効な IPv4、CIDR または gateway:アドレスを入力",
     ),
     "excludeProxyFilter": MessageLookupByLibrary.simpleMessage("除外プロキシフィルター"),
     "excludeSsids": MessageLookupByLibrary.simpleMessage("除外SSID"),
@@ -1294,6 +1307,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "scriptModeDesc": MessageLookupByLibrary.simpleMessage(
       "スクリプトモード、外部拡張スクリプトを使用し、ワンクリックで設定を上書きする機能を提供",
     ),
+    "scriptOptions": MessageLookupByLibrary.simpleMessage("スクリプト設定"),
+    "scriptOptionsEmpty": MessageLookupByLibrary.simpleMessage(
+      "このスクリプトには設定可能なスイッチがありません",
+    ),
     "search": MessageLookupByLibrary.simpleMessage("検索"),
     "seconds": MessageLookupByLibrary.simpleMessage("秒"),
     "secondsCount": m46,
@@ -1399,6 +1416,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "管理者権限が拒否されたため、TUN を有効にできませんでした。システムの権限要求を許可して、もう一度お試しください",
     ),
     "tunDesc": MessageLookupByLibrary.simpleMessage("管理者モードでのみ有効"),
+    "tunMtuDesc": MessageLookupByLibrary.simpleMessage(
+      "既定値は 9000、1480 または 4064 も選択可能。Android VPN の再起動後に適用",
+    ),
+    "tunMtuInvalid": MessageLookupByLibrary.simpleMessage(
+      "1280〜65535 の整数を入力してください",
+    ),
     "turnOff": MessageLookupByLibrary.simpleMessage("オフ"),
     "turnOn": MessageLookupByLibrary.simpleMessage("オン"),
     "undo": MessageLookupByLibrary.simpleMessage("元に戻す"),

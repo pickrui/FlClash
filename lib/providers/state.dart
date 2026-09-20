@@ -175,17 +175,6 @@ TrayState trayState(Ref ref) {
 }
 
 @riverpod
-TrayTitleState trayTitleState(Ref ref) {
-  final showTrayTitle = ref.watch(
-    appSettingProvider.select((state) => state.showTrayTitle),
-  );
-  final traffic = ref.watch(
-    trafficsProvider.select((state) => state.list.safeLast(const Traffic())),
-  );
-  return TrayTitleState(showTrayTitle: showTrayTitle, traffic: traffic);
-}
-
-@riverpod
 VpnState vpnState(Ref ref) {
   final authenticated = ref.watch(
     networkSettingProvider.select((state) => state.authentication.enable),
@@ -197,7 +186,13 @@ VpnState vpnState(Ref ref) {
   final stack = ref.watch(
     patchClashConfigProvider.select((state) => state.tun.stack),
   );
-  return VpnState(stack: stack, vpnProps: vpnProps);
+  return VpnState(
+    stack: stack,
+    mtu: normalizeTunMtu(
+      ref.watch(patchClashConfigProvider.select((state) => state.tun.mtu)),
+    ),
+    vpnProps: vpnProps,
+  );
 }
 
 @riverpod
@@ -586,6 +581,10 @@ SharedState sharedState(Ref ref) {
     ),
     vpnOptions: VpnOptions(
       excludeSSIDs: ref.watch(networkSettingProvider).excludeSSIDs,
+      excludeNetworks: ref.watch(networkSettingProvider).excludeNetworks,
+      mtu: normalizeTunMtu(
+        ref.watch(patchClashConfigProvider.select((state) => state.tun.mtu)),
+      ),
       enable: vpnSetting.enable,
       stack: stack,
       systemProxy: vpnSetting.systemProxy,

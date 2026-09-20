@@ -11,8 +11,8 @@ import (
 )
 
 // Start takes ownership of fd, including when the supplied options are invalid.
-func Start(fd int, stack, address, dns string) *sing_tun.Listener {
-	options, err := parseOptions(fd, stack, address, dns)
+func Start(fd int, stack, address, dns string, mtu int) *sing_tun.Listener {
+	options, err := parseOptions(fd, stack, address, dns, mtu)
 	if err != nil {
 		_ = syscall.Close(fd)
 		log.Errorln("TUN: %v", err)

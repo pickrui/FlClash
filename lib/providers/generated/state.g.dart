@@ -311,47 +311,6 @@ final class TrayStateProvider
 
 String _$trayStateHash() => r'c835f313fb5de090ebbbf90b4c12138935a168c9';
 
-@ProviderFor(trayTitleState)
-final trayTitleStateProvider = TrayTitleStateProvider._();
-
-final class TrayTitleStateProvider
-    extends $FunctionalProvider<TrayTitleState, TrayTitleState, TrayTitleState>
-    with $Provider<TrayTitleState> {
-  TrayTitleStateProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'trayTitleStateProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$trayTitleStateHash();
-
-  @$internal
-  @override
-  $ProviderElement<TrayTitleState> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  TrayTitleState create(Ref ref) {
-    return trayTitleState(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(TrayTitleState value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<TrayTitleState>(value),
-    );
-  }
-}
-
-String _$trayTitleStateHash() => r'aacf3779c879f7f1144484a80043679020bf8424';
-
 @ProviderFor(vpnState)
 final vpnStateProvider = VpnStateProvider._();
 
@@ -391,7 +350,7 @@ final class VpnStateProvider
   }
 }
 
-String _$vpnStateHash() => r'52ed84626e573086acf4f6ea63cb2d2dd29a4dba';
+String _$vpnStateHash() => r'abfe51b04382dcc4feb0dd8988a961f177016794';
 
 @ProviderFor(navigationState)
 final navigationStateProvider = NavigationStateProvider._();
@@ -1936,7 +1895,7 @@ final class SharedStateProvider
   }
 }
 
-String _$sharedStateHash() => r'e988c264ff405ebd18b2c09c2eb443132a5b1f8f';
+String _$sharedStateHash() => r'65f3b842eff6d7986d429e1ecc9b0b1ff2345503';
 
 @ProviderFor(overlayTopOffset)
 final overlayTopOffsetProvider = OverlayTopOffsetProvider._();

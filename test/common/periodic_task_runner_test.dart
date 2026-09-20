@@ -108,4 +108,50 @@ void main() {
     await tester.pump(const Duration(seconds: 3));
     expect(calls, 2);
   });
+  testWidgets(
+    'paused demand retains tasks without timers and resumes immediately',
+    (tester) async {
+      var calls = 0;
+      final runner = PeriodicTaskRunner(onError: (error, _) => fail('$error'));
+      await runner.setPaused(true);
+      await runner.start([() => calls++]);
+      await tester.pump(const Duration(hours: 1));
+      expect(calls, 0);
+      await runner.setPaused(false);
+      expect(calls, 1);
+      await tester.pump(const Duration(seconds: 1));
+      expect(calls, 2);
+      await runner.setPaused(true);
+      await tester.pump(const Duration(hours: 1));
+      expect(calls, 2);
+      runner.stop();
+      await runner.setPaused(false);
+      await tester.pump(const Duration(seconds: 3));
+      expect(calls, 2, reason: 'visibility must not undo a manual stop');
+    },
+  );
+
+  testWidgets(
+    'pause during RPC prevents stale tasks and resume waits for completion',
+    (tester) async {
+      final gate = Completer<void>();
+      final events = <String>[];
+      final runner = PeriodicTaskRunner(onError: (error, _) => fail('$error'));
+      final old = runner.start([
+        () async {
+          events.add('old');
+          await gate.future;
+        },
+        () => events.add('stale'),
+      ]);
+      await runner.setPaused(true);
+      final replace = runner.start([() => events.add('new')]);
+      final resumed = runner.setPaused(false);
+      expect(events, ['old']);
+      gate.complete();
+      await Future.wait([old, replace, resumed]);
+      expect(events, ['old', 'new']);
+      runner.stop();
+    },
+  );
 }

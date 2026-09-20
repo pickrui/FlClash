@@ -57,12 +57,25 @@ const delayTestTimeoutDuration = Duration(seconds: 8);
 const delayTestGuardDuration = Duration(seconds: 30);
 
 /// Probes one test run sends at once.
-const maxConcurrentDelayTests = 16;
+const defaultDelayTestConcurrency = 50;
+const maxConcurrentDelayTests = 150;
+const delayTestConcurrencyOptions = [8, 16, 32, 50, 100, 150];
+int normalizeDelayTestConcurrency(int? value) =>
+    delayTestConcurrencyOptions.contains(value)
+    ? value!
+    : defaultDelayTestConcurrency;
 
-/// Probes kept in flight at the Core across runs. Twice the batch width lets a
-/// new run start while a superseded one still drains, and stays at or below
-/// the Core's own concurrency (`delayTestConcurrency` in core/common.go).
-const maxInFlightDelayTests = maxConcurrentDelayTests * 2;
+/// Mirrored by NormalizeMTU (core/tun/options.go) and normalizeTunMtu (Kotlin).
+const minTunMtu = 1280;
+const maxTunMtu = 65535;
+const defaultTunMtu = 9000;
+int normalizeTunMtu(int? value) =>
+    value != null && value >= minTunMtu && value <= maxTunMtu
+    ? value
+    : defaultTunMtu;
+
+/// One spare RPC lets a new batch cancel saturated probes; network work stays at 150.
+const maxInFlightDelayTests = maxConcurrentDelayTests + 1;
 const animateDuration = Duration(milliseconds: 100);
 const midDuration = Duration(milliseconds: 200);
 const commonDuration = Duration(milliseconds: 300);

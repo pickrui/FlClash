@@ -353,7 +353,9 @@ extension ProxiesControllerExt on AppController {
     );
     await runDelayTestBatch(
       targets: targets,
-      concurrency: maxConcurrentDelayTests,
+      concurrency: normalizeDelayTestConcurrency(
+        _ref.read(proxiesStyleSettingProvider).concurrencyLimit,
+      ),
       probe: (target) => coreController.getDelay(
         target.url,
         target.name,

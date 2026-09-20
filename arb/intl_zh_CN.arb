@@ -875,5 +875,14 @@
   "updateDownloadBrowser": "使用浏览器下载",
   "updatePackageFormat": "选择安装包格式",
   "updatePackageFormatTip": "无法确定当前的安装方式，请选择与之匹配的格式",
-  "updateAppImageTip": "AppImage 无法自动安装，请用下载的文件替换当前程序，已打开文件所在目录"
+  "updateAppImageTip": "AppImage 无法自动安装，请用下载的文件替换当前程序，已打开文件所在目录",
+  "tunMtuDesc": "默认 9000，可尝试 1480 或 4064；Android VPN 需重启后生效",
+  "tunMtuInvalid": "请输入 1280–65535 之间的整数",
+  "scriptOptions": "脚本选项",
+  "scriptOptionsEmpty": "此脚本没有提供可配置的开关",
+  "excludeNetworks": "按 IP 或网关暂停代理",
+  "excludeNetworksDesc": "匹配 Wi-Fi 或以太网的 IPv4 地址、网段或网关时暂停，离开后恢复；用逗号分隔，例如 192.168.1.0/24,gateway:192.168.1.1",
+  "excludeNetworksInvalid": "最多 16 条规则，请输入有效的 IPv4、网段或 gateway:地址",
+  "delayConcurrency": "批量测速并发数",
+  "delayConcurrencyDesc": "默认 50，网络拥堵时可降低；下一轮批量测速生效"
 }

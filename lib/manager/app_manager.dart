@@ -56,6 +56,14 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _isBackground = _isBackgroundState(WidgetsBinding.instance.lifecycleState);
+    globalState.setUpdateVisibility(appVisible: !_isBackground);
+    if (system.isMacOS) {
+      ref.listenManual(
+        appSettingProvider.select((state) => state.showTrayTitle),
+        (_, enabled) => globalState.setUpdateVisibility(trayTraffic: enabled),
+        fireImmediately: true,
+      );
+    }
     ref.listenManual(initProvider, (_, ready) {
       if (ready) {
         _appUpdates.start();
@@ -125,9 +133,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
       if (!_isBackground) {
         _isBackground = true;
         _profileUpdates.stop();
-        if (system.isAndroid) {
-          globalState.stopUpdateTasks();
-        }
+        globalState.setUpdateVisibility(appVisible: false);
         await appController.savePreferences();
       }
     }
@@ -136,9 +142,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
       _isBackground = false;
       _startProfileUpdates();
       render?.resume();
-      if (system.isAndroid && wasBackground && globalState.isStart) {
-        globalState.startUpdateTasks();
-      }
+      globalState.setUpdateVisibility(appVisible: true);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted || _isBackground) return;
         if (wasBackground) {

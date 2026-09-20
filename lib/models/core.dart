@@ -1,3 +1,5 @@
+import 'package:fl_clash/common/constant.dart'
+    show defaultTunMtu, normalizeTunMtu;
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -57,6 +59,8 @@ abstract class VpnOptions with _$VpnOptions {
     required String stack,
     @Default([]) List<String> routeAddress,
     @Default([]) List<String> excludeSSIDs,
+    @Default([]) List<String> excludeNetworks,
+    @Default(defaultTunMtu) @JsonKey(fromJson: normalizeTunMtu) int mtu,
   }) = _VpnOptions;
 
   factory VpnOptions.fromJson(Map<String, Object?> json) =>

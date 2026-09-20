@@ -9,7 +9,22 @@ import (
 	LC "github.com/metacubex/mihomo/listener/config"
 )
 
-func parseOptions(fd int, stack, address, dns string) (LC.Tun, error) {
+// The MTU range the app offers (normalizeTunMtu in lib/common/constant.dart)
+// and the Android VPN builder accept.
+const (
+	minMTU     = 1280
+	maxMTU     = 65535
+	defaultMTU = 9000
+)
+
+func NormalizeMTU(mtu int) uint32 {
+	if mtu < minMTU || mtu > maxMTU {
+		return defaultMTU
+	}
+	return uint32(mtu)
+}
+
+func parseOptions(fd int, stack, address, dns string, mtu int) (LC.Tun, error) {
 	var prefix4 []netip.Prefix
 	var prefix6 []netip.Prefix
 	tunStack, ok := constant.StackTypeMapping[strings.ToLower(stack)]
@@ -54,7 +69,7 @@ func parseOptions(fd int, stack, address, dns string) (LC.Tun, error) {
 		AutoDetectInterface: false,
 		Inet4Address:        prefix4,
 		Inet6Address:        prefix6,
-		MTU:                 9000,
+		MTU:                 NormalizeMTU(mtu),
 		FileDescriptor:      fd,
 	}, nil
 }

@@ -105,6 +105,10 @@ extension CommonControllerExt on AppController {
 
   void updateRunTime() {
     final startTime = globalState.startTime;
+    if (!globalState.isUiVisible &&
+        (startTime != null) == (_ref.read(runTimeProvider) != null)) {
+      return;
+    }
     if (startTime != null) {
       final startTimeStamp = startTime.millisecondsSinceEpoch;
       final nowTimeStamp = DateTime.now().millisecondsSinceEpoch;
@@ -116,22 +120,27 @@ extension CommonControllerExt on AppController {
 
   Future<void> updateTraffic() async {
     final startTime = globalState.startTime;
-    if (startTime == null) return;
-    bool isCurrentRun() => globalState.startTime == startTime;
-    if (!coreController.isCompleted) {
-      _ref.read(trafficsProvider.notifier).addTraffic(const Traffic());
-      _ref.read(totalTrafficProvider.notifier).value = const Traffic();
+    if (startTime == null ||
+        (!globalState.isUiVisible && !globalState.needsTrayTraffic)) {
       return;
     }
+    bool isCurrentRun() => globalState.startTime == startTime;
+    final ready = coreController.isCompleted;
     final onlyStatisticsProxy = _ref.read(
       appSettingProvider.select((state) => state.onlyStatisticsProxy),
     );
-    final traffic = await coreController.getTraffic(onlyStatisticsProxy);
+    final traffic = ready
+        ? await coreController.getTraffic(onlyStatisticsProxy)
+        : const Traffic();
     if (!isCurrentRun()) return;
-    final totalTraffic = await coreController.getTotalTraffic(
-      onlyStatisticsProxy,
-    );
-    if (!isCurrentRun()) return;
+    if (globalState.needsTrayTraffic) {
+      await tray?.updateTraffic(traffic);
+    }
+    if (!isCurrentRun() || !globalState.isUiVisible) return;
+    final totalTraffic = ready
+        ? await coreController.getTotalTraffic(onlyStatisticsProxy)
+        : const Traffic();
+    if (!isCurrentRun() || !globalState.isUiVisible) return;
     _ref.read(trafficsProvider.notifier).addTraffic(traffic);
     _ref.read(totalTrafficProvider.notifier).value = totalTraffic;
   }

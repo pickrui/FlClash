@@ -36,6 +36,7 @@ class CoreController {
   final Map<UpdateGeoDataParams, Future<String>> _geoUpdates = {};
   final Queue<Completer<void>> _delayWaiters = Queue();
   int _activeDelayTests = 0;
+  final String _delayTestSession = utils.uuidV4;
 
   CoreController._internal() {
     if (system.isAndroid) {
@@ -238,9 +239,7 @@ class CoreController {
     // pending marker and the published result share one key.
     Delay canceled() => Delay(url: url, name: proxyName, value: null);
     if (isCurrent?.call() == false) return canceled();
-    // Acquire before invoking the RPC so local queue time cannot consume its
-    // timeout. The bound leaves room for a superseded batch's in-flight
-    // probes, so a new batch does not wait for them to time out.
+    // Acquire before invoking the RPC so local queue time cannot consume its timeout.
     if (_activeDelayTests >= maxInFlightDelayTests) {
       final ready = Completer<void>();
       _delayWaiters.add(ready);
@@ -256,6 +255,7 @@ class CoreController {
         proxyName,
         timeout: timeout,
         generation: generation,
+        session: _delayTestSession,
       );
     } finally {
       if (_delayWaiters.isNotEmpty) {

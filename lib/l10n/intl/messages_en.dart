@@ -561,6 +561,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "defaultText": MessageLookupByLibrary.simpleMessage("Default"),
     "delay": MessageLookupByLibrary.simpleMessage("Delay"),
+    "delayConcurrency": MessageLookupByLibrary.simpleMessage(
+      "Concurrent batch latency tests",
+    ),
+    "delayConcurrencyDesc": MessageLookupByLibrary.simpleMessage(
+      "Default: 50. Reduce on congested networks; applies to the next batch",
+    ),
     "delayTest": MessageLookupByLibrary.simpleMessage("Delay Test"),
     "delete": MessageLookupByLibrary.simpleMessage("Delete"),
     "deleteMultipTip": m13,
@@ -835,6 +841,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "exclude": MessageLookupByLibrary.simpleMessage("Hidden from recent tasks"),
     "excludeDesc": MessageLookupByLibrary.simpleMessage(
       "When the app is in the background, the app is hidden from the recent task",
+    ),
+    "excludeNetworks": MessageLookupByLibrary.simpleMessage(
+      "Pause proxy by IP or gateway",
+    ),
+    "excludeNetworksDesc": MessageLookupByLibrary.simpleMessage(
+      "Pause on matching Wi-Fi/Ethernet IPv4 addresses, subnets or gateways; resume after leaving. Comma-separated, e.g. 192.168.1.0/24,gateway:192.168.1.1",
+    ),
+    "excludeNetworksInvalid": MessageLookupByLibrary.simpleMessage(
+      "Up to 16 rules; enter valid IPv4, CIDR or gateway:address",
     ),
     "excludeProxyFilter": MessageLookupByLibrary.simpleMessage(
       "Exclude proxy filter",
@@ -1591,6 +1606,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "scriptModeDesc": MessageLookupByLibrary.simpleMessage(
       "Script mode, use external extension scripts, provide one-click override configuration capability",
     ),
+    "scriptOptions": MessageLookupByLibrary.simpleMessage("Script options"),
+    "scriptOptionsEmpty": MessageLookupByLibrary.simpleMessage(
+      "This script does not expose configurable switches",
+    ),
     "search": MessageLookupByLibrary.simpleMessage("Search"),
     "seconds": MessageLookupByLibrary.simpleMessage("Seconds"),
     "secondsCount": m46,
@@ -1717,6 +1736,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "tunDesc": MessageLookupByLibrary.simpleMessage(
       "only effective in administrator mode",
+    ),
+    "tunMtuDesc": MessageLookupByLibrary.simpleMessage(
+      "Default: 9000; alternatives: 1480 or 4064. Restart the Android VPN to apply",
+    ),
+    "tunMtuInvalid": MessageLookupByLibrary.simpleMessage(
+      "Enter an integer from 1280 to 65535",
     ),
     "turnOff": MessageLookupByLibrary.simpleMessage("Turn Off"),
     "turnOn": MessageLookupByLibrary.simpleMessage("Turn On"),

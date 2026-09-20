@@ -308,8 +308,8 @@ object Service {
         }
     }
 
-    suspend fun updateExcludeSSIDs(ssids: List<String>) = delegate.useService {
-        it.updateExcludeSSIDs(ssids.toTypedArray())
+    suspend fun updateExcludeSSIDs(ssids: List<String>, networks: List<String>) = delegate.useService {
+        it.updateExcludeSSIDs(ssids.toTypedArray(), networks.toTypedArray())
     }
 
     suspend fun updateNotificationParams(

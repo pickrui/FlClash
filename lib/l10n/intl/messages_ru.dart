@@ -579,6 +579,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "defaultText": MessageLookupByLibrary.simpleMessage("По умолчанию"),
     "delay": MessageLookupByLibrary.simpleMessage("Задержка"),
+    "delayConcurrency": MessageLookupByLibrary.simpleMessage(
+      "Параллельные проверки в группе",
+    ),
+    "delayConcurrencyDesc": MessageLookupByLibrary.simpleMessage(
+      "По умолчанию 50. Уменьшите при перегрузке сети; действует со следующей групповой проверки",
+    ),
     "delayTest": MessageLookupByLibrary.simpleMessage("Тест задержки"),
     "delete": MessageLookupByLibrary.simpleMessage("Удалить"),
     "deleteMultipTip": m13,
@@ -871,6 +877,15 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "excludeDesc": MessageLookupByLibrary.simpleMessage(
       "Когда приложение находится в фоновом режиме, оно скрыто из последних задач",
+    ),
+    "excludeNetworks": MessageLookupByLibrary.simpleMessage(
+      "Приостановка прокси по IP или шлюзу",
+    ),
+    "excludeNetworksDesc": MessageLookupByLibrary.simpleMessage(
+      "Пауза при совпадении IPv4, подсети или шлюза Wi-Fi/Ethernet; возобновление после выхода. Через запятую: 192.168.1.0/24,gateway:192.168.1.1",
+    ),
+    "excludeNetworksInvalid": MessageLookupByLibrary.simpleMessage(
+      "До 16 правил: допустимые IPv4, CIDR или gateway:адрес",
     ),
     "excludeProxyFilter": MessageLookupByLibrary.simpleMessage(
       "Исключить фильтр прокси",
@@ -1672,6 +1687,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "scriptModeDesc": MessageLookupByLibrary.simpleMessage(
       "Режим скрипта, использование внешних расширяющих скриптов, предоставление возможности переопределения конфигурации одним кликом",
     ),
+    "scriptOptions": MessageLookupByLibrary.simpleMessage("Параметры скрипта"),
+    "scriptOptionsEmpty": MessageLookupByLibrary.simpleMessage(
+      "В этом скрипте нет настраиваемых переключателей",
+    ),
     "search": MessageLookupByLibrary.simpleMessage("Поиск"),
     "seconds": MessageLookupByLibrary.simpleMessage("Секунд"),
     "secondsCount": m46,
@@ -1802,6 +1821,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "tunDesc": MessageLookupByLibrary.simpleMessage(
       "действительно только в режиме администратора",
+    ),
+    "tunMtuDesc": MessageLookupByLibrary.simpleMessage(
+      "По умолчанию 9000; можно попробовать 1480 или 4064. Перезапустите Android VPN",
+    ),
+    "tunMtuInvalid": MessageLookupByLibrary.simpleMessage(
+      "Введите целое число от 1280 до 65535",
     ),
     "turnOff": MessageLookupByLibrary.simpleMessage("Выключить"),
     "turnOn": MessageLookupByLibrary.simpleMessage("Включить"),

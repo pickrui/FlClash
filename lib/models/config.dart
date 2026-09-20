@@ -90,6 +90,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(RestoreStrategy.compatible) RestoreStrategy restoreStrategy,
     @Default(true) bool showTrayTitle,
     @Default('') String customUserAgent,
+    @Default({}) Map<String, Map<String, bool>> scriptOptions,
   }) = _AppSettingProps;
 
   factory AppSettingProps.fromJson(Map<String, Object?> json) =>
@@ -216,6 +217,7 @@ abstract class NetworkProps with _$NetworkProps {
     @Default(false) bool blockWebRtc,
     @Default(false) bool suspendOnIdle,
     @Default([]) List<String> excludeSSIDs,
+    @Default([]) List<String> excludeNetworks,
     @Default(AuthenticationProps()) AuthenticationProps authentication,
   }) = _NetworkProps;
 
@@ -231,6 +233,9 @@ abstract class ProxiesStyleProps with _$ProxiesStyleProps {
     @Default(ProxiesLayout.standard) ProxiesLayout layout,
     @Default(ProxiesIconStyle.standard) ProxiesIconStyle iconStyle,
     @Default(ProxyCardType.expand) ProxyCardType cardType,
+    @Default(defaultDelayTestConcurrency)
+    @JsonKey(fromJson: normalizeDelayTestConcurrency)
+    int concurrencyLimit,
   }) = _ProxiesStyleProps;
 
   factory ProxiesStyleProps.fromJson(Map<String, Object?>? json) => json == null

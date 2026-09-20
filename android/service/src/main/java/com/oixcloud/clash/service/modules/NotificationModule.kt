@@ -24,9 +24,6 @@ import com.oixcloud.clash.service.models.getSpeedTrafficText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
@@ -65,15 +62,12 @@ class NotificationModule(private val service: Service) : Module() {
                 emit(isScreenOn())
             }
 
-            combine(
-                tickerFlow(2000, 0), State.notificationParamsFlow, screenFlow
-            ) { _, params, screenOn ->
-                params?.extended to screenOn
-            }.filter { (params, screenOn) -> params != null && screenOn }
-                .distinctUntilChanged { old, new -> old.first == new.first && old.second == new.second }
-                .collect { (params, _) ->
-                    update(params!!)
-                }
+            notificationSamples(
+                State.notificationParamsFlow,
+                screenFlow,
+                ticks = { tickerFlow(2000, 0) },
+                sample = { it.extended },
+            ).collect { update(it) }
 
         }
     }

@@ -26,7 +26,14 @@ data class VpnOptions(
     val stack: String,
     val routeAddress: List<String>,
     val excludeSSIDs: List<String> = emptyList(),
+    val excludeNetworks: List<String> = emptyList(),
+    val mtu: Int = DEFAULT_TUN_MTU,
 ) : Parcelable
+
+const val DEFAULT_TUN_MTU = 9000
+private val TUN_MTU_RANGE = 1280..65535
+
+fun normalizeTunMtu(value: Int): Int = if (value in TUN_MTU_RANGE) value else DEFAULT_TUN_MTU
 
 data class CIDR(val address: InetAddress, val prefixLength: Int)
 

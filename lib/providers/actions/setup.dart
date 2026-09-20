@@ -625,6 +625,10 @@ extension SetupControllerExt on AppController {
       rawConfig = await globalState.handleEvaluate(
         scriptContent!,
         rawConfig,
+        options:
+            _ref.read(appSettingProvider).scriptOptions[setupState.script?.id
+                .toString()] ??
+            const {},
         onConsole: (level, output) {
           addLog(
             Log.app('[script] $output').copyWith(

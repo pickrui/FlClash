@@ -35,6 +35,11 @@ _AppSettingProps _$AppSettingPropsFromJson(Map<String, dynamic> json) =>
           RestoreStrategy.compatible,
       showTrayTitle: json['showTrayTitle'] as bool? ?? true,
       customUserAgent: json['customUserAgent'] as String? ?? '',
+      scriptOptions:
+          (json['scriptOptions'] as Map<String, dynamic>?)?.map(
+            (k, e) => MapEntry(k, Map<String, bool>.from(e as Map)),
+          ) ??
+          const {},
     );
 
 Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
@@ -59,6 +64,7 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'restoreStrategy': _$RestoreStrategyEnumMap[instance.restoreStrategy]!,
       'showTrayTitle': instance.showTrayTitle,
       'customUserAgent': instance.customUserAgent,
+      'scriptOptions': instance.scriptOptions,
     };
 
 const _$RestoreStrategyEnumMap = {
@@ -199,6 +205,11 @@ _NetworkProps _$NetworkPropsFromJson(Map<String, dynamic> json) =>
               ?.map((e) => e as String)
               .toList() ??
           const [],
+      excludeNetworks:
+          (json['excludeNetworks'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
       authentication: json['authentication'] == null
           ? const AuthenticationProps()
           : AuthenticationProps.fromJson(
@@ -219,6 +230,7 @@ Map<String, dynamic> _$NetworkPropsToJson(_NetworkProps instance) =>
       'blockWebRtc': instance.blockWebRtc,
       'suspendOnIdle': instance.suspendOnIdle,
       'excludeSSIDs': instance.excludeSSIDs,
+      'excludeNetworks': instance.excludeNetworks,
       'authentication': instance.authentication,
     };
 
@@ -244,6 +256,11 @@ _ProxiesStyleProps _$ProxiesStylePropsFromJson(Map<String, dynamic> json) =>
       cardType:
           $enumDecodeNullable(_$ProxyCardTypeEnumMap, json['cardType']) ??
           ProxyCardType.expand,
+      concurrencyLimit: json['concurrencyLimit'] == null
+          ? defaultDelayTestConcurrency
+          : normalizeDelayTestConcurrency(
+              (json['concurrencyLimit'] as num?)?.toInt(),
+            ),
     );
 
 Map<String, dynamic> _$ProxiesStylePropsToJson(_ProxiesStyleProps instance) =>
@@ -253,6 +270,7 @@ Map<String, dynamic> _$ProxiesStylePropsToJson(_ProxiesStyleProps instance) =>
       'layout': _$ProxiesLayoutEnumMap[instance.layout]!,
       'iconStyle': _$ProxiesIconStyleEnumMap[instance.iconStyle]!,
       'cardType': _$ProxyCardTypeEnumMap[instance.cardType]!,
+      'concurrencyLimit': instance.concurrencyLimit,
     };
 
 const _$ProxiesTypeEnumMap = {ProxiesType.tab: 'tab', ProxiesType.list: 'list'};

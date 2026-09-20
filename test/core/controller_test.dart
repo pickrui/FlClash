@@ -48,6 +48,7 @@ void main() {
           any(),
           timeout: any(named: 'timeout'),
           generation: any(named: 'generation'),
+          session: any(named: 'session'),
         ),
       ).thenAnswer(
         (_) async => const Delay(name: 'node', url: 'url', value: 6000),
@@ -64,10 +65,95 @@ void main() {
           'node',
           timeout: const Duration(seconds: 15),
           generation: any(named: 'generation'),
+          session: any(named: 'session'),
         ),
       ).called(1);
     },
   );
+
+  test(
+    'probe sessions are stable per frontend and distinct after recreation',
+    () async {
+      final sessions = <String>[];
+      when(
+        () => handler.asyncTestDelay(
+          any(),
+          any(),
+          timeout: any(named: 'timeout'),
+          generation: any(named: 'generation'),
+          session: any(named: 'session'),
+        ),
+      ).thenAnswer((invocation) async {
+        sessions.add(invocation.namedArguments[#session] as String);
+        return const Delay(name: 'node', url: 'url', value: 20);
+      });
+      await controller.getDelay('url', 'node', generation: 100);
+      await controller.getDelay('url', 'node', generation: 101);
+      final recreated = CoreController.forTesting(handler: handler);
+      await recreated.getDelay('url', 'node', generation: 1);
+      expect(sessions[0], isNotEmpty);
+      expect(sessions[1], sessions[0]);
+      expect(sessions[2], isNot(sessions[0]));
+    },
+  );
+
+  test('a full batch leaves room for its replacement to cancel it', () async {
+    final pending = <Completer<Delay>>[];
+    var replacementProbes = 0;
+    const result = Delay(name: 'node', url: 'url', value: 20);
+    void cancelPrevious() {
+      for (final probe in pending) {
+        if (!probe.isCompleted) probe.complete(result);
+      }
+    }
+
+    when(
+      () => handler.asyncTestDelay(
+        any(),
+        any(),
+        timeout: any(named: 'timeout'),
+        generation: any(named: 'generation'),
+        session: any(named: 'session'),
+      ),
+    ).thenAnswer((invocation) {
+      if (invocation.namedArguments[#generation] == 1) {
+        final probe = Completer<Delay>();
+        pending.add(probe);
+        return probe.future;
+      }
+      replacementProbes++;
+      cancelPrevious();
+      return Future.value(result);
+    });
+    var current = 1;
+    final previous = List.generate(
+      maxConcurrentDelayTests,
+      (i) => controller.getDelay(
+        'url',
+        'old$i',
+        generation: 1,
+        isCurrent: () => current == 1,
+      ),
+    );
+    expect(pending.length, maxConcurrentDelayTests);
+    current = 2;
+    final replacement = List.generate(
+      maxConcurrentDelayTests,
+      (i) => controller.getDelay(
+        'url',
+        'new$i',
+        generation: 2,
+        isCurrent: () => current == 2,
+      ),
+    );
+    try {
+      await pumpEventQueue();
+      expect(replacementProbes, maxConcurrentDelayTests);
+    } finally {
+      cancelPrevious();
+      await Future.wait([...previous, ...replacement]);
+    }
+  });
 
   test('delay RPCs share a budget and release slots after failure', () async {
     final pending = <Completer<Delay>>[];
@@ -77,6 +163,7 @@ void main() {
         any(),
         timeout: any(named: 'timeout'),
         generation: any(named: 'generation'),
+        session: any(named: 'session'),
       ),
     ).thenAnswer((_) {
       final result = Completer<Delay>();
@@ -123,6 +210,7 @@ void main() {
         any(),
         timeout: any(named: 'timeout'),
         generation: any(named: 'generation'),
+        session: any(named: 'session'),
       ),
     ).thenAnswer((_) {
       final result = Completer<Delay>();
@@ -146,6 +234,7 @@ void main() {
         'node$maxInFlightDelayTests',
         timeout: const Duration(seconds: 8),
         generation: any(named: 'generation'),
+        session: any(named: 'session'),
       ),
     ).called(1);
     for (final result in pending.skip(1)) {
@@ -164,6 +253,7 @@ void main() {
         any(),
         timeout: any(named: 'timeout'),
         generation: any(named: 'generation'),
+        session: any(named: 'session'),
       ),
     ).thenAnswer((_) {
       final result = Completer<Delay>();
@@ -200,6 +290,7 @@ void main() {
         'obsolete0',
         timeout: any(named: 'timeout'),
         generation: any(named: 'generation'),
+        session: any(named: 'session'),
       ),
     );
     verifyNever(
@@ -208,6 +299,7 @@ void main() {
         'obsolete1',
         timeout: any(named: 'timeout'),
         generation: any(named: 'generation'),
+        session: any(named: 'session'),
       ),
     );
     verifyNever(
@@ -216,6 +308,7 @@ void main() {
         'obsolete2',
         timeout: any(named: 'timeout'),
         generation: any(named: 'generation'),
+        session: any(named: 'session'),
       ),
     );
     verify(
@@ -224,6 +317,7 @@ void main() {
         'replacement',
         timeout: any(named: 'timeout'),
         generation: any(named: 'generation'),
+        session: any(named: 'session'),
       ),
     ).called(1);
     expect(pending.length, maxInFlightDelayTests + 1);

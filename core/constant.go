@@ -48,6 +48,7 @@ type UpdateParams struct {
 }
 
 type tunSchema struct {
+	MTU          *int               `yaml:"mtu" json:"mtu,omitempty"`
 	Enable       bool               `yaml:"enable" json:"enable"`
 	Device       *string            `yaml:"device" json:"device"`
 	Stack        *constant.TUNStack `yaml:"stack" json:"stack"`
@@ -62,6 +63,7 @@ type ChangeProxyParams struct {
 }
 
 type TestDelayParams struct {
+	Session   string `json:"session,omitempty"`
 	ProxyName string `json:"proxy-name"`
 	TestUrl   string `json:"test-url"`
 	Timeout   int64  `json:"timeout"`

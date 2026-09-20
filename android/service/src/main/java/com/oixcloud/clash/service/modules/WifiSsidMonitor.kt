@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.Network
+import android.net.LinkProperties
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.net.wifi.WifiInfo
@@ -53,20 +54,57 @@ class WifiSsidMonitor(private val context: Context, private val onChange: () -> 
             object : ConnectivityManager.NetworkCallback(ConnectivityManager.NetworkCallback.FLAG_INCLUDE_LOCATION_INFO) {
                 override fun onCapabilitiesChanged(network: Network, caps: NetworkCapabilities) = changed(network, caps)
                 override fun onLost(network: Network) = lost(network)
+                override fun onLinkPropertiesChanged(network: Network, properties: LinkProperties) = linksChanged()
             }
         } else {
             object : ConnectivityManager.NetworkCallback() {
                 override fun onCapabilitiesChanged(network: Network, caps: NetworkCapabilities) = changed(network, caps)
                 override fun onLost(network: Network) = lost(network)
+                override fun onLinkPropertiesChanged(network: Network, properties: LinkProperties) = linksChanged()
             }
         }
         callback = listener
         runCatching {
             connectivity?.registerNetworkCallback(NetworkRequest.Builder()
                 .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                .addTransportType(NetworkCapabilities.TRANSPORT_ETHERNET)
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
                 .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN).build(), listener)
         }
         handler.post(poll)
+    }
+
+    fun matchesNetworks(rules: List<String>): Boolean {
+        if (rules.isEmpty()) return false
+        val manager = connectivity ?: return false
+        return runCatching {
+            val active = manager.activeNetwork
+            val activeCaps = active?.let { manager.getNetworkCapabilities(it) }
+            val networks = if (active != null && activeCaps?.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN) == true) {
+                listOf(active)
+            } else manager.allNetworks.toList()
+            val network = networks.mapNotNull { net ->
+                val caps = manager.getNetworkCapabilities(net) ?: return@mapNotNull null
+                if (!caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN) ||
+                    !caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) return@mapNotNull null
+                val priority = when {
+                    caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> 0
+                    caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> 1
+                    else -> return@mapNotNull null
+                }
+                net to priority
+            }.minByOrNull { it.second }?.first ?: return@runCatching false
+            val links = manager.getLinkProperties(network) ?: return@runCatching false
+            NetworkRuleMatcher.matches(
+                links.linkAddresses.mapNotNull { it.address.hostAddress },
+                links.routes.filter { it.isDefaultRoute }.mapNotNull { it.gateway?.hostAddress },
+                rules,
+            )
+        }.getOrDefault(false)
+    }
+
+    private fun linksChanged() = synchronized(lock) {
+        if (active) onChange()
     }
 
     private fun changed(network: Network, caps: NetworkCapabilities) = synchronized(lock) {

@@ -875,5 +875,14 @@
   "updateDownloadBrowser": "ブラウザーでダウンロード",
   "updatePackageFormat": "パッケージ形式を選択",
   "updatePackageFormatTip": "インストール方法を判別できませんでした。一致する形式を選んでください。",
-  "updateAppImageTip": "AppImage は自動インストールできません。ダウンロードしたファイルで現在のプログラムを置き換えてください。保存先のフォルダーを開きました。"
+  "updateAppImageTip": "AppImage は自動インストールできません。ダウンロードしたファイルで現在のプログラムを置き換えてください。保存先のフォルダーを開きました。",
+  "tunMtuDesc": "既定値は 9000、1480 または 4064 も選択可能。Android VPN の再起動後に適用",
+  "tunMtuInvalid": "1280〜65535 の整数を入力してください",
+  "scriptOptions": "スクリプト設定",
+  "scriptOptionsEmpty": "このスクリプトには設定可能なスイッチがありません",
+  "excludeNetworks": "IP またはゲートウェイでプロキシを一時停止",
+  "excludeNetworksDesc": "Wi-Fi／イーサネットの IPv4、サブネット、ゲートウェイに一致すると一時停止し、離れると再開。カンマ区切り、例: 192.168.1.0/24,gateway:192.168.1.1",
+  "excludeNetworksInvalid": "最大 16 件。有効な IPv4、CIDR または gateway:アドレスを入力",
+  "delayConcurrency": "一括測定の同時実行数",
+  "delayConcurrencyDesc": "既定値は 50、回線が混雑する場合は減らしてください。次回の一括測定から適用"
 }

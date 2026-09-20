@@ -15,6 +15,7 @@ import androidx.core.content.getSystemService
 import com.oixcloud.clash.common.AccessControlMode
 import com.oixcloud.clash.common.GlobalState
 import com.oixcloud.clash.core.Core
+import com.oixcloud.clash.service.models.normalizeTunMtu
 import com.oixcloud.clash.service.models.VpnOptions
 import com.oixcloud.clash.service.models.getIpv4RouteAddress
 import com.oixcloud.clash.service.models.getIpv6RouteAddress
@@ -197,7 +198,7 @@ class VpnService : SystemVpnService(), IBaseService {
             if (options.ipv6) {
                 addDnsServer(DNS6)
             }
-            setMtu(9000)
+            setMtu(normalizeTunMtu(options.mtu))
             options.accessControlProps.let { accessControl ->
                 if (accessControl.enable) {
                     when (accessControl.mode) {
@@ -242,7 +243,8 @@ class VpnService : SystemVpnService(), IBaseService {
             resolverProcess = this::resolverProcess,
             options.stack,
             options.address,
-            options.dns
+            options.dns,
+            normalizeTunMtu(options.mtu)
         )) { "Core TUN initialization failed" }
     }
 

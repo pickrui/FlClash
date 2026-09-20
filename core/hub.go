@@ -389,7 +389,7 @@ func handleAsyncTestDelay(params *TestDelayParams, fn func(*Delay)) {
 		// probes still queueing for a slot as well as the ones on the wire.
 		runCtx, cancelRun := context.WithCancel(context.Background())
 		defer cancelRun()
-		probe := manualDelayProbes.begin(params.Generation, cancelRun)
+		probe := manualDelayProbes.begin(params.Session, params.Generation, cancelRun)
 		defer manualDelayProbes.end(probe)
 
 		// Queueing for a slot and probing the node each get the full budget.
@@ -441,7 +441,7 @@ func resetURLTestSelections(testUrl string) {
 // only those read the per-URL health a probe of that URL stored.
 func urlTestGroups(testUrl string) iter.Seq[*outboundgroup.URLTest] {
 	return func(yield func(*outboundgroup.URLTest) bool) {
-		for _, proxy := range tunnel.Proxies() {
+		for _, proxy := range tunnel.ProxiesSnapshot() {
 			adapterProxy, ok := proxy.(*adapter.Proxy)
 			if !ok {
 				continue

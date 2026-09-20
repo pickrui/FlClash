@@ -12,6 +12,9 @@ import 'window.dart';
 
 class Tray {
   static Tray? _instance;
+  Traffic _lastTraffic = const Traffic();
+  bool _showTrayTitle = false;
+  bool _isStarted = false;
 
   Tray._internal();
 
@@ -36,13 +39,13 @@ class Tray {
     return 'assets/images/icon/status_3.$trayIconSuffix';
   }
 
-  Future<void> update({
-    required TrayState trayState,
-    required Traffic traffic,
-  }) async {
+  Future<void> update({required TrayState trayState}) async {
     if (system.isAndroid) {
       return;
     }
+    _showTrayTitle = trayState.showTrayTitle;
+    _isStarted = trayState.isStart;
+    if (!_isStarted) _lastTraffic = const Traffic();
     final menuItems = <native.TrayMenuItem>[];
     final showMenuItem = native.TrayMenuAction(
       label: appLocalizations.show,
@@ -169,18 +172,20 @@ class Tray {
         menu: menuItems,
       ),
     );
-    await updateTrayTitle(
-      showTrayTitle: trayState.showTrayTitle,
-      traffic: traffic,
-    );
+    await _updateTitle();
   }
 
-  Future<void> updateTrayTitle({
-    required bool showTrayTitle,
-    required Traffic traffic,
-  }) async {
+  Future<void> updateTraffic(Traffic traffic) async {
+    if (!system.isMacOS || !_isStarted) return;
+    _lastTraffic = traffic;
+    await _updateTitle();
+  }
+
+  Future<void> _updateTitle() async {
     if (!system.isMacOS) return;
-    await native.Tray.instance.setTitle(showTrayTitle ? traffic.trayTitle : '');
+    await native.Tray.instance.setTitle(
+      _showTrayTitle ? _lastTraffic.trayTitle : '',
+    );
   }
 
   Future<void> _copyEnv(int port, _EnvShell shell) async {

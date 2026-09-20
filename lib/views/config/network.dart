@@ -313,6 +313,78 @@ class _SsidPermissionItemState extends ConsumerState<SsidPermissionItem> {
   }
 }
 
+class ExcludeNetworksItem extends ConsumerWidget {
+  const ExcludeNetworksItem({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.appLocalizations;
+    final rules = ref.watch(networkSettingProvider).excludeNetworks;
+    return ListItem.input(
+      title: Text(l10n.excludeNetworks),
+      subtitle: Text(l10n.excludeNetworksDesc),
+      delegate: InputDelegate(
+        title: l10n.excludeNetworks,
+        value: rules.join(','),
+        maxLength: 1024,
+        resetValue: '',
+        keyboardType: TextInputType.text,
+        validator: (value) =>
+            validNetworkRules(value ?? '') ? null : l10n.excludeNetworksInvalid,
+        onChanged: (value) {
+          if (value == null || !validNetworkRules(value)) return;
+          ref
+              .read(networkSettingProvider.notifier)
+              .update(
+                (state) =>
+                    state.copyWith(excludeNetworks: parseNetworkRules(value)),
+              );
+        },
+      ),
+    );
+  }
+}
+
+class TunMtuItem extends ConsumerWidget {
+  const TunMtuItem({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mtu = ref.watch(
+      patchClashConfigProvider.select(
+        (state) => normalizeTunMtu(state.tun.mtu),
+      ),
+    );
+    final l10n = context.appLocalizations;
+    return ListItem.input(
+      title: const Text('MTU'),
+      subtitle: Text('$mtu · ${l10n.tunMtuDesc}'),
+      delegate: InputDelegate(
+        title: 'MTU',
+        value: '$mtu',
+        resetValue: '$defaultTunMtu',
+        maxLength: 5,
+        keyboardType: TextInputType.number,
+        validator: (value) {
+          final parsed = int.tryParse(value ?? '');
+          return parsed == null || parsed < minTunMtu || parsed > maxTunMtu
+              ? l10n.tunMtuInvalid
+              : null;
+        },
+        onChanged: (value) {
+          final parsed = int.tryParse(value ?? '');
+          if (parsed == null) return;
+          ref
+              .read(patchClashConfigProvider.notifier)
+              .update(
+                (state) => state.copyWith.tun(mtu: normalizeTunMtu(parsed)),
+              );
+        },
+      ),
+    );
+  }
+}
+
 class TunStackItem extends ConsumerWidget {
   const TunStackItem({super.key});
 
@@ -555,8 +627,10 @@ class NetworkListView extends StatelessWidget {
           if (system.isMacOS) const AutoSetSystemDnsItem(),
           if (system.isAndroid) const SuspendOnIdleItem(),
           const ExcludeSsidsItem(),
+          if (system.isAndroid) const ExcludeNetworksItem(),
           if (system.isAndroid || system.isMacOS) const SsidPermissionItem(),
           const TunStackItem(),
+          const TunMtuItem(),
           const BlockQuicItem(),
           const BlockWebRtcItem(),
           if (!system.isDesktop) ...[

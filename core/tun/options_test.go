@@ -9,7 +9,7 @@ import (
 )
 
 func TestParseOptionsPreservesDualStackConfiguration(t *testing.T) {
-	options, err := parseOptions(42, "Mixed", "172.19.0.1/30, fdfe:dcba:9876::1/126", "172.19.0.2, fdfe:dcba:9876::2")
+	options, err := parseOptions(42, "Mixed", "172.19.0.1/30, fdfe:dcba:9876::1/126", "172.19.0.2, fdfe:dcba:9876::2", 9000)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -34,9 +34,25 @@ func TestParseOptionsRejectsInvalidInputBeforeAdoptingDescriptor(t *testing.T) {
 		{name: "DNS port", address: "172.19.0.1/30", dns: "172.19.0.2:53"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			if _, err := parseOptions(42, "system", test.address, test.dns); err == nil {
+			if _, err := parseOptions(42, "system", test.address, test.dns, 9000); err == nil {
 				t.Fatal("invalid TUN configuration was accepted")
 			}
 		})
+	}
+}
+
+func TestParseOptionsKeepsConfiguredMtuAlignedWithVpn(t *testing.T) {
+	for _, mtu := range []int{1280, 1480, 4064, 9000, 65535, 0, -1, 1279, 65536} {
+		options, err := parseOptions(42, "mixed", "172.19.0.1/30", "172.19.0.2", mtu)
+		if err != nil {
+			t.Fatal(err)
+		}
+		want := mtu
+		if mtu < 1280 || mtu > 65535 {
+			want = 9000
+		}
+		if options.MTU != uint32(want) {
+			t.Fatalf("MTU %d became %d, want %d", mtu, options.MTU, want)
+		}
 	}
 }

@@ -205,9 +205,26 @@ void main() {
   ) async {
     final listener = await pumpWindowManager(tester);
 
-    listener.onWindowMinimize();
-    listener.onWindowRestore();
-    listener.onWindowFocus();
+    globalState.setUpdateVisibility(
+      appVisible: true,
+      windowVisible: true,
+      trayTraffic: false,
+    );
+    var samples = 0;
+    await globalState.startUpdateTasks([() => samples++]);
+    try {
+      listener.onWindowMinimize();
+      await tester.pump(const Duration(seconds: 2));
+      expect(globalState.isUiVisible, isFalse);
+      expect(samples, 1);
+      listener.onWindowRestore();
+      listener.onWindowFocus();
+      await tester.pump();
+      expect(globalState.isUiVisible, isTrue);
+      expect(samples, 2);
+    } finally {
+      globalState.stopUpdateTasks();
+    }
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
 

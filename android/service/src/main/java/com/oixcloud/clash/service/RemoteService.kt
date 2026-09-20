@@ -60,12 +60,18 @@ class RemoteService : Service(),
     }
 
     private fun configureSsidMonitor() {
-        if (State.options?.excludeSSIDs.isNullOrEmpty()) ssidMonitor.stop() else ssidMonitor.start()
+        val options = State.options
+        if (options?.excludeSSIDs.isNullOrEmpty() && options?.excludeNetworks.isNullOrEmpty()) {
+            ssidMonitor.stop()
+        } else {
+            ssidMonitor.start()
+        }
     }
 
     private suspend fun applyNetworkPolicy(initial: Boolean = false) {
         val ssid = if (State.options?.excludeSSIDs.isNullOrEmpty()) null else ssidMonitor.current()
-        val excluded = ssid != null && State.options?.excludeSSIDs.orEmpty().contains(ssid)
+        val excluded = (ssid != null && State.options?.excludeSSIDs.orEmpty().contains(ssid)) ||
+            ssidMonitor.matchesNetworks(State.options?.excludeNetworks.orEmpty())
         networkPolicy.apply(excluded, force = initial)
         // When the list is cleared, keep the existing polling retry alive until
         // both VPN and Core have resumed successfully.
@@ -279,12 +285,20 @@ class RemoteService : Service(),
         }
 
 
-        override fun updateExcludeSSIDs(ssids: Array<out String>?) {
+        override fun updateExcludeSSIDs(ssids: Array<out String>?, networks: Array<out String>?) {
             launch {
                 runLock.withLock {
-                    State.options = State.options?.copy(excludeSSIDs = ssids?.toList().orEmpty())
+                    State.options = State.options?.copy(
+                        excludeSSIDs = ssids?.toList().orEmpty(),
+                        excludeNetworks = networks?.toList().orEmpty(),
+                    )
                     if (State.runTime == 0L) return@withLock
-                    if (!State.options?.excludeSSIDs.isNullOrEmpty()) configureSsidMonitor()
+                    val options = State.options
+                    if (!options?.excludeSSIDs.isNullOrEmpty() ||
+                        !options?.excludeNetworks.isNullOrEmpty()
+                    ) {
+                        configureSsidMonitor()
+                    }
                     runCatching { applyNetworkPolicy() }.onFailure {
                         GlobalState.log("Wi-Fi policy update failed: ${it.javaClass.simpleName}")
                     }
