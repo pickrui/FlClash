@@ -33,32 +33,20 @@ class AppUpdateAvailableNotice extends ConsumerWidget {
                 onTap: open,
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 8, 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
+                  child: Row(
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              l.discovery,
-                              style: context.textTheme.titleSmall,
-                            ),
-                          ),
-                          IconButton(
-                            tooltip: l.close,
-                            icon: const Icon(Icons.close),
-                            onPressed: () => ref
-                                .read(updateActionProvider.notifier)
-                                .dismissNotice(info),
-                          ),
-                        ],
+                      Expanded(
+                        child: Text(
+                          l.updateNotice,
+                          style: context.textTheme.titleSmall,
+                        ),
                       ),
-                      if (info.version.isNotEmpty) Text(info.version),
-                      const SizedBox(height: 4),
-                      TextButton(
-                        onPressed: open,
-                        child: Text(l.updateViewDetails),
+                      IconButton(
+                        tooltip: l.close,
+                        icon: const Icon(Icons.close),
+                        onPressed: () => ref
+                            .read(updateActionProvider.notifier)
+                            .dismissNotice(info),
                       ),
                     ],
                   ),
@@ -72,15 +60,50 @@ class AppUpdateAvailableNotice extends ConsumerWidget {
   }
 }
 
-class AppUpdatePage extends StatelessWidget {
-  const AppUpdatePage({super.key, required this.info});
+class AppUpdatePage extends StatefulWidget {
+  const AppUpdatePage({
+    super.key,
+    required this.info,
+    required this.loadReleaseNotes,
+  });
 
   final AppUpdateInfo info;
+  final Future<String?> Function() loadReleaseNotes;
+
+  @override
+  State<AppUpdatePage> createState() => _AppUpdatePageState();
+}
+
+class _AppUpdatePageState extends State<AppUpdatePage> {
+  late Future<String?> _notes;
+
+  @override
+  void initState() {
+    super.initState();
+    _notes = _initialNotes();
+  }
+
+  @override
+  void didUpdateWidget(covariant AppUpdatePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.info != widget.info) _notes = _initialNotes();
+  }
+
+  Future<String?> _initialNotes() {
+    final notes = widget.info.releaseNotes?.trim();
+    return notes == null || notes.isEmpty
+        ? Future.sync(widget.loadReleaseNotes)
+        : Future.value(notes);
+  }
 
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
-    final notes = info.releaseNotes?.trim();
+    final info = widget.info;
+    final version = releaseTagNameFromVersionData(info.version);
+    final buildNumber = info.remoteBuildNumber > 0
+        ? info.remoteBuildNumber
+        : int.tryParse(info.version.split('+').last) ?? 0;
     return Scaffold(
       appBar: AppBar(title: Text(l.discovery)),
       body: Align(
@@ -96,21 +119,57 @@ class AppUpdatePage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (info.version.isNotEmpty) ...[
-                        Text(
-                          info.version,
-                          style: context.textTheme.headlineSmall,
-                        ),
-                        const SizedBox(height: 24),
+                      if (version != null)
+                        Text(version, style: context.textTheme.headlineSmall),
+                      if (buildNumber > 0) ...[
+                        const SizedBox(height: 8),
+                        Text(l.updateBuildNumber(buildNumber)),
                       ],
+                      if (version != null || buildNumber > 0)
+                        const SizedBox(height: 24),
                       Text(
                         l.updateReleaseNotes,
                         style: context.textTheme.titleMedium,
                       ),
                       const SizedBox(height: 12),
-                      SelectableText(
-                        notes == null || notes.isEmpty ? l.noInfo : notes,
-                        style: context.textTheme.bodyLarge,
+                      FutureBuilder<String?>(
+                        future: _notes,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState !=
+                              ConnectionState.done) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const LinearProgressIndicator(),
+                                const SizedBox(height: 12),
+                                Text(l.loading),
+                              ],
+                            );
+                          }
+                          final notes = snapshot.data?.trim();
+                          if (!snapshot.hasError &&
+                              notes != null &&
+                              notes.isNotEmpty) {
+                            return SelectableText(
+                              notes,
+                              style: context.textTheme.bodyLarge,
+                            );
+                          }
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(l.updateReleaseNotesFailed),
+                              const SizedBox(height: 8),
+                              OutlinedButton.icon(
+                                onPressed: () => setState(() {
+                                  _notes = Future.sync(widget.loadReleaseNotes);
+                                }),
+                                icon: const Icon(Icons.refresh),
+                                label: Text(l.configRecoveryRetry),
+                              ),
+                            ],
+                          );
+                        },
                       ),
                     ],
                   ),

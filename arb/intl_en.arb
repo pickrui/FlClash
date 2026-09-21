@@ -887,9 +887,18 @@
   "delayConcurrencyDesc": "Default: 50. Reduce on congested networks; applies to the next batch",
   "delayConcurrencyAndroidDesc": "Default: 16 on Android. Reduce on congested networks; applies to the next batch",
   "delayTestFailed": "Failed",
-  "updateViewDetails": "View update",
   "updateReleaseNotes": "Release notes",
   "updateDownloadConfirm": "Download update",
   "updateLater": "Later",
-  "updateCancelDownload": "Cancel download"
+  "updateCancelDownload": "Cancel download",
+  "updateNotice": "New version detected",
+  "updateBuildNumber": "Build number: {buildNumber}",
+  "@updateBuildNumber": {
+    "placeholders": {
+      "buildNumber": {
+        "type": "int"
+      }
+    }
+  },
+  "updateReleaseNotesFailed": "Could not load release notes. Please try again."
 }

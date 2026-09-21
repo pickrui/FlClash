@@ -118,9 +118,11 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m47(count) => "已选择 ${count} 项";
 
-  static String m48(label) => "${label}必须为URL";
+  static String m48(buildNumber) => "构建号：${buildNumber}";
 
-  static String m49(count) => "${count} 年前";
+  static String m49(label) => "${label}必须为URL";
+
+  static String m50(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1275,6 +1277,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
       "AppImage 无法自动安装，请用下载的文件替换当前程序，已打开文件所在目录",
     ),
+    "updateBuildNumber": m48,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage("取消下载"),
     "updateDownloadBackground": MessageLookupByLibrary.simpleMessage("移到后台下载"),
     "updateDownloadBrowser": MessageLookupByLibrary.simpleMessage("使用浏览器下载"),
@@ -1283,6 +1286,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateDownloading": MessageLookupByLibrary.simpleMessage("正在下载更新"),
     "updateInstall": MessageLookupByLibrary.simpleMessage("安装更新"),
     "updateLater": MessageLookupByLibrary.simpleMessage("稍后"),
+    "updateNotice": MessageLookupByLibrary.simpleMessage("检测到新版本"),
     "updatePackageFormat": MessageLookupByLibrary.simpleMessage("选择安装包格式"),
     "updatePackageFormatTip": MessageLookupByLibrary.simpleMessage(
       "无法确定当前的安装方式，请选择与之匹配的格式",
@@ -1290,12 +1294,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReady": MessageLookupByLibrary.simpleMessage("更新已就绪"),
     "updateReadyHint": MessageLookupByLibrary.simpleMessage("更新已下载完成，可在方便时安装"),
     "updateReleaseNotes": MessageLookupByLibrary.simpleMessage("更新日志"),
-    "updateViewDetails": MessageLookupByLibrary.simpleMessage("查看更新"),
+    "updateReleaseNotesFailed": MessageLookupByLibrary.simpleMessage(
+      "更新日志加载失败，请重试",
+    ),
     "upgradePlan": MessageLookupByLibrary.simpleMessage("升级套餐"),
     "upload": MessageLookupByLibrary.simpleMessage("上传"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("通过URL获取配置文件"),
-    "urlTip": m48,
+    "urlTip": m49,
     "useHosts": MessageLookupByLibrary.simpleMessage("使用Hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("使用系统Hosts"),
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("已用流量"),
@@ -1315,7 +1321,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "vpnTip": MessageLookupByLibrary.simpleMessage("重启VPN后改变生效"),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV配置"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("白名单模式"),
-    "yearsAgo": m49,
+    "yearsAgo": m50,
     "zh_CN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };
 }

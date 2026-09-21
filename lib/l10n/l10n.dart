@@ -7579,16 +7579,6 @@ class AppLocalizations {
     return Intl.message('Failed', name: 'delayTestFailed', desc: '', args: []);
   }
 
-  /// `View update`
-  String get updateViewDetails {
-    return Intl.message(
-      'View update',
-      name: 'updateViewDetails',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Release notes`
   String get updateReleaseNotes {
     return Intl.message(
@@ -7619,6 +7609,36 @@ class AppLocalizations {
     return Intl.message(
       'Cancel download',
       name: 'updateCancelDownload',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New version detected`
+  String get updateNotice {
+    return Intl.message(
+      'New version detected',
+      name: 'updateNotice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Build number: {buildNumber}`
+  String updateBuildNumber(int buildNumber) {
+    return Intl.message(
+      'Build number: $buildNumber',
+      name: 'updateBuildNumber',
+      desc: '',
+      args: [buildNumber],
+    );
+  }
+
+  /// `Could not load release notes. Please try again.`
+  String get updateReleaseNotesFailed {
+    return Intl.message(
+      'Could not load release notes. Please try again.',
+      name: 'updateReleaseNotesFailed',
       desc: '',
       args: [],
     );

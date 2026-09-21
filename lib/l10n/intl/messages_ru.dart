@@ -135,9 +135,11 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m47(count) => "Выбрано ${count} элементов";
 
-  static String m48(label) => "${label} должен быть URL";
+  static String m48(buildNumber) => "Номер сборки: ${buildNumber}";
 
-  static String m49(count) =>
+  static String m49(label) => "${label} должен быть URL";
+
+  static String m50(count) =>
       "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1852,6 +1854,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
       "AppImage нельзя установить автоматически. Замените текущую программу скачанным файлом; его папка открыта.",
     ),
+    "updateBuildNumber": m48,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
       "Отменить загрузку",
     ),
@@ -1874,6 +1877,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Установить обновление",
     ),
     "updateLater": MessageLookupByLibrary.simpleMessage("Позже"),
+    "updateNotice": MessageLookupByLibrary.simpleMessage(
+      "Обнаружена новая версия",
+    ),
     "updatePackageFormat": MessageLookupByLibrary.simpleMessage(
       "Выберите формат пакета",
     ),
@@ -1887,14 +1893,16 @@ class MessageLookup extends MessageLookupByLibrary {
       "Обновление скачано. Установите его в удобное время.",
     ),
     "updateReleaseNotes": MessageLookupByLibrary.simpleMessage("Что нового"),
-    "updateViewDetails": MessageLookupByLibrary.simpleMessage("Подробнее"),
+    "updateReleaseNotesFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось загрузить список изменений. Повторите попытку.",
+    ),
     "upgradePlan": MessageLookupByLibrary.simpleMessage("Улучшить тариф"),
     "upload": MessageLookupByLibrary.simpleMessage("Загрузка"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Получить профиль через URL",
     ),
-    "urlTip": m48,
+    "urlTip": m49,
     "useHosts": MessageLookupByLibrary.simpleMessage("Использовать hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Использовать системные hosts",
@@ -1926,7 +1934,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "whitelistMode": MessageLookupByLibrary.simpleMessage(
       "Режим белого списка",
     ),
-    "yearsAgo": m49,
+    "yearsAgo": m50,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Упрощенный китайский"),
   };
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fl_clash/common/request.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/providers/action.dart';
@@ -37,11 +39,14 @@ void main() {
     expect(find.byType(Card), findsNothing);
     notice.value = _release;
     await tester.pumpAndSettle();
-    expect(find.text(_release.version), findsOneWidget);
+    expect(find.text(_release.version), findsNothing);
+    expect(find.text('v0.8.98'), findsNothing);
+    expect(find.textContaining('${_release.remoteBuildNumber}'), findsNothing);
+    expect(find.text(AppLocalizations.current.updateNotice), findsOneWidget);
     expect(action.opened, isEmpty);
     expect(find.byType(AppUpdatePage), findsNothing);
     expect(find.byType(AlertDialog), findsNothing);
-    await tester.tap(find.text(AppLocalizations.current.updateViewDetails));
+    await tester.tap(find.text(AppLocalizations.current.updateNotice));
     expect(action.opened, [_release]);
     notice.value = null;
     await tester.pumpAndSettle();
@@ -82,7 +87,15 @@ void main() {
         result = value;
         returned = true;
       });
-      expect(find.text(_release.version), findsOneWidget);
+      expect(find.text('v0.8.98'), findsOneWidget);
+      expect(
+        find.text(
+          AppLocalizations.current.updateBuildNumber(
+            _release.remoteBuildNumber,
+          ),
+        ),
+        findsOneWidget,
+      );
       expect(find.text(_release.releaseNotes!), findsOneWidget);
       expect(find.byType(SelectableText), findsOneWidget);
       expect(returned, isFalse);
@@ -104,15 +117,92 @@ void main() {
     });
   }
 
-  testWidgets('missing release notes have a native empty state', (
+  testWidgets('opening a notice with missing notes loads them again', (
     tester,
   ) async {
-    await _openDetails(tester, const AppUpdateInfo(releaseNotes: '  '), (_) {});
-    expect(find.text(AppLocalizations.current.noInfo), findsOneWidget);
+    final pending = Completer<String?>();
+    var calls = 0;
+    await _openDetails(
+      tester,
+      const AppUpdateInfo(version: '0.8.98+2026092110'),
+      (_) {},
+      loadReleaseNotes: () {
+        calls++;
+        return pending.future;
+      },
+      settle: false,
+    );
+    expect(calls, 1);
+    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    expect(find.text('v0.8.98'), findsOneWidget);
     expect(
-      find.text(AppLocalizations.current.updateDownloadConfirm),
+      find.text(AppLocalizations.current.updateBuildNumber(2026092110)),
       findsOneWidget,
     );
+    expect(
+      find.text(AppLocalizations.current.updateDownloadConfirm).hitTestable(),
+      findsOneWidget,
+    );
+    pending.complete('Recovered release notes');
+    await tester.pumpAndSettle();
+    expect(find.text('Recovered release notes'), findsOneWidget);
+    expect(find.byType(LinearProgressIndicator), findsNothing);
+    expect(calls, 1);
+  });
+
+  for (final result in ['empty', 'error']) {
+    testWidgets('$result notes show a retry that can recover', (tester) async {
+      var calls = 0;
+      await _openDetails(
+        tester,
+        const AppUpdateInfo(releaseNotes: '  '),
+        (_) {},
+        loadReleaseNotes: () async {
+          if (++calls == 1) {
+            if (result == 'error') throw StateError('offline');
+            return '  ';
+          }
+          return 'Recovered after retry';
+        },
+      );
+      expect(
+        find.text(AppLocalizations.current.updateReleaseNotesFailed),
+        findsOneWidget,
+      );
+      expect(find.text(AppLocalizations.current.noInfo), findsNothing);
+      expect(
+        find.text(AppLocalizations.current.updateDownloadConfirm),
+        findsOneWidget,
+      );
+      await tester.tap(find.text(AppLocalizations.current.configRecoveryRetry));
+      await tester.pumpAndSettle();
+      expect(calls, 2);
+      expect(find.text('Recovered after retry'), findsOneWidget);
+      expect(
+        find.text(AppLocalizations.current.updateReleaseNotesFailed),
+        findsNothing,
+      );
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets('closing details while notes load ignores late completion', (
+    tester,
+  ) async {
+    final pending = Completer<String?>();
+    await _openDetails(
+      tester,
+      const AppUpdateInfo(),
+      (_) {},
+      loadReleaseNotes: () => pending.future,
+      settle: false,
+    );
+    await tester.tap(find.text(AppLocalizations.current.updateLater));
+    await tester.pumpAndSettle();
+    pending.completeError(StateError('late network error'));
+    await tester.pumpAndSettle();
+    expect(find.byType(AppUpdatePage), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
   for (final locale in AppLocalizations.delegate.supportedLocales) {
@@ -174,6 +264,8 @@ Future<void> _openDetails(
   AppUpdateInfo release,
   void Function(bool?) onResult, {
   Locale locale = const Locale('en'),
+  Future<String?> Function()? loadReleaseNotes,
+  bool settle = true,
 }) async {
   await tester.pumpWidget(
     TestApp(
@@ -185,7 +277,15 @@ Future<void> _openDetails(
           builder: (context) => TextButton(
             onPressed: () async => onResult(
               await Navigator.of(context).push<bool>(
-                MaterialPageRoute(builder: (_) => AppUpdatePage(info: release)),
+                MaterialPageRoute(
+                  builder: (_) => AppUpdatePage(
+                    info: release,
+                    loadReleaseNotes:
+                        loadReleaseNotes ??
+                        () async =>
+                            throw StateError('cached notes fetched again'),
+                  ),
+                ),
               ),
             ),
             child: const Text('Open'),
@@ -196,5 +296,10 @@ Future<void> _openDetails(
   );
   await tester.pumpAndSettle();
   await tester.tap(find.text('Open'));
-  await tester.pumpAndSettle();
+  if (settle) {
+    await tester.pumpAndSettle();
+  } else {
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+  }
 }

@@ -121,15 +121,15 @@ String? extractCurrentReleaseNotes(String? source, String tagName) {
   return normalizeReleaseNotes(source);
 }
 
-String? extractEmbeddedReleaseNotes(Object? versionData, String tagName) {
+String? extractEmbeddedReleaseNotes(Object? versionData, String? tagName) {
   if (versionData is! Map<String, dynamic>) return null;
   for (final key in ['changelog', 'release_notes', 'releaseNotes']) {
     final notes = versionData[key];
     if (notes is String) {
-      final normalized = extractCurrentReleaseNotes(
-        notes,
-        latestReleaseTagNameFromChangelog(notes) ?? tagName,
-      );
+      final currentTag = tagName ?? latestReleaseTagNameFromChangelog(notes);
+      final normalized = currentTag == null
+          ? normalizeReleaseNotes(notes)
+          : extractCurrentReleaseNotes(notes, currentTag);
       if (normalized != null) return normalized;
     }
   }
@@ -175,6 +175,7 @@ String? extractReleaseNotesFromChangelog(String source, String tagName) {
 class Request {
   late final Dio dio;
   final List<String> Function(Uri uri)? _readRoutes;
+  final HttpClientAdapter Function()? _publicGitHubAdapter;
   final bool Function(String host) _isApiDomain;
   final Duration _readTimeout;
   static const _maxReadBytes = 64 * 1024 * 1024;
@@ -192,6 +193,7 @@ class Request {
 
   Request({
     this._readRoutes,
+    this._publicGitHubAdapter,
     bool Function(String host)? isApiDomain,
     this._readTimeout = const Duration(seconds: 30),
   }) : _isApiDomain = isApiDomain ?? Secrets.isApiDomain {
@@ -469,14 +471,9 @@ class Request {
 
         if (!hasUpdate) return null;
 
-        final tagName =
-            releaseTagNameFromVersionData(versionData) ??
-            'v${globalState.packageInfo.version.trim()}';
-        final releaseNotes =
-            extractEmbeddedReleaseNotes(versionData, tagName) ??
-            await _fetchReleaseNotes(tagName);
+        final tagName = releaseTagNameFromVersionData(versionData);
         return AppUpdateInfo(
-          releaseNotes: releaseNotes,
+          releaseNotes: extractEmbeddedReleaseNotes(versionData, tagName),
           version: remoteVersion.trim(),
           remoteBuildNumber: remoteBuildNumber,
         );
@@ -490,17 +487,20 @@ class Request {
     throw Exception('checkForUpdate failed for all domains');
   }
 
-  Future<String?> _fetchReleaseNotes(String tagName) async {
-    final releaseFuture = _fetchLatestGitHubRelease();
-    final changelogFuture = _fetchGitHubChangelog();
+  Future<String?> fetchReleaseNotes(String? tagName) async {
+    final requestedTag = normalizeReleaseTagName(tagName);
+    if (tagName != null && requestedTag == null) return null;
+    final releaseFuture = _fetchGitHubRelease(requestedTag);
+    final changelogFuture = _fetchGitHubChangelog(requestedTag);
     final release = await releaseFuture;
     final changelog = await changelogFuture;
     final currentTagName =
+        requestedTag ??
         release?.tagName ??
         (changelog == null
             ? null
-            : latestReleaseTagNameFromChangelog(changelog)) ??
-        tagName;
+            : latestReleaseTagNameFromChangelog(changelog));
+    if (currentTagName == null) return null;
     return extractReleaseNotesFromReleaseBody(release?.body, currentTagName) ??
         (changelog == null
             ? null
@@ -523,9 +523,11 @@ class Request {
         }.contains(uri.host)) {
       throw ArgumentError('Expected a public GitHub release URL');
     }
-    final routes = FlClashHttpOverrides.handleCloudApiFindProxy(
-      uri,
-    ).split(';').map((route) => route.trim()).toSet();
+    final routes =
+        _readRoutes?.call(uri).toSet() ??
+        FlClashHttpOverrides.handleCloudApiFindProxy(
+          uri,
+        ).split(';').map((route) => route.trim()).toSet();
     final clients = <Dio>[];
     try {
       return await raceHttpReads<Response<T>>(
@@ -533,7 +535,8 @@ class Request {
           (route) => (token) async {
             final client = Dio(_apiOptions.copyWith());
             client.httpClientAdapter = BoundedHttpClientAdapter(
-              createFlClashHttpClientAdapter(findProxy: (_) => route),
+              _publicGitHubAdapter?.call() ??
+                  createFlClashHttpClientAdapter(findProxy: (_) => route),
               maxBytes: _maxReadBytes,
             );
             clients.add(client);
@@ -548,7 +551,7 @@ class Request {
             return response;
           },
         ),
-        timeout: httpTimeoutDuration,
+        timeout: const Duration(seconds: 15),
         isTerminalError: isTerminalPublicHttpReadError,
       );
     } finally {
@@ -558,13 +561,20 @@ class Request {
     }
   }
 
-  Future<({String? body, String tagName})?> _fetchLatestGitHubRelease() async {
+  Future<({String? body, String tagName})?> _fetchGitHubRelease(
+    String? requestedTag,
+  ) async {
     try {
+      final releasePath = requestedTag == null
+          ? 'latest'
+          : 'tags/${Uri.encodeComponent(requestedTag)}';
       final response = await _getPublicGitHub<Map<String, dynamic>>(
-        'https://api.github.com/repos/$releaseRepository/releases/latest',
+        'https://api.github.com/repos/$releaseRepository/releases/$releasePath',
         ResponseType.json,
-        validate: (data) =>
-            normalizeReleaseTagName(data?['tag_name'] as String?) != null,
+        validate: (data) {
+          final tag = normalizeReleaseTagName(data?['tag_name'] as String?);
+          return tag != null && (requestedTag == null || tag == requestedTag);
+        },
       );
       final data = response.data;
       final tagName = normalizeReleaseTagName(data?['tag_name'] as String?);
@@ -579,10 +589,11 @@ class Request {
     }
   }
 
-  Future<String?> _fetchGitHubChangelog() async {
+  Future<String?> _fetchGitHubChangelog(String? tagName) async {
     try {
+      final ref = Uri.encodeComponent(tagName ?? 'main');
       final response = await _getPublicGitHub<String>(
-        'https://raw.githubusercontent.com/$releaseRepository/main/CHANGELOG.md',
+        'https://raw.githubusercontent.com/$releaseRepository/$ref/CHANGELOG.md',
         ResponseType.plain,
         validate: (data) =>
             data != null && latestReleaseTagNameFromChangelog(data) != null,

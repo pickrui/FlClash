@@ -121,9 +121,11 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m47(count) => "${count} 項目が選択されています";
 
-  static String m48(label) => "${label}はURLである必要があります";
+  static String m48(buildNumber) => "ビルド番号：${buildNumber}";
 
-  static String m49(count) => "${count}年前";
+  static String m49(label) => "${label}はURLである必要があります";
+
+  static String m50(count) => "${count}年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1442,6 +1444,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
       "AppImage は自動インストールできません。ダウンロードしたファイルで現在のプログラムを置き換えてください。保存先のフォルダーを開きました。",
     ),
+    "updateBuildNumber": m48,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage("ダウンロードを中止"),
     "updateDownloadBackground": MessageLookupByLibrary.simpleMessage(
       "バックグラウンドでダウンロード",
@@ -1456,6 +1459,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateDownloading": MessageLookupByLibrary.simpleMessage("更新をダウンロード中"),
     "updateInstall": MessageLookupByLibrary.simpleMessage("更新をインストール"),
     "updateLater": MessageLookupByLibrary.simpleMessage("後で"),
+    "updateNotice": MessageLookupByLibrary.simpleMessage("新しいバージョンが見つかりました"),
     "updatePackageFormat": MessageLookupByLibrary.simpleMessage("パッケージ形式を選択"),
     "updatePackageFormatTip": MessageLookupByLibrary.simpleMessage(
       "インストール方法を判別できませんでした。一致する形式を選んでください。",
@@ -1465,12 +1469,14 @@ class MessageLookup extends MessageLookupByLibrary {
       "更新のダウンロードが完了しました。都合のよいときにインストールできます",
     ),
     "updateReleaseNotes": MessageLookupByLibrary.simpleMessage("更新内容"),
-    "updateViewDetails": MessageLookupByLibrary.simpleMessage("更新を確認"),
+    "updateReleaseNotesFailed": MessageLookupByLibrary.simpleMessage(
+      "更新履歴を読み込めませんでした。再試行してください",
+    ),
     "upgradePlan": MessageLookupByLibrary.simpleMessage("プランをアップグレード"),
     "upload": MessageLookupByLibrary.simpleMessage("アップロード"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("URL経由でプロファイルを取得"),
-    "urlTip": m48,
+    "urlTip": m49,
     "useHosts": MessageLookupByLibrary.simpleMessage("ホストを使用"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("システムホストを使用"),
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("使用済みデータ量"),
@@ -1490,7 +1496,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "vpnTip": MessageLookupByLibrary.simpleMessage("変更はVPN再起動後に有効"),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV設定"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("ホワイトリストモード"),
-    "yearsAgo": m49,
+    "yearsAgo": m50,
     "zh_CN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };
 }

@@ -237,8 +237,15 @@ extension InitControllerExt on AppController {
     }
     final res = await promptForAppUpdate(
       showWindow: window?.show,
-      prompt: () =>
-          BaseNavigator.push<bool>(_context, AppUpdatePage(info: info)),
+      prompt: () => BaseNavigator.push<bool>(
+        _context,
+        AppUpdatePage(
+          info: info,
+          loadReleaseNotes: () => request.fetchReleaseNotes(
+            releaseTagNameFromVersionData(info.version),
+          ),
+        ),
+      ),
     );
     if (res != true) {
       _appUpdateCheck.decline(info.remoteBuildNumber);

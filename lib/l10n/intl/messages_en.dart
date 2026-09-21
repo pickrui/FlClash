@@ -135,9 +135,11 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m47(count) => "${count} items have been selected";
 
-  static String m48(label) => "${label} must be a url";
+  static String m48(buildNumber) => "Build number: ${buildNumber}";
 
-  static String m49(count) =>
+  static String m49(label) => "${label} must be a url";
+
+  static String m50(count) =>
       "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1765,6 +1767,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
       "An AppImage cannot be installed automatically. Replace the running program with the downloaded file; its folder has been opened.",
     ),
+    "updateBuildNumber": m48,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
       "Cancel download",
     ),
@@ -1785,6 +1788,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "updateInstall": MessageLookupByLibrary.simpleMessage("Install update"),
     "updateLater": MessageLookupByLibrary.simpleMessage("Later"),
+    "updateNotice": MessageLookupByLibrary.simpleMessage(
+      "New version detected",
+    ),
     "updatePackageFormat": MessageLookupByLibrary.simpleMessage(
       "Choose the package format",
     ),
@@ -1798,14 +1804,16 @@ class MessageLookup extends MessageLookupByLibrary {
       "The update has been downloaded. Install when convenient.",
     ),
     "updateReleaseNotes": MessageLookupByLibrary.simpleMessage("Release notes"),
-    "updateViewDetails": MessageLookupByLibrary.simpleMessage("View update"),
+    "updateReleaseNotesFailed": MessageLookupByLibrary.simpleMessage(
+      "Could not load release notes. Please try again.",
+    ),
     "upgradePlan": MessageLookupByLibrary.simpleMessage("Upgrade plan"),
     "upload": MessageLookupByLibrary.simpleMessage("Upload"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Obtain profile through URL",
     ),
-    "urlTip": m48,
+    "urlTip": m49,
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("Used traffic"),
@@ -1831,7 +1839,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "WebDAV configuration",
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Whitelist mode"),
-    "yearsAgo": m49,
+    "yearsAgo": m50,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };
 }

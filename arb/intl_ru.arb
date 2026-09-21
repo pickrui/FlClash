@@ -887,9 +887,18 @@
   "delayConcurrencyDesc": "По умолчанию 50. Уменьшите при перегрузке сети; действует со следующей групповой проверки",
   "delayConcurrencyAndroidDesc": "По умолчанию 16 на Android. Уменьшите при перегрузке сети; действует со следующей групповой проверки",
   "delayTestFailed": "Ошибка проверки",
-  "updateViewDetails": "Подробнее",
   "updateReleaseNotes": "Что нового",
   "updateDownloadConfirm": "Скачать обновление",
   "updateLater": "Позже",
-  "updateCancelDownload": "Отменить загрузку"
+  "updateCancelDownload": "Отменить загрузку",
+  "updateNotice": "Обнаружена новая версия",
+  "updateBuildNumber": "Номер сборки: {buildNumber}",
+  "@updateBuildNumber": {
+    "placeholders": {
+      "buildNumber": {
+        "type": "int"
+      }
+    }
+  },
+  "updateReleaseNotesFailed": "Не удалось загрузить список изменений. Повторите попытку."
 }

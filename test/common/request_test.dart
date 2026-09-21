@@ -21,7 +21,7 @@ void main() {
     );
   });
 
-  test('extractEmbeddedReleaseNotes selects only the current version', () {
+  test('extractEmbeddedReleaseNotes selects only the requested version', () {
     expect(
       extractEmbeddedReleaseNotes({
         'releaseNotes': '''
@@ -34,7 +34,7 @@ void main() {
 - Previous change
 ''',
       }, 'v0.8.94'),
-      '- Current change',
+      '- Previous change',
     );
   });
 
