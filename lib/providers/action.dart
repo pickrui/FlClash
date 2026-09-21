@@ -731,6 +731,8 @@ class AppController {
   bool _preferencesWriteRequestedWhileSuspended = false;
   int _autoIpv6CheckGeneration = 0;
   int _configUpdateGeneration = 0;
+  final _providerUpdates = <(int?, int, String, String), Future<String>>{};
+  final _providerUpdateCounts = <String, int>{};
   int _groupsUpdateGeneration = 0;
   bool _groupsRefreshRequested = false;
   int? _activeDelayBatchGeneration;

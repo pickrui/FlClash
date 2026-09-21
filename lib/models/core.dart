@@ -198,7 +198,7 @@ abstract class ExternalProvider with _$ExternalProvider {
 }
 
 extension ExternalProviderExt on ExternalProvider {
-  String get updatingKey => 'provider_$name';
+  String get updatingKey => 'provider_${type}_$name';
 }
 
 @freezed

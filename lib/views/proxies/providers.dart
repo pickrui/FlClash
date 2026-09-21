@@ -1,9 +1,7 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/controller.dart';
-import 'package:fl_clash/core/core.dart';
 import 'package:fl_clash/models/common.dart';
 import 'package:fl_clash/models/core.dart';
 import 'package:fl_clash/providers/app.dart';
@@ -22,23 +20,39 @@ class ProvidersView extends ConsumerStatefulWidget {
 }
 
 class _ProvidersViewState extends ConsumerState<ProvidersView> {
-  Future<void> _updateProviders([String? type]) async {
-    final proxiesAction = context.proxiesAction;
+  bool _updating = false;
 
-    final providers = ref
-        .read(providersProvider)
-        .where((provider) => type == null || provider.type == type);
-    final List<UpdatingMessage> messages = [];
-    final updateProviders = providers.map<Future>((provider) async {
-      final message = await proxiesAction.updateProvider(provider);
-      if (message.isNotEmpty) {
-        messages.add(UpdatingMessage(label: provider.name, message: message));
+  Future<void> _updateProviders([String? type]) async {
+    if (_updating) return;
+    setState(() => _updating = true);
+    try {
+      final proxiesAction = context.proxiesAction;
+
+      final providers = ref
+          .read(providersProvider)
+          .where((provider) => type == null || provider.type == type);
+      final results = await Future.wait(
+        providers.map((provider) async {
+          try {
+            final message = await proxiesAction.updateProvider(provider);
+            return message.isEmpty
+                ? null
+                : UpdatingMessage(label: provider.name, message: message);
+          } catch (error) {
+            return UpdatingMessage(
+              label: provider.name,
+              message: error.toString(),
+            );
+          }
+        }),
+      );
+      proxiesAction.updateGroupsDebounce();
+      final messages = results.whereType<UpdatingMessage>().toList();
+      if (mounted && messages.isNotEmpty) {
+        await globalState.showAllUpdatingMessagesDialog(messages);
       }
-    });
-    await Future.wait(updateProviders);
-    proxiesAction.updateGroupsDebounce();
-    if (messages.isNotEmpty) {
-      globalState.showAllUpdatingMessagesDialog(messages);
+    } finally {
+      if (mounted) setState(() => _updating = false);
     }
   }
 
@@ -46,9 +60,7 @@ class _ProvidersViewState extends ConsumerState<ProvidersView> {
     return IconButton(
       iconSize: 20,
       visualDensity: VisualDensity.compact,
-      onPressed: () {
-        _updateProviders(type);
-      },
+      onPressed: _updating ? null : () => _updateProviders(type),
       icon: const Icon(Icons.sync),
     );
   }
@@ -75,9 +87,7 @@ class _ProvidersViewState extends ConsumerState<ProvidersView> {
     return AdaptiveSheetScaffold(
       actions: [
         IconButton(
-          onPressed: () {
-            _updateProviders();
-          },
+          onPressed: _updating ? null : () => _updateProviders(),
           icon: const Icon(Icons.sync),
         ),
       ],
@@ -110,19 +120,11 @@ class ProviderItem extends StatelessWidget {
     final proxiesAction = context.proxiesAction;
 
     await commonAction.safeRun<void>(() async {
-      final platformFile = await picker.pickerFile();
-      if (platformFile == null || provider.path == null) return;
-      final bytes = await platformFile.readBytes();
-      await File(provider.path!).safeWriteAsBytes(bytes);
-      final providerName = provider.name;
-      final message = await coreController.sideLoadExternalProvider(
-        providerName: providerName,
-        data: utf8.decode(bytes),
-      );
-      if (message.isNotEmpty) throw message;
-      proxiesAction.setProvider(
-        await coreController.getExternalProvider(provider.name),
-      );
+      final message = await proxiesAction.sideLoadProvider(provider, () async {
+        final platformFile = await picker.pickerFile();
+        if (platformFile == null) return null;
+        return utf8.decode(await platformFile.readBytes());
+      });
       if (message.isNotEmpty) throw message;
     });
     proxiesAction.updateGroupsDebounce();

@@ -133,6 +133,7 @@ extension ProfilesControllerExt on AppController {
     Profile profile,
     Future<Profile> Function() update, {
     bool preserveCurrentState = false,
+    bool invalidatePendingUpdates = false,
   }) async {
     // Account bootstrap may remove expired profiles using this same lock.
     if (profile.isoixCloudProfile) {
@@ -140,7 +141,7 @@ extension ProfilesControllerExt on AppController {
     }
     // Callers prepare downloads first. Snapshot backup, replacement, metadata
     // commit and rollback must all hold the same lock as other profile edits.
-    return storageLock.synchronized(() async {
+    Future<Profile> commit() async {
       return withFileRollback(
         await appPath.getProfilePath(profile.id.toString()),
         () async {
@@ -159,11 +160,19 @@ extension ProfilesControllerExt on AppController {
           return profileToSave;
         },
       );
-    });
+    }
+
+    return invalidatePendingUpdates
+        ? withProfileStorageMutation(commit, profileId: profile.id)
+        : storageLock.synchronized(commit);
   }
 
   Future<Profile> saveProfileFile(Profile profile, Uint8List bytes) {
-    return persistProfile(profile, () => profile.saveFile(bytes));
+    return persistProfile(
+      profile,
+      () => profile.saveFile(bytes),
+      invalidatePendingUpdates: true,
+    );
   }
 
   Future<void> updateProfiles() async {
@@ -350,23 +359,25 @@ extension ProfilesControllerExt on AppController {
     _ref.read(profilesProvider.notifier).reorder(profiles);
   }
 
-  Future<void> clearEffect(int profileId) async {
-    final profilePath = await appPath.getProfilePath(profileId.toString());
-    final hiddenProfilePath = await appPath.getProfilePath(
-      '.${profileId.toString()}',
-    );
-    final providersDirPath = await appPath.getProvidersDirPath(
-      profileId.toString(),
-    );
-    for (final path in [profilePath, hiddenProfilePath]) {
-      final file = File(path);
-      if (await file.exists()) {
-        await file.safeDelete(recursive: true);
+  Future<void> clearEffect(int profileId) {
+    return withProfileStorageMutation(() async {
+      final profilePath = await appPath.getProfilePath(profileId.toString());
+      final hiddenProfilePath = await appPath.getProfilePath(
+        '.${profileId.toString()}',
+      );
+      final providersDirPath = await appPath.getProvidersDirPath(
+        profileId.toString(),
+      );
+      for (final path in [profilePath, hiddenProfilePath]) {
+        final file = File(path);
+        if (await file.exists()) {
+          await file.safeDelete(recursive: true);
+        }
       }
-    }
-    final providersDir = Directory(providersDirPath);
-    if (await providersDir.exists()) {
-      await providersDir.safeDelete(recursive: true);
-    }
+      final providersDir = Directory(providersDirPath);
+      if (await providersDir.exists()) {
+        await providersDir.safeDelete(recursive: true);
+      }
+    }, profileId: profileId);
   }
 }

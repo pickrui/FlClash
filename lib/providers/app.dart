@@ -76,7 +76,9 @@ class Providers extends _$Providers with NotifierMixin<List<ExternalProvider>> {
 
   void setProvider(ExternalProvider? provider) {
     if (provider == null) return;
-    final index = state.indexWhere((item) => item.name == provider.name);
+    final index = state.indexWhere(
+      (item) => item.name == provider.name && item.type == provider.type,
+    );
     if (index == -1) return;
     final newState = List<ExternalProvider>.from(state)..[index] = provider;
     state = newState;

@@ -8,8 +8,6 @@ import android.net.ProxyInfo
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
-import android.os.Parcel
-import android.os.RemoteException
 import android.util.Log
 import androidx.core.content.getSystemService
 import com.oixcloud.clash.common.AccessControlMode
@@ -118,24 +116,10 @@ class VpnService : SystemVpnService(), IBaseService {
 
     inner class LocalBinder : Binder() {
         fun getService(): VpnService = this@VpnService
-
-        override fun onTransact(code: Int, data: Parcel, reply: Parcel?, flags: Int): Boolean {
-            try {
-                val isSuccess = super.onTransact(code, data, reply, flags)
-                if (!isSuccess) {
-                    GlobalState.log("VpnService disconnected")
-                    handleDestroy()
-                }
-                return isSuccess
-            } catch (e: RemoteException) {
-                GlobalState.log("VpnService onTransact $e")
-                return false
-            }
-        }
     }
 
     override fun onBind(intent: Intent): IBinder {
-        return binder
+        return super.onBind(intent) ?: binder
     }
 
     private fun handleStart(options: VpnOptions) {

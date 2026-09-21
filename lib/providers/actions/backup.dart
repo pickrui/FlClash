@@ -18,30 +18,26 @@ class BackupAction extends _$BackupAction {
 }
 
 extension BackupControllerExt on AppController {
-  Future<void> shakingStore() async {
-    final profileIds = _ref.read(
-      profilesProvider.select((state) => state.map((item) => item.id)),
+  Future<void> shakingStore() {
+    return storageLock.synchronized(
+      () => runExclusiveDatabaseOperation(() async {
+        final profileIds = (await database.profilesDao.all().get())
+            .map((item) => item.id)
+            .toList();
+        final scriptIds = (await database.scriptsDao.all().get())
+            .map((item) => item.id)
+            .toList();
+        final pathsToDelete = await shakingProfileTask(
+          VM2(profileIds, scriptIds),
+        );
+        await Future.wait(
+          pathsToDelete.map((path) async {
+            final message = await coreController.deleteFile(path);
+            if (message.isNotEmpty) throw message;
+          }),
+        );
+      }),
     );
-    final scriptIds = await _ref.read(
-      scriptsProvider.future.select(
-        (state) async => (await state).map((item) => item.id),
-      ),
-    );
-    final pathsToDelete = await shakingProfileTask(VM2(profileIds, scriptIds));
-    if (pathsToDelete.isNotEmpty) {
-      final deleteFutures = pathsToDelete.map((path) async {
-        try {
-          final res = await coreController.deleteFile(path);
-          if (res.isNotEmpty) {
-            throw res;
-          }
-        } catch (e) {
-          rethrow;
-        }
-      });
-
-      await Future.wait(deleteFutures);
-    }
   }
 
   Future<String> backup() async {
@@ -123,7 +119,7 @@ extension BackupControllerExt on AppController {
     RestoreJournal? restoreJournal;
     var recoveryRequired = false;
     try {
-      await storageLock.synchronized(() async {
+      await withProfileStorageMutation(() async {
         final restoreDirPath = await appPath.tempFilePath;
         final restoreDir = Directory(restoreDirPath);
         try {

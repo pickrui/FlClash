@@ -67,21 +67,13 @@ class DeveloperView extends ConsumerWidget {
             await storeAction.handleClear();
           },
         ),
-        // ListItem(
-        //   title: Text(appLocalizations.loadTest),
-        //   minVerticalPadding: 12,
-        //   onTap: () {
-        //     ref.read(loadingProvider.notifier).value = !ref.read(
-        //       loadingProvider,
-        //     );
-        //   },
-        // ),
         ListItem(
           title: Text(appLocalizations.pruneCache),
           minVerticalPadding: 12,
-          onTap: () {
-            backupAction.shakingStore();
-          },
+          onTap: () => context.commonAction.safeRun(
+            backupAction.shakingStore,
+            silence: false,
+          ),
         ),
       ],
     );

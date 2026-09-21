@@ -50,16 +50,23 @@ mixin CoreInterface {
 
   Future<List<ExternalProvider>> getExternalProviders();
 
-  Future<ExternalProvider?> getExternalProvider(String externalProviderName);
+  Future<ExternalProvider?> getExternalProvider(
+    String externalProviderName, {
+    String? providerType,
+  });
 
   Future<String> updateGeoData(UpdateGeoDataParams params);
 
   Future<String> sideLoadExternalProvider({
     required String providerName,
     required String data,
+    String? providerType,
   });
 
-  Future<String> updateExternalProvider(String providerName);
+  Future<String> updateExternalProvider(
+    String providerName, {
+    String? providerType,
+  });
 
   FutureOr<Traffic> getTraffic(bool onlyStatisticsProxy);
 
@@ -241,11 +248,17 @@ abstract class CoreHandlerInterface with CoreInterface {
 
   @override
   Future<ExternalProvider?> getExternalProvider(
-    String externalProviderName,
-  ) async {
+    String externalProviderName, {
+    String? providerType,
+  }) async {
     final data = await _invokeMethod<Map<String, dynamic>>(
       method: CoreMethod.getExternalProvider,
-      arguments: externalProviderName,
+      arguments: providerType == null
+          ? externalProviderName
+          : {
+              'providerName': externalProviderName,
+              'providerType': providerType,
+            },
     );
     return data == null ? null : ExternalProvider.fromJson(data);
   }
@@ -262,21 +275,29 @@ abstract class CoreHandlerInterface with CoreInterface {
   Future<String> sideLoadExternalProvider({
     required String providerName,
     required String data,
-  }) async {
-    return await _invokeMethod<String>(
-          method: CoreMethod.sideLoadExternalProvider,
-          arguments: {'providerName': providerName, 'data': data},
-        ) ??
-        '';
+    String? providerType,
+  }) {
+    return _invokeRequiredMethod<String>(
+      method: CoreMethod.sideLoadExternalProvider,
+      arguments: {
+        'providerName': providerName,
+        'providerType': ?providerType,
+        'data': data,
+      },
+    );
   }
 
   @override
-  Future<String> updateExternalProvider(String providerName) async {
-    return await _invokeMethod<String>(
-          method: CoreMethod.updateExternalProvider,
-          arguments: providerName,
-        ) ??
-        '';
+  Future<String> updateExternalProvider(
+    String providerName, {
+    String? providerType,
+  }) {
+    return _invokeRequiredMethod<String>(
+      method: CoreMethod.updateExternalProvider,
+      arguments: providerType == null
+          ? providerName
+          : {'providerName': providerName, 'providerType': providerType},
+    );
   }
 
   @override
@@ -335,12 +356,11 @@ abstract class CoreHandlerInterface with CoreInterface {
   }
 
   @override
-  Future<String> deleteFile(String path) async {
-    return await _invokeMethod<String>(
-          method: CoreMethod.deleteFile,
-          arguments: path,
-        ) ??
-        '';
+  Future<String> deleteFile(String path) {
+    return _invokeRequiredMethod<String>(
+      method: CoreMethod.deleteFile,
+      arguments: path,
+    );
   }
 
   @override

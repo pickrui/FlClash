@@ -1092,21 +1092,47 @@ extension ProfilesExt on List<Profile> {
 /// oixCloud snapshot paths already validated by the core, keyed to the file's
 /// (modified, size) at validation time.
 final _validatedSnapshots = <String, (int, int)>{};
+final _preparedProfileUpdates = <int, Object>{};
+
+Future<T> withProfileStorageMutation<T>(
+  Future<T> Function() action, {
+  int? profileId,
+}) => storageLock.synchronized(() async {
+  void invalidate() {
+    if (profileId == null) {
+      _preparedProfileUpdates.clear();
+    } else {
+      _preparedProfileUpdates.remove(profileId);
+    }
+  }
+
+  invalidate();
+  try {
+    return await action();
+  } finally {
+    invalidate();
+  }
+});
 
 /// Downloaded and validated bytes, not yet installed as the profile snapshot.
 /// The action layer commits this together with profile metadata under its lock.
 class PreparedProfileUpdate {
-  const PreparedProfileUpdate._(this.profile, this._bytes);
+  const PreparedProfileUpdate._(this.profile, this._bytes, this._token);
 
   final Profile profile;
   final Uint8List? _bytes;
+  final Object _token;
 
-  Future<Profile> save() {
+  Future<Profile> save() => storageLock.synchronized(() async {
+    if (!identical(_preparedProfileUpdates[profile.id], _token)) {
+      throw StateError('profile changed during download');
+    }
+    _preparedProfileUpdates.remove(profile.id);
     final bytes = _bytes;
     return bytes == null
-        ? Future.value(profile)
-        : profile._saveValidatedFile(bytes);
-  }
+        ? profile
+        : profile._saveFileUnlocked(bytes, alreadyValidated: true);
+  });
 }
 
 extension ProfileExtension on Profile {
@@ -1128,37 +1154,39 @@ extension ProfileExtension on Profile {
     return await getExistingFilePath() != null;
   }
 
-  Future<String?> getExistingFilePath({bool validate = true}) async {
-    final mFile = await _getFile(false);
-    if (!await mFile.exists()) return null;
+  Future<String?> getExistingFilePath({bool validate = true}) {
+    return storageLock.synchronized(() async {
+      final mFile = await _getFile(false);
+      if (!await mFile.exists()) return null;
 
-    if (!validate || !isoixCloudProfile) {
-      return mFile.path;
-    }
+      if (!validate || !isoixCloudProfile) {
+        return mFile.path;
+      }
 
-    if (!await coreController.isInit) {
-      return mFile.path;
-    }
+      if (!await coreController.isInit) {
+        return mFile.path;
+      }
 
-    // Every apply asks for a validated snapshot; validating spawns a core
-    // process, so remember the verdict until the file changes.
-    final stat = await mFile.stat();
-    final signature = (stat.modified.millisecondsSinceEpoch, stat.size);
-    if (_validatedSnapshots[mFile.path] == signature) {
-      return mFile.path;
-    }
-    final message = await coreController.validateConfig(mFile.path);
-    if (message.isEmpty) {
-      _validatedSnapshots[mFile.path] = signature;
-      return mFile.path;
-    }
+      // Every apply asks for a validated snapshot; validating spawns a core
+      // process, so remember the verdict until the file changes.
+      final stat = await mFile.stat();
+      final signature = (stat.modified.millisecondsSinceEpoch, stat.size);
+      if (_validatedSnapshots[mFile.path] == signature) {
+        return mFile.path;
+      }
+      final message = await coreController.validateConfig(mFile.path);
+      if (message.isEmpty) {
+        _validatedSnapshots[mFile.path] = signature;
+        return mFile.path;
+      }
 
-    commonPrint.log(
-      'discarding invalid oixCloud snapshot $id: $message',
-      logLevel: LogLevel.warning,
-    );
-    await mFile.safeDelete();
-    return null;
+      commonPrint.log(
+        'discarding invalid oixCloud snapshot $id: $message',
+        logLevel: LogLevel.warning,
+      );
+      await mFile.safeDelete();
+      return null;
+    });
   }
 
   Future<Profile?> checkAndUpdateAndCopy() async {
@@ -1200,6 +1228,19 @@ extension ProfileExtension on Profile {
 
   /// Network failures must happen before the file rollback transaction starts.
   Future<PreparedProfileUpdate> prepareUpdate() async {
+    final token = Object();
+    _preparedProfileUpdates[id] = token;
+    try {
+      return await _prepareUpdate(token);
+    } catch (_) {
+      if (identical(_preparedProfileUpdates[id], token)) {
+        _preparedProfileUpdates.remove(id);
+      }
+      rethrow;
+    }
+  }
+
+  Future<PreparedProfileUpdate> _prepareUpdate(Object token) async {
     if (isoixCloudProfile) {
       final fetch = _fetchManagedConfigCallback;
       if (fetch == null) throw Exception('fetchManagedConfig not registered');
@@ -1207,7 +1248,7 @@ extension ProfileExtension on Profile {
       // Wait for cloud-account bootstrap so the API client has its token.
       await _ensureCloudReady?.call();
       if (!(_canFetchManagedConfigCallback?.call() ?? true)) {
-        return PreparedProfileUpdate._(this, null);
+        return PreparedProfileUpdate._(this, null, token);
       }
 
       final params = await CloudParamsStorage.load();
@@ -1225,6 +1266,7 @@ extension ProfileExtension on Profile {
           subscriptionInfo: SubscriptionInfo.formHString(userinfo),
         ),
         bytes,
+        token,
       );
     }
 
@@ -1243,15 +1285,16 @@ extension ProfileExtension on Profile {
         subscriptionInfo: SubscriptionInfo.formHString(userinfo),
       ),
       response.data!,
+      token,
     );
   }
 
-  Future<Profile> saveFile(Uint8List bytes) async {
-    return storageLock.synchronized(() => _saveFileUnlocked(bytes));
+  Future<Profile> saveFile(Uint8List bytes) {
+    return withProfileStorageMutation(
+      () => _saveFileUnlocked(bytes),
+      profileId: id,
+    );
   }
-
-  Future<Profile> _saveValidatedFile(Uint8List bytes) => storageLock
-      .synchronized(() => _saveFileUnlocked(bytes, alreadyValidated: true));
 
   Future<Profile> _saveFileUnlocked(
     Uint8List bytes, {
@@ -1286,7 +1329,7 @@ extension ProfileExtension on Profile {
   }
 
   Future<Profile> saveFileWithPath(String path) async {
-    return storageLock.synchronized(() async {
+    return withProfileStorageMutation(() async {
       final message = await coreController.validateConfig(path);
       if (message.isNotEmpty) {
         throw ConfigValidationException(message);
@@ -1298,6 +1341,6 @@ extension ProfileExtension on Profile {
         await File(path).copy(mFile.path);
       }
       return copyWith(lastUpdateDate: DateTime.now());
-    });
+    }, profileId: id);
   }
 }

@@ -37,6 +37,19 @@ func decodeMethodArguments(call *MethodCall, response MethodResponse, target any
 	return true
 }
 
+type ExternalProviderRequest struct {
+	Name string `json:"providerName"`
+	Type string `json:"providerType"`
+}
+
+func (p *ExternalProviderRequest) UnmarshalJSON(data []byte) error {
+	if len(data) > 0 && data[0] == '"' {
+		return json.Unmarshal(data, &p.Name)
+	}
+	type request ExternalProviderRequest
+	return json.Unmarshal(data, (*request)(p))
+}
+
 type MethodError struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`
@@ -204,11 +217,11 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 	case getExternalProvidersMethod:
 		response.success(handleGetExternalProviders())
 	case getExternalProviderMethod:
-		name := ""
-		if !decodeMethodArguments(call, response, &name) {
+		params := ExternalProviderRequest{}
+		if !decodeMethodArguments(call, response, &params) {
 			return
 		}
-		response.success(handleGetExternalProvider(name))
+		response.success(handleGetExternalProvider(params.Name, params.Type))
 	case updateGeoDataMethod:
 		params := UpdateGeoDataParams{}
 		if !decodeMethodArguments(call, response, &params) {
@@ -218,16 +231,16 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 			response.success(value)
 		})
 	case updateExternalProviderMethod:
-		name := ""
-		if decodeMethodArguments(call, response, &name) {
-			handleUpdateExternalProvider(name, func(value string) { response.success(value) })
+		params := ExternalProviderRequest{}
+		if decodeMethodArguments(call, response, &params) {
+			handleUpdateExternalProvider(params.Name, params.Type, func(value string) { response.success(value) })
 		}
 	case sideLoadExternalProviderMethod:
 		params := map[string]string{}
 		if !decodeMethodArguments(call, response, &params) {
 			return
 		}
-		handleSideLoadExternalProvider(params["providerName"], []byte(params["data"]), func(value string) {
+		handleSideLoadExternalProvider(params["providerName"], params["providerType"], []byte(params["data"]), func(value string) {
 			response.success(value)
 		})
 	case startLogMethod:

@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"sync"
 	"sync/atomic"
 	"syscall"
 	"testing"
@@ -223,11 +224,12 @@ func TestConcurrentExitWaitsForTheSameCleanup(t *testing.T) {
 		<-release
 	})
 	done := exitGuard.done
-	t.Cleanup(func() { close(release); <-done })
+	var callers sync.WaitGroup
+	t.Cleanup(func() { close(release); <-done; callers.Wait() })
 	returned := make(chan struct{}, 2)
-	go func() { releaseOnExit(); returned <- struct{}{} }()
+	callers.Go(func() { releaseOnExit(); returned <- struct{}{} })
 	<-started
-	go func() { releaseOnExit(); returned <- struct{}{} }()
+	callers.Go(func() { releaseOnExit(); returned <- struct{}{} })
 	select {
 	case <-returned:
 		t.Fatal("an exit path returned while cleanup was still running")

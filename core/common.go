@@ -54,19 +54,19 @@ func init() {
 	constant.DefaultTestURL = defaultTestURL
 }
 
-func getExternalProvidersRaw() map[string]cp.Provider {
-	eps := make(map[string]cp.Provider)
-	for n, p := range tunnel.ProvidersSnapshot() {
+func getExternalProvidersRaw() []cp.Provider {
+	var providers []cp.Provider
+	for _, p := range tunnel.ProvidersSnapshot() {
 		if p.VehicleType() != cp.Compatible {
-			eps[n] = p
+			providers = append(providers, p)
 		}
 	}
-	for n, p := range tunnel.RuleProvidersSnapshot() {
+	for _, p := range tunnel.RuleProvidersSnapshot() {
 		if p.VehicleType() != cp.Compatible {
-			eps[n] = p
+			providers = append(providers, p)
 		}
 	}
-	return eps
+	return providers
 }
 
 func toExternalProvider(p cp.Provider) (*ExternalProvider, error) {
@@ -389,6 +389,7 @@ func applyConfig(params *SetupParams) error {
 	}
 	// Commit only a fully parsed candidate; failed edits leave live routing intact.
 	stopGeoScheduler()
+	retireCurrentProviders()
 	currentConfig = candidate
 	resetCloudIPs()
 	// Config loading owns all tunnel status transitions until ApplyConfig returns.

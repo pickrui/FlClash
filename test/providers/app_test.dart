@@ -83,6 +83,26 @@ void main() {
       expect(container.read(providersProvider).single.count, 2);
     });
 
+    test('same-named proxy and rule providers retain independent state', () {
+      final proxy = ExternalProvider(
+        name: 'shared',
+        type: 'Proxy',
+        count: 1,
+        vehicleType: 'HTTP',
+        updateAt: DateTime(2026),
+      );
+      final rule = proxy.copyWith(type: 'Rule', count: 10);
+      container.read(providersProvider.notifier).value = [proxy, rule];
+      container
+          .read(providersProvider.notifier)
+          .setProvider(rule.copyWith(count: 20));
+      expect(container.read(providersProvider), [
+        proxy,
+        rule.copyWith(count: 20),
+      ]);
+      expect(proxy.updatingKey, isNot(rule.updatingKey));
+    });
+
     test('setProvider ignores null and missing provider names', () {
       final provider = ExternalProvider(
         name: 'Proxy',

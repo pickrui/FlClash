@@ -596,39 +596,46 @@ Future<List<String>> shakingProfileTask(
 Future<List<String>> _shakingProfileTask(
   VM3<Iterable<int>, Iterable<int>, RootIsolateToken> data,
 ) async {
-  final profileIds = data.a;
-  final scriptIds = data.b;
-  final token = data.c;
-  BackgroundIsolateBinaryMessenger.ensureInitialized(token);
-  final profilesDir = Directory(await appPath.profilesPath);
-  final scriptsDir = Directory(await appPath.scriptsDirPath);
-  final providersDir = Directory(await appPath.getProvidersRootPath());
-  final List<String> targets = [];
-  void scanDirectory(
-    Directory dir,
-    Iterable<int> baseNames, {
-    bool skipProvidersFolder = false,
-  }) {
-    if (!dir.existsSync()) return;
-    final entities = dir.listSync(recursive: false, followLinks: false);
+  BackgroundIsolateBinaryMessenger.ensureInitialized(data.c);
+  return collectUnusedProfilePaths(
+    profilesPath: await appPath.profilesPath,
+    scriptsPath: await appPath.scriptsDirPath,
+    providersPath: await appPath.getProvidersRootPath(),
+    profileIds: data.a,
+    scriptIds: data.b,
+  );
+}
 
-    for (final entity in entities) {
-      if (entity is File) {
-        final id = basenameWithoutExtension(entity.path);
-        if (!baseNames.contains(int.tryParse(id))) {
-          targets.add(entity.path);
-        }
-      } else if (skipProvidersFolder && entity is Directory) {
-        if (basename(entity.path) == 'providers') {
-          continue;
-        }
-      }
+List<String> collectUnusedProfilePaths({
+  required String profilesPath,
+  required String scriptsPath,
+  required String providersPath,
+  required Iterable<int> profileIds,
+  required Iterable<int> scriptIds,
+}) {
+  final profiles = profileIds.toSet();
+  final scripts = scriptIds.toSet();
+  final targets = <String>[];
+  void scan(
+    String path,
+    Set<int> ids,
+    RegExp pattern, {
+    bool directories = false,
+  }) {
+    final directory = Directory(path);
+    if (!directory.existsSync()) return;
+    for (final entry in directory.listSync(followLinks: false)) {
+      if (directories ? entry is! Directory : entry is! File) continue;
+      final match = pattern.firstMatch(basename(entry.path));
+      if (match == null) continue;
+      final id = int.tryParse(match.group(1)!);
+      if (id != null && !ids.contains(id)) targets.add(entry.path);
     }
   }
 
-  scanDirectory(profilesDir, profileIds, skipProvidersFolder: true);
-  scanDirectory(providersDir, profileIds);
-  scanDirectory(scriptsDir, scriptIds);
+  scan(profilesPath, profiles, RegExp(r'^\.?([0-9]+)\.yaml$'));
+  scan(scriptsPath, scripts, RegExp(r'^([0-9]+)\.js$'));
+  scan(providersPath, profiles, RegExp(r'^([0-9]+)$'), directories: true);
   return targets;
 }
 

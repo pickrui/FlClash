@@ -135,4 +135,208 @@ void main() {
     expect(saved.lastUpdateDate, isNotNull);
     expect(profile.lastUpdateDate, isNull);
   });
+
+  Future<Uint8List> encryptedBytes(int value) async {
+    final identity = await AgeCrypto.identityFromSeed(
+      Uint8List(32)..fillRange(0, 32, 7),
+    );
+    return AgeCrypto.encrypt(
+      Uint8List.fromList([value]),
+      identity.publicKeyBytes,
+    );
+  }
+
+  test('an older download cannot overwrite a newer saved snapshot', () async {
+    const profile = Profile(
+      id: 4,
+      url: 'oixcloud://managed',
+      autoUpdateDuration: Duration(hours: 1),
+    );
+    final file = await snapshot(profile.id, 'original');
+    final oldBytes = await encryptedBytes(1);
+    final newBytes = await encryptedBytes(2);
+    final entered = Completer<void>();
+    final finish = Completer<void>();
+    var requests = 0;
+    registerFetchManagedConfig((_, {validate}) async {
+      if (requests++ == 0) {
+        entered.complete();
+        await finish.future;
+        return (oldBytes, null);
+      }
+      return (newBytes, null);
+    });
+    final oldDownload = profile.prepareUpdate();
+    await entered.future;
+    final latest = await profile.prepareUpdate();
+    await latest.save();
+    finish.complete();
+    await expectLater((await oldDownload).save(), throwsStateError);
+    expect(await file.readAsBytes(), newBytes);
+  });
+
+  test('restore invalidation keeps same-ID same-URL restored bytes', () async {
+    const profile = Profile(
+      id: 5,
+      url: 'oixcloud://managed',
+      autoUpdateDuration: Duration(hours: 1),
+    );
+    final file = await snapshot(profile.id, 'original');
+    final downloaded = await encryptedBytes(3);
+    final restored = await encryptedBytes(4);
+    final entered = Completer<void>();
+    final finish = Completer<void>();
+    registerFetchManagedConfig((_, {validate}) async {
+      entered.complete();
+      await finish.future;
+      return (downloaded, null);
+    });
+    final download = profile.prepareUpdate();
+    await entered.future;
+    await withProfileStorageMutation(
+      () => writeEncryptedProfileSnapshot(file.path, restored),
+    );
+    finish.complete();
+    await expectLater((await download).save(), throwsStateError);
+    expect(await file.readAsBytes(), restored);
+  });
+
+  test(
+    'deleted profile files cannot be recreated by an old download',
+    () async {
+      const profile = Profile(
+        id: 6,
+        url: 'oixcloud://managed',
+        autoUpdateDuration: Duration(hours: 1),
+      );
+      final file = await snapshot(profile.id, 'original');
+      final downloaded = await encryptedBytes(5);
+      registerFetchManagedConfig((_, {validate}) async => (downloaded, null));
+      final prepared = await profile.prepareUpdate();
+      await AppController().clearEffect(profile.id);
+      await expectLater(prepared.save(), throwsStateError);
+      expect(await file.exists(), isFalse);
+    },
+  );
+
+  for (final clear in [false, true]) {
+    test(
+      'requests started during ${clear ? 'clear' : 'restore'} are invalidated',
+      () async {
+        final profile = Profile(
+          id: clear ? 8 : 7,
+          url: 'oixcloud://managed',
+          autoUpdateDuration: const Duration(hours: 1),
+        );
+        final file = await snapshot(profile.id, 'original');
+        final downloaded = await encryptedBytes(6);
+        final restored = await encryptedBytes(7);
+        registerFetchManagedConfig((_, {validate}) async => (downloaded, null));
+        final before = await profile.prepareUpdate();
+        late PreparedProfileUpdate during;
+        await withProfileStorageMutation(() async {
+          during = await profile.prepareUpdate();
+          if (clear) {
+            await file.delete();
+          } else {
+            await writeEncryptedProfileSnapshot(file.path, restored);
+          }
+        });
+        await expectLater(before.save(), throwsStateError);
+        await expectLater(during.save(), throwsStateError);
+        if (clear) {
+          expect(await file.exists(), isFalse);
+        } else {
+          expect(await file.readAsBytes(), restored);
+        }
+      },
+    );
+  }
+
+  test(
+    'local edits invalidate only their own profile through commit',
+    () async {
+      const profile = Profile(
+        id: 9,
+        url: 'oixcloud://managed',
+        autoUpdateDuration: Duration(hours: 1),
+      );
+      final other = profile.copyWith(id: 10);
+      final file = await snapshot(profile.id, 'original');
+      final downloaded = await encryptedBytes(8);
+      final edited = await encryptedBytes(9);
+      registerFetchManagedConfig((_, {validate}) async => (downloaded, null));
+      final before = await profile.prepareUpdate();
+      final unaffected = await other.prepareUpdate();
+      late PreparedProfileUpdate during;
+      await withProfileStorageMutation(() async {
+        during = await profile.prepareUpdate();
+        await writeEncryptedProfileSnapshot(file.path, edited);
+      }, profileId: profile.id);
+      await expectLater(before.save(), throwsStateError);
+      await expectLater(during.save(), throwsStateError);
+      expect(await file.readAsBytes(), edited);
+      expect((await unaffected.save()).id, other.id);
+    },
+  );
+
+  test(
+    'saving a download preserves a newer request started during its write',
+    () async {
+      const profile = Profile(
+        id: 11,
+        url: 'oixcloud://managed',
+        autoUpdateDuration: Duration(hours: 1),
+      );
+      final file = await snapshot(profile.id, 'original');
+      final firstBytes = await encryptedBytes(10);
+      final secondBytes = await encryptedBytes(11);
+      var requests = 0;
+      registerFetchManagedConfig(
+        (_, {validate}) async =>
+            (requests++ == 0 ? firstBytes : secondBytes, null),
+      );
+      final first = await profile.prepareUpdate();
+      late PreparedProfileUpdate second;
+      await storageLock.synchronized(() async {
+        final saving = first.save();
+        second = await profile.prepareUpdate();
+        await saving;
+      });
+      expect(await file.readAsBytes(), firstBytes);
+      await second.save();
+      expect(await file.readAsBytes(), secondBytes);
+    },
+  );
+
+  test('snapshot inspection waits for a concurrent replacement', () async {
+    const profile = Profile(
+      id: 12,
+      url: 'oixcloud://managed',
+      autoUpdateDuration: Duration(hours: 1),
+    );
+    final file = await snapshot(profile.id, 'old snapshot');
+    final entered = Completer<void>();
+    final release = Completer<void>();
+    final write = storageLock.synchronized(() async {
+      entered.complete();
+      await release.future;
+      await file.writeAsString('new snapshot');
+    });
+    await entered.future;
+    var inspected = false;
+    final inspection = profile.getExistingFilePath(validate: false).then((
+      path,
+    ) {
+      inspected = true;
+      return path;
+    });
+    await pumpEventQueue();
+    final overlapped = inspected;
+    release.complete();
+    await write;
+    expect(await inspection, file.path);
+    expect(overlapped, isFalse);
+    expect(await file.readAsString(), 'new snapshot');
+  });
 }

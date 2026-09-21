@@ -77,26 +77,71 @@ void main() {
     unifiedDelay: true,
   );
 
-  test('configuration operations require an actual Core response', () async {
-    final handler = _FakeCoreHandler();
-    final operations = <CoreMethod, Future<String> Function()>{
-      CoreMethod.validateConfig: () => handler.validateConfig('config.yaml'),
-      CoreMethod.validateConfigWithBytes: () =>
-          handler.validateConfigWithBytes('encoded-config'),
-      CoreMethod.setupConfig: () => handler.setupConfig(setupParams),
-      CoreMethod.updateConfig: () => handler.updateConfig(updateParams),
-    };
+  test(
+    'configuration and file operations require an actual Core response',
+    () async {
+      final handler = _FakeCoreHandler();
+      final operations = <CoreMethod, Future<String> Function()>{
+        CoreMethod.validateConfig: () => handler.validateConfig('config.yaml'),
+        CoreMethod.validateConfigWithBytes: () =>
+            handler.validateConfigWithBytes('encoded-config'),
+        CoreMethod.setupConfig: () => handler.setupConfig(setupParams),
+        CoreMethod.updateConfig: () => handler.updateConfig(updateParams),
+        CoreMethod.deleteFile: () => handler.deleteFile('/unused/profile.yaml'),
+      };
 
-    for (final entry in operations.entries) {
+      for (final entry in operations.entries) {
+        handler.response = null;
+        await expectLater(entry.value(), throwsA(_missingResponse(entry.key)));
+
+        handler.response = '';
+        expect(await entry.value(), isEmpty);
+        handler.response = 'configuration rejected';
+        expect(await entry.value(), 'configuration rejected');
+      }
+    },
+  );
+
+  test(
+    'provider mutations require a Core response and retain typed identity',
+    () async {
+      final handler = _FakeCoreHandler();
+      final operations = <CoreMethod, Future<String> Function()>{
+        CoreMethod.updateExternalProvider: () =>
+            handler.updateExternalProvider('shared', providerType: 'Proxy'),
+        CoreMethod.sideLoadExternalProvider: () =>
+            handler.sideLoadExternalProvider(
+              providerName: 'shared',
+              providerType: 'Rule',
+              data: 'payload: []',
+            ),
+      };
+      for (final entry in operations.entries) {
+        handler.response = null;
+        await expectLater(entry.value(), throwsA(_missingResponse(entry.key)));
+        handler.response = '';
+        expect(await entry.value(), isEmpty);
+        expect((handler.arguments as Map)['providerName'], 'shared');
+        expect(
+          (handler.arguments as Map)['providerType'],
+          entry.key == CoreMethod.updateExternalProvider ? 'Proxy' : 'Rule',
+        );
+        handler.response = 'provider rejected';
+        expect(await entry.value(), 'provider rejected');
+      }
       handler.response = null;
-      await expectLater(entry.value(), throwsA(_missingResponse(entry.key)));
-
+      await handler.getExternalProvider('shared', providerType: 'Rule');
+      expect(handler.arguments, {
+        'providerName': 'shared',
+        'providerType': 'Rule',
+      });
+      await handler.getExternalProvider('legacy');
+      expect(handler.arguments, 'legacy');
       handler.response = '';
-      expect(await entry.value(), isEmpty);
-      handler.response = 'configuration rejected';
-      expect(await entry.value(), 'configuration rejected');
-    }
-  });
+      await handler.updateExternalProvider('legacy');
+      expect(handler.arguments, 'legacy');
+    },
+  );
 
   test(
     'Geo updates distinguish missing responses from success and rejection',

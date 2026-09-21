@@ -193,9 +193,13 @@ class CoreController {
   }
 
   Future<ExternalProvider?> getExternalProvider(
-    String externalProviderName,
-  ) async {
-    return _interface.getExternalProvider(externalProviderName);
+    String externalProviderName, {
+    String? providerType,
+  }) async {
+    return _interface.getExternalProvider(
+      externalProviderName,
+      providerType: providerType,
+    );
   }
 
   Future<String> updateGeoData(UpdateGeoDataParams params) {
@@ -209,15 +213,23 @@ class CoreController {
   Future<String> sideLoadExternalProvider({
     required String providerName,
     required String data,
+    String? providerType,
   }) {
     return _interface.sideLoadExternalProvider(
       providerName: providerName,
       data: data,
+      providerType: providerType,
     );
   }
 
-  Future<String> updateExternalProvider({required String providerName}) async {
-    return _interface.updateExternalProvider(providerName);
+  Future<String> updateExternalProvider({
+    required String providerName,
+    String? providerType,
+  }) async {
+    return _interface.updateExternalProvider(
+      providerName,
+      providerType: providerType,
+    );
   }
 
   Future<bool> startListener() async {

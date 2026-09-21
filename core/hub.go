@@ -152,13 +152,23 @@ func handleShutdown() bool {
 	return true
 }
 
-func closeCurrentProviders() {
+func retireCurrentProviders() {
+	externalProviders := getExternalProvidersRaw()
 	for _, provider := range tunnel.ProvidersSnapshot() {
 		closeProvider(provider)
 	}
 	for _, provider := range tunnel.RuleProvidersSnapshot() {
 		closeProvider(provider)
 	}
+	for _, provider := range externalProviders {
+		if pending, ok := provider.(interface{ WaitForUpdates() }); ok {
+			pending.WaitForUpdates()
+		}
+	}
+}
+
+func closeCurrentProviders() {
+	retireCurrentProviders()
 	tunnel.UpdateProxies(
 		map[string]constant.Proxy{},
 		map[string]cp.ProxyProvider{},
@@ -510,20 +520,37 @@ func handleGetExternalProviders() []ExternalProvider {
 		eps = append(eps, *externalProvider)
 	}
 	slices.SortFunc(eps, func(a, b ExternalProvider) int {
-		return cmp.Compare(a.Name, b.Name)
+		if order := cmp.Compare(a.Name, b.Name); order != 0 {
+			return order
+		}
+		return cmp.Compare(a.Type, b.Type)
 	})
 	return eps
 }
 
-func lookupExternalProvider(name string) (cp.Provider, bool) {
+func lookupExternalProvider(name, providerType string) (cp.Provider, bool) {
 	runLock.Lock()
 	defer runLock.Unlock()
-	p, exist := getExternalProvidersRaw()[name]
-	return p, exist
+	return lookupExternalProviderLocked(name, providerType)
 }
 
-func handleGetExternalProvider(externalProviderName string) *ExternalProvider {
-	externalProvider, exist := lookupExternalProvider(externalProviderName)
+func lookupExternalProviderLocked(name, providerType string) (cp.Provider, bool) {
+	// Legacy name-only requests retain rule-provider precedence.
+	if providerType == "" || providerType == cp.Rule.String() {
+		if p, ok := tunnel.RuleProvidersSnapshot()[name]; ok && p.VehicleType() != cp.Compatible {
+			return p, true
+		}
+	}
+	if providerType == "" || providerType == cp.Proxy.String() {
+		if p, ok := tunnel.ProvidersSnapshot()[name]; ok && p.VehicleType() != cp.Compatible {
+			return p, true
+		}
+	}
+	return nil, false
+}
+
+func handleGetExternalProvider(externalProviderName, providerType string) *ExternalProvider {
+	externalProvider, exist := lookupExternalProvider(externalProviderName, providerType)
 	if !exist {
 		return nil
 	}
@@ -557,9 +584,9 @@ func handleUpdateGeoData(
 	}
 }
 
-func handleUpdateExternalProvider(providerName string, fn func(value string)) {
+func handleUpdateExternalProvider(providerName, providerType string, fn func(value string)) {
 	go func() {
-		externalProvider, exist := lookupExternalProvider(providerName)
+		externalProvider, exist := lookupExternalProvider(providerName, providerType)
 		if !exist {
 			fn("external provider is not exist")
 			return
@@ -572,15 +599,15 @@ func handleUpdateExternalProvider(providerName string, fn func(value string)) {
 	}()
 }
 
-func handleSideLoadExternalProvider(providerName string, data []byte, fn func(value string)) {
+func handleSideLoadExternalProvider(providerName, providerType string, data []byte, fn func(value string)) {
 	go func() {
-		externalProvider, exist := lookupExternalProvider(providerName)
+		runLock.Lock()
+		defer runLock.Unlock()
+		externalProvider, exist := lookupExternalProviderLocked(providerName, providerType)
 		if !exist {
 			fn("external provider is not exist")
 			return
 		}
-		runLock.Lock()
-		defer runLock.Unlock()
 		if err := sideUpdateExternalProvider(externalProvider, data); err != nil {
 			fn(err.Error())
 			return

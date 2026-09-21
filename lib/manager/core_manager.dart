@@ -3,6 +3,7 @@ import 'package:fl_clash/controller.dart';
 import 'package:fl_clash/core/core.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/state.dart';
@@ -112,12 +113,19 @@ class _CoreContainerState extends ConsumerState<CoreManager>
   }
 
   @override
-  Future<void> onLoaded(String providerName) async {
-    ref
-        .read(providersProvider.notifier)
-        .setProvider(await coreController.getExternalProvider(providerName));
+  void onLoaded(String providerName) {
     debouncer.call(FunctionTag.loadedProvider, () async {
-      appController.updateGroupsDebounce();
+      if (!mounted) return;
+      final action = ref.read(proxiesActionProvider.notifier);
+      try {
+        await action.updateProviders();
+        if (mounted) action.updateGroupsDebounce();
+      } catch (error) {
+        commonPrint.log(
+          'Provider snapshot refresh failed: $error',
+          logLevel: LogLevel.warning,
+        );
+      }
     }, duration: const Duration(milliseconds: 5000));
     super.onLoaded(providerName);
   }

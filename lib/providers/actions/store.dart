@@ -41,7 +41,7 @@ extension StoreControllerExt on AppController {
     var irreversibleClearStarted = false;
     try {
       await _serializeCoreLifecycle(
-        () => storageLock.synchronized(() async {
+        () => withProfileStorageMutation(() async {
           _preferencesWritesSuspended = true;
           _persistentLogWritesSuspended = true;
           debouncer.cancel(FunctionTag.savePreferences);

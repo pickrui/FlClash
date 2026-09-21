@@ -13,6 +13,26 @@ const _groupOnlyProxyTypes = {
   'Pass',
 };
 
+Future<String> refreshExternalProvider({
+  required bool Function() isCurrent,
+  required Future<String> Function() update,
+  required Future<ExternalProvider?> Function() read,
+  required void Function(ExternalProvider) publish,
+}) async {
+  if (!isCurrent()) return '';
+  try {
+    final message = await update();
+    if (!isCurrent()) return '';
+    if (message.isNotEmpty) return message;
+    final provider = await read();
+    if (isCurrent() && provider != null) publish(provider);
+    return '';
+  } catch (_) {
+    if (!isCurrent()) return '';
+    rethrow;
+  }
+}
+
 @Riverpod(keepAlive: true)
 class ProxiesAction extends _$ProxiesAction {
   @override
@@ -67,15 +87,15 @@ class ProxiesAction extends _$ProxiesAction {
     proxyName: proxyName,
   );
 
-  void setProvider(ExternalProvider? provider) =>
-      _controller.setProvider(provider);
-
   Future<void> updateProviders() => _controller.updateProviders();
 
-  Future<String> updateProvider(
-    ExternalProvider provider, {
-    bool showLoading = false,
-  }) => _controller.updateProvider(provider, showLoading: showLoading);
+  Future<String> updateProvider(ExternalProvider provider) =>
+      _controller.updateProvider(provider);
+
+  Future<String> sideLoadProvider(
+    ExternalProvider provider,
+    Future<String?> Function() readData,
+  ) => _controller.sideLoadProvider(provider, readData);
 
   int addSortNum() => _controller.addSortNum();
 }
@@ -482,10 +502,6 @@ extension ProxiesControllerExt on AppController {
     );
   }
 
-  void setProvider(ExternalProvider? provider) {
-    _ref.read(providersProvider.notifier).setProvider(provider);
-  }
-
   Future<void> updateProviders() async {
     final profileId = _ref.read(currentProfileIdProvider);
     final generation = _profileApplyGeneration;
@@ -504,27 +520,92 @@ extension ProxiesControllerExt on AppController {
     _ref.read(providersProvider.notifier).value = providers;
   }
 
-  Future<String> updateProvider(
+  Future<String> updateProvider(ExternalProvider provider) {
+    final profileId = _ref.read(currentProfileIdProvider);
+    final generation = _profileApplyGeneration;
+    final key = (profileId, generation, provider.type, provider.name);
+    return _providerUpdates.putIfAbsent(key, () async {
+      try {
+        return await _updateExternalProvider(
+          provider,
+          profileId: profileId,
+          generation: generation,
+          update: () => coreController.updateExternalProvider(
+            providerName: provider.name,
+            providerType: provider.type,
+          ),
+        );
+      } finally {
+        _providerUpdates.remove(key);
+      }
+    });
+  }
+
+  Future<String> sideLoadProvider(
+    ExternalProvider provider,
+    Future<String?> Function() readData,
+  ) async {
+    final profileId = _ref.read(currentProfileIdProvider);
+    final generation = _profileApplyGeneration;
+    final data = await readData();
+    if (data == null) return '';
+    return _serializeCoreLifecycle(
+      () => _updateExternalProvider(
+        provider,
+        profileId: profileId,
+        generation: generation,
+        update: () => coreController.sideLoadExternalProvider(
+          providerName: provider.name,
+          providerType: provider.type,
+          data: data,
+        ),
+      ),
+    );
+  }
+
+  Future<String> _updateExternalProvider(
     ExternalProvider provider, {
-    bool showLoading = false,
+    required int? profileId,
+    required int generation,
+    required Future<String> Function() update,
   }) async {
+    bool isCurrent() =>
+        generation == _profileApplyGeneration &&
+        profileId == _ref.read(currentProfileIdProvider) &&
+        canPublishGroupsForProfile(profileId, globalState.lastSetupState) &&
+        _ref
+            .read(providersProvider)
+            .any(
+              (current) =>
+                  current.name == provider.name &&
+                  current.type == provider.type &&
+                  current.path == provider.path,
+            );
+    final key = provider.updatingKey;
+    _providerUpdateCounts[key] = (_providerUpdateCounts[key] ?? 0) + 1;
+    _ref.read(isUpdatingProvider(key).notifier).value = true;
     try {
-      if (!await ensureCoreReady()) {
-        return _coreDisconnectedMessage;
-      }
-      if (showLoading) {
-        _ref.read(isUpdatingProvider(provider.updatingKey).notifier).value =
-            true;
-      }
-      final message = await coreController.updateExternalProvider(
-        providerName: provider.name,
+      return await refreshExternalProvider(
+        isCurrent: isCurrent,
+        update: () async {
+          if (!await ensureCoreReady()) return _coreDisconnectedMessage;
+          if (!isCurrent()) return '';
+          return update();
+        },
+        read: () => coreController.getExternalProvider(
+          provider.name,
+          providerType: provider.type,
+        ),
+        publish: _ref.read(providersProvider.notifier).setProvider,
       );
-      if (message.isNotEmpty) return message;
-      setProvider(await coreController.getExternalProvider(provider.name));
-      return '';
     } finally {
-      _ref.read(isUpdatingProvider(provider.updatingKey).notifier).value =
-          false;
+      final remaining = _providerUpdateCounts[key]! - 1;
+      if (remaining == 0) {
+        _providerUpdateCounts.remove(key);
+        _ref.read(isUpdatingProvider(key).notifier).value = false;
+      } else {
+        _providerUpdateCounts[key] = remaining;
+      }
     }
   }
 

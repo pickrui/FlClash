@@ -298,7 +298,7 @@ void main() {
       expect(provider.subscriptionInfo!.expire, 1700000000);
     });
 
-    test('updatingKey uses provider_ prefix', () {
+    test('updatingKey includes its provider type', () {
       final provider = ExternalProvider(
         name: 'MyProvider',
         type: 'Proxy',
@@ -306,7 +306,7 @@ void main() {
         vehicleType: 'HTTP',
         updateAt: DateTime.now(),
       );
-      expect(provider.updatingKey, 'provider_MyProvider');
+      expect(provider.updatingKey, 'provider_Proxy_MyProvider');
     });
   });
 
