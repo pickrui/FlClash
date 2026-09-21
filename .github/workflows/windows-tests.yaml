@@ -59,7 +59,7 @@ jobs:
         run: flutter test --no-pub test/common/windows_secure_storage_test.dart test/common/config_reset_test.dart test/common/config_backup_test.dart test/plugins/window_manager_patch_test.dart test/widgets/config_recovery_test.dart
 
       - name: Check Windows diagnostics and background updates
-        run: flutter test --no-pub test/services/network_diagnostic_platform_test.dart test/services/network_diagnostic_proxy_channel_test.dart test/common/update_download_task_test.dart test/widgets/update_download_dialog_test.dart
+        run: flutter test --no-pub test/services/network_diagnostic_platform_test.dart test/services/network_diagnostic_proxy_channel_test.dart test/common/update_download_task_test.dart test/widgets/update_download_page_test.dart
 
       - name: Check Windows native proxy shutdown handling
         shell: pwsh

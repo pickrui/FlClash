@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:fl_clash/common/request.dart';
+import 'package:fl_clash/common/update_download_task.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/update_download.dart';
@@ -78,43 +79,49 @@ void main() {
   });
 
   for (final choice in ['download', 'later', 'back']) {
-    testWidgets('native details return confirmation only for $choice', (
-      tester,
-    ) async {
-      bool? result;
-      var returned = false;
-      await _openDetails(tester, _release, (value) {
-        result = value;
-        returned = true;
-      });
-      expect(find.text('v0.8.98'), findsOneWidget);
-      expect(
-        find.text(
-          AppLocalizations.current.updateBuildNumber(
-            _release.remoteBuildNumber,
-          ),
-        ),
-        findsOneWidget,
-      );
-      expect(find.text(_release.releaseNotes!), findsOneWidget);
-      expect(find.byType(SelectableText), findsOneWidget);
-      expect(returned, isFalse);
-      if (choice == 'back') {
-        await tester.binding.handlePopRoute();
-      } else {
-        await tester.tap(
+    testWidgets(
+      'details start the download in place and close only for $choice',
+      (tester) async {
+        UpdateDownloadAction? result;
+        var returned = false;
+        var downloads = 0;
+        await _openDetails(tester, _release, (value) {
+          result = value;
+          returned = true;
+        }, onDownload: () async => downloads++);
+        expect(find.text('v0.8.98'), findsOneWidget);
+        expect(
           find.text(
-            choice == 'download'
-                ? AppLocalizations.current.updateDownloadConfirm
-                : AppLocalizations.current.updateLater,
+            AppLocalizations.current.updateBuildNumber(
+              _release.remoteBuildNumber,
+            ),
           ),
+          findsOneWidget,
         );
-      }
-      await tester.pumpAndSettle();
-      expect(returned, isTrue);
-      expect(result, choice == 'download' ? isTrue : isNot(true));
-      expect(find.byType(AppUpdatePage), findsNothing);
-    });
+        expect(find.text(_release.releaseNotes!), findsOneWidget);
+        expect(find.byType(SelectableText), findsOneWidget);
+        expect(returned, isFalse);
+        if (choice == 'back') {
+          await tester.binding.handlePopRoute();
+        } else {
+          await tester.tap(
+            find.text(
+              choice == 'download'
+                  ? AppLocalizations.current.updateDownloadConfirm
+                  : AppLocalizations.current.updateLater,
+            ),
+          );
+        }
+        await tester.pumpAndSettle();
+        expect(downloads, choice == 'download' ? 1 : 0);
+        expect(returned, choice != 'download');
+        expect(result, isNull);
+        expect(
+          find.byType(AppUpdatePage),
+          choice == 'download' ? findsOneWidget : findsNothing,
+        );
+      },
+    );
   }
 
   testWidgets('opening a notice with missing notes loads them again', (
@@ -217,12 +224,13 @@ void main() {
         version: _release.version,
         releaseNotes: List.filled(100, _release.releaseNotes).join('\n'),
       );
-      bool? result;
+      var downloads = 0;
       await _openDetails(
         tester,
         release,
-        (value) => result = value,
+        (_) {},
         locale: locale,
+        onDownload: () async => downloads++,
       );
       final button = find.widgetWithText(
         FilledButton,
@@ -240,7 +248,7 @@ void main() {
       expect(tester.takeException(), isNull);
       await tester.tap(button);
       await tester.pumpAndSettle();
-      expect(result, isTrue);
+      expect(downloads, 1);
     });
   }
 }
@@ -262,11 +270,14 @@ class _UpdateAction extends UpdateAction {
 Future<void> _openDetails(
   WidgetTester tester,
   AppUpdateInfo release,
-  void Function(bool?) onResult, {
+  void Function(UpdateDownloadAction?) onResult, {
   Locale locale = const Locale('en'),
   Future<String?> Function()? loadReleaseNotes,
+  Future<void> Function()? onDownload,
   bool settle = true,
 }) async {
+  final task = AppUpdateDownloadTask();
+  addTearDown(task.dispose);
   await tester.pumpWidget(
     TestApp(
       includeNavigatorKey: false,
@@ -276,14 +287,16 @@ Future<void> _openDetails(
         body: Builder(
           builder: (context) => TextButton(
             onPressed: () async => onResult(
-              await Navigator.of(context).push<bool>(
+              await Navigator.of(context).push<UpdateDownloadAction>(
                 MaterialPageRoute(
                   builder: (_) => AppUpdatePage(
                     info: release,
+                    task: task,
                     loadReleaseNotes:
                         loadReleaseNotes ??
                         () async =>
                             throw StateError('cached notes fetched again'),
+                    onDownload: onDownload ?? () async {},
                   ),
                 ),
               ),

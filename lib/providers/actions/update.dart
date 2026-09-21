@@ -151,10 +151,10 @@ extension InitControllerExt on AppController {
       if (isUser) await details;
       return true;
     }
-    final preparing = _startUpdateDownloadFuture;
     final task = _ref.read(appUpdateDownloadProvider);
-    if (preparing == null && !task.hasDownload) return false;
-    if (isUser) await (preparing ?? _showAppUpdateDownload(task));
+    if (_startUpdateDownloadFuture == null && !task.hasDownload) return false;
+    final info = _appUpdateDownloadInfo;
+    if (isUser && info != null) await showAppUpdateDetails(info);
     return true;
   }
 
@@ -229,29 +229,34 @@ extension InitControllerExt on AppController {
 
   Future<void> _confirmAppUpdateDownload(AppUpdateInfo info) async {
     _ref.read(appUpdateNoticeProvider).value = null;
-    final preparing = _startUpdateDownloadFuture;
+    _appUpdateDownloadInfo = info;
     final task = _ref.read(appUpdateDownloadProvider);
-    if (preparing != null || task.hasDownload) {
-      await (preparing ?? _showAppUpdateDownload(task));
-      return;
-    }
-    final res = await promptForAppUpdate(
+    final action = await promptForAppUpdate(
       showWindow: window?.show,
-      prompt: () => BaseNavigator.push<bool>(
+      prompt: () => BaseNavigator.push<UpdateDownloadAction>(
         _context,
         AppUpdatePage(
           info: info,
+          task: task,
           loadReleaseNotes: () => request.fetchReleaseNotes(
             releaseTagNameFromVersionData(info.version),
           ),
+          onDownload: _startAppUpdateDownload,
         ),
       ),
     );
-    if (res != true) {
-      _appUpdateCheck.decline(info.remoteBuildNumber);
+    if (action == UpdateDownloadAction.install) {
+      await installAppUpdate();
       return;
     }
-    await _startAppUpdateDownload();
+    if (action == UpdateDownloadAction.browser) {
+      await safeRun(
+        () => _openUpdateDownloadUrl(task.downloadUrl!),
+        title: appLocalizations.checkUpdate,
+      );
+      return;
+    }
+    if (!task.hasDownload) _appUpdateCheck.decline(info.remoteBuildNumber);
   }
 
   Future<void> _startAppUpdateDownload() async {
@@ -268,8 +273,6 @@ extension InitControllerExt on AppController {
   }
 
   Future<void> _prepareAppUpdateDownload() async {
-    // Download errors live in the task state (dialog / About); only
-    // choosing a package, opening a browser or the dialog can throw here.
     await safeRun<void>(
       () async {
         var linuxFormat = LinuxPackageFormat.deb;
@@ -349,30 +352,6 @@ extension InitControllerExt on AppController {
         directory: directory,
       ),
     );
-    await _showAppUpdateDownload(task);
-  }
-
-  Future<void> _showAppUpdateDownload(AppUpdateDownloadTask task) async {
-    if (_updateDialogOpen) return;
-    _updateDialogOpen = true;
-    UpdateDownloadAction? action;
-    try {
-      await window?.show();
-      action = await globalState.showCommonDialog<UpdateDownloadAction>(
-        dismissible: false,
-        child: UpdateDownloadDialog(task: task),
-      );
-    } finally {
-      _updateDialogOpen = false;
-    }
-    if (action == UpdateDownloadAction.install) {
-      await installAppUpdate();
-    } else if (action == UpdateDownloadAction.browser) {
-      await safeRun(
-        () => _openUpdateDownloadUrl(task.downloadUrl!),
-        title: appLocalizations.checkUpdate,
-      );
-    }
   }
 
   Future<void> installAppUpdate() async {

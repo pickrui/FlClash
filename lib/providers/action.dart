@@ -682,9 +682,9 @@ AppUpdateOffer resolveAppUpdateOffer({
 }
 
 /// The window has to be up before the release notes can be confirmed.
-Future<bool?> promptForAppUpdate({
+Future<T?> promptForAppUpdate<T>({
   required Future<void> Function()? showWindow,
-  required Future<bool?> Function() prompt,
+  required Future<T?> Function() prompt,
 }) async {
   await showWindow?.call();
   return prompt();
@@ -722,7 +722,7 @@ class AppController {
   );
   Future<void>? _updateDetailsFuture;
   Future<void>? _startUpdateDownloadFuture;
-  bool _updateDialogOpen = false;
+  AppUpdateInfo? _appUpdateDownloadInfo;
   bool _openingUpdateInstaller = false;
   Future<bool>? _listenerStartFuture;
   int _startIntentGeneration = 0;

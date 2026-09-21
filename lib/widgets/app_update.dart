@@ -4,7 +4,6 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/update_download_task.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/update_download.dart';
-import 'package:fl_clash/widgets/dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -60,15 +59,22 @@ class AppUpdateAvailableNotice extends ConsumerWidget {
   }
 }
 
+// Closing the page leaves its application-owned download running.
+enum UpdateDownloadAction { install, browser }
+
 class AppUpdatePage extends StatefulWidget {
   const AppUpdatePage({
     super.key,
     required this.info,
+    required this.task,
     required this.loadReleaseNotes,
+    required this.onDownload,
   });
 
   final AppUpdateInfo info;
+  final AppUpdateDownloadTask task;
   final Future<String?> Function() loadReleaseNotes;
+  final Future<void> Function() onDownload;
 
   @override
   State<AppUpdatePage> createState() => _AppUpdatePageState();
@@ -76,6 +82,7 @@ class AppUpdatePage extends StatefulWidget {
 
 class _AppUpdatePageState extends State<AppUpdatePage> {
   late Future<String?> _notes;
+  bool _starting = false;
 
   @override
   void initState() {
@@ -94,6 +101,18 @@ class _AppUpdatePageState extends State<AppUpdatePage> {
     return notes == null || notes.isEmpty
         ? Future.sync(widget.loadReleaseNotes)
         : Future.value(notes);
+  }
+
+  /// Choosing a package or reaching the temporary directory happens before the
+  /// task reports anything, so the button holds the wait itself.
+  Future<void> _startDownload() async {
+    if (_starting) return;
+    setState(() => _starting = true);
+    try {
+      await widget.onDownload();
+    } finally {
+      if (mounted) setState(() => _starting = false);
+    }
   }
 
   @override
@@ -180,20 +199,10 @@ class _AppUpdatePageState extends State<AppUpdatePage> {
                 top: false,
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: OverflowBar(
-                    alignment: MainAxisAlignment.end,
-                    spacing: 8,
-                    overflowSpacing: 8,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(false),
-                        child: Text(l.updateLater),
-                      ),
-                      FilledButton(
-                        onPressed: () => Navigator.of(context).pop(true),
-                        child: Text(l.updateDownloadConfirm),
-                      ),
-                    ],
+                  child: _UpdateDownloadBar(
+                    task: widget.task,
+                    starting: _starting,
+                    onDownload: _startDownload,
                   ),
                 ),
               ),
@@ -205,83 +214,117 @@ class _AppUpdatePageState extends State<AppUpdatePage> {
   }
 }
 
-// Closing a progress view leaves its application-owned download running.
-enum UpdateDownloadAction { install, browser }
+enum _DownloadStage { idle, preparing, downloading, ready, failed }
 
-class UpdateDownloadDialog extends StatelessWidget {
-  const UpdateDownloadDialog({super.key, required this.task});
+class _UpdateDownloadBar extends StatelessWidget {
+  const _UpdateDownloadBar({
+    required this.task,
+    required this.starting,
+    required this.onDownload,
+  });
+
   final AppUpdateDownloadTask task;
+  final bool starting;
+  final VoidCallback onDownload;
+
+  _DownloadStage _stage(AppUpdateDownloadPhase phase) => switch (phase) {
+    AppUpdateDownloadPhase.downloading => _DownloadStage.downloading,
+    AppUpdateDownloadPhase.ready => _DownloadStage.ready,
+    AppUpdateDownloadPhase.failed => _DownloadStage.failed,
+    _ => starting ? _DownloadStage.preparing : _DownloadStage.idle,
+  };
+
+  static void _close(BuildContext context, [UpdateDownloadAction? action]) =>
+      Navigator.of(context).pop(action);
+
+  List<Widget> _status(
+    BuildContext context,
+    _DownloadStage stage,
+    double? progress,
+  ) {
+    final l = context.appLocalizations;
+    return switch (stage) {
+      _DownloadStage.idle => const [],
+      _DownloadStage.preparing || _DownloadStage.downloading => [
+        LinearProgressIndicator(value: progress),
+        const SizedBox(height: 12),
+        Text(
+          progress == null
+              ? l.updateDownloading
+              : '${(progress * 100).floor()}%',
+        ),
+        const SizedBox(height: 16),
+      ],
+      _DownloadStage.ready => [
+        Text(l.updateReadyHint),
+        const SizedBox(height: 16),
+      ],
+      _DownloadStage.failed => [
+        Text(l.updateDownloadFailed),
+        const SizedBox(height: 4),
+        TextButton.icon(
+          onPressed: () => _close(context, UpdateDownloadAction.browser),
+          icon: const Icon(Icons.open_in_new, size: 18),
+          label: Text(l.updateDownloadBrowser),
+        ),
+        const SizedBox(height: 8),
+      ],
+    };
+  }
+
+  List<Widget> _actions(BuildContext context, _DownloadStage stage) {
+    final l = context.appLocalizations;
+    void close() => _close(context);
+    return switch (stage) {
+      _DownloadStage.downloading => [
+        TextButton(onPressed: task.cancel, child: Text(l.updateCancelDownload)),
+        FilledButton(onPressed: close, child: Text(l.updateDownloadBackground)),
+      ],
+      _DownloadStage.ready => [
+        TextButton(onPressed: close, child: Text(l.updateLater)),
+        FilledButton(
+          onPressed: () => _close(context, UpdateDownloadAction.install),
+          child: Text(l.updateInstall),
+        ),
+      ],
+      _DownloadStage.failed => [
+        TextButton(onPressed: close, child: Text(l.close)),
+        FilledButton(
+          onPressed: () => unawaited(task.retry()),
+          child: Text(l.configRecoveryRetry),
+        ),
+      ],
+      _DownloadStage.idle || _DownloadStage.preparing => [
+        TextButton(onPressed: close, child: Text(l.updateLater)),
+        FilledButton(
+          onPressed: stage == _DownloadStage.preparing ? null : onDownload,
+          child: Text(l.updateDownloadConfirm),
+        ),
+      ],
+    };
+  }
 
   @override
-  Widget build(BuildContext context) {
-    final l = context.appLocalizations;
-    return ValueListenableBuilder(
-      valueListenable: task,
-      builder: (context, state, _) {
-        final downloading = state.phase == AppUpdateDownloadPhase.downloading;
-        final ready = state.phase == AppUpdateDownloadPhase.ready;
-        return CommonDialog(
-          title: ready ? l.updateReady : l.download,
-          maxWidth: 360,
-          actions: [
-            if (downloading) ...[
-              TextButton(
-                onPressed: () {
-                  task.cancel();
-                  Navigator.of(context).pop();
-                },
-                child: Text(l.updateCancelDownload),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text(l.updateDownloadBackground),
-              ),
-            ] else ...[
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text(ready ? l.updateLater : l.close),
-              ),
-              if (ready)
-                FilledButton(
-                  onPressed: () =>
-                      Navigator.of(context).pop(UpdateDownloadAction.install),
-                  child: Text(l.updateInstall),
-                ),
-              if (state.phase == AppUpdateDownloadPhase.failed) ...[
-                FilledButton(
-                  onPressed: () => unawaited(task.retry()),
-                  child: Text(l.configRecoveryRetry),
-                ),
-              ],
-            ],
-          ],
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (downloading) ...[
-                LinearProgressIndicator(value: state.progress),
-                const SizedBox(height: 12),
-                Text(
-                  state.progress == null
-                      ? l.loading
-                      : '${(state.progress! * 100).floor()}%',
-                ),
-              ] else
-                Text(ready ? l.updateReadyHint : l.updateDownloadFailed),
-              if (state.phase == AppUpdateDownloadPhase.failed) ...[
-                const SizedBox(height: 12),
-                TextButton.icon(
-                  onPressed: () =>
-                      Navigator.of(context).pop(UpdateDownloadAction.browser),
-                  icon: const Icon(Icons.open_in_new, size: 18),
-                  label: Text(l.updateDownloadBrowser),
-                ),
-              ],
-            ],
+  Widget build(BuildContext context) => ValueListenableBuilder(
+    valueListenable: task,
+    builder: (context, state, _) {
+      final stage = _stage(state.phase);
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ..._status(context, stage, state.progress),
+          Align(
+            alignment: Alignment.centerRight,
+            child: OverflowBar(
+              alignment: MainAxisAlignment.end,
+              spacing: 8,
+              overflowSpacing: 8,
+              children: _actions(context, stage),
+            ),
           ),
-        );
-      },
-    );
-  }
+        ],
+      );
+    },
+  );
 }
