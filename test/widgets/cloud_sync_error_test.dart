@@ -44,12 +44,27 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
-  testWidgets('API failure shows its cause and manual retry clears it', (
+  testWidgets('a single failed attempt does not blame the service', (
     tester,
   ) async {
     var checks = 0;
     await _pumpCloudPage(tester, () async {
       if (++checks == 1) throw const CloudApiException('Connection timed out');
+    });
+    await tester.pumpAndSettle();
+    expect(checks, 2);
+    expect(find.byType(MaterialBanner), findsNothing);
+    expect(find.byIcon(Icons.check_circle), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('API failure shows its cause and manual retry clears it', (
+    tester,
+  ) async {
+    var checks = 0;
+    // Only a check whose every attempt fails reaches the banner.
+    await _pumpCloudPage(tester, () async {
+      if (++checks <= 2) throw const CloudApiException('Connection timed out');
     });
     await tester.pumpAndSettle();
     expect(
@@ -59,7 +74,7 @@ void main() {
     expect(find.byIcon(Icons.error), findsOneWidget);
     await tester.tap(find.widgetWithText(TextButton, 'Check API'));
     await tester.pumpAndSettle();
-    expect(checks, 2);
+    expect(checks, 3);
     expect(find.byType(MaterialBanner), findsNothing);
     expect(find.byIcon(Icons.check_circle), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -70,14 +85,14 @@ void main() {
   ) async {
     var checks = 0;
     final container = await _pumpCloudPage(tester, () async {
-      if (++checks == 1) throw const CloudApiException('Connection failed');
+      if (++checks <= 2) throw const CloudApiException('Connection failed');
     });
     await tester.pumpAndSettle();
     container
         .read(currentPageLabelProvider.notifier)
         .toPage(PageLabel.oixCloud);
     await tester.pumpAndSettle();
-    expect(checks, 2);
+    expect(checks, 3);
     expect(find.byType(MaterialBanner), findsNothing);
     expect(find.byIcon(Icons.check_circle), findsOneWidget);
   });
@@ -98,7 +113,7 @@ void main() {
       expect(checks, 1);
       first.completeError(const CloudApiException('Old connection failed'));
       await tester.pumpAndSettle();
-      expect(checks, 2);
+      expect(checks, 3);
       expect(find.byType(MaterialBanner), findsNothing);
       expect(find.byIcon(Icons.check_circle), findsOneWidget);
     },
