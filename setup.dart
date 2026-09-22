@@ -416,16 +416,70 @@ class BuildCommand extends Command {
         'patchelf',
         'libfuse2',
       ]);
-      final appImageTool = File('/usr/local/bin/appimagetool');
-      if (!appImageTool.existsSync()) {
-        await Build.exec([
-          'wget',
-          '-O',
-          'appimagetool',
-          'https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage',
-        ]);
-        await Build.exec(['chmod', '+x', 'appimagetool']);
-        await Build.exec(['sudo', 'mv', 'appimagetool', '/usr/local/bin/']);
+      await _installAppImageTool();
+    }
+  }
+
+  /// Pins the static runtime through a wrapper, because flutter_distributor
+  /// runs `appimagetool` with no options. See docs/aur-packaging.md.
+  Future<void> _installAppImageTool() async {
+    const toolDir = '/usr/local/lib/flclash';
+    const realTool = '$toolDir/appimagetool';
+    const runtime = '$toolDir/appimage-runtime';
+    const wrapper = '/usr/local/bin/appimagetool';
+
+    await Build.exec(['sudo', 'mkdir', '-p', toolDir]);
+    if (!File(realTool).existsSync()) {
+      await Build.exec([
+        'wget',
+        '-O',
+        'appimagetool',
+        'https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage',
+      ]);
+      await Build.exec(['chmod', '+x', 'appimagetool']);
+      await Build.exec(['sudo', 'mv', 'appimagetool', realTool]);
+    }
+    if (!File(runtime).existsSync()) {
+      await Build.exec([
+        'wget',
+        '-O',
+        'appimage-runtime',
+        'https://github.com/AppImage/type2-runtime/releases/download/continuous/runtime-x86_64',
+      ]);
+      await Build.exec(['sudo', 'mv', 'appimage-runtime', runtime]);
+    }
+
+    final wrapperFile = File(
+      join(Directory.systemTemp.path, 'appimagetool-wrapper.sh'),
+    );
+    await wrapperFile.writeAsString(
+      '#!/bin/sh\n'
+      'exec $realTool --runtime-file $runtime "\$@"\n',
+    );
+    await Build.exec(['chmod', '+x', wrapperFile.path]);
+    await Build.exec(['sudo', 'mv', wrapperFile.path, wrapper]);
+  }
+
+  /// Fails the build when the image still resolves libfuse.so.2 at startup.
+  Future<void> _verifyAppImageRuntime() async {
+    final distDir = Directory(join(current, 'dist'));
+    if (!distDir.existsSync()) return;
+    final images = distDir.listSync().whereType<File>().where(
+      (file) => extension(file.path) == '.AppImage',
+    );
+    for (final image in images) {
+      final handle = await image.open();
+      try {
+        final head = await handle.read(2 * 1024 * 1024);
+        if (const AsciiDecoder(
+          allowInvalid: true,
+        ).convert(head).contains('libfuse.so.2')) {
+          throw Exception(
+            '${basename(image.path)} embeds the fuse2 AppImage runtime',
+          );
+        }
+      } finally {
+        await handle.close();
       }
     }
   }
@@ -637,6 +691,7 @@ class BuildCommand extends Command {
           ],
           env: env,
         );
+        await _verifyAppImageRuntime();
         return;
       case Target.android:
         final targetMap = {

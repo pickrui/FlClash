@@ -639,6 +639,7 @@ String? getAppUpdateDownloadUrl(
   Abi abi, {
   LinuxPackageFormat linuxFormat = LinuxPackageFormat.deb,
 }) {
+  if (linuxFormat.managed) return null;
   final name = switch (abi) {
     Abi.windowsX64 => 'windows-amd64-setup.exe',
     Abi.windowsArm64 => 'windows-arm64-setup.exe',
@@ -658,6 +659,22 @@ String? getAppUpdateDownloadUrl(
 /// would only start a second copy, so the user replaces the image themselves.
 bool isAppImageInstaller(File file) =>
     p.extension(file.path) == '.${LinuxPackageFormat.appImage.extension}';
+
+/// The Linux package to act on before the user is asked. An install a package
+/// manager owns outranks a stored answer; null leaves the question to the user.
+LinuxPackageFormat? resolveLinuxUpdateFormat({
+  required List<LinuxPackageFormat> published,
+  required LinuxPackageFormat? detected,
+  required LinuxPackageFormat? stored,
+}) {
+  if (detected != null && detected.managed) return detected;
+  // An ABI with no Linux package at all falls through to the download page.
+  if (published.isEmpty) return LinuxPackageFormat.deb;
+  if (published.length == 1) return published.first;
+  if (stored != null && published.contains(stored)) return stored;
+  if (detected != null && published.contains(detected)) return detected;
+  return null;
+}
 
 String getAppUpdateFallbackDownloadUrl(String downloadUrl) {
   final fileName = Uri.parse(downloadUrl).pathSegments.last;

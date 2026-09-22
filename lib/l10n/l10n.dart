@@ -7474,6 +7474,16 @@ class AppLocalizations {
     );
   }
 
+  /// `This build was installed by a package manager; upgrade it the same way you installed it.`
+  String get updatePackageManagerTip {
+    return Intl.message(
+      'This build was installed by a package manager; upgrade it the same way you installed it.',
+      name: 'updatePackageManagerTip',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Default: 9000; alternatives: 1480 or 4064. Restart the Android VPN to apply`
   String get tunMtuDesc {
     return Intl.message(

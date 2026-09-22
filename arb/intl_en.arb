@@ -876,6 +876,7 @@
   "updatePackageFormat": "Choose the package format",
   "updatePackageFormatTip": "How this build was installed could not be determined. Pick the format that matches it.",
   "updateAppImageTip": "An AppImage cannot be installed automatically. Replace the running program with the downloaded file; its folder has been opened.",
+  "updatePackageManagerTip": "This build was installed by a package manager; upgrade it the same way you installed it.",
   "tunMtuDesc": "Default: 9000; alternatives: 1480 or 4064. Restart the Android VPN to apply",
   "tunMtuInvalid": "Enter an integer from 1280 to 65535",
   "scriptOptions": "Script options",

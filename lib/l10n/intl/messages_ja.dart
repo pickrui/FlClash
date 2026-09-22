@@ -1464,6 +1464,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "updatePackageFormatTip": MessageLookupByLibrary.simpleMessage(
       "インストール方法を判別できませんでした。一致する形式を選んでください。",
     ),
+    "updatePackageManagerTip": MessageLookupByLibrary.simpleMessage(
+      "このビルドはパッケージマネージャーでインストールされています。インストール時と同じ方法で更新してください。",
+    ),
     "updateReady": MessageLookupByLibrary.simpleMessage("更新の準備ができました"),
     "updateReadyHint": MessageLookupByLibrary.simpleMessage(
       "更新のダウンロードが完了しました。都合のよいときにインストールできます",

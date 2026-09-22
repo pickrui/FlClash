@@ -279,6 +279,10 @@ extension InitControllerExt on AppController {
         if (system.isLinux) {
           final format = await _resolveLinuxPackageFormat();
           if (format == null) return;
+          if (format.managed) {
+            await _showManagedUpdateTip();
+            return;
+          }
           linuxFormat = format;
         }
         await _downloadAppUpdate(
@@ -290,20 +294,17 @@ extension InitControllerExt on AppController {
     );
   }
 
-  /// Picks the package to download: a stored answer, then detection, then the
-  /// user. Returns null while the question is still open.
+  /// Asks the user only when nothing else answers, and returns null until then.
   Future<LinuxPackageFormat?> _resolveLinuxPackageFormat() async {
     final formats = linuxPackageFormatsFor(Abi.current());
-    // An ABI that publishes no Linux package at all (32-bit ARM, riscv) keeps
-    // falling through to the download page rather than asking about formats.
-    if (formats.isEmpty) return LinuxPackageFormat.deb;
-    if (formats.length == 1) return formats.first;
-    final stored = LinuxPackageFormat.fromName(
-      await preferences.getLinuxPackageFormat(),
+    final resolved = resolveLinuxUpdateFormat(
+      published: formats,
+      detected: await detectLinuxPackageFormat(),
+      stored: LinuxPackageFormat.fromName(
+        await preferences.getLinuxPackageFormat(),
+      ),
     );
-    if (stored != null && formats.contains(stored)) return stored;
-    final detected = await detectLinuxPackageFormat();
-    if (detected != null && formats.contains(detected)) return detected;
+    if (resolved != null) return resolved;
     await window?.show();
     final picked = await globalState.showCommonDialog<LinuxPackageFormat>(
       child: LinuxPackageFormatDialog(formats: formats),
@@ -383,6 +384,15 @@ extension InitControllerExt on AppController {
     } finally {
       _openingUpdateInstaller = false;
     }
+  }
+
+  Future<void> _showManagedUpdateTip() async {
+    await window?.show();
+    await globalState.showMessage(
+      title: appLocalizations.checkUpdate,
+      message: TextSpan(text: appLocalizations.updatePackageManagerTip),
+      cancelable: false,
+    );
   }
 
   /// An AppImage replaces itself by hand, so the download is only shown.

@@ -1291,6 +1291,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "updatePackageFormatTip": MessageLookupByLibrary.simpleMessage(
       "无法确定当前的安装方式，请选择与之匹配的格式",
     ),
+    "updatePackageManagerTip": MessageLookupByLibrary.simpleMessage(
+      "当前版本由系统包管理器安装，请按安装时的方式升级",
+    ),
     "updateReady": MessageLookupByLibrary.simpleMessage("更新已就绪"),
     "updateReadyHint": MessageLookupByLibrary.simpleMessage("更新已下载完成，可在方便时安装"),
     "updateReleaseNotes": MessageLookupByLibrary.simpleMessage("更新日志"),

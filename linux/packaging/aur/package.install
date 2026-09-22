@@ -1,0 +1,41 @@
+_helper=/usr/share/FlClash/FlClashHelperService
+_unit=/etc/systemd/system/flclash-helper.service
+
+# The unit pins the Helper path and the Core hash it will start as root, so an
+# upgrade has to restage both or the app falls back to a new polkit prompt.
+_restage_helper() {
+  [ -x "$_helper" ] || return 0
+  [ -f "$_unit" ] || return 0
+  owner=$(sed -n 's/^Environment=FLCLASH_HELPER_OWNER_UID=//p' "$_unit")
+  case "$owner" in
+    '' | *[!0-9]* | 0)
+      echo ">>> FlClash: $_unit names no usable owner; re-enable TUN in the app." >&2
+      return 0
+      ;;
+  esac
+  if ! PKEXEC_UID="$owner" "$_helper" install; then
+    echo ">>> FlClash: restaging the helper failed; re-enable TUN in the app." >&2
+  fi
+}
+
+post_install() {
+  _restage_helper
+}
+
+post_upgrade() {
+  _restage_helper
+}
+
+pre_remove() {
+  if [ -f "$_unit" ]; then
+    systemctl disable --now flclash-helper.service >/dev/null 2>&1 || true
+  fi
+}
+
+post_remove() {
+  rm -f "$_unit"
+  if [ ! -L /usr/local/libexec/flclash ]; then
+    rm -rf /usr/local/libexec/flclash
+  fi
+  systemctl daemon-reload >/dev/null 2>&1 || true
+}

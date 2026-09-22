@@ -1886,6 +1886,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "updatePackageFormatTip": MessageLookupByLibrary.simpleMessage(
       "Не удалось определить способ установки. Выберите подходящий формат.",
     ),
+    "updatePackageManagerTip": MessageLookupByLibrary.simpleMessage(
+      "Эта сборка установлена пакетным менеджером. Обновите её тем же способом, каким устанавливали.",
+    ),
     "updateReady": MessageLookupByLibrary.simpleMessage(
       "Обновление готово к установке",
     ),

@@ -876,6 +876,7 @@
   "updatePackageFormat": "パッケージ形式を選択",
   "updatePackageFormatTip": "インストール方法を判別できませんでした。一致する形式を選んでください。",
   "updateAppImageTip": "AppImage は自動インストールできません。ダウンロードしたファイルで現在のプログラムを置き換えてください。保存先のフォルダーを開きました。",
+  "updatePackageManagerTip": "このビルドはパッケージマネージャーでインストールされています。インストール時と同じ方法で更新してください。",
   "tunMtuDesc": "既定値は 9000、1480 または 4064 も選択可能。Android VPN の再起動後に適用",
   "tunMtuInvalid": "1280〜65535 の整数を入力してください",
   "scriptOptions": "スクリプト設定",

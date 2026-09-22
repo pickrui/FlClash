@@ -616,3 +616,74 @@ jobs:
             echo "   Response: $body"
             exit 1
           fi
+
+  aur:
+    name: Publish AUR package
+    if: ${{ !contains(github.ref, '-') }}
+    needs: [ upload ]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    container: archlinux:base-devel
+    permissions:
+      contents: write
+    env:
+      AUR_PKGNAME: flclash-oixcloud-bin
+      AUR_SOURCE_REPO: ${{ github.repository }}
+      AUR_MAINTAINER: ${{ vars.AUR_MAINTAINER || 'pickrui <pickrui@users.noreply.github.com>' }}
+    steps:
+      - name: Install packaging tools
+        run: pacman -Sy --needed --noconfirm git openssh github-cli
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Render package
+        run: |
+          set -euo pipefail
+          useradd -m builder
+          install -d -o builder "$GITHUB_WORKSPACE/dist/aur"
+          # makepkg refuses to run as root, and .SRCINFO comes from makepkg.
+          runuser -u builder -- env \
+            AUR_PKGNAME="$AUR_PKGNAME" \
+            AUR_SOURCE_REPO="$AUR_SOURCE_REPO" \
+            AUR_MAINTAINER="$AUR_MAINTAINER" \
+            AUR_PKGREL="${{ vars.AUR_PKGREL || '1' }}" \
+            tool/build_aur_package.sh "${{ github.ref_name }}" "$GITHUB_WORKSPACE/dist/aur"
+          cat "$GITHUB_WORKSPACE/dist/aur/.SRCINFO"
+
+      - name: Attach the package to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          gh release upload "$TAG" \
+            "dist/aur/$AUR_PKGNAME-aur.tar.gz" --clobber --repo "$GITHUB_REPOSITORY"
+
+      - name: Push to AUR
+        env:
+          AUR_SSH_KEY: ${{ secrets.AUR_SSH_KEY }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if [ -z "${AUR_SSH_KEY:-}" ]; then
+            echo "AUR_SSH_KEY is not configured; the rendered package was not published." >&2
+            exit 0
+          fi
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$AUR_SSH_KEY" > ~/.ssh/aur
+          chmod 600 ~/.ssh/aur
+          cp .github/aur_known_hosts ~/.ssh/known_hosts
+          export GIT_SSH_COMMAND="ssh -i ~/.ssh/aur -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes"
+          git clone "ssh://aur@aur.archlinux.org/$AUR_PKGNAME.git" aur-checkout
+          cp dist/aur/PKGBUILD dist/aur/.SRCINFO "dist/aur/$AUR_PKGNAME.install" aur-checkout/
+          cd aur-checkout
+          git config user.name "${AUR_MAINTAINER%% <*}"
+          git config user.email "$(printf '%s' "$AUR_MAINTAINER" | sed -n 's/.*<\(.*\)>.*/\1/p')"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "The AUR package already matches $TAG."
+            exit 0
+          fi
+          git commit -m "upgpkg: $AUR_PKGNAME ${TAG#v}"
+          git push origin HEAD:master

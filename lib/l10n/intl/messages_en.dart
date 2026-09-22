@@ -1797,6 +1797,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "updatePackageFormatTip": MessageLookupByLibrary.simpleMessage(
       "How this build was installed could not be determined. Pick the format that matches it.",
     ),
+    "updatePackageManagerTip": MessageLookupByLibrary.simpleMessage(
+      "This build was installed by a package manager; upgrade it the same way you installed it.",
+    ),
     "updateReady": MessageLookupByLibrary.simpleMessage(
       "Update ready to install",
     ),

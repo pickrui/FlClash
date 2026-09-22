@@ -293,13 +293,81 @@ void main() {
       );
     }
     // arm64 publishes a Debian package only, whatever is asked for.
-    for (final format in LinuxPackageFormat.values) {
+    for (final format in linuxPackageFormatsFor(Abi.linuxX64)) {
       expect(
         getAppUpdateDownloadUrl(Abi.linuxArm64, linuxFormat: format),
         'https://dl.dler.io/flclash-linux-arm64.deb',
         reason: format.name,
       );
     }
+    // A managed format has no installer to point at on any ABI.
+    for (final abi in Abi.values) {
+      expect(
+        getAppUpdateDownloadUrl(abi, linuxFormat: LinuxPackageFormat.pacman),
+        isNull,
+        reason: abi.toString(),
+      );
+    }
+  });
+
+  test('a package manager install is never downloaded', () {
+    for (final abi in const [Abi.linuxX64, Abi.linuxArm64]) {
+      expect(
+        resolveLinuxUpdateFormat(
+          published: linuxPackageFormatsFor(abi),
+          detected: LinuxPackageFormat.pacman,
+          stored: LinuxPackageFormat.deb,
+        ),
+        LinuxPackageFormat.pacman,
+        reason: abi.toString(),
+      );
+    }
+  });
+
+  test('a stored answer outranks detection, and detection the user', () {
+    final published = linuxPackageFormatsFor(Abi.linuxX64);
+    expect(
+      resolveLinuxUpdateFormat(
+        published: published,
+        detected: LinuxPackageFormat.rpm,
+        stored: LinuxPackageFormat.appImage,
+      ),
+      LinuxPackageFormat.appImage,
+    );
+    expect(
+      resolveLinuxUpdateFormat(
+        published: published,
+        detected: LinuxPackageFormat.rpm,
+        stored: null,
+      ),
+      LinuxPackageFormat.rpm,
+    );
+    // Nothing answered: an unpacked build on Arch still reaches the dialog.
+    expect(
+      resolveLinuxUpdateFormat(
+        published: published,
+        detected: null,
+        stored: null,
+      ),
+      isNull,
+    );
+    // An ABI with a single package never asks.
+    expect(
+      resolveLinuxUpdateFormat(
+        published: linuxPackageFormatsFor(Abi.linuxArm64),
+        detected: null,
+        stored: LinuxPackageFormat.rpm,
+      ),
+      LinuxPackageFormat.deb,
+    );
+    expect(
+      resolveLinuxUpdateFormat(
+        published: linuxPackageFormatsFor(Abi.macosArm64),
+        detected: null,
+        stored: null,
+      ),
+      LinuxPackageFormat.deb,
+    );
   });
 
   test('only an AppImage download is left to the user to install', () {

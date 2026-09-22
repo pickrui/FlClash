@@ -65,6 +65,18 @@ analysis.
     sudo apt-get install libkeybinder-3.0-dev
    ```
 
+On Arch Linux and its derivatives install with the PKGBUILD published beside
+each release, which leaves dependencies and upgrades to pacman:
+
+   ```bash
+    sudo pacman -S --needed base-devel
+    curl -LO https://github.com/pickrui/FlClash/releases/latest/download/flclash-oixcloud-bin-aur.tar.gz
+    tar xf flclash-oixcloud-bin-aur.tar.gz
+    cd flclash-oixcloud-bin && makepkg -si
+   ```
+
+   `flclash-oixcloud-bin` will also be published on the AUR.
+
 ### Android
 
 Support the following actions

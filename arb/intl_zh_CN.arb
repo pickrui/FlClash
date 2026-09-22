@@ -876,6 +876,7 @@
   "updatePackageFormat": "选择安装包格式",
   "updatePackageFormatTip": "无法确定当前的安装方式，请选择与之匹配的格式",
   "updateAppImageTip": "AppImage 无法自动安装，请用下载的文件替换当前程序，已打开文件所在目录",
+  "updatePackageManagerTip": "当前版本由系统包管理器安装，请按安装时的方式升级",
   "tunMtuDesc": "默认 9000，可尝试 1480 或 4064；Android VPN 需重启后生效",
   "tunMtuInvalid": "请输入 1280–65535 之间的整数",
   "scriptOptions": "脚本选项",

@@ -84,6 +84,34 @@ void main() {
     ]);
   });
 
+  test('pacman owning the executable reports a managed install', () async {
+    final log = <String>[];
+    expect(
+      await _detect(
+        runProcess: _runner(
+          const {'pacman': 0},
+          missing: {'dpkg', 'rpm'},
+          log: log,
+        ),
+        osRelease: 'ID=arch',
+        log: log,
+      ),
+      LinuxPackageFormat.pacman,
+    );
+    expect(log, [
+      'dpkg -S /usr/lib/flclash/FlClash',
+      'rpm -qf /usr/lib/flclash/FlClash',
+      'pacman -Qo /usr/lib/flclash/FlClash',
+    ]);
+  });
+
+  test('only a package manager install is managed', () {
+    expect(LinuxPackageFormat.pacman.managed, isTrue);
+    for (final format in linuxPackageFormatsFor(Abi.linuxX64)) {
+      expect(format.managed, isFalse, reason: format.name);
+    }
+  });
+
   test('a missing or hanging package manager falls through', () async {
     expect(
       await _detect(

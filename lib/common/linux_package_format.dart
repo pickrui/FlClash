@@ -9,12 +9,16 @@ import 'dart:io';
 enum LinuxPackageFormat {
   deb('deb'),
   rpm('rpm'),
-  appImage('AppImage');
+  appImage('AppImage'),
+  pacman('pkg.tar.zst', managed: true);
 
-  const LinuxPackageFormat(this.extension);
+  const LinuxPackageFormat(this.extension, {this.managed = false});
 
   /// Extension of the published installer, e.g. `flclash-linux-amd64.deb`.
   final String extension;
+
+  /// A package manager owns the upgrade; nothing is published to download.
+  final bool managed;
 
   static LinuxPackageFormat? fromName(String? name) {
     for (final format in values) {
@@ -26,7 +30,11 @@ enum LinuxPackageFormat {
 
 /// Formats published for [abi]; arm64 only ships a Debian package.
 List<LinuxPackageFormat> linuxPackageFormatsFor(Abi abi) => switch (abi) {
-  Abi.linuxX64 => LinuxPackageFormat.values,
+  Abi.linuxX64 => const [
+    LinuxPackageFormat.deb,
+    LinuxPackageFormat.rpm,
+    LinuxPackageFormat.appImage,
+  ],
   Abi.linuxArm64 => const [LinuxPackageFormat.deb],
   _ => const [],
 };
@@ -64,6 +72,7 @@ const _rpmIds = {
 const _packageOwners = [
   ('dpkg', ['-S'], LinuxPackageFormat.deb),
   ('rpm', ['-qf'], LinuxPackageFormat.rpm),
+  ('pacman', ['-Qo'], LinuxPackageFormat.pacman),
 ];
 
 /// Reports how this build was installed, or null when nothing answers — an
