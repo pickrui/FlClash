@@ -44,6 +44,11 @@ void main() {
     expect(find.text('v0.8.98'), findsNothing);
     expect(find.textContaining('${_release.remoteBuildNumber}'), findsNothing);
     expect(find.text(AppLocalizations.current.updateNotice), findsOneWidget);
+    // The card is tappable, but only a button reads as one.
+    expect(
+      find.widgetWithText(FilledButton, AppLocalizations.current.view),
+      findsOneWidget,
+    );
     expect(action.opened, isEmpty);
     expect(find.byType(AppUpdatePage), findsNothing);
     expect(find.byType(AlertDialog), findsNothing);

@@ -18,6 +18,8 @@ class AppUpdateAvailableNotice extends ConsumerWidget {
       builder: (context, info, _) {
         if (info == null) return const SizedBox.shrink();
         final l = context.appLocalizations;
+        final colors = context.colorScheme;
+        final onContainer = colors.onPrimaryContainer;
         void open() => unawaited(
           ref.read(updateActionProvider.notifier).showDetails(info),
         );
@@ -25,23 +27,36 @@ class AppUpdateAvailableNotice extends ConsumerWidget {
           alignment: Alignment.centerRight,
           child: Container(
             constraints: const BoxConstraints(maxWidth: 420),
-            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Card(
               clipBehavior: Clip.antiAlias,
+              elevation: 3,
+              color: colors.primaryContainer,
               child: InkWell(
                 onTap: open,
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 8, 12),
+                  padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
                   child: Row(
                     children: [
+                      Icon(Icons.system_update, color: onContainer),
+                      const SizedBox(width: 12),
+                      // The version and notes stay on the details page; this only
+                      // has to be noticed and offer a way in.
                       Expanded(
                         child: Text(
                           l.updateNotice,
-                          style: context.textTheme.titleSmall,
+                          style: context.textTheme.titleSmall?.copyWith(
+                            color: onContainer,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
+                      const SizedBox(width: 8),
+                      FilledButton(onPressed: open, child: Text(l.view)),
                       IconButton(
                         tooltip: l.close,
+                        color: onContainer,
+                        visualDensity: VisualDensity.compact,
                         icon: const Icon(Icons.close),
                         onPressed: () => ref
                             .read(updateActionProvider.notifier)
