@@ -28,6 +28,10 @@ class CloudAccountPage extends ConsumerStatefulWidget {
 }
 
 class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
+  /// One retry: enough to ride out a resume, still quick to report a real outage.
+  static const _healthCheckAttempts = 2;
+  static const _healthCheckRetryDelay = Duration(seconds: 1);
+
   var _isCheckingService = false;
   var _healthCheckPending = false;
   String? _serviceError;
@@ -60,11 +64,25 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
       _serviceError = null;
     });
 
+    // Coming back from a long spell in the background, the first request out is
+    // expected to fail: the connections pooled before the app was suspended are
+    // gone, and the core the request is proxied through may still be coming up.
+    // Give it one more go before blaming the service, so returning to this tab
+    // does not always greet the user with a connection error.
     String? error;
-    try {
-      await ref.read(cloudServiceHealthCheckProvider)();
-    } catch (e) {
-      error = CloudApiException.clean(e);
+    for (var attempt = 0; attempt < _healthCheckAttempts; attempt++) {
+      try {
+        await ref.read(cloudServiceHealthCheckProvider)();
+        error = null;
+        break;
+      } catch (e) {
+        error = CloudApiException.clean(e);
+      }
+      if (!mounted) return;
+      if (attempt < _healthCheckAttempts - 1) {
+        await Future<void>.delayed(_healthCheckRetryDelay);
+        if (!mounted) return;
+      }
     }
 
     if (mounted) {
