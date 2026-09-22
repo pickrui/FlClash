@@ -271,6 +271,7 @@
   "iconStyle": "アイコンスタイル",
   "onlyIcon": "アイコンのみ",
   "stackMode": "スタックモード",
+  "mipsStackDesc": "低メモリのユーザー空間スタック。高遅延の回線ではスループットが低下する場合があります",
   "network": "ネットワーク",
   "networkDesc": "ネットワーク関連設定の変更",
   "bypassDomain": "バイパスドメイン",

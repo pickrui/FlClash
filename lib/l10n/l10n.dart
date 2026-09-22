@@ -2094,6 +2094,16 @@ class AppLocalizations {
     return Intl.message('Stack mode', name: 'stackMode', desc: '', args: []);
   }
 
+  /// `Low-memory userspace stack; throughput may drop on high-latency links`
+  String get mipsStackDesc {
+    return Intl.message(
+      'Low-memory userspace stack; throughput may drop on high-latency links',
+      name: 'mipsStackDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Network`
   String get network {
     return Intl.message('Network', name: 'network', desc: '', args: []);

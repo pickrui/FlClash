@@ -402,6 +402,8 @@ class TunStackItem extends ConsumerWidget {
         value: stack,
         options: TunStack.values,
         textBuilder: (value) => value.name,
+        subtitleBuilder: (value) =>
+            value == TunStack.mips ? appLocalizations.mipsStackDesc : null,
         onChanged: (value) {
           if (value == null) {
             return;

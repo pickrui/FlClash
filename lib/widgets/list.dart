@@ -66,12 +66,14 @@ class OptionsDelegate<T> extends Delegate {
   final String title;
   final T value;
   final String Function(T value) textBuilder;
+  final String? Function(T value)? subtitleBuilder;
   final Function(T? value) onChanged;
 
   const OptionsDelegate({
     required this.title,
     required this.options,
     required this.textBuilder,
+    this.subtitleBuilder,
     required this.value,
     required this.onChanged,
   });
@@ -361,6 +363,7 @@ class ListItem<T> extends StatelessWidget {
               title: optionsDelegate.title,
               options: optionsDelegate.options,
               textBuilder: optionsDelegate.textBuilder,
+              subtitleBuilder: optionsDelegate.subtitleBuilder,
               value: optionsDelegate.value,
             ),
           );

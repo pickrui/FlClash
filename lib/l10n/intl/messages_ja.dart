@@ -952,6 +952,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "システムの終了イベントを変更",
     ),
     "minutesAgo": m28,
+    "mipsStackDesc": MessageLookupByLibrary.simpleMessage(
+      "低メモリのユーザー空間スタック。高遅延の回線ではスループットが低下する場合があります",
+    ),
     "mixedPort": MessageLookupByLibrary.simpleMessage("混合ポート"),
     "mode": MessageLookupByLibrary.simpleMessage("モード"),
     "monochromeScheme": MessageLookupByLibrary.simpleMessage("モノクローム"),

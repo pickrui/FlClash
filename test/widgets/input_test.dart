@@ -112,6 +112,51 @@ void main() {
 
     expect(changedValue, '12345');
   });
+
+  testWidgets('ListItem.options shows per-option subtitles', (tester) async {
+    String? changedValue;
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          viewSizeProvider.overrideWithBuild((_, _) => const Size(1200, 1000)),
+        ],
+        child: _TestApp(
+          child: Scaffold(
+            body: ListItem.options(
+              title: const Text('Stack'),
+              delegate: OptionsDelegate<String>(
+                title: 'Stack',
+                options: const ['mixed', 'mips'],
+                value: 'mixed',
+                textBuilder: (value) => value,
+                subtitleBuilder: (value) =>
+                    value == 'mips' ? 'Low memory' : null,
+                onChanged: (value) {
+                  changedValue = value;
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Stack'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Low memory'), findsOneWidget);
+    final mixedTile = find.ancestor(
+      of: find.text('mixed'),
+      matching: find.byType(ListTile),
+    );
+    expect(tester.widget<ListTile>(mixedTile).subtitle, isNull);
+
+    await tester.tap(find.text('mips'));
+    await tester.pumpAndSettle();
+
+    expect(changedValue, 'mips');
+  });
 }
 
 class _TestCloudAccountNotifier extends CloudAccountNotifier {

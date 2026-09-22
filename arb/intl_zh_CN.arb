@@ -271,6 +271,7 @@
   "iconStyle": "图标样式",
   "onlyIcon": "仅图标",
   "stackMode": "栈模式",
+  "mipsStackDesc": "低内存的用户态协议栈，高延迟链路上吞吐可能下降",
   "network": "网络",
   "networkDesc": "修改网络相关设置",
   "bypassDomain": "排除域名",

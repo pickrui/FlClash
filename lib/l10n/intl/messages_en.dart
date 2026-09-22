@@ -1155,6 +1155,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Modify the default system exit event",
     ),
     "minutesAgo": m28,
+    "mipsStackDesc": MessageLookupByLibrary.simpleMessage(
+      "Low-memory userspace stack; throughput may drop on high-latency links",
+    ),
     "mixedPort": MessageLookupByLibrary.simpleMessage("Mixed Port"),
     "mode": MessageLookupByLibrary.simpleMessage("Mode"),
     "monochromeScheme": MessageLookupByLibrary.simpleMessage("Monochrome"),
