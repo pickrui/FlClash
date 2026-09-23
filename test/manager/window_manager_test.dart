@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:fl_clash/common/render.dart';
+import 'package:fl_clash/common/render_binding.dart';
 import 'package:fl_clash/common/window_port.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/manager/window_manager.dart';
@@ -18,6 +20,9 @@ import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
 
 const _windowChannel = MethodChannel('window_manager');
+
+class _RenderTestBinding extends AutomatedTestWidgetsFlutterBinding
+    with RenderSchedulerBinding {}
 
 class _RecordingSystemAction extends SystemAction {
   static final calls = <String>[];
@@ -81,7 +86,7 @@ class _RecordingWindowPort implements WindowPort {
 }
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
+  final binding = _RenderTestBinding();
 
   late ProviderContainer container;
   late _RecordingWindowPort window;
@@ -126,6 +131,7 @@ void main() {
   });
 
   tearDown(() {
+    render?.resume();
     windowPort = null;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(_windowChannel, null);
@@ -200,7 +206,7 @@ void main() {
     expect(setting.height, 960);
   });
 
-  testWidgets('minimize and restore survive without a visible window', (
+  testWidgets('minimize pauses rendering until the window is restored', (
     tester,
   ) async {
     final listener = await pumpWindowManager(tester);
@@ -214,13 +220,16 @@ void main() {
     await globalState.startUpdateTasks([() => samples++]);
     try {
       listener.onWindowMinimize();
-      await tester.pump(const Duration(seconds: 2));
+      await tester.pump(const Duration(seconds: 6));
       expect(globalState.isUiVisible, isFalse);
+      expect(binding.renderPaused, isTrue);
+      expect(binding.framesEnabled, isFalse);
       expect(samples, 1);
       listener.onWindowRestore();
-      listener.onWindowFocus();
       await tester.pump();
       expect(globalState.isUiVisible, isTrue);
+      expect(binding.renderPaused, isFalse);
+      expect(binding.framesEnabled, isTrue);
       expect(samples, 2);
     } finally {
       globalState.stopUpdateTasks();

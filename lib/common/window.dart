@@ -222,8 +222,8 @@ class Window implements WindowPort {
   }
 
   Future<void> _hideWindow() async {
-    render?.pause();
     await windowManager.hide();
+    render?.pause();
     globalState.setUpdateVisibility(windowVisible: false);
   }
 

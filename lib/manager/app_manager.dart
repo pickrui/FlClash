@@ -141,8 +141,8 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
       final wasBackground = _isBackground;
       _isBackground = false;
       _startProfileUpdates();
-      render?.resume();
       globalState.setUpdateVisibility(appVisible: true);
+      if (globalState.isUiVisible) render?.resume();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted || _isBackground) return;
         if (wasBackground) {
@@ -176,7 +176,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
   Widget build(BuildContext context) {
     return Listener(
       onPointerHover: (_) {
-        render?.resume();
+        if (globalState.isUiVisible) render?.resume();
       },
       child: widget.child,
     );

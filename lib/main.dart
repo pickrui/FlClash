@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/common/render_binding.dart';
 import 'package:fl_clash/pages/error.dart';
 import 'package:fl_clash/pages/config_recovery.dart';
 import 'package:fl_clash/l10n/l10n.dart';
@@ -23,7 +24,7 @@ import 'common/common.dart';
 
 Future<void> main(List<String> arguments) async {
   try {
-    WidgetsFlutterBinding.ensureInitialized();
+    FlClashWidgetsBinding.ensureInitialized();
     await RustLib.init();
     registerFetchManagedConfig(CloudApiService().fetchManagedConfig);
     final version = await system.version;
@@ -44,6 +45,7 @@ Future<void> main(List<String> arguments) async {
     );
   } catch (e, s) {
     commonPrint.log('init failed: $e stack: $s', logLevel: LogLevel.error);
+    render?.resume();
     runApp(
       MaterialApp(
         home: InitErrorScreen(error: e, stack: s),
@@ -76,6 +78,7 @@ Future<Map<String, Object?>?> _loadStartupConfig() async {
       },
       showRecovery: (retry, failure) {
         commonPrint.log('Waiting for local configuration recovery');
+        render?.resume();
         if (system.isDesktop) {
           windowManager.addListener(exitListener);
         }

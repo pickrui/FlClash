@@ -1,3 +1,5 @@
+import 'package:fl_clash/common/render.dart';
+import 'package:fl_clash/common/render_binding.dart';
 import 'package:fl_clash/common/window.dart';
 import 'package:fl_clash/models/config.dart';
 import 'package:flutter/services.dart';
@@ -5,14 +7,18 @@ import 'package:flutter_test/flutter_test.dart';
 
 const _windowChannel = MethodChannel('window_manager');
 
+class _RenderTestBinding extends AutomatedTestWidgetsFlutterBinding
+    with RenderSchedulerBinding {}
+
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
+  final binding = _RenderTestBinding();
 
   late List<String> calls;
   late bool isVisible;
   late bool isMaximized;
   late bool isFullScreen;
   late bool isMinimized;
+  late bool hideFails;
   late Rect bounds;
 
   setUp(() {
@@ -21,10 +27,14 @@ void main() {
     isMaximized = false;
     isFullScreen = false;
     isMinimized = false;
+    hideFails = false;
     bounds = const Rect.fromLTWH(20, 30, 1000, 800);
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(_windowChannel, (call) async {
           calls.add(call.method);
+          if (call.method == 'hide' && hideFails) {
+            throw PlatformException(code: 'hide_failed');
+          }
           return switch (call.method) {
             'isVisible' => isVisible,
             'isMaximized' => isMaximized,
@@ -42,6 +52,7 @@ void main() {
   });
 
   tearDown(() {
+    render?.resume();
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(_windowChannel, null);
   });
@@ -66,6 +77,20 @@ void main() {
     await Window().hide();
 
     expect(calls, containsAllInOrder(<String>['hide', 'setSkipTaskbar']));
+  });
+
+  testWidgets('a failed hide keeps the visible window rendering', (
+    tester,
+  ) async {
+    hideFails = true;
+
+    await expectLater(Window().hide(), throwsA(isA<PlatformException>()));
+    await tester.pump(const Duration(seconds: 6));
+
+    expect(binding.renderPaused, isFalse);
+    expect(binding.framesEnabled, isTrue);
+    expect(calls, isNot(contains('setSkipTaskbar')));
+    expect(tester.takeException(), isNull);
   });
 
   test('close asks the platform to close the window', () async {

@@ -1,56 +1,62 @@
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/enum/enum.dart';
+import 'dart:async';
+
 import 'package:flutter/scheduler.dart';
 
+import 'print.dart';
+import 'render_binding.dart';
+import 'system.dart';
+
 class Render {
-  static Render? _instance;
+  Render({this._binding, this.pauseDelay = const Duration(seconds: 5)});
+
+  final RenderSchedulerBinding? _binding;
+  final Duration pauseDelay;
+  Timer? _pauseTimer;
+  bool _pauseRequested = false;
   bool _isPaused = false;
-  final _dispatcher = SchedulerBinding.instance.platformDispatcher;
-  FrameCallback? _beginFrame;
-  VoidCallback? _drawFrame;
-
-  Render._internal();
-
-  factory Render() {
-    _instance ??= Render._internal();
-    return _instance!;
-  }
 
   void active() {
-    resume();
-    pause();
+    if (!_pauseRequested) return;
+    _cancelPause();
+    _setPaused(false);
+    _schedulePause();
   }
 
   void pause() {
-    throttler.call(
-      FunctionTag.renderPause,
-      _pause,
-      duration: const Duration(seconds: 5),
-    );
+    if (_pauseRequested) return;
+    _pauseRequested = true;
+    _schedulePause();
   }
 
   void resume() {
-    throttler.cancel(FunctionTag.renderPause);
-    _resume();
+    _pauseRequested = false;
+    _cancelPause();
+    _setPaused(false);
   }
 
-  void _pause() async {
-    if (_isPaused) return;
-    _isPaused = true;
-    _beginFrame = _dispatcher.onBeginFrame;
-    _drawFrame = _dispatcher.onDrawFrame;
-    _dispatcher.onBeginFrame = null;
-    _dispatcher.onDrawFrame = null;
-    commonPrint.log('pause');
+  void _schedulePause() {
+    _pauseTimer = Timer(pauseDelay, () {
+      _pauseTimer = null;
+      if (_pauseRequested) _setPaused(true);
+    });
   }
 
-  void _resume() {
-    if (!_isPaused) return;
-    _isPaused = false;
-    _dispatcher.onBeginFrame = _beginFrame;
-    _dispatcher.onDrawFrame = _drawFrame;
-    _dispatcher.scheduleFrame();
-    commonPrint.log('resume');
+  void _cancelPause() {
+    _pauseTimer?.cancel();
+    _pauseTimer = null;
+  }
+
+  void _setPaused(bool value) {
+    if (_isPaused == value) return;
+    final binding =
+        _binding ?? SchedulerBinding.instance as RenderSchedulerBinding;
+    if (value) {
+      binding.pauseRendering();
+    } else {
+      binding.resumeRendering();
+    }
+    _isPaused = value;
+    commonPrint.log(value ? 'pause' : 'resume');
   }
 }
 

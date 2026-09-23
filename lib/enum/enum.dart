@@ -206,7 +206,6 @@ enum FunctionTag {
   updateDelay,
   vpnTip,
   autoLaunch,
-  renderPause,
   logs,
   requests,
   loadedProvider,
