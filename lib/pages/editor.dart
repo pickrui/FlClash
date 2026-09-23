@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/controller.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/common.dart';
 import 'package:fl_clash/providers/app.dart';
@@ -52,13 +53,12 @@ class _EditorPageState extends ConsumerState<EditorPage> {
   late CodeFindController _findController;
   late TextEditingController _titleController;
   late FocusNode _focusNode;
-  late bool readOnly = false;
+  late final bool readOnly = widget.onSave == null;
   late final SelectionToolbarController _toolbarController;
 
   @override
   void initState() {
     super.initState();
-    readOnly = widget.onSave == null;
     _toolbarController = ContextMenuControllerImpl(readOnly);
     _focusNode = FocusNode(canRequestFocus: !readOnly);
     _controller = CodeLineEditingController.fromText(widget.content);
@@ -80,7 +80,6 @@ class _EditorPageState extends ConsumerState<EditorPage> {
         _controller.moveCursor(AxisDirection.down);
         return KeyEventResult.handled;
       } else if (key == LogicalKeyboardKey.arrowLeft) {
-        _controller.selection.endIndex;
         _controller.moveCursor(AxisDirection.left);
         return KeyEventResult.handled;
       } else if (key == LogicalKeyboardKey.arrowRight) {
@@ -124,16 +123,21 @@ class _EditorPageState extends ConsumerState<EditorPage> {
   }
 
   Future<void> _handleImportFormFile() async {
-    final file = await picker.pickerFile();
-    if (file == null) {
+    final content = await context.commonAction.safeRun(() async {
+      final file = await picker.pickerFile();
+      if (file == null) {
+        return null;
+      }
+      return utf8.decode(await file.readBytes());
+    });
+    if (content == null || !mounted) {
       return;
     }
-    final res = utf8.decode(await file.readBytes());
-    _controller.text = res;
+    _controller.text = content;
   }
 
   Future<void> _handleImportFormUrl() async {
-    final url = await globalState.showCommonDialog(
+    final url = await globalState.showCommonDialog<String>(
       child: InputDialog(
         title: appLocalizations.import,
         value: '',
@@ -150,11 +154,16 @@ class _EditorPageState extends ConsumerState<EditorPage> {
         },
       ),
     );
-    if (url == null) {
+    if (url == null || !mounted) {
       return;
     }
-    final res = await request.getTextResponseForUrl(url);
-    _controller.text = res.data ?? '';
+    final content = await context.commonAction.safeRun(
+      () async => (await request.getTextResponseForUrl(url)).data ?? '',
+    );
+    if (content == null || !mounted) {
+      return;
+    }
+    _controller.text = content;
   }
 
   @override
@@ -520,7 +529,7 @@ class FindPanel extends StatelessWidget implements PreferredSizeWidget {
 class ContextMenuControllerImpl implements SelectionToolbarController {
   OverlayEntry? _overlayEntry;
   bool _isFirstRender = true;
-  bool readOnly = false;
+  final bool readOnly;
 
   ContextMenuControllerImpl(this.readOnly);
 
@@ -552,7 +561,6 @@ class ContextMenuControllerImpl implements SelectionToolbarController {
           builder: (_, _, child) {
             final isNotEmpty = controller.selectedText.isNotEmpty;
             final isAllSelected = controller.isAllSelected;
-            final hasSelected = controller.selectedText.isNotEmpty;
             final List<PopupMenuItemData> menus = [
               if (isNotEmpty)
                 PopupMenuItemData(
@@ -569,7 +577,7 @@ class ContextMenuControllerImpl implements SelectionToolbarController {
                   label: appLocalizations.cut,
                   onPressed: controller.cut,
                 ),
-              if (hasSelected && !isAllSelected)
+              if (isNotEmpty && !isAllSelected)
                 PopupMenuItemData(
                   label: appLocalizations.selectAll,
                   onPressed: controller.selectAll,
@@ -662,41 +670,4 @@ class _NoInputBorder extends InputBorder {
     double gapPercentage = 0.0,
     TextDirection? textDirection,
   }) {}
-}
-
-class _ImportOptionsDialog extends StatefulWidget {
-  const _ImportOptionsDialog();
-
-  @override
-  State<_ImportOptionsDialog> createState() => _ImportOptionsDialogState();
-}
-
-class _ImportOptionsDialogState extends State<_ImportOptionsDialog> {
-  void _handleOnTab(ImportOption value) {
-    Navigator.of(context).pop(value);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return CommonDialog(
-      title: appLocalizations.import,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-      child: Wrap(
-        children: [
-          ListItem(
-            onTap: () {
-              _handleOnTab(ImportOption.url);
-            },
-            title: Text(appLocalizations.importUrl),
-          ),
-          ListItem(
-            onTap: () {
-              _handleOnTab(ImportOption.file);
-            },
-            title: Text(appLocalizations.importFile),
-          ),
-        ],
-      ),
-    );
-  }
 }

@@ -4,7 +4,6 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
@@ -24,13 +23,6 @@ class ThemeModeItem {
     required this.iconData,
     required this.label,
   });
-}
-
-class FontFamilyItem {
-  final FontFamily fontFamily;
-  final String label;
-
-  const FontFamilyItem({required this.fontFamily, required this.label});
 }
 
 class ThemeView extends StatelessWidget {
@@ -173,7 +165,7 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
     final res = await globalState.showMessage(
       message: TextSpan(text: context.appLocalizations.resetTip),
     );
-    if (res != true) {
+    if (res != true || !mounted) {
       return;
     }
     ref.read(themeSettingProvider.notifier).update((state) {
@@ -195,7 +187,7 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
         text: appLocalizations.deleteTip(appLocalizations.colorSchemes),
       ),
     );
-    if (res != true) {
+    if (res != true || !mounted) {
       return;
     }
     ref.read(themeSettingProvider.notifier).update((state) {
@@ -224,13 +216,11 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
     final res = await globalState.showCommonDialog<int>(
       child: const _PaletteDialog(),
     );
-    if (res == null) {
+    if (res == null || !mounted) {
       return;
     }
-    final isExists = ref.read(
-      themeSettingProvider.select((state) => state.primaryColors.contains(res)),
-    );
-    if (isExists && mounted) {
+    final isExists = ref.read(themeSettingProvider).primaryColors.contains(res);
+    if (isExists) {
       context.showNotifier(
         appLocalizations.existsTip(appLocalizations.colorSchemes),
       );
@@ -255,7 +245,7 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
         value: schemeVariant,
       ),
     );
-    if (value == null) {
+    if (value == null || !mounted) {
       return;
     }
     ref.read(themeSettingProvider.notifier).update((state) {
@@ -544,7 +534,8 @@ class _PaletteDialog extends StatefulWidget {
 }
 
 class _PaletteDialogState extends State<_PaletteDialog> {
-  final _controller = ValueNotifier<ui.Color>(Colors.transparent);
+  // Palette edits keep the seed's alpha, so the seed must be opaque.
+  final _controller = ValueNotifier<ui.Color>(const ui.Color(0xFF919191));
   late final TextEditingController _hexController;
 
   @override

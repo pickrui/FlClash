@@ -65,6 +65,19 @@ class _ControlledService extends NetworkDiagnosticService {
   }
 }
 
+class _FailingService extends _ControlledService {
+  @override
+  Future<List<NetworkDiagnosticCheck>> run(
+    NetworkDiagnosticSnapshot state,
+    CancelToken cancellation, {
+    required void Function(NetworkDiagnosticCheck) onResult,
+  }) async {
+    runs++;
+    token = cancellation;
+    throw StateError('probe backend missing');
+  }
+}
+
 Future<ProviderContainer> _pump(
   WidgetTester tester,
   _ControlledService service, {
@@ -239,6 +252,23 @@ void main() {
     await tester.pumpAndSettle();
     expect(service.runs, 2);
     expect(find.text(AppLocalizations.current.diagFixing), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+  testWidgets('a failing run logs its cause and shows an unknown result', (
+    tester,
+  ) async {
+    final printed = <String?>[];
+    final originalDebugPrint = debugPrint;
+    debugPrint = (message, {wrapWidth}) => printed.add(message);
+    try {
+      await _pump(tester, _FailingService());
+      await tester.pumpAndSettle();
+    } finally {
+      debugPrint = originalDebugPrint;
+    }
+    expect(find.text(AppLocalizations.current.diagUnknown), findsWidgets);
+    expect(find.byType(LinearProgressIndicator), findsNothing);
+    expect(printed, contains(contains('probe backend missing')));
     expect(tester.takeException(), isNull);
   });
   testWidgets('the report lists suggestions but no fix buttons', (

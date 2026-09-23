@@ -15,7 +15,8 @@ class ScanPage extends StatefulWidget {
 }
 
 class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
-  MobileScannerController controller = MobileScannerController(
+  final MobileScannerController controller = MobileScannerController(
+    autoStart: false,
     detectionSpeed: DetectionSpeed.noDuplicates,
     formats: const [BarcodeFormat.qrCode],
   );
@@ -51,6 +52,10 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
+    // The permission prompt toggles the lifecycle while the first start runs.
+    if (!controller.value.hasCameraPermission) {
+      return;
+    }
     switch (state) {
       case AppLifecycleState.detached:
       case AppLifecycleState.hidden:
@@ -163,10 +168,10 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
   }
 
   @override
-  Future<void> dispose() async {
+  void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _cancelSubscription();
-    await controller.dispose();
+    unawaited(controller.dispose());
     super.dispose();
   }
 }

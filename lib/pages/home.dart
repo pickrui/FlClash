@@ -94,8 +94,12 @@ class HomePage extends StatelessWidget {
                       key: ValueKey(navigationItem.label),
                       builder: (_, ref, child) {
                         final isActive = ref.watch(
-                          currentPageLabelProvider.select(
-                            (label) => label == navigationItem.label,
+                          navigationStateProvider.select(
+                            (state) =>
+                                state
+                                    .navigationItems[state.currentIndex]
+                                    .label ==
+                                navigationItem.label,
                           ),
                         );
                         return PageActivityScope(
@@ -135,7 +139,9 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: _pageIndex);
+    _pageController = PageController(
+      initialPage: _indexOf(ref.read(currentPageLabelProvider)),
+    );
     ref.listenManual(currentPageLabelProvider, (prev, next) {
       if (prev != next) {
         _toPage(next);
@@ -151,9 +157,13 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
     }
   }
 
-  int get _pageIndex {
-    final pageLabel = ref.read(currentPageLabelProvider);
-    return widget.navigationItems.indexWhere((item) => item.label == pageLabel);
+  // A page that left the navigation falls back to the first item, the same
+  // index navigationStateProvider highlights.
+  int _indexOf(PageLabel pageLabel) {
+    final index = widget.navigationItems.indexWhere(
+      (item) => item.label == pageLabel,
+    );
+    return index == -1 ? 0 : index;
   }
 
   Future<void> _toPage(
@@ -163,12 +173,7 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
     if (!mounted) {
       return;
     }
-    final index = widget.navigationItems.indexWhere(
-      (item) => item.label == pageLabel,
-    );
-    if (index == -1) {
-      return;
-    }
+    final index = _indexOf(pageLabel);
     final isAnimateToPage = ref.read(appSettingProvider).isAnimateToPage;
     final isMobile = ref.read(isMobileViewProvider);
     if (isAnimateToPage && isMobile && !ignoreAnimateTo) {
@@ -195,13 +200,19 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
 
   @override
   Widget build(BuildContext context) {
-    final itemCount = ref.watch(
-      currentNavigationItemsStateProvider.select((state) => state.value.length),
-    );
     return PageView.builder(
       controller: _pageController,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: itemCount,
+      itemCount: widget.navigationItems.length,
+      findChildIndexCallback: (key) {
+        if (key is! ValueKey<PageLabel>) {
+          return null;
+        }
+        final index = widget.navigationItems.indexWhere(
+          (item) => item.label == key.value,
+        );
+        return index == -1 ? null : index;
+      },
       itemBuilder: (context, index) {
         return widget.pageBuilder(context, index);
       },

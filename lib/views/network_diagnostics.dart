@@ -124,7 +124,11 @@ class _NetworkDiagnosticsPageState
               }
             },
           );
-    } catch (_) {
+    } catch (error) {
+      commonPrint.log(
+        'network diagnostics failed: $error',
+        logLevel: LogLevel.warning,
+      );
       if (mounted && !token.isCancelled) {
         setState(
           () => _checks.add(
