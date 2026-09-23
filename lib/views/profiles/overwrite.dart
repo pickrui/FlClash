@@ -26,11 +26,16 @@ class OverwriteView extends ConsumerStatefulWidget {
 }
 
 class _OverwriteViewState extends ConsumerState<OverwriteView> {
+  late final SetupAction _setupAction;
   bool _checking = false;
 
-  Future<void> _checkAndApply() async {
-    final setupAction = context.setupAction;
+  @override
+  void initState() {
+    super.initState();
+    _setupAction = context.setupAction;
+  }
 
+  Future<void> _checkAndApply() async {
     final profile = ref.read(profileProvider(widget.profileId));
     if (profile == null || _checking) return;
     setState(() => _checking = true);
@@ -42,7 +47,7 @@ class _OverwriteViewState extends ConsumerState<OverwriteView> {
         return;
       }
       if (ref.read(currentProfileIdProvider) == profile.id) {
-        final applied = await setupAction.applyProfile(force: true);
+        final applied = await _setupAction.applyProfile(force: true);
         if (!mounted || ref.read(currentProfileIdProvider) != profile.id) {
           return;
         }
@@ -53,7 +58,6 @@ class _OverwriteViewState extends ConsumerState<OverwriteView> {
         final lastApplied = globalState.lastSetupState;
         final isApplied =
             applied && lastApplied != null && !latest.needSetup(lastApplied);
-        if (!mounted) return;
         context.showNotifier(
           isApplied
               ? appLocalizations.routingApplied
@@ -114,10 +118,8 @@ class _OverwriteViewState extends ConsumerState<OverwriteView> {
 
   @override
   void dispose() {
-    final setupAction = context.setupAction;
-
     super.dispose();
-    setupAction.autoApplyProfile();
+    _setupAction.autoApplyProfile();
   }
 }
 

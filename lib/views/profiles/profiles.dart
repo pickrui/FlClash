@@ -2,6 +2,7 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/editor.dart';
+import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/features/overwrite/proxy_chain.dart';
@@ -22,7 +23,6 @@ class ProfilesView extends StatefulWidget {
 }
 
 class _ProfilesViewState extends State<ProfilesView> {
-  Function? applyConfigDebounce;
   bool _isUpdating = false;
 
   void _handleShowAddExtendPage() {
@@ -34,7 +34,7 @@ class _ProfilesViewState extends State<ProfilesView> {
           body: AddProfileView(
             context: globalState.navigatorKey.currentState!.context,
           ),
-          title: '${appLocalizations.add}${appLocalizations.profile}',
+          title: appLocalizations.addProfile,
         );
       },
     );
@@ -220,7 +220,7 @@ class ProfileItem extends StatelessWidget {
       builder: (_, type) {
         return AdaptiveSheetScaffold(
           type: type,
-          body: EditProfileView(profile: profile, context: context),
+          body: EditProfileView(profile: profile),
           title: '${appLocalizations.edit}${appLocalizations.profile}',
         );
       },
@@ -265,7 +265,7 @@ class ProfileItem extends StatelessWidget {
       final mFile = await profile.file;
       final value = await picker.saveFile(
         profile.realLabel,
-        mFile.readAsBytesSync(),
+        await mFile.readAsBytes(),
       );
       if (value == null) return false;
       return true;
@@ -444,7 +444,7 @@ class ProfileItem extends StatelessWidget {
   }
 }
 
-class ReorderableProfilesSheet extends StatefulWidget {
+class ReorderableProfilesSheet extends ConsumerStatefulWidget {
   final List<Profile> profiles;
   final SheetType type;
 
@@ -455,11 +455,12 @@ class ReorderableProfilesSheet extends StatefulWidget {
   });
 
   @override
-  State<ReorderableProfilesSheet> createState() =>
+  ConsumerState<ReorderableProfilesSheet> createState() =>
       _ReorderableProfilesSheetState();
 }
 
-class _ReorderableProfilesSheetState extends State<ReorderableProfilesSheet> {
+class _ReorderableProfilesSheetState
+    extends ConsumerState<ReorderableProfilesSheet> {
   late List<Profile> profiles;
 
   @override
@@ -487,9 +488,16 @@ class _ReorderableProfilesSheetState extends State<ReorderableProfilesSheet> {
 
   void _handleSave() {
     final profileAction = context.profileAction;
+    final latest = {
+      for (final profile in ref.read(profilesProvider)) profile.id: profile,
+    };
+    final ordered = [
+      for (final profile in profiles) ?latest.remove(profile.id),
+      ...latest.values,
+    ];
 
     Navigator.of(context).pop();
-    profileAction.reorder(profiles);
+    profileAction.reorder(ordered);
   }
 
   @override

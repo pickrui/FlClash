@@ -16,13 +16,8 @@ import 'package:flutter/services.dart';
 
 class EditProfileView extends ConsumerStatefulWidget {
   final Profile profile;
-  final BuildContext context;
 
-  const EditProfileView({
-    super.key,
-    required this.context,
-    required this.profile,
-  });
+  const EditProfileView({super.key, required this.profile});
 
   @override
   ConsumerState<EditProfileView> createState() => _EditProfileViewState();

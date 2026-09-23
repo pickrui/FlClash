@@ -18,16 +18,53 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-class BackupAndRestore extends ConsumerWidget {
+// Mirrors the DAVClient constructor, which throws for any other URL.
+bool _isValidDavUri(String value) {
+  final uri = Uri.tryParse(value);
+  return uri != null &&
+      const {'http', 'https'}.contains(uri.scheme) &&
+      uri.host.isNotEmpty;
+}
+
+class BackupAndRestore extends ConsumerStatefulWidget {
   const BackupAndRestore({super.key});
 
-  Future<void> _showAddWebDAV(DAVProps? dav) async {
-    await globalState.showCommonDialog<String>(
-      child: WebDAVFormDialog(dav: dav?.copyWith()),
+  @override
+  ConsumerState<BackupAndRestore> createState() => _BackupAndRestoreState();
+}
+
+class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
+  DAVProps? _clientDav;
+  DAVClient? _client;
+
+  String? _davSettingError(DAVProps dav) {
+    if (!_isValidDavUri(dav.uri)) return appLocalizations.addressTip;
+    if (!isSafeDavFileName(dav.fileName)) {
+      return appLocalizations.invalidBackupFile;
+    }
+    return null;
+  }
+
+  DAVClient _clientFor(DAVProps dav) {
+    final cached = _client;
+    if (cached != null && dav == _clientDav) return cached;
+    final client = DAVClient(dav);
+    _clientDav = dav;
+    return _client = client;
+  }
+
+  void _showDavSettingError(String title, String error) {
+    globalState.showMessage(
+      title: title,
+      message: TextSpan(text: error),
     );
   }
 
-  Future<void> _backupOnWebDAV(BuildContext context, DAVClient client) async {
+  Future<void> _showAddWebDAV(DAVProps? dav) async {
+    await globalState.showCommonDialog<void>(child: WebDAVFormDialog(dav: dav));
+  }
+
+  Future<void> _backupOnWebDAV(DAVClient client) async {
     final commonAction = context.commonAction;
     final backupAction = context.backupAction;
 
@@ -53,11 +90,7 @@ class BackupAndRestore extends ConsumerWidget {
     );
   }
 
-  Future<void> _restoreOnWebDAV(
-    BuildContext context,
-    DAVClient client,
-    RestoreOption option,
-  ) async {
+  Future<void> _restoreOnWebDAV(DAVClient client, RestoreOption option) async {
     final commonAction = context.commonAction;
     final backupAction = context.backupAction;
 
@@ -81,18 +114,15 @@ class BackupAndRestore extends ConsumerWidget {
     );
   }
 
-  Future<void> _handleRestoreOnWebDAV(
-    BuildContext context,
-    DAVClient client,
-  ) async {
+  Future<void> _handleRestoreOnWebDAV(DAVClient client) async {
     final restoreOption = await globalState.showCommonDialog<RestoreOption>(
       child: const RestoreOptionsDialog(),
     );
-    if (restoreOption == null || !context.mounted) return;
-    _restoreOnWebDAV(context, client, restoreOption);
+    if (restoreOption == null || !mounted) return;
+    _restoreOnWebDAV(client, restoreOption);
   }
 
-  Future<void> _backupOnLocal(BuildContext context) async {
+  Future<void> _backupOnLocal() async {
     final commonAction = context.commonAction;
     final backupAction = context.backupAction;
 
@@ -123,10 +153,7 @@ class BackupAndRestore extends ConsumerWidget {
     );
   }
 
-  Future<void> _restoreOnLocal(
-    BuildContext context,
-    RestoreOption option,
-  ) async {
+  Future<void> _restoreOnLocal(RestoreOption option) async {
     final commonAction = context.commonAction;
     final backupAction = context.backupAction;
 
@@ -148,15 +175,15 @@ class BackupAndRestore extends ConsumerWidget {
     );
   }
 
-  Future<void> _handleRestoreOnLocal(BuildContext context) async {
+  Future<void> _handleRestoreOnLocal() async {
     final option = await globalState.showCommonDialog<RestoreOption>(
       child: const RestoreOptionsDialog(),
     );
-    if (option == null || !context.mounted) return;
-    _restoreOnLocal(context, option);
+    if (option == null || !mounted) return;
+    _restoreOnLocal(option);
   }
 
-  void _handleChange(String? value, WidgetRef ref) {
+  void _handleChange(String? value) {
     if (value == null || !isSafeDavFileName(value)) {
       if (value != null) {
         globalState.showNotifier(appLocalizations.invalidBackupFile);
@@ -168,7 +195,7 @@ class BackupAndRestore extends ConsumerWidget {
         .update((state) => state?.copyWith(fileName: value));
   }
 
-  Future<void> _handleUpdateRestoreStrategy(WidgetRef ref) async {
+  Future<void> _handleUpdateRestoreStrategy() async {
     final restoreStrategy = ref.read(
       appSettingProvider.select((state) => state.restoreStrategy),
     );
@@ -189,10 +216,11 @@ class BackupAndRestore extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, ref) {
+  Widget build(BuildContext context) {
     final dav = ref.watch(davSettingProvider);
     final isLoading = ref.watch(loadingProvider(LoadingTag.backup_restore));
-    final client = dav != null ? DAVClient(dav) : null;
+    final davError = dav == null ? null : _davSettingError(dav);
+    final client = dav == null || davError != null ? null : _clientFor(dav);
     return CommonScaffold(
       isLoading: isLoading,
       title: appLocalizations.backupAndRestore,
@@ -228,12 +256,14 @@ class BackupAndRestore extends ConsumerWidget {
                   children: [
                     Text(appLocalizations.connectivity),
                     FutureBuilder<bool>(
-                      future: client!.pingCompleter.future,
+                      future: client?.pingCompleter.future,
                       builder: (_, snapshot) {
                         return Center(
                           child: FadeThroughBox(
                             child:
-                                snapshot.connectionState != ConnectionState.done
+                                client != null &&
+                                    snapshot.connectionState !=
+                                        ConnectionState.done
                                 ? const SizedBox(
                                     width: 12,
                                     height: 12,
@@ -274,21 +304,27 @@ class BackupAndRestore extends ConsumerWidget {
                 value: dav.fileName,
                 resetValue: defaultDavFileName,
                 maxLength: TextInputLimits.fileName,
-                onChanged: (value) {
-                  _handleChange(value, ref);
-                },
+                onChanged: _handleChange,
               ),
             ),
             ListItem(
               onTap: () {
-                _backupOnWebDAV(context, client);
+                if (client == null) {
+                  _showDavSettingError(appLocalizations.backup, davError!);
+                  return;
+                }
+                _backupOnWebDAV(client);
               },
               title: Text(appLocalizations.backup),
               subtitle: Text(appLocalizations.remoteBackupDesc),
             ),
             ListItem(
               onTap: () {
-                _handleRestoreOnWebDAV(context, client);
+                if (client == null) {
+                  _showDavSettingError(appLocalizations.restore, davError!);
+                  return;
+                }
+                _handleRestoreOnWebDAV(client);
               },
               title: Text(appLocalizations.restore),
               subtitle: Text(appLocalizations.restoreFromWebDAVDesc),
@@ -296,16 +332,12 @@ class BackupAndRestore extends ConsumerWidget {
           ],
           ListHeader(title: appLocalizations.local),
           ListItem(
-            onTap: () {
-              _backupOnLocal(context);
-            },
+            onTap: _backupOnLocal,
             title: Text(appLocalizations.backup),
             subtitle: Text(appLocalizations.localBackupDesc),
           ),
           ListItem(
-            onTap: () {
-              _handleRestoreOnLocal(context);
-            },
+            onTap: _handleRestoreOnLocal,
             title: Text(appLocalizations.restore),
             subtitle: Text(appLocalizations.restoreFromFileDesc),
           ),
@@ -316,14 +348,10 @@ class BackupAndRestore extends ConsumerWidget {
                 appSettingProvider.select((state) => state.restoreStrategy),
               );
               return ListItem(
-                onTap: () {
-                  _handleUpdateRestoreStrategy(ref);
-                },
+                onTap: _handleUpdateRestoreStrategy,
                 title: Text(appLocalizations.restoreStrategy),
                 trailing: FilledButton(
-                  onPressed: () {
-                    _handleUpdateRestoreStrategy(ref);
-                  },
+                  onPressed: _handleUpdateRestoreStrategy,
                   child: Text(
                     Intl.message('restoreStrategy_${restoreStrategy.name}'),
                   ),
@@ -401,10 +429,14 @@ class _WebDAVFormDialogState extends ConsumerState<WebDAVFormDialog> {
 
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
+    final fileName = widget.dav?.fileName;
     ref.read(davSettingProvider.notifier).value = DAVProps(
       uri: _uriController.text,
       user: _userController.text,
       password: _passwordController.text,
+      fileName: fileName != null && isSafeDavFileName(fileName)
+          ? fileName
+          : defaultDavFileName,
     );
     Navigator.pop(context);
   }
@@ -448,7 +480,7 @@ class _WebDAVFormDialogState extends ConsumerState<WebDAVFormDialog> {
                 helperText: appLocalizations.addressHelp,
               ),
               validator: (String? value) {
-                if (value == null || value.isEmpty || !value.isUrl) {
+                if (value == null || !_isValidDavUri(value)) {
                   return appLocalizations.addressTip;
                 }
                 return null;

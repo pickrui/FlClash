@@ -265,10 +265,9 @@ class CustomProxyGroupsView extends ConsumerWidget {
   ]) async {
     final setupAction = context.setupAction;
 
-    final groups =
-        ref.read(profileProvider(profileId))?.customProxyGroups ?? [];
     final profile = ref.read(profileProvider(profileId));
     if (profile == null) return;
+    final groups = profile.customProxyGroups;
     Map<String, dynamic> rawConfig;
     final reservedNames = <String>{
       ...reservedOutboundNames,
@@ -618,9 +617,7 @@ class CustomRulesView extends ConsumerWidget {
       context.showNotifier(appLocalizations.routingChanged);
       return;
     }
-    final rules = List<Rule>.from(
-      ref.read(profileProvider(profileId))?.customRules ?? [],
-    );
+    final rules = List<Rule>.from(current.customRules);
     if (rule == null) {
       rules.add(result);
     } else {

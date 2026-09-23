@@ -28,16 +28,13 @@ void main() {
               ...GlobalMaterialLocalizations.delegates,
             ],
             supportedLocales: AppLocalizations.delegate.supportedLocales,
-            home: Scaffold(
-              body: Builder(
-                builder: (context) => EditProfileView(
-                  context: context,
-                  profile: const Profile(
-                    id: 1,
-                    label: 'oixCloud',
-                    url: 'oixcloud://managed',
-                    autoUpdateDuration: Duration(minutes: 60),
-                  ),
+            home: const Scaffold(
+              body: EditProfileView(
+                profile: Profile(
+                  id: 1,
+                  label: 'oixCloud',
+                  url: 'oixcloud://managed',
+                  autoUpdateDuration: Duration(minutes: 60),
                 ),
               ),
             ),

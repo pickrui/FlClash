@@ -136,7 +136,7 @@ class _GeoDataListItemState extends ConsumerState<GeoDataListItem> {
     _fileInfoFuture = _getGeoFileLastModified(geoItem.fileName);
   }
 
-  Future<void> _updateUrl(String url, WidgetRef ref) async {
+  Future<void> _updateUrl(String url) async {
     final defaultMap = defaultGeoXUrl.toJson();
     final newUrl = await globalState.showCommonDialog<String>(
       child: UpdateGeoUrlFormDialog(
@@ -145,23 +145,19 @@ class _GeoDataListItemState extends ConsumerState<GeoDataListItem> {
         defaultValue: defaultMap[geoItem.key],
       ),
     );
-    if (newUrl != null && newUrl != url && mounted) {
-      try {
-        if (!newUrl.isUrl) {
-          throw 'Invalid url';
-        }
-        ref.read(patchClashConfigProvider.notifier).update((state) {
-          final map = state.geoXUrl.toJson();
-          map[geoItem.key] = newUrl;
-          return state.copyWith(geoXUrl: GeoXUrl.fromJson(map));
-        });
-      } catch (e) {
-        globalState.showMessage(
-          title: geoItem.label,
-          message: TextSpan(text: e.toString()),
-        );
-      }
+    if (newUrl == null || newUrl == url || !mounted) return;
+    if (!newUrl.isUrl) {
+      globalState.showMessage(
+        title: geoItem.label,
+        message: TextSpan(text: appLocalizations.urlTip(geoItem.label)),
+      );
+      return;
     }
+    ref.read(patchClashConfigProvider.notifier).update((state) {
+      final map = state.geoXUrl.toJson();
+      map[geoItem.key] = newUrl;
+      return state.copyWith(geoXUrl: GeoXUrl.fromJson(map));
+    });
   }
 
   Future<FileInfo> _getGeoFileLastModified(String fileName) async {
@@ -223,7 +219,7 @@ class _GeoDataListItemState extends ConsumerState<GeoDataListItem> {
               avatar: const Icon(Icons.edit),
               label: appLocalizations.edit,
               onPressed: () {
-                _updateUrl(url, ref);
+                _updateUrl(url);
               },
             ),
             SizedBox(
