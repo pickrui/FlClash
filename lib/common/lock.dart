@@ -44,8 +44,11 @@ class AsyncStorageLock {
         parentContext.active;
   }
 
-  Future<T> synchronized<T>(Future<T> Function() action) {
-    if (isActiveInCurrentZone) {
+  Future<T> synchronized<T>(
+    Future<T> Function() action, {
+    bool reentrant = true,
+  }) {
+    if (reentrant && isActiveInCurrentZone) {
       return action();
     }
     final context = _StorageLockContext(this);

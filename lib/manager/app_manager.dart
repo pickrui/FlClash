@@ -150,7 +150,18 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
         }
         appController.tryCheckIp();
         if (system.isAndroid) {
-          appController.tryStartCore();
+          appController
+              .syncAndroidServiceState()
+              .catchError((Object error) {
+                commonPrint.log('Android service state sync failed: $error');
+              })
+              .then((_) async {
+                await appController.tryStartCore();
+                await appController.syncAndroidServiceState();
+              })
+              .catchError((Object error) {
+                commonPrint.log('Android service resume failed: $error');
+              });
         }
       });
     }

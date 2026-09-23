@@ -155,6 +155,15 @@ extension CoreControllerExt on AppController {
     }
   }
 
+  Future<void> syncAndroidServiceState() =>
+      _coreLifecycleOperations.runExternal(() async {
+        if (!system.isAndroid || !_ref.read(initProvider)) return;
+        final changed = await globalState.syncServiceRunState(
+          tasks: [updateRunTime, updateTraffic],
+        );
+        if (changed) addCheckIp();
+      });
+
   Future<bool> tryStartCore([bool start = false]) async {
     if (coreController.isCompleted) {
       return false;

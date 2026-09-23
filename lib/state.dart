@@ -237,10 +237,33 @@ class GlobalState {
     startTime = await service?.getRunTime();
   }
 
-  Future handleStop() async {
+  void clearRunState() {
     ++_runRequest;
     startTime = null;
     stopUpdateTasks();
+    container.read(runTimeProvider.notifier).value = null;
+  }
+
+  Future<bool> syncServiceRunState({
+    Future<DateTime?> Function()? query,
+    UpdateTasks? tasks,
+  }) async {
+    final request = _runRequest;
+    final next = await (query ?? service!.syncRunState)();
+    if (request != _runRequest || startTime == next) return false;
+    if (next == null) {
+      clearRunState();
+      container.read(trafficsProvider.notifier).clear();
+      container.read(totalTrafficProvider.notifier).value = const Traffic();
+    } else {
+      startTime = next;
+      await startUpdateTasks(tasks);
+    }
+    return true;
+  }
+
+  Future handleStop() async {
+    clearRunState();
     try {
       await _listeners.apply(running: false, suspended: false);
     } finally {

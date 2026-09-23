@@ -39,6 +39,12 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
       }
     });
     service?.addListener(this);
+    ref.listenManual(initProvider, (_, ready) {
+      if (ready) onServiceStateChanged();
+    }, fireImmediately: true);
+    ref.listenManual(coreStatusProvider, (_, status) {
+      if (status == CoreStatus.connected) onServiceStateChanged();
+    });
   }
 
   @override
@@ -51,6 +57,13 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
   void onServiceEvent(CoreEvent event) {
     coreEventManager.sendEvent(event);
     super.onServiceEvent(event);
+  }
+
+  @override
+  void onServiceStateChanged() {
+    appController.syncAndroidServiceState().catchError((Object error) {
+      commonPrint.log('Android service state sync failed: $error');
+    });
   }
 
   @override

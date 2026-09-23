@@ -28,6 +28,7 @@ class BroadcastReceiver : BroadcastReceiver() {
         GlobalState.launch {
             try {
                 State.handleSyncState()
+                State.servicePlugin?.handleStateChanged()
             } finally {
                 mainHandler.removeCallbacks(timeout)
                 lease.release()

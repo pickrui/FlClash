@@ -140,9 +140,7 @@ class _CoreContainerState extends ConsumerState<CoreManager>
     if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
       context.showNotifier(message);
     }
-    globalState.startTime = null;
-    globalState.stopUpdateTasks();
-    ref.read(runTimeProvider.notifier).value = null;
+    globalState.clearRunState();
     await runCleanupActions([
       stopSystemProxyIfNeeded,
       () => coreController.shutdown(false),

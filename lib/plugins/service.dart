@@ -12,6 +12,8 @@ abstract mixin class ServiceListener {
   void onServiceEvent(CoreEvent event) {}
 
   void onServiceCrash(String message) {}
+
+  void onServiceStateChanged() {}
 }
 
 class Service {
@@ -39,6 +41,11 @@ class Service {
             for (final listener in _listeners) {
               listener.onServiceEvent(event);
             }
+          }
+          break;
+        case 'stateChanged':
+          for (final listener in _listeners) {
+            listener.onServiceStateChanged();
           }
           break;
         case 'crash':
@@ -87,6 +94,12 @@ class Service {
 
   Future<bool> shutdown() async {
     return await methodChannel.invokeMethod<bool>('shutdown') ?? true;
+  }
+
+  Future<DateTime?> syncRunState() async {
+    final ms = await methodChannel.invokeMethod<int>('syncRunState');
+    if (ms == null) throw StateError('Missing Android service state');
+    return ms == 0 ? null : DateTime.fromMillisecondsSinceEpoch(ms);
   }
 
   Future<DateTime?> getRunTime() async {

@@ -5,6 +5,7 @@ import com.oixcloud.clash.common.GlobalState
 import com.oixcloud.clash.common.RunIntentArbiter
 import com.oixcloud.clash.common.QuickAction
 import com.oixcloud.clash.models.SharedState
+import com.oixcloud.clash.plugins.ServicePlugin
 import com.oixcloud.clash.plugins.AppPlugin
 import com.oixcloud.clash.plugins.TilePlugin
 import com.oixcloud.clash.service.models.NotificationParams
@@ -41,6 +42,9 @@ object State {
     val appPlugin: AppPlugin?
         get() = flutterEngine?.plugin<AppPlugin>()
 
+    val servicePlugin: ServicePlugin?
+        get() = flutterEngine?.plugin<ServicePlugin>()
+
     val tilePlugin: TilePlugin?
         get() = flutterEngine?.plugin<TilePlugin>()
 
@@ -69,23 +73,27 @@ object State {
     }
 
     suspend fun handleSyncState() {
-        runLock.withLock {
-            try {
-                Service.bind()
-                runTime = Service.getRunTime()
-                val runState = when (runTime == 0L) {
-                    true -> RunState.STOP
-                    false -> RunState.START
-                }
-                runStateFlow.tryEmit(runState)
-            } catch (error: CancellationException) {
-                throw error
-            } catch (error: Exception) {
-                // A transport failure is not evidence that the VPN stopped.
-                GlobalState.log("VPN state query failed: $error")
-            }
+        try {
+            syncRunState()
+        } catch (error: CancellationException) {
+            throw error
+        } catch (error: Exception) {
+            // A transport failure is not evidence that the VPN stopped.
+            GlobalState.log("VPN state query failed: $error")
         }
     }
+
+    suspend fun syncRunState(): Long = syncServiceRunTime(
+        lock = runLock,
+        query = {
+            Service.bind()
+            Service.getRunTime()
+        },
+        publish = { current ->
+            runTime = current
+            runStateFlow.value = if (current == 0L) RunState.STOP else RunState.START
+        },
+    )
 
     fun handleServiceLost() {
         runTime = 0L

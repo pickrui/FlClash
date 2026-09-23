@@ -17,15 +17,18 @@ import kotlinx.coroutines.launch
 class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
     CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.Default) {
     private lateinit var flutterMethodChannel: MethodChannel
+    @Volatile private var attached = false
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         flutterMethodChannel = MethodChannel(
             flutterPluginBinding.binaryMessenger, "${Components.PACKAGE_NAME}/service"
         )
         flutterMethodChannel.setMethodCallHandler(this)
+        attached = true
     }
 
     override fun onDetachedFromEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+        attached = false
         flutterMethodChannel.setMethodCallHandler(null)
     }
 
@@ -40,6 +43,10 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
 
         "invokeMethod" -> {
             handleInvokeMethod(call, result)
+        }
+
+        "syncRunState" -> {
+            handleSyncRunState(result)
         }
 
         "getRunTime" -> {
@@ -101,6 +108,12 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
         }
     }
 
+    fun handleStateChanged() {
+        launch(Dispatchers.Main) {
+            if (attached) flutterMethodChannel.invokeMethod("stateChanged", null)
+        }
+    }
+
     fun handleSendEvent(value: String?) {
         launch(Dispatchers.Main) {
             flutterMethodChannel.invokeMethod("event", value)
@@ -135,6 +148,16 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
 
         }
         Service.onServiceDisconnected = ::onServiceDisconnected
+    }
+
+    private fun handleSyncRunState(result: MethodChannel.Result) {
+        launch {
+            try {
+                result.success(State.syncRunState())
+            } catch (error: Exception) {
+                result.error("service_error", error.message, null)
+            }
+        }
     }
 
     private fun handleGetRunTime(result: MethodChannel.Result) {

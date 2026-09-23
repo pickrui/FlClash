@@ -35,6 +35,53 @@ void main() {
     },
   );
 
+  test(
+    'native state synchronization queues behind its originating startup',
+    () async {
+      final operations = CoreLifecycleOperations();
+      final release = Completer<void>();
+      final entered = Completer<void>();
+      final events = <String>[];
+      late Future<void> sync;
+      final startup = operations.run(() async {
+        events.add('starting');
+        sync = operations.runExternal(() async {
+          events.add('query-running');
+        });
+        entered.complete();
+        await release.future;
+        events.add('started');
+      });
+      await entered.future;
+      await pumpEventQueue();
+      expect(events, ['starting']);
+      release.complete();
+      await startup;
+      await sync;
+      expect(events, ['starting', 'started', 'query-running']);
+    },
+  );
+
+  test(
+    'a delayed stop notification queries the replacement after restart',
+    () async {
+      final operations = CoreLifecycleOperations();
+      final release = Completer<void>();
+      final entered = Completer<void>();
+      var runtime = 0;
+      final restart = operations.run(() async {
+        entered.complete();
+        await release.future;
+        runtime = 456;
+      });
+      await entered.future;
+      final sync = operations.runExternal(() async => runtime);
+      release.complete();
+      await restart;
+      expect(await sync, 456);
+    },
+  );
+
   test('independent readiness requests share one recovery', () async {
     final operations = CoreLifecycleOperations();
     final recovered = Completer<bool>();
