@@ -66,9 +66,9 @@ jobs:
           echo "  Build number: $BUILD_NUMBER"
 
   test:
-    name: Dart analyze and tests
+    name: Dart, Rust analyze and tests
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -105,16 +105,24 @@ jobs:
           go build -tags "$GO_TAGS" -trimpath -o "$RUNNER_TEMP/FlClashCore" .
           go test -tags "$GO_TAGS" -c -o "$RUNNER_TEMP/flclash-routing-checker" .
 
-      - name: Cache Rust test library
+      - name: Cache Rust
         uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
             plugins/rust_api/rust/target
-          key: ${{ runner.os }}-${{ runner.arch }}-script-test-cargo-${{ hashFiles('plugins/rust_api/rust/Cargo.lock', 'plugins/rust_api/rust/rust-toolchain.toml') }}
+            services/helper/target
+          key: ${{ runner.os }}-${{ runner.arch }}-test-cargo-${{ hashFiles('plugins/rust_api/rust/Cargo.lock', 'plugins/rust_api/rust/rust-toolchain.toml', 'services/helper/Cargo.lock') }}
           restore-keys: |
-            ${{ runner.os }}-${{ runner.arch }}-script-test-cargo-
+            ${{ runner.os }}-${{ runner.arch }}-test-cargo-
+
+      - name: Validate Rust components
+        run: |
+          cargo fmt --manifest-path services/helper/Cargo.toml -- --check
+          cargo test --manifest-path services/helper/Cargo.toml
+          cargo fmt --manifest-path plugins/rust_api/rust/Cargo.toml -- --check
+          cargo test --manifest-path plugins/rust_api/rust/Cargo.toml
 
       - name: Build native script test library
         run: cargo build --locked --manifest-path plugins/rust_api/rust/Cargo.toml
@@ -174,13 +182,9 @@ jobs:
       go-version: ${{ needs.version.outputs.go_version }}
 
   android-core-test:
-    name: Android core (${{ matrix.arch }})
+    name: Android core
     runs-on: ubuntu-latest
-    timeout-minutes: 25
-    strategy:
-      fail-fast: false
-      matrix:
-        arch: [arm64, arm, amd64]
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
@@ -196,7 +200,10 @@ jobs:
       - name: Compile and link Android core and JNI
         env:
           ANDROID_NDK_HOME: ${{ steps.ndk.outputs.ndk-path }}
-        run: bash tool/check_android_core.sh '${{ matrix.arch }}'
+        run: |
+          for arch in arm64 arm amd64; do
+            bash tool/check_android_core.sh "$arch"
+          done
 
   android-test:
     name: Android unit tests
@@ -276,27 +283,6 @@ jobs:
           for target in android-arm64 android-arm android-x64; do
             flutter build bundle --debug --target-platform "$target"
           done
-
-  rust-test:
-    name: Rust components
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            plugins/rust_api/rust/target
-            services/helper/target
-          key: ${{ runner.os }}-test-cargo-${{ hashFiles('plugins/rust_api/rust/Cargo.lock', 'services/helper/Cargo.lock') }}
-      - name: Validate Rust components
-        run: |
-          cargo fmt --manifest-path services/helper/Cargo.toml -- --check
-          cargo test --manifest-path services/helper/Cargo.toml
-          cargo fmt --manifest-path plugins/rust_api/rust/Cargo.toml -- --check
-          cargo test --manifest-path plugins/rust_api/rust/Cargo.toml
 
   windows-helper-test:
     name: Windows helper test
@@ -517,7 +503,7 @@ jobs:
   checks:
     name: Required release checks
     if: ${{ always() }}
-    needs: [version, test, go-test, deep-tests, android-core-test, android-test, android-native-test, rust-test, windows-helper-test]
+    needs: [version, test, go-test, deep-tests, android-core-test, android-test, android-native-test, windows-helper-test]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

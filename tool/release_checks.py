@@ -4,30 +4,23 @@ import json
 import os
 import re
 import subprocess
-from pathlib import Path
 
-DEEP_PREFIXES = (
-    "core/", "plugins/", "services/", ".github/", "tool/", "test/ci/",
-    "test/core/", "test/tool/", "android/", "linux/", "macos/", "windows/",
-)
-DEEP_FILES = {"setup.dart", "pubspec.yaml", "pubspec.lock", ".gitmodules", "Makefile"}
+# Deep checks only run Go: nothing outside the core module, its submodule and
+# the scripts the deep workflow calls can change their outcome.
+DEEP_PREFIXES = ("core/",)
+DEEP_FILES = {
+    ".gitmodules", ".github/workflows/go-deep-tests.yaml", "tool/go_build_tags.env",
+    "tool/check_form_dependencies.py", "tool/check_mieru_dependencies.py",
+    "tool/check_quic_dependencies.py", "tool/release_checks.py",
+}
 REQUIRED_JOBS = (
     "version", "test", "go-test", "android-core-test", "android-test",
-    "android-native-test", "rust-test", "windows-helper-test",
+    "android-native-test", "windows-helper-test",
 )
 
 
-def needs_deep_tests(paths, before_pubspec=None, after_pubspec=None):
-    paths = list(paths)
-    if "pubspec.yaml" in paths and before_pubspec is not None and after_pubspec is not None:
-        pattern = r"^version:[^\r\n]*(?:\r?\n|$)"
-        if (len(re.findall(pattern, before_pubspec, re.M)) == 1
-                and len(re.findall(pattern, after_pubspec, re.M)) == 1
-                and re.sub(pattern, "", before_pubspec, flags=re.M)
-                == re.sub(pattern, "", after_pubspec, flags=re.M)):
-            paths.remove("pubspec.yaml")
-    return any(path in DEEP_FILES or path.startswith(DEEP_PREFIXES)
-               or Path(path).name.startswith("rust-toolchain") for path in paths)
+def needs_deep_tests(paths):
+    return any(path in DEEP_FILES or path.startswith(DEEP_PREFIXES) for path in paths)
 
 
 def successful_shas(runs, current_run):
@@ -64,11 +57,7 @@ def select_scope(repository, head, run_id):
                 continue
             paths = git("diff", "--no-renames", "--name-only", "-z", baseline, head)
             changed = [p for p in paths.decode().split("\0") if p]
-            before = after = None
-            if "pubspec.yaml" in changed:
-                before = git("show", f"{baseline}:pubspec.yaml").decode()
-                after = git("show", f"{head}:pubspec.yaml").decode()
-            return needs_deep_tests(changed, before, after), baseline
+            return needs_deep_tests(changed), baseline
     except (OSError, ValueError, KeyError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
         print("Could not verify a successful ancestor; requiring deep tests")
     return True, ""

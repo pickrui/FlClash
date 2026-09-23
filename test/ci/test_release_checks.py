@@ -9,23 +9,20 @@ from tool.release_checks import (
 
 
 class ReleaseChecksTest(unittest.TestCase):
-    def test_ui_and_documentation_only_can_reuse_successful_core(self):
-        self.assertFalse(needs_deep_tests(["lib/views/theme.dart", "arb/intl_en.arb", "README.md"]))
+    def test_changes_outside_go_reuse_successful_core(self):
+        self.assertFalse(needs_deep_tests([
+            "lib/views/theme.dart", "arb/intl_en.arb", "README.md", "pubspec.yaml",
+            "pubspec.lock", "setup.dart", "plugins/setup/setup_hooks/lib/src/go.dart",
+            "services/helper/Cargo.lock", ".github/workflows/build.yaml",
+            "android/gradle/libs.versions.toml", "linux/packaging/aur/PKGBUILD.in",
+        ]))
 
-    def test_toolchains_dependencies_submodules_and_build_scripts_require_depth(self):
-        for path in ("core/Clash.Meta", "core/main.go", "pubspec.lock", "pubspec.yaml",
-                     "setup.dart", "plugins/setup/setup_hooks/lib/src/go.dart",
-                     "services/helper/Cargo.lock", ".github/workflows/build.yaml",
-                     "android/gradle/libs.versions.toml", "tool/release_checks.py"):
+    def test_go_core_submodule_tags_and_deep_scripts_require_depth(self):
+        for path in ("core/Clash.Meta", "core/main.go", "core/go.sum", ".gitmodules",
+                     "tool/go_build_tags.env", "tool/check_quic_dependencies.py",
+                     ".github/workflows/go-deep-tests.yaml", "tool/release_checks.py"):
             with self.subTest(path=path):
                 self.assertTrue(needs_deep_tests([path]))
-
-    def test_version_only_changes_do_not_trigger_deep_dependency_tests(self):
-        before = "version: 0.8.97+2026091521\ndependencies: {dio: 5.8.0}\n"
-        after = before.replace("0.8.97+2026091521", "0.8.98+2026092011")
-        self.assertFalse(needs_deep_tests(["pubspec.yaml", "lib/views/theme.dart"], before, after))
-        self.assertTrue(needs_deep_tests(["pubspec.yaml"], before, after.replace("5.8.0", "5.11.0")))
-        self.assertTrue(needs_deep_tests(["pubspec.yaml"]))
 
     def test_failed_manual_and_current_runs_are_not_baselines(self):
         good = {"id": 1, "head_sha": "a" * 40, "event": "push", "conclusion": "success"}

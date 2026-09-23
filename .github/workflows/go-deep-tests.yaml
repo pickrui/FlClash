@@ -18,9 +18,9 @@ env:
 
 jobs:
   go-deep-test:
-    name: Full core and dependency regressions
+    name: Integrated mihomo core
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
@@ -37,9 +37,25 @@ jobs:
         working-directory: core/Clash.Meta
         run: |
           go vet -tags "$GO_TAGS" ./...
-          # Full Sudoku and MKCP/Mekya matrices have separate required jobs below.
+          # Sudoku and MKCP/Mekya run in their own steps of the job below.
           go test -race -tags "$GO_TAGS" -p=2 -parallel=2 -timeout=900s -skip '^(TestInboundSudoku|TestInboundVMess_(MKCP|Mekya)$)' ./...
 
+  go-deep-deps-test:
+    name: Dependency and inbound regressions
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Load shared Go build tags
+        run: grep '^GO_TAGS=' tool/go_build_tags.env >> "$GITHUB_ENV"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: |
+            core/go.sum
+            core/Clash.Meta/go.sum
       - name: Check mips storage and TUN integration
         working-directory: core
         run: |
@@ -84,21 +100,6 @@ jobs:
         run: go test -race -tags "$GO_TAGS" -timeout=180s -run '^(TestNewMieru|TestInboundMieru)$' ./listener/inbound
       - name: Check QUIC dependency regressions
         run: python3 tool/check_quic_dependencies.py
-
-  mkcp-test:
-    name: MKCP and Mekya integration
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - name: Load shared Go build tags
-        run: grep '^GO_TAGS=' tool/go_build_tags.env >> "$GITHUB_ENV"
-      - uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache-dependency-path: core/go.sum
       - name: Validate all MKCP and Mekya variants
         working-directory: core/Clash.Meta
         run: |
@@ -107,21 +108,6 @@ jobs:
           # CPUs: capping GOMAXPROCS can starve UDP/H2 handshakes under -race.
           echo "Available CPUs: $(nproc)"
           go test -v -race -tags "$GO_TAGS" -p=1 -parallel=1 -count=2 -timeout=300s -run '^TestInboundVMess_(MKCP|Mekya)$' ./listener/inbound
-
-  sudoku-test:
-    name: Sudoku inbound integration
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - name: Load shared Go build tags
-        run: grep '^GO_TAGS=' tool/go_build_tags.env >> "$GITHUB_ENV"
-      - uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache-dependency-path: core/go.sum
       - name: Validate all Sudoku inbound variants
         working-directory: core/Clash.Meta
         run: go test -race -tags "$GO_TAGS" -p=2 -parallel=2 -timeout=900s -run '^TestInboundSudoku' ./listener/inbound

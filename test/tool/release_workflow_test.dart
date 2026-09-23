@@ -30,7 +30,6 @@ void main() {
           'android-core-test',
           'android-test',
           'android-native-test',
-          'rust-test',
           'windows-helper-test',
         ]),
       );
@@ -84,7 +83,7 @@ void main() {
       expect(workflow['on']['schedule'], isNotEmpty);
       expect(
         (workflow['jobs'] as YamlMap).keys,
-        containsAll(['go-deep-test', 'mkcp-test', 'sudoku-test']),
+        containsAll(['go-deep-test', 'go-deep-deps-test']),
       );
       expect(
         jobs['deep-tests']['if'],
