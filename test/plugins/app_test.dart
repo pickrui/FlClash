@@ -102,13 +102,7 @@ void main() {
     () async {
       var calls = 0;
       var changes = 0;
-      var exits = 0;
       final api = App();
-      final previousExit = api.onExit;
-      api.onExit = () {
-        exits++;
-      };
-      addTearDown(() => api.onExit = previousExit);
       final subscription = api.packageChanges.listen((_) => changes++);
       addTearDown(subscription.cancel);
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -119,7 +113,6 @@ void main() {
       expect(await api.getPackageIcon('updated.app'), isNull);
       await packagesChanged();
       expect(changes, 1);
-      expect(exits, 0);
       expect(await api.getPackageIcon('updated.app'), isNotNull);
       expect(calls, 2);
     },

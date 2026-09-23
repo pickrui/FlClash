@@ -10,7 +10,6 @@ import 'package:flutter/services.dart';
 class App {
   static App? _instance;
   late MethodChannel methodChannel;
-  Function()? onExit;
   final _packageChanges = StreamController<void>.broadcast(sync: true);
   Stream<void> get packageChanges => _packageChanges.stream;
   final _iconChanges = StreamController<void>.broadcast(sync: true);
@@ -23,10 +22,6 @@ class App {
         case 'packagesChanged':
           clearPackageIconCache();
           _packageChanges.add(null);
-        case 'exit':
-          if (onExit != null) {
-            await onExit!();
-          }
         default:
           throw MissingPluginException();
       }
