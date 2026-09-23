@@ -351,26 +351,3 @@ class SelectIcon extends StatelessWidget {
     );
   }
 }
-
-class SettingsBlock extends StatelessWidget {
-  final String title;
-  final List<Widget> settings;
-
-  const SettingsBlock({super.key, required this.title, required this.settings});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: Column(
-        children: [
-          InfoHeader(info: Info(label: title)),
-          Card(
-            color: context.colorScheme.surfaceContainer,
-            child: Column(children: settings),
-          ),
-        ],
-      ),
-    );
-  }
-}

@@ -3,9 +3,21 @@ import 'dart:async';
 import 'package:fl_clash/common/print.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/widgets/inherited.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 typedef PollGuard = bool Function();
+
+bool _isForegroundState(AppLifecycleState? state) => switch (state) {
+  null || AppLifecycleState.resumed => true,
+  AppLifecycleState.inactive => switch (defaultTargetPlatform) {
+    TargetPlatform.macOS ||
+    TargetPlatform.windows ||
+    TargetPlatform.linux => true,
+    _ => false,
+  },
+  _ => false,
+};
 
 mixin ActivePollingMixin<T extends StatefulWidget>
     on State<T>, WidgetsBindingObserver {
@@ -17,8 +29,6 @@ mixin ActivePollingMixin<T extends StatefulWidget>
 
   Duration get pollInterval;
 
-  bool get pollOnStart => true;
-
   Future<void> poll(PollGuard isCurrent);
 
   bool get canPoll => mounted && _isForeground && _isPageActive;
@@ -27,9 +37,7 @@ mixin ActivePollingMixin<T extends StatefulWidget>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    final lifecycleState = WidgetsBinding.instance.lifecycleState;
-    _isForeground =
-        lifecycleState == null || lifecycleState == AppLifecycleState.resumed;
+    _isForeground = _isForegroundState(WidgetsBinding.instance.lifecycleState);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _syncPolling();
@@ -51,7 +59,7 @@ mixin ActivePollingMixin<T extends StatefulWidget>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    final isForeground = state == AppLifecycleState.resumed;
+    final isForeground = _isForegroundState(state);
     if (_isForeground == isForeground) {
       return;
     }
@@ -72,12 +80,7 @@ mixin ActivePollingMixin<T extends StatefulWidget>
       return;
     }
     _isPolling = true;
-    final generation = ++_pollGeneration;
-    if (pollOnStart) {
-      unawaited(_runPoll(generation));
-      return;
-    }
-    _schedulePoll(generation);
+    unawaited(_runPoll(++_pollGeneration));
   }
 
   void stopPolling() {
@@ -85,11 +88,6 @@ mixin ActivePollingMixin<T extends StatefulWidget>
     _pollGeneration++;
     _pollTimer?.cancel();
     _pollTimer = null;
-  }
-
-  void restartPolling() {
-    stopPolling();
-    _syncPolling();
   }
 
   void _syncPolling() {

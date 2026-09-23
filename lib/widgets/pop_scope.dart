@@ -6,14 +6,8 @@ import 'package:flutter/widgets.dart';
 class CommonPopScope extends StatelessWidget {
   final Widget child;
   final FutureOr<bool> Function(BuildContext context)? onPop;
-  final FutureOr<void> Function()? onPopSuccess;
 
-  const CommonPopScope({
-    super.key,
-    required this.child,
-    this.onPop,
-    this.onPopSuccess,
-  });
+  const CommonPopScope({super.key, required this.child, this.onPop});
 
   @override
   Widget build(BuildContext context) {
@@ -33,9 +27,6 @@ class CommonPopScope extends StatelessWidget {
                 return;
               }
               Navigator.of(context).pop();
-              if (onPopSuccess != null) {
-                await onPopSuccess!();
-              }
             },
       child: child,
     );

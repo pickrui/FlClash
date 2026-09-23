@@ -12,6 +12,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:fl_clash/common/icon_file_service.dart';
 
 final _decodedIcons = _IconCache();
+final _recordedIconUrls = <String>{};
 
 class _IconCache extends EncodedIconCache with WidgetsBindingObserver {
   _IconCache() {
@@ -42,8 +43,14 @@ ImageProvider _resizeIcon(
 class CommonTargetIcon extends StatelessWidget {
   final String src;
   final double size;
+  final bool recordHistory;
 
-  const CommonTargetIcon({super.key, required this.src, required this.size});
+  const CommonTargetIcon({
+    super.key,
+    required this.src,
+    required this.size,
+    this.recordHistory = true,
+  });
 
   Widget _defaultIcon() {
     return Icon(IconsExt.target, size: size);
@@ -69,6 +76,7 @@ class CommonTargetIcon extends StatelessWidget {
       src: src,
       size: size,
       defaultWidget: _defaultIcon(),
+      recordHistory: recordHistory,
     );
   }
 
@@ -86,12 +94,14 @@ class ImageCacheWidget extends StatefulWidget {
   final String src;
   final double size;
   final Widget defaultWidget;
+  final bool recordHistory;
 
   const ImageCacheWidget({
     super.key,
     required this.src,
     required this.defaultWidget,
     required this.size,
+    this.recordHistory = true,
   });
 
   @override
@@ -148,9 +158,11 @@ class _ImageCacheWidgetState extends State<ImageCacheWidget> {
   }
 
   void _rememberIcon(String src) {
+    if (!widget.recordHistory || !_recordedIconUrls.add(src)) return;
     unawaited(
       database.iconRecordsDao.put(src).catchError((Object error) {
         // History is optional; a storage error must not hide a downloaded icon.
+        _recordedIconUrls.remove(src);
         commonPrint.log('Icon history update failed (${error.runtimeType})');
       }),
     );

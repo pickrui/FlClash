@@ -2,41 +2,6 @@ import 'package:animations/animations.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:material_ui/material_ui.dart';
 
-class FadeBox extends StatelessWidget {
-  final Widget child;
-  final AlignmentGeometry? alignment;
-  final StackFit fit;
-
-  const FadeBox({
-    super.key,
-    required this.child,
-    this.alignment,
-    this.fit = StackFit.loose,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final realAlignment = alignment ?? Alignment.center;
-    return AnimatedSwitcher(
-      switchInCurve: Curves.easeOut,
-      switchOutCurve: Curves.easeIn,
-      layoutBuilder: (currentChild, previousChildren) => Align(
-        alignment: realAlignment,
-        child: Stack(
-          alignment: realAlignment,
-          fit: fit,
-          children: <Widget>[...previousChildren, ?currentChild],
-        ),
-      ),
-      transitionBuilder: (child, animation) {
-        return FadeTransition(opacity: animation, child: child);
-      },
-      duration: context.motionDuration(commonDuration),
-      child: child,
-    );
-  }
-}
-
 class FadeThroughBox extends StatelessWidget {
   final Widget child;
   final AlignmentGeometry? alignment;
@@ -197,61 +162,6 @@ mixin _EnterAnimation<T extends StatefulWidget> on State<T> {
 }
 
 const _defaultSlideDistance = 24.0;
-
-class FadeSlideEnterBox extends StatefulWidget {
-  final Duration delay;
-  final double distance;
-  final Axis axis;
-  final Widget child;
-
-  const FadeSlideEnterBox({
-    super.key,
-    this.delay = Duration.zero,
-    this.distance = _defaultSlideDistance,
-    this.axis = Axis.horizontal,
-    required this.child,
-  });
-
-  @override
-  State<FadeSlideEnterBox> createState() => _FadeSlideEnterBoxState();
-}
-
-class _FadeSlideEnterBoxState extends State<FadeSlideEnterBox>
-    with SingleTickerProviderStateMixin, _EnterAnimation {
-  @override
-  late final AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    final total = commonDuration + widget.delay;
-    _controller = AnimationController(vsync: this, duration: total);
-    final start = widget.delay.inMicroseconds / total.inMicroseconds;
-    _animation = start == 0
-        ? _controller.view
-        : _controller.drive(CurveTween(curve: Interval(start, 1)));
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (context.disableAnimations) {
-      return widget.child;
-    }
-    return FadeSlideEnterTransition(
-      animation: _animation,
-      distance: widget.distance,
-      axis: widget.axis,
-      child: widget.child,
-    );
-  }
-}
 
 class FadeSlideEnterTransition extends StatelessWidget {
   const FadeSlideEnterTransition({

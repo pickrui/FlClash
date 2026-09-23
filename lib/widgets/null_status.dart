@@ -19,57 +19,6 @@ enum NullStatusIllustration {
   permission,
 }
 
-class NullStatusSwitcher extends StatelessWidget {
-  static const _exitDuration = Duration(milliseconds: 150);
-
-  final bool isEmpty;
-  final NullStatus nullStatus;
-  final Widget child;
-
-  const NullStatusSwitcher({
-    super.key,
-    required this.isEmpty,
-    required this.nullStatus,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: context.motionDuration(commonDuration),
-      reverseDuration: context.motionDuration(_exitDuration),
-      switchInCurve: Easing.emphasizedDecelerate,
-      switchOutCurve: Curves.easeIn,
-      layoutBuilder: (currentChild, previousChildren) => Align(
-        alignment: Alignment.center,
-        child: Stack(
-          alignment: Alignment.center,
-          fit: StackFit.expand,
-          children: <Widget>[...previousChildren, ?currentChild],
-        ),
-      ),
-      transitionBuilder: (child, animation) => FadeTransition(
-        opacity: animation,
-        child: ScaleTransition(
-          scale: animation.drive(Tween(begin: 0.92, end: 1.0)),
-          child: child,
-        ),
-      ),
-      child: isEmpty
-          ? KeyedSubtree(
-              key: const ValueKey(_NullStatusSlot.empty),
-              child: nullStatus,
-            )
-          : KeyedSubtree(
-              key: const ValueKey(_NullStatusSlot.content),
-              child: child,
-            ),
-    );
-  }
-}
-
-enum _NullStatusSlot { empty, content }
-
 class NullStatus extends StatelessWidget {
   final String label;
   final String? description;

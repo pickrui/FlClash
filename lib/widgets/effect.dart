@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:ui';
 
 import 'package:fl_clash/widgets/inherited.dart';
@@ -20,22 +19,8 @@ class EffectGestureDetector extends StatefulWidget {
   State<EffectGestureDetector> createState() => _EffectGestureDetectorState();
 }
 
-class _EffectGestureDetectorState extends State<EffectGestureDetector>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+class _EffectGestureDetectorState extends State<EffectGestureDetector> {
   double _scale = 1;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,11 +72,9 @@ class _CommonExpandIconState extends State<CommonExpandIcon>
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
+      value: widget.expand ? 1.0 : 0.0,
     );
     _iconTurns = _animationController.drive(_iconTurnTween);
-    if (widget.expand) {
-      _animationController.value = pi;
-    }
   }
 
   @override
@@ -114,11 +97,8 @@ class _CommonExpandIconState extends State<CommonExpandIcon>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _animationController.view,
-      builder: (_, child) {
-        return RotationTransition(turns: _iconTurns, child: child!);
-      },
+    return RotationTransition(
+      turns: _iconTurns,
       child: const Icon(Icons.expand_more),
     );
   }

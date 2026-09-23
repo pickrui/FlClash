@@ -32,51 +32,6 @@ class TooltipText extends StatelessWidget {
   }
 }
 
-class TooltipTextV2 extends StatefulWidget {
-  final Text text;
-
-  const TooltipTextV2({super.key, required this.text});
-
-  @override
-  State<TooltipTextV2> createState() => _TooltipTextV2State();
-}
-
-class _TooltipTextV2State extends State<TooltipTextV2> {
-  bool _isOverflow = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkOverflow();
-    });
-  }
-
-  void _checkOverflow() {
-    if (!mounted) {
-      return;
-    }
-    final renderBox = context.findRenderObject() as RenderBox?;
-    if (renderBox == null) return;
-
-    final isOverflow = globalState.measure.computeTextIsOverflow(
-      widget.text,
-      maxWidth: renderBox.size.width,
-    );
-    setState(() => _isOverflow = isOverflow);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      triggerMode: TooltipTriggerMode.longPress,
-      preferBelow: false,
-      message: _isOverflow ? widget.text.data : '',
-      child: widget.text,
-    );
-  }
-}
-
 class EmojiText extends StatelessWidget {
   final String text;
   final TextStyle? style;
@@ -91,7 +46,7 @@ class EmojiText extends StatelessWidget {
     this.style,
   });
 
-  List<TextSpan> _buildTextSpans(String emojis) {
+  List<TextSpan> _buildTextSpans() {
     final List<TextSpan> spans = [];
     final matches = emojiRegex().allMatches(text);
 
@@ -123,26 +78,10 @@ class EmojiText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RichText(
-      textScaler: MediaQuery.of(context).textScaler,
+      textScaler: MediaQuery.textScalerOf(context),
       maxLines: maxLines,
       overflow: overflow ?? TextOverflow.clip,
-      text: TextSpan(children: _buildTextSpans(text)),
+      text: TextSpan(children: _buildTextSpans()),
     );
   }
 }
-
-// class HighlightText extends StatelessWidget {
-//   const HighlightText({super.key});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return RichText(
-//       textScaler: MediaQuery.of(context).textScaler,
-//       maxLines: maxLines,
-//       overflow: overflow ?? TextOverflow.clip,
-//       text: TextSpan(
-//         children: _buildTextSpans(text),
-//       ),
-//     );
-//   }
-// }

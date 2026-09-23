@@ -241,13 +241,13 @@ class RenderGrid extends RenderBox
         mainAxisExtent =
             (this.mainAxisExtent ?? stride) * mainAxisCellCount -
             mainAxisSpacing;
-        childParentData.realMainAxisExtent = mainAxisExtent;
         final childSize = mainAxis == Axis.vertical
             ? Size(crossAxisExtent, mainAxisExtent)
             : Size(mainAxisExtent, crossAxisExtent);
         final childConstraints = BoxConstraints.tight(childSize);
         _layoutChild(child, childConstraints);
       }
+      childParentData.realMainAxisExtent = mainAxisExtent;
       final origin = _getOrigin(offsets, crossAxisCellCount);
       final mainAxisOffset = origin.mainAxisOffset;
       final crossAxisOffset = origin.crossAxisIndex * stride;
@@ -285,7 +285,10 @@ class RenderGrid extends RenderBox
       child = firstChild;
       while (child != null) {
         final childParentData = _getParentData(child);
-        final crossAxisCellCount = crossAxisCount;
+        final crossAxisCellCount = _computeCrossAxisCellCount(
+          childParentData,
+          crossAxisCount,
+        );
         final crossAxisCellExtent =
             stride * crossAxisCellCount - crossAxisSpacing;
         final offset = childParentData.offset;
@@ -352,7 +355,7 @@ class GridItem extends ParentDataWidget<GridParentData> {
   }
 
   @override
-  Type get debugTypicalAncestorWidgetClass => GridItem;
+  Type get debugTypicalAncestorWidgetClass => Grid;
 
   GridItem wrap({required WrapBuilder builder}) {
     return GridItem(

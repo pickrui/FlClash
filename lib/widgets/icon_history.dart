@@ -55,7 +55,11 @@ class _IconHistoryDialogState extends State<IconHistoryDialog> {
                   itemBuilder: (context, index) {
                     final record = records[index];
                     return ListTile(
-                      leading: CommonTargetIcon(src: record.url, size: 28),
+                      leading: CommonTargetIcon(
+                        src: record.url,
+                        size: 28,
+                        recordHistory: false,
+                      ),
                       title: Text(
                         record.url,
                         maxLines: 2,

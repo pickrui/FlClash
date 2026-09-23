@@ -111,42 +111,12 @@ class SheetProvider<T> extends InheritedWidget {
     this.nestedNavigatorPop,
   });
 
-  SheetProvider copyWith({
-    SheetType? type,
-    void Function([T? result])? nestedNavigatorPop,
-    required Widget child,
-  }) {
-    return SheetProvider<T>(
-      type: type ?? this.type,
-      nestedNavigatorPop: nestedNavigatorPop ?? this.nestedNavigatorPop,
-      child: child,
-    );
-  }
-
   static SheetProvider? of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<SheetProvider>();
   }
 
   @override
   bool updateShouldNotify(SheetProvider oldWidget) =>
-      type != oldWidget.type &&
+      type != oldWidget.type ||
       nestedNavigatorPop != oldWidget.nestedNavigatorPop;
-}
-
-class ProfileIdProvider extends InheritedWidget {
-  final int profileId;
-
-  const ProfileIdProvider({
-    super.key,
-    required this.profileId,
-    required super.child,
-  });
-
-  static ProfileIdProvider? of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<ProfileIdProvider>();
-  }
-
-  @override
-  bool updateShouldNotify(ProfileIdProvider oldWidget) =>
-      profileId != oldWidget.profileId;
 }
