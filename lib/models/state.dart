@@ -34,19 +34,6 @@ abstract class VM5<A, B, C, D, E> with _$VM5<A, B, C, D, E> {
 }
 
 @freezed
-abstract class ActivateState with _$ActivateState {
-  const factory ActivateState({required bool active}) = _ActivateState;
-}
-
-@freezed
-abstract class InitState with _$InitState {
-  const factory InitState({
-    required Config config,
-    required List<Profile> profiles,
-  }) = _InitState;
-}
-
-@freezed
 abstract class CommonMessage with _$CommonMessage {
   const factory CommonMessage({
     required String id,
@@ -88,14 +75,6 @@ abstract class AppBarEditState with _$AppBarEditState {
     @Default(0) int editCount,
     required Function() onExit,
   }) = _AppBarEditState;
-}
-
-@freezed
-abstract class StartButtonState with _$StartButtonState {
-  const factory StartButtonState({
-    required bool isPreload,
-    required bool hasProfile,
-  }) = _StartButtonState;
 }
 
 @freezed
@@ -198,15 +177,6 @@ abstract class ProxyState with _$ProxyState {
     required List<String> bassDomain,
     required int port,
   }) = _ProxyState;
-}
-
-@freezed
-abstract class ClashConfigState with _$ClashConfigState {
-  const factory ClashConfigState({
-    required bool overrideDns,
-    required ClashConfig clashConfig,
-    required RouteMode routeMode,
-  }) = _ClashConfigState;
 }
 
 @freezed

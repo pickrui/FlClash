@@ -538,17 +538,5 @@ int? _planRank(String planCode) => switch (planCode.toLowerCase()) {
   _ => null,
 };
 
-int _legacyPlanRank(int legacyClass) => switch (legacyClass) {
-  1 => 10,
-  2 => 20,
-  3 => 30,
-  4 => 40,
-  5 => 50,
-  6 => 60,
-  7 => 70,
-  8 => 80,
-  9 => 90,
-  10 => 100,
-  11 => 110,
-  _ => 0,
-};
+int _legacyPlanRank(int legacyClass) =>
+    _planRank(_legacyPlanCode(legacyClass)) ?? 0;

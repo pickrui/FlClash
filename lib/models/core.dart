@@ -115,15 +115,6 @@ abstract class CoreEvent with _$CoreEvent {
       _$CoreEventFromJson(json);
 }
 
-@freezed
-abstract class InvokeMessage with _$InvokeMessage {
-  const factory InvokeMessage({required InvokeMessageType type, dynamic data}) =
-      _InvokeMessage;
-
-  factory InvokeMessage.fromJson(Map<String, Object?> json) =>
-      _$InvokeMessageFromJson(json);
-}
-
 enum DelayFailure {
   timeout,
   dns,
@@ -155,19 +146,6 @@ abstract class Now with _$Now {
   const factory Now({required String name, required String value}) = _Now;
 
   factory Now.fromJson(Map<String, Object?> json) => _$NowFromJson(json);
-}
-
-@freezed
-abstract class ProviderSubscriptionInfo with _$ProviderSubscriptionInfo {
-  const factory ProviderSubscriptionInfo({
-    @JsonKey(name: 'UPLOAD') @Default(0) int upload,
-    @JsonKey(name: 'DOWNLOAD') @Default(0) int download,
-    @JsonKey(name: 'TOTAL') @Default(0) int total,
-    @JsonKey(name: 'EXPIRE') @Default(0) int expire,
-  }) = _ProviderSubscriptionInfo;
-
-  factory ProviderSubscriptionInfo.fromJson(Map<String, Object?> json) =>
-      _$ProviderSubscriptionInfoFromJson(json);
 }
 
 SubscriptionInfo? subscriptionInfoFormCore(Map<String, Object?>? json) {

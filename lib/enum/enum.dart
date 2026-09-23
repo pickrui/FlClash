@@ -1,7 +1,5 @@
 // ignore_for_file: constant_identifier_names
 
-import 'dart:io';
-
 import 'package:fl_clash/common/color.dart';
 import 'package:fl_clash/common/system.dart';
 import 'package:fl_clash/views/dashboard/widgets/widgets.dart';
@@ -22,7 +20,7 @@ enum SupportPlatform {
       return SupportPlatform.Windows;
     } else if (system.isMacOS) {
       return SupportPlatform.MacOS;
-    } else if (Platform.isLinux) {
+    } else if (system.isLinux) {
       return SupportPlatform.Linux;
     } else if (system.isAndroid) {
       return SupportPlatform.Android;
@@ -64,23 +62,19 @@ enum GroupType {
 enum GroupName { GLOBAL, Proxy, Auto, Fallback }
 
 extension GroupTypeExtension on GroupType {
-  static List<String> get valueList =>
-      GroupType.values.map((e) => e.toString().split('.').last).toList();
+  static final List<String> valueList = List.unmodifiable(
+    GroupType.values.map((e) => e.name),
+  );
 
   bool get isComputedSelected {
     return [GroupType.URLTest, GroupType.Fallback].contains(this);
   }
-
-  String get value => GroupTypeExtension.valueList[index];
 }
 
 enum UsedProxy { GLOBAL, DIRECT, REJECT }
 
 extension UsedProxyExtension on UsedProxy {
-  static List<String> get valueList =>
-      UsedProxy.values.map((e) => e.toString().split('.').last).toList();
-
-  String get value => UsedProxyExtension.valueList[index];
+  String get value => name;
 }
 
 enum Mode { rule, global, direct }
@@ -126,8 +120,6 @@ enum ResultType {
 
 enum CoreEventType { log, delay, request, loaded, crash, geoUpdate, mode }
 
-enum InvokeMessageType { protect, process }
-
 enum FindProcessMode { always, off }
 
 enum RestoreOption { all, onlyProfiles }
@@ -135,10 +127,6 @@ enum RestoreOption { all, onlyProfiles }
 enum ChipType { action, delete }
 
 enum CommonCardType { plain, filled }
-//
-// extension CommonCardTypeExt on CommonCardType {
-//   CommonCardType get variant => CommonCardType.plain;
-// }
 
 enum ProxiesType { tab, list }
 
@@ -399,26 +387,5 @@ enum ItemPosition {
       return ItemPosition.start;
     }
     return ItemPosition.middle;
-  }
-
-  static ItemPosition calculateVisualPosition<T>(
-    int currentIndex,
-    List<T> items,
-    Set<T> deletedItems,
-  ) {
-    final currentItem = items[currentIndex];
-    if (deletedItems.contains(currentItem)) {
-      return ItemPosition.middle;
-    }
-    final visualLength = items.length - deletedItems.length;
-    if (visualLength <= 0) return ItemPosition.middle;
-    var deletedCountBeforeMe = 0;
-    for (var i = 0; i < currentIndex; i++) {
-      if (deletedItems.contains(items[i])) {
-        deletedCountBeforeMe++;
-      }
-    }
-    final visualIndex = currentIndex - deletedCountBeforeMe;
-    return ItemPosition.get(visualIndex, visualLength);
   }
 }

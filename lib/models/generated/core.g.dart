@@ -205,23 +205,6 @@ const _$CoreEventTypeEnumMap = {
   CoreEventType.mode: 'mode',
 };
 
-_InvokeMessage _$InvokeMessageFromJson(Map<String, dynamic> json) =>
-    _InvokeMessage(
-      type: $enumDecode(_$InvokeMessageTypeEnumMap, json['type']),
-      data: json['data'],
-    );
-
-Map<String, dynamic> _$InvokeMessageToJson(_InvokeMessage instance) =>
-    <String, dynamic>{
-      'type': _$InvokeMessageTypeEnumMap[instance.type]!,
-      'data': instance.data,
-    };
-
-const _$InvokeMessageTypeEnumMap = {
-  InvokeMessageType.protect: 'protect',
-  InvokeMessageType.process: 'process',
-};
-
 _Delay _$DelayFromJson(Map<String, dynamic> json) => _Delay(
   name: json['name'] as String,
   url: json['url'] as String,
@@ -260,24 +243,6 @@ _Now _$NowFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$NowToJson(_Now instance) => <String, dynamic>{
   'name': instance.name,
   'value': instance.value,
-};
-
-_ProviderSubscriptionInfo _$ProviderSubscriptionInfoFromJson(
-  Map<String, dynamic> json,
-) => _ProviderSubscriptionInfo(
-  upload: (json['UPLOAD'] as num?)?.toInt() ?? 0,
-  download: (json['DOWNLOAD'] as num?)?.toInt() ?? 0,
-  total: (json['TOTAL'] as num?)?.toInt() ?? 0,
-  expire: (json['EXPIRE'] as num?)?.toInt() ?? 0,
-);
-
-Map<String, dynamic> _$ProviderSubscriptionInfoToJson(
-  _ProviderSubscriptionInfo instance,
-) => <String, dynamic>{
-  'UPLOAD': instance.upload,
-  'DOWNLOAD': instance.download,
-  'TOTAL': instance.total,
-  'EXPIRE': instance.expire,
 };
 
 _ExternalProvider _$ExternalProviderFromJson(Map<String, dynamic> json) =>

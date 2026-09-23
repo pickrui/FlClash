@@ -119,15 +119,20 @@ abstract class SubscriptionInfo with _$SubscriptionInfo {
   factory SubscriptionInfo.fromJson(Map<String, Object?> json) =>
       _$SubscriptionInfoFromJson(json);
 
+  /// Parses subscription-userinfo the same way mihomo's provider does.
   factory SubscriptionInfo.formHString(String? info) {
     if (info == null) return const SubscriptionInfo();
-    final list = info.split(';');
-    final Map<String, int?> map = {};
-    for (final i in list) {
-      final keyValue = i.trim().split('=');
-      if (keyValue.length >= 2) {
-        map[keyValue[0]] = int.tryParse(keyValue[1]);
-      }
+    final map = <String, int>{};
+    final normalized = info.toLowerCase().replaceAll(RegExp(r'\s'), '');
+    for (final field in normalized.split(';')) {
+      final separator = field.indexOf('=');
+      if (separator < 0) continue;
+      final raw = field.substring(separator + 1);
+      final number = double.tryParse(raw);
+      final value =
+          int.tryParse(raw) ??
+          (number != null && number.isFinite ? number.toInt() : null);
+      if (value != null) map[field.substring(0, separator)] = value;
     }
     return SubscriptionInfo(
       upload: map['upload'] ?? 0,
@@ -292,16 +297,8 @@ extension ProfileProxyExt on ProfileProxy {
 }
 
 extension ProfileProxiesExt on List<ProfileProxy> {
-  List<ProfileProxy> copyAndPut(ProfileProxy profileProxy) {
-    final nextList = List<ProfileProxy>.from(this);
-    final index = nextList.indexWhere((item) => item.id == profileProxy.id);
-    if (index == -1) {
-      nextList.insert(0, profileProxy);
-    } else {
-      nextList[index] = profileProxy;
-    }
-    return nextList;
-  }
+  List<ProfileProxy> copyAndPut(ProfileProxy proxy) =>
+      ListExt(this).copyAndPut(proxy, (item) => item.id == proxy.id);
 }
 
 extension ProxyChainExt on ProxyChain {
@@ -373,16 +370,8 @@ extension ProxyChainExt on ProxyChain {
 }
 
 extension ProxyChainsExt on List<ProxyChain> {
-  List<ProxyChain> copyAndPut(ProxyChain proxyChain) {
-    final nextList = List<ProxyChain>.from(this);
-    final index = nextList.indexWhere((item) => item.id == proxyChain.id);
-    if (index == -1) {
-      nextList.insert(0, proxyChain);
-    } else {
-      nextList[index] = proxyChain;
-    }
-    return nextList;
-  }
+  List<ProxyChain> copyAndPut(ProxyChain proxyChain) =>
+      ListExt(this).copyAndPut(proxyChain, (item) => item.id == proxyChain.id);
 
   List<ProxyChain> copyAndReorder(int oldIndex, int newIndex) {
     final nextList = List<ProxyChain>.from(this);
@@ -1019,37 +1008,6 @@ extension ProfileRuleLinkExt on ProfileRuleLink {
     ];
     return splits.where((item) => item != null).join('_');
   }
-}
-
-// @freezed
-// abstract class Overwrite with _$Overwrite {
-//   const factory Overwrite({
-//     @Default(OverwriteType.standard) OverwriteType type,
-//     @Default(StandardOverwrite()) StandardOverwrite standardOverwrite,
-//     @Default(ScriptOverwrite()) ScriptOverwrite scriptOverwrite,
-//   }) = _Overwrite;
-//
-//   factory Overwrite.fromJson(Map<String, Object?> json) =>
-//       _$OverwriteFromJson(json);
-// }
-
-@freezed
-abstract class StandardOverwrite with _$StandardOverwrite {
-  const factory StandardOverwrite({
-    @Default([]) List<Rule> addedRules,
-    @Default([]) List<int> disabledRuleIds,
-  }) = _StandardOverwrite;
-
-  factory StandardOverwrite.fromJson(Map<String, Object?> json) =>
-      _$StandardOverwriteFromJson(json);
-}
-
-@freezed
-abstract class ScriptOverwrite with _$ScriptOverwrite {
-  const factory ScriptOverwrite({int? scriptId}) = _ScriptOverwrite;
-
-  factory ScriptOverwrite.fromJson(Map<String, Object?> json) =>
-      _$ScriptOverwriteFromJson(json);
 }
 
 extension ProfilesExt on List<Profile> {

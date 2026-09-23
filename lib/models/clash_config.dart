@@ -255,41 +255,6 @@ abstract class RuleProvider with _$RuleProvider {
 }
 
 @freezed
-abstract class Sniffer with _$Sniffer {
-  const factory Sniffer({
-    @Default(false) bool enable,
-    @Default(true) @JsonKey(name: 'override-destination') bool overrideDest,
-    @Default([]) List<String> sniffing,
-    @Default([]) @JsonKey(name: 'force-domain') List<String> forceDomain,
-    @Default([]) @JsonKey(name: 'skip-src-address') List<String> skipSrcAddress,
-    @Default([]) @JsonKey(name: 'skip-dst-address') List<String> skipDstAddress,
-    @Default([]) @JsonKey(name: 'skip-domain') List<String> skipDomain,
-    @Default([]) @JsonKey(name: 'port-whitelist') List<String> port,
-    @Default(true) @JsonKey(name: 'force-dns-mapping') bool forceDnsMapping,
-    @Default(true) @JsonKey(name: 'parse-pure-ip') bool parsePureIp,
-    @Default({}) Map<String, SnifferConfig> sniff,
-  }) = _Sniffer;
-
-  factory Sniffer.fromJson(Map<String, Object?> json) =>
-      _$SnifferFromJson(json);
-}
-
-List<String> _formJsonPorts(List? ports) {
-  return ports?.map((item) => item.toString()).toList() ?? [];
-}
-
-@freezed
-abstract class SnifferConfig with _$SnifferConfig {
-  const factory SnifferConfig({
-    @Default([]) @JsonKey(fromJson: _formJsonPorts) List<String> ports,
-    @JsonKey(name: 'override-destination') bool? overrideDest,
-  }) = _SnifferConfig;
-
-  factory SnifferConfig.fromJson(Map<String, Object?> json) =>
-      _$SnifferConfigFromJson(json);
-}
-
-@freezed
 abstract class Tun with _$Tun {
   const factory Tun({
     @Default(false) bool enable,
@@ -533,16 +498,8 @@ abstract class Rule with _$Rule {
 }
 
 extension RulesExt on List<Rule> {
-  List<Rule> copyAndPut(Rule rule) {
-    final newList = List<Rule>.from(this);
-    final index = newList.indexWhere((item) => item.id == rule.id);
-    if (index != -1) {
-      newList[index] = rule;
-    } else {
-      newList.insert(0, rule);
-    }
-    return newList;
-  }
+  List<Rule> copyAndPut(Rule rule) =>
+      ListExt(this).copyAndPut(rule, (item) => item.id == rule.id);
 }
 
 @freezed

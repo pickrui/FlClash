@@ -212,6 +212,20 @@ void main() {
       expect(state.list[0].id, '2');
     });
 
+    test('destinationIP query ignores surrounding whitespace', () {
+      final state = TrackerInfosState(
+        trackerInfos: [
+          tracker(
+            '1',
+            chains: const ['direct'],
+            metadata: meta(host: '', destinationIP: '192.168.1.1'),
+          ),
+        ],
+        query: ' 192.168.1.1 ',
+      );
+      expect(state.list.map((item) => item.id), ['1']);
+    });
+
     test('query matches chains text', () {
       final state = TrackerInfosState(
         trackerInfos: [

@@ -44,13 +44,14 @@ extension PackagesExt on List<Package> {
     required bool isFilterSystemApp,
     required bool isFilterNonInternetApp,
   }) {
+    final pinned = pinedList.toSet();
     return where(
       (item) =>
           (isFilterSystemApp ? item.system == false : true) &&
           (isFilterNonInternetApp ? item.internet == true : true),
     ).sorted((a, b) {
-      final isSelectA = pinedList.contains(a.packageName);
-      final isSelectB = pinedList.contains(b.packageName);
+      final isSelectA = pinned.contains(a.packageName);
+      final isSelectB = pinned.contains(b.packageName);
 
       if (isSelectA != isSelectB) {
         return isSelectA ? -1 : 1;
@@ -148,25 +149,16 @@ String _logDateTime(dynamic _) {
   return DateTime.now().showFull;
 }
 
-// String _logId(_) {
-//   return utils.id;
-// }
-
 @freezed
 abstract class Log with _$Log {
   const factory Log({
-    // @JsonKey(fromJson: _logId) required String id,
     @JsonKey(name: 'LogLevel') @Default(LogLevel.info) LogLevel logLevel,
     @JsonKey(name: 'Payload') @Default('') String payload,
     @JsonKey(fromJson: _logDateTime) required String dateTime,
   }) = _Log;
 
   factory Log.app(String payload) {
-    return Log(
-      payload: payload,
-      dateTime: _logDateTime(null),
-      // id: _logId(null),
-    );
+    return Log(payload: payload, dateTime: _logDateTime(null));
   }
 
   factory Log.fromJson(Map<String, Object?> json) => _$LogFromJson(json);
@@ -207,7 +199,6 @@ abstract class TrackerInfosState with _$TrackerInfosState {
 extension TrackerInfosStateExt on TrackerInfosState {
   List<TrackerInfo> get list {
     final lowerQuery = query.toLowerCase().trim();
-    final lowQuery = query.toLowerCase();
     return trackerInfos.where((trackerInfo) {
       final chains = trackerInfo.chains;
       final process = trackerInfo.metadata.process;
@@ -220,7 +211,7 @@ extension TrackerInfosStateExt on TrackerInfosState {
       return {...chains, process}.containsAll(keywords) &&
           (networkText.contains(lowerQuery) ||
               hostText.contains(lowerQuery) ||
-              destinationIPText.contains(lowQuery) ||
+              destinationIPText.contains(lowerQuery) ||
               processText.contains(lowerQuery) ||
               chainsText.contains(lowerQuery));
     }).toList();
@@ -251,17 +242,6 @@ abstract class FileInfo with _$FileInfo {
 extension FileInfoExt on FileInfo {
   String get desc =>
       '${size.traffic.show}  ·  ${lastModified.lastUpdateTimeDesc}';
-}
-
-@freezed
-abstract class VersionInfo with _$VersionInfo {
-  const factory VersionInfo({
-    @Default('') String clashName,
-    @Default('') String version,
-  }) = _VersionInfo;
-
-  factory VersionInfo.fromJson(Map<String, Object?> json) =>
-      _$VersionInfoFromJson(json);
 }
 
 @freezed
@@ -349,79 +329,43 @@ extension GroupExt on Group {
 }
 
 @freezed
-abstract class ColorSchemes with _$ColorSchemes {
-  const factory ColorSchemes({
-    ColorScheme? lightColorScheme,
-    ColorScheme? darkColorScheme,
-  }) = _ColorSchemes;
-}
-
-@freezed
 abstract class IpInfo with _$IpInfo {
   const factory IpInfo({required String ip, required String countryCode}) =
       _IpInfo;
 
-  static IpInfo fromIpInfoIoJson(Map<String, dynamic> json) {
-    return switch (json) {
-      {'ip': final String ip, 'country': final String country} => IpInfo(
-        ip: ip,
-        countryCode: country,
-      ),
-      _ => throw const FormatException('invalid json'),
-    };
+  static IpInfo _fromFields(
+    Map<String, dynamic> json, {
+    String ipKey = 'ip',
+    required String countryKey,
+  }) {
+    final ip = json[ipKey];
+    final countryCode = json[countryKey];
+    if (ip is! String || countryCode is! String) {
+      throw const FormatException('invalid json');
+    }
+    return IpInfo(ip: ip, countryCode: countryCode);
   }
 
-  static IpInfo fromIpApiCoJson(Map<String, dynamic> json) {
-    return switch (json) {
-      {'ip': final String ip, 'country_code': final String countryCode} =>
-        IpInfo(ip: ip, countryCode: countryCode),
-      _ => throw const FormatException('invalid json'),
-    };
-  }
+  static IpInfo fromIpInfoIoJson(Map<String, dynamic> json) =>
+      _fromFields(json, countryKey: 'country');
 
-  static IpInfo fromIpSbJson(Map<String, dynamic> json) {
-    return switch (json) {
-      {'ip': final String ip, 'country_code': final String countryCode} =>
-        IpInfo(ip: ip, countryCode: countryCode),
-      _ => throw const FormatException('invalid json'),
-    };
-  }
+  static IpInfo fromIpApiCoJson(Map<String, dynamic> json) =>
+      _fromFields(json, countryKey: 'country_code');
 
-  static IpInfo fromIpWhoIsJson(Map<String, dynamic> json) {
-    return switch (json) {
-      {'ip': final String ip, 'country_code': final String countryCode} =>
-        IpInfo(ip: ip, countryCode: countryCode),
-      _ => throw const FormatException('invalid json'),
-    };
-  }
+  static IpInfo fromIpSbJson(Map<String, dynamic> json) =>
+      _fromFields(json, countryKey: 'country_code');
 
-  static IpInfo fromMyIpJson(Map<String, dynamic> json) {
-    return switch (json) {
-      {'ip': final String ip, 'cc': final String countryCode} => IpInfo(
-        ip: ip,
-        countryCode: countryCode,
-      ),
-      _ => throw const FormatException('invalid json'),
-    };
-  }
+  static IpInfo fromIpWhoIsJson(Map<String, dynamic> json) =>
+      _fromFields(json, countryKey: 'country_code');
 
-  static IpInfo fromIpAPIJson(Map<String, dynamic> json) {
-    return switch (json) {
-      {'query': final String ip, 'countryCode': final String countryCode} =>
-        IpInfo(ip: ip, countryCode: countryCode),
-      _ => throw const FormatException('invalid json'),
-    };
-  }
+  static IpInfo fromMyIpJson(Map<String, dynamic> json) =>
+      _fromFields(json, countryKey: 'cc');
 
-  static IpInfo fromIdentMeJson(Map<String, dynamic> json) {
-    return switch (json) {
-      {'ip': final String ip, 'cc': final String countryCode} => IpInfo(
-        ip: ip,
-        countryCode: countryCode,
-      ),
-      _ => throw const FormatException('invalid json'),
-    };
-  }
+  static IpInfo fromIpAPIJson(Map<String, dynamic> json) =>
+      _fromFields(json, ipKey: 'query', countryKey: 'countryCode');
+
+  static IpInfo fromIdentMeJson(Map<String, dynamic> json) =>
+      _fromFields(json, countryKey: 'cc');
 }
 
 @freezed
@@ -480,12 +424,6 @@ abstract class Result<T> with _$Result<T> {
 
   factory Result.error(String message) =>
       Result(data: null, type: ResultType.error, message: message);
-}
-
-extension ResultExt on Result {
-  bool get isError => type == ResultType.error;
-
-  bool get isSuccess => type == ResultType.success;
 }
 
 @freezed

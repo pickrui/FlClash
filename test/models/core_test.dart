@@ -326,14 +326,4 @@ void main() {
       expect(event.data['skipped'], true);
     });
   });
-
-  group('InvokeMessage', () {
-    test('fromJson', () {
-      final msg = InvokeMessage.fromJson({
-        'type': 'protect',
-        'data': {'method': 'test'},
-      });
-      expect(msg.type, InvokeMessageType.protect);
-    });
-  });
 }

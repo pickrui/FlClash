@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:isolate';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/core/event.dart';
@@ -18,7 +17,6 @@ abstract mixin class ServiceListener {
 class Service {
   static Service? _instance;
   late MethodChannel methodChannel;
-  ReceivePort? receiver;
 
   final ObserverList<ServiceListener> _listeners =
       ObserverList<ServiceListener>();
@@ -97,10 +95,6 @@ class Service {
       return null;
     }
     return DateTime.fromMillisecondsSinceEpoch(ms);
-  }
-
-  bool get hasListeners {
-    return _listeners.isNotEmpty;
   }
 
   void addListener(ServiceListener listener) {

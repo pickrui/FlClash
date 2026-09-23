@@ -85,10 +85,6 @@ class App {
     return packageNamesRaw.map((e) => e.toString()).toList();
   }
 
-  Future<bool?> requestNotificationsPermission() async {
-    return methodChannel.invokeMethod<bool>('requestNotificationsPermission');
-  }
-
   Future<bool> openFile(String path) async {
     return await methodChannel.invokeMethod<bool>('openFile', {'path': path}) ??
         false;
@@ -140,8 +136,8 @@ class App {
     _iconChanges.add(null);
   }
 
-  Future<bool?> tip(String? message) async {
-    return methodChannel.invokeMethod<bool>('tip', {'message': '$message'});
+  Future<bool?> tip(String message) async {
+    return methodChannel.invokeMethod<bool>('tip', {'message': message});
   }
 
   Future<bool?> initShortcuts() async {
