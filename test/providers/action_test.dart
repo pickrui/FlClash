@@ -80,6 +80,25 @@ void main() {
     );
   });
 
+  test('added logs reach list listeners such as the open Logs page', () {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    container.read(logsProvider.notifier).value = FixedList<Log>(10);
+    final updates = <List<Log>>[];
+    container.listen(
+      logsProvider.select((state) => state.list),
+      (_, next) => updates.add(next),
+    );
+
+    container.read(logsProvider.notifier).addLog(Log.app('first'));
+    container.read(logsProvider.notifier).addLog(Log.app('second'));
+
+    expect(updates.map((logs) => logs.map((log) => log.payload)), [
+      ['first'],
+      ['first', 'second'],
+    ]);
+  });
+
   test('cloud requests never enter recent request history', () {
     final container = ProviderContainer();
     addTearDown(container.dispose);

@@ -211,14 +211,14 @@ class Profiles extends _$Profiles {
   }
 
   void reorder(List<Profile> profiles) {
-    final newProfiles = List<Profile>.from(profiles);
-    state = newProfiles;
     final List<ProfilesCompanion> needUpdateProfiles = [];
-    newProfiles.forEachIndexed((index, item) {
-      if (item.order != index) {
-        needUpdateProfiles.add(item.toCompanion(index));
-      }
-    });
+    final newProfiles = profiles.mapIndexed((index, item) {
+      if (item.order == index) return item;
+      final reordered = item.copyWith(order: index);
+      needUpdateProfiles.add(reordered.toCompanion());
+      return reordered;
+    }).toList();
+    state = newProfiles;
     _queueWrite(() => database.profilesDao.putAll(needUpdateProfiles));
   }
 
@@ -324,10 +324,11 @@ class GlobalRules extends _$GlobalRules with AsyncNotifierMixin {
     final nextItems = List<Rule>.from(value);
     final item = nextItems.removeAt(oldIndex);
     nextItems.insert(newIndex, item);
-    value = nextItems;
     final preOrder = nextItems.safeGet(newIndex - 1)?.order;
     final nextOrder = nextItems.safeGet(newIndex + 1)?.order;
     final newOrder = indexing.generateKeyBetween(nextOrder, preOrder)!;
+    nextItems[newIndex] = item.copyWith(order: newOrder);
+    value = nextItems;
     queueDatabaseWrite(
       () => database.rulesDao.orderGlobalRule(ruleId: item.id, order: newOrder),
       onError: () => reloadProviderAfterDatabaseError(ref),
@@ -373,10 +374,11 @@ class ProfileAddedRules extends _$ProfileAddedRules with AsyncNotifierMixin {
     final nextItems = List<Rule>.from(value);
     final item = nextItems.removeAt(oldIndex);
     nextItems.insert(newIndex, item);
-    value = nextItems;
     final preOrder = nextItems.safeGet(newIndex - 1)?.order;
     final nextOrder = nextItems.safeGet(newIndex + 1)?.order;
     final newOrder = indexing.generateKeyBetween(nextOrder, preOrder)!;
+    nextItems[newIndex] = item.copyWith(order: newOrder);
+    value = nextItems;
     queueDatabaseWrite(
       () => database.rulesDao.orderProfileAddedRule(
         profileId,

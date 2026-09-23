@@ -20,7 +20,7 @@ class LogsAction extends _$LogsAction {
 extension LogsControllerExt on AppController {
   void addLog(Log log, {bool persist = true}) {
     if (Secrets.shouldSuppressOutput(log.payload)) return;
-    _ref.read(logsProvider).add(log);
+    _ref.read(logsProvider.notifier).addLog(log);
     if (persist) {
       writePersistentLog(log);
     }

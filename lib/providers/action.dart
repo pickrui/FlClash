@@ -750,6 +750,7 @@ class AppController {
   int _configUpdateGeneration = 0;
   final _providerUpdates = <(int?, int, String, String), Future<String>>{};
   final _providerUpdateCounts = <String, int>{};
+  final _profileUpdateCounts = <String, int>{};
   int _groupsUpdateGeneration = 0;
   bool _groupsRefreshRequested = false;
   int? _activeDelayBatchGeneration;
@@ -771,8 +772,11 @@ class AppController {
   Future<void> attach(BuildContext context, WidgetRef ref) async {
     _context = context;
     _ref = ref;
-    await _init();
-    isAttach = true;
+    try {
+      await _init();
+    } finally {
+      isAttach = true;
+    }
   }
 
   Future<bool> _saveConfigSerialized(Config value) {

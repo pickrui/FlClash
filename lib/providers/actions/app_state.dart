@@ -32,10 +32,6 @@ class AppStateAction extends _$AppStateAction {
 
   SharedState get sharedState => _controller.sharedState;
 
-  SetupParams get setupParams => _controller.setupParams;
-
-  List<Group> getCurrentGroups() => _controller.getCurrentGroups();
-
   String? getCurrentGroupName() => _controller.getCurrentGroupName();
 }
 
@@ -80,22 +76,6 @@ extension StateControllerExt on AppController {
 
   SharedState get sharedState {
     return _ref.read(sharedStateProvider);
-  }
-
-  SetupParams get setupParams {
-    final selectedMap = _ref.read(selectedMapProvider);
-    final testUrl = _ref.read(
-      appSettingProvider.select((state) => state.testUrl),
-    );
-    return SetupParams(
-      selectedMap: selectedMap,
-      testUrl: testUrl,
-      suspendOnIdle: _ref.read(networkSettingProvider).suspendOnIdle,
-    );
-  }
-
-  List<Group> getCurrentGroups() {
-    return _ref.read(currentGroupsStateProvider.select((state) => state.value));
   }
 
   String? getCurrentGroupName() {

@@ -172,8 +172,8 @@ extension SetupControllerExt on AppController {
     }
     clearDelay();
     applyProfile(force: true);
-    _ref.read(logsProvider.notifier).value = FixedList(500);
-    _ref.read(requestsProvider.notifier).value = FixedList(500);
+    _ref.read(logsProvider.notifier).value = FixedList(maxLength);
+    _ref.read(requestsProvider.notifier).value = FixedList(maxLength);
   }
 
   Future<void> updateStatus(bool isStart, {bool isInit = false}) async {

@@ -204,12 +204,13 @@ extension ProfilesControllerExt on AppController {
     bool forceApplyIfCurrent = false,
     bool preserveCurrentState = true,
   }) async {
+    await ensureCoreReadyOrThrow();
+    final key = profile.updatingKey;
+    if (showLoading) {
+      _profileUpdateCounts[key] = (_profileUpdateCounts[key] ?? 0) + 1;
+      _ref.read(isUpdatingProvider(key).notifier).value = true;
+    }
     try {
-      await ensureCoreReadyOrThrow();
-      if (showLoading) {
-        _ref.read(isUpdatingProvider(profile.updatingKey).notifier).value =
-            true;
-      }
       final newProfile = await _updateProfileWithCertificateRetry(
         profile,
         preserveCurrentState: preserveCurrentState,
@@ -223,7 +224,15 @@ extension ProfilesControllerExt on AppController {
       );
       return newProfile;
     } finally {
-      _ref.read(isUpdatingProvider(profile.updatingKey).notifier).value = false;
+      if (showLoading) {
+        final remaining = _profileUpdateCounts[key]! - 1;
+        if (remaining == 0) {
+          _profileUpdateCounts.remove(key);
+          _ref.read(isUpdatingProvider(key).notifier).value = false;
+        } else {
+          _profileUpdateCounts[key] = remaining;
+        }
+      }
     }
   }
 

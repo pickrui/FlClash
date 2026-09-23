@@ -61,18 +61,24 @@ extension InitControllerExt on AppController {
       processId: pid,
     );
     if (!startupRecovery.isCurrent(bootAttempt)) return;
+    var coreReady = false;
     try {
       await _connectCore();
       if (!startupRecovery.isCurrent(bootAttempt)) return;
       await _initCore();
       if (!startupRecovery.isCurrent(bootAttempt)) return;
+      coreReady = true;
       await _initStatus();
       if (!startupRecovery.isCurrent(bootAttempt)) return;
       _ref.read(initProvider.notifier).value = true;
       await startupRecovery.markRunning(bootAttempt);
-    } catch (_) {
+    } catch (error) {
       await startupRecovery.markFailed(bootAttempt);
-      rethrow;
+      if (coreReady) rethrow;
+      commonPrint.log('core startup failed: $error', logLevel: LogLevel.error);
+      if (!startupRecovery.isCurrent(bootAttempt)) return;
+      // Later starts and profile switches wait for init, then reconnect.
+      _ref.read(initProvider.notifier).value = true;
     }
     if (startupRecovery.automaticSetupPaused) {
       await window?.show();
