@@ -141,6 +141,7 @@ class RulesDao extends DatabaseAccessor<Database> with _$RulesDaoMixin {
         ),
       ),
       OrderingTerm.desc(profileRuleLinks.order),
+      OrderingTerm.desc(profileRuleLinks.id),
     ]);
 
     return query.map((row) {
@@ -260,18 +261,79 @@ class RulesDao extends DatabaseAccessor<Database> with _$RulesDaoMixin {
     return stmt.write(ProfileRuleLinksCompanion(order: Value(order)));
   }
 
+  /// Lists show the largest key first and a reorder derives its key from both
+  /// neighbours, so a list with missing or duplicate keys is rekeyed in place.
+  Future<void> repairOrders() async {
+    final profileIds = await customSelect(
+      'SELECT profile_id FROM profile_rule_mapping '
+      "WHERE profile_id IS NULL OR scene = 'added' "
+      'GROUP BY profile_id '
+      'HAVING COUNT(*) > COUNT(DISTINCT "order")',
+      readsFrom: {profileRuleLinks},
+    ).map((row) => row.readNullable<int>('profile_id')).get();
+    if (profileIds.isEmpty) return;
+    final updates = <String, String>{};
+    for (final profileId in profileIds) {
+      final ids =
+          await (selectOnly(profileRuleLinks)
+                ..addColumns([profileRuleLinks.id])
+                ..where(_listFilter(profileId))
+                ..orderBy([
+                  OrderingTerm.desc(profileRuleLinks.order),
+                  OrderingTerm.desc(profileRuleLinks.id),
+                ]))
+              .map((row) => row.read(profileRuleLinks.id)!)
+              .get();
+      final keys = indexing.generateNKeys(ids.length);
+      for (var index = 0; index < ids.length; index++) {
+        updates[ids[index]] = keys[ids.length - 1 - index]!;
+      }
+    }
+    await batch((batch) {
+      for (final MapEntry(key: id, value: order) in updates.entries) {
+        batch.update(
+          profileRuleLinks,
+          ProfileRuleLinksCompanion(order: Value(order)),
+          where: (row) => row.id.equals(id),
+        );
+      }
+    });
+  }
+
+  Expression<bool> _listFilter(int? profileId) => profileId == null
+      ? profileRuleLinks.profileId.isNull()
+      : profileRuleLinks.profileId.equals(profileId) &
+            profileRuleLinks.scene.equalsValue(RuleScene.added);
+
   Future<int> _put(Rule rule, {int? profileId, RuleScene? scene}) async {
     return transaction(() async {
       final row = await rules.insertOnConflictUpdate(rule.toCompanion());
       if (row == 0) {
         return 0;
       }
+      final link = ProfileRuleLink(
+        ruleId: rule.id,
+        profileId: profileId,
+        scene: scene,
+      );
+      final existing = await (select(
+        profileRuleLinks,
+      )..where((row) => row.id.equals(link.key))).getSingleOrNull();
+      final String? order;
+      if (existing != null) {
+        order = existing.order;
+      } else {
+        final top = profileRuleLinks.order.max();
+        final current =
+            await (selectOnly(profileRuleLinks)
+                  ..addColumns([top])
+                  ..where(_listFilter(profileId)))
+                .map((row) => row.read(top))
+                .getSingle();
+        order = indexing.generateKeyBetween(current, null);
+      }
       return profileRuleLinks.insertOnConflictUpdate(
-        ProfileRuleLink(
-          ruleId: rule.id,
-          profileId: profileId,
-          scene: scene,
-        ).toCompanion(),
+        link.copyWith(order: order).toCompanion(),
       );
     });
   }

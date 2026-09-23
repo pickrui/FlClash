@@ -37,14 +37,6 @@ class IconRecordsDao extends DatabaseAccessor<Database>
     });
   }
 
-  Future<void> putIfAbsent(String url) async {
-    final existing = await (select(
-      iconRecords,
-    )..where((t) => t.url.equals(url))).getSingleOrNull();
-    if (existing != null) return;
-    await put(url);
-  }
-
   Future<void> put(String url) async {
     final now = DateTime.now().millisecondsSinceEpoch;
 

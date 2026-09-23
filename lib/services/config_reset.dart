@@ -50,7 +50,14 @@ class ConfigReset {
         p.dirname(homePath),
       ).createTemp('${p.basename(homePath)}.recovery-');
       // Creation and validation never write plaintext copies, even on failure.
-      await backup.create(homePath, names, directory.path);
+      try {
+        await backup.create(homePath, names, directory.path);
+      } catch (_) {
+        try {
+          await directory.delete(recursive: true);
+        } catch (_) {}
+        rethrow;
+      }
       journal = {
         'version': 1,
         'backup': p.basename(directory.path),

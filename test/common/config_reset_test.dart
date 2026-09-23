@@ -175,6 +175,13 @@ void main() {
         await File(p.join(home, ConfigReset.journalName)).exists(),
         isFalse,
       );
+      expect(
+        await directory
+            .list()
+            .where((entity) => p.basename(entity.path) != p.basename(home))
+            .toList(),
+        isEmpty,
+      );
       await for (final file in directory.list(recursive: true)) {
         if (file is! File || p.isWithin(home, file.path)) continue;
         expect(

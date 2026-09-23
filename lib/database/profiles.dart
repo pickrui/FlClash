@@ -95,18 +95,10 @@ class ProfilesDao extends DatabaseAccessor<Database> with _$ProfilesDaoMixin {
     });
   }
 
-  Future<void> putAll<T extends Table, D extends DataClass>(
-    Iterable<Insertable<D>> items,
-  ) async {
-    await batch((b) async {
-      putAllWithBatch(b, items);
-    });
-  }
+  Future<void> putAll(Iterable<Insertable<RawProfile>> items) =>
+      batch((b) => putAllWithBatch(b, items));
 
-  void putAllWithBatch<T extends Table, D extends DataClass>(
-    Batch batch,
-    Iterable<Insertable<D>> items,
-  ) {
+  void putAllWithBatch(Batch batch, Iterable<Insertable<RawProfile>> items) {
     batch.insertAllOnConflictUpdate(profiles, items);
   }
 

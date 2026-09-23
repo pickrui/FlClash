@@ -45,6 +45,10 @@ class Database extends _$Database {
           WHERE rule_id NOT IN (SELECT id FROM rules)
              OR (profile_id IS NOT NULL AND profile_id NOT IN (SELECT id FROM profiles))
         ''');
+        await customStatement(
+          'DELETE FROM rules WHERE id NOT IN (SELECT rule_id FROM profile_rule_mapping)',
+        );
+        await rulesDao.repairOrders();
         await customStatement('PRAGMA foreign_keys = ON');
       },
       onUpgrade: (m, from, to) async {
@@ -199,6 +203,7 @@ class Database extends _$Database {
           await rulesDao.replaceCustomWithBatch(b, profile);
         }
       });
+      await rulesDao.repairOrders();
     });
   }
 
@@ -242,14 +247,6 @@ extension TableInfoExt<Tbl extends Table, Row> on TableInfo<Tbl, Row> {
 
   Future<int> put(Insertable<Row> item) async {
     return insertOnConflictUpdate(item);
-  }
-}
-
-extension SimpleSelectStatementCount<T extends HasResultSet, D>
-    on SimpleSelectStatement<T, D> {
-  Selectable<int> get count {
-    final expression = countAll();
-    return addColumns([expression]).map((row) => row.read(expression)!);
   }
 }
 
