@@ -8,25 +8,6 @@ class CommonTheme {
 
   CommonTheme.of(this.context, this.textScaleFactor) : _colorMap = {};
 
-  Color get darkenSecondaryContainer {
-    return _colorMap.updateCacheValue(
-      'darkenSecondaryContainer',
-      () => context.colorScheme.secondaryContainer.blendDarken(
-        context,
-        factor: 0.1,
-      ),
-    );
-  }
-
-  Color get darkenSecondaryContainerLighter {
-    return _colorMap.updateCacheValue(
-      'darkenSecondaryContainerLighter',
-      () => context.colorScheme.secondaryContainer
-          .blendDarken(context, factor: 0.1)
-          .opacity60,
-    );
-  }
-
   Color get darken2SecondaryContainer {
     return _colorMap.updateCacheValue(
       'darken2SecondaryContainer',

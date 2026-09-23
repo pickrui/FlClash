@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fl_clash/common/function.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:test/test.dart';
@@ -43,6 +45,49 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 10));
 
     expect(values, containsAll(['A', 'B']));
+  });
+
+  group('Throttler', () {
+    test('a throwing deferred callback does not block its tag', () async {
+      final throttler = Throttler();
+      final errors = <Object>[];
+      final values = <int>[];
+
+      runZonedGuarded(() {
+        throttler.call(
+          FunctionTag.changeProxy,
+          () => throw StateError('disposed'),
+          duration: Duration.zero,
+        );
+      }, (error, _) => errors.add(error));
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+
+      final throttled = throttler.call(
+        FunctionTag.changeProxy,
+        values.add,
+        args: [1],
+        duration: Duration.zero,
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+
+      expect(errors, [isA<StateError>()]);
+      expect(throttled, isFalse);
+      expect(values, [1]);
+    });
+
+    test('a call from inside the deferred callback stays throttled', () async {
+      final throttler = Throttler();
+      bool? reentrant;
+
+      throttler.call(
+        FunctionTag.changeProxy,
+        () => reentrant = throttler.call(FunctionTag.changeProxy, () {}),
+        duration: Duration.zero,
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+
+      expect(reentrant, isTrue);
+    });
   });
 
   group('retry', () {

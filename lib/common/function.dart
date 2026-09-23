@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:fl_clash/common/common.dart';
 
 class Debouncer {
-  final Map<Object, Timer?> _operations = {};
+  final Map<Object, Timer> _operations = {};
 
   void call(
     Object tag,
@@ -11,25 +11,18 @@ class Debouncer {
     List<dynamic>? args,
     Duration? duration,
   }) {
-    final timer = _operations[tag];
-    if (timer != null) {
-      timer.cancel();
-    }
+    _operations[tag]?.cancel();
     _operations[tag] = Timer(duration ?? const Duration(milliseconds: 600), () {
-      _operations[tag]?.cancel();
       _operations.remove(tag);
       Function.apply(func, args);
     });
   }
 
-  void cancel(Object tag) {
-    _operations[tag]?.cancel();
-    _operations[tag] = null;
-  }
+  void cancel(Object tag) => _operations.remove(tag)?.cancel();
 }
 
 class Throttler {
-  final Map<Object, Timer?> _operations = {};
+  final Map<Object, Timer> _operations = {};
 
   bool call(
     Object tag,
@@ -38,30 +31,25 @@ class Throttler {
     Duration duration = const Duration(milliseconds: 600),
     bool fire = false,
   }) {
-    final timer = _operations[tag];
-    if (timer != null) {
+    if (_operations.containsKey(tag)) {
       return true;
     }
     if (fire) {
       Function.apply(func, args);
-      _operations[tag] = Timer(duration, () {
-        _operations[tag]?.cancel();
-        _operations.remove(tag);
-      });
+      _operations[tag] = Timer(duration, () => _operations.remove(tag));
     } else {
       _operations[tag] = Timer(duration, () {
-        Function.apply(func, args);
-        _operations[tag]?.cancel();
-        _operations.remove(tag);
+        try {
+          Function.apply(func, args);
+        } finally {
+          _operations.remove(tag);
+        }
       });
     }
     return false;
   }
 
-  void cancel(Object tag) {
-    _operations[tag]?.cancel();
-    _operations[tag] = null;
-  }
+  void cancel(Object tag) => _operations.remove(tag)?.cancel();
 }
 
 Future<T> retry<T>({

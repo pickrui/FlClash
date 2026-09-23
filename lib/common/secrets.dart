@@ -3,24 +3,27 @@ import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 
-bool containsCloudInformation(String value, Iterable<String> hosts) {
+bool containsCloudInformation(String value, Iterable<String> hosts) =>
+    _containsCloudInformation(value, _cloudHostPattern(hosts));
+
+bool _containsCloudInformation(String value, RegExp? hostPattern) {
   final normalized = value.toLowerCase();
-  if (normalized.contains('oixcloud') ||
+  return normalized.contains('oixcloud') ||
       normalized.contains('[dns-auth]') ||
-      normalized.contains('cloudapi')) {
-    return true;
-  }
-  for (final host in hosts) {
-    final domain = host.trim().toLowerCase().replaceFirst(RegExp(r'\.$'), '');
-    if (domain.isEmpty) continue;
-    if (RegExp(
-      '(^|[^a-z0-9_.-])(?:[a-z0-9_-]+\\.)*${RegExp.escape(domain)}\\.?(\$|[^a-z0-9_.-])',
-      caseSensitive: false,
-    ).hasMatch(value)) {
-      return true;
-    }
-  }
-  return false;
+      normalized.contains('cloudapi') ||
+      (hostPattern?.hasMatch(value) ?? false);
+}
+
+RegExp? _cloudHostPattern(Iterable<String> hosts) {
+  final domains = {
+    for (final host in hosts)
+      RegExp.escape(host.trim().toLowerCase().replaceFirst(RegExp(r'\.$'), '')),
+  }..remove('');
+  if (domains.isEmpty) return null;
+  return RegExp(
+    '(^|[^a-z0-9_.-])(?:[a-z0-9_-]+\\.)*(?:${domains.join('|')})\\.?(\$|[^a-z0-9_.-])',
+    caseSensitive: false,
+  );
 }
 
 String redactHostnames(String value, Iterable<String> hosts) {
@@ -69,15 +72,19 @@ class Secrets {
 
   static String get spareSiteDomain => spareDomain.trim();
 
-  static List<String> get cloudDomains => {
-    baseDomain.trim().toLowerCase(),
-    spareDomain.trim().toLowerCase(),
-    apiDomain.trim().toLowerCase(),
-    spareApiDomain.trim().toLowerCase(),
-  }.where((domain) => domain.isNotEmpty).toList();
+  static final List<String> cloudDomains = List.unmodifiable(
+    {
+      baseDomain.trim().toLowerCase(),
+      spareDomain.trim().toLowerCase(),
+      apiDomain.trim().toLowerCase(),
+      spareApiDomain.trim().toLowerCase(),
+    }.where((domain) => domain.isNotEmpty),
+  );
+
+  static final RegExp? _cloudHosts = _cloudHostPattern(cloudDomains);
 
   static bool shouldSuppressOutput(String value) =>
-      containsCloudInformation(value, cloudDomains);
+      _containsCloudInformation(value, _cloudHosts);
 
   static String get primaryApiDomain => _requireDomain(apiDomain, 'API_DOMAIN');
 

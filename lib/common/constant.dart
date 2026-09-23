@@ -48,7 +48,6 @@ String _randomPipeId() {
 
 final defaultTextScaleFactor =
     WidgetsBinding.instance.platformDispatcher.textScaleFactor;
-const httpTimeoutDuration = Duration(milliseconds: 5000);
 
 /// How long the Core may spend on one delay test. It spends this twice in the
 /// worst case, once queueing for a slot and once on the probe itself, so the

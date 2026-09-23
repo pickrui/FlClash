@@ -45,7 +45,17 @@ Future<void> durableDeleteEntity(String path) async {
   await syncDirectory(p.dirname(path));
 }
 
-Future<void> durableRename(String source, String target) async {
+Future<void> durableRename(String source, String target) =>
+    _durableMove(source, target, () => File(source).rename(target));
+
+Future<void> durableRenameDirectory(String source, String target) =>
+    _durableMove(source, target, () => Directory(source).rename(target));
+
+Future<void> _durableMove(
+  String source,
+  String target,
+  Future<FileSystemEntity> Function() rename,
+) async {
   if (Platform.isWindows) {
     final sourcePointer = source.toNativeUtf16();
     final targetPointer = target.toNativeUtf16();
@@ -67,37 +77,7 @@ Future<void> durableRename(String source, String target) async {
     }
     return;
   }
-  await File(source).rename(target);
-  await syncDirectory(p.dirname(source));
-  final targetDirectory = p.dirname(target);
-  if (targetDirectory != p.dirname(source)) {
-    await syncDirectory(targetDirectory);
-  }
-}
-
-Future<void> durableRenameDirectory(String source, String target) async {
-  if (Platform.isWindows) {
-    final sourcePointer = source.toNativeUtf16();
-    final targetPointer = target.toNativeUtf16();
-    try {
-      final result = MoveFileEx(
-        sourcePointer,
-        targetPointer,
-        _moveFileReplaceExisting | _moveFileWriteThrough,
-      );
-      if (result == 0) {
-        throw FileSystemException(
-          'Durable directory rename failed with Win32 error ${GetLastError()}',
-          target,
-        );
-      }
-    } finally {
-      calloc.free(sourcePointer);
-      calloc.free(targetPointer);
-    }
-    return;
-  }
-  await Directory(source).rename(target);
+  await rename();
   await syncDirectory(p.dirname(source));
   final targetDirectory = p.dirname(target);
   if (targetDirectory != p.dirname(source)) {

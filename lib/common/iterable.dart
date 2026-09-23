@@ -12,7 +12,6 @@ extension IterableExt<E> on Iterable<E> {
   }
 
   Iterable<List<E>> chunks(int size) sync* {
-    if (length == 0) return;
     final iterator = this.iterator;
     while (iterator.moveNext()) {
       final chunk = [iterator.current];
@@ -51,19 +50,6 @@ extension ListExt<T> on List<T> {
     return where((item) => list.contains(item)).toList();
   }
 
-  List<List<T>> batch(int maxConcurrent) {
-    final batches = (length / maxConcurrent).ceil();
-    final List<List<T>> res = [];
-    for (int i = 0; i < batches; i++) {
-      if (i != batches - 1) {
-        res.add(sublist(i * maxConcurrent, maxConcurrent * (i + 1)));
-      } else {
-        res.add(sublist(i * maxConcurrent, length));
-      }
-    }
-    return res;
-  }
-
   List<T> copyAndPut(T data, bool Function(T element) test) {
     final newList = List<T>.from(this);
     final index = newList.indexWhere(test);
@@ -80,13 +66,6 @@ extension ListExt<T> on List<T> {
       return defaultValue;
     }
     return this[index];
-  }
-
-  T safeLast(T defaultValue) {
-    if (isNotEmpty) {
-      return last;
-    }
-    return defaultValue;
   }
 
   void addOrRemove(T value) {

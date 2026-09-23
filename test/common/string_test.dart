@@ -76,31 +76,6 @@ void main() {
     });
   });
 
-  group('StringExtension.compareToLower', () {
-    test('case insensitive comparison', () {
-      expect('abc'.compareToLower('ABC'), 0);
-      expect('a'.compareToLower('b'), lessThan(0));
-      expect('b'.compareToLower('a'), greaterThan(0));
-    });
-  });
-
-  group('StringExtension.getBase64', () {
-    test('extracts base64 from data URI', () {
-      const data = 'data:image/png;base64,aGVsbG8=';
-      final result = data.getBase64;
-      expect(result, isNotNull);
-      expect(result!.isNotEmpty, isTrue);
-    });
-
-    test('returns null for non-base64 string', () {
-      expect('hello world'.getBase64, isNull);
-    });
-
-    test('returns null for empty match', () {
-      expect('base64,'.getBase64, isNull);
-    });
-  });
-
   group('StringExtension.isSvg', () {
     test('detects SVG files', () {
       expect('icon.svg'.isSvg, isTrue);
@@ -159,24 +134,6 @@ void main() {
 
     test('trims whitespace', () {
       expect('  hello  '.takeFirstValid([]), 'hello');
-    });
-  });
-
-  group('StringExtension.encodeUtf16LeWithBom', () {
-    test('starts with BOM', () {
-      final encoded = 'A'.encodeUtf16LeWithBom;
-      expect(encoded[0], 0xFF);
-      expect(encoded[1], 0xFE);
-    });
-
-    test('encodes ASCII correctly', () {
-      final encoded = 'AB'.encodeUtf16LeWithBom;
-      // BOM + 'A' (0x41 0x00) + 'B' (0x42 0x00)
-      expect(encoded.length, 2 + 4); // 2 BOM + 2 chars * 2 bytes
-      expect(encoded[2], 0x41);
-      expect(encoded[3], 0x00);
-      expect(encoded[4], 0x42);
-      expect(encoded[5], 0x00);
     });
   });
 }

@@ -131,14 +131,6 @@ class Preferences {
     }
   }
 
-  Future<Config?> getConfig() async {
-    final configMap = await getConfigMap();
-    if (configMap == null) {
-      return null;
-    }
-    return Config.fromJson(configMap);
-  }
-
   Future<bool> saveConfig(Config config) async {
     await durableConfigStore.write(await appPath.durableConfigPath, config);
     final preferences = await _loadSharedPreferences();

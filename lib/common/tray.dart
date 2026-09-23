@@ -1,6 +1,7 @@
 import 'package:fl_clash/controller.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:tray/tray.dart' as native;
@@ -140,7 +141,7 @@ class Tray {
       label: appLocalizations.copyEnvVar,
       enabled: trayState.port > 0,
       items: [
-        for (final shell in _EnvShell.values)
+        for (final shell in ProxyEnvShell.values)
           native.TrayMenuAction(
             label: shell.label,
             onSelected: () async {
@@ -188,33 +189,36 @@ class Tray {
     );
   }
 
-  Future<void> _copyEnv(int port, _EnvShell shell) async {
-    final url = 'http://127.0.0.1:$port';
-
-    final cmdline = switch (shell) {
-      _EnvShell.bash =>
-        'export http_proxy=$url https_proxy=$url all_proxy=$url',
-      _EnvShell.fish =>
-        'set -gx http_proxy $url; set -gx https_proxy $url; set -gx all_proxy $url',
-      _EnvShell.powerShell =>
-        '\$env:http_proxy="$url"; \$env:https_proxy="$url"; \$env:all_proxy="$url"',
-      _EnvShell.cmd =>
-        'set http_proxy=$url && set https_proxy=$url && set all_proxy=$url',
-    };
-
-    await Clipboard.setData(ClipboardData(text: cmdline));
+  Future<void> _copyEnv(int port, ProxyEnvShell shell) async {
+    await Clipboard.setData(ClipboardData(text: proxyEnvCommand(shell, port)));
   }
 }
 
-enum _EnvShell {
+enum ProxyEnvShell {
   bash('Bash'),
   fish('Fish'),
   powerShell('PowerShell'),
   cmd('CMD');
 
-  const _EnvShell(this.label);
+  const ProxyEnvShell(this.label);
 
   final String label;
+}
+
+/// cmd.exe keeps the space before `&&` in an unquoted `set` value.
+@visibleForTesting
+String proxyEnvCommand(ProxyEnvShell shell, int port) {
+  final url = 'http://127.0.0.1:$port';
+  return switch (shell) {
+    ProxyEnvShell.bash =>
+      'export http_proxy=$url https_proxy=$url all_proxy=$url',
+    ProxyEnvShell.fish =>
+      'set -gx http_proxy $url; set -gx https_proxy $url; set -gx all_proxy $url',
+    ProxyEnvShell.powerShell =>
+      '\$env:http_proxy="$url"; \$env:https_proxy="$url"; \$env:all_proxy="$url"',
+    ProxyEnvShell.cmd =>
+      'set "http_proxy=$url" && set "https_proxy=$url" && set "all_proxy=$url"',
+  };
 }
 
 final tray = system.isDesktop ? Tray() : null;

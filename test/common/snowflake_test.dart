@@ -23,14 +23,28 @@ void main() {
       }
     });
 
-    test('buildId returns provided id when non-null', () {
-      expect(Snowflake.buildId(42), 42);
-      expect(Snowflake.buildId(0), 0);
+    test('keeps issuing increasing IDs when the clock steps back', () {
+      var now = 1800000000000;
+      final generator = Snowflake.withClock(() => now);
+      final before = generator.id;
+      now -= 60 * 60 * 1000;
+
+      final after = [generator.id, generator.id];
+
+      expect(after.first, greaterThan(before));
+      expect(after.last, greaterThan(after.first));
     });
 
-    test('buildId generates id when null', () {
-      final id = Snowflake.buildId(null);
-      expect(id, greaterThan(0));
+    test('borrows the next millisecond once a sequence is exhausted', () {
+      const now = 1800000000000;
+      final generator = Snowflake.withClock(() => now);
+
+      final ids = List.generate(4096 * 2 + 1, (_) => generator.id);
+
+      expect(ids.toSet().length, ids.length);
+      for (var i = 1; i < ids.length; i++) {
+        expect(ids[i], greaterThan(ids[i - 1]));
+      }
     });
   });
 }

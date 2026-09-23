@@ -27,20 +27,16 @@ extension NumExt on num {
   }
 
   TrafficShow get traffic {
-    const units = TrafficUnit.values;
-    var size = toDouble();
-    var unitIndex = 0;
-    while (size >= 1024 && unitIndex < units.length - 1) {
-      size /= 1024;
-      unitIndex++;
-    }
-    return TrafficShow(
-      value: size.fixed(decimals: 1),
-      unit: units[unitIndex].name,
-    );
+    final (size, unit) = _trafficScale;
+    return TrafficShow(value: size.fixed(decimals: 1), unit: unit);
   }
 
   TrafficShow get shortTraffic {
+    final (size, unit) = _trafficScale;
+    return TrafficShow(value: size.toStringAsFixed(0), unit: ' $unit');
+  }
+
+  (double, String) get _trafficScale {
     const units = TrafficUnit.values;
     var size = toDouble();
     var unitIndex = 0;
@@ -48,10 +44,7 @@ extension NumExt on num {
       size /= 1024;
       unitIndex++;
     }
-    return TrafficShow(
-      value: size.toStringAsFixed(0),
-      unit: ' ${units[unitIndex].name}',
-    );
+    return (size, units[unitIndex].name);
   }
 }
 
@@ -68,15 +61,5 @@ extension OffsetExt on Offset {
 
   double getMainAxisOffset(Axis direction) {
     return direction == Axis.vertical ? dy : dx;
-  }
-
-  bool less(Offset offset) {
-    if (dy < offset.dy) {
-      return true;
-    }
-    if (dy == offset.dy && dx < offset.dx) {
-      return true;
-    }
-    return false;
   }
 }

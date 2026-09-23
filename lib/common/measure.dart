@@ -4,100 +4,62 @@ import 'package:material_ui/material_ui.dart';
 class Measure {
   final TextScaler _textScaler;
   final BuildContext context;
-  final Map<String, dynamic> _measureMap;
+  final Map<String, double> _measureMap;
 
   Measure.of(this.context, double textScaleFactor)
     : _measureMap = {},
       _textScaler = TextScaler.linear(textScaleFactor);
 
-  TextPainter computeText(Text text, {TextStyle? style, double? maxWidth}) {
-    return TextPainter(
+  T _layoutText<T>(
+    Text text,
+    TextStyle? style,
+    double? maxWidth,
+    T Function(TextPainter painter) read,
+  ) {
+    final painter = TextPainter(
       text: TextSpan(text: text.data, style: text.style ?? style),
       maxLines: text.maxLines,
       textScaler: _textScaler,
       ellipsis: '...',
       locale: Localizations.localeOf(context),
       textDirection: text.textDirection ?? TextDirection.ltr,
-    )..layout(maxWidth: maxWidth ?? double.infinity);
-  }
-
-  Size computeTextSize(Text text, {TextStyle? style, double? maxWidth}) {
-    final textPainter = computeText(text, style: style, maxWidth: maxWidth);
-    return textPainter.size;
-  }
-
-  bool computeTextIsOverflow(Text text, {TextStyle? style, double? maxWidth}) {
-    final textPainter = computeText(text, style: style, maxWidth: maxWidth);
-    return textPainter.didExceedMaxLines;
-  }
-
-  double get bodyMediumHeight {
-    return _measureMap.updateCacheValue(
-      'bodyMediumHeight',
-      () => computeTextSize(
-        Text('X', style: context.textTheme.bodyMedium),
-      ).height,
     );
+    try {
+      return read(painter..layout(maxWidth: maxWidth ?? double.infinity));
+    } finally {
+      painter.dispose();
+    }
   }
 
-  double get bodyLargeHeight {
-    return _measureMap.updateCacheValue(
-      'bodyLargeHeight',
-      () =>
-          computeTextSize(Text('X', style: context.textTheme.bodyLarge)).height,
-    );
-  }
+  Size computeTextSize(Text text, {TextStyle? style, double? maxWidth}) =>
+      _layoutText(text, style, maxWidth, (painter) => painter.size);
 
-  double get bodySmallHeight {
-    return _measureMap.updateCacheValue(
-      'bodySmallHeight',
-      () =>
-          computeTextSize(Text('X', style: context.textTheme.bodySmall)).height,
-    );
-  }
+  bool computeTextIsOverflow(Text text, {TextStyle? style, double? maxWidth}) =>
+      _layoutText(
+        text,
+        style,
+        maxWidth,
+        (painter) => painter.didExceedMaxLines,
+      );
 
-  double get labelSmallHeight {
-    return _measureMap.updateCacheValue(
-      'labelSmallHeight',
-      () => computeTextSize(
-        Text('X', style: context.textTheme.labelSmall),
-      ).height,
-    );
-  }
+  double _lineHeight(String key, TextStyle? style) =>
+      _measureMap.updateCacheValue(
+        key,
+        () => computeTextSize(Text('X', style: style)).height,
+      );
 
-  double get titleSmallHeight {
-    return _measureMap.updateCacheValue(
-      'titleSmallHeight',
-      () => computeTextSize(
-        Text('X', style: context.textTheme.titleSmall),
-      ).height,
-    );
-  }
+  double get bodyMediumHeight =>
+      _lineHeight('bodyMediumHeight', context.textTheme.bodyMedium);
 
-  double get labelMediumHeight {
-    return _measureMap.updateCacheValue(
-      'labelMediumHeight',
-      () => computeTextSize(
-        Text('X', style: context.textTheme.labelMedium),
-      ).height,
-    );
-  }
+  double get bodySmallHeight =>
+      _lineHeight('bodySmallHeight', context.textTheme.bodySmall);
 
-  double get titleLargeHeight {
-    return _measureMap.updateCacheValue(
-      'titleLargeHeight',
-      () => computeTextSize(
-        Text('X', style: context.textTheme.titleLarge),
-      ).height,
-    );
-  }
+  double get labelSmallHeight =>
+      _lineHeight('labelSmallHeight', context.textTheme.labelSmall);
 
-  double get titleMediumHeight {
-    return _measureMap.updateCacheValue(
-      'titleMediumHeight',
-      () => computeTextSize(
-        Text('X', style: context.textTheme.titleMedium),
-      ).height,
-    );
-  }
+  double get titleSmallHeight =>
+      _lineHeight('titleSmallHeight', context.textTheme.titleSmall);
+
+  double get titleMediumHeight =>
+      _lineHeight('titleMediumHeight', context.textTheme.titleMedium);
 }

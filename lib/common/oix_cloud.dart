@@ -7,22 +7,9 @@ bool isoixCloudProfileUrl(String url) {
   if (normalizedUrl == oixCloudManagedProfileUrl) return true;
 
   final parsed = Uri.tryParse(normalizedUrl);
-  if (parsed?.scheme == 'oixcloud') return true;
-
-  final host = parsed?.host.trim().toLowerCase() ?? '';
-  final path = parsed?.path.trim().toLowerCase() ?? '';
-  final cloudDomains = <String>{};
-  try {
-    cloudDomains.addAll(Secrets.apiDomains);
-    cloudDomains.add(Secrets.primarySiteDomain.trim().toLowerCase());
-    cloudDomains.add(Secrets.spareSiteDomain.trim().toLowerCase());
-  } catch (_) {}
-  cloudDomains.remove('');
-  final isManagedPath =
-      path.contains('/managed/flclash') || path.contains('/api/v1/managed/');
-  if (isManagedPath && cloudDomains.contains(host)) return true;
-
-  return cloudDomains.contains(host);
+  if (parsed == null) return false;
+  return parsed.scheme == 'oixcloud' ||
+      Secrets.cloudDomains.contains(parsed.host);
 }
 
 Future<T?> createAndActivateManagedProfile<T>({
