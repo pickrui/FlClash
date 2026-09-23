@@ -28,6 +28,11 @@ func (provider *testProviderCloser) Close() error {
 	return nil
 }
 
+func prepareValidationResources(data []byte) error {
+	_, err := prepareValidationConfig(data)
+	return err
+}
+
 func TestCloseProvider(t *testing.T) {
 	provider := &testProviderCloser{}
 	closeProvider(provider)

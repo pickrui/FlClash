@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/metacubex/mihomo/component/resolver"
@@ -41,13 +42,31 @@ func currentDNSAuth() *dnsAuthSettings {
 	return dnsAuthCurrent
 }
 
+type dnsAuthSuffixList struct {
+	source   string
+	suffixes []string
+}
+
+var dnsAuthSuffixCache atomic.Pointer[dnsAuthSuffixList]
+
+// The log filters call this per token, so the parsed slice is cached and shared; callers must not modify it.
 func dnsAuthSuffixes() []string {
-	if GlobalDNSAuthDomains == "" {
+	source := GlobalDNSAuthDomains
+	if cached := dnsAuthSuffixCache.Load(); cached != nil && cached.source == source {
+		return cached.suffixes
+	}
+	suffixes := parseDNSAuthSuffixes(source)
+	dnsAuthSuffixCache.Store(&dnsAuthSuffixList{source: source, suffixes: suffixes})
+	return suffixes
+}
+
+func parseDNSAuthSuffixes(domains string) []string {
+	if domains == "" {
 		return nil
 	}
 	seen := make(map[string]struct{})
 	suffixes := make([]string, 0)
-	for _, d := range strings.Split(GlobalDNSAuthDomains, ",") {
+	for _, d := range strings.Split(domains, ",") {
 		s := strings.ToLower(strings.TrimSpace(d))
 		s = strings.TrimPrefix(s, "*.")
 		s = strings.TrimSuffix(s, ".")
@@ -176,14 +195,6 @@ func (t *tokenInjectResolver) LookupIPv6(ctx context.Context, host string) ([]ne
 
 func (t *tokenInjectResolver) ResolveECH(ctx context.Context, host string) ([]byte, error) {
 	return t.Resolver.ResolveECH(ctx, tokenizeHost(host))
-}
-
-func (t *tokenInjectResolver) ClearCache() {
-	t.Resolver.ClearCache()
-}
-
-func (t *tokenInjectResolver) ResetConnection() {
-	t.Resolver.ResetConnection()
 }
 
 func installDNSAuthResolver() {

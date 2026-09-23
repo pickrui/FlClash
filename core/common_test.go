@@ -1,16 +1,22 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
+	"context"
 	"encoding/base64"
 	"errors"
+	"net"
+	"net/http"
 	"os"
 	"path/filepath"
 	"slices"
 	"testing"
+	"time"
 
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/hub/route"
 	"github.com/metacubex/mihomo/tunnel"
 )
 
@@ -149,6 +155,103 @@ func TestHandleUpdateConfigBeforeSetup(t *testing.T) {
 	}
 }
 
+func TestExternalControllerConfigKeepsProfileListeners(t *testing.T) {
+	cfg := &config.Config{
+		General: &config.General{},
+		Controller: &config.Controller{
+			ExternalController:     "127.0.0.1:9090",
+			ExternalControllerTLS:  "127.0.0.1:9443",
+			ExternalControllerUnix: "controller.sock",
+			ExternalControllerPipe: `\\.\pipe\controller`,
+			Secret:                 "secret",
+			Cors:                   config.Cors{AllowOrigins: []string{"*"}, AllowPrivateNetwork: true},
+		},
+		TLS: &config.TLS{Certificate: "cert.pem", PrivateKey: "key.pem"},
+	}
+	got := externalControllerConfig(cfg)
+	if got.Addr != "127.0.0.1:9090" || got.TLSAddr != "127.0.0.1:9443" || got.UnixAddr != "controller.sock" ||
+		got.PipeAddr != cfg.Controller.ExternalControllerPipe || got.Secret != "secret" ||
+		got.Certificate != "cert.pem" || got.PrivateKey != "key.pem" ||
+		!slices.Equal(got.Cors.AllowOrigins, []string{"*"}) || !got.Cors.AllowPrivateNetwork {
+		t.Fatalf("controller patch dropped profile settings: %+v", got)
+	}
+}
+
+func TestUpdateConfigKeepsExternalControllerForUnrelatedPatches(t *testing.T) {
+	stubLiveConfig(t)
+	previousMode := tunnel.Mode()
+	probe, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	address := probe.Addr().String()
+	probe.Close()
+	secret := "first"
+	currentConfig.Controller = &config.Controller{ExternalController: address, Secret: secret}
+	currentConfig.TLS = &config.TLS{}
+	route.ReCreateServer(externalControllerConfig(currentConfig))
+	t.Cleanup(func() {
+		tunnel.SetMode(previousMode)
+		route.ReCreateServer(&route.Config{})
+		for deadline := time.Now().Add(5 * time.Second); time.Now().Before(deadline); time.Sleep(20 * time.Millisecond) {
+			conn, err := net.DialTimeout("tcp", address, 100*time.Millisecond)
+			if err != nil {
+				return
+			}
+			conn.Close()
+		}
+	})
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	get := func(ctx context.Context, path, token string) (*http.Response, error) {
+		request, err := http.NewRequestWithContext(ctx, http.MethodGet, "http://"+address+path, nil)
+		if err != nil {
+			return nil, err
+		}
+		request.Header.Set("Authorization", "Bearer "+token)
+		return http.DefaultClient.Do(request)
+	}
+	waitForStatus := func(token string, want int) {
+		t.Helper()
+		for ctx.Err() == nil {
+			if response, err := get(ctx, "/", token); err == nil {
+				response.Body.Close()
+				if response.StatusCode == want {
+					return
+				}
+			}
+			time.Sleep(20 * time.Millisecond)
+		}
+		t.Fatalf("controller never answered %d for token %q", want, token)
+	}
+	waitForStatus(secret, http.StatusOK)
+
+	stream, err := get(ctx, "/traffic", secret)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer stream.Body.Close()
+	lines := bufio.NewReader(stream.Body)
+	if _, err := lines.ReadString('\n'); err != nil {
+		t.Fatal(err)
+	}
+	mode := tunnel.Global
+	if err := updateConfig(&UpdateParams{Mode: &mode, ExternalController: &address, Secret: &secret}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := lines.ReadString('\n'); err != nil {
+		t.Fatalf("an unrelated patch restarted the controller: %v", err)
+	}
+
+	next := "second"
+	if err := updateConfig(&UpdateParams{ExternalController: &address, Secret: &next}); err != nil {
+		t.Fatal(err)
+	}
+	waitForStatus(next, http.StatusOK)
+	waitForStatus(secret, http.StatusUnauthorized)
+}
+
 func TestLogSubscriptionLifecycle(t *testing.T) {
 	previousIsInit := isInit.Load()
 	isInit.Store(true)
@@ -182,10 +285,12 @@ func TestApplyConfigRejectsCandidateWithoutReplacingLiveRouting(t *testing.T) {
 	setValidationTestHome(t)
 	previousConfig, previousURL := currentConfig, constant.DefaultTestURL
 	previousNames := slices.Clone(config.GetProxyNameList())
+	previousAuth := currentDNSAuth()
 	t.Cleanup(func() {
 		currentConfig = previousConfig
 		constant.DefaultTestURL = previousURL
 		config.SetProxyNameList(previousNames)
+		setDNSAuth(previousAuth)
 	})
 	active := &config.Config{General: &config.General{}}
 	active.General.MixedPort = 12345
@@ -193,9 +298,16 @@ func TestApplyConfigRejectsCandidateWithoutReplacingLiveRouting(t *testing.T) {
 	activeNames := []string{"Active"}
 	config.SetProxyNameList(activeNames)
 	activeProxies := tunnel.Proxies()
+	activeAuth := &dnsAuthSettings{suffixes: []string{"managed.example"}}
+	setDNSAuth(activeAuth)
+	invalid := "proxy-groups: ["
+	if err := os.WriteFile(filepath.Join(constant.Path.HomeDir(), "config.yaml"), []byte(invalid), 0o600); err != nil {
+		t.Fatal(err)
+	}
 	for _, candidate := range []string{
-		"proxy-groups: [",
+		invalid,
 		"proxy-groups: [{name: Candidate, type: select, proxies: [DIRECT]}]\nrules: ['MATCH,Missing']",
+		"", // the plain config.yaml written above
 	} {
 		params := defaultSetupParams()
 		params.RawConfig = candidate
@@ -205,6 +317,9 @@ func TestApplyConfigRejectsCandidateWithoutReplacingLiveRouting(t *testing.T) {
 		}
 		if currentConfig != active {
 			t.Fatal("failed candidate replaced active config")
+		}
+		if currentDNSAuth() != activeAuth {
+			t.Fatal("failed candidate changed DNS-Auth for the live config")
 		}
 		if constant.DefaultTestURL != previousURL {
 			t.Fatal("failed candidate changed test URL")

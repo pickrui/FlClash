@@ -137,22 +137,6 @@ func getFileHash(path string) ([sha256.Size]byte, error) {
 	return value, nil
 }
 
-func updateGeoData(geoType string, path string) error {
-	return updateGeoDataFromURL(geoType, path, geoDataURL(geoType))
-}
-
-func updateGeoDataFromURL(geoType string, path string, geoURL string) error {
-	geoLifecycleMu.Lock()
-	ctx := geoLifecycleCtx
-	geoLifecycleMu.Unlock()
-	if ctx == nil {
-		return context.Canceled
-	}
-	return tryRunGeoUpdate(ctx, func(ctx context.Context) error {
-		return updateGeoDataLockedFromURL(ctx, geoType, path, geoURL)
-	})
-}
-
 func runGeoUpdate(ctx context.Context, action func(context.Context) error) error {
 	select {
 	case <-ctx.Done():

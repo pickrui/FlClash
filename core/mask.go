@@ -70,7 +70,10 @@ func shouldSuppressCloudOutput(value string) bool {
 		return !(char >= 'a' && char <= 'z' || char >= '0' && char <= '9' || strings.ContainsRune(".-:[]", char))
 	}) {
 		host = strings.Trim(host, ".")
-		if isCloudHost(host) || isCloudHost(strings.TrimSuffix(host, ":")) {
+		if isCloudHost(host) {
+			return true
+		}
+		if trimmed, ok := strings.CutSuffix(host, ":"); ok && isCloudHost(trimmed) {
 			return true
 		}
 	}

@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"net/netip"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -50,6 +51,27 @@ func TestSuppressCloudOutput(t *testing.T) {
 				t.Fatalf("shouldSuppressCloudOutput(%q) = %v; want %v", test.text, got, test.want)
 			}
 		})
+	}
+}
+
+func TestDNSAuthSuffixesFollowConfiguredDomains(t *testing.T) {
+	previous := GlobalDNSAuthDomains
+	t.Cleanup(func() { GlobalDNSAuthDomains = previous })
+
+	GlobalDNSAuthDomains = " *.Managed.Example., other.example,managed.example"
+	if got := dnsAuthSuffixes(); !slices.Equal(got, []string{"managed.example", "other.example"}) {
+		t.Fatalf("dnsAuthSuffixes() = %q", got)
+	}
+	GlobalDNSAuthDomains = "next.example"
+	if got := dnsAuthSuffixes(); !slices.Equal(got, []string{"next.example"}) {
+		t.Fatalf("dnsAuthSuffixes() kept a stale list: %q", got)
+	}
+	if !shouldSuppressCloudOutput("lookup node.next.example failed") {
+		t.Fatal("log filter ignored the updated DNS-Auth domains")
+	}
+	GlobalDNSAuthDomains = ""
+	if got := dnsAuthSuffixes(); got != nil {
+		t.Fatalf("dnsAuthSuffixes() = %q; want none", got)
 	}
 }
 

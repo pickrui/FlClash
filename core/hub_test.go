@@ -9,6 +9,7 @@ import (
 
 	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/adapter/outbound"
+	"github.com/metacubex/mihomo/adapter/outboundgroup"
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/tunnel"
@@ -40,6 +41,54 @@ func TestPatchSelectGroupPublishesAppliedProxySnapshot(t *testing.T) {
 	selectionLock.Unlock()
 	if got != newProxy {
 		t.Fatalf("proxy snapshot = %p, want applied proxy %p", got, newProxy)
+	}
+}
+
+func TestPatchSelectGroupRestoresGroupsShadowedByProviderNodes(t *testing.T) {
+	setValidationTestHome(t)
+	previousNames := slices.Clone(config.GetProxyNameList())
+	previousProxies, previousProviders := tunnel.Proxies(), tunnel.Providers()
+	selectionLock.Lock()
+	previousSnapshot := proxySnapshot
+	selectionLock.Unlock()
+	t.Cleanup(func() {
+		config.SetProxyNameList(previousNames)
+		tunnel.UpdateProxies(previousProxies, previousProviders)
+		publishProxySnapshot(previousSnapshot)
+	})
+
+	raw, err := config.UnmarshalRawConfig([]byte(`proxy-providers:
+  cloud:
+    type: inline
+    payload:
+      - {name: Personal, type: ss, server: 127.0.0.1, port: 9, cipher: aes-128-gcm, password: test}
+      - {name: Unique, type: ss, server: 127.0.0.1, port: 9, cipher: aes-128-gcm, password: test}
+proxy-groups:
+  - {name: Personal, type: select, use: [cloud]}
+rules: ['MATCH,Personal']
+`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	parsed, err := config.ParseRawConfig(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer closeParsedProviders(parsed)
+	group := parsed.Proxies["Personal"].(*adapter.Proxy).ProxyAdapter.(*outboundgroup.Selector)
+
+	// The reserved "default" provider re-adds the group to AllProxies, and map order picks the "Personal" that wins.
+	for range 64 {
+		group.ForceSet("")
+		tunnel.UpdateProxies(parsed.Proxies, parsed.Providers)
+		patchSelectGroup(map[string]string{"Personal": "Unique"})
+		if now := group.Now(); now != "Unique" {
+			t.Fatalf("saved selection was not restored: now = %q", now)
+		}
+		groupName, proxyName := "Personal", "Personal"
+		if message := handleChangeProxy(&ChangeProxyParams{GroupName: &groupName, ProxyName: &proxyName}); message != "" {
+			t.Fatalf("selection failed before the first proxies snapshot: %s", message)
+		}
 	}
 }
 

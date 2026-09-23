@@ -144,7 +144,8 @@ func patchSelectGroup(mapping map[string]string) {
 	selectionLock.Lock()
 	defer selectionLock.Unlock()
 
-	proxies := tunnel.AllProxies()
+	// Groups are top-level; AllProxies may shadow one with a same-named node.
+	proxies := tunnel.ProxiesSnapshot()
 	for name, proxy := range proxies {
 		outbound, ok := proxy.(*adapter.Proxy)
 		if !ok {
@@ -189,7 +190,7 @@ func normalizeSelectorSelections() {
 	selectionLock.Lock()
 	defer selectionLock.Unlock()
 
-	for _, proxy := range tunnel.AllProxies() {
+	for _, proxy := range tunnel.ProxiesSnapshot() {
 		outbound, ok := proxy.(*adapter.Proxy)
 		if !ok {
 			continue
@@ -227,20 +228,18 @@ func decryptFlClashIfNeeded(data []byte) ([]byte, error) {
 	return DecryptFlClash(data)
 }
 
-func parseConfigPath(path string) (*config.Config, bool, error) {
+func parseConfigPath(path string) (*config.Config, error) {
 	data, err := os.ReadFile(path)
 	if err != nil || !isEncryptedConfig(data) {
 		setDNSAuth(nil)
-		cfg, err := executor.ParseWithPath(path)
-		return cfg, false, err
+		return executor.ParseWithPath(path)
 	}
 	data, err = decryptFlClashIfNeeded(data)
 	if err != nil {
-		return nil, true, err
+		return nil, err
 	}
 	applyDNSAuth()
-	cfg, err := executor.ParseWithBytes(data)
-	return cfg, true, err
+	return executor.ParseWithBytes(data)
 }
 
 func readFile(path string) ([]byte, error) {
@@ -322,17 +321,16 @@ func updateConfig(params *UpdateParams) error {
 		general.IPv6 = *params.IPv6
 		resolver.DisableIPv6 = !general.IPv6
 	}
-	if params.ExternalController != nil || params.Secret != nil {
+	controller := currentConfig.Controller
+	if params.ExternalController != nil && *params.ExternalController != controller.ExternalController ||
+		params.Secret != nil && *params.Secret != controller.Secret {
 		if params.ExternalController != nil {
-			currentConfig.Controller.ExternalController = *params.ExternalController
+			controller.ExternalController = *params.ExternalController
 		}
 		if params.Secret != nil {
-			currentConfig.Controller.Secret = *params.Secret
+			controller.Secret = *params.Secret
 		}
-		route.ReCreateServer(&route.Config{
-			Addr:   currentConfig.Controller.ExternalController,
-			Secret: currentConfig.Controller.Secret,
-		})
+		route.ReCreateServer(externalControllerConfig(currentConfig))
 	}
 
 	if params.Tun != nil {
@@ -367,6 +365,30 @@ func updateConfig(params *UpdateParams) error {
 	return nil
 }
 
+// Mirrors hub.applyRoute; ReCreateServer closes any listener left empty here.
+func externalControllerConfig(cfg *config.Config) *route.Config {
+	controller := cfg.Controller
+	return &route.Config{
+		Addr:           controller.ExternalController,
+		TLSAddr:        controller.ExternalControllerTLS,
+		UnixAddr:       controller.ExternalControllerUnix,
+		PipeAddr:       controller.ExternalControllerPipe,
+		RoutingMark:    controller.ExternalControllerRoutingMark,
+		Secret:         controller.Secret,
+		Certificate:    cfg.TLS.Certificate,
+		PrivateKey:     cfg.TLS.PrivateKey,
+		ClientAuthType: cfg.TLS.ClientAuthType,
+		ClientAuthCert: cfg.TLS.ClientAuthCert,
+		EchKey:         cfg.TLS.EchKey,
+		DohServer:      controller.ExternalDohServer,
+		IsDebug:        cfg.General.LogLevel == log.DEBUG,
+		Cors: route.Cors{
+			AllowOrigins:        controller.Cors.AllowOrigins,
+			AllowPrivateNetwork: controller.Cors.AllowPrivateNetwork,
+		},
+	}
+}
+
 func applyConfig(params *SetupParams) error {
 	runLock.Lock()
 	defer runLock.Unlock()
@@ -374,17 +396,18 @@ func applyConfig(params *SetupParams) error {
 	var candidate *config.Config
 	previousNames := slices.Clone(config.GetProxyNameList())
 	previousTestURL := constant.DefaultTestURL
-	isoixConfig := params.RawConfig != ""
+	previousDNSAuth := currentDNSAuth()
 	constant.DefaultTestURL = params.TestURL
-	if isoixConfig {
+	if params.RawConfig != "" {
 		applyDNSAuth()
 		candidate, err = executor.ParseWithBytes([]byte(params.RawConfig))
 	} else {
-		candidate, isoixConfig, err = parseConfigPath(filepath.Join(constant.Path.HomeDir(), "config.yaml"))
+		candidate, err = parseConfigPath(filepath.Join(constant.Path.HomeDir(), "config.yaml"))
 	}
 	if err != nil {
 		config.SetProxyNameList(previousNames)
 		constant.DefaultTestURL = previousTestURL
+		setDNSAuth(previousDNSAuth)
 		return err
 	}
 	// Commit only a fully parsed candidate; failed edits leave live routing intact.
@@ -400,7 +423,7 @@ func applyConfig(params *SetupParams) error {
 	patchSelectGroup(params.SelectedMap)
 	updateListeners()
 	restartGeoScheduler()
-	return err
+	return nil
 }
 
 func UnmarshalJson(data []byte, v any) error {
