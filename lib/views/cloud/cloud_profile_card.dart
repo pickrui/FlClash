@@ -74,8 +74,7 @@ class _CloudProfileCardState extends ConsumerState<CloudProfileCard> {
 
     setState(() => _params = change(_params));
     // The profile editor and tier reconciliation also write these params.
-    final next = change(await CloudParamsStorage.load());
-    await CloudParamsStorage.save(next);
+    final next = await CloudParamsStorage.update(change);
     if (mounted && generation == _paramsGeneration) {
       setState(() => _params = next);
     }

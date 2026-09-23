@@ -170,18 +170,32 @@ Future<void> _returningShowsParamsEditedElsewhere(WidgetTester tester) async {
   expect(_switchValues(tester), [false, false, true]);
 }
 
-void main() {
-  // CloudParamsStorage chains its writes on a static future that a later
-  // test's fake-async zone never resumes, so the scenarios share one test.
-  testWidgets('the card follows params other writers change', (tester) async {
+void _cardTest(
+  String description,
+  Future<void> Function(WidgetTester tester) scenario,
+) {
+  testWidgets(description, (tester) async {
     tester.view.physicalSize = const Size(800, 1600);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await _switchKeepsParamsSavedMeanwhile(tester);
-    await _planChangeShowsReconciledParams(tester);
-    await _returningShowsParamsEditedElsewhere(tester);
+    await scenario(tester);
     expect(tester.takeException(), isNull);
   });
+}
+
+void main() {
+  _cardTest(
+    'a switch keeps params another writer saved meanwhile',
+    _switchKeepsParamsSavedMeanwhile,
+  );
+  _cardTest(
+    'a plan change shows the reconciled params',
+    _planChangeShowsReconciledParams,
+  );
+  _cardTest(
+    'returning to the page shows params edited elsewhere',
+    _returningShowsParamsEditedElsewhere,
+  );
 }

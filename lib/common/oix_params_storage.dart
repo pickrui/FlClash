@@ -11,11 +11,19 @@ class CloudParamsStorage {
   static const _kDefaultParams = 'cloud_service_default_params';
   // Legacy: previously stored as separate bool. Kept for migration only.
   static const _kLegacyTfo = 'cloud_service_tfo';
-  static Future<void> _tail = Future.value();
+  // Dropped once idle, so no call chains onto a future of a finished zone.
+  static Future<void>? _tail;
 
   static Future<T> _synchronized<T>(Future<T> Function() action) {
-    final operation = _tail.then((_) => action());
-    _tail = operation.then<void>((_) {}, onError: (_, _) {});
+    final previous = _tail;
+    final operation = previous == null
+        ? Future.microtask(action)
+        : previous.then((_) => action());
+    final tail = operation.then<void>((_) {}, onError: (_, _) {});
+    _tail = tail;
+    tail.whenComplete(() {
+      if (identical(_tail, tail)) _tail = null;
+    });
     return operation;
   }
 
@@ -47,6 +55,17 @@ class CloudParamsStorage {
     return _synchronized(() async {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_kConfigParams, params.encode());
+    });
+  }
+
+  static Future<CloudParams> update(
+    CloudParams Function(CloudParams current) change,
+  ) {
+    return _synchronized(() async {
+      final prefs = await SharedPreferences.getInstance();
+      final next = change(await _load(prefs));
+      await prefs.setString(_kConfigParams, next.encode());
+      return next;
     });
   }
 
