@@ -1,3 +1,4 @@
+import 'package:fl_clash/common/task.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/overwrite/overwrite.dart';
 import 'package:fl_clash/l10n/l10n.dart';
@@ -273,6 +274,108 @@ void main() {
       expect(messages, [_l10n.customOutboundInUse('Solo')]);
       expect(profiles.state.single.profileProxies, hasLength(2));
     });
+  });
+
+  group('override whose subscription node has a dialer-proxy', () {
+    Map<String, dynamic> rawConfig(String dialer) => {
+      'proxies': [
+        {'name': 'HK', 'type': 'ss', 'dialer-proxy': dialer},
+        {'name': 'X', 'type': 'ss'},
+        {'name': 'Y', 'type': 'ss'},
+      ],
+      'proxy-groups': [
+        {
+          'name': 'Proxy',
+          'type': 'select',
+          'proxies': ['HK', 'X', 'Y'],
+        },
+      ],
+      'rules': ['MATCH,Proxy'],
+    };
+    final profile = _baseProfile.copyWith(
+      matchTarget: 'HK',
+      profileProxies: const [
+        ProfileProxy(id: 10, proxy: {'name': 'HK', 'type': 'vmess'}),
+      ],
+      proxyChains: const [
+        ProxyChain(id: 20, name: 'Chain', proxies: ['X', 'HK']),
+      ],
+    );
+
+    Future<void> expectBuilds(
+      WidgetTester tester,
+      Map<String, dynamic> raw,
+      Profile next,
+    ) async {
+      final built = await tester.runAsync(
+        () => makeRealProfileTask(
+          MakeRealProfileState(
+            profilesPath: '/profiles',
+            profileId: next.id,
+            rawConfig: raw,
+            overwriteType: next.overwriteType,
+            realPatchConfig: const ClashConfig(),
+            overrideDns: false,
+            appendSystemDns: false,
+            addedRules: const [],
+            proxyChains: next.proxyChains,
+            profileProxies: next.profileProxies,
+            customProxyGroups: next.customProxyGroups,
+            customRules: const [],
+            defaultUA: 'FlClash',
+          ),
+        ),
+      );
+      expect(built, isNotNull);
+    }
+
+    final actions = <String, Future<void> Function(WidgetTester)>{
+      'switching it off': (tester) async {
+        await tester.tap(_switchOf('HK'));
+        await tester.pumpAndSettle();
+      },
+      'deleting it': (tester) => _deleteFromMenu(tester, 'HK'),
+    };
+    for (final MapEntry(key: action, value: perform) in actions.entries) {
+      testWidgets(
+        '$action disables chains the restored dialer conflicts with',
+        (tester) async {
+          final raw = rawConfig('Y');
+          final setupAction = _SetupAction(rawConfig: raw);
+          final (profiles, messages) = await _pump(
+            tester,
+            setupAction,
+            profile,
+          );
+
+          await perform(tester);
+
+          expect(messages, [_l10n.proxyChainRelatedChainsUpdated]);
+          final next = profiles.state.single;
+          expect(next.matchTarget, 'HK');
+          expect(next.proxyChains.single.enable, isFalse);
+          expect(next.proxyChains.single.proxies, ['X', 'HK']);
+          expect(setupAction.applies, 1);
+          await expectBuilds(tester, raw, next);
+        },
+      );
+
+      testWidgets('$action keeps chains the restored dialer agrees with', (
+        tester,
+      ) async {
+        final raw = rawConfig('X');
+        final setupAction = _SetupAction(rawConfig: raw);
+        final (profiles, messages) = await _pump(tester, setupAction, profile);
+
+        await perform(tester);
+
+        expect(messages, isEmpty);
+        final next = profiles.state.single;
+        expect(next.proxyChains.single, profile.proxyChains.single);
+        expect(setupAction.applies, 1);
+        await expectBuilds(tester, raw, next);
+      });
+    }
   });
 
   testWidgets('a raw reference still blocks deleting a custom-only node', (

@@ -878,6 +878,57 @@ Set<String> _rawProxyNames(Map rawConfig) {
       .toSet();
 }
 
+Map<String, String> _rawDialerRelations(
+  Map rawConfig,
+  Set<String> overriddenNames,
+) {
+  final proxies = rawConfig['proxies'];
+  if (proxies is! List) {
+    return const {};
+  }
+  return {
+    for (final proxy in proxies.whereType<Map>())
+      if (proxy['name'] case final String name)
+        if (proxy['dialer-proxy'] case final String dialer)
+          if (name.isNotEmpty &&
+              dialer.isNotEmpty &&
+              !overriddenNames.contains(name))
+            name: dialer,
+  };
+}
+
+/// A custom node drops `dialer-proxy`, so removing one that overrides a
+/// subscription node brings the subscription node's dialer back into the
+/// chain check; the chains through it are disabled when that conflicts.
+List<ProxyChain> _disableChainsConflictingWithRestoredDialers(
+  Map rawConfig,
+  List<ProxyChain> proxyChains,
+  List<ProfileProxy> profileProxies,
+  Set<int> removedProfileProxyIds,
+) {
+  Set<String> overriddenNames(Set<int> excludedIds) => profileProxies
+      .where((item) => item.isValid && !excludedIds.contains(item.id))
+      .map((item) => item.name)
+      .toSet();
+  final before = _rawDialerRelations(rawConfig, overriddenNames(const {}));
+  final after = _rawDialerRelations(
+    rawConfig,
+    overriddenNames(removedProfileProxyIds),
+  );
+  final restoredNames = after.keys.where((name) => !before.containsKey(name));
+  if (restoredNames.isEmpty ||
+      findProxyChainConflictName(proxyChains, existingRelations: before) !=
+          null ||
+      findProxyChainConflictName(proxyChains, existingRelations: after) ==
+          null) {
+    return proxyChains;
+  }
+  return restoredNames.fold(
+    proxyChains,
+    (chains, name) => chains.copyAndDisableChainsUsingProxy(name),
+  );
+}
+
 class OverwriteEntryTile extends StatelessWidget {
   final String title;
   final Widget? subtitle;
@@ -1268,11 +1319,13 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
             .toSet() ??
         {};
     var overrideNames = const <String>{};
+    Map<String, dynamic> rawConfig = const {};
     if (relatedNames.isNotEmpty) {
-      final rawConfig = await _loadRawConfig();
-      if (rawConfig == null || !mounted) {
+      final loadedRawConfig = await _loadRawConfig();
+      if (loadedRawConfig == null || !mounted) {
         return;
       }
+      rawConfig = loadedRawConfig;
       overrideNames = _rawProxyNames(rawConfig).intersection(relatedNames);
       if (_isRawReferenced(rawConfig, relatedNames.difference(overrideNames))) {
         return;
@@ -1294,7 +1347,7 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
       );
       return;
     }
-    final hasRelatedProxyChains =
+    var hasRelatedProxyChains =
         currentProfile?.proxyChains.any((chain) {
           return chain.proxies.any(removedNames.contains);
         }) ??
@@ -1307,12 +1360,24 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
           .map((item) => item.name)
           .toSet()
           .difference(overrideNames);
+      final remainingProxyChains = state.proxyChains.copyAndRemoveProxies(
+        deletedNames,
+      );
+      final proxyChains = _disableChainsConflictingWithRestoredDialers(
+        rawConfig,
+        remainingProxyChains,
+        state.profileProxies,
+        targetProfileProxyIds,
+      );
+      if (!identical(proxyChains, remainingProxyChains)) {
+        hasRelatedProxyChains = true;
+      }
       return state
           .copyWith(
             profileProxies: state.profileProxies
                 .where((item) => !targetProfileProxyIds.contains(item.id))
                 .toList(),
-            proxyChains: state.proxyChains.copyAndRemoveProxies(deletedNames),
+            proxyChains: proxyChains,
           )
           .copyAndRemoveOutboundCaches(deletedNames);
     });
@@ -1335,11 +1400,13 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
   ) async {
     final name = profileProxy.name;
     var isOverride = false;
+    Map<String, dynamic> rawConfig = const {};
     if (!value) {
-      final rawConfig = await _loadRawConfig();
-      if (rawConfig == null || !mounted) {
+      final loadedRawConfig = await _loadRawConfig();
+      if (loadedRawConfig == null || !mounted) {
         return;
       }
+      rawConfig = loadedRawConfig;
       isOverride = _rawProxyNames(rawConfig).contains(name);
       if (!isOverride) {
         final hasCustomReferences =
@@ -1359,7 +1426,7 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
         }
       }
     }
-    final hasRelatedProxyChains =
+    var hasRelatedProxyChains =
         !isOverride &&
         (ref
                 .read(profileProvider(widget.profileId))
@@ -1373,8 +1440,22 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
       final nextProfileProxies = state.profileProxies.copyAndPut(
         nextProfileProxy,
       );
-      if (value || isOverride) {
+      if (value) {
         return state.copyWith(profileProxies: nextProfileProxies);
+      }
+      if (isOverride) {
+        final currentProxyChains = state.proxyChains;
+        final proxyChains = _disableChainsConflictingWithRestoredDialers(
+          rawConfig,
+          currentProxyChains,
+          state.profileProxies,
+          {profileProxy.id},
+        );
+        hasRelatedProxyChains = !identical(proxyChains, currentProxyChains);
+        return state.copyWith(
+          profileProxies: nextProfileProxies,
+          proxyChains: proxyChains,
+        );
       }
       return state
           .copyWith(
