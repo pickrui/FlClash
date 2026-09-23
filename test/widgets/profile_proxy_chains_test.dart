@@ -489,13 +489,186 @@ void main() {
     expect(setupAction.autoApplies, 1);
   });
 
-  test('renaming into a chain that already uses the name is a conflict', () {
-    const chains = [
-      ProxyChain(id: 1, proxies: ['A', 'B']),
-      ProxyChain(id: 2, enable: false, proxies: ['C', 'B']),
-    ];
-    expect(findProxyChainRenameConflict(chains, 'A', 'B'), 'B');
-    expect(findProxyChainRenameConflict(chains, 'C', 'B'), isNull);
-    expect(findProxyChainRenameConflict(chains, 'A', 'D'), isNull);
+  group('renaming a custom proxy', () {
+    const profile = Profile(
+      id: 1,
+      autoUpdateDuration: Duration(hours: 1),
+      profileProxies: [
+        ProfileProxy(id: 10, proxy: {'name': 'HK', 'type': 'ss'}),
+      ],
+      proxyChains: [
+        ProxyChain(id: 20, proxies: ['Z', 'Y']),
+      ],
+    );
+    Map<String, dynamic> rawConfig(List<Map<String, Object?>> proxies) => {
+      'proxies': proxies,
+      'proxy-groups': [
+        {
+          'name': 'Proxy',
+          'type': 'select',
+          'proxies': proxies.map((proxy) => proxy['name']).toList(),
+        },
+      ],
+      'rules': ['MATCH,Proxy'],
+    };
+
+    Profile rename(Profile current, String name) => current
+        .copyWith(
+          profileProxies: current.profileProxies.copyAndPut(
+            current.profileProxies.first.copyWith(
+              proxy: {'name': name, 'type': 'ss'},
+            ),
+          ),
+        )
+        .copyAndRenameOutboundReferences('HK', name);
+
+    String? conflict(Map raw, Profile current, Profile next) =>
+        findProxyChainRenameConflict(
+          current.proxyChains,
+          'HK',
+          next.profileProxies.first.name,
+          rawConfig: raw,
+          nextProfileProxies: next.profileProxies,
+        );
+
+    Future<Map<String, dynamic>> build(
+      Map<String, dynamic> raw,
+      Profile next,
+    ) => makeRealProfileTask(
+      MakeRealProfileState(
+        profilesPath: '/profiles',
+        profileId: next.id,
+        rawConfig: raw,
+        overwriteType: next.overwriteType,
+        realPatchConfig: const ClashConfig(),
+        overrideDns: false,
+        appendSystemDns: false,
+        addedRules: const [],
+        proxyChains: next.proxyChains,
+        profileProxies: next.profileProxies,
+        customProxyGroups: next.customProxyGroups,
+        customRules: const [],
+        defaultUA: 'FlClash',
+      ),
+    );
+
+    test('rejects a cycle restored outside the renamed chains', () async {
+      final raw = rawConfig([
+        {'name': 'HK', 'type': 'ss', 'dialer-proxy': 'Y'},
+        {'name': 'Z', 'type': 'ss', 'dialer-proxy': 'HK'},
+        {'name': 'Y', 'type': 'ss'},
+      ]);
+      final next = rename(profile, 'New');
+
+      expect(await build(raw, profile), isNotNull);
+      expect(next.proxyChains, profile.proxyChains);
+      expect(conflict(raw, profile, next), 'Y');
+      await expectLater(
+        build(raw, next),
+        throwsA(
+          isA<FormatException>().having(
+            (error) => error.message,
+            'message',
+            'proxy chain conflict: Y',
+          ),
+        ),
+      );
+    });
+
+    test('checks renamed chains against existing dialers', () async {
+      final raw = rawConfig([
+        {'name': 'Z', 'type': 'ss', 'dialer-proxy': 'New'},
+        {'name': 'New', 'type': 'ss'},
+      ]);
+      final current = profile.copyWith(
+        proxyChains: const [
+          ProxyChain(id: 20, proxies: ['Z', 'HK']),
+        ],
+      );
+      final next = rename(current, 'New');
+
+      expect(await build(raw, current), isNotNull);
+      expect(conflict(raw, current, next), 'New');
+      await expectLater(build(raw, next), throwsFormatException);
+    });
+
+    test(
+      'drops the destination subscription dialer after overriding it',
+      () async {
+        final raw = rawConfig([
+          {'name': 'HK', 'type': 'ss', 'dialer-proxy': 'New'},
+          {'name': 'New', 'type': 'ss', 'dialer-proxy': 'HK'},
+          {'name': 'Z', 'type': 'ss'},
+        ]);
+        final current = profile.copyWith(
+          proxyChains: const [
+            ProxyChain(id: 20, proxies: ['Z', 'HK']),
+          ],
+        );
+        final next = rename(current, 'New');
+
+        expect(await build(raw, current), isNotNull);
+        expect(conflict(raw, current, next), isNull);
+        expect(await build(raw, next), isNotNull);
+      },
+    );
+
+    test('retains all other enabled overrides when checking dialers', () async {
+      final raw = rawConfig([
+        {'name': 'HK', 'type': 'ss', 'dialer-proxy': 'Y'},
+        {'name': 'Z', 'type': 'ss', 'dialer-proxy': 'HK'},
+        {'name': 'Y', 'type': 'ss'},
+      ]);
+      final current = profile.copyWith(
+        profileProxies: [
+          ...profile.profileProxies,
+          const ProfileProxy(id: 11, proxy: {'name': 'Z', 'type': 'ss'}),
+        ],
+      );
+      final next = rename(current, 'New');
+
+      expect(conflict(raw, current, next), isNull);
+      expect(await build(raw, next), isNotNull);
+      final disabled = next.copyWith(
+        profileProxies: [
+          next.profileProxies.first,
+          next.profileProxies.last.copyWith(enable: false),
+        ],
+      );
+      expect(conflict(raw, current, disabled), 'Y');
+    });
+
+    test('ignores subscription-only cycles without an enabled chain', () async {
+      final raw = rawConfig([
+        {'name': 'HK', 'type': 'ss', 'dialer-proxy': 'Y'},
+        {'name': 'Y', 'type': 'ss', 'dialer-proxy': 'HK'},
+        {'name': 'Z', 'type': 'ss'},
+      ]);
+      final current = profile.copyWith(
+        proxyChains: [profile.proxyChains.single.copyWith(enable: false)],
+      );
+      final next = rename(current, 'New');
+
+      expect(conflict(raw, current, next), isNull);
+      expect(await build(raw, next), isNotNull);
+    });
+
+    test('rejects a duplicate within an enabled chain', () {
+      const chains = [
+        ProxyChain(id: 1, proxies: ['A', 'B']),
+        ProxyChain(id: 2, enable: false, proxies: ['C', 'B']),
+      ];
+      String? conflict(String previous, String next) =>
+          findProxyChainRenameConflict(
+            chains,
+            previous,
+            next,
+            rawConfig: const {},
+            nextProfileProxies: const [],
+          );
+      expect(conflict('A', 'B'), 'B');
+      expect(conflict('C', 'B'), isNull);
+      expect(conflict('A', 'D'), isNull);
+    });
   });
 }

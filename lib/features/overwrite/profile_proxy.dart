@@ -846,13 +846,27 @@ bool hasProfileProxyCustomNameConflict(
 String? findProxyChainRenameConflict(
   List<ProxyChain> proxyChains,
   String previousName,
-  String nextName,
-) {
+  String nextName, {
+  required Map rawConfig,
+  required List<ProfileProxy> nextProfileProxies,
+}) {
   final nextProxyChains = proxyChains.copyAndRenameProxy(
     previousName,
     nextName,
   );
-  final conflictName = findProxyChainConflictName(nextProxyChains);
+  final existingRelations = nextProxyChains.any((chain) => chain.enable)
+      ? _rawDialerRelations(
+          rawConfig,
+          nextProfileProxies
+              .where((proxy) => proxy.isValid)
+              .map((proxy) => proxy.name)
+              .toSet(),
+        )
+      : const <String, String>{};
+  final conflictName = findProxyChainConflictName(
+    nextProxyChains,
+    existingRelations: existingRelations,
+  );
   if (conflictName != null) {
     return conflictName;
   }
@@ -1236,10 +1250,16 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
         previousName.isNotEmpty &&
         nextName.isNotEmpty &&
         previousName != nextName) {
+      final currentProfile = ref.read(profileProvider(widget.profileId));
+      if (currentProfile == null) {
+        return;
+      }
       final conflictName = findProxyChainRenameConflict(
-        ref.read(profileProvider(widget.profileId))?.proxyChains ?? const [],
+        currentProfile.proxyChains,
         previousName,
         nextName,
+        rawConfig: rawConfig,
+        nextProfileProxies: currentProfile.profileProxies.copyAndPut(res),
       );
       if (conflictName != null) {
         context.showNotifier(
