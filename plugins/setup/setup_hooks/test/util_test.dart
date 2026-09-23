@@ -30,6 +30,34 @@ void main() {
     });
   });
 
+  group('runCommandStream', () {
+    test('reports a failure whose output is not UTF-8', () async {
+      final directory = Directory.systemTemp.createTempSync(
+        'setup_hooks_stream_test_',
+      );
+      addTearDown(() => directory.deleteSync(recursive: true));
+      final script = File('${directory.path}/localized_error.dart')
+        ..writeAsStringSync(
+          "import 'dart:io';\n"
+          'void main() {\n'
+          '  stderr.add([0x4c, 0x4e, 0x4b, 0x3a, 0x20, 0xce, 0xde, 0x0a]);\n'
+          '  exitCode = 3;\n'
+          '}\n',
+        );
+
+      await expectLater(
+        runCommandStream(Platform.resolvedExecutable, [script.path]),
+        throwsA(
+          isA<CommandFailedException>().having(
+            (error) => error.exitCode,
+            'exitCode',
+            3,
+          ),
+        ),
+      );
+    });
+  });
+
   group('writeCoreManifest', () {
     test('writes only the Core SHA256 field', () {
       final directory = Directory.systemTemp.createTempSync(

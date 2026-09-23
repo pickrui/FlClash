@@ -26,22 +26,7 @@ extension TargetExt on Target {
     }
     return false;
   }
-
-  String get executableExtensionName {
-    final String extensionName;
-    switch (this) {
-      case Target.windows:
-        extensionName = '.exe';
-        break;
-      default:
-        extensionName = '';
-        break;
-    }
-    return extensionName;
-  }
 }
-
-enum Mode { core, lib }
 
 enum Arch { amd64, arm64, arm }
 
@@ -53,16 +38,10 @@ Arch? resolveHostArch(String? name) => switch (name?.toLowerCase()) {
 };
 
 class BuildItem {
-  Target target;
-  Arch? arch;
-  String? archName;
+  final Target target;
+  final Arch arch;
 
-  BuildItem({required this.target, this.arch, this.archName});
-
-  @override
-  String toString() {
-    return 'BuildLibItem{target: $target, arch: $arch, archName: $archName}';
-  }
+  const BuildItem({required this.target, required this.arch});
 }
 
 /// The release date uses Beijing time regardless of the build host timezone.
@@ -110,21 +89,17 @@ class Build {
     print('Updated version to: $fullVersion');
   }
 
-  static List<BuildItem> get buildItems => [
+  static const buildItems = [
     BuildItem(target: Target.macos, arch: Arch.arm64),
     BuildItem(target: Target.macos, arch: Arch.amd64),
     BuildItem(target: Target.linux, arch: Arch.arm64),
     BuildItem(target: Target.linux, arch: Arch.amd64),
     BuildItem(target: Target.windows, arch: Arch.amd64),
     BuildItem(target: Target.windows, arch: Arch.arm64),
-    BuildItem(target: Target.android, arch: Arch.arm, archName: 'armeabi-v7a'),
-    BuildItem(target: Target.android, arch: Arch.arm64, archName: 'arm64-v8a'),
-    BuildItem(target: Target.android, arch: Arch.amd64, archName: 'x86_64'),
+    BuildItem(target: Target.android, arch: Arch.arm),
+    BuildItem(target: Target.android, arch: Arch.arm64),
+    BuildItem(target: Target.android, arch: Arch.amd64),
   ];
-
-  static String get coreName => 'FlClashCore';
-
-  static String get libName => 'libclash';
 
   static String get distPath => join(current, 'dist');
 
@@ -138,52 +113,18 @@ class Build {
     return int.parse(match[1]!);
   }
 
-  static String _getCc(BuildItem buildItem) {
-    final environment = Platform.environment;
-    if (buildItem.target == Target.android) {
-      final ndk = environment['ANDROID_NDK'];
-      assert(ndk != null);
-      final prebuiltDir = Directory(
-        join(ndk!, 'toolchains', 'llvm', 'prebuilt'),
-      );
-      final prebuiltDirList = prebuiltDir
-          .listSync()
-          .where((file) => !basename(file.path).startsWith('.'))
-          .toList();
-      final map = {
-        'armeabi-v7a': 'armv7a-linux-androideabi$_androidApiLevel-clang',
-        'arm64-v8a': 'aarch64-linux-android$_androidApiLevel-clang',
-        'x86': 'i686-linux-android$_androidApiLevel-clang',
-        'x86_64': 'x86_64-linux-android$_androidApiLevel-clang',
-      };
-      return join(prebuiltDirList.first.path, 'bin', map[buildItem.archName]);
+  /// The per-ABI clang wrappers live in the NDK host toolchain's bin folder.
+  static String get _androidClangDirectory {
+    final ndk = Platform.environment['ANDROID_NDK'];
+    if (ndk == null || ndk.isEmpty) {
+      throw 'Set ANDROID_NDK to the Android NDK directory';
     }
-    return 'gcc';
+    final hosts = Directory(
+      join(ndk, 'toolchains', 'llvm', 'prebuilt'),
+    ).listSync().where((entity) => !basename(entity.path).startsWith('.'));
+    if (hosts.isEmpty) throw 'No LLVM toolchain found under $ndk';
+    return join(hosts.first.path, 'bin');
   }
-
-  static const _sensitiveBuildKeys = {
-    'PROFILE_KEY',
-    'BASE_DOMAIN',
-    'SPARE_DOMAIN',
-    'API_DOMAIN',
-    'SPARE_API_DOMAIN',
-    'FLCLASH_APP_SECRET',
-    'FLCLASH_KEY',
-    'DNS_AUTH_PRIVATE_KEY',
-    'DNS_AUTH_DOMAINS',
-  };
-
-  static final RegExp _sensitiveValuePattern = RegExp(
-    '(${_sensitiveBuildKeys.map(RegExp.escape).join('|')})=([^\\s]+)',
-  );
-
-  static final RegExp _dartDefinesPattern = RegExp(
-    r'((?:--)?DartDefines=|DART_DEFINES\s*=\s*)[^\r\n\s]+',
-  );
-
-  static final RegExp _goLinkerSecretPattern = RegExp(
-    r'(-X\s+main\.GlobalDNSAuth(?:PrivateKey|Domains)=)\S+',
-  );
 
   static void requireEnvironment(Iterable<String> keys) {
     final missing = keys
@@ -194,41 +135,6 @@ class Build {
     }
   }
 
-  static String _redactSensitive(String value) {
-    return value
-        .replaceAllMapped(
-          _sensitiveValuePattern,
-          (match) => '${match[1]}=<redacted>',
-        )
-        .replaceAllMapped(
-          _goLinkerSecretPattern,
-          (match) => '${match[1]}<redacted>',
-        );
-  }
-
-  static String _redactOutput(String value) {
-    return _redactSensitive(
-      value,
-    ).replaceAllMapped(_dartDefinesPattern, (match) => '${match[1]}<redacted>');
-  }
-
-  static String _redactCommand(List<String> executable) {
-    return executable.map(_redactSensitive).join(' ');
-  }
-
-  static Map<String, String>? _redactEnvironment(
-    Map<String, String>? environment,
-  ) {
-    return environment?.map((key, value) {
-      return MapEntry(
-        key,
-        _sensitiveBuildKeys.contains(key)
-            ? '<redacted>'
-            : _redactSensitive(value),
-      );
-    });
-  }
-
   static Future<void> exec(
     List<String> executable, {
     String? name,
@@ -237,8 +143,17 @@ class Build {
     bool runInShell = true,
   }) async {
     if (name != null) print('run $name');
-    print('exec: ${_redactCommand(executable)}');
-    print('env: ${_redactEnvironment(environment).toString()}');
+    print('exec: ${hooks.redactBuildOutput(executable.join(' '))}');
+    if (environment != null) {
+      final variables = [
+        for (final MapEntry(:key, :value) in environment.entries)
+          hooks.redactBuildOutput('$key=_') == '$key=_' &&
+                  hooks.redactBuildOutput(value) == value
+              ? '$key=$value'
+              : '$key=<redacted>',
+      ];
+      print('env: ${variables.join(' ')}');
+    }
     final process = await Process.start(
       executable[0],
       executable.sublist(1),
@@ -249,21 +164,20 @@ class Build {
     Future<void> forward(Stream<List<int>> stream) => stream
         .transform(const Utf8Decoder(allowMalformed: true))
         .transform(const LineSplitter())
-        .forEach((line) => print(_redactOutput(line)));
+        .forEach((line) => print(hooks.redactBuildOutput(line)));
     await Future.wait([forward(process.stdout), forward(process.stderr)]);
     final exitCode = await process.exitCode;
     if (exitCode != 0) {
       throw ProcessException(
         executable.first,
-        executable.skip(1).map(_redactSensitive).toList(),
+        executable.skip(1).map(hooks.redactBuildOutput).toList(),
         '${name ?? executable.first} failed',
         exitCode,
       );
     }
   }
 
-  static Future<List<String>> buildCore({
-    required Mode mode,
+  static Future<void> buildCore({
     required Target target,
     Arch? arch,
     bool includeHelper = false,
@@ -271,40 +185,28 @@ class Build {
     final items = buildItems.where(
       (item) => item.target == target && (arch == null || item.arch == arch),
     );
-    final outputs = <String>[];
     hooks.initLogging();
     try {
       for (final item in items) {
-        final nativeTarget = hooks.Target.resolve(
-          platform: target.name,
-          goarch: item.arch!.name,
-        );
-        final report = await hooks.buildPlatform(
+        await hooks.buildPlatform(
           hooks.BuildRequest(
             rootDir: current,
-            target: nativeTarget,
+            target: hooks.Target.resolve(
+              platform: target.name,
+              goarch: item.arch.name,
+            ),
             harnessDir: join(current, 'plugins', 'setup', 'setup_hooks'),
             includeHelper: includeHelper,
             requireSecrets: true,
-            androidToolchain: mode == Mode.lib
+            androidToolchain: target == Target.android
                 ? hooks.AndroidToolchain(
-                    clangDirectory: dirname(_getCc(item)),
+                    clangDirectory: _androidClangDirectory,
                     apiLevel: _androidApiLevel,
                   )
                 : null,
           ),
         );
-        outputs.add(
-          report.outputs.firstWhere(
-            (path) =>
-                basename(path) ==
-                (mode == Mode.lib
-                    ? '$libName.so'
-                    : '$coreName${target.executableExtensionName}'),
-          ),
-        );
       }
-      return outputs;
     } finally {
       hooks.closeLogging();
     }
@@ -359,8 +261,8 @@ class BuildCommand extends Command {
   String get name => target.name;
 
   List<Arch> get arches => Build.buildItems
-      .where((element) => element.target == target && element.arch != null)
-      .map((e) => e.arch!)
+      .where((element) => element.target == target)
+      .map((e) => e.arch)
       .toList();
 
   List<String> _buildDartDefines({
@@ -462,7 +364,7 @@ class BuildCommand extends Command {
 
   /// Fails the build when the image still resolves libfuse.so.2 at startup.
   Future<void> _verifyAppImageRuntime() async {
-    final distDir = Directory(join(current, 'dist'));
+    final distDir = Directory(Build.distPath);
     if (!distDir.existsSync()) return;
     final images = distDir.listSync().whereType<File>().where(
       (file) => extension(file.path) == '.AppImage',
@@ -481,20 +383,6 @@ class BuildCommand extends Command {
       } finally {
         await handle.close();
       }
-    }
-  }
-
-  Future<void> _setLinuxCoreSetuid() async {
-    final coreFile = File('libclash/linux/FlClashCore');
-    if (!coreFile.existsSync()) return;
-    final result = await Process.run('chmod', ['u+s', coreFile.path]);
-    if (result.exitCode != 0) {
-      throw ProcessException(
-        'chmod',
-        ['u+s', coreFile.path],
-        result.stderr.toString(),
-        result.exitCode,
-      );
     }
   }
 
@@ -570,7 +458,7 @@ class BuildCommand extends Command {
       ...dartDefines,
     ]);
 
-    final distDir = Directory(join(current, 'dist'));
+    final distDir = Directory(Build.distPath);
     if (!await distDir.exists()) {
       await distDir.create(recursive: true);
     }
@@ -608,7 +496,6 @@ class BuildCommand extends Command {
 
   @override
   Future<void> run() async {
-    final mode = target == Target.android ? Mode.lib : Mode.core;
     final String out = argResults?['out'] ?? (target.same ? 'app' : 'core');
     final archName =
         argResults?['arch'] as String? ??
@@ -625,9 +512,10 @@ class BuildCommand extends Command {
       throw 'Invalid arch parameter';
     }
 
-    Build.requireEnvironment(const [
+    Build.requireEnvironment([
       'DNS_AUTH_PRIVATE_KEY',
       'DNS_AUTH_DOMAINS',
+      if (target == Target.android) 'ANDROID_NDK',
     ]);
     if (out == 'app') {
       final config =
@@ -653,7 +541,6 @@ class BuildCommand extends Command {
     await Build.buildCore(
       target: target,
       arch: arch,
-      mode: mode,
       includeHelper: out == 'app',
     );
 
@@ -679,7 +566,6 @@ class BuildCommand extends Command {
         ].join(',');
         final defaultTarget = targetMap[arch];
         await _getLinuxDependencies(arch!);
-        await _setLinuxCoreSetuid();
         await _buildDistributor(
           target: target,
           targets: targets,

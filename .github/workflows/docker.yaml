@@ -16,16 +16,47 @@ permissions:
   packages: write
 
 jobs:
+  release:
+    name: Check the release upload
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # The run conclusion also counts the AUR job, which runs after publication.
+    if: >-
+      ${{ github.event_name == 'workflow_run' &&
+          (github.event.workflow_run.conclusion == 'success' ||
+           github.event.workflow_run.conclusion == 'failure') &&
+          github.event.workflow_run.event == 'push' &&
+          startsWith(github.event.workflow_run.head_branch, 'v') &&
+          !contains(github.event.workflow_run.head_branch, '-') }}
+    permissions:
+      actions: read
+    outputs:
+      uploaded: ${{ steps.upload.outputs.uploaded }}
+    steps:
+      - name: Read the upload job conclusion
+        id: upload
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          set -euo pipefail
+          conclusion="$(gh api --paginate \
+            "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/jobs?per_page=100" \
+            --jq '.jobs[] | select(.name == "upload") | .conclusion')"
+          echo "upload job: ${conclusion:-missing}"
+          if [ "$conclusion" = success ]; then
+            echo "uploaded=true" >> "$GITHUB_OUTPUT"
+          fi
+
   docker:
     name: Build and push image
+    needs: release
     runs-on: ubuntu-latest
     timeout-minutes: 90
     if: >-
-      ${{ github.event_name == 'workflow_dispatch' ||
-          (github.event.workflow_run.conclusion == 'success' &&
-           github.event.workflow_run.event == 'push' &&
-           startsWith(github.event.workflow_run.head_branch, 'v') &&
-           !contains(github.event.workflow_run.head_branch, '-')) }}
+      ${{ !cancelled() &&
+          (github.event_name == 'workflow_dispatch' ||
+           needs.release.outputs.uploaded == 'true') }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

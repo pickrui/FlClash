@@ -87,6 +87,18 @@ void main() {
       );
     },
   );
+  test('packaging output hides app defines and Flutter define lists', () {
+    const lines = [
+      '--build-dart-define=BASE_DOMAIN=fixture.invalid',
+      'flutter build apk --dart-define=SPARE_API_DOMAIN=fixture.invalid',
+      '[ +3 ms] -dDartDefines=fixture.invalid -dTrackWidgetCreation=false',
+      '    DART_DEFINES = fixture.invalid',
+    ];
+    for (final line in lines) {
+      expect(redactBuildOutput(line), isNot(contains('fixture.invalid')));
+    }
+    expect(redactBuildOutput('APP_ENV=pre'), 'APP_ENV=pre');
+  });
   test('normal and failing command diagnostics redact linker inputs', () {
     final secrets = CoreBuildSecrets.load(rootDir: root.path, environment: env);
     final text =

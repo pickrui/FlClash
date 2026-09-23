@@ -1,5 +1,7 @@
 SHELL := /bin/bash
 include tool/go_build_tags.env
+# The release harness builds with this toolchain; GOTOOLCHAIN=local overrides it.
+GOTOOLCHAIN ?= go1.26.8
 
 .PHONY: help submodules hooks analyze format lint test test-go test-rust test-all
 
@@ -36,7 +38,7 @@ test:
 	dart tool/run_tests.dart $(FLUTTER_TEST_ARGS)
 
 test-go:
-	cd core && CGO_ENABLED=0 go test -tags $(GO_TAGS) ./...
+	cd core && GOTOOLCHAIN=$(GOTOOLCHAIN) CGO_ENABLED=0 go test -tags $(GO_TAGS) ./...
 
 test-rust:
 	cargo test --manifest-path plugins/rust_api/rust/Cargo.toml

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import '../../setup.dart' as setup;
@@ -42,5 +43,30 @@ void main() {
       'one argument with spaces',
     ], runInShell: false);
     expect(output.readAsStringSync(), 'one argument with spaces');
+  });
+
+  test('build commands hide secret environment entries', () async {
+    final lines = <String>[];
+    await runZoned(
+      () => setup.Build.exec(
+        ['dart', '--version'],
+        environment: {
+          'PROFILE_KEY': ' fixture-secret',
+          'EXTRA_DEFINE': 'v2:Zml4dHVyZQ==',
+          'FLUTTER_XCODE_ARCHS': 'arm64',
+        },
+        runInShell: false,
+      ),
+      zoneSpecification: ZoneSpecification(
+        print: (self, parent, zone, line) => lines.add(line),
+      ),
+    );
+    expect(
+      lines,
+      contains(
+        'env: PROFILE_KEY=<redacted> EXTRA_DEFINE=<redacted> '
+        'FLUTTER_XCODE_ARCHS=arm64',
+      ),
+    );
   });
 }

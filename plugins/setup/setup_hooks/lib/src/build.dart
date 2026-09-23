@@ -67,7 +67,7 @@ class BuildReport {
 /// The Helper embeds the Core's SHA256, so the Core is built first.
 Future<BuildReport> buildPlatform(BuildRequest request) {
   final target = request.target;
-  final config = BuildConfig.load(rootDir: request.rootDir);
+  const config = BuildConfig.release;
   final outDir = p.join(request.rootDir, config.outputDir, target.platformDir);
   return withArtifactTransaction(
     rootDir: request.rootDir,
@@ -137,16 +137,12 @@ Future<BuildReport> _buildPlatform(BuildRequest request) async {
     rootDir: rootDir,
     requireSecrets: request.requireSecrets,
   );
-  final config = BuildConfig.load(
-    rootDir: rootDir,
-  ).withCoreSecrets(secrets.ldflags);
+  final config = BuildConfig.release.withCoreSecrets(secrets.ldflags);
   final cache = BuildCache(rootDir: rootDir);
   final notice = BuildNotice();
   final harnessInputs = <String>[
     secrets.path,
     p.join(rootDir, 'pubspec.yaml'),
-    if (File(p.join(rootDir, 'build_config.yaml')).existsSync())
-      p.join(rootDir, 'build_config.yaml'),
     ...switch (request.harnessDir) {
       null => const <String>[],
       final dir => collectPackageInputs(dir),

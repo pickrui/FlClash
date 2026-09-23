@@ -90,16 +90,17 @@ Future<void> runCommandStream(
     includeParentEnvironment: true,
     runInShell: Platform.isWindows,
   );
-  process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen(
-    (line) {
-      if (line.isNotEmpty) _log.info(redactBuildOutput(line));
-    },
-  );
-  process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen(
-    (line) {
-      if (line.isNotEmpty) _log.warning(redactBuildOutput(line));
-    },
-  );
+  Future<void> forward(Stream<List<int>> stream, void Function(String) log) =>
+      stream
+          .transform(const Utf8Decoder(allowMalformed: true))
+          .transform(const LineSplitter())
+          .forEach((line) {
+            if (line.isNotEmpty) log(redactBuildOutput(line));
+          });
+  await Future.wait([
+    forward(process.stdout, _log.info),
+    forward(process.stderr, _log.warning),
+  ]);
   final exitCode = await process.exitCode;
   if (exitCode != 0) {
     throw CommandFailedException(

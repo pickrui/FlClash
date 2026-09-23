@@ -1,11 +1,3 @@
-import 'dart:io';
-
-import 'package:logging/logging.dart';
-import 'package:path/path.dart' as p;
-import 'package:yaml/yaml.dart';
-
-final _log = Logger('options');
-
 class BuildConfig {
   const BuildConfig({
     required this.tags,
@@ -42,7 +34,9 @@ class BuildConfig {
   final String helperDir;
   final String helperName;
 
-  static const _defaults = BuildConfig(
+  /// The only build configuration: packaging paths are fixed in CMake, Gradle
+  /// and Xcode, and test/lint/go_build_tags_test.dart pins [tags].
+  static const release = BuildConfig(
     tags: 'with_gvisor,with_mips_low_memory',
     goLdflags: '-w -s -buildid=',
     coreDir: 'core',
@@ -52,26 +46,6 @@ class BuildConfig {
     helperDir: 'services/helper',
     helperName: 'FlClashHelperService',
   );
-
-  static BuildConfig load({required String rootDir}) {
-    final file = File(p.join(rootDir, 'build_config.yaml'));
-    if (!file.existsSync()) {
-      _log.fine('No build_config.yaml found, using defaults');
-      return _defaults;
-    }
-    final yaml = loadYaml(file.readAsStringSync()) as YamlMap?;
-    if (yaml == null) return _defaults;
-    return BuildConfig(
-      tags: yaml['tags'] as String? ?? _defaults.tags,
-      goLdflags: yaml['go_ldflags'] as String? ?? _defaults.goLdflags,
-      coreDir: yaml['core_dir'] as String? ?? _defaults.coreDir,
-      coreName: yaml['core_name'] as String? ?? _defaults.coreName,
-      libName: yaml['lib_name'] as String? ?? _defaults.libName,
-      outputDir: yaml['output_dir'] as String? ?? _defaults.outputDir,
-      helperDir: yaml['helper_dir'] as String? ?? _defaults.helperDir,
-      helperName: yaml['helper_name'] as String? ?? _defaults.helperName,
-    );
-  }
 
   Map<String, String> toFingerprintMap() => {
     'tags': tags,

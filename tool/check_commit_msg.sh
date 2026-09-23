@@ -7,8 +7,10 @@ message_file="${1:?commit message file is required}"
 # The subject and the body have to be cut from the same text, or they overlap:
 # `git commit --cleanup=verbatim` and hook-written templates leave blank lines
 # above the subject, and a body taken as "everything from line two" then
-# contains the subject itself.
-cleaned="$(grep -v '^#' "$message_file" | sed '/[^[:space:]]/,$!d' || true)"
+# contains the subject itself. `git commit -v` appends the staged diff below
+# the scissors line, and git drops it only after this hook has run.
+cleaned="$(sed '/^# -\{24\} >8 -\{24\}$/,$d' "$message_file" | grep -v '^#' |
+  sed '/[^[:space:]]/,$!d' || true)"
 
 subject="$(head -n 1 <<<"$cleaned")"
 

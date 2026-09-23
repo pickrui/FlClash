@@ -149,8 +149,7 @@ class GoBuilder {
     if (target.isLib) {
       env
         ..['CGO_ENABLED'] = '1'
-        ..['CC'] = _resolveCc(target)
-        ..['CFLAGS'] = '-O3 -Werror';
+        ..['CC'] = _resolveCc(target);
     } else {
       env['CGO_ENABLED'] = '0';
     }
