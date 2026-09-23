@@ -375,6 +375,67 @@ void main() {
         expect(setupAction.applies, 1);
         await expectBuilds(tester, raw, next);
       });
+
+      testWidgets(
+        '$action is refused when a chain avoiding it closes a cycle',
+        (tester) async {
+          final raw = <String, dynamic>{
+            'proxies': [
+              {'name': 'HK', 'type': 'ss', 'dialer-proxy': 'Y'},
+              {'name': 'Z', 'type': 'ss', 'dialer-proxy': 'HK'},
+              {'name': 'Y', 'type': 'ss'},
+            ],
+            'proxy-groups': [
+              {
+                'name': 'Proxy',
+                'type': 'select',
+                'proxies': ['HK', 'Z', 'Y'],
+              },
+            ],
+            'rules': ['MATCH,Proxy'],
+          };
+          final cycleProfile = profile.copyWith(
+            proxyChains: const [
+              ProxyChain(id: 20, name: 'Chain', proxies: ['Z', 'Y']),
+            ],
+          );
+          final setupAction = _SetupAction(rawConfig: raw);
+          final (profiles, messages) = await _pump(
+            tester,
+            setupAction,
+            cycleProfile,
+          );
+
+          await perform(tester);
+
+          expect(messages, [_l10n.proxyChainConflictTip('Y')]);
+          final next = profiles.state.single;
+          expect(next, cycleProfile);
+          expect(setupAction.applies, 0);
+          await expectBuilds(tester, raw, next);
+        },
+      );
+
+      testWidgets('$action is kept when no enabled chain is left to conflict', (
+        tester,
+      ) async {
+        final raw = rawConfig('Y');
+        (raw['proxies'] as List)[2] = {
+          'name': 'Y',
+          'type': 'ss',
+          'dialer-proxy': 'HK',
+        };
+        final setupAction = _SetupAction(rawConfig: raw);
+        final (profiles, messages) = await _pump(tester, setupAction, profile);
+
+        await perform(tester);
+
+        expect(messages, [_l10n.proxyChainRelatedChainsUpdated]);
+        final next = profiles.state.single;
+        expect(next.proxyChains.single.enable, isFalse);
+        expect(setupAction.applies, 1);
+        await expectBuilds(tester, raw, next);
+      });
     }
   });
 
