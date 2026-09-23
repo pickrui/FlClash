@@ -263,6 +263,8 @@ class RulesDao extends DatabaseAccessor<Database> with _$RulesDaoMixin {
 
   /// Lists show the largest key first and a reorder derives its key from both
   /// neighbours, so a list with missing or duplicate keys is rekeyed in place.
+  /// Such links used to reach the core in insertion order, so ties follow the
+  /// rowid to keep the routing already in effect.
   Future<void> repairOrders() async {
     final profileIds = await customSelect(
       'SELECT profile_id FROM profile_rule_mapping '
@@ -280,7 +282,7 @@ class RulesDao extends DatabaseAccessor<Database> with _$RulesDaoMixin {
                 ..where(_listFilter(profileId))
                 ..orderBy([
                   OrderingTerm.desc(profileRuleLinks.order),
-                  OrderingTerm.desc(profileRuleLinks.id),
+                  OrderingTerm.asc(profileRuleLinks.rowId),
                 ]))
               .map((row) => row.read(profileRuleLinks.id)!)
               .get();

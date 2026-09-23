@@ -135,7 +135,7 @@ void main() {
   });
 
   test(
-    'reopening rekeys lists with missing or duplicate keys as shown',
+    'reopening rekeys lists with missing or duplicate keys in core order',
     () async {
       final temp = await Directory.systemTemp.createTemp('flclash_rules_');
       addTearDown(() => temp.delete(recursive: true));
@@ -156,11 +156,9 @@ void main() {
       await legacy
           .update(legacy.profileRuleLinks)
           .write(const ProfileRuleLinksCompanion(order: Value(null)));
-      await legacy.rulesDao.orderGlobalRule(ruleId: 1, order: 'a0');
+      await legacy.rulesDao.orderGlobalRule(ruleId: 2, order: 'a0');
       await legacy.rulesDao.orderProfileAddedRule(1, ruleId: 4, order: 'a0');
       await legacy.rulesDao.orderProfileAddedRule(1, ruleId: 5, order: 'a0');
-      final shownBefore = await legacy.rulesDao.allGlobalAddedRules().get();
-      final profileBefore = await legacy.rulesDao.allProfileAddedRules(1).get();
       await legacy.close();
 
       final reopened = Database(NativeDatabase(file));
@@ -168,11 +166,8 @@ void main() {
       final shown = await reopened.rulesDao.allGlobalAddedRules().get();
       final profile = await reopened.rulesDao.allProfileAddedRules(1).get();
 
-      expect(shown.map((rule) => rule.id), shownBefore.map((rule) => rule.id));
-      expect(
-        profile.map((rule) => rule.id),
-        profileBefore.map((rule) => rule.id),
-      );
+      expect(shown.map((rule) => rule.id), [2, 1, 3]);
+      expect(profile.map((rule) => rule.id), [4, 5]);
       for (final list in [shown, profile]) {
         final keys = list.map((rule) => rule.order).toList();
         expect(keys, everyElement(isNotNull));
@@ -180,10 +175,57 @@ void main() {
       }
       expect(
         (await reopened.rulesDao.allAddedRules(1).get()).map((rule) => rule.id),
-        [...profile.map((rule) => rule.id), ...shown.map((rule) => rule.id)],
+        [4, 5, 2, 1, 3],
       );
     },
   );
+
+  test('reopening keeps never reordered rules in insertion order', () async {
+    final temp = await Directory.systemTemp.createTemp('flclash_rules_');
+    addTearDown(() => temp.delete(recursive: true));
+    final file = File('${temp.path}/database.sqlite');
+    final legacy = Database(NativeDatabase(file));
+    for (final (id, value) in [(2, 'A'), (3, 'B'), (1, 'C')]) {
+      await legacy.rulesDao.putGlobalRule(Rule(id: id, value: value));
+    }
+    await legacy
+        .update(legacy.profileRuleLinks)
+        .write(const ProfileRuleLinksCompanion(order: Value(null)));
+    await legacy.close();
+
+    final reopened = Database(NativeDatabase(file));
+    addTearDown(reopened.close);
+    final applied = await reopened.rulesDao.allAddedRules(1).get();
+    final shown = await reopened.rulesDao.allGlobalAddedRules().get();
+    await reopened.rulesDao.repairOrders();
+
+    expect(applied.map((rule) => rule.value), ['A', 'B', 'C']);
+    expect(shown.map((rule) => rule.value), ['A', 'B', 'C']);
+    expect(await reopened.rulesDao.allGlobalAddedRules().get(), shown);
+  });
+
+  test('restoring unkeyed rules keeps their backup order', () async {
+    await database.restore(
+      const [],
+      const [],
+      const [
+        Rule(id: 2, value: 'A'),
+        Rule(id: 3, value: 'B'),
+        Rule(id: 1, value: 'C'),
+      ],
+      const [
+        ProfileRuleLink(ruleId: 2),
+        ProfileRuleLink(ruleId: 3),
+        ProfileRuleLink(ruleId: 1),
+      ],
+    );
+
+    final applied = await database.rulesDao.allAddedRules(1).get();
+    final shown = await database.rulesDao.allGlobalAddedRules().get();
+
+    expect(applied.map((rule) => rule.value), ['A', 'B', 'C']);
+    expect(shown.map((rule) => rule.value), ['A', 'B', 'C']);
+  });
 
   test('reopening drops rules left behind by a deleted profile', () async {
     final temp = await Directory.systemTemp.createTemp('flclash_rules_');
