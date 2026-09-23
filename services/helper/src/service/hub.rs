@@ -351,19 +351,7 @@ fn start(start_params: StartParams) -> warp::reply::Response {
         Ok(mut child) => {
             let process_id = child.id();
             if let Some(stderr) = child.stderr.take() {
-                let reader = io::BufReader::new(stderr);
-                thread::spawn(move || {
-                    for line in reader.lines() {
-                        match line {
-                            Ok(output) => {
-                                log_message(output);
-                            }
-                            Err(_) => {
-                                break;
-                            }
-                        }
-                    }
-                });
+                thread::spawn(move || forward_core_stderr(io::BufReader::new(stderr)));
             }
             *managed = Some(ManagedCore {
                 session_id: start_params.session_id.clone(),
@@ -431,6 +419,19 @@ fn stop_core(stop_params: StopParams) -> warp::reply::Response {
                 )
             }
         },
+    }
+}
+
+/// Reads to EOF: once the pipe closes, the Go Core's next stderr write on Linux kills it (SIGPIPE).
+fn forward_core_stderr(reader: impl BufRead) {
+    for line in reader.split(b'\n') {
+        let Ok(mut line) = line else {
+            break;
+        };
+        if line.last() == Some(&b'\r') {
+            line.pop();
+        }
+        log_message(String::from_utf8_lossy(&line).into_owned());
     }
 }
 
@@ -915,6 +916,15 @@ mod tests {
         assert_eq!(core.session_id, "fedcba9876543210fedcba9876543210");
         assert!(core.child.try_wait().unwrap().is_none());
         release_managed_core(&mut managed).unwrap();
+    }
+
+    #[test]
+    fn core_stderr_keeps_flowing_past_invalid_utf8() {
+        forward_core_stderr(&b"stderr \xff byte\r\nstderr after the bad byte\n"[..]);
+
+        let logs = LOGS.lock().unwrap();
+        assert!(logs.iter().any(|line| line == "stderr \u{fffd} byte"));
+        assert!(logs.iter().any(|line| line == "stderr after the bad byte"));
     }
 
     #[test]

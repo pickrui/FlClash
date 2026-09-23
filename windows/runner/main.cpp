@@ -23,8 +23,11 @@ std::wstring LegacySingleInstanceMutexName() {
   return name;
 }
 
+// The title alone also matches an Explorer window opened on the install
+// folder, which carries the same name.
 bool ActivateExistingInstance() {
-  HWND existing_window = ::FindWindowW(nullptr, kWindowTitle);
+  HWND existing_window =
+      ::FindWindowW(Win32Window::kWindowClassName, kWindowTitle);
   if (existing_window == nullptr) {
     return false;
   }

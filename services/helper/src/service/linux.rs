@@ -7,7 +7,7 @@ use std::ffi::{OsStr, OsString};
 use std::fs;
 use std::future::Future;
 use std::io::{Error, ErrorKind, Seek, SeekFrom};
-use std::os::unix::fs::{FileTypeExt, MetadataExt, PermissionsExt};
+use std::os::unix::fs::{FileTypeExt, MetadataExt, OpenOptionsExt, PermissionsExt};
 use std::path::{Path, PathBuf};
 use std::pin::Pin;
 use std::process::{Command, Stdio};
@@ -260,7 +260,10 @@ impl Drop for InstalledFiles {
                 if self.previous.contains(&name) {
                     // Replacing the inode also works while the old service runs.
                     if let Err(error) = fs::rename(self.backup.join(name), destination.join(name)) {
-                        log_message(format!("Helper rollback failed for {name}: {error}"));
+                        eprintln!(
+                            "Helper rollback failed for {name}: {error}; the previous copy is kept in {}",
+                            self.backup.display()
+                        );
                         return; // Keep the backup for recovery.
                     }
                 } else {
@@ -272,15 +275,55 @@ impl Drop for InstalledFiles {
     }
 }
 
+fn is_core_sha256(value: &str) -> bool {
+    value.len() == 64
+        && value
+            .bytes()
+            .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
+}
+
+/// Serializes installs so one run's cleanup cannot remove the copy that
+/// another run is staging or has just activated.
+fn lock_installations(root: &Path) -> Result<fs::File> {
+    fs::create_dir_all(root)?;
+    secure_directory(root)?;
+    let lock = fs::OpenOptions::new()
+        .write(true)
+        .create(true)
+        .truncate(false)
+        .mode(0o600)
+        .open(root.join(".install.lock"))?;
+    lock.lock().context("wait for another Helper install")?;
+    Ok(lock)
+}
+
+/// Every Core build stages under its own hash, so a committed upgrade leaves
+/// the previous copy behind in a directory only root can clean up.
+fn remove_stale_installations(root: &Path, current: &Path) {
+    let Ok(entries) = fs::read_dir(root) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        let is_directory = entry.file_type().is_ok_and(|kind| kind.is_dir());
+        if !is_directory || path == current || !is_core_sha256(&entry.file_name().to_string_lossy())
+        {
+            continue;
+        }
+        if let Err(error) = fs::remove_dir_all(&path) {
+            eprintln!(
+                "could not remove the previous Helper copy {}: {error}",
+                path.display()
+            );
+        }
+    }
+}
+
 fn stage_installation(executable: &Path) -> Result<InstalledFiles> {
     use crate::service::hub::{expected_core_sha256, verify_installation_core};
     ensure_core_sha256_configured()?;
     let sha = expected_core_sha256();
-    if sha.len() != 64
-        || !sha
-            .bytes()
-            .all(|b| b.is_ascii_hexdigit() && !b.is_ascii_uppercase())
-    {
+    if !is_core_sha256(sha) {
         bail!("invalid embedded Core SHA256");
     }
     let root = Path::new(INSTALL_ROOT);
@@ -362,6 +405,7 @@ fn install_service() -> Result<()> {
     let executable = std::env::current_exe().context("resolve helper executable path")?;
     let owner = invoking_owner()?;
     ensure_unit_is_free_for(owner)?;
+    let _lock = lock_installations(Path::new(INSTALL_ROOT))?;
     let installed = stage_installation(&executable)?;
     let previous = fs::read(UNIT_PATH).ok();
     write_unit(unit_contents(&installed.executable, owner).as_bytes())?;
@@ -383,7 +427,11 @@ fn install_service() -> Result<()> {
         }
         return Err(error);
     }
+    let current = installed.executable.parent().map(Path::to_path_buf);
     installed.commit();
+    if let Some(current) = current {
+        remove_stale_installations(Path::new(INSTALL_ROOT), &current);
+    }
     Ok(())
 }
 
@@ -555,6 +603,34 @@ mod tests {
         );
         assert!(!directory.join("backup").exists());
         fs::remove_dir_all(directory).unwrap();
+    }
+
+    #[test]
+    fn a_committed_upgrade_removes_only_previous_core_copies() {
+        let root = std::env::temp_dir().join(format!("helper-prune-{}", std::process::id()));
+        let current = root.join("a".repeat(64));
+        let previous = root.join("b".repeat(64));
+        let unrelated = root.join("keep");
+        for directory in [&current, &previous, &unrelated] {
+            fs::create_dir_all(directory.join("nested")).unwrap();
+        }
+        fs::write(root.join("c".repeat(64)), b"not a directory").unwrap();
+
+        remove_stale_installations(&root, &current);
+
+        assert!(current.exists());
+        assert!(!previous.exists());
+        assert!(unrelated.exists());
+        assert!(root.join("c".repeat(64)).exists());
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn core_sha256_names_are_lowercase_hex_digests() {
+        assert!(is_core_sha256(&"0f".repeat(32)));
+        assert!(!is_core_sha256(&"0F".repeat(32)));
+        assert!(!is_core_sha256(&"0f".repeat(31)));
+        assert!(!is_core_sha256(""));
     }
 
     #[test]

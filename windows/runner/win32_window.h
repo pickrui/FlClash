@@ -12,6 +12,8 @@
 // rendering and input handling
 class Win32Window {
  public:
+  static constexpr wchar_t kWindowClassName[] = L"FLUTTER_RUNNER_WIN32_WINDOW";
+
   struct Point {
     unsigned int x;
     unsigned int y;

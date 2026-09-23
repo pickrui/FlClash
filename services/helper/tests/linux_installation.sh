@@ -47,7 +47,17 @@ grep 'OWNER_UID=1001' "$unit"
 cp "$fixture/previous.unit" "$unit"
 # Reinstall succeeds, and removing the transient AppImage does not break it.
 "$helper" install
+# A Core upgrade stages under the new hash and drops the previous copy.
+previous="$(dirname "$installed")"
+printf '#!/bin/sh\nexit 1\n' > "$fixture/App Image 100%/FlClashCore"
+export CORE_SHA256=$(sha256sum "$fixture/App Image 100%/FlClashCore" | cut -d ' ' -f 1)
+cargo build --locked --offline
+cp target/debug/helper "$fixture/App Image 100%/FlClashHelperService"
+installed="/usr/local/libexec/flclash/$CORE_SHA256/FlClashHelperService"
+"$helper" install
+[ -x "$installed" ] && [ ! -e "$previous" ]
+grep -F "ExecStart=\"$installed\"" "$unit"
 rm -rf "$fixture/App Image 100%"
 "$installed" uninstall
 [ ! -e "$unit" ] && [ ! -e /usr/local/libexec/flclash ]
-echo 'Linux installation, same-Core rollback, owner isolation and AppImage removal passed'
+echo 'Linux installation, same-Core rollback, owner isolation, upgrade cleanup and AppImage removal passed'
