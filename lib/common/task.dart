@@ -1342,8 +1342,16 @@ Future<MigrationData> _restoreTask(VM3<String, String, String> paths) async {
   final restoreConfigMap =
       json.decode(await restoreConfigFile.readAsString())
           as Map<String, Object?>?;
-  final version = restoreConfigMap?['version'] ?? 0;
-  MigrationData migrationData = MigrationData(configMap: restoreConfigMap);
+  final version = switch (restoreConfigMap?['version']) {
+    final num value => value.toInt(),
+    _ => 0,
+  };
+  // Settings version 2 narrowed 172.2*; a user's later re-add must survive.
+  MigrationData migrationData = MigrationData(
+    configMap: version < 2
+        ? narrowLegacy172Bypass(restoreConfigMap)
+        : restoreConfigMap,
+  );
   if (version == 0 && restoreConfigMap != null) {
     if (!_isLegacyBackupConfig(restoreConfigMap)) {
       throw appLocalizations.invalidBackupFile;
@@ -1355,7 +1363,9 @@ Future<MigrationData> _restoreTask(VM3<String, String, String> paths) async {
       targetPath: legacyOutputPath,
       livePath: homeDirPath,
     );
-    return migrationData;
+    return migrationData.copyWith(
+      configMap: narrowLegacy172Bypass(migrationData.configMap),
+    );
   }
   final backupDatabaseFile = File(join(restoreDirPath, backupDatabaseName));
   sqlite.sqlite3.tempDirectory = restoreDirPath;

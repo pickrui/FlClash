@@ -748,6 +748,91 @@ void main() {
       expect(migration.rules, isEmpty);
       expect(migration.links, isEmpty);
     });
+
+    group('172.2* bypass', () {
+      const narrowed172 = [
+        '172.20.*',
+        '172.21.*',
+        '172.22.*',
+        '172.23.*',
+        '172.24.*',
+        '172.25.*',
+        '172.26.*',
+        '172.27.*',
+        '172.28.*',
+        '172.29.*',
+      ];
+
+      Future<List<Object?>?> restoredBypass(
+        Map<String, Object?> config, {
+        bool withDatabase = true,
+      }) async {
+        final root = await Directory.systemTemp.createTemp('restore_bypass_');
+        addTearDown(() => root.delete(recursive: true));
+        File? databaseFile;
+        if (withDatabase) {
+          databaseFile = File('${root.path}/$backupDatabaseName');
+          final database = Database(NativeDatabase(databaseFile));
+          await database.profilesDao.all().get();
+          await database.close();
+        }
+        final backup = await createBackup(
+          root,
+          config,
+          databaseFile: databaseFile,
+        );
+        final migration = await restoreTask(
+          backup,
+          '${root.path}/restore',
+          '${root.path}/live',
+        );
+        final networkProps = migration.configMap?['networkProps'] as Map?;
+        return networkProps?['bypassDomain'] as List<Object?>?;
+      }
+
+      test('a version-1 backup is narrowed in place', () async {
+        final bypass = await restoredBypass({
+          'version': 1,
+          'networkProps': {
+            'bypassDomain': ['corp.example', '172.19.*', '172.2*', '192.168.*'],
+          },
+        });
+
+        expect(bypass, [
+          'corp.example',
+          '172.19.*',
+          ...narrowed172,
+          '192.168.*',
+        ]);
+      });
+
+      test('a legacy version-0 backup is narrowed as well', () async {
+        final bypass = await restoredBypass({
+          'profiles': <Object?>[],
+          'scripts': <Object?>[],
+          'rules': <Object?>[],
+          'appSetting': <String, Object?>{},
+          'themeProps': <String, Object?>{},
+          'patchClashConfig': <String, Object?>{},
+          'networkProps': {
+            'bypassDomain': ['172.2*', 'localhost'],
+          },
+        }, withDatabase: false);
+
+        expect(bypass, [...narrowed172, 'localhost']);
+      });
+
+      test('a version-2 backup keeps a 172.2* the user added back', () async {
+        final bypass = await restoredBypass({
+          'version': 2,
+          'networkProps': {
+            'bypassDomain': [...narrowed172, '172.2*'],
+          },
+        });
+
+        expect(bypass, [...narrowed172, '172.2*']);
+      });
+    });
   });
 
   group('validateBackupDatabase', () {
