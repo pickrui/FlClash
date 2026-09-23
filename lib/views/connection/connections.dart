@@ -11,8 +11,13 @@ import 'item.dart';
 
 class ConnectionsView extends ConsumerStatefulWidget {
   final Future<List<TrackerInfo>> Function()? connectionsReader;
+  final CoreController? core;
 
-  const ConnectionsView({super.key, @visibleForTesting this.connectionsReader});
+  const ConnectionsView({
+    super.key,
+    @visibleForTesting this.connectionsReader,
+    @visibleForTesting this.core,
+  });
 
   @override
   ConsumerState<ConnectionsView> createState() => _ConnectionsViewState();
@@ -24,6 +29,9 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
     const TrackerInfosState(),
   );
   final ScrollController _scrollController = ScrollController();
+  int _refreshGeneration = 0;
+
+  CoreController get _core => widget.core ?? coreController;
 
   @override
   Duration get pollInterval => const Duration(seconds: 1);
@@ -31,10 +39,7 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
   List<Widget> _buildActions() {
     return [
       IconButton(
-        onPressed: () async {
-          coreController.closeConnections();
-          await _refreshConnections();
-        },
+        onPressed: () => _closeThenRefresh(_core.closeConnections()),
         icon: const Icon(Icons.delete_sweep_outlined),
       ),
     ];
@@ -56,8 +61,11 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
   Future<void> poll(PollGuard isCurrent) => _refreshConnections(isCurrent);
 
   Future<void> _refreshConnections([bool Function()? isCurrent]) async {
+    final generation = ++_refreshGeneration;
     final trackerInfos = await _readConnections();
-    if (trackerInfos == null || !(isCurrent?.call() ?? mounted)) {
+    if (trackerInfos == null ||
+        generation != _refreshGeneration ||
+        !(isCurrent?.call() ?? mounted)) {
       return;
     }
     _connectionsStateNotifier.value = _connectionsStateNotifier.value.copyWith(
@@ -70,7 +78,7 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
       final connectionsReader = widget.connectionsReader;
       return connectionsReader != null
           ? await connectionsReader()
-          : await coreController.getConnections();
+          : await _core.getConnections();
     } catch (error) {
       commonPrint.log(
         'updateConnections error: $error',
@@ -80,8 +88,11 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
     }
   }
 
-  Future<void> _handleBlockConnection(String id) async {
-    coreController.closeConnection(id);
+  Future<void> _closeThenRefresh(Future<void> close) async {
+    await close;
+    if (!mounted) {
+      return;
+    }
     await _refreshConnections();
   }
 
@@ -126,9 +137,8 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
                   visualDensity: VisualDensity.compact,
                   style: IconButton.styleFrom(minimumSize: Size.zero),
                   icon: const Icon(Icons.block),
-                  onPressed: () {
-                    _handleBlockConnection(trackerInfo.id);
-                  },
+                  onPressed: () =>
+                      _closeThenRefresh(_core.closeConnection(trackerInfo.id)),
                 ),
                 detailTitle: appLocalizations.details(
                   appLocalizations.connection,

@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/theme.dart';
+import 'package:fl_clash/core/controller.dart';
+import 'package:fl_clash/core/interface.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
@@ -10,6 +14,9 @@ import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+
+final class _MockCoreHandler extends Mock implements CoreHandlerInterface {}
 
 void main() {
   late ProviderContainer container;
@@ -45,6 +52,7 @@ void main() {
     WidgetTester tester, {
     required Future<List<TrackerInfo>> Function() connectionsReader,
     bool isPageActive = true,
+    CoreController? core,
   }) async {
     tester.view.physicalSize = const Size(600, 800);
     tester.view.devicePixelRatio = 1;
@@ -59,7 +67,10 @@ void main() {
         child: _TestApp(
           child: PageActivityScope(
             isActive: isPageActive,
-            child: ConnectionsView(connectionsReader: connectionsReader),
+            child: ConnectionsView(
+              connectionsReader: connectionsReader,
+              core: core,
+            ),
           ),
         ),
       ),
@@ -178,6 +189,92 @@ void main() {
     await tester.pump();
 
     expect(readCount, 2);
+    expect(tester.takeException(), null);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('ConnectionsView refreshes only after the Core closes', (
+    tester,
+  ) async {
+    final handler = _MockCoreHandler();
+    var connections = buildConnections(3);
+    var readCount = 0;
+    final closeAll = Completer<bool>();
+    final closeOne = Completer<bool>();
+    when(() => handler.closeConnections()).thenAnswer((_) => closeAll.future);
+    when(() => handler.closeConnection('0')).thenAnswer((_) => closeOne.future);
+
+    await pumpConnections(
+      tester,
+      connectionsReader: () async {
+        readCount++;
+        return connections;
+      },
+      core: CoreController.forTesting(handler: handler),
+    );
+    await tester.pump();
+    expect(readCount, 1);
+
+    await tester.tap(find.byIcon(Icons.block).first);
+    await tester.pump();
+    expect(readCount, 1);
+
+    connections = connections.sublist(1);
+    closeOne.complete(true);
+    await tester.pump();
+    expect(readCount, 2);
+    expect(find.text('tcp://host-0.com:443'), findsNothing);
+    expect(find.text('tcp://host-1.com:443'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.delete_sweep_outlined));
+    await tester.pump();
+    expect(readCount, 2);
+
+    connections = const [];
+    closeAll.complete(true);
+    await tester.pump();
+    expect(readCount, 3);
+    expect(find.byType(TrackerInfoItem), findsNothing);
+    expect(tester.takeException(), null);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('ConnectionsView drops a poll that ends after a later refresh', (
+    tester,
+  ) async {
+    final handler = _MockCoreHandler();
+    when(() => handler.closeConnections()).thenAnswer((_) async => true);
+    final reads = <Completer<List<TrackerInfo>>>[];
+
+    await pumpConnections(
+      tester,
+      connectionsReader: () {
+        final read = Completer<List<TrackerInfo>>();
+        reads.add(read);
+        return read.future;
+      },
+      core: CoreController.forTesting(handler: handler),
+    );
+    reads.single.complete(buildConnections(3));
+    await tester.pump();
+    expect(find.text('tcp://host-0.com:443'), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 1));
+    expect(reads, hasLength(2));
+
+    await tester.tap(find.byIcon(Icons.delete_sweep_outlined));
+    await tester.pump();
+    expect(reads, hasLength(3));
+
+    reads[2].complete(const []);
+    await tester.pump();
+    expect(find.byType(TrackerInfoItem), findsNothing);
+
+    reads[1].complete(buildConnections(3));
+    await tester.pump();
+    expect(find.byType(TrackerInfoItem), findsNothing);
     expect(tester.takeException(), null);
 
     await tester.pumpWidget(const SizedBox.shrink());

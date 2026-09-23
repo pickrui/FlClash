@@ -177,12 +177,15 @@ class CoreController {
     return _interface.getConnections();
   }
 
-  void closeConnection(String id) {
-    _detach(CoreMethod.closeConnection, () => _interface.closeConnection(id));
+  Future<void> closeConnection(String id) {
+    return _guarded(
+      CoreMethod.closeConnection,
+      () => _interface.closeConnection(id),
+    );
   }
 
-  void closeConnections() {
-    _detach(CoreMethod.closeConnections, _interface.closeConnections);
+  Future<void> closeConnections() {
+    return _guarded(CoreMethod.closeConnections, _interface.closeConnections);
   }
 
   void resetConnections() {
@@ -190,16 +193,18 @@ class CoreController {
   }
 
   void _detach(CoreMethod method, FutureOr<Object?> Function() call) {
-    unawaited(
-      Future<Object?>.sync(call).then<void>(
-        (_) {},
-        onError: (Object error) {
-          commonPrint.log(
-            'Core ${method.name} failed: $error',
-            logLevel: coreFailureLogLevel(error),
-          );
-        },
-      ),
+    unawaited(_guarded(method, call));
+  }
+
+  Future<void> _guarded(CoreMethod method, FutureOr<Object?> Function() call) {
+    return Future<Object?>.sync(call).then<void>(
+      (_) {},
+      onError: (Object error) {
+        commonPrint.log(
+          'Core ${method.name} failed: $error',
+          logLevel: coreFailureLogLevel(error),
+        );
+      },
     );
   }
 

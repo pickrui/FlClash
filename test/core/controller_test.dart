@@ -560,6 +560,33 @@ void main() {
     verify(() => handler.closeConnections()).called(1);
   });
 
+  test('closing a connection completes once the Core has closed it', () async {
+    final close = Completer<bool>();
+    when(() => handler.closeConnection('1')).thenAnswer((_) => close.future);
+    var completed = false;
+
+    final closing = controller.closeConnection('1').then((_) {
+      completed = true;
+    });
+    await pumpEventQueue();
+    expect(completed, isFalse);
+
+    close.complete(true);
+    await closing;
+    expect(completed, isTrue);
+  });
+
+  test('closing connections resolves normally when the Core fails', () async {
+    when(() => handler.closeConnections()).thenAnswer(
+      (_) async => throw const CoreMethodException(
+        code: 'transport_disconnected',
+        message: 'Core transport disconnected',
+      ),
+    );
+
+    await expectLater(controller.closeConnections(), completes);
+  });
+
   test(
     'validating edited data removes its temporary copy on failure',
     () async {
