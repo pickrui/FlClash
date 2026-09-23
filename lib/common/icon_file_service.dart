@@ -40,7 +40,6 @@ class IconFileService extends FileService {
   static HttpClientAdapter _defaultAdapter(String route) =>
       createFlClashHttpClientAdapter(
         findProxy: FlClashHttpOverrides.pinnedRoute(route),
-        allowBadCertificate: () => FlClashTemporaryTls.allowBadCertificate,
       );
 
   @override

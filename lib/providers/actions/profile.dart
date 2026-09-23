@@ -281,7 +281,7 @@ extension ProfilesControllerExt on AppController {
         Error.throwWithStackTrace(error, stackTrace);
       }
       try {
-        return await cloudApiService.runWithInsecureTls(action);
+        return await cloudApiService.runWithInsecureTls(error, action);
       } catch (retryError, retryStackTrace) {
         await _throwHandledCloudUnauthorized(
           retryError,

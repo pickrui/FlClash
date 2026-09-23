@@ -101,7 +101,7 @@ final _cloudHostResolver = HostResolver(
 HttpClientAdapter _createCloudApiAdapter() => CloudReadRouteAdapter(
   fallback: createFlClashHttpClientAdapter(
     findProxy: FlClashHttpOverrides.handleCloudApiFindProxy,
-    allowBadCertificate: () => FlClashTemporaryTls.allowBadCertificate,
+    allowCertificateRetry: true,
     resolver: _cloudHostResolver,
   ),
   createRouteAdapter: (route) => createFlClashHttpClientAdapter(
@@ -112,7 +112,7 @@ HttpClientAdapter _createCloudApiAdapter() => CloudReadRouteAdapter(
           ? 'DIRECT'
           : route;
     },
-    allowBadCertificate: () => FlClashTemporaryTls.allowBadCertificate,
+    allowCertificateRetry: true,
     resolver: _cloudHostResolver,
   ),
 );
@@ -445,6 +445,13 @@ class CloudApiException implements Exception {
     return appLocalizations.cloudApiDnsFailed;
   }
 
+  static TlsCertificateFailure? certificateFailure(Object error) {
+    if (error is CloudApiException && error.cause != null) {
+      return certificateFailure(error.cause!);
+    }
+    return FlClashTemporaryTls.failureFor(error);
+  }
+
   static bool isCertificateVerifyFailed(Object error) {
     if (error is CloudApiException && error.cause != null) {
       return isCertificateVerifyFailed(error.cause!);
@@ -656,13 +663,15 @@ class CloudApiService {
   bool get temporarilyAllowInsecureTls =>
       FlClashTemporaryTls.allowBadCertificate;
 
-  Future<T> runWithInsecureTls<T>(Future<T> Function() action) async {
-    return FlClashTemporaryTls.runWithBadCertificateAllowed(action);
+  Future<T> runWithInsecureTls<T>(Object error, Future<T> Function() action) {
+    final failure = CloudApiException.certificateFailure(error);
+    if (failure == null) throw StateError('Missing certificate retry target');
+    return FlClashTemporaryTls.runWithBadCertificateAllowed(failure, action);
   }
 
   Future<bool> confirmInsecureTlsRetry(Object error) async {
     if (temporarilyAllowInsecureTls ||
-        !CloudApiException.isCertificateVerifyFailed(error)) {
+        CloudApiException.certificateFailure(error) == null) {
       return false;
     }
 

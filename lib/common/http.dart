@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:fl_clash/common/common.dart';
@@ -20,21 +22,67 @@ String resolveResourceProxy({required bool isCoreRunning, required int port}) {
   return 'PROXY localhost:$port; DIRECT';
 }
 
+class TlsCertificateFailure implements Exception {
+  TlsCertificateFailure(X509Certificate certificate, String host, int port)
+    : origin = Uri(scheme: 'https', host: host.toLowerCase(), port: port),
+      fingerprint = sha256.convert(certificate.der).toString();
+
+  final Uri origin;
+  final String fingerprint;
+
+  bool matches(X509Certificate certificate, String host, int port) =>
+      origin.host == host.toLowerCase() &&
+      origin.port == port &&
+      fingerprint == sha256.convert(certificate.der).toString();
+
+  @override
+  String toString() => 'CERTIFICATE_VERIFY_FAILED';
+}
+
+class _TlsGrant {
+  _TlsGrant(this.failure);
+
+  final TlsCertificateFailure failure;
+  final releases = <void Function()>{};
+  bool active = true;
+
+  void revoke() {
+    active = false;
+    for (final release in releases.toList()) {
+      release();
+    }
+    releases.clear();
+  }
+}
+
 class FlClashTemporaryTls {
   const FlClashTemporaryTls._();
 
-  static int _badCertificateDepth = 0;
+  static final _zoneKey = Object();
+  static _TlsGrant? get _grant {
+    final grant = Zone.current[_zoneKey] as _TlsGrant?;
+    return grant?.active == true ? grant : null;
+  }
 
-  static bool get allowBadCertificate => _badCertificateDepth > 0;
+  static bool get allowBadCertificate => _grant != null;
+
+  static TlsCertificateFailure? failureFor(Object error) {
+    if (error is TlsCertificateFailure) return error;
+    if (error is DioException && error.error != null) {
+      return failureFor(error.error!);
+    }
+    return null;
+  }
 
   static Future<T> runWithBadCertificateAllowed<T>(
+    TlsCertificateFailure failure,
     Future<T> Function() action,
   ) async {
-    _badCertificateDepth++;
+    final grant = _TlsGrant(failure);
     try {
-      return await action();
+      return await runZoned(action, zoneValues: {_zoneKey: grant});
     } finally {
-      _badCertificateDepth--;
+      grant.revoke();
     }
   }
 
@@ -52,20 +100,22 @@ class FlClashTemporaryTls {
   }
 }
 
-IOHttpClientAdapter createFlClashHttpClientAdapter({
+HttpClientAdapter createFlClashHttpClientAdapter({
   required String Function(Uri uri) findProxy,
   bool Function()? allowBadCertificate,
+  bool allowCertificateRetry = false,
   String? Function()? userAgent,
   HostResolver? resolver,
 }) {
-  return _FlClashHttpClientAdapter(
+  IOHttpClientAdapter create(
+    bool Function(X509Certificate, String, int) onBadCertificate,
+  ) => _FlClashHttpClientAdapter(
     createHttpClient: () {
       final client = ProxyAuthenticatedHttpClient.wrap(
         HttpClient(),
         FlClashHttpOverrides.readProxyAuthentication,
       );
-      client.badCertificateCallback = (_, _, _) =>
-          allowBadCertificate?.call() ?? false;
+      client.badCertificateCallback = onBadCertificate;
       if (resolver != null) {
         client.connectionFactory = (uri, proxyHost, proxyPort) =>
             connectWithResolver(
@@ -73,7 +123,7 @@ IOHttpClientAdapter createFlClashHttpClientAdapter({
               proxyHost,
               proxyPort,
               resolver: resolver,
-              allowBadCertificate: allowBadCertificate,
+              onBadCertificate: onBadCertificate,
             );
       }
       client.findProxy = (uri) {
@@ -86,6 +136,100 @@ IOHttpClientAdapter createFlClashHttpClientAdapter({
       return client;
     },
   );
+  return allowCertificateRetry
+      ? _CertificateRetryAdapter(create)
+      : create((_, _, _) => allowBadCertificate?.call() ?? false);
+}
+
+class _CertificateRetryAdapter implements HttpClientAdapter {
+  _CertificateRetryAdapter(this._create);
+
+  final IOHttpClientAdapter Function(
+    bool Function(X509Certificate, String, int),
+  )
+  _create;
+  final _active = <HttpClientAdapter, void Function()>{};
+  bool _closed = false;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    if (_closed) throw StateError('Certificate retry adapter is closed');
+    final grant = FlClashTemporaryTls._grant;
+    TlsCertificateFailure? failure;
+    final adapter = _create((certificate, host, port) {
+      if (grant?.active == true &&
+          grant!.failure.matches(certificate, host, port)) {
+        return true;
+      }
+      failure = TlsCertificateFailure(certificate, host, port);
+      return false;
+    });
+    var released = false;
+    StreamSubscription<void>? cancellation;
+    void release() {
+      if (released) return;
+      released = true;
+      final subscription = cancellation;
+      if (subscription != null) unawaited(subscription.cancel());
+      _active.remove(adapter);
+      grant?.releases.remove(release);
+      adapter.close(force: true);
+    }
+
+    _active[adapter] = release;
+    grant?.releases.add(release);
+    cancellation = cancelFuture?.asStream().listen((_) => release());
+    try {
+      final response = await adapter.fetch(
+        options,
+        requestStream,
+        cancelFuture,
+      );
+      if (released) {
+        await response.stream.listen(null).cancel();
+        throw DioException.requestCancelled(
+          requestOptions: options,
+          reason: 'Certificate retry canceled',
+        );
+      }
+      final stream = response.stream;
+      response.stream = () async* {
+        try {
+          yield* stream;
+        } finally {
+          release();
+        }
+      }();
+      return response;
+    } catch (error) {
+      release();
+      if (failure != null &&
+          FlClashTemporaryTls.isCertificateVerifyFailed(error)) {
+        throw DioException.badCertificate(
+          requestOptions: options,
+          error: failure,
+        );
+      }
+      rethrow;
+    }
+  }
+
+  @override
+  void close({bool force = false}) {
+    if (_closed) return;
+    _closed = true;
+    for (final entry in _active.entries.toList()) {
+      if (force) {
+        entry.value();
+      } else {
+        entry.key.close();
+      }
+    }
+  }
 }
 
 /// Opens the connection over an address [resolver] chose. A direct HTTPS
@@ -98,7 +242,7 @@ Future<ConnectionTask<Socket>> connectWithResolver(
   String? proxyHost,
   int? proxyPort, {
   required HostResolver resolver,
-  bool Function()? allowBadCertificate,
+  bool Function(X509Certificate, String, int)? onBadCertificate,
 }) async {
   if (proxyHost != null) {
     // Never fall through to a direct connection for a proxied request.
@@ -121,7 +265,9 @@ Future<ConnectionTask<Socket>> connectWithResolver(
                 address,
                 port,
                 host: uri.host,
-                onBadCertificate: (_) => allowBadCertificate?.call() ?? false,
+                onBadCertificate: (certificate) =>
+                    onBadCertificate?.call(certificate, uri.host, port) ??
+                    false,
               )
             : Socket.startConnect(address, port));
         if (canceled) {
@@ -247,8 +393,6 @@ class FlClashHttpOverrides extends HttpOverrides {
       securityContext: context,
     );
     client.connectionTimeout = const Duration(seconds: 10);
-    client.badCertificateCallback = (_, _, _) =>
-        FlClashTemporaryTls.allowBadCertificate;
     client.findProxy = handleResourceFindProxy;
     return client;
   }

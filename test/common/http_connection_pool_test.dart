@@ -115,7 +115,22 @@ void main() {
       await request.response.close();
     }, onError: (_) {});
 
-    await FlClashTemporaryTls.runWithBadCertificateAllowed(() async {
+    final retryClient = Dio()
+      ..httpClientAdapter = createFlClashHttpClientAdapter(
+        findProxy: (_) => 'DIRECT',
+        allowCertificateRetry: true,
+      );
+    addTearDown(() => retryClient.close(force: true));
+    late TlsCertificateFailure failure;
+    try {
+      await retryClient.get<String>(
+        'https://localhost:${origin.port}/update.apk',
+      );
+      fail('Expected certificate rejection');
+    } on DioException catch (error) {
+      failure = FlClashTemporaryTls.failureFor(error)!;
+    }
+    await FlClashTemporaryTls.runWithBadCertificateAllowed(failure, () async {
       await HttpOverrides.runWithHttpOverrides(() async {
         final client = createAppUpdateDownloadClient();
         addTearDown(() => client.close(force: true));

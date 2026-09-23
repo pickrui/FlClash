@@ -71,7 +71,6 @@ class DAVClient {
             findProxy: route == null
                 ? FlClashHttpOverrides.handleResourceFindProxy
                 : FlClashHttpOverrides.pinnedRoute(route),
-            allowBadCertificate: () => FlClashTemporaryTls.allowBadCertificate,
           );
     result.c.httpClientAdapter = route == null
         ? adapter

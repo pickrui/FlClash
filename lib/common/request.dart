@@ -206,7 +206,6 @@ class Request {
     );
     dio.httpClientAdapter = createFlClashHttpClientAdapter(
       findProxy: FlClashHttpOverrides.handleFindProxy,
-      allowBadCertificate: () => FlClashTemporaryTls.allowBadCertificate,
     );
   }
 
@@ -285,8 +284,7 @@ class Request {
           routed.httpClientAdapter = BoundedHttpClientAdapter(
             createFlClashHttpClientAdapter(
               findProxy: FlClashHttpOverrides.pinnedRoute(path),
-              allowBadCertificate: () =>
-                  FlClashTemporaryTls.allowBadCertificate,
+              allowCertificateRetry: true,
               userAgent: isApiRequest
                   ? null
                   : () => appController.isAttach ? appController.ua : null,

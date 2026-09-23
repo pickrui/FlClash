@@ -36,7 +36,7 @@ Future<bool> submitCloudAuth(
       return false;
     }
     try {
-      await service.runWithInsecureTls(submit);
+      await service.runWithInsecureTls(error, submit);
       return true;
     } catch (retryError) {
       if (!CloudApiException.isHandledUnauthorized(retryError)) {
