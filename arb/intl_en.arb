@@ -893,11 +893,11 @@
   "updateLater": "Later",
   "updateCancelDownload": "Cancel download",
   "updateNotice": "New version detected",
-  "updateBuildNumber": "Build number: {buildNumber}",
-  "@updateBuildNumber": {
+  "updateVersionNumber": "Version: {version}",
+  "@updateVersionNumber": {
     "placeholders": {
-      "buildNumber": {
-        "type": "int"
+      "version": {
+        "type": "String"
       }
     }
   },

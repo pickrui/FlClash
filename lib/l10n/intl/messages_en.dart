@@ -135,7 +135,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m47(count) => "${count} items have been selected";
 
-  static String m48(buildNumber) => "Build number: ${buildNumber}";
+  static String m48(version) => "Version: ${version}";
 
   static String m49(label) => "${label} must be a url";
 
@@ -1767,7 +1767,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
       "An AppImage cannot be installed automatically. Replace the running program with the downloaded file; its folder has been opened.",
     ),
-    "updateBuildNumber": m48,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
       "Cancel download",
     ),
@@ -1810,6 +1809,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseNotesFailed": MessageLookupByLibrary.simpleMessage(
       "Could not load release notes. Please try again.",
     ),
+    "updateVersionNumber": m48,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("Upgrade plan"),
     "upload": MessageLookupByLibrary.simpleMessage("Upload"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),

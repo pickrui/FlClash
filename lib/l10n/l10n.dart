@@ -7634,13 +7634,13 @@ class AppLocalizations {
     );
   }
 
-  /// `Build number: {buildNumber}`
-  String updateBuildNumber(int buildNumber) {
+  /// `Version: {version}`
+  String updateVersionNumber(String version) {
     return Intl.message(
-      'Build number: $buildNumber',
-      name: 'updateBuildNumber',
+      'Version: $version',
+      name: 'updateVersionNumber',
       desc: '',
-      args: [buildNumber],
+      args: [version],
     );
   }
 

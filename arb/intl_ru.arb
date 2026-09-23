@@ -893,11 +893,11 @@
   "updateLater": "Позже",
   "updateCancelDownload": "Отменить загрузку",
   "updateNotice": "Обнаружена новая версия",
-  "updateBuildNumber": "Номер сборки: {buildNumber}",
-  "@updateBuildNumber": {
+  "updateVersionNumber": "Версия: {version}",
+  "@updateVersionNumber": {
     "placeholders": {
-      "buildNumber": {
-        "type": "int"
+      "version": {
+        "type": "String"
       }
     }
   },

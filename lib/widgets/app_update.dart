@@ -138,6 +138,10 @@ class _AppUpdatePageState extends State<AppUpdatePage> {
     final buildNumber = info.remoteBuildNumber > 0
         ? info.remoteBuildNumber
         : int.tryParse(info.version.split('+').last) ?? 0;
+    // The heading carries the tag alone; a report needs the build behind it.
+    final fullVersion = version == null || buildNumber <= 0
+        ? null
+        : '${version.substring(1)}+$buildNumber';
     return Scaffold(
       appBar: AppBar(title: Text(l.discovery)),
       body: Align(
@@ -155,12 +159,11 @@ class _AppUpdatePageState extends State<AppUpdatePage> {
                     children: [
                       if (version != null)
                         Text(version, style: context.textTheme.headlineSmall),
-                      if (buildNumber > 0) ...[
+                      if (fullVersion != null) ...[
                         const SizedBox(height: 8),
-                        Text(l.updateBuildNumber(buildNumber)),
+                        Text(l.updateVersionNumber(fullVersion)),
                       ],
-                      if (version != null || buildNumber > 0)
-                        const SizedBox(height: 24),
+                      if (version != null) const SizedBox(height: 24),
                       Text(
                         l.updateReleaseNotes,
                         style: context.textTheme.titleMedium,

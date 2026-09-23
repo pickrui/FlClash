@@ -135,7 +135,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m47(count) => "Выбрано ${count} элементов";
 
-  static String m48(buildNumber) => "Номер сборки: ${buildNumber}";
+  static String m48(version) => "Версия: ${version}";
 
   static String m49(label) => "${label} должен быть URL";
 
@@ -1854,7 +1854,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
       "AppImage нельзя установить автоматически. Замените текущую программу скачанным файлом; его папка открыта.",
     ),
-    "updateBuildNumber": m48,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
       "Отменить загрузку",
     ),
@@ -1899,6 +1898,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseNotesFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось загрузить список изменений. Повторите попытку.",
     ),
+    "updateVersionNumber": m48,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("Улучшить тариф"),
     "upload": MessageLookupByLibrary.simpleMessage("Загрузка"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),

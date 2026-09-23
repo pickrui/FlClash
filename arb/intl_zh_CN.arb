@@ -893,11 +893,11 @@
   "updateLater": "稍后",
   "updateCancelDownload": "取消下载",
   "updateNotice": "检测到新版本",
-  "updateBuildNumber": "构建号：{buildNumber}",
-  "@updateBuildNumber": {
+  "updateVersionNumber": "版本号：{version}",
+  "@updateVersionNumber": {
     "placeholders": {
-      "buildNumber": {
-        "type": "int"
+      "version": {
+        "type": "String"
       }
     }
   },

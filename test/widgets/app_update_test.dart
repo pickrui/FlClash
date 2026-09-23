@@ -97,9 +97,7 @@ void main() {
         expect(find.text('v0.8.98'), findsOneWidget);
         expect(
           find.text(
-            AppLocalizations.current.updateBuildNumber(
-              _release.remoteBuildNumber,
-            ),
+            AppLocalizations.current.updateVersionNumber('0.8.98+2026092110'),
           ),
           findsOneWidget,
         );
@@ -148,7 +146,9 @@ void main() {
     expect(find.byType(LinearProgressIndicator), findsOneWidget);
     expect(find.text('v0.8.98'), findsOneWidget);
     expect(
-      find.text(AppLocalizations.current.updateBuildNumber(2026092110)),
+      find.text(
+        AppLocalizations.current.updateVersionNumber('0.8.98+2026092110'),
+      ),
       findsOneWidget,
     );
     expect(
