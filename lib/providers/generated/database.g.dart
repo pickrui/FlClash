@@ -154,7 +154,7 @@ final class ProfilesProvider
   }
 }
 
-String _$profilesHash() => r'42e118dd33c20fcfb158df85bfcd7fe28ba4d143';
+String _$profilesHash() => r'990262e4114e19f8779889020eb153518995d752';
 
 abstract class _$Profiles extends $Notifier<List<Profile>> {
   List<Profile> build();
@@ -242,7 +242,7 @@ final class GlobalRulesProvider
   GlobalRules create() => GlobalRules();
 }
 
-String _$globalRulesHash() => r'61ed8b7b001f86f2e5c50e1acaa4d83f086eebc4';
+String _$globalRulesHash() => r'5b931144175e138e4c64133db7fd1d735211947c';
 
 abstract class _$GlobalRules extends $StreamNotifier<List<Rule>> {
   Stream<List<Rule>> build();
@@ -303,7 +303,7 @@ final class ProfileAddedRulesProvider
   }
 }
 
-String _$profileAddedRulesHash() => r'2ccf45cfc2ddd0747fe717b420b77d510ff061f0';
+String _$profileAddedRulesHash() => r'8070ac45ac5510a46cd729eb2297334219ff442f';
 
 final class ProfileAddedRulesFamily extends $Family
     with

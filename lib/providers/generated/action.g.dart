@@ -92,7 +92,7 @@ final class AppStateActionProvider
   }
 }
 
-String _$appStateActionHash() => r'a6cf447bbc3066507c1cf48773b6690eccbb337f';
+String _$appStateActionHash() => r'bd0455251e5dc3d4a123699245dfac844fae2eed';
 
 abstract class _$AppStateAction extends $Notifier<void> {
   void build();
