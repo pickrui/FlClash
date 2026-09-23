@@ -34,7 +34,8 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
 
   var _isCheckingService = false;
   var _healthCheckPending = false;
-  String? _serviceError;
+  Object? _serviceError;
+  bool _serviceCheckUsedTlsException = false;
   bool _checkedStatus = false;
 
   @override
@@ -53,49 +54,73 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
     });
   }
 
-  Future<void> _checkHealth() async {
+  Future<void> _checkHealth({Object? certificateError}) async {
     if (!mounted) return;
     if (_isCheckingService) {
-      _healthCheckPending = true;
+      if (certificateError == null) _healthCheckPending = true;
       return;
     }
-    setState(() {
-      _isCheckingService = true;
-      _serviceError = null;
-    });
-
-    // Coming back from a long spell in the background, the first request out is
-    // expected to fail: the connections pooled before the app was suspended are
-    // gone, and the core the request is proxied through may still be coming up.
-    // Give it one more go before blaming the service, so returning to this tab
-    // does not always greet the user with a connection error.
-    String? error;
-    for (var attempt = 0; attempt < _healthCheckAttempts; attempt++) {
-      try {
-        await ref.read(cloudServiceHealthCheckProvider)();
-        error = null;
-        break;
-      } catch (e) {
-        error = CloudApiException.clean(e);
+    setState(() => _isCheckingService = true);
+    try {
+      final service = CloudApiService();
+      if (certificateError != null) {
+        final allow = await service.confirmInsecureTlsRetry(certificateError);
+        if (!allow || !mounted) return;
       }
-      if (!mounted) return;
-      if (attempt < _healthCheckAttempts - 1) {
-        await Future<void>.delayed(_healthCheckRetryDelay);
-        if (!mounted) return;
-      }
-    }
-
-    if (mounted) {
       setState(() {
-        _isCheckingService = false;
-        _serviceError = error;
-        _checkedStatus = true;
+        _serviceError = null;
+        _serviceCheckUsedTlsException = false;
       });
-      if (_healthCheckPending) {
-        _healthCheckPending = false;
-        await _checkHealth();
+      Object? error;
+      for (var attempt = 0; attempt < _healthCheckAttempts; attempt++) {
+        try {
+          final check = ref.read(cloudServiceHealthCheckProvider);
+          if (certificateError != null) {
+            await service.runWithInsecureTls(certificateError, check);
+          } else {
+            await check();
+          }
+          error = null;
+          break;
+        } catch (e) {
+          error = e;
+        }
+        if (!mounted) return;
+        if (certificateError != null ||
+            CloudApiException.isCertificateVerifyFailed(error)) {
+          break;
+        }
+        if (attempt < _healthCheckAttempts - 1) {
+          await Future<void>.delayed(_healthCheckRetryDelay);
+          if (!mounted) return;
+        }
+      }
+      if (mounted) {
+        setState(() {
+          _serviceError = error;
+          _serviceCheckUsedTlsException =
+              certificateError != null && error == null;
+          _checkedStatus = true;
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isCheckingService = false);
+        if (_healthCheckPending) {
+          _healthCheckPending = false;
+          await _checkHealth();
+        }
       }
     }
+  }
+
+  String? get _serviceWarning {
+    if (_serviceError case final error?) {
+      return '${AppLocalizations.current.serviceCheckFailed}: ${CloudApiException.clean(error)}';
+    }
+    return _serviceCheckUsedTlsException
+        ? AppLocalizations.current.apiAvailableWithCertificateException
+        : null;
   }
 
   @override
@@ -105,6 +130,12 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
         accountState.isLoading ||
         accountState.isRefreshing ||
         accountState.isSyncing;
+
+    final serviceError = _serviceError;
+    final serviceWarning = _serviceWarning;
+    final canRetryCertificate =
+        serviceError != null &&
+        CloudApiException.certificateFailure(serviceError) != null;
 
     return CommonScaffold(
       title: AppLocalizations.current.loggedOutViewTitle, // oixCloud title text
@@ -150,18 +181,31 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
       ],
       body: Column(
         children: [
-          if (_serviceError case final error?)
+          if (serviceWarning != null)
             MaterialBanner(
               leading: Icon(
-                Icons.error_outline,
-                color: context.colorScheme.error,
+                serviceError != null
+                    ? Icons.error_outline
+                    : Icons.warning_amber,
+                color: serviceError != null
+                    ? context.colorScheme.error
+                    : Colors.orange,
               ),
-              content: Text(
-                '${AppLocalizations.current.serviceCheckFailed}: $error',
-              ),
+              content: Text(serviceWarning),
               actions: [
+                if (canRetryCertificate)
+                  TextButton(
+                    onPressed: _isCheckingService
+                        ? null
+                        : () => _checkHealth(certificateError: serviceError),
+                    child: Text(
+                      AppLocalizations
+                          .current
+                          .retryWithoutCertificateVerification,
+                    ),
+                  ),
                 TextButton(
-                  onPressed: _checkHealth,
+                  onPressed: _isCheckingService ? null : _checkHealth,
                   child: Text(AppLocalizations.current.checkApi),
                 ),
               ],
@@ -182,6 +226,9 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
     if (!_checkedStatus) {
       icon = Icons.help_outline;
       color = Colors.grey;
+    } else if (_serviceCheckUsedTlsException) {
+      icon = Icons.warning_amber;
+      color = Colors.orange;
     } else if (_serviceError == null) {
       icon = Icons.check_circle;
       color = Colors.green;
@@ -193,15 +240,12 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
     final String tooltip;
     if (_isCheckingService || !_checkedStatus) {
       tooltip = AppLocalizations.current.checkApi;
-    } else if (_serviceError == null) {
-      tooltip = AppLocalizations.current.apiAvailable;
     } else {
-      tooltip =
-          '${AppLocalizations.current.serviceCheckFailed}: $_serviceError';
+      tooltip = _serviceWarning ?? AppLocalizations.current.apiAvailable;
     }
 
     return IconButton(
-      icon: _isCheckingService
+      icon: _isCheckingService && _serviceError == null
           ? const SizedBox(
               width: 16,
               height: 16,

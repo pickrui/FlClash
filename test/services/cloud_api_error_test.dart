@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:fl_clash/common/http.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:flutter/widgets.dart' show Locale;
@@ -21,7 +22,12 @@ void main() {
     10051: 'Network unreachable',
     10065: 'Network unreachable',
     10013: 'Network access denied',
-    10049: 'Connection failed',
+    10049: 'Network address is unavailable',
+    10048: 'Network address or port is already in use',
+    10052: 'Connection reset',
+    10053: 'Connection aborted',
+    10024: 'Insufficient system network resources',
+    10055: 'Insufficient system network resources',
   }.entries) {
     test('Windows socket error ${entry.key} has a safe diagnosis', () {
       final error = _networkError(
@@ -108,10 +114,96 @@ void main() {
         const HandshakeException('Connection terminated during handshake'),
         type: DioExceptionType.unknown,
       );
-      expect(CloudApiException.clean(error), 'Direct: TLS handshake failed');
+      expect(
+        CloudApiException.clean(error),
+        'Direct: Connection closed before the TLS handshake completed',
+      );
       expect(CloudApiException.isCertificateVerifyFailed(error), isFalse);
     },
   );
+
+  for (final entry in {
+    'certificate has expired': 'Certificate has expired',
+    'CERT_HAS_EXPIRED': 'Certificate has expired',
+    'certificate is not yet valid': 'Certificate is not yet valid',
+    'CERT_NOT_YET_VALID': 'Certificate is not yet valid',
+    'certificate revoked': 'Certificate has been revoked',
+    'CERT_REVOKED': 'Certificate has been revoked',
+    'hostname mismatch': 'Certificate does not match the requested domain',
+    'IP address mismatch': 'Certificate does not match the requested domain',
+    'HOSTNAME_MISMATCH': 'Certificate does not match the requested domain',
+    'unable to get local issuer certificate':
+        'Certificate chain is not trusted',
+    'unable to verify the first certificate':
+        'Certificate chain is not trusted',
+    'self signed certificate in certificate chain':
+        'Certificate chain is not trusted',
+    'self-signed certificate': 'Certificate chain is not trusted',
+    'certificate not trusted': 'Certificate chain is not trusted',
+    'unspecified verification error': 'Certificate Verification Failed',
+  }.entries) {
+    test(
+      'certificate diagnostic classifies ${entry.key} without raw details',
+      () {
+        final cause = HandshakeException(
+          'CERTIFICATE_VERIFY_FAILED: ${entry.key}; private-api.example secret-token',
+        );
+        final error = _networkError(cause, type: DioExceptionType.unknown);
+        expect(CloudApiException.clean(error), 'Direct: ${entry.value}');
+        expect(CloudApiException.clean(cause), entry.value);
+        expect(
+          CloudApiException.clean(Exception(cause.toString())),
+          entry.value,
+        );
+        final wrapped = CloudApiException(
+          CloudApiException.clean(error),
+          cause: error,
+        );
+        expect(CloudApiException.certificateMessage(wrapped), entry.value);
+      },
+    );
+  }
+
+  for (final entry in {
+    DioExceptionType.cancel: 'Request canceled',
+    DioExceptionType.connectionTimeout: 'Connection timed out',
+    DioExceptionType.badResponse:
+        'Service is temporarily unavailable (HTTP 503)',
+  }.entries) {
+    test('${entry.key} cannot be reclassified by certificate text', () {
+      final error = DioException(
+        requestOptions: _options(),
+        type: entry.key,
+        message: 'CERTIFICATE_VERIFY_FAILED: certificate has expired',
+        response: entry.key == DioExceptionType.badResponse
+            ? Response(requestOptions: _options(), statusCode: 503)
+            : null,
+      );
+      expect(CloudApiException.clean(error), 'Direct: ${entry.value}');
+      expect(CloudApiException.isCertificateVerifyFailed(error), isFalse);
+    });
+  }
+
+  test('untyped Dio metadata cannot invent a certificate failure', () {
+    final error = DioException(
+      requestOptions: _options(),
+      message: 'CERTIFICATE_VERIFY_FAILED: certificate has expired',
+    );
+    expect(CloudApiException.clean(error), 'Direct: Unknown network error');
+    expect(CloudApiException.isCertificateVerifyFailed(error), isFalse);
+  });
+
+  test('request metadata cannot decide the certificate failure category', () {
+    final error = DioException.badCertificate(
+      requestOptions: RequestOptions(
+        path: 'https://api.test/certificate has expired',
+      ),
+    );
+    expect(
+      CloudApiException.certificateReason(error),
+      TlsCertificateFailureReason.unknown,
+    );
+  });
 
   test(
     'localized certificate diagnostics preserve the original certificate cause',
@@ -168,19 +260,155 @@ void main() {
     expect(CloudApiException.isUnauthorized(wrapped), isFalse);
   });
 
-  test('HTTP errors show status without leaking the request or response', () {
-    final options = _options();
-    final error = DioException(
-      requestOptions: options,
-      type: DioExceptionType.badResponse,
-      response: Response(
-        requestOptions: options,
-        statusCode: 503,
-        data: 'secret-token private-api.example',
-      ),
+  for (final entry in {
+    400: 'Server rejected the request as invalid',
+    403: 'Access forbidden',
+    404: 'Requested API or resource was not found',
+    405: 'Request method is not allowed',
+    408: 'Server timed out receiving the request',
+    413: 'Request exceeds the server size limit',
+    429: 'Too many requests; try again later',
+    500: 'Internal server error',
+    502: 'Gateway received an invalid upstream response',
+    503: 'Service is temporarily unavailable',
+    504: 'Gateway timed out waiting for the upstream server',
+    511: 'This network requires sign-in before access',
+  }.entries) {
+    test(
+      'HTTP ${entry.key} retains its meaning and hides response contents',
+      () {
+        final options = _options();
+        final error = DioException(
+          requestOptions: options,
+          type: DioExceptionType.badResponse,
+          response: Response(
+            requestOptions: options,
+            statusCode: entry.key,
+            data: 'secret-token private-api.example',
+          ),
+        );
+        expect(
+          CloudApiException.clean(error),
+          'Direct: ${entry.value} (HTTP ${entry.key})',
+        );
+        expect(CloudApiException.isUnauthorized(error), isFalse);
+      },
     );
-    expect(CloudApiException.clean(error), 'Direct: Server returned HTTP 503');
+  }
+
+  for (final entry in {
+    'WRONG_VERSION_NUMBER': 'Incompatible TLS protocol or invalid TLS response',
+    'tlsv1 alert protocol version':
+        'Incompatible TLS protocol or invalid TLS response',
+    'UNSUPPORTED_PROTOCOL': 'Incompatible TLS protocol or invalid TLS response',
+    'NO_SHARED_CIPHER': 'TLS cryptographic algorithm negotiation failed',
+    'no suitable signature algorithm':
+        'TLS cryptographic algorithm negotiation failed',
+    'UNEXPECTED_EOF_WHILE_READING':
+        'Connection closed before the TLS handshake completed',
+    'sslv3 alert handshake failure': 'TLS handshake failed',
+  }.entries) {
+    test('TLS ${entry.key} stays separate from certificate errors', () {
+      final error = _networkError(
+        HandshakeException('${entry.key} private-api.example secret-token'),
+        type: DioExceptionType.unknown,
+      );
+      expect(CloudApiException.clean(error), 'Direct: ${entry.value}');
+      expect(CloudApiException.isCertificateVerifyFailed(error), isFalse);
+      expect(CloudApiException.certificateFailure(error), isNull);
+    });
+  }
+
+  for (final entry in {
+    'Connection closed before full header was received':
+        'Connection closed before the full response was received',
+    'Connection closed before full body was received':
+        'Connection closed before the full response was received',
+    'Connection closed while receiving data':
+        'Connection closed before the full response was received',
+    'Invalid response line private-api.example secret-token':
+        'Invalid server response',
+    'Invalid header field name, with secret-token': 'Invalid server response',
+  }.entries) {
+    test('HTTP transport distinguishes ${entry.key}', () {
+      final error = HttpException(
+        entry.key,
+        uri: Uri.parse('https://private-api.example?token=secret-token'),
+      );
+      expect(CloudApiException.clean(error), entry.value);
+      expect(
+        CloudApiException.clean(_networkError(error)),
+        'Direct: ${entry.value}',
+      );
+    });
+  }
+
+  for (final entry in {
+    'Redirect loop detected': 'Server redirects form a loop',
+    'Redirect limit exceeded': 'Too many server redirects',
+    'Server response has no Location header for redirect':
+        'Server redirect is invalid',
+  }.entries) {
+    test('redirect errors distinguish ${entry.key}', () {
+      final error = RedirectException(entry.key, const []);
+      expect(CloudApiException.clean(error), entry.value);
+      expect(
+        CloudApiException.clean(_networkError(error)),
+        'Direct: ${entry.value}',
+      );
+    });
+  }
+
+  test(
+    'response size limits stay distinct from invalid data and retain no body',
+    () {
+      const oversized = FormatException('HTTP response exceeds size limit');
+      const invalid = FormatException(
+        'Unexpected private-api.example',
+        'secret-token',
+      );
+      expect(
+        CloudApiException.clean(oversized),
+        'Server response exceeds the allowed size',
+      );
+      expect(
+        CloudApiException.clean(_networkError(oversized)),
+        'Direct: Server response exceeds the allowed size',
+      );
+      expect(CloudApiException.clean(invalid), 'Invalid server response');
+    },
+  );
+
+  test('unknown HTTP status stays numeric', () {
+    final error = DioException.badResponse(
+      statusCode: 418,
+      requestOptions: _options(),
+      response: Response(requestOptions: _options(), statusCode: 418),
+    );
+    expect(CloudApiException.clean(error), 'Direct: Server returned HTTP 418');
   });
+
+  for (final entry in {
+    'Software caused connection abort': 'Connection aborted',
+    "Can't assign requested address": 'Network address is unavailable',
+    'Address already in use': 'Network address or port is already in use',
+    'Too many open files': 'Insufficient system network resources',
+    'No buffer space available': 'Insufficient system network resources',
+  }.entries) {
+    test(
+      'socket text classifies ${entry.key} without guessing platform errno',
+      () {
+        final error = SocketException(
+          entry.key,
+          osError: const OSError('private-api.example secret-token', 9999),
+        );
+        expect(
+          CloudApiException.clean(error),
+          '${entry.value} (System error 9999)',
+        );
+      },
+    );
+  }
 
   test(
     'invalid and unknown transport data cannot leak through generic messages',
@@ -221,14 +449,14 @@ void main() {
     });
   }
 
-  test('a 403 without a known reason keeps the plain status', () {
+  test('a 403 without a known reason reports denial and keeps its status', () {
     expect(
       CloudApiException.clean(_forbidden()),
-      'Direct: Server returned HTTP 403',
+      'Direct: Access forbidden (HTTP 403)',
     );
     expect(
       CloudApiException.clean(_forbidden(reason: 'something_else')),
-      'Direct: Server returned HTTP 403',
+      'Direct: Access forbidden (HTTP 403)',
     );
   });
 }

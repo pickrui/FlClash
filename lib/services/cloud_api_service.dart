@@ -285,8 +285,10 @@ class CloudApiException implements Exception {
       return _cleanDioException(error);
     }
     if (error is SocketException) return _socketError(error);
+    if (error is TlsCertificateFailure) return certificateMessage(error);
     if (error is TlsException) return _transportError(error);
     if (error is HttpException) return _transportError(error);
+    if (error is FormatException) return _formatError(error);
     if (error is TimeoutException) return appLocalizations.cloudApiTimeout;
     if (error is CloudApiException) {
       return _cleanMessage(error.message);
@@ -303,37 +305,85 @@ class CloudApiException implements Exception {
         (error.response?.data is Map && error.response?.data['ret'] == 401)) {
       return 'Unauthorized';
     }
-    final reason = isCertificateVerifyFailed(error)
-        ? appLocalizations.invalidCertificateTitle
-        : switch (error.type) {
-            DioExceptionType.connectionTimeout =>
-              appLocalizations.cloudApiConnectTimeout,
-            DioExceptionType.sendTimeout =>
-              appLocalizations.cloudApiSendTimeout,
-            DioExceptionType.receiveTimeout =>
-              appLocalizations.cloudApiReceiveTimeout,
-            DioExceptionType.badCertificate =>
-              appLocalizations.invalidCertificateTitle,
-            DioExceptionType.badResponse =>
-              error.response?.statusCode == 407
-                  ? appLocalizations.cloudApiProxyAuthFailed
-                  : _managedAuthError(error.response) ??
-                        appLocalizations.cloudApiHttpError(
-                          error.response?.statusCode ?? '?',
-                        ),
-            DioExceptionType.cancel => appLocalizations.cloudApiRequestCanceled,
-            DioExceptionType.connectionError ||
-            DioExceptionType.unknown => _transportError(
-              error.error,
-              connectionError: error.type == DioExceptionType.connectionError,
-            ),
-          };
+    final reason = switch (error.type) {
+      DioExceptionType.connectionTimeout =>
+        appLocalizations.cloudApiConnectTimeout,
+      DioExceptionType.sendTimeout => appLocalizations.cloudApiSendTimeout,
+      DioExceptionType.receiveTimeout =>
+        appLocalizations.cloudApiReceiveTimeout,
+      DioExceptionType.badCertificate => certificateMessage(error),
+      DioExceptionType.badResponse =>
+        _managedAuthError(error.response) ??
+            _httpStatusError(error.response?.statusCode),
+      DioExceptionType.cancel => appLocalizations.cloudApiRequestCanceled,
+      DioExceptionType.connectionError ||
+      DioExceptionType.unknown => _transportError(
+        error.error,
+        connectionError: error.type == DioExceptionType.connectionError,
+      ),
+    };
     final route = error.requestOptions.extra[cloudReadRouteExtraKey];
     if (route == 'DIRECT') return appLocalizations.cloudApiRouteDirect(reason);
     if (route is String && route.startsWith('PROXY ')) {
       return appLocalizations.cloudApiRouteProxy(reason);
     }
     return reason;
+  }
+
+  static String _httpStatusError(int? status) {
+    if (status == HttpStatus.proxyAuthenticationRequired) {
+      return appLocalizations.cloudApiProxyAuthFailed;
+    }
+    final reason = switch (status) {
+      HttpStatus.badRequest => appLocalizations.cloudApiBadRequest,
+      HttpStatus.forbidden => appLocalizations.cloudApiForbidden,
+      HttpStatus.notFound => appLocalizations.cloudApiNotFound,
+      HttpStatus.methodNotAllowed => appLocalizations.cloudApiMethodNotAllowed,
+      HttpStatus.requestTimeout =>
+        appLocalizations.cloudApiServerRequestTimeout,
+      HttpStatus.requestEntityTooLarge =>
+        appLocalizations.cloudApiRequestTooLarge,
+      HttpStatus.tooManyRequests => appLocalizations.cloudApiRateLimited,
+      HttpStatus.internalServerError => appLocalizations.cloudApiServerError,
+      HttpStatus.badGateway => appLocalizations.cloudApiBadGateway,
+      HttpStatus.serviceUnavailable =>
+        appLocalizations.cloudApiServiceUnavailable,
+      HttpStatus.gatewayTimeout => appLocalizations.cloudApiGatewayTimeout,
+      HttpStatus.networkAuthenticationRequired =>
+        appLocalizations.cloudApiNetworkAuthRequired,
+      _ => null,
+    };
+    return reason == null
+        ? appLocalizations.cloudApiHttpError(status ?? '?')
+        : '$reason (HTTP $status)';
+  }
+
+  static String _formatError(FormatException error) =>
+      error.message == 'HTTP response exceeds size limit'
+      ? appLocalizations.cloudApiResponseTooLarge
+      : appLocalizations.cloudApiInvalidResponse;
+
+  static String _tlsError(TlsException error) {
+    final message = '${error.message} ${error.osError?.message ?? ''}'
+        .toLowerCase()
+        .replaceAll('_', ' ');
+    if (message.contains('wrong version number') ||
+        message.contains('unsupported protocol') ||
+        message.contains('alert protocol version')) {
+      return appLocalizations.cloudApiTlsProtocolFailed;
+    }
+    if (message.contains('no shared cipher') ||
+        message.contains('no ciphers available') ||
+        message.contains('no suitable signature algorithm')) {
+      return appLocalizations.cloudApiTlsAlgorithmFailed;
+    }
+    if (error is HandshakeException &&
+        (message.contains('connection terminated during handshake') ||
+            message.contains('connection closed during handshake') ||
+            message.contains('unexpected eof'))) {
+      return appLocalizations.cloudApiTlsInterrupted;
+    }
+    return appLocalizations.cloudApiTlsFailed;
   }
 
   /// The panel names why it rejected a signed managed-config request; a bare
@@ -357,12 +407,17 @@ class CloudApiException implements Exception {
   static String _transportError(Object? error, {bool connectionError = false}) {
     if (error is SocketException) return _socketError(error);
     if (isCertificateVerifyFailed(error ?? '')) {
-      return appLocalizations.invalidCertificateTitle;
+      return certificateMessage(error!);
     }
-    if (error is TlsException) return appLocalizations.cloudApiTlsFailed;
+    if (error is TlsException) return _tlsError(error);
     if (error is TimeoutException) return appLocalizations.cloudApiTimeout;
-    if (error is FormatException) {
-      return appLocalizations.cloudApiInvalidResponse;
+    if (error is FormatException) return _formatError(error);
+    if (error is RedirectException) {
+      return switch (error.message) {
+        'Redirect loop detected' => appLocalizations.cloudApiRedirectLoop,
+        'Redirect limit exceeded' => appLocalizations.cloudApiRedirectLimit,
+        _ => appLocalizations.cloudApiRedirectInvalid,
+      };
     }
     if (error is HttpException) {
       final proxyStatus = RegExp(
@@ -372,6 +427,16 @@ class CloudApiException implements Exception {
       if (proxyStatus == '407') return appLocalizations.cloudApiProxyAuthFailed;
       if (proxyStatus != null) {
         return '${appLocalizations.cloudApiProxyFailed} (HTTP $proxyStatus)';
+      }
+      if (error.message.startsWith('Connection closed before') ||
+          error.message == 'Connection closed while receiving data') {
+        return appLocalizations.cloudApiResponseInterrupted;
+      }
+      if (error.message.startsWith('Invalid response') ||
+          error.message.startsWith('Invalid header') ||
+          error.message.startsWith('Failed to parse HTTP') ||
+          error.message.contains('in HTTP header')) {
+        return appLocalizations.cloudApiInvalidResponse;
       }
       return appLocalizations.cloudApiConnectionFailed;
     }
@@ -392,7 +457,10 @@ class CloudApiException implements Exception {
       reason = dns;
     } else if (code == 10061 || message.contains('connection refused')) {
       reason = appLocalizations.cloudApiConnectionRefused;
-    } else if (code == 10054 ||
+    } else if (code == 10053 || message.contains('connection abort')) {
+      reason = appLocalizations.cloudApiConnectionAborted;
+    } else if (code == 10052 ||
+        code == 10054 ||
         message.contains('connection reset') ||
         message.contains('broken pipe')) {
       reason = appLocalizations.cloudApiConnectionReset;
@@ -402,6 +470,17 @@ class CloudApiException implements Exception {
         message.contains('network is unreachable') ||
         message.contains('no route to host')) {
       reason = appLocalizations.cloudApiNetworkUnreachable;
+    } else if (code == 10049 ||
+        message.contains('cannot assign requested address') ||
+        message.contains("can't assign requested address")) {
+      reason = appLocalizations.cloudApiAddressUnavailable;
+    } else if (code == 10048 || message.contains('address already in use')) {
+      reason = appLocalizations.cloudApiAddressInUse;
+    } else if (code == 10024 ||
+        code == 10055 ||
+        message.contains('too many open files') ||
+        message.contains('no buffer space available')) {
+      reason = appLocalizations.cloudApiNetworkResourcesExhausted;
     } else if (code == 10013 || message.contains('permission denied')) {
       reason = appLocalizations.cloudApiAccessDenied;
     } else {
@@ -445,6 +524,30 @@ class CloudApiException implements Exception {
     return appLocalizations.cloudApiDnsFailed;
   }
 
+  static TlsCertificateFailureReason certificateReason(Object error) {
+    if (error is CloudApiException && error.cause != null) {
+      return certificateReason(error.cause!);
+    }
+    return TlsCertificateFailure.reasonFor(error);
+  }
+
+  static String certificateMessage(Object error) {
+    return switch (certificateReason(error)) {
+      TlsCertificateFailureReason.expired =>
+        appLocalizations.certificateExpired,
+      TlsCertificateFailureReason.notYetValid =>
+        appLocalizations.certificateNotYetValid,
+      TlsCertificateFailureReason.revoked =>
+        appLocalizations.certificateRevoked,
+      TlsCertificateFailureReason.hostnameMismatch =>
+        appLocalizations.certificateHostnameMismatch,
+      TlsCertificateFailureReason.untrusted =>
+        appLocalizations.certificateUntrusted,
+      TlsCertificateFailureReason.unknown =>
+        appLocalizations.invalidCertificateTitle,
+    };
+  }
+
   static TlsCertificateFailure? certificateFailure(Object error) {
     if (error is CloudApiException && error.cause != null) {
       return certificateFailure(error.cause!);
@@ -462,7 +565,7 @@ class CloudApiException implements Exception {
   static String _cleanMessage(String value) {
     var message = Secrets.redactApiDomains(value.trim());
     if (FlClashTemporaryTls.isCertificateVerifyFailed(message)) {
-      return appLocalizations.invalidCertificateTitle;
+      return certificateMessage(message);
     }
     final prefixes = [
       RegExp(r'^_?Excep(?:t)?ion[:：]\s*', caseSensitive: false),
@@ -675,9 +778,17 @@ class CloudApiService {
       return false;
     }
 
+    final reason = CloudApiException.certificateReason(error);
     final allow = await globalState.showMessage(
-      title: appLocalizations.invalidCertificateTitle,
-      message: TextSpan(text: appLocalizations.invalidCertificateContent),
+      title: CloudApiException.certificateMessage(error),
+      message: TextSpan(
+        text: [
+          appLocalizations.invalidCertificateContent,
+          if (reason == TlsCertificateFailureReason.expired ||
+              reason == TlsCertificateFailureReason.notYetValid)
+            appLocalizations.certificateValidityHint,
+        ].join('\n\n'),
+      ),
       confirmText: appLocalizations.allowTemporarily,
       cancelText: appLocalizations.cancel,
     );

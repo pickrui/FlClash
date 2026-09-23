@@ -132,6 +132,37 @@ void main() {
     await other.close(force: true);
   });
 
+  test('TLS rejection retains the category exposed by the platform', () async {
+    final raw = HttpClient()..badCertificateCallback = (_, _, _) => false;
+    addTearDown(() => raw.close(force: true));
+    try {
+      await raw.getUrl(target);
+      fail('Untrusted certificate was accepted');
+    } on HandshakeException catch (error) {
+      expect(failure.reason, TlsCertificateFailure.reasonFor(error));
+      expect(failure.toString(), 'CERTIFICATE_VERIFY_FAILED');
+    }
+  });
+
+  test(
+    'definitive request errors cannot authorize an embedded certificate',
+    () {
+      for (final type in [
+        DioExceptionType.cancel,
+        DioExceptionType.connectionTimeout,
+        DioExceptionType.badResponse,
+      ]) {
+        final error = DioException(
+          requestOptions: RequestOptions(path: target.toString()),
+          type: type,
+          error: failure,
+        );
+        expect(FlClashTemporaryTls.isCertificateVerifyFailed(error), isFalse);
+        expect(FlClashTemporaryTls.failureFor(error), isNull);
+      }
+    },
+  );
+
   test(
     'a shared adapter isolates the retry from concurrent requests',
     () async {

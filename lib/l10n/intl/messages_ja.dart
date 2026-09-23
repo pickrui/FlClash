@@ -180,6 +180,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "amountPayable": MessageLookupByLibrary.simpleMessage("今回のお支払い"),
     "announcement": MessageLookupByLibrary.simpleMessage("お知らせ"),
     "apiAvailable": MessageLookupByLibrary.simpleMessage("APIサービスは正常です"),
+    "apiAvailableWithCertificateException":
+        MessageLookupByLibrary.simpleMessage(
+          "今回の確認では証明書検証のスキップを許可して API に接続できました。「APIをチェック」で接続を再検証してください。",
+        ),
     "app": MessageLookupByLibrary.simpleMessage("アプリ"),
     "appAccessControl": MessageLookupByLibrary.simpleMessage("アプリアクセス制御"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage("システムDNSを追加"),
@@ -256,6 +260,22 @@ class MessageLookup extends MessageLookupByLibrary {
     "calculatingQuote": MessageLookupByLibrary.simpleMessage("計算中…"),
     "cancel": MessageLookupByLibrary.simpleMessage("キャンセル"),
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage("全選択解除"),
+    "certificateExpired": MessageLookupByLibrary.simpleMessage(
+      "証明書の有効期限が切れています",
+    ),
+    "certificateHostnameMismatch": MessageLookupByLibrary.simpleMessage(
+      "証明書が接続先ドメインと一致しません",
+    ),
+    "certificateNotYetValid": MessageLookupByLibrary.simpleMessage(
+      "証明書はまだ有効ではありません",
+    ),
+    "certificateRevoked": MessageLookupByLibrary.simpleMessage("証明書は失効しています"),
+    "certificateUntrusted": MessageLookupByLibrary.simpleMessage(
+      "証明書チェーンを信頼できません",
+    ),
+    "certificateValidityHint": MessageLookupByLibrary.simpleMessage(
+      "まずシステムの日付と時刻を同期してください。時刻が正しい場合は、サーバー証明書の修正が必要です。",
+    ),
     "checkApi": MessageLookupByLibrary.simpleMessage("APIをチェック"),
     "checkRouting": MessageLookupByLibrary.simpleMessage("設定を確認"),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("更新を確認"),
@@ -274,11 +294,26 @@ class MessageLookup extends MessageLookupByLibrary {
     "cloudApiAccessDenied": MessageLookupByLibrary.simpleMessage(
       "ネットワークへのアクセスが拒否されました",
     ),
+    "cloudApiAddressInUse": MessageLookupByLibrary.simpleMessage(
+      "ネットワークアドレスまたはポートは使用中です",
+    ),
+    "cloudApiAddressUnavailable": MessageLookupByLibrary.simpleMessage(
+      "ネットワークアドレスを利用できません",
+    ),
+    "cloudApiBadGateway": MessageLookupByLibrary.simpleMessage(
+      "ゲートウェイが上流から無効な応答を受信しました",
+    ),
+    "cloudApiBadRequest": MessageLookupByLibrary.simpleMessage(
+      "サーバーがリクエストを無効と判断しました",
+    ),
     "cloudApiClockSkew": MessageLookupByLibrary.simpleMessage(
       "端末の時計がサーバーとずれすぎています。日時の自動設定をオンにして再試行してください。",
     ),
     "cloudApiConnectTimeout": MessageLookupByLibrary.simpleMessage(
       "接続がタイムアウトしました",
+    ),
+    "cloudApiConnectionAborted": MessageLookupByLibrary.simpleMessage(
+      "接続が中止されました",
     ),
     "cloudApiConnectionFailed": MessageLookupByLibrary.simpleMessage(
       "接続に失敗しました",
@@ -298,12 +333,30 @@ class MessageLookup extends MessageLookupByLibrary {
     "cloudApiDnsUnknownHost": MessageLookupByLibrary.simpleMessage(
       "DNS がこのドメインを見つけられませんでした",
     ),
+    "cloudApiForbidden": MessageLookupByLibrary.simpleMessage(
+      "サーバーへのアクセスが拒否されました",
+    ),
+    "cloudApiGatewayTimeout": MessageLookupByLibrary.simpleMessage(
+      "ゲートウェイで上流サーバーの応答待ちがタイムアウトしました",
+    ),
     "cloudApiHttpError": m0,
     "cloudApiInvalidResponse": MessageLookupByLibrary.simpleMessage(
       "サーバー応答の形式が無効です",
     ),
+    "cloudApiMethodNotAllowed": MessageLookupByLibrary.simpleMessage(
+      "このリクエストメソッドは許可されていません",
+    ),
+    "cloudApiNetworkAuthRequired": MessageLookupByLibrary.simpleMessage(
+      "このネットワークでは接続前にログインが必要です",
+    ),
+    "cloudApiNetworkResourcesExhausted": MessageLookupByLibrary.simpleMessage(
+      "システムのネットワークリソースが不足しています",
+    ),
     "cloudApiNetworkUnreachable": MessageLookupByLibrary.simpleMessage(
       "ネットワークに到達できません",
+    ),
+    "cloudApiNotFound": MessageLookupByLibrary.simpleMessage(
+      "要求された API またはリソースが見つかりません",
     ),
     "cloudApiProxyAuthFailed": MessageLookupByLibrary.simpleMessage(
       "プロキシ認証に失敗しました（HTTP 407）",
@@ -311,27 +364,64 @@ class MessageLookup extends MessageLookupByLibrary {
     "cloudApiProxyFailed": MessageLookupByLibrary.simpleMessage(
       "プロキシ接続に失敗しました",
     ),
+    "cloudApiRateLimited": MessageLookupByLibrary.simpleMessage(
+      "リクエストが多すぎます。しばらくしてから再試行してください",
+    ),
     "cloudApiReceiveTimeout": MessageLookupByLibrary.simpleMessage(
       "サーバー応答がタイムアウトしました",
     ),
+    "cloudApiRedirectInvalid": MessageLookupByLibrary.simpleMessage(
+      "サーバーのリダイレクトが無効です",
+    ),
+    "cloudApiRedirectLimit": MessageLookupByLibrary.simpleMessage(
+      "サーバーのリダイレクト回数が多すぎます",
+    ),
+    "cloudApiRedirectLoop": MessageLookupByLibrary.simpleMessage(
+      "サーバーのリダイレクトがループしています",
+    ),
     "cloudApiRequestCanceled": MessageLookupByLibrary.simpleMessage(
       "リクエストがキャンセルされました",
+    ),
+    "cloudApiRequestTooLarge": MessageLookupByLibrary.simpleMessage(
+      "リクエストがサーバーのサイズ制限を超えています",
+    ),
+    "cloudApiResponseInterrupted": MessageLookupByLibrary.simpleMessage(
+      "応答の受信が完了する前に接続が切断されました",
+    ),
+    "cloudApiResponseTooLarge": MessageLookupByLibrary.simpleMessage(
+      "サーバーの応答が許容サイズを超えています",
     ),
     "cloudApiRouteDirect": m1,
     "cloudApiRouteProxy": m2,
     "cloudApiSendTimeout": MessageLookupByLibrary.simpleMessage(
       "リクエスト送信がタイムアウトしました",
     ),
+    "cloudApiServerError": MessageLookupByLibrary.simpleMessage("サーバー内部エラー"),
+    "cloudApiServerRequestTimeout": MessageLookupByLibrary.simpleMessage(
+      "サーバーでリクエストの受信がタイムアウトしました",
+    ),
     "cloudApiServerUnconfigured": MessageLookupByLibrary.simpleMessage(
       "サーバーにこのアプリの鍵が設定されていません。サポートにご連絡ください。",
+    ),
+    "cloudApiServiceUnavailable": MessageLookupByLibrary.simpleMessage(
+      "サービスは一時的に利用できません",
     ),
     "cloudApiSignatureRejected": MessageLookupByLibrary.simpleMessage(
       "サーバーがこのアプリの署名を拒否しました。公式の最新版を再インストールしてください。",
     ),
     "cloudApiSystemError": m3,
     "cloudApiTimeout": MessageLookupByLibrary.simpleMessage("リクエストがタイムアウトしました"),
+    "cloudApiTlsAlgorithmFailed": MessageLookupByLibrary.simpleMessage(
+      "TLS 暗号アルゴリズムのネゴシエーションに失敗しました",
+    ),
     "cloudApiTlsFailed": MessageLookupByLibrary.simpleMessage(
       "TLS ハンドシェイクに失敗しました",
+    ),
+    "cloudApiTlsInterrupted": MessageLookupByLibrary.simpleMessage(
+      "TLS ハンドシェイクの完了前に接続が切断されました",
+    ),
+    "cloudApiTlsProtocolFailed": MessageLookupByLibrary.simpleMessage(
+      "TLS プロトコルに互換性がないか、TLS 応答が無効です",
     ),
     "codeSent": MessageLookupByLibrary.simpleMessage("認証コードを送信しました"),
     "color": MessageLookupByLibrary.simpleMessage("カラー"),
@@ -868,7 +958,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "invalidAmount": MessageLookupByLibrary.simpleMessage("有効な金額を入力してください"),
     "invalidBackupFile": MessageLookupByLibrary.simpleMessage("無効なバックアップファイル"),
     "invalidCertificateContent": MessageLookupByLibrary.simpleMessage(
-      "サーバー証明書を検証できません。現在のネットワークとサーバーを信頼できる場合のみ、この再試行だけ検証をスキップできます",
+      "サーバー証明書を検証できません。検証をスキップすると、偽のサーバーに接続し、送受信するアカウント認証情報やサブスクリプションデータが盗まれたり改ざんされたりするおそれがあります。\n\n現在のネットワークとサーバーを信頼できる場合のみ続行してください。この例外は同じサーバーと証明書への今回の再試行にのみ適用され、操作が終わると検証が再開されます。",
     ),
     "invalidCertificateTitle": MessageLookupByLibrary.simpleMessage(
       "証明書の検証に失敗しました",
@@ -1270,6 +1360,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "restoreStrategy_compatible": MessageLookupByLibrary.simpleMessage("互換"),
     "restoreStrategy_override": MessageLookupByLibrary.simpleMessage("上書き"),
     "restoreSuccess": MessageLookupByLibrary.simpleMessage("復元に成功しました"),
+    "retryWithoutCertificateVerification": MessageLookupByLibrary.simpleMessage(
+      "検証をスキップして再試行",
+    ),
     "reverseEngineeringNotice": MessageLookupByLibrary.simpleMessage(
       "本アプリのリバースエンジニアリング、逆コンパイル、逆アセンブル、および AI を用いた解析を嚴禁します",
     ),

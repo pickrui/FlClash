@@ -22,13 +22,68 @@ String resolveResourceProxy({required bool isCoreRunning, required int port}) {
   return 'PROXY localhost:$port; DIRECT';
 }
 
+enum TlsCertificateFailureReason {
+  expired,
+  notYetValid,
+  revoked,
+  hostnameMismatch,
+  untrusted,
+  unknown,
+}
+
 class TlsCertificateFailure implements Exception {
   TlsCertificateFailure(X509Certificate certificate, String host, int port)
-    : origin = Uri(scheme: 'https', host: host.toLowerCase(), port: port),
+    : reason = TlsCertificateFailureReason.unknown,
+      origin = Uri(scheme: 'https', host: host.toLowerCase(), port: port),
       fingerprint = sha256.convert(certificate.der).toString();
+
+  TlsCertificateFailure._(this.origin, this.fingerprint, this.reason);
 
   final Uri origin;
   final String fingerprint;
+  final TlsCertificateFailureReason reason;
+
+  TlsCertificateFailure withVerificationError(Object error) =>
+      TlsCertificateFailure._(origin, fingerprint, reasonFor(error));
+
+  static TlsCertificateFailureReason reasonFor(Object error) {
+    if (error is TlsCertificateFailure) return error.reason;
+    if (error is DioException) {
+      return error.error == null
+          ? TlsCertificateFailureReason.unknown
+          : reasonFor(error.error!);
+    }
+    final message = error.toString().toLowerCase().replaceAll('_', ' ');
+    if (message.contains('certificate has expired') ||
+        message.contains('cert has expired')) {
+      return TlsCertificateFailureReason.expired;
+    }
+    if (message.contains('certificate is not yet valid') ||
+        message.contains('certificate not yet valid') ||
+        message.contains('cert not yet valid')) {
+      return TlsCertificateFailureReason.notYetValid;
+    }
+    if (message.contains('certificate revoked') ||
+        message.contains('cert revoked')) {
+      return TlsCertificateFailureReason.revoked;
+    }
+    if (message.contains('hostname mismatch') ||
+        message.contains('host name mismatch') ||
+        message.contains('ip address mismatch')) {
+      return TlsCertificateFailureReason.hostnameMismatch;
+    }
+    if (message.contains('unable to get local issuer certificate') ||
+        message.contains('unable to get issuer certificate') ||
+        message.contains('unable to verify the first certificate') ||
+        message.contains('unable to verify leaf signature') ||
+        message.contains('self signed certificate') ||
+        message.contains('self-signed certificate') ||
+        message.contains('certificate not trusted') ||
+        message.contains('cert untrusted')) {
+      return TlsCertificateFailureReason.untrusted;
+    }
+    return TlsCertificateFailureReason.unknown;
+  }
 
   bool matches(X509Certificate certificate, String host, int port) =>
       origin.host == host.toLowerCase() &&
@@ -68,7 +123,9 @@ class FlClashTemporaryTls {
 
   static TlsCertificateFailure? failureFor(Object error) {
     if (error is TlsCertificateFailure) return error;
-    if (error is DioException && error.error != null) {
+    if (error is DioException &&
+        error.error != null &&
+        isCertificateVerifyFailed(error)) {
       return failureFor(error.error!);
     }
     return null;
@@ -87,9 +144,13 @@ class FlClashTemporaryTls {
   }
 
   static bool isCertificateVerifyFailed(Object error) {
-    if (error is DioException &&
-        error.type == DioExceptionType.badCertificate) {
-      return true;
+    if (error is DioException) {
+      return switch (error.type) {
+        DioExceptionType.badCertificate => true,
+        DioExceptionType.connectionError || DioExceptionType.unknown =>
+          error.error != null && isCertificateVerifyFailed(error.error!),
+        _ => false,
+      };
     }
     final message = error.toString().toLowerCase();
     return message.contains('certificate_verify_failed') ||
@@ -211,7 +272,7 @@ class _CertificateRetryAdapter implements HttpClientAdapter {
           FlClashTemporaryTls.isCertificateVerifyFailed(error)) {
         throw DioException.badCertificate(
           requestOptions: options,
-          error: failure,
+          error: failure!.withVerificationError(error),
         );
       }
       rethrow;

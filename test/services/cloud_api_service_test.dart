@@ -422,7 +422,7 @@ void main() {
         throwsA(
           predicate<Object>(
             (error) =>
-                CloudApiException.clean(error) == 'Server returned HTTP 403',
+                CloudApiException.clean(error) == 'Access forbidden (HTTP 403)',
           ),
         ),
       );

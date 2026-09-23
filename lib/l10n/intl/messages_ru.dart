@@ -215,6 +215,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "apiAvailable": MessageLookupByLibrary.simpleMessage(
       "API-сервис работает нормально",
     ),
+    "apiAvailableWithCertificateException": MessageLookupByLibrary.simpleMessage(
+      "API доступен, но для этой проверки был разрешён пропуск проверки сертификата. Нажмите «Проверить API», чтобы проверить соединение снова.",
+    ),
     "app": MessageLookupByLibrary.simpleMessage("Приложение"),
     "appAccessControl": MessageLookupByLibrary.simpleMessage(
       "Контроль доступа приложений",
@@ -323,6 +326,24 @@ class MessageLookup extends MessageLookupByLibrary {
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage(
       "Отменить выбор всего",
     ),
+    "certificateExpired": MessageLookupByLibrary.simpleMessage(
+      "Срок действия сертификата истёк",
+    ),
+    "certificateHostnameMismatch": MessageLookupByLibrary.simpleMessage(
+      "Сертификат не соответствует запрошенному домену",
+    ),
+    "certificateNotYetValid": MessageLookupByLibrary.simpleMessage(
+      "Сертификат ещё не вступил в силу",
+    ),
+    "certificateRevoked": MessageLookupByLibrary.simpleMessage(
+      "Сертификат отозван",
+    ),
+    "certificateUntrusted": MessageLookupByLibrary.simpleMessage(
+      "Цепочка сертификатов не является доверенной",
+    ),
+    "certificateValidityHint": MessageLookupByLibrary.simpleMessage(
+      "Сначала синхронизируйте системную дату и время. Если время верное, необходимо исправить сертификат на сервере.",
+    ),
     "checkApi": MessageLookupByLibrary.simpleMessage("Проверить API"),
     "checkRouting": MessageLookupByLibrary.simpleMessage(
       "Проверить конфигурацию",
@@ -351,11 +372,26 @@ class MessageLookup extends MessageLookupByLibrary {
     "cloudApiAccessDenied": MessageLookupByLibrary.simpleMessage(
       "Доступ к сети запрещён",
     ),
+    "cloudApiAddressInUse": MessageLookupByLibrary.simpleMessage(
+      "Сетевой адрес или порт уже используется",
+    ),
+    "cloudApiAddressUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Сетевой адрес недоступен",
+    ),
+    "cloudApiBadGateway": MessageLookupByLibrary.simpleMessage(
+      "Шлюз получил некорректный ответ вышестоящего сервера",
+    ),
+    "cloudApiBadRequest": MessageLookupByLibrary.simpleMessage(
+      "Сервер отклонил запрос как некорректный",
+    ),
     "cloudApiClockSkew": MessageLookupByLibrary.simpleMessage(
       "Часы устройства слишком расходятся с сервером. Включите автоматическую установку времени и повторите.",
     ),
     "cloudApiConnectTimeout": MessageLookupByLibrary.simpleMessage(
       "Время ожидания подключения истекло",
+    ),
+    "cloudApiConnectionAborted": MessageLookupByLibrary.simpleMessage(
+      "Соединение прервано",
     ),
     "cloudApiConnectionFailed": MessageLookupByLibrary.simpleMessage(
       "Ошибка подключения",
@@ -375,12 +411,30 @@ class MessageLookup extends MessageLookupByLibrary {
     "cloudApiDnsUnknownHost": MessageLookupByLibrary.simpleMessage(
       "DNS не нашёл этот домен",
     ),
+    "cloudApiForbidden": MessageLookupByLibrary.simpleMessage(
+      "Доступ запрещён сервером",
+    ),
+    "cloudApiGatewayTimeout": MessageLookupByLibrary.simpleMessage(
+      "Шлюз не дождался ответа вышестоящего сервера",
+    ),
     "cloudApiHttpError": m0,
     "cloudApiInvalidResponse": MessageLookupByLibrary.simpleMessage(
       "Неверный формат ответа сервера",
     ),
+    "cloudApiMethodNotAllowed": MessageLookupByLibrary.simpleMessage(
+      "Метод запроса не разрешён",
+    ),
+    "cloudApiNetworkAuthRequired": MessageLookupByLibrary.simpleMessage(
+      "Для доступа к этой сети требуется авторизация",
+    ),
+    "cloudApiNetworkResourcesExhausted": MessageLookupByLibrary.simpleMessage(
+      "Недостаточно сетевых ресурсов системы",
+    ),
     "cloudApiNetworkUnreachable": MessageLookupByLibrary.simpleMessage(
       "Сеть недоступна",
+    ),
+    "cloudApiNotFound": MessageLookupByLibrary.simpleMessage(
+      "Запрошенный API или ресурс не найден",
     ),
     "cloudApiProxyAuthFailed": MessageLookupByLibrary.simpleMessage(
       "Ошибка аутентификации прокси (HTTP 407)",
@@ -388,19 +442,49 @@ class MessageLookup extends MessageLookupByLibrary {
     "cloudApiProxyFailed": MessageLookupByLibrary.simpleMessage(
       "Ошибка подключения к прокси",
     ),
+    "cloudApiRateLimited": MessageLookupByLibrary.simpleMessage(
+      "Слишком много запросов; повторите позже",
+    ),
     "cloudApiReceiveTimeout": MessageLookupByLibrary.simpleMessage(
       "Время ожидания ответа истекло",
     ),
+    "cloudApiRedirectInvalid": MessageLookupByLibrary.simpleMessage(
+      "Некорректное перенаправление сервера",
+    ),
+    "cloudApiRedirectLimit": MessageLookupByLibrary.simpleMessage(
+      "Слишком много перенаправлений сервера",
+    ),
+    "cloudApiRedirectLoop": MessageLookupByLibrary.simpleMessage(
+      "Обнаружен цикл перенаправлений сервера",
+    ),
     "cloudApiRequestCanceled": MessageLookupByLibrary.simpleMessage(
       "Запрос отменён",
+    ),
+    "cloudApiRequestTooLarge": MessageLookupByLibrary.simpleMessage(
+      "Запрос превышает допустимый для сервера размер",
+    ),
+    "cloudApiResponseInterrupted": MessageLookupByLibrary.simpleMessage(
+      "Соединение закрыто до получения полного ответа",
+    ),
+    "cloudApiResponseTooLarge": MessageLookupByLibrary.simpleMessage(
+      "Ответ сервера превышает допустимый размер",
     ),
     "cloudApiRouteDirect": m1,
     "cloudApiRouteProxy": m2,
     "cloudApiSendTimeout": MessageLookupByLibrary.simpleMessage(
       "Время отправки запроса истекло",
     ),
+    "cloudApiServerError": MessageLookupByLibrary.simpleMessage(
+      "Внутренняя ошибка сервера",
+    ),
+    "cloudApiServerRequestTimeout": MessageLookupByLibrary.simpleMessage(
+      "Сервер не получил запрос вовремя",
+    ),
     "cloudApiServerUnconfigured": MessageLookupByLibrary.simpleMessage(
       "На сервере не настроен ключ для этого приложения. Обратитесь в поддержку.",
+    ),
+    "cloudApiServiceUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Сервис временно недоступен",
     ),
     "cloudApiSignatureRejected": MessageLookupByLibrary.simpleMessage(
       "Сервер отклонил подпись приложения. Переустановите последнюю официальную сборку.",
@@ -409,8 +493,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "cloudApiTimeout": MessageLookupByLibrary.simpleMessage(
       "Время ожидания запроса истекло",
     ),
+    "cloudApiTlsAlgorithmFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось согласовать криптографические алгоритмы TLS",
+    ),
     "cloudApiTlsFailed": MessageLookupByLibrary.simpleMessage(
       "Ошибка рукопожатия TLS",
+    ),
+    "cloudApiTlsInterrupted": MessageLookupByLibrary.simpleMessage(
+      "Соединение закрыто до завершения рукопожатия TLS",
+    ),
+    "cloudApiTlsProtocolFailed": MessageLookupByLibrary.simpleMessage(
+      "Несовместимый протокол TLS или некорректный ответ TLS",
     ),
     "codeSent": MessageLookupByLibrary.simpleMessage(
       "Код подтверждения отправлен",
@@ -1102,7 +1195,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Неверный файл резервной копии",
     ),
     "invalidCertificateContent": MessageLookupByLibrary.simpleMessage(
-      "Не удалось проверить сертификат сервера. Если вы доверяете этой сети и серверу, можно пропустить проверку только для этой попытки.",
+      "Не удалось проверить сертификат сервера. При пропуске проверки сервер может оказаться поддельным, а передаваемые или получаемые учётные данные и данные подписки могут быть украдены или изменены.\n\nПродолжайте, только если доверяете этой сети и серверу. Исключение действует лишь для этой повторной попытки с тем же сервером и сертификатом и отменяется после завершения операции.",
     ),
     "invalidCertificateTitle": MessageLookupByLibrary.simpleMessage(
       "Ошибка проверки сертификата",
@@ -1639,6 +1732,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "restoreSuccess": MessageLookupByLibrary.simpleMessage(
       "Восстановление успешно",
+    ),
+    "retryWithoutCertificateVerification": MessageLookupByLibrary.simpleMessage(
+      "Пропустить проверку и повторить",
     ),
     "reverseEngineeringNotice": MessageLookupByLibrary.simpleMessage(
       "Обратная разработка, декомпиляция, дизассемблирование или анализ этого приложения с помощью ИИ строго запрещены.",

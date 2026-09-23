@@ -171,6 +171,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "amountPayable": MessageLookupByLibrary.simpleMessage("本次应付"),
     "announcement": MessageLookupByLibrary.simpleMessage("公告"),
     "apiAvailable": MessageLookupByLibrary.simpleMessage("API 服务正常"),
+    "apiAvailableWithCertificateException":
+        MessageLookupByLibrary.simpleMessage(
+          "API 可连接，但本次检测允许跳过证书校验，请点击“检查 API”重新验证连接",
+        ),
     "app": MessageLookupByLibrary.simpleMessage("应用"),
     "appAccessControl": MessageLookupByLibrary.simpleMessage("应用访问控制"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage("追加系统DNS"),
@@ -243,6 +247,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "calculatingQuote": MessageLookupByLibrary.simpleMessage("计算中…"),
     "cancel": MessageLookupByLibrary.simpleMessage("取消"),
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage("取消全选"),
+    "certificateExpired": MessageLookupByLibrary.simpleMessage("证书已过期"),
+    "certificateHostnameMismatch": MessageLookupByLibrary.simpleMessage(
+      "证书与请求域名不匹配",
+    ),
+    "certificateNotYetValid": MessageLookupByLibrary.simpleMessage("证书尚未生效"),
+    "certificateRevoked": MessageLookupByLibrary.simpleMessage("证书已被吊销"),
+    "certificateUntrusted": MessageLookupByLibrary.simpleMessage("证书链不受信任"),
+    "certificateValidityHint": MessageLookupByLibrary.simpleMessage(
+      "请先同步系统日期和时间，如果时间正确，则需要服务端修复证书",
+    ),
     "checkApi": MessageLookupByLibrary.simpleMessage("检查 API"),
     "checkRouting": MessageLookupByLibrary.simpleMessage("检查配置"),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("检查更新"),
@@ -259,10 +273,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "clipboardImport": MessageLookupByLibrary.simpleMessage("剪贴板导入"),
     "close": MessageLookupByLibrary.simpleMessage("关闭"),
     "cloudApiAccessDenied": MessageLookupByLibrary.simpleMessage("系统拒绝网络访问"),
+    "cloudApiAddressInUse": MessageLookupByLibrary.simpleMessage("网络地址或端口已被占用"),
+    "cloudApiAddressUnavailable": MessageLookupByLibrary.simpleMessage(
+      "网络地址不可用",
+    ),
+    "cloudApiBadGateway": MessageLookupByLibrary.simpleMessage("网关收到无效的上游响应"),
+    "cloudApiBadRequest": MessageLookupByLibrary.simpleMessage("服务器认为请求无效"),
     "cloudApiClockSkew": MessageLookupByLibrary.simpleMessage(
       "设备时间与服务器相差过大，请开启自动设置时间后重试",
     ),
     "cloudApiConnectTimeout": MessageLookupByLibrary.simpleMessage("连接超时"),
+    "cloudApiConnectionAborted": MessageLookupByLibrary.simpleMessage("连接已中止"),
     "cloudApiConnectionFailed": MessageLookupByLibrary.simpleMessage("连接失败"),
     "cloudApiConnectionRefused": MessageLookupByLibrary.simpleMessage("连接被拒绝"),
     "cloudApiConnectionReset": MessageLookupByLibrary.simpleMessage("连接被重置"),
@@ -273,29 +294,72 @@ class MessageLookup extends MessageLookupByLibrary {
     "cloudApiDnsUnknownHost": MessageLookupByLibrary.simpleMessage(
       "DNS 未找到该域名",
     ),
+    "cloudApiForbidden": MessageLookupByLibrary.simpleMessage("访问被服务器拒绝"),
+    "cloudApiGatewayTimeout": MessageLookupByLibrary.simpleMessage(
+      "网关等待上游服务器响应超时",
+    ),
     "cloudApiHttpError": m0,
     "cloudApiInvalidResponse": MessageLookupByLibrary.simpleMessage(
       "服务器响应格式无效",
     ),
+    "cloudApiMethodNotAllowed": MessageLookupByLibrary.simpleMessage(
+      "服务器不支持此请求方法",
+    ),
+    "cloudApiNetworkAuthRequired": MessageLookupByLibrary.simpleMessage(
+      "当前网络要求认证，请先完成网络登录",
+    ),
+    "cloudApiNetworkResourcesExhausted": MessageLookupByLibrary.simpleMessage(
+      "系统网络资源不足",
+    ),
     "cloudApiNetworkUnreachable": MessageLookupByLibrary.simpleMessage("网络不可达"),
+    "cloudApiNotFound": MessageLookupByLibrary.simpleMessage("请求的接口或资源不存在"),
     "cloudApiProxyAuthFailed": MessageLookupByLibrary.simpleMessage(
       "代理认证失败（HTTP 407）",
     ),
     "cloudApiProxyFailed": MessageLookupByLibrary.simpleMessage("代理连接失败"),
+    "cloudApiRateLimited": MessageLookupByLibrary.simpleMessage("请求过于频繁，请稍后重试"),
     "cloudApiReceiveTimeout": MessageLookupByLibrary.simpleMessage("等待服务器响应超时"),
+    "cloudApiRedirectInvalid": MessageLookupByLibrary.simpleMessage("服务器重定向无效"),
+    "cloudApiRedirectLimit": MessageLookupByLibrary.simpleMessage("服务器重定向次数过多"),
+    "cloudApiRedirectLoop": MessageLookupByLibrary.simpleMessage("服务器重定向存在循环"),
     "cloudApiRequestCanceled": MessageLookupByLibrary.simpleMessage("请求已取消"),
+    "cloudApiRequestTooLarge": MessageLookupByLibrary.simpleMessage(
+      "请求内容超过服务器大小限制",
+    ),
+    "cloudApiResponseInterrupted": MessageLookupByLibrary.simpleMessage(
+      "响应尚未接收完整，连接已断开",
+    ),
+    "cloudApiResponseTooLarge": MessageLookupByLibrary.simpleMessage(
+      "服务器响应超过允许的大小",
+    ),
     "cloudApiRouteDirect": m1,
     "cloudApiRouteProxy": m2,
     "cloudApiSendTimeout": MessageLookupByLibrary.simpleMessage("发送请求超时"),
+    "cloudApiServerError": MessageLookupByLibrary.simpleMessage("服务器内部错误"),
+    "cloudApiServerRequestTimeout": MessageLookupByLibrary.simpleMessage(
+      "服务器接收请求超时",
+    ),
     "cloudApiServerUnconfigured": MessageLookupByLibrary.simpleMessage(
       "服务端未配置本应用的密钥，请联系客服",
+    ),
+    "cloudApiServiceUnavailable": MessageLookupByLibrary.simpleMessage(
+      "服务暂时不可用",
     ),
     "cloudApiSignatureRejected": MessageLookupByLibrary.simpleMessage(
       "服务器拒绝了本应用的签名，请从官方渠道重新安装最新版本",
     ),
     "cloudApiSystemError": m3,
     "cloudApiTimeout": MessageLookupByLibrary.simpleMessage("请求超时"),
+    "cloudApiTlsAlgorithmFailed": MessageLookupByLibrary.simpleMessage(
+      "TLS 加密算法协商失败",
+    ),
     "cloudApiTlsFailed": MessageLookupByLibrary.simpleMessage("TLS 握手失败"),
+    "cloudApiTlsInterrupted": MessageLookupByLibrary.simpleMessage(
+      "TLS 握手完成前连接已断开",
+    ),
+    "cloudApiTlsProtocolFailed": MessageLookupByLibrary.simpleMessage(
+      "TLS 协议不兼容或 TLS 响应无效",
+    ),
     "codeSent": MessageLookupByLibrary.simpleMessage("验证码已发送"),
     "color": MessageLookupByLibrary.simpleMessage("颜色"),
     "colorSchemes": MessageLookupByLibrary.simpleMessage("配色方案"),
@@ -767,7 +831,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "invalidAmount": MessageLookupByLibrary.simpleMessage("请输入有效金额"),
     "invalidBackupFile": MessageLookupByLibrary.simpleMessage("无效备份文件"),
     "invalidCertificateContent": MessageLookupByLibrary.simpleMessage(
-      "无法验证服务器证书。若你信任当前网络和服务器，可仅本次重试跳过验证",
+      "无法验证服务器证书，跳过校验后无法确认服务器身份，发送或接收的账号凭据、订阅等数据可能被窃取或篡改\n\n仅在信任当前网络和服务器时继续，本次例外仅适用于同一服务器和同一证书的本次重试，操作结束后自动恢复校验",
     ),
     "invalidCertificateTitle": MessageLookupByLibrary.simpleMessage("证书校验失败"),
     "inviteCodeHint": MessageLookupByLibrary.simpleMessage("请输入邀请码"),
@@ -1115,6 +1179,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "restoreStrategy_compatible": MessageLookupByLibrary.simpleMessage("兼容"),
     "restoreStrategy_override": MessageLookupByLibrary.simpleMessage("覆盖"),
     "restoreSuccess": MessageLookupByLibrary.simpleMessage("恢复成功"),
+    "retryWithoutCertificateVerification": MessageLookupByLibrary.simpleMessage(
+      "临时跳过并重试",
+    ),
     "reverseEngineeringNotice": MessageLookupByLibrary.simpleMessage(
       "严禁对本应用进行逆向工程、反编译、反汇编或借助 AI 工具分析",
     ),

@@ -213,6 +213,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "apiAvailable": MessageLookupByLibrary.simpleMessage(
       "API service is operational",
     ),
+    "apiAvailableWithCertificateException": MessageLookupByLibrary.simpleMessage(
+      "API reachable with certificate verification bypass allowed for this check. Run Check API again to verify the connection.",
+    ),
     "app": MessageLookupByLibrary.simpleMessage("App"),
     "appAccessControl": MessageLookupByLibrary.simpleMessage(
       "App access control",
@@ -317,6 +320,24 @@ class MessageLookup extends MessageLookupByLibrary {
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage(
       "Cancel select all",
     ),
+    "certificateExpired": MessageLookupByLibrary.simpleMessage(
+      "Certificate has expired",
+    ),
+    "certificateHostnameMismatch": MessageLookupByLibrary.simpleMessage(
+      "Certificate does not match the requested domain",
+    ),
+    "certificateNotYetValid": MessageLookupByLibrary.simpleMessage(
+      "Certificate is not yet valid",
+    ),
+    "certificateRevoked": MessageLookupByLibrary.simpleMessage(
+      "Certificate has been revoked",
+    ),
+    "certificateUntrusted": MessageLookupByLibrary.simpleMessage(
+      "Certificate chain is not trusted",
+    ),
+    "certificateValidityHint": MessageLookupByLibrary.simpleMessage(
+      "First synchronize the system date and time. If the time is correct, the server certificate needs to be fixed.",
+    ),
     "checkApi": MessageLookupByLibrary.simpleMessage("Check API"),
     "checkRouting": MessageLookupByLibrary.simpleMessage("Check configuration"),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("Check for updates"),
@@ -339,11 +360,26 @@ class MessageLookup extends MessageLookupByLibrary {
     "cloudApiAccessDenied": MessageLookupByLibrary.simpleMessage(
       "Network access denied",
     ),
+    "cloudApiAddressInUse": MessageLookupByLibrary.simpleMessage(
+      "Network address or port is already in use",
+    ),
+    "cloudApiAddressUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Network address is unavailable",
+    ),
+    "cloudApiBadGateway": MessageLookupByLibrary.simpleMessage(
+      "Gateway received an invalid upstream response",
+    ),
+    "cloudApiBadRequest": MessageLookupByLibrary.simpleMessage(
+      "Server rejected the request as invalid",
+    ),
     "cloudApiClockSkew": MessageLookupByLibrary.simpleMessage(
       "The device clock is too far from the server. Turn on automatic date and time, then retry.",
     ),
     "cloudApiConnectTimeout": MessageLookupByLibrary.simpleMessage(
       "Connection timed out",
+    ),
+    "cloudApiConnectionAborted": MessageLookupByLibrary.simpleMessage(
+      "Connection aborted",
     ),
     "cloudApiConnectionFailed": MessageLookupByLibrary.simpleMessage(
       "Connection failed",
@@ -363,12 +399,30 @@ class MessageLookup extends MessageLookupByLibrary {
     "cloudApiDnsUnknownHost": MessageLookupByLibrary.simpleMessage(
       "DNS could not find this domain",
     ),
+    "cloudApiForbidden": MessageLookupByLibrary.simpleMessage(
+      "Access forbidden",
+    ),
+    "cloudApiGatewayTimeout": MessageLookupByLibrary.simpleMessage(
+      "Gateway timed out waiting for the upstream server",
+    ),
     "cloudApiHttpError": m0,
     "cloudApiInvalidResponse": MessageLookupByLibrary.simpleMessage(
       "Invalid server response",
     ),
+    "cloudApiMethodNotAllowed": MessageLookupByLibrary.simpleMessage(
+      "Request method is not allowed",
+    ),
+    "cloudApiNetworkAuthRequired": MessageLookupByLibrary.simpleMessage(
+      "This network requires sign-in before access",
+    ),
+    "cloudApiNetworkResourcesExhausted": MessageLookupByLibrary.simpleMessage(
+      "Insufficient system network resources",
+    ),
     "cloudApiNetworkUnreachable": MessageLookupByLibrary.simpleMessage(
       "Network unreachable",
+    ),
+    "cloudApiNotFound": MessageLookupByLibrary.simpleMessage(
+      "Requested API or resource was not found",
     ),
     "cloudApiProxyAuthFailed": MessageLookupByLibrary.simpleMessage(
       "Proxy authentication failed (HTTP 407)",
@@ -376,19 +430,49 @@ class MessageLookup extends MessageLookupByLibrary {
     "cloudApiProxyFailed": MessageLookupByLibrary.simpleMessage(
       "Proxy connection failed",
     ),
+    "cloudApiRateLimited": MessageLookupByLibrary.simpleMessage(
+      "Too many requests; try again later",
+    ),
     "cloudApiReceiveTimeout": MessageLookupByLibrary.simpleMessage(
       "Waiting for the response timed out",
     ),
+    "cloudApiRedirectInvalid": MessageLookupByLibrary.simpleMessage(
+      "Server redirect is invalid",
+    ),
+    "cloudApiRedirectLimit": MessageLookupByLibrary.simpleMessage(
+      "Too many server redirects",
+    ),
+    "cloudApiRedirectLoop": MessageLookupByLibrary.simpleMessage(
+      "Server redirects form a loop",
+    ),
     "cloudApiRequestCanceled": MessageLookupByLibrary.simpleMessage(
       "Request canceled",
+    ),
+    "cloudApiRequestTooLarge": MessageLookupByLibrary.simpleMessage(
+      "Request exceeds the server size limit",
+    ),
+    "cloudApiResponseInterrupted": MessageLookupByLibrary.simpleMessage(
+      "Connection closed before the full response was received",
+    ),
+    "cloudApiResponseTooLarge": MessageLookupByLibrary.simpleMessage(
+      "Server response exceeds the allowed size",
     ),
     "cloudApiRouteDirect": m1,
     "cloudApiRouteProxy": m2,
     "cloudApiSendTimeout": MessageLookupByLibrary.simpleMessage(
       "Sending the request timed out",
     ),
+    "cloudApiServerError": MessageLookupByLibrary.simpleMessage(
+      "Internal server error",
+    ),
+    "cloudApiServerRequestTimeout": MessageLookupByLibrary.simpleMessage(
+      "Server timed out receiving the request",
+    ),
     "cloudApiServerUnconfigured": MessageLookupByLibrary.simpleMessage(
       "The server has no key configured for this app. Contact support.",
+    ),
+    "cloudApiServiceUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Service is temporarily unavailable",
     ),
     "cloudApiSignatureRejected": MessageLookupByLibrary.simpleMessage(
       "The server rejected this app’s signature. Reinstall the latest official build.",
@@ -397,8 +481,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "cloudApiTimeout": MessageLookupByLibrary.simpleMessage(
       "Request timed out",
     ),
+    "cloudApiTlsAlgorithmFailed": MessageLookupByLibrary.simpleMessage(
+      "TLS cryptographic algorithm negotiation failed",
+    ),
     "cloudApiTlsFailed": MessageLookupByLibrary.simpleMessage(
       "TLS handshake failed",
+    ),
+    "cloudApiTlsInterrupted": MessageLookupByLibrary.simpleMessage(
+      "Connection closed before the TLS handshake completed",
+    ),
+    "cloudApiTlsProtocolFailed": MessageLookupByLibrary.simpleMessage(
+      "Incompatible TLS protocol or invalid TLS response",
     ),
     "codeSent": MessageLookupByLibrary.simpleMessage("Verification code sent"),
     "color": MessageLookupByLibrary.simpleMessage("Color"),
@@ -1055,7 +1148,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Invalid backup file",
     ),
     "invalidCertificateContent": MessageLookupByLibrary.simpleMessage(
-      "The server certificate could not be verified. If you trust this network and server, you can skip verification for this retry only.",
+      "The server certificate could not be verified. Skipping verification means the server may be impersonated, and any account credentials or subscription data you send or receive could be stolen or altered.\n\nProceed only if you trust this network and server. This exception applies only to this retry with the same server and certificate, and is removed when the operation ends.",
     ),
     "invalidCertificateTitle": MessageLookupByLibrary.simpleMessage(
       "Certificate Verification Failed",
@@ -1561,6 +1654,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Override",
     ),
     "restoreSuccess": MessageLookupByLibrary.simpleMessage("Restore success"),
+    "retryWithoutCertificateVerification": MessageLookupByLibrary.simpleMessage(
+      "Skip Verification and Retry",
+    ),
     "reverseEngineeringNotice": MessageLookupByLibrary.simpleMessage(
       "Reverse engineering, decompilation, disassembly, or AI-assisted analysis of this application is strictly prohibited.",
     ),

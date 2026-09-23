@@ -4329,10 +4329,60 @@ class AppLocalizations {
     );
   }
 
-  /// `The server certificate could not be verified. If you trust this network and server, you can skip verification for this retry only.`
+  /// `Certificate has expired`
+  String get certificateExpired {
+    return Intl.message(
+      'Certificate has expired',
+      name: 'certificateExpired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Certificate is not yet valid`
+  String get certificateNotYetValid {
+    return Intl.message(
+      'Certificate is not yet valid',
+      name: 'certificateNotYetValid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Certificate does not match the requested domain`
+  String get certificateHostnameMismatch {
+    return Intl.message(
+      'Certificate does not match the requested domain',
+      name: 'certificateHostnameMismatch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Certificate chain is not trusted`
+  String get certificateUntrusted {
+    return Intl.message(
+      'Certificate chain is not trusted',
+      name: 'certificateUntrusted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `First synchronize the system date and time. If the time is correct, the server certificate needs to be fixed.`
+  String get certificateValidityHint {
+    return Intl.message(
+      'First synchronize the system date and time. If the time is correct, the server certificate needs to be fixed.',
+      name: 'certificateValidityHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The server certificate could not be verified. Skipping verification means the server may be impersonated, and any account credentials or subscription data you send or receive could be stolen or altered.\n\nProceed only if you trust this network and server. This exception applies only to this retry with the same server and certificate, and is removed when the operation ends.`
   String get invalidCertificateContent {
     return Intl.message(
-      'The server certificate could not be verified. If you trust this network and server, you can skip verification for this retry only.',
+      'The server certificate could not be verified. Skipping verification means the server may be impersonated, and any account credentials or subscription data you send or receive could be stolen or altered.\n\nProceed only if you trust this network and server. This exception applies only to this retry with the same server and certificate, and is removed when the operation ends.',
       name: 'invalidCertificateContent',
       desc: '',
       args: [],
@@ -4344,6 +4394,26 @@ class AppLocalizations {
     return Intl.message(
       'Allow Temporarily',
       name: 'allowTemporarily',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Skip Verification and Retry`
+  String get retryWithoutCertificateVerification {
+    return Intl.message(
+      'Skip Verification and Retry',
+      name: 'retryWithoutCertificateVerification',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `API reachable with certificate verification bypass allowed for this check. Run Check API again to verify the connection.`
+  String get apiAvailableWithCertificateException {
+    return Intl.message(
+      'API reachable with certificate verification bypass allowed for this check. Run Check API again to verify the connection.',
+      name: 'apiAvailableWithCertificateException',
       desc: '',
       args: [],
     );
@@ -6591,6 +6661,256 @@ class AppLocalizations {
       name: 'cloudApiHttpError',
       desc: '',
       args: [status],
+    );
+  }
+
+  /// `Certificate has been revoked`
+  String get certificateRevoked {
+    return Intl.message(
+      'Certificate has been revoked',
+      name: 'certificateRevoked',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Server rejected the request as invalid`
+  String get cloudApiBadRequest {
+    return Intl.message(
+      'Server rejected the request as invalid',
+      name: 'cloudApiBadRequest',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Access forbidden`
+  String get cloudApiForbidden {
+    return Intl.message(
+      'Access forbidden',
+      name: 'cloudApiForbidden',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Requested API or resource was not found`
+  String get cloudApiNotFound {
+    return Intl.message(
+      'Requested API or resource was not found',
+      name: 'cloudApiNotFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Request method is not allowed`
+  String get cloudApiMethodNotAllowed {
+    return Intl.message(
+      'Request method is not allowed',
+      name: 'cloudApiMethodNotAllowed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Server timed out receiving the request`
+  String get cloudApiServerRequestTimeout {
+    return Intl.message(
+      'Server timed out receiving the request',
+      name: 'cloudApiServerRequestTimeout',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Request exceeds the server size limit`
+  String get cloudApiRequestTooLarge {
+    return Intl.message(
+      'Request exceeds the server size limit',
+      name: 'cloudApiRequestTooLarge',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Too many requests; try again later`
+  String get cloudApiRateLimited {
+    return Intl.message(
+      'Too many requests; try again later',
+      name: 'cloudApiRateLimited',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Internal server error`
+  String get cloudApiServerError {
+    return Intl.message(
+      'Internal server error',
+      name: 'cloudApiServerError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Gateway received an invalid upstream response`
+  String get cloudApiBadGateway {
+    return Intl.message(
+      'Gateway received an invalid upstream response',
+      name: 'cloudApiBadGateway',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Service is temporarily unavailable`
+  String get cloudApiServiceUnavailable {
+    return Intl.message(
+      'Service is temporarily unavailable',
+      name: 'cloudApiServiceUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Gateway timed out waiting for the upstream server`
+  String get cloudApiGatewayTimeout {
+    return Intl.message(
+      'Gateway timed out waiting for the upstream server',
+      name: 'cloudApiGatewayTimeout',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This network requires sign-in before access`
+  String get cloudApiNetworkAuthRequired {
+    return Intl.message(
+      'This network requires sign-in before access',
+      name: 'cloudApiNetworkAuthRequired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Server response exceeds the allowed size`
+  String get cloudApiResponseTooLarge {
+    return Intl.message(
+      'Server response exceeds the allowed size',
+      name: 'cloudApiResponseTooLarge',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Incompatible TLS protocol or invalid TLS response`
+  String get cloudApiTlsProtocolFailed {
+    return Intl.message(
+      'Incompatible TLS protocol or invalid TLS response',
+      name: 'cloudApiTlsProtocolFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `TLS cryptographic algorithm negotiation failed`
+  String get cloudApiTlsAlgorithmFailed {
+    return Intl.message(
+      'TLS cryptographic algorithm negotiation failed',
+      name: 'cloudApiTlsAlgorithmFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connection closed before the TLS handshake completed`
+  String get cloudApiTlsInterrupted {
+    return Intl.message(
+      'Connection closed before the TLS handshake completed',
+      name: 'cloudApiTlsInterrupted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Server redirects form a loop`
+  String get cloudApiRedirectLoop {
+    return Intl.message(
+      'Server redirects form a loop',
+      name: 'cloudApiRedirectLoop',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Too many server redirects`
+  String get cloudApiRedirectLimit {
+    return Intl.message(
+      'Too many server redirects',
+      name: 'cloudApiRedirectLimit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Server redirect is invalid`
+  String get cloudApiRedirectInvalid {
+    return Intl.message(
+      'Server redirect is invalid',
+      name: 'cloudApiRedirectInvalid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connection closed before the full response was received`
+  String get cloudApiResponseInterrupted {
+    return Intl.message(
+      'Connection closed before the full response was received',
+      name: 'cloudApiResponseInterrupted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connection aborted`
+  String get cloudApiConnectionAborted {
+    return Intl.message(
+      'Connection aborted',
+      name: 'cloudApiConnectionAborted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Network address is unavailable`
+  String get cloudApiAddressUnavailable {
+    return Intl.message(
+      'Network address is unavailable',
+      name: 'cloudApiAddressUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Network address or port is already in use`
+  String get cloudApiAddressInUse {
+    return Intl.message(
+      'Network address or port is already in use',
+      name: 'cloudApiAddressInUse',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Insufficient system network resources`
+  String get cloudApiNetworkResourcesExhausted {
+    return Intl.message(
+      'Insufficient system network resources',
+      name: 'cloudApiNetworkResourcesExhausted',
+      desc: '',
+      args: [],
     );
   }
 
