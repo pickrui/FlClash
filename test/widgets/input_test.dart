@@ -157,6 +157,53 @@ void main() {
 
     expect(changedValue, 'mips');
   });
+
+  testWidgets('ListItem.options tells a null option from a dismissal', (
+    tester,
+  ) async {
+    final changes = <String?>[];
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          viewSizeProvider.overrideWithBuild((_, _) => const Size(1200, 1000)),
+        ],
+        child: _TestApp(
+          child: Scaffold(
+            body: ListItem<String?>.options(
+              title: const Text('Language'),
+              delegate: OptionsDelegate<String?>(
+                title: 'Language',
+                options: const [null, 'ja'],
+                value: 'ja',
+                textBuilder: (value) => value ?? 'Default',
+                onChanged: changes.add,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Language'));
+    await tester.pumpAndSettle();
+    await tester.tapAt(const Offset(4, 4));
+    await tester.pumpAndSettle();
+    expect(find.text('Default'), findsNothing);
+    expect(changes, isEmpty);
+
+    await tester.tap(find.text('Language'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(Radio<int>).last);
+    await tester.pumpAndSettle();
+    expect(changes, isEmpty);
+
+    await tester.tap(find.text('Language'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Default'));
+    await tester.pumpAndSettle();
+    expect(changes, [null]);
+  });
 }
 
 class _TestCloudAccountNotifier extends CloudAccountNotifier {

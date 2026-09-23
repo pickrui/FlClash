@@ -10,8 +10,6 @@ import 'package:fl_clash/widgets/grid.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/physics.dart';
 
-typedef VoidCallback = void Function();
-
 class SuperGrid extends StatefulWidget {
   final List<GridItem> children;
   final double mainAxisSpacing;
@@ -50,6 +48,8 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
 
   final ValueNotifier<bool> _animating = ValueNotifier(false);
 
+  final ValueNotifier<bool> _deleting = ValueNotifier(false);
+
   final _dragWidgetSizeNotifier = ValueNotifier(Size.zero);
 
   final _dragIndexNotifier = ValueNotifier(-1);
@@ -69,7 +69,7 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
   late AnimationController _shakeController;
   late Animation<double> _shakeAnimation;
   Rect _dragRect = Rect.zero;
-  Scrollable? _scrollable;
+  ScrollableState? _scrollable;
 
   int get crossCount => widget.crossAxisCount;
 
@@ -133,6 +133,7 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
     _shakeAnimation = Tween<double>(begin: -0.012, end: 0.012).animate(
       CurvedAnimation(parent: _shakeController, curve: Curves.easeInOut),
     );
+    _shakeController.repeat(reverse: true);
 
     _transformController = AnimationController(
       vsync: this,
@@ -149,22 +150,21 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final scrollable = context.findAncestorWidgetOfExactType<Scrollable>();
-    if (scrollable == null) {
+    final scrollable = Scrollable.maybeOf(context);
+    if (scrollable == null || scrollable == _scrollable) {
       return;
     }
-    if (_scrollable != scrollable) {
-      _edgeDraggingAutoScroller = EdgeDraggingAutoScroller(
-        Scrollable.of(context),
-        onScrollViewScrolled: () {
-          _edgeDraggingAutoScroller?.startAutoScrollIfNecessary(_dragRect);
-        },
-        velocityScalar: 40,
-      );
-    }
+    _scrollable = scrollable;
+    _edgeDraggingAutoScroller = EdgeDraggingAutoScroller(
+      scrollable,
+      onScrollViewScrolled: () {
+        _edgeDraggingAutoScroller?.startAutoScrollIfNecessary(_dragRect);
+      },
+      velocityScalar: 40,
+    );
   }
 
-  Future _transform() async {
+  TickerFuture _transform() {
     final List<Offset> layoutOffsets = [Offset(_containerSize.width, 0)];
     final List<Offset> nextOffsets = [];
 
@@ -259,13 +259,13 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
   }
 
   Future<void> _handleDragEnd(DraggableDetails details) async {
+    debouncer.cancel(FunctionTag.handleWill);
+    if (_targetIndex == -1 || _dragIndexNotifier.value == -1) {
+      return;
+    }
     final children = List<GridItem>.from(_childrenNotifier.value);
     children.insert(_targetIndex, children.removeAt(_dragIndexNotifier.value));
     this.children = children;
-    debouncer.cancel(FunctionTag.handleWill);
-    if (_targetIndex == -1) {
-      return;
-    }
     const tolerance = Tolerance(distance: 0.5, velocity: 0.01);
     const spring = SpringDescription(mass: 1, stiffness: 100, damping: 10);
     final simulation = SpringSimulation(spring, 0, 1, 0, tolerance: tolerance);
@@ -317,15 +317,37 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
     await _transform();
   }
 
-  Future<void> _handleDelete(int index) async {
-    _preTransformState();
-    final indexWhere = _tempIndexList.indexWhere((i) => i == index);
-    _tempIndexList.removeAt(indexWhere);
-    await _transform();
-    final children = List<GridItem>.from(_childrenNotifier.value);
-    children.removeAt(index);
-    _childrenNotifier.value = children;
-    _initState();
+  Future<void> _handleDelete(int index, Future<void> removal) async {
+    _deleting.value = true;
+    final item = _childrenNotifier.value[index];
+    try {
+      await removal;
+      final children = _childrenNotifier.value;
+      if (!mounted ||
+          index >= children.length ||
+          !identical(children[index], item)) {
+        return;
+      }
+      _preTransformState();
+      _tempIndexList.remove(index);
+      try {
+        await _transform().orCancel;
+      } on TickerCanceled {
+        // The layout animation was reset; the item is still removed below.
+      }
+      if (!mounted) {
+        return;
+      }
+      _childrenNotifier.value = List<GridItem>.from(_childrenNotifier.value)
+        ..removeAt(index);
+      _initState();
+    } on TickerCanceled {
+      // The fade was interrupted and the item is shown again, so keep it.
+    } finally {
+      if (mounted) {
+        _deleting.value = false;
+      }
+    }
   }
 
   Widget _buildTransform(Widget rawChild, int index) {
@@ -408,8 +430,6 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
 
   Widget _buildShake(Widget child) {
     final random = 0.7 + Random().nextDouble() * 0.3;
-    _shakeController.stop();
-    _shakeController.repeat(reverse: true);
     return AnimatedBuilder(
       animation: _shakeAnimation,
       builder: (_, child) {
@@ -459,9 +479,8 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
           }
           return _buildShake(
             _DeletableContainer(
-              onDelete: () {
-                _handleDelete(index);
-              },
+              deleting: _deleting,
+              onDelete: (removal) => _handleDelete(index, removal),
               child: child!,
             ),
           );
@@ -572,6 +591,7 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
     _dragIndexNotifier.dispose();
     _dragWidgetSizeNotifier.dispose();
     _animating.dispose();
+    _deleting.dispose();
     _childrenNotifier.dispose();
     super.dispose();
   }
@@ -583,19 +603,25 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
         children: [
           _buildInactivate(
             ValueListenableBuilder(
-              valueListenable: _childrenNotifier,
-              builder: (_, children, _) {
-                _onChildrenChange();
-                return Grid(
-                  axisDirection: AxisDirection.down,
-                  crossAxisCount: crossCount,
-                  crossAxisSpacing: widget.crossAxisSpacing,
-                  mainAxisSpacing: widget.mainAxisSpacing,
-                  children: [
-                    for (int i = 0; i < children.length; i++) _builderItem(i),
-                  ],
-                );
+              valueListenable: _deleting,
+              builder: (_, deleting, child) {
+                return IgnorePointer(ignoring: deleting, child: child);
               },
+              child: ValueListenableBuilder(
+                valueListenable: _childrenNotifier,
+                builder: (_, children, _) {
+                  _onChildrenChange();
+                  return Grid(
+                    axisDirection: AxisDirection.down,
+                    crossAxisCount: crossCount,
+                    crossAxisSpacing: widget.crossAxisSpacing,
+                    mainAxisSpacing: widget.mainAxisSpacing,
+                    children: [
+                      for (int i = 0; i < children.length; i++) _builderItem(i),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
           _buildFakeTransformWidget(),
@@ -607,9 +633,14 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
 
 class _DeletableContainer extends StatefulWidget {
   final Widget child;
-  final VoidCallback onDelete;
+  final ValueNotifier<bool> deleting;
+  final ValueChanged<Future<void>> onDelete;
 
-  const _DeletableContainer({required this.child, required this.onDelete});
+  const _DeletableContainer({
+    required this.child,
+    required this.deleting,
+    required this.onDelete,
+  });
 
   @override
   State<_DeletableContainer> createState() => _DeletableContainerState();
@@ -647,12 +678,14 @@ class _DeletableContainerState extends State<_DeletableContainer>
     }
   }
 
-  Future<void> _handleDel() async {
+  void _handleDel() {
+    if (widget.deleting.value) {
+      return;
+    }
     setState(() {
       _deleteButtonVisible = false;
     });
-    await _controller.forward(from: 0);
-    widget.onDelete();
+    widget.onDelete(_controller.forward(from: 0).orCancel);
   }
 
   @override
@@ -684,11 +717,16 @@ class _DeletableContainerState extends State<_DeletableContainer>
               child: SizedBox(
                 width: 24,
                 height: 24,
-                child: IconButton.filled(
-                  iconSize: 20,
-                  padding: const EdgeInsets.all(2),
-                  onPressed: _handleDel,
-                  icon: const Icon(Icons.close),
+                child: ValueListenableBuilder(
+                  valueListenable: widget.deleting,
+                  builder: (_, deleting, _) {
+                    return IconButton.filled(
+                      iconSize: 20,
+                      padding: const EdgeInsets.all(2),
+                      onPressed: deleting ? null : _handleDel,
+                      icon: const Icon(Icons.close),
+                    );
+                  },
                 ),
               ),
             ),

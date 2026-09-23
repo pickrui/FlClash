@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -303,7 +302,6 @@ class _CommonTabBarState<T extends Object> extends State<CommonTabBar<T>>
   Widget build(BuildContext context) {
     assert(widget.children.length >= 2);
     List<Widget> children = <Widget>[];
-    bool isPreviousSegmentHighlighted = false;
 
     int index = 0;
     int? highlightedIndex;
@@ -318,12 +316,7 @@ class _CommonTabBarState<T extends Object> extends State<CommonTabBar<T>>
           : null;
 
       if (index != 0) {
-        children.add(
-          _SegmentSeparator(
-            key: ValueKey<int>(index),
-            highlighted: isPreviousSegmentHighlighted || isHighlighted,
-          ),
-        );
+        children.add(_SegmentSeparator(key: ValueKey<int>(index)));
       }
 
       final TextDirection textDirection = Directionality.of(context);
@@ -364,7 +357,6 @@ class _CommonTabBarState<T extends Object> extends State<CommonTabBar<T>>
       );
 
       index += 1;
-      isPreviousSegmentHighlighted = isHighlighted;
     }
 
     assert((highlightedIndex == null) == (highlighted == null));
@@ -531,67 +523,18 @@ class _SegmentState<T> extends State<_Segment<T>>
   }
 }
 
-class _SegmentSeparator extends StatefulWidget {
-  const _SegmentSeparator({
-    required ValueKey<int> key,
-    required this.highlighted,
-  }) : super(key: key);
-
-  final bool highlighted;
-
-  @override
-  _SegmentSeparatorState createState() => _SegmentSeparatorState();
-}
-
-class _SegmentSeparatorState extends State<_SegmentSeparator>
-    with TickerProviderStateMixin<_SegmentSeparator> {
-  late final AnimationController separatorOpacityController;
-
-  @override
-  void initState() {
-    super.initState();
-
-    separatorOpacityController = AnimationController(
-      duration: _kSpringAnimationDuration,
-      value: widget.highlighted ? 0 : 1,
-      vsync: this,
-    );
-  }
-
-  @override
-  void didUpdateWidget(_SegmentSeparator oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    assert(oldWidget.key == widget.key);
-
-    if (oldWidget.highlighted != widget.highlighted) {
-      separatorOpacityController.animateTo(
-        widget.highlighted ? 0 : 1,
-        duration: _kSpringAnimationDuration,
-        curve: Curves.ease,
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    separatorOpacityController.dispose();
-    super.dispose();
-  }
+class _SegmentSeparator extends StatelessWidget {
+  const _SegmentSeparator({required ValueKey<int> key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: separatorOpacityController,
-      child: const SizedBox(width: _kSeparatorWidth),
-      builder: (BuildContext context, Widget? child) {
-        return Padding(
-          padding: _kSeparatorInset,
-          child: DecoratedBox(
-            decoration: const BoxDecoration(color: Colors.transparent),
-            child: child,
-          ),
-        );
-      },
+    // The transparent box keeps taps between segments hit-testable.
+    return const Padding(
+      padding: _kSeparatorInset,
+      child: DecoratedBox(
+        decoration: BoxDecoration(color: Colors.transparent),
+        child: SizedBox(width: _kSeparatorWidth),
+      ),
     );
   }
 }
@@ -761,7 +704,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     }
 
     final int segmentCount = childCount ~/ 2 + 1;
-    return min(index, segmentCount - 1);
+    return math.min(index, segmentCount - 1);
   }
 
   RenderBox? nonSeparatorChildAfter(RenderBox child) {
@@ -1005,7 +948,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
   void paint(PaintingContext context, Offset offset) {
     final List<RenderBox> children = getChildrenAsList();
     for (int index = 1; index < childCount; index += 2) {
-      _paintSeparator(context, offset, children[index]);
+      _paintChild(context, offset, children[index]);
     }
 
     final int? highlightedChildIndex = highlightedIndex;
@@ -1072,18 +1015,6 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     for (int index = 0; index < children.length; index += 2) {
       _paintChild(context, offset, children[index]);
     }
-  }
-
-  final Paint separatorPaint = Paint();
-
-  void _paintSeparator(
-    PaintingContext context,
-    Offset offset,
-    RenderBox child,
-  ) {
-    final _SegmentedControlContainerBoxParentData childParentData =
-        child.parentData! as _SegmentedControlContainerBoxParentData;
-    context.paintChild(child, offset + childParentData.offset);
   }
 
   void _paintChild(PaintingContext context, Offset offset, RenderBox child) {

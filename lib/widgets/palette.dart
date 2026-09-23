@@ -23,8 +23,7 @@ class _PaletteState extends State<Palette> {
   late double colorHue;
   late double colorSaturation;
   late double colorValue;
-
-  late FocusNode _focusNode;
+  Color? _emitted;
 
   Color get value => widget.controller.value;
 
@@ -33,24 +32,50 @@ class _PaletteState extends State<Palette> {
   @override
   void initState() {
     super.initState();
-    colorHue = color.hue;
-    colorSaturation = color.saturation;
-    colorValue = color.value;
-    _focusNode = FocusNode();
+    _syncFromController();
+    widget.controller.addListener(_handleControllerChanged);
+  }
+
+  @override
+  void didUpdateWidget(Palette oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller.removeListener(_handleControllerChanged);
+      widget.controller.addListener(_handleControllerChanged);
+      _emitted = null;
+      _syncFromController();
+    }
+  }
+
+  void _syncFromController() {
+    final hsv = color;
+    colorHue = hsv.hue;
+    colorSaturation = hsv.saturation;
+    colorValue = hsv.value;
+  }
+
+  void _handleControllerChanged() {
+    setState(() {
+      if (value != _emitted) {
+        _syncFromController();
+      }
+      _emitted = null;
+    });
   }
 
   void _handleChange() {
-    widget.controller.value = HSVColor.fromAHSV(
+    _emitted = HSVColor.fromAHSV(
       color.alpha,
       colorHue,
       colorSaturation,
       colorValue,
     ).toColor();
+    widget.controller.value = _emitted!;
   }
 
   @override
   void dispose() {
-    _focusNode.dispose();
+    widget.controller.removeListener(_handleControllerChanged);
     super.dispose();
   }
 
@@ -132,70 +157,59 @@ class _PaletteState extends State<Palette> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: widget.controller,
-      builder: (_, _, _) {
-        return GestureDetector(
-          dragStartBehavior: DragStartBehavior.down,
-          onVerticalDragDown: (DragDownDetails details) =>
-              onStart(details.globalPosition),
-          onVerticalDragUpdate: (DragUpdateDetails details) =>
-              onUpdate(details.globalPosition),
-          onHorizontalDragUpdate: (DragUpdateDetails details) =>
-              onUpdate(details.globalPosition),
-          onVerticalDragEnd: (DragEndDetails details) => onEnd(),
-          onHorizontalDragEnd: (DragEndDetails details) => onEnd(),
-          onTapUp: (TapUpDetails details) => onEnd(),
-          child: SizedBox(
-            key: renderBoxKey,
-            child: Focus(
-              focusNode: _focusNode,
-              child: MouseRegion(
-                cursor: WidgetStateMouseCursor.clickable,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: <Widget>[
-                    RepaintBoundary(
-                      child: CustomPaint(
-                        painter: _ShadePainter(
-                          colorHue: colorHue,
-                          colorSaturation: colorSaturation,
-                          colorValue: colorValue,
-                          thickness: _thickness,
-                          padding: _padding,
-                          trackBorderRadius: _radius,
-                        ),
-                      ),
-                    ),
-                    CustomPaint(
-                      painter: _ShadeThumbPainter(
-                        colorSaturation: colorSaturation,
-                        colorValue: colorValue,
-                        thickness: _thickness,
-                        padding: _padding,
-                      ),
-                    ),
-                    RepaintBoundary(
-                      child: CustomPaint(
-                        painter: _TrackPainter(
-                          thickness: _thickness,
-                          ticks: 360,
-                        ),
-                      ),
-                    ),
-                    CustomPaint(
-                      painter: _TrackThumbPainter(
-                        colorHue: colorHue,
-                        thickness: _thickness,
-                      ),
-                    ),
-                  ],
+    return GestureDetector(
+      dragStartBehavior: DragStartBehavior.down,
+      onVerticalDragDown: (DragDownDetails details) =>
+          onStart(details.globalPosition),
+      onVerticalDragUpdate: (DragUpdateDetails details) =>
+          onUpdate(details.globalPosition),
+      onHorizontalDragUpdate: (DragUpdateDetails details) =>
+          onUpdate(details.globalPosition),
+      onVerticalDragEnd: (DragEndDetails details) => onEnd(),
+      onHorizontalDragEnd: (DragEndDetails details) => onEnd(),
+      onTapUp: (TapUpDetails details) => onEnd(),
+      child: SizedBox(
+        key: renderBoxKey,
+        child: MouseRegion(
+          cursor: WidgetStateMouseCursor.clickable,
+          child: Stack(
+            fit: StackFit.expand,
+            children: <Widget>[
+              RepaintBoundary(
+                child: CustomPaint(
+                  painter: _ShadePainter(
+                    colorHue: colorHue,
+                    colorSaturation: colorSaturation,
+                    colorValue: colorValue,
+                    thickness: _thickness,
+                    padding: _padding,
+                    trackBorderRadius: _radius,
+                  ),
                 ),
               ),
-            ),
+              CustomPaint(
+                painter: _ShadeThumbPainter(
+                  colorSaturation: colorSaturation,
+                  colorValue: colorValue,
+                  thickness: _thickness,
+                  padding: _padding,
+                ),
+              ),
+              RepaintBoundary(
+                child: CustomPaint(
+                  painter: _TrackPainter(thickness: _thickness, ticks: 360),
+                ),
+              ),
+              CustomPaint(
+                painter: _TrackThumbPainter(
+                  colorHue: colorHue,
+                  thickness: _thickness,
+                ),
+              ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

@@ -53,14 +53,6 @@ class OpenDelegate<T> extends Delegate {
   });
 }
 
-class NextDelegate extends Delegate {
-  final Widget widget;
-  final double? maxWidth;
-  final bool blur;
-
-  const NextDelegate({required this.widget, this.maxWidth, this.blur = true});
-}
-
 class OptionsDelegate<T> extends Delegate {
   final List<T> options;
   final String title;
@@ -147,25 +139,6 @@ class ListItem<T> extends StatelessWidget {
     this.padding = const EdgeInsets.symmetric(horizontal: 16),
     this.trailing,
     required OpenDelegate this.delegate,
-    this.horizontalTitleGap,
-    this.dense,
-    this.titleTextStyle,
-    this.subtitleTextStyle,
-    this.color,
-    this.minTileHeight,
-    this.visualDensity,
-    this.minVerticalPadding = 12,
-    this.tileTitleAlignment = ListTileTitleAlignment.center,
-  }) : onTap = null;
-
-  const ListItem.next({
-    super.key,
-    required this.title,
-    this.subtitle,
-    this.leading,
-    this.padding = const EdgeInsets.symmetric(horizontal: 16),
-    this.trailing,
-    required NextDelegate this.delegate,
     this.horizontalTitleGap,
     this.dense,
     this.titleTextStyle,
@@ -335,39 +308,29 @@ class ListItem<T> extends StatelessWidget {
         },
       );
     }
-    if (delegate is NextDelegate) {
-      final nextDelegate = delegate as NextDelegate;
-      final child = nextDelegate.widget;
-
-      return _buildListTile(
-        onTap: () {
-          showExtend(
-            context,
-            props: ExtendProps(
-              blur: nextDelegate.blur,
-              maxWidth: nextDelegate.maxWidth,
-            ),
-            builder: (_, _) {
-              return child;
-            },
-          );
-        },
-      );
-    }
     if (delegate is OptionsDelegate) {
       final optionsDelegate = delegate as OptionsDelegate<T>;
+      final options = optionsDelegate.options;
+      final subtitleBuilder = optionsDelegate.subtitleBuilder;
       return _buildListTile(
         onTap: () async {
-          final value = await globalState.showCommonDialog<T>(
-            child: OptionsDialog<T>(
+          // Options may hold null; an index tells a pick from a dismissal.
+          final index = await globalState.showCommonDialog<int>(
+            child: OptionsDialog<int>(
               title: optionsDelegate.title,
-              options: optionsDelegate.options,
-              textBuilder: optionsDelegate.textBuilder,
-              subtitleBuilder: optionsDelegate.subtitleBuilder,
-              value: optionsDelegate.value,
+              options: List.generate(options.length, (index) => index),
+              textBuilder: (index) =>
+                  optionsDelegate.textBuilder(options[index]),
+              subtitleBuilder: subtitleBuilder == null
+                  ? null
+                  : (index) => subtitleBuilder(options[index]),
+              value: options.indexOf(optionsDelegate.value),
             ),
           );
-          optionsDelegate.onChanged(value);
+          if (index == null) {
+            return;
+          }
+          optionsDelegate.onChanged(options[index]);
         },
       );
     }

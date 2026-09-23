@@ -40,9 +40,9 @@ class CommonPopupRoute<T> extends PopupRoute<T> {
     Widget child,
   ) {
     const align = Alignment.topRight;
-    final curveAnimation = animation
-        .drive(Tween(begin: 0.0, end: 1.0))
-        .drive(CurveTween(curve: Curves.easeOutBack));
+    final curveAnimation = animation.drive(
+      CurveTween(curve: Curves.easeOutBack),
+    );
     return SafeArea(
       child: ValueListenableBuilder(
         valueListenable: offsetNotifier,
@@ -57,24 +57,18 @@ class CommonPopupRoute<T> extends PopupRoute<T> {
             ),
           );
         },
-        child: AnimatedBuilder(
-          animation: animation,
-          builder: (_, child) {
-            return FadeTransition(
-              opacity: curveAnimation,
-              child: ScaleTransition(
-                alignment: align,
-                scale: curveAnimation,
-                child: SlideTransition(
-                  position: curveAnimation.drive(
-                    Tween(begin: const Offset(0, -0.02), end: Offset.zero),
-                  ),
-                  child: child,
-                ),
+        child: FadeTransition(
+          opacity: curveAnimation,
+          child: ScaleTransition(
+            alignment: align,
+            scale: curveAnimation,
+            child: SlideTransition(
+              position: curveAnimation.drive(
+                Tween(begin: const Offset(0, -0.02), end: Offset.zero),
               ),
-            );
-          },
-          child: builder(context),
+              child: child,
+            ),
+          ),
         ),
       ),
     );
@@ -82,18 +76,6 @@ class CommonPopupRoute<T> extends PopupRoute<T> {
 
   @override
   Duration get transitionDuration => const Duration(milliseconds: 250);
-}
-
-class PopupController extends ValueNotifier<bool> {
-  PopupController() : super(false);
-
-  void open() {
-    value = true;
-  }
-
-  void close() {
-    value = false;
-  }
 }
 
 typedef PopupOpen = Function({Offset offset});
@@ -124,7 +106,9 @@ class _CommonPopupBoxState extends State<CommonPopupBox> {
     Navigator.of(context)
         .push(
           CommonPopupRoute(
-            barrierLabel: utils.id,
+            barrierLabel: MaterialLocalizations.of(
+              context,
+            ).modalBarrierDismissLabel,
             builder: (BuildContext context) {
               return widget.popup;
             },
@@ -255,11 +239,7 @@ class _CommonPopupMenuItemsState extends State<_CommonPopupMenuItems> {
   String? _subTitle;
   bool _status = false;
 
-  Widget _popupMenuItem(
-    BuildContext context, {
-    required PopupMenuItemData item,
-    required int index,
-  }) {
+  Widget _popupMenuItem(BuildContext context, PopupMenuItemData item) {
     final onPressed = item.subItems.isNotEmpty
         ? () {
             _nextItems = item.subItems;
@@ -331,9 +311,9 @@ class _CommonPopupMenuItemsState extends State<_CommonPopupMenuItems> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final item in items.asMap().entries) ...[
-          _popupMenuItem(context, item: item.value, index: item.key),
-          if (item.value != items.last) const Divider(height: 0),
+        for (var i = 0; i < items.length; i++) ...[
+          _popupMenuItem(context, items[i]),
+          if (i != items.length - 1) const Divider(height: 0),
         ],
       ],
     );
