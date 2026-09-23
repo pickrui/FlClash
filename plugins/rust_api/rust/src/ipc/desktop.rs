@@ -58,7 +58,7 @@ const ACCEPT_POLL_INTERVAL: Duration = Duration::from_millis(50);
 // Wait it out, but never past this deadline, so a wedged peer still surfaces.
 const SEND_QUEUE_TIMEOUT: Duration = Duration::from_secs(5);
 const SEND_RETRY_INTERVAL: Duration = Duration::from_millis(2);
-const MIN_WRITE_BACKOFF: Duration = Duration::from_millis(1);
+const MIN_IO_BACKOFF: Duration = Duration::from_millis(1);
 
 #[derive(Clone)]
 struct MessageSender {
@@ -227,12 +227,16 @@ fn normalize_windows_pipe_write(result: io::Result<usize>) -> io::Result<usize> 
     }
 }
 
+fn next_backoff(backoff: Duration) -> Duration {
+    (backoff * 2).min(IO_POLL_INTERVAL)
+}
+
 fn write_all_interruptible(
     writer: &mut impl Write,
     mut data: &[u8],
     connection_running: &AtomicBool,
 ) -> io::Result<()> {
-    let mut backoff = MIN_WRITE_BACKOFF;
+    let mut backoff = MIN_IO_BACKOFF;
     while !data.is_empty() {
         if !connection_running.load(Ordering::SeqCst) || !server_active() {
             return Err(io::Error::new(
@@ -247,7 +251,7 @@ fn write_all_interruptible(
             Ok(0) => return Err(io::ErrorKind::WriteZero.into()),
             Ok(written) => {
                 data = &data[written..];
-                backoff = MIN_WRITE_BACKOFF;
+                backoff = MIN_IO_BACKOFF;
             }
             Err(e) if e.kind() == io::ErrorKind::Interrupted => continue,
             Err(e) if e.kind() == io::ErrorKind::WouldBlock => {
@@ -256,7 +260,7 @@ fn write_all_interruptible(
                 // 20ms wait there parks the whole queue behind one frame, so
                 // back off from 1ms instead.
                 thread::sleep(backoff);
-                backoff = (backoff * 2).min(IO_POLL_INTERVAL);
+                backoff = next_backoff(backoff);
             }
             Err(e) => return Err(e),
         }
@@ -319,6 +323,10 @@ impl FrameReader {
                 return Ok(Some(payload));
             }
         }
+    }
+
+    fn buffered(&self) -> usize {
+        self.header_read + self.payload_read
     }
 
     fn reset(&mut self) {
@@ -500,7 +508,9 @@ fn io_loop(name: String, sink: StreamSink<Vec<u8>, SseCodec>) {
         });
 
         let mut frame_reader = FrameReader::default();
+        let mut backoff = MIN_IO_BACKOFF;
         while connection_running.load(Ordering::SeqCst) && server_active() {
+            let buffered = frame_reader.buffered();
             #[cfg(windows)]
             let poll_result = frame_reader.poll(&mut WindowsPipeReader {
                 receiver: &mut receiver,
@@ -510,11 +520,19 @@ fn io_loop(name: String, sink: StreamSink<Vec<u8>, SseCodec>) {
 
             match poll_result {
                 Ok(Some(data)) => {
+                    backoff = MIN_IO_BACKOFF;
                     if sink.add(make_frame(TYPE_DATA, &data)).is_err() {
                         break;
                     }
                 }
-                Ok(None) => thread::sleep(IO_POLL_INTERVAL),
+                Ok(None) => {
+                    // A macOS Unix socket buffers only 8 KiB, so a large frame stalls mid-read.
+                    if frame_reader.buffered() != buffered {
+                        backoff = MIN_IO_BACKOFF;
+                    }
+                    thread::sleep(backoff);
+                    backoff = next_backoff(backoff);
+                }
                 Err(e) => {
                     if !is_expected_disconnect_error(&e) && server_active() {
                         ipc_debug!("[IPC] read error: {e}, raw={:?}", e.raw_os_error());
@@ -791,13 +809,46 @@ mod tests {
     }
 
     #[test]
-    fn write_backoff_starts_short_and_is_capped() {
-        let mut backoff = MIN_WRITE_BACKOFF;
-        assert_eq!(backoff, Duration::from_millis(1));
+    fn io_backoff_starts_short_and_is_capped() {
+        assert_eq!(MIN_IO_BACKOFF, Duration::from_millis(1));
+        assert_eq!(next_backoff(MIN_IO_BACKOFF), Duration::from_millis(2));
+        let mut backoff = MIN_IO_BACKOFF;
         for _ in 0..10 {
-            backoff = (backoff * 2).min(IO_POLL_INTERVAL);
+            backoff = next_backoff(backoff);
         }
         assert_eq!(backoff, IO_POLL_INTERVAL);
+        assert_eq!(next_backoff(IO_POLL_INTERVAL), IO_POLL_INTERVAL);
+    }
+
+    #[test]
+    fn frame_reader_reports_progress_on_partial_frames_only() {
+        let mut reader = StepReader {
+            steps: VecDeque::from([
+                ReadStep::WouldBlock,
+                ReadStep::Data(vec![5, 0]),
+                ReadStep::WouldBlock,
+                ReadStep::Data(vec![0, 0]),
+                ReadStep::Data(b"he".to_vec()),
+                ReadStep::WouldBlock,
+                ReadStep::WouldBlock,
+                ReadStep::Data(b"llo".to_vec()),
+            ]),
+        };
+        let mut frame_reader = FrameReader::default();
+
+        assert_eq!(frame_reader.poll(&mut reader).unwrap(), None);
+        assert_eq!(frame_reader.buffered(), 0);
+        assert_eq!(frame_reader.poll(&mut reader).unwrap(), None);
+        assert_eq!(frame_reader.buffered(), 2);
+        assert_eq!(frame_reader.poll(&mut reader).unwrap(), None);
+        assert_eq!(frame_reader.buffered(), 6);
+        assert_eq!(frame_reader.poll(&mut reader).unwrap(), None);
+        assert_eq!(frame_reader.buffered(), 6);
+        assert_eq!(
+            frame_reader.poll(&mut reader).unwrap(),
+            Some(b"hello".to_vec())
+        );
+        assert_eq!(frame_reader.buffered(), 0);
     }
 
     #[test]

@@ -1,4 +1,5 @@
 use crate::api::script::ScriptLog;
+use rquickjs::convert::Coerced;
 use rquickjs::function::Rest;
 use rquickjs::{CatchResultExt, Ctx, Function, Object, Result, Value};
 use std::cell::RefCell;
@@ -69,10 +70,15 @@ fn format<'js>(ctx: &Ctx<'js>, value: &Value<'js>) -> String {
     if let Some(text) = value.as_string() {
         return text.to_string().unwrap_or_default();
     }
-    // Clear any stringify exception (cycles, throwing toJSON), so console
-    // formatting cannot poison the user's evaluation.
-    match ctx.json_stringify(value.clone()).catch(ctx) {
-        Ok(Some(json)) => json.to_string().unwrap_or_default(),
-        _ => format!("{value:?}"),
+    // Clear any stringify or ToString exception (cycles, a throwing toJSON or
+    // toString, symbols), so console formatting cannot poison the evaluation.
+    if value.is_object() {
+        if let Ok(Some(json)) = ctx.json_stringify(value.clone()).catch(ctx) {
+            return json.to_string().unwrap_or_default();
+        }
+    }
+    match value.get::<Coerced<String>>().catch(ctx) {
+        Ok(text) => text.0,
+        Err(_) => value.type_name().to_owned(),
     }
 }

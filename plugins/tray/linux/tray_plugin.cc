@@ -50,6 +50,15 @@ static bool bool_value(FlValue* map, const char* key, bool fallback) {
 }
 
 static void on_menu_item_activate(GtkMenuItem* item, gpointer user_data) {
+  // GtkCheckMenuItem flips itself on activate; only show() may change it.
+  if (GTK_IS_CHECK_MENU_ITEM(item)) {
+    GtkCheckMenuItem* check = GTK_CHECK_MENU_ITEM(item);
+    gpointer handler = reinterpret_cast<gpointer>(on_menu_item_activate);
+    g_signal_handlers_block_by_func(item, handler, user_data);
+    gtk_check_menu_item_set_active(check,
+                                   !gtk_check_menu_item_get_active(check));
+    g_signal_handlers_unblock_by_func(item, handler, user_data);
+  }
   if (active_plugin == nullptr) {
     return;
   }

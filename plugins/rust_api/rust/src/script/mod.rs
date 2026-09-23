@@ -401,6 +401,24 @@ mod tests {
     }
 
     #[test]
+    fn formats_console_values_json_cannot_represent() {
+        let result = super::evaluate(
+            "function main(c) { const cycle = {}; cycle.self = cycle; console.log(undefined, c.missing, NaN, function f() {}, 1n); console.log(Symbol('s'), cycle, null, {a: [1]}); return c }",
+            "{}",
+        );
+        assert_eq!(result.error, None);
+        assert_eq!(result.config.as_deref(), Some("{}"));
+        let outputs: Vec<_> = result.logs.iter().map(|log| log.output.as_str()).collect();
+        assert_eq!(
+            outputs,
+            [
+                "undefined undefined NaN function f() {} 1",
+                "symbol [object Object] null {\"a\":[1]}",
+            ]
+        );
+    }
+
+    #[test]
     fn isolates_global_state_and_console_formatting_errors() {
         run("globalThis.leak = 1; function main(c) { const cycle = {}; cycle.self = cycle; console.log(cycle); return c }", json!({})).unwrap();
         let result = run(
