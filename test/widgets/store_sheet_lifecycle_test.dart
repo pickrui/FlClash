@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
@@ -56,9 +58,52 @@ void main() {
       },
     );
   }
+
+  testWidgets('a refresh still syncs the subscription after the page closes', (
+    tester,
+  ) async {
+    final container = ProviderContainer(
+      overrides: [
+        storeProvider.overrideWith(_Store.new),
+        cloudAccountProvider.overrideWith(_Account.new),
+      ],
+    );
+    globalState.container = container;
+    addTearDown(container.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const TestApp(locale: Locale('en'), child: SizedBox.shrink()),
+      ),
+    );
+    final navigator = globalState.navigatorKey.currentState!;
+    unawaited(
+      navigator.push(
+        MaterialPageRoute<void>(builder: (_) => const CloudStorePage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final store = container.read(storeProvider.notifier) as _Store;
+    final account = container.read(cloudAccountProvider.notifier) as _Account;
+    final load = store.loadGate = Completer<void>();
+    await tester.tap(find.byTooltip('Refresh'));
+    await tester.pump();
+    navigator.pop();
+    await tester.pumpAndSettle();
+    expect(find.byType(CloudStorePage), findsNothing);
+
+    load.complete();
+    await tester.pumpAndSettle();
+    expect(account.managedRefreshes, 1);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 }
 
 class _Store extends StoreNotifier {
+  Completer<void>? loadGate;
+
   @override
   StoreState build() => StoreState(
     plans: [
@@ -81,10 +126,15 @@ class _Store extends StoreNotifier {
     ],
   );
   @override
-  Future<void> load() async {}
+  Future<void> load() => loadGate?.future ?? Future.value();
 }
 
 class _Account extends CloudAccountNotifier {
+  var managedRefreshes = 0;
+
   @override
   CloudAccountState build() => const CloudAccountState();
+
+  @override
+  Future<void> refreshManagedSubscription() async => managedRefreshes++;
 }

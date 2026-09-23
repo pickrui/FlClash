@@ -311,8 +311,8 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
               ),
             ),
           ),
-          if (state.latestNotification != null &&
-              state.latestNotification!.cleanMessage.isNotEmpty) ...[
+          if (state.latestNotification case final notice?
+              when notice.cleanMessage.isNotEmpty) ...[
             const SizedBox(height: 16),
             CommonCard(
               child: Padding(
@@ -334,22 +334,16 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
                           ),
                         ),
                         const Spacer(),
-                        if (state.latestNotification?.publishTime != null)
-                          Text(
-                            DateFormat(
-                              'yyyy-MM-dd',
-                            ).format(state.latestNotification!.publishTime),
-                            style: context.textTheme.bodySmall?.copyWith(
-                              color: context.colorScheme.onSurfaceVariant,
-                            ),
+                        Text(
+                          DateFormat('yyyy-MM-dd').format(notice.publishTime),
+                          style: context.textTheme.bodySmall?.copyWith(
+                            color: context.colorScheme.onSurfaceVariant,
                           ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 12),
-                    _buildAnnouncementBody(
-                      context,
-                      state.latestNotification!.cleanMessage,
-                    ),
+                    _buildAnnouncementBody(context, notice.cleanMessage),
                   ],
                 ),
               ),

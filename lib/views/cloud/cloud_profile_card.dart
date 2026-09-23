@@ -20,6 +20,8 @@ class CloudProfileCard extends ConsumerStatefulWidget {
 class _CloudProfileCardState extends ConsumerState<CloudProfileCard> {
   CloudParams _params = const CloudParams();
   bool _paramsLoaded = false;
+  int _paramsGeneration = 0;
+  bool? _pageActive;
 
   @override
   void initState() {
@@ -27,32 +29,61 @@ class _CloudProfileCardState extends ConsumerState<CloudProfileCard> {
     _loadParams();
   }
 
-  Future<void> _loadParams() async {
-    final loaded = await CloudParamsStorage.load();
-    if (mounted) {
-      setState(() {
-        _params = loaded;
-        _paramsLoaded = true;
-      });
-    }
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final active = PageActivityScope.isActiveOf(context);
+    if (active && _pageActive == false) _loadParams();
+    _pageActive = active;
   }
 
-  Future<void> _commit(CloudParams next) async {
+  @override
+  void didUpdateWidget(CloudProfileCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_tierOf(oldWidget.profile) != _tierOf(widget.profile)) _loadParams();
+  }
+
+  static SubscriptionTier _tierOf(CloudProfile profile) {
+    return SubscriptionTier.fromServer(
+      profile.subscription,
+      planCode: profile.planCode,
+      planRank: profile.planRank,
+      nodeAccess: profile.nodeAccess,
+    );
+  }
+
+  Future<void> _loadParams() async {
+    final generation = _paramsGeneration;
+    final loaded = await CloudParamsStorage.load();
+    if (!mounted || generation != _paramsGeneration) return;
+    setState(() {
+      _params = loaded;
+      _paramsLoaded = true;
+    });
+  }
+
+  Future<void> _commit(CloudParams Function(CloudParams current) change) async {
     final commonAction = context.commonAction;
     final profileAction = context.profileAction;
     final setupAction = context.setupAction;
-
-    setState(() => _params = next);
-    await CloudParamsStorage.save(next);
-
-    final clashProfileList = ref
+    final clashProfile = ref
         .read(profilesProvider)
         .where((p) => p.isoixCloudProfile)
-        .toList();
-    if (clashProfileList.isNotEmpty) {
+        .firstOrNull;
+    final generation = ++_paramsGeneration;
+
+    setState(() => _params = change(_params));
+    // The profile editor and tier reconciliation also write these params.
+    final next = change(await CloudParamsStorage.load());
+    await CloudParamsStorage.save(next);
+    if (mounted && generation == _paramsGeneration) {
+      setState(() => _params = next);
+    }
+
+    if (clashProfile != null) {
       final updatedProfile = await commonAction.safeRun(
         () => profileAction.updateProfile(
-          clashProfileList.first,
+          clashProfile,
           showLoading: true,
           applyIfCurrent: false,
         ),
@@ -67,12 +98,7 @@ class _CloudProfileCardState extends ConsumerState<CloudProfileCard> {
   @override
   Widget build(BuildContext context) {
     final profile = widget.profile;
-    final tier = SubscriptionTier.fromServer(
-      profile.subscription,
-      planCode: profile.planCode,
-      planRank: profile.planRank,
-      nodeAccess: profile.nodeAccess,
-    );
+    final tier = _tierOf(profile);
     final clashProfile = ref
         .watch(profilesProvider)
         .where((p) => p.isoixCloudProfile)
@@ -181,13 +207,11 @@ class _CloudProfileCardState extends ConsumerState<CloudProfileCard> {
                   ),
                   delegate: SwitchDelegate<bool>(
                     value: _params.isAllNodes,
-                    onChanged: (val) {
-                      _commit(
-                        val
-                            ? _params.applyingAllNodes()
-                            : _restoreDefault(tier),
-                      );
-                    },
+                    onChanged: (val) => _commit(
+                      val
+                          ? (p) => p.applyingAllNodes()
+                          : (p) => p.applyingTierDefaults(tier.defaultParams),
+                    ),
                   ),
                 ),
               ListItem.switchItem(
@@ -201,12 +225,11 @@ class _CloudProfileCardState extends ConsumerState<CloudProfileCard> {
                 ),
                 delegate: SwitchDelegate<bool>(
                   value: isOverseas,
-                  onChanged: (val) {
-                    final next = val
-                        ? _params.copyWith(level: NetworkLevel.overseas)
-                        : _restoreDefault(tier);
-                    _commit(next);
-                  },
+                  onChanged: (val) => _commit(
+                    val
+                        ? (p) => p.copyWith(level: NetworkLevel.overseas)
+                        : (p) => p.applyingTierDefaults(tier.defaultParams),
+                  ),
                 ),
               ),
               if (tier.canSelectEmergency)
@@ -222,12 +245,11 @@ class _CloudProfileCardState extends ConsumerState<CloudProfileCard> {
                   ),
                   delegate: SwitchDelegate<bool>(
                     value: isEmergency,
-                    onChanged: (val) {
-                      final next = val
-                          ? _params.copyWith(level: NetworkLevel.emergency)
-                          : _restoreDefault(tier);
-                      _commit(next);
-                    },
+                    onChanged: (val) => _commit(
+                      val
+                          ? (p) => p.copyWith(level: NetworkLevel.emergency)
+                          : (p) => p.applyingTierDefaults(tier.defaultParams),
+                    ),
                   ),
                 ),
             ],
@@ -235,10 +257,6 @@ class _CloudProfileCardState extends ConsumerState<CloudProfileCard> {
         ),
       ),
     );
-  }
-
-  CloudParams _restoreDefault(SubscriptionTier tier) {
-    return _params.applyingTierDefaults(tier.defaultParams);
   }
 
   Widget _buildInfo(

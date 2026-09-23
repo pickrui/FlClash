@@ -37,23 +37,13 @@ class PurchasedPlanSummary {
 class PurchasedPlanDetails extends StatelessWidget {
   final BoughtRecord bought;
   final CloudProfile? profile;
-  final DateTime? now;
 
-  const PurchasedPlanDetails({
-    super.key,
-    required this.bought,
-    this.profile,
-    this.now,
-  });
+  const PurchasedPlanDetails({super.key, required this.bought, this.profile});
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final summary = PurchasedPlanSummary(
-      bought: bought,
-      profile: profile,
-      now: now,
-    );
+    final summary = PurchasedPlanSummary(bought: bought, profile: profile);
     final minutes = summary.remainingMinutes;
     final ended = !bought.isActive && !bought.isPending;
     final duration = minutes == null

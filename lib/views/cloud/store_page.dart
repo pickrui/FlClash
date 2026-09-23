@@ -23,12 +23,16 @@ class CloudStorePage extends ConsumerStatefulWidget {
 }
 
 class _CloudStorePageState extends ConsumerState<CloudStorePage> {
+  late final StoreNotifier _store;
+  late final CloudAccountNotifier _account;
   bool _busy = false;
   _StoreSection _section = _StoreSection.plans;
 
   @override
   void initState() {
     super.initState();
+    _store = ref.read(storeProvider.notifier);
+    _account = ref.read(cloudAccountProvider.notifier);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _loadStore();
@@ -36,33 +40,31 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
   }
 
   Future<bool> _loadStore() async {
-    final accountNotifier = ref.read(cloudAccountProvider.notifier);
     try {
-      await ref.read(storeProvider.notifier).load();
-      return mounted;
+      await _store.load();
+      return true;
     } catch (e) {
       if (!CloudApiException.isUnauthorized(e)) rethrow;
-      await accountNotifier.handleUnauthorized();
+      await _account.handleUnauthorized();
       return false;
     }
   }
 
   Future<void> _refresh() async {
-    if (!await _loadStore() || !mounted) return;
+    if (!await _loadStore()) return;
     // Plan changes must regenerate the managed subscription, not just the card.
-    await ref.read(cloudAccountProvider.notifier).refreshManagedSubscription();
+    await _account.refreshManagedSubscription();
   }
 
   Future<void> _runGuarded(Future<void> Function() action) async {
     if (_busy) return;
-    final accountNotifier = ref.read(cloudAccountProvider.notifier);
     setState(() => _busy = true);
     try {
       await action();
     } catch (e) {
       if (CloudApiException.isHandledUnauthorized(e)) return;
       if (CloudApiException.isUnauthorized(e)) {
-        await accountNotifier.handleUnauthorized();
+        await _account.handleUnauthorized();
         return;
       }
       globalState.showNotifier(CloudApiException.clean(e));
@@ -593,7 +595,6 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
       payment: result.method!.payment,
       billingPeriod: result.billingPeriod,
       type: result.method!.type,
-      coin: result.coin,
       coupon: result.coupon,
       autoRenew: result.autoRenew,
     );
@@ -601,13 +602,12 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
   }
 
   Future<void> _rechargeFlow() async {
-    final methods = await ref
-        .read(storeProvider.notifier)
-        .ensurePaymentMethods();
+    final methods = await _store.ensurePaymentMethods();
     if (methods.isEmpty) {
       globalState.showNotifier(appLocalizations.noPaymentMethods);
       return;
     }
+    if (!mounted) return;
 
     final result = await _showRechargeSheet(methods);
     if (result == null) return;
@@ -616,7 +616,6 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
       payment: result.method.payment,
       amount: result.amount,
       type: result.method.type,
-      coin: result.coin,
     );
     await _handlePaymentInitiation(init, payment: result.method.payment);
   }
@@ -771,7 +770,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
     List<PaymentMethodOption> methods = const [];
 
     if (withPayment) {
-      methods = await ref.read(storeProvider.notifier).ensurePaymentMethods();
+      methods = await _store.ensurePaymentMethods();
       if (methods.isEmpty) {
         globalState.showNotifier(appLocalizations.noPaymentMethods);
         return null;
@@ -926,7 +925,6 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
                               coupon: coupon.trim(),
                               autoRenew: autoRenew,
                               method: withPayment ? method : null,
-                              coin: null,
                             ),
                           );
                         },
@@ -1032,11 +1030,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
                           }
                           Navigator.pop(
                             sheetContext,
-                            _RechargeChoice(
-                              amount: amount,
-                              method: method,
-                              coin: null,
-                            ),
+                            _RechargeChoice(amount: amount, method: method),
                           );
                         },
                         icon: const Icon(Icons.payment),
@@ -1103,27 +1097,20 @@ class _PurchaseChoice {
   final String coupon;
   final bool autoRenew;
   final PaymentMethodOption? method;
-  final String? coin;
 
   const _PurchaseChoice({
     required this.billingPeriod,
     required this.coupon,
     required this.autoRenew,
     required this.method,
-    required this.coin,
   });
 }
 
 class _RechargeChoice {
   final double amount;
   final PaymentMethodOption method;
-  final String? coin;
 
-  const _RechargeChoice({
-    required this.amount,
-    required this.method,
-    required this.coin,
-  });
+  const _RechargeChoice({required this.amount, required this.method});
 }
 
 String _priceText(double price) {
@@ -1249,6 +1236,7 @@ class _QuoteDialogState extends ConsumerState<_QuoteDialog> {
       globalState.showNotifier(appLocalizations.discountCodeRequired);
       return;
     }
+    final accountNotifier = ref.read(cloudAccountProvider.notifier);
     setState(() {
       _loading = true;
       _error = null;
@@ -1263,7 +1251,7 @@ class _QuoteDialogState extends ConsumerState<_QuoteDialog> {
     } catch (e) {
       if (CloudApiException.isUnauthorized(e)) {
         if (mounted) Navigator.of(context).pop();
-        await ref.read(cloudAccountProvider.notifier).handleUnauthorized();
+        await accountNotifier.handleUnauthorized();
         return;
       }
       if (!mounted) return;

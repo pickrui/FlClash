@@ -10,6 +10,8 @@ import 'package:fl_clash/widgets/input.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'cloud_login_page.dart';
+
 Future<T?> showCloudRegisterPage<T>(BuildContext context) {
   return showDialog<T>(
     context: context,
@@ -110,6 +112,7 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
     try {
       await CloudApiService().sendEmailVerify(email);
       globalState.showNotifier(AppLocalizations.current.codeSent);
+      if (!mounted) return;
       _startResendCountdown();
     } catch (e) {
       globalState.showMessage(
@@ -125,54 +128,35 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
     if (_isSubmitting || ref.read(cloudAccountProvider).isLoading) return;
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isSubmitting = true);
     final navigator = Navigator.of(context);
+    final submit = _registerSubmission();
+    setState(() => _isSubmitting = true);
     try {
-      await _submitRegister();
-      if (mounted) navigator.popUntil((route) => route.isFirst);
-    } catch (error) {
-      if (CloudApiException.isHandledUnauthorized(error)) return;
-      final retry = await CloudApiService().confirmInsecureTlsRetry(error);
-      if (!retry) {
-        _showError(error);
-        return;
-      }
-      try {
-        await CloudApiService().runWithInsecureTls(_submitRegister);
-        if (mounted) navigator.popUntil((route) => route.isFirst);
-      } catch (retryError) {
-        if (CloudApiException.isHandledUnauthorized(retryError)) return;
-        _showError(retryError);
-      }
+      final registered = await submitCloudAuth(
+        submit,
+        errorTitle: AppLocalizations.current.registerFailed,
+      );
+      if (registered && mounted) navigator.popUntil((route) => route.isFirst);
     } finally {
-      if (mounted) {
-        setState(() => _isSubmitting = false);
-      } else {
-        _isSubmitting = false;
-      }
+      if (mounted) setState(() => _isSubmitting = false);
     }
   }
 
-  Future<void> _submitRegister() {
-    final config = _config;
+  Future<void> Function() _registerSubmission() {
+    final notifier = ref.read(cloudAccountProvider.notifier);
+    final name = _nicknameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
     final invite = _inviteCodeController.text.trim();
-    return ref
-        .read(cloudAccountProvider.notifier)
-        .signUp(
-          name: _nicknameController.text.trim(),
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
-          inviteCode: invite.isEmpty ? null : invite,
-          emailCode: (config?.emailVerify ?? false)
-              ? _emailCodeController.text.trim()
-              : null,
-        );
-  }
-
-  void _showError(Object error) {
-    globalState.showMessage(
-      title: AppLocalizations.current.registerFailed,
-      message: TextSpan(text: CloudApiException.clean(error)),
+    final emailCode = (_config?.emailVerify ?? false)
+        ? _emailCodeController.text.trim()
+        : null;
+    return () => notifier.signUp(
+      name: name,
+      email: email,
+      password: password,
+      inviteCode: invite.isEmpty ? null : invite,
+      emailCode: emailCode,
     );
   }
 
@@ -406,7 +390,13 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
             children: [
               Text(AppLocalizations.current.haveAccountAlready),
               TextButton(
-                onPressed: isLoading ? null : () => Navigator.of(context).pop(),
+                onPressed: isLoading
+                    ? null
+                    : () {
+                        final commonAction = context.commonAction;
+                        Navigator.of(context).pop();
+                        commonAction.openCloudLogin(navigateToCloud: false);
+                      },
                 child: Text(AppLocalizations.current.goLogin),
               ),
             ],

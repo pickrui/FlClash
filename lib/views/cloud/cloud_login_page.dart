@@ -14,6 +14,39 @@ Future<T?> showCloudLoginPage<T>(BuildContext context) {
   );
 }
 
+Future<bool> submitCloudAuth(
+  Future<void> Function() submit, {
+  required String errorTitle,
+}) async {
+  void showError(Object error) {
+    globalState.showMessage(
+      title: errorTitle,
+      message: TextSpan(text: CloudApiException.clean(error)),
+    );
+  }
+
+  try {
+    await submit();
+    return true;
+  } catch (error) {
+    if (CloudApiException.isHandledUnauthorized(error)) return false;
+    final service = CloudApiService();
+    if (!await service.confirmInsecureTlsRetry(error)) {
+      showError(error);
+      return false;
+    }
+    try {
+      await service.runWithInsecureTls(submit);
+      return true;
+    } catch (retryError) {
+      if (!CloudApiException.isHandledUnauthorized(retryError)) {
+        showError(retryError);
+      }
+      return false;
+    }
+  }
+}
+
 class CloudLoginPage extends ConsumerStatefulWidget {
   const CloudLoginPage({super.key});
 
@@ -46,61 +79,34 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
     }
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isSubmitting = true);
-
     final navigator = Navigator.of(context);
-
+    final submit = _loginSubmission();
+    setState(() => _isSubmitting = true);
     try {
-      await _submitLogin();
-      if (mounted) {
-        // If existingProfiles.isEmpty, addProfileFormURL might have already popped.
-        // We only pop if we're still effectively able to pop.
+      final signedIn = await submitCloudAuth(
+        submit,
+        errorTitle: AppLocalizations.current.loginFailed,
+      );
+      if (signedIn && mounted) {
         navigator.popUntil((route) => route.isFirst);
       }
-    } catch (error) {
-      if (CloudApiException.isHandledUnauthorized(error)) return;
-      final retry = await CloudApiService().confirmInsecureTlsRetry(error);
-      if (!retry) {
-        _showLoginError(error);
-        return;
-      }
-
-      try {
-        await CloudApiService().runWithInsecureTls(_submitLogin);
-        if (mounted) {
-          navigator.popUntil((route) => route.isFirst);
-        }
-      } catch (retryError) {
-        if (CloudApiException.isHandledUnauthorized(retryError)) return;
-        _showLoginError(retryError);
-      }
     } finally {
-      if (mounted) {
-        setState(() => _isSubmitting = false);
-      } else {
-        _isSubmitting = false;
-      }
+      if (mounted) setState(() => _isSubmitting = false);
     }
   }
 
-  Future<void> _submitLogin() {
+  Future<void> Function() _loginSubmission() {
     final notifier = ref.read(cloudAccountProvider.notifier);
     switch (_loginMode) {
       case _LoginMode.emailPassword:
-        return notifier.signInWithPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
-        );
+        final email = _emailController.text.trim();
+        final password = _passwordController.text;
+        return () =>
+            notifier.signInWithPassword(email: email, password: password);
       case _LoginMode.token:
-        return notifier.signInWithToken(_tokenController.text.trim());
+        final token = _tokenController.text.trim();
+        return () => notifier.signInWithToken(token);
     }
-  }
-
-  void _showLoginError(Object error) {
-    globalState.showMessage(
-      title: AppLocalizations.current.loginFailed,
-      message: TextSpan(text: CloudApiException.clean(error)),
-    );
   }
 
   @override
