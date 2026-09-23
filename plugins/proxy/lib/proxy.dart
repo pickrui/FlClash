@@ -161,7 +161,6 @@ class Proxy extends ProxyPlatform {
     final commands = _buildLinuxStartCommands(
       port: port,
       bypassDomain: bypassDomain,
-      desktop: desktop,
       homeDir: homeDir,
       configHome: configHome,
       backend: backend,
@@ -729,7 +728,12 @@ class Proxy extends ProxyPlatform {
   }
 
   static String _normalizeGSettingsValue(String value) {
-    final trimmed = value.trim();
+    var trimmed = value.trim();
+    // `gsettings get` type-annotates values it cannot infer, e.g. `@as []`.
+    if (trimmed.startsWith('@')) {
+      final separator = trimmed.indexOf(' ');
+      if (separator != -1) trimmed = trimmed.substring(separator + 1).trim();
+    }
     if (trimmed.length >= 2 &&
         trimmed.startsWith("'") &&
         trimmed.endsWith("'")) {
@@ -1122,16 +1126,27 @@ class Proxy extends ProxyPlatform {
       LinuxProxyBackend.gnome ||
       LinuxProxyBackend.mate =>
         await _executableChecker('gsettings'),
-      LinuxProxyBackend.kde => (await _executableChecker('kwriteconfig6') &&
-              await _executableChecker('kreadconfig6')) ||
-          (await _executableChecker('kwriteconfig5') &&
-              await _executableChecker('kreadconfig5')),
+      LinuxProxyBackend.kde => await _resolveKdeConfigTools() != null,
     };
   }
 
-  static Future<bool> _hasExecutable(String executable) async {
-    final result = await Process.run('which', [executable]);
-    return result.exitCode == 0;
+  // `which` is not in every base system (Arch ships it as a separate package).
+  static Future<bool> _hasExecutable(
+    String executable, [
+    String? searchPath,
+  ]) async {
+    final directories =
+        (searchPath ?? Platform.environment['PATH'] ?? '').split(':');
+    for (final directory in directories) {
+      if (directory.isEmpty) continue;
+      try {
+        final stat = await File(join(directory, executable)).stat();
+        if (stat.type == FileSystemEntityType.file && stat.mode & 0x49 != 0) {
+          return true;
+        }
+      } catch (_) {}
+    }
+    return false;
   }
 
   static LinuxProxyBackend? _preferredLinuxBackend(String? desktop) {
@@ -1169,22 +1184,12 @@ class Proxy extends ProxyPlatform {
   static List<ProxyCommand> _buildLinuxStartCommands({
     required int port,
     required List<String> bypassDomain,
-    required String? desktop,
     required String homeDir,
     String? configHome,
-    LinuxProxyBackend? backend,
-    String kdeConfigWriter = 'kwriteconfig5',
-    Set<String>? availableExecutables,
+    required LinuxProxyBackend backend,
+    required String kdeConfigWriter,
   }) {
-    final resolvedBackend = backend ??
-        _resolveLinuxBackendForBuild(
-          desktop: desktop,
-          availableExecutables: availableExecutables,
-        );
-    if (resolvedBackend == null) {
-      return [];
-    }
-    return switch (resolvedBackend) {
+    return switch (backend) {
       LinuxProxyBackend.gnome => _buildGSettingsStartCommands(
           port: port,
           bypassDomain: bypassDomain,
@@ -1200,57 +1205,9 @@ class Proxy extends ProxyPlatform {
           bypassDomain: bypassDomain,
           homeDir: homeDir,
           configHome: configHome,
-          executable: _resolveKdeConfigWriterForBuild(
-            availableExecutables,
-            fallback: kdeConfigWriter,
-          ),
+          executable: kdeConfigWriter,
         ),
     };
-  }
-
-  static LinuxProxyBackend? _resolveLinuxBackendForBuild({
-    required String? desktop,
-    required Set<String>? availableExecutables,
-  }) {
-    final preferredBackend = _preferredLinuxBackend(desktop);
-    if (preferredBackend != null) {
-      return preferredBackend;
-    }
-    if (availableExecutables == null) {
-      return LinuxProxyBackend.gnome;
-    }
-    for (final backend in LinuxProxyBackend.values) {
-      if (_isLinuxBackendAvailableForBuild(backend, availableExecutables)) {
-        return backend;
-      }
-    }
-    return null;
-  }
-
-  static bool _isLinuxBackendAvailableForBuild(
-    LinuxProxyBackend backend,
-    Set<String> availableExecutables,
-  ) {
-    return switch (backend) {
-      LinuxProxyBackend.gnome ||
-      LinuxProxyBackend.mate =>
-        availableExecutables.contains('gsettings'),
-      LinuxProxyBackend.kde => availableExecutables.contains('kwriteconfig6') ||
-          availableExecutables.contains('kwriteconfig5'),
-    };
-  }
-
-  static String _resolveKdeConfigWriterForBuild(
-    Set<String>? availableExecutables, {
-    required String fallback,
-  }) {
-    if (availableExecutables?.contains('kwriteconfig6') ?? false) {
-      return 'kwriteconfig6';
-    }
-    if (availableExecutables?.contains('kwriteconfig5') ?? false) {
-      return 'kwriteconfig5';
-    }
-    return fallback;
   }
 
   static List<ProxyCommand> _buildGSettingsStartCommands({
@@ -1529,23 +1486,41 @@ class Proxy extends ProxyPlatform {
   Future<bool> restoreProxyForTest() => _restoreProxyState();
 
   @visibleForTesting
-  static List<ProxyCommand> buildLinuxStartCommandsForTest({
+  static Future<List<ProxyCommand>> buildLinuxStartCommandsForTest({
     required int port,
     required List<String> bypassDomain,
     required String? desktop,
     required String homeDir,
     String? configHome,
-    Set<String>? availableExecutables,
-  }) {
+    Set<String> availableExecutables = const {'gsettings'},
+  }) async {
+    final proxy = Proxy(
+      processRunner: (executable, arguments, {runInShell = false}) async =>
+          ProcessResult(0, 1, '', ''),
+      executableChecker: (executable) async =>
+          availableExecutables.contains(executable),
+    );
+    final backend = await proxy._resolveLinuxBackend(desktop);
+    if (backend == null) return const [];
+    final kdeTools = backend == LinuxProxyBackend.kde
+        ? await proxy._resolveKdeConfigTools()
+        : null;
     return _buildLinuxStartCommands(
       port: port,
       bypassDomain: bypassDomain,
-      desktop: desktop,
       homeDir: homeDir,
       configHome: configHome,
-      availableExecutables: availableExecutables,
+      backend: backend,
+      kdeConfigWriter: kdeTools?.$1 ?? 'kwriteconfig5',
     );
   }
+
+  @visibleForTesting
+  static Future<bool> hasExecutableForTest(
+    String executable,
+    String searchPath,
+  ) =>
+      _hasExecutable(executable, searchPath);
 
   @visibleForTesting
   static List<String> parseMacosNetworkServicesForTest(String stdout) {

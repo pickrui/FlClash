@@ -6,8 +6,8 @@ import 'package:proxy/proxy.dart';
 
 void main() {
   group('Linux proxy command builders', () {
-    test('builds GNOME commands without duplicate port writes', () {
-      final commands = Proxy.buildLinuxStartCommandsForTest(
+    test('builds GNOME commands without duplicate port writes', () async {
+      final commands = await Proxy.buildLinuxStartCommandsForTest(
         port: 7890,
         bypassDomain: ['localhost', '127.0.0.1'],
         desktop: 'GNOME',
@@ -36,8 +36,8 @@ void main() {
       );
     });
 
-    test('builds empty GNOME ignore-hosts as an empty list', () {
-      final commands = Proxy.buildLinuxStartCommandsForTest(
+    test('builds empty GNOME ignore-hosts as an empty list', () async {
+      final commands = await Proxy.buildLinuxStartCommandsForTest(
         port: 7890,
         bypassDomain: const [],
         desktop: 'GNOME',
@@ -57,8 +57,8 @@ void main() {
       );
     });
 
-    test('builds MATE commands with MATE proxy schema', () {
-      final commands = Proxy.buildLinuxStartCommandsForTest(
+    test('builds MATE commands with MATE proxy schema', () async {
+      final commands = await Proxy.buildLinuxStartCommandsForTest(
         port: 7890,
         bypassDomain: ['localhost'],
         desktop: 'MATE',
@@ -79,8 +79,9 @@ void main() {
       );
     });
 
-    test('falls back to GNOME gsettings commands for XFCE when available', () {
-      final commands = Proxy.buildLinuxStartCommandsForTest(
+    test('falls back to GNOME gsettings commands for XFCE when available',
+        () async {
+      final commands = await Proxy.buildLinuxStartCommandsForTest(
         port: 7890,
         bypassDomain: ['localhost'],
         desktop: 'XFCE',
@@ -101,13 +102,18 @@ void main() {
       );
     });
 
-    test('prefers kwriteconfig6 for KDE when available', () {
-      final commands = Proxy.buildLinuxStartCommandsForTest(
+    test('prefers kwriteconfig6 for KDE when available', () async {
+      final commands = await Proxy.buildLinuxStartCommandsForTest(
         port: 7890,
         bypassDomain: ['localhost'],
         desktop: 'KDE',
         homeDir: '/home/user',
-        availableExecutables: {'kwriteconfig6', 'kwriteconfig5'},
+        availableExecutables: {
+          'kwriteconfig6',
+          'kreadconfig6',
+          'kwriteconfig5',
+          'kreadconfig5',
+        },
       );
 
       expect(commands.map((command) => command.executable).toSet(), {
@@ -116,13 +122,13 @@ void main() {
     });
 
     test('falls back to kwriteconfig5 for KDE when kwriteconfig6 is missing',
-        () {
-      final commands = Proxy.buildLinuxStartCommandsForTest(
+        () async {
+      final commands = await Proxy.buildLinuxStartCommandsForTest(
         port: 7890,
         bypassDomain: ['localhost'],
         desktop: 'KDE',
         homeDir: '/home/user',
-        availableExecutables: {'kwriteconfig5'},
+        availableExecutables: {'kwriteconfig5', 'kreadconfig5'},
       );
 
       expect(commands.map((command) => command.executable).toSet(), {
@@ -130,13 +136,13 @@ void main() {
       });
     });
 
-    test('uses available backend for unknown desktops', () {
-      final commands = Proxy.buildLinuxStartCommandsForTest(
+    test('uses available backend for unknown desktops', () async {
+      final commands = await Proxy.buildLinuxStartCommandsForTest(
         port: 7890,
         bypassDomain: ['localhost'],
         desktop: 'UNKNOWN',
         homeDir: '/home/user',
-        availableExecutables: {'kwriteconfig5'},
+        availableExecutables: {'kwriteconfig5', 'kreadconfig5'},
       );
 
       expect(commands.map((command) => command.executable).toSet(), {
@@ -144,6 +150,23 @@ void main() {
       });
     });
   });
+
+  test('finds executables through PATH without spawning which', () async {
+    final root = await Directory.systemTemp.createTemp('proxy_path_');
+    addTearDown(() => root.delete(recursive: true));
+    final bin = await Directory('${root.path}/bin').create();
+    File('${bin.path}/gsettings').writeAsStringSync('');
+    File('${bin.path}/kwriteconfig6').writeAsStringSync('');
+    await Process.run('/bin/chmod', ['755', '${bin.path}/gsettings']);
+    await Process.run('/bin/chmod', ['644', '${bin.path}/kwriteconfig6']);
+    final searchPath = '${root.path}/missing::${bin.path}';
+
+    expect(await Proxy.hasExecutableForTest('gsettings', searchPath), true);
+    expect(
+        await Proxy.hasExecutableForTest('kwriteconfig6', searchPath), false);
+    expect(await Proxy.hasExecutableForTest('kreadconfig6', searchPath), false);
+    expect(await Proxy.hasExecutableForTest('bin', root.path), false);
+  }, testOn: '!windows');
 
   group('macOS proxy command builders', () {
     test(
@@ -333,12 +356,12 @@ USB 10/100/1000 LAN
       );
 
       final snapshot = jsonDecode(File(statePath).readAsStringSync()) as Map;
-      final pending = Proxy.buildLinuxStartCommandsForTest(
+      final pending = (await Proxy.buildLinuxStartCommandsForTest(
         port: 7891,
         bypassDomain: const ['localhost'],
         desktop: 'GNOME',
         homeDir: '/home/user',
-      )
+      ))
           .map((command) => {
                 'executable': command.executable,
                 'args': command.args,
@@ -359,6 +382,29 @@ USB 10/100/1000 LAN
       expect(await nextProcess.restoreProxyForTest(), true);
       expect(state, original);
       expect(File(statePath).existsSync(), false);
+    });
+
+    test('GNOME stop restores ignore-hosts after an empty bypass list',
+        () async {
+      final original = _gnomeProxyState();
+      final state = Map<String, String>.from(original);
+      final proxy = Proxy(
+        processRunner: _gsettingsRunner(state),
+        executableChecker: (executable) async => executable == 'gsettings',
+      );
+
+      expect(
+        await proxy.startLinuxProxyForTest(
+          7890,
+          const [],
+          desktop: 'GNOME',
+          homeDir: '/home/user',
+        ),
+        true,
+      );
+      expect(state['org.gnome.system.proxy|ignore-hosts'], '[]');
+      expect(await proxy.restoreProxyForTest(), true);
+      expect(state, original);
     });
 
     test('GNOME start failure rolls every changed value back', () async {
@@ -466,16 +512,17 @@ USB 10/100/1000 LAN
       expect(state, original);
     });
 
-    test('KDE ignores relative XDG_CONFIG_HOME values', () {
-      final commands = Proxy.buildLinuxStartCommandsForTest(
+    test('KDE ignores relative XDG_CONFIG_HOME values', () async {
+      final commands = await Proxy.buildLinuxStartCommandsForTest(
         port: 7890,
         bypassDomain: const [],
         desktop: 'KDE',
         homeDir: '/home/user',
         configHome: 'relative/config',
-        availableExecutables: {'kwriteconfig6'},
+        availableExecutables: {'kwriteconfig6', 'kreadconfig6'},
       );
 
+      expect(commands, isNotEmpty);
       expect(
         commands.every((command) {
           final index = command.args.indexOf('--file');
@@ -714,11 +761,13 @@ ProxyProcessRunner _gsettingsRunner(
     if (arguments.first == 'get') {
       final value = state[key];
       final isStringValue = arguments[2] == 'host' || arguments[2] == 'mode';
-      final output = value == null ||
-              !isStringValue ||
-              (value.startsWith("'") && value.endsWith("'"))
-          ? value
-          : "'${value.replaceAll("'", r"\'")}'";
+      final output = value == '[]'
+          ? '@as []'
+          : value == null ||
+                  !isStringValue ||
+                  (value.startsWith("'") && value.endsWith("'"))
+              ? value
+              : "'${value.replaceAll("'", r"\'")}'";
       return ProcessResult(1, value == null ? 1 : 0, output ?? '', '');
     }
     if (fail?.call(arguments) ?? false) {

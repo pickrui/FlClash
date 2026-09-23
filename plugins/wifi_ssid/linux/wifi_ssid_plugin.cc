@@ -170,6 +170,69 @@ static gchar* get_ssid_from_network_manager() {
   return ssid;
 }
 
+static gchar* iwd_network_name(const gchar* network_path) {
+  g_autoptr(GDBusProxy) network = new_system_proxy(
+      "net.connman.iwd", network_path, "net.connman.iwd.Network");
+  if (network == nullptr) {
+    return nullptr;
+  }
+  g_autoptr(GVariant) name =
+      get_dbus_property(network, "net.connman.iwd.Network", "Name");
+  if (name == nullptr || !g_variant_is_of_type(name, G_VARIANT_TYPE_STRING)) {
+    return nullptr;
+  }
+  return g_variant_dup_string(name, nullptr);
+}
+
+// Each unpacked child keeps the whole reply alive, so every value taken out
+// of the iterator is released on every path, early returns included.
+static gchar* ssid_from_iwd_objects(GVariant* objects) {
+  GVariantIter iter;
+  g_variant_iter_init(&iter, objects);
+  const gchar* object_path = nullptr;
+  GVariant* interfaces_value = nullptr;
+  while (g_variant_iter_next(&iter, "{&o@a{sa{sv}}}", &object_path,
+                             &interfaces_value)) {
+    g_autoptr(GVariant) interfaces = interfaces_value;
+    g_autoptr(GVariant) station = g_variant_lookup_value(
+        interfaces, "net.connman.iwd.Station", G_VARIANT_TYPE_VARDICT);
+    const gchar* network_path = nullptr;
+    if (station == nullptr ||
+        !g_variant_lookup(station, "ConnectedNetwork", "&o", &network_path) ||
+        g_strcmp0(network_path, "/") == 0) {
+      continue;
+    }
+    gchar* ssid = iwd_network_name(network_path);
+    if (ssid != nullptr) {
+      return ssid;
+    }
+  }
+  return nullptr;
+}
+
+static gchar* ssid_from_connman_services(GVariant* services) {
+  GVariantIter iter;
+  g_variant_iter_init(&iter, services);
+  const gchar* service_path = nullptr;
+  GVariant* properties_value = nullptr;
+  while (g_variant_iter_next(&iter, "(&o@a{sv})", &service_path,
+                             &properties_value)) {
+    g_autoptr(GVariant) properties = properties_value;
+    const gchar* type = nullptr;
+    const gchar* state = nullptr;
+    const gchar* name = nullptr;
+    if (g_variant_lookup(properties, "Type", "&s", &type) &&
+        g_strcmp0(type, "wifi") == 0 &&
+        g_variant_lookup(properties, "State", "&s", &state) &&
+        (g_strcmp0(state, "online") == 0 || g_strcmp0(state, "ready") == 0) &&
+        g_variant_lookup(properties, "Name", "&s", &name) &&
+        name[0] != '\0') {
+      return g_strdup(name);
+    }
+  }
+  return nullptr;
+}
+
 static gchar* get_ssid_from_iwd() {
   g_autoptr(GDBusProxy) object_manager = new_system_proxy(
       "net.connman.iwd", "/", "org.freedesktop.DBus.ObjectManager");
@@ -181,62 +244,12 @@ static gchar* get_ssid_from_iwd() {
   g_autoptr(GVariant) response = g_dbus_proxy_call_sync(
       object_manager, "GetManagedObjects", nullptr, G_DBUS_CALL_FLAGS_NONE,
       kDbusTimeoutMs, nullptr, &error);
-  if (response == nullptr) {
+  if (response == nullptr ||
+      !g_variant_is_of_type(response, G_VARIANT_TYPE("(a{oa{sa{sv}}})"))) {
     return nullptr;
   }
-
-  GVariantIter* objects = nullptr;
-  g_variant_get(response, "(a{oa{sa{sv}}})", &objects);
-  if (objects == nullptr) {
-    return nullptr;
-  }
-
-  gchar* ssid = nullptr;
-  const gchar* object_path = nullptr;
-  GVariantIter* interfaces = nullptr;
-  while (ssid == nullptr &&
-         g_variant_iter_loop(objects, "{&oa{sa{sv}}}", &object_path,
-                             &interfaces)) {
-    const gchar* interface_name = nullptr;
-    GVariantIter* properties = nullptr;
-    while (ssid == nullptr &&
-           g_variant_iter_loop(interfaces, "{&sa{sv}}", &interface_name,
-                               &properties)) {
-      if (g_strcmp0(interface_name, "net.connman.iwd.Station") != 0) {
-        continue;
-      }
-
-      const gchar* property_name = nullptr;
-      GVariant* property_value = nullptr;
-      while (g_variant_iter_loop(properties, "{&sv}", &property_name,
-                                 &property_value)) {
-        if (g_strcmp0(property_name, "ConnectedNetwork") != 0) {
-          continue;
-        }
-
-        const gchar* network_path = g_variant_get_string(property_value, nullptr);
-        if (network_path == nullptr || g_strcmp0(network_path, "/") == 0) {
-          break;
-        }
-
-        g_autoptr(GDBusProxy) network = new_system_proxy(
-            "net.connman.iwd", network_path, "net.connman.iwd.Network");
-        if (network == nullptr) {
-          break;
-        }
-
-        g_autoptr(GVariant) name =
-            get_dbus_property(network, "net.connman.iwd.Network", "Name");
-        if (name != nullptr) {
-          ssid = g_strdup(g_variant_get_string(name, nullptr));
-        }
-        break;
-      }
-    }
-  }
-
-  g_variant_iter_free(objects);
-  return ssid;
+  g_autoptr(GVariant) objects = g_variant_get_child_value(response, 0);
+  return ssid_from_iwd_objects(objects);
 }
 
 static gchar* get_ssid_from_connman() {
@@ -251,49 +264,12 @@ static gchar* get_ssid_from_connman() {
       g_dbus_proxy_call_sync(manager, "GetServices", nullptr,
                              G_DBUS_CALL_FLAGS_NONE, kDbusTimeoutMs, nullptr,
                              &error);
-  if (response == nullptr) {
+  if (response == nullptr ||
+      !g_variant_is_of_type(response, G_VARIANT_TYPE("(a(oa{sv}))"))) {
     return nullptr;
   }
-
-  GVariantIter* services = nullptr;
-  g_variant_get(response, "(a(oa{sv}))", &services);
-  if (services == nullptr) {
-    return nullptr;
-  }
-
-  gchar* ssid = nullptr;
-  const gchar* service_path = nullptr;
-  GVariantIter* properties = nullptr;
-  while (ssid == nullptr &&
-         g_variant_iter_loop(services, "(&oa{sv})", &service_path,
-                             &properties)) {
-    const gchar* type = nullptr;
-    const gchar* state = nullptr;
-    const gchar* name = nullptr;
-    const gchar* property_name = nullptr;
-    GVariant* property_value = nullptr;
-
-    while (g_variant_iter_loop(properties, "{&sv}", &property_name,
-                               &property_value)) {
-      if (g_strcmp0(property_name, "Type") == 0) {
-        type = g_variant_get_string(property_value, nullptr);
-      } else if (g_strcmp0(property_name, "State") == 0) {
-        state = g_variant_get_string(property_value, nullptr);
-      } else if (g_strcmp0(property_name, "Name") == 0) {
-        name = g_variant_get_string(property_value, nullptr);
-      }
-    }
-
-    if (g_strcmp0(type, "wifi") == 0 &&
-        (g_strcmp0(state, "online") == 0 ||
-         g_strcmp0(state, "ready") == 0) &&
-        name != nullptr && strlen(name) > 0) {
-      ssid = g_strdup(name);
-    }
-  }
-
-  g_variant_iter_free(services);
-  return ssid;
+  g_autoptr(GVariant) services = g_variant_get_child_value(response, 0);
+  return ssid_from_connman_services(services);
 }
 
 static gchar* get_ssid_from_nmcli() {
