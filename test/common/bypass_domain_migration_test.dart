@@ -26,16 +26,26 @@ Map<String, Object?> _storedConfig(List<String> bypassDomain) {
   return (jsonDecode(jsonEncode(config)) as Map).cast<String, Object?>();
 }
 
-Future<List<String>> _load(Map<String, Object?> configMap) async {
+final _savedAtVersion = <int, List<String>>{};
+
+Future<List<String>> _load(
+  Map<String, Object?> configMap, {
+  Future<void> Function(Config config)? persist,
+}) async {
   final config = await migration.migrationIfNeeded(
     configMap,
     sync: (_) => throw StateError('current configs must not be resynced'),
+    persist:
+        persist ??
+        (config) async => _savedAtVersion[await preferences.getVersion()] =
+            config.networkProps.bypassDomain,
   );
   return config.networkProps.bypassDomain;
 }
 
 void main() {
   setUpAll(() => SharedPreferences.setMockInitialValues({}));
+  setUp(_savedAtVersion.clear);
 
   test('v1 config expands 172.2* in place and keeps user entries', () async {
     await preferences.setVersion(1);
@@ -45,6 +55,7 @@ void main() {
     );
 
     expect(bypass, ['corp.example', '172.19.*', ..._narrowed172, '192.168.*']);
+    expect(_savedAtVersion, {1: bypass});
     expect(await preferences.getVersion(), migration.currentVersion);
     expect(migration.currentVersion, 2);
   });
@@ -54,6 +65,7 @@ void main() {
     const custom = ['*.lan', '10.*', '172.200.*'];
 
     expect(await _load(_storedConfig(custom)), custom);
+    expect(_savedAtVersion, isEmpty);
     expect(await preferences.getVersion(), migration.currentVersion);
   });
 
@@ -61,12 +73,36 @@ void main() {
     await preferences.setVersion(1);
     final migrated = await _load(_storedConfig(['172.2*']));
     expect(migrated, _narrowed172);
+    _savedAtVersion.clear();
 
     final bypass = await _load(_storedConfig([...migrated, '172.2*']));
 
     expect(bypass, [..._narrowed172, '172.2*']);
+    expect(_savedAtVersion, isEmpty);
     expect(await preferences.getVersion(), migration.currentVersion);
   });
+
+  for (final version in [0, 1]) {
+    test(
+      'v$version keeps its version when saving the narrowed list fails',
+      () async {
+        await preferences.setVersion(version);
+        final stored = _storedConfig(['172.2*', 'localhost']);
+
+        await expectLater(
+          _load(stored, persist: (_) => throw StateError('disk full')),
+          throwsStateError,
+        );
+        expect(await preferences.getVersion(), version);
+
+        expect(await _load(stored), [..._narrowed172, 'localhost']);
+        expect(_savedAtVersion, {
+          version: [..._narrowed172, 'localhost'],
+        });
+        expect(await preferences.getVersion(), migration.currentVersion);
+      },
+    );
+  }
 
   test('config without a stored version is narrowed as well', () async {
     await preferences.setVersion(0);
@@ -75,6 +111,9 @@ void main() {
       ..._narrowed172,
       'localhost',
     ]);
+    expect(_savedAtVersion, {
+      0: [..._narrowed172, 'localhost'],
+    });
     expect(await preferences.getVersion(), migration.currentVersion);
   });
 

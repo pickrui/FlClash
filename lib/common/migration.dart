@@ -16,20 +16,27 @@ class Migration {
   Future<Config> migrationIfNeeded(
     Map<String, Object?>? configMap, {
     required Future<Config> Function(MigrationData data) sync,
+    Future<void> Function(Config config)? persist,
   }) async {
+    final persistConfig = persist ?? preferences.saveConfig;
     var oldVersion = await preferences.getVersion();
     if (oldVersion == 0 && isCurrentConfigShape(configMap)) {
-      final config = Config.realFromJson(narrowLegacy172Bypass(configMap));
+      final narrowed = narrowLegacy172Bypass(configMap);
+      final config = Config.realFromJson(narrowed);
+      if (!identical(narrowed, configMap)) {
+        await persistConfig(config);
+      }
       await preferences.setVersion(currentVersion);
       await preferences.clearClashConfig();
       return config;
     }
     if (oldVersion == 1 || oldVersion == currentVersion) {
+      final narrowed = oldVersion == 1
+          ? narrowLegacy172Bypass(configMap)
+          : configMap;
       Config? config;
       try {
-        config = Config.realFromJson(
-          oldVersion == 1 ? narrowLegacy172Bypass(configMap) : configMap,
-        );
+        config = Config.realFromJson(narrowed);
       } catch (_) {
         final isV0 = configMap?['proxiesStyle'] != null;
         if (isV0) {
@@ -40,6 +47,9 @@ class Migration {
       }
       if (config != null) {
         if (oldVersion != currentVersion) {
+          if (!identical(narrowed, configMap)) {
+            await persistConfig(config);
+          }
           await preferences.setVersion(currentVersion);
         }
         return config;
