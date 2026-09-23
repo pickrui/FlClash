@@ -100,23 +100,15 @@ class ProxyDecoratorProvider extends InheritedWidget {
       isProxyDecorator != oldWidget.isProxyDecorator;
 }
 
-class SheetProvider<T> extends InheritedWidget {
+class SheetProvider extends InheritedWidget {
   final SheetType type;
-  final void Function([T? result])? nestedNavigatorPop;
 
-  const SheetProvider({
-    super.key,
-    required super.child,
-    required this.type,
-    this.nestedNavigatorPop,
-  });
+  const SheetProvider({super.key, required super.child, required this.type});
 
   static SheetProvider? of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<SheetProvider>();
   }
 
   @override
-  bool updateShouldNotify(SheetProvider oldWidget) =>
-      type != oldWidget.type ||
-      nestedNavigatorPop != oldWidget.nestedNavigatorPop;
+  bool updateShouldNotify(SheetProvider oldWidget) => type != oldWidget.type;
 }

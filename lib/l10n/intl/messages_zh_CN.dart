@@ -116,13 +116,11 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m46(count) => "${count} 秒";
 
-  static String m47(count) => "已选择 ${count} 项";
+  static String m47(version) => "版本号：${version}";
 
-  static String m48(version) => "版本号：${version}";
+  static String m48(label) => "${label}必须为URL";
 
-  static String m49(label) => "${label}必须为URL";
-
-  static String m50(count) => "${count} 年前";
+  static String m49(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -596,6 +594,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "edit": MessageLookupByLibrary.simpleMessage("编辑"),
     "editCustomRouting": MessageLookupByLibrary.simpleMessage("编辑自定义"),
     "editGlobalRules": MessageLookupByLibrary.simpleMessage("编辑全局规则"),
+    "editProfile": MessageLookupByLibrary.simpleMessage("编辑配置"),
     "editProxyGroup": MessageLookupByLibrary.simpleMessage("编辑策略组"),
     "editRule": MessageLookupByLibrary.simpleMessage("编辑规则"),
     "emailCodeHint": MessageLookupByLibrary.simpleMessage("请输入 6 位验证码"),
@@ -1167,7 +1166,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "selectAll": MessageLookupByLibrary.simpleMessage("全选"),
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage("选择升级目标套餐"),
     "selected": MessageLookupByLibrary.simpleMessage("已选择"),
-    "selectedCountTitle": m47,
     "sendCode": MessageLookupByLibrary.simpleMessage("获取验证码"),
     "sendResetEmail": MessageLookupByLibrary.simpleMessage("发送重置邮件"),
     "serviceCheckFailed": MessageLookupByLibrary.simpleMessage("服务检测失败"),
@@ -1302,12 +1300,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseNotesFailed": MessageLookupByLibrary.simpleMessage(
       "更新日志加载失败，请重试",
     ),
-    "updateVersionNumber": m48,
+    "updateVersionNumber": m47,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("升级套餐"),
     "upload": MessageLookupByLibrary.simpleMessage("上传"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("通过URL获取配置文件"),
-    "urlTip": m49,
+    "urlTip": m48,
     "useHosts": MessageLookupByLibrary.simpleMessage("使用Hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("使用系统Hosts"),
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("已用流量"),
@@ -1327,7 +1325,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "vpnTip": MessageLookupByLibrary.simpleMessage("重启VPN后改变生效"),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV配置"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("白名单模式"),
-    "yearsAgo": m50,
+    "yearsAgo": m49,
     "zh_CN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };
 }

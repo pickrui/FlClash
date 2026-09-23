@@ -2389,16 +2389,6 @@ class AppLocalizations {
     );
   }
 
-  /// `{count} items have been selected`
-  String selectedCountTitle(Object count) {
-    return Intl.message(
-      '$count items have been selected',
-      name: 'selectedCountTitle',
-      desc: '',
-      args: [count],
-    );
-  }
-
   /// `Add rule`
   String get addRule {
     return Intl.message('Add rule', name: 'addRule', desc: '', args: []);
@@ -3967,6 +3957,16 @@ class AppLocalizations {
   /// `Add Profile`
   String get addProfile {
     return Intl.message('Add Profile', name: 'addProfile', desc: '', args: []);
+  }
+
+  /// `Edit Profile`
+  String get editProfile {
+    return Intl.message(
+      'Edit Profile',
+      name: 'editProfile',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Delay Test`

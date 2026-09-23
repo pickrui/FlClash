@@ -516,11 +516,3 @@ abstract class UpdatingMessage with _$UpdatingMessage {
     required String message,
   }) = _UpdatingMessage;
 }
-
-@immutable
-class IconButtonData {
-  final IconData icon;
-  final VoidCallback onPressed;
-
-  const IconButtonData({required this.icon, required this.onPressed});
-}

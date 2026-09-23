@@ -127,12 +127,12 @@ class AdaptiveSheetScaffold extends StatelessWidget {
     final closeButton = switch (type) {
       SheetType.page => null,
       SheetType.bottomSheet => IconButton.filledTonal(
-        onPressed: context.safeNestedPop,
+        onPressed: () => Navigator.of(context).pop(),
         style: closeButtonStyle,
         icon: const Icon(Icons.close),
       ),
       SheetType.sideSheet => IconButton(
-        onPressed: context.safeNestedPop,
+        onPressed: () => Navigator.of(context).pop(),
         style: closeButtonStyle,
         icon: const Icon(Icons.close),
       ),

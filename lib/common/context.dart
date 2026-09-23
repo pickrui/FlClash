@@ -1,7 +1,6 @@
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/manager/status_manager.dart';
 import 'package:fl_clash/models/state.dart';
-import 'package:fl_clash/widgets/inherited.dart';
 import 'package:fl_clash/widgets/scaffold.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -12,14 +11,6 @@ extension BuildContextExtension on BuildContext {
 
   CommonScaffoldState? get commonScaffoldState {
     return findAncestorStateOfType<CommonScaffoldState>();
-  }
-
-  void safeNestedPop<T extends Object?>([T? result]) {
-    final nestedPop = SheetProvider.of(this)?.nestedNavigatorPop;
-    if (nestedPop != null) {
-      return nestedPop(result);
-    }
-    return Navigator.of(this).pop(result);
   }
 
   void showNotifier(String text, {MessageActionState? actionState}) {

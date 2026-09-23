@@ -104,7 +104,7 @@ extension SystemControllerExt on AppController {
   void initLink() {
     linkManager.initAppLinksListen((url) async {
       final res = await globalState.showMessage(
-        title: '${appLocalizations.add}${appLocalizations.profile}',
+        title: appLocalizations.addProfile,
         message: TextSpan(
           children: [
             TextSpan(text: appLocalizations.doYouWantToPass),

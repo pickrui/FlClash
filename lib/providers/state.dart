@@ -438,8 +438,7 @@ String? getSelectedProxyName(Ref ref, String groupName) {
 
 @riverpod
 String getProxyDesc(Ref ref, Proxy proxy) {
-  final groupTypeNamesList = GroupType.values.map((e) => e.name).toList();
-  if (!groupTypeNamesList.contains(proxy.type)) {
+  if (!GroupTypeExtension.valueList.contains(proxy.type)) {
     return proxy.type;
   } else {
     final groups = ref.watch(groupsProvider);
