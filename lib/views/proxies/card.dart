@@ -50,7 +50,7 @@ class ProxyCard extends StatelessWidget {
                         ? const CircularProgressIndicator(strokeWidth: 2)
                         : IconButton(
                             icon: const Icon(Icons.bolt),
-                            iconSize: globalState.measure.labelSmallHeight,
+                            iconSize: measure.labelSmallHeight,
                             padding: EdgeInsets.zero,
                             onPressed: _handleTestCurrentDelay,
                           ),
@@ -74,27 +74,16 @@ class ProxyCard extends StatelessWidget {
   }
 
   Widget _buildProxyNameText(BuildContext context) {
-    if (type == ProxyCardType.min) {
-      return SizedBox(
-        height: measure.bodyMediumHeight * 1,
-        child: EmojiText(
-          proxy.name,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: context.textTheme.bodyMedium,
-        ),
-      );
-    } else {
-      return SizedBox(
-        height: measure.bodyMediumHeight * 2,
-        child: EmojiText(
-          proxy.name,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: context.textTheme.bodyMedium,
-        ),
-      );
-    }
+    final maxLines = type == ProxyCardType.min ? 1 : 2;
+    return SizedBox(
+      height: measure.bodyMediumHeight * maxLines,
+      child: EmojiText(
+        proxy.name,
+        maxLines: maxLines,
+        overflow: TextOverflow.ellipsis,
+        style: context.textTheme.bodyMedium,
+      ),
+    );
   }
 
   Future<void> _changeProxy(WidgetRef ref) async {
@@ -116,7 +105,6 @@ class ProxyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final measure = globalState.measure;
     final delayText = _buildDelayText();
     final proxyNameText = _buildProxyNameText(context);
     return Stack(

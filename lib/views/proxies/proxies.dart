@@ -22,12 +22,13 @@ class ProxiesView extends ConsumerStatefulWidget {
 class _ProxiesViewState extends ConsumerState<ProxiesView> {
   final GlobalKey<CommonScaffoldState> _scaffoldKey = GlobalKey();
   final GlobalKey<ProxiesTabViewState> _proxiesTabKey = GlobalKey();
-  bool _hasProviders = false;
-  bool _isTab = false;
 
-  List<Widget> _buildActions() {
+  List<Widget> _buildActions({
+    required bool isTab,
+    required bool hasProviders,
+  }) {
     return [
-      if (_isTab)
+      if (isTab)
         IconButton(
           onPressed: () {
             _proxiesTabKey.currentState?.scrollToGroupSelected();
@@ -63,7 +64,7 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
                 );
               },
             ),
-            if (_hasProviders)
+            if (hasProviders)
               PopupMenuItemData(
                 icon: Icons.poll_outlined,
                 label: appLocalizations.providers,
@@ -82,8 +83,8 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
     ];
   }
 
-  Widget? _buildFAB() {
-    return _isTab
+  Widget? _buildFAB(bool isTab) {
+    return isTab
         ? DelayTestButton(
             onClick: () async {
               await _proxiesTabKey.currentState?.delayTestCurrentGroup();
@@ -99,29 +100,6 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
   @override
   void initState() {
     super.initState();
-    ref.listenManual(providersProvider.select((state) => state.isNotEmpty), (
-      prev,
-      next,
-    ) {
-      if (prev != next) {
-        setState(() {
-          _hasProviders = next;
-        });
-      }
-    }, fireImmediately: true);
-    ref.listenManual(
-      proxiesStyleSettingProvider.select(
-        (state) => state.type == ProxiesType.tab,
-      ),
-      (prev, next) {
-        if (prev != next) {
-          setState(() {
-            _isTab = next;
-          });
-        }
-      },
-      fireImmediately: true,
-    );
     ref.listenManual(
       currentPageLabelProvider.select((state) => state == PageLabel.proxies),
       (prev, next) {
@@ -137,13 +115,17 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
     final proxiesType = ref.watch(
       proxiesStyleSettingProvider.select((state) => state.type),
     );
+    final hasProviders = ref.watch(
+      providersProvider.select((state) => state.isNotEmpty),
+    );
     final isLoading = ref.watch(loadingProvider(LoadingTag.proxies));
+    final isTab = proxiesType == ProxiesType.tab;
     return CommonScaffold(
       key: _scaffoldKey,
       isLoading: isLoading,
       resizeToAvoidBottomInset: false,
-      floatingActionButton: _buildFAB(),
-      actions: _buildActions(),
+      floatingActionButton: _buildFAB(isTab),
+      actions: _buildActions(isTab: isTab, hasProviders: hasProviders),
       title: appLocalizations.proxies,
       searchState: AppBarSearchState(onSearch: _onSearch),
       body: switch (proxiesType) {

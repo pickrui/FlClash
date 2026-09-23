@@ -13,22 +13,17 @@ class NetworkSpeed extends StatefulWidget {
 }
 
 class _NetworkSpeedState extends State<NetworkSpeed> {
-  List<Point> initPoints = const [Point(0, 0), Point(1, 0)];
+  static const _initPoints = [Point(0, 0), Point(1, 0)];
 
   List<Point> _getPoints(List<Traffic> traffics) {
-    final List<Point> trafficPoints = traffics
-        .toList()
-        .asMap()
-        .map(
-          (index, e) => MapEntry(
-            index,
-            Point((index + initPoints.length).toDouble(), e.speed.toDouble()),
-          ),
-        )
-        .values
-        .toList();
-
-    return [...initPoints, ...trafficPoints];
+    return [
+      ..._initPoints,
+      for (var i = 0; i < traffics.length; i++)
+        Point(
+          (i + _initPoints.length).toDouble(),
+          traffics[i].speed.toDouble(),
+        ),
+    ];
   }
 
   Traffic _getLastTraffic(List<Traffic> traffics) {

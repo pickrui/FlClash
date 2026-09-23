@@ -117,7 +117,7 @@ class NetworkDetection extends ConsumerWidget {
                         )
                       : !isLoading
                       ? Text(
-                          'Timeout',
+                          appLocalizations.timeout,
                           style: context.textTheme.bodyMedium
                               ?.copyWith(color: Colors.red)
                               .adjustSize(1),

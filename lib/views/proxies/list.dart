@@ -123,8 +123,7 @@ class _ProxiesListViewState extends State<ProxiesListView> {
     return itemHeightList;
   }
 
-  List<Widget> _buildItems(
-    WidgetRef ref, {
+  List<Widget> _buildItems({
     required List<Group> groups,
     required int columns,
     required Set<String> currentUnfoldSet,
@@ -181,8 +180,7 @@ class _ProxiesListViewState extends State<ProxiesListView> {
     return items;
   }
 
-  Widget _buildHeader(
-    WidgetRef ref, {
+  Widget _buildHeader({
     required Group group,
     required Set<String> currentUnfoldSet,
   }) {
@@ -305,7 +303,6 @@ class _ProxiesListViewState extends State<ProxiesListView> {
           );
         }
         final items = _buildItems(
-          ref,
           groups: state.groups,
           currentUnfoldSet: state.currentUnfoldSet,
           columns: state.columns,
@@ -365,7 +362,6 @@ class _ProxiesListViewState extends State<ProxiesListView> {
                                 bottom: 8,
                               ),
                               child: _buildHeader(
-                                ref,
                                 group: state.groups[index],
                                 currentUnfoldSet: state.currentUnfoldSet,
                               ),

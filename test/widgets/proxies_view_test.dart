@@ -233,6 +233,51 @@ void main() {
   );
 
   testWidgets(
+    'a groups refresh keeps the tab page state until the profile changes',
+    (tester) async {
+      Group group(String? now) => Group(
+        name: String.fromCharCodes('Group'.codeUnits),
+        type: GroupType.Selector,
+        now: now,
+        all: const [Proxy(name: 'Node', type: 'Shadowsocks')],
+      );
+      var profile = const Profile(id: 1, autoUpdateDuration: Duration.zero);
+      var state = ProxiesTabState(
+        groups: [group(null)],
+        currentGroupName: 'Group',
+        proxyCardType: ProxyCardType.min,
+        columns: 1,
+      );
+      final container = ProviderContainer(
+        overrides: [
+          currentProfileProvider.overrideWith((_) => profile),
+          proxiesTabStateProvider.overrideWith((_) => state),
+        ],
+      );
+      addTearDown(container.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: _TestApp(child: ProxiesTabView(onGroupChanged: (_) {})),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final initial = tester.state(find.byType(ProxyGroupView));
+
+      state = state.copyWith(groups: [group('Node')]);
+      container.invalidate(proxiesTabStateProvider);
+      await tester.pumpAndSettle();
+      expect(tester.state(find.byType(ProxyGroupView)), same(initial));
+
+      profile = profile.copyWith(id: 2);
+      container.invalidate(currentProfileProvider);
+      await tester.pumpAndSettle();
+      expect(tester.state(find.byType(ProxyGroupView)), isNot(same(initial)));
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
     'filtered list expands the visible group without indexing all groups',
     (tester) async {
       const hidden = Group(name: 'Hidden', type: GroupType.Selector);

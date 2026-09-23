@@ -11,15 +11,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'card.dart';
 import 'common.dart';
 
-typedef ProxyGroupViewKeyMap =
-    Map<String, GlobalObjectKey<_ProxyGroupViewState>>;
-
 class ProxiesTabView extends ConsumerStatefulWidget {
   final ValueChanged<String>? onGroupChanged;
 
   const ProxiesTabView({super.key, this.onGroupChanged});
-
-  static Map<String, PageStorageKey> pageListStoreMap = {};
 
   @override
   ConsumerState<ProxiesTabView> createState() => ProxiesTabViewState();
@@ -29,7 +24,8 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
     with TickerProviderStateMixin {
   TabController? _tabController;
   final _hasMoreButtonNotifier = ValueNotifier<bool>(false);
-  ProxyGroupViewKeyMap _keyMap = {};
+  final _groupViewKeys = <String, GlobalKey<_ProxyGroupViewState>>{};
+  int? _groupViewKeysProfileId;
 
   @override
   void initState() {
@@ -69,7 +65,7 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
   }
 
   void scrollToGroupSelected() {
-    _keyMap[_currentGroup?.name]?.currentState?.scrollToSelected();
+    _groupViewKeys[_currentGroup?.name]?.currentState?.scrollToSelected();
   }
 
   Future<void> delayTestCurrentGroup() async {
@@ -171,7 +167,7 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
       return;
     }
     final realIndex = index == -1 ? 0 : index;
-    _tabController ??= TabController(
+    _tabController = TabController(
       length: length,
       initialIndex: realIndex,
       vsync: this,
@@ -180,18 +176,30 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
     _tabController?.addListener(_tabControllerListener);
   }
 
+  void _retainGroupViewKeys(int? profileId, List<Group> groups) {
+    if (_groupViewKeysProfileId != profileId) {
+      _groupViewKeys.clear();
+      _groupViewKeysProfileId = profileId;
+    }
+    final names = {for (final group in groups) group.name};
+    _groupViewKeys.removeWhere((name, _) => !names.contains(name));
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.watch(themeSettingProvider.select((state) => state.textScale));
     final state = ref.watch(proxiesTabStateProvider);
+    final profileId = ref.watch(
+      currentProfileProvider.select((profile) => profile?.id),
+    );
     final groups = state.groups;
+    _retainGroupViewKeys(profileId, groups);
     if (groups.isEmpty || _tabController == null) {
       return NullStatus(
         illustration: NullStatusIllustration.proxies,
         label: appLocalizations.nullTip(appLocalizations.proxies),
       );
     }
-    _keyMap = {};
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -272,10 +280,9 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
             children: [
               for (final group in groups)
                 ProxyGroupView(
-                  key: _keyMap.updateCacheValue(
-                    group.name,
-                    () => GlobalObjectKey<_ProxyGroupViewState>(group.name),
-                  ),
+                  key: _groupViewKeys.putIfAbsent(group.name, GlobalKey.new),
+                  storageKey:
+                      '${profileId}_${ScrollPositionCacheKey.proxiesTabList.name}_${group.name}',
                   group: group,
                   columns: state.columns,
                   cardType: state.proxyCardType,
@@ -288,40 +295,26 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
   }
 }
 
-class ProxyGroupView extends ConsumerStatefulWidget {
+class ProxyGroupView extends StatefulWidget {
   final Group group;
+  final String storageKey;
   final int columns;
   final ProxyCardType cardType;
 
   const ProxyGroupView({
     super.key,
     required this.group,
+    required this.storageKey,
     required this.columns,
     required this.cardType,
   });
 
   @override
-  ConsumerState<ProxyGroupView> createState() => _ProxyGroupViewState();
+  State<ProxyGroupView> createState() => _ProxyGroupViewState();
 }
 
-class _ProxyGroupViewState extends ConsumerState<ProxyGroupView> {
-  late final ScrollController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = ScrollController();
-  }
-
-  PageStorageKey _getPageStorageKey() {
-    final profile = ref.read(currentProfileProvider);
-    final key =
-        '${profile?.id}_${ScrollPositionCacheKey.proxiesTabList.name}_${widget.group.name}';
-    return ProxiesTabView.pageListStoreMap.updateCacheValue(
-      key,
-      () => PageStorageKey(key),
-    );
-  }
+class _ProxyGroupViewState extends State<ProxyGroupView> {
+  final _controller = ScrollController();
 
   @override
   void dispose() {
@@ -354,7 +347,7 @@ class _ProxyGroupViewState extends ConsumerState<ProxyGroupView> {
     return CommonScrollBar(
       controller: _controller,
       child: GridView.builder(
-        key: _getPageStorageKey(),
+        key: PageStorageKey<String>(widget.storageKey),
         controller: _controller,
         padding: const EdgeInsets.only(
           top: 16,

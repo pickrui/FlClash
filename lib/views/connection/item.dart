@@ -45,22 +45,6 @@ class TrackerInfoItem extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(trackerInfo.desc, style: context.textTheme.bodyLarge),
-        // Row(
-        //   mainAxisSize: MainAxisSize.max,
-        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        //   spacing: 8,
-        //   children: [
-        //     Flexible(
-        //       child: Text(trackerInfo.desc, style: context.textTheme.bodyLarge),
-        //     ),
-        //     Text(
-        //       trackerInfo.start.lastUpdateTimeDesc,
-        //       style: context.textTheme.bodySmall?.copyWith(
-        //         color: context.colorScheme.onSurface.opacity60,
-        //       ),
-        //     ),
-        //   ],
-        // ),
         const SizedBox(height: 6),
         Text(
           _getSourceText(trackerInfo),
@@ -228,33 +212,14 @@ class TrackerInfoDetailView extends StatelessWidget {
     );
   }
 
-  Widget _buildItem({
-    required String title,
-    required String desc,
-    bool quickCopy = false,
-  }) {
+  Widget _buildItem({required String title, required String desc}) {
     return ListItem(
       title: Row(
         spacing: 16,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            spacing: 4,
-            children: [
-              Text(title),
-              if (quickCopy)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: IconButton(
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                    icon: const Icon(Icons.content_copy, size: 18),
-                    onPressed: () {},
-                  ),
-                ),
-            ],
-          ),
+          Text(title),
           Flexible(child: Text(desc, textAlign: TextAlign.end)),
         ],
       ),

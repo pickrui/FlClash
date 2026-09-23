@@ -196,7 +196,7 @@ class ProxiesSetting extends StatelessWidget {
                       getTextForProxiesLayout(context, item),
                       isSelected: item == layout,
                       onPressed: () {
-                        ref.watch(proxiesStyleSettingProvider.notifier).update((
+                        ref.read(proxiesStyleSettingProvider.notifier).update((
                           state,
                         ) {
                           return state.copyWith(layout: item);
