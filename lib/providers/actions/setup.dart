@@ -285,9 +285,7 @@ extension SetupControllerExt on AppController {
             .read(networkSettingProvider.notifier)
             .update((state) => state.copyWith(authentication: next));
         try {
-          if (!await _saveConfigSerialized(config)) {
-            throw StateError('Could not save authentication settings');
-          }
+          await _saveConfigSerialized(config);
         } catch (_) {
           _ref
               .read(networkSettingProvider.notifier)
@@ -622,7 +620,7 @@ extension SetupControllerExt on AppController {
     );
     Map<String, dynamic> rawConfig = configMap;
     if (scriptContent?.isNotEmpty == true) {
-      rawConfig = await globalState.handleEvaluate(
+      rawConfig = await evaluateProfileScript(
         scriptContent!,
         rawConfig,
         options:

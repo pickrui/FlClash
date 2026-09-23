@@ -131,8 +131,8 @@ class Preferences {
     }
   }
 
-  Future<bool> saveConfig(Config config) async {
-    await durableConfigStore.write(await appPath.durableConfigPath, config);
+  Future<void> saveConfig(Config config) async {
+    await saveDurableConfig(config);
     final preferences = await _loadSharedPreferences();
     try {
       await preferences?.setString(
@@ -140,7 +140,6 @@ class Preferences {
         json.encode(sanitizeConfigForPreferences(config)),
       );
     } catch (_) {}
-    return true;
   }
 
   Future<void> saveDurableConfig(Config config) async {

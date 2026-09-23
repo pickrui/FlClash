@@ -261,9 +261,7 @@ extension BackupControllerExt on AppController {
                       ),
                     );
                   }
-                  if (!await _saveConfigSerialized(configToApply)) {
-                    throw appLocalizations.restoreException;
-                  }
+                  await _saveConfigSerialized(configToApply);
                   await restoreJournal!.markCommitted();
                 } catch (error, stackTrace) {
                   Object? rollbackError;
@@ -283,11 +281,7 @@ extension BackupControllerExt on AppController {
                     }
                   }
                   try {
-                    if (!await _saveConfigSerialized(previousConfig)) {
-                      rollbackError ??= StateError(
-                        'failed to restore preferences',
-                      );
-                    }
+                    await _saveConfigSerialized(previousConfig);
                   } catch (failure) {
                     rollbackError ??= failure;
                   }

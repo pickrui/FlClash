@@ -19,7 +19,7 @@ class CommonPrint {
     final payload = '[APP] ${text ?? 'null'}';
     final log = Log.app(payload).copyWith(logLevel: logLevel);
     debugPrint(payload);
-    if (!appController.isAttach) {
+    if (!appController.canRecordLogs) {
       return;
     }
     appController.writePersistentLog(log);

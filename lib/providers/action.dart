@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/geo_recovery.dart';
+import 'package:fl_clash/common/javascript.dart';
 import 'package:fl_clash/common/core_launch_error.dart';
 import 'package:fl_clash/common/delay_test.dart';
 import 'package:fl_clash/common/network_failure_prompt.dart';
@@ -758,6 +759,7 @@ class AppController {
   int _pendingProfileApplies = 0;
   final ProfileApplyIntent _profileApplyIntent = ProfileApplyIntent();
   bool isAttach = false;
+  bool _logsAttached = false;
   bool _isCloudLoginDialogShowing = false;
 
   static AppController? _instance;
@@ -769,9 +771,13 @@ class AppController {
     return _instance!;
   }
 
+  bool get canRecordLogs => _logsAttached;
+
   Future<void> attach(BuildContext context, WidgetRef ref) async {
     _context = context;
     _ref = ref;
+    // Set before _init so its startup diagnostics reach the log and app.log.
+    _logsAttached = true;
     try {
       await _init();
     } finally {
@@ -779,7 +785,7 @@ class AppController {
     }
   }
 
-  Future<bool> _saveConfigSerialized(Config value) {
+  Future<void> _saveConfigSerialized(Config value) {
     final operation = _preferencesWriteTail.then(
       (_) => preferences.saveConfig(value),
     );

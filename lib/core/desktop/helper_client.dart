@@ -567,5 +567,3 @@ const linuxHelperInstallRoot = '/usr/local/libexec/flclash';
 String linuxHelperInstalledPath(String sha256) =>
     '$linuxHelperInstallRoot/$sha256/$appHelperService';
 final linuxHelperClient = HelperClient(isLinux: true);
-
-typedef WindowsHelperReadiness = HelperReadiness;

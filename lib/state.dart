@@ -17,7 +17,6 @@ import 'package:fl_clash/widgets/dialog.dart';
 import 'package:fl_clash/widgets/list.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
-import 'package:fl_clash/common/javascript.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -175,15 +174,11 @@ class GlobalState {
             data.links,
           );
         });
-        if (!await preferences.saveConfig(config)) {
-          throw StateError('failed to persist migrated config');
-        }
+        await preferences.saveConfig(config);
         return config;
       },
     );
-    if (!await preferences.saveConfig(config)) {
-      throw StateError('failed to persist application config');
-    }
+    await preferences.saveConfig(config);
     final configOverrides = buildConfigOverrides(config);
     container = ProviderContainer(
       overrides: [...appStateOverrides, ...configOverrides],
@@ -381,20 +376,6 @@ class GlobalState {
       return;
     }
     launchUrl(Uri.parse(url));
-  }
-
-  Future<Map<String, dynamic>> handleEvaluate(
-    String scriptContent,
-    Map<String, dynamic> config, {
-    void Function(String level, String output)? onConsole,
-    Map<String, bool> options = const {},
-  }) async {
-    return evaluateProfileScript(
-      scriptContent,
-      config,
-      onConsole: onConsole,
-      options: options,
-    );
   }
 }
 

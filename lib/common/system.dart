@@ -53,8 +53,7 @@ class System {
   Future<bool> checkIsAdmin() async {
     final corePath = appPath.corePath;
     if (system.isWindows) {
-      return await windowsHelperClient.readiness() ==
-          WindowsHelperReadiness.ready;
+      return await windowsHelperClient.readiness() == HelperReadiness.ready;
     } else if (system.isMacOS) {
       final result = await Process.run('stat', ['-f', '%Su:%Sg %Sp', corePath]);
       final output = result.stdout.trim();
@@ -255,15 +254,15 @@ class Windows {
   Future<AuthorizeCode> registerService() async {
     final readiness = await windowsHelperClient.readiness();
     switch (readiness) {
-      case WindowsHelperReadiness.ready:
+      case HelperReadiness.ready:
         return AuthorizeCode.none;
-      case WindowsHelperReadiness.manifestMissing:
+      case HelperReadiness.manifestMissing:
         commonPrint.log(
           'Core manifest is missing or invalid; Helper unavailable',
           logLevel: LogLevel.warning,
         );
         return AuthorizeCode.error;
-      case WindowsHelperReadiness.notReady:
+      case HelperReadiness.notReady:
         break;
     }
     if (!runas(appPath.helperPath, 'install')) {
@@ -284,7 +283,7 @@ class Windows {
             timeout: remaining,
             logFailure: false,
           ) ==
-          WindowsHelperReadiness.ready) {
+          HelperReadiness.ready) {
         return true;
       }
       if (stopwatch.elapsed + interval >= timeout) {
