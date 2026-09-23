@@ -96,6 +96,8 @@ mixin CoreInterface {
 }
 
 abstract class CoreHandlerInterface with CoreInterface {
+  bool _logStreamRequested = false;
+
   Future<T?> _invokeMethod<T>({
     required CoreMethod method,
     Object? arguments,
@@ -141,11 +143,28 @@ abstract class CoreHandlerInterface with CoreInterface {
 
   @override
   Future<bool> init(InitParams params) async {
-    return await _invokeMethod<bool>(
+    final initialized =
+        await _invokeMethod<bool>(
           method: CoreMethod.initClash,
           arguments: params.toJson(),
         ) ??
         false;
+    // The Core ignores a log subscription made before initClash and drops it
+    // on shutdown, so a stream the app still wants is renewed here.
+    if (initialized && _logStreamRequested) {
+      unawaited(
+        startLog().then<void>(
+          (_) {},
+          onError: (Object error) {
+            commonPrint.log(
+              'Log stream renewal failed: $error',
+              logLevel: coreFailureLogLevel(error),
+            );
+          },
+        ),
+      );
+    }
+    return initialized;
   }
 
   @override
@@ -364,18 +383,20 @@ abstract class CoreHandlerInterface with CoreInterface {
   }
 
   @override
-  FutureOr<void> resetTraffic() {
-    _invokeMethod(method: CoreMethod.resetTraffic);
+  Future<void> resetTraffic() {
+    return _invokeMethod<Object?>(method: CoreMethod.resetTraffic);
   }
 
   @override
-  FutureOr<void> startLog() {
-    _invokeMethod(method: CoreMethod.startLog);
+  Future<void> startLog() {
+    _logStreamRequested = true;
+    return _invokeMethod<Object?>(method: CoreMethod.startLog);
   }
 
   @override
-  FutureOr<void> stopLog() {
-    _invokeMethod<bool>(method: CoreMethod.stopLog);
+  Future<void> stopLog() {
+    _logStreamRequested = false;
+    return _invokeMethod<Object?>(method: CoreMethod.stopLog);
   }
 
   @override

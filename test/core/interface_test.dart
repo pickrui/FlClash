@@ -190,6 +190,33 @@ void main() {
     },
   );
 
+  test('a requested log stream is renewed once the Core initializes', () async {
+    const params = InitParams(homeDir: '/tmp/flclash', version: 1);
+    final handler = _FakeCoreHandler()..response = true;
+
+    await handler.startLog();
+    await handler.init(params);
+    await pumpEventQueue();
+    expect(handler.methods, [
+      CoreMethod.startLog,
+      CoreMethod.initClash,
+      CoreMethod.startLog,
+    ]);
+
+    handler.methods.clear();
+    await handler.stopLog();
+    await handler.init(params);
+    await pumpEventQueue();
+    expect(handler.methods, [CoreMethod.stopLog, CoreMethod.initClash]);
+
+    handler.methods.clear();
+    await handler.startLog();
+    handler.response = false;
+    await handler.init(params);
+    await pumpEventQueue();
+    expect(handler.methods, [CoreMethod.startLog, CoreMethod.initClash]);
+  });
+
   test(
     'optional observations and delay probes retain missing response defaults',
     () async {
@@ -215,6 +242,7 @@ class _FakeCoreHandler extends CoreHandlerInterface {
   Object? response;
   Object? arguments;
   Duration? timeout;
+  final methods = <CoreMethod>[];
 
   @override
   bool get isConnected => true;
@@ -234,6 +262,7 @@ class _FakeCoreHandler extends CoreHandlerInterface {
     Object? arguments,
     Duration? timeout,
   }) async {
+    methods.add(method);
     this.arguments = arguments;
     this.timeout = timeout;
     return response as T?;

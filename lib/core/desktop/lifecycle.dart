@@ -18,8 +18,6 @@ abstract interface class DesktopCoreLifecycleController {
   Future<CoreLifecycleResult> stop();
 
   Future<CoreLifecycleResult> close();
-
-  Future<DesktopCoreSession> waitUntilRunning(Duration timeout);
 }
 
 enum _LifecycleTarget { running, restarted, stopped, closed }
@@ -827,39 +825,5 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
     if (!_stateController.isClosed) {
       _stateController.add(state);
     }
-  }
-
-  @override
-  Future<DesktopCoreSession> waitUntilRunning(Duration timeout) {
-    final current = _state;
-    if (current is DesktopCoreRunning) {
-      return Future.value(current.session);
-    }
-    if (current is DesktopCoreFailed) {
-      return Future.error(current.failure, current.failure.stackTrace);
-    }
-    if (current is DesktopCoreClosed) {
-      return Future.error(StateError('Desktop Core lifecycle is closed'));
-    }
-    return states
-        .firstWhere(
-          (state) =>
-              state is DesktopCoreRunning ||
-              state is DesktopCoreFailed ||
-              state is DesktopCoreClosed,
-        )
-        .then<DesktopCoreSession>((state) {
-          if (state case DesktopCoreRunning(:final session)) {
-            return session;
-          }
-          if (state case DesktopCoreFailed(:final failure)) {
-            Error.throwWithStackTrace(
-              failure,
-              failure.stackTrace ?? StackTrace.current,
-            );
-          }
-          throw StateError('Desktop Core lifecycle is closed');
-        })
-        .timeout(timeout);
   }
 }

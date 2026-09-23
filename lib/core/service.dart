@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:fl_clash/common/constant.dart';
+import 'package:fl_clash/common/core_launch_error.dart';
 import 'package:fl_clash/common/system.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/core.dart';
@@ -79,7 +80,7 @@ class CoreService extends CoreHandlerInterface {
       await start();
       return '';
     } catch (error) {
-      return error.toString();
+      return coreLaunchBlockedMessage(error, null) ?? error.toString();
     }
   }
 

@@ -1,18 +1,27 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:fl_clash/controller.dart';
 import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/core/interface.dart';
+import 'package:fl_clash/core/method.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 
 final class _MockCoreHandler extends Mock implements CoreHandlerInterface {}
 
 void main() {
-  setUpAll(() => registerFallbackValue(Duration.zero));
+  late Directory tempDirectory;
+  setUpAll(() async {
+    registerFallbackValue(Duration.zero);
+    tempDirectory = await Directory.systemTemp.createTemp('core-controller-');
+    PathProviderPlatform.instance = _TempPaths(tempDirectory.path);
+  });
+  tearDownAll(() => tempDirectory.delete(recursive: true));
   const setupParams = SetupParams(
     selectedMap: {},
     testUrl: 'https://example.com',
@@ -536,4 +545,58 @@ void main() {
       verifyNoMoreInteractions(handler);
     });
   });
+
+  test('a failed detached Core call is logged, not left unhandled', () async {
+    when(() => handler.closeConnections()).thenAnswer(
+      (_) async => throw const CoreMethodException(
+        code: 'transport_disconnected',
+        message: 'Core transport disconnected',
+      ),
+    );
+
+    controller.closeConnections();
+    await pumpEventQueue();
+
+    verify(() => handler.closeConnections()).called(1);
+  });
+
+  test(
+    'validating edited data removes its temporary copy on failure',
+    () async {
+      String? validatedPath;
+      var copyWritten = false;
+      when(() => handler.validateConfig(any())).thenAnswer((invocation) async {
+        validatedPath = invocation.positionalArguments.single as String;
+        copyWritten = File(validatedPath!).existsSync();
+        throw const CoreMethodException(
+          code: 'transport_disconnected',
+          message: 'Core transport disconnected',
+        );
+      });
+
+      await expectLater(
+        controller.validateConfigWithData('proxies: []'),
+        throwsA(isA<CoreMethodException>()),
+      );
+
+      expect(validatedPath, startsWith(tempDirectory.path));
+      expect(copyWritten, isTrue);
+      expect(File(validatedPath!).existsSync(), isFalse);
+    },
+  );
+}
+
+class _TempPaths extends PathProviderPlatform {
+  _TempPaths(this.path);
+
+  final String path;
+
+  @override
+  Future<String?> getApplicationSupportPath() async => path;
+
+  @override
+  Future<String?> getTemporaryPath() async => path;
+
+  @override
+  Future<String?> getDownloadsPath() async => path;
 }

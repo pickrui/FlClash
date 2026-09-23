@@ -66,7 +66,7 @@ class _CoreContainerState extends ConsumerState<CoreManager>
   }
 
   @override
-  Future<void> dispose() async {
+  void dispose() {
     coreEventManager.removeListener(this);
     super.dispose();
   }

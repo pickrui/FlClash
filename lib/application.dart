@@ -1,7 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/core/core.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/manager/hotkey_manager.dart';
 import 'package:fl_clash/manager/manager.dart';
@@ -31,10 +31,7 @@ class ApplicationState extends ConsumerState<Application> {
     },
   );
 
-  ColorScheme _getAppColorScheme({
-    required Brightness brightness,
-    int? primaryColor,
-  }) {
+  ColorScheme _getAppColorScheme(Brightness brightness) {
     return ref.read(genColorSchemeProvider(brightness));
   }
 
@@ -183,10 +180,7 @@ class ApplicationState extends ConsumerState<Application> {
             ThemeData(
               useMaterial3: true,
               pageTransitionsTheme: _pageTransitionsTheme,
-              colorScheme: _getAppColorScheme(
-                brightness: Brightness.light,
-                primaryColor: themeProps.primaryColor,
-              ),
+              colorScheme: _getAppColorScheme(Brightness.light),
             ),
           ),
           darkTheme: _getAppTheme(
@@ -194,8 +188,7 @@ class ApplicationState extends ConsumerState<Application> {
               useMaterial3: true,
               pageTransitionsTheme: _pageTransitionsTheme,
               colorScheme: _getAppColorScheme(
-                brightness: Brightness.dark,
-                primaryColor: themeProps.primaryColor,
+                Brightness.dark,
               ).toPureBlack(themeProps.pureBlack),
             ),
           ),
@@ -207,10 +200,9 @@ class ApplicationState extends ConsumerState<Application> {
   }
 
   @override
-  Future<void> dispose() async {
+  void dispose() {
     linkManager.destroy();
-    await coreController.destroy();
-    await appController.handleExit();
+    unawaited(appController.handleExit());
     super.dispose();
   }
 }

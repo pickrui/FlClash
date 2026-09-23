@@ -568,9 +568,4 @@ String linuxHelperInstalledPath(String sha256) =>
     '$linuxHelperInstallRoot/$sha256/$appHelperService';
 final linuxHelperClient = HelperClient(isLinux: true);
 
-// Existing Windows callers keep their protocol and lifecycle contracts.
-typedef WindowsHelperClient = HelperClient;
 typedef WindowsHelperReadiness = HelperReadiness;
-typedef WindowsHelperException = HelperException;
-typedef WindowsHelperLauncher = HelperLauncher;
-typedef WindowsHelperLauncherResolver = HelperLauncherResolver;

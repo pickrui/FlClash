@@ -74,12 +74,11 @@ class GlobalState {
       ? Future.value()
       : _listeners.apply(
           running: isStart,
-          suspended: !system.isAndroid && container.read(suspendProvider),
+          suspended: container.read(suspendProvider),
         );
 
   bool isPre = true;
   late final PackageInfo packageInfo;
-  Function? updateCurrentDelayDebounce;
   late Measure measure;
   late CommonTheme theme;
   late Color accentColor;

@@ -54,7 +54,7 @@ void main() {
     await expectLater(
       client.start(address: 'test-address', sessionId: _sessionId),
       throwsA(
-        isA<WindowsHelperException>().having(
+        isA<HelperException>().having(
           (error) => error.code,
           'code',
           'invalidResponse',
@@ -92,7 +92,7 @@ void main() {
     await expectLater(
       client.stop(_sessionId),
       throwsA(
-        isA<WindowsHelperException>().having(
+        isA<HelperException>().having(
           (error) => error.code,
           'code',
           'invalidResponse',
@@ -115,7 +115,7 @@ void main() {
     await expectLater(
       client.stop(_sessionId),
       throwsA(
-        isA<WindowsHelperException>().having(
+        isA<HelperException>().having(
           (error) => error.code,
           'code',
           'sessionMismatch',
@@ -139,7 +139,7 @@ void main() {
         });
       }),
     );
-    final launcher = WindowsHelperLauncher(client);
+    final launcher = HelperLauncher(client);
     final lease = await launcher.start(
       sessionId: _sessionId,
       address: 'test-address',
@@ -177,10 +177,7 @@ void main() {
         });
       }),
     );
-    final launcher = WindowsHelperLauncher(
-      client,
-      livenessProbe: (_) async => true,
-    );
+    final launcher = HelperLauncher(client, livenessProbe: (_) async => true);
     final lease = await launcher.start(
       sessionId: _sessionId,
       address: 'test-address',
@@ -189,7 +186,7 @@ void main() {
     await expectLater(
       lease.stop(const Duration(seconds: 1)),
       throwsA(
-        isA<WindowsHelperException>().having(
+        isA<HelperException>().having(
           (error) => error.code,
           'code',
           'transportError',
@@ -220,7 +217,7 @@ void main() {
           );
         }),
       );
-      final launcher = WindowsHelperLauncher(
+      final launcher = HelperLauncher(
         client,
         livenessProbe: (pid) async {
           probedPids.add(pid);
@@ -255,7 +252,7 @@ void main() {
         }, statusCode: HttpStatus.conflict);
       }),
     );
-    final launcher = WindowsHelperLauncher(
+    final launcher = HelperLauncher(
       client,
       livenessProbe: (_) async =>
           throw StateError('must not probe a semantic failure'),
@@ -268,7 +265,7 @@ void main() {
     await expectLater(
       lease.stop(const Duration(seconds: 1)),
       throwsA(
-        isA<WindowsHelperException>().having(
+        isA<HelperException>().having(
           (error) => error.code,
           'code',
           'coreStopFailed',
@@ -297,11 +294,11 @@ void main() {
           });
         }),
       );
-      final launcher = WindowsHelperLauncher(client);
+      final launcher = HelperLauncher(client);
 
       await expectLater(
         launcher.start(sessionId: _sessionId, address: 'test-address'),
-        throwsA(isA<WindowsHelperException>()),
+        throwsA(isA<HelperException>()),
       );
 
       expect(requests.map((request) => request.path), [
@@ -330,7 +327,7 @@ void main() {
           r'C:\Program Files\FlClash\FlClashHelperService.exe',
     );
 
-    expect(await client.readiness(), WindowsHelperReadiness.ready);
+    expect(await client.readiness(), HelperReadiness.ready);
   });
 
   test('connection refusal reports a not-ready Helper', () async {
@@ -343,7 +340,7 @@ void main() {
       ),
     );
 
-    expect(await client.readiness(), WindowsHelperReadiness.notReady);
+    expect(await client.readiness(), HelperReadiness.notReady);
   });
 
   test('ping rejects a Helper with the wrong protocol', () async {
@@ -360,7 +357,7 @@ void main() {
       ),
     );
 
-    expect(await client.readiness(), WindowsHelperReadiness.notReady);
+    expect(await client.readiness(), HelperReadiness.notReady);
   });
 
   test('ping rejects a Helper at the wrong path', () async {
@@ -377,7 +374,7 @@ void main() {
       ),
     );
 
-    expect(await client.readiness(), WindowsHelperReadiness.notReady);
+    expect(await client.readiness(), HelperReadiness.notReady);
   });
 
   test(
@@ -392,7 +389,7 @@ void main() {
         ),
       );
 
-      expect(await client.readiness(), WindowsHelperReadiness.notReady);
+      expect(await client.readiness(), HelperReadiness.notReady);
     },
   );
 
@@ -412,7 +409,7 @@ void main() {
         ),
       );
 
-      expect(await client.readiness(), WindowsHelperReadiness.notReady);
+      expect(await client.readiness(), HelperReadiness.notReady);
     },
   );
 
@@ -432,7 +429,7 @@ void main() {
         ),
       );
 
-      expect(await client.readiness(), WindowsHelperReadiness.notReady);
+      expect(await client.readiness(), HelperReadiness.notReady);
     },
   );
 
@@ -442,7 +439,7 @@ void main() {
     );
     final client = _client(adapter, readCoreSha256: () async => '');
 
-    expect(await client.readiness(), WindowsHelperReadiness.manifestMissing);
+    expect(await client.readiness(), HelperReadiness.manifestMissing);
     expect(adapter.requestCount, 0);
   });
 
@@ -465,8 +462,8 @@ void main() {
       },
     );
 
-    expect(await client.readiness(), WindowsHelperReadiness.ready);
-    expect(await client.readiness(), WindowsHelperReadiness.ready);
+    expect(await client.readiness(), HelperReadiness.ready);
+    expect(await client.readiness(), HelperReadiness.ready);
     expect(reads, 1);
   });
 
@@ -489,8 +486,8 @@ void main() {
       },
     );
 
-    expect(await client.readiness(), WindowsHelperReadiness.manifestMissing);
-    expect(await client.readiness(), WindowsHelperReadiness.ready);
+    expect(await client.readiness(), HelperReadiness.manifestMissing);
+    expect(await client.readiness(), HelperReadiness.ready);
     expect(reads, 2);
   });
 
@@ -503,7 +500,7 @@ void main() {
       readCoreSha256: () async => throw const FileSystemException('locked'),
     );
 
-    expect(await client.readiness(), WindowsHelperReadiness.manifestMissing);
+    expect(await client.readiness(), HelperReadiness.manifestMissing);
     expect(adapter.requestCount, 0);
   });
 
@@ -514,7 +511,7 @@ void main() {
       ),
     );
 
-    expect(await client.readiness(), WindowsHelperReadiness.notReady);
+    expect(await client.readiness(), HelperReadiness.notReady);
   });
 
   test('invalid session IDs are rejected before the request', () async {
@@ -525,7 +522,7 @@ void main() {
 
     await expectLater(
       client.start(address: 'test-address', sessionId: 'ABCDEF'),
-      throwsA(isA<WindowsHelperException>()),
+      throwsA(isA<HelperException>()),
     );
     expect(adapter.requestCount, 0);
   });
@@ -538,8 +535,8 @@ void main() {
         owner: CoreProcessOwner.windowsHelper,
         pid: 2,
       );
-      var helperReadiness = WindowsHelperReadiness.ready;
-      final resolver = WindowsHelperLauncherResolver(
+      var helperReadiness = HelperReadiness.ready;
+      final resolver = HelperLauncherResolver(
         isWindows: true,
         directLauncher: direct,
         helperLauncher: helper,
@@ -551,9 +548,9 @@ void main() {
       final fallback = resolved as FallbackCoreLauncher;
       expect(fallback.primary, same(helper));
       expect(fallback.fallback, same(direct));
-      helperReadiness = WindowsHelperReadiness.notReady;
+      helperReadiness = HelperReadiness.notReady;
       expect(await resolver.resolve(), same(direct));
-      helperReadiness = WindowsHelperReadiness.manifestMissing;
+      helperReadiness = HelperReadiness.manifestMissing;
       expect(await resolver.resolve(), same(direct));
     },
   );
@@ -562,13 +559,13 @@ void main() {
     final direct = FakeLauncher(owner: CoreProcessOwner.direct, pid: 1);
     final helper = FakeLauncher(owner: CoreProcessOwner.windowsHelper, pid: 2);
     var readyCalls = 0;
-    final resolver = WindowsHelperLauncherResolver(
+    final resolver = HelperLauncherResolver(
       isWindows: false,
       directLauncher: direct,
       helperLauncher: helper,
       helperReady: () async {
         readyCalls++;
-        return WindowsHelperReadiness.ready;
+        return HelperReadiness.ready;
       },
     );
 
@@ -600,7 +597,7 @@ void main() {
       () async {
         final helper =
             FakeLauncher(owner: CoreProcessOwner.windowsHelper, pid: 2)
-              ..startError = const WindowsHelperException(
+              ..startError = const HelperException(
                 code: 'coreVerificationFailed',
                 message: 'Core executable SHA256 mismatch',
               );
@@ -627,7 +624,7 @@ void main() {
       () async {
         final helper =
             FakeLauncher(owner: CoreProcessOwner.windowsHelper, pid: 2)
-              ..startError = const WindowsHelperException(
+              ..startError = const HelperException(
                 code: 'processLaunchFailed',
                 message: 'unable to spawn the Core',
               );
@@ -651,7 +648,7 @@ void main() {
 
     test('does not fall back for ambiguous Helper start failures', () async {
       final helper = FakeLauncher(owner: CoreProcessOwner.windowsHelper, pid: 2)
-        ..startError = const WindowsHelperException(
+        ..startError = const HelperException(
           code: 'transportError',
           message: 'Helper start request failed',
         );
@@ -660,7 +657,7 @@ void main() {
 
       await expectLater(
         launcher.start(sessionId: _sessionId, address: 'test-address'),
-        throwsA(isA<WindowsHelperException>()),
+        throwsA(isA<HelperException>()),
       );
       expect(helper.startCount, 1);
       expect(direct.startCount, 0);
@@ -668,13 +665,13 @@ void main() {
   });
 }
 
-WindowsHelperClient _client(
+HelperClient _client(
   _ResponseAdapter adapter, {
   String Function()? expectedHelperPath,
   Future<String> Function()? readCoreSha256,
 }) {
   final dio = Dio()..httpClientAdapter = adapter;
-  return WindowsHelperClient(
+  return HelperClient(
     dio: dio,
     expectedHelperPath: expectedHelperPath ?? () => r'C:\Helper.exe',
     readCoreSha256: readCoreSha256 ?? () async => _coreSha256,

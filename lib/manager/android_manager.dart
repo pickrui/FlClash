@@ -42,7 +42,7 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
   }
 
   @override
-  Future<void> dispose() async {
+  void dispose() {
     service?.removeListener(this);
     super.dispose();
   }

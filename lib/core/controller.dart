@@ -117,12 +117,13 @@ class CoreController {
   }
 
   Future<String> validateConfigWithData(String data) async {
-    final path = await appPath.tempFilePath;
-    final file = File(path);
-    await file.safeWriteAsString(data);
-    final res = await _interface.validateConfig(path);
-    await File(path).safeDelete();
-    return res;
+    final file = File(await appPath.tempFilePath);
+    try {
+      await file.safeWriteAsString(data);
+      return await _interface.validateConfig(file.path);
+    } finally {
+      await file.safeDelete();
+    }
   }
 
   Future<String> updateConfig(UpdateParams updateParams) async {
@@ -177,15 +178,29 @@ class CoreController {
   }
 
   void closeConnection(String id) {
-    _interface.closeConnection(id);
+    _detach(CoreMethod.closeConnection, () => _interface.closeConnection(id));
   }
 
   void closeConnections() {
-    _interface.closeConnections();
+    _detach(CoreMethod.closeConnections, _interface.closeConnections);
   }
 
   void resetConnections() {
-    _interface.resetConnections();
+    _detach(CoreMethod.resetConnections, _interface.resetConnections);
+  }
+
+  void _detach(CoreMethod method, FutureOr<Object?> Function() call) {
+    unawaited(
+      Future<Object?>.sync(call).then<void>(
+        (_) {},
+        onError: (Object error) {
+          commonPrint.log(
+            'Core ${method.name} failed: $error',
+            logLevel: coreFailureLogLevel(error),
+          );
+        },
+      ),
+    );
   }
 
   Future<List<ExternalProvider>> getExternalProviders() async {
@@ -316,15 +331,15 @@ class CoreController {
   }
 
   void resetTraffic() {
-    _interface.resetTraffic();
+    _detach(CoreMethod.resetTraffic, _interface.resetTraffic);
   }
 
   void startLog() {
-    _interface.startLog();
+    _detach(CoreMethod.startLog, _interface.startLog);
   }
 
   void stopLog() {
-    _interface.stopLog();
+    _detach(CoreMethod.stopLog, _interface.stopLog);
   }
 
   Future<void> requestGc() async {
