@@ -22,6 +22,7 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
   );
 
   StreamSubscription<Object?>? _subscription;
+  bool _leftApp = false;
 
   void _cancelSubscription() {
     unawaited(_subscription?.cancel());
@@ -52,8 +53,19 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    // The permission prompt toggles the lifecycle while the first start runs.
-    if (!controller.value.hasCameraPermission) {
+    final value = controller.value;
+    final retryDenied =
+        state == AppLifecycleState.resumed &&
+        _leftApp &&
+        value.error?.errorCode == MobileScannerErrorCode.permissionDenied;
+    _leftApp = switch (state) {
+      AppLifecycleState.hidden || AppLifecycleState.paused => true,
+      AppLifecycleState.resumed => false,
+      _ => _leftApp,
+    };
+    // The permission prompt toggles only inactive/resumed while a start runs,
+    // so a denial is retried only after the user left the app, e.g. for Settings.
+    if (value.isStarting || (!value.hasCameraPermission && !retryDenied)) {
       return;
     }
     switch (state) {

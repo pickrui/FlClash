@@ -15,6 +15,7 @@ class _FakeScannerPlatform extends MobileScannerPlatform {
   final _zoom = StreamController<double>.broadcast();
 
   Completer<void>? permission;
+  bool denied = false;
   int startCalls = 0;
   int stopCalls = 0;
   int disposeCalls = 0;
@@ -37,6 +38,11 @@ class _FakeScannerPlatform extends MobileScannerPlatform {
   Future<MobileScannerViewAttributes> start(StartOptions startOptions) async {
     startCalls++;
     await permission?.future;
+    if (denied) {
+      throw const MobileScannerException(
+        errorCode: MobileScannerErrorCode.permissionDenied,
+      );
+    }
     return const MobileScannerViewAttributes(
       cameraDirection: CameraFacing.back,
       currentTorchMode: TorchState.off,
@@ -76,6 +82,19 @@ Future<void> _sendLifecycle(WidgetTester tester, AppLifecycleState state) {
     const StringCodec().encodeMessage(state.toString()),
     (_) {},
   );
+}
+
+Future<void> _leaveAndReturn(WidgetTester tester) async {
+  for (final state in const [
+    AppLifecycleState.inactive,
+    AppLifecycleState.hidden,
+    AppLifecycleState.paused,
+    AppLifecycleState.hidden,
+    AppLifecycleState.inactive,
+    AppLifecycleState.resumed,
+  ]) {
+    await _sendLifecycle(tester, state);
+  }
 }
 
 void main() {
@@ -197,5 +216,56 @@ void main() {
     expect(platform.startCalls, 1);
     expect(platform.stopCalls, 0);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a denial is retried only after returning from outside the app', (
+    tester,
+  ) async {
+    String? result;
+    platform.denied = true;
+    await pumpScanPage(tester, onPopped: (value) => result = value);
+    expect(platform.startCalls, 1);
+
+    await _sendLifecycle(tester, AppLifecycleState.inactive);
+    await _sendLifecycle(tester, AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    expect(platform.startCalls, 1);
+
+    platform.denied = false;
+    await _leaveAndReturn(tester);
+    await tester.pumpAndSettle();
+    expect(platform.startCalls, 2);
+
+    platform.emit(_capture(BarcodeType.url, 'https://c.example'));
+    await tester.pumpAndSettle();
+    expect(result, 'https://c.example');
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a retried start that prompts again does not start twice', (
+    tester,
+  ) async {
+    String? result;
+    platform.denied = true;
+    await pumpScanPage(tester, onPopped: (value) => result = value);
+
+    final permission = platform.permission = Completer<void>();
+    await _leaveAndReturn(tester);
+    await tester.pump();
+    expect(platform.startCalls, 2);
+
+    await _sendLifecycle(tester, AppLifecycleState.inactive);
+    await _sendLifecycle(tester, AppLifecycleState.resumed);
+    await tester.pump();
+
+    platform.denied = false;
+    permission.complete();
+    await tester.pumpAndSettle();
+    expect(platform.startCalls, 2);
+    expect(tester.takeException(), isNull);
+
+    platform.emit(_capture(BarcodeType.url, 'https://d.example'));
+    await tester.pumpAndSettle();
+    expect(result, 'https://d.example');
   });
 }
