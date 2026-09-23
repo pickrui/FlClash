@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
@@ -8,6 +10,14 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+List<String> parsePackageNames(String text) {
+  return LineSplitter.split(text)
+      .map((line) => line.trim())
+      .where((line) => line.isNotEmpty)
+      .toSet()
+      .toList();
+}
 
 class AccessView extends ConsumerStatefulWidget {
   const AccessView({super.key});
@@ -253,11 +263,11 @@ class _AccessViewState extends ConsumerState<AccessView>
   Future<void> _exportToClipboard() async {
     final commonAction = context.commonAction;
 
-    await commonAction.safeRun(() {
+    await commonAction.safeRun(() async {
       final currentList = ref.read(
         accessControlStateProvider.select((state) => state.currentList),
       );
-      Clipboard.setData(ClipboardData(text: currentList.join('\n')));
+      await Clipboard.setData(ClipboardData(text: currentList.join('\n')));
     });
   }
 
@@ -268,10 +278,9 @@ class _AccessViewState extends ConsumerState<AccessView>
       final data = await Clipboard.getData('text/plain');
       final text = data?.text;
       if (text == null) return;
-      final list = text.split('\n');
       ref
           .read(accessControlStateProvider.notifier)
-          .update((state) => state.copyWithNewList(list.toSet().toList()));
+          .update((state) => state.copyWithNewList(parsePackageNames(text)));
     });
   }
 
@@ -471,7 +480,7 @@ class _AccessViewState extends ConsumerState<AccessView>
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(loadingProvider(LoadingTag.access));
-    final query = ref.watch(queryProvider(QueryTag.access));
+    final query = ref.watch(queryProvider(QueryTag.access)).toLowerCase();
     final installed = ref.watch(installedAppsProvider);
     final packages = installed.value?.permissionGranted == true
         ? installed.value!.packages
@@ -495,7 +504,7 @@ class _AccessViewState extends ConsumerState<AccessView>
         .where(
           (package) =>
               package.label.toLowerCase().contains(query) ||
-              package.packageName.contains(query),
+              package.packageName.toLowerCase().contains(query),
         )
         .toList();
     final mode = accessControl.mode;

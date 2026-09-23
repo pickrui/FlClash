@@ -167,4 +167,26 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('search ignores the case of the typed query', (tester) async {
+    final api = InstalledAppsFake()
+      ..packages = [
+        installedPackage('org.chromium.chrome'),
+        installedPackage('other.app'),
+      ];
+    final container = await openAccess(tester, api);
+    container.read(queryProvider(QueryTag.access).notifier).value = 'Chrome';
+    await tester.pumpAndSettle();
+    expect(find.text('org.chromium.chrome'), findsWidgets);
+    expect(find.text('other.app'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  test('clipboard package lists tolerate CRLF, padding and blank lines', () {
+    expect(parsePackageNames('a.app\r\n  b.app \r\n\r\na.app\n'), [
+      'a.app',
+      'b.app',
+    ]);
+    expect(parsePackageNames(''), isEmpty);
+  });
 }

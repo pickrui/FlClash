@@ -141,15 +141,16 @@ class _HotKeyRecorderState extends ConsumerState<HotKeyRecorder> {
       );
       return;
     }
-    final index = hotKeyActions.indexWhere(
+    final conflict = hotKeyActions.any(
       (item) =>
+          item.action != currentHotkeyAction.action &&
           item.key == currentHotkeyAction.key &&
           keyboardModifierListEquality.equals(
             item.modifiers,
             currentHotkeyAction.modifiers,
           ),
     );
-    if (index != -1) {
+    if (conflict) {
       globalState.showMessage(
         title: appLocalizations.tip,
         message: TextSpan(text: appLocalizations.hotkeyConflict),
@@ -164,14 +165,6 @@ class _HotKeyRecorderState extends ConsumerState<HotKeyRecorder> {
     final index = hotKeyActions.indexWhere(
       (item) => item.action == hotKeyAction.action,
     );
-    if (index == -1) {
-      ref.read(hotKeyActionsProvider.notifier).value = List.from(hotKeyActions)
-        ..add(hotKeyAction);
-    } else {
-      ref.read(hotKeyActionsProvider.notifier).value = List.from(hotKeyActions)
-        ..[index] = hotKeyAction;
-    }
-
     ref.read(hotKeyActionsProvider.notifier).value = index == -1
         ? (List.from(hotKeyActions)..add(hotKeyAction))
         : (List.from(hotKeyActions)..[index] = hotKeyAction);

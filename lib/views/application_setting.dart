@@ -3,7 +3,6 @@ import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 class CloseConnectionsItem extends ConsumerWidget {
   const CloseConnectionsItem({super.key});
@@ -214,11 +213,6 @@ class OpenLogsItem extends ConsumerWidget {
 
 class ApplicationSettingView extends StatelessWidget {
   const ApplicationSettingView({super.key});
-
-  String getLocaleString(Locale? locale) {
-    if (locale == null) return appLocalizations.defaultText;
-    return Intl.message(locale.toString());
-  }
 
   @override
   Widget build(BuildContext context) {
