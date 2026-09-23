@@ -23,6 +23,7 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
 
   StreamSubscription<Object?>? _subscription;
   bool _leftApp = false;
+  bool _pickingImage = false;
 
   void _cancelSubscription() {
     unawaited(_subscription?.cancel());
@@ -54,17 +55,19 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     final value = controller.value;
-    final retryDenied =
-        state == AppLifecycleState.resumed &&
-        _leftApp &&
+    final denialShown =
+        !value.isStarting &&
         value.error?.errorCode == MobileScannerErrorCode.permissionDenied;
+    final retryDenied =
+        state == AppLifecycleState.resumed && _leftApp && denialShown;
+    // A denial is retried only when the user left the app with it on screen,
+    // e.g. for Settings. Returning also passes through hidden, so only paused
+    // marks leaving; the permission prompt and the gallery picker do not count.
     _leftApp = switch (state) {
-      AppLifecycleState.hidden || AppLifecycleState.paused => true,
+      AppLifecycleState.paused => denialShown && !_pickingImage,
       AppLifecycleState.resumed => false,
       _ => _leftApp,
     };
-    // The permission prompt toggles only inactive/resumed while a start runs,
-    // so a denial is retried only after the user left the app, e.g. for Settings.
     if (value.isStarting || (!value.hasCameraPermission && !retryDenied)) {
       return;
     }
@@ -84,10 +87,18 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
     }
   }
 
+  Future<void> _pickImage() async {
+    final profileAction = context.profileAction;
+    _pickingImage = true;
+    try {
+      await profileAction.addProfileFormQrCode();
+    } finally {
+      _pickingImage = false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final profileAction = context.profileAction;
-
     final double sideLength = min(
       400,
       MediaQuery.of(context).size.width * 0.67,
@@ -170,7 +181,7 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
               ),
               padding: const EdgeInsets.all(16),
               iconSize: 32.0,
-              onPressed: profileAction.addProfileFormQrCode,
+              onPressed: _pickImage,
               icon: const Icon(Icons.photo_camera_back),
             ),
           ),

@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:fl_clash/pages/scan.dart';
+import 'package:fl_clash/providers/action.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -70,6 +72,17 @@ class _FakeScannerPlatform extends MobileScannerPlatform {
   }
 }
 
+class _PickerProfileAction extends ProfileAction {
+  final picked = Completer<void>();
+  int picks = 0;
+
+  @override
+  Future<void> addProfileFormQrCode() {
+    picks++;
+    return picked.future;
+  }
+}
+
 BarcodeCapture _capture(BarcodeType type, String rawValue) {
   return BarcodeCapture(
     barcodes: [Barcode(type: type, rawValue: rawValue)],
@@ -84,17 +97,29 @@ Future<void> _sendLifecycle(WidgetTester tester, AppLifecycleState state) {
   );
 }
 
-Future<void> _leaveAndReturn(WidgetTester tester) async {
-  for (final state in const [
-    AppLifecycleState.inactive,
-    AppLifecycleState.hidden,
-    AppLifecycleState.paused,
-    AppLifecycleState.hidden,
-    AppLifecycleState.inactive,
-    AppLifecycleState.resumed,
-  ]) {
+Future<void> _sendLifecycles(
+  WidgetTester tester,
+  List<AppLifecycleState> states,
+) async {
+  for (final state in states) {
     await _sendLifecycle(tester, state);
   }
+}
+
+const _leave = [
+  AppLifecycleState.inactive,
+  AppLifecycleState.hidden,
+  AppLifecycleState.paused,
+];
+
+const _return = [
+  AppLifecycleState.hidden,
+  AppLifecycleState.inactive,
+  AppLifecycleState.resumed,
+];
+
+Future<void> _leaveAndReturn(WidgetTester tester) {
+  return _sendLifecycles(tester, [..._leave, ..._return]);
 }
 
 void main() {
@@ -110,10 +135,12 @@ void main() {
     WidgetTester tester, {
     void Function(String? result)? onPopped,
     bool settle = true,
+    List<Override> overrides = const [],
   }) async {
     late BuildContext hostContext;
     await tester.pumpWidget(
       ProviderScope(
+        overrides: overrides,
         child: TestApp(
           child: Builder(
             builder: (context) {
@@ -267,5 +294,56 @@ void main() {
     platform.emit(_capture(BarcodeType.url, 'https://d.example'));
     await tester.pumpAndSettle();
     expect(result, 'https://d.example');
+  });
+
+  testWidgets('a denial after leaving during the prompt is not asked again', (
+    tester,
+  ) async {
+    final permission = platform.permission = Completer<void>();
+    platform.denied = true;
+    await pumpScanPage(tester, settle: false);
+    expect(platform.startCalls, 1);
+
+    await _sendLifecycles(tester, _leave);
+    permission.complete();
+    await tester.pump();
+    await _sendLifecycles(tester, _return);
+    await tester.pumpAndSettle();
+    expect(platform.startCalls, 1);
+
+    platform.denied = false;
+    await _leaveAndReturn(tester);
+    await tester.pumpAndSettle();
+    expect(platform.startCalls, 2);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the gallery picker is not leaving the app after a denial', (
+    tester,
+  ) async {
+    final action = _PickerProfileAction();
+    platform.denied = true;
+    await pumpScanPage(
+      tester,
+      overrides: [profileActionProvider.overrideWith(() => action)],
+    );
+    expect(platform.startCalls, 1);
+
+    await tester.tap(find.byIcon(Icons.photo_camera_back));
+    await tester.pump();
+    expect(action.picks, 1);
+
+    await _sendLifecycles(tester, _leave);
+    action.picked.complete();
+    await tester.pump();
+    await _sendLifecycles(tester, _return);
+    await tester.pumpAndSettle();
+    expect(platform.startCalls, 1);
+
+    platform.denied = false;
+    await _leaveAndReturn(tester);
+    await tester.pumpAndSettle();
+    expect(platform.startCalls, 2);
+    expect(tester.takeException(), isNull);
   });
 }
