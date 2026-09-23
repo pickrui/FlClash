@@ -211,15 +211,19 @@ class Profiles extends _$Profiles {
   }
 
   void reorder(List<Profile> profiles) {
-    final List<ProfilesCompanion> needUpdateProfiles = [];
-    final newProfiles = profiles.mapIndexed((index, item) {
+    final current = {for (final profile in state) profile.id: profile};
+    final ordered = [
+      for (final profile in profiles) ?current.remove(profile.id),
+      ...current.values,
+    ];
+    final orders = <int, int>{};
+    final newProfiles = ordered.mapIndexed((index, item) {
       if (item.order == index) return item;
-      final reordered = item.copyWith(order: index);
-      needUpdateProfiles.add(reordered.toCompanion());
-      return reordered;
+      orders[item.id] = index;
+      return item.copyWith(order: index);
     }).toList();
     state = newProfiles;
-    _queueWrite(() => database.profilesDao.putAll(needUpdateProfiles));
+    _queueWrite(() => database.profilesDao.setOrders(orders));
   }
 
   @override
@@ -286,6 +290,15 @@ class Scripts extends _$Scripts with AsyncNotifierMixin {
   }
 }
 
+extension on List<Rule> {
+  Rule keyedForPut(Rule rule) {
+    final existing = firstWhereOrNull((item) => item.id == rule.id);
+    if (existing != null) return rule.copyWith(order: existing.order);
+    final top = map((item) => item.order).nonNulls.maxOrNull;
+    return rule.copyWith(order: indexing.generateKeyBetween(top, null));
+  }
+}
+
 @riverpod
 class GlobalRules extends _$GlobalRules with AsyncNotifierMixin {
   @override
@@ -313,9 +326,10 @@ class GlobalRules extends _$GlobalRules with AsyncNotifierMixin {
   }
 
   void put(Rule rule) {
-    value = value.copyAndPut(rule);
+    final keyed = value.keyedForPut(rule);
+    value = value.copyAndPut(keyed);
     queueDatabaseWrite(
-      () => database.rulesDao.putGlobalRule(rule),
+      () => database.rulesDao.putGlobalRule(keyed),
       onError: () => reloadProviderAfterDatabaseError(ref),
     );
   }
@@ -355,9 +369,10 @@ class ProfileAddedRules extends _$ProfileAddedRules with AsyncNotifierMixin {
   }
 
   void put(Rule rule) {
-    value = value.copyAndPut(rule);
+    final keyed = value.keyedForPut(rule);
+    value = value.copyAndPut(keyed);
     queueDatabaseWrite(
-      () => database.rulesDao.putProfileAddedRule(profileId, rule),
+      () => database.rulesDao.putProfileAddedRule(profileId, keyed),
       onError: () => reloadProviderAfterDatabaseError(ref),
     );
   }

@@ -723,7 +723,8 @@ Future<MigrationData> _oldToNowTask(
   final List rawRules = configMap['rules'] as List<dynamic>? ?? [];
   final List<Rule> rules = [];
   final List<ProfileRuleLink> links = [];
-  for (final rawRule in rawRules) {
+  final globalOrders = _legacyOrderKeys(rawRules.length);
+  for (final (index, rawRule) in rawRules.indexed) {
     final ruleMap = Map<String, dynamic>.from(rawRule as Map);
     final rawRuleId = ruleMap['id']?.toString();
     if (rawRuleId == null || !definedIds.add(rawRuleId)) {
@@ -735,7 +736,7 @@ Future<MigrationData> _oldToNowTask(
     );
     ruleMap['id'] = id;
     rules.add(Rule.fromJson(ruleMap));
-    links.add(ProfileRuleLink(ruleId: id));
+    links.add(ProfileRuleLink(ruleId: id, order: globalOrders[index]));
   }
   final List rawProfiles = configMap['profiles'] as List<dynamic>? ?? [];
   final List<Profile> profiles = [];
@@ -763,7 +764,8 @@ Future<MigrationData> _oldToNowTask(
       final standardOverwrite = overwrite['standardOverwrite'] as Map?;
       if (standardOverwrite != null) {
         final addedRules = standardOverwrite['addedRules'] as List? ?? [];
-        for (final addRule in addedRules) {
+        final addedOrders = _legacyOrderKeys(addedRules.length);
+        for (final (index, addRule) in addedRules.indexed) {
           final addRuleMap = Map<String, dynamic>.from(addRule as Map);
           final addRuleId = addRuleMap['id']?.toString();
           if (addRuleId == null || !definedIds.add(addRuleId)) {
@@ -780,6 +782,7 @@ Future<MigrationData> _oldToNowTask(
               profileId: profileId,
               ruleId: id,
               scene: RuleScene.added,
+              order: addedOrders[index],
             ),
           );
         }
@@ -843,6 +846,10 @@ Future<MigrationData> _oldToNowTask(
     fileMigrations: fileMigrations,
   );
 }
+
+// Legacy lists applied index 0 first; lists now apply the largest key first.
+List<String?> _legacyOrderKeys(int length) =>
+    indexing.generateNKeys(length).reversed.toList();
 
 int _legacyId(String value) {
   final bytes = sha256.convert(utf8.encode('flclash-legacy-v1:$value')).bytes;

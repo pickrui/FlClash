@@ -330,7 +330,12 @@ class RulesDao extends DatabaseAccessor<Database> with _$RulesDaoMixin {
                   ..where(_listFilter(profileId)))
                 .map((row) => row.read(top))
                 .getSingle();
-        order = indexing.generateKeyBetween(current, null);
+        final requested = rule.order;
+        order =
+            requested != null &&
+                (current == null || requested.compareTo(current) > 0)
+            ? requested
+            : indexing.generateKeyBetween(current, null);
       }
       return profileRuleLinks.insertOnConflictUpdate(
         link.copyWith(order: order).toCompanion(),

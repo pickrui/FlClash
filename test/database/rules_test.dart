@@ -69,6 +69,71 @@ void main() {
     expect(applied, shown);
   });
 
+  test('a new rule keeps a given key only when it tops the list', () async {
+    await database.rulesDao.putGlobalRule(const Rule(id: 1, value: 'first'));
+    await database.rulesDao.putGlobalRule(
+      const Rule(id: 2, value: 'keyed', order: 'a5'),
+    );
+    await database.rulesDao.putGlobalRule(
+      const Rule(id: 3, value: 'stale', order: 'a1'),
+    );
+
+    final shown = await database.rulesDao.allGlobalAddedRules().get();
+
+    expect(shown.map((rule) => (rule.id, rule.order)), [
+      (3, 'a6'),
+      (2, 'a5'),
+      (1, 'a0'),
+    ]);
+  });
+
+  test('migrated legacy rules keep their legacy list order', () async {
+    final temp = await Directory.systemTemp.createTemp('flclash_rules_');
+    addTearDown(() => temp.delete(recursive: true));
+    await File('${temp.path}/profiles/legacy.yaml').create(recursive: true);
+    final globalNames = ['g1', 'g2', 'g3', 'g4', 'g5'];
+    final profileNames = ['p1', 'p2', 'p3', 'p4', 'p5'];
+    final migration = await migrateLegacyBackup(
+      {
+        'rules': [
+          for (final name in globalNames) {'id': name, 'value': name},
+        ],
+        'profiles': [
+          {
+            'id': 'legacy',
+            'autoUpdateDuration': const Duration(days: 1).inMicroseconds,
+            'overwrite': {
+              'type': 'standard',
+              'standardOverwrite': {
+                'addedRules': [
+                  for (final name in profileNames) {'id': name, 'value': name},
+                ],
+              },
+            },
+          },
+        ],
+      },
+      sourcePath: temp.path,
+      targetPath: '${temp.path}/target',
+      livePath: '${temp.path}/live',
+    );
+    await database.restore(
+      migration.profiles,
+      migration.scripts,
+      migration.rules,
+      migration.links,
+    );
+
+    final applied = await database.rulesDao
+        .allAddedRules(migration.profiles.single.id)
+        .get();
+
+    expect(applied.map((rule) => rule.value), [
+      ...profileNames,
+      ...globalNames,
+    ]);
+  });
+
   test(
     'reopening rekeys lists with missing or duplicate keys as shown',
     () async {

@@ -102,6 +102,16 @@ class ProfilesDao extends DatabaseAccessor<Database> with _$ProfilesDaoMixin {
     batch.insertAllOnConflictUpdate(profiles, items);
   }
 
+  Future<void> setOrders(Map<int, int> orders) => batch((b) {
+    for (final MapEntry(key: id, value: order) in orders.entries) {
+      b.update(
+        profiles,
+        ProfilesCompanion(order: Value(order)),
+        where: (row) => row.id.equals(id),
+      );
+    }
+  });
+
   void setAllWithBatch(Batch batch, Iterable<Profile> profiles) {
     final List<ProfilesCompanion> items = [];
     final List<int> ids = [];
