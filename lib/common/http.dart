@@ -194,6 +194,12 @@ class FlClashHttpOverrides extends HttpOverrides {
         (InternetAddress.tryParse(normalizedHost)?.isLoopback ?? false);
   }
 
+  static Set<String> splitRoutes(String findProxyResult) =>
+      findProxyResult.split(';').map((route) => route.trim()).toSet();
+
+  static String Function(Uri) pinnedRoute(String route) =>
+      (uri) => _isLocalHost(uri.host) ? 'DIRECT' : route;
+
   static String handleFindProxy(Uri url) {
     if (_isLocalHost(url.host) || Secrets.isApiDomain(url.host)) {
       return 'DIRECT';

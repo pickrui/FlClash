@@ -18,14 +18,6 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-// Mirrors the DAVClient constructor, which throws for any other URL.
-bool _isValidDavUri(String value) {
-  final uri = Uri.tryParse(value);
-  return uri != null &&
-      const {'http', 'https'}.contains(uri.scheme) &&
-      uri.host.isNotEmpty;
-}
-
 class BackupAndRestore extends ConsumerStatefulWidget {
   const BackupAndRestore({super.key});
 
@@ -38,7 +30,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
   DAVClient? _client;
 
   String? _davSettingError(DAVProps dav) {
-    if (!_isValidDavUri(dav.uri)) return appLocalizations.addressTip;
+    if (!isValidDavUri(dav.uri)) return appLocalizations.addressTip;
     if (!isSafeDavFileName(dav.fileName)) {
       return appLocalizations.invalidBackupFile;
     }
@@ -480,7 +472,7 @@ class _WebDAVFormDialogState extends ConsumerState<WebDAVFormDialog> {
                 helperText: appLocalizations.addressHelp,
               ),
               validator: (String? value) {
-                if (value == null || !_isValidDavUri(value)) {
+                if (value == null || !isValidDavUri(value)) {
                   return appLocalizations.addressTip;
                 }
                 return null;

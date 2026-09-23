@@ -33,17 +33,13 @@ class IconFileService extends FileService {
   final int maxBytes;
 
   static Iterable<String> _defaultRoutes(Uri uri) =>
-      FlClashHttpOverrides.handleResourceFindProxy(
-        uri,
-      ).split(';').map((route) => route.trim()).toSet();
+      FlClashHttpOverrides.splitRoutes(
+        FlClashHttpOverrides.handleResourceFindProxy(uri),
+      );
 
   static HttpClientAdapter _defaultAdapter(String route) =>
       createFlClashHttpClientAdapter(
-        findProxy: (uri) =>
-            uri.host == 'localhost' ||
-                (InternetAddress.tryParse(uri.host)?.isLoopback ?? false)
-            ? 'DIRECT'
-            : route,
+        findProxy: FlClashHttpOverrides.pinnedRoute(route),
         allowBadCertificate: () => FlClashTemporaryTls.allowBadCertificate,
       );
 

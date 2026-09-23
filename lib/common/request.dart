@@ -273,24 +273,18 @@ class Request {
     final uri = Uri.parse(url);
     final paths =
         _readRoutes?.call(uri).toSet() ??
-        (isApiRequest
-                ? FlClashHttpOverrides.handleCloudApiFindProxy(uri)
-                : FlClashHttpOverrides.handleResourceFindProxy(uri))
-            .split(';')
-            .map((path) => path.trim())
-            .toSet();
+        FlClashHttpOverrides.splitRoutes(
+          isApiRequest
+              ? FlClashHttpOverrides.handleCloudApiFindProxy(uri)
+              : FlClashHttpOverrides.handleResourceFindProxy(uri),
+        );
     return raceHttpReads<Response<T>>(
       paths.map(
         (path) => (token) async {
           final routed = Dio(clientOptions.copyWith());
           routed.httpClientAdapter = BoundedHttpClientAdapter(
             createFlClashHttpClientAdapter(
-              findProxy: (target) =>
-                  target.host.toLowerCase() == 'localhost' ||
-                      (InternetAddress.tryParse(target.host)?.isLoopback ??
-                          false)
-                  ? 'DIRECT'
-                  : path,
+              findProxy: FlClashHttpOverrides.pinnedRoute(path),
               allowBadCertificate: () =>
                   FlClashTemporaryTls.allowBadCertificate,
               userAgent: isApiRequest
@@ -525,9 +519,9 @@ class Request {
     }
     final routes =
         _readRoutes?.call(uri).toSet() ??
-        FlClashHttpOverrides.handleCloudApiFindProxy(
-          uri,
-        ).split(';').map((route) => route.trim()).toSet();
+        FlClashHttpOverrides.splitRoutes(
+          FlClashHttpOverrides.handleCloudApiFindProxy(uri),
+        );
     final clients = <Dio>[];
     try {
       return await raceHttpReads<Response<T>>(

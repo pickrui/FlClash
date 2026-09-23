@@ -9,6 +9,13 @@ import 'package:webdav_client/webdav_client.dart';
 import 'bounded_http_client_adapter.dart';
 import 'http_read_race.dart';
 
+bool isValidDavUri(String value) {
+  final uri = Uri.tryParse(value);
+  return uri != null &&
+      const {'http', 'https'}.contains(uri.scheme) &&
+      uri.host.isNotEmpty;
+}
+
 bool isSafeDavFileName(String value) {
   if (value.isEmpty || value == '.' || value == '..' || value.length > 255) {
     return false;
@@ -34,10 +41,7 @@ class DAVClient {
     if (!isSafeDavFileName(dav.fileName)) {
       throw const FormatException('invalid WebDAV backup file name');
     }
-    final uri = Uri.tryParse(dav.uri);
-    if (uri == null ||
-        !const {'http', 'https'}.contains(uri.scheme) ||
-        uri.host.isEmpty) {
+    if (!isValidDavUri(dav.uri)) {
       throw const FormatException('invalid WebDAV URL');
     }
     client = _newClient();
@@ -45,9 +49,9 @@ class DAVClient {
   }
 
   static Iterable<String> _defaultRoutes(Uri uri) =>
-      FlClashHttpOverrides.handleResourceFindProxy(
-        uri,
-      ).split(';').map((route) => route.trim()).toSet();
+      FlClashHttpOverrides.splitRoutes(
+        FlClashHttpOverrides.handleResourceFindProxy(uri),
+      );
 
   Client _newClient({String? route}) {
     final result = newClient(
@@ -66,12 +70,7 @@ class DAVClient {
         : createFlClashHttpClientAdapter(
             findProxy: route == null
                 ? FlClashHttpOverrides.handleResourceFindProxy
-                : (uri) =>
-                      uri.host == 'localhost' ||
-                          (io.InternetAddress.tryParse(uri.host)?.isLoopback ??
-                              false)
-                      ? 'DIRECT'
-                      : route,
+                : FlClashHttpOverrides.pinnedRoute(route),
             allowBadCertificate: () => FlClashTemporaryTls.allowBadCertificate,
           );
     result.c.httpClientAdapter = route == null
