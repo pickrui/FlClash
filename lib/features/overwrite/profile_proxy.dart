@@ -274,7 +274,7 @@ Map<String, Object?> _parseSimpleProxy(
   };
   final userInfo = uri.userInfo;
   if (userInfo.isNotEmpty) {
-    final decoded = _tryDecodeBase64(_decodeComponent(userInfo));
+    final decoded = _tryDecodeBase64(userInfo);
     final parts = decoded.split(':');
     proxy['username'] = parts.first;
     if (parts.length > 1) {
@@ -843,20 +843,59 @@ bool hasProfileProxyCustomNameConflict(
       profile.customProxyGroups.any((group) => group.name == name);
 }
 
-class ProfileProxyItem extends StatelessWidget {
+String? findProxyChainRenameConflict(
+  List<ProxyChain> proxyChains,
+  String previousName,
+  String nextName,
+) {
+  final nextProxyChains = proxyChains.copyAndRenameProxy(
+    previousName,
+    nextName,
+  );
+  final conflictName = findProxyChainConflictName(nextProxyChains);
+  if (conflictName != null) {
+    return conflictName;
+  }
+  final hasDuplicate = nextProxyChains.any(
+    (chain) =>
+        chain.enable &&
+        chain.hasDuplicateProxy &&
+        chain.normalizedProxies.contains(nextName),
+  );
+  return hasDuplicate ? nextName : null;
+}
+
+Set<String> _rawProxyNames(Map rawConfig) {
+  final proxies = rawConfig['proxies'];
+  if (proxies is! List) {
+    return const {};
+  }
+  return proxies
+      .whereType<Map>()
+      .map((proxy) => proxy['name'])
+      .whereType<String>()
+      .where((name) => name.isNotEmpty)
+      .toSet();
+}
+
+class OverwriteEntryTile extends StatelessWidget {
+  final String title;
+  final Widget? subtitle;
+  final bool enable;
   final bool isSelected;
   final bool isEditing;
-  final ProfileProxy profileProxy;
   final VoidCallback onSelected;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final ValueChanged<bool> onToggle;
 
-  const ProfileProxyItem({
+  const OverwriteEntryTile({
     super.key,
+    required this.title,
+    this.subtitle,
+    required this.enable,
     required this.isSelected,
     required this.isEditing,
-    required this.profileProxy,
     required this.onSelected,
     required this.onEdit,
     required this.onDelete,
@@ -881,19 +920,12 @@ class ProfileProxyItem extends StatelessWidget {
             minVerticalPadding: 12,
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             title: Text(
-              profileProxy.name,
+              title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: context.textTheme.bodyMedium?.toJetBrainsMono,
             ),
-            subtitle: Text(
-              profileProxy.type,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textTheme.bodySmall?.copyWith(
-                color: context.colorScheme.onSurfaceVariant.opacity80,
-              ),
-            ),
+            subtitle: subtitle,
             trailing: isEditing
                 ? SizedBox(
                     width: 24,
@@ -909,7 +941,7 @@ class ProfileProxyItem extends StatelessWidget {
                 : Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Switch(value: profileProxy.enable, onChanged: onToggle),
+                      Switch(value: enable, onChanged: onToggle),
                       CommonPopupBox(
                         popup: CommonPopupMenu(
                           items: [
@@ -1050,16 +1082,47 @@ class ProfileProxiesContent extends ConsumerStatefulWidget {
 class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
   final _profileProxyKey = utils.id;
 
-  Future<String?> _findRawReference(String name) {
+  Future<Map<String, dynamic>?> _loadRawConfig() async {
     final setupAction = context.setupAction;
 
-    final profile = ref.read(profileProvider(widget.profileId));
-    return setupAction.findRawProfileOutboundReference(
-      widget.profileId,
-      name,
-      includeTopLevelRules: profile?.overwriteType != OverwriteType.custom,
-      includeProxyGroups: profile?.overwriteType != OverwriteType.custom,
-    );
+    try {
+      return await setupAction.getRawProfileConfig(widget.profileId);
+    } catch (error) {
+      if (mounted) {
+        context.showNotifier(error.toString());
+      }
+      return null;
+    }
+  }
+
+  bool _isRawReferenced(
+    Map<String, dynamic> rawConfig,
+    Iterable<String> names,
+  ) {
+    final notCustom =
+        ref.read(profileProvider(widget.profileId))?.overwriteType !=
+        OverwriteType.custom;
+    for (final name in names) {
+      final String? rawReference;
+      try {
+        rawReference = findRawOutboundReference(
+          rawConfig,
+          name,
+          includeTopLevelRules: notCustom,
+          includeProxyGroups: notCustom,
+        );
+      } catch (error) {
+        context.showNotifier(error.toString());
+        return true;
+      }
+      if (rawReference != null) {
+        context.showNotifier(
+          appLocalizations.rawOutboundInUse(name, rawReference),
+        );
+        return true;
+      }
+    }
+    return false;
   }
 
   Set<int> _getSelectedProfileProxyIds() {
@@ -1072,8 +1135,6 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
   Future<void> _handleAddOrUpdateProfileProxy([
     ProfileProxy? profileProxy,
   ]) async {
-    final setupAction = context.setupAction;
-
     final res = await BaseNavigator.push<ProfileProxy>(
       context,
       ProfileProxyEditView(profileProxy: profileProxy),
@@ -1099,23 +1160,14 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
       );
       return;
     }
-    try {
-      final rawConfig = await setupAction.getRawProfileConfig(widget.profileId);
-      if (hasProfileProxyGroupNameConflict(rawConfig, res)) {
-        if (mounted) {
-          context.showNotifier(
-            appLocalizations.proxyChainUnavailableNodeTip(res.name),
-          );
-        }
-        return;
-      }
-    } catch (error) {
-      if (mounted) {
-        context.showNotifier(error.toString());
-      }
+    final rawConfig = await _loadRawConfig();
+    if (rawConfig == null || !mounted) {
       return;
     }
-    if (!mounted) {
+    if (hasProfileProxyGroupNameConflict(rawConfig, res)) {
+      context.showNotifier(
+        appLocalizations.proxyChainUnavailableNodeTip(res.name),
+      );
       return;
     }
     final previousName = profileProxy?.name;
@@ -1124,31 +1176,19 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
         previousName.isNotEmpty &&
         nextName.isNotEmpty &&
         previousName != nextName) {
-      final nextProxyChains = ref
-          .read(profileProvider(widget.profileId))
-          ?.proxyChains
-          .copyAndRenameProxy(previousName, nextName);
-      final conflictName = findProxyChainConflictName(nextProxyChains ?? []);
+      final conflictName = findProxyChainRenameConflict(
+        ref.read(profileProvider(widget.profileId))?.proxyChains ?? const [],
+        previousName,
+        nextName,
+      );
       if (conflictName != null) {
         context.showNotifier(
           appLocalizations.proxyChainConflictTip(conflictName),
         );
         return;
       }
-      try {
-        final rawReference = await _findRawReference(previousName);
-        if (rawReference != null) {
-          if (mounted) {
-            context.showNotifier(
-              appLocalizations.rawOutboundInUse(previousName, rawReference),
-            );
-          }
-          return;
-        }
-      } catch (error) {
-        if (mounted) {
-          context.showNotifier(error.toString());
-        }
+      if (!_rawProxyNames(rawConfig).contains(previousName) &&
+          _isRawReferenced(rawConfig, [previousName])) {
         return;
       }
     }
@@ -1160,17 +1200,11 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
     ref.read(profilesProvider.notifier).updateProfile(widget.profileId, (
       state,
     ) {
-      final nextProfileProxies = state.profileProxies.copyAndPut(profileProxy);
-      final nextName = profileProxy.name;
       return state
           .copyWith(
-            profileProxies: nextProfileProxies,
-            proxyChains: state.proxyChains.copyAndRenameProxy(
-              previousName,
-              nextName,
-            ),
+            profileProxies: state.profileProxies.copyAndPut(profileProxy),
           )
-          .copyAndRenameOutboundReferences(previousName, nextName);
+          .copyAndRenameOutboundReferences(previousName, profileProxy.name);
     });
   }
 
@@ -1233,28 +1267,19 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
             .map((item) => item.name)
             .toSet() ??
         {};
-    for (final name in relatedNames) {
-      try {
-        final rawReference = await _findRawReference(name);
-        if (rawReference != null) {
-          if (mounted) {
-            context.showNotifier(
-              appLocalizations.rawOutboundInUse(name, rawReference),
-            );
-          }
-          return;
-        }
-      } catch (error) {
-        if (mounted) {
-          context.showNotifier(error.toString());
-        }
+    var overrideNames = const <String>{};
+    if (relatedNames.isNotEmpty) {
+      final rawConfig = await _loadRawConfig();
+      if (rawConfig == null || !mounted) {
+        return;
+      }
+      overrideNames = _rawProxyNames(rawConfig).intersection(relatedNames);
+      if (_isRawReferenced(rawConfig, relatedNames.difference(overrideNames))) {
         return;
       }
     }
-    if (!mounted) {
-      return;
-    }
-    final referencedName = relatedNames.firstWhere(
+    final removedNames = relatedNames.difference(overrideNames);
+    final referencedName = removedNames.firstWhere(
       (name) =>
           currentProfile?.hasCustomOutboundReferences(
             name,
@@ -1271,7 +1296,7 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
     }
     final hasRelatedProxyChains =
         currentProfile?.proxyChains.any((chain) {
-          return chain.proxies.any(relatedNames.contains);
+          return chain.proxies.any(removedNames.contains);
         }) ??
         false;
     ref.read(profilesProvider.notifier).updateProfile(widget.profileId, (
@@ -1280,7 +1305,8 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
       final deletedNames = state.profileProxies
           .where((item) => targetProfileProxyIds.contains(item.id))
           .map((item) => item.name)
-          .toSet();
+          .toSet()
+          .difference(overrideNames);
       return state
           .copyWith(
             profileProxies: state.profileProxies
@@ -1307,47 +1333,39 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
     ProfileProxy profileProxy,
     bool value,
   ) async {
-    final profile = ref.read(profileProvider(widget.profileId));
-    if (!value &&
-        (profile?.hasCustomOutboundReferences(
-              profileProxy.name,
-              includeProxyChains: false,
-            ) ??
-            false)) {
-      context.showNotifier(
-        appLocalizations.customOutboundInUse(profileProxy.name),
-      );
-      return;
-    }
+    final name = profileProxy.name;
+    var isOverride = false;
     if (!value) {
-      try {
-        final rawReference = await _findRawReference(profileProxy.name);
-        if (rawReference != null) {
-          if (mounted) {
-            context.showNotifier(
-              appLocalizations.rawOutboundInUse(
-                profileProxy.name,
-                rawReference,
-              ),
-            );
-          }
-          return;
-        }
-      } catch (error) {
-        if (mounted) {
-          context.showNotifier(error.toString());
-        }
+      final rawConfig = await _loadRawConfig();
+      if (rawConfig == null || !mounted) {
         return;
       }
-    }
-    if (!mounted) {
-      return;
+      isOverride = _rawProxyNames(rawConfig).contains(name);
+      if (!isOverride) {
+        final hasCustomReferences =
+            ref
+                .read(profileProvider(widget.profileId))
+                ?.hasCustomOutboundReferences(
+                  name,
+                  includeProxyChains: false,
+                ) ??
+            false;
+        if (hasCustomReferences) {
+          context.showNotifier(appLocalizations.customOutboundInUse(name));
+          return;
+        }
+        if (_isRawReferenced(rawConfig, [name])) {
+          return;
+        }
+      }
     }
     final hasRelatedProxyChains =
-        profile?.proxyChains.any(
-          (chain) => chain.proxies.contains(profileProxy.name),
-        ) ??
-        false;
+        !isOverride &&
+        (ref
+                .read(profileProvider(widget.profileId))
+                ?.proxyChains
+                .any((chain) => chain.proxies.contains(name)) ??
+            false);
     ref.read(profilesProvider.notifier).updateProfile(widget.profileId, (
       state,
     ) {
@@ -1355,17 +1373,15 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
       final nextProfileProxies = state.profileProxies.copyAndPut(
         nextProfileProxy,
       );
-      if (value) {
+      if (value || isOverride) {
         return state.copyWith(profileProxies: nextProfileProxies);
       }
       return state
           .copyWith(
             profileProxies: nextProfileProxies,
-            proxyChains: state.proxyChains.copyAndDisableChainsUsingProxy(
-              profileProxy.name,
-            ),
+            proxyChains: state.proxyChains.copyAndDisableChainsUsingProxy(name),
           )
-          .copyAndRemoveOutboundCaches({profileProxy.name});
+          .copyAndRemoveOutboundCaches({name});
     });
     _applyProfileChanges();
     if (!value && hasRelatedProxyChains) {
@@ -1419,10 +1435,19 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
             itemCount: profileProxies.length,
             itemBuilder: (_, index) {
               final profileProxy = profileProxies[index];
-              return ProfileProxyItem(
+              return OverwriteEntryTile(
                 isEditing: selectedProfileProxies.isNotEmpty,
                 isSelected: selectedProfileProxies.contains(profileProxy.id),
-                profileProxy: profileProxy,
+                title: profileProxy.name,
+                subtitle: Text(
+                  profileProxy.type,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textTheme.bodySmall?.copyWith(
+                    color: context.colorScheme.onSurfaceVariant.opacity80,
+                  ),
+                ),
+                enable: profileProxy.enable,
                 onSelected: () {
                   _handleProfileProxySelected(profileProxy.id);
                 },

@@ -60,4 +60,34 @@ void main() {
     expect(context.nameScope.targetNames, {'Node A'});
     expect(context.nameScope.dialerNames, {'Node A', 'Proxy'});
   });
+
+  test('candidate sections do not depend on proxy-group order', () {
+    const proxy = {
+      'name': 'Proxy',
+      'type': 'select',
+      'proxies': ['Auto', 'A'],
+    };
+    const auto = {
+      'name': 'Auto',
+      'type': 'url-test',
+      'proxies': ['A'],
+    };
+    Set<String> candidatesFor(List<Map<String, Object>> groups) {
+      final context = buildProxyChainRawContext(
+        customNodesLabel: 'Custom',
+        otherNodesLabel: 'Other',
+        rawConfig: {
+          'proxies': [
+            {'name': 'A', 'type': 'ss'},
+          ],
+          'proxy-groups': groups,
+        },
+      );
+      expect(context.nameScope.dialerNames, {'A', 'Proxy', 'Auto'});
+      return context.sections.expand((section) => section.proxies).toSet();
+    }
+
+    expect(candidatesFor([proxy, auto]), {'A'});
+    expect(candidatesFor([auto, proxy]), {'A'});
+  });
 }

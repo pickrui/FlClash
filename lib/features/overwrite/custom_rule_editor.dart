@@ -322,19 +322,25 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
     });
     try {
       final error = await widget.validate?.call(rule) ?? '';
-      if (!mounted || ModalRoute.of(context)?.isCurrent != true) return;
+      if (!mounted || _abandonIfNotCurrent()) return;
       if (error.isNotEmpty) {
         _showError(error, candidate: rule);
         return;
       }
       Navigator.of(context).pop(rule);
     } catch (error) {
-      if (!mounted || ModalRoute.of(context)?.isCurrent != true) return;
+      if (!mounted || _abandonIfNotCurrent()) return;
       _showError(
         error.toString(),
         candidate: widget.validate == null ? null : rule,
       );
     }
+  }
+
+  bool _abandonIfNotCurrent() {
+    if (ModalRoute.of(context)?.isCurrent == true) return false;
+    setState(() => _saving = false);
+    return true;
   }
 
   void _clearError() {

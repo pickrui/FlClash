@@ -353,6 +353,41 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('re-enables saving when a route covered the pending check', (
+    tester,
+  ) async {
+    final pending = Completer<String>();
+    final results = <Rule?>[];
+    await _open(
+      tester,
+      rule: const Rule(id: 1, value: 'DOMAIN,example.com,DIRECT'),
+      validate: (_) => pending.future,
+      onResult: results.add,
+    );
+    await tester.tap(find.byKey(const Key('custom-rule-save')));
+    await tester.pump();
+    showDialog<void>(
+      context: tester.element(find.byType(CustomRuleEditorDialog)),
+      builder: (_) => const AlertDialog(content: Text('Cover')),
+    );
+    await tester.pump(const Duration(seconds: 1));
+    pending.complete('');
+    await tester.pump(const Duration(seconds: 1));
+    Navigator.of(tester.element(find.text('Cover'))).pop();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CustomRuleEditorDialog), findsOneWidget);
+    expect(results, isEmpty);
+    expect(
+      tester
+          .widget<FilledButton>(find.byKey(const Key('custom-rule-save')))
+          .onPressed,
+      isNotNull,
+    );
+    await _save(tester);
+    expect(results.single?.value, 'DOMAIN,example.com,DIRECT');
+  });
+
   testWidgets(
     'offers an explicit draft only after configuration validation fails',
     (tester) async {
