@@ -38,6 +38,8 @@ typedef _RestoreSnapshot = ({
   List<ProxyCommand>? pendingCommands,
 });
 
+typedef _MacosNetworkServices = ({List<String> enabled, Set<String> all});
+
 @immutable
 class _MacosProxyState {
   final bool enabled;
@@ -174,22 +176,16 @@ class Proxy extends ProxyPlatform {
         !await _restoreProxyState()) {
       return false;
     }
-    final services = await _getNetworkServicesWithMacos();
+    final services = (await _getNetworkServicesWithMacos())?.enabled;
     if (services == null || services.isEmpty) {
       return false;
     }
-    final managedServices = _restoreCommands == null
-        ? services
-        : services.where(_isCapturedMacosService).toList();
-    if (managedServices.isEmpty) {
-      return false;
-    }
-    final restoreCommands = await _captureMacosRestoreCommands(managedServices);
+    final restoreCommands = await _captureMacosRestoreCommands(services);
     if (restoreCommands == null) {
       return false;
     }
     return _applyProxyState(
-      managedServices.expand(
+      services.expand(
         (service) => _buildMacosStartCommands(service, port, bypassDomain),
       ),
       restoreCommands,
@@ -204,19 +200,25 @@ class Proxy extends ProxyPlatform {
     final ownsProxy = _restoreCommands != null;
     final previousRestore = _restoreCommands;
     final previousManaged = _managedCommands;
+    final restoreCommands = previousRestore == null
+        ? rollbackCommands
+        : _mergeCommandStates(rollbackCommands, previousRestore);
+    final managedCommands = previousManaged == null
+        ? appliedCommands
+        : _mergeCommandStates(previousManaged, appliedCommands);
     if (!await _persistRestoreCommands(
-      previousRestore ?? rollbackCommands,
+      restoreCommands,
       previousManaged,
       appliedCommands,
     )) {
       return false;
     }
-    _restoreCommands = previousRestore ?? rollbackCommands;
+    _restoreCommands = restoreCommands;
     _pendingCommands = appliedCommands;
     if (await _runCommands(appliedCommands)) {
       if (!await _persistRestoreCommands(
-        _restoreCommands!,
-        appliedCommands,
+        restoreCommands,
+        managedCommands,
         null,
       )) {
         await _rollbackProxyTransition(
@@ -227,7 +229,7 @@ class Proxy extends ProxyPlatform {
         );
         return false;
       }
-      _managedCommands = appliedCommands;
+      _managedCommands = managedCommands;
       _pendingCommands = null;
       return true;
     }
@@ -289,18 +291,15 @@ class Proxy extends ProxyPlatform {
     }
     var managedCommands = snapshot.managedCommands;
     var pendingCommands = snapshot.pendingCommands;
-    Set<String> unavailableKeys = <String>{};
     Set<String>? matchingKeys;
     if (managedCommands != null || pendingCommands != null) {
-      final state = await _matchManagedCommandStates(
+      matchingKeys = await _matchManagedCommandStates(
         managedCommands ?? pendingCommands!,
         alternateCommands: managedCommands == null ? null : pendingCommands,
       );
-      if (state == null) {
+      if (matchingKeys == null) {
         return false;
       }
-      matchingKeys = state.matchingKeys;
-      unavailableKeys = state.unavailableKeys;
     }
     final managedByKey = <String, ProxyCommand>{};
     for (final command in managedCommands ?? const <ProxyCommand>[]) {
@@ -323,14 +322,6 @@ class Proxy extends ProxyPlatform {
       final key = _commandStateKey(command);
       if (managedCommands != null && key == null) {
         return false;
-      }
-      if (key != null && unavailableKeys.contains(key)) {
-        remainingCommands.add(command);
-        final managed = managedByKey[key];
-        if (managed != null) remainingManaged.add(managed);
-        final pending = pendingByKey[key];
-        if (pending != null) remainingPending.add(pending);
-        continue;
       }
       if (matchingKeys != null &&
           (key == null || !matchingKeys.contains(key))) {
@@ -377,15 +368,21 @@ class Proxy extends ProxyPlatform {
     return false;
   }
 
-  bool _isCapturedMacosService(String service) {
-    final commands = _restoreCommands;
-    return commands != null &&
-        commands.any(
-          (command) =>
-              command.executable == '/usr/sbin/networksetup' &&
-              command.args.length > 1 &&
-              command.args[1] == service,
-        );
+  static List<ProxyCommand> _mergeCommandStates(
+    List<ProxyCommand> base,
+    List<ProxyCommand> preferred,
+  ) {
+    final preferredByKey = {
+      for (final command in preferred)
+        if (_commandStateKey(command) case final key?) key: command,
+    };
+    final baseKeys = base.map(_commandStateKey).nonNulls.toSet();
+    return [
+      for (final command in base)
+        preferredByKey[_commandStateKey(command)] ?? command,
+      for (final command in preferred)
+        if (!baseKeys.contains(_commandStateKey(command))) command,
+    ];
   }
 
   Future<bool> _persistRestoreCommands(
@@ -589,8 +586,7 @@ class Proxy extends ProxyPlatform {
     }
   }
 
-  Future<({Set<String> matchingKeys, Set<String> unavailableKeys})?>
-      _matchManagedCommandStates(
+  Future<Set<String>?> _matchManagedCommandStates(
     List<ProxyCommand> commands, {
     List<ProxyCommand>? alternateCommands,
   }) async {
@@ -604,12 +600,13 @@ class Proxy extends ProxyPlatform {
           alternate.length != alternateCommands.length) {
         return null;
       }
+      final probes = <String, ProxyCommand>{
+        for (final command in [...?alternateCommands, ...commands])
+          if (_commandStateKey(command) case final key?) key: command,
+      };
       final current = <String, String>{};
-      final unavailable = <String>{};
-      if (commands.every((command) => command.executable == 'gsettings')) {
-        for (final command in commands) {
-          final key = _commandStateKey(command);
-          if (key == null) return null;
+      if (probes.values.every((command) => command.executable == 'gsettings')) {
+        for (final MapEntry(:key, value: command) in probes.entries) {
           final value = await _readCommand('gsettings', [
             'get',
             command.args[1],
@@ -618,12 +615,10 @@ class Proxy extends ProxyPlatform {
           if (value == null) return null;
           current[key] = _normalizeGSettingsValue(value);
         }
-      } else if (commands.every(
+      } else if (probes.values.every(
         (command) => command.executable.startsWith('kwriteconfig'),
       )) {
-        for (final command in commands) {
-          final key = _commandStateKey(command);
-          if (key == null) return null;
+        for (final MapEntry(:key, value: command) in probes.entries) {
           final reader = command.executable.replaceFirst(
             'kwriteconfig',
             'kreadconfig',
@@ -636,41 +631,31 @@ class Proxy extends ProxyPlatform {
           if (value == null) return null;
           current[key] = value;
         }
-      } else if (commands.every(
+      } else if (probes.values.every(
         (command) => command.executable == '/usr/sbin/networksetup',
       )) {
         final services = await _getNetworkServicesWithMacos();
         if (services == null) return null;
-        final serviceSet = services.toSet();
-        for (final command in commands) {
-          final key = _commandStateKey(command);
-          final service = _macosService(command);
-          if (key == null || service == null) return null;
-          if (!serviceSet.contains(service)) unavailable.add(key);
-        }
-        final capturedServices = commands
-            .where((command) => command.args.length > 1)
-            .map((command) => command.args[1])
-            .where(serviceSet.contains)
+        final presentServices = probes.values
+            .map(_macosService)
+            .nonNulls
+            .where(services.all.contains)
             .toSet()
             .toList();
-        if (capturedServices.isNotEmpty) {
-          final captured = await _captureMacosRestoreCommands(capturedServices);
+        if (presentServices.isNotEmpty) {
+          final captured = await _captureMacosRestoreCommands(presentServices);
           if (captured == null) return null;
           current.addAll(_commandStateMap(captured));
         }
       } else {
         return null;
       }
-      final matching = <String>{};
-      for (final entry in expected.entries) {
-        if (!unavailable.contains(entry.key) &&
-            (current[entry.key] == entry.value ||
-                current[entry.key] == alternate[entry.key])) {
-          matching.add(entry.key);
-        }
-      }
-      return (matchingKeys: matching, unavailableKeys: unavailable);
+      return {
+        for (final MapEntry(:key, :value) in current.entries)
+          if (probes.containsKey(key) &&
+              (value == expected[key] || value == alternate[key]))
+            key,
+      };
     } catch (_) {
       return null;
     }
@@ -874,7 +859,7 @@ class Proxy extends ProxyPlatform {
     return join(home, '.flclash', 'proxy-restore.json');
   }
 
-  Future<List<String>?> _getNetworkServicesWithMacos() async {
+  Future<_MacosNetworkServices?> _getNetworkServicesWithMacos() async {
     final result = await _processRunner(
       '/usr/sbin/networksetup',
       ['-listallnetworkservices'],
@@ -1372,14 +1357,20 @@ class Proxy extends ProxyPlatform {
     ]);
   }
 
-  static List<String> _parseMacosNetworkServices(String stdout) {
-    return stdout
-        .split('\n')
-        .map((line) => line.trim())
-        .where((line) => line.isNotEmpty)
-        .where((line) => !line.startsWith('*'))
-        .where((line) => !line.startsWith('An asterisk '))
-        .toList();
+  static _MacosNetworkServices _parseMacosNetworkServices(String stdout) {
+    final enabled = <String>[];
+    final all = <String>{};
+    for (final raw in stdout.split('\n')) {
+      final line = raw.trim();
+      if (line.isEmpty || line.startsWith('An asterisk ')) continue;
+      if (line.startsWith('*')) {
+        if (line.length > 1) all.add(line.substring(1));
+      } else {
+        enabled.add(line);
+        all.add(line);
+      }
+    }
+    return (enabled: enabled, all: all);
   }
 
   static _MacosProxyState? _parseMacosProxyState(String stdout) {
@@ -1523,7 +1514,8 @@ class Proxy extends ProxyPlatform {
       _hasExecutable(executable, searchPath);
 
   @visibleForTesting
-  static List<String> parseMacosNetworkServicesForTest(String stdout) {
+  static ({List<String> enabled, Set<String> all})
+      parseMacosNetworkServicesForTest(String stdout) {
     return _parseMacosNetworkServices(stdout);
   }
 

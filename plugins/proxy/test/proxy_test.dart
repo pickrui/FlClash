@@ -169,8 +169,7 @@ void main() {
   }, testOn: '!windows');
 
   group('macOS proxy command builders', () {
-    test(
-        'filters networksetup service list headers, disabled services, and blanks',
+    test('splits networksetup service list into enabled and existing services',
         () {
       final services = Proxy.parseMacosNetworkServicesForTest('''
 An asterisk (*) denotes that a network service is disabled.
@@ -180,7 +179,12 @@ USB 10/100/1000 LAN
 
 ''');
 
-      expect(services, ['Wi-Fi', 'USB 10/100/1000 LAN']);
+      expect(services.enabled, ['Wi-Fi', 'USB 10/100/1000 LAN']);
+      expect(services.all, {
+        'Wi-Fi',
+        'Thunderbolt Bridge',
+        'USB 10/100/1000 LAN',
+      });
     });
 
     test('passes bypass domains as separate networksetup arguments', () {
@@ -736,6 +740,142 @@ USB 10/100/1000 LAN
       expect(calls.any((args) => args.first.startsWith('-set')), false);
     });
   });
+
+  group('macOS network service changes', () {
+    test('stop restores a captured service after it is disabled', () async {
+      final networksetup = _FakeNetworkSetup(['Wi-Fi', 'Ethernet']);
+      final original = networksetup.snapshot();
+      final proxy = Proxy(processRunner: networksetup.run);
+
+      expect(await proxy.startMacosProxyForTest(7890, ['localhost']), true);
+      networksetup.disabled.add('Ethernet');
+
+      expect(await proxy.restoreProxyForTest(), true);
+      expect(networksetup.snapshot(), original);
+      expect(await proxy.startMacosProxyForTest(7891, const []), true);
+      expect(networksetup.snapshot()['Ethernet'], original['Ethernet']);
+      expect(await proxy.restoreProxyForTest(), true);
+      expect(networksetup.snapshot(), original);
+    });
+
+    test('a new process restores a service disabled after the persisted start',
+        () async {
+      final root = await Directory.systemTemp.createTemp('proxy_disabled_');
+      addTearDown(() => root.delete(recursive: true));
+      final statePath = '${root.path}/restore.json';
+      final networksetup = _FakeNetworkSetup(['Wi-Fi', 'Ethernet']);
+      final original = networksetup.snapshot();
+      final firstProcess = Proxy(
+        processRunner: networksetup.run,
+        stateFilePath: statePath,
+      );
+      expect(await firstProcess.startMacosProxyForTest(7890, const []), true);
+      networksetup.disabled.add('Ethernet');
+
+      final nextProcess = Proxy(
+        processRunner: networksetup.run,
+        stateFilePath: statePath,
+      );
+      expect(await nextProcess.startMacosProxyForTest(7891, const []), true);
+      expect(networksetup.snapshot()['Ethernet'], original['Ethernet']);
+      expect(networksetup.services['Wi-Fi']!['webproxy.port'], '7891');
+      expect(await nextProcess.restoreProxyForTest(), true);
+      expect(networksetup.snapshot(), original);
+      expect(File(statePath).existsSync(), false);
+    });
+
+    test('stop drops the restore state of a deleted service', () async {
+      final networksetup = _FakeNetworkSetup(['Wi-Fi', 'Ethernet']);
+      final original = networksetup.snapshot();
+      final proxy = Proxy(processRunner: networksetup.run);
+
+      expect(await proxy.startMacosProxyForTest(7890, const []), true);
+      networksetup.services.remove('Ethernet');
+      networksetup.calls.clear();
+
+      expect(await proxy.restoreProxyForTest(), true);
+      expect(networksetup.snapshot(), {'Wi-Fi': original['Wi-Fi']});
+      expect(
+        networksetup.calls
+            .any((args) => args.length > 1 && args[1] == 'Ethernet'),
+        false,
+      );
+      expect(await proxy.startMacosProxyForTest(7891, const []), true);
+      expect(await proxy.restoreProxyForTest(), true);
+      expect(networksetup.snapshot(), {'Wi-Fi': original['Wi-Fi']});
+    });
+
+    test('repeated start keeps a disabled captured service restorable',
+        () async {
+      final networksetup = _FakeNetworkSetup(['Wi-Fi', 'Ethernet']);
+      final original = networksetup.snapshot();
+      final proxy = Proxy(processRunner: networksetup.run);
+
+      expect(await proxy.startMacosProxyForTest(7890, const []), true);
+      networksetup.disabled.add('Ethernet');
+      expect(await proxy.startMacosProxyForTest(7891, const []), true);
+      expect(networksetup.services['Wi-Fi']!['webproxy.port'], '7891');
+      expect(networksetup.services['Ethernet']!['webproxy.port'], '7890');
+
+      expect(await proxy.restoreProxyForTest(), true);
+      expect(networksetup.snapshot(), original);
+    });
+
+    test('repeated start captures a newly enabled service', () async {
+      final networksetup = _FakeNetworkSetup(['Wi-Fi', 'Ethernet'])
+        ..disabled.add('Ethernet');
+      final original = networksetup.snapshot();
+      final proxy = Proxy(processRunner: networksetup.run);
+
+      expect(await proxy.startMacosProxyForTest(7890, const []), true);
+      expect(networksetup.snapshot()['Ethernet'], original['Ethernet']);
+      networksetup.disabled.remove('Ethernet');
+      expect(await proxy.startMacosProxyForTest(7891, const []), true);
+      expect(networksetup.services['Ethernet']!['webproxy.port'], '7891');
+
+      expect(await proxy.restoreProxyForTest(), true);
+      expect(networksetup.snapshot(), original);
+    });
+
+    test('failed repeated start rolls a newly enabled service back', () async {
+      final networksetup = _FakeNetworkSetup(['Wi-Fi', 'Ethernet'])
+        ..disabled.add('Ethernet');
+      final original = networksetup.snapshot();
+      final proxy = Proxy(processRunner: networksetup.run);
+
+      expect(await proxy.startMacosProxyForTest(7890, const []), true);
+      networksetup.disabled.remove('Ethernet');
+      networksetup.fail = (args) =>
+          args.first == '-setsocksfirewallproxy' && args[1] == 'Ethernet';
+      expect(await proxy.startMacosProxyForTest(7891, const []), false);
+      expect(networksetup.snapshot()['Ethernet'], original['Ethernet']);
+      expect(networksetup.services['Wi-Fi']!['webproxy.port'], '7890');
+
+      networksetup.fail = null;
+      expect(await proxy.restoreProxyForTest(), true);
+      expect(networksetup.snapshot(), original);
+    });
+
+    test('repeated start after a partial stop restores every setting',
+        () async {
+      final networksetup = _FakeNetworkSetup(['Wi-Fi']);
+      final original = networksetup.snapshot();
+      final proxy = Proxy(processRunner: networksetup.run);
+
+      expect(await proxy.startMacosProxyForTest(7890, const []), true);
+      var failed = false;
+      networksetup.fail = (args) {
+        if (failed || args.first != '-setwebproxystate') return false;
+        failed = true;
+        return true;
+      };
+      expect(await proxy.restoreProxyForTest(), false);
+      expect(await proxy.startMacosProxyForTest(7891, const []), true);
+
+      expect(await proxy.restoreProxyForTest(), true);
+      expect(networksetup.snapshot(), original);
+    });
+  });
 }
 
 Map<String, String> _gnomeProxyState() {
@@ -820,4 +960,127 @@ String _macosAutoProxyOutput(String enabled, String url) {
 URL: $url
 Enabled: $enabled
 ''';
+}
+
+Map<String, String> _originalMacosService() {
+  return {
+    'webproxy.enabled': 'off',
+    'webproxy.server': 'old-http',
+    'webproxy.port': '8080',
+    'securewebproxy.enabled': 'on',
+    'securewebproxy.server': 'old-https',
+    'securewebproxy.port': '8443',
+    'socksfirewallproxy.enabled': 'off',
+    'socksfirewallproxy.server': 'old-socks',
+    'socksfirewallproxy.port': '1080',
+    'autoproxy': 'on',
+    'autoproxyurl': 'https://old.local/proxy.pac',
+    'autodiscovery': 'on',
+    'bypass': 'old.local\n*.internal',
+  };
+}
+
+class _FakeNetworkSetup {
+  _FakeNetworkSetup(List<String> names)
+      : services = {for (final name in names) name: _originalMacosService()};
+
+  final Map<String, Map<String, String>> services;
+  final disabled = <String>{};
+  final calls = <List<String>>[];
+  bool Function(List<String> args)? fail;
+
+  Map<String, Map<String, String>> snapshot() => {
+        for (final MapEntry(:key, :value) in services.entries)
+          key: Map.of(value),
+      };
+
+  Future<ProcessResult> run(
+    String executable,
+    List<String> arguments, {
+    bool runInShell = false,
+  }) async {
+    final args = List<String>.from(arguments);
+    calls.add(args);
+    if (args.first == '-listallnetworkservices') {
+      final lines = [
+        'An asterisk (*) denotes that a network service is disabled.',
+        for (final name in services.keys)
+          disabled.contains(name) ? '*$name' : name,
+      ];
+      return ProcessResult(1, 0, '${lines.join('\n')}\n', '');
+    }
+    final service = services[args[1]];
+    if (service == null) {
+      return ProcessResult(
+        1,
+        0,
+        '${args[1]} is not a recognized network service.\n',
+        '',
+      );
+    }
+    if (fail?.call(args) ?? false) {
+      return ProcessResult(1, 1, '', 'failed');
+    }
+    for (final kind in ['webproxy', 'securewebproxy', 'socksfirewallproxy']) {
+      if (args.first == '-get$kind') {
+        return ProcessResult(
+          1,
+          0,
+          _macosProxyOutput(
+            service['$kind.enabled'] == 'on' ? 'Yes' : 'No',
+            service['$kind.server']!,
+            service['$kind.port']!,
+          ),
+          '',
+        );
+      }
+      if (args.first == '-set$kind') {
+        service['$kind.server'] = args[2];
+        service['$kind.port'] = args[3];
+        service['$kind.enabled'] = 'on';
+        return ProcessResult(1, 0, '', '');
+      }
+      if (args.first == '-set${kind}state') {
+        service['$kind.enabled'] = args[2];
+        return ProcessResult(1, 0, '', '');
+      }
+    }
+    switch (args.first) {
+      case '-getautoproxyurl':
+        return ProcessResult(
+          1,
+          0,
+          _macosAutoProxyOutput(
+            service['autoproxy'] == 'on' ? 'Yes' : 'No',
+            service['autoproxyurl']!,
+          ),
+          '',
+        );
+      case '-setautoproxystate':
+        service['autoproxy'] = args[2];
+      case '-getproxyautodiscovery':
+        final state = service['autodiscovery'] == 'on' ? 'On' : 'Off';
+        return ProcessResult(1, 0, 'Auto Proxy Discovery: $state\n', '');
+      case '-setproxyautodiscovery':
+        service['autodiscovery'] = args[2];
+      case '-getproxybypassdomains':
+        final bypass = service['bypass']!;
+        return ProcessResult(
+          1,
+          0,
+          bypass.isEmpty
+              ? "There aren't any bypass domains set on ${args[1]}.\n"
+              : '$bypass\n',
+          '',
+        );
+      case '-setproxybypassdomains':
+        final domains = args.skip(2).toList();
+        service['bypass'] = domains.length == 1 && domains.single == 'Empty'
+            ? ''
+            : domains.join('\n');
+      default:
+        return ProcessResult(1, 1, '', 'unsupported command');
+    }
+    return ProcessResult(1, 0, '', '');
+  }
 }
