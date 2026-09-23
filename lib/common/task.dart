@@ -27,14 +27,6 @@ Future<T> _decodeJSON<T>(String content) async {
   return json.decode(content);
 }
 
-Future<String> encodeJSONTask<T>(T data) async {
-  return compute<T, String>(_encodeJSON, data);
-}
-
-Future<String> _encodeJSON<T>(T content) async {
-  return json.encode(content);
-}
-
 Future<String> encodeYamlTask<T>(T data) async {
   return compute<T, String>(_encodeYaml, data);
 }
@@ -286,8 +278,6 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
   rawConfig['unified-delay'] = realPatchConfig.unifiedDelay;
   rawConfig['ipv6'] = realPatchConfig.ipv6;
   rawConfig['log-level'] = realPatchConfig.logLevel.name;
-  rawConfig['port'] = 0;
-  rawConfig['socks-port'] = 0;
   rawConfig['keep-alive-interval'] = realPatchConfig.keepAliveInterval;
   rawConfig['mixed-port'] = realPatchConfig.mixedPort;
   rawConfig['port'] = realPatchConfig.port;
@@ -531,8 +521,7 @@ void _applyProxyChains(Map rawConfig, List<ProxyChain> proxyChains) {
   if (enabledProxyChains.any((chain) => !chain.isValid)) {
     throw const FormatException('invalid proxy chain');
   }
-  final validProxyChains = enabledProxyChains;
-  if (validProxyChains.isEmpty) return;
+  if (enabledProxyChains.isEmpty) return;
   final proxies = rawConfig['proxies'];
   final proxyMap = <String, Map>{};
   if (proxies is List) {
@@ -556,10 +545,10 @@ void _applyProxyChains(Map rawConfig, List<ProxyChain> proxyChains) {
     targetNames: proxyMap.keys.toSet(),
     dialerNames: {...proxyMap.keys, ...groupNames},
   );
-  final applicableProxyChains = validProxyChains.where((chain) {
+  final applicableProxyChains = enabledProxyChains.where((chain) {
     return scope.isValid(chain.normalizedProxies);
   }).toList();
-  if (applicableProxyChains.length != validProxyChains.length) {
+  if (applicableProxyChains.length != enabledProxyChains.length) {
     throw const FormatException('proxy chain references an unavailable node');
   }
   final existingRelations = <String, String>{
@@ -699,9 +688,6 @@ Future<MigrationData> _oldToNowTask(
   appSettingProps['restoreStrategy'] = appSettingProps['recoveryStrategy'];
   configMap['appSettingProps'] = appSettingProps;
   configMap['proxiesStyleProps'] = configMap['proxiesStyle'];
-  // final overwriteMap = configMap['overwrite'] as Map? ?? {};
-  // configMap['overwriteType'] = overwriteMap['type'];
-  // configMap['scriptId'] = overwriteMap['scriptOverwrite'];
   List rawScripts = configMap['scripts'] as List<dynamic>? ?? [];
   if (rawScripts.isEmpty) {
     final scriptPropsJson = configMap['scriptProps'] as Map<String, dynamic>?;
@@ -880,7 +866,7 @@ Future<String> backupTask(
   );
 }
 
-Future<String> _backupTask<T>(
+Future<String> _backupTask(
   VM4<Map<String, dynamic>, String, String, String> args,
 ) async {
   final configMap = args.a;
@@ -1335,14 +1321,13 @@ Future<MigrationData> _restoreTask(VM3<String, String, String> paths) async {
     throw appLocalizations.invalidBackupFile;
   }
   await validateBackupArchiveDirectory(backupFilePath, restoreDirPath);
+  // Archive entries read lazily from this stream during extraction.
   final input = InputFileStream(backupFilePath);
-  late final Archive archive;
   try {
-    archive = zipDecoder.decodeStream(input);
+    await extractBackupArchive(zipDecoder.decodeStream(input), restoreDirPath);
   } finally {
     await input.close();
   }
-  await extractBackupArchive(archive, restoreDirPath);
   final restoreConfigFile = File(join(restoreDirPath, configJsonName));
   if (!await restoreConfigFile.exists()) {
     throw appLocalizations.invalidBackupFile;

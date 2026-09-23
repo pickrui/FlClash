@@ -78,6 +78,8 @@ class Window implements WindowPort {
   }
 
   Future<void> ensureSingleInstance() async {
+    // acquire() reads any failure as a running instance and exits quietly.
+    await appPath.homeDirPath;
     final acquire = await singleInstanceLock.acquire();
     if (!acquire) {
       await _showExistingInstance();
@@ -210,8 +212,6 @@ class Window implements WindowPort {
 
   @override
   Future<void> toggle() => _visibility.toggle();
-
-  Future<bool> get isVisible => windowManager.isVisible();
 
   Future<void> _showWindow() async {
     await windowManager.ensureInitialized();

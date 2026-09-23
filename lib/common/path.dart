@@ -5,34 +5,34 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'constant.dart';
-import 'string.dart';
 import 'system.dart';
 import 'utils.dart';
 
 class AppPath {
   static AppPath? _instance;
-  Completer<Directory> dataDir = Completer();
-  Completer<Directory> downloadDir = Completer();
-  Completer<Directory> tempDir = Completer();
-  Completer<Directory> cacheDir = Completer();
+  final Completer<Directory> dataDir = Completer();
+  final Completer<Directory> downloadDir = Completer();
+  final Completer<Directory> tempDir = Completer();
   RandomAccessFile? _legacyDataLock;
-  late String appDirPath;
 
   AppPath._internal() {
-    appDirPath = join(dirname(Platform.resolvedExecutable));
-    getApplicationSupportDirectory().then((value) {
-      dataDir.complete(value);
-    });
-    getTemporaryDirectory().then((value) {
-      tempDir.complete(value);
-    });
-    getDownloadsDirectory().then((value) async {
+    _completeWith(dataDir, getApplicationSupportDirectory());
+    _completeWith(tempDir, getTemporaryDirectory());
+    _completeWith(
+      downloadDir,
       // Linux may return null (e.g. no xdg-user-dirs in containers)
-      downloadDir.complete(value ?? await dataDir.future);
-    });
-    getApplicationCacheDirectory().then((value) {
-      cacheDir.complete(value);
-    });
+      getDownloadsDirectory().then(
+        (value) async => value ?? await dataDir.future,
+      ),
+    );
+  }
+
+  static void _completeWith(
+    Completer<Directory> completer,
+    Future<Directory> source,
+  ) {
+    source.then(completer.complete, onError: completer.completeError);
+    completer.future.ignore();
   }
 
   factory AppPath() {
@@ -167,11 +167,6 @@ class AppPath {
     return join(path, '$fileName.js');
   }
 
-  Future<String> getIconsCacheDir() async {
-    final directory = await cacheDir.future;
-    return join(directory.path, 'icons');
-  }
-
   Future<String> getProvidersRootPath() async {
     final directory = await profilesPath;
     return join(directory, 'providers');
@@ -180,15 +175,6 @@ class AppPath {
   Future<String> getProvidersDirPath(String id) async {
     final directory = await profilesPath;
     return join(directory, 'providers', id);
-  }
-
-  Future<String> getProvidersFilePath(
-    String id,
-    String type,
-    String url,
-  ) async {
-    final directory = await profilesPath;
-    return join(directory, 'providers', id, type, url.toMd5());
   }
 
   Future<String> get tempPath async {

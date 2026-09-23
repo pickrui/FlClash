@@ -74,29 +74,6 @@ void main() {
     });
   });
 
-  group('sortByChar', () {
-    test('equal strings return 0', () {
-      expect(utils.sortByChar('abc', 'abc'), 0);
-    });
-
-    test('empty first returns -1', () {
-      expect(utils.sortByChar('', 'a'), -1);
-    });
-
-    test('empty second returns 1', () {
-      expect(utils.sortByChar('a', ''), 1);
-    });
-
-    test('both empty returns 0', () {
-      expect(utils.sortByChar('', ''), 0);
-    });
-
-    test('case insensitive comparison', () {
-      expect(utils.sortByChar('a', 'B'), lessThan(0));
-      expect(utils.sortByChar('B', 'a'), greaterThan(0));
-    });
-  });
-
   group('getOverwriteLabel', () {
     test('appends (1) to label without number', () {
       expect(utils.getOverwriteLabel('foo'), 'foo(1)');
@@ -109,33 +86,48 @@ void main() {
     test('increments higher numbers', () {
       expect(utils.getOverwriteLabel('foo(9)'), 'foo(10)');
     });
+
+    test('increments numbers with three or more digits', () {
+      expect(utils.getOverwriteLabel('foo(100)'), 'foo(101)');
+      expect(utils.getOverwriteLabel('Plan(2025)'), 'Plan(2026)');
+    });
+
+    test('increments a label that is only a counter', () {
+      expect(utils.getOverwriteLabel('(1)'), '(2)');
+    });
+
+    test('appends a counter when the number overflows', () {
+      expect(
+        utils.getOverwriteLabel('foo(99999999999999999999)'),
+        'foo(99999999999999999999)(1)',
+      );
+    });
   });
 
-  group('compareVersions', () {
-    test('equal versions', () {
-      expect(utils.compareVersions('1.0.0', '1.0.0'), 0);
+  group('getFileNameForDisposition', () {
+    test('prefers the encoded file name', () {
+      expect(
+        utils.getFileNameForDisposition(
+          "attachment; filename=plain.yaml; filename*=UTF-8''%E6%B5%8B.yaml",
+        ),
+        '测.yaml',
+      );
     });
 
-    test('major version difference', () {
-      expect(utils.compareVersions('2.0.0', '1.0.0'), greaterThan(0));
-      expect(utils.compareVersions('1.0.0', '2.0.0'), lessThan(0));
+    test('falls back to the plain name when the encoded one is malformed', () {
+      expect(
+        utils.getFileNameForDisposition(
+          "attachment; filename=plain.yaml; filename*=UTF-8''%E4%B8",
+        ),
+        'plain.yaml',
+      );
     });
 
-    test('minor version difference', () {
-      expect(utils.compareVersions('1.2.0', '1.1.0'), greaterThan(0));
-    });
-
-    test('patch version difference', () {
-      expect(utils.compareVersions('1.0.2', '1.0.1'), greaterThan(0));
-    });
-
-    test('handles build number', () {
-      expect(utils.compareVersions('1.0.0+1', '1.0.0+2'), lessThan(0));
-      expect(utils.compareVersions('1.0.0+2', '1.0.0+1'), greaterThan(0));
-    });
-
-    test('handles missing minor/patch', () {
-      expect(utils.compareVersions('1', '1.0.0'), 0);
+    test('ignores a header that cannot be parsed', () {
+      expect(
+        utils.getFileNameForDisposition('attachment; filename="plain'),
+        isNull,
+      );
     });
   });
 

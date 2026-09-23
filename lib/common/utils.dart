@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -110,89 +109,28 @@ class Utils {
     return null;
   }
 
-  int sortByChar(String a, String b) {
-    if (a.isEmpty && b.isEmpty) {
-      return 0;
-    }
-    if (a.isEmpty) {
-      return -1;
-    }
-    if (b.isEmpty) {
-      return 1;
-    }
-    final charA = a[0];
-    final charB = b[0];
-
-    if (charA == charB) {
-      return sortByChar(a.substring(1), b.substring(1));
-    } else {
-      return charA.compareToLower(charB);
-    }
-  }
-
   String getOverwriteLabel(String label) {
-    final reg = RegExp(r'\((\d+)\)$');
-    final matches = reg.allMatches(label);
-    if (matches.isNotEmpty) {
-      final match = matches.last;
-      final number = int.parse(match[1] ?? '0') + 1;
-      return label.replaceFirst(reg, '($number)', label.length - 3 - 1);
-    } else {
-      return '$label(1)';
-    }
-  }
-
-  int compareVersions(String version1, String version2) {
-    final v1 = version1.split('+')[0].split('.');
-    final v2 = version2.split('+')[0].split('.');
-    final major1 = int.parse(v1[0]);
-    final major2 = int.parse(v2[0]);
-    if (major1 != major2) {
-      return major1.compareTo(major2);
-    }
-    final minor1 = v1.length > 1 ? int.parse(v1[1]) : 0;
-    final minor2 = v2.length > 1 ? int.parse(v2[1]) : 0;
-    if (minor1 != minor2) {
-      return minor1.compareTo(minor2);
-    }
-    final patch1 = v1.length > 2 ? int.parse(v1[2]) : 0;
-    final patch2 = v2.length > 2 ? int.parse(v2[2]) : 0;
-    if (patch1 != patch2) {
-      return patch1.compareTo(patch2);
-    }
-    final build1 = version1.contains('+')
-        ? int.parse(version1.split('+')[1])
-        : 0;
-    final build2 = version2.contains('+')
-        ? int.parse(version2.split('+')[1])
-        : 0;
-    return build1.compareTo(build2);
+    final match = RegExp(r'\((\d+)\)$').firstMatch(label);
+    final number = int.tryParse(match?[1] ?? '');
+    if (match == null || number == null) return '$label(1)';
+    return '${label.substring(0, match.start)}(${number + 1})';
   }
 
   String? getFileNameForDisposition(String? disposition) {
     if (disposition == null) return null;
-    final parseValue = HeaderValue.parse(disposition);
-    final parameters = parseValue.parameters;
-    final fileNamePointKey = parameters.keys.firstWhere(
-      (key) => key == 'filename*',
-      orElse: () => '',
-    );
-    if (fileNamePointKey.isNotEmpty) {
-      final res = parameters[fileNamePointKey]?.split("''") ?? [];
-      if (res.length >= 2) {
-        return Uri.decodeComponent(res[1]);
-      }
+    final Map<String, String?> parameters;
+    try {
+      parameters = HeaderValue.parse(disposition).parameters;
+    } on HttpException {
+      return null;
     }
-    final fileNameKey = parameters.keys.firstWhere(
-      (key) => key == 'filename',
-      orElse: () => '',
-    );
-    if (fileNameKey.isEmpty) return null;
-    return parameters[fileNameKey];
-  }
-
-  FlutterView getScreen() {
-    return WidgetsBinding.instance.platformDispatcher.views.first;
+    final encoded = parameters['filename*']?.split("''");
+    if (encoded != null && encoded.length >= 2) {
+      try {
+        return Uri.decodeComponent(encoded[1]);
+      } catch (_) {}
+    }
+    return parameters['filename'];
   }
 
   ViewMode getViewMode(double viewWidth) {
@@ -212,51 +150,6 @@ class Utils {
 
   int getProfilesColumns(double viewWidth) {
     return max((viewWidth / 280).floor(), 1);
-  }
-
-  final _indexPrimary = [50, 100, 200, 300, 400, 500, 600, 700, 800, 850, 900];
-
-  MaterialColor _createPrimarySwatch(Color color) {
-    final Map<int, Color> swatch = <int, Color>{};
-    final int a = color.alpha8bit;
-    final int r = color.red8bit;
-    final int g = color.green8bit;
-    final int b = color.blue8bit;
-    for (final int strength in _indexPrimary) {
-      final double ds = 0.5 - strength / 1000;
-      swatch[strength] = Color.fromARGB(
-        a,
-        r + ((ds < 0 ? r : (255 - r)) * ds).round(),
-        g + ((ds < 0 ? g : (255 - g)) * ds).round(),
-        b + ((ds < 0 ? b : (255 - b)) * ds).round(),
-      );
-    }
-    swatch[50] = swatch[50]!.lighten(18);
-    swatch[100] = swatch[100]!.lighten(16);
-    swatch[200] = swatch[200]!.lighten(14);
-    swatch[300] = swatch[300]!.lighten(10);
-    swatch[400] = swatch[400]!.lighten(6);
-    swatch[700] = swatch[700]!.darken(2);
-    swatch[800] = swatch[800]!.darken(3);
-    swatch[900] = swatch[900]!.darken(4);
-    return MaterialColor(color.value32bit, swatch);
-  }
-
-  List<Color> getMaterialColorShades(Color color) {
-    final swatch = _createPrimarySwatch(color);
-    return <Color>[
-      if (swatch[50] != null) swatch[50]!,
-      if (swatch[100] != null) swatch[100]!,
-      if (swatch[200] != null) swatch[200]!,
-      if (swatch[300] != null) swatch[300]!,
-      if (swatch[400] != null) swatch[400]!,
-      if (swatch[500] != null) swatch[500]!,
-      if (swatch[600] != null) swatch[600]!,
-      if (swatch[700] != null) swatch[700]!,
-      if (swatch[800] != null) swatch[800]!,
-      if (swatch[850] != null) swatch[850]!,
-      if (swatch[900] != null) swatch[900]!,
-    ];
   }
 
   String getBackupFileName() {

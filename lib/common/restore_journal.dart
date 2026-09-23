@@ -244,9 +244,9 @@ Future<void> recoverPendingRestore({
     if (!await configSnapshot.exists()) {
       throw const FormatException('restore config snapshot is missing');
     }
-    await _deleteFileIfExists(File('$databasePath-journal'));
-    await _deleteFileIfExists(File('$databasePath-wal'));
-    await _deleteFileIfExists(File('$databasePath-shm'));
+    await durableDeleteFile('$databasePath-journal');
+    await durableDeleteFile('$databasePath-wal');
+    await durableDeleteFile('$databasePath-shm');
     await _replaceFile(databaseSnapshot, File(databasePath));
     await _replaceFile(configSnapshot, File(durableConfigPath));
   }
@@ -266,25 +266,21 @@ Future<void> _flushFile(File file) async {
 
 Future<void> _validatePlan(String homePath, RestoreFilePlan plan) async {
   final normalizedHome = p.absolute(p.normalize(homePath));
-  for (final replacement in plan.replacements) {
-    for (final path in [
+  for (final path in [
+    for (final replacement in plan.replacements) ...[
       replacement.target,
       replacement.backup,
       replacement.temporary,
-    ]) {
-      if (!p.isWithin(normalizedHome, p.absolute(p.normalize(path)))) {
-        throw const FormatException('restore journal path is outside home');
-      }
-      await _rejectSymlinkComponents(normalizedHome, path);
+    ],
+    for (final deletion in plan.deletions) ...[
+      deletion.target,
+      deletion.backup,
+    ],
+  ]) {
+    if (!p.isWithin(normalizedHome, p.absolute(p.normalize(path)))) {
+      throw const FormatException('restore journal path is outside home');
     }
-  }
-  for (final deletion in plan.deletions) {
-    for (final path in [deletion.target, deletion.backup]) {
-      if (!p.isWithin(normalizedHome, p.absolute(p.normalize(path)))) {
-        throw const FormatException('restore journal path is outside home');
-      }
-      await _rejectSymlinkComponents(normalizedHome, path);
-    }
+    await _rejectSymlinkComponents(normalizedHome, path);
   }
 }
 
@@ -310,7 +306,7 @@ Future<void> _rollbackFiles(RestoreFilePlan plan) async {
       followLinks: false,
     );
     if (backup != FileSystemEntityType.notFound) {
-      await _deleteEntity(deletion.target);
+      await durableDeleteEntity(deletion.target);
       if (deletion.isDirectory) {
         await durableRenameDirectory(deletion.backup, deletion.target);
       } else {
@@ -327,14 +323,14 @@ Future<void> _rollbackFiles(RestoreFilePlan plan) async {
   for (final replacement in plan.replacements.reversed) {
     final backupExists = await File(replacement.backup).exists();
     if (backupExists) {
-      await _deleteEntity(replacement.target);
+      await durableDeleteEntity(replacement.target);
       await durableRename(replacement.backup, replacement.target);
     } else if (!replacement.existed) {
-      await _deleteEntity(replacement.target);
+      await durableDeleteEntity(replacement.target);
     } else if (!await File(replacement.target).exists()) {
       throw const FormatException('restore replacement source is missing');
     }
-    await _deleteFileIfExists(File(replacement.temporary));
+    await durableDeleteFile(replacement.temporary);
   }
 }
 
@@ -343,11 +339,11 @@ Future<void> _cleanupArtifacts(RestoreFilePlan? plan) async {
     return;
   }
   for (final replacement in plan.replacements) {
-    await _deleteFileIfExists(File(replacement.backup));
-    await _deleteFileIfExists(File(replacement.temporary));
+    await durableDeleteFile(replacement.backup);
+    await durableDeleteFile(replacement.temporary);
   }
   for (final deletion in plan.deletions) {
-    await _deleteEntity(deletion.backup);
+    await durableDeleteEntity(deletion.backup);
   }
 }
 
@@ -355,26 +351,13 @@ Future<void> _replaceFile(File source, File target) async {
   await durableCreateDirectory(target.parent.path);
   final temporary = File('${target.path}.restore-recovery-new');
   final discarded = File('${target.path}.restore-recovery-old');
-  await _deleteFileIfExists(temporary);
-  await _deleteFileIfExists(discarded);
+  await durableDeleteFile(temporary.path);
+  await durableDeleteFile(discarded.path);
   await source.openRead().pipe(temporary.openWrite());
-  final handle = await temporary.open(mode: FileMode.append);
-  try {
-    await handle.flush();
-  } finally {
-    await handle.close();
-  }
+  await _flushFile(temporary);
   if (await target.exists()) {
     await durableRename(target.path, discarded.path);
   }
   await durableRename(temporary.path, target.path);
-  await _deleteFileIfExists(discarded);
-}
-
-Future<void> _deleteFileIfExists(File file) async {
-  await durableDeleteFile(file.path);
-}
-
-Future<void> _deleteEntity(String path) async {
-  await durableDeleteEntity(path);
+  await durableDeleteFile(discarded.path);
 }

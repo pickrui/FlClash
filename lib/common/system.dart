@@ -12,7 +12,6 @@ import 'package:fl_clash/plugins/app.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/input.dart';
 import 'package:flutter/services.dart';
-import 'package:path/path.dart';
 
 bool isFlClashDockerEnvironment(Map<String, String> environment) {
   final value = environment['FLCLASH_DOCKER']?.trim().toLowerCase();
@@ -40,16 +39,6 @@ class System {
   bool get isLinux => Platform.isLinux;
 
   bool get isDocker => isFlClashDockerEnvironment(Platform.environment);
-
-  Future<void> hideFile(String path) async {
-    try {
-      if (isWindows) {
-        await Process.run('attrib', ['+h', path]);
-      } else if (isMacOS) {
-        await Process.run('chflags', ['hidden', path]);
-      }
-    } catch (_) {}
-  }
 
   Future<int> get version async {
     final deviceInfo = await DeviceInfoPlugin().deviceInfo;
@@ -263,21 +252,6 @@ class Windows {
     return true;
   }
 
-  // Future<void> _killProcess(int port) async {
-  //   final result = await Process.run('netstat', ['-ano']);
-  //   final lines = result.stdout.toString().trim().split('\n');
-  //   for (final line in lines) {
-  //     if (!line.contains(':$port') || !line.contains('LISTENING')) {
-  //       continue;
-  //     }
-  //     final parts = line.trim().split(RegExp(r'\s+'));
-  //     final pid = int.tryParse(parts.last);
-  //     if (pid != null) {
-  //      await Process.run('taskkill', ['/PID', pid.toString(), '/F']);
-  //     }
-  //   }
-  // }
-
   Future<AuthorizeCode> registerService() async {
     final readiness = await windowsHelperClient.readiness();
     switch (readiness) {
@@ -319,61 +293,6 @@ class Windows {
       await Future.delayed(interval);
     }
     return false;
-  }
-
-  Future<bool> registerTask(String appName) async {
-    final taskXml =
-        '''
-<?xml version="1.0" encoding="UTF-16"?>
-<Task version="1.3" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
-  <Principals>
-    <Principal id="Author">
-      <LogonType>InteractiveToken</LogonType>
-      <RunLevel>HighestAvailable</RunLevel>
-    </Principal>
-  </Principals>
-  <Triggers>
-    <LogonTrigger/>
-  </Triggers>
-  <Settings>
-    <MultipleInstancesPolicy>Parallel</MultipleInstancesPolicy>
-    <DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>
-    <StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>
-    <AllowHardTerminate>false</AllowHardTerminate>
-    <StartWhenAvailable>false</StartWhenAvailable>
-    <RunOnlyIfNetworkAvailable>false</RunOnlyIfNetworkAvailable>
-    <IdleSettings>
-      <StopOnIdleEnd>false</StopOnIdleEnd>
-      <RestartOnIdle>false</RestartOnIdle>
-    </IdleSettings>
-    <AllowStartOnDemand>true</AllowStartOnDemand>
-    <Enabled>true</Enabled>
-    <Hidden>false</Hidden>
-    <RunOnlyIfIdle>false</RunOnlyIfIdle>
-    <WakeToRun>false</WakeToRun>
-    <ExecutionTimeLimit>PT72H</ExecutionTimeLimit>
-    <Priority>7</Priority>
-  </Settings>
-  <Actions Context="Author">
-    <Exec>
-      <Command>"${Platform.resolvedExecutable}"</Command>
-    </Exec>
-  </Actions>
-</Task>''';
-    final taskPath = join(await appPath.tempPath, 'task.xml');
-    await File(taskPath).create(recursive: true);
-    await File(
-      taskPath,
-    ).writeAsBytes(taskXml.encodeUtf16LeWithBom, flush: true);
-    final commandLine = [
-      '/Create',
-      '/TN',
-      appName,
-      '/XML',
-      '%s',
-      '/F',
-    ].join(' ');
-    return runas('schtasks', commandLine.replaceFirst('%s', taskPath));
   }
 }
 
