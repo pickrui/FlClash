@@ -16,7 +16,7 @@ class ServiceDelegate<T>(
     private val binding = ServiceBinding(
         scope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
         connect = {
-            GlobalState.application.bindServiceFlow<IBinder>(intent).map { (binder, message) ->
+            GlobalState.application.bindServiceFlow(intent).map { (binder, message) ->
                 Pair(binder?.let(interfaceCreator), message)
             }
         },

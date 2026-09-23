@@ -63,16 +63,6 @@ Java_com_oixcloud_clash_core_Core_getTraffic(JNIEnv *env, jobject thiz,
 }
 
 extern "C"
-JNIEXPORT jstring JNICALL
-Java_com_oixcloud_clash_core_Core_getTotalTraffic(JNIEnv *env, jobject thiz,
-                                                const jboolean only_statistics_proxy) {
-    auto traffic = getTotalTraffic(only_statistics_proxy);
-    const auto result = new_string(traffic);
-    release_string(&traffic);
-    return result;
-}
-
-extern "C"
 JNIEXPORT void JNICALL
 Java_com_oixcloud_clash_core_Core_suspended(JNIEnv *env, jobject thiz, jboolean suspended) {
     suspend(suspended);
@@ -217,12 +207,6 @@ extern "C"
 JNIEXPORT jstring JNICALL
 Java_com_oixcloud_clash_core_Core_getTraffic(JNIEnv *env, jobject thiz,
                                            const jboolean only_statistics_proxy) {
-    return nullptr;
-}
-extern "C"
-JNIEXPORT jstring JNICALL
-Java_com_oixcloud_clash_core_Core_getTotalTraffic(JNIEnv *env, jobject thiz,
-                                                const jboolean only_statistics_proxy) {
     return nullptr;
 }
 

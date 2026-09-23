@@ -14,7 +14,6 @@ import com.oixcloud.clash.service.IEventInterface
 import com.oixcloud.clash.service.IRemoteInterface
 import com.oixcloud.clash.service.IResultInterface
 import com.oixcloud.clash.service.IValidatorInterface
-import com.oixcloud.clash.service.IVoidInterface
 import com.oixcloud.clash.service.RemoteService
 import com.oixcloud.clash.service.ValidatorService
 import com.oixcloud.clash.service.models.NotificationParams
@@ -230,8 +229,7 @@ object Service {
     suspend fun quickSetup(
         initParamsString: String,
         setupParamsString: String,
-        onStarted: (() -> Unit)?,
-        onResult: ((result: String) -> Unit)?,
+        onResult: (result: String) -> Unit,
     ): Result<Unit> {
         validatorInitAction = JsonObject().apply {
             addProperty("id", "validator-init")
@@ -250,19 +248,10 @@ object Service {
                         res.add(result ?: byteArrayOf())
                         ack?.onAck()
                         if (isSuccess) {
-                            onResult?.let { cb ->
-                                cb(res.formatString())
-                            }
+                            onResult(res.formatString())
                         }
                     }
                 },
-                object : IVoidInterface.Stub() {
-                    override fun invoke() {
-                        onStarted?.let { onStarted ->
-                            onStarted()
-                        }
-                    }
-                }
             )
         }
     }

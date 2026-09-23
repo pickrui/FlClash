@@ -241,13 +241,8 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
             }
         }
 
-        when (value) {
-            true -> task?.setExcludeFromRecents(value)
-            false -> task?.setExcludeFromRecents(value)
-            null -> task?.setExcludeFromRecents(false)
-        }
+        task?.setExcludeFromRecents(value == true)
     }
-
 
     private fun hasInstalledAppsPermission(): Boolean {
         val manager = GlobalState.application.packageManager
@@ -522,7 +517,6 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
     }
 
     override fun onDetachedFromActivity() {
-        channel.invokeMethod("exit", null)
         detachActivityListeners()
         installedAppsRequest.cancel()
         invokeRequestNotificationCallback()

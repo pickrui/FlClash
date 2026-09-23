@@ -5,11 +5,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
@@ -76,13 +79,22 @@ internal class ServiceBinding<T>(
             // before a concurrent bind clears the public state for a new one.
             active?.state ?: state.value?.let { MutableStateFlow(it) } ?: state
         }
-        return runCatching {
+        val outcome = runCatching {
             withTimeout(timeoutMillis) {
                 val result = currentState.filterNotNull().first()
                 val service = result.first ?: throw IllegalStateException(result.second)
                 withContext(Dispatchers.Default) { block(service) }
             }
         }
+        val error = outcome.exceptionOrNull()
+        // Callers rethrow CancellationException as their own cancellation, so
+        // this call's timeout must surface as an ordinary failure.
+        if (error is TimeoutCancellationException && currentCoroutineContext().isActive) {
+            return Result.failure(
+                IllegalStateException("Service did not respond within $timeoutMillis ms", error),
+            )
+        }
+        return outcome
     }
 
     fun unbind() {

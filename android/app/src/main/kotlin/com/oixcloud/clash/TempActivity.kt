@@ -6,6 +6,7 @@ import com.oixcloud.clash.common.GlobalState
 import com.oixcloud.clash.common.QuickAction
 import com.oixcloud.clash.common.action
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.launch
 
 class TempActivity : Activity() {
@@ -24,6 +25,8 @@ class TempActivity : Activity() {
         GlobalState.launch {
             try {
                 State.handleQuickAction(action)
+            } catch (error: TimeoutCancellationException) {
+                GlobalState.application.showToast(error.message ?: "VPN operation timed out")
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Exception) {

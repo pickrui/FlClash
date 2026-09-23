@@ -1,6 +1,5 @@
 package com.oixcloud.clash.plugins
 
-import com.oixcloud.clash.RunState
 import com.oixcloud.clash.Service
 import com.oixcloud.clash.State
 import com.oixcloud.clash.common.Components
@@ -14,8 +13,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Semaphore
-import kotlinx.coroutines.sync.withPermit
 
 class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
     CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.Default) {
@@ -104,18 +101,14 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
         }
     }
 
-    val semaphore = Semaphore(10)
-
     fun handleSendEvent(value: String?) {
         launch(Dispatchers.Main) {
-            semaphore.withPermit {
-                flutterMethodChannel.invokeMethod("event", value)
-            }
+            flutterMethodChannel.invokeMethod("event", value)
         }
     }
 
     private fun onServiceDisconnected(message: String) {
-        State.runStateFlow.tryEmit(RunState.STOP)
+        State.handleServiceLost()
         flutterMethodChannel.invokeMethodOnMainThread<Any>("crash", message)
     }
 
@@ -146,8 +139,11 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
 
     private fun handleGetRunTime(result: MethodChannel.Result) {
         launch {
-            State.handleSyncState()
-            result.success(State.runTime)
+            try {
+                State.handleSyncState()
+            } finally {
+                result.success(State.runTime)
+            }
         }
     }
 }

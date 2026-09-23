@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.oixcloud.clash.service"
-    compileSdk = 36
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
@@ -21,15 +21,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    buildTypes {
-        release {
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
     }
 }
 

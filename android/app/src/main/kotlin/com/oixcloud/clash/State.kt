@@ -28,6 +28,7 @@ object State {
 
     val runLock = Mutex()
 
+    @Volatile
     var runTime: Long = 0
     private val startPreparation = StartPreparation()
 
@@ -86,6 +87,11 @@ object State {
         }
     }
 
+    fun handleServiceLost() {
+        runTime = 0L
+        runStateFlow.value = RunState.STOP
+    }
+
     suspend fun handleStartServiceAction() {
         // Dart calls back into the service while handling this request.
         // Never hold runLock across the Flutter channel round trip.
@@ -126,6 +132,8 @@ object State {
             GlobalState.application.showToast(sharedState.stopTip)
             stopServiceLocked()
             check(runTime == 0L) { "VPN service did not stop" }
+            // Without Dart, nothing else closes the listeners quickSetup opened.
+            withTimeout(5_000) { Service.stopListener() }
         }
     }
 
@@ -218,7 +226,6 @@ object State {
                     Service.quickSetup(
                         initParamsString,
                         setupParamsString,
-                        onStarted = null,
                         onResult = { completion.complete(it) },
                     ).getOrThrow()
                     completion.await()

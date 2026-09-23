@@ -293,6 +293,7 @@ class VpnService : SystemVpnService(), IBaseService {
                     State.delegate = null
                     State.intent = null
                     State.runTime = 0L
+                    NetworkPolicyController.stop()
                     currentDelegate.unbind()
                     handleDestroy()
                 }

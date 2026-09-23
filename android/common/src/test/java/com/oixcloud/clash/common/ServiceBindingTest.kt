@@ -17,8 +17,10 @@ import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.yield
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import kotlin.coroutines.CoroutineContext
@@ -202,12 +204,27 @@ class ServiceBindingTest {
         try {
             binding.bind()
             connection.ready()
-            assertTrue(
-                binding.useService(timeoutMillis = 1) { it }.exceptionOrNull()
-                    is TimeoutCancellationException,
-            )
+            val error = binding.useService(timeoutMillis = 1) { it }.exceptionOrNull()
+            assertTrue(error is IllegalStateException)
+            assertTrue(error?.cause is TimeoutCancellationException)
             connection.emit("late service")
             assertEquals("late service", binding.useService { it }.getOrThrow())
+        } finally {
+            binding.unbind()
+        }
+    }
+
+    @Test
+    fun anOuterTimeoutStillCancelsTheCaller() = runBlocking {
+        val connection = Connection()
+        val binding = ServiceBinding(this, { connection })
+        try {
+            binding.bind()
+            connection.ready()
+            val result = withTimeoutOrNull(50) {
+                binding.useService(timeoutMillis = 60_000) { it }.getOrThrow()
+            }
+            assertNull(result)
         } finally {
             binding.unbind()
         }

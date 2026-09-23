@@ -129,8 +129,6 @@ data object Core {
 
     external fun getTraffic(onlyStatisticsProxy: Boolean): String
 
-    external fun getTotalTraffic(onlyStatisticsProxy: Boolean): String
-
     init {
         System.loadLibrary("core")
     }

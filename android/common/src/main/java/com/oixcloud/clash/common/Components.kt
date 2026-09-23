@@ -10,7 +10,4 @@ object Components {
 
     val TEMP_ACTIVITY =
         ComponentName(GlobalState.packageName, "${PACKAGE_NAME}.TempActivity")
-
-    val BROADCAST_RECEIVER =
-        ComponentName(GlobalState.packageName, "${PACKAGE_NAME}.BroadcastReceiver")
 }

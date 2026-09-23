@@ -13,6 +13,8 @@ class FilesProvider : DocumentsProvider() {
 
     companion object {
         private const val DEFAULT_ROOT_ID = "0"
+        private const val ROOT_DOCUMENT_ID = "/"
+        private const val ROOT_DISPLAY_NAME = "FlClash"
 
         private val DEFAULT_DOCUMENT_COLUMNS = arrayOf(
             DocumentsContract.Document.COLUMN_DOCUMENT_ID,
@@ -41,9 +43,9 @@ class FilesProvider : DocumentsProvider() {
                 add(DocumentsContract.Root.COLUMN_ROOT_ID, DEFAULT_ROOT_ID)
                 add(DocumentsContract.Root.COLUMN_FLAGS, DocumentsContract.Root.FLAG_LOCAL_ONLY)
                 add(DocumentsContract.Root.COLUMN_ICON, R.drawable.ic_service)
-                add(DocumentsContract.Root.COLUMN_TITLE, "FlClash")
+                add(DocumentsContract.Root.COLUMN_TITLE, ROOT_DISPLAY_NAME)
                 add(DocumentsContract.Root.COLUMN_SUMMARY, "Data")
-                add(DocumentsContract.Root.COLUMN_DOCUMENT_ID, "/")
+                add(DocumentsContract.Root.COLUMN_DOCUMENT_ID, ROOT_DOCUMENT_ID)
             }
         }
     }
@@ -55,11 +57,7 @@ class FilesProvider : DocumentsProvider() {
         sortOrder: String?
     ): Cursor {
         val result = MatrixCursor(resolveDocumentProjection(projection))
-        val parentFile = if (parentDocumentId == "/") {
-            context?.filesDir
-        } else {
-            File(parentDocumentId)
-        } ?: throw FileNotFoundException("Parent directory not found")
+        val parentFile = resolveFile(parentDocumentId)
         parentFile.listFiles()?.forEach { file ->
             includeFile(result, file)
         }
@@ -68,8 +66,12 @@ class FilesProvider : DocumentsProvider() {
 
     override fun queryDocument(documentId: String, projection: Array<String>?): Cursor {
         val result = MatrixCursor(resolveDocumentProjection(projection))
-        val file = File(documentId)
-        includeFile(result, file)
+        val file = resolveFile(documentId)
+        if (documentId == ROOT_DOCUMENT_ID) {
+            includeFile(result, file, ROOT_DOCUMENT_ID, ROOT_DISPLAY_NAME)
+        } else {
+            includeFile(result, file)
+        }
         return result
     }
 
@@ -78,19 +80,29 @@ class FilesProvider : DocumentsProvider() {
         mode: String,
         signal: CancellationSignal?
     ): ParcelFileDescriptor {
-        val file = File(documentId)
+        val file = resolveFile(documentId)
         val accessMode = ParcelFileDescriptor.parseMode(mode)
         return ParcelFileDescriptor.open(file, accessMode)
     }
 
-    private fun includeFile(result: MatrixCursor, file: File) {
+    private fun resolveFile(documentId: String): File {
+        if (documentId != ROOT_DOCUMENT_ID) return File(documentId)
+        return context?.filesDir ?: throw FileNotFoundException("Root directory not found")
+    }
+
+    private fun includeFile(
+        result: MatrixCursor,
+        file: File,
+        documentId: String = file.absolutePath,
+        displayName: String = file.name,
+    ) {
         result.newRow().apply {
-            add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, file.absolutePath)
-            add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, file.name)
+            add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, documentId)
+            add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, displayName)
             add(DocumentsContract.Document.COLUMN_SIZE, file.length())
             add(
                 DocumentsContract.Document.COLUMN_FLAGS,
-                DocumentsContract.Document.FLAG_SUPPORTS_WRITE or DocumentsContract.Document.FLAG_SUPPORTS_DELETE
+                if (file.isDirectory) 0 else DocumentsContract.Document.FLAG_SUPPORTS_WRITE
             )
             add(DocumentsContract.Document.COLUMN_MIME_TYPE, getDocumentType(file))
         }

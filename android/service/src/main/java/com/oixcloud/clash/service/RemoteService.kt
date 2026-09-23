@@ -3,9 +3,6 @@ package com.oixcloud.clash.service
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import com.google.gson.JsonParser
-import com.oixcloud.clash.service.modules.WifiSsidMonitor
-import kotlinx.coroutines.withTimeout
 import com.oixcloud.clash.common.GlobalState
 import com.oixcloud.clash.common.BroadcastAction
 import com.oixcloud.clash.common.ServiceDelegate
@@ -18,64 +15,80 @@ import com.oixcloud.clash.service.State.intent
 import com.oixcloud.clash.service.State.runLock
 import com.oixcloud.clash.service.models.NotificationParams
 import com.oixcloud.clash.service.models.VpnOptions
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withTimeoutOrNull
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
+
+private const val EVENT_ACK_TIMEOUT_MILLIS = 5_000L
 
 class RemoteService : Service(),
     CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.Default) {
-    private val networkPolicy = NetworkPolicyReconciler(
-        setVpnExcluded = { excluded -> delegate?.useService { it.setNetworkExcluded(excluded) }?.getOrThrow() },
-        setCoreExcluded = ::setCoreNetworkExcluded,
-        onApplied = { State.networkExcluded = it },
-    )
+    private class EventForwarder(val events: Channel<String?>, val job: Job)
 
-    private val ssidMonitor by lazy { WifiSsidMonitor(this) {
-        launch {
-            runLock.withLock {
-                if (State.runTime == 0L) return@withLock
-                runCatching { applyNetworkPolicy() }.onFailure {
-                    GlobalState.log("Wi-Fi policy transition failed: ${it.javaClass.simpleName}")
-                }
-            }
-        }
-    } }
+    private val eventLock = Any()
+    private var eventForwarder: EventForwarder? = null
 
-    private suspend fun setCoreNetworkExcluded(excluded: Boolean) = withTimeout(5_000) {
-        suspendCancellableCoroutine<Unit> { continuation ->
-            Core.invokeMethod("{\"method\":\"setNetworkExcluded\",\"arguments\":$excluded}") { result ->
-                val response = runCatching { JsonParser.parseString(result).asJsonObject }.getOrNull()
-                val ok = response?.get("result")?.toString() == "true" && response.get("error") == null
-                val failure = if (ok) null else IllegalStateException("Core rejected Wi-Fi policy")
-                if (continuation.isActive) {
-                    continuation.resumeWith(if (failure == null) Result.success(Unit) else Result.failure(failure))
+    private fun replaceEventForwarder(listener: IEventInterface?) {
+        synchronized(eventLock) {
+            val previous = eventForwarder
+            eventForwarder = null
+            if (listener == null) {
+                Core.callSetEventListener(null)
+            } else {
+                // Go's single batcher goroutine calls back here and must never block.
+                val events = Channel<String?>(Channel.UNLIMITED)
+                val job = launch {
+                    val stalled = AtomicBoolean(false)
+                    for (event in events) forwardEvent(listener, event, stalled)
                 }
+                Core.callSetEventListener { events.trySend(it) }
+                eventForwarder = EventForwarder(events, job)
             }
+            previous?.events?.cancel()
+            previous?.job?.cancel()
         }
     }
 
-    private fun configureSsidMonitor() {
-        val options = State.options
-        if (options?.excludeSSIDs.isNullOrEmpty() && options?.excludeNetworks.isNullOrEmpty()) {
-            ssidMonitor.stop()
-        } else {
-            ssidMonitor.start()
-        }
-    }
-
-    private suspend fun applyNetworkPolicy(initial: Boolean = false) {
-        val ssid = if (State.options?.excludeSSIDs.isNullOrEmpty()) null else ssidMonitor.current()
-        val excluded = (ssid != null && State.options?.excludeSSIDs.orEmpty().contains(ssid)) ||
-            ssidMonitor.matchesNetworks(State.options?.excludeNetworks.orEmpty())
-        networkPolicy.apply(excluded, force = initial)
-        // When the list is cleared, keep the existing polling retry alive until
-        // both VPN and Core have resumed successfully.
-        configureSsidMonitor()
+    private suspend fun forwardEvent(
+        listener: IEventInterface,
+        event: String?,
+        stalled: AtomicBoolean,
+    ) {
+        runCatching {
+            val id = UUID.randomUUID().toString()
+            val chunks = event?.chunkedForAidl() ?: listOf()
+            for ((index, chunk) in chunks.withIndex()) {
+                val acknowledged = CompletableDeferred<Unit>()
+                listener.onEvent(
+                    id,
+                    chunk,
+                    index == chunks.lastIndex,
+                    object : IAckInterface.Stub() {
+                        override fun onAck() {
+                            stalled.set(false)
+                            acknowledged.complete(Unit)
+                        }
+                    },
+                )
+                // Stop pacing on a frozen or dead listener until it acknowledges again.
+                if (!stalled.get() &&
+                    withTimeoutOrNull(EVENT_ACK_TIMEOUT_MILLIS) { acknowledged.await() } == null
+                ) {
+                    stalled.set(true)
+                }
+            }
+        }.onFailure { if (it is CancellationException) throw it }
     }
 
     private fun handleStopService(result: IResultInterface) {
@@ -90,7 +103,7 @@ class RemoteService : Service(),
                 stopped.onSuccess {
                     clearBinding(currentDelegate)
                     State.runTime = 0
-                    ssidMonitor.stop()
+                    NetworkPolicyController.stop()
                 }.onFailure {
                     GlobalState.log("Background service stop failed: $it")
                 }
@@ -116,7 +129,7 @@ class RemoteService : Service(),
                 if (delegate !== currentDelegate) return@withLock
                 clearBinding(currentDelegate)
                 State.runTime = 0L
-                ssidMonitor.stop()
+                NetworkPolicyController.stop()
                 BroadcastAction.SERVICE_DESTROYED.sendBroadcast()
             }
         }
@@ -128,8 +141,8 @@ class RemoteService : Service(),
                 var startingService: IBaseService? = null
                 val started = runCatching {
                     State.options = options
-                    configureSsidMonitor()
-                    applyNetworkPolicy(initial = true)
+                    NetworkPolicyController.configure()
+                    NetworkPolicyController.applyPolicy(initial = true)
                     val nextIntent = when (options.enable) {
                         true -> VpnService::class.intent
                         false -> CommonService::class.intent
@@ -175,7 +188,7 @@ class RemoteService : Service(),
                     }
                     GlobalState.log("Background service start failed: $error")
                     clearBinding(delegate)
-                    ssidMonitor.stop()
+                    NetworkPolicyController.stop()
                     0L
                 }
                 result.onResult(State.runTime)
@@ -211,7 +224,6 @@ class RemoteService : Service(),
             initParamsString: String,
             setupParamsString: String,
             callback: ICallbackInterface,
-            onStarted: IVoidInterface
         ) {
             Core.quickSetup(initParamsString, setupParamsString) {
                 launch {
@@ -233,7 +245,6 @@ class RemoteService : Service(),
                     }
                 }
             }
-            onStarted()
         }
 
         override fun updateNotificationParams(params: NotificationParams?) {
@@ -256,32 +267,7 @@ class RemoteService : Service(),
 
         override fun setEventListener(eventListener: IEventInterface?) {
             GlobalState.log("RemoveEventListener ${eventListener == null}")
-            when (eventListener != null) {
-                true -> Core.callSetEventListener {
-                    launch {
-                        runCatching {
-                            val id = UUID.randomUUID().toString()
-                            val chunks = it?.chunkedForAidl() ?: listOf()
-                            for ((index, chunk) in chunks.withIndex()) {
-                                suspendCancellableCoroutine { cont ->
-                                    eventListener.onEvent(
-                                        id,
-                                        chunk,
-                                        index == chunks.lastIndex,
-                                        object : IAckInterface.Stub() {
-                                            override fun onAck() {
-                                                cont.resume(Unit)
-                                            }
-                                        },
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                false -> Core.callSetEventListener(null)
-            }
+            replaceEventForwarder(eventListener)
         }
 
 
@@ -297,9 +283,9 @@ class RemoteService : Service(),
                     if (!options?.excludeSSIDs.isNullOrEmpty() ||
                         !options?.excludeNetworks.isNullOrEmpty()
                     ) {
-                        configureSsidMonitor()
+                        NetworkPolicyController.configure()
                     }
-                    runCatching { applyNetworkPolicy() }.onFailure {
+                    runCatching { NetworkPolicyController.applyPolicy() }.onFailure {
                         GlobalState.log("Wi-Fi policy update failed: ${it.javaClass.simpleName}")
                     }
                 }
@@ -316,7 +302,6 @@ class RemoteService : Service(),
     }
 
     override fun onDestroy() {
-        ssidMonitor.stop()
         GlobalState.log("Remote service destroy")
         super.onDestroy()
     }
