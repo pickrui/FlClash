@@ -19,7 +19,7 @@ use std::process::{Child, Command, Stdio};
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
 use std::{io, thread};
-use warp::http::StatusCode;
+use warp::http::{HeaderMap, StatusCode};
 use warp::{Filter, Rejection, Reply};
 #[cfg(windows)]
 use windows_sys::Win32::Storage::FileSystem::FILE_SHARE_READ;
@@ -32,6 +32,11 @@ const PROTOCOL_VERSION_HEADER: &str = "x-flclash-helper-protocol";
 const PROTOCOL_VERSION: &str = "6";
 const EXPECTED_CORE_SHA256: &str = env!("CORE_SHA256");
 const LOG_CAPACITY: usize = 100;
+const MAX_REQUEST_BYTES: u64 = 4096;
+#[cfg(target_os = "linux")]
+const HELPER_AUTHORITY: &str = "flclash-helper";
+#[cfg(not(target_os = "linux"))]
+const HELPER_AUTHORITY: &str = "127.0.0.1:47890";
 const CORE_EXIT_TIMEOUT: Duration = Duration::from_millis(1500);
 const CORE_EXIT_POLL_INTERVAL: Duration = Duration::from_millis(20);
 
@@ -537,7 +542,44 @@ async fn ping_request(ping_params: PingParams) -> Result<warp::reply::Response, 
         }))
 }
 
+#[derive(Debug)]
+struct UntrustedRequest;
+
+impl warp::reject::Reject for UntrustedRequest {}
+
+async fn require_native_request(headers: HeaderMap) -> Result<(), Rejection> {
+    let host = headers.get("host").and_then(|value| value.to_str().ok());
+    if host != Some(HELPER_AUTHORITY)
+        || headers.contains_key("origin")
+        || headers.contains_key("sec-fetch-site")
+    {
+        return Err(warp::reject::custom(UntrustedRequest));
+    }
+    Ok(())
+}
+
 async fn handle_rejection(rejection: Rejection) -> Result<warp::reply::Response, Infallible> {
+    if rejection.find::<UntrustedRequest>().is_some() {
+        return Ok(error_response(
+            "untrustedRequest",
+            "Helper accepts only native local requests",
+            StatusCode::FORBIDDEN,
+        ));
+    }
+    if rejection.find::<warp::reject::PayloadTooLarge>().is_some() {
+        return Ok(error_response(
+            "requestTooLarge",
+            "Helper request body exceeds the size limit",
+            StatusCode::PAYLOAD_TOO_LARGE,
+        ));
+    }
+    if rejection.find::<warp::reject::LengthRequired>().is_some() {
+        return Ok(error_response(
+            "lengthRequired",
+            "Helper request body requires Content-Length",
+            StatusCode::LENGTH_REQUIRED,
+        ));
+    }
     if rejection.find::<warp::reject::InvalidQuery>().is_some() {
         return Ok(warp::reply::with_header(
             error_response(
@@ -584,12 +626,14 @@ pub(super) fn routes() -> impl Filter<Extract = (impl Reply,), Error = Infallibl
     let api_start = warp::post()
         .and(warp::path("start"))
         .and(warp::path::end())
+        .and(warp::body::content_length_limit(MAX_REQUEST_BYTES))
         .and(warp::body::json())
         .and_then(start_request);
 
     let api_stop = warp::post()
         .and(warp::path("stop"))
         .and(warp::path::end())
+        .and(warp::body::content_length_limit(MAX_REQUEST_BYTES))
         .and(warp::body::json())
         .and_then(stop_request);
 
@@ -598,10 +642,11 @@ pub(super) fn routes() -> impl Filter<Extract = (impl Reply,), Error = Infallibl
         .and(warp::path::end())
         .map(get_logs);
 
-    api_ping
-        .or(api_start)
-        .or(api_stop)
-        .or(api_logs)
+    // A loopback listener alone does not exclude browser requests or DNS rebinding.
+    warp::header::headers_cloned()
+        .and_then(require_native_request)
+        .untuple_one()
+        .and(api_ping.or(api_start).or(api_stop).or(api_logs))
         .recover(handle_rejection)
 }
 
@@ -656,6 +701,17 @@ mod tests {
     #[cfg(target_os = "linux")]
     const TEST_CORE_ADDRESS: &str = "/tmp/FlClashSocket_4821.sock";
 
+    fn helper_request() -> warp::test::RequestBuilder {
+        warp::test::request().header(
+            "host",
+            if cfg!(target_os = "linux") {
+                "flclash-helper"
+            } else {
+                "127.0.0.1:47890"
+            },
+        )
+    }
+
     fn spawn_placeholder_core() -> Child {
         #[cfg(windows)]
         let mut command = {
@@ -697,6 +753,82 @@ mod tests {
             session_id: session_id.to_string(),
             child: spawn_running_core(),
         });
+    }
+
+    #[tokio::test]
+    #[allow(clippy::await_holding_lock)]
+    async fn browser_start_cannot_replace_a_running_core() {
+        let _state = lock_process_state();
+        for origin in ["https://example.invalid", "null"] {
+            adopt_core("fedcba9876543210fedcba9876543210");
+            let response = helper_request()
+                .method("POST")
+                .path("/start")
+                .header("origin", origin)
+                .body(
+                    serde_json::to_vec(&StartParams {
+                        address: TEST_CORE_ADDRESS.to_string(),
+                        session_id: "0123456789abcdef0123456789abcdef".to_string(),
+                    })
+                    .unwrap(),
+                )
+                .reply(&routes())
+                .await;
+            let running = {
+                let mut managed = MANAGED_CORE.lock().unwrap();
+                let running = managed.as_mut().is_some_and(|core| {
+                    core.session_id == "fedcba9876543210fedcba9876543210"
+                        && core.child.try_wait().unwrap().is_none()
+                });
+                release_managed_core(&mut managed).unwrap();
+                running
+            };
+            assert!(running, "a browser request stopped the owned Core");
+            assert_eq!(response.status(), StatusCode::FORBIDDEN);
+        }
+    }
+
+    #[tokio::test]
+    async fn foreign_host_and_browser_metadata_cannot_read_logs() {
+        for request in [
+            helper_request().header("host", "example.invalid:47890"),
+            helper_request().header("host", "127.0.0.1:47890.example.invalid"),
+            helper_request().header("sec-fetch-site", "same-origin"),
+            helper_request().header("sec-fetch-site", "none"),
+        ] {
+            let response = request.path("/logs").reply(&routes()).await;
+            assert_eq!(response.status(), StatusCode::FORBIDDEN);
+        }
+        let response = warp::test::request().path("/logs").reply(&routes()).await;
+        assert_eq!(response.status(), StatusCode::FORBIDDEN);
+    }
+
+    #[tokio::test]
+    async fn oversized_control_bodies_are_rejected_before_json_parsing() {
+        for path in ["/start", "/stop"] {
+            let response = helper_request()
+                .method("POST")
+                .path(path)
+                .header("content-type", "application/json")
+                .body(format!("{}{{}}", " ".repeat(4096)))
+                .reply(&routes())
+                .await;
+            assert_eq!(response.status(), StatusCode::PAYLOAD_TOO_LARGE);
+        }
+    }
+
+    #[tokio::test]
+    async fn control_bodies_require_a_bounded_content_length() {
+        for path in ["/start", "/stop"] {
+            let response = helper_request()
+                .method("POST")
+                .path(path)
+                .header("content-type", "application/json")
+                .header("transfer-encoding", "chunked")
+                .reply(&routes())
+                .await;
+            assert_eq!(response.status(), StatusCode::LENGTH_REQUIRED);
+        }
     }
 
     #[test]
@@ -759,7 +891,7 @@ mod tests {
 
     #[tokio::test]
     async fn ping_is_available_without_authentication() {
-        let response = warp::test::request()
+        let response = helper_request()
             .method("GET")
             .path(&format!("/ping?coreSha256={EXPECTED_CORE_SHA256}"))
             .reply(&routes())
@@ -774,7 +906,7 @@ mod tests {
 
     #[tokio::test]
     async fn ping_requires_the_core_sha256_query_parameter() {
-        let response = warp::test::request()
+        let response = helper_request()
             .method("GET")
             .path("/ping")
             .reply(&routes())
@@ -796,7 +928,7 @@ mod tests {
         };
         assert_ne!(requested, EXPECTED_CORE_SHA256);
 
-        let response = warp::test::request()
+        let response = helper_request()
             .method("GET")
             .path(&format!("/ping?coreSha256={requested}"))
             .reply(&routes())
@@ -813,7 +945,7 @@ mod tests {
 
     #[tokio::test]
     async fn logs_are_available_without_authentication() {
-        let response = warp::test::request()
+        let response = helper_request()
             .method("GET")
             .path("/logs")
             .reply(&routes())
@@ -829,7 +961,7 @@ mod tests {
 
     #[tokio::test]
     async fn start_rejects_a_caller_supplied_core_argument() {
-        let response = warp::test::request()
+        let response = helper_request()
             .method("POST")
             .path("/start")
             .header("content-type", "application/json")
@@ -853,7 +985,7 @@ mod tests {
             child: spawn_placeholder_core(),
         });
 
-        let response = warp::test::request()
+        let response = helper_request()
             .method("POST")
             .path("/start")
             .json(&StartParams {
@@ -876,7 +1008,7 @@ mod tests {
         let session_id = "0123456789abcdef0123456789abcdef";
         adopt_core(session_id);
 
-        let response = warp::test::request()
+        let response = helper_request()
             .method("POST")
             .path("/stop")
             .json(&StopParams {
@@ -898,7 +1030,7 @@ mod tests {
         let _state = lock_process_state();
         adopt_core("fedcba9876543210fedcba9876543210");
 
-        let response = warp::test::request()
+        let response = helper_request()
             .method("POST")
             .path("/stop")
             .json(&StopParams {
@@ -942,7 +1074,7 @@ mod tests {
 
     #[tokio::test]
     async fn start_rejects_an_invalid_session_before_core_verification() {
-        let response = warp::test::request()
+        let response = helper_request()
             .method("POST")
             .path("/start")
             .json(&StartParams {
@@ -983,7 +1115,7 @@ mod tests {
     #[allow(clippy::await_holding_lock)]
     async fn stop_is_available_without_authentication() {
         let _state = lock_process_state();
-        let response = warp::test::request()
+        let response = helper_request()
             .method("POST")
             .path("/stop")
             .json(&StopParams {
@@ -1001,9 +1133,10 @@ mod tests {
 
     #[tokio::test]
     async fn stop_requires_a_session_json_body() {
-        let response = warp::test::request()
+        let response = helper_request()
             .method("POST")
             .path("/stop")
+            .body("{}")
             .reply(&routes())
             .await;
 
@@ -1014,7 +1147,7 @@ mod tests {
 
     #[tokio::test]
     async fn stop_rejects_unknown_fields() {
-        let response = warp::test::request()
+        let response = helper_request()
             .method("POST")
             .path("/stop")
             .header("content-type", "application/json")

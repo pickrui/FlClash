@@ -89,13 +89,10 @@ class Window implements WindowPort {
 
   Future<void> _startWakeupServer() async {
     try {
-      final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
-      final file = File(await appPath.wakeupFilePath);
-      await file.writeAsString(server.port.toString(), flush: true);
-      server.listen((socket) {
-        socket.destroy();
-        show();
-      });
+      await SingleInstanceWakeup.listen(
+        endpoint: File(await appPath.wakeupFilePath),
+        onWakeup: show,
+      );
     } catch (_) {}
   }
 
@@ -110,14 +107,7 @@ class Window implements WindowPort {
       return;
     }
     try {
-      final content = await File(await appPath.wakeupFilePath).readAsString();
-      final port = int.parse(content.trim());
-      final socket = await Socket.connect(
-        InternetAddress.loopbackIPv4,
-        port,
-        timeout: const Duration(seconds: 1),
-      );
-      socket.destroy();
+      await SingleInstanceWakeup.notify(File(await appPath.wakeupFilePath));
     } catch (_) {}
   }
 
