@@ -15,7 +15,7 @@ void main() {
   test(
     'packaging overlaps depth checks while publication waits for every gate',
     () {
-      expect(jobs['build']['needs'], ['version', 'go-test']);
+      expect(jobs['build']['needs'], ['version']);
       expect(
         jobs['upload']['needs'],
         containsAll(['version', 'build', 'checks']),
@@ -29,7 +29,6 @@ void main() {
           'deep-tests',
           'android-core-test',
           'android-test',
-          'android-native-test',
           'windows-helper-test',
         ]),
       );

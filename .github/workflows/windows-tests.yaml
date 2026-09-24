@@ -52,17 +52,27 @@ jobs:
           dart test test/go_build_test.dart test/windows_cache_test.dart
       - name: Skip native build hooks for Windows unit tests
         run: dart tool/set_native_build_assets.dart false
-      - name: Check Windows process liveness and Helper client
-        run: flutter test --no-pub test/core/desktop/process_probe_test.dart test/core/desktop/helper_client_test.dart test/core/desktop/launch_policy_test.dart test/widgets/init_error_screen_test.dart
-
-      - name: Check Windows window wakeup and visibility
-        run: flutter test --no-pub test/common/single_instance_wakeup_test.dart test/common/window_test.dart test/common/window_visibility_test.dart test/common/launch_test.dart
-
-      - name: Check Windows configuration recovery and DPAPI
-        run: flutter test --no-pub test/common/windows_secure_storage_test.dart test/common/config_reset_test.dart test/common/config_backup_test.dart test/plugins/window_manager_patch_test.dart test/widgets/config_recovery_test.dart
-
-      - name: Check Windows diagnostics and background updates
-        run: flutter test --no-pub test/services/network_diagnostic_platform_test.dart test/services/network_diagnostic_proxy_channel_test.dart test/common/update_download_task_test.dart test/widgets/update_download_page_test.dart
+      - name: Check Windows runtime and recovery
+        shell: bash
+        run: |
+          flutter test --no-pub \
+            test/core/desktop/process_probe_test.dart \
+            test/core/desktop/helper_client_test.dart \
+            test/core/desktop/launch_policy_test.dart \
+            test/widgets/init_error_screen_test.dart \
+            test/common/single_instance_wakeup_test.dart \
+            test/common/window_test.dart \
+            test/common/window_visibility_test.dart \
+            test/common/launch_test.dart \
+            test/common/windows_secure_storage_test.dart \
+            test/common/config_reset_test.dart \
+            test/common/config_backup_test.dart \
+            test/plugins/window_manager_patch_test.dart \
+            test/widgets/config_recovery_test.dart \
+            test/services/network_diagnostic_platform_test.dart \
+            test/services/network_diagnostic_proxy_channel_test.dart \
+            test/common/update_download_task_test.dart \
+            test/widgets/update_download_page_test.dart
 
       - name: Check Windows native proxy shutdown handling
         shell: pwsh

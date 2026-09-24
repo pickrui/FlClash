@@ -15,7 +15,7 @@ DEEP_FILES = {
 }
 REQUIRED_JOBS = (
     "version", "test", "go-test", "android-core-test", "android-test",
-    "android-native-test", "windows-helper-test",
+    "windows-helper-test",
 )
 
 

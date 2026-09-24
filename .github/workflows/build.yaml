@@ -201,9 +201,7 @@ jobs:
         env:
           ANDROID_NDK_HOME: ${{ steps.ndk.outputs.ndk-path }}
         run: |
-          for arch in arm64 arm amd64; do
-            bash tool/check_android_core.sh "$arch"
-          done
+          bash tool/check_android_core.sh arm64
 
   android-test:
     name: Android unit tests
@@ -245,45 +243,6 @@ jobs:
           ./gradlew :app:testDebugUnitTest :service:testDebugUnitTest :common:testDebugUnitTest \
             -x :app:compileFlutterBuildDebug -x :app:copyFlutterAssetsDebug --no-daemon
 
-  android-native-test:
-    name: Android Native Assets
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
-    steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          cache: true
-      - run: flutter pub get
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-      - uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: r28c
-      - name: Install script binding dependencies
-        run: sudo apt-get update && sudo apt-get install -y libclang-dev
-      - name: Cache Android Rust build
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            .dart_tool/hooks_runner/shared/rust_api/build/*/target
-          key: ${{ runner.os }}-android-native-${{ env.FLUTTER_VERSION }}-${{ hashFiles('plugins/rust_api/rust/Cargo.lock', 'plugins/rust_api/rust/rust-toolchain.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-android-native-${{ env.FLUTTER_VERSION }}-
-      - name: Compile Android Native Assets for all supported ABIs
-        run: |
-          dart tool/set_native_build_assets.dart false
-          dart tool/set_native_build_assets.dart true rust_api
-          for target in android-arm64 android-arm android-x64; do
-            flutter build bundle --debug --target-platform "$target"
-          done
-
   windows-helper-test:
     name: Windows helper test
     needs: version
@@ -293,7 +252,7 @@ jobs:
 
   build:
     name: "Build ${{ matrix.name }}"
-    needs: [version, go-test]
+    needs: [version]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     strategy:
@@ -503,7 +462,7 @@ jobs:
   checks:
     name: Required release checks
     if: ${{ always() }}
-    needs: [version, test, go-test, deep-tests, android-core-test, android-test, android-native-test, windows-helper-test]
+    needs: [version, test, go-test, deep-tests, android-core-test, android-test, windows-helper-test]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

@@ -13,6 +13,18 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late Directory directory;
   late PathProviderPlatform originalPaths;
+  final readClients = <_Adapter>[];
+
+  _Adapter readAdapter(Future<ResponseBody> Function(RequestOptions) respond) {
+    final adapter = _Adapter(respond);
+    readClients.add(adapter);
+    return adapter;
+  }
+
+  Future<void> waitForReads() => Future.wait(
+    readClients.map((client) => client.whenClosed),
+  ).timeout(const Duration(seconds: 5));
+
   final archive = ZipEncoder().encode(
     Archive()..addFile(ArchiveFile.string('config.json', '{"version":2}')),
   );
@@ -22,7 +34,9 @@ void main() {
     originalPaths = PathProviderPlatform.instance;
     PathProviderPlatform.instance = _Paths(directory.path);
   });
+  setUp(readClients.clear);
   tearDown(() async {
+    await waitForReads();
     for (final file in directory.listSync()) {
       await file.delete(recursive: true);
     }
@@ -36,12 +50,11 @@ void main() {
     'authenticated reads race and only a validated ZIP is retained',
     () async {
       final requests = <(String, String)>[];
-      final clients = <_Adapter>[];
       final dav = DAVClient(
         _props,
         resolveRoutes: (_) => ['direct', 'proxy'],
         createAdapter: (route) {
-          final adapter = _Adapter((options) async {
+          return readAdapter((options) async {
             requests.add((route, options.method));
             if (options.headers['authorization'] == null) return _challenge();
             expect(options.headers['authorization'], startsWith('Basic '));
@@ -52,15 +65,13 @@ void main() {
                   )
                 : ResponseBody.fromBytes([], 200);
           });
-          clients.add(adapter);
-          return adapter;
         },
       );
       expect(await dav.pingCompleter.future, true);
       final path = await dav.restore();
       // The winning read returns as soon as it is validated. Cancelled
       // branches may still be deleting their temporary files before closing.
-      await Future.wait(clients.map((client) => client.whenClosed));
+      await waitForReads();
       expect(await File(path).readAsBytes(), archive);
       expect(directory.listSync().map((file) => file.path), [path]);
       expect(
@@ -71,7 +82,7 @@ void main() {
         {'direct', 'proxy'},
       );
       expect(requests.map((entry) => entry.$2), isNot(contains('MKCOL')));
-      expect(clients.every((client) => client.closed), true);
+      expect(readClients.every((client) => client.closed), true);
     },
   );
 
@@ -84,7 +95,7 @@ void main() {
       final dav = DAVClient(
         _props,
         resolveRoutes: (_) => ['direct', 'proxy'],
-        createAdapter: (route) => _Adapter((options) async {
+        createAdapter: (route) => readAdapter((options) async {
           if (options.method != 'GET') return ResponseBody.fromBytes([], 200);
           if (++reads == 2) bothReading.complete();
           if (route == 'proxy') return delayed.future;
@@ -95,7 +106,7 @@ void main() {
       expect(await dav.pingCompleter.future, true);
       final winner = await dav.restore();
       delayed.complete(ResponseBody.fromBytes(archive, 200));
-      await Future<void>.delayed(const Duration(milliseconds: 30));
+      await waitForReads();
       expect(await File(winner).readAsBytes(), archive);
       expect(directory.listSync().map((file) => file.path), [winner]);
     },
@@ -114,11 +125,8 @@ void main() {
     final dav = DAVClient(
       _props,
       resolveRoutes: (_) => ['direct', 'proxy'],
-      createAdapter: (route) => _Adapter((options) async {
+      createAdapter: (route) => readAdapter((options) async {
         if (options.method != 'GET') return ResponseBody.fromBytes([], 200);
-        if (route == 'proxy') {
-          await Future<void>.delayed(const Duration(milliseconds: 50));
-        }
         return ResponseBody.fromBytes(
           route == 'direct' ? damaged : archive,
           200,
@@ -127,6 +135,7 @@ void main() {
     );
     expect(await dav.pingCompleter.future, true);
     final winner = await dav.restore();
+    await waitForReads();
     expect(await File(winner).readAsBytes(), archive);
     expect(directory.listSync().map((file) => file.path), [winner]);
   });
@@ -138,7 +147,7 @@ void main() {
       final dav = DAVClient(
         _props,
         resolveRoutes: (_) => ['direct'],
-        createAdapter: (_) => _Adapter((options) async {
+        createAdapter: (_) => readAdapter((options) async {
           hosts.add(options.uri.host);
           if (options.headers['authorization'] == null) return _challenge();
           if (options.method == 'GET') {
@@ -155,6 +164,7 @@ void main() {
       );
       expect(await dav.pingCompleter.future, true);
       await expectLater(dav.restore(), throwsA(isA<DioException>()));
+      await waitForReads();
       expect(hosts.toSet(), {'dav.invalid'});
       expect(directory.listSync(), isEmpty);
     },
@@ -166,7 +176,7 @@ void main() {
       final dav = DAVClient(
         _props,
         resolveRoutes: (_) => ['direct', 'proxy'],
-        createAdapter: (_) => _Adapter((_) async => _challenge()),
+        createAdapter: (_) => readAdapter((_) async => _challenge()),
       );
       expect(await dav.pingCompleter.future, false);
       await expectLater(
@@ -179,6 +189,7 @@ void main() {
           ),
         ),
       );
+      await waitForReads();
       expect(directory.listSync(), isEmpty);
     },
   );
@@ -193,7 +204,7 @@ void main() {
         // the full suite while still bounding an idle download.
         readTimeout: const Duration(seconds: 1),
         resolveRoutes: (_) => ['direct', 'proxy'],
-        createAdapter: (_) => _Adapter((options) async {
+        createAdapter: (_) => readAdapter((options) async {
           if (options.method != 'GET') return ResponseBody.fromBytes([], 200);
           return ResponseBody(
             StreamController<Uint8List>(onCancel: () => cancelled++).stream,
@@ -203,7 +214,7 @@ void main() {
       );
       expect(await dav.pingCompleter.future, true);
       await expectLater(dav.restore(), throwsA(isA<TimeoutException>()));
-      await Future<void>.delayed(Duration.zero);
+      await waitForReads();
       expect(cancelled, 2);
       expect(directory.listSync(), isEmpty);
     },
@@ -213,7 +224,7 @@ void main() {
     final dav = DAVClient(
       _props,
       resolveRoutes: (_) => ['direct', 'proxy'],
-      createAdapter: (_) => _Adapter((options) async {
+      createAdapter: (_) => readAdapter((options) async {
         expect(options.method, 'OPTIONS');
         return ResponseBody.fromBytes([], 200);
       }),
@@ -239,7 +250,7 @@ void main() {
       _props,
       resolveRoutes: (_) => ['direct'],
       createAdapter: (_) =>
-          _Adapter((_) async => ResponseBody.fromBytes([], 200)),
+          readAdapter((_) async => ResponseBody.fromBytes([], 200)),
     );
     await dav.pingCompleter.future;
     var uploads = 0;
