@@ -10,6 +10,7 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Shanghai
+      - NO_WEBCAM=true
     ports:
       - "3000:3000"
       - "3001:3001"

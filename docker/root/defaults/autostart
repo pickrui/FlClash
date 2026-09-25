@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Selkies peripheral interposers trip Core's library-injection guard.
+unset LD_PRELOAD LD_AUDIT DYLD_INSERT_LIBRARIES
+
 exec dbus-run-session -- bash -c '
 eval "$(printf "\n" | gnome-keyring-daemon --unlock --components=secrets)"
 exec /usr/share/FlClash/FlClash

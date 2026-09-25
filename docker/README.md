@@ -20,7 +20,8 @@ Desktop, not to an extra VM bundled with FlClash.
 FlClash is a graphical client, so an active browser session still requires
 compositing and video encoding. It will use more resources than a headless
 Clash/Mihomo container. The image defaults to 30 FPS with CSS scaling and
-disables audio, microphone, gamepad, second-screen, and nested-Docker features.
+disables audio, microphone, gamepad, webcam, second-screen, and nested-Docker
+features.
 
 The image includes the complete GNOME Keyring Secret Service and creates a
 dedicated session D-Bus before FlClash starts. Secure credentials such as the
@@ -238,6 +239,26 @@ docker compose -f docker/docker-compose.yml logs --tail=200 flclash
 - **The browser cannot connect:** confirm that the container is running and use
   `https://<host>:3001`. Accept the self-signed certificate warning for trusted
   local access.
+- **Core startup times out after 10 seconds (`IPC Ready` without `IPC Connected`):**
+  Selkies webcam forwarding can inject `selkies_v4l2_interposer.so` through
+  `LD_PRELOAD`, causing Core to exit with `library injection detected` before
+  connecting. The image disables webcam forwarding and clears library-injection
+  variables in the FlClash launcher. For an existing image, add
+  `NO_WEBCAM=true` to the service's `environment` (already included in the supplied
+  Compose file), then recreate it:
+
+  ```yaml
+  environment:
+    - NO_WEBCAM=true
+  ```
+
+  ```bash
+  docker compose -f docker/docker-compose.yml up -d --force-recreate flclash
+  ```
+
+  On QNAP Container Station, add the same environment variable and recreate the
+  container with its existing `/config` volume. A restart alone does not apply
+  changed environment settings. Keep `NO_GAMEPAD=true` enabled as well.
 - **TUN mode reports a permission or device error:** verify that
   `/dev/net/tun` exists and that both `NET_ADMIN` and the device mapping are
   present.

@@ -17,7 +17,7 @@ Docker Desktop 会为所有 Linux 容器运行一个共享的 Linux 虚拟机；
 
 FlClash 是图形客户端，浏览器连接时仍需合成并编码应用画面，因此资源占用会高于
 纯命令行的 Clash/Mihomo 容器。镜像默认将串流限制为 30 FPS、启用 CSS 缩放，并
-关闭音频、麦克风、手柄、第二屏和嵌套 Docker，以降低 CPU 与内存开销。
+关闭音频、麦克风、手柄、摄像头、第二屏和嵌套 Docker，以降低 CPU 与内存开销
 
 镜像包含完整的 GNOME Keyring Secret Service，并在 FlClash 启动前创建独立的
 会话 D-Bus。oixCloud 等安全凭据保存在 `/config/.local/share/keyrings`，容器更新
@@ -218,6 +218,24 @@ docker compose -f docker/docker-compose.yml logs --tail=200 flclash
 
 - **浏览器无法连接：** 确认容器正在运行，并访问
   `https://<宿主机地址>:3001`。在可信局域网中可接受自签名证书警告。
+- **Core 启动 10 秒后超时，只有 `IPC Ready` 没有 `IPC Connected`：**
+  Selkies 摄像头转发可能通过 `LD_PRELOAD` 注入 `selkies_v4l2_interposer.so`，
+  导致 Core 在连接前以 `library injection detected` 退出
+  镜像已默认关闭摄像头转发，并在 FlClash 启动脚本中清除动态库注入变量
+  对于已有镜像，在服务的 `environment` 中添加 `NO_WEBCAM=true`
+  （仓库提供的 Compose 文件已包含），然后重建容器：
+
+  ```yaml
+  environment:
+    - NO_WEBCAM=true
+  ```
+
+  ```bash
+  docker compose -f docker/docker-compose.yml up -d --force-recreate flclash
+  ```
+
+  QNAP Container Station 用户添加同名环境变量后，沿用原来的 `/config` 卷重建容器
+  仅重启不会应用新的环境配置，同时应保留 `NO_GAMEPAD=true`
 - **TUN 模式提示权限或设备错误：** 确认 `/dev/net/tun` 存在，并同时配置
   `NET_ADMIN` 和设备映射。
 - **浏览器界面空白或应用立即退出：** 较旧的内核或 libseccomp 版本可能需要添加
