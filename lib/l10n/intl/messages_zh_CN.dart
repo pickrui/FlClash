@@ -116,11 +116,13 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m46(count) => "${count} 秒";
 
-  static String m47(version) => "版本号：${version}";
+  static String m47(build) => "构建号：${build}";
 
-  static String m48(label) => "${label}必须为URL";
+  static String m48(version) => "版本号：${version}";
 
-  static String m49(count) => "${count} 年前";
+  static String m49(label) => "${label}必须为URL";
+
+  static String m50(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1345,6 +1347,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
       "AppImage 无法自动安装，请用下载的文件替换当前程序，已打开文件所在目录",
     ),
+    "updateBuildNumber": m47,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage("取消下载"),
     "updateDownloadBackground": MessageLookupByLibrary.simpleMessage("移到后台下载"),
     "updateDownloadBrowser": MessageLookupByLibrary.simpleMessage("使用浏览器下载"),
@@ -1367,12 +1370,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseNotesFailed": MessageLookupByLibrary.simpleMessage(
       "更新日志加载失败，请重试",
     ),
-    "updateVersionNumber": m47,
+    "updateVersionNumber": m48,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("升级套餐"),
     "upload": MessageLookupByLibrary.simpleMessage("上传"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("通过URL获取配置文件"),
-    "urlTip": m48,
+    "urlTip": m49,
     "useHosts": MessageLookupByLibrary.simpleMessage("使用Hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("使用系统Hosts"),
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("已用流量"),
@@ -1392,7 +1395,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "vpnTip": MessageLookupByLibrary.simpleMessage("重启VPN后改变生效"),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV配置"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("白名单模式"),
-    "yearsAgo": m49,
+    "yearsAgo": m50,
     "zh_CN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };
 }

@@ -934,5 +934,13 @@
       }
     }
   },
+  "updateBuildNumber": "Номер сборки: {build}",
+  "@updateBuildNumber": {
+    "placeholders": {
+      "build": {
+        "type": "String"
+      }
+    }
+  },
   "updateReleaseNotesFailed": "Не удалось загрузить список изменений. Повторите попытку."
 }

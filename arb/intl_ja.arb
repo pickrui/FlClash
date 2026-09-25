@@ -934,5 +934,13 @@
       }
     }
   },
+  "updateBuildNumber": "ビルド番号: {build}",
+  "@updateBuildNumber": {
+    "placeholders": {
+      "build": {
+        "type": "String"
+      }
+    }
+  },
   "updateReleaseNotesFailed": "更新履歴を読み込めませんでした。再試行してください"
 }

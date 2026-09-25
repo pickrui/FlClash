@@ -934,5 +934,13 @@
       }
     }
   },
+  "updateBuildNumber": "构建号：{build}",
+  "@updateBuildNumber": {
+    "placeholders": {
+      "build": {
+        "type": "String"
+      }
+    }
+  },
   "updateReleaseNotesFailed": "更新日志加载失败，请重试"
 }

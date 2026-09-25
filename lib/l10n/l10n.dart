@@ -7974,6 +7974,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Build: {build}`
+  String updateBuildNumber(String build) {
+    return Intl.message(
+      'Build: $build',
+      name: 'updateBuildNumber',
+      desc: '',
+      args: [build],
+    );
+  }
+
   /// `Could not load release notes. Please try again.`
   String get updateReleaseNotesFailed {
     return Intl.message(

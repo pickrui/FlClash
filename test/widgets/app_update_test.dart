@@ -83,6 +83,43 @@ void main() {
     expect(action.opened, isEmpty);
   });
 
+  testWidgets('version API metadata reaches the details header', (
+    tester,
+  ) async {
+    final release = AppUpdateInfo.fromVersionData({
+      'version': '2026092110',
+      'full_version': '0.8.98+2026092110',
+      'release_notes': 'Offered release notes',
+    });
+    await _openDetails(
+      tester,
+      release,
+      (_) {},
+      locale: const Locale('zh', 'CN'),
+    );
+    expect(find.text('v0.8.98'), findsNothing);
+    expect(find.text('版本号：0.8.98+2026092110').hitTestable(), findsOneWidget);
+    expect(find.text(release.releaseNotes!), findsOneWidget);
+  });
+
+  for (final locale in AppLocalizations.delegate.supportedLocales) {
+    testWidgets('legacy API still shows the build in $locale', (tester) async {
+      final release = AppUpdateInfo.fromVersionData({
+        'version': '2026092110',
+        'release_notes': 'Legacy release notes',
+      });
+      await _openDetails(tester, release, (_) {}, locale: locale);
+      expect(
+        find
+            .text(AppLocalizations.current.updateBuildNumber('2026092110'))
+            .hitTestable(),
+        findsOneWidget,
+      );
+      expect(find.text(release.releaseNotes!), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   for (final choice in ['download', 'later', 'back']) {
     testWidgets(
       'details start the download in place and close only for $choice',
@@ -94,7 +131,7 @@ void main() {
           result = value;
           returned = true;
         }, onDownload: () async => downloads++);
-        expect(find.text('v0.8.98'), findsOneWidget);
+        expect(find.text('v0.8.98'), findsNothing);
         expect(
           find.text(
             AppLocalizations.current.updateVersionNumber('0.8.98+2026092110'),
@@ -144,7 +181,7 @@ void main() {
     );
     expect(calls, 1);
     expect(find.byType(LinearProgressIndicator), findsOneWidget);
-    expect(find.text('v0.8.98'), findsOneWidget);
+    expect(find.text('v0.8.98'), findsNothing);
     expect(
       find.text(
         AppLocalizations.current.updateVersionNumber('0.8.98+2026092110'),

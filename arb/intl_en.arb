@@ -934,5 +934,13 @@
       }
     }
   },
+  "updateBuildNumber": "Build: {build}",
+  "@updateBuildNumber": {
+    "placeholders": {
+      "build": {
+        "type": "String"
+      }
+    }
+  },
   "updateReleaseNotesFailed": "Could not load release notes. Please try again."
 }

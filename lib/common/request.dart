@@ -20,9 +20,26 @@ class AppUpdateInfo {
     this.remoteBuildNumber = 0,
   });
 
+  factory AppUpdateInfo.fromVersionData(Object? data) {
+    final value = data is Map<String, dynamic> ? data['version'] : data;
+    if (value is! String || value.trim().isEmpty) {
+      throw const FormatException('Missing version');
+    }
+    final version = value.trim();
+    final buildNumber = int.tryParse(version.split('+').last) ?? 0;
+    final tagName = releaseTagNameFromVersionData(data);
+    return AppUpdateInfo(
+      version: tagName != null && buildNumber > 0
+          ? '${tagName.substring(1)}+$buildNumber'
+          : version,
+      remoteBuildNumber: buildNumber,
+      releaseNotes: extractEmbeddedReleaseNotes(data, tagName),
+    );
+  }
+
   final String? releaseNotes;
 
-  /// Full version of the offered release, shown by the discovery notice.
+  /// Offered release version, or the build alone for legacy responses.
   final String version;
 
   /// Build number of the offered release.
@@ -54,6 +71,7 @@ String? releaseTagNameFromVersionData(Object? versionData) {
   }
   if (versionData is! Map<String, dynamic>) return null;
   for (final key in [
+    'full_version',
     'tag_name',
     'tagName',
     'version_name',
@@ -434,41 +452,21 @@ class Request {
             if (data is! Map<String, dynamic> || data['ret'] != 200) {
               throw const FormatException('Invalid version response');
             }
-            final value = data['data'];
-            final version = value is Map<String, dynamic>
-                ? value['version']
-                : value;
-            if (version is! String || version.trim().isEmpty) {
-              throw const FormatException('Missing version');
-            }
+            AppUpdateInfo.fromVersionData(data['data']);
           },
         );
         if (response.statusCode != 200) continue;
         final data = jsonDecode(response.data ?? '');
         if (data is! Map<String, dynamic> || data['ret'] != 200) continue;
 
-        final versionData = data['data'];
-        final String? remoteVersion = versionData is Map<String, dynamic>
-            ? versionData['version'] as String?
-            : versionData as String?;
-
-        if (remoteVersion == null) continue;
-
+        final info = AppUpdateInfo.fromVersionData(data['data']);
         final currentBuildNumber =
             int.tryParse(globalState.packageInfo.buildNumber) ?? 0;
-        final remoteBuildNumber =
-            int.tryParse(remoteVersion.split('+').last) ?? 0;
-
-        final hasUpdate = remoteBuildNumber > currentBuildNumber;
+        final hasUpdate = info.remoteBuildNumber > currentBuildNumber;
 
         if (!hasUpdate) return null;
 
-        final tagName = releaseTagNameFromVersionData(versionData);
-        return AppUpdateInfo(
-          releaseNotes: extractEmbeddedReleaseNotes(versionData, tagName),
-          version: remoteVersion.trim(),
-          remoteBuildNumber: remoteBuildNumber,
-        );
+        return info;
       } catch (_) {
         commonPrint.log(
           'checkForUpdate failed for $domain',

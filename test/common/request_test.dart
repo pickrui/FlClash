@@ -11,6 +11,55 @@ void main() {
     expect(releaseTagNameFromVersionData({'tag_name': 'v0.8.96'}), 'v0.8.96');
   });
 
+  test('version API preserves the full version beside the legacy build', () {
+    final info = AppUpdateInfo.fromVersionData({
+      'version': '2026092110',
+      'full_version': '0.8.98+2026092110',
+      'release_notes': '## v0.8.98\n- Offered change\n## v0.8.97\n- Old change',
+    });
+    expect(info.version, '0.8.98+2026092110');
+    expect(info.remoteBuildNumber, 2026092110);
+    expect(info.releaseNotes, '- Offered change');
+    expect(releaseTagNameFromVersionData(info.version), 'v0.8.98');
+  });
+
+  for (final key in ['tag_name', 'tagName', 'version_name', 'versionName']) {
+    test('separate $key survives version response parsing', () {
+      final info = AppUpdateInfo.fromVersionData({
+        'version': '2026092110',
+        key: 'v0.8.98',
+      });
+      expect(info.version, '0.8.98+2026092110');
+      expect(info.remoteBuildNumber, 2026092110);
+    });
+  }
+
+  test('legacy full and build-only versions remain supported', () {
+    for (final version in ['0.8.98+2026092110', '2026092110']) {
+      for (final data in [
+        version,
+        {'version': '  $version  '},
+      ]) {
+        final info = AppUpdateInfo.fromVersionData(data);
+        expect(info.version, version);
+        expect(info.remoteBuildNumber, 2026092110);
+      }
+    }
+  });
+
+  test('missing or invalid version fields are rejected', () {
+    for (final data in [
+      null,
+      '',
+      '  ',
+      2026092110,
+      {},
+      {'version': null},
+    ]) {
+      expect(() => AppUpdateInfo.fromVersionData(data), throwsFormatException);
+    }
+  });
+
   test('extractEmbeddedReleaseNotes accepts supported API fields', () {
     expect(
       extractEmbeddedReleaseNotes({
