@@ -6,7 +6,10 @@ import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import 'cloud_layout.dart';
 
 class CloudProfileCard extends ConsumerStatefulWidget {
   final CloudProfile profile;
@@ -104,6 +107,9 @@ class _CloudProfileCardState extends ConsumerState<CloudProfileCard> {
         .firstOrNull;
     final isOverseas = _params.level == NetworkLevel.overseas;
     final isEmergency = _params.level == NetworkLevel.emergency;
+    final secondary = context.textTheme.bodySmall?.copyWith(
+      color: context.colorScheme.onSurfaceVariant,
+    );
 
     return CommonCard(
       child: Padding(
@@ -113,20 +119,13 @@ class _CloudProfileCardState extends ConsumerState<CloudProfileCard> {
             Row(
               children: [
                 InkWell(
+                  borderRadius: BorderRadius.circular(14),
                   onTap: () => launchUrl(
                     Uri.parse('https://${Secrets.primarySiteDomain}/user'),
                   ),
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: context.colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      Icons.account_circle,
-                      color: context.colorScheme.onPrimaryContainer,
-                      size: 32,
-                    ),
+                  child: const CloudIconTile(
+                    icon: Icons.account_circle,
+                    size: 52,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -138,14 +137,16 @@ class _CloudProfileCardState extends ConsumerState<CloudProfileCard> {
                         profile.subscription,
                         style: context.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
+                          color: context.colorScheme.onSurface,
                         ),
                       ),
-                      Text(
-                        AppLocalizations.current.expireDate(
-                          profile.expireTime.toString(),
+                      if (_expiryText(profile) case final expiry?)
+                        Text(
+                          AppLocalizations.current.expireDate(expiry),
+                          style: context.textTheme.bodyMedium?.copyWith(
+                            color: context.colorScheme.onSurfaceVariant,
+                          ),
                         ),
-                        style: context.textTheme.bodyMedium,
-                      ),
                     ],
                   ),
                 ),
@@ -159,28 +160,43 @@ class _CloudProfileCardState extends ConsumerState<CloudProfileCard> {
               profile.todayUsed,
             ),
             const SizedBox(height: 16),
-            LinearProgressIndicator(value: profile.usageProgress),
+            LinearProgressIndicator(
+              value: profile.usageProgress,
+              borderRadius: BorderRadius.circular(2),
+            ),
             const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(profile.totalUsed),
-                Text(AppLocalizations.current.remaining(profile.remaining)),
-              ],
+            SizedBox(
+              width: double.infinity,
+              child: Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                spacing: 16,
+                runSpacing: 2,
+                children: [
+                  Text(
+                    '${AppLocalizations.current.usedTrafficLabel} '
+                    '${profile.totalUsed} / ${profile.totalTraffic}',
+                    style: secondary,
+                  ),
+                  Text(
+                    AppLocalizations.current.remaining(profile.remaining),
+                    style: secondary,
+                  ),
+                ],
+              ),
             ),
             const Divider(height: 32),
             _buildInfo(
               context,
               Icons.account_balance_wallet,
               AppLocalizations.current.balance,
-              profile.balance,
+              storeMoneyText(profile.balance),
             ),
             const SizedBox(height: 12),
             _buildInfo(
               context,
               Icons.monetization_on,
               AppLocalizations.current.commission,
-              profile.commission,
+              storeMoneyText(profile.commission),
             ),
             const SizedBox(height: 12),
             _buildInfo(
@@ -258,6 +274,11 @@ class _CloudProfileCardState extends ConsumerState<CloudProfileCard> {
     );
   }
 
+  static String? _expiryText(CloudProfile profile) {
+    if (profile.expireTime.millisecondsSinceEpoch <= 0) return null;
+    return DateFormat('yyyy-MM-dd HH:mm').format(profile.expireTime.toLocal());
+  }
+
   Widget _buildInfo(
     BuildContext context,
     IconData icon,
@@ -268,12 +289,19 @@ class _CloudProfileCardState extends ConsumerState<CloudProfileCard> {
       children: [
         Icon(icon, size: 20, color: context.colorScheme.primary),
         const SizedBox(width: 12),
-        Text(label, style: context.textTheme.bodyMedium),
+        Text(
+          label,
+          style: context.textTheme.bodyMedium?.copyWith(
+            color: context.colorScheme.onSurfaceVariant,
+          ),
+        ),
         const Spacer(),
         Text(
           value,
           style: context.textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w600,
+            color: context.colorScheme.onSurface,
+            fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
       ],

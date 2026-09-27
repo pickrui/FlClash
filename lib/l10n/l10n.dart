@@ -4819,10 +4819,10 @@ class AppLocalizations {
     return Intl.message('Balance', name: 'accountBalance', desc: '', args: []);
   }
 
-  /// `Commission ¥ {value}`
+  /// `Commission {value}`
   String commissionBalance(Object value) {
     return Intl.message(
-      'Commission ¥ $value',
+      'Commission $value',
       name: 'commissionBalance',
       desc: '',
       args: [value],
@@ -4842,21 +4842,6 @@ class AppLocalizations {
       desc: '',
       args: [count],
     );
-  }
-
-  /// `Use balance`
-  String get buyWithBalance {
-    return Intl.message(
-      'Use balance',
-      name: 'buyWithBalance',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Pay online`
-  String get orderAndPay {
-    return Intl.message('Pay online', name: 'orderAndPay', desc: '', args: []);
   }
 
   /// `May not be suitable for networks in mainland China`
@@ -5089,10 +5074,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Insufficient balance. Top up before applying the coupon.`
+  /// `Insufficient balance. Top up before continuing.`
   String get insufficientBalanceHint {
     return Intl.message(
-      'Insufficient balance. Top up before applying the coupon.',
+      'Insufficient balance. Top up before continuing.',
       name: 'insufficientBalanceHint',
       desc: '',
       args: [],
@@ -5334,10 +5319,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Buy plans · Recharge · Renew & upgrade`
+  /// `Purchase, renew, and upgrade plans`
   String get storeSubtitle {
     return Intl.message(
-      'Buy plans · Recharge · Renew & upgrade',
+      'Purchase, renew, and upgrade plans',
       name: 'storeSubtitle',
       desc: '',
       args: [],
@@ -5349,6 +5334,81 @@ class AppLocalizations {
     return Intl.message(
       'Payment endpoint returned an unknown format',
       name: 'paymentUnknownResponse',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Buy`
+  String get buy {
+    return Intl.message('Buy', name: 'buy', desc: '', args: []);
+  }
+
+  /// `Pay with balance`
+  String get payWithBalance {
+    return Intl.message(
+      'Pay with balance',
+      name: 'payWithBalance',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Available {value}`
+  String availableBalance(Object value) {
+    return Intl.message(
+      'Available $value',
+      name: 'availableBalance',
+      desc: '',
+      args: [value],
+    );
+  }
+
+  /// `Unavailable`
+  String get planUnavailable {
+    return Intl.message(
+      'Unavailable',
+      name: 'planUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Purchases use your balance first, then commission for any shortfall.`
+  String get balanceDeductionHint {
+    return Intl.message(
+      'Purchases use your balance first, then commission for any shortfall.',
+      name: 'balanceDeductionHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allowed range {min} – {max}`
+  String rechargeAllowedRange(Object min, Object max) {
+    return Intl.message(
+      'Allowed range $min – $max',
+      name: 'rechargeAllowedRange',
+      desc: '',
+      args: [min, max],
+    );
+  }
+
+  /// `The amount is outside the range allowed by this payment method`
+  String get rechargeAmountOutOfRange {
+    return Intl.message(
+      'The amount is outside the range allowed by this payment method',
+      name: 'rechargeAmountOutOfRange',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Insufficient balance. Recharge and try again.`
+  String get insufficientBalanceRecharge {
+    return Intl.message(
+      'Insufficient balance. Recharge and try again.',
+      name: 'insufficientBalanceRecharge',
       desc: '',
       args: [],
     );

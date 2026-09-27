@@ -12,9 +12,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'cloud_layout.dart';
 import 'cloud_profile_card.dart';
 import 'cloud_register_page.dart';
-import 'store_page.dart';
+
+/// Bound at startup, so the navigation barrel that carries this page does not
+/// also compile the whole store.
+WidgetBuilder? cloudStorePageBuilder;
 
 final cloudServiceHealthCheckProvider = Provider<Future<void> Function()>(
   (ref) => CloudApiService().checkServiceHealth,
@@ -259,141 +263,180 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
 
   Widget _buildLoggedIn(CloudAccountState state) {
     final busy = state.isLoading || state.isRefreshing || state.isSyncing;
-    if (state.profile == null) {
+    final notifier = ref.read(cloudAccountProvider.notifier);
+    final profile = state.profile;
+    if (profile == null) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (busy)
-              const CircularProgressIndicator()
-            else ...[
-              Icon(Icons.cloud_off, color: context.colorScheme.error),
-              const SizedBox(height: 16),
-              Text(state.error ?? AppLocalizations.current.noInfo),
-            ],
-            const SizedBox(height: 16),
-            TextButton.icon(
-              icon: const Icon(Icons.refresh),
-              label: Text(AppLocalizations.current.refresh),
-              onPressed: busy
-                  ? null
-                  : () {
-                      ref
-                          .read(cloudAccountProvider.notifier)
-                          .refreshProfile(force: true);
-                    },
-            ),
-          ],
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: busy
+              ? const CircularProgressIndicator()
+              : ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 360),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.cloud_off,
+                        size: 40,
+                        color: context.colorScheme.error,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        state.error ?? AppLocalizations.current.noInfo,
+                        textAlign: TextAlign.center,
+                        style: context.textTheme.bodyMedium?.copyWith(
+                          color: context.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        spacing: 12,
+                        runSpacing: 8,
+                        children: [
+                          FilledButton.tonalIcon(
+                            icon: const Icon(Icons.refresh),
+                            label: Text(AppLocalizations.current.refresh),
+                            onPressed: () =>
+                                notifier.refreshProfile(force: true),
+                          ),
+                          OutlinedButton.icon(
+                            icon: const Icon(Icons.logout),
+                            label: Text(AppLocalizations.current.logoutTitle),
+                            onPressed: _handleLogout,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
         ),
       );
     }
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          if (state.error case final error?) ...[
-            CommonCard(
-              isError: true,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Icon(Icons.error_outline, color: context.colorScheme.error),
-                    const SizedBox(width: 12),
-                    Expanded(child: Text(error)),
-                    IconButton(
-                      onPressed: busy
-                          ? null
-                          : () => ref
-                                .read(cloudAccountProvider.notifier)
-                                .refreshManagedSubscription(),
-                      icon: const Icon(Icons.refresh),
-                      tooltip: AppLocalizations.current.refresh,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
-          CloudProfileCard(profile: state.profile!),
-          const SizedBox(height: 16),
-          CommonCard(
-            onPressed: () {
-              Navigator.of(
-                context,
-              ).push(MaterialPageRoute(builder: (_) => const CloudStorePage()));
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                children: [
-                  Icon(Icons.storefront, color: context.colorScheme.primary),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+    return RefreshIndicator(
+      onRefresh: () => notifier.refreshProfile(force: true),
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(16),
+        child: CloudContentWidth(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (state.error case final error?) ...[
+                CommonCard(
+                  isError: true,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
                       children: [
-                        Text(
-                          AppLocalizations.current.store,
-                          style: context.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                        Icon(
+                          Icons.error_outline,
+                          color: context.colorScheme.error,
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          AppLocalizations.current.storeSubtitle,
-                          style: context.textTheme.bodySmall?.copyWith(
-                            color: context.colorScheme.onSurfaceVariant,
-                          ),
+                        const SizedBox(width: 12),
+                        Expanded(child: Text(error)),
+                        IconButton(
+                          onPressed: busy
+                              ? null
+                              : () => notifier.refreshManagedSubscription(),
+                          icon: const Icon(Icons.refresh),
+                          tooltip: AppLocalizations.current.refresh,
                         ),
                       ],
                     ),
                   ),
-                  const Icon(Icons.chevron_right),
+                ),
+                const SizedBox(height: 16),
+              ],
+              CloudProfileCard(profile: profile),
+              const SizedBox(height: 16),
+              _buildStoreEntry(),
+              if (state.latestNotification case final notice?
+                  when notice.cleanMessage.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                _buildAnnouncement(notice),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStoreEntry() {
+    final storePage = cloudStorePageBuilder;
+    return CommonCard(
+      onPressed: storePage == null
+          ? null
+          : () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: storePage)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            const CloudIconTile(icon: Icons.storefront),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    AppLocalizations.current.store,
+                    style: context.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: context.colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    AppLocalizations.current.storeSubtitle,
+                    style: context.textTheme.bodySmall?.copyWith(
+                      color: context.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
                 ],
               ),
             ),
-          ),
-          if (state.latestNotification case final notice?
-              when notice.cleanMessage.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            CommonCard(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.campaign,
-                          color: context.colorScheme.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          AppLocalizations.current.announcement,
-                          style: context.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const Spacer(),
-                        Text(
-                          DateFormat('yyyy-MM-dd').format(notice.publishTime),
-                          style: context.textTheme.bodySmall?.copyWith(
-                            color: context.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    _buildAnnouncementBody(context, notice.cleanMessage),
-                  ],
-                ),
-              ),
-            ),
+            Icon(Icons.chevron_right, color: context.colorScheme.outline),
           ],
-        ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAnnouncement(CloudNotification notice) {
+    return CommonCard(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.campaign, color: context.colorScheme.primary),
+                const SizedBox(width: 8),
+                Text(
+                  AppLocalizations.current.announcement,
+                  style: context.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: context.colorScheme.onSurface,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  DateFormat('yyyy-MM-dd').format(notice.publishTime),
+                  style: context.textTheme.bodySmall?.copyWith(
+                    color: context.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _buildAnnouncementBody(context, notice.cleanMessage),
+          ],
+        ),
       ),
     );
   }
@@ -406,7 +449,13 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
           if (url != null) launchUrl(Uri.parse(url));
         },
         style: {
-          'body': Style(margin: Margins.zero, padding: HtmlPaddings.zero),
+          // The card is a disabled button, so inherited text would take its dimmed foreground.
+          'body': Style(
+            margin: Margins.zero,
+            padding: HtmlPaddings.zero,
+            color: context.colorScheme.onSurface,
+            lineHeight: const LineHeight(1.5),
+          ),
           'p': Style(margin: Margins.only(top: 0, bottom: 8)),
           'hr': Style(
             margin: Margins.only(top: 8, bottom: 8),
@@ -424,45 +473,53 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
     final commonAction = context.commonAction;
 
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.cloud_off,
-            size: 80,
-            color: context.colorScheme.primary.withValues(alpha: 0.5),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            AppLocalizations.current.loggedOutViewTitle,
-            style: context.textTheme.headlineMedium,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            AppLocalizations.current.loggedOutViewDesc,
-            style: context.textTheme.bodyLarge?.copyWith(
-              color: context.colorScheme.onSurface.withValues(alpha: 0.6),
-            ),
-          ),
-          const SizedBox(height: 32),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              FilledButton.icon(
-                onPressed: () =>
-                    commonAction.openCloudLogin(navigateToCloud: false),
-                icon: const Icon(Icons.login),
-                label: Text(AppLocalizations.current.loginTitle),
+              Icon(
+                Icons.cloud_outlined,
+                size: 80,
+                color: context.colorScheme.primary.withValues(alpha: 0.6),
               ),
-              const SizedBox(width: 12),
-              OutlinedButton.icon(
-                onPressed: () => showCloudRegisterPage(context),
-                icon: const Icon(Icons.person_add_alt_1_outlined),
-                label: Text(AppLocalizations.current.register),
+              const SizedBox(height: 24),
+              Text(
+                AppLocalizations.current.loggedOutViewTitle,
+                style: context.textTheme.headlineMedium,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                AppLocalizations.current.loggedOutViewDesc,
+                textAlign: TextAlign.center,
+                style: context.textTheme.bodyLarge?.copyWith(
+                  color: context.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 32),
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  FilledButton.icon(
+                    onPressed: () =>
+                        commonAction.openCloudLogin(navigateToCloud: false),
+                    icon: const Icon(Icons.login),
+                    label: Text(AppLocalizations.current.loginTitle),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: () => showCloudRegisterPage(context),
+                    icon: const Icon(Icons.person_add_alt_1_outlined),
+                    label: Text(AppLocalizations.current.register),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }

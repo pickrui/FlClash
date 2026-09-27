@@ -582,4 +582,57 @@ void main() {
       );
     });
   });
+
+  group('store display helpers', () {
+    test('prices drop whole-yuan decimals and sign refunds', () {
+      expect(storePriceText(15), '¥15');
+      expect(storePriceText(12.5), '¥12.50');
+      expect(storePriceText(-3.2), '-¥3.20');
+    });
+
+    test('balances gain one yuan sign', () {
+      expect(storeMoneyText('128.50'), '¥128.50');
+      expect(storeMoneyText('¥9'), '¥9');
+      expect(storeMoneyText(' '), '¥0.00');
+      expect(storeMoneyText(null), '¥0.00');
+    });
+
+    test('recharge amounts take a comma and at most two decimals', () {
+      expect(parseRechargeAmount(' 20 '), 20);
+      expect(parseRechargeAmount('12,5'), 12.5);
+      expect(parseRechargeAmount('1.234'), isNull);
+      expect(parseRechargeAmount('0'), isNull);
+      expect(parseRechargeAmount('-5'), isNull);
+      expect(parseRechargeAmount('abc'), isNull);
+    });
+
+    test('a method without a maximum accepts any amount above its minimum', () {
+      const bounded = PaymentMethodOption(
+        payment: 'a',
+        type: 'a',
+        name: '',
+        min: 5,
+        max: 500,
+      );
+      const open = PaymentMethodOption(
+        payment: 'b',
+        type: 'b',
+        name: '',
+        min: 1,
+        max: 0,
+      );
+      expect(bounded.accepts(5), isTrue);
+      expect(bounded.accepts(500.01), isFalse);
+      expect(bounded.accepts(4.99), isFalse);
+      expect(open.accepts(10000), isTrue);
+      expect(open.displayName, 'b');
+    });
+
+    test('only a balance shortfall reads as one', () {
+      expect(isBalanceShortfallMessage('余额不足，请先充值'), isTrue);
+      expect(isBalanceShortfallMessage('Insufficient balance'), isTrue);
+      expect(isBalanceShortfallMessage('库存不足'), isFalse);
+      expect(isBalanceShortfallMessage('Balance updated'), isFalse);
+    });
+  });
 }

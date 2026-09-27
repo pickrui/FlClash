@@ -56,9 +56,8 @@ class PurchasedPlanDetails extends StatelessWidget {
             if (minutes % 60 > 0 || minutes == 0)
               l10n.purchaseMinutes(minutes % 60),
           ].take(2).join(' ');
-    String? price(double? value) => value == null
-        ? null
-        : '¥${value.toStringAsFixed(value == value.roundToDouble() ? 0 : 2)}';
+    String? price(double? value) =>
+        value == null ? null : storePriceText(value);
     String joined(String first, String? second) =>
         second == null ? first : '$first · $second';
     // An ended plan has nothing left to show; its status badge already says so.

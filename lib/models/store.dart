@@ -280,6 +280,38 @@ String compactStorePlanSummary(List<String> tags) {
   return tags.where((tag) => !tag.trim().startsWith('周期')).join(' · ');
 }
 
+String storePriceText(double price) {
+  if (!price.isFinite) return '¥0';
+  final value = price.abs();
+  final text = value.toStringAsFixed(value == value.roundToDouble() ? 0 : 2);
+  return price < 0 ? '-¥$text' : '¥$text';
+}
+
+String storeMoneyText(String? raw) {
+  final value = raw?.trim() ?? '';
+  if (value.isEmpty) return '¥0.00';
+  return value.startsWith('¥') || value.startsWith('￥') ? value : '¥$value';
+}
+
+double? parseRechargeAmount(String text) {
+  final normalized = text.trim().replaceAll(',', '.');
+  if (!RegExp(r'^\d+(\.\d{1,2})?$').hasMatch(normalized)) return null;
+  final value = double.tryParse(normalized);
+  return value != null && value.isFinite && value > 0 ? value : null;
+}
+
+/// Out of stock (库存不足) is a shortfall too, but not one a recharge fixes.
+bool isBalanceShortfallMessage(String message) {
+  final text = message.toLowerCase();
+  final mentionsBalance = ['余额', '资金', 'balance', 'funds'].any(text.contains);
+  final mentionsShortfall = [
+    '不足',
+    'insufficient',
+    'not enough',
+  ].any(text.contains);
+  return mentionsBalance && mentionsShortfall;
+}
+
 List<StorePlan> storeUpgradeTargets(
   BoughtRecord bought,
   List<StorePlan> plans,
@@ -329,6 +361,12 @@ class PaymentMethodOption {
       payment.startsWith('usdt_') ||
       type == 'cryptapi' ||
       type.startsWith('usdt_');
+
+  String get displayName => name.isEmpty ? payment : name;
+
+  bool accepts(double amount) {
+    return amount > 0 && amount >= min && (max <= 0 || amount <= max);
+  }
 
   factory PaymentMethodOption.fromJson(Map<dynamic, dynamic> json) {
     return PaymentMethodOption(

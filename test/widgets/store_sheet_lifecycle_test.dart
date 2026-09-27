@@ -35,9 +35,7 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        final open = recharge
-            ? find.byTooltip('Recharge')
-            : find.text('Use balance');
+        final open = find.text(recharge ? 'Recharge' : 'Buy');
         await tester.ensureVisible(open);
         await tester.tap(open);
         await tester.pump();

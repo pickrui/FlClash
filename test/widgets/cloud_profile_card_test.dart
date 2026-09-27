@@ -170,6 +170,31 @@ Future<void> _returningShowsParamsEditedElsewhere(WidgetTester tester) async {
   expect(_switchValues(tester), [false, false, true]);
 }
 
+Future<void> _expiryShowsLocalMinutesOrNothing(WidgetTester tester) async {
+  SharedPreferences.setMockInitialValues({});
+  final expiry = DateTime.utc(2030, 1, 2, 3, 4, 5);
+  final profile = ValueNotifier(
+    _cloudProfile(planRank: 20).copyWith(expireTime: expiry),
+  );
+  addTearDown(profile.dispose);
+  await _pumpCard(tester, profile);
+  final local = expiry.toLocal();
+  String two(int value) => value.toString().padLeft(2, '0');
+  expect(
+    find.text(
+      'Expires: ${local.year}-${two(local.month)}-${two(local.day)} '
+      '${two(local.hour)}:${two(local.minute)}',
+    ),
+    findsOneWidget,
+  );
+
+  profile.value = profile.value.copyWith(
+    expireTime: DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
+  );
+  await tester.pumpAndSettle();
+  expect(find.textContaining('Expires'), findsNothing);
+}
+
 void _cardTest(
   String description,
   Future<void> Function(WidgetTester tester) scenario,
@@ -197,5 +222,9 @@ void main() {
   _cardTest(
     'returning to the page shows params edited elsewhere',
     _returningShowsParamsEditedElsewhere,
+  );
+  _cardTest(
+    'the expiry shows local minutes and hides an unknown date',
+    _expiryShowsLocalMinutesOrNothing,
   );
 }
