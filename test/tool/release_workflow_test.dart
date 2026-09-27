@@ -40,6 +40,21 @@ void main() {
   );
 
   test(
+    'publication survives a skipped deep-check ancestor but no failed gate',
+    () {
+      final upload = jobs['upload']['if'] as String;
+      expect(upload, contains('!cancelled()'));
+      for (final need in ['version', 'build', 'checks']) {
+        expect(upload, contains("needs.$need.result == 'success'"));
+      }
+      final aur = jobs['aur']['if'] as String;
+      expect(aur, contains('!cancelled()'));
+      expect(aur, contains("needs.upload.result == 'success'"));
+      expect(aur, contains("!contains(github.ref, '-')"));
+    },
+  );
+
+  test(
     'each standalone Android build verifies the manifest before artifact upload',
     () {
       final build = jobs['build'] as YamlMap;

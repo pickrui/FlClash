@@ -473,6 +473,9 @@ jobs:
         run: python3 tool/release_checks.py gate
 
   upload:
+    # The implicit success() also fails on a skipped ancestor, and deep-tests
+    # is skipped whenever the gate accepts reusing a successful Go baseline.
+    if: ${{ !cancelled() && needs.version.result == 'success' && needs.build.result == 'success' && needs.checks.result == 'success' }}
     permissions:
       actions: read
       contents: write
@@ -564,7 +567,7 @@ jobs:
 
   aur:
     name: Publish AUR package
-    if: ${{ !contains(github.ref, '-') }}
+    if: ${{ !cancelled() && needs.upload.result == 'success' && !contains(github.ref, '-') }}
     needs: [ upload ]
     runs-on: ubuntu-latest
     timeout-minutes: 30
