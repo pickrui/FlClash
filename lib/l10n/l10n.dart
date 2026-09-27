@@ -4909,16 +4909,6 @@ class AppLocalizations {
     return Intl.message('Activate', name: 'activate', desc: '', args: []);
   }
 
-  /// `Early renewal`
-  String get earlyRenew {
-    return Intl.message(
-      'Early renewal',
-      name: 'earlyRenew',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Auto-renew on`
   String get autoRenewOn {
     return Intl.message(

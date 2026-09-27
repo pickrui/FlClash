@@ -153,6 +153,11 @@ void main() {
                           ),
                           const SizedBox(height: 12),
                           PurchasedPlanDetails(bought: record(0)),
+                          const SizedBox(height: 24),
+                          PurchasedPlanDetails(
+                            bought: record(1),
+                            profile: profile,
+                          ),
                         ],
                       ),
                     ),
@@ -164,12 +169,15 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('购买价格'), findsOneWidget);
-      expect(find.text('¥88.50'), findsOneWidget);
+      expect(find.text('购买价格'), findsNWidgets(2));
+      expect(find.text('¥88.50 · 年付'), findsNWidgets(2));
       expect(find.text('2000 GiB'), findsOneWidget);
       expect(find.text('365天'), findsOneWidget);
-      expect(find.text('关闭'), findsOneWidget);
-      expect(find.text('2026-09-08 20:35:12'), findsOneWidget);
+      expect(find.text('关闭'), findsNWidgets(2));
+      expect(find.text('2026-09-08 20:35:12'), findsNWidgets(2));
+      expect(find.text('123 GiB'), findsOneWidget);
+      expect(find.text('已用流量 77 GiB / 200 GiB'), findsOneWidget);
+      expect(find.byType(LinearProgressIndicator), findsOneWidget);
       expect(tester.takeException(), isNull);
       final boundary =
           key.currentContext!.findRenderObject()! as RenderRepaintBoundary;

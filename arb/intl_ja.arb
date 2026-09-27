@@ -603,7 +603,6 @@
   "planNumber": "プラン #{id}",
   "purchaseTime": "{time} に購入",
   "activate": "アクティブ化",
-  "earlyRenew": "早期更新",
   "autoRenewOn": "自動更新：オン",
   "autoRenewOff": "自動更新：オフ",
   "upgradePlan": "プランをアップグレード",

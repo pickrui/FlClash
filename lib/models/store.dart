@@ -124,7 +124,6 @@ class BoughtRecord {
   final String buyTime;
   final String billingPeriodText;
   final bool canActivate;
-  final bool canEarlyRenew;
   final bool canBindCoupon;
   final List<int>? upgradeShopIds;
 
@@ -142,7 +141,6 @@ class BoughtRecord {
     required this.buyTime,
     required this.billingPeriodText,
     required this.canActivate,
-    required this.canEarlyRenew,
     required this.canBindCoupon,
     required this.upgradeShopIds,
   });
@@ -167,9 +165,6 @@ class BoughtRecord {
       canActivate: json['can_activate'] == null
           ? _asInt(json['status']) == 0
           : _asBool(json['can_activate']),
-      canEarlyRenew: json['can_early_renew'] == null
-          ? _asInt(json['status']) != -1 && _asBool(json['auto_renew'])
-          : _asBool(json['can_early_renew']),
       canBindCoupon: _asBool(json['can_bind_coupon']),
       upgradeShopIds: json.containsKey('upgrade_shop_ids')
           ? _asIntList(json['upgrade_shop_ids'])

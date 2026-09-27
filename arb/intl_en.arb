@@ -603,7 +603,6 @@
   "planNumber": "Plan #{id}",
   "purchaseTime": "Purchased {time}",
   "activate": "Activate",
-  "earlyRenew": "Early renewal",
   "autoRenewOn": "Auto-renew on",
   "autoRenewOff": "Auto-renew off",
   "upgradePlan": "Upgrade plan",

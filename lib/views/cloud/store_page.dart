@@ -517,30 +517,6 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
   List<Widget> _buildBoughtActions(BoughtRecord bought) {
     final actions = <Widget>[];
 
-    if (bought.canActivate) {
-      actions.add(
-        FilledButton.icon(
-          onPressed: _busy
-              ? null
-              : () => _runGuarded(() => _activateFlow(bought)),
-          icon: const Icon(Icons.check_circle_outline),
-          label: Text(appLocalizations.activate),
-        ),
-      );
-    }
-
-    if (bought.canEarlyRenew) {
-      actions.add(
-        OutlinedButton.icon(
-          onPressed: _busy
-              ? null
-              : () => _runGuarded(() => _earlyRenewFlow(bought)),
-          icon: const Icon(Icons.update),
-          label: Text(appLocalizations.earlyRenew),
-        ),
-      );
-    }
-
     if (bought.canBindCoupon) {
       actions.add(
         OutlinedButton.icon(
@@ -561,6 +537,19 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
               : () => _runGuarded(() => _upgradeFlow(bought)),
           icon: const Icon(Icons.upgrade),
           label: Text(appLocalizations.upgradePlan),
+        ),
+      );
+    }
+
+    // Activation closes the row, so the actions every plan shares keep their place.
+    if (bought.canActivate) {
+      actions.add(
+        FilledButton.icon(
+          onPressed: _busy
+              ? null
+              : () => _runGuarded(() => _activateFlow(bought)),
+          icon: const Icon(Icons.check_circle_outline),
+          label: Text(appLocalizations.activate),
         ),
       );
     }
@@ -628,29 +617,6 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
     );
     if (ok != true) return;
     final res = await CloudApiService().activatePlan(bought.id);
-    _showResultHtml(res.success, res.message);
-    if (res.success) await _refresh();
-  }
-
-  Future<void> _earlyRenewFlow(BoughtRecord bought) async {
-    final choice = await globalState.showCommonDialog<_QuoteChoice>(
-      child: _QuoteDialog(
-        title: appLocalizations.earlyRenew,
-        loadQuote: (coupon) async => _shopQuoteView(
-          await CloudApiService().previewEarlyRenew(
-            bought.id,
-            bought.shopId,
-            coupon: coupon,
-          ),
-        ),
-      ),
-    );
-    if (choice == null) return;
-    final res = await CloudApiService().earlyRenewPlan(
-      bought.id,
-      coupon: choice.coupon.isEmpty ? null : choice.coupon,
-      authorizedPrice: choice.authorizedPrice,
-    );
     _showResultHtml(res.success, res.message);
     if (res.success) await _refresh();
   }

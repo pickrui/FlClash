@@ -603,7 +603,6 @@
   "planNumber": "Тариф #{id}",
   "purchaseTime": "Куплено: {time}",
   "activate": "Активировать",
-  "earlyRenew": "Досрочное продление",
   "autoRenewOn": "Автопродление: вкл",
   "autoRenewOff": "Автопродление: выкл",
   "upgradePlan": "Улучшить тариф",

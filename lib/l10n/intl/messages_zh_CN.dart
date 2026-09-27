@@ -656,7 +656,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "dynamicMembersHint": MessageLookupByLibrary.simpleMessage(
       "订阅更新时自动纳入当前配置的节点，可使用名称筛选，例如 日本|JP",
     ),
-    "earlyRenew": MessageLookupByLibrary.simpleMessage("提前续费"),
     "edit": MessageLookupByLibrary.simpleMessage("编辑"),
     "editCustomRouting": MessageLookupByLibrary.simpleMessage("编辑自定义"),
     "editGlobalRules": MessageLookupByLibrary.simpleMessage("编辑全局规则"),

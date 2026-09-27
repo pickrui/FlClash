@@ -603,7 +603,6 @@
   "planNumber": "套餐 #{id}",
   "purchaseTime": "购买于 {time}",
   "activate": "激活",
-  "earlyRenew": "提前续费",
   "autoRenewOn": "自动续费：开启",
   "autoRenewOff": "自动续费：关闭",
   "upgradePlan": "升级套餐",

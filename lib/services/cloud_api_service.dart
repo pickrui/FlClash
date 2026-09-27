@@ -1547,33 +1547,6 @@ class CloudApiService {
     return _postShopAction('/shop/activate', {'id': boughtId});
   }
 
-  Future<ShopQuote> previewEarlyRenew(
-    int boughtId,
-    int shopId, {
-    String? coupon,
-  }) async {
-    final data = await _postQuote('/shop/coupon_check', {
-      'shop': shopId,
-      'bought_id': boughtId,
-      'early_renew': 1,
-      if (coupon != null && coupon.isNotEmpty) 'coupon_code': coupon,
-    });
-    return ShopQuote.fromJson(data);
-  }
-
-  /// [authorizedPrice] 取 [previewEarlyRenew] 返回的报价。
-  Future<({bool success, String message})> earlyRenewPlan(
-    int boughtId, {
-    String? coupon,
-    required double authorizedPrice,
-  }) {
-    return _postShopAction('/shop/early_renew', {
-      'id': boughtId,
-      'authorized_price': authorizedPrice.toStringAsFixed(2),
-      if (coupon != null && coupon.isNotEmpty) 'coupon_code': coupon,
-    });
-  }
-
   /// 预览绑定折扣代码后的折后价与差价，不产生扣款或退款。
   Future<BindCouponQuote> bindCouponCheck(int boughtId, String coupon) async {
     final data = await _postQuote('/shop/bind_coupon_check', {
