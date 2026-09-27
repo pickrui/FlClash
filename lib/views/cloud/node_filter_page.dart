@@ -485,6 +485,9 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
+        hintStyle: TextStyle(
+          color: context.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+        ),
         floatingLabelBehavior: FloatingLabelBehavior.always,
         border: const OutlineInputBorder(),
         isDense: true,

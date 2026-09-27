@@ -311,6 +311,22 @@ void main() {
       expect(api.previews, const [NodeFilter(match: 'HK')]);
     });
 
+    testWidgets('name pattern examples read as hints', (tester) async {
+      final api = _FakeApi(_catalog(const NodeFilter()));
+      await _pumpEditor(tester, api, _Account());
+      final context = tester.element(find.byType(CloudNodeFilterPage));
+      final hintColor = Theme.of(
+        context,
+      ).colorScheme.onSurfaceVariant.withValues(alpha: 0.6);
+
+      for (final label in ['Name contains', 'Name excludes']) {
+        final field = tester.widget<TextField>(
+          find.widgetWithText(TextField, label),
+        );
+        expect(field.decoration?.hintStyle?.color, hintColor, reason: label);
+      }
+    });
+
     testWidgets('a filter that keeps nothing cannot be saved', (tester) async {
       final api = _FakeApi(_catalog(const NodeFilter()))
         ..keptFor = (filter) => filter.excludeLines.contains('fusion') ? 0 : 2;
