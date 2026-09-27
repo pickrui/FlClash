@@ -245,17 +245,17 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
     VoidCallback? guarded(Future<void> Function() action) =>
         _busy ? null : () => _runGuarded(action);
     return [
-      if (bought.canBindCoupon)
-        OutlinedButton.icon(
-          onPressed: guarded(() => _bindCouponFlow(bought)),
-          icon: const Icon(Icons.sell_outlined),
-          label: Text(appLocalizations.bindCoupon),
-        ),
       if (storeUpgradeTargets(bought, plans).isNotEmpty)
         OutlinedButton.icon(
           onPressed: guarded(() => _upgradeFlow(bought)),
           icon: const Icon(Icons.upgrade),
           label: Text(appLocalizations.upgradePlan),
+        ),
+      if (bought.canBindCoupon)
+        OutlinedButton.icon(
+          onPressed: guarded(() => _bindCouponFlow(bought)),
+          icon: const Icon(Icons.sell_outlined),
+          label: Text(appLocalizations.bindCoupon),
         ),
       // Activation closes the row, so the actions every plan shares keep their place.
       if (bought.canActivate)
