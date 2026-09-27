@@ -1,242 +1,54 @@
-enum SubscriptionTier {
-  none,
-  alu,
-  premium;
-
-  static SubscriptionTier fromServer(
-    String? raw, {
-    String? planCode,
-    int? planRank,
-    List<String>? nodeAccess,
-  }) {
-    final access =
-        nodeAccess
-            ?.map((value) => value.trim().toLowerCase())
-            .where((value) => value.isNotEmpty)
-            .toSet() ??
-        const <String>{};
-    if (access.isNotEmpty) {
-      if (access.any(
-        const {'fusion', 'fusion_advanced', 'fusion_premium', 'gia'}.contains,
-      )) {
-        return premium;
-      }
-      if (access.contains('cia') || access.contains('ixp')) return alu;
-      return none;
-    }
-
-    if (planRank != null) {
-      if (planRank >= 40) return premium;
-      if (planRank >= 20) return alu;
-      return none;
-    }
-
-    switch (planCode?.trim().toLowerCase()) {
-      case 'alu':
-      case 'bronze':
-        return alu;
-      case 'silver':
-      case 'gold':
-      case 'platinum':
-      case 'diamond':
-      case 'developer':
-      case 'team':
-      case 'enterprise':
-      case 'realtime':
-      case 'titanium':
-        return premium;
-      case 'no_plan':
-      case 'iron':
-        return none;
-    }
-
-    final name = raw?.trim().toLowerCase() ?? '';
-    if (name.isEmpty ||
-        name == 'null' ||
-        name == 'no plan' ||
-        name == 'default' ||
-        name == 'pass iron') {
-      return none;
-    }
-    if (name == 'pass alu' || name == 'pass bronze') return alu;
-    return premium;
-  }
-
-  bool get canSelectEmergency => this == premium;
-
-  bool supports(NetworkLevel level) => switch (level) {
-    NetworkLevel.overseas => true,
-    NetworkLevel.emergency => this != none,
-    NetworkLevel.premium => this == premium,
-  };
-
-  CloudParams get defaultParams => switch (this) {
-    none => const CloudParams(),
-    alu => const CloudParams(level: NetworkLevel.emergency),
-    premium => const CloudParams(level: NetworkLevel.premium),
-  };
-}
-
-enum NetworkLevel {
-  overseas('overseas'),
-  emergency('emergency'),
-  premium('premium');
-
-  final String value;
-  const NetworkLevel(this.value);
-
-  static NetworkLevel? fromValue(String? v) {
-    final normalized = v?.trim().toLowerCase();
-    for (final level in NetworkLevel.values) {
-      if (level.value == normalized) return level;
-    }
-    return null;
-  }
-}
-
+/// The two profile switches the managed subscription request carries next to
+/// `nodes=auto`. Nodes come from the server-side [NodeFilter], so every other
+/// stored key is dropped.
 class CloudParams {
-  final NetworkLevel? level;
   final bool? tfo;
   final bool simplerules;
-  final Map<String, String> extras;
 
-  const CloudParams({
-    this.level,
-    this.tfo,
-    this.simplerules = false,
-    this.extras = const {},
-  });
+  const CloudParams({this.tfo, this.simplerules = false});
 
   static CloudParams parse(String raw) {
     final cleaned = raw.trim().replaceFirst(RegExp(r'^[?&]+'), '');
-    if (cleaned.isEmpty) return const CloudParams();
-
-    NetworkLevel? explicitMode;
     bool? tfo;
-    bool simplerules = false;
-    final extras = <String, String>{};
-
+    var simplerules = false;
     for (final pair in cleaned.split('&')) {
-      if (pair.isEmpty) continue;
       final eq = pair.indexOf('=');
-      if (eq < 0) {
-        final key = _decodeQueryComponent(pair);
-        if (key.isNotEmpty && !_isReservedKey(key)) extras[key] = '';
-        continue;
-      }
-      final k = _decodeQueryComponent(pair.substring(0, eq));
-      final v = _decodeQueryComponent(pair.substring(eq + 1));
-      switch (k.toLowerCase()) {
-        case 'mode':
-          explicitMode = NetworkLevel.fromValue(v) ?? explicitMode;
+      if (eq < 0) continue;
+      final value = _decodeQueryComponent(pair.substring(eq + 1));
+      switch (_decodeQueryComponent(pair.substring(0, eq)).toLowerCase()) {
         case 'tfo':
-          tfo = switch (v) {
+          tfo = switch (value) {
             'true' => true,
             'false' => false,
             _ => null,
           };
         case 'simplerules':
-          simplerules = v == 'true';
-        default:
-          if (k.isNotEmpty && !_isReservedKey(k)) extras[k] = v;
+          simplerules = value == 'true';
       }
     }
-
-    return CloudParams(
-      level: explicitMode,
-      tfo: tfo,
-      simplerules: simplerules,
-      extras: extras,
-    );
+    return CloudParams(tfo: tfo, simplerules: simplerules);
   }
 
   String encode() {
-    final segments = <String>[];
-    if (level != null) segments.add('mode=${level!.value}');
-    if (tfo != null) segments.add('tfo=$tfo');
-    if (simplerules) segments.add('simplerules=true');
-    final extraKeys =
-        extras.keys.where((k) => k.isNotEmpty && !_isReservedKey(k)).toList()
-          ..sort();
-    for (final k in extraKeys) {
-      final v = extras[k]!;
-      final encodedKey = _encodeQueryComponent(k);
-      segments.add(
-        v.isEmpty ? encodedKey : '$encodedKey=${_encodeQueryComponent(v)}',
-      );
-    }
-    if (segments.isEmpty) return '';
-    return '&${segments.join('&')}';
+    final segments = [
+      if (tfo != null) 'tfo=$tfo',
+      if (simplerules) 'simplerules=true',
+    ];
+    return segments.isEmpty ? '' : '&${segments.join('&')}';
   }
 
-  /// URL-suffix form guaranteed to include a `tfo` segment (defaults to false).
-  /// Used when handing off to the fetcher, which always wants an explicit value.
-  String encodeWithTfo() {
-    final withTfo = tfo == null ? copyWith(tfo: false) : this;
-    return withTfo.encode();
-  }
-
-  CloudParams copyWith({
-    Object? level = _sentinel,
-    Object? tfo = _sentinel,
-    Object? simplerules = _sentinel,
-    Map<String, String>? extras,
-  }) {
-    return CloudParams(
-      level: level == _sentinel ? this.level : level as NetworkLevel?,
-      tfo: tfo == _sentinel ? this.tfo : tfo as bool?,
-      simplerules: simplerules == _sentinel
-          ? this.simplerules
-          : simplerules as bool,
-      extras: extras ?? this.extras,
-    );
-  }
-
-  /// Encoded form excluding independent switches. Used to compare with tier
-  /// defaults, which only own the routing mode.
-  String encodeDefaultComparable() => CloudParams(level: level).encode();
-
-  String encodeEditableOptions() =>
-      copyWith(tfo: null, simplerules: false).encode();
-
-  bool get isAllNodes => encodeEditableOptions().isEmpty;
-
-  CloudParams applyingAllNodes() => copyWith(level: null, extras: const {});
-
-  CloudParams applyingTierDefaults(CloudParams defaults) {
-    return copyWith(level: defaults.level);
-  }
-
-  CloudParams adjustedForTier(SubscriptionTier tier) {
-    final currentLevel = level;
-    if (currentLevel == null || tier.supports(currentLevel)) return this;
-    return copyWith(level: tier.defaultParams.level);
-  }
+  /// The fetcher always wants an explicit `tfo`, so a missing one is false.
+  String encodeWithTfo() =>
+      CloudParams(tfo: tfo ?? false, simplerules: simplerules).encode();
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other is! CloudParams) return false;
-    if (level != other.level ||
-        tfo != other.tfo ||
-        simplerules != other.simplerules) {
-      return false;
-    }
-    if (extras.length != other.extras.length) return false;
-    for (final e in extras.entries) {
-      if (other.extras[e.key] != e.value) return false;
-    }
-    return true;
-  }
+  bool operator ==(Object other) =>
+      other is CloudParams &&
+      tfo == other.tfo &&
+      simplerules == other.simplerules;
 
   @override
-  int get hashCode {
-    var extrasHash = 0;
-    for (final extra in extras.entries) {
-      extrasHash ^= Object.hash(extra.key, extra.value);
-    }
-    return Object.hash(level, tfo, simplerules, extras.length, extrasHash);
-  }
+  int get hashCode => Object.hash(tfo, simplerules);
 
   static String _decodeQueryComponent(String value) {
     try {
@@ -245,37 +57,352 @@ class CloudParams {
       return value;
     }
   }
+}
 
-  /// Mirrors the core's `url.QueryEscape` + `+`→`%20` so both ends emit the
-  /// exact same encoded suffix.
-  static String _encodeQueryComponent(String value) {
-    return Uri.encodeQueryComponent(value)
-        .replaceAll('+', '%20')
-        .replaceAll('!', '%21')
-        .replaceAll('*', '%2A')
-        .replaceAll("'", '%27')
-        .replaceAll('(', '%28')
-        .replaceAll(')', '%29');
+enum NodeFilterChoice {
+  any,
+  only,
+  exclude;
+
+  NodeFilterChoice get next => switch (this) {
+    any => only,
+    only => exclude,
+    exclude => any,
+  };
+}
+
+/// A client's node filter as `/api/v1/nodes/filter` stores it. Lists hold
+/// lower-case line keys and region codes; `match` / `nomatch` are regexes.
+class NodeFilter {
+  final List<String> includeLines;
+  final List<String> excludeLines;
+  final List<String> includeRegions;
+  final List<String> excludeRegions;
+  final String match;
+  final String nomatch;
+
+  const NodeFilter({
+    this.includeLines = const [],
+    this.excludeLines = const [],
+    this.includeRegions = const [],
+    this.excludeRegions = const [],
+    this.match = '',
+    this.nomatch = '',
+  });
+
+  factory NodeFilter.fromJson(Object? json) {
+    if (json is! Map) return const NodeFilter();
+    final includeLines = _asKeys(json['include_lines']);
+    final includeRegions = _asKeys(json['include_regions']);
+    return NodeFilter(
+      includeLines: includeLines,
+      excludeLines: _asKeys(
+        json['exclude_lines'],
+      ).where((key) => !includeLines.contains(key)).toList(),
+      includeRegions: includeRegions,
+      excludeRegions: _asKeys(
+        json['exclude_regions'],
+      ).where((code) => !includeRegions.contains(code)).toList(),
+      match: _asText(json['match']).trim(),
+      nomatch: _asText(json['nomatch']).trim(),
+    );
   }
 
-  static bool _isReservedKey(String key) {
-    return const {
-      'mode',
-      'type',
-      // Obsolete; the server still migrates leftovers into mode, so drop them.
-      'lv',
-      'nolv',
-      'tfo',
-      'simplerules',
-      'flclash',
-      'age-public-key',
-      'age_public_key',
-      'provider',
-      'anywhere',
-      'debug',
-      'client',
-    }.contains(key.toLowerCase());
+  Map<String, Object> toJson() => {
+    'include_lines': includeLines,
+    'exclude_lines': excludeLines,
+    'include_regions': includeRegions,
+    'exclude_regions': excludeRegions,
+    'match': match.trim(),
+    'nomatch': nomatch.trim(),
+  };
+
+  bool get isEmpty =>
+      includeLines.isEmpty &&
+      excludeLines.isEmpty &&
+      includeRegions.isEmpty &&
+      excludeRegions.isEmpty &&
+      match.trim().isEmpty &&
+      nomatch.trim().isEmpty;
+
+  NodeFilterChoice lineChoice(String key) =>
+      _choice(key, includeLines, excludeLines);
+
+  NodeFilterChoice regionChoice(String code) =>
+      _choice(code, includeRegions, excludeRegions);
+
+  NodeFilter cycleLine(String key) {
+    final (include, exclude) = _cycle(
+      key,
+      lineChoice(key).next,
+      includeLines,
+      excludeLines,
+    );
+    return _copy(includeLines: include, excludeLines: exclude);
+  }
+
+  NodeFilter cycleRegion(String code) {
+    final (include, exclude) = _cycle(
+      code,
+      regionChoice(code).next,
+      includeRegions,
+      excludeRegions,
+    );
+    return _copy(includeRegions: include, excludeRegions: exclude);
+  }
+
+  NodeFilter copyWith({String? match, String? nomatch}) =>
+      _copy(match: match, nomatch: nomatch);
+
+  NodeFilter _copy({
+    List<String>? includeLines,
+    List<String>? excludeLines,
+    List<String>? includeRegions,
+    List<String>? excludeRegions,
+    String? match,
+    String? nomatch,
+  }) {
+    return NodeFilter(
+      includeLines: includeLines ?? this.includeLines,
+      excludeLines: excludeLines ?? this.excludeLines,
+      includeRegions: includeRegions ?? this.includeRegions,
+      excludeRegions: excludeRegions ?? this.excludeRegions,
+      match: match ?? this.match,
+      nomatch: nomatch ?? this.nomatch,
+    );
+  }
+
+  static NodeFilterChoice _choice(
+    String key,
+    List<String> include,
+    List<String> exclude,
+  ) {
+    if (include.contains(key)) return NodeFilterChoice.only;
+    if (exclude.contains(key)) return NodeFilterChoice.exclude;
+    return NodeFilterChoice.any;
+  }
+
+  static (List<String>, List<String>) _cycle(
+    String key,
+    NodeFilterChoice choice,
+    List<String> include,
+    List<String> exclude,
+  ) {
+    return (
+      [
+        ...include.where((item) => item != key),
+        if (choice == NodeFilterChoice.only) key,
+      ],
+      [
+        ...exclude.where((item) => item != key),
+        if (choice == NodeFilterChoice.exclude) key,
+      ],
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is NodeFilter &&
+      _sameItems(includeLines, other.includeLines) &&
+      _sameItems(excludeLines, other.excludeLines) &&
+      _sameItems(includeRegions, other.includeRegions) &&
+      _sameItems(excludeRegions, other.excludeRegions) &&
+      match.trim() == other.match.trim() &&
+      nomatch.trim() == other.nomatch.trim();
+
+  @override
+  int get hashCode => Object.hash(
+    Object.hashAllUnordered(includeLines),
+    Object.hashAllUnordered(excludeLines),
+    Object.hashAllUnordered(includeRegions),
+    Object.hashAllUnordered(excludeRegions),
+    match.trim(),
+    nomatch.trim(),
+  );
+
+  static bool _sameItems(List<String> a, List<String> b) =>
+      a.length == b.length && a.toSet().containsAll(b);
+}
+
+class NodeFilterLine {
+  final String key;
+  final String name;
+  final int count;
+
+  const NodeFilterLine({
+    required this.key,
+    required this.name,
+    required this.count,
+  });
+
+  factory NodeFilterLine.fromJson(Map<dynamic, dynamic> json) {
+    final key = _asText(json['key']).trim().toLowerCase();
+    final name = _asText(json['name']).trim();
+    return NodeFilterLine(
+      key: key,
+      name: name.isEmpty ? key : name,
+      count: _asCount(json['count']),
+    );
   }
 }
 
-const _sentinel = Object();
+class NodeFilterRegion {
+  final String code;
+  final String name;
+  final String emoji;
+  final int count;
+
+  const NodeFilterRegion({
+    required this.code,
+    required this.name,
+    required this.emoji,
+    required this.count,
+  });
+
+  factory NodeFilterRegion.fromJson(Map<dynamic, dynamic> json) {
+    final code = _asText(json['code']).trim().toLowerCase();
+    final name = _asText(json['name']).trim();
+    return NodeFilterRegion(
+      code: code,
+      name: name.isEmpty ? code.toUpperCase() : name,
+      emoji: _asText(json['emoji']).trim(),
+      count: _asCount(json['count']),
+    );
+  }
+}
+
+class NodeFilterNode {
+  final String name;
+  final String line;
+  final String region;
+  final bool kept;
+
+  const NodeFilterNode({
+    required this.name,
+    required this.line,
+    required this.region,
+    required this.kept,
+  });
+
+  factory NodeFilterNode.fromJson(Map<dynamic, dynamic> json) {
+    return NodeFilterNode(
+      name: _asText(json['name']).trim(),
+      line: _asText(json['line']).trim().toLowerCase(),
+      region: _asText(json['region']).trim().toLowerCase(),
+      kept: _asBool(json['kept']),
+    );
+  }
+}
+
+/// The node catalog every `/api/v1/nodes/filter*` endpoint answers with.
+/// `kept` follows the requested filter, or the plan default lines without one.
+class NodeFilterCatalog {
+  final bool available;
+  final bool customized;
+  final bool systemLink;
+  final NodeFilter filter;
+  final List<String> defaultLines;
+  final List<NodeFilterLine> lines;
+  final List<NodeFilterRegion> regions;
+  final List<NodeFilterNode> nodes;
+  final int kept;
+  final int total;
+
+  const NodeFilterCatalog({
+    this.available = true,
+    this.customized = false,
+    this.systemLink = false,
+    this.filter = const NodeFilter(),
+    this.defaultLines = const [],
+    this.lines = const [],
+    this.regions = const [],
+    this.nodes = const [],
+    this.kept = 0,
+    this.total = 0,
+  });
+
+  factory NodeFilterCatalog.fromJson(Map<dynamic, dynamic> json) {
+    final filter = NodeFilter.fromJson(json['filter']);
+    final nodes = _asMaps(json['nodes'])
+        .map(NodeFilterNode.fromJson)
+        .where((node) => node.name.isNotEmpty)
+        .toList();
+    return NodeFilterCatalog(
+      available: json['available'] == null || _asBool(json['available']),
+      customized: json['customized'] == null
+          ? !filter.isEmpty
+          : _asBool(json['customized']),
+      systemLink: _asBool(json['system_link']),
+      filter: filter,
+      defaultLines: _asKeys(json['default_lines']),
+      lines: _uniqueBy(
+        _asMaps(json['lines']).map(NodeFilterLine.fromJson),
+        (line) => line.key,
+      ),
+      regions: _uniqueBy(
+        _asMaps(json['regions']).map(NodeFilterRegion.fromJson),
+        (region) => region.code,
+      ),
+      nodes: nodes,
+      kept: _tryCount(json['kept']) ?? nodes.where((node) => node.kept).length,
+      total: _tryCount(json['total']) ?? nodes.length,
+    );
+  }
+
+  /// Names of the plan default lines that have nodes, with the three Fusion
+  /// tiers shown once. Empty means every node is delivered.
+  List<String> get defaultLineNames {
+    final present = {
+      for (final line in lines)
+        if (line.count > 0) line.key: line.name,
+    };
+    final names = <String>[];
+    for (final key in defaultLines) {
+      final name = present[key];
+      if (name == null) continue;
+      final label = key.startsWith('fusion')
+          ? present['fusion'] ?? 'Fusion'
+          : name;
+      if (!names.contains(label)) names.add(label);
+    }
+    return names;
+  }
+}
+
+String _asText(Object? value) => value == null ? '' : value.toString();
+
+bool _asBool(Object? value) {
+  if (value is bool) return value;
+  if (value is num) return value != 0;
+  return const {'true', '1'}.contains(value?.toString().trim().toLowerCase());
+}
+
+int? _tryCount(Object? value) {
+  final count = value is num
+      ? value.toInt()
+      : int.tryParse(value?.toString().trim() ?? '');
+  return count == null || count < 0 ? null : count;
+}
+
+int _asCount(Object? value) => _tryCount(value) ?? 0;
+
+List<Map<dynamic, dynamic>> _asMaps(Object? value) =>
+    value is List ? value.whereType<Map>().toList() : const [];
+
+List<String> _asKeys(Object? value) {
+  if (value is! List) return const [];
+  return value
+      .whereType<Object>()
+      .map((item) => item.toString().trim().toLowerCase())
+      .where((item) => item.isNotEmpty)
+      .toSet()
+      .toList();
+}
+
+List<T> _uniqueBy<T>(Iterable<T> items, String Function(T item) key) {
+  final seen = <String>{};
+  return [
+    for (final item in items)
+      if (key(item).isNotEmpty && seen.add(key(item))) item,
+  ];
+}

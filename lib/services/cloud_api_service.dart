@@ -76,7 +76,33 @@ bool canReplayCloudRequest(RequestOptions options) {
     '/api/v1/shop/bought',
     '/api/v1/pay/methods',
     '/api/v1/pay/status',
+    '/api/v1/nodes/filter',
+    '/api/v1/nodes/filter/preview',
   }.contains(options.uri.path);
+}
+
+/// The panel picks nodes from the client's node filter when `nodes=auto` is
+/// present, so the keys that used to choose them are never sent.
+@visibleForTesting
+Map<String, String> managedConfigQuery(String paramString) {
+  final cleaned = paramString.trim().replaceFirst(RegExp(r'^[?&]+'), '');
+  final query = cleaned.isEmpty
+      ? <String, String>{}
+      : Map<String, String>.of(Uri.splitQueryString(cleaned));
+  const nodeKeys = {
+    'mode',
+    'lv',
+    'nolv',
+    'type',
+    'area',
+    'noarea',
+    'match',
+    'nomatch',
+    'nodes',
+  };
+  query.removeWhere((key, _) => nodeKeys.contains(key.toLowerCase()));
+  query['nodes'] = 'auto';
+  return query;
 }
 
 List<String> _cloudReadRoutes(Uri uri) {
@@ -252,6 +278,16 @@ class CloudApiException implements Exception {
     return error is CloudApiUnauthorizedHandledException ||
         (error is DioException &&
             error.error is CloudApiUnauthorizedHandledException);
+  }
+
+  /// A panel without the endpoint yet answers 404, over HTTP or in `ret`.
+  static bool isNotFound(Object error) {
+    if (error is _CloudReadResponseException) return error.status == 404;
+    if (error is CloudApiException && error.cause != null) {
+      return isNotFound(error.cause!);
+    }
+    return error is DioException &&
+        error.response?.statusCode == HttpStatus.notFound;
   }
 
   static bool isStaleSession(Object error) {
@@ -613,7 +649,18 @@ class _CloudSessionUnauthorizedException extends CloudApiException {
     : super('Unauthorized');
 }
 
-class CloudApiService {
+abstract interface class CloudNodeFilterApi {
+  Future<NodeFilterCatalog> fetchNodeFilter();
+
+  Future<NodeFilterCatalog> previewNodeFilter(NodeFilter filter);
+
+  /// Null when the panel confirmed without returning the catalog.
+  Future<NodeFilterCatalog?> saveNodeFilter(NodeFilter filter);
+
+  Future<NodeFilterCatalog?> resetNodeFilter();
+}
+
+class CloudApiService implements CloudNodeFilterApi {
   Dio? _dio;
   String? _cachedToken;
   int _sessionRevision = 0;
@@ -1302,16 +1349,7 @@ class CloudApiService {
   }) async {
     final revision = _sessionRevision;
     try {
-      final queryParameters = <String, dynamic>{};
-      final cleaned = paramString.startsWith('&')
-          ? paramString.substring(1)
-          : paramString;
-      if (cleaned.isNotEmpty) {
-        Uri.splitQueryString(cleaned).forEach((k, v) {
-          queryParameters[k] = v;
-        });
-      }
-
+      final queryParameters = managedConfigQuery(paramString);
       final timestamp = _flclashTimestamp();
 
       final identity = await AgeCrypto.generateIdentity();
@@ -1397,6 +1435,67 @@ class CloudApiService {
       }
       rethrow;
     }
+  }
+
+  // -- Node filter --
+
+  @override
+  Future<NodeFilterCatalog> fetchNodeFilter() =>
+      _readNodeFilter('/nodes/filter', const {});
+
+  @override
+  Future<NodeFilterCatalog> previewNodeFilter(NodeFilter filter) =>
+      _readNodeFilter('/nodes/filter/preview', {'filter': filter.toJson()});
+
+  @override
+  Future<NodeFilterCatalog?> saveNodeFilter(NodeFilter filter) =>
+      _writeNodeFilter('/nodes/filter/save', {'filter': filter.toJson()});
+
+  @override
+  Future<NodeFilterCatalog?> resetNodeFilter() =>
+      _writeNodeFilter('/nodes/filter/reset', const {});
+
+  Future<NodeFilterCatalog> _readNodeFilter(
+    String path,
+    Map<String, Object> body,
+  ) async {
+    final res = await _syncRead(
+      (token, options) => _client.post(
+        path,
+        data: body,
+        cancelToken: token,
+        options: options.copyWith(contentType: Headers.jsonContentType),
+      ),
+      validate: (response) =>
+          NodeFilterCatalog.fromJson(_requireReadData(response.data)),
+    );
+    return NodeFilterCatalog.fromJson(_requireReadData(res.data));
+  }
+
+  Future<NodeFilterCatalog?> _writeNodeFilter(
+    String path,
+    Map<String, Object> body,
+  ) async {
+    final res = await _client.post(
+      path,
+      data: body,
+      options: _writeOptions(Options(contentType: Headers.jsonContentType)),
+    );
+    dynamic data = res.data;
+    if (data is String) {
+      try {
+        data = jsonDecode(data);
+      } catch (_) {}
+    }
+    if (data is! Map) {
+      throw CloudApiException(appLocalizations.cloudApiInvalidResponse);
+    }
+    final dto = CloudApiResponse<dynamic>.fromJson(data);
+    if (!dto.isSuccess) {
+      throw CloudApiException(dto.msg ?? appLocalizations.operationFailed);
+    }
+    final catalog = dto.data;
+    return catalog is Map ? NodeFilterCatalog.fromJson(catalog) : null;
   }
 
   // -- Store / Purchase --

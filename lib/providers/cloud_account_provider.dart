@@ -372,7 +372,6 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
     await SafeStorage.write('cloud_token', token);
     _lastRefreshTime = DateTime.now();
     await _saveCache(profile, announcement);
-    await _injectDefaultParams(profile);
     state = state.copyWith(
       isLoading: false,
       isLoggedIn: true,
@@ -420,7 +419,6 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
         userInfo.profile,
         userInfo.announcement ?? state.latestNotification,
       );
-      await _injectDefaultParams(userInfo.profile);
 
       state = state.copyWith(
         profile: userInfo.profile,
@@ -446,18 +444,8 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
     }
   }
 
-  Future<void> _injectDefaultParams(CloudProfile profile) async {
-    final tier = SubscriptionTier.fromServer(
-      profile.subscription,
-      planCode: profile.planCode,
-      planRank: profile.planRank,
-      nodeAccess: profile.nodeAccess,
-    );
-    await CloudParamsStorage.reconcileForTier(tier);
-  }
-
-  /// Refreshes the plan identity first so tier-dependent parameters are current
-  /// before the managed subscription is regenerated.
+  /// Refreshes the plan first so the managed subscription is regenerated for
+  /// the plan the account holds now.
   Future<void> refreshManagedSubscription() async {
     await refreshProfile(force: true);
     if (!state.isLoggedIn || state.error != null) return;
@@ -474,10 +462,6 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
     await _runManagedProfileTask(() async {
       state = state.copyWith(isSyncing: true, error: null);
       try {
-        if (state.profile != null) {
-          await _injectDefaultParams(state.profile!);
-        }
-
         final existing = await _existingCloudProfiles();
         if (existing.isEmpty) {
           if (state.profile != null) {
@@ -690,3 +674,7 @@ final cloudAccountProvider =
     NotifierProvider<CloudAccountNotifier, CloudAccountState>(
       CloudAccountNotifier.new,
     );
+
+final cloudNodeFilterApiProvider = Provider<CloudNodeFilterApi>(
+  (_) => CloudApiService(),
+);

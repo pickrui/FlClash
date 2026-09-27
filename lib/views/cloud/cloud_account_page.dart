@@ -20,6 +20,12 @@ import 'cloud_register_page.dart';
 /// also compile the whole store.
 WidgetBuilder? cloudStorePageBuilder;
 
+/// Bound at startup like [cloudStorePageBuilder]. The page pops with the
+/// catalog it saved or reset.
+WidgetBuilder? cloudNodeFilterPageBuilder;
+
+const cloudNodeFilterMinPlanRank = 20;
+
 final cloudServiceHealthCheckProvider = Provider<Future<void> Function()>(
   (ref) => CloudApiService().checkServiceHealth,
 );
@@ -350,6 +356,8 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
                 const SizedBox(height: 16),
               ],
               CloudProfileCard(profile: profile),
+              if ((profile.planRank ?? 0) >= cloudNodeFilterMinPlanRank)
+                CloudNodeFilterEntry(profile: profile),
               const SizedBox(height: 16),
               _buildStoreEntry(),
               if (state.latestNotification case final notice?
@@ -555,5 +563,144 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
         ),
       );
     }
+  }
+}
+
+class CloudNodeFilterEntry extends ConsumerStatefulWidget {
+  final CloudProfile profile;
+
+  const CloudNodeFilterEntry({super.key, required this.profile});
+
+  @override
+  ConsumerState<CloudNodeFilterEntry> createState() =>
+      _CloudNodeFilterEntryState();
+}
+
+class _CloudNodeFilterEntryState extends ConsumerState<CloudNodeFilterEntry> {
+  NodeFilterCatalog? _catalog;
+  Object? _error;
+  var _generation = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  @override
+  void didUpdateWidget(CloudNodeFilterEntry oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Every account refresh hands over a new profile, and the plan may differ.
+    if (!identical(oldWidget.profile, widget.profile)) _load();
+  }
+
+  Future<void> _load() async {
+    final generation = ++_generation;
+    try {
+      final catalog = await ref
+          .read(cloudNodeFilterApiProvider)
+          .fetchNodeFilter();
+      if (!mounted || generation != _generation) return;
+      setState(() {
+        _catalog = catalog;
+        _error = null;
+      });
+    } catch (e) {
+      if (!mounted || generation != _generation) return;
+      if (CloudApiException.isHandledUnauthorized(e)) return;
+      if (CloudApiException.isUnauthorized(e)) {
+        await ref.read(cloudAccountProvider.notifier).handleUnauthorized();
+        return;
+      }
+      setState(() => _error = e);
+    }
+  }
+
+  Future<void> _open() async {
+    final builder = cloudNodeFilterPageBuilder;
+    if (builder == null) return;
+    final result = await Navigator.of(
+      context,
+    ).push<NodeFilterCatalog>(MaterialPageRoute(builder: builder));
+    if (!mounted) return;
+    if (result == null) {
+      await _load();
+      return;
+    }
+    _generation++;
+    setState(() {
+      _catalog = result;
+      _error = null;
+    });
+  }
+
+  String _summary(NodeFilterCatalog catalog) {
+    final l10n = AppLocalizations.current;
+    if (catalog.customized) {
+      return '${l10n.nodeFilterCustomized} · '
+          '${l10n.nodeFilterKept(catalog.kept, catalog.total)}';
+    }
+    final names = catalog.defaultLineNames;
+    return '${l10n.nodeFilterRecommended} · '
+        '${names.isEmpty ? l10n.nodeFilterAllNodes : names.join(' + ')}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final catalog = _catalog;
+    final error = _error;
+    if (catalog?.available == false ||
+        (catalog == null &&
+            error != null &&
+            CloudApiException.isNotFound(error))) {
+      return const SizedBox.shrink();
+    }
+    final showError = catalog == null && error != null;
+    final summary = switch ((catalog, error)) {
+      (final catalog?, _) => _summary(catalog),
+      (_, final error?) => CloudApiException.clean(error),
+      _ => AppLocalizations.current.loading,
+    };
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: CommonCard(
+        onPressed: cloudNodeFilterPageBuilder == null ? null : _open,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              const CloudIconTile(icon: Icons.filter_alt),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      AppLocalizations.current.nodeFilter,
+                      style: context.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: context.colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      summary,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.textTheme.bodySmall?.copyWith(
+                        color: showError
+                            ? context.colorScheme.error
+                            : context.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, color: context.colorScheme.outline),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

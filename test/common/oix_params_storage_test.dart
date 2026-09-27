@@ -3,69 +3,78 @@ import 'package:fl_clash/models/models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:test/test.dart';
 
-CloudParams _overseas(CloudParams params) =>
-    params.copyWith(level: NetworkLevel.overseas);
-
 void main() {
-  test('update changes the params a queued write stored', () async {
+  test('stored node keys and free-form options are migrated away', () async {
     SharedPreferences.setMockInitialValues({
-      'cloud_service_config_params': '&mode=premium&tfo=false',
+      'cloud_service_config_params':
+          '&mode=premium&tfo=true&simplerules=true&area=hk&noarea=tw'
+          '&match=a&nomatch=b&lv=2&nolv=1&type=love&custom=1',
+      'cloud_service_default_params': '&mode=premium',
     });
-
-    final saved = CloudParamsStorage.save(
-      CloudParams.parse('&mode=premium&tfo=true&simplerules=true&area=hk'),
-    );
-    final updated = await CloudParamsStorage.update(_overseas);
-    await saved;
-
-    expect(
-      updated,
-      CloudParams.parse('&mode=overseas&tfo=true&simplerules=true&area=hk'),
-    );
-    expect(await CloudParamsStorage.load(), updated);
-  });
-
-  test('a write queued behind update is not overwritten by it', () async {
-    SharedPreferences.setMockInitialValues({
-      'cloud_service_config_params': '&mode=premium&tfo=false',
-    });
-    final edited = CloudParams.parse('&mode=emergency&tfo=true');
-
-    await Future.wait([
-      CloudParamsStorage.update(_overseas),
-      CloudParamsStorage.save(edited),
-    ]);
-
-    expect(await CloudParamsStorage.load(), edited);
-  });
-
-  test('update migrates the legacy tfo flag before the change', () async {
-    SharedPreferences.setMockInitialValues({
-      'cloud_service_config_params': '&mode=premium',
-      'cloud_service_tfo': true,
-    });
-
-    final updated = await CloudParamsStorage.update(_overseas);
-
-    expect(updated, CloudParams.parse('&mode=overseas&tfo=true'));
-    final prefs = await SharedPreferences.getInstance();
-    expect(prefs.containsKey('cloud_service_tfo'), isFalse);
-    expect(await CloudParamsStorage.load(), updated);
-  });
-
-  test('a failed change leaves the params and the queue usable', () async {
-    SharedPreferences.setMockInitialValues({
-      'cloud_service_config_params': '&mode=premium&tfo=false',
-    });
-
-    await expectLater(
-      CloudParamsStorage.update((_) => throw StateError('change failed')),
-      throwsStateError,
-    );
 
     expect(
       await CloudParamsStorage.load(),
-      CloudParams.parse('&mode=premium&tfo=false'),
+      const CloudParams(tfo: true, simplerules: true),
     );
+    final prefs = await SharedPreferences.getInstance();
+    expect(
+      prefs.getString('cloud_service_config_params'),
+      '&tfo=true&simplerules=true',
+    );
+    expect(prefs.containsKey('cloud_service_default_params'), isFalse);
+  });
+
+  test('a mode-only value becomes empty', () async {
+    SharedPreferences.setMockInitialValues({
+      'cloud_service_config_params': '&mode=emergency',
+    });
+
+    expect(await CloudParamsStorage.load(), const CloudParams());
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getString('cloud_service_config_params'), '');
+  });
+
+  test('load migrates the legacy tfo flag', () async {
+    SharedPreferences.setMockInitialValues({
+      'cloud_service_config_params': '&mode=premium&simplerules=true',
+      'cloud_service_tfo': true,
+    });
+
+    final loaded = await CloudParamsStorage.load();
+
+    expect(loaded, const CloudParams(tfo: true, simplerules: true));
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.containsKey('cloud_service_tfo'), isFalse);
+    expect(
+      prefs.getString('cloud_service_config_params'),
+      '&tfo=true&simplerules=true',
+    );
+  });
+
+  test('a load queued behind a save reads what was saved', () async {
+    SharedPreferences.setMockInitialValues({
+      'cloud_service_config_params': '&tfo=false',
+    });
+    const edited = CloudParams(tfo: true, simplerules: true);
+
+    final results = await Future.wait([
+      CloudParamsStorage.save(edited).then((_) => null),
+      CloudParamsStorage.load(),
+    ]);
+
+    expect(results.last, edited);
+  });
+
+  test('clear removes current and legacy values', () async {
+    SharedPreferences.setMockInitialValues({
+      'cloud_service_config_params': '&tfo=true',
+      'cloud_service_default_params': '&mode=premium',
+      'cloud_service_tfo': false,
+    });
+
+    await CloudParamsStorage.clear();
+
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getKeys(), isEmpty);
   });
 }

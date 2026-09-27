@@ -3894,16 +3894,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Optional Parameters`
-  String get optionalParameters {
-    return Intl.message(
-      'Optional Parameters',
-      name: 'optionalParameters',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Restore success`
   String get restoreSuccess {
     return Intl.message(
@@ -4669,56 +4659,171 @@ class AppLocalizations {
     return Intl.message('Refresh', name: 'refresh', desc: '', args: []);
   }
 
-  /// `All Nodes`
-  String get allNodes {
-    return Intl.message('All Nodes', name: 'allNodes', desc: '', args: []);
+  /// `Node Filter`
+  String get nodeFilter {
+    return Intl.message('Node Filter', name: 'nodeFilter', desc: '', args: []);
   }
 
-  /// `Get all nodes available for your plan`
-  String get allNodesDesc {
+  /// `Recommended for your plan`
+  String get nodeFilterRecommended {
     return Intl.message(
-      'Get all nodes available for your plan',
-      name: 'allNodesDesc',
+      'Recommended for your plan',
+      name: 'nodeFilterRecommended',
       desc: '',
       args: [],
     );
   }
 
-  /// `Overseas Network Environment`
-  String get overseasNetworkEnvironment {
+  /// `Customized`
+  String get nodeFilterCustomized {
     return Intl.message(
-      'Overseas Network Environment',
-      name: 'overseasNetworkEnvironment',
+      'Customized',
+      name: 'nodeFilterCustomized',
       desc: '',
       args: [],
     );
   }
 
-  /// `Turn on this option if you are currently outside mainland China`
-  String get overseasNetworkEnvironmentDesc {
+  /// `{kept} of {total} nodes kept`
+  String nodeFilterKept(Object kept, Object total) {
     return Intl.message(
-      'Turn on this option if you are currently outside mainland China',
-      name: 'overseasNetworkEnvironmentDesc',
+      '$kept of $total nodes kept',
+      name: 'nodeFilterKept',
+      desc: '',
+      args: [kept, total],
+    );
+  }
+
+  /// `Lines`
+  String get nodeFilterLines {
+    return Intl.message('Lines', name: 'nodeFilterLines', desc: '', args: []);
+  }
+
+  /// `Regions`
+  String get nodeFilterRegions {
+    return Intl.message(
+      'Regions',
+      name: 'nodeFilterRegions',
       desc: '',
       args: [],
     );
   }
 
-  /// `Emergency Mode`
-  String get emergencyMode {
+  /// `Name contains`
+  String get nodeFilterNameContains {
     return Intl.message(
-      'Emergency Mode',
-      name: 'emergencyMode',
+      'Name contains',
+      name: 'nodeFilterNameContains',
       desc: '',
       args: [],
     );
   }
 
-  /// `Enable this option to switch to backup nodes when regular lines are unavailable`
-  String get emergencyModeDesc {
+  /// `Name excludes`
+  String get nodeFilterNameExcludes {
     return Intl.message(
-      'Enable this option to switch to backup nodes when regular lines are unavailable',
-      name: 'emergencyModeDesc',
+      'Name excludes',
+      name: 'nodeFilterNameExcludes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `e.g. HK|JP`
+  String get nodeFilterNameContainsHint {
+    return Intl.message(
+      'e.g. HK|JP',
+      name: 'nodeFilterNameContainsHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `e.g. test|maintenance`
+  String get nodeFilterNameExcludesHint {
+    return Intl.message(
+      'e.g. test|maintenance',
+      name: 'nodeFilterNameExcludesHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Preview`
+  String get nodeFilterPreview {
+    return Intl.message(
+      'Preview',
+      name: 'nodeFilterPreview',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Search nodes`
+  String get nodeFilterSearch {
+    return Intl.message(
+      'Search nodes',
+      name: 'nodeFilterSearch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Any`
+  String get nodeFilterAny {
+    return Intl.message('Any', name: 'nodeFilterAny', desc: '', args: []);
+  }
+
+  /// `Only`
+  String get nodeFilterOnly {
+    return Intl.message('Only', name: 'nodeFilterOnly', desc: '', args: []);
+  }
+
+  /// `Exclude`
+  String get nodeFilterExclude {
+    return Intl.message(
+      'Exclude',
+      name: 'nodeFilterExclude',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All nodes`
+  String get nodeFilterAllNodes {
+    return Intl.message(
+      'All nodes',
+      name: 'nodeFilterAllNodes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Keep at least one node`
+  String get nodeFilterKeepOne {
+    return Intl.message(
+      'Keep at least one node',
+      name: 'nodeFilterKeepOne',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Without a filter, lines follow your plan: Fusion + GIA with GIA access, Fusion with Fusion access, CIA + IXP with CIA or IXP access, otherwise every node.`
+  String get nodeFilterDefaultNote {
+    return Intl.message(
+      'Without a filter, lines follow your plan: Fusion + GIA with GIA access, Fusion with Fusion access, CIA + IXP with CIA or IXP access, otherwise every node.',
+      name: 'nodeFilterDefaultNote',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Saved to your account and applies to every device signed in to this app.`
+  String get nodeFilterAccountNote {
+    return Intl.message(
+      'Saved to your account and applies to every device signed in to this app.',
+      name: 'nodeFilterAccountNote',
       desc: '',
       args: [],
     );

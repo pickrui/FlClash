@@ -1,6 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fl_clash/providers/cloud_account_provider.dart';
-
 import 'dart:convert';
 
 import 'package:fl_clash/common/common.dart';
@@ -14,21 +11,19 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
-class EditProfileView extends ConsumerStatefulWidget {
+class EditProfileView extends StatefulWidget {
   final Profile profile;
 
   const EditProfileView({super.key, required this.profile});
 
   @override
-  ConsumerState<EditProfileView> createState() => _EditProfileViewState();
+  State<EditProfileView> createState() => _EditProfileViewState();
 }
 
-class _EditProfileViewState extends ConsumerState<EditProfileView> {
+class _EditProfileViewState extends State<EditProfileView> {
   late final TextEditingController _labelController;
   late final TextEditingController _urlController;
   late final TextEditingController _autoUpdateDurationController;
-  late final TextEditingController _oixParamsController;
-  String _defaultEditableParams = '';
   late bool _autoUpdate;
   bool _tfo = false;
   bool _minimalConfig = false;
@@ -46,7 +41,6 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     _setupAction = context.setupAction;
     _labelController = TextEditingController(text: widget.profile.label);
     _urlController = TextEditingController(text: widget.profile.url);
-    _oixParamsController = TextEditingController();
     _loadoixParams();
     _autoUpdate = widget.profile.autoUpdate;
     _autoUpdateDurationController = TextEditingController(
@@ -58,16 +52,11 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
   Future<void> _loadoixParams() async {
     if (!widget.profile.isoixCloudProfile) return;
     final params = await CloudParamsStorage.load();
-    final defaultRaw = await CloudParamsStorage.loadDefaultRaw();
 
     if (mounted) {
       setState(() {
-        _defaultEditableParams = CloudParams.parse(
-          defaultRaw,
-        ).encodeEditableOptions();
         _tfo = params.tfo ?? false;
         _minimalConfig = params.simplerules;
-        _oixParamsController.text = params.encodeEditableOptions();
       });
     }
   }
@@ -75,9 +64,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
   Future<void> _saveoixParams(Profile currentProfile) async {
     final profileAction = context.profileAction;
 
-    final edited = CloudParams.parse(
-      _oixParamsController.text,
-    ).copyWith(tfo: _tfo, simplerules: _minimalConfig);
+    final edited = CloudParams(tfo: _tfo, simplerules: _minimalConfig);
     final previous = await CloudParamsStorage.load();
     final savedProfile = await profileAction.saveProfileMetadata(
       currentProfile,
@@ -300,21 +287,13 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     _urlController.dispose();
     _fileInfoNotifier.dispose();
     _autoUpdateDurationController.dispose();
-    _oixParamsController.dispose();
     if (appController.isAttach) _setupAction.autoApplyProfile();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final cloudState = ref.watch(cloudAccountProvider);
     final isoixCloud = widget.profile.isoixCloudProfile;
-    final subscription = cloudState.profile?.subscription ?? '';
-    final showRestore =
-        isoixCloud &&
-        subscription.isNotEmpty &&
-        subscription != 'Pass Iron' &&
-        subscription != 'null';
     final items = [
       ListItem(
         title: TextFormField(
@@ -446,38 +425,6 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
             value: _minimalConfig,
             onChanged: _setMinimalConfig,
           ),
-        ),
-      if (isoixCloud)
-        ListItem(
-          title: TextFormField(
-            textInputAction: TextInputAction.next,
-            controller: _oixParamsController,
-            maxLines: 3,
-            minLines: 1,
-            style: const TextStyle(fontFamily: 'monospace'),
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              labelText: appLocalizations.optionalParameters,
-              hintText: '&area=hk',
-            ),
-            inputFormatters: [
-              FilteringTextInputFormatter.deny(
-                RegExp(
-                  r'(?:^|&)(?:tfo|simplerules)=(?:true|false)(?=&|$)',
-                  caseSensitive: false,
-                ),
-              ),
-            ],
-          ),
-          trailing: showRestore
-              ? IconButton(
-                  icon: const Icon(Icons.restore),
-                  tooltip: appLocalizations.restoreDefault,
-                  onPressed: () {
-                    _oixParamsController.text = _defaultEditableParams;
-                  },
-                )
-              : null,
         ),
     ];
     return CommonPopScope(
