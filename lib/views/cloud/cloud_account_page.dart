@@ -636,13 +636,9 @@ class _CloudNodeFilterEntryState extends ConsumerState<CloudNodeFilterEntry> {
 
   String _summary(NodeFilterCatalog catalog) {
     final l10n = AppLocalizations.current;
-    if (catalog.customized) {
-      return '${l10n.nodeFilterCustomized} · '
-          '${l10n.nodeFilterKept(catalog.kept, catalog.total)}';
-    }
-    final names = catalog.defaultLineNames;
-    return '${l10n.nodeFilterRecommended} · '
-        '${names.isEmpty ? l10n.nodeFilterAllNodes : names.join(' + ')}';
+    if (!catalog.customized) return l10n.nodeFilterSmartSelection;
+    return '${l10n.nodeFilterCustomized} · '
+        '${l10n.nodeFilterKept(catalog.kept, catalog.total)}';
   }
 
   @override

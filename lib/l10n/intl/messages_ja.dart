@@ -1096,14 +1096,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "nodeFilter": MessageLookupByLibrary.simpleMessage("ノードフィルター"),
     "nodeFilterAccountNote": MessageLookupByLibrary.simpleMessage(
-      "フィルターはアカウントに保存され、このアプリでサインインしたすべてのデバイスに適用されます。",
+      "フィルターはアカウントに保存され、このアプリでサインインしたすべてのデバイスに適用されます",
     ),
-    "nodeFilterAllNodes": MessageLookupByLibrary.simpleMessage("すべてのノード"),
     "nodeFilterAny": MessageLookupByLibrary.simpleMessage("指定なし"),
     "nodeFilterCustomized": MessageLookupByLibrary.simpleMessage("カスタマイズ済み"),
-    "nodeFilterDefaultNote": MessageLookupByLibrary.simpleMessage(
-      "フィルター未設定時はプランに応じて回線を自動で選びます：GIA 対応なら Fusion + GIA、Fusion 対応なら Fusion、CIA / IXP 対応なら CIA + IXP、それ以外はすべてのノード。",
-    ),
     "nodeFilterExclude": MessageLookupByLibrary.simpleMessage("除外"),
     "nodeFilterKeepOne": MessageLookupByLibrary.simpleMessage(
       "少なくとも 1 つのノードを残してください",
@@ -1111,18 +1107,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "nodeFilterKept": m31,
     "nodeFilterLines": MessageLookupByLibrary.simpleMessage("回線"),
     "nodeFilterNameContains": MessageLookupByLibrary.simpleMessage("名前に含む"),
-    "nodeFilterNameContainsHint": MessageLookupByLibrary.simpleMessage(
-      "例: 香港|日本",
-    ),
+    "nodeFilterNameContainsHint": MessageLookupByLibrary.simpleMessage("香港|日本"),
     "nodeFilterNameExcludes": MessageLookupByLibrary.simpleMessage("名前から除外"),
     "nodeFilterNameExcludesHint": MessageLookupByLibrary.simpleMessage(
-      "例: テスト|メンテナンス",
+      "テスト|メンテナンス",
     ),
     "nodeFilterOnly": MessageLookupByLibrary.simpleMessage("のみ残す"),
     "nodeFilterPreview": MessageLookupByLibrary.simpleMessage("プレビュー"),
-    "nodeFilterRecommended": MessageLookupByLibrary.simpleMessage("プランのおすすめ"),
     "nodeFilterRegions": MessageLookupByLibrary.simpleMessage("地域"),
     "nodeFilterSearch": MessageLookupByLibrary.simpleMessage("ノードを検索"),
+    "nodeFilterSmartSelection": MessageLookupByLibrary.simpleMessage("スマート選択"),
     "none": MessageLookupByLibrary.simpleMessage("なし"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "現在のプロキシグループは選択できません",

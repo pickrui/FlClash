@@ -14,7 +14,6 @@ NodeFilterCatalog _catalog(
   NodeFilter filter, {
   bool? customized,
   int kept = 3,
-  List<String> defaultLines = const ['fusion', 'fusion_premium', 'gia'],
   bool available = true,
 }) {
   return NodeFilterCatalog.fromJson({
@@ -22,7 +21,6 @@ NodeFilterCatalog _catalog(
     'customized': customized ?? !filter.isEmpty,
     'system_link': customized ?? !filter.isEmpty,
     'filter': filter.toJson(),
-    'default_lines': defaultLines,
     'lines': [
       {'key': 'fusion', 'name': 'Fusion', 'count': 2},
       {'key': 'gia', 'name': 'GIA', 'count': 1},
@@ -212,24 +210,8 @@ void main() {
 
       await _pumpAccountPage(tester, api, planRank: 20);
       expect(find.text('Node Filter'), findsOneWidget);
-      expect(
-        find.text('Recommended for your plan · Fusion + GIA'),
-        findsOneWidget,
-      );
+      expect(find.text('Smart Selection'), findsOneWidget);
       expect(tester.takeException(), isNull);
-    });
-
-    testWidgets('summarizes a plan without default lines as every node', (
-      tester,
-    ) async {
-      final api = _FakeApi(
-        _catalog(const NodeFilter(), defaultLines: const [], kept: 4),
-      );
-      await _pumpAccountPage(tester, api);
-      expect(
-        find.text('Recommended for your plan · All nodes'),
-        findsOneWidget,
-      );
     });
 
     testWidgets('shows how many nodes a customized filter keeps', (

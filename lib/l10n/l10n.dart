@@ -4664,11 +4664,11 @@ class AppLocalizations {
     return Intl.message('Node Filter', name: 'nodeFilter', desc: '', args: []);
   }
 
-  /// `Recommended for your plan`
-  String get nodeFilterRecommended {
+  /// `Smart Selection`
+  String get nodeFilterSmartSelection {
     return Intl.message(
-      'Recommended for your plan',
-      name: 'nodeFilterRecommended',
+      'Smart Selection',
+      name: 'nodeFilterSmartSelection',
       desc: '',
       args: [],
     );
@@ -4729,20 +4729,20 @@ class AppLocalizations {
     );
   }
 
-  /// `e.g. HK|JP`
+  /// `HK|JP`
   String get nodeFilterNameContainsHint {
     return Intl.message(
-      'e.g. HK|JP',
+      'HK|JP',
       name: 'nodeFilterNameContainsHint',
       desc: '',
       args: [],
     );
   }
 
-  /// `e.g. test|maintenance`
+  /// `test|maintenance`
   String get nodeFilterNameExcludesHint {
     return Intl.message(
-      'e.g. test|maintenance',
+      'test|maintenance',
       name: 'nodeFilterNameExcludesHint',
       desc: '',
       args: [],
@@ -4789,31 +4789,11 @@ class AppLocalizations {
     );
   }
 
-  /// `All nodes`
-  String get nodeFilterAllNodes {
-    return Intl.message(
-      'All nodes',
-      name: 'nodeFilterAllNodes',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Keep at least one node`
   String get nodeFilterKeepOne {
     return Intl.message(
       'Keep at least one node',
       name: 'nodeFilterKeepOne',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Without a filter, lines follow your plan: Fusion + GIA with GIA access, Fusion with Fusion access, CIA + IXP with CIA or IXP access, otherwise every node.`
-  String get nodeFilterDefaultNote {
-    return Intl.message(
-      'Without a filter, lines follow your plan: Fusion + GIA with GIA access, Fusion with Fusion access, CIA + IXP with CIA or IXP access, otherwise every node.',
-      name: 'nodeFilterDefaultNote',
       desc: '',
       args: [],
     );

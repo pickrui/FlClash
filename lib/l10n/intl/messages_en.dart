@@ -1320,12 +1320,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "nodeFilterAccountNote": MessageLookupByLibrary.simpleMessage(
       "Saved to your account and applies to every device signed in to this app.",
     ),
-    "nodeFilterAllNodes": MessageLookupByLibrary.simpleMessage("All nodes"),
     "nodeFilterAny": MessageLookupByLibrary.simpleMessage("Any"),
     "nodeFilterCustomized": MessageLookupByLibrary.simpleMessage("Customized"),
-    "nodeFilterDefaultNote": MessageLookupByLibrary.simpleMessage(
-      "Without a filter, lines follow your plan: Fusion + GIA with GIA access, Fusion with Fusion access, CIA + IXP with CIA or IXP access, otherwise every node.",
-    ),
     "nodeFilterExclude": MessageLookupByLibrary.simpleMessage("Exclude"),
     "nodeFilterKeepOne": MessageLookupByLibrary.simpleMessage(
       "Keep at least one node",
@@ -1335,22 +1331,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "nodeFilterNameContains": MessageLookupByLibrary.simpleMessage(
       "Name contains",
     ),
-    "nodeFilterNameContainsHint": MessageLookupByLibrary.simpleMessage(
-      "e.g. HK|JP",
-    ),
+    "nodeFilterNameContainsHint": MessageLookupByLibrary.simpleMessage("HK|JP"),
     "nodeFilterNameExcludes": MessageLookupByLibrary.simpleMessage(
       "Name excludes",
     ),
     "nodeFilterNameExcludesHint": MessageLookupByLibrary.simpleMessage(
-      "e.g. test|maintenance",
+      "test|maintenance",
     ),
     "nodeFilterOnly": MessageLookupByLibrary.simpleMessage("Only"),
     "nodeFilterPreview": MessageLookupByLibrary.simpleMessage("Preview"),
-    "nodeFilterRecommended": MessageLookupByLibrary.simpleMessage(
-      "Recommended for your plan",
-    ),
     "nodeFilterRegions": MessageLookupByLibrary.simpleMessage("Regions"),
     "nodeFilterSearch": MessageLookupByLibrary.simpleMessage("Search nodes"),
+    "nodeFilterSmartSelection": MessageLookupByLibrary.simpleMessage(
+      "Smart Selection",
+    ),
     "none": MessageLookupByLibrary.simpleMessage("none"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "The current proxy group cannot be selected.",

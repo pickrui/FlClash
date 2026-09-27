@@ -180,7 +180,6 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
     return NodeFilterCatalog(
       customized: !_draft.isEmpty,
       filter: _draft,
-      defaultLines: preview.defaultLines,
       lines: preview.lines,
       regions: preview.regions,
       nodes: preview.nodes,
@@ -351,19 +350,9 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.appLocalizations.nodeFilterDefaultNote,
-                    style: style,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    context.appLocalizations.nodeFilterAccountNote,
-                    style: style,
-                  ),
-                ],
+              child: Text(
+                context.appLocalizations.nodeFilterAccountNote,
+                style: style,
               ),
             ),
           ],

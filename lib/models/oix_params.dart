@@ -295,13 +295,12 @@ class NodeFilterNode {
 }
 
 /// The node catalog every `/api/v1/nodes/filter*` endpoint answers with.
-/// `kept` follows the requested filter, or the plan default lines without one.
+/// `kept` follows the requested filter, or the panel's own pick without one.
 class NodeFilterCatalog {
   final bool available;
   final bool customized;
   final bool systemLink;
   final NodeFilter filter;
-  final List<String> defaultLines;
   final List<NodeFilterLine> lines;
   final List<NodeFilterRegion> regions;
   final List<NodeFilterNode> nodes;
@@ -313,7 +312,6 @@ class NodeFilterCatalog {
     this.customized = false,
     this.systemLink = false,
     this.filter = const NodeFilter(),
-    this.defaultLines = const [],
     this.lines = const [],
     this.regions = const [],
     this.nodes = const [],
@@ -334,7 +332,6 @@ class NodeFilterCatalog {
           : _asBool(json['customized']),
       systemLink: _asBool(json['system_link']),
       filter: filter,
-      defaultLines: _asKeys(json['default_lines']),
       lines: _uniqueBy(
         _asMaps(json['lines']).map(NodeFilterLine.fromJson),
         (line) => line.key,
@@ -347,25 +344,6 @@ class NodeFilterCatalog {
       kept: _tryCount(json['kept']) ?? nodes.where((node) => node.kept).length,
       total: _tryCount(json['total']) ?? nodes.length,
     );
-  }
-
-  /// Names of the plan default lines that have nodes, with the three Fusion
-  /// tiers shown once. Empty means every node is delivered.
-  List<String> get defaultLineNames {
-    final present = {
-      for (final line in lines)
-        if (line.count > 0) line.key: line.name,
-    };
-    final names = <String>[];
-    for (final key in defaultLines) {
-      final name = present[key];
-      if (name == null) continue;
-      final label = key.startsWith('fusion')
-          ? present['fusion'] ?? 'Fusion'
-          : name;
-      if (!names.contains(label)) names.add(label);
-    }
-    return names;
   }
 }
 

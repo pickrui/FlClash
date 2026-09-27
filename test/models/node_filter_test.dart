@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:fl_clash/models/models.dart';
 import 'package:test/test.dart';
@@ -198,27 +199,20 @@ void main() {
       expect(catalog.available, isFalse);
       expect(catalog.nodes, isEmpty);
     });
+  });
 
-    test('default lines name each line with nodes once', () {
-      final catalog = NodeFilterCatalog.fromJson(_catalogJson());
-      expect(catalog.defaultLineNames, ['Fusion', 'GIA']);
-
-      final premiumOnly = NodeFilterCatalog.fromJson({
-        'default_lines': ['fusion', 'fusion_premium'],
-        'lines': [
-          {'key': 'fusion_premium', 'name': 'Fusion Premium', 'count': 3},
-        ],
-      });
-      expect(premiumOnly.defaultLineNames, ['Fusion']);
-
-      final noDefaultNodes = NodeFilterCatalog.fromJson({
-        'default_lines': ['cia', 'ixp'],
-        'lines': [
-          {'key': 'edge', 'name': 'Edge', 'count': 9},
-          {'key': 'ixp', 'name': 'IXP', 'count': 0},
-        ],
-      });
-      expect(noDefaultNodes.defaultLineNames, isEmpty);
-    });
+  test('Chinese and Japanese node filter copy ends without 。', () {
+    for (final locale in ['zh_CN', 'ja']) {
+      final arb =
+          jsonDecode(File('arb/intl_$locale.arb').readAsStringSync())
+              as Map<String, dynamic>;
+      final copy = arb.entries.where(
+        (entry) => entry.key.startsWith('nodeFilter'),
+      );
+      expect(copy, isNotEmpty);
+      for (final entry in copy) {
+        expect(entry.value, isNot(contains('。')), reason: entry.key);
+      }
+    }
   });
 }

@@ -1373,12 +1373,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "nodeFilterAccountNote": MessageLookupByLibrary.simpleMessage(
       "Фильтр сохраняется в аккаунте и действует на всех устройствах, где выполнен вход в это приложение.",
     ),
-    "nodeFilterAllNodes": MessageLookupByLibrary.simpleMessage("Все узлы"),
     "nodeFilterAny": MessageLookupByLibrary.simpleMessage("Любые"),
     "nodeFilterCustomized": MessageLookupByLibrary.simpleMessage("Настроено"),
-    "nodeFilterDefaultNote": MessageLookupByLibrary.simpleMessage(
-      "Без фильтра линии выбираются по тарифу: Fusion + GIA при доступе к GIA, Fusion при доступе к Fusion, CIA + IXP при доступе к CIA или IXP, иначе все узлы.",
-    ),
     "nodeFilterExclude": MessageLookupByLibrary.simpleMessage("Исключить"),
     "nodeFilterKeepOne": MessageLookupByLibrary.simpleMessage(
       "Оставьте хотя бы один узел",
@@ -1388,22 +1384,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "nodeFilterNameContains": MessageLookupByLibrary.simpleMessage(
       "Имя содержит",
     ),
-    "nodeFilterNameContainsHint": MessageLookupByLibrary.simpleMessage(
-      "напр. HK|JP",
-    ),
+    "nodeFilterNameContainsHint": MessageLookupByLibrary.simpleMessage("HK|JP"),
     "nodeFilterNameExcludes": MessageLookupByLibrary.simpleMessage(
       "Имя не содержит",
     ),
     "nodeFilterNameExcludesHint": MessageLookupByLibrary.simpleMessage(
-      "напр. тест|обслуживание",
+      "тест|обслуживание",
     ),
     "nodeFilterOnly": MessageLookupByLibrary.simpleMessage("Только"),
     "nodeFilterPreview": MessageLookupByLibrary.simpleMessage("Предпросмотр"),
-    "nodeFilterRecommended": MessageLookupByLibrary.simpleMessage(
-      "Рекомендовано для тарифа",
-    ),
     "nodeFilterRegions": MessageLookupByLibrary.simpleMessage("Регионы"),
     "nodeFilterSearch": MessageLookupByLibrary.simpleMessage("Поиск узлов"),
+    "nodeFilterSmartSelection": MessageLookupByLibrary.simpleMessage(
+      "Умный выбор",
+    ),
     "none": MessageLookupByLibrary.simpleMessage("Нет"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "Текущая группа прокси не может быть выбрана.",
