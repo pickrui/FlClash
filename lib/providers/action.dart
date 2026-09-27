@@ -754,7 +754,7 @@ class AppController {
   final _profileUpdateCounts = <String, int>{};
   int _groupsUpdateGeneration = 0;
   bool _groupsRefreshRequested = false;
-  int? _activeDelayBatchGeneration;
+  final _delayTestRuns = DelayTestRuns();
   int _profileApplyGeneration = 0;
   int _pendingProfileApplies = 0;
   final ProfileApplyIntent _profileApplyIntent = ProfileApplyIntent();

@@ -266,13 +266,14 @@ class CoreController {
     bool Function()? isCurrent,
     Duration timeout = delayTestTimeoutDuration,
     int generation = 0,
+    int maxInFlight = maxInFlightDelayTests,
   }) async {
     // Callers resolve the final URL (including the DIRECT special case) so the
     // pending marker and the published result share one key.
     Delay canceled() => Delay(url: url, name: proxyName, value: null);
     if (isCurrent?.call() == false) return canceled();
     // Acquire before invoking the RPC so local queue time cannot consume its timeout.
-    if (_activeDelayTests >= maxInFlightDelayTests) {
+    if (_activeDelayTests >= maxInFlight) {
       final ready = Completer<void>();
       _delayWaiters.add(ready);
       await ready.future;

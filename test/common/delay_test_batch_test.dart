@@ -225,6 +225,46 @@ void main() {
     },
   );
 
+  group('DelayTestRuns', () {
+    late int generation;
+    late DelayTestRuns runs;
+    int begin() => ++generation;
+    bool isCurrent(int value) => value == generation;
+    int join() => runs.join(begin: begin, isCurrent: isCurrent);
+
+    setUp(() {
+      generation = 0;
+      runs = DelayTestRuns();
+    });
+
+    test('a second test joins a running one instead of superseding it', () {
+      final first = join();
+      final second = join();
+      expect(second, first);
+      expect(generation, 1);
+      runs.leave(first);
+      expect(join(), first, reason: 'the second run is still active');
+    });
+
+    test('a test after every run finished starts a new generation', () {
+      final first = join();
+      final second = join();
+      runs.leave(first);
+      runs.leave(second);
+      expect(join(), greaterThan(first));
+    });
+
+    test('an invalidated generation is not joined and its runs cannot '
+        'end the next one', () {
+      final stale = join();
+      generation++;
+      final fresh = join();
+      expect(fresh, greaterThan(stale));
+      runs.leave(stale);
+      expect(join(), fresh);
+    });
+  });
+
   test('a new generation discards late results and queued probes', () async {
     var current = true;
     var calls = 0;

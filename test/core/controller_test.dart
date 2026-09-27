@@ -209,6 +209,50 @@ void main() {
     expect((await last).value, 40);
   });
 
+  test('joined runs share a configured width below the Core budget', () async {
+    final pending = <Completer<Delay>>[];
+    when(
+      () => handler.asyncTestDelay(
+        any(),
+        any(),
+        timeout: any(named: 'timeout'),
+        generation: any(named: 'generation'),
+        session: any(named: 'session'),
+      ),
+    ).thenAnswer((_) {
+      final result = Completer<Delay>();
+      pending.add(result);
+      return result.future;
+    });
+    const width = 17;
+    final requests = [
+      for (var run = 0; run < 2; run++)
+        for (var i = 0; i < width; i++)
+          controller.getDelay(
+            'https://example.com',
+            'run$run-node$i',
+            maxInFlight: width,
+          ),
+    ];
+    await pumpEventQueue();
+    expect(pending.length, width);
+    pending.first.complete(
+      const Delay(name: 'run0-node0', url: 'https://example.com', value: 20),
+    );
+    await pumpEventQueue();
+    expect(pending.length, width + 1);
+    for (var i = 1; i < width * 2; i++) {
+      if (i < pending.length) {
+        pending[i].complete(
+          const Delay(name: 'node', url: 'https://example.com', value: 30),
+        );
+      }
+      await pumpEventQueue();
+    }
+    await Future.wait(requests);
+    expect(pending.length, width * 2);
+  });
+
   testWidgets('time waiting for a shared slot does not shorten a probe', (
     tester,
   ) async {

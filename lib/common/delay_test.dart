@@ -2,6 +2,31 @@ import 'package:fl_clash/models/models.dart';
 
 typedef DelayProbe = Future<Delay> Function(({String name, String url}) target);
 
+/// Lets manual tests join the running generation instead of superseding it.
+class DelayTestRuns {
+  int? _generation;
+  int _active = 0;
+
+  int join({
+    required int Function() begin,
+    required bool Function(int generation) isCurrent,
+  }) {
+    final generation = _generation;
+    if (generation != null && isCurrent(generation)) {
+      _active++;
+      return generation;
+    }
+    _active = 1;
+    return _generation = begin();
+  }
+
+  void leave(int generation) {
+    if (generation == _generation && --_active == 0) {
+      _generation = null;
+    }
+  }
+}
+
 /// Test every target once with bounded concurrency, as upstream does. Each
 /// probe starts its own network deadline after acquiring a slot. Publish only
 /// completed results; a generation change discards late and queued work.

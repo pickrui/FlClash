@@ -298,8 +298,7 @@ extension ProxiesControllerExt on AppController {
     _ref.read(delayDataSourceProvider.notifier).clear();
   }
 
-  /// Tests one node. While a group test runs, the probe joins that batch
-  /// instead of cancelling it, and a node already queued there is left alone.
+  /// Tests one node; a node already pending in a joined run is left alone.
   Future<void> proxyDelayTest(Proxy proxy, [String? testUrl]) async {
     final target = computeDelayTestTarget(
       proxy: proxy,
@@ -308,16 +307,19 @@ extension ProxiesControllerExt on AppController {
       defaultTestUrl: getRealTestUrl(testUrl),
     );
     if (target == null) return;
-    final batch = _activeDelayBatchGeneration;
-    final joinsBatch = batch != null && isCurrentDelayGeneration(batch);
-    if (joinsBatch &&
-        _ref.read(delayDataSourceProvider)[target.url]?[target.name] == 0) {
-      return;
+    final generation = _joinDelayTest();
+    try {
+      await _probeDelayTargets([target], generation);
+    } finally {
+      _delayTestRuns.leave(generation);
     }
-    final generation = joinsBatch ? batch : beginDelayTest();
-    await _probeDelayTargets([target], generation);
     if (isCurrentDelayGeneration(generation)) updateGroupsDebounce();
   }
+
+  int _joinDelayTest() => _delayTestRuns.join(
+    begin: beginDelayTest,
+    isCurrent: isCurrentDelayGeneration,
+  );
 
   /// Tests a group and returns whether every node failed, so the caller can
   /// offer the network self-check. Results are sorted and regrouped.
@@ -331,11 +333,12 @@ extension ProxiesControllerExt on AppController {
     if (targets.isEmpty) return false;
     final profileId = this.currentProfile?.id;
     final runSession = globalState.startTime;
-    final generation = beginDelayTest();
-    _activeDelayBatchGeneration = generation;
-    final completed = await _probeDelayTargets(targets, generation);
-    if (_activeDelayBatchGeneration == generation) {
-      _activeDelayBatchGeneration = null;
+    final generation = _joinDelayTest();
+    final Map<(String, String), int?> completed;
+    try {
+      completed = await _probeDelayTargets(targets, generation);
+    } finally {
+      _delayTestRuns.leave(generation);
     }
     if (!isCurrentDelayGeneration(generation)) return false;
     addSortNum();
@@ -361,11 +364,16 @@ extension ProxiesControllerExt on AppController {
   }
 
   Future<Map<(String, String), int?>> _probeDelayTargets(
-    List<DelayTestTarget> targets,
+    List<DelayTestTarget> allTargets,
     int generation,
   ) async {
     final completed = <(String, String), int?>{};
     final failures = <(String, String), String>{};
+    final pending = _ref.read(delayDataSourceProvider);
+    final targets = allTargets
+        .where((target) => pending[target.url]?[target.name] != 0)
+        .toList();
+    if (targets.isEmpty) return completed;
     final concurrency = _ref
         .read(proxiesStyleSettingProvider)
         .delayTestConcurrency(isAndroid: system.isAndroid);
@@ -383,6 +391,7 @@ extension ProxiesControllerExt on AppController {
         target.name,
         isCurrent: () => isCurrentDelayGeneration(generation),
         generation: generation,
+        maxInFlight: concurrency + 1,
       ),
       isCurrent: () => isCurrentDelayGeneration(generation),
       onResult: (delay) {
