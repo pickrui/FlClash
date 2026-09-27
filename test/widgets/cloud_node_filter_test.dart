@@ -315,21 +315,55 @@ void main() {
       final api = _FakeApi(_catalog(const NodeFilter()))
         ..keptFor = (filter) => filter.excludeLines.contains('fusion') ? 0 : 2;
       await _pumpEditor(tester, api, _Account());
-      expect(find.text('3 of 4 nodes kept'), findsOneWidget);
+      expect(find.text('Smart Selection · 3 of 4 nodes kept'), findsOneWidget);
       expect(_onPressed<FilledButton>(tester, 'Save'), isNull);
 
       await tester.tap(find.text('Fusion'));
       await tester.pump();
       expect(_onPressed<FilledButton>(tester, 'Save'), isNull);
       await tester.pumpAndSettle();
-      expect(find.text('2 of 4 nodes kept'), findsOneWidget);
+      expect(find.text('Customized · 2 of 4 nodes kept'), findsOneWidget);
       expect(_onPressed<FilledButton>(tester, 'Save'), isNotNull);
 
       await tester.tap(find.text('Fusion'));
       await tester.pumpAndSettle();
-      expect(find.text('0 of 4 nodes kept'), findsOneWidget);
+      expect(find.text('Customized · 0 of 4 nodes kept'), findsOneWidget);
       expect(find.text('Keep at least one node'), findsOneWidget);
       expect(_onPressed<FilledButton>(tester, 'Save'), isNull);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('the preview header names the state of the draft', (
+      tester,
+    ) async {
+      final api = _FakeApi(
+        _catalog(const NodeFilter(includeLines: ['gia']), kept: 1),
+      )..keptFor = (filter) => filter.isEmpty ? 3 : 1;
+      await _pumpEditor(tester, api, _Account());
+      expect(find.text('Customized · 1 of 4 nodes kept'), findsOneWidget);
+
+      await tester.tap(find.text('GIA'));
+      await tester.pumpAndSettle();
+      expect(find.text('Customized · 1 of 4 nodes kept'), findsOneWidget);
+
+      await tester.tap(find.text('GIA'));
+      await tester.pump();
+      expect(find.text('Smart Selection · 1 of 4 nodes kept'), findsOneWidget);
+      await tester.pumpAndSettle();
+      expect(find.text('Smart Selection · 3 of 4 nodes kept'), findsOneWidget);
+
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Name excludes'),
+        'test',
+      );
+      await tester.pump();
+      expect(find.text('Customized · 3 of 4 nodes kept'), findsOneWidget);
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Name excludes'),
+        '  ',
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Smart Selection · 3 of 4 nodes kept'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 

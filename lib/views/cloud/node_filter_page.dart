@@ -504,25 +504,41 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
               .where((node) => node.name.toLowerCase().contains(query))
               .toList();
     final keptNone = settled && catalog.kept == 0;
+    final state = _draft.isEmpty
+        ? l10n.nodeFilterSmartSelection
+        : l10n.nodeFilterCustomized;
     final header = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
           children: [
-            Expanded(child: NodeFilterSectionTitle(l10n.nodeFilterPreview)),
-            if (!settled && _previewError == null) ...[
-              const SizedBox.square(
-                dimension: 14,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-              const SizedBox(width: 8),
-            ],
-            Text(
-              l10n.nodeFilterKept(catalog.kept, catalog.total),
-              style: context.textTheme.labelLarge?.copyWith(
-                color: keptNone ? colorScheme.error : colorScheme.primary,
-                fontWeight: FontWeight.w600,
-                fontFeatures: const [FontFeature.tabularFigures()],
+            NodeFilterSectionTitle(l10n.nodeFilterPreview),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  if (!settled && _previewError == null) ...[
+                    const SizedBox.square(
+                      dimension: 14,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                  Flexible(
+                    child: Text(
+                      '$state · ${l10n.nodeFilterKept(catalog.kept, catalog.total)}',
+                      textAlign: TextAlign.end,
+                      style: context.textTheme.labelLarge?.copyWith(
+                        color: keptNone
+                            ? colorScheme.error
+                            : colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
