@@ -3,7 +3,7 @@ include tool/go_build_tags.env
 # The release harness builds with this toolchain; GOTOOLCHAIN=local overrides it.
 GOTOOLCHAIN ?= go1.26.8
 
-.PHONY: help submodules hooks analyze format lint test test-go test-rust test-all
+.PHONY: help submodules hooks analyze format lint test test-go test-tailscale test-rust test-all
 
 help:
 	@echo 'make submodules  # update git submodules (Clash.Meta core, flutter_distributor)'
@@ -13,6 +13,7 @@ help:
 	@echo 'make lint        # comment density gate over the working tree'
 	@echo 'make test        # flutter test with the native asset hooks switched off'
 	@echo 'make test-go     # Go core tests'
+	@echo 'make test-tailscale # Tailscale outbound against the official test control server'
 	@echo 'make test-rust   # rust_api and helper tests'
 	@echo 'make test-all    # the three suites above'
 	@echo ''
@@ -39,6 +40,9 @@ test:
 
 test-go:
 	cd core && GOTOOLCHAIN=$(GOTOOLCHAIN) CGO_ENABLED=0 go test -tags $(GO_TAGS) ./...
+
+test-tailscale:
+	cd core/Clash.Meta && GOTOOLCHAIN=$(GOTOOLCHAIN) MIHOMO_TAILSCALE_FIXTURE=1 go test -count=1 -timeout=300s -tags $(GO_TAGS) -run '^TestTailscaleFixture' ./adapter/outbound/
 
 test-rust:
 	cargo test --manifest-path plugins/rust_api/rust/Cargo.toml

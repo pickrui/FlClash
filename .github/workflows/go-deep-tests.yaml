@@ -28,12 +28,18 @@ jobs:
           cache-dependency-path: |
             core/go.sum
             core/Clash.Meta/go.sum
+            core/Clash.Meta/test/tailscale/fixture/go.sum
       - name: Validate integrated mihomo core
         working-directory: core/Clash.Meta
         run: |
           go vet -tags "$GO_TAGS" ./...
           # Sudoku and MKCP/Mekya run in their own steps of the job below.
           go test -race -tags "$GO_TAGS" -p=2 -parallel=2 -timeout=900s -skip '^(TestInboundSudoku|TestInboundVMess_(MKCP|Mekya)$)' ./...
+      - name: Check Tailscale against the official test control server
+        working-directory: core/Clash.Meta
+        env:
+          MIHOMO_TAILSCALE_FIXTURE: '1'
+        run: go test -race -count=1 -timeout=300s -tags "$GO_TAGS" -run '^TestTailscaleFixture' ./adapter/outbound/
 
   go-deep-deps-test:
     name: Dependency and inbound regressions
