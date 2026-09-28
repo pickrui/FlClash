@@ -13,78 +13,59 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../helpers/fake_tailscale_backend.dart';
 import '../helpers/test_app.dart';
-
-class _FakeTailscaleAction extends TailscaleAction {
-  final Ref fakeRef;
-  TailscaleStatus? nextStatus;
-  final saved = <(TailscaleNetwork, String?)>[];
-  final logins = <String>[];
-  final removed = <String>[];
-
-  _FakeTailscaleAction(super.ref) : fakeRef = ref;
-
-  @override
-  Future<TailscaleStatus?> status(TailscaleNetwork network) async => nextStatus;
-
-  @override
-  Future<TailscaleNetwork> saveNetwork(
-    TailscaleNetwork network, {
-    String? authKey,
-  }) async {
-    saved.add((network, authKey));
-    fakeRef.read(tailscaleNetworksProvider.notifier).put(network);
-    return network;
-  }
-
-  @override
-  Future<void> login(TailscaleNetwork network) async {
-    logins.add(network.name);
-  }
-
-  @override
-  Future<void> logout(TailscaleNetwork network) async {}
-
-  @override
-  Future<void> removeNetwork(TailscaleNetwork network) async {
-    removed.add(network.id);
-    fakeRef.read(tailscaleNetworksProvider.notifier).remove(network.id);
-  }
-
-  @override
-  Future<bool> hasAuthKey(TailscaleNetwork network) async => false;
-}
 
 const _home = TailscaleNetwork(id: 'home', name: 'Home', stateId: 'state');
 
-Future<_FakeTailscaleAction> _pump(
+const _running = TailscaleStatus(
+  rawState: 'Running',
+  tailnet: 'user@example.com',
+  self: TailscaleDevice(
+    name: 'flclash-macos.tail1234.ts.net',
+    addresses: ['100.64.0.1'],
+  ),
+  peers: [
+    TailscaleDevice(
+      name: 'office.tail1234.ts.net',
+      addresses: ['100.64.0.3'],
+      online: true,
+      direct: true,
+      exitNodeOption: true,
+    ),
+  ],
+);
+
+Future<(FakeTailscaleBackend, ProviderContainer)> _pump(
   WidgetTester tester,
   Widget page, {
   List<TailscaleNetwork> networks = const [],
   TailscaleStatus? status,
+  Object? statusError,
 }) async {
   tester.view.physicalSize = const Size(1000, 2400);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
+  final backend = FakeTailscaleBackend()
+    ..nextStatus = status
+    ..statusError = statusError;
   await tester.pumpWidget(
     TestApp(
       locale: const Locale('en'),
       overrides: [
         viewSizeProvider.overrideWithBuild((_, _) => const Size(1000, 2400)),
         tailscaleNetworksProvider.overrideWithBuild((_, _) => networks),
-        tailscaleActionProvider.overrideWith(
-          (ref) => _FakeTailscaleAction(ref)..nextStatus = status,
-        ),
+        tailscaleBackendProvider.overrideWithValue(backend),
       ],
       child: page,
     ),
   );
   await tester.pump();
   await tester.pump();
-  return ProviderScope.containerOf(
-        tester.element(find.byWidget(page)),
-      ).read(tailscaleActionProvider)
-      as _FakeTailscaleAction;
+  return (
+    backend,
+    ProviderScope.containerOf(tester.element(find.byWidget(page))),
+  );
 }
 
 Future<void> _unmount(WidgetTester tester) async {
@@ -105,10 +86,25 @@ void main() {
       tester,
       const TailscaleView(),
       networks: const [_home],
-      status: const TailscaleStatus(rawState: 'Running'),
+      status: _running,
     );
     expect(find.text('Home'), findsOneWidget);
     expect(find.text('Connected'), findsOneWidget);
+    await _unmount(tester);
+  });
+
+  testWidgets('a Core error is not mistaken for a missing network', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      const TailscaleNetworkPage(networkId: 'home'),
+      networks: const [_home],
+      statusError: StateError('core stopped'),
+    );
+    expect(find.text('Connection unavailable'), findsOneWidget);
+    expect(find.textContaining('core stopped'), findsOneWidget);
+    expect(find.textContaining('not part of the running'), findsNothing);
     await _unmount(tester);
   });
 
@@ -128,9 +124,7 @@ void main() {
     await _unmount(tester);
   });
 
-  testWidgets('an invalid name disables sign-in and names the field', (
-    tester,
-  ) async {
+  testWidgets('an invalid name disables sign-in and says why', (tester) async {
     await _pump(tester, const TailscaleNetworkPage());
     await tester.enterText(
       find.widgetWithText(TextField, 'Network name'),
@@ -141,14 +135,33 @@ void main() {
       find.widgetWithText(FilledButton, 'Save and log in'),
     );
     expect(button.onPressed, isNull);
+    expect(find.text('Use up to 64 characters without commas'), findsOneWidget);
     expect(find.text('Check these settings: Network name'), findsOneWidget);
+    await _unmount(tester);
+  });
+
+  testWidgets('a second network gets a name DNS servers can reference', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      const TailscaleNetworkPage(),
+      networks: const [
+        TailscaleNetwork(id: 'a', name: 'Tailnet', stateId: 's'),
+      ],
+    );
+    expect(find.widgetWithText(TextField, 'Tailnet-2'), findsOneWidget);
     await _unmount(tester);
   });
 
   testWidgets('save and log in stores the network and starts sign-in', (
     tester,
   ) async {
-    final action = await _pump(tester, const TailscaleNetworkPage());
+    final (backend, container) = await _pump(
+      tester,
+      const TailscaleNetworkPage(),
+      status: const TailscaleStatus(rawState: 'Idle'),
+    );
     await tester.enterText(
       find.widgetWithText(TextField, 'Network name'),
       'Lab',
@@ -162,27 +175,33 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    expect(action.saved, hasLength(1));
-    final (network, authKey) = action.saved.single;
+    final network = container.read(tailscaleNetworksProvider).single;
     expect(network.name, 'Lab');
     expect(network.hostname, 'work-laptop');
     expect(network.autoRoute, isTrue);
-    expect(authKey, isNull);
-    expect(action.logins, ['Lab']);
+    expect(backend.logins, [('Lab', null)]);
+    expect(backend.storageCalls, isEmpty);
     await _unmount(tester);
   });
 
-  testWidgets('a pending login offers the page and a QR code', (tester) async {
+  testWidgets('a pending login offers the page, a QR code and the reason', (
+    tester,
+  ) async {
     const url = 'https://login.tailscale.com/a/abc';
     await _pump(
       tester,
       const TailscaleNetworkPage(networkId: 'home'),
       networks: const [_home],
-      status: const TailscaleStatus(rawState: 'NeedsLogin', authUrl: url),
+      status: const TailscaleStatus(
+        rawState: 'NeedsLogin',
+        authUrl: url,
+        health: ['You are logged out. The last login error was: expired'],
+      ),
     );
     expect(find.text('Login required'), findsOneWidget);
     expect(find.text('Open login page'), findsOneWidget);
     expect(find.byType(QrImageView), findsOneWidget);
+    expect(find.textContaining('last login error'), findsOneWidget);
     await _unmount(tester);
   });
 
@@ -193,27 +212,20 @@ void main() {
       tester,
       const TailscaleNetworkPage(networkId: 'home'),
       networks: const [_home],
-      status: const TailscaleStatus(
-        rawState: 'Running',
-        self: TailscaleDevice(
-          name: 'flclash-macos.tail1234.ts.net',
-          addresses: ['100.64.0.1'],
-        ),
-        peers: [
-          TailscaleDevice(
-            name: 'office.tail1234.ts.net',
-            addresses: ['100.64.0.3'],
-            online: true,
-            exitNodeOption: true,
-          ),
-        ],
-      ),
+      status: _running,
     );
     expect(find.text('Connected'), findsOneWidget);
     expect(find.text('Signed in'), findsOneWidget);
+    expect(find.text('user@example.com'), findsOneWidget);
     expect(find.text('flclash-macos.tail1234.ts.net'), findsOneWidget);
     expect(find.text('100.64.0.1'), findsOneWidget);
-    expect(find.text('Devices (1)'), findsOneWidget);
+    // Signed in, the account offers only signing out.
+    expect(find.widgetWithText(OutlinedButton, 'Log out'), findsOneWidget);
+    expect(find.text('Save and log in'), findsNothing);
+
+    await tester.tap(find.text('Devices (1)'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Direct'), findsOneWidget);
     // Offered exit nodes can be picked without typing their names.
     await tester.tap(find.widgetWithText(ActionChip, 'office'));
     await tester.pump();
@@ -222,7 +234,7 @@ void main() {
   });
 
   testWidgets('removing a network asks first', (tester) async {
-    final action = await _pump(
+    final (backend, container) = await _pump(
       tester,
       const TailscaleNetworkPage(networkId: 'home'),
       networks: const [_home],
@@ -233,7 +245,8 @@ void main() {
     expect(find.textContaining('This device will leave Home'), findsOneWidget);
     await tester.tap(find.text('Remove'));
     await tester.pumpAndSettle();
-    expect(action.removed, ['home']);
+    expect(container.read(tailscaleNetworksProvider), isEmpty);
+    expect(backend.forgotten, [('Home', 'tailscale-networks/state')]);
     await _unmount(tester);
   });
 }

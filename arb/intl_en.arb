@@ -971,7 +971,7 @@
   "tailscaleDevices": "Devices ({count})",
   "tailscaleNetworkName": "Network name",
   "tailscaleNameInUse": "This name is already in use",
-  "tailscaleLoginMethod": "Login",
+  "tailscaleLoginMethod": "Login method",
   "tailscaleInteractiveLogin": "Interactive",
   "tailscaleAuthKey": "Auth key",
   "tailscaleAuthKeySaved": "An auth key is saved on this device. Enter a new one to replace it.",
@@ -1014,11 +1014,17 @@
   "tailscaleGuideGetStarted": "Get started",
   "tailscaleGuideGetStartedBody": "Add a network and choose \"Save and log in\". Open the login page and authorize this device; sign-in completes on its own.\nTo sign in with an auth key, choose \"Auth key\" and enter it. No browser is needed.\nThe network carries traffic only while the proxy runs. Signing in alone routes nothing.",
   "tailscaleGuideDevices": "Devices and MagicDNS",
-  "tailscaleGuideDevicesBody": "Automatic routing sends the addresses and MagicDNS names of known peers into this network. Other traffic follows your rules.\nIt applies after the rules you added and before the profile's own rules.\nTo reach a remote subnet, approve the route in your tailnet, then add a rule that points to this network.",
+  "tailscaleGuideDevicesBody": "Automatic routing sends the addresses and MagicDNS names of known peers into this network. Other traffic follows your rules.\nIt applies after your added and custom rules and before the profile's own rules.\nWith a custom control server domain, only known device names are routed, so the domain's public sites stay reachable.\nTo reach a remote subnet, approve the route in your tailnet, then add a rule that points to this network.",
   "tailscaleGuideExitNodes": "Exit nodes",
   "tailscaleGuideExitNodesBody": "With an exit node, the network appears in the profile's selector groups. Traffic uses the exit node only after you select the network there or point a rule to it.\nLeave the field empty to use no exit node. auto picks an available exit node; a device name or address picks that device.",
   "tailscaleGuideSignIn": "Sign-in and backup",
   "tailscaleGuideSignInBody": "Network settings are included in backups. Auth keys and the device identity stay on this device, so sign in again after restoring on another device.\nWhen the node key expires, choose \"Save and log in\" again. Device approval and access are managed in your tailnet.\nRemoving a network signs this device out and deletes its identity from this device.",
   "tailscaleGuideTroubleshooting": "Troubleshooting",
-  "tailscaleGuideTroubleshootingBody": "Check that the proxy is running, this device is approved and the peer is online. For subnets or the Internet, also check route approval and the exit node.\n\"Not applied\" means the running configuration lacks the network: select a profile and make sure none of its nodes uses the same name.\nThis app only connects out to your tailnet. It accepts no inbound connections and never offers this device as a subnet router or exit node."
+  "tailscaleGuideTroubleshootingBody": "Check that the proxy is running, this device is approved and the peer is online. For subnets or the Internet, also check route approval and the exit node.\n\"Not applied\" means the running configuration lacks the network: select a profile and make sure none of its nodes uses the same name.\nThis app only connects out to your tailnet. It accepts no inbound connections and never offers this device as a subnet router or exit node.",
+  "tailscaleNameInvalid": "Use up to 64 characters without commas",
+  "tailscaleHostnameInvalid": "Use lowercase letters, digits and hyphens, up to 63 characters",
+  "tailscaleAuthKeyInvalid": "This does not look like an auth key",
+  "tailscaleDirect": "Direct",
+  "tailscaleRelay": "Relay {region}",
+  "tailscaleExitNodeActive": "Exit node in use"
 }

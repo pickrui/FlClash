@@ -40,15 +40,27 @@ abstract class TailscaleNetwork with _$TailscaleNetwork {
       _$TailscaleNetworkFromJson(json);
 }
 
+final _stateIdPattern = RegExp(r'^[A-Za-z0-9-]{1,64}$');
+
 extension TailscaleNetworkExt on TailscaleNetwork {
+  /// A restored backup can carry any value here; only a plain identifier may
+  /// name a directory the app deletes.
+  bool get hasValidStateId => _stateIdPattern.hasMatch(stateId);
+
   String get stateDir => '$tailscaleNetworksDirectory/$stateId';
 
-  String get authKeyStorageKey => tailscaleAuthKeyStorageKey(id);
+  String get authKeyStorageKey => 'tailscale_auth_key_$id';
 
   bool get hasExitNode => exitNode.trim().isNotEmpty;
 
-  String get effectiveControlUrl =>
-      controlUrl.trim().isEmpty ? tailscaleDefaultControlUrl : controlUrl;
+  /// The control server that owns this network's node identity.
+  String get effectiveControlUrl {
+    var url = controlUrl.trim();
+    while (url.endsWith('/')) {
+      url = url.substring(0, url.length - 1);
+    }
+    return url.isEmpty ? tailscaleDefaultControlUrl : url;
+  }
 
   String get routeRule => 'TAILNET,$name,$name';
 
@@ -70,9 +82,6 @@ extension TailscaleNetworkExt on TailscaleNetwork {
     };
   }
 }
-
-String tailscaleAuthKeyStorageKey(String networkId) =>
-    'tailscale_auth_key_$networkId';
 
 /// Backend states reported by the Core; [idle] means no session has started.
 enum TailscaleState {
@@ -132,7 +141,6 @@ abstract class TailscaleStatus with _$TailscaleStatus {
     @Default('') String tailnet,
     @Default('') String magicDnsSuffix,
     @Default(false) bool keyExpired,
-    @Default(0) int keyExpiry,
     @Default([]) List<String> health,
     TailscaleDevice? self,
     @Default([]) List<TailscaleDevice> peers,
@@ -160,8 +168,6 @@ extension TailscaleStatusExt on TailscaleStatus {
   List<TailscaleDevice> get exitNodeOptions =>
       peers.where((peer) => peer.exitNodeOption).toList();
 }
-
-enum TailscaleField { name, hostname, controlUrl, exitNode, authKey }
 
 final _controlCharacters = RegExp(r'[\x00-\x1f\x7f]');
 final _hostnamePattern = RegExp(r'^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$');

@@ -606,7 +606,7 @@ as bool,
 /// @nodoc
 mixin _$TailscaleStatus {
 
-@JsonKey(name: 'state') String get rawState; String get authUrl; String get error; String get tailnet; String get magicDnsSuffix; bool get keyExpired; int get keyExpiry; List<String> get health; TailscaleDevice? get self; List<TailscaleDevice> get peers;
+@JsonKey(name: 'state') String get rawState; String get authUrl; String get error; String get tailnet; String get magicDnsSuffix; bool get keyExpired; List<String> get health; TailscaleDevice? get self; List<TailscaleDevice> get peers;
 /// Create a copy of TailscaleStatus
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -619,16 +619,16 @@ $TailscaleStatusCopyWith<TailscaleStatus> get copyWith => _$TailscaleStatusCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TailscaleStatus&&(identical(other.rawState, rawState) || other.rawState == rawState)&&(identical(other.authUrl, authUrl) || other.authUrl == authUrl)&&(identical(other.error, error) || other.error == error)&&(identical(other.tailnet, tailnet) || other.tailnet == tailnet)&&(identical(other.magicDnsSuffix, magicDnsSuffix) || other.magicDnsSuffix == magicDnsSuffix)&&(identical(other.keyExpired, keyExpired) || other.keyExpired == keyExpired)&&(identical(other.keyExpiry, keyExpiry) || other.keyExpiry == keyExpiry)&&const DeepCollectionEquality().equals(other.health, health)&&(identical(other.self, self) || other.self == self)&&const DeepCollectionEquality().equals(other.peers, peers));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TailscaleStatus&&(identical(other.rawState, rawState) || other.rawState == rawState)&&(identical(other.authUrl, authUrl) || other.authUrl == authUrl)&&(identical(other.error, error) || other.error == error)&&(identical(other.tailnet, tailnet) || other.tailnet == tailnet)&&(identical(other.magicDnsSuffix, magicDnsSuffix) || other.magicDnsSuffix == magicDnsSuffix)&&(identical(other.keyExpired, keyExpired) || other.keyExpired == keyExpired)&&const DeepCollectionEquality().equals(other.health, health)&&(identical(other.self, self) || other.self == self)&&const DeepCollectionEquality().equals(other.peers, peers));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,rawState,authUrl,error,tailnet,magicDnsSuffix,keyExpired,keyExpiry,const DeepCollectionEquality().hash(health),self,const DeepCollectionEquality().hash(peers));
+int get hashCode => Object.hash(runtimeType,rawState,authUrl,error,tailnet,magicDnsSuffix,keyExpired,const DeepCollectionEquality().hash(health),self,const DeepCollectionEquality().hash(peers));
 
 @override
 String toString() {
-  return 'TailscaleStatus(rawState: $rawState, authUrl: $authUrl, error: $error, tailnet: $tailnet, magicDnsSuffix: $magicDnsSuffix, keyExpired: $keyExpired, keyExpiry: $keyExpiry, health: $health, self: $self, peers: $peers)';
+  return 'TailscaleStatus(rawState: $rawState, authUrl: $authUrl, error: $error, tailnet: $tailnet, magicDnsSuffix: $magicDnsSuffix, keyExpired: $keyExpired, health: $health, self: $self, peers: $peers)';
 }
 
 
@@ -639,7 +639,7 @@ abstract mixin class $TailscaleStatusCopyWith<$Res>  {
   factory $TailscaleStatusCopyWith(TailscaleStatus value, $Res Function(TailscaleStatus) _then) = _$TailscaleStatusCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'state') String rawState, String authUrl, String error, String tailnet, String magicDnsSuffix, bool keyExpired, int keyExpiry, List<String> health, TailscaleDevice? self, List<TailscaleDevice> peers
+@JsonKey(name: 'state') String rawState, String authUrl, String error, String tailnet, String magicDnsSuffix, bool keyExpired, List<String> health, TailscaleDevice? self, List<TailscaleDevice> peers
 });
 
 
@@ -656,7 +656,7 @@ class _$TailscaleStatusCopyWithImpl<$Res>
 
 /// Create a copy of TailscaleStatus
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? rawState = null,Object? authUrl = null,Object? error = null,Object? tailnet = null,Object? magicDnsSuffix = null,Object? keyExpired = null,Object? keyExpiry = null,Object? health = null,Object? self = freezed,Object? peers = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? rawState = null,Object? authUrl = null,Object? error = null,Object? tailnet = null,Object? magicDnsSuffix = null,Object? keyExpired = null,Object? health = null,Object? self = freezed,Object? peers = null,}) {
   return _then(_self.copyWith(
 rawState: null == rawState ? _self.rawState : rawState // ignore: cast_nullable_to_non_nullable
 as String,authUrl: null == authUrl ? _self.authUrl : authUrl // ignore: cast_nullable_to_non_nullable
@@ -664,8 +664,7 @@ as String,error: null == error ? _self.error : error // ignore: cast_nullable_to
 as String,tailnet: null == tailnet ? _self.tailnet : tailnet // ignore: cast_nullable_to_non_nullable
 as String,magicDnsSuffix: null == magicDnsSuffix ? _self.magicDnsSuffix : magicDnsSuffix // ignore: cast_nullable_to_non_nullable
 as String,keyExpired: null == keyExpired ? _self.keyExpired : keyExpired // ignore: cast_nullable_to_non_nullable
-as bool,keyExpiry: null == keyExpiry ? _self.keyExpiry : keyExpiry // ignore: cast_nullable_to_non_nullable
-as int,health: null == health ? _self.health : health // ignore: cast_nullable_to_non_nullable
+as bool,health: null == health ? _self.health : health // ignore: cast_nullable_to_non_nullable
 as List<String>,self: freezed == self ? _self.self : self // ignore: cast_nullable_to_non_nullable
 as TailscaleDevice?,peers: null == peers ? _self.peers : peers // ignore: cast_nullable_to_non_nullable
 as List<TailscaleDevice>,
@@ -765,10 +764,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'state')  String rawState,  String authUrl,  String error,  String tailnet,  String magicDnsSuffix,  bool keyExpired,  int keyExpiry,  List<String> health,  TailscaleDevice? self,  List<TailscaleDevice> peers)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'state')  String rawState,  String authUrl,  String error,  String tailnet,  String magicDnsSuffix,  bool keyExpired,  List<String> health,  TailscaleDevice? self,  List<TailscaleDevice> peers)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TailscaleStatus() when $default != null:
-return $default(_that.rawState,_that.authUrl,_that.error,_that.tailnet,_that.magicDnsSuffix,_that.keyExpired,_that.keyExpiry,_that.health,_that.self,_that.peers);case _:
+return $default(_that.rawState,_that.authUrl,_that.error,_that.tailnet,_that.magicDnsSuffix,_that.keyExpired,_that.health,_that.self,_that.peers);case _:
   return orElse();
 
 }
@@ -786,10 +785,10 @@ return $default(_that.rawState,_that.authUrl,_that.error,_that.tailnet,_that.mag
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'state')  String rawState,  String authUrl,  String error,  String tailnet,  String magicDnsSuffix,  bool keyExpired,  int keyExpiry,  List<String> health,  TailscaleDevice? self,  List<TailscaleDevice> peers)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'state')  String rawState,  String authUrl,  String error,  String tailnet,  String magicDnsSuffix,  bool keyExpired,  List<String> health,  TailscaleDevice? self,  List<TailscaleDevice> peers)  $default,) {final _that = this;
 switch (_that) {
 case _TailscaleStatus():
-return $default(_that.rawState,_that.authUrl,_that.error,_that.tailnet,_that.magicDnsSuffix,_that.keyExpired,_that.keyExpiry,_that.health,_that.self,_that.peers);case _:
+return $default(_that.rawState,_that.authUrl,_that.error,_that.tailnet,_that.magicDnsSuffix,_that.keyExpired,_that.health,_that.self,_that.peers);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -806,10 +805,10 @@ return $default(_that.rawState,_that.authUrl,_that.error,_that.tailnet,_that.mag
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'state')  String rawState,  String authUrl,  String error,  String tailnet,  String magicDnsSuffix,  bool keyExpired,  int keyExpiry,  List<String> health,  TailscaleDevice? self,  List<TailscaleDevice> peers)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'state')  String rawState,  String authUrl,  String error,  String tailnet,  String magicDnsSuffix,  bool keyExpired,  List<String> health,  TailscaleDevice? self,  List<TailscaleDevice> peers)?  $default,) {final _that = this;
 switch (_that) {
 case _TailscaleStatus() when $default != null:
-return $default(_that.rawState,_that.authUrl,_that.error,_that.tailnet,_that.magicDnsSuffix,_that.keyExpired,_that.keyExpiry,_that.health,_that.self,_that.peers);case _:
+return $default(_that.rawState,_that.authUrl,_that.error,_that.tailnet,_that.magicDnsSuffix,_that.keyExpired,_that.health,_that.self,_that.peers);case _:
   return null;
 
 }
@@ -821,7 +820,7 @@ return $default(_that.rawState,_that.authUrl,_that.error,_that.tailnet,_that.mag
 @JsonSerializable()
 
 class _TailscaleStatus implements TailscaleStatus {
-  const _TailscaleStatus({@JsonKey(name: 'state') this.rawState = '', this.authUrl = '', this.error = '', this.tailnet = '', this.magicDnsSuffix = '', this.keyExpired = false, this.keyExpiry = 0, final  List<String> health = const [], this.self, final  List<TailscaleDevice> peers = const []}): _health = health,_peers = peers;
+  const _TailscaleStatus({@JsonKey(name: 'state') this.rawState = '', this.authUrl = '', this.error = '', this.tailnet = '', this.magicDnsSuffix = '', this.keyExpired = false, final  List<String> health = const [], this.self, final  List<TailscaleDevice> peers = const []}): _health = health,_peers = peers;
   factory _TailscaleStatus.fromJson(Map<String, dynamic> json) => _$TailscaleStatusFromJson(json);
 
 @override@JsonKey(name: 'state') final  String rawState;
@@ -830,7 +829,6 @@ class _TailscaleStatus implements TailscaleStatus {
 @override@JsonKey() final  String tailnet;
 @override@JsonKey() final  String magicDnsSuffix;
 @override@JsonKey() final  bool keyExpired;
-@override@JsonKey() final  int keyExpiry;
  final  List<String> _health;
 @override@JsonKey() List<String> get health {
   if (_health is EqualUnmodifiableListView) return _health;
@@ -860,16 +858,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TailscaleStatus&&(identical(other.rawState, rawState) || other.rawState == rawState)&&(identical(other.authUrl, authUrl) || other.authUrl == authUrl)&&(identical(other.error, error) || other.error == error)&&(identical(other.tailnet, tailnet) || other.tailnet == tailnet)&&(identical(other.magicDnsSuffix, magicDnsSuffix) || other.magicDnsSuffix == magicDnsSuffix)&&(identical(other.keyExpired, keyExpired) || other.keyExpired == keyExpired)&&(identical(other.keyExpiry, keyExpiry) || other.keyExpiry == keyExpiry)&&const DeepCollectionEquality().equals(other._health, _health)&&(identical(other.self, self) || other.self == self)&&const DeepCollectionEquality().equals(other._peers, _peers));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TailscaleStatus&&(identical(other.rawState, rawState) || other.rawState == rawState)&&(identical(other.authUrl, authUrl) || other.authUrl == authUrl)&&(identical(other.error, error) || other.error == error)&&(identical(other.tailnet, tailnet) || other.tailnet == tailnet)&&(identical(other.magicDnsSuffix, magicDnsSuffix) || other.magicDnsSuffix == magicDnsSuffix)&&(identical(other.keyExpired, keyExpired) || other.keyExpired == keyExpired)&&const DeepCollectionEquality().equals(other._health, _health)&&(identical(other.self, self) || other.self == self)&&const DeepCollectionEquality().equals(other._peers, _peers));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,rawState,authUrl,error,tailnet,magicDnsSuffix,keyExpired,keyExpiry,const DeepCollectionEquality().hash(_health),self,const DeepCollectionEquality().hash(_peers));
+int get hashCode => Object.hash(runtimeType,rawState,authUrl,error,tailnet,magicDnsSuffix,keyExpired,const DeepCollectionEquality().hash(_health),self,const DeepCollectionEquality().hash(_peers));
 
 @override
 String toString() {
-  return 'TailscaleStatus(rawState: $rawState, authUrl: $authUrl, error: $error, tailnet: $tailnet, magicDnsSuffix: $magicDnsSuffix, keyExpired: $keyExpired, keyExpiry: $keyExpiry, health: $health, self: $self, peers: $peers)';
+  return 'TailscaleStatus(rawState: $rawState, authUrl: $authUrl, error: $error, tailnet: $tailnet, magicDnsSuffix: $magicDnsSuffix, keyExpired: $keyExpired, health: $health, self: $self, peers: $peers)';
 }
 
 
@@ -880,7 +878,7 @@ abstract mixin class _$TailscaleStatusCopyWith<$Res> implements $TailscaleStatus
   factory _$TailscaleStatusCopyWith(_TailscaleStatus value, $Res Function(_TailscaleStatus) _then) = __$TailscaleStatusCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'state') String rawState, String authUrl, String error, String tailnet, String magicDnsSuffix, bool keyExpired, int keyExpiry, List<String> health, TailscaleDevice? self, List<TailscaleDevice> peers
+@JsonKey(name: 'state') String rawState, String authUrl, String error, String tailnet, String magicDnsSuffix, bool keyExpired, List<String> health, TailscaleDevice? self, List<TailscaleDevice> peers
 });
 
 
@@ -897,7 +895,7 @@ class __$TailscaleStatusCopyWithImpl<$Res>
 
 /// Create a copy of TailscaleStatus
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? rawState = null,Object? authUrl = null,Object? error = null,Object? tailnet = null,Object? magicDnsSuffix = null,Object? keyExpired = null,Object? keyExpiry = null,Object? health = null,Object? self = freezed,Object? peers = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? rawState = null,Object? authUrl = null,Object? error = null,Object? tailnet = null,Object? magicDnsSuffix = null,Object? keyExpired = null,Object? health = null,Object? self = freezed,Object? peers = null,}) {
   return _then(_TailscaleStatus(
 rawState: null == rawState ? _self.rawState : rawState // ignore: cast_nullable_to_non_nullable
 as String,authUrl: null == authUrl ? _self.authUrl : authUrl // ignore: cast_nullable_to_non_nullable
@@ -905,8 +903,7 @@ as String,error: null == error ? _self.error : error // ignore: cast_nullable_to
 as String,tailnet: null == tailnet ? _self.tailnet : tailnet // ignore: cast_nullable_to_non_nullable
 as String,magicDnsSuffix: null == magicDnsSuffix ? _self.magicDnsSuffix : magicDnsSuffix // ignore: cast_nullable_to_non_nullable
 as String,keyExpired: null == keyExpired ? _self.keyExpired : keyExpired // ignore: cast_nullable_to_non_nullable
-as bool,keyExpiry: null == keyExpiry ? _self.keyExpiry : keyExpiry // ignore: cast_nullable_to_non_nullable
-as int,health: null == health ? _self._health : health // ignore: cast_nullable_to_non_nullable
+as bool,health: null == health ? _self._health : health // ignore: cast_nullable_to_non_nullable
 as List<String>,self: freezed == self ? _self.self : self // ignore: cast_nullable_to_non_nullable
 as TailscaleDevice?,peers: null == peers ? _self._peers : peers // ignore: cast_nullable_to_non_nullable
 as List<TailscaleDevice>,

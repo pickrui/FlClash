@@ -8244,10 +8244,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Login`
+  /// `Login method`
   String get tailscaleLoginMethod {
     return Intl.message(
-      'Login',
+      'Login method',
       name: 'tailscaleLoginMethod',
       desc: '',
       args: [],
@@ -8664,10 +8664,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Automatic routing sends the addresses and MagicDNS names of known peers into this network. Other traffic follows your rules.\nIt applies after the rules you added and before the profile's own rules.\nTo reach a remote subnet, approve the route in your tailnet, then add a rule that points to this network.`
+  /// `Automatic routing sends the addresses and MagicDNS names of known peers into this network. Other traffic follows your rules.\nIt applies after your added and custom rules and before the profile's own rules.\nWith a custom control server domain, only known device names are routed, so the domain's public sites stay reachable.\nTo reach a remote subnet, approve the route in your tailnet, then add a rule that points to this network.`
   String get tailscaleGuideDevicesBody {
     return Intl.message(
-      'Automatic routing sends the addresses and MagicDNS names of known peers into this network. Other traffic follows your rules.\nIt applies after the rules you added and before the profile\'s own rules.\nTo reach a remote subnet, approve the route in your tailnet, then add a rule that points to this network.',
+      'Automatic routing sends the addresses and MagicDNS names of known peers into this network. Other traffic follows your rules.\nIt applies after your added and custom rules and before the profile\'s own rules.\nWith a custom control server domain, only known device names are routed, so the domain\'s public sites stay reachable.\nTo reach a remote subnet, approve the route in your tailnet, then add a rule that points to this network.',
       name: 'tailscaleGuideDevicesBody',
       desc: '',
       args: [],
@@ -8729,6 +8729,61 @@ class AppLocalizations {
     return Intl.message(
       'Check that the proxy is running, this device is approved and the peer is online. For subnets or the Internet, also check route approval and the exit node.\n"Not applied" means the running configuration lacks the network: select a profile and make sure none of its nodes uses the same name.\nThis app only connects out to your tailnet. It accepts no inbound connections and never offers this device as a subnet router or exit node.',
       name: 'tailscaleGuideTroubleshootingBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use up to 64 characters without commas`
+  String get tailscaleNameInvalid {
+    return Intl.message(
+      'Use up to 64 characters without commas',
+      name: 'tailscaleNameInvalid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use lowercase letters, digits and hyphens, up to 63 characters`
+  String get tailscaleHostnameInvalid {
+    return Intl.message(
+      'Use lowercase letters, digits and hyphens, up to 63 characters',
+      name: 'tailscaleHostnameInvalid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This does not look like an auth key`
+  String get tailscaleAuthKeyInvalid {
+    return Intl.message(
+      'This does not look like an auth key',
+      name: 'tailscaleAuthKeyInvalid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Direct`
+  String get tailscaleDirect {
+    return Intl.message('Direct', name: 'tailscaleDirect', desc: '', args: []);
+  }
+
+  /// `Relay {region}`
+  String tailscaleRelay(Object region) {
+    return Intl.message(
+      'Relay $region',
+      name: 'tailscaleRelay',
+      desc: '',
+      args: [region],
+    );
+  }
+
+  /// `Exit node in use`
+  String get tailscaleExitNodeActive {
+    return Intl.message(
+      'Exit node in use',
+      name: 'tailscaleExitNodeActive',
       desc: '',
       args: [],
     );

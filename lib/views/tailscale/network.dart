@@ -47,26 +47,29 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
   late TailscaleLoginMethod _loginMethod;
   late bool _autoRoute;
   late bool _allowLan;
-  bool _hasSavedAuthKey = false;
+  bool? _hasSavedAuthKey;
   TailscaleStatus? _status;
+  String? _statusError;
   bool _statusLoaded = false;
   DateTime? _loginStartedAt;
+
+  /// Cancelling or restarting a login ignores the results of the earlier one.
+  int _loginAttempt = 0;
   bool _busy = false;
   Timer? _timer;
   bool _polling = false;
 
-  TailscaleNetwork? get _saved => ref
-      .read(tailscaleNetworksProvider)
-      .where((network) => network.id == _id)
-      .firstOrNull;
+  TailscaleAction get _action => ref.read(tailscaleActionProvider);
+
+  TailscaleNetwork? get _saved => _action.network(_id);
 
   @override
   void initState() {
     super.initState();
     final networks = ref.read(tailscaleNetworksProvider);
-    final existing = networks
-        .where((network) => network.id == widget.networkId)
-        .firstOrNull;
+    final existing = widget.networkId == null
+        ? null
+        : _action.network(widget.networkId!);
     _id = existing?.id ?? utils.uuidV4;
     _name = TextEditingController(
       text: existing?.name ?? _defaultName(networks),
@@ -77,8 +80,10 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
     _loginMethod = existing?.loginMethod ?? TailscaleLoginMethod.interactive;
     _autoRoute = existing?.autoRoute ?? true;
     _allowLan = existing?.exitNodeAllowLanAccess ?? false;
-    if (existing != null) {
-      unawaited(_loadSavedAuthKey());
+    if (existing == null) {
+      _hasSavedAuthKey = false;
+    } else {
+      unawaited(_loadSavedAuthKey(existing));
       _startPolling();
     }
   }
@@ -94,19 +99,22 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
     super.dispose();
   }
 
+  /// Network names back `tailscale://` DNS servers, which cannot hold spaces.
   static String _defaultName(List<TailscaleNetwork> networks) {
     final names = networks.map((network) => network.name).toSet();
     var name = 'Tailnet';
     for (var index = 2; names.contains(name); index++) {
-      name = 'Tailnet $index';
+      name = 'Tailnet-$index';
     }
     return name;
   }
 
-  Future<void> _loadSavedAuthKey() async {
-    final saved = _saved;
-    if (saved == null) return;
-    final hasKey = await context.tailscaleAction.hasAuthKey(saved);
+  Future<void> _loadSavedAuthKey(TailscaleNetwork network) async {
+    if (network.loginMethod != TailscaleLoginMethod.authKey) {
+      _hasSavedAuthKey = false;
+      return;
+    }
+    final hasKey = await _action.hasAuthKey(network);
     if (mounted) setState(() => _hasSavedAuthKey = hasKey);
   }
 
@@ -116,32 +124,43 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
     _timer = Timer.periodic(_pollInterval, (_) => unawaited(_poll()));
   }
 
+  void _stopPolling() {
+    _timer?.cancel();
+    _timer = null;
+  }
+
   Future<void> _poll() async {
     final saved = _saved;
     if (_polling || saved == null) return;
     _polling = true;
-    final action = context.tailscaleAction;
+    final action = _action;
     TailscaleStatus? status;
+    String? error;
     try {
       status = await action.status(saved);
-    } catch (_) {
-      status = null;
+    } catch (exception) {
+      error = _describeError(exception);
     } finally {
       _polling = false;
     }
     if (!mounted) return;
     final l = context.appLocalizations;
     final startedAt = _loginStartedAt;
-    var signedIn = false;
-    var timedOut = false;
-    if (startedAt != null) {
-      signedIn = status?.isRunning == true;
-      timedOut = !signedIn && DateTime.now().difference(startedAt) > _loginWait;
-    }
+    final state = status?.state;
+    final signedIn = startedAt != null && status?.isRunning == true;
+    // Approval happens outside this device and may take longer than a login.
+    final awaitingApproval =
+        startedAt != null && state == TailscaleState.needsMachineAuth;
+    final timedOut =
+        startedAt != null &&
+        !signedIn &&
+        !awaitingApproval &&
+        DateTime.now().difference(startedAt) > _loginWait;
     setState(() {
       _status = status;
+      _statusError = error;
       _statusLoaded = true;
-      if (signedIn || timedOut) _loginStartedAt = null;
+      if (signedIn || awaitingApproval || timedOut) _endLogin();
     });
     if (signedIn) {
       context.showNotifier(l.tailscaleSignedIn);
@@ -150,7 +169,12 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
     }
   }
 
-  String? _normalizedExitNode() {
+  void _endLogin() {
+    _loginStartedAt = null;
+    _loginAttempt++;
+  }
+
+  String _normalizedExitNode() {
     final value = _exitNode.text.trim();
     if (value.isEmpty || value.toLowerCase() == 'none') return '';
     if (value.toLowerCase() == tailscaleExitNodeAuto) {
@@ -160,15 +184,15 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
   }
 
   TailscaleNetwork _draft() {
-    final saved = _saved;
-    return (saved ?? TailscaleNetwork(id: _id, name: '', stateId: utils.uuidV4))
+    return (_saved ??
+            TailscaleNetwork(id: _id, name: '', stateId: utils.uuidV4))
         .copyWith(
           name: _name.text.trim(),
           hostname: _hostname.text.trim().toLowerCase(),
           loginMethod: _loginMethod,
           controlUrl: _controlUrl.text.trim(),
           autoRoute: _autoRoute,
-          exitNode: _normalizedExitNode() ?? '',
+          exitNode: _normalizedExitNode(),
           exitNodeAllowLanAccess: _allowLan,
         );
   }
@@ -181,7 +205,12 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
         .any((network) => network.id != _id && network.name == name);
   }
 
-  bool get _nameValid => isValidTailscaleNetworkName(_name.text) && !_nameTaken;
+  String? _nameError(AppLocalizations l) {
+    if (_name.text.trim().isEmpty) return l.emptyTip(l.tailscaleNetworkName);
+    if (!isValidTailscaleNetworkName(_name.text)) return l.tailscaleNameInvalid;
+    if (_nameTaken) return l.tailscaleNameInUse;
+    return null;
+  }
 
   bool get _hostnameValid =>
       isValidTailscaleHostname(_hostname.text.trim().toLowerCase());
@@ -194,7 +223,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
       _authKey.text.trim().isEmpty || isValidTailscaleAuthKey(_authKey.text);
 
   List<String> _invalidFields(AppLocalizations l) => [
-    if (!_nameValid) l.tailscaleNetworkName,
+    if (_nameError(l) != null) l.tailscaleNetworkName,
     if (!_hostnameValid) l.tailscaleDeviceName,
     if (!_exitNodeValid) l.tailscaleExitNode,
     if (!_controlUrlValid) l.tailscaleControlUrl,
@@ -204,13 +233,13 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
 
   bool get _needsAuthKey =>
       _loginMethod == TailscaleLoginMethod.authKey &&
-      !_hasSavedAuthKey &&
+      _hasSavedAuthKey == false &&
       _authKey.text.trim().isEmpty;
 
-  Future<void> _showError(String message) {
+  Future<void> _showError(String message, {String? title}) {
     return globalState.showMessage(
       context: context,
-      title: context.appLocalizations.tailscaleLoginFailed,
+      title: title ?? context.appLocalizations.tailscaleLoginFailed,
       message: TextSpan(text: message),
       cancelable: false,
     );
@@ -227,17 +256,8 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
   }
 
   Future<TailscaleNetwork?> _save() async {
-    final l = context.appLocalizations;
-    final invalid = _invalidFields(l);
-    if (invalid.isNotEmpty) {
-      await globalState.showMessage(
-        context: context,
-        message: TextSpan(text: l.tailscaleCheckSettings(_joinFields(invalid))),
-        cancelable: false,
-      );
-      return null;
-    }
-    final action = context.tailscaleAction;
+    if (_invalidFields(context.appLocalizations).isNotEmpty) return null;
+    final action = _action;
     setState(() => _busy = true);
     try {
       final saved = await action.saveNetwork(
@@ -246,14 +266,26 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
             ? _authKey.text
             : null,
       );
-      final hasKey = await action.hasAuthKey(saved);
       if (!mounted) return saved;
+      final keyEntered = _authKey.text.trim().isNotEmpty;
       setState(() {
-        _hasSavedAuthKey = hasKey;
+        if (_loginMethod == TailscaleLoginMethod.interactive) {
+          _hasSavedAuthKey = false;
+        } else if (keyEntered) {
+          _hasSavedAuthKey = true;
+        }
         _authKey.clear();
       });
       _startPolling();
       return saved;
+    } catch (error) {
+      if (mounted) {
+        await _showError(
+          _describeError(error),
+          title: context.appLocalizations.tip,
+        );
+      }
+      return null;
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -261,26 +293,26 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
 
   Future<void> _saveAndLogin() async {
     if (_needsAuthKey) {
-      await globalState.showMessage(
-        context: context,
-        message: TextSpan(text: context.appLocalizations.tailscaleEnterAuthKey),
-        cancelable: false,
+      await _showError(
+        context.appLocalizations.tailscaleEnterAuthKey,
+        title: context.appLocalizations.tip,
       );
       return;
     }
-    final action = context.tailscaleAction;
     final saved = await _save();
     if (saved == null || !mounted) return;
+    final action = _action;
+    final attempt = ++_loginAttempt;
     setState(() {
       _busy = true;
       _loginStartedAt = DateTime.now();
     });
     try {
       await action.login(saved);
-      unawaited(_poll());
+      if (mounted) unawaited(_poll());
     } catch (error) {
-      if (!mounted) return;
-      setState(() => _loginStartedAt = null);
+      if (!mounted || attempt != _loginAttempt) return;
+      setState(_endLogin);
       await _showError(_describeError(error));
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -290,15 +322,22 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
   Future<void> _logout() async {
     final saved = _saved;
     if (saved == null) return;
-    final action = context.tailscaleAction;
+    final action = _action;
     setState(() => _busy = true);
     try {
       await action.logout(saved);
-      unawaited(_poll());
     } catch (error) {
-      if (mounted) await _showError(_describeError(error));
+      if (mounted) {
+        await _showError(
+          _describeError(error),
+          title: context.appLocalizations.tip,
+        );
+      }
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) {
+        setState(() => _busy = false);
+        unawaited(_poll());
+      }
     }
   }
 
@@ -306,7 +345,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
     final saved = _saved;
     if (saved == null) return;
     final l = context.appLocalizations;
-    final action = context.tailscaleAction;
+    final action = _action;
     final navigator = Navigator.of(context);
     final confirmed = await globalState.showMessage(
       context: context,
@@ -315,14 +354,17 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
       confirmText: l.remove,
     );
     if (confirmed != true || !mounted) return;
-    _timer?.cancel();
+    _stopPolling();
     setState(() => _busy = true);
     try {
       await action.removeNetwork(saved);
-      if (navigator.canPop()) navigator.pop();
-    } finally {
-      if (mounted) setState(() => _busy = false);
+    } catch (error) {
+      // The network is already gone from the config; only its cleanup failed.
+      if (mounted) await _showError(_describeError(error), title: l.tip);
     }
+    if (!mounted) return;
+    setState(() => _busy = false);
+    if (navigator.canPop()) navigator.pop();
   }
 
   Future<void> _openLoginPage(String url) async {
@@ -365,6 +407,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
           helperText: helper,
           helperMaxLines: 3,
           errorText: error,
+          errorMaxLines: 3,
         ),
       ),
     );
@@ -386,26 +429,42 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
     final status = _status;
     final self = status?.self;
     final peers = status?.peers ?? const <TailscaleDevice>[];
+    final error = _statusError;
     return [
       ListHeader(title: l.tailscaleThisDevice),
       ListItem(
         title: Text(l.tailscaleStatus),
-        subtitle: _statusLoaded && status == null
+        subtitle: _statusLoaded && status == null && error == null
             ? Text(l.tailscaleNotAppliedHint)
             : null,
         trailing: _statusLoaded
             ? Text(
-                tailscaleStatusLabel(l, status),
-                style: TextStyle(color: tailscaleStatusColor(context, status)),
+                error != null
+                    ? l.tailscaleUnavailable
+                    : tailscaleStatusLabel(l, status),
+                style: TextStyle(
+                  color: error != null
+                      ? context.colorScheme.error
+                      : tailscaleStatusColor(context, status),
+                ),
               )
             : const SizedBox.square(
                 dimension: 16,
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
       ),
-      if (status != null && status.error.isNotEmpty)
-        _footnote(status.error, color: context.colorScheme.error),
+      for (final message in [
+        ?error,
+        if (status != null && status.error.isNotEmpty) status.error,
+        if (status != null && !status.isRunning) ...status.health,
+      ])
+        _footnote(message, color: context.colorScheme.error),
       if (status != null && status.isRunning && self != null) ...[
+        if (status.tailnet.isNotEmpty)
+          ListItem(
+            title: const Text('Tailnet'),
+            subtitle: Text(status.tailnet),
+          ),
         ListItem(
           title: Text(l.tailscaleDeviceName),
           subtitle: SelectableText(self.name),
@@ -438,7 +497,14 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
         [
           address,
           if (peer.os.isNotEmpty) peer.os,
-          if (peer.exitNodeOption) l.tailscaleExitNode,
+          if (peer.direct)
+            l.tailscaleDirect
+          else if (peer.relay.isNotEmpty)
+            l.tailscaleRelay(peer.relay),
+          if (peer.exitNode)
+            l.tailscaleExitNodeActive
+          else if (peer.exitNodeOption)
+            l.tailscaleExitNode,
         ].where((item) => item.isNotEmpty).join(' · '),
       ),
       trailing: address.isEmpty
@@ -453,23 +519,18 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
 
   List<Widget> _buildFormSection(AppLocalizations l) {
     final exitOptions = _status?.exitNodeOptions ?? const <TailscaleDevice>[];
-    final hasExitNode = (_normalizedExitNode() ?? '').isNotEmpty;
     return [
       const ListHeader(title: 'Tailnet'),
       _textField(
         controller: _name,
         label: l.tailscaleNetworkName,
-        error: _nameValid
-            ? null
-            : _nameTaken
-            ? l.tailscaleNameInUse
-            : l.emptyTip(l.tailscaleNetworkName),
+        error: _nameError(l),
       ),
       _textField(
         controller: _hostname,
         label: l.tailscaleDeviceName,
         hint: defaultTailscaleHostname(Platform.operatingSystem),
-        error: _hostnameValid ? null : l.tailscaleDeviceName,
+        error: _hostnameValid ? null : l.tailscaleHostnameInvalid,
       ),
       Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
@@ -494,6 +555,10 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
                   ? null
                   : (selection) {
                       setState(() => _loginMethod = selection.first);
+                      final saved = _saved;
+                      if (_hasSavedAuthKey == null && saved != null) {
+                        unawaited(_loadSavedAuthKey(saved));
+                      }
                     },
             ),
           ],
@@ -505,8 +570,8 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
           label: l.tailscaleAuthKey,
           hint: 'tskey-auth-…',
           obscure: true,
-          helper: _hasSavedAuthKey ? l.tailscaleAuthKeySaved : null,
-          error: _authKeyValid ? null : l.tailscaleAuthKey,
+          helper: _hasSavedAuthKey == true ? l.tailscaleAuthKeySaved : null,
+          error: _authKeyValid ? null : l.tailscaleAuthKeyInvalid,
         ),
       _footnote(l.tailscaleLoginFooter),
       ListItem.switchItem(
@@ -520,9 +585,8 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
       _textField(
         controller: _exitNode,
         label: l.tailscaleExitNode,
-        hint: 'none',
         helper: l.tailscaleExitNodeDesc,
-        error: _exitNodeValid ? null : l.tailscaleExitNode,
+        error: _exitNodeValid ? null : l.tailscaleExitNodeDesc,
       ),
       if (exitOptions.isNotEmpty)
         Padding(
@@ -549,7 +613,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
             ],
           ),
         ),
-      if (hasExitNode)
+      if (_normalizedExitNode().isNotEmpty)
         ListItem.switchItem(
           title: Text(l.tailscaleExitNodeAllowLan),
           delegate: SwitchDelegate(
@@ -566,7 +630,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
             label: l.tailscaleControlUrl,
             hint: tailscaleDefaultControlUrl,
             keyboardType: TextInputType.url,
-            error: _controlUrlValid ? null : l.tailscaleControlUrl,
+            error: _controlUrlValid ? null : l.urlTip(l.tailscaleControlUrl),
           ),
         ],
       ),
@@ -577,11 +641,11 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
   List<Widget> _buildAccountSection(AppLocalizations l) {
     final status = _status;
     final signingIn = _loginStartedAt != null;
+    final signedIn = !signingIn && status?.isSignedIn == true;
     final authUrl = status?.awaitsBrowser == true ? status!.authUrl : null;
     final invalid = _invalidFields(l);
-    final children = <Widget>[];
-    if (signingIn) {
-      children.add(
+    final children = <Widget>[
+      if (signingIn)
         Row(
           children: [
             const SizedBox.square(
@@ -591,23 +655,18 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                status?.state == TailscaleState.needsMachineAuth
-                    ? l.tailscaleNeedsApproval
-                    : authUrl != null
+                authUrl != null
                     ? l.tailscaleLoginWaiting
                     : l.tailscaleSigningIn,
               ),
             ),
           ],
-        ),
-      );
-    } else if (status?.isSignedIn == true) {
-      children.add(Text(l.tailscaleSignedIn));
-    } else if (status?.state == TailscaleState.needsMachineAuth) {
-      children.add(Text(l.tailscaleNeedsApproval));
-    }
-    if (authUrl != null) {
-      children.addAll([
+        )
+      else if (signedIn)
+        Text(l.tailscaleSignedIn)
+      else if (status?.state == TailscaleState.needsMachineAuth)
+        Text(l.tailscaleNeedsApproval),
+      if (authUrl != null) ...[
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,
@@ -636,36 +695,21 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
             backgroundColor: Colors.white,
           ),
         ),
-      ]);
-    }
-    children.add(const SizedBox(height: 12));
-    if (signingIn) {
-      children.add(
-        TextButton(
-          onPressed: () => setState(() => _loginStartedAt = null),
-          child: Text(l.cancel),
+      ],
+      const SizedBox(height: 12),
+      if (signingIn)
+        TextButton(onPressed: () => setState(_endLogin), child: Text(l.cancel))
+      else if (signedIn)
+        OutlinedButton(
+          onPressed: _busy ? null : _logout,
+          child: Text(l.tailscaleLogout),
+        )
+      else ...[
+        FilledButton(
+          onPressed: _busy || invalid.isNotEmpty ? null : _saveAndLogin,
+          child: Text(l.tailscaleSaveAndLogin),
         ),
-      );
-    } else {
-      children.add(
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            FilledButton(
-              onPressed: _busy || invalid.isNotEmpty ? null : _saveAndLogin,
-              child: Text(l.tailscaleSaveAndLogin),
-            ),
-            if (status?.isSignedIn == true)
-              OutlinedButton(
-                onPressed: _busy ? null : _logout,
-                child: Text(l.tailscaleLogout),
-              ),
-          ],
-        ),
-      );
-      children.add(const SizedBox(height: 8));
-      children.add(
+        const SizedBox(height: 8),
         Text(
           invalid.isNotEmpty
               ? l.tailscaleCheckSettings(_joinFields(invalid))
@@ -678,8 +722,8 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
                 : context.colorScheme.onSurfaceVariant,
           ),
         ),
-      );
-    }
+      ],
+    ];
     return [
       ListHeader(title: l.tailscaleAccount),
       Padding(

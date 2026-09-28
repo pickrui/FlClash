@@ -130,16 +130,18 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m53(count) => "设备（${count}）";
 
-  static String m54(name) =>
+  static String m54(region) => "中继 ${region}";
+
+  static String m55(name) =>
       "此设备将退出 ${name}，并删除此设备上的登录信息；如果当前无法连接该网络，请到 Tailscale 管理后台移除此设备";
 
-  static String m55(build) => "构建号：${build}";
+  static String m56(build) => "构建号：${build}";
 
-  static String m56(version) => "版本号：${version}";
+  static String m57(version) => "版本号：${version}";
 
-  static String m57(label) => "${label}必须为URL";
+  static String m58(label) => "${label}必须为URL";
 
-  static String m58(count) => "${count} 年前";
+  static String m59(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1333,6 +1335,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleAddNetwork": MessageLookupByLibrary.simpleMessage("添加网络"),
     "tailscaleAdvanced": MessageLookupByLibrary.simpleMessage("高级"),
     "tailscaleAuthKey": MessageLookupByLibrary.simpleMessage("认证密钥"),
+    "tailscaleAuthKeyInvalid": MessageLookupByLibrary.simpleMessage(
+      "认证密钥格式不正确",
+    ),
     "tailscaleAuthKeySaved": MessageLookupByLibrary.simpleMessage(
       "此设备已保存认证密钥，填写新密钥即可替换",
     ),
@@ -1352,6 +1357,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "tailscaleDeviceName": MessageLookupByLibrary.simpleMessage("设备名称"),
     "tailscaleDevices": m53,
+    "tailscaleDirect": MessageLookupByLibrary.simpleMessage("直连"),
     "tailscaleEmptyDesc": MessageLookupByLibrary.simpleMessage(
       "添加网络并在此设备上登录，启动代理后即可访问你的设备",
     ),
@@ -1363,6 +1369,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "访问你的 Tailnet 中的设备",
     ),
     "tailscaleExitNode": MessageLookupByLibrary.simpleMessage("出口节点"),
+    "tailscaleExitNodeActive": MessageLookupByLibrary.simpleMessage(
+      "正在使用的出口节点",
+    ),
     "tailscaleExitNodeAllowLan": MessageLookupByLibrary.simpleMessage(
       "允许访问本地网络",
     ),
@@ -1374,7 +1383,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "设备与 MagicDNS",
     ),
     "tailscaleGuideDevicesBody": MessageLookupByLibrary.simpleMessage(
-      "自动路由会把已知对等设备的地址和 MagicDNS 名称送入此网络，其他流量仍遵循你的规则\n自动路由位于你添加的规则之后、配置自带的规则之前\n访问远程子网前，请在 Tailnet 中批准对应路由，再添加一条指向此网络的规则",
+      "自动路由会把已知对等设备的地址和 MagicDNS 名称送入此网络，其他流量仍遵循你的规则\n自动路由位于你添加的规则和自定义规则之后、配置自带的规则之前\n使用自建控制服务器的自有域名时，只接管已知设备的名称，该域名下的公开网站不受影响\n访问远程子网前，请在 Tailnet 中批准对应路由，再添加一条指向此网络的规则",
     ),
     "tailscaleGuideExitNodes": MessageLookupByLibrary.simpleMessage("出口节点"),
     "tailscaleGuideExitNodesBody": MessageLookupByLibrary.simpleMessage(
@@ -1393,6 +1402,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "tailscaleGuideTroubleshootingBody": MessageLookupByLibrary.simpleMessage(
       "确认代理已启动、此设备已获批准且对等设备在线；访问子网或互联网时，还需检查路由批准状态和出口节点\n状态为“未生效”时，说明运行中的配置不包含此网络，请先选择配置，并确认配置中没有同名节点\n本应用只主动访问你的 Tailnet，不接受来自 Tailnet 的入站连接，也不会把此设备发布为子网路由器或出口节点",
+    ),
+    "tailscaleHostnameInvalid": MessageLookupByLibrary.simpleMessage(
+      "只能使用小写字母、数字和连字符，最多 63 个字符",
     ),
     "tailscaleInteractiveLogin": MessageLookupByLibrary.simpleMessage("交互式登录"),
     "tailscaleKeyExpired": MessageLookupByLibrary.simpleMessage("节点密钥已过期"),
@@ -1414,6 +1426,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "tailscaleLogout": MessageLookupByLibrary.simpleMessage("退出登录"),
     "tailscaleNameInUse": MessageLookupByLibrary.simpleMessage("此名称已被使用"),
+    "tailscaleNameInvalid": MessageLookupByLibrary.simpleMessage(
+      "不超过 64 个字符，且不能包含逗号",
+    ),
     "tailscaleNeedsApproval": MessageLookupByLibrary.simpleMessage("等待设备审批"),
     "tailscaleNeedsLogin": MessageLookupByLibrary.simpleMessage("需要登录"),
     "tailscaleNetworkName": MessageLookupByLibrary.simpleMessage("网络名称"),
@@ -1426,7 +1441,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleOffline": MessageLookupByLibrary.simpleMessage("离线"),
     "tailscaleOnline": MessageLookupByLibrary.simpleMessage("在线"),
     "tailscaleOpenLoginPage": MessageLookupByLibrary.simpleMessage("打开登录页面"),
-    "tailscaleRemoveConfirm": m54,
+    "tailscaleRelay": m54,
+    "tailscaleRemoveConfirm": m55,
     "tailscaleRemoveNetwork": MessageLookupByLibrary.simpleMessage("移除网络"),
     "tailscaleSaveAndLogin": MessageLookupByLibrary.simpleMessage("保存并登录"),
     "tailscaleSignedIn": MessageLookupByLibrary.simpleMessage("已登录"),
@@ -1488,7 +1504,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
       "AppImage 无法自动安装，请用下载的文件替换当前程序，已打开文件所在目录",
     ),
-    "updateBuildNumber": m55,
+    "updateBuildNumber": m56,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage("取消下载"),
     "updateDownloadBackground": MessageLookupByLibrary.simpleMessage("移到后台下载"),
     "updateDownloadBrowser": MessageLookupByLibrary.simpleMessage("使用浏览器下载"),
@@ -1511,12 +1527,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseNotesFailed": MessageLookupByLibrary.simpleMessage(
       "更新日志加载失败，请重试",
     ),
-    "updateVersionNumber": m56,
+    "updateVersionNumber": m57,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("升级套餐"),
     "upload": MessageLookupByLibrary.simpleMessage("上传"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("通过URL获取配置文件"),
-    "urlTip": m57,
+    "urlTip": m58,
     "useHosts": MessageLookupByLibrary.simpleMessage("使用Hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("使用系统Hosts"),
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("已用流量"),
@@ -1536,7 +1552,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "vpnTip": MessageLookupByLibrary.simpleMessage("重启VPN后改变生效"),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV配置"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("白名单模式"),
-    "yearsAgo": m58,
+    "yearsAgo": m59,
     "zh_CN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };
 }

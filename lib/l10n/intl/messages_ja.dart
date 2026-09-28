@@ -133,16 +133,18 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m53(count) => "デバイス（${count}）";
 
-  static String m54(name) =>
+  static String m54(region) => "リレー ${region}";
+
+  static String m55(name) =>
       "このデバイスは ${name} から退出し、このデバイス上のログイン情報が削除されます。現在ネットワークに接続できない場合は、Tailscale の管理コンソールでデバイスを削除してください";
 
-  static String m55(build) => "ビルド番号: ${build}";
+  static String m56(build) => "ビルド番号: ${build}";
 
-  static String m56(version) => "バージョン：${version}";
+  static String m57(version) => "バージョン：${version}";
 
-  static String m57(label) => "${label}はURLである必要があります";
+  static String m58(label) => "${label}はURLである必要があります";
 
-  static String m58(count) => "${count}年前";
+  static String m59(count) => "${count}年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1520,6 +1522,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleAddNetwork": MessageLookupByLibrary.simpleMessage("ネットワークを追加"),
     "tailscaleAdvanced": MessageLookupByLibrary.simpleMessage("詳細設定"),
     "tailscaleAuthKey": MessageLookupByLibrary.simpleMessage("認証キー"),
+    "tailscaleAuthKeyInvalid": MessageLookupByLibrary.simpleMessage(
+      "認証キーの形式が正しくありません",
+    ),
     "tailscaleAuthKeySaved": MessageLookupByLibrary.simpleMessage(
       "このデバイスには認証キーが保存されています。新しいキーを入力すると置き換えます",
     ),
@@ -1541,6 +1546,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "tailscaleDeviceName": MessageLookupByLibrary.simpleMessage("デバイス名"),
     "tailscaleDevices": m53,
+    "tailscaleDirect": MessageLookupByLibrary.simpleMessage("直接接続"),
     "tailscaleEmptyDesc": MessageLookupByLibrary.simpleMessage(
       "ネットワークを追加してこのデバイスでログインし、プロキシを起動するとデバイスにアクセスできます",
     ),
@@ -1554,6 +1560,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Tailnet 内のデバイスにアクセス",
     ),
     "tailscaleExitNode": MessageLookupByLibrary.simpleMessage("出口ノード"),
+    "tailscaleExitNodeActive": MessageLookupByLibrary.simpleMessage(
+      "使用中の出口ノード",
+    ),
     "tailscaleExitNodeAllowLan": MessageLookupByLibrary.simpleMessage(
       "ローカルネットワークへのアクセスを許可",
     ),
@@ -1565,7 +1574,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "デバイスと MagicDNS",
     ),
     "tailscaleGuideDevicesBody": MessageLookupByLibrary.simpleMessage(
-      "自動ルーティングは既知のピアのアドレスと MagicDNS 名をこのネットワークに送ります。その他の通信はルールに従います\n自動ルーティングは追加したルールの後、プロファイル自身のルールの前に適用されます\nリモートのサブネットにアクセスするには、Tailnet でルートを承認してから、このネットワークを指すルールを追加してください",
+      "自動ルーティングは既知のピアのアドレスと MagicDNS 名をこのネットワークに送ります。その他の通信はルールに従います\n自動ルーティングは追加したルールとカスタムルールの後、プロファイル自身のルールの前に適用されます\n独自ドメインのコントロールサーバーでは既知のデバイス名だけを経由させるため、そのドメインの公開サイトには影響しません\nリモートのサブネットにアクセスするには、Tailnet でルートを承認してから、このネットワークを指すルールを追加してください",
     ),
     "tailscaleGuideExitNodes": MessageLookupByLibrary.simpleMessage("出口ノード"),
     "tailscaleGuideExitNodesBody": MessageLookupByLibrary.simpleMessage(
@@ -1584,6 +1593,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "tailscaleGuideTroubleshootingBody": MessageLookupByLibrary.simpleMessage(
       "プロキシが実行中か、このデバイスが承認済みか、ピアがオンラインかを確認してください。サブネットやインターネットにアクセスする場合は、ルートの承認状態と出口ノードも確認してください\n「未適用」は実行中の設定にこのネットワークが含まれていないことを示します。プロファイルを選択し、同じ名前のノードがないことを確認してください\nこのアプリは Tailnet へ接続するだけで、Tailnet からの着信接続は受け付けず、このデバイスをサブネットルーターや出口ノードとして公開しません",
+    ),
+    "tailscaleHostnameInvalid": MessageLookupByLibrary.simpleMessage(
+      "小文字、数字、ハイフンのみ、63 文字以内",
     ),
     "tailscaleInteractiveLogin": MessageLookupByLibrary.simpleMessage(
       "対話型ログイン",
@@ -1611,6 +1623,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleNameInUse": MessageLookupByLibrary.simpleMessage(
       "この名前は既に使われています",
     ),
+    "tailscaleNameInvalid": MessageLookupByLibrary.simpleMessage(
+      "64 文字以内で、カンマは使えません",
+    ),
     "tailscaleNeedsApproval": MessageLookupByLibrary.simpleMessage(
       "デバイスの承認待ちです",
     ),
@@ -1627,7 +1642,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleOpenLoginPage": MessageLookupByLibrary.simpleMessage(
       "ログインページを開く",
     ),
-    "tailscaleRemoveConfirm": m54,
+    "tailscaleRelay": m54,
+    "tailscaleRemoveConfirm": m55,
     "tailscaleRemoveNetwork": MessageLookupByLibrary.simpleMessage("ネットワークを削除"),
     "tailscaleSaveAndLogin": MessageLookupByLibrary.simpleMessage("保存してログイン"),
     "tailscaleSignedIn": MessageLookupByLibrary.simpleMessage("ログイン済み"),
@@ -1693,7 +1709,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
       "AppImage は自動インストールできません。ダウンロードしたファイルで現在のプログラムを置き換えてください。保存先のフォルダーを開きました。",
     ),
-    "updateBuildNumber": m55,
+    "updateBuildNumber": m56,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage("ダウンロードを中止"),
     "updateDownloadBackground": MessageLookupByLibrary.simpleMessage(
       "バックグラウンドでダウンロード",
@@ -1724,12 +1740,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseNotesFailed": MessageLookupByLibrary.simpleMessage(
       "更新履歴を読み込めませんでした。再試行してください",
     ),
-    "updateVersionNumber": m56,
+    "updateVersionNumber": m57,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("プランをアップグレード"),
     "upload": MessageLookupByLibrary.simpleMessage("アップロード"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("URL経由でプロファイルを取得"),
-    "urlTip": m57,
+    "urlTip": m58,
     "useHosts": MessageLookupByLibrary.simpleMessage("ホストを使用"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("システムホストを使用"),
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("使用済みデータ量"),
@@ -1749,7 +1765,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "vpnTip": MessageLookupByLibrary.simpleMessage("変更はVPN再起動後に有効"),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV設定"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("ホワイトリストモード"),
-    "yearsAgo": m58,
+    "yearsAgo": m59,
     "zh_CN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };
 }

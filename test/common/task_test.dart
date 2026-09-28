@@ -117,6 +117,7 @@ void main() {
       List<Rule> addedRules = const [],
       OverwriteType overwriteType = OverwriteType.standard,
       List<Rule> customRules = const [],
+      List<ProxyGroup> customProxyGroups = const [],
     }) {
       return makeRealProfileTask(
         _makeRealProfileState(
@@ -147,6 +148,7 @@ void main() {
           addedRules: addedRules,
           overwriteType: overwriteType,
           customRules: customRules,
+          customProxyGroups: customProxyGroups,
         ),
       );
     }
@@ -157,32 +159,37 @@ void main() {
       expect((result['proxies'] as List).length, 1);
     });
 
-    test('adds the network before the profile rules', () async {
-      final result = await apply(
-        const [home],
-        addedRules: const [Rule(id: 1, value: 'DOMAIN,nas.example,DIRECT')],
-      );
-      final proxies = result['proxies'] as List;
-      expect(proxies.first, {
-        'name': 'Home',
-        'type': 'tailscale',
-        'state-dir': 'tailscale-networks/home-state',
-        'hostname': 'flclash-test',
-        'udp': true,
-        'accept-routes': true,
-      });
-      // The user's added rules keep precedence; the profile's private-address
-      // rule must not see tailnet peers first.
-      expect(result['rules'], [
-        'DOMAIN,nas.example,DIRECT',
-        'TAILNET,Home,Home',
-        'GEOIP,private,DIRECT',
-        'MATCH,Proxy',
-      ]);
-      expect(result['dns']['nameserver-policy'], {
-        '+.tail1234.ts.net': 'tailscale://Home',
-      });
-    });
+    test(
+      'adds the network after the profile nodes, before its rules',
+      () async {
+        final result = await apply(
+          const [home],
+          addedRules: const [Rule(id: 1, value: 'DOMAIN,nas.example,DIRECT')],
+        );
+        final proxies = result['proxies'] as List;
+        // Appended, so include-all selectors keep defaulting to profile nodes.
+        expect(proxies.first['name'], 'Node');
+        expect(proxies.last, {
+          'name': 'Home',
+          'type': 'tailscale',
+          'state-dir': 'tailscale-networks/home-state',
+          'hostname': 'flclash-test',
+          'udp': true,
+          'accept-routes': true,
+        });
+        // The user's added rules keep precedence; the profile's private-address
+        // rule must not see tailnet peers first.
+        expect(result['rules'], [
+          'DOMAIN,nas.example,DIRECT',
+          'TAILNET,Home,Home',
+          'GEOIP,private,DIRECT',
+          'MATCH,Proxy',
+        ]);
+        expect(result['dns']['nameserver-policy'], {
+          '+.tail1234.ts.net': 'tailscale://Home',
+        });
+      },
+    );
 
     test('custom overwrite rules still end with their MATCH', () async {
       final result = await apply(
@@ -191,6 +198,40 @@ void main() {
         customRules: const [Rule(id: 1, value: 'MATCH,DIRECT')],
       );
       expect(result['rules'], ['TAILNET,Home,Home', 'MATCH,DIRECT']);
+    });
+
+    test('merge mode keeps custom rules ahead of the tailnet', () async {
+      final result = await apply(
+        const [home],
+        overwriteType: OverwriteType.merge,
+        addedRules: const [Rule(id: 1, value: 'DOMAIN,a.example,DIRECT')],
+        customRules: const [Rule(id: 2, value: 'IP-CIDR,100.64.0.9/32,DIRECT')],
+      );
+      expect(result['rules'], [
+        'DOMAIN,a.example,DIRECT',
+        'IP-CIDR,100.64.0.9/32,DIRECT',
+        'TAILNET,Home,Home',
+        'GEOIP,private,DIRECT',
+        'MATCH,Proxy',
+      ]);
+    });
+
+    test('a script profile gets the tailnet ahead of its rules', () async {
+      final result = await apply(const [
+        home,
+      ], overwriteType: OverwriteType.script);
+      expect(result['rules'], [
+        'TAILNET,Home,Home',
+        'GEOIP,private,DIRECT',
+        'MATCH,Proxy',
+      ]);
+    });
+
+    test('skips a network with a malformed state id', () async {
+      final result = await apply([home.copyWith(stateId: '../profiles')]);
+      final proxies = result['proxies'] as List;
+      expect(proxies.where((proxy) => proxy['type'] == 'tailscale'), isEmpty);
+      expect(result['rules'], ['GEOIP,private,DIRECT', 'MATCH,Proxy']);
     });
 
     test('offers only exit-node networks in selectors', () async {
@@ -206,6 +247,22 @@ void main() {
       final groups = result['proxy-groups'] as List;
       expect(groups[0]['proxies'], ['Node', 'Office']);
       expect(groups[1]['proxies'], ['Node']);
+    });
+
+    test('leaves personal selectors to the user', () async {
+      final result = await apply(
+        [home.copyWith(exitNode: tailscaleExitNodeAuto)],
+        overwriteType: OverwriteType.merge,
+        customProxyGroups: const [
+          ProxyGroup(name: 'Mine', type: GroupType.Selector, proxies: ['Node']),
+        ],
+      );
+      final groups = {
+        for (final group in result['proxy-groups'] as List)
+          group['name']: group['proxies'],
+      };
+      expect(groups['Proxy'], ['Node', 'Home']);
+      expect(groups['Mine'], ['Node']);
     });
 
     test('skips a network whose name the profile already uses', () async {
@@ -224,7 +281,7 @@ void main() {
       expect(result['rules'], ['GEOIP,private,DIRECT', 'MATCH,Proxy']);
       expect(result['dns']['nameserver-policy'], isNull);
       expect(
-        (result['proxies'] as List).first['type'],
+        (result['proxies'] as List).last['type'],
         'tailscale',
         reason: 'the network stays usable in explicit rules',
       );
@@ -249,6 +306,30 @@ void main() {
       expect(result['dns']['nameserver-policy'], {
         '+.family.ts.net': 'tailscale://家里',
       });
+    });
+
+    test('DNS policy claims only a Tailscale tailnet domain, first', () async {
+      final result = await apply(
+        [
+          home,
+          home.copyWith(
+            id: 'hs',
+            name: 'Headscale',
+            stateId: 'hs-state',
+            magicDnsSuffix: 'example.com',
+          ),
+        ],
+        rawConfig: {
+          'dns': {
+            'enable': true,
+            'nameserver-policy': {'geosite:private': 'system'},
+          },
+          'rules': ['MATCH,DIRECT'],
+        },
+      );
+      final policy = result['dns']['nameserver-policy'] as Map;
+      // Policy entries match in order, so the tailnet goes ahead of the rest.
+      expect(policy.keys.toList(), ['+.tail1234.ts.net', 'geosite:private']);
     });
 
     test('keeps a profile policy for the same suffix', () async {

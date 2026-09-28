@@ -147,16 +147,18 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m53(count) => "Устройства (${count})";
 
-  static String m54(name) =>
+  static String m54(region) => "Ретранслятор ${region}";
+
+  static String m55(name) =>
       "Это устройство выйдет из сети ${name}, а данные входа будут удалены с него. Если сеть сейчас недоступна, удалите устройство в консоли администратора Tailscale.";
 
-  static String m55(build) => "Номер сборки: ${build}";
+  static String m56(build) => "Номер сборки: ${build}";
 
-  static String m56(version) => "Версия: ${version}";
+  static String m57(version) => "Версия: ${version}";
 
-  static String m57(label) => "${label} должен быть URL";
+  static String m58(label) => "${label} должен быть URL";
 
-  static String m58(count) =>
+  static String m59(count) =>
       "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1933,6 +1935,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleAuthKey": MessageLookupByLibrary.simpleMessage(
       "Ключ авторизации",
     ),
+    "tailscaleAuthKeyInvalid": MessageLookupByLibrary.simpleMessage(
+      "Это не похоже на ключ авторизации",
+    ),
     "tailscaleAuthKeySaved": MessageLookupByLibrary.simpleMessage(
       "На этом устройстве сохранён ключ авторизации. Введите новый, чтобы заменить его.",
     ),
@@ -1958,6 +1963,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Имя устройства",
     ),
     "tailscaleDevices": m53,
+    "tailscaleDirect": MessageLookupByLibrary.simpleMessage("Напрямую"),
     "tailscaleEmptyDesc": MessageLookupByLibrary.simpleMessage(
       "Добавьте сеть, войдите на этом устройстве и запустите прокси, чтобы получить доступ к своим устройствам.",
     ),
@@ -1971,6 +1977,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Доступ к устройствам в вашей сети tailnet",
     ),
     "tailscaleExitNode": MessageLookupByLibrary.simpleMessage("Выходной узел"),
+    "tailscaleExitNodeActive": MessageLookupByLibrary.simpleMessage(
+      "Используемый выходной узел",
+    ),
     "tailscaleExitNodeAllowLan": MessageLookupByLibrary.simpleMessage(
       "Разрешить доступ к локальной сети",
     ),
@@ -1982,7 +1991,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Устройства и MagicDNS",
     ),
     "tailscaleGuideDevicesBody": MessageLookupByLibrary.simpleMessage(
-      "Автоматическая маршрутизация направляет в эту сеть адреса и имена MagicDNS известных узлов. Остальной трафик идёт по вашим правилам.\nОна применяется после добавленных вами правил и до собственных правил профиля.\nЧтобы попасть в удалённую подсеть, одобрите маршрут в tailnet и добавьте правило, указывающее на эту сеть.",
+      "Автоматическая маршрутизация направляет в эту сеть адреса и имена MagicDNS известных узлов. Остальной трафик идёт по вашим правилам.\nОна применяется после добавленных и пользовательских правил и до собственных правил профиля.\nС собственным доменом сервера управления маршрутизируются только известные имена устройств, поэтому публичные сайты домена остаются доступны.\nЧтобы попасть в удалённую подсеть, одобрите маршрут в tailnet и добавьте правило, указывающее на эту сеть.",
     ),
     "tailscaleGuideExitNodes": MessageLookupByLibrary.simpleMessage(
       "Выходные узлы",
@@ -2007,6 +2016,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "tailscaleGuideTroubleshootingBody": MessageLookupByLibrary.simpleMessage(
       "Проверьте, что прокси запущен, устройство одобрено, а узел в сети. Для подсетей и интернета также проверьте одобрение маршрутов и выходной узел.\n«Не применено» означает, что текущая конфигурация не содержит сеть: выберите профиль и убедитесь, что в нём нет узла с таким же именем.\nПриложение только подключается к вашему tailnet: оно не принимает входящие соединения и не предлагает это устройство как маршрутизатор подсети или выходной узел.",
+    ),
+    "tailscaleHostnameInvalid": MessageLookupByLibrary.simpleMessage(
+      "Только строчные буквы, цифры и дефисы, не более 63 символов",
     ),
     "tailscaleInteractiveLogin": MessageLookupByLibrary.simpleMessage(
       "Интерактивный",
@@ -2036,6 +2048,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleNameInUse": MessageLookupByLibrary.simpleMessage(
       "Это имя уже используется",
     ),
+    "tailscaleNameInvalid": MessageLookupByLibrary.simpleMessage(
+      "Не более 64 символов, без запятых",
+    ),
     "tailscaleNeedsApproval": MessageLookupByLibrary.simpleMessage(
       "Ожидается одобрение устройства",
     ),
@@ -2058,7 +2073,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleOpenLoginPage": MessageLookupByLibrary.simpleMessage(
       "Открыть страницу входа",
     ),
-    "tailscaleRemoveConfirm": m54,
+    "tailscaleRelay": m54,
+    "tailscaleRemoveConfirm": m55,
     "tailscaleRemoveNetwork": MessageLookupByLibrary.simpleMessage(
       "Удалить сеть",
     ),
@@ -2146,7 +2162,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
       "AppImage нельзя установить автоматически. Замените текущую программу скачанным файлом; его папка открыта.",
     ),
-    "updateBuildNumber": m55,
+    "updateBuildNumber": m56,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
       "Отменить загрузку",
     ),
@@ -2191,14 +2207,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseNotesFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось загрузить список изменений. Повторите попытку.",
     ),
-    "updateVersionNumber": m56,
+    "updateVersionNumber": m57,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("Улучшить тариф"),
     "upload": MessageLookupByLibrary.simpleMessage("Загрузка"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Получить профиль через URL",
     ),
-    "urlTip": m57,
+    "urlTip": m58,
     "useHosts": MessageLookupByLibrary.simpleMessage("Использовать hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Использовать системные hosts",
@@ -2230,7 +2246,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "whitelistMode": MessageLookupByLibrary.simpleMessage(
       "Режим белого списка",
     ),
-    "yearsAgo": m58,
+    "yearsAgo": m59,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Упрощенный китайский"),
   };
 }

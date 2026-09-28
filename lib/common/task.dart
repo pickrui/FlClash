@@ -362,6 +362,7 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
     rawConfig,
     data.tailscaleNetworks,
     data.tailscaleHostname,
+    personalGroups: {for (final group in customProxyGroups) group.name},
   );
   rawConfig['geox-url'] = realPatchConfig.geoXUrl.toJson();
   rawConfig['global-ua'] = realPatchConfig.globalUa ?? defaultUA;
@@ -405,9 +406,11 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
   }
   _applyTailscaleDnsPolicy(rawConfig, data.tailscaleNetworks, tailnetRules);
   List<String> rules = [
-    if (data.overwriteType == OverwriteType.custom ||
-        data.overwriteType == OverwriteType.merge)
-      ...customRules.map((rule) => rule.value),
+    ..._placeTailnetRules([
+      if (data.overwriteType == OverwriteType.custom ||
+          data.overwriteType == OverwriteType.merge)
+        ...customRules.map((rule) => rule.value),
+    ], tailnetRules),
     if (data.overwriteType != OverwriteType.custom &&
         rawConfig['rules'] != null)
       ...List<String>.from(rawConfig['rules']),
@@ -452,9 +455,7 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
     } else {
       finalAddedRules = addedRules.map((e) => e.value).toList();
     }
-    rules = [...finalAddedRules, ...tailnetRules, ...rules];
-  } else {
-    rules = [...tailnetRules, ...rules];
+    rules = [...finalAddedRules, ...rules];
   }
   rawConfig['rules'] = [
     if (blockWebRtc) 'SNIFF-PROTOCOL,stun,REJECT-DROP',
@@ -464,13 +465,12 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
   return Map<String, dynamic>.from(rawConfig);
 }
 
-/// Returns the TAILNET rules, which go after the user's added rules and before
-/// the profile's own, so a private-address rule cannot catch tailnet traffic.
 List<String> _applyTailscaleNetworks(
   Map<String, dynamic> rawConfig,
   List<TailscaleNetwork> networks,
-  String defaultHostname,
-) {
+  String defaultHostname, {
+  required Set<String> personalGroups,
+}) {
   if (networks.isEmpty) {
     return const [];
   }
@@ -489,7 +489,8 @@ List<String> _applyTailscaleNetworks(
   }
   final applied = [
     for (final network in networks)
-      if (isValidTailscaleNetworkName(network.name) &&
+      if (network.hasValidStateId &&
+          isValidTailscaleNetworkName(network.name) &&
           takenNames.add(network.name))
         network,
   ];
@@ -498,24 +499,43 @@ List<String> _applyTailscaleNetworks(
   }
   final proxies = rawConfig['proxies'];
   rawConfig['proxies'] = [
+    if (proxies is List) ...proxies,
     for (final network in applied)
       network.toProxy(defaultHostname: defaultHostname),
-    if (proxies is List) ...proxies,
   ];
   _appendProfileProxyNamesToSelectorGroups(rawConfig, [
     for (final network in applied)
       if (network.hasExitNode) network.name,
-  ]);
+  ], skipGroups: personalGroups);
   return [
     for (final network in applied)
       if (network.autoRoute) network.routeRule,
   ];
 }
 
+/// Ahead of the profile's rules, so its private-address rule cannot catch peers.
+List<String> _placeTailnetRules(
+  List<String> userRules,
+  List<String> tailnetRules,
+) {
+  if (tailnetRules.isEmpty) {
+    return userRules;
+  }
+  final endsWithMatch =
+      userRules.isNotEmpty &&
+      ParsedRule.parseString(userRules.last).ruleAction == RuleAction.MATCH;
+  final end = endsWithMatch ? userRules.length - 1 : userRules.length;
+  return [
+    ...userRules.sublist(0, end),
+    ...tailnetRules,
+    ...userRules.sublist(end),
+  ];
+}
+
 /// Go's URL parser rejects spaces and delimiters in a `tailscale://` host.
 final _tailscaleDnsNamePattern = RegExp(r'^[\p{L}\p{N}._-]+$', unicode: true);
 
-/// A real-IP lookup of a MagicDNS name must not reach public resolvers.
+/// A custom Headscale base domain may also serve public names, so only *.ts.net.
 void _applyTailscaleDnsPolicy(
   Map<String, dynamic> rawConfig,
   List<TailscaleNetwork> networks,
@@ -526,25 +546,21 @@ void _applyTailscaleDnsPolicy(
     return;
   }
   final current = dns['nameserver-policy'];
-  final policy = current is Map
-      ? Map<dynamic, dynamic>.from(current)
-      : <dynamic, dynamic>{};
-  var changed = false;
+  final existing = current is Map ? current : const {};
+  final tailnetPolicy = <dynamic, dynamic>{};
   for (final network in networks) {
     final suffix = network.magicDnsSuffix.trim();
-    if (suffix.isEmpty ||
+    final key = '+.$suffix';
+    if (!suffix.endsWith('.ts.net') ||
         !tailnetRules.contains(network.routeRule) ||
-        !_tailscaleDnsNamePattern.hasMatch(network.name)) {
+        !_tailscaleDnsNamePattern.hasMatch(network.name) ||
+        existing.containsKey(key)) {
       continue;
     }
-    final key = '+.$suffix';
-    if (!policy.containsKey(key)) {
-      policy[key] = 'tailscale://${network.name}';
-      changed = true;
-    }
+    tailnetPolicy[key] = 'tailscale://${network.name}';
   }
-  if (changed) {
-    dns['nameserver-policy'] = policy;
+  if (tailnetPolicy.isNotEmpty) {
+    dns['nameserver-policy'] = {...tailnetPolicy, ...existing};
   }
 }
 
@@ -578,8 +594,9 @@ void _applyProfileProxies(Map rawConfig, List<ProfileProxy> profileProxies) {
 
 void _appendProfileProxyNamesToSelectorGroups(
   Map rawConfig,
-  List<String> customNames,
-) {
+  List<String> customNames, {
+  Set<String> skipGroups = const {},
+}) {
   if (customNames.isEmpty) {
     return;
   }
@@ -593,7 +610,7 @@ void _appendProfileProxyNamesToSelectorGroups(
     if (group is! Map) {
       continue;
     }
-    if (group['type'] != 'select') {
+    if (group['type'] != 'select' || skipGroups.contains(group['name'])) {
       continue;
     }
     final rawProxies = group['proxies'];

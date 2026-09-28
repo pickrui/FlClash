@@ -1014,11 +1014,17 @@
   "tailscaleGuideGetStarted": "开始使用",
   "tailscaleGuideGetStartedBody": "添加网络并选择“保存并登录”，打开登录页面并授权此设备，登录将自动完成\n使用认证密钥登录时，选择“认证密钥”并填写密钥，无需通过浏览器登录\n启动代理后才能访问此网络，仅登录不会接管任何流量",
   "tailscaleGuideDevices": "设备与 MagicDNS",
-  "tailscaleGuideDevicesBody": "自动路由会把已知对等设备的地址和 MagicDNS 名称送入此网络，其他流量仍遵循你的规则\n自动路由位于你添加的规则之后、配置自带的规则之前\n访问远程子网前，请在 Tailnet 中批准对应路由，再添加一条指向此网络的规则",
+  "tailscaleGuideDevicesBody": "自动路由会把已知对等设备的地址和 MagicDNS 名称送入此网络，其他流量仍遵循你的规则\n自动路由位于你添加的规则和自定义规则之后、配置自带的规则之前\n使用自建控制服务器的自有域名时，只接管已知设备的名称，该域名下的公开网站不受影响\n访问远程子网前，请在 Tailnet 中批准对应路由，再添加一条指向此网络的规则",
   "tailscaleGuideExitNodes": "出口节点",
   "tailscaleGuideExitNodesBody": "填写出口节点后，此网络会出现在配置的选择组中；在组中选择它或添加指向它的规则后，相应流量才会经出口节点访问互联网\n留空表示不使用出口节点；auto 会选择一个可用的出口节点，填写设备名称或地址则使用指定设备",
   "tailscaleGuideSignIn": "登录与备份",
   "tailscaleGuideSignInBody": "网络设置会随备份保存，认证密钥和设备身份只保留在此设备上，在其他设备上恢复后需要重新登录\n节点密钥过期后，请再次选择“保存并登录”；设备审批和访问权限在你的 Tailnet 中管理\n移除网络会让此设备退出登录，并删除此设备上的设备身份",
   "tailscaleGuideTroubleshooting": "故障排查",
-  "tailscaleGuideTroubleshootingBody": "确认代理已启动、此设备已获批准且对等设备在线；访问子网或互联网时，还需检查路由批准状态和出口节点\n状态为“未生效”时，说明运行中的配置不包含此网络，请先选择配置，并确认配置中没有同名节点\n本应用只主动访问你的 Tailnet，不接受来自 Tailnet 的入站连接，也不会把此设备发布为子网路由器或出口节点"
+  "tailscaleGuideTroubleshootingBody": "确认代理已启动、此设备已获批准且对等设备在线；访问子网或互联网时，还需检查路由批准状态和出口节点\n状态为“未生效”时，说明运行中的配置不包含此网络，请先选择配置，并确认配置中没有同名节点\n本应用只主动访问你的 Tailnet，不接受来自 Tailnet 的入站连接，也不会把此设备发布为子网路由器或出口节点",
+  "tailscaleNameInvalid": "不超过 64 个字符，且不能包含逗号",
+  "tailscaleHostnameInvalid": "只能使用小写字母、数字和连字符，最多 63 个字符",
+  "tailscaleAuthKeyInvalid": "认证密钥格式不正确",
+  "tailscaleDirect": "直连",
+  "tailscaleRelay": "中继 {region}",
+  "tailscaleExitNodeActive": "正在使用的出口节点"
 }

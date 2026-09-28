@@ -75,8 +75,7 @@ class _TailscaleViewState extends ConsumerState<TailscaleView> {
   @override
   void initState() {
     super.initState();
-    unawaited(_refresh());
-    _timer = Timer.periodic(_pollInterval, (_) => unawaited(_refresh()));
+    _startPolling();
   }
 
   @override
@@ -85,17 +84,22 @@ class _TailscaleViewState extends ConsumerState<TailscaleView> {
     super.dispose();
   }
 
+  void _startPolling() {
+    unawaited(_refresh());
+    _timer = Timer.periodic(_pollInterval, (_) => unawaited(_refresh()));
+  }
+
   Future<void> _refresh() async {
     if (_refreshing) return;
     _refreshing = true;
     try {
-      final action = context.tailscaleAction;
+      final action = ref.read(tailscaleActionProvider);
       final next = <String, TailscaleStatus?>{};
       for (final network in ref.read(tailscaleNetworksProvider)) {
         try {
           next[network.id] = await action.status(network);
-        } catch (_) {
-          next[network.id] = null;
+        } catch (error) {
+          next[network.id] = TailscaleStatus(error: error.toString());
         }
       }
       if (!mounted) return;
@@ -109,9 +113,11 @@ class _TailscaleViewState extends ConsumerState<TailscaleView> {
     }
   }
 
+  /// The network page polls the same network, so this list pauses meanwhile.
   Future<void> _open(String? networkId) async {
+    _timer?.cancel();
     await openTailscaleNetwork(context, networkId: networkId);
-    if (mounted) unawaited(_refresh());
+    if (mounted) _startPolling();
   }
 
   Widget _buildEmpty(AppLocalizations l) {

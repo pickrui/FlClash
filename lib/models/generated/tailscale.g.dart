@@ -82,7 +82,6 @@ _TailscaleStatus _$TailscaleStatusFromJson(Map<String, dynamic> json) =>
       tailnet: json['tailnet'] as String? ?? '',
       magicDnsSuffix: json['magicDnsSuffix'] as String? ?? '',
       keyExpired: json['keyExpired'] as bool? ?? false,
-      keyExpiry: (json['keyExpiry'] as num?)?.toInt() ?? 0,
       health:
           (json['health'] as List<dynamic>?)
               ?.map((e) => e as String)
@@ -106,7 +105,6 @@ Map<String, dynamic> _$TailscaleStatusToJson(_TailscaleStatus instance) =>
       'tailnet': instance.tailnet,
       'magicDnsSuffix': instance.magicDnsSuffix,
       'keyExpired': instance.keyExpired,
-      'keyExpiry': instance.keyExpiry,
       'health': instance.health,
       'self': instance.self,
       'peers': instance.peers,
