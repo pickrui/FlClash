@@ -286,6 +286,7 @@ class _StoreRechargeSheetState extends State<StoreRechargeSheet> {
   @override
   Widget build(BuildContext context) {
     final amount = parseRechargeAmount(_amount.text);
+    final invalid = amount == null && _amount.text.trim().isNotEmpty;
     final outOfRange = amount != null && !_method.accepts(amount);
     final quickAmounts = _quickRechargeAmounts.where(_method.accepts);
     return AdaptiveSheetScaffold(
@@ -312,7 +313,9 @@ class _StoreRechargeSheetState extends State<StoreRechargeSheet> {
                         storePriceText(_method.max),
                       )
                     : null,
-                errorText: outOfRange
+                errorText: invalid
+                    ? appLocalizations.invalidAmount
+                    : outOfRange
                     ? appLocalizations.rechargeAmountOutOfRange
                     : null,
               ),

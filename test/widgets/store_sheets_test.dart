@@ -117,6 +117,11 @@ void main() {
     expect(pay().onPressed, isNull);
     expect(find.text('Allowed range ¥5 – ¥500'), findsOneWidget);
 
+    await tester.enterText(find.byType(TextField), '1.234');
+    await tester.pump();
+    expect(find.text('Please enter a valid amount'), findsOneWidget);
+    expect(pay().onPressed, isNull);
+
     await tester.enterText(find.byType(TextField), '1');
     await tester.pump();
     expect(
