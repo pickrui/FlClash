@@ -587,6 +587,8 @@
   "nodeFilterOnly": "Только",
   "nodeFilterExclude": "Исключить",
   "nodeFilterKeepOne": "Оставьте хотя бы один узел",
+  "nodeFilterNodeKept": "{name}, оставлен",
+  "nodeFilterNodeExcluded": "{name}, исключён",
   "nodeFilterAccountNote": "Фильтр сохраняется в аккаунте и действует на всех устройствах, где выполнен вход в это приложение.",
   "minimalConfiguration": "Минимальная конфигурация",
   "minimalConfigurationDesc": "Использовать сокращенный набор правил для меньшего профиля",

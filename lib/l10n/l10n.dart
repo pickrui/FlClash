@@ -4779,6 +4779,26 @@ class AppLocalizations {
     );
   }
 
+  /// `{name}, kept`
+  String nodeFilterNodeKept(Object name) {
+    return Intl.message(
+      '$name, kept',
+      name: 'nodeFilterNodeKept',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `{name}, excluded`
+  String nodeFilterNodeExcluded(Object name) {
+    return Intl.message(
+      '$name, excluded',
+      name: 'nodeFilterNodeExcluded',
+      desc: '',
+      args: [name],
+    );
+  }
+
   /// `Saved to your account and applies to every device signed in to this app.`
   String get nodeFilterAccountNote {
     return Intl.message(

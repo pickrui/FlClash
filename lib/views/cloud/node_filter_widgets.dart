@@ -150,29 +150,36 @@ class NodeFilterNodeRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          Icon(
-            node.kept ? Icons.check_circle : Icons.remove_circle_outline,
-            size: 18,
-            color: node.kept ? colorScheme.primary : colorScheme.outline,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              node.name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textTheme.bodyMedium?.copyWith(
-                color: node.kept
-                    ? colorScheme.onSurface
-                    : colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+    final l10n = context.appLocalizations;
+    return Semantics(
+      label: node.kept
+          ? l10n.nodeFilterNodeKept(node.name)
+          : l10n.nodeFilterNodeExcluded(node.name),
+      excludeSemantics: true,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Row(
+          children: [
+            Icon(
+              node.kept ? Icons.check_circle : Icons.remove_circle_outline,
+              size: 18,
+              color: node.kept ? colorScheme.primary : colorScheme.outline,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                node.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: node.kept
+                      ? colorScheme.onSurface
+                      : colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

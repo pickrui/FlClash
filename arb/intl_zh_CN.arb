@@ -587,6 +587,8 @@
   "nodeFilterOnly": "仅保留",
   "nodeFilterExclude": "排除",
   "nodeFilterKeepOne": "至少保留一个节点",
+  "nodeFilterNodeKept": "{name}，保留",
+  "nodeFilterNodeExcluded": "{name}，排除",
   "nodeFilterAccountNote": "筛选保存在账户上，对使用此客户端的所有设备生效",
   "minimalConfiguration": "最小化配置",
   "minimalConfigurationDesc": "使用精简规则集生成更小的配置",

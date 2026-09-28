@@ -587,6 +587,8 @@
   "nodeFilterOnly": "のみ残す",
   "nodeFilterExclude": "除外",
   "nodeFilterKeepOne": "少なくとも 1 つのノードを残してください",
+  "nodeFilterNodeKept": "{name}、保持",
+  "nodeFilterNodeExcluded": "{name}、除外",
   "nodeFilterAccountNote": "フィルターはアカウントに保存され、このアプリでサインインしたすべてのデバイスに適用されます",
   "minimalConfiguration": "最小構成",
   "minimalConfigurationDesc": "簡略化したルールセットで小さなプロファイルを生成します",

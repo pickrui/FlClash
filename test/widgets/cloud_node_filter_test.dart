@@ -433,6 +433,18 @@ void main() {
       expect(_onPressed<OutlinedButton>(tester, 'Restore Default'), isNull);
     });
 
+    testWidgets('preview rows tell screen readers whether a node is kept', (
+      tester,
+    ) async {
+      final semantics = tester.ensureSemantics();
+      final api = _FakeApi(_catalog(const NodeFilter()));
+      await _pumpEditor(tester, api, _Account());
+
+      expect(find.bySemanticsLabel('HK GIA 01, kept'), findsOneWidget);
+      expect(find.bySemanticsLabel('JP Edge 01, excluded'), findsOneWidget);
+      semantics.dispose();
+    });
+
     testWidgets('the search narrows the preview list', (tester) async {
       final api = _FakeApi(_catalog(const NodeFilter()));
       await _pumpEditor(tester, api, _Account());

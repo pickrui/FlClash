@@ -587,6 +587,8 @@
   "nodeFilterOnly": "Only",
   "nodeFilterExclude": "Exclude",
   "nodeFilterKeepOne": "Keep at least one node",
+  "nodeFilterNodeKept": "{name}, kept",
+  "nodeFilterNodeExcluded": "{name}, excluded",
   "nodeFilterAccountNote": "Saved to your account and applies to every device signed in to this app.",
   "minimalConfiguration": "Minimal Configuration",
   "minimalConfigurationDesc": "Use a simplified rule set to generate a smaller profile",
