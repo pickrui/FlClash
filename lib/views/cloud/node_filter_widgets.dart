@@ -129,6 +129,7 @@ class NodeFilterChoiceChip extends StatelessWidget {
     }
     return Semantics(
       button: true,
+      enabled: onTap != null,
       label: '$label, $state',
       excludeSemantics: true,
       child: Material(
