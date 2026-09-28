@@ -9,6 +9,7 @@ import 'package:fl_clash/providers/tailscale.dart';
 /// Records what the Tailscale action asks of the Core and secure storage.
 class FakeTailscaleBackend extends TailscaleBackend {
   TailscaleStatus? nextStatus;
+  Future<TailscaleStatus?> Function(String)? statusHandler;
   Object? statusError;
   Object? forgetError;
   bool applied = true;
@@ -22,7 +23,7 @@ class FakeTailscaleBackend extends TailscaleBackend {
   @override
   Future<TailscaleStatus?> status(String name) async {
     if (statusError case final error?) throw error;
-    return nextStatus;
+    return statusHandler == null ? nextStatus : await statusHandler!(name);
   }
 
   @override

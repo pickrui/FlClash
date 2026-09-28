@@ -69,6 +69,7 @@ class TailscaleAction {
   static const _applyPoll = Duration(milliseconds: 250);
 
   final Ref _ref;
+  int _statusRevision = 0;
 
   TailscaleAction(this._ref);
 
@@ -78,6 +79,14 @@ class TailscaleAction {
       .read(tailscaleNetworksProvider)
       .where((item) => item.id == id)
       .firstOrNull;
+
+  TailscaleNetwork? _currentNetwork(TailscaleNetwork network) {
+    if (!_ref.mounted) return null;
+    final current = this.network(network.id);
+    return current?.copyWith(magicDnsSuffix: network.magicDnsSuffix) == network
+        ? current
+        : null;
+  }
 
   Future<TailscaleNetwork> saveNetwork(
     TailscaleNetwork network, {
@@ -114,8 +123,15 @@ class TailscaleAction {
       }
     }
     final deadline = DateTime.now().add(applyWait);
-    while (!_backend.isApplied(this.network(network.id) ?? network) ||
-        await _backend.status(network.name) == null) {
+    while (true) {
+      final current = _currentNetwork(network);
+      if (current == null) throw const TailscaleNotAppliedException();
+      if (_backend.isApplied(current) &&
+          await _backend.status(network.name) != null) {
+        final applied = _currentNetwork(network);
+        if (applied == null) throw const TailscaleNotAppliedException();
+        if (_backend.isApplied(applied)) break;
+      }
       if (DateTime.now().isAfter(deadline)) {
         throw const TailscaleNotAppliedException();
       }
@@ -125,8 +141,13 @@ class TailscaleAction {
   }
 
   Future<void> logout(TailscaleNetwork network) async {
-    await _backend.logout(network.name);
-    final current = this.network(network.id);
+    _statusRevision++;
+    try {
+      await _backend.logout(network.name);
+    } finally {
+      _statusRevision++;
+    }
+    final current = _currentNetwork(network);
     if (current != null && current.magicDnsSuffix.isNotEmpty) {
       _ref
           .read(tailscaleNetworksProvider.notifier)
@@ -152,14 +173,22 @@ class TailscaleAction {
   }
 
   Future<TailscaleStatus?> status(TailscaleNetwork network) async {
+    final current = _currentNetwork(network);
+    if (current == null || !_backend.isApplied(current)) return null;
+    final revision = _statusRevision;
     final status = await _backend.status(network.name);
+    final latest = _currentNetwork(network);
+    if (revision != _statusRevision ||
+        latest == null ||
+        !_backend.isApplied(latest)) {
+      return null;
+    }
     final suffix = status?.magicDnsSuffix ?? '';
     if (status != null && status.isRunning && suffix.endsWith('.ts.net')) {
-      final current = this.network(network.id);
-      if (current != null && current.magicDnsSuffix != suffix) {
+      if (latest.magicDnsSuffix != suffix) {
         _ref
             .read(tailscaleNetworksProvider.notifier)
-            .put(current.copyWith(magicDnsSuffix: suffix));
+            .put(latest.copyWith(magicDnsSuffix: suffix));
       }
     }
     return status;

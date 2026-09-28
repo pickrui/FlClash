@@ -139,6 +139,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
     try {
       status = await action.status(saved);
     } catch (exception) {
+      if (!mounted) return;
       error = _describeError(exception);
     } finally {
       _polling = false;
