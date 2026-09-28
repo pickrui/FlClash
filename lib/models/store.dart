@@ -300,9 +300,24 @@ double? parseRechargeAmount(String text) {
   return value != null && value.isFinite && value > 0 ? value : null;
 }
 
+/// The panel ends a shortfall message with a link to its web cashier.
+final _panelRechargeLink = RegExp(
+  r'<a\b[^>]*\bbalance-recharge-btn\b[^>]*>.*?</a>',
+  caseSensitive: false,
+  dotAll: true,
+);
+
+/// A panel store message as plain text, without the web-only recharge link.
+String storeMessageText(String message) => message
+    .replaceAll(_panelRechargeLink, ' ')
+    .replaceAll(RegExp(r'<[^>]*>'), ' ')
+    .replaceAll(RegExp(r'\s+'), ' ')
+    .trim();
+
 /// Out of stock (库存不足) is a shortfall too, but not one a recharge fixes.
 bool isBalanceShortfallMessage(String message) {
-  final text = message.toLowerCase();
+  if (_panelRechargeLink.hasMatch(message)) return true;
+  final text = storeMessageText(message).toLowerCase();
   final mentionsBalance = ['余额', '资金', 'balance', 'funds'].any(text.contains);
   final mentionsShortfall = [
     '不足',

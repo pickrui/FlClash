@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
+import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/cloud/store_page.dart';
 import 'package:material_ui/material_ui.dart';
@@ -97,10 +98,76 @@ void main() {
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
   });
+
+  testWidgets('a recharge offered after a shortfall reports its own failure', (
+    tester,
+  ) async {
+    final container = ProviderContainer(
+      overrides: [
+        storeProvider.overrideWith(_Store.new),
+        cloudAccountProvider.overrideWith(_Account.new),
+        viewSizeProvider.overrideWithBuild((_, _) => const Size(1000, 1400)),
+      ],
+    );
+    globalState.container = container;
+    addTearDown(container.dispose);
+    tester.view.physicalSize = const Size(1000, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const TestApp(locale: Locale('en'), child: CloudStorePage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final store = container.read(storeProvider.notifier) as _Store;
+    store.methodErrors.addAll(const [
+      CloudApiException('Insufficient balance'),
+      CloudApiException('Service unavailable'),
+    ]);
+
+    // The busy bar keeps animating, so settle by time instead.
+    Future<void> settle() async {
+      for (var i = 0; i < 5; i++) {
+        await tester.pump(const Duration(milliseconds: 200));
+      }
+    }
+
+    final openRecharge = find.text('Recharge').first;
+    await tester.tap(openRecharge);
+    await settle();
+    expect(
+      find.text(
+        'Insufficient balance\nInsufficient balance. Recharge and try again.',
+      ),
+      findsOneWidget,
+    );
+    await tester.tap(find.widgetWithText(TextButton, 'Recharge'));
+    await settle();
+
+    expect(store.methodErrors, isEmpty);
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(openRecharge);
+    await settle();
+    expect(find.text('Recharge amount (¥)'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 }
 
 class _Store extends StoreNotifier {
   Completer<void>? loadGate;
+  final methodErrors = <Object>[];
+
+  @override
+  Future<List<PaymentMethodOption>> ensurePaymentMethods({
+    bool force = false,
+  }) async {
+    if (methodErrors.isNotEmpty) throw methodErrors.removeAt(0);
+    return super.ensurePaymentMethods(force: force);
+  }
 
   @override
   StoreState build() => StoreState(

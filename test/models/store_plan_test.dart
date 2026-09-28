@@ -403,5 +403,19 @@ void main() {
       expect(isBalanceShortfallMessage('库存不足'), isFalse);
       expect(isBalanceShortfallMessage('Balance updated'), isFalse);
     });
+
+    test('the panel recharge link marks a shortfall and is not shown', () {
+      const link =
+          '<a href="/user/v2/counter?modal=1" '
+          'class="btn btn-primary balance-recharge-btn">立即充值</a>';
+      const shortfall = '余额不足，需充值 5 元<br><br>$link';
+      const minimum = '<strong>按量付费套餐要求：</strong><br>• 需充值：5 元<br>$link';
+
+      expect(storeMessageText(shortfall), '余额不足，需充值 5 元');
+      expect(storeMessageText(minimum), '按量付费套餐要求： • 需充值：5 元');
+      expect(isBalanceShortfallMessage(minimum), isTrue);
+      expect(storeMessageText('<p>购买成功</p>'), '购买成功');
+      expect(isBalanceShortfallMessage('<a href="/faq">余额说明</a>'), isFalse);
+    });
   });
 }

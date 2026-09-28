@@ -60,6 +60,14 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
     if (_busy) return;
     setState(() => _busy = true);
     try {
+      await _reportFailures(action);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _reportFailures(Future<void> Function() action) async {
+    try {
       await action();
     } catch (e) {
       if (CloudApiException.isHandledUnauthorized(e)) return;
@@ -68,8 +76,6 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
         return;
       }
       await _showFailure(CloudApiException.clean(e));
-    } finally {
-      if (mounted) setState(() => _busy = false);
     }
   }
 
@@ -452,7 +458,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
   }
 
   void _showSuccess(String message) {
-    final plain = _plainText(message);
+    final plain = storeMessageText(message);
     globalState.showNotifier(
       plain.isEmpty ? appLocalizations.operationSuccess : plain,
     );
@@ -460,8 +466,8 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
 
   /// A balance shortfall offers to recharge right away instead of a passing notice.
   Future<void> _showFailure(String message) async {
-    final plain = _plainText(message);
-    if (!isBalanceShortfallMessage(plain)) {
+    final plain = storeMessageText(message);
+    if (!isBalanceShortfallMessage(message)) {
       globalState.showNotifier(
         plain.isEmpty ? appLocalizations.operationFailed : plain,
       );
@@ -470,17 +476,15 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
     final recharge = await globalState.showMessage(
       title: appLocalizations.operationFailed,
       message: TextSpan(
-        text: '$plain\n${appLocalizations.insufficientBalanceRecharge}',
+        text: [
+          if (plain.isNotEmpty) plain,
+          appLocalizations.insufficientBalanceRecharge,
+        ].join('\n'),
       ),
       confirmText: appLocalizations.recharge,
     );
-    if (recharge == true && mounted) await _rechargeFlow();
+    if (recharge == true && mounted) await _reportFailures(_rechargeFlow);
   }
-
-  static String _plainText(String message) => message
-      .replaceAll(RegExp(r'<[^>]*>'), ' ')
-      .replaceAll(RegExp(r'\s+'), ' ')
-      .trim();
 
   Future<StorePlan?> _showPlanPicker(String title, List<StorePlan> plans) {
     return globalState.showCommonDialog<StorePlan>(
