@@ -4,6 +4,7 @@ import 'package:fl_clash/common/oix_cloud.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/cloud_account_provider.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
+import 'package:fl_clash/utils/safe_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -381,6 +382,134 @@ void main() {
     expect(notifier.calls, ['refresh:true']);
     expect(container.read(cloudAccountProvider).error, 'Network unavailable');
   });
+
+  group('token issued to another client', () {
+    late CloudApiService api;
+
+    setUp(() async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+      SharedPreferences.setMockInitialValues({});
+      await SafeStorage.write('cloud_token', 'ios-token');
+      api = CloudApiService()..setToken('ios-token');
+    });
+
+    tearDown(() {
+      api.setToken(null);
+      debugDefaultTargetPlatformOverride = null;
+    });
+
+    Future<_RebindNotifier> refresh(_RebindNotifier notifier) async {
+      final container = ProviderContainer(
+        overrides: [cloudAccountProvider.overrideWith(() => notifier)],
+      );
+      addTearDown(container.dispose);
+      container.read(cloudAccountProvider);
+      await notifier.refreshProfile(force: true);
+      expect(container.read(cloudAccountProvider).isLoggedIn, isTrue);
+      expect(container.read(cloudAccountProvider).error, isNull);
+      return notifier;
+    }
+
+    test('is exchanged for FlClash\'s own and stored', () async {
+      final revision = api.sessionRevision;
+      final notifier = await refresh(
+        _RebindNotifier('oixcloud', () async => 'flclash-token'),
+      );
+
+      expect(notifier.rebinds, 1);
+      expect(api.sessionRevision, isNot(revision));
+      expect(await SafeStorage.read('cloud_token'), 'flclash-token');
+    });
+
+    for (final tokenClient in [null, CloudApiService.clientId]) {
+      test('is left alone when the panel reports $tokenClient', () async {
+        final revision = api.sessionRevision;
+        final notifier = await refresh(
+          _RebindNotifier(tokenClient, () async => 'unexpected'),
+        );
+
+        expect(notifier.rebinds, 0);
+        expect(api.sessionRevision, revision);
+      });
+    }
+
+    test('keeps the current token when the exchange fails', () async {
+      final revision = api.sessionRevision;
+      final notifier = await refresh(
+        _RebindNotifier(
+          'oixcloud',
+          () async => throw const CloudApiException('not rebindable'),
+        ),
+      );
+
+      expect(notifier.rebinds, 1);
+      expect(api.sessionRevision, revision);
+      expect(await SafeStorage.read('cloud_token'), 'ios-token');
+    });
+
+    test('is discarded when the session changed meanwhile', () async {
+      final exchanged = Completer<String>();
+      final notifier = _RebindNotifier('oixcloud', () => exchanged.future);
+      final container = ProviderContainer(
+        overrides: [cloudAccountProvider.overrideWith(() => notifier)],
+      );
+      addTearDown(container.dispose);
+      container.read(cloudAccountProvider);
+
+      final refreshing = notifier.refreshProfile(force: true);
+      await pumpEventQueue();
+      expect(notifier.rebinds, 1);
+      api.setToken('other-session');
+      final revision = api.sessionRevision;
+      exchanged.complete('flclash-token');
+      await refreshing;
+
+      expect(api.sessionRevision, revision);
+      expect(await SafeStorage.read('cloud_token'), 'ios-token');
+    });
+  });
+}
+
+final _managedProfile = CloudProfile(
+  subscription: 'Gold',
+  planCode: 'gold',
+  planRank: 50,
+  nodeAccess: const ['standard'],
+  expireTime: DateTime.now().add(const Duration(days: 30)),
+  todayUsed: '0',
+  totalUsed: '0',
+  totalTraffic: '0',
+  usageProgress: 0,
+  remaining: '0',
+  balance: '0.00',
+  commission: '0.00',
+  points: '0 / 50',
+);
+
+class _RebindNotifier extends CloudAccountNotifier {
+  final String? tokenClient;
+  final Future<String> Function() rebind;
+  var rebinds = 0;
+
+  _RebindNotifier(this.tokenClient, this.rebind);
+
+  @override
+  CloudAccountState build() => const CloudAccountState(isLoggedIn: true);
+
+  @override
+  Future<CloudUserInfo> Function() get userInfoRequest =>
+      () async => (
+        profile: _managedProfile,
+        announcement: null,
+        tokenClient: tokenClient,
+      );
+
+  @override
+  Future<String> Function() get rebindTokenRequest => () {
+    rebinds++;
+    return rebind();
+  };
 }
 
 class _OrderNotifier extends CloudAccountNotifier {
@@ -485,16 +614,14 @@ class _SessionCleanupNotifier extends CloudAccountNotifier {
 }
 
 class _StaleRefreshNotifier extends CloudAccountNotifier {
-  var pending =
-      Completer<({CloudProfile profile, CloudNotification? announcement})>();
+  var pending = Completer<CloudUserInfo>();
   var requests = 0;
 
   @override
   CloudAccountState build() => const CloudAccountState(isLoggedIn: true);
 
   @override
-  Future<({CloudProfile profile, CloudNotification? announcement})> Function()
-  get userInfoRequest => () {
+  Future<CloudUserInfo> Function() get userInfoRequest => () {
     requests++;
     return pending.future;
   };

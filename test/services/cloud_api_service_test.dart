@@ -276,7 +276,7 @@ void main() {
     );
   }
 
-  test('requests carry the current app language', () async {
+  test('requests carry the client identity and current app language', () async {
     addTearDown(() => AppLocalizations.load(const Locale('en')));
     final adapter = QueuedCloudAdapter();
     final service = CloudApiService.forTesting(client: adapter.createClient());
@@ -284,6 +284,7 @@ void main() {
     await AppLocalizations.load(const Locale('zh', 'CN'));
     final chinese = service.fetchPlans();
     final chineseRequest = await adapter.takeRequest();
+    expect(chineseRequest.options.headers['X-oixCloud-Client'], 'flclash');
     expect(chineseRequest.options.headers['Accept-Language'], 'zh-CN');
     chineseRequest.respond({
       'ret': 200,
@@ -301,6 +302,77 @@ void main() {
     });
     await english;
   });
+
+  for (final (reported, expected) in [
+    (null, null),
+    ('', null),
+    ('oixcloud', 'oixcloud'),
+    ('flclash', 'flclash'),
+  ]) {
+    test('user info reports token client $reported as $expected', () async {
+      final adapter = QueuedCloudAdapter();
+      final service = CloudApiService.forTesting(client: adapter.createClient())
+        ..setToken('session');
+      final result = service.getUserInfo();
+      final request = await adapter.takeRequest();
+      request.respond({
+        'ret': 200,
+        'data': {
+          for (final key in [
+            'plan',
+            'plan_time',
+            'used',
+            'traffic',
+            'today_used',
+            'unused',
+            'money',
+            'aff_money',
+            'integral',
+          ])
+            key: '0',
+          'token_client': ?reported,
+        },
+      });
+      expect((await result).tokenClient, expected);
+    });
+  }
+
+  test('token rebind posts the session and returns the new token', () async {
+    final adapter = QueuedCloudAdapter();
+    final service = CloudApiService.forTesting(client: adapter.createClient())
+      ..setToken('ios-token');
+    final result = service.rebindToken();
+    final request = await adapter.takeRequest();
+    expect(request.options.uri.path, '/api/v1/token/rebind');
+    expect(request.options.headers['Authorization'], 'Bearer ios-token');
+    expect(request.options.headers['X-oixCloud-Client'], 'flclash');
+    request.respond({
+      'ret': 200,
+      'data': {
+        'token': 'flclash-token',
+        'token_client': 'flclash',
+        'rebound': true,
+      },
+    });
+    expect(await result, 'flclash-token');
+  });
+
+  for (final body in [
+    {'ret': 403, 'msg': 'not rebindable'},
+    {'ret': 200, 'data': <String, Object>{}},
+  ]) {
+    test('token rebind rejects ${body['ret']} without a token', () async {
+      final adapter = QueuedCloudAdapter();
+      final service = CloudApiService.forTesting(client: adapter.createClient())
+        ..setToken('ios-token');
+      final result = expectLater(
+        service.rebindToken(),
+        throwsA(isA<CloudApiException>()),
+      );
+      (await adapter.takeRequest()).respond(body);
+      await result;
+    });
+  }
 
   test('a current-session 401 still clears its credentials', () async {
     final adapter = QueuedCloudAdapter();

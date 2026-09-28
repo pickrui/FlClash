@@ -235,6 +235,13 @@ class _CloudReadResponseException extends CloudApiException {
 }
 
 // -- DTOs --
+/// [tokenClient] names the client kind the panel issued the session token to.
+typedef CloudUserInfo = ({
+  CloudProfile profile,
+  CloudNotification? announcement,
+  String? tokenClient,
+});
+
 class CloudApiResponse<T> {
   final int ret;
   final String? msg;
@@ -662,6 +669,10 @@ abstract interface class CloudNodeFilterApi {
 }
 
 class CloudApiService implements CloudNodeFilterApi {
+  /// The panel issues one token per client kind and tells them apart by this
+  /// identifier, not by the User-Agent.
+  static const clientId = 'flclash';
+
   Dio? _dio;
   String? _cachedToken;
   int _sessionRevision = 0;
@@ -759,6 +770,7 @@ class CloudApiService implements CloudNodeFilterApi {
           // read it per request so a language switch applies immediately.
           options.headers['Accept-Language'] = Intl.getCurrentLocale()
               .replaceAll('_', '-');
+          options.headers['X-oixCloud-Client'] = clientId;
           if (options.extra['skipAuth'] != true) {
             final revision = options.extra[_sessionRevisionKey];
             if (revision != null && revision != _sessionRevision) {
@@ -910,9 +922,7 @@ class CloudApiService implements CloudNodeFilterApi {
     }
   }
 
-  ({CloudProfile profile, CloudNotification? announcement}) _parseUserInfo(
-    dynamic infoData,
-  ) {
+  CloudUserInfo _parseUserInfo(dynamic infoData) {
     if (infoData is! Map) {
       throw Exception('Invalid user data format');
     }
@@ -979,7 +989,14 @@ class CloudApiService implements CloudNodeFilterApi {
       points: info['integral']?.toString() ?? '50 / 50',
     );
 
-    return (profile: profile, announcement: announcement);
+    final tokenClient = info['token_client'];
+    return (
+      profile: profile,
+      announcement: announcement,
+      tokenClient: tokenClient is String && tokenClient.isNotEmpty
+          ? tokenClient
+          : null,
+    );
   }
 
   /// Parses a human traffic string ("1.5 GB", "200 MiB", "42") into bytes.
@@ -1304,8 +1321,7 @@ class CloudApiService implements CloudNodeFilterApi {
     }
   }
 
-  Future<({CloudProfile profile, CloudNotification? announcement})>
-  getUserInfo() async {
+  Future<CloudUserInfo> getUserInfo() async {
     final token = _cachedToken;
     if (token == null || token.isEmpty) {
       throw Exception('Missing access token');
@@ -1325,6 +1341,18 @@ class CloudApiService implements CloudNodeFilterApi {
     }
 
     return _parseUserInfo(responseDto.data!);
+  }
+
+  /// Exchanges a token the panel issued to another client kind for this
+  /// client's own. The panel keeps the old token for the client it belongs to.
+  Future<String> rebindToken() async {
+    final res = await _client.post('/token/rebind', options: _writeOptions());
+    final dto = CloudApiResponse<Map<dynamic, dynamic>>.fromJson(res.data);
+    final token = normalizeToken(dto.data?['token']?.toString());
+    if (!dto.isSuccess || token == null) {
+      throw CloudApiException(dto.msg ?? appLocalizations.operationFailed);
+    }
+    return token;
   }
 
   String _flclashTimestamp() {

@@ -399,8 +399,34 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
   }
 
   @protected
-  Future<({CloudProfile profile, CloudNotification? announcement})> Function()
-  get userInfoRequest => CloudApiService().getUserInfo;
+  Future<CloudUserInfo> Function() get userInfoRequest =>
+      CloudApiService().getUserInfo;
+
+  @protected
+  Future<String> Function() get rebindTokenRequest =>
+      CloudApiService().rebindToken;
+
+  /// The panel once told clients apart by User-Agent substrings and handed
+  /// FlClash the iOS app's token, so the two shared node filters and
+  /// subscription links. Swap such a token for FlClash's own.
+  Future<void> _adoptOwnClientToken(String? tokenClient) async {
+    if (tokenClient == null || tokenClient == CloudApiService.clientId) return;
+    final service = CloudApiService();
+    final revision = service.sessionRevision;
+    try {
+      final token = await rebindTokenRequest();
+      if (!ref.mounted || service.sessionRevision != revision) return;
+      service.setToken(token);
+      await SafeStorage.write('cloud_token', token);
+    } catch (e) {
+      if (CloudApiException.isUnauthorized(e)) rethrow;
+      if (CloudApiException.isHandledUnauthorized(e)) return;
+      commonPrint.log(
+        'failed to exchange the oixCloud token: $e',
+        logLevel: LogLevel.warning,
+      );
+    }
+  }
 
   Future<void> _runRefreshProfile({bool force = false}) async {
     if (!state.isLoggedIn || state.isLoading || state.isSyncing) return;
@@ -427,6 +453,7 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
       if (!_canFetchManagedConfig) {
         await _clearManagedProfiles();
       }
+      await _adoptOwnClientToken(userInfo.tokenClient);
     } catch (e) {
       if (CloudApiException.isHandledUnauthorized(e)) {
         return;
