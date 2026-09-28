@@ -13,7 +13,7 @@ checked=0
 
 # Generated sources are rewritten by their generators, so they carry no notice.
 while IFS= read -r -d '' file; do
-  if head -n 10 "$ROOT/$file" | grep -Eq 'GENERATED CODE|Code generated|DO NOT EDIT|@generated'; then
+  if head -n 10 "$ROOT/$file" | grep -Eq 'GENERATED CODE|Generated file|Code generated|DO NOT EDIT|@generated'; then
     continue
   fi
   checked=$((checked + 1))
