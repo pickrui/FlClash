@@ -41,7 +41,12 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
 
   DAVClient _clientFor(DAVProps dav) {
     final cached = _client;
-    if (cached != null && dav == _clientDav) return cached;
+    if (cached != null &&
+        dav.uri == _clientDav?.uri &&
+        dav.user == _clientDav?.user &&
+        dav.password == _clientDav?.password) {
+      return cached;
+    }
     final client = DAVClient(dav);
     _clientDav = dav;
     return _client = client;
@@ -77,8 +82,13 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
           return false;
         }
         try {
-          final device = davBackupDevice(await _deviceName());
-          await client.backup(path, device: device, keep: keep);
+          final device = await _deviceName();
+          await client.backup(
+            path,
+            device: device,
+            deviceId: await preferences.getDavDeviceId(),
+            keep: keep,
+          );
           return true;
         } finally {
           await File(path).safeDelete();
@@ -217,7 +227,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
         value: value,
       ),
     );
-    if (res == null) return;
+    if (res == null || !mounted) return;
     ref
         .read(davSettingProvider.notifier)
         .update((state) => state?.copyWith(maxBackups: res));
@@ -235,7 +245,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
         value: restoreStrategy,
       ),
     );
-    if (res == null) {
+    if (res == null || !mounted) {
       return;
     }
     ref
@@ -410,27 +420,29 @@ class _DavBackupsDialogState extends State<DavBackupsDialog> {
   bool _deleting = false;
 
   Future<void> _delete(DavBackup backup) async {
+    if (_deleting) return;
     final commonAction = context.commonAction;
-    final res = await globalState.showMessage(
-      title: appLocalizations.delete,
-      message: TextSpan(text: appLocalizations.deleteBackupTip),
-    );
-    if (res != true || !mounted) return;
     setState(() => _deleting = true);
-    final deleted = await commonAction.loadingRun<bool>(
-      () async {
-        await widget.client.remove(backup.name);
-        return true;
-      },
-      tag: null,
-      title: appLocalizations.delete,
-    );
-    if (!mounted) return;
-    setState(() {
-      _deleting = false;
-      if (deleted == true) _backups.remove(backup);
-    });
-    if (_backups.isEmpty) Navigator.of(context).pop();
+    try {
+      final res = await globalState.showMessage(
+        title: appLocalizations.delete,
+        message: TextSpan(text: appLocalizations.deleteBackupTip),
+      );
+      if (res != true || !mounted) return;
+      final deleted = await commonAction.loadingRun<bool>(
+        () async {
+          await widget.client.remove(backup.name);
+          return true;
+        },
+        tag: null,
+        title: appLocalizations.delete,
+      );
+      if (deleted != true || !mounted) return;
+      setState(() => _backups.remove(backup));
+      if (_backups.isEmpty) Navigator.of(context).pop();
+    } finally {
+      if (mounted) setState(() => _deleting = false);
+    }
   }
 
   @override

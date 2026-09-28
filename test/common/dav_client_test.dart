@@ -6,10 +6,14 @@
 import 'dart:io';
 
 import 'package:fl_clash/common/dav_client.dart';
+import 'package:fl_clash/common/preferences.dart';
 import 'package:fl_clash/models/models.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   test('WebDAV backup file name rejects path and URI syntax', () {
     for (final value in [
       '',
@@ -35,36 +39,80 @@ void main() {
   });
 
   test('WebDAV backup names round-trip their device and time', () {
-    final time = DateTime(2026, 9, 29, 8, 5, 3);
-    final name = davBackupFileName('Pixel-8', time);
-    expect(name, 'backup_Pixel-8_20260929-080503.zip');
+    final time = DateTime(2026, 9, 29, 8, 5, 3, 123, 456);
+    final name = davBackupFileName('Pixel-8', time, deviceId: _deviceId);
+    expect(name, 'backup_Pixel-8_20260929-080503-123456_$_deviceId.zip');
+    expect(
+      davBackupFileName(
+        'Pixel-8',
+        time.add(const Duration(microseconds: 1)),
+        deviceId: _deviceId,
+      ),
+      isNot(name),
+    );
     expect(isSafeDavFileName(name), true);
 
     final backup = DavBackup.parse(name, size: 7);
     expect((backup.device, backup.time, backup.size), ('Pixel-8', time, 7));
+    expect(backup.deviceId, _deviceId);
+    final previous = DavBackup.parse('backup_Pixel-8_20260929-080503.zip');
+    expect(previous.device, 'Pixel-8');
+    expect(previous.deviceId, isNull);
 
     final legacy = DavBackup.parse('backup.zip', modified: time);
     expect((legacy.device, legacy.time), (null, time));
     expect(DavBackup.parse('backup_Pixel-8_20261399-000000.zip').device, null);
   });
 
-  test('WebDAV backup cleanup only selects the same device', () {
-    const names = [
-      'backup_Pixel-8_20260101-000000.zip',
-      'backup_Pixel-8_20260301-000000.zip',
-      'backup_Pixel-8_20260201-000000.zip',
-      'backup_Pixel-8-Pro_20250101-000000.zip',
+  test('retention isolates identical models and survives device renames', () {
+    final oldest = davBackupFileName(
+      'Pixel-8',
+      DateTime(2026, 1),
+      deviceId: _deviceId,
+    );
+    final newest = davBackupFileName(
+      'Renamed',
+      DateTime(2026, 3),
+      deviceId: _deviceId,
+    );
+    final middle = davBackupFileName(
+      'Pixel-8',
+      DateTime(2026, 2),
+      deviceId: _deviceId,
+    );
+    final other = davBackupFileName(
+      'Pixel-8',
+      DateTime(2025, 1),
+      deviceId: _otherDeviceId,
+    );
+    final names = [
+      oldest,
+      newest,
+      middle,
+      oldest,
+      other,
+      'backup_Pixel-8_20250101-000000.zip',
       'backup.zip',
     ];
-    expect(expiredDavBackups(names, 'Pixel-8', 1), [
-      'backup_Pixel-8_20260201-000000.zip',
-      'backup_Pixel-8_20260101-000000.zip',
-    ]);
-    expect(expiredDavBackups(names, 'Pixel-8', 0), hasLength(3));
-    expect(expiredDavBackups(names, 'Pixel-8', 3), isEmpty);
-    expect(expiredDavBackups(names, 'Pixel-8-Pro', 0), [
-      'backup_Pixel-8-Pro_20250101-000000.zip',
-    ]);
+    expect(expiredDavBackups(names, _deviceId, 1), [middle, oldest]);
+    expect(expiredDavBackups(names, _deviceId, 0), [newest, middle, oldest]);
+    expect(expiredDavBackups(names, _deviceId, 3), isEmpty);
+    expect(expiredDavBackups(names, _otherDeviceId, 0), [other]);
+  });
+
+  test('concurrent backups share a persisted installation identity', () async {
+    SharedPreferences.setMockInitialValues({});
+    final ids = await Future.wait(
+      List.generate(8, (_) => Preferences().getDavDeviceId()),
+    );
+    expect(ids.toSet(), hasLength(1));
+    expect(ids.first, matches(r'^[a-f0-9]{32}$'));
+    final store = await SharedPreferences.getInstance();
+    expect(store.getString('dav_device_id'), ids.first);
+    await store.setString('dav_device_id', _otherDeviceId);
+    expect(await Preferences().getDavDeviceId(), _otherDeviceId);
+    await store.setString('dav_device_id', '../invalid');
+    expect(await Preferences().getDavDeviceId(), matches(r'^[a-f0-9]{32}$'));
   });
 
   test('a WebDAV setting saved with a backup file name still loads', () {
@@ -105,3 +153,6 @@ void main() {
     );
   });
 }
+
+const _deviceId = '11111111111111111111111111111111';
+const _otherDeviceId = '22222222222222222222222222222222';

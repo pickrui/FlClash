@@ -244,6 +244,9 @@ void main() {
     final writes = <String>[];
     dav.client.c.httpClientAdapter = _Adapter((options) async {
       writes.add(options.method);
+      if (options.method == 'MOVE') {
+        expect(options.headers['overwrite'], 'F');
+      }
       return ResponseBody.fromBytes(
         [],
         options.method == 'OPTIONS' ? 200 : 201,
@@ -252,9 +255,10 @@ void main() {
     final file = File('${directory.path}/upload.zip');
     await file.writeAsBytes(archive);
     expect(
-      await dav.backup(file.path, device: 'Pixel-8'),
-      matches(r'^backup_Pixel-8_\d{8}-\d{6}\.zip$'),
+      await dav.backup(file.path, device: 'Pixel-8', deviceId: _deviceId),
+      matches(r'^backup_Pixel-8_\d{8}-\d{6}-\d{6}_[a-f0-9]{32}\.zip$'),
     );
+    expect(writes.where((method) => method == 'MKCOL'), hasLength(1));
     expect(writes.where((method) => method == 'PUT'), hasLength(1));
     expect(writes.where((method) => method == 'MOVE'), hasLength(1));
     expect(writes, isNot(contains('DELETE')));
@@ -272,9 +276,11 @@ void main() {
     dav.client.c.httpClientAdapter = _Adapter((options) async {
       return switch (options.method) {
         'PROPFIND' => _listing([
-          'backup_Pixel-8_20260101-000000.zip',
-          'backup_Pixel-8_20260301-000000.zip',
-          'backup_Pixel-8_20260201-000000.zip',
+          'backup_Pixel-8_20260101-000000-000000_$_deviceId.zip',
+          'backup_Pixel-8_20260301-000000-000000_$_deviceId.zip',
+          'backup_Pixel-8_20260201-000000-000000_$_deviceId.zip',
+          'backup_Pixel-8_20250101-000000-000000_$_otherDeviceId.zip',
+          'backup_Pixel-8_20250101-000000.zip',
           'backup_MacBook_20250101-000000.zip',
           'backup.zip',
         ]),
@@ -288,11 +294,82 @@ void main() {
     });
     final file = File('${directory.path}/upload.zip');
     await file.writeAsBytes(archive);
-    await dav.backup(file.path, device: 'Pixel-8', keep: 2);
+    await dav.backup(
+      file.path,
+      device: 'Pixel-8',
+      deviceId: _deviceId,
+      keep: 2,
+    );
     expect(deleted, [
-      'backup_Pixel-8_20260201-000000.zip',
-      'backup_Pixel-8_20260101-000000.zip',
+      'backup_Pixel-8_20260201-000000-000000_$_deviceId.zip',
+      'backup_Pixel-8_20260101-000000-000000_$_deviceId.zip',
     ]);
+  });
+
+  test('concurrent clients serialize upload and retention together', () async {
+    final stored = <String>{};
+    final firstListing = Completer<void>();
+    final finishListing = Completer<void>();
+    final secondRequests = <String>[];
+    DAVClient writer({required bool first}) {
+      final dav = DAVClient(
+        _props,
+        resolveRoutes: (_) => ['direct'],
+        createAdapter: (_) =>
+            readAdapter((_) async => ResponseBody.fromBytes([], 200)),
+      );
+      dav.client.c.httpClientAdapter = _Adapter((options) async {
+        if (!first) secondRequests.add(options.method);
+        switch (options.method) {
+          case 'MOVE':
+            stored.add(
+              Uri.parse(
+                options.headers['destination'] as String,
+              ).pathSegments.last,
+            );
+          case 'DELETE':
+            stored.remove(options.uri.pathSegments.last);
+            return ResponseBody.fromBytes([], 204);
+          case 'PROPFIND':
+            if (first) {
+              firstListing.complete();
+              await finishListing.future;
+            }
+            return _listing(stored.toList());
+          case 'OPTIONS':
+            return ResponseBody.fromBytes([], 200);
+        }
+        return ResponseBody.fromBytes([], 201);
+      });
+      return dav;
+    }
+
+    final first = writer(first: true);
+    final second = writer(first: false);
+    await Future.wait([
+      first.pingCompleter.future,
+      second.pingCompleter.future,
+    ]);
+    final file = File('${directory.path}/upload.zip');
+    await file.writeAsBytes(archive);
+    final firstBackup = first.backup(
+      file.path,
+      device: 'Pixel-8',
+      deviceId: _deviceId,
+    );
+    await firstListing.future;
+    final secondBackup = second.backup(
+      file.path,
+      device: 'Pixel-8',
+      deviceId: _deviceId,
+    );
+    await Future<void>.delayed(Duration.zero);
+    final interleaved = secondRequests.toList();
+    finishListing.complete();
+    final names = await Future.wait([firstBackup, secondBackup]);
+    expect(interleaved, isEmpty);
+    expect(names.toSet(), hasLength(2));
+    expect(stored, {names.last});
   });
 
   test(
@@ -360,6 +437,96 @@ void main() {
     await waitForReads();
   });
 
+  test('an incomplete MOVE never starts retention cleanup', () async {
+    final dav = DAVClient(
+      _props,
+      resolveRoutes: (_) => ['direct'],
+      createAdapter: (_) =>
+          readAdapter((_) async => ResponseBody.fromBytes([], 200)),
+    );
+    await dav.pingCompleter.future;
+    final requests = <RequestOptions>[];
+    dav.client.c.httpClientAdapter = _Adapter((options) async {
+      requests.add(options);
+      return switch (options.method) {
+        'OPTIONS' => ResponseBody.fromBytes([], 200),
+        'MOVE' => ResponseBody.fromString(
+          '<d:multistatus xmlns:d="DAV:"><d:response>'
+          '<d:href>/dav/FlClash/backup.zip</d:href>'
+          '<d:status>HTTP/1.1 507 Insufficient Storage</d:status>'
+          '</d:response></d:multistatus>',
+          207,
+        ),
+        'PROPFIND' => _listing(['backup_Pixel-8_20260101-000000.zip']),
+        'DELETE' => ResponseBody.fromBytes([], 204),
+        _ => ResponseBody.fromBytes([], 201),
+      };
+    });
+    final file = File('${directory.path}/upload.zip');
+    await file.writeAsBytes(archive);
+    await expectLater(
+      dav.backup(file.path, device: 'Pixel-8', deviceId: _deviceId),
+      throwsA(isA<DioException>()),
+    );
+    expect(requests.where((r) => r.method == 'PROPFIND'), isEmpty);
+    expect(
+      requests.where((r) => r.method == 'DELETE').map((r) => r.uri.path),
+      everyElement(contains('.upload-')),
+    );
+  });
+
+  for (final status in [409, 412]) {
+    test(
+      'a MOVE conflict ($status) cannot replay or prune old backups',
+      () async {
+        final dav = DAVClient(
+          _props,
+          resolveRoutes: (_) => ['direct'],
+          createAdapter: (_) =>
+              readAdapter((_) async => ResponseBody.fromBytes([], 200)),
+        );
+        await dav.pingCompleter.future;
+        var moves = 0;
+        var listings = 0;
+        dav.client.c.httpClientAdapter = _Adapter((options) async {
+          if (options.method == 'MOVE') {
+            return ResponseBody.fromBytes([], ++moves == 1 ? status : 500);
+          }
+          if (options.method == 'PROPFIND') listings++;
+          return ResponseBody.fromBytes(
+            [],
+            options.method == 'OPTIONS' ? 200 : 201,
+          );
+        });
+        final file = File('${directory.path}/upload.zip');
+        await file.writeAsBytes(archive);
+        await expectLater(
+          dav.backup(file.path, device: 'Pixel-8', deviceId: _deviceId),
+          throwsA(isA<DioException>()),
+        );
+        expect(moves, 1);
+        expect(listings, 0);
+      },
+    );
+  }
+
+  test('a literal percent-encoded file name cannot become a path', () async {
+    final dav = DAVClient(
+      _props,
+      resolveRoutes: (_) => ['direct'],
+      createAdapter: (_) =>
+          readAdapter((_) async => ResponseBody.fromBytes([], 200)),
+    );
+    await dav.pingCompleter.future;
+    late Uri deleted;
+    dav.client.c.httpClientAdapter = _Adapter((options) async {
+      deleted = options.uri;
+      return ResponseBody.fromBytes([], 204);
+    });
+    await dav.remove('%2e%2e%2fbackup.zip');
+    expect(deleted.pathSegments.last, '%2e%2e%2fbackup.zip');
+  });
+
   test('a redirect after PUT cannot replay the write', () async {
     final dav = DAVClient(
       _props,
@@ -388,12 +555,15 @@ void main() {
     final file = File('${directory.path}/upload.zip');
     await file.writeAsBytes(archive);
     await expectLater(
-      dav.backup(file.path, device: 'Pixel-8'),
+      dav.backup(file.path, device: 'Pixel-8', deviceId: _deviceId),
       throwsA(isA<DioException>()),
     );
     expect(uploads, 1);
   });
 }
+
+const _deviceId = '11111111111111111111111111111111';
+const _otherDeviceId = '22222222222222222222222222222222';
 
 const _props = DAVProps(
   uri: 'https://dav.invalid/dav',
