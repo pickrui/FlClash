@@ -952,10 +952,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "アプリ一覧へのアクセス許可が必要です",
     ),
     "insufficientBalanceHint": MessageLookupByLibrary.simpleMessage(
-      "残高が不足しています。チャージしてから続行してください。",
+      "残高が不足しています。チャージしてから続行してください",
     ),
     "insufficientBalanceRecharge": MessageLookupByLibrary.simpleMessage(
-      "残高が不足しています。チャージしてからもう一度お試しください。",
+      "残高が不足しています。チャージしてからもう一度お試しください",
     ),
     "intelligentSelected": MessageLookupByLibrary.simpleMessage("インテリジェント選択"),
     "internet": MessageLookupByLibrary.simpleMessage("インターネット"),
