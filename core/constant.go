@@ -148,6 +148,10 @@ const (
 	getConfigFromBytesMethod       CoreMethod = "getConfigFromBytes"
 	getConfigMethod                CoreMethod = "getConfig"
 	deleteFileMethod               CoreMethod = "deleteFile"
+	getTailscaleStatusMethod       CoreMethod = "getTailscaleStatus"
+	tailscaleLoginMethod           CoreMethod = "tailscaleLogin"
+	tailscaleLogoutMethod          CoreMethod = "tailscaleLogout"
+	forgetTailscaleNetworkMethod   CoreMethod = "forgetTailscaleNetwork"
 )
 
 type CoreMethod string

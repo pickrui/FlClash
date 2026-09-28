@@ -284,6 +284,40 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 			}
 			response.success("")
 		}()
+	case getTailscaleStatusMethod:
+		name := ""
+		if !decodeMethodArguments(call, response, &name) {
+			return
+		}
+		go func() {
+			status, err := handleGetTailscaleStatus(name)
+			if err != nil {
+				response.failure("core_error", err.Error(), nil)
+				return
+			}
+			response.success(status)
+		}()
+	case tailscaleLoginMethod, tailscaleLogoutMethod, forgetTailscaleNetworkMethod:
+		request := TailscaleRequest{}
+		if !decodeMethodArguments(call, response, &request) {
+			return
+		}
+		go func() {
+			var err error
+			switch call.Method {
+			case tailscaleLoginMethod:
+				err = handleTailscaleLogin(request)
+			case tailscaleLogoutMethod:
+				err = handleTailscaleLogout(request.Name)
+			default:
+				err = handleForgetTailscaleNetwork(request)
+			}
+			if err != nil {
+				response.failure("core_error", err.Error(), nil)
+				return
+			}
+			response.success(true)
+		}()
 	default:
 		response.notImplemented(call.Method)
 	}

@@ -429,6 +429,7 @@ func applyConfig(params *SetupParams) error {
 	patchSelectGroup(params.SelectedMap)
 	updateListeners()
 	restartGeoScheduler()
+	warmTailscaleNetworks()
 	return nil
 }
 
