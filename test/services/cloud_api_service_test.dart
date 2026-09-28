@@ -276,6 +276,32 @@ void main() {
     );
   }
 
+  test('requests carry the current app language', () async {
+    addTearDown(() => AppLocalizations.load(const Locale('en')));
+    final adapter = QueuedCloudAdapter();
+    final service = CloudApiService.forTesting(client: adapter.createClient());
+
+    await AppLocalizations.load(const Locale('zh', 'CN'));
+    final chinese = service.fetchPlans();
+    final chineseRequest = await adapter.takeRequest();
+    expect(chineseRequest.options.headers['Accept-Language'], 'zh-CN');
+    chineseRequest.respond({
+      'ret': 200,
+      'data': {'shops': []},
+    });
+    await chinese;
+
+    await AppLocalizations.load(const Locale('en'));
+    final english = service.fetchPlans();
+    final englishRequest = await adapter.takeRequest();
+    expect(englishRequest.options.headers['Accept-Language'], 'en');
+    englishRequest.respond({
+      'ret': 200,
+      'data': {'shops': []},
+    });
+    await english;
+  });
+
   test('a current-session 401 still clears its credentials', () async {
     final adapter = QueuedCloudAdapter();
     final service = CloudApiService.forTesting(client: adapter.createClient());

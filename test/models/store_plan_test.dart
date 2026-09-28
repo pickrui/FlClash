@@ -235,6 +235,14 @@ void main() {
         ]),
         '流量 2000 GiB · 500Mbps 速率 · 团队',
       );
+      expect(
+        compactStorePlanSummary([
+          'Traffic 2000 GiB',
+          'Unlimited Speed',
+          'Billing: Monthly / Annual',
+        ]),
+        'Traffic 2000 GiB · Unlimited Speed',
+      );
     });
 
     test('store lists skip malformed elements', () {

@@ -15,6 +15,7 @@ import 'package:fl_clash/services/age_crypto.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
+import 'package:intl/intl.dart' show Intl;
 
 // -- Constants --
 const int _defaultConnectTimeoutMs = 10000;
@@ -754,6 +755,10 @@ class CloudApiService implements CloudNodeFilterApi {
       // Authorization interceptor
       InterceptorsWrapper(
         onRequest: (options, handler) async {
+          // The panel localizes store labels and messages by this header;
+          // read it per request so a language switch applies immediately.
+          options.headers['Accept-Language'] = Intl.getCurrentLocale()
+              .replaceAll('_', '-');
           if (options.extra['skipAuth'] != true) {
             final revision = options.extra[_sessionRevisionKey];
             if (revision != null && revision != _sessionRevision) {

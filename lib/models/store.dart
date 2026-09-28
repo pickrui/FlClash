@@ -276,8 +276,14 @@ List<BoughtRecord> decodeBoughtRecords(dynamic value) {
       .toList();
 }
 
+/// Billing periods show separately; the panel words this tag in Chinese or
+/// English (its fallback for the app's other languages).
+const _billingPeriodTagPrefixes = ['周期', 'Billing:'];
+
 String compactStorePlanSummary(List<String> tags) {
-  return tags.where((tag) => !tag.trim().startsWith('周期')).join(' · ');
+  return tags
+      .where((tag) => !_billingPeriodTagPrefixes.any(tag.trim().startsWith))
+      .join(' · ');
 }
 
 String storePriceText(double price) {
