@@ -581,8 +581,6 @@
   "nodeFilterRegions": "地区",
   "nodeFilterNameContains": "名称包含",
   "nodeFilterNameExcludes": "名称排除",
-  "nodeFilterNameContainsHint": "香港|日本",
-  "nodeFilterNameExcludesHint": "测试|维护",
   "nodeFilterPreview": "节点预览",
   "nodeFilterSearch": "搜索节点",
   "nodeFilterAny": "不筛选",

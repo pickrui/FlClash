@@ -581,8 +581,6 @@
   "nodeFilterRegions": "Regions",
   "nodeFilterNameContains": "Name contains",
   "nodeFilterNameExcludes": "Name excludes",
-  "nodeFilterNameContainsHint": "HK|JP",
-  "nodeFilterNameExcludesHint": "test|maintenance",
   "nodeFilterPreview": "Preview",
   "nodeFilterSearch": "Search nodes",
   "nodeFilterAny": "Any",

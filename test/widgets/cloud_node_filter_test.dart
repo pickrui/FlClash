@@ -319,10 +319,14 @@ void main() {
         context,
       ).colorScheme.onSurfaceVariant.withValues(alpha: 0.6);
 
-      for (final label in ['Name contains', 'Name excludes']) {
+      for (final (label, example) in [
+        ('Name contains', '香港|日本'),
+        ('Name excludes', '测试|维护'),
+      ]) {
         final field = tester.widget<TextField>(
           find.widgetWithText(TextField, label),
         );
+        expect(field.decoration?.hintText, example, reason: label);
         expect(field.decoration?.hintStyle?.color, hintColor, reason: label);
       }
     });

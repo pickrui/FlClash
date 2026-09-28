@@ -581,8 +581,6 @@
   "nodeFilterRegions": "地域",
   "nodeFilterNameContains": "名前に含む",
   "nodeFilterNameExcludes": "名前から除外",
-  "nodeFilterNameContainsHint": "香港|日本",
-  "nodeFilterNameExcludesHint": "テスト|メンテナンス",
   "nodeFilterPreview": "プレビュー",
   "nodeFilterSearch": "ノードを検索",
   "nodeFilterAny": "指定なし",

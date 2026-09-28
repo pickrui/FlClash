@@ -581,8 +581,6 @@
   "nodeFilterRegions": "Регионы",
   "nodeFilterNameContains": "Имя содержит",
   "nodeFilterNameExcludes": "Имя не содержит",
-  "nodeFilterNameContainsHint": "HK|JP",
-  "nodeFilterNameExcludesHint": "тест|обслуживание",
   "nodeFilterPreview": "Предпросмотр",
   "nodeFilterSearch": "Поиск узлов",
   "nodeFilterAny": "Любые",

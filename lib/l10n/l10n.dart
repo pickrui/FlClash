@@ -4729,26 +4729,6 @@ class AppLocalizations {
     );
   }
 
-  /// `HK|JP`
-  String get nodeFilterNameContainsHint {
-    return Intl.message(
-      'HK|JP',
-      name: 'nodeFilterNameContainsHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `test|maintenance`
-  String get nodeFilterNameExcludesHint {
-    return Intl.message(
-      'test|maintenance',
-      name: 'nodeFilterNameExcludesHint',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Preview`
   String get nodeFilterPreview {
     return Intl.message(

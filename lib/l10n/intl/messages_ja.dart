@@ -1107,11 +1107,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "nodeFilterKept": m31,
     "nodeFilterLines": MessageLookupByLibrary.simpleMessage("回線"),
     "nodeFilterNameContains": MessageLookupByLibrary.simpleMessage("名前に含む"),
-    "nodeFilterNameContainsHint": MessageLookupByLibrary.simpleMessage("香港|日本"),
     "nodeFilterNameExcludes": MessageLookupByLibrary.simpleMessage("名前から除外"),
-    "nodeFilterNameExcludesHint": MessageLookupByLibrary.simpleMessage(
-      "テスト|メンテナンス",
-    ),
     "nodeFilterOnly": MessageLookupByLibrary.simpleMessage("のみ残す"),
     "nodeFilterPreview": MessageLookupByLibrary.simpleMessage("プレビュー"),
     "nodeFilterRegions": MessageLookupByLibrary.simpleMessage("地域"),

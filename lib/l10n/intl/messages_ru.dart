@@ -1384,12 +1384,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "nodeFilterNameContains": MessageLookupByLibrary.simpleMessage(
       "Имя содержит",
     ),
-    "nodeFilterNameContainsHint": MessageLookupByLibrary.simpleMessage("HK|JP"),
     "nodeFilterNameExcludes": MessageLookupByLibrary.simpleMessage(
       "Имя не содержит",
-    ),
-    "nodeFilterNameExcludesHint": MessageLookupByLibrary.simpleMessage(
-      "тест|обслуживание",
     ),
     "nodeFilterOnly": MessageLookupByLibrary.simpleMessage("Только"),
     "nodeFilterPreview": MessageLookupByLibrary.simpleMessage("Предпросмотр"),

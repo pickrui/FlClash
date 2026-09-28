@@ -16,6 +16,9 @@ import 'node_filter_widgets.dart';
 const _previewDelay = Duration(milliseconds: 400);
 const _twoPaneWidth = 880.0;
 const _patternMaxLength = 255;
+// Panel node names are Chinese in every UI language, so the examples are too.
+const _nameContainsExample = '香港|日本';
+const _nameExcludesExample = '测试|维护';
 
 enum _Submission { save, reset }
 
@@ -418,7 +421,7 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
           _buildPatternField(
             controller: _matchController,
             label: l10n.nodeFilterNameContains,
-            hint: l10n.nodeFilterNameContainsHint,
+            hint: _nameContainsExample,
             enabled: editable,
             onChanged: (value) => _edit(_draft.copyWith(match: value)),
           ),
@@ -426,7 +429,7 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
           _buildPatternField(
             controller: _nomatchController,
             label: l10n.nodeFilterNameExcludes,
-            hint: l10n.nodeFilterNameExcludesHint,
+            hint: _nameExcludesExample,
             enabled: editable,
             onChanged: (value) => _edit(_draft.copyWith(nomatch: value)),
           ),
