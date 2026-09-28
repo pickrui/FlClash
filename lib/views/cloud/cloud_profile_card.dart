@@ -134,13 +134,17 @@ class CloudProfileCard extends StatelessWidget {
       children: [
         Icon(icon, size: 20, color: context.colorScheme.primary),
         const SizedBox(width: 12),
-        Text(
-          label,
-          style: context.textTheme.bodyMedium?.copyWith(
-            color: context.colorScheme.onSurfaceVariant,
+        Expanded(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.textTheme.bodyMedium?.copyWith(
+              color: context.colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
-        const Spacer(),
+        const SizedBox(width: 12),
         Text(
           value,
           style: context.textTheme.bodyMedium?.copyWith(
