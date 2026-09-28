@@ -324,21 +324,31 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
     }
   }
 
-  Future<void> _rechargeFlow() async {
+  /// Pass a dialog's context: the page's desktop navigator sits below dialogs.
+  Future<bool> _rechargeFlow([BuildContext? from]) async {
     final methods = await _store.ensurePaymentMethods();
     if (methods.isEmpty) {
       globalState.showNotifier(appLocalizations.noPaymentMethods);
-      return;
+      return false;
     }
-    if (!mounted) return;
-    final choice = await showStoreRechargeSheet(context, methods: methods);
-    if (choice == null) return;
+    final sheetContext = from ?? context;
+    if (!mounted || !sheetContext.mounted) return false;
+    final choice = await showStoreRechargeSheet(sheetContext, methods: methods);
+    if (choice == null) return false;
     final init = await CloudApiService().createRecharge(
       payment: choice.method.payment,
       amount: choice.amount,
       type: choice.method.type,
     );
-    await _handlePaymentInitiation(init, payment: choice.method.payment);
+    return _handlePaymentInitiation(init, payment: choice.method.payment);
+  }
+
+  Future<bool> _rechargeForQuote(BuildContext dialogContext) async {
+    var recharged = false;
+    await _reportFailures(() async {
+      recharged = await _rechargeFlow(dialogContext);
+    });
+    return recharged;
   }
 
   Future<void> _activateFlow(BoughtRecord bought) async {
@@ -357,6 +367,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
         title: appLocalizations.bindCoupon,
         couponRequired: true,
         hint: appLocalizations.bindCouponIntro,
+        onRecharge: _rechargeForQuote,
         loadQuote: (coupon) async => storeBindCouponQuote(
           await CloudApiService().bindCouponCheck(bought.id, coupon),
         ),
@@ -386,6 +397,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
     final choice = await globalState.showCommonDialog<StoreQuoteChoice>(
       child: StoreQuoteDialog(
         title: appLocalizations.upgradePlan,
+        onRecharge: _rechargeForQuote,
         loadQuote: (coupon) async => storeShopQuote(
           await CloudApiService().previewUpgrade(
             bought.id,
@@ -424,7 +436,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
     }
   }
 
-  Future<void> _handlePaymentInitiation(
+  Future<bool> _handlePaymentInitiation(
     PaymentInitiation init, {
     required String payment,
     bool showOrders = false,
@@ -435,25 +447,27 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
           success: true,
           message: init.message ?? appLocalizations.operationSuccess,
         ), showOrders: showOrders);
+        return true;
       case PaymentInitiationKind.externalUrl ||
           PaymentInitiationKind.cryptoAddress:
         if (init.kind == PaymentInitiationKind.externalUrl &&
             init.url == null) {
-          return;
+          return false;
         }
         final paid = await globalState.showCommonDialog<bool>(
           child: StorePaymentDialog(init: init, payment: payment),
         );
-        if (paid == true) {
-          await _finishAction((
-            success: true,
-            message: appLocalizations.paymentSuccess,
-          ), showOrders: showOrders);
-        }
+        if (paid != true) return false;
+        await _finishAction((
+          success: true,
+          message: appLocalizations.paymentSuccess,
+        ), showOrders: showOrders);
+        return true;
       case PaymentInitiationKind.error:
         await _showFailure(
           init.message ?? appLocalizations.paymentRequestFailed,
         );
+        return false;
     }
   }
 

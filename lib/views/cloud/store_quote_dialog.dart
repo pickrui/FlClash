@@ -88,12 +88,16 @@ class StoreQuoteDialog extends ConsumerStatefulWidget {
   final bool couponRequired;
   final String? hint;
 
+  /// Offered while the balance falls short; true once a recharge went through.
+  final Future<bool> Function(BuildContext context)? onRecharge;
+
   const StoreQuoteDialog({
     super.key,
     required this.title,
     required this.loadQuote,
     this.couponRequired = false,
     this.hint,
+    this.onRecharge,
   });
 
   @override
@@ -105,6 +109,7 @@ class _StoreQuoteDialogState extends ConsumerState<StoreQuoteDialog> {
   StoreQuote? _quote;
   String _quotedCoupon = '';
   bool _loading = false;
+  bool _recharging = false;
   String? _error;
 
   @override
@@ -158,6 +163,19 @@ class _StoreQuoteDialogState extends ConsumerState<StoreQuoteDialog> {
     }
   }
 
+  Future<void> _recharge(
+    Future<bool> Function(BuildContext context) recharge,
+  ) async {
+    setState(() => _recharging = true);
+    var recharged = false;
+    try {
+      recharged = await recharge(context);
+    } finally {
+      if (mounted) setState(() => _recharging = false);
+    }
+    if (recharged && mounted) await _load();
+  }
+
   Widget _summaryRow(StoreQuoteRow row) {
     final theme = Theme.of(context);
     return Row(
@@ -184,6 +202,8 @@ class _StoreQuoteDialogState extends ConsumerState<StoreQuoteDialog> {
     final coupon = _controller.text.trim();
     final quote = _quote;
     final quoted = quote != null && coupon == _quotedCoupon;
+    final busy = _loading || _recharging;
+    final recharge = widget.onRecharge;
     return CommonDialog(
       title: widget.title,
       actions: [
@@ -192,20 +212,31 @@ class _StoreQuoteDialogState extends ConsumerState<StoreQuoteDialog> {
           child: Text(appLocalizations.cancel),
         ),
         TextButton(
-          onPressed: _loading ? null : _load,
+          onPressed: busy ? null : _load,
           child: Text(appLocalizations.verifyCoupon),
         ),
-        TextButton(
-          onPressed: quoted && !_loading && quote.sufficientBalance
-              ? () => Navigator.of(context).pop(
-                  StoreQuoteChoice(
-                    coupon: coupon,
-                    authorizedPrice: quote.authorizedPrice,
-                  ),
-                )
-              : null,
-          child: Text(appLocalizations.confirm),
-        ),
+        if (quoted && !quote.sufficientBalance && recharge != null)
+          TextButton(
+            onPressed: busy ? null : () => _recharge(recharge),
+            child: _recharging
+                ? const SizedBox.square(
+                    dimension: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Text(appLocalizations.recharge),
+          )
+        else
+          TextButton(
+            onPressed: quoted && !busy && quote.sufficientBalance
+                ? () => Navigator.of(context).pop(
+                    StoreQuoteChoice(
+                      coupon: coupon,
+                      authorizedPrice: quote.authorizedPrice,
+                    ),
+                  )
+                : null,
+            child: Text(appLocalizations.confirm),
+          ),
       ],
       child: SizedBox(
         width: 320,
