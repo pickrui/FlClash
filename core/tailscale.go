@@ -88,14 +88,14 @@ func handleTailscaleLogout(name string) error {
 
 // Signing out is best effort: an offline device must still lose its identity.
 func handleForgetTailscaleNetwork(request TailscaleRequest) error {
-	if request.Name != "" {
-		if err := handleTailscaleLogout(request.Name); err != nil {
-			log.Warnln("[Tailscale](%s) sign out before removal failed: %v", request.Name, err)
-		}
-	}
 	stateDir, err := tailscaleNetworkStateDir(request.StateDir)
 	if err != nil {
 		return err
+	}
+	if request.Name != "" {
+		if err := handleTailscaleLogout(request.Name); err != nil {
+			log.Debugln("[Tailscale](%s) sign out before removal: %v", request.Name, err)
+		}
 	}
 	return outbound.ForgetTailscaleState(stateDir)
 }
@@ -110,7 +110,16 @@ func tailscaleNetworkStateDir(stateDir string) (string, error) {
 	return cleaned, nil
 }
 
-func warmTailscaleNetworks() {
+// updateTailscaleNetworks closes the outbounds a config apply replaced, which
+// hand their sessions to the new ones, then starts networks that are signed in.
+// Replaced outbounds would otherwise keep their sessions until collected.
+func updateTailscaleNetworks(previous map[string]constant.Proxy) {
+	current := tunnel.Proxies()
+	for name, proxy := range previous {
+		if tailscale, ok := asTailscale(proxy); ok && current[name] != proxy {
+			_ = tailscale.Close()
+		}
+	}
 	for _, proxy := range tunnel.AllProxies() {
 		if tailscale, ok := asTailscale(proxy); ok {
 			tailscale.Warm()
@@ -119,8 +128,8 @@ func warmTailscaleNetworks() {
 }
 
 // An HTTP probe through a network without an exit node could only fail.
-func tailscaleDelay(ctx context.Context, name string) (time.Duration, bool, error) {
-	tailscale, ok := asTailscale(tunnel.AllProxies()[name])
+func tailscaleDelay(ctx context.Context, proxy constant.Proxy) (time.Duration, bool, error) {
+	tailscale, ok := asTailscale(proxy)
 	if !ok || tailscale.HasExitNode() {
 		return 0, false, nil
 	}

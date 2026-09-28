@@ -438,7 +438,7 @@ func handleAsyncTestDelay(params *TestDelayParams, fn func(*Delay)) {
 		// Accept any status, as upstream does: a manual test answers whether
 		// the node is reachable, not whether it satisfies a group's policy.
 		finish := manualDelayEvents.begin(proxy.Name(), testUrl)
-		if latency, handled, err := tailscaleDelay(ctx, proxy.Name()); handled {
+		if latency, handled, err := tailscaleDelay(ctx, proxy); handled {
 			finish()
 			if err == nil {
 				delayData.Value = max(int32(latency.Milliseconds()), 1)

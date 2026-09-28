@@ -424,12 +424,13 @@ func applyConfig(params *SetupParams) error {
 	// Config loading owns all tunnel status transitions until ApplyConfig returns.
 	idleOwnsTunnelSuspend = false
 	suspendOnIdle = params.SuspendOnIdle
+	previousProxies := tunnel.Proxies()
 	hub.ApplyConfig(currentConfig)
 	installDNSAuthResolver()
 	patchSelectGroup(params.SelectedMap)
 	updateListeners()
 	restartGeoScheduler()
-	warmTailscaleNetworks()
+	updateTailscaleNetworks(previousProxies)
 	return nil
 }
 

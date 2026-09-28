@@ -91,6 +91,44 @@ rules:
 	}
 }
 
+func TestUpdateTailscaleNetworksClosesReplacedOutbounds(t *testing.T) {
+	previousHome := constant.Path.HomeDir()
+	constant.SetHomeDir(t.TempDir())
+	t.Cleanup(func() { constant.SetHomeDir(previousHome) })
+	previousProxies := tunnel.Proxies()
+	previousProviders := tunnel.Providers()
+	t.Cleanup(func() { tunnel.UpdateProxies(previousProxies, previousProviders) })
+
+	parse := func() map[string]constant.Proxy {
+		t.Helper()
+		cfg, err := config.Parse([]byte(`
+proxies:
+  - {name: Home, type: tailscale, state-dir: tailscale-networks/home}
+rules: ["MATCH,DIRECT"]
+`))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return cfg.Proxies
+	}
+	old := parse()
+	tunnel.UpdateProxies(old, nil)
+	replaced := parse()
+	tunnel.UpdateProxies(replaced, nil)
+	updateTailscaleNetworks(old)
+
+	oldHome, _ := asTailscale(old["Home"])
+	if err := oldHome.Login(context.Background(), ""); err == nil {
+		t.Fatal("the replaced outbound was not closed")
+	}
+	newHome, _ := asTailscale(replaced["Home"])
+	t.Cleanup(func() { _ = newHome.Close() })
+	status, err := newHome.Status(context.Background())
+	if err != nil || status.State != outbound.TailscaleIdle {
+		t.Fatalf("the current outbound changed: %+v, %v", status, err)
+	}
+}
+
 func TestTailscaleStatusIsNilOutsideRunningConfig(t *testing.T) {
 	previousProxies := tunnel.Proxies()
 	previousProviders := tunnel.Providers()
@@ -104,7 +142,7 @@ func TestTailscaleStatusIsNilOutsideRunningConfig(t *testing.T) {
 	if err := handleTailscaleLogin(TailscaleRequest{Name: "Home"}); err == nil {
 		t.Fatal("login succeeded without a network")
 	}
-	if _, handled, _ := tailscaleDelay(context.Background(), "Home"); handled {
+	if _, handled, _ := tailscaleDelay(context.Background(), nil); handled {
 		t.Fatal("a missing proxy was treated as a tailscale network")
 	}
 }
