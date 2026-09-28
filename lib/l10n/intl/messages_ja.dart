@@ -250,6 +250,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "backupAndRestoreDesc": MessageLookupByLibrary.simpleMessage(
       "WebDAVまたはファイルを介してデータを同期する",
     ),
+    "backupRetention": MessageLookupByLibrary.simpleMessage("保持するバックアップ数"),
+    "backupRetentionDesc": MessageLookupByLibrary.simpleMessage(
+      "バックアップのたびにこのデバイスの古い WebDAV バックアップを削除",
+    ),
     "backupSuccess": MessageLookupByLibrary.simpleMessage("バックアップ成功"),
     "balance": MessageLookupByLibrary.simpleMessage("残高"),
     "balanceDeductionHint": MessageLookupByLibrary.simpleMessage(
@@ -593,6 +597,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "delayTest": MessageLookupByLibrary.simpleMessage("遅延テスト"),
     "delayTestFailed": MessageLookupByLibrary.simpleMessage("測定失敗"),
     "delete": MessageLookupByLibrary.simpleMessage("削除"),
+    "deleteBackupTip": MessageLookupByLibrary.simpleMessage(
+      "このバックアップを WebDAV から削除しますか？",
+    ),
     "deleteMultipTip": m14,
     "deleteTip": m15,
     "desc": MessageLookupByLibrary.simpleMessage(
@@ -1102,6 +1109,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "noProxy": MessageLookupByLibrary.simpleMessage("プロキシなし"),
     "noPurchaseRecords": MessageLookupByLibrary.simpleMessage("購入済みのプランはありません"),
+    "noRemoteBackup": MessageLookupByLibrary.simpleMessage(
+      "WebDAV にバックアップがありません",
+    ),
     "noResolve": MessageLookupByLibrary.simpleMessage("IPを解決しない"),
     "noSearchResult": MessageLookupByLibrary.simpleMessage("一致する結果がありません"),
     "noUpgradablePlans": MessageLookupByLibrary.simpleMessage(
@@ -1455,6 +1465,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "seconds": MessageLookupByLibrary.simpleMessage("秒"),
     "secondsCount": m51,
     "selectAll": MessageLookupByLibrary.simpleMessage("すべて選択"),
+    "selectBackup": MessageLookupByLibrary.simpleMessage("バックアップを選択"),
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage("アップグレード対象を選択"),
     "selected": MessageLookupByLibrary.simpleMessage("選択済み"),
     "sendCode": MessageLookupByLibrary.simpleMessage("コードを送信"),

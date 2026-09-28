@@ -55,6 +55,11 @@ class System {
     };
   }
 
+  Future<String> get deviceName async {
+    if (isAndroid) return (await DeviceInfoPlugin().androidInfo).model;
+    return Platform.localHostname.split('.').first;
+  }
+
   Future<bool> checkIsAdmin() async {
     final corePath = appPath.corePath;
     if (system.isWindows) {

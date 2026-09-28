@@ -73,7 +73,7 @@ void main() {
         },
       );
       expect(await dav.pingCompleter.future, true);
-      final path = await dav.restore();
+      final path = await dav.restore('backup.zip');
       // The winning read returns as soon as it is validated. Cancelled
       // branches may still be deleting their temporary files before closing.
       await waitForReads();
@@ -109,7 +109,7 @@ void main() {
         }),
       );
       expect(await dav.pingCompleter.future, true);
-      final winner = await dav.restore();
+      final winner = await dav.restore('backup.zip');
       delayed.complete(ResponseBody.fromBytes(archive, 200));
       await waitForReads();
       expect(await File(winner).readAsBytes(), archive);
@@ -139,7 +139,7 @@ void main() {
       }),
     );
     expect(await dav.pingCompleter.future, true);
-    final winner = await dav.restore();
+    final winner = await dav.restore('backup.zip');
     await waitForReads();
     expect(await File(winner).readAsBytes(), archive);
     expect(directory.listSync().map((file) => file.path), [winner]);
@@ -168,7 +168,10 @@ void main() {
         }),
       );
       expect(await dav.pingCompleter.future, true);
-      await expectLater(dav.restore(), throwsA(isA<DioException>()));
+      await expectLater(
+        dav.restore('backup.zip'),
+        throwsA(isA<DioException>()),
+      );
       await waitForReads();
       expect(hosts.toSet(), {'dav.invalid'});
       expect(directory.listSync(), isEmpty);
@@ -185,7 +188,7 @@ void main() {
       );
       expect(await dav.pingCompleter.future, false);
       await expectLater(
-        dav.restore(),
+        dav.restore('backup.zip'),
         throwsA(
           isA<DioException>().having(
             (error) => error.response?.statusCode,
@@ -218,7 +221,10 @@ void main() {
         }),
       );
       expect(await dav.pingCompleter.future, true);
-      await expectLater(dav.restore(), throwsA(isA<TimeoutException>()));
+      await expectLater(
+        dav.restore('backup.zip'),
+        throwsA(isA<TimeoutException>()),
+      );
       await waitForReads();
       expect(cancelled, 2);
       expect(directory.listSync(), isEmpty);
@@ -245,9 +251,113 @@ void main() {
     });
     final file = File('${directory.path}/upload.zip');
     await file.writeAsBytes(archive);
-    expect(await dav.backup(file.path), true);
+    expect(
+      await dav.backup(file.path, device: 'Pixel-8'),
+      matches(r'^backup_Pixel-8_\d{8}-\d{6}\.zip$'),
+    );
     expect(writes.where((method) => method == 'PUT'), hasLength(1));
     expect(writes.where((method) => method == 'MOVE'), hasLength(1));
+    expect(writes, isNot(contains('DELETE')));
+  });
+
+  test('a backup keeps only the newest backups of this device', () async {
+    final dav = DAVClient(
+      _props,
+      resolveRoutes: (_) => ['direct'],
+      createAdapter: (_) =>
+          readAdapter((_) async => ResponseBody.fromBytes([], 200)),
+    );
+    await dav.pingCompleter.future;
+    final deleted = <String>[];
+    dav.client.c.httpClientAdapter = _Adapter((options) async {
+      return switch (options.method) {
+        'PROPFIND' => _listing([
+          'backup_Pixel-8_20260101-000000.zip',
+          'backup_Pixel-8_20260301-000000.zip',
+          'backup_Pixel-8_20260201-000000.zip',
+          'backup_MacBook_20250101-000000.zip',
+          'backup.zip',
+        ]),
+        'DELETE' => () {
+          deleted.add(Uri.decodeFull(options.uri.pathSegments.last));
+          return ResponseBody.fromBytes([], 204);
+        }(),
+        'OPTIONS' => ResponseBody.fromBytes([], 200),
+        _ => ResponseBody.fromBytes([], 201),
+      };
+    });
+    final file = File('${directory.path}/upload.zip');
+    await file.writeAsBytes(archive);
+    await dav.backup(file.path, device: 'Pixel-8', keep: 2);
+    expect(deleted, [
+      'backup_Pixel-8_20260201-000000.zip',
+      'backup_Pixel-8_20260101-000000.zip',
+    ]);
+  });
+
+  test(
+    'backups list newest first without folders or partial uploads',
+    () async {
+      final dav = DAVClient(
+        _props,
+        resolveRoutes: (_) => ['direct'],
+        createAdapter: (_) => readAdapter((options) async {
+          if (options.method != 'PROPFIND') {
+            return ResponseBody.fromBytes([], 200);
+          }
+          return _listing(
+            [
+              'backup_Pixel-8_20260101-000000.zip',
+              'backup_MacBook_20260301-000000.zip',
+              'backup.zip',
+              'backup_Pixel-8_20260401-000000.zip.upload-abc',
+            ],
+            folders: ['old'],
+          );
+        }),
+      );
+      final backups = await dav.listBackups();
+      await waitForReads();
+      expect(backups.map((backup) => backup.name), [
+        'backup_MacBook_20260301-000000.zip',
+        'backup.zip',
+        'backup_Pixel-8_20260101-000000.zip',
+      ]);
+      expect(backups.map((backup) => backup.device), [
+        'MacBook',
+        null,
+        'Pixel-8',
+      ]);
+      expect(backups[1].size, 42);
+    },
+  );
+
+  test('a missing backup folder lists no backups', () async {
+    final dav = DAVClient(
+      _props,
+      resolveRoutes: (_) => ['direct', 'proxy'],
+      createAdapter: (_) => readAdapter(
+        (options) async => ResponseBody.fromBytes(
+          [],
+          options.method == 'PROPFIND' ? 404 : 200,
+        ),
+      ),
+    );
+    expect(await dav.listBackups(), isEmpty);
+    await waitForReads();
+  });
+
+  test('restoring rejects a backup name with path syntax', () async {
+    final dav = DAVClient(
+      _props,
+      resolveRoutes: (_) => ['direct'],
+      createAdapter: (_) =>
+          readAdapter((_) async => ResponseBody.fromBytes([], 200)),
+    );
+    await dav.pingCompleter.future;
+    await expectLater(dav.restore('../backup.zip'), throwsFormatException);
+    await expectLater(dav.remove('a/b.zip'), throwsFormatException);
+    await waitForReads();
   });
 
   test('a redirect after PUT cannot replay the write', () async {
@@ -277,7 +387,10 @@ void main() {
     });
     final file = File('${directory.path}/upload.zip');
     await file.writeAsBytes(archive);
-    await expectLater(dav.backup(file.path), throwsA(isA<DioException>()));
+    await expectLater(
+      dav.backup(file.path, device: 'Pixel-8'),
+      throwsA(isA<DioException>()),
+    );
     expect(uploads, 1);
   });
 }
@@ -287,6 +400,27 @@ const _props = DAVProps(
   user: 'alice',
   password: 'local-test',
 );
+
+ResponseBody _listing(List<String> files, {List<String> folders = const []}) {
+  String entry(String name, {required bool folder}) =>
+      '<d:response><d:href>/dav/backups/$name${folder ? '/' : ''}</d:href>'
+      '<d:propstat><d:prop>'
+      '<d:resourcetype>${folder ? '<d:collection/>' : ''}</d:resourcetype>'
+      '<d:getcontentlength>42</d:getcontentlength>'
+      '<d:getlastmodified>Sun, 01 Feb 2026 12:00:00 GMT</d:getlastmodified>'
+      '</d:prop><d:status>HTTP/1.1 200 OK</d:status></d:propstat>'
+      '</d:response>';
+  return ResponseBody.fromString(
+    '<?xml version="1.0" encoding="utf-8"?><d:multistatus xmlns:d="DAV:">'
+    '<d:response><d:href>/dav/backups/</d:href><d:propstat><d:prop>'
+    '<d:resourcetype><d:collection/></d:resourcetype></d:prop>'
+    '<d:status>HTTP/1.1 200 OK</d:status></d:propstat></d:response>'
+    '${folders.map((name) => entry(name, folder: true)).join()}'
+    '${files.map((name) => entry(name, folder: false)).join()}'
+    '</d:multistatus>',
+    207,
+  );
+}
 
 ResponseBody _challenge() => ResponseBody.fromString(
   'authenticate',

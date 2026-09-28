@@ -3944,6 +3944,56 @@ class AppLocalizations {
     );
   }
 
+  /// `Backups to keep`
+  String get backupRetention {
+    return Intl.message(
+      'Backups to keep',
+      name: 'backupRetention',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Each backup removes this device's older WebDAV backups`
+  String get backupRetentionDesc {
+    return Intl.message(
+      'Each backup removes this device\'s older WebDAV backups',
+      name: 'backupRetentionDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select a backup`
+  String get selectBackup {
+    return Intl.message(
+      'Select a backup',
+      name: 'selectBackup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No backups on WebDAV`
+  String get noRemoteBackup {
+    return Intl.message(
+      'No backups on WebDAV',
+      name: 'noRemoteBackup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete this backup from WebDAV?`
+  String get deleteBackupTip {
+    return Intl.message(
+      'Delete this backup from WebDAV?',
+      name: 'deleteBackupTip',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Add Profile`
   String get addProfile {
     return Intl.message('Add Profile', name: 'addProfile', desc: '', args: []);

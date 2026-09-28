@@ -302,6 +302,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "backupAndRestoreDesc": MessageLookupByLibrary.simpleMessage(
       "Sync data via WebDAV or files",
     ),
+    "backupRetention": MessageLookupByLibrary.simpleMessage("Backups to keep"),
+    "backupRetentionDesc": MessageLookupByLibrary.simpleMessage(
+      "Each backup removes this device\'s older WebDAV backups",
+    ),
     "backupSuccess": MessageLookupByLibrary.simpleMessage("Backup success"),
     "balance": MessageLookupByLibrary.simpleMessage("Balance"),
     "balanceDeductionHint": MessageLookupByLibrary.simpleMessage(
@@ -687,6 +691,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "delayTest": MessageLookupByLibrary.simpleMessage("Delay Test"),
     "delayTestFailed": MessageLookupByLibrary.simpleMessage("Failed"),
     "delete": MessageLookupByLibrary.simpleMessage("Delete"),
+    "deleteBackupTip": MessageLookupByLibrary.simpleMessage(
+      "Delete this backup from WebDAV?",
+    ),
     "deleteMultipTip": m14,
     "deleteTip": m15,
     "desc": MessageLookupByLibrary.simpleMessage(
@@ -1322,6 +1329,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "noPurchaseRecords": MessageLookupByLibrary.simpleMessage(
       "No purchased plans yet",
     ),
+    "noRemoteBackup": MessageLookupByLibrary.simpleMessage(
+      "No backups on WebDAV",
+    ),
     "noResolve": MessageLookupByLibrary.simpleMessage("No resolve IP"),
     "noSearchResult": MessageLookupByLibrary.simpleMessage(
       "No matching results",
@@ -1761,6 +1771,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "seconds": MessageLookupByLibrary.simpleMessage("Seconds"),
     "secondsCount": m51,
     "selectAll": MessageLookupByLibrary.simpleMessage("Select all"),
+    "selectBackup": MessageLookupByLibrary.simpleMessage("Select a backup"),
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage(
       "Select upgrade target",
     ),

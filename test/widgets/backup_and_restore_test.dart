@@ -37,40 +37,51 @@ Future<ProviderContainer> _pumpPage(WidgetTester tester, DAVProps dav) async {
 }
 
 void main() {
-  for (final (name, dav, message) in [
-    (
-      'a non-http address',
-      const DAVProps(uri: 'ftp://dav.example.com', user: 'me', password: 'p'),
-      () => appLocalizations.addressTip,
-    ),
-    (
-      'an unsafe file name',
-      const DAVProps(
-        uri: 'https://dav.example.com',
-        user: 'me',
-        password: 'p',
-        fileName: 'nested/backup.zip',
-      ),
-      () => appLocalizations.invalidBackupFile,
-    ),
-  ]) {
-    testWidgets('a stored setting with $name keeps the page usable', (
+  testWidgets('a stored non-http address keeps the page usable', (
+    tester,
+  ) async {
+    await _pumpPage(
       tester,
-    ) async {
-      await _pumpPage(tester, dav);
+      const DAVProps(uri: 'ftp://dav.example.com', user: 'me', password: 'p'),
+    );
 
-      expect(tester.takeException(), isNull);
-      expect(find.text('me'), findsOneWidget);
-      expect(find.text(appLocalizations.edit), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    expect(find.text('me'), findsOneWidget);
+    expect(find.text(appLocalizations.edit), findsOneWidget);
 
-      await tester.tap(find.text(appLocalizations.remoteBackupDesc));
-      await tester.pumpAndSettle();
-      expect(find.text(message()), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    });
-  }
+    await tester.tap(find.text(appLocalizations.remoteBackupDesc));
+    await tester.pumpAndSettle();
+    expect(find.text(appLocalizations.addressTip), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 
-  testWidgets('editing the account keeps the chosen backup file name', (
+  testWidgets('the backup count is chosen from the offered options', (
+    tester,
+  ) async {
+    final container = await _pumpPage(
+      tester,
+      const DAVProps(uri: 'ftp://dav.example.com', user: 'me', password: 'p'),
+    );
+
+    await tester.tap(find.text(appLocalizations.backupRetention));
+    await tester.pumpAndSettle();
+    for (final count in davMaxBackupsOptions) {
+      expect(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.text('$count'),
+        ),
+        findsOneWidget,
+      );
+    }
+    await tester.tap(find.text('5'));
+    await tester.pumpAndSettle();
+
+    expect(container.read(davSettingProvider)?.maxBackups, 5);
+    expect(find.byType(AlertDialog), findsNothing);
+  });
+
+  testWidgets('editing the account keeps the chosen backup count', (
     tester,
   ) async {
     final container = await _pumpPage(
@@ -79,7 +90,7 @@ void main() {
         uri: 'ftp://dav.example.com',
         user: 'me',
         password: 'old',
-        fileName: 'custom.zip',
+        maxBackups: 5,
       ),
     );
 
@@ -104,7 +115,7 @@ void main() {
         uri: 'https://dav.example.com',
         user: 'me',
         password: 'old',
-        fileName: 'custom.zip',
+        maxBackups: 5,
       ),
     );
     expect(tester.takeException(), isNull);

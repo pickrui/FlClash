@@ -304,6 +304,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "backupAndRestoreDesc": MessageLookupByLibrary.simpleMessage(
       "Синхронизация данных через WebDAV или файлы",
     ),
+    "backupRetention": MessageLookupByLibrary.simpleMessage("Хранить копий"),
+    "backupRetentionDesc": MessageLookupByLibrary.simpleMessage(
+      "При каждом резервном копировании старые копии этого устройства в WebDAV удаляются",
+    ),
     "backupSuccess": MessageLookupByLibrary.simpleMessage(
       "Резервное копирование успешно",
     ),
@@ -703,6 +707,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "delayTest": MessageLookupByLibrary.simpleMessage("Тест задержки"),
     "delayTestFailed": MessageLookupByLibrary.simpleMessage("Ошибка проверки"),
     "delete": MessageLookupByLibrary.simpleMessage("Удалить"),
+    "deleteBackupTip": MessageLookupByLibrary.simpleMessage(
+      "Удалить эту резервную копию из WebDAV?",
+    ),
     "deleteMultipTip": m14,
     "deleteTip": m15,
     "desc": MessageLookupByLibrary.simpleMessage(
@@ -1377,6 +1384,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "noPurchaseRecords": MessageLookupByLibrary.simpleMessage(
       "Купленных тарифов пока нет",
     ),
+    "noRemoteBackup": MessageLookupByLibrary.simpleMessage(
+      "В WebDAV нет резервных копий",
+    ),
     "noResolve": MessageLookupByLibrary.simpleMessage("Не разрешать IP"),
     "noSearchResult": MessageLookupByLibrary.simpleMessage("Нет совпадений"),
     "noUpgradablePlans": MessageLookupByLibrary.simpleMessage(
@@ -1844,6 +1854,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "seconds": MessageLookupByLibrary.simpleMessage("Секунд"),
     "secondsCount": m51,
     "selectAll": MessageLookupByLibrary.simpleMessage("Выбрать все"),
+    "selectBackup": MessageLookupByLibrary.simpleMessage(
+      "Выберите резервную копию",
+    ),
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage(
       "Выберите тариф для улучшения",
     ),

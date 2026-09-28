@@ -36,9 +36,6 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
 
   String? _davSettingError(DAVProps dav) {
     if (!isValidDavUri(dav.uri)) return appLocalizations.addressTip;
-    if (!isSafeDavFileName(dav.fileName)) {
-      return appLocalizations.invalidBackupFile;
-    }
     return null;
   }
 
@@ -61,7 +58,15 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
     await globalState.showCommonDialog<void>(child: WebDAVFormDialog(dav: dav));
   }
 
-  Future<void> _backupOnWebDAV(DAVClient client) async {
+  Future<String> _deviceName() async {
+    try {
+      return await system.deviceName;
+    } catch (_) {
+      return '';
+    }
+  }
+
+  Future<void> _backupOnWebDAV(DAVClient client, int keep) async {
     final commonAction = context.commonAction;
     final backupAction = context.backupAction;
 
@@ -72,7 +77,9 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
           return false;
         }
         try {
-          return await client.backup(path);
+          final device = davBackupDevice(await _deviceName());
+          await client.backup(path, device: device, keep: keep);
+          return true;
         } finally {
           await File(path).safeDelete();
         }
@@ -87,13 +94,17 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
     );
   }
 
-  Future<void> _restoreOnWebDAV(DAVClient client, RestoreOption option) async {
+  Future<void> _restoreOnWebDAV(
+    DAVClient client,
+    String name,
+    RestoreOption option,
+  ) async {
     final commonAction = context.commonAction;
     final backupAction = context.backupAction;
 
     final res = await commonAction.loadingRun<bool>(
       () async {
-        final path = await client.restore();
+        final path = await client.restore(name);
         try {
           await backupAction.restore(option, backupPath: path);
           return true;
@@ -112,11 +123,28 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
   }
 
   Future<void> _handleRestoreOnWebDAV(DAVClient client) async {
+    final backups = await context.commonAction.loadingRun<List<DavBackup>>(
+      client.listBackups,
+      tag: LoadingTag.backup_restore,
+      title: appLocalizations.restore,
+    );
+    if (backups == null || !mounted) return;
+    if (backups.isEmpty) {
+      globalState.showMessage(
+        title: appLocalizations.restore,
+        message: TextSpan(text: appLocalizations.noRemoteBackup),
+      );
+      return;
+    }
+    final name = await globalState.showCommonDialog<String>(
+      child: DavBackupsDialog(client: client, backups: backups),
+    );
+    if (name == null || !mounted) return;
     final restoreOption = await globalState.showCommonDialog<RestoreOption>(
       child: const RestoreOptionsDialog(),
     );
     if (restoreOption == null || !mounted) return;
-    _restoreOnWebDAV(client, restoreOption);
+    _restoreOnWebDAV(client, name, restoreOption);
   }
 
   Future<void> _backupOnLocal() async {
@@ -180,16 +208,19 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
     _restoreOnLocal(option);
   }
 
-  void _handleChange(String? value) {
-    if (value == null || !isSafeDavFileName(value)) {
-      if (value != null) {
-        globalState.showNotifier(appLocalizations.invalidBackupFile);
-      }
-      return;
-    }
+  Future<void> _handleUpdateMaxBackups(int value) async {
+    final res = await globalState.showCommonDialog<int>(
+      child: OptionsDialog<int>(
+        title: appLocalizations.backupRetention,
+        options: davMaxBackupsOptions,
+        textBuilder: (count) => '$count',
+        value: value,
+      ),
+    );
+    if (res == null) return;
     ref
         .read(davSettingProvider.notifier)
-        .update((state) => state?.copyWith(fileName: value));
+        .update((state) => state?.copyWith(maxBackups: res));
   }
 
   Future<void> _handleUpdateRestoreStrategy() async {
@@ -293,15 +324,13 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
               ),
             ),
             const SizedBox(height: 4),
-            ListItem.input(
-              title: Text(appLocalizations.file),
-              subtitle: Text(dav.fileName),
-              delegate: InputDelegate(
-                title: appLocalizations.file,
-                value: dav.fileName,
-                resetValue: defaultDavFileName,
-                maxLength: TextInputLimits.fileName,
-                onChanged: _handleChange,
+            ListItem(
+              onTap: () => _handleUpdateMaxBackups(dav.maxBackups),
+              title: Text(appLocalizations.backupRetention),
+              subtitle: Text(appLocalizations.backupRetentionDesc),
+              trailing: FilledButton(
+                onPressed: () => _handleUpdateMaxBackups(dav.maxBackups),
+                child: Text('${dav.maxBackups}'),
               ),
             ),
             ListItem(
@@ -310,7 +339,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
                   _showDavSettingError(appLocalizations.backup, davError!);
                   return;
                 }
-                _backupOnWebDAV(client);
+                _backupOnWebDAV(client, dav.maxBackups);
               },
               title: Text(appLocalizations.backup),
               subtitle: Text(appLocalizations.remoteBackupDesc),
@@ -356,6 +385,83 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
               );
             },
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class DavBackupsDialog extends StatefulWidget {
+  final DAVClient client;
+  final List<DavBackup> backups;
+
+  const DavBackupsDialog({
+    super.key,
+    required this.client,
+    required this.backups,
+  });
+
+  @override
+  State<DavBackupsDialog> createState() => _DavBackupsDialogState();
+}
+
+class _DavBackupsDialogState extends State<DavBackupsDialog> {
+  late final List<DavBackup> _backups = [...widget.backups];
+  bool _deleting = false;
+
+  Future<void> _delete(DavBackup backup) async {
+    final commonAction = context.commonAction;
+    final res = await globalState.showMessage(
+      title: appLocalizations.delete,
+      message: TextSpan(text: appLocalizations.deleteBackupTip),
+    );
+    if (res != true || !mounted) return;
+    setState(() => _deleting = true);
+    final deleted = await commonAction.loadingRun<bool>(
+      () async {
+        await widget.client.remove(backup.name);
+        return true;
+      },
+      tag: null,
+      title: appLocalizations.delete,
+    );
+    if (!mounted) return;
+    setState(() {
+      _deleting = false;
+      if (deleted == true) _backups.remove(backup);
+    });
+    if (_backups.isEmpty) Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CommonDialog(
+      title: appLocalizations.selectBackup,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (_deleting) const LinearProgressIndicator(),
+          for (final backup in _backups)
+            ListItem(
+              onTap: _deleting
+                  ? null
+                  : () => Navigator.of(context).pop(backup.name),
+              title: Text(
+                backup.device == null ? backup.name : backup.time!.showFull,
+              ),
+              subtitle: Text(
+                [
+                  backup.device ?? backup.time?.showFull,
+                  backup.size?.traffic.show,
+                ].nonNulls.join(' · '),
+              ),
+              trailing: IconButton(
+                tooltip: appLocalizations.delete,
+                onPressed: _deleting ? null : () => _delete(backup),
+                icon: const Icon(Icons.delete_outline),
+              ),
+            ),
         ],
       ),
     );
@@ -426,14 +532,11 @@ class _WebDAVFormDialogState extends ConsumerState<WebDAVFormDialog> {
 
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
-    final fileName = widget.dav?.fileName;
     ref.read(davSettingProvider.notifier).value = DAVProps(
       uri: _uriController.text,
       user: _userController.text,
       password: _passwordController.text,
-      fileName: fileName != null && isSafeDavFileName(fileName)
-          ? fileName
-          : defaultDavFileName,
+      maxBackups: widget.dav?.maxBackups ?? defaultDavMaxBackups,
     );
     Navigator.pop(context);
   }

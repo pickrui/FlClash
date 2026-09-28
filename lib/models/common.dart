@@ -223,7 +223,9 @@ extension TrackerInfosStateExt on TrackerInfosState {
   }
 }
 
-const defaultDavFileName = 'backup.zip';
+const defaultDavMaxBackups = 1;
+
+const davMaxBackupsOptions = [1, 3, 5, 10];
 
 @freezed
 abstract class DAVProps with _$DAVProps {
@@ -231,7 +233,7 @@ abstract class DAVProps with _$DAVProps {
     required String uri,
     required String user,
     required String password,
-    @Default(defaultDavFileName) String fileName,
+    @Default(defaultDavMaxBackups) int maxBackups,
   }) = _DAVProps;
 
   factory DAVProps.fromJson(Map<String, Object?> json) =>

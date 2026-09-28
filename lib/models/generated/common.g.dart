@@ -129,14 +129,14 @@ _DAVProps _$DAVPropsFromJson(Map<String, dynamic> json) => _DAVProps(
   uri: json['uri'] as String,
   user: json['user'] as String,
   password: json['password'] as String,
-  fileName: json['fileName'] as String? ?? defaultDavFileName,
+  maxBackups: (json['maxBackups'] as num?)?.toInt() ?? defaultDavMaxBackups,
 );
 
 Map<String, dynamic> _$DAVPropsToJson(_DAVProps instance) => <String, dynamic>{
   'uri': instance.uri,
   'user': instance.user,
   'password': instance.password,
-  'fileName': instance.fileName,
+  'maxBackups': instance.maxBackups,
 };
 
 _Traffic _$TrafficFromJson(Map<String, dynamic> json) =>

@@ -241,6 +241,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "backupAndRestoreDesc": MessageLookupByLibrary.simpleMessage(
       "通过WebDAV或者文件同步数据",
     ),
+    "backupRetention": MessageLookupByLibrary.simpleMessage("保留备份数"),
+    "backupRetentionDesc": MessageLookupByLibrary.simpleMessage(
+      "每次备份后自动删除本设备较早的 WebDAV 备份",
+    ),
     "backupSuccess": MessageLookupByLibrary.simpleMessage("备份成功"),
     "balance": MessageLookupByLibrary.simpleMessage("余额"),
     "balanceDeductionHint": MessageLookupByLibrary.simpleMessage(
@@ -516,6 +520,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "delayTest": MessageLookupByLibrary.simpleMessage("延迟测试"),
     "delayTestFailed": MessageLookupByLibrary.simpleMessage("测试失败"),
     "delete": MessageLookupByLibrary.simpleMessage("删除"),
+    "deleteBackupTip": MessageLookupByLibrary.simpleMessage(
+      "确定从 WebDAV 删除这个备份吗？",
+    ),
     "deleteMultipTip": m14,
     "deleteTip": m15,
     "desc": MessageLookupByLibrary.simpleMessage(
@@ -959,6 +966,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "noPaymentMethods": MessageLookupByLibrary.simpleMessage("暂无可用支付方式"),
     "noProxy": MessageLookupByLibrary.simpleMessage("暂无代理"),
     "noPurchaseRecords": MessageLookupByLibrary.simpleMessage("暂未购买套餐"),
+    "noRemoteBackup": MessageLookupByLibrary.simpleMessage("WebDAV 上没有备份"),
     "noResolve": MessageLookupByLibrary.simpleMessage("不解析IP"),
     "noSearchResult": MessageLookupByLibrary.simpleMessage("没有匹配结果"),
     "noUpgradablePlans": MessageLookupByLibrary.simpleMessage("暂无可升级的套餐"),
@@ -1270,6 +1278,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "seconds": MessageLookupByLibrary.simpleMessage("秒"),
     "secondsCount": m51,
     "selectAll": MessageLookupByLibrary.simpleMessage("全选"),
+    "selectBackup": MessageLookupByLibrary.simpleMessage("选择备份"),
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage("选择升级目标套餐"),
     "selected": MessageLookupByLibrary.simpleMessage("已选择"),
     "sendCode": MessageLookupByLibrary.simpleMessage("获取验证码"),
