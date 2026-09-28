@@ -128,6 +128,7 @@ const scriptListEquality = ListEquality<Script>();
 const profileListEquality = ListEquality<Profile>();
 const proxyGroupsEquality = ListEquality<ProxyGroup>();
 const hotKeyActionListEquality = ListEquality<HotKeyAction>();
+const tailscaleNetworkListEquality = ListEquality<TailscaleNetwork>();
 const stringAndStringMapEquality = MapEquality<String, String>();
 const stringAndStringMapEntryListEquality =
     ListEquality<MapEntry<String, String>>();

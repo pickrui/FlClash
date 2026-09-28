@@ -21,6 +21,8 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/cloud/cloud_account_page.dart';
 import 'package:fl_clash/views/cloud/node_filter_page.dart';
 import 'package:fl_clash/views/cloud/store_page.dart';
+import 'package:fl_clash/views/tailscale/tailscale.dart';
+import 'package:fl_clash/views/tools.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -37,6 +39,7 @@ Future<void> main(List<String> arguments) async {
     registerFetchManagedConfig(CloudApiService().fetchManagedConfig);
     cloudStorePageBuilder = (_) => const CloudStorePage();
     cloudNodeFilterPageBuilder = (_) => const CloudNodeFilterPage();
+    tailscalePageBuilder = (_) => const TailscaleView();
     final version = await system.version;
     final container = await globalState.init(
       version,

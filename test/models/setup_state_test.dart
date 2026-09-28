@@ -15,6 +15,7 @@ void main() {
     OverwriteType overwriteType = OverwriteType.custom,
     bool blockQuic = false,
     bool blockWebRtc = false,
+    List<TailscaleNetwork> tailscaleNetworks = const [],
   }) {
     return SetupState(
       profileId: 1,
@@ -30,6 +31,7 @@ void main() {
       dns: const Dns(),
       blockQuic: blockQuic,
       blockWebRtc: blockWebRtc,
+      tailscaleNetworks: tailscaleNetworks,
     );
   }
 
@@ -108,5 +110,21 @@ void main() {
       expect(buildState(blockQuic: true).needSetup(previous), true);
       expect(buildState(blockWebRtc: true).needSetup(previous), true);
     });
+  });
+
+  test('a Tailscale network change requires setup', () {
+    const network = TailscaleNetwork(id: 'n', name: 'Home', stateId: 's');
+    final previous = buildState(tailscaleNetworks: const [network]);
+    expect(
+      buildState(tailscaleNetworks: const [network]).needSetup(previous),
+      isFalse,
+    );
+    expect(buildState().needSetup(previous), isTrue);
+    expect(
+      buildState(
+        tailscaleNetworks: [network.copyWith(exitNode: 'auto')],
+      ).needSetup(previous),
+      isTrue,
+    );
   });
 }

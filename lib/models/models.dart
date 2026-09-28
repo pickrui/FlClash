@@ -14,3 +14,4 @@ export 'cloud_account.dart';
 export 'cloud_register_config.dart';
 export 'oix_params.dart';
 export 'store.dart';
+export 'tailscale.dart';

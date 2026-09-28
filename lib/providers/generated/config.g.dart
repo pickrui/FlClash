@@ -475,6 +475,59 @@ abstract class _$HotKeyActions extends $Notifier<List<HotKeyAction>> {
   }
 }
 
+@ProviderFor(TailscaleNetworks)
+final tailscaleNetworksProvider = TailscaleNetworksProvider._();
+
+final class TailscaleNetworksProvider
+    extends $NotifierProvider<TailscaleNetworks, List<TailscaleNetwork>> {
+  TailscaleNetworksProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'tailscaleNetworksProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$tailscaleNetworksHash();
+
+  @$internal
+  @override
+  TailscaleNetworks create() => TailscaleNetworks();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(List<TailscaleNetwork> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<List<TailscaleNetwork>>(value),
+    );
+  }
+}
+
+String _$tailscaleNetworksHash() => r'a2df4958d3d462164277d2c08b49aa592203312f';
+
+abstract class _$TailscaleNetworks extends $Notifier<List<TailscaleNetwork>> {
+  List<TailscaleNetwork> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref =
+        this.ref as $Ref<List<TailscaleNetwork>, List<TailscaleNetwork>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<List<TailscaleNetwork>, List<TailscaleNetwork>>,
+              List<TailscaleNetwork>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(ProxiesStyleSetting)
 final proxiesStyleSettingProvider = ProxiesStyleSettingProvider._();
 
@@ -618,4 +671,4 @@ final class _ConfigProvider extends $FunctionalProvider<Config, Config, Config>
   }
 }
 
-String _$_configHash() => r'17dad8563f5727690a7fd484815e7344e6a46ffa';
+String _$_configHash() => r'f1f684dddf7b5e1ff95a1f9c9a79f8ef0c741e69';

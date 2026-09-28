@@ -14,6 +14,7 @@ import 'common.dart';
 import 'config.dart';
 import 'core.dart';
 import 'profile.dart';
+import 'tailscale.dart';
 
 part 'generated/state.freezed.dart';
 part 'generated/state.g.dart';
@@ -245,6 +246,8 @@ abstract class MakeRealProfileState with _$MakeRealProfileState {
     @Default(false) bool blockQuic,
     @Default(false) bool blockWebRtc,
     @Default([]) List<String> authentication,
+    @Default([]) List<TailscaleNetwork> tailscaleNetworks,
+    @Default('flclash') String tailscaleHostname,
   }) = _MakeRealProfileState;
 }
 
@@ -277,6 +280,7 @@ abstract class SetupState with _$SetupState {
     required Dns dns,
     @Default(false) bool blockQuic,
     @Default(false) bool blockWebRtc,
+    @Default([]) List<TailscaleNetwork> tailscaleNetworks,
   }) = _SetupState;
 }
 
@@ -346,6 +350,12 @@ extension SetupStateExt on SetupState {
       return true;
     }
     if (blockWebRtc != lastSetupState.blockWebRtc) {
+      return true;
+    }
+    if (!tailscaleNetworkListEquality.equals(
+      tailscaleNetworks,
+      lastSetupState.tailscaleNetworks,
+    )) {
       return true;
     }
     return false;

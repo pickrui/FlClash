@@ -94,6 +94,26 @@ class HotKeyActions extends _$HotKeyActions with AutoDisposeNotifierMixin {
 }
 
 @riverpod
+class TailscaleNetworks extends _$TailscaleNetworks
+    with AutoDisposeNotifierMixin {
+  @override
+  List<TailscaleNetwork> build() {
+    return [];
+  }
+
+  void put(TailscaleNetwork network) {
+    final index = state.indexWhere((item) => item.id == network.id);
+    value = index == -1
+        ? [...state, network]
+        : (List.of(state)..[index] = network);
+  }
+
+  void remove(String id) {
+    value = state.where((item) => item.id != id).toList();
+  }
+}
+
+@riverpod
 class ProxiesStyleSetting extends _$ProxiesStyleSetting
     with AutoDisposeNotifierMixin {
   @override
@@ -124,6 +144,7 @@ Config _config(Ref ref) {
   final hotKeyActions = ref.watch(hotKeyActionsProvider);
   final proxiesStyleProps = ref.watch(proxiesStyleSettingProvider);
   final patchClashConfig = ref.watch(patchClashConfigProvider);
+  final tailscaleNetworks = ref.watch(tailscaleNetworksProvider);
   return Config(
     appSettingProps: appSettingProps,
     windowProps: windowProps,
@@ -136,6 +157,7 @@ Config _config(Ref ref) {
     hotKeyActions: hotKeyActions,
     proxiesStyleProps: proxiesStyleProps,
     patchClashConfig: patchClashConfig,
+    tailscaleNetworks: tailscaleNetworks,
   );
 }
 
@@ -157,6 +179,9 @@ List<Override> buildConfigOverrides(Config config) {
     ),
     patchClashConfigProvider.overrideWithBuild(
       (_, _) => config.patchClashConfig,
+    ),
+    tailscaleNetworksProvider.overrideWithBuild(
+      (_, _) => config.tailscaleNetworks,
     ),
   ];
 }

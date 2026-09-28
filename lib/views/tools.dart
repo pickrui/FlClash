@@ -26,6 +26,10 @@ import 'developer.dart';
 import 'theme.dart';
 import 'network_diagnostics.dart';
 
+/// Bound at startup like `cloudStorePageBuilder`, which keeps the Tailscale
+/// pages out of the common barrel's import closure.
+WidgetBuilder? tailscalePageBuilder;
+
 class ToolsView extends ConsumerStatefulWidget {
   const ToolsView({super.key});
 
@@ -88,6 +92,13 @@ class _ToolViewState extends ConsumerState<ToolsView> {
             title: Text(context.appLocalizations.diagTitle),
             subtitle: Text(context.appLocalizations.diagEntryHint),
             delegate: const OpenDelegate(widget: NetworkDiagnosticsPage()),
+          ),
+        if (tailscalePageBuilder case final builder?)
+          ListItem.open(
+            leading: const Icon(Icons.hub_outlined),
+            title: const Text('Tailscale'),
+            subtitle: Text(context.appLocalizations.tailscaleEntryHint),
+            delegate: OpenDelegate(widget: Builder(builder: builder)),
           ),
         const _ConfigItem(),
         const _AdvancedConfigItem(),

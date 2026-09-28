@@ -44,6 +44,10 @@ enum CoreMethod {
   crash,
   setupConfig,
   deleteFile,
+  getTailscaleStatus,
+  tailscaleLogin,
+  tailscaleLogout,
+  forgetTailscaleNetwork,
 }
 
 class CoreMethodCall {

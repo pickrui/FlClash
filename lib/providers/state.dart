@@ -660,6 +660,7 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
   final blockWebRtc = ref.watch(
     networkSettingProvider.select((state) => state.blockWebRtc),
   );
+  final tailscaleNetworks = ref.watch(tailscaleNetworksProvider);
   final List<Rule> addedRules = profileId != null
       ? await ref.watch(addedRuleStreamProvider(profileId).future)
       : [];
@@ -678,6 +679,7 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
     dns: dns,
     blockQuic: blockQuic,
     blockWebRtc: blockWebRtc,
+    tailscaleNetworks: tailscaleNetworks,
   );
 }
 

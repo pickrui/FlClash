@@ -143,13 +143,20 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m51(count) => "${count} секунд";
 
-  static String m52(build) => "Номер сборки: ${build}";
+  static String m52(fields) => "Проверьте настройки: ${fields}";
 
-  static String m53(version) => "Версия: ${version}";
+  static String m53(count) => "Устройства (${count})";
 
-  static String m54(label) => "${label} должен быть URL";
+  static String m54(name) =>
+      "Это устройство выйдет из сети ${name}, а данные входа будут удалены с него. Если сеть сейчас недоступна, удалите устройство в консоли администратора Tailscale.";
 
-  static String m55(count) =>
+  static String m55(build) => "Номер сборки: ${build}";
+
+  static String m56(version) => "Версия: ${version}";
+
+  static String m57(label) => "${label} должен быть URL";
+
+  static String m58(count) =>
       "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1918,6 +1925,158 @@ class MessageLookup extends MessageLookupByLibrary {
     "tabAnimationDesc": MessageLookupByLibrary.simpleMessage(
       "Действительно только в мобильном виде",
     ),
+    "tailscaleAccount": MessageLookupByLibrary.simpleMessage("Аккаунт"),
+    "tailscaleAddNetwork": MessageLookupByLibrary.simpleMessage(
+      "Добавить сеть",
+    ),
+    "tailscaleAdvanced": MessageLookupByLibrary.simpleMessage("Дополнительно"),
+    "tailscaleAuthKey": MessageLookupByLibrary.simpleMessage(
+      "Ключ авторизации",
+    ),
+    "tailscaleAuthKeySaved": MessageLookupByLibrary.simpleMessage(
+      "На этом устройстве сохранён ключ авторизации. Введите новый, чтобы заменить его.",
+    ),
+    "tailscaleAutoRoute": MessageLookupByLibrary.simpleMessage(
+      "Автоматическая маршрутизация",
+    ),
+    "tailscaleAutoRouteDesc": MessageLookupByLibrary.simpleMessage(
+      "Направлять адреса узлов и имена MagicDNS через эту сеть",
+    ),
+    "tailscaleAvailableExitNodes": MessageLookupByLibrary.simpleMessage(
+      "Доступные выходные узлы",
+    ),
+    "tailscaleCheckSettings": m52,
+    "tailscaleConnected": MessageLookupByLibrary.simpleMessage("Подключено"),
+    "tailscaleConnecting": MessageLookupByLibrary.simpleMessage("Подключение"),
+    "tailscaleControlUrl": MessageLookupByLibrary.simpleMessage(
+      "Адрес сервера управления",
+    ),
+    "tailscaleCredentialsFooter": MessageLookupByLibrary.simpleMessage(
+      "Данные авторизации и идентификатор устройства хранятся только на этом устройстве.",
+    ),
+    "tailscaleDeviceName": MessageLookupByLibrary.simpleMessage(
+      "Имя устройства",
+    ),
+    "tailscaleDevices": m53,
+    "tailscaleEmptyDesc": MessageLookupByLibrary.simpleMessage(
+      "Добавьте сеть, войдите на этом устройстве и запустите прокси, чтобы получить доступ к своим устройствам.",
+    ),
+    "tailscaleEmptyTitle": MessageLookupByLibrary.simpleMessage(
+      "Доступ к вашей сети tailnet",
+    ),
+    "tailscaleEnterAuthKey": MessageLookupByLibrary.simpleMessage(
+      "Введите ключ авторизации, чтобы войти на этом устройстве.",
+    ),
+    "tailscaleEntryHint": MessageLookupByLibrary.simpleMessage(
+      "Доступ к устройствам в вашей сети tailnet",
+    ),
+    "tailscaleExitNode": MessageLookupByLibrary.simpleMessage("Выходной узел"),
+    "tailscaleExitNodeAllowLan": MessageLookupByLibrary.simpleMessage(
+      "Разрешить доступ к локальной сети",
+    ),
+    "tailscaleExitNodeDesc": MessageLookupByLibrary.simpleMessage(
+      "Оставьте пустым, чтобы не использовать, или укажите auto, имя узла либо его IP-адрес.",
+    ),
+    "tailscaleGuide": MessageLookupByLibrary.simpleMessage("Инструкция"),
+    "tailscaleGuideDevices": MessageLookupByLibrary.simpleMessage(
+      "Устройства и MagicDNS",
+    ),
+    "tailscaleGuideDevicesBody": MessageLookupByLibrary.simpleMessage(
+      "Автоматическая маршрутизация направляет в эту сеть адреса и имена MagicDNS известных узлов. Остальной трафик идёт по вашим правилам.\nОна применяется после добавленных вами правил и до собственных правил профиля.\nЧтобы попасть в удалённую подсеть, одобрите маршрут в tailnet и добавьте правило, указывающее на эту сеть.",
+    ),
+    "tailscaleGuideExitNodes": MessageLookupByLibrary.simpleMessage(
+      "Выходные узлы",
+    ),
+    "tailscaleGuideExitNodesBody": MessageLookupByLibrary.simpleMessage(
+      "Если указан выходной узел, сеть появляется в группах выбора профиля. Трафик идёт через него, только когда вы выберете сеть в группе или направите на неё правило.\nОставьте поле пустым, чтобы не использовать выходной узел. auto выбирает доступный выходной узел, имя или адрес устройства — конкретное устройство.",
+    ),
+    "tailscaleGuideGetStarted": MessageLookupByLibrary.simpleMessage(
+      "Начало работы",
+    ),
+    "tailscaleGuideGetStartedBody": MessageLookupByLibrary.simpleMessage(
+      "Добавьте сеть и выберите «Сохранить и войти». Откройте страницу входа и авторизуйте это устройство — вход завершится сам.\nЧтобы войти по ключу авторизации, выберите «Ключ авторизации» и введите его. Браузер не нужен.\nСеть работает только при запущенном прокси. Сам по себе вход не перенаправляет трафик.",
+    ),
+    "tailscaleGuideSignIn": MessageLookupByLibrary.simpleMessage(
+      "Вход и резервное копирование",
+    ),
+    "tailscaleGuideSignInBody": MessageLookupByLibrary.simpleMessage(
+      "Настройки сети входят в резервную копию. Ключи авторизации и идентификатор устройства остаются только на этом устройстве, поэтому после восстановления на другом устройстве войдите снова.\nКогда истечёт срок ключа узла, снова выберите «Сохранить и войти». Одобрение устройств и доступ настраиваются в вашем tailnet.\nУдаление сети выполняет выход этого устройства и удаляет его идентификатор с этого устройства.",
+    ),
+    "tailscaleGuideTroubleshooting": MessageLookupByLibrary.simpleMessage(
+      "Устранение неполадок",
+    ),
+    "tailscaleGuideTroubleshootingBody": MessageLookupByLibrary.simpleMessage(
+      "Проверьте, что прокси запущен, устройство одобрено, а узел в сети. Для подсетей и интернета также проверьте одобрение маршрутов и выходной узел.\n«Не применено» означает, что текущая конфигурация не содержит сеть: выберите профиль и убедитесь, что в нём нет узла с таким же именем.\nПриложение только подключается к вашему tailnet: оно не принимает входящие соединения и не предлагает это устройство как маршрутизатор подсети или выходной узел.",
+    ),
+    "tailscaleInteractiveLogin": MessageLookupByLibrary.simpleMessage(
+      "Интерактивный",
+    ),
+    "tailscaleKeyExpired": MessageLookupByLibrary.simpleMessage(
+      "Срок действия ключа узла истёк",
+    ),
+    "tailscaleLoginFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось войти в Tailscale",
+    ),
+    "tailscaleLoginFooter": MessageLookupByLibrary.simpleMessage(
+      "Достаточно один раз войти в каждую сеть на этом устройстве.",
+    ),
+    "tailscaleLoginHint": MessageLookupByLibrary.simpleMessage(
+      "Вход авторизует это устройство. Чтобы пользоваться сетью, запустите прокси.",
+    ),
+    "tailscaleLoginMethod": MessageLookupByLibrary.simpleMessage(
+      "Способ входа",
+    ),
+    "tailscaleLoginTimeout": MessageLookupByLibrary.simpleMessage(
+      "Вход не был завершён за пять минут. Попробуйте ещё раз.",
+    ),
+    "tailscaleLoginWaiting": MessageLookupByLibrary.simpleMessage(
+      "Откройте страницу входа или отсканируйте код. Вход завершится автоматически после подтверждения.",
+    ),
+    "tailscaleLogout": MessageLookupByLibrary.simpleMessage("Выйти"),
+    "tailscaleNameInUse": MessageLookupByLibrary.simpleMessage(
+      "Это имя уже используется",
+    ),
+    "tailscaleNeedsApproval": MessageLookupByLibrary.simpleMessage(
+      "Ожидается одобрение устройства",
+    ),
+    "tailscaleNeedsLogin": MessageLookupByLibrary.simpleMessage(
+      "Требуется вход",
+    ),
+    "tailscaleNetworkName": MessageLookupByLibrary.simpleMessage(
+      "Название сети",
+    ),
+    "tailscaleNetworks": MessageLookupByLibrary.simpleMessage("Сети"),
+    "tailscaleNotApplied": MessageLookupByLibrary.simpleMessage("Не применено"),
+    "tailscaleNotAppliedHint": MessageLookupByLibrary.simpleMessage(
+      "Сеть не входит в текущую конфигурацию. Выберите профиль и убедитесь, что в нём нет узла с таким же именем.",
+    ),
+    "tailscaleNotSignedIn": MessageLookupByLibrary.simpleMessage(
+      "Вход не выполнен",
+    ),
+    "tailscaleOffline": MessageLookupByLibrary.simpleMessage("Не в сети"),
+    "tailscaleOnline": MessageLookupByLibrary.simpleMessage("В сети"),
+    "tailscaleOpenLoginPage": MessageLookupByLibrary.simpleMessage(
+      "Открыть страницу входа",
+    ),
+    "tailscaleRemoveConfirm": m54,
+    "tailscaleRemoveNetwork": MessageLookupByLibrary.simpleMessage(
+      "Удалить сеть",
+    ),
+    "tailscaleSaveAndLogin": MessageLookupByLibrary.simpleMessage(
+      "Сохранить и войти",
+    ),
+    "tailscaleSignedIn": MessageLookupByLibrary.simpleMessage("Вход выполнен"),
+    "tailscaleSigningIn": MessageLookupByLibrary.simpleMessage(
+      "Выполняется вход",
+    ),
+    "tailscaleStatus": MessageLookupByLibrary.simpleMessage("Состояние"),
+    "tailscaleStopped": MessageLookupByLibrary.simpleMessage("Остановлено"),
+    "tailscaleThisDevice": MessageLookupByLibrary.simpleMessage(
+      "Это устройство",
+    ),
+    "tailscaleUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Подключение недоступно",
+    ),
     "tcpConcurrent": MessageLookupByLibrary.simpleMessage("TCP параллелизм"),
     "tcpConcurrentDesc": MessageLookupByLibrary.simpleMessage(
       "Включение позволит использовать параллелизм TCP",
@@ -1987,7 +2146,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
       "AppImage нельзя установить автоматически. Замените текущую программу скачанным файлом; его папка открыта.",
     ),
-    "updateBuildNumber": m52,
+    "updateBuildNumber": m55,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
       "Отменить загрузку",
     ),
@@ -2032,14 +2191,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseNotesFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось загрузить список изменений. Повторите попытку.",
     ),
-    "updateVersionNumber": m53,
+    "updateVersionNumber": m56,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("Улучшить тариф"),
     "upload": MessageLookupByLibrary.simpleMessage("Загрузка"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Получить профиль через URL",
     ),
-    "urlTip": m54,
+    "urlTip": m57,
     "useHosts": MessageLookupByLibrary.simpleMessage("Использовать hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Использовать системные hosts",
@@ -2071,7 +2230,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "whitelistMode": MessageLookupByLibrary.simpleMessage(
       "Режим белого списка",
     ),
-    "yearsAgo": m55,
+    "yearsAgo": m58,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Упрощенный китайский"),
   };
 }

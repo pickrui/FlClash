@@ -313,6 +313,58 @@ class CoreController {
     return result;
   }
 
+  /// Null while the network is not part of the running config.
+  Future<TailscaleStatus?> getTailscaleStatus(String name) async {
+    final result = await _interface.invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.getTailscaleStatus,
+      arguments: name,
+      timeout: const Duration(seconds: 8),
+    );
+    return result == null ? null : TailscaleStatus.fromJson(result);
+  }
+
+  /// The auth key travels only in this call; the config never contains it.
+  Future<void> tailscaleLogin(String name, {String? authKey}) async {
+    await _invokeTailscale(CoreMethod.tailscaleLogin, {
+      'name': name,
+      if (authKey != null && authKey.isNotEmpty) 'authKey': authKey,
+    }, timeout: const Duration(seconds: 35));
+  }
+
+  Future<void> tailscaleLogout(String name) async {
+    await _invokeTailscale(CoreMethod.tailscaleLogout, {
+      'name': name,
+    }, timeout: const Duration(seconds: 15));
+  }
+
+  Future<void> forgetTailscaleNetwork({
+    required String name,
+    required String stateDir,
+  }) async {
+    await _invokeTailscale(CoreMethod.forgetTailscaleNetwork, {
+      'name': name,
+      'stateDir': stateDir,
+    }, timeout: const Duration(seconds: 20));
+  }
+
+  Future<void> _invokeTailscale(
+    CoreMethod method,
+    Map<String, Object> arguments, {
+    required Duration timeout,
+  }) async {
+    final result = await _interface.invokeMethod<bool>(
+      method: method,
+      arguments: arguments,
+      timeout: timeout,
+    );
+    if (result != true) {
+      throw CoreMethodException(
+        code: 'empty_result',
+        message: 'Core returned no response for ${method.name}',
+      );
+    }
+  }
+
   Future<Map<String, dynamic>> getConfig(String path) async {
     return normalizeCoreRawConfig(await _interface.getConfig(path));
   }

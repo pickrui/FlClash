@@ -150,6 +150,34 @@ void main() {
     });
   });
 
+  group('TailscaleNetworks provider', () {
+    test('adds, replaces and removes networks by id', () {
+      const home = TailscaleNetwork(id: 'home', name: 'Home', stateId: 'a');
+      const office = TailscaleNetwork(
+        id: 'office',
+        name: 'Office',
+        stateId: 'b',
+      );
+      final notifier = container.read(tailscaleNetworksProvider.notifier);
+      expect(container.read(tailscaleNetworksProvider), isEmpty);
+
+      notifier.put(home);
+      notifier.put(office);
+      notifier.put(home.copyWith(name: 'House'));
+      expect(container.read(tailscaleNetworksProvider).map((n) => n.name), [
+        'House',
+        'Office',
+      ]);
+      expect(
+        container.read(configProvider).tailscaleNetworks,
+        container.read(tailscaleNetworksProvider),
+      );
+
+      notifier.remove('home');
+      expect(container.read(tailscaleNetworksProvider), [office]);
+    });
+  });
+
   group('ProxiesStyleSetting provider', () {
     test('default values', () {
       final value = container.read(proxiesStyleSettingProvider);
@@ -197,15 +225,22 @@ void main() {
         themeProps: ThemeProps(),
         currentProfileId: 7,
         overrideDns: true,
+        tailscaleNetworks: [
+          TailscaleNetwork(id: 'n', name: 'Home', stateId: 's'),
+        ],
       );
       final overrides = buildConfigOverrides(config);
-      expect(overrides.length, 11);
+      expect(overrides.length, 12);
 
       final overrideContainer = ProviderContainer(overrides: overrides);
       addTearDown(overrideContainer.dispose);
 
       expect(overrideContainer.read(currentProfileIdProvider), 7);
       expect(overrideContainer.read(overrideDnsProvider), true);
+      expect(
+        overrideContainer.read(tailscaleNetworksProvider),
+        config.tailscaleNetworks,
+      );
       expect(
         overrideContainer.read(appSettingProvider).onlyStatisticsProxy,
         false,

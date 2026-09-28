@@ -143,13 +143,20 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m51(count) => "${count} seconds";
 
-  static String m52(build) => "Build: ${build}";
+  static String m52(fields) => "Check these settings: ${fields}";
 
-  static String m53(version) => "Version: ${version}";
+  static String m53(count) => "Devices (${count})";
 
-  static String m54(label) => "${label} must be a url";
+  static String m54(name) =>
+      "This device will leave ${name} and its sign-in will be deleted from this device. If the network is unreachable now, remove the device in the Tailscale admin console.";
 
-  static String m55(count) =>
+  static String m55(build) => "Build: ${build}";
+
+  static String m56(version) => "Version: ${version}";
+
+  static String m57(label) => "${label} must be a url";
+
+  static String m58(count) =>
       "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1833,6 +1840,144 @@ class MessageLookup extends MessageLookupByLibrary {
     "tabAnimationDesc": MessageLookupByLibrary.simpleMessage(
       "Effective only in mobile view",
     ),
+    "tailscaleAccount": MessageLookupByLibrary.simpleMessage("Account"),
+    "tailscaleAddNetwork": MessageLookupByLibrary.simpleMessage("Add network"),
+    "tailscaleAdvanced": MessageLookupByLibrary.simpleMessage("Advanced"),
+    "tailscaleAuthKey": MessageLookupByLibrary.simpleMessage("Auth key"),
+    "tailscaleAuthKeySaved": MessageLookupByLibrary.simpleMessage(
+      "An auth key is saved on this device. Enter a new one to replace it.",
+    ),
+    "tailscaleAutoRoute": MessageLookupByLibrary.simpleMessage(
+      "Automatic routing",
+    ),
+    "tailscaleAutoRouteDesc": MessageLookupByLibrary.simpleMessage(
+      "Route peer addresses and MagicDNS names through this network",
+    ),
+    "tailscaleAvailableExitNodes": MessageLookupByLibrary.simpleMessage(
+      "Available exit nodes",
+    ),
+    "tailscaleCheckSettings": m52,
+    "tailscaleConnected": MessageLookupByLibrary.simpleMessage("Connected"),
+    "tailscaleConnecting": MessageLookupByLibrary.simpleMessage("Connecting"),
+    "tailscaleControlUrl": MessageLookupByLibrary.simpleMessage("Control URL"),
+    "tailscaleCredentialsFooter": MessageLookupByLibrary.simpleMessage(
+      "Authentication and device identity stay on this device.",
+    ),
+    "tailscaleDeviceName": MessageLookupByLibrary.simpleMessage("Device name"),
+    "tailscaleDevices": m53,
+    "tailscaleEmptyDesc": MessageLookupByLibrary.simpleMessage(
+      "Add a network, sign in on this device, then start the proxy to reach your devices.",
+    ),
+    "tailscaleEmptyTitle": MessageLookupByLibrary.simpleMessage(
+      "Access your tailnet",
+    ),
+    "tailscaleEnterAuthKey": MessageLookupByLibrary.simpleMessage(
+      "Enter the auth key to log in on this device.",
+    ),
+    "tailscaleEntryHint": MessageLookupByLibrary.simpleMessage(
+      "Access the devices in your tailnet",
+    ),
+    "tailscaleExitNode": MessageLookupByLibrary.simpleMessage("Exit node"),
+    "tailscaleExitNodeAllowLan": MessageLookupByLibrary.simpleMessage(
+      "Allow local network access",
+    ),
+    "tailscaleExitNodeDesc": MessageLookupByLibrary.simpleMessage(
+      "Leave empty for none, or use auto, a peer name or a peer IP address.",
+    ),
+    "tailscaleGuide": MessageLookupByLibrary.simpleMessage("Guide"),
+    "tailscaleGuideDevices": MessageLookupByLibrary.simpleMessage(
+      "Devices and MagicDNS",
+    ),
+    "tailscaleGuideDevicesBody": MessageLookupByLibrary.simpleMessage(
+      "Automatic routing sends the addresses and MagicDNS names of known peers into this network. Other traffic follows your rules.\nIt applies after the rules you added and before the profile\'s own rules.\nTo reach a remote subnet, approve the route in your tailnet, then add a rule that points to this network.",
+    ),
+    "tailscaleGuideExitNodes": MessageLookupByLibrary.simpleMessage(
+      "Exit nodes",
+    ),
+    "tailscaleGuideExitNodesBody": MessageLookupByLibrary.simpleMessage(
+      "With an exit node, the network appears in the profile\'s selector groups. Traffic uses the exit node only after you select the network there or point a rule to it.\nLeave the field empty to use no exit node. auto picks an available exit node; a device name or address picks that device.",
+    ),
+    "tailscaleGuideGetStarted": MessageLookupByLibrary.simpleMessage(
+      "Get started",
+    ),
+    "tailscaleGuideGetStartedBody": MessageLookupByLibrary.simpleMessage(
+      "Add a network and choose \"Save and log in\". Open the login page and authorize this device; sign-in completes on its own.\nTo sign in with an auth key, choose \"Auth key\" and enter it. No browser is needed.\nThe network carries traffic only while the proxy runs. Signing in alone routes nothing.",
+    ),
+    "tailscaleGuideSignIn": MessageLookupByLibrary.simpleMessage(
+      "Sign-in and backup",
+    ),
+    "tailscaleGuideSignInBody": MessageLookupByLibrary.simpleMessage(
+      "Network settings are included in backups. Auth keys and the device identity stay on this device, so sign in again after restoring on another device.\nWhen the node key expires, choose \"Save and log in\" again. Device approval and access are managed in your tailnet.\nRemoving a network signs this device out and deletes its identity from this device.",
+    ),
+    "tailscaleGuideTroubleshooting": MessageLookupByLibrary.simpleMessage(
+      "Troubleshooting",
+    ),
+    "tailscaleGuideTroubleshootingBody": MessageLookupByLibrary.simpleMessage(
+      "Check that the proxy is running, this device is approved and the peer is online. For subnets or the Internet, also check route approval and the exit node.\n\"Not applied\" means the running configuration lacks the network: select a profile and make sure none of its nodes uses the same name.\nThis app only connects out to your tailnet. It accepts no inbound connections and never offers this device as a subnet router or exit node.",
+    ),
+    "tailscaleInteractiveLogin": MessageLookupByLibrary.simpleMessage(
+      "Interactive",
+    ),
+    "tailscaleKeyExpired": MessageLookupByLibrary.simpleMessage(
+      "Node key has expired",
+    ),
+    "tailscaleLoginFailed": MessageLookupByLibrary.simpleMessage(
+      "Tailscale login failed",
+    ),
+    "tailscaleLoginFooter": MessageLookupByLibrary.simpleMessage(
+      "Sign in once per network on this device.",
+    ),
+    "tailscaleLoginHint": MessageLookupByLibrary.simpleMessage(
+      "Signing in authorizes this device. Start the proxy to use the network.",
+    ),
+    "tailscaleLoginMethod": MessageLookupByLibrary.simpleMessage("Login"),
+    "tailscaleLoginTimeout": MessageLookupByLibrary.simpleMessage(
+      "Sign-in was not completed within five minutes. Try again.",
+    ),
+    "tailscaleLoginWaiting": MessageLookupByLibrary.simpleMessage(
+      "Open the login page or scan the code. Sign-in completes automatically after approval.",
+    ),
+    "tailscaleLogout": MessageLookupByLibrary.simpleMessage("Log out"),
+    "tailscaleNameInUse": MessageLookupByLibrary.simpleMessage(
+      "This name is already in use",
+    ),
+    "tailscaleNeedsApproval": MessageLookupByLibrary.simpleMessage(
+      "Device approval is pending",
+    ),
+    "tailscaleNeedsLogin": MessageLookupByLibrary.simpleMessage(
+      "Login required",
+    ),
+    "tailscaleNetworkName": MessageLookupByLibrary.simpleMessage(
+      "Network name",
+    ),
+    "tailscaleNetworks": MessageLookupByLibrary.simpleMessage("Networks"),
+    "tailscaleNotApplied": MessageLookupByLibrary.simpleMessage("Not applied"),
+    "tailscaleNotAppliedHint": MessageLookupByLibrary.simpleMessage(
+      "The network is not part of the running configuration. Select a profile and make sure none of its nodes uses the same name.",
+    ),
+    "tailscaleNotSignedIn": MessageLookupByLibrary.simpleMessage(
+      "Not signed in",
+    ),
+    "tailscaleOffline": MessageLookupByLibrary.simpleMessage("Offline"),
+    "tailscaleOnline": MessageLookupByLibrary.simpleMessage("Online"),
+    "tailscaleOpenLoginPage": MessageLookupByLibrary.simpleMessage(
+      "Open login page",
+    ),
+    "tailscaleRemoveConfirm": m54,
+    "tailscaleRemoveNetwork": MessageLookupByLibrary.simpleMessage(
+      "Remove network",
+    ),
+    "tailscaleSaveAndLogin": MessageLookupByLibrary.simpleMessage(
+      "Save and log in",
+    ),
+    "tailscaleSignedIn": MessageLookupByLibrary.simpleMessage("Signed in"),
+    "tailscaleSigningIn": MessageLookupByLibrary.simpleMessage("Signing in"),
+    "tailscaleStatus": MessageLookupByLibrary.simpleMessage("Status"),
+    "tailscaleStopped": MessageLookupByLibrary.simpleMessage("Stopped"),
+    "tailscaleThisDevice": MessageLookupByLibrary.simpleMessage("This device"),
+    "tailscaleUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Connection unavailable",
+    ),
     "tcpConcurrent": MessageLookupByLibrary.simpleMessage("TCP concurrent"),
     "tcpConcurrentDesc": MessageLookupByLibrary.simpleMessage(
       "Enabling it will allow TCP concurrency",
@@ -1898,7 +2043,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
       "An AppImage cannot be installed automatically. Replace the running program with the downloaded file; its folder has been opened.",
     ),
-    "updateBuildNumber": m52,
+    "updateBuildNumber": m55,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
       "Cancel download",
     ),
@@ -1941,14 +2086,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseNotesFailed": MessageLookupByLibrary.simpleMessage(
       "Could not load release notes. Please try again.",
     ),
-    "updateVersionNumber": m53,
+    "updateVersionNumber": m56,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("Upgrade plan"),
     "upload": MessageLookupByLibrary.simpleMessage("Upload"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Obtain profile through URL",
     ),
-    "urlTip": m54,
+    "urlTip": m57,
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("Used traffic"),
@@ -1974,7 +2119,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "WebDAV configuration",
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Whitelist mode"),
-    "yearsAgo": m55,
+    "yearsAgo": m58,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };
 }

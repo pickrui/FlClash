@@ -12,7 +12,7 @@ import 'package:test/test.dart';
 /// endorsement: `common/navigation.dart` and `enum/enum.dart` name widgets, so
 /// the barrel carries the view tree. Upstream binds those through ports
 /// instead (`common/app_ports.dart`).
-const _closureBudget = 291;
+const _closureBudget = 294;
 const _viewsInClosureBudget = 49;
 
 final _directive = RegExp(

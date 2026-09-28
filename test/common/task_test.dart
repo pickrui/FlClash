@@ -103,6 +103,171 @@ void main() {
     expect(overriddenResult['dns']['fallback-lazy-query'], true);
   });
 
+  group('Tailscale networks', () {
+    const home = TailscaleNetwork(
+      id: 'home',
+      name: 'Home',
+      stateId: 'home-state',
+      magicDnsSuffix: 'tail1234.ts.net',
+    );
+
+    Future<Map<String, dynamic>> apply(
+      List<TailscaleNetwork> networks, {
+      Map<String, dynamic>? rawConfig,
+      List<Rule> addedRules = const [],
+      OverwriteType overwriteType = OverwriteType.standard,
+      List<Rule> customRules = const [],
+    }) {
+      return makeRealProfileTask(
+        _makeRealProfileState(
+          rawConfig:
+              rawConfig ??
+              {
+                'proxies': [
+                  {'name': 'Node', 'type': 'socks5', 'server': '127.0.0.1'},
+                ],
+                'proxy-groups': [
+                  {
+                    'name': 'Proxy',
+                    'type': 'select',
+                    'proxies': ['Node'],
+                  },
+                  {
+                    'name': 'Auto',
+                    'type': 'url-test',
+                    'proxies': ['Node'],
+                  },
+                ],
+                'dns': {'enable': true, 'enhanced-mode': 'redir-host'},
+                'rules': ['GEOIP,private,DIRECT', 'MATCH,Proxy'],
+              },
+        ).copyWith(
+          tailscaleNetworks: networks,
+          tailscaleHostname: 'flclash-test',
+          addedRules: addedRules,
+          overwriteType: overwriteType,
+          customRules: customRules,
+        ),
+      );
+    }
+
+    test('leaves a profile without networks unchanged', () async {
+      final result = await apply(const []);
+      expect(result['rules'], ['GEOIP,private,DIRECT', 'MATCH,Proxy']);
+      expect((result['proxies'] as List).length, 1);
+    });
+
+    test('adds the network before the profile rules', () async {
+      final result = await apply(
+        const [home],
+        addedRules: const [Rule(id: 1, value: 'DOMAIN,nas.example,DIRECT')],
+      );
+      final proxies = result['proxies'] as List;
+      expect(proxies.first, {
+        'name': 'Home',
+        'type': 'tailscale',
+        'state-dir': 'tailscale-networks/home-state',
+        'hostname': 'flclash-test',
+        'udp': true,
+        'accept-routes': true,
+      });
+      // The user's added rules keep precedence; the profile's private-address
+      // rule must not see tailnet peers first.
+      expect(result['rules'], [
+        'DOMAIN,nas.example,DIRECT',
+        'TAILNET,Home,Home',
+        'GEOIP,private,DIRECT',
+        'MATCH,Proxy',
+      ]);
+      expect(result['dns']['nameserver-policy'], {
+        '+.tail1234.ts.net': 'tailscale://Home',
+      });
+    });
+
+    test('custom overwrite rules still end with their MATCH', () async {
+      final result = await apply(
+        const [home],
+        overwriteType: OverwriteType.custom,
+        customRules: const [Rule(id: 1, value: 'MATCH,DIRECT')],
+      );
+      expect(result['rules'], ['TAILNET,Home,Home', 'MATCH,DIRECT']);
+    });
+
+    test('offers only exit-node networks in selectors', () async {
+      final result = await apply([
+        home,
+        home.copyWith(
+          id: 'office',
+          name: 'Office',
+          stateId: 'office-state',
+          exitNode: tailscaleExitNodeAuto,
+        ),
+      ]);
+      final groups = result['proxy-groups'] as List;
+      expect(groups[0]['proxies'], ['Node', 'Office']);
+      expect(groups[1]['proxies'], ['Node']);
+    });
+
+    test('skips a network whose name the profile already uses', () async {
+      final result = await apply([
+        home.copyWith(name: 'Node'),
+        home.copyWith(id: 'global', name: 'GLOBAL'),
+      ]);
+      final proxies = result['proxies'] as List;
+      expect(proxies.where((proxy) => proxy['type'] == 'tailscale'), isEmpty);
+      expect(result['rules'], ['GEOIP,private,DIRECT', 'MATCH,Proxy']);
+      expect(result['dns']['nameserver-policy'], isNull);
+    });
+
+    test('automatic routing off adds neither rule nor DNS policy', () async {
+      final result = await apply([home.copyWith(autoRoute: false)]);
+      expect(result['rules'], ['GEOIP,private,DIRECT', 'MATCH,Proxy']);
+      expect(result['dns']['nameserver-policy'], isNull);
+      expect(
+        (result['proxies'] as List).first['type'],
+        'tailscale',
+        reason: 'the network stays usable in explicit rules',
+      );
+    });
+
+    test('DNS policy needs a learned suffix and a URL-safe name', () async {
+      final result = await apply([
+        home.copyWith(magicDnsSuffix: ''),
+        home.copyWith(
+          id: 'lab',
+          name: 'Home Lab',
+          stateId: 'lab-state',
+          magicDnsSuffix: 'lab.ts.net',
+        ),
+        home.copyWith(
+          id: 'cn',
+          name: '家里',
+          stateId: 'cn-state',
+          magicDnsSuffix: 'family.ts.net',
+        ),
+      ]);
+      expect(result['dns']['nameserver-policy'], {
+        '+.family.ts.net': 'tailscale://家里',
+      });
+    });
+
+    test('keeps a profile policy for the same suffix', () async {
+      final result = await apply(
+        const [home],
+        rawConfig: {
+          'dns': {
+            'enable': true,
+            'nameserver-policy': {'+.tail1234.ts.net': '100.100.100.100'},
+          },
+          'rules': ['MATCH,DIRECT'],
+        },
+      );
+      expect(result['dns']['nameserver-policy'], {
+        '+.tail1234.ts.net': '100.100.100.100',
+      });
+    });
+  });
+
   group('resolveSafeArchivePath', () {
     test('allows normalized child paths', () {
       expect(

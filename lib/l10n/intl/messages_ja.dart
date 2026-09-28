@@ -129,13 +129,20 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m51(count) => "${count} 秒";
 
-  static String m52(build) => "ビルド番号: ${build}";
+  static String m52(fields) => "次の設定を確認してください：${fields}";
 
-  static String m53(version) => "バージョン：${version}";
+  static String m53(count) => "デバイス（${count}）";
 
-  static String m54(label) => "${label}はURLである必要があります";
+  static String m54(name) =>
+      "このデバイスは ${name} から退出し、このデバイス上のログイン情報が削除されます。現在ネットワークに接続できない場合は、Tailscale の管理コンソールでデバイスを削除してください";
 
-  static String m55(count) => "${count}年前";
+  static String m55(build) => "ビルド番号: ${build}";
+
+  static String m56(version) => "バージョン：${version}";
+
+  static String m57(label) => "${label}はURLである必要があります";
+
+  static String m58(count) => "${count}年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1509,6 +1516,126 @@ class MessageLookup extends MessageLookupByLibrary {
     "tab": MessageLookupByLibrary.simpleMessage("タブ"),
     "tabAnimation": MessageLookupByLibrary.simpleMessage("タブアニメーション"),
     "tabAnimationDesc": MessageLookupByLibrary.simpleMessage("モバイル表示でのみ有効"),
+    "tailscaleAccount": MessageLookupByLibrary.simpleMessage("アカウント"),
+    "tailscaleAddNetwork": MessageLookupByLibrary.simpleMessage("ネットワークを追加"),
+    "tailscaleAdvanced": MessageLookupByLibrary.simpleMessage("詳細設定"),
+    "tailscaleAuthKey": MessageLookupByLibrary.simpleMessage("認証キー"),
+    "tailscaleAuthKeySaved": MessageLookupByLibrary.simpleMessage(
+      "このデバイスには認証キーが保存されています。新しいキーを入力すると置き換えます",
+    ),
+    "tailscaleAutoRoute": MessageLookupByLibrary.simpleMessage("自動ルーティング"),
+    "tailscaleAutoRouteDesc": MessageLookupByLibrary.simpleMessage(
+      "ピアのアドレスと MagicDNS 名をこのネットワーク経由でルーティング",
+    ),
+    "tailscaleAvailableExitNodes": MessageLookupByLibrary.simpleMessage(
+      "利用可能な出口ノード",
+    ),
+    "tailscaleCheckSettings": m52,
+    "tailscaleConnected": MessageLookupByLibrary.simpleMessage("接続済み"),
+    "tailscaleConnecting": MessageLookupByLibrary.simpleMessage("接続中"),
+    "tailscaleControlUrl": MessageLookupByLibrary.simpleMessage(
+      "コントロールサーバーの URL",
+    ),
+    "tailscaleCredentialsFooter": MessageLookupByLibrary.simpleMessage(
+      "認証情報とデバイスの識別情報はこのデバイスにのみ保存されます",
+    ),
+    "tailscaleDeviceName": MessageLookupByLibrary.simpleMessage("デバイス名"),
+    "tailscaleDevices": m53,
+    "tailscaleEmptyDesc": MessageLookupByLibrary.simpleMessage(
+      "ネットワークを追加してこのデバイスでログインし、プロキシを起動するとデバイスにアクセスできます",
+    ),
+    "tailscaleEmptyTitle": MessageLookupByLibrary.simpleMessage(
+      "Tailnet にアクセス",
+    ),
+    "tailscaleEnterAuthKey": MessageLookupByLibrary.simpleMessage(
+      "このデバイスでログインするには認証キーを入力してください",
+    ),
+    "tailscaleEntryHint": MessageLookupByLibrary.simpleMessage(
+      "Tailnet 内のデバイスにアクセス",
+    ),
+    "tailscaleExitNode": MessageLookupByLibrary.simpleMessage("出口ノード"),
+    "tailscaleExitNodeAllowLan": MessageLookupByLibrary.simpleMessage(
+      "ローカルネットワークへのアクセスを許可",
+    ),
+    "tailscaleExitNodeDesc": MessageLookupByLibrary.simpleMessage(
+      "空欄で使用しません。auto、ピア名またはピアの IP アドレスも指定できます",
+    ),
+    "tailscaleGuide": MessageLookupByLibrary.simpleMessage("使い方"),
+    "tailscaleGuideDevices": MessageLookupByLibrary.simpleMessage(
+      "デバイスと MagicDNS",
+    ),
+    "tailscaleGuideDevicesBody": MessageLookupByLibrary.simpleMessage(
+      "自動ルーティングは既知のピアのアドレスと MagicDNS 名をこのネットワークに送ります。その他の通信はルールに従います\n自動ルーティングは追加したルールの後、プロファイル自身のルールの前に適用されます\nリモートのサブネットにアクセスするには、Tailnet でルートを承認してから、このネットワークを指すルールを追加してください",
+    ),
+    "tailscaleGuideExitNodes": MessageLookupByLibrary.simpleMessage("出口ノード"),
+    "tailscaleGuideExitNodesBody": MessageLookupByLibrary.simpleMessage(
+      "出口ノードを設定すると、このネットワークがプロファイルの選択グループに表示されます。グループで選択するかルールで指定した通信だけが出口ノード経由になります\n空欄の場合は出口ノードを使用しません。auto は利用可能な出口ノードを選び、デバイス名やアドレスを指定するとそのデバイスを使います",
+    ),
+    "tailscaleGuideGetStarted": MessageLookupByLibrary.simpleMessage("はじめに"),
+    "tailscaleGuideGetStartedBody": MessageLookupByLibrary.simpleMessage(
+      "ネットワークを追加して「保存してログイン」を選び、ログインページでこのデバイスを承認すると自動でログインが完了します\n認証キーでログインする場合は「認証キー」を選んでキーを入力します。ブラウザは不要です\nネットワークはプロキシの実行中のみ使えます。ログインしただけでは通信は経由しません",
+    ),
+    "tailscaleGuideSignIn": MessageLookupByLibrary.simpleMessage("ログインとバックアップ"),
+    "tailscaleGuideSignInBody": MessageLookupByLibrary.simpleMessage(
+      "ネットワーク設定はバックアップに含まれます。認証キーとデバイスの識別情報はこのデバイスにのみ残るため、別のデバイスで復元した後は再ログインが必要です\nノードキーの有効期限が切れたら、もう一度「保存してログイン」を選んでください。デバイスの承認とアクセス権は Tailnet で管理します\nネットワークを削除すると、このデバイスはログアウトし、このデバイス上の識別情報が削除されます",
+    ),
+    "tailscaleGuideTroubleshooting": MessageLookupByLibrary.simpleMessage(
+      "トラブルシューティング",
+    ),
+    "tailscaleGuideTroubleshootingBody": MessageLookupByLibrary.simpleMessage(
+      "プロキシが実行中か、このデバイスが承認済みか、ピアがオンラインかを確認してください。サブネットやインターネットにアクセスする場合は、ルートの承認状態と出口ノードも確認してください\n「未適用」は実行中の設定にこのネットワークが含まれていないことを示します。プロファイルを選択し、同じ名前のノードがないことを確認してください\nこのアプリは Tailnet へ接続するだけで、Tailnet からの着信接続は受け付けず、このデバイスをサブネットルーターや出口ノードとして公開しません",
+    ),
+    "tailscaleInteractiveLogin": MessageLookupByLibrary.simpleMessage(
+      "対話型ログイン",
+    ),
+    "tailscaleKeyExpired": MessageLookupByLibrary.simpleMessage(
+      "ノードキーの有効期限が切れました",
+    ),
+    "tailscaleLoginFailed": MessageLookupByLibrary.simpleMessage(
+      "Tailscale へのログインに失敗しました",
+    ),
+    "tailscaleLoginFooter": MessageLookupByLibrary.simpleMessage(
+      "ネットワークごとにこのデバイスで一度ログインするだけです",
+    ),
+    "tailscaleLoginHint": MessageLookupByLibrary.simpleMessage(
+      "ログインでこのデバイスを承認します。ネットワークを使うにはプロキシを起動してください",
+    ),
+    "tailscaleLoginMethod": MessageLookupByLibrary.simpleMessage("ログイン方法"),
+    "tailscaleLoginTimeout": MessageLookupByLibrary.simpleMessage(
+      "5 分以内にログインが完了しませんでした。もう一度お試しください",
+    ),
+    "tailscaleLoginWaiting": MessageLookupByLibrary.simpleMessage(
+      "ログインページを開くかコードをスキャンしてください。承認後に自動でログインが完了します",
+    ),
+    "tailscaleLogout": MessageLookupByLibrary.simpleMessage("ログアウト"),
+    "tailscaleNameInUse": MessageLookupByLibrary.simpleMessage(
+      "この名前は既に使われています",
+    ),
+    "tailscaleNeedsApproval": MessageLookupByLibrary.simpleMessage(
+      "デバイスの承認待ちです",
+    ),
+    "tailscaleNeedsLogin": MessageLookupByLibrary.simpleMessage("ログインが必要です"),
+    "tailscaleNetworkName": MessageLookupByLibrary.simpleMessage("ネットワーク名"),
+    "tailscaleNetworks": MessageLookupByLibrary.simpleMessage("ネットワーク"),
+    "tailscaleNotApplied": MessageLookupByLibrary.simpleMessage("未適用"),
+    "tailscaleNotAppliedHint": MessageLookupByLibrary.simpleMessage(
+      "ネットワークが実行中の設定に含まれていません。プロファイルを選択し、同じ名前のノードがないことを確認してください",
+    ),
+    "tailscaleNotSignedIn": MessageLookupByLibrary.simpleMessage("未ログイン"),
+    "tailscaleOffline": MessageLookupByLibrary.simpleMessage("オフライン"),
+    "tailscaleOnline": MessageLookupByLibrary.simpleMessage("オンライン"),
+    "tailscaleOpenLoginPage": MessageLookupByLibrary.simpleMessage(
+      "ログインページを開く",
+    ),
+    "tailscaleRemoveConfirm": m54,
+    "tailscaleRemoveNetwork": MessageLookupByLibrary.simpleMessage("ネットワークを削除"),
+    "tailscaleSaveAndLogin": MessageLookupByLibrary.simpleMessage("保存してログイン"),
+    "tailscaleSignedIn": MessageLookupByLibrary.simpleMessage("ログイン済み"),
+    "tailscaleSigningIn": MessageLookupByLibrary.simpleMessage("ログイン中"),
+    "tailscaleStatus": MessageLookupByLibrary.simpleMessage("状態"),
+    "tailscaleStopped": MessageLookupByLibrary.simpleMessage("停止中"),
+    "tailscaleThisDevice": MessageLookupByLibrary.simpleMessage("このデバイス"),
+    "tailscaleUnavailable": MessageLookupByLibrary.simpleMessage("接続できません"),
     "tcpConcurrent": MessageLookupByLibrary.simpleMessage("TCP並列処理"),
     "tcpConcurrentDesc": MessageLookupByLibrary.simpleMessage("TCP並列処理を許可"),
     "tcpFastOpen": MessageLookupByLibrary.simpleMessage("TCP Fast Open"),
@@ -1566,7 +1693,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
       "AppImage は自動インストールできません。ダウンロードしたファイルで現在のプログラムを置き換えてください。保存先のフォルダーを開きました。",
     ),
-    "updateBuildNumber": m52,
+    "updateBuildNumber": m55,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage("ダウンロードを中止"),
     "updateDownloadBackground": MessageLookupByLibrary.simpleMessage(
       "バックグラウンドでダウンロード",
@@ -1597,12 +1724,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseNotesFailed": MessageLookupByLibrary.simpleMessage(
       "更新履歴を読み込めませんでした。再試行してください",
     ),
-    "updateVersionNumber": m53,
+    "updateVersionNumber": m56,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("プランをアップグレード"),
     "upload": MessageLookupByLibrary.simpleMessage("アップロード"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("URL経由でプロファイルを取得"),
-    "urlTip": m54,
+    "urlTip": m57,
     "useHosts": MessageLookupByLibrary.simpleMessage("ホストを使用"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("システムホストを使用"),
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("使用済みデータ量"),
@@ -1622,7 +1749,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "vpnTip": MessageLookupByLibrary.simpleMessage("変更はVPN再起動後に有効"),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV設定"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("ホワイトリストモード"),
-    "yearsAgo": m55,
+    "yearsAgo": m58,
     "zh_CN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };
 }

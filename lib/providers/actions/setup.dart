@@ -661,6 +661,8 @@ extension SetupControllerExt on AppController {
         dockerMode: system.isDocker,
         blockQuic: setupState.blockQuic,
         blockWebRtc: setupState.blockWebRtc,
+        tailscaleNetworks: setupState.tailscaleNetworks,
+        tailscaleHostname: defaultTailscaleHostname(Platform.operatingSystem),
         authentication: _ref
             .read(networkSettingProvider)
             .authentication

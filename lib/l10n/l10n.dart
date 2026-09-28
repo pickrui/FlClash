@@ -8133,6 +8133,606 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Access the devices in your tailnet`
+  String get tailscaleEntryHint {
+    return Intl.message(
+      'Access the devices in your tailnet',
+      name: 'tailscaleEntryHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Access your tailnet`
+  String get tailscaleEmptyTitle {
+    return Intl.message(
+      'Access your tailnet',
+      name: 'tailscaleEmptyTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add a network, sign in on this device, then start the proxy to reach your devices.`
+  String get tailscaleEmptyDesc {
+    return Intl.message(
+      'Add a network, sign in on this device, then start the proxy to reach your devices.',
+      name: 'tailscaleEmptyDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add network`
+  String get tailscaleAddNetwork {
+    return Intl.message(
+      'Add network',
+      name: 'tailscaleAddNetwork',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Networks`
+  String get tailscaleNetworks {
+    return Intl.message(
+      'Networks',
+      name: 'tailscaleNetworks',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Guide`
+  String get tailscaleGuide {
+    return Intl.message('Guide', name: 'tailscaleGuide', desc: '', args: []);
+  }
+
+  /// `This device`
+  String get tailscaleThisDevice {
+    return Intl.message(
+      'This device',
+      name: 'tailscaleThisDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Status`
+  String get tailscaleStatus {
+    return Intl.message('Status', name: 'tailscaleStatus', desc: '', args: []);
+  }
+
+  /// `Device name`
+  String get tailscaleDeviceName {
+    return Intl.message(
+      'Device name',
+      name: 'tailscaleDeviceName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Devices ({count})`
+  String tailscaleDevices(Object count) {
+    return Intl.message(
+      'Devices ($count)',
+      name: 'tailscaleDevices',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Network name`
+  String get tailscaleNetworkName {
+    return Intl.message(
+      'Network name',
+      name: 'tailscaleNetworkName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This name is already in use`
+  String get tailscaleNameInUse {
+    return Intl.message(
+      'This name is already in use',
+      name: 'tailscaleNameInUse',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Login`
+  String get tailscaleLoginMethod {
+    return Intl.message(
+      'Login',
+      name: 'tailscaleLoginMethod',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Interactive`
+  String get tailscaleInteractiveLogin {
+    return Intl.message(
+      'Interactive',
+      name: 'tailscaleInteractiveLogin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Auth key`
+  String get tailscaleAuthKey {
+    return Intl.message(
+      'Auth key',
+      name: 'tailscaleAuthKey',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `An auth key is saved on this device. Enter a new one to replace it.`
+  String get tailscaleAuthKeySaved {
+    return Intl.message(
+      'An auth key is saved on this device. Enter a new one to replace it.',
+      name: 'tailscaleAuthKeySaved',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sign in once per network on this device.`
+  String get tailscaleLoginFooter {
+    return Intl.message(
+      'Sign in once per network on this device.',
+      name: 'tailscaleLoginFooter',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Automatic routing`
+  String get tailscaleAutoRoute {
+    return Intl.message(
+      'Automatic routing',
+      name: 'tailscaleAutoRoute',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Route peer addresses and MagicDNS names through this network`
+  String get tailscaleAutoRouteDesc {
+    return Intl.message(
+      'Route peer addresses and MagicDNS names through this network',
+      name: 'tailscaleAutoRouteDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Exit node`
+  String get tailscaleExitNode {
+    return Intl.message(
+      'Exit node',
+      name: 'tailscaleExitNode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Leave empty for none, or use auto, a peer name or a peer IP address.`
+  String get tailscaleExitNodeDesc {
+    return Intl.message(
+      'Leave empty for none, or use auto, a peer name or a peer IP address.',
+      name: 'tailscaleExitNodeDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Available exit nodes`
+  String get tailscaleAvailableExitNodes {
+    return Intl.message(
+      'Available exit nodes',
+      name: 'tailscaleAvailableExitNodes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow local network access`
+  String get tailscaleExitNodeAllowLan {
+    return Intl.message(
+      'Allow local network access',
+      name: 'tailscaleExitNodeAllowLan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Advanced`
+  String get tailscaleAdvanced {
+    return Intl.message(
+      'Advanced',
+      name: 'tailscaleAdvanced',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Control URL`
+  String get tailscaleControlUrl {
+    return Intl.message(
+      'Control URL',
+      name: 'tailscaleControlUrl',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Authentication and device identity stay on this device.`
+  String get tailscaleCredentialsFooter {
+    return Intl.message(
+      'Authentication and device identity stay on this device.',
+      name: 'tailscaleCredentialsFooter',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Account`
+  String get tailscaleAccount {
+    return Intl.message(
+      'Account',
+      name: 'tailscaleAccount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save and log in`
+  String get tailscaleSaveAndLogin {
+    return Intl.message(
+      'Save and log in',
+      name: 'tailscaleSaveAndLogin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open login page`
+  String get tailscaleOpenLoginPage {
+    return Intl.message(
+      'Open login page',
+      name: 'tailscaleOpenLoginPage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open the login page or scan the code. Sign-in completes automatically after approval.`
+  String get tailscaleLoginWaiting {
+    return Intl.message(
+      'Open the login page or scan the code. Sign-in completes automatically after approval.',
+      name: 'tailscaleLoginWaiting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Signing in`
+  String get tailscaleSigningIn {
+    return Intl.message(
+      'Signing in',
+      name: 'tailscaleSigningIn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Signed in`
+  String get tailscaleSignedIn {
+    return Intl.message(
+      'Signed in',
+      name: 'tailscaleSignedIn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Log out`
+  String get tailscaleLogout {
+    return Intl.message('Log out', name: 'tailscaleLogout', desc: '', args: []);
+  }
+
+  /// `Tailscale login failed`
+  String get tailscaleLoginFailed {
+    return Intl.message(
+      'Tailscale login failed',
+      name: 'tailscaleLoginFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sign-in was not completed within five minutes. Try again.`
+  String get tailscaleLoginTimeout {
+    return Intl.message(
+      'Sign-in was not completed within five minutes. Try again.',
+      name: 'tailscaleLoginTimeout',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Signing in authorizes this device. Start the proxy to use the network.`
+  String get tailscaleLoginHint {
+    return Intl.message(
+      'Signing in authorizes this device. Start the proxy to use the network.',
+      name: 'tailscaleLoginHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter the auth key to log in on this device.`
+  String get tailscaleEnterAuthKey {
+    return Intl.message(
+      'Enter the auth key to log in on this device.',
+      name: 'tailscaleEnterAuthKey',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check these settings: {fields}`
+  String tailscaleCheckSettings(Object fields) {
+    return Intl.message(
+      'Check these settings: $fields',
+      name: 'tailscaleCheckSettings',
+      desc: '',
+      args: [fields],
+    );
+  }
+
+  /// `Not applied`
+  String get tailscaleNotApplied {
+    return Intl.message(
+      'Not applied',
+      name: 'tailscaleNotApplied',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The network is not part of the running configuration. Select a profile and make sure none of its nodes uses the same name.`
+  String get tailscaleNotAppliedHint {
+    return Intl.message(
+      'The network is not part of the running configuration. Select a profile and make sure none of its nodes uses the same name.',
+      name: 'tailscaleNotAppliedHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not signed in`
+  String get tailscaleNotSignedIn {
+    return Intl.message(
+      'Not signed in',
+      name: 'tailscaleNotSignedIn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Login required`
+  String get tailscaleNeedsLogin {
+    return Intl.message(
+      'Login required',
+      name: 'tailscaleNeedsLogin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Node key has expired`
+  String get tailscaleKeyExpired {
+    return Intl.message(
+      'Node key has expired',
+      name: 'tailscaleKeyExpired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Device approval is pending`
+  String get tailscaleNeedsApproval {
+    return Intl.message(
+      'Device approval is pending',
+      name: 'tailscaleNeedsApproval',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connecting`
+  String get tailscaleConnecting {
+    return Intl.message(
+      'Connecting',
+      name: 'tailscaleConnecting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connected`
+  String get tailscaleConnected {
+    return Intl.message(
+      'Connected',
+      name: 'tailscaleConnected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Stopped`
+  String get tailscaleStopped {
+    return Intl.message(
+      'Stopped',
+      name: 'tailscaleStopped',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connection unavailable`
+  String get tailscaleUnavailable {
+    return Intl.message(
+      'Connection unavailable',
+      name: 'tailscaleUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Online`
+  String get tailscaleOnline {
+    return Intl.message('Online', name: 'tailscaleOnline', desc: '', args: []);
+  }
+
+  /// `Offline`
+  String get tailscaleOffline {
+    return Intl.message(
+      'Offline',
+      name: 'tailscaleOffline',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove network`
+  String get tailscaleRemoveNetwork {
+    return Intl.message(
+      'Remove network',
+      name: 'tailscaleRemoveNetwork',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This device will leave {name} and its sign-in will be deleted from this device. If the network is unreachable now, remove the device in the Tailscale admin console.`
+  String tailscaleRemoveConfirm(Object name) {
+    return Intl.message(
+      'This device will leave $name and its sign-in will be deleted from this device. If the network is unreachable now, remove the device in the Tailscale admin console.',
+      name: 'tailscaleRemoveConfirm',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Get started`
+  String get tailscaleGuideGetStarted {
+    return Intl.message(
+      'Get started',
+      name: 'tailscaleGuideGetStarted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add a network and choose "Save and log in". Open the login page and authorize this device; sign-in completes on its own.\nTo sign in with an auth key, choose "Auth key" and enter it. No browser is needed.\nThe network carries traffic only while the proxy runs. Signing in alone routes nothing.`
+  String get tailscaleGuideGetStartedBody {
+    return Intl.message(
+      'Add a network and choose "Save and log in". Open the login page and authorize this device; sign-in completes on its own.\nTo sign in with an auth key, choose "Auth key" and enter it. No browser is needed.\nThe network carries traffic only while the proxy runs. Signing in alone routes nothing.',
+      name: 'tailscaleGuideGetStartedBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Devices and MagicDNS`
+  String get tailscaleGuideDevices {
+    return Intl.message(
+      'Devices and MagicDNS',
+      name: 'tailscaleGuideDevices',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Automatic routing sends the addresses and MagicDNS names of known peers into this network. Other traffic follows your rules.\nIt applies after the rules you added and before the profile's own rules.\nTo reach a remote subnet, approve the route in your tailnet, then add a rule that points to this network.`
+  String get tailscaleGuideDevicesBody {
+    return Intl.message(
+      'Automatic routing sends the addresses and MagicDNS names of known peers into this network. Other traffic follows your rules.\nIt applies after the rules you added and before the profile\'s own rules.\nTo reach a remote subnet, approve the route in your tailnet, then add a rule that points to this network.',
+      name: 'tailscaleGuideDevicesBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Exit nodes`
+  String get tailscaleGuideExitNodes {
+    return Intl.message(
+      'Exit nodes',
+      name: 'tailscaleGuideExitNodes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `With an exit node, the network appears in the profile's selector groups. Traffic uses the exit node only after you select the network there or point a rule to it.\nLeave the field empty to use no exit node. auto picks an available exit node; a device name or address picks that device.`
+  String get tailscaleGuideExitNodesBody {
+    return Intl.message(
+      'With an exit node, the network appears in the profile\'s selector groups. Traffic uses the exit node only after you select the network there or point a rule to it.\nLeave the field empty to use no exit node. auto picks an available exit node; a device name or address picks that device.',
+      name: 'tailscaleGuideExitNodesBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sign-in and backup`
+  String get tailscaleGuideSignIn {
+    return Intl.message(
+      'Sign-in and backup',
+      name: 'tailscaleGuideSignIn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Network settings are included in backups. Auth keys and the device identity stay on this device, so sign in again after restoring on another device.\nWhen the node key expires, choose "Save and log in" again. Device approval and access are managed in your tailnet.\nRemoving a network signs this device out and deletes its identity from this device.`
+  String get tailscaleGuideSignInBody {
+    return Intl.message(
+      'Network settings are included in backups. Auth keys and the device identity stay on this device, so sign in again after restoring on another device.\nWhen the node key expires, choose "Save and log in" again. Device approval and access are managed in your tailnet.\nRemoving a network signs this device out and deletes its identity from this device.',
+      name: 'tailscaleGuideSignInBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Troubleshooting`
+  String get tailscaleGuideTroubleshooting {
+    return Intl.message(
+      'Troubleshooting',
+      name: 'tailscaleGuideTroubleshooting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check that the proxy is running, this device is approved and the peer is online. For subnets or the Internet, also check route approval and the exit node.\n"Not applied" means the running configuration lacks the network: select a profile and make sure none of its nodes uses the same name.\nThis app only connects out to your tailnet. It accepts no inbound connections and never offers this device as a subnet router or exit node.`
+  String get tailscaleGuideTroubleshootingBody {
+    return Intl.message(
+      'Check that the proxy is running, this device is approved and the peer is online. For subnets or the Internet, also check route approval and the exit node.\n"Not applied" means the running configuration lacks the network: select a profile and make sure none of its nodes uses the same name.\nThis app only connects out to your tailnet. It accepts no inbound connections and never offers this device as a subnet router or exit node.',
+      name: 'tailscaleGuideTroubleshootingBody',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

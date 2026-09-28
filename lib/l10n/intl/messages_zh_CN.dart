@@ -126,13 +126,20 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m51(count) => "${count} 秒";
 
-  static String m52(build) => "构建号：${build}";
+  static String m52(fields) => "请检查以下设置：${fields}";
 
-  static String m53(version) => "版本号：${version}";
+  static String m53(count) => "设备（${count}）";
 
-  static String m54(label) => "${label}必须为URL";
+  static String m54(name) =>
+      "此设备将退出 ${name}，并删除此设备上的登录信息；如果当前无法连接该网络，请到 Tailscale 管理后台移除此设备";
 
-  static String m55(count) => "${count} 年前";
+  static String m55(build) => "构建号：${build}";
+
+  static String m56(version) => "版本号：${version}";
+
+  static String m57(label) => "${label}必须为URL";
+
+  static String m58(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1322,6 +1329,112 @@ class MessageLookup extends MessageLookupByLibrary {
     "tab": MessageLookupByLibrary.simpleMessage("标签页"),
     "tabAnimation": MessageLookupByLibrary.simpleMessage("选项卡动画"),
     "tabAnimationDesc": MessageLookupByLibrary.simpleMessage("仅在移动视图中有效"),
+    "tailscaleAccount": MessageLookupByLibrary.simpleMessage("账户"),
+    "tailscaleAddNetwork": MessageLookupByLibrary.simpleMessage("添加网络"),
+    "tailscaleAdvanced": MessageLookupByLibrary.simpleMessage("高级"),
+    "tailscaleAuthKey": MessageLookupByLibrary.simpleMessage("认证密钥"),
+    "tailscaleAuthKeySaved": MessageLookupByLibrary.simpleMessage(
+      "此设备已保存认证密钥，填写新密钥即可替换",
+    ),
+    "tailscaleAutoRoute": MessageLookupByLibrary.simpleMessage("自动路由"),
+    "tailscaleAutoRouteDesc": MessageLookupByLibrary.simpleMessage(
+      "自动通过此网络访问对等设备地址和 MagicDNS 名称",
+    ),
+    "tailscaleAvailableExitNodes": MessageLookupByLibrary.simpleMessage(
+      "可用的出口节点",
+    ),
+    "tailscaleCheckSettings": m52,
+    "tailscaleConnected": MessageLookupByLibrary.simpleMessage("已连接"),
+    "tailscaleConnecting": MessageLookupByLibrary.simpleMessage("正在连接"),
+    "tailscaleControlUrl": MessageLookupByLibrary.simpleMessage("控制服务器地址"),
+    "tailscaleCredentialsFooter": MessageLookupByLibrary.simpleMessage(
+      "认证信息和设备身份仅保存在此设备",
+    ),
+    "tailscaleDeviceName": MessageLookupByLibrary.simpleMessage("设备名称"),
+    "tailscaleDevices": m53,
+    "tailscaleEmptyDesc": MessageLookupByLibrary.simpleMessage(
+      "添加网络并在此设备上登录，启动代理后即可访问你的设备",
+    ),
+    "tailscaleEmptyTitle": MessageLookupByLibrary.simpleMessage("访问你的 Tailnet"),
+    "tailscaleEnterAuthKey": MessageLookupByLibrary.simpleMessage(
+      "请填写认证密钥以在此设备上登录",
+    ),
+    "tailscaleEntryHint": MessageLookupByLibrary.simpleMessage(
+      "访问你的 Tailnet 中的设备",
+    ),
+    "tailscaleExitNode": MessageLookupByLibrary.simpleMessage("出口节点"),
+    "tailscaleExitNodeAllowLan": MessageLookupByLibrary.simpleMessage(
+      "允许访问本地网络",
+    ),
+    "tailscaleExitNodeDesc": MessageLookupByLibrary.simpleMessage(
+      "留空表示不使用，也可填写 auto、对端名称或对端 IP 地址",
+    ),
+    "tailscaleGuide": MessageLookupByLibrary.simpleMessage("使用说明"),
+    "tailscaleGuideDevices": MessageLookupByLibrary.simpleMessage(
+      "设备与 MagicDNS",
+    ),
+    "tailscaleGuideDevicesBody": MessageLookupByLibrary.simpleMessage(
+      "自动路由会把已知对等设备的地址和 MagicDNS 名称送入此网络，其他流量仍遵循你的规则\n自动路由位于你添加的规则之后、配置自带的规则之前\n访问远程子网前，请在 Tailnet 中批准对应路由，再添加一条指向此网络的规则",
+    ),
+    "tailscaleGuideExitNodes": MessageLookupByLibrary.simpleMessage("出口节点"),
+    "tailscaleGuideExitNodesBody": MessageLookupByLibrary.simpleMessage(
+      "填写出口节点后，此网络会出现在配置的选择组中；在组中选择它或添加指向它的规则后，相应流量才会经出口节点访问互联网\n留空表示不使用出口节点；auto 会选择一个可用的出口节点，填写设备名称或地址则使用指定设备",
+    ),
+    "tailscaleGuideGetStarted": MessageLookupByLibrary.simpleMessage("开始使用"),
+    "tailscaleGuideGetStartedBody": MessageLookupByLibrary.simpleMessage(
+      "添加网络并选择“保存并登录”，打开登录页面并授权此设备，登录将自动完成\n使用认证密钥登录时，选择“认证密钥”并填写密钥，无需通过浏览器登录\n启动代理后才能访问此网络，仅登录不会接管任何流量",
+    ),
+    "tailscaleGuideSignIn": MessageLookupByLibrary.simpleMessage("登录与备份"),
+    "tailscaleGuideSignInBody": MessageLookupByLibrary.simpleMessage(
+      "网络设置会随备份保存，认证密钥和设备身份只保留在此设备上，在其他设备上恢复后需要重新登录\n节点密钥过期后，请再次选择“保存并登录”；设备审批和访问权限在你的 Tailnet 中管理\n移除网络会让此设备退出登录，并删除此设备上的设备身份",
+    ),
+    "tailscaleGuideTroubleshooting": MessageLookupByLibrary.simpleMessage(
+      "故障排查",
+    ),
+    "tailscaleGuideTroubleshootingBody": MessageLookupByLibrary.simpleMessage(
+      "确认代理已启动、此设备已获批准且对等设备在线；访问子网或互联网时，还需检查路由批准状态和出口节点\n状态为“未生效”时，说明运行中的配置不包含此网络，请先选择配置，并确认配置中没有同名节点\n本应用只主动访问你的 Tailnet，不接受来自 Tailnet 的入站连接，也不会把此设备发布为子网路由器或出口节点",
+    ),
+    "tailscaleInteractiveLogin": MessageLookupByLibrary.simpleMessage("交互式登录"),
+    "tailscaleKeyExpired": MessageLookupByLibrary.simpleMessage("节点密钥已过期"),
+    "tailscaleLoginFailed": MessageLookupByLibrary.simpleMessage(
+      "Tailscale 登录失败",
+    ),
+    "tailscaleLoginFooter": MessageLookupByLibrary.simpleMessage(
+      "每个网络在此设备上登录一次即可",
+    ),
+    "tailscaleLoginHint": MessageLookupByLibrary.simpleMessage(
+      "登录用于授权此设备，启动代理后才能使用此网络",
+    ),
+    "tailscaleLoginMethod": MessageLookupByLibrary.simpleMessage("登录方式"),
+    "tailscaleLoginTimeout": MessageLookupByLibrary.simpleMessage(
+      "五分钟内未完成登录，请重试",
+    ),
+    "tailscaleLoginWaiting": MessageLookupByLibrary.simpleMessage(
+      "打开登录页面或扫码，授权后将自动完成登录",
+    ),
+    "tailscaleLogout": MessageLookupByLibrary.simpleMessage("退出登录"),
+    "tailscaleNameInUse": MessageLookupByLibrary.simpleMessage("此名称已被使用"),
+    "tailscaleNeedsApproval": MessageLookupByLibrary.simpleMessage("等待设备审批"),
+    "tailscaleNeedsLogin": MessageLookupByLibrary.simpleMessage("需要登录"),
+    "tailscaleNetworkName": MessageLookupByLibrary.simpleMessage("网络名称"),
+    "tailscaleNetworks": MessageLookupByLibrary.simpleMessage("网络"),
+    "tailscaleNotApplied": MessageLookupByLibrary.simpleMessage("未生效"),
+    "tailscaleNotAppliedHint": MessageLookupByLibrary.simpleMessage(
+      "网络尚未在运行中的配置里生效，请先选择配置，并确认配置中没有同名节点",
+    ),
+    "tailscaleNotSignedIn": MessageLookupByLibrary.simpleMessage("未登录"),
+    "tailscaleOffline": MessageLookupByLibrary.simpleMessage("离线"),
+    "tailscaleOnline": MessageLookupByLibrary.simpleMessage("在线"),
+    "tailscaleOpenLoginPage": MessageLookupByLibrary.simpleMessage("打开登录页面"),
+    "tailscaleRemoveConfirm": m54,
+    "tailscaleRemoveNetwork": MessageLookupByLibrary.simpleMessage("移除网络"),
+    "tailscaleSaveAndLogin": MessageLookupByLibrary.simpleMessage("保存并登录"),
+    "tailscaleSignedIn": MessageLookupByLibrary.simpleMessage("已登录"),
+    "tailscaleSigningIn": MessageLookupByLibrary.simpleMessage("正在登录"),
+    "tailscaleStatus": MessageLookupByLibrary.simpleMessage("状态"),
+    "tailscaleStopped": MessageLookupByLibrary.simpleMessage("已停止"),
+    "tailscaleThisDevice": MessageLookupByLibrary.simpleMessage("此设备"),
+    "tailscaleUnavailable": MessageLookupByLibrary.simpleMessage("连接不可用"),
     "tcpConcurrent": MessageLookupByLibrary.simpleMessage("TCP并发"),
     "tcpConcurrentDesc": MessageLookupByLibrary.simpleMessage("开启后允许TCP并发"),
     "tcpFastOpen": MessageLookupByLibrary.simpleMessage("TCP Fast Open"),
@@ -1375,7 +1488,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
       "AppImage 无法自动安装，请用下载的文件替换当前程序，已打开文件所在目录",
     ),
-    "updateBuildNumber": m52,
+    "updateBuildNumber": m55,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage("取消下载"),
     "updateDownloadBackground": MessageLookupByLibrary.simpleMessage("移到后台下载"),
     "updateDownloadBrowser": MessageLookupByLibrary.simpleMessage("使用浏览器下载"),
@@ -1398,12 +1511,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseNotesFailed": MessageLookupByLibrary.simpleMessage(
       "更新日志加载失败，请重试",
     ),
-    "updateVersionNumber": m53,
+    "updateVersionNumber": m56,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("升级套餐"),
     "upload": MessageLookupByLibrary.simpleMessage("上传"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("通过URL获取配置文件"),
-    "urlTip": m54,
+    "urlTip": m57,
     "useHosts": MessageLookupByLibrary.simpleMessage("使用Hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("使用系统Hosts"),
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("已用流量"),
@@ -1423,7 +1536,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "vpnTip": MessageLookupByLibrary.simpleMessage("重启VPN后改变生效"),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV配置"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("白名单模式"),
-    "yearsAgo": m55,
+    "yearsAgo": m58,
     "zh_CN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };
 }
