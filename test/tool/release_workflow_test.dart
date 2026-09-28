@@ -12,47 +12,40 @@ void main() {
             as YamlMap;
   });
 
-  test(
-    'packaging overlaps depth checks while publication waits for every gate',
-    () {
-      expect(jobs['build']['needs'], ['version']);
-      expect(
-        jobs['upload']['needs'],
-        containsAll(['version', 'build', 'checks']),
-      );
-      expect(
-        jobs['checks']['needs'],
-        containsAll([
-          'version',
-          'test',
-          'go-test',
-          'deep-tests',
-          'android-core-test',
-          'android-test',
-          'windows-helper-test',
-        ]),
-      );
-      expect(jobs['checks']['if'], contains('always()'));
-      final step = (jobs['checks']['steps'] as YamlList).last as YamlMap;
-      expect(step['env']['NEEDS_JSON'], contains('toJSON(needs)'));
-      expect(step['run'], 'python3 tool/release_checks.py gate');
-    },
-  );
+  test('packaging overlaps checks while publication waits for every gate', () {
+    expect(jobs['build']['needs'], ['version']);
+    expect(
+      jobs['upload']['needs'],
+      containsAll(['version', 'build', 'checks']),
+    );
+    expect(
+      jobs['checks']['needs'],
+      containsAll([
+        'version',
+        'test',
+        'go-test',
+        'android-core-test',
+        'android-test',
+        'windows-helper-test',
+      ]),
+    );
+    expect(jobs['checks']['if'], contains('always()'));
+    final step = (jobs['checks']['steps'] as YamlList).last as YamlMap;
+    expect(step['env']['NEEDS_JSON'], contains('toJSON(needs)'));
+    expect(step['run'], 'python3 tool/release_checks.py gate');
+  });
 
-  test(
-    'publication survives a skipped deep-check ancestor but no failed gate',
-    () {
-      final upload = jobs['upload']['if'] as String;
-      expect(upload, contains('!cancelled()'));
-      for (final need in ['version', 'build', 'checks']) {
-        expect(upload, contains("needs.$need.result == 'success'"));
-      }
-      final aur = jobs['aur']['if'] as String;
-      expect(aur, contains('!cancelled()'));
-      expect(aur, contains("needs.upload.result == 'success'"));
-      expect(aur, contains("!contains(github.ref, '-')"));
-    },
-  );
+  test('publication requires successful builds and checks', () {
+    final upload = jobs['upload']['if'] as String;
+    expect(upload, contains('!cancelled()'));
+    for (final need in ['version', 'build', 'checks']) {
+      expect(upload, contains("needs.$need.result == 'success'"));
+    }
+    final aur = jobs['aur']['if'] as String;
+    expect(aur, contains('!cancelled()'));
+    expect(aur, contains("needs.upload.result == 'success'"));
+    expect(aur, contains("!contains(github.ref, '-')"));
+  });
 
   test(
     'each standalone Android build verifies the manifest before artifact upload',
@@ -85,28 +78,21 @@ void main() {
     },
   );
 
-  test(
-    'deep checks remain callable by releases and scheduled without a release',
-    () {
-      final workflow =
-          loadYaml(
-                File('.github/workflows/go-deep-tests.yaml').readAsStringSync(),
-              )
-              as YamlMap;
-      expect(workflow['on']['workflow_call'], isNotNull);
-      expect(workflow['on']['schedule'], isNotEmpty);
-      expect(
-        (workflow['jobs'] as YamlMap).keys,
-        containsAll(['go-deep-test', 'go-deep-deps-test']),
-      );
-      expect(
-        jobs['deep-tests']['if'],
-        "needs.version.outputs.deep_tests == 'true'",
-      );
-      expect(
-        jobs['deep-tests']['uses'],
-        './.github/workflows/go-deep-tests.yaml',
-      );
-    },
-  );
+  test('deep checks run only on schedule or manual dispatch', () {
+    final workflow =
+        loadYaml(
+              File('.github/workflows/go-deep-tests.yaml').readAsStringSync(),
+            )
+            as YamlMap;
+    expect(
+      (workflow['on'] as YamlMap).keys,
+      unorderedEquals(['workflow_dispatch', 'schedule']),
+    );
+    expect(workflow['on']['schedule'], isNotEmpty);
+    expect(
+      (workflow['jobs'] as YamlMap).keys,
+      containsAll(['go-deep-test', 'go-deep-deps-test']),
+    );
+    expect(jobs.containsKey('deep-tests'), isFalse);
+  });
 }

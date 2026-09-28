@@ -19,12 +19,7 @@ jobs:
     name: Generate Version
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    permissions:
-      contents: read
-      actions: read
     outputs:
-      deep_tests: ${{ steps.scope.outputs.deep_tests }}
-      go_version: ${{ env.GO_VERSION }}
       full_version: ${{ steps.version.outputs.full_version }}
       flutter_version: ${{ env.FLUTTER_VERSION }}
       version_number: ${{ steps.version.outputs.version_number }}
@@ -32,14 +27,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Determine required Go test scope
-        id: scope
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: python3 tool/release_checks.py scope
 
       - name: Validate release checks
         run: python3 -m unittest discover -s test/ci -v
@@ -172,14 +159,6 @@ jobs:
         run: |
           go test -race tun_callbacks.go tun_callbacks_test.go
           go test -race ownership_unix.go ownership_test.go ownership_stat_linux_test.go
-
-  deep-tests:
-    name: Deep Go checks
-    needs: version
-    if: needs.version.outputs.deep_tests == 'true'
-    uses: ./.github/workflows/go-deep-tests.yaml
-    with:
-      go-version: ${{ needs.version.outputs.go_version }}
 
   android-core-test:
     name: Android core
@@ -462,7 +441,7 @@ jobs:
   checks:
     name: Required release checks
     if: ${{ always() }}
-    needs: [version, test, go-test, deep-tests, android-core-test, android-test, windows-helper-test]
+    needs: [version, test, go-test, android-core-test, android-test, windows-helper-test]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -473,8 +452,6 @@ jobs:
         run: python3 tool/release_checks.py gate
 
   upload:
-    # The implicit success() also fails on a skipped ancestor, and deep-tests
-    # is skipped whenever the gate accepts reusing a successful Go baseline.
     if: ${{ !cancelled() && needs.version.result == 'success' && needs.build.result == 'success' && needs.checks.result == 'success' }}
     permissions:
       actions: read
