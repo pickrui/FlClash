@@ -18,7 +18,6 @@ Map<String, Object?> _catalog({int kept = 40}) => {
   'customized': true,
   'system_link': true,
   'filter': _filter.toJson(),
-  'default_lines': ['gia'],
   'lines': [
     {'key': 'fusion', 'name': 'Fusion', 'count': 20},
   ],

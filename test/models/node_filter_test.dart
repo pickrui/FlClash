@@ -16,7 +16,6 @@ Map<String, dynamic> _catalogJson() => {
     'match': '',
     'nomatch': '测试|维护',
   },
-  'default_lines': ['fusion', 'fusion_advanced', 'fusion_premium', 'gia'],
   'lines': [
     {'key': 'fusion', 'name': 'Fusion', 'count': 20},
     {'key': 'fusion_premium', 'name': 'Fusion Premium', 'count': 4},
