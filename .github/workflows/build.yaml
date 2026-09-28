@@ -78,6 +78,9 @@ jobs:
       - name: Analyze
         run: dart analyze
 
+      - name: Check build notices
+        run: bash tool/check_build_notices.sh
+
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
