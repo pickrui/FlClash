@@ -4799,6 +4799,11 @@ class AppLocalizations {
     );
   }
 
+  /// `Retry`
+  String get nodeFilterRetry {
+    return Intl.message('Retry', name: 'nodeFilterRetry', desc: '', args: []);
+  }
+
   /// `Saved to your account and applies to every device signed in to this app.`
   String get nodeFilterAccountNote {
     return Intl.message(

@@ -144,15 +144,23 @@ class NodeFilterChoiceChip extends StatelessWidget {
 
 class NodeFilterNodeRow extends StatelessWidget {
   final NodeFilterNode node;
+  final bool showKept;
 
-  const NodeFilterNodeRow({super.key, required this.node});
+  const NodeFilterNodeRow({
+    super.key,
+    required this.node,
+    this.showKept = true,
+  });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
     final l10n = context.appLocalizations;
+    final dimmed = showKept && !node.kept;
     return Semantics(
-      label: node.kept
+      label: !showKept
+          ? node.name
+          : node.kept
           ? l10n.nodeFilterNodeKept(node.name)
           : l10n.nodeFilterNodeExcluded(node.name),
       excludeSemantics: true,
@@ -160,11 +168,14 @@ class NodeFilterNodeRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 6),
         child: Row(
           children: [
-            Icon(
-              node.kept ? Icons.check_circle : Icons.remove_circle_outline,
-              size: 18,
-              color: node.kept ? colorScheme.primary : colorScheme.outline,
-            ),
+            if (showKept)
+              Icon(
+                node.kept ? Icons.check_circle : Icons.remove_circle_outline,
+                size: 18,
+                color: node.kept ? colorScheme.primary : colorScheme.outline,
+              )
+            else
+              const SizedBox.square(dimension: 18),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
@@ -172,9 +183,9 @@ class NodeFilterNodeRow extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: context.textTheme.bodyMedium?.copyWith(
-                  color: node.kept
-                      ? colorScheme.onSurface
-                      : colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                  color: dimmed
+                      ? colorScheme.onSurfaceVariant.withValues(alpha: 0.7)
+                      : colorScheme.onSurface,
                 ),
               ),
             ),

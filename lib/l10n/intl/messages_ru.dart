@@ -1396,6 +1396,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "nodeFilterOnly": MessageLookupByLibrary.simpleMessage("Только"),
     "nodeFilterPreview": MessageLookupByLibrary.simpleMessage("Предпросмотр"),
     "nodeFilterRegions": MessageLookupByLibrary.simpleMessage("Регионы"),
+    "nodeFilterRetry": MessageLookupByLibrary.simpleMessage("Повторить"),
     "nodeFilterSearch": MessageLookupByLibrary.simpleMessage("Поиск узлов"),
     "nodeFilterSmartSelection": MessageLookupByLibrary.simpleMessage(
       "Умный выбор",

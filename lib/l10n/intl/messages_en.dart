@@ -1343,6 +1343,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "nodeFilterOnly": MessageLookupByLibrary.simpleMessage("Only"),
     "nodeFilterPreview": MessageLookupByLibrary.simpleMessage("Preview"),
     "nodeFilterRegions": MessageLookupByLibrary.simpleMessage("Regions"),
+    "nodeFilterRetry": MessageLookupByLibrary.simpleMessage("Retry"),
     "nodeFilterSearch": MessageLookupByLibrary.simpleMessage("Search nodes"),
     "nodeFilterSmartSelection": MessageLookupByLibrary.simpleMessage(
       "Smart Selection",

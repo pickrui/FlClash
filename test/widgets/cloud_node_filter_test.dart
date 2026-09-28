@@ -46,6 +46,7 @@ class _FakeApi implements CloudNodeFilterApi {
 
   NodeFilterCatalog catalog;
   Object? fetchError;
+  Object? previewError;
   var fetches = 0;
   final previews = <NodeFilter>[];
   final saves = <NodeFilter>[];
@@ -62,6 +63,7 @@ class _FakeApi implements CloudNodeFilterApi {
   @override
   Future<NodeFilterCatalog> previewNodeFilter(NodeFilter filter) async {
     previews.add(filter);
+    if (previewError case final error?) throw error;
     return _catalog(filter, kept: keptFor(filter));
   }
 
@@ -443,6 +445,38 @@ void main() {
       expect(find.bySemanticsLabel('HK GIA 01, kept'), findsOneWidget);
       expect(find.bySemanticsLabel('JP Edge 01, excluded'), findsOneWidget);
       semantics.dispose();
+    });
+
+    testWidgets('a failed preview hides stale counts until a retry works', (
+      tester,
+    ) async {
+      final semantics = tester.ensureSemantics();
+      final api = _FakeApi(_catalog(const NodeFilter()))
+        ..previewError = const CloudApiException('Service unavailable');
+      await _pumpEditor(tester, api, _Account());
+
+      await tester.tap(find.text('GIA'));
+      await tester.pumpAndSettle();
+      expect(find.text('Service unavailable'), findsOneWidget);
+      expect(find.text('Customized'), findsOneWidget);
+      expect(find.textContaining('nodes kept'), findsNothing);
+      expect(find.byIcon(Icons.check_circle), findsNothing);
+      expect(find.bySemanticsLabel('HK GIA 01'), findsOneWidget);
+      expect(_onPressed<FilledButton>(tester, 'Save'), isNull);
+
+      api.previewError = null;
+      await tester.tap(find.widgetWithText(TextButton, 'Retry'));
+      await tester.pumpAndSettle();
+      expect(api.previews, const [
+        NodeFilter(includeLines: ['gia']),
+        NodeFilter(includeLines: ['gia']),
+      ]);
+      expect(find.text('Service unavailable'), findsNothing);
+      expect(find.text('Customized · 3 of 4 nodes kept'), findsOneWidget);
+      expect(find.bySemanticsLabel('HK GIA 01, kept'), findsOneWidget);
+      expect(_onPressed<FilledButton>(tester, 'Save'), isNotNull);
+      semantics.dispose();
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('the search narrows the preview list', (tester) async {

@@ -970,6 +970,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "nodeFilterOnly": MessageLookupByLibrary.simpleMessage("仅保留"),
     "nodeFilterPreview": MessageLookupByLibrary.simpleMessage("节点预览"),
     "nodeFilterRegions": MessageLookupByLibrary.simpleMessage("地区"),
+    "nodeFilterRetry": MessageLookupByLibrary.simpleMessage("重试"),
     "nodeFilterSearch": MessageLookupByLibrary.simpleMessage("搜索节点"),
     "nodeFilterSmartSelection": MessageLookupByLibrary.simpleMessage("智能优选"),
     "none": MessageLookupByLibrary.simpleMessage("无"),

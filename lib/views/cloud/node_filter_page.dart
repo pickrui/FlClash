@@ -510,6 +510,8 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
               .where((node) => node.name.toLowerCase().contains(query))
               .toList();
     final keptNone = settled && catalog.kept == 0;
+    // A failed preview leaves counts and marks from another draft.
+    final failed = _previewError != null;
     final state = _draft.isEmpty
         ? l10n.nodeFilterSmartSelection
         : l10n.nodeFilterCustomized;
@@ -524,7 +526,7 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  if (!settled && _previewError == null) ...[
+                  if (!settled && !failed) ...[
                     const SizedBox.square(
                       dimension: 14,
                       child: CircularProgressIndicator(strokeWidth: 2),
@@ -533,7 +535,9 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
                   ],
                   Flexible(
                     child: Text(
-                      '$state · ${l10n.nodeFilterKept(catalog.kept, catalog.total)}',
+                      failed
+                          ? state
+                          : '$state · ${l10n.nodeFilterKept(catalog.kept, catalog.total)}',
                       textAlign: TextAlign.end,
                       style: context.textTheme.labelLarge?.copyWith(
                         color: keptNone
@@ -594,7 +598,7 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
         ),
       ),
     );
-    final fade = settled ? 1.0 : 0.55;
+    final fade = settled || failed ? 1.0 : 0.55;
     if (!expand) {
       return Padding(
         padding: const EdgeInsets.all(16),
@@ -609,7 +613,10 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: nodes.isEmpty
                     ? [empty]
-                    : [for (final node in nodes) NodeFilterNodeRow(node: node)],
+                    : [
+                        for (final node in nodes)
+                          NodeFilterNodeRow(node: node, showKept: !failed),
+                      ],
               ),
             ),
           ],
@@ -631,8 +638,10 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
                   : ListView.builder(
                       padding: const EdgeInsets.only(bottom: 12),
                       itemCount: nodes.length,
-                      itemBuilder: (_, index) =>
-                          NodeFilterNodeRow(node: nodes[index]),
+                      itemBuilder: (_, index) => NodeFilterNodeRow(
+                        node: nodes[index],
+                        showKept: !failed,
+                      ),
                     ),
             ),
           ),
@@ -657,9 +666,10 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
               ),
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: context.appLocalizations.refresh,
+          const SizedBox(width: 8),
+          TextButton.icon(
+            icon: const Icon(Icons.refresh, size: 18),
+            label: Text(context.appLocalizations.nodeFilterRetry),
             onPressed: () {
               setState(() => _previewError = null);
               _runPreview();
