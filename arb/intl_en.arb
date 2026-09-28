@@ -663,7 +663,7 @@
   "balanceDeductionHint": "Purchases use your balance first, then commission for any shortfall.",
   "rechargeAllowedRange": "Allowed range {min} – {max}",
   "rechargeAmountOutOfRange": "The amount is outside the range allowed by this payment method",
-  "insufficientBalanceRecharge": "Insufficient balance. Recharge and try again.",
+  "insufficientBalanceRecharge": "Recharge and try again.",
   "configParseErrorAtLine": "The configuration format is invalid at line {line}.",
   "configTypeMismatch": "Expected {expected}, but found {actual}.",
   "configYamlFormatHint": "Check the indentation and \"-\" list markers near this line.",

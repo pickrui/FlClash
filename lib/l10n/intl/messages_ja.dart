@@ -955,7 +955,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "残高が不足しています。チャージしてから続行してください",
     ),
     "insufficientBalanceRecharge": MessageLookupByLibrary.simpleMessage(
-      "残高が不足しています。チャージしてからもう一度お試しください",
+      "チャージしてからもう一度お試しください",
     ),
     "intelligentSelected": MessageLookupByLibrary.simpleMessage("インテリジェント選択"),
     "internet": MessageLookupByLibrary.simpleMessage("インターネット"),

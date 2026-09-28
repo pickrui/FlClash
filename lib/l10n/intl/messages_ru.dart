@@ -1184,7 +1184,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Недостаточно средств. Пополните баланс, чтобы продолжить.",
     ),
     "insufficientBalanceRecharge": MessageLookupByLibrary.simpleMessage(
-      "Недостаточно средств. Пополните баланс и повторите попытку.",
+      "Пополните баланс и повторите попытку.",
     ),
     "intelligentSelected": MessageLookupByLibrary.simpleMessage(
       "Интеллектуальный выбор",

@@ -1139,7 +1139,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Insufficient balance. Top up before continuing.",
     ),
     "insufficientBalanceRecharge": MessageLookupByLibrary.simpleMessage(
-      "Insufficient balance. Recharge and try again.",
+      "Recharge and try again.",
     ),
     "intelligentSelected": MessageLookupByLibrary.simpleMessage(
       "Intelligent selection",

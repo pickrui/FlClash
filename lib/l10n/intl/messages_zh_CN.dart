@@ -830,7 +830,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "余额不足，请先充值后再继续",
     ),
     "insufficientBalanceRecharge": MessageLookupByLibrary.simpleMessage(
-      "余额不足，请充值后重试",
+      "请充值后重试",
     ),
     "intelligentSelected": MessageLookupByLibrary.simpleMessage("智能选择"),
     "internet": MessageLookupByLibrary.simpleMessage("互联网"),

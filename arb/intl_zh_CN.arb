@@ -663,7 +663,7 @@
   "balanceDeductionHint": "购买时优先扣除余额，不足部分自动使用佣金抵扣",
   "rechargeAllowedRange": "可用范围 {min} – {max}",
   "rechargeAmountOutOfRange": "金额超出该支付方式允许的范围",
-  "insufficientBalanceRecharge": "余额不足，请充值后重试",
+  "insufficientBalanceRecharge": "请充值后重试",
   "configParseErrorAtLine": "第 {line} 行的配置格式不正确",
   "configTypeMismatch": "此处应为{expected}，但实际为{actual}",
   "configYamlFormatHint": "请检查该行附近的缩进和 \"-\" 列表标记",

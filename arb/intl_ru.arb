@@ -663,7 +663,7 @@
   "balanceDeductionHint": "Покупки сначала списываются с баланса, а недостающая сумма покрывается комиссией.",
   "rechargeAllowedRange": "Допустимый диапазон {min} – {max}",
   "rechargeAmountOutOfRange": "Сумма выходит за пределы диапазона этого способа оплаты",
-  "insufficientBalanceRecharge": "Недостаточно средств. Пополните баланс и повторите попытку.",
+  "insufficientBalanceRecharge": "Пополните баланс и повторите попытку.",
   "configParseErrorAtLine": "Неверный формат конфигурации в строке {line}.",
   "configTypeMismatch": "Ожидалось: {expected}; получено: {actual}.",
   "configYamlFormatHint": "Проверьте отступы и маркеры списка \"-\" рядом с этой строкой.",

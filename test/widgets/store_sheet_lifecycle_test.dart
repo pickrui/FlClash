@@ -139,9 +139,7 @@ void main() {
     await tester.tap(openRecharge);
     await settle();
     expect(
-      find.text(
-        'Insufficient balance\nInsufficient balance. Recharge and try again.',
-      ),
+      find.text('Insufficient balance\nRecharge and try again.'),
       findsOneWidget,
     );
     await tester.tap(find.widgetWithText(TextButton, 'Recharge'));

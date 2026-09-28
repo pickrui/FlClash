@@ -663,7 +663,7 @@
   "balanceDeductionHint": "購入時は残高から優先して差し引かれ、不足分はコミッションで自動的に補われます",
   "rechargeAllowedRange": "利用可能な範囲 {min} – {max}",
   "rechargeAmountOutOfRange": "金額がこの支払い方法で利用できる範囲外です",
-  "insufficientBalanceRecharge": "残高が不足しています。チャージしてからもう一度お試しください",
+  "insufficientBalanceRecharge": "チャージしてからもう一度お試しください",
   "configParseErrorAtLine": "設定ファイルの {line} 行目の形式が正しくありません",
   "configTypeMismatch": "{expected} が必要ですが、{actual} が指定されています",
   "configYamlFormatHint": "この行付近のインデントと \"-\" のリスト記号を確認してください",

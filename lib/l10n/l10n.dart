@@ -5469,10 +5469,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Insufficient balance. Recharge and try again.`
+  /// `Recharge and try again.`
   String get insufficientBalanceRecharge {
     return Intl.message(
-      'Insufficient balance. Recharge and try again.',
+      'Recharge and try again.',
       name: 'insufficientBalanceRecharge',
       desc: '',
       args: [],
