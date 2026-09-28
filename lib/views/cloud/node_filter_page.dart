@@ -299,7 +299,7 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 1120),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+          padding: const EdgeInsets.all(16),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -690,6 +690,13 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
           : null,
       child: label(_Submission.save, l10n.save),
     );
+    final buttons = Row(
+      children: [
+        Expanded(child: reset),
+        const SizedBox(width: 12),
+        Expanded(child: save),
+      ],
+    );
     return DecoratedBox(
       decoration: BoxDecoration(
         color: context.colorScheme.surface,
@@ -698,34 +705,18 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: LayoutBuilder(
-          builder: (context, constraints) {
-            if (constraints.maxWidth >= _twoPaneWidth) {
-              return Align(
-                alignment: Alignment.centerRight,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 360),
-                  child: Row(
-                    children: [
-                      Expanded(child: reset),
-                      const SizedBox(width: 12),
-                      Expanded(child: save),
-                    ],
+          builder: (context, constraints) =>
+              constraints.maxWidth >= _twoPaneWidth
+              ? Align(
+                  alignment: Alignment.centerRight,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 360),
+                    child: buttons,
                   ),
-                ),
-              );
-            }
-            return CloudContentWidth(
-              child: Row(
-                children: [
-                  Expanded(child: reset),
-                  const SizedBox(width: 12),
-                  Expanded(child: save),
-                ],
-              ),
-            );
-          },
+                )
+              : CloudContentWidth(child: buttons),
         ),
       ),
     );

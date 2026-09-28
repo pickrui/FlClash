@@ -24,7 +24,7 @@ WidgetBuilder? cloudStorePageBuilder;
 /// catalog it saved or reset.
 WidgetBuilder? cloudNodeFilterPageBuilder;
 
-const cloudNodeFilterMinPlanRank = 20;
+const _nodeFilterMinPlanRank = 20;
 
 final cloudServiceHealthCheckProvider = Provider<Future<void> Function()>(
   (ref) => CloudApiService().checkServiceHealth,
@@ -356,7 +356,7 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
                 const SizedBox(height: 16),
               ],
               CloudProfileCard(profile: profile),
-              if ((profile.planRank ?? 0) >= cloudNodeFilterMinPlanRank)
+              if ((profile.planRank ?? 0) >= _nodeFilterMinPlanRank)
                 CloudNodeFilterEntry(profile: profile),
               const SizedBox(height: 16),
               _buildStoreEntry(),

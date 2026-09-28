@@ -1,7 +1,7 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:material_ui/material_ui.dart';
 
-const cloudContentMaxWidth = 720.0;
+const _contentMaxWidth = 720.0;
 
 /// Keeps the account page and the store readable in a wide desktop window.
 class CloudContentWidth extends StatelessWidget {
@@ -14,7 +14,7 @@ class CloudContentWidth extends StatelessWidget {
     return Align(
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: cloudContentMaxWidth),
+        constraints: const BoxConstraints(maxWidth: _contentMaxWidth),
         child: child,
       ),
     );
