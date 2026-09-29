@@ -141,15 +141,22 @@ extension SetupControllerExt on AppController {
       start: () => globalState.handleStart([updateRunTime, updateTraffic]),
       resolveConflict: () async {
         final patchConfig = _ref.read(patchClashConfigProvider);
+        final otherPorts = [
+          patchConfig.port,
+          patchConfig.socksPort,
+          patchConfig.redirPort,
+          patchConfig.tproxyPort,
+        ];
+        final suggestedPort = await findAvailablePort(
+          patchConfig.mixedPort,
+          reserved: otherPorts,
+        );
+        if (!shouldContinue()) return false;
         final port = await globalState.showCommonDialog<int>(
           child: PortConflictDialog(
             port: patchConfig.mixedPort,
-            otherPorts: [
-              patchConfig.port,
-              patchConfig.socksPort,
-              patchConfig.redirPort,
-              patchConfig.tproxyPort,
-            ],
+            suggestedPort: suggestedPort,
+            otherPorts: otherPorts,
           ),
         );
         if (port == null || !shouldContinue()) {
@@ -191,6 +198,8 @@ extension SetupControllerExt on AppController {
       } else {
         startupRecovery.resumeAutomaticSetup();
       }
+      final conflicts = await _probeProxyConflicts();
+      if (generation != _startIntentGeneration) return;
       // Load the selected profile before opening listeners. A freshly initialized
       // Core also rejects startListener when no config has been applied yet.
       final started = await applyProfile(
@@ -204,6 +213,8 @@ extension SetupControllerExt on AppController {
       );
       if (!started && _ref.read(isStartProvider)) {
         await updateStatus(false);
+      } else if (started && conflicts != null) {
+        unawaited(_reportProxyConflicts(conflicts, generation));
       }
     } else {
       _startIntentGeneration++;
@@ -218,6 +229,56 @@ extension SetupControllerExt on AppController {
           coreController.resetTraffic();
         }
       }
+    }
+  }
+
+  Future<ProxyConflictReport?> _probeProxyConflicts() async {
+    if (!system.isMacOS && !system.isWindows) return null;
+    final patch = _ref.read(patchClashConfigProvider);
+    if (!_ref.read(proxyStateProvider).systemProxy && !patch.tun.enable) {
+      return null;
+    }
+    return NetworkDiagnosticPlatform().probeConflicts(
+      patch.mixedPort,
+      patch.tun.device,
+    );
+  }
+
+  Future<void> _reportProxyConflicts(
+    ProxyConflictReport report,
+    int generation,
+  ) async {
+    if (generation != _startIntentGeneration || !_ref.read(isStartProvider)) {
+      return;
+    }
+    if (report.isEmpty) {
+      _reportedProxyConflict = null;
+      return;
+    }
+    if (report == _reportedProxyConflict ||
+        globalState.navigatorKey.currentContext == null) {
+      return;
+    }
+    _reportedProxyConflict = report;
+    final localizations = appLocalizations;
+    final openDiagnostics = await globalState.showMessage(
+      title: localizations.proxyConflictTitle,
+      message: TextSpan(
+        text: [
+          if (report.systemProxy case final address?)
+            localizations.proxyConflictSystemProxy(address),
+          if (report.autoConfig) localizations.proxyConflictAutoConfig,
+          if (report.vpnInterface case final name?)
+            localizations.proxyConflictVpn(name),
+          localizations.proxyConflictHint,
+        ].join('\n'),
+      ),
+      confirmText: localizations.diagTitle,
+      cancelText: localizations.close,
+    );
+    final context = globalState.navigatorKey.currentContext;
+    if (openDiagnostics == true && context != null && context.mounted) {
+      showNetworkDiagnostics(context);
     }
   }
 

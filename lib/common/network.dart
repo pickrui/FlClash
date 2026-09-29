@@ -77,3 +77,30 @@ bool validNetworkRules(String value) {
   final rules = parseNetworkRules(value);
   return rules.length <= maxNetworkRules && rules.every(validNetworkRule);
 }
+
+Future<int?> findAvailablePort(
+  int port, {
+  Iterable<int> reserved = const [],
+  Future<bool> Function(int port) isAvailable = isLoopbackPortAvailable,
+  int attempts = 500,
+}) async {
+  var candidate = port;
+  for (var i = 0; i < attempts; i++) {
+    candidate = candidate >= 49151 || candidate < 1024 ? 1024 : candidate + 1;
+    if (candidate == port) break;
+    if (reserved.contains(candidate)) continue;
+    if (await isAvailable(candidate)) return candidate;
+  }
+  return null;
+}
+
+// Loopback only: a wildcard bind would raise the OS firewall prompt.
+Future<bool> isLoopbackPortAvailable(int port) async {
+  try {
+    final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, port);
+    await server.close();
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
