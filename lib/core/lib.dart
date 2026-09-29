@@ -17,6 +17,7 @@ class CoreLib extends CoreHandlerInterface {
   static CoreLib? _instance;
 
   Completer<bool> _connectedCompleter = Completer<bool>();
+  Future<CoreLifecycleResult>? _startOperation;
   Future<CoreLifecycleResult>? _closeOperation;
   int _lifecycleRevision = 0;
   int _methodCallId = 0;
@@ -30,7 +31,9 @@ class CoreLib extends CoreHandlerInterface {
   @override
   Future<String> preload() async {
     try {
-      await _start();
+      await (_startOperation ??= _start().whenComplete(() {
+        _startOperation = null;
+      }));
       return '';
     } catch (error) {
       return error.toString();
