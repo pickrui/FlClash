@@ -1352,7 +1352,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "tailscaleAutoRoute": MessageLookupByLibrary.simpleMessage("自动路由"),
     "tailscaleAutoRouteDesc": MessageLookupByLibrary.simpleMessage(
-      "自动通过此网络访问对等设备地址和 MagicDNS 名称",
+      "自动通过此网络访问对等设备地址、MagicDNS 名称和已批准的子网",
     ),
     "tailscaleAvailableExitNodes": MessageLookupByLibrary.simpleMessage(
       "可用的出口节点",
@@ -1392,7 +1392,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "设备与 MagicDNS",
     ),
     "tailscaleGuideDevicesBody": MessageLookupByLibrary.simpleMessage(
-      "自动路由会把已知对等设备的地址和 MagicDNS 名称送入此网络，其他流量仍遵循你的规则\n自动路由位于你添加的规则和自定义规则之后、配置自带的规则之前\n使用自建控制服务器的自有域名时，只接管已知设备的名称，该域名下的公开网站不受影响\n访问远程子网前，请在 Tailnet 中批准对应路由，再添加一条指向此网络的规则",
+      "自动路由会把已知对等设备的地址和 MagicDNS 名称，以及 Tailnet 中已批准的子网送入此网络，其他流量仍遵循你的规则\n自动路由位于你添加的规则和自定义规则之后、配置自带的规则之前\n使用自建控制服务器的自有域名时，只接管已知设备的名称，该域名下的公开网站不受影响\n此设备当前所在局域网内的子网地址仍走本地；如需访问地址相同的远程子网，或用主机名访问子网设备，请添加一条指向此网络的规则",
     ),
     "tailscaleGuideExitNodes": MessageLookupByLibrary.simpleMessage("出口节点"),
     "tailscaleGuideExitNodesBody": MessageLookupByLibrary.simpleMessage(

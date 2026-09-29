@@ -104,6 +104,32 @@ void main() {
     expect(targets.every((target) => target.trim().isNotEmpty), isTrue);
   });
 
+  test('Tailscale networks are destinations in every profile', () {
+    const networks = [
+      TailscaleNetwork(id: 'home', name: 'Home', stateId: 'home'),
+      TailscaleNetwork(id: 'comma', name: 'a,b', stateId: 'comma'),
+      TailscaleNetwork(id: 'escape', name: 'Office', stateId: '../escape'),
+    ];
+    for (final type in OverwriteType.values) {
+      final targets = customRoutingTargets(
+        profile.copyWith(overwriteType: type),
+        rawConfig,
+        tailscaleNetworks: networks,
+      );
+      expect(targets, contains('Home'), reason: '$type');
+      expect(targets, isNot(contains('a,b')), reason: '$type');
+      expect(targets, isNot(contains('Office')), reason: '$type');
+    }
+    expect(
+      customRoutingTargets(profile, {
+        'proxies': [
+          {'name': 'Home'},
+        ],
+      }, tailscaleNetworks: networks).where((target) => target == 'Home'),
+      hasLength(1),
+    );
+  });
+
   test('destination choices deduplicate shared outbound names', () {
     final targets = customRoutingTargets(profile, {
       'proxy-groups': [

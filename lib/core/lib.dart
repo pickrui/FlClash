@@ -128,6 +128,9 @@ class CoreLib extends CoreHandlerInterface {
 
   Future<CoreLifecycleResult> _close() async {
     _closed = true;
+    try {
+      await _startOperation;
+    } catch (_) {}
     return _stop(allowClosed: true);
   }
 

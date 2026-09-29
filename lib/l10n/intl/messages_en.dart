@@ -1867,7 +1867,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Automatic routing",
     ),
     "tailscaleAutoRouteDesc": MessageLookupByLibrary.simpleMessage(
-      "Route peer addresses and MagicDNS names through this network",
+      "Route peer addresses, MagicDNS names and approved subnets through this network",
     ),
     "tailscaleAvailableExitNodes": MessageLookupByLibrary.simpleMessage(
       "Available exit nodes",
@@ -1909,7 +1909,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Devices and MagicDNS",
     ),
     "tailscaleGuideDevicesBody": MessageLookupByLibrary.simpleMessage(
-      "Automatic routing sends the addresses and MagicDNS names of known peers into this network. Other traffic follows your rules.\nIt applies after your added and custom rules and before the profile\'s own rules.\nWith a custom control server domain, only known device names are routed, so the domain\'s public sites stay reachable.\nTo reach a remote subnet, approve the route in your tailnet, then add a rule that points to this network.",
+      "Automatic routing sends the addresses and MagicDNS names of known peers, and the subnets approved in your tailnet, into this network. Other traffic follows your rules.\nIt applies after your added and custom rules and before the profile\'s own rules.\nWith a custom control server domain, only known device names are routed, so the domain\'s public sites stay reachable.\nSubnet addresses inside the local network this device is on stay local. To reach a remote subnet with the same addresses, or a subnet device by hostname, add a rule that points to this network.",
     ),
     "tailscaleGuideExitNodes": MessageLookupByLibrary.simpleMessage(
       "Exit nodes",

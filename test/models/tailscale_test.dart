@@ -86,6 +86,18 @@ void main() {
       expect(isValidTailscaleNetworkName('x' * 65), isFalse);
     });
 
+    test('routing targets name only the networks a profile gets', () {
+      expect(
+        tailscaleRoutingTargets(const [
+          TailscaleNetwork(id: 'a', name: 'Home', stateId: 'home'),
+          TailscaleNetwork(id: 'b', name: '家里 NAS', stateId: 'nas'),
+          TailscaleNetwork(id: 'c', name: 'a,b', stateId: 'comma'),
+          TailscaleNetwork(id: 'd', name: 'Office', stateId: '../escape'),
+        ]),
+        ['Home', '家里 NAS'],
+      );
+    });
+
     test('hostnames follow DNS label rules', () {
       expect(isValidTailscaleHostname(''), isTrue);
       expect(isValidTailscaleHostname('flclash-phone'), isTrue);

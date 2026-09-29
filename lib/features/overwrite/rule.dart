@@ -95,7 +95,9 @@ class RuleStatusItem extends StatelessWidget {
 class AddOrEditRuleDialog extends StatefulWidget {
   final Rule? rule;
 
-  const AddOrEditRuleDialog({super.key, this.rule});
+  final List<String> targets;
+
+  const AddOrEditRuleDialog({super.key, this.rule, this.targets = const []});
 
   @override
   State<AddOrEditRuleDialog> createState() => _AddOrEditRuleDialogState();
@@ -118,9 +120,11 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
 
   void _initState() {
     _targetItems = [
-      ...RuleTarget.values.map(
-        (item) => DropdownMenuEntry(value: item.name, label: item.name),
-      ),
+      for (final target in {
+        ...RuleTarget.values.map((item) => item.name),
+        ...widget.targets,
+      })
+        DropdownMenuEntry(value: target, label: target),
     ];
     if (widget.rule != null) {
       final parsedRule = ParsedRule.parseString(widget.rule!.value);

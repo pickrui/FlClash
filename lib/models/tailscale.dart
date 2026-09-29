@@ -183,6 +183,12 @@ bool isValidTailscaleNetworkName(String name) {
       !_controlCharacters.hasMatch(value);
 }
 
+List<String> tailscaleRoutingTargets(Iterable<TailscaleNetwork> networks) => [
+  for (final network in networks)
+    if (network.hasValidStateId && isValidTailscaleNetworkName(network.name))
+      network.name,
+];
+
 bool isValidTailscaleHostname(String hostname) {
   final value = hostname.trim();
   return value.isEmpty || _hostnamePattern.hasMatch(value);

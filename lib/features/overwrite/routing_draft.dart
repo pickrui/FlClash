@@ -12,7 +12,11 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-List<String> customRoutingTargets(Profile profile, Map<String, dynamic> raw) {
+List<String> customRoutingTargets(
+  Profile profile,
+  Map<String, dynamic> raw, {
+  Iterable<TailscaleNetwork> tailscaleNetworks = const [],
+}) {
   Iterable<String> names(String key) => raw[key] is List
       ? (raw[key] as List)
             .whereType<Map>()
@@ -31,6 +35,7 @@ List<String> customRoutingTargets(Profile profile, Map<String, dynamic> raw) {
         .where((node) => node.isValid)
         .map((node) => node.name),
     ...names('proxies'),
+    ...tailscaleRoutingTargets(tailscaleNetworks),
   }.toList();
 }
 

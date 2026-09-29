@@ -359,7 +359,11 @@ class __StandardContentState extends ConsumerState<_StandardContent> {
     if (!mounted) return;
     final names = <String>{
       '',
-      ...customRoutingTargets(profile, raw ?? {}),
+      ...customRoutingTargets(
+        profile,
+        raw ?? {},
+        tailscaleNetworks: ref.read(tailscaleNetworksProvider),
+      ),
       if (profile.matchTarget != null) profile.matchTarget!,
     }.toList();
     final selected = await globalState.showCommonDialog<String>(
@@ -393,7 +397,10 @@ class __StandardContentState extends ConsumerState<_StandardContent> {
 
   Future<void> _handleAddOrUpdate([Rule? rule]) async {
     final res = await globalState.showCommonDialog<Rule>(
-      child: AddOrEditRuleDialog(rule: rule),
+      child: AddOrEditRuleDialog(
+        rule: rule,
+        targets: tailscaleRoutingTargets(ref.read(tailscaleNetworksProvider)),
+      ),
     );
     if (res == null) {
       return;

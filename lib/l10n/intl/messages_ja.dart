@@ -1541,7 +1541,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "tailscaleAutoRoute": MessageLookupByLibrary.simpleMessage("自動ルーティング"),
     "tailscaleAutoRouteDesc": MessageLookupByLibrary.simpleMessage(
-      "ピアのアドレスと MagicDNS 名をこのネットワーク経由でルーティング",
+      "ピアのアドレス、MagicDNS 名、承認済みサブネットをこのネットワーク経由でルーティング",
     ),
     "tailscaleAvailableExitNodes": MessageLookupByLibrary.simpleMessage(
       "利用可能な出口ノード",
@@ -1585,7 +1585,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "デバイスと MagicDNS",
     ),
     "tailscaleGuideDevicesBody": MessageLookupByLibrary.simpleMessage(
-      "自動ルーティングは既知のピアのアドレスと MagicDNS 名をこのネットワークに送ります。その他の通信はルールに従います\n自動ルーティングは追加したルールとカスタムルールの後、プロファイル自身のルールの前に適用されます\n独自ドメインのコントロールサーバーでは既知のデバイス名だけを経由させるため、そのドメインの公開サイトには影響しません\nリモートのサブネットにアクセスするには、Tailnet でルートを承認してから、このネットワークを指すルールを追加してください",
+      "自動ルーティングは既知のピアのアドレスと MagicDNS 名、および Tailnet で承認済みのサブネットをこのネットワークに送ります。その他の通信はルールに従います\n自動ルーティングは追加したルールとカスタムルールの後、プロファイル自身のルールの前に適用されます\n独自ドメインのコントロールサーバーでは既知のデバイス名だけを経由させるため、そのドメインの公開サイトには影響しません\nこのデバイスが接続しているローカルネットワーク内のサブネットアドレスはローカルのままです。同じアドレスのリモートサブネットや、ホスト名でサブネット内のデバイスにアクセスするには、このネットワークを指すルールを追加してください",
     ),
     "tailscaleGuideExitNodes": MessageLookupByLibrary.simpleMessage("出口ノード"),
     "tailscaleGuideExitNodesBody": MessageLookupByLibrary.simpleMessage(

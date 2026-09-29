@@ -313,6 +313,7 @@ class CustomProxyGroupsView extends ConsumerWidget {
         availableMembers: customRoutingTargets(
           profile,
           rawConfig,
+          tailscaleNetworks: ref.read(tailscaleNetworksProvider),
         ).where((name) => name != group?.name).toList(),
         availableProviders: (rawConfig['proxy-providers'] is Map)
             ? (rawConfig['proxy-providers'] as Map).keys
@@ -584,7 +585,11 @@ class CustomRulesView extends ConsumerWidget {
     final result = await globalState.showCommonDialog<Rule>(
       child: CustomRuleEditorDialog(
         rule: rule,
-        targets: customRoutingTargets(profile, raw),
+        targets: customRoutingTargets(
+          profile,
+          raw,
+          tailscaleNetworks: ref.read(tailscaleNetworksProvider),
+        ),
         ruleProviders: raw['rule-providers'] is Map
             ? (raw['rule-providers'] as Map).keys.whereType<String>().toList()
             : const [],
