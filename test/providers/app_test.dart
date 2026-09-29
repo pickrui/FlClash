@@ -489,7 +489,7 @@ void main() {
       final notifier = container.read(networkDetectionProvider.notifier);
       container.read(initProvider.notifier).value = true;
       notifier.startCheck();
-      await Future.delayed(commonDuration + const Duration(milliseconds: 50));
+      await _waitForIpRequests(adapter, count: 7);
       for (final pending in adapter.pending) {
         pending.complete(ResponseBody.fromString('{}', 200));
       }
@@ -498,7 +498,7 @@ void main() {
       expect(container.read(networkDetectionProvider).ipInfo, isNull);
       adapter.pending.clear();
       notifier.startCheck();
-      await Future.delayed(commonDuration + const Duration(milliseconds: 50));
+      await _waitForIpRequests(adapter);
       adapter.succeed('1.1.1.1');
       await pumpEventQueue();
       expect(container.read(networkDetectionProvider).ipInfo?.ip, '1.1.1.1');
@@ -513,7 +513,7 @@ void main() {
         container.read(runTimeProvider.notifier).value = 1;
         final notifier = container.read(networkDetectionProvider.notifier);
         notifier.startCheck();
-        await Future.delayed(commonDuration + const Duration(milliseconds: 50));
+        await _waitForIpRequests(adapter);
         adapter.succeed('2.2.2.2');
         await pumpEventQueue();
         expect(container.read(networkDetectionProvider).ipInfo?.ip, '2.2.2.2');
@@ -522,14 +522,14 @@ void main() {
         await container.pump();
         expect(container.read(networkDetectionProvider).ipInfo, isNull);
         expect(container.read(networkDetectionProvider).isLoading, true);
-        await Future.delayed(commonDuration + const Duration(milliseconds: 50));
+        await _waitForIpRequests(adapter);
         adapter.succeed('1.1.1.1');
         await pumpEventQueue();
         expect(container.read(networkDetectionProvider).ipInfo?.ip, '1.1.1.1');
         // Another refresh while stopped must not reuse the cached carrier IP.
         adapter.pending.clear();
         notifier.startCheck();
-        await Future.delayed(commonDuration + const Duration(milliseconds: 50));
+        await _waitForIpRequests(adapter);
         adapter.succeed('3.3.3.3');
         await pumpEventQueue();
         expect(container.read(networkDetectionProvider).ipInfo?.ip, '3.3.3.3');
@@ -562,7 +562,7 @@ void main() {
       final owner = ProviderContainer();
       owner.read(initProvider.notifier).value = true;
       owner.read(networkDetectionProvider.notifier).startCheck();
-      await Future.delayed(commonDuration + const Duration(milliseconds: 50));
+      await _waitForIpRequests(adapter, count: 7);
       owner.dispose();
       await pumpEventQueue();
       expect(adapter.cancellations, 7);
@@ -675,6 +675,19 @@ class _FakePathProvider extends PathProviderPlatform {
 
   @override
   Future<String?> getDownloadsPath() async => path;
+}
+
+/// Waits for the debounced check to reach the adapter; a fixed delay is too
+/// short on a loaded machine.
+Future<void> _waitForIpRequests(
+  _ControlledIpAdapter adapter, {
+  int count = 1,
+}) async {
+  final deadline = DateTime.now().add(const Duration(seconds: 5));
+  while (adapter.pending.length < count && DateTime.now().isBefore(deadline)) {
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+  }
+  expect(adapter.pending.length, greaterThanOrEqualTo(count));
 }
 
 class _ControlledIpAdapter implements HttpClientAdapter {
