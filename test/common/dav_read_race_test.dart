@@ -459,7 +459,7 @@ void main() {
     await waitForReads();
   });
 
-  test('a listing from another route beats a 404', () async {
+  test('a slow listing from another route beats a 404', () async {
     final dav = DAVClient(
       _props,
       resolveRoutes: (_) => ['direct', 'proxy'],
@@ -468,7 +468,7 @@ void main() {
           return ResponseBody.fromBytes([], 200);
         }
         if (route == 'direct') return ResponseBody.fromBytes([], 404);
-        await Future<void>.delayed(const Duration(milliseconds: 200));
+        await Future<void>.delayed(const Duration(seconds: 3));
         return _listing(['backup.zip']);
       }),
     );
@@ -477,6 +477,71 @@ void main() {
       'backup.zip',
     ]);
     await waitForReads();
+  });
+
+  test('a missing folder does not spend the read deadline waiting', () async {
+    final dav = DAVClient(
+      _props,
+      readTimeout: const Duration(seconds: 1),
+      resolveRoutes: (_) => ['direct'],
+      createAdapter: (_) => readAdapter((options) async {
+        return ResponseBody.fromBytes(
+          [],
+          options.method == 'PROPFIND' ? 404 : 200,
+        );
+      }),
+    );
+    await dav.pingCompleter.future;
+    expect(await dav.listBackups(), isEmpty);
+  });
+
+  test('a slow authentication failure still beats a missing folder', () async {
+    final dav = DAVClient(
+      _props,
+      resolveRoutes: (_) => ['direct', 'proxy'],
+      createAdapter: (route) => readAdapter((options) async {
+        if (options.method != 'PROPFIND') {
+          return ResponseBody.fromBytes([], 200);
+        }
+        if (route == 'direct') return ResponseBody.fromBytes([], 404);
+        await Future<void>.delayed(const Duration(seconds: 3));
+        return ResponseBody.fromBytes([], 403);
+      }),
+    );
+    await dav.pingCompleter.future;
+    await expectLater(
+      dav.listBackups(),
+      throwsA(
+        isA<DioException>().having(
+          (error) => error.response?.statusCode,
+          'status',
+          403,
+        ),
+      ),
+    );
+  });
+
+  test('a missing folder cannot hide an unfinished route timeout', () async {
+    var cancelled = false;
+    final dav = DAVClient(
+      _props,
+      readTimeout: const Duration(seconds: 1),
+      resolveRoutes: (_) => ['direct', 'proxy'],
+      createAdapter: (route) => readAdapter((options) async {
+        if (options.method != 'PROPFIND') {
+          return ResponseBody.fromBytes([], 200);
+        }
+        if (route == 'direct') return ResponseBody.fromBytes([], 404);
+        return ResponseBody(
+          StreamController<Uint8List>(onCancel: () => cancelled = true).stream,
+          207,
+        );
+      }),
+    );
+    await dav.pingCompleter.future;
+    await expectLater(dav.listBackups(), throwsA(isA<TimeoutException>()));
+    await waitForReads();
+    expect(cancelled, isTrue);
   });
 
   test('restoring rejects a backup name with path syntax', () async {
