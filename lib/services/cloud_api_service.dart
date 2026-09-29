@@ -360,6 +360,7 @@ class CloudApiException implements Exception {
       DioExceptionType.sendTimeout => appLocalizations.cloudApiSendTimeout,
       DioExceptionType.receiveTimeout =>
         appLocalizations.cloudApiReceiveTimeout,
+      DioExceptionType.transformTimeout => appLocalizations.cloudApiTimeout,
       DioExceptionType.badCertificate => certificateMessage(error),
       DioExceptionType.badResponse =>
         _managedAuthError(error.response) ??

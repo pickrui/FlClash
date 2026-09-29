@@ -560,6 +560,21 @@ void main() {
     expect(message, isNot(contains('requested address')));
   });
 
+  test('cloud API transform timeouts use the sanitized timeout message', () {
+    final error = DioException(
+      requestOptions: RequestOptions(
+        path: 'https://private-api.example/account',
+      ),
+      type: DioExceptionType.transformTimeout,
+      message: 'decoding response from private-api.example failed',
+    );
+
+    expect(
+      CloudApiException.clean(error),
+      CloudApiException.clean(TimeoutException('private-api.example')),
+    );
+  });
+
   test('API hostname redaction covers URLs, ports, and socket addresses', () {
     const host = 'private-api.example';
     final redacted = redactHostnames(
