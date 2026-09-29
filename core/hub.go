@@ -175,10 +175,12 @@ func retireCurrentProviders() {
 
 func closeCurrentProviders() {
 	retireCurrentProviders()
+	previousProxies := tunnel.ProxiesSnapshot()
 	tunnel.UpdateProxies(
 		map[string]constant.Proxy{},
 		map[string]cp.ProxyProvider{},
 	)
+	updateTailscaleNetworks(previousProxies)
 	tunnel.UpdateRules(nil, nil, map[string]cp.RuleProvider{})
 	publishProxySnapshot(map[string]constant.Proxy{})
 }

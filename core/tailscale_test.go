@@ -89,6 +89,38 @@ rules:
 	if status.State != outbound.TailscaleIdle {
 		t.Fatalf("warm started an unauthenticated network: %+v", status)
 	}
+	if _, handled, err := tailscaleDelay(context.Background(), cfg.Proxies["Home"]); !handled || err == nil {
+		t.Fatalf("delay measured a network that needs login: %v, %v", handled, err)
+	}
+	status, _ = tailscale.Status(context.Background())
+	if status.State != outbound.TailscaleIdle {
+		t.Fatalf("a delay test started an unauthenticated network: %+v", status)
+	}
+}
+
+func TestShutdownClosesTailscaleNetworks(t *testing.T) {
+	previousHome := constant.Path.HomeDir()
+	constant.SetHomeDir(t.TempDir())
+	t.Cleanup(func() { constant.SetHomeDir(previousHome) })
+	previousProxies := tunnel.Proxies()
+	previousProviders := tunnel.Providers()
+	t.Cleanup(func() { tunnel.UpdateProxies(previousProxies, previousProviders) })
+
+	cfg, err := config.Parse([]byte(`
+proxies:
+  - {name: Home, type: tailscale, state-dir: tailscale-networks/home}
+rules: ["MATCH,DIRECT"]
+`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	tunnel.UpdateProxies(cfg.Proxies, nil)
+	closeCurrentProviders()
+
+	home, _ := asTailscale(cfg.Proxies["Home"])
+	if err := home.Login(context.Background(), ""); err == nil {
+		t.Fatal("shutdown left the tailscale outbound open")
+	}
 }
 
 func TestUpdateTailscaleNetworksClosesReplacedOutbounds(t *testing.T) {

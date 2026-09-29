@@ -44,7 +44,7 @@ func asTailscale(proxy constant.Proxy) (*outbound.Tailscale, bool) {
 }
 
 func findTailscale(name string) (*outbound.Tailscale, error) {
-	proxy := tunnel.AllProxies()[name]
+	proxy := tunnel.ProxiesSnapshot()[name]
 	if proxy == nil {
 		return nil, fmt.Errorf("proxy %q not found", name)
 	}
@@ -114,10 +114,10 @@ func tailscaleNetworkStateDir(stateDir string) (string, error) {
 // hand their sessions to the new ones, then starts networks that are signed in.
 // Replaced outbounds would otherwise keep their sessions until collected.
 func updateTailscaleNetworks(previous map[string]constant.Proxy) {
-	current := tunnel.Proxies()
+	current := tunnel.ProxiesSnapshot()
 	for name, proxy := range previous {
-		if tailscale, ok := asTailscale(proxy); ok && current[name] != proxy {
-			_ = tailscale.Close()
+		if _, ok := asTailscale(proxy); ok && current[name] != proxy {
+			_ = proxy.Adapter().Close()
 		}
 	}
 	for _, proxy := range tunnel.AllProxies() {
@@ -128,9 +128,23 @@ func updateTailscaleNetworks(previous map[string]constant.Proxy) {
 }
 
 // An HTTP probe through a network without an exit node could only fail.
+// Starting one that needs login would open a login page nobody asked for.
 func tailscaleDelay(ctx context.Context, proxy constant.Proxy) (time.Duration, bool, error) {
 	tailscale, ok := asTailscale(proxy)
-	if !ok || tailscale.HasExitNode() {
+	if !ok {
+		return 0, false, nil
+	}
+	status, err := tailscale.Status(ctx)
+	if err != nil {
+		return 0, true, err
+	}
+	if status.State != "Running" {
+		if status.State == outbound.TailscaleIdle {
+			tailscale.Warm()
+		}
+		return 0, true, fmt.Errorf("tailscale is %s", status.State)
+	}
+	if tailscale.HasExitNode() {
 		return 0, false, nil
 	}
 	latency, err := tailscale.PingPeers(ctx)
