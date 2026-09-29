@@ -402,7 +402,7 @@ jobs:
           for attempt in 1 2 3; do
             go mod download && exit 0
             echo "go mod download failed (attempt $attempt)" >&2
-            sleep $((attempt * 15))
+            if [ "$attempt" -lt 3 ]; then sleep $((attempt * 15)); fi
           done
           exit 1
 
