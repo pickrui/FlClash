@@ -424,7 +424,7 @@ func applyConfig(params *SetupParams) error {
 	// Config loading owns all tunnel status transitions until ApplyConfig returns.
 	idleOwnsTunnelSuspend = false
 	suspendOnIdle = params.SuspendOnIdle
-	previousProxies := tunnel.Proxies()
+	previousProxies := tunnel.ProxiesSnapshot()
 	hub.ApplyConfig(currentConfig)
 	installDNSAuthResolver()
 	patchSelectGroup(params.SelectedMap)
