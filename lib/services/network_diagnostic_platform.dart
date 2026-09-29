@@ -127,16 +127,14 @@ class NetworkDiagnosticPlatform {
         return parseWindowsDiagnosticState(data, port, tunDevice);
       }
       if (platform == 'macos') {
-        // Failure to inspect the route must not discard valid proxy evidence.
-        final proxy = await runCommand('/usr/sbin/scutil', ['--proxy'], token);
+        var proxy = '';
+        try {
+          proxy = await runCommand('/usr/sbin/scutil', ['--proxy'], token);
+        } catch (_) {}
         String? route;
         if (tunDevice != null && tunDevice.isNotEmpty && !token.isCancelled) {
           try {
-            route = await runCommand('/sbin/route', [
-              '-n',
-              'get',
-              '1.1.1.1',
-            ], token);
+            route = await _readMacosRoute(token);
           } catch (_) {}
         }
         return parseMacosDiagnosticState(proxy, route, port, tunDevice);
@@ -183,10 +181,16 @@ class NetworkDiagnosticPlatform {
     try {
       if (platform == 'windows') {
         final data = await readWindowsProxy();
-        if (data != null) return parseWindowsProxyConflict(data, port);
+        final flags = data?['flags'];
+        if (flags is int &&
+            flags >= 0 &&
+            ((flags & 2) == 0 || data?['proxyServer'] is String)) {
+          return parseWindowsProxyConflict(data!, port);
+        }
       } else if (platform == 'macos') {
         final raw = await runCommand('/usr/sbin/scutil', ['--proxy'], token);
-        return parseMacosProxyConflict(raw, port);
+        final values = _parseScutilProxy(raw);
+        if (values != null) return _macosProxyConflict(values, port);
       }
     } catch (_) {}
     return null;
@@ -199,21 +203,27 @@ class NetworkDiagnosticPlatform {
     try {
       if (platform == 'windows') {
         final route = await _readWindowsRoute(token);
-        if (route['routeInterface'] is! String) return null;
+        final name = route['routeInterface'];
+        if (name is! String ||
+            name.trim().isEmpty ||
+            route['routeHardware'] is! bool ||
+            route['routeType'] is! int ||
+            route['routeDescription'] is! String) {
+          return null;
+        }
         return (name: parseWindowsVpnInterface(route, ownTunDevice));
       }
       if (platform == 'macos') {
-        final route = await runCommand('/sbin/route', [
-          '-n',
-          'get',
-          '1.1.1.1',
-        ], token);
+        final route = await _readMacosRoute(token);
         if (_macosRouteInterface(route) == null) return null;
         return (name: parseMacosVpnInterface(route, ownTunDevice));
       }
     } catch (_) {}
     return null;
   }
+
+  Future<String> _readMacosRoute(CancelToken token) =>
+      runCommand('/sbin/route', ['-n', 'get', '1.1.1.1'], token);
 
   Future<Map<dynamic, dynamic>> _readWindowsRoute(CancelToken token) async {
     final root = Platform.environment['SystemRoot'] ?? r'C:\Windows';
@@ -311,18 +321,21 @@ bool _matchesMacosProxy(Map<String, String> values, String protocol, int port) {
   return host != null && actualPort == port && _isLoopbackHost(host);
 }
 
-Map<String, String> _parseScutilProxy(String raw) {
+Map<String, String>? _parseScutilProxy(String raw) {
+  if (!RegExp(r'^\s*<dictionary>\s*\{').hasMatch(raw)) return null;
   final values = <String, String>{};
+  final entry = RegExp(r'^\s*(\w+)\s*:\s*([^<{]+)\s*$');
   var depth = 0;
   for (final line in raw.split('\n')) {
     // Scoped and supplemental dictionaries may describe a different interface.
     if (depth == 1) {
-      final match = RegExp(r'^\s*(\w+)\s*:\s*([^<{]+)\s*$').firstMatch(line);
+      final match = entry.firstMatch(line);
       if (match != null) values[match[1]!] = match[2]!.trim();
     }
     depth += '{'.allMatches(line).length - '}'.allMatches(line).length;
+    if (depth < 0) return null;
   }
-  return values;
+  return depth == 0 ? values : null;
 }
 
 String? _macosRouteInterface(String route) => RegExp(
@@ -338,7 +351,9 @@ DiagnosticSystemState parseMacosDiagnosticState(
 ) {
   final values = _parseScutilProxy(raw);
   final DiagnosticProxyState proxy;
-  if (values['ProxyAutoConfigEnable'] == '1' ||
+  if (values == null) {
+    proxy = DiagnosticProxyState.unknown;
+  } else if (values['ProxyAutoConfigEnable'] == '1' ||
       values['ProxyAutoDiscoveryEnable'] == '1') {
     proxy = DiagnosticProxyState.automatic;
   } else if (values['HTTPEnable'] == '1' || values['HTTPSEnable'] == '1') {
@@ -351,9 +366,7 @@ DiagnosticSystemState parseMacosDiagnosticState(
         ? DiagnosticProxyState.matching
         : DiagnosticProxyState.different;
   } else {
-    proxy = raw.contains('<dictionary>')
-        ? DiagnosticProxyState.disabled
-        : DiagnosticProxyState.unknown;
+    proxy = DiagnosticProxyState.disabled;
   }
   final interface = route == null ? null : _macosRouteInterface(route);
   return DiagnosticSystemState(
@@ -390,8 +403,10 @@ ProxyConflictReport parseWindowsProxyConflict(
   );
 }
 
-ProxyConflictReport parseMacosProxyConflict(String raw, int port) {
-  final values = _parseScutilProxy(raw);
+ProxyConflictReport parseMacosProxyConflict(String raw, int port) =>
+    _macosProxyConflict(_parseScutilProxy(raw) ?? const {}, port);
+
+ProxyConflictReport _macosProxyConflict(Map<String, String> values, int port) {
   String? systemProxy;
   for (final protocol in const ['HTTP', 'HTTPS', 'SOCKS']) {
     if (values['${protocol}Enable'] == '1' &&
