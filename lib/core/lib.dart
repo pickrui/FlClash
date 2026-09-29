@@ -104,10 +104,14 @@ class CoreLib extends CoreHandlerInterface {
     );
   }
 
+  /// A connect that joins an in-flight start must not get one a stop undid.
   Future<CoreLifecycleResult> _stop({bool allowClosed = false}) async {
     if (_closed && !allowClosed) {
       throw StateError('Core lifecycle is closed');
     }
+    try {
+      await _startOperation;
+    } catch (_) {}
     final revision = ++_lifecycleRevision;
     if (!_connectedCompleter.isCompleted) {
       return CoreLifecycleResult(
@@ -128,9 +132,6 @@ class CoreLib extends CoreHandlerInterface {
 
   Future<CoreLifecycleResult> _close() async {
     _closed = true;
-    try {
-      await _startOperation;
-    } catch (_) {}
     return _stop(allowClosed: true);
   }
 
