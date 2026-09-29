@@ -13,6 +13,7 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/hub/route"
 	"github.com/metacubex/mihomo/log"
 	"github.com/metacubex/mihomo/tunnel/statistic"
@@ -27,6 +28,7 @@ func init() {
 	statistic.TrackerInfoFilter = func(info *statistic.TrackerInfo) bool {
 		return !shouldSuppressCloudTracker(info)
 	}
+	statistic.MetadataProcessor = redactCloudTrackerMetadata
 	route.DNSQueryObfuscated = matchManagedSuffix
 	log.EventFilter = func(event log.Event) bool {
 		return !shouldSuppressCloudOutput(event.Payload)
@@ -45,6 +47,7 @@ func setCloudOutputDomains(domains []string) {
 }
 
 func isCloudHost(host string) bool {
+	host = strings.ToLower(strings.TrimSpace(host))
 	if parsed, _, err := net.SplitHostPort(host); err == nil {
 		host = parsed
 	}
@@ -91,27 +94,23 @@ func shouldSuppressCloudTracker(info *statistic.TrackerInfo) bool {
 		return false
 	}
 	if metadata := info.Metadata; metadata != nil {
-		if shouldSuppressCloudOutput(metadata.Host) || shouldSuppressCloudOutput(metadata.SniffHost) {
+		if isCloudHost(metadata.Host) || isCloudHost(metadata.SniffHost) {
 			if metadata.DstIP.IsValid() {
 				markCloudIP(metadata.DstIP.String())
 			}
 			return true
 		}
-		if shouldSuppressCloudOutput(metadata.RemoteDst) || isCloudIP(metadata.DstIP.String()) {
-			return true
-		}
-		for _, value := range []string{metadata.SpecialRules, metadata.SpecialProxy, metadata.Process, metadata.ProcessPath} {
-			if shouldSuppressCloudOutput(value) {
-				return true
-			}
-		}
-	}
-	for _, value := range append(append([]string{info.Rule, info.RulePayload}, info.Chain...), info.ProviderChain...) {
-		if shouldSuppressCloudOutput(value) {
+		if isCloudIP(metadata.DstIP.String()) {
 			return true
 		}
 	}
 	return false
+}
+
+func redactCloudTrackerMetadata(metadata *constant.Metadata) {
+	if metadata != nil && isCloudHost(metadata.RemoteDst) {
+		metadata.RemoteDst = ""
+	}
 }
 
 func resetCloudIPs() {

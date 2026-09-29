@@ -104,7 +104,7 @@ void main() {
     ]);
   });
 
-  test('cloud requests never enter recent request history', () {
+  test('only cloud destinations stay out of recent request history', () {
     final container = ProviderContainer();
     addTearDown(container.dispose);
     final notifier = container.read(requestsProvider.notifier);
@@ -117,12 +117,14 @@ void main() {
       rule: 'MATCH',
       rulePayload: '',
     );
-    for (final domain in ['api.oixcloud.example', ...Secrets.cloudDomains]) {
+    for (final domain in Secrets.cloudDomains) {
       notifier.addRequest(ordinary.copyWith(metadata: Metadata(host: domain)));
     }
+    final viaCloudNode = ordinary.copyWith(chains: const ['oixCloud', 'HK 01']);
+    notifier.addRequest(viaCloudNode);
     notifier.addRequest(ordinary);
 
-    expect(container.read(requestsProvider).list, [ordinary]);
+    expect(container.read(requestsProvider).list, [viaCloudNode, ordinary]);
   });
 
   test('visibility actions use the serialized window toggle', () async {

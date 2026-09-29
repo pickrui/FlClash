@@ -104,13 +104,16 @@ func TestCloudTrackersAreNotPublished(t *testing.T) {
 		{name: "api", info: &statistic.TrackerInfo{Metadata: &constant.Metadata{Host: "api.example", DstIP: netip.MustParseAddr("192.0.2.10")}}, hidden: true},
 		{name: "sniffed api", info: &statistic.TrackerInfo{Metadata: &constant.Metadata{SniffHost: "API.EXAMPLE"}}, hidden: true},
 		{name: "api ip", info: &statistic.TrackerInfo{Metadata: &constant.Metadata{DstIP: netip.MustParseAddr("192.0.2.10")}}, hidden: true},
-		{name: "remote", info: &statistic.TrackerInfo{Metadata: &constant.Metadata{RemoteDst: "api.example:443"}}, hidden: true},
-		{name: "chain", info: &statistic.TrackerInfo{Chain: constant.Chain{"oixCloud"}}, hidden: true},
-		{name: "provider", info: &statistic.TrackerInfo{ProviderChain: constant.Chain{"oixCloud"}}, hidden: true},
-		{name: "rule", info: &statistic.TrackerInfo{RulePayload: "api.example"}, hidden: true},
-		{name: "special rule", info: &statistic.TrackerInfo{Metadata: &constant.Metadata{SpecialRules: "api.example"}}, hidden: true},
-		{name: "special proxy", info: &statistic.TrackerInfo{Metadata: &constant.Metadata{SpecialProxy: "oixCloud"}}, hidden: true},
-		{name: "process", info: &statistic.TrackerInfo{Metadata: &constant.Metadata{ProcessPath: "/apps/oixCloud/client"}}, hidden: true},
+		{name: "process rule", info: &statistic.TrackerInfo{Rule: "ProcessPath", RulePayload: "/apps/api.example/client"}},
+		{name: "rule set", info: &statistic.TrackerInfo{Rule: "RuleSet", RulePayload: "api.example"}},
+		{name: "domain boundary", info: &statistic.TrackerInfo{Metadata: &constant.Metadata{Host: "not_api.example"}}},
+		{name: "trailing dot", info: &statistic.TrackerInfo{Metadata: &constant.Metadata{Host: "Sub.API.EXAMPLE."}}, hidden: true},
+		{name: "through a cloud node", info: &statistic.TrackerInfo{Metadata: &constant.Metadata{Host: "public.example", RemoteDst: "api.example:443"}}},
+		{name: "chain", info: &statistic.TrackerInfo{Chain: constant.Chain{"oixCloud"}}},
+		{name: "provider", info: &statistic.TrackerInfo{ProviderChain: constant.Chain{"oixCloud"}}},
+		{name: "special proxy", info: &statistic.TrackerInfo{Metadata: &constant.Metadata{SpecialProxy: "oixCloud"}}},
+		{name: "process", info: &statistic.TrackerInfo{Metadata: &constant.Metadata{ProcessPath: "/apps/oixCloud/client"}}},
+		{name: "tencent cloud api", info: &statistic.TrackerInfo{Metadata: &constant.Metadata{Host: "cvm.tencentcloudapi.com"}}},
 		{name: "ordinary", info: &statistic.TrackerInfo{Metadata: &constant.Metadata{Host: "public.example"}}},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -126,6 +129,27 @@ func TestCloudTrackersAreNotPublished(t *testing.T) {
 				t.Fatal("filter removed the live connection from the manager")
 			}
 		})
+	}
+}
+
+func TestCloudNodeAddressIsRedactedFromTrackers(t *testing.T) {
+	previous := currentDNSAuth()
+	setDNSAuth(&dnsAuthSettings{suffixes: []string{"managed.example"}})
+	t.Cleanup(func() { setDNSAuth(previous) })
+	markCloudIP("198.51.100.7")
+	t.Cleanup(resetCloudIPs)
+
+	for _, remote := range []string{"198.51.100.7:443", "[::ffff:198.51.100.7]:443", "node.managed.example"} {
+		metadata := &constant.Metadata{Host: "public.example", RemoteDst: remote}
+		redactCloudTrackerMetadata(metadata)
+		if metadata.RemoteDst != "" || metadata.Host != "public.example" {
+			t.Fatalf("remote %q: metadata = %+v", remote, metadata)
+		}
+	}
+	metadata := &constant.Metadata{RemoteDst: "203.0.113.9:443"}
+	redactCloudTrackerMetadata(metadata)
+	if metadata.RemoteDst != "203.0.113.9:443" {
+		t.Fatalf("an ordinary remote was redacted: %q", metadata.RemoteDst)
 	}
 }
 

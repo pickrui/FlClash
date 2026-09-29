@@ -130,26 +130,42 @@ void main() {
       rulePayload: '',
     );
 
-    test('cloud destinations, chains and rule details are suppressed', () {
-      for (final metadata in [
-        meta(host: 'api.oixcloud.example'),
-        const Metadata(remoteDestination: 'node.oixcloud.example:443'),
-        const Metadata(specialProxy: 'oixCloud'),
+    test('only a cloud destination suppresses a connection', () {
+      bool matchesCloudHost(String value) =>
+          isCloudHost(value, const ['api.example']);
+
+      for (final cloud in [
+        tracker('api', metadata: meta(host: 'Account.API.example')),
+        tracker('trailing dot', metadata: meta(host: 'api.example.')),
       ]) {
-        expect(
-          tracker('cloud', metadata: metadata).shouldSuppressOutput,
-          isTrue,
-        );
+        expect(cloud.hasCloudDestination(matchesCloudHost), isTrue);
       }
-      expect(
-        tracker('cloud', chains: ['oixCloud']).shouldSuppressOutput,
-        isTrue,
-      );
-      expect(
-        tracker('cloud').copyWith(rulePayload: 'oixCloud').shouldSuppressOutput,
-        isTrue,
-      );
-      expect(tracker('ordinary').shouldSuppressOutput, isFalse);
+      for (final visible in [
+        tracker('ordinary'),
+        tracker('process rule').copyWith(
+          rule: 'ProcessPath',
+          rulePayload: '/apps/api.example/client',
+        ),
+        tracker(
+          'rule set',
+        ).copyWith(rule: 'RuleSet', rulePayload: 'api.example'),
+        tracker('suffix boundary', metadata: meta(host: 'notapi.example')),
+        tracker('label boundary', metadata: meta(host: 'not_api.example')),
+        tracker('prefix boundary', metadata: meta(host: 'api.example.other')),
+        tracker('chain', chains: ['oixCloud', 'HK 01']),
+        tracker(
+          'node',
+          metadata: const Metadata(
+            host: 'public.example',
+            remoteDestination: 'node.api.example:443',
+            specialProxy: 'oixCloud',
+            processPath: '/apps/oixCloud/client',
+          ),
+        ),
+        tracker('tencent', metadata: meta(host: 'cvm.tencentcloudapi.com')),
+      ]) {
+        expect(visible.hasCloudDestination(matchesCloudHost), isFalse);
+      }
     });
 
     test('returns all when no keywords and empty query', () {
