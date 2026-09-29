@@ -309,6 +309,35 @@ void main() {
     ]);
   });
 
+  test('one failed cleanup does not stop the rest', () async {
+    final dav = DAVClient(
+      _props,
+      resolveRoutes: (_) => ['direct'],
+      createAdapter: (_) =>
+          readAdapter((_) async => ResponseBody.fromBytes([], 200)),
+    );
+    await dav.pingCompleter.future;
+    final attempted = <String>[];
+    dav.client.c.httpClientAdapter = _Adapter((options) async {
+      return switch (options.method) {
+        'PROPFIND' => _listing([
+          'backup_Pixel-8_20260101-000000-000000_$_deviceId.zip',
+          'backup_Pixel-8_20260201-000000-000000_$_deviceId.zip',
+        ]),
+        'DELETE' => () {
+          attempted.add(Uri.decodeFull(options.uri.pathSegments.last));
+          return ResponseBody.fromBytes([], attempted.length == 1 ? 500 : 204);
+        }(),
+        'OPTIONS' => ResponseBody.fromBytes([], 200),
+        _ => ResponseBody.fromBytes([], 201),
+      };
+    });
+    final file = File('${directory.path}/upload.zip');
+    await file.writeAsBytes(archive);
+    await dav.backup(file.path, device: 'Pixel-8', deviceId: _deviceId);
+    expect(attempted, hasLength(2));
+  });
+
   test('concurrent clients serialize upload and retention together', () async {
     final stored = <String>{};
     final firstListing = Completer<void>();
