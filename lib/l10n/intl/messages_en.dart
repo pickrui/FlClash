@@ -155,18 +155,21 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m56(count) => "Devices (${count})";
 
-  static String m57(region) => "Relay ${region}";
+  static String m57(name, profile) =>
+      "${name} is still used by a rule or group in profile ${profile}";
 
-  static String m58(name) =>
+  static String m58(region) => "Relay ${region}";
+
+  static String m59(name) =>
       "This device will leave ${name} and its sign-in will be deleted from this device. If the network is unreachable now, remove the device in the Tailscale admin console.";
 
-  static String m59(build) => "Build: ${build}";
+  static String m60(build) => "Build: ${build}";
 
-  static String m60(version) => "Version: ${version}";
+  static String m61(version) => "Version: ${version}";
 
-  static String m61(label) => "${label} must be a url";
+  static String m62(label) => "${label} must be a url";
 
-  static String m62(count) =>
+  static String m63(count) =>
       "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1998,6 +2001,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleNeedsLogin": MessageLookupByLibrary.simpleMessage(
       "Login required",
     ),
+    "tailscaleNetworkInUse": m57,
     "tailscaleNetworkName": MessageLookupByLibrary.simpleMessage(
       "Network name",
     ),
@@ -2014,8 +2018,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleOpenLoginPage": MessageLookupByLibrary.simpleMessage(
       "Open login page",
     ),
-    "tailscaleRelay": m57,
-    "tailscaleRemoveConfirm": m58,
+    "tailscaleRelay": m58,
+    "tailscaleRemoveConfirm": m59,
     "tailscaleRemoveNetwork": MessageLookupByLibrary.simpleMessage(
       "Remove network",
     ),
@@ -2095,7 +2099,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
       "An AppImage cannot be installed automatically. Replace the running program with the downloaded file; its folder has been opened.",
     ),
-    "updateBuildNumber": m59,
+    "updateBuildNumber": m60,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
       "Cancel download",
     ),
@@ -2138,14 +2142,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseNotesFailed": MessageLookupByLibrary.simpleMessage(
       "Could not load release notes. Please try again.",
     ),
-    "updateVersionNumber": m60,
+    "updateVersionNumber": m61,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("Upgrade plan"),
     "upload": MessageLookupByLibrary.simpleMessage("Upload"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Obtain profile through URL",
     ),
-    "urlTip": m61,
+    "urlTip": m62,
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("Used traffic"),
@@ -2171,7 +2175,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "WebDAV configuration",
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Whitelist mode"),
-    "yearsAgo": m62,
+    "yearsAgo": m63,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };
 }

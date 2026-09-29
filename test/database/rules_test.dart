@@ -28,6 +28,20 @@ void main() {
     await database.close();
   });
 
+  test('a rule target reports its profile, a global rule first', () async {
+    expect(await database.rulesDao.findRuleTarget('Home'), isNull);
+    await database.rulesDao.putProfileAddedRule(
+      1,
+      const Rule(id: 1, value: 'DOMAIN,nas.example,Home'),
+    );
+    expect(await database.rulesDao.findRuleTarget('Home'), (profileId: 1));
+    expect(await database.rulesDao.findRuleTarget('home'), isNull);
+    await database.rulesDao.putGlobalRule(
+      const Rule(id: 2, value: 'IP-CIDR,192.168.30.0/24,Home,no-resolve'),
+    );
+    expect(await database.rulesDao.findRuleTarget('Home'), (profileId: null));
+  });
+
   test('added rules follow profile then global UI order', () async {
     await database.rulesDao.putProfileAddedRule(
       1,

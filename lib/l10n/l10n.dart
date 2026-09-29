@@ -8754,6 +8754,16 @@ class AppLocalizations {
     );
   }
 
+  /// `{name} is still used by a rule or group in profile {profile}`
+  String tailscaleNetworkInUse(Object name, Object profile) {
+    return Intl.message(
+      '$name is still used by a rule or group in profile $profile',
+      name: 'tailscaleNetworkInUse',
+      desc: '',
+      args: [name, profile],
+    );
+  }
+
   /// `Get started`
   String get tailscaleGuideGetStarted {
     return Intl.message(

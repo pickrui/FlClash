@@ -251,6 +251,8 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
     return switch (error) {
       TailscaleNotAppliedException() => l.tailscaleNotAppliedHint,
       TailscaleMissingAuthKeyException() => l.tailscaleEnterAuthKey,
+      TailscaleNetworkInUseException(:final name, :final profile?) =>
+        l.tailscaleNetworkInUse(name, profile),
       TailscaleNetworkInUseException(:final name) => l.customOutboundInUse(
         name,
       ),

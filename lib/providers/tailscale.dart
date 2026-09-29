@@ -28,7 +28,10 @@ class TailscaleMissingAuthKeyException implements Exception {
 class TailscaleNetworkInUseException implements Exception {
   final String name;
 
-  const TailscaleNetworkInUseException(this.name);
+  /// The profile whose rules or groups use the network; null for a global rule.
+  final String? profile;
+
+  const TailscaleNetworkInUseException(this.name, {this.profile});
 }
 
 class TailscaleBackend {
@@ -61,8 +64,8 @@ class TailscaleBackend {
         false;
   }
 
-  Future<bool> hasRuleTarget(String name) =>
-      database.rulesDao.hasRuleTarget(name);
+  Future<({int? profileId})?> findRuleTarget(String name) =>
+      database.rulesDao.findRuleTarget(name);
 
   Future<void> deleteState(String stateId) async {
     final directory = Directory(
@@ -221,12 +224,21 @@ class TailscaleAction {
   }
 
   Future<void> _ensureUnreferenced(String name) async {
-    final inProfile = _ref
-        .read(profilesProvider)
-        .any((profile) => profile.hasCustomOutboundReferences(name));
-    if (inProfile || await _backend.hasRuleTarget(name)) {
-      throw TailscaleNetworkInUseException(name);
+    final profiles = _ref.read(profilesProvider);
+    for (final profile in profiles) {
+      if (profile.hasCustomOutboundReferences(name)) {
+        throw TailscaleNetworkInUseException(name, profile: profile.realLabel);
+      }
     }
+    final rule = await _backend.findRuleTarget(name);
+    if (rule == null) return;
+    final profileId = rule.profileId;
+    throw TailscaleNetworkInUseException(
+      name,
+      profile: profileId == null
+          ? null
+          : profiles.getProfile(profileId)?.realLabel,
+    );
   }
 
   /// Only an unreachable Core, which then runs no session, leaves it to the app.

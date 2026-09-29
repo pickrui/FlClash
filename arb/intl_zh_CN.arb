@@ -1023,6 +1023,7 @@
   "tailscaleOffline": "离线",
   "tailscaleRemoveNetwork": "移除网络",
   "tailscaleRemoveConfirm": "此设备将退出 {name}，并删除此设备上的登录信息；如果当前无法连接该网络，请到 Tailscale 管理后台移除此设备",
+  "tailscaleNetworkInUse": "{name} 仍被配置「{profile}」中的规则或策略组使用",
   "tailscaleGuideGetStarted": "开始使用",
   "tailscaleGuideGetStartedBody": "添加网络并选择“保存并登录”，打开登录页面并授权此设备，登录将自动完成\n使用认证密钥登录时，选择“认证密钥”并填写密钥，无需通过浏览器登录\n启动代理后才能访问此网络，仅登录不会接管任何流量",
   "tailscaleGuideDevices": "设备与 MagicDNS",
