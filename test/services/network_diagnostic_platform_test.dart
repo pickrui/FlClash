@@ -103,6 +103,18 @@ void main() {
       DiagnosticProxyState.matching,
     );
   });
+  test('macOS proxy failure still allows route inspection', () async {
+    final platform = NetworkDiagnosticPlatform(
+      platform: 'macos',
+      runCommand: (exe, _, _) async {
+        if (exe == '/usr/sbin/scutil') throw StateError('unavailable');
+        return ' interface: utun4\n';
+      },
+    );
+    final result = await platform.inspect(7890, 'utun4', CancelToken());
+    expect(result.proxy, DiagnosticProxyState.unknown);
+    expect(result.tunRoute, isTrue);
+  });
   test('Windows route must match the actual core interface', () {
     expect(windows({'routeInterface': 'flclash'}).tunRoute, isTrue);
     expect(windows({'routeInterface': 'Other VPN'}).tunRoute, isFalse);
@@ -464,6 +476,60 @@ void main() {
         proxySampled: true,
         routeSampled: false,
       ));
+    });
+    test('incomplete Windows observations preserve prior conflicts', () async {
+      const previous = ProxyConflictReport(
+        systemProxy: 'localhost:7897',
+        vpnInterface: 'Other VPN',
+      );
+      for (final (proxy, route) in <(Map<String, dynamic>, String)>[
+        ({}, '{"routeInterface":"Other VPN"}'),
+        ({'flags': '1'}, '{"routeInterface":""}'),
+        ({'flags': -1}, '{}'),
+        ({'flags': 3}, '{"routeInterface":"Other VPN","routeHardware":false}'),
+      ]) {
+        final platform = NetworkDiagnosticPlatform(
+          platform: 'windows',
+          readWindowsProxy: () async => proxy,
+          runCommand: (_, _, _) async => route,
+        );
+        final sample = await platform.probeConflicts(7890, null);
+        expect(sample.proxySampled, isFalse, reason: '$proxy');
+        expect(sample.routeSampled, isFalse, reason: route);
+        expect(resolveProxyConflictSample(sample, previous), previous);
+      }
+    });
+    test(
+      'complete Windows observations can report or clear conflicts',
+      () async {
+        for (final hardware in [true, false]) {
+          final platform = NetworkDiagnosticPlatform(
+            platform: 'windows',
+            readWindowsProxy: () async => {'flags': 1},
+            runCommand: (_, _, _) async =>
+                '{"routeInterface":"Adapter","routeHardware":$hardware,'
+                '"routeType":53,"routeDescription":"Wintun Userspace Tunnel"}',
+          );
+          final sample = await platform.probeConflicts(7890, null);
+          expect(sample.proxySampled, isTrue);
+          expect(sample.routeSampled, isTrue);
+          expect(sample.report.vpnInterface, hardware ? isNull : 'Adapter');
+        }
+      },
+    );
+    test('invalid macOS proxy output preserves a prior conflict', () async {
+      const previous = ProxyConflictReport(systemProxy: 'localhost:7897');
+      for (final raw in ['', 'permission denied', '<dictionary> {\n']) {
+        final platform = NetworkDiagnosticPlatform(
+          platform: 'macos',
+          runCommand: (exe, _, _) async =>
+              exe == '/sbin/route' ? ' interface: en0\n' : raw,
+        );
+        final sample = await platform.probeConflicts(7890, null);
+        expect(sample.proxySampled, isFalse, reason: raw);
+        expect(sample.routeSampled, isTrue);
+        expect(resolveProxyConflictSample(sample, previous), previous);
+      }
     });
     test('an unsampled part keeps what was last shown', () {
       const shown = ProxyConflictReport(
