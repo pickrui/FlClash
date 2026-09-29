@@ -55,14 +55,14 @@ func isCloudHost(host string) bool {
 	if matchManagedSuffix(host) || isCloudIP(host) {
 		return true
 	}
-	if domains := cloudOutputDomains.Load(); domains != nil {
-		for _, domain := range *domains {
-			if host == domain || strings.HasSuffix(host, "."+domain) {
-				return true
-			}
-		}
+	if domains := cloudOutputDomains.Load(); domains != nil && hasDomainSuffix(host, *domains) {
+		return true
 	}
-	for _, domain := range dnsAuthSuffixes() {
+	return hasDomainSuffix(host, dnsAuthSuffixes())
+}
+
+func hasDomainSuffix(host string, domains []string) bool {
+	for _, domain := range domains {
 		if host == domain || strings.HasSuffix(host, "."+domain) {
 			return true
 		}
