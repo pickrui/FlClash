@@ -24,7 +24,7 @@ jobs:
     timeout-minutes: 25
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Check format
         run: cargo fmt --manifest-path services/helper/Cargo.toml -- --check
@@ -40,7 +40,7 @@ jobs:
           cache: true
       - run: flutter pub get
       - name: Setup Go for hook regressions
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v7
         with:
           go-version: '1.26.8'
           cache: false

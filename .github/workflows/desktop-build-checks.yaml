@@ -31,10 +31,10 @@ jobs:
           Invoke-WebRequest -Uri "https://win.rustup.rs/aarch64" -OutFile rustup-init.exe
           .\rustup-init.exe -y --default-toolchain stable
           Add-Content $env:GITHUB_PATH "$env:USERPROFILE\.cargo\bin"
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version: '1.26.8'
           cache-dependency-path: core/go.sum
@@ -84,7 +84,7 @@ jobs:
           PYTHON
       - name: Save native hook diagnostics
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: desktop-diagnostics-${{ inputs.platform }}-${{ inputs.arch }}
           include-hidden-files: true
