@@ -293,6 +293,35 @@ void main() {
     });
   });
 
+  test('a Core that is briefly silent does not fail the login', () async {
+    await action.saveNetwork(home);
+    var calls = 0;
+    backend.statusHandler = (_) async {
+      if (++calls == 1) {
+        throw const CoreMethodException(
+          code: 'empty_result',
+          message: 'no response',
+        );
+      }
+      return const TailscaleStatus(rawState: 'Idle');
+    };
+    await action.login(home);
+    expect(backend.logins, [('Home', null)]);
+
+    final previous = TailscaleAction.applyWait;
+    TailscaleAction.applyWait = const Duration(milliseconds: 300);
+    addTearDown(() => TailscaleAction.applyWait = previous);
+    backend.statusHandler = (_) async => throw const CoreMethodException(
+      code: 'empty_result',
+      message: 'no response',
+    );
+    await expectLater(
+      action.login(home),
+      throwsA(isA<CoreMethodException>()),
+      reason: 'a Core that never answers is reported as such',
+    );
+  });
+
   test('cancelling a login never reaches the Core', () async {
     await action.saveNetwork(home);
     await action.login(home, cancelled: () => true);
