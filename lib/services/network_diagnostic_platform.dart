@@ -63,8 +63,27 @@ class ProxyConflictReport {
   int get hashCode => Object.hash(systemProxy, autoConfig, vpnInterface);
 }
 
-/// Incomplete if a sample failed or timed out; then empty proves nothing.
-typedef ProxyConflictSample = ({ProxyConflictReport report, bool complete});
+typedef ProxyConflictSample = ({
+  ProxyConflictReport report,
+  bool proxySampled,
+  bool routeSampled,
+});
+
+/// An unsampled part keeps what was last shown; it neither repeats nor clears.
+ProxyConflictReport resolveProxyConflictSample(
+  ProxyConflictSample sample,
+  ProxyConflictReport? previous,
+) => ProxyConflictReport(
+  systemProxy: sample.proxySampled
+      ? sample.report.systemProxy
+      : previous?.systemProxy,
+  autoConfig: sample.proxySampled
+      ? sample.report.autoConfig
+      : previous?.autoConfig ?? false,
+  vpnInterface: sample.routeSampled
+      ? sample.report.vpnInterface
+      : previous?.vpnInterface,
+);
 
 typedef DiagnosticCommandRunner =
     Future<String> Function(
@@ -149,7 +168,8 @@ class NetworkDiagnosticPlatform {
           autoConfig: proxy?.autoConfig ?? false,
           vpnInterface: vpn?.name,
         ),
-        complete: proxy != null && vpn != null,
+        proxySampled: proxy != null,
+        routeSampled: vpn != null,
       );
     } finally {
       token.cancel();
@@ -178,12 +198,9 @@ class NetworkDiagnosticPlatform {
   ) async {
     try {
       if (platform == 'windows') {
-        return (
-          name: parseWindowsVpnInterface(
-            await _readWindowsRoute(token),
-            ownTunDevice,
-          ),
-        );
+        final route = await _readWindowsRoute(token);
+        if (route['routeInterface'] is! String) return null;
+        return (name: parseWindowsVpnInterface(route, ownTunDevice));
       }
       if (platform == 'macos') {
         final route = await runCommand('/sbin/route', [
@@ -191,6 +208,7 @@ class NetworkDiagnosticPlatform {
           'get',
           '1.1.1.1',
         ], token);
+        if (_macosRouteInterface(route) == null) return null;
         return (name: parseMacosVpnInterface(route, ownTunDevice));
       }
     } catch (_) {}

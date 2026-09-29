@@ -253,13 +253,13 @@ extension SetupControllerExt on AppController {
     if (generation != _startIntentGeneration || !_ref.read(isStartProvider)) {
       return;
     }
-    final report = sample.report;
+    final previous = _reportedProxyConflict;
+    final report = resolveProxyConflictSample(sample, previous);
     if (report.isEmpty) {
-      if (sample.complete) _reportedProxyConflict = null;
+      _reportedProxyConflict = null;
       return;
     }
-    if (report == _reportedProxyConflict ||
-        globalState.navigatorKey.currentContext == null) {
+    if (report == previous || globalState.navigatorKey.currentContext == null) {
       return;
     }
     _reportedProxyConflict = report;
