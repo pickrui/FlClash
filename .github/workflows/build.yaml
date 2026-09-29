@@ -395,6 +395,17 @@ jobs:
         if: matrix.platform == 'android'
         run: sudo apt-get update && sudo apt-get install -y libclang-dev
 
+      - name: Download Go modules with retries
+        working-directory: core
+        shell: bash
+        run: |
+          for attempt in 1 2 3; do
+            go mod download && exit 0
+            echo "go mod download failed (attempt $attempt)" >&2
+            sleep $((attempt * 15))
+          done
+          exit 1
+
       - name: Build Application
         id: build
         shell: bash
