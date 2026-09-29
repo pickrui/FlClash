@@ -310,7 +310,9 @@ class DAVClient {
               isSafeDavFileName(other),
         ),
       ]) {
-        await client.remove(_pathOf(expired));
+        try {
+          await client.remove(_pathOf(expired));
+        } catch (_) {}
       }
     } catch (_) {}
     return name;
