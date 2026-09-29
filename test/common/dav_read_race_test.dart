@@ -256,7 +256,7 @@ void main() {
     await file.writeAsBytes(archive);
     expect(
       await dav.backup(file.path, device: 'Pixel-8', deviceId: _deviceId),
-      matches(r'^backup_Pixel-8_\d{8}-\d{6}-\d{6}_[a-f0-9]{32}\.zip$'),
+      matches(r'^backup_Pixel-8_\d{8}-\d{6}-\d{6}Z_[a-f0-9]{32}\.zip$'),
     );
     expect(writes.where((method) => method == 'MKCOL'), hasLength(1));
     expect(writes.where((method) => method == 'PUT'), hasLength(1));
@@ -277,9 +277,11 @@ void main() {
       return switch (options.method) {
         'PROPFIND' => _listing([
           'backup_Pixel-8_20260101-000000-000000_$_deviceId.zip',
-          'backup_Pixel-8_20260301-000000-000000_$_deviceId.zip',
+          'backup_Pixel-8_20260301-000000-000000Z_$_deviceId.zip',
           'backup_Pixel-8_20260201-000000-000000_$_deviceId.zip',
+          'backup_Pixel-8_20260401-000000-000000Z_$_deviceId.zip.upload-abc',
           'backup_Pixel-8_20250101-000000-000000_$_otherDeviceId.zip',
+          'backup_Pixel-8_20260401-000000-000000Z_$_otherDeviceId.zip.upload-a',
           'backup_Pixel-8_20250101-000000.zip',
           'backup_MacBook_20250101-000000.zip',
           'backup.zip',
@@ -303,6 +305,7 @@ void main() {
     expect(deleted, [
       'backup_Pixel-8_20260201-000000-000000_$_deviceId.zip',
       'backup_Pixel-8_20260101-000000-000000_$_deviceId.zip',
+      'backup_Pixel-8_20260401-000000-000000Z_$_deviceId.zip.upload-abc',
     ]);
   });
 
@@ -384,10 +387,10 @@ void main() {
           }
           return _listing(
             [
-              'backup_Pixel-8_20260101-000000.zip',
-              'backup_MacBook_20260301-000000.zip',
+              'backup_Pixel-8_20260101-000000-000000Z_$_deviceId.zip',
+              'backup_MacBook_20260301-000000-000000_$_otherDeviceId.zip',
               'backup.zip',
-              'backup_Pixel-8_20260401-000000.zip.upload-abc',
+              'backup_Pixel-8_20260401-000000-000000Z_$_deviceId.zip.upload-a',
             ],
             folders: ['old'],
           );
@@ -396,9 +399,9 @@ void main() {
       final backups = await dav.listBackups();
       await waitForReads();
       expect(backups.map((backup) => backup.name), [
-        'backup_MacBook_20260301-000000.zip',
+        'backup_MacBook_20260301-000000-000000_$_otherDeviceId.zip',
         'backup.zip',
-        'backup_Pixel-8_20260101-000000.zip',
+        'backup_Pixel-8_20260101-000000-000000Z_$_deviceId.zip',
       ]);
       expect(backups.map((backup) => backup.device), [
         'MacBook',
@@ -413,13 +416,16 @@ void main() {
     final dav = DAVClient(
       _props,
       resolveRoutes: (_) => ['direct', 'proxy'],
-      createAdapter: (_) => readAdapter(
-        (options) async => ResponseBody.fromBytes(
-          [],
-          options.method == 'PROPFIND' ? 404 : 200,
-        ),
-      ),
+      createAdapter: (route) => readAdapter((options) async {
+        if (options.method != 'PROPFIND') {
+          return ResponseBody.fromBytes([], 200);
+        }
+        if (route == 'direct') return ResponseBody.fromBytes([], 404);
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        throw const SocketException('proxy unreachable');
+      }),
     );
+    await dav.pingCompleter.future;
     expect(await dav.listBackups(), isEmpty);
     await waitForReads();
   });

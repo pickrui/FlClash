@@ -39,9 +39,13 @@ void main() {
   });
 
   test('WebDAV backup names round-trip their device and time', () {
-    final time = DateTime(2026, 9, 29, 8, 5, 3, 123, 456);
-    final name = davBackupFileName('Pixel-8', time, deviceId: _deviceId);
-    expect(name, 'backup_Pixel-8_20260929-080503-123456_$_deviceId.zip');
+    final time = DateTime.utc(2026, 9, 29, 8, 5, 3, 123, 456);
+    final name = davBackupFileName(
+      'Pixel-8',
+      time.toLocal(),
+      deviceId: _deviceId,
+    );
+    expect(name, 'backup_Pixel-8_20260929-080503-123456Z_$_deviceId.zip');
     expect(
       davBackupFileName(
         'Pixel-8',
@@ -53,15 +57,32 @@ void main() {
     expect(isSafeDavFileName(name), true);
 
     final backup = DavBackup.parse(name, size: 7);
-    expect((backup.device, backup.time, backup.size), ('Pixel-8', time, 7));
-    expect(backup.deviceId, _deviceId);
-    final previous = DavBackup.parse('backup_Pixel-8_20260929-080503.zip');
-    expect(previous.device, 'Pixel-8');
-    expect(previous.deviceId, isNull);
+    expect(
+      (backup.device, backup.deviceId, backup.size),
+      ('Pixel-8', _deviceId, 7),
+    );
+    expect(backup.time!.isAtSameMomentAs(time), true);
+    expect(backup.time!.isUtc, false);
+
+    final local = DateTime(2026, 9, 29, 8, 5, 3, 123, 456);
+    final released = DavBackup.parse(
+      'backup_Pixel-8_20260929-080503-123456_$_deviceId.zip',
+    );
+    expect(
+      (released.device, released.deviceId, released.time),
+      ('Pixel-8', _deviceId, local),
+    );
+    expect(DavBackup.parse('backup_Pixel-8_20260929-080503.zip').device, null);
 
     final legacy = DavBackup.parse('backup.zip', modified: time);
-    expect((legacy.device, legacy.time), (null, time));
-    expect(DavBackup.parse('backup_Pixel-8_20261399-000000.zip').device, null);
+    expect(legacy.device, null);
+    expect(legacy.time, time.toLocal());
+    expect(
+      DavBackup.parse(
+        'backup_Pixel-8_20261399-000000-000000Z_$_deviceId.zip',
+      ).device,
+      null,
+    );
   });
 
   test('retention isolates identical models and survives device renames', () {
@@ -80,6 +101,7 @@ void main() {
       DateTime(2026, 2),
       deviceId: _deviceId,
     );
+    const released = 'backup_Pixel-8_20260215-000000-000000_$_deviceId.zip';
     final other = davBackupFileName(
       'Pixel-8',
       DateTime(2025, 1),
@@ -88,15 +110,21 @@ void main() {
     final names = [
       oldest,
       newest,
+      released,
       middle,
       oldest,
       other,
       'backup_Pixel-8_20250101-000000.zip',
       'backup.zip',
     ];
-    expect(expiredDavBackups(names, _deviceId, 1), [middle, oldest]);
-    expect(expiredDavBackups(names, _deviceId, 0), [newest, middle, oldest]);
-    expect(expiredDavBackups(names, _deviceId, 3), isEmpty);
+    expect(expiredDavBackups(names, _deviceId, 1), [released, middle, oldest]);
+    expect(expiredDavBackups(names, _deviceId, 0), [
+      newest,
+      released,
+      middle,
+      oldest,
+    ]);
+    expect(expiredDavBackups(names, _deviceId, 4), isEmpty);
     expect(expiredDavBackups(names, _otherDeviceId, 0), [other]);
   });
 

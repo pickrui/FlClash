@@ -32,8 +32,9 @@ bool isSafeDavFileName(String value) {
 
 final _davBackupStamp = DateFormat('yyyyMMdd-HHmmss', 'en_US');
 
+// v0.8.99 stamped names in local time without the trailing Z.
 final _davBackupName = RegExp(
-  r'^backup_([A-Za-z0-9-]+)_(\d{8}-\d{6})(?:-(\d{6})_([a-f0-9]{32}))?\.zip$',
+  r'^backup_([A-Za-z0-9-]+)_(\d{8}-\d{6})-(\d{6})(Z?)_([a-f0-9]{32})\.zip$',
 );
 
 String davBackupDevice(String name) {
@@ -52,11 +53,12 @@ String davBackupFileName(
   if (!RegExp(r'^[a-f0-9]{32}$').hasMatch(deviceId)) {
     throw const FormatException('invalid WebDAV backup device ID');
   }
-  final fraction = (time.millisecond * 1000 + time.microsecond)
+  final utc = time.toUtc();
+  final fraction = (utc.millisecond * 1000 + utc.microsecond)
       .toString()
       .padLeft(6, '0');
-  return 'backup_${davBackupDevice(device)}_${_davBackupStamp.format(time)}'
-      '-${fraction}_$deviceId.zip';
+  return 'backup_${davBackupDevice(device)}_${_davBackupStamp.format(utc)}'
+      '-${fraction}Z_$deviceId.zip';
 }
 
 class DavBackup {
@@ -81,16 +83,16 @@ class DavBackup {
         ? null
         : DateTime.tryParse(
             '${stamp.substring(0, 8)}T${stamp.substring(9)}'
-            '.${match?[3] ?? '000000'}',
+            '.${match![3]}${match[4]}',
           );
     if (time == null || _davBackupStamp.format(time) != stamp) {
-      return DavBackup(name: name, time: modified, size: size);
+      return DavBackup(name: name, time: modified?.toLocal(), size: size);
     }
     return DavBackup(
       name: name,
       device: match![1],
-      deviceId: match[4],
-      time: time,
+      deviceId: match[5],
+      time: time.toLocal(),
       size: size,
     );
   }
@@ -248,13 +250,14 @@ class DAVClient {
   }
 
   Future<List<DavBackup>> listBackups() async {
-    final List<File> files;
-    try {
-      files = await _raceRead((client, token) => client.readDir(root, token));
-    } on DioException catch (error) {
-      if (error.response?.statusCode == 404) return const [];
-      rethrow;
-    }
+    final files = await _raceRead((client, token) async {
+      try {
+        return await client.readDir(root, token);
+      } on DioException catch (error) {
+        if (error.response?.statusCode == 404) return const <File>[];
+        rethrow;
+      }
+    });
     return sortDavBackups(
       files
           .where((file) => file.isDir != true)
@@ -279,7 +282,6 @@ class DAVClient {
     required String deviceId,
     int keep = defaultDavMaxBackups,
   }) => _backupLock.synchronized(() async {
-    if (keep < 1) throw ArgumentError.value(keep, 'keep', 'must be positive');
     final name = davBackupFileName(device, DateTime.now(), deviceId: deviceId);
     final backupFile = _pathOf(name);
     final temporaryRemotePath = '$backupFile.upload-${utils.id}';
@@ -298,8 +300,16 @@ class DAVClient {
           .where((file) => file.isDir != true)
           .map((file) => file.name)
           .nonNulls
-          .where((other) => other != name);
-      for (final expired in expiredDavBackups(others, deviceId, keep - 1)) {
+          .where((other) => other != name)
+          .toList();
+      for (final expired in [
+        ...expiredDavBackups(others, deviceId, max(keep, 1) - 1),
+        ...others.where(
+          (other) =>
+              other.contains('_$deviceId.zip.upload-') &&
+              isSafeDavFileName(other),
+        ),
+      ]) {
         await client.remove(_pathOf(expired));
       }
     } catch (_) {}
