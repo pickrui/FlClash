@@ -10,11 +10,13 @@ import 'package:material_ui/material_ui.dart';
 
 class PortConflictDialog extends StatefulWidget {
   final int port;
+  final int? suggestedPort;
   final Iterable<int> otherPorts;
 
   const PortConflictDialog({
     super.key,
     required this.port,
+    this.suggestedPort,
     required this.otherPorts,
   });
 
@@ -29,7 +31,7 @@ class _PortConflictDialogState extends State<PortConflictDialog> {
   @override
   void initState() {
     super.initState();
-    final text = widget.port.toString();
+    final text = (widget.suggestedPort ?? widget.port).toString();
     _controller = TextEditingController.fromValue(
       TextEditingValue(
         text: text,
@@ -72,6 +74,12 @@ class _PortConflictDialogState extends State<PortConflictDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(localizations.portUnavailableMessage(widget.port)),
+            if (widget.suggestedPort case final suggestedPort?) ...[
+              const SizedBox(height: 8),
+              Text(localizations.portSuggestionTip(suggestedPort)),
+            ],
+            const SizedBox(height: 8),
+            Text(localizations.portProxyAppTip),
             const SizedBox(height: 20),
             TextFormField(
               controller: _controller,

@@ -2819,6 +2819,26 @@ class AppLocalizations {
     );
   }
 
+  /// `Suggested port {port} has been filled in.`
+  String portSuggestionTip(Object port) {
+    return Intl.message(
+      'Suggested port $port has been filled in.',
+      name: 'portSuggestionTip',
+      desc: '',
+      args: [port],
+    );
+  }
+
+  /// `If another proxy app is running, close it first.`
+  String get portProxyAppTip {
+    return Intl.message(
+      'If another proxy app is running, close it first.',
+      name: 'portProxyAppTip',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Import`
   String get import {
     return Intl.message('Import', name: 'import', desc: '', args: []);
@@ -7644,6 +7664,56 @@ class AppLocalizations {
     return Intl.message(
       'Turn TUN off and on and complete system authorization. If the route differs, check other VPNs. IPv6, UDP and app-specific exclusions need separate checks.',
       name: 'diagTunHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Possible proxy conflict`
+  String get proxyConflictTitle {
+    return Intl.message(
+      'Possible proxy conflict',
+      name: 'proxyConflictTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The system proxy already points to {address}.`
+  String proxyConflictSystemProxy(Object address) {
+    return Intl.message(
+      'The system proxy already points to $address.',
+      name: 'proxyConflictSystemProxy',
+      desc: '',
+      args: [address],
+    );
+  }
+
+  /// `The system proxy uses an automatic configuration script.`
+  String get proxyConflictAutoConfig {
+    return Intl.message(
+      'The system proxy uses an automatic configuration script.',
+      name: 'proxyConflictAutoConfig',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Traffic is routed through another VPN or virtual adapter: {name}.`
+  String proxyConflictVpn(Object name) {
+    return Intl.message(
+      'Traffic is routed through another VPN or virtual adapter: $name.',
+      name: 'proxyConflictVpn',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `If this belongs to another proxy app or VPN, close it; running both can break the connection.`
+  String get proxyConflictHint {
+    return Intl.message(
+      'If this belongs to another proxy app or VPN, close it; running both can break the connection.',
+      name: 'proxyConflictHint',
       desc: '',
       args: [],
     );

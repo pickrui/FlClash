@@ -35,6 +35,35 @@ void main() {
     expect(find.byType(PortConflictDialog), findsNothing);
   });
 
+  testWidgets('prefills the suggested port and asks to close proxy apps', (
+    tester,
+  ) async {
+    int? result;
+    await _openDialog(
+      tester,
+      suggestedPort: 7892,
+      onResult: (value) => result = value,
+    );
+
+    final editable = tester.widget<EditableText>(find.byType(EditableText));
+    expect(
+      editable.controller.selection.textInside(editable.controller.text),
+      '7892',
+    );
+    expect(
+      find.text('Suggested port 7892 has been filled in.'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('If another proxy app is running, close it first.'),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text('Save and retry'));
+    await tester.pumpAndSettle();
+    expect(result, 7892);
+  });
+
   testWidgets('cancel discards the edited port', (tester) async {
     int? result = -1;
     await _openDialog(tester, onResult: (value) => result = value);
@@ -106,6 +135,7 @@ void main() {
 
 Future<void> _openDialog(
   WidgetTester tester, {
+  int? suggestedPort,
   required ValueChanged<int?> onResult,
 }) async {
   await tester.pumpWidget(
@@ -126,9 +156,10 @@ Future<void> _openDialog(
               onPressed: () async {
                 final port = await showDialog<int>(
                   context: context,
-                  builder: (_) => const PortConflictDialog(
+                  builder: (_) => PortConflictDialog(
                     port: 7890,
-                    otherPorts: [7891, 0, 0, 0],
+                    suggestedPort: suggestedPort,
+                    otherPorts: const [7891, 0, 0, 0],
                   ),
                 );
                 onResult(port);
