@@ -6,16 +6,16 @@ GOTOOLCHAIN ?= go1.26.8
 .PHONY: help submodules hooks analyze format lint test test-go test-tailscale test-rust test-all
 
 help:
-	@echo 'make submodules  # update git submodules (Clash.Meta core, flutter_distributor)'
-	@echo 'make hooks       # install the pre-commit, pre-push and commit-msg hooks'
-	@echo 'make analyze     # dart analyze lib test tool'
-	@echo 'make format      # dart format lib test tool'
-	@echo 'make lint        # comment density gate over the working tree'
-	@echo 'make test        # flutter test with the native asset hooks switched off'
-	@echo 'make test-go     # Go core tests'
+	@echo 'make submodules     # update git submodules (Clash.Meta core, flutter_distributor)'
+	@echo 'make hooks          # install the pre-commit, pre-push and commit-msg hooks'
+	@echo 'make analyze        # dart analyze lib test tool'
+	@echo 'make format         # dart format lib test tool'
+	@echo 'make lint           # comment density gate over the working tree'
+	@echo 'make test           # flutter test with the native asset hooks switched off'
+	@echo 'make test-go        # Go core tests'
 	@echo 'make test-tailscale # Tailscale outbound against the official test control server'
-	@echo 'make test-rust   # rust_api and helper tests'
-	@echo 'make test-all    # the three suites above'
+	@echo 'make test-rust      # rust_api and helper tests'
+	@echo 'make test-all       # test, test-go and test-rust'
 	@echo ''
 	@echo 'Packaging stays with setup.dart; see AGENTS.md.'
 
