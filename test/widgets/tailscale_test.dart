@@ -6,6 +6,7 @@
 import 'dart:async';
 
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/tailscale.dart';
 import 'package:fl_clash/views/tailscale/network.dart';
@@ -58,6 +59,7 @@ Future<(FakeTailscaleBackend, ProviderContainer)> _pump(
         viewSizeProvider.overrideWithBuild((_, _) => const Size(1000, 2400)),
         tailscaleNetworksProvider.overrideWithBuild((_, _) => networks),
         tailscaleBackendProvider.overrideWithValue(backend),
+        profilesProvider.overrideWithBuild((_, _) => const []),
       ],
       child: page,
     ),
@@ -266,6 +268,26 @@ void main() {
     await tester.pumpAndSettle();
     expect(container.read(tailscaleNetworksProvider), isEmpty);
     expect(backend.forgotten, [('Home', 'tailscale-networks/state')]);
+    await _unmount(tester);
+  });
+
+  testWidgets('a network a rule still uses stays with a reason', (
+    tester,
+  ) async {
+    final (backend, container) = await _pump(
+      tester,
+      const TailscaleNetworkPage(networkId: 'home'),
+      networks: const [_home],
+    );
+    backend.ruleTargets.add('Home');
+    await tester.ensureVisible(find.text('Remove network'));
+    await tester.tap(find.text('Remove network'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Remove'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Home is still referenced'), findsOneWidget);
+    expect(container.read(tailscaleNetworksProvider), const [_home]);
+    expect(backend.forgotten, isEmpty);
     await _unmount(tester);
   });
 }

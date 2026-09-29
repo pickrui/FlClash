@@ -660,6 +660,26 @@ void main() {
       expect(File(validatedPath!).existsSync(), isFalse);
     },
   );
+
+  test('a silent Core is not mistaken for an absent network', () async {
+    Future<Map<String, dynamic>?> status() =>
+        handler.invokeMethod<Map<String, dynamic>>(
+          method: CoreMethod.getTailscaleStatus,
+          arguments: any(named: 'arguments'),
+          timeout: any(named: 'timeout'),
+        );
+    when(status).thenAnswer((_) async => {'state': 'Absent', 'peers': []});
+    expect(await controller.getTailscaleStatus('Home'), isNull);
+
+    when(status).thenAnswer((_) async => {'state': 'Running', 'peers': []});
+    expect((await controller.getTailscaleStatus('Home'))?.isRunning, true);
+
+    when(status).thenAnswer((_) async => null);
+    await expectLater(
+      controller.getTailscaleStatus('Home'),
+      throwsA(isA<CoreMethodException>()),
+    );
+  });
 }
 
 class _TempPaths extends PathProviderPlatform {

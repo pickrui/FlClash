@@ -251,6 +251,9 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
     return switch (error) {
       TailscaleNotAppliedException() => l.tailscaleNotAppliedHint,
       TailscaleMissingAuthKeyException() => l.tailscaleEnterAuthKey,
+      TailscaleNetworkInUseException(:final name) => l.customOutboundInUse(
+        name,
+      ),
       CoreMethodException(:final message) => message,
       _ => error.toString(),
     };
@@ -309,7 +312,10 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
       _loginStartedAt = DateTime.now();
     });
     try {
-      await action.login(saved);
+      await action.login(
+        saved,
+        cancelled: () => !mounted || attempt != _loginAttempt,
+      );
       if (mounted) unawaited(_poll());
     } catch (error) {
       if (!mounted || attempt != _loginAttempt) return;
@@ -359,6 +365,12 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
     setState(() => _busy = true);
     try {
       await action.removeNetwork(saved);
+    } on TailscaleNetworkInUseException catch (error) {
+      if (!mounted) return;
+      setState(() => _busy = false);
+      _startPolling();
+      await _showError(_describeError(error), title: l.tip);
+      return;
     } catch (error) {
       // The network is already gone from the config; only its cleanup failed.
       if (mounted) await _showError(_describeError(error), title: l.tip);
@@ -554,13 +566,8 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
               selected: {_loginMethod},
               onSelectionChanged: _busy
                   ? null
-                  : (selection) {
-                      setState(() => _loginMethod = selection.first);
-                      final saved = _saved;
-                      if (_hasSavedAuthKey == null && saved != null) {
-                        unawaited(_loadSavedAuthKey(saved));
-                      }
-                    },
+                  : (selection) =>
+                        setState(() => _loginMethod = selection.first),
             ),
           ],
         ),

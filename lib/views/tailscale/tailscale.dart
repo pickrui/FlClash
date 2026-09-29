@@ -85,6 +85,7 @@ class _TailscaleViewState extends ConsumerState<TailscaleView> {
   }
 
   void _startPolling() {
+    _timer?.cancel();
     unawaited(_refresh());
     _timer = Timer.periodic(_pollInterval, (_) => unawaited(_refresh()));
   }
