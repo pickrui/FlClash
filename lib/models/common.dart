@@ -119,7 +119,7 @@ extension TrackerInfoExt on TrackerInfo {
   bool get shouldSuppressOutput => hasCloudDestination(Secrets.isCloudHost);
 
   bool hasCloudDestination(bool Function(String value) isCloudHost) =>
-      isCloudHost(metadata.host) || isCloudHost(metadata.destinationIP);
+      isCloudHost(metadata.host);
 
   String get desc {
     var text = '${metadata.network}://';
