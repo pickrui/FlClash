@@ -111,9 +111,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m42(name) => "ノード ${name} はこの位置では使用できません";
 
-  static String m43(address) => "システムプロキシはすでに ${address} に設定されています";
+  static String m43(address) => "起動前、システムプロキシは ${address} に設定されていました";
 
-  static String m44(name) => "通信が別の VPN または仮想アダプター ${name} を経由しています";
+  static String m44(name) => "起動前、通信は別の VPN または仮想アダプター ${name} を経由していました";
 
   static String m45(count) => "${count}日";
 
@@ -1308,7 +1308,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "proxyChains": MessageLookupByLibrary.simpleMessage("プロキシチェーン"),
     "proxyConflictAutoConfig": MessageLookupByLibrary.simpleMessage(
-      "システムプロキシが自動構成スクリプトを使用しています",
+      "起動前、システムプロキシは自動構成スクリプトを使用していました",
     ),
     "proxyConflictHint": MessageLookupByLibrary.simpleMessage(
       "同時に使用すると接続に問題が起きるため、他のプロキシアプリや VPN であれば終了してください",

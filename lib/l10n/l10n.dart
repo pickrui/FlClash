@@ -7679,30 +7679,30 @@ class AppLocalizations {
     );
   }
 
-  /// `The system proxy already points to {address}.`
+  /// `Before starting, the system proxy pointed to {address}.`
   String proxyConflictSystemProxy(Object address) {
     return Intl.message(
-      'The system proxy already points to $address.',
+      'Before starting, the system proxy pointed to $address.',
       name: 'proxyConflictSystemProxy',
       desc: '',
       args: [address],
     );
   }
 
-  /// `The system proxy uses an automatic configuration script.`
+  /// `Before starting, the system proxy used an automatic configuration script.`
   String get proxyConflictAutoConfig {
     return Intl.message(
-      'The system proxy uses an automatic configuration script.',
+      'Before starting, the system proxy used an automatic configuration script.',
       name: 'proxyConflictAutoConfig',
       desc: '',
       args: [],
     );
   }
 
-  /// `Traffic is routed through another VPN or virtual adapter: {name}.`
+  /// `Before starting, traffic was routed through another VPN or virtual adapter: {name}.`
   String proxyConflictVpn(Object name) {
     return Intl.message(
-      'Traffic is routed through another VPN or virtual adapter: $name.',
+      'Before starting, traffic was routed through another VPN or virtual adapter: $name.',
       name: 'proxyConflictVpn',
       desc: '',
       args: [name],

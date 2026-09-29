@@ -108,9 +108,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m42(name) => "节点 ${name} 当前不可用于此位置";
 
-  static String m43(address) => "系统代理已指向 ${address}";
+  static String m43(address) => "启动前系统代理指向 ${address}";
 
-  static String m44(name) => "网络流量正经过其他 VPN 或虚拟网卡 ${name}";
+  static String m44(name) => "启动前网络流量经过其他 VPN 或虚拟网卡 ${name}";
 
   static String m45(count) => "${count}天";
 
@@ -1137,7 +1137,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "proxyChains": MessageLookupByLibrary.simpleMessage("链式代理"),
     "proxyConflictAutoConfig": MessageLookupByLibrary.simpleMessage(
-      "系统代理正在使用自动配置脚本",
+      "启动前系统代理使用自动配置脚本",
     ),
     "proxyConflictHint": MessageLookupByLibrary.simpleMessage(
       "如果这是其他代理软件或 VPN，请将其关闭，同时运行可能导致连接异常",
