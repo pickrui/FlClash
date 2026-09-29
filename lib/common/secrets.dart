@@ -11,6 +11,9 @@ import 'package:crypto/crypto.dart';
 bool containsCloudInformation(String value, Iterable<String> hosts) =>
     _containsCloudInformation(value, _cloudHostPattern(hosts));
 
+bool isCloudHost(String value, Iterable<String> hosts) =>
+    _cloudHostPattern(hosts, exact: true)?.hasMatch(value) ?? false;
+
 bool _containsCloudInformation(String value, RegExp? hostPattern) {
   final normalized = value.toLowerCase();
   return normalized.contains('oixcloud') ||
@@ -19,14 +22,16 @@ bool _containsCloudInformation(String value, RegExp? hostPattern) {
       (hostPattern?.hasMatch(value) ?? false);
 }
 
-RegExp? _cloudHostPattern(Iterable<String> hosts) {
+RegExp? _cloudHostPattern(Iterable<String> hosts, {bool exact = false}) {
   final domains = {
     for (final host in hosts)
       RegExp.escape(host.trim().toLowerCase().replaceFirst(RegExp(r'\.$'), '')),
   }..remove('');
   if (domains.isEmpty) return null;
+  final prefix = exact ? '^' : '(^|[^a-z0-9_.-])';
+  final suffix = exact ? r'$' : r'($|[^a-z0-9_.-])';
   return RegExp(
-    '(^|[^a-z0-9_.-])(?:[a-z0-9_-]+\\.)*(?:${domains.join('|')})\\.?(\$|[^a-z0-9_.-])',
+    '$prefix(?:[a-z0-9_-]+\\.)*(?:${domains.join('|')})\\.?$suffix',
     caseSensitive: false,
   );
 }
@@ -90,6 +95,14 @@ class Secrets {
 
   static bool shouldSuppressOutput(String value) =>
       _containsCloudInformation(value, _cloudHosts);
+
+  static final RegExp? _cloudDestinationHosts = _cloudHostPattern(
+    cloudDomains,
+    exact: true,
+  );
+
+  static bool isCloudHost(String value) =>
+      _cloudDestinationHosts?.hasMatch(value) ?? false;
 
   static String get primaryApiDomain => _requireDomain(apiDomain, 'API_DOMAIN');
 

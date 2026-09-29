@@ -116,18 +116,10 @@ abstract class TrackerInfo with _$TrackerInfo {
 }
 
 extension TrackerInfoExt on TrackerInfo {
-  bool get shouldSuppressOutput => [
-    metadata.host,
-    metadata.destinationIP,
-    metadata.remoteDestination,
-    metadata.process,
-    metadata.processPath,
-    metadata.specialRules,
-    metadata.specialProxy,
-    rule,
-    rulePayload,
-    ...chains,
-  ].any(Secrets.shouldSuppressOutput);
+  bool get shouldSuppressOutput => hasCloudDestination(Secrets.isCloudHost);
+
+  bool hasCloudDestination(bool Function(String value) isCloudHost) =>
+      isCloudHost(metadata.host) || isCloudHost(metadata.destinationIP);
 
   String get desc {
     var text = '${metadata.network}://';
