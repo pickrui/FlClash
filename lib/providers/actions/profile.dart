@@ -172,7 +172,8 @@ extension ProfilesControllerExt on AppController {
         : storageLock.synchronized(commit);
   }
 
-  Future<Profile> saveProfileFile(Profile profile, Uint8List bytes) {
+  Future<Profile> saveProfileFile(Profile profile, Uint8List bytes) async {
+    await ensureCoreReadyOrThrow();
     return persistProfile(
       profile,
       () => profile.saveFile(bytes),
@@ -332,6 +333,7 @@ extension ProfilesControllerExt on AppController {
     }
     toProfiles();
     final profile = await loadingRun(tag: LoadingTag.profiles, () async {
+      await ensureCoreReadyOrThrow();
       return _runWithCertificateRetry(() async {
         final profile = Profile.normal(url: url);
         final prepared = await profile.prepareUpdate();

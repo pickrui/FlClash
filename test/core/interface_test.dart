@@ -195,6 +195,30 @@ void main() {
     },
   );
 
+  test('a missing response from a disconnected Core says so', () async {
+    final handler = _FakeCoreHandler()..connected = false;
+    await expectLater(
+      handler.validateConfigWithBytes('encoded-config'),
+      throwsA(
+        isA<CoreMethodException>()
+            .having((error) => error.code, 'code', 'transport_disconnected')
+            .having((error) => error.isCoreUnavailable, 'unavailable', isTrue)
+            .having(
+              (error) => error.message,
+              'message',
+              contains(CoreMethod.validateConfigWithBytes.name),
+            ),
+      ),
+    );
+    expect(await handler.isInit, isFalse);
+
+    handler.connected = true;
+    await expectLater(
+      handler.validateConfigWithBytes('encoded-config'),
+      throwsA(_missingResponse(CoreMethod.validateConfigWithBytes)),
+    );
+  });
+
   test('a requested log stream is renewed once the Core initializes', () async {
     const params = InitParams(homeDir: '/tmp/flclash', version: 1);
     final handler = _FakeCoreHandler()..response = true;
@@ -248,9 +272,10 @@ class _FakeCoreHandler extends CoreHandlerInterface {
   Object? arguments;
   Duration? timeout;
   final methods = <CoreMethod>[];
+  bool connected = true;
 
   @override
-  bool get isConnected => true;
+  bool get isConnected => connected;
 
   @override
   Future<bool> destroy() async => true;

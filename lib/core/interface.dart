@@ -133,6 +133,12 @@ abstract class CoreHandlerInterface with CoreInterface {
     Object? arguments,
   }) async {
     final result = await _invokeMethod<T>(method: method, arguments: arguments);
+    if (result == null && !isConnected) {
+      throw CoreMethodException(
+        code: 'transport_disconnected',
+        message: 'Core is not connected for ${method.name}',
+      );
+    }
     if (result == null) {
       throw CoreMethodException(
         code: 'empty_result',
