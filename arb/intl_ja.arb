@@ -1023,6 +1023,7 @@
   "tailscaleOffline": "オフライン",
   "tailscaleRemoveNetwork": "ネットワークを削除",
   "tailscaleRemoveConfirm": "このデバイスは {name} から退出し、このデバイス上のログイン情報が削除されます。現在ネットワークに接続できない場合は、Tailscale の管理コンソールでデバイスを削除してください",
+  "tailscaleNetworkInUse": "{name} はプロファイル「{profile}」のルールまたはグループでまだ使われています",
   "tailscaleGuideGetStarted": "はじめに",
   "tailscaleGuideGetStartedBody": "ネットワークを追加して「保存してログイン」を選び、ログインページでこのデバイスを承認すると自動でログインが完了します\n認証キーでログインする場合は「認証キー」を選んでキーを入力します。ブラウザは不要です\nネットワークはプロキシの実行中のみ使えます。ログインしただけでは通信は経由しません",
   "tailscaleGuideDevices": "デバイスと MagicDNS",

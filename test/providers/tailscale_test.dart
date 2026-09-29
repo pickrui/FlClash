@@ -210,7 +210,7 @@ void main() {
   group('references', () {
     test('a rule target blocks a rename and a removal', () async {
       await action.saveNetwork(home);
-      backend.ruleTargets.add('Home');
+      backend.ruleTargets['Home'] = null;
       await expectLater(
         action.saveNetwork(home.copyWith(name: 'Office')),
         throwsA(
@@ -238,6 +238,7 @@ void main() {
       for (final profile in const [
         Profile(
           id: 1,
+          label: 'Office',
           autoUpdateDuration: Duration(days: 1),
           customProxyGroups: [
             ProxyGroup(
@@ -249,6 +250,7 @@ void main() {
         ),
         Profile(
           id: 2,
+          label: 'Travel',
           autoUpdateDuration: Duration(days: 1),
           matchTarget: 'Home',
         ),
@@ -257,10 +259,37 @@ void main() {
         container.invalidate(profilesProvider);
         await expectLater(
           action.removeNetwork(home),
-          throwsA(isA<TailscaleNetworkInUseException>()),
+          throwsA(
+            isA<TailscaleNetworkInUseException>().having(
+              (error) => error.profile,
+              'profile',
+              profile.label,
+            ),
+          ),
         );
       }
       expect(networks(), [home]);
+    });
+
+    test('a stored rule names its profile, a global one none', () async {
+      await action.saveNetwork(home);
+      profiles = const [
+        Profile(id: 3, label: 'Lab', autoUpdateDuration: Duration(days: 1)),
+      ];
+      container.invalidate(profilesProvider);
+      for (final (profileId, label) in [(3, 'Lab'), (null, null)]) {
+        backend.ruleTargets['Home'] = profileId;
+        await expectLater(
+          action.removeNetwork(home),
+          throwsA(
+            isA<TailscaleNetworkInUseException>().having(
+              (error) => error.profile,
+              'profile',
+              label,
+            ),
+          ),
+        );
+      }
     });
   });
 

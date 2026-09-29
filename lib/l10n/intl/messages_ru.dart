@@ -155,18 +155,21 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m56(count) => "Устройства (${count})";
 
-  static String m57(region) => "Ретранслятор ${region}";
+  static String m57(name, profile) =>
+      "${name} все еще используется правилом или группой в профиле «${profile}»";
 
-  static String m58(name) =>
+  static String m58(region) => "Ретранслятор ${region}";
+
+  static String m59(name) =>
       "Это устройство выйдет из сети ${name}, а данные входа будут удалены с него. Если сеть сейчас недоступна, удалите устройство в консоли администратора Tailscale.";
 
-  static String m59(build) => "Номер сборки: ${build}";
+  static String m60(build) => "Номер сборки: ${build}";
 
-  static String m60(version) => "Версия: ${version}";
+  static String m61(version) => "Версия: ${version}";
 
-  static String m61(label) => "${label} должен быть URL";
+  static String m62(label) => "${label} должен быть URL";
 
-  static String m62(count) =>
+  static String m63(count) =>
       "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2093,6 +2096,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleNeedsLogin": MessageLookupByLibrary.simpleMessage(
       "Требуется вход",
     ),
+    "tailscaleNetworkInUse": m57,
     "tailscaleNetworkName": MessageLookupByLibrary.simpleMessage(
       "Название сети",
     ),
@@ -2109,8 +2113,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleOpenLoginPage": MessageLookupByLibrary.simpleMessage(
       "Открыть страницу входа",
     ),
-    "tailscaleRelay": m57,
-    "tailscaleRemoveConfirm": m58,
+    "tailscaleRelay": m58,
+    "tailscaleRemoveConfirm": m59,
     "tailscaleRemoveNetwork": MessageLookupByLibrary.simpleMessage(
       "Удалить сеть",
     ),
@@ -2198,7 +2202,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
       "AppImage нельзя установить автоматически. Замените текущую программу скачанным файлом; его папка открыта.",
     ),
-    "updateBuildNumber": m59,
+    "updateBuildNumber": m60,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
       "Отменить загрузку",
     ),
@@ -2243,14 +2247,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseNotesFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось загрузить список изменений. Повторите попытку.",
     ),
-    "updateVersionNumber": m60,
+    "updateVersionNumber": m61,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("Улучшить тариф"),
     "upload": MessageLookupByLibrary.simpleMessage("Загрузка"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Получить профиль через URL",
     ),
-    "urlTip": m61,
+    "urlTip": m62,
     "useHosts": MessageLookupByLibrary.simpleMessage("Использовать hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Использовать системные hosts",
@@ -2282,7 +2286,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "whitelistMode": MessageLookupByLibrary.simpleMessage(
       "Режим белого списка",
     ),
-    "yearsAgo": m62,
+    "yearsAgo": m63,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Упрощенный китайский"),
   };
 }

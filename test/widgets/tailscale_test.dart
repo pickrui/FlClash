@@ -279,7 +279,7 @@ void main() {
       const TailscaleNetworkPage(networkId: 'home'),
       networks: const [_home],
     );
-    backend.ruleTargets.add('Home');
+    backend.ruleTargets['Home'] = null;
     await tester.ensureVisible(find.text('Remove network'));
     await tester.tap(find.text('Remove network'));
     await tester.pumpAndSettle();

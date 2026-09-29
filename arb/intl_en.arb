@@ -1023,6 +1023,7 @@
   "tailscaleOffline": "Offline",
   "tailscaleRemoveNetwork": "Remove network",
   "tailscaleRemoveConfirm": "This device will leave {name} and its sign-in will be deleted from this device. If the network is unreachable now, remove the device in the Tailscale admin console.",
+  "tailscaleNetworkInUse": "{name} is still used by a rule or group in profile {profile}",
   "tailscaleGuideGetStarted": "Get started",
   "tailscaleGuideGetStartedBody": "Add a network and choose \"Save and log in\". Open the login page and authorize this device; sign-in completes on its own.\nTo sign in with an auth key, choose \"Auth key\" and enter it. No browser is needed.\nThe network carries traffic only while the proxy runs. Signing in alone routes nothing.",
   "tailscaleGuideDevices": "Devices and MagicDNS",

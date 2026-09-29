@@ -107,7 +107,9 @@ class RulesDao extends DatabaseAccessor<Database> with _$RulesDaoMixin {
         );
       });
 
-  Future<bool> hasRuleTarget(String target) async {
+  /// Null when no stored rule routes to [target]; a global rule, listed
+  /// first, has no profile.
+  Future<({int? profileId})?> findRuleTarget(String target) async {
     final query =
         selectOnly(rules).join([
             innerJoin(
@@ -115,10 +117,14 @@ class RulesDao extends DatabaseAccessor<Database> with _$RulesDaoMixin {
               profileRuleLinks.ruleId.equalsExp(rules.id),
             ),
           ])
-          ..addColumns([rules.id])
+          ..addColumns([profileRuleLinks.profileId])
           ..where(rules.ruleTarget.equals(target))
+          ..orderBy([OrderingTerm.asc(profileRuleLinks.profileId)])
           ..limit(1);
-    return await query.getSingleOrNull() != null;
+    final row = await query.getSingleOrNull();
+    return row == null
+        ? null
+        : (profileId: row.read(profileRuleLinks.profileId));
   }
 
   Selectable<Rule> allGlobalAddedRules() {
