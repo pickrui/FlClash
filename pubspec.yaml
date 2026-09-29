@@ -57,7 +57,8 @@ dependencies:
   device_info_plus: ^12.2.0
   wifi_ssid:
     path: plugins/wifi_ssid
-  connectivity_plus: 7.3.1
+  # 7.1+ needs the Xcode 26.1 SDK; the macos-15-intel runner builds with 16.4.
+  connectivity_plus: 7.0.0
   screen_retriever: ^0.2.0
   defer_pointer: ^0.0.2
   flutter_riverpod: ^3.0.0
