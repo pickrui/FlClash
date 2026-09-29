@@ -107,6 +107,20 @@ class RulesDao extends DatabaseAccessor<Database> with _$RulesDaoMixin {
         );
       });
 
+  Future<bool> hasRuleTarget(String target) async {
+    final query =
+        selectOnly(rules).join([
+            innerJoin(
+              profileRuleLinks,
+              profileRuleLinks.ruleId.equalsExp(rules.id),
+            ),
+          ])
+          ..addColumns([rules.id])
+          ..where(rules.ruleTarget.equals(target))
+          ..limit(1);
+    return await query.getSingleOrNull() != null;
+  }
+
   Selectable<Rule> allGlobalAddedRules() {
     return _get();
   }

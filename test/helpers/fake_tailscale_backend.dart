@@ -13,6 +13,7 @@ class FakeTailscaleBackend extends TailscaleBackend {
   Object? statusError;
   Object? forgetError;
   bool applied = true;
+  final ruleTargets = <String>{};
   final authKeys = <String, String>{};
   final logins = <(String, String?)>[];
   final logouts = <String>[];
@@ -62,6 +63,9 @@ class FakeTailscaleBackend extends TailscaleBackend {
 
   @override
   bool isApplied(TailscaleNetwork network) => applied;
+
+  @override
+  Future<bool> hasRuleTarget(String name) async => ruleTargets.contains(name);
 
   @override
   Future<void> deleteState(String stateId) async {

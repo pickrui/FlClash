@@ -83,6 +83,9 @@ extension TailscaleNetworkExt on TailscaleNetwork {
   }
 }
 
+/// The Core's answer for a network outside the running config.
+const tailscaleAbsentState = 'Absent';
+
 /// Backend states reported by the Core; [idle] means no session has started.
 enum TailscaleState {
   idle,

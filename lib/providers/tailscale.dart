@@ -7,7 +7,9 @@ import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/core/core.dart';
+import 'package:fl_clash/database/database.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/utils/safe_storage.dart';
@@ -21,6 +23,12 @@ class TailscaleNotAppliedException implements Exception {
 
 class TailscaleMissingAuthKeyException implements Exception {
   const TailscaleMissingAuthKeyException();
+}
+
+class TailscaleNetworkInUseException implements Exception {
+  final String name;
+
+  const TailscaleNetworkInUseException(this.name);
 }
 
 class TailscaleBackend {
@@ -44,8 +52,17 @@ class TailscaleBackend {
 
   Future<void> deleteAuthKey(String key) => SafeStorage.delete(key);
 
-  bool isApplied(TailscaleNetwork network) =>
-      globalState.lastSetupState?.tailscaleNetworks.contains(network) ?? false;
+  /// The learned MagicDNS suffix only changes DNS, never the outbound.
+  bool isApplied(TailscaleNetwork network) {
+    final outbound = network.copyWith(magicDnsSuffix: '');
+    return globalState.lastSetupState?.tailscaleNetworks.any(
+          (applied) => applied.copyWith(magicDnsSuffix: '') == outbound,
+        ) ??
+        false;
+  }
+
+  Future<bool> hasRuleTarget(String name) =>
+      database.rulesDao.hasRuleTarget(name);
 
   Future<void> deleteState(String stateId) async {
     final directory = Directory(
@@ -93,6 +110,9 @@ class TailscaleAction {
     String? authKey,
   }) async {
     final previous = this.network(network.id);
+    if (previous != null && previous.name != network.name) {
+      await _ensureUnreferenced(previous.name);
+    }
     var next = network;
     if (previous != null &&
         previous.effectiveControlUrl != network.effectiveControlUrl) {
@@ -114,7 +134,10 @@ class TailscaleAction {
   }
 
   /// Waiting for the applied config keeps the login off a replaced outbound.
-  Future<void> login(TailscaleNetwork network) async {
+  Future<void> login(
+    TailscaleNetwork network, {
+    bool Function()? cancelled,
+  }) async {
     String? authKey;
     if (network.loginMethod == TailscaleLoginMethod.authKey) {
       authKey = await _backend.readAuthKey(network.authKeyStorageKey);
@@ -124,6 +147,7 @@ class TailscaleAction {
     }
     final deadline = DateTime.now().add(applyWait);
     while (true) {
+      if (cancelled?.call() ?? false) return;
       final current = _currentNetwork(network);
       if (current == null) throw const TailscaleNotAppliedException();
       if (_backend.isApplied(current) &&
@@ -137,6 +161,7 @@ class TailscaleAction {
       }
       await Future<void>.delayed(_applyPoll);
     }
+    if (cancelled?.call() ?? false) return;
     await _backend.login(network.name, authKey: authKey);
   }
 
@@ -157,6 +182,7 @@ class TailscaleAction {
 
   /// Config first, so a failed cleanup leaves no half-removed network behind.
   Future<void> removeNetwork(TailscaleNetwork network) async {
+    await _ensureUnreferenced(network.name);
     _ref.read(tailscaleNetworksProvider.notifier).remove(network.id);
     try {
       await _forgetState(network);
@@ -192,6 +218,15 @@ class TailscaleAction {
       }
     }
     return status;
+  }
+
+  Future<void> _ensureUnreferenced(String name) async {
+    final inProfile = _ref
+        .read(profilesProvider)
+        .any((profile) => profile.hasCustomOutboundReferences(name));
+    if (inProfile || await _backend.hasRuleTarget(name)) {
+      throw TailscaleNetworkInUseException(name);
+    }
   }
 
   /// Only an unreachable Core, which then runs no session, leaves it to the app.

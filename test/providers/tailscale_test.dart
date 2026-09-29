@@ -6,9 +6,12 @@
 import 'dart:async';
 
 import 'package:fl_clash/core/core.dart';
+import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/tailscale.dart';
+import 'package:fl_clash/state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:riverpod/riverpod.dart';
 
@@ -19,11 +22,16 @@ void main() {
   late FakeTailscaleBackend backend;
   late ProviderContainer container;
   late TailscaleAction action;
+  var profiles = <Profile>[];
 
   setUp(() {
     backend = FakeTailscaleBackend();
+    profiles = [];
     container = ProviderContainer(
-      overrides: [tailscaleBackendProvider.overrideWithValue(backend)],
+      overrides: [
+        tailscaleBackendProvider.overrideWithValue(backend),
+        profilesProvider.overrideWithBuild((_, _) => profiles),
+      ],
     );
     container.listen(tailscaleNetworksProvider, (_, _) {});
     action = container.read(tailscaleActionProvider);
@@ -198,6 +206,99 @@ void main() {
       expect(await status, isNull);
     },
   );
+
+  group('references', () {
+    test('a rule target blocks a rename and a removal', () async {
+      await action.saveNetwork(home);
+      backend.ruleTargets.add('Home');
+      await expectLater(
+        action.saveNetwork(home.copyWith(name: 'Office')),
+        throwsA(
+          isA<TailscaleNetworkInUseException>().having(
+            (error) => error.name,
+            'name',
+            'Home',
+          ),
+        ),
+      );
+      await expectLater(
+        action.removeNetwork(home),
+        throwsA(isA<TailscaleNetworkInUseException>()),
+      );
+      expect(networks().single.name, 'Home');
+      expect(backend.forgotten, isEmpty);
+
+      backend.ruleTargets.clear();
+      await action.saveNetwork(home.copyWith(name: 'Office'));
+      expect(networks().single.name, 'Office');
+    });
+
+    test('a profile group or match target blocks a removal', () async {
+      await action.saveNetwork(home);
+      for (final profile in const [
+        Profile(
+          id: 1,
+          autoUpdateDuration: Duration(days: 1),
+          customProxyGroups: [
+            ProxyGroup(
+              name: 'Work',
+              type: GroupType.Selector,
+              proxies: ['Home'],
+            ),
+          ],
+        ),
+        Profile(
+          id: 2,
+          autoUpdateDuration: Duration(days: 1),
+          matchTarget: 'Home',
+        ),
+      ]) {
+        profiles = [profile];
+        container.invalidate(profilesProvider);
+        await expectLater(
+          action.removeNetwork(home),
+          throwsA(isA<TailscaleNetworkInUseException>()),
+        );
+      }
+      expect(networks(), [home]);
+    });
+  });
+
+  test('cancelling a login never reaches the Core', () async {
+    await action.saveNetwork(home);
+    await action.login(home, cancelled: () => true);
+    expect(backend.logins, isEmpty);
+
+    backend.applied = false;
+    var cancelled = false;
+    final login = action.login(home, cancelled: () => cancelled);
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+    cancelled = true;
+    await login;
+    expect(backend.logins, isEmpty);
+  });
+
+  test('a learned MagicDNS suffix keeps the running network applied', () {
+    final previous = globalState.lastSetupState;
+    addTearDown(() => globalState.lastSetupState = previous);
+    globalState.lastSetupState = const SetupState(
+      profileId: 1,
+      profileLastUpdateDate: null,
+      overwriteType: OverwriteType.standard,
+      addedRules: [],
+      proxyChains: [],
+      profileProxies: [],
+      customProxyGroups: [],
+      customRules: [],
+      script: null,
+      overrideDns: false,
+      dns: Dns(),
+      tailscaleNetworks: [home],
+    );
+    const real = TailscaleBackend();
+    expect(real.isApplied(home.copyWith(magicDnsSuffix: 'tail1.ts.net')), true);
+    expect(real.isApplied(home.copyWith(hostname: 'laptop')), false);
+  });
 
   group('removeNetwork', () {
     test('drops the network and its identity and key', () async {

@@ -161,14 +161,14 @@ rules: ["MATCH,DIRECT"]
 	}
 }
 
-func TestTailscaleStatusIsNilOutsideRunningConfig(t *testing.T) {
+func TestTailscaleStatusIsAbsentOutsideRunningConfig(t *testing.T) {
 	previousProxies := tunnel.Proxies()
 	previousProviders := tunnel.Providers()
 	t.Cleanup(func() { tunnel.UpdateProxies(previousProxies, previousProviders) })
 	tunnel.UpdateProxies(nil, nil)
 
 	status, err := handleGetTailscaleStatus("Home")
-	if status != nil || err != nil {
+	if err != nil || status == nil || status.State != tailscaleAbsent {
 		t.Fatalf("status = %+v, %v", status, err)
 	}
 	if err := handleTailscaleLogin(TailscaleRequest{Name: "Home"}); err == nil {

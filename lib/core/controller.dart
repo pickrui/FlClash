@@ -313,14 +313,23 @@ class CoreController {
     return result;
   }
 
-  /// Null while the network is not part of the running config.
+  /// Null while the network is not part of the running config; a Core that
+  /// does not answer throws instead.
   Future<TailscaleStatus?> getTailscaleStatus(String name) async {
     final result = await _interface.invokeMethod<Map<String, dynamic>>(
       method: CoreMethod.getTailscaleStatus,
       arguments: name,
       timeout: const Duration(seconds: 8),
     );
-    return result == null ? null : TailscaleStatus.fromJson(result);
+    if (result == null) {
+      throw CoreMethodException(
+        code: 'empty_result',
+        message:
+            'Core returned no response for ${CoreMethod.getTailscaleStatus.name}',
+      );
+    }
+    final status = TailscaleStatus.fromJson(result);
+    return status.rawState == tailscaleAbsentState ? null : status;
   }
 
   /// The auth key travels only in this call; the config never contains it.

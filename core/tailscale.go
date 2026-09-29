@@ -20,7 +20,10 @@ import (
 	"github.com/metacubex/mihomo/tunnel"
 )
 
-const tailscaleNetworksDir = "tailscale-networks"
+const (
+	tailscaleNetworksDir = "tailscale-networks"
+	tailscaleAbsent      = "Absent"
+)
 
 const (
 	tailscaleStatusTimeout = 5 * time.Second
@@ -55,11 +58,12 @@ func findTailscale(name string) (*outbound.Tailscale, error) {
 	return tailscale, nil
 }
 
-// A nil status tells the app the network is not in the running config.
+// An Absent status tells the app the network is not in the running config;
+// a missing answer means the Core did not respond.
 func handleGetTailscaleStatus(name string) (*outbound.TailscaleStatus, error) {
 	tailscale, err := findTailscale(name)
 	if err != nil {
-		return nil, nil
+		return &outbound.TailscaleStatus{State: tailscaleAbsent, Peers: []outbound.TailscaleDevice{}}, nil
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), tailscaleStatusTimeout)
 	defer cancel()
