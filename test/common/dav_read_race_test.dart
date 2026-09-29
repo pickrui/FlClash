@@ -459,6 +459,26 @@ void main() {
     await waitForReads();
   });
 
+  test('a listing from another route beats a 404', () async {
+    final dav = DAVClient(
+      _props,
+      resolveRoutes: (_) => ['direct', 'proxy'],
+      createAdapter: (route) => readAdapter((options) async {
+        if (options.method != 'PROPFIND') {
+          return ResponseBody.fromBytes([], 200);
+        }
+        if (route == 'direct') return ResponseBody.fromBytes([], 404);
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+        return _listing(['backup.zip']);
+      }),
+    );
+    await dav.pingCompleter.future;
+    expect((await dav.listBackups()).map((backup) => backup.name), [
+      'backup.zip',
+    ]);
+    await waitForReads();
+  });
+
   test('restoring rejects a backup name with path syntax', () async {
     final dav = DAVClient(
       _props,

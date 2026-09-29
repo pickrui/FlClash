@@ -254,8 +254,10 @@ class DAVClient {
       try {
         return await client.readDir(root, token);
       } on DioException catch (error) {
-        if (error.response?.statusCode == 404) return const <File>[];
-        rethrow;
+        if (error.response?.statusCode != 404) rethrow;
+        // Another route's listing or auth error still wins if it comes soon.
+        await Future<void>.delayed(const Duration(seconds: 2));
+        return const <File>[];
       }
     });
     return sortDavBackups(
