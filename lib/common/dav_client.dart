@@ -250,16 +250,25 @@ class DAVClient {
   }
 
   Future<List<DavBackup>> listBackups() async {
-    final files = await _raceRead((client, token) async {
-      try {
-        return await client.readDir(root, token);
-      } on DioException catch (error) {
-        if (error.response?.statusCode != 404) rethrow;
-        // Another route's listing or auth error still wins if it comes soon.
-        await Future<void>.delayed(const Duration(seconds: 2));
-        return const <File>[];
+    var missing = false;
+    late List<File> files;
+    try {
+      files = await _raceRead((client, token) async {
+        try {
+          return await client.readDir(root, token);
+        } on DioException catch (error) {
+          if (error.response?.statusCode == 404) missing = true;
+          rethrow;
+        }
+      });
+    } catch (error) {
+      if (!missing ||
+          error is TimeoutException ||
+          isTerminalHttpReadError(error)) {
+        rethrow;
       }
-    });
+      files = const [];
+    }
     return sortDavBackups(
       files
           .where((file) => file.isDir != true)

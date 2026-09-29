@@ -480,18 +480,8 @@ class _DavBackupsDialogState extends State<DavBackupsDialog> {
   }
 }
 
-class RestoreOptionsDialog extends StatefulWidget {
+class RestoreOptionsDialog extends StatelessWidget {
   const RestoreOptionsDialog({super.key});
-
-  @override
-  State<RestoreOptionsDialog> createState() => _RestoreOptionsDialogState();
-}
-
-class _RestoreOptionsDialogState extends State<RestoreOptionsDialog> {
-  void _handleOnTab(RestoreOption? option) {
-    if (option == null) return;
-    Navigator.of(context).pop(option);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -501,15 +491,11 @@ class _RestoreOptionsDialogState extends State<RestoreOptionsDialog> {
       child: Wrap(
         children: [
           ListItem(
-            onTap: () {
-              _handleOnTab(RestoreOption.onlyProfiles);
-            },
+            onTap: () => Navigator.of(context).pop(RestoreOption.onlyProfiles),
             title: Text(appLocalizations.restoreOnlyConfig),
           ),
           ListItem(
-            onTap: () {
-              _handleOnTab(RestoreOption.all);
-            },
+            onTap: () => Navigator.of(context).pop(RestoreOption.all),
             title: Text(appLocalizations.restoreAllData),
           ),
         ],
