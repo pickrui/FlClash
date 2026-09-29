@@ -149,18 +149,28 @@ class TailscaleAction {
       }
     }
     final deadline = DateTime.now().add(applyWait);
+    // A Core that does not answer yet may still be applying the config.
+    CoreMethodException? silence;
     while (true) {
       if (cancelled?.call() ?? false) return;
       final current = _currentNetwork(network);
       if (current == null) throw const TailscaleNotAppliedException();
-      if (_backend.isApplied(current) &&
-          await _backend.status(network.name) != null) {
-        final applied = _currentNetwork(network);
-        if (applied == null) throw const TailscaleNotAppliedException();
-        if (_backend.isApplied(applied)) break;
+      if (_backend.isApplied(current)) {
+        try {
+          final running = await _backend.status(network.name) != null;
+          silence = null;
+          if (running) {
+            final applied = _currentNetwork(network);
+            if (applied == null) throw const TailscaleNotAppliedException();
+            if (_backend.isApplied(applied)) break;
+          }
+        } on CoreMethodException catch (error) {
+          if (error.code != 'empty_result' && !error.isCoreUnavailable) rethrow;
+          silence = error;
+        }
       }
       if (DateTime.now().isAfter(deadline)) {
-        throw const TailscaleNotAppliedException();
+        throw silence ?? const TailscaleNotAppliedException();
       }
       await Future<void>.delayed(_applyPoll);
     }
