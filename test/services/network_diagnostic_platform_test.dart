@@ -317,7 +317,8 @@ void main() {
         final probe = platform.probeConflicts(7890, null);
         expect(await probe, (
           report: const ProxyConflictReport(),
-          complete: false,
+          proxySampled: false,
+          routeSampled: false,
         ));
         proxy.complete({'flags': 3, 'proxyServer': 'localhost:7897'});
         expect((await probe).report.isEmpty, isTrue);
@@ -435,7 +436,8 @@ void main() {
           systemProxy: '127.0.0.1:7897',
           vpnInterface: 'utun7',
         ),
-        complete: true,
+        proxySampled: true,
+        routeSampled: true,
       ));
     });
     test('only a clean sample of both parts is complete', () async {
@@ -447,8 +449,65 @@ void main() {
       );
       expect(await platform.probeConflicts(7890, null), (
         report: const ProxyConflictReport(),
-        complete: true,
+        proxySampled: true,
+        routeSampled: true,
       ));
+    });
+    test('a Windows route lookup that failed is not a clean route', () async {
+      final platform = NetworkDiagnosticPlatform(
+        platform: 'windows',
+        readWindowsProxy: () async => {'flags': 1},
+        runCommand: (_, _, _) async => '{}',
+      );
+      expect(await platform.probeConflicts(7890, null), (
+        report: const ProxyConflictReport(),
+        proxySampled: true,
+        routeSampled: false,
+      ));
+    });
+    test('an unsampled part keeps what was last shown', () {
+      const shown = ProxyConflictReport(
+        systemProxy: '10.0.0.2:8080',
+        vpnInterface: 'utun7',
+      );
+      ProxyConflictReport resolve(
+        ProxyConflictReport report, {
+        bool proxySampled = true,
+        bool routeSampled = true,
+      }) => resolveProxyConflictSample((
+        report: report,
+        proxySampled: proxySampled,
+        routeSampled: routeSampled,
+      ), shown);
+
+      expect(
+        resolve(
+          const ProxyConflictReport(systemProxy: '10.0.0.2:8080'),
+          routeSampled: false,
+        ),
+        shown,
+        reason: 'a timed-out route repeats nothing',
+      );
+      expect(
+        resolve(
+          const ProxyConflictReport(),
+          proxySampled: false,
+          routeSampled: false,
+        ),
+        shown,
+        reason: 'nothing sampled clears nothing',
+      );
+      expect(
+        resolve(
+          const ProxyConflictReport(systemProxy: '10.0.0.3:8080'),
+          routeSampled: false,
+        ),
+        const ProxyConflictReport(
+          systemProxy: '10.0.0.3:8080',
+          vpnInterface: 'utun7',
+        ),
+      );
+      expect(resolve(const ProxyConflictReport()).isEmpty, isTrue);
     });
     test(
       'a stalled route preserves proxy evidence and gets canceled',
@@ -467,7 +526,8 @@ void main() {
         final probe = platform.probeConflicts(7890, null);
         expect(await probe, (
           report: const ProxyConflictReport(systemProxy: 'localhost:7897'),
-          complete: false,
+          proxySampled: true,
+          routeSampled: false,
         ));
         expect(cancellation.isCancelled, isTrue);
         route.complete(' interface: utun9\n');
@@ -480,7 +540,11 @@ void main() {
         readWindowsProxy: () async => throw StateError('old plugin'),
         runCommand: (_, _, _) async => 'not json',
       );
-      const nothing = (report: ProxyConflictReport(), complete: false);
+      const nothing = (
+        report: ProxyConflictReport(),
+        proxySampled: false,
+        routeSampled: false,
+      );
       expect(await platform.probeConflicts(7890, null), nothing);
       expect(
         await NetworkDiagnosticPlatform(
