@@ -63,6 +63,9 @@ class ProxyConflictReport {
   int get hashCode => Object.hash(systemProxy, autoConfig, vpnInterface);
 }
 
+/// Incomplete if a sample failed or timed out; then empty proves nothing.
+typedef ProxyConflictSample = ({ProxyConflictReport report, bool complete});
+
 typedef DiagnosticCommandRunner =
     Future<String> Function(
       String executable,
@@ -123,36 +126,37 @@ class NetworkDiagnosticPlatform {
     return const DiagnosticSystemState();
   }
 
-  Future<ProxyConflictReport> probeConflicts(
+  Future<ProxyConflictSample> probeConflicts(
     int port,
     String? ownTunDevice,
   ) async {
     final token = CancelToken();
-    // Finish both samples before startup changes the proxy or route; late
-    // results no longer describe the configuration that preceded this start.
-    const deadline = Duration(seconds: 1);
+    final deadline = Duration(seconds: platform == 'windows' ? 3 : 1);
     try {
       final (proxy, vpn) = await (
         _foreignSystemProxy(
           port,
           token,
-        ).timeout(deadline, onTimeout: () => const ProxyConflictReport()),
+        ).timeout(deadline, onTimeout: () => null),
         _foreignVpnInterface(
           ownTunDevice,
           token,
         ).timeout(deadline, onTimeout: () => null),
       ).wait;
-      return ProxyConflictReport(
-        systemProxy: proxy.systemProxy,
-        autoConfig: proxy.autoConfig,
-        vpnInterface: vpn,
+      return (
+        report: ProxyConflictReport(
+          systemProxy: proxy?.systemProxy,
+          autoConfig: proxy?.autoConfig ?? false,
+          vpnInterface: vpn?.name,
+        ),
+        complete: proxy != null && vpn != null,
       );
     } finally {
       token.cancel();
     }
   }
 
-  Future<ProxyConflictReport> _foreignSystemProxy(
+  Future<ProxyConflictReport?> _foreignSystemProxy(
     int port,
     CancelToken token,
   ) async {
@@ -165,18 +169,20 @@ class NetworkDiagnosticPlatform {
         return parseMacosProxyConflict(raw, port);
       }
     } catch (_) {}
-    return const ProxyConflictReport();
+    return null;
   }
 
-  Future<String?> _foreignVpnInterface(
+  Future<({String? name})?> _foreignVpnInterface(
     String? ownTunDevice,
     CancelToken token,
   ) async {
     try {
       if (platform == 'windows') {
-        return parseWindowsVpnInterface(
-          await _readWindowsRoute(token),
-          ownTunDevice,
+        return (
+          name: parseWindowsVpnInterface(
+            await _readWindowsRoute(token),
+            ownTunDevice,
+          ),
         );
       }
       if (platform == 'macos') {
@@ -185,7 +191,7 @@ class NetworkDiagnosticPlatform {
           'get',
           '1.1.1.1',
         ], token);
-        return parseMacosVpnInterface(route, ownTunDevice);
+        return (name: parseMacosVpnInterface(route, ownTunDevice));
       }
     } catch (_) {}
     return null;
@@ -210,6 +216,10 @@ class NetworkDiagnosticPlatform {
   }
 }
 
+bool _isLoopbackHost(String host) =>
+    host.toLowerCase() == 'localhost' ||
+    (InternetAddress.tryParse(host)?.isLoopback ?? false);
+
 bool _matchesProxy(String address, int port) {
   final uri = Uri.tryParse('http://${address.trim()}');
   if (uri == null ||
@@ -220,8 +230,7 @@ bool _matchesProxy(String address, int port) {
       uri.hasFragment) {
     return false;
   }
-  return uri.host.toLowerCase() == 'localhost' ||
-      (InternetAddress.tryParse(uri.host)?.isLoopback ?? false);
+  return _isLoopbackHost(uri.host);
 }
 
 Map<String, String> _windowsProxyEntries(String proxyServer) {
@@ -281,9 +290,7 @@ DiagnosticSystemState parseWindowsDiagnosticState(
 bool _matchesMacosProxy(Map<String, String> values, String protocol, int port) {
   final host = values['${protocol}Proxy'];
   final actualPort = int.tryParse(values['${protocol}Port'] ?? '');
-  if (host == null || actualPort != port) return false;
-  return host.toLowerCase() == 'localhost' ||
-      (InternetAddress.tryParse(host)?.isLoopback ?? false);
+  return host != null && actualPort == port && _isLoopbackHost(host);
 }
 
 Map<String, String> _parseScutilProxy(String raw) {

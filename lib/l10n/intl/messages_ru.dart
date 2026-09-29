@@ -124,10 +124,11 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m42(name) => "Узел ${name} недоступен для этой позиции";
 
-  static String m43(address) => "Системный прокси уже указывает на ${address}.";
+  static String m43(address) =>
+      "До запуска системный прокси указывал на ${address}.";
 
   static String m44(name) =>
-      "Трафик идёт через другой VPN или виртуальный адаптер: ${name}.";
+      "До запуска трафик шёл через другой VPN или виртуальный адаптер: ${name}.";
 
   static String m45(count) => "${count}д";
 
@@ -1634,7 +1635,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "proxyChains": MessageLookupByLibrary.simpleMessage("Цепочки прокси"),
     "proxyConflictAutoConfig": MessageLookupByLibrary.simpleMessage(
-      "Системный прокси использует сценарий автоматической настройки.",
+      "До запуска системный прокси использовал сценарий автоматической настройки.",
     ),
     "proxyConflictHint": MessageLookupByLibrary.simpleMessage(
       "Если это другое прокси-приложение или VPN, закройте его: одновременная работа может нарушить подключение.",

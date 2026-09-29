@@ -125,10 +125,10 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m42(name) => "Node ${name} is not available in this position";
 
   static String m43(address) =>
-      "The system proxy already points to ${address}.";
+      "Before starting, the system proxy pointed to ${address}.";
 
   static String m44(name) =>
-      "Traffic is routed through another VPN or virtual adapter: ${name}.";
+      "Before starting, traffic was routed through another VPN or virtual adapter: ${name}.";
 
   static String m45(count) => "${count}d";
 
@@ -1564,7 +1564,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "proxyChains": MessageLookupByLibrary.simpleMessage("Proxy chains"),
     "proxyConflictAutoConfig": MessageLookupByLibrary.simpleMessage(
-      "The system proxy uses an automatic configuration script.",
+      "Before starting, the system proxy used an automatic configuration script.",
     ),
     "proxyConflictHint": MessageLookupByLibrary.simpleMessage(
       "If this belongs to another proxy app or VPN, close it; running both can break the connection.",

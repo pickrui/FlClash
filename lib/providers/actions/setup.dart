@@ -198,19 +198,21 @@ extension SetupControllerExt on AppController {
       } else {
         startupRecovery.resumeAutomaticSetup();
       }
-      final conflicts = await _probeProxyConflicts();
-      if (generation != _startIntentGeneration) return;
+      final conflictProbe = _probeProxyConflicts();
       // Load the selected profile before opening listeners. A freshly initialized
       // Core also rejects startListener when no config has been applied yet.
+      // Listeners, TUN and the system proxy change only after the probe.
       final started = await applyProfile(
         force: true,
         silence: !isInit,
         preloadInvoke: () async {
+          await conflictProbe;
           if (!await _startWithPortRecovery(generation)) {
             throw const _CoreStartCancelledException();
           }
         },
       );
+      final conflicts = await conflictProbe;
       if (!started && _ref.read(isStartProvider)) {
         await updateStatus(false);
       } else if (started && conflicts != null) {
@@ -232,7 +234,7 @@ extension SetupControllerExt on AppController {
     }
   }
 
-  Future<ProxyConflictReport?> _probeProxyConflicts() async {
+  Future<ProxyConflictSample?> _probeProxyConflicts() async {
     if (!system.isMacOS && !system.isWindows) return null;
     final patch = _ref.read(patchClashConfigProvider);
     if (!_ref.read(proxyStateProvider).systemProxy && !patch.tun.enable) {
@@ -245,14 +247,15 @@ extension SetupControllerExt on AppController {
   }
 
   Future<void> _reportProxyConflicts(
-    ProxyConflictReport report,
+    ProxyConflictSample sample,
     int generation,
   ) async {
     if (generation != _startIntentGeneration || !_ref.read(isStartProvider)) {
       return;
     }
+    final report = sample.report;
     if (report.isEmpty) {
-      _reportedProxyConflict = null;
+      if (sample.complete) _reportedProxyConflict = null;
       return;
     }
     if (report == _reportedProxyConflict ||

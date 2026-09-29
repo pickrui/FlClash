@@ -315,9 +315,12 @@ void main() {
           runCommand: (_, _, _) async => '{}',
         );
         final probe = platform.probeConflicts(7890, null);
-        expect((await probe).isEmpty, isTrue);
+        expect(await probe, (
+          report: const ProxyConflictReport(),
+          complete: false,
+        ));
         proxy.complete({'flags': 3, 'proxyServer': 'localhost:7897'});
-        expect((await probe).isEmpty, isTrue);
+        expect((await probe).report.isEmpty, isTrue);
       },
     );
     test('macOS reports the first foreign protocol and PAC only', () {
@@ -427,13 +430,25 @@ void main() {
       final probe = platform.probeConflicts(7890, 'FlClash');
       expect(calls, ['/usr/sbin/scutil', '/sbin/route']);
       route.complete(' interface: utun7\n');
-      expect(
-        await probe,
-        const ProxyConflictReport(
+      expect(await probe, (
+        report: const ProxyConflictReport(
           systemProxy: '127.0.0.1:7897',
           vpnInterface: 'utun7',
         ),
+        complete: true,
+      ));
+    });
+    test('only a clean sample of both parts is complete', () async {
+      final platform = NetworkDiagnosticPlatform(
+        platform: 'macos',
+        runCommand: (exe, _, _) async => exe == '/sbin/route'
+            ? ' interface: en0\n'
+            : '<dictionary> {\n HTTPEnable : 0\n}',
       );
+      expect(await platform.probeConflicts(7890, null), (
+        report: const ProxyConflictReport(),
+        complete: true,
+      ));
     });
     test(
       'a stalled route preserves proxy evidence and gets canceled',
@@ -450,13 +465,13 @@ void main() {
           },
         );
         final probe = platform.probeConflicts(7890, null);
-        expect(
-          await probe,
-          const ProxyConflictReport(systemProxy: 'localhost:7897'),
-        );
+        expect(await probe, (
+          report: const ProxyConflictReport(systemProxy: 'localhost:7897'),
+          complete: false,
+        ));
         expect(cancellation.isCancelled, isTrue);
         route.complete(' interface: utun9\n');
-        expect((await probe).vpnInterface, isNull);
+        expect((await probe).report.vpnInterface, isNull);
       },
     );
     test('probe failures report nothing', () async {
@@ -465,13 +480,14 @@ void main() {
         readWindowsProxy: () async => throw StateError('old plugin'),
         runCommand: (_, _, _) async => 'not json',
       );
-      expect((await platform.probeConflicts(7890, null)).isEmpty, isTrue);
+      const nothing = (report: ProxyConflictReport(), complete: false);
+      expect(await platform.probeConflicts(7890, null), nothing);
       expect(
-        (await NetworkDiagnosticPlatform(
+        await NetworkDiagnosticPlatform(
           platform: 'linux',
           runCommand: (_, _, _) async => throw TestFailure('unexpected'),
-        ).probeConflicts(7890, null)).isEmpty,
-        isTrue,
+        ).probeConflicts(7890, null),
+        nothing,
       );
     });
   });
