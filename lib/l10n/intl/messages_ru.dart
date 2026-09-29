@@ -61,7 +61,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m15(label) =>
       "Вы уверены, что хотите удалить текущий ${label}?";
 
-  static String m16(label) => "Детали {}";
+  static String m16(label) => "Детали: ${label}";
 
   static String m17(count) =>
       "Пройдено ${count} из 2 независимых проверок HTTPS";
