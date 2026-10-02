@@ -227,6 +227,87 @@ void main() {
     },
   );
 
+  Future<void> useLocalStorage(WidgetTester tester) async {
+    await tester.tap(find.text('Use local file storage'));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.widgetWithText(FilledButton, 'Use local file storage'),
+    );
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('local file storage needs confirmation, then switches and '
+      'retries', (tester) async {
+    final calls = <String>[];
+    await _showRecovery(
+      tester,
+      initialReason: ConfigRecoveryReason.storageUnavailable,
+      usesSystemKeyring: true,
+      onUseLocalStorage: () async => calls.add('switch'),
+      onRetry: () async => calls.add('retry'),
+    );
+    expect(find.textContaining('KDE Wallet'), findsOneWidget);
+
+    await tester.tap(find.text('Use local file storage'));
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsOneWidget);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(calls, isEmpty);
+
+    await useLocalStorage(tester);
+    expect(calls, ['switch', 'retry']);
+    expect(find.text('Use local file storage'), findsNothing);
+  });
+
+  testWidgets('a failed retry after switching drops the keyring guidance', (
+    tester,
+  ) async {
+    await _showRecovery(
+      tester,
+      initialReason: ConfigRecoveryReason.storageUnavailable,
+      usesSystemKeyring: true,
+      onUseLocalStorage: () async {},
+      onRetry: () async => throw const ConfigKeyUnavailableException(),
+    );
+    await useLocalStorage(tester);
+
+    expect(find.textContaining('KDE Wallet'), findsNothing);
+    expect(find.textContaining('application data folder'), findsOneWidget);
+    expect(find.text('Use local file storage'), findsNothing);
+  });
+
+  testWidgets('a failed switch keeps the option and skips the retry', (
+    tester,
+  ) async {
+    var retries = 0;
+    await _showRecovery(
+      tester,
+      initialReason: ConfigRecoveryReason.storageUnavailable,
+      usesSystemKeyring: true,
+      onUseLocalStorage: () async => throw StateError('private path'),
+      onRetry: () async => retries++,
+    );
+    await useLocalStorage(tester);
+
+    expect(retries, 0);
+    expect(find.text('Use local file storage'), findsOneWidget);
+    expect(find.textContaining('KDE Wallet'), findsOneWidget);
+    expect(find.textContaining('private path'), findsNothing);
+  });
+
+  testWidgets('local file storage is not offered for other failures', (
+    tester,
+  ) async {
+    await _showRecovery(
+      tester,
+      initialReason: ConfigRecoveryReason.missingKey,
+      onUseLocalStorage: () => fail('must not switch storage'),
+      onRetry: () async {},
+    );
+    expect(find.text('Use local file storage'), findsNothing);
+  });
+
   testWidgets('offers exit and disables it while retrying', (tester) async {
     final pending = Completer<void>();
     var exits = 0;
@@ -260,7 +341,9 @@ Future<void> _showRecovery(
   required Future<void> Function() onRetry,
   VoidCallback? onExit,
   Future<String> Function()? onReset,
+  Future<void> Function()? onUseLocalStorage,
   ConfigRecoveryReason? initialReason,
+  bool usesSystemKeyring = false,
   Locale locale = const Locale('en'),
 }) async {
   await tester.pumpWidget(
@@ -275,7 +358,9 @@ Future<void> _showRecovery(
         onRetry: onRetry,
         onExit: onExit,
         onReset: onReset,
+        onUseLocalStorage: onUseLocalStorage,
         initialReason: initialReason,
+        usesSystemKeyring: usesSystemKeyring,
       ),
     ),
   );

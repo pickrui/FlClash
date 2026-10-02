@@ -6564,6 +6564,36 @@ class AppLocalizations {
     );
   }
 
+  /// `The system keyring (Secret Service) could not be accessed. Enable and unlock KDE Wallet or GNOME Keyring in your system settings, then retry.`
+  String get configRecoveryKeyring {
+    return Intl.message(
+      'The system keyring (Secret Service) could not be accessed. Enable and unlock KDE Wallet or GNOME Keyring in your system settings, then retry.',
+      name: 'configRecoveryKeyring',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use local file storage`
+  String get configRecoveryUseLocalStorage {
+    return Intl.message(
+      'Use local file storage',
+      name: 'configRecoveryUseLocalStorage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Store encryption keys and account credentials in a file in the application data folder that only your user account can open, instead of the system keyring? Any program running as your user can read them and decrypt the local configuration. This choice stays in effect from now on.`
+  String get configRecoveryUseLocalStorageConfirm {
+    return Intl.message(
+      'Store encryption keys and account credentials in a file in the application data folder that only your user account can open, instead of the system keyring? Any program running as your user can read them and decrypt the local configuration. This choice stays in effect from now on.',
+      name: 'configRecoveryUseLocalStorageConfirm',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Exclude SSIDs`
   String get excludeSsids {
     return Intl.message(

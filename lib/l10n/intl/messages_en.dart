@@ -540,6 +540,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Data detected in configuration",
     ),
     "configParseErrorAtLine": m6,
+    "configRecoveryKeyring": MessageLookupByLibrary.simpleMessage(
+      "The system keyring (Secret Service) could not be accessed. Enable and unlock KDE Wallet or GNOME Keyring in your system settings, then retry.",
+    ),
     "configRecoveryMessage": MessageLookupByLibrary.simpleMessage(
       "Local configuration is temporarily unavailable. Your existing data has been kept. Unlock your device and retry, or reopen the app later.",
     ),
@@ -567,6 +570,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "configRecoveryUnreadable": MessageLookupByLibrary.simpleMessage(
       "The local configuration cannot be decrypted or is damaged. Existing files have been kept. Restore the matching key and configuration backup, or back up and reset.",
+    ),
+    "configRecoveryUseLocalStorage": MessageLookupByLibrary.simpleMessage(
+      "Use local file storage",
+    ),
+    "configRecoveryUseLocalStorageConfirm": MessageLookupByLibrary.simpleMessage(
+      "Store encryption keys and account credentials in a file in the application data folder that only your user account can open, instead of the system keyring? Any program running as your user can read them and decrypt the local configuration. This choice stays in effect from now on.",
     ),
     "configTypeMismatch": m7,
     "configValueTypeBoolean": MessageLookupByLibrary.simpleMessage("a boolean"),

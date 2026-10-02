@@ -7,13 +7,16 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:fl_clash/common/durable_file.dart';
 import 'package:fl_clash/common/path.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/services.dart';
+import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'windows_secure_storage.dart';
+import 'file_secure_storage.dart';
+import 'windows_storage_crypto.dart';
 
 String? legacySecureStorageValue(String? payload, String key) {
   if (payload == null || payload.isEmpty) return null;
@@ -37,18 +40,82 @@ bool shouldReadLegacyMacStorage({
 class SafeStorage {
   static const _secureStorage = FlutterSecureStorage();
 
-  static Future<WindowsSecureStorage> get _windowsStorage async =>
-      WindowsSecureStorage(
+  /// Windows always uses its DPAPI file; Linux uses a private plain file only
+  /// after the user chose it over an unavailable system keyring.
+  static Future<FileSecureStorage?> get _fileStorage async {
+    if (Platform.isWindows) {
+      return FileSecureStorage(
         path: '${await appPath.homeDirPath}/flutter_secure_storage.dat',
+        encrypt: protectWindowsStorage,
+        decrypt: unprotectWindowsStorage,
       );
+    }
+    if (!_isLinux) return null;
+    final directory = await _localStorageDirectory;
+    final type = await FileSystemEntity.type(directory, followLinks: false);
+    if (type == FileSystemEntityType.notFound) return null;
+    if (type != FileSystemEntityType.directory ||
+        !await _isPrivateDirectory(directory)) {
+      throw FileSystemException(
+        'Local secure storage is not private',
+        directory,
+      );
+    }
+    return FileSecureStorage(
+      path: p.join(directory, 'storage.json'),
+      encrypt: _plain,
+      decrypt: _plain,
+    );
+  }
 
-  static Future<String?> _readSecure(String key) async => Platform.isWindows
-      ? (await _windowsStorage).read(key)
-      : _secureStorage.read(key: key);
+  static Uint8List _plain(Uint8List bytes) => bytes;
+
+  static Future<String> get _localStorageDirectory async =>
+      p.join(await appPath.homeDirPath, 'secure_storage');
+
+  static Future<bool> _isPrivateDirectory(String path) async =>
+      (await FileStat.stat(path)).mode & 0x3F == 0;
+
+  static Future<bool> get usesLocalFileStorage async =>
+      _isLinux &&
+      await FileSystemEntity.type(
+            await _localStorageDirectory,
+            followLinks: false,
+          ) !=
+          FileSystemEntityType.notFound;
+
+  /// Keeps every later Linux secret in a directory only this user can open.
+  /// It appears atomically with its final mode, and its presence is the switch.
+  static Future<void> useLocalFileStorage() async {
+    if (!_isLinux) {
+      throw UnsupportedError('local file storage replaces the Linux keyring');
+    }
+    if (await usesLocalFileStorage) {
+      await _fileStorage;
+      return;
+    }
+    final directory = await _localStorageDirectory;
+    final staging = '$directory.new';
+    await durableDeleteEntity(staging);
+    await Directory(staging).create(recursive: true);
+    final chmod = await Process.run('chmod', ['700', staging]);
+    if (chmod.exitCode != 0 || !await _isPrivateDirectory(staging)) {
+      throw FileSystemException('Local secure storage is not private', staging);
+    }
+    await durableRenameDirectory(staging, directory);
+  }
+
+  static Future<String?> _readSecure(String key) async {
+    final fileStorage = await _fileStorage;
+    return fileStorage != null
+        ? fileStorage.read(key)
+        : _secureStorage.read(key: key);
+  }
 
   static Future<void> _deleteSecure(String key) async {
-    if (Platform.isWindows) {
-      await (await _windowsStorage).delete(key);
+    final fileStorage = await _fileStorage;
+    if (fileStorage != null) {
+      await fileStorage.delete(key);
     } else {
       await _secureStorage.delete(key: key);
     }
@@ -67,6 +134,9 @@ class SafeStorage {
 
   static bool get _isMacOS =>
       !kIsWeb && defaultTargetPlatform == TargetPlatform.macOS;
+
+  static bool get _isLinux =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.linux;
 
   static Future<String?> read(
     String key, {
@@ -238,7 +308,8 @@ class SafeStorage {
   }
 
   static Future<String?> _readLegacyLinuxValue(String key) async {
-    if (!Platform.isLinux ||
+    if (!_isLinux ||
+        await usesLocalFileStorage ||
         !await File(await appPath.identityMigrationMarkerPath).exists()) {
       return null;
     }
@@ -261,8 +332,9 @@ class SafeStorage {
   }
 
   static Future<void> _writeSecure(String key, String value) async {
-    if (Platform.isWindows) {
-      await (await _windowsStorage).write(key, value);
+    final fileStorage = await _fileStorage;
+    if (fileStorage != null) {
+      await fileStorage.write(key, value);
     } else {
       await _secureStorage.write(key: key, value: value);
     }

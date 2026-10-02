@@ -18,6 +18,7 @@ import 'package:fl_clash/services/config_recovery.dart';
 import 'package:fl_clash/services/config_reset.dart';
 import 'package:fl_clash/models/profile.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/utils/safe_storage.dart';
 import 'package:fl_clash/views/cloud/cloud_account_page.dart';
 import 'package:fl_clash/views/cloud/node_filter_page.dart';
 import 'package:fl_clash/views/cloud/store_page.dart';
@@ -89,11 +90,23 @@ Future<Map<String, Object?>?> _loadStartupConfig() async {
         }
         return preferences.getConfigMap();
       },
-      showRecovery: (retry, failure) {
+      showRecovery: (retry, failure) async {
         commonPrint.log('Waiting for local configuration recovery');
         render?.resume();
         if (system.isDesktop) {
           windowManager.addListener(exitListener);
+        }
+        var usesSystemKeyring = false;
+        var canUseLocalStorage = false;
+        if (Platform.isLinux) {
+          try {
+            usesSystemKeyring = !await SafeStorage.usesLocalFileStorage;
+            canUseLocalStorage = await ConfigKeyStore.canUseLocalStorage();
+          } catch (error) {
+            commonPrint.log(
+              'Could not inspect local secure storage: ${error.runtimeType}',
+            );
+          }
         }
         runApp(
           MaterialApp(
@@ -106,6 +119,10 @@ Future<Map<String, Object?>?> _loadStartupConfig() async {
             home: ConfigRecoveryScreen(
               onRetry: retry,
               initialReason: failure.reason,
+              usesSystemKeyring: usesSystemKeyring,
+              onUseLocalStorage: canUseLocalStorage
+                  ? SafeStorage.useLocalFileStorage
+                  : null,
               onReset: Platform.isWindows
                   ? () async =>
                         ConfigReset(await appPath.homeDirPath).backupAndReset()

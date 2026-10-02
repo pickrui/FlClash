@@ -168,6 +168,13 @@ class ConfigKeyStore {
     return seed;
   }
 
+  /// Offered only before any encrypted configuration exists, so switching
+  /// storage can never strand the key of existing data in the keyring.
+  static Future<bool> canUseLocalStorage() async =>
+      defaultTargetPlatform == TargetPlatform.linux &&
+      !await SafeStorage.usesLocalFileStorage &&
+      !await _durableConfigExists();
+
   static Future<bool> _durableConfigExists() async {
     final path = await appPath.durableConfigPath;
     for (final candidate in [path, '$path.tmp', '$path.old']) {

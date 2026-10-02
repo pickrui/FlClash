@@ -404,6 +404,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "compatible": MessageLookupByLibrary.simpleMessage("兼容模式"),
     "configDataDetected": MessageLookupByLibrary.simpleMessage("检测到配置中存在数据"),
     "configParseErrorAtLine": m6,
+    "configRecoveryKeyring": MessageLookupByLibrary.simpleMessage(
+      "无法访问系统密钥环（Secret Service），请在系统设置中启用并解锁 KDE 钱包或 GNOME 密钥环后重试",
+    ),
     "configRecoveryMessage": MessageLookupByLibrary.simpleMessage(
       "暂时无法读取本地配置，原有数据已保留。请解锁设备后重试，或稍后重新打开应用",
     ),
@@ -427,6 +430,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "configRecoveryTitle": MessageLookupByLibrary.simpleMessage("恢复本地配置"),
     "configRecoveryUnreadable": MessageLookupByLibrary.simpleMessage(
       "本地配置无法解密或文件已损坏，原文件已保留。请恢复匹配的密钥与配置备份，或备份后重置",
+    ),
+    "configRecoveryUseLocalStorage": MessageLookupByLibrary.simpleMessage(
+      "改用本地文件存储",
+    ),
+    "configRecoveryUseLocalStorageConfirm": MessageLookupByLibrary.simpleMessage(
+      "将加密密钥和账号凭据改存到应用数据目录中仅当前用户可访问的文件，不再使用系统密钥环？以当前用户身份运行的程序都能读取它们并解密本地配置，此选择之后会一直生效",
     ),
     "configTypeMismatch": m7,
     "configValueTypeBoolean": MessageLookupByLibrary.simpleMessage("布尔值"),

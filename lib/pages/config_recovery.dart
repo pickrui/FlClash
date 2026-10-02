@@ -13,14 +13,18 @@ class ConfigRecoveryScreen extends StatefulWidget {
   final Future<void> Function() onRetry;
   final VoidCallback? onExit;
   final Future<String> Function()? onReset;
+  final Future<void> Function()? onUseLocalStorage;
   final ConfigRecoveryReason? initialReason;
+  final bool usesSystemKeyring;
 
   const ConfigRecoveryScreen({
     super.key,
     required this.onRetry,
     this.onExit,
     this.onReset,
+    this.onUseLocalStorage,
     this.initialReason,
+    this.usesSystemKeyring = false,
   });
 
   @override
@@ -33,35 +37,62 @@ class _ConfigRecoveryScreenState extends State<ConfigRecoveryScreen> {
   bool get _busy => _isRetrying || _isConfirming;
   bool _resetRequested = false;
   bool _resetFailed = false;
+  bool _localStorageEnabled = false;
   String? _backupPath;
   late ConfigRecoveryReason? _reason = widget.initialReason;
+
+  bool get _offersLocalStorage =>
+      widget.onUseLocalStorage != null &&
+      !_localStorageEnabled &&
+      !_resetRequested &&
+      _reason == ConfigRecoveryReason.storageUnavailable;
+
+  Future<bool> _confirm(String title, String content) async {
+    // Lock every action while the confirmation dialog is open too.
+    setState(() => _isConfirming = true);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(AppLocalizations.of(context).cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(title),
+          ),
+        ],
+      ),
+    );
+    if (!mounted) return false;
+    setState(() => _isConfirming = false);
+    return confirmed == true;
+  }
+
+  Future<void> _useLocalStorage() async {
+    if (_busy || !_offersLocalStorage) return;
+    final localizations = AppLocalizations.of(context);
+    if (!await _confirm(
+      localizations.configRecoveryUseLocalStorage,
+      localizations.configRecoveryUseLocalStorageConfirm,
+    )) {
+      return;
+    }
+    await _retry(prepare: widget.onUseLocalStorage);
+  }
 
   Future<void> _reset() async {
     if (_busy || _backupPath != null) return;
     final localizations = AppLocalizations.of(context);
-    if (!_resetRequested) {
-      // Lock every action while the confirmation dialog is open too.
-      setState(() => _isConfirming = true);
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text(localizations.configRecoveryReset),
-          content: Text(localizations.configRecoveryResetConfirm),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text(localizations.cancel),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: Text(localizations.configRecoveryReset),
-            ),
-          ],
-        ),
-      );
-      if (!mounted) return;
-      setState(() => _isConfirming = false);
-      if (confirmed != true) return;
+    if (!_resetRequested &&
+        !await _confirm(
+          localizations.configRecoveryReset,
+          localizations.configRecoveryResetConfirm,
+        )) {
+      return;
     }
     setState(() {
       _isRetrying = true;
@@ -90,15 +121,21 @@ class _ConfigRecoveryScreenState extends State<ConfigRecoveryScreen> {
       ConfigRecoveryReason.unreadableConfig =>
         localizations.configRecoveryUnreadable,
       ConfigRecoveryReason.storageUnavailable =>
-        localizations.configRecoveryStorage,
+        widget.usesSystemKeyring && !_localStorageEnabled
+            ? localizations.configRecoveryKeyring
+            : localizations.configRecoveryStorage,
       null => localizations.configRecoveryMessage,
     };
   }
 
-  Future<void> _retry() async {
+  Future<void> _retry({Future<void> Function()? prepare}) async {
     if (_busy || _resetRequested) return;
     setState(() => _isRetrying = true);
     try {
+      if (prepare != null) {
+        await prepare();
+        if (mounted) setState(() => _localStorageEnabled = true);
+      }
       await widget.onRetry();
     } catch (error) {
       if (mounted && error is ConfigKeyUnavailableException) {
@@ -166,6 +203,14 @@ class _ConfigRecoveryScreenState extends State<ConfigRecoveryScreen> {
                           : const Icon(Icons.refresh_rounded),
                       label: Text(localizations.configRecoveryRetry),
                     ),
+                  if (_offersLocalStorage) ...[
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      onPressed: _busy ? null : _useLocalStorage,
+                      icon: const Icon(Icons.folder_outlined),
+                      label: Text(localizations.configRecoveryUseLocalStorage),
+                    ),
+                  ],
                   if (widget.onReset != null && _backupPath == null) ...[
                     const SizedBox(height: 12),
                     OutlinedButton.icon(
