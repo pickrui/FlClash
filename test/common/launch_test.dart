@@ -121,4 +121,35 @@ void main() {
       );
     });
   });
+
+  group('Linux desktop entries', () {
+    test('start the AppImage file rather than its temporary mount', () {
+      expect(
+        linuxLaunchExecutable(
+          environment: {'APPIMAGE': '/home/deck/Apps/flclash.AppImage'},
+          resolvedExecutable: '/tmp/.mount_flclaXY/FlClash',
+        ),
+        '/home/deck/Apps/flclash.AppImage',
+      );
+      for (final environment in [
+        <String, String>{},
+        {'APPIMAGE': ''},
+      ]) {
+        expect(
+          linuxLaunchExecutable(
+            environment: environment,
+            resolvedExecutable: '/usr/share/flclash/FlClash',
+          ),
+          '/usr/share/flclash/FlClash',
+        );
+      }
+    });
+
+    test('quote paths with spaces and reserved characters', () {
+      expect(
+        quoteDesktopExecArgument(r'/home/deck/My Apps/a"b$c`d\e%f.AppImage'),
+        r'"/home/deck/My Apps/a\"b\$c\`d\\e%%f.AppImage"',
+      );
+    });
+  });
 }
