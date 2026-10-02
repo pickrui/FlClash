@@ -19,4 +19,51 @@ void main() {
       expect(plan.command, r'"C:\Program Files\FlClash\FlClash.exe" "%1"');
     });
   });
+
+  group('LinuxProtocolRegistrationPlan', () {
+    const schemes = ['clash', 'flclash'];
+
+    test('keeps a packaged build out of the menu', () {
+      const plan = LinuxProtocolRegistrationPlan(
+        schemes: schemes,
+        executable: '/usr/share/flclash/FlClash',
+        applicationsDir: '/home/user/.local/share/applications',
+      );
+
+      expect(plan.desktopEntry, contains('NoDisplay=true\n'));
+      expect(plan.desktopEntry, isNot(contains('Icon=')));
+      expect(
+        plan.desktopEntry,
+        contains('Exec="/usr/share/flclash/FlClash" %u\n'),
+      );
+    });
+
+    test('shows an AppImage in the menu with its icon', () {
+      const plan = LinuxProtocolRegistrationPlan(
+        schemes: schemes,
+        executable: '/home/deck/My Apps/flclash.AppImage',
+        applicationsDir: '/home/deck/.local/share/applications',
+        menuIcon: '/home/deck/.local/share/icons/flclash-oixcloud.png',
+      );
+
+      expect(plan.desktopEntry, isNot(contains('NoDisplay')));
+      expect(
+        plan.desktopEntry,
+        contains('Icon=/home/deck/.local/share/icons/flclash-oixcloud.png\n'),
+      );
+      expect(plan.desktopEntry, contains('Categories=Network;\n'));
+      expect(
+        plan.desktopEntry,
+        contains('StartupWMClass=com.oixcloud.clash\n'),
+      );
+      expect(
+        plan.desktopEntry,
+        contains('Exec="/home/deck/My Apps/flclash.AppImage" %u\n'),
+      );
+      expect(
+        plan.desktopEntry,
+        contains('MimeType=x-scheme-handler/clash;x-scheme-handler/flclash;'),
+      );
+    });
+  });
 }

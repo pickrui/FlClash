@@ -38,13 +38,35 @@ bool shouldLaunchSilently({
   return enabled && arguments.contains(silentLaunchArgument);
 }
 
+String linuxLaunchExecutable({
+  Map<String, String>? environment,
+  String? resolvedExecutable,
+}) {
+  final appImage = (environment ?? Platform.environment)['APPIMAGE'];
+  return appImage != null && appImage.isNotEmpty
+      ? appImage
+      : resolvedExecutable ?? Platform.resolvedExecutable;
+}
+
+String quoteDesktopExecArgument(String value) {
+  final escaped = value
+      .replaceAll(r'\', r'\\')
+      .replaceAll('"', r'\"')
+      .replaceAll(r'$', r'\$')
+      .replaceAll('`', r'\`')
+      .replaceAll('%', '%%');
+  return '"$escaped"';
+}
+
 class AutoLaunch {
   static AutoLaunch? _instance;
 
   AutoLaunch._internal() {
     launchAtStartup.setup(
       appName: appName,
-      appPath: Platform.resolvedExecutable,
+      appPath: system.isLinux
+          ? quoteDesktopExecArgument(linuxLaunchExecutable())
+          : Platform.resolvedExecutable,
       args: const [silentLaunchArgument],
     );
   }
@@ -56,6 +78,11 @@ class AutoLaunch {
 
   Future<void> updateStatus(bool isAutoLaunch) async {
     if (kDebugMode) {
+      return;
+    }
+    // Linux only checks the entry exists, so rewrite it to drop a stale path.
+    if (isAutoLaunch && system.isLinux) {
+      await launchAtStartup.enable();
       return;
     }
     if (await launchAtStartup.isEnabled() == isAutoLaunch) return;
