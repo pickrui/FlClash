@@ -121,7 +121,7 @@ Future<Map<String, Object?>?> _loadStartupConfig() async {
               initialReason: failure.reason,
               usesSystemKeyring: usesSystemKeyring,
               onUseLocalStorage: canUseLocalStorage
-                  ? SafeStorage.useLocalFileStorage
+                  ? ConfigKeyStore.useLocalStorage
                   : null,
               onReset: Platform.isWindows
                   ? () async =>

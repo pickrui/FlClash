@@ -296,6 +296,28 @@ void main() {
     expect(find.textContaining('private path'), findsNothing);
   });
 
+  testWidgets('a restored config blocks switching and shows key recovery', (
+    tester,
+  ) async {
+    var retries = 0;
+    await _showRecovery(
+      tester,
+      initialReason: ConfigRecoveryReason.storageUnavailable,
+      usesSystemKeyring: true,
+      onUseLocalStorage: () async => throw const ConfigKeyUnavailableException(
+        null,
+        ConfigRecoveryReason.missingKey,
+      ),
+      onRetry: () async => retries++,
+    );
+    await useLocalStorage(tester);
+
+    expect(retries, 0);
+    expect(find.text('Use local file storage'), findsNothing);
+    expect(find.textContaining('KDE Wallet'), findsNothing);
+    expect(find.textContaining('original system account'), findsOneWidget);
+  });
+
   testWidgets('local file storage is not offered for other failures', (
     tester,
   ) async {
