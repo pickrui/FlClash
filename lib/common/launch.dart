@@ -55,8 +55,15 @@ String quoteDesktopExecArgument(String value) {
       .replaceAll(r'$', r'\$')
       .replaceAll('`', r'\`')
       .replaceAll('%', '%%');
-  return '"$escaped"';
+  // Desktop values are unescaped before the Exec quoting rules.
+  return '"${escapeDesktopEntryValue(escaped)}"';
 }
+
+String escapeDesktopEntryValue(String value) => value
+    .replaceAll(r'\', r'\\')
+    .replaceAll('\n', r'\n')
+    .replaceAll('\r', r'\r')
+    .replaceAll('\t', r'\t');
 
 class AutoLaunch {
   static AutoLaunch? _instance;

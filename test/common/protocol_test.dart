@@ -38,6 +38,24 @@ void main() {
       );
     });
 
+    test('escapes the menu icon as a desktop string value', () {
+      const plan = LinuxProtocolRegistrationPlan(
+        schemes: schemes,
+        executable: '/home/deck/flclash.AppImage',
+        applicationsDir: '/fixture/applications',
+        menuIcon: '/home/deck/My\\Icons\nName=changed\t/icon.png',
+      );
+
+      expect(
+        plan.desktopEntry,
+        contains(
+          r'Icon=/home/deck/My\\Icons\nName=changed\t/icon.png'
+          '\n',
+        ),
+      );
+      expect(plan.desktopEntry, isNot(contains('\nName=changed')));
+    });
+
     test('shows an AppImage in the menu with its icon', () {
       const plan = LinuxProtocolRegistrationPlan(
         schemes: schemes,

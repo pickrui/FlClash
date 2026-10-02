@@ -60,7 +60,7 @@ class LinuxProtocolRegistrationPlan {
     'Type=Application',
     'Name=FlClash for oixCloud',
     if (menuIcon case final icon?) ...[
-      'Icon=$icon',
+      'Icon=${escapeDesktopEntryValue(icon)}',
       'Categories=Network;',
       'StartupWMClass=$packageName',
     ] else

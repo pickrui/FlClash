@@ -145,10 +145,17 @@ void main() {
       }
     });
 
+    test('keeps line breaks and tabs inside the Exec value', () {
+      expect(
+        quoteDesktopExecArgument('/home/deck/line\nName=changed\tapp\rimage'),
+        r'"/home/deck/line\nName=changed\tapp\rimage"',
+      );
+    });
+
     test('quote paths with spaces and reserved characters', () {
       expect(
         quoteDesktopExecArgument(r'/home/deck/My Apps/a"b$c`d\e%f.AppImage'),
-        r'"/home/deck/My Apps/a\"b\$c\`d\\e%%f.AppImage"',
+        r'"/home/deck/My Apps/a\\"b\\$c\\`d\\\\e%%f.AppImage"',
       );
     });
   });
