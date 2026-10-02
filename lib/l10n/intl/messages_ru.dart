@@ -552,6 +552,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Данные обнаружены в конфигурации",
     ),
     "configParseErrorAtLine": m6,
+    "configRecoveryKeyring": MessageLookupByLibrary.simpleMessage(
+      "Не удалось получить доступ к системной связке ключей (Secret Service). Включите и разблокируйте KWallet или GNOME Keyring в настройках системы, затем повторите попытку.",
+    ),
     "configRecoveryMessage": MessageLookupByLibrary.simpleMessage(
       "Локальные настройки временно недоступны. Ваши данные сохранены. Разблокируйте устройство и повторите попытку или откройте приложение позже.",
     ),
@@ -579,6 +582,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "configRecoveryUnreadable": MessageLookupByLibrary.simpleMessage(
       "Локальные настройки не удаётся расшифровать, либо файл повреждён. Исходные файлы сохранены. Восстановите подходящие ключ и резервную копию настроек или создайте копию и выполните сброс.",
+    ),
+    "configRecoveryUseLocalStorage": MessageLookupByLibrary.simpleMessage(
+      "Хранить в локальном файле",
+    ),
+    "configRecoveryUseLocalStorageConfirm": MessageLookupByLibrary.simpleMessage(
+      "Хранить ключи шифрования и учётные данные аккаунта не в системной связке ключей, а в файле в папке данных приложения, доступном только вашему пользователю? Любая программа, запущенная от вашего имени, сможет прочитать их и расшифровать локальные настройки. Этот выбор будет действовать и дальше.",
     ),
     "configTypeMismatch": m7,
     "configValueTypeBoolean": MessageLookupByLibrary.simpleMessage(

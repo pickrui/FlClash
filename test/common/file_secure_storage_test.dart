@@ -7,14 +7,14 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:fl_clash/utils/windows_secure_storage.dart';
+import 'package:fl_clash/utils/file_secure_storage.dart';
 import 'package:fl_clash/utils/windows_storage_crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   late Directory directory;
   late String path;
-  late WindowsSecureStorage storage;
+  late FileSecureStorage storage;
   Uint8List encrypt(Uint8List bytes) => Uint8List.fromList([42, ...bytes]);
   Uint8List decrypt(Uint8List bytes) {
     if (bytes.isEmpty || bytes.first != 42) {
@@ -23,11 +23,11 @@ void main() {
     return Uint8List.fromList(bytes.sublist(1));
   }
 
-  WindowsSecureStorage open() =>
-      WindowsSecureStorage(path: path, encrypt: encrypt, decrypt: decrypt);
+  FileSecureStorage open() =>
+      FileSecureStorage(path: path, encrypt: encrypt, decrypt: decrypt);
 
   setUp(() async {
-    directory = await Directory.systemTemp.createTemp('windows_storage_');
+    directory = await Directory.systemTemp.createTemp('file_secure_storage_');
     path = '${directory.path}/flutter_secure_storage.dat';
     storage = open();
   });
@@ -100,7 +100,7 @@ void main() {
   test('encryption failure leaves the committed files unchanged', () async {
     await storage.write('seed', 'original');
     final before = await File(path).readAsBytes();
-    final failing = WindowsSecureStorage(
+    final failing = FileSecureStorage(
       path: path,
       decrypt: decrypt,
       encrypt: (_) => throw StateError('protection unavailable'),
@@ -140,26 +140,21 @@ void main() {
     },
   );
 
-  test(
-    'Windows DPAPI preserves keys across storage instances',
-    () async {
-      final native = WindowsSecureStorage(path: path);
-      await native.write('config_age_seed', 'original');
-      await native.write('cloud_token', 'token');
-      expect(
-        await WindowsSecureStorage(path: path).read('config_age_seed'),
-        'original',
-      );
-      final raw = await File(path).readAsBytes();
-      expect(
-        utf8.decode(raw, allowMalformed: true),
-        isNot(contains('original')),
-      );
-      final decoded = jsonDecode(utf8.decode(unprotectWindowsStorage(raw)));
-      expect(decoded, {'config_age_seed': 'original', 'cloud_token': 'token'});
-      await File(path).writeAsBytes([1, 2, 3]);
-      expect(await native.read('config_age_seed'), 'original');
-    },
-    skip: !Platform.isWindows,
-  );
+  test('Windows DPAPI preserves keys across storage instances', () async {
+    FileSecureStorage openNative() => FileSecureStorage(
+      path: path,
+      encrypt: protectWindowsStorage,
+      decrypt: unprotectWindowsStorage,
+    );
+    final native = openNative();
+    await native.write('config_age_seed', 'original');
+    await native.write('cloud_token', 'token');
+    expect(await openNative().read('config_age_seed'), 'original');
+    final raw = await File(path).readAsBytes();
+    expect(utf8.decode(raw, allowMalformed: true), isNot(contains('original')));
+    final decoded = jsonDecode(utf8.decode(unprotectWindowsStorage(raw)));
+    expect(decoded, {'config_age_seed': 'original', 'cloud_token': 'token'});
+    await File(path).writeAsBytes([1, 2, 3]);
+    expect(await native.read('config_age_seed'), 'original');
+  }, skip: !Platform.isWindows);
 }

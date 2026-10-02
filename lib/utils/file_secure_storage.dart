@@ -11,15 +11,14 @@ import 'dart:typed_data';
 import 'package:fl_clash/common/durable_file.dart';
 import 'package:path/path.dart' as p;
 
-import 'windows_storage_crypto.dart';
-
-/// Compatible with flutter_secure_storage's existing DPAPI JSON file. All keys
-/// share one transaction, including across instances and Windows processes.
-class WindowsSecureStorage {
-  WindowsSecureStorage({
+/// One JSON file of secrets; on Windows it stays compatible with
+/// flutter_secure_storage's DPAPI file. All keys share one transaction,
+/// including across instances and processes.
+class FileSecureStorage {
+  FileSecureStorage({
     required this.path,
-    this.encrypt = protectWindowsStorage,
-    this.decrypt = unprotectWindowsStorage,
+    required this.encrypt,
+    required this.decrypt,
   });
 
   final String path;

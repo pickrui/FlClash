@@ -468,6 +468,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "設定内にデータが検出されました",
     ),
     "configParseErrorAtLine": m6,
+    "configRecoveryKeyring": MessageLookupByLibrary.simpleMessage(
+      "システムのキーリング（Secret Service）にアクセスできないため、システム設定で KDE ウォレットまたは GNOME キーリングを有効にしてロックを解除してから再試行してください",
+    ),
     "configRecoveryMessage": MessageLookupByLibrary.simpleMessage(
       "現在、ローカル設定を読み込めません。既存のデータは保持されています。端末のロックを解除して再試行するか、後でアプリを開き直してください",
     ),
@@ -491,6 +494,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "configRecoveryTitle": MessageLookupByLibrary.simpleMessage("ローカル設定の復元"),
     "configRecoveryUnreadable": MessageLookupByLibrary.simpleMessage(
       "ローカル設定を復号できないか、ファイルが破損しています。元のファイルは保持されています。対応するキーと設定のバックアップを復元するか、バックアップしてリセットしてください",
+    ),
+    "configRecoveryUseLocalStorage": MessageLookupByLibrary.simpleMessage(
+      "ローカルファイルに保存",
+    ),
+    "configRecoveryUseLocalStorageConfirm": MessageLookupByLibrary.simpleMessage(
+      "暗号化キーとアカウントの認証情報を、システムのキーリングではなくアプリのデータフォルダー内の現在のユーザーだけがアクセスできるファイルに保存しますか？現在のユーザーとして動作するプログラムはそれらを読み取ってローカル設定を復号でき、この選択は今後も維持されます",
     ),
     "configTypeMismatch": m7,
     "configValueTypeBoolean": MessageLookupByLibrary.simpleMessage("真偽値"),
