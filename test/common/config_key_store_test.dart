@@ -182,46 +182,49 @@ void main() {
     );
   });
 
-  // Clearing intentionally invalidates the store for this isolate permanently.
-  test('a new Linux install can move its seed to local storage', () async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.linux;
-    final storageDirectory = Directory('${directory.path}/secure_storage');
-    addTearDown(() async {
-      if (await storageDirectory.exists()) {
-        await storageDirectory.delete(recursive: true);
-      }
-    });
-    var keyringCalls = 0;
-    messenger.setMockMethodCallHandler(keychainChannel, (call) async {
-      keyringCalls++;
-      throw PlatformException(code: 'Libsecret error');
-    });
+  test(
+    'a new Linux install can move its seed to local storage',
+    () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+      final storageDirectory = Directory('${directory.path}/secure_storage');
+      addTearDown(() async {
+        if (await storageDirectory.exists()) {
+          await storageDirectory.delete(recursive: true);
+        }
+      });
+      var keyringCalls = 0;
+      messenger.setMockMethodCallHandler(keychainChannel, (call) async {
+        keyringCalls++;
+        throw PlatformException(code: 'Libsecret error');
+      });
 
-    await expectLater(
-      ConfigKeyStore.reload(),
-      throwsA(
-        isA<ConfigKeyUnavailableException>().having(
-          (error) => error.reason,
-          'reason',
-          ConfigRecoveryReason.storageUnavailable,
+      await expectLater(
+        ConfigKeyStore.reload(),
+        throwsA(
+          isA<ConfigKeyUnavailableException>().having(
+            (error) => error.reason,
+            'reason',
+            ConfigRecoveryReason.storageUnavailable,
+          ),
         ),
-      ),
-    );
-    expect(await ConfigKeyStore.canUseLocalStorage(), isTrue);
+      );
+      expect(await ConfigKeyStore.canUseLocalStorage(), isTrue);
 
-    await SafeStorage.useLocalFileStorage();
-    keyringCalls = 0;
-    await ConfigKeyStore.reload();
-    final seed = await ConfigKeyStore.seedBase64();
+      await ConfigKeyStore.useLocalStorage();
+      keyringCalls = 0;
+      await ConfigKeyStore.reload();
+      final seed = await ConfigKeyStore.seedBase64();
 
-    expect(ConfigKeyStore.decodeSeed(seed), isNotNull);
-    expect(keyringCalls, 0);
-    expect(await ConfigKeyStore.canUseLocalStorage(), isFalse);
-    final stored = await File(
-      '${storageDirectory.path}/storage.json',
-    ).readAsString();
-    expect(jsonDecode(stored), {seedKey: seed});
-  }, skip: Platform.isWindows);
+      expect(ConfigKeyStore.decodeSeed(seed), isNotNull);
+      expect(keyringCalls, 0);
+      expect(await ConfigKeyStore.canUseLocalStorage(), isFalse);
+      final stored = await File(
+        '${storageDirectory.path}/storage.json',
+      ).readAsString();
+      expect(jsonDecode(stored), {seedKey: seed});
+    },
+    skip: Platform.isWindows,
+  );
 
   test('local storage is offered only on Linux before any config', () async {
     debugDefaultTargetPlatformOverride = TargetPlatform.windows;
@@ -232,6 +235,43 @@ void main() {
     expect(await ConfigKeyStore.canUseLocalStorage(), isFalse);
   });
 
+  for (final suffix in ['', '.tmp', '.old']) {
+    test(
+      'local storage rejects config restored after the offer ($suffix)',
+      () async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+        final storageDirectory = Directory('${directory.path}/secure_storage');
+        addTearDown(() async {
+          if (await storageDirectory.exists()) {
+            await storageDirectory.delete(recursive: true);
+          }
+        });
+        expect(await ConfigKeyStore.canUseLocalStorage(), isTrue);
+        final restored = File('$configPath$suffix');
+        await restored.writeAsString('restored encrypted configuration');
+
+        await expectLater(
+          ConfigKeyStore.useLocalStorage(),
+          throwsA(
+            isA<ConfigKeyUnavailableException>().having(
+              (error) => error.reason,
+              'reason',
+              ConfigRecoveryReason.missingKey,
+            ),
+          ),
+        );
+
+        expect(await SafeStorage.usesLocalFileStorage, isFalse);
+        expect(
+          await restored.readAsString(),
+          'restored encrypted configuration',
+        );
+      },
+      skip: Platform.isWindows,
+    );
+  }
+
+  // Clearing intentionally invalidates the store for this isolate permanently.
   test(
     'clear waits for an in-flight recovery and prevents seed resurrection',
     () async {

@@ -175,6 +175,16 @@ class ConfigKeyStore {
       !await SafeStorage.usesLocalFileStorage &&
       !await _durableConfigExists();
 
+  static Future<void> useLocalStorage() async {
+    if (await _durableConfigExists()) {
+      throw const ConfigKeyUnavailableException(
+        null,
+        ConfigRecoveryReason.missingKey,
+      );
+    }
+    await SafeStorage.useLocalFileStorage();
+  }
+
   static Future<bool> _durableConfigExists() async {
     final path = await appPath.durableConfigPath;
     for (final candidate in [path, '$path.tmp', '$path.old']) {
