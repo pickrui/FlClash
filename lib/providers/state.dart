@@ -106,6 +106,7 @@ UpdateParams updateParams(Ref ref) {
         secret: resolveExternalControllerSecret(state.secret),
         unifiedDelay: state.unifiedDelay,
         mixedPort: state.mixedPort,
+        geoXUrl: state.geoXUrl.toJson().cast<String, String>(),
         geoAutoUpdate: state.geoAutoUpdate,
         geoUpdateInterval: normalizeGeoUpdateInterval(state.geoUpdateInterval),
         suspendOnIdle: suspendOnIdle,

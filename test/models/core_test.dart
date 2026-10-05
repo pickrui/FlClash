@@ -118,6 +118,7 @@ void main() {
       expect(params.logLevel, LogLevel.info);
       expect(params.geoAutoUpdate, true);
       expect(params.geoUpdateInterval, 24);
+      expect(params.geoXUrl, isEmpty);
       expect(params.suspendOnIdle, false);
     });
 

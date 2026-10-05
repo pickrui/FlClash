@@ -213,6 +213,36 @@ func updateGeoDataLockedFromURL(
 	return nil
 }
 
+func updateGeoResourceURLs(urls map[string]string) {
+	for geoType, link := range urls {
+		if link == "" {
+			continue
+		}
+		switch strings.ToUpper(geoType) {
+		case "MMDB":
+			if link != geodata.MmdbUrl() {
+				geodata.SetMmdbUrl(link)
+			}
+			currentConfig.General.GeoXUrl.Mmdb = link
+		case "ASN":
+			if link != geodata.ASNUrl() {
+				geodata.SetASNUrl(link)
+			}
+			currentConfig.General.GeoXUrl.ASN = link
+		case "GEOIP":
+			if link != geodata.GeoIpUrl() {
+				geodata.SetGeoIpUrl(link)
+			}
+			currentConfig.General.GeoXUrl.GeoIp = link
+		case "GEOSITE":
+			if link != geodata.GeoSiteUrl() {
+				geodata.SetGeoSiteUrl(link)
+			}
+			currentConfig.General.GeoXUrl.GeoSite = link
+		}
+	}
+}
+
 func geoDataURL(geoType string) string {
 	switch geoType {
 	case "MMDB":

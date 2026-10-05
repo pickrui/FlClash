@@ -42,6 +42,7 @@ abstract class UpdateParams with _$UpdateParams {
     @JsonKey(name: 'unified-delay') required bool unifiedDelay,
     @Default(true) @JsonKey(name: 'geo-auto-update') bool geoAutoUpdate,
     @Default(24) @JsonKey(name: 'geo-update-interval') int geoUpdateInterval,
+    @Default({}) @JsonKey(name: 'geox-url') Map<String, String> geoXUrl,
     @Default(false) @JsonKey(name: 'suspend-on-idle') bool suspendOnIdle,
     @Default([]) List<String> authentication,
   }) = _UpdateParams;

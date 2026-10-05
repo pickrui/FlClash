@@ -39,6 +39,11 @@ _UpdateParams _$UpdateParamsFromJson(Map<String, dynamic> json) =>
       unifiedDelay: json['unified-delay'] as bool,
       geoAutoUpdate: json['geo-auto-update'] as bool? ?? true,
       geoUpdateInterval: (json['geo-update-interval'] as num?)?.toInt() ?? 24,
+      geoXUrl:
+          (json['geox-url'] as Map<String, dynamic>?)?.map(
+            (k, e) => MapEntry(k, e as String),
+          ) ??
+          const {},
       suspendOnIdle: json['suspend-on-idle'] as bool? ?? false,
       authentication:
           (json['authentication'] as List<dynamic>?)
@@ -62,6 +67,7 @@ Map<String, dynamic> _$UpdateParamsToJson(_UpdateParams instance) =>
       'unified-delay': instance.unifiedDelay,
       'geo-auto-update': instance.geoAutoUpdate,
       'geo-update-interval': instance.geoUpdateInterval,
+      'geox-url': instance.geoXUrl,
       'suspend-on-idle': instance.suspendOnIdle,
       'authentication': instance.authentication,
     };

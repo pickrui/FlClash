@@ -365,6 +365,7 @@ func updateConfig(params *UpdateParams) error {
 		applyAuthentication(currentConfig, *params.Authentication, users)
 	}
 	updateListeners()
+	updateGeoResourceURLs(params.GeoXUrl)
 	if restartGeo {
 		restartGeoScheduler()
 	}

@@ -9,6 +9,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"net"
 	"net/http"
@@ -755,5 +756,53 @@ func TestCanceledGeoReplacementPreservesExistingFile(t *testing.T) {
 	entries, err := os.ReadDir(directory)
 	if err != nil || len(entries) != 1 || entries[0].Name() != "GEOIP.dat" {
 		t.Fatalf("canceled replacement leaked staging files: %v, %v", entries, err)
+	}
+}
+
+func TestUpdateConfigChangesGeoDownloadURLsWithoutApply(t *testing.T) {
+	stubLiveConfig(t)
+	data, oldRequests := setupGeoUpdateServer(t, nil)
+	active := currentConfig
+	active.General.MixedPort = 17890
+	newRequests := make(chan string, 4)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		geoType := strings.TrimPrefix(r.URL.Path, "/")
+		newRequests <- geoType
+		_, _ = w.Write(data[geoType])
+	}))
+	defer server.Close()
+	for _, geoType := range []string{"MMDB", "ASN", "GEOIP", "GEOSITE"} {
+		url := server.URL + "/" + geoType
+		encoded, err := json.Marshal(map[string]any{"geox-url": map[string]string{strings.ToLower(geoType): url}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		var params UpdateParams
+		if err := json.Unmarshal(encoded, &params); err != nil {
+			t.Fatal(err)
+		}
+		if err := updateConfig(&params); err != nil {
+			t.Fatal(err)
+		}
+		if currentConfig != active || currentConfig.General.MixedPort != 17890 {
+			t.Fatal("URL update replaced the active configuration")
+		}
+		if got := geoDataURL(geoType); got != url {
+			t.Fatalf("URL = %q, want %q", got, url)
+		}
+		if err := updateGeoDataLocked(context.Background(), geoType, geoTestPaths()[geoType]); err != nil {
+			t.Fatal(err)
+		}
+	}
+	assertGeoRequests(t, newRequests, []string{"MMDB", "ASN", "GEOIP", "GEOSITE"})
+	assertGeoRequests(t, oldRequests, nil)
+	before := active.General.GeoXUrl
+	for _, urls := range []map[string]string{nil, {"mmdb": "", "unknown": "https://example.test/ignored"}} {
+		if err := updateConfig(&UpdateParams{GeoXUrl: urls}); err != nil {
+			t.Fatal(err)
+		}
+		if active.General.GeoXUrl != before {
+			t.Fatal("omitted or empty URLs changed the active resources")
+		}
 	}
 }
