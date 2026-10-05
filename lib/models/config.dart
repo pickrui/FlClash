@@ -94,6 +94,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(true) bool closeConnections,
     @Default(defaultTestUrl) @JsonKey(fromJson: testUrlFromJson) String testUrl,
     @Default(false) bool isAnimateToPage,
+    @Default(true) bool floatingNavigationBar,
     @Default(false) bool showLabel,
     @Default(false) bool disclaimerAccepted,
     @Default(true) bool minimizeOnExit,

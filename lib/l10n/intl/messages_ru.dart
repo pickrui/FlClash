@@ -1178,6 +1178,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "findProcessModeDesc": MessageLookupByLibrary.simpleMessage(
       "При включении возможны небольшие потери производительности",
     ),
+    "floatingNavigationBar": MessageLookupByLibrary.simpleMessage(
+      "Плавающая навигация",
+    ),
+    "floatingNavigationBarDesc": MessageLookupByLibrary.simpleMessage(
+      "Использовать плавающую панель в компактном режиме",
+    ),
     "followProfile": MessageLookupByLibrary.simpleMessage("Как в профиле"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("Семейство шрифтов"),
     "forceRestartCoreTip": MessageLookupByLibrary.simpleMessage(

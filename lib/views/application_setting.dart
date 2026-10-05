@@ -193,6 +193,29 @@ class AnimateTabItem extends ConsumerWidget {
   }
 }
 
+class FloatingNavigationItem extends ConsumerWidget {
+  const FloatingNavigationItem({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final floatingNavigationBar = ref.watch(
+      appSettingProvider.select((state) => state.floatingNavigationBar),
+    );
+    return ListItem.switchItem(
+      title: Text(appLocalizations.floatingNavigationBar),
+      subtitle: Text(appLocalizations.floatingNavigationBarDesc),
+      delegate: SwitchDelegate(
+        value: floatingNavigationBar,
+        onChanged: (value) {
+          ref
+              .read(appSettingProvider.notifier)
+              .update((state) => state.copyWith(floatingNavigationBar: value));
+        },
+      ),
+    );
+  }
+}
+
 class OpenLogsItem extends ConsumerWidget {
   const OpenLogsItem({super.key});
 
@@ -230,6 +253,7 @@ class ApplicationSettingView extends StatelessWidget {
       const AutoRunItem(),
       if (system.isAndroid) ...[const HiddenItem()],
       const AnimateTabItem(),
+      const FloatingNavigationItem(),
       const OpenLogsItem(),
       const CloseConnectionsItem(),
       const UsageItem(),

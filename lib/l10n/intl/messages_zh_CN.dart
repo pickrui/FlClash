@@ -837,6 +837,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "fileIsUpdate": MessageLookupByLibrary.simpleMessage("文件有修改，是否保存修改"),
     "findProcessMode": MessageLookupByLibrary.simpleMessage("查找进程"),
     "findProcessModeDesc": MessageLookupByLibrary.simpleMessage("开启后会有一定性能损耗"),
+    "floatingNavigationBar": MessageLookupByLibrary.simpleMessage("悬浮导航"),
+    "floatingNavigationBarDesc": MessageLookupByLibrary.simpleMessage(
+      "在紧凑布局中使用悬浮导航栏",
+    ),
     "followProfile": MessageLookupByLibrary.simpleMessage("跟随配置"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("字体"),
     "forceRestartCoreTip": MessageLookupByLibrary.simpleMessage("您确定要强制重启核心吗？"),

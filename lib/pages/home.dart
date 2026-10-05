@@ -9,10 +9,13 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/manager/app_manager.dart';
 import 'package:fl_clash/models/common.dart';
 import 'package:fl_clash/providers/providers.dart';
+import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/widgets/widgets.dart';
+import 'package:fl_clash/widgets/navigation_dock.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:fl_clash/views/dashboard/widgets/start_button.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -31,23 +34,53 @@ class HomePage extends StatelessWidget {
               final isMobile = state.viewMode == ViewMode.mobile;
               final navigationItems = state.navigationItems;
               final currentIndex = state.currentIndex;
-              final bottomNavigationBar = NavigationBarTheme(
-                data: _NavigationBarDefaultsM3(context),
-                child: NavigationBar(
-                  destinations: navigationItems
-                      .map(
-                        (e) => NavigationDestination(
-                          icon: e.icon,
-                          label: Intl.message(e.label.name),
-                        ),
-                      )
-                      .toList(),
-                  onDestinationSelected: (index) {
-                    commonAction.toPage(navigationItems[index].label);
-                  },
-                  selectedIndex: currentIndex,
+              final floating = ref.watch(
+                appSettingProvider.select(
+                  (value) => value.floatingNavigationBar,
                 ),
               );
+              final docked =
+                  floating && MediaQuery.sizeOf(context).width >= 380;
+              final hasProfile = ref.watch(
+                profilesProvider.select((value) => value.isNotEmpty),
+              );
+              final bottomNavigationBar = floating
+                  ? NavigationDock(
+                      destinations: [
+                        for (final item in navigationItems)
+                          NavigationDockDestination(
+                            icon: item.icon,
+                            label: Intl.message(item.label.name),
+                          ),
+                      ],
+                      selectedIndex: currentIndex,
+                      onSelected: (index) =>
+                          commonAction.toPage(navigationItems[index].label),
+                      trailing:
+                          docked &&
+                              hasProfile &&
+                              navigationItems[currentIndex].label ==
+                                  PageLabel.dashboard
+                          ? const StartButton()
+                          : null,
+                    )
+                  : NavigationBarTheme(
+                      data: _NavigationBarDefaultsM3(context),
+                      child: NavigationBar(
+                        destinations: navigationItems
+                            .map(
+                              (e) => NavigationDestination(
+                                icon: e.icon,
+                                label: Intl.message(e.label.name),
+                              ),
+                            )
+                            .toList(),
+                        onDestinationSelected: (index) {
+                          commonAction.toPage(navigationItems[index].label);
+                        },
+                        selectedIndex: currentIndex,
+                      ),
+                    );
               if (isMobile) {
                 return Column(
                   children: [
@@ -59,7 +92,10 @@ class HomePage extends StatelessWidget {
                         removeLeft: true,
                         removeRight: true,
                         context: context,
-                        child: child!,
+                        child: DockedPageScope(
+                          docked: docked && hasProfile,
+                          child: child!,
+                        ),
                       ),
                     ),
                     MediaQuery.removePadding(
@@ -182,7 +218,10 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
     final index = _indexOf(pageLabel);
     final isAnimateToPage = ref.read(appSettingProvider).isAnimateToPage;
     final isMobile = ref.read(isMobileViewProvider);
-    if (isAnimateToPage && isMobile && !ignoreAnimateTo) {
+    if (isAnimateToPage &&
+        isMobile &&
+        !ignoreAnimateTo &&
+        !MediaQuery.disableAnimationsOf(context)) {
       await _pageController.animateToPage(
         index,
         duration: kTabScrollDuration,

@@ -950,6 +950,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "findProcessModeDesc": MessageLookupByLibrary.simpleMessage(
       "有効化するとパフォーマンスが若干低下します",
     ),
+    "floatingNavigationBar": MessageLookupByLibrary.simpleMessage(
+      "フローティングナビゲーション",
+    ),
+    "floatingNavigationBarDesc": MessageLookupByLibrary.simpleMessage(
+      "コンパクトな画面でフローティングドックを使用",
+    ),
     "followProfile": MessageLookupByLibrary.simpleMessage("プロファイルに従う"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("フォントファミリー"),
     "forceRestartCoreTip": MessageLookupByLibrary.simpleMessage(

@@ -9658,6 +9658,26 @@ class AppLocalizations {
   String get runTime {
     return Intl.message('Uptime', name: 'runTime', desc: '', args: []);
   }
+
+  /// `Floating navigation`
+  String get floatingNavigationBar {
+    return Intl.message(
+      'Floating navigation',
+      name: 'floatingNavigationBar',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use a floating dock for compact layouts`
+  String get floatingNavigationBarDesc {
+    return Intl.message(
+      'Use a floating dock for compact layouts',
+      name: 'floatingNavigationBarDesc',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

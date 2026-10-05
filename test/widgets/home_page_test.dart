@@ -7,8 +7,10 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/home.dart';
 import 'package:fl_clash/providers/app.dart';
+import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/widgets/inherited.dart';
+import 'package:fl_clash/widgets/navigation_dock.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -51,7 +53,13 @@ void main() {
       (_, _) => const Size(400, 800),
     );
     const all = [PageLabel.dashboard, PageLabel.proxies, PageLabel.tools];
-    final container = ProviderContainer(overrides: [viewSize, _items(all)]);
+    final container = ProviderContainer(
+      overrides: [
+        viewSize,
+        _items(all),
+        profilesProvider.overrideWithValue([]),
+      ],
+    );
     addTearDown(container.dispose);
     container.read(currentPageLabelProvider.notifier).value = PageLabel.proxies;
     await tester.pumpWidget(
@@ -65,15 +73,20 @@ void main() {
 
     container.updateOverrides([
       viewSize,
+      profilesProvider.overrideWithValue([]),
       _items(const [PageLabel.dashboard, PageLabel.tools]),
     ]);
     await tester.pumpAndSettle();
     expect(find.text('dashboard:true'), findsOneWidget);
     expect(find.textContaining('tools:'), findsNothing);
-    final bar = tester.widget<NavigationBar>(find.byType(NavigationBar));
+    final bar = tester.widget<NavigationDock>(find.byType(NavigationDock));
     expect(bar.selectedIndex, 0);
 
-    container.updateOverrides([viewSize, _items(all)]);
+    container.updateOverrides([
+      viewSize,
+      _items(all),
+      profilesProvider.overrideWithValue([]),
+    ]);
     await tester.pumpAndSettle();
     expect(find.text('proxies:true'), findsOneWidget);
     expect(tester.takeException(), isNull);

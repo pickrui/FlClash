@@ -1131,6 +1131,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "findProcessModeDesc": MessageLookupByLibrary.simpleMessage(
       "There is a certain performance loss after opening",
     ),
+    "floatingNavigationBar": MessageLookupByLibrary.simpleMessage(
+      "Floating navigation",
+    ),
+    "floatingNavigationBarDesc": MessageLookupByLibrary.simpleMessage(
+      "Use a floating dock for compact layouts",
+    ),
     "followProfile": MessageLookupByLibrary.simpleMessage("Follow profile"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("FontFamily"),
     "forceRestartCoreTip": MessageLookupByLibrary.simpleMessage(

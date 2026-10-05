@@ -1119,5 +1119,7 @@
   "serviceOriginalsOnly": "Только оригинальный контент",
   "serviceComingSoon": "Скоро",
   "serviceTimeout": "Время ожидания истекло",
-  "runTime": "Время работы"
+  "runTime": "Время работы",
+  "floatingNavigationBar": "Плавающая навигация",
+  "floatingNavigationBarDesc": "Использовать плавающую панель в компактном режиме"
 }

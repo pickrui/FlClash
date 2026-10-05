@@ -1119,5 +1119,7 @@
   "serviceOriginalsOnly": "仅自制内容",
   "serviceComingSoon": "尚未开放",
   "serviceTimeout": "超时",
-  "runTime": "运行时间"
+  "runTime": "运行时间",
+  "floatingNavigationBar": "悬浮导航",
+  "floatingNavigationBarDesc": "在紧凑布局中使用悬浮导航栏"
 }

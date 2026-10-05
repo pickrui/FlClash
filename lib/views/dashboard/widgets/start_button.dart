@@ -8,6 +8,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/widgets/navigation_dock.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -108,6 +109,14 @@ class _StartButtonState extends ConsumerState<StartButton>
           commonAction.toProfiles();
         },
         child: const Icon(Icons.add),
+      );
+    }
+    if (NavigationDock.isDocked(context)) {
+      return FloatingActionButton(
+        heroTag: null,
+        tooltip: isStart ? appLocalizations.stop : appLocalizations.start,
+        onPressed: handleSwitchStart,
+        child: Icon(isStart ? Icons.stop : Icons.play_arrow),
       );
     }
     final textWidth =

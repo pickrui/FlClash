@@ -1119,5 +1119,7 @@
   "serviceOriginalsOnly": "Originals only",
   "serviceComingSoon": "Coming soon",
   "serviceTimeout": "Timed out",
-  "runTime": "Uptime"
+  "runTime": "Uptime",
+  "floatingNavigationBar": "Floating navigation",
+  "floatingNavigationBarDesc": "Use a floating dock for compact layouts"
 }
