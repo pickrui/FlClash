@@ -6,7 +6,7 @@
 import Cocoa
 import FlutterMacOS
 
-public class TrayPlugin: NSObject, FlutterPlugin, NSMenuDelegate {
+public class TrayPlugin: NSObject, FlutterPlugin {
     private var channel: FlutterMethodChannel!
     private var statusItem: TrayStatusItem?
     private var menu: TrayMenu?
@@ -54,11 +54,15 @@ public class TrayPlugin: NSObject, FlutterPlugin, NSMenuDelegate {
         item.setTitle(arguments["title"] as? String ?? "")
 
         if let items = arguments["menu"] as? [[String: Any]] {
-            let built = TrayMenu(items: items) { [weak self] id in
-                self?.channel.invokeMethod("onMenuItemSelected", arguments: ["id": id])
-            }
-            built.delegate = self
-            menu = built
+            menu = TrayMenu(
+                items: items,
+                onSelect: { [weak self] id in
+                    self?.channel.invokeMethod("onMenuItemSelected", arguments: ["id": id])
+                },
+                onClose: { [weak self] in
+                    self?.statusItem?.closeMenu()
+                }
+            )
         }
 
         return true
@@ -121,7 +125,4 @@ public class TrayPlugin: NSObject, FlutterPlugin, NSMenuDelegate {
         return image
     }
 
-    public func menuDidClose(_ menu: NSMenu) {
-        statusItem?.closeMenu()
-    }
 }

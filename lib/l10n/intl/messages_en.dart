@@ -214,10 +214,23 @@ class MessageLookup extends MessageLookupByLibrary {
     "account": MessageLookupByLibrary.simpleMessage("Account"),
     "accountBalance": MessageLookupByLibrary.simpleMessage("Balance"),
     "action": MessageLookupByLibrary.simpleMessage("Action"),
+    "action_copyEnv": MessageLookupByLibrary.simpleMessage(
+      "Copy proxy environment variables",
+    ),
+    "action_delayTest": MessageLookupByLibrary.simpleMessage(
+      "Test node latency",
+    ),
+    "action_directMode": MessageLookupByLibrary.simpleMessage("Direct mode"),
+    "action_exit": MessageLookupByLibrary.simpleMessage("Exit"),
+    "action_globalMode": MessageLookupByLibrary.simpleMessage("Global mode"),
     "action_mode": MessageLookupByLibrary.simpleMessage("Switch mode"),
     "action_proxy": MessageLookupByLibrary.simpleMessage("System proxy"),
+    "action_ruleMode": MessageLookupByLibrary.simpleMessage("Rule mode"),
     "action_start": MessageLookupByLibrary.simpleMessage("Start/Stop"),
     "action_tun": MessageLookupByLibrary.simpleMessage("TUN"),
+    "action_updateProfiles": MessageLookupByLibrary.simpleMessage(
+      "Update profiles",
+    ),
     "action_view": MessageLookupByLibrary.simpleMessage("Show/Hide"),
     "activate": MessageLookupByLibrary.simpleMessage("Activate"),
     "activatePlanConfirm": MessageLookupByLibrary.simpleMessage(
@@ -1211,6 +1224,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "hotkeyManagementDesc": MessageLookupByLibrary.simpleMessage(
       "Use keyboard to control applications",
+    ),
+    "hotkeyUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Shortcut unavailable",
     ),
     "hours": MessageLookupByLibrary.simpleMessage("Hours"),
     "hoursAgo": m26,

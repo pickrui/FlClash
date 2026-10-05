@@ -16,6 +16,39 @@ TraySpec _spec({
 }
 
 void main() {
+  test('details survive encoding and participate in menu refresh', () {
+    final first = TrayCodec.encode(
+      _spec(
+        menu: const [
+          TrayMenuAction(label: 'test', detail: 'Ctrl+T'),
+          TrayMenuCheckbox(label: 'node', checked: true, detail: '24 ms'),
+          TrayMenuSubmenu(label: 'group', detail: '24 ms', items: []),
+        ],
+      ),
+    );
+    expect(first.menu.cast<Map>().map((item) => item['detail']), [
+      'Ctrl+T',
+      '24 ms',
+      '24 ms',
+    ]);
+    final changed = TrayCodec.encode(
+      _spec(
+        menu: const [TrayMenuAction(label: 'test', detail: 'Ctrl+D')],
+      ),
+    );
+    expect(changed.signature, isNot(first.signature));
+    expect(
+      (TrayCodec.encode(
+                _spec(
+                  menu: const [TrayMenuAction(label: 'empty', detail: '')],
+                ),
+              ).menu.single
+              as Map)
+          .containsKey('detail'),
+      isFalse,
+    );
+  });
+
   test('assigns ids in pre-order starting at the first id', () {
     final encoded = TrayCodec.encode(
       _spec(

@@ -41,6 +41,8 @@ final class Tray {
   Map<int, TrayMenuItem> _itemsById = const {};
   Future<void> _queue = Future<void>.value();
   String? _signature;
+  int _firstItemId = TrayCodec.firstItemId;
+  int _nextItemId = TrayCodec.firstItemId;
   String _title = '';
   String _requestedTitle = '';
   bool _isVisible = false;
@@ -74,6 +76,8 @@ final class Tray {
     _itemsById = const {};
     _queue = Future<void>.value();
     _signature = null;
+    _firstItemId = TrayCodec.firstItemId;
+    _nextItemId = TrayCodec.firstItemId;
     _title = '';
     _requestedTitle = '';
     _isVisible = false;
@@ -95,11 +99,14 @@ final class Tray {
     if (!capabilities.supported) {
       return;
     }
-    final encoded = TrayCodec.encode(spec);
-    if (_isVisible && encoded.signature == _signature) {
-      _itemsById = encoded.itemsById;
+    final canonical = TrayCodec.encode(spec);
+    if (_isVisible && canonical.signature == _signature) {
+      _itemsById = TrayCodec.encode(spec, firstId: _firstItemId).itemsById;
       return;
     }
+    final firstId = _nextItemId;
+    final encoded = TrayCodec.encode(spec, firstId: firstId);
+    _nextItemId += encoded.itemsById.length;
     final isApplied = await _channel
         .invokeMethod<bool>(_methodShow, <String, Object?>{
           'id': _stableId,
@@ -113,7 +120,8 @@ final class Tray {
       return;
     }
     _itemsById = encoded.itemsById;
-    _signature = encoded.signature;
+    _signature = canonical.signature;
+    _firstItemId = firstId;
     _isVisible = true;
   }
 
@@ -166,9 +174,11 @@ final class Tray {
           return;
         }
         switch (item) {
-          case TrayMenuAction(:final onSelected):
+          case TrayMenuAction(:final onSelected, :final enabled):
+            if (!enabled) return;
             onSelected?.call();
-          case TrayMenuCheckbox(:final onSelected):
+          case TrayMenuCheckbox(:final onSelected, :final enabled):
+            if (!enabled) return;
             onSelected?.call();
           case TrayMenuSubmenu():
           case TrayMenuSeparator():

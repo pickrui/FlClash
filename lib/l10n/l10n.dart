@@ -9438,6 +9438,81 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Rule mode`
+  String get action_ruleMode {
+    return Intl.message(
+      'Rule mode',
+      name: 'action_ruleMode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Global mode`
+  String get action_globalMode {
+    return Intl.message(
+      'Global mode',
+      name: 'action_globalMode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Direct mode`
+  String get action_directMode {
+    return Intl.message(
+      'Direct mode',
+      name: 'action_directMode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Test node latency`
+  String get action_delayTest {
+    return Intl.message(
+      'Test node latency',
+      name: 'action_delayTest',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update profiles`
+  String get action_updateProfiles {
+    return Intl.message(
+      'Update profiles',
+      name: 'action_updateProfiles',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copy proxy environment variables`
+  String get action_copyEnv {
+    return Intl.message(
+      'Copy proxy environment variables',
+      name: 'action_copyEnv',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Exit`
+  String get action_exit {
+    return Intl.message('Exit', name: 'action_exit', desc: '', args: []);
+  }
+
+  /// `Shortcut unavailable`
+  String get hotkeyUnavailable {
+    return Intl.message(
+      'Shortcut unavailable',
+      name: 'hotkeyUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

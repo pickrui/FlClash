@@ -150,6 +150,41 @@ ProxyState proxyState(Ref ref) {
 }
 
 @riverpod
+Map<String, Map<String, int>> trayDelays(Ref ref) {
+  final delayMap = ref.watch(delayDataSourceProvider);
+  if (delayMap.isEmpty) {
+    return const {};
+  }
+  final groups = ref.watch(currentGroupsStateProvider).value;
+  final allGroups = ref.watch(groupsProvider);
+  final selectedMap = ref.watch(selectedMapProvider);
+  final defaultTestUrl = ref.watch(
+    appSettingProvider.select((state) => state.testUrl),
+  );
+  final delays = <String, Map<String, int>>{};
+  for (final group in groups) {
+    final testUrl = group.testUrl.takeFirstValid([defaultTestUrl]);
+    final groupDelays = <String, int>{};
+    for (final proxy in group.all) {
+      final delay = computeProxyDelayState(
+        proxyName: proxy.name,
+        testUrl: testUrl,
+        groups: allGroups,
+        selectedMap: selectedMap,
+        delayMap: delayMap,
+      ).delay;
+      if (delay != 0) {
+        groupDelays[proxy.name] = delay;
+      }
+    }
+    if (groupDelays.isNotEmpty) {
+      delays[group.name] = groupDelays;
+    }
+  }
+  return delays;
+}
+
+@riverpod
 TrayState trayState(Ref ref) {
   final isStart = ref.watch(runTimeProvider.select((state) => state != null));
   final systemProxy = ref.watch(
@@ -181,6 +216,13 @@ TrayState trayState(Ref ref) {
     groups: groups,
     selectedMap: selectedMap,
     showTrayTitle: appSettingVm3.c,
+    delays: ref.watch(trayDelaysProvider),
+    hotKeys: {
+      for (final key in ref.watch(hotKeyActionsProvider))
+        if (isValidHotKey(key.modifiers, key.key) &&
+            !ref.watch(hotKeyFailuresProvider).containsKey(key.action))
+          key.action: key,
+    },
   );
 }
 

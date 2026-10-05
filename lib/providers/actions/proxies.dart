@@ -79,6 +79,9 @@ class ProxiesAction extends _$ProxiesAction {
   Future<bool> delayTest(List<Proxy> proxies, [String? testUrl]) =>
       _controller.delayTest(proxies, testUrl);
 
+  Future<void> delayTestGroups(List<Group> groups) =>
+      _controller.delayTestGroups(groups);
+
   Future<void> proxyDelayTest(Proxy proxy, [String? testUrl]) =>
       _controller.proxyDelayTest(proxy, testUrl);
 
@@ -349,7 +352,9 @@ extension ProxiesControllerExt on AppController {
     } finally {
       _delayTestRuns.leave(generation);
     }
-    if (!isCurrentDelayGeneration(generation) || completed.isEmpty) return false;
+    if (!isCurrentDelayGeneration(generation) || completed.isEmpty) {
+      return false;
+    }
     addSortNum();
     updateGroupsDebounce();
     if (!system.isWindows && !system.isMacOS) return false;
@@ -370,6 +375,29 @@ extension ProxiesControllerExt on AppController {
           runSession == globalState.startTime,
       running: isProxyActive,
     );
+  }
+
+  Future<void> delayTestGroups(List<Group> testGroups) async {
+    final targets = <DelayTestTarget>{
+      for (final group in testGroups)
+        ...computeDelayTestTargets(
+          proxies: group.all,
+          groups: groups,
+          selectedMap: this.currentProfile?.selectedMap ?? {},
+          defaultTestUrl: getRealTestUrl(group.testUrl),
+        ),
+    };
+    if (targets.isEmpty) return;
+    final generation = _joinDelayTest();
+    try {
+      final completed = await _probeDelayTargets(targets.toList(), generation);
+      if (isCurrentDelayGeneration(generation) && completed.isNotEmpty) {
+        addSortNum();
+        updateGroupsDebounce();
+      }
+    } finally {
+      _delayTestRuns.leave(generation);
+    }
   }
 
   Future<Map<(String, String), int?>> _probeDelayTargets(

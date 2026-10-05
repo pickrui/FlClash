@@ -246,7 +246,20 @@ extension KeyboardModifierExt on KeyboardModifier {
   }
 }
 
-enum HotAction { start, view, mode, proxy, tun }
+enum HotAction {
+  start,
+  view,
+  mode,
+  proxy,
+  tun,
+  ruleMode,
+  globalMode,
+  directMode,
+  delayTest,
+  updateProfiles,
+  copyEnv,
+  exit,
+}
 
 enum ProxiesIconStyle { none, standard, icon }
 

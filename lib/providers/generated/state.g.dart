@@ -270,6 +270,55 @@ final class ProxyStateProvider
 
 String _$proxyStateHash() => r'8ea9a6d176d46966a9e5e790e2613b3d79df469e';
 
+@ProviderFor(trayDelays)
+final trayDelaysProvider = TrayDelaysProvider._();
+
+final class TrayDelaysProvider
+    extends
+        $FunctionalProvider<
+          Map<String, Map<String, int>>,
+          Map<String, Map<String, int>>,
+          Map<String, Map<String, int>>
+        >
+    with $Provider<Map<String, Map<String, int>>> {
+  TrayDelaysProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'trayDelaysProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$trayDelaysHash();
+
+  @$internal
+  @override
+  $ProviderElement<Map<String, Map<String, int>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  Map<String, Map<String, int>> create(Ref ref) {
+    return trayDelays(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Map<String, Map<String, int>> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Map<String, Map<String, int>>>(
+        value,
+      ),
+    );
+  }
+}
+
+String _$trayDelaysHash() => r'266ed418b13319a7fcc6a3d8307b6786f6ce89bf';
+
 @ProviderFor(trayState)
 final trayStateProvider = TrayStateProvider._();
 
@@ -309,7 +358,7 @@ final class TrayStateProvider
   }
 }
 
-String _$trayStateHash() => r'c835f313fb5de090ebbbf90b4c12138935a168c9';
+String _$trayStateHash() => r'5fec4e5e44ed42d816523721703ef387328972f0';
 
 @ProviderFor(vpnState)
 final vpnStateProvider = VpnStateProvider._();

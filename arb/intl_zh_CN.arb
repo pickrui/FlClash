@@ -1095,5 +1095,13 @@
   "dnsQueryInitiatorOther": "其他",
   "overrideNtp": "覆写 NTP",
   "overrideFieldsDesc": "仅覆写选中的字段，其余值沿用订阅配置",
-  "overrideFieldsEmpty": "添加需要覆写的字段，或编辑 YAML 片段"
+  "overrideFieldsEmpty": "添加需要覆写的字段，或编辑 YAML 片段",
+  "action_ruleMode": "规则模式",
+  "action_globalMode": "全局模式",
+  "action_directMode": "直连模式",
+  "action_delayTest": "节点测速",
+  "action_updateProfiles": "更新订阅",
+  "action_copyEnv": "复制代理环境变量",
+  "action_exit": "退出",
+  "hotkeyUnavailable": "快捷键注册失败"
 }

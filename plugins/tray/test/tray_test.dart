@@ -63,6 +63,49 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   });
 
+  test('old menu callbacks cannot select a replacement item', () async {
+    var oldSelected = 0;
+    var newSelected = 0;
+    await Tray.instance.show(
+      _spec(
+        menu: [TrayMenuAction(label: 'old', onSelected: () => oldSelected++)],
+      ),
+    );
+    final oldId = ((calls.last.arguments as Map)['menu'] as List).first['id'];
+    await Tray.instance.show(
+      _spec(
+        menu: [
+          TrayMenuAction(
+            label: 'new',
+            detail: '24 ms',
+            onSelected: () => newSelected++,
+          ),
+        ],
+      ),
+    );
+    final newId = ((calls.last.arguments as Map)['menu'] as List).first['id'];
+    expect(newId, isNot(oldId));
+    await _emit('onMenuItemSelected', {'id': oldId});
+    expect([oldSelected, newSelected], [0, 0]);
+    await _emit('onMenuItemSelected', {'id': newId});
+    expect([oldSelected, newSelected], [0, 1]);
+    await Tray.instance.show(
+      _spec(
+        menu: [
+          TrayMenuAction(
+            label: 'disabled',
+            enabled: false,
+            onSelected: () => newSelected++,
+          ),
+        ],
+      ),
+    );
+    final disabledId =
+        ((calls.last.arguments as Map)['menu'] as List).first['id'];
+    await _emit('onMenuItemSelected', {'id': disabledId});
+    expect(newSelected, 1);
+  });
+
   test('a rejected show stays invisible and is retried', () async {
     showResult = false;
     await Tray.instance.show(_spec());

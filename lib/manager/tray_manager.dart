@@ -22,6 +22,7 @@ class TrayManager extends ConsumerStatefulWidget {
 
 class _TrayContainerState extends ConsumerState<TrayManager> {
   StreamSubscription<native.TrayEvent>? _subscription;
+  Timer? _refreshTimer;
   @override
   void initState() {
     super.initState();
@@ -31,7 +32,7 @@ class _TrayContainerState extends ConsumerState<TrayManager> {
           window?.show();
         case native.TrayMenuRequested():
           unawaited(
-            native.Tray.instance.openMenu().catchError((Object error) {
+            _openMenu().catchError((Object error) {
               commonPrint.log('Tray menu failed: $error');
             }),
           );
@@ -41,9 +42,19 @@ class _TrayContainerState extends ConsumerState<TrayManager> {
     });
     ref.listenManual(trayStateProvider, (prev, next) {
       if (prev != next) {
-        appController.updateTray();
+        _refreshTimer ??= Timer(const Duration(milliseconds: 200), () {
+          _refreshTimer = null;
+          if (mounted) appController.updateTray();
+        });
       }
     });
+  }
+
+  Future<void> _openMenu() async {
+    _refreshTimer?.cancel();
+    _refreshTimer = null;
+    await appController.updateTray();
+    if (mounted) await native.Tray.instance.openMenu();
   }
 
   @override
@@ -54,6 +65,7 @@ class _TrayContainerState extends ConsumerState<TrayManager> {
   @override
   void dispose() {
     _subscription?.cancel();
+    _refreshTimer?.cancel();
     super.dispose();
   }
 }

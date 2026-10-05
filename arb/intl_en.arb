@@ -1095,5 +1095,13 @@
   "dnsQueryInitiatorOther": "Other",
   "overrideNtp": "Override NTP",
   "overrideFieldsDesc": "Only the selected fields override the profile; other values are inherited",
-  "overrideFieldsEmpty": "Add fields to override, or edit the YAML fragment"
+  "overrideFieldsEmpty": "Add fields to override, or edit the YAML fragment",
+  "action_ruleMode": "Rule mode",
+  "action_globalMode": "Global mode",
+  "action_directMode": "Direct mode",
+  "action_delayTest": "Test node latency",
+  "action_updateProfiles": "Update profiles",
+  "action_copyEnv": "Copy proxy environment variables",
+  "action_exit": "Exit",
+  "hotkeyUnavailable": "Shortcut unavailable"
 }

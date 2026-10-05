@@ -1095,5 +1095,13 @@
   "dnsQueryInitiatorOther": "Другое",
   "overrideNtp": "Переопределить NTP",
   "overrideFieldsDesc": "Переопределяются только выбранные поля, остальные берутся из профиля",
-  "overrideFieldsEmpty": "Добавьте поля для переопределения или измените YAML"
+  "overrideFieldsEmpty": "Добавьте поля для переопределения или измените YAML",
+  "action_ruleMode": "Режим правил",
+  "action_globalMode": "Глобальный режим",
+  "action_directMode": "Прямое подключение",
+  "action_delayTest": "Проверить задержку узлов",
+  "action_updateProfiles": "Обновить профили",
+  "action_copyEnv": "Копировать переменные прокси",
+  "action_exit": "Выход",
+  "hotkeyUnavailable": "Не удалось зарегистрировать сочетание"
 }

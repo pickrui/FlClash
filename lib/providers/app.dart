@@ -531,3 +531,19 @@ List<Override> buildAppStateOverrides(AppState appState) {
     coreStatusProvider.overrideWithBuild((_, _) => appState.coreStatus),
   ];
 }
+
+@Riverpod(keepAlive: true)
+class HotKeyRecording extends _$HotKeyRecording with NotifierMixin<bool> {
+  @override
+  bool build() => false;
+  void setRecording(bool value) {
+    if (ref.mounted) state = value;
+  }
+}
+
+@Riverpod(keepAlive: true)
+class HotKeyFailures extends _$HotKeyFailures
+    with NotifierMixin<Map<HotAction, String>> {
+  @override
+  Map<HotAction, String> build() => {};
+}

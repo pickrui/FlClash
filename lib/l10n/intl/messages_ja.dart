@@ -191,10 +191,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "account": MessageLookupByLibrary.simpleMessage("アカウント"),
     "accountBalance": MessageLookupByLibrary.simpleMessage("残高"),
     "action": MessageLookupByLibrary.simpleMessage("アクション"),
+    "action_copyEnv": MessageLookupByLibrary.simpleMessage("プロキシ環境変数をコピー"),
+    "action_delayTest": MessageLookupByLibrary.simpleMessage("ノード遅延を測定"),
+    "action_directMode": MessageLookupByLibrary.simpleMessage("直接接続モード"),
+    "action_exit": MessageLookupByLibrary.simpleMessage("終了"),
+    "action_globalMode": MessageLookupByLibrary.simpleMessage("グローバルモード"),
     "action_mode": MessageLookupByLibrary.simpleMessage("モード切替"),
     "action_proxy": MessageLookupByLibrary.simpleMessage("システムプロキシ"),
+    "action_ruleMode": MessageLookupByLibrary.simpleMessage("ルールモード"),
     "action_start": MessageLookupByLibrary.simpleMessage("開始/停止"),
     "action_tun": MessageLookupByLibrary.simpleMessage("TUN"),
+    "action_updateProfiles": MessageLookupByLibrary.simpleMessage("プロファイルを更新"),
     "action_view": MessageLookupByLibrary.simpleMessage("表示/非表示"),
     "activate": MessageLookupByLibrary.simpleMessage("アクティブ化"),
     "activatePlanConfirm": MessageLookupByLibrary.simpleMessage(
@@ -1022,6 +1029,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "hotkeyManagement": MessageLookupByLibrary.simpleMessage("ホットキー管理"),
     "hotkeyManagementDesc": MessageLookupByLibrary.simpleMessage(
       "キーボードでアプリを制御",
+    ),
+    "hotkeyUnavailable": MessageLookupByLibrary.simpleMessage(
+      "ショートカットを登録できません",
     ),
     "hours": MessageLookupByLibrary.simpleMessage("時間"),
     "hoursAgo": m26,

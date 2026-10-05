@@ -1981,3 +1981,108 @@ abstract class _$NetworkDetection extends $Notifier<NetworkDetectionState> {
     element.handleCreate(ref, build);
   }
 }
+
+@ProviderFor(HotKeyRecording)
+final hotKeyRecordingProvider = HotKeyRecordingProvider._();
+
+final class HotKeyRecordingProvider
+    extends $NotifierProvider<HotKeyRecording, bool> {
+  HotKeyRecordingProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'hotKeyRecordingProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$hotKeyRecordingHash();
+
+  @$internal
+  @override
+  HotKeyRecording create() => HotKeyRecording();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$hotKeyRecordingHash() => r'62f941dcd446a5810fedd0662f5c5c07017a575c';
+
+abstract class _$HotKeyRecording extends $Notifier<bool> {
+  bool build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<bool, bool>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<bool, bool>,
+              bool,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(HotKeyFailures)
+final hotKeyFailuresProvider = HotKeyFailuresProvider._();
+
+final class HotKeyFailuresProvider
+    extends $NotifierProvider<HotKeyFailures, Map<HotAction, String>> {
+  HotKeyFailuresProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'hotKeyFailuresProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$hotKeyFailuresHash();
+
+  @$internal
+  @override
+  HotKeyFailures create() => HotKeyFailures();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Map<HotAction, String> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Map<HotAction, String>>(value),
+    );
+  }
+}
+
+String _$hotKeyFailuresHash() => r'18cd39fb371f16559693a6ab3a31d8d737613eab';
+
+abstract class _$HotKeyFailures extends $Notifier<Map<HotAction, String>> {
+  Map<HotAction, String> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref =
+        this.ref as $Ref<Map<HotAction, String>, Map<HotAction, String>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<Map<HotAction, String>, Map<HotAction, String>>,
+              Map<HotAction, String>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}

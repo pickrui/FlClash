@@ -27,9 +27,9 @@ final class EncodedTray {
 abstract final class TrayCodec {
   static const int firstItemId = 1024;
 
-  static EncodedTray encode(TraySpec spec) {
+  static EncodedTray encode(TraySpec spec, {int firstId = firstItemId}) {
     final itemsById = <int, TrayMenuItem>{};
-    final menu = _encodeItems(spec.menu, itemsById, _IdAllocator());
+    final menu = _encodeItems(spec.menu, itemsById, _IdAllocator(firstId));
     final icon = <String, Object?>{
       'asset': spec.icon.asset,
       'isTemplate': spec.icon.isTemplate,
@@ -59,25 +59,39 @@ abstract final class TrayCodec {
       sink[id] = item;
       return switch (item) {
         TrayMenuSeparator() => <String, Object?>{'id': id, 'type': 'separator'},
-        TrayMenuAction(:final label, :final enabled) => <String, Object?>{
-          'id': id,
-          'type': 'action',
-          'label': label,
-          'enabled': enabled,
-        },
-        TrayMenuCheckbox(:final label, :final enabled, :final checked) =>
+        TrayMenuAction(:final label, :final detail, :final enabled) =>
+          <String, Object?>{
+            'id': id,
+            'type': 'action',
+            'label': label,
+            if (detail != null && detail.isNotEmpty) 'detail': detail,
+            'enabled': enabled,
+          },
+        TrayMenuCheckbox(
+          :final label,
+          :final detail,
+          :final enabled,
+          :final checked,
+        ) =>
           <String, Object?>{
             'id': id,
             'type': 'checkbox',
             'label': label,
+            if (detail != null && detail.isNotEmpty) 'detail': detail,
             'enabled': enabled,
             'checked': checked,
           },
-        TrayMenuSubmenu(:final label, :final enabled, :final items) =>
+        TrayMenuSubmenu(
+          :final label,
+          :final detail,
+          :final enabled,
+          :final items,
+        ) =>
           <String, Object?>{
             'id': id,
             'type': 'submenu',
             'label': label,
+            if (detail != null && detail.isNotEmpty) 'detail': detail,
             'enabled': enabled,
             'items': _encodeItems(items, sink, allocator),
           },
@@ -87,7 +101,9 @@ abstract final class TrayCodec {
 }
 
 final class _IdAllocator {
-  int _next = TrayCodec.firstItemId;
+  int _next;
+
+  _IdAllocator(this._next);
 
   int next() {
     final id = _next;

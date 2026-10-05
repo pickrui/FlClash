@@ -213,10 +213,27 @@ class MessageLookup extends MessageLookupByLibrary {
     "account": MessageLookupByLibrary.simpleMessage("Аккаунт"),
     "accountBalance": MessageLookupByLibrary.simpleMessage("Баланс"),
     "action": MessageLookupByLibrary.simpleMessage("Действие"),
+    "action_copyEnv": MessageLookupByLibrary.simpleMessage(
+      "Копировать переменные прокси",
+    ),
+    "action_delayTest": MessageLookupByLibrary.simpleMessage(
+      "Проверить задержку узлов",
+    ),
+    "action_directMode": MessageLookupByLibrary.simpleMessage(
+      "Прямое подключение",
+    ),
+    "action_exit": MessageLookupByLibrary.simpleMessage("Выход"),
+    "action_globalMode": MessageLookupByLibrary.simpleMessage(
+      "Глобальный режим",
+    ),
     "action_mode": MessageLookupByLibrary.simpleMessage("Переключить режим"),
     "action_proxy": MessageLookupByLibrary.simpleMessage("Системный прокси"),
+    "action_ruleMode": MessageLookupByLibrary.simpleMessage("Режим правил"),
     "action_start": MessageLookupByLibrary.simpleMessage("Старт/Стоп"),
     "action_tun": MessageLookupByLibrary.simpleMessage("TUN"),
+    "action_updateProfiles": MessageLookupByLibrary.simpleMessage(
+      "Обновить профили",
+    ),
     "action_view": MessageLookupByLibrary.simpleMessage("Показать/Скрыть"),
     "activate": MessageLookupByLibrary.simpleMessage("Активировать"),
     "activatePlanConfirm": MessageLookupByLibrary.simpleMessage(
@@ -1258,6 +1275,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "hotkeyManagementDesc": MessageLookupByLibrary.simpleMessage(
       "Использование клавиатуры для управления приложением",
+    ),
+    "hotkeyUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Не удалось зарегистрировать сочетание",
     ),
     "hours": MessageLookupByLibrary.simpleMessage("Часов"),
     "hoursAgo": m26,

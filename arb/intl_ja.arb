@@ -1095,5 +1095,13 @@
   "dnsQueryInitiatorOther": "その他",
   "overrideNtp": "NTP を上書き",
   "overrideFieldsDesc": "選択した項目だけを上書きし、ほかの値はプロファイルを引き継ぎます",
-  "overrideFieldsEmpty": "上書きする項目を追加するか、YAML を編集してください"
+  "overrideFieldsEmpty": "上書きする項目を追加するか、YAML を編集してください",
+  "action_ruleMode": "ルールモード",
+  "action_globalMode": "グローバルモード",
+  "action_directMode": "直接接続モード",
+  "action_delayTest": "ノード遅延を測定",
+  "action_updateProfiles": "プロファイルを更新",
+  "action_copyEnv": "プロキシ環境変数をコピー",
+  "action_exit": "終了",
+  "hotkeyUnavailable": "ショートカットを登録できません"
 }
