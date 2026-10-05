@@ -177,9 +177,13 @@ func handleStartTun(callback unsafe.Pointer, fd int, stack, address, dns string,
 }
 
 func handleUpdateDns(value string) {
+	var addresses []string
+	if value != "" {
+		addresses = strings.Split(value, ",")
+	}
 	go func() {
 		log.Infoln("[DNS] updateDns %s", value)
-		dns.UpdateSystemDNS(strings.Split(value, ","))
+		dns.UpdateSystemDNS(addresses)
 		dns.FlushCacheWithDefaultResolver()
 	}()
 }
