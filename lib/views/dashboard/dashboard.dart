@@ -15,6 +15,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'widgets/start_button.dart';
+import 'widgets/widgets.dart';
 
 typedef _IsEditWidgetBuilder = Widget Function(bool isEdit);
 
@@ -223,7 +224,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
     if (mounted) {
       await currentState.isTransformCompleter;
       final dashboardWidgets = currentState.children
-          .map((item) => DashboardWidget.getDashboardWidget(item))
+          .map((item) => DashboardWidgetView.fromWidget(item))
           .toList();
       ref
           .read(appSettingProvider.notifier)

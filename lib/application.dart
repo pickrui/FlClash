@@ -8,6 +8,8 @@ import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/l10n/l10n.dart';
+import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/views/views.dart';
 import 'package:fl_clash/manager/hotkey_manager.dart';
 import 'package:fl_clash/manager/manager.dart';
 import 'package:fl_clash/plugins/app.dart';
@@ -43,6 +45,7 @@ class ApplicationState extends ConsumerState<Application> {
   @override
   void initState() {
     super.initState();
+    navigation.pageBuilder = buildNavigationPage;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       final currentContext = globalState.navigatorKey.currentContext;
@@ -211,3 +214,30 @@ class ApplicationState extends ConsumerState<Application> {
     super.dispose();
   }
 }
+
+Widget buildNavigationPage(BuildContext context, PageLabel label) =>
+    switch (label) {
+      PageLabel.dashboard => const DashboardView(
+        key: GlobalObjectKey(PageLabel.dashboard),
+      ),
+      PageLabel.proxies => const ProxiesView(
+        key: GlobalObjectKey(PageLabel.proxies),
+      ),
+      PageLabel.profiles => const ProfilesView(
+        key: GlobalObjectKey(PageLabel.profiles),
+      ),
+      PageLabel.oixCloud => const CloudAccountPage(
+        key: GlobalObjectKey(PageLabel.oixCloud),
+      ),
+      PageLabel.requests => const RequestsView(
+        key: GlobalObjectKey(PageLabel.requests),
+      ),
+      PageLabel.connections => const ConnectionsView(
+        key: GlobalObjectKey(PageLabel.connections),
+      ),
+      PageLabel.resources => const ResourcesView(
+        key: GlobalObjectKey(PageLabel.resources),
+      ),
+      PageLabel.logs => const LogsView(key: GlobalObjectKey(PageLabel.logs)),
+      PageLabel.tools => const ToolsView(key: GlobalObjectKey(PageLabel.tools)),
+    };

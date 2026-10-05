@@ -8,12 +8,10 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
-/// What `lib/common/common.dart` pulls in today, as a ratchet rather than an
-/// endorsement: `common/navigation.dart` and `enum/enum.dart` name widgets, so
-/// the barrel carries the view tree. Upstream binds those through ports
-/// instead (`common/app_ports.dart`).
-const _closureBudget = 294;
-const _viewsInClosureBudget = 49;
+// Page construction is bound by Application; common only reaches the two
+// diagnostic/login screens still opened directly by actions.
+const _closureBudget = 231;
+const _viewsInClosureBudget = 2;
 
 final _directive = RegExp(
   r'''^\s*(?:import|export|part)\s+['"]([^'"]+)['"]''',
