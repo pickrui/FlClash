@@ -8,7 +8,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:fl_clash/controller.dart';
+import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/common/preferences.dart';
 import 'package:fl_clash/enum/enum.dart';

@@ -11,7 +11,7 @@ import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/controller.dart';
+import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/common/proxy_auth.dart';
 import 'tls_connection.dart';
 

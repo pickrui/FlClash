@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
-import 'package:fl_clash/controller.dart';
+import 'package:fl_clash/providers/action.dart';
 import 'package:flutter/widgets.dart';
 
 class CommonPopScope extends StatelessWidget {

@@ -6,7 +6,7 @@
 import 'dart:math';
 
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/controller.dart';
+import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';

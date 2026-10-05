@@ -10,7 +10,7 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/controller.dart';
+import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/core/controller.dart' show ConfigValidationException;
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';

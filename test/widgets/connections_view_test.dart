@@ -230,6 +230,37 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets('paused polling discards a response held by a route gesture', (
+    tester,
+  ) async {
+    var count = 0;
+    await pumpConnections(
+      tester,
+      connectionsReader: () async => buildConnections(++count),
+    );
+    final navigator = Navigator.of(
+      tester.element(find.byType(ConnectionsView)),
+    );
+    expect(find.text('tcp://host-0.com:443'), findsOneWidget);
+
+    navigator.didStartUserGesture();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump();
+    expect(count, 2);
+    expect(find.text('tcp://host-1.com:443'), findsNothing);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    navigator.didStopUserGesture();
+    await tester.pump();
+    expect(find.text('tcp://host-1.com:443'), findsNothing);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('tcp://host-2.com:443'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('ConnectionsView refreshes only after the Core closes', (
     tester,
   ) async {

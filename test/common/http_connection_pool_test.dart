@@ -10,7 +10,7 @@ import 'package:dio/dio.dart';
 import 'package:fl_clash/common/http.dart';
 import 'package:fl_clash/common/proxy_auth.dart';
 import 'package:fl_clash/models/config.dart';
-import 'package:fl_clash/controller.dart';
+import 'package:fl_clash/providers/action.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

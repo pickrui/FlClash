@@ -6,7 +6,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:fl_clash/controller.dart';
+import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/core/interface.dart';

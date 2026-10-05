@@ -9,7 +9,7 @@ import 'dart:typed_data';
 
 import 'package:fl_clash/common/lock.dart';
 import 'package:fl_clash/common/path.dart';
-import 'package:fl_clash/controller.dart';
+import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/models/profile.dart';
 import 'package:fl_clash/services/age_crypto.dart';
 import 'package:flutter_test/flutter_test.dart';

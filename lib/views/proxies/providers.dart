@@ -6,7 +6,7 @@
 import 'dart:convert';
 
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/controller.dart';
+import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/models/common.dart';
 import 'package:fl_clash/models/core.dart';
 import 'package:fl_clash/providers/app.dart';

@@ -12,7 +12,7 @@ import 'package:fl_clash/common/update_download_task.dart';
 
 import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/common/linux_package_format.dart';
-import 'package:fl_clash/controller.dart';
+import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/update_download.dart';
 import 'package:flutter_test/flutter_test.dart';
 

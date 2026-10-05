@@ -7,7 +7,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:fl_clash/common/color.dart';
-import 'package:fl_clash/controller.dart';
+import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/widgets/activate_box.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
