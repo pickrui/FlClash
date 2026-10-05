@@ -774,6 +774,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "delayTest": MessageLookupByLibrary.simpleMessage("Тест задержки"),
     "delayTestFailed": MessageLookupByLibrary.simpleMessage("Ошибка проверки"),
+    "delayTestQueued": MessageLookupByLibrary.simpleMessage("В очереди"),
+    "delayTestRunning": MessageLookupByLibrary.simpleMessage("Проверка"),
     "delete": MessageLookupByLibrary.simpleMessage("Удалить"),
     "deleteBackupTip": MessageLookupByLibrary.simpleMessage(
       "Удалить эту резервную копию из WebDAV?",
@@ -1214,6 +1216,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "hide": MessageLookupByLibrary.simpleMessage("Скрыть"),
     "hideFromList": MessageLookupByLibrary.simpleMessage("Скрыть из списка"),
+    "hideTimeoutProxies": MessageLookupByLibrary.simpleMessage(
+      "Скрывать узлы с ошибкой проверки",
+    ),
+    "hideTimeoutProxiesDesc": MessageLookupByLibrary.simpleMessage(
+      "Сохранять выбранный узел и узлы с незавершённой проверкой",
+    ),
     "host": MessageLookupByLibrary.simpleMessage("Хост"),
     "hostsDesc": MessageLookupByLibrary.simpleMessage("Добавить Hosts"),
     "hotkeyConflict": MessageLookupByLibrary.simpleMessage(

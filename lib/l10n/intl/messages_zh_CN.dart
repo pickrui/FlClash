@@ -581,6 +581,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "delayTest": MessageLookupByLibrary.simpleMessage("延迟测试"),
     "delayTestFailed": MessageLookupByLibrary.simpleMessage("测试失败"),
+    "delayTestQueued": MessageLookupByLibrary.simpleMessage("排队中"),
+    "delayTestRunning": MessageLookupByLibrary.simpleMessage("测速中"),
     "delete": MessageLookupByLibrary.simpleMessage("删除"),
     "deleteBackupTip": MessageLookupByLibrary.simpleMessage(
       "确定从 WebDAV 删除这个备份吗？",
@@ -871,6 +873,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "haveAccountAlready": MessageLookupByLibrary.simpleMessage("已有账号？"),
     "hide": MessageLookupByLibrary.simpleMessage("隐藏"),
     "hideFromList": MessageLookupByLibrary.simpleMessage("从列表中隐藏"),
+    "hideTimeoutProxies": MessageLookupByLibrary.simpleMessage("隐藏测速失败的节点"),
+    "hideTimeoutProxiesDesc": MessageLookupByLibrary.simpleMessage(
+      "保留当前选中节点和尚未完成测速的节点",
+    ),
     "host": MessageLookupByLibrary.simpleMessage("主机"),
     "hostsDesc": MessageLookupByLibrary.simpleMessage("追加Hosts"),
     "hotkeyConflict": MessageLookupByLibrary.simpleMessage("快捷键冲突"),

@@ -12,6 +12,8 @@ import 'package:flutter/services.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:rust_api/rust_api.dart' show HotKeyModifier;
 
+enum DelayTestPhase { queued, running }
+
 enum SupportPlatform {
   Windows,
   MacOS,

@@ -190,3 +190,52 @@ DelayState computeProxyDelayState({
   final delay = currentDelayMap[state.proxyName];
   return DelayState(delay: delay ?? 0, group: state.group);
 }
+
+List<Group> computeHideTimeout({
+  required List<Group> groups,
+  required List<Group> allGroups,
+  required DelayMap delayMap,
+  required Map<String, String> selectedMap,
+  required String defaultTestUrl,
+}) {
+  const unprobeable = {
+    'Reject',
+    'RejectDrop',
+    'Pass',
+    'PassRule',
+    'Rematch',
+    'Compatible',
+    'Dns',
+  };
+  final types = {
+    for (final group in allGroups)
+      for (final proxy in group.all) proxy.name: proxy.type,
+  };
+  final states = <String, SelectedProxyState>{};
+  return groups.map((group) {
+    final selected = (allGroups.getGroup(group.name) ?? group)
+        .getCurrentSelectedName(selectedMap[group.name] ?? '');
+    final visible = group.all.where((proxy) {
+      if (proxy.name == selected) return true;
+      final state = states.putIfAbsent(
+        proxy.name,
+        () => computeRealSelectedProxyState(
+          proxy.name,
+          groups: allGroups,
+          selectedMap: selectedMap,
+        ),
+      );
+      if (state.proxyName.isEmpty ||
+          unprobeable.contains(types[state.proxyName])) {
+        return true;
+      }
+      final url = getDelayTestUrl(
+        proxyName: state.proxyName,
+        testUrl: state.testUrl.takeFirstValid([group.testUrl, defaultTestUrl]),
+      );
+      final delay = delayMap[url]?[state.proxyName];
+      return delay == null || delay >= 0;
+    }).toList();
+    return group.copyWith(all: visible.isEmpty ? group.all : visible);
+  }).toList();
+}

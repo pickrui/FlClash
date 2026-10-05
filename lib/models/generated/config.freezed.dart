@@ -975,7 +975,7 @@ as AccessControlProps,
 @override
 @pragma('vm:prefer-inline')
 $AccessControlPropsCopyWith<$Res> get accessControlProps {
-
+  
   return $AccessControlPropsCopyWith<$Res>(_self.accessControlProps, (value) {
     return _then(_self.copyWith(accessControlProps: value));
   });
@@ -1194,7 +1194,7 @@ as AccessControlProps,
 @override
 @pragma('vm:prefer-inline')
 $AccessControlPropsCopyWith<$Res> get accessControlProps {
-
+  
   return $AccessControlPropsCopyWith<$Res>(_self.accessControlProps, (value) {
     return _then(_self.copyWith(accessControlProps: value));
   });
@@ -1539,7 +1539,7 @@ as AuthenticationProps,
 @override
 @pragma('vm:prefer-inline')
 $AuthenticationPropsCopyWith<$Res> get authentication {
-
+  
   return $AuthenticationPropsCopyWith<$Res>(_self.authentication, (value) {
     return _then(_self.copyWith(authentication: value));
   });
@@ -1790,7 +1790,7 @@ as AuthenticationProps,
 @override
 @pragma('vm:prefer-inline')
 $AuthenticationPropsCopyWith<$Res> get authentication {
-
+  
   return $AuthenticationPropsCopyWith<$Res>(_self.authentication, (value) {
     return _then(_self.copyWith(authentication: value));
   });
@@ -1801,7 +1801,7 @@ $AuthenticationPropsCopyWith<$Res> get authentication {
 /// @nodoc
 mixin _$ProxiesStyleProps {
 
- ProxiesType get type; ProxiesSortType get sortType; ProxiesLayout get layout; ProxiesIconStyle get iconStyle; ProxyCardType get cardType;@JsonKey(fromJson: normalizeDelayTestConcurrency) int get concurrencyLimit;@JsonKey(fromJson: normalizeOptionalDelayTestConcurrency) int? get androidConcurrencyLimit;
+ ProxiesType get type; ProxiesSortType get sortType; ProxiesLayout get layout; ProxiesIconStyle get iconStyle; ProxyCardType get cardType; bool get hideTimeoutProxies;@JsonKey(fromJson: normalizeDelayTestConcurrency) int get concurrencyLimit;@JsonKey(fromJson: normalizeOptionalDelayTestConcurrency) int? get androidConcurrencyLimit;
 /// Create a copy of ProxiesStyleProps
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1814,16 +1814,16 @@ $ProxiesStylePropsCopyWith<ProxiesStyleProps> get copyWith => _$ProxiesStyleProp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProxiesStyleProps&&(identical(other.type, type) || other.type == type)&&(identical(other.sortType, sortType) || other.sortType == sortType)&&(identical(other.layout, layout) || other.layout == layout)&&(identical(other.iconStyle, iconStyle) || other.iconStyle == iconStyle)&&(identical(other.cardType, cardType) || other.cardType == cardType)&&(identical(other.concurrencyLimit, concurrencyLimit) || other.concurrencyLimit == concurrencyLimit)&&(identical(other.androidConcurrencyLimit, androidConcurrencyLimit) || other.androidConcurrencyLimit == androidConcurrencyLimit));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProxiesStyleProps&&(identical(other.type, type) || other.type == type)&&(identical(other.sortType, sortType) || other.sortType == sortType)&&(identical(other.layout, layout) || other.layout == layout)&&(identical(other.iconStyle, iconStyle) || other.iconStyle == iconStyle)&&(identical(other.cardType, cardType) || other.cardType == cardType)&&(identical(other.hideTimeoutProxies, hideTimeoutProxies) || other.hideTimeoutProxies == hideTimeoutProxies)&&(identical(other.concurrencyLimit, concurrencyLimit) || other.concurrencyLimit == concurrencyLimit)&&(identical(other.androidConcurrencyLimit, androidConcurrencyLimit) || other.androidConcurrencyLimit == androidConcurrencyLimit));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,type,sortType,layout,iconStyle,cardType,concurrencyLimit,androidConcurrencyLimit);
+int get hashCode => Object.hash(runtimeType,type,sortType,layout,iconStyle,cardType,hideTimeoutProxies,concurrencyLimit,androidConcurrencyLimit);
 
 @override
 String toString() {
-  return 'ProxiesStyleProps(type: $type, sortType: $sortType, layout: $layout, iconStyle: $iconStyle, cardType: $cardType, concurrencyLimit: $concurrencyLimit, androidConcurrencyLimit: $androidConcurrencyLimit)';
+  return 'ProxiesStyleProps(type: $type, sortType: $sortType, layout: $layout, iconStyle: $iconStyle, cardType: $cardType, hideTimeoutProxies: $hideTimeoutProxies, concurrencyLimit: $concurrencyLimit, androidConcurrencyLimit: $androidConcurrencyLimit)';
 }
 
 
@@ -1834,7 +1834,7 @@ abstract mixin class $ProxiesStylePropsCopyWith<$Res>  {
   factory $ProxiesStylePropsCopyWith(ProxiesStyleProps value, $Res Function(ProxiesStyleProps) _then) = _$ProxiesStylePropsCopyWithImpl;
 @useResult
 $Res call({
- ProxiesType type, ProxiesSortType sortType, ProxiesLayout layout, ProxiesIconStyle iconStyle, ProxyCardType cardType,@JsonKey(fromJson: normalizeDelayTestConcurrency) int concurrencyLimit,@JsonKey(fromJson: normalizeOptionalDelayTestConcurrency) int? androidConcurrencyLimit
+ ProxiesType type, ProxiesSortType sortType, ProxiesLayout layout, ProxiesIconStyle iconStyle, ProxyCardType cardType, bool hideTimeoutProxies,@JsonKey(fromJson: normalizeDelayTestConcurrency) int concurrencyLimit,@JsonKey(fromJson: normalizeOptionalDelayTestConcurrency) int? androidConcurrencyLimit
 });
 
 
@@ -1851,14 +1851,15 @@ class _$ProxiesStylePropsCopyWithImpl<$Res>
 
 /// Create a copy of ProxiesStyleProps
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? type = null,Object? sortType = null,Object? layout = null,Object? iconStyle = null,Object? cardType = null,Object? concurrencyLimit = null,Object? androidConcurrencyLimit = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? type = null,Object? sortType = null,Object? layout = null,Object? iconStyle = null,Object? cardType = null,Object? hideTimeoutProxies = null,Object? concurrencyLimit = null,Object? androidConcurrencyLimit = freezed,}) {
   return _then(_self.copyWith(
 type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as ProxiesType,sortType: null == sortType ? _self.sortType : sortType // ignore: cast_nullable_to_non_nullable
 as ProxiesSortType,layout: null == layout ? _self.layout : layout // ignore: cast_nullable_to_non_nullable
 as ProxiesLayout,iconStyle: null == iconStyle ? _self.iconStyle : iconStyle // ignore: cast_nullable_to_non_nullable
 as ProxiesIconStyle,cardType: null == cardType ? _self.cardType : cardType // ignore: cast_nullable_to_non_nullable
-as ProxyCardType,concurrencyLimit: null == concurrencyLimit ? _self.concurrencyLimit : concurrencyLimit // ignore: cast_nullable_to_non_nullable
+as ProxyCardType,hideTimeoutProxies: null == hideTimeoutProxies ? _self.hideTimeoutProxies : hideTimeoutProxies // ignore: cast_nullable_to_non_nullable
+as bool,concurrencyLimit: null == concurrencyLimit ? _self.concurrencyLimit : concurrencyLimit // ignore: cast_nullable_to_non_nullable
 as int,androidConcurrencyLimit: freezed == androidConcurrencyLimit ? _self.androidConcurrencyLimit : androidConcurrencyLimit // ignore: cast_nullable_to_non_nullable
 as int?,
   ));
@@ -1945,10 +1946,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ProxiesType type,  ProxiesSortType sortType,  ProxiesLayout layout,  ProxiesIconStyle iconStyle,  ProxyCardType cardType, @JsonKey(fromJson: normalizeDelayTestConcurrency)  int concurrencyLimit, @JsonKey(fromJson: normalizeOptionalDelayTestConcurrency)  int? androidConcurrencyLimit)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ProxiesType type,  ProxiesSortType sortType,  ProxiesLayout layout,  ProxiesIconStyle iconStyle,  ProxyCardType cardType,  bool hideTimeoutProxies, @JsonKey(fromJson: normalizeDelayTestConcurrency)  int concurrencyLimit, @JsonKey(fromJson: normalizeOptionalDelayTestConcurrency)  int? androidConcurrencyLimit)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ProxiesStyleProps() when $default != null:
-return $default(_that.type,_that.sortType,_that.layout,_that.iconStyle,_that.cardType,_that.concurrencyLimit,_that.androidConcurrencyLimit);case _:
+return $default(_that.type,_that.sortType,_that.layout,_that.iconStyle,_that.cardType,_that.hideTimeoutProxies,_that.concurrencyLimit,_that.androidConcurrencyLimit);case _:
   return orElse();
 
 }
@@ -1966,10 +1967,10 @@ return $default(_that.type,_that.sortType,_that.layout,_that.iconStyle,_that.car
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ProxiesType type,  ProxiesSortType sortType,  ProxiesLayout layout,  ProxiesIconStyle iconStyle,  ProxyCardType cardType, @JsonKey(fromJson: normalizeDelayTestConcurrency)  int concurrencyLimit, @JsonKey(fromJson: normalizeOptionalDelayTestConcurrency)  int? androidConcurrencyLimit)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ProxiesType type,  ProxiesSortType sortType,  ProxiesLayout layout,  ProxiesIconStyle iconStyle,  ProxyCardType cardType,  bool hideTimeoutProxies, @JsonKey(fromJson: normalizeDelayTestConcurrency)  int concurrencyLimit, @JsonKey(fromJson: normalizeOptionalDelayTestConcurrency)  int? androidConcurrencyLimit)  $default,) {final _that = this;
 switch (_that) {
 case _ProxiesStyleProps():
-return $default(_that.type,_that.sortType,_that.layout,_that.iconStyle,_that.cardType,_that.concurrencyLimit,_that.androidConcurrencyLimit);case _:
+return $default(_that.type,_that.sortType,_that.layout,_that.iconStyle,_that.cardType,_that.hideTimeoutProxies,_that.concurrencyLimit,_that.androidConcurrencyLimit);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1986,10 +1987,10 @@ return $default(_that.type,_that.sortType,_that.layout,_that.iconStyle,_that.car
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ProxiesType type,  ProxiesSortType sortType,  ProxiesLayout layout,  ProxiesIconStyle iconStyle,  ProxyCardType cardType, @JsonKey(fromJson: normalizeDelayTestConcurrency)  int concurrencyLimit, @JsonKey(fromJson: normalizeOptionalDelayTestConcurrency)  int? androidConcurrencyLimit)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ProxiesType type,  ProxiesSortType sortType,  ProxiesLayout layout,  ProxiesIconStyle iconStyle,  ProxyCardType cardType,  bool hideTimeoutProxies, @JsonKey(fromJson: normalizeDelayTestConcurrency)  int concurrencyLimit, @JsonKey(fromJson: normalizeOptionalDelayTestConcurrency)  int? androidConcurrencyLimit)?  $default,) {final _that = this;
 switch (_that) {
 case _ProxiesStyleProps() when $default != null:
-return $default(_that.type,_that.sortType,_that.layout,_that.iconStyle,_that.cardType,_that.concurrencyLimit,_that.androidConcurrencyLimit);case _:
+return $default(_that.type,_that.sortType,_that.layout,_that.iconStyle,_that.cardType,_that.hideTimeoutProxies,_that.concurrencyLimit,_that.androidConcurrencyLimit);case _:
   return null;
 
 }
@@ -2001,7 +2002,7 @@ return $default(_that.type,_that.sortType,_that.layout,_that.iconStyle,_that.car
 @JsonSerializable()
 
 class _ProxiesStyleProps extends ProxiesStyleProps {
-  const _ProxiesStyleProps({this.type = ProxiesType.tab, this.sortType = ProxiesSortType.none, this.layout = ProxiesLayout.standard, this.iconStyle = ProxiesIconStyle.standard, this.cardType = ProxyCardType.expand, @JsonKey(fromJson: normalizeDelayTestConcurrency) this.concurrencyLimit = defaultDelayTestConcurrency, @JsonKey(fromJson: normalizeOptionalDelayTestConcurrency) this.androidConcurrencyLimit}): super._();
+  const _ProxiesStyleProps({this.type = ProxiesType.tab, this.sortType = ProxiesSortType.none, this.layout = ProxiesLayout.standard, this.iconStyle = ProxiesIconStyle.standard, this.cardType = ProxyCardType.expand, this.hideTimeoutProxies = false, @JsonKey(fromJson: normalizeDelayTestConcurrency) this.concurrencyLimit = defaultDelayTestConcurrency, @JsonKey(fromJson: normalizeOptionalDelayTestConcurrency) this.androidConcurrencyLimit}): super._();
   factory _ProxiesStyleProps.fromJson(Map<String, dynamic> json) => _$ProxiesStylePropsFromJson(json);
 
 @override@JsonKey() final  ProxiesType type;
@@ -2009,6 +2010,7 @@ class _ProxiesStyleProps extends ProxiesStyleProps {
 @override@JsonKey() final  ProxiesLayout layout;
 @override@JsonKey() final  ProxiesIconStyle iconStyle;
 @override@JsonKey() final  ProxyCardType cardType;
+@override@JsonKey() final  bool hideTimeoutProxies;
 @override@JsonKey(fromJson: normalizeDelayTestConcurrency) final  int concurrencyLimit;
 @override@JsonKey(fromJson: normalizeOptionalDelayTestConcurrency) final  int? androidConcurrencyLimit;
 
@@ -2025,16 +2027,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProxiesStyleProps&&(identical(other.type, type) || other.type == type)&&(identical(other.sortType, sortType) || other.sortType == sortType)&&(identical(other.layout, layout) || other.layout == layout)&&(identical(other.iconStyle, iconStyle) || other.iconStyle == iconStyle)&&(identical(other.cardType, cardType) || other.cardType == cardType)&&(identical(other.concurrencyLimit, concurrencyLimit) || other.concurrencyLimit == concurrencyLimit)&&(identical(other.androidConcurrencyLimit, androidConcurrencyLimit) || other.androidConcurrencyLimit == androidConcurrencyLimit));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProxiesStyleProps&&(identical(other.type, type) || other.type == type)&&(identical(other.sortType, sortType) || other.sortType == sortType)&&(identical(other.layout, layout) || other.layout == layout)&&(identical(other.iconStyle, iconStyle) || other.iconStyle == iconStyle)&&(identical(other.cardType, cardType) || other.cardType == cardType)&&(identical(other.hideTimeoutProxies, hideTimeoutProxies) || other.hideTimeoutProxies == hideTimeoutProxies)&&(identical(other.concurrencyLimit, concurrencyLimit) || other.concurrencyLimit == concurrencyLimit)&&(identical(other.androidConcurrencyLimit, androidConcurrencyLimit) || other.androidConcurrencyLimit == androidConcurrencyLimit));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,type,sortType,layout,iconStyle,cardType,concurrencyLimit,androidConcurrencyLimit);
+int get hashCode => Object.hash(runtimeType,type,sortType,layout,iconStyle,cardType,hideTimeoutProxies,concurrencyLimit,androidConcurrencyLimit);
 
 @override
 String toString() {
-  return 'ProxiesStyleProps(type: $type, sortType: $sortType, layout: $layout, iconStyle: $iconStyle, cardType: $cardType, concurrencyLimit: $concurrencyLimit, androidConcurrencyLimit: $androidConcurrencyLimit)';
+  return 'ProxiesStyleProps(type: $type, sortType: $sortType, layout: $layout, iconStyle: $iconStyle, cardType: $cardType, hideTimeoutProxies: $hideTimeoutProxies, concurrencyLimit: $concurrencyLimit, androidConcurrencyLimit: $androidConcurrencyLimit)';
 }
 
 
@@ -2045,7 +2047,7 @@ abstract mixin class _$ProxiesStylePropsCopyWith<$Res> implements $ProxiesStyleP
   factory _$ProxiesStylePropsCopyWith(_ProxiesStyleProps value, $Res Function(_ProxiesStyleProps) _then) = __$ProxiesStylePropsCopyWithImpl;
 @override @useResult
 $Res call({
- ProxiesType type, ProxiesSortType sortType, ProxiesLayout layout, ProxiesIconStyle iconStyle, ProxyCardType cardType,@JsonKey(fromJson: normalizeDelayTestConcurrency) int concurrencyLimit,@JsonKey(fromJson: normalizeOptionalDelayTestConcurrency) int? androidConcurrencyLimit
+ ProxiesType type, ProxiesSortType sortType, ProxiesLayout layout, ProxiesIconStyle iconStyle, ProxyCardType cardType, bool hideTimeoutProxies,@JsonKey(fromJson: normalizeDelayTestConcurrency) int concurrencyLimit,@JsonKey(fromJson: normalizeOptionalDelayTestConcurrency) int? androidConcurrencyLimit
 });
 
 
@@ -2062,14 +2064,15 @@ class __$ProxiesStylePropsCopyWithImpl<$Res>
 
 /// Create a copy of ProxiesStyleProps
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? type = null,Object? sortType = null,Object? layout = null,Object? iconStyle = null,Object? cardType = null,Object? concurrencyLimit = null,Object? androidConcurrencyLimit = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? type = null,Object? sortType = null,Object? layout = null,Object? iconStyle = null,Object? cardType = null,Object? hideTimeoutProxies = null,Object? concurrencyLimit = null,Object? androidConcurrencyLimit = freezed,}) {
   return _then(_ProxiesStyleProps(
 type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as ProxiesType,sortType: null == sortType ? _self.sortType : sortType // ignore: cast_nullable_to_non_nullable
 as ProxiesSortType,layout: null == layout ? _self.layout : layout // ignore: cast_nullable_to_non_nullable
 as ProxiesLayout,iconStyle: null == iconStyle ? _self.iconStyle : iconStyle // ignore: cast_nullable_to_non_nullable
 as ProxiesIconStyle,cardType: null == cardType ? _self.cardType : cardType // ignore: cast_nullable_to_non_nullable
-as ProxyCardType,concurrencyLimit: null == concurrencyLimit ? _self.concurrencyLimit : concurrencyLimit // ignore: cast_nullable_to_non_nullable
+as ProxyCardType,hideTimeoutProxies: null == hideTimeoutProxies ? _self.hideTimeoutProxies : hideTimeoutProxies // ignore: cast_nullable_to_non_nullable
+as bool,concurrencyLimit: null == concurrencyLimit ? _self.concurrencyLimit : concurrencyLimit // ignore: cast_nullable_to_non_nullable
 as int,androidConcurrencyLimit: freezed == androidConcurrencyLimit ? _self.androidConcurrencyLimit : androidConcurrencyLimit // ignore: cast_nullable_to_non_nullable
 as int?,
   ));
@@ -2414,7 +2417,7 @@ as TextScale,
 @override
 @pragma('vm:prefer-inline')
 $TextScaleCopyWith<$Res> get textScale {
-
+  
   return $TextScaleCopyWith<$Res>(_self.textScale, (value) {
     return _then(_self.copyWith(textScale: value));
   });
@@ -2639,7 +2642,7 @@ as TextScale,
 @override
 @pragma('vm:prefer-inline')
 $TextScaleCopyWith<$Res> get textScale {
-
+  
   return $TextScaleCopyWith<$Res>(_self.textScale, (value) {
     return _then(_self.copyWith(textScale: value));
   });
@@ -2722,7 +2725,7 @@ as List<TailscaleNetwork>,
 @override
 @pragma('vm:prefer-inline')
 $AppSettingPropsCopyWith<$Res> get appSettingProps {
-
+  
   return $AppSettingPropsCopyWith<$Res>(_self.appSettingProps, (value) {
     return _then(_self.copyWith(appSettingProps: value));
   });
@@ -2743,7 +2746,7 @@ $DAVPropsCopyWith<$Res>? get davProps {
 @override
 @pragma('vm:prefer-inline')
 $NetworkPropsCopyWith<$Res> get networkProps {
-
+  
   return $NetworkPropsCopyWith<$Res>(_self.networkProps, (value) {
     return _then(_self.copyWith(networkProps: value));
   });
@@ -2752,7 +2755,7 @@ $NetworkPropsCopyWith<$Res> get networkProps {
 @override
 @pragma('vm:prefer-inline')
 $VpnPropsCopyWith<$Res> get vpnProps {
-
+  
   return $VpnPropsCopyWith<$Res>(_self.vpnProps, (value) {
     return _then(_self.copyWith(vpnProps: value));
   });
@@ -2761,7 +2764,7 @@ $VpnPropsCopyWith<$Res> get vpnProps {
 @override
 @pragma('vm:prefer-inline')
 $ThemePropsCopyWith<$Res> get themeProps {
-
+  
   return $ThemePropsCopyWith<$Res>(_self.themeProps, (value) {
     return _then(_self.copyWith(themeProps: value));
   });
@@ -2770,7 +2773,7 @@ $ThemePropsCopyWith<$Res> get themeProps {
 @override
 @pragma('vm:prefer-inline')
 $ProxiesStylePropsCopyWith<$Res> get proxiesStyleProps {
-
+  
   return $ProxiesStylePropsCopyWith<$Res>(_self.proxiesStyleProps, (value) {
     return _then(_self.copyWith(proxiesStyleProps: value));
   });
@@ -2779,7 +2782,7 @@ $ProxiesStylePropsCopyWith<$Res> get proxiesStyleProps {
 @override
 @pragma('vm:prefer-inline')
 $WindowPropsCopyWith<$Res> get windowProps {
-
+  
   return $WindowPropsCopyWith<$Res>(_self.windowProps, (value) {
     return _then(_self.copyWith(windowProps: value));
   });
@@ -2788,7 +2791,7 @@ $WindowPropsCopyWith<$Res> get windowProps {
 @override
 @pragma('vm:prefer-inline')
 $ClashConfigCopyWith<$Res> get patchClashConfig {
-
+  
   return $ClashConfigCopyWith<$Res>(_self.patchClashConfig, (value) {
     return _then(_self.copyWith(patchClashConfig: value));
   });
@@ -3031,7 +3034,7 @@ as List<TailscaleNetwork>,
 @override
 @pragma('vm:prefer-inline')
 $AppSettingPropsCopyWith<$Res> get appSettingProps {
-
+  
   return $AppSettingPropsCopyWith<$Res>(_self.appSettingProps, (value) {
     return _then(_self.copyWith(appSettingProps: value));
   });
@@ -3052,7 +3055,7 @@ $DAVPropsCopyWith<$Res>? get davProps {
 @override
 @pragma('vm:prefer-inline')
 $NetworkPropsCopyWith<$Res> get networkProps {
-
+  
   return $NetworkPropsCopyWith<$Res>(_self.networkProps, (value) {
     return _then(_self.copyWith(networkProps: value));
   });
@@ -3061,7 +3064,7 @@ $NetworkPropsCopyWith<$Res> get networkProps {
 @override
 @pragma('vm:prefer-inline')
 $VpnPropsCopyWith<$Res> get vpnProps {
-
+  
   return $VpnPropsCopyWith<$Res>(_self.vpnProps, (value) {
     return _then(_self.copyWith(vpnProps: value));
   });
@@ -3070,7 +3073,7 @@ $VpnPropsCopyWith<$Res> get vpnProps {
 @override
 @pragma('vm:prefer-inline')
 $ThemePropsCopyWith<$Res> get themeProps {
-
+  
   return $ThemePropsCopyWith<$Res>(_self.themeProps, (value) {
     return _then(_self.copyWith(themeProps: value));
   });
@@ -3079,7 +3082,7 @@ $ThemePropsCopyWith<$Res> get themeProps {
 @override
 @pragma('vm:prefer-inline')
 $ProxiesStylePropsCopyWith<$Res> get proxiesStyleProps {
-
+  
   return $ProxiesStylePropsCopyWith<$Res>(_self.proxiesStyleProps, (value) {
     return _then(_self.copyWith(proxiesStyleProps: value));
   });
@@ -3088,7 +3091,7 @@ $ProxiesStylePropsCopyWith<$Res> get proxiesStyleProps {
 @override
 @pragma('vm:prefer-inline')
 $WindowPropsCopyWith<$Res> get windowProps {
-
+  
   return $WindowPropsCopyWith<$Res>(_self.windowProps, (value) {
     return _then(_self.copyWith(windowProps: value));
   });
@@ -3097,7 +3100,7 @@ $WindowPropsCopyWith<$Res> get windowProps {
 @override
 @pragma('vm:prefer-inline')
 $ClashConfigCopyWith<$Res> get patchClashConfig {
-
+  
   return $ClashConfigCopyWith<$Res>(_self.patchClashConfig, (value) {
     return _then(_self.copyWith(patchClashConfig: value));
   });

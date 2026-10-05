@@ -9238,6 +9238,41 @@ class AppLocalizations {
       args: [appName],
     );
   }
+
+  /// `Hide failed nodes`
+  String get hideTimeoutProxies {
+    return Intl.message(
+      'Hide failed nodes',
+      name: 'hideTimeoutProxies',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Keep the selected node and nodes that have not finished testing`
+  String get hideTimeoutProxiesDesc {
+    return Intl.message(
+      'Keep the selected node and nodes that have not finished testing',
+      name: 'hideTimeoutProxiesDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Queued`
+  String get delayTestQueued {
+    return Intl.message('Queued', name: 'delayTestQueued', desc: '', args: []);
+  }
+
+  /// `Testing`
+  String get delayTestRunning {
+    return Intl.message(
+      'Testing',
+      name: 'delayTestRunning',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

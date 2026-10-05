@@ -257,18 +257,54 @@ ProfilesState profilesState(Ref ref) {
   );
 }
 
+@Riverpod(keepAlive: true)
+DelayMap delaysAtLastTestBatch(Ref ref) {
+  ref.watch(sortNumProvider);
+  ref.listen(delayDataSourceProvider.select((state) => state.isEmpty), (
+    _,
+    empty,
+  ) {
+    if (empty) ref.invalidateSelf();
+  });
+  return {
+    for (final entry in ref.read(delayDataSourceProvider).entries)
+      entry.key: {...entry.value},
+  };
+}
+
+@riverpod
+GroupsState visibleGroupsState(Ref ref) {
+  final current = ref.watch(currentGroupsStateProvider);
+  if (!ref.watch(
+    proxiesStyleSettingProvider.select((state) => state.hideTimeoutProxies),
+  )) {
+    return current;
+  }
+  return current.copyWith(
+    value: computeHideTimeout(
+      groups: current.value,
+      allGroups: ref.watch(groupsProvider),
+      delayMap: ref.watch(delaysAtLastTestBatchProvider),
+      selectedMap: ref.watch(selectedMapProvider),
+      defaultTestUrl: ref.watch(realTestUrlProvider()),
+    ),
+  );
+}
+
 @riverpod
 GroupsState filterGroupsState(Ref ref, String query) {
-  final currentGroups = ref.watch(currentGroupsStateProvider);
-  if (query.isEmpty) {
-    return currentGroups;
-  }
-  final lowQuery = query.toLowerCase();
+  final currentGroups = ref.watch(visibleGroupsStateProvider);
+  final search = SearchQuery(query);
+  if (search.isEmpty) return currentGroups;
+  final matches = <Proxy, bool>{};
   final groups = currentGroups.value
       .map((group) {
         return group.copyWith(
           all: group.all
-              .where((proxy) => proxy.name.toLowerCase().contains(lowQuery))
+              .where(
+                (proxy) =>
+                    matches[proxy] ??= search.matches([proxy.name, proxy.type]),
+              )
               .toList(),
         );
       })
@@ -373,6 +409,26 @@ int? getDelay(Ref ref, {required String proxyName, String? testUrl}) {
   );
 
   return delay;
+}
+
+@riverpod
+DelayTestPhase? getDelayTestPhase(
+  Ref ref, {
+  required String proxyName,
+  String? testUrl,
+}) {
+  final proxyState = ref.watch(realSelectedProxyStateProvider(proxyName));
+  final url = getDelayTestUrl(
+    proxyName: proxyState.proxyName,
+    testUrl: proxyState.testUrl.takeFirstValid([
+      ref.watch(realTestUrlProvider(testUrl)),
+    ]),
+  );
+  return ref.watch(
+    pendingDelayTestsProvider.select(
+      (state) => state[(name: proxyState.proxyName, url: url)],
+    ),
+  );
 }
 
 @riverpod

@@ -313,12 +313,16 @@ extension ProxiesControllerExt on AppController {
     );
     if (target == null) return;
     final generation = _joinDelayTest();
+    final Map<(String, String), int?> completed;
     try {
-      await _probeDelayTargets([target], generation);
+      completed = await _probeDelayTargets([target], generation);
     } finally {
       _delayTestRuns.leave(generation);
     }
-    if (isCurrentDelayGeneration(generation)) updateGroupsDebounce();
+    if (isCurrentDelayGeneration(generation) && completed.isNotEmpty) {
+      addSortNum();
+      updateGroupsDebounce();
+    }
   }
 
   int _joinDelayTest() => _delayTestRuns.join(
@@ -345,7 +349,7 @@ extension ProxiesControllerExt on AppController {
     } finally {
       _delayTestRuns.leave(generation);
     }
-    if (!isCurrentDelayGeneration(generation)) return false;
+    if (!isCurrentDelayGeneration(generation) || completed.isEmpty) return false;
     addSortNum();
     updateGroupsDebounce();
     if (!system.isWindows && !system.isMacOS) return false;
@@ -388,7 +392,10 @@ extension ProxiesControllerExt on AppController {
       ),
       generation: generation,
     );
+    final phases = _ref.read(pendingDelayTestsProvider.notifier);
+    phases.queue(targets, generation: generation);
     await runDelayTestBatch(
+      onStarted: (target) => phases.start(target, generation: generation),
       targets: targets,
       concurrency: concurrency,
       probe: (target) => coreController.getDelay(

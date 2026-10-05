@@ -256,6 +256,7 @@ _ProxiesStyleProps _$ProxiesStylePropsFromJson(Map<String, dynamic> json) =>
       cardType:
           $enumDecodeNullable(_$ProxyCardTypeEnumMap, json['cardType']) ??
           ProxyCardType.expand,
+      hideTimeoutProxies: json['hideTimeoutProxies'] as bool? ?? false,
       concurrencyLimit: json['concurrencyLimit'] == null
           ? defaultDelayTestConcurrency
           : normalizeDelayTestConcurrency(
@@ -273,6 +274,7 @@ Map<String, dynamic> _$ProxiesStylePropsToJson(_ProxiesStyleProps instance) =>
       'layout': _$ProxiesLayoutEnumMap[instance.layout]!,
       'iconStyle': _$ProxiesIconStyleEnumMap[instance.iconStyle]!,
       'cardType': _$ProxyCardTypeEnumMap[instance.cardType]!,
+      'hideTimeoutProxies': instance.hideTimeoutProxies,
       'concurrencyLimit': instance.concurrencyLimit,
       'androidConcurrencyLimit': instance.androidConcurrencyLimit,
     };

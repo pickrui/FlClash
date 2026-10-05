@@ -658,6 +658,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "delayTest": MessageLookupByLibrary.simpleMessage("遅延テスト"),
     "delayTestFailed": MessageLookupByLibrary.simpleMessage("測定失敗"),
+    "delayTestQueued": MessageLookupByLibrary.simpleMessage("待機中"),
+    "delayTestRunning": MessageLookupByLibrary.simpleMessage("測定中"),
     "delete": MessageLookupByLibrary.simpleMessage("削除"),
     "deleteBackupTip": MessageLookupByLibrary.simpleMessage(
       "このバックアップを WebDAV から削除しますか？",
@@ -992,6 +994,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "hide": MessageLookupByLibrary.simpleMessage("非表示"),
     "hideFromList": MessageLookupByLibrary.simpleMessage("リストから隠す"),
+    "hideTimeoutProxies": MessageLookupByLibrary.simpleMessage(
+      "測定に失敗したノードを非表示",
+    ),
+    "hideTimeoutProxiesDesc": MessageLookupByLibrary.simpleMessage(
+      "選択中のノードと測定が完了していないノードは表示します",
+    ),
     "host": MessageLookupByLibrary.simpleMessage("ホスト"),
     "hostsDesc": MessageLookupByLibrary.simpleMessage("ホストを追加"),
     "hotkeyConflict": MessageLookupByLibrary.simpleMessage("ホットキー競合"),

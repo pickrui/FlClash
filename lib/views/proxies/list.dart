@@ -7,6 +7,7 @@ import 'dart:math';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/providers/action.dart';
+import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/config.dart';
@@ -386,7 +387,7 @@ class _ProxiesListViewState extends State<ProxiesListView> {
   }
 }
 
-class ListHeader extends StatefulWidget {
+class ListHeader extends ConsumerStatefulWidget {
   final Group group;
 
   final Function(String groupName) onChange;
@@ -405,10 +406,10 @@ class ListHeader extends StatefulWidget {
   });
 
   @override
-  State<ListHeader> createState() => _ListHeaderState();
+  ConsumerState<ListHeader> createState() => _ListHeaderState();
 }
 
-class _ListHeaderState extends State<ListHeader> {
+class _ListHeaderState extends ConsumerState<ListHeader> {
   var isLock = false;
 
   String get icon => widget.group.icon;
@@ -423,7 +424,9 @@ class _ListHeaderState extends State<ListHeader> {
     if (isLock) return;
     isLock = true;
     try {
-      await delayTest(widget.group.all, widget.group.testUrl);
+      final source =
+          ref.read(groupsProvider).getGroup(groupName) ?? widget.group;
+      await delayTest(source.all, source.testUrl);
     } finally {
       isLock = false;
     }

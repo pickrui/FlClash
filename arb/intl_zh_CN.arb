@@ -1072,5 +1072,9 @@
   "invalidRuleSet": "{ruleSet} 不是有效的规则集",
   "invalidSubRule": "{subRule} 是一个无效的SUB_RULE",
   "safeMode": "安全模式",
-  "safeModeAppTitle": "{appName}（安全模式）"
+  "safeModeAppTitle": "{appName}（安全模式）",
+  "hideTimeoutProxies": "隐藏测速失败的节点",
+  "hideTimeoutProxiesDesc": "保留当前选中节点和尚未完成测速的节点",
+  "delayTestQueued": "排队中",
+  "delayTestRunning": "测速中"
 }

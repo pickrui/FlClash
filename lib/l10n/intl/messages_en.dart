@@ -759,6 +759,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "delayTest": MessageLookupByLibrary.simpleMessage("Delay Test"),
     "delayTestFailed": MessageLookupByLibrary.simpleMessage("Failed"),
+    "delayTestQueued": MessageLookupByLibrary.simpleMessage("Queued"),
+    "delayTestRunning": MessageLookupByLibrary.simpleMessage("Testing"),
     "delete": MessageLookupByLibrary.simpleMessage("Delete"),
     "deleteBackupTip": MessageLookupByLibrary.simpleMessage(
       "Delete this backup from WebDAV?",
@@ -1173,6 +1175,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "hide": MessageLookupByLibrary.simpleMessage("Hide"),
     "hideFromList": MessageLookupByLibrary.simpleMessage("Hide from list"),
+    "hideTimeoutProxies": MessageLookupByLibrary.simpleMessage(
+      "Hide failed nodes",
+    ),
+    "hideTimeoutProxiesDesc": MessageLookupByLibrary.simpleMessage(
+      "Keep the selected node and nodes that have not finished testing",
+    ),
     "host": MessageLookupByLibrary.simpleMessage("Host"),
     "hostsDesc": MessageLookupByLibrary.simpleMessage("Add Hosts"),
     "hotkeyConflict": MessageLookupByLibrary.simpleMessage("Hotkey conflict"),

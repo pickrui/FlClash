@@ -262,6 +262,7 @@ abstract class ProxiesStyleProps with _$ProxiesStyleProps {
     @Default(ProxiesLayout.standard) ProxiesLayout layout,
     @Default(ProxiesIconStyle.standard) ProxiesIconStyle iconStyle,
     @Default(ProxyCardType.expand) ProxyCardType cardType,
+    @Default(false) bool hideTimeoutProxies,
     @Default(defaultDelayTestConcurrency)
     @JsonKey(fromJson: normalizeDelayTestConcurrency)
     int concurrencyLimit,

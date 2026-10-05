@@ -1072,5 +1072,9 @@
   "invalidRuleSet": "{ruleSet} is an invalid rule set",
   "invalidSubRule": "{subRule} is an invalid SUB_RULE",
   "safeMode": "Safe mode",
-  "safeModeAppTitle": "{appName} (Safe mode)"
+  "safeModeAppTitle": "{appName} (Safe mode)",
+  "hideTimeoutProxies": "Hide failed nodes",
+  "hideTimeoutProxiesDesc": "Keep the selected node and nodes that have not finished testing",
+  "delayTestQueued": "Queued",
+  "delayTestRunning": "Testing"
 }

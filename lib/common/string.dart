@@ -64,3 +64,22 @@ extension StringNullExt on String? {
     return defaultValue;
   }
 }
+
+class SearchQuery {
+  static final _separator = RegExp(r'\s+');
+  final List<String> terms;
+
+  SearchQuery(String query)
+    : terms = query
+          .toLowerCase()
+          .split(_separator)
+          .where((term) => term.isNotEmpty)
+          .toList(growable: false);
+
+  bool get isEmpty => terms.isEmpty;
+
+  bool matches(Iterable<String?> fields) {
+    final text = fields.nonNulls.join('\n').toLowerCase();
+    return terms.every(text.contains);
+  }
+}

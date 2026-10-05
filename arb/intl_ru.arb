@@ -1072,5 +1072,9 @@
   "invalidRuleSet": "{ruleSet} — недопустимый набор правил",
   "invalidSubRule": "{subRule} — недопустимый SUB_RULE",
   "safeMode": "Безопасный режим",
-  "safeModeAppTitle": "{appName} (Безопасный режим)"
+  "safeModeAppTitle": "{appName} (Безопасный режим)",
+  "hideTimeoutProxies": "Скрывать узлы с ошибкой проверки",
+  "hideTimeoutProxiesDesc": "Сохранять выбранный узел и узлы с незавершённой проверкой",
+  "delayTestQueued": "В очереди",
+  "delayTestRunning": "Проверка"
 }

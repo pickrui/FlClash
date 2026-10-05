@@ -1072,5 +1072,9 @@
   "invalidRuleSet": "{ruleSet} は無効なルールセットです",
   "invalidSubRule": "{subRule} は無効な SUB_RULE です",
   "safeMode": "セーフモード",
-  "safeModeAppTitle": "{appName}（セーフモード）"
+  "safeModeAppTitle": "{appName}（セーフモード）",
+  "hideTimeoutProxies": "測定に失敗したノードを非表示",
+  "hideTimeoutProxiesDesc": "選択中のノードと測定が完了していないノードは表示します",
+  "delayTestQueued": "待機中",
+  "delayTestRunning": "測定中"
 }

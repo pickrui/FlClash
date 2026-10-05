@@ -517,6 +517,90 @@ final class ProfilesStateProvider
 
 String _$profilesStateHash() => r'8b07eeacb83b9002ba7e6283ff7a7f451a0845a6';
 
+@ProviderFor(delaysAtLastTestBatch)
+final delaysAtLastTestBatchProvider = DelaysAtLastTestBatchProvider._();
+
+final class DelaysAtLastTestBatchProvider
+    extends $FunctionalProvider<DelayMap, DelayMap, DelayMap>
+    with $Provider<DelayMap> {
+  DelaysAtLastTestBatchProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'delaysAtLastTestBatchProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$delaysAtLastTestBatchHash();
+
+  @$internal
+  @override
+  $ProviderElement<DelayMap> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  DelayMap create(Ref ref) {
+    return delaysAtLastTestBatch(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(DelayMap value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<DelayMap>(value),
+    );
+  }
+}
+
+String _$delaysAtLastTestBatchHash() =>
+    r'bb44aa9acbb67ac9f446a32f3d18fc26a13043eb';
+
+@ProviderFor(visibleGroupsState)
+final visibleGroupsStateProvider = VisibleGroupsStateProvider._();
+
+final class VisibleGroupsStateProvider
+    extends $FunctionalProvider<GroupsState, GroupsState, GroupsState>
+    with $Provider<GroupsState> {
+  VisibleGroupsStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'visibleGroupsStateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$visibleGroupsStateHash();
+
+  @$internal
+  @override
+  $ProviderElement<GroupsState> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  GroupsState create(Ref ref) {
+    return visibleGroupsState(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GroupsState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GroupsState>(value),
+    );
+  }
+}
+
+String _$visibleGroupsStateHash() =>
+    r'532e46d57014ecba5683c6cab71ec8798975fb8f';
+
 @ProviderFor(filterGroupsState)
 final filterGroupsStateProvider = FilterGroupsStateFamily._();
 
@@ -574,7 +658,7 @@ final class FilterGroupsStateProvider
   }
 }
 
-String _$filterGroupsStateHash() => r'7de7a4603ca5ed7c39a00351af43144eb6c21404';
+String _$filterGroupsStateHash() => r'de75e653c083829ea87bea5a00b0f5b30ebaeb51';
 
 final class FilterGroupsStateFamily extends $Family
     with $FunctionalFamilyOverride<GroupsState, String> {
@@ -977,6 +1061,97 @@ final class GetDelayFamily extends $Family
 
   @override
   String toString() => r'getDelayProvider';
+}
+
+@ProviderFor(getDelayTestPhase)
+final getDelayTestPhaseProvider = GetDelayTestPhaseFamily._();
+
+final class GetDelayTestPhaseProvider
+    extends
+        $FunctionalProvider<DelayTestPhase?, DelayTestPhase?, DelayTestPhase?>
+    with $Provider<DelayTestPhase?> {
+  GetDelayTestPhaseProvider._({
+    required GetDelayTestPhaseFamily super.from,
+    required ({String proxyName, String? testUrl}) super.argument,
+  }) : super(
+         retry: null,
+         name: r'getDelayTestPhaseProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$getDelayTestPhaseHash();
+
+  @override
+  String toString() {
+    return r'getDelayTestPhaseProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<DelayTestPhase?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  DelayTestPhase? create(Ref ref) {
+    final argument = this.argument as ({String proxyName, String? testUrl});
+    return getDelayTestPhase(
+      ref,
+      proxyName: argument.proxyName,
+      testUrl: argument.testUrl,
+    );
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(DelayTestPhase? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<DelayTestPhase?>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is GetDelayTestPhaseProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$getDelayTestPhaseHash() => r'bb92167c15dd512141cb6b46174b23ad265e1238';
+
+final class GetDelayTestPhaseFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          DelayTestPhase?,
+          ({String proxyName, String? testUrl})
+        > {
+  GetDelayTestPhaseFamily._()
+    : super(
+        retry: null,
+        name: r'getDelayTestPhaseProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  GetDelayTestPhaseProvider call({
+    required String proxyName,
+    String? testUrl,
+  }) => GetDelayTestPhaseProvider._(
+    argument: (proxyName: proxyName, testUrl: testUrl),
+    from: this,
+  );
+
+  @override
+  String toString() => r'getDelayTestPhaseProvider';
 }
 
 @ProviderFor(selectedMap)

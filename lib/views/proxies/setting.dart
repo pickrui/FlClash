@@ -263,6 +263,20 @@ class ProxiesSetting extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           DelayConcurrencySetting(isAndroid: system.isAndroid),
+          Consumer(
+            builder: (context, ref, _) => SwitchListTile(
+              title: Text(context.appLocalizations.hideTimeoutProxies),
+              subtitle: Text(context.appLocalizations.hideTimeoutProxiesDesc),
+              value: ref.watch(
+                proxiesStyleSettingProvider.select(
+                  (state) => state.hideTimeoutProxies,
+                ),
+              ),
+              onChanged: (value) => ref
+                  .read(proxiesStyleSettingProvider.notifier)
+                  .update((state) => state.copyWith(hideTimeoutProxies: value)),
+            ),
+          ),
           ..._buildStyleSetting(context),
           ..._buildSortSetting(context),
           ..._buildLayoutSetting(context),

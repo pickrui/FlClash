@@ -1254,6 +1254,72 @@ abstract class _$Groups extends $Notifier<List<Group>> {
   }
 }
 
+@ProviderFor(PendingDelayTests)
+final pendingDelayTestsProvider = PendingDelayTestsProvider._();
+
+final class PendingDelayTestsProvider
+    extends
+        $NotifierProvider<
+          PendingDelayTests,
+          Map<DelayTestTarget, DelayTestPhase>
+        > {
+  PendingDelayTestsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'pendingDelayTestsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$pendingDelayTestsHash();
+
+  @$internal
+  @override
+  PendingDelayTests create() => PendingDelayTests();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Map<DelayTestTarget, DelayTestPhase> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<Map<DelayTestTarget, DelayTestPhase>>(value),
+    );
+  }
+}
+
+String _$pendingDelayTestsHash() => r'3db7e610155bb92f0499e7abf29ed1ec1fce9fa8';
+
+abstract class _$PendingDelayTests
+    extends $Notifier<Map<DelayTestTarget, DelayTestPhase>> {
+  Map<DelayTestTarget, DelayTestPhase> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref =
+        this.ref
+            as $Ref<
+              Map<DelayTestTarget, DelayTestPhase>,
+              Map<DelayTestTarget, DelayTestPhase>
+            >;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<
+                Map<DelayTestTarget, DelayTestPhase>,
+                Map<DelayTestTarget, DelayTestPhase>
+              >,
+              Map<DelayTestTarget, DelayTestPhase>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(DelayDataSource)
 final delayDataSourceProvider = DelayDataSourceProvider._();
 
@@ -1286,7 +1352,7 @@ final class DelayDataSourceProvider
   }
 }
 
-String _$delayDataSourceHash() => r'd1053b7000b915ef4424bbfa70ee11a5a38c33b8';
+String _$delayDataSourceHash() => r'8c778ca2a659c348122da2bdef1b97d3167faf56';
 
 abstract class _$DelayDataSource extends $Notifier<DelayMap> {
   DelayMap build();

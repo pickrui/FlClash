@@ -43,6 +43,9 @@ class ProxyCard extends StatelessWidget {
           final delay = ref.watch(
             getDelayProvider(proxyName: proxy.name, testUrl: testUrl),
           );
+          final phase = ref.watch(
+            getDelayTestPhaseProvider(proxyName: proxy.name, testUrl: testUrl),
+          );
           return FadeThroughBox(
             alignment: type == ProxyCardType.expand
                 ? Alignment.centerLeft
@@ -52,7 +55,19 @@ class ProxyCard extends StatelessWidget {
                     height: measure.labelSmallHeight,
                     width: measure.labelSmallHeight,
                     child: delay == 0
-                        ? const CircularProgressIndicator(strokeWidth: 2)
+                        ? Tooltip(
+                            message: phase == DelayTestPhase.queued
+                                ? context.appLocalizations.delayTestQueued
+                                : context.appLocalizations.delayTestRunning,
+                            child: phase == DelayTestPhase.queued
+                                ? Icon(
+                                    Icons.hourglass_empty,
+                                    size: measure.labelSmallHeight,
+                                  )
+                                : const CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                          )
                         : IconButton(
                             icon: const Icon(Icons.bolt),
                             iconSize: measure.labelSmallHeight,

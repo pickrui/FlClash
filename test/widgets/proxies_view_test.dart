@@ -100,6 +100,15 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
       expect(find.text('Failed'), findsNothing);
+      final phases = container.read(pendingDelayTestsProvider.notifier);
+      phases.queue([(name: 'Node', url: url)], generation: generation);
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.hourglass_empty), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      phases.start((name: 'Node', url: url), generation: generation);
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.byIcon(Icons.hourglass_empty), findsNothing);
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
       for (final value in <int?>[null, -1, 6000]) {
         delays.setDelay(

@@ -253,6 +253,37 @@ class Groups extends _$Groups with NotifierMixin<List<Group>> {
 }
 
 @Riverpod(keepAlive: true)
+class PendingDelayTests extends _$PendingDelayTests {
+  int _generation = 0;
+
+  @override
+  Map<DelayTestTarget, DelayTestPhase> build() => {};
+
+  void reset(int generation) {
+    _generation = generation;
+    if (state.isNotEmpty) state = {};
+  }
+
+  void queue(Iterable<DelayTestTarget> targets, {required int generation}) {
+    if (generation != _generation) return;
+    state = {
+      ...state,
+      for (final target in targets) target: DelayTestPhase.queued,
+    };
+  }
+
+  void start(DelayTestTarget target, {required int generation}) {
+    if (generation != _generation || !state.containsKey(target)) return;
+    state = {...state, target: DelayTestPhase.running};
+  }
+
+  void finish(DelayTestTarget target, {required int generation}) {
+    if (generation != _generation || !state.containsKey(target)) return;
+    state = {...state}..remove(target);
+  }
+}
+
+@Riverpod(keepAlive: true)
 class DelayDataSource extends _$DelayDataSource with NotifierMixin<DelayMap> {
   int _generation = 0;
 
@@ -267,6 +298,7 @@ class DelayDataSource extends _$DelayDataSource with NotifierMixin<DelayMap> {
 
   int begin() {
     _generation++;
+    ref.read(pendingDelayTestsProvider.notifier).reset(_generation);
     final nextState = <String, Map<String, int?>>{};
     for (final entry in state.entries) {
       final completed = Map<String, int?>.from(entry.value)
@@ -286,6 +318,7 @@ class DelayDataSource extends _$DelayDataSource with NotifierMixin<DelayMap> {
 
   void clear() {
     _generation++;
+    ref.read(pendingDelayTestsProvider.notifier).reset(_generation);
     state = {};
   }
 
@@ -305,6 +338,12 @@ class DelayDataSource extends _$DelayDataSource with NotifierMixin<DelayMap> {
       // health checks must not replace its spinner with an unrelated result.
       if (generation == null && state[delay.url]?[delay.name] == 0) {
         continue;
+      }
+      if (delay.value != 0) {
+        ref.read(pendingDelayTestsProvider.notifier).finish((
+          name: delay.name,
+          url: delay.url,
+        ), generation: _generation);
       }
       if (nextState[delay.url]?[delay.name] == delay.value) {
         continue;

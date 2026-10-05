@@ -76,7 +76,8 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
   Future<void> delayTestCurrentGroup() async {
     final group = _currentGroup;
     if (group != null) {
-      await delayTest(group.all, group.testUrl);
+      final source = ref.read(groupsProvider).getGroup(group.name) ?? group;
+      await delayTest(source.all, source.testUrl);
     }
   }
 

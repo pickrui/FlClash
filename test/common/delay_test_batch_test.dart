@@ -11,6 +11,29 @@ import 'package:fl_clash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test(
+    'only dispatched targets become running; a missing Core response drops the queue',
+    () async {
+      final first = Completer<Delay>();
+      final started = <String>[];
+      final results = <Delay>[];
+      final run = runDelayTestBatch(
+        targets: [(name: 'first', url: 'url'), (name: 'queued', url: 'url')],
+        concurrency: 1,
+        isCurrent: () => true,
+        onStarted: (target) => started.add(target.name),
+        probe: (_) => first.future,
+        onResult: results.add,
+      );
+      expect(started, ['first']);
+      first.complete(const Delay(name: 'first', url: 'url', value: null));
+      await run;
+      expect(started, ['first']);
+      expect(results.map((d) => d.name), ['first', 'queued']);
+      expect(results.map((d) => d.value), everyElement(isNull));
+    },
+  );
+
   for (final concurrency in [16, 50]) {
     test(
       'partially failed batches probe each target once at $concurrency',

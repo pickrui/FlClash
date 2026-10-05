@@ -42,6 +42,7 @@ Future<void> runDelayTestBatch({
   required DelayProbe probe,
   required bool Function() isCurrent,
   required void Function(Delay delay) onResult,
+  void Function(({String name, String url}) target)? onStarted,
 }) async {
   if (concurrency <= 0) {
     throw ArgumentError.value(concurrency, 'concurrency', 'Must be positive');
@@ -50,6 +51,7 @@ Future<void> runDelayTestBatch({
   Future<void> worker() async {
     while (isCurrent() && next < targets.length) {
       final target = targets[next++];
+      onStarted?.call(target);
       Delay delay;
       try {
         delay = await probe(target);
