@@ -18,26 +18,28 @@ class TUNButton extends StatelessWidget {
     return SizedBox(
       height: getWidgetHeight(1),
       child: CommonCard(
-        onPressed: () {
-          showSheet(
-            context: context,
-            builder: (_, type) {
-              return AdaptiveSheetScaffold(
-                type: type,
-                body: generateListView(
-                  generateSection(
-                    items: [
-                      if (system.isDesktop) const TUNItem(),
-                      if (system.isMacOS) const AutoSetSystemDnsItem(),
-                      const TunStackItem(),
-                    ],
-                  ),
-                ),
-                title: appLocalizations.tun,
-              );
-            },
-          );
-        },
+        onPressed: safeModeBuild
+            ? null
+            : () {
+                showSheet(
+                  context: context,
+                  builder: (_, type) {
+                    return AdaptiveSheetScaffold(
+                      type: type,
+                      body: generateListView(
+                        generateSection(
+                          items: [
+                            if (system.isDesktop) const TUNItem(),
+                            if (system.isMacOS) const AutoSetSystemDnsItem(),
+                            const TunStackItem(),
+                          ],
+                        ),
+                      ),
+                      title: appLocalizations.tun,
+                    );
+                  },
+                );
+              },
         info: Info(
           label: appLocalizations.tun,
           iconData: Icons.stacked_line_chart,
@@ -52,7 +54,9 @@ class TUNButton extends StatelessWidget {
                 flex: 1,
                 child: TooltipText(
                   text: Text(
-                    appLocalizations.options,
+                    safeModeBuild
+                        ? appLocalizations.safeMode
+                        : appLocalizations.options,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(
@@ -69,12 +73,16 @@ class TUNButton extends StatelessWidget {
                     ),
                   );
                   return Switch(
-                    value: enable,
-                    onChanged: (value) {
-                      ref
-                          .read(patchClashConfigProvider.notifier)
-                          .update((state) => state.copyWith.tun(enable: value));
-                    },
+                    value: enable && !safeModeBuild,
+                    onChanged: safeModeBuild
+                        ? null
+                        : (value) {
+                            ref
+                                .read(patchClashConfigProvider.notifier)
+                                .update(
+                                  (state) => state.copyWith.tun(enable: value),
+                                );
+                          },
                   );
                 },
               ),
@@ -94,22 +102,27 @@ class SystemProxyButton extends StatelessWidget {
     return SizedBox(
       height: getWidgetHeight(1),
       child: CommonCard(
-        onPressed: () {
-          showSheet(
-            context: context,
-            builder: (_, type) {
-              return AdaptiveSheetScaffold(
-                type: type,
-                body: generateListView(
-                  generateSection(
-                    items: [const SystemProxyItem(), const BypassDomainItem()],
-                  ),
-                ),
-                title: appLocalizations.systemProxy,
-              );
-            },
-          );
-        },
+        onPressed: safeModeBuild
+            ? null
+            : () {
+                showSheet(
+                  context: context,
+                  builder: (_, type) {
+                    return AdaptiveSheetScaffold(
+                      type: type,
+                      body: generateListView(
+                        generateSection(
+                          items: [
+                            const SystemProxyItem(),
+                            const BypassDomainItem(),
+                          ],
+                        ),
+                      ),
+                      title: appLocalizations.systemProxy,
+                    );
+                  },
+                );
+              },
         info: Info(
           label: appLocalizations.systemProxy,
           iconData: Icons.shuffle,
@@ -124,7 +137,9 @@ class SystemProxyButton extends StatelessWidget {
                 flex: 1,
                 child: TooltipText(
                   text: Text(
-                    appLocalizations.options,
+                    safeModeBuild
+                        ? appLocalizations.safeMode
+                        : appLocalizations.options,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(
@@ -145,8 +160,8 @@ class SystemProxyButton extends StatelessWidget {
                   );
                   return Switch(
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    value: systemProxy && !authenticated,
-                    onChanged: authenticated
+                    value: systemProxy && !authenticated && !safeModeBuild,
+                    onChanged: authenticated || safeModeBuild
                         ? null
                         : (value) {
                             ref

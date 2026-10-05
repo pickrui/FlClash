@@ -10,6 +10,8 @@ import window_manager
 
 @main
 class AppDelegate: FlutterAppDelegate {
+    private(set) var isSafeMode = true
+    private var startupPrepared = false
     private var wasLaunchedAtLogin: Bool?
     private var launchResultCallbacks: [FlutterResult] = []
     private let currentIdentifierPrefix = "com.oixcloud.clash"
@@ -64,12 +66,15 @@ class AppDelegate: FlutterAppDelegate {
         return false
     }
 
-    override func applicationWillFinishLaunching(_ notification: Notification) {
+    func prepareApplication(safeMode: Bool) {
+        guard !startupPrepared else { return }
+        startupPrepared = true
+        isSafeMode = safeMode
+        if safeMode { return }
         if activateExistingInstanceIfNeeded() {
             Darwin.exit(0)
         }
         migrateLegacyDefaultsIfNeeded()
-        super.applicationWillFinishLaunching(notification)
     }
 
     override func applicationDidFinishLaunching(_ notification: Notification) {

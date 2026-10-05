@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 // ignore_for_file: constant_identifier_names
 
+import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 
@@ -24,7 +25,9 @@ const packageName = 'com.oixcloud.clash';
 const legacyPackageName = 'com.follow.clash';
 const identityMigrationMarkerName = '.identity-migrated-from-com.follow.clash';
 const releaseRepository = 'pickrui/FlClash';
-final unixSocketPath = '/tmp/FlClashSocket_${_randomPipeId()}.sock';
+final unixSocketPath = safeModeBuild
+    ? '${Directory.systemTemp.path}/fc_${_randomPipeId().substring(0, 16)}.sock'
+    : '/tmp/FlClashSocket_${_randomPipeId()}.sock';
 final windowsPipeName = '\\\\.\\pipe\\FlClashCore_${_randomPipeId()}';
 const helperPort = 47890;
 const helperProtocolVersionHeader = 'x-flclash-helper-protocol';

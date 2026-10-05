@@ -15,6 +15,16 @@ import 'system.dart';
 
 const silentLaunchArgument = '--silent-launch';
 
+Future<void> prepareDesktopApplication({
+  required bool isMacOS,
+  required bool safeMode,
+}) async {
+  if (!isMacOS) return;
+  await const MethodChannel(
+    'launch_at_startup',
+  ).invokeMethod<void>('prepareApplication', {'safeMode': safeMode});
+}
+
 Future<List<String>> resolveLaunchArguments({
   required List<String> arguments,
   required bool isMacOS,

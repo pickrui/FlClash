@@ -10,6 +10,48 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  group('prepareDesktopApplication', () {
+    const channel = MethodChannel('launch_at_startup');
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    final calls = <MethodCall>[];
+
+    setUp(() {
+      calls.clear();
+      messenger.setMockMethodCallHandler(channel, (call) async {
+        calls.add(call);
+        return null;
+      });
+    });
+    tearDown(() => messenger.setMockMethodCallHandler(channel, null));
+
+    for (final safeMode in [true, false]) {
+      test('passes safe mode $safeMode before native startup work', () async {
+        await prepareDesktopApplication(isMacOS: true, safeMode: safeMode);
+        expect(calls.single.method, 'prepareApplication');
+        expect(calls.single.arguments, {'safeMode': safeMode});
+      });
+    }
+
+    test('does not invoke the macOS channel on other platforms', () async {
+      await prepareDesktopApplication(isMacOS: false, safeMode: true);
+      expect(calls, isEmpty);
+    });
+
+    test(
+      'does not silently bypass a failed native startup handshake',
+      () async {
+        messenger.setMockMethodCallHandler(channel, (_) async {
+          throw PlatformException(code: 'invalid_startup');
+        });
+        await expectLater(
+          prepareDesktopApplication(isMacOS: true, safeMode: true),
+          throwsA(isA<PlatformException>()),
+        );
+      },
+    );
+  });
+
   group('resolveLaunchArguments', () {
     const channel = MethodChannel('launch_at_startup');
     final messenger =

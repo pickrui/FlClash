@@ -63,6 +63,10 @@ void main() {
           final home = await appPath.homeDirPath;
           expect(p.basename(home), startsWith('flclash-safe-'));
           if (!Platform.isWindows) {
+            expect(p.dirname(unixSocketPath), Directory.systemTemp.path);
+            expect(unixSocketPath.length, lessThan(104));
+          }
+          if (!Platform.isWindows) {
             expect((await FileStat.stat(home)).mode & 0x3F, 0);
           }
           for (final file in [

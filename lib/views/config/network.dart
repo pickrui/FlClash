@@ -52,12 +52,14 @@ class TUNItem extends ConsumerWidget {
       title: Text(appLocalizations.tun),
       subtitle: Text(appLocalizations.tunDesc),
       delegate: SwitchDelegate(
-        value: enable,
-        onChanged: (value) async {
-          ref
-              .read(patchClashConfigProvider.notifier)
-              .update((state) => state.copyWith.tun(enable: value));
-        },
+        value: enable && !safeModeBuild,
+        onChanged: safeModeBuild
+            ? null
+            : (value) async {
+                ref
+                    .read(patchClashConfigProvider.notifier)
+                    .update((state) => state.copyWith.tun(enable: value));
+              },
       ),
     );
   }
@@ -141,8 +143,8 @@ class SystemProxyItem extends ConsumerWidget {
             : appLocalizations.systemProxyDesc,
       ),
       delegate: SwitchDelegate(
-        value: systemProxy && !authenticated,
-        onChanged: authenticated
+        value: systemProxy && !authenticated && !safeModeBuild,
+        onChanged: authenticated || safeModeBuild
             ? null
             : (bool value) async {
                 ref
@@ -188,12 +190,14 @@ class AutoSetSystemDnsItem extends ConsumerWidget {
     return ListItem.switchItem(
       title: Text(appLocalizations.autoSetSystemDns),
       delegate: SwitchDelegate(
-        value: autoSetSystemDns,
-        onChanged: (bool value) async {
-          ref
-              .read(networkSettingProvider.notifier)
-              .update((state) => state.copyWith(autoSetSystemDns: value));
-        },
+        value: autoSetSystemDns && !safeModeBuild,
+        onChanged: safeModeBuild
+            ? null
+            : (bool value) async {
+                ref
+                    .read(networkSettingProvider.notifier)
+                    .update((state) => state.copyWith(autoSetSystemDns: value));
+              },
       ),
     );
   }

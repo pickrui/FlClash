@@ -34,11 +34,20 @@ import 'application.dart';
 import 'common/common.dart';
 
 Future<void> main(List<String> arguments) async {
+  if (Platform.environment['FLCLASH_REQUIRE_SAFE_MODE'] == '1' &&
+      !safeModeBuild) {
+    stderr.writeln('The isolated launcher requires a SAFE_MODE build');
+    exit(64);
+  }
   try {
     FlClashWidgetsBinding.ensureInitialized();
     if (safeModeBuild && !system.isDesktop) {
       throw UnsupportedError('SAFE_MODE currently requires a desktop build');
     }
+    await prepareDesktopApplication(
+      isMacOS: system.isMacOS,
+      safeMode: safeModeBuild,
+    );
     initializeSafeModePreferences();
     await RustLib.init();
     registerFetchManagedConfig(CloudApiService().fetchManagedConfig);

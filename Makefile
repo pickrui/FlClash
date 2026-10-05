@@ -3,7 +3,7 @@ include tool/go_build_tags.env
 # The release harness builds with this toolchain; GOTOOLCHAIN=local overrides it.
 GOTOOLCHAIN ?= go1.26.8
 
-.PHONY: help submodules hooks analyze format lint test test-safe test-go test-tailscale test-rust test-all
+.PHONY: help submodules hooks analyze format lint test test-safe test-macos-isolated test-go test-tailscale test-rust test-all
 
 help:
 	@echo 'make submodules     # update git submodules (Clash.Meta core, flutter_distributor)'
@@ -13,6 +13,7 @@ help:
 	@echo 'make lint           # comment density gate over the working tree'
 	@echo 'make test           # flutter test with the native asset hooks switched off'
 	@echo 'make test-safe      # isolated desktop safe-mode checks'
+	@echo 'make test-macos-isolated # offline macOS GUI smoke test (APP=/path/to/safe.app)'
 	@echo 'make test-go        # Go core tests'
 	@echo 'make test-tailscale # Tailscale outbound against the official test control server'
 	@echo 'make test-rust      # rust_api and helper tests'
@@ -41,6 +42,9 @@ test:
 
 test-safe:
 	dart tool/run_tests.dart --dart-define=SAFE_MODE=true test/safe_mode test/common/safe_mode_profile_test.dart
+
+test-macos-isolated:
+	python3 tool/run_macos_isolated.py --app "$(APP)" $(MACOS_TEST_ARGS)
 
 test-go:
 	cd core && GOTOOLCHAIN=$(GOTOOLCHAIN) CGO_ENABLED=0 go test -tags $(GO_TAGS) ./...

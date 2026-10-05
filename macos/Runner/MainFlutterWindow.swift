@@ -20,6 +20,15 @@ class MainFlutterWindow: NSWindow {
         )
         .setMethodCallHandler { (_ call: FlutterMethodCall, result: @escaping FlutterResult) in
             switch call.method {
+            case "prepareApplication":
+                guard let delegate = NSApp.delegate as? AppDelegate,
+                      let arguments = call.arguments as? [String: Any],
+                      let safeMode = arguments["safeMode"] as? Bool else {
+                    result(FlutterError(code: "invalid_startup", message: "Missing safe mode state", details: nil))
+                    return
+                }
+                delegate.prepareApplication(safeMode: safeMode)
+                result(nil)
             case "launchAtStartupIsEnabled":
                 result(LaunchAtLogin.isEnabled)
             case "launchAtStartupWasLaunchedAtLogin":
@@ -29,6 +38,10 @@ class MainFlutterWindow: NSWindow {
                 }
                 delegate.resolveLaunchAtLogin(result)
             case "launchAtStartupSetEnabled":
+                guard let delegate = NSApp.delegate as? AppDelegate, !delegate.isSafeMode else {
+                    result(FlutterError(code: "safe_mode", message: "Login items are disabled in safe mode", details: nil))
+                    return
+                }
                 if let arguments = call.arguments as? [String: Any] {
                     LaunchAtLogin.isEnabled = arguments["setEnabledValue"] as! Bool
                 }
