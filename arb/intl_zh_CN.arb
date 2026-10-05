@@ -1103,5 +1103,20 @@
   "action_updateProfiles": "更新订阅",
   "action_copyEnv": "复制代理环境变量",
   "action_exit": "退出",
-  "hotkeyUnavailable": "快捷键注册失败"
+  "hotkeyUnavailable": "快捷键注册失败",
+  "serviceAvailability": "服务可用性",
+  "currentRoute": "当前路由规则",
+  "outboundIp": "出口 IP",
+  "serviceProbeHint": "点击刷新，检查实际代理链和服务响应",
+  "serviceProbeStart": "启动内核后可检测（安全模式禁用）",
+  "serviceProbeStale": "路由已变化，请刷新重新检测",
+  "serviceAvailable": "可用",
+  "serviceUnavailable": "不可用",
+  "serviceRestricted": "受限",
+  "serviceDisallowedIsp": "运营商不受支持",
+  "serviceBlocked": "被阻止",
+  "serviceUnsupportedRegion": "地区不受支持",
+  "serviceOriginalsOnly": "仅自制内容",
+  "serviceComingSoon": "尚未开放",
+  "serviceTimeout": "超时"
 }

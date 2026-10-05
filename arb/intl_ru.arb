@@ -1103,5 +1103,20 @@
   "action_updateProfiles": "Обновить профили",
   "action_copyEnv": "Копировать переменные прокси",
   "action_exit": "Выход",
-  "hotkeyUnavailable": "Не удалось зарегистрировать сочетание"
+  "hotkeyUnavailable": "Не удалось зарегистрировать сочетание",
+  "serviceAvailability": "Доступность сервисов",
+  "currentRoute": "Текущие правила",
+  "outboundIp": "Исходящий IP",
+  "serviceProbeHint": "Обновите, чтобы проверить маршрут и ответы сервисов",
+  "serviceProbeStart": "Запустите ядро для проверки (в безопасном режиме отключено)",
+  "serviceProbeStale": "Маршрут изменён — обновите проверку",
+  "serviceAvailable": "Доступен",
+  "serviceUnavailable": "Недоступен",
+  "serviceRestricted": "Ограничен",
+  "serviceDisallowedIsp": "Провайдер не поддерживается",
+  "serviceBlocked": "Заблокирован",
+  "serviceUnsupportedRegion": "Регион не поддерживается",
+  "serviceOriginalsOnly": "Только оригинальный контент",
+  "serviceComingSoon": "Скоро",
+  "serviceTimeout": "Время ожидания истекло"
 }

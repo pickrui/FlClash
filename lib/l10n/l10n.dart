@@ -9513,6 +9513,146 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Service availability`
+  String get serviceAvailability {
+    return Intl.message(
+      'Service availability',
+      name: 'serviceAvailability',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Current routing rules`
+  String get currentRoute {
+    return Intl.message(
+      'Current routing rules',
+      name: 'currentRoute',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Outbound IP`
+  String get outboundIp {
+    return Intl.message('Outbound IP', name: 'outboundIp', desc: '', args: []);
+  }
+
+  /// `Run a check to inspect the actual route and service responses`
+  String get serviceProbeHint {
+    return Intl.message(
+      'Run a check to inspect the actual route and service responses',
+      name: 'serviceProbeHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Start the core to run checks (disabled in safe mode)`
+  String get serviceProbeStart {
+    return Intl.message(
+      'Start the core to run checks (disabled in safe mode)',
+      name: 'serviceProbeStart',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Route changed — refresh to check again`
+  String get serviceProbeStale {
+    return Intl.message(
+      'Route changed — refresh to check again',
+      name: 'serviceProbeStale',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Available`
+  String get serviceAvailable {
+    return Intl.message(
+      'Available',
+      name: 'serviceAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unavailable`
+  String get serviceUnavailable {
+    return Intl.message(
+      'Unavailable',
+      name: 'serviceUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restricted`
+  String get serviceRestricted {
+    return Intl.message(
+      'Restricted',
+      name: 'serviceRestricted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ISP not supported`
+  String get serviceDisallowedIsp {
+    return Intl.message(
+      'ISP not supported',
+      name: 'serviceDisallowedIsp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Blocked`
+  String get serviceBlocked {
+    return Intl.message('Blocked', name: 'serviceBlocked', desc: '', args: []);
+  }
+
+  /// `Region not supported`
+  String get serviceUnsupportedRegion {
+    return Intl.message(
+      'Region not supported',
+      name: 'serviceUnsupportedRegion',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Originals only`
+  String get serviceOriginalsOnly {
+    return Intl.message(
+      'Originals only',
+      name: 'serviceOriginalsOnly',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Coming soon`
+  String get serviceComingSoon {
+    return Intl.message(
+      'Coming soon',
+      name: 'serviceComingSoon',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Timed out`
+  String get serviceTimeout {
+    return Intl.message(
+      'Timed out',
+      name: 'serviceTimeout',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

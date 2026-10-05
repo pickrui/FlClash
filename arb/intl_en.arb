@@ -1103,5 +1103,20 @@
   "action_updateProfiles": "Update profiles",
   "action_copyEnv": "Copy proxy environment variables",
   "action_exit": "Exit",
-  "hotkeyUnavailable": "Shortcut unavailable"
+  "hotkeyUnavailable": "Shortcut unavailable",
+  "serviceAvailability": "Service availability",
+  "currentRoute": "Current routing rules",
+  "outboundIp": "Outbound IP",
+  "serviceProbeHint": "Run a check to inspect the actual route and service responses",
+  "serviceProbeStart": "Start the core to run checks (disabled in safe mode)",
+  "serviceProbeStale": "Route changed — refresh to check again",
+  "serviceAvailable": "Available",
+  "serviceUnavailable": "Unavailable",
+  "serviceRestricted": "Restricted",
+  "serviceDisallowedIsp": "ISP not supported",
+  "serviceBlocked": "Blocked",
+  "serviceUnsupportedRegion": "Region not supported",
+  "serviceOriginalsOnly": "Originals only",
+  "serviceComingSoon": "Coming soon",
+  "serviceTimeout": "Timed out"
 }

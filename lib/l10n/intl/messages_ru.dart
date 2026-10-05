@@ -721,6 +721,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "crashTest": MessageLookupByLibrary.simpleMessage("Тест на сбои"),
     "create": MessageLookupByLibrary.simpleMessage("Создать"),
     "creationTime": MessageLookupByLibrary.simpleMessage("Время создания"),
+    "currentRoute": MessageLookupByLibrary.simpleMessage("Текущие правила"),
     "custom": MessageLookupByLibrary.simpleMessage("Пользовательский"),
     "customOutboundInUse": m9,
     "customRoutingDraftHint": MessageLookupByLibrary.simpleMessage(
@@ -1572,6 +1573,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "options": MessageLookupByLibrary.simpleMessage("Опции"),
     "other": MessageLookupByLibrary.simpleMessage("Другое"),
+    "outboundIp": MessageLookupByLibrary.simpleMessage("Исходящий IP"),
     "outboundMode": MessageLookupByLibrary.simpleMessage(
       "Режим исходящего трафика",
     ),
@@ -2057,8 +2059,37 @@ class MessageLookup extends MessageLookupByLibrary {
     "sendResetEmail": MessageLookupByLibrary.simpleMessage(
       "Отправить письмо для сброса",
     ),
+    "serviceAvailability": MessageLookupByLibrary.simpleMessage(
+      "Доступность сервисов",
+    ),
+    "serviceAvailable": MessageLookupByLibrary.simpleMessage("Доступен"),
+    "serviceBlocked": MessageLookupByLibrary.simpleMessage("Заблокирован"),
     "serviceCheckFailed": MessageLookupByLibrary.simpleMessage(
       "Проверка сервиса не удалась",
+    ),
+    "serviceComingSoon": MessageLookupByLibrary.simpleMessage("Скоро"),
+    "serviceDisallowedIsp": MessageLookupByLibrary.simpleMessage(
+      "Провайдер не поддерживается",
+    ),
+    "serviceOriginalsOnly": MessageLookupByLibrary.simpleMessage(
+      "Только оригинальный контент",
+    ),
+    "serviceProbeHint": MessageLookupByLibrary.simpleMessage(
+      "Обновите, чтобы проверить маршрут и ответы сервисов",
+    ),
+    "serviceProbeStale": MessageLookupByLibrary.simpleMessage(
+      "Маршрут изменён — обновите проверку",
+    ),
+    "serviceProbeStart": MessageLookupByLibrary.simpleMessage(
+      "Запустите ядро для проверки (в безопасном режиме отключено)",
+    ),
+    "serviceRestricted": MessageLookupByLibrary.simpleMessage("Ограничен"),
+    "serviceTimeout": MessageLookupByLibrary.simpleMessage(
+      "Время ожидания истекло",
+    ),
+    "serviceUnavailable": MessageLookupByLibrary.simpleMessage("Недоступен"),
+    "serviceUnsupportedRegion": MessageLookupByLibrary.simpleMessage(
+      "Регион не поддерживается",
     ),
     "settings": MessageLookupByLibrary.simpleMessage("Настройки"),
     "show": MessageLookupByLibrary.simpleMessage("Показать"),

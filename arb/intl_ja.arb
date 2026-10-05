@@ -1103,5 +1103,20 @@
   "action_updateProfiles": "プロファイルを更新",
   "action_copyEnv": "プロキシ環境変数をコピー",
   "action_exit": "終了",
-  "hotkeyUnavailable": "ショートカットを登録できません"
+  "hotkeyUnavailable": "ショートカットを登録できません",
+  "serviceAvailability": "サービス接続確認",
+  "currentRoute": "現在のルール",
+  "outboundIp": "出口 IP",
+  "serviceProbeHint": "更新して実際の経路と応答を確認",
+  "serviceProbeStart": "コア起動後に確認できます（セーフモードでは無効）",
+  "serviceProbeStale": "経路が変更されました。再度確認してください",
+  "serviceAvailable": "利用可能",
+  "serviceUnavailable": "利用不可",
+  "serviceRestricted": "制限あり",
+  "serviceDisallowedIsp": "ISP 非対応",
+  "serviceBlocked": "ブロック済み",
+  "serviceUnsupportedRegion": "地域非対応",
+  "serviceOriginalsOnly": "オリジナル作品のみ",
+  "serviceComingSoon": "近日公開",
+  "serviceTimeout": "タイムアウト"
 }

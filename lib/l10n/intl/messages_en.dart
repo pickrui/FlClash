@@ -702,6 +702,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "crashTest": MessageLookupByLibrary.simpleMessage("Crash test"),
     "create": MessageLookupByLibrary.simpleMessage("Create"),
     "creationTime": MessageLookupByLibrary.simpleMessage("Creation time"),
+    "currentRoute": MessageLookupByLibrary.simpleMessage(
+      "Current routing rules",
+    ),
     "custom": MessageLookupByLibrary.simpleMessage("Custom"),
     "customOutboundInUse": m9,
     "customRoutingDraftHint": MessageLookupByLibrary.simpleMessage(
@@ -1510,6 +1513,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "options": MessageLookupByLibrary.simpleMessage("Options"),
     "other": MessageLookupByLibrary.simpleMessage("Other"),
+    "outboundIp": MessageLookupByLibrary.simpleMessage("Outbound IP"),
     "outboundMode": MessageLookupByLibrary.simpleMessage("Outbound mode"),
     "outboundUnavailable": MessageLookupByLibrary.simpleMessage(
       "Unavailable in this configuration. Remove or replace it.",
@@ -1951,8 +1955,35 @@ class MessageLookup extends MessageLookupByLibrary {
     "selected": MessageLookupByLibrary.simpleMessage("Selected"),
     "sendCode": MessageLookupByLibrary.simpleMessage("Send Code"),
     "sendResetEmail": MessageLookupByLibrary.simpleMessage("Send reset email"),
+    "serviceAvailability": MessageLookupByLibrary.simpleMessage(
+      "Service availability",
+    ),
+    "serviceAvailable": MessageLookupByLibrary.simpleMessage("Available"),
+    "serviceBlocked": MessageLookupByLibrary.simpleMessage("Blocked"),
     "serviceCheckFailed": MessageLookupByLibrary.simpleMessage(
       "Service Check Failed",
+    ),
+    "serviceComingSoon": MessageLookupByLibrary.simpleMessage("Coming soon"),
+    "serviceDisallowedIsp": MessageLookupByLibrary.simpleMessage(
+      "ISP not supported",
+    ),
+    "serviceOriginalsOnly": MessageLookupByLibrary.simpleMessage(
+      "Originals only",
+    ),
+    "serviceProbeHint": MessageLookupByLibrary.simpleMessage(
+      "Run a check to inspect the actual route and service responses",
+    ),
+    "serviceProbeStale": MessageLookupByLibrary.simpleMessage(
+      "Route changed — refresh to check again",
+    ),
+    "serviceProbeStart": MessageLookupByLibrary.simpleMessage(
+      "Start the core to run checks (disabled in safe mode)",
+    ),
+    "serviceRestricted": MessageLookupByLibrary.simpleMessage("Restricted"),
+    "serviceTimeout": MessageLookupByLibrary.simpleMessage("Timed out"),
+    "serviceUnavailable": MessageLookupByLibrary.simpleMessage("Unavailable"),
+    "serviceUnsupportedRegion": MessageLookupByLibrary.simpleMessage(
+      "Region not supported",
     ),
     "settings": MessageLookupByLibrary.simpleMessage("Settings"),
     "show": MessageLookupByLibrary.simpleMessage("Show"),

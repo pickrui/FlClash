@@ -118,6 +118,24 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 			return
 		}
 		response.success(handleInitClash(&params))
+	case probeRouteMethod:
+		epoch, picks := routeStamp()
+		response.success(map[string]uint64{"core-epoch": epoch, "picks-version": picks})
+	case probeMethod:
+		params := ProbeParams{}
+		if decodeMethodArguments(call, response, &params) {
+			response.success(handleProbe(&params))
+		}
+	case outboundIpMethod:
+		params := OutboundIpParams{}
+		if decodeMethodArguments(call, response, &params) {
+			response.success(handleOutboundIp(&params))
+		}
+	case serviceCheckMethod:
+		params := ServiceCheckParams{}
+		if decodeMethodArguments(call, response, &params) {
+			response.success(handleServiceCheck(&params))
+		}
 	case networkDiagnosticsMethod:
 		response.success(handleNetworkDiagnostics())
 	case getIsInitMethod:

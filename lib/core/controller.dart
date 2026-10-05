@@ -304,6 +304,59 @@ class CoreController {
     }
   }
 
+  Future<Map<String, dynamic>> getProbeRoute() async {
+    final result = await _interface.invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.probeRoute,
+      timeout: const Duration(seconds: 5),
+    );
+    if (result == null) throw StateError('Missing probe route');
+    return result;
+  }
+
+  Future<List<Map<String, dynamic>>> checkNodeServices(
+    ({String name, String group}) target,
+  ) async {
+    if (safeModeBuild) throw StateError('Probes are disabled in safe mode');
+    final result = await _interface.invokeMethod<List<dynamic>>(
+      method: CoreMethod.serviceCheck,
+      arguments: {
+        'proxy-name': target.name,
+        'group-name': target.group,
+        'timeout': 10000,
+      },
+      timeout: const Duration(seconds: 65),
+    );
+    if (result == null) throw StateError('Missing service response');
+    return result
+        .map((item) => Map<String, dynamic>.from(item as Map))
+        .toList();
+  }
+
+  Future<Map<String, dynamic>> checkOutboundIp(
+    ({String name, String group}) target,
+  ) async {
+    if (safeModeBuild) throw StateError('Probes are disabled in safe mode');
+    final result = await _interface.invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.outboundIp,
+      arguments: {
+        'proxy-name': target.name,
+        'group-name': target.group,
+        'timeout': 10000,
+        'urls': [
+          'https://ipwho.is',
+          'https://api.myip.com',
+          'https://ipapi.co/json',
+          'https://ident.me/json',
+          'https://api.ip.sb/geoip',
+          'https://ipinfo.io/json',
+        ],
+      },
+      timeout: const Duration(seconds: 15),
+    );
+    if (result == null) throw StateError('Missing outbound IP response');
+    return result;
+  }
+
   Future<Map<String, dynamic>> getNetworkDiagnostics() async {
     final result = await _interface.invokeMethod<Map<String, dynamic>>(
       method: CoreMethod.networkDiagnostics,
