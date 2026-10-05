@@ -14,6 +14,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:material_ui/material_ui.dart';
 
+const safeModeBuild = bool.fromEnvironment('SAFE_MODE');
 const appName = 'FlClash for oixCloud';
 const appHelperService = 'FlClashHelperService';
 const coreManifestName = 'manifest.json';
@@ -23,7 +24,7 @@ const packageName = 'com.oixcloud.clash';
 const legacyPackageName = 'com.follow.clash';
 const identityMigrationMarkerName = '.identity-migrated-from-com.follow.clash';
 const releaseRepository = 'pickrui/FlClash';
-final unixSocketPath = '/tmp/FlClashSocket_${Random().nextInt(10000)}.sock';
+final unixSocketPath = '/tmp/FlClashSocket_${_randomPipeId()}.sock';
 final windowsPipeName = '\\\\.\\pipe\\FlClashCore_${_randomPipeId()}';
 const helperPort = 47890;
 const helperProtocolVersionHeader = 'x-flclash-helper-protocol';

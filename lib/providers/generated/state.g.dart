@@ -187,7 +187,7 @@ final class UpdateParamsProvider
   }
 }
 
-String _$updateParamsHash() => r'fbb9c8ba64ac5b608e213366d7fa8e710479f251';
+String _$updateParamsHash() => r'45b92d60dfa8939ecd21352c4c3a8f0eebdf12c2';
 
 @ProviderFor(suspend)
 final suspendProvider = SuspendProvider._();
@@ -268,7 +268,7 @@ final class ProxyStateProvider
   }
 }
 
-String _$proxyStateHash() => r'1a09e1d756d64c9d3f6a7ebdb66364d5c898a63d';
+String _$proxyStateHash() => r'8ea9a6d176d46966a9e5e790e2613b3d79df469e';
 
 @ProviderFor(trayState)
 final trayStateProvider = TrayStateProvider._();
@@ -1805,7 +1805,7 @@ final class AutoSetSystemDnsStateProvider
 }
 
 String _$autoSetSystemDnsStateHash() =>
-    r'e105d85957c2482ea02808a4a51eb9cf29af3ea1';
+    r'6985b471f403f7f7b50bf77657a4227cb8b49f73';
 
 @ProviderFor(needUpdateGroups)
 final needUpdateGroupsProvider = NeedUpdateGroupsProvider._();

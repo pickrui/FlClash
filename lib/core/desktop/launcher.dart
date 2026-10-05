@@ -39,6 +39,11 @@ final class DirectCoreLauncher implements CoreProcessLauncher {
     required String sessionId,
     required String address,
   }) async {
+    if (safeModeBuild &&
+        !Platform.isWindows &&
+        (await FileStat.stat(corePath)).mode & 0xC00 != 0) {
+      throw StateError('SAFE_MODE requires a Core without setuid or setgid');
+    }
     final process = await _startProcess(corePath, [address]);
     process.stdout.listen((_) {});
     process.stderr

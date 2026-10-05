@@ -174,7 +174,9 @@ class Tray {
           ),
           isTemplate: system.isMacOS,
         ),
-        toolTip: appName,
+        toolTip: safeModeBuild
+            ? appLocalizations.safeModeAppTitle(appName)
+            : appName,
         menu: menuItems,
       ),
     );

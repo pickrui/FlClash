@@ -1070,5 +1070,7 @@
   "overwriteIssueGroupLoop": "プロキシグループが循環参照しています：{path}",
   "invalidPolicy": "{target} は無効なポリシーです",
   "invalidRuleSet": "{ruleSet} は無効なルールセットです",
-  "invalidSubRule": "{subRule} は無効な SUB_RULE です"
+  "invalidSubRule": "{subRule} は無効な SUB_RULE です",
+  "safeMode": "セーフモード",
+  "safeModeAppTitle": "{appName}（セーフモード）"
 }

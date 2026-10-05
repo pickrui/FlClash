@@ -42,12 +42,12 @@ class Window implements WindowPort {
   }) async {
     await ensureSingleInstance();
     if (!system.isMacOS) unawaited(_startWakeupServer());
-    if (system.isWindows) {
+    if (system.isWindows && !safeModeBuild) {
       for (final scheme in protocolSchemes) {
         protocol.register(scheme);
       }
     }
-    if (system.isLinux) {
+    if (system.isLinux && !safeModeBuild) {
       unawaited(protocol.registerLinux(protocolSchemes));
     }
     await windowManager.ensureInitialized();
@@ -56,6 +56,9 @@ class Window implements WindowPort {
       _supportsPosition = await windowManager.isPositionSupported();
     }
     final WindowOptions windowOptions = WindowOptions(
+      title: safeModeBuild
+          ? appLocalizations.safeModeAppTitle(appName)
+          : appName,
       size: props.size,
       minimumSize: const Size(380, 400),
     );

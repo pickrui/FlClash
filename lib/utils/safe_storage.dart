@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/common/durable_file.dart';
 import 'package:fl_clash/common/path.dart';
 import 'package:flutter/foundation.dart';
@@ -38,6 +39,7 @@ bool shouldReadLegacyMacStorage({
 }
 
 class SafeStorage {
+  static final _sessionValues = <String, String>{};
   static const _secureStorage = FlutterSecureStorage();
 
   /// Windows always uses its DPAPI file; Linux uses a private plain file only
@@ -147,6 +149,13 @@ class SafeStorage {
     final state = _states.putIfAbsent(key, _StorageMutationState.new);
     final revision = state.revision;
     await state.pending;
+    if (safeModeBuild) {
+      final value = _sessionValues[key];
+      return identical(state.revision, revision) &&
+              (isValid?.call(value) ?? true)
+          ? value
+          : null;
+    }
     final prefs = await SharedPreferences.getInstance();
     if (retry) {
       await prefs.reload();
@@ -239,6 +248,10 @@ class SafeStorage {
   }
 
   static Future<void> _write(String key, String value) async {
+    if (safeModeBuild) {
+      _sessionValues[key] = value;
+      return;
+    }
     final prefs = await SharedPreferences.getInstance();
     if (_isMacOS) {
       await _writeFallback(prefs, key, value, _migrationKey(key));
@@ -256,6 +269,10 @@ class SafeStorage {
   }
 
   static Future<void> _delete(String key) async {
+    if (safeModeBuild) {
+      _sessionValues.remove(key);
+      return;
+    }
     final prefs = await SharedPreferences.getInstance();
     if (!await prefs.setBool(_deletionKey(key), true) ||
         prefs.getBool(_deletionKey(key)) != true) {

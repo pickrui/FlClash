@@ -21,6 +21,19 @@ class AppPath {
   RandomAccessFile? _legacyDataLock;
 
   AppPath._internal() {
+    if (safeModeBuild) {
+      final home = Directory.systemTemp.createTemp('flclash-safe-');
+      _completeWith(dataDir, home);
+      _completeWith(
+        tempDir,
+        home.then((dir) => Directory(join(dir.path, 'tmp')).create()),
+      );
+      _completeWith(
+        downloadDir,
+        home.then((dir) => Directory(join(dir.path, 'downloads')).create()),
+      );
+      return;
+    }
     _completeWith(dataDir, getApplicationSupportDirectory());
     _completeWith(tempDir, getTemporaryDirectory());
     _completeWith(
@@ -77,7 +90,7 @@ class AppPath {
   }
 
   Future<bool> migrateLegacyApplicationSupportData() async {
-    if (!system.isDesktop) return false;
+    if (safeModeBuild || !system.isDesktop) return false;
     if (_legacyDataLock != null) return false;
     final currentPath = await homeDirPath;
     final legacyPath = legacyApplicationSupportPathFor(

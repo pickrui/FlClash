@@ -1070,5 +1070,7 @@
   "overwriteIssueGroupLoop": "策略组之间存在循环引用：{path}",
   "invalidPolicy": "{target} 是一个无效的策略",
   "invalidRuleSet": "{ruleSet} 不是有效的规则集",
-  "invalidSubRule": "{subRule} 是一个无效的SUB_RULE"
+  "invalidSubRule": "{subRule} 是一个无效的SUB_RULE",
+  "safeMode": "安全模式",
+  "safeModeAppTitle": "{appName}（安全模式）"
 }

@@ -61,6 +61,7 @@ class GlobalState {
   }
 
   late final _listeners = ListenerStateScheduler((running) async {
+    if (safeModeBuild) return;
     if (coreController.isCompleted) {
       if (running) {
         if (!await coreController.startListener()) {

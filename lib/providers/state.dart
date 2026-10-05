@@ -92,20 +92,24 @@ UpdateParams updateParams(Ref ref) {
   return ref.watch(
     patchClashConfigProvider.select(
       (state) => UpdateParams(
-        tun: state.tun.getRealTun(routeMode),
-        allowLan: system.isDocker || state.allowLan,
+        tun: safeModeBuild
+            ? state.tun.copyWith(enable: false)
+            : state.tun.getRealTun(routeMode),
+        allowLan: !safeModeBuild && (system.isDocker || state.allowLan),
         findProcessMode: state.findProcessMode,
         mode: state.mode,
         logLevel: state.logLevel,
         ipv6: state.ipv6,
         tcpConcurrent: state.tcpConcurrent,
-        externalController: resolveExternalController(
-          state.externalController,
-          state.externalControllerAddress,
-        ),
+        externalController: safeModeBuild
+            ? ''
+            : resolveExternalController(
+                state.externalController,
+                state.externalControllerAddress,
+              ),
         secret: resolveExternalControllerSecret(state.secret),
         unifiedDelay: state.unifiedDelay,
-        mixedPort: state.mixedPort,
+        mixedPort: safeModeBuild ? 0 : state.mixedPort,
         geoXUrl: state.geoXUrl.toJson().cast<String, String>(),
         geoAutoUpdate: state.geoAutoUpdate,
         geoUpdateInterval: normalizeGeoUpdateInterval(state.geoUpdateInterval),
@@ -139,7 +143,7 @@ ProxyState proxyState(Ref ref) {
   );
   return ProxyState(
     isStart: isStart && !ref.watch(suspendProvider),
-    systemProxy: vm2.a && !authenticated,
+    systemProxy: !safeModeBuild && vm2.a && !authenticated,
     bassDomain: vm2.b,
     port: mixedPort,
   );
@@ -519,6 +523,7 @@ Brightness currentBrightness(Ref ref) {
 
 @riverpod
 VM2<bool, bool> autoSetSystemDnsState(Ref ref) {
+  if (safeModeBuild) return const VM2(false, false);
   final isStart = ref.watch(runTimeProvider.select((state) => state != null));
   final realTunEnable = ref.watch(realTunEnableProvider);
   final autoSetSystemDns = ref.watch(

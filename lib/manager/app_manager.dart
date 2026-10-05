@@ -70,7 +70,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
       );
     }
     ref.listenManual(initProvider, (_, ready) {
-      if (ready) {
+      if (ready && !safeModeBuild) {
         _appUpdates.start();
         _startProfileUpdates();
       } else {
@@ -79,7 +79,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
       }
     }, fireImmediately: true);
     ref.listenManual(checkIpProvider, (prev, next) {
-      if (prev != next && next.a && next.c) {
+      if (!safeModeBuild && prev != next && next.a && next.c) {
         ref.read(networkDetectionProvider.notifier).startCheck();
       }
     });
@@ -195,6 +195,13 @@ class AppEnvManager extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (safeModeBuild) {
+      return Banner(
+        message: context.appLocalizations.safeMode,
+        location: BannerLocation.topEnd,
+        child: child,
+      );
+    }
     if (kDebugMode) {
       if (globalState.isPre) {
         return Banner(

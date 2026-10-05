@@ -61,6 +61,7 @@ class System {
   }
 
   Future<bool> checkIsAdmin() async {
+    if (safeModeBuild) return false;
     final corePath = appPath.corePath;
     if (system.isWindows) {
       return await windowsHelperClient.readiness() == HelperReadiness.ready;
@@ -87,7 +88,7 @@ class System {
   }
 
   Future<AuthorizeCode> authorizeCore() async {
-    if (system.isAndroid) {
+    if (safeModeBuild || system.isAndroid) {
       return AuthorizeCode.error;
     }
     final corePath = appPath.corePath;
@@ -262,6 +263,7 @@ class Windows {
   }
 
   Future<AuthorizeCode> registerService() async {
+    if (safeModeBuild) return AuthorizeCode.error;
     final readiness = await windowsHelperClient.readiness();
     switch (readiness) {
       case HelperReadiness.ready:
@@ -318,4 +320,4 @@ class MacOS extends MacosDnsController {
   }
 }
 
-final macOS = system.isMacOS ? MacOS() : null;
+final macOS = system.isMacOS && !safeModeBuild ? MacOS() : null;

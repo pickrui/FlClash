@@ -33,6 +33,7 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
   void initState() {
     super.initState();
     _owner = ++_ownerGeneration;
+    if (safeModeBuild) return;
     try {
       _eventSubscription = hotKeyEvents().listen(
         (id) {
@@ -74,7 +75,7 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
   Future<void> _updateHotKeys({
     required List<HotKeyAction> hotKeyActions,
   }) async {
-    if (_owner != _ownerGeneration) return;
+    if (safeModeBuild || _owner != _ownerGeneration) return;
     try {
       final failures = await setHotKeys(
         specs: [

@@ -1070,5 +1070,7 @@
   "overwriteIssueGroupLoop": "Группы прокси ссылаются друг на друга по кругу: {path}",
   "invalidPolicy": "{target} — недопустимая политика",
   "invalidRuleSet": "{ruleSet} — недопустимый набор правил",
-  "invalidSubRule": "{subRule} — недопустимый SUB_RULE"
+  "invalidSubRule": "{subRule} — недопустимый SUB_RULE",
+  "safeMode": "Безопасный режим",
+  "safeModeAppTitle": "{appName} (Безопасный режим)"
 }

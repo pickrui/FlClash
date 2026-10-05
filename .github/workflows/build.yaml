@@ -134,6 +134,9 @@ jobs:
           FLCLASH_TEST_ROUTING_CHECKER: ${{ runner.temp }}/flclash-routing-checker
         run: flutter test --reporter expanded test plugins/proxy/test/proxy_test.dart plugins/wifi_ssid/test plugins/tray/test
 
+      - name: Verify isolated desktop safe mode
+        run: flutter test --dart-define=SAFE_MODE=true test/safe_mode test/common/safe_mode_profile_test.dart
+
   go-test:
     name: Go core tests
     runs-on: ubuntu-latest

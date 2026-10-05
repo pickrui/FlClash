@@ -9223,6 +9223,21 @@ class AppLocalizations {
       args: [subRule],
     );
   }
+
+  /// `Safe mode`
+  String get safeMode {
+    return Intl.message('Safe mode', name: 'safeMode', desc: '', args: []);
+  }
+
+  /// `{appName} (Safe mode)`
+  String safeModeAppTitle(Object appName) {
+    return Intl.message(
+      '$appName (Safe mode)',
+      name: 'safeModeAppTitle',
+      desc: '',
+      args: [appName],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -181,7 +181,9 @@ class ApplicationState extends ConsumerState<Application> {
             );
           },
           scrollBehavior: BaseScrollBehavior(),
-          title: appName,
+          title: safeModeBuild
+              ? appLocalizations.safeModeAppTitle(appName)
+              : appName,
           locale: utils.getLocaleForString(locale),
           supportedLocales: AppLocalizations.delegate.supportedLocales,
           themeMode: themeProps.themeMode,

@@ -650,7 +650,7 @@ extension SetupControllerExt on AppController {
   }) async {
     final profileId = setupState.profileId;
     if (profileId == null) {
-      return {};
+      return safeModeBuild ? safeModeProfile({}) : {};
     }
     final defaultUA = globalState.packageInfo.ua;
     final networkVM2 = _ref.read(

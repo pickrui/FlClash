@@ -88,6 +88,35 @@ Future<List<Group>> _toGroupsTask(ComputeGroupsState state) async {
   );
 }
 
+Map<String, dynamic> safeModeProfile(Map<String, dynamic> config) => {
+  ...config,
+  for (final key in [
+    'port',
+    'socks-port',
+    'mixed-port',
+    'redir-port',
+    'tproxy-port',
+  ])
+    key: 0,
+  'allow-lan': false,
+  'bind-address': '127.0.0.1',
+  for (final key in [
+    'external-controller',
+    'external-controller-tls',
+    'external-controller-unix',
+    'external-controller-pipe',
+  ])
+    key: '',
+  'tun': {if (config['tun'] is Map) ...config['tun'] as Map, 'enable': false},
+  'dns': {if (config['dns'] is Map) ...config['dns'] as Map, 'listen': ''},
+  'ntp': {
+    if (config['ntp'] is Map) ...config['ntp'] as Map,
+    'write-to-system': false,
+  },
+  'listeners': <dynamic>[],
+  'tunnels': <dynamic>[],
+};
+
 Future<Map<String, dynamic>> makeRealProfileTask(
   MakeRealProfileState data,
 ) async {
@@ -462,7 +491,9 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
     if (blockQuic) 'AND,((NETWORK,udp),(DST-PORT,443)),REJECT',
     ...rules,
   ];
-  return Map<String, dynamic>.from(rawConfig);
+  return safeModeBuild
+      ? safeModeProfile(rawConfig)
+      : Map<String, dynamic>.from(rawConfig);
 }
 
 List<String> _applyTailscaleNetworks(

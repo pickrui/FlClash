@@ -112,6 +112,10 @@ extension CoreControllerExt on AppController {
   }
 
   Future<AuthorizeCode> _requestAdmin(bool enableTun) async {
+    if (safeModeBuild) {
+      _ref.read(realTunEnableProvider.notifier).value = false;
+      return AuthorizeCode.none;
+    }
     final realTunEnable = _ref.read(realTunEnableProvider);
     if (enableTun != realTunEnable && realTunEnable == false) {
       final code = await system.authorizeCore();

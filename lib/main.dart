@@ -36,6 +36,10 @@ import 'common/common.dart';
 Future<void> main(List<String> arguments) async {
   try {
     FlClashWidgetsBinding.ensureInitialized();
+    if (safeModeBuild && !system.isDesktop) {
+      throw UnsupportedError('SAFE_MODE currently requires a desktop build');
+    }
+    initializeSafeModePreferences();
     await RustLib.init();
     registerFetchManagedConfig(CloudApiService().fetchManagedConfig);
     cloudStorePageBuilder = (_) => const CloudStorePage();

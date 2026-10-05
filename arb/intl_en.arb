@@ -1070,5 +1070,7 @@
   "overwriteIssueGroupLoop": "Proxy groups reference each other in a loop: {path}",
   "invalidPolicy": "{target} is an invalid policy",
   "invalidRuleSet": "{ruleSet} is an invalid rule set",
-  "invalidSubRule": "{subRule} is an invalid SUB_RULE"
+  "invalidSubRule": "{subRule} is an invalid SUB_RULE",
+  "safeMode": "Safe mode",
+  "safeModeAppTitle": "{appName} (Safe mode)"
 }

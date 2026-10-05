@@ -10,6 +10,7 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/services/config_key_store.dart';
 import 'package:fl_clash/services/durable_config_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
 
 import 'boot_record.dart';
 import 'constant.dart';
@@ -19,6 +20,13 @@ import 'path.dart';
 final durableConfigStore = DurableConfigStore(
   identityProvider: ConfigKeyStore.identity,
 );
+
+void initializeSafeModePreferences() {
+  if (safeModeBuild) {
+    SharedPreferencesStorePlatform.instance =
+        InMemorySharedPreferencesStore.empty();
+  }
+}
 
 class Preferences {
   static Preferences? _instance;
