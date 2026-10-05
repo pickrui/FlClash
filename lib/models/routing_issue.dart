@@ -114,7 +114,8 @@ RoutingIssues inspectCustomRouting(
       else if ((groupNames[group.name] ?? 0) > 1 ||
           proxies.contains(group.name) ||
           rawGroups.contains(group.name) ||
-          providers.contains(group.name))
+          (profile.overwriteType == OverwriteType.merge &&
+              providers.contains(group.name)))
         RoutingIssue(RoutingIssueKind.duplicateName, [group.name]),
       if ((group.proxies?.isEmpty ?? true) &&
           (group.use?.isEmpty ?? true) &&

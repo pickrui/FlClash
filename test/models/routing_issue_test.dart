@@ -49,6 +49,25 @@ void main() {
     },
   );
 
+  test('provider names are occupied only for personal merged groups', () {
+    final candidate = profile.copyWith(
+      customProxyGroups: const [
+        ProxyGroup(name: 'Shared', type: GroupType.Selector, use: ['Shared']),
+      ],
+    );
+    final raw = <String, dynamic>{
+      'proxy-providers': {'Shared': {}},
+    };
+    expect(inspectCustomRouting(candidate, raw: raw).groups, isEmpty);
+    expect(
+      inspectCustomRouting(
+        candidate.copyWith(overwriteType: OverwriteType.merge),
+        raw: raw,
+      ).groups[0]!.single.kind,
+      RoutingIssueKind.duplicateName,
+    );
+  });
+
   test('reports missing references only after source data is available', () {
     final candidate = profile.copyWith(
       customProxyGroups: const [
