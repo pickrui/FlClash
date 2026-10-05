@@ -67,7 +67,7 @@ char *jni_get_string(JNIEnv *env, jstring str) {
     return content;
 }
 
-jstring jni_new_string(JNIEnv *env, const char *str) {
+jbyteArray jni_new_bytes(JNIEnv *env, const char *str) {
     if (str == nullptr) {
         str = "";
     }
@@ -78,11 +78,15 @@ jstring jni_new_string(JNIEnv *env, const char *str) {
     }
     env->SetByteArrayRegion(array, 0, length, reinterpret_cast<const jbyte *>(str));
     if (jni_clear_exception(env)) {
-        // Calling NewObject with an exception still pending is undefined, and
-        // the array it would read from was not filled in anyway.
         env->DeleteLocalRef(array);
         return nullptr;
     }
+    return array;
+}
+
+jstring jni_new_string(JNIEnv *env, const char *str) {
+    const auto array = jni_new_bytes(env, str);
+    if (array == nullptr) return nullptr;
     const auto result = reinterpret_cast<jstring>(env->NewObject(c_string, m_new_string, array));
     const auto failed = jni_clear_exception(env);
     env->DeleteLocalRef(array);

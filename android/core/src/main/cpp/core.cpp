@@ -137,7 +137,7 @@ call_tun_interface_resolve_process_impl(void *tun_interface, const int protocol,
 static void call_invoke_interface_result_impl(void *invoke_interface, const char *data) {
     if (invoke_interface == nullptr) return;
     ATTACH_JNI();
-    const auto value = new_string(data);
+    const auto value = new_bytes(data);
     if (value == nullptr) return;
     env->CallVoidMethod(static_cast<jobject>(invoke_interface),
                         m_invoke_interface_result, value);
@@ -163,7 +163,7 @@ JNI_OnLoad(JavaVM *vm, void *) {
     m_tun_interface_resolve_process = find_method(c_tun_interface, "resolverProcess",
                                                   "(ILjava/lang/String;Ljava/lang/String;I)Ljava/lang/String;");
     m_invoke_interface_result = find_method(c_invoke_interface, "onResult",
-                                            "(Ljava/lang/String;)V");
+                                            "([B)V");
 
 
     protect_func = &call_tun_interface_protect_impl;

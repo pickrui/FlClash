@@ -113,5 +113,16 @@ int main() {
     reset();
     assert(jni_new_string(&env, nullptr) == &string_value && length == 0);
     assert(!pending && deleted == 1);
-    puts("JNI string copy, exception cleanup, and local reference tests passed");
+    for (auto fault : {allocate_array, write_array}) {
+        reset(fault);
+        assert(jni_new_bytes(&env, "test") == nullptr && !pending);
+        assert(deleted == (fault == write_array ? 1 : 0) && constructed == 0);
+    }
+    reset();
+    const char *utf8 = "UTF-8: \xe4\xb8\xad\xf0\x9f\x98\x80";
+    assert(jni_new_bytes(&env, utf8) == &bytes);
+    assert(strcmp(payload, utf8) == 0 && constructed == 0 && deleted == 0);
+    reset();
+    assert(jni_new_bytes(&env, nullptr) == &bytes && length == 0 && !pending);
+    puts("JNI string/byte copy, exception cleanup, and local reference tests passed");
 }

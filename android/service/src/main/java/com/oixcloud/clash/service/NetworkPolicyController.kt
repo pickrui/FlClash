@@ -46,7 +46,7 @@ internal object NetworkPolicyController {
     private suspend fun setCoreNetworkExcluded(excluded: Boolean) = withTimeout(5_000) {
         suspendCancellableCoroutine<Unit> { continuation ->
             Core.invokeMethod("{\"method\":\"setNetworkExcluded\",\"arguments\":$excluded}") { result ->
-                val response = runCatching { JsonParser.parseString(result).asJsonObject }.getOrNull()
+                val response = runCatching { JsonParser.parseString(result?.decodeToString()).asJsonObject }.getOrNull()
                 val ok = response?.get("result")?.toString() == "true" && response.get("error") == null
                 val failure = if (ok) null else IllegalStateException("Core rejected Wi-Fi policy")
                 if (continuation.isActive) {

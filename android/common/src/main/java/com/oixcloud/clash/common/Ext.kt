@@ -189,14 +189,16 @@ fun String.chunkedForAidl(
     charset: Charset = Charsets.UTF_8,
     maxTotalBytes: Int = Int.MAX_VALUE,
 ): List<ByteArray> {
-    val allBytes = toByteArray(charset)
-    val total = allBytes.size
+    return toByteArray(charset).chunkedForAidl(maxTotalBytes)
+}
+
+fun ByteArray.chunkedForAidl(maxTotalBytes: Int = Int.MAX_VALUE): List<ByteArray> {
+    val total = size
     require(total <= maxTotalBytes) { "AIDL message exceeds byte limit" }
-    if (total == 0) {
-        return listOf(byteArrayOf())
+    if (total <= 100 * 1024) {
+        return listOf(this)
     }
     val maxBytes = when {
-        total <= 100 * 1024 -> total
         total <= 1024 * 1024 -> 64 * 1024
         total <= 10 * 1024 * 1024 -> 128 * 1024
         else -> 256 * 1024
@@ -206,7 +208,7 @@ fun String.chunkedForAidl(
     var index = 0
     while (index < total) {
         val end = minOf(index + maxBytes, total)
-        result.add(allBytes.copyOfRange(index, end))
+        result.add(copyOfRange(index, end))
         index = end
     }
     return result

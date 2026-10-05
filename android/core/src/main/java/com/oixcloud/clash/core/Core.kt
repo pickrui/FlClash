@@ -78,12 +78,12 @@ data object Core {
 
     fun invokeMethod(
         data: String,
-        cb: (result: String?) -> Unit
+        cb: (result: ByteArray?) -> Unit
     ) {
         invokeMethod(
             data,
             object : InvokeInterface {
-                override fun onResult(result: String?) {
+                override fun onResult(result: ByteArray?) {
                     cb(result)
                 }
             },
@@ -98,8 +98,8 @@ data object Core {
         when (cb != null) {
             true -> setEventListener(
                 object : InvokeInterface {
-                    override fun onResult(result: String?) {
-                        cb(result)
+                    override fun onResult(result: ByteArray?) {
+                        cb(result?.decodeToString())
                     }
                 },
             )
@@ -117,8 +117,8 @@ data object Core {
             initParamsString,
             setupParamsString,
             object : InvokeInterface {
-                override fun onResult(result: String?) {
-                    cb(result)
+                override fun onResult(result: ByteArray?) {
+                    cb(result?.decodeToString())
                 }
             },
         )

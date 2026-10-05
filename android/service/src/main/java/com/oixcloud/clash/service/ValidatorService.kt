@@ -68,7 +68,7 @@ class ValidatorService : Service(),
                     return@launch
                 }
                 Core.invokeMethod(isolatedInitAction) { initResult ->
-                    if (!isSuccessfulInit(initResult)) {
+                    if (!isSuccessfulInit(initResult?.decodeToString())) {
                         deliverAndFinish(
                             validationError(action, "validator initialization failed"),
                             callback,
@@ -143,7 +143,7 @@ class ValidatorService : Service(),
         validatorHome = null
     }
 
-    private fun validationError(action: String, message: String): String {
+    private fun validationError(action: String, message: String): ByteArray {
         return runCatching {
             val id = JsonParser.parseString(action).asJsonObject
                 .getAsJsonPrimitive("id")?.asString
@@ -155,10 +155,10 @@ class ValidatorService : Service(),
             JsonObject().apply {
                 addProperty("result", message)
             }.toString()
-        }
+        }.toByteArray()
     }
 
-    private fun deliverAndFinish(result: String, callback: ICallbackInterface) {
+    private fun deliverAndFinish(result: ByteArray, callback: ICallbackInterface) {
         launch {
             runCatching {
                 val chunks = result.chunkedForAidl(

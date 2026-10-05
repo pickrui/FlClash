@@ -14,6 +14,8 @@ struct scoped_jni {
 
 extern void initialize_jni(JavaVM *vm, JNIEnv *env);
 
+extern jbyteArray jni_new_bytes(JNIEnv *env, const char *str);
+
 extern jstring jni_new_string(JNIEnv *env, const char *str);
 
 extern char *jni_get_string(JNIEnv *env, jstring str);
@@ -37,3 +39,5 @@ extern void release_string( char **str);
 #define del_global(obj) env->DeleteGlobalRef(obj)
 #define get_string(jstr) jni_get_string(env, jstr)
 #define new_string(cstr) jni_new_string(env, cstr)
+
+#define new_bytes(cstr) jni_new_bytes(env, cstr)
