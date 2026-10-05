@@ -179,4 +179,37 @@ void main() {
       expect((await db.iconRecordsDao.query('example.test')).length, 1000);
     },
   );
+
+  for (final newGroupFirst in [false, true]) {
+    test('renaming a group can reuse its old name: $newGroupFirst', () async {
+      final db = Database(NativeDatabase.memory());
+      addTearDown(db.close);
+      await db.putProfile(sample);
+      final original = await db.proxyGroupsDao.query(1).getSingle();
+      final renamed = original.copyWith(name: 'Renamed');
+      final replacement = sample.customProxyGroups.single.copyWith(
+        proxies: ['DIRECT'],
+      );
+      final groups = newGroupFirst
+          ? [replacement, renamed]
+          : [renamed, replacement];
+
+      await db.proxyGroupsDao.setAll(1, groups);
+
+      final saved = await db.proxyGroupsDao.query(1).get();
+      expect(
+        saved.map((group) => group.name),
+        groups.map((group) => group.name),
+      );
+      expect(
+        saved.singleWhere((group) => group.name == 'Renamed').id,
+        original.id,
+      );
+      expect(saved.map((group) => group.id).toSet(), hasLength(2));
+      expect(
+        saved.map((group) => group.proxies),
+        groups.map((group) => group.proxies),
+      );
+    });
+  }
 }

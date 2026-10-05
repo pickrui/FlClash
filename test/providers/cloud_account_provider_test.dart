@@ -388,6 +388,96 @@ void main() {
     expect(container.read(cloudAccountProvider).error, 'Network unavailable');
   });
 
+  for (final duringCache in [false, true]) {
+    test(
+      'an account reply is discarded when its session changes during caching: $duringCache',
+      () async {
+        TestWidgetsFlutterBinding.ensureInitialized();
+        SharedPreferences.setMockInitialValues({});
+        final api = CloudApiService()..setToken('old-session');
+        addTearDown(() => api.setToken(null));
+        final notifier = _StaleRefreshNotifier();
+        final container = ProviderContainer(
+          overrides: [cloudAccountProvider.overrideWith(() => notifier)],
+        );
+        addTearDown(container.dispose);
+        container.read(cloudAccountProvider);
+        final refreshing = notifier.refreshProfile(force: true);
+        notifier.pending.complete((
+          profile: _managedProfile,
+          announcement: null,
+          tokenClient: null,
+        ));
+        if (duringCache) {
+          scheduleMicrotask(() => api.setToken('new-session'));
+        } else {
+          api.setToken('new-session');
+        }
+        await refreshing;
+
+        final state = container.read(cloudAccountProvider);
+        expect(state.profile, isNull);
+        expect(state.error, isNull);
+        expect(state.isRefreshing, isFalse);
+        expect(
+          (await SharedPreferences.getInstance()).getString('cloud_profile'),
+          isNull,
+        );
+      },
+    );
+  }
+
+  test(
+    'an expired token still clears the account after API invalidation',
+    () async {
+      final api = CloudApiService()..setToken('expired-session');
+      addTearDown(() => api.setToken(null));
+      final notifier = _StaleRefreshNotifier();
+      final container = ProviderContainer(
+        overrides: [cloudAccountProvider.overrideWith(() => notifier)],
+      );
+      addTearDown(container.dispose);
+      container.read(cloudAccountProvider);
+      final refreshing = notifier.refreshProfile(force: true);
+      api.setToken(null);
+      notifier.pending.completeError(const CloudApiException('Unauthorized'));
+      await refreshing;
+      expect(notifier.unauthorizedCalls, 1);
+      expect(container.read(cloudAccountProvider).isLoggedIn, isFalse);
+    },
+  );
+
+  for (final fails in [false, true]) {
+    test(
+      'disposing an account during refresh ignores its result: $fails',
+      () async {
+        TestWidgetsFlutterBinding.ensureInitialized();
+        SharedPreferences.setMockInitialValues({});
+        final notifier = _StaleRefreshNotifier();
+        final container = ProviderContainer(
+          overrides: [cloudAccountProvider.overrideWith(() => notifier)],
+        );
+        container.read(cloudAccountProvider);
+        final refreshing = notifier.refreshProfile(force: true);
+        container.dispose();
+        if (fails) {
+          notifier.pending.completeError(const CloudApiException('offline'));
+        } else {
+          notifier.pending.complete((
+            profile: _managedProfile,
+            announcement: null,
+            tokenClient: null,
+          ));
+        }
+        await refreshing;
+        expect(
+          (await SharedPreferences.getInstance()).getString('cloud_profile'),
+          isNull,
+        );
+      },
+    );
+  }
+
   group('token issued to another client', () {
     late CloudApiService api;
 
@@ -621,6 +711,7 @@ class _SessionCleanupNotifier extends CloudAccountNotifier {
 class _StaleRefreshNotifier extends CloudAccountNotifier {
   var pending = Completer<CloudUserInfo>();
   var requests = 0;
+  var unauthorizedCalls = 0;
 
   @override
   CloudAccountState build() => const CloudAccountState(isLoggedIn: true);
@@ -630,4 +721,10 @@ class _StaleRefreshNotifier extends CloudAccountNotifier {
     requests++;
     return pending.future;
   };
+
+  @override
+  Future<void> handleUnauthorized() async {
+    unauthorizedCalls++;
+    state = const CloudAccountState();
+  }
 }

@@ -99,17 +99,29 @@ class ProxyGroupsDao extends DatabaseAccessor<Database>
 
   Future<void> replaceWithBatch(Batch batch, Profile profile) async {
     final previous = await query(profile.id).get();
+    final byId = {for (final group in previous) group.id: group};
+    final byName = <String, ProxyGroup>{};
+    for (final group in previous) {
+      byName.putIfAbsent(group.name, () => group);
+    }
+    final retainedIds = profile.customProxyGroups
+        .map((group) => group.id)
+        .whereType<int>()
+        .where(byId.containsKey)
+        .toSet();
+    final usedIds = <int>{};
     final keys = indexing.generateNKeys(profile.customProxyGroups.length);
     proxyGroups.setAll(
       batch,
       profile.customProxyGroups.mapIndexed((index, group) {
-        final old =
-            previous.firstWhereOrNull(
-              (item) => group.id != null && item.id == group.id,
-            ) ??
-            previous.firstWhereOrNull((item) => item.name == group.name);
+        var old = byId[group.id];
+        if (old == null) {
+          final named = byName[group.name];
+          if (named != null && !retainedIds.contains(named.id)) old = named;
+        }
+        final id = old != null && usedIds.add(old.id!) ? old.id! : snowflake.id;
         return group
-            .copyWith(id: old?.id ?? snowflake.id, profileId: profile.id)
+            .copyWith(id: id, profileId: profile.id)
             .toCompanion(profile.id, keys[index]);
       }),
       deleteFilter: (row) => row.profileId.equals(profile.id),

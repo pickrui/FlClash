@@ -26,7 +26,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.withLock
@@ -46,8 +48,11 @@ class RemoteService : Service(),
 
     private fun replaceEventForwarder(listener: IEventInterface?) {
         synchronized(eventLock) {
+            if (!isActive) return
             val previous = eventForwarder
             eventForwarder = null
+            previous?.events?.cancel()
+            previous?.job?.cancel()
             if (listener == null) {
                 Core.callSetEventListener(null)
             } else {
@@ -60,8 +65,6 @@ class RemoteService : Service(),
                 Core.callSetEventListener { events.trySend(it) }
                 eventForwarder = EventForwarder(events, job)
             }
-            previous?.events?.cancel()
-            previous?.job?.cancel()
         }
     }
 
@@ -308,6 +311,13 @@ class RemoteService : Service(),
 
     override fun onDestroy() {
         GlobalState.log("Remote service destroy")
-        super.onDestroy()
+        synchronized(eventLock) {
+            try {
+                if (eventForwarder != null) replaceEventForwarder(null)
+            } finally {
+                cancel()
+                super.onDestroy()
+            }
+        }
     }
 }

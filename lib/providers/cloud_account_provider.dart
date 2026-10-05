@@ -155,10 +155,13 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
 
   Future<void> _saveCache(
     CloudProfile profile,
-    CloudNotification? notification,
-  ) async {
+    CloudNotification? notification, {
+    bool Function()? isCurrent,
+  }) async {
     final prefs = await _safePrefs;
+    if (isCurrent?.call() == false) return;
     await prefs.setString('cloud_profile', jsonEncode(profile.toJson()));
+    if (isCurrent?.call() == false) return;
     if (notification != null) {
       await prefs.setString(
         'cloud_notification',
@@ -442,15 +445,20 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
       }
     }
 
+    final service = CloudApiService();
+    final revision = service.sessionRevision;
+    bool isCurrent() => ref.mounted && revision == service.sessionRevision;
     state = state.copyWith(isRefreshing: true, error: null);
     try {
       final userInfo = await userInfoRequest();
-      _lastRefreshTime = DateTime.now();
+      if (!isCurrent()) return;
       await _saveCache(
         userInfo.profile,
         userInfo.announcement ?? state.latestNotification,
+        isCurrent: isCurrent,
       );
-
+      if (!isCurrent()) return;
+      _lastRefreshTime = DateTime.now();
       state = state.copyWith(
         profile: userInfo.profile,
         latestNotification: userInfo.announcement ?? state.latestNotification,
@@ -458,8 +466,10 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
       if (!_canFetchManagedConfig) {
         await _clearManagedProfiles();
       }
+      if (!isCurrent()) return;
       await _adoptOwnClientToken(userInfo.tokenClient);
     } catch (e) {
+      if (!ref.mounted) return;
       if (CloudApiException.isHandledUnauthorized(e)) {
         return;
       }
@@ -468,6 +478,7 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
         await handleUnauthorized();
         return;
       }
+      if (!isCurrent()) return;
       state = state.copyWith(error: CloudApiException.clean(e));
     } finally {
       // refreshProfile shares one in-flight request, so this run owns the flag

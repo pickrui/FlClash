@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:fl_clash/common/periodic_task_runner.dart';
 import 'package:fl_clash/common/print.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/widgets/inherited.dart';
@@ -26,7 +27,13 @@ bool _isForegroundState(AppLifecycleState? state) => switch (state) {
 
 mixin ActivePollingMixin<T extends StatefulWidget>
     on State<T>, WidgetsBindingObserver {
-  Timer? _pollTimer;
+  late final _pollRunner = PeriodicTaskRunner(
+    interval: pollInterval,
+    onError: (error, _) => commonPrint.log(
+      '$runtimeType poll error: $error',
+      logLevel: LogLevel.warning,
+    ),
+  );
   bool _isForeground = false;
   bool _isPageActive = true;
   bool _isPolling = false;
@@ -85,14 +92,21 @@ mixin ActivePollingMixin<T extends StatefulWidget>
       return;
     }
     _isPolling = true;
-    unawaited(_runPoll(++_pollGeneration));
+    final generation = ++_pollGeneration;
+    unawaited(
+      _pollRunner.start([() => poll(() => _isCurrentPoll(generation))]),
+    );
   }
 
   void stopPolling() {
     _isPolling = false;
     _pollGeneration++;
-    _pollTimer?.cancel();
-    _pollTimer = null;
+    _pollRunner.stop();
+  }
+
+  void restartPolling() {
+    stopPolling();
+    _syncPolling();
   }
 
   void _syncPolling() {
@@ -105,28 +119,4 @@ mixin ActivePollingMixin<T extends StatefulWidget>
 
   bool _isCurrentPoll(int generation) =>
       canPoll && _isPolling && generation == _pollGeneration;
-
-  void _schedulePoll(int generation) {
-    _pollTimer = Timer(pollInterval, () {
-      _pollTimer = null;
-      if (_isCurrentPoll(generation)) {
-        unawaited(_runPoll(generation));
-      }
-    });
-  }
-
-  Future<void> _runPoll(int generation) async {
-    try {
-      await poll(() => _isCurrentPoll(generation));
-    } catch (error) {
-      commonPrint.log(
-        '$runtimeType poll error: $error',
-        logLevel: LogLevel.warning,
-      );
-    } finally {
-      if (_isCurrentPoll(generation)) {
-        _schedulePoll(generation);
-      }
-    }
-  }
 }

@@ -32,9 +32,8 @@ class TailscaleNetworkPage extends ConsumerStatefulWidget {
       _TailscaleNetworkPageState();
 }
 
-class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
-  static const _pollInterval = Duration(seconds: 3);
-
+class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
+    with WidgetsBindingObserver, ActivePollingMixin<TailscaleNetworkPage> {
   /// Control keeps a login page open for days; the page stops waiting sooner.
   static const _loginWait = Duration(minutes: 5);
 
@@ -56,8 +55,13 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
   /// Cancelling or restarting a login ignores the results of the earlier one.
   int _loginAttempt = 0;
   bool _busy = false;
-  Timer? _timer;
-  bool _polling = false;
+  bool _removing = false;
+
+  @override
+  Duration get pollInterval => const Duration(seconds: 3);
+
+  @override
+  bool get canPoll => super.canPoll && !_removing && _saved != null;
 
   TailscaleAction get _action => ref.read(tailscaleActionProvider);
 
@@ -84,13 +88,11 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
       _hasSavedAuthKey = false;
     } else {
       unawaited(_loadSavedAuthKey(existing));
-      _startPolling();
     }
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
     _name.dispose();
     _hostname.dispose();
     _controlUrl.dispose();
@@ -118,33 +120,20 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
     if (mounted) setState(() => _hasSavedAuthKey = hasKey);
   }
 
-  void _startPolling() {
-    if (_timer != null) return;
-    unawaited(_poll());
-    _timer = Timer.periodic(_pollInterval, (_) => unawaited(_poll()));
-  }
-
-  void _stopPolling() {
-    _timer?.cancel();
-    _timer = null;
-  }
-
-  Future<void> _poll() async {
+  @override
+  Future<void> poll(PollGuard isCurrent) async {
     final saved = _saved;
-    if (_polling || saved == null) return;
-    _polling = true;
+    if (saved == null) return;
     final action = _action;
     TailscaleStatus? status;
     String? error;
     try {
       status = await action.status(saved);
     } catch (exception) {
-      if (!mounted) return;
+      if (!isCurrent()) return;
       error = _describeError(exception);
-    } finally {
-      _polling = false;
     }
-    if (!mounted) return;
+    if (!mounted || !isCurrent()) return;
     final l = context.appLocalizations;
     final startedAt = _loginStartedAt;
     final state = status?.state;
@@ -282,7 +271,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
         }
         _authKey.clear();
       });
-      _startPolling();
+      startPolling();
       return saved;
     } catch (error) {
       if (mounted) {
@@ -318,7 +307,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
         saved,
         cancelled: () => !mounted || attempt != _loginAttempt,
       );
-      if (mounted) unawaited(_poll());
+      if (mounted) restartPolling();
     } catch (error) {
       if (!mounted || attempt != _loginAttempt) return;
       setState(_endLogin);
@@ -345,7 +334,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
     } finally {
       if (mounted) {
         setState(() => _busy = false);
-        unawaited(_poll());
+        restartPolling();
       }
     }
   }
@@ -363,14 +352,16 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage> {
       confirmText: l.remove,
     );
     if (confirmed != true || !mounted) return;
-    _stopPolling();
+    _removing = true;
+    stopPolling();
     setState(() => _busy = true);
     try {
       await action.removeNetwork(saved);
     } on TailscaleNetworkInUseException catch (error) {
       if (!mounted) return;
       setState(() => _busy = false);
-      _startPolling();
+      _removing = false;
+      startPolling();
       await _showError(_describeError(error), title: l.tip);
       return;
     } catch (error) {

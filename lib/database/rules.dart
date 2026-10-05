@@ -63,6 +63,10 @@ class RulesDao extends DatabaseAccessor<Database> with _$RulesDaoMixin {
                   row.scene.equalsValue(RuleScene.custom),
             ))
             .get();
+    final bySourceId = <int?, RawProfileRuleLink>{};
+    for (final link in links) {
+      bySourceId.putIfAbsent(link.sourceId, () => link);
+    }
     final keys = indexing.generateNKeys(profile.customRules.length);
     batch.deleteWhere(
       profileRuleLinks,
@@ -72,7 +76,7 @@ class RulesDao extends DatabaseAccessor<Database> with _$RulesDaoMixin {
     );
     for (var index = 0; index < profile.customRules.length; index++) {
       final rule = profile.customRules[index];
-      final old = links.firstWhereOrNull((link) => link.sourceId == rule.id);
+      final old = bySourceId[rule.id];
       final internalId = old?.ruleId ?? snowflake.id;
       batch.insertAllOnConflictUpdate(rules, [
         rule.copyWith(id: internalId).toCompanion(),

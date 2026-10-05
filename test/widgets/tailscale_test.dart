@@ -11,6 +11,7 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/tailscale.dart';
 import 'package:fl_clash/views/tailscale/network.dart';
 import 'package:fl_clash/views/tailscale/tailscale.dart';
+import 'package:fl_clash/widgets/inherited.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -73,8 +74,14 @@ Future<(FakeTailscaleBackend, ProviderContainer)> _pump(
 }
 
 Future<void> _unmount(WidgetTester tester) async {
-  // The pages poll on a timer that only disposal cancels.
   await tester.pumpWidget(const SizedBox());
+}
+
+void _setVisible(WidgetTester tester, bool visible) {
+  tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+  tester.binding.handleAppLifecycleStateChanged(
+    visible ? AppLifecycleState.resumed : AppLifecycleState.hidden,
+  );
 }
 
 void main() {
@@ -94,6 +101,100 @@ void main() {
     );
     expect(find.text('Home'), findsOneWidget);
     expect(find.text('Connected'), findsOneWidget);
+    await _unmount(tester);
+  });
+
+  testWidgets('the hidden list does not poll until it becomes active', (
+    tester,
+  ) async {
+    _setVisible(tester, true);
+    final active = ValueNotifier(false);
+    addTearDown(active.dispose);
+    final (backend, _) = await _pump(
+      tester,
+      ValueListenableBuilder<bool>(
+        valueListenable: active,
+        builder: (_, value, child) =>
+            PageActivityScope(isActive: value, child: child!),
+        child: const TailscaleView(),
+      ),
+      networks: const [_home],
+      status: _running,
+    );
+    var polls = 0;
+    backend.statusHandler = (_) async {
+      polls++;
+      return _running;
+    };
+    await tester.pump(const Duration(seconds: 10));
+    expect(polls, 0);
+    expect(find.text('Connected'), findsNothing);
+
+    active.value = true;
+    await tester.pump();
+    await tester.pump();
+    expect(polls, 1);
+    expect(find.text('Connected'), findsOneWidget);
+
+    _setVisible(tester, false);
+    await tester.pump(const Duration(seconds: 10));
+    expect(polls, 1);
+    _setVisible(tester, true);
+    await tester.pump();
+    expect(polls, 2);
+    await _unmount(tester);
+  });
+
+  testWidgets('hiding the list stops the remaining network status reads', (
+    tester,
+  ) async {
+    _setVisible(tester, true);
+    final (backend, _) = await _pump(
+      tester,
+      const TailscaleView(),
+      networks: const [
+        _home,
+        TailscaleNetwork(id: 'work', name: 'Work', stateId: 'work-state'),
+      ],
+    );
+    final reply = Completer<TailscaleStatus?>();
+    final calls = <String>[];
+    backend.statusHandler = (name) {
+      calls.add(name);
+      return reply.future;
+    };
+    await tester.pump(const Duration(seconds: 5));
+    expect(calls, ['Home']);
+    _setVisible(tester, false);
+    reply.complete(_running);
+    await tester.pump();
+    expect(calls, ['Home']);
+    expect(tester.takeException(), isNull);
+    await _unmount(tester);
+    _setVisible(tester, true);
+  });
+
+  testWidgets('network status pauses while hidden and refreshes on resume', (
+    tester,
+  ) async {
+    _setVisible(tester, true);
+    final (backend, _) = await _pump(
+      tester,
+      const TailscaleNetworkPage(networkId: 'home'),
+      networks: const [_home],
+      status: _running,
+    );
+    var polls = 0;
+    backend.statusHandler = (_) async {
+      polls++;
+      return _running;
+    };
+    _setVisible(tester, false);
+    await tester.pump(const Duration(seconds: 12));
+    expect(polls, 0);
+    _setVisible(tester, true);
+    await tester.pump();
+    expect(polls, 1);
     await _unmount(tester);
   });
 
