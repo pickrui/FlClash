@@ -12,16 +12,20 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:super_sliver_list/super_sliver_list.dart';
 
+import 'package:fl_clash/features/connection/tracker_speed_ranker.dart';
+
 import 'item.dart';
 
 class ConnectionsView extends ConsumerStatefulWidget {
   final Future<List<TrackerInfo>> Function()? connectionsReader;
   final CoreController? core;
+  final DateTime Function()? now;
 
   const ConnectionsView({
     super.key,
     @visibleForTesting this.connectionsReader,
     @visibleForTesting this.core,
+    @visibleForTesting this.now,
   });
 
   @override
@@ -35,6 +39,7 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
   );
   final ScrollController _scrollController = ScrollController();
   int _refreshGeneration = 0;
+  final _speedRanker = TrackerSpeedRanker();
 
   CoreController get _core => widget.core ?? coreController;
 
@@ -74,8 +79,17 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
       return;
     }
     _connectionsStateNotifier.value = _connectionsStateNotifier.value.copyWith(
-      trackerInfos: trackerInfos,
+      trackerInfos: _speedRanker.rank(
+        trackerInfos,
+        widget.now?.call() ?? DateTime.now(),
+      ),
     );
+  }
+
+  @override
+  void stopPolling() {
+    super.stopPolling();
+    _speedRanker.reset();
   }
 
   Future<List<TrackerInfo>?> _readConnections() async {

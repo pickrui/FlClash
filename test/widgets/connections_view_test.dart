@@ -58,6 +58,7 @@ void main() {
     required Future<List<TrackerInfo>> Function() connectionsReader,
     bool isPageActive = true,
     CoreController? core,
+    DateTime Function()? now,
   }) async {
     tester.view.physicalSize = const Size(600, 800);
     tester.view.devicePixelRatio = 1;
@@ -75,6 +76,7 @@ void main() {
             child: ConnectionsView(
               connectionsReader: connectionsReader,
               core: core,
+              now: now,
             ),
           ),
         ),
@@ -108,6 +110,35 @@ void main() {
     expect(find.text('tcp://host-99.com:443'), findsOneWidget);
     expect(tester.takeException(), null);
 
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('active connections show current speed above idle traffic', (
+    tester,
+  ) async {
+    var now = DateTime.utc(2026);
+    final connections = buildConnections(2);
+    connections[0] = connections[0].copyWith(download: 1 << 30);
+    await pumpConnections(
+      tester,
+      connectionsReader: () async => connections,
+      now: () => now,
+    );
+    await tester.pump();
+    now = now.add(const Duration(seconds: 1));
+    connections[1] = connections[1].copyWith(upload: 1024, download: 4096);
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump();
+    final items = tester
+        .widgetList<TrackerInfoItem>(find.byType(TrackerInfoItem))
+        .toList();
+    expect(items.map((item) => item.trackerInfo.id), ['1', '0']);
+    expect(items.first.trackerInfo.uploadSpeed, 1024);
+    expect(items.first.trackerInfo.downloadSpeed, 4096);
+    expect(
+      find.textContaining(const Traffic(up: 1024, down: 4096).speedText),
+      findsOneWidget,
+    );
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
