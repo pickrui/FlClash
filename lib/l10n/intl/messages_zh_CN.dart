@@ -1406,6 +1406,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "rulesRequireRuleMode": MessageLookupByLibrary.simpleMessage(
       "个人分流规则仅在规则模式下生效",
     ),
+    "runTime": MessageLookupByLibrary.simpleMessage("运行时间"),
     "safeMode": MessageLookupByLibrary.simpleMessage("安全模式"),
     "safeModeAppTitle": m62,
     "save": MessageLookupByLibrary.simpleMessage("保存"),

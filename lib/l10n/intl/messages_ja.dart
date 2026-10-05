@@ -1597,6 +1597,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "rulesRequireRuleMode": MessageLookupByLibrary.simpleMessage(
       "個人ルールはルールモードで有効になります",
     ),
+    "runTime": MessageLookupByLibrary.simpleMessage("稼働時間"),
     "safeMode": MessageLookupByLibrary.simpleMessage("セーフモード"),
     "safeModeAppTitle": m62,
     "save": MessageLookupByLibrary.simpleMessage("保存"),

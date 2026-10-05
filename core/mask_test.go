@@ -184,3 +184,27 @@ func TestCloudLogsAreNotPublished(t *testing.T) {
 		t.Fatal("console output did not follow the cloud log filter")
 	}
 }
+
+func TestConnectionCountAppliesTrackerPrivacy(t *testing.T) {
+	previousDomains := cloudOutputDomains.Load()
+	setCloudOutputDomains([]string{"count-private.example"})
+	previousManager, previousNotify := statistic.DefaultManager, statistic.DefaultRequestNotify
+	statistic.DefaultManager = &statistic.Manager{}
+	statistic.DefaultRequestNotify = nil
+	t.Cleanup(func() {
+		statistic.DefaultManager = previousManager
+		statistic.DefaultRequestNotify = previousNotify
+		cloudOutputDomains.Store(previousDomains)
+	})
+	for _, host := range []string{"count-private.example", "public.example"} {
+		statistic.DefaultManager.Join(cloudTestTracker{info: &statistic.TrackerInfo{Metadata: &constant.Metadata{Host: host}}})
+		expected := 0
+		if host == "public.example" {
+			expected = 1
+		}
+		if count := handleGetConnectionCount(); count != expected {
+			t.Fatalf("count for %s = %d, want %d", host, count, expected)
+		}
+		statistic.DefaultManager.Leave(cloudTestTracker{})
+	}
+}

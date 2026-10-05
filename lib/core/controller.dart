@@ -178,6 +178,13 @@ class CoreController {
     }
   }
 
+  Future<int> getConnectionCount() async =>
+      await _interface.invokeMethod<int>(
+        method: CoreMethod.getConnectionCount,
+        timeout: const Duration(seconds: 5),
+      ) ??
+      0;
+
   Future<List<TrackerInfo>> getConnections() async {
     return _interface.getConnections();
   }

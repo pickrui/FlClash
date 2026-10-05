@@ -65,14 +65,12 @@ const List<DashboardWidget> defaultDashboardWidgets = [
 List<DashboardWidget> dashboardWidgetsSafeFormJson(
   List<dynamic>? dashboardWidgets,
 ) {
-  try {
-    return dashboardWidgets
-            ?.map((e) => $enumDecode(_$DashboardWidgetEnumMap, e))
-            .toList() ??
-        defaultDashboardWidgets;
-  } catch (_) {
-    return defaultDashboardWidgets;
-  }
+  if (dashboardWidgets == null) return defaultDashboardWidgets;
+  final known = {for (final value in DashboardWidget.values) value.name: value};
+  return {
+    for (final value in dashboardWidgets)
+      if (known[value] != null) known[value]!,
+  }.toList();
 }
 
 String testUrlFromJson(String? value) {

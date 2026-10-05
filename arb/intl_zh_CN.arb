@@ -1118,5 +1118,6 @@
   "serviceUnsupportedRegion": "地区不受支持",
   "serviceOriginalsOnly": "仅自制内容",
   "serviceComingSoon": "尚未开放",
-  "serviceTimeout": "超时"
+  "serviceTimeout": "超时",
+  "runTime": "运行时间"
 }

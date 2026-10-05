@@ -1118,5 +1118,6 @@
   "serviceUnsupportedRegion": "地域非対応",
   "serviceOriginalsOnly": "オリジナル作品のみ",
   "serviceComingSoon": "近日公開",
-  "serviceTimeout": "タイムアウト"
+  "serviceTimeout": "タイムアウト",
+  "runTime": "稼働時間"
 }

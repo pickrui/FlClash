@@ -34,7 +34,6 @@ final serviceProbeBackendProvider = Provider<ServiceProbeBackend>(
 class ServiceStatus extends _$ServiceStatus {
   int _generation = 0;
   ProbeStamp? _stamp;
-  Timer? _timer;
   bool _polling = false;
   @override
   ServiceCheckState build(ProbeTarget target) {
@@ -43,10 +42,8 @@ class ServiceStatus extends _$ServiceStatus {
     ref.listen(currentProfileIdProvider, (_, _) => _invalidate());
     ref.listen(selectedMapProvider, (_, _) => _invalidate());
     ref.listen(patchClashConfigProvider, (_, _) => _invalidate());
-    _timer = Timer.periodic(const Duration(seconds: 2), (_) => _poll());
     ref.onDispose(() {
       _generation++;
-      _timer?.cancel();
     });
     return const ServiceCheckState();
   }
@@ -59,7 +56,7 @@ class ServiceStatus extends _$ServiceStatus {
     state = const ServiceCheckState(stale: true);
   }
 
-  Future<void> _poll() async {
+  Future<void> pollRoute() async {
     if (_polling || !canProbe || _stamp == null) return;
     _polling = true;
     final generation = _generation;

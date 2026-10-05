@@ -493,6 +493,17 @@ func urlTestGroups(testUrl string) iter.Seq[*outboundgroup.URLTest] {
 	}
 }
 
+func handleGetConnectionCount() int {
+	count := 0
+	statistic.DefaultManager.Range(func(c statistic.Tracker) bool {
+		if !shouldSuppressCloudTracker(c.Info()) {
+			count++
+		}
+		return true
+	})
+	return count
+}
+
 func handleGetConnections() any {
 	runLock.Lock()
 	defer runLock.Unlock()

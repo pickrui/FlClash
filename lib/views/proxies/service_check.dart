@@ -21,13 +21,24 @@ void showServiceCheck(
   );
 }
 
-class ServiceCheckPage extends ConsumerWidget {
+class ServiceCheckPage extends ConsumerStatefulWidget {
   final ProbeTarget target;
   const ServiceCheckPage({super.key, required this.target});
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ServiceCheckPage> createState() => _ServiceCheckPageState();
+}
+
+class _ServiceCheckPageState extends ConsumerState<ServiceCheckPage>
+    with WidgetsBindingObserver, ActivePollingMixin<ServiceCheckPage> {
+  @override
+  Duration get pollInterval => const Duration(seconds: 2);
+  @override
+  Future<void> poll(PollGuard isCurrent) =>
+      ref.read(serviceStatusProvider(widget.target).notifier).pollRoute();
+  @override
+  Widget build(BuildContext context) {
     final l = context.appLocalizations;
-    final result = ref.watch(serviceStatusProvider(target));
+    final result = ref.watch(serviceStatusProvider(widget.target));
     final enabled =
         !safeModeBuild && ref.watch(initProvider) && ref.watch(isStartProvider);
     final ip = result.ip;
@@ -38,7 +49,9 @@ class ServiceCheckPage extends ConsumerWidget {
           tooltip: l.refresh,
           icon: const Icon(Icons.refresh),
           onPressed: enabled && !result.loading
-              ? () => ref.read(serviceStatusProvider(target).notifier).refresh()
+              ? () => ref
+                    .read(serviceStatusProvider(widget.target).notifier)
+                    .refresh()
               : null,
         ),
       ],
@@ -46,9 +59,13 @@ class ServiceCheckPage extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         children: [
           ListTile(
-            title: Text(target.name.isEmpty ? l.currentRoute : target.name),
+            title: Text(
+              widget.target.name.isEmpty ? l.currentRoute : widget.target.name,
+            ),
             subtitle: Text(
-              target.group.isEmpty ? l.serviceProbeHint : target.group,
+              widget.target.group.isEmpty
+                  ? l.serviceProbeHint
+                  : widget.target.group,
             ),
           ),
           if (result.loading) const LinearProgressIndicator(),

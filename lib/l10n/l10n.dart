@@ -9653,6 +9653,11 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Uptime`
+  String get runTime {
+    return Intl.message('Uptime', name: 'runTime', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

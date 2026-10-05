@@ -1118,5 +1118,6 @@
   "serviceUnsupportedRegion": "Регион не поддерживается",
   "serviceOriginalsOnly": "Только оригинальный контент",
   "serviceComingSoon": "Скоро",
-  "serviceTimeout": "Время ожидания истекло"
+  "serviceTimeout": "Время ожидания истекло",
+  "runTime": "Время работы"
 }

@@ -1922,6 +1922,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "rulesRequireRuleMode": MessageLookupByLibrary.simpleMessage(
       "Personal routing rules take effect in Rule mode.",
     ),
+    "runTime": MessageLookupByLibrary.simpleMessage("Uptime"),
     "safeMode": MessageLookupByLibrary.simpleMessage("Safe mode"),
     "safeModeAppTitle": m62,
     "save": MessageLookupByLibrary.simpleMessage("Save"),

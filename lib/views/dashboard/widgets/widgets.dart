@@ -7,6 +7,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/widgets/grid.dart';
 
 import 'intranet_ip.dart';
+import 'inspection.dart';
 import 'network_detection.dart';
 import 'network_speed.dart';
 import 'outbound_mode.dart';
@@ -63,6 +64,42 @@ extension DashboardWidgetView on DashboardWidget {
     DashboardWidget.memoryInfo => const GridItem(
       crossAxisCellCount: 4,
       child: MemoryInfo(),
+    ),
+    DashboardWidget.serviceStatus => const GridItem(
+      crossAxisCellCount: 8,
+      child: ServiceStatusCard(),
+    ),
+    DashboardWidget.dnsQueries => const GridItem(
+      crossAxisCellCount: 4,
+      child: FeedCountCard(page: PageLabel.dnsQueries),
+    ),
+    DashboardWidget.requests => const GridItem(
+      crossAxisCellCount: 4,
+      child: FeedCountCard(page: PageLabel.requests),
+    ),
+    DashboardWidget.connections => const GridItem(
+      crossAxisCellCount: 4,
+      child: FeedCountCard(page: PageLabel.connections),
+    ),
+    DashboardWidget.overrideDnsButton => const GridItem(
+      crossAxisCellCount: 4,
+      child: OverrideCard(),
+    ),
+    DashboardWidget.overrideNtpButton => const GridItem(
+      crossAxisCellCount: 4,
+      child: OverrideCard(ntp: true),
+    ),
+    DashboardWidget.runTime => const GridItem(
+      crossAxisCellCount: 4,
+      child: RuntimeCard(),
+    ),
+    DashboardWidget.proxyGroups => const GridItem(
+      crossAxisCellCount: 8,
+      child: DashboardGroupsCard(),
+    ),
+    DashboardWidget.profiles => const GridItem(
+      crossAxisCellCount: 8,
+      child: DashboardProfilesCard(),
     ),
   };
 

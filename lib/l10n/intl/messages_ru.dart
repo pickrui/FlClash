@@ -2020,6 +2020,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "rulesRequireRuleMode": MessageLookupByLibrary.simpleMessage(
       "Личные правила действуют в режиме правил.",
     ),
+    "runTime": MessageLookupByLibrary.simpleMessage("Время работы"),
     "safeMode": MessageLookupByLibrary.simpleMessage("Безопасный режим"),
     "safeModeAppTitle": m62,
     "save": MessageLookupByLibrary.simpleMessage("Сохранить"),
