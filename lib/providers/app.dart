@@ -73,6 +73,19 @@ class Requests extends _$Requests with NotifierMixin<FixedList<TrackerInfo>> {
 }
 
 @Riverpod(keepAlive: true)
+class DnsQueries extends _$DnsQueries {
+  @override
+  FixedList<DnsQuery> build() => FixedList(500);
+
+  void addQuery(DnsQuery value) {
+    if (value.shouldSuppressOutput) return;
+    state = state.copyWith()..add(value);
+  }
+
+  void clear() => state = FixedList(state.maxLength);
+}
+
+@Riverpod(keepAlive: true)
 class Providers extends _$Providers with NotifierMixin<List<ExternalProvider>> {
   @override
   List<ExternalProvider> build() {

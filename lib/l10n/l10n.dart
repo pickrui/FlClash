@@ -9273,6 +9273,141 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `DNS queries`
+  String get dnsQueries {
+    return Intl.message('DNS queries', name: 'dnsQueries', desc: '', args: []);
+  }
+
+  /// `View the latest 500 resolver queries`
+  String get dnsQueriesDesc {
+    return Intl.message(
+      'View the latest 500 resolver queries',
+      name: 'dnsQueriesDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cached`
+  String get dnsQueryCached {
+    return Intl.message('Cached', name: 'dnsQueryCached', desc: '', args: []);
+  }
+
+  /// `Upstream`
+  String get dnsQueryUpstream {
+    return Intl.message(
+      'Upstream',
+      name: 'dnsQueryUpstream',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Answers`
+  String get dnsQueryAnswers {
+    return Intl.message('Answers', name: 'dnsQueryAnswers', desc: '', args: []);
+  }
+
+  /// `Response code`
+  String get dnsQueryRcode {
+    return Intl.message(
+      'Response code',
+      name: 'dnsQueryRcode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Query type`
+  String get dnsQueryType {
+    return Intl.message('Query type', name: 'dnsQueryType', desc: '', args: []);
+  }
+
+  /// `Pause updates`
+  String get pauseUpdates {
+    return Intl.message(
+      'Pause updates',
+      name: 'pauseUpdates',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Resume updates`
+  String get resumeUpdates {
+    return Intl.message(
+      'Resume updates',
+      name: 'resumeUpdates',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All queries`
+  String get dnsQueryAll {
+    return Intl.message('All queries', name: 'dnsQueryAll', desc: '', args: []);
+  }
+
+  /// `Failed queries`
+  String get dnsQueryFailures {
+    return Intl.message(
+      'Failed queries',
+      name: 'dnsQueryFailures',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Application`
+  String get dnsQueryInitiatorApp {
+    return Intl.message(
+      'Application',
+      name: 'dnsQueryInitiatorApp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rule matching`
+  String get dnsQueryInitiatorRule {
+    return Intl.message(
+      'Rule matching',
+      name: 'dnsQueryInitiatorRule',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Direct connection`
+  String get dnsQueryInitiatorDirect {
+    return Intl.message(
+      'Direct connection',
+      name: 'dnsQueryInitiatorDirect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Proxy connection`
+  String get dnsQueryInitiatorProxy {
+    return Intl.message(
+      'Proxy connection',
+      name: 'dnsQueryInitiatorProxy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Other`
+  String get dnsQueryInitiatorOther {
+    return Intl.message(
+      'Other',
+      name: 'dnsQueryInitiatorOther',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -123,7 +123,7 @@ enum ResultType {
   error,
 }
 
-enum CoreEventType { log, delay, request, loaded, crash, geoUpdate, mode }
+enum CoreEventType { log, delay, request, dns, loaded, crash, geoUpdate, mode }
 
 enum FindProcessMode { always, off }
 
@@ -267,6 +267,7 @@ enum PageLabel {
   tools,
   logs,
   requests,
+  dnsQueries,
   resources,
   connections,
   oixCloud,

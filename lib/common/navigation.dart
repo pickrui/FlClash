@@ -55,6 +55,13 @@ class Navigation {
         modes: [NavigationItemMode.desktop, NavigationItemMode.more],
       ),
       NavigationItem(
+        icon: const Icon(Icons.dns_outlined),
+        label: PageLabel.dnsQueries,
+        builder: (context) => _buildPage(context, PageLabel.dnsQueries),
+        description: 'dnsQueriesDesc',
+        modes: [NavigationItemMode.desktop, NavigationItemMode.more],
+      ),
+      NavigationItem(
         icon: const Icon(Icons.ballot),
         label: PageLabel.connections,
         builder: (context) => _buildPage(context, PageLabel.connections),

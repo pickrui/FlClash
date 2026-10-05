@@ -213,7 +213,7 @@ return $default(_that.icon,_that.label,_that.description,_that.builder,_that.kee
 
 class _NavigationItem implements NavigationItem {
   const _NavigationItem({required this.icon, required this.label, this.description, required this.builder, this.keep = true, this.path, final  List<NavigationItemMode> modes = const [NavigationItemMode.mobile, NavigationItemMode.desktop]}): _modes = modes;
-
+  
 
 @override final  Icon icon;
 @override final  PageLabel label;
@@ -964,7 +964,7 @@ as int?,
 @override
 @pragma('vm:prefer-inline')
 $MetadataCopyWith<$Res> get metadata {
-
+  
   return $MetadataCopyWith<$Res>(_self.metadata, (value) {
     return _then(_self.copyWith(metadata: value));
   });
@@ -1197,7 +1197,7 @@ as int?,
 @override
 @pragma('vm:prefer-inline')
 $MetadataCopyWith<$Res> get metadata {
-
+  
   return $MetadataCopyWith<$Res>(_self.metadata, (value) {
     return _then(_self.copyWith(metadata: value));
   });
@@ -1672,7 +1672,7 @@ return $default(_that.logs,_that.keywords,_that.query,_that.autoScrollToEnd);cas
 
 class _LogsState implements LogsState {
   const _LogsState({final  List<Log> logs = const [], final  List<String> keywords = const [], this.query = '', this.autoScrollToEnd = true}): _logs = logs,_keywords = keywords;
-
+  
 
  final  List<Log> _logs;
 @override@JsonKey() List<Log> get logs {
@@ -1950,7 +1950,7 @@ return $default(_that.trackerInfos,_that.keywords,_that.query,_that.autoScrollTo
 
 class _TrackerInfosState implements TrackerInfosState {
   const _TrackerInfosState({final  List<TrackerInfo> trackerInfos = const [], final  List<String> keywords = const [], this.query = '', this.autoScrollToEnd = true}): _trackerInfos = trackerInfos,_keywords = keywords;
-
+  
 
  final  List<TrackerInfo> _trackerInfos;
 @override@JsonKey() List<TrackerInfo> get trackerInfos {
@@ -2498,7 +2498,7 @@ return $default(_that.size,_that.lastModified);case _:
 
 class _FileInfo implements FileInfo {
   const _FileInfo({required this.size, required this.lastModified});
-
+  
 
 @override final  int size;
 @override final  DateTime lastModified;
@@ -3024,7 +3024,7 @@ return $default(_that.value,_that.unit);case _:
 
 class _TrafficShow implements TrafficShow {
   const _TrafficShow({required this.value, required this.unit});
-
+  
 
 @override final  String value;
 @override final  String unit;
@@ -3843,7 +3843,7 @@ return $default(_that.ip,_that.countryCode);case _:
 
 class _IpInfo implements IpInfo {
   const _IpInfo({required this.ip, required this.countryCode});
-
+  
 
 @override final  String ip;
 @override final  String countryCode;
@@ -4379,7 +4379,7 @@ return $default(_that.label,_that.value,_that.validator);case _:
 
 class _Field implements Field {
   const _Field({required this.label, required this.value, this.validator});
-
+  
 
 @override final  String label;
 @override final  String value;
@@ -4642,7 +4642,7 @@ return $default(_that.data,_that.type,_that.message);case _:
 
 class _Result<T> implements Result<T> {
   const _Result({required this.data, required this.type, required this.message});
-
+  
 
 @override final  T? data;
 @override final  ResultType type;
@@ -5173,7 +5173,7 @@ return $default(_that.delay,_that.group);case _:
 
 class _DelayState implements DelayState {
   const _DelayState({required this.delay, required this.group});
-
+  
 
 @override final  int delay;
 @override final  bool group;
@@ -5433,7 +5433,7 @@ return $default(_that.label,_that.message);case _:
 
 class _UpdatingMessage implements UpdatingMessage {
   const _UpdatingMessage({required this.label, required this.message});
-
+  
 
 @override final  String label;
 @override final  String message;
@@ -5490,6 +5490,302 @@ class __$UpdatingMessageCopyWithImpl<$Res>
 label: null == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
 as String,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
 as String,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$DnsQuery {
+
+ String get domain; String get type; DateTime get time; String get initiator; String get upstream; bool get cached; List<String> get answers; String get rcode; String get error; int get delay;
+/// Create a copy of DnsQuery
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$DnsQueryCopyWith<DnsQuery> get copyWith => _$DnsQueryCopyWithImpl<DnsQuery>(this as DnsQuery, _$identity);
+
+  /// Serializes this DnsQuery to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DnsQuery&&(identical(other.domain, domain) || other.domain == domain)&&(identical(other.type, type) || other.type == type)&&(identical(other.time, time) || other.time == time)&&(identical(other.initiator, initiator) || other.initiator == initiator)&&(identical(other.upstream, upstream) || other.upstream == upstream)&&(identical(other.cached, cached) || other.cached == cached)&&const DeepCollectionEquality().equals(other.answers, answers)&&(identical(other.rcode, rcode) || other.rcode == rcode)&&(identical(other.error, error) || other.error == error)&&(identical(other.delay, delay) || other.delay == delay));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,domain,type,time,initiator,upstream,cached,const DeepCollectionEquality().hash(answers),rcode,error,delay);
+
+@override
+String toString() {
+  return 'DnsQuery(domain: $domain, type: $type, time: $time, initiator: $initiator, upstream: $upstream, cached: $cached, answers: $answers, rcode: $rcode, error: $error, delay: $delay)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $DnsQueryCopyWith<$Res>  {
+  factory $DnsQueryCopyWith(DnsQuery value, $Res Function(DnsQuery) _then) = _$DnsQueryCopyWithImpl;
+@useResult
+$Res call({
+ String domain, String type, DateTime time, String initiator, String upstream, bool cached, List<String> answers, String rcode, String error, int delay
+});
+
+
+
+
+}
+/// @nodoc
+class _$DnsQueryCopyWithImpl<$Res>
+    implements $DnsQueryCopyWith<$Res> {
+  _$DnsQueryCopyWithImpl(this._self, this._then);
+
+  final DnsQuery _self;
+  final $Res Function(DnsQuery) _then;
+
+/// Create a copy of DnsQuery
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? domain = null,Object? type = null,Object? time = null,Object? initiator = null,Object? upstream = null,Object? cached = null,Object? answers = null,Object? rcode = null,Object? error = null,Object? delay = null,}) {
+  return _then(_self.copyWith(
+domain: null == domain ? _self.domain : domain // ignore: cast_nullable_to_non_nullable
+as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as String,time: null == time ? _self.time : time // ignore: cast_nullable_to_non_nullable
+as DateTime,initiator: null == initiator ? _self.initiator : initiator // ignore: cast_nullable_to_non_nullable
+as String,upstream: null == upstream ? _self.upstream : upstream // ignore: cast_nullable_to_non_nullable
+as String,cached: null == cached ? _self.cached : cached // ignore: cast_nullable_to_non_nullable
+as bool,answers: null == answers ? _self.answers : answers // ignore: cast_nullable_to_non_nullable
+as List<String>,rcode: null == rcode ? _self.rcode : rcode // ignore: cast_nullable_to_non_nullable
+as String,error: null == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
+as String,delay: null == delay ? _self.delay : delay // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [DnsQuery].
+extension DnsQueryPatterns on DnsQuery {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _DnsQuery value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _DnsQuery() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _DnsQuery value)  $default,){
+final _that = this;
+switch (_that) {
+case _DnsQuery():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _DnsQuery value)?  $default,){
+final _that = this;
+switch (_that) {
+case _DnsQuery() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String domain,  String type,  DateTime time,  String initiator,  String upstream,  bool cached,  List<String> answers,  String rcode,  String error,  int delay)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _DnsQuery() when $default != null:
+return $default(_that.domain,_that.type,_that.time,_that.initiator,_that.upstream,_that.cached,_that.answers,_that.rcode,_that.error,_that.delay);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String domain,  String type,  DateTime time,  String initiator,  String upstream,  bool cached,  List<String> answers,  String rcode,  String error,  int delay)  $default,) {final _that = this;
+switch (_that) {
+case _DnsQuery():
+return $default(_that.domain,_that.type,_that.time,_that.initiator,_that.upstream,_that.cached,_that.answers,_that.rcode,_that.error,_that.delay);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String domain,  String type,  DateTime time,  String initiator,  String upstream,  bool cached,  List<String> answers,  String rcode,  String error,  int delay)?  $default,) {final _that = this;
+switch (_that) {
+case _DnsQuery() when $default != null:
+return $default(_that.domain,_that.type,_that.time,_that.initiator,_that.upstream,_that.cached,_that.answers,_that.rcode,_that.error,_that.delay);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _DnsQuery implements DnsQuery {
+  const _DnsQuery({required this.domain, required this.type, required this.time, this.initiator = 'other', this.upstream = '', this.cached = false, final  List<String> answers = const [], this.rcode = '', this.error = '', this.delay = 0}): _answers = answers;
+  factory _DnsQuery.fromJson(Map<String, dynamic> json) => _$DnsQueryFromJson(json);
+
+@override final  String domain;
+@override final  String type;
+@override final  DateTime time;
+@override@JsonKey() final  String initiator;
+@override@JsonKey() final  String upstream;
+@override@JsonKey() final  bool cached;
+ final  List<String> _answers;
+@override@JsonKey() List<String> get answers {
+  if (_answers is EqualUnmodifiableListView) return _answers;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_answers);
+}
+
+@override@JsonKey() final  String rcode;
+@override@JsonKey() final  String error;
+@override@JsonKey() final  int delay;
+
+/// Create a copy of DnsQuery
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$DnsQueryCopyWith<_DnsQuery> get copyWith => __$DnsQueryCopyWithImpl<_DnsQuery>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$DnsQueryToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DnsQuery&&(identical(other.domain, domain) || other.domain == domain)&&(identical(other.type, type) || other.type == type)&&(identical(other.time, time) || other.time == time)&&(identical(other.initiator, initiator) || other.initiator == initiator)&&(identical(other.upstream, upstream) || other.upstream == upstream)&&(identical(other.cached, cached) || other.cached == cached)&&const DeepCollectionEquality().equals(other._answers, _answers)&&(identical(other.rcode, rcode) || other.rcode == rcode)&&(identical(other.error, error) || other.error == error)&&(identical(other.delay, delay) || other.delay == delay));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,domain,type,time,initiator,upstream,cached,const DeepCollectionEquality().hash(_answers),rcode,error,delay);
+
+@override
+String toString() {
+  return 'DnsQuery(domain: $domain, type: $type, time: $time, initiator: $initiator, upstream: $upstream, cached: $cached, answers: $answers, rcode: $rcode, error: $error, delay: $delay)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$DnsQueryCopyWith<$Res> implements $DnsQueryCopyWith<$Res> {
+  factory _$DnsQueryCopyWith(_DnsQuery value, $Res Function(_DnsQuery) _then) = __$DnsQueryCopyWithImpl;
+@override @useResult
+$Res call({
+ String domain, String type, DateTime time, String initiator, String upstream, bool cached, List<String> answers, String rcode, String error, int delay
+});
+
+
+
+
+}
+/// @nodoc
+class __$DnsQueryCopyWithImpl<$Res>
+    implements _$DnsQueryCopyWith<$Res> {
+  __$DnsQueryCopyWithImpl(this._self, this._then);
+
+  final _DnsQuery _self;
+  final $Res Function(_DnsQuery) _then;
+
+/// Create a copy of DnsQuery
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? domain = null,Object? type = null,Object? time = null,Object? initiator = null,Object? upstream = null,Object? cached = null,Object? answers = null,Object? rcode = null,Object? error = null,Object? delay = null,}) {
+  return _then(_DnsQuery(
+domain: null == domain ? _self.domain : domain // ignore: cast_nullable_to_non_nullable
+as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as String,time: null == time ? _self.time : time // ignore: cast_nullable_to_non_nullable
+as DateTime,initiator: null == initiator ? _self.initiator : initiator // ignore: cast_nullable_to_non_nullable
+as String,upstream: null == upstream ? _self.upstream : upstream // ignore: cast_nullable_to_non_nullable
+as String,cached: null == cached ? _self.cached : cached // ignore: cast_nullable_to_non_nullable
+as bool,answers: null == answers ? _self._answers : answers // ignore: cast_nullable_to_non_nullable
+as List<String>,rcode: null == rcode ? _self.rcode : rcode // ignore: cast_nullable_to_non_nullable
+as String,error: null == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
+as String,delay: null == delay ? _self.delay : delay // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 

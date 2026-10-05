@@ -101,6 +101,11 @@ class _CoreContainerState extends ConsumerState<CoreManager>
   }
 
   @override
+  void onDnsQuery(DnsQuery query) {
+    ref.read(dnsQueriesProvider.notifier).addQuery(query);
+  }
+
+  @override
   void onModeChanged(String mode) {
     final index = Mode.values.indexWhere((item) => item.name == mode);
     if (index == -1) {

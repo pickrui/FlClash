@@ -184,6 +184,7 @@ const (
 	LogMessage       MessageType = "log"
 	DelayMessage     MessageType = "delay"
 	RequestMessage   MessageType = "request"
+	DnsMessage       MessageType = "dns"
 	LoadedMessage    MessageType = "loaded"
 	GeoUpdateMessage MessageType = "geoUpdate"
 	ModeMessage      MessageType = "mode"

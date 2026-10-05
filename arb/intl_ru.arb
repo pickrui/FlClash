@@ -1076,5 +1076,21 @@
   "hideTimeoutProxies": "Скрывать узлы с ошибкой проверки",
   "hideTimeoutProxiesDesc": "Сохранять выбранный узел и узлы с незавершённой проверкой",
   "delayTestQueued": "В очереди",
-  "delayTestRunning": "Проверка"
+  "delayTestRunning": "Проверка",
+  "dnsQueries": "DNS-запросы",
+  "dnsQueriesDesc": "Последние 500 запросов резолвера",
+  "dnsQueryCached": "Из кеша",
+  "dnsQueryUpstream": "Вышестоящий сервер",
+  "dnsQueryAnswers": "Ответы",
+  "dnsQueryRcode": "Код ответа",
+  "dnsQueryType": "Тип запроса",
+  "pauseUpdates": "Приостановить обновление",
+  "resumeUpdates": "Возобновить обновление",
+  "dnsQueryAll": "Все запросы",
+  "dnsQueryFailures": "Неудачные запросы",
+  "dnsQueryInitiatorApp": "Приложение",
+  "dnsQueryInitiatorRule": "Подбор правила",
+  "dnsQueryInitiatorDirect": "Прямое соединение",
+  "dnsQueryInitiatorProxy": "Соединение с прокси",
+  "dnsQueryInitiatorOther": "Другое"
 }

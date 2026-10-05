@@ -35,7 +35,7 @@ func requestMessage(tracker statistic.Tracker) Message {
 
 func sendMessage(message Message) {
 	queue := priorityMessageQueue
-	if message.Type == LogMessage || message.Type == RequestMessage {
+	if message.Type == LogMessage || message.Type == RequestMessage || message.Type == DnsMessage {
 		queue = bulkMessageQueue
 	}
 	enqueueLatest(queue, message)

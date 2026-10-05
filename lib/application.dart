@@ -235,6 +235,9 @@ Widget buildNavigationPage(BuildContext context, PageLabel label) =>
       PageLabel.requests => const RequestsView(
         key: GlobalObjectKey(PageLabel.requests),
       ),
+      PageLabel.dnsQueries => const DnsQueriesView(
+        key: GlobalObjectKey(PageLabel.dnsQueries),
+      ),
       PageLabel.connections => const ConnectionsView(
         key: GlobalObjectKey(PageLabel.connections),
       ),

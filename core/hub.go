@@ -29,6 +29,7 @@ import (
 	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/constant/features"
 	cp "github.com/metacubex/mihomo/constant/provider"
+	"github.com/metacubex/mihomo/dns"
 	"github.com/metacubex/mihomo/hub/executor"
 	"github.com/metacubex/mihomo/listener"
 	"github.com/metacubex/mihomo/log"
@@ -753,6 +754,11 @@ func init() {
 			Data: delayData,
 		})
 	}
+	dns.SetQueryNotify(func(record dns.QueryRecord) {
+		if query := newDnsQuery(record); query != nil {
+			sendMessage(Message{Type: DnsMessage, Data: query})
+		}
+	})
 	statistic.DefaultRequestNotify = func(c statistic.Tracker) {
 		sendMessage(requestMessage(c))
 	}

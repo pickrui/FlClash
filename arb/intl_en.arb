@@ -1076,5 +1076,21 @@
   "hideTimeoutProxies": "Hide failed nodes",
   "hideTimeoutProxiesDesc": "Keep the selected node and nodes that have not finished testing",
   "delayTestQueued": "Queued",
-  "delayTestRunning": "Testing"
+  "delayTestRunning": "Testing",
+  "dnsQueries": "DNS queries",
+  "dnsQueriesDesc": "View the latest 500 resolver queries",
+  "dnsQueryCached": "Cached",
+  "dnsQueryUpstream": "Upstream",
+  "dnsQueryAnswers": "Answers",
+  "dnsQueryRcode": "Response code",
+  "dnsQueryType": "Query type",
+  "pauseUpdates": "Pause updates",
+  "resumeUpdates": "Resume updates",
+  "dnsQueryAll": "All queries",
+  "dnsQueryFailures": "Failed queries",
+  "dnsQueryInitiatorApp": "Application",
+  "dnsQueryInitiatorRule": "Rule matching",
+  "dnsQueryInitiatorDirect": "Direct connection",
+  "dnsQueryInitiatorProxy": "Proxy connection",
+  "dnsQueryInitiatorOther": "Other"
 }

@@ -985,6 +985,28 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "dnsHijacking": MessageLookupByLibrary.simpleMessage("DNS hijacking"),
     "dnsMode": MessageLookupByLibrary.simpleMessage("DNS mode"),
+    "dnsQueries": MessageLookupByLibrary.simpleMessage("DNS queries"),
+    "dnsQueriesDesc": MessageLookupByLibrary.simpleMessage(
+      "View the latest 500 resolver queries",
+    ),
+    "dnsQueryAll": MessageLookupByLibrary.simpleMessage("All queries"),
+    "dnsQueryAnswers": MessageLookupByLibrary.simpleMessage("Answers"),
+    "dnsQueryCached": MessageLookupByLibrary.simpleMessage("Cached"),
+    "dnsQueryFailures": MessageLookupByLibrary.simpleMessage("Failed queries"),
+    "dnsQueryInitiatorApp": MessageLookupByLibrary.simpleMessage("Application"),
+    "dnsQueryInitiatorDirect": MessageLookupByLibrary.simpleMessage(
+      "Direct connection",
+    ),
+    "dnsQueryInitiatorOther": MessageLookupByLibrary.simpleMessage("Other"),
+    "dnsQueryInitiatorProxy": MessageLookupByLibrary.simpleMessage(
+      "Proxy connection",
+    ),
+    "dnsQueryInitiatorRule": MessageLookupByLibrary.simpleMessage(
+      "Rule matching",
+    ),
+    "dnsQueryRcode": MessageLookupByLibrary.simpleMessage("Response code"),
+    "dnsQueryType": MessageLookupByLibrary.simpleMessage("Query type"),
+    "dnsQueryUpstream": MessageLookupByLibrary.simpleMessage("Upstream"),
     "doYouWantToPass": MessageLookupByLibrary.simpleMessage(
       "Do you want to pass",
     ),
@@ -1519,6 +1541,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Please enter password",
     ),
     "paste": MessageLookupByLibrary.simpleMessage("Paste"),
+    "pauseUpdates": MessageLookupByLibrary.simpleMessage("Pause updates"),
     "payWithBalance": MessageLookupByLibrary.simpleMessage("Pay with balance"),
     "paymentAmount": MessageLookupByLibrary.simpleMessage("Payment amount"),
     "paymentMethod": MessageLookupByLibrary.simpleMessage("Payment method"),
@@ -1814,6 +1837,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Override",
     ),
     "restoreSuccess": MessageLookupByLibrary.simpleMessage("Restore success"),
+    "resumeUpdates": MessageLookupByLibrary.simpleMessage("Resume updates"),
     "retryCloudSyncWithCertificateException":
         MessageLookupByLibrary.simpleMessage("Allow Temporarily and Sync"),
     "retryWithoutCertificateVerification": MessageLookupByLibrary.simpleMessage(

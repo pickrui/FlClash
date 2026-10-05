@@ -241,3 +241,31 @@ Map<String, dynamic> _$ScriptToJson(_Script instance) => <String, dynamic>{
   'label': instance.label,
   'lastUpdateTime': instance.lastUpdateTime.toIso8601String(),
 };
+
+_DnsQuery _$DnsQueryFromJson(Map<String, dynamic> json) => _DnsQuery(
+  domain: json['domain'] as String,
+  type: json['type'] as String,
+  time: DateTime.parse(json['time'] as String),
+  initiator: json['initiator'] as String? ?? 'other',
+  upstream: json['upstream'] as String? ?? '',
+  cached: json['cached'] as bool? ?? false,
+  answers:
+      (json['answers'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      const [],
+  rcode: json['rcode'] as String? ?? '',
+  error: json['error'] as String? ?? '',
+  delay: (json['delay'] as num?)?.toInt() ?? 0,
+);
+
+Map<String, dynamic> _$DnsQueryToJson(_DnsQuery instance) => <String, dynamic>{
+  'domain': instance.domain,
+  'type': instance.type,
+  'time': instance.time.toIso8601String(),
+  'initiator': instance.initiator,
+  'upstream': instance.upstream,
+  'cached': instance.cached,
+  'answers': instance.answers,
+  'rcode': instance.rcode,
+  'error': instance.error,
+  'delay': instance.delay,
+};

@@ -1076,5 +1076,21 @@
   "hideTimeoutProxies": "隐藏测速失败的节点",
   "hideTimeoutProxiesDesc": "保留当前选中节点和尚未完成测速的节点",
   "delayTestQueued": "排队中",
-  "delayTestRunning": "测速中"
+  "delayTestRunning": "测速中",
+  "dnsQueries": "DNS 查询",
+  "dnsQueriesDesc": "查看最近 500 条解析查询记录",
+  "dnsQueryCached": "缓存命中",
+  "dnsQueryUpstream": "上游解析器",
+  "dnsQueryAnswers": "解析结果",
+  "dnsQueryRcode": "响应码",
+  "dnsQueryType": "查询类型",
+  "pauseUpdates": "暂停刷新",
+  "resumeUpdates": "恢复刷新",
+  "dnsQueryAll": "全部查询",
+  "dnsQueryFailures": "失败查询",
+  "dnsQueryInitiatorApp": "应用",
+  "dnsQueryInitiatorRule": "规则匹配",
+  "dnsQueryInitiatorDirect": "直连连接",
+  "dnsQueryInitiatorProxy": "代理连接",
+  "dnsQueryInitiatorOther": "其他"
 }

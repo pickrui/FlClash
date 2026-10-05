@@ -1076,5 +1076,21 @@
   "hideTimeoutProxies": "測定に失敗したノードを非表示",
   "hideTimeoutProxiesDesc": "選択中のノードと測定が完了していないノードは表示します",
   "delayTestQueued": "待機中",
-  "delayTestRunning": "測定中"
+  "delayTestRunning": "測定中",
+  "dnsQueries": "DNS クエリ",
+  "dnsQueriesDesc": "最新 500 件の名前解決クエリを表示",
+  "dnsQueryCached": "キャッシュ",
+  "dnsQueryUpstream": "上流リゾルバー",
+  "dnsQueryAnswers": "応答",
+  "dnsQueryRcode": "応答コード",
+  "dnsQueryType": "クエリの種類",
+  "pauseUpdates": "更新を一時停止",
+  "resumeUpdates": "更新を再開",
+  "dnsQueryAll": "すべてのクエリ",
+  "dnsQueryFailures": "失敗したクエリ",
+  "dnsQueryInitiatorApp": "アプリ",
+  "dnsQueryInitiatorRule": "ルール判定",
+  "dnsQueryInitiatorDirect": "直接接続",
+  "dnsQueryInitiatorProxy": "プロキシ接続",
+  "dnsQueryInitiatorOther": "その他"
 }

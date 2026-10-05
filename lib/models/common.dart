@@ -515,3 +515,38 @@ abstract class UpdatingMessage with _$UpdatingMessage {
     required String message,
   }) = _UpdatingMessage;
 }
+
+@freezed
+abstract class DnsQuery with _$DnsQuery {
+  const factory DnsQuery({
+    required String domain,
+    required String type,
+    required DateTime time,
+    @Default('other') String initiator,
+    @Default('') String upstream,
+    @Default(false) bool cached,
+    @Default([]) List<String> answers,
+    @Default('') String rcode,
+    @Default('') String error,
+    @Default(0) int delay,
+  }) = _DnsQuery;
+
+  factory DnsQuery.fromJson(Map<String, Object?> json) =>
+      _$DnsQueryFromJson(json);
+}
+
+extension DnsQueryExt on DnsQuery {
+  bool get isFailed =>
+      error.isNotEmpty || (rcode.isNotEmpty && rcode != 'NOERROR');
+  Iterable<String> get searchFields => [
+    domain,
+    type,
+    initiator,
+    upstream,
+    rcode,
+    error,
+    ...answers,
+  ];
+  bool get shouldSuppressOutput =>
+      searchFields.any(Secrets.shouldSuppressOutput);
+}

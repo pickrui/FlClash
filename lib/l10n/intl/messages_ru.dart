@@ -1010,6 +1010,32 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "dnsHijacking": MessageLookupByLibrary.simpleMessage("DNS-перехват"),
     "dnsMode": MessageLookupByLibrary.simpleMessage("Режим DNS"),
+    "dnsQueries": MessageLookupByLibrary.simpleMessage("DNS-запросы"),
+    "dnsQueriesDesc": MessageLookupByLibrary.simpleMessage(
+      "Последние 500 запросов резолвера",
+    ),
+    "dnsQueryAll": MessageLookupByLibrary.simpleMessage("Все запросы"),
+    "dnsQueryAnswers": MessageLookupByLibrary.simpleMessage("Ответы"),
+    "dnsQueryCached": MessageLookupByLibrary.simpleMessage("Из кеша"),
+    "dnsQueryFailures": MessageLookupByLibrary.simpleMessage(
+      "Неудачные запросы",
+    ),
+    "dnsQueryInitiatorApp": MessageLookupByLibrary.simpleMessage("Приложение"),
+    "dnsQueryInitiatorDirect": MessageLookupByLibrary.simpleMessage(
+      "Прямое соединение",
+    ),
+    "dnsQueryInitiatorOther": MessageLookupByLibrary.simpleMessage("Другое"),
+    "dnsQueryInitiatorProxy": MessageLookupByLibrary.simpleMessage(
+      "Соединение с прокси",
+    ),
+    "dnsQueryInitiatorRule": MessageLookupByLibrary.simpleMessage(
+      "Подбор правила",
+    ),
+    "dnsQueryRcode": MessageLookupByLibrary.simpleMessage("Код ответа"),
+    "dnsQueryType": MessageLookupByLibrary.simpleMessage("Тип запроса"),
+    "dnsQueryUpstream": MessageLookupByLibrary.simpleMessage(
+      "Вышестоящий сервер",
+    ),
     "doYouWantToPass": MessageLookupByLibrary.simpleMessage(
       "Вы хотите пропустить",
     ),
@@ -1581,6 +1607,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Пожалуйста, введите пароль",
     ),
     "paste": MessageLookupByLibrary.simpleMessage("Вставить"),
+    "pauseUpdates": MessageLookupByLibrary.simpleMessage(
+      "Приостановить обновление",
+    ),
     "payWithBalance": MessageLookupByLibrary.simpleMessage(
       "Оплатить с баланса",
     ),
@@ -1891,6 +1920,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "restoreSuccess": MessageLookupByLibrary.simpleMessage(
       "Восстановление успешно",
+    ),
+    "resumeUpdates": MessageLookupByLibrary.simpleMessage(
+      "Возобновить обновление",
     ),
     "retryCloudSyncWithCertificateException":
         MessageLookupByLibrary.simpleMessage(
