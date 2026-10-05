@@ -16,6 +16,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:re_editor/re_editor.dart';
+import 'package:fl_clash/features/editor/assistance.dart';
+import 'package:fl_clash/features/editor/clash_schema.dart';
 import 'package:re_highlight/languages/javascript.dart';
 import 'package:re_highlight/languages/json.dart';
 import 'package:re_highlight/languages/yaml.dart';
@@ -27,6 +29,7 @@ typedef TextEditingValueChangeBuilder = Widget Function(TextEditingValue value);
 class EditorPage extends ConsumerStatefulWidget {
   final String title;
   final String content;
+  final EditorSchema schema;
   final List<Language> languages;
   final bool supportRemoteDownload;
   final bool titleEditable;
@@ -42,6 +45,7 @@ class EditorPage extends ConsumerStatefulWidget {
     super.key,
     required this.title,
     required this.content,
+    this.schema = EditorSchema.config,
     this.titleEditable = false,
     this.onSave,
     this.onPop,
@@ -272,57 +276,64 @@ class _EditorPageState extends ConsumerState<EditorPage> {
             ),
           ]),
         ),
-        body: CodeEditor(
-          readOnly: readOnly,
-          autofocus: false,
-          findController: _findController,
-          findBuilder: (context, controller, readOnly) => FindPanel(
-            controller: controller,
-            readOnly: readOnly,
-            isMobileView: isMobileView,
-          ),
-          padding: const EdgeInsets.only(right: 16),
-          autocompleteSymbols: true,
-          focusNode: _focusNode,
-          scrollbarBuilder: (context, child, details) {
-            return CommonScrollBar(
-              controller: details.controller,
-              child: child,
-            );
-          },
-          toolbarController: _toolbarController,
-          indicatorBuilder:
-              (context, editingController, chunkController, notifier) {
-                return Row(
-                  children: [
-                    DefaultCodeLineNumber(
-                      controller: editingController,
-                      notifier: notifier,
-                    ),
-                    DefaultCodeChunkIndicator(
-                      width: 20,
-                      controller: chunkController,
-                      notifier: notifier,
-                    ),
-                  ],
-                );
-              },
-          shortcutsActivatorsBuilder:
-              const DefaultCodeShortcutsActivatorsBuilder(),
+        body: EditorAssistance(
           controller: _controller,
-          style: CodeEditorStyle(
-            fontSize: context.textTheme.bodyLarge?.fontSize?.ap,
-            fontFamily: FontFamily.jetBrainsMono.value,
-            codeTheme: CodeHighlightTheme(
-              languages: {
-                if (widget.languages.contains(Language.yaml))
-                  'yaml': CodeHighlightThemeMode(mode: langYaml),
-                if (widget.languages.contains(Language.javaScript))
-                  'javascript': CodeHighlightThemeMode(mode: langJavascript),
-                if (widget.languages.contains(Language.json))
-                  'json': CodeHighlightThemeMode(mode: langJson),
-              },
-              theme: atomOneLightTheme,
+          focusNode: _focusNode,
+          language: widget.languages.firstOrNull ?? Language.yaml,
+          schema: widget.schema,
+          enabled: !readOnly,
+          child: CodeEditor(
+            readOnly: readOnly,
+            autofocus: false,
+            findController: _findController,
+            findBuilder: (context, controller, readOnly) => FindPanel(
+              controller: controller,
+              readOnly: readOnly,
+              isMobileView: isMobileView,
+            ),
+            padding: const EdgeInsets.only(right: 16),
+            autocompleteSymbols: true,
+            focusNode: _focusNode,
+            scrollbarBuilder: (context, child, details) {
+              return CommonScrollBar(
+                controller: details.controller,
+                child: child,
+              );
+            },
+            toolbarController: _toolbarController,
+            indicatorBuilder:
+                (context, editingController, chunkController, notifier) {
+                  return Row(
+                    children: [
+                      DefaultCodeLineNumber(
+                        controller: editingController,
+                        notifier: notifier,
+                      ),
+                      DefaultCodeChunkIndicator(
+                        width: 20,
+                        controller: chunkController,
+                        notifier: notifier,
+                      ),
+                    ],
+                  );
+                },
+            shortcutsActivatorsBuilder:
+                const DefaultCodeShortcutsActivatorsBuilder(),
+            controller: _controller,
+            style: CodeEditorStyle(
+              fontSize: context.textTheme.bodyLarge?.fontSize?.ap,
+              fontFamily: FontFamily.jetBrainsMono.value,
+              codeTheme: CodeHighlightTheme(
+                languages: {
+                  if (widget.languages.contains(Language.yaml))
+                    'yaml': CodeHighlightThemeMode(mode: langYaml),
+                  if (widget.languages.contains(Language.javaScript))
+                    'javascript': CodeHighlightThemeMode(mode: langJavascript),
+                  if (widget.languages.contains(Language.json))
+                    'json': CodeHighlightThemeMode(mode: langJson),
+                },
+                theme: atomOneLightTheme,
+              ),
             ),
           ),
         ),

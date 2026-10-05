@@ -7,6 +7,7 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/editor.dart';
+import 'package:fl_clash/features/editor/clash_schema.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
@@ -146,6 +147,7 @@ class _OverrideView extends ConsumerWidget {
       context,
       EditorPage(
         title: path ?? _section,
+        schema: isNtp ? EditorSchema.ntp : EditorSchema.dns,
         content: saved,
         onSave: (context, _, content) async {
           if (await save(context, content) && context.mounted) {
