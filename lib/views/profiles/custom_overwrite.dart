@@ -7,6 +7,8 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/features/overwrite/proxy_group_editor.dart';
 import 'package:fl_clash/features/overwrite/routing_draft.dart';
 import 'package:fl_clash/features/overwrite/rule_preset.dart';
+import 'package:fl_clash/features/overwrite/routing_issue.dart';
+import 'package:fl_clash/providers/routing_issues.dart';
 import 'package:fl_clash/features/overwrite/custom_rule_editor.dart';
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -510,6 +512,7 @@ class CustomProxyGroupsView extends ConsumerWidget {
     final groups =
         ref.watch(profileProvider(profileId))?.customProxyGroups ??
         const <ProxyGroup>[];
+    final issues = ref.watch(routingIssuesProvider(profileId)).groups;
     return CommonScaffold(
       title: appLocalizations.proxyGroup,
       actions: [
@@ -537,6 +540,8 @@ class CustomProxyGroupsView extends ConsumerWidget {
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        if (issues[index] case final groupIssues?)
+                          RoutingIssueButton(issues: groupIssues),
                         IconButton(
                           tooltip: appLocalizations.delete,
                           onPressed: () => _delete(context, ref, group),
@@ -708,6 +713,7 @@ class CustomRulesView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final rules =
         ref.watch(profileProvider(profileId))?.customRules ?? const <Rule>[];
+    final issues = ref.watch(routingIssuesProvider(profileId)).rules;
     return CommonScaffold(
       title: appLocalizations.rule,
       actions: [
@@ -742,6 +748,8 @@ class CustomRulesView extends ConsumerWidget {
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        if (issues[rule.id] case final ruleIssues?)
+                          RoutingIssueButton(issues: ruleIssues),
                         IconButton(
                           tooltip: appLocalizations.delete,
                           onPressed: () => _delete(context, ref, rule),

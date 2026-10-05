@@ -73,7 +73,7 @@ class _RulePresetDialogState extends State<RulePresetDialog> {
           if (_selected.contains(preset)) ...preset.rules,
       ];
       final error = await widget.validate(rules);
-      if (!mounted) return;
+      if (!mounted || ModalRoute.of(context)?.isCurrent == false) return;
       if (error.isEmpty) {
         Navigator.of(context).pop(rules);
       } else {

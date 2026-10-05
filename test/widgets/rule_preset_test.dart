@@ -38,6 +38,7 @@ void main() {
     'presets preview rules and retain selections after failed validation',
     (tester) async {
       final pending = Completer<String>();
+      final covered = Completer<String>();
       List<Rule>? result;
       var attempts = 0;
       await tester.binding.setSurfaceSize(const Size(360, 640));
@@ -72,9 +73,11 @@ void main() {
                             rules.map((rule) => rule.value),
                             RulePreset.blockQuic.rawRules,
                           );
-                          return attempts == 1
-                              ? pending.future
-                              : Future.value('');
+                          return switch (attempts) {
+                            1 => pending.future,
+                            2 => covered.future,
+                            _ => Future.value(''),
+                          };
                         },
                       ),
                     );
@@ -108,9 +111,28 @@ void main() {
       );
       expect(result, isNull);
       await tester.tap(confirm);
+      await tester.pump();
+      final navigator = tester.state<NavigatorState>(
+        find.byType(Navigator).first,
+      );
+      unawaited(
+        navigator.push(
+          MaterialPageRoute<void>(
+            builder: (_) => const Scaffold(body: Text('Covered')),
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 400));
+      covered.complete('');
+      await tester.pumpAndSettle();
+      expect(find.text('Covered'), findsOneWidget);
+      expect(result, isNull);
+      navigator.pop();
+      await tester.pumpAndSettle();
+      await tester.tap(confirm);
       await tester.pumpAndSettle();
       expect(result?.map((rule) => rule.value), RulePreset.blockQuic.rawRules);
-      expect(attempts, 2);
+      expect(attempts, 3);
       expect(tester.takeException(), isNull);
     },
   );

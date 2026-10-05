@@ -1060,5 +1060,15 @@
   "rulePresetLanDirect": "LAN 直接接続",
   "rulePresetSystemServicesDirect": "Apple と Microsoft に直接接続",
   "rulePresetBittorrentDirect": "BitTorrent を直接接続",
-  "rulePresetInsertHint": "選択したプリセットを既存のルールの前に追加します。同じルールは重複して追加しません。"
+  "rulePresetInsertHint": "選択したプリセットを既存のルールの前に追加します。同じルールは重複して追加しません。",
+  "overwriteIssueEmptyName": "名前が空です",
+  "overwriteIssueReservedName": "{name} は組み込みポリシー名のため使用できません",
+  "overwriteIssueDuplicateName": "名前 {name} は他のプロキシまたはプロキシグループで使用されています",
+  "overwriteIssueNoProxySource": "プロキシもプロキシプロバイダーも選択されていないため、コアはこのグループを拒否します",
+  "overwriteIssueMissingProxies": "次のプロキシまたはポリシーは存在しません：{names}",
+  "overwriteIssueMissingProviders": "次のプロキシプロバイダーは存在しません：{names}",
+  "overwriteIssueGroupLoop": "プロキシグループが循環参照しています：{path}",
+  "invalidPolicy": "{target} は無効なポリシーです",
+  "invalidRuleSet": "{ruleSet} は無効なルールセットです",
+  "invalidSubRule": "{subRule} は無効な SUB_RULE です"
 }

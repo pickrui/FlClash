@@ -1060,5 +1060,15 @@
   "rulePresetLanDirect": "Локальная сеть напрямую",
   "rulePresetSystemServicesDirect": "Apple и Microsoft напрямую",
   "rulePresetBittorrentDirect": "BitTorrent напрямую",
-  "rulePresetInsertHint": "Выбранные наборы добавляются перед существующими правилами. Одинаковые правила не дублируются."
+  "rulePresetInsertHint": "Выбранные наборы добавляются перед существующими правилами. Одинаковые правила не дублируются.",
+  "overwriteIssueEmptyName": "Имя не задано",
+  "overwriteIssueReservedName": "{name} — встроенное имя политики, его нельзя использовать",
+  "overwriteIssueDuplicateName": "Имя {name} уже занято другим прокси или группой прокси",
+  "overwriteIssueNoProxySource": "Не выбраны ни прокси, ни провайдеры прокси, поэтому ядро отклонит эту группу",
+  "overwriteIssueMissingProxies": "Эти прокси или политики не существуют: {names}",
+  "overwriteIssueMissingProviders": "Эти провайдеры прокси не существуют: {names}",
+  "overwriteIssueGroupLoop": "Группы прокси ссылаются друг на друга по кругу: {path}",
+  "invalidPolicy": "{target} — недопустимая политика",
+  "invalidRuleSet": "{ruleSet} — недопустимый набор правил",
+  "invalidSubRule": "{subRule} — недопустимый SUB_RULE"
 }

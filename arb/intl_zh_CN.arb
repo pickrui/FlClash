@@ -1060,5 +1060,15 @@
   "rulePresetLanDirect": "局域网直连",
   "rulePresetSystemServicesDirect": "Apple 与 Microsoft 直连",
   "rulePresetBittorrentDirect": "BT 下载直连",
-  "rulePresetInsertHint": "所选预设会添加到现有规则之前，相同规则不会重复添加"
+  "rulePresetInsertHint": "所选预设会添加到现有规则之前，相同规则不会重复添加",
+  "overwriteIssueEmptyName": "名称为空",
+  "overwriteIssueReservedName": "{name} 是内置策略名，不能在此使用",
+  "overwriteIssueDuplicateName": "名称 {name} 已被其他代理或策略组使用",
+  "overwriteIssueNoProxySource": "未选择任何代理或代理集，内核会拒绝该策略组",
+  "overwriteIssueMissingProxies": "以下代理或策略不存在：{names}",
+  "overwriteIssueMissingProviders": "以下代理集不存在：{names}",
+  "overwriteIssueGroupLoop": "策略组之间存在循环引用：{path}",
+  "invalidPolicy": "{target} 是一个无效的策略",
+  "invalidRuleSet": "{ruleSet} 不是有效的规则集",
+  "invalidSubRule": "{subRule} 是一个无效的SUB_RULE"
 }

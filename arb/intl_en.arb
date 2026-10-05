@@ -1060,5 +1060,15 @@
   "rulePresetLanDirect": "LAN direct",
   "rulePresetSystemServicesDirect": "Apple and Microsoft direct",
   "rulePresetBittorrentDirect": "BitTorrent direct",
-  "rulePresetInsertHint": "Add selected presets before existing rules. Identical rules are not added again."
+  "rulePresetInsertHint": "Add selected presets before existing rules. Identical rules are not added again.",
+  "overwriteIssueEmptyName": "The name is empty",
+  "overwriteIssueReservedName": "{name} is a built-in policy name and cannot be used here",
+  "overwriteIssueDuplicateName": "The name {name} is already used by another proxy or proxy group",
+  "overwriteIssueNoProxySource": "No proxies or proxy providers are selected, so the core rejects this group",
+  "overwriteIssueMissingProxies": "These proxies or policies do not exist: {names}",
+  "overwriteIssueMissingProviders": "These proxy providers do not exist: {names}",
+  "overwriteIssueGroupLoop": "Proxy groups reference each other in a loop: {path}",
+  "invalidPolicy": "{target} is an invalid policy",
+  "invalidRuleSet": "{ruleSet} is an invalid rule set",
+  "invalidSubRule": "{subRule} is an invalid SUB_RULE"
 }

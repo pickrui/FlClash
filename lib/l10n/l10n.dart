@@ -9123,6 +9123,106 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `The name is empty`
+  String get overwriteIssueEmptyName {
+    return Intl.message(
+      'The name is empty',
+      name: 'overwriteIssueEmptyName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{name} is a built-in policy name and cannot be used here`
+  String overwriteIssueReservedName(Object name) {
+    return Intl.message(
+      '$name is a built-in policy name and cannot be used here',
+      name: 'overwriteIssueReservedName',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `The name {name} is already used by another proxy or proxy group`
+  String overwriteIssueDuplicateName(Object name) {
+    return Intl.message(
+      'The name $name is already used by another proxy or proxy group',
+      name: 'overwriteIssueDuplicateName',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `No proxies or proxy providers are selected, so the core rejects this group`
+  String get overwriteIssueNoProxySource {
+    return Intl.message(
+      'No proxies or proxy providers are selected, so the core rejects this group',
+      name: 'overwriteIssueNoProxySource',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `These proxies or policies do not exist: {names}`
+  String overwriteIssueMissingProxies(Object names) {
+    return Intl.message(
+      'These proxies or policies do not exist: $names',
+      name: 'overwriteIssueMissingProxies',
+      desc: '',
+      args: [names],
+    );
+  }
+
+  /// `These proxy providers do not exist: {names}`
+  String overwriteIssueMissingProviders(Object names) {
+    return Intl.message(
+      'These proxy providers do not exist: $names',
+      name: 'overwriteIssueMissingProviders',
+      desc: '',
+      args: [names],
+    );
+  }
+
+  /// `Proxy groups reference each other in a loop: {path}`
+  String overwriteIssueGroupLoop(Object path) {
+    return Intl.message(
+      'Proxy groups reference each other in a loop: $path',
+      name: 'overwriteIssueGroupLoop',
+      desc: '',
+      args: [path],
+    );
+  }
+
+  /// `{target} is an invalid policy`
+  String invalidPolicy(Object target) {
+    return Intl.message(
+      '$target is an invalid policy',
+      name: 'invalidPolicy',
+      desc: '',
+      args: [target],
+    );
+  }
+
+  /// `{ruleSet} is an invalid rule set`
+  String invalidRuleSet(Object ruleSet) {
+    return Intl.message(
+      '$ruleSet is an invalid rule set',
+      name: 'invalidRuleSet',
+      desc: '',
+      args: [ruleSet],
+    );
+  }
+
+  /// `{subRule} is an invalid SUB_RULE`
+  String invalidSubRule(Object subRule) {
+    return Intl.message(
+      '$subRule is an invalid SUB_RULE',
+      name: 'invalidSubRule',
+      desc: '',
+      args: [subRule],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {
