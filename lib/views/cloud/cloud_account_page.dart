@@ -42,16 +42,36 @@ class CloudAccountPage extends ConsumerStatefulWidget {
   ConsumerState<CloudAccountPage> createState() => _CloudAccountPageState();
 }
 
+enum _ServiceCheckPhase { idle, checking, confirming, syncing }
+
 class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
   /// One retry: enough to ride out a resume, still quick to report a real outage.
   static const _healthCheckAttempts = 2;
   static const _healthCheckRetryDelay = Duration(seconds: 1);
 
-  var _isCheckingService = false;
+  var _checkPhase = _ServiceCheckPhase.idle;
   var _healthCheckPending = false;
   Object? _serviceError;
-  bool _serviceCheckUsedTlsException = false;
+  Object? _tlsException;
   bool _checkedStatus = false;
+  bool _serviceCheckSyncedAccount = false;
+  String? _syncRecoveryError;
+  ({CloudProfile profile, AsyncValue<NodeFilterCatalog> result})?
+  _nodeFilterRecovery;
+
+  bool get _isCheckingService => _checkPhase != _ServiceCheckPhase.idle;
+  bool get _recoveringSubscription =>
+      _checkPhase == _ServiceCheckPhase.confirming ||
+      _checkPhase == _ServiceCheckPhase.syncing;
+  bool get _serviceCheckUsedTlsException => _tlsException != null;
+
+  Object? get _certificateRetryError {
+    final error =
+        _serviceError ?? (_syncRecoveryError != null ? _tlsException : null);
+    return error != null && CloudApiException.certificateFailure(error) != null
+        ? error
+        : null;
+  }
 
   @override
   void initState() {
@@ -64,7 +84,9 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
     ref.listenManual(currentPageLabelProvider, (prev, next) {
       if (prev != next && next == PageLabel.oixCloud) {
         _checkHealth();
-        ref.read(cloudAccountProvider.notifier).refreshProfile();
+        if (!_recoveringSubscription) {
+          ref.read(cloudAccountProvider.notifier).refreshProfile();
+        }
       }
     });
   }
@@ -75,23 +97,58 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
       if (certificateError == null) _healthCheckPending = true;
       return;
     }
-    setState(() => _isCheckingService = true);
+    final service = CloudApiService();
+    final sessionRevision = service.sessionRevision;
+    final recoverSubscription =
+        certificateError != null && ref.read(cloudAccountProvider).isLoggedIn;
+    setState(() {
+      _checkPhase = certificateError == null
+          ? _ServiceCheckPhase.checking
+          : _ServiceCheckPhase.confirming;
+    });
     try {
-      final service = CloudApiService();
       if (certificateError != null) {
-        final allow = await service.confirmInsecureTlsRetry(certificateError);
+        final allow = await service.confirmInsecureTlsRetry(
+          certificateError,
+          actionDescription: recoverSubscription
+              ? AppLocalizations.current.certificateSyncRetryDescription
+              : null,
+        );
         if (!allow || !mounted) return;
+        if (recoverSubscription && service.sessionRevision != sessionRevision) {
+          return;
+        }
       }
       setState(() {
+        _checkPhase = recoverSubscription
+            ? _ServiceCheckPhase.syncing
+            : _ServiceCheckPhase.checking;
         _serviceError = null;
-        _serviceCheckUsedTlsException = false;
+        _tlsException = null;
+        _serviceCheckSyncedAccount = false;
+        _syncRecoveryError = null;
       });
       Object? error;
+      String? syncError;
+      var accountSynced = false;
       for (var attempt = 0; attempt < _healthCheckAttempts; attempt++) {
         try {
           final check = ref.read(cloudServiceHealthCheckProvider);
           if (certificateError != null) {
-            await service.runWithInsecureTls(certificateError, check);
+            await service.runWithInsecureTls(certificateError, () async {
+              await check();
+              if (!recoverSubscription || !mounted) return;
+              if (service.sessionRevision != sessionRevision) {
+                syncError = AppLocalizations.current.cloudApiRequestCanceled;
+                return;
+              }
+              try {
+                syncError = await _syncSubscription();
+                accountSynced = syncError == null;
+              } catch (e) {
+                syncError = CloudApiException.clean(e);
+              }
+            });
           } else {
             await check();
           }
@@ -113,14 +170,15 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
       if (mounted) {
         setState(() {
           _serviceError = error;
-          _serviceCheckUsedTlsException =
-              certificateError != null && error == null;
+          _tlsException = error == null ? certificateError : null;
+          _serviceCheckSyncedAccount = accountSynced;
+          _syncRecoveryError = syncError;
           _checkedStatus = true;
         });
       }
     } finally {
       if (mounted) {
-        setState(() => _isCheckingService = false);
+        setState(() => _checkPhase = _ServiceCheckPhase.idle);
         if (_healthCheckPending) {
           _healthCheckPending = false;
           await _checkHealth();
@@ -129,13 +187,62 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
     }
   }
 
+  Future<String?> _syncSubscription() async {
+    final notifier = ref.read(cloudAccountProvider.notifier);
+    await notifier.refreshManagedSubscription();
+    if (!mounted) return AppLocalizations.current.cloudApiRequestCanceled;
+    final account = ref.read(cloudAccountProvider);
+    if (!account.isLoggedIn) {
+      return AppLocalizations.current.cloudApiRequestCanceled;
+    }
+    if (account.error != null) return account.error;
+    final profile = account.profile;
+    if (profile == null ||
+        account.isLoading ||
+        account.isRefreshing ||
+        account.isSyncing) {
+      return AppLocalizations.current.cloudConfigSyncIncomplete;
+    }
+    if ((profile.planRank ?? 0) < _nodeFilterMinPlanRank) return null;
+    final sessionRevision = CloudApiService().sessionRevision;
+    setState(
+      () => _nodeFilterRecovery = (
+        profile: profile,
+        result: const AsyncLoading<NodeFilterCatalog>(),
+      ),
+    );
+    final result = await AsyncValue.guard(
+      ref.read(cloudNodeFilterApiProvider).fetchNodeFilter,
+    );
+    if (!mounted) return AppLocalizations.current.cloudApiRequestCanceled;
+    if (CloudApiService().sessionRevision != sessionRevision ||
+        !ref.read(cloudAccountProvider).isLoggedIn) {
+      return AppLocalizations.current.cloudApiRequestCanceled;
+    }
+    if (result case AsyncError(:final error)) {
+      if (CloudApiException.isUnauthorized(error)) {
+        await notifier.handleUnauthorized();
+        return AppLocalizations.current.cloudApiRequestCanceled;
+      }
+      if (CloudApiException.isHandledUnauthorized(error)) {
+        return AppLocalizations.current.cloudApiRequestCanceled;
+      }
+    }
+    setState(() => _nodeFilterRecovery = (profile: profile, result: result));
+    return null;
+  }
+
   String? get _serviceWarning {
     if (_serviceError case final error?) {
       return '${AppLocalizations.current.serviceCheckFailed}: ${CloudApiException.clean(error)}';
     }
-    return _serviceCheckUsedTlsException
-        ? AppLocalizations.current.apiAvailableWithCertificateException
-        : null;
+    if (_syncRecoveryError case final error?) {
+      return '${AppLocalizations.current.cloudCertificateSyncFailed}: $error';
+    }
+    if (!_serviceCheckUsedTlsException) return null;
+    return _serviceCheckSyncedAccount
+        ? AppLocalizations.current.cloudSyncedWithCertificateException
+        : AppLocalizations.current.apiAvailableWithCertificateException;
   }
 
   @override
@@ -144,13 +251,19 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
     final accountBusy =
         accountState.isLoading ||
         accountState.isRefreshing ||
-        accountState.isSyncing;
+        accountState.isSyncing ||
+        _recoveringSubscription;
 
     final serviceError = _serviceError;
     final serviceWarning = _serviceWarning;
-    final canRetryCertificate =
-        serviceError != null &&
-        CloudApiException.certificateFailure(serviceError) != null;
+    final certificateRetryError = _certificateRetryError;
+    final certificateError = serviceError ?? _tlsException;
+    final certificateHint =
+        certificateError != null &&
+            CloudApiException.isCertificateVerifyFailed(certificateError)
+        ? CloudApiException.certificateRecoveryHint(certificateError)
+        : null;
+    final serviceFailed = serviceError != null || _syncRecoveryError != null;
 
     return CommonScaffold(
       title: AppLocalizations.current.loggedOutViewTitle, // oixCloud title text
@@ -199,24 +312,48 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
           if (serviceWarning != null)
             MaterialBanner(
               leading: Icon(
-                serviceError != null
-                    ? Icons.error_outline
-                    : Icons.warning_amber,
-                color: serviceError != null
+                serviceFailed ? Icons.error_outline : Icons.warning_amber,
+                color: serviceFailed
                     ? context.colorScheme.error
                     : Colors.orange,
               ),
-              content: Text(serviceWarning),
+              content: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(serviceWarning),
+                  if (certificateHint != null) ...[
+                    const SizedBox(height: 8),
+                    Text(certificateHint),
+                  ],
+                  if (certificateRetryError != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      accountState.isLoggedIn
+                          ? AppLocalizations
+                                .current
+                                .certificateSyncRetryDescription
+                          : AppLocalizations.current.certificateCheckOnlyHint,
+                    ),
+                  ],
+                ],
+              ),
               actions: [
-                if (canRetryCertificate)
+                if (certificateRetryError != null)
                   TextButton(
-                    onPressed: _isCheckingService
+                    onPressed: _isCheckingService || accountBusy
                         ? null
-                        : () => _checkHealth(certificateError: serviceError),
+                        : () => _checkHealth(
+                            certificateError: certificateRetryError,
+                          ),
                     child: Text(
-                      AppLocalizations
-                          .current
-                          .retryWithoutCertificateVerification,
+                      accountState.isLoggedIn
+                          ? AppLocalizations
+                                .current
+                                .retryCloudSyncWithCertificateException
+                          : AppLocalizations
+                                .current
+                                .retryWithoutCertificateVerification,
                     ),
                   ),
                 TextButton(
@@ -241,15 +378,15 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
     if (!_checkedStatus) {
       icon = Icons.help_outline;
       color = Colors.grey;
+    } else if (_serviceError != null || _syncRecoveryError != null) {
+      icon = Icons.error;
+      color = Colors.red;
     } else if (_serviceCheckUsedTlsException) {
       icon = Icons.warning_amber;
       color = Colors.orange;
-    } else if (_serviceError == null) {
+    } else {
       icon = Icons.check_circle;
       color = Colors.green;
-    } else {
-      icon = Icons.error;
-      color = Colors.red;
     }
 
     final String tooltip;
@@ -260,7 +397,7 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
     }
 
     return IconButton(
-      icon: _isCheckingService && _serviceError == null
+      icon: _isCheckingService && _checkPhase != _ServiceCheckPhase.confirming
           ? const SizedBox(
               width: 16,
               height: 16,
@@ -273,14 +410,19 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
   }
 
   Widget _buildLoggedIn(CloudAccountState state) {
-    final busy = state.isLoading || state.isRefreshing || state.isSyncing;
+    final loading =
+        state.isLoading ||
+        state.isRefreshing ||
+        state.isSyncing ||
+        _checkPhase == _ServiceCheckPhase.syncing;
+    final busy = loading || _recoveringSubscription;
     final notifier = ref.read(cloudAccountProvider.notifier);
     final profile = state.profile;
     if (profile == null) {
       return Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
-          child: busy
+          child: loading
               ? const CircularProgressIndicator()
               : ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 360),
@@ -309,13 +451,14 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
                           FilledButton.tonalIcon(
                             icon: const Icon(Icons.refresh),
                             label: Text(AppLocalizations.current.refresh),
-                            onPressed: () =>
-                                notifier.refreshProfile(force: true),
+                            onPressed: busy
+                                ? null
+                                : () => notifier.refreshProfile(force: true),
                           ),
                           OutlinedButton.icon(
                             icon: const Icon(Icons.logout),
                             label: Text(AppLocalizations.current.logoutTitle),
-                            onPressed: _handleLogout,
+                            onPressed: busy ? null : _handleLogout,
                           ),
                         ],
                       ),
@@ -326,7 +469,9 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
       );
     }
     return RefreshIndicator(
-      onRefresh: () => notifier.refreshProfile(force: true),
+      onRefresh: () async {
+        if (!busy) await notifier.refreshProfile(force: true);
+      },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(16),
@@ -362,7 +507,13 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
               ],
               CloudProfileCard(profile: profile),
               if ((profile.planRank ?? 0) >= _nodeFilterMinPlanRank)
-                CloudNodeFilterEntry(profile: profile),
+                CloudNodeFilterEntry(
+                  profile: profile,
+                  enabled: !busy,
+                  recovery: identical(_nodeFilterRecovery?.profile, profile)
+                      ? _nodeFilterRecovery?.result
+                      : null,
+                ),
               const SizedBox(height: 16),
               _buildStoreEntry(),
               if (state.latestNotification case final notice?
@@ -573,8 +724,15 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
 
 class CloudNodeFilterEntry extends ConsumerStatefulWidget {
   final CloudProfile profile;
+  final bool enabled;
+  final AsyncValue<NodeFilterCatalog>? recovery;
 
-  const CloudNodeFilterEntry({super.key, required this.profile});
+  const CloudNodeFilterEntry({
+    super.key,
+    required this.profile,
+    this.enabled = true,
+    this.recovery,
+  });
 
   @override
   ConsumerState<CloudNodeFilterEntry> createState() =>
@@ -589,14 +747,35 @@ class _CloudNodeFilterEntryState extends ConsumerState<CloudNodeFilterEntry> {
   @override
   void initState() {
     super.initState();
-    _load();
+    if (widget.recovery case final recovery?) {
+      _acceptRecovery(recovery);
+    } else {
+      _load();
+    }
   }
 
   @override
   void didUpdateWidget(CloudNodeFilterEntry oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Every account refresh hands over a new profile, and the plan may differ.
-    if (!identical(oldWidget.profile, widget.profile)) _load();
+    if (widget.recovery case final recovery?
+        when !identical(recovery, oldWidget.recovery)) {
+      _acceptRecovery(recovery);
+    } else if (!identical(oldWidget.profile, widget.profile)) {
+      _load();
+    }
+  }
+
+  void _acceptRecovery(AsyncValue<NodeFilterCatalog> recovery) {
+    _generation++;
+    switch (recovery) {
+      case AsyncData(:final value):
+        _catalog = value;
+        _error = null;
+      case AsyncError(:final error):
+        _error = error;
+      case AsyncLoading():
+        _error = null;
+    }
   }
 
   Future<void> _load() async {
@@ -665,7 +844,9 @@ class _CloudNodeFilterEntryState extends ConsumerState<CloudNodeFilterEntry> {
     return Padding(
       padding: const EdgeInsets.only(top: 16),
       child: CommonCard(
-        onPressed: cloudNodeFilterPageBuilder == null ? null : _open,
+        onPressed: !widget.enabled || cloudNodeFilterPageBuilder == null
+            ? null
+            : _open,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(

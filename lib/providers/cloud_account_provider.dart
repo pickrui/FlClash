@@ -232,10 +232,10 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
     }
   }
 
-  Future<void> _addManagedProfile(String url) async {
-    if (!_canFetchManagedConfig) return;
+  Future<Profile?> _addManagedProfile(String url) async {
+    if (!_canFetchManagedConfig) return null;
 
-    await createAndActivateManagedProfile<Profile>(
+    return createAndActivateManagedProfile<Profile>(
       create: ({required requestStartIfNeeded}) {
         return appController.addProfileFormURL(
           url,
@@ -497,7 +497,12 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
         final existing = await _existingCloudProfiles();
         if (existing.isEmpty) {
           if (state.profile != null) {
-            await _addManagedProfile(oixCloudManagedProfileUrl);
+            final added = await _addManagedProfile(oixCloudManagedProfileUrl);
+            if (added == null) {
+              throw CloudApiException(
+                AppLocalizations.current.cloudConfigSyncIncomplete,
+              );
+            }
             await _dedupCloudProfiles(await _existingCloudProfiles());
           }
         } else {

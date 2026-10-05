@@ -598,6 +598,22 @@ class CloudApiException implements Exception {
     };
   }
 
+  static String certificateRecoveryHint(Object error) {
+    return switch (certificateReason(error)) {
+      TlsCertificateFailureReason.expired ||
+      TlsCertificateFailureReason.notYetValid =>
+        appLocalizations.certificateValidityHint,
+      TlsCertificateFailureReason.untrusted =>
+        appLocalizations.certificateUntrustedHint,
+      TlsCertificateFailureReason.hostnameMismatch =>
+        appLocalizations.certificateHostnameHint,
+      TlsCertificateFailureReason.revoked =>
+        appLocalizations.certificateRevokedHint,
+      TlsCertificateFailureReason.unknown =>
+        appLocalizations.certificateUnknownHint,
+    };
+  }
+
   static TlsCertificateFailure? certificateFailure(Object error) {
     if (error is CloudApiException && error.cause != null) {
       return certificateFailure(error.cause!);
@@ -842,21 +858,22 @@ class CloudApiService implements CloudNodeFilterApi {
     return FlClashTemporaryTls.runWithBadCertificateAllowed(failure, action);
   }
 
-  Future<bool> confirmInsecureTlsRetry(Object error) async {
+  Future<bool> confirmInsecureTlsRetry(
+    Object error, {
+    String? actionDescription,
+  }) async {
     if (temporarilyAllowInsecureTls ||
         CloudApiException.certificateFailure(error) == null) {
       return false;
     }
 
-    final reason = CloudApiException.certificateReason(error);
     final allow = await globalState.showMessage(
       title: CloudApiException.certificateMessage(error),
       message: TextSpan(
         text: [
+          CloudApiException.certificateRecoveryHint(error),
+          ?actionDescription,
           appLocalizations.invalidCertificateContent,
-          if (reason == TlsCertificateFailureReason.expired ||
-              reason == TlsCertificateFailureReason.notYetValid)
-            appLocalizations.certificateValidityHint,
         ].join('\n\n'),
       ),
       confirmText: appLocalizations.allowTemporarily,

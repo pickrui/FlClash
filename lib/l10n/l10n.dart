@@ -4459,21 +4459,121 @@ class AppLocalizations {
     );
   }
 
-  /// `Skip Verification and Retry`
+  /// `Temporarily Check API`
   String get retryWithoutCertificateVerification {
     return Intl.message(
-      'Skip Verification and Retry',
+      'Temporarily Check API',
       name: 'retryWithoutCertificateVerification',
       desc: '',
       args: [],
     );
   }
 
-  /// `API reachable with certificate verification bypass allowed for this check. Run Check API again to verify the connection.`
+  /// `The API was reachable with a temporary certificate exception. No account or node configuration was synced. Fix the certificate issue, then check again.`
   String get apiAvailableWithCertificateException {
     return Intl.message(
-      'API reachable with certificate verification bypass allowed for this check. Run Check API again to verify the connection.',
+      'The API was reachable with a temporary certificate exception. No account or node configuration was synced. Fix the certificate issue, then check again.',
       name: 'apiAvailableWithCertificateException',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Try a different network, such as a phone hotspot, and check for system updates. If antivirus software or a company network inspects HTTPS, ask its administrator to check it. If the problem persists, contact the service provider to check the certificate chain.`
+  String get certificateUntrustedHint {
+    return Intl.message(
+      'Try a different network, such as a phone hotspot, and check for system updates. If antivirus software or a company network inspects HTTPS, ask its administrator to check it. If the problem persists, contact the service provider to check the certificate chain.',
+      name: 'certificateUntrustedHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Try a different network and complete any Wi-Fi sign-in first. If the problem persists, contact the service provider to check that the certificate matches the server domain.`
+  String get certificateHostnameHint {
+    return Intl.message(
+      'Try a different network and complete any Wi-Fi sign-in first. If the problem persists, contact the service provider to check that the certificate matches the server domain.',
+      name: 'certificateHostnameHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Contact the service provider to replace the revoked certificate. Retrying or changing the system time will not fix a revoked certificate.`
+  String get certificateRevokedHint {
+    return Intl.message(
+      'Contact the service provider to replace the revoked certificate. Retrying or changing the system time will not fix a revoked certificate.',
+      name: 'certificateRevokedHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check the system date and time, then try a different network. If verification still fails, send this error to the service provider for help.`
+  String get certificateUnknownHint {
+    return Intl.message(
+      'Check the system date and time, then try a different network. If verification still fails, send this error to the service provider for help.',
+      name: 'certificateUnknownHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This action only checks API connectivity. It does not sign in or download node configurations.`
+  String get certificateCheckOnlyHint {
+    return Intl.message(
+      'This action only checks API connectivity. It does not sign in or download node configurations.',
+      name: 'certificateCheckOnlyHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `After confirmation, this attempt checks the connection, refreshes your account, and downloads the node configuration. The certificate exception ends when this sync finishes.`
+  String get certificateSyncRetryDescription {
+    return Intl.message(
+      'After confirmation, this attempt checks the connection, refreshes your account, and downloads the node configuration. The certificate exception ends when this sync finishes.',
+      name: 'certificateSyncRetryDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow Temporarily and Sync`
+  String get retryCloudSyncWithCertificateException {
+    return Intl.message(
+      'Allow Temporarily and Sync',
+      name: 'retryCloudSyncWithCertificateException',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Account and configuration sync completed with a temporary certificate exception. Verification is now restored; resolve the certificate issue before the next sync.`
+  String get cloudSyncedWithCertificateException {
+    return Intl.message(
+      'Account and configuration sync completed with a temporary certificate exception. Verification is now restored; resolve the certificate issue before the next sync.',
+      name: 'cloudSyncedWithCertificateException',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The API check passed, but account or node configuration sync failed: `
+  String get cloudCertificateSyncFailed {
+    return Intl.message(
+      'The API check passed, but account or node configuration sync failed: ',
+      name: 'cloudCertificateSyncFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The node configuration was not downloaded. Resolve the download error and sync again.`
+  String get cloudConfigSyncIncomplete {
+    return Intl.message(
+      'The node configuration was not downloaded. Resolve the download error and sync again.',
+      name: 'cloudConfigSyncIncomplete',
       desc: '',
       args: [],
     );

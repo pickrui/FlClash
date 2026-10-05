@@ -200,7 +200,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "apiAvailable": MessageLookupByLibrary.simpleMessage("API 服务正常"),
     "apiAvailableWithCertificateException":
         MessageLookupByLibrary.simpleMessage(
-          "API 可连接，但本次检测允许跳过证书校验，请点击“检查 API”重新验证连接",
+          "本次临时检测可连接 API，但未同步账户或节点配置，请处理证书问题后重新检测",
         ),
     "app": MessageLookupByLibrary.simpleMessage("应用"),
     "appAccessControl": MessageLookupByLibrary.simpleMessage("应用访问控制"),
@@ -282,13 +282,31 @@ class MessageLookup extends MessageLookupByLibrary {
     "calculatingQuote": MessageLookupByLibrary.simpleMessage("计算中…"),
     "cancel": MessageLookupByLibrary.simpleMessage("取消"),
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage("取消全选"),
+    "certificateCheckOnlyHint": MessageLookupByLibrary.simpleMessage(
+      "此操作只检测 API 连通性，不会登录账户或下载节点配置",
+    ),
     "certificateExpired": MessageLookupByLibrary.simpleMessage("证书已过期"),
+    "certificateHostnameHint": MessageLookupByLibrary.simpleMessage(
+      "先换个网络，并完成 Wi-Fi 登录认证；仍失败请联系服务商检查证书是否匹配服务器域名",
+    ),
     "certificateHostnameMismatch": MessageLookupByLibrary.simpleMessage(
       "证书与请求域名不匹配",
     ),
     "certificateNotYetValid": MessageLookupByLibrary.simpleMessage("证书尚未生效"),
     "certificateRevoked": MessageLookupByLibrary.simpleMessage("证书已被吊销"),
+    "certificateRevokedHint": MessageLookupByLibrary.simpleMessage(
+      "请联系服务商更换已吊销的证书，重复重试或修改系统时间无法解决证书吊销问题",
+    ),
+    "certificateSyncRetryDescription": MessageLookupByLibrary.simpleMessage(
+      "确认后，本次操作会检查连接、刷新账户并下载节点配置，临时证书例外在本次同步结束后失效",
+    ),
+    "certificateUnknownHint": MessageLookupByLibrary.simpleMessage(
+      "请检查系统日期和时间，再换个网络重试；仍无法验证时，请将此错误提供给服务商协助处理",
+    ),
     "certificateUntrusted": MessageLookupByLibrary.simpleMessage("证书链不受信任"),
+    "certificateUntrustedHint": MessageLookupByLibrary.simpleMessage(
+      "先换用手机热点等其他网络重试，并检查系统更新；若安全软件或公司网络会检查 HTTPS，请联系管理员确认；仍失败请联系服务商检查完整证书链",
+    ),
     "certificateValidityHint": MessageLookupByLibrary.simpleMessage(
       "请先同步系统日期和时间，如果时间正确，则需要服务端修复证书",
     ),
@@ -394,6 +412,15 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "cloudApiTlsProtocolFailed": MessageLookupByLibrary.simpleMessage(
       "TLS 协议不兼容或 TLS 响应无效",
+    ),
+    "cloudCertificateSyncFailed": MessageLookupByLibrary.simpleMessage(
+      "API 检测已通过，但账户或节点配置同步失败",
+    ),
+    "cloudConfigSyncIncomplete": MessageLookupByLibrary.simpleMessage(
+      "未能获取节点配置，请处理下载时的错误提示后重新同步",
+    ),
+    "cloudSyncedWithCertificateException": MessageLookupByLibrary.simpleMessage(
+      "本次已临时完成账户和配置同步，现已恢复证书校验，请在下次同步前处理证书问题",
     ),
     "codeSent": MessageLookupByLibrary.simpleMessage("验证码已发送"),
     "color": MessageLookupByLibrary.simpleMessage("颜色"),
@@ -1256,8 +1283,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "restoreStrategy_compatible": MessageLookupByLibrary.simpleMessage("兼容"),
     "restoreStrategy_override": MessageLookupByLibrary.simpleMessage("覆盖"),
     "restoreSuccess": MessageLookupByLibrary.simpleMessage("恢复成功"),
+    "retryCloudSyncWithCertificateException":
+        MessageLookupByLibrary.simpleMessage("临时允许并同步配置"),
     "retryWithoutCertificateVerification": MessageLookupByLibrary.simpleMessage(
-      "临时跳过并重试",
+      "仅临时检测 API",
     ),
     "reverseEngineeringNotice": MessageLookupByLibrary.simpleMessage(
       "严禁对本应用进行逆向工程、反编译、反汇编或借助 AI 工具分析",

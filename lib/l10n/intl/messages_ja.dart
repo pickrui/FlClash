@@ -206,10 +206,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "amountPayable": MessageLookupByLibrary.simpleMessage("今回のお支払い"),
     "announcement": MessageLookupByLibrary.simpleMessage("お知らせ"),
     "apiAvailable": MessageLookupByLibrary.simpleMessage("APIサービスは正常です"),
-    "apiAvailableWithCertificateException":
-        MessageLookupByLibrary.simpleMessage(
-          "今回の確認では証明書検証のスキップを許可して API に接続できました。「APIをチェック」で接続を再検証してください。",
-        ),
+    "apiAvailableWithCertificateException": MessageLookupByLibrary.simpleMessage(
+      "一時的な証明書の例外で API に接続できました。アカウントやノード設定は同期していません。証明書の問題を解決してから再確認してください。",
+    ),
     "app": MessageLookupByLibrary.simpleMessage("アプリ"),
     "appAccessControl": MessageLookupByLibrary.simpleMessage("アプリアクセス制御"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage("システムDNSを追加"),
@@ -294,8 +293,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "calculatingQuote": MessageLookupByLibrary.simpleMessage("計算中…"),
     "cancel": MessageLookupByLibrary.simpleMessage("キャンセル"),
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage("全選択解除"),
+    "certificateCheckOnlyHint": MessageLookupByLibrary.simpleMessage(
+      "この操作は API の接続確認のみです。アカウントへのログインやノード設定のダウンロードは行いません。",
+    ),
     "certificateExpired": MessageLookupByLibrary.simpleMessage(
       "証明書の有効期限が切れています",
+    ),
+    "certificateHostnameHint": MessageLookupByLibrary.simpleMessage(
+      "別のネットワークを試し、Wi-Fi のログイン認証を完了してください。解決しない場合はサービス提供元に証明書とサーバードメインの一致を確認してもらってください。",
     ),
     "certificateHostnameMismatch": MessageLookupByLibrary.simpleMessage(
       "証明書が接続先ドメインと一致しません",
@@ -304,8 +309,20 @@ class MessageLookup extends MessageLookupByLibrary {
       "証明書はまだ有効ではありません",
     ),
     "certificateRevoked": MessageLookupByLibrary.simpleMessage("証明書は失効しています"),
+    "certificateRevokedHint": MessageLookupByLibrary.simpleMessage(
+      "サービス提供元に失効した証明書の交換を依頼してください。再試行やシステム時刻の変更では解決しません。",
+    ),
+    "certificateSyncRetryDescription": MessageLookupByLibrary.simpleMessage(
+      "確認後、接続確認、アカウント更新、ノード設定のダウンロードを行います。一時的な証明書の例外は今回の同期終了時に解除されます。",
+    ),
+    "certificateUnknownHint": MessageLookupByLibrary.simpleMessage(
+      "システムの日時を確認し、別のネットワークで再試行してください。引き続き検証できない場合は、このエラーをサービス提供元に伝えてください。",
+    ),
     "certificateUntrusted": MessageLookupByLibrary.simpleMessage(
       "証明書チェーンを信頼できません",
+    ),
+    "certificateUntrustedHint": MessageLookupByLibrary.simpleMessage(
+      "スマートフォンのテザリングなど別のネットワークで再試行し、システム更新を確認してください。セキュリティソフトや社内ネットワークが HTTPS を検査する場合は管理者に確認してください。解決しない場合はサービス提供元に証明書チェーンの確認を依頼してください。",
     ),
     "certificateValidityHint": MessageLookupByLibrary.simpleMessage(
       "まずシステムの日付と時刻を同期してください。時刻が正しい場合は、サーバー証明書の修正が必要です。",
@@ -456,6 +473,15 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "cloudApiTlsProtocolFailed": MessageLookupByLibrary.simpleMessage(
       "TLS プロトコルに互換性がないか、TLS 応答が無効です",
+    ),
+    "cloudCertificateSyncFailed": MessageLookupByLibrary.simpleMessage(
+      "API の接続確認には成功しましたが、アカウントまたはノード設定の同期に失敗しました",
+    ),
+    "cloudConfigSyncIncomplete": MessageLookupByLibrary.simpleMessage(
+      "ノード設定をダウンロードできませんでした。ダウンロード時のエラーを解決してから再同期してください。",
+    ),
+    "cloudSyncedWithCertificateException": MessageLookupByLibrary.simpleMessage(
+      "一時的な証明書の例外でアカウントと設定を同期しました。証明書の検証は復元されています。次回の同期前に証明書の問題を解決してください。",
     ),
     "codeSent": MessageLookupByLibrary.simpleMessage("認証コードを送信しました"),
     "color": MessageLookupByLibrary.simpleMessage("カラー"),
@@ -1442,8 +1468,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "restoreStrategy_compatible": MessageLookupByLibrary.simpleMessage("互換"),
     "restoreStrategy_override": MessageLookupByLibrary.simpleMessage("上書き"),
     "restoreSuccess": MessageLookupByLibrary.simpleMessage("復元に成功しました"),
+    "retryCloudSyncWithCertificateException":
+        MessageLookupByLibrary.simpleMessage("一時的に許可して設定を同期"),
     "retryWithoutCertificateVerification": MessageLookupByLibrary.simpleMessage(
-      "検証をスキップして再試行",
+      "API を一時的に確認",
     ),
     "reverseEngineeringNotice": MessageLookupByLibrary.simpleMessage(
       "本アプリのリバースエンジニアリング、逆コンパイル、逆アセンブル、および AI を用いた解析を嚴禁します",

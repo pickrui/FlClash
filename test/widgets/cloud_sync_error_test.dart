@@ -96,10 +96,11 @@ void main() {
     'certificate retry requires consent and cancel preserves the error',
     (tester) async {
       var checks = 0;
+      final account = _RecoveryAccount();
       await _pumpCloudPage(tester, () async {
         checks++;
         throw _certificateError();
-      });
+      }, account: account);
       await tester.pumpAndSettle();
       expect(checks, 1);
       expect(find.text('Allow Temporarily'), findsNothing);
@@ -107,7 +108,7 @@ void main() {
         find.text('Service Check Failed: Direct: Certificate has expired'),
         findsOneWidget,
       );
-      await tester.tap(find.text('Skip Verification and Retry'));
+      await tester.tap(find.text('Allow Temporarily and Sync'));
       await tester.pumpAndSettle();
       expect(find.text('Certificate has expired'), findsOneWidget);
       expect(
@@ -119,13 +120,15 @@ void main() {
           'synchronize the system date and time',
           findRichText: true,
         ),
-        findsOneWidget,
+        findsWidgets,
       );
       expect(checks, 1);
       await tester.tap(find.text('Cancel').last);
       await tester.pumpAndSettle();
       expect(checks, 1);
-      expect(find.text('Skip Verification and Retry'), findsOneWidget);
+      expect(account.refreshAttempts, isEmpty);
+      expect(account.syncAttempts, isEmpty);
+      expect(find.text('Allow Temporarily and Sync'), findsOneWidget);
       expect(FlClashTemporaryTls.allowBadCertificate, isFalse);
     },
   );
@@ -139,7 +142,7 @@ void main() {
       if (attempts.length == 1) throw _certificateError();
     });
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Skip Verification and Retry'));
+    await tester.tap(find.text('Allow Temporarily and Sync'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Allow Temporarily'));
     await tester.pumpAndSettle();
@@ -148,7 +151,7 @@ void main() {
     expect(find.byIcon(Icons.check_circle), findsNothing);
     expect(find.byIcon(Icons.warning_amber), findsNWidgets(2));
     expect(
-      find.text(AppLocalizations.current.apiAvailableWithCertificateException),
+      find.text(AppLocalizations.current.cloudSyncedWithCertificateException),
       findsOneWidget,
     );
     await tester.tap(find.widgetWithText(TextButton, 'Check API'));
@@ -171,7 +174,7 @@ void main() {
         );
       });
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Skip Verification and Retry'));
+      await tester.tap(find.text('Allow Temporarily and Sync'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Allow Temporarily'));
       await tester.pumpAndSettle();
@@ -188,6 +191,252 @@ void main() {
     },
   );
 
+  testWidgets('temporary recovery waits for the configuration download', (
+    tester,
+  ) async {
+    final account = _RecoveryAccount()..syncGate = Completer<void>();
+    final attempts = <bool>[];
+    await _pumpCloudPage(tester, () async {
+      attempts.add(FlClashTemporaryTls.allowBadCertificate);
+      if (attempts.length == 1) throw _certificateError();
+    }, account: account);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Allow Temporarily and Sync'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Allow Temporarily'));
+    await tester.pump();
+    expect(account.refreshAttempts, [true]);
+    expect(account.syncAttempts, [true]);
+    expect(
+      find.text(AppLocalizations.current.cloudSyncedWithCertificateException),
+      findsNothing,
+    );
+    expect(
+      tester
+          .widget<IconButton>(find.widgetWithIcon(IconButton, Icons.sync_alt))
+          .onPressed,
+      isNull,
+    );
+    account.syncGate!.complete();
+    await tester.pumpAndSettle();
+    expect(
+      find.text(AppLocalizations.current.cloudSyncedWithCertificateException),
+      findsOneWidget,
+    );
+    expect(FlClashTemporaryTls.allowBadCertificate, isFalse);
+    await tester.tap(find.byTooltip('Sync'));
+    await tester.pumpAndSettle();
+    expect(account.refreshAttempts, [true, false]);
+    expect(account.syncAttempts, [true, false]);
+  });
+
+  for (final refreshFails in [true, false]) {
+    testWidgets(
+      'temporary recovery reports a failed ${refreshFails ? 'account refresh' : 'configuration download'}',
+      (tester) async {
+        final account = _RecoveryAccount();
+        if (refreshFails) {
+          account.refreshError = 'Account request failed';
+        } else {
+          account.syncError = 'Configuration download failed';
+        }
+        var checks = 0;
+        await _pumpCloudPage(tester, () async {
+          if (++checks == 1) throw _certificateError();
+        }, account: account);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Allow Temporarily and Sync'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Allow Temporarily'));
+        await tester.pumpAndSettle();
+        expect(account.refreshAttempts, [true]);
+        expect(account.syncAttempts, refreshFails ? isEmpty : [true]);
+        expect(
+          find.textContaining(
+            AppLocalizations.current.cloudCertificateSyncFailed,
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.textContaining(account.refreshError ?? account.syncError!),
+          findsNWidgets(2),
+        );
+        expect(
+          find.text(
+            AppLocalizations.current.cloudSyncedWithCertificateException,
+          ),
+          findsNothing,
+        );
+        expect(find.byIcon(Icons.check_circle), findsNothing);
+        expect(find.byIcon(Icons.error), findsOneWidget);
+        expect(FlClashTemporaryTls.allowBadCertificate, isFalse);
+        account.refreshError = null;
+        account.syncError = null;
+        await tester.tap(find.text('Allow Temporarily and Sync'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Allow Temporarily'));
+        await tester.pumpAndSettle();
+        expect(account.refreshAttempts, [true, true]);
+        expect(account.syncAttempts, refreshFails ? [true] : [true, true]);
+        expect(
+          find.text(
+            AppLocalizations.current.cloudSyncedWithCertificateException,
+          ),
+          findsOneWidget,
+        );
+      },
+    );
+  }
+
+  testWidgets(
+    'an empty account refresh cannot report recovered configuration',
+    (tester) async {
+      final account = _RecoveryAccount()..returnEmptyProfile = true;
+      var checks = 0;
+      await _pumpCloudPage(tester, () async {
+        if (++checks == 1) throw _certificateError();
+      }, account: account);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Allow Temporarily and Sync'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Allow Temporarily'));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining(AppLocalizations.current.cloudConfigSyncIncomplete),
+        findsOneWidget,
+      );
+      expect(
+        find.text(AppLocalizations.current.cloudSyncedWithCertificateException),
+        findsNothing,
+      );
+    },
+  );
+
+  testWidgets('temporary recovery also refreshes the failed node filter', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final account = _RecoveryAccount()
+      ..syncGate = Completer<void>()
+      ..initialProfile = _profile(planRank: 40);
+    final api = _RecoveryNodeFilterApi();
+    var checks = 0;
+    await _pumpCloudPage(
+      tester,
+      () async {
+        if (++checks == 1) throw _certificateError();
+      },
+      account: account,
+      nodeFilterApi: api,
+    );
+    await tester.pumpAndSettle();
+    expect(api.attempts, [false]);
+    await tester.tap(find.text('Allow Temporarily and Sync'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Allow Temporarily'));
+    await tester.pump();
+    account.syncGate!.complete();
+    await tester.idle();
+    expect(api.attempts, [false, true]);
+    await tester.pumpAndSettle();
+    expect(
+      find.text(AppLocalizations.current.nodeFilterSmartSelection),
+      findsOneWidget,
+    );
+    expect(
+      find.text(AppLocalizations.current.cloudSyncedWithCertificateException),
+      findsOneWidget,
+    );
+    expect(FlClashTemporaryTls.allowBadCertificate, isFalse);
+  });
+
+  for (final changeDuringConsent in [true, false]) {
+    testWidgets(
+      'account change during ${changeDuringConsent ? 'consent' : 'API check'} cancels recovery',
+      (tester) async {
+        final service = CloudApiService();
+        addTearDown(() => service.setToken(null));
+        final account = _RecoveryAccount();
+        final pending = Completer<void>();
+        var checks = 0;
+        await _pumpCloudPage(tester, () async {
+          if (++checks == 1) throw _certificateError();
+          if (!changeDuringConsent) await pending.future;
+        }, account: account);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Allow Temporarily and Sync'));
+        await tester.pumpAndSettle();
+        if (changeDuringConsent) service.setToken('replacement-session');
+        await tester.tap(find.text('Allow Temporarily'));
+        await tester.pump();
+        if (!changeDuringConsent) {
+          service.setToken('replacement-session');
+          pending.complete();
+        }
+        await tester.pumpAndSettle();
+        expect(checks, changeDuringConsent ? 1 : 2);
+        expect(account.refreshAttempts, isEmpty);
+        expect(account.syncAttempts, isEmpty);
+        expect(
+          find.text(
+            AppLocalizations.current.cloudSyncedWithCertificateException,
+          ),
+          findsNothing,
+        );
+        expect(FlClashTemporaryTls.allowBadCertificate, isFalse);
+      },
+    );
+  }
+
+  testWidgets('a logged-out certificate retry only checks the API', (
+    tester,
+  ) async {
+    final account = _LoggedOutAccount();
+    var checks = 0;
+    await _pumpCloudPage(tester, () async {
+      if (++checks == 1) throw _certificateError();
+    }, account: account);
+    await tester.pumpAndSettle();
+    expect(
+      find.text(AppLocalizations.current.certificateCheckOnlyHint),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('Temporarily Check API'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Allow Temporarily'));
+    await tester.pumpAndSettle();
+    expect(checks, 2);
+    expect(account.refreshAttempts, isEmpty);
+    expect(account.syncAttempts, isEmpty);
+    expect(
+      find.text(AppLocalizations.current.apiAvailableWithCertificateException),
+      findsOneWidget,
+    );
+    expect(FlClashTemporaryTls.allowBadCertificate, isFalse);
+  });
+
+  testWidgets('untrusted certificate guidance is visible before retry', (
+    tester,
+  ) async {
+    await _pumpCloudPage(
+      tester,
+      () async =>
+          throw _certificateError('unable to get local issuer certificate'),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.text(AppLocalizations.current.certificateUntrustedHint),
+      findsOneWidget,
+    );
+    expect(
+      find.text(AppLocalizations.current.certificateValidityHint),
+      findsNothing,
+    );
+  });
+
   testWidgets('a certificate message alone cannot enable bypass', (
     tester,
   ) async {
@@ -196,7 +445,7 @@ void main() {
       () async => throw Exception('CERTIFICATE_VERIFY_FAILED'),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Skip Verification and Retry'), findsNothing);
+    expect(find.text('Allow Temporarily and Sync'), findsNothing);
     expect(find.byType(MaterialBanner), findsOneWidget);
   });
 
@@ -209,7 +458,7 @@ void main() {
         if (attempts.length == 1) throw _certificateError();
       });
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Skip Verification and Retry'));
+      await tester.tap(find.text('Allow Temporarily and Sync'));
       await tester.pumpAndSettle();
       container
           .read(currentPageLabelProvider.notifier)
@@ -239,14 +488,15 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
       await _pumpCloudPage(
         tester,
-        () async => throw _certificateError(),
+        () async =>
+            throw _certificateError('unable to get local issuer certificate'),
         locale: locale,
       );
       await tester.pumpAndSettle();
       final l = AppLocalizations.current;
-      await tester.tap(find.text(l.retryWithoutCertificateVerification));
+      await tester.tap(find.text(l.retryCloudSyncWithCertificateException));
       await tester.pumpAndSettle();
-      expect(find.text(l.certificateExpired), findsOneWidget);
+      expect(find.text(l.certificateUntrusted), findsOneWidget);
       expect(find.text(l.allowTemporarily), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.tap(find.text(l.cancel).last);
@@ -310,6 +560,8 @@ Future<ProviderContainer> _pumpCloudPage(
   WidgetTester tester,
   Future<void> Function() healthCheck, {
   Locale locale = const Locale('en'),
+  CloudAccountNotifier? account,
+  CloudNodeFilterApi? nodeFilterApi,
 }) async {
   SharedPreferences.setMockInitialValues({});
   await tester.pumpWidget(
@@ -319,8 +571,10 @@ Future<ProviderContainer> _pumpCloudPage(
         viewSizeProvider.overrideWithBuild(
           (_, _) => tester.view.physicalSize / tester.view.devicePixelRatio,
         ),
-        cloudAccountProvider.overrideWith(_FailedAccount.new),
+        cloudAccountProvider.overrideWith(() => account ?? _RecoveryAccount()),
         cloudServiceHealthCheckProvider.overrideWithValue(healthCheck),
+        if (nodeFilterApi != null)
+          cloudNodeFilterApiProvider.overrideWithValue(nodeFilterApi),
       ],
       child: const CloudAccountPage(),
     ),
@@ -341,6 +595,81 @@ class _FailedAccount extends CloudAccountNotifier {
   Future<void> refreshProfile({bool force = false}) async {
     retries++;
   }
+}
+
+class _RecoveryAccount extends _FailedAccount {
+  final refreshAttempts = <bool>[];
+  final syncAttempts = <bool>[];
+  Completer<void>? syncGate;
+  String? syncError;
+  String? refreshError;
+  CloudProfile? initialProfile;
+  bool returnEmptyProfile = false;
+
+  @override
+  CloudAccountState build() => super.build().copyWith(profile: initialProfile);
+
+  @override
+  Future<void> refreshProfile({bool force = false}) async {
+    refreshAttempts.add(FlClashTemporaryTls.allowBadCertificate);
+    state = state.copyWith(
+      error: refreshError,
+      profile: refreshError == null && !returnEmptyProfile
+          ? initialProfile ?? _profile()
+          : state.profile,
+    );
+  }
+
+  @override
+  Future<void> syncManagedConfig() async {
+    syncAttempts.add(FlClashTemporaryTls.allowBadCertificate);
+    await syncGate?.future;
+    state = state.copyWith(error: syncError);
+  }
+}
+
+CloudProfile _profile({int planRank = 10}) => CloudProfile(
+  subscription: 'Fixture',
+  planCode: 'gold',
+  planRank: planRank,
+  nodeAccess: const ['fusion'],
+  expireTime: DateTime.utc(2030),
+  todayUsed: '0 B',
+  totalUsed: '0 B',
+  totalTraffic: '1 GB',
+  usageProgress: 0,
+  remaining: '1 GB',
+  balance: '0',
+  commission: '0',
+  points: '0',
+);
+
+class _RecoveryNodeFilterApi implements CloudNodeFilterApi {
+  final attempts = <bool>[];
+
+  @override
+  Future<NodeFilterCatalog> fetchNodeFilter() async {
+    attempts.add(FlClashTemporaryTls.allowBadCertificate);
+    if (!FlClashTemporaryTls.allowBadCertificate) throw _certificateError();
+    return NodeFilterCatalog.fromJson({
+      'available': true,
+      'customized': false,
+      'filter': <String, dynamic>{},
+      'lines': <dynamic>[],
+      'regions': <dynamic>[],
+      'nodes': <dynamic>[],
+      'kept': 0,
+      'total': 0,
+    });
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _LoggedOutAccount extends _RecoveryAccount {
+  @override
+  CloudAccountState build() => const CloudAccountState();
 }
 
 class _Certificate implements X509Certificate {

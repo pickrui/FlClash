@@ -242,7 +242,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "API service is operational",
     ),
     "apiAvailableWithCertificateException": MessageLookupByLibrary.simpleMessage(
-      "API reachable with certificate verification bypass allowed for this check. Run Check API again to verify the connection.",
+      "The API was reachable with a temporary certificate exception. No account or node configuration was synced. Fix the certificate issue, then check again.",
     ),
     "app": MessageLookupByLibrary.simpleMessage("App"),
     "appAccessControl": MessageLookupByLibrary.simpleMessage(
@@ -356,8 +356,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage(
       "Cancel select all",
     ),
+    "certificateCheckOnlyHint": MessageLookupByLibrary.simpleMessage(
+      "This action only checks API connectivity. It does not sign in or download node configurations.",
+    ),
     "certificateExpired": MessageLookupByLibrary.simpleMessage(
       "Certificate has expired",
+    ),
+    "certificateHostnameHint": MessageLookupByLibrary.simpleMessage(
+      "Try a different network and complete any Wi-Fi sign-in first. If the problem persists, contact the service provider to check that the certificate matches the server domain.",
     ),
     "certificateHostnameMismatch": MessageLookupByLibrary.simpleMessage(
       "Certificate does not match the requested domain",
@@ -368,8 +374,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "certificateRevoked": MessageLookupByLibrary.simpleMessage(
       "Certificate has been revoked",
     ),
+    "certificateRevokedHint": MessageLookupByLibrary.simpleMessage(
+      "Contact the service provider to replace the revoked certificate. Retrying or changing the system time will not fix a revoked certificate.",
+    ),
+    "certificateSyncRetryDescription": MessageLookupByLibrary.simpleMessage(
+      "After confirmation, this attempt checks the connection, refreshes your account, and downloads the node configuration. The certificate exception ends when this sync finishes.",
+    ),
+    "certificateUnknownHint": MessageLookupByLibrary.simpleMessage(
+      "Check the system date and time, then try a different network. If verification still fails, send this error to the service provider for help.",
+    ),
     "certificateUntrusted": MessageLookupByLibrary.simpleMessage(
       "Certificate chain is not trusted",
+    ),
+    "certificateUntrustedHint": MessageLookupByLibrary.simpleMessage(
+      "Try a different network, such as a phone hotspot, and check for system updates. If antivirus software or a company network inspects HTTPS, ask its administrator to check it. If the problem persists, contact the service provider to check the certificate chain.",
     ),
     "certificateValidityHint": MessageLookupByLibrary.simpleMessage(
       "First synchronize the system date and time. If the time is correct, the server certificate needs to be fixed.",
@@ -528,6 +546,15 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "cloudApiTlsProtocolFailed": MessageLookupByLibrary.simpleMessage(
       "Incompatible TLS protocol or invalid TLS response",
+    ),
+    "cloudCertificateSyncFailed": MessageLookupByLibrary.simpleMessage(
+      "The API check passed, but account or node configuration sync failed: ",
+    ),
+    "cloudConfigSyncIncomplete": MessageLookupByLibrary.simpleMessage(
+      "The node configuration was not downloaded. Resolve the download error and sync again.",
+    ),
+    "cloudSyncedWithCertificateException": MessageLookupByLibrary.simpleMessage(
+      "Account and configuration sync completed with a temporary certificate exception. Verification is now restored; resolve the certificate issue before the next sync.",
     ),
     "codeSent": MessageLookupByLibrary.simpleMessage("Verification code sent"),
     "color": MessageLookupByLibrary.simpleMessage("Color"),
@@ -1742,8 +1769,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Override",
     ),
     "restoreSuccess": MessageLookupByLibrary.simpleMessage("Restore success"),
+    "retryCloudSyncWithCertificateException":
+        MessageLookupByLibrary.simpleMessage("Allow Temporarily and Sync"),
     "retryWithoutCertificateVerification": MessageLookupByLibrary.simpleMessage(
-      "Skip Verification and Retry",
+      "Temporarily Check API",
     ),
     "reverseEngineeringNotice": MessageLookupByLibrary.simpleMessage(
       "Reverse engineering, decompilation, disassembly, or AI-assisted analysis of this application is strictly prohibited.",

@@ -244,7 +244,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "API-сервис работает нормально",
     ),
     "apiAvailableWithCertificateException": MessageLookupByLibrary.simpleMessage(
-      "API доступен, но для этой проверки был разрешён пропуск проверки сертификата. Нажмите «Проверить API», чтобы проверить соединение снова.",
+      "API доступен с временным исключением для сертификата. Аккаунт и конфигурация узлов не синхронизированы. Устраните проблему с сертификатом и повторите проверку.",
     ),
     "app": MessageLookupByLibrary.simpleMessage("Приложение"),
     "appAccessControl": MessageLookupByLibrary.simpleMessage(
@@ -360,8 +360,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage(
       "Отменить выбор всего",
     ),
+    "certificateCheckOnlyHint": MessageLookupByLibrary.simpleMessage(
+      "Это действие только проверяет доступность API. Вход в аккаунт и загрузка конфигурации узлов не выполняются.",
+    ),
     "certificateExpired": MessageLookupByLibrary.simpleMessage(
       "Срок действия сертификата истёк",
+    ),
+    "certificateHostnameHint": MessageLookupByLibrary.simpleMessage(
+      "Попробуйте другую сеть и завершите авторизацию Wi-Fi. Если ошибка остаётся, попросите поставщика сервиса проверить соответствие сертификата домену сервера.",
     ),
     "certificateHostnameMismatch": MessageLookupByLibrary.simpleMessage(
       "Сертификат не соответствует запрошенному домену",
@@ -372,8 +378,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "certificateRevoked": MessageLookupByLibrary.simpleMessage(
       "Сертификат отозван",
     ),
+    "certificateRevokedHint": MessageLookupByLibrary.simpleMessage(
+      "Попросите поставщика сервиса заменить отозванный сертификат. Повторные попытки или изменение времени системы не устранят отзыв сертификата.",
+    ),
+    "certificateSyncRetryDescription": MessageLookupByLibrary.simpleMessage(
+      "После подтверждения будут проверены соединение, обновлены данные аккаунта и загружена конфигурация узлов. Исключение для сертификата отменяется по завершении этой синхронизации.",
+    ),
+    "certificateUnknownHint": MessageLookupByLibrary.simpleMessage(
+      "Проверьте дату и время системы и попробуйте другую сеть. Если проверка по-прежнему не проходит, передайте эту ошибку поставщику сервиса.",
+    ),
     "certificateUntrusted": MessageLookupByLibrary.simpleMessage(
       "Цепочка сертификатов не является доверенной",
+    ),
+    "certificateUntrustedHint": MessageLookupByLibrary.simpleMessage(
+      "Попробуйте другую сеть, например точку доступа телефона, и проверьте обновления системы. Если антивирус или корпоративная сеть проверяет HTTPS, обратитесь к администратору. Если ошибка остаётся, попросите поставщика сервиса проверить цепочку сертификатов.",
     ),
     "certificateValidityHint": MessageLookupByLibrary.simpleMessage(
       "Сначала синхронизируйте системную дату и время. Если время верное, необходимо исправить сертификат на сервере.",
@@ -538,6 +556,15 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "cloudApiTlsProtocolFailed": MessageLookupByLibrary.simpleMessage(
       "Несовместимый протокол TLS или некорректный ответ TLS",
+    ),
+    "cloudCertificateSyncFailed": MessageLookupByLibrary.simpleMessage(
+      "Проверка API пройдена, но синхронизация аккаунта или конфигурации узлов не удалась: ",
+    ),
+    "cloudConfigSyncIncomplete": MessageLookupByLibrary.simpleMessage(
+      "Конфигурация узлов не загружена. Устраните ошибку загрузки и повторите синхронизацию.",
+    ),
+    "cloudSyncedWithCertificateException": MessageLookupByLibrary.simpleMessage(
+      "Аккаунт и конфигурация синхронизированы с временным исключением для сертификата. Проверка восстановлена; устраните проблему до следующей синхронизации.",
     ),
     "codeSent": MessageLookupByLibrary.simpleMessage(
       "Код подтверждения отправлен",
@@ -1821,8 +1848,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "restoreSuccess": MessageLookupByLibrary.simpleMessage(
       "Восстановление успешно",
     ),
+    "retryCloudSyncWithCertificateException":
+        MessageLookupByLibrary.simpleMessage(
+          "Временно разрешить и синхронизировать",
+        ),
     "retryWithoutCertificateVerification": MessageLookupByLibrary.simpleMessage(
-      "Пропустить проверку и повторить",
+      "Временно проверить API",
     ),
     "reverseEngineeringNotice": MessageLookupByLibrary.simpleMessage(
       "Обратная разработка, декомпиляция, дизассемблирование или анализ этого приложения с помощью ИИ строго запрещены.",
