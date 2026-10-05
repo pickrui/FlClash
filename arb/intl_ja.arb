@@ -1052,5 +1052,13 @@
   "tailscaleAuthKeyInvalid": "認証キーの形式が正しくありません",
   "tailscaleDirect": "直接接続",
   "tailscaleRelay": "リレー {region}",
-  "tailscaleExitNodeActive": "使用中の出口ノード"
+  "tailscaleExitNodeActive": "使用中の出口ノード",
+  "quickAdd": "クイック追加",
+  "rulePresetBlockQuic": "QUIC をブロック",
+  "rulePresetBlockStun": "STUN をブロック",
+  "rulePresetBlockDot": "DNS over TLS をブロック",
+  "rulePresetLanDirect": "LAN 直接接続",
+  "rulePresetSystemServicesDirect": "Apple と Microsoft に直接接続",
+  "rulePresetBittorrentDirect": "BitTorrent を直接接続",
+  "rulePresetInsertHint": "選択したプリセットを既存のルールの前に追加します。同じルールは重複して追加しません。"
 }

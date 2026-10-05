@@ -6,6 +6,7 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/features/overwrite/proxy_group_editor.dart';
 import 'package:fl_clash/features/overwrite/routing_draft.dart';
+import 'package:fl_clash/features/overwrite/rule_preset.dart';
 import 'package:fl_clash/features/overwrite/custom_rule_editor.dart';
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -569,6 +570,36 @@ class CustomRulesView extends ConsumerWidget {
     });
   }
 
+  Future<void> _addPresets(BuildContext context, WidgetRef ref) async {
+    Profile? validatedProfile;
+    List<Rule>? candidateRules;
+    final selected = await globalState.showCommonDialog<List<Rule>>(
+      child: RulePresetDialog(
+        validate: (rules) async {
+          if (!context.mounted) return appLocalizations.routingChanged;
+          final current = ref.read(profileProvider(profileId));
+          if (current == null) return appLocalizations.routingChanged;
+          final candidate = insertRulePresets(current.customRules, rules);
+          final error = await validateCustomRoutingDraft(
+            ref,
+            current.copyWith(customRules: candidate),
+          );
+          if (error.isEmpty) {
+            validatedProfile = current;
+            candidateRules = candidate;
+          }
+          return error;
+        },
+      ),
+    );
+    if (selected == null || !context.mounted || candidateRules == null) return;
+    if (ref.read(profileProvider(profileId)) != validatedProfile) {
+      context.showNotifier(appLocalizations.routingChanged);
+      return;
+    }
+    _update(ref, candidateRules!);
+  }
+
   Future<void> _edit(BuildContext context, WidgetRef ref, [Rule? rule]) async {
     final setupAction = context.setupAction;
 
@@ -680,6 +711,11 @@ class CustomRulesView extends ConsumerWidget {
     return CommonScaffold(
       title: appLocalizations.rule,
       actions: [
+        IconButton(
+          tooltip: appLocalizations.quickAdd,
+          onPressed: () => _addPresets(context, ref),
+          icon: const Icon(Icons.playlist_add),
+        ),
         IconButton(
           tooltip: appLocalizations.add,
           onPressed: () => _edit(context, ref),

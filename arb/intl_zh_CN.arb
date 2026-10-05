@@ -1052,5 +1052,13 @@
   "tailscaleAuthKeyInvalid": "认证密钥格式不正确",
   "tailscaleDirect": "直连",
   "tailscaleRelay": "中继 {region}",
-  "tailscaleExitNodeActive": "正在使用的出口节点"
+  "tailscaleExitNodeActive": "正在使用的出口节点",
+  "quickAdd": "快捷添加",
+  "rulePresetBlockQuic": "屏蔽 QUIC",
+  "rulePresetBlockStun": "屏蔽 STUN",
+  "rulePresetBlockDot": "屏蔽 DNS over TLS",
+  "rulePresetLanDirect": "局域网直连",
+  "rulePresetSystemServicesDirect": "Apple 与 Microsoft 直连",
+  "rulePresetBittorrentDirect": "BT 下载直连",
+  "rulePresetInsertHint": "所选预设会添加到现有规则之前，相同规则不会重复添加"
 }

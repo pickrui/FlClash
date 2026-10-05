@@ -9048,6 +9048,81 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Quick add`
+  String get quickAdd {
+    return Intl.message('Quick add', name: 'quickAdd', desc: '', args: []);
+  }
+
+  /// `Block QUIC`
+  String get rulePresetBlockQuic {
+    return Intl.message(
+      'Block QUIC',
+      name: 'rulePresetBlockQuic',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Block STUN`
+  String get rulePresetBlockStun {
+    return Intl.message(
+      'Block STUN',
+      name: 'rulePresetBlockStun',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Block DNS over TLS`
+  String get rulePresetBlockDot {
+    return Intl.message(
+      'Block DNS over TLS',
+      name: 'rulePresetBlockDot',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `LAN direct`
+  String get rulePresetLanDirect {
+    return Intl.message(
+      'LAN direct',
+      name: 'rulePresetLanDirect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Apple and Microsoft direct`
+  String get rulePresetSystemServicesDirect {
+    return Intl.message(
+      'Apple and Microsoft direct',
+      name: 'rulePresetSystemServicesDirect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `BitTorrent direct`
+  String get rulePresetBittorrentDirect {
+    return Intl.message(
+      'BitTorrent direct',
+      name: 'rulePresetBittorrentDirect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add selected presets before existing rules. Identical rules are not added again.`
+  String get rulePresetInsertHint {
+    return Intl.message(
+      'Add selected presets before existing rules. Identical rules are not added again.',
+      name: 'rulePresetInsertHint',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

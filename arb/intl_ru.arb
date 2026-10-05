@@ -1052,5 +1052,13 @@
   "tailscaleAuthKeyInvalid": "Это не похоже на ключ авторизации",
   "tailscaleDirect": "Напрямую",
   "tailscaleRelay": "Ретранслятор {region}",
-  "tailscaleExitNodeActive": "Используемый выходной узел"
+  "tailscaleExitNodeActive": "Используемый выходной узел",
+  "quickAdd": "Быстрое добавление",
+  "rulePresetBlockQuic": "Блокировать QUIC",
+  "rulePresetBlockStun": "Блокировать STUN",
+  "rulePresetBlockDot": "Блокировать DNS over TLS",
+  "rulePresetLanDirect": "Локальная сеть напрямую",
+  "rulePresetSystemServicesDirect": "Apple и Microsoft напрямую",
+  "rulePresetBittorrentDirect": "BitTorrent напрямую",
+  "rulePresetInsertHint": "Выбранные наборы добавляются перед существующими правилами. Одинаковые правила не дублируются."
 }

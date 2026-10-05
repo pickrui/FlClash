@@ -1655,6 +1655,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
       "Scan QR code to obtain profile",
     ),
+    "quickAdd": MessageLookupByLibrary.simpleMessage("Quick add"),
     "quickFill": MessageLookupByLibrary.simpleMessage("Quick fill"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("Rainbow"),
     "rawOutboundInUse": m49,
@@ -1806,6 +1807,21 @@ class MessageLookup extends MessageLookupByLibrary {
     "rule": MessageLookupByLibrary.simpleMessage("Rule"),
     "ruleEmpty": MessageLookupByLibrary.simpleMessage("Rule is empty"),
     "ruleName": MessageLookupByLibrary.simpleMessage("Rule name"),
+    "rulePresetBittorrentDirect": MessageLookupByLibrary.simpleMessage(
+      "BitTorrent direct",
+    ),
+    "rulePresetBlockDot": MessageLookupByLibrary.simpleMessage(
+      "Block DNS over TLS",
+    ),
+    "rulePresetBlockQuic": MessageLookupByLibrary.simpleMessage("Block QUIC"),
+    "rulePresetBlockStun": MessageLookupByLibrary.simpleMessage("Block STUN"),
+    "rulePresetInsertHint": MessageLookupByLibrary.simpleMessage(
+      "Add selected presets before existing rules. Identical rules are not added again.",
+    ),
+    "rulePresetLanDirect": MessageLookupByLibrary.simpleMessage("LAN direct"),
+    "rulePresetSystemServicesDirect": MessageLookupByLibrary.simpleMessage(
+      "Apple and Microsoft direct",
+    ),
     "ruleProviders": MessageLookupByLibrary.simpleMessage("Rule providers"),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("Rule target"),
     "rulesRequireRuleMode": MessageLookupByLibrary.simpleMessage(

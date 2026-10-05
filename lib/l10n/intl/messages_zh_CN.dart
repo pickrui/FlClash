@@ -1209,6 +1209,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("纯黑模式"),
     "qrcode": MessageLookupByLibrary.simpleMessage("二维码"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage("扫描二维码获取配置文件"),
+    "quickAdd": MessageLookupByLibrary.simpleMessage("快捷添加"),
     "quickFill": MessageLookupByLibrary.simpleMessage("一键填入"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("彩虹"),
     "rawOutboundInUse": m49,
@@ -1314,6 +1315,21 @@ class MessageLookup extends MessageLookupByLibrary {
     "rule": MessageLookupByLibrary.simpleMessage("规则"),
     "ruleEmpty": MessageLookupByLibrary.simpleMessage("规则为空"),
     "ruleName": MessageLookupByLibrary.simpleMessage("规则名称"),
+    "rulePresetBittorrentDirect": MessageLookupByLibrary.simpleMessage(
+      "BT 下载直连",
+    ),
+    "rulePresetBlockDot": MessageLookupByLibrary.simpleMessage(
+      "屏蔽 DNS over TLS",
+    ),
+    "rulePresetBlockQuic": MessageLookupByLibrary.simpleMessage("屏蔽 QUIC"),
+    "rulePresetBlockStun": MessageLookupByLibrary.simpleMessage("屏蔽 STUN"),
+    "rulePresetInsertHint": MessageLookupByLibrary.simpleMessage(
+      "所选预设会添加到现有规则之前，相同规则不会重复添加",
+    ),
+    "rulePresetLanDirect": MessageLookupByLibrary.simpleMessage("局域网直连"),
+    "rulePresetSystemServicesDirect": MessageLookupByLibrary.simpleMessage(
+      "Apple 与 Microsoft 直连",
+    ),
     "ruleProviders": MessageLookupByLibrary.simpleMessage("规则提供者"),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("规则目标"),
     "rulesRequireRuleMode": MessageLookupByLibrary.simpleMessage(

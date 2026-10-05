@@ -1052,5 +1052,13 @@
   "tailscaleAuthKeyInvalid": "This does not look like an auth key",
   "tailscaleDirect": "Direct",
   "tailscaleRelay": "Relay {region}",
-  "tailscaleExitNodeActive": "Exit node in use"
+  "tailscaleExitNodeActive": "Exit node in use",
+  "quickAdd": "Quick add",
+  "rulePresetBlockQuic": "Block QUIC",
+  "rulePresetBlockStun": "Block STUN",
+  "rulePresetBlockDot": "Block DNS over TLS",
+  "rulePresetLanDirect": "LAN direct",
+  "rulePresetSystemServicesDirect": "Apple and Microsoft direct",
+  "rulePresetBittorrentDirect": "BitTorrent direct",
+  "rulePresetInsertHint": "Add selected presets before existing rules. Identical rules are not added again."
 }

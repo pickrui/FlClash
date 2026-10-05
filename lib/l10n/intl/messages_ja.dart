@@ -1386,6 +1386,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("純黒モード"),
     "qrcode": MessageLookupByLibrary.simpleMessage("QRコード"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage("QRコードをスキャンしてプロファイルを取得"),
+    "quickAdd": MessageLookupByLibrary.simpleMessage("クイック追加"),
     "quickFill": MessageLookupByLibrary.simpleMessage("クイック入力"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("レインボー"),
     "rawOutboundInUse": m49,
@@ -1501,6 +1502,21 @@ class MessageLookup extends MessageLookupByLibrary {
     "rule": MessageLookupByLibrary.simpleMessage("ルール"),
     "ruleEmpty": MessageLookupByLibrary.simpleMessage("ルールが空です"),
     "ruleName": MessageLookupByLibrary.simpleMessage("ルール名"),
+    "rulePresetBittorrentDirect": MessageLookupByLibrary.simpleMessage(
+      "BitTorrent を直接接続",
+    ),
+    "rulePresetBlockDot": MessageLookupByLibrary.simpleMessage(
+      "DNS over TLS をブロック",
+    ),
+    "rulePresetBlockQuic": MessageLookupByLibrary.simpleMessage("QUIC をブロック"),
+    "rulePresetBlockStun": MessageLookupByLibrary.simpleMessage("STUN をブロック"),
+    "rulePresetInsertHint": MessageLookupByLibrary.simpleMessage(
+      "選択したプリセットを既存のルールの前に追加します。同じルールは重複して追加しません。",
+    ),
+    "rulePresetLanDirect": MessageLookupByLibrary.simpleMessage("LAN 直接接続"),
+    "rulePresetSystemServicesDirect": MessageLookupByLibrary.simpleMessage(
+      "Apple と Microsoft に直接接続",
+    ),
     "ruleProviders": MessageLookupByLibrary.simpleMessage("ルールプロバイダー"),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("ルール対象"),
     "rulesRequireRuleMode": MessageLookupByLibrary.simpleMessage(
