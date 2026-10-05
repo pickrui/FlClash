@@ -226,7 +226,7 @@
   "proxyProviders": "Proxy providers",
   "ruleProviders": "Rule providers",
   "overrideDns": "Override Dns",
-  "overrideDnsDesc": "Turning it on will override the DNS options in the profile",
+  "overrideDnsDesc": "Only the selected fields override the profile; other values are inherited",
   "status": "Status",
   "statusDesc": "System DNS will be used when turned off",
   "preferH3Desc": "Prioritize the use of DOH's http/3",
@@ -1092,5 +1092,8 @@
   "dnsQueryInitiatorRule": "Rule matching",
   "dnsQueryInitiatorDirect": "Direct connection",
   "dnsQueryInitiatorProxy": "Proxy connection",
-  "dnsQueryInitiatorOther": "Other"
+  "dnsQueryInitiatorOther": "Other",
+  "overrideNtp": "Override NTP",
+  "overrideFieldsDesc": "Only the selected fields override the profile; other values are inherited",
+  "overrideFieldsEmpty": "Add fields to override, or edit the YAML fragment"
 }

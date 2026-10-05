@@ -6,12 +6,16 @@
 import 'package:fl_clash/widgets/keyboard_inset_hold.dart';
 import 'package:animations/animations.dart';
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/providers/action.dart';
+import 'package:fl_clash/providers/app.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
 class BaseNavigator {
   static Future<T?> push<T>(BuildContext context, Widget child) async {
-    if (!appController.isMobile) {
+    if (!ProviderScope.containerOf(
+      context,
+      listen: false,
+    ).read(isMobileViewProvider)) {
       return Navigator.of(
         context,
       ).push<T>(CommonDesktopRoute(builder: (context) => child));

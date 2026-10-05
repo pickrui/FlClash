@@ -1744,10 +1744,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Turning it on will override the DNS options in the profile`
+  /// `Only the selected fields override the profile; other values are inherited`
   String get overrideDnsDesc {
     return Intl.message(
-      'Turning it on will override the DNS options in the profile',
+      'Only the selected fields override the profile; other values are inherited',
       name: 'overrideDnsDesc',
       desc: '',
       args: [],
@@ -9404,6 +9404,36 @@ class AppLocalizations {
     return Intl.message(
       'Other',
       name: 'dnsQueryInitiatorOther',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Override NTP`
+  String get overrideNtp {
+    return Intl.message(
+      'Override NTP',
+      name: 'overrideNtp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Only the selected fields override the profile; other values are inherited`
+  String get overrideFieldsDesc {
+    return Intl.message(
+      'Only the selected fields override the profile; other values are inherited',
+      name: 'overrideFieldsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add fields to override, or edit the YAML fragment`
+  String get overrideFieldsEmpty {
+    return Intl.message(
+      'Add fields to override, or edit the YAML fragment',
+      name: 'overrideFieldsEmpty',
       desc: '',
       args: [],
     );

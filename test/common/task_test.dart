@@ -1273,6 +1273,7 @@ void main() {
           'rules': <String>[],
         },
         realPatchConfig: ClashConfig(
+          dnsOverrideKeys: legacyDnsOverrideKeys,
           dns: Dns(
             nameserver: [customNameserver],
             proxyServerNameserver: [customNameserver],
@@ -1313,6 +1314,7 @@ void main() {
           'rules': <String>[],
         },
         realPatchConfig: ClashConfig(
+          dnsOverrideKeys: legacyDnsOverrideKeys,
           dns: Dns(
             fakeIpFilter: ['*.override.example'],
             nameserver: ['https://dns.example/dns-query'],
@@ -1359,6 +1361,7 @@ void main() {
           'rules': <String>[],
         },
         realPatchConfig: ClashConfig(
+          dnsOverrideKeys: legacyDnsOverrideKeys,
           dns: Dns(proxyServerNameserver: [customNameserver]),
         ),
         overrideDns: true,

@@ -1565,11 +1565,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "override": MessageLookupByLibrary.simpleMessage("Переопределить"),
     "overrideDns": MessageLookupByLibrary.simpleMessage("Переопределить DNS"),
     "overrideDnsDesc": MessageLookupByLibrary.simpleMessage(
-      "Включение переопределит настройки DNS в профиле",
+      "Переопределяются только выбранные поля, остальные берутся из профиля",
+    ),
+    "overrideFieldsDesc": MessageLookupByLibrary.simpleMessage(
+      "Переопределяются только выбранные поля, остальные берутся из профиля",
+    ),
+    "overrideFieldsEmpty": MessageLookupByLibrary.simpleMessage(
+      "Добавьте поля для переопределения или измените YAML",
     ),
     "overrideMode": MessageLookupByLibrary.simpleMessage(
       "Режим переопределения",
     ),
+    "overrideNtp": MessageLookupByLibrary.simpleMessage("Переопределить NTP"),
     "overrideScript": MessageLookupByLibrary.simpleMessage(
       "Скрипт переопределения",
     ),

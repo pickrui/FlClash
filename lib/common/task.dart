@@ -209,7 +209,11 @@ void _preserveProxyDnsBootstrap(
 
   // Proxy endpoint resolution is a connectivity prerequisite, not part of
   // the user-facing DNS override.
-  targetDns['proxy-server-nameserver-policy'] = policy;
+  targetDns['proxy-server-nameserver-policy'] = {
+    if (targetDns['proxy-server-nameserver-policy'] is Map)
+      ...Map<String, dynamic>.from(targetDns['proxy-server-nameserver-policy']),
+    ...policy,
+  };
 
   final targetNameservers = targetDns['proxy-server-nameserver'];
   if (targetNameservers is! List || targetNameservers.isEmpty) {
@@ -219,6 +223,7 @@ void _preserveProxyDnsBootstrap(
     }
   }
 
+  if ((targetDns['fake-ip-filter-mode'] ?? 'blacklist') != 'blacklist') return;
   final sourceFakeIpFilter = sourceDns['fake-ip-filter'];
   final targetFakeIpFilter = targetDns['fake-ip-filter'];
   if (sourceFakeIpFilter is! List || targetFakeIpFilter is! List) {
@@ -405,25 +410,41 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
   for (final host in realPatchConfig.hosts.entries) {
     rawConfig['hosts'][host.key] = host.value.splitByMultipleSeparators;
   }
-  if (rawConfig['dns'] == null) {
-    rawConfig['dns'] = {};
-  }
-  final sourceDns = Map<dynamic, dynamic>.from(rawConfig['dns'] as Map);
-  final isEnableDns = rawConfig['dns']['enable'] == true;
+  final sourceDns = rawConfig['dns'] is Map
+      ? Map<String, dynamic>.from(rawConfig['dns'] as Map)
+      : <String, dynamic>{};
+  final isEnableDns = sourceDns['enable'] == true;
   const systemDns = 'system://';
-  if (overrideDns || !isEnableDns) {
-    final baseDns = overrideDns ? realPatchConfig.dns : defaultDns;
-    final dns = !isEnableDns && !baseDns.nameserver.contains(systemDns)
-        ? baseDns.copyWith(nameserver: [...baseDns.nameserver, systemDns])
-        : baseDns;
-    final targetDns = dns.toJson();
-    targetDns['nameserver-policy'] = {};
-    for (final entry in dns.nameserverPolicy.entries) {
-      targetDns['nameserver-policy'][entry.key] =
-          entry.value.splitByMultipleSeparators;
-    }
+  var targetDns = Map<String, dynamic>.from(sourceDns);
+  if (!isEnableDns) {
+    targetDns = {
+      ...defaultDns.overrideJson(legacyDnsOverrideKeys),
+      ...sourceDns,
+      'enable': true,
+      'enhanced-mode': defaultDns.toJson()['enhanced-mode'],
+      'nameserver': [...defaultDns.nameserver],
+    };
+  }
+  if (overrideDns) {
+    targetDns = mergeDnsOverride(
+      targetDns,
+      realPatchConfig.dns.overrideJson(realPatchConfig.dnsOverrideKeys),
+    );
     _preserveProxyDnsBootstrap(targetDns, sourceDns);
-    rawConfig['dns'] = targetDns;
+  }
+  if (!isEnableDns && targetDns['enable'] == true) {
+    final nameservers = List<String>.from(targetDns['nameserver'] ?? []);
+    if (!nameservers.contains(systemDns)) {
+      targetDns['nameserver'] = [...nameservers, systemDns];
+    }
+  }
+  rawConfig['dns'] = targetDns;
+  if (data.overrideNtp) {
+    rawConfig['ntp'] = {
+      if (rawConfig['ntp'] is Map)
+        ...Map<String, dynamic>.from(rawConfig['ntp']),
+      ...realPatchConfig.ntp.overrideJson(realPatchConfig.ntpOverrideKeys),
+    };
   }
   if (appendSystemDns) {
     final List<String> nameserver = List<String>.from(

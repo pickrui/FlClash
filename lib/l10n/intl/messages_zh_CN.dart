@@ -1102,8 +1102,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "overlayNameConflict": m39,
     "override": MessageLookupByLibrary.simpleMessage("覆写"),
     "overrideDns": MessageLookupByLibrary.simpleMessage("覆写DNS"),
-    "overrideDnsDesc": MessageLookupByLibrary.simpleMessage("开启后将覆盖配置中的DNS选项"),
+    "overrideDnsDesc": MessageLookupByLibrary.simpleMessage(
+      "仅覆写选中的字段，其余值沿用订阅配置",
+    ),
+    "overrideFieldsDesc": MessageLookupByLibrary.simpleMessage(
+      "仅覆写选中的字段，其余值沿用订阅配置",
+    ),
+    "overrideFieldsEmpty": MessageLookupByLibrary.simpleMessage(
+      "添加需要覆写的字段，或编辑 YAML 片段",
+    ),
     "overrideMode": MessageLookupByLibrary.simpleMessage("覆写模式"),
+    "overrideNtp": MessageLookupByLibrary.simpleMessage("覆写 NTP"),
     "overrideScript": MessageLookupByLibrary.simpleMessage("覆写脚本"),
     "overwriteIssueDuplicateName": m40,
     "overwriteIssueEmptyName": MessageLookupByLibrary.simpleMessage("名称为空"),

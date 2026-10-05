@@ -1505,9 +1505,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "override": MessageLookupByLibrary.simpleMessage("Override"),
     "overrideDns": MessageLookupByLibrary.simpleMessage("Override Dns"),
     "overrideDnsDesc": MessageLookupByLibrary.simpleMessage(
-      "Turning it on will override the DNS options in the profile",
+      "Only the selected fields override the profile; other values are inherited",
+    ),
+    "overrideFieldsDesc": MessageLookupByLibrary.simpleMessage(
+      "Only the selected fields override the profile; other values are inherited",
+    ),
+    "overrideFieldsEmpty": MessageLookupByLibrary.simpleMessage(
+      "Add fields to override, or edit the YAML fragment",
     ),
     "overrideMode": MessageLookupByLibrary.simpleMessage("Override mode"),
+    "overrideNtp": MessageLookupByLibrary.simpleMessage("Override NTP"),
     "overrideScript": MessageLookupByLibrary.simpleMessage("Override script"),
     "overwriteIssueDuplicateName": m40,
     "overwriteIssueEmptyName": MessageLookupByLibrary.simpleMessage(

@@ -226,7 +226,7 @@
   "proxyProviders": "プロキシプロバイダー",
   "ruleProviders": "ルールプロバイダー",
   "overrideDns": "DNS上書き",
-  "overrideDnsDesc": "有効化するとプロファイルのDNS設定を上書き",
+  "overrideDnsDesc": "選択した項目だけを上書きし、ほかの値はプロファイルを引き継ぎます",
   "status": "ステータス",
   "statusDesc": "無効時はシステムDNSを使用",
   "preferH3Desc": "DOHのHTTP/3を優先使用",
@@ -1092,5 +1092,8 @@
   "dnsQueryInitiatorRule": "ルール判定",
   "dnsQueryInitiatorDirect": "直接接続",
   "dnsQueryInitiatorProxy": "プロキシ接続",
-  "dnsQueryInitiatorOther": "その他"
+  "dnsQueryInitiatorOther": "その他",
+  "overrideNtp": "NTP を上書き",
+  "overrideFieldsDesc": "選択した項目だけを上書きし、ほかの値はプロファイルを引き継ぎます",
+  "overrideFieldsEmpty": "上書きする項目を追加するか、YAML を編集してください"
 }

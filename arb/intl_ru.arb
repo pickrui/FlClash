@@ -226,7 +226,7 @@
   "proxyProviders": "Провайдеры прокси",
   "ruleProviders": "Провайдеры правил",
   "overrideDns": "Переопределить DNS",
-  "overrideDnsDesc": "Включение переопределит настройки DNS в профиле",
+  "overrideDnsDesc": "Переопределяются только выбранные поля, остальные берутся из профиля",
   "status": "Статус",
   "statusDesc": "Системный DNS будет использоваться при выключении",
   "preferH3Desc": "Приоритетное использование HTTP/3 для DOH",
@@ -1092,5 +1092,8 @@
   "dnsQueryInitiatorRule": "Подбор правила",
   "dnsQueryInitiatorDirect": "Прямое соединение",
   "dnsQueryInitiatorProxy": "Соединение с прокси",
-  "dnsQueryInitiatorOther": "Другое"
+  "dnsQueryInitiatorOther": "Другое",
+  "overrideNtp": "Переопределить NTP",
+  "overrideFieldsDesc": "Переопределяются только выбранные поля, остальные берутся из профиля",
+  "overrideFieldsEmpty": "Добавьте поля для переопределения или измените YAML"
 }

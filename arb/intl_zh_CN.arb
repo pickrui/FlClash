@@ -226,7 +226,7 @@
   "proxyProviders": "代理提供者",
   "ruleProviders": "规则提供者",
   "overrideDns": "覆写DNS",
-  "overrideDnsDesc": "开启后将覆盖配置中的DNS选项",
+  "overrideDnsDesc": "仅覆写选中的字段，其余值沿用订阅配置",
   "status": "状态",
   "statusDesc": "关闭后将使用系统DNS",
   "preferH3Desc": "优先使用DOH的http/3",
@@ -1092,5 +1092,8 @@
   "dnsQueryInitiatorRule": "规则匹配",
   "dnsQueryInitiatorDirect": "直连连接",
   "dnsQueryInitiatorProxy": "代理连接",
-  "dnsQueryInitiatorOther": "其他"
+  "dnsQueryInitiatorOther": "其他",
+  "overrideNtp": "覆写 NTP",
+  "overrideFieldsDesc": "仅覆写选中的字段，其余值沿用订阅配置",
+  "overrideFieldsEmpty": "添加需要覆写的字段，或编辑 YAML 片段"
 }

@@ -35,6 +35,33 @@ void main() {
     );
   }
 
+  test('DNS and NTP key selection triggers setup only while enabled', () {
+    final off = buildState();
+    final dns = off.copyWith(overrideDns: true);
+    final ntp = off.copyWith(overrideNtp: true);
+    expect(
+      off.copyWith(dnsOverrideKeys: {DnsOverrideKey.ipv6}).needSetup(off),
+      isFalse,
+    );
+    expect(
+      dns.copyWith(dnsOverrideKeys: {DnsOverrideKey.ipv6}).needSetup(dns),
+      isTrue,
+    );
+    expect(ntp.needSetup(off), isTrue);
+    expect(
+      ntp.copyWith(ntpOverrideKeys: {NtpOverrideKey.server}).needSetup(ntp),
+      isTrue,
+    );
+    expect(
+      ntp.copyWith(ntp: const Ntp(server: 'time.example')).needSetup(ntp),
+      isTrue,
+    );
+    expect(
+      off.copyWith(ntp: const Ntp(server: 'time.example')).needSetup(off),
+      isFalse,
+    );
+  });
+
   group('SetupState personal overlay changes', () {
     final previous = buildState(overwriteType: OverwriteType.merge);
 

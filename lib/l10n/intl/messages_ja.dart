@@ -1260,9 +1260,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "override": MessageLookupByLibrary.simpleMessage("上書き"),
     "overrideDns": MessageLookupByLibrary.simpleMessage("DNS上書き"),
     "overrideDnsDesc": MessageLookupByLibrary.simpleMessage(
-      "有効化するとプロファイルのDNS設定を上書き",
+      "選択した項目だけを上書きし、ほかの値はプロファイルを引き継ぎます",
+    ),
+    "overrideFieldsDesc": MessageLookupByLibrary.simpleMessage(
+      "選択した項目だけを上書きし、ほかの値はプロファイルを引き継ぎます",
+    ),
+    "overrideFieldsEmpty": MessageLookupByLibrary.simpleMessage(
+      "上書きする項目を追加するか、YAML を編集してください",
     ),
     "overrideMode": MessageLookupByLibrary.simpleMessage("上書きモード"),
+    "overrideNtp": MessageLookupByLibrary.simpleMessage("NTP を上書き"),
     "overrideScript": MessageLookupByLibrary.simpleMessage("上書きスクリプト"),
     "overwriteIssueDuplicateName": m40,
     "overwriteIssueEmptyName": MessageLookupByLibrary.simpleMessage("名前が空です"),

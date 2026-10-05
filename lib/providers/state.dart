@@ -739,6 +739,14 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
     script: script,
     overrideDns: overrideDns,
     dns: dns,
+    dnsOverrideKeys: ref.watch(
+      patchClashConfigProvider.select((state) => state.dnsOverrideKeys),
+    ),
+    overrideNtp: ref.watch(overrideNtpProvider),
+    ntp: ref.watch(patchClashConfigProvider.select((state) => state.ntp)),
+    ntpOverrideKeys: ref.watch(
+      patchClashConfigProvider.select((state) => state.ntpOverrideKeys),
+    ),
     blockQuic: blockQuic,
     blockWebRtc: blockWebRtc,
     tailscaleNetworks: tailscaleNetworks,

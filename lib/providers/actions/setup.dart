@@ -714,6 +714,7 @@ extension SetupControllerExt on AppController {
         overwriteType: setupState.overwriteType,
         realPatchConfig: realPatchConfig,
         overrideDns: overrideDns,
+        overrideNtp: setupState.overrideNtp,
         appendSystemDns: appendSystemDns,
         addedRules: addedRules,
         proxyChains: proxyChains,

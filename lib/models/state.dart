@@ -7,6 +7,7 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:collection/collection.dart';
 
 import 'app.dart';
 import 'clash_config.dart';
@@ -234,6 +235,7 @@ abstract class MakeRealProfileState with _$MakeRealProfileState {
     required OverwriteType overwriteType,
     required ClashConfig realPatchConfig,
     required bool overrideDns,
+    @Default(false) bool overrideNtp,
     required bool appendSystemDns,
     required List<Rule> addedRules,
     required List<ProxyChain> proxyChains,
@@ -277,7 +279,11 @@ abstract class SetupState with _$SetupState {
     String? matchTarget,
     required Script? script,
     required bool overrideDns,
+    @Default(false) bool overrideNtp,
     required Dns dns,
+    @Default({}) Set<DnsOverrideKey> dnsOverrideKeys,
+    @Default(defaultNtp) Ntp ntp,
+    @Default({}) Set<NtpOverrideKey> ntpOverrideKeys,
     @Default(false) bool blockQuic,
     @Default(false) bool blockWebRtc,
     @Default([]) List<TailscaleNetwork> tailscaleNetworks,
@@ -343,7 +349,21 @@ extension SetupStateExt on SetupState {
     if (overrideDns != lastSetupState.overrideDns) {
       return true;
     }
-    if (overrideDns == true && dns != lastSetupState.dns) {
+    if (overrideNtp != lastSetupState.overrideNtp ||
+        overrideNtp &&
+            (ntp != lastSetupState.ntp ||
+                !const SetEquality<NtpOverrideKey>().equals(
+                  ntpOverrideKeys,
+                  lastSetupState.ntpOverrideKeys,
+                ))) {
+      return true;
+    }
+    if (overrideDns &&
+        (dns != lastSetupState.dns ||
+            !const SetEquality<DnsOverrideKey>().equals(
+              dnsOverrideKeys,
+              lastSetupState.dnsOverrideKeys,
+            ))) {
       return true;
     }
     if (blockQuic != lastSetupState.blockQuic) {

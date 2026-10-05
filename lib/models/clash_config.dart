@@ -6,6 +6,8 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:collection/collection.dart';
+import 'package:yaml/yaml.dart';
 
 part 'generated/clash_config.freezed.dart';
 part 'generated/clash_config.g.dart';
@@ -14,6 +16,7 @@ const defaultClashConfig = ClashConfig();
 
 const defaultTun = Tun();
 const defaultDns = Dns();
+const defaultNtp = Ntp();
 const defaultGeoXUrl = GeoXUrl();
 
 const defaultMixedPort = 7890;
@@ -325,11 +328,33 @@ abstract class Dns with _$Dns {
   const factory Dns({
     @Default(true) bool enable,
     @Default('0.0.0.0:1053') String listen,
+    @Default(0) @JsonKey(name: 'listen-routing-mark') int listenRoutingMark,
     @Default(false) @JsonKey(name: 'prefer-h3') bool preferH3,
     @Default(true) @JsonKey(name: 'use-hosts') bool useHosts,
     @Default(true) @JsonKey(name: 'use-system-hosts') bool useSystemHosts,
     @Default(false) @JsonKey(name: 'respect-rules') bool respectRules,
     @Default(false) bool ipv6,
+    @Default(100) @JsonKey(name: 'ipv6-timeout') int ipv6Timeout,
+    @Default(DnsCacheAlgorithm.lru)
+    @JsonKey(name: 'cache-algorithm')
+    DnsCacheAlgorithm cacheAlgorithm,
+    @Default(4096) @JsonKey(name: 'cache-max-size') int cacheMaxSize,
+    @Default(1) @JsonKey(name: 'fake-ip-ttl') int fakeIpTtl,
+    @Default('fdfe:dcba:9876::1/64')
+    @JsonKey(name: 'fake-ip-range6')
+    String fakeIpRange6,
+    @Default(FakeIpFilterMode.blacklist)
+    @JsonKey(name: 'fake-ip-filter-mode')
+    FakeIpFilterMode fakeIpFilterMode,
+    @Default({})
+    @JsonKey(name: 'proxy-server-nameserver-policy')
+    Map<String, String> proxyServerNameserverPolicy,
+    @Default([])
+    @JsonKey(name: 'direct-nameserver')
+    List<String> directNameserver,
+    @Default(false)
+    @JsonKey(name: 'direct-nameserver-follow-policy')
+    bool directNameserverFollowPolicy,
     @Default(['223.5.5.5'])
     @JsonKey(name: 'default-nameserver')
     List<String> defaultNameserver,
@@ -371,6 +396,291 @@ abstract class Dns with _$Dns {
     } catch (_) {
       return const Dns();
     }
+  }
+}
+
+const _dnsOverrideKeysJsonKey = 'dns-override-keys';
+
+Set<DnsOverrideKey> _dnsOverrideKeysFromJson(List<Object?> json) => {
+  for (final path in json)
+    ?DnsOverrideKey.values.firstWhereOrNull((key) => key.path == path),
+};
+
+/// Configs saved before the key set existed overrode the whole DNS section as
+/// the model held it then.
+const legacyDnsOverrideKeys = {
+  DnsOverrideKey.enable,
+  DnsOverrideKey.listen,
+  DnsOverrideKey.useHosts,
+  DnsOverrideKey.useSystemHosts,
+  DnsOverrideKey.ipv6,
+  DnsOverrideKey.respectRules,
+  DnsOverrideKey.preferH3,
+  DnsOverrideKey.enhancedMode,
+  DnsOverrideKey.fakeIpRange,
+  DnsOverrideKey.fakeIpFilter,
+  DnsOverrideKey.defaultNameserver,
+  DnsOverrideKey.nameserverPolicy,
+  DnsOverrideKey.nameserver,
+  DnsOverrideKey.fallback,
+  DnsOverrideKey.fallbackLazyQuery,
+  DnsOverrideKey.proxyServerNameserver,
+  DnsOverrideKey.fallbackFilterGeoip,
+  DnsOverrideKey.fallbackFilterGeoipCode,
+  DnsOverrideKey.fallbackFilterGeosite,
+  DnsOverrideKey.fallbackFilterIpcidr,
+  DnsOverrideKey.fallbackFilterDomain,
+};
+
+Map<String, Object?> _withLegacyDnsOverrideKeys(Map<String, Object?> json) {
+  if (json.containsKey(_dnsOverrideKeysJsonKey) || !json.containsKey('dns')) {
+    return json;
+  }
+  return {
+    ...json,
+    _dnsOverrideKeysJsonKey: [
+      for (final key in legacyDnsOverrideKeys) key.path,
+    ],
+  };
+}
+
+extension DnsOverrideExt on Dns {
+  Map<String, Object?> get _json {
+    final json = toJson();
+    json[DnsOverrideKey.fallbackFilterSection] = fallbackFilter.toJson();
+    json[DnsOverrideKey.nameserverPolicy.path] = _splitPolicyServers(
+      nameserverPolicy,
+    );
+    json[DnsOverrideKey.proxyServerNameserverPolicy.path] = _splitPolicyServers(
+      proxyServerNameserverPolicy,
+    );
+    return json;
+  }
+
+  Object? valueOf(DnsOverrideKey key) {
+    final json = _json;
+    if (!key.isFallbackFilter) {
+      return json[key.path];
+    }
+    final section = json[DnsOverrideKey.fallbackFilterSection] as Map;
+    return section[key.jsonKey];
+  }
+
+  Map<String, Object?> overrideJson(Set<DnsOverrideKey> keys) {
+    final json = _json;
+    final section = json[DnsOverrideKey.fallbackFilterSection] as Map;
+    final result = <String, Object?>{};
+    for (final key in DnsOverrideKey.values) {
+      if (!keys.contains(key)) {
+        continue;
+      }
+      if (!key.isFallbackFilter) {
+        result[key.path] = json[key.path];
+        continue;
+      }
+      final filter =
+          result.putIfAbsent(
+                DnsOverrideKey.fallbackFilterSection,
+                () => <String, Object?>{},
+              )
+              as Map<String, Object?>;
+      filter[key.jsonKey] = section[key.jsonKey];
+    }
+    return result;
+  }
+
+  String overrideYaml(Set<DnsOverrideKey> keys) =>
+      yaml.encode(overrideJson(keys));
+
+  ({Dns dns, Set<DnsOverrideKey> keys}) applyOverrideYaml(String content) {
+    final document = _plainYaml(loadYaml(content));
+    if (document == null) {
+      return (dns: this, keys: const {});
+    }
+    if (document is! Map) {
+      throw const FormatException('The override must be a map of DNS keys');
+    }
+    final keys = <DnsOverrideKey>{};
+    final json = _json;
+    final filter = Map<String, Object?>.from(
+      json[DnsOverrideKey.fallbackFilterSection] as Map,
+    );
+    void take(String path, Object? value) {
+      final key = DnsOverrideKey.values.firstWhereOrNull(
+        (key) => key.path == path,
+      );
+      if (key == null) {
+        throw FormatException('Unknown DNS key: $path');
+      }
+      _validateOverrideValue(path, value, valueOf(key));
+      keys.add(key);
+      if (key.isFallbackFilter) {
+        filter[key.jsonKey] = value;
+      } else {
+        json[path] = value;
+      }
+    }
+
+    for (final entry in document.entries) {
+      final name = entry.key.toString();
+      if (name != DnsOverrideKey.fallbackFilterSection) {
+        take(name, entry.value);
+        continue;
+      }
+      if (entry.value is! Map) {
+        throw FormatException('$name must be a map');
+      }
+      for (final sub in (entry.value as Map).entries) {
+        take('$name.${sub.key}', sub.value);
+      }
+    }
+    json[DnsOverrideKey.fallbackFilterSection] = filter;
+    for (final policy in _policyKeys) {
+      json[policy.path] = _joinPolicyServers(json[policy.path]);
+    }
+    return (dns: Dns.fromJson(json), keys: keys);
+  }
+}
+
+Object? _plainYaml(Object? node) => switch (node) {
+  YamlMap() => {
+    for (final entry in node.entries)
+      entry.key.toString(): _plainYaml(entry.value),
+  },
+  YamlList() => [for (final item in node) _plainYaml(item)],
+  _ => node,
+};
+
+const _policyKeys = [
+  DnsOverrideKey.nameserverPolicy,
+  DnsOverrideKey.proxyServerNameserverPolicy,
+];
+
+Map<String, Object> _splitPolicyServers(Map<String, String> policy) => {
+  for (final entry in policy.entries)
+    entry.key: entry.value.splitByMultipleSeparators,
+};
+
+Object? _joinPolicyServers(Object? value) => switch (value) {
+  Map() => {
+    for (final entry in value.entries)
+      entry.key.toString(): switch (entry.value) {
+        List() => (entry.value as List).join(', '),
+        final server => server.toString(),
+      },
+  },
+  _ => value,
+};
+
+Map<String, dynamic> mergeDnsOverride(
+  Map<String, dynamic> raw,
+  Map<String, Object?> override,
+) {
+  final merged = Map<String, dynamic>.from(raw);
+  for (final entry in override.entries) {
+    final current = merged[entry.key];
+    final value = entry.value;
+    merged[entry.key] =
+        entry.key == DnsOverrideKey.fallbackFilterSection &&
+            current is Map &&
+            value is Map
+        ? {...Map<String, dynamic>.from(current), ...value}
+        : value;
+  }
+  return merged;
+}
+
+@freezed
+abstract class Ntp with _$Ntp {
+  const factory Ntp({
+    @Default(false) bool enable,
+    @Default('time.apple.com') String server,
+    @Default(123) int port,
+    @Default(30) int interval,
+    @Default('') @JsonKey(name: 'dialer-proxy') String dialerProxy,
+    @Default(false) @JsonKey(name: 'write-to-system') bool writeToSystem,
+  }) = _Ntp;
+
+  factory Ntp.fromJson(Map<String, Object?> json) => _$NtpFromJson(json);
+
+  factory Ntp.safeNtpFromJson(Map<String, Object?> json) {
+    try {
+      return Ntp.fromJson(json);
+    } catch (_) {
+      return const Ntp();
+    }
+  }
+}
+
+const _ntpOverrideKeysJsonKey = 'ntp-override-keys';
+
+Set<NtpOverrideKey> _ntpOverrideKeysFromJson(List<Object?> json) => {
+  for (final path in json)
+    ?NtpOverrideKey.values.firstWhereOrNull((key) => key.path == path),
+};
+
+extension NtpOverrideExt on Ntp {
+  Map<String, Object?> overrideJson(Set<NtpOverrideKey> keys) {
+    final json = toJson();
+    return {
+      for (final key in NtpOverrideKey.values)
+        if (keys.contains(key)) key.path: json[key.path],
+    };
+  }
+
+  String overrideYaml(Set<NtpOverrideKey> keys) =>
+      yaml.encode(overrideJson(keys));
+
+  ({Ntp ntp, Set<NtpOverrideKey> keys}) applyOverrideYaml(String content) {
+    final document = _plainYaml(loadYaml(content));
+    if (document == null) {
+      return (ntp: this, keys: const {});
+    }
+    if (document is! Map) {
+      throw const FormatException('The override must be a map of NTP keys');
+    }
+    final keys = <NtpOverrideKey>{};
+    final json = toJson();
+    for (final entry in document.entries) {
+      final path = entry.key.toString();
+      final key = NtpOverrideKey.values.firstWhereOrNull(
+        (key) => key.path == path,
+      );
+      if (key == null) {
+        throw FormatException('Unknown NTP key: $path');
+      }
+      _validateOverrideValue(path, entry.value, json[path]);
+      keys.add(key);
+      json[path] = entry.value;
+    }
+    return (ntp: Ntp.fromJson(json), keys: keys);
+  }
+}
+
+void _validateOverrideValue(String path, Object? value, Object? template) {
+  final valid = switch (template) {
+    bool() => value is bool,
+    int() => value is int && value >= 0,
+    String() => value is String,
+    List() => value is List && value.every((item) => item is String),
+    Map() =>
+      value is Map &&
+          value.entries.every(
+            (entry) =>
+                entry.key is String &&
+                (entry.value is String ||
+                    (entry.value is List &&
+                        (entry.value as List).every((item) => item is String))),
+          ),
+    _ => false,
+  };
+  if (!valid) {
+    throw FormatException('Invalid value for $path');
+  }
+  if (path == 'port' && (value == 0 || (value as int) > 65535) ||
+      path == 'interval' && value == 0 ||
+      path == 'server' && (value as String).trim().isEmpty) {
+    throw FormatException('Invalid value for $path');
   }
 }
 
@@ -569,6 +879,13 @@ abstract class ClashConfig with _$ClashConfig {
     @Default(true) @JsonKey(name: 'tcp-concurrent') bool tcpConcurrent,
     @Default(defaultTun) @JsonKey(fromJson: Tun.safeFormJson) Tun tun,
     @Default(defaultDns) @JsonKey(fromJson: Dns.safeDnsFromJson) Dns dns,
+    @Default({})
+    @JsonKey(name: _dnsOverrideKeysJsonKey, fromJson: _dnsOverrideKeysFromJson)
+    Set<DnsOverrideKey> dnsOverrideKeys,
+    @Default(defaultNtp) @JsonKey(fromJson: Ntp.safeNtpFromJson) Ntp ntp,
+    @Default({})
+    @JsonKey(name: _ntpOverrideKeysJsonKey, fromJson: _ntpOverrideKeysFromJson)
+    Set<NtpOverrideKey> ntpOverrideKeys,
     @Default(defaultGeoXUrl)
     @JsonKey(name: 'geox-url', fromJson: GeoXUrl.safeFormJson)
     GeoXUrl geoXUrl,
@@ -593,7 +910,7 @@ abstract class ClashConfig with _$ClashConfig {
   }) = _ClashConfig;
 
   factory ClashConfig.fromJson(Map<String, Object?> json) =>
-      _$ClashConfigFromJson(json);
+      _$ClashConfigFromJson(_withLegacyDnsOverrideKeys(json));
 
   factory ClashConfig.safeFormJson(Map<String, Object?>? json) {
     if (json == null) {
