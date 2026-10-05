@@ -112,7 +112,7 @@ class WifiSsidMonitor(private val context: Context, private val onChange: () -> 
         if (active) onChange()
     }
 
-    private fun changed(network: Network, caps: NetworkCapabilities) = synchronized(lock) {
+    private fun changed(network: Network, caps: NetworkCapabilities): Unit = synchronized(lock) {
         if (!active) return
         names[network] = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             normalizeSsid((caps.transportInfo as? WifiInfo)?.ssid)
@@ -120,7 +120,7 @@ class WifiSsidMonitor(private val context: Context, private val onChange: () -> 
         onChange()
     }
 
-    private fun lost(network: Network) = synchronized(lock) {
+    private fun lost(network: Network): Unit = synchronized(lock) {
         if (!active) return
         names.remove(network)
         onChange()

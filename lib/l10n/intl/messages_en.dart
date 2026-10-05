@@ -276,9 +276,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "apiAvailable": MessageLookupByLibrary.simpleMessage(
       "API service is operational",
     ),
-    "apiAvailableWithCertificateException": MessageLookupByLibrary.simpleMessage(
-      "The API was reachable with a temporary certificate exception. No account or node configuration was synced. Fix the certificate issue, then check again.",
-    ),
+    "apiAvailableWithCertificateException":
+        MessageLookupByLibrary.simpleMessage(
+          "The API was reachable with a temporary certificate exception. No account or node configuration was synced. Fix the certificate issue, then check again.",
+        ),
     "app": MessageLookupByLibrary.simpleMessage("App"),
     "appAccessControl": MessageLookupByLibrary.simpleMessage(
       "App access control",
@@ -636,9 +637,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "configRecoveryUseLocalStorage": MessageLookupByLibrary.simpleMessage(
       "Use local file storage",
     ),
-    "configRecoveryUseLocalStorageConfirm": MessageLookupByLibrary.simpleMessage(
-      "Store encryption keys and account credentials in a file in the application data folder that only your user account can open, instead of the system keyring? Any program running as your user can read them and decrypt the local configuration. This choice stays in effect from now on.",
-    ),
+    "configRecoveryUseLocalStorageConfirm":
+        MessageLookupByLibrary.simpleMessage(
+          "Store encryption keys and account credentials in a file in the application data folder that only your user account can open, instead of the system keyring? Any program running as your user can read them and decrypt the local configuration. This choice stays in effect from now on.",
+        ),
     "configTypeMismatch": m7,
     "configValueTypeBoolean": MessageLookupByLibrary.simpleMessage("a boolean"),
     "configValueTypeInteger": MessageLookupByLibrary.simpleMessage(
@@ -1335,6 +1337,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "local": MessageLookupByLibrary.simpleMessage("Local"),
     "localBackupDesc": MessageLookupByLibrary.simpleMessage(
       "Backup local data to local",
+    ),
+    "localNetworkTip": MessageLookupByLibrary.simpleMessage(
+      "Local network access denied; using gVisor for this connection. LAN proxies and services may remain unavailable",
     ),
     "locationPermission": MessageLookupByLibrary.simpleMessage(
       "Location permission",

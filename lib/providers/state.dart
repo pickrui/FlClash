@@ -682,6 +682,7 @@ SharedState sharedState(Ref ref) {
     stopText: appLocalizations.stop,
     stopTip: appLocalizations.stopVpn,
     startTip: appLocalizations.startVpn,
+    localNetworkTip: appLocalizations.localNetworkTip,
     setupParams: SetupParams(
       selectedMap: selectedMap,
       testUrl: testUrl,

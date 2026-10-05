@@ -31,6 +31,10 @@ internal class PermissionRequestBroker {
         return true
     }
 
+    fun remove(callback: (Boolean) -> Unit) {
+        synchronized(lock) { callbacks.removeAll { it === callback } }
+    }
+
     fun cancel() {
         val waiting = synchronized(lock) {
             code = null

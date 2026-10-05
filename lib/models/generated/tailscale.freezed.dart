@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of '../tailscale.dart';
@@ -9,6 +9,7 @@ part of '../tailscale.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -32,16 +33,21 @@ $TailscaleNetworkCopyWith<TailscaleNetwork> get copyWith => _$TailscaleNetworkCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TailscaleNetwork&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.stateId, stateId) || other.stateId == stateId)&&(identical(other.hostname, hostname) || other.hostname == hostname)&&(identical(other.loginMethod, loginMethod) || other.loginMethod == loginMethod)&&(identical(other.controlUrl, controlUrl) || other.controlUrl == controlUrl)&&(identical(other.autoRoute, autoRoute) || other.autoRoute == autoRoute)&&(identical(other.exitNode, exitNode) || other.exitNode == exitNode)&&(identical(other.exitNodeAllowLanAccess, exitNodeAllowLanAccess) || other.exitNodeAllowLanAccess == exitNodeAllowLanAccess)&&(identical(other.magicDnsSuffix, magicDnsSuffix) || other.magicDnsSuffix == magicDnsSuffix));
+  final _this = this as TailscaleNetwork;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TailscaleNetwork&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.stateId, _this.stateId) || other.stateId == _this.stateId)&&(identical(other.hostname, _this.hostname) || other.hostname == _this.hostname)&&(identical(other.loginMethod, _this.loginMethod) || other.loginMethod == _this.loginMethod)&&(identical(other.controlUrl, _this.controlUrl) || other.controlUrl == _this.controlUrl)&&(identical(other.autoRoute, _this.autoRoute) || other.autoRoute == _this.autoRoute)&&(identical(other.exitNode, _this.exitNode) || other.exitNode == _this.exitNode)&&(identical(other.exitNodeAllowLanAccess, _this.exitNodeAllowLanAccess) || other.exitNodeAllowLanAccess == _this.exitNodeAllowLanAccess)&&(identical(other.magicDnsSuffix, _this.magicDnsSuffix) || other.magicDnsSuffix == _this.magicDnsSuffix));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,stateId,hostname,loginMethod,controlUrl,autoRoute,exitNode,exitNodeAllowLanAccess,magicDnsSuffix);
+int get hashCode {
+  final _this = this as TailscaleNetwork;
+  return Object.hash(runtimeType,_this.id,_this.name,_this.stateId,_this.hostname,_this.loginMethod,_this.controlUrl,_this.autoRoute,_this.exitNode,_this.exitNodeAllowLanAccess,_this.magicDnsSuffix);
+}
 
 @override
 String toString() {
-  return 'TailscaleNetwork(id: $id, name: $name, stateId: $stateId, hostname: $hostname, loginMethod: $loginMethod, controlUrl: $controlUrl, autoRoute: $autoRoute, exitNode: $exitNode, exitNodeAllowLanAccess: $exitNodeAllowLanAccess, magicDnsSuffix: $magicDnsSuffix)';
+  final _this = this as TailscaleNetwork;
+  return 'TailscaleNetwork(id: ${_this.id}, name: ${_this.name}, stateId: ${_this.stateId}, hostname: ${_this.hostname}, loginMethod: ${_this.loginMethod}, controlUrl: ${_this.controlUrl}, autoRoute: ${_this.autoRoute}, exitNode: ${_this.exitNode}, exitNodeAllowLanAccess: ${_this.exitNodeAllowLanAccess}, magicDnsSuffix: ${_this.magicDnsSuffix})';
 }
 
 
@@ -70,7 +76,7 @@ class _$TailscaleNetworkCopyWithImpl<$Res>
 /// Create a copy of TailscaleNetwork
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? stateId = null,Object? hostname = null,Object? loginMethod = null,Object? controlUrl = null,Object? autoRoute = null,Object? exitNode = null,Object? exitNodeAllowLanAccess = null,Object? magicDnsSuffix = null,}) {
-  return _then(_self.copyWith(
+  return _then(TailscaleNetwork(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,stateId: null == stateId ? _self.stateId : stateId // ignore: cast_nullable_to_non_nullable
@@ -253,16 +259,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TailscaleNetwork&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.stateId, stateId) || other.stateId == stateId)&&(identical(other.hostname, hostname) || other.hostname == hostname)&&(identical(other.loginMethod, loginMethod) || other.loginMethod == loginMethod)&&(identical(other.controlUrl, controlUrl) || other.controlUrl == controlUrl)&&(identical(other.autoRoute, autoRoute) || other.autoRoute == autoRoute)&&(identical(other.exitNode, exitNode) || other.exitNode == exitNode)&&(identical(other.exitNodeAllowLanAccess, exitNodeAllowLanAccess) || other.exitNodeAllowLanAccess == exitNodeAllowLanAccess)&&(identical(other.magicDnsSuffix, magicDnsSuffix) || other.magicDnsSuffix == magicDnsSuffix));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _TailscaleNetwork&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.stateId, stateId) || other.stateId == stateId)&&(identical(other.hostname, hostname) || other.hostname == hostname)&&(identical(other.loginMethod, loginMethod) || other.loginMethod == loginMethod)&&(identical(other.controlUrl, controlUrl) || other.controlUrl == controlUrl)&&(identical(other.autoRoute, autoRoute) || other.autoRoute == autoRoute)&&(identical(other.exitNode, exitNode) || other.exitNode == exitNode)&&(identical(other.exitNodeAllowLanAccess, exitNodeAllowLanAccess) || other.exitNodeAllowLanAccess == exitNodeAllowLanAccess)&&(identical(other.magicDnsSuffix, magicDnsSuffix) || other.magicDnsSuffix == magicDnsSuffix));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,stateId,hostname,loginMethod,controlUrl,autoRoute,exitNode,exitNodeAllowLanAccess,magicDnsSuffix);
+int get hashCode {
+    return Object.hash(runtimeType,id,name,stateId,hostname,loginMethod,controlUrl,autoRoute,exitNode,exitNodeAllowLanAccess,magicDnsSuffix);
+}
 
 @override
 String toString() {
-  return 'TailscaleNetwork(id: $id, name: $name, stateId: $stateId, hostname: $hostname, loginMethod: $loginMethod, controlUrl: $controlUrl, autoRoute: $autoRoute, exitNode: $exitNode, exitNodeAllowLanAccess: $exitNodeAllowLanAccess, magicDnsSuffix: $magicDnsSuffix)';
+    return 'TailscaleNetwork(id: $id, name: $name, stateId: $stateId, hostname: $hostname, loginMethod: $loginMethod, controlUrl: $controlUrl, autoRoute: $autoRoute, exitNode: $exitNode, exitNodeAllowLanAccess: $exitNodeAllowLanAccess, magicDnsSuffix: $magicDnsSuffix)';
 }
 
 
@@ -326,16 +334,21 @@ $TailscaleDeviceCopyWith<TailscaleDevice> get copyWith => _$TailscaleDeviceCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TailscaleDevice&&(identical(other.name, name) || other.name == name)&&(identical(other.hostName, hostName) || other.hostName == hostName)&&(identical(other.os, os) || other.os == os)&&const DeepCollectionEquality().equals(other.addresses, addresses)&&(identical(other.online, online) || other.online == online)&&(identical(other.direct, direct) || other.direct == direct)&&(identical(other.relay, relay) || other.relay == relay)&&(identical(other.exitNodeOption, exitNodeOption) || other.exitNodeOption == exitNodeOption)&&(identical(other.exitNode, exitNode) || other.exitNode == exitNode));
+  final _this = this as TailscaleDevice;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TailscaleDevice&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.hostName, _this.hostName) || other.hostName == _this.hostName)&&(identical(other.os, _this.os) || other.os == _this.os)&&const DeepCollectionEquality().equals(other.addresses, _this.addresses)&&(identical(other.online, _this.online) || other.online == _this.online)&&(identical(other.direct, _this.direct) || other.direct == _this.direct)&&(identical(other.relay, _this.relay) || other.relay == _this.relay)&&(identical(other.exitNodeOption, _this.exitNodeOption) || other.exitNodeOption == _this.exitNodeOption)&&(identical(other.exitNode, _this.exitNode) || other.exitNode == _this.exitNode));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,name,hostName,os,const DeepCollectionEquality().hash(addresses),online,direct,relay,exitNodeOption,exitNode);
+int get hashCode {
+  final _this = this as TailscaleDevice;
+  return Object.hash(runtimeType,_this.name,_this.hostName,_this.os,const DeepCollectionEquality().hash(_this.addresses),_this.online,_this.direct,_this.relay,_this.exitNodeOption,_this.exitNode);
+}
 
 @override
 String toString() {
-  return 'TailscaleDevice(name: $name, hostName: $hostName, os: $os, addresses: $addresses, online: $online, direct: $direct, relay: $relay, exitNodeOption: $exitNodeOption, exitNode: $exitNode)';
+  final _this = this as TailscaleDevice;
+  return 'TailscaleDevice(name: ${_this.name}, hostName: ${_this.hostName}, os: ${_this.os}, addresses: ${_this.addresses}, online: ${_this.online}, direct: ${_this.direct}, relay: ${_this.relay}, exitNodeOption: ${_this.exitNodeOption}, exitNode: ${_this.exitNode})';
 }
 
 
@@ -364,7 +377,7 @@ class _$TailscaleDeviceCopyWithImpl<$Res>
 /// Create a copy of TailscaleDevice
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? hostName = null,Object? os = null,Object? addresses = null,Object? online = null,Object? direct = null,Object? relay = null,Object? exitNodeOption = null,Object? exitNode = null,}) {
-  return _then(_self.copyWith(
+  return _then(TailscaleDevice(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,hostName: null == hostName ? _self.hostName : hostName // ignore: cast_nullable_to_non_nullable
 as String,os: null == os ? _self.os : os // ignore: cast_nullable_to_non_nullable
@@ -515,7 +528,7 @@ return $default(_that.name,_that.hostName,_that.os,_that.addresses,_that.online,
 @JsonSerializable()
 
 class _TailscaleDevice implements TailscaleDevice {
-  const _TailscaleDevice({this.name = '', this.hostName = '', this.os = '', final  List<String> addresses = const [], this.online = false, this.direct = false, this.relay = '', this.exitNodeOption = false, this.exitNode = false}): _addresses = addresses;
+  const _TailscaleDevice({this.name = '', this.hostName = '', this.os = '',  List<String> addresses = const [], this.online = false, this.direct = false, this.relay = '', this.exitNodeOption = false, this.exitNode = false}): _addresses = addresses;
   factory _TailscaleDevice.fromJson(Map<String, dynamic> json) => _$TailscaleDeviceFromJson(json);
 
 @override@JsonKey() final  String name;
@@ -547,16 +560,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TailscaleDevice&&(identical(other.name, name) || other.name == name)&&(identical(other.hostName, hostName) || other.hostName == hostName)&&(identical(other.os, os) || other.os == os)&&const DeepCollectionEquality().equals(other._addresses, _addresses)&&(identical(other.online, online) || other.online == online)&&(identical(other.direct, direct) || other.direct == direct)&&(identical(other.relay, relay) || other.relay == relay)&&(identical(other.exitNodeOption, exitNodeOption) || other.exitNodeOption == exitNodeOption)&&(identical(other.exitNode, exitNode) || other.exitNode == exitNode));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _TailscaleDevice&&(identical(other.name, name) || other.name == name)&&(identical(other.hostName, hostName) || other.hostName == hostName)&&(identical(other.os, os) || other.os == os)&&const DeepCollectionEquality().equals(other.addresses, _addresses)&&(identical(other.online, online) || other.online == online)&&(identical(other.direct, direct) || other.direct == direct)&&(identical(other.relay, relay) || other.relay == relay)&&(identical(other.exitNodeOption, exitNodeOption) || other.exitNodeOption == exitNodeOption)&&(identical(other.exitNode, exitNode) || other.exitNode == exitNode));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,name,hostName,os,const DeepCollectionEquality().hash(_addresses),online,direct,relay,exitNodeOption,exitNode);
+int get hashCode {
+    return Object.hash(runtimeType,name,hostName,os,const DeepCollectionEquality().hash(_addresses),online,direct,relay,exitNodeOption,exitNode);
+}
 
 @override
 String toString() {
-  return 'TailscaleDevice(name: $name, hostName: $hostName, os: $os, addresses: $addresses, online: $online, direct: $direct, relay: $relay, exitNodeOption: $exitNodeOption, exitNode: $exitNode)';
+    return 'TailscaleDevice(name: $name, hostName: $hostName, os: $os, addresses: $addresses, online: $online, direct: $direct, relay: $relay, exitNodeOption: $exitNodeOption, exitNode: $exitNode)';
 }
 
 
@@ -619,16 +634,21 @@ $TailscaleStatusCopyWith<TailscaleStatus> get copyWith => _$TailscaleStatusCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TailscaleStatus&&(identical(other.rawState, rawState) || other.rawState == rawState)&&(identical(other.authUrl, authUrl) || other.authUrl == authUrl)&&(identical(other.error, error) || other.error == error)&&(identical(other.tailnet, tailnet) || other.tailnet == tailnet)&&(identical(other.magicDnsSuffix, magicDnsSuffix) || other.magicDnsSuffix == magicDnsSuffix)&&(identical(other.keyExpired, keyExpired) || other.keyExpired == keyExpired)&&const DeepCollectionEquality().equals(other.health, health)&&(identical(other.self, self) || other.self == self)&&const DeepCollectionEquality().equals(other.peers, peers));
+  final _this = this as TailscaleStatus;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TailscaleStatus&&(identical(other.rawState, _this.rawState) || other.rawState == _this.rawState)&&(identical(other.authUrl, _this.authUrl) || other.authUrl == _this.authUrl)&&(identical(other.error, _this.error) || other.error == _this.error)&&(identical(other.tailnet, _this.tailnet) || other.tailnet == _this.tailnet)&&(identical(other.magicDnsSuffix, _this.magicDnsSuffix) || other.magicDnsSuffix == _this.magicDnsSuffix)&&(identical(other.keyExpired, _this.keyExpired) || other.keyExpired == _this.keyExpired)&&const DeepCollectionEquality().equals(other.health, _this.health)&&(identical(other.self, _this.self) || other.self == _this.self)&&const DeepCollectionEquality().equals(other.peers, _this.peers));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,rawState,authUrl,error,tailnet,magicDnsSuffix,keyExpired,const DeepCollectionEquality().hash(health),self,const DeepCollectionEquality().hash(peers));
+int get hashCode {
+  final _this = this as TailscaleStatus;
+  return Object.hash(runtimeType,_this.rawState,_this.authUrl,_this.error,_this.tailnet,_this.magicDnsSuffix,_this.keyExpired,const DeepCollectionEquality().hash(_this.health),_this.self,const DeepCollectionEquality().hash(_this.peers));
+}
 
 @override
 String toString() {
-  return 'TailscaleStatus(rawState: $rawState, authUrl: $authUrl, error: $error, tailnet: $tailnet, magicDnsSuffix: $magicDnsSuffix, keyExpired: $keyExpired, health: $health, self: $self, peers: $peers)';
+  final _this = this as TailscaleStatus;
+  return 'TailscaleStatus(rawState: ${_this.rawState}, authUrl: ${_this.authUrl}, error: ${_this.error}, tailnet: ${_this.tailnet}, magicDnsSuffix: ${_this.magicDnsSuffix}, keyExpired: ${_this.keyExpired}, health: ${_this.health}, self: ${_this.self}, peers: ${_this.peers})';
 }
 
 
@@ -657,7 +677,7 @@ class _$TailscaleStatusCopyWithImpl<$Res>
 /// Create a copy of TailscaleStatus
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? rawState = null,Object? authUrl = null,Object? error = null,Object? tailnet = null,Object? magicDnsSuffix = null,Object? keyExpired = null,Object? health = null,Object? self = freezed,Object? peers = null,}) {
-  return _then(_self.copyWith(
+  return _then(TailscaleStatus(
 rawState: null == rawState ? _self.rawState : rawState // ignore: cast_nullable_to_non_nullable
 as String,authUrl: null == authUrl ? _self.authUrl : authUrl // ignore: cast_nullable_to_non_nullable
 as String,error: null == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
@@ -820,7 +840,7 @@ return $default(_that.rawState,_that.authUrl,_that.error,_that.tailnet,_that.mag
 @JsonSerializable()
 
 class _TailscaleStatus implements TailscaleStatus {
-  const _TailscaleStatus({@JsonKey(name: 'state') this.rawState = '', this.authUrl = '', this.error = '', this.tailnet = '', this.magicDnsSuffix = '', this.keyExpired = false, final  List<String> health = const [], this.self, final  List<TailscaleDevice> peers = const []}): _health = health,_peers = peers;
+  const _TailscaleStatus({@JsonKey(name: 'state') this.rawState = '', this.authUrl = '', this.error = '', this.tailnet = '', this.magicDnsSuffix = '', this.keyExpired = false,  List<String> health = const [], this.self,  List<TailscaleDevice> peers = const []}): _health = health,_peers = peers;
   factory _TailscaleStatus.fromJson(Map<String, dynamic> json) => _$TailscaleStatusFromJson(json);
 
 @override@JsonKey(name: 'state') final  String rawState;
@@ -858,16 +878,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TailscaleStatus&&(identical(other.rawState, rawState) || other.rawState == rawState)&&(identical(other.authUrl, authUrl) || other.authUrl == authUrl)&&(identical(other.error, error) || other.error == error)&&(identical(other.tailnet, tailnet) || other.tailnet == tailnet)&&(identical(other.magicDnsSuffix, magicDnsSuffix) || other.magicDnsSuffix == magicDnsSuffix)&&(identical(other.keyExpired, keyExpired) || other.keyExpired == keyExpired)&&const DeepCollectionEquality().equals(other._health, _health)&&(identical(other.self, self) || other.self == self)&&const DeepCollectionEquality().equals(other._peers, _peers));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _TailscaleStatus&&(identical(other.rawState, rawState) || other.rawState == rawState)&&(identical(other.authUrl, authUrl) || other.authUrl == authUrl)&&(identical(other.error, error) || other.error == error)&&(identical(other.tailnet, tailnet) || other.tailnet == tailnet)&&(identical(other.magicDnsSuffix, magicDnsSuffix) || other.magicDnsSuffix == magicDnsSuffix)&&(identical(other.keyExpired, keyExpired) || other.keyExpired == keyExpired)&&const DeepCollectionEquality().equals(other.health, _health)&&(identical(other.self, self) || other.self == self)&&const DeepCollectionEquality().equals(other.peers, _peers));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,rawState,authUrl,error,tailnet,magicDnsSuffix,keyExpired,const DeepCollectionEquality().hash(_health),self,const DeepCollectionEquality().hash(_peers));
+int get hashCode {
+    return Object.hash(runtimeType,rawState,authUrl,error,tailnet,magicDnsSuffix,keyExpired,const DeepCollectionEquality().hash(_health),self,const DeepCollectionEquality().hash(_peers));
+}
 
 @override
 String toString() {
-  return 'TailscaleStatus(rawState: $rawState, authUrl: $authUrl, error: $error, tailnet: $tailnet, magicDnsSuffix: $magicDnsSuffix, keyExpired: $keyExpired, health: $health, self: $self, peers: $peers)';
+    return 'TailscaleStatus(rawState: $rawState, authUrl: $authUrl, error: $error, tailnet: $tailnet, magicDnsSuffix: $magicDnsSuffix, keyExpired: $keyExpired, health: $health, self: $self, peers: $peers)';
 }
 
 

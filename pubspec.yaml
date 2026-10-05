@@ -3,8 +3,8 @@ description: A multi-platform proxy client based on ClashMeta, simple and easy t
 publish_to: 'none'
 version: 0.8.99+2026092815
 environment:
-  sdk: '>=3.12.0 <4.0.0'
-  flutter: '>=3.44.0'
+  sdk: '>=3.13.2 <4.0.0'
+  flutter: '>=3.47.2'
 
 dependencies:
   setup:
@@ -76,9 +76,8 @@ dependencies:
   yaml_writer: 2.1.0
   super_sliver_list: ^0.4.1
 
-  drift: ^2.29.0
-  drift_flutter: ^0.2.7
-  sqlite3: ^2.9.4
+  drift: ^2.34.3
+  sqlite3: ^3.5.1
   # flutter_html 3.0.0 uses querySelector.matches, removed in html 0.15.7.
   html: 0.15.6
   flutter_html: ^3.0.0
@@ -88,15 +87,15 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  json_serializable: ^6.7.1
-  build_runner: ^2.7.1
+  json_serializable: ^6.14.1
+  build_runner: ^2.15.1
   args: ^2.4.2
-  freezed: ^3.2.0
-  riverpod_generator: ^4.0.3
+  freezed: ^4.0.1
+  riverpod_generator: ^4.0.8
   riverpod_lint: ^3.0.0
 
-  drift_dev: ^2.29.0
-  intl_utils: ^2.8.11
+  drift_dev: ^2.34.0
+  intl_utils: ^2.8.15
   path_provider_platform_interface: ^2.1.2
   test: ^1.30.0
   mocktail: ^1.0.4

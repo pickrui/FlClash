@@ -16,6 +16,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.content.getSystemService
 import com.oixcloud.clash.common.AccessControlMode
+import com.oixcloud.clash.common.LocalNetworkAccess
 import com.oixcloud.clash.common.GlobalState
 import com.oixcloud.clash.core.Core
 import com.oixcloud.clash.service.models.normalizeTunMtu
@@ -127,7 +128,10 @@ class VpnService : SystemVpnService(), IBaseService {
         return super.onBind(intent) ?: binder
     }
 
-    private fun handleStart(options: VpnOptions) {
+    private fun handleStart(requested: VpnOptions) {
+        val options = requested.copy(stack = LocalNetworkAccess.effectiveStack(
+            requested.enable, requested.stack, LocalNetworkAccess.isGranted(this),
+        ))
         val fd = with(Builder()) {
             val cidr = IPV4_ADDRESS.toCIDR()
             addAddress(cidr.address, cidr.prefixLength)

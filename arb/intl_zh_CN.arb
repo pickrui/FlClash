@@ -1121,5 +1121,6 @@
   "serviceTimeout": "超时",
   "runTime": "运行时间",
   "floatingNavigationBar": "悬浮导航",
-  "floatingNavigationBarDesc": "在紧凑布局中使用悬浮导航栏"
+  "floatingNavigationBarDesc": "在紧凑布局中使用悬浮导航栏",
+  "localNetworkTip": "未获准访问局域网，本次连接改用 gVisor；局域网代理和服务仍可能不可用"
 }

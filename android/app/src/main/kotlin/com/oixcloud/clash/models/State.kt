@@ -10,6 +10,7 @@ import com.google.gson.annotations.SerializedName
 
 data class SharedState(
     val startTip: String = "Starting VPN...",
+    val localNetworkTip: String? = null,
     val stopTip: String = "Stopping VPN...",
     val currentProfileName: String = "FlClash",
     val stopText: String = "Stop",

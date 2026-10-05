@@ -549,9 +549,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "configRecoveryUseLocalStorage": MessageLookupByLibrary.simpleMessage(
       "ローカルファイルに保存",
     ),
-    "configRecoveryUseLocalStorageConfirm": MessageLookupByLibrary.simpleMessage(
-      "暗号化キーとアカウントの認証情報を、システムのキーリングではなくアプリのデータフォルダー内の現在のユーザーだけがアクセスできるファイルに保存しますか？現在のユーザーとして動作するプログラムはそれらを読み取ってローカル設定を復号でき、この選択は今後も維持されます",
-    ),
+    "configRecoveryUseLocalStorageConfirm":
+        MessageLookupByLibrary.simpleMessage(
+          "暗号化キーとアカウントの認証情報を、システムのキーリングではなくアプリのデータフォルダー内の現在のユーザーだけがアクセスできるファイルに保存しますか？現在のユーザーとして動作するプログラムはそれらを読み取ってローカル設定を復号でき、この選択は今後も維持されます",
+        ),
     "configTypeMismatch": m7,
     "configValueTypeBoolean": MessageLookupByLibrary.simpleMessage("真偽値"),
     "configValueTypeInteger": MessageLookupByLibrary.simpleMessage("整数"),
@@ -1119,6 +1120,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "loading": MessageLookupByLibrary.simpleMessage("読み込み中..."),
     "local": MessageLookupByLibrary.simpleMessage("ローカル"),
     "localBackupDesc": MessageLookupByLibrary.simpleMessage("ローカルにデータをバックアップ"),
+    "localNetworkTip": MessageLookupByLibrary.simpleMessage(
+      "ローカルネットワークへのアクセスが許可されていないため、今回は gVisor を使用します。LAN 上のプロキシやサービスは引き続き利用できない場合があります",
+    ),
     "locationPermission": MessageLookupByLibrary.simpleMessage("位置情報の権限"),
     "locationPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
       "位置情報の権限が拒否されたため、現在の Wi-Fi 名を取得できません。システム設定で位置情報の権限を手動で有効にしてください",

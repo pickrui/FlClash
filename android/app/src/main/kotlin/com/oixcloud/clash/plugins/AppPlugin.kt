@@ -33,6 +33,7 @@ import com.oixcloud.clash.ProcessExitRecord
 import com.oixcloud.clash.R
 import com.oixcloud.clash.common.Components
 import com.oixcloud.clash.common.GlobalState
+import com.oixcloud.clash.common.LocalNetworkAccess
 import com.oixcloud.clash.common.PendingCallback
 import com.oixcloud.clash.common.QuickAction
 import com.oixcloud.clash.common.quickIntent
@@ -80,6 +81,8 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
 
     private val packages = PackageSnapshotCache { loadPackages() }
     private val installedAppsRequest = PermissionRequestBroker()
+    private val localNetworkRequest = PermissionRequestBroker()
+    private var localNetworkRequested = false
     private var packageChangeContext: Context? = null
     private var packageChangeReceiver: BroadcastReceiver? = null
     private var activityBinding: ActivityPluginBinding? = null
@@ -238,11 +241,13 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
     @Suppress("DEPRECATION")
     private fun updateExcludeFromRecents(value: Boolean?) {
         val am = getSystemService(GlobalState.application, ActivityManager::class.java)
+        val taskId = activityRef?.get()?.taskId ?: return
         val task = am?.appTasks?.firstOrNull {
+            val info = it.taskInfo ?: return@firstOrNull false
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                it.taskInfo.taskId == activityRef?.get()?.taskId
+                info.taskId == taskId
             } else {
-                it.taskInfo.id == activityRef?.get()?.taskId
+                info.id == taskId
             }
         }
 
@@ -331,6 +336,29 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
             check(hasInstalledAppsPermission()) { "Installed apps permission was revoked" }
             Gson().toJson(names)
         }
+    }
+
+    fun requestLocalNetworkPermission(callback: (Boolean) -> Unit) {
+        if (LocalNetworkAccess.isGranted(GlobalState.application)) {
+            callback(true)
+            return
+        }
+        val activity = activityRef?.get()
+        if (activity == null || localNetworkRequested) {
+            callback(false)
+            return
+        }
+        val requestCode = localNetworkRequest.begin(callback) ?: return
+        try {
+            ActivityCompat.requestPermissions(activity, arrayOf(LocalNetworkAccess.permission), requestCode)
+        } catch (error: Exception) {
+            localNetworkRequest.cancel()
+            throw error
+        }
+    }
+
+    fun cancelLocalNetworkPreparation(callback: (Boolean) -> Unit) {
+        localNetworkRequest.remove(callback)
     }
 
     fun requestNotificationsPermission(callBack: (Unit) -> Unit) {
@@ -492,6 +520,7 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
         packageChangeContext = null
         detachActivityListeners()
         installedAppsRequest.cancel()
+        localNetworkRequest.cancel()
         packages.invalidate()
         invokeRequestNotificationCallback()
         invokeVpnPrepareCallback(false)
@@ -524,6 +553,7 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
     override fun onDetachedFromActivity() {
         detachActivityListeners()
         installedAppsRequest.cancel()
+        localNetworkRequest.cancel()
         invokeRequestNotificationCallback()
         invokeVpnPrepareCallback(false)
     }
@@ -538,6 +568,12 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
         requestCode: Int, permissions: Array<String>, grantResults: IntArray
     ): Boolean {
         if (requestCode >= 0x2000) {
+            val localGranted = permissions.contains(LocalNetworkAccess.permission) &&
+                grantResults.isNotEmpty() && LocalNetworkAccess.isGranted(GlobalState.application)
+            if (localNetworkRequest.complete(requestCode, localGranted)) {
+                localNetworkRequested = true
+                return true
+            }
             if (permissions.isNotEmpty() && !permissions.contains(GET_INSTALLED_APPS)) return false
             val granted = permissions.contains(GET_INSTALLED_APPS) &&
                 grantResults.isNotEmpty() &&

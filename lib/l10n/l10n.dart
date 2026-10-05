@@ -1,6 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 import 'intl/messages_all.dart';
 
 // **************************************************************************
@@ -9674,6 +9675,16 @@ class AppLocalizations {
     return Intl.message(
       'Use a floating dock for compact layouts',
       name: 'floatingNavigationBarDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Local network access denied; using gVisor for this connection. LAN proxies and services may remain unavailable`
+  String get localNetworkTip {
+    return Intl.message(
+      'Local network access denied; using gVisor for this connection. LAN proxies and services may remain unavailable',
+      name: 'localNetworkTip',
       desc: '',
       args: [],
     );

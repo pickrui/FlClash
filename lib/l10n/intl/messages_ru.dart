@@ -281,9 +281,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "apiAvailable": MessageLookupByLibrary.simpleMessage(
       "API-сервис работает нормально",
     ),
-    "apiAvailableWithCertificateException": MessageLookupByLibrary.simpleMessage(
-      "API доступен с временным исключением для сертификата. Аккаунт и конфигурация узлов не синхронизированы. Устраните проблему с сертификатом и повторите проверку.",
-    ),
+    "apiAvailableWithCertificateException":
+        MessageLookupByLibrary.simpleMessage(
+          "API доступен с временным исключением для сертификата. Аккаунт и конфигурация узлов не синхронизированы. Устраните проблему с сертификатом и повторите проверку.",
+        ),
     "app": MessageLookupByLibrary.simpleMessage("Приложение"),
     "appAccessControl": MessageLookupByLibrary.simpleMessage(
       "Контроль доступа приложений",
@@ -651,9 +652,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "configRecoveryUseLocalStorage": MessageLookupByLibrary.simpleMessage(
       "Хранить в локальном файле",
     ),
-    "configRecoveryUseLocalStorageConfirm": MessageLookupByLibrary.simpleMessage(
-      "Хранить ключи шифрования и учётные данные аккаунта не в системной связке ключей, а в файле в папке данных приложения, доступном только вашему пользователю? Любая программа, запущенная от вашего имени, сможет прочитать их и расшифровать локальные настройки. Этот выбор будет действовать и дальше.",
-    ),
+    "configRecoveryUseLocalStorageConfirm":
+        MessageLookupByLibrary.simpleMessage(
+          "Хранить ключи шифрования и учётные данные аккаунта не в системной связке ключей, а в файле в папке данных приложения, доступном только вашему пользователю? Любая программа, запущенная от вашего имени, сможет прочитать их и расшифровать локальные настройки. Этот выбор будет действовать и дальше.",
+        ),
     "configTypeMismatch": m7,
     "configValueTypeBoolean": MessageLookupByLibrary.simpleMessage(
       "логическое значение",
@@ -1387,6 +1389,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "local": MessageLookupByLibrary.simpleMessage("Локальный"),
     "localBackupDesc": MessageLookupByLibrary.simpleMessage(
       "Резервное копирование локальных данных на локальный диск",
+    ),
+    "localNetworkTip": MessageLookupByLibrary.simpleMessage(
+      "Доступ к локальной сети не разрешён; для этого подключения используется gVisor. Прокси и сервисы в локальной сети могут оставаться недоступны",
     ),
     "locationPermission": MessageLookupByLibrary.simpleMessage(
       "Разрешение на геолокацию",

@@ -1121,5 +1121,6 @@
   "serviceTimeout": "Timed out",
   "runTime": "Uptime",
   "floatingNavigationBar": "Floating navigation",
-  "floatingNavigationBarDesc": "Use a floating dock for compact layouts"
+  "floatingNavigationBarDesc": "Use a floating dock for compact layouts",
+  "localNetworkTip": "Local network access denied; using gVisor for this connection. LAN proxies and services may remain unavailable"
 }

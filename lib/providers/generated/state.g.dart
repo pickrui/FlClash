@@ -2119,7 +2119,7 @@ final class SharedStateProvider
   }
 }
 
-String _$sharedStateHash() => r'65f3b842eff6d7986d429e1ecc9b0b1ff2345503';
+String _$sharedStateHash() => r'e37acdf479bf2bf5caf48b08af5febca1f003585';
 
 @ProviderFor(overlayTopOffset)
 final overlayTopOffsetProvider = OverlayTopOffsetProvider._();
@@ -2498,7 +2498,7 @@ abstract class _$AccessControlState extends $Notifier<AccessControlProps> {
   AccessControlProps build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AccessControlProps, AccessControlProps>;
     final element =
         ref.element
@@ -2508,6 +2508,6 @@ abstract class _$AccessControlState extends $Notifier<AccessControlProps> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

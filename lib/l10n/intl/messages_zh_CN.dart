@@ -486,9 +486,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "configRecoveryUseLocalStorage": MessageLookupByLibrary.simpleMessage(
       "改用本地文件存储",
     ),
-    "configRecoveryUseLocalStorageConfirm": MessageLookupByLibrary.simpleMessage(
-      "将加密密钥和账号凭据改存到应用数据目录中仅当前用户可访问的文件，不再使用系统密钥环？以当前用户身份运行的程序都能读取它们并解密本地配置，此选择之后会一直生效",
-    ),
+    "configRecoveryUseLocalStorageConfirm":
+        MessageLookupByLibrary.simpleMessage(
+          "将加密密钥和账号凭据改存到应用数据目录中仅当前用户可访问的文件，不再使用系统密钥环？以当前用户身份运行的程序都能读取它们并解密本地配置，此选择之后会一直生效",
+        ),
     "configTypeMismatch": m7,
     "configValueTypeBoolean": MessageLookupByLibrary.simpleMessage("布尔值"),
     "configValueTypeInteger": MessageLookupByLibrary.simpleMessage("整数"),
@@ -980,6 +981,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "loading": MessageLookupByLibrary.simpleMessage("加载中..."),
     "local": MessageLookupByLibrary.simpleMessage("本地"),
     "localBackupDesc": MessageLookupByLibrary.simpleMessage("备份数据到本地"),
+    "localNetworkTip": MessageLookupByLibrary.simpleMessage(
+      "未获准访问局域网，本次连接改用 gVisor；局域网代理和服务仍可能不可用",
+    ),
     "locationPermission": MessageLookupByLibrary.simpleMessage("位置权限"),
     "locationPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
       "位置权限已被拒绝，无法获取当前 Wi-Fi 名称。请前往系统设置手动开启位置权限",

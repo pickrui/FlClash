@@ -68,4 +68,28 @@ class PermissionRequestBrokerTest {
         broker.cancel()
         assertEquals(listOf(false), values)
     }
+    @Test
+    fun cancelledWaiterDoesNotDismissTheDialogOrResolveANewWaiterEarly() {
+        val broker = PermissionRequestBroker()
+        val values = mutableListOf<Boolean>()
+        val cancelled: (Boolean) -> Unit = { error("cancelled callback invoked") }
+        val code = broker.begin(cancelled)!!
+        broker.remove(cancelled)
+        assertNull(broker.begin { values.add(it) })
+        assertTrue(broker.complete(code, true))
+        assertEquals(listOf(true), values)
+    }
+
+    @Test
+    fun differentPermissionsCannotConsumeEachOthersResponses() {
+        val first = PermissionRequestBroker()
+        val second = PermissionRequestBroker()
+        val firstCode = first.begin {}!!
+        val secondCode = second.begin {}!!
+        assertNotEquals(firstCode, secondCode)
+        assertFalse(first.complete(secondCode, true))
+        assertFalse(second.complete(firstCode, true))
+        assertTrue(first.complete(firstCode, false))
+        assertTrue(second.complete(secondCode, true))
+    }
 }

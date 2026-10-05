@@ -6,6 +6,8 @@
 package com.oixcloud.clash
 
 import android.net.VpnService
+import com.oixcloud.clash.service.models.VpnOptions
+import com.oixcloud.clash.common.LocalNetworkAccess
 import com.oixcloud.clash.common.GlobalState
 import com.oixcloud.clash.common.RunIntentArbiter
 import com.oixcloud.clash.common.QuickAction
@@ -163,6 +165,13 @@ object State {
                     unregister = plugin::cancelNotificationPreparation,
                 )
             }
+            withContext(Dispatchers.Main) {
+                startPreparation.await<Boolean>(
+                    request,
+                    register = plugin::requestLocalNetworkPermission,
+                    unregister = plugin::cancelLocalNetworkPreparation,
+                )
+            }
             val allowed = withContext(Dispatchers.Main) {
                 startPreparation.await<Boolean>(
                     request,
@@ -182,7 +191,7 @@ object State {
             runStateFlow.value = RunState.PENDING
             startWithRollback(
                 block = {
-                    runTime = Service.startService(options, runTime)
+                    runTime = Service.startService(withLocalNetworkFallback(options), runTime)
                     check(runTime != 0L) { "VPN service did not start" }
                     startPreparation.ensureCurrent(request)
                     runStateFlow.value = RunState.START
@@ -245,13 +254,23 @@ object State {
                 }
                 check(result.isEmpty()) { result }
                 startPreparation.ensureCurrent(request)
-                runTime = Service.startService(options, runTime)
+                runTime = Service.startService(withLocalNetworkFallback(options), runTime)
                 check(runTime != 0L) { "VPN service did not start" }
                 startPreparation.ensureCurrent(request)
                 runStateFlow.value = RunState.START
             },
             rollback = ::rollbackStart,
         )
+    }
+
+    private fun withLocalNetworkFallback(options: VpnOptions): VpnOptions {
+        val stack = LocalNetworkAccess.effectiveStack(
+            options.enable, options.stack, LocalNetworkAccess.isGranted(GlobalState.application),
+        )
+        if (stack == options.stack) return options
+        GlobalState.application.showToast(sharedState.localNetworkTip?.takeIf { it.isNotBlank() }
+            ?: "Local network access denied; using gVisor for this connection")
+        return options.copy(stack = stack)
     }
 
     private suspend fun rollbackStart() {
