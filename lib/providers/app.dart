@@ -10,7 +10,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart'
     show Notifier, NotifierProvider;
 
-import 'dart:ui' show Brightness, Size;
+import 'dart:ui' show Brightness, Size, Locale;
 
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/common.dart';
@@ -20,6 +20,12 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'generated/app.g.dart';
+
+@Riverpod(keepAlive: true)
+class LoadedLocale extends _$LoadedLocale with NotifierMixin<Locale?> {
+  @override
+  Locale? build() => null;
+}
 
 @Riverpod(keepAlive: true)
 CoreController coreHandler(Ref ref) => coreController;

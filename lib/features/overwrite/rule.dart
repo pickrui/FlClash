@@ -36,8 +36,8 @@ class RuleItem extends StatelessWidget {
     final error = parsed.payloadError?.getMessage(context);
     final target = parsed.subRule ?? parsed.ruleTarget;
     final color = switch (target?.toUpperCase()) {
-      'DIRECT' => context.colorScheme.primary,
-      'REJECT' || 'REJECT-DROP' => context.colorScheme.error,
+      'DIRECT' => context.colorScheme.success,
+      'REJECT' || 'REJECT-DROP' => context.colorScheme.warning,
       _ => context.colorScheme.tertiary,
     };
     return SelectedDecorationListItem(

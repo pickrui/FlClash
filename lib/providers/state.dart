@@ -213,7 +213,7 @@ TrayState trayState(Ref ref) {
     systemProxy: systemProxy,
     tunEnable: clashConfigVm3.c,
     isStart: isStart,
-    locale: appSettingVm3.b,
+    locale: ref.watch(loadedLocaleProvider)?.toLanguageTag() ?? appSettingVm3.b,
     brightness: brightness,
     groups: groups,
     selectedMap: selectedMap,
@@ -649,7 +649,7 @@ VM3<bool, int, ProxiesSortType> needUpdateGroups(Ref ref) {
 
 @riverpod
 SharedState sharedState(Ref ref) {
-  ref.watch((appSettingProvider).select((state) => state.locale));
+  ref.watch(loadedLocaleProvider);
   final currentProfileVM2 = ref.watch(
     currentProfileProvider.select(
       (state) => VM2(state?.label ?? '', state?.selectedMap ?? {}),

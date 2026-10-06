@@ -9,7 +9,6 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/ua_dialog.dart';
-import 'package:fl_clash/widgets/proxy_authentication.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -775,26 +774,6 @@ class _ExternalControllerDialogState
     );
   }
 }
-
-final generalItems = <Widget>[
-  const LogLevelItem(),
-  const UaItem(),
-  const InterfaceNameItem(),
-  if (system.isDesktop) const KeepAliveIntervalItem(),
-  const TestUrlItem(),
-  const PortItem(),
-  const HostsItem(),
-  const AutoIpv6Item(),
-  const Ipv6Item(),
-  const AllowLanItem(),
-  const ProxyAuthenticationItem(),
-  const UnifiedDelayItem(),
-  const AppendSystemDNSItem(),
-  const FindProcessItem(),
-  const TcpConcurrentItem(),
-  const GeodataLoaderItem(),
-  const ExternalControllerItem(),
-].separated(const Divider(height: 0)).toList();
 
 class _PortDialog extends ConsumerStatefulWidget {
   const _PortDialog();

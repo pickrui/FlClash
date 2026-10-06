@@ -1344,5 +1344,13 @@
   "ruleActionOrDesc": "逻辑规则 OR",
   "ruleActionSubRuleDesc": "匹配至子规则，需要注意括号的使用",
   "ruleActionProcessNameWildcardDesc": "使用进程名称通配符匹配，仅支持*和?通配符",
-  "ruleActionProcessNameDesc": "使用进程匹配，在Android平台可以匹配包名"
+  "ruleActionProcessNameDesc": "使用进程匹配，在Android平台可以匹配包名",
+  "general": "常规",
+  "startupAndBackground": "启动与后台",
+  "requestsAndUpdates": "请求与更新",
+  "inbound": "入站",
+  "logsAndDiagnostics": "日志与诊断",
+  "onDemand": "按需运行",
+  "onDemandDesc": "配置程序特定场景运行状态",
+  "prerequisites": "前置条件"
 }

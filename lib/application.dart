@@ -20,6 +20,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/views/views.dart';
 import 'package:fl_clash/manager/hotkey_manager.dart';
 import 'package:fl_clash/manager/manager.dart';
+import 'package:fl_clash/manager/locale_manager.dart';
 import 'package:fl_clash/plugins/app.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
@@ -78,7 +79,7 @@ class ApplicationState extends ConsumerState<Application> {
       }
       if (!mounted) return;
       appController.initLink();
-      app?.initShortcuts();
+      if (!safeModeBuild) app?.initShortcuts();
     });
   }
 
@@ -192,11 +193,13 @@ class ApplicationState extends ConsumerState<Application> {
             return MaterialUiCompatibilityBridge(
               child: IconTheme(
                 data: Theme.of(context).iconTheme,
-                child: AppEnvManager(
-                  child: _buildApp(
-                    child: _buildPlatformState(
-                      child: _buildState(
-                        child: _buildPlatformApp(child: child!),
+                child: LocaleManager(
+                  child: AppEnvManager(
+                    child: _buildApp(
+                      child: _buildPlatformState(
+                        child: _buildState(
+                          child: _buildPlatformApp(child: child!),
+                        ),
                       ),
                     ),
                   ),

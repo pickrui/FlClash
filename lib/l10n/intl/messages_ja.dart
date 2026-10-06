@@ -1050,6 +1050,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "forgotPassword": MessageLookupByLibrary.simpleMessage("パスワードをお忘れですか？"),
     "format": MessageLookupByLibrary.simpleMessage("形式"),
     "fruitSaladScheme": MessageLookupByLibrary.simpleMessage("フルーツサラダ"),
+    "general": MessageLookupByLibrary.simpleMessage("一般"),
     "geoAutoUpdate": MessageLookupByLibrary.simpleMessage("自動更新"),
     "geoAutoUpdateInterval": MessageLookupByLibrary.simpleMessage("自動更新間隔"),
     "geoAutoUpdateIntervalTip": MessageLookupByLibrary.simpleMessage(
@@ -1140,6 +1141,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "importFile": MessageLookupByLibrary.simpleMessage("ファイルからインポート"),
     "importFromURL": MessageLookupByLibrary.simpleMessage("URLからインポート"),
     "importUrl": MessageLookupByLibrary.simpleMessage("URLからインポート"),
+    "inbound": MessageLookupByLibrary.simpleMessage("インバウンド"),
     "includeAll": MessageLookupByLibrary.simpleMessage("すべてのプロキシとプロバイダーを含める"),
     "includeAllProxies": MessageLookupByLibrary.simpleMessage("すべてのプロキシを含める"),
     "includeAllProxyProviders": MessageLookupByLibrary.simpleMessage(
@@ -1289,6 +1291,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "logoutContent": MessageLookupByLibrary.simpleMessage("ログアウトしますか？"),
     "logoutTitle": MessageLookupByLibrary.simpleMessage("ログアウト"),
     "logs": MessageLookupByLibrary.simpleMessage("ログ"),
+    "logsAndDiagnostics": MessageLookupByLibrary.simpleMessage("ログと診断"),
     "logsDesc": MessageLookupByLibrary.simpleMessage("ログキャプチャ記録"),
     "logsTest": MessageLookupByLibrary.simpleMessage("ログテスト"),
     "loopback": MessageLookupByLibrary.simpleMessage("ループバック解除ツール"),
@@ -1460,6 +1463,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "nullTip": m46,
     "numberTip": m47,
     "oixCloud": MessageLookupByLibrary.simpleMessage("oixCloud"),
+    "onDemand": MessageLookupByLibrary.simpleMessage("オンデマンド"),
+    "onDemandDesc": MessageLookupByLibrary.simpleMessage(
+      "特定のシナリオでのアプリの実行状態を設定します",
+    ),
     "onlyIcon": MessageLookupByLibrary.simpleMessage("アイコンのみ"),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage("プロキシのみ統計"),
     "onlyStatisticsProxyDesc": MessageLookupByLibrary.simpleMessage(
@@ -1565,6 +1572,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "portUnavailableMessage": m57,
     "portUnavailableTitle": MessageLookupByLibrary.simpleMessage("ポートを使用できません"),
     "preferH3Desc": MessageLookupByLibrary.simpleMessage("DOHのHTTP/3を優先使用"),
+    "prerequisites": MessageLookupByLibrary.simpleMessage("前提条件"),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage("キーボードを押してください"),
     "preview": MessageLookupByLibrary.simpleMessage("プレビュー"),
     "previousMatch": MessageLookupByLibrary.simpleMessage("前の一致"),
@@ -1747,6 +1755,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "replaceAll": MessageLookupByLibrary.simpleMessage("すべて置換"),
     "request": MessageLookupByLibrary.simpleMessage("リクエスト"),
     "requests": MessageLookupByLibrary.simpleMessage("リクエスト"),
+    "requestsAndUpdates": MessageLookupByLibrary.simpleMessage("リクエストと更新"),
     "requestsDesc": MessageLookupByLibrary.simpleMessage("最近のリクエスト記録を表示"),
     "resendCodeIn": m75,
     "reset": MessageLookupByLibrary.simpleMessage("リセット"),
@@ -2034,6 +2043,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "startCorePromptTitle": MessageLookupByLibrary.simpleMessage("プロンプト"),
     "startSuccess": MessageLookupByLibrary.simpleMessage("起動しました"),
     "startVpn": MessageLookupByLibrary.simpleMessage("VPNを開始中..."),
+    "startupAndBackground": MessageLookupByLibrary.simpleMessage("起動とバックグラウンド"),
     "startupRecoveryTip": MessageLookupByLibrary.simpleMessage(
       "直近2回の起動に失敗したため、今回は設定の自動適用とVPNの自動起動を一時停止しました。選択中のプロファイルと設定は保持されています。設定を確認し、「開始」を押して再試行してください。実行中のVPN接続は維持されます",
     ),

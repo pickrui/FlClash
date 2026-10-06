@@ -252,9 +252,10 @@ class ExcludeSsidsItem extends ConsumerWidget {
               .read(networkSettingProvider.notifier)
               .update(
                 (s) => s.copyWith(
-                  excludeSSIDs: List<String>.from(
-                    items,
-                  ).where((s) => s.isNotEmpty).toSet().toList(),
+                  excludeSSIDs: List<String>.from(items)
+                      .where((s) => s.isNotEmpty)
+                      .toSet()
+                      .toList(),
                 ),
               );
         },
@@ -304,9 +305,6 @@ class _SsidPermissionItemState extends ConsumerState<SsidPermissionItem> {
 
   @override
   Widget build(BuildContext context) {
-    if (ref.watch(networkSettingProvider).excludeSSIDs.isEmpty) {
-      return const SizedBox.shrink();
-    }
     final l10n = context.appLocalizations;
     return ListItem(
       title: Text(l10n.locationPermission),
@@ -636,10 +634,6 @@ class NetworkListView extends StatelessWidget {
         items: [
           if (system.isDesktop) const TUNItem(),
           if (system.isMacOS) const AutoSetSystemDnsItem(),
-          if (system.isAndroid) const SuspendOnIdleItem(),
-          const ExcludeSsidsItem(),
-          if (system.isAndroid) const ExcludeNetworksItem(),
-          if (system.isAndroid || system.isMacOS) const SsidPermissionItem(),
           const TunStackItem(),
           const TunMtuItem(),
           const BlockQuicItem(),
@@ -651,5 +645,35 @@ class NetworkListView extends StatelessWidget {
         ],
       ),
     ]);
+  }
+}
+
+class OnDemandView extends StatelessWidget {
+  const OnDemandView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.appLocalizations;
+    return BaseScaffold(
+      title: l.onDemand,
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          if (system.isAndroid || system.isMacOS)
+            generateSectionV3(
+              title: l.prerequisites,
+              items: const [SsidPermissionItem()],
+            ),
+          generateSectionV3(
+            title: l.options,
+            items: [
+              if (system.isAndroid) const SuspendOnIdleItem(),
+              const ExcludeSsidsItem(),
+              if (system.isAndroid) const ExcludeNetworksItem(),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }

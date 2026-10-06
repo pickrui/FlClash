@@ -5,6 +5,9 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:math';
 
+import 'package:dynamic_color/dynamic_color.dart';
+import 'package:material_color_utilities/hct/hct.dart';
+
 import 'package:material_ui/material_ui.dart';
 
 extension ColorExtension on Color {
@@ -75,10 +78,40 @@ extension ColorExtension on Color {
 }
 
 extension ColorSchemeExtension on ColorScheme {
-  ColorScheme toPureBlack(bool isPrueBlack) => isPrueBlack
-      ? copyWith(
-          surface: Colors.black,
-          surfaceContainer: surfaceContainer.darken(5),
-        )
-      : this;
+  ColorScheme toPureBlack(bool isPureBlack) {
+    if (!isPureBlack || brightness != Brightness.dark) {
+      return this;
+    }
+    final shift = Hct.fromInt(surface.toARGB32()).tone;
+    Color lower(Color color) {
+      final hct = Hct.fromInt(color.toARGB32());
+      return Color(
+        Hct.from(hct.hue, hct.chroma, max(0, hct.tone - shift)).toInt(),
+      );
+    }
+
+    return copyWith(
+      surface: Colors.black,
+      surfaceDim: Colors.black,
+      surfaceContainerLowest: Colors.black,
+      surfaceContainerLow: lower(surfaceContainerLow),
+      surfaceContainer: lower(surfaceContainer),
+      surfaceContainerHigh: lower(surfaceContainerHigh),
+      surfaceContainerHighest: lower(surfaceContainerHighest),
+      surfaceBright: lower(surfaceBright),
+    );
+  }
+
+  Color get modalScrim => scrim.withValues(alpha: 0.32);
+
+  Color get success => Colors.green.harmonizeWith(primary);
+
+  Color get warning => Colors.orange.harmonizeWith(primary);
+
+  Color? delayColor(int? delay) {
+    if (delay == null) return null;
+    if (delay < 0) return error;
+    if (delay < 600) return success;
+    return warning;
+  }
 }

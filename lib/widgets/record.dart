@@ -222,7 +222,7 @@ extension RecordToneExt on RecordTone {
   Color? accentColor(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return switch (this) {
-      RecordTone.warning => colorScheme.tertiary,
+      RecordTone.warning => colorScheme.warning,
       RecordTone.error => colorScheme.error,
       RecordTone.muted || RecordTone.neutral => null,
     };

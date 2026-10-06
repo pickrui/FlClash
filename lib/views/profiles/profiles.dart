@@ -123,44 +123,45 @@ class _ProfilesViewState extends State<ProfilesView> {
           title: appLocalizations.profiles,
           floatingActionButton: _buildFAB(),
           actions: _buildActions(state.profiles),
-          body: state.profiles.isEmpty
-              ? NullStatus(
-                  label: appLocalizations.nullProfileDesc,
-                  illustration: NullStatusIllustration.profile,
-                )
-              : Align(
-                  alignment: Alignment.topCenter,
-                  child: SingleChildScrollView(
-                    key: profilesStoreKey,
-                    padding: const EdgeInsets.only(
-                      left: 16,
-                      right: 16,
-                      top: 16,
-                      bottom: 88,
-                    ),
-                    child: Grid(
-                      mainAxisSpacing: spacing,
-                      crossAxisSpacing: spacing,
-                      crossAxisCount: state.columns,
-                      children: [
-                        for (int i = 0; i < state.profiles.length; i++)
-                          GridItem(
-                            child: ProfileItem(
-                              key: Key(state.profiles[i].id.toString()),
-                              profile: state.profiles[i],
-                              groupValue: state.currentProfileId,
-                              onChanged: (profileId) {
-                                ref
-                                        .read(currentProfileIdProvider.notifier)
-                                        .value =
-                                    profileId;
-                              },
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
+          body: NullStatusSwitcher(
+            isLoading: isLoading,
+            isEmpty: state.profiles.isEmpty,
+            nullStatus: NullStatus(
+              label: appLocalizations.nullProfileDesc,
+              illustration: NullStatusIllustration.profile,
+            ),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: SingleChildScrollView(
+                key: profilesStoreKey,
+                padding: const EdgeInsets.only(
+                  left: 16,
+                  right: 16,
+                  top: 16,
+                  bottom: 88,
                 ),
+                child: Grid(
+                  mainAxisSpacing: spacing,
+                  crossAxisSpacing: spacing,
+                  crossAxisCount: state.columns,
+                  children: [
+                    for (int i = 0; i < state.profiles.length; i++)
+                      GridItem(
+                        child: ProfileItem(
+                          key: Key(state.profiles[i].id.toString()),
+                          profile: state.profiles[i],
+                          groupValue: state.currentProfileId,
+                          onChanged: (profileId) {
+                            ref.read(currentProfileIdProvider.notifier).value =
+                                profileId;
+                          },
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         );
       },
     );

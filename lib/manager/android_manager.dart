@@ -33,6 +33,11 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
     ) {
       app?.updateExcludeFromRecents(next);
     }, fireImmediately: true);
+    ref.listenManual(loadedLocaleProvider, (previous, next) {
+      if (previous != null && previous != next && !safeModeBuild) {
+        app?.initShortcuts();
+      }
+    });
     ref.listenManual(sharedStateProvider, (prev, next) {
       if (prev != next) {
         debouncer.call(FunctionTag.saveSharedFile, () async {

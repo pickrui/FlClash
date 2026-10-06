@@ -1344,5 +1344,13 @@
   "ruleActionOrDesc": "Логическое правило OR",
   "ruleActionSubRuleDesc": "Переход к подправилу; обратите внимание на скобки",
   "ruleActionProcessNameWildcardDesc": "Сопоставить по маске имени процесса; поддерживаются только * и ?",
-  "ruleActionProcessNameDesc": "Сопоставить по имени процесса; на Android соответствует имени пакета"
+  "ruleActionProcessNameDesc": "Сопоставить по имени процесса; на Android соответствует имени пакета",
+  "general": "Общие",
+  "startupAndBackground": "Запуск и фоновая работа",
+  "requestsAndUpdates": "Запросы и обновления",
+  "inbound": "Входящие",
+  "logsAndDiagnostics": "Логи и диагностика",
+  "onDemand": "По условию",
+  "onDemandDesc": "Настройте состояние работы приложения для определённых сценариев",
+  "prerequisites": "Предварительные условия"
 }

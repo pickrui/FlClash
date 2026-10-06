@@ -1306,6 +1306,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "forgotPassword": MessageLookupByLibrary.simpleMessage("Забыли пароль?"),
     "format": MessageLookupByLibrary.simpleMessage("Формат"),
     "fruitSaladScheme": MessageLookupByLibrary.simpleMessage("Фруктовый микс"),
+    "general": MessageLookupByLibrary.simpleMessage("Общие"),
     "geoAutoUpdate": MessageLookupByLibrary.simpleMessage("Автообновление"),
     "geoAutoUpdateInterval": MessageLookupByLibrary.simpleMessage(
       "Интервал автообновления",
@@ -1414,6 +1415,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "importFile": MessageLookupByLibrary.simpleMessage("Импорт из файла"),
     "importFromURL": MessageLookupByLibrary.simpleMessage("Импорт из URL"),
     "importUrl": MessageLookupByLibrary.simpleMessage("Импорт по URL"),
+    "inbound": MessageLookupByLibrary.simpleMessage("Входящие"),
     "includeAll": MessageLookupByLibrary.simpleMessage(
       "Включить все прокси и провайдеры",
     ),
@@ -1604,6 +1606,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "logoutContent": MessageLookupByLibrary.simpleMessage("Выйти из аккаунта?"),
     "logoutTitle": MessageLookupByLibrary.simpleMessage("Выход"),
     "logs": MessageLookupByLibrary.simpleMessage("Логи"),
+    "logsAndDiagnostics": MessageLookupByLibrary.simpleMessage(
+      "Логи и диагностика",
+    ),
     "logsDesc": MessageLookupByLibrary.simpleMessage("Записи захвата логов"),
     "logsTest": MessageLookupByLibrary.simpleMessage("Тест журналов"),
     "loopback": MessageLookupByLibrary.simpleMessage(
@@ -1829,6 +1834,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "nullTip": m46,
     "numberTip": m47,
     "oixCloud": MessageLookupByLibrary.simpleMessage("oixCloud"),
+    "onDemand": MessageLookupByLibrary.simpleMessage("По условию"),
+    "onDemandDesc": MessageLookupByLibrary.simpleMessage(
+      "Настройте состояние работы приложения для определённых сценариев",
+    ),
     "onlyIcon": MessageLookupByLibrary.simpleMessage("Только иконка"),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage(
       "Только статистика прокси",
@@ -1971,6 +1980,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
       "Приоритетное использование HTTP/3 для DOH",
+    ),
+    "prerequisites": MessageLookupByLibrary.simpleMessage(
+      "Предварительные условия",
     ),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage(
       "Пожалуйста, нажмите клавишу.",
@@ -2196,6 +2208,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "replaceAll": MessageLookupByLibrary.simpleMessage("Заменить все"),
     "request": MessageLookupByLibrary.simpleMessage("Запрос"),
     "requests": MessageLookupByLibrary.simpleMessage("Запросы"),
+    "requestsAndUpdates": MessageLookupByLibrary.simpleMessage(
+      "Запросы и обновления",
+    ),
     "requestsDesc": MessageLookupByLibrary.simpleMessage(
       "Просмотр последних записей запросов",
     ),
@@ -2569,6 +2584,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "startCorePromptTitle": MessageLookupByLibrary.simpleMessage("Подсказка"),
     "startSuccess": MessageLookupByLibrary.simpleMessage("Запущено успешно"),
     "startVpn": MessageLookupByLibrary.simpleMessage("Запуск VPN..."),
+    "startupAndBackground": MessageLookupByLibrary.simpleMessage(
+      "Запуск и фоновая работа",
+    ),
     "startupRecoveryTip": MessageLookupByLibrary.simpleMessage(
       "Две последние попытки запуска завершились с ошибкой. В этот раз автоматическое применение профиля и запуск VPN приостановлены. Выбранный профиль и настройки сохранены. Проверьте конфигурацию и нажмите «Запустить» для повторной попытки. Уже работающее VPN-соединение сохраняется.",
     ),

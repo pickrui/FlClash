@@ -170,29 +170,6 @@ class HiddenItem extends ConsumerWidget {
   }
 }
 
-class FloatingNavigationItem extends ConsumerWidget {
-  const FloatingNavigationItem({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final floatingNavigationBar = ref.watch(
-      appSettingProvider.select((state) => state.floatingNavigationBar),
-    );
-    return ListItem.switchItem(
-      title: Text(appLocalizations.floatingNavigationBar),
-      subtitle: Text(appLocalizations.floatingNavigationBarDesc),
-      delegate: SwitchDelegate(
-        value: floatingNavigationBar,
-        onChanged: (value) {
-          ref
-              .read(appSettingProvider.notifier)
-              .update((state) => state.copyWith(floatingNavigationBar: value));
-        },
-      ),
-    );
-  }
-}
-
 class OpenLogsItem extends ConsumerWidget {
   const OpenLogsItem({super.key});
 
@@ -230,39 +207,4 @@ class NotificationStopItem extends ConsumerWidget {
           .update((state) => state.copyWith(showNotificationStopAction: value)),
     ),
   );
-}
-
-class ApplicationSettingView extends StatelessWidget {
-  const ApplicationSettingView({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final List<Widget> items = [
-      const MinimizeItem(),
-      if (system.isDesktop) ...[
-        const AutoLaunchItem(),
-        const SilentLaunchItem(),
-      ],
-      const AutoRunItem(),
-      if (system.isAndroid) const NotificationStopItem(),
-      if (system.isAndroid) ...[const HiddenItem()],
-      const FloatingNavigationItem(),
-      const OpenLogsItem(),
-      const CloseConnectionsItem(),
-      const UsageItem(),
-    ];
-    return BaseScaffold(
-      title: appLocalizations.application,
-      body: ListView.separated(
-        itemBuilder: (_, index) {
-          final item = items[index];
-          return item;
-        },
-        separatorBuilder: (_, _) {
-          return const Divider(height: 0);
-        },
-        itemCount: items.length,
-      ),
-    );
-  }
 }

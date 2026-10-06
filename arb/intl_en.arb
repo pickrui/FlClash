@@ -1344,5 +1344,13 @@
   "ruleActionOrDesc": "Logical rule OR",
   "ruleActionSubRuleDesc": "Match into a sub-rule; mind the parentheses",
   "ruleActionProcessNameWildcardDesc": "Match by process name wildcard; only * and ? are supported",
-  "ruleActionProcessNameDesc": "Match by process name; matches the package name on Android"
+  "ruleActionProcessNameDesc": "Match by process name; matches the package name on Android",
+  "general": "General",
+  "startupAndBackground": "Startup and background",
+  "requestsAndUpdates": "Requests and updates",
+  "inbound": "Inbound",
+  "logsAndDiagnostics": "Logs and diagnostics",
+  "onDemand": "On demand",
+  "onDemandDesc": "Configure the app's running state for specific scenarios",
+  "prerequisites": "Prerequisites"
 }

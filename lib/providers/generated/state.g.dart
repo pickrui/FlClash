@@ -358,7 +358,7 @@ final class TrayStateProvider
   }
 }
 
-String _$trayStateHash() => r'5fec4e5e44ed42d816523721703ef387328972f0';
+String _$trayStateHash() => r'9b3144df912ce4258ebba6017f59909bd817fada';
 
 @ProviderFor(vpnState)
 final vpnStateProvider = VpnStateProvider._();
@@ -2119,7 +2119,7 @@ final class SharedStateProvider
   }
 }
 
-String _$sharedStateHash() => r'd7aec708f7e03870ce99913141bb4a040b46c2a8';
+String _$sharedStateHash() => r'0921b03157b933256492d0e96581b678ecd6bd87';
 
 @ProviderFor(overlayTopOffset)
 final overlayTopOffsetProvider = OverlayTopOffsetProvider._();

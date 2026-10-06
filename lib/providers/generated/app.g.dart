@@ -9,6 +9,58 @@ part of '../app.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
+@ProviderFor(LoadedLocale)
+final loadedLocaleProvider = LoadedLocaleProvider._();
+
+final class LoadedLocaleProvider
+    extends $NotifierProvider<LoadedLocale, Locale?> {
+  LoadedLocaleProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'loadedLocaleProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$loadedLocaleHash();
+
+  @$internal
+  @override
+  LoadedLocale create() => LoadedLocale();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Locale? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Locale?>(value),
+    );
+  }
+}
+
+String _$loadedLocaleHash() => r'225c4519d699cf830d75c14e75ecfdc7db773172';
+
+abstract class _$LoadedLocale extends $Notifier<Locale?> {
+  Locale? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<Locale?, Locale?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<Locale?, Locale?>,
+              Locale?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(coreHandler)
 final coreHandlerProvider = CoreHandlerProvider._();
 

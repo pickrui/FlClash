@@ -1344,5 +1344,13 @@
   "ruleActionOrDesc": "論理ルール OR",
   "ruleActionSubRuleDesc": "サブルールへマッチします。括弧の使い方に注意してください",
   "ruleActionProcessNameWildcardDesc": "プロセス名のワイルドカードでマッチ（* と ? のみ対応）",
-  "ruleActionProcessNameDesc": "プロセス名でマッチ（Androidではパッケージ名にマッチ）"
+  "ruleActionProcessNameDesc": "プロセス名でマッチ（Androidではパッケージ名にマッチ）",
+  "general": "一般",
+  "startupAndBackground": "起動とバックグラウンド",
+  "requestsAndUpdates": "リクエストと更新",
+  "inbound": "インバウンド",
+  "logsAndDiagnostics": "ログと診断",
+  "onDemand": "オンデマンド",
+  "onDemandDesc": "特定のシナリオでのアプリの実行状態を設定します",
+  "prerequisites": "前提条件"
 }

@@ -11423,6 +11423,71 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `General`
+  String get general {
+    return Intl.message('General', name: 'general', desc: '', args: []);
+  }
+
+  /// `Startup and background`
+  String get startupAndBackground {
+    return Intl.message(
+      'Startup and background',
+      name: 'startupAndBackground',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Requests and updates`
+  String get requestsAndUpdates {
+    return Intl.message(
+      'Requests and updates',
+      name: 'requestsAndUpdates',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Inbound`
+  String get inbound {
+    return Intl.message('Inbound', name: 'inbound', desc: '', args: []);
+  }
+
+  /// `Logs and diagnostics`
+  String get logsAndDiagnostics {
+    return Intl.message(
+      'Logs and diagnostics',
+      name: 'logsAndDiagnostics',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `On demand`
+  String get onDemand {
+    return Intl.message('On demand', name: 'onDemand', desc: '', args: []);
+  }
+
+  /// `Configure the app's running state for specific scenarios`
+  String get onDemandDesc {
+    return Intl.message(
+      'Configure the app\'s running state for specific scenarios',
+      name: 'onDemandDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Prerequisites`
+  String get prerequisites {
+    return Intl.message(
+      'Prerequisites',
+      name: 'prerequisites',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

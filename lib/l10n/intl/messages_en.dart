@@ -1261,6 +1261,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "forgotPassword": MessageLookupByLibrary.simpleMessage("Forgot password?"),
     "format": MessageLookupByLibrary.simpleMessage("Format"),
     "fruitSaladScheme": MessageLookupByLibrary.simpleMessage("FruitSalad"),
+    "general": MessageLookupByLibrary.simpleMessage("General"),
     "geoAutoUpdate": MessageLookupByLibrary.simpleMessage("Auto Update"),
     "geoAutoUpdateInterval": MessageLookupByLibrary.simpleMessage(
       "Auto Update Interval",
@@ -1367,6 +1368,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "importFile": MessageLookupByLibrary.simpleMessage("Import from file"),
     "importFromURL": MessageLookupByLibrary.simpleMessage("Import from URL"),
     "importUrl": MessageLookupByLibrary.simpleMessage("Import from URL"),
+    "inbound": MessageLookupByLibrary.simpleMessage("Inbound"),
     "includeAll": MessageLookupByLibrary.simpleMessage(
       "Include all proxies and providers",
     ),
@@ -1548,6 +1550,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "logoutContent": MessageLookupByLibrary.simpleMessage("Sign out?"),
     "logoutTitle": MessageLookupByLibrary.simpleMessage("Logout"),
     "logs": MessageLookupByLibrary.simpleMessage("Logs"),
+    "logsAndDiagnostics": MessageLookupByLibrary.simpleMessage(
+      "Logs and diagnostics",
+    ),
     "logsDesc": MessageLookupByLibrary.simpleMessage("Log capture records"),
     "logsTest": MessageLookupByLibrary.simpleMessage("Logs test"),
     "loopback": MessageLookupByLibrary.simpleMessage("Loopback unlock tool"),
@@ -1755,6 +1760,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "nullTip": m46,
     "numberTip": m47,
     "oixCloud": MessageLookupByLibrary.simpleMessage("oixCloud"),
+    "onDemand": MessageLookupByLibrary.simpleMessage("On demand"),
+    "onDemandDesc": MessageLookupByLibrary.simpleMessage(
+      "Configure the app\'s running state for specific scenarios",
+    ),
     "onlyIcon": MessageLookupByLibrary.simpleMessage("Icon"),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage(
       "Only statistics proxy",
@@ -1878,6 +1887,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
       "Prioritize the use of DOH\'s http/3",
     ),
+    "prerequisites": MessageLookupByLibrary.simpleMessage("Prerequisites"),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage(
       "Please press the keyboard.",
     ),
@@ -2096,6 +2106,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "replaceAll": MessageLookupByLibrary.simpleMessage("Replace all"),
     "request": MessageLookupByLibrary.simpleMessage("Request"),
     "requests": MessageLookupByLibrary.simpleMessage("Requests"),
+    "requestsAndUpdates": MessageLookupByLibrary.simpleMessage(
+      "Requests and updates",
+    ),
     "requestsDesc": MessageLookupByLibrary.simpleMessage(
       "View recently request records",
     ),
@@ -2437,6 +2450,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Started successfully",
     ),
     "startVpn": MessageLookupByLibrary.simpleMessage("Starting VPN..."),
+    "startupAndBackground": MessageLookupByLibrary.simpleMessage(
+      "Startup and background",
+    ),
     "startupRecoveryTip": MessageLookupByLibrary.simpleMessage(
       "Two recent startup attempts failed. Automatic profile application and VPN start are paused for this launch. Your selected profile and settings are preserved. Check the configuration, then press Start to retry. An already running VPN is kept active.",
     ),
