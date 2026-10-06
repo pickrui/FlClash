@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import Cocoa
 import FlutterMacOS
-import window_manager
+import window
 import LaunchAtLogin
 
 class MainFlutterWindow: NSWindow {

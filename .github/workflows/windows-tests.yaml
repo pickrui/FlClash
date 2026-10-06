@@ -67,7 +67,7 @@ jobs:
             test/common/file_secure_storage_test.dart \
             test/common/config_reset_test.dart \
             test/common/config_backup_test.dart \
-            test/plugins/window_manager_patch_test.dart \
+            test/plugins/window_plugin_native_test.dart \
             test/widgets/config_recovery_test.dart \
             test/services/network_diagnostic_platform_test.dart \
             test/services/network_diagnostic_proxy_channel_test.dart \

@@ -28,7 +28,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:rust_api/rust_api.dart';
-import 'package:window_manager/window_manager.dart';
+import 'package:window/window.dart';
 
 import 'application.dart';
 import 'common/common.dart';
@@ -107,7 +107,7 @@ Future<Map<String, Object?>?> _loadStartupConfig() async {
         commonPrint.log('Waiting for local configuration recovery');
         render?.resume();
         if (system.isDesktop) {
-          windowManager.addListener(exitListener);
+          desktopWindow.addListener(exitListener);
         }
         var usesSystemKeyring = false;
         var canUseLocalStorage = false;
@@ -157,7 +157,7 @@ Future<Map<String, Object?>?> _loadStartupConfig() async {
     );
   } finally {
     if (system.isDesktop) {
-      windowManager.removeListener(exitListener);
+      desktopWindow.removeListener(exitListener);
     }
   }
 }

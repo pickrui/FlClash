@@ -729,9 +729,8 @@ Profile? profile(Ref ref, int? profileId) {
 @riverpod
 OverwriteType overwriteType(Ref ref, int? profileId) {
   return ref.watch(
-    profileProvider(
-      profileId,
-    ).select((state) => state?.overwriteType ?? OverwriteType.standard),
+    profileProvider(profileId)
+        .select((state) => state?.overwriteType ?? OverwriteType.standard),
   );
 }
 
@@ -801,4 +800,19 @@ class AccessControlState extends _$AccessControlState
     with AutoDisposeNotifierMixin {
   @override
   AccessControlProps build() => const AccessControlProps();
+}
+
+typedef WindowBlurRequest = ({bool enabled, Brightness brightness, Color tint});
+
+@riverpod
+WindowBlurRequest windowBlurRequest(Ref ref) {
+  final brightness = ref.watch(currentBrightnessProvider);
+  return (
+    enabled:
+        system.isDesktop &&
+        !system.isLinux &&
+        ref.watch(themeSettingProvider.select((value) => value.sidebarBlur)),
+    brightness: brightness,
+    tint: ref.watch(genColorSchemeProvider(brightness)).surfaceContainer,
+  );
 }

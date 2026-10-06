@@ -1656,6 +1656,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "settings": MessageLookupByLibrary.simpleMessage("設定"),
     "show": MessageLookupByLibrary.simpleMessage("表示"),
     "shrink": MessageLookupByLibrary.simpleMessage("縮小"),
+    "sidebarBlur": MessageLookupByLibrary.simpleMessage("サイドバーのぼかし"),
+    "sidebarBlurDesc": MessageLookupByLibrary.simpleMessage(
+      "サイドバーに半透明のシステム背景を表示",
+    ),
     "silentLaunch": MessageLookupByLibrary.simpleMessage("バックグラウンド起動"),
     "silentLaunchDesc": MessageLookupByLibrary.simpleMessage("バックグラウンドで起動"),
     "size": MessageLookupByLibrary.simpleMessage("サイズ"),

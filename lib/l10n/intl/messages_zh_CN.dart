@@ -1461,6 +1461,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "settings": MessageLookupByLibrary.simpleMessage("设置"),
     "show": MessageLookupByLibrary.simpleMessage("显示"),
     "shrink": MessageLookupByLibrary.simpleMessage("紧凑"),
+    "sidebarBlur": MessageLookupByLibrary.simpleMessage("侧边栏模糊"),
+    "sidebarBlurDesc": MessageLookupByLibrary.simpleMessage("在侧边栏显示半透明系统背景"),
     "silentLaunch": MessageLookupByLibrary.simpleMessage("静默启动"),
     "silentLaunchDesc": MessageLookupByLibrary.simpleMessage("后台启动"),
     "size": MessageLookupByLibrary.simpleMessage("尺寸"),

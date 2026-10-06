@@ -2000,6 +2000,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "settings": MessageLookupByLibrary.simpleMessage("Settings"),
     "show": MessageLookupByLibrary.simpleMessage("Show"),
     "shrink": MessageLookupByLibrary.simpleMessage("Shrink"),
+    "sidebarBlur": MessageLookupByLibrary.simpleMessage("Blur sidebar"),
+    "sidebarBlurDesc": MessageLookupByLibrary.simpleMessage(
+      "Show a translucent system backdrop behind the sidebar",
+    ),
     "silentLaunch": MessageLookupByLibrary.simpleMessage("SilentLaunch"),
     "silentLaunchDesc": MessageLookupByLibrary.simpleMessage(
       "Start in the background",

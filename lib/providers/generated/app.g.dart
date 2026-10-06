@@ -2086,3 +2086,54 @@ abstract class _$HotKeyFailures extends $Notifier<Map<HotAction, String>> {
     return element.handleCreate(ref, build);
   }
 }
+
+@ProviderFor(WindowBlur)
+final windowBlurProvider = WindowBlurProvider._();
+
+final class WindowBlurProvider extends $NotifierProvider<WindowBlur, bool> {
+  WindowBlurProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'windowBlurProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$windowBlurHash();
+
+  @$internal
+  @override
+  WindowBlur create() => WindowBlur();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$windowBlurHash() => r'b07b0f6a176a01587d02c9a3dd1eff86d99076dc';
+
+abstract class _$WindowBlur extends $Notifier<bool> {
+  bool build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<bool, bool>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<bool, bool>,
+              bool,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}

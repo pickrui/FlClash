@@ -2106,6 +2106,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "settings": MessageLookupByLibrary.simpleMessage("Настройки"),
     "show": MessageLookupByLibrary.simpleMessage("Показать"),
     "shrink": MessageLookupByLibrary.simpleMessage("Сжать"),
+    "sidebarBlur": MessageLookupByLibrary.simpleMessage(
+      "Размытие боковой панели",
+    ),
+    "sidebarBlurDesc": MessageLookupByLibrary.simpleMessage(
+      "Показывать полупрозрачный системный фон боковой панели",
+    ),
     "silentLaunch": MessageLookupByLibrary.simpleMessage("Тихий запуск"),
     "silentLaunchDesc": MessageLookupByLibrary.simpleMessage(
       "Запуск в фоновом режиме",

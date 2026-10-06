@@ -6,7 +6,7 @@
 import Cocoa
 import Darwin
 import FlutterMacOS
-import window_manager
+import window
 
 @main
 class AppDelegate: FlutterAppDelegate {
@@ -102,7 +102,7 @@ class AppDelegate: FlutterAppDelegate {
     }
 
     override func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        WindowManagerPlugin.instance?.handleShouldTerminate()
+        WindowPlugin.instance?.handleShouldTerminate()
         return .terminateCancel
     }
 
@@ -111,7 +111,7 @@ class AppDelegate: FlutterAppDelegate {
     }
 
     override func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        WindowManagerPlugin.instance?.handleReopen()
+        WindowPlugin.instance?.handleReopen()
         return false
     }
 }

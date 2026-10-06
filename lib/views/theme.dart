@@ -45,6 +45,7 @@ class ThemeView extends StatelessWidget {
           _PrimaryColorItem(),
           SliverToBoxAdapter(child: SizedBox(height: 16)),
           _PrueBlackItem(),
+          _SidebarBlurItem(),
           SliverToBoxAdapter(child: SizedBox(height: 16)),
           _TextScaleFactorItem(),
           SliverToBoxAdapter(child: SizedBox(height: 32)),
@@ -432,9 +433,8 @@ class _PrueBlackItem extends ConsumerWidget {
         horizontalTitleGap: 12,
         title: Text(
           appLocalizations.pureBlackMode,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            color: context.colorScheme.onSurfaceVariant,
-          ),
+          style: Theme.of(context).textTheme.titleSmall
+              ?.copyWith(color: context.colorScheme.onSurfaceVariant),
         ),
         delegate: SwitchDelegate(
           value: prueBlack,
@@ -470,9 +470,8 @@ class _TextScaleFactorItem extends ConsumerWidget {
               horizontalTitleGap: 12,
               title: Text(
                 appLocalizations.textScale,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: context.colorScheme.onSurfaceVariant,
-                ),
+                style: Theme.of(context).textTheme.titleSmall
+                    ?.copyWith(color: context.colorScheme.onSurfaceVariant),
               ),
               delegate: SwitchDelegate(
                 value: textScale.enable,
@@ -711,9 +710,9 @@ class _SliderDefaultsM3 extends SliderThemeData {
       });
 
   @override
-  TextStyle? get valueIndicatorTextStyle => Theme.of(
-    context,
-  ).textTheme.labelLarge!.copyWith(color: _colors.onInverseSurface);
+  TextStyle? get valueIndicatorTextStyle =>
+      Theme.of(context).textTheme.labelLarge!
+          .copyWith(color: _colors.onInverseSurface);
 
   @override
   Color? get valueIndicatorColor => _colors.inverseSurface;
@@ -756,4 +755,30 @@ class _SliderDefaultsM3 extends SliderThemeData {
 
   @override
   double? get trackGap => 6.0;
+}
+
+class _SidebarBlurItem extends ConsumerWidget {
+  const _SidebarBlurItem();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!system.isDesktop || system.isLinux) return const SliverToBoxAdapter();
+    final enabled = ref.watch(
+      themeSettingProvider.select((value) => value.sidebarBlur),
+    );
+    return SliverToBoxAdapter(
+      child: ListItem.switchItem(
+        title: Text(context.appLocalizations.sidebarBlur),
+        subtitle: Text(context.appLocalizations.sidebarBlurDesc),
+        delegate: SwitchDelegate(
+          value: enabled,
+          onChanged: (value) {
+            ref
+                .read(themeSettingProvider.notifier)
+                .update((state) => state.copyWith(sidebarBlur: value));
+          },
+        ),
+      ),
+    );
+  }
 }

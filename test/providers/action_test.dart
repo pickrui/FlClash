@@ -12,6 +12,7 @@ import 'package:fl_clash/widgets/pop_scope.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+
 import '../helpers/test_app.dart';
 
 class _ProfileAction extends ProfileAction {
@@ -36,6 +37,13 @@ class _BackAction extends BackBlockAction {
 }
 
 class _WindowPort implements WindowPort {
+  @override
+  Future<bool> setBlur({
+    required bool enabled,
+    required Brightness brightness,
+    required Color tint,
+  }) async => false;
+
   int toggles = 0;
   @override
   Future<void> toggle() async {

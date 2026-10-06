@@ -547,3 +547,9 @@ class HotKeyFailures extends _$HotKeyFailures
   @override
   Map<HotAction, String> build() => {};
 }
+
+@riverpod
+class WindowBlur extends _$WindowBlur with NotifierMixin<bool> {
+  @override
+  bool build() => false;
+}

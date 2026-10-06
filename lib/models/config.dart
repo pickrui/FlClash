@@ -293,6 +293,7 @@ abstract class ThemeProps with _$ThemeProps {
     @Default(ThemeMode.dark) ThemeMode themeMode,
     @Default(DynamicSchemeVariant.content) DynamicSchemeVariant schemeVariant,
     @Default(false) bool pureBlack,
+    @Default(true) bool sidebarBlur,
     @Default(TextScale()) TextScale textScale,
   }) = _ThemeProps;
 

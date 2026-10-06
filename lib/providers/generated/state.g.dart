@@ -2511,3 +2511,50 @@ abstract class _$AccessControlState extends $Notifier<AccessControlProps> {
     return element.handleCreate(ref, build);
   }
 }
+
+@ProviderFor(windowBlurRequest)
+final windowBlurRequestProvider = WindowBlurRequestProvider._();
+
+final class WindowBlurRequestProvider
+    extends
+        $FunctionalProvider<
+          WindowBlurRequest,
+          WindowBlurRequest,
+          WindowBlurRequest
+        >
+    with $Provider<WindowBlurRequest> {
+  WindowBlurRequestProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'windowBlurRequestProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$windowBlurRequestHash();
+
+  @$internal
+  @override
+  $ProviderElement<WindowBlurRequest> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  WindowBlurRequest create(Ref ref) {
+    return windowBlurRequest(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(WindowBlurRequest value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<WindowBlurRequest>(value),
+    );
+  }
+}
+
+String _$windowBlurRequestHash() => r'8d200c430eb194b9f60b97d401ea2c444c1ec253';

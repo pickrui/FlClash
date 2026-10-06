@@ -317,7 +317,9 @@ class AppSidebarContainer extends ConsumerWidget {
     return Row(
       children: [
         Material(
-          color: context.colorScheme.surfaceContainer,
+          color: ref.watch(windowBlurProvider)
+              ? context.colorScheme.surfaceContainer.withValues(alpha: 0.72)
+              : context.colorScheme.surfaceContainer,
           child: SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,

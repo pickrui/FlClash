@@ -1122,5 +1122,7 @@
   "runTime": "Uptime",
   "floatingNavigationBar": "Floating navigation",
   "floatingNavigationBarDesc": "Use a floating dock for compact layouts",
-  "localNetworkTip": "Local network access denied; using gVisor for this connection. LAN proxies and services may remain unavailable"
+  "localNetworkTip": "Local network access denied; using gVisor for this connection. LAN proxies and services may remain unavailable",
+  "sidebarBlur": "Blur sidebar",
+  "sidebarBlurDesc": "Show a translucent system backdrop behind the sidebar"
 }

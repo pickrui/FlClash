@@ -6,6 +6,7 @@
 #include "flutter_window.h"
 
 #include <optional>
+#include <window/window_plugin_runner.h>
 
 #include "flutter/generated_plugin_registrant.h"
 
@@ -52,6 +53,7 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
                               LPARAM const lparam) noexcept {
   // Give Flutter, including plugins, an opportunity to handle window messages.
   if (flutter_controller_) {
+    WindowPluginForwardVisibility(*flutter_controller_, message, wparam, lparam);
     std::optional<LRESULT> result =
         flutter_controller_->HandleTopLevelWindowProc(hwnd, message, wparam,
                                                       lparam);

@@ -9689,6 +9689,26 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Blur sidebar`
+  String get sidebarBlur {
+    return Intl.message(
+      'Blur sidebar',
+      name: 'sidebarBlur',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show a translucent system backdrop behind the sidebar`
+  String get sidebarBlurDesc {
+    return Intl.message(
+      'Show a translucent system backdrop behind the sidebar',
+      name: 'sidebarBlurDesc',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

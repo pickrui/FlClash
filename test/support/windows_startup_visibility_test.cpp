@@ -17,21 +17,20 @@ void Require(bool condition, const char* message) {
   }
 }
 
-class WindowManager {
+class WindowController {
  public:
-  explicit WindowManager(HWND window) : window_(window) {}
-  HWND GetMainWindow() { return window_; }
+  explicit WindowController(HWND window) : hwnd_(window) {}
   void Hide();
-  void Show();
+  void Show(bool inactive = false);
   void Focus();
-  bool IsMinimized();
+  bool IsMinimized() const;
   void Restore();
 
  private:
-  HWND window_;
+  HWND hwnd_;
 };
 
-#include "window_manager_visibility.inc"
+#include "window_plugin_visibility.inc"
 
 void DrainMessages() {
   MSG message{};
@@ -61,13 +60,11 @@ void CheckChild(int show_command) {
   Require(window != nullptr, "CreateWindow failed");
   Require(!IsWindowVisible(window), "Window must start hidden");
 
-  WindowManager manager(window);
+  WindowController manager(window);
   manager.Hide();
   Require(!IsWindowVisible(window), "First silent hide became visible");
   manager.Hide();
   Require(!IsWindowVisible(window), "Silent launch became visible");
-  // Match Window._showWindow and window_manager's Dart show wrapper.
-  if (manager.IsMinimized()) manager.Restore();
   manager.Show();
   manager.Focus();
   DrainMessages();

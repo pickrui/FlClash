@@ -1122,5 +1122,7 @@
   "runTime": "稼働時間",
   "floatingNavigationBar": "フローティングナビゲーション",
   "floatingNavigationBarDesc": "コンパクトな画面でフローティングドックを使用",
-  "localNetworkTip": "ローカルネットワークへのアクセスが許可されていないため、今回は gVisor を使用します。LAN 上のプロキシやサービスは引き続き利用できない場合があります"
+  "localNetworkTip": "ローカルネットワークへのアクセスが許可されていないため、今回は gVisor を使用します。LAN 上のプロキシやサービスは引き続き利用できない場合があります",
+  "sidebarBlur": "サイドバーのぼかし",
+  "sidebarBlurDesc": "サイドバーに半透明のシステム背景を表示"
 }
