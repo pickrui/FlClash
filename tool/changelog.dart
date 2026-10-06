@@ -82,6 +82,11 @@ int _release(String root, ArgResults command) {
   if (Git(workingDirectory: root).tagExists('v$version')) {
     _fail('Release is already tagged; released notes are immutable');
   }
+  final newest = Git(workingDirectory: root).stableTags().firstOrNull;
+  final target = VersionTag.tryParse('v$version')!;
+  if (newest != null && target.compareTo(newest) <= 0) {
+    _fail('Release version must be newer than ${newest.name}');
+  }
   final result =
       ChangelogBuilder(Git(workingDirectory: root), boundary: _boundary).build(
         pending: PendingVersion(

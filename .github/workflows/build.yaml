@@ -132,7 +132,18 @@ jobs:
           FLCLASH_TEST_SCRIPT_LIB: ${{ github.workspace }}/plugins/rust_api/rust/target/debug/librust_api.so
           FLCLASH_TEST_CORE: ${{ runner.temp }}/FlClashCore
           FLCLASH_TEST_ROUTING_CHECKER: ${{ runner.temp }}/flclash-routing-checker
-        run: flutter test --reporter expanded test plugins/proxy/test/proxy_test.dart plugins/wifi_ssid/test plugins/tray/test plugins/window/test
+        run: flutter test --coverage --reporter expanded test plugins/proxy/test/proxy_test.dart plugins/wifi_ssid/test plugins/tray/test plugins/window/test
+
+      - name: Coverage floor
+        run: dart tool/check_coverage.dart
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: flutter-coverage
+          path: coverage/lcov.info
+          if-no-files-found: ignore
 
       - name: Verify isolated desktop safe mode
         run: flutter test --dart-define=SAFE_MODE=true test/safe_mode test/common/safe_mode_profile_test.dart
@@ -493,7 +504,7 @@ jobs:
           tag="${{ github.ref_name }}"
           out="release.md"
           awk -v heading="## $tag" '
-            $0 == heading { found=1; capture=1; next }
+            $0 == heading || index($0, heading " (") == 1 { found=1; capture=1; next }
             capture && /^## / { exit }
             capture { print }
             END { if (!found) exit 1 }
@@ -502,6 +513,22 @@ jobs:
             echo "No changelog entries found for $tag" >&2
             exit 1
           fi
+          RELEASE_TAG="$tag" python3 - <<'PYCODE'
+          import json, os
+          from pathlib import Path
+          source = Path('changelog.json')
+          if source.exists():
+              data = json.loads(source.read_text())
+              if data.get('schemaVersion') != 2:
+                  raise ValueError('Unsupported changelog schema')
+              versions = [v for v in data['versions'] if v['tag'] == os.environ['RELEASE_TAG']]
+              if len(versions) > 1:
+                  raise ValueError('Duplicate changelog tag')
+              if versions:
+                  payload = json.dumps({'schemaVersion': 2, 'versions': versions}, ensure_ascii=False).replace('>', r'\u003e')
+                  with open('release.md', 'a') as out:
+                      out.write('\n<!-- flclash:changelog:json\n' + payload + '\n-->\n')
+          PYCODE
 
       - name: Patch release.md
         run: |

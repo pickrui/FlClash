@@ -78,3 +78,6 @@ devtools_options.yaml
 AGENTS.md
 CLAUDE.md
 /core/core
+
+# Generated test coverage
+/coverage/
