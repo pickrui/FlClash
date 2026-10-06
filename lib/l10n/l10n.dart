@@ -10768,6 +10768,256 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Add override entry`
+  String get addOverrideEntry {
+    return Intl.message(
+      'Add override entry',
+      name: 'addOverrideEntry',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Batch add`
+  String get batchAdd {
+    return Intl.message('Batch add', name: 'batchAdd', desc: '', args: []);
+  }
+
+  /// `One item per line, or separated by commas`
+  String get batchListInputTip {
+    return Intl.message(
+      'One item per line, or separated by commas',
+      name: 'batchListInputTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `One entry per line: key, a space, then value`
+  String get batchMapInputTip {
+    return Intl.message(
+      'One entry per line: key, a space, then value',
+      name: 'batchMapInputTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count} to add, {skipped} skipped as existing`
+  String batchPreviewTip(Object count, Object skipped) {
+    return Intl.message(
+      '$count to add, $skipped skipped as existing',
+      name: 'batchPreviewTip',
+      desc: '',
+      args: [count, skipped],
+    );
+  }
+
+  /// `Cache algorithm`
+  String get cacheAlgorithm {
+    return Intl.message(
+      'Cache algorithm',
+      name: 'cacheAlgorithm',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cache size`
+  String get cacheMaxSize {
+    return Intl.message('Cache size', name: 'cacheMaxSize', desc: '', args: []);
+  }
+
+  /// `Dialer proxy`
+  String get dialerProxy {
+    return Intl.message(
+      'Dialer proxy',
+      name: 'dialerProxy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The outbound used to reach the NTP server`
+  String get dialerProxyDesc {
+    return Intl.message(
+      'The outbound used to reach the NTP server',
+      name: 'dialerProxyDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Discard the changes?`
+  String get discardChanges {
+    return Intl.message(
+      'Discard the changes?',
+      name: 'discardChanges',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Fake-IP filter mode`
+  String get fakeipFilterMode {
+    return Intl.message(
+      'Fake-IP filter mode',
+      name: 'fakeipFilterMode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `blacklist excludes matches, whitelist fakes only matches, rule matches as rules`
+  String get fakeipFilterModeDesc {
+    return Intl.message(
+      'blacklist excludes matches, whitelist fakes only matches, rule matches as rules',
+      name: 'fakeipFilterModeDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Fake-IP range (IPv6)`
+  String get fakeipRange6 {
+    return Intl.message(
+      'Fake-IP range (IPv6)',
+      name: 'fakeipRange6',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Fake-IP TTL`
+  String get fakeipTtl {
+    return Intl.message('Fake-IP TTL', name: 'fakeipTtl', desc: '', args: []);
+  }
+
+  /// `IPv6 timeout (ms)`
+  String get ipv6Timeout {
+    return Intl.message(
+      'IPv6 timeout (ms)',
+      name: 'ipv6Timeout',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Line {line}: {message}`
+  String lineIssueTip(Object line, Object message) {
+    return Intl.message(
+      'Line $line: $message',
+      name: 'lineIssueTip',
+      desc: '',
+      args: [line, message],
+    );
+  }
+
+  /// `Listen routing mark`
+  String get listenRoutingMark {
+    return Intl.message(
+      'Listen routing mark',
+      name: 'listenRoutingMark',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Linux only`
+  String get listenRoutingMarkDesc {
+    return Intl.message(
+      'Linux only',
+      name: 'listenRoutingMarkDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{label} must be at most {max} characters`
+  String maxLengthTip(Object label, Object max) {
+    return Intl.message(
+      '$label must be at most $max characters',
+      name: 'maxLengthTip',
+      desc: '',
+      args: [label, max],
+    );
+  }
+
+  /// `Sync interval (minutes)`
+  String get ntpInterval {
+    return Intl.message(
+      'Sync interval (minutes)',
+      name: 'ntpInterval',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Take the time from an NTP server instead of the system clock`
+  String get ntpStatusDesc {
+    return Intl.message(
+      'Take the time from an NTP server instead of the system clock',
+      name: 'ntpStatusDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Override entries`
+  String get overrideEntries {
+    return Intl.message(
+      'Override entries',
+      name: 'overrideEntries',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Quick edit`
+  String get quickEdit {
+    return Intl.message('Quick edit', name: 'quickEdit', desc: '', args: []);
+  }
+
+  /// `Server`
+  String get server {
+    return Intl.message('Server', name: 'server', desc: '', args: []);
+  }
+
+  /// `Single add`
+  String get singleAdd {
+    return Intl.message('Single add', name: 'singleAdd', desc: '', args: []);
+  }
+
+  /// `{label} must be a single item`
+  String singleValueTip(Object label) {
+    return Intl.message(
+      '$label must be a single item',
+      name: 'singleValueTip',
+      desc: '',
+      args: [label],
+    );
+  }
+
+  /// `Write to system`
+  String get writeToSystem {
+    return Intl.message(
+      'Write to system',
+      name: 'writeToSystem',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Also set the system clock; Android ignores it`
+  String get writeToSystemDesc {
+    return Intl.message(
+      'Also set the system clock; Android ignores it',
+      name: 'writeToSystemDesc',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

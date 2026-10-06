@@ -5,280 +5,574 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/features/overwrite/overwrite_selection_sheet.dart';
+import 'package:fl_clash/widgets/config_item.dart';
+import 'package:fl_clash/widgets/navigation_dock.dart';
+import 'package:fl_clash/state.dart';
+import 'package:fl_clash/icons/icons.dart';
+import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/config.dart';
-import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class DnsView extends StatelessWidget {
+export 'ntp.dart';
+
+typedef _DnsUpdate<T> = ClashConfig Function(ClashConfig state, T value);
+
+final _dnsOverrideKeysSelector = patchClashConfigProvider.select(
+  (state) => state.dnsOverrideKeys,
+);
+
+ProviderListenable<T> _dnsSelector<T>(T Function(Dns dns) select) {
+  return patchClashConfigProvider.select((state) => select(state.dns));
+}
+
+ConfigWriter<T> _dnsWriter<T>(_DnsUpdate<T> update) {
+  return (ref, value) => ref
+      .read(patchClashConfigProvider.notifier)
+      .update((state) => update(state, value));
+}
+
+extension on DnsOverrideKey {
+  String label(AppLocalizations l) => switch (this) {
+    DnsOverrideKey.enable => l.status,
+    DnsOverrideKey.listen => l.listen,
+    DnsOverrideKey.listenRoutingMark => l.listenRoutingMark,
+    DnsOverrideKey.useHosts => l.useHosts,
+    DnsOverrideKey.useSystemHosts => l.useSystemHosts,
+    DnsOverrideKey.ipv6 => 'IPv6',
+    DnsOverrideKey.ipv6Timeout => l.ipv6Timeout,
+    DnsOverrideKey.respectRules => l.respectRules,
+    DnsOverrideKey.preferH3 => 'Prefer H3',
+    DnsOverrideKey.cacheAlgorithm => l.cacheAlgorithm,
+    DnsOverrideKey.cacheMaxSize => l.cacheMaxSize,
+    DnsOverrideKey.enhancedMode => l.dnsMode,
+    DnsOverrideKey.fakeIpRange => l.fakeipRange,
+    DnsOverrideKey.fakeIpRange6 => l.fakeipRange6,
+    DnsOverrideKey.fakeIpFilter => l.fakeipFilter,
+    DnsOverrideKey.fakeIpFilterMode => l.fakeipFilterMode,
+    DnsOverrideKey.fakeIpTtl => l.fakeipTtl,
+    DnsOverrideKey.defaultNameserver => 'Default Nameserver',
+    DnsOverrideKey.nameserverPolicy => 'Nameserver Policy',
+    DnsOverrideKey.nameserver => 'Nameserver',
+    DnsOverrideKey.fallback => 'Fallback',
+    DnsOverrideKey.fallbackLazyQuery => 'Fallback Lazy Query',
+    DnsOverrideKey.proxyServerNameserver => 'Proxy Server Nameserver',
+    DnsOverrideKey.proxyServerNameserverPolicy =>
+      'Proxy Server Nameserver Policy',
+    DnsOverrideKey.directNameserver => 'Direct Nameserver',
+    DnsOverrideKey.directNameserverFollowPolicy =>
+      'Direct Nameserver Follow Policy',
+    DnsOverrideKey.fallbackFilterGeoip => 'GeoIP',
+    DnsOverrideKey.fallbackFilterGeoipCode => 'GeoIP Code',
+    DnsOverrideKey.fallbackFilterGeosite => 'GeoSite',
+    DnsOverrideKey.fallbackFilterIpcidr => 'IP-CIDR',
+    DnsOverrideKey.fallbackFilterDomain => l.domain,
+  };
+
+  ConfigLabel? get description => switch (this) {
+    DnsOverrideKey.enable => (l) => l.statusDesc,
+    DnsOverrideKey.listenRoutingMark => (l) => l.listenRoutingMarkDesc,
+    DnsOverrideKey.respectRules => (l) => l.respectRulesDesc,
+    DnsOverrideKey.fakeIpFilterMode => (l) => l.fakeipFilterModeDesc,
+    _ => null,
+  };
+}
+
+// mihomo reports `hosts` in connection metadata but rejects it as an
+// enhanced-mode.
+const _enhancedModes = [DnsMode.normal, DnsMode.fakeIp, DnsMode.redirHost];
+
+List<(String, List<DnsOverrideKey>)> _sectionsOf(
+  AppLocalizations l,
+  Iterable<DnsOverrideKey> keys,
+) {
+  return [
+    (l.options, keys.where((key) => !key.isFallbackFilter).toList()),
+    (l.fallbackFilter, keys.where((key) => key.isFallbackFilter).toList()),
+  ];
+}
+
+class DnsView extends ConsumerWidget {
   const DnsView({super.key});
-  @override
-  Widget build(BuildContext context) => const _OverrideView(isNtp: false);
-}
 
-class NtpView extends StatelessWidget {
-  const NtpView({super.key});
-  @override
-  Widget build(BuildContext context) => const _OverrideView(isNtp: true);
-}
-
-class _OverrideView extends ConsumerWidget {
-  final bool isNtp;
-  const _OverrideView({required this.isNtp});
-
-  String get _section => isNtp ? 'NTP' : 'DNS';
-  List<String> get _paths => isNtp
-      ? NtpOverrideKey.values.map((key) => key.path).toList()
-      : DnsOverrideKey.values.map((key) => key.path).toList();
-  Set<String> _selected(ClashConfig config) => isNtp
-      ? config.ntpOverrideKeys.map((key) => key.path).toSet()
-      : config.dnsOverrideKeys.map((key) => key.path).toSet();
-
-  void _select(WidgetRef ref, String path, bool enabled) {
-    ref.read(patchClashConfigProvider.notifier).update((state) {
-      if (isNtp) {
-        final key = NtpOverrideKey.values.firstWhere((key) => key.path == path);
-        return state.copyWith(
-          ntpOverrideKeys: {...state.ntpOverrideKeys, if (enabled) key}
-            ..removeWhere((item) => !enabled && item == key),
-        );
-      }
-      final key = DnsOverrideKey.values.firstWhere((key) => key.path == path);
-      return state.copyWith(
-        dnsOverrideKeys: {...state.dnsOverrideKeys, if (enabled) key}
-          ..removeWhere((item) => !enabled && item == key),
-      );
-    });
-  }
-
-  Future<void> _add(BuildContext context, WidgetRef ref) async {
-    final selected = _selected(ref.read(patchClashConfigProvider));
-    final paths = _paths.where((key) => !selected.contains(key)).toList();
-    final path = await showDialog<String>(
+  Future<void> _handleAdd(BuildContext context, WidgetRef ref) async {
+    final appLocalizations = context.appLocalizations;
+    final added = ref.read(_dnsOverrideKeysSelector);
+    final remaining = DnsOverrideKey.values.where(
+      (key) => !added.contains(key),
+    );
+    final key = await showSheet<DnsOverrideKey>(
       context: context,
-      builder: (context) => SimpleDialog(
-        title: Text(context.appLocalizations.add),
-        children: [
-          for (final path in paths)
-            SimpleDialogOption(
-              onPressed: () => Navigator.of(context).pop(path),
-              child: Text(path),
-            ),
+      props: const SheetProps(isScrollControlled: true),
+      builder: (context, _) => OverwriteSelectionSheet<DnsOverrideKey>(
+        title: appLocalizations.addOverrideEntry,
+        sections: [
+          for (final (label, keys) in _sectionsOf(appLocalizations, remaining))
+            if (keys.isNotEmpty)
+              OverwriteSelectionSection(
+                label: label,
+                items: keys,
+                subtitleBuilder: (context, key) =>
+                    key.description?.call(context.appLocalizations),
+              ),
         ],
+        labelBuilder: (key) => key.label(appLocalizations),
+        selectedOf: (_) => null,
+        onSelected: (key) => Navigator.of(context).pop(key),
       ),
     );
-    if (path != null && context.mounted) _select(ref, path, true);
-  }
-
-  String _fragment(ClashConfig config, String? path) {
-    if (isNtp) {
-      return config.ntp.overrideYaml(
-        path == null
-            ? config.ntpOverrideKeys
-            : {NtpOverrideKey.values.firstWhere((key) => key.path == path)},
-      );
+    if (key == null || !context.mounted) {
+      return;
     }
-    return config.dns.overrideYaml(
-      path == null
-          ? config.dnsOverrideKeys
-          : {DnsOverrideKey.values.firstWhere((key) => key.path == path)},
-    );
-  }
-
-  Future<bool> _save(
-    BuildContext context,
-    WidgetRef ref,
-    String content, {
-    String? path,
-  }) async {
-    try {
-      final config = ref.read(patchClashConfigProvider);
-      if (isNtp) {
-        final result = config.ntp.applyOverrideYaml(content);
-        ref
-            .read(patchClashConfigProvider.notifier)
-            .update(
-              (state) => state.copyWith(
-                ntp: result.ntp,
-                ntpOverrideKeys: path == null
-                    ? result.keys
-                    : {...state.ntpOverrideKeys, ...result.keys},
-              ),
-            );
-      } else {
-        final result = config.dns.applyOverrideYaml(content);
-        ref
-            .read(patchClashConfigProvider.notifier)
-            .update(
-              (state) => state.copyWith(
-                dns: result.dns,
-                dnsOverrideKeys: path == null
-                    ? result.keys
-                    : {...state.dnsOverrideKeys, ...result.keys},
-              ),
-            );
-      }
-      return true;
-    } catch (error) {
-      if (context.mounted) {
-        await globalState.showMessage(
-          context: context,
-          message: TextSpan(text: error.toString()),
+    ref
+        .read(patchClashConfigProvider.notifier)
+        .update(
+          (state) =>
+              state.copyWith(dnsOverrideKeys: {...state.dnsOverrideKeys, key}),
         );
-      }
-      return false;
-    }
   }
 
-  Future<void> _edit(BuildContext context, WidgetRef ref, {String? path}) {
-    var saved = _fragment(ref.read(patchClashConfigProvider), path);
-    Future<bool> save(BuildContext editorContext, String content) async {
-      if (content == saved) return true;
-      final result = await _save(editorContext, ref, content, path: path);
-      if (result) saved = content;
-      return result;
-    }
-
+  Future<void> _handleQuickEdit(BuildContext context, WidgetRef ref) {
+    final config = ref.read(patchClashConfigProvider);
+    final raw = config.dns.overrideYaml(config.dnsOverrideKeys);
     return BaseNavigator.push(
       context,
       EditorPage(
-        title: path ?? _section,
-        schema: isNtp ? EditorSchema.ntp : EditorSchema.dns,
-        content: saved,
+        title: 'DNS',
+        content: raw,
+        schema: EditorSchema.dns,
+        readOnly: false,
         onSave: (context, _, content) async {
-          if (await save(context, content) && context.mounted) {
+          if (await _handleQuickEditPop(ref, content, raw) && context.mounted) {
             Navigator.of(context).pop();
           }
         },
-        onPop: (context, _, content) => save(context, content),
+        onPop: (_, _, content) => _handleQuickEditPop(ref, content, raw),
       ),
     );
   }
 
-  Object? _value(ClashConfig config, String path) => isNtp
-      ? config.ntp.toJson()[path]
-      : config.dns.valueOf(
-          DnsOverrideKey.values.firstWhere((key) => key.path == path),
-        );
+  Future<bool> _handleQuickEditPop(
+    WidgetRef ref,
+    String content,
+    String raw,
+  ) async {
+    if (content == raw) {
+      return true;
+    }
+    try {
+      final result = ref
+          .read(patchClashConfigProvider)
+          .dns
+          .applyOverrideYaml(content);
+      ref
+          .read(patchClashConfigProvider.notifier)
+          .update(
+            (state) =>
+                state.copyWith(dns: result.dns, dnsOverrideKeys: result.keys),
+          );
+      return true;
+    } catch (error) {
+      final res = await globalState.showMessage(
+        message: TextSpan(
+          text:
+              '${error.toString()}\n\n'
+              '${appLocalizations.discardChanges}',
+        ),
+      );
+      return res == true;
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l = context.appLocalizations;
-    final config = ref.watch(patchClashConfigProvider);
-    final selected = _selected(config);
-    final enabled = ref.watch(
-      isNtp ? overrideNtpProvider : overrideDnsProvider,
+    final appLocalizations = context.appLocalizations;
+    final canAdd = ref.watch(
+      _dnsOverrideKeysSelector.select(
+        (keys) => keys.length < DnsOverrideKey.values.length,
+      ),
     );
     return BaseScaffold(
-      title: _section,
+      title: 'DNS',
       actions: [
         IconButton(
-          tooltip: l.add,
-          icon: const Icon(Icons.add),
-          onPressed: selected.length == _paths.length
-              ? null
-              : () => _add(context, ref),
+          icon: const GlyphIcon(AppGlyphs.add),
+          tooltip: appLocalizations.add,
+          onPressed: canAdd ? () => _handleAdd(context, ref) : null,
         ),
         IconButton(
-          tooltip: l.edit,
-          icon: const Icon(Icons.code),
-          onPressed: () => _edit(context, ref),
-        ),
-        IconButton(
-          tooltip: l.reset,
-          icon: const Icon(Icons.replay),
-          onPressed: () async {
-            final reset = await globalState.showMessage(
-              context: context,
-              title: l.reset,
-              message: TextSpan(text: l.resetTip),
-            );
-            if (reset != true || !context.mounted) return;
-            ref
-                .read(patchClashConfigProvider.notifier)
-                .update(
-                  (state) => isNtp
-                      ? state.copyWith(ntp: defaultNtp, ntpOverrideKeys: {})
-                      : state.copyWith(dns: defaultDns, dnsOverrideKeys: {}),
-                );
-          },
+          icon: const GlyphIcon(AppGlyphs.compose),
+          tooltip: appLocalizations.quickEdit,
+          onPressed: () => _handleQuickEdit(context, ref),
         ),
       ],
-      body: ListView(
-        children: [
-          SwitchListTile(
-            title: Text(isNtp ? l.overrideNtp : l.overrideDns),
-            subtitle: Text(l.overrideFieldsDesc),
-            value: enabled,
-            onChanged: (value) {
-              if (isNtp) {
-                ref.read(overrideNtpProvider.notifier).value = value;
-              } else {
-                ref.read(overrideDnsProvider.notifier).value = value;
-              }
-            },
-          ),
-          if (selected.isEmpty)
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Text(l.overrideFieldsEmpty),
-            ),
-          for (final path in _paths.where(selected.contains))
-            Builder(
-              builder: (context) {
-                final value = _value(config, path);
-                final preview = yaml.encode(value).trim();
-                return ListTile(
-                  title: Text(path),
-                  subtitle: value is bool
-                      ? null
-                      : Text(
-                          preview,
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                  onTap: () => _edit(context, ref, path: path),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (value is bool)
-                        Switch(
-                          value: value,
-                          onChanged: (value) {
-                            final fragment = isNtp
-                                ? {path: value}
-                                : mergeDnsOverride(
-                                    {},
-                                    path.startsWith('fallback-filter.')
-                                        ? {
-                                            'fallback-filter': {
-                                              path.split('.').last: value,
-                                            },
-                                          }
-                                        : {path: value},
-                                  );
-                            _save(
-                              context,
-                              ref,
-                              yaml.encode(fragment),
-                              path: path,
-                            );
-                          },
-                        ),
-                      IconButton(
-                        tooltip: l.delete,
-                        icon: const Icon(Icons.remove_circle_outline),
-                        onPressed: () => _select(ref, path, false),
-                      ),
-                    ],
+      body: const _OverrideList(),
+    );
+  }
+}
+
+class _OverrideList extends ConsumerWidget {
+  const _OverrideList();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    final keys = ref.watch(_dnsOverrideKeysSelector);
+    final entries = DnsOverrideKey.values.where(keys.contains);
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 16)
+              .copyWith(top: 16, bottom: entries.isEmpty ? 0 : 16),
+          sliver: SliverList.list(
+            children: [
+              generateSectionV3(
+                items: [
+                  ConfigToggleItem(
+                    title: (l) => l.overrideDns,
+                    selector: overrideDnsProvider,
+                    onChanged: (ref, value) =>
+                        ref.read(overrideDnsProvider.notifier).value = value,
                   ),
-                );
-              },
+                ],
+              ),
+              for (final (title, keys) in _sectionsOf(
+                appLocalizations,
+                entries,
+              ))
+                generateSectionV3(
+                  title: title,
+                  items: [
+                    for (final key in keys)
+                      _OverrideItem(key: ValueKey(key), overrideKey: key),
+                  ],
+                ),
+            ],
+          ),
+        ),
+        if (entries.isEmpty)
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: NullStatus(
+              label: appLocalizations.nullTip(appLocalizations.overrideEntries),
+              illustration: NullStatusIllustration.dns,
             ),
-        ],
+          ),
+      ],
+    );
+  }
+}
+
+class _OverrideItem extends StatelessWidget {
+  const _OverrideItem({super.key, required this.overrideKey});
+
+  final DnsOverrideKey overrideKey;
+
+  @override
+  Widget build(BuildContext context) {
+    final leading = _RemoveButton(overrideKey);
+    final title = overrideKey.label;
+
+    Widget toggle(bool Function(Dns dns) select, _DnsUpdate<bool> update) {
+      return ConfigToggleItem(
+        leading: leading,
+        title: title,
+        subtitle: overrideKey.description,
+        selector: _dnsSelector(select),
+        onChanged: _dnsWriter(update),
+      );
+    }
+
+    Widget text(
+      String Function(Dns dns) select,
+      _DnsUpdate<String> update, {
+      required int maxLength,
+    }) {
+      return ConfigTextItem(
+        leading: leading,
+        title: title,
+        selector: _dnsSelector(select),
+        onChanged: _dnsWriter(update),
+        maxLength: maxLength,
+      );
+    }
+
+    Widget number(int Function(Dns dns) select, _DnsUpdate<int> update) {
+      return ConfigTextItem(
+        leading: leading,
+        title: title,
+        selector: _dnsSelector((dns) => '${select(dns)}'),
+        onChanged: _dnsWriter<String>(
+          (state, value) => update(state, int.parse(value)),
+        ),
+        maxLength: TextInputLimits.number,
+        keyboardType: TextInputType.number,
+        normalize: (value) => value.trim(),
+        validator: (value, l) => (int.tryParse(value ?? '') ?? -1) < 0
+            ? l.numberTip(title(l))
+            : null,
+      );
+    }
+
+    Widget options<T extends Enum>(
+      List<T> values,
+      T Function(Dns dns) select,
+      _DnsUpdate<T> update,
+    ) {
+      return ConfigOptionsItem<T>(
+        leading: leading,
+        title: title,
+        options: values,
+        textBuilder: (value) => value.name,
+        selector: _dnsSelector(select),
+        onChanged: _dnsWriter(update),
+      );
+    }
+
+    Widget policy(
+      Map<String, String> Function(Dns dns) select,
+      _DnsUpdate<Map<String, String>> update,
+    ) {
+      return _PolicyItem(
+        overrideKey: overrideKey,
+        leading: leading,
+        select: select,
+        update: update,
+      );
+    }
+
+    Widget list(
+      List<String> Function(Dns dns) select,
+      _DnsUpdate<List<String>> update, {
+      required int itemMaxLength,
+    }) {
+      return ConfigListEditItem(
+        leading: leading,
+        title: title,
+        subtitle: overrideKey.description,
+        selector: _dnsSelector(select),
+        onChanged: _dnsWriter(update),
+        itemMaxLength: itemMaxLength,
+      );
+    }
+
+    return switch (overrideKey) {
+      DnsOverrideKey.enable => toggle(
+        (dns) => dns.enable,
+        (state, value) => state.copyWith.dns(enable: value),
+      ),
+      DnsOverrideKey.listen => text(
+        (dns) => dns.listen,
+        (state, value) => state.copyWith.dns(listen: value),
+        maxLength: TextInputLimits.dnsListen,
+      ),
+      DnsOverrideKey.listenRoutingMark => number(
+        (dns) => dns.listenRoutingMark,
+        (state, value) => state.copyWith.dns(listenRoutingMark: value),
+      ),
+      DnsOverrideKey.useHosts => toggle(
+        (dns) => dns.useHosts,
+        (state, value) => state.copyWith.dns(useHosts: value),
+      ),
+      DnsOverrideKey.useSystemHosts => toggle(
+        (dns) => dns.useSystemHosts,
+        (state, value) => state.copyWith.dns(useSystemHosts: value),
+      ),
+      DnsOverrideKey.ipv6 => toggle(
+        (dns) => dns.ipv6,
+        (state, value) => state.copyWith.dns(ipv6: value),
+      ),
+      DnsOverrideKey.ipv6Timeout => number(
+        (dns) => dns.ipv6Timeout,
+        (state, value) => state.copyWith.dns(ipv6Timeout: value),
+      ),
+      DnsOverrideKey.respectRules => toggle(
+        (dns) => dns.respectRules,
+        (state, value) => state.copyWith.dns(respectRules: value),
+      ),
+      DnsOverrideKey.preferH3 => toggle(
+        (dns) => dns.preferH3,
+        (state, value) => state.copyWith.dns(preferH3: value),
+      ),
+      DnsOverrideKey.cacheAlgorithm => options(
+        DnsCacheAlgorithm.values,
+        (dns) => dns.cacheAlgorithm,
+        (state, value) => state.copyWith.dns(cacheAlgorithm: value),
+      ),
+      DnsOverrideKey.cacheMaxSize => number(
+        (dns) => dns.cacheMaxSize,
+        (state, value) => state.copyWith.dns(cacheMaxSize: value),
+      ),
+      DnsOverrideKey.enhancedMode => options(
+        _enhancedModes,
+        (dns) => dns.enhancedMode,
+        (state, value) => state.copyWith.dns(enhancedMode: value),
+      ),
+      DnsOverrideKey.fakeIpRange => text(
+        (dns) => dns.fakeIpRange,
+        (state, value) => state.copyWith.dns(fakeIpRange: value),
+        maxLength: TextInputLimits.cidr,
+      ),
+      DnsOverrideKey.fakeIpRange6 => text(
+        (dns) => dns.fakeIpRange6,
+        (state, value) => state.copyWith.dns(fakeIpRange6: value),
+        maxLength: TextInputLimits.cidr,
+      ),
+      DnsOverrideKey.fakeIpFilter => list(
+        (dns) => dns.fakeIpFilter,
+        (state, value) => state.copyWith.dns(fakeIpFilter: value),
+        itemMaxLength: TextInputLimits.domain,
+      ),
+      DnsOverrideKey.fakeIpFilterMode => options(
+        FakeIpFilterMode.values,
+        (dns) => dns.fakeIpFilterMode,
+        (state, value) => state.copyWith.dns(fakeIpFilterMode: value),
+      ),
+      DnsOverrideKey.fakeIpTtl => number(
+        (dns) => dns.fakeIpTtl,
+        (state, value) => state.copyWith.dns(fakeIpTtl: value),
+      ),
+      DnsOverrideKey.defaultNameserver => list(
+        (dns) => dns.defaultNameserver,
+        (state, value) => state.copyWith.dns(defaultNameserver: value),
+        itemMaxLength: TextInputLimits.dnsServer,
+      ),
+      DnsOverrideKey.nameserverPolicy => policy(
+        (dns) => dns.nameserverPolicy,
+        (state, value) => state.copyWith.dns(nameserverPolicy: value),
+      ),
+      DnsOverrideKey.nameserver => list(
+        (dns) => dns.nameserver,
+        (state, value) => state.copyWith.dns(nameserver: value),
+        itemMaxLength: TextInputLimits.dnsServer,
+      ),
+      DnsOverrideKey.fallback => list(
+        (dns) => dns.fallback,
+        (state, value) => state.copyWith.dns(fallback: value),
+        itemMaxLength: TextInputLimits.dnsServer,
+      ),
+      DnsOverrideKey.fallbackLazyQuery => toggle(
+        (dns) => dns.fallbackLazyQuery,
+        (state, value) => state.copyWith.dns(fallbackLazyQuery: value),
+      ),
+      DnsOverrideKey.proxyServerNameserver => list(
+        (dns) => dns.proxyServerNameserver,
+        (state, value) => state.copyWith.dns(proxyServerNameserver: value),
+        itemMaxLength: TextInputLimits.dnsServer,
+      ),
+      DnsOverrideKey.proxyServerNameserverPolicy => policy(
+        (dns) => dns.proxyServerNameserverPolicy,
+        (state, value) =>
+            state.copyWith.dns(proxyServerNameserverPolicy: value),
+      ),
+      DnsOverrideKey.directNameserver => list(
+        (dns) => dns.directNameserver,
+        (state, value) => state.copyWith.dns(directNameserver: value),
+        itemMaxLength: TextInputLimits.dnsServer,
+      ),
+      DnsOverrideKey.directNameserverFollowPolicy => toggle(
+        (dns) => dns.directNameserverFollowPolicy,
+        (state, value) =>
+            state.copyWith.dns(directNameserverFollowPolicy: value),
+      ),
+      DnsOverrideKey.fallbackFilterGeoip => toggle(
+        (dns) => dns.fallbackFilter.geoip,
+        (state, value) => state.copyWith.dns.fallbackFilter(geoip: value),
+      ),
+      DnsOverrideKey.fallbackFilterGeoipCode => text(
+        (dns) => dns.fallbackFilter.geoipCode,
+        (state, value) => state.copyWith.dns.fallbackFilter(geoipCode: value),
+        maxLength: TextInputLimits.geoIpCode,
+      ),
+      DnsOverrideKey.fallbackFilterGeosite => list(
+        (dns) => dns.fallbackFilter.geosite,
+        (state, value) => state.copyWith.dns.fallbackFilter(geosite: value),
+        itemMaxLength: TextInputLimits.geoSite,
+      ),
+      DnsOverrideKey.fallbackFilterIpcidr => list(
+        (dns) => dns.fallbackFilter.ipcidr,
+        (state, value) => state.copyWith.dns.fallbackFilter(ipcidr: value),
+        itemMaxLength: TextInputLimits.cidr,
+      ),
+      DnsOverrideKey.fallbackFilterDomain => list(
+        (dns) => dns.fallbackFilter.domain,
+        (state, value) => state.copyWith.dns.fallbackFilter(domain: value),
+        itemMaxLength: TextInputLimits.domain,
+      ),
+    };
+  }
+}
+
+class _PolicyItem extends ConsumerWidget {
+  const _PolicyItem({
+    required this.overrideKey,
+    required this.leading,
+    required this.select,
+    required this.update,
+  });
+
+  final DnsOverrideKey overrideKey;
+  final Widget leading;
+  final Map<String, String> Function(Dns dns) select;
+  final _DnsUpdate<Map<String, String>> update;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    final title = overrideKey.label(appLocalizations);
+    final description = overrideKey.description;
+    final policy = ref.watch(_dnsSelector(select));
+    return ListItem.open(
+      leading: leading,
+      title: Text(title),
+      subtitle: description == null
+          ? null
+          : Text(description(appLocalizations)),
+      delegate: OpenDelegate(
+        widget: MapInputPage(
+          title: title,
+          entries: policy,
+          keyMaxLength: TextInputLimits.domain,
+          valueMaxLength: TextInputLimits.dnsServer,
+          titleBuilder: (item) => Text(item.key),
+          subtitleBuilder: (item) => Text(item.value),
+        ),
+        onChanged: (value) {
+          if (value is Map) {
+            _dnsWriter(update)(ref, Map<String, String>.from(value));
+          }
+        },
+      ),
+    );
+  }
+}
+
+class _RemoveButton extends ConsumerWidget {
+  const _RemoveButton(this.overrideKey);
+
+  final DnsOverrideKey overrideKey;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return CommonMinIconButtonTheme(
+      child: ElasticButton(
+        child: IconButton.filledTonal(
+          tooltip: context.appLocalizations.remove,
+          onPressed: () => ref
+              .read(patchClashConfigProvider.notifier)
+              .update(
+                (state) => state.copyWith(
+                  dnsOverrideKeys: {...state.dnsOverrideKeys}
+                    ..remove(overrideKey),
+                ),
+              ),
+          icon: const GlyphIcon(AppGlyphs.remove, size: 18, fill: 1),
+          padding: EdgeInsets.zero,
+        ),
       ),
     );
   }

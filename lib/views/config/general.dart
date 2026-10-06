@@ -278,7 +278,7 @@ class HostsItem extends ConsumerWidget {
         blur: false,
         widget: MapInputPage(
           title: 'Hosts',
-          map: hosts,
+          entries: hosts,
           keyMaxLength: TextInputLimits.domain,
           valueMaxLength: TextInputLimits.hostValue,
           titleBuilder: (item) => Text(item.key),

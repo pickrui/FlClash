@@ -11,6 +11,7 @@ import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/config/dns.dart';
+import 'package:fl_clash/widgets/null_status.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -51,24 +52,21 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(
-        find.text('Add fields to override, or edit the YAML fragment'),
-        findsOneWidget,
-      );
+      expect(find.byType(NullStatus), findsOneWidget);
       await tester.tap(find.byTooltip('Add'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('enable'));
+      await tester.tap(find.text('Status'));
       await tester.pumpAndSettle();
-      expect(find.text('enable'), findsOneWidget);
+      expect(find.text('Status'), findsOneWidget);
       await tester.tap(find.byType(Switch).last);
       await tester.pumpAndSettle();
       var patch = container.read(patchClashConfigProvider);
       expect(ntp ? patch.ntp.enable : patch.dns.enable, ntp);
-      await tester.tap(find.byTooltip('Delete'));
+      await tester.tap(find.byTooltip('Remove'));
       await tester.pumpAndSettle();
       patch = container.read(patchClashConfigProvider);
       expect(ntp ? patch.ntpOverrideKeys : patch.dnsOverrideKeys, isEmpty);
-      await tester.tap(find.byTooltip('Edit'));
+      await tester.tap(find.byTooltip('Quick edit'));
       await tester.pumpAndSettle();
       expect(find.byType(EditorPage), findsOneWidget);
       final editor = tester.widget<CodeForge>(find.byType(CodeForge));
