@@ -5,6 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/icons/glyph.dart';
+import 'package:fl_clash/icons/glyph_icon.dart';
 import 'package:fl_clash/state.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
@@ -15,8 +17,9 @@ import 'text.dart';
 class Info {
   final String label;
   final IconData? iconData;
+  final Glyph? glyph;
 
-  const Info({required this.label, this.iconData});
+  const Info({required this.label, this.iconData, this.glyph});
 }
 
 class InfoHeader extends StatelessWidget {
@@ -48,7 +51,13 @@ class InfoHeader extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.max,
               children: [
-                if (info.iconData != null) ...[
+                if (info.glyph != null) ...[
+                  GlyphIcon(
+                    info.glyph!,
+                    color: context.colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 8),
+                ] else if (info.iconData != null) ...[
                   Icon(
                     info.iconData,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,

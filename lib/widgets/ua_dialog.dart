@@ -7,7 +7,7 @@ import 'package:fl_clash/common/input_limits.dart';
 import 'package:fl_clash/models/config.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/widgets/dialog.dart';
-import 'package:fl_clash/widgets/input.dart';
+import 'package:fl_clash/widgets/input_dialog.dart';
 import 'package:fl_clash/widgets/list.dart';
 import 'package:material_ui/material_ui.dart';
 

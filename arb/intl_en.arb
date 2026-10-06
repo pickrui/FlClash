@@ -1264,5 +1264,14 @@
   "changelogPerformance": "Performance",
   "changelogReverts": "Reverts",
   "showMore": "Expand",
-  "showLess": "Collapse"
+  "showLess": "Collapse",
+  "switchProfile": "Switch profile",
+  "subscriptionInfo": "Subscription info",
+  "lastUpdated": "Last updated",
+  "proxiesCount": "{count, plural, =1{1 proxy} other{{count} proxies}}",
+  "rulesCount": "{count, plural, =1{1 rule} other{{count} rules}}",
+  "back": "Back",
+  "noSearchResults": "No matching results",
+  "proxyNode": "Proxy node",
+  "rules": "Rules"
 }

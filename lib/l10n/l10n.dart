@@ -10669,6 +10669,85 @@ class AppLocalizations {
   String get showLess {
     return Intl.message('Collapse', name: 'showLess', desc: '', args: []);
   }
+
+  /// `Switch profile`
+  String get switchProfile {
+    return Intl.message(
+      'Switch profile',
+      name: 'switchProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription info`
+  String get subscriptionInfo {
+    return Intl.message(
+      'Subscription info',
+      name: 'subscriptionInfo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Last updated`
+  String get lastUpdated {
+    return Intl.message(
+      'Last updated',
+      name: 'lastUpdated',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, =1{1 proxy} other{{count} proxies}}`
+  String proxiesCount(num count) {
+    return Intl.plural(
+      count,
+      one: '1 proxy',
+      other: '$count proxies',
+      name: 'proxiesCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, =1{1 rule} other{{count} rules}}`
+  String rulesCount(num count) {
+    return Intl.plural(
+      count,
+      one: '1 rule',
+      other: '$count rules',
+      name: 'rulesCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Back`
+  String get back {
+    return Intl.message('Back', name: 'back', desc: '', args: []);
+  }
+
+  /// `No matching results`
+  String get noSearchResults {
+    return Intl.message(
+      'No matching results',
+      name: 'noSearchResults',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Proxy node`
+  String get proxyNode {
+    return Intl.message('Proxy node', name: 'proxyNode', desc: '', args: []);
+  }
+
+  /// `Rules`
+  String get rules {
+    return Intl.message('Rules', name: 'rules', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

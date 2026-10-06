@@ -6,11 +6,11 @@
 import 'package:fl_clash/common/common.dart';
 
 import '../widget_metrics.dart';
+export 'profiles.dart';
+export 'proxy_groups.dart';
 
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/profile.dart';
 import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/service_status.dart';
 import 'package:fl_clash/views/config/dns.dart';
 import 'package:fl_clash/views/proxies/service_check.dart';
@@ -221,145 +221,6 @@ class _ServiceStatusCardState extends ConsumerState<ServiceStatusCard>
                       : null,
                   icon: const Icon(Icons.refresh),
                 ),
-        ],
-      ),
-    );
-  }
-}
-
-class DashboardProfilesCard extends ConsumerWidget {
-  const DashboardProfilesCard({super.key});
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final profiles = ref.watch(profilesProvider);
-    final id = ref.watch(currentProfileIdProvider);
-    return InspectionCard(
-      label: context.appLocalizations.profiles,
-      icon: Icons.article_outlined,
-      onPressed: () => ref.read(currentPageLabelProvider.notifier).value =
-          PageLabel.profiles,
-      child: Align(
-        alignment: Alignment.bottomLeft,
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton<int>(
-            isDense: true,
-            isExpanded: true,
-            value: profiles.any((profile) => profile.id == id) ? id : null,
-            hint: const Text('—'),
-            items: [
-              for (final profile in profiles)
-                DropdownMenuItem(
-                  value: profile.id,
-                  child: Text(
-                    profile.realLabel,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-            ],
-            onChanged: (value) {
-              if (value != null) {
-                ref.read(currentProfileIdProvider.notifier).value = value;
-              }
-            },
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class DashboardGroupsCard extends ConsumerStatefulWidget {
-  const DashboardGroupsCard({super.key});
-  @override
-  ConsumerState<DashboardGroupsCard> createState() =>
-      _DashboardGroupsCardState();
-}
-
-class _DashboardGroupsCardState extends ConsumerState<DashboardGroupsCard> {
-  String? _group;
-  @override
-  Widget build(BuildContext context) {
-    final groups = ref.watch(currentGroupsStateProvider).value;
-    final group =
-        groups
-            .where(
-              (group) =>
-                  group.name ==
-                  (_group ??
-                      ref.watch(currentProfileProvider)?.currentGroupName),
-            )
-            .firstOrNull ??
-        groups.firstOrNull;
-    final selected = group == null
-        ? ''
-        : ref.watch(getProxyNameProvider(group.name));
-    return InspectionCard(
-      label: context.appLocalizations.proxyGroup,
-      rows: 2,
-      icon: Icons.hub_outlined,
-      onPressed: () =>
-          ref.read(currentPageLabelProvider.notifier).value = PageLabel.proxies,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              isExpanded: true,
-              isDense: true,
-              value: group?.name,
-              items: [
-                for (final group in groups)
-                  DropdownMenuItem(
-                    value: group.name,
-                    child: Text(
-                      group.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-              ],
-              onChanged: (name) => setState(() => _group = name),
-            ),
-          ),
-          if (group != null)
-            DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                isExpanded: true,
-                value: group.all.any((proxy) => proxy.name == selected)
-                    ? selected
-                    : null,
-                hint: Text(
-                  group.now ?? '—',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                items: [
-                  for (final name
-                      in group.all.map((proxy) => proxy.name).toSet())
-                    DropdownMenuItem(
-                      value: name,
-                      child: Text(
-                        name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                ],
-                onChanged:
-                    group.type == GroupType.Selector ||
-                        group.type.isComputedSelected
-                    ? (value) {
-                        if (value != null) {
-                          ref
-                              .read(proxiesActionProvider.notifier)
-                              .changeProxyDebounce(group.name, value);
-                        }
-                      }
-                    : null,
-              ),
-            ),
         ],
       ),
     );

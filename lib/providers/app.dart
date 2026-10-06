@@ -6,6 +6,10 @@
 import 'package:fl_clash/core/controller.dart';
 
 import 'dart:async';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart'
+    show Notifier, NotifierProvider;
+
 import 'dart:ui' show Brightness, Size;
 
 import 'package:dio/dio.dart';
@@ -557,4 +561,31 @@ class HotKeyFailures extends _$HotKeyFailures
 class WindowBlur extends _$WindowBlur with NotifierMixin<bool> {
   @override
   bool build() => false;
+}
+
+typedef AppliedConfigCounts = ({
+  int? profileId,
+  int groups,
+  int proxies,
+  int rules,
+});
+
+final appliedConfigCountsProvider =
+    NotifierProvider<AppliedConfigStatistics, AppliedConfigCounts?>(
+      AppliedConfigStatistics.new,
+    );
+
+class AppliedConfigStatistics extends Notifier<AppliedConfigCounts?> {
+  @override
+  AppliedConfigCounts? build() => null;
+
+  void applied(int? profileId, Map<String, dynamic> config) {
+    int lengthOf(Object? value) => value is List ? value.length : 0;
+    state = (
+      profileId: profileId,
+      groups: lengthOf(config['proxy-groups']),
+      proxies: lengthOf(config['proxies']),
+      rules: lengthOf(config['rules']),
+    );
+  }
 }

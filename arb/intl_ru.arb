@@ -1264,5 +1264,14 @@
   "changelogPerformance": "Производительность",
   "changelogReverts": "Откаты",
   "showMore": "Развернуть",
-  "showLess": "Свернуть"
+  "showLess": "Свернуть",
+  "switchProfile": "Сменить профиль",
+  "subscriptionInfo": "Информация о подписке",
+  "lastUpdated": "Последнее обновление",
+  "proxiesCount": "{count} прокси",
+  "rulesCount": "{count, plural, one{{count} правило} few{{count} правила} many{{count} правил} other{{count} правила}}",
+  "back": "Назад",
+  "noSearchResults": "Ничего не найдено",
+  "proxyNode": "Прокси-узел",
+  "rules": "Правила"
 }

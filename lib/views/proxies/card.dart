@@ -16,6 +16,28 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+Future<void> selectGroupProxy(
+  WidgetRef ref, {
+  required String groupName,
+  required GroupType groupType,
+  required String proxyName,
+}) async {
+  final isComputedSelected = groupType.isComputedSelected;
+  final isSelector = groupType == GroupType.Selector;
+  if (isComputedSelected || isSelector) {
+    final currentProxyName = ref.read(getProxyNameProvider(groupName));
+    final nextProxyName = switch (isComputedSelected) {
+      true => currentProxyName == proxyName ? '' : proxyName,
+      false => proxyName,
+    };
+    ref
+        .read(proxiesActionProvider.notifier)
+        .changeProxyDebounce(groupName, nextProxyName);
+    return;
+  }
+  globalState.showNotifier(appLocalizations.notSelectedTip);
+}
+
 class ProxyCard extends StatelessWidget {
   final String groupName;
   final Proxy proxy;
@@ -110,22 +132,12 @@ class ProxyCard extends StatelessWidget {
     );
   }
 
-  Future<void> _changeProxy(WidgetRef ref) async {
-    final isComputedSelected = groupType.isComputedSelected;
-    final isSelector = groupType == GroupType.Selector;
-    if (isComputedSelected || isSelector) {
-      final currentProxyName = ref.read(getProxyNameProvider(groupName));
-      final nextProxyName = switch (isComputedSelected) {
-        true => currentProxyName == proxy.name ? '' : proxy.name,
-        false => proxy.name,
-      };
-      ref
-          .read(proxiesActionProvider.notifier)
-          .changeProxyDebounce(groupName, nextProxyName);
-      return;
-    }
-    globalState.showNotifier(appLocalizations.notSelectedTip);
-  }
+  Future<void> _changeProxy(WidgetRef ref) => selectGroupProxy(
+    ref,
+    groupName: groupName,
+    groupType: groupType,
+    proxyName: proxy.name,
+  );
 
   @override
   Widget build(BuildContext context) {

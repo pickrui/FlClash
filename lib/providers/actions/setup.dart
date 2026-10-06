@@ -891,6 +891,7 @@ extension SetupControllerExt on AppController {
       return false;
     }
     globalState.lastSetupState = setupState;
+    _ref.read(appliedConfigCountsProvider.notifier).applied(profileId, config);
     if (system.isAndroid) {
       globalState.lastVpnState = _ref.read(vpnStateProvider);
       preferences.saveShareState(this.sharedState);

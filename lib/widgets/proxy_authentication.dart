@@ -10,7 +10,7 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/dialog.dart';
-import 'package:fl_clash/widgets/input.dart';
+import 'package:fl_clash/widgets/input_dialog.dart';
 import 'package:fl_clash/widgets/list.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -12,8 +12,10 @@ import 'package:fl_clash/widgets/inherited.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'package:collection/collection.dart';
+
 import 'card.dart';
-import 'input.dart';
+import 'input_dialog.dart';
 import 'open_container.dart';
 import 'scaffold.dart';
 import 'sheet.dart';
@@ -773,4 +775,24 @@ class CommonInputListItem extends StatelessWidget {
     }
     return KeyedSubtree(key: itemKey, child: child);
   }
+}
+
+Widget generateSectionV3({
+  String? title,
+  required Iterable<Widget> items,
+  List<Widget>? actions,
+}) {
+  final genItems = items.mapIndexed<Widget>(
+    (index, item) => ItemPositionProvider(
+      position: ItemPosition.get(index, items.length),
+      child: item,
+    ),
+  );
+  return Column(
+    children: [
+      if (items.isNotEmpty && title != null)
+        ListHeader(title: title, actions: actions),
+      Column(children: [...genItems]),
+    ],
+  );
 }

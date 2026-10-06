@@ -1264,5 +1264,14 @@
   "changelogPerformance": "性能优化",
   "changelogReverts": "已回滚",
   "showMore": "展开",
-  "showLess": "收起"
+  "showLess": "收起",
+  "switchProfile": "切换配置",
+  "subscriptionInfo": "订阅信息",
+  "lastUpdated": "上次更新",
+  "proxiesCount": "{count} 个代理",
+  "rulesCount": "{count} 条规则",
+  "back": "返回",
+  "noSearchResults": "没有匹配的结果",
+  "proxyNode": "代理节点",
+  "rules": "规则"
 }

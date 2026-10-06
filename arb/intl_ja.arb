@@ -1264,5 +1264,14 @@
   "changelogPerformance": "パフォーマンス",
   "changelogReverts": "取り消し",
   "showMore": "展開",
-  "showLess": "折りたたむ"
+  "showLess": "折りたたむ",
+  "switchProfile": "プロファイルを切り替え",
+  "subscriptionInfo": "サブスクリプション情報",
+  "lastUpdated": "最終更新",
+  "proxiesCount": "プロキシ {count} 件",
+  "rulesCount": "ルール {count} 件",
+  "back": "戻る",
+  "noSearchResults": "一致する結果はありません",
+  "proxyNode": "プロキシノード",
+  "rules": "ルール"
 }

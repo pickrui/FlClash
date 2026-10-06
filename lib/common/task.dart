@@ -35,6 +35,10 @@ const maxBackupFileBytes = 64 * 1024 * 1024;
 const maxBackupTotalBytes = 256 * 1024 * 1024;
 const maxBackupEntries = 4096;
 
+Future<String> readTextFileTask(String path) => compute(_readTextFile, path);
+
+Future<String> _readTextFile(String path) => File(path).readAsString();
+
 Future<T> decodeJSONTask<T>(String data) async {
   return compute<String, T>(_decodeJSON, data);
 }

@@ -15,7 +15,7 @@ import 'package:fl_clash/core/desktop/linux_helper.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/plugins/app.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/widgets/input.dart';
+import 'package:fl_clash/widgets/input_dialog.dart';
 import 'package:flutter/services.dart';
 
 bool isFlClashDockerEnvironment(Map<String, String> environment) {
