@@ -11263,6 +11263,71 @@ class AppLocalizations {
   String get discard {
     return Intl.message('Discard', name: 'discard', desc: '', args: []);
   }
+
+  /// `Docked`
+  String get docked {
+    return Intl.message('Docked', name: 'docked', desc: '', args: []);
+  }
+
+  /// `Fade`
+  String get fade {
+    return Intl.message('Fade', name: 'fade', desc: '', args: []);
+  }
+
+  /// `Floating`
+  String get floating {
+    return Intl.message('Floating', name: 'floating', desc: '', args: []);
+  }
+
+  /// `Follow system`
+  String get followSystem {
+    return Intl.message(
+      'Follow system',
+      name: 'followSystem',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Bottom bar`
+  String get navigationBarStyle {
+    return Intl.message(
+      'Bottom bar',
+      name: 'navigationBarStyle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pure black`
+  String get pureBlack {
+    return Intl.message('Pure black', name: 'pureBlack', desc: '', args: []);
+  }
+
+  /// `Slide`
+  String get slide {
+    return Intl.message('Slide', name: 'slide', desc: '', args: []);
+  }
+
+  /// `Text in the app will look like this`
+  String get textScalePreview {
+    return Intl.message(
+      'Text in the app will look like this',
+      name: 'textScalePreview',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Basic strategies`
+  String get basicStrategy {
+    return Intl.message(
+      'Basic strategies',
+      name: 'basicStrategy',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -1325,5 +1325,14 @@
   "hotkeyConflictWith": "「{action}」で使用中です。保存するとこちらに移動します。",
   "confirmExitWindow": "現在のウィンドウを閉じてもよろしいですか？",
   "dataChangedSave": "データの変更を検出しました。保存しますか？",
-  "discard": "破棄"
+  "discard": "破棄",
+  "docked": "固定",
+  "fade": "フェード",
+  "floating": "フローティング",
+  "followSystem": "システムに従う",
+  "navigationBarStyle": "ボトムバー",
+  "pureBlack": "ピュアブラック",
+  "slide": "スライド",
+  "textScalePreview": "アプリ内の文字はこの大きさで表示されます",
+  "basicStrategy": "基本ポリシー"
 }

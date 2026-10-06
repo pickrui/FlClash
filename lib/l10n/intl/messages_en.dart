@@ -426,6 +426,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Modify the basic configuration globally",
     ),
     "basicInfo": MessageLookupByLibrary.simpleMessage("Basic info"),
+    "basicStrategy": MessageLookupByLibrary.simpleMessage("Basic strategies"),
     "batchAdd": MessageLookupByLibrary.simpleMessage("Batch add"),
     "batchListInputTip": MessageLookupByLibrary.simpleMessage(
       "One item per line, or separated by commas",
@@ -1149,6 +1150,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "doYouWantToPass": MessageLookupByLibrary.simpleMessage(
       "Do you want to pass",
     ),
+    "docked": MessageLookupByLibrary.simpleMessage("Docked"),
     "documentCenter": MessageLookupByLibrary.simpleMessage("Document Center"),
     "domain": MessageLookupByLibrary.simpleMessage("Domain"),
     "download": MessageLookupByLibrary.simpleMessage("Download"),
@@ -1237,6 +1239,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "externalFetch": MessageLookupByLibrary.simpleMessage("External fetch"),
     "externalLink": MessageLookupByLibrary.simpleMessage("External link"),
+    "fade": MessageLookupByLibrary.simpleMessage("Fade"),
     "fakeipFilter": MessageLookupByLibrary.simpleMessage("Fakeip filter"),
     "fakeipFilterMode": MessageLookupByLibrary.simpleMessage(
       "Fake-IP filter mode",
@@ -1270,6 +1273,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "findProcessModeDesc": MessageLookupByLibrary.simpleMessage(
       "There is a certain performance loss after opening",
     ),
+    "floating": MessageLookupByLibrary.simpleMessage("Floating"),
     "floatingNavigationBar": MessageLookupByLibrary.simpleMessage(
       "Floating navigation",
     ),
@@ -1277,6 +1281,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Use a floating dock for compact layouts",
     ),
     "followProfile": MessageLookupByLibrary.simpleMessage("Follow profile"),
+    "followSystem": MessageLookupByLibrary.simpleMessage("Follow system"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("FontFamily"),
     "fontSize": MessageLookupByLibrary.simpleMessage("Size"),
     "forceRestartCoreTip": MessageLookupByLibrary.simpleMessage(
@@ -1632,6 +1637,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "nameserverPolicyDesc": MessageLookupByLibrary.simpleMessage(
       "Specify the corresponding nameserver policy",
     ),
+    "navigationBarStyle": MessageLookupByLibrary.simpleMessage("Bottom bar"),
     "network": MessageLookupByLibrary.simpleMessage("Network"),
     "networkAccessDeniedError": m40,
     "networkBadResponseError": m41,
@@ -2036,6 +2042,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Total traffic",
     ),
     "purchasedAtLabel": MessageLookupByLibrary.simpleMessage("Purchase time"),
+    "pureBlack": MessageLookupByLibrary.simpleMessage("Pure black"),
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("Pure black mode"),
     "qrcode": MessageLookupByLibrary.simpleMessage("QR code"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
@@ -2394,6 +2401,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "singleAdd": MessageLookupByLibrary.simpleMessage("Single add"),
     "singleValueTip": m83,
     "size": MessageLookupByLibrary.simpleMessage("Size"),
+    "slide": MessageLookupByLibrary.simpleMessage("Slide"),
     "socksPort": MessageLookupByLibrary.simpleMessage("Socks Port"),
     "softwareCenter": MessageLookupByLibrary.simpleMessage("Software Center"),
     "soldOut": MessageLookupByLibrary.simpleMessage("Sold out"),
@@ -2635,6 +2643,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "testUrl": MessageLookupByLibrary.simpleMessage("Test url"),
     "textScale": MessageLookupByLibrary.simpleMessage("Text Scaling"),
+    "textScalePreview": MessageLookupByLibrary.simpleMessage(
+      "Text in the app will look like this",
+    ),
     "theme": MessageLookupByLibrary.simpleMessage("Theme"),
     "themeColor": MessageLookupByLibrary.simpleMessage("Theme color"),
     "themeDesc": MessageLookupByLibrary.simpleMessage(

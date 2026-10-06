@@ -27,11 +27,13 @@ class InfoHeader extends StatelessWidget {
   final Info info;
   final List<Widget> actions;
   final EdgeInsets? padding;
+  final double? space;
 
   const InfoHeader({
     super.key,
     required this.info,
     this.padding,
+    this.space,
     List<Widget>? actions,
   }) : actions = actions ?? const [];
 
@@ -88,6 +90,7 @@ class InfoHeader extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.end,
+                spacing: space ?? 0,
                 children: [...actions],
               ),
             ),

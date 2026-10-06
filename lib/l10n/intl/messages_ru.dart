@@ -432,6 +432,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Глобальное изменение базовых настроек",
     ),
     "basicInfo": MessageLookupByLibrary.simpleMessage("Основная информация"),
+    "basicStrategy": MessageLookupByLibrary.simpleMessage("Базовые политики"),
     "batchAdd": MessageLookupByLibrary.simpleMessage("Массовое добавление"),
     "batchListInputTip": MessageLookupByLibrary.simpleMessage(
       "По одному значению на строку или через запятую",
@@ -1181,6 +1182,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "doYouWantToPass": MessageLookupByLibrary.simpleMessage(
       "Вы хотите пропустить",
     ),
+    "docked": MessageLookupByLibrary.simpleMessage("Закреплённая"),
     "documentCenter": MessageLookupByLibrary.simpleMessage(
       "Центр документации",
     ),
@@ -1281,6 +1283,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "externalFetch": MessageLookupByLibrary.simpleMessage("Внешнее получение"),
     "externalLink": MessageLookupByLibrary.simpleMessage("Внешняя ссылка"),
+    "fade": MessageLookupByLibrary.simpleMessage("Растворение"),
     "fakeipFilter": MessageLookupByLibrary.simpleMessage("Фильтр Fakeip"),
     "fakeipFilterMode": MessageLookupByLibrary.simpleMessage(
       "Режим фильтра Fake-IP",
@@ -1318,6 +1321,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "findProcessModeDesc": MessageLookupByLibrary.simpleMessage(
       "При включении возможны небольшие потери производительности",
     ),
+    "floating": MessageLookupByLibrary.simpleMessage("Плавающая"),
     "floatingNavigationBar": MessageLookupByLibrary.simpleMessage(
       "Плавающая навигация",
     ),
@@ -1325,6 +1329,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Использовать плавающую панель в компактном режиме",
     ),
     "followProfile": MessageLookupByLibrary.simpleMessage("Как в профиле"),
+    "followSystem": MessageLookupByLibrary.simpleMessage("Как в системе"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("Семейство шрифтов"),
     "fontSize": MessageLookupByLibrary.simpleMessage("Размер"),
     "forceRestartCoreTip": MessageLookupByLibrary.simpleMessage(
@@ -1705,6 +1710,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "nameserverPolicyDesc": MessageLookupByLibrary.simpleMessage(
       "Указать соответствующую политику сервера имен",
     ),
+    "navigationBarStyle": MessageLookupByLibrary.simpleMessage("Нижняя панель"),
     "network": MessageLookupByLibrary.simpleMessage("Сеть"),
     "networkAccessDeniedError": m40,
     "networkBadResponseError": m41,
@@ -2137,6 +2143,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Общий трафик",
     ),
     "purchasedAtLabel": MessageLookupByLibrary.simpleMessage("Время покупки"),
+    "pureBlack": MessageLookupByLibrary.simpleMessage("Чисто чёрный"),
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("Чисто черный режим"),
     "qrcode": MessageLookupByLibrary.simpleMessage("QR-код"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
@@ -2525,6 +2532,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "singleAdd": MessageLookupByLibrary.simpleMessage("По одному"),
     "singleValueTip": m83,
     "size": MessageLookupByLibrary.simpleMessage("Размер"),
+    "slide": MessageLookupByLibrary.simpleMessage("Сдвиг"),
     "socksPort": MessageLookupByLibrary.simpleMessage("Socks-порт"),
     "softwareCenter": MessageLookupByLibrary.simpleMessage("Центр ПО"),
     "soldOut": MessageLookupByLibrary.simpleMessage("Распродано"),
@@ -2780,6 +2788,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "testUrl": MessageLookupByLibrary.simpleMessage("Тест URL"),
     "textScale": MessageLookupByLibrary.simpleMessage("Масштабирование текста"),
+    "textScalePreview": MessageLookupByLibrary.simpleMessage(
+      "Так будет выглядеть текст в приложении",
+    ),
     "theme": MessageLookupByLibrary.simpleMessage("Тема"),
     "themeColor": MessageLookupByLibrary.simpleMessage("Цвет темы"),
     "themeDesc": MessageLookupByLibrary.simpleMessage(

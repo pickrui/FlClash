@@ -1325,5 +1325,14 @@
   "hotkeyConflictWith": "Already used by “{action}”. Saving moves it here.",
   "confirmExitWindow": "Are you sure you want to exit the current window?",
   "dataChangedSave": "Data changes detected. Save them?",
-  "discard": "Discard"
+  "discard": "Discard",
+  "docked": "Docked",
+  "fade": "Fade",
+  "floating": "Floating",
+  "followSystem": "Follow system",
+  "navigationBarStyle": "Bottom bar",
+  "pureBlack": "Pure black",
+  "slide": "Slide",
+  "textScalePreview": "Text in the app will look like this",
+  "basicStrategy": "Basic strategies"
 }

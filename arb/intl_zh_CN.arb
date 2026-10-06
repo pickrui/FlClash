@@ -1325,5 +1325,14 @@
   "hotkeyConflictWith": "已被“{action}”使用，保存后将移到这里",
   "confirmExitWindow": "确定要退出当前窗口吗？",
   "dataChangedSave": "检测到数据有更改，是否保存",
-  "discard": "放弃"
+  "discard": "放弃",
+  "docked": "固定",
+  "fade": "淡入",
+  "floating": "悬浮",
+  "followSystem": "跟随系统",
+  "navigationBarStyle": "底栏",
+  "pureBlack": "纯黑",
+  "slide": "滑动",
+  "textScalePreview": "应用内的文字将以这个大小显示",
+  "basicStrategy": "基础策略"
 }

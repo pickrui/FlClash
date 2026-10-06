@@ -38,7 +38,11 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.byType(ThemeLivePreview), findsOneWidget);
-      await tester.ensureVisible(find.text('Slide'));
+      await Scrollable.ensureVisible(
+        tester.element(find.text('Slide')),
+        alignment: 0.5,
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Slide'));
       await tester.pumpAndSettle();
       expect(c.read(appSettingProvider).tabAnimation, TabAnimation.slide);

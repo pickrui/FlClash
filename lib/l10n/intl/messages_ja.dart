@@ -345,6 +345,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "basicConfig": MessageLookupByLibrary.simpleMessage("基本設定"),
     "basicConfigDesc": MessageLookupByLibrary.simpleMessage("基本設定をグローバルに変更"),
     "basicInfo": MessageLookupByLibrary.simpleMessage("基本情報"),
+    "basicStrategy": MessageLookupByLibrary.simpleMessage("基本ポリシー"),
     "batchAdd": MessageLookupByLibrary.simpleMessage("一括追加"),
     "batchListInputTip": MessageLookupByLibrary.simpleMessage(
       "1行に1項目、またはカンマ区切りで入力してください",
@@ -964,6 +965,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "dnsQueryType": MessageLookupByLibrary.simpleMessage("クエリの種類"),
     "dnsQueryUpstream": MessageLookupByLibrary.simpleMessage("上流リゾルバー"),
     "doYouWantToPass": MessageLookupByLibrary.simpleMessage("通過させますか？"),
+    "docked": MessageLookupByLibrary.simpleMessage("固定"),
     "documentCenter": MessageLookupByLibrary.simpleMessage("ドキュメントセンター"),
     "domain": MessageLookupByLibrary.simpleMessage("ドメイン"),
     "download": MessageLookupByLibrary.simpleMessage("ダウンロード"),
@@ -1036,6 +1038,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "externalFetch": MessageLookupByLibrary.simpleMessage("外部取得"),
     "externalLink": MessageLookupByLibrary.simpleMessage("外部リンク"),
+    "fade": MessageLookupByLibrary.simpleMessage("フェード"),
     "fakeipFilter": MessageLookupByLibrary.simpleMessage("Fakeipフィルター"),
     "fakeipFilterMode": MessageLookupByLibrary.simpleMessage("Fake-IPフィルターモード"),
     "fakeipFilterModeDesc": MessageLookupByLibrary.simpleMessage(
@@ -1059,6 +1062,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "findProcessModeDesc": MessageLookupByLibrary.simpleMessage(
       "有効化するとパフォーマンスが若干低下します",
     ),
+    "floating": MessageLookupByLibrary.simpleMessage("フローティング"),
     "floatingNavigationBar": MessageLookupByLibrary.simpleMessage(
       "フローティングナビゲーション",
     ),
@@ -1066,6 +1070,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "コンパクトな画面でフローティングドックを使用",
     ),
     "followProfile": MessageLookupByLibrary.simpleMessage("プロファイルに従う"),
+    "followSystem": MessageLookupByLibrary.simpleMessage("システムに従う"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("フォントファミリー"),
     "fontSize": MessageLookupByLibrary.simpleMessage("サイズ"),
     "forceRestartCoreTip": MessageLookupByLibrary.simpleMessage(
@@ -1357,6 +1362,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "nameserverPolicyDesc": MessageLookupByLibrary.simpleMessage(
       "対応するネームサーバーポリシーを指定",
     ),
+    "navigationBarStyle": MessageLookupByLibrary.simpleMessage("ボトムバー"),
     "network": MessageLookupByLibrary.simpleMessage("ネットワーク"),
     "networkAccessDeniedError": m40,
     "networkBadResponseError": m41,
@@ -1701,6 +1707,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "purchaseTime": m73,
     "purchaseTotalTrafficLabel": MessageLookupByLibrary.simpleMessage("合計データ量"),
     "purchasedAtLabel": MessageLookupByLibrary.simpleMessage("購入日時"),
+    "pureBlack": MessageLookupByLibrary.simpleMessage("ピュアブラック"),
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("純黒モード"),
     "qrcode": MessageLookupByLibrary.simpleMessage("QRコード"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage("QRコードをスキャンしてプロファイルを取得"),
@@ -1999,6 +2006,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "singleAdd": MessageLookupByLibrary.simpleMessage("個別追加"),
     "singleValueTip": m83,
     "size": MessageLookupByLibrary.simpleMessage("サイズ"),
+    "slide": MessageLookupByLibrary.simpleMessage("スライド"),
     "socksPort": MessageLookupByLibrary.simpleMessage("Socksポート"),
     "softwareCenter": MessageLookupByLibrary.simpleMessage("ソフトウェアセンター"),
     "soldOut": MessageLookupByLibrary.simpleMessage("売り切れ"),
@@ -2202,6 +2210,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "testUrl": MessageLookupByLibrary.simpleMessage("URLテスト"),
     "textScale": MessageLookupByLibrary.simpleMessage("テキストスケーリング"),
+    "textScalePreview": MessageLookupByLibrary.simpleMessage(
+      "アプリ内の文字はこの大きさで表示されます",
+    ),
     "theme": MessageLookupByLibrary.simpleMessage("テーマ"),
     "themeColor": MessageLookupByLibrary.simpleMessage("テーマカラー"),
     "themeDesc": MessageLookupByLibrary.simpleMessage("ダークモードの設定、色の調整"),
