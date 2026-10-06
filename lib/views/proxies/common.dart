@@ -29,10 +29,6 @@ double getItemHeight(ProxyCardType proxyCardType) {
   };
 }
 
-Future<void> proxyDelayTest(Proxy proxy, [String? testUrl]) {
-  return appController.proxyDelayTest(proxy, testUrl);
-}
-
 /// Tests a group; when every node failed, offers the network self-check.
 Future<void> delayTest(List<Proxy> proxies, [String? testUrl]) async {
   if (!await appController.delayTest(proxies, testUrl)) return;

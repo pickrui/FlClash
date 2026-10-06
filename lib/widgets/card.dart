@@ -308,8 +308,17 @@ class CommonCard extends StatelessWidget {
               }
               final focusNode = FocusManager.instance.primaryFocus;
               final context = focusNode?.context;
-              if (focusNode == null ||
-                  context == null ||
+              if (focusNode == null || context == null) {
+                return KeyEventResult.ignored;
+              }
+              final action = focusNode.descendants
+                  .where((node) => node.skipTraversal && node.canRequestFocus)
+                  .firstOrNull;
+              if (action != null) {
+                action.requestFocus();
+                return KeyEventResult.handled;
+              }
+              if (focusNode.skipTraversal ||
                   context.findAncestorWidgetOfExactType<IconButton>() != null) {
                 return KeyEventResult.ignored;
               }
@@ -327,7 +336,7 @@ class CommonCard extends StatelessWidget {
   }
 }
 
-class _SkipTraversalFocusNode extends FocusNode {
+class SkipTraversalFocusNode extends FocusNode {
   @override
   bool get skipTraversal => true;
 }
@@ -342,7 +351,7 @@ class _SkipTraversalScope extends StatefulWidget {
 }
 
 class _SkipTraversalScopeState extends State<_SkipTraversalScope> {
-  final FocusNode _focusNode = _SkipTraversalFocusNode();
+  final FocusNode _focusNode = SkipTraversalFocusNode();
 
   @override
   void dispose() {

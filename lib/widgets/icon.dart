@@ -10,7 +10,7 @@ import 'package:fl_clash/database/database.dart';
 import 'package:fl_clash/common/encoded_icon_cache.dart';
 
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/common/icons.dart';
+import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/plugins/app.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -59,7 +59,7 @@ class CommonTargetIcon extends StatelessWidget {
   });
 
   Widget _defaultIcon() {
-    return Icon(IconsExt.target, size: size);
+    return GlyphIcon(AppGlyphs.target, size: size);
   }
 
   Widget _buildIcon(BuildContext context) {

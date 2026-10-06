@@ -15,6 +15,12 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/proxies/card.dart';
 import 'package:fl_clash/views/proxies/common.dart';
 import 'package:fl_clash/widgets/loading.dart';
+import 'package:fl_clash/widgets/card.dart';
+import 'package:fl_clash/icons/icons.dart';
+import 'package:flutter/services.dart';
+
+import '../helpers/glyph_finders.dart';
+
 import 'package:fl_clash/views/proxies/list.dart';
 import 'package:fl_clash/views/proxies/tab.dart';
 import 'package:fl_clash/views/proxies/setting.dart';
@@ -99,17 +105,17 @@ void main() {
         ),
       );
       await tester.pump(const Duration(milliseconds: 300));
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(CommonCircleLoading), findsOneWidget);
       expect(find.text('Failed'), findsNothing);
       final phases = container.read(pendingDelayTestsProvider.notifier);
       phases.queue([(name: 'Node', url: url)], generation: generation);
       await tester.pumpAndSettle();
-      expect(find.byIcon(Icons.hourglass_empty), findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.byGlyph(AppGlyphs.clock), findsOneWidget);
+      expect(find.byType(CommonCircleLoading), findsNothing);
       phases.start((name: 'Node', url: url), generation: generation);
       await tester.pump(const Duration(milliseconds: 300));
-      expect(find.byIcon(Icons.hourglass_empty), findsNothing);
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byGlyph(AppGlyphs.clock), findsNothing);
+      expect(find.byType(CommonCircleLoading), findsOneWidget);
 
       for (final value in <int?>[null, -1, 6000]) {
         delays.setDelay(
@@ -117,13 +123,13 @@ void main() {
           generation: generation,
         );
         await tester.pumpAndSettle();
-        expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(find.byType(CommonCircleLoading), findsNothing);
         expect(
           find.text('Failed'),
           value == -1 ? findsOneWidget : findsNothing,
         );
         expect(
-          find.byIcon(Icons.bolt),
+          find.byGlyph(AppGlyphs.bolt),
           value == null ? findsOneWidget : findsNothing,
         );
         expect(
@@ -131,6 +137,64 @@ void main() {
           value == 6000 ? findsOneWidget : findsNothing,
         );
       }
+    },
+  );
+
+  testWidgets(
+    'arrow right enters measured latency and enter retests without selecting',
+    (tester) async {
+      final action = _DelayAction();
+      final container = ProviderContainer(
+        overrides: [
+          proxiesActionProvider.overrideWith(() => action),
+          getSelectedProxyNameProvider('Group').overrideWith((_) => ''),
+          getDelayProvider(
+            proxyName: 'Node',
+            testUrl: 'https://example.com',
+          ).overrideWith((_) => 42),
+          getDelayTestPhaseProvider(
+            proxyName: 'Node',
+            testUrl: 'https://example.com',
+          ).overrideWith((_) => null),
+        ],
+      );
+      addTearDown(container.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const _TestApp(
+            child: Center(
+              child: SizedBox(
+                width: 240,
+                height: 100,
+                child: ProxyCard(
+                  groupName: 'Group',
+                  testUrl: 'https://example.com',
+                  proxy: Proxy(name: 'Node', type: 'Shadowsocks'),
+                  groupType: GroupType.Selector,
+                  type: ProxyCardType.min,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final cardFocus = Focus.of(
+        tester.element(find.text('Node', findRichText: true)),
+      );
+      cardFocus.requestFocus();
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+      expect(FocusManager.instance.primaryFocus, isA<SkipTraversalFocusNode>());
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pumpAndSettle();
+      expect(action.delays, ['Node']);
+      expect(action.selections, isEmpty);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
     },
   );
 
@@ -475,5 +539,19 @@ class _TestApp extends StatelessWidget {
       },
       home: Scaffold(body: child),
     );
+  }
+}
+
+class _DelayAction extends ProxiesAction {
+  final delays = <String>[];
+  final selections = <String>[];
+  @override
+  Future<void> proxyDelayTest(Proxy proxy, [String? testUrl]) async {
+    delays.add(proxy.name);
+  }
+
+  @override
+  void changeProxyDebounce(String groupName, String proxyName) {
+    selections.add(proxyName);
   }
 }
