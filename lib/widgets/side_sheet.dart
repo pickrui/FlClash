@@ -6,6 +6,7 @@
 import 'dart:ui';
 
 import 'package:fl_clash/widgets/drag_back.dart';
+import 'package:fl_clash/widgets/sheet_navigator.dart';
 
 import 'package:fl_clash/common/color.dart';
 import 'package:material_ui/material_ui.dart';
@@ -279,7 +280,7 @@ class _ModalSideSheetState<T> extends State<_ModalSideSheet<T>> {
     final String routeLabel = _getRouteLabel(localizations);
 
     return AnimatedBuilder(
-      animation: widget.route.animation!,
+      animation: widget.route._presence,
       child: widget.route.dragBackDetector(
         SideSheet(
           builder: widget.route.builder,
@@ -294,9 +295,9 @@ class _ModalSideSheetState<T> extends State<_ModalSideSheet<T>> {
         final curve = widget.route.isDragBackActive
             ? Curves.linear
             : _modalBottomSheetCurve;
-        final double animationValue = curve.transform(
-          widget.route.animation!.value,
-        );
+        final double animationValue =
+            curve.transform(widget.route.animation!.value) *
+            (1 - (widget.route.aside?.value ?? 0));
         return Semantics(
           scopesRoute: true,
           namesRoute: true,
@@ -335,6 +336,7 @@ class ModalSideSheetRoute<T> extends PopupRoute<T> with DragBackRouteMixin<T> {
     super.settings,
     this.transitionAnimationController,
     this.anchorPoint,
+    this.aside,
     super.filter,
   });
 
@@ -359,6 +361,10 @@ class ModalSideSheetRoute<T> extends PopupRoute<T> with DragBackRouteMixin<T> {
   final AnimationController? transitionAnimationController;
 
   final Offset? anchorPoint;
+  final Animation<double>? aside;
+  late final Animation<double> _presence = aside == null
+      ? animation!
+      : _SidePresence(animation!, aside!);
 
   final String? barrierOnTapHint;
 
@@ -479,15 +485,15 @@ Future<T?> showModalSideSheet<T>({
   RouteSettings? routeSettings,
   AnimationController? transitionAnimationController,
   Offset? anchorPoint,
+  Animation<double>? aside,
   ImageFilter? filter,
 }) {
   assert(debugCheckHasMediaQuery(context));
   assert(debugCheckHasMaterialLocalizations(context));
 
-  final NavigatorState navigator = Navigator.of(
-    context,
-    rootNavigator: useRootNavigator,
-  );
+  final NavigatorState navigator = useRootNavigator
+      ? Navigator.of(context, rootNavigator: true)
+      : sheetNavigatorOf(context);
   final MaterialLocalizations localizations = MaterialLocalizations.of(context);
   return navigator.push(
     ModalSideSheetRoute<T>(
@@ -510,6 +516,15 @@ Future<T?> showModalSideSheet<T>({
       settings: routeSettings,
       transitionAnimationController: transitionAnimationController,
       anchorPoint: anchorPoint,
+      aside: aside,
     ),
   );
+}
+
+class _SidePresence extends CompoundAnimation<double> {
+  _SidePresence(Animation<double> entrance, Animation<double> aside)
+    : super(first: entrance, next: aside);
+
+  @override
+  double get value => first.value * (1 - next.value);
 }

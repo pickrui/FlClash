@@ -188,13 +188,13 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
   }
 
   void _showAddWidgetsModal() {
-    showSheet(
-      builder: (_, type) {
+    showSnapSheet(
+      context,
+      builder: (_, controller) {
         return ValueListenableBuilder(
           valueListenable: _addedWidgetsNotifier,
           builder: (_, value, _) {
             return AdaptiveSheetScaffold(
-              type: type,
               body: _AddDashboardWidgetModal(
                 items: value,
                 onAdd: (gridItem) {
@@ -206,7 +206,6 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
           },
         );
       },
-      context: context,
     );
   }
 
