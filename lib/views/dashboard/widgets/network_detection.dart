@@ -53,7 +53,10 @@ class NetworkDetection extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Container(
-              height: globalState.measure.titleMediumHeight + 16,
+              height:
+                  globalState.measure.titleMediumHeight *
+                      DashboardWidgetMetrics.textScaleOf(context) +
+                  16,
               padding: DashboardWidgetMetrics.paddingOf(context)
                   .copyWith(bottom: 0),
               child: Row(
@@ -117,7 +120,10 @@ class NetworkDetection extends ConsumerWidget {
               padding: DashboardWidgetMetrics.paddingOf(context)
                   .copyWith(top: 0),
               child: SizedBox(
-                height: globalState.measure.bodyMediumHeight + 2,
+                height:
+                    globalState.measure.bodyMediumHeight *
+                        DashboardWidgetMetrics.textScaleOf(context) +
+                    2,
                 child: FadeThroughBox(
                   child: ipInfo != null
                       ? TooltipText(

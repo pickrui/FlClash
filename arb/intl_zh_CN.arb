@@ -1318,5 +1318,9 @@
   "tapToAuthorize": "点击授权",
   "addSsid": "添加SSID",
   "editSsid": "编辑SSID",
-  "ssidsEmpty": "SSIDs为空"
+  "ssidsEmpty": "SSIDs为空",
+  "hotkeyDesc": "全局快捷键在窗口隐藏时依然生效，点击操作即可录制组合键",
+  "hotkeyNotSet": "未设置",
+  "hotkeyNeedsModifier": "至少包含 {modifiers} 中的一个",
+  "hotkeyConflictWith": "已被“{action}”使用，保存后将移到这里"
 }

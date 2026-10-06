@@ -38,7 +38,10 @@ class IntranetIP extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               SizedBox(
-                height: globalState.measure.bodyMediumHeight + 2,
+                height:
+                    globalState.measure.bodyMediumHeight *
+                        DashboardWidgetMetrics.textScaleOf(context) +
+                    2,
                 child: Consumer(
                   builder: (_, ref, _) {
                     final localIp = ref.watch(localIpProvider);

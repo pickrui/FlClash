@@ -11203,6 +11203,41 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Global hotkeys work even while the window is hidden. Tap an action to record its key combination.`
+  String get hotkeyDesc {
+    return Intl.message(
+      'Global hotkeys work even while the window is hidden. Tap an action to record its key combination.',
+      name: 'hotkeyDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not set`
+  String get hotkeyNotSet {
+    return Intl.message('Not set', name: 'hotkeyNotSet', desc: '', args: []);
+  }
+
+  /// `Include at least one of {modifiers}`
+  String hotkeyNeedsModifier(Object modifiers) {
+    return Intl.message(
+      'Include at least one of $modifiers',
+      name: 'hotkeyNeedsModifier',
+      desc: '',
+      args: [modifiers],
+    );
+  }
+
+  /// `Already used by “{action}”. Saving moves it here.`
+  String hotkeyConflictWith(Object action) {
+    return Intl.message(
+      'Already used by “$action”. Saving moves it here.',
+      name: 'hotkeyConflictWith',
+      desc: '',
+      args: [action],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

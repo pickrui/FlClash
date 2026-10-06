@@ -158,7 +158,10 @@ class _MemoryInfoState extends ConsumerState<MemoryInfo>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(
-                  height: globalState.measure.bodyMediumHeight + 2,
+                  height:
+                      globalState.measure.bodyMediumHeight *
+                          DashboardWidgetMetrics.textScaleOf(context) +
+                      2,
                   child: ValueListenableBuilder(
                     valueListenable: _memoryStateNotifier,
                     builder: (_, memory, _) {

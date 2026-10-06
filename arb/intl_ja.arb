@@ -1318,5 +1318,9 @@
   "tapToAuthorize": "タップして許可",
   "addSsid": "SSIDを追加",
   "editSsid": "SSIDを編集",
-  "ssidsEmpty": "SSIDが空です"
+  "ssidsEmpty": "SSIDが空です",
+  "hotkeyDesc": "グローバルホットキーはウィンドウが非表示でも有効です。アクションをタップしてキーの組み合わせを記録します。",
+  "hotkeyNotSet": "未設定",
+  "hotkeyNeedsModifier": "{modifiers} のいずれかを含めてください",
+  "hotkeyConflictWith": "「{action}」で使用中です。保存するとこちらに移動します。"
 }

@@ -1318,5 +1318,9 @@
   "tapToAuthorize": "Tap to authorize",
   "addSsid": "Add SSID",
   "editSsid": "Edit SSID",
-  "ssidsEmpty": "SSIDs are empty"
+  "ssidsEmpty": "SSIDs are empty",
+  "hotkeyDesc": "Global hotkeys work even while the window is hidden. Tap an action to record its key combination.",
+  "hotkeyNotSet": "Not set",
+  "hotkeyNeedsModifier": "Include at least one of {modifiers}",
+  "hotkeyConflictWith": "Already used by “{action}”. Saving moves it here."
 }
