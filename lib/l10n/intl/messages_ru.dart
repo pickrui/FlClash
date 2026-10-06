@@ -296,6 +296,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Добавить группу прокси",
     ),
     "addRule": MessageLookupByLibrary.simpleMessage("Добавить правило"),
+    "addSsid": MessageLookupByLibrary.simpleMessage("Добавить SSID"),
     "addedRules": MessageLookupByLibrary.simpleMessage("Добавленные правила"),
     "address": MessageLookupByLibrary.simpleMessage("Адрес"),
     "addressCopied": MessageLookupByLibrary.simpleMessage("Адрес скопирован"),
@@ -368,6 +369,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "authenticationUsernameInvalid": MessageLookupByLibrary.simpleMessage(
       "От 1 до 255 байт UTF-8, без двоеточий и управляющих символов",
     ),
+    "authorized": MessageLookupByLibrary.simpleMessage("Разрешено"),
     "auto": MessageLookupByLibrary.simpleMessage("Авто"),
     "autoCloseConnections": MessageLookupByLibrary.simpleMessage(
       "Автоматическое закрытие соединений",
@@ -433,6 +435,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "По одной записи на строку: ключ, пробел, значение",
     ),
     "batchPreviewTip": m1,
+    "batteryOptimizationDesc": MessageLookupByLibrary.simpleMessage(
+      "Чтобы приложение работало в фоне, отключите для него оптимизацию батареи. Нажмите, чтобы перейти к настройкам.",
+    ),
+    "batteryOptimizationStatusTip": MessageLookupByLibrary.simpleMessage(
+      "Из-за системных ограничений во время работы невозможно корректно получить статус оптимизации батареи",
+    ),
     "behavior": MessageLookupByLibrary.simpleMessage("Поведение"),
     "billingPeriodLabel": MessageLookupByLibrary.simpleMessage("Период оплаты"),
     "bind": MessageLookupByLibrary.simpleMessage("Привязать"),
@@ -1184,6 +1192,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Редактировать группу прокси",
     ),
     "editRule": MessageLookupByLibrary.simpleMessage("Редактировать правило"),
+    "editSsid": MessageLookupByLibrary.simpleMessage("Изменить SSID"),
     "editorUnavailable": MessageLookupByLibrary.simpleMessage(
       "Редактор недоступен",
     ),
@@ -1418,6 +1427,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "iconHistory": MessageLookupByLibrary.simpleMessage("Недавние значки"),
     "iconStyle": MessageLookupByLibrary.simpleMessage("Стиль иконки"),
     "iconUrl": MessageLookupByLibrary.simpleMessage("URL иконки"),
+    "ignoreBatteryOptimization": MessageLookupByLibrary.simpleMessage(
+      "Игнорировать оптимизацию батареи",
+    ),
     "import": MessageLookupByLibrary.simpleMessage("Импорт"),
     "importFile": MessageLookupByLibrary.simpleMessage("Импорт из файла"),
     "importFromURL": MessageLookupByLibrary.simpleMessage("Импорт из URL"),
@@ -2581,6 +2593,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "ssidPermissionGuide": MessageLookupByLibrary.simpleMessage(
       "Разрешите доступ к геолокации для чтения имён Wi-Fi. На Android разрешите точное местоположение всегда и включите геолокацию.",
     ),
+    "ssidsEmpty": MessageLookupByLibrary.simpleMessage("Список SSID пуст"),
     "stackMode": MessageLookupByLibrary.simpleMessage("Режим стека"),
     "standard": MessageLookupByLibrary.simpleMessage("Стандартный"),
     "standardModeDesc": MessageLookupByLibrary.simpleMessage(
@@ -2807,6 +2820,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "tailscaleUnavailable": MessageLookupByLibrary.simpleMessage(
       "Подключение недоступно",
+    ),
+    "tapToAuthorize": MessageLookupByLibrary.simpleMessage(
+      "Нажмите, чтобы разрешить",
     ),
     "tcpConcurrent": MessageLookupByLibrary.simpleMessage("TCP параллелизм"),
     "tcpConcurrentDesc": MessageLookupByLibrary.simpleMessage(

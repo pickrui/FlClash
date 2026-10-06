@@ -1357,5 +1357,13 @@
   "enabled": "已开启",
   "disabled": "已关闭",
   "overwriteIssuesSummary": "{count} 项存在问题，应用覆写可能失败",
-  "selectedCountTitle": "已选择 {count} 项"
+  "selectedCountTitle": "已选择 {count} 项",
+  "ignoreBatteryOptimization": "忽略电池优化",
+  "batteryOptimizationDesc": "为保证后台运行，请关闭本应用的电池优化。点击前往设置",
+  "batteryOptimizationStatusTip": "由于系统限制，运行状态下无法正确获取电池优化状态",
+  "authorized": "已授权",
+  "tapToAuthorize": "点击授权",
+  "addSsid": "添加SSID",
+  "editSsid": "编辑SSID",
+  "ssidsEmpty": "SSIDs为空"
 }

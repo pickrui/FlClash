@@ -244,6 +244,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "addProxyChainNode": MessageLookupByLibrary.simpleMessage("新增"),
     "addProxyGroup": MessageLookupByLibrary.simpleMessage("添加策略组"),
     "addRule": MessageLookupByLibrary.simpleMessage("添加规则"),
+    "addSsid": MessageLookupByLibrary.simpleMessage("添加SSID"),
     "addedRules": MessageLookupByLibrary.simpleMessage("附加规则"),
     "address": MessageLookupByLibrary.simpleMessage("地址"),
     "addressCopied": MessageLookupByLibrary.simpleMessage("地址已复制"),
@@ -288,6 +289,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "authenticationUsernameInvalid": MessageLookupByLibrary.simpleMessage(
       "请输入 1–255 字节的用户名，不支持冒号或控制字符",
     ),
+    "authorized": MessageLookupByLibrary.simpleMessage("已授权"),
     "auto": MessageLookupByLibrary.simpleMessage("自动"),
     "autoCloseConnections": MessageLookupByLibrary.simpleMessage("自动关闭连接"),
     "autoCloseConnectionsDesc": MessageLookupByLibrary.simpleMessage(
@@ -333,6 +335,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "batchListInputTip": MessageLookupByLibrary.simpleMessage("每行一项，也可用逗号分隔"),
     "batchMapInputTip": MessageLookupByLibrary.simpleMessage("每行一条，键和值之间用空格分隔"),
     "batchPreviewTip": m1,
+    "batteryOptimizationDesc": MessageLookupByLibrary.simpleMessage(
+      "为保证后台运行，请关闭本应用的电池优化。点击前往设置",
+    ),
+    "batteryOptimizationStatusTip": MessageLookupByLibrary.simpleMessage(
+      "由于系统限制，运行状态下无法正确获取电池优化状态",
+    ),
     "behavior": MessageLookupByLibrary.simpleMessage("行为"),
     "billingPeriodLabel": MessageLookupByLibrary.simpleMessage("计费周期"),
     "bind": MessageLookupByLibrary.simpleMessage("绑定"),
@@ -848,6 +856,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "editProfile": MessageLookupByLibrary.simpleMessage("编辑配置"),
     "editProxyGroup": MessageLookupByLibrary.simpleMessage("编辑策略组"),
     "editRule": MessageLookupByLibrary.simpleMessage("编辑规则"),
+    "editSsid": MessageLookupByLibrary.simpleMessage("编辑SSID"),
     "editorUnavailable": MessageLookupByLibrary.simpleMessage("编辑器不可用"),
     "emailCodeHint": MessageLookupByLibrary.simpleMessage("请输入 6 位验证码"),
     "emailCodeLabel": MessageLookupByLibrary.simpleMessage("邮箱验证码"),
@@ -1002,6 +1011,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "iconHistory": MessageLookupByLibrary.simpleMessage("最近使用的图标"),
     "iconStyle": MessageLookupByLibrary.simpleMessage("图标样式"),
     "iconUrl": MessageLookupByLibrary.simpleMessage("图标链接"),
+    "ignoreBatteryOptimization": MessageLookupByLibrary.simpleMessage("忽略电池优化"),
     "import": MessageLookupByLibrary.simpleMessage("导入"),
     "importFile": MessageLookupByLibrary.simpleMessage("通过文件导入"),
     "importFromURL": MessageLookupByLibrary.simpleMessage("从URL导入"),
@@ -1798,6 +1808,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "ssidPermissionGuide": MessageLookupByLibrary.simpleMessage(
       "读取 Wi-Fi 名称需要定位权限。Android 请允许始终使用精确位置，并开启系统定位服务",
     ),
+    "ssidsEmpty": MessageLookupByLibrary.simpleMessage("SSIDs为空"),
     "stackMode": MessageLookupByLibrary.simpleMessage("栈模式"),
     "standard": MessageLookupByLibrary.simpleMessage("标准"),
     "standardModeDesc": MessageLookupByLibrary.simpleMessage(
@@ -1963,6 +1974,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleStopped": MessageLookupByLibrary.simpleMessage("已停止"),
     "tailscaleThisDevice": MessageLookupByLibrary.simpleMessage("此设备"),
     "tailscaleUnavailable": MessageLookupByLibrary.simpleMessage("连接不可用"),
+    "tapToAuthorize": MessageLookupByLibrary.simpleMessage("点击授权"),
     "tcpConcurrent": MessageLookupByLibrary.simpleMessage("TCP并发"),
     "tcpConcurrentDesc": MessageLookupByLibrary.simpleMessage("开启后允许TCP并发"),
     "tcpFastOpen": MessageLookupByLibrary.simpleMessage("TCP Fast Open"),

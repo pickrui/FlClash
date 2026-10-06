@@ -1357,5 +1357,13 @@
   "enabled": "Включено",
   "disabled": "Выключено",
   "overwriteIssuesSummary": "Проблем: {count}, применение переопределения может завершиться ошибкой",
-  "selectedCountTitle": "Выбрано: {count}"
+  "selectedCountTitle": "Выбрано: {count}",
+  "ignoreBatteryOptimization": "Игнорировать оптимизацию батареи",
+  "batteryOptimizationDesc": "Чтобы приложение работало в фоне, отключите для него оптимизацию батареи. Нажмите, чтобы перейти к настройкам.",
+  "batteryOptimizationStatusTip": "Из-за системных ограничений во время работы невозможно корректно получить статус оптимизации батареи",
+  "authorized": "Разрешено",
+  "tapToAuthorize": "Нажмите, чтобы разрешить",
+  "addSsid": "Добавить SSID",
+  "editSsid": "Изменить SSID",
+  "ssidsEmpty": "Список SSID пуст"
 }

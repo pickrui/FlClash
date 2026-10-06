@@ -1357,5 +1357,13 @@
   "enabled": "有効",
   "disabled": "無効",
   "overwriteIssuesSummary": "{count} 件に問題があり、上書きの適用に失敗する可能性があります",
-  "selectedCountTitle": "{count} 件選択中"
+  "selectedCountTitle": "{count} 件選択中",
+  "ignoreBatteryOptimization": "電池の最適化を無視",
+  "batteryOptimizationDesc": "バックグラウンドでの動作を維持するため、このアプリの電池の最適化を無効にしてください。タップすると設定を開きます。",
+  "batteryOptimizationStatusTip": "システムの制限により、実行中は電池の最適化の状態を正しく取得できません",
+  "authorized": "許可済み",
+  "tapToAuthorize": "タップして許可",
+  "addSsid": "SSIDを追加",
+  "editSsid": "SSIDを編集",
+  "ssidsEmpty": "SSIDが空です"
 }

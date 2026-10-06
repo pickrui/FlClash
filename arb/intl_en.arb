@@ -1357,5 +1357,13 @@
   "enabled": "Enabled",
   "disabled": "Disabled",
   "overwriteIssuesSummary": "{count} items have problems, and applying this override may fail",
-  "selectedCountTitle": "{count} selected"
+  "selectedCountTitle": "{count} selected",
+  "ignoreBatteryOptimization": "Ignore battery optimization",
+  "batteryOptimizationDesc": "To keep the app running in the background, disable battery optimization for it. Tap to open settings.",
+  "batteryOptimizationStatusTip": "Due to system limitations, the battery optimization status cannot be read correctly while running",
+  "authorized": "Authorized",
+  "tapToAuthorize": "Tap to authorize",
+  "addSsid": "Add SSID",
+  "editSsid": "Edit SSID",
+  "ssidsEmpty": "SSIDs are empty"
 }

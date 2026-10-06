@@ -6,6 +6,7 @@
 package com.oixcloud.clash.plugins
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.ActivityManager
 import android.content.BroadcastReceiver
@@ -18,6 +19,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.net.VpnService
 import android.os.Build
+import android.os.PowerManager
 import android.provider.Settings
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -134,6 +136,13 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                 result.success(opened)
             }
 
+            "isBatteryOptimizationDisabled" -> platformCalls.submit(result) {
+                getSystemService(GlobalState.application, PowerManager::class.java)
+                    ?.isIgnoringBatteryOptimizations(GlobalState.application.packageName) ?: false
+            }
+
+            "openBatteryOptimizationSettings" -> result.success(openBatteryOptimizationSettings())
+
             "getChinaPackageNames" -> platformCalls.submit(result) { getChinaPackageNames() }
 
             "getPackageIcon" -> {
@@ -154,6 +163,19 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                 result.notImplemented()
             }
         }
+    }
+
+    @SuppressLint("BatteryLife")
+    private fun openBatteryOptimizationSettings(): Boolean {
+        val activity = activityRef?.get() ?: return false
+        // A continuous VPN connection is the user-requested core function.
+        return runCatching {
+            activity.startActivity(Intent(
+                Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                Uri.fromParts("package", activity.packageName, null),
+            ))
+            true
+        }.getOrDefault(false)
     }
 
     private fun lastExitInfo(): Map<String, Any>? {

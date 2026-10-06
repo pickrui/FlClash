@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/models/models.dart' show AppBarEditState;
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/plugins/app.dart';
 import 'package:fl_clash/state.dart';
@@ -13,6 +14,8 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+
+import 'battery_optimization.dart';
 
 class VPNItem extends ConsumerWidget {
   const VPNItem({super.key});
@@ -664,30 +667,186 @@ class NetworkListView extends StatelessWidget {
   );
 }
 
-class OnDemandView extends StatelessWidget {
-  const OnDemandView({super.key});
+class OnDemandView extends ConsumerStatefulWidget {
+  const OnDemandView({super.key, this.isAndroid, this.isMacOS});
+
+  final bool? isAndroid;
+  final bool? isMacOS;
+
+  @override
+  ConsumerState<OnDemandView> createState() => _OnDemandViewState();
+}
+
+class _OnDemandViewState extends ConsumerState<OnDemandView> {
+  final _selected = <String>{};
+  bool get _isAndroid => widget.isAndroid ?? system.isAndroid;
+  bool get _isMacOS => widget.isMacOS ?? system.isMacOS;
+  List<String> get _ssids => ref.read(networkSettingProvider).excludeSSIDs;
+
+  Future<void> _edit([String? ssid]) async {
+    final l = context.appLocalizations;
+    final value = await globalState.showCommonDialog<String>(
+      child: InputDialog(
+        title: ssid == null ? l.addSsid : l.editSsid,
+        value: ssid ?? '',
+        maxLength: 32,
+        keyboardType: TextInputType.text,
+        validator: (value) {
+          if (value == null || value.isEmpty) return l.emptyTip('SSID').trim();
+          if (_ssids.contains(value) && ssid != value) {
+            return l.existsTip('SSID').trim();
+          }
+          return null;
+        },
+      ),
+    );
+    if (!mounted || value == null || value == ssid || value.isEmpty) return;
+    ref.read(networkSettingProvider.notifier).update((state) {
+      final items = state.excludeSSIDs.toList();
+      if (items.contains(value)) return state;
+      if (ssid == null) {
+        items.add(value);
+      } else {
+        final index = items.indexOf(ssid);
+        if (index < 0) return state;
+        items[index] = value;
+      }
+      return state.copyWith(excludeSSIDs: items);
+    });
+  }
+
+  void _reorder(int oldIndex, int newIndex) {
+    ref.read(networkSettingProvider.notifier).update((state) {
+      final items = state.excludeSSIDs.toList();
+      items.insert(newIndex, items.removeAt(oldIndex));
+      return state.copyWith(excludeSSIDs: items);
+    });
+  }
+
+  void _deleteSelected() {
+    ref
+        .read(networkSettingProvider.notifier)
+        .update(
+          (state) => state.copyWith(
+            excludeSSIDs: state.excludeSSIDs
+                .where((item) => !_selected.contains(item))
+                .toList(),
+          ),
+        );
+    setState(_selected.clear);
+  }
 
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
-    return BaseScaffold(
+    final ssids = ref.watch(
+      networkSettingProvider.select((state) => state.excludeSSIDs),
+    );
+    final selected = _selected.intersection(ssids.toSet());
+    final editing = selected.isNotEmpty;
+    return CommonScaffold(
       title: l.onDemand,
-      body: ListView(
-        padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 16),
-        children: [
-          if (system.isAndroid || system.isMacOS)
-            generateSectionV3(
-              title: l.prerequisites,
-              items: const [SsidPermissionItem()],
+      editState: editing
+          ? AppBarEditState(
+              editCount: selected.length,
+              onExit: () => setState(_selected.clear),
+            )
+          : null,
+      body: CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 0),
+            sliver: SliverToBoxAdapter(
+              child: Column(
+                children: [
+                  if (_isAndroid || _isMacOS)
+                    generateSectionV3(
+                      title: l.prerequisites,
+                      items: [
+                        if (_isAndroid) const BatteryOptimizationItem(),
+                        const SsidPermissionItem(),
+                      ],
+                    ),
+                  if (_isAndroid)
+                    generateSectionV3(
+                      title: l.options,
+                      items: const [SuspendOnIdleItem(), ExcludeNetworksItem()],
+                    ),
+                  ListHeader(
+                    title: l.excludeSsids,
+                    subTitle: l.excludeSsidsDesc,
+                    actions: [
+                      if (editing)
+                        IconButton.filledTonal(
+                          tooltip: l.delete,
+                          onPressed: _deleteSelected,
+                          icon: const Icon(Icons.delete),
+                        ),
+                      FilledButton.tonal(
+                        onPressed: editing
+                            ? () => setState(() {
+                                if (selected.length == ssids.length) {
+                                  _selected.clear();
+                                } else {
+                                  _selected.addAll(ssids);
+                                }
+                              })
+                            : _edit,
+                        child: Text(editing ? l.selectAll : l.add),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          generateSectionV3(
-            title: l.options,
-            items: [
-              if (system.isAndroid) const SuspendOnIdleItem(),
-              const ExcludeSsidsItem(),
-              if (system.isAndroid) const ExcludeNetworksItem(),
-            ],
           ),
+          if (ssids.isEmpty)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 48),
+                child: NullStatus(
+                  label: l.ssidsEmpty,
+                  illustration: NullStatusIllustration.wifi,
+                ),
+              ),
+            )
+          else
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(
+                16,
+                12,
+                16,
+                MediaQuery.viewPaddingOf(context).bottom + 16,
+              ),
+              sliver: SliverReorderableList(
+                itemCount: ssids.length,
+                onReorderItem: _reorder,
+                proxyDecorator: commonProxyDecorator,
+                itemBuilder: (_, index) {
+                  final ssid = ssids[index];
+                  return ReorderableDelayedDragStartListener(
+                    key: ValueKey(ssid),
+                    index: index,
+                    child: ItemPositionProvider(
+                      position: ItemPosition.get(index, ssids.length),
+                      child: SelectedDecorationListItem(
+                        title: Text(
+                          ssid,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        isEditing: editing,
+                        isSelected: selected.contains(ssid),
+                        onSelected: () => setState(() {
+                          if (!_selected.remove(ssid)) _selected.add(ssid);
+                        }),
+                        onPressed: () => _edit(ssid),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
         ],
       ),
     );

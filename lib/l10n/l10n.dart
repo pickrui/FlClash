@@ -11523,6 +11523,71 @@ class AppLocalizations {
       args: [count],
     );
   }
+
+  /// `Ignore battery optimization`
+  String get ignoreBatteryOptimization {
+    return Intl.message(
+      'Ignore battery optimization',
+      name: 'ignoreBatteryOptimization',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `To keep the app running in the background, disable battery optimization for it. Tap to open settings.`
+  String get batteryOptimizationDesc {
+    return Intl.message(
+      'To keep the app running in the background, disable battery optimization for it. Tap to open settings.',
+      name: 'batteryOptimizationDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Due to system limitations, the battery optimization status cannot be read correctly while running`
+  String get batteryOptimizationStatusTip {
+    return Intl.message(
+      'Due to system limitations, the battery optimization status cannot be read correctly while running',
+      name: 'batteryOptimizationStatusTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Authorized`
+  String get authorized {
+    return Intl.message('Authorized', name: 'authorized', desc: '', args: []);
+  }
+
+  /// `Tap to authorize`
+  String get tapToAuthorize {
+    return Intl.message(
+      'Tap to authorize',
+      name: 'tapToAuthorize',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add SSID`
+  String get addSsid {
+    return Intl.message('Add SSID', name: 'addSsid', desc: '', args: []);
+  }
+
+  /// `Edit SSID`
+  String get editSsid {
+    return Intl.message('Edit SSID', name: 'editSsid', desc: '', args: []);
+  }
+
+  /// `SSIDs are empty`
+  String get ssidsEmpty {
+    return Intl.message(
+      'SSIDs are empty',
+      name: 'ssidsEmpty',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

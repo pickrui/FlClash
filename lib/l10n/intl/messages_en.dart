@@ -291,6 +291,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "addProxyChainNode": MessageLookupByLibrary.simpleMessage("Add"),
     "addProxyGroup": MessageLookupByLibrary.simpleMessage("Add proxy group"),
     "addRule": MessageLookupByLibrary.simpleMessage("Add rule"),
+    "addSsid": MessageLookupByLibrary.simpleMessage("Add SSID"),
     "addedRules": MessageLookupByLibrary.simpleMessage("Added rules"),
     "address": MessageLookupByLibrary.simpleMessage("Address"),
     "addressCopied": MessageLookupByLibrary.simpleMessage("Address copied"),
@@ -365,6 +366,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "authenticationUsernameInvalid": MessageLookupByLibrary.simpleMessage(
       "Use 1–255 UTF-8 bytes, without colons or control characters",
     ),
+    "authorized": MessageLookupByLibrary.simpleMessage("Authorized"),
     "auto": MessageLookupByLibrary.simpleMessage("Auto"),
     "autoCloseConnections": MessageLookupByLibrary.simpleMessage(
       "Auto close connections",
@@ -428,6 +430,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "One entry per line: key, a space, then value",
     ),
     "batchPreviewTip": m1,
+    "batteryOptimizationDesc": MessageLookupByLibrary.simpleMessage(
+      "To keep the app running in the background, disable battery optimization for it. Tap to open settings.",
+    ),
+    "batteryOptimizationStatusTip": MessageLookupByLibrary.simpleMessage(
+      "Due to system limitations, the battery optimization status cannot be read correctly while running",
+    ),
     "behavior": MessageLookupByLibrary.simpleMessage("Behavior"),
     "billingPeriodLabel": MessageLookupByLibrary.simpleMessage(
       "Billing period",
@@ -1149,6 +1157,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "editProfile": MessageLookupByLibrary.simpleMessage("Edit Profile"),
     "editProxyGroup": MessageLookupByLibrary.simpleMessage("Edit proxy group"),
     "editRule": MessageLookupByLibrary.simpleMessage("Edit rule"),
+    "editSsid": MessageLookupByLibrary.simpleMessage("Edit SSID"),
     "editorUnavailable": MessageLookupByLibrary.simpleMessage(
       "Editor unavailable",
     ),
@@ -1371,6 +1380,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "iconHistory": MessageLookupByLibrary.simpleMessage("Recent icons"),
     "iconStyle": MessageLookupByLibrary.simpleMessage("Icon style"),
     "iconUrl": MessageLookupByLibrary.simpleMessage("Icon URL"),
+    "ignoreBatteryOptimization": MessageLookupByLibrary.simpleMessage(
+      "Ignore battery optimization",
+    ),
     "import": MessageLookupByLibrary.simpleMessage("Import"),
     "importFile": MessageLookupByLibrary.simpleMessage("Import from file"),
     "importFromURL": MessageLookupByLibrary.simpleMessage("Import from URL"),
@@ -2445,6 +2457,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "ssidPermissionGuide": MessageLookupByLibrary.simpleMessage(
       "Allow location access to read Wi-Fi names. On Android, allow precise location all the time and enable system location services.",
     ),
+    "ssidsEmpty": MessageLookupByLibrary.simpleMessage("SSIDs are empty"),
     "stackMode": MessageLookupByLibrary.simpleMessage("Stack mode"),
     "standard": MessageLookupByLibrary.simpleMessage("Standard"),
     "standardModeDesc": MessageLookupByLibrary.simpleMessage(
@@ -2662,6 +2675,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleUnavailable": MessageLookupByLibrary.simpleMessage(
       "Connection unavailable",
     ),
+    "tapToAuthorize": MessageLookupByLibrary.simpleMessage("Tap to authorize"),
     "tcpConcurrent": MessageLookupByLibrary.simpleMessage("TCP concurrent"),
     "tcpConcurrentDesc": MessageLookupByLibrary.simpleMessage(
       "Enabling it will allow TCP concurrency",

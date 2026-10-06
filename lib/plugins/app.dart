@@ -76,6 +76,20 @@ class App {
     return await methodChannel.invokeMethod<bool>('openAppSettings') ?? false;
   }
 
+  Future<bool> isBatteryOptimizationDisabled() async {
+    return await methodChannel.invokeMethod<bool>(
+          'isBatteryOptimizationDisabled',
+        ) ??
+        false;
+  }
+
+  Future<bool> openBatteryOptimizationSettings() async {
+    return await methodChannel.invokeMethod<bool>(
+          'openBatteryOptimizationSettings',
+        ) ??
+        false;
+  }
+
   Future<List<String>> getChinaPackageNames() async {
     final packageNamesString = await methodChannel.invokeMethod<String>(
       'getChinaPackageNames',

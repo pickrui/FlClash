@@ -252,6 +252,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "addProxyChainNode": MessageLookupByLibrary.simpleMessage("追加"),
     "addProxyGroup": MessageLookupByLibrary.simpleMessage("プロキシグループを追加"),
     "addRule": MessageLookupByLibrary.simpleMessage("ルールを追加"),
+    "addSsid": MessageLookupByLibrary.simpleMessage("SSIDを追加"),
     "addedRules": MessageLookupByLibrary.simpleMessage("追加ルール"),
     "address": MessageLookupByLibrary.simpleMessage("アドレス"),
     "addressCopied": MessageLookupByLibrary.simpleMessage("アドレスをコピーしました"),
@@ -299,6 +300,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "authenticationUsernameInvalid": MessageLookupByLibrary.simpleMessage(
       "コロンや制御文字を含まない 1～255 UTF-8 バイトを入力してください",
     ),
+    "authorized": MessageLookupByLibrary.simpleMessage("許可済み"),
     "auto": MessageLookupByLibrary.simpleMessage("自動"),
     "autoCloseConnections": MessageLookupByLibrary.simpleMessage("接続を自動閉じる"),
     "autoCloseConnectionsDesc": MessageLookupByLibrary.simpleMessage(
@@ -348,6 +350,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "1行に1件、キーと値はスペースで区切ってください",
     ),
     "batchPreviewTip": m1,
+    "batteryOptimizationDesc": MessageLookupByLibrary.simpleMessage(
+      "バックグラウンドでの動作を維持するため、このアプリの電池の最適化を無効にしてください。タップすると設定を開きます。",
+    ),
+    "batteryOptimizationStatusTip": MessageLookupByLibrary.simpleMessage(
+      "システムの制限により、実行中は電池の最適化の状態を正しく取得できません",
+    ),
     "behavior": MessageLookupByLibrary.simpleMessage("動作"),
     "billingPeriodLabel": MessageLookupByLibrary.simpleMessage("請求期間"),
     "bind": MessageLookupByLibrary.simpleMessage("バインド"),
@@ -959,6 +967,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "editProfile": MessageLookupByLibrary.simpleMessage("プロファイルを編集"),
     "editProxyGroup": MessageLookupByLibrary.simpleMessage("プロキシグループを編集"),
     "editRule": MessageLookupByLibrary.simpleMessage("ルールを編集"),
+    "editSsid": MessageLookupByLibrary.simpleMessage("SSIDを編集"),
     "editorUnavailable": MessageLookupByLibrary.simpleMessage("エディターを利用できません"),
     "emailCodeHint": MessageLookupByLibrary.simpleMessage("6桁のコードを入力"),
     "emailCodeLabel": MessageLookupByLibrary.simpleMessage("メール認証コード"),
@@ -1143,6 +1152,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "iconHistory": MessageLookupByLibrary.simpleMessage("最近使用したアイコン"),
     "iconStyle": MessageLookupByLibrary.simpleMessage("アイコンスタイル"),
     "iconUrl": MessageLookupByLibrary.simpleMessage("アイコンURL"),
+    "ignoreBatteryOptimization": MessageLookupByLibrary.simpleMessage(
+      "電池の最適化を無視",
+    ),
     "import": MessageLookupByLibrary.simpleMessage("インポート"),
     "importFile": MessageLookupByLibrary.simpleMessage("ファイルからインポート"),
     "importFromURL": MessageLookupByLibrary.simpleMessage("URLからインポート"),
@@ -2039,6 +2051,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "ssidPermissionGuide": MessageLookupByLibrary.simpleMessage(
       "Wi-Fi 名の取得には位置情報の許可が必要です。Android では正確な位置情報を常に許可し、位置情報サービスを有効にしてください",
     ),
+    "ssidsEmpty": MessageLookupByLibrary.simpleMessage("SSIDが空です"),
     "stackMode": MessageLookupByLibrary.simpleMessage("スタックモード"),
     "standard": MessageLookupByLibrary.simpleMessage("標準"),
     "standardModeDesc": MessageLookupByLibrary.simpleMessage(
@@ -2220,6 +2233,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleStopped": MessageLookupByLibrary.simpleMessage("停止中"),
     "tailscaleThisDevice": MessageLookupByLibrary.simpleMessage("このデバイス"),
     "tailscaleUnavailable": MessageLookupByLibrary.simpleMessage("接続できません"),
+    "tapToAuthorize": MessageLookupByLibrary.simpleMessage("タップして許可"),
     "tcpConcurrent": MessageLookupByLibrary.simpleMessage("TCP並列処理"),
     "tcpConcurrentDesc": MessageLookupByLibrary.simpleMessage("TCP並列処理を許可"),
     "tcpFastOpen": MessageLookupByLibrary.simpleMessage("TCP Fast Open"),
