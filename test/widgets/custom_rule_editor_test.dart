@@ -239,10 +239,32 @@ void main() {
     expect(result?.value, 'MATCH,Japan automatic');
   });
 
+  testWidgets('edits wildcard rules in the form without changing their value', (
+    tester,
+  ) async {
+    const value = 'DOMAIN-WILDCARD,*.example.com,Japan automatic';
+    Rule? result;
+    await _open(
+      tester,
+      rule: const Rule(id: 42, value: value),
+      onResult: (rule) => result = rule,
+    );
+    expect(find.byKey(const Key('custom-rule-raw')), findsNothing);
+    expect(
+      tester
+          .widget<TextFormField>(_payload('DOMAIN_WILDCARD'))
+          .controller
+          ?.text,
+      '*.example.com',
+    );
+    await _save(tester);
+    expect(result?.value, value);
+    expect(result?.id, 42);
+  });
+
   for (final value in [
     'AND,((DOMAIN,example.com),(IP-CIDR,192.168.0.0/16,no-resolve)),Japan automatic',
     r'DOMAIN-REGEX,^example[0-9]{1,3}\.com$,Japan automatic',
-    'DOMAIN-WILDCARD,*.example.com,Japan automatic',
   ]) {
     testWidgets('keeps advanced rule text unchanged: $value', (tester) async {
       Rule? result;

@@ -11023,6 +11023,406 @@ class AppLocalizations {
   String get basicInfo {
     return Intl.message('Basic info', name: 'basicInfo', desc: '', args: []);
   }
+
+  /// `Match an IP suffix range`
+  String get ruleActionIpSuffixDesc {
+    return Intl.message(
+      'Match an IP suffix range',
+      name: 'ruleActionIpSuffixDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match a domain suffix`
+  String get ruleActionDomainSuffixDesc {
+    return Intl.message(
+      'Match a domain suffix',
+      name: 'ruleActionDomainSuffixDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match all requests, no conditions needed`
+  String get ruleActionMatchDesc {
+    return Intl.message(
+      'Match all requests, no conditions needed',
+      name: 'ruleActionMatchDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match the source IP's country code`
+  String get ruleActionSrcGeoipDesc {
+    return Intl.message(
+      'Match the source IP\'s country code',
+      name: 'ruleActionSrcGeoipDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Wildcard match; only * and ? are supported`
+  String get ruleActionDomainWildcardDesc {
+    return Intl.message(
+      'Wildcard match; only * and ? are supported',
+      name: 'ruleActionDomainWildcardDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Logical rule AND`
+  String get ruleActionAndDesc {
+    return Intl.message(
+      'Logical rule AND',
+      name: 'ruleActionAndDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match an IP address range; IP-CIDR6 is just an alias`
+  String get ruleActionIpCidr6Desc {
+    return Intl.message(
+      'Match an IP address range; IP-CIDR6 is just an alias',
+      name: 'ruleActionIpCidr6Desc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match a domain regex`
+  String get ruleActionDomainRegexDesc {
+    return Intl.message(
+      'Match a domain regex',
+      name: 'ruleActionDomainRegexDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match by process path regex`
+  String get ruleActionProcessPathRegexDesc {
+    return Intl.message(
+      'Match by process path regex',
+      name: 'ruleActionProcessPathRegexDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match the destination port range`
+  String get ruleActionDstPortDesc {
+    return Intl.message(
+      'Match the destination port range',
+      name: 'ruleActionDstPortDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match the DSCP mark (tproxy UDP inbound only)`
+  String get ruleActionDscpDesc {
+    return Intl.message(
+      'Match the DSCP mark (tproxy UDP inbound only)',
+      name: 'ruleActionDscpDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match the inbound port`
+  String get ruleActionInPortDesc {
+    return Intl.message(
+      'Match the inbound port',
+      name: 'ruleActionInPortDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match the Linux user ID`
+  String get ruleActionUidDesc {
+    return Intl.message(
+      'Match the Linux user ID',
+      name: 'ruleActionUidDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match an IP address range`
+  String get ruleActionIpCidrDesc {
+    return Intl.message(
+      'Match an IP address range',
+      name: 'ruleActionIpCidrDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reference a rule set; requires rule-providers`
+  String get ruleActionRuleSetDesc {
+    return Intl.message(
+      'Reference a rule set; requires rule-providers',
+      name: 'ruleActionRuleSetDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match domains in Geosite`
+  String get ruleActionGeositeDesc {
+    return Intl.message(
+      'Match domains in Geosite',
+      name: 'ruleActionGeositeDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match TCP or UDP`
+  String get ruleActionNetworkDesc {
+    return Intl.message(
+      'Match TCP or UDP',
+      name: 'ruleActionNetworkDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match by the full process path`
+  String get ruleActionProcessPathDesc {
+    return Intl.message(
+      'Match by the full process path',
+      name: 'ruleActionProcessPathDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match by process path wildcard; only * and ? are supported`
+  String get ruleActionProcessPathWildcardDesc {
+    return Intl.message(
+      'Match by process path wildcard; only * and ? are supported',
+      name: 'ruleActionProcessPathWildcardDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match the rematch name; separate multiple names with /`
+  String get ruleActionRematchNameDesc {
+    return Intl.message(
+      'Match the rematch name; separate multiple names with /',
+      name: 'ruleActionRematchNameDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match a source IP suffix range`
+  String get ruleActionSrcIpSuffixDesc {
+    return Intl.message(
+      'Match a source IP suffix range',
+      name: 'ruleActionSrcIpSuffixDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match the IP's country code`
+  String get ruleActionGeoipDesc {
+    return Intl.message(
+      'Match the IP\'s country code',
+      name: 'ruleActionGeoipDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match the inbound username; separate multiple usernames with /`
+  String get ruleActionInUserDesc {
+    return Intl.message(
+      'Match the inbound username; separate multiple usernames with /',
+      name: 'ruleActionInUserDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Only tcp or udp is supported`
+  String get invalidNetworkContent {
+    return Intl.message(
+      'Only tcp or udp is supported',
+      name: 'invalidNetworkContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match a domain keyword`
+  String get ruleActionDomainKeywordDesc {
+    return Intl.message(
+      'Match a domain keyword',
+      name: 'ruleActionDomainKeywordDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Logical rule NOT`
+  String get ruleActionNotDesc {
+    return Intl.message(
+      'Logical rule NOT',
+      name: 'ruleActionNotDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match the source IP's ASN`
+  String get ruleActionSrcIpAsnDesc {
+    return Intl.message(
+      'Match the source IP\'s ASN',
+      name: 'ruleActionSrcIpAsnDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter numbers or ranges such as 80 or 8000-9000, separated by /`
+  String get invalidRangeContent {
+    return Intl.message(
+      'Enter numbers or ranges such as 80 or 8000-9000, separated by /',
+      name: 'invalidRangeContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match by process name regex; matches the package name on Android`
+  String get ruleActionProcessNameRegexDesc {
+    return Intl.message(
+      'Match by process name regex; matches the package name on Android',
+      name: 'ruleActionProcessNameRegexDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match a source IP address range`
+  String get ruleActionSrcIpCidrDesc {
+    return Intl.message(
+      'Match a source IP address range',
+      name: 'ruleActionSrcIpCidrDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match the full domain`
+  String get ruleActionDomainDesc {
+    return Intl.message(
+      'Match the full domain',
+      name: 'ruleActionDomainDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match the inbound name`
+  String get ruleActionInNameDesc {
+    return Intl.message(
+      'Match the inbound name',
+      name: 'ruleActionInNameDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A DSCP mark cannot exceed 63`
+  String get invalidDscpContent {
+    return Intl.message(
+      'A DSCP mark cannot exceed 63',
+      name: 'invalidDscpContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match the IP's ASN`
+  String get ruleActionIpAsnDesc {
+    return Intl.message(
+      'Match the IP\'s ASN',
+      name: 'ruleActionIpAsnDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match the source port range`
+  String get ruleActionSrcPortDesc {
+    return Intl.message(
+      'Match the source port range',
+      name: 'ruleActionSrcPortDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match the inbound type`
+  String get ruleActionInTypeDesc {
+    return Intl.message(
+      'Match the inbound type',
+      name: 'ruleActionInTypeDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Logical rule OR`
+  String get ruleActionOrDesc {
+    return Intl.message(
+      'Logical rule OR',
+      name: 'ruleActionOrDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match into a sub-rule; mind the parentheses`
+  String get ruleActionSubRuleDesc {
+    return Intl.message(
+      'Match into a sub-rule; mind the parentheses',
+      name: 'ruleActionSubRuleDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match by process name wildcard; only * and ? are supported`
+  String get ruleActionProcessNameWildcardDesc {
+    return Intl.message(
+      'Match by process name wildcard; only * and ? are supported',
+      name: 'ruleActionProcessNameWildcardDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match by process name; matches the package name on Android`
+  String get ruleActionProcessNameDesc {
+    return Intl.message(
+      'Match by process name; matches the package name on Android',
+      name: 'ruleActionProcessNameDesc',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -1038,9 +1038,18 @@ class MessageLookup extends MessageLookupByLibrary {
       "无法验证服务器证书，跳过校验后无法确认服务器身份，发送或接收的账号凭据、订阅等数据可能被窃取或篡改\n\n仅在信任当前网络和服务器时继续，本次例外仅适用于同一服务器和同一证书的本次重试，操作结束后自动恢复校验",
     ),
     "invalidCertificateTitle": MessageLookupByLibrary.simpleMessage("证书校验失败"),
+    "invalidDscpContent": MessageLookupByLibrary.simpleMessage(
+      "DSCP 标记不能超过 63",
+    ),
+    "invalidNetworkContent": MessageLookupByLibrary.simpleMessage(
+      "仅支持 tcp 或 udp",
+    ),
     "invalidPolicy": m29,
     "invalidProfileQrcode": MessageLookupByLibrary.simpleMessage(
       "该二维码不包含配置文件链接",
+    ),
+    "invalidRangeContent": MessageLookupByLibrary.simpleMessage(
+      "请输入数字或范围，如 80 或 8000-9000，多个用 / 分隔",
     ),
     "invalidRuleSet": m30,
     "invalidSubRule": m31,
@@ -1593,6 +1602,89 @@ class MessageLookup extends MessageLookupByLibrary {
     "routingGroupType": MessageLookupByLibrary.simpleMessage("策略组类型"),
     "ru": MessageLookupByLibrary.simpleMessage("俄语"),
     "rule": MessageLookupByLibrary.simpleMessage("规则"),
+    "ruleActionAndDesc": MessageLookupByLibrary.simpleMessage("逻辑规则 AND"),
+    "ruleActionDomainDesc": MessageLookupByLibrary.simpleMessage("匹配完整域名"),
+    "ruleActionDomainKeywordDesc": MessageLookupByLibrary.simpleMessage(
+      "匹配域名关键字",
+    ),
+    "ruleActionDomainRegexDesc": MessageLookupByLibrary.simpleMessage(
+      "使用域名正则表达式匹配",
+    ),
+    "ruleActionDomainSuffixDesc": MessageLookupByLibrary.simpleMessage(
+      "匹配域名后缀",
+    ),
+    "ruleActionDomainWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "通配符匹配，仅支持*和?通配符",
+    ),
+    "ruleActionDscpDesc": MessageLookupByLibrary.simpleMessage(
+      "匹配DSCP标记（仅限 tproxy udp 入站）",
+    ),
+    "ruleActionDstPortDesc": MessageLookupByLibrary.simpleMessage("匹配请求目标端口范围"),
+    "ruleActionGeoipDesc": MessageLookupByLibrary.simpleMessage("匹配 IP 所属国家代码"),
+    "ruleActionGeositeDesc": MessageLookupByLibrary.simpleMessage(
+      "匹配 Geosite 内的域名",
+    ),
+    "ruleActionInNameDesc": MessageLookupByLibrary.simpleMessage("匹配入站名称"),
+    "ruleActionInPortDesc": MessageLookupByLibrary.simpleMessage("匹配入站端口"),
+    "ruleActionInTypeDesc": MessageLookupByLibrary.simpleMessage("匹配入站类型"),
+    "ruleActionInUserDesc": MessageLookupByLibrary.simpleMessage(
+      "匹配入站用户名，支持使用 / 分隔多个用户名",
+    ),
+    "ruleActionIpAsnDesc": MessageLookupByLibrary.simpleMessage("匹配 IP 所属 ASN"),
+    "ruleActionIpCidr6Desc": MessageLookupByLibrary.simpleMessage(
+      "匹配 IP 地址范围，IP-CIDR6 只是一个别名",
+    ),
+    "ruleActionIpCidrDesc": MessageLookupByLibrary.simpleMessage("匹配 IP 地址范围"),
+    "ruleActionIpSuffixDesc": MessageLookupByLibrary.simpleMessage(
+      "匹配 IP 后缀范围",
+    ),
+    "ruleActionMatchDesc": MessageLookupByLibrary.simpleMessage("匹配所有请求，无需条件"),
+    "ruleActionNetworkDesc": MessageLookupByLibrary.simpleMessage("匹配TCP或者UDP"),
+    "ruleActionNotDesc": MessageLookupByLibrary.simpleMessage("逻辑规则 NOT"),
+    "ruleActionOrDesc": MessageLookupByLibrary.simpleMessage("逻辑规则 OR"),
+    "ruleActionProcessNameDesc": MessageLookupByLibrary.simpleMessage(
+      "使用进程匹配，在Android平台可以匹配包名",
+    ),
+    "ruleActionProcessNameRegexDesc": MessageLookupByLibrary.simpleMessage(
+      "使用进程名称正则表达式匹配，在Android平台可以匹配包名",
+    ),
+    "ruleActionProcessNameWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "使用进程名称通配符匹配，仅支持*和?通配符",
+    ),
+    "ruleActionProcessPathDesc": MessageLookupByLibrary.simpleMessage(
+      "使用完整进程路径匹配",
+    ),
+    "ruleActionProcessPathRegexDesc": MessageLookupByLibrary.simpleMessage(
+      "使用进程路径正则表达式匹配",
+    ),
+    "ruleActionProcessPathWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "使用进程路径通配符匹配，仅支持*和?通配符",
+    ),
+    "ruleActionRematchNameDesc": MessageLookupByLibrary.simpleMessage(
+      "匹配重匹配名称，多个名称用/分隔",
+    ),
+    "ruleActionRuleSetDesc": MessageLookupByLibrary.simpleMessage(
+      "引用规则集合，需配置rule-providers",
+    ),
+    "ruleActionSrcGeoipDesc": MessageLookupByLibrary.simpleMessage(
+      "匹配来源 IP 所属国家代码",
+    ),
+    "ruleActionSrcIpAsnDesc": MessageLookupByLibrary.simpleMessage(
+      "匹配来源 IP 所属 ASN",
+    ),
+    "ruleActionSrcIpCidrDesc": MessageLookupByLibrary.simpleMessage(
+      "匹配来源 IP 地址范围",
+    ),
+    "ruleActionSrcIpSuffixDesc": MessageLookupByLibrary.simpleMessage(
+      "匹配来源 IP 后缀范围",
+    ),
+    "ruleActionSrcPortDesc": MessageLookupByLibrary.simpleMessage("匹配请求来源端口范围"),
+    "ruleActionSubRuleDesc": MessageLookupByLibrary.simpleMessage(
+      "匹配至子规则，需要注意括号的使用",
+    ),
+    "ruleActionUidDesc": MessageLookupByLibrary.simpleMessage(
+      "匹配 Linux USER ID",
+    ),
     "ruleEmpty": MessageLookupByLibrary.simpleMessage("规则为空"),
     "ruleName": MessageLookupByLibrary.simpleMessage("规则名称"),
     "rulePresetBittorrentDirect": MessageLookupByLibrary.simpleMessage(

@@ -180,7 +180,7 @@ void main() {
         installedPackage('other.app'),
       ];
     final container = await openAccess(tester, api);
-    container.read(queryProvider(QueryTag.access).notifier).value = 'Chrome';
+    container.read(queryProvider(QueryTag.access).notifier).value = 'Chrome org';
     await tester.pumpAndSettle();
     expect(find.text('org.chromium.chrome'), findsWidgets);
     expect(find.text('other.app'), findsNothing);

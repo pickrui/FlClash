@@ -1428,9 +1428,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "invalidCertificateTitle": MessageLookupByLibrary.simpleMessage(
       "Certificate Verification Failed",
     ),
+    "invalidDscpContent": MessageLookupByLibrary.simpleMessage(
+      "A DSCP mark cannot exceed 63",
+    ),
+    "invalidNetworkContent": MessageLookupByLibrary.simpleMessage(
+      "Only tcp or udp is supported",
+    ),
     "invalidPolicy": m29,
     "invalidProfileQrcode": MessageLookupByLibrary.simpleMessage(
       "This QR code doesn\'t contain a profile link",
+    ),
+    "invalidRangeContent": MessageLookupByLibrary.simpleMessage(
+      "Enter numbers or ranges such as 80 or 8000-9000, separated by /",
     ),
     "invalidRuleSet": m30,
     "invalidSubRule": m31,
@@ -2183,6 +2192,115 @@ class MessageLookup extends MessageLookupByLibrary {
     "routingGroupType": MessageLookupByLibrary.simpleMessage("Group type"),
     "ru": MessageLookupByLibrary.simpleMessage("Russian"),
     "rule": MessageLookupByLibrary.simpleMessage("Rule"),
+    "ruleActionAndDesc": MessageLookupByLibrary.simpleMessage(
+      "Logical rule AND",
+    ),
+    "ruleActionDomainDesc": MessageLookupByLibrary.simpleMessage(
+      "Match the full domain",
+    ),
+    "ruleActionDomainKeywordDesc": MessageLookupByLibrary.simpleMessage(
+      "Match a domain keyword",
+    ),
+    "ruleActionDomainRegexDesc": MessageLookupByLibrary.simpleMessage(
+      "Match a domain regex",
+    ),
+    "ruleActionDomainSuffixDesc": MessageLookupByLibrary.simpleMessage(
+      "Match a domain suffix",
+    ),
+    "ruleActionDomainWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "Wildcard match; only * and ? are supported",
+    ),
+    "ruleActionDscpDesc": MessageLookupByLibrary.simpleMessage(
+      "Match the DSCP mark (tproxy UDP inbound only)",
+    ),
+    "ruleActionDstPortDesc": MessageLookupByLibrary.simpleMessage(
+      "Match the destination port range",
+    ),
+    "ruleActionGeoipDesc": MessageLookupByLibrary.simpleMessage(
+      "Match the IP\'s country code",
+    ),
+    "ruleActionGeositeDesc": MessageLookupByLibrary.simpleMessage(
+      "Match domains in Geosite",
+    ),
+    "ruleActionInNameDesc": MessageLookupByLibrary.simpleMessage(
+      "Match the inbound name",
+    ),
+    "ruleActionInPortDesc": MessageLookupByLibrary.simpleMessage(
+      "Match the inbound port",
+    ),
+    "ruleActionInTypeDesc": MessageLookupByLibrary.simpleMessage(
+      "Match the inbound type",
+    ),
+    "ruleActionInUserDesc": MessageLookupByLibrary.simpleMessage(
+      "Match the inbound username; separate multiple usernames with /",
+    ),
+    "ruleActionIpAsnDesc": MessageLookupByLibrary.simpleMessage(
+      "Match the IP\'s ASN",
+    ),
+    "ruleActionIpCidr6Desc": MessageLookupByLibrary.simpleMessage(
+      "Match an IP address range; IP-CIDR6 is just an alias",
+    ),
+    "ruleActionIpCidrDesc": MessageLookupByLibrary.simpleMessage(
+      "Match an IP address range",
+    ),
+    "ruleActionIpSuffixDesc": MessageLookupByLibrary.simpleMessage(
+      "Match an IP suffix range",
+    ),
+    "ruleActionMatchDesc": MessageLookupByLibrary.simpleMessage(
+      "Match all requests, no conditions needed",
+    ),
+    "ruleActionNetworkDesc": MessageLookupByLibrary.simpleMessage(
+      "Match TCP or UDP",
+    ),
+    "ruleActionNotDesc": MessageLookupByLibrary.simpleMessage(
+      "Logical rule NOT",
+    ),
+    "ruleActionOrDesc": MessageLookupByLibrary.simpleMessage("Logical rule OR"),
+    "ruleActionProcessNameDesc": MessageLookupByLibrary.simpleMessage(
+      "Match by process name; matches the package name on Android",
+    ),
+    "ruleActionProcessNameRegexDesc": MessageLookupByLibrary.simpleMessage(
+      "Match by process name regex; matches the package name on Android",
+    ),
+    "ruleActionProcessNameWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "Match by process name wildcard; only * and ? are supported",
+    ),
+    "ruleActionProcessPathDesc": MessageLookupByLibrary.simpleMessage(
+      "Match by the full process path",
+    ),
+    "ruleActionProcessPathRegexDesc": MessageLookupByLibrary.simpleMessage(
+      "Match by process path regex",
+    ),
+    "ruleActionProcessPathWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "Match by process path wildcard; only * and ? are supported",
+    ),
+    "ruleActionRematchNameDesc": MessageLookupByLibrary.simpleMessage(
+      "Match the rematch name; separate multiple names with /",
+    ),
+    "ruleActionRuleSetDesc": MessageLookupByLibrary.simpleMessage(
+      "Reference a rule set; requires rule-providers",
+    ),
+    "ruleActionSrcGeoipDesc": MessageLookupByLibrary.simpleMessage(
+      "Match the source IP\'s country code",
+    ),
+    "ruleActionSrcIpAsnDesc": MessageLookupByLibrary.simpleMessage(
+      "Match the source IP\'s ASN",
+    ),
+    "ruleActionSrcIpCidrDesc": MessageLookupByLibrary.simpleMessage(
+      "Match a source IP address range",
+    ),
+    "ruleActionSrcIpSuffixDesc": MessageLookupByLibrary.simpleMessage(
+      "Match a source IP suffix range",
+    ),
+    "ruleActionSrcPortDesc": MessageLookupByLibrary.simpleMessage(
+      "Match the source port range",
+    ),
+    "ruleActionSubRuleDesc": MessageLookupByLibrary.simpleMessage(
+      "Match into a sub-rule; mind the parentheses",
+    ),
+    "ruleActionUidDesc": MessageLookupByLibrary.simpleMessage(
+      "Match the Linux user ID",
+    ),
     "ruleEmpty": MessageLookupByLibrary.simpleMessage("Rule is empty"),
     "ruleName": MessageLookupByLibrary.simpleMessage("Rule name"),
     "rulePresetBittorrentDirect": MessageLookupByLibrary.simpleMessage(

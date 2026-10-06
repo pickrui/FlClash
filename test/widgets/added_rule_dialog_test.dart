@@ -55,7 +55,7 @@ void main() {
       (tester.widget(targets) as DropdownMenu).dropdownMenuEntries.map(
         (entry) => entry.value,
       ),
-      ['DIRECT', 'REJECT', 'MATCH', 'Home'],
+      ['DIRECT', 'REJECT', 'REJECT-DROP', 'MATCH', 'Home'],
     );
     await tester.tap(targets);
     await tester.pumpAndSettle();

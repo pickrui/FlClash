@@ -50,6 +50,20 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
     RuleAction.IP_ASN,
     RuleAction.RULE_SET,
     RuleAction.MATCH,
+    RuleAction.DOMAIN_WILDCARD,
+    RuleAction.PROCESS_PATH_WILDCARD,
+    RuleAction.PROCESS_NAME_WILDCARD,
+    RuleAction.REMATCH_NAME,
+    RuleAction.IN_PORT,
+    RuleAction.IN_TYPE,
+    RuleAction.IN_NAME,
+    RuleAction.IN_USER,
+    RuleAction.UID,
+    RuleAction.DSCP,
+    RuleAction.SRC_GEOIP,
+    RuleAction.SRC_IP_ASN,
+    RuleAction.IP_SUFFIX,
+    RuleAction.SRC_IP_SUFFIX,
   ];
   static const _commaPayloadTypes = {
     'AND',
@@ -60,14 +74,7 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
     'PROCESS-NAME-REGEX',
     'PROCESS-PATH-REGEX',
   };
-  // These core-supported types have no RuleAction enum entry yet. They must
-  // remain editable without guessing a different action in ParsedRule.
-  static const _additionalRawTypes = {
-    'DOMAIN-WILDCARD',
-    'PROCESS-NAME-WILDCARD',
-    'PROCESS-PATH-WILDCARD',
-    'SNIFF-PROTOCOL',
-  };
+  static const _additionalRawTypes = {'SNIFF-PROTOCOL'};
 
   final _formKey = GlobalKey<FormState>();
   final _errorKey = GlobalKey();
@@ -204,6 +211,11 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
           ? null
           : l10n.customRuleUnavailableProvider(value);
     }
+    final payloadError = ParsedRule(
+      ruleAction: action,
+      content: value,
+    ).payloadError;
+    if (payloadError != null) return payloadError.getMessage(context);
     bool valid = true;
     switch (action) {
       case RuleAction.DOMAIN:
@@ -229,6 +241,7 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
             prefix <= (address.type == InternetAddressType.IPv4 ? 32 : 128);
       case RuleAction.DST_PORT:
       case RuleAction.SRC_PORT:
+      case RuleAction.IN_PORT:
         final ranges = value.split('/');
         valid =
             ranges.length <= 28 &&
@@ -562,9 +575,7 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
                     border: const OutlineInputBorder(),
                     labelText: l10n.content,
                     hintText: _example(_action),
-                    helperText: _action == RuleAction.DOMAIN_SUFFIX
-                        ? l10n.customRuleDomainSuffixHint
-                        : null,
+                    helperText: _action.getDesc(context),
                     helperMaxLines: 4,
                     errorMaxLines: 4,
                   ),

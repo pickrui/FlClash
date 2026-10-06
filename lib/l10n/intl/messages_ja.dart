@@ -1183,9 +1183,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "invalidCertificateTitle": MessageLookupByLibrary.simpleMessage(
       "証明書の検証に失敗しました",
     ),
+    "invalidDscpContent": MessageLookupByLibrary.simpleMessage(
+      "DSCP マークは 63 を超えられません",
+    ),
+    "invalidNetworkContent": MessageLookupByLibrary.simpleMessage(
+      "tcp または udp のみ対応しています",
+    ),
     "invalidPolicy": m29,
     "invalidProfileQrcode": MessageLookupByLibrary.simpleMessage(
       "このQRコードにはプロファイルのリンクが含まれていません",
+    ),
+    "invalidRangeContent": MessageLookupByLibrary.simpleMessage(
+      "80 や 8000-9000 のような数値または範囲を / 区切りで入力してください",
     ),
     "invalidRuleSet": m30,
     "invalidSubRule": m31,
@@ -1812,6 +1821,105 @@ class MessageLookup extends MessageLookupByLibrary {
     "routingGroupType": MessageLookupByLibrary.simpleMessage("グループの種類"),
     "ru": MessageLookupByLibrary.simpleMessage("ロシア語"),
     "rule": MessageLookupByLibrary.simpleMessage("ルール"),
+    "ruleActionAndDesc": MessageLookupByLibrary.simpleMessage("論理ルール AND"),
+    "ruleActionDomainDesc": MessageLookupByLibrary.simpleMessage("完全なドメインにマッチ"),
+    "ruleActionDomainKeywordDesc": MessageLookupByLibrary.simpleMessage(
+      "ドメインキーワードにマッチ",
+    ),
+    "ruleActionDomainRegexDesc": MessageLookupByLibrary.simpleMessage(
+      "ドメインの正規表現でマッチ",
+    ),
+    "ruleActionDomainSuffixDesc": MessageLookupByLibrary.simpleMessage(
+      "ドメインサフィックスにマッチ",
+    ),
+    "ruleActionDomainWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "ワイルドカードでマッチ（* と ? のみ対応）",
+    ),
+    "ruleActionDscpDesc": MessageLookupByLibrary.simpleMessage(
+      "DSCPマークにマッチ（tproxy udpインバウンドのみ）",
+    ),
+    "ruleActionDstPortDesc": MessageLookupByLibrary.simpleMessage(
+      "宛先ポート範囲にマッチ",
+    ),
+    "ruleActionGeoipDesc": MessageLookupByLibrary.simpleMessage("IPの国コードにマッチ"),
+    "ruleActionGeositeDesc": MessageLookupByLibrary.simpleMessage(
+      "Geosite 内のドメインにマッチ",
+    ),
+    "ruleActionInNameDesc": MessageLookupByLibrary.simpleMessage("インバウンド名にマッチ"),
+    "ruleActionInPortDesc": MessageLookupByLibrary.simpleMessage(
+      "インバウンドポートにマッチ",
+    ),
+    "ruleActionInTypeDesc": MessageLookupByLibrary.simpleMessage(
+      "インバウンドタイプにマッチ",
+    ),
+    "ruleActionInUserDesc": MessageLookupByLibrary.simpleMessage(
+      "インバウンドユーザー名にマッチ（/ で複数指定可）",
+    ),
+    "ruleActionIpAsnDesc": MessageLookupByLibrary.simpleMessage(
+      "IPが属するASNにマッチ",
+    ),
+    "ruleActionIpCidr6Desc": MessageLookupByLibrary.simpleMessage(
+      "IPアドレス範囲にマッチ（IP-CIDR6 は別名です）",
+    ),
+    "ruleActionIpCidrDesc": MessageLookupByLibrary.simpleMessage(
+      "IPアドレス範囲にマッチ",
+    ),
+    "ruleActionIpSuffixDesc": MessageLookupByLibrary.simpleMessage(
+      "IPサフィックス範囲にマッチ",
+    ),
+    "ruleActionMatchDesc": MessageLookupByLibrary.simpleMessage(
+      "すべてのリクエストにマッチ（条件不要）",
+    ),
+    "ruleActionNetworkDesc": MessageLookupByLibrary.simpleMessage(
+      "TCPまたはUDPにマッチ",
+    ),
+    "ruleActionNotDesc": MessageLookupByLibrary.simpleMessage("論理ルール NOT"),
+    "ruleActionOrDesc": MessageLookupByLibrary.simpleMessage("論理ルール OR"),
+    "ruleActionProcessNameDesc": MessageLookupByLibrary.simpleMessage(
+      "プロセス名でマッチ（Androidではパッケージ名にマッチ）",
+    ),
+    "ruleActionProcessNameRegexDesc": MessageLookupByLibrary.simpleMessage(
+      "プロセス名の正規表現でマッチ（Androidではパッケージ名にマッチ）",
+    ),
+    "ruleActionProcessNameWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "プロセス名のワイルドカードでマッチ（* と ? のみ対応）",
+    ),
+    "ruleActionProcessPathDesc": MessageLookupByLibrary.simpleMessage(
+      "プロセスのフルパスでマッチ",
+    ),
+    "ruleActionProcessPathRegexDesc": MessageLookupByLibrary.simpleMessage(
+      "プロセスパスの正規表現でマッチ",
+    ),
+    "ruleActionProcessPathWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "プロセスパスのワイルドカードでマッチ（* と ? のみ対応）",
+    ),
+    "ruleActionRematchNameDesc": MessageLookupByLibrary.simpleMessage(
+      "再マッチ名にマッチ（複数は / で区切る）",
+    ),
+    "ruleActionRuleSetDesc": MessageLookupByLibrary.simpleMessage(
+      "ルールセットを参照します。rule-providersの設定が必要です",
+    ),
+    "ruleActionSrcGeoipDesc": MessageLookupByLibrary.simpleMessage(
+      "送信元IPの国コードにマッチ",
+    ),
+    "ruleActionSrcIpAsnDesc": MessageLookupByLibrary.simpleMessage(
+      "送信元IPが属するASNにマッチ",
+    ),
+    "ruleActionSrcIpCidrDesc": MessageLookupByLibrary.simpleMessage(
+      "送信元IPアドレス範囲にマッチ",
+    ),
+    "ruleActionSrcIpSuffixDesc": MessageLookupByLibrary.simpleMessage(
+      "送信元IPサフィックス範囲にマッチ",
+    ),
+    "ruleActionSrcPortDesc": MessageLookupByLibrary.simpleMessage(
+      "送信元ポート範囲にマッチ",
+    ),
+    "ruleActionSubRuleDesc": MessageLookupByLibrary.simpleMessage(
+      "サブルールへマッチします。括弧の使い方に注意してください",
+    ),
+    "ruleActionUidDesc": MessageLookupByLibrary.simpleMessage(
+      "LinuxのユーザーIDにマッチ",
+    ),
     "ruleEmpty": MessageLookupByLibrary.simpleMessage("ルールが空です"),
     "ruleName": MessageLookupByLibrary.simpleMessage("ルール名"),
     "rulePresetBittorrentDirect": MessageLookupByLibrary.simpleMessage(

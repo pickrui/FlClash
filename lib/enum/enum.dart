@@ -6,6 +6,7 @@
 // ignore_for_file: constant_identifier_names
 
 import 'package:fl_clash/common/color.dart';
+import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/common/system.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
@@ -365,6 +366,7 @@ enum RuleAction {
   DOMAIN_SUFFIX('DOMAIN-SUFFIX'),
   DOMAIN_KEYWORD('DOMAIN-KEYWORD'),
   DOMAIN_REGEX('DOMAIN-REGEX'),
+  DOMAIN_WILDCARD('DOMAIN-WILDCARD'),
   GEOSITE('GEOSITE'),
   IP_CIDR('IP-CIDR'),
   IP_CIDR6('IP-CIDR6'),
@@ -381,10 +383,13 @@ enum RuleAction {
   IN_TYPE('IN-TYPE'),
   IN_USER('IN-USER'),
   IN_NAME('IN-NAME'),
+  REMATCH_NAME('REMATCH-NAME'),
   PROCESS_PATH('PROCESS-PATH'),
   PROCESS_PATH_REGEX('PROCESS-PATH-REGEX'),
+  PROCESS_PATH_WILDCARD('PROCESS-PATH-WILDCARD'),
   PROCESS_NAME('PROCESS-NAME'),
   PROCESS_NAME_REGEX('PROCESS-NAME-REGEX'),
+  PROCESS_NAME_WILDCARD('PROCESS-NAME-WILDCARD'),
   UID('UID'),
   NETWORK('NETWORK'),
   DSCP('DSCP'),
@@ -422,6 +427,77 @@ extension RuleActionExt on RuleAction {
     RuleAction.IP_SUFFIX,
     RuleAction.RULE_SET,
   ].contains(this);
+
+  bool get hasCommaPayload => [
+    RuleAction.AND,
+    RuleAction.OR,
+    RuleAction.NOT,
+    RuleAction.SUB_RULE,
+    RuleAction.DOMAIN_REGEX,
+    RuleAction.PROCESS_NAME_REGEX,
+    RuleAction.PROCESS_PATH_REGEX,
+  ].contains(this);
+
+  String getDesc(BuildContext context) {
+    final appLocalizations = AppLocalizations.of(context);
+    return switch (this) {
+      RuleAction.DOMAIN => appLocalizations.ruleActionDomainDesc,
+      RuleAction.DOMAIN_SUFFIX => appLocalizations.ruleActionDomainSuffixDesc,
+      RuleAction.DOMAIN_KEYWORD => appLocalizations.ruleActionDomainKeywordDesc,
+      RuleAction.DOMAIN_REGEX => appLocalizations.ruleActionDomainRegexDesc,
+      RuleAction.DOMAIN_WILDCARD =>
+        appLocalizations.ruleActionDomainWildcardDesc,
+      RuleAction.GEOSITE => appLocalizations.ruleActionGeositeDesc,
+      RuleAction.IP_CIDR => appLocalizations.ruleActionIpCidrDesc,
+      RuleAction.IP_CIDR6 => appLocalizations.ruleActionIpCidr6Desc,
+      RuleAction.IP_SUFFIX => appLocalizations.ruleActionIpSuffixDesc,
+      RuleAction.IP_ASN => appLocalizations.ruleActionIpAsnDesc,
+      RuleAction.GEOIP => appLocalizations.ruleActionGeoipDesc,
+      RuleAction.SRC_GEOIP => appLocalizations.ruleActionSrcGeoipDesc,
+      RuleAction.SRC_IP_ASN => appLocalizations.ruleActionSrcIpAsnDesc,
+      RuleAction.SRC_IP_CIDR => appLocalizations.ruleActionSrcIpCidrDesc,
+      RuleAction.SRC_IP_SUFFIX => appLocalizations.ruleActionSrcIpSuffixDesc,
+      RuleAction.DST_PORT => appLocalizations.ruleActionDstPortDesc,
+      RuleAction.SRC_PORT => appLocalizations.ruleActionSrcPortDesc,
+      RuleAction.IN_PORT => appLocalizations.ruleActionInPortDesc,
+      RuleAction.IN_TYPE => appLocalizations.ruleActionInTypeDesc,
+      RuleAction.IN_USER => appLocalizations.ruleActionInUserDesc,
+      RuleAction.IN_NAME => appLocalizations.ruleActionInNameDesc,
+      RuleAction.REMATCH_NAME => appLocalizations.ruleActionRematchNameDesc,
+      RuleAction.PROCESS_PATH => appLocalizations.ruleActionProcessPathDesc,
+      RuleAction.PROCESS_PATH_REGEX =>
+        appLocalizations.ruleActionProcessPathRegexDesc,
+      RuleAction.PROCESS_PATH_WILDCARD =>
+        appLocalizations.ruleActionProcessPathWildcardDesc,
+      RuleAction.PROCESS_NAME => appLocalizations.ruleActionProcessNameDesc,
+      RuleAction.PROCESS_NAME_REGEX =>
+        appLocalizations.ruleActionProcessNameRegexDesc,
+      RuleAction.PROCESS_NAME_WILDCARD =>
+        appLocalizations.ruleActionProcessNameWildcardDesc,
+      RuleAction.UID => appLocalizations.ruleActionUidDesc,
+      RuleAction.NETWORK => appLocalizations.ruleActionNetworkDesc,
+      RuleAction.DSCP => appLocalizations.ruleActionDscpDesc,
+      RuleAction.RULE_SET => appLocalizations.ruleActionRuleSetDesc,
+      RuleAction.AND => appLocalizations.ruleActionAndDesc,
+      RuleAction.OR => appLocalizations.ruleActionOrDesc,
+      RuleAction.NOT => appLocalizations.ruleActionNotDesc,
+      RuleAction.SUB_RULE => appLocalizations.ruleActionSubRuleDesc,
+      RuleAction.MATCH => appLocalizations.ruleActionMatchDesc,
+    };
+  }
+}
+
+enum RulePayloadError { network, numberRange, dscpRange }
+
+extension RulePayloadErrorExt on RulePayloadError {
+  String getMessage(BuildContext context) {
+    final appLocalizations = AppLocalizations.of(context);
+    return switch (this) {
+      RulePayloadError.network => appLocalizations.invalidNetworkContent,
+      RulePayloadError.numberRange => appLocalizations.invalidRangeContent,
+      RulePayloadError.dscpRange => appLocalizations.invalidDscpContent,
+    };
+  }
 }
 
 enum ProviderKind { proxy, rule }
@@ -432,7 +508,15 @@ enum RuleProviderFormat { yaml, text, mrs }
 
 enum OverwriteType { standard, script, custom, merge }
 
-enum RuleTarget { DIRECT, REJECT, MATCH }
+enum RuleTarget {
+  DIRECT('DIRECT'),
+  REJECT('REJECT'),
+  REJECT_DROP('REJECT-DROP'),
+  MATCH('MATCH');
+
+  final String value;
+  const RuleTarget(this.value);
+}
 
 enum RestoreStrategy { compatible, override }
 

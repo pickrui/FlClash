@@ -478,12 +478,10 @@ extension DnsOverrideExt on Dns {
         result[key.path] = json[key.path];
         continue;
       }
-      final filter =
-          result.putIfAbsent(
-                DnsOverrideKey.fallbackFilterSection,
-                () => <String, Object?>{},
-              )
-              as Map<String, Object?>;
+      final filter = result.putIfAbsent(
+        DnsOverrideKey.fallbackFilterSection,
+        () => <String, Object?>{},
+      ) as Map<String, Object?>;
       filter[key.jsonKey] = section[key.jsonKey];
     }
     return result;
@@ -733,60 +731,77 @@ abstract class ParsedRule with _$ParsedRule {
   }) = _ParsedRule;
 
   factory ParsedRule.parseString(String value) {
-    final splits = value.split(',').map((item) => item.trim()).toList();
-    final shortSplits = splits
-        .where(
-          (item) => item.isNotEmpty && item != 'src' && item != 'no-resolve',
-        )
-        .toList();
-    if (shortSplits.isEmpty) {
-      return ParsedRule(
-        ruleAction: RuleAction.DOMAIN,
-        src: splits.contains('src'),
-        noResolve: splits.contains('no-resolve'),
-      );
+    final fields = value.split(',').map((item) => item.trim()).toList();
+    final type = fields.first.toUpperCase();
+    if (type.isEmpty) {
+      return const ParsedRule(ruleAction: RuleAction.DOMAIN);
     }
-    final ruleAction = RuleAction.values.firstWhere(
-      (item) => item.value == shortSplits.first,
+    final action = RuleAction.values.firstWhere(
+      (item) => item.value == type,
       orElse: () => RuleAction.DOMAIN,
     );
-    final params = shortSplits.skip(1).toList();
-    String? subRule;
-    String? ruleTarget;
-
-    if (params.isNotEmpty) {
-      if (ruleAction == RuleAction.SUB_RULE) {
-        subRule = params.last;
-      } else {
-        ruleTarget = params.last;
-      }
-    }
-
-    String? content;
-    String? ruleProvider;
-    final Iterable<String> values = params.length > 1
-        ? params.take(params.length - 1)
-        : const <String>[];
-
-    if (ruleAction == RuleAction.RULE_SET) {
-      ruleProvider = values.join(',');
+    final rest = fields.sublist(1);
+    String? payload;
+    String? target;
+    var params = const <String>[];
+    if (action == RuleAction.MATCH) {
+      target = rest.firstOrNull;
+    } else if (action.hasCommaPayload) {
+      target = rest.lastOrNull;
+      payload = rest.length > 1
+          ? rest.sublist(0, rest.length - 1).join(',')
+          : null;
     } else {
-      content = values.join(',');
+      payload = rest.elementAtOrNull(0);
+      target = rest.elementAtOrNull(1);
+      params = rest.skip(2).toList();
     }
+    payload = payload?.isNotEmpty == true ? payload : null;
+    target = target?.isNotEmpty == true ? target : null;
 
     return ParsedRule(
-      ruleAction: ruleAction,
-      content: content,
-      src: splits.contains('src'),
-      ruleProvider: ruleProvider,
-      noResolve: splits.contains('no-resolve'),
-      subRule: subRule,
-      ruleTarget: ruleTarget,
+      ruleAction: action,
+      content: action == RuleAction.RULE_SET ? null : payload,
+      ruleProvider: action == RuleAction.RULE_SET ? payload : null,
+      ruleTarget: action == RuleAction.SUB_RULE ? null : target,
+      subRule: action == RuleAction.SUB_RULE ? target : null,
+      src: params.contains('src'),
+      noResolve: params.contains('no-resolve'),
     );
   }
 }
 
 extension ParsedRuleExt on ParsedRule {
+  RulePayloadError? get payloadError {
+    final payload = (ruleProvider ?? content)?.trim() ?? '';
+    if (payload.isEmpty) {
+      return null;
+    }
+    switch (ruleAction) {
+      case RuleAction.NETWORK:
+        return const ['tcp', 'udp'].contains(payload.toLowerCase())
+            ? null
+            : RulePayloadError.network;
+      case RuleAction.DST_PORT:
+      case RuleAction.SRC_PORT:
+      case RuleAction.IN_PORT:
+      case RuleAction.UID:
+        return _parseRanges(payload) == null
+            ? RulePayloadError.numberRange
+            : null;
+      case RuleAction.DSCP:
+        final bounds = _parseRanges(payload);
+        if (bounds == null) {
+          return RulePayloadError.numberRange;
+        }
+        return bounds.every((item) => item <= 63)
+            ? null
+            : RulePayloadError.dscpRange;
+      default:
+        return null;
+    }
+  }
+
   String get value {
     return [
       ruleAction.value,
@@ -798,6 +813,35 @@ extension ParsedRuleExt on ParsedRule {
       ],
     ].whereType<String>().where((item) => item.isNotEmpty).join(',');
   }
+}
+
+List<int>? _parseRanges(String payload) {
+  if (payload == '*') {
+    return null;
+  }
+  final segments = payload.replaceAll(',', '/').split('/');
+  if (segments.length > 28) {
+    return null;
+  }
+  final bounds = <int>[];
+  for (final segment in segments) {
+    final trimmed = segment.trim();
+    if (trimmed.isEmpty) {
+      continue;
+    }
+    final parts = trimmed.split('-');
+    if (parts.length > 2) {
+      return null;
+    }
+    for (final part in parts) {
+      final bound = int.tryParse(part.replaceAll(RegExp(r'[\[\] ]'), ''));
+      if (bound == null || bound < 0) {
+        return null;
+      }
+      bounds.add(bound);
+    }
+  }
+  return bounds.isEmpty ? null : bounds;
 }
 
 @freezed

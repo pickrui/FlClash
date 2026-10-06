@@ -367,25 +367,32 @@ class _AccessViewState extends ConsumerState<AccessView>
     if (status.value?.permissionGranted != true) {
       return _buildPackageStatus(permission: true);
     }
-    return packages.isEmpty
-        ? NullStatus(label: appLocalizations.noData)
-        : CommonScrollBar(
-            controller: _controller,
-            child: ListView.builder(
-              controller: _controller,
-              itemCount: packages.length,
-              itemExtent: 72,
-              itemBuilder: (_, index) {
-                final package = packages[index];
-                return PackageListItem(
-                  key: ValueKey((package.packageName, package.lastUpdateTime)),
-                  package: package,
-                  value: valueList.contains(package.packageName),
-                  onChanged: (_) => _handleSelected(package.packageName),
-                );
-              },
-            ),
-          );
+    return NullStatusSwitcher(
+      isEmpty: packages.isEmpty,
+      isSearching: !SearchQuery(ref.watch(queryProvider(QueryTag.access)))
+          .isEmpty,
+      nullStatus: NullStatus(
+        label: appLocalizations.noData,
+        illustration: NullStatusIllustration.apps,
+      ),
+      child: CommonScrollBar(
+        controller: _controller,
+        child: ListView.builder(
+          controller: _controller,
+          itemCount: packages.length,
+          itemExtent: 72,
+          itemBuilder: (_, index) {
+            final package = packages[index];
+            return PackageListItem(
+              key: ValueKey((package.packageName, package.lastUpdateTime)),
+              package: package,
+              value: valueList.contains(package.packageName),
+              onChanged: (_) => _handleSelected(package.packageName),
+            );
+          },
+        ),
+      ),
+    );
   }
 
   Widget _buildPackageStatus({required bool permission}) {
@@ -486,7 +493,7 @@ class _AccessViewState extends ConsumerState<AccessView>
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(loadingProvider(LoadingTag.access));
-    final query = ref.watch(queryProvider(QueryTag.access)).toLowerCase();
+    final query = SearchQuery(ref.watch(queryProvider(QueryTag.access)));
     final installed = ref.watch(installedAppsProvider);
     final packages = installed.value?.permissionGranted == true
         ? installed.value!.packages
@@ -507,11 +514,7 @@ class _AccessViewState extends ConsumerState<AccessView>
           isFilterNonInternetApp: accessControl.isFilterNonInternetApp,
           isFilterSystemApp: accessControl.isFilterSystemApp,
         )
-        .where(
-          (package) =>
-              package.label.toLowerCase().contains(query) ||
-              package.packageName.toLowerCase().contains(query),
-        )
+        .where((package) => query.matches([package.label, package.packageName]))
         .toList();
     final mode = accessControl.mode;
     final currentList = accessControl.currentList;

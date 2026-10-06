@@ -8,7 +8,6 @@ library;
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/clash_config.dart';
-import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/card.dart';
 import 'package:fl_clash/widgets/dialog.dart';
 import 'package:fl_clash/widgets/input.dart';
@@ -33,19 +32,72 @@ class RuleItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CommonSelectedListItem(
+    final parsed = ParsedRule.parseString(rule.value);
+    final error = parsed.payloadError?.getMessage(context);
+    final target = parsed.subRule ?? parsed.ruleTarget;
+    final color = switch (target?.toUpperCase()) {
+      'DIRECT' => context.colorScheme.primary,
+      'REJECT' || 'REJECT-DROP' => context.colorScheme.error,
+      _ => context.colorScheme.tertiary,
+    };
+    return SelectedDecorationListItem(
       isSelected: isSelected,
       isEditing: isEditing,
-      onSelected: () {
-        onSelected();
-      },
-      title: Text(
-        rule.value,
-        style: context.textTheme.bodyMedium?.toJetBrainsMono,
+      invalid: error != null,
+      onSelected: onSelected,
+      onPressed: () => onEdit(rule),
+      title: LayoutBuilder(
+        builder: (context, constraints) => Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    parsed.ruleAction.value,
+                    style: context.textTheme.bodyLarge?.toJetBrainsMono,
+                  ),
+                  Text(
+                    parsed.ruleProvider ?? parsed.content ?? '',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textTheme.bodyMedium?.toJetBrainsMono
+                        .copyWith(color: context.colorScheme.onSurfaceVariant),
+                  ),
+                ],
+              ),
+            ),
+            if (error != null)
+              Tooltip(
+                message: error,
+                child: Icon(
+                  Icons.info_outline,
+                  color: context.colorScheme.error,
+                  size: 18,
+                ),
+              ),
+            if (target != null) ...[
+              const SizedBox(width: 12),
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: constraints.maxWidth * 0.45,
+                ),
+                child: Tooltip(
+                  message: target,
+                  child: Text(
+                    target,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textTheme.bodyMedium?.toJetBrainsMono
+                        .copyWith(color: color),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
-      onPressed: () {
-        onEdit(rule);
-      },
     );
   }
 }
@@ -64,30 +116,18 @@ class RuleStatusItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        child: CommonCard(
-          padding: EdgeInsets.zero,
-          radius: 18,
-          type: CommonCardType.filled,
-          onPressed: () {
-            onChange(!status);
-          },
-          child: ListTile(
-            minTileHeight: 0,
-            minVerticalPadding: 0,
-            titleTextStyle: context.textTheme.bodyMedium?.toJetBrainsMono,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-            trailing: Switch(value: status, onChanged: onChange),
-            title: Text(rule.value),
-          ),
+    return DecorationListItem(
+      title: Tooltip(
+        message: rule.value,
+        child: Text(
+          rule.value,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: context.textTheme.bodyMedium?.toJetBrainsMono,
         ),
       ),
+      trailing: Switch(value: status, onChanged: onChange),
+      onPressed: () => onChange(!status),
     );
   }
 }
@@ -121,7 +161,7 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
   void _initState() {
     _targetItems = [
       for (final target in {
-        ...RuleTarget.values.map((item) => item.name),
+        ...RuleTarget.values.map((item) => item.value),
         ...widget.targets,
       })
         DropdownMenuEntry(value: target, label: target),
@@ -163,8 +203,8 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
     }
     final parsedRule = ParsedRule(
       ruleAction: _ruleAction,
-      content: _contentController.text,
-      ruleTarget: _ruleTargetController.text,
+      content: _contentController.text.trim(),
+      ruleTarget: _ruleTargetController.text.trim(),
       noResolve: _noResolve,
       src: _src,
     );
@@ -189,7 +229,7 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
       child: DropdownMenuTheme(
         data: DropdownMenuThemeData(
           inputDecorationTheme: InputDecorationTheme(
-            border: const OutlineInputBorder(),
+            border: AppShape.input,
             labelStyle: context.textTheme.bodyLarge?.copyWith(
               overflow: TextOverflow.ellipsis,
             ),
@@ -205,17 +245,18 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
                   FilledButton.tonal(
                     onPressed: () async {
                       _ruleAction =
-                          await globalState.showCommonDialog<RuleAction>(
-                            filter: false,
-                            child: OptionsDialog<RuleAction>(
+                          await showDialog<RuleAction>(
+                            context: context,
+                            builder: (_) => OptionsDialog<RuleAction>(
                               title: appLocalizations.ruleName,
                               options: RuleAction.addedRuleActions,
                               textBuilder: (item) => item.value,
+                              subtitleBuilder: (item) => item.getDesc(context),
                               value: _ruleAction,
                             ),
                           ) ??
                           _ruleAction;
-                      setState(() {});
+                      if (mounted) setState(() {});
                     },
                     child: Text(_ruleAction.value),
                   ),
@@ -230,16 +271,21 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
                     },
                     controller: _contentController,
                     decoration: InputDecoration(
-                      border: const OutlineInputBorder(),
+                      border: AppShape.input,
                       labelText: appLocalizations.content,
+                      helperText: _ruleAction.getDesc(context),
+                      helperMaxLines: 4,
                     ),
                     validator: (_) {
-                      if (_contentController.text.isEmpty) {
+                      if (_contentController.text.trim().isEmpty) {
                         return appLocalizations.emptyTip(
                           appLocalizations.content,
                         );
                       }
-                      return null;
+                      return ParsedRule(
+                        ruleAction: _ruleAction,
+                        content: _contentController.text,
+                      ).payloadError?.getMessage(context);
                     },
                   ),
                   const SizedBox(height: 24),

@@ -1476,9 +1476,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "invalidCertificateTitle": MessageLookupByLibrary.simpleMessage(
       "Ошибка проверки сертификата",
     ),
+    "invalidDscpContent": MessageLookupByLibrary.simpleMessage(
+      "Метка DSCP не может превышать 63",
+    ),
+    "invalidNetworkContent": MessageLookupByLibrary.simpleMessage(
+      "Поддерживаются только tcp и udp",
+    ),
     "invalidPolicy": m29,
     "invalidProfileQrcode": MessageLookupByLibrary.simpleMessage(
       "Этот QR-код не содержит ссылку на профиль",
+    ),
+    "invalidRangeContent": MessageLookupByLibrary.simpleMessage(
+      "Введите числа или диапазоны, например 80 или 8000-9000, через /",
     ),
     "invalidRuleSet": m30,
     "invalidSubRule": m31,
@@ -2297,6 +2306,117 @@ class MessageLookup extends MessageLookupByLibrary {
     "routingGroupType": MessageLookupByLibrary.simpleMessage("Тип группы"),
     "ru": MessageLookupByLibrary.simpleMessage("Русский"),
     "rule": MessageLookupByLibrary.simpleMessage("Правило"),
+    "ruleActionAndDesc": MessageLookupByLibrary.simpleMessage(
+      "Логическое правило AND",
+    ),
+    "ruleActionDomainDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить полный домен",
+    ),
+    "ruleActionDomainKeywordDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить ключевое слово в домене",
+    ),
+    "ruleActionDomainRegexDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить по регулярному выражению домена",
+    ),
+    "ruleActionDomainSuffixDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить суффикс домена",
+    ),
+    "ruleActionDomainWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставление по маске; поддерживаются только * и ?",
+    ),
+    "ruleActionDscpDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить метку DSCP (только для входящих tproxy UDP)",
+    ),
+    "ruleActionDstPortDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить диапазон портов назначения",
+    ),
+    "ruleActionGeoipDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить код страны IP-адреса",
+    ),
+    "ruleActionGeositeDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить домены из Geosite",
+    ),
+    "ruleActionInNameDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить имя входящего подключения",
+    ),
+    "ruleActionInPortDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить входящий порт",
+    ),
+    "ruleActionInTypeDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить тип входящего подключения",
+    ),
+    "ruleActionInUserDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить имя пользователя входящего подключения; несколько имён разделяются /",
+    ),
+    "ruleActionIpAsnDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить ASN, которой принадлежит IP",
+    ),
+    "ruleActionIpCidr6Desc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить диапазон IP-адресов; IP-CIDR6 — просто псевдоним",
+    ),
+    "ruleActionIpCidrDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить диапазон IP-адресов",
+    ),
+    "ruleActionIpSuffixDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить диапазон суффиксов IP",
+    ),
+    "ruleActionMatchDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставляет все запросы, условия не нужны",
+    ),
+    "ruleActionNetworkDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить TCP или UDP",
+    ),
+    "ruleActionNotDesc": MessageLookupByLibrary.simpleMessage(
+      "Логическое правило NOT",
+    ),
+    "ruleActionOrDesc": MessageLookupByLibrary.simpleMessage(
+      "Логическое правило OR",
+    ),
+    "ruleActionProcessNameDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить по имени процесса; на Android соответствует имени пакета",
+    ),
+    "ruleActionProcessNameRegexDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить по регулярному выражению имени процесса; на Android соответствует имени пакета",
+    ),
+    "ruleActionProcessNameWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить по маске имени процесса; поддерживаются только * и ?",
+    ),
+    "ruleActionProcessPathDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить по полному пути процесса",
+    ),
+    "ruleActionProcessPathRegexDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить по регулярному выражению пути процесса",
+    ),
+    "ruleActionProcessPathWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить по маске пути процесса; поддерживаются только * и ?",
+    ),
+    "ruleActionRematchNameDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить имя повторного сопоставления; несколько имён разделяются /",
+    ),
+    "ruleActionRuleSetDesc": MessageLookupByLibrary.simpleMessage(
+      "Ссылка на набор правил; требуется настроить rule-providers",
+    ),
+    "ruleActionSrcGeoipDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить код страны IP источника",
+    ),
+    "ruleActionSrcIpAsnDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить ASN IP источника",
+    ),
+    "ruleActionSrcIpCidrDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить диапазон IP-адресов источника",
+    ),
+    "ruleActionSrcIpSuffixDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить диапазон суффиксов IP источника",
+    ),
+    "ruleActionSrcPortDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить диапазон портов источника",
+    ),
+    "ruleActionSubRuleDesc": MessageLookupByLibrary.simpleMessage(
+      "Переход к подправилу; обратите внимание на скобки",
+    ),
+    "ruleActionUidDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить Linux USER ID",
+    ),
     "ruleEmpty": MessageLookupByLibrary.simpleMessage("Правило пусто"),
     "ruleName": MessageLookupByLibrary.simpleMessage("Название правила"),
     "rulePresetBittorrentDirect": MessageLookupByLibrary.simpleMessage(
