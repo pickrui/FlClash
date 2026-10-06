@@ -1616,6 +1616,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "serviceComingSoon": MessageLookupByLibrary.simpleMessage("尚未开放"),
     "serviceDisallowedIsp": MessageLookupByLibrary.simpleMessage("运营商不受支持"),
     "serviceOriginalsOnly": MessageLookupByLibrary.simpleMessage("仅自制内容"),
+    "servicePending": MessageLookupByLibrary.simpleMessage("待检测"),
     "serviceProbeHint": MessageLookupByLibrary.simpleMessage(
       "点击刷新，检查实际代理链和服务响应",
     ),
@@ -1624,6 +1625,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "启动内核后可检测（安全模式禁用）",
     ),
     "serviceRestricted": MessageLookupByLibrary.simpleMessage("受限"),
+    "serviceStatus": MessageLookupByLibrary.simpleMessage("服务状态"),
     "serviceTimeout": MessageLookupByLibrary.simpleMessage("超时"),
     "serviceUnavailable": MessageLookupByLibrary.simpleMessage("不可用"),
     "serviceUnsupportedRegion": MessageLookupByLibrary.simpleMessage("地区不受支持"),

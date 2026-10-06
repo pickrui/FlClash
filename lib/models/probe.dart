@@ -11,19 +11,36 @@ ProbeStamp probeStamp(Map<String, dynamic> json) => (
   picks: (json['picks-version'] as num?)?.toInt() ?? 0,
 );
 
-const serviceTargets = {
-  'google': 'Google',
-  'github': 'GitHub',
-  'youtube': 'YouTube',
-  'chatgpt': 'ChatGPT',
-  'claude': 'Claude',
-  'gemini': 'Gemini',
-  'netflix': 'Netflix',
-  'disney-plus': 'Disney+',
-  'prime-video': 'Prime Video',
-  'spotify': 'Spotify',
-  'tiktok': 'TikTok',
-  'bilibili': 'bilibili',
+enum ServiceTarget {
+  google('google', 'Google', 'google'),
+  github('github', 'GitHub', 'github'),
+  youtube('youtube', 'YouTube', 'youtube'),
+  chatgpt('chatgpt', 'ChatGPT', 'openai'),
+  claude('claude', 'Claude', 'claude'),
+  gemini('gemini', 'Gemini', 'gemini'),
+  netflix('netflix', 'Netflix', 'netflix'),
+  disneyPlus('disney-plus', 'Disney+', 'disneyplus'),
+  primeVideo('prime-video', 'Prime Video', 'primevideo'),
+  spotify('spotify', 'Spotify', 'spotify'),
+  tiktok('tiktok', 'TikTok', 'tiktok'),
+  bilibili('bilibili', 'bilibili', 'bilibili');
+
+  const ServiceTarget(this.id, this.label, this.icon);
+
+  final String id;
+  final String label;
+  final String icon;
+
+  static ServiceTarget? byId(String id) {
+    for (final target in values) {
+      if (target.id == id) return target;
+    }
+    return null;
+  }
+}
+
+final serviceTargets = {
+  for (final target in ServiceTarget.values) target.id: target.label,
 };
 
 class ServiceCheckResult {
@@ -60,17 +77,50 @@ class OutboundIpResult {
 
 class ServiceCheckState {
   final bool loading;
+  final Set<String> loadingNames;
+  final Set<String> failedNames;
+  final bool ipLoading;
+  final bool ipFailed;
   final bool stale;
   final bool failed;
   final OutboundIpResult? ip;
   final List<ServiceCheckResult> services;
   const ServiceCheckState({
     this.loading = false,
+    this.loadingNames = const {},
+    this.failedNames = const {},
+    this.ipLoading = false,
+    this.ipFailed = false,
     this.stale = false,
     this.failed = false,
     this.ip,
     this.services = const [],
   });
+  ServiceCheckState copyWith({
+    Set<String>? loadingNames,
+    Set<String>? failedNames,
+    bool? ipLoading,
+    bool? ipFailed,
+    OutboundIpResult? ip,
+    List<ServiceCheckResult>? services,
+    bool? stale,
+  }) {
+    final nextNames = loadingNames ?? this.loadingNames;
+    final nextIp = ipLoading ?? this.ipLoading;
+    final failures = failedNames ?? this.failedNames;
+    final failedIp = ipFailed ?? this.ipFailed;
+    return ServiceCheckState(
+      loading: nextNames.isNotEmpty || nextIp,
+      loadingNames: Set.unmodifiable(nextNames),
+      failedNames: Set.unmodifiable(failures),
+      ipLoading: nextIp,
+      ipFailed: failedIp,
+      failed: failures.isNotEmpty || failedIp,
+      stale: stale ?? this.stale,
+      ip: ip ?? this.ip,
+      services: List.unmodifiable(services ?? this.services),
+    );
+  }
 }
 
 List<String> orderedServiceNames(

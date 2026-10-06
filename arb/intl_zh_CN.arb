@@ -1273,5 +1273,7 @@
   "back": "返回",
   "noSearchResults": "没有匹配的结果",
   "proxyNode": "代理节点",
-  "rules": "规则"
+  "rules": "规则",
+  "servicePending": "待检测",
+  "serviceStatus": "服务状态"
 }

@@ -2321,6 +2321,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "serviceOriginalsOnly": MessageLookupByLibrary.simpleMessage(
       "Только оригинальный контент",
     ),
+    "servicePending": MessageLookupByLibrary.simpleMessage("Не проверено"),
     "serviceProbeHint": MessageLookupByLibrary.simpleMessage(
       "Обновите, чтобы проверить маршрут и ответы сервисов",
     ),
@@ -2331,6 +2332,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Запустите ядро для проверки (в безопасном режиме отключено)",
     ),
     "serviceRestricted": MessageLookupByLibrary.simpleMessage("Ограничен"),
+    "serviceStatus": MessageLookupByLibrary.simpleMessage("Состояние сервисов"),
     "serviceTimeout": MessageLookupByLibrary.simpleMessage(
       "Время ожидания истекло",
     ),

@@ -1273,5 +1273,7 @@
   "back": "Back",
   "noSearchResults": "No matching results",
   "proxyNode": "Proxy node",
-  "rules": "Rules"
+  "rules": "Rules",
+  "servicePending": "Not checked",
+  "serviceStatus": "Service status"
 }

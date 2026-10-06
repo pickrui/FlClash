@@ -82,40 +82,101 @@ class ServiceStatus extends _$ServiceStatus {
     }
   }
 
-  Future<void> refresh() async {
-    if (!canProbe || state.loading) return;
-    final generation = ++_generation;
+  Future<void> refresh({String? service, bool includeIp = true}) async {
+    if (!canProbe) return;
+    final settings = ref.read(appSettingProvider);
+    final enabled = orderedServiceNames(
+      settings.serviceOrder,
+      disabled: settings.disabledServices,
+    );
+    final selected = service ?? settings.currentService;
+    final requested = enabled.contains(selected)
+        ? [selected]
+        : service == null || service.isEmpty
+        ? enabled
+        : <String>[];
+    final names = requested
+        .where((name) => !state.loadingNames.contains(name))
+        .toSet();
+    final loadIp = includeIp && !state.ipLoading;
+    if (names.isEmpty && !loadIp) return;
+    final generation = _generation;
+    bool isCurrent() => ref.mounted && generation == _generation;
     final backend = ref.read(serviceProbeBackendProvider);
-    state = const ServiceCheckState(loading: true);
+    state = state.copyWith(
+      loadingNames: {...state.loadingNames, ...names},
+      failedNames: {...state.failedNames}..removeAll(names),
+      ipLoading: state.ipLoading || loadIp,
+      ipFailed: loadIp ? false : state.ipFailed,
+      stale: false,
+    );
     try {
       final start = await backend.route();
-      if (!ref.mounted || generation != _generation) return;
-      _stamp = start;
-      final settings = ref.read(appSettingProvider);
-      final names = orderedServiceNames(
-        settings.serviceOrder,
-        disabled: settings.disabledServices,
-      );
-      final results = await (
-        backend.ip(target),
-        backend.services(target, names: names),
-      ).wait;
-      if (!ref.mounted || generation != _generation) return;
-      final end = await backend.route();
-      if (!ref.mounted || generation != _generation) return;
-      if (start != end ||
-          results.$1.stamp != end ||
-          results.$2.any((item) => item.stamp != end)) {
+      if (!isCurrent()) return;
+      if (_stamp != null && _stamp != start) {
         _invalidate();
         return;
       }
-      state = ServiceCheckState(
-        ip: results.$1,
-        services: List.unmodifiable(results.$2),
+      _stamp = start;
+      OutboundIpResult? ip;
+      List<ServiceCheckResult> services = const [];
+      var failedIp = false;
+      final failures = <String>{};
+      await Future.wait([
+        if (loadIp)
+          () async {
+            try {
+              ip = await backend.ip(target);
+            } catch (_) {
+              failedIp = true;
+            }
+          }(),
+        if (names.isNotEmpty)
+          () async {
+            try {
+              services = (await backend.services(
+                target,
+                names: names.toList(),
+              )).where((item) => names.contains(item.name)).toList();
+              failures.addAll(
+                names.difference(services.map((item) => item.name).toSet()),
+              );
+            } catch (_) {
+              failures.addAll(names);
+            }
+          }(),
+      ]);
+      if (!isCurrent()) return;
+      final end = await backend.route();
+      if (!isCurrent()) return;
+      if (start != end ||
+          (ip != null && ip!.stamp != end) ||
+          services.any((item) => item.stamp != end)) {
+        _invalidate();
+        return;
+      }
+      state = state.copyWith(
+        ip: ip,
+        ipLoading: loadIp ? false : state.ipLoading,
+        ipFailed: loadIp
+            ? failedIp || ip?.address.isEmpty == true
+            : state.ipFailed,
+        loadingNames: {...state.loadingNames}..removeAll(names),
+        failedNames: {...state.failedNames, ...failures},
+        services: [
+          ...state.services.where((item) => !names.contains(item.name)),
+          ...services,
+        ],
       );
     } catch (_) {
-      if (ref.mounted && generation == _generation) {
-        state = const ServiceCheckState(failed: true);
+      if (isCurrent()) {
+        _invalidate();
+        state = ServiceCheckState(
+          stale: true,
+          failed: true,
+          failedNames: names,
+          ipFailed: loadIp,
+        );
       }
     }
   }

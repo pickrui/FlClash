@@ -54,6 +54,38 @@ class FakeProbe extends ServiceProbeBackend {
   }
 }
 
+class MultiProbe extends FakeProbe {
+  final requested = <List<String>>[];
+  final pending = <String, Completer<void>>{};
+  bool failIp = false;
+  @override
+  Future<OutboundIpResult> ip(ProbeTarget target) {
+    if (failIp) throw StateError('offline fixture');
+    return super.ip(target);
+  }
+
+  @override
+  Future<List<ServiceCheckResult>> services(
+    ProbeTarget target, {
+    required List<String> names,
+  }) async {
+    requested.add(names);
+    final captured = stamp;
+    for (final name in names) {
+      await pending[name]?.future;
+    }
+    return [
+      for (final name in names)
+        ServiceCheckResult.fromJson({
+          'name': name,
+          'status': 'available',
+          'core-epoch': captured.epoch,
+          'picks-version': captured.picks,
+        }),
+    ];
+  }
+}
+
 void main() {
   const target = (name: 'node-a', group: 'group-a');
   ProviderContainer setup(FakeProbe fake, {bool running = true}) {
@@ -69,6 +101,53 @@ void main() {
     c.listen(serviceStatusProvider(target), (_, _) {});
     return c;
   }
+
+  test('independent service retries preserve cache and deduplicate overlapping requests', () async {
+    final fake = MultiProbe();
+    final c = setup(fake);
+    final notifier = c.read(serviceStatusProvider(target).notifier);
+    await notifier.refresh(service: 'google');
+    fake.pending['github'] = Completer<void>();
+    final pending = notifier.refresh(service: 'github', includeIp: false);
+    await pumpEventQueue();
+    await notifier.refresh(service: 'github', includeIp: false);
+    await notifier.refresh(service: 'youtube', includeIp: false);
+    expect(fake.requested, [
+      ['google'],
+      ['github'],
+      ['youtube'],
+    ]);
+    expect(fake.calls, 1);
+    expect(c.read(serviceStatusProvider(target)).loadingNames, {'github'});
+    fake.pending['github']!.complete();
+    await pending;
+    expect(
+      c
+          .read(serviceStatusProvider(target))
+          .services
+          .map((item) => item.name)
+          .toSet(),
+      {'google', 'github', 'youtube'},
+    );
+    expect(c.read(serviceStatusProvider(target)).loading, false);
+  });
+
+  test('selected service is the only default check and IP failure keeps its result', () async {
+    final fake = MultiProbe()..failIp = true;
+    final c = setup(fake);
+    c
+        .read(appSettingProvider.notifier)
+        .update((state) => state.copyWith(currentService: 'github'));
+    await c.read(serviceStatusProvider(target).notifier).refresh();
+    expect(fake.requested, [
+      ['github'],
+    ]);
+    expect(
+      c.read(serviceStatusProvider(target)).services.single.name,
+      'github',
+    );
+    expect(c.read(serviceStatusProvider(target)).ipFailed, true);
+  });
 
   test('only enabled services are requested in saved order', () async {
     final fake = FakeProbe();

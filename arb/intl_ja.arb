@@ -1273,5 +1273,7 @@
   "back": "戻る",
   "noSearchResults": "一致する結果はありません",
   "proxyNode": "プロキシノード",
-  "rules": "ルール"
+  "rules": "ルール",
+  "servicePending": "未検査",
+  "serviceStatus": "サービスの状態"
 }

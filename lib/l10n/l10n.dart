@@ -10748,6 +10748,26 @@ class AppLocalizations {
   String get rules {
     return Intl.message('Rules', name: 'rules', desc: '', args: []);
   }
+
+  /// `Not checked`
+  String get servicePending {
+    return Intl.message(
+      'Not checked',
+      name: 'servicePending',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Service status`
+  String get serviceStatus {
+    return Intl.message(
+      'Service status',
+      name: 'serviceStatus',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

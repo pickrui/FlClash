@@ -2201,6 +2201,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "serviceOriginalsOnly": MessageLookupByLibrary.simpleMessage(
       "Originals only",
     ),
+    "servicePending": MessageLookupByLibrary.simpleMessage("Not checked"),
     "serviceProbeHint": MessageLookupByLibrary.simpleMessage(
       "Run a check to inspect the actual route and service responses",
     ),
@@ -2211,6 +2212,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Start the core to run checks (disabled in safe mode)",
     ),
     "serviceRestricted": MessageLookupByLibrary.simpleMessage("Restricted"),
+    "serviceStatus": MessageLookupByLibrary.simpleMessage("Service status"),
     "serviceTimeout": MessageLookupByLibrary.simpleMessage("Timed out"),
     "serviceUnavailable": MessageLookupByLibrary.simpleMessage("Unavailable"),
     "serviceUnsupportedRegion": MessageLookupByLibrary.simpleMessage(

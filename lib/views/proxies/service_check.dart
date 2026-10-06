@@ -11,6 +11,7 @@ import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/providers/service_status.dart';
 import 'package:fl_clash/widgets/widgets.dart';
+import 'package:fl_clash/widgets/service_status.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -18,14 +19,22 @@ void showServiceCheck(
   BuildContext context, {
   ProbeTarget target = (name: '', group: ''),
 }) {
-  Navigator.of(context).push(
-    MaterialPageRoute<void>(builder: (_) => ServiceCheckPage(target: target)),
+  showSheet<void>(
+    context: context,
+    props: const SheetProps(isScrollControlled: true, maxWidth: 520),
+    builder: (_, _) =>
+        ServiceCheckPage(target: target, selectOnTap: target.name.isEmpty),
   );
 }
 
 class ServiceCheckPage extends ConsumerStatefulWidget {
   final ProbeTarget target;
-  const ServiceCheckPage({super.key, required this.target});
+  final bool selectOnTap;
+  const ServiceCheckPage({
+    super.key,
+    required this.target,
+    this.selectOnTap = false,
+  });
   @override
   ConsumerState<ServiceCheckPage> createState() => _ServiceCheckPageState();
 }
@@ -43,7 +52,7 @@ class _ServiceCheckPageState extends ConsumerState<ServiceCheckPage>
     final result = ref.watch(serviceStatusProvider(widget.target));
     final enabled =
         !safeModeBuild && ref.watch(initProvider) && ref.watch(isStartProvider);
-    final ip = result.ip;
+    final ip = result.ipFailed || result.ipLoading ? null : result.ip;
     final hideIp = ref.watch(
       appSettingProvider.select((state) => state.hideIp),
     );
@@ -132,48 +141,80 @@ class _ServiceCheckPageState extends ConsumerState<ServiceCheckPage>
                 .read(appSettingProvider.notifier)
                 .update((state) => state.copyWith(currentService: value ?? '')),
           ),
-          for (final target in (current.isEmpty ? names : [current]).map(
-            (name) => MapEntry(name, serviceTargets[name]!),
-          ))
+          for (final target
+              in (widget.selectOnTap || current.isEmpty ? names : [current])
+                  .map((name) => MapEntry(name, serviceTargets[name]!)))
             Builder(
               builder: (context) {
                 final item = result.services
                     .where((item) => item.name == target.key)
                     .firstOrNull;
-                final status = item?.status;
-                final label = switch (status) {
-                  'available' => l.serviceAvailable,
-                  'unavailable' => l.serviceUnavailable,
-                  'restricted' => l.serviceRestricted,
-                  'disallowed-isp' => l.serviceDisallowedIsp,
-                  'blocked' => l.serviceBlocked,
-                  'unsupported-region' => l.serviceUnsupportedRegion,
-                  'originals-only' => l.serviceOriginalsOnly,
-                  'coming-soon' => l.serviceComingSoon,
-                  'timeout' => l.serviceTimeout,
-                  'failed' => l.serviceCheckFailed,
-                  _ => '—',
-                };
+                final loading = result.loadingNames.contains(target.key);
+                final (label, color) = serviceStatusPresentation(
+                  context,
+                  result.failedNames.contains(target.key)
+                      ? 'failed'
+                      : item?.status,
+                );
                 return ListTile(
-                  leading: Icon(
-                    status == 'available'
-                        ? Icons.check_circle_outline
-                        : status == null
-                        ? Icons.more_horiz
-                        : Icons.info_outline,
+                  onTap: widget.selectOnTap
+                      ? () {
+                          ref
+                              .read(appSettingProvider.notifier)
+                              .update(
+                                (state) =>
+                                    state.copyWith(currentService: target.key),
+                              );
+                          Navigator.of(context).pop();
+                        }
+                      : null,
+                  leading: ServiceBadge(
+                    target: ServiceTarget.byId(target.key)!,
+                    size: 40,
+                    dot: color,
                   ),
                   title: Text(target.value),
                   subtitle: Text(
                     [
-                      label,
-                      if (item != null && item.region.isNotEmpty) item.region,
-                      if (item != null && item.chains.isNotEmpty)
-                        item.chains.join(' → '),
-                    ].join(' · '),
+                          loading ? l.loading : label,
+                          if (item != null && item.region.isNotEmpty)
+                            item.region,
+                          if (item != null && item.chains.isNotEmpty)
+                            item.chains.join(' → '),
+                        ].join(' · ') +
+                        (item != null && item.checkedAt > 0
+                            ? '\n${DateTime.fromMillisecondsSinceEpoch(item.checkedAt).showFull}'
+                            : ''),
                   ),
-                  trailing: item != null && item.delay > 0
-                      ? Text('${item.delay} ms')
-                      : null,
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (item != null && item.delay > 0)
+                        Text('${item.delay} ms'),
+                      if (loading)
+                        const SizedBox.square(
+                          dimension: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      else
+                        IconButton(
+                          tooltip: l.retry,
+                          icon: const Icon(Icons.refresh),
+                          onPressed: enabled
+                              ? () => ref
+                                    .read(
+                                      serviceStatusProvider(widget.target)
+                                          .notifier,
+                                    )
+                                    .refresh(
+                                      service: target.key,
+                                      includeIp: false,
+                                    )
+                              : null,
+                        ),
+                    ],
+                  ),
+                  isThreeLine: item != null && item.checkedAt > 0,
                 );
               },
             ),

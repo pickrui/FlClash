@@ -1273,5 +1273,7 @@
   "back": "Назад",
   "noSearchResults": "Ничего не найдено",
   "proxyNode": "Прокси-узел",
-  "rules": "Правила"
+  "rules": "Правила",
+  "servicePending": "Не проверено",
+  "serviceStatus": "Состояние сервисов"
 }

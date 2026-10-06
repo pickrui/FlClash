@@ -1829,6 +1829,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "serviceComingSoon": MessageLookupByLibrary.simpleMessage("近日公開"),
     "serviceDisallowedIsp": MessageLookupByLibrary.simpleMessage("ISP 非対応"),
     "serviceOriginalsOnly": MessageLookupByLibrary.simpleMessage("オリジナル作品のみ"),
+    "servicePending": MessageLookupByLibrary.simpleMessage("未検査"),
     "serviceProbeHint": MessageLookupByLibrary.simpleMessage("更新して実際の経路と応答を確認"),
     "serviceProbeStale": MessageLookupByLibrary.simpleMessage(
       "経路が変更されました。再度確認してください",
@@ -1837,6 +1838,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "コア起動後に確認できます（セーフモードでは無効）",
     ),
     "serviceRestricted": MessageLookupByLibrary.simpleMessage("制限あり"),
+    "serviceStatus": MessageLookupByLibrary.simpleMessage("サービスの状態"),
     "serviceTimeout": MessageLookupByLibrary.simpleMessage("タイムアウト"),
     "serviceUnavailable": MessageLookupByLibrary.simpleMessage("利用不可"),
     "serviceUnsupportedRegion": MessageLookupByLibrary.simpleMessage("地域非対応"),

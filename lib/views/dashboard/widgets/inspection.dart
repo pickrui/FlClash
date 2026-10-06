@@ -6,14 +6,13 @@
 import 'package:fl_clash/common/common.dart';
 
 import '../widget_metrics.dart';
+export 'service_status.dart';
 export 'profiles.dart';
 export 'proxy_groups.dart';
 
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/providers/service_status.dart';
 import 'package:fl_clash/views/config/dns.dart';
-import 'package:fl_clash/views/proxies/service_check.dart';
 import 'package:fl_clash/widgets/route_motion_hold.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -158,71 +157,4 @@ class RuntimeCard extends ConsumerWidget {
       ),
     ),
   );
-}
-
-class ServiceStatusCard extends ConsumerStatefulWidget {
-  const ServiceStatusCard({super.key});
-  @override
-  ConsumerState<ServiceStatusCard> createState() => _ServiceStatusCardState();
-}
-
-class _ServiceStatusCardState extends ConsumerState<ServiceStatusCard>
-    with WidgetsBindingObserver, ActivePollingMixin<ServiceStatusCard> {
-  static const _target = (name: '', group: '');
-  @override
-  Duration get pollInterval => const Duration(seconds: 2);
-  @override
-  Future<void> poll(PollGuard isCurrent) =>
-      ref.read(serviceStatusProvider(_target).notifier).pollRoute();
-  @override
-  Widget build(BuildContext context) {
-    final l = context.appLocalizations;
-    final state = ref.watch(serviceStatusProvider(_target));
-    final enabled =
-        !safeModeBuild && ref.watch(isStartProvider) && ref.watch(initProvider);
-    return InspectionCard(
-      label: l.serviceAvailability,
-      rows: 2,
-      icon: Icons.travel_explore,
-      onPressed: () => showServiceCheck(context),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  state.stale ? l.serviceProbeStale : state.ip?.address ?? '—',
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                if (state.services.isNotEmpty)
-                  Text(
-                    '${state.services.where((item) => item.status == "available").length}/${state.services.length} ${l.serviceAvailable}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-              ],
-            ),
-          ),
-          state.loading
-              ? const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : IconButton(
-                  tooltip: l.refresh,
-                  onPressed: enabled
-                      ? () => ref
-                            .read(serviceStatusProvider(_target).notifier)
-                            .refresh()
-                      : null,
-                  icon: const Icon(Icons.refresh),
-                ),
-        ],
-      ),
-    );
-  }
 }
