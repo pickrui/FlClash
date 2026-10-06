@@ -1902,10 +1902,11 @@ packages:
   yaml_writer:
     dependency: "direct main"
     description:
-      name: yaml_writer
-      sha256: "69651cd7238411179ac32079937d4aa9a2970150d6b2ae2c6fe6de09402a5dc5"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: "79c78a44ec9c2f5f5f97da1a65610c6fb2ead8b3"
+      resolved-ref: "79c78a44ec9c2f5f5f97da1a65610c6fb2ead8b3"
+      url: "https://github.com/chen08209/yaml_writer"
+    source: git
     version: "2.1.0"
 sdks:
   dart: ">=3.13.2 <4.0.0"
