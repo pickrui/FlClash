@@ -12,7 +12,10 @@ export 'proxy_groups.dart';
 
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/views/config/dns.dart';
+
+import 'quick_options.dart';
+
+import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/views/connection/connections.dart';
 import 'package:fl_clash/views/connection/requests.dart';
 import 'package:fl_clash/views/connection/dns_queries.dart';
@@ -23,14 +26,14 @@ import 'package:material_ui/material_ui.dart';
 
 class InspectionCard extends StatelessWidget {
   final String label;
-  final IconData icon;
+  final Glyph glyph;
   final Widget child;
   final VoidCallback? onPressed;
   final double rows;
   const InspectionCard({
     super.key,
     required this.label,
-    required this.icon,
+    required this.glyph,
     required this.child,
     this.onPressed,
     this.rows = 1,
@@ -40,7 +43,9 @@ class InspectionCard extends StatelessWidget {
     height: DashboardWidgetMetrics.heightOf(context, rows),
     child: CommonCard(
       radius: DashboardWidgetMetrics.radiusOf(context),
-      info: Info(label: label, iconData: icon),
+      info: Info(label: label, glyph: glyph),
+      infoPadding: DashboardWidgetMetrics.paddingOf(context)
+          .copyWith(bottom: 0),
       onPressed: onPressed,
       child: Padding(
         padding: DashboardWidgetMetrics.paddingOf(context).copyWith(top: 0),
@@ -92,9 +97,11 @@ class _FeedCountCardState extends ConsumerState<FeedCountCard>
         PageLabel.requests => l.requests,
         _ => l.connections,
       },
-      icon: widget.page == PageLabel.dnsQueries
-          ? Icons.dns_outlined
-          : Icons.swap_calls,
+      glyph: switch (widget.page) {
+        PageLabel.dnsQueries => AppGlyphs.dns,
+        PageLabel.requests => AppGlyphs.requests,
+        _ => AppGlyphs.connections,
+      },
       onPressed: () => showSnapSheet(
         context,
         initialScrollOffset: widget.page == PageLabel.requests
@@ -108,49 +115,21 @@ class _FeedCountCardState extends ConsumerState<FeedCountCard>
       ),
       child: Align(
         alignment: Alignment.bottomLeft,
-        child: Text('$_count', style: context.textTheme.headlineSmall),
+        child: Text(
+          '$_count',
+          style: context.textTheme.bodyMedium?.toLight.adjustSize(1),
+        ),
       ),
     );
   }
 }
 
-class OverrideCard extends ConsumerWidget {
+class OverrideCard extends StatelessWidget {
   final bool ntp;
   const OverrideCard({super.key, this.ntp = false});
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = context.appLocalizations;
-    final enabled = ref.watch(ntp ? overrideNtpProvider : overrideDnsProvider);
-    final config = ref.watch(patchClashConfigProvider);
-    final count = ntp
-        ? config.ntpOverrideKeys.length
-        : config.dnsOverrideKeys.length;
-    return InspectionCard(
-      label: ntp ? l.overrideNtp : l.overrideDns,
-      rows: 2,
-      icon: ntp ? Icons.schedule : Icons.dns_outlined,
-      onPressed: () =>
-          BaseNavigator.push(context, ntp ? const NtpView() : const DnsView()),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Flexible(
-            child: Text('$count', style: context.textTheme.headlineSmall),
-          ),
-          Switch(
-            value: enabled,
-            onChanged: (value) {
-              if (ntp) {
-                ref.read(overrideNtpProvider.notifier).value = value;
-              } else {
-                ref.read(overrideDnsProvider.notifier).value = value;
-              }
-            },
-          ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      ntp ? const OverrideNtpButton() : const OverrideDnsButton();
 }
 
 class RuntimeCard extends ConsumerWidget {
@@ -158,7 +137,7 @@ class RuntimeCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) => InspectionCard(
     label: context.appLocalizations.runTime,
-    icon: Icons.history,
+    glyph: AppGlyphs.history,
     child: Align(
       alignment: Alignment.bottomLeft,
       child: Text(

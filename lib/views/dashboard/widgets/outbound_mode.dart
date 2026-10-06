@@ -6,6 +6,7 @@
 import 'dart:math';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/icons/icons.dart';
 
 import '../widget_metrics.dart';
 
@@ -41,10 +42,12 @@ class OutboundMode extends StatelessWidget {
             ),
             child: CommonCard(
               radius: DashboardWidgetMetrics.radiusOf(context),
+              infoPadding: DashboardWidgetMetrics.paddingOf(context)
+                  .copyWith(bottom: 0),
               skipTraversal: true,
               info: Info(
                 label: appLocalizations.outboundMode,
-                iconData: Icons.call_split_sharp,
+                glyph: AppGlyphs.split,
               ),
               child: Padding(
                 padding: const EdgeInsets.only(top: 12, bottom: 12),
@@ -125,6 +128,8 @@ class OutboundModeV2 extends StatelessWidget {
       height: height,
       child: CommonCard(
         radius: DashboardWidgetMetrics.radiusOf(context),
+        infoPadding: DashboardWidgetMetrics.paddingOf(context)
+            .copyWith(bottom: 0),
         padding: EdgeInsets.zero,
         child: Consumer(
           builder: (_, ref, _) {

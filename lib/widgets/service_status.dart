@@ -29,12 +29,12 @@ import 'package:material_ui/material_ui.dart';
     _ => l.servicePending,
   };
   final color = status == 'available'
-      ? Colors.green
+      ? context.colorScheme.success
       : status == null
       ? context.colorScheme.onSurfaceVariant
       : ['failed', 'timeout', 'unavailable'].contains(status)
       ? context.colorScheme.error
-      : Colors.orange;
+      : context.colorScheme.warning;
   return (label, color);
 }
 

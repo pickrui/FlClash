@@ -109,7 +109,7 @@ class ProxyCard extends StatelessWidget {
                           : context.appLocalizations.delayTestFailed,
                       style: context.textTheme.labelSmall?.copyWith(
                         overflow: TextOverflow.ellipsis,
-                        color: utils.getDelayColor(delay),
+                        color: context.colorScheme.delayColor(delay),
                       ),
                     ),
                   ),

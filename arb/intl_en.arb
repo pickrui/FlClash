@@ -1352,5 +1352,8 @@
   "logsAndDiagnostics": "Logs and diagnostics",
   "onDemand": "On demand",
   "onDemandDesc": "Configure the app's running state for specific scenarios",
-  "prerequisites": "Prerequisites"
+  "prerequisites": "Prerequisites",
+  "suspended": "Suspended…",
+  "enabled": "Enabled",
+  "disabled": "Disabled"
 }

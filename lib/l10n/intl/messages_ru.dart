@@ -1105,6 +1105,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "direct": MessageLookupByLibrary.simpleMessage("Прямой"),
     "disableUDP": MessageLookupByLibrary.simpleMessage("Отключить UDP"),
+    "disabled": MessageLookupByLibrary.simpleMessage("Выключено"),
     "discardChanges": MessageLookupByLibrary.simpleMessage(
       "Отменить изменения?",
     ),
@@ -1207,6 +1208,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "enableAutoRenew": MessageLookupByLibrary.simpleMessage(
       "Включить автопродление",
     ),
+    "enabled": MessageLookupByLibrary.simpleMessage("Включено"),
     "entries": MessageLookupByLibrary.simpleMessage(" записей"),
     "entriesCount": m20,
     "exclude": MessageLookupByLibrary.simpleMessage(
@@ -2616,6 +2618,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "suspendOnIdleDesc": MessageLookupByLibrary.simpleMessage(
       "Приостанавливать передачу трафика для экономии энергии, когда экран выключен и система переходит в режим бездействия. Звонки и прямые аудиотрансляции могут прерываться.",
     ),
+    "suspended": MessageLookupByLibrary.simpleMessage("Приостановлено…"),
     "switchProfile": MessageLookupByLibrary.simpleMessage("Сменить профиль"),
     "sync": MessageLookupByLibrary.simpleMessage("Синхронизация"),
     "system": MessageLookupByLibrary.simpleMessage("Система"),

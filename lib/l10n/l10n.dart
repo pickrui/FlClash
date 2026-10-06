@@ -11488,6 +11488,21 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Suspended…`
+  String get suspended {
+    return Intl.message('Suspended…', name: 'suspended', desc: '', args: []);
+  }
+
+  /// `Enabled`
+  String get enabled {
+    return Intl.message('Enabled', name: 'enabled', desc: '', args: []);
+  }
+
+  /// `Disabled`
+  String get disabled {
+    return Intl.message('Disabled', name: 'disabled', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

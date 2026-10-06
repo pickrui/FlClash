@@ -11,6 +11,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/database.dart';
+import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/dashboard/widgets/start_button.dart';
 import 'package:material_ui/material_ui.dart';
@@ -20,6 +21,24 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   tearDown(() => debouncer.cancel(FunctionTag.updateStatus));
+
+  testWidgets('long runtimes update without a restart', (tester) async {
+    await _pumpButton(tester, (_) async {});
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(StartButton)),
+    );
+    container.read(runTimeProvider.notifier).value = const Duration(
+      hours: 101,
+      minutes: 23,
+    ).inMilliseconds;
+    await tester.pumpAndSettle();
+    expect(find.text('101:23'), findsOneWidget);
+    expect(_progress(tester), 1);
+    container.read(runTimeProvider.notifier).value = null;
+    await tester.pumpAndSettle();
+    expect(_progress(tester), 0);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('cancelled startup restores the play button and permits retry', (
     tester,
@@ -83,7 +102,10 @@ void main() {
 }
 
 double _progress(WidgetTester tester) {
-  return tester.widget<AnimatedIcon>(find.byType(AnimatedIcon)).progress.value;
+  return tester
+      .widget<SizeTransition>(find.byType(SizeTransition).first)
+      .sizeFactor
+      .value;
 }
 
 Future<void> _pumpButton(

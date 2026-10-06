@@ -605,47 +605,63 @@ class BlockWebRtcItem extends ConsumerWidget {
   }
 }
 
-class NetworkListView extends StatelessWidget {
-  const NetworkListView({super.key});
-
+class VpnSections extends StatelessWidget {
+  const VpnSections({super.key});
   @override
-  Widget build(BuildContext context) {
-    final appLocalizations = context.appLocalizations;
-    return generateListView([
-      if (system.isAndroid) const VPNItem(),
-      if (system.isAndroid)
-        ...generateSection(
-          title: 'VPN',
-          items: [
-            const VpnSystemProxyItem(),
-            const BypassDomainItem(),
-            const AllowBypassItem(),
-            const Ipv6Item(),
-            const DNSHijackingItem(),
-          ],
-        ),
-      if (system.isDesktop)
-        ...generateSection(
-          title: appLocalizations.system,
-          items: [const SystemProxyItem(), const BypassDomainItem()],
-        ),
-      ...generateSection(
-        title: appLocalizations.options,
-        items: [
-          if (system.isDesktop) const TUNItem(),
-          if (system.isMacOS) const AutoSetSystemDnsItem(),
-          const TunStackItem(),
-          const TunMtuItem(),
-          const BlockQuicItem(),
-          const BlockWebRtcItem(),
-          if (!system.isDesktop) ...[
-            const RouteModeItem(),
-            const RouteAddressItem(),
-          ],
+  Widget build(BuildContext context) => Column(
+    children: [
+      generateSectionV3(items: const [VPNItem()]),
+      generateSectionV3(
+        title: 'VPN',
+        items: const [
+          VpnSystemProxyItem(),
+          BypassDomainItem(),
+          AllowBypassItem(),
+          Ipv6Item(),
+          DNSHijackingItem(),
         ],
       ),
-    ]);
-  }
+    ],
+  );
+}
+
+class SystemProxySection extends StatelessWidget {
+  const SystemProxySection({super.key});
+  @override
+  Widget build(BuildContext context) => generateSectionV3(
+    title: context.appLocalizations.system,
+    items: const [SystemProxyItem(), BypassDomainItem()],
+  );
+}
+
+class NetworkOptionsSection extends StatelessWidget {
+  const NetworkOptionsSection({super.key});
+  @override
+  Widget build(BuildContext context) => generateSectionV3(
+    title: context.appLocalizations.options,
+    items: [
+      if (system.isDesktop) const TUNItem(),
+      if (system.isMacOS) const AutoSetSystemDnsItem(),
+      const TunStackItem(),
+      const TunMtuItem(),
+      const BlockQuicItem(),
+      const BlockWebRtcItem(),
+      if (!system.isDesktop) ...const [RouteModeItem(), RouteAddressItem()],
+    ],
+  );
+}
+
+class NetworkListView extends StatelessWidget {
+  const NetworkListView({super.key});
+  @override
+  Widget build(BuildContext context) => ListView(
+    padding: const EdgeInsets.all(16),
+    children: [
+      if (system.isAndroid) const VpnSections(),
+      if (system.isDesktop) const SystemProxySection(),
+      const NetworkOptionsSection(),
+    ],
+  );
 }
 
 class OnDemandView extends StatelessWidget {

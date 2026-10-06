@@ -107,6 +107,7 @@ class CommonCard extends StatelessWidget {
     this.padding,
     this.enterAnimated = false,
     this.info,
+    this.infoPadding,
     this.onLongPress,
     this.shape,
     this.isError = false,
@@ -126,6 +127,7 @@ class CommonCard extends StatelessWidget {
   final Widget child;
   final EdgeInsets? padding;
   final Info? info;
+  final EdgeInsets? infoPadding;
   final CommonCardType type;
   final double? radius;
   final OutlinedBorder? shape;
@@ -270,7 +272,7 @@ class CommonCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           InfoHeader(
-            padding: baseInfoEdgeInsets.copyWith(bottom: 0),
+            padding: infoPadding ?? baseInfoEdgeInsets.copyWith(bottom: 0),
             info: info!,
           ),
           Flexible(flex: 1, child: child),

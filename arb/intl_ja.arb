@@ -1352,5 +1352,8 @@
   "logsAndDiagnostics": "ログと診断",
   "onDemand": "オンデマンド",
   "onDemandDesc": "特定のシナリオでのアプリの実行状態を設定します",
-  "prerequisites": "前提条件"
+  "prerequisites": "前提条件",
+  "suspended": "一時停止中…",
+  "enabled": "有効",
+  "disabled": "無効"
 }

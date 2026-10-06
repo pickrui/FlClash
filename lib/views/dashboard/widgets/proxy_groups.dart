@@ -345,7 +345,7 @@ class _ProxyDelay extends ConsumerWidget {
       delay > 0 ? '$delay ms' : context.appLocalizations.delayTestFailed,
       maxLines: 1,
       style: context.textTheme.labelSmall?.copyWith(
-        color: utils.getDelayColor(delay),
+        color: context.colorScheme.delayColor(delay),
       ),
     );
   }

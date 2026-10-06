@@ -913,6 +913,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "direct": MessageLookupByLibrary.simpleMessage("ダイレクト"),
     "disableUDP": MessageLookupByLibrary.simpleMessage("UDPを無効化"),
+    "disabled": MessageLookupByLibrary.simpleMessage("無効"),
     "discardChanges": MessageLookupByLibrary.simpleMessage("変更を破棄しますか？"),
     "disconnected": MessageLookupByLibrary.simpleMessage("切断済み"),
     "discountCode": MessageLookupByLibrary.simpleMessage("クーポンコード"),
@@ -973,6 +974,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "emptyTip": m19,
     "en": MessageLookupByLibrary.simpleMessage("英語"),
     "enableAutoRenew": MessageLookupByLibrary.simpleMessage("自動更新を有効にする"),
+    "enabled": MessageLookupByLibrary.simpleMessage("有効"),
     "entries": MessageLookupByLibrary.simpleMessage(" エントリ"),
     "entriesCount": m20,
     "exclude": MessageLookupByLibrary.simpleMessage("最近のタスクから非表示"),
@@ -2063,6 +2065,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "suspendOnIdleDesc": MessageLookupByLibrary.simpleMessage(
       "画面がオフでシステムがアイドル状態のとき、通信の転送を一時停止して電力を節約します。通話やライブ音声が切断される場合があります",
     ),
+    "suspended": MessageLookupByLibrary.simpleMessage("一時停止中…"),
     "switchProfile": MessageLookupByLibrary.simpleMessage("プロファイルを切り替え"),
     "sync": MessageLookupByLibrary.simpleMessage("同期"),
     "system": MessageLookupByLibrary.simpleMessage("システム"),

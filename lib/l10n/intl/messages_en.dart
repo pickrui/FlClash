@@ -1080,6 +1080,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "direct": MessageLookupByLibrary.simpleMessage("Direct"),
     "disableUDP": MessageLookupByLibrary.simpleMessage("Disable UDP"),
+    "disabled": MessageLookupByLibrary.simpleMessage("Disabled"),
     "discardChanges": MessageLookupByLibrary.simpleMessage(
       "Discard the changes?",
     ),
@@ -1170,6 +1171,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "enableAutoRenew": MessageLookupByLibrary.simpleMessage(
       "Enable auto-renew",
     ),
+    "enabled": MessageLookupByLibrary.simpleMessage("Enabled"),
     "entries": MessageLookupByLibrary.simpleMessage(" entries"),
     "entriesCount": m20,
     "exclude": MessageLookupByLibrary.simpleMessage("Hidden from recent tasks"),
@@ -2482,6 +2484,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "suspendOnIdleDesc": MessageLookupByLibrary.simpleMessage(
       "Pause traffic forwarding to save power when the screen is off and the system becomes idle. This may disconnect calls and live audio.",
     ),
+    "suspended": MessageLookupByLibrary.simpleMessage("Suspended…"),
     "switchProfile": MessageLookupByLibrary.simpleMessage("Switch profile"),
     "sync": MessageLookupByLibrary.simpleMessage("Sync"),
     "system": MessageLookupByLibrary.simpleMessage("System"),

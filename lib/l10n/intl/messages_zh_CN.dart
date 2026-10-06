@@ -806,6 +806,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "dialerProxyDesc": MessageLookupByLibrary.simpleMessage("用于连接NTP服务器的出站"),
     "direct": MessageLookupByLibrary.simpleMessage("直连"),
     "disableUDP": MessageLookupByLibrary.simpleMessage("禁用 UDP"),
+    "disabled": MessageLookupByLibrary.simpleMessage("已关闭"),
     "discardChanges": MessageLookupByLibrary.simpleMessage("是否放弃更改？"),
     "disconnected": MessageLookupByLibrary.simpleMessage("已断开"),
     "discountCode": MessageLookupByLibrary.simpleMessage("折扣代码"),
@@ -858,6 +859,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "emptyTip": m19,
     "en": MessageLookupByLibrary.simpleMessage("英语"),
     "enableAutoRenew": MessageLookupByLibrary.simpleMessage("开启自动续费"),
+    "enabled": MessageLookupByLibrary.simpleMessage("已开启"),
     "entries": MessageLookupByLibrary.simpleMessage("个条目"),
     "entriesCount": m20,
     "exclude": MessageLookupByLibrary.simpleMessage("从最近任务中隐藏"),
@@ -1822,6 +1824,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "suspendOnIdleDesc": MessageLookupByLibrary.simpleMessage(
       "熄屏并进入系统空闲状态时暂停流量转发以节省电量，可能导致语音通话和实时音频断开",
     ),
+    "suspended": MessageLookupByLibrary.simpleMessage("挂起中…"),
     "switchProfile": MessageLookupByLibrary.simpleMessage("切换配置"),
     "sync": MessageLookupByLibrary.simpleMessage("同步"),
     "system": MessageLookupByLibrary.simpleMessage("系统"),

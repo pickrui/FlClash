@@ -12,6 +12,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/icons/icons.dart';
 
 import '../widget_metrics.dart';
 
@@ -142,8 +143,10 @@ class _MemoryInfoState extends ConsumerState<MemoryInfo>
       child: RepaintBoundary(
         child: CommonCard(
           radius: DashboardWidgetMetrics.radiusOf(context),
+          infoPadding: DashboardWidgetMetrics.paddingOf(context)
+              .copyWith(bottom: 0),
           info: Info(
-            iconData: Icons.memory,
+            glyph: AppGlyphs.memory,
             label: appLocalizations.memoryInfo,
           ),
           onPressed: _showDetail,

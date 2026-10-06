@@ -920,7 +920,7 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: context.textTheme.labelSmall?.copyWith(
-            color: utils.getDelayColor(delay),
+            color: context.colorScheme.delayColor(delay),
             fontWeight: FontWeight.w600,
           ),
         );

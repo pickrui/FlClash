@@ -10,7 +10,6 @@ import 'package:defer_pointer/defer_pointer.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:fl_clash/widgets/navigation_dock.dart';
 import 'package:material_ui/material_ui.dart';
@@ -21,6 +20,7 @@ import 'package:fl_clash/widgets/snap_sheet.dart';
 
 import 'widget_metrics.dart';
 import 'widgets/start_button.dart';
+import 'widgets/core_status_button.dart';
 import 'widgets/widgets.dart';
 
 typedef _IsEditWidgetBuilder = Widget Function(bool isEdit);
@@ -57,116 +57,9 @@ class _DashboardViewState extends ConsumerState<DashboardView>
     );
   }
 
-  Future<void> _handleConnection() async {
-    final coreAction = context.coreAction;
-
-    final coreStatus = ref.read(coreStatusProvider);
-    if (coreStatus == CoreStatus.connecting) {
-      return;
-    }
-    final tip = coreStatus == CoreStatus.connected
-        ? appLocalizations.forceRestartCoreTip
-        : appLocalizations.restartCoreTip;
-    final res = await globalState.showMessage(message: TextSpan(text: tip));
-    if (res != true) {
-      return;
-    }
-    coreAction.restartCore();
-  }
-
   List<Widget> _buildActions(bool isEdit) {
     return [
-      if (!isEdit)
-        Consumer(
-          builder: (_, ref, _) {
-            final coreStatus = ref.watch(coreStatusProvider);
-            return Tooltip(
-              message: coreStatus == CoreStatus.connected
-                  ? ''
-                  : appLocalizations.coreStatus,
-              child: FadeScaleBox(
-                alignment: Alignment.centerRight,
-                child: coreStatus == CoreStatus.connected
-                    ? IconButton.filled(
-                        tooltip: context.appLocalizations.coreStatus,
-                        visualDensity: VisualDensity.compact,
-                        iconSize: 20,
-                        padding: EdgeInsets.zero,
-                        style: IconButton.styleFrom(
-                          backgroundColor: Colors.greenAccent,
-                          foregroundColor: switch (Theme.brightnessOf(
-                            context,
-                          )) {
-                            Brightness.light =>
-                              context.colorScheme.onSurfaceVariant,
-                            Brightness.dark =>
-                              context.colorScheme.onPrimaryFixedVariant,
-                          },
-                        ),
-                        onPressed: _handleConnection,
-                        icon: const Icon(
-                          Icons.check,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      )
-                    : FilledButton.icon(
-                        key: ValueKey(coreStatus),
-                        onPressed: _handleConnection,
-                        style: FilledButton.styleFrom(
-                          visualDensity: VisualDensity.compact,
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          backgroundColor: switch (coreStatus) {
-                            CoreStatus.connecting => null,
-                            CoreStatus.connected => Colors.greenAccent,
-                            CoreStatus.disconnected =>
-                              context.colorScheme.error,
-                          },
-                          foregroundColor: switch (coreStatus) {
-                            CoreStatus.connecting => null,
-                            CoreStatus.connected => switch (Theme.brightnessOf(
-                              context,
-                            )) {
-                              Brightness.light =>
-                                context.colorScheme.onSurfaceVariant,
-                              Brightness.dark => null,
-                            },
-                            CoreStatus.disconnected =>
-                              context.colorScheme.onError,
-                          },
-                        ),
-                        icon: SizedBox(
-                          height: globalState.measure.bodyMediumHeight,
-                          width: globalState.measure.bodyMediumHeight,
-                          child: switch (coreStatus) {
-                            CoreStatus.connecting => Padding(
-                              padding: const EdgeInsets.all(2),
-                              child: CircularProgressIndicator(
-                                strokeWidth: 3,
-                                color: context.colorScheme.onPrimary,
-                                backgroundColor: Colors.transparent,
-                              ),
-                            ),
-                            CoreStatus.connected => const Icon(
-                              Icons.check_sharp,
-                              fontWeight: FontWeight.w900,
-                            ),
-                            CoreStatus.disconnected => const Icon(
-                              Icons.restart_alt_sharp,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          },
-                        ),
-                        label: Text(switch (coreStatus) {
-                          CoreStatus.connecting => appLocalizations.connecting,
-                          CoreStatus.connected => appLocalizations.connected,
-                          CoreStatus.disconnected =>
-                            appLocalizations.disconnected,
-                        }),
-                      ),
-              ),
-            );
-          },
-        ),
+      if (!isEdit) const CoreStatusButton(),
       if (isEdit)
         ValueListenableBuilder(
           valueListenable: _addedWidgetsNotifier,

@@ -6,6 +6,7 @@
 import 'dart:math';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/icons/icons.dart';
 
 import '../widget_metrics.dart';
 
@@ -82,9 +83,11 @@ class TrafficUsage extends StatelessWidget {
       child: RepaintBoundary(
         child: CommonCard(
           radius: DashboardWidgetMetrics.radiusOf(context),
+          infoPadding: DashboardWidgetMetrics.paddingOf(context)
+              .copyWith(bottom: 0),
           info: Info(
             label: appLocalizations.trafficUsage,
-            iconData: Icons.data_saver_off,
+            glyph: AppGlyphs.dataUsage,
           ),
           onPressed: () {},
           child: Consumer(
