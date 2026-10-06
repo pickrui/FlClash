@@ -208,6 +208,7 @@ abstract class SharedState with _$SharedState {
     required String currentProfileName,
     required String stopText,
     required bool onlyStatisticsProxy,
+    @Default(true) bool showNotificationStopAction,
   }) = _SharedState;
 
   factory SharedState.fromJson(Map<String, Object?> json) =>
@@ -273,6 +274,7 @@ abstract class MigrationData with _$MigrationData {
 @freezed
 abstract class SetupState with _$SetupState {
   const factory SetupState({
+    String? interfaceName,
     required int? profileId,
     required int? profileLastUpdateDate,
     required OverwriteType overwriteType,
@@ -301,6 +303,7 @@ extension SetupStateExt on SetupState {
     if (lastSetupState == null) {
       return false;
     }
+    if (interfaceName != lastSetupState.interfaceName) return true;
     if (profileId != lastSetupState.profileId) {
       return true;
     }

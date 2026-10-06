@@ -36,6 +36,26 @@ MakeRealProfileState state(
 
 void main() {
   test(
+    'interface selection follows, clears or overrides without mutating source',
+    () async {
+      const raw = <String, dynamic>{'interface-name': 'source0'};
+      final inherited = await makeRealProfileTask(
+        state(raw, const ClashConfig()),
+      );
+      final cleared = await makeRealProfileTask(
+        state(raw, const ClashConfig(interfaceName: '')),
+      );
+      final custom = await makeRealProfileTask(
+        state(raw, const ClashConfig(interfaceName: 'Ethernet 2')),
+      );
+      expect(inherited['interface-name'], 'source0');
+      expect(cleared.containsKey('interface-name'), false);
+      expect(custom['interface-name'], 'Ethernet 2');
+      expect(raw['interface-name'], 'source0');
+    },
+  );
+
+  test(
     'only selected DNS and NTP fields replace source values without mutation',
     () async {
       const raw = <String, dynamic>{
@@ -96,9 +116,8 @@ void main() {
         ntpOverrideKeys: {NtpOverrideKey.interval},
       );
       expect(
-        (await makeRealProfileTask(
-          state({}, patch, ntp: false),
-        )).containsKey('ntp'),
+        (await makeRealProfileTask(state({}, patch, ntp: false)))
+            .containsKey('ntp'),
         isFalse,
       );
       expect((await makeRealProfileTask(state({}, patch)))['ntp'], {

@@ -271,6 +271,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "コロンや制御文字を含まない 1～255 UTF-8 バイトを入力してください",
     ),
     "auto": MessageLookupByLibrary.simpleMessage("自動"),
+    "autoCheckUpdate": MessageLookupByLibrary.simpleMessage("更新の自動チェック"),
     "autoCloseConnections": MessageLookupByLibrary.simpleMessage("接続を自動閉じる"),
     "autoCloseConnectionsDesc": MessageLookupByLibrary.simpleMessage(
       "ノード変更後に接続を自動閉じる",
@@ -1096,6 +1097,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "チャージしてからもう一度お試しください",
     ),
     "intelligentSelected": MessageLookupByLibrary.simpleMessage("インテリジェント選択"),
+    "interfaceAutomatic": MessageLookupByLibrary.simpleMessage("指定を解除（自動選択）"),
+    "interfaceFollowProfile": MessageLookupByLibrary.simpleMessage("プロファイルに従う"),
+    "interfaceName": MessageLookupByLibrary.simpleMessage("インターフェース名"),
     "internet": MessageLookupByLibrary.simpleMessage("インターネット"),
     "interval": MessageLookupByLibrary.simpleMessage("インターバル"),
     "intranetIP": MessageLookupByLibrary.simpleMessage("イントラネットIP"),
@@ -1168,6 +1172,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "中国本土のネットワークには適さない可能性があります",
     ),
     "manageServices": MessageLookupByLibrary.simpleMessage("サービスの管理"),
+    "manageUserAgents": MessageLookupByLibrary.simpleMessage("一覧を管理"),
     "matchTarget": MessageLookupByLibrary.simpleMessage("MATCH-TARGET"),
     "matchTargetDesc": MessageLookupByLibrary.simpleMessage(
       "MATCH-TARGET を対象にしたルールの行き先。既定ではこのプロファイル末尾の MATCH ルールのターゲットを使います",
@@ -1721,6 +1726,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "serviceUnsupportedRegion": MessageLookupByLibrary.simpleMessage("地域非対応"),
     "settings": MessageLookupByLibrary.simpleMessage("設定"),
     "show": MessageLookupByLibrary.simpleMessage("表示"),
+    "showNotificationStopAction": MessageLookupByLibrary.simpleMessage(
+      "通知に停止ボタンを表示",
+    ),
     "shrink": MessageLookupByLibrary.simpleMessage("縮小"),
     "sidebarBlur": MessageLookupByLibrary.simpleMessage("サイドバーのぼかし"),
     "sidebarBlurDesc": MessageLookupByLibrary.simpleMessage(

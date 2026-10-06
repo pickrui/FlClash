@@ -5860,7 +5860,7 @@ $VpnPropsCopyWith<$Res> get vpnProps {
 /// @nodoc
 mixin _$SharedState {
 
- SetupParams? get setupParams; VpnOptions? get vpnOptions; String get stopTip; String get startTip; String get localNetworkTip; String get currentProfileName; String get stopText; bool get onlyStatisticsProxy;
+ SetupParams? get setupParams; VpnOptions? get vpnOptions; String get stopTip; String get startTip; String get localNetworkTip; String get currentProfileName; String get stopText; bool get onlyStatisticsProxy; bool get showNotificationStopAction;
 /// Create a copy of SharedState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -5874,20 +5874,20 @@ $SharedStateCopyWith<SharedState> get copyWith => _$SharedStateCopyWithImpl<Shar
 @override
 bool operator ==(Object other) {
   final _this = this as SharedState;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SharedState&&(identical(other.setupParams, _this.setupParams) || other.setupParams == _this.setupParams)&&(identical(other.vpnOptions, _this.vpnOptions) || other.vpnOptions == _this.vpnOptions)&&(identical(other.stopTip, _this.stopTip) || other.stopTip == _this.stopTip)&&(identical(other.startTip, _this.startTip) || other.startTip == _this.startTip)&&(identical(other.localNetworkTip, _this.localNetworkTip) || other.localNetworkTip == _this.localNetworkTip)&&(identical(other.currentProfileName, _this.currentProfileName) || other.currentProfileName == _this.currentProfileName)&&(identical(other.stopText, _this.stopText) || other.stopText == _this.stopText)&&(identical(other.onlyStatisticsProxy, _this.onlyStatisticsProxy) || other.onlyStatisticsProxy == _this.onlyStatisticsProxy));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SharedState&&(identical(other.setupParams, _this.setupParams) || other.setupParams == _this.setupParams)&&(identical(other.vpnOptions, _this.vpnOptions) || other.vpnOptions == _this.vpnOptions)&&(identical(other.stopTip, _this.stopTip) || other.stopTip == _this.stopTip)&&(identical(other.startTip, _this.startTip) || other.startTip == _this.startTip)&&(identical(other.localNetworkTip, _this.localNetworkTip) || other.localNetworkTip == _this.localNetworkTip)&&(identical(other.currentProfileName, _this.currentProfileName) || other.currentProfileName == _this.currentProfileName)&&(identical(other.stopText, _this.stopText) || other.stopText == _this.stopText)&&(identical(other.onlyStatisticsProxy, _this.onlyStatisticsProxy) || other.onlyStatisticsProxy == _this.onlyStatisticsProxy)&&(identical(other.showNotificationStopAction, _this.showNotificationStopAction) || other.showNotificationStopAction == _this.showNotificationStopAction));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as SharedState;
-  return Object.hash(runtimeType,_this.setupParams,_this.vpnOptions,_this.stopTip,_this.startTip,_this.localNetworkTip,_this.currentProfileName,_this.stopText,_this.onlyStatisticsProxy);
+  return Object.hash(runtimeType,_this.setupParams,_this.vpnOptions,_this.stopTip,_this.startTip,_this.localNetworkTip,_this.currentProfileName,_this.stopText,_this.onlyStatisticsProxy,_this.showNotificationStopAction);
 }
 
 @override
 String toString() {
   final _this = this as SharedState;
-  return 'SharedState(setupParams: ${_this.setupParams}, vpnOptions: ${_this.vpnOptions}, stopTip: ${_this.stopTip}, startTip: ${_this.startTip}, localNetworkTip: ${_this.localNetworkTip}, currentProfileName: ${_this.currentProfileName}, stopText: ${_this.stopText}, onlyStatisticsProxy: ${_this.onlyStatisticsProxy})';
+  return 'SharedState(setupParams: ${_this.setupParams}, vpnOptions: ${_this.vpnOptions}, stopTip: ${_this.stopTip}, startTip: ${_this.startTip}, localNetworkTip: ${_this.localNetworkTip}, currentProfileName: ${_this.currentProfileName}, stopText: ${_this.stopText}, onlyStatisticsProxy: ${_this.onlyStatisticsProxy}, showNotificationStopAction: ${_this.showNotificationStopAction})';
 }
 
 
@@ -5898,7 +5898,7 @@ abstract mixin class $SharedStateCopyWith<$Res>  {
   factory $SharedStateCopyWith(SharedState value, $Res Function(SharedState) _then) = _$SharedStateCopyWithImpl;
 @useResult
 $Res call({
- SetupParams? setupParams, VpnOptions? vpnOptions, String stopTip, String startTip, String localNetworkTip, String currentProfileName, String stopText, bool onlyStatisticsProxy
+ SetupParams? setupParams, VpnOptions? vpnOptions, String stopTip, String startTip, String localNetworkTip, String currentProfileName, String stopText, bool onlyStatisticsProxy, bool showNotificationStopAction
 });
 
 
@@ -5915,7 +5915,7 @@ class _$SharedStateCopyWithImpl<$Res>
 
 /// Create a copy of SharedState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? setupParams = freezed,Object? vpnOptions = freezed,Object? stopTip = null,Object? startTip = null,Object? localNetworkTip = null,Object? currentProfileName = null,Object? stopText = null,Object? onlyStatisticsProxy = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? setupParams = freezed,Object? vpnOptions = freezed,Object? stopTip = null,Object? startTip = null,Object? localNetworkTip = null,Object? currentProfileName = null,Object? stopText = null,Object? onlyStatisticsProxy = null,Object? showNotificationStopAction = null,}) {
   return _then(SharedState(
 setupParams: freezed == setupParams ? _self.setupParams : setupParams // ignore: cast_nullable_to_non_nullable
 as SetupParams?,vpnOptions: freezed == vpnOptions ? _self.vpnOptions : vpnOptions // ignore: cast_nullable_to_non_nullable
@@ -5925,6 +5925,7 @@ as String,localNetworkTip: null == localNetworkTip ? _self.localNetworkTip : loc
 as String,currentProfileName: null == currentProfileName ? _self.currentProfileName : currentProfileName // ignore: cast_nullable_to_non_nullable
 as String,stopText: null == stopText ? _self.stopText : stopText // ignore: cast_nullable_to_non_nullable
 as String,onlyStatisticsProxy: null == onlyStatisticsProxy ? _self.onlyStatisticsProxy : onlyStatisticsProxy // ignore: cast_nullable_to_non_nullable
+as bool,showNotificationStopAction: null == showNotificationStopAction ? _self.showNotificationStopAction : showNotificationStopAction // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -6034,10 +6035,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( SetupParams? setupParams,  VpnOptions? vpnOptions,  String stopTip,  String startTip,  String localNetworkTip,  String currentProfileName,  String stopText,  bool onlyStatisticsProxy)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( SetupParams? setupParams,  VpnOptions? vpnOptions,  String stopTip,  String startTip,  String localNetworkTip,  String currentProfileName,  String stopText,  bool onlyStatisticsProxy,  bool showNotificationStopAction)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SharedState() when $default != null:
-return $default(_that.setupParams,_that.vpnOptions,_that.stopTip,_that.startTip,_that.localNetworkTip,_that.currentProfileName,_that.stopText,_that.onlyStatisticsProxy);case _:
+return $default(_that.setupParams,_that.vpnOptions,_that.stopTip,_that.startTip,_that.localNetworkTip,_that.currentProfileName,_that.stopText,_that.onlyStatisticsProxy,_that.showNotificationStopAction);case _:
   return orElse();
 
 }
@@ -6055,10 +6056,10 @@ return $default(_that.setupParams,_that.vpnOptions,_that.stopTip,_that.startTip,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( SetupParams? setupParams,  VpnOptions? vpnOptions,  String stopTip,  String startTip,  String localNetworkTip,  String currentProfileName,  String stopText,  bool onlyStatisticsProxy)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( SetupParams? setupParams,  VpnOptions? vpnOptions,  String stopTip,  String startTip,  String localNetworkTip,  String currentProfileName,  String stopText,  bool onlyStatisticsProxy,  bool showNotificationStopAction)  $default,) {final _that = this;
 switch (_that) {
 case _SharedState():
-return $default(_that.setupParams,_that.vpnOptions,_that.stopTip,_that.startTip,_that.localNetworkTip,_that.currentProfileName,_that.stopText,_that.onlyStatisticsProxy);case _:
+return $default(_that.setupParams,_that.vpnOptions,_that.stopTip,_that.startTip,_that.localNetworkTip,_that.currentProfileName,_that.stopText,_that.onlyStatisticsProxy,_that.showNotificationStopAction);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -6075,10 +6076,10 @@ return $default(_that.setupParams,_that.vpnOptions,_that.stopTip,_that.startTip,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( SetupParams? setupParams,  VpnOptions? vpnOptions,  String stopTip,  String startTip,  String localNetworkTip,  String currentProfileName,  String stopText,  bool onlyStatisticsProxy)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( SetupParams? setupParams,  VpnOptions? vpnOptions,  String stopTip,  String startTip,  String localNetworkTip,  String currentProfileName,  String stopText,  bool onlyStatisticsProxy,  bool showNotificationStopAction)?  $default,) {final _that = this;
 switch (_that) {
 case _SharedState() when $default != null:
-return $default(_that.setupParams,_that.vpnOptions,_that.stopTip,_that.startTip,_that.localNetworkTip,_that.currentProfileName,_that.stopText,_that.onlyStatisticsProxy);case _:
+return $default(_that.setupParams,_that.vpnOptions,_that.stopTip,_that.startTip,_that.localNetworkTip,_that.currentProfileName,_that.stopText,_that.onlyStatisticsProxy,_that.showNotificationStopAction);case _:
   return null;
 
 }
@@ -6090,7 +6091,7 @@ return $default(_that.setupParams,_that.vpnOptions,_that.stopTip,_that.startTip,
 @JsonSerializable()
 
 class _SharedState implements SharedState {
-  const _SharedState({this.setupParams, this.vpnOptions, required this.stopTip, required this.startTip, this.localNetworkTip = '', required this.currentProfileName, required this.stopText, required this.onlyStatisticsProxy});
+  const _SharedState({this.setupParams, this.vpnOptions, required this.stopTip, required this.startTip, this.localNetworkTip = '', required this.currentProfileName, required this.stopText, required this.onlyStatisticsProxy, this.showNotificationStopAction = true});
   factory _SharedState.fromJson(Map<String, dynamic> json) => _$SharedStateFromJson(json);
 
 @override final  SetupParams? setupParams;
@@ -6101,6 +6102,7 @@ class _SharedState implements SharedState {
 @override final  String currentProfileName;
 @override final  String stopText;
 @override final  bool onlyStatisticsProxy;
+@override@JsonKey() final  bool showNotificationStopAction;
 
 /// Create a copy of SharedState
 /// with the given fields replaced by the non-null parameter values.
@@ -6115,18 +6117,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SharedState&&(identical(other.setupParams, setupParams) || other.setupParams == setupParams)&&(identical(other.vpnOptions, vpnOptions) || other.vpnOptions == vpnOptions)&&(identical(other.stopTip, stopTip) || other.stopTip == stopTip)&&(identical(other.startTip, startTip) || other.startTip == startTip)&&(identical(other.localNetworkTip, localNetworkTip) || other.localNetworkTip == localNetworkTip)&&(identical(other.currentProfileName, currentProfileName) || other.currentProfileName == currentProfileName)&&(identical(other.stopText, stopText) || other.stopText == stopText)&&(identical(other.onlyStatisticsProxy, onlyStatisticsProxy) || other.onlyStatisticsProxy == onlyStatisticsProxy));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SharedState&&(identical(other.setupParams, setupParams) || other.setupParams == setupParams)&&(identical(other.vpnOptions, vpnOptions) || other.vpnOptions == vpnOptions)&&(identical(other.stopTip, stopTip) || other.stopTip == stopTip)&&(identical(other.startTip, startTip) || other.startTip == startTip)&&(identical(other.localNetworkTip, localNetworkTip) || other.localNetworkTip == localNetworkTip)&&(identical(other.currentProfileName, currentProfileName) || other.currentProfileName == currentProfileName)&&(identical(other.stopText, stopText) || other.stopText == stopText)&&(identical(other.onlyStatisticsProxy, onlyStatisticsProxy) || other.onlyStatisticsProxy == onlyStatisticsProxy)&&(identical(other.showNotificationStopAction, showNotificationStopAction) || other.showNotificationStopAction == showNotificationStopAction));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,setupParams,vpnOptions,stopTip,startTip,localNetworkTip,currentProfileName,stopText,onlyStatisticsProxy);
+    return Object.hash(runtimeType,setupParams,vpnOptions,stopTip,startTip,localNetworkTip,currentProfileName,stopText,onlyStatisticsProxy,showNotificationStopAction);
 }
 
 @override
 String toString() {
-    return 'SharedState(setupParams: $setupParams, vpnOptions: $vpnOptions, stopTip: $stopTip, startTip: $startTip, localNetworkTip: $localNetworkTip, currentProfileName: $currentProfileName, stopText: $stopText, onlyStatisticsProxy: $onlyStatisticsProxy)';
+    return 'SharedState(setupParams: $setupParams, vpnOptions: $vpnOptions, stopTip: $stopTip, startTip: $startTip, localNetworkTip: $localNetworkTip, currentProfileName: $currentProfileName, stopText: $stopText, onlyStatisticsProxy: $onlyStatisticsProxy, showNotificationStopAction: $showNotificationStopAction)';
 }
 
 
@@ -6137,7 +6139,7 @@ abstract mixin class _$SharedStateCopyWith<$Res> implements $SharedStateCopyWith
   factory _$SharedStateCopyWith(_SharedState value, $Res Function(_SharedState) _then) = __$SharedStateCopyWithImpl;
 @override @useResult
 $Res call({
- SetupParams? setupParams, VpnOptions? vpnOptions, String stopTip, String startTip, String localNetworkTip, String currentProfileName, String stopText, bool onlyStatisticsProxy
+ SetupParams? setupParams, VpnOptions? vpnOptions, String stopTip, String startTip, String localNetworkTip, String currentProfileName, String stopText, bool onlyStatisticsProxy, bool showNotificationStopAction
 });
 
 
@@ -6154,7 +6156,7 @@ class __$SharedStateCopyWithImpl<$Res>
 
 /// Create a copy of SharedState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? setupParams = freezed,Object? vpnOptions = freezed,Object? stopTip = null,Object? startTip = null,Object? localNetworkTip = null,Object? currentProfileName = null,Object? stopText = null,Object? onlyStatisticsProxy = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? setupParams = freezed,Object? vpnOptions = freezed,Object? stopTip = null,Object? startTip = null,Object? localNetworkTip = null,Object? currentProfileName = null,Object? stopText = null,Object? onlyStatisticsProxy = null,Object? showNotificationStopAction = null,}) {
   return _then(_SharedState(
 setupParams: freezed == setupParams ? _self.setupParams : setupParams // ignore: cast_nullable_to_non_nullable
 as SetupParams?,vpnOptions: freezed == vpnOptions ? _self.vpnOptions : vpnOptions // ignore: cast_nullable_to_non_nullable
@@ -6164,6 +6166,7 @@ as String,localNetworkTip: null == localNetworkTip ? _self.localNetworkTip : loc
 as String,currentProfileName: null == currentProfileName ? _self.currentProfileName : currentProfileName // ignore: cast_nullable_to_non_nullable
 as String,stopText: null == stopText ? _self.stopText : stopText // ignore: cast_nullable_to_non_nullable
 as String,onlyStatisticsProxy: null == onlyStatisticsProxy ? _self.onlyStatisticsProxy : onlyStatisticsProxy // ignore: cast_nullable_to_non_nullable
+as bool,showNotificationStopAction: null == showNotificationStopAction ? _self.showNotificationStopAction : showNotificationStopAction // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -7229,7 +7232,7 @@ as List<VM2<String, String>>,
 /// @nodoc
 mixin _$SetupState {
 
- int? get profileId; int? get profileLastUpdateDate; OverwriteType get overwriteType; List<Rule> get addedRules; List<ProxyChain> get proxyChains; List<ProfileProxy> get profileProxies; List<ClashProvider> get clashProviders; List<ProxyGroup> get customProxyGroups; List<Rule> get customRules; String? get matchTarget; Script? get script; bool get overrideDns; bool get overrideNtp; Dns get dns; Set<DnsOverrideKey> get dnsOverrideKeys; Ntp get ntp; Set<NtpOverrideKey> get ntpOverrideKeys; bool get blockQuic; bool get blockWebRtc; List<TailscaleNetwork> get tailscaleNetworks;
+ String? get interfaceName; int? get profileId; int? get profileLastUpdateDate; OverwriteType get overwriteType; List<Rule> get addedRules; List<ProxyChain> get proxyChains; List<ProfileProxy> get profileProxies; List<ClashProvider> get clashProviders; List<ProxyGroup> get customProxyGroups; List<Rule> get customRules; String? get matchTarget; Script? get script; bool get overrideDns; bool get overrideNtp; Dns get dns; Set<DnsOverrideKey> get dnsOverrideKeys; Ntp get ntp; Set<NtpOverrideKey> get ntpOverrideKeys; bool get blockQuic; bool get blockWebRtc; List<TailscaleNetwork> get tailscaleNetworks;
 /// Create a copy of SetupState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -7241,20 +7244,20 @@ $SetupStateCopyWith<SetupState> get copyWith => _$SetupStateCopyWithImpl<SetupSt
 @override
 bool operator ==(Object other) {
   final _this = this as SetupState;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SetupState&&(identical(other.profileId, _this.profileId) || other.profileId == _this.profileId)&&(identical(other.profileLastUpdateDate, _this.profileLastUpdateDate) || other.profileLastUpdateDate == _this.profileLastUpdateDate)&&(identical(other.overwriteType, _this.overwriteType) || other.overwriteType == _this.overwriteType)&&const DeepCollectionEquality().equals(other.addedRules, _this.addedRules)&&const DeepCollectionEquality().equals(other.proxyChains, _this.proxyChains)&&const DeepCollectionEquality().equals(other.profileProxies, _this.profileProxies)&&const DeepCollectionEquality().equals(other.clashProviders, _this.clashProviders)&&const DeepCollectionEquality().equals(other.customProxyGroups, _this.customProxyGroups)&&const DeepCollectionEquality().equals(other.customRules, _this.customRules)&&(identical(other.matchTarget, _this.matchTarget) || other.matchTarget == _this.matchTarget)&&(identical(other.script, _this.script) || other.script == _this.script)&&(identical(other.overrideDns, _this.overrideDns) || other.overrideDns == _this.overrideDns)&&(identical(other.overrideNtp, _this.overrideNtp) || other.overrideNtp == _this.overrideNtp)&&(identical(other.dns, _this.dns) || other.dns == _this.dns)&&const DeepCollectionEquality().equals(other.dnsOverrideKeys, _this.dnsOverrideKeys)&&(identical(other.ntp, _this.ntp) || other.ntp == _this.ntp)&&const DeepCollectionEquality().equals(other.ntpOverrideKeys, _this.ntpOverrideKeys)&&(identical(other.blockQuic, _this.blockQuic) || other.blockQuic == _this.blockQuic)&&(identical(other.blockWebRtc, _this.blockWebRtc) || other.blockWebRtc == _this.blockWebRtc)&&const DeepCollectionEquality().equals(other.tailscaleNetworks, _this.tailscaleNetworks));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SetupState&&(identical(other.interfaceName, _this.interfaceName) || other.interfaceName == _this.interfaceName)&&(identical(other.profileId, _this.profileId) || other.profileId == _this.profileId)&&(identical(other.profileLastUpdateDate, _this.profileLastUpdateDate) || other.profileLastUpdateDate == _this.profileLastUpdateDate)&&(identical(other.overwriteType, _this.overwriteType) || other.overwriteType == _this.overwriteType)&&const DeepCollectionEquality().equals(other.addedRules, _this.addedRules)&&const DeepCollectionEquality().equals(other.proxyChains, _this.proxyChains)&&const DeepCollectionEquality().equals(other.profileProxies, _this.profileProxies)&&const DeepCollectionEquality().equals(other.clashProviders, _this.clashProviders)&&const DeepCollectionEquality().equals(other.customProxyGroups, _this.customProxyGroups)&&const DeepCollectionEquality().equals(other.customRules, _this.customRules)&&(identical(other.matchTarget, _this.matchTarget) || other.matchTarget == _this.matchTarget)&&(identical(other.script, _this.script) || other.script == _this.script)&&(identical(other.overrideDns, _this.overrideDns) || other.overrideDns == _this.overrideDns)&&(identical(other.overrideNtp, _this.overrideNtp) || other.overrideNtp == _this.overrideNtp)&&(identical(other.dns, _this.dns) || other.dns == _this.dns)&&const DeepCollectionEquality().equals(other.dnsOverrideKeys, _this.dnsOverrideKeys)&&(identical(other.ntp, _this.ntp) || other.ntp == _this.ntp)&&const DeepCollectionEquality().equals(other.ntpOverrideKeys, _this.ntpOverrideKeys)&&(identical(other.blockQuic, _this.blockQuic) || other.blockQuic == _this.blockQuic)&&(identical(other.blockWebRtc, _this.blockWebRtc) || other.blockWebRtc == _this.blockWebRtc)&&const DeepCollectionEquality().equals(other.tailscaleNetworks, _this.tailscaleNetworks));
 }
 
 
 @override
 int get hashCode {
   final _this = this as SetupState;
-  return Object.hashAll([runtimeType,_this.profileId,_this.profileLastUpdateDate,_this.overwriteType,const DeepCollectionEquality().hash(_this.addedRules),const DeepCollectionEquality().hash(_this.proxyChains),const DeepCollectionEquality().hash(_this.profileProxies),const DeepCollectionEquality().hash(_this.clashProviders),const DeepCollectionEquality().hash(_this.customProxyGroups),const DeepCollectionEquality().hash(_this.customRules),_this.matchTarget,_this.script,_this.overrideDns,_this.overrideNtp,_this.dns,const DeepCollectionEquality().hash(_this.dnsOverrideKeys),_this.ntp,const DeepCollectionEquality().hash(_this.ntpOverrideKeys),_this.blockQuic,_this.blockWebRtc,const DeepCollectionEquality().hash(_this.tailscaleNetworks)]);
+  return Object.hashAll([runtimeType,_this.interfaceName,_this.profileId,_this.profileLastUpdateDate,_this.overwriteType,const DeepCollectionEquality().hash(_this.addedRules),const DeepCollectionEquality().hash(_this.proxyChains),const DeepCollectionEquality().hash(_this.profileProxies),const DeepCollectionEquality().hash(_this.clashProviders),const DeepCollectionEquality().hash(_this.customProxyGroups),const DeepCollectionEquality().hash(_this.customRules),_this.matchTarget,_this.script,_this.overrideDns,_this.overrideNtp,_this.dns,const DeepCollectionEquality().hash(_this.dnsOverrideKeys),_this.ntp,const DeepCollectionEquality().hash(_this.ntpOverrideKeys),_this.blockQuic,_this.blockWebRtc,const DeepCollectionEquality().hash(_this.tailscaleNetworks)]);
 }
 
 @override
 String toString() {
   final _this = this as SetupState;
-  return 'SetupState(profileId: ${_this.profileId}, profileLastUpdateDate: ${_this.profileLastUpdateDate}, overwriteType: ${_this.overwriteType}, addedRules: ${_this.addedRules}, proxyChains: ${_this.proxyChains}, profileProxies: ${_this.profileProxies}, clashProviders: ${_this.clashProviders}, customProxyGroups: ${_this.customProxyGroups}, customRules: ${_this.customRules}, matchTarget: ${_this.matchTarget}, script: ${_this.script}, overrideDns: ${_this.overrideDns}, overrideNtp: ${_this.overrideNtp}, dns: ${_this.dns}, dnsOverrideKeys: ${_this.dnsOverrideKeys}, ntp: ${_this.ntp}, ntpOverrideKeys: ${_this.ntpOverrideKeys}, blockQuic: ${_this.blockQuic}, blockWebRtc: ${_this.blockWebRtc}, tailscaleNetworks: ${_this.tailscaleNetworks})';
+  return 'SetupState(interfaceName: ${_this.interfaceName}, profileId: ${_this.profileId}, profileLastUpdateDate: ${_this.profileLastUpdateDate}, overwriteType: ${_this.overwriteType}, addedRules: ${_this.addedRules}, proxyChains: ${_this.proxyChains}, profileProxies: ${_this.profileProxies}, clashProviders: ${_this.clashProviders}, customProxyGroups: ${_this.customProxyGroups}, customRules: ${_this.customRules}, matchTarget: ${_this.matchTarget}, script: ${_this.script}, overrideDns: ${_this.overrideDns}, overrideNtp: ${_this.overrideNtp}, dns: ${_this.dns}, dnsOverrideKeys: ${_this.dnsOverrideKeys}, ntp: ${_this.ntp}, ntpOverrideKeys: ${_this.ntpOverrideKeys}, blockQuic: ${_this.blockQuic}, blockWebRtc: ${_this.blockWebRtc}, tailscaleNetworks: ${_this.tailscaleNetworks})';
 }
 
 
@@ -7265,7 +7268,7 @@ abstract mixin class $SetupStateCopyWith<$Res>  {
   factory $SetupStateCopyWith(SetupState value, $Res Function(SetupState) _then) = _$SetupStateCopyWithImpl;
 @useResult
 $Res call({
- int? profileId, int? profileLastUpdateDate, OverwriteType overwriteType, List<Rule> addedRules, List<ProxyChain> proxyChains, List<ProfileProxy> profileProxies, List<ClashProvider> clashProviders, List<ProxyGroup> customProxyGroups, List<Rule> customRules, String? matchTarget, Script? script, bool overrideDns, bool overrideNtp, Dns dns, Set<DnsOverrideKey> dnsOverrideKeys, Ntp ntp, Set<NtpOverrideKey> ntpOverrideKeys, bool blockQuic, bool blockWebRtc, List<TailscaleNetwork> tailscaleNetworks
+ String? interfaceName, int? profileId, int? profileLastUpdateDate, OverwriteType overwriteType, List<Rule> addedRules, List<ProxyChain> proxyChains, List<ProfileProxy> profileProxies, List<ClashProvider> clashProviders, List<ProxyGroup> customProxyGroups, List<Rule> customRules, String? matchTarget, Script? script, bool overrideDns, bool overrideNtp, Dns dns, Set<DnsOverrideKey> dnsOverrideKeys, Ntp ntp, Set<NtpOverrideKey> ntpOverrideKeys, bool blockQuic, bool blockWebRtc, List<TailscaleNetwork> tailscaleNetworks
 });
 
 
@@ -7282,9 +7285,10 @@ class _$SetupStateCopyWithImpl<$Res>
 
 /// Create a copy of SetupState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? profileId = freezed,Object? profileLastUpdateDate = freezed,Object? overwriteType = null,Object? addedRules = null,Object? proxyChains = null,Object? profileProxies = null,Object? clashProviders = null,Object? customProxyGroups = null,Object? customRules = null,Object? matchTarget = freezed,Object? script = freezed,Object? overrideDns = null,Object? overrideNtp = null,Object? dns = null,Object? dnsOverrideKeys = null,Object? ntp = null,Object? ntpOverrideKeys = null,Object? blockQuic = null,Object? blockWebRtc = null,Object? tailscaleNetworks = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? interfaceName = freezed,Object? profileId = freezed,Object? profileLastUpdateDate = freezed,Object? overwriteType = null,Object? addedRules = null,Object? proxyChains = null,Object? profileProxies = null,Object? clashProviders = null,Object? customProxyGroups = null,Object? customRules = null,Object? matchTarget = freezed,Object? script = freezed,Object? overrideDns = null,Object? overrideNtp = null,Object? dns = null,Object? dnsOverrideKeys = null,Object? ntp = null,Object? ntpOverrideKeys = null,Object? blockQuic = null,Object? blockWebRtc = null,Object? tailscaleNetworks = null,}) {
   return _then(SetupState(
-profileId: freezed == profileId ? _self.profileId : profileId // ignore: cast_nullable_to_non_nullable
+interfaceName: freezed == interfaceName ? _self.interfaceName : interfaceName // ignore: cast_nullable_to_non_nullable
+as String?,profileId: freezed == profileId ? _self.profileId : profileId // ignore: cast_nullable_to_non_nullable
 as int?,profileLastUpdateDate: freezed == profileLastUpdateDate ? _self.profileLastUpdateDate : profileLastUpdateDate // ignore: cast_nullable_to_non_nullable
 as int?,overwriteType: null == overwriteType ? _self.overwriteType : overwriteType // ignore: cast_nullable_to_non_nullable
 as OverwriteType,addedRules: null == addedRules ? _self.addedRules : addedRules // ignore: cast_nullable_to_non_nullable
@@ -7419,10 +7423,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? profileId,  int? profileLastUpdateDate,  OverwriteType overwriteType,  List<Rule> addedRules,  List<ProxyChain> proxyChains,  List<ProfileProxy> profileProxies,  List<ClashProvider> clashProviders,  List<ProxyGroup> customProxyGroups,  List<Rule> customRules,  String? matchTarget,  Script? script,  bool overrideDns,  bool overrideNtp,  Dns dns,  Set<DnsOverrideKey> dnsOverrideKeys,  Ntp ntp,  Set<NtpOverrideKey> ntpOverrideKeys,  bool blockQuic,  bool blockWebRtc,  List<TailscaleNetwork> tailscaleNetworks)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? interfaceName,  int? profileId,  int? profileLastUpdateDate,  OverwriteType overwriteType,  List<Rule> addedRules,  List<ProxyChain> proxyChains,  List<ProfileProxy> profileProxies,  List<ClashProvider> clashProviders,  List<ProxyGroup> customProxyGroups,  List<Rule> customRules,  String? matchTarget,  Script? script,  bool overrideDns,  bool overrideNtp,  Dns dns,  Set<DnsOverrideKey> dnsOverrideKeys,  Ntp ntp,  Set<NtpOverrideKey> ntpOverrideKeys,  bool blockQuic,  bool blockWebRtc,  List<TailscaleNetwork> tailscaleNetworks)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SetupState() when $default != null:
-return $default(_that.profileId,_that.profileLastUpdateDate,_that.overwriteType,_that.addedRules,_that.proxyChains,_that.profileProxies,_that.clashProviders,_that.customProxyGroups,_that.customRules,_that.matchTarget,_that.script,_that.overrideDns,_that.overrideNtp,_that.dns,_that.dnsOverrideKeys,_that.ntp,_that.ntpOverrideKeys,_that.blockQuic,_that.blockWebRtc,_that.tailscaleNetworks);case _:
+return $default(_that.interfaceName,_that.profileId,_that.profileLastUpdateDate,_that.overwriteType,_that.addedRules,_that.proxyChains,_that.profileProxies,_that.clashProviders,_that.customProxyGroups,_that.customRules,_that.matchTarget,_that.script,_that.overrideDns,_that.overrideNtp,_that.dns,_that.dnsOverrideKeys,_that.ntp,_that.ntpOverrideKeys,_that.blockQuic,_that.blockWebRtc,_that.tailscaleNetworks);case _:
   return orElse();
 
 }
@@ -7440,10 +7444,10 @@ return $default(_that.profileId,_that.profileLastUpdateDate,_that.overwriteType,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? profileId,  int? profileLastUpdateDate,  OverwriteType overwriteType,  List<Rule> addedRules,  List<ProxyChain> proxyChains,  List<ProfileProxy> profileProxies,  List<ClashProvider> clashProviders,  List<ProxyGroup> customProxyGroups,  List<Rule> customRules,  String? matchTarget,  Script? script,  bool overrideDns,  bool overrideNtp,  Dns dns,  Set<DnsOverrideKey> dnsOverrideKeys,  Ntp ntp,  Set<NtpOverrideKey> ntpOverrideKeys,  bool blockQuic,  bool blockWebRtc,  List<TailscaleNetwork> tailscaleNetworks)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? interfaceName,  int? profileId,  int? profileLastUpdateDate,  OverwriteType overwriteType,  List<Rule> addedRules,  List<ProxyChain> proxyChains,  List<ProfileProxy> profileProxies,  List<ClashProvider> clashProviders,  List<ProxyGroup> customProxyGroups,  List<Rule> customRules,  String? matchTarget,  Script? script,  bool overrideDns,  bool overrideNtp,  Dns dns,  Set<DnsOverrideKey> dnsOverrideKeys,  Ntp ntp,  Set<NtpOverrideKey> ntpOverrideKeys,  bool blockQuic,  bool blockWebRtc,  List<TailscaleNetwork> tailscaleNetworks)  $default,) {final _that = this;
 switch (_that) {
 case _SetupState():
-return $default(_that.profileId,_that.profileLastUpdateDate,_that.overwriteType,_that.addedRules,_that.proxyChains,_that.profileProxies,_that.clashProviders,_that.customProxyGroups,_that.customRules,_that.matchTarget,_that.script,_that.overrideDns,_that.overrideNtp,_that.dns,_that.dnsOverrideKeys,_that.ntp,_that.ntpOverrideKeys,_that.blockQuic,_that.blockWebRtc,_that.tailscaleNetworks);case _:
+return $default(_that.interfaceName,_that.profileId,_that.profileLastUpdateDate,_that.overwriteType,_that.addedRules,_that.proxyChains,_that.profileProxies,_that.clashProviders,_that.customProxyGroups,_that.customRules,_that.matchTarget,_that.script,_that.overrideDns,_that.overrideNtp,_that.dns,_that.dnsOverrideKeys,_that.ntp,_that.ntpOverrideKeys,_that.blockQuic,_that.blockWebRtc,_that.tailscaleNetworks);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -7460,10 +7464,10 @@ return $default(_that.profileId,_that.profileLastUpdateDate,_that.overwriteType,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? profileId,  int? profileLastUpdateDate,  OverwriteType overwriteType,  List<Rule> addedRules,  List<ProxyChain> proxyChains,  List<ProfileProxy> profileProxies,  List<ClashProvider> clashProviders,  List<ProxyGroup> customProxyGroups,  List<Rule> customRules,  String? matchTarget,  Script? script,  bool overrideDns,  bool overrideNtp,  Dns dns,  Set<DnsOverrideKey> dnsOverrideKeys,  Ntp ntp,  Set<NtpOverrideKey> ntpOverrideKeys,  bool blockQuic,  bool blockWebRtc,  List<TailscaleNetwork> tailscaleNetworks)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? interfaceName,  int? profileId,  int? profileLastUpdateDate,  OverwriteType overwriteType,  List<Rule> addedRules,  List<ProxyChain> proxyChains,  List<ProfileProxy> profileProxies,  List<ClashProvider> clashProviders,  List<ProxyGroup> customProxyGroups,  List<Rule> customRules,  String? matchTarget,  Script? script,  bool overrideDns,  bool overrideNtp,  Dns dns,  Set<DnsOverrideKey> dnsOverrideKeys,  Ntp ntp,  Set<NtpOverrideKey> ntpOverrideKeys,  bool blockQuic,  bool blockWebRtc,  List<TailscaleNetwork> tailscaleNetworks)?  $default,) {final _that = this;
 switch (_that) {
 case _SetupState() when $default != null:
-return $default(_that.profileId,_that.profileLastUpdateDate,_that.overwriteType,_that.addedRules,_that.proxyChains,_that.profileProxies,_that.clashProviders,_that.customProxyGroups,_that.customRules,_that.matchTarget,_that.script,_that.overrideDns,_that.overrideNtp,_that.dns,_that.dnsOverrideKeys,_that.ntp,_that.ntpOverrideKeys,_that.blockQuic,_that.blockWebRtc,_that.tailscaleNetworks);case _:
+return $default(_that.interfaceName,_that.profileId,_that.profileLastUpdateDate,_that.overwriteType,_that.addedRules,_that.proxyChains,_that.profileProxies,_that.clashProviders,_that.customProxyGroups,_that.customRules,_that.matchTarget,_that.script,_that.overrideDns,_that.overrideNtp,_that.dns,_that.dnsOverrideKeys,_that.ntp,_that.ntpOverrideKeys,_that.blockQuic,_that.blockWebRtc,_that.tailscaleNetworks);case _:
   return null;
 
 }
@@ -7475,9 +7479,10 @@ return $default(_that.profileId,_that.profileLastUpdateDate,_that.overwriteType,
 
 
 class _SetupState implements SetupState {
-  const _SetupState({required this.profileId, required this.profileLastUpdateDate, required this.overwriteType, required  List<Rule> addedRules, required  List<ProxyChain> proxyChains, required  List<ProfileProxy> profileProxies,  List<ClashProvider> clashProviders = const [], required  List<ProxyGroup> customProxyGroups, required  List<Rule> customRules, this.matchTarget, required this.script, required this.overrideDns, this.overrideNtp = false, required this.dns,  Set<DnsOverrideKey> dnsOverrideKeys = const {}, this.ntp = defaultNtp,  Set<NtpOverrideKey> ntpOverrideKeys = const {}, this.blockQuic = false, this.blockWebRtc = false,  List<TailscaleNetwork> tailscaleNetworks = const []}): _addedRules = addedRules,_proxyChains = proxyChains,_profileProxies = profileProxies,_clashProviders = clashProviders,_customProxyGroups = customProxyGroups,_customRules = customRules,_dnsOverrideKeys = dnsOverrideKeys,_ntpOverrideKeys = ntpOverrideKeys,_tailscaleNetworks = tailscaleNetworks;
+  const _SetupState({this.interfaceName, required this.profileId, required this.profileLastUpdateDate, required this.overwriteType, required  List<Rule> addedRules, required  List<ProxyChain> proxyChains, required  List<ProfileProxy> profileProxies,  List<ClashProvider> clashProviders = const [], required  List<ProxyGroup> customProxyGroups, required  List<Rule> customRules, this.matchTarget, required this.script, required this.overrideDns, this.overrideNtp = false, required this.dns,  Set<DnsOverrideKey> dnsOverrideKeys = const {}, this.ntp = defaultNtp,  Set<NtpOverrideKey> ntpOverrideKeys = const {}, this.blockQuic = false, this.blockWebRtc = false,  List<TailscaleNetwork> tailscaleNetworks = const []}): _addedRules = addedRules,_proxyChains = proxyChains,_profileProxies = profileProxies,_clashProviders = clashProviders,_customProxyGroups = customProxyGroups,_customRules = customRules,_dnsOverrideKeys = dnsOverrideKeys,_ntpOverrideKeys = ntpOverrideKeys,_tailscaleNetworks = tailscaleNetworks;
   
 
+@override final  String? interfaceName;
 @override final  int? profileId;
 @override final  int? profileLastUpdateDate;
 @override final  OverwriteType overwriteType;
@@ -7563,18 +7568,18 @@ _$SetupStateCopyWith<_SetupState> get copyWith => __$SetupStateCopyWithImpl<_Set
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SetupState&&(identical(other.profileId, profileId) || other.profileId == profileId)&&(identical(other.profileLastUpdateDate, profileLastUpdateDate) || other.profileLastUpdateDate == profileLastUpdateDate)&&(identical(other.overwriteType, overwriteType) || other.overwriteType == overwriteType)&&const DeepCollectionEquality().equals(other.addedRules, _addedRules)&&const DeepCollectionEquality().equals(other.proxyChains, _proxyChains)&&const DeepCollectionEquality().equals(other.profileProxies, _profileProxies)&&const DeepCollectionEquality().equals(other.clashProviders, _clashProviders)&&const DeepCollectionEquality().equals(other.customProxyGroups, _customProxyGroups)&&const DeepCollectionEquality().equals(other.customRules, _customRules)&&(identical(other.matchTarget, matchTarget) || other.matchTarget == matchTarget)&&(identical(other.script, script) || other.script == script)&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&(identical(other.overrideNtp, overrideNtp) || other.overrideNtp == overrideNtp)&&(identical(other.dns, dns) || other.dns == dns)&&const DeepCollectionEquality().equals(other.dnsOverrideKeys, _dnsOverrideKeys)&&(identical(other.ntp, ntp) || other.ntp == ntp)&&const DeepCollectionEquality().equals(other.ntpOverrideKeys, _ntpOverrideKeys)&&(identical(other.blockQuic, blockQuic) || other.blockQuic == blockQuic)&&(identical(other.blockWebRtc, blockWebRtc) || other.blockWebRtc == blockWebRtc)&&const DeepCollectionEquality().equals(other.tailscaleNetworks, _tailscaleNetworks));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SetupState&&(identical(other.interfaceName, interfaceName) || other.interfaceName == interfaceName)&&(identical(other.profileId, profileId) || other.profileId == profileId)&&(identical(other.profileLastUpdateDate, profileLastUpdateDate) || other.profileLastUpdateDate == profileLastUpdateDate)&&(identical(other.overwriteType, overwriteType) || other.overwriteType == overwriteType)&&const DeepCollectionEquality().equals(other.addedRules, _addedRules)&&const DeepCollectionEquality().equals(other.proxyChains, _proxyChains)&&const DeepCollectionEquality().equals(other.profileProxies, _profileProxies)&&const DeepCollectionEquality().equals(other.clashProviders, _clashProviders)&&const DeepCollectionEquality().equals(other.customProxyGroups, _customProxyGroups)&&const DeepCollectionEquality().equals(other.customRules, _customRules)&&(identical(other.matchTarget, matchTarget) || other.matchTarget == matchTarget)&&(identical(other.script, script) || other.script == script)&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&(identical(other.overrideNtp, overrideNtp) || other.overrideNtp == overrideNtp)&&(identical(other.dns, dns) || other.dns == dns)&&const DeepCollectionEquality().equals(other.dnsOverrideKeys, _dnsOverrideKeys)&&(identical(other.ntp, ntp) || other.ntp == ntp)&&const DeepCollectionEquality().equals(other.ntpOverrideKeys, _ntpOverrideKeys)&&(identical(other.blockQuic, blockQuic) || other.blockQuic == blockQuic)&&(identical(other.blockWebRtc, blockWebRtc) || other.blockWebRtc == blockWebRtc)&&const DeepCollectionEquality().equals(other.tailscaleNetworks, _tailscaleNetworks));
 }
 
 
 @override
 int get hashCode {
-    return Object.hashAll([runtimeType,profileId,profileLastUpdateDate,overwriteType,const DeepCollectionEquality().hash(_addedRules),const DeepCollectionEquality().hash(_proxyChains),const DeepCollectionEquality().hash(_profileProxies),const DeepCollectionEquality().hash(_clashProviders),const DeepCollectionEquality().hash(_customProxyGroups),const DeepCollectionEquality().hash(_customRules),matchTarget,script,overrideDns,overrideNtp,dns,const DeepCollectionEquality().hash(_dnsOverrideKeys),ntp,const DeepCollectionEquality().hash(_ntpOverrideKeys),blockQuic,blockWebRtc,const DeepCollectionEquality().hash(_tailscaleNetworks)]);
+    return Object.hashAll([runtimeType,interfaceName,profileId,profileLastUpdateDate,overwriteType,const DeepCollectionEquality().hash(_addedRules),const DeepCollectionEquality().hash(_proxyChains),const DeepCollectionEquality().hash(_profileProxies),const DeepCollectionEquality().hash(_clashProviders),const DeepCollectionEquality().hash(_customProxyGroups),const DeepCollectionEquality().hash(_customRules),matchTarget,script,overrideDns,overrideNtp,dns,const DeepCollectionEquality().hash(_dnsOverrideKeys),ntp,const DeepCollectionEquality().hash(_ntpOverrideKeys),blockQuic,blockWebRtc,const DeepCollectionEquality().hash(_tailscaleNetworks)]);
 }
 
 @override
 String toString() {
-    return 'SetupState(profileId: $profileId, profileLastUpdateDate: $profileLastUpdateDate, overwriteType: $overwriteType, addedRules: $addedRules, proxyChains: $proxyChains, profileProxies: $profileProxies, clashProviders: $clashProviders, customProxyGroups: $customProxyGroups, customRules: $customRules, matchTarget: $matchTarget, script: $script, overrideDns: $overrideDns, overrideNtp: $overrideNtp, dns: $dns, dnsOverrideKeys: $dnsOverrideKeys, ntp: $ntp, ntpOverrideKeys: $ntpOverrideKeys, blockQuic: $blockQuic, blockWebRtc: $blockWebRtc, tailscaleNetworks: $tailscaleNetworks)';
+    return 'SetupState(interfaceName: $interfaceName, profileId: $profileId, profileLastUpdateDate: $profileLastUpdateDate, overwriteType: $overwriteType, addedRules: $addedRules, proxyChains: $proxyChains, profileProxies: $profileProxies, clashProviders: $clashProviders, customProxyGroups: $customProxyGroups, customRules: $customRules, matchTarget: $matchTarget, script: $script, overrideDns: $overrideDns, overrideNtp: $overrideNtp, dns: $dns, dnsOverrideKeys: $dnsOverrideKeys, ntp: $ntp, ntpOverrideKeys: $ntpOverrideKeys, blockQuic: $blockQuic, blockWebRtc: $blockWebRtc, tailscaleNetworks: $tailscaleNetworks)';
 }
 
 
@@ -7585,7 +7590,7 @@ abstract mixin class _$SetupStateCopyWith<$Res> implements $SetupStateCopyWith<$
   factory _$SetupStateCopyWith(_SetupState value, $Res Function(_SetupState) _then) = __$SetupStateCopyWithImpl;
 @override @useResult
 $Res call({
- int? profileId, int? profileLastUpdateDate, OverwriteType overwriteType, List<Rule> addedRules, List<ProxyChain> proxyChains, List<ProfileProxy> profileProxies, List<ClashProvider> clashProviders, List<ProxyGroup> customProxyGroups, List<Rule> customRules, String? matchTarget, Script? script, bool overrideDns, bool overrideNtp, Dns dns, Set<DnsOverrideKey> dnsOverrideKeys, Ntp ntp, Set<NtpOverrideKey> ntpOverrideKeys, bool blockQuic, bool blockWebRtc, List<TailscaleNetwork> tailscaleNetworks
+ String? interfaceName, int? profileId, int? profileLastUpdateDate, OverwriteType overwriteType, List<Rule> addedRules, List<ProxyChain> proxyChains, List<ProfileProxy> profileProxies, List<ClashProvider> clashProviders, List<ProxyGroup> customProxyGroups, List<Rule> customRules, String? matchTarget, Script? script, bool overrideDns, bool overrideNtp, Dns dns, Set<DnsOverrideKey> dnsOverrideKeys, Ntp ntp, Set<NtpOverrideKey> ntpOverrideKeys, bool blockQuic, bool blockWebRtc, List<TailscaleNetwork> tailscaleNetworks
 });
 
 
@@ -7602,9 +7607,10 @@ class __$SetupStateCopyWithImpl<$Res>
 
 /// Create a copy of SetupState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? profileId = freezed,Object? profileLastUpdateDate = freezed,Object? overwriteType = null,Object? addedRules = null,Object? proxyChains = null,Object? profileProxies = null,Object? clashProviders = null,Object? customProxyGroups = null,Object? customRules = null,Object? matchTarget = freezed,Object? script = freezed,Object? overrideDns = null,Object? overrideNtp = null,Object? dns = null,Object? dnsOverrideKeys = null,Object? ntp = null,Object? ntpOverrideKeys = null,Object? blockQuic = null,Object? blockWebRtc = null,Object? tailscaleNetworks = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? interfaceName = freezed,Object? profileId = freezed,Object? profileLastUpdateDate = freezed,Object? overwriteType = null,Object? addedRules = null,Object? proxyChains = null,Object? profileProxies = null,Object? clashProviders = null,Object? customProxyGroups = null,Object? customRules = null,Object? matchTarget = freezed,Object? script = freezed,Object? overrideDns = null,Object? overrideNtp = null,Object? dns = null,Object? dnsOverrideKeys = null,Object? ntp = null,Object? ntpOverrideKeys = null,Object? blockQuic = null,Object? blockWebRtc = null,Object? tailscaleNetworks = null,}) {
   return _then(_SetupState(
-profileId: freezed == profileId ? _self.profileId : profileId // ignore: cast_nullable_to_non_nullable
+interfaceName: freezed == interfaceName ? _self.interfaceName : interfaceName // ignore: cast_nullable_to_non_nullable
+as String?,profileId: freezed == profileId ? _self.profileId : profileId // ignore: cast_nullable_to_non_nullable
 as int?,profileLastUpdateDate: freezed == profileLastUpdateDate ? _self.profileLastUpdateDate : profileLastUpdateDate // ignore: cast_nullable_to_non_nullable
 as int?,overwriteType: null == overwriteType ? _self.overwriteType : overwriteType // ignore: cast_nullable_to_non_nullable
 as OverwriteType,addedRules: null == addedRules ? _self._addedRules : addedRules // ignore: cast_nullable_to_non_nullable

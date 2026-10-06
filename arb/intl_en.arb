@@ -1187,5 +1187,11 @@
   "memoryReleased": "Memory released",
   "memoryReleasedSize": "Released {size}",
   "releaseMemoryFailed": "Failed to release memory",
-  "total": "Total"
+  "total": "Total",
+  "autoCheckUpdate": "Auto check for updates",
+  "showNotificationStopAction": "Stop button in notification",
+  "interfaceName": "Interface name",
+  "interfaceFollowProfile": "Follow profile",
+  "interfaceAutomatic": "Clear override (automatic interface)",
+  "manageUserAgents": "Manage list"
 }

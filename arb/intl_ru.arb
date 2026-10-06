@@ -1187,5 +1187,11 @@
   "memoryReleased": "Память освобождена",
   "memoryReleasedSize": "Освобождено {size}",
   "releaseMemoryFailed": "Не удалось освободить память",
-  "total": "Всего"
+  "total": "Всего",
+  "autoCheckUpdate": "Автопроверка обновлений",
+  "showNotificationStopAction": "Кнопка остановки в уведомлении",
+  "interfaceName": "Имя интерфейса",
+  "interfaceFollowProfile": "Из профиля",
+  "interfaceAutomatic": "Снять привязку (автовыбор интерфейса)",
+  "manageUserAgents": "Управление списком"
 }

@@ -38,11 +38,12 @@ data class ExtendedNotificationParams(
     val stopText: String,
     val onlyStatisticsProxy: Boolean,
     val contentText: String,
+    val showStopAction: Boolean = true,
 )
 
 val NotificationParams.extended: ExtendedNotificationParams
     get() = ExtendedNotificationParams(
-        title, stopText, onlyStatisticsProxy, Core.getSpeedTrafficText(onlyStatisticsProxy)
+        title, stopText, onlyStatisticsProxy, Core.getSpeedTrafficText(onlyStatisticsProxy), showStopAction
     )
 
 class NotificationModule(private val service: Service) : Module() {
@@ -112,9 +113,10 @@ class NotificationModule(private val service: Service) : Module() {
                 setContentTitle(params.title)
                 setContentText(params.contentText)
                 clearActions()
-                addAction(
-                    0, params.stopText, QuickAction.STOP.quickIntent.toPendingIntent
-                ).build()
+                if (params.showStopAction) {
+                    addAction(0, params.stopText, QuickAction.STOP.quickIntent.toPendingIntent)
+                }
+                build()
             })
     }
 

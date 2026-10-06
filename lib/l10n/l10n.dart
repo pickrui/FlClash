@@ -10044,6 +10044,66 @@ class AppLocalizations {
   String get total {
     return Intl.message('Total', name: 'total', desc: '', args: []);
   }
+
+  /// `Auto check for updates`
+  String get autoCheckUpdate {
+    return Intl.message(
+      'Auto check for updates',
+      name: 'autoCheckUpdate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Stop button in notification`
+  String get showNotificationStopAction {
+    return Intl.message(
+      'Stop button in notification',
+      name: 'showNotificationStopAction',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Interface name`
+  String get interfaceName {
+    return Intl.message(
+      'Interface name',
+      name: 'interfaceName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Follow profile`
+  String get interfaceFollowProfile {
+    return Intl.message(
+      'Follow profile',
+      name: 'interfaceFollowProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clear override (automatic interface)`
+  String get interfaceAutomatic {
+    return Intl.message(
+      'Clear override (automatic interface)',
+      name: 'interfaceAutomatic',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Manage list`
+  String get manageUserAgents {
+    return Intl.message(
+      'Manage list',
+      name: 'manageUserAgents',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

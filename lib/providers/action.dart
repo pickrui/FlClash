@@ -744,6 +744,7 @@ class AppController {
   Future<void>? _updateDownloadsSweep;
   late final _appUpdateCheck = AppUpdateCheck(
     checkForUpdates: (isUser) => _checkUpdate(isUser: isUser),
+    automaticEnabled: () => _ref.read(appSettingProvider).autoCheckUpdate,
   );
   Future<void>? _updateDetailsFuture;
   Future<void>? _startUpdateDownloadFuture;

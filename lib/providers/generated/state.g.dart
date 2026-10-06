@@ -2119,7 +2119,7 @@ final class SharedStateProvider
   }
 }
 
-String _$sharedStateHash() => r'e37acdf479bf2bf5caf48b08af5febca1f003585';
+String _$sharedStateHash() => r'd7aec708f7e03870ce99913141bb4a040b46c2a8';
 
 @ProviderFor(overlayTopOffset)
 final overlayTopOffsetProvider = OverlayTopOffsetProvider._();
@@ -2439,7 +2439,7 @@ final class SetupStateProvider
   }
 }
 
-String _$setupStateHash() => r'5d36d412476631a9193e4af32abb407ac9fbc046';
+String _$setupStateHash() => r'691cd6c332607bfdfcad782b70d5ae5747c53b92';
 
 final class SetupStateFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<SetupState>, int?> {

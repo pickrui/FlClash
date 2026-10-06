@@ -681,6 +681,9 @@ SharedState sharedState(Ref ref) {
   return SharedState(
     currentProfileName: currentProfileName,
     onlyStatisticsProxy: onlyStatisticsProxy,
+    showNotificationStopAction: ref.watch(
+      appSettingProvider.select((state) => state.showNotificationStopAction),
+    ),
     stopText: appLocalizations.stop,
     stopTip: appLocalizations.stopVpn,
     startTip: appLocalizations.startVpn,
@@ -771,6 +774,9 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
       ? await ref.watch(addedRuleStreamProvider(profileId).future)
       : [];
   return SetupState(
+    interfaceName: ref.watch(
+      patchClashConfigProvider.select((state) => state.interfaceName),
+    ),
     profileId: profileId,
     profileLastUpdateDate: profileLastUpdateDate,
     overwriteType: overwriteType,

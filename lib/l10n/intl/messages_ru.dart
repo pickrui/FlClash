@@ -334,6 +334,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "От 1 до 255 байт UTF-8, без двоеточий и управляющих символов",
     ),
     "auto": MessageLookupByLibrary.simpleMessage("Авто"),
+    "autoCheckUpdate": MessageLookupByLibrary.simpleMessage(
+      "Автопроверка обновлений",
+    ),
     "autoCloseConnections": MessageLookupByLibrary.simpleMessage(
       "Автоматическое закрытие соединений",
     ),
@@ -1358,6 +1361,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "intelligentSelected": MessageLookupByLibrary.simpleMessage(
       "Интеллектуальный выбор",
     ),
+    "interfaceAutomatic": MessageLookupByLibrary.simpleMessage(
+      "Снять привязку (автовыбор интерфейса)",
+    ),
+    "interfaceFollowProfile": MessageLookupByLibrary.simpleMessage(
+      "Из профиля",
+    ),
+    "interfaceName": MessageLookupByLibrary.simpleMessage("Имя интерфейса"),
     "internet": MessageLookupByLibrary.simpleMessage("Интернет"),
     "interval": MessageLookupByLibrary.simpleMessage("Интервал"),
     "intranetIP": MessageLookupByLibrary.simpleMessage("Внутренний IP"),
@@ -1453,6 +1463,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "manageServices": MessageLookupByLibrary.simpleMessage(
       "Управление сервисами",
+    ),
+    "manageUserAgents": MessageLookupByLibrary.simpleMessage(
+      "Управление списком",
     ),
     "matchTarget": MessageLookupByLibrary.simpleMessage("MATCH-TARGET"),
     "matchTargetDesc": MessageLookupByLibrary.simpleMessage(
@@ -2193,6 +2206,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "settings": MessageLookupByLibrary.simpleMessage("Настройки"),
     "show": MessageLookupByLibrary.simpleMessage("Показать"),
+    "showNotificationStopAction": MessageLookupByLibrary.simpleMessage(
+      "Кнопка остановки в уведомлении",
+    ),
     "shrink": MessageLookupByLibrary.simpleMessage("Сжать"),
     "sidebarBlur": MessageLookupByLibrary.simpleMessage(
       "Размытие боковой панели",

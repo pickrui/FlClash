@@ -79,6 +79,31 @@ String testUrlFromJson(String? value) {
       : value;
 }
 
+const defaultUserAgents = ['clash-verge/v2.4.2', 'ClashforWindows/0.19.23'];
+
+bool isValidUserAgent(String value) =>
+    value.trim().isNotEmpty &&
+    value.length <= TextInputLimits.userAgent &&
+    !value.codeUnits.any((char) => char != 9 && (char < 32 || char > 126));
+
+Object? _readUserAgents(Map<dynamic, dynamic> json, String key) {
+  if (json.containsKey(key)) return json[key];
+  final previous = json['customUserAgent'];
+  return [
+    ...defaultUserAgents,
+    if (previous is String && isValidUserAgent(previous)) previous.trim(),
+  ];
+}
+
+List<String> userAgentsFromJson(Object? value) => value is List
+    ? value
+          .whereType<String>()
+          .map((item) => item.trim())
+          .where(isValidUserAgent)
+          .toSet()
+          .toList()
+    : defaultUserAgents;
+
 @freezed
 abstract class AppSettingProps with _$AppSettingProps {
   const factory AppSettingProps({
@@ -87,6 +112,11 @@ abstract class AppSettingProps with _$AppSettingProps {
     @JsonKey(fromJson: dashboardWidgetsSafeFormJson)
     List<DashboardWidget> dashboardWidgets,
     @Default(false) bool onlyStatisticsProxy,
+    @Default(true) bool autoCheckUpdate,
+    @Default(true) bool showNotificationStopAction,
+    @Default(defaultUserAgents)
+    @JsonKey(readValue: _readUserAgents, fromJson: userAgentsFromJson)
+    List<String> userAgents,
     @Default(false) bool autoLaunch,
     @Default(false) bool silentLaunch,
     @Default(false) bool autoRun,

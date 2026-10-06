@@ -170,7 +170,10 @@ extension InitControllerExt on AppController {
   }
 
   Future<void> _checkUpdate({required bool isUser}) async {
-    if (safeModeBuild && !isUser) return;
+    if (!isUser &&
+        (safeModeBuild || !_ref.read(appSettingProvider).autoCheckUpdate)) {
+      return;
+    }
     // Every trigger waits for the one-time cleanup before starting a download.
     await (_updateDownloadsSweep ??= _sweepUpdateDownloads());
     if (await _reuseAppUpdateDownload(isUser: isUser)) return;

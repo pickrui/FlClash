@@ -330,6 +330,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Use 1–255 UTF-8 bytes, without colons or control characters",
     ),
     "auto": MessageLookupByLibrary.simpleMessage("Auto"),
+    "autoCheckUpdate": MessageLookupByLibrary.simpleMessage(
+      "Auto check for updates",
+    ),
     "autoCloseConnections": MessageLookupByLibrary.simpleMessage(
       "Auto close connections",
     ),
@@ -1309,6 +1312,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "intelligentSelected": MessageLookupByLibrary.simpleMessage(
       "Intelligent selection",
     ),
+    "interfaceAutomatic": MessageLookupByLibrary.simpleMessage(
+      "Clear override (automatic interface)",
+    ),
+    "interfaceFollowProfile": MessageLookupByLibrary.simpleMessage(
+      "Follow profile",
+    ),
+    "interfaceName": MessageLookupByLibrary.simpleMessage("Interface name"),
     "internet": MessageLookupByLibrary.simpleMessage("Internet"),
     "interval": MessageLookupByLibrary.simpleMessage("Interval"),
     "intranetIP": MessageLookupByLibrary.simpleMessage("Intranet IP"),
@@ -1397,6 +1407,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "May not be suitable for networks in mainland China",
     ),
     "manageServices": MessageLookupByLibrary.simpleMessage("Manage services"),
+    "manageUserAgents": MessageLookupByLibrary.simpleMessage("Manage list"),
     "matchTarget": MessageLookupByLibrary.simpleMessage("MATCH-TARGET"),
     "matchTargetDesc": MessageLookupByLibrary.simpleMessage(
       "Where rules targeting MATCH-TARGET go. Defaults to the target of the final MATCH rule in this profile.",
@@ -2074,6 +2085,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "settings": MessageLookupByLibrary.simpleMessage("Settings"),
     "show": MessageLookupByLibrary.simpleMessage("Show"),
+    "showNotificationStopAction": MessageLookupByLibrary.simpleMessage(
+      "Stop button in notification",
+    ),
     "shrink": MessageLookupByLibrary.simpleMessage("Shrink"),
     "sidebarBlur": MessageLookupByLibrary.simpleMessage("Blur sidebar"),
     "sidebarBlurDesc": MessageLookupByLibrary.simpleMessage(

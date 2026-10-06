@@ -311,7 +311,6 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
   rawConfig['authentication'] = data.authentication;
   rawConfig['skip-auth-prefixes'] = <String>[];
   rawConfig['external-ui'] = '';
-  rawConfig['interface-name'] = '';
   rawConfig['external-ui-url'] = '';
   rawConfig['tcp-concurrent'] = realPatchConfig.tcpConcurrent;
   rawConfig['unified-delay'] = realPatchConfig.unifiedDelay;
@@ -400,6 +399,13 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
   );
   rawConfig['geox-url'] = realPatchConfig.geoXUrl.toJson();
   rawConfig['global-ua'] = realPatchConfig.globalUa ?? defaultUA;
+  if (realPatchConfig.interfaceName != null) {
+    if (realPatchConfig.interfaceName!.isEmpty) {
+      rawConfig.remove('interface-name');
+    } else {
+      rawConfig['interface-name'] = realPatchConfig.interfaceName;
+    }
+  }
   final existingFingerprint = rawConfig['global-client-fingerprint'];
   if (existingFingerprint is! String || existingFingerprint.isEmpty) {
     rawConfig['global-client-fingerprint'] = defaultGlobalClientFingerprint;

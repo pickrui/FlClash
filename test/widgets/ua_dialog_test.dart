@@ -14,6 +14,26 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('editing a saved UA replaces it and retains its order', (
+    tester,
+  ) async {
+    UaDialogResult? result;
+    await _openDialog(tester, onResult: (value) => result = value);
+    await tester.tap(find.text(AppLocalizations.current.manageUserAgents));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('clash-verge/v2.4.2').last);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextFormField), 'Edited/3');
+    await tester.tap(find.text(AppLocalizations.current.submit).last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(AppLocalizations.current.submit).last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Edited/3'));
+    await tester.pumpAndSettle();
+    expect(result?.value, 'Edited/3');
+    expect(result?.userAgents, ['Edited/3', 'ClashforWindows/0.19.23']);
+  });
+
   testWidgets('custom choice opens and focuses the remembered value', (
     tester,
   ) async {

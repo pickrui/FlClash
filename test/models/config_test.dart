@@ -22,6 +22,28 @@ T roundTrip<T>(
 }
 
 void main() {
+  test(
+    'legacy UA migration preserves user choice and sanitizes stored headers',
+    () {
+      final old = AppSettingProps.fromJson({'customUserAgent': ' Legacy/1 '});
+      expect(old.userAgents, [...defaultUserAgents, 'Legacy/1']);
+      expect(old.autoCheckUpdate, true);
+      expect(old.showNotificationStopAction, true);
+      final explicit = AppSettingProps.fromJson({
+        'userAgents': ['B/2', 'A/1', 'B/2', 'bad\r\nheader', null],
+        'customUserAgent': 'Ignored/1',
+      });
+      expect(explicit.userAgents, ['B/2', 'A/1']);
+      expect(AppSettingProps.fromJson({'userAgents': []}).userAgents, isEmpty);
+      final disabled = old.copyWith(
+        autoCheckUpdate: false,
+        showNotificationStopAction: false,
+        userAgents: ['Only/1'],
+      );
+      expect(roundTrip(disabled.toJson, AppSettingProps.fromJson), disabled);
+    },
+  );
+
   group('AppSettingProps JSON round-trip', () {
     test('default values survive round-trip', () {
       const props = AppSettingProps();
@@ -341,9 +363,9 @@ void main() {
     test('missing Geo settings default on while saved opt-out survives', () {
       expect(Config.fromJson({}).patchClashConfig.geoAutoUpdate, true);
       expect(
-        Config.fromJson(
-          jsonDecode('{"patchClashConfig":{}}'),
-        ).patchClashConfig.geoAutoUpdate,
+        Config.fromJson(jsonDecode('{"patchClashConfig":{}}'))
+            .patchClashConfig
+            .geoAutoUpdate,
         true,
       );
       final config = Config.fromJson({

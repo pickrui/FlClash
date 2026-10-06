@@ -262,6 +262,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "请输入 1–255 字节的用户名，不支持冒号或控制字符",
     ),
     "auto": MessageLookupByLibrary.simpleMessage("自动"),
+    "autoCheckUpdate": MessageLookupByLibrary.simpleMessage("自动检查更新"),
     "autoCloseConnections": MessageLookupByLibrary.simpleMessage("自动关闭连接"),
     "autoCloseConnectionsDesc": MessageLookupByLibrary.simpleMessage(
       "切换节点后自动关闭连接",
@@ -963,6 +964,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "请充值后重试",
     ),
     "intelligentSelected": MessageLookupByLibrary.simpleMessage("智能选择"),
+    "interfaceAutomatic": MessageLookupByLibrary.simpleMessage("清除绑定（自动选择网卡）"),
+    "interfaceFollowProfile": MessageLookupByLibrary.simpleMessage("跟随配置"),
+    "interfaceName": MessageLookupByLibrary.simpleMessage("网卡名称"),
     "internet": MessageLookupByLibrary.simpleMessage("互联网"),
     "interval": MessageLookupByLibrary.simpleMessage("间隔"),
     "intranetIP": MessageLookupByLibrary.simpleMessage("内网 IP"),
@@ -1027,6 +1031,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "可能不适用于中国大陆网络",
     ),
     "manageServices": MessageLookupByLibrary.simpleMessage("管理检测服务"),
+    "manageUserAgents": MessageLookupByLibrary.simpleMessage("管理列表"),
     "matchTarget": MessageLookupByLibrary.simpleMessage("MATCH-TARGET"),
     "matchTargetDesc": MessageLookupByLibrary.simpleMessage(
       "目标为 MATCH-TARGET 的规则路由到这里，默认取本配置末尾 MATCH 规则的目标",
@@ -1518,6 +1523,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "serviceUnsupportedRegion": MessageLookupByLibrary.simpleMessage("地区不受支持"),
     "settings": MessageLookupByLibrary.simpleMessage("设置"),
     "show": MessageLookupByLibrary.simpleMessage("显示"),
+    "showNotificationStopAction": MessageLookupByLibrary.simpleMessage(
+      "通知栏显示停止按钮",
+    ),
     "shrink": MessageLookupByLibrary.simpleMessage("紧凑"),
     "sidebarBlur": MessageLookupByLibrary.simpleMessage("侧边栏模糊"),
     "sidebarBlurDesc": MessageLookupByLibrary.simpleMessage("在侧边栏显示半透明系统背景"),

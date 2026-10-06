@@ -54,10 +54,14 @@ class UaItem extends ConsumerWidget {
       child: UaDialog(
         value: ref.read(patchClashConfigProvider).globalUa,
         customValue: ref.read(appSettingProvider).customUserAgent,
+        userAgents: ref.read(appSettingProvider).userAgents,
       ),
     );
     if (result == null || !ref.context.mounted) return;
     final userAgent = result.value;
+    ref
+        .read(appSettingProvider.notifier)
+        .update((state) => state.copyWith(userAgents: result.userAgents));
     if (result.isCustom) {
       ref
           .read(appSettingProvider.notifier)
@@ -82,6 +86,73 @@ class UaItem extends ConsumerWidget {
       title: Text(appLocalizations.userAgent),
       subtitle: Text(globalUa ?? appLocalizations.defaultText),
       onTap: () => _handleShowUaDialog(ref),
+    );
+  }
+}
+
+enum _InterfaceMode { profile, automatic, custom }
+
+class InterfaceNameItem extends ConsumerWidget {
+  const InterfaceNameItem({super.key});
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.appLocalizations;
+    final value = ref.watch(
+      patchClashConfigProvider.select((state) => state.interfaceName),
+    );
+    return ListItem(
+      leading: const Icon(Icons.settings_ethernet),
+      title: Text(l.interfaceName),
+      subtitle: Text(
+        value == null
+            ? l.interfaceFollowProfile
+            : value.isEmpty
+            ? l.interfaceAutomatic
+            : value,
+      ),
+      onTap: () async {
+        final mode = await showDialog<_InterfaceMode>(
+          context: context,
+          builder: (context) => SimpleDialog(
+            title: Text(l.interfaceName),
+            children: [
+              for (final mode in _InterfaceMode.values)
+                SimpleDialogOption(
+                  onPressed: () => Navigator.pop(context, mode),
+                  child: Text(switch (mode) {
+                    _InterfaceMode.profile => l.interfaceFollowProfile,
+                    _InterfaceMode.automatic => l.interfaceAutomatic,
+                    _InterfaceMode.custom => l.custom,
+                  }),
+                ),
+            ],
+          ),
+        );
+        if (!context.mounted || mode == null) return;
+        String? next;
+        if (mode == _InterfaceMode.automatic) next = '';
+        if (mode == _InterfaceMode.custom) {
+          next = await showDialog<String>(
+            context: context,
+            builder: (_) => InputDialog(
+              title: l.interfaceName,
+              value: value ?? '',
+              maxLength: 128,
+              validator: (value) =>
+                  value == null ||
+                      value.trim().isEmpty ||
+                      value.codeUnits.any((char) => char < 32 || char == 127)
+                  ? l.emptyTip(l.interfaceName)
+                  : null,
+            ),
+          );
+          if (!context.mounted || next == null) return;
+          next = next.trim();
+        }
+        ref
+            .read(patchClashConfigProvider.notifier)
+            .update((state) => state.copyWith(interfaceName: next));
+      },
     );
   }
 }
@@ -708,6 +779,7 @@ class _ExternalControllerDialogState
 final generalItems = <Widget>[
   const LogLevelItem(),
   const UaItem(),
+  const InterfaceNameItem(),
   if (system.isDesktop) const KeepAliveIntervalItem(),
   const TestUrlItem(),
   const PortItem(),

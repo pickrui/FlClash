@@ -211,7 +211,8 @@ object State {
             NotificationParams(
                 title = sharedState.currentProfileName,
                 stopText = sharedState.stopText,
-                onlyStatisticsProxy = sharedState.onlyStatisticsProxy
+                onlyStatisticsProxy = sharedState.onlyStatisticsProxy,
+                showStopAction = sharedState.showNotificationStopAction
             )
         )
     }
