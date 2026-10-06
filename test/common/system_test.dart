@@ -7,6 +7,13 @@ import 'package:fl_clash/common/system.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('only TV device features enable remote navigation', () {
+    expect(isAndroidTvFeatures(['android.hardware.type.television']), isTrue);
+    expect(isAndroidTvFeatures(['android.software.leanback']), isTrue);
+    expect(isAndroidTvFeatures(['android.hardware.touchscreen']), isFalse);
+    expect(isAndroidTvFeatures([]), isFalse);
+  });
+
   test('recognizes the Docker runtime marker', () {
     expect(isFlClashDockerEnvironment({'FLCLASH_DOCKER': 'true'}), true);
     expect(isFlClashDockerEnvironment({'FLCLASH_DOCKER': '1'}), true);

@@ -104,6 +104,49 @@ void main() {
     });
   }
 
+  for (final (width, hasProfile, docked) in [
+    (400.0, false, false),
+    (360.0, true, false),
+    (400.0, true, true),
+  ]) {
+    testWidgets('dashboard docking at $width with profiles=$hasProfile', (
+      tester,
+    ) async {
+      final size = Size(width, 800);
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final c = ProviderContainer(
+        overrides: [
+          viewSizeProvider.overrideWithBuild((_, _) => size),
+          profilesProvider.overrideWithValue([
+            if (hasProfile)
+              const Profile(
+                id: 1,
+                label: 'Fixture',
+                autoUpdateDuration: Duration.zero,
+              ),
+          ]),
+          _items(const [PageLabel.dashboard, PageLabel.proxies]),
+        ],
+      );
+      addTearDown(c.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: c,
+          child: const TestApp(child: HomePage()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(DockedPageScope.of(tester.element(find.byType(_Probe))), docked);
+      expect(
+        tester.widget<NavigationDock>(find.byType(NavigationDock)).trailing,
+        docked ? isNotNull : isNull,
+      );
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets('a page that leaves the navigation falls back to the first tab', (
     tester,
   ) async {

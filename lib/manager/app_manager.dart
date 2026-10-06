@@ -11,11 +11,11 @@ import 'package:fl_clash/common/periodic_task_runner.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/icons/navigation_glyph.dart';
 import 'package:fl_clash/widgets/sidebar.dart';
+import 'package:fl_clash/widgets/animated_visibility.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -223,68 +223,6 @@ class AppEnvManager extends StatelessWidget {
   }
 }
 
-class NavigationRailFocus extends StatelessWidget {
-  final Widget child;
-  final int currentIndex;
-  final int itemCount;
-  final ValueChanged<int> onSelected;
-  final bool autofocus;
-
-  const NavigationRailFocus({
-    super.key,
-    required this.child,
-    required this.currentIndex,
-    required this.itemCount,
-    required this.onSelected,
-    this.autofocus = false,
-  }) : assert(itemCount > 0),
-       assert(currentIndex >= 0 && currentIndex < itemCount);
-
-  KeyEventResult _handleKeyEvent(FocusNode _, KeyEvent event) {
-    final logicalKey = event.logicalKey;
-    final navigationOffset = switch (logicalKey) {
-      LogicalKeyboardKey.arrowUp => -1,
-      LogicalKeyboardKey.arrowDown => 1,
-      _ => null,
-    };
-    final isActivationKey =
-        logicalKey == LogicalKeyboardKey.enter ||
-        logicalKey == LogicalKeyboardKey.numpadEnter ||
-        logicalKey == LogicalKeyboardKey.gameButtonA ||
-        logicalKey == LogicalKeyboardKey.select;
-    if (event is KeyRepeatEvent &&
-        (navigationOffset != null || isActivationKey)) {
-      return KeyEventResult.handled;
-    }
-    if (event is! KeyDownEvent) {
-      return KeyEventResult.ignored;
-    }
-    if (navigationOffset != null) {
-      final nextIndex = currentIndex + navigationOffset;
-      if (nextIndex >= 0 && nextIndex < itemCount) {
-        onSelected(nextIndex);
-        return KeyEventResult.handled;
-      }
-      return KeyEventResult.ignored;
-    }
-    if (isActivationKey) {
-      onSelected(currentIndex);
-      return KeyEventResult.handled;
-    }
-    return KeyEventResult.ignored;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Focus(
-      autofocus: autofocus,
-      descendantsAreFocusable: false,
-      onKeyEvent: _handleKeyEvent,
-      child: child,
-    );
-  }
-}
-
 class AppSidebarContainer extends ConsumerWidget {
   final Widget child;
 
@@ -303,58 +241,56 @@ class AppSidebarContainer extends ConsumerWidget {
     final navigationState = ref.watch(navigationStateProvider);
     final navigationItems = navigationState.navigationItems;
     final isMobileView = navigationState.viewMode == ViewMode.mobile;
-    if (isMobileView) {
-      return child;
-    }
     final currentIndex = navigationState.currentIndex;
     final showLabel = ref.watch(appSettingProvider).showLabel;
     final canExpand = navigationState.viewMode == ViewMode.desktop;
     final version = ref.watch(versionProvider);
     void selectDestination(int index) {
+      final focus = FocusManager.instance.primaryFocus;
+      final preserveFocus =
+          focus?.context?.findAncestorWidgetOfExactType<NavigationSidebar>() !=
+          null;
       appController.toPage(navigationItems[index].label);
+      if (preserveFocus) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (focus?.context != null && focus!.canRequestFocus) {
+            focus.requestFocus();
+          }
+        });
+      }
     }
 
     return Row(
       children: [
-        Material(
-          color: ref.watch(windowBlurProvider)
-              ? context.colorScheme.surfaceContainer.withValues(alpha: 0.72)
-              : context.colorScheme.surfaceContainer,
-          child: Builder(
-            builder: (context) {
-              final sidebar = NavigationSidebar(
-                destinations: [
-                  for (final item in navigationItems)
-                    SidebarDestination(
-                      glyph: navigationGlyphOf(item.label),
-                      label: Intl.message(item.label.name),
-                    ),
-                ],
-                selectedIndex: currentIndex,
-                expanded: canExpand && showLabel,
-                onSelected: selectDestination,
-                onToggle: canExpand
-                    ? () => ref
-                          .read(appSettingProvider.notifier)
-                          .update(
-                            (state) =>
-                                state.copyWith(showLabel: !state.showLabel),
-                          )
-                    : null,
-                windowControls: system.isMacOS && version > 10
-                    ? const Size(78, 32)
-                    : Size.zero,
-              );
-              return system.isAndroid
-                  ? NavigationRailFocus(
-                      autofocus: true,
-                      currentIndex: currentIndex,
-                      itemCount: navigationItems.length,
-                      onSelected: selectDestination,
-                      child: sidebar,
-                    )
-                  : sidebar;
-            },
+        AnimatedVisibility.sidebar(
+          visible: !isMobileView,
+          child: Material(
+            color: ref.watch(windowBlurProvider)
+                ? context.colorScheme.surfaceContainer.withValues(alpha: 0.72)
+                : context.colorScheme.surfaceContainer,
+            child: NavigationSidebar(
+              destinations: [
+                for (final item in navigationItems)
+                  SidebarDestination(
+                    glyph: navigationGlyphOf(item.label),
+                    label: Intl.message(item.label.name),
+                  ),
+              ],
+              selectedIndex: currentIndex,
+              expanded: canExpand && showLabel,
+              onSelected: selectDestination,
+              onToggle: canExpand
+                  ? () => ref
+                        .read(appSettingProvider.notifier)
+                        .update(
+                          (state) =>
+                              state.copyWith(showLabel: !state.showLabel),
+                        )
+                  : null,
+              windowControls: system.isMacOS && version > 10
+                  ? const Size(78, 32)
+                  : Size.zero,
+            ),
           ),
         ),
         Expanded(

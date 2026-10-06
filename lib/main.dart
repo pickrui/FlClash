@@ -54,7 +54,7 @@ Future<void> main(List<String> arguments) async {
     cloudStorePageBuilder = (_) => const CloudStorePage();
     cloudNodeFilterPageBuilder = (_) => const CloudNodeFilterPage();
     tailscalePageBuilder = (_) => const TailscaleView();
-    final version = await system.version;
+    final version = await system.init();
     final container = await globalState.init(
       version,
       arguments: arguments,

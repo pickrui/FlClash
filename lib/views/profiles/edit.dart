@@ -16,6 +16,7 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
+import 'package:fl_clash/widgets/focus.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
@@ -437,46 +438,51 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
           ),
         ),
     ];
-    return CommonPopScope(
-      onPop: (context) {
-        if (_saving) return false;
-        if (_fileData == null) {
-          return true;
-        }
-        _handleBack();
-        return false;
-      },
-      child: FloatLayout(
-        floatingWidget: FloatWrapper(
-          child: FloatingActionButton.extended(
-            heroTag: null,
-            onPressed: _saving ? null : _handleConfirm,
-            label: Text(appLocalizations.save),
-            icon: _saving
-                ? const SizedBox.square(
-                    dimension: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const GlyphIcon(AppGlyphs.save),
-          ),
-        ),
-        child: ExcludeFocus(
-          excluding: _saving,
-          child: AbsorbPointer(
-            absorbing: _saving,
-            child: Form(
-              key: _formKey,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: ListView.separated(
-                  padding: kMaterialListPadding.copyWith(bottom: 72),
-                  itemBuilder: (_, index) {
-                    return items[index];
-                  },
-                  separatorBuilder: (_, _) {
-                    return const SizedBox(height: 24);
-                  },
-                  itemCount: items.length,
+    return FocusTraversalGroup(
+      policy: PageTraversalPolicy(),
+      child: PageFocusScope(
+        child: CommonPopScope(
+          onPop: (context) {
+            if (_saving) return false;
+            if (_fileData == null) {
+              return true;
+            }
+            _handleBack();
+            return false;
+          },
+          child: FloatLayout(
+            floatingWidget: FloatWrapper(
+              child: FloatingActionButton.extended(
+                heroTag: null,
+                onPressed: _saving ? null : _handleConfirm,
+                label: Text(appLocalizations.save),
+                icon: _saving
+                    ? const SizedBox.square(
+                        dimension: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const GlyphIcon(AppGlyphs.save),
+              ),
+            ),
+            child: ExcludeFocus(
+              excluding: _saving,
+              child: AbsorbPointer(
+                absorbing: _saving,
+                child: Form(
+                  key: _formKey,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: ListView.separated(
+                      padding: kMaterialListPadding.copyWith(bottom: 72),
+                      itemBuilder: (_, index) {
+                        return items[index];
+                      },
+                      separatorBuilder: (_, _) {
+                        return const SizedBox(height: 24);
+                      },
+                      itemCount: items.length,
+                    ),
+                  ),
                 ),
               ),
             ),

@@ -599,7 +599,8 @@ class CommonScaffoldState extends State<CommonScaffold> {
     final isBottomSheet = form.isBottomSheet;
     final isTV =
         widget.isTV ??
-        (MediaQuery.navigationModeOf(context) == NavigationMode.directional);
+        (system.isTV ||
+            MediaQuery.navigationModeOf(context) == NavigationMode.directional);
     final bottomInset = BottomInsetScope.of(context);
     final primaryAction = widget.primaryAction;
     final actionInBar =

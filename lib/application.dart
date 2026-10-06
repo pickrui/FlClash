@@ -6,6 +6,7 @@
 import 'package:fl_clash/views/network_diagnostics.dart';
 import 'package:fl_clash/views/cloud/cloud_login_page.dart';
 import 'package:fl_clash/widgets/keyboard_inset_hold.dart';
+import 'package:fl_clash/widgets/focus.dart';
 
 import 'dart:async';
 
@@ -207,7 +208,15 @@ class ApplicationState extends ConsumerState<Application> {
                     child: _buildApp(
                       child: _buildPlatformState(
                         child: _buildState(
-                          child: _buildPlatformApp(child: child!),
+                          child: _buildPlatformApp(
+                            child: RemoteFocusAdapter(
+                              enabled:
+                                  system.isTV ||
+                                  MediaQuery.navigationModeOf(context) ==
+                                      NavigationMode.directional,
+                              child: child!,
+                            ),
+                          ),
                         ),
                       ),
                     ),

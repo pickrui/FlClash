@@ -21,8 +21,16 @@ bool isFlClashDockerEnvironment(Map<String, String> environment) {
   return value == 'true' || value == '1';
 }
 
+bool isAndroidTvFeatures(Iterable<String> features) => features.any(
+  const {
+    'android.hardware.type.television',
+    'android.software.leanback',
+  }.contains,
+);
+
 class System {
   static System? _instance;
+  bool _isTV = false;
   Future<String?> Function()? requestAdminPassword;
 
   System._internal();
@@ -44,8 +52,16 @@ class System {
 
   bool get isDocker => isFlClashDockerEnvironment(Platform.environment);
 
-  Future<int> get version async {
+  bool get isTV => _isTV;
+
+  Future<int> init() async {
     final deviceInfo = await DeviceInfoPlugin().deviceInfo;
+    _isTV = switch (deviceInfo) {
+      AndroidDeviceInfo(:final systemFeatures) => isAndroidTvFeatures(
+        systemFeatures,
+      ),
+      _ => false,
+    };
     return switch (Platform.operatingSystem) {
       'macos' => (deviceInfo as MacOsDeviceInfo).majorVersion,
       'android' => (deviceInfo as AndroidDeviceInfo).version.sdkInt,

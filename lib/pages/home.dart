@@ -18,157 +18,256 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_clash/views/dashboard/widgets/start_button.dart';
 
-class HomePage extends StatelessWidget {
+import 'package:fl_clash/widgets/focus.dart';
+import 'package:fl_clash/widgets/animated_visibility.dart';
+
+class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final commonAction = context.commonAction;
-
+  Widget build(BuildContext context, WidgetRef ref) {
+    final hasViewSize = ref.watch(
+      viewSizeProvider.select((size) => !size.isEmpty),
+    );
+    if (!hasViewSize) {
+      return const SizedBox.shrink();
+    }
     return HomeBackScopeContainer(
       child: AppSidebarContainer(
-        child: Material(
-          color: context.colorScheme.surface,
+        child: _HomeShell(
           child: Consumer(
-            builder: (context, ref, child) {
-              final state = ref.watch(navigationStateProvider);
-              final isMobile = state.viewMode == ViewMode.mobile;
-              final navigationItems = state.navigationItems;
-              final currentIndex = state.currentIndex;
+            builder: (_, ref, _) {
+              final navigationItems = ref
+                  .watch(currentNavigationItemsStateProvider)
+                  .value;
+              final isMobile = ref.watch(isMobileViewProvider);
               final floating = ref.watch(
                 appSettingProvider.select(
-                  (value) => value.floatingNavigationBar,
+                  (state) => state.floatingNavigationBar,
                 ),
               );
-              final docked =
-                  floating && MediaQuery.sizeOf(context).width >= 380;
               final hasProfile = ref.watch(
-                profilesProvider.select((value) => value.isNotEmpty),
+                profilesProvider.select((profiles) => profiles.isNotEmpty),
               );
-              final bottomNavigationBar = floating
-                  ? NavigationDock(
-                      destinations: [
-                        for (final item in navigationItems)
-                          NavigationDockDestination(
-                            icon: navigationGlyph(
-                              item.label,
-                              selected:
-                                  navigationItems[currentIndex].label ==
-                                  item.label,
-                            ),
-                            label: Intl.message(item.label.name),
-                          ),
-                      ],
-                      selectedIndex: currentIndex,
-                      onSelected: (index) =>
-                          commonAction.toPage(navigationItems[index].label),
-                      trailing:
-                          docked &&
-                              hasProfile &&
-                              navigationItems[currentIndex].label ==
-                                  PageLabel.dashboard
-                          ? const StartButton()
-                          : null,
-                    )
-                  : NavigationBarTheme(
-                      data: _NavigationBarDefaultsM3(context),
-                      child: NavigationBar(
-                        destinations: navigationItems
-                            .map(
-                              (e) => NavigationDestination(
-                                icon: navigationGlyph(
-                                  e.label,
-                                  selected:
-                                      navigationItems[currentIndex].label ==
-                                      e.label,
-                                ),
-                                label: Intl.message(e.label.name),
-                              ),
-                            )
-                            .toList(),
-                        onDestinationSelected: (index) {
-                          commonAction.toPage(navigationItems[index].label);
-                        },
-                        selectedIndex: currentIndex,
-                      ),
-                    );
-              if (isMobile) {
-                return Column(
-                  children: [
-                    Flexible(
-                      flex: 1,
-                      child: MediaQuery.removePadding(
-                        removeTop: false,
-                        removeBottom: true,
-                        removeLeft: true,
-                        removeRight: true,
-                        context: context,
-                        child: DockedPageScope(
-                          docked: docked && hasProfile,
-                          child: child!,
-                        ),
-                      ),
-                    ),
-                    MediaQuery.removePadding(
-                      removeTop: true,
-                      removeBottom: false,
-                      removeLeft: true,
-                      removeRight: true,
-                      context: context,
-                      child: bottomNavigationBar,
-                    ),
-                  ],
-                );
-              } else {
-                return child!;
-              }
+              final docked =
+                  isMobile &&
+                  floating &&
+                  hasProfile &&
+                  MediaQuery.sizeOf(context).width >= 380;
+              return _HomePageView(
+                navigationItems: navigationItems,
+                pageBuilder: (_, index) {
+                  final navigationItem = navigationItems[index];
+                  return _NavigationPage(
+                    key: ValueKey(navigationItem.label),
+                    item: navigationItem,
+                    isMobile: isMobile,
+                    docked: docked,
+                    view: navigationItem.builder(context),
+                  );
+                },
+              );
             },
-            child: Consumer(
-              builder: (_, ref, _) {
-                final navigationItems = ref
-                    .watch(currentNavigationItemsStateProvider)
-                    .value;
-                final isMobile = ref.watch(isMobileViewProvider);
-                return _HomePageView(
-                  navigationItems: navigationItems,
-                  pageBuilder: (_, index) {
-                    final navigationItem = navigationItems[index];
-                    final navigationView = navigationItem.builder(context);
-                    final view = KeepScope(
-                      keep: navigationItem.keep,
-                      child: isMobile
-                          ? navigationView
-                          : Navigator(
-                              pages: [MaterialPage(child: navigationView)],
-                              onDidRemovePage: (_) {},
-                            ),
-                    );
-                    return Consumer(
-                      key: ValueKey(navigationItem.label),
-                      builder: (_, ref, child) {
-                        final isActive = ref.watch(
-                          navigationStateProvider.select(
-                            (state) =>
-                                state
-                                    .navigationItems[state.currentIndex]
-                                    .label ==
-                                navigationItem.label,
-                          ),
-                        );
-                        return PageActivityScope(
-                          isActive: isActive,
-                          child: child!,
-                        );
-                      },
-                      child: KeyboardInsetHold(child: view),
-                    );
-                  },
-                );
-              },
-            ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _HomeShell extends ConsumerWidget {
+  const _HomeShell({required this.child});
+
+  final Widget child;
+
+  void _handleToPage(PageLabel pageLabel, WidgetRef ref) {
+    ref.read(currentPageLabelProvider.notifier).toPage(pageLabel);
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(navigationStateProvider);
+    final isMobile = state.viewMode == ViewMode.mobile;
+    final navigationItems = state.navigationItems;
+    final floating = ref.watch(
+      appSettingProvider.select((state) => state.floatingNavigationBar),
+    );
+    final hasProfile = ref.watch(
+      profilesProvider.select((profiles) => profiles.isNotEmpty),
+    );
+    final isDashboard =
+        navigationItems[state.currentIndex].label == PageLabel.dashboard;
+    return Material(
+      color: context.colorScheme.surface,
+      child: Column(
+        children: [
+          Expanded(
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: FocusTraversalGroup(
+                    policy: PageTraversalPolicy(),
+                    child: BottomInsetScope(
+                      inset: isMobile && floating
+                          ? NavigationDock.insetOf(context)
+                          : 0,
+                      child: _BodyPadding(isMobile: isMobile, child: child),
+                    ),
+                  ),
+                ),
+                PositionedDirectional(
+                  start: 0,
+                  end: 0,
+                  bottom: 0,
+                  child: AnimatedVisibility.bottomNavigation(
+                    visible: isMobile && floating,
+                    child: _NavigationPadding(
+                      child: NavigationDock(
+                        destinations: [
+                          for (final item in navigationItems)
+                            NavigationDockDestination(
+                              icon: navigationGlyph(
+                                item.label,
+                                selected:
+                                    item.label ==
+                                    navigationItems[state.currentIndex].label,
+                              ),
+                              label: Intl.message(item.label.name),
+                            ),
+                        ],
+                        selectedIndex: state.currentIndex,
+                        onSelected: (index) {
+                          _handleToPage(navigationItems[index].label, ref);
+                        },
+                        trailing:
+                            hasProfile &&
+                                isDashboard &&
+                                MediaQuery.sizeOf(context).width >= 380
+                            ? const StartButton()
+                            : null,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          AnimatedVisibility.bottomNavigation(
+            visible: isMobile && !floating,
+            child: _NavigationPadding(
+              child: NavigationBar(
+                destinations: [
+                  for (final (index, item) in navigationItems.indexed)
+                    NavigationDestination(
+                      icon: navigationGlyph(
+                        item.label,
+                        selected: index == state.currentIndex,
+                      ),
+                      label: Intl.message(item.label.name),
+                    ),
+                ],
+                selectedIndex: state.currentIndex,
+                onDestinationSelected: (index) {
+                  _handleToPage(navigationItems[index].label, ref);
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BodyPadding extends StatelessWidget {
+  const _BodyPadding({required this.isMobile, required this.child});
+
+  final bool isMobile;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return MediaQuery.removePadding(
+      removeTop: false,
+      removeBottom: isMobile,
+      removeLeft: isMobile,
+      removeRight: isMobile,
+      context: context,
+      child: child,
+    );
+  }
+}
+
+class _NavigationPadding extends StatelessWidget {
+  const _NavigationPadding({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return MediaQuery.removePadding(
+      removeTop: true,
+      removeBottom: false,
+      removeLeft: true,
+      removeRight: true,
+      context: context,
+      child: child,
+    );
+  }
+}
+
+class _NavigationPage extends StatelessWidget {
+  const _NavigationPage({
+    super.key,
+    required this.item,
+    required this.isMobile,
+    required this.docked,
+    required this.view,
+  });
+
+  final NavigationItem item;
+  final bool isMobile;
+  final bool docked;
+  final Widget view;
+
+  @override
+  Widget build(BuildContext context) {
+    final scopedView = PageFocusScope(
+      child: DockedPageScope(docked: docked, child: view),
+    );
+    final keptView = KeepScope(
+      key: ValueKey(item.label),
+      keep: item.keep,
+      child: isMobile
+          ? scopedView
+          : Navigator(
+              key: ValueKey('${item.label.name}_navigator'),
+              pages: [MaterialPage(child: scopedView)],
+              onDidRemovePage: (_) {},
+            ),
+    );
+    return Consumer(
+      builder: (_, ref, child) {
+        final isActive = ref.watch(
+          navigationStateProvider.select(
+            (state) =>
+                state.navigationItems[state.currentIndex].label == item.label,
+          ),
+        );
+        // A kept-alive page off screen still ticks its animations, and
+        // each tick asks for a frame.
+        return PageActivityScope(
+          isActive: isActive,
+          child: TickerMode(
+            enabled: isActive,
+            child: ExcludeFocus(
+              excluding: !isActive,
+              child: KeyboardInsetHold(child: child!),
+            ),
+          ),
+        );
+      },
+      child: keptView,
     );
   }
 }
@@ -355,63 +454,6 @@ class _FadeTabPage extends StatelessWidget {
       },
       child: child,
     );
-  }
-}
-
-class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
-  _NavigationBarDefaultsM3(this.context)
-    : super(
-        height: 80.0,
-        elevation: 3.0,
-        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-      );
-
-  final BuildContext context;
-  late final ColorScheme _colors = Theme.of(context).colorScheme;
-  late final TextTheme _textTheme = Theme.of(context).textTheme;
-
-  @override
-  Color? get backgroundColor => _colors.surfaceContainer;
-
-  @override
-  Color? get shadowColor => Colors.transparent;
-
-  @override
-  Color? get surfaceTintColor => Colors.transparent;
-
-  @override
-  WidgetStateProperty<IconThemeData?>? get iconTheme {
-    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      return IconThemeData(
-        size: 24.0,
-        color: states.contains(WidgetState.disabled)
-            ? _colors.onSurfaceVariant.opacity38
-            : states.contains(WidgetState.selected)
-            ? _colors.onSecondaryContainer
-            : _colors.onSurfaceVariant,
-      );
-    });
-  }
-
-  @override
-  Color? get indicatorColor => _colors.secondaryContainer;
-
-  @override
-  ShapeBorder? get indicatorShape => const StadiumBorder();
-
-  @override
-  WidgetStateProperty<TextStyle?>? get labelTextStyle {
-    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      final TextStyle style = _textTheme.labelMedium!;
-      return style.apply(
-        overflow: TextOverflow.ellipsis,
-        color: states.contains(WidgetState.disabled)
-            ? _colors.onSurfaceVariant.opacity38
-            : states.contains(WidgetState.selected)
-            ? _colors.onSurface
-            : _colors.onSurfaceVariant,
-      );
-    });
   }
 }
 
