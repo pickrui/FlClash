@@ -13,6 +13,9 @@ export 'proxy_groups.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/views/config/dns.dart';
+import 'package:fl_clash/views/connection/connections.dart';
+import 'package:fl_clash/views/connection/requests.dart';
+import 'package:fl_clash/views/connection/dns_queries.dart';
 import 'package:fl_clash/widgets/route_motion_hold.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -92,8 +95,17 @@ class _FeedCountCardState extends ConsumerState<FeedCountCard>
       icon: widget.page == PageLabel.dnsQueries
           ? Icons.dns_outlined
           : Icons.swap_calls,
-      onPressed: () =>
-          ref.read(currentPageLabelProvider.notifier).value = widget.page,
+      onPressed: () => showSnapSheet(
+        context,
+        initialScrollOffset: widget.page == PageLabel.requests
+            ? double.maxFinite
+            : 0,
+        builder: (_, controller) => switch (widget.page) {
+          PageLabel.dnsQueries => DnsQueriesView(scrollController: controller),
+          PageLabel.requests => RequestsView(scrollController: controller),
+          _ => ConnectionsView(scrollController: controller),
+        },
+      ),
       child: Align(
         alignment: Alignment.bottomLeft,
         child: Text('$_count', style: context.textTheme.headlineSmall),

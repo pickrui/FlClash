@@ -414,6 +414,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "basicConfigDesc": MessageLookupByLibrary.simpleMessage(
       "Modify the basic configuration globally",
     ),
+    "basicInfo": MessageLookupByLibrary.simpleMessage("Basic info"),
     "batchAdd": MessageLookupByLibrary.simpleMessage("Batch add"),
     "batchListInputTip": MessageLookupByLibrary.simpleMessage(
       "One item per line, or separated by commas",

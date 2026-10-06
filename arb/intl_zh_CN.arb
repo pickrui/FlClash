@@ -1303,5 +1303,6 @@
   "singleAdd": "单条添加",
   "singleValueTip": "{label}只能是一项",
   "writeToSystem": "写入系统",
-  "writeToSystemDesc": "同时设置系统时钟，Android上不生效"
+  "writeToSystemDesc": "同时设置系统时钟，Android上不生效",
+  "basicInfo": "基础信息"
 }

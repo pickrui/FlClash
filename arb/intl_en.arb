@@ -1303,5 +1303,6 @@
   "singleAdd": "Single add",
   "singleValueTip": "{label} must be a single item",
   "writeToSystem": "Write to system",
-  "writeToSystemDesc": "Also set the system clock; Android ignores it"
+  "writeToSystemDesc": "Also set the system clock; Android ignores it",
+  "basicInfo": "Basic info"
 }

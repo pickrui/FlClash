@@ -11018,6 +11018,11 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Basic info`
+  String get basicInfo {
+    return Intl.message('Basic info', name: 'basicInfo', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

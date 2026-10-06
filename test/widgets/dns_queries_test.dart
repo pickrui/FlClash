@@ -69,12 +69,12 @@ void main() {
       await tester.tap(find.byTooltip('Resume updates'));
       await tester.pumpAndSettle();
       expect(find.text('failed.example'), findsOneWidget);
-      await tester.tap(find.text('Cached'));
+      await tester.tap(find.widgetWithText(ChoiceChip, 'Cached'));
       await tester.pumpAndSettle();
       expect(find.text('failed.example'), findsNothing);
       await tester.tap(find.text('cached.example'));
       await tester.pumpAndSettle();
-      expect(find.text('192.0.2.10'), findsOneWidget);
+      expect(find.text('192.0.2.10'), findsNWidgets(2));
       expect(find.text('21 ms'), findsNWidgets(2));
       await tester.tap(find.text('Close'));
       await tester.pumpAndSettle();

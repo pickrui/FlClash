@@ -19,12 +19,14 @@ import 'package:fl_clash/features/connection/tracker_speed_ranker.dart';
 import 'item.dart';
 
 class ConnectionsView extends ConsumerStatefulWidget {
+  final ScrollController? scrollController;
   final Future<List<TrackerInfo>> Function()? connectionsReader;
   final CoreController? core;
   final DateTime Function()? now;
 
   const ConnectionsView({
     super.key,
+    this.scrollController,
     @visibleForTesting this.connectionsReader,
     @visibleForTesting this.core,
     @visibleForTesting this.now,
@@ -42,7 +44,8 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
   final _connectionsStateNotifier = ValueNotifier<TrackerInfosState>(
     const TrackerInfosState(),
   );
-  final ScrollController _scrollController = ScrollController();
+  late final ScrollController _scrollController =
+      widget.scrollController ?? ScrollController();
   int _refreshGeneration = 0;
   final _speedRanker = TrackerSpeedRanker();
 
@@ -128,7 +131,7 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
   @override
   void dispose() {
     _connectionsStateNotifier.dispose();
-    _scrollController.dispose();
+    if (widget.scrollController == null) _scrollController.dispose();
     super.dispose();
   }
 
@@ -143,38 +146,42 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
         valueListenable: _connectionsStateNotifier,
         builder: (context, state, _) {
           final connections = state.list;
-          if (connections.isEmpty) {
-            return NullStatus(
+          return NullStatusSwitcher(
+            isEmpty: connections.isEmpty,
+            isSearching: state.query.isNotEmpty || state.keywords.isNotEmpty,
+            nullStatus: NullStatus(
               label: appLocalizations.nullTip(appLocalizations.connections),
               illustration: NullStatusIllustration.connections,
-            );
-          }
-          return SuperListView.separated(
-            controller: _scrollController,
-            itemCount: connections.length,
-            separatorBuilder: (_, _) => const Divider(height: 0),
-            itemBuilder: (_, index) {
-              final trackerInfo = connections[index];
-              return TrackerInfoItem(
-                key: Key(trackerInfo.id),
-                trackerInfo: trackerInfo,
-                onClickKeyword: (value) {
-                  context.commonScaffoldState?.addKeyword(value);
-                },
-                trailing: IconButton(
-                  tooltip: context.appLocalizations.close,
-                  padding: EdgeInsets.zero,
-                  visualDensity: VisualDensity.compact,
-                  style: IconButton.styleFrom(minimumSize: Size.zero),
-                  icon: const Icon(Icons.block),
-                  onPressed: () =>
-                      _closeThenRefresh(_core.closeConnection(trackerInfo.id)),
-                ),
-                detailTitle: appLocalizations.details(
-                  appLocalizations.connection,
-                ),
-              );
-            },
+            ),
+            child: SuperListView.separated(
+              controller: _scrollController,
+              itemCount: connections.length,
+              separatorBuilder: (_, _) => const Divider(height: 0),
+              itemBuilder: (_, index) {
+                final trackerInfo = connections[index];
+                return TrackerInfoItem(
+                  key: Key(trackerInfo.id),
+                  trackerInfo: trackerInfo,
+                  isLive: true,
+                  onClickKeyword: (value) {
+                    context.commonScaffoldState?.addKeyword(value);
+                  },
+                  trailing: IconButton(
+                    tooltip: context.appLocalizations.close,
+                    padding: EdgeInsets.zero,
+                    visualDensity: VisualDensity.compact,
+                    style: IconButton.styleFrom(minimumSize: Size.zero),
+                    icon: const Icon(Icons.block),
+                    onPressed: () => _closeThenRefresh(
+                      _core.closeConnection(trackerInfo.id),
+                    ),
+                  ),
+                  detailTitle: appLocalizations.details(
+                    appLocalizations.connection,
+                  ),
+                );
+              },
+            ),
           );
         },
       ),

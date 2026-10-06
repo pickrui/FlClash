@@ -10,13 +10,15 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/widgets/route_motion_hold.dart';
 import 'package:fl_clash/widgets/widgets.dart';
+import 'package:fl_clash/widgets/record.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
 enum _QueryFilter { all, cached, failed }
 
 class DnsQueriesView extends ConsumerStatefulWidget {
-  const DnsQueriesView({super.key});
+  final ScrollController? scrollController;
+  const DnsQueriesView({super.key, this.scrollController});
 
   @override
   ConsumerState<DnsQueriesView> createState() => _DnsQueriesViewState();
@@ -191,45 +193,75 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
           Expanded(
             child: queries.isEmpty
                 ? NullStatus(
-                    label: appLocalizations.nullTip(
-                      appLocalizations.dnsQueries,
-                    ),
+                    label: search.isEmpty
+                        ? appLocalizations.nullTip(appLocalizations.dnsQueries)
+                        : appLocalizations.noSearchResults,
+                    illustration: search.isEmpty
+                        ? NullStatusIllustration.dns
+                        : NullStatusIllustration.search,
                   )
                 : ListView.separated(
+                    controller: widget.scrollController,
                     itemCount: queries.length,
                     separatorBuilder: (_, _) => const Divider(height: 0),
                     itemBuilder: (context, index) {
                       final query = queries[index];
-                      return ListTile(
-                        leading: Icon(
-                          query.isFailed
-                              ? Icons.error_outline
-                              : query.cached
-                              ? Icons.cached
-                              : Icons.dns_outlined,
-                          color: query.isFailed
-                              ? Theme.of(context).colorScheme.error
-                              : null,
-                        ),
-                        title: Text(
-                          query.domain,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        subtitle: Text(
-                          [
-                            query.type,
-                            _initiator(query),
-                            if (query.isFailed)
-                              query.error.isNotEmpty ? query.error : query.rcode
-                            else if (query.upstream.isNotEmpty)
-                              query.upstream,
-                          ].join(' · '),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        trailing: Text('${query.delay} ms'),
+                      final styles = RecordTextStyles.of(context);
+                      final tone = query.isFailed
+                          ? RecordTone.error
+                          : query.cached
+                          ? RecordTone.muted
+                          : RecordTone.neutral;
+                      return RecordListItem(
+                        tone: tone,
                         onTap: () => _showDetails(query),
+                        header: RecordHeader(
+                          trailing: Text('${query.delay} ms'),
+                          children: [
+                            RecordTimestamp(query.time.toLocal().showFull),
+                            RecordLabel(label: query.type, tone: tone),
+                            if (query.cached)
+                              RecordLabel(
+                                label: appLocalizations.dnsQueryCached,
+                                tone: RecordTone.muted,
+                              ),
+                          ],
+                        ),
+                        body: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 4,
+                          children: [
+                            Text(
+                              query.domain,
+                              style: styles.primary?.copyWith(
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            if (query.isFailed)
+                              Text(
+                                query.error.isNotEmpty
+                                    ? query.error
+                                    : query.rcode,
+                                style: styles.secondary?.copyWith(
+                                  color: context.colorScheme.error,
+                                ),
+                              ),
+                            if (query.answers.isNotEmpty)
+                              Text(
+                                query.answers.join(', '),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: styles.secondary,
+                              ),
+                            Text(
+                              [
+                                _initiator(query),
+                                if (query.upstream.isNotEmpty) query.upstream,
+                              ].join(' · '),
+                              style: styles.muted,
+                            ),
+                          ],
+                        ),
                       );
                     },
                   ),

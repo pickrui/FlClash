@@ -1303,5 +1303,6 @@
   "singleAdd": "個別追加",
   "singleValueTip": "{label}は1項目のみ指定できます",
   "writeToSystem": "システムに書き込む",
-  "writeToSystemDesc": "システムクロックも設定します。Androidでは無視されます"
+  "writeToSystemDesc": "システムクロックも設定します。Androidでは無視されます",
+  "basicInfo": "基本情報"
 }

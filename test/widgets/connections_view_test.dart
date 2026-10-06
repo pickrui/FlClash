@@ -94,10 +94,10 @@ void main() {
     final builtItems = find.byType(TrackerInfoItem).evaluate().length;
     expect(builtItems, greaterThan(0));
     expect(builtItems, lessThan(connections.length));
-    expect(find.text('tcp://host-0.com:443'), findsOneWidget);
+    expect(find.text('host-0.com:443', findRichText: true), findsOneWidget);
 
     await tester.scrollUntilVisible(
-      find.text('tcp://host-99.com:443'),
+      find.text('host-99.com:443', findRichText: true),
       800,
       scrollable: find.byWidgetPredicate(
         (widget) =>
@@ -107,7 +107,7 @@ void main() {
       ),
     );
 
-    expect(find.text('tcp://host-99.com:443'), findsOneWidget);
+    expect(find.text('host-99.com:443', findRichText: true), findsOneWidget);
     expect(tester.takeException(), null);
 
     await tester.pumpWidget(const SizedBox.shrink());
@@ -136,7 +136,7 @@ void main() {
     expect(items.first.trackerInfo.uploadSpeed, 1024);
     expect(items.first.trackerInfo.downloadSpeed, 4096);
     expect(
-      find.textContaining(const Traffic(up: 1024, down: 4096).speedText),
+      find.textContaining('${(1024).traffic.show}/s', findRichText: true),
       findsOneWidget,
     );
     await tester.pumpWidget(const SizedBox.shrink());
@@ -241,23 +241,23 @@ void main() {
     final navigator = Navigator.of(
       tester.element(find.byType(ConnectionsView)),
     );
-    expect(find.text('tcp://host-0.com:443'), findsOneWidget);
+    expect(find.text('host-0.com:443', findRichText: true), findsOneWidget);
 
     navigator.didStartUserGesture();
     await tester.pump(const Duration(seconds: 1));
     await tester.pump();
     expect(count, 2);
-    expect(find.text('tcp://host-1.com:443'), findsNothing);
+    expect(find.text('host-1.com:443', findRichText: true), findsNothing);
 
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
     navigator.didStopUserGesture();
     await tester.pump();
-    expect(find.text('tcp://host-1.com:443'), findsNothing);
+    expect(find.text('host-1.com:443', findRichText: true), findsNothing);
 
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pump();
     await tester.pump();
-    expect(find.text('tcp://host-2.com:443'), findsOneWidget);
+    expect(find.text('host-2.com:443', findRichText: true), findsOneWidget);
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
@@ -291,8 +291,8 @@ void main() {
     closeOne.complete(true);
     await tester.pump();
     expect(readCount, 2);
-    expect(find.text('tcp://host-0.com:443'), findsNothing);
-    expect(find.text('tcp://host-1.com:443'), findsOneWidget);
+    expect(find.text('host-0.com:443', findRichText: true), findsNothing);
+    expect(find.text('host-1.com:443', findRichText: true), findsOneWidget);
 
     await tester.tap(find.byIcon(Icons.delete_sweep_outlined));
     await tester.pump();
@@ -326,7 +326,7 @@ void main() {
     );
     reads.single.complete(buildConnections(3));
     await tester.pump();
-    expect(find.text('tcp://host-0.com:443'), findsOneWidget);
+    expect(find.text('host-0.com:443', findRichText: true), findsOneWidget);
 
     await tester.pump(const Duration(seconds: 1));
     expect(reads, hasLength(2));
@@ -336,7 +336,7 @@ void main() {
     expect(reads, hasLength(3));
 
     reads[2].complete(const []);
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.byType(TrackerInfoItem), findsNothing);
 
     reads[1].complete(buildConnections(3));

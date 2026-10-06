@@ -12,6 +12,7 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
+import 'package:fl_clash/widgets/record.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:super_sliver_list/super_sliver_list.dart';
@@ -144,41 +145,43 @@ class _LogsViewState extends ConsumerState<LogsView>
         valueListenable: _logsStateNotifier,
         builder: (context, state, _) {
           final logs = state.list;
-          if (logs.isEmpty) {
-            return NullStatus(
-              illustration: NullStatusIllustration.logs,
+          return NullStatusSwitcher(
+            isEmpty: logs.isEmpty,
+            isSearching: state.query.isNotEmpty || state.keywords.isNotEmpty,
+            nullStatus: NullStatus(
               label: appLocalizations.nullTip(appLocalizations.logs),
-            );
-          }
-          return Align(
-            alignment: Alignment.topCenter,
-            child: ScrollToEndBox(
-              onCancelToEnd: () {
-                _logsStateNotifier.value = _logsStateNotifier.value.copyWith(
-                  autoScrollToEnd: false,
-                );
-              },
-              controller: _scrollController,
-              enable: state.autoScrollToEnd,
-              dataSource: logs,
-              child: CommonScrollBar(
+              illustration: NullStatusIllustration.logs,
+            ),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: ScrollToEndBox(
+                onCancelToEnd: () {
+                  _logsStateNotifier.value = _logsStateNotifier.value.copyWith(
+                    autoScrollToEnd: false,
+                  );
+                },
                 controller: _scrollController,
-                child: SuperListView.separated(
-                  physics: const NextClampingScrollPhysics(),
-                  reverse: true,
-                  shrinkWrap: true,
+                enable: state.autoScrollToEnd,
+                dataSource: logs,
+                child: CommonScrollBar(
                   controller: _scrollController,
-                  itemBuilder: (_, index) {
-                    final log = logs[index];
-                    return LogItem(
-                      key: Key(log.dateTime),
-                      log: log,
-                      onClick: (value) =>
-                          context.commonScaffoldState?.addKeyword(value),
-                    );
-                  },
-                  separatorBuilder: (_, _) => const Divider(height: 0),
-                  itemCount: logs.length,
+                  child: SuperListView.separated(
+                    physics: const NextClampingScrollPhysics(),
+                    reverse: true,
+                    shrinkWrap: true,
+                    controller: _scrollController,
+                    itemBuilder: (_, index) {
+                      final log = logs[index];
+                      return LogItem(
+                        key: Key(log.dateTime),
+                        log: log,
+                        onClick: (value) =>
+                            context.commonScaffoldState?.addKeyword(value),
+                      );
+                    },
+                    separatorBuilder: (_, _) => const Divider(height: 0),
+                    itemCount: logs.length,
+                  ),
                 ),
               ),
             ),
@@ -197,33 +200,26 @@ class LogItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListItem(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+    final tone = switch (log.logLevel) {
+      LogLevel.warning => RecordTone.warning,
+      LogLevel.error => RecordTone.error,
+      LogLevel.info => RecordTone.neutral,
+      LogLevel.debug || LogLevel.silent => RecordTone.muted,
+    };
+    return RecordListItem(
+      tone: tone,
       onTap: () {},
-      title: _LogBody(log: log),
-      subtitle: Column(
+      header: RecordHeader(
         children: [
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              CommonChip(
-                onPressed: () {
-                  if (onClick == null) return;
-                  onClick!(log.logLevel.name);
-                },
-                label: log.logLevel.name,
-              ),
-              Text(
-                log.dateTime,
-                style: context.textTheme.bodySmall?.copyWith(
-                  color: context.colorScheme.onSurface.opacity80,
-                ),
-              ),
-            ],
+          RecordTimestamp(log.dateTime),
+          RecordLabel(
+            label: log.logLevel.name,
+            tone: tone,
+            onPressed: () => onClick?.call(log.logLevel.name),
           ),
         ],
       ),
+      body: _LogBody(log: log),
     );
   }
 }
@@ -237,11 +233,10 @@ class _LogBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final payload = LogPayload.parse(log.payload);
     final route = payload.route;
-    final primary = context.textTheme.bodyLarge;
-    final secondary = context.textTheme.bodyMedium;
-    final muted = context.textTheme.bodySmall?.copyWith(
-      color: context.colorScheme.onSurfaceVariant,
-    );
+    final styles = RecordTextStyles.of(context);
+    final primary = styles.primary;
+    final secondary = styles.secondary;
+    final muted = styles.muted;
     if (route == null) {
       return SelectableText(
         log.payload,

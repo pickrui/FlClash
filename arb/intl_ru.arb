@@ -1303,5 +1303,6 @@
   "singleAdd": "По одному",
   "singleValueTip": "«{label}» — только одно значение",
   "writeToSystem": "Записывать в систему",
-  "writeToSystemDesc": "Также устанавливать системные часы; Android это игнорирует"
+  "writeToSystemDesc": "Также устанавливать системные часы; Android это игнорирует",
+  "basicInfo": "Основная информация"
 }

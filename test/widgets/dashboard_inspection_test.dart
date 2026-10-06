@@ -10,6 +10,7 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/views/connection/dns_queries.dart';
 import 'package:fl_clash/views/dashboard/widgets/inspection.dart';
 import 'package:fl_clash/views/dashboard/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -101,6 +102,32 @@ void main() {
       c.dispose();
     },
   );
+  testWidgets('DNS card opens a dismissible sheet without switching pages', (
+    tester,
+  ) async {
+    final c = ProviderContainer();
+    final navigator = GlobalKey<NavigatorState>();
+    final page = c.read(currentPageLabelProvider);
+    await tester.pumpWidget(
+      app(
+        const FeedCountCard(page: PageLabel.dnsQueries),
+        container: c,
+        navigator: navigator,
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(InspectionCard));
+    await tester.pumpAndSettle();
+    expect(find.byType(DnsQueriesView), findsOneWidget);
+    expect(c.read(currentPageLabelProvider), page);
+    navigator.currentState!.pop();
+    await tester.pumpAndSettle();
+    expect(find.byType(DnsQueriesView), findsNothing);
+    expect(find.byType(FeedCountCard), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
+    c.dispose();
+  });
   testWidgets('override card updates only its own saved switch', (
     tester,
   ) async {

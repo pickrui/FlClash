@@ -419,6 +419,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "basicConfigDesc": MessageLookupByLibrary.simpleMessage(
       "Глобальное изменение базовых настроек",
     ),
+    "basicInfo": MessageLookupByLibrary.simpleMessage("Основная информация"),
     "batchAdd": MessageLookupByLibrary.simpleMessage("Массовое добавление"),
     "batchListInputTip": MessageLookupByLibrary.simpleMessage(
       "По одному значению на строку или через запятую",

@@ -17,7 +17,8 @@ import 'package:super_sliver_list/super_sliver_list.dart';
 import 'item.dart';
 
 class RequestsView extends ConsumerStatefulWidget {
-  const RequestsView({super.key});
+  final ScrollController? scrollController;
+  const RequestsView({super.key, this.scrollController});
 
   @override
   ConsumerState<RequestsView> createState() => _RequestsViewState();
@@ -47,7 +48,9 @@ class _RequestsViewState extends ConsumerState<RequestsView>
   void initState() {
     super.initState();
     _requests = ref.read(requestsProvider).list;
-    _scrollController = ScrollController(initialScrollOffset: double.maxFinite);
+    _scrollController =
+        widget.scrollController ??
+        ScrollController(initialScrollOffset: double.maxFinite);
     _requestsStateNotifier.value = _requestsStateNotifier.value.copyWith(
       trackerInfos: _requests,
     );
@@ -63,7 +66,7 @@ class _RequestsViewState extends ConsumerState<RequestsView>
   @override
   void dispose() {
     _requestsStateNotifier.dispose();
-    _scrollController.dispose();
+    if (widget.scrollController == null) _scrollController.dispose();
     super.dispose();
   }
 
@@ -122,44 +125,47 @@ class _RequestsViewState extends ConsumerState<RequestsView>
         valueListenable: _requestsStateNotifier,
         builder: (context, state, _) {
           final requests = state.list;
-          if (requests.isEmpty) {
-            return NullStatus(
+          return NullStatusSwitcher(
+            isEmpty: requests.isEmpty,
+            isSearching: state.query.isNotEmpty || state.keywords.isNotEmpty,
+            nullStatus: NullStatus(
               label: appLocalizations.nullTip(appLocalizations.requests),
-            );
-          }
-          return Align(
-            alignment: Alignment.topCenter,
-            child: CommonScrollBar(
-              trackVisibility: false,
-              controller: _scrollController,
-              child: ScrollToEndBox(
+              illustration: NullStatusIllustration.requests,
+            ),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: CommonScrollBar(
+                trackVisibility: false,
                 controller: _scrollController,
-                dataSource: requests,
-                enable: state.autoScrollToEnd,
-                onCancelToEnd: () {
-                  _requestsStateNotifier.value = _requestsStateNotifier.value
-                      .copyWith(autoScrollToEnd: false);
-                },
-                child: SuperListView.separated(
-                  reverse: true,
-                  shrinkWrap: true,
-                  physics: const NextClampingScrollPhysics(),
+                child: ScrollToEndBox(
                   controller: _scrollController,
-                  itemCount: requests.length,
-                  separatorBuilder: (_, _) => const Divider(height: 0),
-                  itemBuilder: (_, index) {
-                    final trackerInfo = requests[index];
-                    return TrackerInfoItem(
-                      key: Key(trackerInfo.id),
-                      trackerInfo: trackerInfo,
-                      onClickKeyword: (value) {
-                        context.commonScaffoldState?.addKeyword(value);
-                      },
-                      detailTitle: appLocalizations.details(
-                        appLocalizations.request,
-                      ),
-                    );
+                  dataSource: requests,
+                  enable: state.autoScrollToEnd,
+                  onCancelToEnd: () {
+                    _requestsStateNotifier.value = _requestsStateNotifier.value
+                        .copyWith(autoScrollToEnd: false);
                   },
+                  child: SuperListView.separated(
+                    reverse: true,
+                    shrinkWrap: true,
+                    physics: const NextClampingScrollPhysics(),
+                    controller: _scrollController,
+                    itemCount: requests.length,
+                    separatorBuilder: (_, _) => const Divider(height: 0),
+                    itemBuilder: (_, index) {
+                      final trackerInfo = requests[index];
+                      return TrackerInfoItem(
+                        key: Key(trackerInfo.id),
+                        trackerInfo: trackerInfo,
+                        onClickKeyword: (value) {
+                          context.commonScaffoldState?.addKeyword(value);
+                        },
+                        detailTitle: appLocalizations.details(
+                          appLocalizations.request,
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ),

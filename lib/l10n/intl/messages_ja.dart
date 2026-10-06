@@ -335,6 +335,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "basicConfig": MessageLookupByLibrary.simpleMessage("基本設定"),
     "basicConfigDesc": MessageLookupByLibrary.simpleMessage("基本設定をグローバルに変更"),
+    "basicInfo": MessageLookupByLibrary.simpleMessage("基本情報"),
     "batchAdd": MessageLookupByLibrary.simpleMessage("一括追加"),
     "batchListInputTip": MessageLookupByLibrary.simpleMessage(
       "1行に1項目、またはカンマ区切りで入力してください",

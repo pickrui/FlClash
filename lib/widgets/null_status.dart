@@ -81,7 +81,13 @@ class _NullStatusSwitcherState extends State<NullStatusSwitcher> {
         child: Stack(
           alignment: Alignment.center,
           fit: StackFit.expand,
-          children: <Widget>[...previousChildren, ?currentChild],
+          children: <Widget>[
+            for (final child in previousChildren)
+              IgnorePointer(
+                child: ExcludeFocus(child: ExcludeSemantics(child: child)),
+              ),
+            ?currentChild,
+          ],
         ),
       ),
       transitionBuilder: (child, animation) => FadeTransition(
