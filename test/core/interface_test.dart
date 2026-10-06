@@ -11,6 +11,28 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test(
+    'memory detail requires a live Core response and decodes all categories',
+    () async {
+      final handler = _FakeCoreHandler();
+      handler.response = <String, dynamic>{
+        'rss': 100,
+        'heapInuse': 30,
+        'heapIdle': 10,
+        'stackInuse': 5,
+        'runtimeOther': 5,
+      };
+      final result = await handler.getMemoryStats();
+      expect(result.rss, 100);
+      expect(result.runtimeTotal, 50);
+      handler.response = null;
+      await expectLater(
+        handler.getMemoryStats(),
+        throwsA(_missingResponse(CoreMethod.getMemoryStats)),
+      );
+    },
+  );
+
+  test(
     'proxy validation preserves order and rejects partial or missing results',
     () async {
       final handler = _FakeCoreHandler();

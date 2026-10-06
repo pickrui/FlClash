@@ -1173,5 +1173,19 @@
   "nodeCoreValidationUnavailable": "Запустите Core перед проверкой узла",
   "nodeInvalidDefinition": "Введите одно полное определение узла с name и type",
   "manageServices": "Управление сервисами",
-  "allServices": "Все сервисы"
+  "allServices": "Все сервисы",
+  "releaseMemory": "Освободить память",
+  "memoryCoreHeapInuse": "Используемая куча",
+  "memoryCoreHeapIdle": "Свободная куча",
+  "memoryCoreStack": "Стеки горутин",
+  "memoryCoreRuntime": "Накладные расходы среды",
+  "memoryCoreNotRunning": "Ядро не запущено",
+  "memoryAppResident": "Резидентная память",
+  "memoryAppShared": "Приложение и общая",
+  "memoryEstimateDesc": "Оценка по резидентной памяти процессов; может отличаться от данных системы.",
+  "memoryEstimateSharedDesc": "Ядро работает в процессе приложения. Его доля оценивается по статистике среды выполнения, остальное относится к приложению и общей памяти.",
+  "memoryReleased": "Память освобождена",
+  "memoryReleasedSize": "Освобождено {size}",
+  "releaseMemoryFailed": "Не удалось освободить память",
+  "total": "Всего"
 }

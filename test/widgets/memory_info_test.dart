@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/theme.dart';
 import 'package:fl_clash/l10n/l10n.dart';
+import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/dashboard/widgets/memory_info.dart';
 import 'package:fl_clash/widgets/inherited.dart';
@@ -16,14 +17,78 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('Android shares process RSS and never counts Core twice', () {
+    const core = CoreMemoryStats(
+      rss: 1000,
+      heapInuse: 300,
+      heapIdle: 100,
+      stackInuse: 50,
+      runtimeOther: 50,
+    );
+    final android = MemorySnapshot.resolve(
+      rss: 1000,
+      core: core,
+      coreInProcess: true,
+    );
+    expect(android.total, 1000);
+    expect(android.app, 500);
+    expect(android.coreTotal, 500);
+    final desktop = MemorySnapshot.resolve(
+      rss: 1000,
+      core: core,
+      coreInProcess: false,
+    );
+    expect(desktop.total, 2000);
+    final retained = MemorySnapshot.resolve(
+      rss: 100,
+      core: core,
+      coreInProcess: true,
+    );
+    expect(retained.total, 100);
+    expect(retained.app, 0);
+  });
+
+  testWidgets('memory release prevents duplicates and reports completion', (
+    tester,
+  ) async {
+    final snapshot = ValueNotifier(const MemorySnapshot(app: 1024));
+    addTearDown(snapshot.dispose);
+    final released = Completer<int>();
+    var calls = 0;
+    await tester.pumpWidget(
+      _TestApp(
+        child: MemoryDetailSheet(
+          snapshot: snapshot,
+          onRelease: () {
+            calls++;
+            return released.future;
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Release memory'));
+    await tester.pump();
+    await tester.tap(find.byTooltip('Release memory'));
+    expect(calls, 1);
+    released.complete(1024);
+    await tester.pumpAndSettle();
+    expect(
+      find.text(AppLocalizations.current.memoryReleasedSize(1024.traffic.show)),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets('MemoryInfo refreshes only while the app is resumed', (
     tester,
   ) async {
     var readCount = 0;
 
-    Future<num> readMemory() async {
+    Future<MemorySnapshot> readMemory() async {
       readCount++;
-      return readCount;
+      return MemorySnapshot(app: readCount);
     }
 
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
@@ -60,10 +125,10 @@ void main() {
   testWidgets('MemoryInfo ignores a request completed in the background', (
     tester,
   ) async {
-    final requests = <Completer<num>>[];
+    final requests = <Completer<MemorySnapshot>>[];
 
-    Future<num> readMemory() {
-      final request = Completer<num>();
+    Future<MemorySnapshot> readMemory() {
+      final request = Completer<MemorySnapshot>();
       requests.add(request);
       return request.future;
     }
@@ -77,7 +142,7 @@ void main() {
     expect(requests, hasLength(1));
 
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-    requests.first.complete(1);
+    requests.first.complete(const MemorySnapshot(app: 1));
     await tester.pump();
     await tester.pump(const Duration(seconds: 2));
 
@@ -88,7 +153,7 @@ void main() {
 
     expect(requests, hasLength(2));
 
-    requests.last.complete(2);
+    requests.last.complete(const MemorySnapshot(app: 2));
     await tester.pump();
     await tester.pumpWidget(const SizedBox.shrink());
   });
@@ -96,12 +161,12 @@ void main() {
   testWidgets('MemoryInfo keeps polling after a failed read', (tester) async {
     var readCount = 0;
 
-    Future<num> readMemory() async {
+    Future<MemorySnapshot> readMemory() async {
       readCount++;
       if (readCount == 1) {
         throw StateError('core unavailable');
       }
-      return readCount;
+      return MemorySnapshot(app: readCount);
     }
 
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
@@ -127,9 +192,9 @@ void main() {
   ) async {
     var readCount = 0;
 
-    Future<num> readMemory() async {
+    Future<MemorySnapshot> readMemory() async {
       readCount++;
-      return readCount;
+      return MemorySnapshot(app: readCount);
     }
 
     Widget buildApp({required bool isPageActive}) {

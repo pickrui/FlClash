@@ -47,6 +47,7 @@ enum CoreMethod {
   setNetworkExcluded,
   getCountryCode,
   getMemory,
+  getMemoryStats,
   crash,
   setupConfig,
   deleteFile,

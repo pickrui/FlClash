@@ -142,6 +142,7 @@ const (
 	getExternalProviderMethod      CoreMethod = "getExternalProvider"
 	getCountryCodeMethod           CoreMethod = "getCountryCode"
 	getMemoryMethod                CoreMethod = "getMemory"
+	getMemoryStatsMethod           CoreMethod = "getMemoryStats"
 	updateGeoDataMethod            CoreMethod = "updateGeoData"
 	updateExternalProviderMethod   CoreMethod = "updateExternalProvider"
 	sideLoadExternalProviderMethod CoreMethod = "sideLoadExternalProvider"
@@ -195,3 +196,11 @@ const (
 	GeoUpdateMessage MessageType = "geoUpdate"
 	ModeMessage      MessageType = "mode"
 )
+
+type MemoryStats struct {
+	Rss          uint64 `json:"rss"`
+	HeapInuse    uint64 `json:"heapInuse"`
+	HeapIdle     uint64 `json:"heapIdle"`
+	StackInuse   uint64 `json:"stackInuse"`
+	RuntimeOther uint64 `json:"runtimeOther"`
+}

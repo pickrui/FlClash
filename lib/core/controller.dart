@@ -464,6 +464,8 @@ class CoreController {
     return _interface.getTotalTraffic(onlyStatisticsProxy);
   }
 
+  Future<CoreMemoryStats> getMemoryStats() => _interface.getMemoryStats();
+
   Future<int> getMemory() async {
     return _interface.getMemory();
   }
@@ -481,7 +483,9 @@ class CoreController {
   }
 
   Future<void> requestGc() async {
-    await _interface.forceGc();
+    if (!await _interface.forceGc()) {
+      throw StateError('Core did not complete garbage collection');
+    }
   }
 
   Future<void> destroy() async {

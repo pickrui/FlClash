@@ -295,6 +295,13 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 		if decodeMethodArguments(call, response, &ip) {
 			handleGetCountryCode(ip, func(value string) { response.success(value) })
 		}
+	case getMemoryStatsMethod:
+		stats, err := handleGetMemoryStats()
+		if err != nil {
+			response.failure("core_error", "could not read process memory", nil)
+		} else {
+			response.success(stats)
+		}
 	case getMemoryMethod:
 		handleGetMemory(func(value uint64) { response.success(value) })
 	case deleteFileMethod:

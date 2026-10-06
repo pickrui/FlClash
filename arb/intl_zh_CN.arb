@@ -1173,5 +1173,19 @@
   "nodeCoreValidationUnavailable": "请先启动 Core，再验证节点",
   "nodeInvalidDefinition": "请输入包含 name 和 type 的单个完整节点定义",
   "manageServices": "管理检测服务",
-  "allServices": "全部服务"
+  "allServices": "全部服务",
+  "releaseMemory": "释放内存",
+  "memoryCoreHeapInuse": "堆内存使用中",
+  "memoryCoreHeapIdle": "堆内存空闲",
+  "memoryCoreStack": "协程栈",
+  "memoryCoreRuntime": "运行时开销",
+  "memoryCoreNotRunning": "内核未运行",
+  "memoryAppResident": "常驻内存",
+  "memoryAppShared": "应用及共享",
+  "memoryEstimateDesc": "基于进程常驻内存估算，可能与系统显示的数值不同。",
+  "memoryEstimateSharedDesc": "内核与应用运行在同一进程，内核部分按运行时统计估算，其余计入应用及共享内存。",
+  "memoryReleased": "内存已释放",
+  "memoryReleasedSize": "已释放 {size}",
+  "releaseMemoryFailed": "释放内存失败",
+  "total": "总计"
 }

@@ -23,6 +23,7 @@ import (
 	"github.com/metacubex/mihomo/adapter/provider"
 	"github.com/metacubex/mihomo/common/observable"
 	"github.com/metacubex/mihomo/common/utils"
+	"github.com/metacubex/mihomo/component/memory"
 	"github.com/metacubex/mihomo/component/mmdb"
 	"github.com/metacubex/mihomo/component/resolver"
 	"github.com/metacubex/mihomo/config"
@@ -706,6 +707,22 @@ func handleGetCountryCode(ip string, fn func(value string)) {
 		}
 		fn(codes[0])
 	}()
+}
+
+func handleGetMemoryStats() (MemoryStats, error) {
+	var stats runtime.MemStats
+	runtime.ReadMemStats(&stats)
+	resident, err := memory.GetMemoryInfo(int32(os.Getpid()))
+	if err != nil {
+		return MemoryStats{}, err
+	}
+	return MemoryStats{
+		Rss:          resident.RSS,
+		HeapInuse:    stats.HeapInuse,
+		HeapIdle:     stats.HeapIdle - stats.HeapReleased,
+		StackInuse:   stats.StackInuse,
+		RuntimeOther: stats.Sys - stats.HeapSys - stats.StackInuse,
+	}, nil
 }
 
 func handleGetMemory(fn func(value uint64)) {

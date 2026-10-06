@@ -60,3 +60,13 @@ func TestValidateProxiesPreservesRunningMeshResolver(t *testing.T) {
 		}
 	}
 }
+
+func TestGetMemoryStats(t *testing.T) {
+	stats, err := handleGetMemoryStats()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stats.Rss == 0 || stats.HeapInuse == 0 || stats.StackInuse == 0 {
+		t.Fatalf("incomplete memory snapshot: %+v", stats)
+	}
+}

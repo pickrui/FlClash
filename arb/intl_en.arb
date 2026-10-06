@@ -1173,5 +1173,19 @@
   "nodeCoreValidationUnavailable": "Start the Core before validating this node",
   "nodeInvalidDefinition": "Enter one complete proxy definition with a name and type",
   "manageServices": "Manage services",
-  "allServices": "All services"
+  "allServices": "All services",
+  "releaseMemory": "Release memory",
+  "memoryCoreHeapInuse": "Heap in use",
+  "memoryCoreHeapIdle": "Heap idle",
+  "memoryCoreStack": "Goroutine stacks",
+  "memoryCoreRuntime": "Runtime overhead",
+  "memoryCoreNotRunning": "Core is not running",
+  "memoryAppResident": "Resident memory",
+  "memoryAppShared": "App & shared",
+  "memoryEstimateDesc": "Estimated from process resident memory; it may differ from what the system reports.",
+  "memoryEstimateSharedDesc": "The Core runs inside the app process. Its share is estimated from runtime stats, and the rest counts as app and shared memory.",
+  "memoryReleased": "Memory released",
+  "memoryReleasedSize": "Released {size}",
+  "releaseMemoryFailed": "Failed to release memory",
+  "total": "Total"
 }

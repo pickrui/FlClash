@@ -83,6 +83,8 @@ mixin CoreInterface {
 
   FutureOr<int> getMemory();
 
+  Future<CoreMemoryStats> getMemoryStats();
+
   FutureOr<void> resetTraffic();
 
   FutureOr<void> startLog();
@@ -475,6 +477,13 @@ abstract class CoreHandlerInterface with CoreInterface {
         ) ??
         '';
   }
+
+  @override
+  Future<CoreMemoryStats> getMemoryStats() async => CoreMemoryStats.fromJson(
+    await _invokeRequiredMethod<Map<String, dynamic>>(
+      method: CoreMethod.getMemoryStats,
+    ),
+  );
 
   @override
   Future<int> getMemory() async {

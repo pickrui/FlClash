@@ -1173,5 +1173,19 @@
   "nodeCoreValidationUnavailable": "ノードの検証前に Core を起動してください",
   "nodeInvalidDefinition": "name と type を含む完全なノード定義を1つ入力してください",
   "manageServices": "サービスの管理",
-  "allServices": "すべてのサービス"
+  "allServices": "すべてのサービス",
+  "releaseMemory": "メモリを解放",
+  "memoryCoreHeapInuse": "使用中のヒープ",
+  "memoryCoreHeapIdle": "未使用のヒープ",
+  "memoryCoreStack": "ゴルーチンスタック",
+  "memoryCoreRuntime": "ランタイムのオーバーヘッド",
+  "memoryCoreNotRunning": "コアは実行されていません",
+  "memoryAppResident": "常駐メモリ",
+  "memoryAppShared": "アプリと共有",
+  "memoryEstimateDesc": "プロセスの常駐メモリからの推定値で、システムの表示とは異なる場合があります。",
+  "memoryEstimateSharedDesc": "コアはアプリと同じプロセスで動作します。コア分はランタイム統計から推定し、残りはアプリと共有メモリとして計上します。",
+  "memoryReleased": "メモリを解放しました",
+  "memoryReleasedSize": "{size} を解放しました",
+  "releaseMemoryFailed": "メモリの解放に失敗しました",
+  "total": "合計"
 }
