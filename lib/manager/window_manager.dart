@@ -319,6 +319,9 @@ class WindowCaptionController extends ValueNotifier<WindowCaptionState>
   }
 
   bool _disposed = false;
+  bool _hasMaximizeEvent = false;
+  bool _hasFullScreenEvent = false;
+  bool _hasPinChange = false;
 
   Future<void> _syncFromWindow() async {
     final states = await Future.wait<bool>([
@@ -327,10 +330,10 @@ class WindowCaptionController extends ValueNotifier<WindowCaptionState>
       desktopWindow.isFullScreen(),
     ]);
     _set(
-      WindowCaptionState(
-        isPinned: states[0],
-        isMaximized: states[1],
-        isFullScreen: states[2],
+      value.copyWith(
+        isPinned: _hasPinChange ? null : states[0],
+        isMaximized: _hasMaximizeEvent ? null : states[1],
+        isFullScreen: _hasFullScreenEvent ? null : states[2],
       ),
     );
   }
@@ -343,24 +346,28 @@ class WindowCaptionController extends ValueNotifier<WindowCaptionState>
   @override
   void onWindowMaximize() {
     super.onWindowMaximize();
+    _hasMaximizeEvent = true;
     _set(value.copyWith(isMaximized: true));
   }
 
   @override
   void onWindowUnmaximize() {
     super.onWindowUnmaximize();
+    _hasMaximizeEvent = true;
     _set(value.copyWith(isMaximized: false));
   }
 
   @override
   void onWindowEnterFullScreen() {
     super.onWindowEnterFullScreen();
+    _hasFullScreenEvent = true;
     _set(value.copyWith(isFullScreen: true));
   }
 
   @override
   void onWindowLeaveFullScreen() {
     super.onWindowLeaveFullScreen();
+    _hasFullScreenEvent = true;
     _set(value.copyWith(isFullScreen: false));
   }
 
@@ -377,7 +384,9 @@ class WindowCaptionController extends ValueNotifier<WindowCaptionState>
   Future<void> togglePin() async {
     final isPinned = await desktopWindow.isAlwaysOnTop();
     await desktopWindow.setAlwaysOnTop(!isPinned);
-    _set(value.copyWith(isPinned: await desktopWindow.isAlwaysOnTop()));
+    _hasPinChange = true;
+    final pinned = await desktopWindow.isAlwaysOnTop();
+    _set(value.copyWith(isPinned: pinned));
   }
 
   @override
