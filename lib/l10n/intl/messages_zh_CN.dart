@@ -1083,6 +1083,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "noResolve": MessageLookupByLibrary.simpleMessage("不解析IP"),
     "noSearchResult": MessageLookupByLibrary.simpleMessage("没有匹配结果"),
     "noUpgradablePlans": MessageLookupByLibrary.simpleMessage("暂无可升级的套餐"),
+    "nodeCoreValidationUnavailable": MessageLookupByLibrary.simpleMessage(
+      "请先启动 Core，再验证节点",
+    ),
+    "nodeDefinition": MessageLookupByLibrary.simpleMessage("完整节点定义"),
     "nodeFilter": MessageLookupByLibrary.simpleMessage("节点筛选"),
     "nodeFilterAccountNote": MessageLookupByLibrary.simpleMessage(
       "筛选保存在账户上，对使用此客户端的所有设备生效",
@@ -1103,6 +1107,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "nodeFilterRetry": MessageLookupByLibrary.simpleMessage("重试"),
     "nodeFilterSearch": MessageLookupByLibrary.simpleMessage("搜索节点"),
     "nodeFilterSmartSelection": MessageLookupByLibrary.simpleMessage("智能优选"),
+    "nodeInvalidDefinition": MessageLookupByLibrary.simpleMessage(
+      "请输入包含 name 和 type 的单个完整节点定义",
+    ),
+    "nodeQuickFields": MessageLookupByLibrary.simpleMessage("快速编辑"),
     "none": MessageLookupByLibrary.simpleMessage("无"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage("当前代理组无法选中"),
     "nullProfileDesc": MessageLookupByLibrary.simpleMessage("没有配置文件,请先添加配置文件"),

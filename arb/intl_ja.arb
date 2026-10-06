@@ -1167,5 +1167,9 @@
         "type": "String"
       }
     }
-  }
+  },
+  "nodeDefinition": "ノード定義",
+  "nodeQuickFields": "簡易編集",
+  "nodeCoreValidationUnavailable": "ノードの検証前に Core を起動してください",
+  "nodeInvalidDefinition": "name と type を含む完全なノード定義を1つ入力してください"
 }

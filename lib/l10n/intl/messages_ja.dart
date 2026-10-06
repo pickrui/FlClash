@@ -1238,6 +1238,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "noUpgradablePlans": MessageLookupByLibrary.simpleMessage(
       "アップグレード可能なプランがありません",
     ),
+    "nodeCoreValidationUnavailable": MessageLookupByLibrary.simpleMessage(
+      "ノードの検証前に Core を起動してください",
+    ),
+    "nodeDefinition": MessageLookupByLibrary.simpleMessage("ノード定義"),
     "nodeFilter": MessageLookupByLibrary.simpleMessage("ノードフィルター"),
     "nodeFilterAccountNote": MessageLookupByLibrary.simpleMessage(
       "フィルターはアカウントに保存され、このアプリでサインインしたすべてのデバイスに適用されます",
@@ -1260,6 +1264,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "nodeFilterRetry": MessageLookupByLibrary.simpleMessage("再試行"),
     "nodeFilterSearch": MessageLookupByLibrary.simpleMessage("ノードを検索"),
     "nodeFilterSmartSelection": MessageLookupByLibrary.simpleMessage("スマート選択"),
+    "nodeInvalidDefinition": MessageLookupByLibrary.simpleMessage(
+      "name と type を含む完全なノード定義を1つ入力してください",
+    ),
+    "nodeQuickFields": MessageLookupByLibrary.simpleMessage("簡易編集"),
     "none": MessageLookupByLibrary.simpleMessage("なし"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "現在のプロキシグループは選択できません",

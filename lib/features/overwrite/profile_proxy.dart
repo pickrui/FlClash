@@ -6,6 +6,9 @@
 import 'dart:convert';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/core/controller.dart';
+import 'package:fl_clash/pages/editor.dart';
+import 'package:yaml/yaml.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/database.dart';
@@ -1064,84 +1067,261 @@ class ProfileProxyEditView extends StatefulWidget {
   State<ProfileProxyEditView> createState() => _ProfileProxyEditViewState();
 }
 
+Map<String, Object?> parseProfileProxyDefinition(String source) {
+  if (utf8.encode(source).length > 256 * 1024) {
+    throw const FormatException('Node definition exceeds 256 KiB');
+  }
+  Object? value = loadYaml(source);
+  if (value is Map && value['proxies'] is List) {
+    final entries = value['proxies'] as List;
+    if (entries.length != 1) throw const FormatException('Expected one proxy');
+    value = entries.single;
+  }
+  if (value is! Map || value.keys.any((key) => key is! String)) {
+    throw const FormatException('Expected a proxy mapping');
+  }
+  final proxy = Map<String, Object?>.from(jsonDecode(jsonEncode(value)) as Map);
+  for (final key in ['name', 'type']) {
+    if (proxy[key] is! String || (proxy[key] as String).trim().isEmpty) {
+      throw FormatException('Missing $key');
+    }
+  }
+  return proxy;
+}
+
 class _ProfileProxyEditViewState extends State<ProfileProxyEditView> {
   final _uriController = TextEditingController();
+  final _yamlController = TextEditingController();
+  final _fields = <String, TextEditingController>{
+    for (final key in [
+      'name',
+      'type',
+      'server',
+      'port',
+      'username',
+      'password',
+      'uuid',
+    ])
+      key: TextEditingController(),
+  };
+  Map<String, Object?> _proxy = {};
+  int _mode = 0;
+  bool _saving = false;
 
   @override
   void initState() {
     super.initState();
-    final profileProxy = widget.profileProxy;
-    _uriController.text = profileProxy?.uri ?? '';
-    _uriController.addListener(_handleUriChanged);
+    _uriController.text = widget.profileProxy?.uri ?? '';
+    _proxy = Map.of(widget.profileProxy?.proxy ?? {});
+    if (_proxy.isNotEmpty) _mode = 1;
+    _writeEditors();
   }
 
-  @override
-  void dispose() {
-    _uriController.removeListener(_handleUriChanged);
-    _uriController.dispose();
-    super.dispose();
+  void _writeEditors() {
+    _yamlController.text = _proxy.isEmpty ? '' : yaml.encode(_proxy);
+    for (final entry in _fields.entries) {
+      entry.value.text = _proxy[entry.key]?.toString() ?? '';
+    }
   }
 
-  void _handleUriChanged() {
-    setState(() {});
+  Map<String, Object?> _readEditor() {
+    if (_mode == 0) return parseProfileProxyUri(_uriController.text.trim());
+    if (_mode == 2) return parseProfileProxyDefinition(_yamlController.text);
+    final proxy = Map<String, Object?>.from(_proxy);
+    for (final entry in _fields.entries) {
+      final value = entry.value.text;
+      if (value.isEmpty) {
+        proxy.remove(entry.key);
+        continue;
+      }
+      if (entry.key == 'port') {
+        final port = int.tryParse(value);
+        if (port == null || port < 1 || port > 65535) {
+          throw const FormatException('Invalid port');
+        }
+        proxy[entry.key] = port;
+      } else {
+        proxy[entry.key] = value;
+      }
+    }
+    return parseProfileProxyDefinition(yaml.encode(proxy));
   }
 
-  bool get _hasUri => _uriController.text.trim().isNotEmpty;
-
-  void _handleSubmit() {
+  void _switchMode(int mode) {
     try {
-      final uri = _uriController.text.trim();
-      final proxy = parseProfileProxyUri(uri);
-      final nextProfileProxy =
-          (widget.profileProxy ?? ProfileProxy.create(uri: uri, proxy: proxy))
-              .copyWith(enable: true, uri: uri, proxy: proxy);
-      Navigator.of(context).pop(nextProfileProxy);
-    } catch (e) {
-      context.showNotifier(e.toString());
+      if ((_mode == 0 && _uriController.text.trim().isNotEmpty) || _mode != 0) {
+        _proxy = _readEditor();
+      }
+      _writeEditors();
+      if (mode == 0 && _mode != 0) _uriController.clear();
+      setState(() => _mode = mode);
+    } catch (_) {
+      context.showNotifier(context.appLocalizations.nodeInvalidDefinition);
     }
   }
 
   @override
+  void dispose() {
+    _uriController.dispose();
+    _yamlController.dispose();
+    for (final controller in _fields.values) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  Future<void> _handleSubmit() async {
+    if (_saving) return;
+    final route = ModalRoute.of(context);
+    setState(() => _saving = true);
+    try {
+      final proxy = _readEditor();
+      final core = coreController;
+      if (!core.isCompleted) {
+        context.showNotifier(
+          context.appLocalizations.nodeCoreValidationUnavailable,
+        );
+        return;
+      }
+      final errors = await core.validateProxies([proxy]);
+      if (!mounted || route?.isCurrent != true) return;
+      if (errors.single.isNotEmpty) {
+        context.showNotifier(errors.single);
+        return;
+      }
+      final uri = _mode == 0 ? _uriController.text.trim() : '';
+      final next =
+          (widget.profileProxy ?? ProfileProxy.create(uri: uri, proxy: proxy))
+              .copyWith(
+                enable: widget.profileProxy?.enable ?? true,
+                uri: uri,
+                proxy: proxy,
+              );
+      Navigator.of(context).pop(next);
+    } catch (error) {
+      if (mounted) {
+        context.showNotifier(
+          error is FormatException
+              ? context.appLocalizations.nodeInvalidDefinition
+              : error.toString(),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  void _openEditor() {
+    BaseNavigator.push(
+      context,
+      EditorPage(
+        title: context.appLocalizations.nodeDefinition,
+        content: _yamlController.text,
+        onSave: (editorContext, _, content) {
+          try {
+            final value = parseProfileProxyDefinition(content);
+            if (!mounted) return;
+            setState(() {
+              _proxy = value;
+              _writeEditors();
+            });
+            Navigator.of(editorContext).pop();
+          } catch (_) {
+            editorContext.showNotifier(
+              editorContext.appLocalizations.nodeInvalidDefinition,
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final canSubmit = _hasUri;
+    final l = context.appLocalizations;
     return CommonScaffold(
-      title: appLocalizations.proxyChainCustomNode,
+      title: l.proxyChainCustomNode,
       actions: [
-        CommonMinIconButtonTheme(
-          child: IconButton.filled(
-            style:
-                IconButton.styleFrom(
-                  backgroundColor: canSubmit ? Colors.green : null,
-                  foregroundColor: canSubmit ? Colors.white : null,
-                ).copyWith(
-                  mouseCursor: WidgetStatePropertyAll(
-                    canSubmit
-                        ? SystemMouseCursors.click
-                        : SystemMouseCursors.basic,
-                  ),
-                ),
-            onPressed: canSubmit ? _handleSubmit : null,
-            icon: const Icon(Icons.check),
-          ),
+        IconButton(
+          tooltip: l.save,
+          onPressed: _saving ? null : _handleSubmit,
+          icon: _saving
+              ? const SizedBox.square(
+                  dimension: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.check),
         ),
         const SizedBox(width: 8),
       ],
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          TextField(
-            controller: _uriController,
-            minLines: 4,
-            maxLines: 8,
-            keyboardType: TextInputType.url,
-            textInputAction: TextInputAction.done,
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              labelText: 'URI',
-              helperText: appLocalizations.proxyChainUriNodeSupportedFormats,
-              helperMaxLines: 4,
-            ),
+          SegmentedButton<int>(
+            segments: [
+              const ButtonSegment(value: 0, label: Text('URI')),
+              ButtonSegment(value: 1, label: Text(l.nodeQuickFields)),
+              const ButtonSegment(value: 2, label: Text('YAML')),
+            ],
+            selected: {_mode},
+            onSelectionChanged: _saving
+                ? null
+                : (selected) => _switchMode(selected.single),
           ),
+          const SizedBox(height: 16),
+          if (_mode == 0)
+            TextField(
+              controller: _uriController,
+              minLines: 4,
+              maxLines: 8,
+              keyboardType: TextInputType.url,
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                labelText: 'URI',
+                helperText: l.proxyChainUriNodeSupportedFormats,
+                helperMaxLines: 4,
+              ),
+            ),
+          if (_mode == 1)
+            for (final entry in _fields.entries)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: TextField(
+                  controller: entry.value,
+                  obscureText: entry.key == 'password',
+                  keyboardType: entry.key == 'port'
+                      ? TextInputType.number
+                      : TextInputType.text,
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    labelText: switch (entry.key) {
+                      'name' => l.name,
+                      'password' => l.password,
+                      _ => entry.key,
+                    },
+                  ),
+                ),
+              ),
+          if (_mode == 2) ...[
+            TextField(
+              controller: _yamlController,
+              minLines: 10,
+              maxLines: 25,
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                labelText: l.nodeDefinition,
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: _openEditor,
+                icon: const Icon(Icons.code),
+                label: Text(l.edit),
+              ),
+            ),
+          ],
         ],
       ),
     );

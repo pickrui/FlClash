@@ -10,6 +10,30 @@ import 'package:fl_clash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test(
+    'proxy validation preserves order and rejects partial or missing results',
+    () async {
+      final handler = _FakeCoreHandler();
+      final proxies = <Map<String, Object?>>[
+        {'name': 'A', 'type': 'direct'},
+        {'name': 'B', 'type': 'invalid'},
+      ];
+      handler.response = ['', 'unsupported'];
+      expect(await handler.validateProxies(proxies), ['', 'unsupported']);
+      expect(handler.arguments, proxies);
+      handler.response = [''];
+      await expectLater(
+        handler.validateProxies(proxies),
+        throwsFormatException,
+      );
+      handler.response = null;
+      await expectLater(
+        handler.validateProxies(proxies),
+        throwsA(_missingResponse(CoreMethod.validateProxies)),
+      );
+    },
+  );
+
   test('default probe budget and RPC guard match upstream', () async {
     final handler = _FakeCoreHandler();
     await handler.asyncTestDelay('https://example.com', 'node');

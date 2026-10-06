@@ -125,6 +125,7 @@ const (
 	shutdownMethod                 CoreMethod = "shutdown"
 	validateConfigWithBytesMethod  CoreMethod = "validateConfigWithBytes"
 	validateConfigMethod           CoreMethod = "validateConfig"
+	validateProxiesMethod          CoreMethod = "validateProxies"
 	updateConfigMethod             CoreMethod = "updateConfig"
 	getProxiesMethod               CoreMethod = "getProxies"
 	changeProxyMethod              CoreMethod = "changeProxy"

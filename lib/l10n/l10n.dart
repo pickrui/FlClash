@@ -9849,6 +9849,46 @@ class AppLocalizations {
       args: [profiles],
     );
   }
+
+  /// `Node definition`
+  String get nodeDefinition {
+    return Intl.message(
+      'Node definition',
+      name: 'nodeDefinition',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Quick edit`
+  String get nodeQuickFields {
+    return Intl.message(
+      'Quick edit',
+      name: 'nodeQuickFields',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Start the Core before validating this node`
+  String get nodeCoreValidationUnavailable {
+    return Intl.message(
+      'Start the Core before validating this node',
+      name: 'nodeCoreValidationUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter one complete proxy definition with a name and type`
+  String get nodeInvalidDefinition {
+    return Intl.message(
+      'Enter one complete proxy definition with a name and type',
+      name: 'nodeInvalidDefinition',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

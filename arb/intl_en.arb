@@ -1167,5 +1167,9 @@
         "type": "String"
       }
     }
-  }
+  },
+  "nodeDefinition": "Node definition",
+  "nodeQuickFields": "Quick edit",
+  "nodeCoreValidationUnavailable": "Start the Core before validating this node",
+  "nodeInvalidDefinition": "Enter one complete proxy definition with a name and type"
 }

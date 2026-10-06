@@ -145,6 +145,11 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 		response.success(true)
 	case shutdownMethod:
 		response.success(handleShutdown())
+	case validateProxiesMethod:
+		var mappings []map[string]any
+		if decodeMethodArguments(call, response, &mappings) {
+			response.success(handleValidateProxies(mappings))
+		}
 	case validateConfigMethod:
 		path := ""
 		if decodeMethodArguments(call, response, &path) {

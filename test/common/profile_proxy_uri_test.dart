@@ -7,6 +7,38 @@ import 'package:fl_clash/features/overwrite/profile_proxy.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('full node definitions retain nested and unknown protocol fields', () {
+    final proxy = parseProfileProxyDefinition('''
+name: Full node
+type: vless
+server: example.com
+port: 443
+uuid: 12345678-1234-1234-1234-123456789012
+reality-opts: {public-key: test, short-id: abcd}
+ws-opts: {path: /ws, headers: {Host: example.com}}
+future-field: {enabled: true}
+''');
+    expect(proxy['port'], 443);
+    expect(proxy['future-field'], {'enabled': true});
+    expect(proxy['ws-opts'], {
+      'path': '/ws',
+      'headers': {'Host': 'example.com'},
+    });
+    expect(parseProfileProxyDefinition('proxies: [{name: A, type: direct}]'), {
+      'name': 'A',
+      'type': 'direct',
+    });
+    for (final invalid in [
+      'proxies: []',
+      'proxies: [{name: A, type: direct}, {name: B, type: direct}]',
+      '[]',
+      'name: Missing type',
+      'name: [A]\ntype: direct',
+    ]) {
+      expect(() => parseProfileProxyDefinition(invalid), throwsFormatException);
+    }
+  });
+
   const cases = <String, Map<String, Object>>{
     'ss://YWVzLTEyOC1nY206cGFzcw@1.2.3.4:8388#SS%20Node': {
       'name': 'SS Node',

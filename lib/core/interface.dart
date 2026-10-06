@@ -27,6 +27,8 @@ mixin CoreInterface {
 
   Future<String> validateConfig(String path);
 
+  Future<List<String>> validateProxies(List<Map<String, Object?>> proxies);
+
   Future<String> validateConfigWithBytes(String data);
 
   Future<Map<String, dynamic>> getConfig(String path);
@@ -186,6 +188,21 @@ abstract class CoreHandlerInterface with CoreInterface {
   @override
   Future<bool> forceGc() async {
     return await _invokeMethod<bool>(method: CoreMethod.forceGc) ?? false;
+  }
+
+  @override
+  Future<List<String>> validateProxies(
+    List<Map<String, Object?>> proxies,
+  ) async {
+    final results = await _invokeRequiredMethod<List<dynamic>>(
+      method: CoreMethod.validateProxies,
+      arguments: proxies,
+    );
+    if (results.length != proxies.length ||
+        results.any((value) => value is! String)) {
+      throw const FormatException('Invalid proxy validation response');
+    }
+    return results.cast<String>();
   }
 
   @override

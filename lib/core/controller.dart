@@ -111,6 +111,9 @@ class CoreController {
 
   FutureOr<bool> get isInit => _interface.isInit;
 
+  Future<List<String>> validateProxies(List<Map<String, Object?>> proxies) =>
+      _interface.validateProxies(proxies);
+
   Future<String> validateConfig(String path) async {
     final res = await _interface.validateConfig(path);
     return res;

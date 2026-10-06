@@ -1544,6 +1544,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "noUpgradablePlans": MessageLookupByLibrary.simpleMessage(
       "Нет тарифов для улучшения",
     ),
+    "nodeCoreValidationUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Запустите Core перед проверкой узла",
+    ),
+    "nodeDefinition": MessageLookupByLibrary.simpleMessage("Определение узла"),
     "nodeFilter": MessageLookupByLibrary.simpleMessage("Фильтр узлов"),
     "nodeFilterAccountNote": MessageLookupByLibrary.simpleMessage(
       "Фильтр сохраняется в аккаунте и действует на всех устройствах, где выполнен вход в это приложение.",
@@ -1571,6 +1575,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "nodeFilterSearch": MessageLookupByLibrary.simpleMessage("Поиск узлов"),
     "nodeFilterSmartSelection": MessageLookupByLibrary.simpleMessage(
       "Умный выбор",
+    ),
+    "nodeInvalidDefinition": MessageLookupByLibrary.simpleMessage(
+      "Введите одно полное определение узла с name и type",
+    ),
+    "nodeQuickFields": MessageLookupByLibrary.simpleMessage(
+      "Быстрое редактирование",
     ),
     "none": MessageLookupByLibrary.simpleMessage("Нет"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(

@@ -1487,6 +1487,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "noUpgradablePlans": MessageLookupByLibrary.simpleMessage(
       "No upgradable plans",
     ),
+    "nodeCoreValidationUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Start the Core before validating this node",
+    ),
+    "nodeDefinition": MessageLookupByLibrary.simpleMessage("Node definition"),
     "nodeFilter": MessageLookupByLibrary.simpleMessage("Node Filter"),
     "nodeFilterAccountNote": MessageLookupByLibrary.simpleMessage(
       "Saved to your account and applies to every device signed in to this app.",
@@ -1515,6 +1519,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "nodeFilterSmartSelection": MessageLookupByLibrary.simpleMessage(
       "Smart Selection",
     ),
+    "nodeInvalidDefinition": MessageLookupByLibrary.simpleMessage(
+      "Enter one complete proxy definition with a name and type",
+    ),
+    "nodeQuickFields": MessageLookupByLibrary.simpleMessage("Quick edit"),
     "none": MessageLookupByLibrary.simpleMessage("none"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "The current proxy group cannot be selected.",
