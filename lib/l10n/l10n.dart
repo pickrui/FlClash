@@ -11503,6 +11503,16 @@ class AppLocalizations {
   String get disabled {
     return Intl.message('Disabled', name: 'disabled', desc: '', args: []);
   }
+
+  /// `{count} items have problems, and applying this override may fail`
+  String overwriteIssuesSummary(Object count) {
+    return Intl.message(
+      '$count items have problems, and applying this override may fail',
+      name: 'overwriteIssuesSummary',
+      desc: '',
+      args: [count],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

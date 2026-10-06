@@ -10,6 +10,7 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/database.dart';
+import 'package:fl_clash/providers/clash_providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/profiles/custom_overwrite.dart';
 import 'package:material_ui/material_ui.dart';
@@ -303,6 +304,7 @@ Future<_TestProfiles> _pumpContent(
     ProviderScope(
       overrides: [
         profilesProvider.overrideWith(() => profiles),
+        clashProvidersProvider.overrideWith((_) => Stream.value([])),
         viewSizeProvider.overrideWithBuild((_, _) => size),
       ],
       child: MaterialApp(

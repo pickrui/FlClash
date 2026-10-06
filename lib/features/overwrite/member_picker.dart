@@ -34,11 +34,11 @@ class _ProxyMemberPickerState extends State<ProxyMemberPicker> {
     final selectedOrder = {
       for (final (index, name) in _selected.indexed) name: index,
     };
-    final query = _query.trim().toLowerCase();
+    final query = SearchQuery(_query);
     final names = <String>{
       ...available,
       ..._selected,
-    }.where((name) => name.toLowerCase().contains(query)).toList();
+    }.where((name) => query.matches([name])).toList();
     return CommonDialog(
       maxWidth: 480,
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),

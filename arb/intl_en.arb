@@ -1355,5 +1355,6 @@
   "prerequisites": "Prerequisites",
   "suspended": "Suspended…",
   "enabled": "Enabled",
-  "disabled": "Disabled"
+  "disabled": "Disabled",
+  "overwriteIssuesSummary": "{count} items have problems, and applying this override may fail"
 }

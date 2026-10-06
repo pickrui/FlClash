@@ -14,6 +14,7 @@ import 'package:fl_clash/providers/routing_issues.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/profiles/custom_overwrite.dart';
+import 'package:fl_clash/widgets/scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -33,6 +34,11 @@ void main() {
             autoUpdateDuration: Duration.zero,
             overwriteType: OverwriteType.custom,
             customProxyGroups: [
+              ProxyGroup(
+                name: 'Other',
+                type: GroupType.Selector,
+                proxies: ['DIRECT'],
+              ),
               ProxyGroup(
                 name: 'Personal',
                 type: GroupType.Selector,
@@ -66,6 +72,20 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('Personal'), findsOneWidget);
+    tester
+        .widget<CommonScaffold>(find.byType(CommonScaffold))
+        .searchState!
+        .onSearch('Personal');
+    await tester.pumpAndSettle();
+    expect(find.text('Other'), findsNothing);
+    expect(
+      tester
+          .widget<ReorderableDelayedDragStartListener>(
+            find.byType(ReorderableDelayedDragStartListener),
+          )
+          .enabled,
+      isFalse,
+    );
     expect(find.byType(RoutingIssueButton), findsOneWidget);
     await tester.tap(find.byType(RoutingIssueButton));
     await tester.pumpAndSettle();

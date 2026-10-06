@@ -92,11 +92,7 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
         .where((item) => item.kind == _kind)
         .toList();
     final visible = entries
-        .where(
-          (item) => '${item.label} ${item.url}'.toLowerCase().contains(
-            _search.toLowerCase(),
-          ),
-        )
+        .where((item) => SearchQuery(_search).matches([item.label, item.url]))
         .toList();
     return BaseScaffold(
       title: l.appProviderLibrary,

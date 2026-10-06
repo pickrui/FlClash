@@ -1355,5 +1355,6 @@
   "prerequisites": "前置条件",
   "suspended": "挂起中…",
   "enabled": "已开启",
-  "disabled": "已关闭"
+  "disabled": "已关闭",
+  "overwriteIssuesSummary": "{count} 项存在问题，应用覆写可能失败"
 }

@@ -6,11 +6,13 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/overwrite/proxy_chain.dart';
 import 'package:fl_clash/features/overwrite/rule.dart';
 import 'package:fl_clash/features/overwrite/routing_draft.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
@@ -33,11 +35,32 @@ class OverwriteView extends ConsumerStatefulWidget {
 class _OverwriteViewState extends ConsumerState<OverwriteView> {
   late final SetupAction _setupAction;
   bool _checking = false;
+  bool _previewing = false;
 
   @override
   void initState() {
     super.initState();
     _setupAction = context.setupAction;
+  }
+
+  Future<void> _preview() async {
+    final profile = ref.read(profileProvider(widget.profileId));
+    if (profile == null || profile.isoixCloudProfile || _previewing) return;
+    setState(() => _previewing = true);
+    try {
+      final config = await _setupAction.getProfileWithId(profile.id);
+      if (config.isEmpty) return;
+      final text = await encodeYamlTask(config);
+      if (!mounted) return;
+      BaseNavigator.push(
+        context,
+        EditorPage(title: profile.realLabel, content: text),
+      );
+    } catch (error) {
+      if (mounted) context.showNotifier(error.toString());
+    } finally {
+      if (mounted) setState(() => _previewing = false);
+    }
   }
 
   Future<void> _checkAndApply() async {
@@ -83,6 +106,12 @@ class _OverwriteViewState extends ConsumerState<OverwriteView> {
     return CommonScaffold(
       title: appLocalizations.override,
       actions: [
+        if (ref.watch(profileProvider(widget.profileId)) case final profile?
+            when !profile.isoixCloudProfile)
+          TextButton(
+            onPressed: _previewing ? null : _preview,
+            child: Text(context.appLocalizations.preview),
+          ),
         IconButton(
           tooltip: appLocalizations.checkRouting,
           onPressed: _checking ? null : _checkAndApply,
@@ -167,12 +196,12 @@ class _OverwriteModeSelectorState extends ConsumerState<OverwriteModeSelector> {
     };
   }
 
-  IconData _getIcon(OverwriteType type) {
+  Glyph _getIcon(OverwriteType type) {
     return switch (type) {
-      OverwriteType.standard => Icons.stars,
-      OverwriteType.script => Icons.rocket,
-      OverwriteType.custom => Icons.dashboard_customize,
-      OverwriteType.merge => Icons.layers_outlined,
+      OverwriteType.standard => AppGlyphs.star,
+      OverwriteType.script => AppGlyphs.code,
+      OverwriteType.custom => AppGlyphs.customize,
+      OverwriteType.merge => AppGlyphs.layers,
     };
   }
 
@@ -272,7 +301,7 @@ class _OverwriteModeSelectorState extends ConsumerState<OverwriteModeSelector> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           else
-                            Icon(_getIcon(type)),
+                            GlyphIcon(_getIcon(type)),
                           const SizedBox(width: 8),
                           Flexible(child: Text(_getTitle(type))),
                         ],

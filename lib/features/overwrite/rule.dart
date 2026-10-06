@@ -32,6 +32,31 @@ class RuleItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final error = ParsedRule.parseString(rule.value).payloadError;
+    return SelectedDecorationListItem(
+      isSelected: isSelected,
+      isEditing: isEditing,
+      invalid: error != null,
+      onSelected: onSelected,
+      onPressed: () => onEdit(rule),
+      title: RuleSummary(rule: rule),
+    );
+  }
+}
+
+class RuleSummary extends StatelessWidget {
+  const RuleSummary({super.key, required this.rule});
+  final Rule rule;
+  @override
+  Widget build(BuildContext context) {
+    if (!RuleAction.values.any(
+      (action) => action.value == rule.value.split(',').first.toUpperCase(),
+    )) {
+      return Text(
+        rule.value,
+        style: context.textTheme.bodyMedium?.toJetBrainsMono,
+      );
+    }
     final parsed = ParsedRule.parseString(rule.value);
     final error = parsed.payloadError?.getMessage(context);
     final target = parsed.subRule ?? parsed.ruleTarget;
@@ -40,63 +65,58 @@ class RuleItem extends StatelessWidget {
       'REJECT' || 'REJECT-DROP' => context.colorScheme.warning,
       _ => context.colorScheme.tertiary,
     };
-    return SelectedDecorationListItem(
-      isSelected: isSelected,
-      isEditing: isEditing,
-      invalid: error != null,
-      onSelected: onSelected,
-      onPressed: () => onEdit(rule),
-      title: LayoutBuilder(
-        builder: (context, constraints) => Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    parsed.ruleAction.value,
-                    style: context.textTheme.bodyLarge?.toJetBrainsMono,
+    return LayoutBuilder(
+      builder: (context, constraints) => Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  parsed.ruleAction.value,
+                  style: context.textTheme.bodyLarge?.toJetBrainsMono,
+                ),
+                Text(
+                  parsed.ruleProvider ?? parsed.content ?? '',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textTheme.bodyMedium?.toJetBrainsMono.copyWith(
+                    color: context.colorScheme.onSurfaceVariant,
                   ),
-                  Text(
-                    parsed.ruleProvider ?? parsed.content ?? '',
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.textTheme.bodyMedium?.toJetBrainsMono
-                        .copyWith(color: context.colorScheme.onSurfaceVariant),
-                  ),
-                ],
+                ),
+              ],
+            ),
+          ),
+          if (error != null)
+            Tooltip(
+              message: error,
+              child: Icon(
+                Icons.info_outline,
+                color: context.colorScheme.error,
+                size: 18,
               ),
             ),
-            if (error != null)
-              Tooltip(
-                message: error,
-                child: Icon(
-                  Icons.info_outline,
-                  color: context.colorScheme.error,
-                  size: 18,
-                ),
+          if (target != null) ...[
+            const SizedBox(width: 12),
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: constraints.maxWidth * 0.45,
               ),
-            if (target != null) ...[
-              const SizedBox(width: 12),
-              ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: constraints.maxWidth * 0.45,
-                ),
-                child: Tooltip(
-                  message: target,
-                  child: Text(
-                    target,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.textTheme.bodyMedium?.toJetBrainsMono
-                        .copyWith(color: color),
+              child: Tooltip(
+                message: target,
+                child: Text(
+                  target,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textTheme.bodyMedium?.toJetBrainsMono.copyWith(
+                    color: color,
                   ),
                 ),
               ),
-            ],
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -203,7 +223,14 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
     }
     final parsedRule = ParsedRule(
       ruleAction: _ruleAction,
-      content: _contentController.text.trim(),
+      content: switch (_ruleAction) {
+        RuleAction.DST_PORT ||
+        RuleAction.SRC_PORT ||
+        RuleAction.IN_PORT ||
+        RuleAction.UID ||
+        RuleAction.DSCP => _contentController.text.trim().replaceAll(',', '/'),
+        _ => _contentController.text.trim(),
+      },
       ruleTarget: _ruleTargetController.text.trim(),
       noResolve: _noResolve,
       src: _src,
