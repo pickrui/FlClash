@@ -353,6 +353,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-${{ matrix.platform }}-${{ matrix.arch }}-cargo-v2-${{ env.FLUTTER_VERSION }}-
 
+      - name: Setup Xcode
+        if: matrix.platform == 'macos'
+        run: |
+          sudo xcode-select -s /Applications/Xcode_26.3.app || sudo xcode-select -s /Applications/Xcode_26.2.app
+          xcodebuild -version
+
       - name: Cache CocoaPods
         if: matrix.platform == 'macos'
         uses: actions/cache@v6

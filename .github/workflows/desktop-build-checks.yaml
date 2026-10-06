@@ -45,6 +45,12 @@ jobs:
           channel: master
           flutter-version: '3.47.4'
           cache: ${{ inputs.platform != 'windows' }}
+      - name: Setup Xcode
+        if: inputs.platform == 'macos'
+        run: |
+          sudo xcode-select -s /Applications/Xcode_26.3.app || sudo xcode-select -s /Applications/Xcode_26.2.app
+          xcodebuild -version
+
       - run: flutter pub get
       - name: Prepare isolated Core settings
         shell: bash
