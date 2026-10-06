@@ -10104,6 +10104,221 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Level`
+  String get ipQualityLevel {
+    return Intl.message('Level', name: 'ipQualityLevel', desc: '', args: []);
+  }
+
+  /// `Good`
+  String get ipQualityGood {
+    return Intl.message('Good', name: 'ipQualityGood', desc: '', args: []);
+  }
+
+  /// `Normal`
+  String get ipQualityNormal {
+    return Intl.message('Normal', name: 'ipQualityNormal', desc: '', args: []);
+  }
+
+  /// `Risky`
+  String get ipQualityRisky {
+    return Intl.message('Risky', name: 'ipQualityRisky', desc: '', args: []);
+  }
+
+  /// `Type`
+  String get ipType {
+    return Intl.message('Type', name: 'ipType', desc: '', args: []);
+  }
+
+  /// `Residential`
+  String get ipTypeResidential {
+    return Intl.message(
+      'Residential',
+      name: 'ipTypeResidential',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Mobile network`
+  String get ipTypeMobile {
+    return Intl.message(
+      'Mobile network',
+      name: 'ipTypeMobile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Business`
+  String get ipTypeBusiness {
+    return Intl.message('Business', name: 'ipTypeBusiness', desc: '', args: []);
+  }
+
+  /// `Data center`
+  String get ipTypeHosting {
+    return Intl.message(
+      'Data center',
+      name: 'ipTypeHosting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Flags`
+  String get ipFlags {
+    return Intl.message('Flags', name: 'ipFlags', desc: '', args: []);
+  }
+
+  /// `Proxy`
+  String get ipFlagProxy {
+    return Intl.message('Proxy', name: 'ipFlagProxy', desc: '', args: []);
+  }
+
+  /// `VPN`
+  String get ipFlagVpn {
+    return Intl.message('VPN', name: 'ipFlagVpn', desc: '', args: []);
+  }
+
+  /// `Tor`
+  String get ipFlagTor {
+    return Intl.message('Tor', name: 'ipFlagTor', desc: '', args: []);
+  }
+
+  /// `Abuse history`
+  String get ipFlagAbuser {
+    return Intl.message(
+      'Abuse history',
+      name: 'ipFlagAbuser',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Organization`
+  String get ipOrganization {
+    return Intl.message(
+      'Organization',
+      name: 'ipOrganization',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ASN`
+  String get ipAsn {
+    return Intl.message('ASN', name: 'ipAsn', desc: '', args: []);
+  }
+
+  /// `Answered by`
+  String get ipQualitySource {
+    return Intl.message(
+      'Answered by',
+      name: 'ipQualitySource',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sources`
+  String get ipQualitySources {
+    return Intl.message(
+      'Sources',
+      name: 'ipQualitySources',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Couldn't determine the IP type`
+  String get ipQualityFailed {
+    return Intl.message(
+      'Couldn\'t determine the IP type',
+      name: 'ipQualityFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check again`
+  String get ipQualityRetry {
+    return Intl.message(
+      'Check again',
+      name: 'ipQualityRetry',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No type`
+  String get ipSourceNoType {
+    return Intl.message('No type', name: 'ipSourceNoType', desc: '', args: []);
+  }
+
+  /// `Rate limited`
+  String get ipSourceRateLimited {
+    return Intl.message(
+      'Rate limited',
+      name: 'ipSourceRateLimited',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Different outbound IP`
+  String get ipSourceIpMismatch {
+    return Intl.message(
+      'Different outbound IP',
+      name: 'ipSourceIpMismatch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hide IP`
+  String get hideIp {
+    return Intl.message('Hide IP', name: 'hideIp', desc: '', args: []);
+  }
+
+  /// `IP quality`
+  String get ipQualityDetails {
+    return Intl.message(
+      'IP quality',
+      name: 'ipQualityDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Queries IPQuery, IPLocate, ipapi.is and proxycheck.io when tapped`
+  String get ipQualityQueryHint {
+    return Intl.message(
+      'Queries IPQuery, IPLocate, ipapi.is and proxycheck.io when tapped',
+      name: 'ipQualityQueryHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unknown`
+  String get ipTypeUnknown {
+    return Intl.message('Unknown', name: 'ipTypeUnknown', desc: '', args: []);
+  }
+
+  /// `Inferred`
+  String get ipTypeInferred {
+    return Intl.message('Inferred', name: 'ipTypeInferred', desc: '', args: []);
+  }
+
+  /// `Yes`
+  String get ipFlagYes {
+    return Intl.message('Yes', name: 'ipFlagYes', desc: '', args: []);
+  }
+
+  /// `No`
+  String get ipFlagNo {
+    return Intl.message('No', name: 'ipFlagNo', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

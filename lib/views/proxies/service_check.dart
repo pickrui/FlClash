@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/models/probe.dart';
+import 'package:fl_clash/features/ip_quality/ip_quality.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/state.dart';
@@ -43,6 +44,9 @@ class _ServiceCheckPageState extends ConsumerState<ServiceCheckPage>
     final enabled =
         !safeModeBuild && ref.watch(initProvider) && ref.watch(isStartProvider);
     final ip = result.ip;
+    final hideIp = ref.watch(
+      appSettingProvider.select((state) => state.hideIp),
+    );
     final settings = ref.watch(appSettingProvider);
     final names = orderedServiceNames(
       settings.serviceOrder,
@@ -87,6 +91,13 @@ class _ServiceCheckPageState extends ConsumerState<ServiceCheckPage>
           if (!enabled) ListTile(title: Text(l.serviceProbeStart)),
           if (result.stale) ListTile(title: Text(l.serviceProbeStale)),
           if (result.failed) ListTile(title: Text(l.serviceCheckFailed)),
+          SwitchListTile.adaptive(
+            title: Text(l.hideIp),
+            value: hideIp,
+            onChanged: (value) => ref
+                .read(appSettingProvider.notifier)
+                .update((state) => state.copyWith(hideIp: value)),
+          ),
           ListTile(
             leading: const Icon(Icons.public),
             title: Text(l.outboundIp),
@@ -96,13 +107,15 @@ class _ServiceCheckPageState extends ConsumerState<ServiceCheckPage>
                   : ip.address.isEmpty
                   ? l.serviceCheckFailed
                   : [
-                      ip.address,
+                      hideIp ? '••••••••' : ip.address,
                       ip.region,
                       ip.chains.join(' → '),
                       ip.source,
                     ].where((text) => text.isNotEmpty).join('\n'),
             ),
           ),
+          if (ip != null && ip.address.isNotEmpty && !result.stale)
+            IpQualityDetails(key: ValueKey(ip.address), ip: ip.address),
           DropdownButtonFormField<String>(
             key: ValueKey(current),
             initialValue: current,

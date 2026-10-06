@@ -126,6 +126,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(false) bool isAnimateToPage,
     @Default(true) bool floatingNavigationBar,
     @Default(false) bool showLabel,
+    @Default(false) bool hideIp,
     @Default([]) List<String> serviceOrder,
     @Default([]) List<String> disabledServices,
     @Default('') String currentService,

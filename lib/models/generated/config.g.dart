@@ -30,6 +30,7 @@ _AppSettingProps _$AppSettingPropsFromJson(Map<String, dynamic> json) =>
       isAnimateToPage: json['isAnimateToPage'] as bool? ?? false,
       floatingNavigationBar: json['floatingNavigationBar'] as bool? ?? true,
       showLabel: json['showLabel'] as bool? ?? false,
+      hideIp: json['hideIp'] as bool? ?? false,
       serviceOrder:
           (json['serviceOrder'] as List<dynamic>?)
               ?.map((e) => e as String)
@@ -79,6 +80,7 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'isAnimateToPage': instance.isAnimateToPage,
       'floatingNavigationBar': instance.floatingNavigationBar,
       'showLabel': instance.showLabel,
+      'hideIp': instance.hideIp,
       'serviceOrder': instance.serviceOrder,
       'disabledServices': instance.disabledServices,
       'currentService': instance.currentService,

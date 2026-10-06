@@ -467,3 +467,20 @@ enum ItemPosition {
     return ItemPosition.middle;
   }
 }
+
+enum IpType { residential, mobile, business, hosting, unknown }
+
+enum IpQualityLevel { good, normal, risky }
+
+enum IpQualitySource {
+  ipQuery('ipquery.io'),
+  ipLocate('iplocate.io'),
+  proxyCheck('proxycheck.io'),
+  ipApiIs('ipapi.is');
+
+  const IpQualitySource(this.label);
+
+  final String label;
+}
+
+enum IpQualitySourceStatus { noType, timeout, rateLimited, failed, ipMismatch }
