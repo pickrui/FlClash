@@ -6,6 +6,7 @@
 import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
@@ -84,7 +85,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         const _ThemeItem(),
         const _BackupItem(),
         ListItem.open(
-          leading: const Icon(Icons.inventory_2_outlined),
+          leading: const GlyphIcon(AppGlyphs.resources),
           title: Text(context.appLocalizations.appProviderLibrary),
           delegate: const OpenDelegate(widget: ClashProvidersView()),
         ),
@@ -93,14 +94,14 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         if (system.isAndroid) const _AccessItem(),
         if (system.isWindows || system.isMacOS)
           ListItem.open(
-            leading: const Icon(Icons.network_check),
+            leading: const GlyphIcon(AppGlyphs.networkCheck),
             title: Text(context.appLocalizations.diagTitle),
             subtitle: Text(context.appLocalizations.diagEntryHint),
             delegate: const OpenDelegate(widget: NetworkDiagnosticsPage()),
           ),
         if (tailscalePageBuilder case final builder?)
           ListItem.open(
-            leading: const Icon(Icons.hub_outlined),
+            leading: const GlyphIcon(AppGlyphs.connections),
             title: const Text('Tailscale'),
             subtitle: Text(context.appLocalizations.tailscaleEntryHint),
             delegate: OpenDelegate(widget: Builder(builder: builder)),
@@ -164,7 +165,7 @@ class _LocaleItem extends ConsumerWidget {
     final subTitle = locale ?? context.appLocalizations.defaultText;
     final currentLocale = utils.getLocaleForString(locale);
     return ListItem<Locale?>.options(
-      leading: const Icon(Icons.language_outlined),
+      leading: const GlyphIcon(AppGlyphs.language),
       title: Text(context.appLocalizations.language),
       subtitle: Text(Intl.message(subTitle)),
       delegate: OptionsDelegate(
@@ -188,7 +189,7 @@ class _ThemeItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListItem.open(
-      leading: const Icon(Icons.style),
+      leading: const GlyphIcon(AppGlyphs.palette),
       title: Text(context.appLocalizations.theme),
       subtitle: Text(context.appLocalizations.themeDesc),
       delegate: const OpenDelegate(widget: ThemeView()),
@@ -202,7 +203,7 @@ class _BackupItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListItem.open(
-      leading: const Icon(Icons.cloud_sync),
+      leading: const GlyphIcon(AppGlyphs.cloudSync),
       title: Text(context.appLocalizations.backupAndRestore),
       subtitle: Text(context.appLocalizations.backupAndRestoreDesc),
       delegate: const OpenDelegate(widget: BackupAndRestore()),
@@ -216,7 +217,7 @@ class _HotkeyItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListItem.open(
-      leading: const Icon(Icons.keyboard),
+      leading: const GlyphIcon(AppGlyphs.keyboard),
       title: Text(context.appLocalizations.hotkeyManagement),
       subtitle: Text(context.appLocalizations.hotkeyManagementDesc),
       delegate: const OpenDelegate(widget: HotKeyView()),
@@ -230,7 +231,7 @@ class _LoopbackItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListItem(
-      leading: const Icon(Icons.lock),
+      leading: const GlyphIcon(AppGlyphs.lock),
       title: Text(context.appLocalizations.loopback),
       subtitle: Text(context.appLocalizations.loopbackDesc),
       onTap: () {
@@ -249,7 +250,7 @@ class _AccessItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListItem.open(
-      leading: const Icon(Icons.view_list),
+      leading: const GlyphIcon(AppGlyphs.layoutList),
       title: Text(context.appLocalizations.accessControl),
       subtitle: Text(context.appLocalizations.accessControlDesc),
       delegate: const OpenDelegate(widget: AccessView()),
@@ -263,7 +264,7 @@ class _ConfigItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListItem.open(
-      leading: const Icon(Icons.edit),
+      leading: const GlyphIcon(AppGlyphs.edit),
       title: Text(context.appLocalizations.general),
       delegate: const OpenDelegate(widget: ConfigView()),
     );
@@ -276,7 +277,7 @@ class _AdvancedConfigItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListItem.open(
-      leading: const Icon(Icons.build),
+      leading: const GlyphIcon(AppGlyphs.wrench),
       title: Text(context.appLocalizations.advancedConfig),
       subtitle: Text(context.appLocalizations.advancedConfigDesc),
       delegate: const OpenDelegate(widget: AdvancedConfigView()),
@@ -290,7 +291,7 @@ class _InfoItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListItem.open(
-      leading: const Icon(Icons.info),
+      leading: const GlyphIcon(AppGlyphs.info),
       title: Text(context.appLocalizations.about),
       delegate: const OpenDelegate(widget: AboutView()),
     );
@@ -303,7 +304,7 @@ class _DeveloperItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListItem.open(
-      leading: const Icon(Icons.developer_board),
+      leading: const GlyphIcon(AppGlyphs.cpu),
       title: Text(context.appLocalizations.developerMode),
       delegate: const OpenDelegate(widget: DeveloperView()),
     );

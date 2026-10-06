@@ -49,7 +49,7 @@ class RoutingIssueButton extends StatelessWidget {
     return IconButton(
       tooltip: message,
       color: context.colorScheme.error,
-      icon: const Icon(Icons.error_outline),
+      icon: const GlyphIcon(AppGlyphs.error),
       onPressed: () => showDialog<void>(
         context: context,
         builder: (context) => AlertDialog(

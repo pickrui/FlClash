@@ -5,7 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/models/common.dart';
-import 'package:fl_clash/icons/icons.dart';
+import 'package:fl_clash/icons/app_glyphs.dart';
+import 'package:fl_clash/icons/glyph_icon.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'animated_cross_slide.dart';
@@ -343,8 +344,8 @@ class _CommonPopupMenuItemsState extends State<_CommonPopupMenuItems> {
             children: [
               IconButton(
                 tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-                icon: Icon(
-                  Icons.arrow_back_outlined,
+                icon: GlyphIcon(
+                  AppGlyphs.arrowBack,
                   color: context.colorScheme.onSurfaceVariant.opacity80,
                 ),
                 onPressed: () {

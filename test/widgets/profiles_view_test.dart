@@ -89,9 +89,9 @@ Future<ProviderContainer> _pushRoute(
       child: TestApp(
         child: Builder(
           builder: (context) => TextButton(
-            onPressed: () => Navigator.of(
-              context,
-            ).push(MaterialPageRoute<void>(builder: (_) => page())),
+            onPressed: () =>
+                Navigator.of(context)
+                    .push(MaterialPageRoute<void>(builder: (_) => page())),
             child: const Text('open'),
           ),
         ),
@@ -138,7 +138,7 @@ void main() {
       added,
     ]);
 
-    await tester.tap(find.byIcon(Icons.check));
+    await tester.tap(find.byTooltip('Save'));
     await tester.pumpAndSettle();
 
     expect(action.reordered, [refreshed, _first, added]);

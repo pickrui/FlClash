@@ -141,7 +141,7 @@ void main() {
     final bSlot = tester.getTopLeft(_content('B'));
     final cSlot = tester.getTopLeft(_content('C'));
 
-    await tester.tap(find.byIcon(Icons.close).at(1));
+    await tester.tap(find.byTooltip('Remove').at(1));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
@@ -175,7 +175,7 @@ void main() {
     await tester.pump();
     final before = position.pixels;
 
-    await tester.tap(find.byIcon(Icons.close).last);
+    await tester.tap(find.byTooltip('Remove').last);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 16));
 
@@ -237,14 +237,14 @@ void main() {
 
     await tester.pumpWidget(_Harness(gridKey: key, labels: const ['A', 'B']));
     await tester.pump();
-    expect(find.byIcon(Icons.close), findsNWidgets(2));
+    expect(find.byTooltip('Remove'), findsNWidgets(2));
     expect(tester.element(_content('A')), same(element));
 
     await tester.pumpWidget(
       _Harness(gridKey: key, labels: const ['A', 'B'], editing: false),
     );
     await tester.pump();
-    expect(find.byIcon(Icons.close), findsNothing);
+    expect(find.byTooltip('Remove'), findsNothing);
     expect(tester.element(_content('A')), same(element));
   });
 
@@ -304,7 +304,7 @@ void main() {
     final key = GlobalKey<SuperGridState>();
     await tester.pumpWidget(_Harness(gridKey: key, labels: const ['A', 'B']));
     await tester.pumpAndSettle();
-    await tester.tap(find.byIcon(Icons.close).first);
+    await tester.tap(find.byTooltip('Remove').first);
     await tester.pumpAndSettle();
     expect(_content('A'), findsNothing);
     unawaited(

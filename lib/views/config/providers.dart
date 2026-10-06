@@ -6,6 +6,7 @@
 import 'dart:convert';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/editor.dart';
@@ -100,7 +101,7 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
         IconButton(
           tooltip: l.add,
           onPressed: () => _edit(),
-          icon: const Icon(Icons.add),
+          icon: const GlyphIcon(AppGlyphs.add),
         ),
       ],
       body: AppBarClearance(
@@ -129,7 +130,7 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
               child: TextField(
                 decoration: InputDecoration(
                   labelText: l.search,
-                  prefixIcon: const Icon(Icons.search),
+                  prefixIcon: const GlyphIcon(AppGlyphs.search),
                 ),
                 onChanged: (value) => setState(() => _search = value),
               ),
@@ -180,12 +181,12 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
                               IconButton(
                                 tooltip: l.delete,
                                 onPressed: () => _remove(item),
-                                icon: const Icon(Icons.delete_outline),
+                                icon: const GlyphIcon(AppGlyphs.delete),
                               ),
                               if (_search.isEmpty)
                                 ReorderableDragStartListener(
                                   index: index,
-                                  child: const Icon(Icons.drag_handle),
+                                  child: const GlyphIcon(AppGlyphs.dragHandle),
                                 ),
                             ],
                           ),
@@ -327,7 +328,7 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
         IconButton(
           tooltip: l.save,
           onPressed: _saving ? null : _save,
-          icon: const Icon(Icons.save_outlined),
+          icon: const GlyphIcon(AppGlyphs.save),
         ),
       ],
       body: AppBarClearance(
@@ -413,13 +414,13 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
                   children: [
                     TextButton.icon(
                       onPressed: _import,
-                      icon: const Icon(Icons.file_open_outlined),
+                      icon: const GlyphIcon(AppGlyphs.importFile),
                       label: Text(l.import),
                     ),
                     if (_draft.isTextContent)
                       TextButton.icon(
                         onPressed: _editContent,
-                        icon: const Icon(Icons.edit_outlined),
+                        icon: const GlyphIcon(AppGlyphs.edit),
                         label: Text(l.providerContent),
                       ),
                   ],

@@ -268,7 +268,7 @@ class _MemoryDetailSheetState extends State<MemoryDetailSheet> {
                   dimension: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Icon(Icons.cleaning_services_outlined),
+              : const GlyphIcon(AppGlyphs.broom),
         ),
       ],
       body: ValueListenableBuilder<MemorySnapshot>(

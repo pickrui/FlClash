@@ -151,7 +151,9 @@ void main() {
       await tester.pumpAndSettle();
       final delete = tester
           .widget<IconButton>(
-            find.widgetWithIcon(IconButton, Icons.delete_outline),
+            find.byWidgetPredicate(
+              (widget) => widget is IconButton && widget.tooltip == 'Delete',
+            ),
           )
           .onPressed!;
       delete();

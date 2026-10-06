@@ -10,6 +10,7 @@ import 'package:fl_clash/widgets/keyboard_inset_hold.dart';
 import 'dart:async';
 
 import 'package:fl_clash/widgets/app_update.dart';
+import 'package:fl_clash/widgets/input_dialog.dart';
 
 import 'dart:io';
 
@@ -54,6 +55,14 @@ class ApplicationState extends ConsumerState<Application> {
   @override
   void initState() {
     super.initState();
+    system.requestAdminPassword = () => globalState.showCommonDialog<String>(
+      child: InputDialog(
+        obscureText: true,
+        title: appLocalizations.pleaseInputAdminPassword,
+        value: '',
+        inputFormatters: TextInputLimits.limit(TextInputLimits.password),
+      ),
+    );
     navigation.pageBuilder = buildNavigationPage;
     navigation.updatePresenter = (context, info, task, loadNotes, download) =>
         BaseNavigator.push<UpdateDownloadAction>(

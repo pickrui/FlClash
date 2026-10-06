@@ -12,11 +12,16 @@ void main() {
   group('Tray.getTryIcon', () {
     final tray = Tray();
     final suffix = tray.trayIconSuffix;
+    final directory = Platform.isWindows
+        ? 'windows'
+        : Platform.isMacOS
+        ? 'macos'
+        : 'unix';
 
     test('returns idle icon when core is not started', () {
       expect(
         tray.getTryIcon(isStart: false, tunEnable: false),
-        'assets/images/icon/status_1.$suffix',
+        'assets/images/tray/$directory/status_1.$suffix',
       );
     });
 
@@ -24,8 +29,8 @@ void main() {
       expect(
         tray.getTryIcon(isStart: true, tunEnable: false),
         Platform.isMacOS
-            ? 'assets/images/icon/status_1.$suffix'
-            : 'assets/images/icon/status_2.$suffix',
+            ? 'assets/images/tray/$directory/status_1.$suffix'
+            : 'assets/images/tray/$directory/status_2.$suffix',
       );
     });
 
@@ -33,10 +38,20 @@ void main() {
       expect(
         tray.getTryIcon(isStart: true, tunEnable: true),
         Platform.isMacOS
-            ? 'assets/images/icon/status_1.$suffix'
-            : 'assets/images/icon/status_3.$suffix',
+            ? 'assets/images/tray/$directory/status_1.$suffix'
+            : 'assets/images/tray/$directory/status_3.$suffix',
       );
     });
+  });
+
+  test('isolated mode uses its own packaged tray icon', () {
+    final path = Tray().getTryIcon(
+      isStart: true,
+      tunEnable: true,
+      safeMode: true,
+    );
+    expect(path, contains('status_4.'));
+    expect(File(path).existsSync(), isTrue);
   });
 
   group('proxyEnvCommand', () {

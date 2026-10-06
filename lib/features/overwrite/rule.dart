@@ -6,6 +6,7 @@
 library;
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/clash_config.dart';
 import 'package:fl_clash/widgets/card.dart';
@@ -91,8 +92,8 @@ class RuleSummary extends StatelessWidget {
           if (error != null)
             Tooltip(
               message: error,
-              child: Icon(
-                Icons.info_outline,
+              child: GlyphIcon(
+                AppGlyphs.info,
                 color: context.colorScheme.error,
                 size: 18,
               ),

@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/widgets/route_motion_hold.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/common/scroll.dart';
 import 'package:fl_clash/common/log_payload.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -55,7 +56,7 @@ class _LogsViewState extends ConsumerState<LogsView>
         onPressed: () {
           _handleExport();
         },
-        icon: const Icon(Icons.save_as_outlined),
+        icon: const GlyphIcon(AppGlyphs.save),
       ),
     ];
   }
@@ -135,8 +136,8 @@ class _LogsViewState extends ConsumerState<LogsView>
                 );
               },
               child: autoScrollToEnd
-                  ? const Icon(Icons.block)
-                  : const Icon(Icons.vertical_align_top),
+                  ? const GlyphIcon(AppGlyphs.block)
+                  : const GlyphIcon(AppGlyphs.scrollToTop),
             ),
           );
         },

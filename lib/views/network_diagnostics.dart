@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/network_diagnostic_fix.dart';
 import 'package:fl_clash/providers/providers.dart';
@@ -223,7 +224,7 @@ class _NetworkDiagnosticsPageState
                   await Clipboard.setData(ClipboardData(text: _report()));
                   if (context.mounted) context.showNotifier(l.copySuccess);
                 },
-          icon: const Icon(Icons.copy),
+          icon: const GlyphIcon(AppGlyphs.copy),
         ),
       ],
       body: ListView(
@@ -237,7 +238,7 @@ class _NetworkDiagnosticsPageState
             children: [
               FilledButton.icon(
                 onPressed: _busy ? null : _run,
-                icon: const Icon(Icons.network_check),
+                icon: const GlyphIcon(AppGlyphs.networkCheck),
                 label: Text(l.diagRun),
               ),
               if (_running)
@@ -273,13 +274,12 @@ class _NetworkDiagnosticsPageState
                   children: [
                     Row(
                       children: [
-                        Icon(
+                        GlyphIcon(
                           switch (check.status) {
-                            DiagnosticStatus.passed =>
-                              Icons.check_circle_outline,
-                            DiagnosticStatus.failed => Icons.error_outline,
-                            DiagnosticStatus.warning => Icons.warning_amber,
-                            _ => Icons.help_outline,
+                            DiagnosticStatus.passed => AppGlyphs.checkCircle,
+                            DiagnosticStatus.failed => AppGlyphs.error,
+                            DiagnosticStatus.warning => AppGlyphs.warning,
+                            _ => AppGlyphs.info,
                           },
                           color: switch (check.status) {
                             DiagnosticStatus.passed => Colors.green,
@@ -310,7 +310,7 @@ class _NetworkDiagnosticsPageState
                         alignment: Alignment.centerRight,
                         child: FilledButton.tonalIcon(
                           onPressed: _busy ? null : () => _fix(fix),
-                          icon: const Icon(Icons.auto_fix_high),
+                          icon: const GlyphIcon(AppGlyphs.sparkle),
                           label: Text(_fixLabel(fix)),
                         ),
                       ),

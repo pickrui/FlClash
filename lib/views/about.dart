@@ -6,6 +6,7 @@
 import 'dart:async';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/update_download.dart';
@@ -29,7 +30,7 @@ class AboutView extends StatelessWidget {
       onTap: () {
         globalState.openUrl('https://$domain$path');
       },
-      trailing: const Icon(Icons.launch),
+      trailing: const GlyphIcon(AppGlyphs.openExternal),
     );
   }
 
@@ -90,14 +91,14 @@ class AboutView extends StatelessWidget {
           onTap: () {
             globalState.openUrl('https://docs.dler.io/black-hole');
           },
-          trailing: const Icon(Icons.launch),
+          trailing: const GlyphIcon(AppGlyphs.openExternal),
         ),
         ListItem(
           title: Text(appLocalizations.project),
           onTap: () {
             globalState.openUrl('https://github.com/$repository');
           },
-          trailing: const Icon(Icons.launch),
+          trailing: const GlyphIcon(AppGlyphs.openExternal),
         ),
         ListItem(
           title: Text(appLocalizations.core),
@@ -106,7 +107,7 @@ class AboutView extends StatelessWidget {
               'https://github.com/chen08209/Clash.Meta/tree/FlClash',
             );
           },
-          trailing: const Icon(Icons.launch),
+          trailing: const GlyphIcon(AppGlyphs.openExternal),
         ),
       ],
     );

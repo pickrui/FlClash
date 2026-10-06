@@ -36,14 +36,23 @@ class Tray {
 
   Future<void> destroy() => native.Tray.instance.hide();
 
-  String getTryIcon({required bool isStart, required bool tunEnable}) {
-    if (system.isMacOS || !isStart) {
-      return 'assets/images/icon/status_1.$trayIconSuffix';
-    }
-    if (!tunEnable) {
-      return 'assets/images/icon/status_2.$trayIconSuffix';
-    }
-    return 'assets/images/icon/status_3.$trayIconSuffix';
+  String getTryIcon({
+    required bool isStart,
+    required bool tunEnable,
+    bool safeMode = safeModeBuild,
+  }) {
+    final directory = system.isWindows
+        ? 'windows'
+        : system.isMacOS
+        ? 'macos'
+        : 'unix';
+    final status = switch ((safeMode, system.isMacOS || !isStart, tunEnable)) {
+      (true, _, _) => 4,
+      (false, true, _) => 1,
+      (false, false, false) => 2,
+      (false, false, true) => 3,
+    };
+    return 'assets/images/tray/$directory/status_$status.$trayIconSuffix';
   }
 
   Future<void> update({required TrayState trayState}) async {

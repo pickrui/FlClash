@@ -55,16 +55,16 @@ void main() {
   ) async {
     final key = await pumpGrid(tester);
 
-    await tester.tap(find.byIcon(Icons.close).at(1));
+    await tester.tap(find.byTooltip('Remove').at(1));
     await tester.pump(const Duration(milliseconds: 100));
     final pending = tester.widgetList<IconButton>(find.byType(IconButton));
     expect(pending.every((button) => button.onPressed != null), isTrue);
-    await tester.tap(find.byIcon(Icons.close).last, warnIfMissed: false);
+    await tester.tap(find.byTooltip('Remove').last, warnIfMissed: false);
     await settle(tester);
 
     expect(labels(key), ['item0', 'item2']);
 
-    await tester.tap(find.byIcon(Icons.close).last);
+    await tester.tap(find.byTooltip('Remove').last);
     await settle(tester);
 
     expect(labels(key), ['item0']);
@@ -75,8 +75,8 @@ void main() {
   ) async {
     final key = await pumpGrid(tester);
 
-    await tester.tap(find.byIcon(Icons.close).at(1));
-    await tester.tap(find.byIcon(Icons.close).last);
+    await tester.tap(find.byTooltip('Remove').at(1));
+    await tester.tap(find.byTooltip('Remove').last);
     await tester.pump(const Duration(milliseconds: 100));
     await settle(tester);
 

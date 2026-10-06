@@ -14,8 +14,6 @@ import 'package:fl_clash/core/desktop/helper_client.dart';
 import 'package:fl_clash/core/desktop/linux_helper.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/plugins/app.dart';
-import 'package:fl_clash/state.dart';
-import 'package:fl_clash/widgets/input_dialog.dart';
 import 'package:flutter/services.dart';
 
 bool isFlClashDockerEnvironment(Map<String, String> environment) {
@@ -25,6 +23,7 @@ bool isFlClashDockerEnvironment(Map<String, String> environment) {
 
 class System {
   static System? _instance;
+  Future<String?> Function()? requestAdminPassword;
 
   System._internal();
 
@@ -140,14 +139,7 @@ class System {
         commonPrint.log('pkexec failed: $error');
       }
       await window?.show();
-      final password = await globalState.showCommonDialog<String>(
-        child: InputDialog(
-          obscureText: true,
-          title: appLocalizations.pleaseInputAdminPassword,
-          value: '',
-          inputFormatters: TextInputLimits.limit(TextInputLimits.password),
-        ),
-      );
+      final password = await requestAdminPassword?.call();
       if (password == null || password.isEmpty) {
         return AuthorizeCode.error;
       }

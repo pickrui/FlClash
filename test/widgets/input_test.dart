@@ -37,17 +37,17 @@ void main() {
       tester.widget<EditableText>(find.byType(EditableText)).obscureText,
       isTrue,
     );
-    expect(find.byIcon(Icons.visibility_outlined), findsOneWidget);
+    expect(find.byTooltip('Show'), findsOneWidget);
     expect(find.byTooltip('Show'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.visibility_outlined));
+    await tester.tap(find.byTooltip('Show'));
     await tester.pump();
 
     expect(
       tester.widget<EditableText>(find.byType(EditableText)).obscureText,
       isFalse,
     );
-    expect(find.byIcon(Icons.visibility_off_outlined), findsOneWidget);
+    expect(find.byTooltip('Hide'), findsOneWidget);
     expect(find.byTooltip('Hide'), findsOneWidget);
   });
 
@@ -68,7 +68,7 @@ void main() {
       isTrue,
     );
 
-    await tester.tap(find.byIcon(Icons.visibility_outlined));
+    await tester.tap(find.byTooltip('Show'));
     await tester.pump();
     expect(
       tester.widget<EditableText>(find.byType(EditableText)).obscureText,

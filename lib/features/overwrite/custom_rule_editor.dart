@@ -6,6 +6,7 @@
 import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/clash_config.dart';
 import 'package:fl_clash/widgets/dialog.dart';
@@ -440,7 +441,7 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
                     ? validator(value)
                     : null),
             errorMaxLines: 4,
-            suffixIcon: const Icon(Icons.expand_more),
+            suffixIcon: const GlyphIcon(AppGlyphs.chevronDown),
           ),
           child: Text(value?.isNotEmpty == true ? value! : placeholder),
         ),
@@ -704,7 +705,7 @@ class _RuleOptionDialogState extends State<_RuleOptionDialog> {
               decoration: InputDecoration(
                 border: const OutlineInputBorder(),
                 labelText: l10n.search,
-                prefixIcon: const Icon(Icons.search),
+                prefixIcon: const GlyphIcon(AppGlyphs.search),
               ),
               onChanged: (value) => setState(() => _query = value),
             ),
@@ -720,7 +721,7 @@ class _RuleOptionDialogState extends State<_RuleOptionDialog> {
                           title: Text(option),
                           selected: option == widget.value,
                           trailing: option == widget.value
-                              ? const Icon(Icons.check)
+                              ? const GlyphIcon(AppGlyphs.check)
                               : null,
                           onTap: () => Navigator.of(context).pop(option),
                         );

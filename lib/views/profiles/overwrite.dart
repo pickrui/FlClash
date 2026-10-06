@@ -121,7 +121,7 @@ class _OverwriteViewState extends ConsumerState<OverwriteView> {
                   height: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Icon(Icons.fact_check_outlined),
+              : const GlyphIcon(AppGlyphs.rules),
         ),
       ],
       body: CustomScrollView(
@@ -335,7 +335,7 @@ class _OverwriteModeSelectorState extends ConsumerState<OverwriteModeSelector> {
                         context,
                         CustomOverwriteDraftView(profileId: widget.profileId),
                       ),
-                icon: const Icon(Icons.edit_outlined),
+                icon: const GlyphIcon(AppGlyphs.edit),
                 label: Text(appLocalizations.editCustomRouting),
               ),
             ),
@@ -496,13 +496,13 @@ class __StandardContentState extends ConsumerState<_StandardContent> {
         slivers: [
           SliverToBoxAdapter(
             child: ListTile(
-              leading: const Icon(Icons.route),
+              leading: const GlyphIcon(AppGlyphs.split),
               title: Text(appLocalizations.matchTargetTitle),
               subtitle: Text(
                 ref.watch(profileProvider(widget.profileId))?.matchTarget ??
                     appLocalizations.followProfile,
               ),
-              trailing: const Icon(Icons.chevron_right),
+              trailing: const GlyphIcon(AppGlyphs.chevronForward),
               onTap: _selectMatchTarget,
             ),
           ),
@@ -520,7 +520,7 @@ class __StandardContentState extends ConsumerState<_StandardContent> {
                           onPressed: () {
                             _handleDelete();
                           },
-                          icon: const Icon(Icons.delete),
+                          icon: const GlyphIcon(AppGlyphs.delete),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -598,7 +598,7 @@ class __StandardContentState extends ConsumerState<_StandardContent> {
                         ),
                       ),
                       const SizedBox(width: 4),
-                      const Icon(Icons.arrow_forward, size: 18),
+                      const GlyphIcon(AppGlyphs.send, size: 18),
                     ],
                   ),
                 ),
@@ -724,7 +724,7 @@ class _ScriptContent extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(width: 4),
-                    const Icon(Icons.arrow_forward, size: 18),
+                    const GlyphIcon(AppGlyphs.send, size: 18),
                   ],
                 ),
               ),

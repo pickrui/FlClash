@@ -6,6 +6,7 @@
 import 'dart:math';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/common.dart';
 import 'package:fl_clash/providers/providers.dart';
@@ -89,8 +90,8 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
           tooltip: context.appLocalizations.more,
           onPressed: _showMoreMenu,
           icon: isMobileView
-              ? const Icon(Icons.expand_more)
-              : const Icon(Icons.chevron_right),
+              ? const GlyphIcon(AppGlyphs.chevronDown)
+              : const GlyphIcon(AppGlyphs.chevronForward),
         );
       },
     );
@@ -246,8 +247,8 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
                                   if (group.fixed?.isNotEmpty == true)
                                     Padding(
                                       padding: const EdgeInsets.only(left: 4),
-                                      child: Icon(
-                                        Icons.lock_outline,
+                                      child: GlyphIcon(
+                                        AppGlyphs.lock,
                                         size: 14,
                                         color: style.color,
                                       ),
@@ -444,7 +445,7 @@ class _DelayTestButtonState extends State<DelayTestButton>
       child: CommonFloatingActionButton(
         onPressed: _healthcheck,
         label: appLocalizations.delayTest,
-        icon: const Icon(Icons.network_ping),
+        icon: const GlyphIcon(AppGlyphs.bolt),
       ),
     );
   }

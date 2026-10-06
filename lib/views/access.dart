@@ -6,6 +6,7 @@
 import 'dart:convert';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
@@ -141,14 +142,14 @@ class _AccessViewState extends ConsumerState<AccessView>
               key: const ValueKey(true),
               onPressed: onPressed,
               label: Text(appLocalizations.cancelSelectAll),
-              icon: const Icon(Icons.deselect),
+              icon: const GlyphIcon(AppGlyphs.deselect),
             )
           : FloatingActionButton.extended(
               key: const ValueKey(false),
               tooltip: appLocalizations.selectAll,
               onPressed: onPressed,
               label: Text(appLocalizations.selectAll),
-              icon: const Icon(Icons.select_all),
+              icon: const GlyphIcon(AppGlyphs.selectAll),
             ),
     );
   }
@@ -299,49 +300,49 @@ class _AccessViewState extends ConsumerState<AccessView>
             onPressed: () {
               open(offset: const Offset(0, 0));
             },
-            icon: const Icon(Icons.more_vert),
+            icon: const GlyphIcon(AppGlyphs.more),
           );
         },
         popup: CommonPopupMenu(
           items: [
             PopupMenuItemData(
-              icon: Icons.swap_horiz,
+              glyph: AppGlyphs.shuffle,
               label: enable
                   ? appLocalizations.turnOff
                   : appLocalizations.turnOn,
               onPressed: _handleToggle,
             ),
             PopupMenuItemData(
-              icon: Icons.refresh,
+              glyph: AppGlyphs.refresh,
               label: appLocalizations.refresh,
               onPressed: _reloadPackages,
             ),
             PopupMenuItemData(
-              icon: Icons.search,
+              glyph: AppGlyphs.search,
               label: appLocalizations.search,
               onPressed: _handleSearch,
             ),
             PopupMenuItemData(
-              icon: Icons.tune,
+              glyph: AppGlyphs.sliders,
               label: appLocalizations.settings,
               onPressed: _handleToSetting,
             ),
             PopupMenuItemData(
-              icon: Icons.emergency_outlined,
+              glyph: AppGlyphs.moreCircle,
               label: appLocalizations.action,
               subItems: [
                 PopupMenuItemData(
-                  icon: Icons.auto_awesome,
+                  glyph: AppGlyphs.sparkle,
                   label: appLocalizations.intelligentSelected,
                   onPressed: _intelligentSelected,
                 ),
                 PopupMenuItemData(
-                  icon: Icons.content_copy,
+                  glyph: AppGlyphs.copy,
                   label: appLocalizations.clipboardExport,
                   onPressed: _exportToClipboard,
                 ),
                 PopupMenuItemData(
-                  icon: Icons.paste,
+                  glyph: AppGlyphs.paste,
                   label: appLocalizations.clipboardImport,
                   onPressed: _importFormClipboard,
                 ),
@@ -598,10 +599,10 @@ class AccessControlPanel extends ConsumerStatefulWidget {
 }
 
 class _AccessControlPanelState extends ConsumerState<AccessControlPanel> {
-  IconData _getIconWithAccessControlMode(AccessControlMode mode) {
+  Glyph _getIconWithAccessControlMode(AccessControlMode mode) {
     return switch (mode) {
-      AccessControlMode.acceptSelected => Icons.adjust_outlined,
-      AccessControlMode.rejectSelected => Icons.block_outlined,
+      AccessControlMode.acceptSelected => AppGlyphs.target,
+      AccessControlMode.rejectSelected => AppGlyphs.block,
     };
   }
 
@@ -620,11 +621,11 @@ class _AccessControlPanelState extends ConsumerState<AccessControlPanel> {
     };
   }
 
-  IconData _getIconWithProxiesSortType(AccessSortType type) {
+  Glyph _getIconWithProxiesSortType(AccessSortType type) {
     return switch (type) {
-      AccessSortType.none => Icons.sort,
-      AccessSortType.name => Icons.sort_by_alpha,
-      AccessSortType.time => Icons.timeline,
+      AccessSortType.none => AppGlyphs.sort,
+      AccessSortType.name => AppGlyphs.sortAlpha,
+      AccessSortType.time => AppGlyphs.history,
     };
   }
 
@@ -648,7 +649,7 @@ class _AccessControlPanelState extends ConsumerState<AccessControlPanel> {
                     SettingInfoCard(
                       Info(
                         label: _getTextWithAccessControlMode(item),
-                        iconData: _getIconWithAccessControlMode(item),
+                        glyph: _getIconWithAccessControlMode(item),
                       ),
                       isSelected: accessControlMode == item,
                       onPressed: () {
@@ -685,7 +686,7 @@ class _AccessControlPanelState extends ConsumerState<AccessControlPanel> {
                     SettingInfoCard(
                       Info(
                         label: _getTextWithAccessSortType(item),
-                        iconData: _getIconWithProxiesSortType(item),
+                        glyph: _getIconWithProxiesSortType(item),
                       ),
                       isSelected: accessSortType == item,
                       onPressed: () {

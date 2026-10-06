@@ -21,7 +21,7 @@ class TrafficUsage extends StatelessWidget {
 
   Widget _buildTrafficDataItem(
     BuildContext context,
-    Icon icon,
+    Widget icon,
     num trafficValue,
   ) {
     return Row(
@@ -194,14 +194,18 @@ class TrafficUsage extends StatelessWidget {
                     ),
                     _buildTrafficDataItem(
                       context,
-                      Icon(Icons.arrow_upward, color: primaryColor, size: 14),
+                      GlyphIcon(
+                        AppGlyphs.arrowUp,
+                        color: primaryColor,
+                        size: 14,
+                      ),
                       upTotalTrafficValue,
                     ),
                     const SizedBox(height: 8),
                     _buildTrafficDataItem(
                       context,
-                      Icon(
-                        Icons.arrow_downward,
+                      GlyphIcon(
+                        AppGlyphs.arrowDown,
                         color: secondaryColor,
                         size: 14,
                       ),

@@ -63,7 +63,13 @@ void main() {
     'batch refresh aggregates thrown and returned failures after all items finish',
     (tester) async {
       final action = await mount(tester);
-      await tester.tap(find.widgetWithIcon(IconButton, Icons.sync).first);
+      await tester.tap(
+        find
+            .byWidgetPredicate(
+              (widget) => widget is IconButton && widget.tooltip == 'Update',
+            )
+            .first,
+      );
       await tester.pump();
       expect(action.calls, ['first', 'second']);
       action.pending['first']!.completeError(StateError('transport lost'));
@@ -83,7 +89,9 @@ void main() {
     tester,
   ) async {
     final action = await mount(tester);
-    final buttons = find.widgetWithIcon(IconButton, Icons.sync);
+    final buttons = find.byWidgetPredicate(
+      (widget) => widget is IconButton && widget.tooltip == 'Update',
+    );
     await tester.tap(buttons.first);
     await tester.pump();
     for (final button in tester.widgetList<IconButton>(buttons)) {
@@ -104,7 +112,13 @@ void main() {
     'closing the view during refresh leaves no late dialog or state write',
     (tester) async {
       final action = await mount(tester);
-      await tester.tap(find.widgetWithIcon(IconButton, Icons.sync).first);
+      await tester.tap(
+        find
+            .byWidgetPredicate(
+              (widget) => widget is IconButton && widget.tooltip == 'Update',
+            )
+            .first,
+      );
       await tester.pump();
       await tester.pumpWidget(const SizedBox.shrink());
       for (final pending in action.pending.values) {

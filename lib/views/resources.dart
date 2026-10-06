@@ -6,6 +6,7 @@
 import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/common/geo_recovery.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -223,7 +224,7 @@ class _GeoDataListItemState extends ConsumerState<GeoDataListItem> {
           runAlignment: WrapAlignment.center,
           children: [
             CommonChip(
-              avatar: const Icon(Icons.edit),
+              avatar: const GlyphIcon(AppGlyphs.edit),
               label: appLocalizations.edit,
               onPressed: () {
                 _updateUrl(url);
@@ -240,7 +241,7 @@ class _GeoDataListItemState extends ConsumerState<GeoDataListItem> {
                       ),
                     )
                   : CommonChip(
-                      avatar: const Icon(Icons.sync),
+                      avatar: const GlyphIcon(AppGlyphs.sync),
                       label: appLocalizations.sync,
                       onPressed: () => _handleUpdateGeoDataItem(url),
                     ),

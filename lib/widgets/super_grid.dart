@@ -7,6 +7,8 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/icons/app_glyphs.dart';
+import 'package:fl_clash/icons/glyph_icon.dart';
 import 'package:fl_clash/widgets/activate_box.dart';
 import 'package:defer_pointer/defer_pointer.dart';
 import 'package:fl_clash/widgets/motion_grid.dart';
@@ -614,7 +616,7 @@ class _DeletableContainer extends StatelessWidget {
                   iconSize: 16,
                   padding: const EdgeInsets.all(4),
                   onPressed: onDelete,
-                  icon: const Icon(Icons.close),
+                  icon: const GlyphIcon(AppGlyphs.close),
                 ),
               ),
             ),

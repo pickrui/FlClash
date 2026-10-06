@@ -6,6 +6,7 @@
 import 'dart:convert';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/models/common.dart';
 import 'package:fl_clash/models/core.dart';
@@ -67,7 +68,7 @@ class _ProvidersViewState extends ConsumerState<ProvidersView> {
       iconSize: 20,
       visualDensity: VisualDensity.compact,
       onPressed: _updating ? null : () => _updateProviders(type),
-      icon: const Icon(Icons.sync),
+      icon: const GlyphIcon(AppGlyphs.sync),
     );
   }
 
@@ -95,7 +96,7 @@ class _ProvidersViewState extends ConsumerState<ProvidersView> {
         IconButton(
           tooltip: context.appLocalizations.update,
           onPressed: _updating ? null : () => _updateProviders(),
-          icon: const Icon(Icons.sync),
+          icon: const GlyphIcon(AppGlyphs.sync),
         ),
       ],
       type: widget.type,
@@ -167,7 +168,7 @@ class ProviderItem extends StatelessWidget {
             runAlignment: WrapAlignment.center,
             children: [
               CommonChip(
-                avatar: const Icon(Icons.upload),
+                avatar: const GlyphIcon(AppGlyphs.upload),
                 label: appLocalizations.upload,
                 onPressed: () => _handleSideLoadProvider(context),
               ),
@@ -187,7 +188,7 @@ class ProviderItem extends StatelessWidget {
                             ),
                           )
                         : CommonChip(
-                            avatar: const Icon(Icons.sync),
+                            avatar: const GlyphIcon(AppGlyphs.sync),
                             label: appLocalizations.sync,
                             onPressed: () => _handleUpdateProvider(context),
                           );

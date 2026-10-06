@@ -6,6 +6,7 @@
 import 'dart:math';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/common/scroll.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/app.dart';
@@ -527,8 +528,8 @@ class _ListHeaderState extends ConsumerState<ListHeader> {
                               if (widget.group.fixed?.isNotEmpty == true)
                                 Padding(
                                   padding: const EdgeInsets.only(left: 4),
-                                  child: Icon(
-                                    Icons.lock_outline,
+                                  child: GlyphIcon(
+                                    AppGlyphs.lock,
                                     size: 14,
                                     color: context
                                         .textTheme
@@ -597,7 +598,7 @@ class _ListHeaderState extends ConsumerState<ListHeader> {
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                     iconSize: 19,
-                    icon: const Icon(Icons.adjust),
+                    icon: const GlyphIcon(AppGlyphs.target),
                   ),
                   const SizedBox(width: 2),
                   IconButton(
@@ -609,7 +610,7 @@ class _ListHeaderState extends ConsumerState<ListHeader> {
                     style: const ButtonStyle(
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
-                    icon: const Icon(Icons.network_ping),
+                    icon: const GlyphIcon(AppGlyphs.bolt),
                   ),
                   const SizedBox(width: 6),
                 ] else

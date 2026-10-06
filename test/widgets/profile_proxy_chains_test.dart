@@ -115,7 +115,7 @@ Finder _switchOf(String title) =>
 
 Future<void> _deleteFromMenu(WidgetTester tester, String title) async {
   await tester.tap(
-    find.descendant(of: _tile(title), matching: find.byIcon(Icons.more_vert)),
+    find.descendant(of: _tile(title), matching: find.byTooltip(_l10n.more)),
   );
   await tester.pumpAndSettle();
   await tester.tap(find.text(_l10n.delete));
@@ -252,7 +252,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(_tile('HK'));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithIcon(IconButton, Icons.delete));
+      await tester.tap(find.byTooltip(_l10n.delete));
       await tester.pumpAndSettle();
       await tester.tap(find.text(_l10n.confirm));
       await tester.pumpAndSettle();

@@ -6,6 +6,7 @@
 import 'dart:async';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/widgets/route_motion_hold.dart';
@@ -155,7 +156,7 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
           tooltip: _paused
               ? appLocalizations.resumeUpdates
               : appLocalizations.pauseUpdates,
-          icon: Icon(_paused ? Icons.play_arrow : Icons.pause),
+          icon: GlyphIcon(AppGlyphs.playPause(_paused ? 0 : 1)),
           onPressed: () => setState(() {
             _paused = !_paused;
             if (!_paused) _queries = ref.read(dnsQueriesProvider).list;
@@ -163,7 +164,7 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
         ),
         IconButton(
           tooltip: appLocalizations.clearData,
-          icon: const Icon(Icons.delete_sweep_outlined),
+          icon: const GlyphIcon(AppGlyphs.clearAll),
           onPressed: () {
             ref.read(dnsQueriesProvider.notifier).clear();
             setState(() => _queries = []);

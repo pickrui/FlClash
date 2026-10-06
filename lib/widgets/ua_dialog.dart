@@ -9,6 +9,8 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/widgets/dialog.dart';
 import 'package:fl_clash/widgets/input_dialog.dart';
 import 'package:fl_clash/widgets/list.dart';
+import 'package:fl_clash/icons/app_glyphs.dart';
+import 'package:fl_clash/icons/glyph_icon.dart';
 import 'package:material_ui/material_ui.dart';
 
 const _defaultUaValue = '';
@@ -155,7 +157,7 @@ class _UaDialogState extends State<UaDialog> {
                     key: ValueKey(value),
                     leading: ReorderableDragStartListener(
                       index: index,
-                      child: const Icon(Icons.drag_handle),
+                      child: const GlyphIcon(AppGlyphs.dragHandle),
                     ),
                     title: Text(
                       value,
@@ -165,7 +167,7 @@ class _UaDialogState extends State<UaDialog> {
                     onTap: () => edit(value),
                     trailing: IconButton(
                       tooltip: l.delete,
-                      icon: const Icon(Icons.delete_outline),
+                      icon: const GlyphIcon(AppGlyphs.delete),
                       onPressed: () => update(() => values.remove(value)),
                     ),
                   );

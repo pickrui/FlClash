@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:convert';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
@@ -403,12 +404,12 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
                             spacing: 12,
                             children: [
                               CommonChip(
-                                avatar: const Icon(Icons.edit),
+                                avatar: const GlyphIcon(AppGlyphs.edit),
                                 label: appLocalizations.edit,
                                 onPressed: _editProfileFile,
                               ),
                               CommonChip(
-                                avatar: const Icon(Icons.upload),
+                                avatar: const GlyphIcon(AppGlyphs.upload),
                                 label: appLocalizations.upload,
                                 onPressed: _uploadProfileFile,
                               ),
@@ -456,7 +457,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
                     dimension: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Icon(Icons.save),
+                : const GlyphIcon(AppGlyphs.save),
           ),
         ),
         child: ExcludeFocus(

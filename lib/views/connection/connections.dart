@@ -6,6 +6,7 @@
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/widgets/route_motion_hold.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/core/method.dart';
 import 'package:fl_clash/models/models.dart';
@@ -59,7 +60,7 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
       IconButton(
         tooltip: context.appLocalizations.closeAllConnections,
         onPressed: () => _closeThenRefresh(_core.closeConnections()),
-        icon: const Icon(Icons.delete_sweep_outlined),
+        icon: const GlyphIcon(AppGlyphs.clearAll),
       ),
     ];
   }
@@ -175,7 +176,7 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
                     padding: EdgeInsets.zero,
                     visualDensity: VisualDensity.compact,
                     style: IconButton.styleFrom(minimumSize: Size.zero),
-                    icon: const Icon(Icons.block),
+                    icon: const GlyphIcon(AppGlyphs.block),
                     onPressed: () => _closeThenRefresh(
                       _core.closeConnection(trackerInfo.id),
                     ),

@@ -9,6 +9,7 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/views/theme_preview.dart';
@@ -90,7 +91,7 @@ class _ThemeModeItem extends ConsumerWidget {
     final dark = ref.watch(genColorSchemeProvider(Brightness.dark));
     return SliverToBoxAdapter(
       child: PreviewChoiceGroup(
-        info: Info(label: l.themeMode, iconData: Icons.brightness_high),
+        info: Info(label: l.themeMode, glyph: AppGlyphs.themeAuto),
         value: ref.watch(themeSettingProvider.select((s) => s.themeMode)),
         onChanged: (ThemeMode value) => ref
             .read(themeSettingProvider.notifier)
@@ -132,7 +133,7 @@ class _NavigationPreviewItem extends ConsumerWidget {
     final l = context.appLocalizations;
     return SliverToBoxAdapter(
       child: PreviewChoiceGroup(
-        info: Info(label: l.floatingNavigationBar, iconData: Icons.dock),
+        info: Info(label: l.floatingNavigationBar, glyph: AppGlyphs.layoutTabs),
         value: ref.watch(
           appSettingProvider.select((s) => s.floatingNavigationBar),
         ),
@@ -164,7 +165,7 @@ class _TabAnimationPreviewItem extends ConsumerWidget {
     final l = context.appLocalizations;
     return SliverToBoxAdapter(
       child: PreviewChoiceGroup(
-        info: Info(label: l.tabAnimation, iconData: Icons.animation),
+        info: Info(label: l.tabAnimation, glyph: AppGlyphs.motion),
         value: ref.watch(appSettingProvider.select((s) => s.tabAnimation)),
         onChanged: (TabAnimation value) => ref
             .read(appSettingProvider.notifier)
@@ -336,7 +337,7 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
         child: ItemCard(
           info: Info(
             label: appLocalizations.themeColor,
-            iconData: Icons.palette,
+            glyph: AppGlyphs.palette,
           ),
           actions: genActions([
             if (_removablePrimaryColor == null)
@@ -366,7 +367,7 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
                 padding: const EdgeInsets.all(4),
                 visualDensity: VisualDensity.compact,
                 onPressed: _handleReset,
-                icon: const Icon(Icons.replay),
+                icon: const GlyphIcon(AppGlyphs.reset),
               ),
           ], space: 8),
           child: Container(
@@ -423,9 +424,9 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
                                   onPressed: _handleDel,
                                   padding: const EdgeInsets.all(12),
                                   iconSize: 30,
-                                  icon: Icon(
+                                  icon: GlyphIcon(
                                     color: context.colorScheme.primary,
-                                    Icons.delete,
+                                    AppGlyphs.delete,
                                   ),
                                 ),
                               ),
@@ -441,9 +442,9 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
                           tooltip: appLocalizations.add,
                           onPressed: _handleAdd,
                           iconSize: 32,
-                          icon: Icon(
+                          icon: GlyphIcon(
                             color: context.colorScheme.primary,
-                            Icons.add,
+                            AppGlyphs.add,
                           ),
                         ),
                       ),
@@ -469,7 +470,7 @@ class _PrueBlackItem extends ConsumerWidget {
     );
     return SliverToBoxAdapter(
       child: ListItem.switchItem(
-        leading: const Icon(Icons.contrast),
+        leading: const GlyphIcon(AppGlyphs.pureBlack),
         horizontalTitleGap: 12,
         title: Text(
           appLocalizations.pureBlackMode,
@@ -506,7 +507,7 @@ class _TextScaleFactorItem extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: ListItem.switchItem(
-              leading: const Icon(Icons.text_fields),
+              leading: const GlyphIcon(AppGlyphs.textSize),
               horizontalTitleGap: 12,
               title: Text(
                 appLocalizations.textScale,

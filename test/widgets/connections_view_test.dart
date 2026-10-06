@@ -283,7 +283,7 @@ void main() {
     await tester.pump();
     expect(readCount, 1);
 
-    await tester.tap(find.byIcon(Icons.block).first);
+    await tester.tap(find.byTooltip('Close').first);
     await tester.pump();
     expect(readCount, 1);
 
@@ -296,7 +296,7 @@ void main() {
     expect(find.text('host-0.com:443', findRichText: true), findsNothing);
     expect(find.text('host-1.com:443', findRichText: true), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.delete_sweep_outlined));
+    await tester.tap(find.byTooltip('Close all connections'));
     await tester.pump();
     expect(readCount, 2);
 
@@ -334,7 +334,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(reads, hasLength(2));
 
-    await tester.tap(find.byIcon(Icons.delete_sweep_outlined));
+    await tester.tap(find.byTooltip('Close all connections'));
     await tester.pump();
     expect(reads, hasLength(3));
 

@@ -174,7 +174,7 @@ class CustomOverwriteContent extends ConsumerWidget {
                       onPressed: groups.isEmpty && rules.isEmpty
                           ? null
                           : () => _clear(context, ref),
-                      icon: const Icon(Icons.delete_sweep_outlined),
+                      icon: const GlyphIcon(AppGlyphs.clearAll),
                       label: Text(
                         appLocalizations.clearCustomRouting,
                         maxLines: 1,
@@ -241,7 +241,7 @@ class CustomOverwriteContent extends ConsumerWidget {
                 actions: [
                   FilledButton.tonalIcon(
                     onPressed: () => _quickFill(context, ref),
-                    icon: const Icon(Icons.auto_fix_high),
+                    icon: const GlyphIcon(AppGlyphs.sparkle),
                     label: Text(appLocalizations.quickFill),
                   ),
                 ],
@@ -595,11 +595,11 @@ class _CustomProxyGroupsViewState extends ConsumerState<CustomProxyGroupsView> {
                     IconButton(
                       tooltip: appLocalizations.delete,
                       onPressed: () => _delete(context, ref, group),
-                      icon: const Icon(Icons.delete_outline),
+                      icon: const GlyphIcon(AppGlyphs.delete),
                     ),
                     const Padding(
                       padding: EdgeInsets.all(12),
-                      child: Icon(Icons.drag_handle),
+                      child: GlyphIcon(AppGlyphs.dragHandle),
                     ),
                   ],
                 ),
@@ -818,11 +818,11 @@ class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
                     IconButton(
                       tooltip: appLocalizations.delete,
                       onPressed: () => _delete(context, ref, rule),
-                      icon: const Icon(Icons.delete_outline),
+                      icon: const GlyphIcon(AppGlyphs.delete),
                     ),
                     const Padding(
                       padding: EdgeInsets.all(12),
-                      child: Icon(Icons.drag_handle),
+                      child: GlyphIcon(AppGlyphs.dragHandle),
                     ),
                   ],
                 ),

@@ -12,6 +12,8 @@ export 'package:fl_clash/common/update_download_task.dart'
     show UpdateDownloadAction;
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/icons/app_glyphs.dart';
+import 'package:fl_clash/icons/glyph_icon.dart';
 import 'package:fl_clash/common/update_download_task.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/update_download.dart';
@@ -49,7 +51,7 @@ class AppUpdateAvailableNotice extends ConsumerWidget {
                   padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
                   child: Row(
                     children: [
-                      Icon(Icons.system_update, color: onContainer),
+                      GlyphIcon(AppGlyphs.cloudDownload, color: onContainer),
                       const SizedBox(width: 12),
                       // The version and notes stay on the details page; this only
                       // has to be noticed and offer a way in.
@@ -68,7 +70,7 @@ class AppUpdateAvailableNotice extends ConsumerWidget {
                         tooltip: l.close,
                         color: onContainer,
                         visualDensity: VisualDensity.compact,
-                        icon: const Icon(Icons.close),
+                        icon: const GlyphIcon(AppGlyphs.close),
                         onPressed: () => ref
                             .read(updateActionProvider.notifier)
                             .dismissNotice(info),
@@ -223,7 +225,7 @@ class _AppUpdatePageState extends State<AppUpdatePage> {
                                 onPressed: () => setState(() {
                                   _notes = Future.sync(widget.loadReleaseNotes);
                                 }),
-                                icon: const Icon(Icons.refresh),
+                                icon: const GlyphIcon(AppGlyphs.refresh),
                                 label: Text(l.configRecoveryRetry),
                               ),
                             ],
@@ -304,7 +306,7 @@ class _UpdateDownloadBar extends StatelessWidget {
         const SizedBox(height: 4),
         TextButton.icon(
           onPressed: () => _close(context, UpdateDownloadAction.browser),
-          icon: const Icon(Icons.open_in_new, size: 18),
+          icon: const GlyphIcon(AppGlyphs.openExternal, size: 18),
           label: Text(l.updateDownloadBrowser),
         ),
         const SizedBox(height: 8),

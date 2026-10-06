@@ -69,7 +69,7 @@ void main() {
               .obscureText,
           isTrue,
         );
-        await tester.tap(find.byIcon(Icons.visibility_outlined));
+        await tester.tap(find.byTooltip(AppLocalizations.current.show));
         await tester.pump();
         expect(
           tester

@@ -8,6 +8,7 @@ import 'dart:math';
 
 import 'package:defer_pointer/defer_pointer.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/widgets/widgets.dart';
@@ -74,7 +75,7 @@ class _DashboardViewState extends ConsumerState<DashboardView>
             onPressed: () {
               _showAddWidgetsModal();
             },
-            icon: const Icon(Icons.add_circle),
+            icon: const GlyphIcon(AppGlyphs.addCircle),
           ),
         ),
       FadeRotationScaleBox(
@@ -82,13 +83,19 @@ class _DashboardViewState extends ConsumerState<DashboardView>
             ? IconButton(
                 tooltip: context.appLocalizations.save,
                 key: const ValueKey(true),
-                icon: const Icon(Icons.save, key: ValueKey('save-icon')),
+                icon: const GlyphIcon(
+                  AppGlyphs.save,
+                  key: ValueKey('save-icon'),
+                ),
                 onPressed: _handleUpdateIsEdit,
               )
             : IconButton(
                 tooltip: context.appLocalizations.edit,
                 key: const ValueKey(false),
-                icon: const Icon(Icons.edit, key: ValueKey('edit-icon')),
+                icon: const GlyphIcon(
+                  AppGlyphs.edit,
+                  key: ValueKey('edit-icon'),
+                ),
                 onPressed: _handleUpdateIsEdit,
               ),
       ),
@@ -308,7 +315,7 @@ class _AddedContainer extends StatelessWidget {
                     onAdd(box.localToGlobal(Offset.zero) & box.size);
                   }
                 },
-                icon: const Icon(Icons.add),
+                icon: const GlyphIcon(AppGlyphs.add),
               ),
             ),
           ),

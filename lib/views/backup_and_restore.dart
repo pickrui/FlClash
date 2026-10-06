@@ -6,6 +6,7 @@
 import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/common/dav_client.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -267,7 +268,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
           ListHeader(title: appLocalizations.remote),
           if (dav == null)
             ListItem(
-              leading: const Icon(Icons.account_box),
+              leading: const GlyphIcon(AppGlyphs.account),
               title: Text(appLocalizations.noInfo),
               subtitle: Text(appLocalizations.pleaseBindWebDAV),
               trailing: FilledButton.tonal(
@@ -279,7 +280,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
             )
           else ...[
             ListItem(
-              leading: const Icon(Icons.account_box),
+              leading: const GlyphIcon(AppGlyphs.account),
               title: TooltipText(
                 text: Text(
                   dav.user,
@@ -471,7 +472,7 @@ class _DavBackupsDialogState extends State<DavBackupsDialog> {
               trailing: IconButton(
                 tooltip: appLocalizations.delete,
                 onPressed: _deleting ? null : () => _delete(backup),
-                icon: const Icon(Icons.delete_outline),
+                icon: const GlyphIcon(AppGlyphs.delete),
               ),
             ),
         ],
@@ -572,7 +573,7 @@ class _WebDAVFormDialogState extends ConsumerState<WebDAVFormDialog> {
               maxLines: 5,
               minLines: 1,
               decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.link),
+                prefixIcon: const GlyphIcon(AppGlyphs.link),
                 border: const OutlineInputBorder(),
                 labelText: appLocalizations.address,
                 helperText: appLocalizations.addressHelp,
@@ -588,7 +589,7 @@ class _WebDAVFormDialogState extends ConsumerState<WebDAVFormDialog> {
               controller: _userController,
               inputFormatters: TextInputLimits.limit(TextInputLimits.userName),
               decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.account_circle),
+                prefixIcon: const GlyphIcon(AppGlyphs.account),
                 border: const OutlineInputBorder(),
                 labelText: appLocalizations.account,
               ),
@@ -606,7 +607,7 @@ class _WebDAVFormDialogState extends ConsumerState<WebDAVFormDialog> {
               enableSuggestions: false,
               autocorrect: false,
               decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.password),
+                prefixIcon: const GlyphIcon(AppGlyphs.password),
                 border: const OutlineInputBorder(),
                 suffixIcon: VisibilityToggleButton(
                   obscureText: _obscurePassword,

@@ -6,6 +6,7 @@
 import 'dart:convert';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:yaml/yaml.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -1027,13 +1028,13 @@ class OverwriteEntryTile extends StatelessWidget {
                         popup: CommonPopupMenu(
                           items: [
                             PopupMenuItemData(
-                              icon: Icons.edit_outlined,
+                              glyph: AppGlyphs.edit,
                               label: appLocalizations.edit,
                               onPressed: onEdit,
                             ),
                             PopupMenuItemData(
                               danger: true,
-                              icon: Icons.delete_outline,
+                              glyph: AppGlyphs.delete,
                               label: appLocalizations.delete,
                               onPressed: onDelete,
                             ),
@@ -1045,7 +1046,7 @@ class OverwriteEntryTile extends StatelessWidget {
                             onPressed: () {
                               open();
                             },
-                            icon: const Icon(Icons.more_vert),
+                            icon: const GlyphIcon(AppGlyphs.more),
                           );
                         },
                       ),
@@ -1251,7 +1252,7 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
                   dimension: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Icon(Icons.check),
+              : const GlyphIcon(AppGlyphs.check),
         ),
         const SizedBox(width: 8),
       ],
@@ -1318,7 +1319,7 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
               alignment: Alignment.centerRight,
               child: TextButton.icon(
                 onPressed: _openEditor,
-                icon: const Icon(Icons.code),
+                icon: const GlyphIcon(AppGlyphs.code),
                 label: Text(l.edit),
               ),
             ),
@@ -1730,7 +1731,7 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
                   child: IconButton.filledTonal(
                     tooltip: context.appLocalizations.delete,
                     onPressed: _handleDeleteProfileProxies,
-                    icon: const Icon(Icons.delete),
+                    icon: const GlyphIcon(AppGlyphs.delete),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -1745,7 +1746,7 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
                         onPressed: () {
                           _handleAddOrUpdateProfileProxy();
                         },
-                        icon: const Icon(Icons.add),
+                        icon: const GlyphIcon(AppGlyphs.add),
                         label: Text(appLocalizations.addProxyChainNode),
                       ),
               ),
