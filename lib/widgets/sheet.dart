@@ -12,7 +12,6 @@ import 'sheet_navigator.dart';
 import 'snap_sheet.dart';
 
 import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/inherited.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -54,7 +53,10 @@ Future<T?> showSheet<T>({
   required SheetBuilder builder,
   SheetProps props = const SheetProps(),
 }) {
-  final isMobile = globalState.container.read(isMobileViewProvider);
+  final isMobile = ProviderScope.containerOf(
+    context,
+    listen: false,
+  ).read(isMobileViewProvider);
   return switch (isMobile) {
     true => showModalBottomSheet<T>(
       context: context,
@@ -89,7 +91,10 @@ Future<T?> showExtend<T>(
   required SheetBuilder builder,
   ExtendProps props = const ExtendProps(),
 }) {
-  final isMobile = globalState.container.read(isMobileViewProvider);
+  final isMobile = ProviderScope.containerOf(
+    context,
+    listen: false,
+  ).read(isMobileViewProvider);
   return switch (isMobile || props.forceFull) {
     true => BaseNavigator.push(
       context,
@@ -139,11 +144,13 @@ class AdaptiveSheetScaffold extends StatelessWidget {
     final closeButton = switch (type) {
       SheetType.page => null,
       SheetType.bottomSheet => IconButton.filledTonal(
+        tooltip: context.appLocalizations.close,
         onPressed: () => Navigator.of(context).pop(),
         style: closeButtonStyle,
         icon: const Icon(Icons.close),
       ),
       SheetType.sideSheet => IconButton(
+        tooltip: context.appLocalizations.close,
         onPressed: () => Navigator.of(context).pop(),
         style: closeButtonStyle,
         icon: const Icon(Icons.close),

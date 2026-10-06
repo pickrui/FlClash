@@ -77,12 +77,14 @@ class _ProfilesViewState extends State<ProfilesView> {
     return profiles.isNotEmpty
         ? [
             IconButton(
+              tooltip: context.appLocalizations.update,
               onPressed: () {
                 _updateProfiles(profiles);
               },
               icon: const Icon(Icons.sync),
             ),
             IconButton(
+              tooltip: context.appLocalizations.sort,
               onPressed: () {
                 showSheet(
                   context: context,
@@ -406,6 +408,7 @@ class ProfileItem extends StatelessWidget {
                         ),
                         targetBuilder: (open) {
                           return IconButton(
+                            tooltip: context.appLocalizations.more,
                             onPressed: () {
                               open();
                             },
@@ -512,6 +515,7 @@ class _ReorderableProfilesSheetState
       actions: [
         if (widget.type == SheetType.bottomSheet)
           IconButton.filledTonal(
+            tooltip: context.appLocalizations.save,
             onPressed: _handleSave,
             style: IconButton.styleFrom(
               visualDensity: VisualDensity.comfortable,
@@ -523,6 +527,7 @@ class _ReorderableProfilesSheetState
           )
         else
           IconButton.filledTonal(
+            tooltip: context.appLocalizations.save,
             icon: const Icon(Icons.check),
             onPressed: _handleSave,
           ),

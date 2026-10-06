@@ -474,6 +474,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "certificateValidityHint": MessageLookupByLibrary.simpleMessage(
       "Сначала синхронизируйте системную дату и время. Если время верное, необходимо исправить сертификат на сервере.",
     ),
+    "changelogBreaking": MessageLookupByLibrary.simpleMessage(
+      "Важные изменения",
+    ),
+    "changelogFeatures": MessageLookupByLibrary.simpleMessage("Новые функции"),
+    "changelogFixes": MessageLookupByLibrary.simpleMessage("Исправления"),
+    "changelogPerformance": MessageLookupByLibrary.simpleMessage(
+      "Производительность",
+    ),
+    "changelogReverts": MessageLookupByLibrary.simpleMessage("Откаты"),
     "checkApi": MessageLookupByLibrary.simpleMessage("Проверить API"),
     "checkRouting": MessageLookupByLibrary.simpleMessage(
       "Проверить конфигурацию",
@@ -492,6 +501,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "clearProxyChain": MessageLookupByLibrary.simpleMessage(
       "Удалить настройку цепочки",
     ),
+    "clearSearch": MessageLookupByLibrary.simpleMessage("Очистить поиск"),
     "clipboardExport": MessageLookupByLibrary.simpleMessage(
       "Экспорт в буфер обмена",
     ),
@@ -502,6 +512,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Не удалось скопировать в буфер обмена. Возможно, выделение слишком велико",
     ),
     "close": MessageLookupByLibrary.simpleMessage("Закрыть"),
+    "closeAllConnections": MessageLookupByLibrary.simpleMessage(
+      "Закрыть все соединения",
+    ),
     "cloudApiAccessDenied": MessageLookupByLibrary.simpleMessage(
       "Доступ к сети запрещён",
     ),
@@ -650,6 +663,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "codeSent": MessageLookupByLibrary.simpleMessage(
       "Код подтверждения отправлен",
     ),
+    "collapseList": MessageLookupByLibrary.simpleMessage("Свернуть"),
     "color": MessageLookupByLibrary.simpleMessage("Цвет"),
     "colorSchemes": MessageLookupByLibrary.simpleMessage("Цветовые схемы"),
     "columns": MessageLookupByLibrary.simpleMessage("Столбцы"),
@@ -1183,6 +1197,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Выйти из полноэкранного режима",
     ),
     "expand": MessageLookupByLibrary.simpleMessage("Стандартный"),
+    "expandList": MessageLookupByLibrary.simpleMessage("Развернуть"),
     "expectedStatus": MessageLookupByLibrary.simpleMessage("Ожидаемый статус"),
     "expireDate": m21,
     "expiresAtLabel": MessageLookupByLibrary.simpleMessage("Истекает"),
@@ -1488,6 +1503,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "localNetworkTip": MessageLookupByLibrary.simpleMessage(
       "Доступ к локальной сети не разрешён; для этого подключения используется gVisor. Прокси и сервисы в локальной сети могут оставаться недоступны",
+    ),
+    "locateSelected": MessageLookupByLibrary.simpleMessage(
+      "Перейти к выбранному узлу",
     ),
     "locationPermission": MessageLookupByLibrary.simpleMessage(
       "Разрешение на геолокацию",
@@ -2577,6 +2595,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "toggle": MessageLookupByLibrary.simpleMessage("Переключить"),
     "toggleFlashlight": MessageLookupByLibrary.simpleMessage(
       "Переключить фонарик",
+    ),
+    "toggleNavigationLabels": MessageLookupByLibrary.simpleMessage(
+      "Переключить подписи навигации",
     ),
     "tokenLabel": MessageLookupByLibrary.simpleMessage("Токен доступа"),
     "tokenValidation": MessageLookupByLibrary.simpleMessage(

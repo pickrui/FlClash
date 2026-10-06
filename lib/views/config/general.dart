@@ -963,6 +963,9 @@ class _PortDialogState extends ConsumerState<_PortDialog> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             IconButton.filledTonal(
+              tooltip: _isMore
+                  ? context.appLocalizations.collapseList
+                  : context.appLocalizations.expandList,
               onPressed: _handleMore,
               icon: CommonExpandIcon(expand: _isMore),
             ),

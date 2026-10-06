@@ -11,15 +11,19 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/widgets/fade_box.dart';
-import 'package:fl_clash/widgets/app_update.dart';
 import 'package:fl_clash/widgets/theme.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class StatusManager extends StatefulWidget {
   final Widget child;
+  final Widget updateNotice;
 
-  const StatusManager({super.key, required this.child});
+  const StatusManager({
+    super.key,
+    required this.child,
+    this.updateNotice = const SizedBox.shrink(),
+  });
 
   @override
   State<StatusManager> createState() => StatusManagerState();
@@ -191,7 +195,7 @@ class StatusManagerState extends State<StatusManager> {
                   ),
                 ),
               ),
-              const AppUpdateAvailableNotice(),
+              widget.updateNotice,
             ],
           ),
         ),

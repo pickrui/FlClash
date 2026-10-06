@@ -468,6 +468,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "certificateValidityHint": MessageLookupByLibrary.simpleMessage(
       "First synchronize the system date and time. If the time is correct, the server certificate needs to be fixed.",
     ),
+    "changelogBreaking": MessageLookupByLibrary.simpleMessage(
+      "Breaking changes",
+    ),
+    "changelogFeatures": MessageLookupByLibrary.simpleMessage("New features"),
+    "changelogFixes": MessageLookupByLibrary.simpleMessage("Bug fixes"),
+    "changelogPerformance": MessageLookupByLibrary.simpleMessage("Performance"),
+    "changelogReverts": MessageLookupByLibrary.simpleMessage("Reverts"),
     "checkApi": MessageLookupByLibrary.simpleMessage("Check API"),
     "checkRouting": MessageLookupByLibrary.simpleMessage("Check configuration"),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("Check for updates"),
@@ -484,6 +491,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "clearProxyChain": MessageLookupByLibrary.simpleMessage(
       "Clear chain config",
     ),
+    "clearSearch": MessageLookupByLibrary.simpleMessage("Clear search"),
     "clipboardExport": MessageLookupByLibrary.simpleMessage(
       "Export to clipboard",
     ),
@@ -494,6 +502,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Couldn\'t copy to the clipboard. The selection may be too large",
     ),
     "close": MessageLookupByLibrary.simpleMessage("Close"),
+    "closeAllConnections": MessageLookupByLibrary.simpleMessage(
+      "Close all connections",
+    ),
     "cloudApiAccessDenied": MessageLookupByLibrary.simpleMessage(
       "Network access denied",
     ),
@@ -640,6 +651,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Account and configuration sync completed with a temporary certificate exception. Verification is now restored; resolve the certificate issue before the next sync.",
     ),
     "codeSent": MessageLookupByLibrary.simpleMessage("Verification code sent"),
+    "collapseList": MessageLookupByLibrary.simpleMessage("Collapse"),
     "color": MessageLookupByLibrary.simpleMessage("Color"),
     "colorSchemes": MessageLookupByLibrary.simpleMessage("Color schemes"),
     "columns": MessageLookupByLibrary.simpleMessage("Columns"),
@@ -1145,6 +1157,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "exit": MessageLookupByLibrary.simpleMessage("Exit"),
     "exitFullScreen": MessageLookupByLibrary.simpleMessage("Exit full screen"),
     "expand": MessageLookupByLibrary.simpleMessage("Standard"),
+    "expandList": MessageLookupByLibrary.simpleMessage("Expand"),
     "expectedStatus": MessageLookupByLibrary.simpleMessage("Expected status"),
     "expireDate": m21,
     "expiresAtLabel": MessageLookupByLibrary.simpleMessage("Expires at"),
@@ -1439,6 +1452,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "localNetworkTip": MessageLookupByLibrary.simpleMessage(
       "Local network access denied; using gVisor for this connection. LAN proxies and services may remain unavailable",
+    ),
+    "locateSelected": MessageLookupByLibrary.simpleMessage(
+      "Locate selected node",
     ),
     "locationPermission": MessageLookupByLibrary.simpleMessage(
       "Location permission",
@@ -2442,6 +2458,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "toggle": MessageLookupByLibrary.simpleMessage("Toggle"),
     "toggleFlashlight": MessageLookupByLibrary.simpleMessage(
       "Toggle flashlight",
+    ),
+    "toggleNavigationLabels": MessageLookupByLibrary.simpleMessage(
+      "Toggle navigation labels",
     ),
     "tokenLabel": MessageLookupByLibrary.simpleMessage("Access Token"),
     "tokenValidation": MessageLookupByLibrary.simpleMessage(

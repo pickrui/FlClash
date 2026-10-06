@@ -23,6 +23,27 @@ const _release = AppUpdateInfo(
 );
 
 void main() {
+  for (final schema in [2, 3]) {
+    testWidgets('structured release schema $schema keeps a readable fallback', (
+      tester,
+    ) async {
+      final info = AppUpdateInfo(
+        version: '0.8.99',
+        releaseNotes:
+            'Readable fallback\n<!-- flclash:changelog:json\n{"schemaVersion":$schema,"versions":[{"version":"0.8.99","tag":"v0.8.99","groups":[{"type":"fix","entries":[{"id":"abc1234","text":"Correct structured fix"}]}]}]}\n-->',
+      );
+      await _openDetails(tester, info, (_) {});
+      expect(find.textContaining('schemaVersion'), findsNothing);
+      expect(
+        find.textContaining(
+          schema == 2 ? 'Correct structured fix' : 'Readable fallback',
+        ),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets('a new release remains a notice until the user opens details', (
     tester,
   ) async {

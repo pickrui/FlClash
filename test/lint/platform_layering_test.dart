@@ -8,10 +8,9 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
-// Page construction is bound by Application; common only reaches the two
-// diagnostic/login screens still opened directly by actions.
-const _closureBudget = 211;
-const _viewsInClosureBudget = 2;
+// Application binds page construction so the common barrel reaches no views.
+const _closureBudget = 206;
+const _viewsInClosureBudget = 0;
 
 final _directive = RegExp(
   r'''^\s*(?:import|export|part)\s+['"]([^'"]+)['"]''',

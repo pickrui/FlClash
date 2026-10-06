@@ -87,6 +87,7 @@ class NetworkDetection extends ConsumerWidget {
                   AspectRatio(
                     aspectRatio: 1,
                     child: IconButton(
+                      tooltip: context.appLocalizations.tip,
                       padding: EdgeInsets.zero,
                       onPressed: () {
                         globalState.showMessage(

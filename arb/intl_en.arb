@@ -1250,5 +1250,16 @@
   "fontSize": "Size",
   "replace": "Replace",
   "tabAnimationSlide": "Slide",
-  "tabAnimationFade": "Fade"
+  "tabAnimationFade": "Fade",
+  "locateSelected": "Locate selected node",
+  "toggleNavigationLabels": "Toggle navigation labels",
+  "expandList": "Expand",
+  "collapseList": "Collapse",
+  "clearSearch": "Clear search",
+  "closeAllConnections": "Close all connections",
+  "changelogBreaking": "Breaking changes",
+  "changelogFeatures": "New features",
+  "changelogFixes": "Bug fixes",
+  "changelogPerformance": "Performance",
+  "changelogReverts": "Reverts"
 }

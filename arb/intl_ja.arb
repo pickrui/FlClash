@@ -1250,5 +1250,16 @@
   "fontSize": "サイズ",
   "replace": "置換",
   "tabAnimationSlide": "スライド",
-  "tabAnimationFade": "フェード"
+  "tabAnimationFade": "フェード",
+  "locateSelected": "選択中のノードへ移動",
+  "toggleNavigationLabels": "ナビゲーションラベルの表示切替",
+  "expandList": "展開",
+  "collapseList": "折りたたむ",
+  "clearSearch": "検索をクリア",
+  "closeAllConnections": "すべての接続を閉じる",
+  "changelogBreaking": "破壊的変更",
+  "changelogFeatures": "新機能",
+  "changelogFixes": "不具合修正",
+  "changelogPerformance": "パフォーマンス",
+  "changelogReverts": "取り消し"
 }

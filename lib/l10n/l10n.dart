@@ -10549,6 +10549,106 @@ class AppLocalizations {
   String get tabAnimationFade {
     return Intl.message('Fade', name: 'tabAnimationFade', desc: '', args: []);
   }
+
+  /// `Locate selected node`
+  String get locateSelected {
+    return Intl.message(
+      'Locate selected node',
+      name: 'locateSelected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Toggle navigation labels`
+  String get toggleNavigationLabels {
+    return Intl.message(
+      'Toggle navigation labels',
+      name: 'toggleNavigationLabels',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Expand`
+  String get expandList {
+    return Intl.message('Expand', name: 'expandList', desc: '', args: []);
+  }
+
+  /// `Collapse`
+  String get collapseList {
+    return Intl.message('Collapse', name: 'collapseList', desc: '', args: []);
+  }
+
+  /// `Clear search`
+  String get clearSearch {
+    return Intl.message(
+      'Clear search',
+      name: 'clearSearch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Close all connections`
+  String get closeAllConnections {
+    return Intl.message(
+      'Close all connections',
+      name: 'closeAllConnections',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Breaking changes`
+  String get changelogBreaking {
+    return Intl.message(
+      'Breaking changes',
+      name: 'changelogBreaking',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New features`
+  String get changelogFeatures {
+    return Intl.message(
+      'New features',
+      name: 'changelogFeatures',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Bug fixes`
+  String get changelogFixes {
+    return Intl.message(
+      'Bug fixes',
+      name: 'changelogFixes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Performance`
+  String get changelogPerformance {
+    return Intl.message(
+      'Performance',
+      name: 'changelogPerformance',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reverts`
+  String get changelogReverts {
+    return Intl.message(
+      'Reverts',
+      name: 'changelogReverts',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -363,6 +363,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "certificateValidityHint": MessageLookupByLibrary.simpleMessage(
       "请先同步系统日期和时间，如果时间正确，则需要服务端修复证书",
     ),
+    "changelogBreaking": MessageLookupByLibrary.simpleMessage("重大变更"),
+    "changelogFeatures": MessageLookupByLibrary.simpleMessage("新功能"),
+    "changelogFixes": MessageLookupByLibrary.simpleMessage("问题修复"),
+    "changelogPerformance": MessageLookupByLibrary.simpleMessage("性能优化"),
+    "changelogReverts": MessageLookupByLibrary.simpleMessage("已回滚"),
     "checkApi": MessageLookupByLibrary.simpleMessage("检查 API"),
     "checkRouting": MessageLookupByLibrary.simpleMessage("检查配置"),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("检查更新"),
@@ -375,12 +380,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "clearCustomRouting": MessageLookupByLibrary.simpleMessage("一键清空"),
     "clearData": MessageLookupByLibrary.simpleMessage("清除数据"),
     "clearProxyChain": MessageLookupByLibrary.simpleMessage("删除链式配置"),
+    "clearSearch": MessageLookupByLibrary.simpleMessage("清除搜索"),
     "clipboardExport": MessageLookupByLibrary.simpleMessage("导出剪贴板"),
     "clipboardImport": MessageLookupByLibrary.simpleMessage("剪贴板导入"),
     "clipboardWriteFailed": MessageLookupByLibrary.simpleMessage(
       "无法复制到剪贴板，所选内容可能过大",
     ),
     "close": MessageLookupByLibrary.simpleMessage("关闭"),
+    "closeAllConnections": MessageLookupByLibrary.simpleMessage("关闭所有连接"),
     "cloudApiAccessDenied": MessageLookupByLibrary.simpleMessage("系统拒绝网络访问"),
     "cloudApiAddressInUse": MessageLookupByLibrary.simpleMessage("网络地址或端口已被占用"),
     "cloudApiAddressUnavailable": MessageLookupByLibrary.simpleMessage(
@@ -479,6 +486,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "本次已临时完成账户和配置同步，现已恢复证书校验，请在下次同步前处理证书问题",
     ),
     "codeSent": MessageLookupByLibrary.simpleMessage("验证码已发送"),
+    "collapseList": MessageLookupByLibrary.simpleMessage("收起"),
     "color": MessageLookupByLibrary.simpleMessage("颜色"),
     "colorSchemes": MessageLookupByLibrary.simpleMessage("配色方案"),
     "columns": MessageLookupByLibrary.simpleMessage("列数"),
@@ -844,6 +852,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "exit": MessageLookupByLibrary.simpleMessage("退出"),
     "exitFullScreen": MessageLookupByLibrary.simpleMessage("退出全屏"),
     "expand": MessageLookupByLibrary.simpleMessage("标准"),
+    "expandList": MessageLookupByLibrary.simpleMessage("展开"),
     "expectedStatus": MessageLookupByLibrary.simpleMessage("预期状态"),
     "expireDate": m21,
     "expiresAtLabel": MessageLookupByLibrary.simpleMessage("到期时间"),
@@ -1057,6 +1066,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "localNetworkTip": MessageLookupByLibrary.simpleMessage(
       "未获准访问局域网，本次连接改用 gVisor；局域网代理和服务仍可能不可用",
     ),
+    "locateSelected": MessageLookupByLibrary.simpleMessage("定位当前节点"),
     "locationPermission": MessageLookupByLibrary.simpleMessage("位置权限"),
     "locationPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
       "位置权限已被拒绝，无法获取当前 Wi-Fi 名称。请前往系统设置手动开启位置权限",
@@ -1806,6 +1816,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "todayUsed": MessageLookupByLibrary.simpleMessage("今日使用"),
     "toggle": MessageLookupByLibrary.simpleMessage("切换"),
     "toggleFlashlight": MessageLookupByLibrary.simpleMessage("切换闪光灯"),
+    "toggleNavigationLabels": MessageLookupByLibrary.simpleMessage("切换导航标签显示"),
     "tokenLabel": MessageLookupByLibrary.simpleMessage("Access Token"),
     "tokenValidation": MessageLookupByLibrary.simpleMessage("请输入 Access Token"),
     "tolerance": MessageLookupByLibrary.simpleMessage("容差"),

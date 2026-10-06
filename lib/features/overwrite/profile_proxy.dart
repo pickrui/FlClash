@@ -6,7 +6,6 @@
 import 'dart:convert';
 
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:yaml/yaml.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -1042,6 +1041,7 @@ class OverwriteEntryTile extends StatelessWidget {
                         ),
                         targetBuilder: (open) {
                           return IconButton(
+                            tooltip: context.appLocalizations.more,
                             onPressed: () {
                               open();
                             },
@@ -1058,13 +1058,14 @@ class OverwriteEntryTile extends StatelessWidget {
   }
 }
 
-class ProfileProxyEditView extends StatefulWidget {
+class ProfileProxyEditView extends ConsumerStatefulWidget {
   final ProfileProxy? profileProxy;
 
   const ProfileProxyEditView({super.key, this.profileProxy});
 
   @override
-  State<ProfileProxyEditView> createState() => _ProfileProxyEditViewState();
+  ConsumerState<ProfileProxyEditView> createState() =>
+      _ProfileProxyEditViewState();
 }
 
 Map<String, Object?> parseProfileProxyDefinition(String source) {
@@ -1089,7 +1090,7 @@ Map<String, Object?> parseProfileProxyDefinition(String source) {
   return proxy;
 }
 
-class _ProfileProxyEditViewState extends State<ProfileProxyEditView> {
+class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
   final _uriController = TextEditingController();
   final _yamlController = TextEditingController();
   final _fields = <String, TextEditingController>{
@@ -1176,7 +1177,7 @@ class _ProfileProxyEditViewState extends State<ProfileProxyEditView> {
     setState(() => _saving = true);
     try {
       final proxy = _readEditor();
-      final core = coreController;
+      final core = ref.read(coreHandlerProvider);
       if (!core.isCompleted) {
         context.showNotifier(
           context.appLocalizations.nodeCoreValidationUnavailable,
@@ -1727,6 +1728,7 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
               if (selectedProfileProxies.isNotEmpty) ...[
                 CommonMinIconButtonTheme(
                   child: IconButton.filledTonal(
+                    tooltip: context.appLocalizations.delete,
                     onPressed: _handleDeleteProfileProxies,
                     icon: const Icon(Icons.delete),
                   ),

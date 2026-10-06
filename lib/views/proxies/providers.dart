@@ -63,6 +63,7 @@ class _ProvidersViewState extends ConsumerState<ProvidersView> {
 
   Widget _buildSectionSyncButton(String type) {
     return IconButton(
+      tooltip: context.appLocalizations.update,
       iconSize: 20,
       visualDensity: VisualDensity.compact,
       onPressed: _updating ? null : () => _updateProviders(type),
@@ -92,6 +93,7 @@ class _ProvidersViewState extends ConsumerState<ProvidersView> {
     return AdaptiveSheetScaffold(
       actions: [
         IconButton(
+          tooltip: context.appLocalizations.update,
           onPressed: _updating ? null : () => _updateProviders(),
           icon: const Icon(Icons.sync),
         ),

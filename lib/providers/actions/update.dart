@@ -247,16 +247,14 @@ extension InitControllerExt on AppController {
     final task = _ref.read(appUpdateDownloadProvider);
     final action = await promptForAppUpdate(
       showWindow: window?.show,
-      prompt: () => BaseNavigator.push<UpdateDownloadAction>(
+      prompt: () => navigation.showUpdate(
         _context,
-        AppUpdatePage(
-          info: info,
-          task: task,
-          loadReleaseNotes: () => request.fetchReleaseNotes(
-            releaseTagNameFromVersionData(info.version),
-          ),
-          onDownload: _startAppUpdateDownload,
+        info,
+        task,
+        () => request.fetchReleaseNotes(
+          releaseTagNameFromVersionData(info.version),
         ),
+        _startAppUpdateDownload,
       ),
     );
     if (action == UpdateDownloadAction.install) {

@@ -434,6 +434,7 @@ class _ListInputPageState extends ConsumerState<ListInputPage> {
           if (selectedItems.isNotEmpty) ...[
             CommonMinIconButtonTheme(
               child: IconButton.filledTonal(
+                tooltip: context.appLocalizations.delete,
                 onPressed: _handleDelete,
                 icon: const Icon(Icons.delete),
               ),
@@ -442,6 +443,7 @@ class _ListInputPageState extends ConsumerState<ListInputPage> {
           ] else if (!stringListEquality.equals(_items, _originItems)) ...[
             CommonMinIconButtonTheme(
               child: IconButton.filledTonal(
+                tooltip: context.appLocalizations.reset,
                 onPressed: _handleReset,
                 icon: const Icon(Icons.replay),
               ),
@@ -689,6 +691,7 @@ class _MapInputPageState extends ConsumerState<MapInputPage> {
           if (selectedItems.isNotEmpty) ...[
             CommonMinIconButtonTheme(
               child: IconButton.filledTonal(
+                tooltip: context.appLocalizations.delete,
                 onPressed: _handleDelete,
                 icon: const Icon(Icons.delete),
               ),
@@ -700,6 +703,7 @@ class _MapInputPageState extends ConsumerState<MapInputPage> {
           )) ...[
             CommonMinIconButtonTheme(
               child: IconButton.filledTonal(
+                tooltip: context.appLocalizations.reset,
                 onPressed: _handleReset,
                 icon: const Icon(Icons.replay),
               ),

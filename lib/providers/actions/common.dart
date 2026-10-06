@@ -81,7 +81,7 @@ extension CommonControllerExt on AppController {
       if (context == null || !context.mounted) {
         return;
       }
-      await showCloudLoginPage(context);
+      await navigation.showCloudLogin(context);
     } finally {
       _isCloudLoginDialogShowing = false;
     }

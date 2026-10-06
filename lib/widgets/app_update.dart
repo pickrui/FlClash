@@ -5,6 +5,12 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:fl_clash/common/changelog.dart';
+import 'package:fl_clash/models/changelog.dart';
+
+export 'package:fl_clash/common/update_download_task.dart'
+    show UpdateDownloadAction;
+
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/update_download_task.dart';
 import 'package:fl_clash/providers/action.dart';
@@ -80,7 +86,6 @@ class AppUpdateAvailableNotice extends ConsumerWidget {
 }
 
 // Closing the page leaves its application-owned download running.
-enum UpdateDownloadAction { install, browser }
 
 class AppUpdatePage extends StatefulWidget {
   const AppUpdatePage({
@@ -188,7 +193,19 @@ class _AppUpdatePageState extends State<AppUpdatePage> {
                               ],
                             );
                           }
-                          final notes = snapshot.data?.trim();
+                          final rawNotes = snapshot.data?.trim();
+                          final structured = parseReleaseChangelog(
+                            rawNotes,
+                            expectedTag: version,
+                          );
+                          if (!snapshot.hasError &&
+                              structured != null &&
+                              !structured.isEmpty) {
+                            return _StructuredReleaseNotes(version: structured);
+                          }
+                          final notes = rawNotes == null
+                              ? null
+                              : visibleReleaseNotes(rawNotes);
                           if (!snapshot.hasError &&
                               notes != null &&
                               notes.isNotEmpty) {
@@ -349,5 +366,34 @@ class _UpdateDownloadBar extends StatelessWidget {
         ],
       );
     },
+  );
+}
+
+class _StructuredReleaseNotes extends StatelessWidget {
+  const _StructuredReleaseNotes({required this.version});
+  final ChangelogVersion version;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      for (final group in version.visibleGroups) ...[
+        Padding(
+          padding: const EdgeInsets.only(top: 12, bottom: 8),
+          child: Text(
+            changelogGroupTitle(context.appLocalizations, group.type),
+            style: context.textTheme.titleSmall,
+          ),
+        ),
+        for (final entry in group.entries)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: SelectableText(
+              '• ${entry.scope == null ? '' : '${entry.scope}: '}${entry.text}',
+              style: context.textTheme.bodyLarge,
+            ),
+          ),
+      ],
+    ],
   );
 }

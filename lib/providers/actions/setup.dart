@@ -287,7 +287,7 @@ extension SetupControllerExt on AppController {
     );
     final context = globalState.navigatorKey.currentContext;
     if (openDiagnostics == true && context != null && context.mounted) {
-      showNetworkDiagnostics(context);
+      navigation.showNetworkDiagnostics(context);
     }
   }
 

@@ -10,7 +10,6 @@ import 'package:fl_clash/features/overwrite/rule_preset.dart';
 import 'package:fl_clash/features/overwrite/routing_issue.dart';
 import 'package:fl_clash/providers/routing_issues.dart';
 import 'package:fl_clash/features/overwrite/custom_rule_editor.dart';
-import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/database.dart';
@@ -118,7 +117,7 @@ class CustomOverwriteContent extends ConsumerWidget {
       for (final group in snippet.proxyGroups) {
         final message = await validateProxyGroupFilters(
           group,
-          coreController.validateConfigWithBytes,
+          ref.read(coreHandlerProvider).validateConfigWithBytes,
         );
         if (!context.mounted) return;
         if (message.isNotEmpty) {

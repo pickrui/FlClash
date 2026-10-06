@@ -80,11 +80,14 @@ class _DashboardViewState extends ConsumerState<DashboardView>
           builder: (_, ref, _) {
             final coreStatus = ref.watch(coreStatusProvider);
             return Tooltip(
-              message: appLocalizations.coreStatus,
+              message: coreStatus == CoreStatus.connected
+                  ? ''
+                  : appLocalizations.coreStatus,
               child: FadeScaleBox(
                 alignment: Alignment.centerRight,
                 child: coreStatus == CoreStatus.connected
                     ? IconButton.filled(
+                        tooltip: context.appLocalizations.coreStatus,
                         visualDensity: VisualDensity.compact,
                         iconSize: 20,
                         padding: EdgeInsets.zero,
@@ -173,6 +176,7 @@ class _DashboardViewState extends ConsumerState<DashboardView>
             return child!;
           },
           child: IconButton(
+            tooltip: context.appLocalizations.add,
             onPressed: () {
               _showAddWidgetsModal();
             },
@@ -182,11 +186,13 @@ class _DashboardViewState extends ConsumerState<DashboardView>
       FadeRotationScaleBox(
         child: isEdit
             ? IconButton(
+                tooltip: context.appLocalizations.save,
                 key: const ValueKey(true),
                 icon: const Icon(Icons.save, key: ValueKey('save-icon')),
                 onPressed: _handleUpdateIsEdit,
               )
             : IconButton(
+                tooltip: context.appLocalizations.edit,
                 key: const ValueKey(false),
                 icon: const Icon(Icons.edit, key: ValueKey('edit-icon')),
                 onPressed: _handleUpdateIsEdit,
@@ -383,6 +389,7 @@ class _AddedContainer extends StatelessWidget {
               width: 24,
               height: 24,
               child: IconButton.filled(
+                tooltip: context.appLocalizations.add,
                 iconSize: 20,
                 padding: const EdgeInsets.all(2),
                 onPressed: () {

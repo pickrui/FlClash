@@ -1250,5 +1250,16 @@
   "fontSize": "大小",
   "replace": "替换",
   "tabAnimationSlide": "滑动",
-  "tabAnimationFade": "淡入"
+  "tabAnimationFade": "淡入",
+  "locateSelected": "定位当前节点",
+  "toggleNavigationLabels": "切换导航标签显示",
+  "expandList": "展开",
+  "collapseList": "收起",
+  "clearSearch": "清除搜索",
+  "closeAllConnections": "关闭所有连接",
+  "changelogBreaking": "重大变更",
+  "changelogFeatures": "新功能",
+  "changelogFixes": "问题修复",
+  "changelogPerformance": "性能优化",
+  "changelogReverts": "已回滚"
 }

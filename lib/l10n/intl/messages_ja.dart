@@ -384,6 +384,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "certificateValidityHint": MessageLookupByLibrary.simpleMessage(
       "まずシステムの日付と時刻を同期してください。時刻が正しい場合は、サーバー証明書の修正が必要です。",
     ),
+    "changelogBreaking": MessageLookupByLibrary.simpleMessage("破壊的変更"),
+    "changelogFeatures": MessageLookupByLibrary.simpleMessage("新機能"),
+    "changelogFixes": MessageLookupByLibrary.simpleMessage("不具合修正"),
+    "changelogPerformance": MessageLookupByLibrary.simpleMessage("パフォーマンス"),
+    "changelogReverts": MessageLookupByLibrary.simpleMessage("取り消し"),
     "checkApi": MessageLookupByLibrary.simpleMessage("APIをチェック"),
     "checkRouting": MessageLookupByLibrary.simpleMessage("設定を確認"),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("更新を確認"),
@@ -396,12 +401,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "clearCustomRouting": MessageLookupByLibrary.simpleMessage("一括クリア"),
     "clearData": MessageLookupByLibrary.simpleMessage("データを消去"),
     "clearProxyChain": MessageLookupByLibrary.simpleMessage("チェーン設定を削除"),
+    "clearSearch": MessageLookupByLibrary.simpleMessage("検索をクリア"),
     "clipboardExport": MessageLookupByLibrary.simpleMessage("クリップボードへエクスポート"),
     "clipboardImport": MessageLookupByLibrary.simpleMessage("クリップボードからインポート"),
     "clipboardWriteFailed": MessageLookupByLibrary.simpleMessage(
       "クリップボードにコピーできませんでした。選択範囲が大きすぎる可能性があります",
     ),
     "close": MessageLookupByLibrary.simpleMessage("閉じる"),
+    "closeAllConnections": MessageLookupByLibrary.simpleMessage("すべての接続を閉じる"),
     "cloudApiAccessDenied": MessageLookupByLibrary.simpleMessage(
       "ネットワークへのアクセスが拒否されました",
     ),
@@ -544,6 +551,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "一時的な証明書の例外でアカウントと設定を同期しました。証明書の検証は復元されています。次回の同期前に証明書の問題を解決してください。",
     ),
     "codeSent": MessageLookupByLibrary.simpleMessage("認証コードを送信しました"),
+    "collapseList": MessageLookupByLibrary.simpleMessage("折りたたむ"),
     "color": MessageLookupByLibrary.simpleMessage("カラー"),
     "colorSchemes": MessageLookupByLibrary.simpleMessage("カラースキーム"),
     "columns": MessageLookupByLibrary.simpleMessage("列"),
@@ -957,6 +965,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "exit": MessageLookupByLibrary.simpleMessage("終了"),
     "exitFullScreen": MessageLookupByLibrary.simpleMessage("全画面表示を終了"),
     "expand": MessageLookupByLibrary.simpleMessage("標準"),
+    "expandList": MessageLookupByLibrary.simpleMessage("展開"),
     "expectedStatus": MessageLookupByLibrary.simpleMessage("期待されるステータス"),
     "expireDate": m21,
     "expiresAtLabel": MessageLookupByLibrary.simpleMessage("有効期限"),
@@ -1204,6 +1213,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "localNetworkTip": MessageLookupByLibrary.simpleMessage(
       "ローカルネットワークへのアクセスが許可されていないため、今回は gVisor を使用します。LAN 上のプロキシやサービスは引き続き利用できない場合があります",
     ),
+    "locateSelected": MessageLookupByLibrary.simpleMessage("選択中のノードへ移動"),
     "locationPermission": MessageLookupByLibrary.simpleMessage("位置情報の権限"),
     "locationPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
       "位置情報の権限が拒否されたため、現在の Wi-Fi 名を取得できません。システム設定で位置情報の権限を手動で有効にしてください",
@@ -2037,6 +2047,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "todayUsed": MessageLookupByLibrary.simpleMessage("今日の使用量"),
     "toggle": MessageLookupByLibrary.simpleMessage("トグル"),
     "toggleFlashlight": MessageLookupByLibrary.simpleMessage("ライト切替"),
+    "toggleNavigationLabels": MessageLookupByLibrary.simpleMessage(
+      "ナビゲーションラベルの表示切替",
+    ),
     "tokenLabel": MessageLookupByLibrary.simpleMessage("アクセストークン"),
     "tokenValidation": MessageLookupByLibrary.simpleMessage(
       "アクセストークンを入力してください",

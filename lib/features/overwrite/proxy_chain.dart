@@ -630,6 +630,7 @@ class _ProfileProxyChainsContentState
               if (selectedProxyChains.isNotEmpty) ...[
                 CommonMinIconButtonTheme(
                   child: IconButton.filledTonal(
+                    tooltip: context.appLocalizations.delete,
                     onPressed: _handleDeleteProxyChains,
                     icon: const Icon(Icons.delete),
                   ),
@@ -985,6 +986,7 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
                     color: context.colorScheme.onSurfaceVariant.opacity80,
                   ),
                   IconButton(
+                    tooltip: context.appLocalizations.delete,
                     onPressed: isDecorator
                         ? null
                         : () {
@@ -1090,6 +1092,7 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
       actions: [
         CommonMinIconButtonTheme(
           child: IconButton.filled(
+            tooltip: context.appLocalizations.save,
             style:
                 IconButton.styleFrom(
                   backgroundColor: canSubmit ? Colors.green : null,

@@ -295,6 +295,7 @@ class _AccessViewState extends ConsumerState<AccessView>
       CommonPopupBox(
         targetBuilder: (open) {
           return IconButton(
+            tooltip: context.appLocalizations.more,
             onPressed: () {
               open(offset: const Offset(0, 0));
             },

@@ -11,6 +11,15 @@ import 'package:fl_clash/common/request.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('normalizing release text preserves opaque structured JSON', () {
+    const payload =
+        '<!-- flclash:changelog:json\n{"schemaVersion":2,"versions":[{"version":"0.8.99","tag":"v0.8.99","groups":[{"type":"fix","entries":[{"id":"abc1234","text":"Keep **literal** [syntax](url)"}]}]}]}\n-->';
+    expect(
+      normalizeReleaseNotes('### Fixes\n- Human text\n$payload'),
+      contains(payload),
+    );
+  });
+
   late List<RequestOptions> requests;
   late int closed;
 

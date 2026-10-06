@@ -12,10 +12,14 @@ import 'package:path/path.dart' as p;
 
 import 'update_download.dart';
 
+enum UpdateDownloadAction { install, browser }
+
 enum AppUpdateDownloadPhase { idle, downloading, ready, failed, canceled }
 
-typedef AppUpdateDownloader =
-    Future<File> Function(CancelToken token, ProgressCallback onProgress);
+typedef AppUpdateDownloader = Future<File> Function(
+  CancelToken token,
+  ProgressCallback onProgress,
+);
 
 Future<void> waitForAppUpdateStartup({
   required bool Function() isReady,

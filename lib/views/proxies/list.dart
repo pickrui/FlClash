@@ -587,6 +587,7 @@ class _ListHeaderState extends ConsumerState<ListHeader> {
               children: [
                 if (isExpand) ...[
                   IconButton(
+                    tooltip: context.appLocalizations.locateSelected,
                     visualDensity: VisualDensity.compact,
                     padding: const EdgeInsets.all(2),
                     onPressed: () {
@@ -600,6 +601,7 @@ class _ListHeaderState extends ConsumerState<ListHeader> {
                   ),
                   const SizedBox(width: 2),
                   IconButton(
+                    tooltip: context.appLocalizations.delayTest,
                     iconSize: 20,
                     visualDensity: VisualDensity.compact,
                     padding: const EdgeInsets.all(2),
@@ -613,6 +615,9 @@ class _ListHeaderState extends ConsumerState<ListHeader> {
                 ] else
                   const SizedBox(width: 6),
                 IconButton.filledTonal(
+                  tooltip: isExpand
+                      ? context.appLocalizations.collapseList
+                      : context.appLocalizations.expandList,
                   visualDensity: VisualDensity.compact,
                   padding: const EdgeInsets.all(2),
                   iconSize: 24,

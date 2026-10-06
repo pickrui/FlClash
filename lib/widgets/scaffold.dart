@@ -162,6 +162,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
   Widget? _buildLeading(VoidCallback? backAction) {
     if (_isSearch) {
       return IconButton(
+        tooltip: MaterialLocalizations.of(context).backButtonTooltip,
         onPressed: handleExitSearching,
         icon: const Icon(Icons.arrow_back),
       );
@@ -199,12 +200,17 @@ class CommonScaffoldState extends State<CommonScaffold> {
   List<Widget> _buildActions(bool hasSearch, List<Widget> actions) {
     if (_isSearch) {
       return genActions([
-        IconButton(onPressed: _handleClear, icon: const Icon(Icons.close)),
+        IconButton(
+          tooltip: context.appLocalizations.clearSearch,
+          onPressed: _handleClear,
+          icon: const Icon(Icons.close),
+        ),
       ]);
     }
     return genActions([
       if (hasSearch && widget.searchState?.autoAddSearch == true)
         IconButton(
+          tooltip: context.appLocalizations.search,
           onPressed: () {
             _updateSearchState((state) => state?.copyWith(query: ''));
           },

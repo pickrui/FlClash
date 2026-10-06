@@ -484,6 +484,7 @@ class __StandardContentState extends ConsumerState<_StandardContent> {
                     if (selectedRules.isNotEmpty) ...[
                       CommonMinIconButtonTheme(
                         child: IconButton.filledTonal(
+                          tooltip: context.appLocalizations.delete,
                           onPressed: () {
                             _handleDelete();
                           },

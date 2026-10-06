@@ -7,7 +7,6 @@ import 'dart:convert';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -78,9 +77,9 @@ Future<String> validateCustomRoutingDraft(
       patchConfig: patchConfig,
     );
     final yaml = await encodeYamlTask(config);
-    final result = await coreController.validateConfigWithBytes(
-      base64Encode(utf8.encode(yaml)),
-    );
+    final result = await ref
+        .read(coreHandlerProvider)
+        .validateConfigWithBytes(base64Encode(utf8.encode(yaml)));
     if (!context.mounted) return appLocalizations.routingApplyFailed;
     final currentState = await ref.read(setupStateProvider(profile.id).future);
     if (!context.mounted) return appLocalizations.routingApplyFailed;

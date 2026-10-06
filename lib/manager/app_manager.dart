@@ -371,6 +371,7 @@ class AppSidebarContainer extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 IconButton(
+ tooltip: context.appLocalizations.toggleNavigationLabels,
                   onPressed: () {
                     ref
                         .read(appSettingProvider.notifier)

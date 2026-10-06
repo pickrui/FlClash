@@ -1250,5 +1250,16 @@
   "fontSize": "Размер",
   "replace": "Заменить",
   "tabAnimationSlide": "Сдвиг",
-  "tabAnimationFade": "Растворение"
+  "tabAnimationFade": "Растворение",
+  "locateSelected": "Перейти к выбранному узлу",
+  "toggleNavigationLabels": "Переключить подписи навигации",
+  "expandList": "Развернуть",
+  "collapseList": "Свернуть",
+  "clearSearch": "Очистить поиск",
+  "closeAllConnections": "Закрыть все соединения",
+  "changelogBreaking": "Важные изменения",
+  "changelogFeatures": "Новые функции",
+  "changelogFixes": "Исправления",
+  "changelogPerformance": "Производительность",
+  "changelogReverts": "Откаты"
 }

@@ -88,6 +88,7 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
           if (selectedRules.isNotEmpty) ...[
             CommonMinIconButtonTheme(
               child: IconButton.filledTonal(
+                tooltip: context.appLocalizations.delete,
                 onPressed: _handleDelete,
                 icon: const Icon(Icons.delete),
               ),
