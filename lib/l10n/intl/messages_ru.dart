@@ -1448,6 +1448,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "icon": MessageLookupByLibrary.simpleMessage("Иконка"),
     "iconHistory": MessageLookupByLibrary.simpleMessage("Недавние значки"),
     "iconStyle": MessageLookupByLibrary.simpleMessage("Стиль иконки"),
+    "iconStyleFilled": MessageLookupByLibrary.simpleMessage("С подложкой"),
+    "iconStyleHidden": MessageLookupByLibrary.simpleMessage("Скрыто"),
+    "iconStylePlain": MessageLookupByLibrary.simpleMessage("Без подложки"),
     "iconUrl": MessageLookupByLibrary.simpleMessage("URL иконки"),
     "ignoreBatteryOptimization": MessageLookupByLibrary.simpleMessage(
       "Игнорировать оптимизацию батареи",

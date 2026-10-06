@@ -13,6 +13,8 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/proxies/card.dart';
+import 'package:fl_clash/views/proxies/common.dart';
+import 'package:fl_clash/widgets/loading.dart';
 import 'package:fl_clash/views/proxies/list.dart';
 import 'package:fl_clash/views/proxies/tab.dart';
 import 'package:fl_clash/views/proxies/setting.dart';
@@ -66,9 +68,8 @@ void main() {
       const url = 'https://example.com';
       final container = ProviderContainer(
         overrides: [
-          realSelectedProxyStateProvider(
-            'Node',
-          ).overrideWith((_) => const SelectedProxyState(proxyName: 'Node')),
+          realSelectedProxyStateProvider('Node')
+              .overrideWith((_) => const SelectedProxyState(proxyName: 'Node')),
           getSelectedProxyNameProvider('Group').overrideWith((_) => ''),
         ],
       );
@@ -288,6 +289,117 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.state(find.byType(ProxyGroupView)), isNot(same(initial)));
       expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'group progress survives header replacement and is scoped to the profile',
+    (tester) async {
+      const groupName = 'A long group name that must fit a narrow list';
+      var profileId = 1;
+      var expanded = true;
+      var headerKey = 0;
+      var located = 0;
+      var toggled = 0;
+      final container = ProviderContainer(
+        overrides: [
+          currentProfileIdProvider.overrideWithBuild((_, _) => profileId),
+          getSelectedProxyNameProvider(groupName)
+              .overrideWith((_) => 'A selected node with a long name'),
+        ],
+      );
+      addTearDown(container.dispose);
+      Future<void> pumpHeader() async {
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: _TestApp(
+              child: Center(
+                child: Builder(
+                  builder: (_) => SizedBox(
+                    width: 320,
+                    height: listHeaderHeight,
+                    child: ListHeader(
+                      key: ValueKey(headerKey),
+                      enterAnimated: false,
+                      group: const Group(
+                        name: groupName,
+                        type: GroupType.URLTest,
+                        fixed: 'Node',
+                      ),
+                      isExpand: expanded,
+                      onChange: (_) => toggled++,
+                      onScrollToSelected: (_) => located++,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+      }
+
+      await pumpHeader();
+      await tester.tap(find.byTooltip(AppLocalizations.current.locateSelected));
+      expect(located, 1);
+      expect(toggled, 0);
+      await tester.tap(find.byTooltip(AppLocalizations.current.collapseList));
+      expect(toggled, 1);
+      final running = container.read(delayTestingGroupsProvider.notifier);
+      final completion = Completer<void>();
+      final request = running.run(
+        profileId: 1,
+        groupName: groupName,
+        test: () => completion.future,
+      );
+      await tester.pump();
+      await running.run(
+        profileId: 1,
+        groupName: groupName,
+        test: () async =>
+            fail('a second header must not start a duplicate test'),
+      );
+      IconButton delayButton() => tester.widget<IconButton>(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is IconButton &&
+              widget.tooltip == AppLocalizations.current.delayTest,
+        ),
+      );
+      expect(delayButton().onPressed, isNull);
+      headerKey++;
+      await pumpHeader();
+      expect(delayButton().onPressed, isNull);
+      expect(find.byType(CommonCircleLoading), findsOneWidget);
+      profileId = 2;
+      container.invalidate(currentProfileIdProvider);
+      await tester.pump();
+      expect(delayButton().onPressed, isNotNull);
+      await expectLater(
+        running.run(
+          profileId: 2,
+          groupName: groupName,
+          test: () async => throw StateError('offline fixture'),
+        ),
+        throwsStateError,
+      );
+      await tester.pump();
+      expect(delayButton().onPressed, isNotNull);
+      completion.complete();
+      await request;
+      for (final style in ProxiesIconStyle.values) {
+        container
+            .read(proxiesStyleSettingProvider.notifier)
+            .update((state) => state.copyWith(iconStyle: style));
+        for (final value in [true, false]) {
+          expanded = value;
+          await pumpHeader();
+          expect(tester.takeException(), isNull);
+        }
+      }
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
     },
   );
 

@@ -2085,6 +2085,21 @@ class AppLocalizations {
     return Intl.message('Icon style', name: 'iconStyle', desc: '', args: []);
   }
 
+  /// `Filled`
+  String get iconStyleFilled {
+    return Intl.message('Filled', name: 'iconStyleFilled', desc: '', args: []);
+  }
+
+  /// `Plain`
+  String get iconStylePlain {
+    return Intl.message('Plain', name: 'iconStylePlain', desc: '', args: []);
+  }
+
+  /// `Hidden`
+  String get iconStyleHidden {
+    return Intl.message('Hidden', name: 'iconStyleHidden', desc: '', args: []);
+  }
+
   /// `Icon`
   String get onlyIcon {
     return Intl.message('Icon', name: 'onlyIcon', desc: '', args: []);

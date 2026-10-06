@@ -15,12 +15,15 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
+import 'package:fl_clash/widgets/navigation_dock.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'card.dart';
 import 'common.dart';
+
+const _headerInset = 10.0;
 
 class ProxiesListView extends StatefulWidget {
   final ValueChanged<Set<String>>? onUnfoldChanged;
@@ -389,7 +392,7 @@ class _ProxiesListViewState extends State<ProxiesListView> {
   }
 }
 
-class ListHeader extends ConsumerStatefulWidget {
+class ListHeader extends ConsumerWidget {
   final Group group;
 
   final Function(String groupName) onChange;
@@ -408,236 +411,241 @@ class ListHeader extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<ListHeader> createState() => _ListHeaderState();
-}
-
-class _ListHeaderState extends ConsumerState<ListHeader> {
-  var isLock = false;
-
-  String get icon => widget.group.icon;
-
-  String get groupName => widget.group.name;
-
-  String get groupType => widget.group.type.name;
-
-  bool get isExpand => widget.isExpand;
-
-  Future<void> _delayTest() async {
-    if (isLock) return;
-    isLock = true;
-    try {
-      final source =
-          ref.read(groupsProvider).getGroup(groupName) ?? widget.group;
-      await delayTest(source.all, source.testUrl);
-    } finally {
-      isLock = false;
-    }
-  }
-
-  void _handleChange(String groupName) {
-    widget.onChange(groupName);
-  }
-
-  Widget _buildIcon() {
-    return Consumer(
-      builder: (_, ref, child) {
-        final iconStyle = ref.watch(
-          proxiesStyleSettingProvider.select((state) => state.iconStyle),
-        );
-        return switch (iconStyle) {
-          ProxiesIconStyle.standard => LayoutBuilder(
-            builder: (_, constraints) {
-              return Container(
-                margin: const EdgeInsets.only(right: 16),
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: Container(
-                    height: constraints.maxHeight,
-                    width: constraints.maxWidth,
-                    alignment: Alignment.center,
-                    padding: EdgeInsets.all(6.ap),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      color: context.colorScheme.secondaryContainer,
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: CommonTargetIcon(
-                      src: icon,
-                      size: constraints.maxHeight - 12.ap,
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-          ProxiesIconStyle.icon => Container(
-            margin: const EdgeInsets.only(right: 16),
-            child: LayoutBuilder(
-              builder: (_, constraints) {
-                return CommonTargetIcon(
-                  src: icon,
-                  size: constraints.maxHeight - 8,
-                );
-              },
-            ),
-          ),
-          ProxiesIconStyle.none => Container(),
-        };
-      },
+  Widget build(BuildContext context, WidgetRef ref) {
+    final groupName = group.name;
+    final profileId = ref.watch(currentProfileIdProvider);
+    final isDelayTesting = ref.watch(
+      delayTestingGroupsProvider.select(
+        (state) => state.contains((profileId: profileId, groupName: groupName)),
+      ),
     );
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return CommonCard(
       enterActionsOnRight: true,
-      enterAnimated: widget.enterAnimated,
-      key: widget.key,
-      radius: 18.ap,
+      enterAnimated: enterAnimated,
+      key: key,
+      radius: AppCorner.xl.ap,
       type: CommonCardType.filled,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.all(_headerInset),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Flexible(
               child: Row(
                 children: [
-                  _buildIcon(),
+                  _GroupIcon(src: group.icon),
                   Flexible(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        EmojiText(
-                          groupName,
-                          style: context.textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 4),
-                        Flexible(
-                          flex: 1,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                groupType,
-                                style: context.textTheme.labelMedium?.toLight,
-                              ),
-                              if (widget.group.fixed?.isNotEmpty == true)
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 4),
-                                  child: GlyphIcon(
-                                    AppGlyphs.lock,
-                                    size: 14,
-                                    color: context
-                                        .textTheme
-                                        .labelMedium
-                                        ?.toLight
-                                        .color,
-                                  ),
-                                ),
-                              Flexible(
-                                flex: 1,
-                                child: Consumer(
-                                  builder: (_, ref, _) {
-                                    final proxyName = ref
-                                        .watch(
-                                          getSelectedProxyNameProvider(
-                                            groupName,
-                                          ),
-                                        )
-                                        .takeFirstValid([]);
-                                    return Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        if (proxyName.isNotEmpty) ...[
-                                          Flexible(
-                                            flex: 1,
-                                            child: EmojiText(
-                                              overflow: TextOverflow.ellipsis,
-                                              ' · $proxyName',
-                                              style: context
-                                                  .textTheme
-                                                  .labelMedium
-                                                  ?.toLight,
-                                            ),
-                                          ),
-                                        ],
-                                      ],
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                      ],
+                    child: _GroupSummary(
+                      groupName: groupName,
+                      isFixed: group.fixed?.isNotEmpty == true,
                     ),
                   ),
                 ],
               ),
             ),
-            Row(
-              children: [
-                if (isExpand) ...[
-                  IconButton(
-                    tooltip: context.appLocalizations.locateSelected,
-                    visualDensity: VisualDensity.compact,
-                    padding: const EdgeInsets.all(2),
-                    onPressed: () {
-                      widget.onScrollToSelected(groupName);
-                    },
-                    style: const ButtonStyle(
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    iconSize: 19,
-                    icon: const GlyphIcon(AppGlyphs.target),
-                  ),
-                  const SizedBox(width: 2),
-                  IconButton(
-                    tooltip: context.appLocalizations.delayTest,
-                    iconSize: 20,
-                    visualDensity: VisualDensity.compact,
-                    padding: const EdgeInsets.all(2),
-                    onPressed: _delayTest,
-                    style: const ButtonStyle(
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    icon: const GlyphIcon(AppGlyphs.bolt),
-                  ),
-                  const SizedBox(width: 6),
-                ] else
-                  const SizedBox(width: 6),
-                IconButton.filledTonal(
-                  tooltip: isExpand
-                      ? context.appLocalizations.collapseList
-                      : context.appLocalizations.expandList,
-                  visualDensity: VisualDensity.compact,
-                  padding: const EdgeInsets.all(2),
-                  iconSize: 24,
-                  style: const ButtonStyle(
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  onPressed: () {
-                    _handleChange(groupName);
-                  },
-                  icon: CommonExpandIcon(expand: isExpand),
-                ),
-              ],
+            const SizedBox(width: 8),
+            _GroupActions(
+              isExpand: isExpand,
+              isDelayTesting: isDelayTesting,
+              groupType: group.type.name,
+              onScrollToSelected: () {
+                onScrollToSelected(groupName);
+              },
+              onDelayTest: () {
+                final source =
+                    ref.read(groupsProvider).getGroup(groupName) ?? group;
+                delayTestGroup(ref, source);
+              },
+              onToggle: () {
+                onChange(groupName);
+              },
             ),
           ],
         ),
       ),
       onPressed: () {
-        _handleChange(groupName);
+        onChange(groupName);
       },
+    );
+  }
+}
+
+class _GroupIcon extends ConsumerWidget {
+  const _GroupIcon({required this.src});
+
+  final String src;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final iconStyle = ref.watch(
+      proxiesStyleSettingProvider.select((state) => state.iconStyle),
+    );
+    return switch (iconStyle) {
+      ProxiesIconStyle.standard => LayoutBuilder(
+        builder: (_, constraints) {
+          return Container(
+            margin: const EdgeInsets.only(right: 12),
+            child: AspectRatio(
+              aspectRatio: 1,
+              child: Container(
+                height: constraints.maxHeight,
+                width: constraints.maxWidth,
+                alignment: Alignment.center,
+                padding: EdgeInsets.all(6.ap),
+                decoration: ShapeDecoration(
+                  color: context.colorScheme.secondaryContainer,
+                  shape: AppShape.all(AppCorner.xl.ap - _headerInset),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: CommonTargetIcon(
+                  src: src,
+                  size: constraints.maxHeight - 12.ap,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+      ProxiesIconStyle.icon => Container(
+        margin: const EdgeInsets.only(left: 2, right: 10),
+        child: LayoutBuilder(
+          builder: (_, constraints) {
+            return CommonTargetIcon(
+              src: src,
+              size: constraints.maxHeight - 16.ap,
+            );
+          },
+        ),
+      ),
+      ProxiesIconStyle.none => const SizedBox(width: 4),
+    };
+  }
+}
+
+class _GroupSummary extends StatelessWidget {
+  const _GroupSummary({required this.groupName, required this.isFixed});
+
+  final String groupName;
+  final bool isFixed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Flexible(
+              child: EmojiText(
+                groupName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textTheme.titleSmall,
+              ),
+            ),
+            if (isFixed)
+              Padding(
+                padding: const EdgeInsets.only(left: 4),
+                child: GlyphIcon(
+                  AppGlyphs.lock,
+                  size: 14,
+                  color: context.textTheme.labelMedium?.toLight.color,
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 2),
+        Flexible(flex: 1, child: _SelectedProxyName(groupName: groupName)),
+      ],
+    );
+  }
+}
+
+class _SelectedProxyName extends ConsumerWidget {
+  const _SelectedProxyName({required this.groupName});
+
+  final String groupName;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final proxyName = ref
+        .watch(getSelectedProxyNameProvider(groupName))
+        .takeFirstValid([]);
+    if (proxyName.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return EmojiText(
+      proxyName,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: context.textTheme.labelSmall?.toLight,
+    );
+  }
+}
+
+class _GroupActions extends StatelessWidget {
+  const _GroupActions({
+    required this.isExpand,
+    required this.isDelayTesting,
+    required this.groupType,
+    required this.onScrollToSelected,
+    required this.onDelayTest,
+    required this.onToggle,
+  });
+
+  final bool isExpand;
+  final bool isDelayTesting;
+  final String groupType;
+  final VoidCallback onScrollToSelected;
+  final VoidCallback onDelayTest;
+  final VoidCallback onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    return TonalButtonTheme(
+      size: TonalButtonSize.compact,
+      child: Row(
+        children: [
+          if (isExpand)
+            TonalButtonGroup(
+              size: TonalButtonSize.compact,
+              children: [
+                IconButton(
+                  tooltip: context.appLocalizations.locateSelected,
+                  onPressed: onScrollToSelected,
+                  iconSize: 19,
+                  icon: const GlyphIcon(AppGlyphs.locate),
+                ),
+                IconButton(
+                  tooltip: context.appLocalizations.delayTest,
+                  onPressed: isDelayTesting ? null : onDelayTest,
+                  icon: isDelayTesting
+                      ? SizedBox.square(
+                          dimension: TonalButtonSize.compact.icon,
+                          child: const Padding(
+                            padding: EdgeInsets.all(2),
+                            child: CommonCircleLoading(),
+                          ),
+                        )
+                      : const GlyphIcon(AppGlyphs.bolt),
+                ),
+              ],
+            )
+          else
+            Text(groupType, style: context.textTheme.labelMedium?.toLight),
+          const SizedBox(width: 6),
+          ElasticPress(
+            child: IconButton(
+              tooltip: isExpand
+                  ? context.appLocalizations.collapseList
+                  : context.appLocalizations.expandList,
+              onPressed: onToggle,
+              icon: CommonExpandIcon(expand: isExpand),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -78,7 +78,7 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
     final group = _currentGroup;
     if (group != null) {
       final source = ref.read(groupsProvider).getGroup(group.name) ?? group;
-      await delayTest(source.all, source.testUrl);
+      await delayTestGroup(ref, source);
     }
   }
 

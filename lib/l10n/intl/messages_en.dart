@@ -1398,6 +1398,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "icon": MessageLookupByLibrary.simpleMessage("Icon"),
     "iconHistory": MessageLookupByLibrary.simpleMessage("Recent icons"),
     "iconStyle": MessageLookupByLibrary.simpleMessage("Icon style"),
+    "iconStyleFilled": MessageLookupByLibrary.simpleMessage("Filled"),
+    "iconStyleHidden": MessageLookupByLibrary.simpleMessage("Hidden"),
+    "iconStylePlain": MessageLookupByLibrary.simpleMessage("Plain"),
     "iconUrl": MessageLookupByLibrary.simpleMessage("Icon URL"),
     "ignoreBatteryOptimization": MessageLookupByLibrary.simpleMessage(
       "Ignore battery optimization",

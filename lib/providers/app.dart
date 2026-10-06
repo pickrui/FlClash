@@ -281,6 +281,27 @@ class Groups extends _$Groups with NotifierMixin<List<Group>> {
 }
 
 @Riverpod(keepAlive: true)
+class DelayTestingGroups extends _$DelayTestingGroups {
+  @override
+  Set<({int? profileId, String groupName})> build() => {};
+
+  Future<void> run({
+    required int? profileId,
+    required String groupName,
+    required Future<void> Function() test,
+  }) async {
+    final key = (profileId: profileId, groupName: groupName);
+    if (state.contains(key)) return;
+    state = {...state, key};
+    try {
+      await test();
+    } finally {
+      if (ref.mounted) state = {...state}..remove(key);
+    }
+  }
+}
+
+@Riverpod(keepAlive: true)
 class PendingDelayTests extends _$PendingDelayTests {
   int _generation = 0;
 

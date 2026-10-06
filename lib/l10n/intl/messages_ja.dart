@@ -1171,6 +1171,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "icon": MessageLookupByLibrary.simpleMessage("アイコン"),
     "iconHistory": MessageLookupByLibrary.simpleMessage("最近使用したアイコン"),
     "iconStyle": MessageLookupByLibrary.simpleMessage("アイコンスタイル"),
+    "iconStyleFilled": MessageLookupByLibrary.simpleMessage("背景あり"),
+    "iconStyleHidden": MessageLookupByLibrary.simpleMessage("非表示"),
+    "iconStylePlain": MessageLookupByLibrary.simpleMessage("背景なし"),
     "iconUrl": MessageLookupByLibrary.simpleMessage("アイコンURL"),
     "ignoreBatteryOptimization": MessageLookupByLibrary.simpleMessage(
       "電池の最適化を無視",

@@ -57,9 +57,33 @@ class ProxiesSetting extends StatelessWidget {
   ) {
     final appLocalizations = context.appLocalizations;
     return switch (style) {
-      ProxiesIconStyle.standard => appLocalizations.standard,
-      ProxiesIconStyle.none => appLocalizations.none,
-      ProxiesIconStyle.icon => appLocalizations.onlyIcon,
+      ProxiesIconStyle.standard => appLocalizations.iconStyleFilled,
+      ProxiesIconStyle.none => appLocalizations.iconStyleHidden,
+      ProxiesIconStyle.icon => appLocalizations.iconStylePlain,
+    };
+  }
+
+  Glyph _getIconWithProxiesLayout(ProxiesLayout proxiesLayout) {
+    return switch (proxiesLayout) {
+      ProxiesLayout.tight => AppGlyphs.columnsThree,
+      ProxiesLayout.standard => AppGlyphs.columnsTwo,
+      ProxiesLayout.loose => AppGlyphs.columnsOne,
+    };
+  }
+
+  Glyph _getIconWithProxyCardType(ProxyCardType type) {
+    return switch (type) {
+      ProxyCardType.expand => AppGlyphs.cardLarge,
+      ProxyCardType.shrink => AppGlyphs.cardMedium,
+      ProxyCardType.min => AppGlyphs.cardSmall,
+    };
+  }
+
+  Glyph _getIconWithProxiesIconStyle(ProxiesIconStyle style) {
+    return switch (style) {
+      ProxiesIconStyle.standard => AppGlyphs.iconTile,
+      ProxiesIconStyle.icon => AppGlyphs.iconPlain,
+      ProxiesIconStyle.none => AppGlyphs.eyeOff,
     };
   }
 
@@ -161,8 +185,11 @@ class ProxiesSetting extends StatelessWidget {
                 spacing: 16,
                 children: [
                   for (final item in ProxyCardType.values)
-                    SettingTextCard(
-                      Intl.message(item.name),
+                    SettingInfoCard(
+                      Info(
+                        label: Intl.message(item.name),
+                        glyph: _getIconWithProxyCardType(item),
+                      ),
                       isSelected: item == cardType,
                       onPressed: () {
                         ref.read(proxiesStyleSettingProvider.notifier).update((
@@ -198,8 +225,11 @@ class ProxiesSetting extends StatelessWidget {
                 spacing: 16,
                 children: [
                   for (final item in ProxiesLayout.values)
-                    SettingTextCard(
-                      getTextForProxiesLayout(context, item),
+                    SettingInfoCard(
+                      Info(
+                        label: getTextForProxiesLayout(context, item),
+                        glyph: _getIconWithProxiesLayout(item),
+                      ),
                       isSelected: item == layout,
                       onPressed: () {
                         ref.read(proxiesStyleSettingProvider.notifier).update((
@@ -234,9 +264,16 @@ class ProxiesSetting extends StatelessWidget {
               return Wrap(
                 spacing: 16,
                 children: [
-                  for (final item in ProxiesIconStyle.values)
-                    SettingTextCard(
-                      _getTextWithProxiesIconStyle(context, item),
+                  for (final item in [
+                    ProxiesIconStyle.standard,
+                    ProxiesIconStyle.icon,
+                    ProxiesIconStyle.none,
+                  ])
+                    SettingInfoCard(
+                      Info(
+                        label: _getTextWithProxiesIconStyle(context, item),
+                        glyph: _getIconWithProxiesIconStyle(item),
+                      ),
                       isSelected: iconStyle == item,
                       onPressed: () {
                         ref.read(proxiesStyleSettingProvider.notifier).update((

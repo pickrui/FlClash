@@ -1399,6 +1399,73 @@ abstract class _$Groups extends $Notifier<List<Group>> {
   }
 }
 
+@ProviderFor(DelayTestingGroups)
+final delayTestingGroupsProvider = DelayTestingGroupsProvider._();
+
+final class DelayTestingGroupsProvider
+    extends
+        $NotifierProvider<
+          DelayTestingGroups,
+          Set<({String groupName, int? profileId})>
+        > {
+  DelayTestingGroupsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'delayTestingGroupsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$delayTestingGroupsHash();
+
+  @$internal
+  @override
+  DelayTestingGroups create() => DelayTestingGroups();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Set<({String groupName, int? profileId})> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<Set<({String groupName, int? profileId})>>(value),
+    );
+  }
+}
+
+String _$delayTestingGroupsHash() =>
+    r'93fd736ed6fe40a50aa2e36dee4fc42db66b9c0c';
+
+abstract class _$DelayTestingGroups
+    extends $Notifier<Set<({String groupName, int? profileId})>> {
+  Set<({String groupName, int? profileId})> build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref =
+        this.ref
+            as $Ref<
+              Set<({String groupName, int? profileId})>,
+              Set<({String groupName, int? profileId})>
+            >;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<
+                Set<({String groupName, int? profileId})>,
+                Set<({String groupName, int? profileId})>
+              >,
+              Set<({String groupName, int? profileId})>,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(PendingDelayTests)
 final pendingDelayTestsProvider = PendingDelayTestsProvider._();
 
