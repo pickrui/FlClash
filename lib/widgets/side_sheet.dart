@@ -5,6 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:ui';
 
+import 'package:fl_clash/widgets/drag_back.dart';
+
 import 'package:fl_clash/common/color.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
@@ -147,9 +149,8 @@ class _RenderSideSheetLayoutWithSizeListener extends RenderShiftedBox {
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    final double width = _getSize(
-      BoxConstraints.tightForFinite(height: height),
-    ).width;
+    final double width = _getSize(BoxConstraints.tightForFinite(height: height))
+        .width;
     if (width.isFinite) {
       return width;
     }
@@ -158,9 +159,8 @@ class _RenderSideSheetLayoutWithSizeListener extends RenderShiftedBox {
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    final double width = _getSize(
-      BoxConstraints.tightForFinite(height: height),
-    ).width;
+    final double width = _getSize(BoxConstraints.tightForFinite(height: height))
+        .width;
     if (width.isFinite) {
       return width;
     }
@@ -169,9 +169,8 @@ class _RenderSideSheetLayoutWithSizeListener extends RenderShiftedBox {
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    final double height = _getSize(
-      BoxConstraints.tightForFinite(width: width),
-    ).height;
+    final double height = _getSize(BoxConstraints.tightForFinite(width: width))
+        .height;
     if (height.isFinite) {
       return height;
     }
@@ -180,9 +179,8 @@ class _RenderSideSheetLayoutWithSizeListener extends RenderShiftedBox {
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    final double height = _getSize(
-      BoxConstraints.tightForFinite(width: width),
-    ).height;
+    final double height = _getSize(BoxConstraints.tightForFinite(width: width))
+        .height;
     if (height.isFinite) {
       return height;
     }
@@ -282,16 +280,21 @@ class _ModalSideSheetState<T> extends State<_ModalSideSheet<T>> {
 
     return AnimatedBuilder(
       animation: widget.route.animation!,
-      child: SideSheet(
-        builder: widget.route.builder,
-        backgroundColor: widget.backgroundColor,
-        elevation: widget.elevation,
-        shape: widget.shape,
-        clipBehavior: widget.clipBehavior,
-        constraints: widget.constraints,
+      child: widget.route.dragBackDetector(
+        SideSheet(
+          builder: widget.route.builder,
+          backgroundColor: widget.backgroundColor,
+          elevation: widget.elevation,
+          shape: widget.shape,
+          clipBehavior: widget.clipBehavior,
+          constraints: widget.constraints,
+        ),
       ),
       builder: (BuildContext context, Widget? child) {
-        final double animationValue = _modalBottomSheetCurve.transform(
+        final curve = widget.route.isDragBackActive
+            ? Curves.linear
+            : _modalBottomSheetCurve;
+        final double animationValue = curve.transform(
           widget.route.animation!.value,
         );
         return Semantics(
@@ -316,7 +319,7 @@ class _ModalSideSheetState<T> extends State<_ModalSideSheet<T>> {
   }
 }
 
-class ModalSideSheetRoute<T> extends PopupRoute<T> {
+class ModalSideSheetRoute<T> extends PopupRoute<T> with DragBackRouteMixin<T> {
   ModalSideSheetRoute({
     required this.builder,
     this.capturedThemes,
