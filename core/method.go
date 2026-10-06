@@ -131,11 +131,6 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 		if decodeMethodArguments(call, response, &params) {
 			response.success(handleOutboundIp(&params))
 		}
-	case serviceCheckMethod:
-		params := ServiceCheckParams{}
-		if decodeMethodArguments(call, response, &params) {
-			response.success(handleServiceCheck(&params))
-		}
 	case networkDiagnosticsMethod:
 		response.success(handleNetworkDiagnostics())
 	case getIsInitMethod:

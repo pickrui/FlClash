@@ -32,6 +32,7 @@ const (
 
 	probeTunnelPoll = 50 * time.Millisecond
 
+	probeMaxBody     = 8 * 1024 * 1024
 	probeScanChunk   = 32 * 1024
 	probeScanOverlap = 256
 )
@@ -279,7 +280,7 @@ func runProbe(parent context.Context, req probeRequest) *ProbeResult {
 		result.RulePayload = route.rulePayload
 	}
 	if req.maxBody > 0 {
-		result.Body, err = readProbeBody(response.Body, min(req.maxBody, int64(serviceScanMaxBody)), req.until)
+		result.Body, err = readProbeBody(response.Body, min(req.maxBody, int64(probeMaxBody)), req.until)
 		if err != nil {
 			return fail(err)
 		}

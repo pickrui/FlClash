@@ -307,7 +307,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "advancedConfigDesc": MessageLookupByLibrary.simpleMessage(
       "Provide diverse configuration options",
     ),
-    "allServices": MessageLookupByLibrary.simpleMessage("All services"),
     "allowBypass": MessageLookupByLibrary.simpleMessage(
       "Allow applications to bypass VPN",
     ),
@@ -809,9 +808,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "crashTest": MessageLookupByLibrary.simpleMessage("Crash test"),
     "create": MessageLookupByLibrary.simpleMessage("Create"),
     "creationTime": MessageLookupByLibrary.simpleMessage("Creation time"),
-    "currentRoute": MessageLookupByLibrary.simpleMessage(
-      "Current routing rules",
-    ),
     "custom": MessageLookupByLibrary.simpleMessage("Custom"),
     "customOutboundInUse": m10,
     "customRoutingDraftHint": MessageLookupByLibrary.simpleMessage(
@@ -1469,41 +1465,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "inviteCodeValidation": MessageLookupByLibrary.simpleMessage(
       "Please enter the invite code",
     ),
-    "ipAsn": MessageLookupByLibrary.simpleMessage("ASN"),
-    "ipFlagAbuser": MessageLookupByLibrary.simpleMessage("Abuse history"),
-    "ipFlagNo": MessageLookupByLibrary.simpleMessage("No"),
-    "ipFlagProxy": MessageLookupByLibrary.simpleMessage("Proxy"),
-    "ipFlagTor": MessageLookupByLibrary.simpleMessage("Tor"),
-    "ipFlagVpn": MessageLookupByLibrary.simpleMessage("VPN"),
-    "ipFlagYes": MessageLookupByLibrary.simpleMessage("Yes"),
-    "ipFlags": MessageLookupByLibrary.simpleMessage("Flags"),
-    "ipOrganization": MessageLookupByLibrary.simpleMessage("Organization"),
-    "ipQualityDetails": MessageLookupByLibrary.simpleMessage("IP quality"),
-    "ipQualityFailed": MessageLookupByLibrary.simpleMessage(
-      "Couldn\'t determine the IP type",
-    ),
-    "ipQualityGood": MessageLookupByLibrary.simpleMessage("Good"),
-    "ipQualityLevel": MessageLookupByLibrary.simpleMessage("Level"),
-    "ipQualityNormal": MessageLookupByLibrary.simpleMessage("Normal"),
-    "ipQualityQueryHint": MessageLookupByLibrary.simpleMessage(
-      "Queries IPQuery, IPLocate, ipapi.is and proxycheck.io when tapped",
-    ),
-    "ipQualityRetry": MessageLookupByLibrary.simpleMessage("Check again"),
-    "ipQualityRisky": MessageLookupByLibrary.simpleMessage("Risky"),
-    "ipQualitySource": MessageLookupByLibrary.simpleMessage("Answered by"),
-    "ipQualitySources": MessageLookupByLibrary.simpleMessage("Sources"),
-    "ipSourceIpMismatch": MessageLookupByLibrary.simpleMessage(
-      "Different outbound IP",
-    ),
-    "ipSourceNoType": MessageLookupByLibrary.simpleMessage("No type"),
-    "ipSourceRateLimited": MessageLookupByLibrary.simpleMessage("Rate limited"),
-    "ipType": MessageLookupByLibrary.simpleMessage("Type"),
-    "ipTypeBusiness": MessageLookupByLibrary.simpleMessage("Business"),
-    "ipTypeHosting": MessageLookupByLibrary.simpleMessage("Data center"),
-    "ipTypeInferred": MessageLookupByLibrary.simpleMessage("Inferred"),
-    "ipTypeMobile": MessageLookupByLibrary.simpleMessage("Mobile network"),
-    "ipTypeResidential": MessageLookupByLibrary.simpleMessage("Residential"),
-    "ipTypeUnknown": MessageLookupByLibrary.simpleMessage("Unknown"),
     "ipcidr": MessageLookupByLibrary.simpleMessage("Ipcidr"),
     "ipv6Desc": MessageLookupByLibrary.simpleMessage(
       "When turned on it will be able to receive IPv6 traffic",
@@ -1582,7 +1543,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "mainlandNetworkWarning": MessageLookupByLibrary.simpleMessage(
       "May not be suitable for networks in mainland China",
     ),
-    "manageServices": MessageLookupByLibrary.simpleMessage("Manage services"),
     "manageUserAgents": MessageLookupByLibrary.simpleMessage("Manage list"),
     "matchTarget": MessageLookupByLibrary.simpleMessage("MATCH-TARGET"),
     "matchTargetDesc": MessageLookupByLibrary.simpleMessage(
@@ -2394,37 +2354,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "sendCode": MessageLookupByLibrary.simpleMessage("Send Code"),
     "sendResetEmail": MessageLookupByLibrary.simpleMessage("Send reset email"),
     "server": MessageLookupByLibrary.simpleMessage("Server"),
-    "serviceAvailability": MessageLookupByLibrary.simpleMessage(
-      "Service availability",
-    ),
-    "serviceAvailable": MessageLookupByLibrary.simpleMessage("Available"),
-    "serviceBlocked": MessageLookupByLibrary.simpleMessage("Blocked"),
     "serviceCheckFailed": MessageLookupByLibrary.simpleMessage(
       "Service Check Failed",
-    ),
-    "serviceComingSoon": MessageLookupByLibrary.simpleMessage("Coming soon"),
-    "serviceDisallowedIsp": MessageLookupByLibrary.simpleMessage(
-      "ISP not supported",
-    ),
-    "serviceOriginalsOnly": MessageLookupByLibrary.simpleMessage(
-      "Originals only",
-    ),
-    "servicePending": MessageLookupByLibrary.simpleMessage("Not checked"),
-    "serviceProbeHint": MessageLookupByLibrary.simpleMessage(
-      "Run a check to inspect the actual route and service responses",
-    ),
-    "serviceProbeStale": MessageLookupByLibrary.simpleMessage(
-      "Route changed — refresh to check again",
-    ),
-    "serviceProbeStart": MessageLookupByLibrary.simpleMessage(
-      "Start the core to run checks (disabled in safe mode)",
-    ),
-    "serviceRestricted": MessageLookupByLibrary.simpleMessage("Restricted"),
-    "serviceStatus": MessageLookupByLibrary.simpleMessage("Service status"),
-    "serviceTimeout": MessageLookupByLibrary.simpleMessage("Timed out"),
-    "serviceUnavailable": MessageLookupByLibrary.simpleMessage("Unavailable"),
-    "serviceUnsupportedRegion": MessageLookupByLibrary.simpleMessage(
-      "Region not supported",
     ),
     "settings": MessageLookupByLibrary.simpleMessage("Settings"),
     "show": MessageLookupByLibrary.simpleMessage("Show"),

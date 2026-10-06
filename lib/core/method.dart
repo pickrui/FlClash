@@ -14,7 +14,6 @@ enum CoreMethod {
   networkDiagnostics,
   probe,
   outboundIp,
-  serviceCheck,
   probeRoute,
   forceGc,
   shutdown,

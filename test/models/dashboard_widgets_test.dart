@@ -9,17 +9,18 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test(
-    'future and duplicate dashboard entries retain recognized user order',
+    'retired, future and duplicate dashboard entries retain recognized order',
     () {
       expect(
         dashboardWidgetsSafeFormJson([
+          'networkDetection',
           'serviceStatus',
           'future-card',
           'runTime',
-          'serviceStatus',
+          'networkDetection',
           23,
         ]),
-        [DashboardWidget.serviceStatus, DashboardWidget.runTime],
+        [DashboardWidget.networkDetection, DashboardWidget.runTime],
       );
       expect(dashboardWidgetsSafeFormJson([]), isEmpty);
       expect(dashboardWidgetsSafeFormJson(null), defaultDashboardWidgets);

@@ -323,28 +323,6 @@ class CoreController {
     return result;
   }
 
-  Future<List<Map<String, dynamic>>> checkNodeServices(
-    ({String name, String group}) target, {
-    List<String>? names,
-  }) async {
-    if (names != null && names.isEmpty) return [];
-    if (safeModeBuild) throw StateError('Probes are disabled in safe mode');
-    final result = await _interface.invokeMethod<List<dynamic>>(
-      method: CoreMethod.serviceCheck,
-      arguments: {
-        'names': ?names,
-        'proxy-name': target.name,
-        'group-name': target.group,
-        'timeout': 10000,
-      },
-      timeout: const Duration(seconds: 65),
-    );
-    if (result == null) throw StateError('Missing service response');
-    return result
-        .map((item) => Map<String, dynamic>.from(item as Map))
-        .toList();
-  }
-
   Future<Map<String, dynamic>> checkOutboundIp(
     ({String name, String group}) target,
   ) async {

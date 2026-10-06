@@ -41,17 +41,6 @@ _AppSettingProps _$AppSettingPropsFromJson(
   editorFontSize:
       $enumDecodeNullable(_$EditorFontSizeEnumMap, json['editorFontSize']) ??
       EditorFontSize.standard,
-  serviceOrder:
-      (json['serviceOrder'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList() ??
-      const [],
-  disabledServices:
-      (json['disabledServices'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList() ??
-      const [],
-  currentService: json['currentService'] as String? ?? '',
   disclaimerAccepted: json['disclaimerAccepted'] as bool? ?? false,
   minimizeOnExit: json['minimizeOnExit'] as bool? ?? true,
   hidden: json['hidden'] as bool? ?? false,
@@ -89,9 +78,6 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'hideIp': instance.hideIp,
       'editorLineWrap': instance.editorLineWrap,
       'editorFontSize': _$EditorFontSizeEnumMap[instance.editorFontSize]!,
-      'serviceOrder': instance.serviceOrder,
-      'disabledServices': instance.disabledServices,
-      'currentService': instance.currentService,
       'disclaimerAccepted': instance.disclaimerAccepted,
       'minimizeOnExit': instance.minimizeOnExit,
       'hidden': instance.hidden,
@@ -129,7 +115,6 @@ const _$DashboardWidgetEnumMap = {
   DashboardWidget.systemProxyButton: 'systemProxyButton',
   DashboardWidget.intranetIp: 'intranetIp',
   DashboardWidget.memoryInfo: 'memoryInfo',
-  DashboardWidget.serviceStatus: 'serviceStatus',
   DashboardWidget.dnsQueries: 'dnsQueries',
   DashboardWidget.requests: 'requests',
   DashboardWidget.connections: 'connections',

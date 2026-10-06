@@ -310,7 +310,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "advancedConfigDesc": MessageLookupByLibrary.simpleMessage(
       "Предоставляет разнообразные варианты конфигурации",
     ),
-    "allServices": MessageLookupByLibrary.simpleMessage("Все сервисы"),
     "allowBypass": MessageLookupByLibrary.simpleMessage(
       "Разрешить приложениям обходить VPN",
     ),
@@ -824,7 +823,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "crashTest": MessageLookupByLibrary.simpleMessage("Тест на сбои"),
     "create": MessageLookupByLibrary.simpleMessage("Создать"),
     "creationTime": MessageLookupByLibrary.simpleMessage("Время создания"),
-    "currentRoute": MessageLookupByLibrary.simpleMessage("Текущие правила"),
     "custom": MessageLookupByLibrary.simpleMessage("Пользовательский"),
     "customOutboundInUse": m10,
     "customRoutingDraftHint": MessageLookupByLibrary.simpleMessage(
@@ -1519,43 +1517,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "inviteCodeValidation": MessageLookupByLibrary.simpleMessage(
       "Введите код приглашения",
     ),
-    "ipAsn": MessageLookupByLibrary.simpleMessage("ASN"),
-    "ipFlagAbuser": MessageLookupByLibrary.simpleMessage("Злоупотребления"),
-    "ipFlagNo": MessageLookupByLibrary.simpleMessage("Нет"),
-    "ipFlagProxy": MessageLookupByLibrary.simpleMessage("Прокси"),
-    "ipFlagTor": MessageLookupByLibrary.simpleMessage("Tor"),
-    "ipFlagVpn": MessageLookupByLibrary.simpleMessage("VPN"),
-    "ipFlagYes": MessageLookupByLibrary.simpleMessage("Да"),
-    "ipFlags": MessageLookupByLibrary.simpleMessage("Метки"),
-    "ipOrganization": MessageLookupByLibrary.simpleMessage("Организация"),
-    "ipQualityDetails": MessageLookupByLibrary.simpleMessage("Качество IP"),
-    "ipQualityFailed": MessageLookupByLibrary.simpleMessage(
-      "Не удалось определить тип IP",
-    ),
-    "ipQualityGood": MessageLookupByLibrary.simpleMessage("Хороший"),
-    "ipQualityLevel": MessageLookupByLibrary.simpleMessage("Уровень"),
-    "ipQualityNormal": MessageLookupByLibrary.simpleMessage("Обычный"),
-    "ipQualityQueryHint": MessageLookupByLibrary.simpleMessage(
-      "Запрос IPQuery, IPLocate, ipapi.is и proxycheck.io по нажатию",
-    ),
-    "ipQualityRetry": MessageLookupByLibrary.simpleMessage("Проверить снова"),
-    "ipQualityRisky": MessageLookupByLibrary.simpleMessage("Рискованный"),
-    "ipQualitySource": MessageLookupByLibrary.simpleMessage("Источник ответа"),
-    "ipQualitySources": MessageLookupByLibrary.simpleMessage("Источники"),
-    "ipSourceIpMismatch": MessageLookupByLibrary.simpleMessage(
-      "Другой исходящий IP",
-    ),
-    "ipSourceNoType": MessageLookupByLibrary.simpleMessage("Тип не определён"),
-    "ipSourceRateLimited": MessageLookupByLibrary.simpleMessage(
-      "Лимит запросов",
-    ),
-    "ipType": MessageLookupByLibrary.simpleMessage("Тип"),
-    "ipTypeBusiness": MessageLookupByLibrary.simpleMessage("Бизнес"),
-    "ipTypeHosting": MessageLookupByLibrary.simpleMessage("Дата-центр"),
-    "ipTypeInferred": MessageLookupByLibrary.simpleMessage("Предположение"),
-    "ipTypeMobile": MessageLookupByLibrary.simpleMessage("Мобильная сеть"),
-    "ipTypeResidential": MessageLookupByLibrary.simpleMessage("Домашний"),
-    "ipTypeUnknown": MessageLookupByLibrary.simpleMessage("Неизвестно"),
     "ipcidr": MessageLookupByLibrary.simpleMessage("IPCIDR"),
     "ipv6Desc": MessageLookupByLibrary.simpleMessage(
       "При включении будет возможно получать IPv6 трафик",
@@ -1639,9 +1600,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "loose": MessageLookupByLibrary.simpleMessage("Свободный"),
     "mainlandNetworkWarning": MessageLookupByLibrary.simpleMessage(
       "Может не подходить для сетей материкового Китая",
-    ),
-    "manageServices": MessageLookupByLibrary.simpleMessage(
-      "Управление сервисами",
     ),
     "manageUserAgents": MessageLookupByLibrary.simpleMessage(
       "Управление списком",
@@ -2524,39 +2482,8 @@ class MessageLookup extends MessageLookupByLibrary {
       "Отправить письмо для сброса",
     ),
     "server": MessageLookupByLibrary.simpleMessage("Сервер"),
-    "serviceAvailability": MessageLookupByLibrary.simpleMessage(
-      "Доступность сервисов",
-    ),
-    "serviceAvailable": MessageLookupByLibrary.simpleMessage("Доступен"),
-    "serviceBlocked": MessageLookupByLibrary.simpleMessage("Заблокирован"),
     "serviceCheckFailed": MessageLookupByLibrary.simpleMessage(
       "Проверка сервиса не удалась",
-    ),
-    "serviceComingSoon": MessageLookupByLibrary.simpleMessage("Скоро"),
-    "serviceDisallowedIsp": MessageLookupByLibrary.simpleMessage(
-      "Провайдер не поддерживается",
-    ),
-    "serviceOriginalsOnly": MessageLookupByLibrary.simpleMessage(
-      "Только оригинальный контент",
-    ),
-    "servicePending": MessageLookupByLibrary.simpleMessage("Не проверено"),
-    "serviceProbeHint": MessageLookupByLibrary.simpleMessage(
-      "Обновите, чтобы проверить маршрут и ответы сервисов",
-    ),
-    "serviceProbeStale": MessageLookupByLibrary.simpleMessage(
-      "Маршрут изменён — обновите проверку",
-    ),
-    "serviceProbeStart": MessageLookupByLibrary.simpleMessage(
-      "Запустите ядро для проверки (в безопасном режиме отключено)",
-    ),
-    "serviceRestricted": MessageLookupByLibrary.simpleMessage("Ограничен"),
-    "serviceStatus": MessageLookupByLibrary.simpleMessage("Состояние сервисов"),
-    "serviceTimeout": MessageLookupByLibrary.simpleMessage(
-      "Время ожидания истекло",
-    ),
-    "serviceUnavailable": MessageLookupByLibrary.simpleMessage("Недоступен"),
-    "serviceUnsupportedRegion": MessageLookupByLibrary.simpleMessage(
-      "Регион не поддерживается",
     ),
     "settings": MessageLookupByLibrary.simpleMessage("Настройки"),
     "show": MessageLookupByLibrary.simpleMessage("Показать"),

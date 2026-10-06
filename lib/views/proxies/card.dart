@@ -5,8 +5,6 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 
-import 'service_check.dart';
-
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
@@ -155,10 +153,6 @@ class ProxyCard extends StatelessWidget {
               onPressed: () {
                 _changeProxy(ref);
               },
-              onLongPress: () => showServiceCheck(
-                context,
-                target: (name: proxy.name, group: groupName),
-              ),
               isSelected: selectedProxyName == proxy.name,
               child: child!,
             );

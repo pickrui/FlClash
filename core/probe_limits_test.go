@@ -7,7 +7,6 @@
 package main
 
 import (
-	"context"
 	"errors"
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
@@ -37,19 +36,6 @@ func TestProbeLimitsAndReadFailures(t *testing.T) {
 		}
 	}
 }
-func TestServiceClaimsAreScopedToNode(t *testing.T) {
-	checker := []serviceChecker{{name: "google"}}
-	a, releaseA := claimServices(context.Background(), checker, "node-a")
-	defer releaseA()
-	b, releaseB := claimServices(context.Background(), checker, "node-b")
-	defer releaseB()
-	_, releaseNew := claimServices(context.Background(), checker, "node-a")
-	defer releaseNew()
-	if a[0].Err() == nil || b[0].Err() != nil {
-		t.Fatal("replacement did not respect node ownership")
-	}
-}
-
 func TestProbeStampObservesSelectionAndMode(t *testing.T) {
 	oldMode := tunnel.Mode()
 	t.Cleanup(func() { tunnel.SetMode(oldMode) })

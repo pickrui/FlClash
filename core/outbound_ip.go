@@ -163,3 +163,12 @@ func parseOutboundIp(body string) (string, string) {
 	}
 	return addr.String(), region
 }
+
+func traceValue(body string, key string) string {
+	for _, line := range strings.Split(body, "\n") {
+		if rest, found := strings.CutPrefix(line, key+"="); found {
+			return strings.TrimSpace(rest)
+		}
+	}
+	return ""
+}

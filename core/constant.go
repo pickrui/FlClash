@@ -118,7 +118,6 @@ const (
 	getIsInitMethod                CoreMethod = "getIsInit"
 	probeMethod                    CoreMethod = "probe"
 	outboundIpMethod               CoreMethod = "outboundIp"
-	serviceCheckMethod             CoreMethod = "serviceCheck"
 	probeRouteMethod               CoreMethod = "probeRoute"
 	networkDiagnosticsMethod       CoreMethod = "networkDiagnostics"
 	forceGcMethod                  CoreMethod = "forceGc"

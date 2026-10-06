@@ -22,6 +22,32 @@ T roundTrip<T>(
 }
 
 void main() {
+  test('retired service settings do not replace existing preferences', () {
+    final props = AppSettingProps.fromJson({
+      'locale': 'ja',
+      'dashboardWidgets': ['networkDetection', 'serviceStatus', 'runTime'],
+      'serviceOrder': ['github', 'netflix'],
+      'disabledServices': ['netflix'],
+      'currentService': 'github',
+      'hideIp': true,
+      'userAgents': ['Custom/1'],
+      'autoRun': true,
+    });
+    expect(props.locale, 'ja');
+    expect(props.autoRun, true);
+    expect(props.hideIp, true);
+    expect(props.userAgents, ['Custom/1']);
+    expect(props.dashboardWidgets, [
+      DashboardWidget.networkDetection,
+      DashboardWidget.runTime,
+    ]);
+    final saved =
+        jsonDecode(jsonEncode(props.toJson())) as Map<String, dynamic>;
+    for (final key in ['serviceOrder', 'disabledServices', 'currentService']) {
+      expect(saved, isNot(contains(key)));
+    }
+    expect(AppSettingProps.fromJson(saved), props);
+  });
   test(
     'tab animation migrates the previous switch and tolerates future values',
     () {

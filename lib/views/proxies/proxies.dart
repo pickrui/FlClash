@@ -5,8 +5,6 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 
-import 'service_check.dart';
-
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/common.dart';
 import 'package:fl_clash/models/state.dart';
@@ -57,11 +55,6 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
         },
         popup: CommonPopupMenu(
           items: [
-            PopupMenuItemData(
-              icon: Icons.travel_explore,
-              label: context.appLocalizations.serviceAvailability,
-              onPressed: () => showServiceCheck(context),
-            ),
             PopupMenuItemData(
               icon: Icons.tune,
               label: appLocalizations.settings,
