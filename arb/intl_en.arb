@@ -1223,5 +1223,12 @@
   "ipTypeUnknown": "Unknown",
   "ipTypeInferred": "Inferred",
   "ipFlagYes": "Yes",
-  "ipFlagNo": "No"
+  "ipFlagNo": "No",
+  "cameraPermissionRequired": "Camera permission required",
+  "cameraPermissionDesc": "Allow camera access in system settings to scan QR codes, or choose a QR code image from the album.",
+  "cameraUnavailable": "Camera unavailable",
+  "invalidProfileQrcode": "This QR code doesn't contain a profile link",
+  "pickFromAlbum": "Choose from album",
+  "retry": "Retry",
+  "toggleFlashlight": "Toggle flashlight"
 }

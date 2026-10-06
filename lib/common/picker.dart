@@ -63,12 +63,12 @@ class Picker {
         xFile.path,
         formats: [BarcodeFormat.qrCode],
       );
-      for (final barcode in capture?.barcodes ?? const <Barcode>[]) {
-        final value = barcode.rawValue;
-        if (value != null && value.isUrl) {
-          return value;
-        }
-      }
+      final url = profileUrlFromQrCodes(
+        (capture?.barcodes ?? const <Barcode>[]).map(
+          (barcode) => barcode.rawValue,
+        ),
+      );
+      if (url != null) return url;
       throw appLocalizations.pleaseUploadValidQrcode;
     } finally {
       await controller.dispose();

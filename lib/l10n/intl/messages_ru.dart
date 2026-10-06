@@ -415,6 +415,15 @@ class MessageLookup extends MessageLookupByLibrary {
       "Кэш поврежден. Хотите очистить его?",
     ),
     "calculatingQuote": MessageLookupByLibrary.simpleMessage("Расчёт…"),
+    "cameraPermissionDesc": MessageLookupByLibrary.simpleMessage(
+      "Разрешите доступ к камере в системных настройках, чтобы сканировать QR-коды, или выберите изображение QR-кода из галереи.",
+    ),
+    "cameraPermissionRequired": MessageLookupByLibrary.simpleMessage(
+      "Требуется доступ к камере",
+    ),
+    "cameraUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Камера недоступна",
+    ),
     "cancel": MessageLookupByLibrary.simpleMessage("Отмена"),
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage(
       "Отменить выбор всего",
@@ -1385,6 +1394,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ошибка проверки сертификата",
     ),
     "invalidPolicy": m28,
+    "invalidProfileQrcode": MessageLookupByLibrary.simpleMessage(
+      "Этот QR-код не содержит ссылку на профиль",
+    ),
     "invalidRuleSet": m29,
     "invalidSubRule": m30,
     "inviteCodeHint": MessageLookupByLibrary.simpleMessage(
@@ -1778,6 +1790,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "personalRouting": MessageLookupByLibrary.simpleMessage(
       "Личная маршрутизация",
     ),
+    "pickFromAlbum": MessageLookupByLibrary.simpleMessage("Выбрать из галереи"),
     "pinWindow": MessageLookupByLibrary.simpleMessage(
       "Закрепить поверх всех окон",
     ),
@@ -2103,6 +2116,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "resumeUpdates": MessageLookupByLibrary.simpleMessage(
       "Возобновить обновление",
     ),
+    "retry": MessageLookupByLibrary.simpleMessage("Повторить"),
     "retryCloudSyncWithCertificateException":
         MessageLookupByLibrary.simpleMessage(
           "Временно разрешить и синхронизировать",
@@ -2512,6 +2526,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "tip": MessageLookupByLibrary.simpleMessage("подсказка"),
     "todayUsed": MessageLookupByLibrary.simpleMessage("Использовано сегодня"),
     "toggle": MessageLookupByLibrary.simpleMessage("Переключить"),
+    "toggleFlashlight": MessageLookupByLibrary.simpleMessage(
+      "Переключить фонарик",
+    ),
     "tokenLabel": MessageLookupByLibrary.simpleMessage("Токен доступа"),
     "tokenValidation": MessageLookupByLibrary.simpleMessage(
       "Пожалуйста, введите токен доступа",

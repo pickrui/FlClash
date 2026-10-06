@@ -7,6 +7,9 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:fl_clash/common/color.dart';
+import 'package:fl_clash/common/context.dart';
+import 'package:fl_clash/common/string.dart';
+import 'package:fl_clash/plugins/app.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/widgets/activate_box.dart';
 import 'package:material_ui/material_ui.dart';
@@ -29,6 +32,9 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
   StreamSubscription<Object?>? _subscription;
   bool _leftApp = false;
   bool _pickingImage = false;
+  bool _completed = false;
+  Timer? _invalidTimer;
+  final _invalid = ValueNotifier(false);
 
   void _cancelSubscription() {
     unawaited(_subscription?.cancel());
@@ -39,21 +45,56 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _subscription = controller.barcodes.listen(_handleBarcode);
-    unawaited(controller.start());
+    _listen();
+    unawaited(_start());
   }
 
-  void _handleBarcode(BarcodeCapture barcodeCapture) {
-    if (!mounted || _subscription == null || barcodeCapture.barcodes.isEmpty) {
+  void _listen() {
+    _subscription ??= controller.barcodes.listen(
+      _handleBarcode,
+      onError: (Object _) => _showInvalid(),
+    );
+  }
+
+  Future<void> _start() async {
+    if (_completed ||
+        controller.value.isStarting ||
+        controller.value.isRunning) {
       return;
     }
-    final barcode = barcodeCapture.barcodes.first;
-    _cancelSubscription();
-    if (barcode.type == BarcodeType.url && barcode.rawValue != null) {
-      Navigator.pop<String>(context, barcode.rawValue);
-    } else {
-      Navigator.pop(context);
+    try {
+      await controller.start();
+    } on MobileScannerException catch (_) {
+      // The controller exposes the camera error to the retry interface.
     }
+  }
+
+  void _showInvalid() {
+    if (!mounted || _completed) return;
+    _invalidTimer?.cancel();
+    _invalid.value = true;
+    _invalidTimer = Timer(
+      const Duration(seconds: 2),
+      () => _invalid.value = false,
+    );
+  }
+
+  void _handleBarcode(BarcodeCapture capture) {
+    if (!mounted ||
+        _completed ||
+        _subscription == null ||
+        capture.barcodes.isEmpty ||
+        ModalRoute.isCurrentOf(context) == false) {
+      return;
+    }
+    final url = profileUrlFromQrCodes(capture.barcodes.map((b) => b.rawValue));
+    if (url == null) {
+      _showInvalid();
+      return;
+    }
+    _completed = true;
+    _cancelSubscription();
+    Navigator.pop<String>(context, url);
   }
 
   @override
@@ -82,8 +123,8 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
       case AppLifecycleState.paused:
         return;
       case AppLifecycleState.resumed:
-        _subscription ??= controller.barcodes.listen(_handleBarcode);
-        unawaited(controller.start());
+        _listen();
+        unawaited(_start());
       case AppLifecycleState.inactive:
         _cancelSubscription();
         if (controller.value.isRunning) {
@@ -93,6 +134,7 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
   }
 
   Future<void> _pickImage() async {
+    if (_pickingImage || _completed) return;
     final profileAction = context.profileAction;
     _pickingImage = true;
     try {
@@ -104,93 +146,159 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    final double sideLength = min(
-      400,
-      MediaQuery.of(context).size.width * 0.67,
-    );
-    final scanWindow = Rect.fromCenter(
-      center: MediaQuery.sizeOf(context).center(Offset.zero),
-      width: sideLength,
-      height: sideLength,
-    );
-    return Scaffold(
-      body: Stack(
-        children: [
-          Center(
-            child: MobileScanner(
-              controller: controller,
-              scanWindow: scanWindow,
-            ),
-          ),
-          CustomPaint(painter: ScannerOverlay(scanWindow: scanWindow)),
-          AppBar(
-            backgroundColor: Colors.transparent,
-            automaticallyImplyLeading: false,
-            leading: IconButton(
-              style: IconButton.styleFrom(
-                iconSize: 32,
-                foregroundColor: Colors.white,
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              icon: const Icon(Icons.close),
-            ),
-            actions: [
-              ValueListenableBuilder<MobileScannerState>(
-                valueListenable: controller,
-                builder: (context, state, _) {
-                  var icon = const Icon(Icons.flash_off);
-                  var backgroundColor = Colors.black12;
-                  switch (state.torchState) {
-                    case TorchState.off:
-                      icon = const Icon(Icons.flash_off);
-                      backgroundColor = Colors.black12;
-                    case TorchState.on:
-                      icon = const Icon(Icons.flash_on);
-                      backgroundColor = Colors.orange;
-                    case TorchState.unavailable:
-                      icon = const Icon(Icons.flash_off);
-                      backgroundColor = Colors.transparent;
-                    case TorchState.auto:
-                      icon = const Icon(Icons.flash_auto);
-                      backgroundColor = Colors.orange;
-                  }
-                  return Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 8),
-                    child: ActivateBox(
-                      active: state.torchState != TorchState.unavailable,
-                      child: IconButton(
-                        color: Colors.white,
-                        icon: icon,
-                        style: IconButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: backgroundColor,
-                        ),
-                        onPressed: () => controller.toggleTorch(),
-                      ),
+    final l = context.appLocalizations;
+    return Theme(
+      data: ThemeData.dark(useMaterial3: true),
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            final layout = _ScanLayout(
+              size: constraints.biggest,
+              padding: MediaQuery.paddingOf(context),
+              hintHeight: MediaQuery.textScalerOf(context).scale(14) * 1.5 * 2,
+            );
+            return Stack(
+              children: [
+                Positioned.fill(
+                  child: MobileScanner(
+                    controller: controller,
+                    scanWindow: layout.scanWindow,
+                    errorBuilder: (_, _) => const SizedBox.shrink(),
+                  ),
+                ),
+                Positioned.fill(
+                  child: ValueListenableBuilder<MobileScannerState>(
+                    valueListenable: controller,
+                    builder: (context, state, _) {
+                      final error = state.error;
+                      if (error != null) {
+                        final denied =
+                            error.errorCode ==
+                            MobileScannerErrorCode.permissionDenied;
+                        return SafeArea(
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.fromLTRB(
+                              24,
+                              kToolbarHeight + 24,
+                              24,
+                              24,
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.no_photography_outlined,
+                                  size: 48,
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  denied
+                                      ? l.cameraPermissionRequired
+                                      : l.cameraUnavailable,
+                                  textAlign: TextAlign.center,
+                                ),
+                                if (denied)
+                                  Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Text(
+                                      l.cameraPermissionDesc,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                if (error.errorCode !=
+                                    MobileScannerErrorCode.unsupported)
+                                  FilledButton.icon(
+                                    onPressed: denied
+                                        ? () => app?.openAppSettings()
+                                        : _start,
+                                    icon: Icon(
+                                      denied ? Icons.settings : Icons.refresh,
+                                    ),
+                                    label: Text(denied ? l.settings : l.retry),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+                      return Stack(
+                        children: [
+                          Positioned.fill(
+                            child: CustomPaint(
+                              painter: ScannerOverlay(
+                                scanWindow: layout.scanWindow,
+                              ),
+                            ),
+                          ),
+                          Positioned.fromRect(
+                            rect: layout.hint,
+                            child: ValueListenableBuilder<bool>(
+                              valueListenable: _invalid,
+                              builder: (context, invalid, _) => Semantics(
+                                liveRegion: true,
+                                child: Text(
+                                  invalid
+                                      ? l.invalidProfileQrcode
+                                      : l.qrcodeDesc,
+                                  textAlign: TextAlign.center,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: invalid
+                                        ? Colors.orangeAccent
+                                        : Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Positioned.fromRect(
+                            rect: layout.torch,
+                            child: ActivateBox(
+                              active:
+                                  state.torchState != TorchState.unavailable,
+                              child: IconButton.filledTonal(
+                                tooltip: l.toggleFlashlight,
+                                onPressed: () => controller.toggleTorch(),
+                                icon: Icon(
+                                  state.torchState == TorchState.on
+                                      ? Icons.flash_on
+                                      : Icons.flash_off,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: AppBar(
+                    backgroundColor: Colors.transparent,
+                    automaticallyImplyLeading: false,
+                    leading: IconButton(
+                      tooltip: l.close,
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.close),
                     ),
-                  );
-                },
-              ),
-            ],
-          ),
-          Container(
-            margin: const EdgeInsets.only(bottom: 32),
-            alignment: Alignment.bottomCenter,
-            child: IconButton(
-              color: Colors.white,
-              style: IconButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Colors.grey,
-              ),
-              padding: const EdgeInsets.all(16),
-              iconSize: 32.0,
-              onPressed: _pickImage,
-              icon: const Icon(Icons.photo_camera_back),
-            ),
-          ),
-        ],
+                    actions: [
+                      IconButton(
+                        tooltip: l.pickFromAlbum,
+                        onPressed: _pickImage,
+                        icon: const Icon(Icons.photo_camera_back),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -199,6 +307,8 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _cancelSubscription();
+    _invalidTimer?.cancel();
+    _invalid.dispose();
     unawaited(controller.dispose());
     super.dispose();
   }
@@ -257,5 +367,135 @@ class ScannerOverlay extends CustomPainter {
   bool shouldRepaint(ScannerOverlay oldDelegate) {
     return scanWindow != oldDelegate.scanWindow ||
         borderRadius != oldDelegate.borderRadius;
+  }
+}
+
+const _scanWindowMaxSide = 400.0;
+const _scanWindowShortestSideRatio = 0.67;
+const _hintGap = 24.0;
+const _hintInset = 32.0;
+const _torchSize = 64.0;
+const _torchBottomMargin = 48.0;
+const _torchSideMargin = 24.0;
+const _controlGap = 16.0;
+const _edgeMargin = 16.0;
+
+class _ScanLayout {
+  const _ScanLayout._({
+    required this.scanWindow,
+    required this.hint,
+    required this.torch,
+  });
+
+  factory _ScanLayout({
+    required Size size,
+    required EdgeInsets padding,
+    required double hintHeight,
+  }) {
+    final below = _ScanLayout._torchBelow(size, padding, hintHeight);
+    final beside = _ScanLayout._torchBeside(size, padding, hintHeight);
+    return beside.scanWindow.width > below.scanWindow.width ? beside : below;
+  }
+
+  factory _ScanLayout._torchBelow(
+    Size size,
+    EdgeInsets padding,
+    double hintHeight,
+  ) {
+    final torchTop =
+        size.height - max(padding.bottom, _torchBottomMargin) - _torchSize;
+    final scanWindow = _fitScanWindow(
+      size: size,
+      top: padding.top + kToolbarHeight,
+      bottom: torchTop - _controlGap - _hintGap - hintHeight,
+      maxWidth: size.width,
+    );
+    return _ScanLayout._(
+      scanWindow: scanWindow,
+      hint: Rect.fromLTWH(
+        padding.left + _hintInset,
+        scanWindow.bottom + _hintGap,
+        max(0, size.width - padding.horizontal - 2 * _hintInset),
+        hintHeight,
+      ),
+      torch: Rect.fromLTWH(
+        padding.left + (size.width - padding.horizontal - _torchSize) / 2,
+        torchTop,
+        _torchSize,
+        _torchSize,
+      ),
+    );
+  }
+
+  factory _ScanLayout._torchBeside(
+    Size size,
+    EdgeInsets padding,
+    double hintHeight,
+  ) {
+    final inset =
+        max(padding.left, padding.right) +
+        _torchSideMargin +
+        _torchSize +
+        _controlGap;
+    final scanWindow = _fitScanWindow(
+      size: size,
+      top: padding.top + _edgeMargin,
+      bottom:
+          size.height -
+          max(padding.bottom, _edgeMargin) -
+          _hintGap -
+          hintHeight,
+      maxWidth: size.width - 2 * inset,
+    );
+    final torch = Rect.fromLTWH(
+      size.width - padding.right - _torchSideMargin - _torchSize,
+      max(padding.top + kToolbarHeight, scanWindow.center.dy - _torchSize / 2),
+      _torchSize,
+      _torchSize,
+    );
+    final hintTop = scanWindow.bottom + _hintGap;
+    final hintInset = torch.bottom <= hintTop
+        ? max(padding.left, padding.right) + _hintInset
+        : inset;
+    return _ScanLayout._(
+      scanWindow: scanWindow,
+      hint: Rect.fromLTWH(
+        hintInset,
+        hintTop,
+        max(0, size.width - 2 * hintInset),
+        hintHeight,
+      ),
+      torch: torch,
+    );
+  }
+
+  final Rect scanWindow;
+  final Rect hint;
+  final Rect torch;
+
+  static Rect _fitScanWindow({
+    required Size size,
+    required double top,
+    required double bottom,
+    required double maxWidth,
+  }) {
+    final side = max(
+      0.0,
+      [
+        _scanWindowMaxSide,
+        size.shortestSide * _scanWindowShortestSideRatio,
+        bottom - top,
+        maxWidth,
+      ].reduce(min),
+    );
+    final centerY = max(
+      top + side / 2,
+      min(size.height / 2, bottom - side / 2),
+    );
+    return Rect.fromCenter(
+      center: Offset(size.width / 2, centerY),
+      width: side,
+      height: side,
+    );
   }
 }

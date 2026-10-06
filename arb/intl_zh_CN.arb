@@ -1223,5 +1223,12 @@
   "ipTypeUnknown": "未知",
   "ipTypeInferred": "推测",
   "ipFlagYes": "是",
-  "ipFlagNo": "否"
+  "ipFlagNo": "否",
+  "cameraPermissionRequired": "需要相机权限",
+  "cameraPermissionDesc": "请在系统设置中允许访问相机以扫描二维码，或从相册选择二维码图片。",
+  "cameraUnavailable": "相机不可用",
+  "invalidProfileQrcode": "该二维码不包含配置文件链接",
+  "pickFromAlbum": "从相册选择",
+  "retry": "重试",
+  "toggleFlashlight": "切换闪光灯"
 }

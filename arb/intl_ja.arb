@@ -1223,5 +1223,12 @@
   "ipTypeUnknown": "不明",
   "ipTypeInferred": "推定",
   "ipFlagYes": "はい",
-  "ipFlagNo": "いいえ"
+  "ipFlagNo": "いいえ",
+  "cameraPermissionRequired": "カメラの権限が必要です",
+  "cameraPermissionDesc": "QRコードをスキャンするには、システム設定でカメラへのアクセスを許可するか、アルバムからQRコード画像を選択してください。",
+  "cameraUnavailable": "カメラを使用できません",
+  "invalidProfileQrcode": "このQRコードにはプロファイルのリンクが含まれていません",
+  "pickFromAlbum": "アルバムから選択",
+  "retry": "再試行",
+  "toggleFlashlight": "ライト切替"
 }

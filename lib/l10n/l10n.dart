@@ -10319,6 +10319,71 @@ class AppLocalizations {
   String get ipFlagNo {
     return Intl.message('No', name: 'ipFlagNo', desc: '', args: []);
   }
+
+  /// `Camera permission required`
+  String get cameraPermissionRequired {
+    return Intl.message(
+      'Camera permission required',
+      name: 'cameraPermissionRequired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow camera access in system settings to scan QR codes, or choose a QR code image from the album.`
+  String get cameraPermissionDesc {
+    return Intl.message(
+      'Allow camera access in system settings to scan QR codes, or choose a QR code image from the album.',
+      name: 'cameraPermissionDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Camera unavailable`
+  String get cameraUnavailable {
+    return Intl.message(
+      'Camera unavailable',
+      name: 'cameraUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This QR code doesn't contain a profile link`
+  String get invalidProfileQrcode {
+    return Intl.message(
+      'This QR code doesn\'t contain a profile link',
+      name: 'invalidProfileQrcode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose from album`
+  String get pickFromAlbum {
+    return Intl.message(
+      'Choose from album',
+      name: 'pickFromAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Retry`
+  String get retry {
+    return Intl.message('Retry', name: 'retry', desc: '', args: []);
+  }
+
+  /// `Toggle flashlight`
+  String get toggleFlashlight {
+    return Intl.message(
+      'Toggle flashlight',
+      name: 'toggleFlashlight',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

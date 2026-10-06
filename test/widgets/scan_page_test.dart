@@ -351,4 +351,48 @@ void main() {
     expect(platform.startCalls, 2);
     expect(tester.takeException(), isNull);
   });
+  testWidgets('invalid QR stays open and later text URL succeeds once', (
+    tester,
+  ) async {
+    var pops = 0;
+    String? result;
+    await pumpScanPage(
+      tester,
+      onPopped: (value) {
+        pops++;
+        result = value;
+      },
+    );
+    platform.emit(_capture(BarcodeType.text, 'not a profile'));
+    await tester.pumpAndSettle();
+    expect(pops, 0);
+    expect(find.byType(ScanPage), findsOneWidget);
+    platform.emit(
+      const BarcodeCapture(
+        barcodes: [
+          Barcode(rawValue: 'mailto:bad@example.invalid'),
+          Barcode(type: BarcodeType.text, rawValue: ' https://sub.example/ok '),
+        ],
+      ),
+    );
+    platform.emit(_capture(BarcodeType.url, 'https://sub.example/duplicate'));
+    await tester.pumpAndSettle();
+    expect(pops, 1);
+    expect(result, 'https://sub.example/ok');
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('landscape camera window stays inside available height', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(740, 360);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await pumpScanPage(tester);
+    final scanner = tester.widget<MobileScanner>(find.byType(MobileScanner));
+    expect(scanner.scanWindow!.bottom, lessThan(360));
+    expect(scanner.scanWindow!.top, greaterThanOrEqualTo(0));
+    expect(tester.takeException(), isNull);
+  });
 }

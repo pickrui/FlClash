@@ -1223,5 +1223,12 @@
   "ipTypeUnknown": "Неизвестно",
   "ipTypeInferred": "Предположение",
   "ipFlagYes": "Да",
-  "ipFlagNo": "Нет"
+  "ipFlagNo": "Нет",
+  "cameraPermissionRequired": "Требуется доступ к камере",
+  "cameraPermissionDesc": "Разрешите доступ к камере в системных настройках, чтобы сканировать QR-коды, или выберите изображение QR-кода из галереи.",
+  "cameraUnavailable": "Камера недоступна",
+  "invalidProfileQrcode": "Этот QR-код не содержит ссылку на профиль",
+  "pickFromAlbum": "Выбрать из галереи",
+  "retry": "Повторить",
+  "toggleFlashlight": "Переключить фонарик"
 }

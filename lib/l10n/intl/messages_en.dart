@@ -409,6 +409,15 @@ class MessageLookup extends MessageLookupByLibrary {
       "The cache is corrupt. Do you want to clear it?",
     ),
     "calculatingQuote": MessageLookupByLibrary.simpleMessage("Calculating…"),
+    "cameraPermissionDesc": MessageLookupByLibrary.simpleMessage(
+      "Allow camera access in system settings to scan QR codes, or choose a QR code image from the album.",
+    ),
+    "cameraPermissionRequired": MessageLookupByLibrary.simpleMessage(
+      "Camera permission required",
+    ),
+    "cameraUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Camera unavailable",
+    ),
     "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage(
       "Cancel select all",
@@ -1336,6 +1345,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Certificate Verification Failed",
     ),
     "invalidPolicy": m28,
+    "invalidProfileQrcode": MessageLookupByLibrary.simpleMessage(
+      "This QR code doesn\'t contain a profile link",
+    ),
     "invalidRuleSet": m29,
     "invalidSubRule": m30,
     "inviteCodeHint": MessageLookupByLibrary.simpleMessage("Enter invite code"),
@@ -1689,6 +1701,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Payment endpoint returned an unknown format",
     ),
     "personalRouting": MessageLookupByLibrary.simpleMessage("Personal routing"),
+    "pickFromAlbum": MessageLookupByLibrary.simpleMessage("Choose from album"),
     "pinWindow": MessageLookupByLibrary.simpleMessage("Pin window"),
     "planEnded": MessageLookupByLibrary.simpleMessage("Ended"),
     "planInUse": MessageLookupByLibrary.simpleMessage("In use"),
@@ -1998,6 +2011,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "restoreSuccess": MessageLookupByLibrary.simpleMessage("Restore success"),
     "resumeUpdates": MessageLookupByLibrary.simpleMessage("Resume updates"),
+    "retry": MessageLookupByLibrary.simpleMessage("Retry"),
     "retryCloudSyncWithCertificateException":
         MessageLookupByLibrary.simpleMessage("Allow Temporarily and Sync"),
     "retryWithoutCertificateVerification": MessageLookupByLibrary.simpleMessage(
@@ -2375,6 +2389,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "tip": MessageLookupByLibrary.simpleMessage("tip"),
     "todayUsed": MessageLookupByLibrary.simpleMessage("Today\'s Usage"),
     "toggle": MessageLookupByLibrary.simpleMessage("Toggle"),
+    "toggleFlashlight": MessageLookupByLibrary.simpleMessage(
+      "Toggle flashlight",
+    ),
     "tokenLabel": MessageLookupByLibrary.simpleMessage("Access Token"),
     "tokenValidation": MessageLookupByLibrary.simpleMessage(
       "Please enter Access Token",

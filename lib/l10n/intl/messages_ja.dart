@@ -330,6 +330,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "キャッシュが破損しています。クリアしますか？",
     ),
     "calculatingQuote": MessageLookupByLibrary.simpleMessage("計算中…"),
+    "cameraPermissionDesc": MessageLookupByLibrary.simpleMessage(
+      "QRコードをスキャンするには、システム設定でカメラへのアクセスを許可するか、アルバムからQRコード画像を選択してください。",
+    ),
+    "cameraPermissionRequired": MessageLookupByLibrary.simpleMessage(
+      "カメラの権限が必要です",
+    ),
+    "cameraUnavailable": MessageLookupByLibrary.simpleMessage("カメラを使用できません"),
     "cancel": MessageLookupByLibrary.simpleMessage("キャンセル"),
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage("全選択解除"),
     "certificateCheckOnlyHint": MessageLookupByLibrary.simpleMessage(
@@ -1113,6 +1120,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "証明書の検証に失敗しました",
     ),
     "invalidPolicy": m28,
+    "invalidProfileQrcode": MessageLookupByLibrary.simpleMessage(
+      "このQRコードにはプロファイルのリンクが含まれていません",
+    ),
     "invalidRuleSet": m29,
     "invalidSubRule": m30,
     "inviteCodeHint": MessageLookupByLibrary.simpleMessage("招待コードを入力"),
@@ -1414,6 +1424,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "支払いエンドポイントが不明な形式を返しました",
     ),
     "personalRouting": MessageLookupByLibrary.simpleMessage("個人ルーティング"),
+    "pickFromAlbum": MessageLookupByLibrary.simpleMessage("アルバムから選択"),
     "pinWindow": MessageLookupByLibrary.simpleMessage("最前面に固定"),
     "planEnded": MessageLookupByLibrary.simpleMessage("終了"),
     "planInUse": MessageLookupByLibrary.simpleMessage("使用中"),
@@ -1661,6 +1672,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "restoreStrategy_override": MessageLookupByLibrary.simpleMessage("上書き"),
     "restoreSuccess": MessageLookupByLibrary.simpleMessage("復元に成功しました"),
     "resumeUpdates": MessageLookupByLibrary.simpleMessage("更新を再開"),
+    "retry": MessageLookupByLibrary.simpleMessage("再試行"),
     "retryCloudSyncWithCertificateException":
         MessageLookupByLibrary.simpleMessage("一時的に許可して設定を同期"),
     "retryWithoutCertificateVerification": MessageLookupByLibrary.simpleMessage(
@@ -1978,6 +1990,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tip": MessageLookupByLibrary.simpleMessage("ヒント"),
     "todayUsed": MessageLookupByLibrary.simpleMessage("今日の使用量"),
     "toggle": MessageLookupByLibrary.simpleMessage("トグル"),
+    "toggleFlashlight": MessageLookupByLibrary.simpleMessage("ライト切替"),
     "tokenLabel": MessageLookupByLibrary.simpleMessage("アクセストークン"),
     "tokenValidation": MessageLookupByLibrary.simpleMessage(
       "アクセストークンを入力してください",

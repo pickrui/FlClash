@@ -319,6 +319,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "bypassDomainDesc": MessageLookupByLibrary.simpleMessage("仅在系统代理启用时生效"),
     "cacheCorrupt": MessageLookupByLibrary.simpleMessage("缓存已损坏，是否清空？"),
     "calculatingQuote": MessageLookupByLibrary.simpleMessage("计算中…"),
+    "cameraPermissionDesc": MessageLookupByLibrary.simpleMessage(
+      "请在系统设置中允许访问相机以扫描二维码，或从相册选择二维码图片。",
+    ),
+    "cameraPermissionRequired": MessageLookupByLibrary.simpleMessage("需要相机权限"),
+    "cameraUnavailable": MessageLookupByLibrary.simpleMessage("相机不可用"),
     "cancel": MessageLookupByLibrary.simpleMessage("取消"),
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage("取消全选"),
     "certificateCheckOnlyHint": MessageLookupByLibrary.simpleMessage(
@@ -978,6 +983,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "invalidCertificateTitle": MessageLookupByLibrary.simpleMessage("证书校验失败"),
     "invalidPolicy": m28,
+    "invalidProfileQrcode": MessageLookupByLibrary.simpleMessage(
+      "该二维码不包含配置文件链接",
+    ),
     "invalidRuleSet": m29,
     "invalidSubRule": m30,
     "inviteCodeHint": MessageLookupByLibrary.simpleMessage("请输入邀请码"),
@@ -1243,6 +1251,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "支付接口返回未知格式",
     ),
     "personalRouting": MessageLookupByLibrary.simpleMessage("个人分流"),
+    "pickFromAlbum": MessageLookupByLibrary.simpleMessage("从相册选择"),
     "pinWindow": MessageLookupByLibrary.simpleMessage("窗口置顶"),
     "planEnded": MessageLookupByLibrary.simpleMessage("已结束"),
     "planInUse": MessageLookupByLibrary.simpleMessage("使用中"),
@@ -1458,6 +1467,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "restoreStrategy_override": MessageLookupByLibrary.simpleMessage("覆盖"),
     "restoreSuccess": MessageLookupByLibrary.simpleMessage("恢复成功"),
     "resumeUpdates": MessageLookupByLibrary.simpleMessage("恢复刷新"),
+    "retry": MessageLookupByLibrary.simpleMessage("重试"),
     "retryCloudSyncWithCertificateException":
         MessageLookupByLibrary.simpleMessage("临时允许并同步配置"),
     "retryWithoutCertificateVerification": MessageLookupByLibrary.simpleMessage(
@@ -1753,6 +1763,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tip": MessageLookupByLibrary.simpleMessage("提示"),
     "todayUsed": MessageLookupByLibrary.simpleMessage("今日使用"),
     "toggle": MessageLookupByLibrary.simpleMessage("切换"),
+    "toggleFlashlight": MessageLookupByLibrary.simpleMessage("切换闪光灯"),
     "tokenLabel": MessageLookupByLibrary.simpleMessage("Access Token"),
     "tokenValidation": MessageLookupByLibrary.simpleMessage("请输入 Access Token"),
     "tolerance": MessageLookupByLibrary.simpleMessage("容差"),

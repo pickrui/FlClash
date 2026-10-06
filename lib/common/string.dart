@@ -19,9 +19,9 @@ extension StringExtension on String {
   }
 
   dynamic get splitByMultipleSeparators {
-    final parts = split(
-      RegExp(r'[, ;]+'),
-    ).where((part) => part.isNotEmpty).toList();
+    final parts = split(RegExp(r'[, ;]+'))
+        .where((part) => part.isNotEmpty)
+        .toList();
 
     return parts.length > 1 ? parts : this;
   }
@@ -82,4 +82,18 @@ class SearchQuery {
     final text = fields.nonNulls.join('\n').toLowerCase();
     return terms.every(text.contains);
   }
+}
+
+String? profileUrlFromQrCodes(Iterable<String?> values) {
+  for (final raw in values) {
+    final value = raw?.trim();
+    if (value == null || value.length > 8192) continue;
+    final uri = Uri.tryParse(value);
+    if (uri != null &&
+        (uri.isScheme('http') || uri.isScheme('https')) &&
+        uri.host.isNotEmpty) {
+      return value;
+    }
+  }
+  return null;
 }
