@@ -141,10 +141,12 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
       actions: _buildActions(isTab: isTab, hasProviders: hasProviders),
       title: appLocalizations.proxies,
       searchState: AppBarSearchState(onSearch: _onSearch),
-      body: switch (proxiesType) {
-        ProxiesType.tab => ProxiesTabView(key: _proxiesTabKey),
-        ProxiesType.list => const ProxiesListView(),
-      },
+      body: AppBarClearance(
+        child: switch (proxiesType) {
+          ProxiesType.tab => ProxiesTabView(key: _proxiesTabKey),
+          ProxiesType.list => const ProxiesListView(),
+        },
+      ),
     );
   }
 }

@@ -8,7 +8,6 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
 import 'dialog.dart';
-import 'list.dart';
 
 class VisibilityToggleButton extends StatelessWidget {
   final bool obscureText;
@@ -30,62 +29,6 @@ class VisibilityToggleButton extends StatelessWidget {
         obscureText ? Icons.visibility_outlined : Icons.visibility_off_outlined,
       ),
       onPressed: onPressed,
-    );
-  }
-}
-
-class OptionsDialog<T> extends StatelessWidget {
-  final String title;
-  final List<T> options;
-  final T value;
-  final String Function(T value) textBuilder;
-  final String? Function(T value)? subtitleBuilder;
-
-  const OptionsDialog({
-    super.key,
-    required this.title,
-    required this.options,
-    required this.textBuilder,
-    this.subtitleBuilder,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return CommonDialog(
-      title: title,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-      child: RadioGroup(
-        onChanged: (value) {
-          Navigator.of(context).pop(value);
-        },
-        groupValue: value,
-        child: Wrap(
-          children: [
-            for (final option in options)
-              Builder(
-                builder: (context) {
-                  if (value == option) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      Scrollable.ensureVisible(context);
-                    });
-                  }
-                  final subtitle = subtitleBuilder?.call(option);
-                  return ListItem.radio(
-                    delegate: RadioDelegate(
-                      value: option,
-                      onTap: () {
-                        Navigator.of(context).pop(option);
-                      },
-                    ),
-                    title: Text(textBuilder(option)),
-                    subtitle: subtitle != null ? Text(subtitle) : null,
-                  );
-                },
-              ),
-          ],
-        ),
-      ),
     );
   }
 }

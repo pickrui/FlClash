@@ -307,67 +307,69 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
           ),
         ],
       ],
-      body: Column(
-        children: [
-          if (serviceWarning != null)
-            MaterialBanner(
-              leading: Icon(
-                serviceFailed ? Icons.error_outline : Icons.warning_amber,
-                color: serviceFailed
-                    ? context.colorScheme.error
-                    : Colors.orange,
-              ),
-              content: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(serviceWarning),
-                  if (certificateHint != null) ...[
-                    const SizedBox(height: 8),
-                    Text(certificateHint),
+      body: AppBarClearance(
+        child: Column(
+          children: [
+            if (serviceWarning != null)
+              MaterialBanner(
+                leading: Icon(
+                  serviceFailed ? Icons.error_outline : Icons.warning_amber,
+                  color: serviceFailed
+                      ? context.colorScheme.error
+                      : Colors.orange,
+                ),
+                content: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(serviceWarning),
+                    if (certificateHint != null) ...[
+                      const SizedBox(height: 8),
+                      Text(certificateHint),
+                    ],
+                    if (certificateRetryError != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        accountState.isLoggedIn
+                            ? AppLocalizations
+                                  .current
+                                  .certificateSyncRetryDescription
+                            : AppLocalizations.current.certificateCheckOnlyHint,
+                      ),
+                    ],
                   ],
-                  if (certificateRetryError != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      accountState.isLoggedIn
-                          ? AppLocalizations
-                                .current
-                                .certificateSyncRetryDescription
-                          : AppLocalizations.current.certificateCheckOnlyHint,
+                ),
+                actions: [
+                  if (certificateRetryError != null)
+                    TextButton(
+                      onPressed: _isCheckingService || accountBusy
+                          ? null
+                          : () => _checkHealth(
+                              certificateError: certificateRetryError,
+                            ),
+                      child: Text(
+                        accountState.isLoggedIn
+                            ? AppLocalizations
+                                  .current
+                                  .retryCloudSyncWithCertificateException
+                            : AppLocalizations
+                                  .current
+                                  .retryWithoutCertificateVerification,
+                      ),
                     ),
-                  ],
+                  TextButton(
+                    onPressed: _isCheckingService ? null : _checkHealth,
+                    child: Text(AppLocalizations.current.checkApi),
+                  ),
                 ],
               ),
-              actions: [
-                if (certificateRetryError != null)
-                  TextButton(
-                    onPressed: _isCheckingService || accountBusy
-                        ? null
-                        : () => _checkHealth(
-                            certificateError: certificateRetryError,
-                          ),
-                    child: Text(
-                      accountState.isLoggedIn
-                          ? AppLocalizations
-                                .current
-                                .retryCloudSyncWithCertificateException
-                          : AppLocalizations
-                                .current
-                                .retryWithoutCertificateVerification,
-                    ),
-                  ),
-                TextButton(
-                  onPressed: _isCheckingService ? null : _checkHealth,
-                  child: Text(AppLocalizations.current.checkApi),
-                ),
-              ],
+            Expanded(
+              child: accountState.isLoggedIn
+                  ? _buildLoggedIn(accountState)
+                  : _buildLoggedOut(),
             ),
-          Expanded(
-            child: accountState.isLoggedIn
-                ? _buildLoggedIn(accountState)
-                : _buildLoggedOut(),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -533,9 +535,9 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
     return CommonCard(
       onPressed: storePage == null
           ? null
-          : () => Navigator.of(
-              context,
-            ).push(MaterialPageRoute(builder: storePage)),
+          : () =>
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: storePage)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -803,9 +805,8 @@ class _CloudNodeFilterEntryState extends ConsumerState<CloudNodeFilterEntry> {
   Future<void> _open() async {
     final builder = cloudNodeFilterPageBuilder;
     if (builder == null) return;
-    final result = await Navigator.of(
-      context,
-    ).push<NodeFilterCatalog>(MaterialPageRoute(builder: builder));
+    final result = await Navigator.of(context)
+        .push<NodeFilterCatalog>(MaterialPageRoute(builder: builder));
     if (!mounted) return;
     if (result == null) {
       await _load();

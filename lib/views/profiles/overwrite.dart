@@ -126,6 +126,9 @@ class _OverwriteViewState extends ConsumerState<OverwriteView> {
       ],
       body: CustomScrollView(
         slivers: [
+          SliverToBoxAdapter(
+            child: SizedBox(height: context.contentTopPadding),
+          ),
           OverwriteModeSelector(profileId: widget.profileId),
           if (ref.watch(
                 patchClashConfigProvider.select((config) => config.mode),
@@ -762,7 +765,12 @@ class _EditGlobalAddedRules extends ConsumerWidget {
               illustration: NullStatusIllustration.rules,
             )
           : ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.fromLTRB(
+                16,
+                context.contentTopPadding,
+                16,
+                16,
+              ),
               itemBuilder: (context, index) {
                 final rule = rules[index];
                 return RuleStatusItem(

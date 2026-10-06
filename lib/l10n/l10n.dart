@@ -11513,6 +11513,16 @@ class AppLocalizations {
       args: [count],
     );
   }
+
+  /// `{count} selected`
+  String selectedCountTitle(Object count) {
+    return Intl.message(
+      '$count selected',
+      name: 'selectedCountTitle',
+      desc: '',
+      args: [count],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -201,7 +201,7 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
     return CommonScaffold(
       title: context.appLocalizations.nodeFilter,
       isLoading: _submitting != null,
-      body: _buildBody(context),
+      body: AppBarClearance(child: _buildBody(context)),
     );
   }
 
@@ -581,9 +581,8 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
                 ? null
                 : IconButton(
                     icon: const Icon(Icons.close),
-                    tooltip: MaterialLocalizations.of(
-                      context,
-                    ).clearButtonTooltip,
+                    tooltip: MaterialLocalizations.of(context)
+                        .clearButtonTooltip,
                     onPressed: () => setState(_searchController.clear),
                   ),
             border: const OutlineInputBorder(),

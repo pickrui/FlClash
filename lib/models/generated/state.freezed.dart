@@ -7667,4 +7667,586 @@ $NtpCopyWith<$Res> get ntp {
 }
 }
 
+/// @nodoc
+mixin _$AppBarState {
+
+ AppBarSearchState? get searchState; AppBarEditState? get editState;
+/// Create a copy of AppBarState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$AppBarStateCopyWith<AppBarState> get copyWith => _$AppBarStateCopyWithImpl<AppBarState>(this as AppBarState, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as AppBarState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppBarState&&(identical(other.searchState, _this.searchState) || other.searchState == _this.searchState)&&(identical(other.editState, _this.editState) || other.editState == _this.editState));
+}
+
+
+@override
+int get hashCode {
+  final _this = this as AppBarState;
+  return Object.hash(runtimeType,_this.searchState,_this.editState);
+}
+
+@override
+String toString() {
+  final _this = this as AppBarState;
+  return 'AppBarState(searchState: ${_this.searchState}, editState: ${_this.editState})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $AppBarStateCopyWith<$Res>  {
+  factory $AppBarStateCopyWith(AppBarState value, $Res Function(AppBarState) _then) = _$AppBarStateCopyWithImpl;
+@useResult
+$Res call({
+ AppBarSearchState? searchState, AppBarEditState? editState
+});
+
+
+$AppBarSearchStateCopyWith<$Res>? get searchState;$AppBarEditStateCopyWith<$Res>? get editState;
+
+}
+/// @nodoc
+class _$AppBarStateCopyWithImpl<$Res>
+    implements $AppBarStateCopyWith<$Res> {
+  _$AppBarStateCopyWithImpl(this._self, this._then);
+
+  final AppBarState _self;
+  final $Res Function(AppBarState) _then;
+
+/// Create a copy of AppBarState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? searchState = freezed,Object? editState = freezed,}) {
+  return _then(AppBarState(
+searchState: freezed == searchState ? _self.searchState : searchState // ignore: cast_nullable_to_non_nullable
+as AppBarSearchState?,editState: freezed == editState ? _self.editState : editState // ignore: cast_nullable_to_non_nullable
+as AppBarEditState?,
+  ));
+}
+/// Create a copy of AppBarState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AppBarSearchStateCopyWith<$Res>? get searchState {
+    if (_self.searchState == null) {
+    return null;
+  }
+
+  return $AppBarSearchStateCopyWith<$Res>(_self.searchState!, (value) {
+    return _then(_self.copyWith(searchState: value));
+  });
+}/// Create a copy of AppBarState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AppBarEditStateCopyWith<$Res>? get editState {
+    if (_self.editState == null) {
+    return null;
+  }
+
+  return $AppBarEditStateCopyWith<$Res>(_self.editState!, (value) {
+    return _then(_self.copyWith(editState: value));
+  });
+}
+}
+
+
+/// Adds pattern-matching-related methods to [AppBarState].
+extension AppBarStatePatterns on AppBarState {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _AppBarState value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _AppBarState() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _AppBarState value)  $default,){
+final _that = this;
+switch (_that) {
+case _AppBarState():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _AppBarState value)?  $default,){
+final _that = this;
+switch (_that) {
+case _AppBarState() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AppBarSearchState? searchState,  AppBarEditState? editState)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _AppBarState() when $default != null:
+return $default(_that.searchState,_that.editState);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AppBarSearchState? searchState,  AppBarEditState? editState)  $default,) {final _that = this;
+switch (_that) {
+case _AppBarState():
+return $default(_that.searchState,_that.editState);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AppBarSearchState? searchState,  AppBarEditState? editState)?  $default,) {final _that = this;
+switch (_that) {
+case _AppBarState() when $default != null:
+return $default(_that.searchState,_that.editState);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _AppBarState implements AppBarState {
+  const _AppBarState({this.searchState, this.editState});
+  
+
+@override final  AppBarSearchState? searchState;
+@override final  AppBarEditState? editState;
+
+/// Create a copy of AppBarState
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$AppBarStateCopyWith<_AppBarState> get copyWith => __$AppBarStateCopyWithImpl<_AppBarState>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppBarState&&(identical(other.searchState, searchState) || other.searchState == searchState)&&(identical(other.editState, editState) || other.editState == editState));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,searchState,editState);
+}
+
+@override
+String toString() {
+    return 'AppBarState(searchState: $searchState, editState: $editState)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$AppBarStateCopyWith<$Res> implements $AppBarStateCopyWith<$Res> {
+  factory _$AppBarStateCopyWith(_AppBarState value, $Res Function(_AppBarState) _then) = __$AppBarStateCopyWithImpl;
+@override @useResult
+$Res call({
+ AppBarSearchState? searchState, AppBarEditState? editState
+});
+
+
+@override $AppBarSearchStateCopyWith<$Res>? get searchState;@override $AppBarEditStateCopyWith<$Res>? get editState;
+
+}
+/// @nodoc
+class __$AppBarStateCopyWithImpl<$Res>
+    implements _$AppBarStateCopyWith<$Res> {
+  __$AppBarStateCopyWithImpl(this._self, this._then);
+
+  final _AppBarState _self;
+  final $Res Function(_AppBarState) _then;
+
+/// Create a copy of AppBarState
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? searchState = freezed,Object? editState = freezed,}) {
+  return _then(_AppBarState(
+searchState: freezed == searchState ? _self.searchState : searchState // ignore: cast_nullable_to_non_nullable
+as AppBarSearchState?,editState: freezed == editState ? _self.editState : editState // ignore: cast_nullable_to_non_nullable
+as AppBarEditState?,
+  ));
+}
+
+/// Create a copy of AppBarState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AppBarSearchStateCopyWith<$Res>? get searchState {
+    if (_self.searchState == null) {
+    return null;
+  }
+
+  return $AppBarSearchStateCopyWith<$Res>(_self.searchState!, (value) {
+    return _then(_self.copyWith(searchState: value));
+  });
+}/// Create a copy of AppBarState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AppBarEditStateCopyWith<$Res>? get editState {
+    if (_self.editState == null) {
+    return null;
+  }
+
+  return $AppBarEditStateCopyWith<$Res>(_self.editState!, (value) {
+    return _then(_self.copyWith(editState: value));
+  });
+}
+}
+
+/// @nodoc
+mixin _$AppBarEditState {
+
+ int get editCount; dynamic Function() get onExit;
+/// Create a copy of AppBarEditState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$AppBarEditStateCopyWith<AppBarEditState> get copyWith => _$AppBarEditStateCopyWithImpl<AppBarEditState>(this as AppBarEditState, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as AppBarEditState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppBarEditState&&(identical(other.editCount, _this.editCount) || other.editCount == _this.editCount)&&(identical(other.onExit, _this.onExit) || other.onExit == _this.onExit));
+}
+
+
+@override
+int get hashCode {
+  final _this = this as AppBarEditState;
+  return Object.hash(runtimeType,_this.editCount,_this.onExit);
+}
+
+@override
+String toString() {
+  final _this = this as AppBarEditState;
+  return 'AppBarEditState(editCount: ${_this.editCount}, onExit: ${_this.onExit})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $AppBarEditStateCopyWith<$Res>  {
+  factory $AppBarEditStateCopyWith(AppBarEditState value, $Res Function(AppBarEditState) _then) = _$AppBarEditStateCopyWithImpl;
+@useResult
+$Res call({
+ int editCount, dynamic Function() onExit
+});
+
+
+
+
+}
+/// @nodoc
+class _$AppBarEditStateCopyWithImpl<$Res>
+    implements $AppBarEditStateCopyWith<$Res> {
+  _$AppBarEditStateCopyWithImpl(this._self, this._then);
+
+  final AppBarEditState _self;
+  final $Res Function(AppBarEditState) _then;
+
+/// Create a copy of AppBarEditState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? editCount = null,Object? onExit = null,}) {
+  return _then(AppBarEditState(
+editCount: null == editCount ? _self.editCount : editCount // ignore: cast_nullable_to_non_nullable
+as int,onExit: null == onExit ? _self.onExit : onExit // ignore: cast_nullable_to_non_nullable
+as dynamic Function(),
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [AppBarEditState].
+extension AppBarEditStatePatterns on AppBarEditState {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _AppBarEditState value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _AppBarEditState() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _AppBarEditState value)  $default,){
+final _that = this;
+switch (_that) {
+case _AppBarEditState():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _AppBarEditState value)?  $default,){
+final _that = this;
+switch (_that) {
+case _AppBarEditState() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int editCount,  dynamic Function() onExit)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _AppBarEditState() when $default != null:
+return $default(_that.editCount,_that.onExit);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int editCount,  dynamic Function() onExit)  $default,) {final _that = this;
+switch (_that) {
+case _AppBarEditState():
+return $default(_that.editCount,_that.onExit);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int editCount,  dynamic Function() onExit)?  $default,) {final _that = this;
+switch (_that) {
+case _AppBarEditState() when $default != null:
+return $default(_that.editCount,_that.onExit);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _AppBarEditState implements AppBarEditState {
+  const _AppBarEditState({this.editCount = 0, required this.onExit});
+  
+
+@override@JsonKey() final  int editCount;
+@override final  dynamic Function() onExit;
+
+/// Create a copy of AppBarEditState
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$AppBarEditStateCopyWith<_AppBarEditState> get copyWith => __$AppBarEditStateCopyWithImpl<_AppBarEditState>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppBarEditState&&(identical(other.editCount, editCount) || other.editCount == editCount)&&(identical(other.onExit, onExit) || other.onExit == onExit));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,editCount,onExit);
+}
+
+@override
+String toString() {
+    return 'AppBarEditState(editCount: $editCount, onExit: $onExit)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$AppBarEditStateCopyWith<$Res> implements $AppBarEditStateCopyWith<$Res> {
+  factory _$AppBarEditStateCopyWith(_AppBarEditState value, $Res Function(_AppBarEditState) _then) = __$AppBarEditStateCopyWithImpl;
+@override @useResult
+$Res call({
+ int editCount, dynamic Function() onExit
+});
+
+
+
+
+}
+/// @nodoc
+class __$AppBarEditStateCopyWithImpl<$Res>
+    implements _$AppBarEditStateCopyWith<$Res> {
+  __$AppBarEditStateCopyWithImpl(this._self, this._then);
+
+  final _AppBarEditState _self;
+  final $Res Function(_AppBarEditState) _then;
+
+/// Create a copy of AppBarEditState
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? editCount = null,Object? onExit = null,}) {
+  return _then(_AppBarEditState(
+editCount: null == editCount ? _self.editCount : editCount // ignore: cast_nullable_to_non_nullable
+as int,onExit: null == onExit ? _self.onExit : onExit // ignore: cast_nullable_to_non_nullable
+as dynamic Function(),
+  ));
+}
+
+
+}
+
 // dart format on

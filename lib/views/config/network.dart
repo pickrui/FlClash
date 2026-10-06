@@ -673,7 +673,7 @@ class OnDemandView extends StatelessWidget {
     return BaseScaffold(
       title: l.onDemand,
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 16),
         children: [
           if (system.isAndroid || system.isMacOS)
             generateSectionV3(

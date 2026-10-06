@@ -227,7 +227,7 @@ class _NetworkDiagnosticsPageState
         ),
       ],
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 88),
         children: [
           Text(l.diagScope),
           const SizedBox(height: 12),

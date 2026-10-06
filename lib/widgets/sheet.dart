@@ -15,6 +15,9 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/widgets/inherited.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'package:fl_clash/enum/enum.dart';
+export 'package:fl_clash/enum/enum.dart' show SheetType;
+
 import 'scaffold.dart';
 import 'side_sheet.dart';
 
@@ -43,8 +46,6 @@ class ExtendProps {
 
   const ExtendProps({this.maxWidth, this.blur = true, this.forceFull = false});
 }
-
-enum SheetType { page, bottomSheet, sideSheet }
 
 typedef SheetBuilder = Widget Function(BuildContext context, SheetType type);
 
@@ -134,77 +135,18 @@ class AdaptiveSheetScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final type = this.type ?? SheetProvider.of(context)?.type ?? SheetType.page;
-    final backgroundColor = type == SheetType.bottomSheet
-        ? context.colorScheme.surfaceContainerLow
-        : context.colorScheme.surface;
-    final closeButtonStyle = IconButton.styleFrom(
-      visualDensity: VisualDensity.standard,
-      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-    );
-    final closeButton = switch (type) {
-      SheetType.page => null,
-      SheetType.bottomSheet => IconButton.filledTonal(
-        tooltip: context.appLocalizations.close,
-        onPressed: () => Navigator.of(context).pop(),
-        style: closeButtonStyle,
-        icon: const Icon(Icons.close),
+    return SheetProvider(
+      type: type,
+      child: CommonScaffold(
+        key: type == SheetType.bottomSheet
+            ? const ValueKey('adaptive-sheet')
+            : null,
+        title: title,
+        centerTitle: true,
+        actions: actions,
+        body: AppBarClearance(child: body),
       ),
-      SheetType.sideSheet => IconButton(
-        tooltip: context.appLocalizations.close,
-        onPressed: () => Navigator.of(context).pop(),
-        style: closeButtonStyle,
-        icon: const Icon(Icons.close),
-      ),
-    };
-    final suffixPop = closeButton != null && actions.isEmpty;
-    final appBar = AppBar(
-      backgroundColor: backgroundColor,
-      forceMaterialTransparency: type == SheetType.bottomSheet,
-      leading: suffixPop ? null : closeButton,
-      automaticallyImplyLeading: type == SheetType.page,
-      centerTitle: true,
-      toolbarHeight: type == SheetType.bottomSheet ? 48 : null,
-      title: Text(title),
-      titleTextStyle: type == SheetType.bottomSheet
-          ? context.textTheme.titleLarge?.adjustSize(-4)
-          : null,
-      actions: genActions(suffixPop ? [closeButton] : actions),
     );
-    if (type == SheetType.bottomSheet) {
-      const handleSize = Size(28, 4);
-      return ClipRRect(
-        key: const ValueKey('adaptive-sheet'),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: Container(
-                alignment: Alignment.center,
-                height: handleSize.height,
-                width: handleSize.width,
-                decoration: ShapeDecoration(
-                  color: context.colorScheme.onSurfaceVariant,
-                  shape: RoundedSuperellipseBorder(
-                    borderRadius: BorderRadius.circular(handleSize.height / 2),
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: appBar,
-            ),
-            const SizedBox(height: 6),
-            Flexible(child: body),
-            SizedBox(height: MediaQuery.viewInsetsOf(context).bottom),
-            SizedBox(height: MediaQuery.viewPaddingOf(context).bottom),
-          ],
-        ),
-      );
-    }
-    return CommonScaffold(appBar: appBar, body: body);
   }
 }
 

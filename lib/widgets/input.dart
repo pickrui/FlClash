@@ -21,4 +21,5 @@ import 'scaffold.dart';
 import 'effect.dart';
 import 'list.dart';
 export 'input_dialog.dart';
+export 'options_dialog.dart';
 part 'edit_view.dart';

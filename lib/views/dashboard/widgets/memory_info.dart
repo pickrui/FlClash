@@ -273,7 +273,7 @@ class _MemoryDetailSheetState extends State<MemoryDetailSheet> {
         builder: (context, snapshot, _) {
           final core = snapshot.core;
           return ListView(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 88),
             children: [
               ListTile(
                 title: Text(l.total),

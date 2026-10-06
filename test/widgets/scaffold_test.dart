@@ -87,7 +87,7 @@ void main() {
     );
 
     expect(find.byIcon(Icons.tune), findsOneWidget);
-    await tester.tap(find.byIcon(Icons.search));
+    await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
     expect(find.byIcon(Icons.tune), findsNothing);
 
@@ -95,7 +95,7 @@ void main() {
     expect(queries, ['hk']);
     expect(backAction.balance, 1);
 
-    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.tap(find.byTooltip('Back'));
     await tester.pumpAndSettle();
     expect(queries.last, '');
     expect(find.byType(TextField), findsNothing);

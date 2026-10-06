@@ -7,6 +7,7 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/theme.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/providers/action.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -68,4 +69,13 @@ class TestApp extends StatelessWidget {
         ? ProviderScope(overrides: overrides, child: app)
         : app;
   }
+}
+
+class TestBackBlockAction extends BackBlockAction {
+  @override
+  void build() {}
+  @override
+  void backBlock() {}
+  @override
+  void unBackBlock() {}
 }

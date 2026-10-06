@@ -95,7 +95,6 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
       child: CommonScaffold(
         searchState: AppBarSearchState(
           onSearch: (value) => setState(() => _query = value),
-          autoAddSearch: false,
         ),
 
         title: appLocalizations.addedRules,
@@ -134,7 +133,10 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
             illustration: NullStatusIllustration.rules,
           ),
           child: ReorderableList(
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            padding: EdgeInsets.only(
+              top: context.contentTopPadding,
+              bottom: 88,
+            ),
             itemCount: rules.length,
             itemBuilder: (context, index) {
               final rule = rules[index];

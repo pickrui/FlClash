@@ -20,7 +20,7 @@ class ConfigView extends StatelessWidget {
     return BaseScaffold(
       title: l.general,
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 88),
         children: [
           generateSectionV3(
             title: l.startupAndBackground,

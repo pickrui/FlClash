@@ -195,7 +195,7 @@ class _ProfilePickerSheet extends ConsumerWidget {
           onChanged: select,
           child: ListView.builder(
             shrinkWrap: true,
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 88),
             itemCount: profiles.length,
             itemBuilder: (context, index) {
               final profile = profiles[index];

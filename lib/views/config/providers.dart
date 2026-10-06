@@ -103,96 +103,98 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
           icon: const Icon(Icons.add),
         ),
       ],
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: SegmentedButton<ProviderKind>(
-              segments: [
-                ButtonSegment(
-                  value: ProviderKind.proxy,
-                  label: Text(l.proxyProviders),
-                ),
-                ButtonSegment(
-                  value: ProviderKind.rule,
-                  label: Text(l.ruleProviders),
-                ),
-              ],
-              selected: {_kind},
-              onSelectionChanged: (value) =>
-                  setState(() => _kind = value.single),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: TextField(
-              decoration: InputDecoration(
-                labelText: l.search,
-                prefixIcon: const Icon(Icons.search),
-              ),
-              onChanged: (value) => setState(() => _search = value),
-            ),
-          ),
-          if (state.hasError)
+      body: AppBarClearance(
+        child: Column(
+          children: [
             Padding(
               padding: const EdgeInsets.all(16),
-              child: Text(state.error.toString()),
-            ),
-          if (state.isLoading) const LinearProgressIndicator(),
-          Expanded(
-            child: visible.isEmpty
-                ? Center(child: Text(l.nullTip(l.providers)))
-                : ReorderableListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    buildDefaultDragHandles: false,
-                    itemCount: visible.length,
-                    onReorderItem: (before, after) async {
-                      if (_search.isNotEmpty) return;
-                      final ids = entries.map((item) => item.id).toList();
-                      ids.insert(after, ids.removeAt(before));
-                      try {
-                        await ref
-                            .read(clashProviderLibraryProvider)
-                            .reorder(_kind, ids);
-                      } catch (error) {
-                        if (context.mounted) {
-                          context.showNotifier(
-                            providerLibraryError(context, error),
-                          );
-                        }
-                      }
-                    },
-                    itemBuilder: (context, index) {
-                      final item = visible[index];
-                      return ListTile(
-                        key: ValueKey(item.id),
-                        title: Text(item.label),
-                        subtitle: Text(
-                          item.isRemote ? item.url : l.providerLocal,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        onTap: () => _edit(item),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              tooltip: l.delete,
-                              onPressed: () => _remove(item),
-                              icon: const Icon(Icons.delete_outline),
-                            ),
-                            if (_search.isEmpty)
-                              ReorderableDragStartListener(
-                                index: index,
-                                child: const Icon(Icons.drag_handle),
-                              ),
-                          ],
-                        ),
-                      );
-                    },
+              child: SegmentedButton<ProviderKind>(
+                segments: [
+                  ButtonSegment(
+                    value: ProviderKind.proxy,
+                    label: Text(l.proxyProviders),
                   ),
-          ),
-        ],
+                  ButtonSegment(
+                    value: ProviderKind.rule,
+                    label: Text(l.ruleProviders),
+                  ),
+                ],
+                selected: {_kind},
+                onSelectionChanged: (value) =>
+                    setState(() => _kind = value.single),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: l.search,
+                  prefixIcon: const Icon(Icons.search),
+                ),
+                onChanged: (value) => setState(() => _search = value),
+              ),
+            ),
+            if (state.hasError)
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(state.error.toString()),
+              ),
+            if (state.isLoading) const LinearProgressIndicator(),
+            Expanded(
+              child: visible.isEmpty
+                  ? Center(child: Text(l.nullTip(l.providers)))
+                  : ReorderableListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      buildDefaultDragHandles: false,
+                      itemCount: visible.length,
+                      onReorderItem: (before, after) async {
+                        if (_search.isNotEmpty) return;
+                        final ids = entries.map((item) => item.id).toList();
+                        ids.insert(after, ids.removeAt(before));
+                        try {
+                          await ref
+                              .read(clashProviderLibraryProvider)
+                              .reorder(_kind, ids);
+                        } catch (error) {
+                          if (context.mounted) {
+                            context.showNotifier(
+                              providerLibraryError(context, error),
+                            );
+                          }
+                        }
+                      },
+                      itemBuilder: (context, index) {
+                        final item = visible[index];
+                        return ListTile(
+                          key: ValueKey(item.id),
+                          title: Text(item.label),
+                          subtitle: Text(
+                            item.isRemote ? item.url : l.providerLocal,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          onTap: () => _edit(item),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                tooltip: l.delete,
+                                onPressed: () => _remove(item),
+                                icon: const Icon(Icons.delete_outline),
+                              ),
+                              if (_search.isEmpty)
+                                ReorderableDragStartListener(
+                                  index: index,
+                                  child: const Icon(Icons.drag_handle),
+                                ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -328,103 +330,108 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
           icon: const Icon(Icons.save_outlined),
         ),
       ],
-      body: AbsorbPointer(
-        absorbing: _saving,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            TextField(
-              controller: _name,
-              decoration: InputDecoration(labelText: l.name),
-            ),
-            const SizedBox(height: 16),
-            SegmentedButton<bool>(
-              segments: [
-                ButtonSegment(value: false, label: Text(l.providerLocal)),
-                ButtonSegment(value: true, label: Text(l.providerRemote)),
-              ],
-              selected: {_remote},
-              onSelectionChanged: (value) =>
-                  setState(() => _remote = value.single),
-            ),
-            if (_remote)
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: TextField(
-                  controller: _url,
-                  keyboardType: TextInputType.url,
-                  decoration: const InputDecoration(labelText: 'URL'),
-                ),
-              ),
-            if (_draft.kind == ProviderKind.rule) ...[
-              const SizedBox(height: 16),
-              DropdownButtonFormField<RuleProviderFormat>(
-                key: ValueKey(_draft.format),
-                initialValue: _draft.format,
-                decoration: InputDecoration(labelText: l.format),
-                items: [
-                  for (final format in RuleProviderFormat.values)
-                    DropdownMenuItem(value: format, child: Text(format.name)),
-                ],
-                onChanged: (format) {
-                  if (format == null) return;
-                  setState(
-                    () => _draft = _draft.copyWith(
-                      format: format,
-                      behavior:
-                          format == RuleProviderFormat.mrs &&
-                              _draft.behavior == RuleProviderBehavior.classical
-                          ? RuleProviderBehavior.domain
-                          : _draft.behavior,
-                    ),
-                  );
-                },
+      body: AppBarClearance(
+        child: AbsorbPointer(
+          absorbing: _saving,
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              TextField(
+                controller: _name,
+                decoration: InputDecoration(labelText: l.name),
               ),
               const SizedBox(height: 16),
-              DropdownButtonFormField<RuleProviderBehavior>(
-                key: ValueKey(_draft.format),
-                initialValue: _draft.behavior,
-                decoration: InputDecoration(labelText: l.behavior),
-                items: [
-                  for (final behavior in RuleProviderBehavior.values)
-                    if (_draft.format != RuleProviderFormat.mrs ||
-                        behavior != RuleProviderBehavior.classical)
-                      DropdownMenuItem(
-                        value: behavior,
-                        child: Text(behavior.name),
-                      ),
+              SegmentedButton<bool>(
+                segments: [
+                  ButtonSegment(value: false, label: Text(l.providerLocal)),
+                  ButtonSegment(value: true, label: Text(l.providerRemote)),
                 ],
-                onChanged: (behavior) {
-                  if (behavior == null) return;
-                  setState(() => _draft = _draft.copyWith(behavior: behavior));
-                },
+                selected: {_remote},
+                onSelectionChanged: (value) =>
+                    setState(() => _remote = value.single),
               ),
-            ],
-            const SizedBox(height: 16),
-            if (!_remote)
-              Wrap(
-                spacing: 12,
-                children: [
-                  TextButton.icon(
-                    onPressed: _import,
-                    icon: const Icon(Icons.file_open_outlined),
-                    label: Text(l.import),
+              if (_remote)
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: TextField(
+                    controller: _url,
+                    keyboardType: TextInputType.url,
+                    decoration: const InputDecoration(labelText: 'URL'),
                   ),
-                  if (_draft.isTextContent)
+                ),
+              if (_draft.kind == ProviderKind.rule) ...[
+                const SizedBox(height: 16),
+                DropdownButtonFormField<RuleProviderFormat>(
+                  key: ValueKey(_draft.format),
+                  initialValue: _draft.format,
+                  decoration: InputDecoration(labelText: l.format),
+                  items: [
+                    for (final format in RuleProviderFormat.values)
+                      DropdownMenuItem(value: format, child: Text(format.name)),
+                  ],
+                  onChanged: (format) {
+                    if (format == null) return;
+                    setState(
+                      () => _draft = _draft.copyWith(
+                        format: format,
+                        behavior:
+                            format == RuleProviderFormat.mrs &&
+                                _draft.behavior ==
+                                    RuleProviderBehavior.classical
+                            ? RuleProviderBehavior.domain
+                            : _draft.behavior,
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<RuleProviderBehavior>(
+                  key: ValueKey(_draft.format),
+                  initialValue: _draft.behavior,
+                  decoration: InputDecoration(labelText: l.behavior),
+                  items: [
+                    for (final behavior in RuleProviderBehavior.values)
+                      if (_draft.format != RuleProviderFormat.mrs ||
+                          behavior != RuleProviderBehavior.classical)
+                        DropdownMenuItem(
+                          value: behavior,
+                          child: Text(behavior.name),
+                        ),
+                  ],
+                  onChanged: (behavior) {
+                    if (behavior == null) return;
+                    setState(
+                      () => _draft = _draft.copyWith(behavior: behavior),
+                    );
+                  },
+                ),
+              ],
+              const SizedBox(height: 16),
+              if (!_remote)
+                Wrap(
+                  spacing: 12,
+                  children: [
                     TextButton.icon(
-                      onPressed: _editContent,
-                      icon: const Icon(Icons.edit_outlined),
-                      label: Text(l.providerContent),
+                      onPressed: _import,
+                      icon: const Icon(Icons.file_open_outlined),
+                      label: Text(l.import),
                     ),
-                ],
-              ),
-            if (_draft.content.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 12),
-                child: Text('${_draft.content.length} B'),
-              ),
-            if (_saving) const LinearProgressIndicator(),
-          ],
+                    if (_draft.isTextContent)
+                      TextButton.icon(
+                        onPressed: _editContent,
+                        icon: const Icon(Icons.edit_outlined),
+                        label: Text(l.providerContent),
+                      ),
+                  ],
+                ),
+              if (_draft.content.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Text('${_draft.content.length} B'),
+                ),
+              if (_saving) const LinearProgressIndicator(),
+            ],
+          ),
         ),
       ),
     );

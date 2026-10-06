@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/models/common.dart';
+import 'package:fl_clash/icons/icons.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'animated_cross_slide.dart';
@@ -111,9 +112,8 @@ class _CommonPopupBoxState extends State<CommonPopupBox> {
     Navigator.of(context)
         .push(
           CommonPopupRoute(
-            barrierLabel: MaterialLocalizations.of(
-              context,
-            ).modalBarrierDismissLabel,
+            barrierLabel: MaterialLocalizations.of(context)
+                .modalBarrierDismissLabel,
             builder: (BuildContext context) {
               return widget.popup;
             },
@@ -288,12 +288,19 @@ class _CommonPopupMenuItemsState extends State<_CommonPopupMenuItems> {
         child: Row(
           mainAxisSize: MainAxisSize.max,
           children: [
-            if (item.icon != null) ...[
-              Icon(
-                item.icon,
-                size: widget.fontSize + 4,
-                color: foregroundColor,
-              ),
+            if (item.glyph != null || item.icon != null) ...[
+              if (item.glyph != null)
+                GlyphIcon(
+                  item.glyph!,
+                  size: widget.fontSize + 4,
+                  color: foregroundColor,
+                )
+              else
+                Icon(
+                  item.icon,
+                  size: widget.fontSize + 4,
+                  color: foregroundColor,
+                ),
               const SizedBox(width: 16),
             ],
             Flexible(

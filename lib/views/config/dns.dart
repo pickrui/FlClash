@@ -226,8 +226,10 @@ class _OverrideList extends ConsumerWidget {
     return CustomScrollView(
       slivers: [
         SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 16)
-              .copyWith(top: 16, bottom: entries.isEmpty ? 0 : 16),
+          padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
+            top: context.contentTopPadding,
+            bottom: entries.isEmpty ? 0 : 16,
+          ),
           sliver: SliverList.list(
             children: [
               generateSectionV3(

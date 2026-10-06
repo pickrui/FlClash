@@ -154,6 +154,10 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
               illustration: NullStatusIllustration.connections,
             ),
             child: SuperListView.separated(
+              padding: EdgeInsets.only(
+                top: context.contentTopPadding,
+                bottom: BottomInsetScope.of(context) + 16,
+              ),
               controller: _scrollController,
               itemCount: connections.length,
               separatorBuilder: (_, _) => const Divider(height: 0),

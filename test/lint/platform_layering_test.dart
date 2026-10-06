@@ -9,7 +9,7 @@ import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 // Application binds page construction so the common barrel reaches no views.
-const _closureBudget = 206;
+const _closureBudget = 193;
 const _viewsInClosureBudget = 0;
 
 final _directive = RegExp(

@@ -123,7 +123,7 @@ class _NetworkSheet extends StatelessWidget {
       body: Builder(
         builder: (context) => ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16)
-              .copyWith(top: 16, bottom: 16),
+              .copyWith(top: context.contentTopPadding, bottom: 16),
           children: sections,
         ),
       ),

@@ -146,6 +146,10 @@ class _RequestsViewState extends ConsumerState<RequestsView>
                         .copyWith(autoScrollToEnd: false);
                   },
                   child: SuperListView.separated(
+                    padding: EdgeInsets.only(
+                      top: context.contentTopPadding,
+                      bottom: BottomInsetScope.of(context) + 16,
+                    ),
                     reverse: true,
                     shrinkWrap: true,
                     physics: const NextClampingScrollPhysics(),

@@ -1356,5 +1356,6 @@
   "suspended": "Suspended…",
   "enabled": "Enabled",
   "disabled": "Disabled",
-  "overwriteIssuesSummary": "{count} items have problems, and applying this override may fail"
+  "overwriteIssuesSummary": "{count} items have problems, and applying this override may fail",
+  "selectedCountTitle": "{count} selected"
 }

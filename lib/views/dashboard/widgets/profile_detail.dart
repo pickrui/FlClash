@@ -97,7 +97,7 @@ class ProfileDetailSheet extends ConsumerWidget {
       ],
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16)
-            .copyWith(top: 16, bottom: 20),
+            .copyWith(top: context.contentTopPadding, bottom: 20),
         children: [
           _StatsGrid(
             stats: switch (activeCounts) {

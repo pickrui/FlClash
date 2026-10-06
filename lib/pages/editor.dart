@@ -321,92 +321,89 @@ class _EditorPageState extends ConsumerState<EditorPage> {
         child: Focus(
           autofocus: true,
           child: CommonScaffold(
-            appBar: AppBar(
-              title: _EditorTitleField(
-                controller: _titleController,
-                enabled: widget.titleEditable,
+            titleWidget: _EditorTitleField(
+              controller: _titleController,
+              enabled: widget.titleEditable,
+            ),
+            actions: [
+              IconButton(
+                tooltip: appLocalizations.search,
+                icon: const GlyphIcon(AppGlyphs.search),
+                onPressed: isReady ? _handleSearch : null,
               ),
-              actions: [
+              if (widget.onSave != null)
                 IconButton(
-                  tooltip: appLocalizations.search,
-                  icon: const GlyphIcon(AppGlyphs.search),
-                  onPressed: isReady ? _handleSearch : null,
+                  tooltip: appLocalizations.save,
+                  icon: const GlyphIcon(AppGlyphs.check),
+                  onPressed: _barState.isDirty && !_saving ? _handleSave : null,
                 ),
-                if (widget.onSave != null)
-                  IconButton(
-                    tooltip: appLocalizations.save,
-                    icon: const GlyphIcon(AppGlyphs.check),
-                    onPressed: _barState.isDirty && !_saving
-                        ? _handleSave
-                        : null,
+              PopupMenuButton<VoidCallback>(
+                icon: const GlyphIcon(AppGlyphs.more),
+                tooltip: appLocalizations.more,
+                onSelected: (action) => action(),
+                itemBuilder: (_) => [
+                  PopupMenuItem(
+                    value: _undoController.undo,
+                    enabled: _barState.canUndo,
+                    child: Row(
+                      children: [
+                        const GlyphIcon(AppGlyphs.undo),
+                        const SizedBox(width: 8),
+                        Text(appLocalizations.undo),
+                      ],
+                    ),
                   ),
-                PopupMenuButton<VoidCallback>(
-                  icon: const GlyphIcon(AppGlyphs.more),
-                  tooltip: appLocalizations.more,
-                  onSelected: (action) => action(),
-                  itemBuilder: (_) => [
-                    PopupMenuItem(
-                      value: _undoController.undo,
-                      enabled: _barState.canUndo,
-                      child: Row(
-                        children: [
-                          const GlyphIcon(AppGlyphs.undo),
-                          const SizedBox(width: 8),
-                          Text(appLocalizations.undo),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: _undoController.redo,
-                      enabled: _barState.canRedo,
-                      child: Text(appLocalizations.redo),
-                    ),
-                    for (final size in EditorFontSize.values)
-                      CheckedPopupMenuItem(
-                        checked: size == fontSize,
-                        value: () => ref
-                            .read(appSettingProvider.notifier)
-                            .update(
-                              (state) => state.copyWith(editorFontSize: size),
-                            ),
-                        child: Text(
-                          '${appLocalizations.fontSize} · ${size.value.toInt()}',
-                        ),
-                      ),
+                  PopupMenuItem(
+                    value: _undoController.redo,
+                    enabled: _barState.canRedo,
+                    child: Text(appLocalizations.redo),
+                  ),
+                  for (final size in EditorFontSize.values)
                     CheckedPopupMenuItem(
-                      checked: lineWrap,
+                      checked: size == fontSize,
                       value: () => ref
                           .read(appSettingProvider.notifier)
                           .update(
-                            (state) =>
-                                state.copyWith(editorLineWrap: !lineWrap),
+                            (state) => state.copyWith(editorFontSize: size),
                           ),
-                      child: Text(appLocalizations.lineWrap),
+                      child: Text(
+                        '${appLocalizations.fontSize} · ${size.value.toInt()}',
+                      ),
                     ),
-                    if (widget.supportRemoteDownload && !readOnly) ...[
-                      PopupMenuItem(
-                        value: _handleImportFormUrl,
-                        child: Text(appLocalizations.importUrl),
-                      ),
-                      PopupMenuItem(
-                        value: _handleImportFormFile,
-                        child: Text(appLocalizations.importFile),
-                      ),
-                    ],
+                  CheckedPopupMenuItem(
+                    checked: lineWrap,
+                    value: () => ref
+                        .read(appSettingProvider.notifier)
+                        .update(
+                          (state) => state.copyWith(editorLineWrap: !lineWrap),
+                        ),
+                    child: Text(appLocalizations.lineWrap),
+                  ),
+                  if (widget.supportRemoteDownload && !readOnly) ...[
+                    PopupMenuItem(
+                      value: _handleImportFormUrl,
+                      child: Text(appLocalizations.importUrl),
+                    ),
+                    PopupMenuItem(
+                      value: _handleImportFormFile,
+                      child: Text(appLocalizations.importFile),
+                    ),
                   ],
+                ],
+              ),
+            ],
+            body: AppBarClearance(
+              child: AbsorbPointer(
+                absorbing: _saving,
+                child: EditorView(
+                  key: _editorKey,
+                  content: _original,
+                  language: widget.language,
+                  schema: widget.schema,
+                  readOnly: readOnly,
+                  undoController: _undoController,
+                  onReady: _handleReady,
                 ),
-              ],
-            ),
-            body: AbsorbPointer(
-              absorbing: _saving,
-              child: EditorView(
-                key: _editorKey,
-                content: _original,
-                language: widget.language,
-                schema: widget.schema,
-                readOnly: readOnly,
-                undoController: _undoController,
-                onReady: _handleReady,
               ),
             ),
           ),

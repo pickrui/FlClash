@@ -170,103 +170,108 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
           },
         ),
       ],
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Wrap(
-              spacing: 8,
-              children: [
-                for (final filter in _QueryFilter.values)
-                  ChoiceChip(
-                    label: Text(switch (filter) {
-                      _QueryFilter.all => appLocalizations.dnsQueryAll,
-                      _QueryFilter.cached => appLocalizations.dnsQueryCached,
-                      _QueryFilter.failed => appLocalizations.dnsQueryFailures,
-                    }),
-                    selected: _filter == filter,
-                    onSelected: (_) => setState(() => _filter = filter),
-                  ),
-              ],
+      body: AppBarClearance(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Wrap(
+                spacing: 8,
+                children: [
+                  for (final filter in _QueryFilter.values)
+                    ChoiceChip(
+                      label: Text(switch (filter) {
+                        _QueryFilter.all => appLocalizations.dnsQueryAll,
+                        _QueryFilter.cached => appLocalizations.dnsQueryCached,
+                        _QueryFilter.failed =>
+                          appLocalizations.dnsQueryFailures,
+                      }),
+                      selected: _filter == filter,
+                      onSelected: (_) => setState(() => _filter = filter),
+                    ),
+                ],
+              ),
             ),
-          ),
-          Expanded(
-            child: queries.isEmpty
-                ? NullStatus(
-                    label: search.isEmpty
-                        ? appLocalizations.nullTip(appLocalizations.dnsQueries)
-                        : appLocalizations.noSearchResults,
-                    illustration: search.isEmpty
-                        ? NullStatusIllustration.dns
-                        : NullStatusIllustration.search,
-                  )
-                : ListView.separated(
-                    controller: widget.scrollController,
-                    itemCount: queries.length,
-                    separatorBuilder: (_, _) => const Divider(height: 0),
-                    itemBuilder: (context, index) {
-                      final query = queries[index];
-                      final styles = RecordTextStyles.of(context);
-                      final tone = query.isFailed
-                          ? RecordTone.error
-                          : query.cached
-                          ? RecordTone.muted
-                          : RecordTone.neutral;
-                      return RecordListItem(
-                        tone: tone,
-                        onTap: () => _showDetails(query),
-                        header: RecordHeader(
-                          trailing: Text('${query.delay} ms'),
-                          children: [
-                            RecordTimestamp(query.time.toLocal().showFull),
-                            RecordLabel(label: query.type, tone: tone),
-                            if (query.cached)
-                              RecordLabel(
-                                label: appLocalizations.dnsQueryCached,
-                                tone: RecordTone.muted,
-                              ),
-                          ],
-                        ),
-                        body: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          spacing: 4,
-                          children: [
-                            Text(
-                              query.domain,
-                              style: styles.primary?.copyWith(
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            if (query.isFailed)
+            Expanded(
+              child: queries.isEmpty
+                  ? NullStatus(
+                      label: search.isEmpty
+                          ? appLocalizations.nullTip(
+                              appLocalizations.dnsQueries,
+                            )
+                          : appLocalizations.noSearchResults,
+                      illustration: search.isEmpty
+                          ? NullStatusIllustration.dns
+                          : NullStatusIllustration.search,
+                    )
+                  : ListView.separated(
+                      controller: widget.scrollController,
+                      itemCount: queries.length,
+                      separatorBuilder: (_, _) => const Divider(height: 0),
+                      itemBuilder: (context, index) {
+                        final query = queries[index];
+                        final styles = RecordTextStyles.of(context);
+                        final tone = query.isFailed
+                            ? RecordTone.error
+                            : query.cached
+                            ? RecordTone.muted
+                            : RecordTone.neutral;
+                        return RecordListItem(
+                          tone: tone,
+                          onTap: () => _showDetails(query),
+                          header: RecordHeader(
+                            trailing: Text('${query.delay} ms'),
+                            children: [
+                              RecordTimestamp(query.time.toLocal().showFull),
+                              RecordLabel(label: query.type, tone: tone),
+                              if (query.cached)
+                                RecordLabel(
+                                  label: appLocalizations.dnsQueryCached,
+                                  tone: RecordTone.muted,
+                                ),
+                            ],
+                          ),
+                          body: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            spacing: 4,
+                            children: [
                               Text(
-                                query.error.isNotEmpty
-                                    ? query.error
-                                    : query.rcode,
-                                style: styles.secondary?.copyWith(
-                                  color: context.colorScheme.error,
+                                query.domain,
+                                style: styles.primary?.copyWith(
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
-                            if (query.answers.isNotEmpty)
+                              if (query.isFailed)
+                                Text(
+                                  query.error.isNotEmpty
+                                      ? query.error
+                                      : query.rcode,
+                                  style: styles.secondary?.copyWith(
+                                    color: context.colorScheme.error,
+                                  ),
+                                ),
+                              if (query.answers.isNotEmpty)
+                                Text(
+                                  query.answers.join(', '),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: styles.secondary,
+                                ),
                               Text(
-                                query.answers.join(', '),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: styles.secondary,
+                                [
+                                  _initiator(query),
+                                  if (query.upstream.isNotEmpty) query.upstream,
+                                ].join(' · '),
+                                style: styles.muted,
                               ),
-                            Text(
-                              [
-                                _initiator(query),
-                                if (query.upstream.isNotEmpty) query.upstream,
-                              ].join(' · '),
-                              style: styles.muted,
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-          ),
-        ],
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }

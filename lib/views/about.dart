@@ -170,17 +170,18 @@ class AboutView extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Text(
           appLocalizations.reverseEngineeringNotice,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: Theme.of(context).colorScheme.outline,
-          ),
+          style: Theme.of(context).textTheme.labelSmall
+              ?.copyWith(color: Theme.of(context).colorScheme.outline),
         ),
       ),
     ];
     return BaseScaffold(
       title: appLocalizations.about,
-      body: Padding(
-        padding: kMaterialListPadding.copyWith(top: 16, bottom: 16),
-        child: generateListView(items),
+      body: AppBarClearance(
+        child: Padding(
+          padding: kMaterialListPadding.copyWith(top: 16, bottom: 16),
+          child: generateListView(items),
+        ),
       ),
     );
   }

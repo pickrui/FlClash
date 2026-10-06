@@ -167,7 +167,10 @@ class _TailscaleViewState extends ConsumerState<TailscaleView>
       body: networks.isEmpty
           ? _buildEmpty(l)
           : ListView(
-              padding: const EdgeInsets.only(bottom: 20),
+              padding: EdgeInsets.only(
+                top: context.contentTopPadding,
+                bottom: 20,
+              ),
               children: [
                 ...generateSection(
                   title: l.tailscaleNetworks,
@@ -224,7 +227,7 @@ class TailscaleGuidePage extends StatelessWidget {
     return CommonScaffold(
       title: l.tailscaleGuide,
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 24),
         children: [
           for (final (title, body) in sections) ...[
             Padding(

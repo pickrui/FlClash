@@ -201,7 +201,12 @@ class _DashboardViewState extends ConsumerState<DashboardView>
                 child: DashboardWidgetMetrics(
                   unitHeight: dashboardUnitHeight(gridWidth),
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(16).copyWith(bottom: 88),
+                    padding: EdgeInsets.fromLTRB(
+                      16,
+                      context.contentTopPadding,
+                      16,
+                      88,
+                    ),
                     child: isEdit
                         ? SystemBackBlock(
                             child: CommonPopScope(

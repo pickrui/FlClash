@@ -166,6 +166,10 @@ class _LogsViewState extends ConsumerState<LogsView>
                 child: CommonScrollBar(
                   controller: _scrollController,
                   child: SuperListView.separated(
+                    padding: EdgeInsets.only(
+                      top: context.contentTopPadding,
+                      bottom: BottomInsetScope.of(context) + 16,
+                    ),
                     physics: const NextClampingScrollPhysics(),
                     reverse: true,
                     shrinkWrap: true,

@@ -396,3 +396,19 @@ extension SetupStateExt on SetupState {
     return false;
   }
 }
+
+@freezed
+abstract class AppBarState with _$AppBarState {
+  const factory AppBarState({
+    AppBarSearchState? searchState,
+    AppBarEditState? editState,
+  }) = _AppBarState;
+}
+
+@freezed
+abstract class AppBarEditState with _$AppBarEditState {
+  const factory AppBarEditState({
+    @Default(0) int editCount,
+    required Function() onExit,
+  }) = _AppBarEditState;
+}

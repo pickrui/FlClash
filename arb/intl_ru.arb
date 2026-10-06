@@ -1356,5 +1356,6 @@
   "suspended": "Приостановлено…",
   "enabled": "Включено",
   "disabled": "Выключено",
-  "overwriteIssuesSummary": "Проблем: {count}, применение переопределения может завершиться ошибкой"
+  "overwriteIssuesSummary": "Проблем: {count}, применение переопределения может завершиться ошибкой",
+  "selectedCountTitle": "Выбрано: {count}"
 }

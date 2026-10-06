@@ -28,7 +28,7 @@ class AdvancedConfigView extends StatelessWidget {
           blur: false,
           widget: BaseScaffold(
             title: appLocalizations.network,
-            body: const NetworkListView(),
+            body: const AppBarClearance(child: NetworkListView()),
           ),
         ),
       ),
@@ -59,8 +59,10 @@ class AdvancedConfigView extends StatelessWidget {
     ];
     return BaseScaffold(
       title: appLocalizations.advancedConfig,
-      body: generateListView(
-        items.separated(const Divider(height: 0)).toList(),
+      body: AppBarClearance(
+        child: generateListView(
+          items.separated(const Divider(height: 0)).toList(),
+        ),
       ),
     );
   }

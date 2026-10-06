@@ -8,6 +8,7 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/icons/glyph.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -394,6 +395,7 @@ abstract class Field with _$Field {
 class PopupMenuItemData {
   const PopupMenuItemData({
     this.icon,
+    this.glyph,
     required this.label,
     this.onPressed,
     this.danger = false,
@@ -403,6 +405,7 @@ class PopupMenuItemData {
   final String label;
   final VoidCallback? onPressed;
   final IconData? icon;
+  final Glyph? glyph;
   final bool danger;
   final List<PopupMenuItemData> subItems;
 }
@@ -599,3 +602,13 @@ String renameRuleProvider(String rule, String before, String after) =>
       providerRulePattern(before),
       (match) => '${match[1]}RULE-SET,$after',
     );
+
+@freezed
+abstract class IconButtonData with _$IconButtonData {
+  const factory IconButtonData({
+    required Glyph glyph,
+    required VoidCallback? onPressed,
+    String? tooltip,
+    @Default(false) bool isLoading,
+  }) = _IconButtonData;
+}

@@ -71,7 +71,7 @@ void main() {
         expect(find.text('body'), findsOneWidget);
         expect(find.byIcon(Icons.check), withActions ? findsOne : findsNothing);
 
-        await tester.tap(find.byIcon(Icons.close));
+        await tester.tap(find.byTooltip('Close'));
         await tester.pumpAndSettle();
 
         expect(find.text('body'), findsNothing);

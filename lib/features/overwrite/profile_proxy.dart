@@ -1256,7 +1256,7 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
         const SizedBox(width: 8),
       ],
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 88),
         children: [
           SegmentedButton<int>(
             segments: [

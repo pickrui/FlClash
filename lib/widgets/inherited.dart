@@ -5,7 +5,6 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/enum/enum.dart';
 import 'package:flutter/foundation.dart';
-import 'package:fl_clash/widgets/sheet.dart';
 import 'package:material_ui/material_ui.dart';
 
 class PageActivityScope extends InheritedWidget {
@@ -242,6 +241,43 @@ class BottomInsetScope extends InheritedWidget {
 
   @override
   bool updateShouldNotify(BottomInsetScope oldWidget) {
+    return inset != oldWidget.inset;
+  }
+}
+
+class TopInsetScope extends InheritedWidget {
+  final double inset;
+
+  const TopInsetScope({super.key, required this.inset, required super.child});
+
+  static double? of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<TopInsetScope>()?.inset;
+  }
+
+  @override
+  bool updateShouldNotify(TopInsetScope oldWidget) {
+    return inset != oldWidget.inset;
+  }
+}
+
+/// How far a page's app bar reaches over the body floating under it.
+class FloatingBarScope extends InheritedWidget {
+  final double inset;
+
+  const FloatingBarScope({
+    super.key,
+    required this.inset,
+    required super.child,
+  });
+
+  static double? of(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<FloatingBarScope>()
+        ?.inset;
+  }
+
+  @override
+  bool updateShouldNotify(FloatingBarScope oldWidget) {
     return inset != oldWidget.inset;
   }
 }

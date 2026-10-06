@@ -203,55 +203,57 @@ class _OverwriteSelectionSheetState<T>
       searchState: searchable
           ? AppBarSearchState(onSearch: _handleSearch)
           : null,
-      body: SizedBox(
-        height: height,
-        child: Builder(
-          builder: (context) => NullStatusSwitcher(
-            isEmpty:
-                count == 0 && (widget.emptyLabel != null || !_query.isEmpty),
-            isSearching: !_query.isEmpty,
-            nullStatus: NullStatus(label: widget.emptyLabel ?? ''),
-            child: CustomScrollView(
-              controller: _controller,
-              slivers: [
-                const SliverToBoxAdapter(child: SizedBox(height: 16)),
-                for (final (sectionIndex, section) in sections.indexed) ...[
-                  if (section.label != null) ...[
+      body: AppBarClearance(
+        child: SizedBox(
+          height: height,
+          child: Builder(
+            builder: (context) => NullStatusSwitcher(
+              isEmpty:
+                  count == 0 && (widget.emptyLabel != null || !_query.isEmpty),
+              isSearching: !_query.isEmpty,
+              nullStatus: NullStatus(label: widget.emptyLabel ?? ''),
+              child: CustomScrollView(
+                controller: _controller,
+                slivers: [
+                  const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                  for (final (sectionIndex, section) in sections.indexed) ...[
+                    if (section.label != null) ...[
+                      SliverPadding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        sliver: SliverToBoxAdapter(
+                          child: InfoHeader(info: Info(label: section.label!)),
+                        ),
+                      ),
+                      const SliverToBoxAdapter(child: SizedBox(height: 4)),
+                    ],
                     SliverPadding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      sliver: SliverToBoxAdapter(
-                        child: InfoHeader(info: Info(label: section.label!)),
+                      sliver: SuperSliverList.builder(
+                        listController: sectionIndex == location?.section
+                            ? _revealController
+                            : null,
+                        itemCount: section.items.length,
+                        itemBuilder: (context, index) {
+                          final item = section.items[index];
+                          return _buildItem(
+                            context,
+                            section,
+                            item,
+                            index,
+                            isSelected: item == selected,
+                            isRevealTarget:
+                                sectionIndex == location?.section &&
+                                index == location?.index,
+                          );
+                        },
                       ),
                     ),
-                    const SliverToBoxAdapter(child: SizedBox(height: 4)),
                   ],
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    sliver: SuperSliverList.builder(
-                      listController: sectionIndex == location?.section
-                          ? _revealController
-                          : null,
-                      itemCount: section.items.length,
-                      itemBuilder: (context, index) {
-                        final item = section.items[index];
-                        return _buildItem(
-                          context,
-                          section,
-                          item,
-                          index,
-                          isSelected: item == selected,
-                          isRevealTarget:
-                              sectionIndex == location?.section &&
-                              index == location?.index,
-                        );
-                      },
-                    ),
+                  SliverToBoxAdapter(
+                    child: SizedBox(height: 20 + BottomInsetScope.of(context)),
                   ),
                 ],
-                SliverToBoxAdapter(
-                  child: SizedBox(height: 20 + BottomInsetScope.of(context)),
-                ),
-              ],
+              ),
             ),
           ),
         ),

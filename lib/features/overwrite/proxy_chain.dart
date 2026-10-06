@@ -349,6 +349,9 @@ class _ProfileProxyChainsViewState extends State<ProfileProxyChainsView> {
       title: appLocalizations.proxyChains,
       body: CustomScrollView(
         slivers: [
+          SliverToBoxAdapter(
+            child: SizedBox(height: context.contentTopPadding),
+          ),
           ProfileProxyChainsContent(
             profileId: widget.profileId,
             showEmptyStatus: true,
@@ -1112,6 +1115,9 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
       ],
       body: CustomScrollView(
         slivers: [
+          SliverToBoxAdapter(
+            child: SizedBox(height: context.contentTopPadding),
+          ),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),

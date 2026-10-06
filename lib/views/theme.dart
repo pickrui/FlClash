@@ -29,23 +29,28 @@ class ThemeView extends StatelessWidget {
     final appLocalizations = context.appLocalizations;
     return BaseScaffold(
       title: appLocalizations.theme,
-      body: const CustomScrollView(
+      body: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(child: ThemeLivePreview()),
-          SliverToBoxAdapter(child: SizedBox(height: 16)),
-          _ThemeModeItem(),
-          SliverToBoxAdapter(child: SizedBox(height: 16)),
-          _NavigationPreviewItem(),
-          SliverToBoxAdapter(child: SizedBox(height: 16)),
-          _TabAnimationPreviewItem(),
-          SliverToBoxAdapter(child: SizedBox(height: 16)),
-          _PrimaryColorItem(),
-          SliverToBoxAdapter(child: SizedBox(height: 16)),
-          _PrueBlackItem(),
-          _SidebarBlurItem(),
-          SliverToBoxAdapter(child: SizedBox(height: 16)),
-          _TextScaleFactorItem(),
-          SliverToBoxAdapter(child: SizedBox(height: 32)),
+          SliverToBoxAdapter(
+            child: SizedBox(height: context.contentTopPadding),
+          ),
+          ...const [
+            SliverToBoxAdapter(child: ThemeLivePreview()),
+            SliverToBoxAdapter(child: SizedBox(height: 16)),
+            _ThemeModeItem(),
+            SliverToBoxAdapter(child: SizedBox(height: 16)),
+            _NavigationPreviewItem(),
+            SliverToBoxAdapter(child: SizedBox(height: 16)),
+            _TabAnimationPreviewItem(),
+            SliverToBoxAdapter(child: SizedBox(height: 16)),
+            _PrimaryColorItem(),
+            SliverToBoxAdapter(child: SizedBox(height: 16)),
+            _PrueBlackItem(),
+            _SidebarBlurItem(),
+            SliverToBoxAdapter(child: SizedBox(height: 16)),
+            _TextScaleFactorItem(),
+            SliverToBoxAdapter(child: SizedBox(height: 32)),
+          ],
         ],
       ),
     );

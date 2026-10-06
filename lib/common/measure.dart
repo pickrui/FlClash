@@ -53,6 +53,9 @@ class Measure {
         () => computeTextSize(Text('X', style: style)).height,
       );
 
+  double get bodyLargeHeight =>
+      _lineHeight('bodyLargeHeight', context.textTheme.bodyLarge);
+
   double get bodyMediumHeight =>
       _lineHeight('bodyMediumHeight', context.textTheme.bodyMedium);
 

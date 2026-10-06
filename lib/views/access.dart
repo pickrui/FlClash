@@ -526,20 +526,22 @@ class _AccessViewState extends ConsumerState<AccessView>
       searchState: AppBarSearchState(onSearch: _onSearch, autoAddSearch: false),
       title: appLocalizations.appAccessControl,
       actions: _buildActions(enable: accessControl.enable),
-      body: DisabledMask(
-        status: !accessControl.enable,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildBannerBar(mode, valueList.length),
-            const SizedBox(height: 8),
-            Expanded(
-              child: _buildContent(
-                packages: viewPackages,
-                valueList: valueList,
+      body: AppBarClearance(
+        child: DisabledMask(
+          status: !accessControl.enable,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildBannerBar(mode, valueList.length),
+              const SizedBox(height: 8),
+              Expanded(
+                child: _buildContent(
+                  packages: viewPackages,
+                  valueList: valueList,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       floatingActionButton:

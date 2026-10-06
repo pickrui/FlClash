@@ -90,7 +90,7 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
       );
     }
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: EdgeInsets.only(top: context.contentTopPadding, bottom: 88),
       itemCount: scripts.length,
       itemBuilder: (_, index) {
         final script = scripts[index];

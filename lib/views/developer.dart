@@ -92,7 +92,7 @@ class DeveloperView extends ConsumerWidget {
     return BaseScaffold(
       title: appLocalizations.developerMode,
       body: SingleChildScrollView(
-        padding: baseInfoEdgeInsets,
+        padding: baseInfoEdgeInsets.copyWith(top: context.contentTopPadding),
         child: Column(
           children: [
             CommonCard(

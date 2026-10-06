@@ -759,7 +759,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
         ),
       ],
       body: ListView(
-        padding: const EdgeInsets.only(bottom: 24),
+        padding: EdgeInsets.only(top: context.contentTopPadding, bottom: 24),
         children: [
           if (saved != null) ..._buildDeviceSection(l),
           ..._buildFormSection(l),

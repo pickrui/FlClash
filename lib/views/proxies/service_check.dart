@@ -84,7 +84,7 @@ class _ServiceCheckPageState extends ConsumerState<ServiceCheckPage>
         ),
       ],
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 88),
         children: [
           ListTile(
             title: Text(
@@ -233,6 +233,7 @@ class ServiceManagementPage extends ConsumerWidget {
     return CommonScaffold(
       title: context.appLocalizations.manageServices,
       body: ReorderableListView.builder(
+        padding: EdgeInsets.only(top: context.contentTopPadding, bottom: 16),
         itemCount: order.length,
         onReorderItem: (before, after) {
           final next = List.of(order);
