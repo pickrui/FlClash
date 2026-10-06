@@ -23,6 +23,23 @@ T roundTrip<T>(
 
 void main() {
   test(
+    'tab animation migrates the previous switch and tolerates future values',
+    () {
+      expect(
+        AppSettingProps.fromJson({'isAnimateToPage': true}).tabAnimation,
+        TabAnimation.slide,
+      );
+      expect(
+        AppSettingProps.fromJson({'isAnimateToPage': false}).tabAnimation,
+        TabAnimation.fade,
+      );
+      expect(
+        AppSettingProps.fromJson({'tabAnimation': 'future'}).tabAnimation,
+        TabAnimation.fade,
+      );
+    },
+  );
+  test(
     'legacy UA migration preserves user choice and sanitizes stored headers',
     () {
       final old = AppSettingProps.fromJson({'customUserAgent': ' Legacy/1 '});
@@ -55,7 +72,7 @@ void main() {
       expect(restored.autoRun, false);
       expect(restored.openLogs, false);
       expect(restored.closeConnections, true);
-      expect(restored.isAnimateToPage, false);
+      expect(restored.tabAnimation, TabAnimation.fade);
       expect(restored.showLabel, false);
       expect(restored.minimizeOnExit, true);
       expect(restored.restoreStrategy, RestoreStrategy.compatible);

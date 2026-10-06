@@ -493,3 +493,5 @@ enum EditorFontSize {
   final double value;
   const EditorFontSize(this.value);
 }
+
+enum TabAnimation { slide, fade }

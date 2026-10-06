@@ -1248,5 +1248,7 @@
   "editorUnavailable": "エディターを利用できません",
   "replaceAll": "すべて置換",
   "fontSize": "サイズ",
-  "replace": "置換"
+  "replace": "置換",
+  "tabAnimationSlide": "スライド",
+  "tabAnimationFade": "フェード"
 }

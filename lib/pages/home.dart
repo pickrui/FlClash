@@ -6,6 +6,7 @@
 import 'package:fl_clash/widgets/keyboard_inset_hold.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/icons/navigation_glyph.dart';
 import 'package:fl_clash/manager/app_manager.dart';
 import 'package:fl_clash/models/common.dart';
 import 'package:fl_clash/providers/providers.dart';
@@ -49,7 +50,12 @@ class HomePage extends StatelessWidget {
                       destinations: [
                         for (final item in navigationItems)
                           NavigationDockDestination(
-                            icon: item.icon,
+                            icon: navigationGlyph(
+                              item.label,
+                              selected:
+                                  navigationItems[currentIndex].label ==
+                                  item.label,
+                            ),
                             label: Intl.message(item.label.name),
                           ),
                       ],
@@ -70,7 +76,12 @@ class HomePage extends StatelessWidget {
                         destinations: navigationItems
                             .map(
                               (e) => NavigationDestination(
-                                icon: e.icon,
+                                icon: navigationGlyph(
+                                  e.label,
+                                  selected:
+                                      navigationItems[currentIndex].label ==
+                                      e.label,
+                                ),
                                 label: Intl.message(e.label.name),
                               ),
                             )
@@ -177,6 +188,8 @@ class _HomePageView extends ConsumerStatefulWidget {
 
 class _HomePageViewState extends ConsumerState<_HomePageView> {
   late PageController _pageController;
+  List<int>? _order;
+  int _slide = 0;
 
   @override
   void initState() {
@@ -195,6 +208,8 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
   void didUpdateWidget(covariant _HomePageView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.navigationItems.length != widget.navigationItems.length) {
+      _order = null;
+      _slide++;
       _updatePageController();
     }
   }
@@ -216,19 +231,41 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
       return;
     }
     final index = _indexOf(pageLabel);
-    final isAnimateToPage = ref.read(appSettingProvider).isAnimateToPage;
+    final tabAnimation = ref.read(appSettingProvider).tabAnimation;
     final isMobile = ref.read(isMobileViewProvider);
-    if (isAnimateToPage &&
-        isMobile &&
-        !ignoreAnimateTo &&
-        !MediaQuery.disableAnimationsOf(context)) {
-      await _pageController.animateToPage(
-        index,
-        duration: kTabScrollDuration,
-        curve: Curves.easeOut,
-      );
-    } else {
+    final slide = ++_slide;
+    final page = _pageController.hasClients
+        ? _pageController.page?.round() ?? index
+        : index;
+    final current = _order?[page] ?? page;
+    if (_order != null) {
+      setState(() => _order = null);
+      _pageController.jumpToPage(current);
+    }
+    if (!isMobile ||
+        ignoreAnimateTo ||
+        MediaQuery.disableAnimationsOf(context)) {
       _pageController.jumpToPage(index);
+      return;
+    }
+    // As TabBarView does, so no page between is built and painted on the way.
+    if ((index - current).abs() > 1) {
+      final adjacent = index > current ? index - 1 : index + 1;
+      setState(() {
+        _order = List.generate(widget.navigationItems.length, (item) => item)
+          ..[adjacent] = current
+          ..[current] = adjacent;
+      });
+      _pageController.jumpToPage(adjacent);
+    }
+    final fade = tabAnimation == TabAnimation.fade;
+    await _pageController.animateToPage(
+      index,
+      duration: fade ? fadeTabDuration : kTabScrollDuration,
+      curve: fade ? fadeTabCurve : Curves.easeOut,
+    );
+    if (mounted && slide == _slide && _order != null) {
+      setState(() => _order = null);
     }
   }
 
@@ -245,10 +282,16 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
 
   @override
   Widget build(BuildContext context) {
+    final itemCount = widget.navigationItems.length;
+    final fade = ref.watch(
+      appSettingProvider.select(
+        (state) => state.tabAnimation == TabAnimation.fade,
+      ),
+    );
     return PageView.builder(
       controller: _pageController,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: widget.navigationItems.length,
+      itemCount: itemCount,
       findChildIndexCallback: (key) {
         if (key is! ValueKey<PageLabel>) {
           return null;
@@ -256,11 +299,61 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
         final index = widget.navigationItems.indexWhere(
           (item) => item.label == key.value,
         );
-        return index == -1 ? null : index;
+        if (index == -1) {
+          return null;
+        }
+        return _order?.indexOf(index) ?? index;
       },
       itemBuilder: (context, index) {
-        return widget.pageBuilder(context, index);
+        final page = widget.pageBuilder(context, _order?[index] ?? index);
+        return _FadeTabPage(
+          key: page.key,
+          controller: _pageController,
+          position: index,
+          enabled: fade,
+          child: page,
+        );
       },
+    );
+  }
+}
+
+/// Cancels the page view's slide so a tab switch cross-fades in place, and
+/// wraps every page even when off so switching the setting keeps their state.
+class _FadeTabPage extends StatelessWidget {
+  const _FadeTabPage({
+    super.key,
+    required this.controller,
+    required this.position,
+    required this.enabled,
+    required this.child,
+  });
+
+  final PageController controller;
+  final int position;
+  final bool enabled;
+  final Widget child;
+
+  double get _delta {
+    if (!controller.hasClients || !controller.position.hasContentDimensions) {
+      return 0;
+    }
+    final page = controller.page ?? position.toDouble();
+    return (position - page).clamp(-1.0, 1.0);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (_, child) {
+        final delta = enabled ? _delta : 0.0;
+        return FractionalTranslation(
+          translation: Offset(-delta, 0),
+          child: Opacity(opacity: 1 - delta.abs(), child: child),
+        );
+      },
+      child: child,
     );
   }
 }

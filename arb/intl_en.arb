@@ -1248,5 +1248,7 @@
   "editorUnavailable": "Editor unavailable",
   "replaceAll": "Replace all",
   "fontSize": "Size",
-  "replace": "Replace"
+  "replace": "Replace",
+  "tabAnimationSlide": "Slide",
+  "tabAnimationFade": "Fade"
 }

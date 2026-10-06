@@ -10,6 +10,7 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/scroll.dart';
 import 'package:fl_clash/common/periodic_task_runner.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/icons/navigation_glyph.dart';
 import 'package:fl_clash/manager/window_manager.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
@@ -348,7 +349,12 @@ class AppSidebarContainer extends ConsumerWidget {
                         destinations: navigationItems
                             .map(
                               (e) => NavigationRailDestination(
-                                icon: e.icon,
+                                icon: navigationGlyph(
+                                  e.label,
+                                  selected:
+                                      currentIndex ==
+                                      navigationItems.indexOf(e),
+                                ),
                                 label: Text(Intl.message(e.label.name)),
                               ),
                             )

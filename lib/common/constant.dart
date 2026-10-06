@@ -168,3 +168,6 @@ const main = (config) => {
 
 const backupDatabaseName = 'database.sqlite';
 const configJsonName = 'config.json';
+
+const fadeTabDuration = Duration(milliseconds: 220);
+const fadeTabCurve = Curves.easeInOut;

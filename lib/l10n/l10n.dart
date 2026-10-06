@@ -10539,6 +10539,16 @@ class AppLocalizations {
   String get replace {
     return Intl.message('Replace', name: 'replace', desc: '', args: []);
   }
+
+  /// `Slide`
+  String get tabAnimationSlide {
+    return Intl.message('Slide', name: 'tabAnimationSlide', desc: '', args: []);
+  }
+
+  /// `Fade`
+  String get tabAnimationFade {
+    return Intl.message('Fade', name: 'tabAnimationFade', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

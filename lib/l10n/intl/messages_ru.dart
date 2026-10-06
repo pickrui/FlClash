@@ -2384,6 +2384,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tabAnimationDesc": MessageLookupByLibrary.simpleMessage(
       "Действительно только в мобильном виде",
     ),
+    "tabAnimationFade": MessageLookupByLibrary.simpleMessage("Растворение"),
+    "tabAnimationSlide": MessageLookupByLibrary.simpleMessage("Сдвиг"),
     "tailscaleAccount": MessageLookupByLibrary.simpleMessage("Аккаунт"),
     "tailscaleAddNetwork": MessageLookupByLibrary.simpleMessage(
       "Добавить сеть",

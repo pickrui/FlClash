@@ -26,7 +26,7 @@ void main() {
       expect(value.onlyStatisticsProxy, false);
       expect(value.autoLaunch, false);
       expect(value.closeConnections, true);
-      expect(value.isAnimateToPage, false);
+      expect(value.tabAnimation, TabAnimation.fade);
     });
 
     test('can update state', () {

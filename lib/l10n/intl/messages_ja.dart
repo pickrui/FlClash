@@ -1881,6 +1881,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tab": MessageLookupByLibrary.simpleMessage("タブ"),
     "tabAnimation": MessageLookupByLibrary.simpleMessage("タブアニメーション"),
     "tabAnimationDesc": MessageLookupByLibrary.simpleMessage("モバイル表示でのみ有効"),
+    "tabAnimationFade": MessageLookupByLibrary.simpleMessage("フェード"),
+    "tabAnimationSlide": MessageLookupByLibrary.simpleMessage("スライド"),
     "tailscaleAccount": MessageLookupByLibrary.simpleMessage("アカウント"),
     "tailscaleAddNetwork": MessageLookupByLibrary.simpleMessage("ネットワークを追加"),
     "tailscaleAdvanced": MessageLookupByLibrary.simpleMessage("詳細設定"),

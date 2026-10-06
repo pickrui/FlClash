@@ -9,6 +9,9 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/providers/state.dart';
+import 'package:fl_clash/views/theme_preview.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
@@ -17,18 +20,6 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-
-class ThemeModeItem {
-  final ThemeMode themeMode;
-  final IconData iconData;
-  final String label;
-
-  const ThemeModeItem({
-    required this.themeMode,
-    required this.iconData,
-    required this.label,
-  });
-}
 
 class ThemeView extends StatelessWidget {
   const ThemeView({super.key});
@@ -40,7 +31,13 @@ class ThemeView extends StatelessWidget {
       title: appLocalizations.theme,
       body: const CustomScrollView(
         slivers: [
+          SliverToBoxAdapter(child: ThemeLivePreview()),
+          SliverToBoxAdapter(child: SizedBox(height: 16)),
           _ThemeModeItem(),
+          SliverToBoxAdapter(child: SizedBox(height: 16)),
+          _NavigationPreviewItem(),
+          SliverToBoxAdapter(child: SizedBox(height: 16)),
+          _TabAnimationPreviewItem(),
           SliverToBoxAdapter(child: SizedBox(height: 16)),
           _PrimaryColorItem(),
           SliverToBoxAdapter(child: SizedBox(height: 16)),
@@ -81,73 +78,111 @@ class ItemCard extends StatelessWidget {
 
 class _ThemeModeItem extends ConsumerWidget {
   const _ThemeModeItem();
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final appLocalizations = context.appLocalizations;
-    final themeMode = ref.watch(
-      themeSettingProvider.select((state) => state.themeMode),
-    );
-    final List<ThemeModeItem> themeModeItems = [
-      ThemeModeItem(
-        iconData: Icons.auto_mode,
-        label: appLocalizations.auto,
-        themeMode: ThemeMode.system,
-      ),
-      ThemeModeItem(
-        iconData: Icons.light_mode,
-        label: appLocalizations.light,
-        themeMode: ThemeMode.light,
-      ),
-      ThemeModeItem(
-        iconData: Icons.dark_mode,
-        label: appLocalizations.dark,
-        themeMode: ThemeMode.dark,
-      ),
-    ];
+    final l = context.appLocalizations;
+    final light = ref.watch(genColorSchemeProvider(Brightness.light));
+    final dark = ref.watch(genColorSchemeProvider(Brightness.dark));
     return SliverToBoxAdapter(
-      child: ItemCard(
-        info: Info(
-          label: appLocalizations.themeMode,
-          iconData: Icons.brightness_high,
+      child: PreviewChoiceGroup(
+        info: Info(label: l.themeMode, iconData: Icons.brightness_high),
+        value: ref.watch(themeSettingProvider.select((s) => s.themeMode)),
+        onChanged: (ThemeMode value) => ref
+            .read(themeSettingProvider.notifier)
+            .update((s) => s.copyWith(themeMode: value)),
+        choices: [
+          for (final mode in ThemeMode.values)
+            PreviewChoice(
+              value: mode,
+              label: switch (mode) {
+                ThemeMode.system => l.auto,
+                ThemeMode.light => l.light,
+                ThemeMode.dark => l.dark,
+              },
+              pictogram: MiniScreenThumb(
+                screen: mode == ThemeMode.system
+                    ? MiniSplitScreen(
+                        light: MiniScreen(
+                          colorScheme: light,
+                          floatingBar: true,
+                        ),
+                        dark: MiniScreen(colorScheme: dark, floatingBar: true),
+                      )
+                    : MiniScreen(
+                        colorScheme: mode == ThemeMode.light ? light : dark,
+                        floatingBar: true,
+                      ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NavigationPreviewItem extends ConsumerWidget {
+  const _NavigationPreviewItem();
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.appLocalizations;
+    return SliverToBoxAdapter(
+      child: PreviewChoiceGroup(
+        info: Info(label: l.floatingNavigationBar, iconData: Icons.dock),
+        value: ref.watch(
+          appSettingProvider.select((s) => s.floatingNavigationBar),
         ),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          height: 56,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: themeModeItems.length,
-            itemBuilder: (_, index) {
-              final themeModeItem = themeModeItems[index];
-              return CommonCard(
-                isSelected: themeModeItem.themeMode == themeMode,
-                onPressed: () {
-                  ref
-                      .read(themeSettingProvider.notifier)
-                      .update(
-                        (state) =>
-                            state.copyWith(themeMode: themeModeItem.themeMode),
-                      );
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Flexible(child: Icon(themeModeItem.iconData)),
-                      const SizedBox(width: 8),
-                      Flexible(child: Text(themeModeItem.label)),
-                    ],
-                  ),
+        onChanged: (bool value) => ref
+            .read(appSettingProvider.notifier)
+            .update((s) => s.copyWith(floatingNavigationBar: value)),
+        choices: [
+          for (final floating in [false, true])
+            PreviewChoice(
+              value: floating,
+              label: floating ? l.floatingNavigationBar : l.standard,
+              pictogram: MiniScreenThumb(
+                screen: MiniScreen(
+                  colorScheme: context.colorScheme,
+                  floatingBar: floating,
                 ),
-              );
-            },
-            separatorBuilder: (_, _) {
-              return const SizedBox(width: 16);
-            },
-          ),
-        ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TabAnimationPreviewItem extends ConsumerWidget {
+  const _TabAnimationPreviewItem();
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.appLocalizations;
+    return SliverToBoxAdapter(
+      child: PreviewChoiceGroup(
+        info: Info(label: l.tabAnimation, iconData: Icons.animation),
+        value: ref.watch(appSettingProvider.select((s) => s.tabAnimation)),
+        onChanged: (TabAnimation value) => ref
+            .read(appSettingProvider.notifier)
+            .update((s) => s.copyWith(tabAnimation: value)),
+        choices: [
+          for (final mode in TabAnimation.values)
+            PreviewChoice(
+              value: mode,
+              label: mode == TabAnimation.slide
+                  ? l.tabAnimationSlide
+                  : l.tabAnimationFade,
+              pictogram: MiniScreenThumb(
+                screen: MiniScreen(
+                  colorScheme: context.colorScheme,
+                  floatingBar: true,
+                  tabAnimation: mode,
+                  selected: 1,
+                  previous: 0,
+                  progress: 0.4,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

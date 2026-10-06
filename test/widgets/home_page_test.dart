@@ -7,6 +7,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/home.dart';
 import 'package:fl_clash/providers/app.dart';
+import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/widgets/inherited.dart';
@@ -42,6 +43,67 @@ Override _items(List<PageLabel> labels) =>
     );
 
 void main() {
+  for (final animation in TabAnimation.values) {
+    testWidgets('nonadjacent $animation navigation skips intermediate pages', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final built = <PageLabel>[];
+      final c = ProviderContainer(
+        overrides: [
+          viewSizeProvider.overrideWithBuild((_, _) => const Size(400, 800)),
+          profilesProvider.overrideWithValue([]),
+          currentNavigationItemsStateProvider.overrideWithValue(
+            NavigationItemsState(
+              value: [
+                for (final label in [
+                  PageLabel.dashboard,
+                  PageLabel.proxies,
+                  PageLabel.tools,
+                ])
+                  NavigationItem(
+                    icon: const Icon(Icons.circle),
+                    label: label,
+                    keep: true,
+                    builder: (_) {
+                      built.add(label);
+                      return _Probe(label);
+                    },
+                  ),
+              ],
+            ),
+          ),
+        ],
+      );
+      addTearDown(c.dispose);
+      c
+          .read(appSettingProvider.notifier)
+          .update((value) => value.copyWith(tabAnimation: animation));
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: c,
+          child: const TestApp(child: HomePage()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      built.clear();
+      c.read(currentPageLabelProvider.notifier).value = PageLabel.tools;
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pumpAndSettle();
+      expect(find.text('tools:true'), findsOneWidget);
+      expect(built, isNot(contains(PageLabel.proxies)));
+      c.read(currentPageLabelProvider.notifier).value = PageLabel.dashboard;
+      await tester.pump(const Duration(milliseconds: 50));
+      c.read(currentPageLabelProvider.notifier).value = PageLabel.proxies;
+      await tester.pumpAndSettle();
+      expect(find.text('proxies:true'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets('a page that leaves the navigation falls back to the first tab', (
     tester,
   ) async {

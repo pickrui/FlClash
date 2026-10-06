@@ -2261,6 +2261,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tabAnimationDesc": MessageLookupByLibrary.simpleMessage(
       "Effective only in mobile view",
     ),
+    "tabAnimationFade": MessageLookupByLibrary.simpleMessage("Fade"),
+    "tabAnimationSlide": MessageLookupByLibrary.simpleMessage("Slide"),
     "tailscaleAccount": MessageLookupByLibrary.simpleMessage("Account"),
     "tailscaleAddNetwork": MessageLookupByLibrary.simpleMessage("Add network"),
     "tailscaleAdvanced": MessageLookupByLibrary.simpleMessage("Advanced"),

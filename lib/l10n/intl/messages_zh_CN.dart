@@ -1664,6 +1664,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tab": MessageLookupByLibrary.simpleMessage("标签页"),
     "tabAnimation": MessageLookupByLibrary.simpleMessage("选项卡动画"),
     "tabAnimationDesc": MessageLookupByLibrary.simpleMessage("仅在移动视图中有效"),
+    "tabAnimationFade": MessageLookupByLibrary.simpleMessage("淡入"),
+    "tabAnimationSlide": MessageLookupByLibrary.simpleMessage("滑动"),
     "tailscaleAccount": MessageLookupByLibrary.simpleMessage("账户"),
     "tailscaleAddNetwork": MessageLookupByLibrary.simpleMessage("添加网络"),
     "tailscaleAdvanced": MessageLookupByLibrary.simpleMessage("高级"),

@@ -27,7 +27,13 @@ _AppSettingProps _$AppSettingPropsFromJson(
   testUrl: json['testUrl'] == null
       ? defaultTestUrl
       : testUrlFromJson(json['testUrl'] as String?),
-  isAnimateToPage: json['isAnimateToPage'] as bool? ?? false,
+  tabAnimation:
+      $enumDecodeNullable(
+        _$TabAnimationEnumMap,
+        _readTabAnimation(json, 'tabAnimation'),
+        unknownValue: TabAnimation.fade,
+      ) ??
+      TabAnimation.fade,
   floatingNavigationBar: json['floatingNavigationBar'] as bool? ?? true,
   showLabel: json['showLabel'] as bool? ?? false,
   hideIp: json['hideIp'] as bool? ?? false,
@@ -77,7 +83,7 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'openLogs': instance.openLogs,
       'closeConnections': instance.closeConnections,
       'testUrl': instance.testUrl,
-      'isAnimateToPage': instance.isAnimateToPage,
+      'tabAnimation': _$TabAnimationEnumMap[instance.tabAnimation]!,
       'floatingNavigationBar': instance.floatingNavigationBar,
       'showLabel': instance.showLabel,
       'hideIp': instance.hideIp,
@@ -95,6 +101,11 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'customUserAgent': instance.customUserAgent,
       'scriptOptions': instance.scriptOptions,
     };
+
+const _$TabAnimationEnumMap = {
+  TabAnimation.slide: 'slide',
+  TabAnimation.fade: 'fade',
+};
 
 const _$EditorFontSizeEnumMap = {
   EditorFontSize.standard: 'standard',

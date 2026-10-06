@@ -170,29 +170,6 @@ class HiddenItem extends ConsumerWidget {
   }
 }
 
-class AnimateTabItem extends ConsumerWidget {
-  const AnimateTabItem({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isAnimateToPage = ref.watch(
-      appSettingProvider.select((state) => state.isAnimateToPage),
-    );
-    return ListItem.switchItem(
-      title: Text(appLocalizations.tabAnimation),
-      subtitle: Text(appLocalizations.tabAnimationDesc),
-      delegate: SwitchDelegate(
-        value: isAnimateToPage,
-        onChanged: (value) {
-          ref
-              .read(appSettingProvider.notifier)
-              .update((state) => state.copyWith(isAnimateToPage: value));
-        },
-      ),
-    );
-  }
-}
-
 class FloatingNavigationItem extends ConsumerWidget {
   const FloatingNavigationItem({super.key});
 
@@ -269,7 +246,6 @@ class ApplicationSettingView extends StatelessWidget {
       const AutoRunItem(),
       if (system.isAndroid) const NotificationStopItem(),
       if (system.isAndroid) ...[const HiddenItem()],
-      const AnimateTabItem(),
       const FloatingNavigationItem(),
       const OpenLogsItem(),
       const CloseConnectionsItem(),

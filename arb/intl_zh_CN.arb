@@ -1248,5 +1248,7 @@
   "editorUnavailable": "编辑器不可用",
   "replaceAll": "全部替换",
   "fontSize": "大小",
-  "replace": "替换"
+  "replace": "替换",
+  "tabAnimationSlide": "滑动",
+  "tabAnimationFade": "淡入"
 }

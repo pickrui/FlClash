@@ -1248,5 +1248,7 @@
   "editorUnavailable": "Редактор недоступен",
   "replaceAll": "Заменить все",
   "fontSize": "Размер",
-  "replace": "Заменить"
+  "replace": "Заменить",
+  "tabAnimationSlide": "Сдвиг",
+  "tabAnimationFade": "Растворение"
 }

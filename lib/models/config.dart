@@ -122,7 +122,9 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(false) bool openLogs,
     @Default(true) bool closeConnections,
     @Default(defaultTestUrl) @JsonKey(fromJson: testUrlFromJson) String testUrl,
-    @Default(false) bool isAnimateToPage,
+    @Default(TabAnimation.fade)
+    @JsonKey(readValue: _readTabAnimation, unknownEnumValue: TabAnimation.fade)
+    TabAnimation tabAnimation,
     @Default(true) bool floatingNavigationBar,
     @Default(false) bool showLabel,
     @Default(false) bool hideIp,
@@ -376,3 +378,6 @@ abstract class Config with _$Config {
     return _$ConfigFromJson(json);
   }
 }
+
+Object? _readTabAnimation(Map json, String key) =>
+    json[key] ?? (json['isAnimateToPage'] == true ? 'slide' : 'fade');
