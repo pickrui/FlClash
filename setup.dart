@@ -15,6 +15,23 @@ import 'package:setup_hooks/setup_hooks.dart' as hooks;
 
 enum Target { windows, linux, android, macos }
 
+const packageTargets = {
+  Target.windows: ['exe', 'zip'],
+  Target.linux: ['deb', 'appimage', 'rpm'],
+  Target.android: ['apk'],
+  Target.macos: ['dmg'],
+};
+
+String appImageArchitecture(Arch arch) => switch (arch) {
+  Arch.amd64 => 'x86_64',
+  Arch.arm64 => 'aarch64',
+  Arch.arm => throw ArgumentError.value(
+    arch,
+    'arch',
+    'unsupported AppImage architecture',
+  ),
+};
+
 extension TargetExt on Target {
   bool get same {
     if (this == Target.android) {
@@ -124,9 +141,9 @@ class Build {
     if (ndk == null || ndk.isEmpty) {
       throw 'Set ANDROID_NDK to the Android NDK directory';
     }
-    final hosts = Directory(
-      join(ndk, 'toolchains', 'llvm', 'prebuilt'),
-    ).listSync().where((entity) => !basename(entity.path).startsWith('.'));
+    final hosts = Directory(join(ndk, 'toolchains', 'llvm', 'prebuilt'))
+        .listSync()
+        .where((entity) => !basename(entity.path).startsWith('.'));
     if (hosts.isEmpty) throw 'No LLVM toolchain found under $ndk';
     return join(hosts.first.path, 'bin');
   }
@@ -252,6 +269,12 @@ class BuildCommand extends Command {
       allowed: [if (target.same) 'app', 'core'],
       help: 'The $name build arch',
     );
+    argParser.addMultiOption(
+      'targets',
+      allowed: packageTargets[target],
+      defaultsTo: packageTargets[target],
+      help: 'Package formats to build (comma-separated)',
+    );
     argParser.addOption(
       'env',
       allowed: ['pre', 'stable'],
@@ -297,7 +320,7 @@ class BuildCommand extends Command {
         .toList();
   }
 
-  Future<void> _getLinuxDependencies(Arch arch) async {
+  Future<void> _getLinuxDependencies(Arch arch, List<String> targets) async {
     await Build.exec(['sudo', 'apt-get', 'update', '-y']);
     await Build.exec([
       'sudo',
@@ -313,26 +336,25 @@ class BuildCommand extends Command {
       'libglib2.0-dev',
       'locate',
     ]);
-    if (arch == Arch.amd64) {
-      await Build.exec([
-        'sudo',
-        'apt-get',
-        'install',
-        '-y',
-        'rpm',
-        'patchelf',
-        'libfuse2',
-      ]);
-      await _installAppImageTool();
+    if (targets.contains('rpm')) {
+      await Build.exec(['sudo', 'apt-get', 'install', '-y', 'rpm']);
+    }
+    if (targets.contains('appimage')) {
+      await Build.exec(['sudo', 'apt-get', 'install', '-y', 'patchelf']);
+      await _installAppImageTool(arch);
     }
   }
 
   /// Pins the static runtime through a wrapper, because flutter_distributor
   /// runs `appimagetool` with no options. See docs/aur-packaging.md.
-  Future<void> _installAppImageTool() async {
+  Future<void> _installAppImageTool(Arch targetArch) async {
+    final hostArch = resolveHostArch(await systemArch);
+    if (hostArch == null) throw StateError('Unsupported AppImage build host');
+    final toolArch = appImageArchitecture(hostArch);
+    final runtimeArch = appImageArchitecture(targetArch);
     const toolDir = '/usr/local/lib/flclash';
-    const realTool = '$toolDir/appimagetool';
-    const runtime = '$toolDir/appimage-runtime';
+    final realTool = '$toolDir/appimagetool-$toolArch';
+    final runtime = '$toolDir/appimage-runtime-$runtimeArch';
     const wrapper = '/usr/local/bin/appimagetool';
 
     await Build.exec(['sudo', 'mkdir', '-p', toolDir]);
@@ -341,7 +363,7 @@ class BuildCommand extends Command {
         'wget',
         '-O',
         'appimagetool',
-        'https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage',
+        'https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-$toolArch.AppImage',
       ]);
       await Build.exec(['chmod', '+x', 'appimagetool']);
       await Build.exec(['sudo', 'mv', 'appimagetool', realTool]);
@@ -351,7 +373,7 @@ class BuildCommand extends Command {
         'wget',
         '-O',
         'appimage-runtime',
-        'https://github.com/AppImage/type2-runtime/releases/download/continuous/runtime-x86_64',
+        'https://github.com/AppImage/type2-runtime/releases/download/continuous/runtime-$runtimeArch',
       ]);
       await Build.exec(['sudo', 'mv', 'appimage-runtime', runtime]);
     }
@@ -361,6 +383,7 @@ class BuildCommand extends Command {
     );
     await wrapperFile.writeAsString(
       '#!/bin/sh\n'
+      'export APPIMAGE_EXTRACT_AND_RUN=1\n'
       'exec $realTool --runtime-file $runtime "\$@"\n',
     );
     await Build.exec(['chmod', '+x', wrapperFile.path]);
@@ -371,16 +394,17 @@ class BuildCommand extends Command {
   Future<void> _verifyAppImageRuntime() async {
     final distDir = Directory(Build.distPath);
     if (!distDir.existsSync()) return;
-    final images = distDir.listSync().whereType<File>().where(
-      (file) => extension(file.path) == '.AppImage',
-    );
+    final images = distDir
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((file) => extension(file.path).toLowerCase() == '.appimage');
     for (final image in images) {
       final handle = await image.open();
       try {
         final head = await handle.read(2 * 1024 * 1024);
-        if (const AsciiDecoder(
-          allowInvalid: true,
-        ).convert(head).contains('libfuse.so.2')) {
+        if (const AsciiDecoder(allowInvalid: true)
+            .convert(head)
+            .contains('libfuse.so.2')) {
           throw Exception(
             '${basename(image.path)} embeds the fuse2 AppImage runtime',
           );
@@ -502,6 +526,12 @@ class BuildCommand extends Command {
   @override
   Future<void> run() async {
     final String out = argResults?['out'] ?? (target.same ? 'app' : 'core');
+    final targets = (argResults!['targets'] as List<String>).toSet().toList();
+    if (targets.isEmpty) usageException('Select at least one package target');
+    if (out != 'app' && argResults!.wasParsed('targets')) {
+      usageException('--targets requires --out app on the target platform');
+    }
+    final formats = targets.join(',');
     final archName =
         argResults?['arch'] as String? ??
         (target == Target.android
@@ -557,23 +587,18 @@ class BuildCommand extends Command {
       case Target.windows:
         await _buildDistributor(
           target: target,
-          targets: 'exe,zip',
+          targets: formats,
           args: ['--description', archName!],
           env: env,
         );
         return;
       case Target.linux:
         final targetMap = {Arch.arm64: 'linux-arm64', Arch.amd64: 'linux-x64'};
-        final targets = [
-          'deb',
-          if (arch == Arch.amd64) 'appimage',
-          if (arch == Arch.amd64) 'rpm',
-        ].join(',');
         final defaultTarget = targetMap[arch];
-        await _getLinuxDependencies(arch!);
+        await _getLinuxDependencies(arch!, targets);
         await _buildDistributor(
           target: target,
-          targets: targets,
+          targets: formats,
           args: [
             '--description',
             archName!,
@@ -582,7 +607,7 @@ class BuildCommand extends Command {
           ],
           env: env,
         );
-        await _verifyAppImageRuntime();
+        if (targets.contains('appimage')) await _verifyAppImageRuntime();
         return;
       case Target.android:
         final targetMap = {
@@ -609,7 +634,7 @@ class BuildCommand extends Command {
               .toList();
           await _buildDistributor(
             target: target,
-            targets: 'apk',
+            targets: formats,
             args: ['--build-target-platform', defaultTargets.join(',')],
             env: env,
           );
@@ -619,7 +644,7 @@ class BuildCommand extends Command {
         await _getMacosDependencies();
         await _buildDistributor(
           target: target,
-          targets: 'dmg',
+          targets: formats,
           args: ['--description', archName!],
           // Flutter release builds otherwise default to a universal app, while
           // this package contains the Core for the explicitly selected arch.

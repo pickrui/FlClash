@@ -163,7 +163,10 @@ void main() {
       LinuxPackageFormat.rpm,
       LinuxPackageFormat.appImage,
     ]);
-    expect(linuxPackageFormatsFor(Abi.linuxArm64), [LinuxPackageFormat.deb]);
+    expect(
+      linuxPackageFormatsFor(Abi.linuxArm64),
+      linuxPackageFormatsFor(Abi.linuxX64),
+    );
     for (final abi in Abi.values.where(
       (abi) => abi != Abi.linuxX64 && abi != Abi.linuxArm64,
     )) {

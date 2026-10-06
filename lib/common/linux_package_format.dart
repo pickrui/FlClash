@@ -33,19 +33,20 @@ enum LinuxPackageFormat {
   }
 }
 
-/// Formats published for [abi]; arm64 only ships a Debian package.
+/// Formats published for each supported Linux architecture.
 List<LinuxPackageFormat> linuxPackageFormatsFor(Abi abi) => switch (abi) {
-  Abi.linuxX64 => const [
+  Abi.linuxX64 || Abi.linuxArm64 => const [
     LinuxPackageFormat.deb,
     LinuxPackageFormat.rpm,
     LinuxPackageFormat.appImage,
   ],
-  Abi.linuxArm64 => const [LinuxPackageFormat.deb],
   _ => const [],
 };
 
-typedef ProcessRunner =
-    Future<ProcessResult> Function(String executable, List<String> arguments);
+typedef ProcessRunner = Future<ProcessResult> Function(
+  String executable,
+  List<String> arguments,
+);
 
 const _debianIds = {
   'debian',

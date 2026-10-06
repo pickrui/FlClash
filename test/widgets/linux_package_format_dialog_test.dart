@@ -62,8 +62,8 @@ void main() {
       findsOneWidget,
     );
     expect(find.text(LinuxPackageFormat.deb.extension), findsOneWidget);
-    expect(find.text(LinuxPackageFormat.rpm.extension), findsNothing);
-    expect(find.text(LinuxPackageFormat.appImage.extension), findsNothing);
+    expect(find.text(LinuxPackageFormat.rpm.extension), findsOneWidget);
+    expect(find.text(LinuxPackageFormat.appImage.extension), findsOneWidget);
   });
 
   testWidgets('the tapped format is the answer', (tester) async {
