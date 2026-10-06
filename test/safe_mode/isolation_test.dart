@@ -151,7 +151,7 @@ void main() {
           );
           expect(starts, 0);
         },
-        skip: Platform.isWindows,
+        skip: Platform.isWindows ? 'Requires POSIX file permissions' : null,
       );
 
       test(
