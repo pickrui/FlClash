@@ -15,6 +15,7 @@ import 'package:fl_clash/core/controller.dart' show ConfigValidationException;
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
+
 import 'bounded_http_client_adapter.dart';
 import 'http_read_race.dart';
 
@@ -422,11 +423,6 @@ class Request {
           throw 'Unauthorized';
         }
         if (isApiDomain) {
-          throw appLocalizations.networkException;
-        }
-        if (e.type == DioExceptionType.unknown) {
-          throw appLocalizations.unknownNetworkError;
-        } else if (e.type == DioExceptionType.badResponse) {
           throw appLocalizations.networkException;
         }
         rethrow;

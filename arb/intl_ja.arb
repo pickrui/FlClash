@@ -1230,5 +1230,16 @@
   "invalidProfileQrcode": "このQRコードにはプロファイルのリンクが含まれていません",
   "pickFromAlbum": "アルバムから選択",
   "retry": "再試行",
-  "toggleFlashlight": "ライト切替"
+  "toggleFlashlight": "ライト切替",
+  "networkTimeoutError": "リクエストがタイムアウトしました。ネットワークまたはプロキシを確認してから再試行してください",
+  "networkHostLookupError": "サーバーのアドレスを解決できませんでした。URL が正しいこと、DNS が使えることを確認してください",
+  "networkConnectionError": "サーバーに接続できませんでした。ネットワーク接続またはプロキシ設定を確認してください",
+  "networkTlsError": "安全な接続に失敗しました。サーバー証明書が無効か、接続が傍受されている可能性があります",
+  "networkCancelledError": "リクエストはキャンセルされました",
+  "networkAccessDeniedError": "サーバーがアクセスを拒否しました（HTTP {code}）。リンクの期限切れか、認証情報が誤っている可能性があります",
+  "networkNotFoundError": "このアドレスには何も見つかりませんでした（HTTP {code}）。URL が正しいか確認してください",
+  "networkRateLimitedError": "リクエストが多すぎます（HTTP 429）。しばらく待ってから再試行してください",
+  "networkServerError": "サーバーで問題が発生しました（HTTP {code}）。しばらくしてから再試行してください",
+  "networkBadResponseError": "サーバーがリクエストを拒否しました（HTTP {code}）",
+  "networkRequestFailed": "ネットワークリクエストに失敗しました：{detail}"
 }

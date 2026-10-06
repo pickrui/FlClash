@@ -1230,5 +1230,16 @@
   "invalidProfileQrcode": "该二维码不包含配置文件链接",
   "pickFromAlbum": "从相册选择",
   "retry": "重试",
-  "toggleFlashlight": "切换闪光灯"
+  "toggleFlashlight": "切换闪光灯",
+  "networkTimeoutError": "请求超时，请检查网络或代理后重试",
+  "networkHostLookupError": "无法解析服务器地址，请确认链接正确且 DNS 可用",
+  "networkConnectionError": "无法连接到服务器，请检查网络连接或代理设置",
+  "networkTlsError": "安全连接失败，服务器证书可能无效，或连接被拦截",
+  "networkCancelledError": "请求已取消",
+  "networkAccessDeniedError": "服务器拒绝访问（HTTP {code}），链接可能已过期或凭据有误",
+  "networkNotFoundError": "该地址下没有内容（HTTP {code}），请确认链接是否正确",
+  "networkRateLimitedError": "请求过于频繁（HTTP 429），请稍后再试",
+  "networkServerError": "服务器出现问题（HTTP {code}），请稍后再试",
+  "networkBadResponseError": "服务器拒绝了请求（HTTP {code}）",
+  "networkRequestFailed": "网络请求失败：{detail}"
 }

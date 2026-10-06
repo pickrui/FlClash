@@ -12,7 +12,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/geo_recovery.dart';
 import 'package:fl_clash/common/javascript.dart';
-import 'package:fl_clash/common/core_launch_error.dart';
+import 'package:fl_clash/common/network_error.dart';
 import 'package:fl_clash/common/delay_test.dart';
 import 'package:fl_clash/common/network_failure_prompt.dart';
 import 'package:fl_clash/common/update_download.dart';

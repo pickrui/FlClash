@@ -5,4 +5,4 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/l10n/l10n.dart';
 
-final appLocalizations = AppLocalizations.current;
+AppLocalizations get appLocalizations => AppLocalizations.current;

@@ -10384,6 +10384,116 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `The request timed out. Check your network or proxy, then try again`
+  String get networkTimeoutError {
+    return Intl.message(
+      'The request timed out. Check your network or proxy, then try again',
+      name: 'networkTimeoutError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Couldn't resolve the server address. Check that the URL is correct and DNS is working`
+  String get networkHostLookupError {
+    return Intl.message(
+      'Couldn\'t resolve the server address. Check that the URL is correct and DNS is working',
+      name: 'networkHostLookupError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Couldn't connect to the server. Check your network connection or proxy settings`
+  String get networkConnectionError {
+    return Intl.message(
+      'Couldn\'t connect to the server. Check your network connection or proxy settings',
+      name: 'networkConnectionError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Secure connection failed. The server's certificate may be invalid, or the connection is being intercepted`
+  String get networkTlsError {
+    return Intl.message(
+      'Secure connection failed. The server\'s certificate may be invalid, or the connection is being intercepted',
+      name: 'networkTlsError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The request was cancelled`
+  String get networkCancelledError {
+    return Intl.message(
+      'The request was cancelled',
+      name: 'networkCancelledError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The server denied access (HTTP {code}). The link may have expired, or the credentials are wrong`
+  String networkAccessDeniedError(Object code) {
+    return Intl.message(
+      'The server denied access (HTTP $code). The link may have expired, or the credentials are wrong',
+      name: 'networkAccessDeniedError',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `Nothing was found at this address (HTTP {code}). Check that the URL is correct`
+  String networkNotFoundError(Object code) {
+    return Intl.message(
+      'Nothing was found at this address (HTTP $code). Check that the URL is correct',
+      name: 'networkNotFoundError',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `Too many requests (HTTP 429). Wait a moment and try again`
+  String get networkRateLimitedError {
+    return Intl.message(
+      'Too many requests (HTTP 429). Wait a moment and try again',
+      name: 'networkRateLimitedError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The server ran into a problem (HTTP {code}). Try again later`
+  String networkServerError(Object code) {
+    return Intl.message(
+      'The server ran into a problem (HTTP $code). Try again later',
+      name: 'networkServerError',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `The server rejected the request (HTTP {code})`
+  String networkBadResponseError(Object code) {
+    return Intl.message(
+      'The server rejected the request (HTTP $code)',
+      name: 'networkBadResponseError',
+      desc: '',
+      args: [code],
+    );
+  }
+
+  /// `Network request failed: {detail}`
+  String networkRequestFailed(Object detail) {
+    return Intl.message(
+      'Network request failed: $detail',
+      name: 'networkRequestFailed',
+      desc: '',
+      args: [detail],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

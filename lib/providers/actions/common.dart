@@ -192,11 +192,15 @@ extension CommonControllerExt on AppController {
       if (CloudApiException.isHandledUnauthorized(e)) {
         return null;
       }
-      commonPrint.log('$title ===> $e, $s', logLevel: LogLevel.warning);
+      commonPrint.log(
+        networkErrorMessage(e, appLocalizations) ?? '$title ===> $e, $s',
+        logLevel: LogLevel.warning,
+      );
       final isConfigValidationError = e is ConfigValidationException;
       final message = isConfigValidationError
           ? formatConfigValidationMessage(e.message, appLocalizations)
-          : coreLaunchBlockedMessage(e, appLocalizations) ??
+          : networkErrorMessage(e, appLocalizations) ??
+                coreLaunchBlockedMessage(e, appLocalizations) ??
                 Secrets.redactApiDomains(e.toString());
       if (silence) {
         globalState.showNotifier(message);
