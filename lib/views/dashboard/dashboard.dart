@@ -262,7 +262,6 @@ class _DashboardViewState extends ConsumerState<DashboardView>
   @override
   Widget build(BuildContext context) {
     final dashboardState = ref.watch(dashboardStateProvider);
-    final columns = max(4 * ((dashboardState.contentWidth / 280).ceil()), 8);
     final spacing = 14.mAp;
     final children = dashboardState.dashboardWidgets
         .where(
@@ -289,34 +288,39 @@ class _DashboardViewState extends ConsumerState<DashboardView>
             : const StartButton(),
         body: Align(
           alignment: Alignment.topCenter,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16).copyWith(bottom: 88),
-            child: isEdit
-                ? SystemBackBlock(
-                    child: CommonPopScope(
-                      child: SuperGrid(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final columns = max(4 * (constraints.maxWidth / 280).ceil(), 8);
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(16).copyWith(bottom: 88),
+                child: isEdit
+                    ? SystemBackBlock(
+                        child: CommonPopScope(
+                          child: SuperGrid(
+                            key: key,
+                            editing: true,
+                            crossAxisCount: columns,
+                            crossAxisSpacing: spacing,
+                            mainAxisSpacing: spacing,
+                            children: children,
+                            onChanged: (_) => _handleSave(),
+                          ),
+                          onPop: (context) {
+                            _handleUpdateIsEdit();
+                            return false;
+                          },
+                        ),
+                      )
+                    : SuperGrid(
                         key: key,
-                        editing: true,
+                        onChanged: (_) => _handleSave(),
                         crossAxisCount: columns,
                         crossAxisSpacing: spacing,
                         mainAxisSpacing: spacing,
                         children: children,
-                        onChanged: (_) => _handleSave(),
                       ),
-                      onPop: (context) {
-                        _handleUpdateIsEdit();
-                        return false;
-                      },
-                    ),
-                  )
-                : SuperGrid(
-                    key: key,
-                    onChanged: (_) => _handleSave(),
-                    crossAxisCount: columns,
-                    crossAxisSpacing: spacing,
-                    mainAxisSpacing: spacing,
-                    children: children,
-                  ),
+              );
+            },
           ),
         ),
       ),
