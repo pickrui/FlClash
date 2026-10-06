@@ -51,6 +51,10 @@ jobs:
           sudo xcode-select -s /Applications/Xcode_26.3.app || sudo xcode-select -s /Applications/Xcode_26.2.app
           xcodebuild -version
 
+      - name: Disable Impeller on Intel macOS
+        if: inputs.platform == 'macos' && inputs.arch == 'amd64'
+        run: plutil -replace FLTEnableImpeller -bool NO macos/Runner/Info.plist
+
       - run: flutter pub get
       - name: Prepare isolated Core settings
         shell: bash
