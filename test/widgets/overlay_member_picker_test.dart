@@ -19,29 +19,26 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('search keeps members selected across different queries', (
+  testWidgets('grouped additions keep search selection and fallback order', (
     tester,
   ) async {
     List<String>? result;
     await _open(
       tester,
-      available: const ['Japan Tokyo', 'Japan Osaka', 'US Seattle'],
+      available: const ['Japan Tokyo', 'Japan Osaka', 'US Seattle', 'DIRECT'],
       selected: const ['Japan Osaka'],
       onResult: (value) => result = value,
     );
-
+    await _addPage(tester);
     await _search(tester, 'JAPAN');
-    expect(_isChecked(tester, 'Japan Osaka'), isTrue);
-    expect(find.text('US Seattle'), findsNothing);
-    await _toggle(tester, 'Japan Tokyo');
-
+    expect(find.text('Japan Osaka').hitTestable(), findsNothing);
+    expect(find.text('US Seattle').hitTestable(), findsNothing);
+    await _choose(tester, 'Japan Tokyo');
     await _search(tester, 'seattle');
-    await _toggle(tester, 'US Seattle');
-    await _search(tester, 'japan');
-    expect(_isChecked(tester, 'Japan Tokyo'), isTrue);
-    expect(_isChecked(tester, 'Japan Osaka'), isTrue);
+    await _choose(tester, 'US Seattle');
     await _confirm(tester);
-
+    expect(result, isNull);
+    await _confirm(tester);
     expect(result, ['Japan Osaka', 'Japan Tokyo', 'US Seattle']);
   });
 
@@ -51,74 +48,105 @@ void main() {
     List<String>? result;
     await _open(
       tester,
-      available: const ['Japan Tokyo', 'US Seattle'],
+      available: const ['Japan Tokyo'],
       selected: const ['Removed node', 'Japan Tokyo'],
       onResult: (value) => result = value,
     );
-
-    final missing = _member('Removed node');
-    expect(missing, findsOneWidget);
-    expect(_isChecked(tester, 'Removed node'), isTrue);
     expect(
       find.descendant(
-        of: missing,
+        of: _member('Removed node'),
         matching: find.text(AppLocalizations.current.outboundUnavailable),
       ),
       findsOneWidget,
     );
-    await _toggle(tester, 'Removed node');
+    await _remove(tester, 'Removed node');
     expect(find.text('Removed node'), findsNothing);
     await _confirm(tester);
-
     expect(result, ['Japan Tokyo']);
   });
 
-  testWidgets('keeps fallback order and moves reselected members to the end', (
+  testWidgets('dragging selected members changes fallback priority', (
     tester,
   ) async {
     List<String>? result;
     await _open(
       tester,
       available: const ['First', 'Second', 'Third'],
-      selected: const ['Second', 'First'],
+      selected: const ['Second', 'First', 'Third'],
       onResult: (value) => result = value,
     );
-
-    expect(
-      find.descendant(of: _member('Second'), matching: find.text('#1')),
-      findsOneWidget,
+    final drag = await tester.startGesture(
+      tester.getCenter(find.byType(ReorderableDragStartListener).first),
     );
-    await _toggle(tester, 'Third');
-    await _toggle(tester, 'Second');
-    await _toggle(tester, 'Second');
-    expect(
-      find.descendant(of: _member('Second'), matching: find.text('#3')),
-      findsOneWidget,
-    );
+    await tester.pump();
+    final rowHeight = tester.getSize(_member('First')).height;
+    for (var step = 0; step < 4; step++) {
+      await drag.moveBy(Offset(0, rowHeight / 4));
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    await drag.up();
+    await tester.pumpAndSettle();
     await _confirm(tester);
-
-    expect(result, ['First', 'Third', 'Second']);
+    expect(result, ['First', 'Second', 'Third']);
   });
 
-  testWidgets('cancel keeps caller selection unchanged', (tester) async {
-    final selected = ['Japan Tokyo'];
-    List<String>? result = const ['not completed'];
+  testWidgets(
+    'cancelled additions and edits keep the caller selection intact',
+    (tester) async {
+      final selected = ['Japan Tokyo'];
+      List<String>? result = const ['pending'];
+      await _open(
+        tester,
+        available: const ['Japan Tokyo', 'US Seattle'],
+        selected: selected,
+        onResult: (value) => result = value,
+      );
+      await _addPage(tester);
+      await _choose(tester, 'US Seattle');
+      await tester.tap(
+        find.text(AppLocalizations.current.cancel).hitTestable().last,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('US Seattle').hitTestable(), findsNothing);
+      await tester.tap(
+        find.text(AppLocalizations.current.cancel).hitTestable().last,
+      );
+      await tester.pumpAndSettle();
+      expect(result, isNull);
+      expect(selected, ['Japan Tokyo']);
+    },
+  );
+
+  testWidgets('confirm during removal excludes the leaving member', (
+    tester,
+  ) async {
+    List<String>? result;
     await _open(
       tester,
-      available: const ['Japan Tokyo', 'US Seattle'],
-      selected: selected,
+      available: const ['First', 'Second'],
+      selected: const ['First', 'Second'],
       onResult: (value) => result = value,
     );
-
-    await _toggle(tester, 'US Seattle');
-    await tester.tap(find.text(AppLocalizations.current.cancel));
-    await tester.pumpAndSettle();
-
-    expect(result, isNull);
-    expect(selected, ['Japan Tokyo']);
+    await tester.tap(
+      find.descendant(
+        of: _member('First'),
+        matching: find.byTooltip(AppLocalizations.current.delete),
+      ),
+    );
+    await tester.pump();
+    await _confirm(tester);
+    expect(result, ['Second']);
+    expect(tester.takeException(), isNull);
   });
 
-  testWidgets('member picker fits 360 wide screens with long node names', (
+  testWidgets('long selected lists only build visible rows', (tester) async {
+    final names = List.generate(2000, (index) => 'Member $index');
+    await _open(tester, available: names, selected: names, onResult: (_) {});
+    expect(find.byType(ListTile).evaluate().length, lessThan(100));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('member picker fits 360 wide screens with long names', (
     tester,
   ) async {
     final screenshotKey = GlobalKey();
@@ -135,18 +163,17 @@ void main() {
       screenshotKey: screenshotKey,
       onResult: (value) => result = value,
     );
-
     expect(tester.takeException(), isNull);
-    final dialogBounds = tester.getRect(find.byType(AlertDialog));
-    expect(dialogBounds.left, greaterThanOrEqualTo(0));
-    expect(dialogBounds.right, lessThanOrEqualTo(360));
-    expect(dialogBounds.bottom, lessThanOrEqualTo(640));
-    expect(find.byType(FilledButton).hitTestable(), findsOneWidget);
+    final bounds = tester.getRect(find.byType(AlertDialog));
+    expect(bounds.left, greaterThanOrEqualTo(0));
+    expect(bounds.right, lessThanOrEqualTo(360));
+    expect(bounds.bottom, lessThanOrEqualTo(640));
     await _saveScreenshot(tester, screenshotKey);
+    await _addPage(tester);
     await _search(tester, 'residential');
-    await _toggle(tester, 'US Seattle - Residential broadband');
+    await _choose(tester, 'US Seattle - Residential broadband');
     await _confirm(tester);
-
+    await _confirm(tester);
     expect(result, [
       'Japan Tokyo - Streaming and automatic failover',
       'US Seattle - Residential broadband',
@@ -155,23 +182,40 @@ void main() {
   });
 }
 
-Finder _member(String name) => find.widgetWithText(CheckboxListTile, name);
-
-bool _isChecked(WidgetTester tester, String name) =>
-    tester.widget<CheckboxListTile>(_member(name)).value == true;
-
-Future<void> _search(WidgetTester tester, String query) async {
-  await tester.enterText(find.byType(TextField), query);
+Finder _member(String name) =>
+    find.widgetWithText(ListTile, name).hitTestable();
+Future<void> _search(WidgetTester tester, String text) async {
+  await tester.enterText(find.byType(TextField).hitTestable().last, text);
   await tester.pumpAndSettle();
 }
 
-Future<void> _toggle(WidgetTester tester, String name) async {
-  await tester.tap(_member(name));
+Future<void> _addPage(WidgetTester tester) async {
+  await tester.tap(find.text(AppLocalizations.current.add).hitTestable());
+  await tester.pumpAndSettle();
+}
+
+Future<void> _choose(WidgetTester tester, String name) async {
+  await tester.tap(
+    find.descendant(
+      of: _member(name),
+      matching: find.byTooltip(AppLocalizations.current.add),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
+Future<void> _remove(WidgetTester tester, String name) async {
+  await tester.tap(
+    find.descendant(
+      of: _member(name),
+      matching: find.byTooltip(AppLocalizations.current.delete),
+    ),
+  );
   await tester.pumpAndSettle();
 }
 
 Future<void> _confirm(WidgetTester tester) async {
-  await tester.tap(find.byType(FilledButton));
+  await tester.tap(find.byType(FilledButton).hitTestable().last);
   await tester.pumpAndSettle();
 }
 

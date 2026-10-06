@@ -64,8 +64,7 @@ void main() {
         existingGroups: const [],
         availableMembers: const ['DIRECT', 'Japan Tokyo'],
         availableProviders: const ['Subscription nodes'],
-        validate: (_) async =>
-            "Japan automatic: 'Retired subscription' not found. Choose an available provider.",
+        validate: (_) async => "Japan automatic: 'Retired subscription' not found. Choose an available provider.",
       ),
     );
     await tester.tap(find.text(AppLocalizations.current.save));
@@ -206,14 +205,42 @@ void main() {
           );
           _expectActionsVisible(tester, scenario.size, scenario.keyboard);
           if (!skip) await _capture(tester, key, '$prefix-members.png');
-          await tester.enterText(find.byType(TextField), 'residential');
+          await tester.tap(
+            find.text(AppLocalizations.current.add).hitTestable(),
+          );
           await tester.pumpAndSettle();
-          await tester.ensureVisible(find.byType(Checkbox));
+          await tester.enterText(
+            find.byType(TextField).hitTestable(),
+            'residential',
+          );
           await tester.pumpAndSettle();
-          expect(find.byType(Checkbox).hitTestable(), findsOneWidget);
-          await tester.tap(find.byType(Checkbox));
+          final add = find.descendant(
+            of: find.widgetWithText(
+              ListTile,
+              'US Seattle - Residential broadband',
+            ),
+            matching: find.byTooltip(AppLocalizations.current.add),
+          );
+          await tester.ensureVisible(add);
           await tester.pumpAndSettle();
-          await tester.tap(find.byType(FilledButton));
+          expect(add.hitTestable(), findsOneWidget);
+          await tester.tap(add);
+          await tester.pumpAndSettle();
+          final confirm = find.byType(FilledButton).hitTestable().last;
+          expect(
+            tester.getRect(confirm).bottom,
+            lessThanOrEqualTo(scenario.size.height - scenario.keyboard),
+          );
+          final empty = find.text(AppLocalizations.current.noSearchResult);
+          expect(empty.hitTestable(), findsOneWidget);
+          expect(
+            tester.getRect(empty).bottom,
+            lessThanOrEqualTo(tester.getRect(confirm).top),
+          );
+          if (!skip) await _capture(tester, key, '$prefix-member-add.png');
+          await tester.tap(confirm);
+          await tester.pumpAndSettle();
+          await tester.tap(find.byType(FilledButton).hitTestable().last);
           await tester.pumpAndSettle();
           expect(find.byType(ProxyMemberPicker), findsNothing);
           expect(result, [

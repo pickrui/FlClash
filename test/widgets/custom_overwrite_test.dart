@@ -349,17 +349,21 @@ void main() {
       await tester.ensureVisible(providers);
       await tester.tap(providers);
       await tester.pumpAndSettle();
-      final selectedProvider = find.widgetWithText(
-        CheckboxListTile,
-        'Subscription A',
-      );
-      expect(tester.widget<CheckboxListTile>(selectedProvider).value, isTrue);
-      await tester.tap(find.widgetWithText(CheckboxListTile, 'Subscription B'));
-      await tester.pump();
-      await tester.tap(find.text('Confirm (2)'));
+      expect(find.widgetWithText(ListTile, 'Subscription A'), findsOneWidget);
+      await tester.tap(find.text('Add').hitTestable());
       await tester.pumpAndSettle();
-      expect(find.widgetWithText(InputChip, 'Subscription A'), findsOneWidget);
-      expect(find.widgetWithText(InputChip, 'Subscription B'), findsOneWidget);
+      await tester.tap(
+        find.descendant(
+          of: find.widgetWithText(ListTile, 'Subscription B'),
+          matching: find.byTooltip('Add'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Confirm (1)').hitTestable());
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Confirm (2)').hitTestable());
+      await tester.pumpAndSettle();
+      expect(find.text('Proxy providers (2)'), findsOneWidget);
       await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
 
@@ -462,7 +466,12 @@ void main() {
         find.widgetWithText(OutlinedButton, 'Proxy providers (1)'),
         findsOneWidget,
       );
-      expect(find.widgetWithText(InputChip, 'Subscription A'), findsOneWidget);
+      await tester.ensureVisible(find.text('Proxy providers (1)'));
+      await tester.tap(find.text('Proxy providers (1)'));
+      await tester.pumpAndSettle();
+      expect(find.widgetWithText(ListTile, 'Subscription A'), findsOneWidget);
+      await tester.tap(find.text('Cancel').hitTestable().last);
+      await tester.pumpAndSettle();
       expect(
         find.widgetWithText(TextFormField, 'Proxy filter'),
         findsOneWidget,

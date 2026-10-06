@@ -94,7 +94,18 @@ void main() {
       await tester.tap(members);
       await tester.pumpAndSettle();
       expect(find.byType(ProxyMemberPicker), findsOneWidget);
-      await tester.tap(find.text('Japan'));
+      await tester.tap(find.text(AppLocalizations.current.add).hitTestable());
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.descendant(
+          of: find.widgetWithText(ListTile, 'Japan'),
+          matching: find.byTooltip(AppLocalizations.current.add),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.text('${AppLocalizations.current.confirm} (1)').hitTestable(),
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.text('${AppLocalizations.current.confirm} (1)'));
       await tester.pumpAndSettle();
@@ -137,7 +148,18 @@ void main() {
       }
 
       await members();
-      await tester.tap(find.text('DIRECT'));
+      await tester.tap(find.text(AppLocalizations.current.add).hitTestable());
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.descendant(
+          of: find.widgetWithText(ListTile, 'DIRECT'),
+          matching: find.byTooltip(AppLocalizations.current.add),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.text('${AppLocalizations.current.confirm} (1)').hitTestable(),
+      );
       await tester.pumpAndSettle();
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();

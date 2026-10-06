@@ -283,8 +283,19 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
       context: context,
       builder: (_) => ProxyMemberPicker(
         title: title,
-        available: available,
+        available: controller == _proxiesController
+            ? available
+                  .where((name) => name != _nameController.text.trim())
+                  .toList()
+            : available,
         selected: _parseList(controller.text) ?? [],
+        providers: controller == _providersController,
+        groupTypes: controller == _providersController
+            ? const {}
+            : {
+                for (final group in widget.existingGroups)
+                  group.name: customProxyGroupTypeLabel(group.type),
+              },
       ),
     );
     if (selected == null || !mounted) return;
@@ -307,28 +318,15 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
           icon: const GlyphIcon(AppGlyphs.listAdd),
           label: Text('$title (${selected.length})'),
         ),
-        if (selected.isNotEmpty)
-          Wrap(
-            spacing: 4,
-            children: [
-              for (final name in selected)
-                InputChip(
-                  label: Text(name, overflow: TextOverflow.ellipsis),
-                  tooltip: available.contains(name)
-                      ? name
-                      : appLocalizations.outboundUnavailable,
-                  avatar: available.contains(name)
-                      ? null
-                      : const GlyphIcon(AppGlyphs.warning, size: 16),
-                  onDeleted: _saving
-                      ? null
-                      : () => setState(() {
-                          final next = List<String>.from(selected)
-                            ..remove(name);
-                          controller.text = next.join('\n');
-                        }),
-                ),
-            ],
+        if (selected.any((name) => !available.contains(name)))
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              appLocalizations.outboundUnavailable,
+              style: context.textTheme.bodySmall?.copyWith(
+                color: context.colorScheme.error,
+              ),
+            ),
           ),
       ],
     );
