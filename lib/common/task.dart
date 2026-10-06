@@ -19,6 +19,17 @@ import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite;
 
+enum BackupFailure { invalid, newerVersion }
+
+final class BackupException implements Exception {
+  final BackupFailure failure;
+
+  const BackupException(this.failure);
+
+  @override
+  String toString() => 'BackupException(${failure.name})';
+}
+
 const maxBackupArchiveBytes = 64 * 1024 * 1024;
 const maxBackupFileBytes = 64 * 1024 * 1024;
 const maxBackupTotalBytes = 256 * 1024 * 1024;
@@ -1352,27 +1363,34 @@ Future<void> validateBackupArchiveDirectory(
 }
 
 Future<bool> validateBackupDatabase(String path) async {
+  return await _backupDatabaseFailure(path) == null;
+}
+
+Future<BackupFailure?> _backupDatabaseFailure(String path) async {
   final file = File(path);
   if (!await file.exists() || await file.length() < 16) {
-    return false;
+    return BackupFailure.invalid;
   }
   final header = await file
       .openRead(0, 16)
       .fold<List<int>>(<int>[], (bytes, chunk) => bytes..addAll(chunk));
   if (ascii.decode(header, allowInvalid: true) != 'SQLite format 3\u0000') {
-    return false;
+    return BackupFailure.invalid;
   }
   sqlite.Database? backupDatabase;
   try {
     backupDatabase = sqlite.sqlite3.open(path, mode: sqlite.OpenMode.readOnly);
     final quickCheck = backupDatabase.select('PRAGMA quick_check').first;
     if (quickCheck.values.first != 'ok') {
-      return false;
+      return BackupFailure.invalid;
     }
     final schemaVersion =
         backupDatabase.select('PRAGMA user_version').first.values.first as int;
-    if (schemaVersion < 1 || schemaVersion > currentDatabaseSchemaVersion) {
-      return false;
+    if (schemaVersion > currentDatabaseSchemaVersion) {
+      return BackupFailure.newerVersion;
+    }
+    if (schemaVersion < 1) {
+      return BackupFailure.invalid;
     }
     final foreignKeyViolations = backupDatabase.select(
       'PRAGMA foreign_key_check',
@@ -1380,7 +1398,7 @@ Future<bool> validateBackupDatabase(String path) async {
     if (foreignKeyViolations.any(
       (row) => row['table'] != 'profile_rule_mapping',
     )) {
-      return false;
+      return BackupFailure.invalid;
     }
     final tables = backupDatabase
         .select("SELECT name FROM sqlite_master WHERE type = 'table'")
@@ -1394,7 +1412,7 @@ Future<bool> validateBackupDatabase(String path) async {
       'profile_rule_mapping',
       if (schemaVersion >= 4) ...{'proxy_groups', 'icon_records'},
     }.difference(tables).isNotEmpty) {
-      return false;
+      return BackupFailure.invalid;
     }
     final requiredColumns = <String, Set<String>>{
       'profiles': {
@@ -1452,12 +1470,12 @@ Future<bool> validateBackupDatabase(String path) async {
           .whereType<String>()
           .toSet();
       if (entry.value.difference(columns).isNotEmpty) {
-        return false;
+        return BackupFailure.invalid;
       }
     }
-    return true;
+    return null;
   } catch (_) {
-    return false;
+    return BackupFailure.invalid;
   } finally {
     backupDatabase?.close();
   }
@@ -1578,7 +1596,7 @@ Future<MigrationData> _restoreTask(VM3<String, String, String> paths) async {
   final backupFile = File(backupFilePath);
   if (!await backupFile.exists() ||
       await backupFile.length() > maxBackupArchiveBytes) {
-    throw appLocalizations.invalidBackupFile;
+    throw const BackupException(BackupFailure.invalid);
   }
   await validateBackupArchiveDirectory(backupFilePath, restoreDirPath);
   // Archive entries read lazily from this stream during extraction.
@@ -1590,24 +1608,34 @@ Future<MigrationData> _restoreTask(VM3<String, String, String> paths) async {
   }
   final restoreConfigFile = File(join(restoreDirPath, configJsonName));
   if (!await restoreConfigFile.exists()) {
-    throw appLocalizations.invalidBackupFile;
+    throw const BackupException(BackupFailure.invalid);
   }
-  final restoreConfigMap = json.decode(
-    await restoreConfigFile.readAsString(),
-  ) as Map<String, Object?>?;
-  final version = switch (restoreConfigMap?['version']) {
-    final num value => value.toInt(),
-    _ => 0,
-  };
+  final Map<String, Object?> restoreConfigMap;
+  try {
+    final decoded = json.decode(await restoreConfigFile.readAsString());
+    if (decoded is! Map<String, Object?>) {
+      throw const BackupException(BackupFailure.invalid);
+    }
+    restoreConfigMap = decoded;
+  } on FormatException {
+    throw const BackupException(BackupFailure.invalid);
+  }
+  final version = restoreConfigMap['version'] ?? 0;
+  if (version is! int || version < 0) {
+    throw const BackupException(BackupFailure.invalid);
+  }
+  if (version > migration.currentVersion) {
+    throw const BackupException(BackupFailure.newerVersion);
+  }
   // Settings version 2 narrowed 172.2*; a user's later re-add must survive.
   MigrationData migrationData = MigrationData(
     configMap: version < 2
         ? narrowLegacy172Bypass(restoreConfigMap)
         : restoreConfigMap,
   );
-  if (version == 0 && restoreConfigMap != null) {
+  if (version == 0) {
     if (!_isLegacyBackupConfig(restoreConfigMap)) {
-      throw appLocalizations.invalidBackupFile;
+      throw const BackupException(BackupFailure.invalid);
     }
     final legacyOutputPath = join(restoreDirPath, 'legacy-output');
     migrationData = await migrateLegacyBackup(
@@ -1622,8 +1650,9 @@ Future<MigrationData> _restoreTask(VM3<String, String, String> paths) async {
   }
   final backupDatabaseFile = File(join(restoreDirPath, backupDatabaseName));
   sqlite.sqlite3.tempDirectory = restoreDirPath;
-  if (!await validateBackupDatabase(backupDatabaseFile.path)) {
-    throw appLocalizations.invalidBackupFile;
+  final databaseFailure = await _backupDatabaseFailure(backupDatabaseFile.path);
+  if (databaseFailure != null) {
+    throw BackupException(databaseFailure);
   }
   final database = Database(NativeDatabase(backupDatabaseFile));
   try {
@@ -1653,7 +1682,7 @@ Future<MigrationData> _restoreTask(VM3<String, String, String> paths) async {
     final fileMigrations = [...profilesMigration, ...scriptsMigration];
     for (final migration in fileMigrations) {
       if (!await File(migration.a).exists()) {
-        throw appLocalizations.invalidBackupFile;
+        throw const BackupException(BackupFailure.invalid);
       }
     }
     return migrationData.copyWith(

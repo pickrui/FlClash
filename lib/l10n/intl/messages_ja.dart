@@ -307,6 +307,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "backupAndRestoreDesc": MessageLookupByLibrary.simpleMessage(
       "WebDAVまたはファイルを介してデータを同期する",
     ),
+    "backupFromNewerVersion": MessageLookupByLibrary.simpleMessage(
+      "このバックアップは新しいバージョンのアプリで作成されています。アプリを更新してから復元してください",
+    ),
     "backupRetention": MessageLookupByLibrary.simpleMessage("保持するバックアップ数"),
     "backupRetentionDesc": MessageLookupByLibrary.simpleMessage(
       "バックアップのたびにこのデバイスの古い WebDAV バックアップを削除",

@@ -379,6 +379,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "backupAndRestoreDesc": MessageLookupByLibrary.simpleMessage(
       "Sync data via WebDAV or files",
     ),
+    "backupFromNewerVersion": MessageLookupByLibrary.simpleMessage(
+      "This backup comes from a newer version of the app. Update the app before restoring it",
+    ),
     "backupRetention": MessageLookupByLibrary.simpleMessage("Backups to keep"),
     "backupRetentionDesc": MessageLookupByLibrary.simpleMessage(
       "Each backup removes this device\'s older WebDAV backups",

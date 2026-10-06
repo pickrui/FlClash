@@ -383,6 +383,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "backupAndRestoreDesc": MessageLookupByLibrary.simpleMessage(
       "Синхронизация данных через WebDAV или файлы",
     ),
+    "backupFromNewerVersion": MessageLookupByLibrary.simpleMessage(
+      "Резервная копия создана более новой версией приложения. Обновите приложение перед восстановлением",
+    ),
     "backupRetention": MessageLookupByLibrary.simpleMessage("Хранить копий"),
     "backupRetentionDesc": MessageLookupByLibrary.simpleMessage(
       "При каждом резервном копировании старые копии этого устройства в WebDAV удаляются",

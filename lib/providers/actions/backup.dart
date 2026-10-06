@@ -387,7 +387,12 @@ extension BackupControllerExt on AppController {
         }
       });
     } catch (error, stackTrace) {
-      restoreError = error;
+      restoreError = switch (error) {
+        BackupException(failure: BackupFailure.newerVersion) =>
+          appLocalizations.backupFromNewerVersion,
+        BackupException() => appLocalizations.invalidBackupFile,
+        _ => error,
+      };
       restoreStackTrace = stackTrace;
       try {
         await restoreJournal?.clearIfUnprepared();

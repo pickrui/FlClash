@@ -3875,6 +3875,16 @@ class AppLocalizations {
     );
   }
 
+  /// `This backup comes from a newer version of the app. Update the app before restoring it`
+  String get backupFromNewerVersion {
+    return Intl.message(
+      'This backup comes from a newer version of the app. Update the app before restoring it',
+      name: 'backupFromNewerVersion',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Prune cache`
   String get pruneCache {
     return Intl.message('Prune cache', name: 'pruneCache', desc: '', args: []);

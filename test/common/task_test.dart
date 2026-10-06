@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'package:archive/archive.dart';
 import 'package:drift/native.dart';
 import 'package:fl_clash/common/constant.dart';
+import 'package:fl_clash/common/migration.dart';
 import 'package:fl_clash/common/string.dart';
 import 'package:fl_clash/common/task.dart';
 import 'package:fl_clash/database/database.dart';
@@ -1084,7 +1085,7 @@ void main() {
   group('restoreTask', () {
     Future<String> createBackup(
       Directory root,
-      Map<String, Object?> config, {
+      Object? config, {
       File? databaseFile,
     }) async {
       final archive = Archive()
@@ -1097,6 +1098,99 @@ void main() {
       await File(path).writeAsBytes(ZipEncoder().encode(archive));
       return path;
     }
+
+    group('version compatibility', () {
+      late Directory root;
+      late File databaseFile;
+      late File liveConfig;
+
+      Matcher failsWith(BackupFailure failure) => throwsA(
+        isA<BackupException>().having(
+          (error) => error.failure,
+          'failure',
+          failure,
+        ),
+      );
+
+      setUp(() async {
+        root = await Directory.systemTemp.createTemp('backup-version-');
+        databaseFile = File('${root.path}/$backupDatabaseName');
+        final database = Database(NativeDatabase(databaseFile));
+        await database.profilesDao.all().get();
+        await database.close();
+        liveConfig = File('${root.path}/live/$configJsonName');
+        await liveConfig.parent.create(recursive: true);
+        await liveConfig.writeAsString('live fixture settings');
+      });
+      tearDown(() => root.delete(recursive: true));
+
+      test('rejects newer settings before touching live data', () async {
+        final backup = await createBackup(root, {
+          'version': migration.currentVersion + 1,
+        }, databaseFile: databaseFile);
+        await expectLater(
+          restoreTask(backup, '${root.path}/restore', '${root.path}/live'),
+          failsWith(BackupFailure.newerVersion),
+        );
+        expect(await liveConfig.readAsString(), 'live fixture settings');
+      });
+
+      test('reports a newer database without migrating it', () async {
+        final database = sqlite.sqlite3.open(databaseFile.path);
+        database.execute(
+          'PRAGMA user_version = ${currentDatabaseSchemaVersion + 1}',
+        );
+        database.close();
+        final backup = await createBackup(root, {
+          'version': migration.currentVersion,
+        }, databaseFile: databaseFile);
+        await expectLater(
+          restoreTask(backup, '${root.path}/restore', '${root.path}/live'),
+          failsWith(BackupFailure.newerVersion),
+        );
+        expect(await liveConfig.readAsString(), 'live fixture settings');
+        expect(
+          await File('${root.path}/restore/$backupDatabaseName').readAsBytes(),
+          await databaseFile.readAsBytes(),
+        );
+      });
+
+      for (final config in [null, <Object?>[], 'fixture']) {
+        test('rejects a non-object config $config', () async {
+          final backup = await createBackup(
+            root,
+            config,
+            databaseFile: databaseFile,
+          );
+          await expectLater(
+            restoreTask(backup, '${root.path}/restore', '${root.path}/live'),
+            failsWith(BackupFailure.invalid),
+          );
+        });
+      }
+
+      for (final version in [-1, 1.5, 2.0, '2', true]) {
+        test(
+          'rejects invalid version $version (${version.runtimeType})',
+          () async {
+            final backup = await createBackup(root, {
+              'version': version,
+              'profiles': <Object?>[],
+              'scripts': <Object?>[],
+              'rules': <Object?>[],
+              'appSetting': <String, Object?>{},
+              'themeProps': <String, Object?>{},
+              'patchClashConfig': <String, Object?>{},
+            }, databaseFile: databaseFile);
+            await expectLater(
+              restoreTask(backup, '${root.path}/restore', '${root.path}/live'),
+              failsWith(BackupFailure.invalid),
+            );
+            expect(await liveConfig.readAsString(), 'live fixture settings');
+          },
+        );
+      }
+    });
 
     test('rejects an unstructured versionless config', () async {
       final root = await Directory.systemTemp.createTemp('legacy_empty_');

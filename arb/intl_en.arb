@@ -484,6 +484,7 @@
   "restoreException": "Recovery exception",
   "networkException": "Network exception, please check your connection and try again",
   "invalidBackupFile": "Invalid backup file",
+  "backupFromNewerVersion": "This backup comes from a newer version of the app. Update the app before restoring it",
   "pruneCache": "Prune cache",
   "backupAndRestore": "Backup and Restore",
   "backupAndRestoreDesc": "Sync data via WebDAV or files",

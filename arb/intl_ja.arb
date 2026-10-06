@@ -484,6 +484,7 @@
   "restoreException": "復元例外",
   "networkException": "ネットワーク例外、接続を確認してもう一度お試しください",
   "invalidBackupFile": "無効なバックアップファイル",
+  "backupFromNewerVersion": "このバックアップは新しいバージョンのアプリで作成されています。アプリを更新してから復元してください",
   "pruneCache": "キャッシュの削除",
   "backupAndRestore": "バックアップと復元",
   "backupAndRestoreDesc": "WebDAVまたはファイルを介してデータを同期する",

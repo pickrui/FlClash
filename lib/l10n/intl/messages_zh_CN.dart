@@ -296,6 +296,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "backupAndRestoreDesc": MessageLookupByLibrary.simpleMessage(
       "通过WebDAV或者文件同步数据",
     ),
+    "backupFromNewerVersion": MessageLookupByLibrary.simpleMessage(
+      "该备份来自更高版本的应用，请先更新应用再恢复",
+    ),
     "backupRetention": MessageLookupByLibrary.simpleMessage("保留备份数"),
     "backupRetentionDesc": MessageLookupByLibrary.simpleMessage(
       "每次备份后自动删除本设备较早的 WebDAV 备份",
