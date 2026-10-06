@@ -12,7 +12,7 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:super_sliver_list/super_sliver_list.dart';
+import 'package:fl_clash/widgets/keyed_animated_list.dart';
 
 import 'package:fl_clash/features/connection/tracker_speed_ranker.dart';
 
@@ -153,16 +153,16 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
               label: appLocalizations.nullTip(appLocalizations.connections),
               illustration: NullStatusIllustration.connections,
             ),
-            child: SuperListView.separated(
+            child: KeyedAnimatedList<TrackerInfo>(
               padding: EdgeInsets.only(
                 top: context.contentTopPadding,
                 bottom: BottomInsetScope.of(context) + 16,
               ),
               controller: _scrollController,
-              itemCount: connections.length,
-              separatorBuilder: (_, _) => const Divider(height: 0),
-              itemBuilder: (_, index) {
-                final trackerInfo = connections[index];
+              items: connections,
+              keyOf: (item) => item.id,
+              separator: const Divider(height: 0),
+              itemBuilder: (_, trackerInfo) {
                 return TrackerInfoItem(
                   key: Key(trackerInfo.id),
                   trackerInfo: trackerInfo,

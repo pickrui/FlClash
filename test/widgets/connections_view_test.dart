@@ -291,6 +291,8 @@ void main() {
     closeOne.complete(true);
     await tester.pump();
     expect(readCount, 2);
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump();
     expect(find.text('host-0.com:443', findRichText: true), findsNothing);
     expect(find.text('host-1.com:443', findRichText: true), findsOneWidget);
 
@@ -302,6 +304,7 @@ void main() {
     closeAll.complete(true);
     await tester.pump();
     expect(readCount, 3);
+    await tester.pumpAndSettle();
     expect(find.byType(TrackerInfoItem), findsNothing);
     expect(tester.takeException(), null);
 
