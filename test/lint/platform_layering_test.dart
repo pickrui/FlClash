@@ -10,7 +10,7 @@ import 'package:test/test.dart';
 
 // Page construction is bound by Application; common only reaches the two
 // diagnostic/login screens still opened directly by actions.
-const _closureBudget = 231;
+const _closureBudget = 211;
 const _viewsInClosureBudget = 2;
 
 final _directive = RegExp(
