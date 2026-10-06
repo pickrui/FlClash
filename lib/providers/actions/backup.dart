@@ -155,6 +155,9 @@ extension BackupControllerExt on AppController {
           previousProfileId = previousConfig.currentProfileId;
           final previousProfiles = await database.profilesDao.all().get();
           final previousScripts = await database.scriptsDao.all().get();
+          final previousProviders = await database.clashProvidersDao
+              .all()
+              .get();
           final previousRules = await database.select(database.rules).map((
             row,
           ) {
@@ -230,6 +233,7 @@ extension BackupControllerExt on AppController {
                       migrationData.rules,
                       migrationData.links,
                       isOverride: isOverride,
+                      clashProviders: migrationData.clashProviders,
                     );
                   });
                   databaseChanged = true;
@@ -279,6 +283,7 @@ extension BackupControllerExt on AppController {
                           previousRules,
                           previousLinks,
                           isOverride: true,
+                          clashProviders: previousProviders,
                         );
                       });
                     } catch (failure) {

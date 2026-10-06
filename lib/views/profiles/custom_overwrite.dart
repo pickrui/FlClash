@@ -106,7 +106,7 @@ class CustomOverwriteContent extends ConsumerWidget {
       return;
     }
     await commonAction.safeRun<void>(() async {
-      final rawConfig = await setupAction.getRawProfileConfig(profileId);
+      final rawConfig = await setupAction.getRoutingProfileConfig(profileId);
       if (!context.mounted) {
         return;
       }
@@ -282,7 +282,7 @@ class CustomProxyGroupsView extends ConsumerWidget {
       ...profile.profileProxies.map((item) => item.name),
     };
     try {
-      rawConfig = await setupAction.getRawProfileConfig(profileId);
+      rawConfig = await setupAction.getRoutingProfileConfig(profileId);
       if (profile.overwriteType != OverwriteType.custom) {
         reservedNames.addAll(rawProxyGroupNames(rawConfig));
       }
@@ -612,7 +612,7 @@ class CustomRulesView extends ConsumerWidget {
     if (profile == null) return;
     Map<String, dynamic> raw;
     try {
-      raw = await setupAction.getRawProfileConfig(profileId);
+      raw = await setupAction.getRoutingProfileConfig(profileId);
     } catch (error) {
       if (context.mounted) context.showNotifier(error.toString());
       return;

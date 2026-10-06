@@ -6504,7 +6504,7 @@ $ProxiesDataCopyWith<$Res> get proxiesData {
 /// @nodoc
 mixin _$MakeRealProfileState {
 
- String get profilesPath; int get profileId; Map<String, dynamic> get rawConfig; OverwriteType get overwriteType; ClashConfig get realPatchConfig; bool get overrideDns; bool get overrideNtp; bool get appendSystemDns; List<Rule> get addedRules; List<ProxyChain> get proxyChains; List<ProfileProxy> get profileProxies; List<ProxyGroup> get customProxyGroups; List<Rule> get customRules; String? get matchTarget; String get defaultUA; bool get dockerMode; bool get blockQuic; bool get blockWebRtc; List<String> get authentication; List<TailscaleNetwork> get tailscaleNetworks; String get tailscaleHostname;
+ String get profilesPath; int get profileId; Map<String, dynamic> get rawConfig; OverwriteType get overwriteType; ClashConfig get realPatchConfig; bool get overrideDns; bool get overrideNtp; bool get appendSystemDns; List<Rule> get addedRules; List<ProxyChain> get proxyChains; List<ProfileProxy> get profileProxies; List<ClashProvider> get clashProviders; List<ProxyGroup> get customProxyGroups; List<Rule> get customRules; String? get matchTarget; String get defaultUA; bool get dockerMode; bool get blockQuic; bool get blockWebRtc; List<String> get authentication; List<TailscaleNetwork> get tailscaleNetworks; String get tailscaleHostname;
 /// Create a copy of MakeRealProfileState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -6516,20 +6516,20 @@ $MakeRealProfileStateCopyWith<MakeRealProfileState> get copyWith => _$MakeRealPr
 @override
 bool operator ==(Object other) {
   final _this = this as MakeRealProfileState;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MakeRealProfileState&&(identical(other.profilesPath, _this.profilesPath) || other.profilesPath == _this.profilesPath)&&(identical(other.profileId, _this.profileId) || other.profileId == _this.profileId)&&const DeepCollectionEquality().equals(other.rawConfig, _this.rawConfig)&&(identical(other.overwriteType, _this.overwriteType) || other.overwriteType == _this.overwriteType)&&(identical(other.realPatchConfig, _this.realPatchConfig) || other.realPatchConfig == _this.realPatchConfig)&&(identical(other.overrideDns, _this.overrideDns) || other.overrideDns == _this.overrideDns)&&(identical(other.overrideNtp, _this.overrideNtp) || other.overrideNtp == _this.overrideNtp)&&(identical(other.appendSystemDns, _this.appendSystemDns) || other.appendSystemDns == _this.appendSystemDns)&&const DeepCollectionEquality().equals(other.addedRules, _this.addedRules)&&const DeepCollectionEquality().equals(other.proxyChains, _this.proxyChains)&&const DeepCollectionEquality().equals(other.profileProxies, _this.profileProxies)&&const DeepCollectionEquality().equals(other.customProxyGroups, _this.customProxyGroups)&&const DeepCollectionEquality().equals(other.customRules, _this.customRules)&&(identical(other.matchTarget, _this.matchTarget) || other.matchTarget == _this.matchTarget)&&(identical(other.defaultUA, _this.defaultUA) || other.defaultUA == _this.defaultUA)&&(identical(other.dockerMode, _this.dockerMode) || other.dockerMode == _this.dockerMode)&&(identical(other.blockQuic, _this.blockQuic) || other.blockQuic == _this.blockQuic)&&(identical(other.blockWebRtc, _this.blockWebRtc) || other.blockWebRtc == _this.blockWebRtc)&&const DeepCollectionEquality().equals(other.authentication, _this.authentication)&&const DeepCollectionEquality().equals(other.tailscaleNetworks, _this.tailscaleNetworks)&&(identical(other.tailscaleHostname, _this.tailscaleHostname) || other.tailscaleHostname == _this.tailscaleHostname));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MakeRealProfileState&&(identical(other.profilesPath, _this.profilesPath) || other.profilesPath == _this.profilesPath)&&(identical(other.profileId, _this.profileId) || other.profileId == _this.profileId)&&const DeepCollectionEquality().equals(other.rawConfig, _this.rawConfig)&&(identical(other.overwriteType, _this.overwriteType) || other.overwriteType == _this.overwriteType)&&(identical(other.realPatchConfig, _this.realPatchConfig) || other.realPatchConfig == _this.realPatchConfig)&&(identical(other.overrideDns, _this.overrideDns) || other.overrideDns == _this.overrideDns)&&(identical(other.overrideNtp, _this.overrideNtp) || other.overrideNtp == _this.overrideNtp)&&(identical(other.appendSystemDns, _this.appendSystemDns) || other.appendSystemDns == _this.appendSystemDns)&&const DeepCollectionEquality().equals(other.addedRules, _this.addedRules)&&const DeepCollectionEquality().equals(other.proxyChains, _this.proxyChains)&&const DeepCollectionEquality().equals(other.profileProxies, _this.profileProxies)&&const DeepCollectionEquality().equals(other.clashProviders, _this.clashProviders)&&const DeepCollectionEquality().equals(other.customProxyGroups, _this.customProxyGroups)&&const DeepCollectionEquality().equals(other.customRules, _this.customRules)&&(identical(other.matchTarget, _this.matchTarget) || other.matchTarget == _this.matchTarget)&&(identical(other.defaultUA, _this.defaultUA) || other.defaultUA == _this.defaultUA)&&(identical(other.dockerMode, _this.dockerMode) || other.dockerMode == _this.dockerMode)&&(identical(other.blockQuic, _this.blockQuic) || other.blockQuic == _this.blockQuic)&&(identical(other.blockWebRtc, _this.blockWebRtc) || other.blockWebRtc == _this.blockWebRtc)&&const DeepCollectionEquality().equals(other.authentication, _this.authentication)&&const DeepCollectionEquality().equals(other.tailscaleNetworks, _this.tailscaleNetworks)&&(identical(other.tailscaleHostname, _this.tailscaleHostname) || other.tailscaleHostname == _this.tailscaleHostname));
 }
 
 
 @override
 int get hashCode {
   final _this = this as MakeRealProfileState;
-  return Object.hashAll([runtimeType,_this.profilesPath,_this.profileId,const DeepCollectionEquality().hash(_this.rawConfig),_this.overwriteType,_this.realPatchConfig,_this.overrideDns,_this.overrideNtp,_this.appendSystemDns,const DeepCollectionEquality().hash(_this.addedRules),const DeepCollectionEquality().hash(_this.proxyChains),const DeepCollectionEquality().hash(_this.profileProxies),const DeepCollectionEquality().hash(_this.customProxyGroups),const DeepCollectionEquality().hash(_this.customRules),_this.matchTarget,_this.defaultUA,_this.dockerMode,_this.blockQuic,_this.blockWebRtc,const DeepCollectionEquality().hash(_this.authentication),const DeepCollectionEquality().hash(_this.tailscaleNetworks),_this.tailscaleHostname]);
+  return Object.hashAll([runtimeType,_this.profilesPath,_this.profileId,const DeepCollectionEquality().hash(_this.rawConfig),_this.overwriteType,_this.realPatchConfig,_this.overrideDns,_this.overrideNtp,_this.appendSystemDns,const DeepCollectionEquality().hash(_this.addedRules),const DeepCollectionEquality().hash(_this.proxyChains),const DeepCollectionEquality().hash(_this.profileProxies),const DeepCollectionEquality().hash(_this.clashProviders),const DeepCollectionEquality().hash(_this.customProxyGroups),const DeepCollectionEquality().hash(_this.customRules),_this.matchTarget,_this.defaultUA,_this.dockerMode,_this.blockQuic,_this.blockWebRtc,const DeepCollectionEquality().hash(_this.authentication),const DeepCollectionEquality().hash(_this.tailscaleNetworks),_this.tailscaleHostname]);
 }
 
 @override
 String toString() {
   final _this = this as MakeRealProfileState;
-  return 'MakeRealProfileState(profilesPath: ${_this.profilesPath}, profileId: ${_this.profileId}, rawConfig: ${_this.rawConfig}, overwriteType: ${_this.overwriteType}, realPatchConfig: ${_this.realPatchConfig}, overrideDns: ${_this.overrideDns}, overrideNtp: ${_this.overrideNtp}, appendSystemDns: ${_this.appendSystemDns}, addedRules: ${_this.addedRules}, proxyChains: ${_this.proxyChains}, profileProxies: ${_this.profileProxies}, customProxyGroups: ${_this.customProxyGroups}, customRules: ${_this.customRules}, matchTarget: ${_this.matchTarget}, defaultUA: ${_this.defaultUA}, dockerMode: ${_this.dockerMode}, blockQuic: ${_this.blockQuic}, blockWebRtc: ${_this.blockWebRtc}, authentication: ${_this.authentication}, tailscaleNetworks: ${_this.tailscaleNetworks}, tailscaleHostname: ${_this.tailscaleHostname})';
+  return 'MakeRealProfileState(profilesPath: ${_this.profilesPath}, profileId: ${_this.profileId}, rawConfig: ${_this.rawConfig}, overwriteType: ${_this.overwriteType}, realPatchConfig: ${_this.realPatchConfig}, overrideDns: ${_this.overrideDns}, overrideNtp: ${_this.overrideNtp}, appendSystemDns: ${_this.appendSystemDns}, addedRules: ${_this.addedRules}, proxyChains: ${_this.proxyChains}, profileProxies: ${_this.profileProxies}, clashProviders: ${_this.clashProviders}, customProxyGroups: ${_this.customProxyGroups}, customRules: ${_this.customRules}, matchTarget: ${_this.matchTarget}, defaultUA: ${_this.defaultUA}, dockerMode: ${_this.dockerMode}, blockQuic: ${_this.blockQuic}, blockWebRtc: ${_this.blockWebRtc}, authentication: ${_this.authentication}, tailscaleNetworks: ${_this.tailscaleNetworks}, tailscaleHostname: ${_this.tailscaleHostname})';
 }
 
 
@@ -6540,7 +6540,7 @@ abstract mixin class $MakeRealProfileStateCopyWith<$Res>  {
   factory $MakeRealProfileStateCopyWith(MakeRealProfileState value, $Res Function(MakeRealProfileState) _then) = _$MakeRealProfileStateCopyWithImpl;
 @useResult
 $Res call({
- String profilesPath, int profileId, Map<String, dynamic> rawConfig, OverwriteType overwriteType, ClashConfig realPatchConfig, bool overrideDns, bool overrideNtp, bool appendSystemDns, List<Rule> addedRules, List<ProxyChain> proxyChains, List<ProfileProxy> profileProxies, List<ProxyGroup> customProxyGroups, List<Rule> customRules, String? matchTarget, String defaultUA, bool dockerMode, bool blockQuic, bool blockWebRtc, List<String> authentication, List<TailscaleNetwork> tailscaleNetworks, String tailscaleHostname
+ String profilesPath, int profileId, Map<String, dynamic> rawConfig, OverwriteType overwriteType, ClashConfig realPatchConfig, bool overrideDns, bool overrideNtp, bool appendSystemDns, List<Rule> addedRules, List<ProxyChain> proxyChains, List<ProfileProxy> profileProxies, List<ClashProvider> clashProviders, List<ProxyGroup> customProxyGroups, List<Rule> customRules, String? matchTarget, String defaultUA, bool dockerMode, bool blockQuic, bool blockWebRtc, List<String> authentication, List<TailscaleNetwork> tailscaleNetworks, String tailscaleHostname
 });
 
 
@@ -6557,7 +6557,7 @@ class _$MakeRealProfileStateCopyWithImpl<$Res>
 
 /// Create a copy of MakeRealProfileState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? profilesPath = null,Object? profileId = null,Object? rawConfig = null,Object? overwriteType = null,Object? realPatchConfig = null,Object? overrideDns = null,Object? overrideNtp = null,Object? appendSystemDns = null,Object? addedRules = null,Object? proxyChains = null,Object? profileProxies = null,Object? customProxyGroups = null,Object? customRules = null,Object? matchTarget = freezed,Object? defaultUA = null,Object? dockerMode = null,Object? blockQuic = null,Object? blockWebRtc = null,Object? authentication = null,Object? tailscaleNetworks = null,Object? tailscaleHostname = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? profilesPath = null,Object? profileId = null,Object? rawConfig = null,Object? overwriteType = null,Object? realPatchConfig = null,Object? overrideDns = null,Object? overrideNtp = null,Object? appendSystemDns = null,Object? addedRules = null,Object? proxyChains = null,Object? profileProxies = null,Object? clashProviders = null,Object? customProxyGroups = null,Object? customRules = null,Object? matchTarget = freezed,Object? defaultUA = null,Object? dockerMode = null,Object? blockQuic = null,Object? blockWebRtc = null,Object? authentication = null,Object? tailscaleNetworks = null,Object? tailscaleHostname = null,}) {
   return _then(MakeRealProfileState(
 profilesPath: null == profilesPath ? _self.profilesPath : profilesPath // ignore: cast_nullable_to_non_nullable
 as String,profileId: null == profileId ? _self.profileId : profileId // ignore: cast_nullable_to_non_nullable
@@ -6570,7 +6570,8 @@ as bool,appendSystemDns: null == appendSystemDns ? _self.appendSystemDns : appen
 as bool,addedRules: null == addedRules ? _self.addedRules : addedRules // ignore: cast_nullable_to_non_nullable
 as List<Rule>,proxyChains: null == proxyChains ? _self.proxyChains : proxyChains // ignore: cast_nullable_to_non_nullable
 as List<ProxyChain>,profileProxies: null == profileProxies ? _self.profileProxies : profileProxies // ignore: cast_nullable_to_non_nullable
-as List<ProfileProxy>,customProxyGroups: null == customProxyGroups ? _self.customProxyGroups : customProxyGroups // ignore: cast_nullable_to_non_nullable
+as List<ProfileProxy>,clashProviders: null == clashProviders ? _self.clashProviders : clashProviders // ignore: cast_nullable_to_non_nullable
+as List<ClashProvider>,customProxyGroups: null == customProxyGroups ? _self.customProxyGroups : customProxyGroups // ignore: cast_nullable_to_non_nullable
 as List<ProxyGroup>,customRules: null == customRules ? _self.customRules : customRules // ignore: cast_nullable_to_non_nullable
 as List<Rule>,matchTarget: freezed == matchTarget ? _self.matchTarget : matchTarget // ignore: cast_nullable_to_non_nullable
 as String?,defaultUA: null == defaultUA ? _self.defaultUA : defaultUA // ignore: cast_nullable_to_non_nullable
@@ -6674,10 +6675,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String profilesPath,  int profileId,  Map<String, dynamic> rawConfig,  OverwriteType overwriteType,  ClashConfig realPatchConfig,  bool overrideDns,  bool overrideNtp,  bool appendSystemDns,  List<Rule> addedRules,  List<ProxyChain> proxyChains,  List<ProfileProxy> profileProxies,  List<ProxyGroup> customProxyGroups,  List<Rule> customRules,  String? matchTarget,  String defaultUA,  bool dockerMode,  bool blockQuic,  bool blockWebRtc,  List<String> authentication,  List<TailscaleNetwork> tailscaleNetworks,  String tailscaleHostname)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String profilesPath,  int profileId,  Map<String, dynamic> rawConfig,  OverwriteType overwriteType,  ClashConfig realPatchConfig,  bool overrideDns,  bool overrideNtp,  bool appendSystemDns,  List<Rule> addedRules,  List<ProxyChain> proxyChains,  List<ProfileProxy> profileProxies,  List<ClashProvider> clashProviders,  List<ProxyGroup> customProxyGroups,  List<Rule> customRules,  String? matchTarget,  String defaultUA,  bool dockerMode,  bool blockQuic,  bool blockWebRtc,  List<String> authentication,  List<TailscaleNetwork> tailscaleNetworks,  String tailscaleHostname)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MakeRealProfileState() when $default != null:
-return $default(_that.profilesPath,_that.profileId,_that.rawConfig,_that.overwriteType,_that.realPatchConfig,_that.overrideDns,_that.overrideNtp,_that.appendSystemDns,_that.addedRules,_that.proxyChains,_that.profileProxies,_that.customProxyGroups,_that.customRules,_that.matchTarget,_that.defaultUA,_that.dockerMode,_that.blockQuic,_that.blockWebRtc,_that.authentication,_that.tailscaleNetworks,_that.tailscaleHostname);case _:
+return $default(_that.profilesPath,_that.profileId,_that.rawConfig,_that.overwriteType,_that.realPatchConfig,_that.overrideDns,_that.overrideNtp,_that.appendSystemDns,_that.addedRules,_that.proxyChains,_that.profileProxies,_that.clashProviders,_that.customProxyGroups,_that.customRules,_that.matchTarget,_that.defaultUA,_that.dockerMode,_that.blockQuic,_that.blockWebRtc,_that.authentication,_that.tailscaleNetworks,_that.tailscaleHostname);case _:
   return orElse();
 
 }
@@ -6695,10 +6696,10 @@ return $default(_that.profilesPath,_that.profileId,_that.rawConfig,_that.overwri
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String profilesPath,  int profileId,  Map<String, dynamic> rawConfig,  OverwriteType overwriteType,  ClashConfig realPatchConfig,  bool overrideDns,  bool overrideNtp,  bool appendSystemDns,  List<Rule> addedRules,  List<ProxyChain> proxyChains,  List<ProfileProxy> profileProxies,  List<ProxyGroup> customProxyGroups,  List<Rule> customRules,  String? matchTarget,  String defaultUA,  bool dockerMode,  bool blockQuic,  bool blockWebRtc,  List<String> authentication,  List<TailscaleNetwork> tailscaleNetworks,  String tailscaleHostname)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String profilesPath,  int profileId,  Map<String, dynamic> rawConfig,  OverwriteType overwriteType,  ClashConfig realPatchConfig,  bool overrideDns,  bool overrideNtp,  bool appendSystemDns,  List<Rule> addedRules,  List<ProxyChain> proxyChains,  List<ProfileProxy> profileProxies,  List<ClashProvider> clashProviders,  List<ProxyGroup> customProxyGroups,  List<Rule> customRules,  String? matchTarget,  String defaultUA,  bool dockerMode,  bool blockQuic,  bool blockWebRtc,  List<String> authentication,  List<TailscaleNetwork> tailscaleNetworks,  String tailscaleHostname)  $default,) {final _that = this;
 switch (_that) {
 case _MakeRealProfileState():
-return $default(_that.profilesPath,_that.profileId,_that.rawConfig,_that.overwriteType,_that.realPatchConfig,_that.overrideDns,_that.overrideNtp,_that.appendSystemDns,_that.addedRules,_that.proxyChains,_that.profileProxies,_that.customProxyGroups,_that.customRules,_that.matchTarget,_that.defaultUA,_that.dockerMode,_that.blockQuic,_that.blockWebRtc,_that.authentication,_that.tailscaleNetworks,_that.tailscaleHostname);case _:
+return $default(_that.profilesPath,_that.profileId,_that.rawConfig,_that.overwriteType,_that.realPatchConfig,_that.overrideDns,_that.overrideNtp,_that.appendSystemDns,_that.addedRules,_that.proxyChains,_that.profileProxies,_that.clashProviders,_that.customProxyGroups,_that.customRules,_that.matchTarget,_that.defaultUA,_that.dockerMode,_that.blockQuic,_that.blockWebRtc,_that.authentication,_that.tailscaleNetworks,_that.tailscaleHostname);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -6715,10 +6716,10 @@ return $default(_that.profilesPath,_that.profileId,_that.rawConfig,_that.overwri
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String profilesPath,  int profileId,  Map<String, dynamic> rawConfig,  OverwriteType overwriteType,  ClashConfig realPatchConfig,  bool overrideDns,  bool overrideNtp,  bool appendSystemDns,  List<Rule> addedRules,  List<ProxyChain> proxyChains,  List<ProfileProxy> profileProxies,  List<ProxyGroup> customProxyGroups,  List<Rule> customRules,  String? matchTarget,  String defaultUA,  bool dockerMode,  bool blockQuic,  bool blockWebRtc,  List<String> authentication,  List<TailscaleNetwork> tailscaleNetworks,  String tailscaleHostname)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String profilesPath,  int profileId,  Map<String, dynamic> rawConfig,  OverwriteType overwriteType,  ClashConfig realPatchConfig,  bool overrideDns,  bool overrideNtp,  bool appendSystemDns,  List<Rule> addedRules,  List<ProxyChain> proxyChains,  List<ProfileProxy> profileProxies,  List<ClashProvider> clashProviders,  List<ProxyGroup> customProxyGroups,  List<Rule> customRules,  String? matchTarget,  String defaultUA,  bool dockerMode,  bool blockQuic,  bool blockWebRtc,  List<String> authentication,  List<TailscaleNetwork> tailscaleNetworks,  String tailscaleHostname)?  $default,) {final _that = this;
 switch (_that) {
 case _MakeRealProfileState() when $default != null:
-return $default(_that.profilesPath,_that.profileId,_that.rawConfig,_that.overwriteType,_that.realPatchConfig,_that.overrideDns,_that.overrideNtp,_that.appendSystemDns,_that.addedRules,_that.proxyChains,_that.profileProxies,_that.customProxyGroups,_that.customRules,_that.matchTarget,_that.defaultUA,_that.dockerMode,_that.blockQuic,_that.blockWebRtc,_that.authentication,_that.tailscaleNetworks,_that.tailscaleHostname);case _:
+return $default(_that.profilesPath,_that.profileId,_that.rawConfig,_that.overwriteType,_that.realPatchConfig,_that.overrideDns,_that.overrideNtp,_that.appendSystemDns,_that.addedRules,_that.proxyChains,_that.profileProxies,_that.clashProviders,_that.customProxyGroups,_that.customRules,_that.matchTarget,_that.defaultUA,_that.dockerMode,_that.blockQuic,_that.blockWebRtc,_that.authentication,_that.tailscaleNetworks,_that.tailscaleHostname);case _:
   return null;
 
 }
@@ -6730,7 +6731,7 @@ return $default(_that.profilesPath,_that.profileId,_that.rawConfig,_that.overwri
 
 
 class _MakeRealProfileState implements MakeRealProfileState {
-  const _MakeRealProfileState({required this.profilesPath, required this.profileId, required  Map<String, dynamic> rawConfig, required this.overwriteType, required this.realPatchConfig, required this.overrideDns, this.overrideNtp = false, required this.appendSystemDns, required  List<Rule> addedRules, required  List<ProxyChain> proxyChains, required  List<ProfileProxy> profileProxies, required  List<ProxyGroup> customProxyGroups, required  List<Rule> customRules, this.matchTarget, required this.defaultUA, this.dockerMode = false, this.blockQuic = false, this.blockWebRtc = false,  List<String> authentication = const [],  List<TailscaleNetwork> tailscaleNetworks = const [], this.tailscaleHostname = 'flclash'}): _rawConfig = rawConfig,_addedRules = addedRules,_proxyChains = proxyChains,_profileProxies = profileProxies,_customProxyGroups = customProxyGroups,_customRules = customRules,_authentication = authentication,_tailscaleNetworks = tailscaleNetworks;
+  const _MakeRealProfileState({required this.profilesPath, required this.profileId, required  Map<String, dynamic> rawConfig, required this.overwriteType, required this.realPatchConfig, required this.overrideDns, this.overrideNtp = false, required this.appendSystemDns, required  List<Rule> addedRules, required  List<ProxyChain> proxyChains, required  List<ProfileProxy> profileProxies,  List<ClashProvider> clashProviders = const [], required  List<ProxyGroup> customProxyGroups, required  List<Rule> customRules, this.matchTarget, required this.defaultUA, this.dockerMode = false, this.blockQuic = false, this.blockWebRtc = false,  List<String> authentication = const [],  List<TailscaleNetwork> tailscaleNetworks = const [], this.tailscaleHostname = 'flclash'}): _rawConfig = rawConfig,_addedRules = addedRules,_proxyChains = proxyChains,_profileProxies = profileProxies,_clashProviders = clashProviders,_customProxyGroups = customProxyGroups,_customRules = customRules,_authentication = authentication,_tailscaleNetworks = tailscaleNetworks;
   
 
 @override final  String profilesPath;
@@ -6766,6 +6767,13 @@ class _MakeRealProfileState implements MakeRealProfileState {
   if (_profileProxies is EqualUnmodifiableListView) return _profileProxies;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_profileProxies);
+}
+
+ final  List<ClashProvider> _clashProviders;
+@override@JsonKey() List<ClashProvider> get clashProviders {
+  if (_clashProviders is EqualUnmodifiableListView) return _clashProviders;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_clashProviders);
 }
 
  final  List<ProxyGroup> _customProxyGroups;
@@ -6813,18 +6821,18 @@ _$MakeRealProfileStateCopyWith<_MakeRealProfileState> get copyWith => __$MakeRea
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MakeRealProfileState&&(identical(other.profilesPath, profilesPath) || other.profilesPath == profilesPath)&&(identical(other.profileId, profileId) || other.profileId == profileId)&&const DeepCollectionEquality().equals(other.rawConfig, _rawConfig)&&(identical(other.overwriteType, overwriteType) || other.overwriteType == overwriteType)&&(identical(other.realPatchConfig, realPatchConfig) || other.realPatchConfig == realPatchConfig)&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&(identical(other.overrideNtp, overrideNtp) || other.overrideNtp == overrideNtp)&&(identical(other.appendSystemDns, appendSystemDns) || other.appendSystemDns == appendSystemDns)&&const DeepCollectionEquality().equals(other.addedRules, _addedRules)&&const DeepCollectionEquality().equals(other.proxyChains, _proxyChains)&&const DeepCollectionEquality().equals(other.profileProxies, _profileProxies)&&const DeepCollectionEquality().equals(other.customProxyGroups, _customProxyGroups)&&const DeepCollectionEquality().equals(other.customRules, _customRules)&&(identical(other.matchTarget, matchTarget) || other.matchTarget == matchTarget)&&(identical(other.defaultUA, defaultUA) || other.defaultUA == defaultUA)&&(identical(other.dockerMode, dockerMode) || other.dockerMode == dockerMode)&&(identical(other.blockQuic, blockQuic) || other.blockQuic == blockQuic)&&(identical(other.blockWebRtc, blockWebRtc) || other.blockWebRtc == blockWebRtc)&&const DeepCollectionEquality().equals(other.authentication, _authentication)&&const DeepCollectionEquality().equals(other.tailscaleNetworks, _tailscaleNetworks)&&(identical(other.tailscaleHostname, tailscaleHostname) || other.tailscaleHostname == tailscaleHostname));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MakeRealProfileState&&(identical(other.profilesPath, profilesPath) || other.profilesPath == profilesPath)&&(identical(other.profileId, profileId) || other.profileId == profileId)&&const DeepCollectionEquality().equals(other.rawConfig, _rawConfig)&&(identical(other.overwriteType, overwriteType) || other.overwriteType == overwriteType)&&(identical(other.realPatchConfig, realPatchConfig) || other.realPatchConfig == realPatchConfig)&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&(identical(other.overrideNtp, overrideNtp) || other.overrideNtp == overrideNtp)&&(identical(other.appendSystemDns, appendSystemDns) || other.appendSystemDns == appendSystemDns)&&const DeepCollectionEquality().equals(other.addedRules, _addedRules)&&const DeepCollectionEquality().equals(other.proxyChains, _proxyChains)&&const DeepCollectionEquality().equals(other.profileProxies, _profileProxies)&&const DeepCollectionEquality().equals(other.clashProviders, _clashProviders)&&const DeepCollectionEquality().equals(other.customProxyGroups, _customProxyGroups)&&const DeepCollectionEquality().equals(other.customRules, _customRules)&&(identical(other.matchTarget, matchTarget) || other.matchTarget == matchTarget)&&(identical(other.defaultUA, defaultUA) || other.defaultUA == defaultUA)&&(identical(other.dockerMode, dockerMode) || other.dockerMode == dockerMode)&&(identical(other.blockQuic, blockQuic) || other.blockQuic == blockQuic)&&(identical(other.blockWebRtc, blockWebRtc) || other.blockWebRtc == blockWebRtc)&&const DeepCollectionEquality().equals(other.authentication, _authentication)&&const DeepCollectionEquality().equals(other.tailscaleNetworks, _tailscaleNetworks)&&(identical(other.tailscaleHostname, tailscaleHostname) || other.tailscaleHostname == tailscaleHostname));
 }
 
 
 @override
 int get hashCode {
-    return Object.hashAll([runtimeType,profilesPath,profileId,const DeepCollectionEquality().hash(_rawConfig),overwriteType,realPatchConfig,overrideDns,overrideNtp,appendSystemDns,const DeepCollectionEquality().hash(_addedRules),const DeepCollectionEquality().hash(_proxyChains),const DeepCollectionEquality().hash(_profileProxies),const DeepCollectionEquality().hash(_customProxyGroups),const DeepCollectionEquality().hash(_customRules),matchTarget,defaultUA,dockerMode,blockQuic,blockWebRtc,const DeepCollectionEquality().hash(_authentication),const DeepCollectionEquality().hash(_tailscaleNetworks),tailscaleHostname]);
+    return Object.hashAll([runtimeType,profilesPath,profileId,const DeepCollectionEquality().hash(_rawConfig),overwriteType,realPatchConfig,overrideDns,overrideNtp,appendSystemDns,const DeepCollectionEquality().hash(_addedRules),const DeepCollectionEquality().hash(_proxyChains),const DeepCollectionEquality().hash(_profileProxies),const DeepCollectionEquality().hash(_clashProviders),const DeepCollectionEquality().hash(_customProxyGroups),const DeepCollectionEquality().hash(_customRules),matchTarget,defaultUA,dockerMode,blockQuic,blockWebRtc,const DeepCollectionEquality().hash(_authentication),const DeepCollectionEquality().hash(_tailscaleNetworks),tailscaleHostname]);
 }
 
 @override
 String toString() {
-    return 'MakeRealProfileState(profilesPath: $profilesPath, profileId: $profileId, rawConfig: $rawConfig, overwriteType: $overwriteType, realPatchConfig: $realPatchConfig, overrideDns: $overrideDns, overrideNtp: $overrideNtp, appendSystemDns: $appendSystemDns, addedRules: $addedRules, proxyChains: $proxyChains, profileProxies: $profileProxies, customProxyGroups: $customProxyGroups, customRules: $customRules, matchTarget: $matchTarget, defaultUA: $defaultUA, dockerMode: $dockerMode, blockQuic: $blockQuic, blockWebRtc: $blockWebRtc, authentication: $authentication, tailscaleNetworks: $tailscaleNetworks, tailscaleHostname: $tailscaleHostname)';
+    return 'MakeRealProfileState(profilesPath: $profilesPath, profileId: $profileId, rawConfig: $rawConfig, overwriteType: $overwriteType, realPatchConfig: $realPatchConfig, overrideDns: $overrideDns, overrideNtp: $overrideNtp, appendSystemDns: $appendSystemDns, addedRules: $addedRules, proxyChains: $proxyChains, profileProxies: $profileProxies, clashProviders: $clashProviders, customProxyGroups: $customProxyGroups, customRules: $customRules, matchTarget: $matchTarget, defaultUA: $defaultUA, dockerMode: $dockerMode, blockQuic: $blockQuic, blockWebRtc: $blockWebRtc, authentication: $authentication, tailscaleNetworks: $tailscaleNetworks, tailscaleHostname: $tailscaleHostname)';
 }
 
 
@@ -6835,7 +6843,7 @@ abstract mixin class _$MakeRealProfileStateCopyWith<$Res> implements $MakeRealPr
   factory _$MakeRealProfileStateCopyWith(_MakeRealProfileState value, $Res Function(_MakeRealProfileState) _then) = __$MakeRealProfileStateCopyWithImpl;
 @override @useResult
 $Res call({
- String profilesPath, int profileId, Map<String, dynamic> rawConfig, OverwriteType overwriteType, ClashConfig realPatchConfig, bool overrideDns, bool overrideNtp, bool appendSystemDns, List<Rule> addedRules, List<ProxyChain> proxyChains, List<ProfileProxy> profileProxies, List<ProxyGroup> customProxyGroups, List<Rule> customRules, String? matchTarget, String defaultUA, bool dockerMode, bool blockQuic, bool blockWebRtc, List<String> authentication, List<TailscaleNetwork> tailscaleNetworks, String tailscaleHostname
+ String profilesPath, int profileId, Map<String, dynamic> rawConfig, OverwriteType overwriteType, ClashConfig realPatchConfig, bool overrideDns, bool overrideNtp, bool appendSystemDns, List<Rule> addedRules, List<ProxyChain> proxyChains, List<ProfileProxy> profileProxies, List<ClashProvider> clashProviders, List<ProxyGroup> customProxyGroups, List<Rule> customRules, String? matchTarget, String defaultUA, bool dockerMode, bool blockQuic, bool blockWebRtc, List<String> authentication, List<TailscaleNetwork> tailscaleNetworks, String tailscaleHostname
 });
 
 
@@ -6852,7 +6860,7 @@ class __$MakeRealProfileStateCopyWithImpl<$Res>
 
 /// Create a copy of MakeRealProfileState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? profilesPath = null,Object? profileId = null,Object? rawConfig = null,Object? overwriteType = null,Object? realPatchConfig = null,Object? overrideDns = null,Object? overrideNtp = null,Object? appendSystemDns = null,Object? addedRules = null,Object? proxyChains = null,Object? profileProxies = null,Object? customProxyGroups = null,Object? customRules = null,Object? matchTarget = freezed,Object? defaultUA = null,Object? dockerMode = null,Object? blockQuic = null,Object? blockWebRtc = null,Object? authentication = null,Object? tailscaleNetworks = null,Object? tailscaleHostname = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? profilesPath = null,Object? profileId = null,Object? rawConfig = null,Object? overwriteType = null,Object? realPatchConfig = null,Object? overrideDns = null,Object? overrideNtp = null,Object? appendSystemDns = null,Object? addedRules = null,Object? proxyChains = null,Object? profileProxies = null,Object? clashProviders = null,Object? customProxyGroups = null,Object? customRules = null,Object? matchTarget = freezed,Object? defaultUA = null,Object? dockerMode = null,Object? blockQuic = null,Object? blockWebRtc = null,Object? authentication = null,Object? tailscaleNetworks = null,Object? tailscaleHostname = null,}) {
   return _then(_MakeRealProfileState(
 profilesPath: null == profilesPath ? _self.profilesPath : profilesPath // ignore: cast_nullable_to_non_nullable
 as String,profileId: null == profileId ? _self.profileId : profileId // ignore: cast_nullable_to_non_nullable
@@ -6865,7 +6873,8 @@ as bool,appendSystemDns: null == appendSystemDns ? _self.appendSystemDns : appen
 as bool,addedRules: null == addedRules ? _self._addedRules : addedRules // ignore: cast_nullable_to_non_nullable
 as List<Rule>,proxyChains: null == proxyChains ? _self._proxyChains : proxyChains // ignore: cast_nullable_to_non_nullable
 as List<ProxyChain>,profileProxies: null == profileProxies ? _self._profileProxies : profileProxies // ignore: cast_nullable_to_non_nullable
-as List<ProfileProxy>,customProxyGroups: null == customProxyGroups ? _self._customProxyGroups : customProxyGroups // ignore: cast_nullable_to_non_nullable
+as List<ProfileProxy>,clashProviders: null == clashProviders ? _self._clashProviders : clashProviders // ignore: cast_nullable_to_non_nullable
+as List<ClashProvider>,customProxyGroups: null == customProxyGroups ? _self._customProxyGroups : customProxyGroups // ignore: cast_nullable_to_non_nullable
 as List<ProxyGroup>,customRules: null == customRules ? _self._customRules : customRules // ignore: cast_nullable_to_non_nullable
 as List<Rule>,matchTarget: freezed == matchTarget ? _self.matchTarget : matchTarget // ignore: cast_nullable_to_non_nullable
 as String?,defaultUA: null == defaultUA ? _self.defaultUA : defaultUA // ignore: cast_nullable_to_non_nullable
@@ -6894,7 +6903,7 @@ $ClashConfigCopyWith<$Res> get realPatchConfig {
 /// @nodoc
 mixin _$MigrationData {
 
- Map<String, Object?>? get configMap; List<Rule> get rules; List<Script> get scripts; List<Profile> get profiles; List<ProfileRuleLink> get links; List<VM2<String, String>> get fileMigrations;
+ Map<String, Object?>? get configMap; List<Rule> get rules; List<Script> get scripts; List<Profile> get profiles; List<ProfileRuleLink> get links; List<ClashProvider> get clashProviders; List<VM2<String, String>> get fileMigrations;
 /// Create a copy of MigrationData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -6906,20 +6915,20 @@ $MigrationDataCopyWith<MigrationData> get copyWith => _$MigrationDataCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as MigrationData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MigrationData&&const DeepCollectionEquality().equals(other.configMap, _this.configMap)&&const DeepCollectionEquality().equals(other.rules, _this.rules)&&const DeepCollectionEquality().equals(other.scripts, _this.scripts)&&const DeepCollectionEquality().equals(other.profiles, _this.profiles)&&const DeepCollectionEquality().equals(other.links, _this.links)&&const DeepCollectionEquality().equals(other.fileMigrations, _this.fileMigrations));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MigrationData&&const DeepCollectionEquality().equals(other.configMap, _this.configMap)&&const DeepCollectionEquality().equals(other.rules, _this.rules)&&const DeepCollectionEquality().equals(other.scripts, _this.scripts)&&const DeepCollectionEquality().equals(other.profiles, _this.profiles)&&const DeepCollectionEquality().equals(other.links, _this.links)&&const DeepCollectionEquality().equals(other.clashProviders, _this.clashProviders)&&const DeepCollectionEquality().equals(other.fileMigrations, _this.fileMigrations));
 }
 
 
 @override
 int get hashCode {
   final _this = this as MigrationData;
-  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.configMap),const DeepCollectionEquality().hash(_this.rules),const DeepCollectionEquality().hash(_this.scripts),const DeepCollectionEquality().hash(_this.profiles),const DeepCollectionEquality().hash(_this.links),const DeepCollectionEquality().hash(_this.fileMigrations));
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.configMap),const DeepCollectionEquality().hash(_this.rules),const DeepCollectionEquality().hash(_this.scripts),const DeepCollectionEquality().hash(_this.profiles),const DeepCollectionEquality().hash(_this.links),const DeepCollectionEquality().hash(_this.clashProviders),const DeepCollectionEquality().hash(_this.fileMigrations));
 }
 
 @override
 String toString() {
   final _this = this as MigrationData;
-  return 'MigrationData(configMap: ${_this.configMap}, rules: ${_this.rules}, scripts: ${_this.scripts}, profiles: ${_this.profiles}, links: ${_this.links}, fileMigrations: ${_this.fileMigrations})';
+  return 'MigrationData(configMap: ${_this.configMap}, rules: ${_this.rules}, scripts: ${_this.scripts}, profiles: ${_this.profiles}, links: ${_this.links}, clashProviders: ${_this.clashProviders}, fileMigrations: ${_this.fileMigrations})';
 }
 
 
@@ -6930,7 +6939,7 @@ abstract mixin class $MigrationDataCopyWith<$Res>  {
   factory $MigrationDataCopyWith(MigrationData value, $Res Function(MigrationData) _then) = _$MigrationDataCopyWithImpl;
 @useResult
 $Res call({
- Map<String, Object?>? configMap, List<Rule> rules, List<Script> scripts, List<Profile> profiles, List<ProfileRuleLink> links, List<VM2<String, String>> fileMigrations
+ Map<String, Object?>? configMap, List<Rule> rules, List<Script> scripts, List<Profile> profiles, List<ProfileRuleLink> links, List<ClashProvider> clashProviders, List<VM2<String, String>> fileMigrations
 });
 
 
@@ -6947,14 +6956,15 @@ class _$MigrationDataCopyWithImpl<$Res>
 
 /// Create a copy of MigrationData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? configMap = freezed,Object? rules = null,Object? scripts = null,Object? profiles = null,Object? links = null,Object? fileMigrations = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? configMap = freezed,Object? rules = null,Object? scripts = null,Object? profiles = null,Object? links = null,Object? clashProviders = null,Object? fileMigrations = null,}) {
   return _then(MigrationData(
 configMap: freezed == configMap ? _self.configMap : configMap // ignore: cast_nullable_to_non_nullable
 as Map<String, Object?>?,rules: null == rules ? _self.rules : rules // ignore: cast_nullable_to_non_nullable
 as List<Rule>,scripts: null == scripts ? _self.scripts : scripts // ignore: cast_nullable_to_non_nullable
 as List<Script>,profiles: null == profiles ? _self.profiles : profiles // ignore: cast_nullable_to_non_nullable
 as List<Profile>,links: null == links ? _self.links : links // ignore: cast_nullable_to_non_nullable
-as List<ProfileRuleLink>,fileMigrations: null == fileMigrations ? _self.fileMigrations : fileMigrations // ignore: cast_nullable_to_non_nullable
+as List<ProfileRuleLink>,clashProviders: null == clashProviders ? _self.clashProviders : clashProviders // ignore: cast_nullable_to_non_nullable
+as List<ClashProvider>,fileMigrations: null == fileMigrations ? _self.fileMigrations : fileMigrations // ignore: cast_nullable_to_non_nullable
 as List<VM2<String, String>>,
   ));
 }
@@ -7040,10 +7050,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Map<String, Object?>? configMap,  List<Rule> rules,  List<Script> scripts,  List<Profile> profiles,  List<ProfileRuleLink> links,  List<VM2<String, String>> fileMigrations)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Map<String, Object?>? configMap,  List<Rule> rules,  List<Script> scripts,  List<Profile> profiles,  List<ProfileRuleLink> links,  List<ClashProvider> clashProviders,  List<VM2<String, String>> fileMigrations)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MigrationData() when $default != null:
-return $default(_that.configMap,_that.rules,_that.scripts,_that.profiles,_that.links,_that.fileMigrations);case _:
+return $default(_that.configMap,_that.rules,_that.scripts,_that.profiles,_that.links,_that.clashProviders,_that.fileMigrations);case _:
   return orElse();
 
 }
@@ -7061,10 +7071,10 @@ return $default(_that.configMap,_that.rules,_that.scripts,_that.profiles,_that.l
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Map<String, Object?>? configMap,  List<Rule> rules,  List<Script> scripts,  List<Profile> profiles,  List<ProfileRuleLink> links,  List<VM2<String, String>> fileMigrations)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Map<String, Object?>? configMap,  List<Rule> rules,  List<Script> scripts,  List<Profile> profiles,  List<ProfileRuleLink> links,  List<ClashProvider> clashProviders,  List<VM2<String, String>> fileMigrations)  $default,) {final _that = this;
 switch (_that) {
 case _MigrationData():
-return $default(_that.configMap,_that.rules,_that.scripts,_that.profiles,_that.links,_that.fileMigrations);case _:
+return $default(_that.configMap,_that.rules,_that.scripts,_that.profiles,_that.links,_that.clashProviders,_that.fileMigrations);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -7081,10 +7091,10 @@ return $default(_that.configMap,_that.rules,_that.scripts,_that.profiles,_that.l
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Map<String, Object?>? configMap,  List<Rule> rules,  List<Script> scripts,  List<Profile> profiles,  List<ProfileRuleLink> links,  List<VM2<String, String>> fileMigrations)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Map<String, Object?>? configMap,  List<Rule> rules,  List<Script> scripts,  List<Profile> profiles,  List<ProfileRuleLink> links,  List<ClashProvider> clashProviders,  List<VM2<String, String>> fileMigrations)?  $default,) {final _that = this;
 switch (_that) {
 case _MigrationData() when $default != null:
-return $default(_that.configMap,_that.rules,_that.scripts,_that.profiles,_that.links,_that.fileMigrations);case _:
+return $default(_that.configMap,_that.rules,_that.scripts,_that.profiles,_that.links,_that.clashProviders,_that.fileMigrations);case _:
   return null;
 
 }
@@ -7096,7 +7106,7 @@ return $default(_that.configMap,_that.rules,_that.scripts,_that.profiles,_that.l
 
 
 class _MigrationData implements MigrationData {
-  const _MigrationData({ Map<String, Object?>? configMap,  List<Rule> rules = const [],  List<Script> scripts = const [],  List<Profile> profiles = const [],  List<ProfileRuleLink> links = const [],  List<VM2<String, String>> fileMigrations = const []}): _configMap = configMap,_rules = rules,_scripts = scripts,_profiles = profiles,_links = links,_fileMigrations = fileMigrations;
+  const _MigrationData({ Map<String, Object?>? configMap,  List<Rule> rules = const [],  List<Script> scripts = const [],  List<Profile> profiles = const [],  List<ProfileRuleLink> links = const [],  List<ClashProvider> clashProviders = const [],  List<VM2<String, String>> fileMigrations = const []}): _configMap = configMap,_rules = rules,_scripts = scripts,_profiles = profiles,_links = links,_clashProviders = clashProviders,_fileMigrations = fileMigrations;
   
 
  final  Map<String, Object?>? _configMap;
@@ -7136,6 +7146,13 @@ class _MigrationData implements MigrationData {
   return EqualUnmodifiableListView(_links);
 }
 
+ final  List<ClashProvider> _clashProviders;
+@override@JsonKey() List<ClashProvider> get clashProviders {
+  if (_clashProviders is EqualUnmodifiableListView) return _clashProviders;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_clashProviders);
+}
+
  final  List<VM2<String, String>> _fileMigrations;
 @override@JsonKey() List<VM2<String, String>> get fileMigrations {
   if (_fileMigrations is EqualUnmodifiableListView) return _fileMigrations;
@@ -7154,18 +7171,18 @@ _$MigrationDataCopyWith<_MigrationData> get copyWith => __$MigrationDataCopyWith
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MigrationData&&const DeepCollectionEquality().equals(other.configMap, _configMap)&&const DeepCollectionEquality().equals(other.rules, _rules)&&const DeepCollectionEquality().equals(other.scripts, _scripts)&&const DeepCollectionEquality().equals(other.profiles, _profiles)&&const DeepCollectionEquality().equals(other.links, _links)&&const DeepCollectionEquality().equals(other.fileMigrations, _fileMigrations));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MigrationData&&const DeepCollectionEquality().equals(other.configMap, _configMap)&&const DeepCollectionEquality().equals(other.rules, _rules)&&const DeepCollectionEquality().equals(other.scripts, _scripts)&&const DeepCollectionEquality().equals(other.profiles, _profiles)&&const DeepCollectionEquality().equals(other.links, _links)&&const DeepCollectionEquality().equals(other.clashProviders, _clashProviders)&&const DeepCollectionEquality().equals(other.fileMigrations, _fileMigrations));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_configMap),const DeepCollectionEquality().hash(_rules),const DeepCollectionEquality().hash(_scripts),const DeepCollectionEquality().hash(_profiles),const DeepCollectionEquality().hash(_links),const DeepCollectionEquality().hash(_fileMigrations));
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_configMap),const DeepCollectionEquality().hash(_rules),const DeepCollectionEquality().hash(_scripts),const DeepCollectionEquality().hash(_profiles),const DeepCollectionEquality().hash(_links),const DeepCollectionEquality().hash(_clashProviders),const DeepCollectionEquality().hash(_fileMigrations));
 }
 
 @override
 String toString() {
-    return 'MigrationData(configMap: $configMap, rules: $rules, scripts: $scripts, profiles: $profiles, links: $links, fileMigrations: $fileMigrations)';
+    return 'MigrationData(configMap: $configMap, rules: $rules, scripts: $scripts, profiles: $profiles, links: $links, clashProviders: $clashProviders, fileMigrations: $fileMigrations)';
 }
 
 
@@ -7176,7 +7193,7 @@ abstract mixin class _$MigrationDataCopyWith<$Res> implements $MigrationDataCopy
   factory _$MigrationDataCopyWith(_MigrationData value, $Res Function(_MigrationData) _then) = __$MigrationDataCopyWithImpl;
 @override @useResult
 $Res call({
- Map<String, Object?>? configMap, List<Rule> rules, List<Script> scripts, List<Profile> profiles, List<ProfileRuleLink> links, List<VM2<String, String>> fileMigrations
+ Map<String, Object?>? configMap, List<Rule> rules, List<Script> scripts, List<Profile> profiles, List<ProfileRuleLink> links, List<ClashProvider> clashProviders, List<VM2<String, String>> fileMigrations
 });
 
 
@@ -7193,14 +7210,15 @@ class __$MigrationDataCopyWithImpl<$Res>
 
 /// Create a copy of MigrationData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? configMap = freezed,Object? rules = null,Object? scripts = null,Object? profiles = null,Object? links = null,Object? fileMigrations = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? configMap = freezed,Object? rules = null,Object? scripts = null,Object? profiles = null,Object? links = null,Object? clashProviders = null,Object? fileMigrations = null,}) {
   return _then(_MigrationData(
 configMap: freezed == configMap ? _self._configMap : configMap // ignore: cast_nullable_to_non_nullable
 as Map<String, Object?>?,rules: null == rules ? _self._rules : rules // ignore: cast_nullable_to_non_nullable
 as List<Rule>,scripts: null == scripts ? _self._scripts : scripts // ignore: cast_nullable_to_non_nullable
 as List<Script>,profiles: null == profiles ? _self._profiles : profiles // ignore: cast_nullable_to_non_nullable
 as List<Profile>,links: null == links ? _self._links : links // ignore: cast_nullable_to_non_nullable
-as List<ProfileRuleLink>,fileMigrations: null == fileMigrations ? _self._fileMigrations : fileMigrations // ignore: cast_nullable_to_non_nullable
+as List<ProfileRuleLink>,clashProviders: null == clashProviders ? _self._clashProviders : clashProviders // ignore: cast_nullable_to_non_nullable
+as List<ClashProvider>,fileMigrations: null == fileMigrations ? _self._fileMigrations : fileMigrations // ignore: cast_nullable_to_non_nullable
 as List<VM2<String, String>>,
   ));
 }
@@ -7211,7 +7229,7 @@ as List<VM2<String, String>>,
 /// @nodoc
 mixin _$SetupState {
 
- int? get profileId; int? get profileLastUpdateDate; OverwriteType get overwriteType; List<Rule> get addedRules; List<ProxyChain> get proxyChains; List<ProfileProxy> get profileProxies; List<ProxyGroup> get customProxyGroups; List<Rule> get customRules; String? get matchTarget; Script? get script; bool get overrideDns; bool get overrideNtp; Dns get dns; Set<DnsOverrideKey> get dnsOverrideKeys; Ntp get ntp; Set<NtpOverrideKey> get ntpOverrideKeys; bool get blockQuic; bool get blockWebRtc; List<TailscaleNetwork> get tailscaleNetworks;
+ int? get profileId; int? get profileLastUpdateDate; OverwriteType get overwriteType; List<Rule> get addedRules; List<ProxyChain> get proxyChains; List<ProfileProxy> get profileProxies; List<ClashProvider> get clashProviders; List<ProxyGroup> get customProxyGroups; List<Rule> get customRules; String? get matchTarget; Script? get script; bool get overrideDns; bool get overrideNtp; Dns get dns; Set<DnsOverrideKey> get dnsOverrideKeys; Ntp get ntp; Set<NtpOverrideKey> get ntpOverrideKeys; bool get blockQuic; bool get blockWebRtc; List<TailscaleNetwork> get tailscaleNetworks;
 /// Create a copy of SetupState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -7223,20 +7241,20 @@ $SetupStateCopyWith<SetupState> get copyWith => _$SetupStateCopyWithImpl<SetupSt
 @override
 bool operator ==(Object other) {
   final _this = this as SetupState;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SetupState&&(identical(other.profileId, _this.profileId) || other.profileId == _this.profileId)&&(identical(other.profileLastUpdateDate, _this.profileLastUpdateDate) || other.profileLastUpdateDate == _this.profileLastUpdateDate)&&(identical(other.overwriteType, _this.overwriteType) || other.overwriteType == _this.overwriteType)&&const DeepCollectionEquality().equals(other.addedRules, _this.addedRules)&&const DeepCollectionEquality().equals(other.proxyChains, _this.proxyChains)&&const DeepCollectionEquality().equals(other.profileProxies, _this.profileProxies)&&const DeepCollectionEquality().equals(other.customProxyGroups, _this.customProxyGroups)&&const DeepCollectionEquality().equals(other.customRules, _this.customRules)&&(identical(other.matchTarget, _this.matchTarget) || other.matchTarget == _this.matchTarget)&&(identical(other.script, _this.script) || other.script == _this.script)&&(identical(other.overrideDns, _this.overrideDns) || other.overrideDns == _this.overrideDns)&&(identical(other.overrideNtp, _this.overrideNtp) || other.overrideNtp == _this.overrideNtp)&&(identical(other.dns, _this.dns) || other.dns == _this.dns)&&const DeepCollectionEquality().equals(other.dnsOverrideKeys, _this.dnsOverrideKeys)&&(identical(other.ntp, _this.ntp) || other.ntp == _this.ntp)&&const DeepCollectionEquality().equals(other.ntpOverrideKeys, _this.ntpOverrideKeys)&&(identical(other.blockQuic, _this.blockQuic) || other.blockQuic == _this.blockQuic)&&(identical(other.blockWebRtc, _this.blockWebRtc) || other.blockWebRtc == _this.blockWebRtc)&&const DeepCollectionEquality().equals(other.tailscaleNetworks, _this.tailscaleNetworks));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SetupState&&(identical(other.profileId, _this.profileId) || other.profileId == _this.profileId)&&(identical(other.profileLastUpdateDate, _this.profileLastUpdateDate) || other.profileLastUpdateDate == _this.profileLastUpdateDate)&&(identical(other.overwriteType, _this.overwriteType) || other.overwriteType == _this.overwriteType)&&const DeepCollectionEquality().equals(other.addedRules, _this.addedRules)&&const DeepCollectionEquality().equals(other.proxyChains, _this.proxyChains)&&const DeepCollectionEquality().equals(other.profileProxies, _this.profileProxies)&&const DeepCollectionEquality().equals(other.clashProviders, _this.clashProviders)&&const DeepCollectionEquality().equals(other.customProxyGroups, _this.customProxyGroups)&&const DeepCollectionEquality().equals(other.customRules, _this.customRules)&&(identical(other.matchTarget, _this.matchTarget) || other.matchTarget == _this.matchTarget)&&(identical(other.script, _this.script) || other.script == _this.script)&&(identical(other.overrideDns, _this.overrideDns) || other.overrideDns == _this.overrideDns)&&(identical(other.overrideNtp, _this.overrideNtp) || other.overrideNtp == _this.overrideNtp)&&(identical(other.dns, _this.dns) || other.dns == _this.dns)&&const DeepCollectionEquality().equals(other.dnsOverrideKeys, _this.dnsOverrideKeys)&&(identical(other.ntp, _this.ntp) || other.ntp == _this.ntp)&&const DeepCollectionEquality().equals(other.ntpOverrideKeys, _this.ntpOverrideKeys)&&(identical(other.blockQuic, _this.blockQuic) || other.blockQuic == _this.blockQuic)&&(identical(other.blockWebRtc, _this.blockWebRtc) || other.blockWebRtc == _this.blockWebRtc)&&const DeepCollectionEquality().equals(other.tailscaleNetworks, _this.tailscaleNetworks));
 }
 
 
 @override
 int get hashCode {
   final _this = this as SetupState;
-  return Object.hashAll([runtimeType,_this.profileId,_this.profileLastUpdateDate,_this.overwriteType,const DeepCollectionEquality().hash(_this.addedRules),const DeepCollectionEquality().hash(_this.proxyChains),const DeepCollectionEquality().hash(_this.profileProxies),const DeepCollectionEquality().hash(_this.customProxyGroups),const DeepCollectionEquality().hash(_this.customRules),_this.matchTarget,_this.script,_this.overrideDns,_this.overrideNtp,_this.dns,const DeepCollectionEquality().hash(_this.dnsOverrideKeys),_this.ntp,const DeepCollectionEquality().hash(_this.ntpOverrideKeys),_this.blockQuic,_this.blockWebRtc,const DeepCollectionEquality().hash(_this.tailscaleNetworks)]);
+  return Object.hashAll([runtimeType,_this.profileId,_this.profileLastUpdateDate,_this.overwriteType,const DeepCollectionEquality().hash(_this.addedRules),const DeepCollectionEquality().hash(_this.proxyChains),const DeepCollectionEquality().hash(_this.profileProxies),const DeepCollectionEquality().hash(_this.clashProviders),const DeepCollectionEquality().hash(_this.customProxyGroups),const DeepCollectionEquality().hash(_this.customRules),_this.matchTarget,_this.script,_this.overrideDns,_this.overrideNtp,_this.dns,const DeepCollectionEquality().hash(_this.dnsOverrideKeys),_this.ntp,const DeepCollectionEquality().hash(_this.ntpOverrideKeys),_this.blockQuic,_this.blockWebRtc,const DeepCollectionEquality().hash(_this.tailscaleNetworks)]);
 }
 
 @override
 String toString() {
   final _this = this as SetupState;
-  return 'SetupState(profileId: ${_this.profileId}, profileLastUpdateDate: ${_this.profileLastUpdateDate}, overwriteType: ${_this.overwriteType}, addedRules: ${_this.addedRules}, proxyChains: ${_this.proxyChains}, profileProxies: ${_this.profileProxies}, customProxyGroups: ${_this.customProxyGroups}, customRules: ${_this.customRules}, matchTarget: ${_this.matchTarget}, script: ${_this.script}, overrideDns: ${_this.overrideDns}, overrideNtp: ${_this.overrideNtp}, dns: ${_this.dns}, dnsOverrideKeys: ${_this.dnsOverrideKeys}, ntp: ${_this.ntp}, ntpOverrideKeys: ${_this.ntpOverrideKeys}, blockQuic: ${_this.blockQuic}, blockWebRtc: ${_this.blockWebRtc}, tailscaleNetworks: ${_this.tailscaleNetworks})';
+  return 'SetupState(profileId: ${_this.profileId}, profileLastUpdateDate: ${_this.profileLastUpdateDate}, overwriteType: ${_this.overwriteType}, addedRules: ${_this.addedRules}, proxyChains: ${_this.proxyChains}, profileProxies: ${_this.profileProxies}, clashProviders: ${_this.clashProviders}, customProxyGroups: ${_this.customProxyGroups}, customRules: ${_this.customRules}, matchTarget: ${_this.matchTarget}, script: ${_this.script}, overrideDns: ${_this.overrideDns}, overrideNtp: ${_this.overrideNtp}, dns: ${_this.dns}, dnsOverrideKeys: ${_this.dnsOverrideKeys}, ntp: ${_this.ntp}, ntpOverrideKeys: ${_this.ntpOverrideKeys}, blockQuic: ${_this.blockQuic}, blockWebRtc: ${_this.blockWebRtc}, tailscaleNetworks: ${_this.tailscaleNetworks})';
 }
 
 
@@ -7247,7 +7265,7 @@ abstract mixin class $SetupStateCopyWith<$Res>  {
   factory $SetupStateCopyWith(SetupState value, $Res Function(SetupState) _then) = _$SetupStateCopyWithImpl;
 @useResult
 $Res call({
- int? profileId, int? profileLastUpdateDate, OverwriteType overwriteType, List<Rule> addedRules, List<ProxyChain> proxyChains, List<ProfileProxy> profileProxies, List<ProxyGroup> customProxyGroups, List<Rule> customRules, String? matchTarget, Script? script, bool overrideDns, bool overrideNtp, Dns dns, Set<DnsOverrideKey> dnsOverrideKeys, Ntp ntp, Set<NtpOverrideKey> ntpOverrideKeys, bool blockQuic, bool blockWebRtc, List<TailscaleNetwork> tailscaleNetworks
+ int? profileId, int? profileLastUpdateDate, OverwriteType overwriteType, List<Rule> addedRules, List<ProxyChain> proxyChains, List<ProfileProxy> profileProxies, List<ClashProvider> clashProviders, List<ProxyGroup> customProxyGroups, List<Rule> customRules, String? matchTarget, Script? script, bool overrideDns, bool overrideNtp, Dns dns, Set<DnsOverrideKey> dnsOverrideKeys, Ntp ntp, Set<NtpOverrideKey> ntpOverrideKeys, bool blockQuic, bool blockWebRtc, List<TailscaleNetwork> tailscaleNetworks
 });
 
 
@@ -7264,7 +7282,7 @@ class _$SetupStateCopyWithImpl<$Res>
 
 /// Create a copy of SetupState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? profileId = freezed,Object? profileLastUpdateDate = freezed,Object? overwriteType = null,Object? addedRules = null,Object? proxyChains = null,Object? profileProxies = null,Object? customProxyGroups = null,Object? customRules = null,Object? matchTarget = freezed,Object? script = freezed,Object? overrideDns = null,Object? overrideNtp = null,Object? dns = null,Object? dnsOverrideKeys = null,Object? ntp = null,Object? ntpOverrideKeys = null,Object? blockQuic = null,Object? blockWebRtc = null,Object? tailscaleNetworks = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? profileId = freezed,Object? profileLastUpdateDate = freezed,Object? overwriteType = null,Object? addedRules = null,Object? proxyChains = null,Object? profileProxies = null,Object? clashProviders = null,Object? customProxyGroups = null,Object? customRules = null,Object? matchTarget = freezed,Object? script = freezed,Object? overrideDns = null,Object? overrideNtp = null,Object? dns = null,Object? dnsOverrideKeys = null,Object? ntp = null,Object? ntpOverrideKeys = null,Object? blockQuic = null,Object? blockWebRtc = null,Object? tailscaleNetworks = null,}) {
   return _then(SetupState(
 profileId: freezed == profileId ? _self.profileId : profileId // ignore: cast_nullable_to_non_nullable
 as int?,profileLastUpdateDate: freezed == profileLastUpdateDate ? _self.profileLastUpdateDate : profileLastUpdateDate // ignore: cast_nullable_to_non_nullable
@@ -7272,7 +7290,8 @@ as int?,overwriteType: null == overwriteType ? _self.overwriteType : overwriteTy
 as OverwriteType,addedRules: null == addedRules ? _self.addedRules : addedRules // ignore: cast_nullable_to_non_nullable
 as List<Rule>,proxyChains: null == proxyChains ? _self.proxyChains : proxyChains // ignore: cast_nullable_to_non_nullable
 as List<ProxyChain>,profileProxies: null == profileProxies ? _self.profileProxies : profileProxies // ignore: cast_nullable_to_non_nullable
-as List<ProfileProxy>,customProxyGroups: null == customProxyGroups ? _self.customProxyGroups : customProxyGroups // ignore: cast_nullable_to_non_nullable
+as List<ProfileProxy>,clashProviders: null == clashProviders ? _self.clashProviders : clashProviders // ignore: cast_nullable_to_non_nullable
+as List<ClashProvider>,customProxyGroups: null == customProxyGroups ? _self.customProxyGroups : customProxyGroups // ignore: cast_nullable_to_non_nullable
 as List<ProxyGroup>,customRules: null == customRules ? _self.customRules : customRules // ignore: cast_nullable_to_non_nullable
 as List<Rule>,matchTarget: freezed == matchTarget ? _self.matchTarget : matchTarget // ignore: cast_nullable_to_non_nullable
 as String?,script: freezed == script ? _self.script : script // ignore: cast_nullable_to_non_nullable
@@ -7400,10 +7419,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? profileId,  int? profileLastUpdateDate,  OverwriteType overwriteType,  List<Rule> addedRules,  List<ProxyChain> proxyChains,  List<ProfileProxy> profileProxies,  List<ProxyGroup> customProxyGroups,  List<Rule> customRules,  String? matchTarget,  Script? script,  bool overrideDns,  bool overrideNtp,  Dns dns,  Set<DnsOverrideKey> dnsOverrideKeys,  Ntp ntp,  Set<NtpOverrideKey> ntpOverrideKeys,  bool blockQuic,  bool blockWebRtc,  List<TailscaleNetwork> tailscaleNetworks)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? profileId,  int? profileLastUpdateDate,  OverwriteType overwriteType,  List<Rule> addedRules,  List<ProxyChain> proxyChains,  List<ProfileProxy> profileProxies,  List<ClashProvider> clashProviders,  List<ProxyGroup> customProxyGroups,  List<Rule> customRules,  String? matchTarget,  Script? script,  bool overrideDns,  bool overrideNtp,  Dns dns,  Set<DnsOverrideKey> dnsOverrideKeys,  Ntp ntp,  Set<NtpOverrideKey> ntpOverrideKeys,  bool blockQuic,  bool blockWebRtc,  List<TailscaleNetwork> tailscaleNetworks)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SetupState() when $default != null:
-return $default(_that.profileId,_that.profileLastUpdateDate,_that.overwriteType,_that.addedRules,_that.proxyChains,_that.profileProxies,_that.customProxyGroups,_that.customRules,_that.matchTarget,_that.script,_that.overrideDns,_that.overrideNtp,_that.dns,_that.dnsOverrideKeys,_that.ntp,_that.ntpOverrideKeys,_that.blockQuic,_that.blockWebRtc,_that.tailscaleNetworks);case _:
+return $default(_that.profileId,_that.profileLastUpdateDate,_that.overwriteType,_that.addedRules,_that.proxyChains,_that.profileProxies,_that.clashProviders,_that.customProxyGroups,_that.customRules,_that.matchTarget,_that.script,_that.overrideDns,_that.overrideNtp,_that.dns,_that.dnsOverrideKeys,_that.ntp,_that.ntpOverrideKeys,_that.blockQuic,_that.blockWebRtc,_that.tailscaleNetworks);case _:
   return orElse();
 
 }
@@ -7421,10 +7440,10 @@ return $default(_that.profileId,_that.profileLastUpdateDate,_that.overwriteType,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? profileId,  int? profileLastUpdateDate,  OverwriteType overwriteType,  List<Rule> addedRules,  List<ProxyChain> proxyChains,  List<ProfileProxy> profileProxies,  List<ProxyGroup> customProxyGroups,  List<Rule> customRules,  String? matchTarget,  Script? script,  bool overrideDns,  bool overrideNtp,  Dns dns,  Set<DnsOverrideKey> dnsOverrideKeys,  Ntp ntp,  Set<NtpOverrideKey> ntpOverrideKeys,  bool blockQuic,  bool blockWebRtc,  List<TailscaleNetwork> tailscaleNetworks)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? profileId,  int? profileLastUpdateDate,  OverwriteType overwriteType,  List<Rule> addedRules,  List<ProxyChain> proxyChains,  List<ProfileProxy> profileProxies,  List<ClashProvider> clashProviders,  List<ProxyGroup> customProxyGroups,  List<Rule> customRules,  String? matchTarget,  Script? script,  bool overrideDns,  bool overrideNtp,  Dns dns,  Set<DnsOverrideKey> dnsOverrideKeys,  Ntp ntp,  Set<NtpOverrideKey> ntpOverrideKeys,  bool blockQuic,  bool blockWebRtc,  List<TailscaleNetwork> tailscaleNetworks)  $default,) {final _that = this;
 switch (_that) {
 case _SetupState():
-return $default(_that.profileId,_that.profileLastUpdateDate,_that.overwriteType,_that.addedRules,_that.proxyChains,_that.profileProxies,_that.customProxyGroups,_that.customRules,_that.matchTarget,_that.script,_that.overrideDns,_that.overrideNtp,_that.dns,_that.dnsOverrideKeys,_that.ntp,_that.ntpOverrideKeys,_that.blockQuic,_that.blockWebRtc,_that.tailscaleNetworks);case _:
+return $default(_that.profileId,_that.profileLastUpdateDate,_that.overwriteType,_that.addedRules,_that.proxyChains,_that.profileProxies,_that.clashProviders,_that.customProxyGroups,_that.customRules,_that.matchTarget,_that.script,_that.overrideDns,_that.overrideNtp,_that.dns,_that.dnsOverrideKeys,_that.ntp,_that.ntpOverrideKeys,_that.blockQuic,_that.blockWebRtc,_that.tailscaleNetworks);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -7441,10 +7460,10 @@ return $default(_that.profileId,_that.profileLastUpdateDate,_that.overwriteType,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? profileId,  int? profileLastUpdateDate,  OverwriteType overwriteType,  List<Rule> addedRules,  List<ProxyChain> proxyChains,  List<ProfileProxy> profileProxies,  List<ProxyGroup> customProxyGroups,  List<Rule> customRules,  String? matchTarget,  Script? script,  bool overrideDns,  bool overrideNtp,  Dns dns,  Set<DnsOverrideKey> dnsOverrideKeys,  Ntp ntp,  Set<NtpOverrideKey> ntpOverrideKeys,  bool blockQuic,  bool blockWebRtc,  List<TailscaleNetwork> tailscaleNetworks)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? profileId,  int? profileLastUpdateDate,  OverwriteType overwriteType,  List<Rule> addedRules,  List<ProxyChain> proxyChains,  List<ProfileProxy> profileProxies,  List<ClashProvider> clashProviders,  List<ProxyGroup> customProxyGroups,  List<Rule> customRules,  String? matchTarget,  Script? script,  bool overrideDns,  bool overrideNtp,  Dns dns,  Set<DnsOverrideKey> dnsOverrideKeys,  Ntp ntp,  Set<NtpOverrideKey> ntpOverrideKeys,  bool blockQuic,  bool blockWebRtc,  List<TailscaleNetwork> tailscaleNetworks)?  $default,) {final _that = this;
 switch (_that) {
 case _SetupState() when $default != null:
-return $default(_that.profileId,_that.profileLastUpdateDate,_that.overwriteType,_that.addedRules,_that.proxyChains,_that.profileProxies,_that.customProxyGroups,_that.customRules,_that.matchTarget,_that.script,_that.overrideDns,_that.overrideNtp,_that.dns,_that.dnsOverrideKeys,_that.ntp,_that.ntpOverrideKeys,_that.blockQuic,_that.blockWebRtc,_that.tailscaleNetworks);case _:
+return $default(_that.profileId,_that.profileLastUpdateDate,_that.overwriteType,_that.addedRules,_that.proxyChains,_that.profileProxies,_that.clashProviders,_that.customProxyGroups,_that.customRules,_that.matchTarget,_that.script,_that.overrideDns,_that.overrideNtp,_that.dns,_that.dnsOverrideKeys,_that.ntp,_that.ntpOverrideKeys,_that.blockQuic,_that.blockWebRtc,_that.tailscaleNetworks);case _:
   return null;
 
 }
@@ -7456,7 +7475,7 @@ return $default(_that.profileId,_that.profileLastUpdateDate,_that.overwriteType,
 
 
 class _SetupState implements SetupState {
-  const _SetupState({required this.profileId, required this.profileLastUpdateDate, required this.overwriteType, required  List<Rule> addedRules, required  List<ProxyChain> proxyChains, required  List<ProfileProxy> profileProxies, required  List<ProxyGroup> customProxyGroups, required  List<Rule> customRules, this.matchTarget, required this.script, required this.overrideDns, this.overrideNtp = false, required this.dns,  Set<DnsOverrideKey> dnsOverrideKeys = const {}, this.ntp = defaultNtp,  Set<NtpOverrideKey> ntpOverrideKeys = const {}, this.blockQuic = false, this.blockWebRtc = false,  List<TailscaleNetwork> tailscaleNetworks = const []}): _addedRules = addedRules,_proxyChains = proxyChains,_profileProxies = profileProxies,_customProxyGroups = customProxyGroups,_customRules = customRules,_dnsOverrideKeys = dnsOverrideKeys,_ntpOverrideKeys = ntpOverrideKeys,_tailscaleNetworks = tailscaleNetworks;
+  const _SetupState({required this.profileId, required this.profileLastUpdateDate, required this.overwriteType, required  List<Rule> addedRules, required  List<ProxyChain> proxyChains, required  List<ProfileProxy> profileProxies,  List<ClashProvider> clashProviders = const [], required  List<ProxyGroup> customProxyGroups, required  List<Rule> customRules, this.matchTarget, required this.script, required this.overrideDns, this.overrideNtp = false, required this.dns,  Set<DnsOverrideKey> dnsOverrideKeys = const {}, this.ntp = defaultNtp,  Set<NtpOverrideKey> ntpOverrideKeys = const {}, this.blockQuic = false, this.blockWebRtc = false,  List<TailscaleNetwork> tailscaleNetworks = const []}): _addedRules = addedRules,_proxyChains = proxyChains,_profileProxies = profileProxies,_clashProviders = clashProviders,_customProxyGroups = customProxyGroups,_customRules = customRules,_dnsOverrideKeys = dnsOverrideKeys,_ntpOverrideKeys = ntpOverrideKeys,_tailscaleNetworks = tailscaleNetworks;
   
 
 @override final  int? profileId;
@@ -7481,6 +7500,13 @@ class _SetupState implements SetupState {
   if (_profileProxies is EqualUnmodifiableListView) return _profileProxies;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_profileProxies);
+}
+
+ final  List<ClashProvider> _clashProviders;
+@override@JsonKey() List<ClashProvider> get clashProviders {
+  if (_clashProviders is EqualUnmodifiableListView) return _clashProviders;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_clashProviders);
 }
 
  final  List<ProxyGroup> _customProxyGroups;
@@ -7537,18 +7563,18 @@ _$SetupStateCopyWith<_SetupState> get copyWith => __$SetupStateCopyWithImpl<_Set
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SetupState&&(identical(other.profileId, profileId) || other.profileId == profileId)&&(identical(other.profileLastUpdateDate, profileLastUpdateDate) || other.profileLastUpdateDate == profileLastUpdateDate)&&(identical(other.overwriteType, overwriteType) || other.overwriteType == overwriteType)&&const DeepCollectionEquality().equals(other.addedRules, _addedRules)&&const DeepCollectionEquality().equals(other.proxyChains, _proxyChains)&&const DeepCollectionEquality().equals(other.profileProxies, _profileProxies)&&const DeepCollectionEquality().equals(other.customProxyGroups, _customProxyGroups)&&const DeepCollectionEquality().equals(other.customRules, _customRules)&&(identical(other.matchTarget, matchTarget) || other.matchTarget == matchTarget)&&(identical(other.script, script) || other.script == script)&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&(identical(other.overrideNtp, overrideNtp) || other.overrideNtp == overrideNtp)&&(identical(other.dns, dns) || other.dns == dns)&&const DeepCollectionEquality().equals(other.dnsOverrideKeys, _dnsOverrideKeys)&&(identical(other.ntp, ntp) || other.ntp == ntp)&&const DeepCollectionEquality().equals(other.ntpOverrideKeys, _ntpOverrideKeys)&&(identical(other.blockQuic, blockQuic) || other.blockQuic == blockQuic)&&(identical(other.blockWebRtc, blockWebRtc) || other.blockWebRtc == blockWebRtc)&&const DeepCollectionEquality().equals(other.tailscaleNetworks, _tailscaleNetworks));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SetupState&&(identical(other.profileId, profileId) || other.profileId == profileId)&&(identical(other.profileLastUpdateDate, profileLastUpdateDate) || other.profileLastUpdateDate == profileLastUpdateDate)&&(identical(other.overwriteType, overwriteType) || other.overwriteType == overwriteType)&&const DeepCollectionEquality().equals(other.addedRules, _addedRules)&&const DeepCollectionEquality().equals(other.proxyChains, _proxyChains)&&const DeepCollectionEquality().equals(other.profileProxies, _profileProxies)&&const DeepCollectionEquality().equals(other.clashProviders, _clashProviders)&&const DeepCollectionEquality().equals(other.customProxyGroups, _customProxyGroups)&&const DeepCollectionEquality().equals(other.customRules, _customRules)&&(identical(other.matchTarget, matchTarget) || other.matchTarget == matchTarget)&&(identical(other.script, script) || other.script == script)&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&(identical(other.overrideNtp, overrideNtp) || other.overrideNtp == overrideNtp)&&(identical(other.dns, dns) || other.dns == dns)&&const DeepCollectionEquality().equals(other.dnsOverrideKeys, _dnsOverrideKeys)&&(identical(other.ntp, ntp) || other.ntp == ntp)&&const DeepCollectionEquality().equals(other.ntpOverrideKeys, _ntpOverrideKeys)&&(identical(other.blockQuic, blockQuic) || other.blockQuic == blockQuic)&&(identical(other.blockWebRtc, blockWebRtc) || other.blockWebRtc == blockWebRtc)&&const DeepCollectionEquality().equals(other.tailscaleNetworks, _tailscaleNetworks));
 }
 
 
 @override
 int get hashCode {
-    return Object.hashAll([runtimeType,profileId,profileLastUpdateDate,overwriteType,const DeepCollectionEquality().hash(_addedRules),const DeepCollectionEquality().hash(_proxyChains),const DeepCollectionEquality().hash(_profileProxies),const DeepCollectionEquality().hash(_customProxyGroups),const DeepCollectionEquality().hash(_customRules),matchTarget,script,overrideDns,overrideNtp,dns,const DeepCollectionEquality().hash(_dnsOverrideKeys),ntp,const DeepCollectionEquality().hash(_ntpOverrideKeys),blockQuic,blockWebRtc,const DeepCollectionEquality().hash(_tailscaleNetworks)]);
+    return Object.hashAll([runtimeType,profileId,profileLastUpdateDate,overwriteType,const DeepCollectionEquality().hash(_addedRules),const DeepCollectionEquality().hash(_proxyChains),const DeepCollectionEquality().hash(_profileProxies),const DeepCollectionEquality().hash(_clashProviders),const DeepCollectionEquality().hash(_customProxyGroups),const DeepCollectionEquality().hash(_customRules),matchTarget,script,overrideDns,overrideNtp,dns,const DeepCollectionEquality().hash(_dnsOverrideKeys),ntp,const DeepCollectionEquality().hash(_ntpOverrideKeys),blockQuic,blockWebRtc,const DeepCollectionEquality().hash(_tailscaleNetworks)]);
 }
 
 @override
 String toString() {
-    return 'SetupState(profileId: $profileId, profileLastUpdateDate: $profileLastUpdateDate, overwriteType: $overwriteType, addedRules: $addedRules, proxyChains: $proxyChains, profileProxies: $profileProxies, customProxyGroups: $customProxyGroups, customRules: $customRules, matchTarget: $matchTarget, script: $script, overrideDns: $overrideDns, overrideNtp: $overrideNtp, dns: $dns, dnsOverrideKeys: $dnsOverrideKeys, ntp: $ntp, ntpOverrideKeys: $ntpOverrideKeys, blockQuic: $blockQuic, blockWebRtc: $blockWebRtc, tailscaleNetworks: $tailscaleNetworks)';
+    return 'SetupState(profileId: $profileId, profileLastUpdateDate: $profileLastUpdateDate, overwriteType: $overwriteType, addedRules: $addedRules, proxyChains: $proxyChains, profileProxies: $profileProxies, clashProviders: $clashProviders, customProxyGroups: $customProxyGroups, customRules: $customRules, matchTarget: $matchTarget, script: $script, overrideDns: $overrideDns, overrideNtp: $overrideNtp, dns: $dns, dnsOverrideKeys: $dnsOverrideKeys, ntp: $ntp, ntpOverrideKeys: $ntpOverrideKeys, blockQuic: $blockQuic, blockWebRtc: $blockWebRtc, tailscaleNetworks: $tailscaleNetworks)';
 }
 
 
@@ -7559,7 +7585,7 @@ abstract mixin class _$SetupStateCopyWith<$Res> implements $SetupStateCopyWith<$
   factory _$SetupStateCopyWith(_SetupState value, $Res Function(_SetupState) _then) = __$SetupStateCopyWithImpl;
 @override @useResult
 $Res call({
- int? profileId, int? profileLastUpdateDate, OverwriteType overwriteType, List<Rule> addedRules, List<ProxyChain> proxyChains, List<ProfileProxy> profileProxies, List<ProxyGroup> customProxyGroups, List<Rule> customRules, String? matchTarget, Script? script, bool overrideDns, bool overrideNtp, Dns dns, Set<DnsOverrideKey> dnsOverrideKeys, Ntp ntp, Set<NtpOverrideKey> ntpOverrideKeys, bool blockQuic, bool blockWebRtc, List<TailscaleNetwork> tailscaleNetworks
+ int? profileId, int? profileLastUpdateDate, OverwriteType overwriteType, List<Rule> addedRules, List<ProxyChain> proxyChains, List<ProfileProxy> profileProxies, List<ClashProvider> clashProviders, List<ProxyGroup> customProxyGroups, List<Rule> customRules, String? matchTarget, Script? script, bool overrideDns, bool overrideNtp, Dns dns, Set<DnsOverrideKey> dnsOverrideKeys, Ntp ntp, Set<NtpOverrideKey> ntpOverrideKeys, bool blockQuic, bool blockWebRtc, List<TailscaleNetwork> tailscaleNetworks
 });
 
 
@@ -7576,7 +7602,7 @@ class __$SetupStateCopyWithImpl<$Res>
 
 /// Create a copy of SetupState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? profileId = freezed,Object? profileLastUpdateDate = freezed,Object? overwriteType = null,Object? addedRules = null,Object? proxyChains = null,Object? profileProxies = null,Object? customProxyGroups = null,Object? customRules = null,Object? matchTarget = freezed,Object? script = freezed,Object? overrideDns = null,Object? overrideNtp = null,Object? dns = null,Object? dnsOverrideKeys = null,Object? ntp = null,Object? ntpOverrideKeys = null,Object? blockQuic = null,Object? blockWebRtc = null,Object? tailscaleNetworks = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? profileId = freezed,Object? profileLastUpdateDate = freezed,Object? overwriteType = null,Object? addedRules = null,Object? proxyChains = null,Object? profileProxies = null,Object? clashProviders = null,Object? customProxyGroups = null,Object? customRules = null,Object? matchTarget = freezed,Object? script = freezed,Object? overrideDns = null,Object? overrideNtp = null,Object? dns = null,Object? dnsOverrideKeys = null,Object? ntp = null,Object? ntpOverrideKeys = null,Object? blockQuic = null,Object? blockWebRtc = null,Object? tailscaleNetworks = null,}) {
   return _then(_SetupState(
 profileId: freezed == profileId ? _self.profileId : profileId // ignore: cast_nullable_to_non_nullable
 as int?,profileLastUpdateDate: freezed == profileLastUpdateDate ? _self.profileLastUpdateDate : profileLastUpdateDate // ignore: cast_nullable_to_non_nullable
@@ -7584,7 +7610,8 @@ as int?,overwriteType: null == overwriteType ? _self.overwriteType : overwriteTy
 as OverwriteType,addedRules: null == addedRules ? _self._addedRules : addedRules // ignore: cast_nullable_to_non_nullable
 as List<Rule>,proxyChains: null == proxyChains ? _self._proxyChains : proxyChains // ignore: cast_nullable_to_non_nullable
 as List<ProxyChain>,profileProxies: null == profileProxies ? _self._profileProxies : profileProxies // ignore: cast_nullable_to_non_nullable
-as List<ProfileProxy>,customProxyGroups: null == customProxyGroups ? _self._customProxyGroups : customProxyGroups // ignore: cast_nullable_to_non_nullable
+as List<ProfileProxy>,clashProviders: null == clashProviders ? _self._clashProviders : clashProviders // ignore: cast_nullable_to_non_nullable
+as List<ClashProvider>,customProxyGroups: null == customProxyGroups ? _self._customProxyGroups : customProxyGroups // ignore: cast_nullable_to_non_nullable
 as List<ProxyGroup>,customRules: null == customRules ? _self._customRules : customRules // ignore: cast_nullable_to_non_nullable
 as List<Rule>,matchTarget: freezed == matchTarget ? _self.matchTarget : matchTarget // ignore: cast_nullable_to_non_nullable
 as String?,script: freezed == script ? _self.script : script // ignore: cast_nullable_to_non_nullable

@@ -120,54 +120,62 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m48(port) => "混合端口 ${port} 无法监听，可能已被其他程序占用。修改后可立即重试";
 
-  static String m49(name) => "节点 ${name} 已处于其他启用链路中，或存在链式代理关系冲突";
+  static String m49(profiles) => "资源仍被以下配置或规则引用：${profiles}";
 
-  static String m50(name) => "节点 ${name} 当前不可用于此位置";
+  static String m50(profiles) => "改名会改变以下配置中的订阅资源引用：${profiles}";
 
-  static String m51(address) => "启动前系统代理指向 ${address}";
+  static String m51(profiles) => "请先在原始配置中修改资源引用，再改名：${profiles}";
 
-  static String m52(name) => "启动前网络流量经过其他 VPN 或虚拟网卡 ${name}";
+  static String m52(profiles) => "无法读取以下配置，暂不能检查引用：${profiles}";
 
-  static String m53(count) => "${count}天";
+  static String m53(name) => "节点 ${name} 已处于其他启用链路中，或存在链式代理关系冲突";
 
-  static String m54(count) => "${count}小时";
+  static String m54(name) => "节点 ${name} 当前不可用于此位置";
 
-  static String m55(count) => "${count}分钟";
+  static String m55(address) => "启动前系统代理指向 ${address}";
 
-  static String m56(time) => "购买于 ${time}";
+  static String m56(name) => "启动前网络流量经过其他 VPN 或虚拟网卡 ${name}";
 
-  static String m57(name, path) => "${name} 仍被原始配置中的 ${path} 引用";
+  static String m57(count) => "${count}天";
 
-  static String m58(min, max) => "可用范围 ${min} – ${max}";
+  static String m58(count) => "${count}小时";
 
-  static String m59(value) => "剩余: ${value}";
+  static String m59(count) => "${count}分钟";
 
-  static String m60(count) => "仅剩 ${count}";
+  static String m60(time) => "购买于 ${time}";
 
-  static String m61(seconds) => "${seconds} 秒后重发";
+  static String m61(name, path) => "${name} 仍被原始配置中的 ${path} 引用";
 
-  static String m62(appName) => "${appName}（安全模式）";
+  static String m62(min, max) => "可用范围 ${min} – ${max}";
 
-  static String m63(count) => "${count} 秒";
+  static String m63(value) => "剩余: ${value}";
 
-  static String m64(fields) => "请检查以下设置：${fields}";
+  static String m64(count) => "仅剩 ${count}";
 
-  static String m65(count) => "设备（${count}）";
+  static String m65(seconds) => "${seconds} 秒后重发";
 
-  static String m66(name, profile) => "${name} 仍被配置「${profile}」中的规则或策略组使用";
+  static String m66(appName) => "${appName}（安全模式）";
 
-  static String m67(region) => "中继 ${region}";
+  static String m67(count) => "${count} 秒";
 
-  static String m68(name) =>
+  static String m68(fields) => "请检查以下设置：${fields}";
+
+  static String m69(count) => "设备（${count}）";
+
+  static String m70(name, profile) => "${name} 仍被配置「${profile}」中的规则或策略组使用";
+
+  static String m71(region) => "中继 ${region}";
+
+  static String m72(name) =>
       "此设备将退出 ${name}，并删除此设备上的登录信息；如果当前无法连接该网络，请到 Tailscale 管理后台移除此设备";
 
-  static String m69(build) => "构建号：${build}";
+  static String m73(build) => "构建号：${build}";
 
-  static String m70(version) => "版本号：${version}";
+  static String m74(version) => "版本号：${version}";
 
-  static String m71(label) => "${label}必须为URL";
+  static String m75(label) => "${label}必须为URL";
 
-  static String m72(count) => "${count} 年前";
+  static String m76(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -229,6 +237,7 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "app": MessageLookupByLibrary.simpleMessage("应用"),
     "appAccessControl": MessageLookupByLibrary.simpleMessage("应用访问控制"),
+    "appProviderLibrary": MessageLookupByLibrary.simpleMessage("应用资源库"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage("追加系统DNS"),
     "appendSystemDnsTip": MessageLookupByLibrary.simpleMessage("强制为配置附加系统DNS"),
     "application": MessageLookupByLibrary.simpleMessage("应用程序"),
@@ -285,6 +294,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "basicConfig": MessageLookupByLibrary.simpleMessage("基本配置"),
     "basicConfigDesc": MessageLookupByLibrary.simpleMessage("全局修改基本配置"),
+    "behavior": MessageLookupByLibrary.simpleMessage("行为"),
     "billingPeriodLabel": MessageLookupByLibrary.simpleMessage("计费周期"),
     "bind": MessageLookupByLibrary.simpleMessage("绑定"),
     "bindCoupon": MessageLookupByLibrary.simpleMessage("绑定折扣"),
@@ -846,6 +856,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "fontFamily": MessageLookupByLibrary.simpleMessage("字体"),
     "forceRestartCoreTip": MessageLookupByLibrary.simpleMessage("您确定要强制重启核心吗？"),
     "forgotPassword": MessageLookupByLibrary.simpleMessage("忘记密码？"),
+    "format": MessageLookupByLibrary.simpleMessage("格式"),
     "fruitSaladScheme": MessageLookupByLibrary.simpleMessage("果缤纷"),
     "geoAutoUpdate": MessageLookupByLibrary.simpleMessage("自动更新"),
     "geoAutoUpdateInterval": MessageLookupByLibrary.simpleMessage("自动更新间隔"),
@@ -1217,10 +1228,28 @@ class MessageLookup extends MessageLookupByLibrary {
     "profiles": MessageLookupByLibrary.simpleMessage("配置"),
     "profilesSort": MessageLookupByLibrary.simpleMessage("配置排序"),
     "project": MessageLookupByLibrary.simpleMessage("项目"),
+    "providerChanged": MessageLookupByLibrary.simpleMessage("资源已发生变化，请重新打开后编辑"),
+    "providerContent": MessageLookupByLibrary.simpleMessage("资源内容"),
+    "providerContentInvalid": MessageLookupByLibrary.simpleMessage("资源内容或格式无效"),
+    "providerContentTooLarge": MessageLookupByLibrary.simpleMessage(
+      "资源超过 32 MiB",
+    ),
+    "providerInUse": m49,
+    "providerLocal": MessageLookupByLibrary.simpleMessage("本地文件"),
+    "providerNameInvalid": MessageLookupByLibrary.simpleMessage(
+      "名称不能为空，且不能包含逗号或换行",
+    ),
+    "providerRemote": MessageLookupByLibrary.simpleMessage("远程地址"),
+    "providerRenameShadowed": m50,
+    "providerSourceReference": m51,
+    "providerSourceUnavailable": m52,
+    "providerUrlTip": MessageLookupByLibrary.simpleMessage(
+      "请输入不含内嵌账号密码的 HTTP 或 HTTPS 地址",
+    ),
     "providers": MessageLookupByLibrary.simpleMessage("提供者"),
     "proxies": MessageLookupByLibrary.simpleMessage("代理"),
     "proxyChainAvailableNodes": MessageLookupByLibrary.simpleMessage("可用节点"),
-    "proxyChainConflictTip": m49,
+    "proxyChainConflictTip": m53,
     "proxyChainCustomNode": MessageLookupByLibrary.simpleMessage("自定义节点"),
     "proxyChainCustomNodes": MessageLookupByLibrary.simpleMessage("自定义节点"),
     "proxyChainEmpty": MessageLookupByLibrary.simpleMessage("暂无代理链节点"),
@@ -1244,7 +1273,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "链式代理已保存并应用，请选择出口节点使用",
     ),
     "proxyChainSelectedNodes": MessageLookupByLibrary.simpleMessage("代理链"),
-    "proxyChainUnavailableNodeTip": m50,
+    "proxyChainUnavailableNodeTip": m54,
     "proxyChainUriNodeSupportedFormats": MessageLookupByLibrary.simpleMessage(
       "支持格式：ss://、ssr://、vmess://、vless://、trojan://、anytls://、hysteria:// / hy://、hysteria2:// / hy2://、tuic://、wireguard:// / wg://、http(s)://、socks(5)://",
     ),
@@ -1258,9 +1287,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyConflictHint": MessageLookupByLibrary.simpleMessage(
       "如果这是其他代理软件或 VPN，请将其关闭，同时运行可能导致连接异常",
     ),
-    "proxyConflictSystemProxy": m51,
+    "proxyConflictSystemProxy": m55,
     "proxyConflictTitle": MessageLookupByLibrary.simpleMessage("可能存在代理冲突"),
-    "proxyConflictVpn": m52,
+    "proxyConflictVpn": m56,
     "proxyFilter": MessageLookupByLibrary.simpleMessage("节点过滤器"),
     "proxyGroup": MessageLookupByLibrary.simpleMessage("代理组"),
     "proxyGroupEmpty": MessageLookupByLibrary.simpleMessage("策略组为空"),
@@ -1274,14 +1303,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyProviders": MessageLookupByLibrary.simpleMessage("代理提供者"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("修剪缓存"),
     "purchaseAutoRenewLabel": MessageLookupByLibrary.simpleMessage("自动续费"),
-    "purchaseDays": m53,
-    "purchaseHours": m54,
-    "purchaseMinutes": m55,
+    "purchaseDays": m57,
+    "purchaseHours": m58,
+    "purchaseMinutes": m59,
     "purchasePriceLabel": MessageLookupByLibrary.simpleMessage("购买价格"),
     "purchaseRenewOff": MessageLookupByLibrary.simpleMessage("关闭"),
     "purchaseRenewOn": MessageLookupByLibrary.simpleMessage("开启"),
     "purchaseRenewalPriceLabel": MessageLookupByLibrary.simpleMessage("续费价格"),
-    "purchaseTime": m56,
+    "purchaseTime": m60,
     "purchaseTotalTrafficLabel": MessageLookupByLibrary.simpleMessage("总流量"),
     "purchasedAtLabel": MessageLookupByLibrary.simpleMessage("购买时间"),
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("纯黑模式"),
@@ -1290,10 +1319,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "quickAdd": MessageLookupByLibrary.simpleMessage("快捷添加"),
     "quickFill": MessageLookupByLibrary.simpleMessage("一键填入"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("彩虹"),
-    "rawOutboundInUse": m57,
+    "rawOutboundInUse": m61,
     "receivingAddress": MessageLookupByLibrary.simpleMessage("收款地址"),
     "recharge": MessageLookupByLibrary.simpleMessage("充值"),
-    "rechargeAllowedRange": m58,
+    "rechargeAllowedRange": m62,
     "rechargeAmount": MessageLookupByLibrary.simpleMessage("充值金额（¥）"),
     "rechargeAmountOutOfRange": MessageLookupByLibrary.simpleMessage(
       "金额超出该支付方式允许的范围",
@@ -1313,8 +1342,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "relayGroupUnsupported": MessageLookupByLibrary.simpleMessage(
       "核心已移除 Relay 策略组，请选择其他类型",
     ),
-    "remaining": m59,
-    "remainingStock": m60,
+    "remaining": m63,
+    "remainingStock": m64,
     "remainingTimeLabel": MessageLookupByLibrary.simpleMessage("剩余时间"),
     "remainingTrafficLabel": MessageLookupByLibrary.simpleMessage("剩余流量"),
     "remote": MessageLookupByLibrary.simpleMessage("远程"),
@@ -1326,7 +1355,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "request": MessageLookupByLibrary.simpleMessage("请求"),
     "requests": MessageLookupByLibrary.simpleMessage("请求"),
     "requestsDesc": MessageLookupByLibrary.simpleMessage("查看最近请求记录"),
-    "resendCodeIn": m61,
+    "resendCodeIn": m65,
     "reset": MessageLookupByLibrary.simpleMessage("重置"),
     "resetEmailSent": MessageLookupByLibrary.simpleMessage(
       "重置邮件已发送，请将邮件中的重置链接或代码粘贴到下方",
@@ -1416,7 +1445,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "runTime": MessageLookupByLibrary.simpleMessage("运行时间"),
     "safeMode": MessageLookupByLibrary.simpleMessage("安全模式"),
-    "safeModeAppTitle": m62,
+    "safeModeAppTitle": m66,
     "save": MessageLookupByLibrary.simpleMessage("保存"),
     "saveAndRetry": MessageLookupByLibrary.simpleMessage("保存并重试"),
     "saveChanges": MessageLookupByLibrary.simpleMessage("是否保存更改？"),
@@ -1433,7 +1462,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "scriptOptionsEmpty": MessageLookupByLibrary.simpleMessage("此脚本没有提供可配置的开关"),
     "search": MessageLookupByLibrary.simpleMessage("搜索"),
     "seconds": MessageLookupByLibrary.simpleMessage("秒"),
-    "secondsCount": m63,
+    "secondsCount": m67,
     "selectAll": MessageLookupByLibrary.simpleMessage("全选"),
     "selectBackup": MessageLookupByLibrary.simpleMessage("选择备份"),
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage("选择升级目标套餐"),
@@ -1533,7 +1562,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleAvailableExitNodes": MessageLookupByLibrary.simpleMessage(
       "可用的出口节点",
     ),
-    "tailscaleCheckSettings": m64,
+    "tailscaleCheckSettings": m68,
     "tailscaleConnected": MessageLookupByLibrary.simpleMessage("已连接"),
     "tailscaleConnecting": MessageLookupByLibrary.simpleMessage("正在连接"),
     "tailscaleControlUrl": MessageLookupByLibrary.simpleMessage("控制服务器地址"),
@@ -1541,7 +1570,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "认证信息和设备身份仅保存在此设备",
     ),
     "tailscaleDeviceName": MessageLookupByLibrary.simpleMessage("设备名称"),
-    "tailscaleDevices": m65,
+    "tailscaleDevices": m69,
     "tailscaleDirect": MessageLookupByLibrary.simpleMessage("直连"),
     "tailscaleEmptyDesc": MessageLookupByLibrary.simpleMessage(
       "添加网络并在此设备上登录，启动代理后即可访问你的设备",
@@ -1616,7 +1645,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "tailscaleNeedsApproval": MessageLookupByLibrary.simpleMessage("等待设备审批"),
     "tailscaleNeedsLogin": MessageLookupByLibrary.simpleMessage("需要登录"),
-    "tailscaleNetworkInUse": m66,
+    "tailscaleNetworkInUse": m70,
     "tailscaleNetworkName": MessageLookupByLibrary.simpleMessage("网络名称"),
     "tailscaleNetworks": MessageLookupByLibrary.simpleMessage("网络"),
     "tailscaleNotApplied": MessageLookupByLibrary.simpleMessage("未生效"),
@@ -1627,8 +1656,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleOffline": MessageLookupByLibrary.simpleMessage("离线"),
     "tailscaleOnline": MessageLookupByLibrary.simpleMessage("在线"),
     "tailscaleOpenLoginPage": MessageLookupByLibrary.simpleMessage("打开登录页面"),
-    "tailscaleRelay": m67,
-    "tailscaleRemoveConfirm": m68,
+    "tailscaleRelay": m71,
+    "tailscaleRemoveConfirm": m72,
     "tailscaleRemoveNetwork": MessageLookupByLibrary.simpleMessage("移除网络"),
     "tailscaleSaveAndLogin": MessageLookupByLibrary.simpleMessage("保存并登录"),
     "tailscaleSignedIn": MessageLookupByLibrary.simpleMessage("已登录"),
@@ -1690,7 +1719,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
       "AppImage 无法自动安装，请用下载的文件替换当前程序，已打开文件所在目录",
     ),
-    "updateBuildNumber": m69,
+    "updateBuildNumber": m73,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage("取消下载"),
     "updateDownloadBackground": MessageLookupByLibrary.simpleMessage("移到后台下载"),
     "updateDownloadBrowser": MessageLookupByLibrary.simpleMessage("使用浏览器下载"),
@@ -1713,12 +1742,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseNotesFailed": MessageLookupByLibrary.simpleMessage(
       "更新日志加载失败，请重试",
     ),
-    "updateVersionNumber": m70,
+    "updateVersionNumber": m74,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("升级套餐"),
     "upload": MessageLookupByLibrary.simpleMessage("上传"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("通过URL获取配置文件"),
-    "urlTip": m71,
+    "urlTip": m75,
     "useHosts": MessageLookupByLibrary.simpleMessage("使用Hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("使用系统Hosts"),
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("已用流量"),
@@ -1738,7 +1767,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "vpnTip": MessageLookupByLibrary.simpleMessage("重启VPN后改变生效"),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV配置"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("白名单模式"),
-    "yearsAgo": m72,
+    "yearsAgo": m76,
     "zh_CN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };
 }

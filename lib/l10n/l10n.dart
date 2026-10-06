@@ -9709,6 +9709,146 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Format`
+  String get format {
+    return Intl.message('Format', name: 'format', desc: '', args: []);
+  }
+
+  /// `Behavior`
+  String get behavior {
+    return Intl.message('Behavior', name: 'behavior', desc: '', args: []);
+  }
+
+  /// `Provider library`
+  String get appProviderLibrary {
+    return Intl.message(
+      'Provider library',
+      name: 'appProviderLibrary',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Local file`
+  String get providerLocal {
+    return Intl.message(
+      'Local file',
+      name: 'providerLocal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remote URL`
+  String get providerRemote {
+    return Intl.message(
+      'Remote URL',
+      name: 'providerRemote',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Resource content`
+  String get providerContent {
+    return Intl.message(
+      'Resource content',
+      name: 'providerContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The resource content or format is invalid`
+  String get providerContentInvalid {
+    return Intl.message(
+      'The resource content or format is invalid',
+      name: 'providerContentInvalid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The resource exceeds 32 MiB`
+  String get providerContentTooLarge {
+    return Intl.message(
+      'The resource exceeds 32 MiB',
+      name: 'providerContentTooLarge',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The resource changed while editing; reopen it and try again`
+  String get providerChanged {
+    return Intl.message(
+      'The resource changed while editing; reopen it and try again',
+      name: 'providerChanged',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter a name without commas or line breaks`
+  String get providerNameInvalid {
+    return Intl.message(
+      'Enter a name without commas or line breaks',
+      name: 'providerNameInvalid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This resource is still used by {profiles}`
+  String providerInUse(String profiles) {
+    return Intl.message(
+      'This resource is still used by $profiles',
+      name: 'providerInUse',
+      desc: '',
+      args: [profiles],
+    );
+  }
+
+  /// `Renaming would change subscription resource references in {profiles}`
+  String providerRenameShadowed(String profiles) {
+    return Intl.message(
+      'Renaming would change subscription resource references in $profiles',
+      name: 'providerRenameShadowed',
+      desc: '',
+      args: [profiles],
+    );
+  }
+
+  /// `Enter an HTTP or HTTPS URL without embedded credentials`
+  String get providerUrlTip {
+    return Intl.message(
+      'Enter an HTTP or HTTPS URL without embedded credentials',
+      name: 'providerUrlTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Edit references in the source profile before renaming: {profiles}`
+  String providerSourceReference(String profiles) {
+    return Intl.message(
+      'Edit references in the source profile before renaming: $profiles',
+      name: 'providerSourceReference',
+      desc: '',
+      args: [profiles],
+    );
+  }
+
+  /// `Cannot read these profiles to check references: {profiles}`
+  String providerSourceUnavailable(String profiles) {
+    return Intl.message(
+      'Cannot read these profiles to check references: $profiles',
+      name: 'providerSourceUnavailable',
+      desc: '',
+      args: [profiles],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

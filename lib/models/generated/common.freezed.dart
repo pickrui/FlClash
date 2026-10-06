@@ -5940,4 +5940,301 @@ as int,
 
 }
 
+
+/// @nodoc
+mixin _$ClashProvider {
+
+ int get id; ProviderKind get kind; String get label; String get url; RuleProviderBehavior get behavior; RuleProviderFormat get format; List<int> get content; int get order;
+/// Create a copy of ClashProvider
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ClashProviderCopyWith<ClashProvider> get copyWith => _$ClashProviderCopyWithImpl<ClashProvider>(this as ClashProvider, _$identity);
+
+  /// Serializes this ClashProvider to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as ClashProvider;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ClashProvider&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.kind, _this.kind) || other.kind == _this.kind)&&(identical(other.label, _this.label) || other.label == _this.label)&&(identical(other.url, _this.url) || other.url == _this.url)&&(identical(other.behavior, _this.behavior) || other.behavior == _this.behavior)&&(identical(other.format, _this.format) || other.format == _this.format)&&const DeepCollectionEquality().equals(other.content, _this.content)&&(identical(other.order, _this.order) || other.order == _this.order));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as ClashProvider;
+  return Object.hash(runtimeType,_this.id,_this.kind,_this.label,_this.url,_this.behavior,_this.format,const DeepCollectionEquality().hash(_this.content),_this.order);
+}
+
+@override
+String toString() {
+  final _this = this as ClashProvider;
+  return 'ClashProvider(id: ${_this.id}, kind: ${_this.kind}, label: ${_this.label}, url: ${_this.url}, behavior: ${_this.behavior}, format: ${_this.format}, content: ${_this.content}, order: ${_this.order})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ClashProviderCopyWith<$Res>  {
+  factory $ClashProviderCopyWith(ClashProvider value, $Res Function(ClashProvider) _then) = _$ClashProviderCopyWithImpl;
+@useResult
+$Res call({
+ int id, ProviderKind kind, String label, String url, RuleProviderBehavior behavior, RuleProviderFormat format, List<int> content, int order
+});
+
+
+
+
+}
+/// @nodoc
+class _$ClashProviderCopyWithImpl<$Res>
+    implements $ClashProviderCopyWith<$Res> {
+  _$ClashProviderCopyWithImpl(this._self, this._then);
+
+  final ClashProvider _self;
+  final $Res Function(ClashProvider) _then;
+
+/// Create a copy of ClashProvider
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? kind = null,Object? label = null,Object? url = null,Object? behavior = null,Object? format = null,Object? content = null,Object? order = null,}) {
+  return _then(ClashProvider(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as int,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
+as ProviderKind,label: null == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
+as String,url: null == url ? _self.url : url // ignore: cast_nullable_to_non_nullable
+as String,behavior: null == behavior ? _self.behavior : behavior // ignore: cast_nullable_to_non_nullable
+as RuleProviderBehavior,format: null == format ? _self.format : format // ignore: cast_nullable_to_non_nullable
+as RuleProviderFormat,content: null == content ? _self.content : content // ignore: cast_nullable_to_non_nullable
+as List<int>,order: null == order ? _self.order : order // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [ClashProvider].
+extension ClashProviderPatterns on ClashProvider {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ClashProvider value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ClashProvider() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ClashProvider value)  $default,){
+final _that = this;
+switch (_that) {
+case _ClashProvider():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ClashProvider value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ClashProvider() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  ProviderKind kind,  String label,  String url,  RuleProviderBehavior behavior,  RuleProviderFormat format,  List<int> content,  int order)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ClashProvider() when $default != null:
+return $default(_that.id,_that.kind,_that.label,_that.url,_that.behavior,_that.format,_that.content,_that.order);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  ProviderKind kind,  String label,  String url,  RuleProviderBehavior behavior,  RuleProviderFormat format,  List<int> content,  int order)  $default,) {final _that = this;
+switch (_that) {
+case _ClashProvider():
+return $default(_that.id,_that.kind,_that.label,_that.url,_that.behavior,_that.format,_that.content,_that.order);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  ProviderKind kind,  String label,  String url,  RuleProviderBehavior behavior,  RuleProviderFormat format,  List<int> content,  int order)?  $default,) {final _that = this;
+switch (_that) {
+case _ClashProvider() when $default != null:
+return $default(_that.id,_that.kind,_that.label,_that.url,_that.behavior,_that.format,_that.content,_that.order);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _ClashProvider implements ClashProvider {
+  const _ClashProvider({required this.id, required this.kind, required this.label, this.url = '', this.behavior = RuleProviderBehavior.classical, this.format = RuleProviderFormat.yaml,  List<int> content = const [], this.order = 0}): _content = content;
+  factory _ClashProvider.fromJson(Map<String, dynamic> json) => _$ClashProviderFromJson(json);
+
+@override final  int id;
+@override final  ProviderKind kind;
+@override final  String label;
+@override@JsonKey() final  String url;
+@override@JsonKey() final  RuleProviderBehavior behavior;
+@override@JsonKey() final  RuleProviderFormat format;
+ final  List<int> _content;
+@override@JsonKey() List<int> get content {
+  if (_content is EqualUnmodifiableListView) return _content;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_content);
+}
+
+@override@JsonKey() final  int order;
+
+/// Create a copy of ClashProvider
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ClashProviderCopyWith<_ClashProvider> get copyWith => __$ClashProviderCopyWithImpl<_ClashProvider>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$ClashProviderToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ClashProvider&&(identical(other.id, id) || other.id == id)&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.label, label) || other.label == label)&&(identical(other.url, url) || other.url == url)&&(identical(other.behavior, behavior) || other.behavior == behavior)&&(identical(other.format, format) || other.format == format)&&const DeepCollectionEquality().equals(other.content, _content)&&(identical(other.order, order) || other.order == order));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,id,kind,label,url,behavior,format,const DeepCollectionEquality().hash(_content),order);
+}
+
+@override
+String toString() {
+    return 'ClashProvider(id: $id, kind: $kind, label: $label, url: $url, behavior: $behavior, format: $format, content: $content, order: $order)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ClashProviderCopyWith<$Res> implements $ClashProviderCopyWith<$Res> {
+  factory _$ClashProviderCopyWith(_ClashProvider value, $Res Function(_ClashProvider) _then) = __$ClashProviderCopyWithImpl;
+@override @useResult
+$Res call({
+ int id, ProviderKind kind, String label, String url, RuleProviderBehavior behavior, RuleProviderFormat format, List<int> content, int order
+});
+
+
+
+
+}
+/// @nodoc
+class __$ClashProviderCopyWithImpl<$Res>
+    implements _$ClashProviderCopyWith<$Res> {
+  __$ClashProviderCopyWithImpl(this._self, this._then);
+
+  final _ClashProvider _self;
+  final $Res Function(_ClashProvider) _then;
+
+/// Create a copy of ClashProvider
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? kind = null,Object? label = null,Object? url = null,Object? behavior = null,Object? format = null,Object? content = null,Object? order = null,}) {
+  return _then(_ClashProvider(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as int,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
+as ProviderKind,label: null == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
+as String,url: null == url ? _self.url : url // ignore: cast_nullable_to_non_nullable
+as String,behavior: null == behavior ? _self.behavior : behavior // ignore: cast_nullable_to_non_nullable
+as RuleProviderBehavior,format: null == format ? _self.format : format // ignore: cast_nullable_to_non_nullable
+as RuleProviderFormat,content: null == content ? _self._content : content // ignore: cast_nullable_to_non_nullable
+as List<int>,order: null == order ? _self.order : order // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
 // dart format on

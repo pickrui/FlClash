@@ -22,6 +22,7 @@ import 'package:intl/intl.dart';
 import 'package:path/path.dart' show dirname, join;
 
 import 'config/advanced.dart';
+import 'config/providers.dart';
 import 'developer.dart';
 import 'theme.dart';
 import 'network_diagnostics.dart';
@@ -83,6 +84,11 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         const _LocaleItem(),
         const _ThemeItem(),
         const _BackupItem(),
+        ListItem.open(
+          leading: const Icon(Icons.inventory_2_outlined),
+          title: Text(context.appLocalizations.appProviderLibrary),
+          delegate: const OpenDelegate(widget: ClashProvidersView()),
+        ),
         if (system.isDesktop) const _HotkeyItem(),
         if (system.isWindows) const _LoopbackItem(),
         if (system.isAndroid) const _AccessItem(),

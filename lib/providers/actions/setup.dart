@@ -34,6 +34,12 @@ class SetupAction extends _$SetupAction {
   Future<Map<String, dynamic>> getRawProfileConfig(int profileId) =>
       _controller.getRawProfileConfig(profileId);
 
+  Future<Map<String, dynamic>> getRoutingProfileConfig(int profileId) async {
+    final source = await getRawProfileConfig(profileId);
+    final providers = await database.clashProvidersDao.all().get();
+    return withLibraryProviders(source, providers, await appPath.profilesPath);
+  }
+
   Future<String?> findRawProfileOutboundReference(
     int profileId,
     String name, {
@@ -719,6 +725,7 @@ extension SetupControllerExt on AppController {
         addedRules: addedRules,
         proxyChains: proxyChains,
         profileProxies: setupState.profileProxies,
+        clashProviders: setupState.clashProviders,
         customProxyGroups: customProxyGroups,
         customRules: customRules,
         matchTarget: setupState.matchTarget,

@@ -243,6 +243,7 @@ abstract class MakeRealProfileState with _$MakeRealProfileState {
     required List<Rule> addedRules,
     required List<ProxyChain> proxyChains,
     required List<ProfileProxy> profileProxies,
+    @Default([]) List<ClashProvider> clashProviders,
     required List<ProxyGroup> customProxyGroups,
     required List<Rule> customRules,
     String? matchTarget,
@@ -264,6 +265,7 @@ abstract class MigrationData with _$MigrationData {
     @Default([]) List<Script> scripts,
     @Default([]) List<Profile> profiles,
     @Default([]) List<ProfileRuleLink> links,
+    @Default([]) List<ClashProvider> clashProviders,
     @Default([]) List<VM2<String, String>> fileMigrations,
   }) = _MigrationData;
 }
@@ -277,6 +279,7 @@ abstract class SetupState with _$SetupState {
     required List<Rule> addedRules,
     required List<ProxyChain> proxyChains,
     required List<ProfileProxy> profileProxies,
+    @Default([]) List<ClashProvider> clashProviders,
     required List<ProxyGroup> customProxyGroups,
     required List<Rule> customRules,
     String? matchTarget,
@@ -319,6 +322,12 @@ extension SetupStateExt on SetupState {
     if (matchTarget != lastSetupState.matchTarget &&
         (overwriteType == OverwriteType.standard ||
             overwriteType == OverwriteType.merge)) {
+      return true;
+    }
+    if (!const DeepCollectionEquality().equals(
+      clashProviders,
+      lastSetupState.clashProviders,
+    )) {
       return true;
     }
     final scriptIsChange = script != lastSetupState.script;

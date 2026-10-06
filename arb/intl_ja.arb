@@ -1124,5 +1124,48 @@
   "floatingNavigationBarDesc": "コンパクトな画面でフローティングドックを使用",
   "localNetworkTip": "ローカルネットワークへのアクセスが許可されていないため、今回は gVisor を使用します。LAN 上のプロキシやサービスは引き続き利用できない場合があります",
   "sidebarBlur": "サイドバーのぼかし",
-  "sidebarBlurDesc": "サイドバーに半透明のシステム背景を表示"
+  "sidebarBlurDesc": "サイドバーに半透明のシステム背景を表示",
+  "format": "形式",
+  "behavior": "動作",
+  "appProviderLibrary": "プロバイダーライブラリ",
+  "providerLocal": "ローカルファイル",
+  "providerRemote": "リモート URL",
+  "providerContent": "リソースの内容",
+  "providerContentInvalid": "リソースの内容または形式が無効です",
+  "providerContentTooLarge": "リソースが 32 MiB を超えています",
+  "providerChanged": "編集中にリソースが変更されました。開き直してください",
+  "providerNameInvalid": "空でなく、カンマや改行を含まない名前を入力してください",
+  "providerInUse": "このリソースは {profiles} で使用中です",
+  "@providerInUse": {
+    "placeholders": {
+      "profiles": {
+        "type": "String"
+      }
+    }
+  },
+  "providerRenameShadowed": "名前の変更で {profiles} の参照先が変わります",
+  "@providerRenameShadowed": {
+    "placeholders": {
+      "profiles": {
+        "type": "String"
+      }
+    }
+  },
+  "providerUrlTip": "認証情報を含まない HTTP または HTTPS URL を入力してください",
+  "providerSourceReference": "名前を変更する前に元のプロファイルの参照を編集してください：{profiles}",
+  "providerSourceUnavailable": "参照の確認に必要なプロファイルを読み取れません：{profiles}",
+  "@providerSourceReference": {
+    "placeholders": {
+      "profiles": {
+        "type": "String"
+      }
+    }
+  },
+  "@providerSourceUnavailable": {
+    "placeholders": {
+      "profiles": {
+        "type": "String"
+      }
+    }
+  }
 }

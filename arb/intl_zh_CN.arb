@@ -1124,5 +1124,48 @@
   "floatingNavigationBarDesc": "在紧凑布局中使用悬浮导航栏",
   "localNetworkTip": "未获准访问局域网，本次连接改用 gVisor；局域网代理和服务仍可能不可用",
   "sidebarBlur": "侧边栏模糊",
-  "sidebarBlurDesc": "在侧边栏显示半透明系统背景"
+  "sidebarBlurDesc": "在侧边栏显示半透明系统背景",
+  "format": "格式",
+  "behavior": "行为",
+  "appProviderLibrary": "应用资源库",
+  "providerLocal": "本地文件",
+  "providerRemote": "远程地址",
+  "providerContent": "资源内容",
+  "providerContentInvalid": "资源内容或格式无效",
+  "providerContentTooLarge": "资源超过 32 MiB",
+  "providerChanged": "资源已发生变化，请重新打开后编辑",
+  "providerNameInvalid": "名称不能为空，且不能包含逗号或换行",
+  "providerInUse": "资源仍被以下配置或规则引用：{profiles}",
+  "@providerInUse": {
+    "placeholders": {
+      "profiles": {
+        "type": "String"
+      }
+    }
+  },
+  "providerRenameShadowed": "改名会改变以下配置中的订阅资源引用：{profiles}",
+  "@providerRenameShadowed": {
+    "placeholders": {
+      "profiles": {
+        "type": "String"
+      }
+    }
+  },
+  "providerUrlTip": "请输入不含内嵌账号密码的 HTTP 或 HTTPS 地址",
+  "providerSourceReference": "请先在原始配置中修改资源引用，再改名：{profiles}",
+  "providerSourceUnavailable": "无法读取以下配置，暂不能检查引用：{profiles}",
+  "@providerSourceReference": {
+    "placeholders": {
+      "profiles": {
+        "type": "String"
+      }
+    }
+  },
+  "@providerSourceUnavailable": {
+    "placeholders": {
+      "profiles": {
+        "type": "String"
+      }
+    }
+  }
 }

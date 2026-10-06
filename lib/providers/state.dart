@@ -11,6 +11,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import 'clash_providers.dart';
+
 import 'app.dart';
 import 'config.dart';
 import 'database.dart';
@@ -775,6 +777,7 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
     addedRules: addedRules,
     proxyChains: proxyChains,
     profileProxies: profileProxies,
+    clashProviders: await ref.watch(clashProvidersProvider.future),
     customProxyGroups: customProxyGroups,
     customRules: customRules,
     matchTarget: profile?.matchTarget,

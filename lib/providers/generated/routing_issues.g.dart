@@ -66,7 +66,7 @@ final class RoutingSourceProvider
   }
 }
 
-String _$routingSourceHash() => r'95c1005bb62ecb81151ef6a328c7c13e7cfe80ea';
+String _$routingSourceHash() => r'4b8f53bfa8d7cdf41526c42c90228090753be3c1';
 
 final class RoutingSourceFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<Map<String, dynamic>?>, int> {

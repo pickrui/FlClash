@@ -424,6 +424,12 @@ extension RuleActionExt on RuleAction {
   ].contains(this);
 }
 
+enum ProviderKind { proxy, rule }
+
+enum RuleProviderBehavior { domain, ipcidr, classical }
+
+enum RuleProviderFormat { yaml, text, mrs }
+
 enum OverwriteType { standard, script, custom, merge }
 
 enum RuleTarget { DIRECT, REJECT, MATCH }

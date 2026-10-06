@@ -269,7 +269,7 @@ void _applyWebRtcBlock(Map<String, dynamic> rawConfig) {
 Future<Map<String, dynamic>> _makeRealProfileTask(
   MakeRealProfileState data,
 ) async {
-  final rawConfig = Map<String, dynamic>.from(data.rawConfig);
+  var rawConfig = Map<String, dynamic>.from(data.rawConfig);
   final realPatchConfig = data.realPatchConfig;
   final profilesPath = data.profilesPath;
   final profileId = data.profileId;
@@ -512,9 +512,74 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
     if (blockQuic) 'AND,((NETWORK,udp),(DST-PORT,443)),REJECT',
     ...rules,
   ];
+  rawConfig = withLibraryProviders(
+    rawConfig,
+    data.clashProviders,
+    profilesPath,
+    referencedOnly: true,
+  );
+  for (final provider in data.clashProviders.where((item) => !item.isRemote)) {
+    final definition = (rawConfig[provider.section] as Map?)?[provider.label];
+    final expected = join(
+      profilesPath,
+      'providers',
+      'app',
+      provider.kind.name,
+      provider.cacheKey,
+    );
+    if (definition is! Map || definition['path'] != expected) continue;
+    final file = File(expected);
+    if (!await file.exists()) await file.safeWriteAsBytes(provider.content);
+  }
   return safeModeBuild
       ? safeModeProfile(rawConfig)
       : Map<String, dynamic>.from(rawConfig);
+}
+
+Map<String, dynamic> withLibraryProviders(
+  Map<String, dynamic> source,
+  Iterable<ClashProvider> providers,
+  String profilesPath, {
+  bool referencedOnly = false,
+}) {
+  final result = Map<String, dynamic>.from(source);
+  final groups = source['proxy-groups'] is List
+      ? (source['proxy-groups'] as List).whereType<Map>()
+      : const <Map>[];
+  final rules = <String>[
+    if (source['rules'] is List)
+      ...(source['rules'] as List).whereType<String>(),
+    if (source['sub-rules'] is Map)
+      for (final entries in (source['sub-rules'] as Map).values)
+        if (entries is List) ...entries.whereType<String>(),
+  ];
+  for (final provider in providers) {
+    final referenced = provider.kind == ProviderKind.proxy
+        ? groups.any(
+            (group) =>
+                group['include-all'] == true ||
+                group['include-all-providers'] == true ||
+                (group['use'] is List &&
+                    (group['use'] as List).contains(provider.label)),
+          )
+        : rules.any((rule) => ruleReferencesProvider(rule, provider.label));
+    if (referencedOnly && !referenced) continue;
+    final section = result[provider.section] is Map
+        ? Map<String, dynamic>.from(result[provider.section] as Map)
+        : <String, dynamic>{};
+    if (section.containsKey(provider.label)) continue;
+    section[provider.label] = provider.definition(
+      join(
+        profilesPath,
+        'providers',
+        'app',
+        provider.kind.name,
+        provider.cacheKey,
+      ),
+    );
+    result[provider.section] = section;
+  }
+  return result;
 }
 
 List<String> _applyTailscaleNetworks(
@@ -1505,9 +1570,9 @@ Future<MigrationData> _restoreTask(VM3<String, String, String> paths) async {
   if (!await restoreConfigFile.exists()) {
     throw appLocalizations.invalidBackupFile;
   }
-  final restoreConfigMap =
-      json.decode(await restoreConfigFile.readAsString())
-          as Map<String, Object?>?;
+  final restoreConfigMap = json.decode(
+    await restoreConfigFile.readAsString(),
+  ) as Map<String, Object?>?;
   final version = switch (restoreConfigMap?['version']) {
     final num value => value.toInt(),
     _ => 0,
@@ -1545,6 +1610,7 @@ Future<MigrationData> _restoreTask(VM3<String, String, String> paths) async {
       database.scriptsDao.all().get(),
       database.rules.all().map((item) => item.toRule()).get(),
       database.profileRuleLinks.all().map((item) => item.toLink()).get(),
+      database.clashProvidersDao.all().get(),
     ]);
     final profiles = results[0].cast<Profile>();
     final scripts = results[1].cast<Script>();
@@ -1573,6 +1639,7 @@ Future<MigrationData> _restoreTask(VM3<String, String, String> paths) async {
       scripts: scripts,
       rules: results[2].cast<Rule>(),
       links: results[3].cast<ProfileRuleLink>(),
+      clashProviders: results[4].cast<ClashProvider>(),
       fileMigrations: fileMigrations,
     );
   } finally {

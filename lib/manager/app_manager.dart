@@ -7,6 +7,7 @@ import 'dart:async';
 
 import 'package:fl_clash/common/app_update_scheduler.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/scroll.dart';
 import 'package:fl_clash/common/periodic_task_runner.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/manager/window_manager.dart';

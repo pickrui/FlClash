@@ -276,3 +276,55 @@ Map<String, dynamic> _$DnsQueryToJson(_DnsQuery instance) => <String, dynamic>{
   'error': instance.error,
   'delay': instance.delay,
 };
+
+_ClashProvider _$ClashProviderFromJson(Map<String, dynamic> json) =>
+    _ClashProvider(
+      id: (json['id'] as num).toInt(),
+      kind: $enumDecode(_$ProviderKindEnumMap, json['kind']),
+      label: json['label'] as String,
+      url: json['url'] as String? ?? '',
+      behavior:
+          $enumDecodeNullable(
+            _$RuleProviderBehaviorEnumMap,
+            json['behavior'],
+          ) ??
+          RuleProviderBehavior.classical,
+      format:
+          $enumDecodeNullable(_$RuleProviderFormatEnumMap, json['format']) ??
+          RuleProviderFormat.yaml,
+      content:
+          (json['content'] as List<dynamic>?)
+              ?.map((e) => (e as num).toInt())
+              .toList() ??
+          const [],
+      order: (json['order'] as num?)?.toInt() ?? 0,
+    );
+
+Map<String, dynamic> _$ClashProviderToJson(_ClashProvider instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'kind': _$ProviderKindEnumMap[instance.kind]!,
+      'label': instance.label,
+      'url': instance.url,
+      'behavior': _$RuleProviderBehaviorEnumMap[instance.behavior]!,
+      'format': _$RuleProviderFormatEnumMap[instance.format]!,
+      'content': instance.content,
+      'order': instance.order,
+    };
+
+const _$ProviderKindEnumMap = {
+  ProviderKind.proxy: 'proxy',
+  ProviderKind.rule: 'rule',
+};
+
+const _$RuleProviderBehaviorEnumMap = {
+  RuleProviderBehavior.domain: 'domain',
+  RuleProviderBehavior.ipcidr: 'ipcidr',
+  RuleProviderBehavior.classical: 'classical',
+};
+
+const _$RuleProviderFormatEnumMap = {
+  RuleProviderFormat.yaml: 'yaml',
+  RuleProviderFormat.text: 'text',
+  RuleProviderFormat.mrs: 'mrs',
+};

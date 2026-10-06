@@ -41,7 +41,7 @@ void main() {
     addTearDown(database.close);
     final profile = await database.profilesDao.all().getSingle();
 
-    expect(database.schemaVersion, 4);
+    expect(database.schemaVersion, 5);
     expect(profile.label, 'Legacy');
     expect(profile.customProxyGroups, isEmpty);
     expect(profile.customRules, isEmpty);
@@ -116,7 +116,7 @@ void main() {
           columns.map((row) => row.read<String>('name')),
           containsAll(['custom_proxy_groups', 'custom_rules']),
         );
-        expect(userVersion.read<int>('user_version'), 4);
+        expect(userVersion.read<int>('user_version'), 5);
       },
     );
   }

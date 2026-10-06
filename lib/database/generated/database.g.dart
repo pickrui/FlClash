@@ -3849,6 +3849,521 @@ class IconRecordsCompanion extends UpdateCompanion<IconRecord> {
   }
 }
 
+class $ClashProvidersTable extends ClashProviders
+    with TableInfo<$ClashProvidersTable, RawClashProvider> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ClashProvidersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<ProviderKind, String> kind =
+      GeneratedColumn<String>(
+        'kind',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<ProviderKind>($ClashProvidersTable.$converterkind);
+  static const VerificationMeta _labelMeta = const VerificationMeta('label');
+  @override
+  late final GeneratedColumn<String> label = GeneratedColumn<String>(
+    'label',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _urlMeta = const VerificationMeta('url');
+  @override
+  late final GeneratedColumn<String> url = GeneratedColumn<String>(
+    'url',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<RuleProviderBehavior, String>
+  behavior =
+      GeneratedColumn<String>(
+        'behavior',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<RuleProviderBehavior>(
+        $ClashProvidersTable.$converterbehavior,
+      );
+  @override
+  late final GeneratedColumnWithTypeConverter<RuleProviderFormat, String>
+  format = GeneratedColumn<String>(
+    'format',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  ).withConverter<RuleProviderFormat>($ClashProvidersTable.$converterformat);
+  static const VerificationMeta _contentMeta = const VerificationMeta(
+    'content',
+  );
+  @override
+  late final GeneratedColumn<Uint8List> content = GeneratedColumn<Uint8List>(
+    'content',
+    aliasedName,
+    false,
+    type: DriftSqlType.blob,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _orderMeta = const VerificationMeta('order');
+  @override
+  late final GeneratedColumn<int> order = GeneratedColumn<int>(
+    'order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    kind,
+    label,
+    url,
+    behavior,
+    format,
+    content,
+    order,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'clash_providers';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<RawClashProvider> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('label')) {
+      context.handle(
+        _labelMeta,
+        label.isAcceptableOrUnknown(data['label']!, _labelMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_labelMeta);
+    }
+    if (data.containsKey('url')) {
+      context.handle(
+        _urlMeta,
+        url.isAcceptableOrUnknown(data['url']!, _urlMeta),
+      );
+    }
+    if (data.containsKey('content')) {
+      context.handle(
+        _contentMeta,
+        content.isAcceptableOrUnknown(data['content']!, _contentMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contentMeta);
+    }
+    if (data.containsKey('order')) {
+      context.handle(
+        _orderMeta,
+        order.isAcceptableOrUnknown(data['order']!, _orderMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_orderMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {kind, label},
+  ];
+  @override
+  RawClashProvider map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RawClashProvider(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      kind: $ClashProvidersTable.$converterkind.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}kind'],
+        )!,
+      ),
+      label: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}label'],
+      )!,
+      url: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}url'],
+      )!,
+      behavior: $ClashProvidersTable.$converterbehavior.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}behavior'],
+        )!,
+      ),
+      format: $ClashProvidersTable.$converterformat.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}format'],
+        )!,
+      ),
+      content: attachedDatabase.typeMapping.read(
+        DriftSqlType.blob,
+        data['${effectivePrefix}content'],
+      )!,
+      order: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}order'],
+      )!,
+    );
+  }
+
+  @override
+  $ClashProvidersTable createAlias(String alias) {
+    return $ClashProvidersTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<ProviderKind, String, String> $converterkind =
+      const EnumNameConverter<ProviderKind>(ProviderKind.values);
+  static JsonTypeConverter2<RuleProviderBehavior, String, String>
+  $converterbehavior = const EnumNameConverter<RuleProviderBehavior>(
+    RuleProviderBehavior.values,
+  );
+  static JsonTypeConverter2<RuleProviderFormat, String, String>
+  $converterformat = const EnumNameConverter<RuleProviderFormat>(
+    RuleProviderFormat.values,
+  );
+}
+
+class RawClashProvider extends DataClass
+    implements Insertable<RawClashProvider> {
+  final int id;
+  final ProviderKind kind;
+  final String label;
+  final String url;
+  final RuleProviderBehavior behavior;
+  final RuleProviderFormat format;
+  final Uint8List content;
+  final int order;
+  const RawClashProvider({
+    required this.id,
+    required this.kind,
+    required this.label,
+    required this.url,
+    required this.behavior,
+    required this.format,
+    required this.content,
+    required this.order,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    {
+      map['kind'] = Variable<String>(
+        $ClashProvidersTable.$converterkind.toSql(kind),
+      );
+    }
+    map['label'] = Variable<String>(label);
+    map['url'] = Variable<String>(url);
+    {
+      map['behavior'] = Variable<String>(
+        $ClashProvidersTable.$converterbehavior.toSql(behavior),
+      );
+    }
+    {
+      map['format'] = Variable<String>(
+        $ClashProvidersTable.$converterformat.toSql(format),
+      );
+    }
+    map['content'] = Variable<Uint8List>(content);
+    map['order'] = Variable<int>(order);
+    return map;
+  }
+
+  ClashProvidersCompanion toCompanion(bool nullToAbsent) {
+    return ClashProvidersCompanion(
+      id: Value(id),
+      kind: Value(kind),
+      label: Value(label),
+      url: Value(url),
+      behavior: Value(behavior),
+      format: Value(format),
+      content: Value(content),
+      order: Value(order),
+    );
+  }
+
+  factory RawClashProvider.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RawClashProvider(
+      id: serializer.fromJson<int>(json['id']),
+      kind: $ClashProvidersTable.$converterkind.fromJson(
+        serializer.fromJson<String>(json['kind']),
+      ),
+      label: serializer.fromJson<String>(json['label']),
+      url: serializer.fromJson<String>(json['url']),
+      behavior: $ClashProvidersTable.$converterbehavior.fromJson(
+        serializer.fromJson<String>(json['behavior']),
+      ),
+      format: $ClashProvidersTable.$converterformat.fromJson(
+        serializer.fromJson<String>(json['format']),
+      ),
+      content: serializer.fromJson<Uint8List>(json['content']),
+      order: serializer.fromJson<int>(json['order']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'kind': serializer.toJson<String>(
+        $ClashProvidersTable.$converterkind.toJson(kind),
+      ),
+      'label': serializer.toJson<String>(label),
+      'url': serializer.toJson<String>(url),
+      'behavior': serializer.toJson<String>(
+        $ClashProvidersTable.$converterbehavior.toJson(behavior),
+      ),
+      'format': serializer.toJson<String>(
+        $ClashProvidersTable.$converterformat.toJson(format),
+      ),
+      'content': serializer.toJson<Uint8List>(content),
+      'order': serializer.toJson<int>(order),
+    };
+  }
+
+  RawClashProvider copyWith({
+    int? id,
+    ProviderKind? kind,
+    String? label,
+    String? url,
+    RuleProviderBehavior? behavior,
+    RuleProviderFormat? format,
+    Uint8List? content,
+    int? order,
+  }) => RawClashProvider(
+    id: id ?? this.id,
+    kind: kind ?? this.kind,
+    label: label ?? this.label,
+    url: url ?? this.url,
+    behavior: behavior ?? this.behavior,
+    format: format ?? this.format,
+    content: content ?? this.content,
+    order: order ?? this.order,
+  );
+  RawClashProvider copyWithCompanion(ClashProvidersCompanion data) {
+    return RawClashProvider(
+      id: data.id.present ? data.id.value : this.id,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      label: data.label.present ? data.label.value : this.label,
+      url: data.url.present ? data.url.value : this.url,
+      behavior: data.behavior.present ? data.behavior.value : this.behavior,
+      format: data.format.present ? data.format.value : this.format,
+      content: data.content.present ? data.content.value : this.content,
+      order: data.order.present ? data.order.value : this.order,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RawClashProvider(')
+          ..write('id: $id, ')
+          ..write('kind: $kind, ')
+          ..write('label: $label, ')
+          ..write('url: $url, ')
+          ..write('behavior: $behavior, ')
+          ..write('format: $format, ')
+          ..write('content: $content, ')
+          ..write('order: $order')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    kind,
+    label,
+    url,
+    behavior,
+    format,
+    $driftBlobEquality.hash(content),
+    order,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RawClashProvider &&
+          other.id == this.id &&
+          other.kind == this.kind &&
+          other.label == this.label &&
+          other.url == this.url &&
+          other.behavior == this.behavior &&
+          other.format == this.format &&
+          $driftBlobEquality.equals(other.content, this.content) &&
+          other.order == this.order);
+}
+
+class ClashProvidersCompanion extends UpdateCompanion<RawClashProvider> {
+  final Value<int> id;
+  final Value<ProviderKind> kind;
+  final Value<String> label;
+  final Value<String> url;
+  final Value<RuleProviderBehavior> behavior;
+  final Value<RuleProviderFormat> format;
+  final Value<Uint8List> content;
+  final Value<int> order;
+  const ClashProvidersCompanion({
+    this.id = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.label = const Value.absent(),
+    this.url = const Value.absent(),
+    this.behavior = const Value.absent(),
+    this.format = const Value.absent(),
+    this.content = const Value.absent(),
+    this.order = const Value.absent(),
+  });
+  ClashProvidersCompanion.insert({
+    this.id = const Value.absent(),
+    required ProviderKind kind,
+    required String label,
+    this.url = const Value.absent(),
+    required RuleProviderBehavior behavior,
+    required RuleProviderFormat format,
+    required Uint8List content,
+    required int order,
+  }) : kind = Value(kind),
+       label = Value(label),
+       behavior = Value(behavior),
+       format = Value(format),
+       content = Value(content),
+       order = Value(order);
+  static Insertable<RawClashProvider> custom({
+    Expression<int>? id,
+    Expression<String>? kind,
+    Expression<String>? label,
+    Expression<String>? url,
+    Expression<String>? behavior,
+    Expression<String>? format,
+    Expression<Uint8List>? content,
+    Expression<int>? order,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (kind != null) 'kind': kind,
+      if (label != null) 'label': label,
+      if (url != null) 'url': url,
+      if (behavior != null) 'behavior': behavior,
+      if (format != null) 'format': format,
+      if (content != null) 'content': content,
+      if (order != null) 'order': order,
+    });
+  }
+
+  ClashProvidersCompanion copyWith({
+    Value<int>? id,
+    Value<ProviderKind>? kind,
+    Value<String>? label,
+    Value<String>? url,
+    Value<RuleProviderBehavior>? behavior,
+    Value<RuleProviderFormat>? format,
+    Value<Uint8List>? content,
+    Value<int>? order,
+  }) {
+    return ClashProvidersCompanion(
+      id: id ?? this.id,
+      kind: kind ?? this.kind,
+      label: label ?? this.label,
+      url: url ?? this.url,
+      behavior: behavior ?? this.behavior,
+      format: format ?? this.format,
+      content: content ?? this.content,
+      order: order ?? this.order,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(
+        $ClashProvidersTable.$converterkind.toSql(kind.value),
+      );
+    }
+    if (label.present) {
+      map['label'] = Variable<String>(label.value);
+    }
+    if (url.present) {
+      map['url'] = Variable<String>(url.value);
+    }
+    if (behavior.present) {
+      map['behavior'] = Variable<String>(
+        $ClashProvidersTable.$converterbehavior.toSql(behavior.value),
+      );
+    }
+    if (format.present) {
+      map['format'] = Variable<String>(
+        $ClashProvidersTable.$converterformat.toSql(format.value),
+      );
+    }
+    if (content.present) {
+      map['content'] = Variable<Uint8List>(content.value);
+    }
+    if (order.present) {
+      map['order'] = Variable<int>(order.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ClashProvidersCompanion(')
+          ..write('id: $id, ')
+          ..write('kind: $kind, ')
+          ..write('label: $label, ')
+          ..write('url: $url, ')
+          ..write('behavior: $behavior, ')
+          ..write('format: $format, ')
+          ..write('content: $content, ')
+          ..write('order: $order')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$Database extends GeneratedDatabase {
   _$Database(QueryExecutor e) : super(e);
   $DatabaseManager get managers => $DatabaseManager(this);
@@ -3860,6 +4375,7 @@ abstract class _$Database extends GeneratedDatabase {
   );
   late final $ProxyGroupsTable proxyGroups = $ProxyGroupsTable(this);
   late final $IconRecordsTable iconRecords = $IconRecordsTable(this);
+  late final $ClashProvidersTable clashProviders = $ClashProvidersTable(this);
   late final Index idxRuleTarget = Index(
     'idx_rule_target',
     'CREATE INDEX idx_rule_target ON rules (rule_target)',
@@ -3881,6 +4397,9 @@ abstract class _$Database extends GeneratedDatabase {
   late final RulesDao rulesDao = RulesDao(this as Database);
   late final ProxyGroupsDao proxyGroupsDao = ProxyGroupsDao(this as Database);
   late final IconRecordsDao iconRecordsDao = IconRecordsDao(this as Database);
+  late final ClashProvidersDao clashProvidersDao = ClashProvidersDao(
+    this as Database,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3892,6 +4411,7 @@ abstract class _$Database extends GeneratedDatabase {
     profileRuleLinks,
     proxyGroups,
     iconRecords,
+    clashProviders,
     idxRuleTarget,
     idxProfileSceneOrder,
     idxProfileNameOrder,
@@ -6414,6 +6934,273 @@ typedef $$IconRecordsTableProcessedTableManager =
       IconRecord,
       PrefetchHooks Function()
     >;
+typedef $$ClashProvidersTableCreateCompanionBuilder =
+    ClashProvidersCompanion Function({
+      Value<int> id,
+      required ProviderKind kind,
+      required String label,
+      Value<String> url,
+      required RuleProviderBehavior behavior,
+      required RuleProviderFormat format,
+      required Uint8List content,
+      required int order,
+    });
+typedef $$ClashProvidersTableUpdateCompanionBuilder =
+    ClashProvidersCompanion Function({
+      Value<int> id,
+      Value<ProviderKind> kind,
+      Value<String> label,
+      Value<String> url,
+      Value<RuleProviderBehavior> behavior,
+      Value<RuleProviderFormat> format,
+      Value<Uint8List> content,
+      Value<int> order,
+    });
+
+class $$ClashProvidersTableFilterComposer
+    extends Composer<_$Database, $ClashProvidersTable> {
+  $$ClashProvidersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<ProviderKind, ProviderKind, String> get kind =>
+      $composableBuilder(
+        column: $table.kind,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get url => $composableBuilder(
+    column: $table.url,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<
+    RuleProviderBehavior,
+    RuleProviderBehavior,
+    String
+  >
+  get behavior => $composableBuilder(
+    column: $table.behavior,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<RuleProviderFormat, RuleProviderFormat, String>
+  get format => $composableBuilder(
+    column: $table.format,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<Uint8List> get content => $composableBuilder(
+    column: $table.content,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get order => $composableBuilder(
+    column: $table.order,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ClashProvidersTableOrderingComposer
+    extends Composer<_$Database, $ClashProvidersTable> {
+  $$ClashProvidersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get url => $composableBuilder(
+    column: $table.url,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get behavior => $composableBuilder(
+    column: $table.behavior,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get format => $composableBuilder(
+    column: $table.format,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get content => $composableBuilder(
+    column: $table.content,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get order => $composableBuilder(
+    column: $table.order,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ClashProvidersTableAnnotationComposer
+    extends Composer<_$Database, $ClashProvidersTable> {
+  $$ClashProvidersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<ProviderKind, String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get label =>
+      $composableBuilder(column: $table.label, builder: (column) => column);
+
+  GeneratedColumn<String> get url =>
+      $composableBuilder(column: $table.url, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<RuleProviderBehavior, String> get behavior =>
+      $composableBuilder(column: $table.behavior, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<RuleProviderFormat, String> get format =>
+      $composableBuilder(column: $table.format, builder: (column) => column);
+
+  GeneratedColumn<Uint8List> get content =>
+      $composableBuilder(column: $table.content, builder: (column) => column);
+
+  GeneratedColumn<int> get order =>
+      $composableBuilder(column: $table.order, builder: (column) => column);
+}
+
+class $$ClashProvidersTableTableManager
+    extends
+        RootTableManager<
+          _$Database,
+          $ClashProvidersTable,
+          RawClashProvider,
+          $$ClashProvidersTableFilterComposer,
+          $$ClashProvidersTableOrderingComposer,
+          $$ClashProvidersTableAnnotationComposer,
+          $$ClashProvidersTableCreateCompanionBuilder,
+          $$ClashProvidersTableUpdateCompanionBuilder,
+          (
+            RawClashProvider,
+            BaseReferences<_$Database, $ClashProvidersTable, RawClashProvider>,
+          ),
+          RawClashProvider,
+          PrefetchHooks Function()
+        > {
+  $$ClashProvidersTableTableManager(_$Database db, $ClashProvidersTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ClashProvidersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ClashProvidersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ClashProvidersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<ProviderKind> kind = const Value.absent(),
+                Value<String> label = const Value.absent(),
+                Value<String> url = const Value.absent(),
+                Value<RuleProviderBehavior> behavior = const Value.absent(),
+                Value<RuleProviderFormat> format = const Value.absent(),
+                Value<Uint8List> content = const Value.absent(),
+                Value<int> order = const Value.absent(),
+              }) => ClashProvidersCompanion(
+                id: id,
+                kind: kind,
+                label: label,
+                url: url,
+                behavior: behavior,
+                format: format,
+                content: content,
+                order: order,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required ProviderKind kind,
+                required String label,
+                Value<String> url = const Value.absent(),
+                required RuleProviderBehavior behavior,
+                required RuleProviderFormat format,
+                required Uint8List content,
+                required int order,
+              }) => ClashProvidersCompanion.insert(
+                id: id,
+                kind: kind,
+                label: label,
+                url: url,
+                behavior: behavior,
+                format: format,
+                content: content,
+                order: order,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ClashProvidersTable, RawClashProvider>(table),
+                  BaseReferences<
+                    _$Database,
+                    $ClashProvidersTable,
+                    RawClashProvider
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ClashProvidersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$Database,
+      $ClashProvidersTable,
+      RawClashProvider,
+      $$ClashProvidersTableFilterComposer,
+      $$ClashProvidersTableOrderingComposer,
+      $$ClashProvidersTableAnnotationComposer,
+      $$ClashProvidersTableCreateCompanionBuilder,
+      $$ClashProvidersTableUpdateCompanionBuilder,
+      (
+        RawClashProvider,
+        BaseReferences<_$Database, $ClashProvidersTable, RawClashProvider>,
+      ),
+      RawClashProvider,
+      PrefetchHooks Function()
+    >;
 
 class $DatabaseManager {
   final _$Database _db;
@@ -6430,6 +7217,8 @@ class $DatabaseManager {
       $$ProxyGroupsTableTableManager(_db, _db.proxyGroups);
   $$IconRecordsTableTableManager get iconRecords =>
       $$IconRecordsTableTableManager(_db, _db.iconRecords);
+  $$ClashProvidersTableTableManager get clashProviders =>
+      $$ClashProvidersTableTableManager(_db, _db.clashProviders);
 }
 
 mixin _$ProfilesDaoMixin on DatabaseAccessor<Database> {
@@ -6503,4 +7292,19 @@ class IconRecordsDaoManager {
   IconRecordsDaoManager(this._db);
   $$IconRecordsTableTableManager get iconRecords =>
       $$IconRecordsTableTableManager(_db.attachedDatabase, _db.iconRecords);
+}
+
+mixin _$ClashProvidersDaoMixin on DatabaseAccessor<Database> {
+  $ClashProvidersTable get clashProviders => attachedDatabase.clashProviders;
+  ClashProvidersDaoManager get managers => ClashProvidersDaoManager(this);
+}
+
+class ClashProvidersDaoManager {
+  final _$ClashProvidersDaoMixin _db;
+  ClashProvidersDaoManager(this._db);
+  $$ClashProvidersTableTableManager get clashProviders =>
+      $$ClashProvidersTableTableManager(
+        _db.attachedDatabase,
+        _db.clashProviders,
+      );
 }

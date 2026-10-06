@@ -12,18 +12,21 @@ import 'action.dart';
 import 'app.dart';
 import 'config.dart';
 import 'state.dart';
+import 'clash_providers.dart';
 
 part 'generated/routing_issues.g.dart';
 
 @riverpod
 Future<Map<String, dynamic>?> routingSource(Ref ref, int profileId) {
   ref.watch(
-    profileProvider(
-      profileId,
-    ).select((profile) => (profile?.lastUpdateDate, profile?.url)),
+    profileProvider(profileId)
+        .select((profile) => (profile?.lastUpdateDate, profile?.url)),
   );
+  ref.watch(clashProvidersProvider);
   if (!ref.watch(initProvider)) return Future.value(null);
-  return ref.read(setupActionProvider.notifier).getRawProfileConfig(profileId);
+  return ref
+      .read(setupActionProvider.notifier)
+      .getRoutingProfileConfig(profileId);
 }
 
 @riverpod

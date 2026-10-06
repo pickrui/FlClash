@@ -1124,5 +1124,48 @@
   "floatingNavigationBarDesc": "Использовать плавающую панель в компактном режиме",
   "localNetworkTip": "Доступ к локальной сети не разрешён; для этого подключения используется gVisor. Прокси и сервисы в локальной сети могут оставаться недоступны",
   "sidebarBlur": "Размытие боковой панели",
-  "sidebarBlurDesc": "Показывать полупрозрачный системный фон боковой панели"
+  "sidebarBlurDesc": "Показывать полупрозрачный системный фон боковой панели",
+  "format": "Формат",
+  "behavior": "Поведение",
+  "appProviderLibrary": "Библиотека провайдеров",
+  "providerLocal": "Локальный файл",
+  "providerRemote": "Удалённый URL",
+  "providerContent": "Содержимое ресурса",
+  "providerContentInvalid": "Недопустимое содержимое или формат ресурса",
+  "providerContentTooLarge": "Размер ресурса превышает 32 МиБ",
+  "providerChanged": "Ресурс изменился во время редактирования. Откройте его снова",
+  "providerNameInvalid": "Введите непустое имя без запятых и переводов строк",
+  "providerInUse": "Ресурс используется в {profiles}",
+  "@providerInUse": {
+    "placeholders": {
+      "profiles": {
+        "type": "String"
+      }
+    }
+  },
+  "providerRenameShadowed": "Переименование изменит ссылки в {profiles}",
+  "@providerRenameShadowed": {
+    "placeholders": {
+      "profiles": {
+        "type": "String"
+      }
+    }
+  },
+  "providerUrlTip": "Введите HTTP/HTTPS URL без встроенных учётных данных",
+  "providerSourceReference": "Перед переименованием измените ссылки в исходном профиле: {profiles}",
+  "providerSourceUnavailable": "Не удалось прочитать профили для проверки ссылок: {profiles}",
+  "@providerSourceReference": {
+    "placeholders": {
+      "profiles": {
+        "type": "String"
+      }
+    }
+  },
+  "@providerSourceUnavailable": {
+    "placeholders": {
+      "profiles": {
+        "type": "String"
+      }
+    }
+  }
 }

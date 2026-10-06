@@ -15,6 +15,7 @@ import 'package:fl_clash/models/models.dart';
 
 part 'generated/database.g.dart';
 part 'converter.dart';
+part 'clash_providers.dart';
 part 'groups.dart';
 part 'icons.dart';
 part 'links.dart';
@@ -22,7 +23,7 @@ part 'profiles.dart';
 part 'rules.dart';
 part 'scripts.dart';
 
-const currentDatabaseSchemaVersion = 4;
+const currentDatabaseSchemaVersion = 5;
 
 @DriftDatabase(
   tables: [
@@ -32,8 +33,16 @@ const currentDatabaseSchemaVersion = 4;
     ProfileRuleLinks,
     ProxyGroups,
     IconRecords,
+    ClashProviders,
   ],
-  daos: [ProfilesDao, ScriptsDao, RulesDao, ProxyGroupsDao, IconRecordsDao],
+  daos: [
+    ProfilesDao,
+    ScriptsDao,
+    RulesDao,
+    ProxyGroupsDao,
+    IconRecordsDao,
+    ClashProvidersDao,
+  ],
 )
 class Database extends _$Database {
   Database([QueryExecutor? executor]) : super(executor ?? _openConnection());
@@ -57,6 +66,12 @@ class Database extends _$Database {
         await customStatement('PRAGMA foreign_keys = ON');
       },
       onUpgrade: (m, from, to) async {
+        if (from < 5) {
+          final existing = await customSelect(
+            "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'clash_providers'",
+          ).get();
+          if (existing.isEmpty) await m.createTable(clashProviders);
+        }
         final profileColumns = await _profileColumnNames();
         if (from < 2) {
           if (profileColumns.add('proxy_chains')) {
@@ -113,9 +128,8 @@ class Database extends _$Database {
             'CREATE INDEX IF NOT EXISTS idx_rule_target ON rules(rule_target)',
           );
           for (final rule in await select(rules).get()) {
-            await into(
-              rules,
-            ).insertOnConflictUpdate(rule.toRule().toCompanion());
+            await into(rules)
+                .insertOnConflictUpdate(rule.toRule().toCompanion());
           }
           final existing = await profilesDao.all().get();
           await batch((batch) async {
@@ -176,6 +190,7 @@ class Database extends _$Database {
     List<Rule> rules,
     List<ProfileRuleLink> links, {
     bool isOverride = false,
+    List<ClashProvider> clashProviders = const [],
   }) async {
     await transaction(() async {
       await batch((b) {
@@ -208,6 +223,7 @@ class Database extends _$Database {
           await rulesDao.replaceCustomWithBatch(b, profile);
         }
       });
+      await clashProvidersDao.restore(clashProviders, replace: isOverride);
       await rulesDao.repairOrders();
     });
   }

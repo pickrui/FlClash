@@ -1124,5 +1124,48 @@
   "floatingNavigationBarDesc": "Use a floating dock for compact layouts",
   "localNetworkTip": "Local network access denied; using gVisor for this connection. LAN proxies and services may remain unavailable",
   "sidebarBlur": "Blur sidebar",
-  "sidebarBlurDesc": "Show a translucent system backdrop behind the sidebar"
+  "sidebarBlurDesc": "Show a translucent system backdrop behind the sidebar",
+  "format": "Format",
+  "behavior": "Behavior",
+  "appProviderLibrary": "Provider library",
+  "providerLocal": "Local file",
+  "providerRemote": "Remote URL",
+  "providerContent": "Resource content",
+  "providerContentInvalid": "The resource content or format is invalid",
+  "providerContentTooLarge": "The resource exceeds 32 MiB",
+  "providerChanged": "The resource changed while editing; reopen it and try again",
+  "providerNameInvalid": "Enter a name without commas or line breaks",
+  "providerInUse": "This resource is still used by {profiles}",
+  "@providerInUse": {
+    "placeholders": {
+      "profiles": {
+        "type": "String"
+      }
+    }
+  },
+  "providerRenameShadowed": "Renaming would change subscription resource references in {profiles}",
+  "@providerRenameShadowed": {
+    "placeholders": {
+      "profiles": {
+        "type": "String"
+      }
+    }
+  },
+  "providerUrlTip": "Enter an HTTP or HTTPS URL without embedded credentials",
+  "providerSourceReference": "Edit references in the source profile before renaming: {profiles}",
+  "providerSourceUnavailable": "Cannot read these profiles to check references: {profiles}",
+  "@providerSourceReference": {
+    "placeholders": {
+      "profiles": {
+        "type": "String"
+      }
+    }
+  },
+  "@providerSourceUnavailable": {
+    "placeholders": {
+      "profiles": {
+        "type": "String"
+      }
+    }
+  }
 }
