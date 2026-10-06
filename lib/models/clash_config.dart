@@ -785,8 +785,13 @@ extension ParsedRuleExt on ParsedRule {
       case RuleAction.DST_PORT:
       case RuleAction.SRC_PORT:
       case RuleAction.IN_PORT:
+        final bounds = _parseRanges(payload);
+        return bounds == null || bounds.any((item) => item > 65535)
+            ? RulePayloadError.numberRange
+            : null;
       case RuleAction.UID:
-        return _parseRanges(payload) == null
+        final bounds = _parseRanges(payload);
+        return bounds == null || bounds.any((item) => item > 0xffffffff)
             ? RulePayloadError.numberRange
             : null;
       case RuleAction.DSCP:
@@ -834,7 +839,9 @@ List<int>? _parseRanges(String payload) {
       return null;
     }
     for (final part in parts) {
-      final bound = int.tryParse(part.replaceAll(RegExp(r'[\[\] ]'), ''));
+      final value = part.replaceAll(RegExp(r'^[\[\] ]+|[\[\] ]+$'), '');
+      if (!RegExp(r'^[0-9]+$').hasMatch(value)) return null;
+      final bound = int.tryParse(value);
       if (bound == null || bound < 0) {
         return null;
       }

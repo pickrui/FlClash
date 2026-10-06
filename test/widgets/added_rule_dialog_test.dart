@@ -11,7 +11,54 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../helpers/test_app.dart';
+
 void main() {
+  testWidgets('adding a port rule selects a type and blocks invalid ranges', (
+    tester,
+  ) async {
+    Rule? result;
+    await tester.pumpWidget(
+      TestApp(
+        wrapInProviderScope: true,
+        child: Scaffold(
+          body: Builder(
+            builder: (context) => TextButton(
+              onPressed: () async {
+                result = await showDialog<Rule>(
+                  context: context,
+                  builder: (_) => const AddOrEditRuleDialog(),
+                );
+              },
+              child: const Text('Open'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'DOMAIN'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('DST-PORT'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('DST-PORT'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextFormField), '70000');
+    await tester.tap(find.text('Confirm'));
+    await tester.pumpAndSettle();
+    expect(result, isNull);
+    expect(find.byType(AddOrEditRuleDialog), findsOneWidget);
+    final l = AppLocalizations.of(
+      tester.element(find.byType(AddOrEditRuleDialog)),
+    );
+    expect(find.text(l.invalidRangeContent), findsOneWidget);
+    await tester.enterText(find.byType(TextFormField), '80,443');
+    await tester.tap(find.text('Confirm'));
+    await tester.pumpAndSettle();
+    expect(result?.value, 'DST-PORT,80/443,DIRECT');
+  });
+
   testWidgets('an added rule can point to a Tailscale network', (tester) async {
     Rule? result;
     await tester.pumpWidget(

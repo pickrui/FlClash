@@ -47,12 +47,16 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      final toggle = tester.widget<Switch>(find.byType(Switch));
+      final toggleFinder = find.descendant(
+        of: find.byType(entry.value.runtimeType),
+        matching: find.byType(Switch),
+      );
+      final toggle = tester.widget<Switch>(toggleFinder);
       expect(toggle.value, !safeModeBuild);
       expect(toggle.onChanged, safeModeBuild ? isNull : isNotNull);
-      await tester.tap(find.byType(Switch), warnIfMissed: false);
+      await tester.tap(toggleFinder, warnIfMissed: false);
       await tester.pumpAndSettle();
-      expect(tester.widget<Switch>(find.byType(Switch)).value, isFalse);
+      expect(tester.widget<Switch>(toggleFinder).value, isFalse);
       if (safeModeBuild) {
         expect(container.read(networkSettingProvider).systemProxy, isTrue);
         expect(container.read(networkSettingProvider).autoSetSystemDns, isTrue);

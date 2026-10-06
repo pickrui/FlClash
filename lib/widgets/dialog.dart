@@ -5,11 +5,9 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:math';
 
-import 'package:fl_clash/providers/app.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class CommonDialog extends ConsumerWidget {
+class CommonDialog extends StatelessWidget {
   final String title;
   final Widget? trailing;
   final Widget? child;
@@ -34,8 +32,8 @@ class CommonDialog extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, ref) {
-    final size = ref.watch(viewSizeProvider);
+  Widget build(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
     return AlertDialog(
       title: trailing == null
           ? Text(title)
@@ -51,10 +49,10 @@ class CommonDialog extends ConsumerWidget {
       insetPadding: insetPadding,
       content: Container(
         constraints: BoxConstraints(
-          maxHeight: min(size.height - 40, 500),
+          maxHeight: (size.height - 40).clamp(0, 500),
           maxWidth: maxWidth,
         ),
-        width: size.width - 40,
+        width: max(0, size.width - 40),
         child: !overrideScroll ? SingleChildScrollView(child: child) : child,
       ),
     );
