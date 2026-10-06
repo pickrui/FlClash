@@ -52,6 +52,7 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
       _eventSubscription = (widget.hotKeyEventSource ?? hotKeyEvents)().listen(
         (id) {
           if (mounted &&
+              _owner == _ownerGeneration &&
               !ref.read(hotKeyRecordingProvider) &&
               id >= 0 &&
               id < HotAction.values.length) {

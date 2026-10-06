@@ -15,6 +15,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rust_api/rust_api.dart';
 
+class _CountingModeAction extends CommonAction {
+  int calls = 0;
+
+  @override
+  void build() {}
+
+  @override
+  void updateMode() => calls++;
+}
+
 void main() {
   testWidgets(
     'recording suspends registration and stale results cannot replace current failures',
@@ -126,4 +136,39 @@ void main() {
       await tester.pump();
     },
   );
+
+  testWidgets('only the current registration owner handles global events', (
+    tester,
+  ) async {
+    final action = _CountingModeAction();
+    final container = ProviderContainer(
+      overrides: [commonActionProvider.overrideWith(() => action)],
+    );
+    addTearDown(container.dispose);
+    final events = StreamController<int>.broadcast();
+    addTearDown(events.close);
+    HotKeyManager manager(String id, Widget child) => HotKeyManager(
+      key: ValueKey(id),
+      hotKeyEventSource: () => events.stream,
+      registerHotKeys: ({required specs}) async => [],
+      child: child,
+    );
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: manager('old', const SizedBox()),
+      ),
+    );
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: manager('old', manager('new', const SizedBox())),
+      ),
+    );
+    events.add(HotAction.mode.index);
+    await tester.pump();
+    expect(action.calls, 1);
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump();
+  });
 }
