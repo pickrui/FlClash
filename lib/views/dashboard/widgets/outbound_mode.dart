@@ -6,6 +6,9 @@
 import 'dart:math';
 
 import 'package:fl_clash/common/common.dart';
+
+import '../widget_metrics.dart';
+
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/config.dart';
@@ -22,7 +25,7 @@ class OutboundMode extends StatelessWidget {
   Widget build(BuildContext context) {
     final setupAction = context.setupAction;
 
-    final height = getWidgetHeight(2);
+    final height = DashboardWidgetMetrics.heightOf(context, 2);
     return SizedBox(
       height: height,
       child: Consumer(
@@ -37,6 +40,7 @@ class OutboundMode extends StatelessWidget {
               hoverColor: Colors.transparent,
             ),
             child: CommonCard(
+              radius: DashboardWidgetMetrics.radiusOf(context),
               skipTraversal: true,
               info: Info(
                 label: appLocalizations.outboundMode,
@@ -81,9 +85,10 @@ class OutboundMode extends StatelessWidget {
                               ),
                               title: Text(
                                 Intl.message(item.name),
-                                style: Theme.of(
-                                  context,
-                                ).textTheme.bodyMedium?.toSoftBold,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.toSoftBold,
                               ),
                             ),
                         ],
@@ -115,10 +120,11 @@ class OutboundModeV2 extends StatelessWidget {
   Widget build(BuildContext context) {
     final setupAction = context.setupAction;
 
-    final height = getWidgetHeight(1);
+    final height = DashboardWidgetMetrics.heightOf(context, 1);
     return SizedBox(
       height: height,
       child: CommonCard(
+        radius: DashboardWidgetMetrics.radiusOf(context),
         padding: EdgeInsets.zero,
         child: Consumer(
           builder: (_, ref, _) {

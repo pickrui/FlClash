@@ -2326,6 +2326,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "settings": MessageLookupByLibrary.simpleMessage("Настройки"),
     "show": MessageLookupByLibrary.simpleMessage("Показать"),
+    "showLess": MessageLookupByLibrary.simpleMessage("Свернуть"),
+    "showMore": MessageLookupByLibrary.simpleMessage("Развернуть"),
     "showNotificationStopAction": MessageLookupByLibrary.simpleMessage(
       "Кнопка остановки в уведомлении",
     ),

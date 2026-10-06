@@ -10659,6 +10659,16 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Expand`
+  String get showMore {
+    return Intl.message('Expand', name: 'showMore', desc: '', args: []);
+  }
+
+  /// `Collapse`
+  String get showLess {
+    return Intl.message('Collapse', name: 'showLess', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

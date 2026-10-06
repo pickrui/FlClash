@@ -8,18 +8,17 @@ import 'package:fl_clash/icons/icons.dart';
 import 'package:material_ui/material_ui.dart';
 
 Widget navigationGlyph(PageLabel label, {required bool selected}) =>
-    AnimatedGlyph(
-      filled: selected,
-      glyph: switch (label) {
-        PageLabel.dashboard => AppGlyphs.dashboard,
-        PageLabel.proxies => AppGlyphs.proxies,
-        PageLabel.profiles => AppGlyphs.profiles,
-        PageLabel.connections => AppGlyphs.connections,
-        PageLabel.requests => AppGlyphs.requests,
-        PageLabel.dnsQueries => AppGlyphs.dns,
-        PageLabel.resources => AppGlyphs.profiles,
-        PageLabel.logs => AppGlyphs.logs,
-        PageLabel.tools => AppGlyphs.settings,
-        PageLabel.oixCloud => AppGlyphs.cloudSync,
-      },
-    );
+    AnimatedGlyph(filled: selected, glyph: navigationGlyphOf(label));
+
+Glyph navigationGlyphOf(PageLabel label) => switch (label) {
+  PageLabel.dashboard => AppGlyphs.dashboard,
+  PageLabel.proxies => AppGlyphs.proxies,
+  PageLabel.profiles => AppGlyphs.profiles,
+  PageLabel.connections => AppGlyphs.connections,
+  PageLabel.requests => AppGlyphs.requests,
+  PageLabel.dnsQueries => AppGlyphs.dns,
+  PageLabel.resources => AppGlyphs.resources,
+  PageLabel.logs => AppGlyphs.logs,
+  PageLabel.tools => AppGlyphs.tools,
+  PageLabel.oixCloud => AppGlyphs.cloudSync,
+};

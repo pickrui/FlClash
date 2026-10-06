@@ -6,6 +6,9 @@
 import 'dart:math';
 
 import 'package:fl_clash/common/common.dart';
+
+import '../widget_metrics.dart';
+
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
@@ -75,9 +78,10 @@ class TrafficUsage extends StatelessWidget {
     );
     final maxTextWidth = max(uploadTextSize.width, downloadTextSize.width);
     return SizedBox(
-      height: getWidgetHeight(2),
+      height: DashboardWidgetMetrics.heightOf(context, 2),
       child: RepaintBoundary(
         child: CommonCard(
+          radius: DashboardWidgetMetrics.radiusOf(context),
           info: Info(
             label: appLocalizations.trafficUsage,
             iconData: Icons.data_saver_off,
@@ -89,7 +93,8 @@ class TrafficUsage extends StatelessWidget {
               final upTotalTrafficValue = totalTraffic.up;
               final downTotalTrafficValue = totalTraffic.down;
               return Padding(
-                padding: baseInfoEdgeInsets.copyWith(top: 0),
+                padding: DashboardWidgetMetrics.paddingOf(context)
+                    .copyWith(top: 0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,

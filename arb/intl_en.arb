@@ -1262,5 +1262,7 @@
   "changelogFeatures": "New features",
   "changelogFixes": "Bug fixes",
   "changelogPerformance": "Performance",
-  "changelogReverts": "Reverts"
+  "changelogReverts": "Reverts",
+  "showMore": "Expand",
+  "showLess": "Collapse"
 }

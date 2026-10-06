@@ -7,11 +7,10 @@ import 'dart:async';
 
 import 'package:fl_clash/common/app_update_scheduler.dart';
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/common/scroll.dart';
 import 'package:fl_clash/common/periodic_task_runner.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/icons/navigation_glyph.dart';
-import 'package:fl_clash/manager/window_manager.dart';
+import 'package:fl_clash/widgets/sidebar.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/foundation.dart';
@@ -309,9 +308,8 @@ class AppSidebarContainer extends ConsumerWidget {
     }
     final currentIndex = navigationState.currentIndex;
     final showLabel = ref.watch(appSettingProvider).showLabel;
-    final labelTextStyle = context.textTheme.labelLarge!.copyWith(
-      color: context.colorScheme.onSurface,
-    );
+    final canExpand = navigationState.viewMode == ViewMode.desktop;
+    final version = ref.watch(versionProvider);
     void selectDestination(int index) {
       appController.toPage(navigationItems[index].label);
     }
@@ -322,72 +320,41 @@ class AppSidebarContainer extends ConsumerWidget {
           color: ref.watch(windowBlurProvider)
               ? context.colorScheme.surfaceContainer.withValues(alpha: 0.72)
               : context.colorScheme.surfaceContainer,
-          child: SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                if (system.isMacOS) const SizedBox(height: 22),
-                const SizedBox(height: 10),
-                if (!system.isMacOS) ...[
-                  const ClipRect(child: AppIcon()),
-                  const SizedBox(height: 12),
+          child: Builder(
+            builder: (context) {
+              final sidebar = NavigationSidebar(
+                destinations: [
+                  for (final item in navigationItems)
+                    SidebarDestination(
+                      glyph: navigationGlyphOf(item.label),
+                      label: Intl.message(item.label.name),
+                    ),
                 ],
-                Expanded(
-                  child: ScrollConfiguration(
-                    behavior: const HiddenBarScrollBehavior(),
-                    child: NavigationRailFocus(
-                      autofocus: system.isAndroid,
+                selectedIndex: currentIndex,
+                expanded: canExpand && showLabel,
+                onSelected: selectDestination,
+                onToggle: canExpand
+                    ? () => ref
+                          .read(appSettingProvider.notifier)
+                          .update(
+                            (state) =>
+                                state.copyWith(showLabel: !state.showLabel),
+                          )
+                    : null,
+                windowControls: system.isMacOS && version > 10
+                    ? const Size(78, 32)
+                    : Size.zero,
+              );
+              return system.isAndroid
+                  ? NavigationRailFocus(
+                      autofocus: true,
                       currentIndex: currentIndex,
                       itemCount: navigationItems.length,
                       onSelected: selectDestination,
-                      child: NavigationRail(
-                        scrollable: true,
-                        minExtendedWidth: 200,
-                        backgroundColor: Colors.transparent,
-                        selectedLabelTextStyle: labelTextStyle,
-                        unselectedLabelTextStyle: labelTextStyle,
-                        destinations: navigationItems
-                            .map(
-                              (e) => NavigationRailDestination(
-                                icon: navigationGlyph(
-                                  e.label,
-                                  selected:
-                                      currentIndex ==
-                                      navigationItems.indexOf(e),
-                                ),
-                                label: Text(Intl.message(e.label.name)),
-                              ),
-                            )
-                            .toList(),
-                        onDestinationSelected: selectDestination,
-                        extended: false,
-                        selectedIndex: currentIndex,
-                        labelType: showLabel
-                            ? NavigationRailLabelType.all
-                            : NavigationRailLabelType.none,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                IconButton(
- tooltip: context.appLocalizations.toggleNavigationLabels,
-                  onPressed: () {
-                    ref
-                        .read(appSettingProvider.notifier)
-                        .update(
-                          (state) =>
-                              state.copyWith(showLabel: !state.showLabel),
-                        );
-                  },
-                  icon: Icon(
-                    Icons.menu,
-                    color: context.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
-            ),
+                      child: sidebar,
+                    )
+                  : sidebar;
+            },
           ),
         ),
         Expanded(

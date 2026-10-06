@@ -1618,6 +1618,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "serviceUnsupportedRegion": MessageLookupByLibrary.simpleMessage("地区不受支持"),
     "settings": MessageLookupByLibrary.simpleMessage("设置"),
     "show": MessageLookupByLibrary.simpleMessage("显示"),
+    "showLess": MessageLookupByLibrary.simpleMessage("收起"),
+    "showMore": MessageLookupByLibrary.simpleMessage("展开"),
     "showNotificationStopAction": MessageLookupByLibrary.simpleMessage(
       "通知栏显示停止按钮",
     ),

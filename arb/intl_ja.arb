@@ -1262,5 +1262,7 @@
   "changelogFeatures": "新機能",
   "changelogFixes": "不具合修正",
   "changelogPerformance": "パフォーマンス",
-  "changelogReverts": "取り消し"
+  "changelogReverts": "取り消し",
+  "showMore": "展開",
+  "showLess": "折りたたむ"
 }

@@ -1262,5 +1262,7 @@
   "changelogFeatures": "新功能",
   "changelogFixes": "问题修复",
   "changelogPerformance": "性能优化",
-  "changelogReverts": "已回滚"
+  "changelogReverts": "已回滚",
+  "showMore": "展开",
+  "showLess": "收起"
 }

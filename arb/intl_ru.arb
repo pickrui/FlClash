@@ -1262,5 +1262,7 @@
   "changelogFeatures": "Новые функции",
   "changelogFixes": "Исправления",
   "changelogPerformance": "Производительность",
-  "changelogReverts": "Откаты"
+  "changelogReverts": "Откаты",
+  "showMore": "Развернуть",
+  "showLess": "Свернуть"
 }

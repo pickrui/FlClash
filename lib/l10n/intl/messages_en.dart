@@ -2203,6 +2203,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "settings": MessageLookupByLibrary.simpleMessage("Settings"),
     "show": MessageLookupByLibrary.simpleMessage("Show"),
+    "showLess": MessageLookupByLibrary.simpleMessage("Collapse"),
+    "showMore": MessageLookupByLibrary.simpleMessage("Expand"),
     "showNotificationStopAction": MessageLookupByLibrary.simpleMessage(
       "Stop button in notification",
     ),

@@ -1831,6 +1831,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "serviceUnsupportedRegion": MessageLookupByLibrary.simpleMessage("地域非対応"),
     "settings": MessageLookupByLibrary.simpleMessage("設定"),
     "show": MessageLookupByLibrary.simpleMessage("表示"),
+    "showLess": MessageLookupByLibrary.simpleMessage("折りたたむ"),
+    "showMore": MessageLookupByLibrary.simpleMessage("展開"),
     "showNotificationStopAction": MessageLookupByLibrary.simpleMessage(
       "通知に停止ボタンを表示",
     ),

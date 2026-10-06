@@ -12,6 +12,9 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 
 import 'package:fl_clash/common/common.dart';
+
+import '../widget_metrics.dart';
+
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/core/method.dart';
 import 'package:fl_clash/state.dart';
@@ -135,16 +138,17 @@ class _MemoryInfoState extends ConsumerState<MemoryInfo>
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     return SizedBox(
-      height: getWidgetHeight(1),
+      height: DashboardWidgetMetrics.heightOf(context, 1),
       child: RepaintBoundary(
         child: CommonCard(
+          radius: DashboardWidgetMetrics.radiusOf(context),
           info: Info(
             iconData: Icons.memory,
             label: appLocalizations.memoryInfo,
           ),
           onPressed: _showDetail,
           child: Container(
-            padding: baseInfoEdgeInsets.copyWith(top: 0),
+            padding: DashboardWidgetMetrics.paddingOf(context).copyWith(top: 0),
             child: Column(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.end,

@@ -9,6 +9,8 @@ import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/views/dashboard/dashboard.dart';
+import 'package:fl_clash/views/dashboard/widget_metrics.dart';
+import 'package:fl_clash/widgets/super_grid.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -64,10 +66,26 @@ void main() {
         await tester.tap(find.byKey(const ValueKey('edit-icon')));
         await tester.pump(const Duration(milliseconds: 300));
       }
-      for (final width in [420.0, 560.0, 840.0, 420.0]) {
+      for (final width in [420.0, 512.0, 840.0, 1600.0, 420.0]) {
         tester.view.physicalSize = Size(width, 760);
         await tester.pump();
         expect(tester.takeException(), isNull);
+        final grid = tester.widget<SuperGrid>(find.byType(SuperGrid));
+        expect(
+          grid.crossAxisCount,
+          width < 512
+              ? 8
+              : width <= 872
+              ? 12
+              : 16,
+        );
+        final metrics = tester.widget<DashboardWidgetMetrics>(
+          find.byType(DashboardWidgetMetrics),
+        );
+        expect(
+          metrics.unitHeight,
+          width > 872 ? 120 : inInclusiveRange(80, 120),
+        );
       }
       await tester.pumpWidget(const SizedBox());
       await tester.pump(const Duration(seconds: 1));
