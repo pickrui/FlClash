@@ -11,6 +11,26 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test(
+    'MRS preview carries provider identity and requires an actual response',
+    () async {
+      final handler = _FakeCoreHandler()..response = 'example.com\n';
+      expect(
+        await handler.dumpRuleSet('rules', '/fixture/rules.mrs'),
+        'example.com\n',
+      );
+      expect(handler.arguments, {
+        'providerName': 'rules',
+        'path': '/fixture/rules.mrs',
+      });
+      handler.response = null;
+      await expectLater(
+        handler.dumpRuleSet('rules', '/fixture/rules.mrs'),
+        throwsA(_missingResponse(CoreMethod.dumpRuleSet)),
+      );
+    },
+  );
+
+  test(
     'memory detail requires a live Core response and decodes all categories',
     () async {
       final handler = _FakeCoreHandler();

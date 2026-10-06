@@ -237,6 +237,9 @@ class CoreController {
     );
   }
 
+  Future<String> dumpRuleSet(String providerName, String path) =>
+      _interface.dumpRuleSet(providerName, path);
+
   Future<String> updateGeoData(UpdateGeoDataParams params) {
     return _geoUpdates[params] ??= _interface
         .updateGeoData(params)

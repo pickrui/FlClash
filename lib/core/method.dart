@@ -36,6 +36,7 @@ enum CoreMethod {
   closeConnection,
   getExternalProviders,
   getExternalProvider,
+  dumpRuleSet,
   updateGeoData,
   updateExternalProvider,
   sideLoadExternalProvider,

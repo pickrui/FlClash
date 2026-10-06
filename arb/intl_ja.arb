@@ -1337,5 +1337,6 @@
   "pureBlack": "ピュアブラック",
   "slide": "スライド",
   "textScalePreview": "アプリ内の文字はこの大きさで表示されます",
-  "basicStrategy": "基本ポリシー"
+  "basicStrategy": "基本ポリシー",
+  "nonTextProviderFile": "この外部リソースはテキストファイルではありません"
 }

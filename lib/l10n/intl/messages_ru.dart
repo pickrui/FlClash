@@ -1823,6 +1823,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "nodeQuickFields": MessageLookupByLibrary.simpleMessage(
       "Быстрое редактирование",
     ),
+    "nonTextProviderFile": MessageLookupByLibrary.simpleMessage(
+      "Этот внешний ресурс не является текстовым файлом",
+    ),
     "none": MessageLookupByLibrary.simpleMessage("Нет"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "Текущая группа прокси не может быть выбрана.",

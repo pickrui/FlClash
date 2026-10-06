@@ -62,6 +62,8 @@ mixin CoreInterface {
     String? providerType,
   });
 
+  Future<String> dumpRuleSet(String providerName, String path);
+
   Future<String> updateGeoData(UpdateGeoDataParams params);
 
   Future<String> sideLoadExternalProvider({
@@ -311,6 +313,13 @@ abstract class CoreHandlerInterface with CoreInterface {
     );
     return data == null ? null : ExternalProvider.fromJson(data);
   }
+
+  @override
+  Future<String> dumpRuleSet(String providerName, String path) =>
+      _invokeRequiredMethod<String>(
+        method: CoreMethod.dumpRuleSet,
+        arguments: {'providerName': providerName, 'path': path},
+      );
 
   @override
   Future<String> updateGeoData(UpdateGeoDataParams params) async {

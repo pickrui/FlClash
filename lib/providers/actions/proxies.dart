@@ -105,6 +105,10 @@ class ProxiesAction extends _$ProxiesAction {
     Future<String?> Function() readData,
   ) => _controller.sideLoadProvider(provider, readData);
 
+  Future<void> Function(String) providerEditorSaver(
+    ExternalProvider provider,
+  ) => _controller.providerEditorSaver(provider);
+
   int addSortNum() => _controller.addSortNum();
 }
 
@@ -586,6 +590,40 @@ extension ProxiesControllerExt on AppController {
         );
       } finally {
         _providerUpdates.remove(key);
+      }
+    });
+  }
+
+  Future<void> Function(String) providerEditorSaver(ExternalProvider provider) {
+    final profileId = _ref.read(currentProfileIdProvider);
+    final generation = _profileApplyGeneration;
+    bool isCurrent() =>
+        generation == _profileApplyGeneration &&
+        profileId == _ref.read(currentProfileIdProvider) &&
+        _ref.read(providersProvider).contains(provider);
+    return (data) => _serializeCoreLifecycle(() async {
+      var applied = false;
+      if (!isCurrent()) throw appLocalizations.providerChanged;
+      final message = await _updateExternalProvider(
+        provider,
+        profileId: profileId,
+        generation: generation,
+        update: () async {
+          if (!isCurrent()) throw appLocalizations.providerChanged;
+          final result = await coreController.sideLoadExternalProvider(
+            providerName: provider.name,
+            providerType: provider.type,
+            data: data,
+          );
+          applied = result.isEmpty;
+          return result;
+        },
+      );
+      if (message.isNotEmpty) throw message;
+      if (!applied ||
+          generation != _profileApplyGeneration ||
+          profileId != _ref.read(currentProfileIdProvider)) {
+        throw appLocalizations.providerChanged;
       }
     });
   }

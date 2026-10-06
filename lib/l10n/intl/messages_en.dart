@@ -1750,6 +1750,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Enter one complete proxy definition with a name and type",
     ),
     "nodeQuickFields": MessageLookupByLibrary.simpleMessage("Quick edit"),
+    "nonTextProviderFile": MessageLookupByLibrary.simpleMessage(
+      "This external resource is not a text file",
+    ),
     "none": MessageLookupByLibrary.simpleMessage("none"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "The current proxy group cannot be selected.",

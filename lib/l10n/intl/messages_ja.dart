@@ -1455,6 +1455,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "name と type を含む完全なノード定義を1つ入力してください",
     ),
     "nodeQuickFields": MessageLookupByLibrary.simpleMessage("簡易編集"),
+    "nonTextProviderFile": MessageLookupByLibrary.simpleMessage(
+      "この外部リソースはテキストファイルではありません",
+    ),
     "none": MessageLookupByLibrary.simpleMessage("なし"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "現在のプロキシグループは選択できません",

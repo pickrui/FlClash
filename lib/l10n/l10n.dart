@@ -11343,6 +11343,16 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `This external resource is not a text file`
+  String get nonTextProviderFile {
+    return Intl.message(
+      'This external resource is not a text file',
+      name: 'nonTextProviderFile',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

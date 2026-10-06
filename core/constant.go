@@ -139,6 +139,7 @@ const (
 	closeConnectionMethod          CoreMethod = "closeConnection"
 	getExternalProvidersMethod     CoreMethod = "getExternalProviders"
 	getExternalProviderMethod      CoreMethod = "getExternalProvider"
+	dumpRuleSetMethod              CoreMethod = "dumpRuleSet"
 	getCountryCodeMethod           CoreMethod = "getCountryCode"
 	getMemoryMethod                CoreMethod = "getMemory"
 	getMemoryStatsMethod           CoreMethod = "getMemoryStats"

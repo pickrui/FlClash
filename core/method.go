@@ -248,6 +248,22 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 			return
 		}
 		response.success(handleGetExternalProvider(params.Name, params.Type))
+	case dumpRuleSetMethod:
+		params := struct {
+			Name string `json:"providerName"`
+			Path string `json:"path"`
+		}{}
+		if !decodeMethodArguments(call, response, &params) {
+			return
+		}
+		go func() {
+			text, err := handleDumpRuleSet(params.Name, params.Path)
+			if err != nil {
+				response.failure("core_error", err.Error(), nil)
+				return
+			}
+			response.success(text)
+		}()
 	case updateGeoDataMethod:
 		params := UpdateGeoDataParams{}
 		if !decodeMethodArguments(call, response, &params) {

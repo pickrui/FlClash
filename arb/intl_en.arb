@@ -1337,5 +1337,6 @@
   "pureBlack": "Pure black",
   "slide": "Slide",
   "textScalePreview": "Text in the app will look like this",
-  "basicStrategy": "Basic strategies"
+  "basicStrategy": "Basic strategies",
+  "nonTextProviderFile": "This external resource is not a text file"
 }

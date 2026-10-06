@@ -1337,5 +1337,6 @@
   "pureBlack": "纯黑",
   "slide": "滑动",
   "textScalePreview": "应用内的文字将以这个大小显示",
-  "basicStrategy": "基础策略"
+  "basicStrategy": "基础策略",
+  "nonTextProviderFile": "该外部资源不是文本文件"
 }

@@ -1278,6 +1278,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "请输入包含 name 和 type 的单个完整节点定义",
     ),
     "nodeQuickFields": MessageLookupByLibrary.simpleMessage("快速编辑"),
+    "nonTextProviderFile": MessageLookupByLibrary.simpleMessage("该外部资源不是文本文件"),
     "none": MessageLookupByLibrary.simpleMessage("无"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage("当前代理组无法选中"),
     "ntpInterval": MessageLookupByLibrary.simpleMessage("同步间隔（分钟）"),

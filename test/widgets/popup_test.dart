@@ -79,4 +79,71 @@ void main() {
     expect(pressed, isEmpty);
     semantics.dispose();
   });
+  testWidgets(
+    'large text menus stay inside a small viewport and scroll to submenus',
+    (tester) async {
+      tester.view.physicalSize = const Size(280, 360);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      var selected = false;
+      const submenu = 'A very long resource subscription information title';
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context)
+                .copyWith(textScaler: const TextScaler.linear(2)),
+            child: child!,
+          ),
+          home: Scaffold(
+            body: Align(
+              alignment: Alignment.bottomRight,
+              child: CommonPopupBox(
+                targetBuilder: (open) => IconButton(
+                  icon: const Icon(Icons.more_vert),
+                  onPressed: () => open(),
+                ),
+                popup: CommonPopupMenu(
+                  items: [
+                    for (var index = 0; index < 12; index++)
+                      PopupMenuItemData(
+                        label: 'Resource $index',
+                        onPressed: () {},
+                      ),
+                    PopupMenuItemData(
+                      label: submenu,
+                      subItems: [
+                        PopupMenuItemData(
+                          label: 'Apply',
+                          onPressed: () => selected = true,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.byIcon(Icons.more_vert));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      final bounds = tester.getRect(find.byType(CommonPopupMenu));
+      expect(bounds.left, greaterThanOrEqualTo(16));
+      expect(bounds.right, lessThanOrEqualTo(264));
+      expect(bounds.top, greaterThanOrEqualTo(16));
+      expect(bounds.bottom, lessThanOrEqualTo(344));
+      await tester.ensureVisible(find.text(submenu));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(submenu));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      await tester.ensureVisible(find.text('Apply'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Apply'));
+      await tester.pumpAndSettle();
+      expect(selected, isTrue);
+      expect(find.byType(CommonPopupMenu), findsNothing);
+    },
+  );
 }
