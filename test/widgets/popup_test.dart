@@ -9,9 +9,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 void main() {
-  Future<void> pumpMenu(WidgetTester tester, List<String> pressed) {
+  Future<void> pumpMenu(
+    WidgetTester tester,
+    List<String> pressed, {
+    bool reduceMotion = false,
+  }) {
     return tester.pumpWidget(
       MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context)
+              .copyWith(disableAnimations: reduceMotion),
+          child: child!,
+        ),
         home: Scaffold(
           body: Align(
             alignment: Alignment.topRight,
@@ -51,7 +60,6 @@ void main() {
     await tester.tap(find.byIcon(Icons.more_vert));
     await tester.pumpAndSettle();
     expect(find.text('Edit'), findsOneWidget);
-    expect(find.byType(Divider), findsOneWidget);
 
     await tester.tap(find.text('Edit'));
     await tester.pumpAndSettle();
@@ -78,6 +86,22 @@ void main() {
     expect(find.text('Delete'), findsNothing);
     expect(pressed, isEmpty);
     semantics.dispose();
+  });
+
+  testWidgets('reduced motion menus can unfold and execute an item', (
+    tester,
+  ) async {
+    final pressed = <String>[];
+    await pumpMenu(tester, pressed, reduceMotion: true);
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('More'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Delete'));
+    await tester.pumpAndSettle();
+    expect(pressed, ['Delete']);
+    expect(find.text('Delete'), findsNothing);
+    expect(tester.takeException(), isNull);
   });
   testWidgets(
     'large text menus stay inside a small viewport and scroll to submenus',

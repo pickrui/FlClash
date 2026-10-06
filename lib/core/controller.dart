@@ -237,6 +237,9 @@ class CoreController {
     );
   }
 
+  Future<String> previewRuleSet(List<int> content, String behavior) =>
+      _interface.previewRuleSet(content, behavior);
+
   Future<String> dumpRuleSet(String providerName, String path) =>
       _interface.dumpRuleSet(providerName, path);
 

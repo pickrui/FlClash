@@ -118,7 +118,7 @@ class _AccessViewState extends ConsumerState<AccessView>
     }
   }
 
-  Widget _buildSelectedAllButton({
+  IconButtonData _buildSelectAllAction({
     required bool isSelectedAll,
     required List<String> allValueList,
   }) {
@@ -135,22 +135,12 @@ class _AccessViewState extends ConsumerState<AccessView>
       });
     }
 
-    return FadeRotationScaleBox(
-      alignment: Alignment.centerRight,
-      child: isSelectedAll
-          ? FloatingActionButton.extended(
-              key: const ValueKey(true),
-              onPressed: onPressed,
-              label: Text(appLocalizations.cancelSelectAll),
-              icon: const GlyphIcon(AppGlyphs.deselect),
-            )
-          : FloatingActionButton.extended(
-              key: const ValueKey(false),
-              tooltip: appLocalizations.selectAll,
-              onPressed: onPressed,
-              label: Text(appLocalizations.selectAll),
-              icon: const GlyphIcon(AppGlyphs.selectAll),
-            ),
+    return IconButtonData(
+      glyph: isSelectedAll ? AppGlyphs.deselect : AppGlyphs.selectAll,
+      tooltip: isSelectedAll
+          ? appLocalizations.cancelSelectAll
+          : appLocalizations.selectAll,
+      onPressed: onPressed,
     );
   }
 
@@ -213,15 +203,12 @@ class _AccessViewState extends ConsumerState<AccessView>
     });
   }
 
-  void _handleSearch() {
-    _scaffoldKey.currentState?.handleToSearch();
-  }
-
   Future<void> _handleBack() async {
     final res = await globalState.showMessage(
       title: appLocalizations.tip,
       message: TextSpan(text: appLocalizations.saveChanges),
     );
+    if (res == null) return;
     if (res == true) {
       _handleSave();
     }
@@ -235,35 +222,6 @@ class _AccessViewState extends ConsumerState<AccessView>
     ref
         .read(vpnSettingProvider.notifier)
         .update((state) => state.copyWith(accessControlProps: accessControl));
-  }
-
-  Widget _buildConfirm() {
-    return Consumer(
-      builder: (_, ref, child) {
-        final accessControl = ref.watch(accessControlStateProvider);
-        final noSave = ref.watch(
-          vpnSettingProvider.select(
-            (state) => state.accessControlProps == accessControl,
-          ),
-        );
-        if (noSave) {
-          return const SizedBox();
-        }
-        return child!;
-      },
-      child: CommonPopScope(
-        onPop: (_) {
-          _handleBack();
-          return false;
-        },
-        child: CommonMinFilledButtonTheme(
-          child: FilledButton.tonal(
-            onPressed: _handleSave,
-            child: Text(context.appLocalizations.save),
-          ),
-        ),
-      ),
-    );
   }
 
   Future<void> _exportToClipboard() async {
@@ -290,69 +248,44 @@ class _AccessViewState extends ConsumerState<AccessView>
     });
   }
 
-  List<Widget> _buildActions({required bool enable}) {
-    return [
-      _buildConfirm(),
-      CommonPopupBox(
-        targetBuilder: (open) {
-          return IconButton(
-            tooltip: context.appLocalizations.more,
-            onPressed: () {
-              open(offset: const Offset(0, 0));
-            },
-            icon: const GlyphIcon(AppGlyphs.more),
-          );
-        },
-        popup: CommonPopupMenu(
-          items: [
-            PopupMenuItemData(
-              glyph: AppGlyphs.shuffle,
-              label: enable
-                  ? appLocalizations.turnOff
-                  : appLocalizations.turnOn,
-              onPressed: _handleToggle,
-            ),
-            PopupMenuItemData(
-              glyph: AppGlyphs.refresh,
-              label: appLocalizations.refresh,
-              onPressed: _reloadPackages,
-            ),
-            PopupMenuItemData(
-              glyph: AppGlyphs.search,
-              label: appLocalizations.search,
-              onPressed: _handleSearch,
-            ),
-            PopupMenuItemData(
-              glyph: AppGlyphs.sliders,
-              label: appLocalizations.settings,
-              onPressed: _handleToSetting,
-            ),
-            PopupMenuItemData(
-              glyph: AppGlyphs.moreCircle,
-              label: appLocalizations.action,
-              subItems: [
-                PopupMenuItemData(
-                  glyph: AppGlyphs.sparkle,
-                  label: appLocalizations.intelligentSelected,
-                  onPressed: _intelligentSelected,
-                ),
-                PopupMenuItemData(
-                  glyph: AppGlyphs.copy,
-                  label: appLocalizations.clipboardExport,
-                  onPressed: _exportToClipboard,
-                ),
-                PopupMenuItemData(
-                  glyph: AppGlyphs.paste,
-                  label: appLocalizations.clipboardImport,
-                  onPressed: _importFormClipboard,
-                ),
-              ],
-            ),
-          ],
+  List<PopupMenuItemData> _buildMenuItems({required bool enable}) => [
+    PopupMenuItemData(
+      glyph: AppGlyphs.shuffle,
+      label: enable ? appLocalizations.turnOff : appLocalizations.turnOn,
+      onPressed: _handleToggle,
+    ),
+    PopupMenuItemData(
+      glyph: AppGlyphs.refresh,
+      label: appLocalizations.refresh,
+      onPressed: _reloadPackages,
+    ),
+    PopupMenuItemData(
+      glyph: AppGlyphs.sliders,
+      label: appLocalizations.settings,
+      onPressed: _handleToSetting,
+    ),
+    PopupMenuItemData(
+      glyph: AppGlyphs.moreCircle,
+      label: appLocalizations.action,
+      subItems: [
+        PopupMenuItemData(
+          glyph: AppGlyphs.sparkle,
+          label: appLocalizations.intelligentSelected,
+          onPressed: _intelligentSelected,
         ),
-      ),
-    ];
-  }
+        PopupMenuItemData(
+          glyph: AppGlyphs.copy,
+          label: appLocalizations.clipboardExport,
+          onPressed: _exportToClipboard,
+        ),
+        PopupMenuItemData(
+          glyph: AppGlyphs.paste,
+          label: appLocalizations.clipboardImport,
+          onPressed: _importFormClipboard,
+        ),
+      ],
+    ),
+  ];
 
   Widget _buildContent({
     required List<Package> packages,
@@ -381,7 +314,6 @@ class _AccessViewState extends ConsumerState<AccessView>
         child: ListView.builder(
           controller: _controller,
           itemCount: packages.length,
-          itemExtent: 72,
           itemBuilder: (_, index) {
             final package = packages[index];
             return PackageListItem(
@@ -454,7 +386,19 @@ class _AccessViewState extends ConsumerState<AccessView>
     );
   }
 
-  Widget _buildBannerBar(AccessControlMode mode, int count) {
+  Widget _buildBannerBar(AccessControlMode mode, int count, bool enable) {
+    if (!enable) {
+      return MaterialBanner(
+        leading: GlyphIcon(AppGlyphs.info, color: context.colorScheme.outline),
+        content: Text(context.appLocalizations.accessControlDisabledDesc),
+        actions: [
+          FilledButton.tonal(
+            onPressed: _handleToggle,
+            child: Text(context.appLocalizations.turnOn),
+          ),
+        ],
+      );
+    }
     final describe = mode == AccessControlMode.acceptSelected
         ? appLocalizations.accessControlAllowDesc
         : appLocalizations.accessControlNotAllowDesc;
@@ -521,41 +465,71 @@ class _AccessViewState extends ConsumerState<AccessView>
     final currentList = accessControl.currentList;
     final viewPackageNameList = viewPackages.map((e) => e.packageName).toList();
     final valueList = currentList.intersection(viewPackageNameList);
-    return CommonScaffold(
-      key: _scaffoldKey,
-      isLoading: isLoading,
-      searchState: AppBarSearchState(onSearch: _onSearch, autoAddSearch: false),
-      title: appLocalizations.appAccessControl,
-      actions: _buildActions(enable: accessControl.enable),
-      body: AppBarClearance(
-        child: DisabledMask(
-          status: !accessControl.enable,
+    final canSelect =
+        accessControl.enable &&
+        !installed.isLoading &&
+        !installed.hasError &&
+        installed.value?.permissionGranted == true &&
+        viewPackages.isNotEmpty;
+    final selectAll = canSelect
+        ? _buildSelectAllAction(
+            isSelectedAll: valueList.length == viewPackageNameList.length,
+            allValueList: viewPackageNameList,
+          )
+        : null;
+    final hasChanges =
+        _isInit &&
+        ref.watch(vpnSettingProvider).accessControlProps != accessControl;
+    return CommonPopScope(
+      onPop: hasChanges
+          ? (_) {
+              _handleBack();
+              return false;
+            }
+          : null,
+      child: CommonScaffold(
+        key: _scaffoldKey,
+        isLoading: isLoading,
+        searchState: AppBarSearchState(onSearch: _onSearch),
+        searchActions: [?selectAll],
+        title: appLocalizations.appAccessControl,
+        iconActions: [
+          if (hasChanges)
+            IconButtonData(
+              glyph: AppGlyphs.check,
+              tooltip: appLocalizations.save,
+              onPressed: _handleSave,
+            ),
+        ],
+        menuItems: [
+          ..._buildMenuItems(enable: accessControl.enable),
+          if (selectAll != null)
+            PopupMenuItemData(
+              glyph: selectAll.glyph,
+              label: selectAll.tooltip!,
+              onPressed: selectAll.onPressed,
+            ),
+        ],
+        body: AppBarClearance(
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              _buildBannerBar(mode, valueList.length),
+              _buildBannerBar(mode, valueList.length, accessControl.enable),
               const SizedBox(height: 8),
               Expanded(
-                child: _buildContent(
-                  packages: viewPackages,
-                  valueList: valueList,
+                child: DisabledMask(
+                  status:
+                      !accessControl.enable &&
+                      installed.value?.permissionGranted == true,
+                  child: _buildContent(
+                    packages: viewPackages,
+                    valueList: valueList,
+                  ),
                 ),
               ),
             ],
           ),
         ),
       ),
-      floatingActionButton:
-          accessControl.enable &&
-              !installed.isLoading &&
-              !installed.hasError &&
-              installed.value?.permissionGranted == true &&
-              viewPackages.isNotEmpty
-          ? _buildSelectedAllButton(
-              isSelectedAll: valueList.length == viewPackageNameList.length,
-              allValueList: viewPackageNameList,
-            )
-          : null,
     );
   }
 }

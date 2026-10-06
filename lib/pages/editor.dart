@@ -337,59 +337,69 @@ class _EditorPageState extends ConsumerState<EditorPage> {
                   icon: const GlyphIcon(AppGlyphs.check),
                   onPressed: _barState.isDirty && !_saving ? _handleSave : null,
                 ),
-              PopupMenuButton<VoidCallback>(
-                icon: const GlyphIcon(AppGlyphs.more),
-                tooltip: appLocalizations.more,
-                onSelected: (action) => action(),
-                itemBuilder: (_) => [
-                  PopupMenuItem(
-                    value: _undoController.undo,
-                    enabled: _barState.canUndo,
-                    child: Row(
-                      children: [
-                        const GlyphIcon(AppGlyphs.undo),
-                        const SizedBox(width: 8),
-                        Text(appLocalizations.undo),
+              CommonPopupBox(
+                targetBuilder: (open) => IconButton(
+                  icon: const GlyphIcon(AppGlyphs.more),
+                  tooltip: appLocalizations.more,
+                  onPressed: () => open(),
+                ),
+                popupBuilder: (_) => CommonPopupMenu(
+                  items: [
+                    PopupMenuItemData(
+                      label: appLocalizations.undo,
+                      glyph: AppGlyphs.undo,
+                      onPressed: _barState.canUndo
+                          ? _undoController.undo
+                          : null,
+                    ),
+                    PopupMenuItemData(
+                      label: appLocalizations.redo,
+                      glyph: AppGlyphs.redo,
+                      onPressed: _barState.canRedo
+                          ? _undoController.redo
+                          : null,
+                    ),
+                    PopupMenuItemData(
+                      label: appLocalizations.fontSize,
+                      glyph: AppGlyphs.textSize,
+                      subItems: [
+                        for (final size in EditorFontSize.values)
+                          PopupMenuItemData(
+                            label: '${size.value.toInt()}',
+                            checked: size == fontSize,
+                            onPressed: () => ref
+                                .read(appSettingProvider.notifier)
+                                .update(
+                                  (state) =>
+                                      state.copyWith(editorFontSize: size),
+                                ),
+                          ),
                       ],
                     ),
-                  ),
-                  PopupMenuItem(
-                    value: _undoController.redo,
-                    enabled: _barState.canRedo,
-                    child: Text(appLocalizations.redo),
-                  ),
-                  for (final size in EditorFontSize.values)
-                    CheckedPopupMenuItem(
-                      checked: size == fontSize,
-                      value: () => ref
+                    PopupMenuItemData(
+                      label: appLocalizations.lineWrap,
+                      checked: lineWrap,
+                      onPressed: () => ref
                           .read(appSettingProvider.notifier)
                           .update(
-                            (state) => state.copyWith(editorFontSize: size),
+                            (state) =>
+                                state.copyWith(editorLineWrap: !lineWrap),
                           ),
-                      child: Text(
-                        '${appLocalizations.fontSize} · ${size.value.toInt()}',
+                    ),
+                    if (widget.supportRemoteDownload && !readOnly) ...[
+                      PopupMenuItemData(
+                        label: appLocalizations.importUrl,
+                        glyph: AppGlyphs.cloudDownload,
+                        onPressed: _handleImportFormUrl,
                       ),
-                    ),
-                  CheckedPopupMenuItem(
-                    checked: lineWrap,
-                    value: () => ref
-                        .read(appSettingProvider.notifier)
-                        .update(
-                          (state) => state.copyWith(editorLineWrap: !lineWrap),
-                        ),
-                    child: Text(appLocalizations.lineWrap),
-                  ),
-                  if (widget.supportRemoteDownload && !readOnly) ...[
-                    PopupMenuItem(
-                      value: _handleImportFormUrl,
-                      child: Text(appLocalizations.importUrl),
-                    ),
-                    PopupMenuItem(
-                      value: _handleImportFormFile,
-                      child: Text(appLocalizations.importFile),
-                    ),
+                      PopupMenuItemData(
+                        label: appLocalizations.importFile,
+                        glyph: AppGlyphs.importFile,
+                        onPressed: _handleImportFormFile,
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ],
             body: AppBarClearance(
@@ -810,8 +820,18 @@ class _CodeEditorState extends ConsumerState<_CodeEditor> {
       return;
     }
     final point = navigatorBox.globalToLocal(request.globalPosition);
-    final route = _EditorContextMenuRoute(
-      point: point,
+    final selectionRect = request.selectionRect;
+    final route = CommonPopupRoute<void>(
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      placement: PopupPlacement.belowPoint,
+      modal: false,
+      anchorOf: () => point & Size.zero,
+      avoid: system.isDesktop || selectionRect == null
+          ? null
+          : Rect.fromPoints(
+              navigatorBox.globalToLocal(selectionRect.topLeft),
+              navigatorBox.globalToLocal(selectionRect.bottomRight),
+            ),
       builder: (_) => CommonPopupMenu(items: items),
     );
     final controller = widget.controller;
@@ -1204,35 +1224,4 @@ class FindPanel extends StatelessWidget implements PreferredSizeWidget {
     }
     return IconButton(tooltip: tooltip, onPressed: onPressed, icon: icon);
   }
-}
-
-class _EditorContextMenuRoute extends PopupRoute<void> {
-  _EditorContextMenuRoute({required this.point, required this.builder})
-    : super(requestFocus: false);
-  final Offset point;
-  final WidgetBuilder builder;
-  @override
-  Color? get barrierColor => null;
-  @override
-  bool get barrierDismissible => false;
-  @override
-  String? get barrierLabel => null;
-  @override
-  Duration get transitionDuration => Duration.zero;
-  @override
-  Widget buildModalBarrier() => const SizedBox.shrink();
-  @override
-  Widget buildPage(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-  ) => CustomSingleChildLayout(
-    delegate: CaretPopupLayout(caretRect: point & Size.zero),
-    child: TapRegion(
-      onTapOutside: (_) {
-        if (isCurrent) navigator?.pop();
-      },
-      child: builder(context),
-    ),
-  );
 }

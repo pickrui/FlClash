@@ -314,6 +314,25 @@ void main() {
     },
   );
 
+  test('discarded imports cannot write or cancel a newer download', () async {
+    const profile = Profile(
+      id: 13,
+      url: 'oixcloud://managed',
+      autoUpdateDuration: Duration(hours: 1),
+    );
+    final file = await snapshot(profile.id, 'original');
+    final bytes = await encryptedBytes(12);
+    registerFetchManagedConfig((_, {validate}) async => (bytes, null));
+    final discarded = await profile.prepareUpdate();
+    discarded.discard();
+    await expectLater(discarded.save(), throwsStateError);
+    expect(await file.readAsString(), 'original');
+    final next = await profile.prepareUpdate();
+    discarded.discard();
+    await next.save();
+    expect(await file.readAsBytes(), bytes);
+  });
+
   test('snapshot inspection waits for a concurrent replacement', () async {
     const profile = Profile(
       id: 12,

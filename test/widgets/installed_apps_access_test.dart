@@ -21,6 +21,7 @@ Future<ProviderContainer> openAccess(
   InstalledAppsFake api, {
   Locale locale = const Locale('en'),
   AccessControlProps props = const AccessControlProps(enable: true),
+  TextScaler textScaler = TextScaler.noScaling,
 }) async {
   tester.view.physicalSize = const Size(400, 800);
   tester.view.devicePixelRatio = 1;
@@ -43,6 +44,10 @@ Future<ProviderContainer> openAccess(
     UncontrolledProviderScope(
       container: container,
       child: MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+          child: child!,
+        ),
         locale: locale,
         supportedLocales: AppLocalizations.delegate.supportedLocales,
         localizationsDelegates: const [
@@ -58,6 +63,46 @@ Future<ProviderContainer> openAccess(
 }
 
 void main() {
+  testWidgets('large text keeps neighboring app rows separate', (tester) async {
+    final api = InstalledAppsFake()
+      ..packages = [
+        installedPackage('first.app'),
+        installedPackage('second.app'),
+      ];
+    await openAccess(tester, api, textScaler: const TextScaler.linear(2));
+    expect(
+      tester.getRect(find.text('second.app').first).top,
+      greaterThanOrEqualTo(tester.getRect(find.text('first.app').last).bottom),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'disabled access explains the state and offers an enable action',
+    (tester) async {
+      final api = InstalledAppsFake()
+        ..packages = [installedPackage('fixture.app')];
+      final container = await openAccess(
+        tester,
+        api,
+        props: const AccessControlProps(enable: false),
+      );
+      expect(
+        find.text(AppLocalizations.current.accessControlDisabledDesc),
+        findsOneWidget,
+      );
+      await tester.tap(find.text(AppLocalizations.current.turnOn));
+      await tester.pumpAndSettle();
+      expect(container.read(accessControlStateProvider).enable, isTrue);
+      await tester.tap(find.byTooltip(AppLocalizations.current.save));
+      await tester.pumpAndSettle();
+      expect(
+        container.read(vpnSettingProvider).accessControlProps.enable,
+        isTrue,
+      );
+    },
+  );
+
   for (final locale in const [
     Locale('en'),
     Locale('zh', 'CN'),
@@ -154,7 +199,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byType(Checkbox).first);
       await tester.pumpAndSettle();
-      await tester.tap(find.text(AppLocalizations.current.save));
+      await tester.tap(find.byTooltip(AppLocalizations.current.save));
       await tester.pumpAndSettle();
       expect(
         container.read(vpnSettingProvider).accessControlProps.acceptList,
@@ -180,7 +225,8 @@ void main() {
         installedPackage('other.app'),
       ];
     final container = await openAccess(tester, api);
-    container.read(queryProvider(QueryTag.access).notifier).value = 'Chrome org';
+    container.read(queryProvider(QueryTag.access).notifier).value =
+        'Chrome org';
     await tester.pumpAndSettle();
     expect(find.text('org.chromium.chrome'), findsWidgets);
     expect(find.text('other.app'), findsNothing);

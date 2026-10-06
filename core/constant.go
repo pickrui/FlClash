@@ -140,6 +140,7 @@ const (
 	getExternalProvidersMethod     CoreMethod = "getExternalProviders"
 	getExternalProviderMethod      CoreMethod = "getExternalProvider"
 	dumpRuleSetMethod              CoreMethod = "dumpRuleSet"
+	previewRuleSetMethod           CoreMethod = "previewRuleSet"
 	getCountryCodeMethod           CoreMethod = "getCountryCode"
 	getMemoryMethod                CoreMethod = "getMemory"
 	getMemoryStatsMethod           CoreMethod = "getMemoryStats"

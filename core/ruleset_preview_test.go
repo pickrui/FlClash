@@ -8,10 +8,13 @@ package main
 
 import (
 	"bytes"
+	"encoding/binary"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
+	"github.com/klauspost/compress/zstd"
 	"github.com/metacubex/mihomo/component/resource"
 	cp "github.com/metacubex/mihomo/constant/provider"
 	rp "github.com/metacubex/mihomo/rules/provider"
@@ -80,5 +83,58 @@ func TestRuleSetPreviewRejectsOversizeWithoutPartialResults(t *testing.T) {
 	text, err := dumpRuleSet(rules, 24)
 	if err == nil || text != "" || rules.visited != 3 {
 		t.Fatalf("unbounded or partial preview: %q, %v, visited=%d", text, err, rules.visited)
+	}
+}
+
+func TestPreviewLibraryMrsContent(t *testing.T) {
+	for _, test := range []struct {
+		behavior cp.RuleBehavior
+		text     string
+	}{{cp.Domain, "+.example.com\nexample.org\n"}, {cp.IPCIDR, "192.0.2.0/24\n2001:db8::/32\n"}} {
+		t.Run(test.behavior.String(), func(t *testing.T) {
+			var mrs bytes.Buffer
+			if err := rp.ConvertToMrs([]byte(test.text), test.behavior, cp.TextRule, &mrs); err != nil {
+				t.Fatal(err)
+			}
+			actual, err := previewRuleSetContent(mrs.Bytes(), strings.ToLower(test.behavior.String()))
+			if err != nil || actual != test.text {
+				t.Fatalf("preview = %q, %v", actual, err)
+			}
+			if _, err := previewRuleSetContent(mrs.Bytes(), "classical"); err == nil {
+				t.Fatal("unsupported behavior accepted")
+			}
+		})
+	}
+	for _, data := range [][]byte{nil, []byte("not mrs")} {
+		if _, err := previewRuleSetContent(data, "domain"); err == nil {
+			t.Fatal("invalid content accepted")
+		}
+	}
+}
+
+func TestPreviewLibraryRejectsMalformedAllocationLengths(t *testing.T) {
+	for _, behavior := range []cp.RuleBehavior{cp.Domain, cp.IPCIDR} {
+		var raw bytes.Buffer
+		raw.Write(rp.MrsMagicBytes[:])
+		raw.WriteByte(behavior.Byte())
+		_ = binary.Write(&raw, binary.BigEndian, int64(1))
+		_ = binary.Write(&raw, binary.BigEndian, int64(0))
+		raw.WriteByte(1)
+		_ = binary.Write(&raw, binary.BigEndian, int64(1<<60))
+		encoder, err := zstd.NewWriter(nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		data := encoder.EncodeAll(raw.Bytes(), nil)
+		encoder.Close()
+		if result, err := previewRuleSetContent(data, strings.ToLower(behavior.String())); err == nil || result != "" {
+			t.Fatal("malformed allocation length accepted")
+		}
+	}
+	writer := &ruleSetPreviewWriter{}
+	writer.Grow(maxRuleSetPreviewBytes)
+	_, _ = writer.Write(bytes.Repeat([]byte{'x'}, maxRuleSetPreviewBytes))
+	if _, err := writer.Write([]byte("extra")); err == nil || !writer.overflow || writer.Len() != maxRuleSetPreviewBytes {
+		t.Fatal("preview output was not bounded")
 	}
 }

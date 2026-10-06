@@ -144,7 +144,7 @@ final class ProfileActionProvider
   }
 }
 
-String _$profileActionHash() => r'15291c43b8366c6d8031866df8b691202eeec0cb';
+String _$profileActionHash() => r'6be3cd66bca5d6a08ce21d4d63d9e3940a584a5e';
 
 abstract class _$ProfileAction extends $Notifier<void> {
   void build();

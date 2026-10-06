@@ -57,9 +57,11 @@ class ProfileAction extends _$ProfileAction {
 
   Future<Profile?> addProfileFormURL(
     String url, {
+    String? label,
     bool requestStartIfNeeded = true,
   }) => _controller.addProfileFormURL(
     url,
+    label: label,
     requestStartIfNeeded: requestStartIfNeeded,
   );
 
@@ -326,6 +328,7 @@ extension ProfilesControllerExt on AppController {
 
   Future<Profile?> addProfileFormURL(
     String url, {
+    String? label,
     bool requestStartIfNeeded = true,
   }) async {
     if (globalState.navigatorKey.currentState?.canPop() ?? false) {
@@ -335,9 +338,23 @@ extension ProfilesControllerExt on AppController {
     final profile = await loadingRun(tag: LoadingTag.profiles, () async {
       await ensureCoreReadyOrThrow();
       return _runWithCertificateRetry(() async {
-        final profile = Profile.normal(url: url);
+        final profile = Profile.normal(url: url, label: label?.trim());
         final prepared = await profile.prepareUpdate();
-        return persistProfile(profile, prepared.save);
+        try {
+          return await persistProfile(profile, () async {
+            final providers = await database.clashProvidersDao.all().get();
+            if (providers.any(
+              (item) =>
+                  item.kind == ProviderKind.proxy &&
+                  item.label == prepared.profile.label,
+            )) {
+              throw appLocalizations.existsTip(appLocalizations.name);
+            }
+            return prepared.save();
+          });
+        } finally {
+          prepared.discard();
+        }
       }, handleCloudUnauthorized: isoixCloudProfileUrl(url));
     }, title: appLocalizations.addProfile);
     if (profile != null) {

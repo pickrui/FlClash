@@ -37,6 +37,7 @@ enum CoreMethod {
   getExternalProviders,
   getExternalProvider,
   dumpRuleSet,
+  previewRuleSet,
   updateGeoData,
   updateExternalProvider,
   sideLoadExternalProvider,

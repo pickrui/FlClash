@@ -1338,5 +1338,9 @@
   "slide": "スライド",
   "textScalePreview": "アプリ内の文字はこの大きさで表示されます",
   "basicStrategy": "基本ポリシー",
-  "nonTextProviderFile": "この外部リソースはテキストファイルではありません"
+  "nonTextProviderFile": "この外部リソースはテキストファイルではありません",
+  "scriptChanged": "スクリプトが変更または削除されました。開き直して再試行してください。",
+  "startFromScratch": "最初から作成",
+  "accessControlDisabledDesc": "アプリアクセス制御は無効です",
+  "optional": "任意"
 }

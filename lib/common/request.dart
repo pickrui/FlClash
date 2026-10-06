@@ -296,6 +296,7 @@ class Request {
     String url, {
     required Options options,
     bool isApiRequest = false,
+    int maxBytes = _maxReadBytes,
     FutureOr<void> Function(Response<T> response)? validate,
   }) async {
     final clientOptions = isApiRequest ? _apiOptions : _resourceOptions;
@@ -319,7 +320,7 @@ class Request {
                   ? null
                   : () => appController.isAttach ? appController.ua : null,
             ),
-            maxBytes: _maxReadBytes,
+            maxBytes: maxBytes,
           );
           try {
             final response = await _getWithRedirectOnRoute<T>(
@@ -395,6 +396,7 @@ class Request {
   Future<Response<Uint8List>> getFileResponseForUrl(
     String url, {
     FutureOr<void> Function(Uint8List bytes)? validate,
+    int maxBytes = _maxReadBytes,
   }) async {
     final uri = Uri.tryParse(url);
     final isApiDomain = uri != null && _isApiDomain(uri.host);
@@ -402,6 +404,7 @@ class Request {
       return await _getWithRedirect<Uint8List>(
         url,
         isApiRequest: isApiDomain,
+        maxBytes: maxBytes,
         validate: (response) async {
           final bytes = response.data;
           if (bytes == null || bytes.isEmpty) {
@@ -437,9 +440,13 @@ class Request {
     }
   }
 
-  Future<Response<String>> getTextResponseForUrl(String url) async {
+  Future<Response<String>> getTextResponseForUrl(
+    String url, {
+    int maxBytes = _maxReadBytes,
+  }) async {
     return _getWithRedirect<String>(
       url,
+      maxBytes: maxBytes,
       options: Options(responseType: ResponseType.plain),
     );
   }

@@ -253,6 +253,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "accessControlDesc": MessageLookupByLibrary.simpleMessage(
       "Настройка доступа приложений к прокси",
     ),
+    "accessControlDisabledDesc": MessageLookupByLibrary.simpleMessage(
+      "Контроль доступа приложений отключён",
+    ),
     "accessControlNotAllowDesc": MessageLookupByLibrary.simpleMessage(
       "Выбранные приложения будут исключены из VPN",
     ),
@@ -1861,6 +1864,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "operationSuccess": MessageLookupByLibrary.simpleMessage(
       "Операция выполнена успешно",
     ),
+    "optional": MessageLookupByLibrary.simpleMessage("Необязательно"),
     "options": MessageLookupByLibrary.simpleMessage("Опции"),
     "other": MessageLookupByLibrary.simpleMessage("Другое"),
     "outboundIp": MessageLookupByLibrary.simpleMessage("Исходящий IP"),
@@ -2490,6 +2494,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Отсканируйте через Alipay / WeChat",
     ),
     "script": MessageLookupByLibrary.simpleMessage("Скрипт"),
+    "scriptChanged": MessageLookupByLibrary.simpleMessage(
+      "Скрипт изменён или удалён. Откройте его заново и повторите попытку.",
+    ),
     "scriptModeDesc": MessageLookupByLibrary.simpleMessage(
       "Режим скрипта, использование внешних расширяющих скриптов, предоставление возможности переопределения конфигурации одним кликом",
     ),
@@ -2564,6 +2571,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Профиль успешно импортирован. Хотите запустить ядро сейчас?",
     ),
     "startCorePromptTitle": MessageLookupByLibrary.simpleMessage("Подсказка"),
+    "startFromScratch": MessageLookupByLibrary.simpleMessage("С нуля"),
     "startSuccess": MessageLookupByLibrary.simpleMessage("Запущено успешно"),
     "startVpn": MessageLookupByLibrary.simpleMessage("Запуск VPN..."),
     "startupAndBackground": MessageLookupByLibrary.simpleMessage(

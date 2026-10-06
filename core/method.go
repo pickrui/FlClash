@@ -248,6 +248,22 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 			return
 		}
 		response.success(handleGetExternalProvider(params.Name, params.Type))
+	case previewRuleSetMethod:
+		params := struct {
+			Content  []byte `json:"content"`
+			Behavior string `json:"behavior"`
+		}{}
+		if !decodeMethodArguments(call, response, &params) {
+			return
+		}
+		go func() {
+			text, err := previewRuleSetContent(params.Content, params.Behavior)
+			if err != nil {
+				response.failure("core_error", err.Error(), nil)
+				return
+			}
+			response.success(text)
+		}()
 	case dumpRuleSetMethod:
 		params := struct {
 			Name string `json:"providerName"`

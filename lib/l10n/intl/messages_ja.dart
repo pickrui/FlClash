@@ -225,6 +225,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "accessControlDesc": MessageLookupByLibrary.simpleMessage(
       "アプリケーションのプロキシアクセスを設定",
     ),
+    "accessControlDisabledDesc": MessageLookupByLibrary.simpleMessage(
+      "アプリアクセス制御は無効です",
+    ),
     "accessControlNotAllowDesc": MessageLookupByLibrary.simpleMessage(
       "選択したアプリをVPNから除外",
     ),
@@ -1485,6 +1488,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "openInBrowser": MessageLookupByLibrary.simpleMessage("ブラウザで開く"),
     "operationFailed": MessageLookupByLibrary.simpleMessage("操作に失敗しました"),
     "operationSuccess": MessageLookupByLibrary.simpleMessage("操作に成功しました"),
+    "optional": MessageLookupByLibrary.simpleMessage("任意"),
     "options": MessageLookupByLibrary.simpleMessage("オプション"),
     "other": MessageLookupByLibrary.simpleMessage("その他"),
     "outboundIp": MessageLookupByLibrary.simpleMessage("出口 IP"),
@@ -1976,6 +1980,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Alipay / WeChat でスキャンして支払い",
     ),
     "script": MessageLookupByLibrary.simpleMessage("スクリプト"),
+    "scriptChanged": MessageLookupByLibrary.simpleMessage(
+      "スクリプトが変更または削除されました。開き直して再試行してください。",
+    ),
     "scriptModeDesc": MessageLookupByLibrary.simpleMessage(
       "スクリプトモード、外部拡張スクリプトを使用し、ワンクリックで設定を上書きする機能を提供",
     ),
@@ -2036,6 +2043,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "プロファイルが正常にインポートされました。今すぐ起動しますか？",
     ),
     "startCorePromptTitle": MessageLookupByLibrary.simpleMessage("プロンプト"),
+    "startFromScratch": MessageLookupByLibrary.simpleMessage("最初から作成"),
     "startSuccess": MessageLookupByLibrary.simpleMessage("起動しました"),
     "startVpn": MessageLookupByLibrary.simpleMessage("VPNを開始中..."),
     "startupAndBackground": MessageLookupByLibrary.simpleMessage("起動とバックグラウンド"),

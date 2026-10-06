@@ -30,6 +30,61 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets(
+    'group latency action follows the page search and keeps matching hidden nodes',
+    (tester) async {
+      const group = Group(
+        name: 'Fixture',
+        type: GroupType.Selector,
+        all: [
+          Proxy(name: 'Tokyo', type: 'ss'),
+          Proxy(name: 'Tokyo hidden', type: 'ss'),
+          Proxy(name: 'Hong Kong', type: 'trojan'),
+        ],
+      );
+      final action = _DelayAction();
+      final container = ProviderContainer(
+        overrides: [
+          proxiesActionProvider.overrideWith(() => action),
+          groupsProvider.overrideWithBuild((_, _) => [group]),
+          getSelectedProxyNameProvider('Fixture').overrideWith((_) => 'Tokyo'),
+        ],
+      );
+      addTearDown(container.dispose);
+      container.listen(queryProvider(QueryTag.proxies), (_, _) {});
+      container.read(queryProvider(QueryTag.proxies).notifier).value = 'Tokyo';
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: _TestApp(
+            child: Center(
+              child: SizedBox(
+                width: 320,
+                height: 72,
+                child: ListHeader(
+                  group: group.copyWith(all: [group.all.first]),
+                  enterAnimated: false,
+                  isExpand: true,
+                  onChange: (_) {},
+                  onScrollToSelected: (_) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip(AppLocalizations.current.delayTest));
+      await tester.pumpAndSettle();
+      expect(action.delays, ['Tokyo', 'Tokyo hidden']);
+      action.delays.clear();
+      container.read(queryProvider(QueryTag.proxies).notifier).value = '';
+      await tester.tap(find.byTooltip(AppLocalizations.current.delayTest));
+      await tester.pumpAndSettle();
+      expect(action.delays, ['Tokyo', 'Tokyo hidden', 'Hong Kong']);
+    },
+  );
+
   for (final isAndroid in [true, false]) {
     testWidgets(
       'concurrency setting shows and saves the effective platform value: Android=$isAndroid',
@@ -545,6 +600,12 @@ class _TestApp extends StatelessWidget {
 class _DelayAction extends ProxiesAction {
   final delays = <String>[];
   final selections = <String>[];
+  @override
+  Future<bool> delayTest(List<Proxy> proxies, [String? testUrl]) async {
+    delays.addAll(proxies.map((item) => item.name));
+    return false;
+  }
+
   @override
   Future<void> proxyDelayTest(Proxy proxy, [String? testUrl]) async {
     delays.add(proxy.name);

@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:io';
 
-import 'package:drift/drift.dart';
+import 'package:drift/drift.dart' hide isNull;
 import 'package:drift/native.dart';
 import 'package:fl_clash/database/database.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -41,7 +41,11 @@ void main() {
     addTearDown(database.close);
     final profile = await database.profilesDao.all().getSingle();
 
-    expect(database.schemaVersion, 5);
+    expect(database.schemaVersion, 6);
+    final scripts = await database.scriptsDao.all().get();
+    expect(scripts.single.label, 'Legacy script');
+    expect(scripts.single.url, isNull);
+    expect(scripts.single.order, isNull);
     expect(profile.label, 'Legacy');
     expect(profile.customProxyGroups, isEmpty);
     expect(profile.customRules, isEmpty);
@@ -116,7 +120,7 @@ void main() {
           columns.map((row) => row.read<String>('name')),
           containsAll(['custom_proxy_groups', 'custom_rules']),
         );
-        expect(userVersion.read<int>('user_version'), 5);
+        expect(userVersion.read<int>('user_version'), 6);
       },
     );
   }
@@ -183,6 +187,9 @@ Future<void> _createV2Database(
       last_update_time INTEGER NOT NULL
     )
   ''');
+  await oldExecutor.runCustom(
+    "INSERT INTO scripts VALUES (7, 'Legacy script', 1)",
+  );
   await oldExecutor.runCustom('''
     CREATE TABLE profile_rule_mapping (
       id TEXT NOT NULL PRIMARY KEY,

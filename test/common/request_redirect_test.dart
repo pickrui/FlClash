@@ -8,13 +8,44 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/request.dart';
+import 'package:fl_clash/state.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 void main() {
   late Request request;
 
-  setUp(() => request = Request());
+  setUpAll(() {
+    globalState.packageInfo = PackageInfo(
+      appName: 'FlClash',
+      packageName: 'test.flclash',
+      version: '0.0.1',
+      buildNumber: '1',
+    );
+  });
+
+  setUp(() => request = Request(isApiDomain: (_) => false));
   tearDown(() => request.dio.close(force: true));
+
+  for (final binary in [false, true]) {
+    test(
+      'resource reads enforce their requested byte limit ($binary)',
+      () async {
+        final server = await _server((incoming) async {
+          incoming.response.write('123456789');
+          await incoming.response.close();
+        });
+        final url = 'http://127.0.0.1:${server.port}/resource';
+        await expectLater(
+          binary
+              ? request.getFileResponseForUrl(url, maxBytes: 8)
+              : request.getTextResponseForUrl(url, maxBytes: 8),
+          throwsA(isA<DioException>()),
+        );
+        expect((await request.getTextResponseForUrl(url)).data, '123456789');
+      },
+    );
+  }
 
   test('HTML redirects are followed before decoding version JSON', () async {
     final server = await _server((incoming) async {

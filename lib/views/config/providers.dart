@@ -11,6 +11,9 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/clash_providers.dart';
+import 'package:fl_clash/providers/app.dart';
+import 'package:fl_clash/state.dart';
+import 'package:path/path.dart' as p;
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
@@ -41,48 +44,274 @@ class ClashProvidersView extends ConsumerStatefulWidget {
 class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
   ProviderKind _kind = ProviderKind.proxy;
   String _search = '';
+  bool _importing = false;
 
-  void _edit([ClashProvider? provider]) {
+  Future<void> _run(Future<void> Function() action) async {
+    try {
+      await action();
+    } catch (error) {
+      if (mounted) context.showNotifier(providerLibraryError(context, error));
+    }
+  }
+
+  ClashProvider _newProvider({
+    String label = '',
+    String url = '',
+    List<int> content = const [],
+  }) => ClashProvider(
+    id: snowflake.id,
+    kind: _kind,
+    label: label,
+    url: url,
+    content: content,
+    order: (ref.read(clashProvidersProvider).value ?? []).length,
+  );
+
+  String _uniqueLabel(String source) {
+    final path = Uri.tryParse(source)?.path ?? source;
+    final name = p.basenameWithoutExtension(path);
+    final base = name.isEmpty
+        ? (_kind == ProviderKind.proxy
+              ? context.appLocalizations.proxyProviders
+              : context.appLocalizations.ruleProviders)
+        : name;
+    final labels = (ref.read(clashProvidersProvider).value ?? [])
+        .where((item) => item.kind == _kind)
+        .map((item) => item.label)
+        .toSet();
+    var label = base;
+    for (var suffix = 2; labels.contains(label); suffix++) {
+      label = '$base ($suffix)';
+    }
+    return label;
+  }
+
+  void _options(ClashProvider provider, {bool isNew = false}) =>
+      BaseNavigator.push(
+        context,
+        EditClashProviderView(provider: provider, isNew: isNew),
+      );
+
+  Future<void> _import({required bool fromUrl}) async {
+    if (_importing) return;
+    setState(() => _importing = true);
+    try {
+      await _run(() async {
+        if (fromUrl) {
+          final result = await globalState
+              .showCommonDialog<({String label, String url})>(
+                child: NamedUrlDialog(
+                  title: context.appLocalizations.importUrl,
+                  labelValidator: (value) =>
+                      (ref.read(clashProvidersProvider).value ?? []).any(
+                        (item) =>
+                            item.kind == _kind && item.label == value?.trim(),
+                      )
+                      ? context.appLocalizations.existsTip(
+                          context.appLocalizations.name,
+                        )
+                      : null,
+                  urlValidator: (value) {
+                    final uri = Uri.tryParse(value?.trim() ?? '');
+                    return uri != null &&
+                            ['http', 'https'].contains(uri.scheme) &&
+                            uri.host.isNotEmpty &&
+                            uri.userInfo.isEmpty
+                        ? null
+                        : context.appLocalizations.providerUrlTip;
+                  },
+                ),
+              );
+          if (result == null || !mounted) return;
+          _options(
+            _newProvider(
+              label: result.label.isEmpty
+                  ? _uniqueLabel(result.url)
+                  : result.label,
+              url: result.url,
+            ).withFileFormat(result.url),
+            isNew: true,
+          );
+        } else {
+          final file = await picker.pickerFile();
+          if (file == null || !mounted) return;
+          final bytes = await file.readBytes(maxBytes: maxProviderContentBytes);
+          if (!mounted) return;
+          _options(
+            _newProvider(
+              label: _uniqueLabel(file.name),
+              content: bytes,
+            ).withFileFormat(file.name),
+            isNew: true,
+          );
+        }
+      });
+    } finally {
+      if (mounted) setState(() => _importing = false);
+    }
+  }
+
+  void _editContent([ClashProvider? provider]) {
+    final draft = provider ?? _newProvider();
+    String raw;
+    try {
+      raw = draft.content.isEmpty
+          ? (draft.kind == ProviderKind.proxy
+                ? 'proxies: []\n'
+                : 'payload: []\n')
+          : utf8.decode(draft.content);
+    } catch (error) {
+      context.showNotifier(providerLibraryError(context, error));
+      return;
+    }
+    Future<void> save(
+      BuildContext editorContext,
+      String label,
+      String content,
+    ) async {
+      var name = label.trim();
+      if (name.isEmpty) {
+        name =
+            (await globalState.showCommonDialog<String>(
+              child: InputDialog(
+                title: context.appLocalizations.save,
+                labelText: context.appLocalizations.name,
+                value: '',
+                validator: (value) => value?.trim().isNotEmpty == true
+                    ? null
+                    : context.appLocalizations.providerNameInvalid,
+              ),
+            ))?.trim() ??
+            '';
+        if (name.isEmpty || !mounted) return;
+      }
+      var next = draft.copyWith(label: name, content: utf8.encode(content));
+      if (provider == null && draft.kind == ProviderKind.rule) {
+        final behavior = await globalState
+            .showCommonDialog<RuleProviderBehavior>(
+              child: OptionsDialog<RuleProviderBehavior>(
+                title: context.appLocalizations.behavior,
+                options: RuleProviderBehavior.values,
+                value: next.behavior,
+                textBuilder: (item) => item.name,
+              ),
+            );
+        if (behavior == null || !mounted) return;
+        next = next.copyWith(behavior: behavior);
+      }
+      await ref
+          .read(clashProviderLibraryProvider)
+          .save(next, previous: provider);
+      if (editorContext.mounted) Navigator.of(editorContext).pop();
+    }
+
     BaseNavigator.push(
       context,
-      EditClashProviderView(
-        provider:
-            provider ??
-            ClashProvider(
-              id: snowflake.id,
-              kind: _kind,
-              label: '',
-              order: (ref.read(clashProvidersProvider).value ?? []).length,
-            ),
-        isNew: provider == null,
+      EditorPage(
+        title: draft.label,
+        titleEditable: true,
+        content: raw,
+        schema: EditorSchema.provider,
+        onSave: save,
+        onPop: (editorContext, title, content) async {
+          if (title == draft.label && content == raw) return true;
+          final answer = await globalState.showMessage(
+            message: TextSpan(text: context.appLocalizations.saveChanges),
+          );
+          if (answer == false) return true;
+          if (answer == true && mounted && editorContext.mounted) {
+            await _run(() => save(editorContext, title, content));
+          }
+          return false;
+        },
+      ),
+    );
+  }
+
+  void _preview(ClashProvider provider) {
+    final core = ref.read(coreHandlerProvider);
+    BaseNavigator.push(
+      context,
+      EditorPage(
+        title: provider.label,
+        load: () async {
+          final bytes = provider.isRemote
+              ? (await request.getFileResponseForUrl(
+                  provider.url,
+                  maxBytes: maxProviderContentBytes,
+                )).data!
+              : provider.content;
+          if (bytes.length > maxProviderContentBytes) {
+            throw const ProviderLibraryException('size');
+          }
+          return core.previewRuleSet(bytes, provider.behavior.name);
+        },
+        schema: EditorSchema.provider,
       ),
     );
   }
 
   Future<void> _remove(ClashProvider provider) async {
-    final l = context.appLocalizations;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        content: Text(l.deleteTip(provider.label)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(l.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(l.delete),
-          ),
-        ],
+    final confirmed = await globalState.showMessage(
+      message: TextSpan(
+        text: context.appLocalizations.deleteTip(provider.label),
       ),
     );
-    if (confirmed != true || !mounted) return;
-    try {
-      await ref.read(clashProviderLibraryProvider).remove(provider);
-    } catch (error) {
-      if (mounted) context.showNotifier(providerLibraryError(context, error));
+    if (confirmed == true && mounted) {
+      await _run(() => ref.read(clashProviderLibraryProvider).remove(provider));
     }
+  }
+
+  Widget _item(ClashProvider item, int index, int length) {
+    final l = context.appLocalizations;
+    final editable = !item.isRemote && item.isTextContent;
+    return ItemPositionProvider(
+      position: ItemPosition.get(index, length),
+      child: DecorationListItem(
+        contentPadding: const EdgeInsets.only(left: 16, right: 6),
+        title: Text(item.label, maxLines: 1, overflow: TextOverflow.ellipsis),
+        subtitle: Text(
+          item.isRemote ? item.url : l.file,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        onPressed: () => editable ? _editContent(item) : _options(item),
+        trailing: CommonPopupBox(
+          targetBuilder: (open) => IconButton(
+            tooltip: l.more,
+            icon: const GlyphIcon(AppGlyphs.more),
+            onPressed: () => open(),
+          ),
+          popup: CommonPopupMenu(
+            items: [
+              if (editable)
+                PopupMenuItemData(
+                  label: l.edit,
+                  glyph: AppGlyphs.edit,
+                  onPressed: () => _editContent(item),
+                ),
+              if (!item.isTextContent)
+                PopupMenuItemData(
+                  label: l.preview,
+                  glyph: AppGlyphs.eye,
+                  onPressed: () => _preview(item),
+                ),
+              PopupMenuItemData(
+                label: l.options,
+                glyph: AppGlyphs.settings,
+                onPressed: () => _options(item),
+              ),
+              PopupMenuItemData(
+                label: l.delete,
+                glyph: AppGlyphs.delete,
+                danger: true,
+                onPressed: () => _remove(item),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -92,16 +321,41 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
     final entries = (state.value ?? [])
         .where((item) => item.kind == _kind)
         .toList();
+    final query = SearchQuery(_search);
     final visible = entries
-        .where((item) => SearchQuery(_search).matches([item.label, item.url]))
+        .where((item) => query.matches([item.label, item.url]))
         .toList();
-    return BaseScaffold(
+    return CommonScaffold(
       title: l.appProviderLibrary,
+      isLoading: _importing,
+      searchState: AppBarSearchState(
+        onSearch: (value) => setState(() => _search = value),
+      ),
       actions: [
-        IconButton(
-          tooltip: l.add,
-          onPressed: () => _edit(),
-          icon: const GlyphIcon(AppGlyphs.add),
+        CommonPopupBox(
+          targetBuilder: (open) => FilledButton.tonal(
+            onPressed: _importing ? null : () => open(),
+            child: Text(l.add),
+          ),
+          popup: CommonPopupMenu(
+            items: [
+              PopupMenuItemData(
+                label: l.startFromScratch,
+                glyph: AppGlyphs.compose,
+                onPressed: _editContent,
+              ),
+              PopupMenuItemData(
+                label: l.importUrl,
+                glyph: AppGlyphs.cloudDownload,
+                onPressed: () => _import(fromUrl: true),
+              ),
+              PopupMenuItemData(
+                label: l.importFile,
+                glyph: AppGlyphs.importFile,
+                onPressed: () => _import(fromUrl: false),
+              ),
+            ],
+          ),
         ),
       ],
       body: AppBarClearance(
@@ -121,18 +375,9 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
                   ),
                 ],
                 selected: {_kind},
-                onSelectionChanged: (value) =>
-                    setState(() => _kind = value.single),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: TextField(
-                decoration: InputDecoration(
-                  labelText: l.search,
-                  prefixIcon: const GlyphIcon(AppGlyphs.search),
-                ),
-                onChanged: (value) => setState(() => _search = value),
+                onSelectionChanged: _importing
+                    ? null
+                    : (value) => setState(() => _kind = value.single),
               ),
             ),
             if (state.hasError)
@@ -140,59 +385,43 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
                 padding: const EdgeInsets.all(16),
                 child: Text(state.error.toString()),
               ),
-            if (state.isLoading) const LinearProgressIndicator(),
             Expanded(
-              child: visible.isEmpty
-                  ? Center(child: Text(l.nullTip(l.providers)))
-                  : ReorderableListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      buildDefaultDragHandles: false,
-                      itemCount: visible.length,
-                      onReorderItem: (before, after) async {
-                        if (_search.isNotEmpty) return;
-                        final ids = entries.map((item) => item.id).toList();
-                        ids.insert(after, ids.removeAt(before));
-                        try {
-                          await ref
-                              .read(clashProviderLibraryProvider)
-                              .reorder(_kind, ids);
-                        } catch (error) {
-                          if (context.mounted) {
-                            context.showNotifier(
-                              providerLibraryError(context, error),
-                            );
-                          }
-                        }
-                      },
-                      itemBuilder: (context, index) {
-                        final item = visible[index];
-                        return ListTile(
-                          key: ValueKey(item.id),
-                          title: Text(item.label),
-                          subtitle: Text(
-                            item.isRemote ? item.url : l.providerLocal,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          onTap: () => _edit(item),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                tooltip: l.delete,
-                                onPressed: () => _remove(item),
-                                icon: const GlyphIcon(AppGlyphs.delete),
-                              ),
-                              if (_search.isEmpty)
-                                ReorderableDragStartListener(
-                                  index: index,
-                                  child: const GlyphIcon(AppGlyphs.dragHandle),
-                                ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
+              child: NullStatusSwitcher(
+                isLoading: state.isLoading,
+                isEmpty: visible.isEmpty,
+                isSearching: !query.isEmpty,
+                nullStatus: NullStatus(
+                  illustration: _kind == ProviderKind.proxy
+                      ? NullStatusIllustration.proxies
+                      : NullStatusIllustration.rules,
+                  label: l.nullTip(l.providers),
+                ),
+                child: ReorderableListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  buildDefaultDragHandles: false,
+                  itemCount: visible.length,
+                  itemBuilder: (_, index) =>
+                      ReorderableDelayedDragStartListener(
+                        key: ValueKey(visible[index].id),
+                        index: index,
+                        enabled: query.isEmpty,
+                        child: _item(visible[index], index, visible.length),
+                      ),
+                  proxyDecorator: (_, index, animation) => commonProxyDecorator(
+                    _item(visible[index], index, visible.length),
+                    index,
+                    animation,
+                  ),
+                  onReorderItem: (before, after) => _run(() async {
+                    if (!query.isEmpty) return;
+                    final ids = entries.map((item) => item.id).toList();
+                    ids.insert(after, ids.removeAt(before));
+                    await ref
+                        .read(clashProviderLibraryProvider)
+                        .reorder(_kind, ids);
+                  }),
+                ),
+              ),
             ),
           ],
         ),
@@ -220,10 +449,15 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
   );
   late final TextEditingController _url = TextEditingController(
     text: widget.provider.url,
-  );
+  )..addListener(_followUrlFormat);
   late ClashProvider _draft = widget.provider;
   late bool _remote = widget.provider.isRemote;
   bool _saving = false;
+
+  void _followUrlFormat() {
+    final next = _draft.withFileFormat(_url.text.trim());
+    if (next != _draft) setState(() => _draft = next);
+  }
 
   @override
   void dispose() {
@@ -283,6 +517,26 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
         titleEditable: false,
         content: content,
         language: Language.yaml,
+        onPop: (editorContext, _, value) async {
+          if (value == content) return true;
+          final answer = await globalState.showMessage(
+            message: TextSpan(text: context.appLocalizations.saveChanges),
+          );
+          if (answer == null) return false;
+          if (answer && mounted) {
+            final bytes = utf8.encode(value);
+            if (bytes.length > maxProviderContentBytes) {
+              if (editorContext.mounted) {
+                editorContext.showNotifier(
+                  editorContext.appLocalizations.providerContentTooLarge,
+                );
+              }
+              return false;
+            }
+            setState(() => _draft = _draft.copyWith(content: bytes));
+          }
+          return true;
+        },
         onSave: (editorContext, _, content) {
           final bytes = utf8.encode(content);
           if (bytes.length > maxProviderContentBytes) {

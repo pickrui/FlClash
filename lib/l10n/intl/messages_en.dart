@@ -255,6 +255,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "accessControlDesc": MessageLookupByLibrary.simpleMessage(
       "Configure application access proxy",
     ),
+    "accessControlDisabledDesc": MessageLookupByLibrary.simpleMessage(
+      "App access control is disabled",
+    ),
     "accessControlNotAllowDesc": MessageLookupByLibrary.simpleMessage(
       "The selected application will be excluded from VPN",
     ),
@@ -1786,6 +1789,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "operationSuccess": MessageLookupByLibrary.simpleMessage(
       "Operation successful",
     ),
+    "optional": MessageLookupByLibrary.simpleMessage("Optional"),
     "options": MessageLookupByLibrary.simpleMessage("Options"),
     "other": MessageLookupByLibrary.simpleMessage("Other"),
     "outboundIp": MessageLookupByLibrary.simpleMessage("Outbound IP"),
@@ -2365,6 +2369,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Scan with Alipay / WeChat to pay",
     ),
     "script": MessageLookupByLibrary.simpleMessage("Script"),
+    "scriptChanged": MessageLookupByLibrary.simpleMessage(
+      "The script changed or was deleted. Reopen it and try again.",
+    ),
     "scriptModeDesc": MessageLookupByLibrary.simpleMessage(
       "Script mode, use external extension scripts, provide one-click override configuration capability",
     ),
@@ -2431,6 +2438,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Profile has been successfully imported. Do you want to start the core now?",
     ),
     "startCorePromptTitle": MessageLookupByLibrary.simpleMessage("Prompt"),
+    "startFromScratch": MessageLookupByLibrary.simpleMessage(
+      "Start from scratch",
+    ),
     "startSuccess": MessageLookupByLibrary.simpleMessage(
       "Started successfully",
     ),

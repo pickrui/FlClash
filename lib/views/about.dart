@@ -17,8 +17,25 @@ import 'package:fl_clash/widgets/scaffold.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class AboutView extends StatelessWidget {
+class AboutView extends StatefulWidget {
   const AboutView({super.key});
+  @override
+  State<AboutView> createState() => _AboutViewState();
+}
+
+class _AboutViewState extends State<AboutView> {
+  bool _checkingUpdate = false;
+
+  Future<void> _checkUpdate() async {
+    if (_checkingUpdate) return;
+    final action = context.updateAction;
+    setState(() => _checkingUpdate = true);
+    try {
+      await action.checkUpdate(isUser: true);
+    } finally {
+      if (mounted) setState(() => _checkingUpdate = false);
+    }
+  }
 
   ListItem _siteLinkItem({
     required String title,
@@ -26,6 +43,7 @@ class AboutView extends StatelessWidget {
     required String path,
   }) {
     return ListItem(
+      leading: const _LinkBadge(glyph: AppGlyphs.link),
       title: Text(title),
       onTap: () {
         globalState.openUrl('https://$domain$path');
@@ -35,134 +53,92 @@ class AboutView extends StatelessWidget {
   }
 
   List<Widget> _buildMoreSection(BuildContext context) {
-    final updateAction = context.updateAction;
-
     final baseDomain = Secrets.primarySiteDomain;
     final spareDomain = Secrets.spareSiteDomain;
-    return generateSection(
-      separated: false,
-      title: appLocalizations.more,
-      items: [
-        Consumer(
-          builder: (context, ref, _) {
-            final task = ref.watch(appUpdateDownloadProvider);
-            return ValueListenableBuilder(
-              valueListenable: task,
-              builder: (context, state, _) {
-                final l = context.appLocalizations;
-                return ListItem(
-                  title: Text(switch (state.phase) {
-                    AppUpdateDownloadPhase.downloading => l.updateDownloading,
-                    AppUpdateDownloadPhase.ready => l.updateInstall,
-                    AppUpdateDownloadPhase.failed => l.updateDownloadFailed,
-                    _ => l.checkUpdate,
-                  }),
-                  subtitle:
-                      state.phase == AppUpdateDownloadPhase.downloading &&
-                          state.progress != null
-                      ? Text('${(state.progress! * 100).floor()}%')
-                      : null,
-                  onTap: () => updateAction.checkUpdate(isUser: true),
-                );
-              },
-            );
-          },
-        ),
-        if (baseDomain.isNotEmpty)
-          _siteLinkItem(
-            title: appLocalizations.userCenter,
-            domain: baseDomain,
-            path: '/user',
+    return [
+      generateSectionV3(
+        title: appLocalizations.more,
+        items: [
+          if (baseDomain.isNotEmpty)
+            _siteLinkItem(
+              title: appLocalizations.userCenter,
+              domain: baseDomain,
+              path: '/user',
+            ),
+          if (spareDomain.isNotEmpty)
+            _siteLinkItem(
+              title: appLocalizations.userCenterFallback,
+              domain: spareDomain,
+              path: '/user',
+            ),
+          if (baseDomain.isNotEmpty)
+            _siteLinkItem(
+              title: appLocalizations.softwareCenter,
+              domain: baseDomain,
+              path: '/client',
+            ),
+          ListItem(
+            leading: const _LinkBadge(glyph: AppGlyphs.info),
+            title: Text(appLocalizations.documentCenter),
+            onTap: () {
+              globalState.openUrl('https://docs.dler.io/black-hole');
+            },
+            trailing: const GlyphIcon(AppGlyphs.openExternal),
           ),
-        if (spareDomain.isNotEmpty)
-          _siteLinkItem(
-            title: appLocalizations.userCenterFallback,
-            domain: spareDomain,
-            path: '/user',
+          ListItem(
+            leading: const _LinkBadge(glyph: AppGlyphs.code),
+            title: Text(appLocalizations.project),
+            onTap: () {
+              globalState.openUrl('https://github.com/$repository');
+            },
+            trailing: const GlyphIcon(AppGlyphs.openExternal),
           ),
-        if (baseDomain.isNotEmpty)
-          _siteLinkItem(
-            title: appLocalizations.softwareCenter,
-            domain: baseDomain,
-            path: '/client',
+          ListItem(
+            leading: const _LinkBadge(glyph: AppGlyphs.cpu),
+            title: Text(appLocalizations.core),
+            onTap: () {
+              globalState.openUrl(
+                'https://github.com/chen08209/Clash.Meta/tree/FlClash',
+              );
+            },
+            trailing: const GlyphIcon(AppGlyphs.openExternal),
           ),
-        ListItem(
-          title: Text(appLocalizations.documentCenter),
-          onTap: () {
-            globalState.openUrl('https://docs.dler.io/black-hole');
-          },
-          trailing: const GlyphIcon(AppGlyphs.openExternal),
-        ),
-        ListItem(
-          title: Text(appLocalizations.project),
-          onTap: () {
-            globalState.openUrl('https://github.com/$repository');
-          },
-          trailing: const GlyphIcon(AppGlyphs.openExternal),
-        ),
-        ListItem(
-          title: Text(appLocalizations.core),
-          onTap: () {
-            globalState.openUrl(
-              'https://github.com/chen08209/Clash.Meta/tree/FlClash',
-            );
-          },
-          trailing: const GlyphIcon(AppGlyphs.openExternal),
-        ),
-      ],
-    );
+        ],
+      ),
+    ];
   }
 
   @override
   Widget build(BuildContext context) {
     final items = [
-      ListTile(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Consumer(
-              builder: (_, ref, _) {
-                return _DeveloperModeDetector(
-                  child: Wrap(
-                    spacing: 16,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Image.asset(
-                          'assets/images/icon.png',
-                          width: 64,
-                          height: 64,
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            appName,
-                            style: Theme.of(context).textTheme.headlineSmall,
-                          ),
-                          Text(
-                            '${globalState.packageInfo.version}+${globalState.packageInfo.buildNumber}',
-                            style: Theme.of(context).textTheme.labelLarge,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  onEnterDeveloperMode: () {
-                    ref
-                        .read(appSettingProvider.notifier)
-                        .update((state) => state.copyWith(developerMode: true));
-                    context.showNotifier(
-                      appLocalizations.developerModeEnableTip,
-                    );
-                  },
+      Consumer(
+        builder: (context, ref, _) {
+          final task = ref.watch(appUpdateDownloadProvider);
+          return ValueListenableBuilder(
+            valueListenable: task,
+            builder: (context, state, _) => _AboutHero(
+              isCheckingUpdate: _checkingUpdate,
+              onCheckUpdate: _checkUpdate,
+              updateLabel: switch (state.phase) {
+                AppUpdateDownloadPhase.downloading =>
+                  '${context.appLocalizations.updateDownloading}${state.progress == null ? '' : ' ${(state.progress! * 100).floor()}%'}',
+                AppUpdateDownloadPhase.ready =>
+                  context.appLocalizations.updateInstall,
+                AppUpdateDownloadPhase.failed =>
+                  context.appLocalizations.updateDownloadFailed,
+                _ => context.appLocalizations.checkUpdate,
+              },
+              onEnterDeveloperMode: () {
+                ref
+                    .read(appSettingProvider.notifier)
+                    .update((state) => state.copyWith(developerMode: true));
+                context.showNotifier(
+                  context.appLocalizations.developerModeEnableTip,
                 );
               },
             ),
-          ],
-        ),
+          );
+        },
       ),
       const SizedBox(height: 12),
       ..._buildMoreSection(context),
@@ -182,6 +158,154 @@ class AboutView extends StatelessWidget {
         child: Padding(
           padding: kMaterialListPadding.copyWith(top: 16, bottom: 16),
           child: generateListView(items),
+        ),
+      ),
+    );
+  }
+}
+
+class _AboutHero extends StatelessWidget {
+  final bool isCheckingUpdate;
+  final String updateLabel;
+  final VoidCallback onCheckUpdate;
+  final VoidCallback onEnterDeveloperMode;
+
+  const _AboutHero({
+    required this.isCheckingUpdate,
+    required this.updateLabel,
+    required this.onCheckUpdate,
+    required this.onEnterDeveloperMode,
+  });
+
+  static const _logoSize = 96.0;
+  static const _logoInset = 14.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final textTheme = context.textTheme;
+    final appLocalizations = context.appLocalizations;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+      child: Column(
+        children: [
+          _DeveloperModeDetector(
+            onEnterDeveloperMode: onEnterDeveloperMode,
+            child: DecoratedBox(
+              decoration: ShapeDecoration(
+                color: colorScheme.surfaceContainerHigh,
+                shape: AppShape.all(AppCorner.fit(_logoSize)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(_logoInset),
+                child: Image.asset(
+                  'assets/images/icon.png',
+                  width: _logoSize - _logoInset * 2,
+                  height: _logoSize - _logoInset * 2,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            appName,
+            style: textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.center,
+            children: [
+              _Pill(
+                label:
+                    'v${globalState.packageInfo.version}+${globalState.packageInfo.buildNumber}',
+                color: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+              ),
+              _Pill(
+                label: 'Clash / mihomo',
+                color: colorScheme.surfaceContainerHighest,
+                foregroundColor: colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Text(
+              appLocalizations.desc,
+              textAlign: TextAlign.center,
+              style: textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                height: 1.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          FilledButton.tonalIcon(
+            onPressed: isCheckingUpdate ? null : onCheckUpdate,
+            icon: const GlyphIcon(AppGlyphs.sync, fill: 1),
+            label: Text(updateLabel),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Pill extends StatelessWidget {
+  final String label;
+  final Color color;
+  final Color foregroundColor;
+
+  const _Pill({
+    required this.label,
+    required this.color,
+    required this.foregroundColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: ShapeDecoration(color: color, shape: AppShape.full),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        child: Text(
+          label,
+          style: context.textTheme.labelMedium?.copyWith(
+            color: foregroundColor,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LinkBadge extends StatelessWidget {
+  final Glyph glyph;
+
+  const _LinkBadge({required this.glyph});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    return DecoratedBox(
+      decoration: ShapeDecoration(
+        color: colorScheme.secondaryContainer,
+        shape: AppShape.md,
+      ),
+      child: SizedBox.square(
+        dimension: 40,
+        child: Center(
+          child: GlyphIcon(
+            glyph,
+            size: 20,
+            color: colorScheme.onSecondaryContainer,
+          ),
         ),
       ),
     );

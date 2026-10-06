@@ -30,8 +30,15 @@ double getItemHeight(ProxyCardType proxyCardType) {
 }
 
 /// Tests a group; when every node failed, offers the network self-check.
-Future<void> delayTest(List<Proxy> proxies, [String? testUrl]) async {
-  if (!await appController.delayTest(proxies, testUrl)) return;
+Future<void> delayTest(
+  List<Proxy> proxies, [
+  String? testUrl,
+  ProxiesAction? action,
+]) async {
+  final failed = action == null
+      ? await appController.delayTest(proxies, testUrl)
+      : await action.delayTest(proxies, testUrl);
+  if (!failed) return;
   globalState.showNotifier(
     appLocalizations.diagAllFailed,
     actionState: MessageActionState(
@@ -51,7 +58,16 @@ Future<void> delayTestGroup(WidgetRef ref, Group group) => ref
     .run(
       profileId: ref.read(currentProfileIdProvider),
       groupName: group.name,
-      test: () => delayTest(group.all, group.testUrl),
+      test: () {
+        final query = SearchQuery(ref.read(queryProvider(QueryTag.proxies)));
+        return delayTest(
+          group.all
+              .where((proxy) => query.matches([proxy.name, proxy.type]))
+              .toList(),
+          group.testUrl,
+          ref.read(proxiesActionProvider.notifier),
+        );
+      },
     );
 
 double getScrollToSelectedOffset({

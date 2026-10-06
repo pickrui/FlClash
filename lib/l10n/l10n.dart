@@ -11353,6 +11353,41 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `The script changed or was deleted. Reopen it and try again.`
+  String get scriptChanged {
+    return Intl.message(
+      'The script changed or was deleted. Reopen it and try again.',
+      name: 'scriptChanged',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Start from scratch`
+  String get startFromScratch {
+    return Intl.message(
+      'Start from scratch',
+      name: 'startFromScratch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `App access control is disabled`
+  String get accessControlDisabledDesc {
+    return Intl.message(
+      'App access control is disabled',
+      name: 'accessControlDisabledDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Optional`
+  String get optional {
+    return Intl.message('Optional', name: 'optional', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -399,6 +399,7 @@ class PopupMenuItemData {
     required this.label,
     this.onPressed,
     this.danger = false,
+    this.checked,
     this.subItems = const [],
   });
 
@@ -407,6 +408,7 @@ class PopupMenuItemData {
   final IconData? icon;
   final Glyph? glyph;
   final bool danger;
+  final bool? checked;
   final List<PopupMenuItemData> subItems;
 }
 
@@ -435,15 +437,18 @@ abstract class Script with _$Script {
     required int id,
     required String label,
     required DateTime lastUpdateTime,
+    String? url,
+    int? order,
   }) = _Script;
 
   factory Script.fromJson(Map<String, Object?> json) => _$ScriptFromJson(json);
 
-  factory Script.create({required String label}) {
+  factory Script.create({required String label, String? url}) {
     return Script(
       id: snowflake.id,
       label: label,
       lastUpdateTime: DateTime.now(),
+      url: url,
     );
   }
 }
@@ -573,6 +578,21 @@ abstract class ClashProvider with _$ClashProvider {
 }
 
 extension ClashProviderExt on ClashProvider {
+  ClashProvider withFileFormat(String source) {
+    if (kind != ProviderKind.rule) return this;
+    final format = ruleProviderFormatOf(source);
+    return format == null ? this : withFormat(format);
+  }
+
+  ClashProvider withFormat(RuleProviderFormat format) => copyWith(
+    format: format,
+    behavior:
+        format == RuleProviderFormat.mrs &&
+            behavior == RuleProviderBehavior.classical
+        ? RuleProviderBehavior.domain
+        : behavior,
+  );
+
   bool get isRemote => url.isNotEmpty;
   bool get isTextContent =>
       kind == ProviderKind.proxy || format != RuleProviderFormat.mrs;
@@ -588,6 +608,16 @@ extension ClashProviderExt on ClashProvider {
       'behavior': behavior.name,
       'format': format.name,
     },
+  };
+}
+
+RuleProviderFormat? ruleProviderFormatOf(String source) {
+  final path = Uri.tryParse(source)?.path ?? source;
+  return switch (path.toLowerCase().split('.').last) {
+    'mrs' => RuleProviderFormat.mrs,
+    'txt' || 'list' || 'conf' => RuleProviderFormat.text,
+    'yaml' || 'yml' => RuleProviderFormat.yaml,
+    _ => null,
   };
 }
 

@@ -217,6 +217,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "只允许选中应用进入VPN",
     ),
     "accessControlDesc": MessageLookupByLibrary.simpleMessage("配置应用访问代理"),
+    "accessControlDisabledDesc": MessageLookupByLibrary.simpleMessage(
+      "应用访问控制已关闭",
+    ),
     "accessControlNotAllowDesc": MessageLookupByLibrary.simpleMessage(
       "选中应用将会被排除在VPN之外",
     ),
@@ -1298,6 +1301,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "openInBrowser": MessageLookupByLibrary.simpleMessage("在浏览器中打开"),
     "operationFailed": MessageLookupByLibrary.simpleMessage("操作失败"),
     "operationSuccess": MessageLookupByLibrary.simpleMessage("操作成功"),
+    "optional": MessageLookupByLibrary.simpleMessage("可选"),
     "options": MessageLookupByLibrary.simpleMessage("选项"),
     "other": MessageLookupByLibrary.simpleMessage("其他"),
     "outboundIp": MessageLookupByLibrary.simpleMessage("出口 IP"),
@@ -1735,6 +1739,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "请使用支付宝 / 微信扫一扫完成支付",
     ),
     "script": MessageLookupByLibrary.simpleMessage("脚本"),
+    "scriptChanged": MessageLookupByLibrary.simpleMessage("脚本已修改或删除，请重新打开后再试"),
     "scriptModeDesc": MessageLookupByLibrary.simpleMessage(
       "脚本模式，使用外部扩展脚本，提供一键覆写配置的能力",
     ),
@@ -1791,6 +1796,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "已成功获取配置文件，是否立即启动？",
     ),
     "startCorePromptTitle": MessageLookupByLibrary.simpleMessage("提示"),
+    "startFromScratch": MessageLookupByLibrary.simpleMessage("从零开始"),
     "startSuccess": MessageLookupByLibrary.simpleMessage("已启动"),
     "startVpn": MessageLookupByLibrary.simpleMessage("正在启动VPN..."),
     "startupAndBackground": MessageLookupByLibrary.simpleMessage("启动与后台"),

@@ -1086,6 +1086,12 @@ class PreparedProfileUpdate {
   final Uint8List? _bytes;
   final Object _token;
 
+  void discard() {
+    if (identical(_preparedProfileUpdates[profile.id], _token)) {
+      _preparedProfileUpdates.remove(profile.id);
+    }
+  }
+
   Future<Profile> save() => storageLock.synchronized(() async {
     if (!identical(_preparedProfileUpdates[profile.id], _token)) {
       throw StateError('profile changed during download');

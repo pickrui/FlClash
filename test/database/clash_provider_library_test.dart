@@ -38,6 +38,29 @@ Matcher fails(String code) => throwsA(
 );
 
 void main() {
+  test(
+    'remote provider URL infers format and resets incompatible behavior',
+    () {
+      final rule = resource().withFileFormat(
+        'https://example.invalid/Rules.MRS?token=fixture',
+      );
+      expect(rule.format, RuleProviderFormat.mrs);
+      expect(rule.behavior, RuleProviderBehavior.domain);
+      expect(
+        rule.withFileFormat('https://example.invalid/file.list').format,
+        RuleProviderFormat.text,
+      );
+      expect(
+        rule.withFileFormat('https://example.invalid/subscription').format,
+        RuleProviderFormat.mrs,
+      );
+      expect(
+        resource(kind: ProviderKind.proxy).withFileFormat('nodes.mrs').format,
+        RuleProviderFormat.yaml,
+      );
+    },
+  );
+
   late Database db;
   late ClashProviderLibrary library;
   late Map<int, Map<String, dynamic>> sources;

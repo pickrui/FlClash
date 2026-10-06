@@ -7,6 +7,9 @@ import 'dart:math' as math;
 import 'dart:ui' show ImageFilter, lerpDouble;
 
 import 'package:fl_clash/common/common.dart';
+
+import 'spring_curve.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
@@ -49,13 +52,13 @@ const double _slotEnterScale = 0.5;
 const double _slotExitScale = 0.7;
 const double _slotBlur = 6;
 const _slotRevealCurve = Interval(0, 0.5, curve: Curves.easeOut);
-final _slotSizeCurve = _DockSpringCurve(
+final _slotSizeCurve = SpringCurve(
   SpringDescription.withDurationAndBounce(
     duration: const Duration(milliseconds: 420),
   ),
   seconds: 0.5,
 );
-final _slotPopCurve = _DockSpringCurve(
+final _slotPopCurve = SpringCurve(
   SpringDescription.withDurationAndBounce(
     duration: const Duration(milliseconds: 400),
     bounce: 0.3,
@@ -80,19 +83,6 @@ final _hoverSpring = SpringDescription.withDurationAndBounce(
 final _fadeSpring = SpringDescription.withDurationAndBounce(
   duration: const Duration(milliseconds: 200),
 );
-
-class _DockSpringCurve extends Curve {
-  _DockSpringCurve(SpringDescription spring, {required this.seconds})
-    : _simulation = SpringSimulation(spring, 0, 1, 0);
-
-  final double seconds;
-  final SpringSimulation _simulation;
-  late final double _residual = 1 - _simulation.x(seconds);
-
-  @override
-  double transformInternal(double t) =>
-      _simulation.x(t * seconds) + _residual * t;
-}
 
 double _rubberBand(double overshoot, double limit) {
   final pull = 1 - 1 / (overshoot.abs() * 0.55 / limit + 1);

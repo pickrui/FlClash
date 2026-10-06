@@ -1338,5 +1338,9 @@
   "slide": "Slide",
   "textScalePreview": "Text in the app will look like this",
   "basicStrategy": "Basic strategies",
-  "nonTextProviderFile": "This external resource is not a text file"
+  "nonTextProviderFile": "This external resource is not a text file",
+  "scriptChanged": "The script changed or was deleted. Reopen it and try again.",
+  "startFromScratch": "Start from scratch",
+  "accessControlDisabledDesc": "App access control is disabled",
+  "optional": "Optional"
 }

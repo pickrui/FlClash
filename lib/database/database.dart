@@ -23,7 +23,7 @@ part 'profiles.dart';
 part 'rules.dart';
 part 'scripts.dart';
 
-const currentDatabaseSchemaVersion = 5;
+const currentDatabaseSchemaVersion = 6;
 
 @DriftDatabase(
   tables: [
@@ -66,6 +66,16 @@ class Database extends _$Database {
         await customStatement('PRAGMA foreign_keys = ON');
       },
       onUpgrade: (m, from, to) async {
+        if (from < 6) {
+          final columns = (await customSelect(
+            'PRAGMA table_info(scripts)',
+          ).get()).map((row) => row.read<String>('name')).toSet();
+          for (final column in [scripts.url, scripts.order]) {
+            if (!columns.contains(column.name)) {
+              await m.addColumn(scripts, column);
+            }
+          }
+        }
         if (from < 5) {
           final existing = await customSelect(
             "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'clash_providers'",
