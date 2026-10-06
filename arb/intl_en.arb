@@ -204,8 +204,8 @@
   "source": "Source",
   "action": "Action",
   "intelligentSelected": "Intelligent selection",
-  "clipboardImport": "Clipboard import",
-  "clipboardExport": "Export clipboard",
+  "clipboardImport": "Import from clipboard",
+  "clipboardExport": "Export to clipboard",
   "layout": "Layout",
   "tight": "Tight",
   "standard": "Standard",
@@ -1240,5 +1240,13 @@
   "networkRateLimitedError": "Too many requests (HTTP 429). Wait a moment and try again",
   "networkServerError": "The server ran into a problem (HTTP {code}). Try again later",
   "networkBadResponseError": "The server rejected the request (HTTP {code})",
-  "networkRequestFailed": "Network request failed: {detail}"
+  "networkRequestFailed": "Network request failed: {detail}",
+  "clipboardWriteFailed": "Couldn't copy to the clipboard. The selection may be too large",
+  "lineWrap": "Word wrap",
+  "previousMatch": "Previous match",
+  "nextMatch": "Next match",
+  "editorUnavailable": "Editor unavailable",
+  "replaceAll": "Replace all",
+  "fontSize": "Size",
+  "replace": "Replace"
 }

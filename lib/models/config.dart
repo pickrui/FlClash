@@ -126,6 +126,8 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(true) bool floatingNavigationBar,
     @Default(false) bool showLabel,
     @Default(false) bool hideIp,
+    @Default(false) bool editorLineWrap,
+    @Default(EditorFontSize.standard) EditorFontSize editorFontSize,
     @Default([]) List<String> serviceOrder,
     @Default([]) List<String> disabledServices,
     @Default('') String currentService,

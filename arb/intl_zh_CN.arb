@@ -1240,5 +1240,13 @@
   "networkRateLimitedError": "请求过于频繁（HTTP 429），请稍后再试",
   "networkServerError": "服务器出现问题（HTTP {code}），请稍后再试",
   "networkBadResponseError": "服务器拒绝了请求（HTTP {code}）",
-  "networkRequestFailed": "网络请求失败：{detail}"
+  "networkRequestFailed": "网络请求失败：{detail}",
+  "clipboardWriteFailed": "无法复制到剪贴板，所选内容可能过大",
+  "lineWrap": "自动换行",
+  "previousMatch": "上一个匹配",
+  "nextMatch": "下一个匹配",
+  "editorUnavailable": "编辑器不可用",
+  "replaceAll": "全部替换",
+  "fontSize": "大小",
+  "replace": "替换"
 }

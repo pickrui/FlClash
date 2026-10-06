@@ -14,9 +14,12 @@ import 'package:fl_clash/views/config/dns.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:re_editor/re_editor.dart';
+import 'package:code_forge/code_forge.dart';
+
+import '../plugins/code_forge/support.dart';
 
 void main() {
+  setUpAll(initEditorNative);
   for (final ntp in [false, true]) {
     testWidgets('override fields can be added, edited and removed: NTP=$ntp', (
       tester,
@@ -68,12 +71,12 @@ void main() {
       await tester.tap(find.byTooltip('Edit'));
       await tester.pumpAndSettle();
       expect(find.byType(EditorPage), findsOneWidget);
-      final editor = tester.widget<CodeEditor>(find.byType(CodeEditor));
-      editor.controller!.text = ntp
+      final editor = tester.widget<CodeForge>(find.byType(CodeForge));
+      editor.controller.text = ntp
           ? 'server: time.fixture.example\nport: 123'
           : 'nameserver: [192.0.2.42]\nfallback-filter:\n  geoip: false';
       await tester.pumpAndSettle();
-      await tester.tap(find.byIcon(Icons.save));
+      await tester.tap(find.byTooltip('Save'));
       await tester.pumpAndSettle();
       patch = container.read(patchClashConfigProvider);
       if (ntp) {

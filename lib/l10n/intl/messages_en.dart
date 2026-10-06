@@ -484,8 +484,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "clearProxyChain": MessageLookupByLibrary.simpleMessage(
       "Clear chain config",
     ),
-    "clipboardExport": MessageLookupByLibrary.simpleMessage("Export clipboard"),
-    "clipboardImport": MessageLookupByLibrary.simpleMessage("Clipboard import"),
+    "clipboardExport": MessageLookupByLibrary.simpleMessage(
+      "Export to clipboard",
+    ),
+    "clipboardImport": MessageLookupByLibrary.simpleMessage(
+      "Import from clipboard",
+    ),
+    "clipboardWriteFailed": MessageLookupByLibrary.simpleMessage(
+      "Couldn\'t copy to the clipboard. The selection may be too large",
+    ),
     "close": MessageLookupByLibrary.simpleMessage("Close"),
     "cloudApiAccessDenied": MessageLookupByLibrary.simpleMessage(
       "Network access denied",
@@ -1084,6 +1091,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "editProfile": MessageLookupByLibrary.simpleMessage("Edit Profile"),
     "editProxyGroup": MessageLookupByLibrary.simpleMessage("Edit proxy group"),
     "editRule": MessageLookupByLibrary.simpleMessage("Edit rule"),
+    "editorUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Editor unavailable",
+    ),
     "emailCodeHint": MessageLookupByLibrary.simpleMessage(
       "Enter the 6-digit code",
     ),
@@ -1181,6 +1191,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "followProfile": MessageLookupByLibrary.simpleMessage("Follow profile"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("FontFamily"),
+    "fontSize": MessageLookupByLibrary.simpleMessage("Size"),
     "forceRestartCoreTip": MessageLookupByLibrary.simpleMessage(
       "Are you sure you want to force restart the core?",
     ),
@@ -1417,6 +1428,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "layout": MessageLookupByLibrary.simpleMessage("Layout"),
     "lazy": MessageLookupByLibrary.simpleMessage("Lazy loading"),
     "light": MessageLookupByLibrary.simpleMessage("Light"),
+    "lineWrap": MessageLookupByLibrary.simpleMessage("Word wrap"),
     "list": MessageLookupByLibrary.simpleMessage("List"),
     "listen": MessageLookupByLibrary.simpleMessage("Listen"),
     "loadTest": MessageLookupByLibrary.simpleMessage("Load test"),
@@ -1572,6 +1584,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "networkType": MessageLookupByLibrary.simpleMessage("Network type"),
     "neutralScheme": MessageLookupByLibrary.simpleMessage("Neutral"),
     "newPasswordLabel": MessageLookupByLibrary.simpleMessage("New password"),
+    "nextMatch": MessageLookupByLibrary.simpleMessage("Next match"),
     "nicknameHint": MessageLookupByLibrary.simpleMessage(
       "Letters and numbers, up to 12 characters",
     ),
@@ -1776,6 +1789,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Please press the keyboard.",
     ),
     "preview": MessageLookupByLibrary.simpleMessage("Preview"),
+    "previousMatch": MessageLookupByLibrary.simpleMessage("Previous match"),
     "process": MessageLookupByLibrary.simpleMessage("Process"),
     "profile": MessageLookupByLibrary.simpleMessage("Profile"),
     "profileAutoUpdateIntervalInvalidValidationDesc":
@@ -1982,6 +1996,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "remove": MessageLookupByLibrary.simpleMessage("Remove"),
     "rename": MessageLookupByLibrary.simpleMessage("Rename"),
     "renewalPriceLabel": MessageLookupByLibrary.simpleMessage("Renewal price"),
+    "replace": MessageLookupByLibrary.simpleMessage("Replace"),
+    "replaceAll": MessageLookupByLibrary.simpleMessage("Replace all"),
     "request": MessageLookupByLibrary.simpleMessage("Request"),
     "requests": MessageLookupByLibrary.simpleMessage("Requests"),
     "requestsDesc": MessageLookupByLibrary.simpleMessage(

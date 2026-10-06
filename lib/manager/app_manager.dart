@@ -333,7 +333,7 @@ class AppSidebarContainer extends ConsumerWidget {
                 ],
                 Expanded(
                   child: ScrollConfiguration(
-                    behavior: HiddenBarScrollBehavior(),
+                    behavior: const HiddenBarScrollBehavior(),
                     child: NavigationRailFocus(
                       autofocus: system.isAndroid,
                       currentIndex: currentIndex,

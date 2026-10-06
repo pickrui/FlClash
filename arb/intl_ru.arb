@@ -22,7 +22,7 @@
   "settings": "Настройки",
   "language": "Язык",
   "defaultText": "По умолчанию",
-  "more": "Еще",
+  "more": "Ещё",
   "other": "Другое",
   "about": "О программе",
   "en": "Английский",
@@ -1240,5 +1240,13 @@
   "networkRateLimitedError": "Слишком много запросов (HTTP 429). Подождите немного и повторите попытку",
   "networkServerError": "На сервере произошла ошибка (HTTP {code}). Повторите попытку позже",
   "networkBadResponseError": "Сервер отклонил запрос (HTTP {code})",
-  "networkRequestFailed": "Сетевой запрос не выполнен: {detail}"
+  "networkRequestFailed": "Сетевой запрос не выполнен: {detail}",
+  "clipboardWriteFailed": "Не удалось скопировать в буфер обмена. Возможно, выделение слишком велико",
+  "lineWrap": "Перенос строк",
+  "previousMatch": "Предыдущее совпадение",
+  "nextMatch": "Следующее совпадение",
+  "editorUnavailable": "Редактор недоступен",
+  "replaceAll": "Заменить все",
+  "fontSize": "Размер",
+  "replace": "Заменить"
 }

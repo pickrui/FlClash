@@ -484,3 +484,12 @@ enum IpQualitySource {
 }
 
 enum IpQualitySourceStatus { noType, timeout, rateLimited, failed, ipMismatch }
+
+enum EditorFontSize {
+  standard(16),
+  large(18),
+  extraLarge(20);
+
+  final double value;
+  const EditorFontSize(this.value);
+}

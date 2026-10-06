@@ -213,3 +213,35 @@ class SheetSettlingScope extends InheritedWidget {
   bool updateShouldNotify(SheetSettlingScope oldWidget) =>
       settling != oldWidget.settling;
 }
+
+const double _floatingActionButtonHeight = 56;
+
+class BottomInsetScope extends InheritedWidget {
+  static const double floatingActionButtonInset =
+      kFloatingActionButtonMargin + _floatingActionButtonHeight;
+
+  static const double dockedSearchHeight = 48;
+  static const double dockedSearchMargin = kFloatingActionButtonMargin;
+  static const double dockedSearchInset =
+      dockedSearchMargin + dockedSearchHeight;
+
+  final double inset;
+
+  const BottomInsetScope({
+    super.key,
+    required this.inset,
+    required super.child,
+  });
+
+  static double of(BuildContext context) {
+    return context
+            .dependOnInheritedWidgetOfExactType<BottomInsetScope>()
+            ?.inset ??
+        0;
+  }
+
+  @override
+  bool updateShouldNotify(BottomInsetScope oldWidget) {
+    return inset != oldWidget.inset;
+  }
+}

@@ -1580,20 +1580,20 @@ class AppLocalizations {
     );
   }
 
-  /// `Clipboard import`
+  /// `Import from clipboard`
   String get clipboardImport {
     return Intl.message(
-      'Clipboard import',
+      'Import from clipboard',
       name: 'clipboardImport',
       desc: '',
       args: [],
     );
   }
 
-  /// `Export clipboard`
+  /// `Export to clipboard`
   String get clipboardExport {
     return Intl.message(
-      'Export clipboard',
+      'Export to clipboard',
       name: 'clipboardExport',
       desc: '',
       args: [],
@@ -10483,6 +10483,61 @@ class AppLocalizations {
       desc: '',
       args: [detail],
     );
+  }
+
+  /// `Couldn't copy to the clipboard. The selection may be too large`
+  String get clipboardWriteFailed {
+    return Intl.message(
+      'Couldn\'t copy to the clipboard. The selection may be too large',
+      name: 'clipboardWriteFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Word wrap`
+  String get lineWrap {
+    return Intl.message('Word wrap', name: 'lineWrap', desc: '', args: []);
+  }
+
+  /// `Previous match`
+  String get previousMatch {
+    return Intl.message(
+      'Previous match',
+      name: 'previousMatch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Next match`
+  String get nextMatch {
+    return Intl.message('Next match', name: 'nextMatch', desc: '', args: []);
+  }
+
+  /// `Editor unavailable`
+  String get editorUnavailable {
+    return Intl.message(
+      'Editor unavailable',
+      name: 'editorUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Replace all`
+  String get replaceAll {
+    return Intl.message('Replace all', name: 'replaceAll', desc: '', args: []);
+  }
+
+  /// `Size`
+  String get fontSize {
+    return Intl.message('Size', name: 'fontSize', desc: '', args: []);
+  }
+
+  /// `Replace`
+  String get replace {
+    return Intl.message('Replace', name: 'replace', desc: '', args: []);
   }
 }
 

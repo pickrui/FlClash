@@ -181,7 +181,7 @@ class ApplicationState extends ConsumerState<Application> {
               ),
             );
           },
-          scrollBehavior: BaseScrollBehavior(),
+          scrollBehavior: const BaseScrollBehavior(),
           title: safeModeBuild
               ? appLocalizations.safeModeAppTitle(appName)
               : appName,

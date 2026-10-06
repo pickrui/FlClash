@@ -5,7 +5,11 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 library;
 
+import 'src/rust/frb_generated.dart';
+
 export 'src/rust/api/ipc.dart';
 export 'src/rust/api/script.dart';
 export 'src/rust/frb_generated.dart' show RustLib;
 export 'src/rust/api/hotkey.dart';
+
+bool get isRustLibInitialized => RustLib.instance.initialized;

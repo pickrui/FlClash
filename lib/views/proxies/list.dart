@@ -324,7 +324,7 @@ class _ProxiesListViewState extends State<ProxiesListView> {
             children: [
               Positioned.fill(
                 child: ScrollConfiguration(
-                  behavior: HiddenBarScrollBehavior(),
+                  behavior: const HiddenBarScrollBehavior(),
                   child: ListView.builder(
                     key: proxiesListStoreKey,
                     padding: const EdgeInsets.all(16),

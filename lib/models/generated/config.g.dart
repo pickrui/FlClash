@@ -6,59 +6,61 @@ part of '../config.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_AppSettingProps _$AppSettingPropsFromJson(Map<String, dynamic> json) =>
-    _AppSettingProps(
-      locale: json['locale'] as String?,
-      dashboardWidgets: json['dashboardWidgets'] == null
-          ? defaultDashboardWidgets
-          : dashboardWidgetsSafeFormJson(json['dashboardWidgets'] as List?),
-      onlyStatisticsProxy: json['onlyStatisticsProxy'] as bool? ?? false,
-      showNotificationStopAction:
-          json['showNotificationStopAction'] as bool? ?? true,
-      userAgents: _readUserAgents(json, 'userAgents') == null
-          ? defaultUserAgents
-          : userAgentsFromJson(_readUserAgents(json, 'userAgents')),
-      autoLaunch: json['autoLaunch'] as bool? ?? false,
-      silentLaunch: json['silentLaunch'] as bool? ?? false,
-      autoRun: json['autoRun'] as bool? ?? false,
-      openLogs: json['openLogs'] as bool? ?? false,
-      closeConnections: json['closeConnections'] as bool? ?? true,
-      testUrl: json['testUrl'] == null
-          ? defaultTestUrl
-          : testUrlFromJson(json['testUrl'] as String?),
-      isAnimateToPage: json['isAnimateToPage'] as bool? ?? false,
-      floatingNavigationBar: json['floatingNavigationBar'] as bool? ?? true,
-      showLabel: json['showLabel'] as bool? ?? false,
-      hideIp: json['hideIp'] as bool? ?? false,
-      serviceOrder:
-          (json['serviceOrder'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const [],
-      disabledServices:
-          (json['disabledServices'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const [],
-      currentService: json['currentService'] as String? ?? '',
-      disclaimerAccepted: json['disclaimerAccepted'] as bool? ?? false,
-      minimizeOnExit: json['minimizeOnExit'] as bool? ?? true,
-      hidden: json['hidden'] as bool? ?? false,
-      developerMode: json['developerMode'] as bool? ?? false,
-      restoreStrategy:
-          $enumDecodeNullable(
-            _$RestoreStrategyEnumMap,
-            json['restoreStrategy'],
-          ) ??
-          RestoreStrategy.compatible,
-      showTrayTitle: json['showTrayTitle'] as bool? ?? true,
-      customUserAgent: json['customUserAgent'] as String? ?? '',
-      scriptOptions:
-          (json['scriptOptions'] as Map<String, dynamic>?)?.map(
-            (k, e) => MapEntry(k, Map<String, bool>.from(e as Map)),
-          ) ??
-          const {},
-    );
+_AppSettingProps _$AppSettingPropsFromJson(
+  Map<String, dynamic> json,
+) => _AppSettingProps(
+  locale: json['locale'] as String?,
+  dashboardWidgets: json['dashboardWidgets'] == null
+      ? defaultDashboardWidgets
+      : dashboardWidgetsSafeFormJson(json['dashboardWidgets'] as List?),
+  onlyStatisticsProxy: json['onlyStatisticsProxy'] as bool? ?? false,
+  showNotificationStopAction:
+      json['showNotificationStopAction'] as bool? ?? true,
+  userAgents: _readUserAgents(json, 'userAgents') == null
+      ? defaultUserAgents
+      : userAgentsFromJson(_readUserAgents(json, 'userAgents')),
+  autoLaunch: json['autoLaunch'] as bool? ?? false,
+  silentLaunch: json['silentLaunch'] as bool? ?? false,
+  autoRun: json['autoRun'] as bool? ?? false,
+  openLogs: json['openLogs'] as bool? ?? false,
+  closeConnections: json['closeConnections'] as bool? ?? true,
+  testUrl: json['testUrl'] == null
+      ? defaultTestUrl
+      : testUrlFromJson(json['testUrl'] as String?),
+  isAnimateToPage: json['isAnimateToPage'] as bool? ?? false,
+  floatingNavigationBar: json['floatingNavigationBar'] as bool? ?? true,
+  showLabel: json['showLabel'] as bool? ?? false,
+  hideIp: json['hideIp'] as bool? ?? false,
+  editorLineWrap: json['editorLineWrap'] as bool? ?? false,
+  editorFontSize:
+      $enumDecodeNullable(_$EditorFontSizeEnumMap, json['editorFontSize']) ??
+      EditorFontSize.standard,
+  serviceOrder:
+      (json['serviceOrder'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  disabledServices:
+      (json['disabledServices'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  currentService: json['currentService'] as String? ?? '',
+  disclaimerAccepted: json['disclaimerAccepted'] as bool? ?? false,
+  minimizeOnExit: json['minimizeOnExit'] as bool? ?? true,
+  hidden: json['hidden'] as bool? ?? false,
+  developerMode: json['developerMode'] as bool? ?? false,
+  restoreStrategy:
+      $enumDecodeNullable(_$RestoreStrategyEnumMap, json['restoreStrategy']) ??
+      RestoreStrategy.compatible,
+  showTrayTitle: json['showTrayTitle'] as bool? ?? true,
+  customUserAgent: json['customUserAgent'] as String? ?? '',
+  scriptOptions:
+      (json['scriptOptions'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, Map<String, bool>.from(e as Map)),
+      ) ??
+      const {},
+);
 
 Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
     <String, dynamic>{
@@ -79,6 +81,8 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'floatingNavigationBar': instance.floatingNavigationBar,
       'showLabel': instance.showLabel,
       'hideIp': instance.hideIp,
+      'editorLineWrap': instance.editorLineWrap,
+      'editorFontSize': _$EditorFontSizeEnumMap[instance.editorFontSize]!,
       'serviceOrder': instance.serviceOrder,
       'disabledServices': instance.disabledServices,
       'currentService': instance.currentService,
@@ -91,6 +95,12 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'customUserAgent': instance.customUserAgent,
       'scriptOptions': instance.scriptOptions,
     };
+
+const _$EditorFontSizeEnumMap = {
+  EditorFontSize.standard: 'standard',
+  EditorFontSize.large: 'large',
+  EditorFontSize.extraLarge: 'extraLarge',
+};
 
 const _$RestoreStrategyEnumMap = {
   RestoreStrategy.compatible: 'compatible',

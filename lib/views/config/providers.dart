@@ -283,7 +283,7 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
         title: _name.text,
         titleEditable: false,
         content: content,
-        languages: const [Language.yaml],
+        language: Language.yaml,
         onSave: (editorContext, _, content) {
           final bytes = utf8.encode(content);
           if (bytes.length > maxProviderContentBytes) {

@@ -498,6 +498,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "clipboardImport": MessageLookupByLibrary.simpleMessage(
       "Импорт из буфера обмена",
     ),
+    "clipboardWriteFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось скопировать в буфер обмена. Возможно, выделение слишком велико",
+    ),
     "close": MessageLookupByLibrary.simpleMessage("Закрыть"),
     "cloudApiAccessDenied": MessageLookupByLibrary.simpleMessage(
       "Доступ к сети запрещён",
@@ -1120,6 +1123,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Редактировать группу прокси",
     ),
     "editRule": MessageLookupByLibrary.simpleMessage("Редактировать правило"),
+    "editorUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Редактор недоступен",
+    ),
     "emailCodeHint": MessageLookupByLibrary.simpleMessage(
       "Введите 6-значный код",
     ),
@@ -1227,6 +1233,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "followProfile": MessageLookupByLibrary.simpleMessage("Как в профиле"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("Семейство шрифтов"),
+    "fontSize": MessageLookupByLibrary.simpleMessage("Размер"),
     "forceRestartCoreTip": MessageLookupByLibrary.simpleMessage(
       "Вы уверены, что хотите принудительно перезапустить ядро?",
     ),
@@ -1470,6 +1477,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "layout": MessageLookupByLibrary.simpleMessage("Макет"),
     "lazy": MessageLookupByLibrary.simpleMessage("Ленивая загрузка"),
     "light": MessageLookupByLibrary.simpleMessage("Светлый"),
+    "lineWrap": MessageLookupByLibrary.simpleMessage("Перенос строк"),
     "list": MessageLookupByLibrary.simpleMessage("Список"),
     "listen": MessageLookupByLibrary.simpleMessage("Слушать"),
     "loadTest": MessageLookupByLibrary.simpleMessage("Тест загрузки"),
@@ -1595,7 +1603,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "mode": MessageLookupByLibrary.simpleMessage("Режим"),
     "monochromeScheme": MessageLookupByLibrary.simpleMessage("Монохром"),
     "monthsAgo": m34,
-    "more": MessageLookupByLibrary.simpleMessage("Еще"),
+    "more": MessageLookupByLibrary.simpleMessage("Ещё"),
     "myOrders": MessageLookupByLibrary.simpleMessage("Купленные тарифы"),
     "name": MessageLookupByLibrary.simpleMessage("Имя"),
     "nameserver": MessageLookupByLibrary.simpleMessage("Сервер имен"),
@@ -1645,6 +1653,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "networkType": MessageLookupByLibrary.simpleMessage("Тип сети"),
     "neutralScheme": MessageLookupByLibrary.simpleMessage("Нейтральные"),
     "newPasswordLabel": MessageLookupByLibrary.simpleMessage("Новый пароль"),
+    "nextMatch": MessageLookupByLibrary.simpleMessage("Следующее совпадение"),
     "nicknameHint": MessageLookupByLibrary.simpleMessage(
       "Буквы и цифры, до 12 символов",
     ),
@@ -1867,6 +1876,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Пожалуйста, нажмите клавишу.",
     ),
     "preview": MessageLookupByLibrary.simpleMessage("Предпросмотр"),
+    "previousMatch": MessageLookupByLibrary.simpleMessage(
+      "Предыдущее совпадение",
+    ),
     "process": MessageLookupByLibrary.simpleMessage("процесс"),
     "profile": MessageLookupByLibrary.simpleMessage("Профиль"),
     "profileAutoUpdateIntervalInvalidValidationDesc":
@@ -2077,6 +2089,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "remove": MessageLookupByLibrary.simpleMessage("Удалить"),
     "rename": MessageLookupByLibrary.simpleMessage("Переименовать"),
     "renewalPriceLabel": MessageLookupByLibrary.simpleMessage("Цена продления"),
+    "replace": MessageLookupByLibrary.simpleMessage("Заменить"),
+    "replaceAll": MessageLookupByLibrary.simpleMessage("Заменить все"),
     "request": MessageLookupByLibrary.simpleMessage("Запрос"),
     "requests": MessageLookupByLibrary.simpleMessage("Запросы"),
     "requestsDesc": MessageLookupByLibrary.simpleMessage(

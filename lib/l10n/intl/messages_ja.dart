@@ -396,8 +396,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "clearCustomRouting": MessageLookupByLibrary.simpleMessage("一括クリア"),
     "clearData": MessageLookupByLibrary.simpleMessage("データを消去"),
     "clearProxyChain": MessageLookupByLibrary.simpleMessage("チェーン設定を削除"),
-    "clipboardExport": MessageLookupByLibrary.simpleMessage("クリップボードにエクスポート"),
+    "clipboardExport": MessageLookupByLibrary.simpleMessage("クリップボードへエクスポート"),
     "clipboardImport": MessageLookupByLibrary.simpleMessage("クリップボードからインポート"),
+    "clipboardWriteFailed": MessageLookupByLibrary.simpleMessage(
+      "クリップボードにコピーできませんでした。選択範囲が大きすぎる可能性があります",
+    ),
     "close": MessageLookupByLibrary.simpleMessage("閉じる"),
     "cloudApiAccessDenied": MessageLookupByLibrary.simpleMessage(
       "ネットワークへのアクセスが拒否されました",
@@ -910,6 +913,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "editProfile": MessageLookupByLibrary.simpleMessage("プロファイルを編集"),
     "editProxyGroup": MessageLookupByLibrary.simpleMessage("プロキシグループを編集"),
     "editRule": MessageLookupByLibrary.simpleMessage("ルールを編集"),
+    "editorUnavailable": MessageLookupByLibrary.simpleMessage("エディターを利用できません"),
     "emailCodeHint": MessageLookupByLibrary.simpleMessage("6桁のコードを入力"),
     "emailCodeLabel": MessageLookupByLibrary.simpleMessage("メール認証コード"),
     "emailCodeValidation": MessageLookupByLibrary.simpleMessage(
@@ -991,6 +995,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "followProfile": MessageLookupByLibrary.simpleMessage("プロファイルに従う"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("フォントファミリー"),
+    "fontSize": MessageLookupByLibrary.simpleMessage("サイズ"),
     "forceRestartCoreTip": MessageLookupByLibrary.simpleMessage(
       "コアを強制再起動してもよろしいですか？",
     ),
@@ -1189,6 +1194,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "layout": MessageLookupByLibrary.simpleMessage("レイアウト"),
     "lazy": MessageLookupByLibrary.simpleMessage("遅延読み込み"),
     "light": MessageLookupByLibrary.simpleMessage("ライト"),
+    "lineWrap": MessageLookupByLibrary.simpleMessage("折り返し"),
     "list": MessageLookupByLibrary.simpleMessage("リスト"),
     "listen": MessageLookupByLibrary.simpleMessage("リスン"),
     "loadTest": MessageLookupByLibrary.simpleMessage("読み込みテスト"),
@@ -1278,7 +1284,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "mode": MessageLookupByLibrary.simpleMessage("モード"),
     "monochromeScheme": MessageLookupByLibrary.simpleMessage("モノクローム"),
     "monthsAgo": m34,
-    "more": MessageLookupByLibrary.simpleMessage("詳細"),
+    "more": MessageLookupByLibrary.simpleMessage("その他"),
     "myOrders": MessageLookupByLibrary.simpleMessage("購入済みプラン"),
     "name": MessageLookupByLibrary.simpleMessage("名前"),
     "nameserver": MessageLookupByLibrary.simpleMessage("ネームサーバー"),
@@ -1320,6 +1326,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "networkType": MessageLookupByLibrary.simpleMessage("ネットワーク種別"),
     "neutralScheme": MessageLookupByLibrary.simpleMessage("ニュートラル"),
     "newPasswordLabel": MessageLookupByLibrary.simpleMessage("新しいパスワード"),
+    "nextMatch": MessageLookupByLibrary.simpleMessage("次の一致"),
     "nicknameHint": MessageLookupByLibrary.simpleMessage("英数字、最大12文字"),
     "nicknameLabel": MessageLookupByLibrary.simpleMessage("ニックネーム"),
     "nicknameValidation": MessageLookupByLibrary.simpleMessage(
@@ -1490,6 +1497,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "preferH3Desc": MessageLookupByLibrary.simpleMessage("DOHのHTTP/3を優先使用"),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage("キーボードを押してください"),
     "preview": MessageLookupByLibrary.simpleMessage("プレビュー"),
+    "previousMatch": MessageLookupByLibrary.simpleMessage("前の一致"),
     "process": MessageLookupByLibrary.simpleMessage("プロセス"),
     "profile": MessageLookupByLibrary.simpleMessage("プロファイル"),
     "profileAutoUpdateIntervalInvalidValidationDesc":
@@ -1662,6 +1670,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "remove": MessageLookupByLibrary.simpleMessage("削除"),
     "rename": MessageLookupByLibrary.simpleMessage("リネーム"),
     "renewalPriceLabel": MessageLookupByLibrary.simpleMessage("以降の更新料金"),
+    "replace": MessageLookupByLibrary.simpleMessage("置換"),
+    "replaceAll": MessageLookupByLibrary.simpleMessage("すべて置換"),
     "request": MessageLookupByLibrary.simpleMessage("リクエスト"),
     "requests": MessageLookupByLibrary.simpleMessage("リクエスト"),
     "requestsDesc": MessageLookupByLibrary.simpleMessage("最近のリクエスト記録を表示"),

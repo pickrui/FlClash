@@ -215,7 +215,7 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
         onPop: (context, title, content) {
           return _handleEditorPop(context, title, content, raw, script: script);
         },
-        languages: const [Language.javaScript],
+        language: Language.javaScript,
         content: raw,
       ),
     );

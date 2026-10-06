@@ -22,7 +22,7 @@
   "settings": "設定",
   "language": "言語",
   "defaultText": "デフォルト",
-  "more": "詳細",
+  "more": "その他",
   "other": "その他",
   "about": "について",
   "en": "英語",
@@ -205,7 +205,7 @@
   "action": "アクション",
   "intelligentSelected": "インテリジェント選択",
   "clipboardImport": "クリップボードからインポート",
-  "clipboardExport": "クリップボードにエクスポート",
+  "clipboardExport": "クリップボードへエクスポート",
   "layout": "レイアウト",
   "tight": "密",
   "standard": "標準",
@@ -1240,5 +1240,13 @@
   "networkRateLimitedError": "リクエストが多すぎます（HTTP 429）。しばらく待ってから再試行してください",
   "networkServerError": "サーバーで問題が発生しました（HTTP {code}）。しばらくしてから再試行してください",
   "networkBadResponseError": "サーバーがリクエストを拒否しました（HTTP {code}）",
-  "networkRequestFailed": "ネットワークリクエストに失敗しました：{detail}"
+  "networkRequestFailed": "ネットワークリクエストに失敗しました：{detail}",
+  "clipboardWriteFailed": "クリップボードにコピーできませんでした。選択範囲が大きすぎる可能性があります",
+  "lineWrap": "折り返し",
+  "previousMatch": "前の一致",
+  "nextMatch": "次の一致",
+  "editorUnavailable": "エディターを利用できません",
+  "replaceAll": "すべて置換",
+  "fontSize": "サイズ",
+  "replace": "置換"
 }

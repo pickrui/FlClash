@@ -15,8 +15,9 @@ import 'inherited.dart';
 
 typedef OnKeywordsUpdateCallback = void Function(List<String> keywords);
 
-typedef AppBarSearchStateBuilder =
-    AppBarSearchState? Function(AppBarSearchState? state);
+typedef AppBarSearchStateBuilder = AppBarSearchState? Function(
+  AppBarSearchState? state,
+);
 
 class CommonScaffold extends StatefulWidget {
   final AppBar? appBar;
@@ -305,7 +306,14 @@ class CommonScaffoldState extends State<CommonScaffold> {
               );
             },
           ),
-          Expanded(child: widget.body),
+          Expanded(
+            child: BottomInsetScope(
+              inset: widget.floatingActionButton == null
+                  ? 0
+                  : BottomInsetScope.floatingActionButtonInset,
+              child: widget.body,
+            ),
+          ),
         ],
       ),
     );
