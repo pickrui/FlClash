@@ -1171,5 +1171,7 @@
   "nodeDefinition": "Определение узла",
   "nodeQuickFields": "Быстрое редактирование",
   "nodeCoreValidationUnavailable": "Запустите Core перед проверкой узла",
-  "nodeInvalidDefinition": "Введите одно полное определение узла с name и type"
+  "nodeInvalidDefinition": "Введите одно полное определение узла с name и type",
+  "manageServices": "Управление сервисами",
+  "allServices": "Все сервисы"
 }

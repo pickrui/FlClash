@@ -324,12 +324,15 @@ class CoreController {
   }
 
   Future<List<Map<String, dynamic>>> checkNodeServices(
-    ({String name, String group}) target,
-  ) async {
+    ({String name, String group}) target, {
+    List<String>? names,
+  }) async {
+    if (names != null && names.isEmpty) return [];
     if (safeModeBuild) throw StateError('Probes are disabled in safe mode');
     final result = await _interface.invokeMethod<List<dynamic>>(
       method: CoreMethod.serviceCheck,
       arguments: {
+        'names': ?names,
         'proxy-name': target.name,
         'group-name': target.group,
         'timeout': 10000,

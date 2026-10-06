@@ -1171,5 +1171,7 @@
   "nodeDefinition": "Node definition",
   "nodeQuickFields": "Quick edit",
   "nodeCoreValidationUnavailable": "Start the Core before validating this node",
-  "nodeInvalidDefinition": "Enter one complete proxy definition with a name and type"
+  "nodeInvalidDefinition": "Enter one complete proxy definition with a name and type",
+  "manageServices": "Manage services",
+  "allServices": "All services"
 }

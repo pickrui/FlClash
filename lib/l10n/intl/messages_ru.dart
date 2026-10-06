@@ -272,6 +272,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "advancedConfigDesc": MessageLookupByLibrary.simpleMessage(
       "Предоставляет разнообразные варианты конфигурации",
     ),
+    "allServices": MessageLookupByLibrary.simpleMessage("Все сервисы"),
     "allowBypass": MessageLookupByLibrary.simpleMessage(
       "Разрешить приложениям обходить VPN",
     ),
@@ -1447,6 +1448,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "loose": MessageLookupByLibrary.simpleMessage("Свободный"),
     "mainlandNetworkWarning": MessageLookupByLibrary.simpleMessage(
       "Может не подходить для сетей материкового Китая",
+    ),
+    "manageServices": MessageLookupByLibrary.simpleMessage(
+      "Управление сервисами",
     ),
     "matchTarget": MessageLookupByLibrary.simpleMessage("MATCH-TARGET"),
     "matchTargetDesc": MessageLookupByLibrary.simpleMessage(

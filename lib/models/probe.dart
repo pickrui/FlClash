@@ -72,3 +72,14 @@ class ServiceCheckState {
     this.services = const [],
   });
 }
+
+List<String> orderedServiceNames(
+  Iterable<String> saved, {
+  Iterable<String> disabled = const [],
+}) {
+  final hidden = disabled.toSet();
+  return <String>{
+    ...saved.where(serviceTargets.containsKey),
+    ...serviceTargets.keys,
+  }.where((name) => !hidden.contains(name)).toList();
+}

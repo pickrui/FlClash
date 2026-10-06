@@ -58,7 +58,7 @@ final class ServiceStatusProvider
   }
 }
 
-String _$serviceStatusHash() => r'34d744da1036193450cf17591817c82715c1e89f';
+String _$serviceStatusHash() => r'a3b769f1e19e0292bade13c408deb061366bcf9e';
 
 final class ServiceStatusFamily extends $Family
     with

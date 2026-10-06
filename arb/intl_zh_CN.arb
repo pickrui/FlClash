@@ -1171,5 +1171,7 @@
   "nodeDefinition": "完整节点定义",
   "nodeQuickFields": "快速编辑",
   "nodeCoreValidationUnavailable": "请先启动 Core，再验证节点",
-  "nodeInvalidDefinition": "请输入包含 name 和 type 的单个完整节点定义"
+  "nodeInvalidDefinition": "请输入包含 name 和 type 的单个完整节点定义",
+  "manageServices": "管理检测服务",
+  "allServices": "全部服务"
 }

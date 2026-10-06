@@ -222,6 +222,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "addressTip": MessageLookupByLibrary.simpleMessage("请输入有效的WebDAV地址"),
     "advancedConfig": MessageLookupByLibrary.simpleMessage("进阶配置"),
     "advancedConfigDesc": MessageLookupByLibrary.simpleMessage("提供多样化配置"),
+    "allServices": MessageLookupByLibrary.simpleMessage("全部服务"),
     "allowBypass": MessageLookupByLibrary.simpleMessage("允许应用绕过VPN"),
     "allowBypassDesc": MessageLookupByLibrary.simpleMessage("开启后部分应用可绕过VPN"),
     "allowLan": MessageLookupByLibrary.simpleMessage("局域网代理"),
@@ -1023,6 +1024,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "mainlandNetworkWarning": MessageLookupByLibrary.simpleMessage(
       "可能不适用于中国大陆网络",
     ),
+    "manageServices": MessageLookupByLibrary.simpleMessage("管理检测服务"),
     "matchTarget": MessageLookupByLibrary.simpleMessage("MATCH-TARGET"),
     "matchTargetDesc": MessageLookupByLibrary.simpleMessage(
       "目标为 MATCH-TARGET 的规则路由到这里，默认取本配置末尾 MATCH 规则的目标",

@@ -6,6 +6,7 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/models/probe.dart';
 import 'package:fl_clash/providers/app.dart';
+import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/providers/service_status.dart';
 import 'package:fl_clash/widgets/widgets.dart';
@@ -42,9 +43,23 @@ class _ServiceCheckPageState extends ConsumerState<ServiceCheckPage>
     final enabled =
         !safeModeBuild && ref.watch(initProvider) && ref.watch(isStartProvider);
     final ip = result.ip;
+    final settings = ref.watch(appSettingProvider);
+    final names = orderedServiceNames(
+      settings.serviceOrder,
+      disabled: settings.disabledServices,
+    );
+    final current = names.contains(settings.currentService)
+        ? settings.currentService
+        : '';
     return CommonScaffold(
       title: l.serviceAvailability,
       actions: [
+        IconButton(
+          tooltip: l.manageServices,
+          icon: const Icon(Icons.tune),
+          onPressed: () =>
+              BaseNavigator.push(context, const ServiceManagementPage()),
+        ),
         IconButton(
           tooltip: l.refresh,
           icon: const Icon(Icons.refresh),
@@ -88,7 +103,25 @@ class _ServiceCheckPageState extends ConsumerState<ServiceCheckPage>
                     ].where((text) => text.isNotEmpty).join('\n'),
             ),
           ),
-          for (final target in serviceTargets.entries)
+          DropdownButtonFormField<String>(
+            key: ValueKey(current),
+            initialValue: current,
+            decoration: InputDecoration(labelText: l.serviceAvailability),
+            items: [
+              DropdownMenuItem(value: '', child: Text(l.allServices)),
+              for (final name in names)
+                DropdownMenuItem(
+                  value: name,
+                  child: Text(serviceTargets[name]!),
+                ),
+            ],
+            onChanged: (value) => ref
+                .read(appSettingProvider.notifier)
+                .update((state) => state.copyWith(currentService: value ?? '')),
+          ),
+          for (final target in (current.isEmpty ? names : [current]).map(
+            (name) => MapEntry(name, serviceTargets[name]!),
+          ))
             Builder(
               builder: (context) {
                 final item = result.services
@@ -132,6 +165,52 @@ class _ServiceCheckPageState extends ConsumerState<ServiceCheckPage>
               },
             ),
         ],
+      ),
+    );
+  }
+}
+
+class ServiceManagementPage extends ConsumerWidget {
+  const ServiceManagementPage({super.key});
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(appSettingProvider);
+    final order = orderedServiceNames(settings.serviceOrder);
+    return CommonScaffold(
+      title: context.appLocalizations.manageServices,
+      body: ReorderableListView.builder(
+        itemCount: order.length,
+        onReorderItem: (before, after) {
+          final next = List.of(order);
+          next.insert(after, next.removeAt(before));
+          ref
+              .read(appSettingProvider.notifier)
+              .update((state) => state.copyWith(serviceOrder: next));
+        },
+        buildDefaultDragHandles: false,
+        itemBuilder: (context, index) {
+          final name = order[index];
+          return SwitchListTile.adaptive(
+            key: ValueKey(name),
+            title: Text(serviceTargets[name]!),
+            secondary: ReorderableDragStartListener(
+              index: index,
+              child: const Icon(Icons.drag_handle),
+            ),
+            value: !settings.disabledServices.contains(name),
+            onChanged: (enabled) =>
+                ref.read(appSettingProvider.notifier).update((state) {
+                  final hidden = state.disabledServices.toSet();
+                  enabled ? hidden.remove(name) : hidden.add(name);
+                  return state.copyWith(
+                    disabledServices: hidden.toList(),
+                    currentService: !enabled && state.currentService == name
+                        ? ''
+                        : state.currentService,
+                  );
+                }),
+          );
+        },
       ),
     );
   }

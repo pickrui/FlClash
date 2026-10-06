@@ -228,6 +228,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "addressTip": MessageLookupByLibrary.simpleMessage("有効なWebDAVアドレスを入力"),
     "advancedConfig": MessageLookupByLibrary.simpleMessage("高度な設定"),
     "advancedConfigDesc": MessageLookupByLibrary.simpleMessage("多様な設定を提供"),
+    "allServices": MessageLookupByLibrary.simpleMessage("すべてのサービス"),
     "allowBypass": MessageLookupByLibrary.simpleMessage("アプリがVPNをバイパスすることを許可"),
     "allowBypassDesc": MessageLookupByLibrary.simpleMessage(
       "有効化すると一部アプリがVPNをバイパス",
@@ -1164,6 +1165,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "mainlandNetworkWarning": MessageLookupByLibrary.simpleMessage(
       "中国本土のネットワークには適さない可能性があります",
     ),
+    "manageServices": MessageLookupByLibrary.simpleMessage("サービスの管理"),
     "matchTarget": MessageLookupByLibrary.simpleMessage("MATCH-TARGET"),
     "matchTargetDesc": MessageLookupByLibrary.simpleMessage(
       "MATCH-TARGET を対象にしたルールの行き先。既定ではこのプロファイル末尾の MATCH ルールのターゲットを使います",

@@ -268,6 +268,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "advancedConfigDesc": MessageLookupByLibrary.simpleMessage(
       "Provide diverse configuration options",
     ),
+    "allServices": MessageLookupByLibrary.simpleMessage("All services"),
     "allowBypass": MessageLookupByLibrary.simpleMessage(
       "Allow applications to bypass VPN",
     ),
@@ -1393,6 +1394,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "mainlandNetworkWarning": MessageLookupByLibrary.simpleMessage(
       "May not be suitable for networks in mainland China",
     ),
+    "manageServices": MessageLookupByLibrary.simpleMessage("Manage services"),
     "matchTarget": MessageLookupByLibrary.simpleMessage("MATCH-TARGET"),
     "matchTargetDesc": MessageLookupByLibrary.simpleMessage(
       "Where rules targeting MATCH-TARGET go. Defaults to the target of the final MATCH rule in this profile.",

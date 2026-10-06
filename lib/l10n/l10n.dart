@@ -9889,6 +9889,26 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Manage services`
+  String get manageServices {
+    return Intl.message(
+      'Manage services',
+      name: 'manageServices',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All services`
+  String get allServices {
+    return Intl.message(
+      'All services',
+      name: 'allServices',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {
