@@ -774,6 +774,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
         borderRadius: AppRadius.top(AppCorner.xxl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Flexible(child: sheetBody),
             const _KeyboardSpacer(),
