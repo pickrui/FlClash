@@ -266,6 +266,24 @@ void _applyWebRtcBlock(Map<String, dynamic> rawConfig) {
   rawConfig['sniffer'] = snifferMap;
 }
 
+void _migrateLegacyProviderFile({
+  required String legacyPath,
+  required String newPath,
+}) {
+  try {
+    if (FileSystemEntity.typeSync(newPath, followLinks: false) !=
+            FileSystemEntityType.notFound ||
+        FileSystemEntity.typeSync(legacyPath, followLinks: false) !=
+            FileSystemEntityType.file) {
+      return;
+    }
+    final legacyFile = File(legacyPath);
+    final modified = legacyFile.lastModifiedSync();
+    // The running Core may still need the old cache if applying the profile fails.
+    legacyFile.copySync(newPath).setLastModifiedSync(modified);
+  } on FileSystemException catch (_) {}
+}
+
 Future<Map<String, dynamic>> _makeRealProfileTask(
   MakeRealProfileState data,
 ) async {
@@ -348,36 +366,34 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
   if (rawConfig['profile'] == null) {
     rawConfig['profile'] = {};
   }
-  if (rawConfig['proxy-providers'] != null) {
-    final proxyProviders = rawConfig['proxy-providers'] as Map;
-    for (final key in proxyProviders.keys) {
-      final proxyProvider = proxyProviders[key];
-      if (proxyProvider['type'] != 'http') {
-        continue;
-      }
-      if (proxyProvider['url'] != null) {
-        proxyProvider['path'] = getProvidersFilePathInner(
-          'proxies',
-          proxyProvider['url'],
-        );
+  void isolateRemoteProviderCaches(String section, String type) {
+    final providers = rawConfig[section];
+    if (providers is! Map) return;
+    final urlUses = <String, int>{};
+    for (final provider in providers.values.whereType<Map>()) {
+      final url = provider['url'];
+      if (provider['type'] == 'http' && url is String && url.isNotEmpty) {
+        urlUses.update(url, (count) => count + 1, ifAbsent: () => 1);
       }
     }
-  }
-  if (rawConfig['rule-providers'] != null) {
-    final ruleProviders = rawConfig['rule-providers'] as Map;
-    for (final key in ruleProviders.keys) {
-      final ruleProvider = ruleProviders[key];
-      if (ruleProvider['type'] != 'http') {
-        continue;
-      }
-      if (ruleProvider['url'] != null) {
-        ruleProvider['path'] = getProvidersFilePathInner(
-          'rules',
-          ruleProvider['url'],
+    for (final entry in providers.entries) {
+      final provider = entry.value;
+      if (provider is! Map || provider['type'] != 'http') continue;
+      final url = provider['url'];
+      if (url is! String || url.isEmpty) continue;
+      final path = getProvidersFilePathInner(type, '${entry.key}@$url');
+      if (urlUses[url] == 1) {
+        _migrateLegacyProviderFile(
+          legacyPath: getProvidersFilePathInner(type, url),
+          newPath: path,
         );
       }
+      provider['path'] = path;
     }
   }
+
+  isolateRemoteProviderCaches('proxy-providers', 'proxies');
+  isolateRemoteProviderCaches('rule-providers', 'rules');
   rawConfig['profile']['store-selected'] = false;
   if (data.overwriteType == OverwriteType.custom) {
     rawConfig['proxy-groups'] = customProxyGroups.map((group) {

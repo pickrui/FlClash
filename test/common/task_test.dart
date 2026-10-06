@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'package:archive/archive.dart';
 import 'package:drift/native.dart';
 import 'package:fl_clash/common/constant.dart';
+import 'package:fl_clash/common/string.dart';
 import 'package:fl_clash/common/task.dart';
 import 'package:fl_clash/database/database.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -59,6 +60,105 @@ void main() {
 
   tearDownAll(() {
     pathProviderDir.deleteSync(recursive: true);
+  });
+
+  group('remote provider cache', () {
+    late Directory root;
+    const url = 'https://fixture.invalid/resources';
+
+    setUp(() async {
+      root = await Directory.systemTemp.createTemp('flclash-provider-cache-');
+    });
+    tearDown(() => root.delete(recursive: true));
+
+    for (final (section, directory) in [
+      ('proxy-providers', 'proxies'),
+      ('rule-providers', 'rules'),
+    ]) {
+      Future<Map> buildProviders(Map<String, Object?> providers) async {
+        final result = await makeRealProfileTask(
+          _makeRealProfileState(
+            rawConfig: {
+              section: providers,
+              'rules': ['MATCH,DIRECT'],
+            },
+          ).copyWith(profilesPath: root.path),
+        );
+        return result[section] as Map;
+      }
+
+      File legacyFile() =>
+          File('${root.path}/providers/1/$directory/${url.toMd5()}');
+
+      Future<File> seedLegacyCache() async {
+        final file = legacyFile();
+        await file.parent.create(recursive: true);
+        await file.writeAsString('legacy fixture cache');
+        return file;
+      }
+
+      test(
+        '$section isolates names sharing a URL with different headers',
+        () async {
+          final result = await buildProviders({
+            for (final name in ['First', 'Second'])
+              name: {
+                'type': 'http',
+                'url': url,
+                'header': {
+                  'X-Fixture': [name],
+                },
+              },
+          });
+          expect(result['First']['path'], isNot(result['Second']['path']));
+          expect(result['First']['header'], {
+            'X-Fixture': ['First'],
+          });
+          expect(result['Second']['header'], {
+            'X-Fixture': ['Second'],
+          });
+        },
+      );
+
+      test('$section retains legacy cache while copying to new path', () async {
+        final legacy = await seedLegacyCache();
+        final modified = DateTime.utc(2024, 1, 1);
+        await legacy.setLastModified(modified);
+        final result = await buildProviders({
+          'Fixture': {'type': 'http', 'url': url},
+        });
+        final current = File(result['Fixture']['path'] as String);
+        expect(current.path, isNot(legacy.path));
+        expect(await current.readAsString(), 'legacy fixture cache');
+        expect((await current.lastModified()).toUtc(), modified);
+        expect(await legacy.readAsString(), 'legacy fixture cache');
+        await current.writeAsString('refreshed fixture cache');
+        await buildProviders({
+          'Fixture': {'type': 'http', 'url': url},
+        });
+        expect(await current.readAsString(), 'refreshed fixture cache');
+      });
+
+      test('$section does not migrate an ambiguous shared URL cache', () async {
+        final legacy = await seedLegacyCache();
+        final result = await buildProviders({
+          for (final name in ['First', 'Second'])
+            name: {'type': 'http', 'url': url},
+        });
+        for (final provider in result.values) {
+          expect(await File(provider['path'] as String).exists(), false);
+        }
+        expect(await legacy.readAsString(), 'legacy fixture cache');
+      });
+
+      test('$section preserves file and inline providers', () async {
+        const providers = {
+          'File': {'type': 'file', 'path': 'providers/fixture.yaml'},
+          'Inline': {'type': 'inline', 'payload': <Object?>[]},
+        };
+        expect(await buildProviders(providers), providers);
+      });
+    }
   });
 
   test(
