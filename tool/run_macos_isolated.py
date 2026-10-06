@@ -101,19 +101,30 @@ def network_state():
 
 
 def stop_process_group(process):
-    try:
-        os.killpg(process.pid, signal.SIGTERM)
-    except ProcessLookupError:
-        pass
+    def signal_group(signum):
+        try:
+            os.killpg(process.pid, signum)
+        except ProcessLookupError:
+            return
+        except PermissionError:
+            rows = subprocess.check_output(
+                ['/bin/ps', '-axo', 'pid=,pgid=,uid=,stat='], text=True,
+            ).splitlines()
+            for row in rows:
+                pid, group, owner, status = row.split()
+                if int(group) != process.pid or int(owner) != os.getuid() or status.startswith('Z'):
+                    continue
+                try:
+                    os.kill(int(pid), signum)
+                except ProcessLookupError:
+                    pass
+    signal_group(signal.SIGTERM)
     try:
         process.wait(timeout=5)
     except subprocess.TimeoutExpired:
         pass
-    try:
-        os.killpg(process.pid, signal.SIGKILL)
-    except ProcessLookupError:
-        pass
-    process.wait()
+    signal_group(signal.SIGKILL)
+    process.wait(timeout=5)
 
 
 def request_stop(_signal, _frame):

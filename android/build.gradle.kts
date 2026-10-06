@@ -21,15 +21,6 @@ subprojects {
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
 subprojects {
-    if (name == "file_picker" && providers.gradleProperty("android.builtInKotlin").orNull == "false") {
-        // file_picker skips Kotlin on AGP 9 even when Flutter disables built-in Kotlin.
-        pluginManager.withPlugin("com.android.library") {
-            pluginManager.apply("org.jetbrains.kotlin.android")
-            tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-                compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-            }
-        }
-    }
     project.evaluationDependsOn(":app")
 }
 

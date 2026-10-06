@@ -33,6 +33,8 @@ void main() {
 
     await tester.tap(find.byType(UaItem));
     await tester.pumpAndSettle();
+    await tester.tap(find.text(AppLocalizations.current.customUserAgent));
+    await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextFormField), 'Unsaved/3.0');
     await tester.tap(find.text('clash-verge/v2.4.2'));
     await tester.pumpAndSettle();
@@ -53,7 +55,14 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text(AppLocalizations.current.customUserAgent));
     await tester.pumpAndSettle();
-    expect(find.text('Saved/2.0'), findsOneWidget);
+    expect(
+      tester.widget<TextFormField>(find.byType(TextFormField)).controller!.text,
+      'Saved/2.0',
+    );
+    expect(
+      container.read(appSettingProvider).userAgents,
+      contains('Saved/2.0'),
+    );
   });
 
   testWidgets('discards dialog result when settings item was removed', (
