@@ -237,10 +237,10 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
     try {
       final file = await picker.pickerFile();
       if (file == null || !mounted) return;
-      if (file.size > maxProviderContentBytes) {
+      if ((file.lengthSync() ?? 0) > maxProviderContentBytes) {
         throw const ProviderLibraryException('size');
       }
-      final bytes = await file.readBytes();
+      final bytes = await file.readBytes(maxBytes: maxProviderContentBytes);
       if (!mounted) return;
       final ext = file.extension?.toLowerCase();
       final format = switch (ext) {

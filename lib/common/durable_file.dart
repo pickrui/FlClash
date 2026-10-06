@@ -66,13 +66,13 @@ Future<void> _durableMove(
     final targetPointer = target.toNativeUtf16();
     try {
       final result = MoveFileEx(
-        sourcePointer,
-        targetPointer,
-        _moveFileReplaceExisting | _moveFileWriteThrough,
+        PCWSTR(sourcePointer),
+        PCWSTR(targetPointer),
+        const MOVE_FILE_FLAGS(_moveFileReplaceExisting | _moveFileWriteThrough),
       );
-      if (result == 0) {
+      if (!result.value) {
         throw FileSystemException(
-          'Durable rename failed with Win32 error ${GetLastError()}',
+          'Durable rename failed with Win32 error ${result.error}',
           target,
         );
       }

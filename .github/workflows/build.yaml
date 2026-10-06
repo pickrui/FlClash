@@ -7,7 +7,7 @@ on:
 
 env:
   IS_STABLE: ${{ !contains(github.ref, '-') }}
-  FLUTTER_VERSION: '3.47.2'
+  FLUTTER_VERSION: '3.47.4'
   GO_VERSION: '1.26.8'
   MSYS_NO_PATHCONV: 1
 

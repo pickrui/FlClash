@@ -12,43 +12,28 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 class Picker {
-  Future<PlatformFile?> pickerFile({bool withData = false}) async {
-    final filePickerResult = await FilePicker.pickFiles(
-      withData: withData,
-      allowMultiple: false,
-      initialDirectory: await appPath.downloadDirPath,
-    );
-    return filePickerResult?.files.first;
-  }
+  Future<PlatformFile?> pickerFile() async =>
+      FilePicker.pickFile(initialDirectory: await appPath.downloadDirPath);
 
   Future<String?> saveFile(String fileName, Uint8List bytes) async {
-    final path = await FilePicker.saveFile(
+    final uri = await FilePicker.saveFile(
       fileName: fileName,
       initialDirectory: await appPath.downloadDirPath,
       bytes: bytes,
     );
-    if (!system.isAndroid && path != null) {
-      final file = File(path);
-      await file.safeWriteAsBytes(bytes);
+    if (uri == null) return null;
+    if (uri.scheme == 'file') {
+      final path = uri.toFilePath();
+      if (bytes.isEmpty) await File(path).safeWriteAsBytes(bytes);
+      return path;
     }
-    return path;
+    return uri.toString();
   }
 
   Future<String?> saveFileWithPath(String fileName, String localPath) async {
-    final localFile = File(localPath);
-    if (!await localFile.exists()) {
-      await localFile.create(recursive: true);
-    }
-    final bytes = Platform.isAndroid ? await localFile.readAsBytes() : null;
-    final path = await FilePicker.saveFile(
-      fileName: fileName,
-      initialDirectory: await appPath.downloadDirPath,
-      bytes: bytes,
-    );
-    if (path != null && bytes == null) {
-      await localFile.copy(path);
-    }
-    await localFile.safeDelete();
+    final file = File(localPath);
+    final path = await saveFile(fileName, await file.readAsBytes());
+    await file.safeDelete();
     return path;
   }
 
@@ -77,14 +62,19 @@ class Picker {
 }
 
 extension PlatformFileExt on PlatformFile {
-  Future<Uint8List> readBytes() async {
-    final data = bytes;
-    if (data != null) return data;
-    final filePath = path;
-    if (filePath == null) {
-      throw StateError('Selected file has neither bytes nor a readable path');
+  Future<Uint8List> readBytes({int? maxBytes}) async {
+    if (maxBytes == null) return readAsBytes();
+    if ((lengthSync() ?? 0) > maxBytes) {
+      throw const FormatException('File exceeds size limit');
     }
-    return File(filePath).readAsBytes();
+    final bytes = BytesBuilder(copy: false);
+    await for (final chunk in readAsByteStream()) {
+      if (bytes.length + chunk.length > maxBytes) {
+        throw const FormatException('File exceeds size limit');
+      }
+      bytes.add(chunk);
+    }
+    return bytes.takeBytes();
   }
 }
 

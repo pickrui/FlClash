@@ -192,7 +192,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
     final commonAction = context.commonAction;
     final backupAction = context.backupAction;
 
-    final file = await picker.pickerFile(withData: false);
+    final file = await picker.pickerFile();
     final path = file?.path;
     if (path == null) return;
     final res = await commonAction.loadingRun<bool>(

@@ -10,7 +10,7 @@ import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 import 'package:win32/win32.dart';
 
-// CRYPTPROTECT_UI_FORBIDDEN from dpapi.h (not exported by win32 5.x).
+// CRYPTPROTECT_UI_FORBIDDEN from dpapi.h (kept numeric for existing-file compatibility).
 const _cryptProtectUiForbidden = 0x1;
 
 class WindowsStorageProtectionException implements Exception {
@@ -41,23 +41,21 @@ Uint8List _crypt(Uint8List bytes, {required bool protect}) {
       final result = protect
           ? CryptProtectData(
               input,
-              nullptr,
-              nullptr,
-              nullptr,
-              nullptr,
+              null,
+              null,
+              null,
               _cryptProtectUiForbidden,
               output,
             )
           : CryptUnprotectData(
               input,
-              nullptr,
-              nullptr,
-              nullptr,
-              nullptr,
+              null,
+              null,
+              null,
               _cryptProtectUiForbidden,
               output,
             );
-      if (result == 0) throw WindowsStorageProtectionException(GetLastError());
+      if (!result.value) throw WindowsStorageProtectionException(result.error);
       if (output.ref.pbData == nullptr) {
         throw const WindowsStorageProtectionException(ERROR_INVALID_DATA);
       }
@@ -70,7 +68,7 @@ Uint8List _crypt(Uint8List bytes, {required bool protect}) {
         output.ref.pbData
             .asTypedList(output.ref.cbData)
             .fillRange(0, output.ref.cbData, 0);
-        LocalFree(output.ref.pbData);
+        LocalFree(HLOCAL(output.ref.pbData));
       }
     }
   });

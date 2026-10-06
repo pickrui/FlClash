@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:win32_registry/win32_registry.dart';
+
 import 'constant.dart';
 import 'launch.dart';
 import 'print.dart';
@@ -88,12 +89,12 @@ class Protocol {
       scheme: scheme,
       executable: Platform.resolvedExecutable,
     );
-    final regKey = Registry.currentUser.createKey(plan.protocolKey);
+    final regKey = CURRENT_USER.create(plan.protocolKey);
     try {
-      regKey.createValue(const RegistryValue.string('URL Protocol', ''));
-      final commandKey = regKey.createKey(plan.commandKey);
+      regKey.setValue('URL Protocol', const RegistryValue.string(''));
+      final commandKey = regKey.create(plan.commandKey);
       try {
-        commandKey.createValue(RegistryValue.string('', plan.command));
+        commandKey.setValue('', RegistryValue.string(plan.command));
       } finally {
         commandKey.close();
       }
