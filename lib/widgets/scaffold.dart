@@ -9,6 +9,7 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/pop_scope.dart';
+import 'package:fl_clash/widgets/sheet_navigator.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -348,7 +349,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
       data: useCloseIcon
           ? IconButtonData(
               glyph: AppGlyphs.close,
-              onPressed: context.safeNestedPop,
+              onPressed: backAction ?? context.safeNestedPop,
               tooltip: appLocalizations.close,
             )
           : IconButtonData(
@@ -1059,7 +1060,9 @@ class _SheetPop {
   }
 
   static bool backActionUnavailable(BuildContext context) =>
-      CommonScaffoldBackActionProvider.of(context)?.backAction == null;
+      isSheetPage(context)
+      ? !Navigator.of(context).canPop()
+      : CommonScaffoldBackActionProvider.of(context)?.backAction == null;
 
   final bool useCloseIcon;
   final bool asSuffix;

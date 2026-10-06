@@ -9,6 +9,9 @@ import 'package:fl_clash/widgets/drag_back.dart';
 import 'package:fl_clash/widgets/sheet_navigator.dart';
 
 import 'package:fl_clash/common/color.dart';
+
+import 'inherited.dart';
+
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 
@@ -368,11 +371,14 @@ class ModalSideSheetRoute<T> extends PopupRoute<T> with DragBackRouteMixin<T> {
 
   final String? barrierOnTapHint;
 
+  final _dismissHandler = ValueNotifier<SheetDismissHandler?>(null);
+
   final ValueNotifier<EdgeInsets> _clipDetailsNotifier =
       ValueNotifier<EdgeInsets>(EdgeInsets.zero);
 
   @override
   void dispose() {
+    _dismissHandler.dispose();
     _clipDetailsNotifier.dispose();
     super.dispose();
   }
@@ -437,7 +443,17 @@ class ModalSideSheetRoute<T> extends PopupRoute<T> with DragBackRouteMixin<T> {
       ),
     );
 
-    return capturedThemes?.wrap(content) ?? content;
+    final scoped = SheetDismissScope(handler: _dismissHandler, child: content);
+    return capturedThemes?.wrap(scoped) ?? scoped;
+  }
+
+  void _dismiss() {
+    final handler = _dismissHandler.value;
+    if (handler != null) {
+      handler();
+    } else {
+      navigator?.maybePop();
+    }
   }
 
   @override
@@ -457,6 +473,7 @@ class ModalSideSheetRoute<T> extends PopupRoute<T> with DragBackRouteMixin<T> {
         barrierSemanticsDismissible: semanticsDismissible,
         clipDetailsNotifier: _clipDetailsNotifier,
         semanticsOnTapHint: barrierOnTapHint,
+        onDismiss: _dismiss,
       );
     } else {
       return ModalBarrier(
@@ -465,6 +482,7 @@ class ModalSideSheetRoute<T> extends PopupRoute<T> with DragBackRouteMixin<T> {
         barrierSemanticsDismissible: semanticsDismissible,
         clipDetailsNotifier: _clipDetailsNotifier,
         semanticsOnTapHint: barrierOnTapHint,
+        onDismiss: _dismiss,
       );
     }
   }

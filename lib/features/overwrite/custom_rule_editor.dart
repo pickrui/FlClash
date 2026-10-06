@@ -9,8 +9,11 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/clash_config.dart';
-import 'package:fl_clash/widgets/dialog.dart';
 import 'package:material_ui/material_ui.dart';
+
+import 'overwrite_sheet.dart';
+
+import 'package:collection/collection.dart';
 
 /// A visual editor for common rules, with a lossless text editor for advanced
 /// expressions. [validate] can check the candidate in its complete configuration
@@ -77,6 +80,17 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
   };
   static const _additionalRawTypes = {'SNIFF-PROTOCOL'};
 
+  late final List<Object?> _origin;
+  List<Object?> get _snapshot => [
+    _payloadController.text,
+    _rawController.text,
+    _action,
+    _target,
+    _noResolve,
+    _src,
+    _rawMode,
+  ];
+
   final _formKey = GlobalKey<FormState>();
   final _errorKey = GlobalKey();
   final _payloadController = TextEditingController();
@@ -106,6 +120,7 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
         _loadParsedRule(parsed);
       }
     }
+    _origin = _snapshot;
   }
 
   @override
@@ -328,7 +343,7 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
         _formKey.currentState?.validate() != true) {
       return;
     }
-    Navigator.of(context).pop(_failedCandidate);
+    context.safeNestedPop(_failedCandidate);
   }
 
   Future<void> _submit() async {
@@ -346,7 +361,7 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
         _showError(error, candidate: rule);
         return;
       }
-      Navigator.of(context).pop(rule);
+      context.safeNestedPop(rule);
     } catch (error) {
       if (!mounted || _abandonIfNotCurrent()) return;
       _showError(
@@ -388,7 +403,7 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
     required String title,
     required List<String> options,
     String? value,
-  }) => showDialog<String>(
+  }) => showOverwriteSheet<String>(
     context: context,
     builder: (_) =>
         _RuleOptionDialog(title: title, options: options, value: value),
@@ -452,13 +467,16 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.appLocalizations;
-    return CommonDialog(
+    return OverwriteEditorForm(
+      isDirty: () => !const ListEquality().equals(_origin, _snapshot),
+      save: _submit,
+      isBusy: () => _saving,
       maxWidth: 480,
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       title: widget.rule == null ? l10n.addRule : l10n.editRule,
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.safeNestedPop(),
           child: Text(l10n.cancel),
         ),
         if (_failedCandidate != null)
@@ -684,14 +702,14 @@ class _RuleOptionDialogState extends State<_RuleOptionDialog> {
           (item) => item.toLowerCase().contains(_query.trim().toLowerCase()),
         )
         .toList();
-    return CommonDialog(
+    return OverwriteEditorForm(
       maxWidth: 480,
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       title: widget.title,
       overrideScroll: true,
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.safeNestedPop(),
           child: Text(l10n.cancel),
         ),
       ],
@@ -723,7 +741,7 @@ class _RuleOptionDialogState extends State<_RuleOptionDialog> {
                           trailing: option == widget.value
                               ? const GlyphIcon(AppGlyphs.check)
                               : null,
-                          onTap: () => Navigator.of(context).pop(option),
+                          onTap: () => context.safeNestedPop(option),
                         );
                       },
                     ),

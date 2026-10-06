@@ -786,6 +786,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "confirmClearCustomRouting": MessageLookupByLibrary.simpleMessage(
       "Очистить пользовательские группы прокси и правила текущего профиля? Содержимое подписки, добавленные правила, цепочки прокси и пользовательские узлы сохранятся.",
     ),
+    "confirmExitWindow": MessageLookupByLibrary.simpleMessage(
+      "Вы уверены, что хотите закрыть текущее окно?",
+    ),
     "confirmForceCrashCore": MessageLookupByLibrary.simpleMessage(
       "Вы уверены, что хотите принудительно аварийно завершить работу ядра?",
     ),
@@ -879,6 +882,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "cut": MessageLookupByLibrary.simpleMessage("Вырезать"),
     "dark": MessageLookupByLibrary.simpleMessage("Темный"),
     "dashboard": MessageLookupByLibrary.simpleMessage("Панель управления"),
+    "dataChangedSave": MessageLookupByLibrary.simpleMessage(
+      "Обнаружены изменения данных. Сохранить их?",
+    ),
     "daysAgo": m14,
     "defaultNameserver": MessageLookupByLibrary.simpleMessage(
       "Сервер имен по умолчанию",
@@ -1123,6 +1129,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "direct": MessageLookupByLibrary.simpleMessage("Прямой"),
     "disableUDP": MessageLookupByLibrary.simpleMessage("Отключить UDP"),
     "disabled": MessageLookupByLibrary.simpleMessage("Выключено"),
+    "discard": MessageLookupByLibrary.simpleMessage("Не сохранять"),
     "discardChanges": MessageLookupByLibrary.simpleMessage(
       "Отменить изменения?",
     ),

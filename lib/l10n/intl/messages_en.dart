@@ -772,6 +772,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "confirmClearCustomRouting": MessageLookupByLibrary.simpleMessage(
       "Clear this profile’s custom proxy groups and rules? Subscription content, added rules, proxy chains, and custom nodes will be kept.",
     ),
+    "confirmExitWindow": MessageLookupByLibrary.simpleMessage(
+      "Are you sure you want to exit the current window?",
+    ),
     "confirmForceCrashCore": MessageLookupByLibrary.simpleMessage(
       "Are you sure you want to force crash the core?",
     ),
@@ -863,6 +866,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "cut": MessageLookupByLibrary.simpleMessage("Cut"),
     "dark": MessageLookupByLibrary.simpleMessage("Dark"),
     "dashboard": MessageLookupByLibrary.simpleMessage("Dashboard"),
+    "dataChangedSave": MessageLookupByLibrary.simpleMessage(
+      "Data changes detected. Save them?",
+    ),
     "daysAgo": m14,
     "defaultNameserver": MessageLookupByLibrary.simpleMessage(
       "Default nameserver",
@@ -1095,6 +1101,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "direct": MessageLookupByLibrary.simpleMessage("Direct"),
     "disableUDP": MessageLookupByLibrary.simpleMessage("Disable UDP"),
     "disabled": MessageLookupByLibrary.simpleMessage("Disabled"),
+    "discard": MessageLookupByLibrary.simpleMessage("Discard"),
     "discardChanges": MessageLookupByLibrary.simpleMessage(
       "Discard the changes?",
     ),

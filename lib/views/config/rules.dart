@@ -12,6 +12,7 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:fl_clash/features/overwrite/overwrite_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AddedRulesView extends ConsumerStatefulWidget {
@@ -31,8 +32,9 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
   }
 
   Future<void> _handleAddOrUpdate([Rule? rule]) async {
-    final res = await globalState.showCommonDialog<Rule>(
-      child: AddOrEditRuleDialog(
+    final res = await showOverwriteSheet<Rule>(
+      context: context,
+      builder: (_) => AddOrEditRuleDialog(
         rule: rule,
         targets: tailscaleRoutingTargets(ref.read(tailscaleNetworksProvider)),
       ),

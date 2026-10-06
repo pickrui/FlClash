@@ -10,10 +10,13 @@ import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/clash_config.dart';
 import 'package:fl_clash/widgets/card.dart';
-import 'package:fl_clash/widgets/dialog.dart';
 import 'package:fl_clash/widgets/input.dart';
 import 'package:fl_clash/widgets/list.dart';
 import 'package:material_ui/material_ui.dart';
+
+import 'overwrite_sheet.dart';
+
+import 'package:collection/collection.dart';
 
 class RuleItem extends StatelessWidget {
   final bool isSelected;
@@ -165,6 +168,14 @@ class AddOrEditRuleDialog extends StatefulWidget {
 }
 
 class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
+  late List<Object?> _origin;
+  List<Object?> get _snapshot => [
+    _ruleAction,
+    _contentController.text,
+    _ruleTargetController.text,
+    _noResolve,
+    _src,
+  ];
   late RuleAction _ruleAction;
   final _ruleTargetController = TextEditingController();
   final _contentController = TextEditingController();
@@ -176,6 +187,7 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
   @override
   void initState() {
     _initState();
+    _origin = _snapshot;
     super.initState();
   }
 
@@ -214,6 +226,7 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.rule != widget.rule) {
       _initState();
+      _origin = _snapshot;
     }
   }
 
@@ -239,12 +252,14 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
     final rule = widget.rule != null
         ? widget.rule!.copyWith(value: parsedRule.value)
         : Rule.value(parsedRule.value);
-    Navigator.of(context).pop(rule);
+    context.safeNestedPop(rule);
   }
 
   @override
   Widget build(BuildContext context) {
-    return CommonDialog(
+    return OverwriteEditorForm(
+      isDirty: () => !const ListEquality().equals(_origin, _snapshot),
+      save: _handleSubmit,
       title: widget.rule != null
           ? appLocalizations.editRule
           : appLocalizations.addRule,
@@ -273,7 +288,7 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
                   FilledButton.tonal(
                     onPressed: () async {
                       _ruleAction =
-                          await showDialog<RuleAction>(
+                          await showOverwriteSheet<RuleAction>(
                             context: context,
                             builder: (_) => OptionsDialog<RuleAction>(
                               title: appLocalizations.ruleName,

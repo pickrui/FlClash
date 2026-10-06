@@ -6,8 +6,9 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/widgets/dialog.dart';
 import 'package:material_ui/material_ui.dart';
+
+import 'overwrite_sheet.dart';
 
 enum RulePreset {
   blockQuic(['AND,((NETWORK,UDP),(DST-PORT,443)),REJECT-DROP']),
@@ -75,7 +76,7 @@ class _RulePresetDialogState extends State<RulePresetDialog> {
       final error = await widget.validate(rules);
       if (!mounted || ModalRoute.of(context)?.isCurrent == false) return;
       if (error.isEmpty) {
-        Navigator.of(context).pop(rules);
+        context.safeNestedPop(rules);
       } else {
         setState(() => _error = error);
       }
@@ -89,13 +90,16 @@ class _RulePresetDialogState extends State<RulePresetDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.appLocalizations;
-    return CommonDialog(
+    return OverwriteEditorForm(
+      isDirty: () => _selected.isNotEmpty,
+      save: _submit,
+      isBusy: () => _saving,
       title: l10n.quickAdd,
       maxWidth: 600,
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       actions: [
         TextButton(
-          onPressed: _saving ? null : () => Navigator.of(context).pop(),
+          onPressed: _saving ? null : () => context.safeNestedPop(),
           child: Text(l10n.cancel),
         ),
         FilledButton(

@@ -11238,6 +11238,31 @@ class AppLocalizations {
       args: [action],
     );
   }
+
+  /// `Are you sure you want to exit the current window?`
+  String get confirmExitWindow {
+    return Intl.message(
+      'Are you sure you want to exit the current window?',
+      name: 'confirmExitWindow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Data changes detected. Save them?`
+  String get dataChangedSave {
+    return Intl.message(
+      'Data changes detected. Save them?',
+      name: 'dataChangedSave',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Discard`
+  String get discard {
+    return Intl.message('Discard', name: 'discard', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -105,17 +105,37 @@ class ProxyDecoratorProvider extends InheritedWidget {
       isProxyDecorator != oldWidget.isProxyDecorator;
 }
 
-class SheetProvider extends InheritedWidget {
+class SheetProvider<T> extends InheritedWidget {
   final SheetType type;
+  final void Function([T? result])? nestedNavigatorPop;
 
-  const SheetProvider({super.key, required super.child, required this.type});
+  const SheetProvider({
+    super.key,
+    required super.child,
+    required this.type,
+    this.nestedNavigatorPop,
+  });
+
+  SheetProvider copyWith({
+    SheetType? type,
+    void Function([T? result])? nestedNavigatorPop,
+    required Widget child,
+  }) {
+    return SheetProvider<T>(
+      type: type ?? this.type,
+      nestedNavigatorPop: nestedNavigatorPop ?? this.nestedNavigatorPop,
+      child: child,
+    );
+  }
 
   static SheetProvider? of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<SheetProvider>();
   }
 
   @override
-  bool updateShouldNotify(SheetProvider oldWidget) => type != oldWidget.type;
+  bool updateShouldNotify(SheetProvider oldWidget) =>
+      type != oldWidget.type ||
+      nestedNavigatorPop != oldWidget.nestedNavigatorPop;
 }
 
 /// How far a sheet's content hangs below the screen at its current detent.

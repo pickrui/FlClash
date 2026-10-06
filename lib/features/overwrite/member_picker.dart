@@ -5,8 +5,9 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/icons/icons.dart';
-import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+
+import 'overwrite_sheet.dart';
 
 /// Keeps selection order: fallback groups try their members in this order.
 class ProxyMemberPicker extends StatefulWidget {
@@ -40,19 +41,18 @@ class _ProxyMemberPickerState extends State<ProxyMemberPicker> {
       ...available,
       ..._selected,
     }.where((name) => query.matches([name])).toList();
-    return CommonDialog(
+    return OverwriteEditorForm(
       maxWidth: 480,
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       title: widget.title,
       overrideScroll: true,
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.safeNestedPop(),
           child: Text(appLocalizations.cancel),
         ),
         FilledButton(
-          onPressed: () =>
-              Navigator.of(context).pop(List<String>.from(_selected)),
+          onPressed: () => context.safeNestedPop(List<String>.from(_selected)),
           child: Text('${appLocalizations.confirm} (${_selected.length})'),
         ),
       ],

@@ -1322,5 +1322,8 @@
   "hotkeyDesc": "グローバルホットキーはウィンドウが非表示でも有効です。アクションをタップしてキーの組み合わせを記録します。",
   "hotkeyNotSet": "未設定",
   "hotkeyNeedsModifier": "{modifiers} のいずれかを含めてください",
-  "hotkeyConflictWith": "「{action}」で使用中です。保存するとこちらに移動します。"
+  "hotkeyConflictWith": "「{action}」で使用中です。保存するとこちらに移動します。",
+  "confirmExitWindow": "現在のウィンドウを閉じてもよろしいですか？",
+  "dataChangedSave": "データの変更を検出しました。保存しますか？",
+  "discard": "破棄"
 }

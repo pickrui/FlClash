@@ -5,7 +5,10 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:material_ui/material_ui.dart';
 
-import 'dialog.dart';
+import 'paged_sheet.dart';
+
+import 'package:fl_clash/common/context.dart';
+
 import 'list.dart';
 
 class OptionsDialog<T> extends StatelessWidget {
@@ -26,12 +29,12 @@ class OptionsDialog<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CommonDialog(
+    return PagedSheetForm(
       title: title,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
       child: RadioGroup(
         onChanged: (value) {
-          Navigator.of(context).pop(value);
+          context.safeNestedPop(value);
         },
         groupValue: value,
         child: Wrap(
@@ -49,7 +52,7 @@ class OptionsDialog<T> extends StatelessWidget {
                     delegate: RadioDelegate(
                       value: option,
                       onTap: () {
-                        Navigator.of(context).pop(option);
+                        context.safeNestedPop(option);
                       },
                     ),
                     title: Text(textBuilder(option)),

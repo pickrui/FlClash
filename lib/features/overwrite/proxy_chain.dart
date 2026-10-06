@@ -13,6 +13,10 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+
+import 'overwrite_sheet.dart';
+
+import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ProxyChainCandidateSection {
@@ -410,9 +414,9 @@ class _ProfileProxyChainsContentState
       rawConfig: rawConfig,
       profileProxies: profileProxies,
     );
-    final res = await BaseNavigator.push<ProxyChain>(
-      context,
-      ProxyChainEditView(
+    final res = await showOverwriteSheet<ProxyChain>(
+      context: context,
+      builder: (_) => ProxyChainEditView(
         profileId: widget.profileId,
         proxyChain: proxyChain,
         rawConfig: rawConfig,
@@ -740,6 +744,9 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
   List<String> _proxies = [];
   late ProxyChainRawContext _rawContext;
 
+  late final List<Object?> _origin;
+  List<Object?> get _snapshot => [_nameController.text, ..._proxies];
+
   @override
   void initState() {
     super.initState();
@@ -747,6 +754,7 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
     _nameController.text = proxyChain?.name ?? '';
     _proxies = List<String>.from(proxyChain?.proxies ?? []);
     _refreshRawContext();
+    _origin = _snapshot;
   }
 
   @override
@@ -810,9 +818,9 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
   Future<void> _handleAddProfileProxy() async {
     final setupAction = context.setupAction;
 
-    final res = await BaseNavigator.push<ProfileProxy>(
-      context,
-      const ProfileProxyEditView(),
+    final res = await showOverwriteSheet<ProfileProxy>(
+      context: context,
+      builder: (_) => const ProfileProxyEditView(),
     );
     if (res == null || !mounted) {
       return;
@@ -897,7 +905,7 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
       name: _nameController.text.trim(),
       proxies: proxies,
     );
-    Navigator.of(context).pop(proxyChain);
+    context.safeNestedPop(proxyChain);
   }
 
   Widget _buildProxyDelay(String proxy, String? testUrl) {
@@ -1087,192 +1095,196 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
     final selectedProxies = normalizeProxyChainProxies(_proxies);
     final candidateSections = _getVisibleCandidateSections(selectedProxies);
     final canSubmit = selectedProxies.length >= 2;
-    return CommonScaffold(
-      title: appLocalizations.proxyChains,
-      actions: [
-        CommonMinIconButtonTheme(
-          child: IconButton.filled(
-            tooltip: context.appLocalizations.save,
-            style:
-                IconButton.styleFrom(
-                  backgroundColor: canSubmit ? Colors.green : null,
-                  foregroundColor: canSubmit ? Colors.white : null,
-                ).copyWith(
-                  mouseCursor: WidgetStatePropertyAll(
-                    canSubmit
-                        ? SystemMouseCursors.click
-                        : SystemMouseCursors.basic,
+    return OverwriteExitGuard(
+      isDirty: () => !const ListEquality().equals(_origin, _snapshot),
+      save: _handleSubmit,
+      child: CommonScaffold(
+        title: appLocalizations.proxyChains,
+        actions: [
+          CommonMinIconButtonTheme(
+            child: IconButton.filled(
+              tooltip: context.appLocalizations.save,
+              style:
+                  IconButton.styleFrom(
+                    backgroundColor: canSubmit ? Colors.green : null,
+                    foregroundColor: canSubmit ? Colors.white : null,
+                  ).copyWith(
+                    mouseCursor: WidgetStatePropertyAll(
+                      canSubmit
+                          ? SystemMouseCursors.click
+                          : SystemMouseCursors.basic,
+                    ),
                   ),
+              onPressed: canSubmit ? _handleSubmit : null,
+              icon: const GlyphIcon(AppGlyphs.check),
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
+        body: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: SizedBox(height: context.contentTopPadding),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Column(
+                  children: [
+                    CommonCard(
+                      padding: EdgeInsets.zero,
+                      type: CommonCardType.filled,
+                      radius: 18,
+                      child: ListTile(
+                        minTileHeight: 64,
+                        leading: GlyphIcon(
+                          AppGlyphs.warning,
+                          color: context.colorScheme.error,
+                        ),
+                        title: Text(appLocalizations.proxyChainWarning),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _nameController,
+                      inputFormatters: TextInputLimits.limit(
+                        TextInputLimits.groupName,
+                      ),
+                      decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
+                        labelText: appLocalizations.name,
+                      ),
+                    ),
+                  ],
                 ),
-            onPressed: canSubmit ? _handleSubmit : null,
-            icon: const GlyphIcon(AppGlyphs.check),
-          ),
-        ),
-        const SizedBox(width: 8),
-      ],
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: SizedBox(height: context.contentTopPadding),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Column(
-                children: [
-                  CommonCard(
-                    padding: EdgeInsets.zero,
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: InfoHeader(
+                info: Info(label: appLocalizations.proxyChainSelectedNodes),
+                actions: [
+                  CommonMinFilledButtonTheme(
+                    child: FilledButton.icon(
+                      onPressed: _handleAddProfileProxy,
+                      icon: const GlyphIcon(AppGlyphs.link),
+                      label: Text(appLocalizations.addProxyChainNode),
+                    ),
+                  ),
+                  if (_proxies.isNotEmpty) const SizedBox(width: 8),
+                  if (_proxies.isNotEmpty)
+                    CommonMinIconButtonTheme(
+                      child: IconButton.filledTonal(
+                        tooltip: appLocalizations.clearProxyChain,
+                        onPressed: _handleClear,
+                        icon: const GlyphIcon(AppGlyphs.delete),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            SliverToBoxAdapter(child: _buildChainHint()),
+            const SliverToBoxAdapter(child: SizedBox(height: 8)),
+            if (_proxies.isEmpty)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: CommonCard(
                     type: CommonCardType.filled,
                     radius: 18,
                     child: ListTile(
                       minTileHeight: 64,
-                      leading: GlyphIcon(
-                        AppGlyphs.warning,
-                        color: context.colorScheme.error,
+                      title: Text(
+                        appLocalizations.proxyChainEmpty,
+                        style: context.textTheme.bodyMedium?.copyWith(
+                          color: context.colorScheme.onSurfaceVariant.opacity80,
+                        ),
                       ),
-                      title: Text(appLocalizations.proxyChainWarning),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: _nameController,
-                    inputFormatters: TextInputLimits.limit(
-                      TextInputLimits.groupName,
-                    ),
-                    decoration: InputDecoration(
-                      border: const OutlineInputBorder(),
-                      labelText: appLocalizations.name,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: InfoHeader(
-              info: Info(label: appLocalizations.proxyChainSelectedNodes),
-              actions: [
-                CommonMinFilledButtonTheme(
-                  child: FilledButton.icon(
-                    onPressed: _handleAddProfileProxy,
-                    icon: const GlyphIcon(AppGlyphs.link),
-                    label: Text(appLocalizations.addProxyChainNode),
                   ),
                 ),
-                if (_proxies.isNotEmpty) const SizedBox(width: 8),
-                if (_proxies.isNotEmpty)
-                  CommonMinIconButtonTheme(
-                    child: IconButton.filledTonal(
-                      tooltip: appLocalizations.clearProxyChain,
-                      onPressed: _handleClear,
-                      icon: const GlyphIcon(AppGlyphs.delete),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          SliverToBoxAdapter(child: _buildChainHint()),
-          const SliverToBoxAdapter(child: SizedBox(height: 8)),
-          if (_proxies.isEmpty)
-            SliverToBoxAdapter(
-              child: Padding(
+              )
+            else
+              SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: CommonCard(
-                  type: CommonCardType.filled,
-                  radius: 18,
-                  child: ListTile(
-                    minTileHeight: 64,
-                    title: Text(
-                      appLocalizations.proxyChainEmpty,
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        color: context.colorScheme.onSurfaceVariant.opacity80,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            )
-          else
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              sliver: SliverReorderableList(
-                itemCount: _proxies.length,
-                itemBuilder: (context, index) {
-                  return _buildProxyItem(
-                    proxy: _proxies[index],
-                    index: index,
-                    totalLength: _proxies.length,
-                  );
-                },
-                proxyDecorator: (child, index, animation) {
-                  return commonProxyDecorator(
-                    _buildProxyItem(
+                sliver: SliverReorderableList(
+                  itemCount: _proxies.length,
+                  itemBuilder: (context, index) {
+                    return _buildProxyItem(
                       proxy: _proxies[index],
                       index: index,
                       totalLength: _proxies.length,
-                      isDecorator: true,
-                    ),
-                    index,
-                    animation,
-                  );
-                },
-                onReorderItem: _handleReorder,
+                    );
+                  },
+                  proxyDecorator: (child, index, animation) {
+                    return commonProxyDecorator(
+                      _buildProxyItem(
+                        proxy: _proxies[index],
+                        index: index,
+                        totalLength: _proxies.length,
+                        isDecorator: true,
+                      ),
+                      index,
+                      animation,
+                    );
+                  },
+                  onReorderItem: _handleReorder,
+                ),
               ),
-            ),
-          if (candidateSections.isEmpty)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                child: CommonCard(
-                  type: CommonCardType.filled,
-                  radius: 18,
-                  child: ListTile(
-                    minTileHeight: 64,
-                    title: Text(
-                      appLocalizations.nullTip(appLocalizations.proxies),
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        color: context.colorScheme.onSurfaceVariant.opacity80,
+            if (candidateSections.isEmpty)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  child: CommonCard(
+                    type: CommonCardType.filled,
+                    radius: 18,
+                    child: ListTile(
+                      minTileHeight: 64,
+                      title: Text(
+                        appLocalizations.nullTip(appLocalizations.proxies),
+                        style: context.textTheme.bodyMedium?.copyWith(
+                          color: context.colorScheme.onSurfaceVariant.opacity80,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            )
-          else ...[
-            SliverToBoxAdapter(
-              child: InfoHeader(
-                padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-                info: Info(
-                  label: appLocalizations.proxyChainAvailableNodes,
-                  glyph: AppGlyphs.layoutList,
-                ),
-              ),
-            ),
-            for (final section in candidateSections) ...[
+              )
+            else ...[
               SliverToBoxAdapter(
                 child: InfoHeader(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                  info: Info(label: section.label, glyph: section.glyph),
+                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+                  info: Info(
+                    label: appLocalizations.proxyChainAvailableNodes,
+                    glyph: AppGlyphs.layoutList,
+                  ),
                 ),
               ),
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                sliver: SliverList.builder(
-                  itemCount: section.proxies.length,
-                  itemBuilder: (context, index) {
-                    return _buildCandidateItem(
-                      proxy: section.proxies[index],
-                      glyph: section.glyph,
-                      index: index,
-                      totalLength: section.proxies.length,
-                    );
-                  },
+              for (final section in candidateSections) ...[
+                SliverToBoxAdapter(
+                  child: InfoHeader(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                    info: Info(label: section.label, glyph: section.glyph),
+                  ),
                 ),
-              ),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  sliver: SliverList.builder(
+                    itemCount: section.proxies.length,
+                    itemBuilder: (context, index) {
+                      return _buildCandidateItem(
+                        proxy: section.proxies[index],
+                        glyph: section.glyph,
+                        index: index,
+                        totalLength: section.proxies.length,
+                      );
+                    },
+                  ),
+                ),
+              ],
             ],
+            const SliverToBoxAdapter(child: SizedBox(height: 16)),
           ],
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
-        ],
+        ),
       ),
     );
   }

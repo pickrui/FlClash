@@ -19,6 +19,7 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:fl_clash/features/overwrite/overwrite_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class CustomOverwriteDraftView extends StatelessWidget {
@@ -209,9 +210,9 @@ class CustomOverwriteContent extends ConsumerWidget {
             label: appLocalizations.proxyGroup,
             trailing: _CountBadge(groups.length, issues: issues.groups.length),
             onPressed: () {
-              BaseNavigator.push(
-                context,
-                CustomProxyGroupsView(profileId: profileId),
+              showOverwriteSheet(
+                context: context,
+                builder: (_) => CustomProxyGroupsView(profileId: profileId),
               );
             },
           ),
@@ -222,9 +223,9 @@ class CustomOverwriteContent extends ConsumerWidget {
             label: appLocalizations.rule,
             trailing: _CountBadge(rules.length, issues: issues.rules.length),
             onPressed: () {
-              BaseNavigator.push(
-                context,
-                CustomRulesView(profileId: profileId),
+              showOverwriteSheet(
+                context: context,
+                builder: (_) => CustomRulesView(profileId: profileId),
               );
             },
           ),
@@ -340,8 +341,9 @@ class _CustomProxyGroupsViewState extends ConsumerState<CustomProxyGroupsView> {
     if (!context.mounted) {
       return;
     }
-    final result = await globalState.showCommonDialog<ProxyGroup>(
-      child: ProxyGroupDialog(
+    final result = await showOverwriteSheet<ProxyGroup>(
+      context: context,
+      builder: (_) => ProxyGroupDialog(
         group: group,
         existingGroups: groups,
         reservedNames: reservedNames,
@@ -635,8 +637,9 @@ class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
   Future<void> _addPresets(BuildContext context, WidgetRef ref) async {
     Profile? validatedProfile;
     List<Rule>? candidateRules;
-    final selected = await globalState.showCommonDialog<List<Rule>>(
-      child: RulePresetDialog(
+    final selected = await showOverwriteSheet<List<Rule>>(
+      context: context,
+      builder: (_) => RulePresetDialog(
         validate: (rules) async {
           if (!context.mounted) return appLocalizations.routingChanged;
           final current = ref.read(profileProvider(profileId));
@@ -675,8 +678,9 @@ class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
       return;
     }
     if (!context.mounted) return;
-    final result = await globalState.showCommonDialog<Rule>(
-      child: CustomRuleEditorDialog(
+    final result = await showOverwriteSheet<Rule>(
+      context: context,
+      builder: (_) => CustomRuleEditorDialog(
         rule: rule,
         targets: customRoutingTargets(
           profile,

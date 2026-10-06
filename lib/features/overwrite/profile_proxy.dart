@@ -16,6 +16,10 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+
+import 'overwrite_sheet.dart';
+
+import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 String _decodeBase64(String value) {
@@ -1110,6 +1114,13 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
   int _mode = 0;
   bool _saving = false;
 
+  late final List<Object?> _origin;
+  List<Object?> get _snapshot => [
+    _uriController.text,
+    _yamlController.text,
+    ..._fields.values.map((field) => field.text),
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -1117,6 +1128,7 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
     _proxy = Map.of(widget.profileProxy?.proxy ?? {});
     if (_proxy.isNotEmpty) _mode = 1;
     _writeEditors();
+    _origin = _snapshot;
   }
 
   void _writeEditors() {
@@ -1199,7 +1211,7 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
                 uri: uri,
                 proxy: proxy,
               );
-      Navigator.of(context).pop(next);
+      context.safeNestedPop(next);
     } catch (error) {
       if (mounted) {
         context.showNotifier(
@@ -1214,9 +1226,9 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
   }
 
   void _openEditor() {
-    BaseNavigator.push(
-      context,
-      EditorPage(
+    showOverwriteSheet(
+      context: context,
+      builder: (_) => EditorPage(
         title: context.appLocalizations.nodeDefinition,
         content: _yamlController.text,
         onSave: (editorContext, _, content) {
@@ -1227,7 +1239,7 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
               _proxy = value;
               _writeEditors();
             });
-            Navigator.of(editorContext).pop();
+            editorContext.safeNestedPop();
           } catch (_) {
             editorContext.showNotifier(
               editorContext.appLocalizations.nodeInvalidDefinition,
@@ -1241,90 +1253,95 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
-    return CommonScaffold(
-      title: l.proxyChainCustomNode,
-      actions: [
-        IconButton(
-          tooltip: l.save,
-          onPressed: _saving ? null : _handleSubmit,
-          icon: _saving
-              ? const SizedBox.square(
-                  dimension: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const GlyphIcon(AppGlyphs.check),
-        ),
-        const SizedBox(width: 8),
-      ],
-      body: ListView(
-        padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 88),
-        children: [
-          SegmentedButton<int>(
-            segments: [
-              const ButtonSegment(value: 0, label: Text('URI')),
-              ButtonSegment(value: 1, label: Text(l.nodeQuickFields)),
-              const ButtonSegment(value: 2, label: Text('YAML')),
-            ],
-            selected: {_mode},
-            onSelectionChanged: _saving
-                ? null
-                : (selected) => _switchMode(selected.single),
+    return OverwriteExitGuard(
+      isDirty: () => !const ListEquality().equals(_origin, _snapshot),
+      save: _handleSubmit,
+      isBusy: () => _saving,
+      child: CommonScaffold(
+        title: l.proxyChainCustomNode,
+        actions: [
+          IconButton(
+            tooltip: l.save,
+            onPressed: _saving ? null : _handleSubmit,
+            icon: _saving
+                ? const SizedBox.square(
+                    dimension: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const GlyphIcon(AppGlyphs.check),
           ),
-          const SizedBox(height: 16),
-          if (_mode == 0)
-            TextField(
-              controller: _uriController,
-              minLines: 4,
-              maxLines: 8,
-              keyboardType: TextInputType.url,
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                labelText: 'URI',
-                helperText: l.proxyChainUriNodeSupportedFormats,
-                helperMaxLines: 4,
-              ),
+          const SizedBox(width: 8),
+        ],
+        body: ListView(
+          padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 88),
+          children: [
+            SegmentedButton<int>(
+              segments: [
+                const ButtonSegment(value: 0, label: Text('URI')),
+                ButtonSegment(value: 1, label: Text(l.nodeQuickFields)),
+                const ButtonSegment(value: 2, label: Text('YAML')),
+              ],
+              selected: {_mode},
+              onSelectionChanged: _saving
+                  ? null
+                  : (selected) => _switchMode(selected.single),
             ),
-          if (_mode == 1)
-            for (final entry in _fields.entries)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: TextField(
-                  controller: entry.value,
-                  obscureText: entry.key == 'password',
-                  keyboardType: entry.key == 'port'
-                      ? TextInputType.number
-                      : TextInputType.text,
-                  decoration: InputDecoration(
-                    border: const OutlineInputBorder(),
-                    labelText: switch (entry.key) {
-                      'name' => l.name,
-                      'password' => l.password,
-                      _ => entry.key,
-                    },
-                  ),
+            const SizedBox(height: 16),
+            if (_mode == 0)
+              TextField(
+                controller: _uriController,
+                minLines: 4,
+                maxLines: 8,
+                keyboardType: TextInputType.url,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  labelText: 'URI',
+                  helperText: l.proxyChainUriNodeSupportedFormats,
+                  helperMaxLines: 4,
                 ),
               ),
-          if (_mode == 2) ...[
-            TextField(
-              controller: _yamlController,
-              minLines: 10,
-              maxLines: 25,
-              style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                labelText: l.nodeDefinition,
+            if (_mode == 1)
+              for (final entry in _fields.entries)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: TextField(
+                    controller: entry.value,
+                    obscureText: entry.key == 'password',
+                    keyboardType: entry.key == 'port'
+                        ? TextInputType.number
+                        : TextInputType.text,
+                    decoration: InputDecoration(
+                      border: const OutlineInputBorder(),
+                      labelText: switch (entry.key) {
+                        'name' => l.name,
+                        'password' => l.password,
+                        _ => entry.key,
+                      },
+                    ),
+                  ),
+                ),
+            if (_mode == 2) ...[
+              TextField(
+                controller: _yamlController,
+                minLines: 10,
+                maxLines: 25,
+                style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  labelText: l.nodeDefinition,
+                ),
               ),
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton.icon(
-                onPressed: _openEditor,
-                icon: const GlyphIcon(AppGlyphs.code),
-                label: Text(l.edit),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  onPressed: _openEditor,
+                  icon: const GlyphIcon(AppGlyphs.code),
+                  label: Text(l.edit),
+                ),
               ),
-            ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -1396,9 +1413,9 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
   Future<void> _handleAddOrUpdateProfileProxy([
     ProfileProxy? profileProxy,
   ]) async {
-    final res = await BaseNavigator.push<ProfileProxy>(
-      context,
-      ProfileProxyEditView(profileProxy: profileProxy),
+    final res = await showOverwriteSheet<ProfileProxy>(
+      context: context,
+      builder: (_) => ProfileProxyEditView(profileProxy: profileProxy),
     );
     if (res == null) {
       return;

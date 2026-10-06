@@ -7,9 +7,12 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/widgets/widgets.dart';
 import 'package:fl_clash/widgets/icon_history.dart';
 import 'package:material_ui/material_ui.dart';
+
+import 'overwrite_sheet.dart';
+
+import 'package:collection/collection.dart';
 
 import 'member_picker.dart';
 
@@ -62,6 +65,31 @@ class ProxyGroupDialog extends StatefulWidget {
 }
 
 class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
+  late final List<Object?> _origin;
+  List<Object?> get _snapshot => [
+    _nameController.text,
+    _proxiesController.text,
+    _providersController.text,
+    _urlController.text,
+    _intervalController.text,
+    _toleranceController.text,
+    _timeoutController.text,
+    _maxFailedTimesController.text,
+    _filterController.text,
+    _excludeFilterController.text,
+    _excludeTypeController.text,
+    _expectedStatusController.text,
+    _iconController.text,
+    _type,
+    _strategy,
+    _lazy,
+    _disableUdp,
+    _includeAll,
+    _includeAllProxies,
+    _includeAllProviders,
+    _hidden,
+  ];
+
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
   late final TextEditingController _proxiesController;
@@ -132,6 +160,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
     _includeAllProxies = group?.includeAllProxies ?? false;
     _includeAllProviders = group?.includeAllProviders ?? false;
     _hidden = group?.hidden ?? false;
+    _origin = _snapshot;
   }
 
   List<String>? _parseList(String value) {
@@ -218,7 +247,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
         _showError(message, canSaveDraft: true);
         return;
       }
-      Navigator.of(context).pop(result);
+      context.safeNestedPop(result);
     } catch (error) {
       if (mounted && ModalRoute.of(context)?.isCurrent == true) {
         _showError(
@@ -250,7 +279,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
     List<String> available,
     String title,
   ) async {
-    final selected = await showDialog<List<String>>(
+    final selected = await showOverwriteSheet<List<String>>(
       context: context,
       builder: (_) => ProxyMemberPicker(
         title: title,
@@ -389,7 +418,10 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
       _strategy,
     };
 
-    return CommonDialog(
+    return OverwriteEditorForm(
+      isDirty: () => !const ListEquality().equals(_origin, _snapshot),
+      save: _submit,
+      isBusy: () => _saving,
       maxWidth: 480,
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       title: widget.group == null
@@ -402,7 +434,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
             child: Text(appLocalizations.saveRoutingDraft),
           ),
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.safeNestedPop(),
           child: Text(appLocalizations.cancel),
         ),
         FilledButton(
@@ -706,7 +738,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
                           icon: const GlyphIcon(AppGlyphs.history),
                           label: Text(appLocalizations.iconHistory),
                           onPressed: () async {
-                            final url = await showDialog<String>(
+                            final url = await showOverwriteSheet<String>(
                               context: context,
                               builder: (_) => const IconHistoryDialog(),
                             );

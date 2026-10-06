@@ -657,6 +657,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "confirmClearCustomRouting": MessageLookupByLibrary.simpleMessage(
       "このプロファイルのカスタムプロキシグループとルールを消去しますか？サブスクリプションの内容、追加ルール、プロキシチェーン、カスタムノードは保持されます",
     ),
+    "confirmExitWindow": MessageLookupByLibrary.simpleMessage(
+      "現在のウィンドウを閉じてもよろしいですか？",
+    ),
     "confirmForceCrashCore": MessageLookupByLibrary.simpleMessage(
       "コアを強制的にクラッシュさせてもよろしいですか？",
     ),
@@ -736,6 +739,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "cut": MessageLookupByLibrary.simpleMessage("切り取り"),
     "dark": MessageLookupByLibrary.simpleMessage("ダーク"),
     "dashboard": MessageLookupByLibrary.simpleMessage("ダッシュボード"),
+    "dataChangedSave": MessageLookupByLibrary.simpleMessage(
+      "データの変更を検出しました。保存しますか？",
+    ),
     "daysAgo": m14,
     "defaultNameserver": MessageLookupByLibrary.simpleMessage("デフォルトネームサーバー"),
     "defaultNameserverDesc": MessageLookupByLibrary.simpleMessage(
@@ -928,6 +934,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "direct": MessageLookupByLibrary.simpleMessage("ダイレクト"),
     "disableUDP": MessageLookupByLibrary.simpleMessage("UDPを無効化"),
     "disabled": MessageLookupByLibrary.simpleMessage("無効"),
+    "discard": MessageLookupByLibrary.simpleMessage("破棄"),
     "discardChanges": MessageLookupByLibrary.simpleMessage("変更を破棄しますか？"),
     "disconnected": MessageLookupByLibrary.simpleMessage("切断済み"),
     "discountCode": MessageLookupByLibrary.simpleMessage("クーポンコード"),

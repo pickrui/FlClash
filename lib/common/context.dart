@@ -19,8 +19,15 @@ extension BuildContextExtension on BuildContext {
   bool get isMobileView => MediaQuery.sizeOf(this).width < 600;
   bool get isInBottomSheet =>
       SheetProvider.of(this)?.type == SheetType.bottomSheet;
-  void safeNestedPop<T extends Object?>([T? result]) =>
+  void safeNestedPop<T extends Object?>([T? result]) {
+    final nestedPop = SheetProvider.of(this)?.nestedNavigatorPop;
+    if (nestedPop != null && ModalRoute.of(this)?.isFirst == true) {
+      nestedPop(result);
+    } else {
       Navigator.of(this).pop(result);
+    }
+  }
+
   double get appBarInset =>
       FloatingBarScope.of(this) ??
       (isInBottomSheet

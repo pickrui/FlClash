@@ -584,6 +584,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "confirmClearCustomRouting": MessageLookupByLibrary.simpleMessage(
       "清空当前配置的自定义策略组和规则？订阅内容、附加规则、链式代理和自定义节点将保留",
     ),
+    "confirmExitWindow": MessageLookupByLibrary.simpleMessage("确定要退出当前窗口吗？"),
     "confirmForceCrashCore": MessageLookupByLibrary.simpleMessage("确定要强制崩溃核心？"),
     "confirmOverwriteTip": MessageLookupByLibrary.simpleMessage("确定后将会覆盖已有数据"),
     "confirmPasswordHint": MessageLookupByLibrary.simpleMessage("请再次输入密码"),
@@ -653,6 +654,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "cut": MessageLookupByLibrary.simpleMessage("剪切"),
     "dark": MessageLookupByLibrary.simpleMessage("深色"),
     "dashboard": MessageLookupByLibrary.simpleMessage("仪表盘"),
+    "dataChangedSave": MessageLookupByLibrary.simpleMessage("检测到数据有更改，是否保存"),
     "daysAgo": m14,
     "defaultNameserver": MessageLookupByLibrary.simpleMessage("默认域名服务器"),
     "defaultNameserverDesc": MessageLookupByLibrary.simpleMessage("用于解析DNS服务器"),
@@ -821,6 +823,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "direct": MessageLookupByLibrary.simpleMessage("直连"),
     "disableUDP": MessageLookupByLibrary.simpleMessage("禁用 UDP"),
     "disabled": MessageLookupByLibrary.simpleMessage("已关闭"),
+    "discard": MessageLookupByLibrary.simpleMessage("放弃"),
     "discardChanges": MessageLookupByLibrary.simpleMessage("是否放弃更改？"),
     "disconnected": MessageLookupByLibrary.simpleMessage("已断开"),
     "discountCode": MessageLookupByLibrary.simpleMessage("折扣代码"),

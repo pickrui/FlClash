@@ -9,7 +9,7 @@ import 'package:fl_clash/icons/glyph_icon.dart';
 import 'package:fl_clash/database/database.dart';
 import 'package:material_ui/material_ui.dart';
 
-import 'dialog.dart';
+import 'paged_sheet.dart';
 import 'icon.dart';
 
 class IconHistoryDialog extends StatefulWidget {
@@ -23,13 +23,13 @@ class _IconHistoryDialogState extends State<IconHistoryDialog> {
   late Future<List<IconRecord>> _records = database.iconRecordsDao.query('');
 
   @override
-  Widget build(BuildContext context) => CommonDialog(
+  Widget build(BuildContext context) => PagedSheetForm(
     title: context.appLocalizations.iconHistory,
     maxWidth: 480,
     overrideScroll: true,
     actions: [
       TextButton(
-        onPressed: () => Navigator.of(context).pop(),
+        onPressed: () => context.safeNestedPop(),
         child: Text(context.appLocalizations.cancel),
       ),
     ],
@@ -72,7 +72,7 @@ class _IconHistoryDialogState extends State<IconHistoryDialog> {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      onTap: () => Navigator.of(context).pop(record.url),
+                      onTap: () => context.safeNestedPop(record.url),
                     );
                   },
                 );

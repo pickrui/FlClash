@@ -1322,5 +1322,8 @@
   "hotkeyDesc": "Global hotkeys work even while the window is hidden. Tap an action to record its key combination.",
   "hotkeyNotSet": "Not set",
   "hotkeyNeedsModifier": "Include at least one of {modifiers}",
-  "hotkeyConflictWith": "Already used by “{action}”. Saving moves it here."
+  "hotkeyConflictWith": "Already used by “{action}”. Saving moves it here.",
+  "confirmExitWindow": "Are you sure you want to exit the current window?",
+  "dataChangedSave": "Data changes detected. Save them?",
+  "discard": "Discard"
 }
