@@ -51,6 +51,27 @@ void main() {
   });
   tearDown(() => db.close());
 
+  for (final key in ['include-all', 'include-all-providers']) {
+    test(
+      'implicit $key provider use protects deletion and permits safe rename',
+      () async {
+        final before = resource(kind: ProviderKind.proxy, label: 'Nodes');
+        await library.save(before);
+        await db.putProfile(profile);
+        sources[profile.id] = {
+          'proxy-groups': [
+            {'name': 'All', key: true},
+          ],
+        };
+        await expectLater(library.remove(before), fails('inUse'));
+        final renamed = before.copyWith(label: 'Renamed');
+        await library.save(renamed, previous: before);
+        expect((await db.clashProvidersDao.all().getSingle()).label, 'Renamed');
+        await expectLater(library.remove(renamed), fails('inUse'));
+      },
+    );
+  }
+
   test('rename updates snapshots, normalized custom rules and global added rules together', () async {
     final before = resource();
     await library.save(before);

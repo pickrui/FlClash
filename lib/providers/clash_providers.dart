@@ -199,14 +199,21 @@ class ClashProviderLibrary {
   bool _references(Profile profile, ClashProvider provider) =>
       switch (provider.kind) {
         ProviderKind.proxy => profile.customProxyGroups.any(
-          (group) => group.use?.contains(provider.label) ?? false,
+          (group) =>
+              group.includeAll == true ||
+              group.includeAllProviders == true ||
+              (group.use?.contains(provider.label) ?? false),
         ),
         ProviderKind.rule => profile.customRules.any(
           (rule) => ruleReferencesProvider(rule.value, provider.label),
         ),
       };
 
-  bool _sourceReferences(Map<String, dynamic> source, ClashProvider provider) {
+  bool _sourceReferences(
+    Map<String, dynamic> source,
+    ClashProvider provider, {
+    bool includeImplicit = true,
+  }) {
     final entries = provider.kind == ProviderKind.proxy
         ? source['proxy-groups']
         : <Object?>[
@@ -219,8 +226,11 @@ class ClashProviderLibrary {
     return provider.kind == ProviderKind.proxy
         ? entries.whereType<Map>().any(
             (group) =>
-                group['use'] is List &&
-                (group['use'] as List).contains(provider.label),
+                (includeImplicit &&
+                    (group['include-all'] == true ||
+                        group['include-all-providers'] == true)) ||
+                (group['use'] is List &&
+                    (group['use'] as List).contains(provider.label)),
           )
         : entries.whereType<String>().any(
             (rule) => ruleReferencesProvider(rule, provider.label),
@@ -251,7 +261,8 @@ class ClashProviderLibrary {
       final source = sources[profile.id]!;
       if (_defines(source, provider, provider.label)) continue;
       if (_sourceReferences(source, provider)) {
-        if (renamedTo != null) {
+        if (renamedTo != null &&
+            _sourceReferences(source, provider, includeImplicit: false)) {
           throw ProviderLibraryException('sourceReference', [profile.label]);
         }
         use(profile);

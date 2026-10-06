@@ -62,6 +62,61 @@ void main() {
   });
 
   test(
+    'library content is materialized from the database only when referenced',
+    () async {
+      final root = await Directory.systemTemp.createTemp(
+        'flclash-provider-files-',
+      );
+      addTearDown(() => root.delete(recursive: true));
+      final provider = ClashProvider(
+        id: 1,
+        kind: ProviderKind.proxy,
+        label: 'Local',
+        content: utf8.encode('proxies: [{name: Fixture, type: direct}]'),
+      );
+      final state =
+          _makeRealProfileState(
+            rawConfig: {
+              'proxy-groups': [
+                {
+                  'name': 'All',
+                  'type': 'select',
+                  'use': ['Local'],
+                },
+              ],
+              'rules': ['MATCH,All'],
+            },
+          ).copyWith(
+            profilesPath: root.path,
+            clashProviders: [
+              provider,
+              provider.copyWith(id: 2, label: 'Unused'),
+            ],
+          );
+      final result = await makeRealProfileTask(state);
+      final definition = (result['proxy-providers'] as Map)['Local'] as Map;
+      final file = File(definition['path'] as String);
+      expect(await file.readAsBytes(), provider.content);
+      expect(
+        await root.list(recursive: true).where((entry) => entry is File).length,
+        1,
+      );
+      final next = provider.copyWith(
+        content: utf8.encode('proxies: [{name: Changed, type: direct}]'),
+      );
+      final changed = await makeRealProfileTask(
+        state.copyWith(clashProviders: [next]),
+      );
+      final nextFile = File(
+        changed['proxy-providers']['Local']['path'] as String,
+      );
+      expect(nextFile.path, isNot(file.path));
+      expect(await nextFile.readAsBytes(), next.content);
+      expect(await file.readAsBytes(), provider.content);
+    },
+  );
+
+  test(
     'app-owned authentication overrides profile and script exemptions',
     () async {
       final state = _makeRealProfileState(
