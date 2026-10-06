@@ -10045,16 +10045,6 @@ class AppLocalizations {
     return Intl.message('Total', name: 'total', desc: '', args: []);
   }
 
-  /// `Auto check for updates`
-  String get autoCheckUpdate {
-    return Intl.message(
-      'Auto check for updates',
-      name: 'autoCheckUpdate',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Stop button in notification`
   String get showNotificationStopAction {
     return Intl.message(

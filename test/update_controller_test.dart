@@ -17,24 +17,6 @@ import 'package:fl_clash/providers/update_download.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('disabling automatic updates still permits manual checks and can be reversed', () async {
-    var automatic = false;
-    final calls = <bool>[];
-    final check = AppUpdateCheck(
-      automaticEnabled: () => automatic,
-      checkForUpdates: (isUser) async {
-        calls.add(isUser);
-      },
-    );
-    await check.run();
-    expect(calls, isEmpty);
-    await check.run(isUser: true);
-    expect(calls, [true]);
-    automatic = true;
-    await check.run();
-    expect(calls, [true, false]);
-  });
-
   test(
     'manual checks queued behind an automatic check share one follow-up',
     () async {

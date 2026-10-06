@@ -343,9 +343,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Use 1–255 UTF-8 bytes, without colons or control characters",
     ),
     "auto": MessageLookupByLibrary.simpleMessage("Auto"),
-    "autoCheckUpdate": MessageLookupByLibrary.simpleMessage(
-      "Auto check for updates",
-    ),
     "autoCloseConnections": MessageLookupByLibrary.simpleMessage(
       "Auto close connections",
     ),

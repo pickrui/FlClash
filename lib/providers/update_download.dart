@@ -21,9 +21,7 @@ final appUpdateNoticeProvider = Provider<ValueNotifier<AppUpdateInfo?>>((ref) {
 });
 
 class AppUpdateCheck {
-  AppUpdateCheck({required this.checkForUpdates, this.automaticEnabled});
-
-  final bool Function()? automaticEnabled;
+  AppUpdateCheck({required this.checkForUpdates});
 
   final Future<void> Function(bool isUser) checkForUpdates;
   Future<void>? _inFlight;
@@ -38,7 +36,6 @@ class AppUpdateCheck {
   }
 
   Future<void> run({bool isUser = false}) async {
-    if (!isUser && automaticEnabled?.call() == false) return;
     while (_inFlight != null) {
       final inFlight = _inFlight!;
       if (!isUser || _forUser) return inFlight;

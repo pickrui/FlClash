@@ -239,22 +239,6 @@ class OpenLogsItem extends ConsumerWidget {
   }
 }
 
-class AutomaticUpdateItem extends ConsumerWidget {
-  const AutomaticUpdateItem({super.key});
-  @override
-  Widget build(BuildContext context, WidgetRef ref) => ListItem.switchItem(
-    title: Text(context.appLocalizations.autoCheckUpdate),
-    delegate: SwitchDelegate(
-      value: ref.watch(
-        appSettingProvider.select((state) => state.autoCheckUpdate),
-      ),
-      onChanged: (value) => ref
-          .read(appSettingProvider.notifier)
-          .update((state) => state.copyWith(autoCheckUpdate: value)),
-    ),
-  );
-}
-
 class NotificationStopItem extends ConsumerWidget {
   const NotificationStopItem({super.key});
   @override
@@ -283,7 +267,6 @@ class ApplicationSettingView extends StatelessWidget {
         const SilentLaunchItem(),
       ],
       const AutoRunItem(),
-      const AutomaticUpdateItem(),
       if (system.isAndroid) const NotificationStopItem(),
       if (system.isAndroid) ...[const HiddenItem()],
       const AnimateTabItem(),

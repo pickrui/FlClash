@@ -27,7 +27,6 @@ void main() {
     () {
       final old = AppSettingProps.fromJson({'customUserAgent': ' Legacy/1 '});
       expect(old.userAgents, [...defaultUserAgents, 'Legacy/1']);
-      expect(old.autoCheckUpdate, true);
       expect(old.showNotificationStopAction, true);
       final explicit = AppSettingProps.fromJson({
         'userAgents': ['B/2', 'A/1', 'B/2', 'bad\r\nheader', null],
@@ -36,7 +35,6 @@ void main() {
       expect(explicit.userAgents, ['B/2', 'A/1']);
       expect(AppSettingProps.fromJson({'userAgents': []}).userAgents, isEmpty);
       final disabled = old.copyWith(
-        autoCheckUpdate: false,
         showNotificationStopAction: false,
         userAgents: ['Only/1'],
       );

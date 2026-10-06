@@ -347,9 +347,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "От 1 до 255 байт UTF-8, без двоеточий и управляющих символов",
     ),
     "auto": MessageLookupByLibrary.simpleMessage("Авто"),
-    "autoCheckUpdate": MessageLookupByLibrary.simpleMessage(
-      "Автопроверка обновлений",
-    ),
     "autoCloseConnections": MessageLookupByLibrary.simpleMessage(
       "Автоматическое закрытие соединений",
     ),

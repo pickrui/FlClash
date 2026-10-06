@@ -13,7 +13,6 @@ _AppSettingProps _$AppSettingPropsFromJson(Map<String, dynamic> json) =>
           ? defaultDashboardWidgets
           : dashboardWidgetsSafeFormJson(json['dashboardWidgets'] as List?),
       onlyStatisticsProxy: json['onlyStatisticsProxy'] as bool? ?? false,
-      autoCheckUpdate: json['autoCheckUpdate'] as bool? ?? true,
       showNotificationStopAction:
           json['showNotificationStopAction'] as bool? ?? true,
       userAgents: _readUserAgents(json, 'userAgents') == null
@@ -68,7 +67,6 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
           .map((e) => _$DashboardWidgetEnumMap[e]!)
           .toList(),
       'onlyStatisticsProxy': instance.onlyStatisticsProxy,
-      'autoCheckUpdate': instance.autoCheckUpdate,
       'showNotificationStopAction': instance.showNotificationStopAction,
       'userAgents': instance.userAgents,
       'autoLaunch': instance.autoLaunch,

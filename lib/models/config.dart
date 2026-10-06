@@ -112,7 +112,6 @@ abstract class AppSettingProps with _$AppSettingProps {
     @JsonKey(fromJson: dashboardWidgetsSafeFormJson)
     List<DashboardWidget> dashboardWidgets,
     @Default(false) bool onlyStatisticsProxy,
-    @Default(true) bool autoCheckUpdate,
     @Default(true) bool showNotificationStopAction,
     @Default(defaultUserAgents)
     @JsonKey(readValue: _readUserAgents, fromJson: userAgentsFromJson)

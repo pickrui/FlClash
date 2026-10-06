@@ -1188,7 +1188,6 @@
   "memoryReleasedSize": "Освобождено {size}",
   "releaseMemoryFailed": "Не удалось освободить память",
   "total": "Всего",
-  "autoCheckUpdate": "Автопроверка обновлений",
   "showNotificationStopAction": "Кнопка остановки в уведомлении",
   "interfaceName": "Имя интерфейса",
   "interfaceFollowProfile": "Из профиля",

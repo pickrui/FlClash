@@ -1188,7 +1188,6 @@
   "memoryReleasedSize": "{size} を解放しました",
   "releaseMemoryFailed": "メモリの解放に失敗しました",
   "total": "合計",
-  "autoCheckUpdate": "更新の自動チェック",
   "showNotificationStopAction": "通知に停止ボタンを表示",
   "interfaceName": "インターフェース名",
   "interfaceFollowProfile": "プロファイルに従う",

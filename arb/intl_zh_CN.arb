@@ -1188,7 +1188,6 @@
   "memoryReleasedSize": "已释放 {size}",
   "releaseMemoryFailed": "释放内存失败",
   "total": "总计",
-  "autoCheckUpdate": "自动检查更新",
   "showNotificationStopAction": "通知栏显示停止按钮",
   "interfaceName": "网卡名称",
   "interfaceFollowProfile": "跟随配置",

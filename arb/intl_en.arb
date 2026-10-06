@@ -1188,7 +1188,6 @@
   "memoryReleasedSize": "Released {size}",
   "releaseMemoryFailed": "Failed to release memory",
   "total": "Total",
-  "autoCheckUpdate": "Auto check for updates",
   "showNotificationStopAction": "Stop button in notification",
   "interfaceName": "Interface name",
   "interfaceFollowProfile": "Follow profile",

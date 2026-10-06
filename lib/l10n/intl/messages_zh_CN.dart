@@ -272,7 +272,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "请输入 1–255 字节的用户名，不支持冒号或控制字符",
     ),
     "auto": MessageLookupByLibrary.simpleMessage("自动"),
-    "autoCheckUpdate": MessageLookupByLibrary.simpleMessage("自动检查更新"),
     "autoCloseConnections": MessageLookupByLibrary.simpleMessage("自动关闭连接"),
     "autoCloseConnectionsDesc": MessageLookupByLibrary.simpleMessage(
       "切换节点后自动关闭连接",

@@ -283,7 +283,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "コロンや制御文字を含まない 1～255 UTF-8 バイトを入力してください",
     ),
     "auto": MessageLookupByLibrary.simpleMessage("自動"),
-    "autoCheckUpdate": MessageLookupByLibrary.simpleMessage("更新の自動チェック"),
     "autoCloseConnections": MessageLookupByLibrary.simpleMessage("接続を自動閉じる"),
     "autoCloseConnectionsDesc": MessageLookupByLibrary.simpleMessage(
       "ノード変更後に接続を自動閉じる",
