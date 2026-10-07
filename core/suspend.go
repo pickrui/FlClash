@@ -6,7 +6,10 @@
 
 package main
 
-import "github.com/metacubex/mihomo/tunnel"
+import (
+	"github.com/metacubex/mihomo/adapter/provider"
+	"github.com/metacubex/mihomo/tunnel"
+)
 
 // All idle state is protected by runLock, including calls from Android's idle
 // receiver and configuration changes. Keeping traffic active is the default.
@@ -19,6 +22,7 @@ var (
 // reconcileIdleSuspendLocked changes only the suspend state owned by the idle
 // policy. The caller must hold runLock so config loading cannot be resumed early.
 func reconcileIdleSuspendLocked() {
+	provider.SetHealthCheckSuspended(deviceIdle && suspendOnIdle)
 	if !isRunning {
 		// Retain ownership until the next explicit start. A wake event or setting
 		// change while stopped must not restart the tunnel.

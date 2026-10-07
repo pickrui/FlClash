@@ -38,6 +38,8 @@ object Service {
     private const val INIT_METHOD = "initClash"
     private val validationMethods = setOf("validateConfig", "validateConfigWithBytes")
     private val validationMutex = Mutex()
+    private val eventListenerMutex = Mutex()
+    private var eventListenerOwner: Any? = null
     @Volatile
     private var validatorInitAction: String? = null
 
@@ -275,31 +277,37 @@ object Service {
     }
 
     suspend fun setEventListener(
-        cb: ((result: String?) -> Unit)?
-    ): Result<Unit> {
+        owner: Any,
+        isCurrent: () -> Boolean,
+        cb: (result: String?) -> Unit,
+    ): Result<Unit> = eventListenerMutex.withLock {
         val results = HashMap<String, MutableList<ByteArray>>()
-        return delegate.useService {
+        delegate.useService {
+            check(isCurrent()) { "Flutter event owner was detached" }
             it.setEventListener(
-                when (cb != null) {
-                    true -> object : IEventInterface.Stub() {
-                        override fun onEvent(
-                            id: String, data: ByteArray?, isSuccess: Boolean, ack: IAckInterface?
-                        ) {
-                            if (results[id] == null) {
-                                results[id] = mutableListOf()
-                            }
-                            results[id]?.add(data ?: byteArrayOf())
-                            ack?.onAck()
-                            if (isSuccess) {
-                                cb(results[id]?.formatString())
-                                results.remove(id)
-                            }
+                object : IEventInterface.Stub() {
+                    override fun onEvent(
+                        id: String, data: ByteArray?, isSuccess: Boolean, ack: IAckInterface?
+                    ) {
+                        if (results[id] == null) {
+                            results[id] = mutableListOf()
+                        }
+                        results[id]?.add(data ?: byteArrayOf())
+                        ack?.onAck()
+                        if (isSuccess) {
+                            cb(results[id]?.formatString())
+                            results.remove(id)
                         }
                     }
+                },
+            )
+        }.onSuccess { eventListenerOwner = owner }
+    }
 
-                    false -> null
-                })
-        }
+    suspend fun clearEventListener(owner: Any): Result<Unit> = eventListenerMutex.withLock {
+        if (eventListenerOwner !== owner) return@withLock Result.success(Unit)
+        delegate.useService { it.setEventListener(null) }
+            .onSuccess { eventListenerOwner = null }
     }
 
     suspend fun updateExcludeSSIDs(ssids: List<String>, networks: List<String>) = delegate.useService {

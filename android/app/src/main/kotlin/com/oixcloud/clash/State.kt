@@ -6,6 +6,7 @@
 package com.oixcloud.clash
 
 import android.net.VpnService
+import android.content.Intent
 import com.oixcloud.clash.service.models.VpnOptions
 import com.oixcloud.clash.common.LocalNetworkAccess
 import com.oixcloud.clash.common.GlobalState
@@ -44,6 +45,7 @@ object State {
 
     val runStateFlow: MutableStateFlow<RunState> = MutableStateFlow(RunState.STOP)
 
+    @Volatile
     var flutterEngine: FlutterEngine? = null
 
     val appPlugin: AppPlugin?
@@ -126,6 +128,26 @@ object State {
             setupAndStart(request)
         }
 
+    }
+
+    suspend fun handleSystemVpnStart() {
+        try {
+            check(GlobalState.application.sharedState.vpnOptions?.enable == true) {
+                "Open the app and enable VPN before using always-on VPN"
+            }
+            handleStartServiceAction()
+        } catch (error: Exception) {
+            withContext(kotlinx.coroutines.NonCancellable) {
+                runLock.withLock {
+                    if (runStateFlow.value == RunState.STOP) {
+                        val app = GlobalState.application
+                        app.stopService(Intent(app, com.oixcloud.clash.service.VpnService::class.java))
+                        app.stopService(Intent(app, com.oixcloud.clash.service.CommonService::class.java))
+                    }
+                }
+            }
+            throw error
+        }
     }
 
     suspend fun handleStopServiceAction() {

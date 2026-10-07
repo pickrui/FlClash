@@ -7,16 +7,19 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"net"
 	"net/netip"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/adapter/outbound"
 	"github.com/metacubex/mihomo/adapter/provider"
+	"github.com/metacubex/mihomo/common/utils"
 	"github.com/metacubex/mihomo/config"
 	C "github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/tunnel"
@@ -38,7 +41,7 @@ func resetSuspendTestState(t *testing.T) {
 		isRunning = previousRunning
 		currentConfig = previousConfig
 		deviceIdle, suspendOnIdle, idleOwnsTunnelSuspend = previousIdle, previousOption, previousOwner
-		provider.SetHealthCheckSuspended(previousIdle)
+		provider.SetHealthCheckSuspended(previousIdle && previousOption)
 		setSuspendTestTunnelStatus(previousStatus)
 	})
 }
@@ -323,4 +326,56 @@ func TestHandleSuspendKeepsUDPVoiceTrafficFlowing(t *testing.T) {
 	enabled = false
 	updateConfig(&UpdateParams{SuspendOnIdle: &enabled})
 	assertExchange(existingSession, "voice after hot disabling idle suspension")
+}
+
+type idleHealthProbe struct {
+	C.Proxy
+	calls atomic.Int32
+}
+
+func (p *idleHealthProbe) Name() string { return "idle-policy" }
+func (p *idleHealthProbe) URLTest(context.Context, string, utils.IntRanges[uint16]) (uint16, error) {
+	p.calls.Add(1)
+	return 1, nil
+}
+func (p *idleHealthProbe) AliveForTestUrl(string) bool       { return true }
+func (p *idleHealthProbe) LastDelayForTestUrl(string) uint16 { return 1 }
+
+func TestIdleHealthChecksRequireExplicitOptIn(t *testing.T) {
+	resetSuspendTestState(t)
+	tunnel.OnRunning()
+	proxy := &idleHealthProbe{}
+	proxies := []C.Proxy{proxy}
+	check := func(want int32) {
+		t.Helper()
+		checks, err := provider.NewCompatibleProvider("idle-policy", proxies,
+			provider.NewHealthCheck(proxies, "https://example.invalid/", 1000, 0, false, nil))
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer checks.Close()
+		checks.HealthCheck()
+		if got := proxy.calls.Load(); got != want {
+			t.Fatalf("health checks = %d, want %d", got, want)
+		}
+	}
+	handleSuspend(true)
+	check(1)
+	enabled := true
+	if err := updateConfig(&UpdateParams{SuspendOnIdle: &enabled}); err != nil {
+		t.Fatal(err)
+	}
+	check(1)
+	enabled = false
+	if err := updateConfig(&UpdateParams{SuspendOnIdle: &enabled}); err != nil {
+		t.Fatal(err)
+	}
+	check(2)
+	enabled = true
+	if err := updateConfig(&UpdateParams{SuspendOnIdle: &enabled}); err != nil {
+		t.Fatal(err)
+	}
+	check(2)
+	handleSuspend(false)
+	check(3)
 }

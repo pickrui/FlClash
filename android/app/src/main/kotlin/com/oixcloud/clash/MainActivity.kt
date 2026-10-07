@@ -14,20 +14,25 @@ import io.flutter.embedding.engine.FlutterEngine
 import kotlinx.coroutines.launch
 
 class MainActivity : FlutterActivity() {
+    private var ownedEngine: FlutterEngine? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         flutterEngine.plugins.add(AppPlugin())
         flutterEngine.plugins.add(ServicePlugin())
         flutterEngine.plugins.add(TilePlugin())
+        ownedEngine = flutterEngine
         State.flutterEngine = flutterEngine
     }
 
     override fun onDestroy() {
-        GlobalState.launch {
-            Service.setEventListener(null)
+        val engine = ownedEngine
+        val owner = engine?.plugin<ServicePlugin>()
+        ownedEngine = null
+        if (State.flutterEngine === engine) State.flutterEngine = null
+        if (owner != null) GlobalState.launch {
+            Service.clearEventListener(owner)
         }
-        State.flutterEngine = null
         super.onDestroy()
     }
 }

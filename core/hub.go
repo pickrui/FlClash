@@ -20,7 +20,6 @@ import (
 
 	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
-	"github.com/metacubex/mihomo/adapter/provider"
 	"github.com/metacubex/mihomo/common/observable"
 	"github.com/metacubex/mihomo/common/utils"
 	"github.com/metacubex/mihomo/component/memory"
@@ -651,7 +650,6 @@ func handleSuspend(suspended bool) bool {
 	runLock.Lock()
 	defer runLock.Unlock()
 	deviceIdle = suspended
-	provider.SetHealthCheckSuspended(suspended)
 	reconcileIdleSuspendLocked()
 	return true
 }

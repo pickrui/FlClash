@@ -143,7 +143,7 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
     fun handleInit(result: MethodChannel.Result) {
         Service.bind()
         launch {
-            Service.setEventListener {
+            Service.setEventListener(this@ServicePlugin, { attached && State.servicePlugin === this@ServicePlugin }) {
                 handleSendEvent(it)
             }.onSuccess {
                 result.success("")

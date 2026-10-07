@@ -13,11 +13,17 @@ import android.net.ProxyInfo
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import androidx.core.content.getSystemService
 import com.oixcloud.clash.common.AccessControlMode
 import com.oixcloud.clash.common.LocalNetworkAccess
 import com.oixcloud.clash.common.GlobalState
+import com.oixcloud.clash.common.BroadcastAction
+import com.oixcloud.clash.common.sendBroadcast
+import com.oixcloud.clash.common.startForeground
 import com.oixcloud.clash.core.Core
 import com.oixcloud.clash.service.models.normalizeTunMtu
 import com.oixcloud.clash.service.models.VpnOptions
@@ -38,6 +44,12 @@ class VpnService : SystemVpnService(), IBaseService {
     private val lifecycleLock = Any()
     private var tunStarted = false
     private var started = false
+    private val startupHandler = Handler(Looper.getMainLooper())
+    private val startupTimeout: Runnable = Runnable {
+        synchronized(lifecycleLock) {
+            if (!started) stop()
+        }
+    }
 
     private val self: VpnService
         get() = this
@@ -53,6 +65,33 @@ class VpnService : SystemVpnService(), IBaseService {
         handleCreate()
     }
 
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent?.action != null && intent.action != SystemVpnService.SERVICE_INTERFACE) {
+            return START_NOT_STICKY
+        }
+        synchronized(lifecycleLock) {
+            if (started) return START_NOT_STICKY
+            try {
+                startForeground(
+                    NotificationCompat.Builder(this, GlobalState.NOTIFICATION_CHANNEL)
+                        .setSmallIcon(R.drawable.ic_service)
+                        .setContentTitle(applicationInfo.loadLabel(packageManager))
+                        .setOngoing(true)
+                        .setOnlyAlertOnce(true)
+                        .build(),
+                )
+                startupHandler.removeCallbacks(startupTimeout)
+                // Core setup can take 60 seconds; retire an orphaned system start after it expires.
+                startupHandler.postDelayed(startupTimeout, 70_000L)
+                BroadcastAction.VPN_START_REQUESTED.sendBroadcast()
+            } catch (error: Exception) {
+                GlobalState.log("System VPN startup failed: $error")
+                stop()
+            }
+        }
+        return START_NOT_STICKY
+    }
+
     override fun onDestroy() {
         runCatching { stop() }.onFailure {
             GlobalState.log("VPN service cleanup failed: $it")
@@ -66,18 +105,16 @@ class VpnService : SystemVpnService(), IBaseService {
     }
     private val uidPackages = UidPackageCache { uid -> packageManager.getPackagesForUid(uid) }
 
-    private fun resolverProcess(
+    private fun resolveUid(
         protocol: Int,
         source: InetSocketAddress,
         target: InetSocketAddress,
-        uid: Int,
-    ): String {
-        val nextUid = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+    ): Int {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             connectivity?.getConnectionOwnerUid(protocol, source, target) ?: -1
         } else {
-            uid
+            -1
         }
-        return uidPackages.resolve(nextUid)
     }
 
     val VpnOptions.address
@@ -233,7 +270,8 @@ class VpnService : SystemVpnService(), IBaseService {
         check(Core.startTun(
             fd,
             protect = this::protect,
-            resolverProcess = this::resolverProcess,
+            resolveUid = this::resolveUid,
+            resolvePackage = uidPackages::resolve,
             options.stack,
             options.address,
             options.dns,
@@ -272,7 +310,8 @@ class VpnService : SystemVpnService(), IBaseService {
         }
     }
 
-    override fun stop() = synchronized(lifecycleLock) {
+    override fun stop(): Unit = synchronized(lifecycleLock) {
+        startupHandler.removeCallbacks(startupTimeout)
         started = false
         try {
             loader.cancel()
@@ -284,6 +323,7 @@ class VpnService : SystemVpnService(), IBaseService {
                 }
             } finally {
                 uidPackages.clear()
+                stopForeground(true)
                 stopSelf()
             }
         }

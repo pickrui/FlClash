@@ -83,7 +83,8 @@ Java_com_oixcloud_clash_core_Core_quickSetup(JNIEnv *env, jobject thiz, jstring 
 
 
 static jmethodID m_tun_interface_protect;
-static jmethodID m_tun_interface_resolve_process;
+static jmethodID m_tun_interface_resolve_uid;
+static jmethodID m_tun_interface_resolve_package;
 static jmethodID m_invoke_interface_result;
 
 
@@ -105,31 +106,33 @@ static int call_tun_interface_protect_impl(void *tun_interface, const int fd) {
     return accepted == JNI_TRUE ? 1 : 0;
 }
 
-static char *
-call_tun_interface_resolve_process_impl(void *tun_interface, const int protocol,
-                                        const char *source,
-                                        const char *target,
-                                        const int uid) {
-    if (tun_interface == nullptr) return nullptr;
+static int call_tun_interface_resolve_uid_impl(void *tun_interface, const int protocol,
+                                                const char *source, const char *target) {
+    if (tun_interface == nullptr) return -1;
     ATTACH_JNI();
     const auto sourceString = new_string(source);
-    if (sourceString == nullptr) return nullptr;
+    if (sourceString == nullptr) return -1;
     const auto targetString = new_string(target);
     if (targetString == nullptr) {
         env->DeleteLocalRef(sourceString);
-        return nullptr;
+        return -1;
     }
+    const auto uid = env->CallIntMethod(static_cast<jobject>(tun_interface),
+                                       m_tun_interface_resolve_uid, protocol,
+                                       sourceString, targetString);
+    const auto failed = jni_clear_exception(env);
+    env->DeleteLocalRef(sourceString);
+    env->DeleteLocalRef(targetString);
+    return failed ? -1 : uid;
+}
+
+static char *call_tun_interface_resolve_package_impl(void *tun_interface, const int uid) {
+    if (tun_interface == nullptr || uid < 0) return nullptr;
+    ATTACH_JNI();
     const auto packageName = reinterpret_cast<jstring>(env->CallObjectMethod(
-            static_cast<jobject>(tun_interface),
-            m_tun_interface_resolve_process,
-            protocol,
-            sourceString,
-            targetString,
-            uid));
+            static_cast<jobject>(tun_interface), m_tun_interface_resolve_package, uid));
     const auto failed = jni_clear_exception(env);
     const auto result = failed ? nullptr : get_string(packageName);
-    if (sourceString != nullptr) env->DeleteLocalRef(sourceString);
-    if (targetString != nullptr) env->DeleteLocalRef(targetString);
     if (packageName != nullptr) env->DeleteLocalRef(packageName);
     return result;
 }
@@ -160,14 +163,17 @@ JNI_OnLoad(JavaVM *vm, void *) {
     const auto c_invoke_interface = find_class("com/oixcloud/clash/core/InvokeInterface");
 
     m_tun_interface_protect = find_method(c_tun_interface, "protect", "(I)Z");
-    m_tun_interface_resolve_process = find_method(c_tun_interface, "resolverProcess",
-                                                  "(ILjava/lang/String;Ljava/lang/String;I)Ljava/lang/String;");
+    m_tun_interface_resolve_uid = find_method(c_tun_interface, "resolveUid",
+                                              "(ILjava/lang/String;Ljava/lang/String;)I");
+    m_tun_interface_resolve_package = find_method(c_tun_interface, "resolvePackage",
+                                                  "(I)Ljava/lang/String;");
     m_invoke_interface_result = find_method(c_invoke_interface, "onResult",
                                             "([B)V");
 
 
     protect_func = &call_tun_interface_protect_impl;
-    resolve_process_func = &call_tun_interface_resolve_process_impl;
+    resolve_uid_func = &call_tun_interface_resolve_uid_impl;
+    resolve_package_func = &call_tun_interface_resolve_package_impl;
     result_func = &call_invoke_interface_result_impl;
     release_object_func = &release_jni_object_impl;
     free_string_func = &free_string_impl;

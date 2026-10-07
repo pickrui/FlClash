@@ -75,23 +75,29 @@ func (th *TunHandler) handleProtect(fd int) error {
 	return th.callbacks.protect(fd, func(fd int) bool { return protect(th.callback, fd) })
 }
 
-func (th *TunHandler) handleResolveProcess(source, target net.Addr) string {
+func (th *TunHandler) handleResolveProcess(source, target net.Addr) (int, string) {
+	uid := -1
 	var result string
 	th.callbacks.use(func() {
 		var protocol int
-		uid := -1
 		switch source.Network() {
 		case "udp", "udp4", "udp6":
 			protocol = syscall.IPPROTO_UDP
 		case "tcp", "tcp4", "tcp6":
 			protocol = syscall.IPPROTO_TCP
+		default:
+			return
 		}
 		if version < 29 {
 			uid = platform.QuerySocketUidFromProcFs(source, target)
+		} else {
+			uid = resolveUid(th.callback, protocol, source.String(), target.String())
 		}
-		result = resolveProcess(th.callback, protocol, source.String(), target.String(), uid)
+		if uid >= 0 {
+			result = resolvePackage(th.callback, uid)
+		}
 	})
-	return result
+	return uid, result
 }
 
 var activeTunHandler atomic.Pointer[TunHandler]
@@ -118,7 +124,11 @@ func init() {
 		if src == nil || dst == nil {
 			return "", process.ErrInvalidNetwork
 		}
-		return th.handleResolveProcess(src, dst), nil
+		uid, name := th.handleResolveProcess(src, dst)
+		if uid >= 0 {
+			metadata.Uid = uint32(uid)
+		}
+		return name, nil
 	}
 }
 

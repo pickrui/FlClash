@@ -9,6 +9,9 @@
         android:name="android.hardware.camera"
         android:required="false" />
     <uses-feature
+        android:name="android.hardware.wifi"
+        android:required="false" />
+    <uses-feature
         android:name="android.software.leanback"
         android:required="false" />
 
@@ -112,6 +115,7 @@
             <intent-filter>
                 <action android:name="${applicationId}.intent.action.SERVICE_CREATED" />
                 <action android:name="${applicationId}.intent.action.SERVICE_DESTROYED" />
+                <action android:name="${applicationId}.intent.action.VPN_START_REQUESTED" />
             </intent-filter>
         </receiver>
 

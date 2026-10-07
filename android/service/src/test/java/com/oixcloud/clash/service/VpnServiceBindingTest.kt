@@ -11,6 +11,7 @@ import android.os.IBinder
 import android.os.Parcel
 import com.oixcloud.clash.common.GlobalState
 import com.oixcloud.clash.common.ServiceDelegate
+import com.oixcloud.clash.common.action
 import com.oixcloud.clash.service.modules.Module
 import com.oixcloud.clash.service.modules.moduleLoader
 import java.util.concurrent.CountDownLatch
@@ -99,6 +100,31 @@ class VpnServiceBindingTest {
         }
         assertTrue("System revoke must run service cleanup", stopped.await(5, TimeUnit.SECONDS))
         runBlocking { withTimeout(5_000) { State.runLock.withLock {} } }
+    }
+
+    @Test
+    fun alwaysOnStartRequestsInitializationAndTimesOutWithoutStickyRetries() {
+        val controller = Robolectric.buildService(VpnService::class.java).create()
+        val service = controller.get()
+        val application = RuntimeEnvironment.getApplication()
+        assertEquals(android.app.Service.START_NOT_STICKY,
+            service.onStartCommand(Intent(SystemVpnService.SERVICE_INTERFACE), 0, 1))
+        assertTrue(shadowOf(application).broadcastIntents.any {
+            it.action == com.oixcloud.clash.common.BroadcastAction.VPN_START_REQUESTED.action
+        })
+        assertNotNull(shadowOf(service).lastForegroundNotification)
+        shadowOf(android.os.Looper.getMainLooper()).idleFor(java.time.Duration.ofSeconds(70))
+        assertTrue(shadowOf(service).isStoppedBySelf)
+        controller.destroy()
+    }
+
+    @Test
+    fun unrelatedStartedIntentDoesNotRequestVpnStartup() {
+        val controller = Robolectric.buildService(VpnService::class.java).create()
+        val before = shadowOf(RuntimeEnvironment.getApplication()).broadcastIntents.size
+        controller.get().onStartCommand(Intent("unrelated"), 0, 1)
+        assertEquals(before, shadowOf(RuntimeEnvironment.getApplication()).broadcastIntents.size)
+        controller.destroy()
     }
 
     @Test

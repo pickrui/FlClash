@@ -15,11 +15,13 @@ import com.oixcloud.clash.common.BroadcastLease
 import com.oixcloud.clash.common.GlobalState
 import com.oixcloud.clash.common.action
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
 
 class BroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         if (intent?.action != BroadcastAction.SERVICE_CREATED.action &&
-            intent?.action != BroadcastAction.SERVICE_DESTROYED.action
+            intent?.action != BroadcastAction.SERVICE_DESTROYED.action &&
+            intent?.action != BroadcastAction.VPN_START_REQUESTED.action
         ) return
 
         // Creation is announced before VPN establishment succeeds. Treat these
@@ -32,8 +34,16 @@ class BroadcastReceiver : BroadcastReceiver() {
         mainHandler.postDelayed(timeout, BROADCAST_TIMEOUT_MILLIS)
         GlobalState.launch {
             try {
-                State.handleSyncState()
+                if (intent?.action == BroadcastAction.VPN_START_REQUESTED.action) {
+                    State.handleSystemVpnStart()
+                } else {
+                    State.handleSyncState()
+                }
                 State.servicePlugin?.handleStateChanged()
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                GlobalState.log("Service broadcast failed: $error")
             } finally {
                 mainHandler.removeCallbacks(timeout)
                 lease.release()

@@ -10,8 +10,9 @@ import android.app.Application
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 
-object GlobalState : CoroutineScope by CoroutineScope(Dispatchers.Default) {
+object GlobalState : CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.Default) {
 
     const val NOTIFICATION_CHANNEL = "FlClash"
 

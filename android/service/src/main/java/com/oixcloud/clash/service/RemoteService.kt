@@ -112,6 +112,8 @@ class RemoteService : Service(),
                     clearBinding(currentDelegate)
                     State.runTime = 0
                     NetworkPolicyController.stop()
+                    stopService(VpnService::class.intent)
+                    stopService(CommonService::class.intent)
                 }.onFailure {
                     GlobalState.log("Background service stop failed: $it")
                 }
