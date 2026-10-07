@@ -522,6 +522,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "certificateValidityHint": MessageLookupByLibrary.simpleMessage(
       "First synchronize the system date and time. If the time is correct, the server certificate needs to be fixed.",
     ),
+    "changeProxyFailedTip": MessageLookupByLibrary.simpleMessage(
+      "Failed to switch proxy; the previous selection has been restored",
+    ),
     "changelogBreaking": MessageLookupByLibrary.simpleMessage(
       "Breaking changes",
     ),
@@ -816,6 +819,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "copySuccess": MessageLookupByLibrary.simpleMessage("Copy success"),
     "core": MessageLookupByLibrary.simpleMessage("Core"),
     "coreBlockedByPolicyTip": m9,
+    "coreBlockedBySmartAppControlTip": MessageLookupByLibrary.simpleMessage(
+      "Windows blocked FlClashCore.exe, and Smart App Control is enabled. Check the block details in Windows Security → App & browser control, and use a trusted, verified release.",
+    ),
     "coreStatus": MessageLookupByLibrary.simpleMessage("Core status"),
     "crashTest": MessageLookupByLibrary.simpleMessage("Crash test"),
     "create": MessageLookupByLibrary.simpleMessage("Create"),
@@ -872,6 +878,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "dashboard": MessageLookupByLibrary.simpleMessage("Dashboard"),
     "dataChangedSave": MessageLookupByLibrary.simpleMessage(
       "Data changes detected. Save them?",
+    ),
+    "databaseWriteFailedTip": MessageLookupByLibrary.simpleMessage(
+      "Failed to save the change. Please check the current value and try again.",
     ),
     "daysAgo": m14,
     "defaultNameserver": MessageLookupByLibrary.simpleMessage(
@@ -1366,6 +1375,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "haveAccountAlready": MessageLookupByLibrary.simpleMessage(
       "Already have an account?",
+    ),
+    "helperCorruptTip": MessageLookupByLibrary.simpleMessage(
+      "Helper service unavailable; TUN mode cannot be enabled. Reinstall FlClash to restore it.",
     ),
     "hide": MessageLookupByLibrary.simpleMessage("Hide"),
     "hideFromList": MessageLookupByLibrary.simpleMessage("Hide from list"),
@@ -2449,7 +2461,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Startup and background",
     ),
     "startupRecoveryTip": MessageLookupByLibrary.simpleMessage(
-      "Two recent startup attempts failed. Automatic profile application and VPN start are paused for this launch. Your selected profile and settings are preserved. Check the configuration, then press Start to retry. An already running VPN is kept active.",
+      "The previous startup did not finish. Automatic configuration setup and VPN startup are paused for this launch. Your selected profile and settings are unchanged. Check the configuration and tap Start to retry; an already running VPN will stay connected.",
     ),
     "startupRecoveryTitle": MessageLookupByLibrary.simpleMessage(
       "Startup recovery",

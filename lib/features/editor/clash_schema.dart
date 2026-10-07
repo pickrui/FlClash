@@ -722,7 +722,7 @@ const _ntp = YamlSchema.map({
 
 const _tun = YamlSchema.map({
   'enable': _bool,
-  'stack': YamlSchema.scalar(['mixed', 'system', 'gvisor']),
+  'stack': YamlSchema.scalar(['mixed', 'system', 'gvisor', 'mips']),
   'device': _str,
   'dns-hijack': YamlSchema.list(YamlSchema.scalar(['any:53', 'tcp://any:53'])),
   'auto-route': _bool,

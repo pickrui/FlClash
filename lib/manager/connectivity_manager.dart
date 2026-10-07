@@ -42,6 +42,7 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager>
   int _revision = 0;
   int _networkRevision = 0;
   bool _onWifi = false;
+  bool _permissionRequested = false;
 
   @override
   void initState() {
@@ -110,10 +111,16 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager>
         ssid =
             await (widget.readSsid ??
                 () async {
-                  if (await wifiSsidManager.checkPermission() !=
-                      WifiSsidPermission.granted) {
-                    return null;
+                  var permission = await wifiSsidManager.checkPermission();
+                  if (permission == WifiSsidPermission.denied &&
+                      !_permissionRequested &&
+                      !safeModeBuild &&
+                      WidgetsBinding.instance.lifecycleState ==
+                          AppLifecycleState.resumed) {
+                    _permissionRequested = true;
+                    permission = await wifiSsidManager.requestPermission();
                   }
+                  if (permission != WifiSsidPermission.granted) return null;
                   return wifiSsidManager.getSsid();
                 })();
       } catch (error) {

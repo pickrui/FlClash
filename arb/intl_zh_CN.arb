@@ -777,7 +777,7 @@
     }
   },
   "startupRecoveryTitle": "启动恢复",
-  "startupRecoveryTip": "最近两次启动未能完成。本次已暂停自动应用配置和启动 VPN，当前配置选择与设置均已保留。请检查配置后点击“启动”重试；已经运行的 VPN 会继续保持连接",
+  "startupRecoveryTip": "上次启动未能完成，本次已暂停自动应用配置和启动 VPN，当前配置选择与设置均已保留，请检查配置后点击“启动”重试；已经运行的 VPN 会继续保持连接",
   "authentication": "本地代理认证",
   "authenticationDesc": "为 HTTP/SOCKS 代理设置用户名和密码。启用后暂停自动设置系统 HTTP 代理，TUN/VPN 仍可使用",
   "authenticationSystemProxyDesc": "启用本地代理认证时不设置系统 HTTP 代理",
@@ -1342,5 +1342,9 @@
   "scriptChanged": "脚本已修改或删除，请重新打开后再试",
   "startFromScratch": "从零开始",
   "accessControlDisabledDesc": "应用访问控制已关闭",
-  "optional": "可选"
+  "optional": "可选",
+  "coreBlockedBySmartAppControlTip": "Windows 阻止了 FlClashCore.exe，当前已开启智能应用控制，请在 Windows 安全中心 → 应用和浏览器控制中查看拦截详情，并使用来源可信、经过验证的发行版本",
+  "helperCorruptTip": "Helper 服务不可用，无法启用 TUN 模式，请重新安装 FlClash",
+  "changeProxyFailedTip": "切换代理失败，已恢复上一次的选择",
+  "databaseWriteFailedTip": "保存更改失败，请检查当前值后重试"
 }

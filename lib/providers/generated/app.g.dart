@@ -2049,7 +2049,7 @@ final class IsUpdatingProvider extends $NotifierProvider<IsUpdating, bool> {
   }
 }
 
-String _$isUpdatingHash() => r'e48bf1a00f8ac22a905fc56eea278468af3971d4';
+String _$isUpdatingHash() => r'92583620688d2a47bee87eb19bddc0efd9cc51ee';
 
 final class IsUpdatingFamily extends $Family
     with $ClassFamilyOverride<IsUpdating, bool, bool, bool, String> {
@@ -2122,7 +2122,7 @@ final class NetworkDetectionProvider
   }
 }
 
-String _$networkDetectionHash() => r'7c9e1b10734beb0e9cc370a85463a7921cbb12bb';
+String _$networkDetectionHash() => r'e4e0067f4e590af55e04d26cfc00bbff0d7e2589';
 
 abstract class _$NetworkDetection extends $Notifier<NetworkDetectionState> {
   NetworkDetectionState build();

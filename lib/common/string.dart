@@ -84,11 +84,34 @@ class SearchQuery {
   }
 }
 
+String? installConfigUrl(Uri uri) {
+  if (!const {
+        'clash',
+        'clashmeta',
+        'flclash',
+      }.contains(uri.scheme.toLowerCase()) ||
+      uri.host != 'install-config') {
+    return null;
+  }
+  final value = uri.queryParameters['url'];
+  final target = value == null ? null : Uri.tryParse(value);
+  if (target == null ||
+      !(target.isScheme('http') || target.isScheme('https')) ||
+      target.host.isEmpty) {
+    return null;
+  }
+  return value;
+}
+
 String? profileUrlFromQrCodes(Iterable<String?> values) {
   for (final raw in values) {
     final value = raw?.trim();
     if (value == null || value.length > 8192) continue;
     final uri = Uri.tryParse(value);
+    if (uri != null) {
+      final install = installConfigUrl(uri);
+      if (install != null) return install;
+    }
     if (uri != null &&
         (uri.isScheme('http') || uri.isScheme('https')) &&
         uri.host.isNotEmpty) {

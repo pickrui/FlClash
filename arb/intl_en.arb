@@ -777,7 +777,7 @@
     }
   },
   "startupRecoveryTitle": "Startup recovery",
-  "startupRecoveryTip": "Two recent startup attempts failed. Automatic profile application and VPN start are paused for this launch. Your selected profile and settings are preserved. Check the configuration, then press Start to retry. An already running VPN is kept active.",
+  "startupRecoveryTip": "The previous startup did not finish. Automatic configuration setup and VPN startup are paused for this launch. Your selected profile and settings are unchanged. Check the configuration and tap Start to retry; an already running VPN will stay connected.",
   "authentication": "Local proxy authentication",
   "authenticationDesc": "Require a username and password for HTTP/SOCKS proxies. Automatic system HTTP proxy is suspended; TUN/VPN remains available.",
   "authenticationSystemProxyDesc": "Not applied while local proxy authentication is enabled",
@@ -1342,5 +1342,9 @@
   "scriptChanged": "The script changed or was deleted. Reopen it and try again.",
   "startFromScratch": "Start from scratch",
   "accessControlDisabledDesc": "App access control is disabled",
-  "optional": "Optional"
+  "optional": "Optional",
+  "coreBlockedBySmartAppControlTip": "Windows blocked FlClashCore.exe, and Smart App Control is enabled. Check the block details in Windows Security → App & browser control, and use a trusted, verified release.",
+  "helperCorruptTip": "Helper service unavailable; TUN mode cannot be enabled. Reinstall FlClash to restore it.",
+  "changeProxyFailedTip": "Failed to switch proxy; the previous selection has been restored",
+  "databaseWriteFailedTip": "Failed to save the change. Please check the current value and try again."
 }

@@ -5,6 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:io';
 
+import 'package:win32_registry/win32_registry.dart';
+
 import 'package:fl_clash/core/desktop/helper_client.dart';
 import 'package:fl_clash/core/desktop/model.dart';
 
@@ -26,6 +28,22 @@ int? launchOsError(Object? error) {
 
 bool isPolicyBlockedLaunch(Object? error) {
   return policyBlockedOsErrors.contains(launchOsError(error));
+}
+
+bool isSmartAppControlEnabled() {
+  if (!Platform.isWindows) return false;
+  try {
+    final key = LOCAL_MACHINE.open(
+      r'SYSTEM\CurrentControlSet\Control\CI\Policy',
+    );
+    try {
+      return key.getInt('VerifiedAndReputablePolicyState') == 1;
+    } finally {
+      key.close();
+    }
+  } catch (_) {
+    return false;
+  }
 }
 
 int? _helperOsError(HelperException error) {

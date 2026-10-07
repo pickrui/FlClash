@@ -100,7 +100,10 @@ extension SystemControllerExt on AppController {
   }
 
   void initLink() {
+    if (safeModeBuild) return;
     linkManager.initAppLinksListen((url) async {
+      await window?.show();
+      if (!_context.mounted) return;
       final res = await globalState.showMessage(
         title: appLocalizations.addProfile,
         message: TextSpan(
@@ -124,8 +127,8 @@ extension SystemControllerExt on AppController {
       if (res != true) {
         return;
       }
-      addProfileFormURL(url);
-    });
+      await addProfileFormURL(url);
+    }, initialLinks: system.isLinux ? globalState.launchArguments : const []);
   }
 
   void updateTun() {

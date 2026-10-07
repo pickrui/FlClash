@@ -91,7 +91,10 @@ Future<void> queueDatabaseWrite(
     onError?.call();
     onFinished?.call();
     FlutterError.reportError(
-      FlutterErrorDetails(exception: error, library: 'database'),
+      FlutterErrorDetails(
+        exception: error,
+        library: reportOnWait ? 'database' : 'database-handled',
+      ),
     );
     final operation = Future<void>.error(error);
     unawaited(operation.catchError((_) {}));
@@ -106,7 +109,7 @@ Future<void> queueDatabaseWrite(
         FlutterErrorDetails(
           exception: error,
           stack: stackTrace,
-          library: 'database',
+          library: reportOnWait ? 'database' : 'database-handled',
         ),
       );
       rethrow;

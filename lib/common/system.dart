@@ -281,7 +281,7 @@ class Windows {
           'Core manifest is missing or invalid; Helper unavailable',
           logLevel: LogLevel.warning,
         );
-        return AuthorizeCode.error;
+        return AuthorizeCode.helperCorrupt;
       case HelperReadiness.notReady:
         break;
     }

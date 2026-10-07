@@ -9,6 +9,42 @@ import 'package:fl_clash/models/models.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test(
+    'multiple query terms can match different log and connection fields',
+    () {
+      const logs = LogsState(
+        logs: [
+          Log(
+            logLevel: LogLevel.warning,
+            payload: 'Example timeout',
+            dateTime: '',
+          ),
+        ],
+      );
+      expect(logs.copyWith(query: 'WARN example').list, hasLength(1));
+      expect(logs.copyWith(query: 'warn missing').list, isEmpty);
+      final tracker = TrackerInfo(
+        id: '1',
+        start: DateTime.utc(2026),
+        metadata: const Metadata(
+          network: 'tcp',
+          host: 'example.com',
+          process: 'browser',
+        ),
+        chains: ['Tokyo'],
+        rule: 'MATCH',
+        rulePayload: '',
+      );
+      final connections = TrackerInfosState(trackerInfos: [tracker]);
+      expect(connections.copyWith(query: 'TCP tokyo EXAMPLE').list, [tracker]);
+      expect(connections.copyWith(query: 'tcp missing').list, isEmpty);
+      expect(
+        connections.copyWith(query: 'tcp', keywords: ['unknown']).list,
+        isEmpty,
+      );
+    },
+  );
+
   group('cloud output suppression', () {
     const hosts = [' api.example ', 'backup.example', 'site.example', ''];
 
@@ -146,9 +182,8 @@ void main() {
           rule: 'ProcessPath',
           rulePayload: '/apps/api.example/client',
         ),
-        tracker(
-          'rule set',
-        ).copyWith(rule: 'RuleSet', rulePayload: 'api.example'),
+        tracker('rule set')
+            .copyWith(rule: 'RuleSet', rulePayload: 'api.example'),
         tracker('suffix boundary', metadata: meta(host: 'notapi.example')),
         tracker('label boundary', metadata: meta(host: 'not_api.example')),
         tracker('prefix boundary', metadata: meta(host: 'api.example.other')),

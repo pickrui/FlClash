@@ -28,11 +28,28 @@ String countryCodeToEmoji(String countryCode) {
   return String.fromCharCode(firstLetter) + String.fromCharCode(secondLetter);
 }
 
-class NetworkDetection extends ConsumerWidget {
+class NetworkDetection extends ConsumerStatefulWidget {
   const NetworkDetection({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<NetworkDetection> createState() => _NetworkDetectionState();
+}
+
+class _NetworkDetectionState extends ConsumerState<NetworkDetection>
+    with WidgetsBindingObserver, ActivePollingMixin<NetworkDetection> {
+  @override
+  Duration get pollInterval => const Duration(seconds: 1);
+
+  @override
+  Future<void> poll(PollGuard isCurrent) async {
+    if (safeModeBuild || !ref.read(initProvider)) return;
+    final route = await ref.read(coreHandlerProvider).getProbeRoute();
+    if (!isCurrent()) return;
+    ref.read(networkDetectionProvider.notifier).updateRoute(route);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     final networkDetection = ref.watch(networkDetectionProvider);
     final ipInfo = networkDetection.ipInfo;

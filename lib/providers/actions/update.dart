@@ -32,6 +32,15 @@ extension InitControllerExt on AppController {
           'exception: ${details.exception} stack: ${details.stack}',
           logLevel: LogLevel.warning,
         );
+        if (details.library == 'database') {
+          final now = DateTime.now();
+          if (_lastDatabaseWriteNotice == null ||
+              now.difference(_lastDatabaseWriteNotice!) >=
+                  const Duration(seconds: 10)) {
+            _lastDatabaseWriteNotice = now;
+            globalState.showNotifier(appLocalizations.databaseWriteFailedTip);
+          }
+        }
       });
     };
     WidgetsBinding.instance.platformDispatcher.onError = (error, stack) {

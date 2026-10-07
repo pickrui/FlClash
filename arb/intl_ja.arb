@@ -777,7 +777,7 @@
     }
   },
   "startupRecoveryTitle": "起動の復旧",
-  "startupRecoveryTip": "直近2回の起動に失敗したため、今回は設定の自動適用とVPNの自動起動を一時停止しました。選択中のプロファイルと設定は保持されています。設定を確認し、「開始」を押して再試行してください。実行中のVPN接続は維持されます",
+  "startupRecoveryTip": "前回の起動が完了しませんでした。今回は設定の自動適用と VPN の自動起動を一時停止しています。選択中のプロファイルと設定は保持されています。設定を確認し、「開始」で再試行してください。実行中の VPN は接続を維持します",
   "authentication": "ローカルプロキシ認証",
   "authenticationDesc": "HTTP/SOCKS プロキシにユーザー名とパスワードを設定します。システム HTTP プロキシの自動設定は停止しますが、TUN/VPN は利用できます",
   "authenticationSystemProxyDesc": "ローカルプロキシ認証が有効な間は設定されません",
@@ -1342,5 +1342,9 @@
   "scriptChanged": "スクリプトが変更または削除されました。開き直して再試行してください。",
   "startFromScratch": "最初から作成",
   "accessControlDisabledDesc": "アプリアクセス制御は無効です",
-  "optional": "任意"
+  "optional": "任意",
+  "coreBlockedBySmartAppControlTip": "Windows が FlClashCore.exe をブロックし、スマート アプリ コントロールが有効になっています。Windows セキュリティ → アプリとブラウザーの制御で詳細を確認し、信頼できる検証済みのリリースを使用してください",
+  "helperCorruptTip": "Helper サービスが利用できないため、TUN モードを有効にできません。FlClash を再インストールしてください。",
+  "changeProxyFailedTip": "プロキシの切り替えに失敗したため、前回の選択に戻しました",
+  "databaseWriteFailedTip": "変更を保存できませんでした。現在の値を確認して再試行してください"
 }

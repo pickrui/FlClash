@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:app_links/app_links.dart';
 
 import 'print.dart';
+import 'string.dart';
 
 class LinkManager {
   static LinkManager? _instance;
@@ -19,20 +20,41 @@ class LinkManager {
   }
 
   Future<void> initAppLinksListen(
-    Function(String url) installConfigCallBack,
-  ) async {
+    FutureOr<void> Function(String url) installConfigCallBack, {
+    Iterable<String> initialLinks = const [],
+  }) async {
     commonPrint.log('initAppLinksListen');
     destroy();
-    subscription = _appLinks.uriLinkStream.listen((uri) {
-      commonPrint.log('onAppLink: $uri');
-      if (uri.host == 'install-config') {
-        final parameters = uri.queryParameters;
-        final url = parameters['url'];
-        if (url != null) {
-          installConfigCallBack(url);
+    String? lastLink;
+    DateTime? lastReceived;
+    Future<void> receive(Uri uri) async {
+      try {
+        final url = installConfigUrl(uri);
+        if (url == null) return;
+        final now = DateTime.now();
+        if (url == lastLink &&
+            lastReceived != null &&
+            now.difference(lastReceived!) < const Duration(seconds: 2)) {
+          return;
         }
+        lastLink = url;
+        lastReceived = now;
+        await installConfigCallBack(url);
+      } catch (error) {
+        commonPrint.log('App link handling failed: ${error.runtimeType}');
       }
-    });
+    }
+
+    subscription = _appLinks.uriLinkStream.listen(
+      receive,
+      onError: (Object error) {
+        commonPrint.log('App link stream failed: ${error.runtimeType}');
+      },
+    );
+    for (final value in initialLinks) {
+      final uri = Uri.tryParse(value);
+      if (uri != null) unawaited(receive(uri));
+    }
   }
 
   void destroy() {

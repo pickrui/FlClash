@@ -63,6 +63,37 @@ void main() {
     pathProviderDir.deleteSync(recursive: true);
   });
 
+  test(
+    'desktop automatic TUN routing follows the resolved interface preference',
+    () async {
+      for (final (override, source, expected) in <(String?, String?, bool)>[
+        (null, null, true),
+        (null, 'en0', false),
+        ('', 'en0', true),
+        ('en1', null, false),
+      ]) {
+        final state = _makeRealProfileState(
+          rawConfig: {
+            'rules': ['MATCH,DIRECT'],
+            'interface-name': ?source,
+          },
+        );
+        final result = await makeRealProfileTask(
+          state.copyWith(
+            realPatchConfig: state.realPatchConfig.copyWith(
+              interfaceName: override,
+              tun: state.realPatchConfig.tun.copyWith(
+                enable: true,
+                autoRoute: true,
+              ),
+            ),
+          ),
+        );
+        expect(result['tun']['auto-detect-interface'], expected);
+      }
+    },
+  );
+
   group('remote provider cache', () {
     late Directory root;
     const url = 'https://fixture.invalid/resources';

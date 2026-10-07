@@ -290,9 +290,9 @@ _ProxiesStyleProps _$ProxiesStylePropsFromJson(Map<String, dynamic> json) =>
       layout:
           $enumDecodeNullable(_$ProxiesLayoutEnumMap, json['layout']) ??
           ProxiesLayout.standard,
-      iconStyle:
-          $enumDecodeNullable(_$ProxiesIconStyleEnumMap, json['iconStyle']) ??
-          ProxiesIconStyle.standard,
+      iconStyle: json['iconStyle'] == null
+          ? ProxiesIconStyle.standard
+          : proxiesIconStyleFromJson(json['iconStyle']),
       cardType:
           $enumDecodeNullable(_$ProxyCardTypeEnumMap, json['cardType']) ??
           ProxyCardType.expand,
@@ -333,16 +333,16 @@ const _$ProxiesLayoutEnumMap = {
   ProxiesLayout.tight: 'tight',
 };
 
-const _$ProxiesIconStyleEnumMap = {
-  ProxiesIconStyle.none: 'none',
-  ProxiesIconStyle.standard: 'standard',
-  ProxiesIconStyle.icon: 'icon',
-};
-
 const _$ProxyCardTypeEnumMap = {
   ProxyCardType.expand: 'expand',
   ProxyCardType.shrink: 'shrink',
   ProxyCardType.min: 'min',
+};
+
+const _$ProxiesIconStyleEnumMap = {
+  ProxiesIconStyle.none: 'none',
+  ProxiesIconStyle.standard: 'standard',
+  ProxiesIconStyle.icon: 'icon',
 };
 
 _TextScale _$TextScaleFromJson(Map<String, dynamic> json) => _TextScale(
@@ -416,9 +416,7 @@ _Config _$ConfigFromJson(Map<String, dynamic> json) => _Config(
       const [],
   appSettingProps: json['appSettingProps'] == null
       ? defaultAppSettingProps
-      : AppSettingProps.safeFromJson(
-          json['appSettingProps'] as Map<String, Object?>?,
-        ),
+      : AppSettingProps.safeFromJson(json['appSettingProps']),
   davProps: json['davProps'] == null
       ? null
       : DAVProps.fromJson(json['davProps'] as Map<String, dynamic>),

@@ -34,6 +34,8 @@ class AppExitInfo {
   // ApplicationExitInfo: Java/native crash, ANR, or initialization failure.
   // Unknown, low-memory, user-requested and package-update exits are excluded.
   bool get isCrash => const {4, 5, 6, 7}.contains(reason);
+  bool get isExternalStop =>
+      const {1, 2, 3, 8, 9, 10, 11, 12, 14, 15, 16}.contains(reason);
 }
 
 class BootRecord {
@@ -112,7 +114,7 @@ class BootDecision {
   // Identifies the in-process attempt; never persisted in the journal.
   final int revision;
   const BootDecision({this.failureCount = 0, this.revision = 0});
-  bool get skipAutoSetup => failureCount >= 2;
+  bool get skipAutoSetup => failureCount >= 1;
 }
 
 BootDecision resolveBootDecision({
@@ -128,14 +130,17 @@ BootDecision resolveBootDecision({
       record.startedAt > now) {
     return const BootDecision();
   }
-  final confirmedCrash =
-      record.stage == BootStage.starting &&
+  final matchesRecordedRun =
       exitInfo != null &&
-      exitInfo.isCrash &&
       exitInfo.processId == record.processId &&
       exitInfo.timestamp >= record.startedAt &&
       exitInfo.timestamp <= now;
-  if (record.stage != BootStage.failed && !confirmedCrash) {
+  if (record.stage == BootStage.starting &&
+      matchesRecordedRun &&
+      exitInfo.isExternalStop) {
+    return const BootDecision();
+  }
+  if (record.stage != BootStage.failed && record.stage != BootStage.starting) {
     return const BootDecision();
   }
   return BootDecision(failureCount: (record.failureCount + 1).clamp(0, 2));

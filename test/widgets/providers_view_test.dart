@@ -166,6 +166,37 @@ void main() {
     }
   });
 
+  testWidgets('unknown quota retains usage and expiration without progress', (
+    tester,
+  ) async {
+    const info = SubscriptionInfo(upload: 200, download: 300);
+    await tester.pumpWidget(
+      const TestApp(
+        locale: Locale('en'),
+        child: Scaffold(
+          body: Column(
+            children: [
+              SubscriptionInfoView(subscriptionInfo: info),
+              SubscriptionInfoDetailView(subscriptionInfo: info),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(LinearProgressIndicator), findsNothing);
+    expect(
+      find.text(AppLocalizations.current.usedTrafficLabel),
+      findsOneWidget,
+    );
+    expect(
+      find.text(AppLocalizations.current.purchaseTotalTrafficLabel),
+      findsNothing,
+    );
+    expect(find.text(AppLocalizations.current.infiniteTime), findsNWidgets(2));
+    expect(tester.takeException(), isNull);
+  });
+
   Future<_ProxiesAction> mount(WidgetTester tester) async {
     final action = _ProxiesAction();
     await tester.pumpWidget(

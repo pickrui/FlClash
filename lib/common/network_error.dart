@@ -136,7 +136,8 @@ String? coreLaunchBlockedMessage(
   AppLocalizations? localizations,
 ) {
   if (!Platform.isWindows || !isPolicyBlockedLaunch(error)) return null;
-  return (localizations ?? AppLocalizations()).coreBlockedByPolicyTip(
-    launchOsError(error)!,
-  );
+  final strings = localizations ?? AppLocalizations();
+  return isSmartAppControlEnabled()
+      ? strings.coreBlockedBySmartAppControlTip
+      : strings.coreBlockedByPolicyTip(launchOsError(error)!);
 }

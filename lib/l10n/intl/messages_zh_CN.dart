@@ -406,6 +406,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "certificateValidityHint": MessageLookupByLibrary.simpleMessage(
       "请先同步系统日期和时间，如果时间正确，则需要服务端修复证书",
     ),
+    "changeProxyFailedTip": MessageLookupByLibrary.simpleMessage(
+      "切换代理失败，已恢复上一次的选择",
+    ),
     "changelogBreaking": MessageLookupByLibrary.simpleMessage("重大变更"),
     "changelogFeatures": MessageLookupByLibrary.simpleMessage("新功能"),
     "changelogFixes": MessageLookupByLibrary.simpleMessage("问题修复"),
@@ -610,6 +613,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "copySuccess": MessageLookupByLibrary.simpleMessage("复制成功"),
     "core": MessageLookupByLibrary.simpleMessage("内核"),
     "coreBlockedByPolicyTip": m9,
+    "coreBlockedBySmartAppControlTip": MessageLookupByLibrary.simpleMessage(
+      "Windows 阻止了 FlClashCore.exe，当前已开启智能应用控制，请在 Windows 安全中心 → 应用和浏览器控制中查看拦截详情，并使用来源可信、经过验证的发行版本",
+    ),
     "coreStatus": MessageLookupByLibrary.simpleMessage("核心状态"),
     "crashTest": MessageLookupByLibrary.simpleMessage("崩溃测试"),
     "create": MessageLookupByLibrary.simpleMessage("创建"),
@@ -659,6 +665,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "dark": MessageLookupByLibrary.simpleMessage("深色"),
     "dashboard": MessageLookupByLibrary.simpleMessage("仪表盘"),
     "dataChangedSave": MessageLookupByLibrary.simpleMessage("检测到数据有更改，是否保存"),
+    "databaseWriteFailedTip": MessageLookupByLibrary.simpleMessage(
+      "保存更改失败，请检查当前值后重试",
+    ),
     "daysAgo": m14,
     "defaultNameserver": MessageLookupByLibrary.simpleMessage("默认域名服务器"),
     "defaultNameserverDesc": MessageLookupByLibrary.simpleMessage("用于解析DNS服务器"),
@@ -1003,6 +1012,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage("是否缓存修改"),
     "haveAccountAlready": MessageLookupByLibrary.simpleMessage("已有账号？"),
+    "helperCorruptTip": MessageLookupByLibrary.simpleMessage(
+      "Helper 服务不可用，无法启用 TUN 模式，请重新安装 FlClash",
+    ),
     "hide": MessageLookupByLibrary.simpleMessage("隐藏"),
     "hideFromList": MessageLookupByLibrary.simpleMessage("从列表中隐藏"),
     "hideIp": MessageLookupByLibrary.simpleMessage("隐藏 IP"),
@@ -1801,7 +1813,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "startVpn": MessageLookupByLibrary.simpleMessage("正在启动VPN..."),
     "startupAndBackground": MessageLookupByLibrary.simpleMessage("启动与后台"),
     "startupRecoveryTip": MessageLookupByLibrary.simpleMessage(
-      "最近两次启动未能完成。本次已暂停自动应用配置和启动 VPN，当前配置选择与设置均已保留。请检查配置后点击“启动”重试；已经运行的 VPN 会继续保持连接",
+      "上次启动未能完成，本次已暂停自动应用配置和启动 VPN，当前配置选择与设置均已保留，请检查配置后点击“启动”重试；已经运行的 VPN 会继续保持连接",
     ),
     "startupRecoveryTitle": MessageLookupByLibrary.simpleMessage("启动恢复"),
     "status": MessageLookupByLibrary.simpleMessage("状态"),

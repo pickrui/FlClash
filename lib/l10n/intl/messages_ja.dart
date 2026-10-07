@@ -431,6 +431,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "certificateValidityHint": MessageLookupByLibrary.simpleMessage(
       "まずシステムの日付と時刻を同期してください。時刻が正しい場合は、サーバー証明書の修正が必要です。",
     ),
+    "changeProxyFailedTip": MessageLookupByLibrary.simpleMessage(
+      "プロキシの切り替えに失敗したため、前回の選択に戻しました",
+    ),
     "changelogBreaking": MessageLookupByLibrary.simpleMessage("破壊的変更"),
     "changelogFeatures": MessageLookupByLibrary.simpleMessage("新機能"),
     "changelogFixes": MessageLookupByLibrary.simpleMessage("不具合修正"),
@@ -693,6 +696,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "copySuccess": MessageLookupByLibrary.simpleMessage("コピー成功"),
     "core": MessageLookupByLibrary.simpleMessage("コア"),
     "coreBlockedByPolicyTip": m9,
+    "coreBlockedBySmartAppControlTip": MessageLookupByLibrary.simpleMessage(
+      "Windows が FlClashCore.exe をブロックし、スマート アプリ コントロールが有効になっています。Windows セキュリティ → アプリとブラウザーの制御で詳細を確認し、信頼できる検証済みのリリースを使用してください",
+    ),
     "coreStatus": MessageLookupByLibrary.simpleMessage("コアステータス"),
     "crashTest": MessageLookupByLibrary.simpleMessage("クラッシュテスト"),
     "create": MessageLookupByLibrary.simpleMessage("作成"),
@@ -745,6 +751,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "dashboard": MessageLookupByLibrary.simpleMessage("ダッシュボード"),
     "dataChangedSave": MessageLookupByLibrary.simpleMessage(
       "データの変更を検出しました。保存しますか？",
+    ),
+    "databaseWriteFailedTip": MessageLookupByLibrary.simpleMessage(
+      "変更を保存できませんでした。現在の値を確認して再試行してください",
     ),
     "daysAgo": m14,
     "defaultNameserver": MessageLookupByLibrary.simpleMessage("デフォルトネームサーバー"),
@@ -1141,6 +1150,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "hasCacheChange": MessageLookupByLibrary.simpleMessage("変更をキャッシュしますか？"),
     "haveAccountAlready": MessageLookupByLibrary.simpleMessage(
       "すでにアカウントをお持ちですか？",
+    ),
+    "helperCorruptTip": MessageLookupByLibrary.simpleMessage(
+      "Helper サービスが利用できないため、TUN モードを有効にできません。FlClash を再インストールしてください。",
     ),
     "hide": MessageLookupByLibrary.simpleMessage("非表示"),
     "hideFromList": MessageLookupByLibrary.simpleMessage("リストから隠す"),
@@ -2048,7 +2060,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "startVpn": MessageLookupByLibrary.simpleMessage("VPNを開始中..."),
     "startupAndBackground": MessageLookupByLibrary.simpleMessage("起動とバックグラウンド"),
     "startupRecoveryTip": MessageLookupByLibrary.simpleMessage(
-      "直近2回の起動に失敗したため、今回は設定の自動適用とVPNの自動起動を一時停止しました。選択中のプロファイルと設定は保持されています。設定を確認し、「開始」を押して再試行してください。実行中のVPN接続は維持されます",
+      "前回の起動が完了しませんでした。今回は設定の自動適用と VPN の自動起動を一時停止しています。選択中のプロファイルと設定は保持されています。設定を確認し、「開始」で再試行してください。実行中の VPN は接続を維持します",
     ),
     "startupRecoveryTitle": MessageLookupByLibrary.simpleMessage("起動の復旧"),
     "status": MessageLookupByLibrary.simpleMessage("ステータス"),

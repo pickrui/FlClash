@@ -489,7 +489,7 @@ extension ProxiesControllerExt on AppController {
     } catch (error) {
       commonPrint.log('changeProxy error: $error', logLevel: LogLevel.warning);
       if (isCurrentProfile()) {
-        globalState.showNotifier(error.toString());
+        globalState.showNotifier(appLocalizations.changeProxyFailedTip);
       }
       return false;
     }

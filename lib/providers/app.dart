@@ -481,8 +481,24 @@ class SelectedItem extends _$SelectedItem with NotifierMixin<dynamic> {
 
 @riverpod
 class IsUpdating extends _$IsUpdating with NotifierMixin<bool> {
+  Timer? _expiry;
+
   @override
   bool build(String name) {
+    if (name.startsWith('geo_resource_')) {
+      ref.onDispose(() => _expiry?.cancel());
+      listenSelf((_, next) {
+        _expiry?.cancel();
+        if (next) {
+          _expiry = Timer(const Duration(minutes: 3), () {
+            if (ref.mounted) state = false;
+          });
+        }
+      });
+      ref.listen(coreStatusProvider, (previous, next) {
+        if (previous != next && next != CoreStatus.connected) state = false;
+      });
+    }
     return false;
   }
 }
@@ -493,6 +509,7 @@ class NetworkDetection extends _$NetworkDetection
   CancelToken? _cancelToken;
   Timer? _checkTimer;
   int _generation = 0;
+  (int, int)? _route;
 
   @override
   NetworkDetectionState build() {
@@ -514,6 +531,16 @@ class NetworkDetection extends _$NetworkDetection
     // Invalidate the old route immediately, before the debounce delay.
     state = const NetworkDetectionState(isLoading: true, ipInfo: null);
     _checkTimer = Timer(commonDuration, () => _checkIp(generation));
+  }
+
+  void updateRoute(Map<String, dynamic> route) {
+    final epoch = route['core-epoch'];
+    final picks = route['picks-version'];
+    if (epoch is! int || picks is! int) return;
+    final next = (epoch, picks);
+    final previous = _route;
+    _route = next;
+    if (previous != null && previous != next) startCheck();
   }
 
   Future<void> _checkIp(int generation) async {

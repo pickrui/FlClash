@@ -33,12 +33,12 @@ class SubscriptionInfoView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final info = subscriptionInfo;
-    if (info == null || info.total == 0) {
+    if (info == null) {
       return const SizedBox.shrink();
     }
     final use = info.upload + info.download;
     final total = info.total;
-    final progress = (use / total).clamp(0.0, 1.0).toDouble();
+    final progress = total > 0 ? (use / total).clamp(0.0, 1.0).toDouble() : 0.0;
 
     final useShow = use.traffic.show;
     final totalShow = total.traffic.show;
@@ -49,7 +49,7 @@ class SubscriptionInfoView extends StatelessWidget {
       color: context.colorScheme.onSurfaceVariant,
     );
     final metaStyle = context.textTheme.bodySmall?.toLight;
-    final trafficLabel = '$useShow / $totalShow';
+    final trafficLabel = total > 0 ? '$useShow / $totalShow' : useShow;
     final trafficText = Text(
       trafficLabel,
       style: valueStyle,
@@ -83,12 +83,14 @@ class SubscriptionInfoView extends StatelessWidget {
             );
           },
         ),
-        const SizedBox(height: 4),
-        LinearProgressIndicator(
-          minHeight: 4,
-          value: progress,
-          backgroundColor: context.colorScheme.primary.opacity15,
-        ),
+        if (total > 0) ...[
+          const SizedBox(height: 4),
+          LinearProgressIndicator(
+            minHeight: 4,
+            value: progress,
+            backgroundColor: context.colorScheme.primary.opacity15,
+          ),
+        ],
       ],
     );
   }
@@ -129,10 +131,11 @@ class SubscriptionInfoDetailView extends StatelessWidget {
                 label: appLocalizations.usedTrafficLabel,
                 value: used.traffic.show,
               ),
-              _buildItem(
-                label: appLocalizations.purchaseTotalTrafficLabel,
-                value: subscriptionInfo.total.traffic.show,
-              ),
+              if (subscriptionInfo.total > 0)
+                _buildItem(
+                  label: appLocalizations.purchaseTotalTrafficLabel,
+                  value: subscriptionInfo.total.traffic.show,
+                ),
             ],
           ),
           const SizedBox(height: 12),

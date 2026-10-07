@@ -437,6 +437,13 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
       rawConfig['interface-name'] = realPatchConfig.interfaceName;
     }
   }
+  if ((Platform.isMacOS || Platform.isWindows || Platform.isLinux) &&
+      rawConfig['tun']['enable'] == true &&
+      rawConfig['tun']['auto-route'] == true) {
+    final interfaceName = rawConfig['interface-name'];
+    rawConfig['tun']['auto-detect-interface'] =
+        interfaceName is! String || interfaceName.trim().isEmpty;
+  }
   final existingFingerprint = rawConfig['global-client-fingerprint'];
   if (existingFingerprint is! String || existingFingerprint.isEmpty) {
     rawConfig['global-client-fingerprint'] = defaultGlobalClientFingerprint;

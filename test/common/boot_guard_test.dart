@@ -41,17 +41,17 @@ BootDecision decide(
 );
 
 void main() {
-  test('unknown or externally stopped starts do not count as crashes', () {
-    for (final reason in [null, 0, 1, 2, 3, 8, 9, 10, 11, 12, 13, 14, 15, 16]) {
+  test('externally stopped starts do not trigger recovery', () {
+    for (final reason in [1, 2, 3, 8, 9, 10, 11, 12, 14, 15, 16]) {
       final decision = decide(record(failures: 1), reason: reason);
       expect(decision.failureCount, 0, reason: '$reason');
       expect(decision.skipAutoSetup, isFalse);
     }
   });
 
-  test('two confirmed failed starts pause automatic setup', () {
-    for (final reason in [4, 5, 6, 7]) {
-      expect(decide(record(), reason: reason).skipAutoSetup, isFalse);
+  test('the first interrupted or failed startup pauses automatic setup', () {
+    for (final reason in [null, 0, 4, 5, 6, 7, 13]) {
+      expect(decide(record(), reason: reason).skipAutoSetup, isTrue);
       expect(decide(record(failures: 1), reason: reason).skipAutoSetup, isTrue);
     }
     expect(
@@ -60,11 +60,11 @@ void main() {
     );
   });
 
-  test('exit evidence must identify the recorded attempt', () {
+  test('unrelated exit evidence cannot excuse the interrupted attempt', () {
     final previous = record(failures: 1);
-    expect(decide(previous, reason: 4, exitAt: 999).skipAutoSetup, isFalse);
-    expect(decide(previous, reason: 4, exitAt: 2001).skipAutoSetup, isFalse);
-    expect(decide(previous, reason: 4, exitPid: 999).skipAutoSetup, isFalse);
+    expect(decide(previous, reason: 10, exitAt: 999).skipAutoSetup, isTrue);
+    expect(decide(previous, reason: 10, exitAt: 2001).skipAutoSetup, isTrue);
+    expect(decide(previous, reason: 10, exitPid: 999).skipAutoSetup, isTrue);
     expect(decide(previous, reason: 4, profileId: 7).skipAutoSetup, isFalse);
     expect(
       decide(previous, reason: 4, appVersion: 'new-build').skipAutoSetup,
@@ -97,11 +97,8 @@ void main() {
     expect(BootRecord.fromJson(null), isNull);
     expect(AppExitInfo.fromJson({'reason': 4, 'timestamp': 1000}), isNull);
     expect(
-      AppExitInfo.fromJson({
-        'reason': 4,
-        'timestamp': 1000,
-        'pid': 100,
-      })?.isCrash,
+      AppExitInfo.fromJson({'reason': 4, 'timestamp': 1000, 'pid': 100})
+          ?.isCrash,
       isTrue,
     );
   });

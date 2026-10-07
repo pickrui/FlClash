@@ -143,10 +143,14 @@ abstract class AppSettingProps with _$AppSettingProps {
   factory AppSettingProps.fromJson(Map<String, Object?> json) =>
       _$AppSettingPropsFromJson(json);
 
-  factory AppSettingProps.safeFromJson(Map<String, Object?>? json) {
-    return json == null
-        ? defaultAppSettingProps
-        : AppSettingProps.fromJson(json);
+  factory AppSettingProps.safeFromJson(Object? json) {
+    try {
+      return json is Map<String, Object?>
+          ? AppSettingProps.fromJson(json)
+          : defaultAppSettingProps;
+    } catch (_) {
+      return defaultAppSettingProps;
+    }
   }
 }
 
@@ -272,6 +276,12 @@ abstract class NetworkProps with _$NetworkProps {
       json == null ? const NetworkProps() : _$NetworkPropsFromJson(json);
 }
 
+ProxiesIconStyle proxiesIconStyleFromJson(Object? value) => switch (value) {
+  'none' => ProxiesIconStyle.none,
+  'icon' => ProxiesIconStyle.icon,
+  _ => ProxiesIconStyle.standard,
+};
+
 @freezed
 abstract class ProxiesStyleProps with _$ProxiesStyleProps {
   const ProxiesStyleProps._();
@@ -293,7 +303,9 @@ abstract class ProxiesStyleProps with _$ProxiesStyleProps {
     @Default(ProxiesType.tab) ProxiesType type,
     @Default(ProxiesSortType.none) ProxiesSortType sortType,
     @Default(ProxiesLayout.standard) ProxiesLayout layout,
-    @Default(ProxiesIconStyle.standard) ProxiesIconStyle iconStyle,
+    @Default(ProxiesIconStyle.standard)
+    @JsonKey(fromJson: proxiesIconStyleFromJson)
+    ProxiesIconStyle iconStyle,
     @Default(ProxyCardType.expand) ProxyCardType cardType,
     @Default(false) bool hideTimeoutProxies,
     @Default(defaultDelayTestConcurrency)

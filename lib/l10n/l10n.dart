@@ -6500,10 +6500,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Two recent startup attempts failed. Automatic profile application and VPN start are paused for this launch. Your selected profile and settings are preserved. Check the configuration, then press Start to retry. An already running VPN is kept active.`
+  /// `The previous startup did not finish. Automatic configuration setup and VPN startup are paused for this launch. Your selected profile and settings are unchanged. Check the configuration and tap Start to retry; an already running VPN will stay connected.`
   String get startupRecoveryTip {
     return Intl.message(
-      'Two recent startup attempts failed. Automatic profile application and VPN start are paused for this launch. Your selected profile and settings are preserved. Check the configuration, then press Start to retry. An already running VPN is kept active.',
+      'The previous startup did not finish. Automatic configuration setup and VPN startup are paused for this launch. Your selected profile and settings are unchanged. Check the configuration and tap Start to retry; an already running VPN will stay connected.',
       name: 'startupRecoveryTip',
       desc: '',
       args: [],
@@ -11387,6 +11387,46 @@ class AppLocalizations {
   /// `Optional`
   String get optional {
     return Intl.message('Optional', name: 'optional', desc: '', args: []);
+  }
+
+  /// `Windows blocked FlClashCore.exe, and Smart App Control is enabled. Check the block details in Windows Security → App & browser control, and use a trusted, verified release.`
+  String get coreBlockedBySmartAppControlTip {
+    return Intl.message(
+      'Windows blocked FlClashCore.exe, and Smart App Control is enabled. Check the block details in Windows Security → App & browser control, and use a trusted, verified release.',
+      name: 'coreBlockedBySmartAppControlTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Helper service unavailable; TUN mode cannot be enabled. Reinstall FlClash to restore it.`
+  String get helperCorruptTip {
+    return Intl.message(
+      'Helper service unavailable; TUN mode cannot be enabled. Reinstall FlClash to restore it.',
+      name: 'helperCorruptTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed to switch proxy; the previous selection has been restored`
+  String get changeProxyFailedTip {
+    return Intl.message(
+      'Failed to switch proxy; the previous selection has been restored',
+      name: 'changeProxyFailedTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed to save the change. Please check the current value and try again.`
+  String get databaseWriteFailedTip {
+    return Intl.message(
+      'Failed to save the change. Please check the current value and try again.',
+      name: 'databaseWriteFailedTip',
+      desc: '',
+      args: [],
+    );
   }
 }
 

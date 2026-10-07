@@ -528,6 +528,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "certificateValidityHint": MessageLookupByLibrary.simpleMessage(
       "Сначала синхронизируйте системную дату и время. Если время верное, необходимо исправить сертификат на сервере.",
     ),
+    "changeProxyFailedTip": MessageLookupByLibrary.simpleMessage(
+      "Не удалось переключить прокси; восстановлен предыдущий выбор",
+    ),
     "changelogBreaking": MessageLookupByLibrary.simpleMessage(
       "Важные изменения",
     ),
@@ -832,6 +835,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "copySuccess": MessageLookupByLibrary.simpleMessage("Копирование успешно"),
     "core": MessageLookupByLibrary.simpleMessage("Ядро"),
     "coreBlockedByPolicyTip": m9,
+    "coreBlockedBySmartAppControlTip": MessageLookupByLibrary.simpleMessage(
+      "Windows заблокировала FlClashCore.exe; Smart App Control включён. Проверьте сведения в разделе «Безопасность Windows → Управление приложениями и браузером» и используйте проверенный выпуск из доверенного источника.",
+    ),
     "coreStatus": MessageLookupByLibrary.simpleMessage("Основной статус"),
     "crashTest": MessageLookupByLibrary.simpleMessage("Тест на сбои"),
     "create": MessageLookupByLibrary.simpleMessage("Создать"),
@@ -888,6 +894,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "dashboard": MessageLookupByLibrary.simpleMessage("Панель управления"),
     "dataChangedSave": MessageLookupByLibrary.simpleMessage(
       "Обнаружены изменения данных. Сохранить их?",
+    ),
+    "databaseWriteFailedTip": MessageLookupByLibrary.simpleMessage(
+      "Не удалось сохранить изменение. Проверьте текущее значение и повторите попытку.",
     ),
     "daysAgo": m14,
     "defaultNameserver": MessageLookupByLibrary.simpleMessage(
@@ -1414,6 +1423,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "haveAccountAlready": MessageLookupByLibrary.simpleMessage(
       "Уже есть аккаунт?",
+    ),
+    "helperCorruptTip": MessageLookupByLibrary.simpleMessage(
+      "Служба Helper недоступна, поэтому TUN-режим включить нельзя. Переустановите FlClash.",
     ),
     "hide": MessageLookupByLibrary.simpleMessage("Скрыть"),
     "hideFromList": MessageLookupByLibrary.simpleMessage("Скрыть из списка"),
@@ -2578,7 +2590,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Запуск и фоновая работа",
     ),
     "startupRecoveryTip": MessageLookupByLibrary.simpleMessage(
-      "Две последние попытки запуска завершились с ошибкой. В этот раз автоматическое применение профиля и запуск VPN приостановлены. Выбранный профиль и настройки сохранены. Проверьте конфигурацию и нажмите «Запустить» для повторной попытки. Уже работающее VPN-соединение сохраняется.",
+      "Предыдущий запуск не завершился. Автоматическое применение конфигурации и запуск VPN приостановлены на этот раз. Выбранный профиль и настройки сохранены. Проверьте конфигурацию и нажмите «Запустить»; уже работающий VPN останется подключённым.",
     ),
     "startupRecoveryTitle": MessageLookupByLibrary.simpleMessage(
       "Восстановление запуска",

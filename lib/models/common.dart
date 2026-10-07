@@ -175,12 +175,11 @@ abstract class LogsState with _$LogsState {
 
 extension LogsStateExt on LogsState {
   List<Log> get list {
-    final lowQuery = query.toLowerCase();
+    final search = SearchQuery(query);
     return logs.where((log) {
       final logLevelName = log.logLevel.name;
       return {logLevelName}.containsAll(keywords) &&
-          ((log.payload.toLowerCase().contains(lowQuery)) ||
-              logLevelName.contains(lowQuery));
+          search.matches([log.payload, logLevelName]);
     }).toList();
   }
 }
@@ -197,22 +196,18 @@ abstract class TrackerInfosState with _$TrackerInfosState {
 
 extension TrackerInfosStateExt on TrackerInfosState {
   List<TrackerInfo> get list {
-    final lowerQuery = query.toLowerCase().trim();
+    final search = SearchQuery(query);
     return trackerInfos.where((trackerInfo) {
       final chains = trackerInfo.chains;
       final process = trackerInfo.metadata.process;
-      final networkText = trackerInfo.metadata.network.toLowerCase();
-      final hostText = trackerInfo.metadata.host.toLowerCase();
-      final destinationIPText = trackerInfo.metadata.destinationIP
-          .toLowerCase();
-      final processText = trackerInfo.metadata.process.toLowerCase();
-      final chainsText = chains.join('').toLowerCase();
       return {...chains, process}.containsAll(keywords) &&
-          (networkText.contains(lowerQuery) ||
-              hostText.contains(lowerQuery) ||
-              destinationIPText.contains(lowerQuery) ||
-              processText.contains(lowerQuery) ||
-              chainsText.contains(lowerQuery));
+          search.matches([
+            trackerInfo.metadata.network,
+            trackerInfo.metadata.host,
+            trackerInfo.metadata.destinationIP,
+            trackerInfo.metadata.process,
+            ...chains,
+          ]);
     }).toList();
   }
 }

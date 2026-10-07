@@ -8,7 +8,7 @@ import 'dart:async';
 import 'boot_record.dart';
 
 /// The journal records only initialization attempts, never configuration data.
-/// Missing/unreadable records and unavailable OS exit history fail open.
+/// Missing or unreadable records fail open.
 class BootGuard {
   final Future<BootRecord?> Function() readRecord;
   final Future<void> Function(BootRecord) writeRecord;

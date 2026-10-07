@@ -789,6 +789,7 @@ class AppController {
   bool isAttach = false;
   bool _logsAttached = false;
   bool _isCloudLoginDialogShowing = false;
+  DateTime? _lastDatabaseWriteNotice;
 
   static AppController? _instance;
 

@@ -22,6 +22,38 @@ T roundTrip<T>(
 }
 
 void main() {
+  test('bad app preferences do not discard the rest of the configuration', () {
+    for (final value in [
+      42,
+      {'autoRun': 'invalid'},
+      {'editorFontSize': 'unknown'},
+    ]) {
+      final result = Config.fromJson({
+        'currentProfileId': 42,
+        'appSettingProps': value,
+      });
+      expect(result.currentProfileId, 42);
+      expect(result.appSettingProps, defaultAppSettingProps);
+    }
+  });
+  test(
+    'upstream filled icon style and unknown styles use the filled default',
+    () {
+      expect(
+        ProxiesStyleProps.fromJson({'iconStyle': 'filled'}).iconStyle,
+        ProxiesIconStyle.standard,
+      );
+      expect(
+        ProxiesStyleProps.fromJson({'iconStyle': 'future'}).iconStyle,
+        ProxiesIconStyle.standard,
+      );
+      expect(
+        ProxiesStyleProps.fromJson({'iconStyle': 'icon'}).iconStyle,
+        ProxiesIconStyle.icon,
+      );
+    },
+  );
+
   test('retired service settings do not replace existing preferences', () {
     final props = AppSettingProps.fromJson({
       'locale': 'ja',
