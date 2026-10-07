@@ -15,6 +15,29 @@ void main() {
     overwriteType: OverwriteType.custom,
   );
   test(
+    'logical and regex targets are diagnosed independently of sub-rules',
+    () {
+      final issues = inspectCustomRouting(
+        profile.copyWith(
+          customRules: const [
+            Rule(id: 1, value: 'AND,((NETWORK,UDP),(DST-PORT,443)),Missing'),
+            Rule(
+              id: 2,
+              value: r'DOMAIN-REGEX,^example[0-9]{1,3}\.com$,Missing',
+            ),
+            Rule(id: 3, value: 'SUB-RULE,(NETWORK,TCP),Known'),
+          ],
+        ),
+        raw: {
+          'sub-rules': {'Known': []},
+        },
+      );
+      expect(issues.rules[1]!.single.kind, RoutingIssueKind.missingTarget);
+      expect(issues.rules[2]!.single.kind, RoutingIssueKind.missingTarget);
+      expect(issues.rules[3], isNull);
+    },
+  );
+  test(
     'identifies each invalid name and missing source without loading a profile',
     () {
       final result = inspectCustomRouting(
@@ -159,7 +182,7 @@ void main() {
           ],
         },
       );
-      expect(result.rules.keys, [1, 2]);
+      expect(result.rules.keys, [1, 2, 4]);
       expect(result.rules[1]!.single.kind, RoutingIssueKind.missingRuleSet);
       expect(result.rules[2]!.single.kind, RoutingIssueKind.missingSubRule);
     },

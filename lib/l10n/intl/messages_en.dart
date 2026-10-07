@@ -2044,6 +2044,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyNode": MessageLookupByLibrary.simpleMessage("Proxy node"),
     "proxyPort": MessageLookupByLibrary.simpleMessage("ProxyPort"),
     "proxyProviders": MessageLookupByLibrary.simpleMessage("Proxy providers"),
+    "proxyType": MessageLookupByLibrary.simpleMessage("Proxy type"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("Prune cache"),
     "purchaseAutoRenewLabel": MessageLookupByLibrary.simpleMessage(
       "Auto-renew",

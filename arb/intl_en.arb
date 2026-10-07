@@ -1346,5 +1346,6 @@
   "coreBlockedBySmartAppControlTip": "Windows blocked FlClashCore.exe, and Smart App Control is enabled. Check the block details in Windows Security → App & browser control, and use a trusted, verified release.",
   "helperCorruptTip": "Helper service unavailable; TUN mode cannot be enabled. Reinstall FlClash to restore it.",
   "changeProxyFailedTip": "Failed to switch proxy; the previous selection has been restored",
-  "databaseWriteFailedTip": "Failed to save the change. Please check the current value and try again."
+  "databaseWriteFailedTip": "Failed to save the change. Please check the current value and try again.",
+  "proxyType": "Proxy type"
 }

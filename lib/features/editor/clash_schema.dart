@@ -247,7 +247,7 @@ const _smux = YamlSchema.map({
   'brutal-opts': YamlSchema.map({'enabled': _bool, 'up': _str, 'down': _str}),
 });
 
-const _proxyTypes = [
+const customProxyTypes = [
   'ss',
   'ssr',
   'vmess',
@@ -265,11 +265,21 @@ const _proxyTypes = [
   'mieru',
   'direct',
   'dns',
+  'reject',
+  'rematch',
+  'shadowquic',
+  'gost-relay',
+  'sudoku',
+  'masque',
+  'trusttunnel',
+  'openvpn',
+  'tailscale',
+  'zerotier',
 ];
 
 const _proxyCommon = {
   'name': _str,
-  'type': YamlSchema.scalar(_proxyTypes),
+  'type': YamlSchema.scalar(customProxyTypes),
   'server': _str,
   'port': _str,
   'udp': _bool,

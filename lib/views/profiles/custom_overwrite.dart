@@ -687,6 +687,9 @@ class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
           raw,
           tailscaleNetworks: ref.read(tailscaleNetworksProvider),
         ),
+        subRules: raw['sub-rules'] is Map
+            ? (raw['sub-rules'] as Map).keys.whereType<String>().toList()
+            : const [],
         ruleProviders: raw['rule-providers'] is Map
             ? (raw['rule-providers'] as Map).keys.whereType<String>().toList()
             : const [],

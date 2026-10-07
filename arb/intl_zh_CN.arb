@@ -1346,5 +1346,6 @@
   "coreBlockedBySmartAppControlTip": "Windows 阻止了 FlClashCore.exe，当前已开启智能应用控制，请在 Windows 安全中心 → 应用和浏览器控制中查看拦截详情，并使用来源可信、经过验证的发行版本",
   "helperCorruptTip": "Helper 服务不可用，无法启用 TUN 模式，请重新安装 FlClash",
   "changeProxyFailedTip": "切换代理失败，已恢复上一次的选择",
-  "databaseWriteFailedTip": "保存更改失败，请检查当前值后重试"
+  "databaseWriteFailedTip": "保存更改失败，请检查当前值后重试",
+  "proxyType": "节点类型"
 }

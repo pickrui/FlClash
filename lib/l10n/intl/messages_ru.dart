@@ -2147,6 +2147,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyNode": MessageLookupByLibrary.simpleMessage("Прокси-узел"),
     "proxyPort": MessageLookupByLibrary.simpleMessage("Порт прокси"),
     "proxyProviders": MessageLookupByLibrary.simpleMessage("Провайдеры прокси"),
+    "proxyType": MessageLookupByLibrary.simpleMessage("Тип прокси"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("Очистить кэш"),
     "purchaseAutoRenewLabel": MessageLookupByLibrary.simpleMessage(
       "Автопродление",

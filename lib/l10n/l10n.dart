@@ -11428,6 +11428,11 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Proxy type`
+  String get proxyType {
+    return Intl.message('Proxy type', name: 'proxyType', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

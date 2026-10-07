@@ -1717,6 +1717,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyNode": MessageLookupByLibrary.simpleMessage("プロキシノード"),
     "proxyPort": MessageLookupByLibrary.simpleMessage("プロキシポート"),
     "proxyProviders": MessageLookupByLibrary.simpleMessage("プロキシプロバイダー"),
+    "proxyType": MessageLookupByLibrary.simpleMessage("ノードの種類"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("キャッシュの削除"),
     "purchaseAutoRenewLabel": MessageLookupByLibrary.simpleMessage("自動更新"),
     "purchaseDays": m70,

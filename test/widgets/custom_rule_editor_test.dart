@@ -92,7 +92,10 @@ void main() {
       );
       expect(find.byKey(const Key('custom-rule-raw')), findsNothing);
       await _save(tester);
-      expect(result?.value, value);
+      expect(
+        result?.value,
+        value.endsWith(',src') ? '$value,no-resolve' : value,
+      );
     });
   }
 
@@ -273,19 +276,42 @@ void main() {
         rule: Rule(id: 42, value: value),
         onResult: (value) => result = value,
       );
-      expect(find.byKey(const Key('custom-rule-raw')), findsOneWidget);
-      await tester.tap(find.text('Form'));
+      expect(find.byKey(const Key('custom-rule-raw')), findsNothing);
+      await tester.tap(find.text('Rule text'));
       await tester.pumpAndSettle();
       expect(
-        find.textContaining('This rule uses advanced syntax'),
-        findsOneWidget,
+        tester
+            .widget<TextFormField>(find.byKey(const Key('custom-rule-raw')))
+            .controller!
+            .text,
+        value,
       );
-      expect(find.byKey(const Key('custom-rule-raw')), findsOneWidget);
+      await tester.tap(find.text('Form'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('custom-rule-raw')), findsNothing);
       await _save(tester);
       expect(result?.value, value);
       expect(result?.id, 42);
     });
   }
+
+  testWidgets('sub-rule uses its own named target list', (tester) async {
+    Rule? result;
+    await _open(
+      tester,
+      rule: const Rule(
+        id: 42,
+        value: 'SUB-RULE,(DOMAIN-SUFFIX,example.com),Missing',
+      ),
+      onResult: (value) => result = value,
+    );
+    expect(find.byKey(const Key('custom-rule-raw')), findsNothing);
+    await _save(tester);
+    expect(result, isNull);
+    await _chooseTarget(tester, name: 'Private rules');
+    await _save(tester);
+    expect(result?.value, 'SUB-RULE,(DOMAIN-SUFFIX,example.com),Private rules');
+  });
 
   testWidgets('rejects malformed raw rules and missing raw targets', (
     tester,
@@ -532,6 +558,7 @@ Future<void> _open(
     'US fallback',
   ],
   List<String> ruleProviders = const ['Streaming', 'Advertising'],
+  List<String> subRules = const ['Private rules'],
   Size size = const Size(800, 600),
 }) async {
   await tester.pumpWidget(
@@ -554,6 +581,7 @@ Future<void> _open(
                     rule: rule,
                     targets: targets,
                     ruleProviders: ruleProviders,
+                    subRules: subRules,
                     validate: validate,
                   ),
                 );

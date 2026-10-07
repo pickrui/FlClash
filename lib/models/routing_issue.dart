@@ -149,16 +149,7 @@ RoutingIssues inspectCustomRouting(
             parts.length >= 3 &&
             !subRules.contains(parts.last))
           RoutingIssue(RoutingIssueKind.missingSubRule, [parts.last]),
-        if (target != null &&
-            !targets.contains(target) &&
-            !{
-              'AND',
-              'OR',
-              'NOT',
-              'DOMAIN-REGEX',
-              'PROCESS-NAME-REGEX',
-              'PROCESS-PATH-REGEX',
-            }.contains(parts.first))
+        if (target != null && !targets.contains(target))
           RoutingIssue(RoutingIssueKind.missingTarget, [target]),
       ];
       if (issues.isNotEmpty) ruleIssues[rule.id] = issues;

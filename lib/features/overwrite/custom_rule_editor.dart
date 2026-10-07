@@ -22,6 +22,7 @@ class CustomRuleEditorDialog extends StatefulWidget {
   final Rule? rule;
   final List<String> targets;
   final List<String> ruleProviders;
+  final List<String> subRules;
   final Future<String> Function(Rule)? validate;
 
   const CustomRuleEditorDialog({
@@ -29,6 +30,7 @@ class CustomRuleEditorDialog extends StatefulWidget {
     this.rule,
     required this.targets,
     this.ruleProviders = const [],
+    this.subRules = const [],
     this.validate,
   });
 
@@ -68,6 +70,13 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
     RuleAction.SRC_IP_ASN,
     RuleAction.IP_SUFFIX,
     RuleAction.SRC_IP_SUFFIX,
+    RuleAction.SUB_RULE,
+    RuleAction.AND,
+    RuleAction.OR,
+    RuleAction.NOT,
+    RuleAction.DOMAIN_REGEX,
+    RuleAction.PROCESS_NAME_REGEX,
+    RuleAction.PROCESS_PATH_REGEX,
   ];
   static const _commaPayloadTypes = {
     'AND',
@@ -105,7 +114,10 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
   Rule? _failedCandidate;
 
   List<String> get _targets =>
-      widget.targets.where((name) => name.trim().isNotEmpty).toSet().toList();
+      (_action == RuleAction.SUB_RULE ? widget.subRules : widget.targets)
+          .where((name) => name.trim().isNotEmpty)
+          .toSet()
+          .toList();
 
   @override
   void initState() {
@@ -141,6 +153,19 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
     if (fields.length < requiredFields) {
       return null;
     }
+    if (action.hasCommaPayload) {
+      final first = value.indexOf(',');
+      final last = value.lastIndexOf(',');
+      if (first == last) return null;
+      final payload = value.substring(first + 1, last).trim();
+      final target = value.substring(last + 1).trim();
+      return ParsedRule(
+        ruleAction: action,
+        content: payload,
+        ruleTarget: action == RuleAction.SUB_RULE ? null : target,
+        subRule: action == RuleAction.SUB_RULE ? target : null,
+      );
+    }
     final params = fields.skip(requiredFields).toList();
     if (params.isNotEmpty &&
         (!action.hasParams ||
@@ -166,7 +191,7 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
   void _loadParsedRule(ParsedRule rule) {
     _action = rule.ruleAction;
     _payloadController.text = rule.ruleProvider ?? rule.content ?? '';
-    _target = rule.ruleTarget;
+    _target = rule.subRule ?? rule.ruleTarget;
     _noResolve = rule.noResolve;
     _src = rule.src;
   }
@@ -175,7 +200,10 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
     _action.value,
     if (_action != RuleAction.MATCH) _payloadController.text.trim(),
     _target ?? '',
-    if (_action.hasParams) ...[if (_src) 'src', if (_noResolve) 'no-resolve'],
+    if (_action.hasParams) ...[
+      if (_src) 'src',
+      if (_noResolve || _src) 'no-resolve',
+    ],
   ].join(',');
 
   void _setMode(bool raw) {
@@ -208,6 +236,9 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
     RuleAction.IP_ASN => '13335',
     RuleAction.NETWORK => 'TCP',
     RuleAction.DOMAIN_KEYWORD => 'example',
+    RuleAction.AND || RuleAction.OR => '((NETWORK,UDP),(DST-PORT,443))',
+    RuleAction.NOT || RuleAction.SUB_RULE => '(DOMAIN-SUFFIX,example.com)',
+    RuleAction.DOMAIN_REGEX => r'^example\.com$',
     _ => 'example.com',
   };
 
@@ -219,7 +250,8 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
     final l10n = context.appLocalizations;
     if (action == RuleAction.MATCH) return null;
     if (value.isEmpty) return l10n.emptyTip(l10n.content);
-    if (RegExp(r'[,\r\n\x00]').hasMatch(value)) {
+    if (RegExp(action.hasCommaPayload ? r'[\r\n\x00]' : r'[,\r\n\x00]')
+        .hasMatch(value)) {
       return l10n.customRuleInvalidSyntax;
     }
     if (action == RuleAction.RULE_SET) {
@@ -287,14 +319,17 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
     return valid ? null : l10n.customRuleInvalidContent(_example(action));
   }
 
-  String? _validateTarget(String? value) {
+  String? _validateTarget(String? value, {bool? subRule}) {
     final l10n = context.appLocalizations;
     if (value == null || value.isEmpty) return l10n.customRuleChooseTarget;
     if (RegExp(r'[,\r\n\x00]').hasMatch(value)) {
       return l10n.customRuleInvalidSyntax;
     }
-    return _targets.contains(value)
+    final isSubRule = subRule ?? _action == RuleAction.SUB_RULE;
+    return (isSubRule ? widget.subRules : widget.targets).contains(value)
         ? null
+        : isSubRule
+        ? l10n.invalidSubRule(value)
         : l10n.customRuleUnavailableTarget(value);
   }
 
@@ -319,13 +354,11 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
     final commaPayload = _commaPayloadTypes.contains(type);
     final target = commaPayload ? fields.last : fields[match ? 1 : 2];
     if (target.isEmpty) return l10n.customRuleChooseTarget;
-    if (type != 'SUB-RULE') {
-      final error = _validateTarget(target);
-      if (error != null) return error;
-    }
+    final error = _validateTarget(target, subRule: type == 'SUB-RULE');
+    if (error != null) return error;
     if (match) return null;
     final payload = commaPayload
-        ? fields.sublist(1, fields.length - 1).join(',')
+        ? text.substring(text.indexOf(',') + 1, text.lastIndexOf(',')).trim()
         : fields[1];
     if (payload.isEmpty) return l10n.emptyTip(l10n.content);
     if (!commaPayload && fields.skip(3).any((item) => item.isEmpty)) {
@@ -606,7 +639,9 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
               const SizedBox(height: 20),
               _selectionField(
                 key: const Key('custom-rule-target'),
-                label: l10n.ruleTarget,
+                label: _action == RuleAction.SUB_RULE
+                    ? l10n.subRule
+                    : l10n.ruleTarget,
                 placeholder: l10n.customRuleChooseTarget,
                 value: _target,
                 options: _targets,
@@ -620,8 +655,8 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
                   contentPadding: EdgeInsets.zero,
                   title: Text(l10n.noResolve),
                   subtitle: Text(l10n.customRuleNoResolveHint),
-                  value: _noResolve,
-                  onChanged: _saving
+                  value: _noResolve || _src,
+                  onChanged: _saving || _src
                       ? null
                       : (value) => setState(() {
                           _noResolve = value;
