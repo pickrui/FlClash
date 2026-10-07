@@ -85,6 +85,14 @@ func (response MethodResponse) failure(code, message string, details any) {
 	response.send()
 }
 
+func (response MethodResponse) providerResult(err *MethodError) {
+	if err != nil {
+		response.failure(err.Code, err.Message, err.Details)
+	} else {
+		response.success("")
+	}
+}
+
 func (response MethodResponse) notImplemented(method CoreMethod) {
 	response.failure("not_implemented", fmt.Sprintf("unknown method: %s", method), nil)
 }
@@ -291,16 +299,14 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 	case updateExternalProviderMethod:
 		params := ExternalProviderRequest{}
 		if decodeMethodArguments(call, response, &params) {
-			handleUpdateExternalProvider(params.Name, params.Type, func(value string) { response.success(value) })
+			handleUpdateExternalProvider(params.Name, params.Type, response.providerResult)
 		}
 	case sideLoadExternalProviderMethod:
 		params := map[string]string{}
 		if !decodeMethodArguments(call, response, &params) {
 			return
 		}
-		handleSideLoadExternalProvider(params["providerName"], params["providerType"], []byte(params["data"]), func(value string) {
-			response.success(value)
-		})
+		handleSideLoadExternalProvider(params["providerName"], params["providerType"], []byte(params["data"]), response.providerResult)
 	case startLogMethod:
 		handleStartLog()
 		response.success(true)

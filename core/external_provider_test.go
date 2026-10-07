@@ -104,7 +104,13 @@ rules: ['RULE-SET,shared,select', 'MATCH,DIRECT']
 	invoke := func(kind string, data []byte) string {
 		t.Helper()
 		result := make(chan string, 1)
-		handleSideLoadExternalProvider("shared", kind, data, func(message string) { result <- message })
+		handleSideLoadExternalProvider("shared", kind, data, func(err *MethodError) {
+			if err != nil {
+				result <- err.Message
+			} else {
+				result <- ""
+			}
+		})
 		select {
 		case message := <-result:
 			return message
@@ -189,7 +195,13 @@ func TestExternalProviderUpdateDoesNotOutliveReapply(t *testing.T) {
 		t.Fatal("invalid candidate retired the active configuration")
 	}
 	result := make(chan string, 1)
-	handleUpdateExternalProvider("shared", "Proxy", func(message string) { result <- message })
+	handleUpdateExternalProvider("shared", "Proxy", func(err *MethodError) {
+		if err != nil {
+			result <- err.Message
+		} else {
+			result <- ""
+		}
+	})
 	select {
 	case <-started:
 	case <-time.After(3 * time.Second):
@@ -199,7 +211,13 @@ func TestExternalProviderUpdateDoesNotOutliveReapply(t *testing.T) {
 		t.Fatal(err)
 	}
 	imported := make(chan string, 1)
-	handleSideLoadExternalProvider("shared", "Proxy", data("new"), func(message string) { imported <- message })
+	handleSideLoadExternalProvider("shared", "Proxy", data("new"), func(err *MethodError) {
+		if err != nil {
+			imported <- err.Message
+		} else {
+			imported <- ""
+		}
+	})
 	if message := <-imported; message != "" {
 		t.Fatal(message)
 	}

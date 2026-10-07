@@ -10,6 +10,7 @@ import (
 	"cmp"
 	"context"
 	"encoding/json"
+	"errors"
 	"iter"
 	"net"
 	"os"
@@ -614,35 +615,29 @@ func handleUpdateGeoData(
 	}
 }
 
-func handleUpdateExternalProvider(providerName, providerType string, fn func(value string)) {
+func handleUpdateExternalProvider(providerName, providerType string, fn func(*MethodError)) {
 	go func() {
 		externalProvider, exist := lookupExternalProvider(providerName, providerType)
 		if !exist {
-			fn("external provider is not exist")
+			fn(providerMethodError("provider_not_found", providerName, errors.New("external provider does not exist")))
 			return
 		}
-		if err := externalProvider.Update(); err != nil {
-			fn(err.Error())
-			return
-		}
-		fn("")
+		fn(runProviderUpdate(providerName, externalProvider, externalProvider.Update))
 	}()
 }
 
-func handleSideLoadExternalProvider(providerName, providerType string, data []byte, fn func(value string)) {
+func handleSideLoadExternalProvider(providerName, providerType string, data []byte, fn func(*MethodError)) {
 	go func() {
 		runLock.Lock()
 		defer runLock.Unlock()
 		externalProvider, exist := lookupExternalProviderLocked(providerName, providerType)
 		if !exist {
-			fn("external provider is not exist")
+			fn(providerMethodError("provider_not_found", providerName, errors.New("external provider does not exist")))
 			return
 		}
-		if err := sideUpdateExternalProvider(externalProvider, data); err != nil {
-			fn(err.Error())
-			return
-		}
-		fn("")
+		fn(runProviderUpdate(providerName, externalProvider, func() error {
+			return sideUpdateExternalProvider(externalProvider, data)
+		}))
 	}()
 }
 
