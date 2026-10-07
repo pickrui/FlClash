@@ -5,40 +5,17 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/icons/icons.dart';
-
-import '../widget_metrics.dart';
-
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
+import 'package:fl_clash/views/dashboard/widget_metrics.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class NetworkSpeed extends StatefulWidget {
+const _minSpeedScale = 8 * 1024.0;
+
+class NetworkSpeed extends StatelessWidget {
   const NetworkSpeed({super.key});
-
-  @override
-  State<NetworkSpeed> createState() => _NetworkSpeedState();
-}
-
-class _NetworkSpeedState extends State<NetworkSpeed> {
-  static const _initPoints = [Point(0, 0), Point(1, 0)];
-
-  List<Point> _getPoints(List<Traffic> traffics) {
-    return [
-      ..._initPoints,
-      for (var i = 0; i < traffics.length; i++)
-        Point(
-          (i + _initPoints.length).toDouble(),
-          traffics[i].speed.toDouble(),
-        ),
-    ];
-  }
-
-  Traffic _getLastTraffic(List<Traffic> traffics) {
-    if (traffics.isEmpty) return const Traffic();
-    return traffics.last;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,12 +26,12 @@ class _NetworkSpeedState extends State<NetworkSpeed> {
       child: RepaintBoundary(
         child: CommonCard(
           radius: DashboardWidgetMetrics.radiusOf(context),
-          infoPadding: DashboardWidgetMetrics.paddingOf(context)
-              .copyWith(bottom: 0),
           onPressed: () {},
           child: Consumer(
             builder: (_, ref, _) {
-              final traffics = ref.watch(trafficsProvider).list;
+              final traffics = ref.watch(trafficsProvider);
+              final samples = traffics.list;
+              final latest = samples.isEmpty ? const Traffic() : samples.last;
               return Column(
                 children: [
                   Padding(
@@ -74,7 +51,7 @@ class _NetworkSpeedState extends State<NetworkSpeed> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          _getLastTraffic(traffics).speedText,
+                          latest.speedText,
                           style: context.textTheme.bodySmall?.copyWith(
                             color: color,
                           ),
@@ -87,9 +64,14 @@ class _NetworkSpeedState extends State<NetworkSpeed> {
                       padding: const EdgeInsets.all(16)
                           .copyWith(bottom: 0, left: 0, right: 0),
                       child: LineChart(
-                        gradient: true,
-                        color: Theme.of(context).colorScheme.primary,
-                        points: _getPoints(traffics),
+                        values: [
+                          for (final traffic in samples)
+                            traffic.speed.toDouble(),
+                        ],
+                        revision: traffics.revision,
+                        capacity: traffics.maxLength,
+                        minScale: _minSpeedScale,
+                        color: context.colorScheme.primary,
                       ),
                     ),
                   ),

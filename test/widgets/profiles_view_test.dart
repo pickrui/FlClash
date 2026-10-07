@@ -7,6 +7,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/app.dart';
+import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/views/profiles/overwrite.dart';
 import 'package:fl_clash/views/profiles/profiles.dart';
@@ -104,6 +105,57 @@ Future<ProviderContainer> _pushRoute(
 }
 
 void main() {
+  testWidgets(
+    'profile selection survives a change from wide to narrow layout',
+    (tester) async {
+      const wide = Size(1100, 840);
+      const narrow = Size(400, 800);
+      tester.view.physicalSize = wide;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final container = ProviderContainer(
+        overrides: [
+          viewSizeProvider.overrideWithBuild((_, _) => wide),
+          profilesProvider.overrideWith(
+            () => _Profiles([_first, _second, _third]),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const TestApp(child: ProfilesView()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final first = find.widgetWithText(ProfileItem, 'First');
+      final second = find.widgetWithText(ProfileItem, 'Second');
+      expect(tester.getTopLeft(first).dy, tester.getTopLeft(second).dy);
+      expect(
+        tester.getTopLeft(first).dx,
+        lessThan(tester.getTopLeft(second).dx),
+      );
+      await tester.tap(find.text('Second'));
+      await tester.pumpAndSettle();
+      expect(container.read(currentProfileIdProvider), _second.id);
+
+      tester.view.physicalSize = narrow;
+      container.read(viewSizeProvider.notifier).value = narrow;
+      await tester.pumpAndSettle();
+      expect(tester.getTopLeft(first).dx, tester.getTopLeft(second).dx);
+      expect(
+        tester.getBottomLeft(first).dy,
+        lessThan(tester.getTopLeft(second).dy),
+      );
+      expect(tester.widget<ProfileItem>(second).groupValue, _second.id);
+      await tester.tap(find.text('Third'));
+      await tester.pumpAndSettle();
+      expect(container.read(currentProfileIdProvider), _third.id);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('saving the sort order keeps profile changes made meanwhile', (
     tester,
   ) async {

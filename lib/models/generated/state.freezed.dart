@@ -1935,7 +1935,7 @@ as String?,
 /// @nodoc
 mixin _$ProfilesState {
 
- List<Profile> get profiles; int? get currentProfileId; int get columns;
+ List<Profile> get profiles; int? get currentProfileId;
 /// Create a copy of ProfilesState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1947,20 +1947,20 @@ $ProfilesStateCopyWith<ProfilesState> get copyWith => _$ProfilesStateCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as ProfilesState;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProfilesState&&const DeepCollectionEquality().equals(other.profiles, _this.profiles)&&(identical(other.currentProfileId, _this.currentProfileId) || other.currentProfileId == _this.currentProfileId)&&(identical(other.columns, _this.columns) || other.columns == _this.columns));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProfilesState&&const DeepCollectionEquality().equals(other.profiles, _this.profiles)&&(identical(other.currentProfileId, _this.currentProfileId) || other.currentProfileId == _this.currentProfileId));
 }
 
 
 @override
 int get hashCode {
   final _this = this as ProfilesState;
-  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.profiles),_this.currentProfileId,_this.columns);
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.profiles),_this.currentProfileId);
 }
 
 @override
 String toString() {
   final _this = this as ProfilesState;
-  return 'ProfilesState(profiles: ${_this.profiles}, currentProfileId: ${_this.currentProfileId}, columns: ${_this.columns})';
+  return 'ProfilesState(profiles: ${_this.profiles}, currentProfileId: ${_this.currentProfileId})';
 }
 
 
@@ -1971,7 +1971,7 @@ abstract mixin class $ProfilesStateCopyWith<$Res>  {
   factory $ProfilesStateCopyWith(ProfilesState value, $Res Function(ProfilesState) _then) = _$ProfilesStateCopyWithImpl;
 @useResult
 $Res call({
- List<Profile> profiles, int? currentProfileId, int columns
+ List<Profile> profiles, int? currentProfileId
 });
 
 
@@ -1988,12 +1988,11 @@ class _$ProfilesStateCopyWithImpl<$Res>
 
 /// Create a copy of ProfilesState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? profiles = null,Object? currentProfileId = freezed,Object? columns = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? profiles = null,Object? currentProfileId = freezed,}) {
   return _then(ProfilesState(
 profiles: null == profiles ? _self.profiles : profiles // ignore: cast_nullable_to_non_nullable
 as List<Profile>,currentProfileId: freezed == currentProfileId ? _self.currentProfileId : currentProfileId // ignore: cast_nullable_to_non_nullable
-as int?,columns: null == columns ? _self.columns : columns // ignore: cast_nullable_to_non_nullable
-as int,
+as int?,
   ));
 }
 
@@ -2078,10 +2077,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<Profile> profiles,  int? currentProfileId,  int columns)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<Profile> profiles,  int? currentProfileId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ProfilesState() when $default != null:
-return $default(_that.profiles,_that.currentProfileId,_that.columns);case _:
+return $default(_that.profiles,_that.currentProfileId);case _:
   return orElse();
 
 }
@@ -2099,10 +2098,10 @@ return $default(_that.profiles,_that.currentProfileId,_that.columns);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<Profile> profiles,  int? currentProfileId,  int columns)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<Profile> profiles,  int? currentProfileId)  $default,) {final _that = this;
 switch (_that) {
 case _ProfilesState():
-return $default(_that.profiles,_that.currentProfileId,_that.columns);case _:
+return $default(_that.profiles,_that.currentProfileId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2119,10 +2118,10 @@ return $default(_that.profiles,_that.currentProfileId,_that.columns);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<Profile> profiles,  int? currentProfileId,  int columns)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<Profile> profiles,  int? currentProfileId)?  $default,) {final _that = this;
 switch (_that) {
 case _ProfilesState() when $default != null:
-return $default(_that.profiles,_that.currentProfileId,_that.columns);case _:
+return $default(_that.profiles,_that.currentProfileId);case _:
   return null;
 
 }
@@ -2134,7 +2133,7 @@ return $default(_that.profiles,_that.currentProfileId,_that.columns);case _:
 
 
 class _ProfilesState implements ProfilesState {
-  const _ProfilesState({required  List<Profile> profiles, required this.currentProfileId, required this.columns}): _profiles = profiles;
+  const _ProfilesState({required  List<Profile> profiles, required this.currentProfileId}): _profiles = profiles;
   
 
  final  List<Profile> _profiles;
@@ -2145,7 +2144,6 @@ class _ProfilesState implements ProfilesState {
 }
 
 @override final  int? currentProfileId;
-@override final  int columns;
 
 /// Create a copy of ProfilesState
 /// with the given fields replaced by the non-null parameter values.
@@ -2157,18 +2155,18 @@ _$ProfilesStateCopyWith<_ProfilesState> get copyWith => __$ProfilesStateCopyWith
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProfilesState&&const DeepCollectionEquality().equals(other.profiles, _profiles)&&(identical(other.currentProfileId, currentProfileId) || other.currentProfileId == currentProfileId)&&(identical(other.columns, columns) || other.columns == columns));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProfilesState&&const DeepCollectionEquality().equals(other.profiles, _profiles)&&(identical(other.currentProfileId, currentProfileId) || other.currentProfileId == currentProfileId));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_profiles),currentProfileId,columns);
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_profiles),currentProfileId);
 }
 
 @override
 String toString() {
-    return 'ProfilesState(profiles: $profiles, currentProfileId: $currentProfileId, columns: $columns)';
+    return 'ProfilesState(profiles: $profiles, currentProfileId: $currentProfileId)';
 }
 
 
@@ -2179,7 +2177,7 @@ abstract mixin class _$ProfilesStateCopyWith<$Res> implements $ProfilesStateCopy
   factory _$ProfilesStateCopyWith(_ProfilesState value, $Res Function(_ProfilesState) _then) = __$ProfilesStateCopyWithImpl;
 @override @useResult
 $Res call({
- List<Profile> profiles, int? currentProfileId, int columns
+ List<Profile> profiles, int? currentProfileId
 });
 
 
@@ -2196,12 +2194,11 @@ class __$ProfilesStateCopyWithImpl<$Res>
 
 /// Create a copy of ProfilesState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? profiles = null,Object? currentProfileId = freezed,Object? columns = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? profiles = null,Object? currentProfileId = freezed,}) {
   return _then(_ProfilesState(
 profiles: null == profiles ? _self._profiles : profiles // ignore: cast_nullable_to_non_nullable
 as List<Profile>,currentProfileId: freezed == currentProfileId ? _self.currentProfileId : currentProfileId // ignore: cast_nullable_to_non_nullable
-as int?,columns: null == columns ? _self.columns : columns // ignore: cast_nullable_to_non_nullable
-as int,
+as int?,
   ));
 }
 

@@ -139,7 +139,7 @@ class SystemBrightness extends _$SystemBrightness
 class Traffics extends _$Traffics with NotifierMixin<FixedList<Traffic>> {
   @override
   FixedList<Traffic> build() {
-    return FixedList(0);
+    return FixedList(30);
   }
 
   void addTraffic(Traffic value) {

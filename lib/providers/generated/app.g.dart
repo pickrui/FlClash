@@ -602,7 +602,7 @@ final class TrafficsProvider
   }
 }
 
-String _$trafficsHash() => r'52f4905d8917d545c55292824a90248aaf4ce0e4';
+String _$trafficsHash() => r'd1b6748460c3c19f7ef37512cbce12f2ad8e7a0b';
 
 abstract class _$Traffics extends $Notifier<FixedList<Traffic>> {
   FixedList<Traffic> build();

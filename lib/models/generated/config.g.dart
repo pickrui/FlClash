@@ -35,7 +35,7 @@ _AppSettingProps _$AppSettingPropsFromJson(
       ) ??
       TabAnimation.fade,
   floatingNavigationBar: json['floatingNavigationBar'] as bool? ?? true,
-  showLabel: json['showLabel'] as bool? ?? false,
+  showLabel: json['showLabel'] as bool? ?? true,
   hideIp: json['hideIp'] as bool? ?? false,
   editorLineWrap: json['editorLineWrap'] as bool? ?? false,
   editorFontSize:

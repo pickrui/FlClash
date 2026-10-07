@@ -13,6 +13,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
 import 'fade_box.dart';
+import 'scaffold.dart' show appBarActionSpace;
 import 'text.dart';
 
 class Info {
@@ -90,7 +91,7 @@ class InfoHeader extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.end,
-                spacing: space ?? 0,
+                spacing: space ?? appBarActionSpace,
                 children: [...actions],
               ),
             ),

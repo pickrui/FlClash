@@ -255,10 +255,26 @@ class ListItem<T> extends StatelessWidget {
        onTap = null;
 
   Widget _buildListTile({
+    required ItemPosition? position,
     void Function()? onTap,
     Widget? trailing,
     Widget? leading,
   }) {
+    if (position != null) {
+      // OpenContainer reparents its tile outside the section's provider.
+      return ItemPositionProvider(
+        position: position,
+        child: DecorationListItem(
+          leading: leading ?? this.leading,
+          title: title,
+          subtitle: subtitle,
+          trailing: trailing ?? this.trailing,
+          contentPadding: padding,
+          horizontalTitleGap: horizontalTitleGap,
+          onPressed: onTap,
+        ),
+      );
+    }
     return ListTile(
       key: key,
       dense: dense,
@@ -281,6 +297,7 @@ class ListItem<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final position = ItemPositionProvider.of(context)?.position;
     if (delegate is OpenDelegate) {
       final openDelegate = delegate as OpenDelegate;
       final child = openDelegate.widget;
@@ -312,7 +329,7 @@ class ListItem<T> extends StatelessWidget {
             action();
           }
 
-          return _buildListTile(onTap: openAction);
+          return _buildListTile(position: position, onTap: openAction);
         },
         onClosed: onChanged,
         openBuilder: (_, action) {
@@ -325,6 +342,7 @@ class ListItem<T> extends StatelessWidget {
       final options = optionsDelegate.options;
       final subtitleBuilder = optionsDelegate.subtitleBuilder;
       return _buildListTile(
+        position: position,
         onTap: () async {
           // Options may hold null; an index tells a pick from a dismissal.
           final index = await globalState.showCommonDialog<int>(
@@ -349,6 +367,7 @@ class ListItem<T> extends StatelessWidget {
     if (delegate is InputDelegate) {
       final inputDelegate = delegate as InputDelegate;
       return _buildListTile(
+        position: position,
         onTap: () async {
           final value = await globalState.showCommonDialog<String>(
             child: InputDialog(
@@ -370,11 +389,10 @@ class ListItem<T> extends StatelessWidget {
     if (delegate is CheckboxDelegate) {
       final checkboxDelegate = delegate as CheckboxDelegate;
       return _buildListTile(
-        onTap: () {
-          if (checkboxDelegate.onChanged != null) {
-            checkboxDelegate.onChanged!(!checkboxDelegate.value);
-          }
-        },
+        position: position,
+        onTap: checkboxDelegate.onChanged == null
+            ? null
+            : () => checkboxDelegate.onChanged!(!checkboxDelegate.value),
         trailing: CommonCheckBox(
           value: checkboxDelegate.value,
           onChanged: checkboxDelegate.onChanged,
@@ -384,11 +402,10 @@ class ListItem<T> extends StatelessWidget {
     if (delegate is SwitchDelegate) {
       final switchDelegate = delegate as SwitchDelegate;
       return _buildListTile(
-        onTap: () {
-          if (switchDelegate.onChanged != null) {
-            switchDelegate.onChanged!(!switchDelegate.value);
-          }
-        },
+        position: position,
+        onTap: switchDelegate.onChanged == null
+            ? null
+            : () => switchDelegate.onChanged!(!switchDelegate.value),
         trailing: Switch(
           value: switchDelegate.value,
           onChanged: switchDelegate.onChanged,
@@ -398,6 +415,7 @@ class ListItem<T> extends StatelessWidget {
     if (delegate is RadioDelegate) {
       final radioDelegate = delegate as RadioDelegate<T>;
       return _buildListTile(
+        position: position,
         onTap: radioDelegate.onTap,
         leading: ExcludeFocus(
           child: Radio<T>(
@@ -411,7 +429,7 @@ class ListItem<T> extends StatelessWidget {
       );
     }
 
-    return _buildListTile(onTap: onTap);
+    return _buildListTile(position: position, onTap: onTap);
   }
 }
 
@@ -439,7 +457,7 @@ class ListHeader extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        spacing: 36,
+        spacing: actions.isEmpty ? 0 : 12,
         children: [
           Expanded(
             child: Column(
@@ -447,6 +465,8 @@ class ListHeader extends StatelessWidget {
               children: [
                 Text(
                   title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: context.textTheme.labelLarge?.copyWith(
                     color: context.colorScheme.onSurfaceVariant.opacity80,
                     fontWeight: FontWeight.w600,
@@ -465,7 +485,8 @@ class ListHeader extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.end,
-            children: [...genActions(actions, space: space)],
+            spacing: space ?? appBarActionSpace,
+            children: [...actions],
           ),
         ],
       ),

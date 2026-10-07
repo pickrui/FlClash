@@ -118,6 +118,19 @@ void main() {
   );
 
   group('AppSettingProps JSON round-trip', () {
+    test(
+      'expanded sidebar default preserves an existing collapsed preference',
+      () {
+        expect(AppSettingProps.fromJson({}).showLabel, isTrue);
+        final saved = AppSettingProps.fromJson({'showLabel': false});
+        expect(saved.showLabel, isFalse);
+        expect(
+          roundTrip(saved.toJson, AppSettingProps.fromJson).showLabel,
+          isFalse,
+        );
+      },
+    );
+
     test('default values survive round-trip', () {
       const props = AppSettingProps();
       final restored = roundTrip(
@@ -131,7 +144,7 @@ void main() {
       expect(restored.openLogs, false);
       expect(restored.closeConnections, true);
       expect(restored.tabAnimation, TabAnimation.fade);
-      expect(restored.showLabel, false);
+      expect(restored.showLabel, true);
       expect(restored.minimizeOnExit, true);
       expect(restored.restoreStrategy, RestoreStrategy.compatible);
       expect(restored.testUrl, defaultTestUrl);

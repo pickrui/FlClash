@@ -32,10 +32,16 @@ void main() {
 
     test('copyWith creates independent copy', () {
       final original = FixedList(3, list: [1, 2, 3]);
+      original.add(4);
       final copy = original.copyWith();
-      copy.add(4);
-      expect(original.list, [1, 2, 3]);
-      expect(copy.list, [2, 3, 4]);
+      expect(copy.revision, original.revision);
+      copy.add(5);
+      expect(original.list, [2, 3, 4]);
+      expect(copy.list, [3, 4, 5]);
+      expect(copy.revision, original.revision + 1);
+      copy.clear();
+      expect(copy.revision, 0);
+      expect(original.list, [2, 3, 4]);
     });
 
     test('operator [] returns correct element', () {

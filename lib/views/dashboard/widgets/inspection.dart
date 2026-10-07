@@ -11,6 +11,7 @@ export 'proxy_groups.dart';
 
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/providers.dart';
+import 'package:fl_clash/state.dart';
 
 import 'quick_options.dart';
 
@@ -48,7 +49,18 @@ class InspectionCard extends StatelessWidget {
       onPressed: onPressed,
       child: Padding(
         padding: DashboardWidgetMetrics.paddingOf(context).copyWith(top: 0),
-        child: child,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            SizedBox(
+              height:
+                  globalState.measure.bodyMediumHeight *
+                      DashboardWidgetMetrics.textScaleOf(context) +
+                  2,
+              child: child,
+            ),
+          ],
+        ),
       ),
     ),
   );
@@ -113,9 +125,11 @@ class _FeedCountCardState extends ConsumerState<FeedCountCard>
         },
       ),
       child: Align(
-        alignment: Alignment.bottomLeft,
+        alignment: AlignmentDirectional.centerStart,
         child: Text(
           '$_count',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: context.textTheme.bodyMedium?.toLight.adjustSize(1),
         ),
       ),
@@ -138,10 +152,12 @@ class RuntimeCard extends ConsumerWidget {
     label: context.appLocalizations.runTime,
     glyph: AppGlyphs.history,
     child: Align(
-      alignment: Alignment.bottomLeft,
+      alignment: AlignmentDirectional.centerStart,
       child: Text(
         utils.getTimeText(ref.watch(runTimeProvider)),
-        style: context.textTheme.titleLarge,
+        style: context.textTheme.bodyMedium?.toLight
+            .adjustSize(1)
+            .copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),

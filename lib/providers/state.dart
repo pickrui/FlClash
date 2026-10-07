@@ -291,14 +291,7 @@ DashboardState dashboardState(Ref ref) {
 ProfilesState profilesState(Ref ref) {
   final currentProfileId = ref.watch(currentProfileIdProvider);
   final profiles = ref.watch(profilesProvider);
-  final columns = ref.watch(
-    contentWidthProvider.select((state) => utils.getProfilesColumns(state)),
-  );
-  return ProfilesState(
-    profiles: profiles,
-    currentProfileId: currentProfileId,
-    columns: columns,
-  );
+  return ProfilesState(profiles: profiles, currentProfileId: currentProfileId);
 }
 
 @Riverpod(keepAlive: true)

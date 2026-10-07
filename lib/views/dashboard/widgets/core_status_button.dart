@@ -11,6 +11,7 @@ import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
+import 'package:fl_clash/widgets/navigation_dock.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -99,13 +100,15 @@ class _CoreStatusButtonState extends ConsumerState<CoreStatusButton> {
         child: coreStatus == CoreStatus.connected
             ? IconButton.filled(
                 tooltip: appLocalizations.coreStatus,
-                style: IconButton.styleFrom(
-                  backgroundColor: context.colorScheme.success,
-                  foregroundColor: switch (Theme.brightnessOf(context)) {
-                    Brightness.light => context.colorScheme.onSurfaceVariant,
-                    Brightness.dark =>
-                      context.colorScheme.onPrimaryFixedVariant,
-                  },
+                style: ElasticPress.buttonStyle.merge(
+                  IconButton.styleFrom(
+                    backgroundColor: context.colorScheme.success,
+                    foregroundColor: switch (Theme.brightnessOf(context)) {
+                      Brightness.light => context.colorScheme.onSurfaceVariant,
+                      Brightness.dark =>
+                        context.colorScheme.onPrimaryFixedVariant,
+                    },
+                  ),
                 ),
                 onPressed: _handleConnection,
                 icon: const GlyphIcon(AppGlyphs.check, fill: 1),
@@ -113,22 +116,25 @@ class _CoreStatusButtonState extends ConsumerState<CoreStatusButton> {
             : FilledButton.icon(
                 key: ValueKey(coreStatus),
                 onPressed: _handleConnection,
-                style: FilledButton.styleFrom(
-                  backgroundColor: switch (coreStatus) {
-                    CoreStatus.connecting => null,
-                    CoreStatus.connected => context.colorScheme.success,
-                    CoreStatus.disconnected => context.colorScheme.error,
-                  },
-                  foregroundColor: switch (coreStatus) {
-                    CoreStatus.connecting => null,
-                    CoreStatus.connected => switch (Theme.brightnessOf(
-                      context,
-                    )) {
-                      Brightness.light => context.colorScheme.onSurfaceVariant,
-                      Brightness.dark => null,
+                style: ElasticPress.buttonStyle.merge(
+                  FilledButton.styleFrom(
+                    backgroundColor: switch (coreStatus) {
+                      CoreStatus.connecting => null,
+                      CoreStatus.connected => context.colorScheme.success,
+                      CoreStatus.disconnected => context.colorScheme.error,
                     },
-                    CoreStatus.disconnected => context.colorScheme.onError,
-                  },
+                    foregroundColor: switch (coreStatus) {
+                      CoreStatus.connecting => null,
+                      CoreStatus.connected => switch (Theme.brightnessOf(
+                        context,
+                      )) {
+                        Brightness.light =>
+                          context.colorScheme.onSurfaceVariant,
+                        Brightness.dark => null,
+                      },
+                      CoreStatus.disconnected => context.colorScheme.onError,
+                    },
+                  ),
                 ),
                 icon: SizedBox(
                   height: globalState.measure.bodyMediumHeight,

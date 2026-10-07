@@ -36,7 +36,7 @@ void main() {
     ]);
     final neutral = Theme.of(tester.element(find.byType(DonutChart)))
         .colorScheme
-        .outlineVariant;
+        .surfaceContainerHighest;
     expect(
       chart(tester),
       paints..circle(color: neutral, style: PaintingStyle.stroke),
@@ -58,9 +58,7 @@ void main() {
     expect(chart(tester), paints..circle(color: neutral));
   });
 
-  testWidgets('one-sided traffic fills the ring with its own color', (
-    tester,
-  ) async {
+  testWidgets('one-sided traffic draws only its own segment', (tester) async {
     for (final uploadOnly in [true, false]) {
       await show(tester, [
         DonutChartData(value: uploadOnly ? 1 : 0, color: Colors.red),
@@ -68,9 +66,9 @@ void main() {
       ]);
       expect(
         chart(tester),
-        paints..circle(color: uploadOnly ? Colors.red : Colors.blue),
+        paints..arc(color: uploadOnly ? Colors.red : Colors.blue),
       );
-      expect(chart(tester), paintsExactlyCountTimes(#drawArc, 0));
+      expect(chart(tester), paintsExactlyCountTimes(#drawArc, 1));
     }
   });
 

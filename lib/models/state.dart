@@ -72,7 +72,6 @@ abstract class ProfilesState with _$ProfilesState {
   const factory ProfilesState({
     required List<Profile> profiles,
     required int? currentProfileId,
-    required int columns,
   }) = _ProfilesState;
 }
 

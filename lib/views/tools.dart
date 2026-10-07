@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/icons/icons.dart';
+import 'package:fl_clash/icons/navigation_glyph.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
@@ -41,7 +42,7 @@ class ToolsView extends ConsumerStatefulWidget {
 class _ToolViewState extends ConsumerState<ToolsView> {
   Widget _buildNavigationMenuItem(NavigationItem navigationItem) {
     return ListItem.open(
-      leading: navigationItem.icon,
+      leading: GlyphIcon(navigationGlyphOf(navigationItem.label)),
       title: Text(Intl.message(navigationItem.label.name)),
       subtitle: navigationItem.description != null
           ? Text(Intl.message(navigationItem.description!))
@@ -143,7 +144,10 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         key: toolsStoreKey,
         itemCount: items.length,
         itemBuilder: (_, index) => items[index],
-        padding: EdgeInsets.only(top: context.contentTopPadding, bottom: 20),
+        padding: EdgeInsets.only(
+          top: context.appBarInset,
+          bottom: 20 + BottomInsetScope.of(context),
+        ),
       ),
     );
   }

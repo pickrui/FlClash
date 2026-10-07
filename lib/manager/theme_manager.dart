@@ -71,23 +71,13 @@ class ThemeManager extends ConsumerWidget {
           top: padding.top > height * 0.3 ? 20.0 : padding.top,
         ),
       ),
-      child: Theme(
-        data: Theme.of(context).copyWith(
-          floatingActionButtonTheme: Theme.of(context).floatingActionButtonTheme
-              .copyWith(
-                shape: const RoundedSuperellipseBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(16.0)),
-                ),
-              ),
-        ),
-        child: LayoutBuilder(
-          builder: (_, container) {
-            appController.updateViewSize(
-              Size(container.maxWidth, container.maxHeight),
-            );
-            return _buildSystemUi(child);
-          },
-        ),
+      child: LayoutBuilder(
+        builder: (_, container) {
+          appController.updateViewSize(
+            Size(container.maxWidth, container.maxHeight),
+          );
+          return _buildSystemUi(child);
+        },
       ),
     );
   }

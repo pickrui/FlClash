@@ -8,6 +8,7 @@ import 'iterable.dart';
 class FixedList<T> {
   final int maxLength;
   final List<T> _list;
+  int _revision = 0;
 
   FixedList(this.maxLength, {List<T>? list})
     : _list = (list ?? [])..truncate(maxLength);
@@ -15,11 +16,15 @@ class FixedList<T> {
   void add(T item) {
     _list.add(item);
     _list.truncate(maxLength);
+    _revision++;
   }
 
   void clear() {
     _list.clear();
+    _revision = 0;
   }
+
+  int get revision => _revision;
 
   List<T> get list => List.unmodifiable(_list);
 
@@ -28,6 +33,6 @@ class FixedList<T> {
   T operator [](int index) => _list[index];
 
   FixedList<T> copyWith() {
-    return FixedList(maxLength, list: List.of(_list));
+    return FixedList(maxLength, list: List.of(_list)).._revision = _revision;
   }
 }

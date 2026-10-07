@@ -17,6 +17,8 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:fl_clash/widgets/navigation_dock.dart';
 
 import 'add.dart';
 import 'edit.dart';
@@ -109,51 +111,59 @@ class _ProfilesViewState extends State<ProfilesView> {
       builder: (_, ref, _) {
         final isLoading = ref.watch(loadingProvider(LoadingTag.profiles));
         final state = ref.watch(profilesStateProvider);
-        final spacing = 14.mAp;
+        final spacing = 12.mAp;
         return CommonScaffold(
           isLoading: isLoading,
           title: appLocalizations.profiles,
-          primaryAction: IconButtonData(
-            glyph: AppGlyphs.add,
-            tooltip: context.appLocalizations.addProfile,
-            onPressed: _handleShowAddExtendPage,
-          ),
+          primaryAction: state.profiles.isEmpty
+              ? null
+              : IconButtonData(
+                  glyph: AppGlyphs.add,
+                  tooltip: context.appLocalizations.addProfile,
+                  onPressed: _handleShowAddExtendPage,
+                ),
+          foldPrimaryAction: true,
           iconActions: _buildActions(state.profiles),
           body: NullStatusSwitcher(
             isLoading: isLoading,
             isEmpty: state.profiles.isEmpty,
             nullStatus: NullStatus(
-              label: appLocalizations.nullProfileDesc,
+              label: appLocalizations.nullTip(appLocalizations.profiles),
+              description: appLocalizations.nullProfileDesc,
               illustration: NullStatusIllustration.profile,
+              action: ElasticButton(
+                child: FilledButton.tonalIcon(
+                  onPressed: _handleShowAddExtendPage,
+                  icon: const GlyphIcon(AppGlyphs.add, fill: 1),
+                  label: Text(appLocalizations.addProfile),
+                ),
+              ),
             ),
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: SingleChildScrollView(
+            child: LayoutBuilder(
+              builder: (_, constraints) => MasonryGridView.count(
                 key: profilesStoreKey,
                 padding: EdgeInsets.only(
                   left: 16,
                   right: 16,
                   top: context.contentTopPadding,
-                  bottom: 88,
+                  bottom: 16 + BottomInsetScope.of(context),
                 ),
-                child: Grid(
-                  mainAxisSpacing: spacing,
-                  crossAxisSpacing: spacing,
-                  crossAxisCount: state.columns,
-                  children: [
-                    for (int i = 0; i < state.profiles.length; i++)
-                      GridItem(
-                        child: ProfileItem(
-                          key: Key(state.profiles[i].id.toString()),
-                          profile: state.profiles[i],
-                          groupValue: state.currentProfileId,
-                          onChanged: (profileId) {
-                            ref.read(currentProfileIdProvider.notifier).value =
-                                profileId;
-                          },
-                        ),
-                      ),
-                  ],
+                crossAxisCount: utils.getProfilesColumns(
+                  constraints.maxWidth - 32,
+                  spacing: spacing,
+                  minItemWidth: 270.ap,
+                ),
+                mainAxisSpacing: spacing,
+                crossAxisSpacing: spacing,
+                itemCount: state.profiles.length,
+                itemBuilder: (_, index) => ProfileItem(
+                  key: ValueKey(state.profiles[index].id),
+                  profile: state.profiles[index],
+                  groupValue: state.currentProfileId,
+                  onChanged: (profileId) {
+                    ref.read(currentProfileIdProvider.notifier).value =
+                        profileId;
+                  },
                 ),
               ),
             ),
@@ -234,22 +244,22 @@ class ProfileItem extends StatelessWidget {
   List<Widget> _buildUrlProfileInfo(BuildContext context) {
     final subscriptionInfo = profile.subscriptionInfo;
     return [
-      const SizedBox(height: 8),
-      if (subscriptionInfo != null)
+      if (subscriptionInfo != null) ...[
         SubscriptionInfoView(subscriptionInfo: subscriptionInfo),
+        const SizedBox(height: 6),
+      ],
       Text(
         profile.lastUpdateDate?.lastUpdateTimeDesc ?? '',
-        style: context.textTheme.labelMedium?.toLighter,
+        style: context.textTheme.bodySmall?.toLighter,
       ),
     ];
   }
 
   List<Widget> _buildFileProfileInfo(BuildContext context) {
     return [
-      const SizedBox(height: 8),
       Text(
         profile.lastUpdateDate?.lastUpdateTimeDesc ?? '',
-        style: context.textTheme.labelMedium?.toLight,
+        style: context.textTheme.bodySmall?.toLighter,
       ),
     ];
   }
@@ -291,14 +301,16 @@ class ProfileItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return CommonCard(
       enterActionsOnRight: true,
+      radius: AppCorner.xl,
       isSelected: profile.id == groupValue,
       onPressed: () {
         onChanged(profile.id);
       },
       child: ListItem(
         key: Key(profile.id.toString()),
-        horizontalTitleGap: 16,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        horizontalTitleGap: 8,
+        minVerticalPadding: 12,
+        padding: const EdgeInsets.only(left: 16, right: 6),
         trailing: SizedBox(
           height: 40,
           width: 40,
@@ -308,11 +320,12 @@ class ProfileItem extends StatelessWidget {
                 isUpdatingProvider(profile.updatingKey),
               );
               return FadeThroughBox(
+                alignment: Alignment.center,
                 child: isUpdating
                     ? const Padding(
                         key: ValueKey('loading'),
                         padding: EdgeInsets.all(8),
-                        child: CircularProgressIndicator(),
+                        child: CommonCircleLoading(),
                       )
                     : CommonPopupBox(
                         key: const ValueKey('menu'),
@@ -405,6 +418,10 @@ class ProfileItem extends StatelessWidget {
                         ),
                         targetBuilder: (open) {
                           return IconButton(
+                            style: IconButton.styleFrom(
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              visualDensity: VisualDensity.standard,
+                            ),
                             tooltip: context.appLocalizations.more,
                             onPressed: () {
                               open();
@@ -417,33 +434,24 @@ class ProfileItem extends StatelessWidget {
             },
           ),
         ),
-        title: Container(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                profile.realLabel,
-                style: context.textTheme.titleMedium,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ...switch (profile.type) {
-                    ProfileType.file => _buildFileProfileInfo(context),
-                    ProfileType.url => _buildUrlProfileInfo(context),
-                  },
-                ],
-              ),
-            ],
-          ),
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              profile.realLabel,
+              style: context.textTheme.titleMedium,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 6),
+            ...switch (profile.type) {
+              ProfileType.file => _buildFileProfileInfo(context),
+              ProfileType.url => _buildUrlProfileInfo(context),
+            },
+          ],
         ),
-        tileTitleAlignment: ListTileTitleAlignment.titleHeight,
+        tileTitleAlignment: ListTileTitleAlignment.top,
       ),
     );
   }
@@ -474,20 +482,18 @@ class _ReorderableProfilesSheetState
     profiles = List.from(widget.profiles);
   }
 
-  Widget _buildItem(int index, [bool isDecorator = false]) {
-    final isLast = index == profiles.length - 1;
-    final isFirst = index == 0;
+  Widget _buildItem(int index) {
     final profile = profiles[index];
-    return CommonInputListItem(
+    return ItemPositionProvider(
       key: Key(profile.id.toString()),
-      trailing: ReorderableDelayedDragStartListener(
+      position: ItemPosition.get(index, profiles.length),
+      child: ReorderableDelayedDragStartListener(
         index: index,
-        child: const GlyphIcon(AppGlyphs.dragHandle),
+        child: DecorationListItem(
+          trailing: const GlyphIcon(AppGlyphs.dragHandle),
+          title: Text(profile.realLabel),
+        ),
       ),
-      title: Text(profile.realLabel),
-      isFirst: isFirst,
-      isLast: isLast,
-      isDecorator: isDecorator,
     );
   }
 
@@ -510,24 +516,13 @@ class _ReorderableProfilesSheetState
     return AdaptiveSheetScaffold(
       type: widget.type,
       actions: [
-        if (widget.type == SheetType.bottomSheet)
-          IconButton.filledTonal(
-            tooltip: context.appLocalizations.save,
+        AppBarActionButton(
+          data: IconButtonData(
+            glyph: AppGlyphs.check,
             onPressed: _handleSave,
-            style: IconButton.styleFrom(
-              visualDensity: VisualDensity.comfortable,
-              tapTargetSize: MaterialTapTargetSize.padded,
-              padding: const EdgeInsets.all(8),
-              iconSize: 20,
-            ),
-            icon: const GlyphIcon(AppGlyphs.check),
-          )
-        else
-          IconButton.filledTonal(
             tooltip: context.appLocalizations.save,
-            icon: const GlyphIcon(AppGlyphs.check),
-            onPressed: _handleSave,
           ),
+        ),
       ],
       body: Padding(
         padding: const EdgeInsets.only(bottom: 32, top: 12),
@@ -535,11 +530,7 @@ class _ReorderableProfilesSheetState
           buildDefaultDragHandles: false,
           padding: const EdgeInsets.symmetric(horizontal: 16),
           proxyDecorator: (child, index, animation) {
-            return commonProxyDecorator(
-              _buildItem(index, true),
-              index,
-              animation,
-            );
+            return commonProxyDecorator(_buildItem(index), index, animation);
           },
           onReorderItem: (oldIndex, newIndex) {
             setState(() {

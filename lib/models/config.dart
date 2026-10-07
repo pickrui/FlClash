@@ -126,7 +126,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     @JsonKey(readValue: _readTabAnimation, unknownEnumValue: TabAnimation.fade)
     TabAnimation tabAnimation,
     @Default(true) bool floatingNavigationBar,
-    @Default(false) bool showLabel,
+    @Default(true) bool showLabel,
     @Default(false) bool hideIp,
     @Default(false) bool editorLineWrap,
     @Default(EditorFontSize.standard) EditorFontSize editorFontSize,

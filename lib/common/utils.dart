@@ -146,8 +146,12 @@ class Utils {
     };
   }
 
-  int getProfilesColumns(double viewWidth) {
-    return max((viewWidth / 280).floor(), 1);
+  int getProfilesColumns(
+    double viewWidth, {
+    double spacing = 0,
+    double minItemWidth = 270,
+  }) {
+    return max(((viewWidth + spacing) / (minItemWidth + spacing)).floor(), 1);
   }
 
   String getBackupFileName() {
