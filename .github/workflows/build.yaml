@@ -457,7 +457,28 @@ jobs:
           [ -n "${{ matrix.arch }}" ] && BUILD_ARGS="$BUILD_ARGS --arch ${{ matrix.arch }}"
           BUILD_ARGS="$BUILD_ARGS --out app"
           [ "${{ env.IS_STABLE }}" == "true" ] && BUILD_ARGS="$BUILD_ARGS --env stable"
-          dart setup.dart $BUILD_ARGS
+          if [ "${{ matrix.platform }}" == "android" ]; then
+            build_log="$RUNNER_TEMP/android-build.log"
+            set +e
+            dart setup.dart $BUILD_ARGS 2>&1 | tee "$build_log"
+            build_status=${PIPESTATUS[0]}
+            set -e
+            if [ "$build_status" -ne 0 ]; then
+              if ! grep -q 'Could not resolve all files for configuration' "$build_log" ||
+                 ! grep -Eq 'Could not find [^[:space:]]+\.jar ' "$build_log"; then
+                exit "$build_status"
+              fi
+              echo "Retrying Android build once with refreshed Gradle dependency metadata"
+              init_dir="${GRADLE_USER_HOME:-$HOME/.gradle}/init.d"
+              mkdir -p "$init_dir"
+              refresh_init=$(mktemp "$init_dir/flclash-refresh-XXXXXX.gradle")
+              trap 'rm -f "$refresh_init"' EXIT
+              printf '%s\n' 'gradle.startParameter.refreshDependencies = true' > "$refresh_init"
+              dart setup.dart $BUILD_ARGS
+            fi
+          else
+            dart setup.dart $BUILD_ARGS
+          fi
 
           if [ ! -d ./dist ] || [ -z "$(find ./dist -type f -print -quit)" ]; then
             echo "Build produced no artifacts in ./dist" >&2
