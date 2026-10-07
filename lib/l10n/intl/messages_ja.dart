@@ -974,7 +974,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "dnsQueryUpstream": MessageLookupByLibrary.simpleMessage("上流リゾルバー"),
     "doYouWantToPass": MessageLookupByLibrary.simpleMessage("通過させますか？"),
     "docked": MessageLookupByLibrary.simpleMessage("固定"),
-    "documentCenter": MessageLookupByLibrary.simpleMessage("ドキュメントセンター"),
     "domain": MessageLookupByLibrary.simpleMessage("ドメイン"),
     "download": MessageLookupByLibrary.simpleMessage("ダウンロード"),
     "dynamicMembersHint": MessageLookupByLibrary.simpleMessage(
@@ -2036,7 +2035,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "size": MessageLookupByLibrary.simpleMessage("サイズ"),
     "slide": MessageLookupByLibrary.simpleMessage("スライド"),
     "socksPort": MessageLookupByLibrary.simpleMessage("Socksポート"),
-    "softwareCenter": MessageLookupByLibrary.simpleMessage("ソフトウェアセンター"),
     "soldOut": MessageLookupByLibrary.simpleMessage("売り切れ"),
     "sort": MessageLookupByLibrary.simpleMessage("並び替え"),
     "source": MessageLookupByLibrary.simpleMessage("ソース"),
@@ -2341,6 +2339,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("使用済みデータ量"),
     "userCenter": MessageLookupByLibrary.simpleMessage("ユーザーセンター"),
     "userCenterFallback": MessageLookupByLibrary.simpleMessage("ユーザーセンター（予備）"),
+    "userGuide": MessageLookupByLibrary.simpleMessage("ユーザーガイド"),
     "value": MessageLookupByLibrary.simpleMessage("値"),
     "verifyCoupon": MessageLookupByLibrary.simpleMessage("確認"),
     "vibrantScheme": MessageLookupByLibrary.simpleMessage("ビブラント"),

@@ -59,6 +59,14 @@ class _AboutViewState extends State<AboutView> {
       generateSectionV3(
         title: appLocalizations.more,
         items: [
+          ListItem(
+            leading: const _LinkBadge(glyph: AppGlyphs.info),
+            title: Text(appLocalizations.userGuide),
+            onTap: () {
+              globalState.openUrl('https://oixcloud.com/guide');
+            },
+            trailing: const GlyphIcon(AppGlyphs.openExternal),
+          ),
           if (baseDomain.isNotEmpty)
             _siteLinkItem(
               title: appLocalizations.userCenter,
@@ -71,20 +79,6 @@ class _AboutViewState extends State<AboutView> {
               domain: spareDomain,
               path: '/user',
             ),
-          if (baseDomain.isNotEmpty)
-            _siteLinkItem(
-              title: appLocalizations.softwareCenter,
-              domain: baseDomain,
-              path: '/client',
-            ),
-          ListItem(
-            leading: const _LinkBadge(glyph: AppGlyphs.info),
-            title: Text(appLocalizations.documentCenter),
-            onTap: () {
-              globalState.openUrl('https://docs.dler.io/black-hole');
-            },
-            trailing: const GlyphIcon(AppGlyphs.openExternal),
-          ),
           ListItem(
             leading: const _LinkBadge(glyph: AppGlyphs.code),
             title: Text(appLocalizations.project),

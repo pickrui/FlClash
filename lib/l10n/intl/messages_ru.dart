@@ -1189,9 +1189,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Вы хотите пропустить",
     ),
     "docked": MessageLookupByLibrary.simpleMessage("Закреплённая"),
-    "documentCenter": MessageLookupByLibrary.simpleMessage(
-      "Центр документации",
-    ),
     "domain": MessageLookupByLibrary.simpleMessage("Домен"),
     "download": MessageLookupByLibrary.simpleMessage("Скачивание"),
     "dynamicMembersHint": MessageLookupByLibrary.simpleMessage(
@@ -2564,7 +2561,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "size": MessageLookupByLibrary.simpleMessage("Размер"),
     "slide": MessageLookupByLibrary.simpleMessage("Сдвиг"),
     "socksPort": MessageLookupByLibrary.simpleMessage("Socks-порт"),
-    "softwareCenter": MessageLookupByLibrary.simpleMessage("Центр ПО"),
     "soldOut": MessageLookupByLibrary.simpleMessage("Распродано"),
     "sort": MessageLookupByLibrary.simpleMessage("Сортировка"),
     "source": MessageLookupByLibrary.simpleMessage("Источник"),
@@ -2954,6 +2950,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "userCenter": MessageLookupByLibrary.simpleMessage("Центр пользователя"),
     "userCenterFallback": MessageLookupByLibrary.simpleMessage(
       "Центр пользователя (резервный)",
+    ),
+    "userGuide": MessageLookupByLibrary.simpleMessage(
+      "Руководство пользователя",
     ),
     "value": MessageLookupByLibrary.simpleMessage("Значение"),
     "verifyCoupon": MessageLookupByLibrary.simpleMessage("Проверить"),

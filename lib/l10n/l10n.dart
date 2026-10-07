@@ -4040,24 +4040,9 @@ class AppLocalizations {
     );
   }
 
-  /// `Software Center`
-  String get softwareCenter {
-    return Intl.message(
-      'Software Center',
-      name: 'softwareCenter',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Document Center`
-  String get documentCenter {
-    return Intl.message(
-      'Document Center',
-      name: 'documentCenter',
-      desc: '',
-      args: [],
-    );
+  /// `User Guide`
+  String get userGuide {
+    return Intl.message('User Guide', name: 'userGuide', desc: '', args: []);
   }
 
   /// `oixCloud`

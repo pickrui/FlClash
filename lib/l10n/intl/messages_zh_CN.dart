@@ -858,7 +858,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "dnsQueryUpstream": MessageLookupByLibrary.simpleMessage("上游解析器"),
     "doYouWantToPass": MessageLookupByLibrary.simpleMessage("是否要通过"),
     "docked": MessageLookupByLibrary.simpleMessage("固定"),
-    "documentCenter": MessageLookupByLibrary.simpleMessage("文档中心"),
     "domain": MessageLookupByLibrary.simpleMessage("域名"),
     "download": MessageLookupByLibrary.simpleMessage("下载"),
     "dynamicMembersHint": MessageLookupByLibrary.simpleMessage(
@@ -1788,7 +1787,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "size": MessageLookupByLibrary.simpleMessage("尺寸"),
     "slide": MessageLookupByLibrary.simpleMessage("滑动"),
     "socksPort": MessageLookupByLibrary.simpleMessage("Socks端口"),
-    "softwareCenter": MessageLookupByLibrary.simpleMessage("软件中心"),
     "soldOut": MessageLookupByLibrary.simpleMessage("已售罄"),
     "sort": MessageLookupByLibrary.simpleMessage("排序"),
     "source": MessageLookupByLibrary.simpleMessage("来源"),
@@ -2061,6 +2059,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("已用流量"),
     "userCenter": MessageLookupByLibrary.simpleMessage("用户中心"),
     "userCenterFallback": MessageLookupByLibrary.simpleMessage("用户中心（备用）"),
+    "userGuide": MessageLookupByLibrary.simpleMessage("用户指南"),
     "value": MessageLookupByLibrary.simpleMessage("值"),
     "verifyCoupon": MessageLookupByLibrary.simpleMessage("验证"),
     "vibrantScheme": MessageLookupByLibrary.simpleMessage("活力"),

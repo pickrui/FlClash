@@ -1157,7 +1157,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Do you want to pass",
     ),
     "docked": MessageLookupByLibrary.simpleMessage("Docked"),
-    "documentCenter": MessageLookupByLibrary.simpleMessage("Document Center"),
     "domain": MessageLookupByLibrary.simpleMessage("Domain"),
     "download": MessageLookupByLibrary.simpleMessage("Download"),
     "dynamicMembersHint": MessageLookupByLibrary.simpleMessage(
@@ -2431,7 +2430,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "size": MessageLookupByLibrary.simpleMessage("Size"),
     "slide": MessageLookupByLibrary.simpleMessage("Slide"),
     "socksPort": MessageLookupByLibrary.simpleMessage("Socks Port"),
-    "softwareCenter": MessageLookupByLibrary.simpleMessage("Software Center"),
     "soldOut": MessageLookupByLibrary.simpleMessage("Sold out"),
     "sort": MessageLookupByLibrary.simpleMessage("Sort"),
     "source": MessageLookupByLibrary.simpleMessage("Source"),
@@ -2800,6 +2798,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "userCenterFallback": MessageLookupByLibrary.simpleMessage(
       "User Center (Backup)",
     ),
+    "userGuide": MessageLookupByLibrary.simpleMessage("User Guide"),
     "value": MessageLookupByLibrary.simpleMessage("Value"),
     "verifyCoupon": MessageLookupByLibrary.simpleMessage("Verify"),
     "vibrantScheme": MessageLookupByLibrary.simpleMessage("Vibrant"),
