@@ -11,26 +11,107 @@ import 'dart:typed_data';
 /// Retains the raw TCP socket through TLS negotiation. SecureSocket.secure()
 /// detaches its input Socket, whose destroy() then cannot cancel the handshake.
 Future<ConnectionTask<Socket>> startTlsConnection(
-  InternetAddress address,
+  Object address,
   int port, {
   required String host,
   SecurityContext? context,
   bool Function(X509Certificate)? onBadCertificate,
+  void Function(String)? keyLog,
 }) async {
   final tcp = await RawSocket.startConnect(address, port);
+  return _secureRawConnection(
+    tcp.socket,
+    cancelConnect: tcp.cancel,
+    host: host,
+    context: context,
+    onBadCertificate: onBadCertificate,
+    keyLog: keyLog,
+  );
+}
+
+Future<ConnectionTask<Socket>> startPlainConnection(
+  Object host,
+  int port,
+) async {
+  final tcp = await RawSocket.startConnect(host, port);
+  Socket? connected;
+  var canceled = false;
+  return ConnectionTask.fromSocket(
+    tcp.socket.then((raw) {
+      if (canceled) {
+        unawaited(raw.close());
+        throw const SocketException('Connection attempt cancelled');
+      }
+      return connected = _StreamSocket(raw);
+    }),
+    () {
+      canceled = true;
+      tcp.cancel();
+      connected?.destroy();
+    },
+  );
+}
+
+Future<ConnectionTask<Socket>> secureConnection(
+  Socket socket, {
+  required String host,
+  SecurityContext? context,
+  bool Function(X509Certificate)? onBadCertificate,
+  void Function(String)? keyLog,
+}) async {
+  if (socket is! _StreamSocket) {
+    return ConnectionTask.fromSocket(
+      SecureSocket.secure(
+        socket,
+        host: host,
+        context: context,
+        onBadCertificate: onBadCertificate,
+        keyLog: keyLog,
+      ),
+      socket.destroy,
+    );
+  }
+  await socket.flush();
+  if (socket._destroyed) throw const SocketException('Connection closed');
+  socket._handedOff = true;
+  socket._raw.readEventsEnabled = false;
+  socket._raw.writeEventsEnabled = false;
+  unawaited(socket._incoming.close());
+  return _secureRawConnection(
+    Future.value(socket._raw),
+    cancelConnect: () {},
+    subscription: socket._subscription,
+    host: host,
+    context: context,
+    onBadCertificate: onBadCertificate,
+    keyLog: keyLog,
+  );
+}
+
+ConnectionTask<Socket> _secureRawConnection(
+  Future<RawSocket> connection, {
+  required void Function() cancelConnect,
+  required String host,
+  StreamSubscription<RawSocketEvent>? subscription,
+  SecurityContext? context,
+  bool Function(X509Certificate)? onBadCertificate,
+  void Function(String)? keyLog,
+}) {
   RawSocket? raw;
   Socket? secured;
   var canceled = false;
   final result = Completer<Socket>();
   final future = () async {
     try {
-      final socket = raw = await tcp.socket;
+      final socket = raw = await connection;
       if (canceled) throw const SocketException('Connection attempt cancelled');
       final tls = await RawSecureSocket.secure(
         socket,
+        subscription: subscription,
         host: host,
         context: context,
         onBadCertificate: onBadCertificate,
+        keyLog: keyLog,
       );
       if (canceled) {
         await tls.close();
@@ -65,7 +146,7 @@ Future<ConnectionTask<Socket>> startTlsConnection(
         const SocketException('Connection attempt cancelled'),
       );
     }
-    tcp.cancel();
+    cancelConnect();
     if (secured case final socket?) {
       socket.destroy();
     } else {
@@ -74,39 +155,45 @@ Future<ConnectionTask<Socket>> startTlsConnection(
   });
 }
 
-/// Stream/IOSink facade over public RawSecureSocket APIs for HttpClient.
+/// Stream/IOSink facade over public RawSocket APIs for HttpClient.
 /// Reading honors subscription pauses; writing waits for raw buffer space.
-class _TlsSocket extends Stream<Uint8List> implements SecureSocket {
-  _TlsSocket(this._raw) {
+class _StreamSocket extends Stream<Uint8List> implements Socket {
+  _StreamSocket(this._raw) {
     _raw.readEventsEnabled = false;
     _raw.writeEventsEnabled = false;
     _incoming = StreamController<Uint8List>(
       sync: true,
-      onListen: () => _raw.readEventsEnabled = !_destroyed,
-      onPause: () => _raw.readEventsEnabled = false,
-      onResume: () => _raw.readEventsEnabled = !_destroyed,
+      onListen: () => _setReadEvents(true),
+      onPause: () => _setReadEvents(false),
+      onResume: () => _setReadEvents(true),
       onCancel: destroy,
     );
-    _consumer = _TlsConsumer(this);
+    _consumer = _SocketConsumer(this);
     _sink = IOSink(_consumer);
     // Errors remain observable on done; an idle sink must not emit an
     // unhandled error merely because the peer closed the transport.
     unawaited(
       _sink.done.then<void>((_) {}, onError: (Object _, StackTrace _) {}),
     );
-    _raw.listen(_onEvent, onError: _onError, onDone: destroy);
+    _subscription = _raw.listen(_onEvent, onError: _onError, onDone: destroy);
   }
 
-  final RawSecureSocket _raw;
+  final RawSocket _raw;
+  late final StreamSubscription<RawSocketEvent> _subscription;
   late final StreamController<Uint8List> _incoming;
   late final IOSink _sink;
-  late final _TlsConsumer _consumer;
+  late final _SocketConsumer _consumer;
   Future<void>? _binding;
   Completer<void>? _writable;
   bool _destroyed = false;
+  bool _handedOff = false;
+
+  void _setReadEvents(bool enabled) {
+    if (!_handedOff && !_destroyed) _raw.readEventsEnabled = enabled;
+  }
 
   void _onEvent(RawSocketEvent event) {
-    if (_destroyed) return;
+    if (_destroyed || _handedOff) return;
     if (event == RawSocketEvent.read) {
       final bytes = _raw.read();
       if (bytes != null && !_incoming.isClosed) _incoming.add(bytes);
@@ -129,7 +216,9 @@ class _TlsSocket extends Stream<Uint8List> implements SecureSocket {
   Future<void> _write(List<int> bytes) async {
     var offset = 0;
     while (offset < bytes.length) {
-      if (_destroyed) throw const SocketException('Connection closed');
+      if (_destroyed || _handedOff) {
+        throw const SocketException('Connection closed');
+      }
       final written = _raw.write(bytes, offset, bytes.length - offset);
       offset += written;
       if (offset < bytes.length) {
@@ -142,7 +231,7 @@ class _TlsSocket extends Stream<Uint8List> implements SecureSocket {
 
   @override
   void destroy() {
-    if (_destroyed) return;
+    if (_destroyed || _handedOff) return;
     _destroyed = true;
     // Wake a blocked writer; it observes _destroyed before its next write.
     _writable?.complete();
@@ -223,10 +312,17 @@ class _TlsSocket extends Stream<Uint8List> implements SecureSocket {
   Uint8List getRawOption(RawSocketOption option) => _raw.getRawOption(option);
   @override
   void setRawOption(RawSocketOption option) => _raw.setRawOption(option);
+}
+
+class _TlsSocket extends _StreamSocket implements SecureSocket {
+  _TlsSocket(RawSecureSocket super.raw);
+
+  RawSecureSocket get _tls => _raw as RawSecureSocket;
+
   @override
-  X509Certificate? get peerCertificate => _raw.peerCertificate;
+  X509Certificate? get peerCertificate => _tls.peerCertificate;
   @override
-  String? get selectedProtocol => _raw.selectedProtocol;
+  String? get selectedProtocol => _tls.selectedProtocol;
   @override
   void renegotiate({
     bool useSessionCache = true,
@@ -235,9 +331,9 @@ class _TlsSocket extends Stream<Uint8List> implements SecureSocket {
   }) {}
 }
 
-class _TlsConsumer implements StreamConsumer<List<int>> {
-  _TlsConsumer(this.socket);
-  final _TlsSocket socket;
+class _SocketConsumer implements StreamConsumer<List<int>> {
+  _SocketConsumer(this.socket);
+  final _StreamSocket socket;
   StreamIterator<List<int>>? _input;
 
   void stop() {
@@ -259,6 +355,8 @@ class _TlsConsumer implements StreamConsumer<List<int>> {
 
   @override
   Future<void> close() async {
-    if (!socket._destroyed) socket._raw.shutdown(SocketDirection.send);
+    if (!socket._destroyed && !socket._handedOff) {
+      socket._raw.shutdown(SocketDirection.send);
+    }
   }
 }

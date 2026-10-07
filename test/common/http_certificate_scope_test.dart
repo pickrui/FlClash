@@ -303,6 +303,77 @@ void main() {
     });
     await rejected(uri, using: resolved);
   });
+  for (final resolved in [false, true]) {
+    for (final cancel in [false, true]) {
+      test('unfinished tunneled TLS closes (resolver=$resolved, cancel=$cancel)', () async {
+        final stalled = await ServerSocket.bind(
+          InternetAddress.loopbackIPv4,
+          0,
+        );
+        final received = Completer<void>();
+        final closed = Completer<void>();
+        Socket? accepted;
+        stalled.listen((socket) {
+          accepted = socket;
+          socket.listen(
+            (_) {
+              if (!received.isCompleted) received.complete();
+            },
+            onDone: () {
+              if (!closed.isCompleted) closed.complete();
+            },
+            onError: (Object _) {},
+          );
+        });
+        addTearDown(() async {
+          accepted?.destroy();
+          await stalled.close();
+        });
+        final proxy = await connectProxy(
+          fallbackPort: stalled.port,
+          destination: (_, _) => stalled.port,
+        );
+        final tunneled = Dio()
+          ..httpClientAdapter = createFlClashHttpClientAdapter(
+            findProxy: (_) => 'PROXY localhost:${proxy.port}',
+            allowCertificateRetry: true,
+            resolver: resolved
+                ? HostResolver(
+                    lookup: (_, {type = InternetAddressType.any}) async {
+                      fail(
+                        'The proxy destination must not use a local DNS lookup',
+                      );
+                    },
+                  )
+                : null,
+            proxyTargets: (uri) => [uri.replace(host: '1.1.1.1')],
+          );
+        addTearDown(() => tunneled.close(force: true));
+        final token = CancelToken();
+        final response = expectLater(
+          tunneled.get<String>('https://example.invalid/', cancelToken: token),
+          throwsA(
+            cancel
+                ? isA<DioException>().having(
+                    (error) => error.type,
+                    'type',
+                    DioExceptionType.cancel,
+                  )
+                : isA<DioException>(),
+          ),
+        );
+        await received.future.timeout(const Duration(seconds: 2));
+        if (cancel) {
+          token.cancel();
+        } else {
+          tunneled.close(force: true);
+        }
+        await response;
+        await closed.future.timeout(const Duration(seconds: 2));
+      });
+    }
+  }
+
   test('authenticated CONNECT preserves the scoped TLS decision', () async {
     var connects = 0;
     final proxy = await connectProxy(

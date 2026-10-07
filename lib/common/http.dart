@@ -314,8 +314,11 @@ Future<ConnectionTask<Socket>> connectWithResolver(
   bool Function(X509Certificate, String, int)? onBadCertificate,
 }) async {
   if (proxyHost != null) {
-    // Never fall through to a direct connection for a proxied request.
-    return Socket.startConnect(proxyHost, proxyPort!);
+    // Dart's HTTPS proxy path requires a native Socket for its private TLS
+    // upgrade. Our explicit CONNECT uses HTTP and retains raw ownership instead.
+    return uri.scheme == 'https'
+        ? Socket.startConnect(proxyHost, proxyPort!)
+        : startPlainConnection(proxyHost, proxyPort!);
   }
   final secure = uri.isScheme('https');
   final port = uri.hasPort ? uri.port : (secure ? 443 : 80);

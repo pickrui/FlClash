@@ -9,6 +9,8 @@ import 'dart:math';
 
 import 'package:fl_clash/models/config.dart';
 
+import 'tls_connection.dart';
+
 typedef ProxyAuthenticationState = ({
   int port,
   AuthenticationProps authentication,
@@ -181,7 +183,22 @@ class ProxyAuthenticatedHttpClient implements HttpClient {
               if (route == 'DIRECT') {
                 directTask =
                     await (_connectionFactory?.call(uri, null, null) ??
-                        Socket.startConnect(uri.host, uri.port));
+                        (uri.scheme == 'https'
+                            ? startTlsConnection(
+                                uri.host,
+                                uri.port,
+                                host: uri.host,
+                                context: _securityContext,
+                                keyLog: _keyLog,
+                                onBadCertificate: (certificate) =>
+                                    _badCertificateCallback?.call(
+                                      certificate,
+                                      uri.host,
+                                      uri.port,
+                                    ) ??
+                                    false,
+                              )
+                            : Socket.startConnect(uri.host, uri.port)));
                 if (canceled || _closed) directTask!.cancel();
                 connected = await directTask!.socket;
               } else if (route.startsWith('PROXY ')) {
@@ -199,7 +216,7 @@ class ProxyAuthenticatedHttpClient implements HttpClient {
                       final factory = _connectionFactory;
                       directTask =
                           await (factory?.call(target, proxyHost, proxyPort) ??
-                              Socket.startConnect(
+                              startPlainConnection(
                                 proxyHost ?? target.host,
                                 proxyPort ?? target.port,
                               ));
@@ -244,9 +261,7 @@ class ProxyAuthenticatedHttpClient implements HttpClient {
                   );
                 }
                 final detached = await response.detachSocket();
-                // HttpClient's DetachedSocket wrapper cannot be upgraded by
-                // SecureSocket.secure. Retain the native socket from our factory;
-                // detachSocket has already released the HTTP parser's ownership.
+                // The detached HTTP wrapper cannot expose raw ownership for TLS cancellation.
                 connected = uri.scheme == 'https' ? tunnelSocket! : detached;
               } else {
                 throw const HttpException('Unsupported proxy configuration');
@@ -257,7 +272,7 @@ class ProxyAuthenticatedHttpClient implements HttpClient {
               }
               if (uri.scheme == 'https' && connected is! SecureSocket) {
                 final certificateCallback = _badCertificateCallback;
-                connected = await SecureSocket.secure(
+                directTask = await secureConnection(
                   connected!,
                   host: uri.host,
                   context: _securityContext,
@@ -270,6 +285,12 @@ class ProxyAuthenticatedHttpClient implements HttpClient {
                       ) ??
                       false,
                 );
+                if (canceled || _closed) directTask!.cancel();
+                connected = await directTask!.socket;
+              }
+              if (canceled || _closed) {
+                connected?.destroy();
+                throw const HttpException('Connection canceled');
               }
               return connected!;
             } on SocketException catch (error) {

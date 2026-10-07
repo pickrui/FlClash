@@ -7,8 +7,11 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:fl_clash/common/proxy_auth.dart';
 import 'package:fl_clash/common/tls_connection.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../helpers/connect_proxy.dart';
 
 void main() {
   late HttpServer server;
@@ -27,55 +30,76 @@ void main() {
   });
   tearDown(() => server.close(force: true));
 
-  test('trusted HTTPS streams large bodies and preserves the domain', () async {
-    final hosts = <String?>[];
-    final clients = <int>{};
-    server.listen((request) async {
-      hosts.add(request.headers.value(HttpHeaders.hostHeader));
-      clients.add(request.connectionInfo!.remotePort);
-      request.response.headers.contentType = ContentType.binary;
-      request.response.contentLength = request.contentLength;
-      final body = BytesBuilder(copy: false);
-      await for (final chunk in request) {
-        body.add(chunk);
-      }
-      request.response.add(body.takeBytes());
-      await request.response.close();
-    });
-    final client = HttpClient()
-      ..connectionFactory = (uri, _, _) => startTlsConnection(
-        InternetAddress.loopbackIPv4,
-        server.port,
-        host: uri.host,
-        context: trust,
-      );
-    addTearDown(() => client.close(force: true));
-    final payload = Uint8List.fromList(
-      List.generate(2 * 1024 * 1024, (i) => i % 251),
+  for (final tunneled in [false, true]) {
+    test(
+      'trusted HTTPS streams and reuses connections (tunneled=$tunneled)',
+      () async {
+        final hosts = <String?>[];
+        final clients = <int>{};
+        server.listen((request) async {
+          hosts.add(request.headers.value(HttpHeaders.hostHeader));
+          clients.add(request.connectionInfo!.remotePort);
+          request.response.headers.contentType = ContentType.binary;
+          request.response.contentLength = request.contentLength;
+          final body = BytesBuilder(copy: false);
+          await for (final chunk in request) {
+            body.add(chunk);
+          }
+          request.response.add(body.takeBytes());
+          await request.response.close();
+        });
+        final proxy = tunneled
+            ? await connectProxy(
+                fallbackPort: server.port,
+                destination: (_, _) => server.port,
+              )
+            : null;
+        final HttpClient client;
+        if (proxy != null) {
+          client = ProxyAuthenticatedHttpClient(
+            create: () => HttpClient(context: trust),
+            read: () => null,
+            securityContext: trust,
+            tunnelTargets: (uri) => [uri],
+          )..findProxy = (_) => 'PROXY localhost:${proxy.port}';
+        } else {
+          client = HttpClient()
+            ..connectionFactory = (uri, _, _) => startTlsConnection(
+              InternetAddress.loopbackIPv4,
+              server.port,
+              host: uri.host,
+              context: trust,
+            );
+        }
+        addTearDown(() => client.close(force: true));
+        final payload = Uint8List.fromList(
+          List.generate(2 * 1024 * 1024, (i) => i % 251),
+        );
+        for (var i = 0; i < 2; i++) {
+          final request = await client.postUrl(
+            Uri.parse('https://api.test:${server.port}/echo'),
+          );
+          request.contentLength = payload.length;
+          request.add(payload);
+          final response = await request.close();
+          expect(response.certificate, isNotNull);
+          final received = BytesBuilder(copy: false);
+          await for (final chunk in response) {
+            received.add(chunk);
+          }
+          expect(received.takeBytes(), payload);
+          // HttpClient returns a drained connection to its pool asynchronously.
+          await pumpEventQueue();
+        }
+        expect(hosts, List.filled(2, 'api.test:${server.port}'));
+        expect(
+          clients,
+          hasLength(1),
+          reason: 'completed responses keep the TLS connection reusable',
+        );
+      },
     );
-    for (var i = 0; i < 2; i++) {
-      final request = await client.postUrl(
-        Uri.parse('https://api.test:${server.port}/echo'),
-      );
-      request.contentLength = payload.length;
-      request.add(payload);
-      final response = await request.close();
-      expect(response.certificate, isNotNull);
-      final received = BytesBuilder(copy: false);
-      await for (final chunk in response) {
-        received.add(chunk);
-      }
-      expect(received.takeBytes(), payload);
-      // HttpClient returns a drained connection to its pool asynchronously.
-      await pumpEventQueue();
-    }
-    expect(hosts, List.filled(2, 'api.test:${server.port}'));
-    expect(
-      clients,
-      hasLength(1),
-      reason: 'completed responses keep the TLS connection reusable',
-    );
-  });
+  }
 
   test('a trusted certificate still rejects the wrong domain', () async {
     server.listen((request) async {
