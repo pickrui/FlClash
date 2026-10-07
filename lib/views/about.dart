@@ -41,9 +41,10 @@ class _AboutViewState extends State<AboutView> {
     required String title,
     required String domain,
     required String path,
+    Glyph glyph = AppGlyphs.link,
   }) {
     return ListItem(
-      leading: const _LinkBadge(glyph: AppGlyphs.link),
+      leading: _LinkBadge(glyph: glyph),
       title: Text(title),
       onTap: () {
         globalState.openUrl('https://$domain$path');
@@ -59,14 +60,13 @@ class _AboutViewState extends State<AboutView> {
       generateSectionV3(
         title: appLocalizations.more,
         items: [
-          ListItem(
-            leading: const _LinkBadge(glyph: AppGlyphs.info),
-            title: Text(appLocalizations.userGuide),
-            onTap: () {
-              globalState.openUrl('https://oixcloud.com/guide');
-            },
-            trailing: const GlyphIcon(AppGlyphs.openExternal),
-          ),
+          if (baseDomain.isNotEmpty)
+            _siteLinkItem(
+              title: appLocalizations.userGuide,
+              domain: baseDomain,
+              path: '/guide',
+              glyph: AppGlyphs.info,
+            ),
           if (baseDomain.isNotEmpty)
             _siteLinkItem(
               title: appLocalizations.userCenter,
