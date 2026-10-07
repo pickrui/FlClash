@@ -82,6 +82,8 @@ void main() {
         ),
       );
       var attempts = 0;
+      final saved = Completer<void>();
+      String? pendingContent;
       unawaited(
         BaseNavigator.push<void>(
           home,
@@ -89,7 +91,8 @@ void main() {
             provider: _providers.first.copyWith(path: file.path),
             save: (content) async {
               if (++attempts == 1) throw 'fixture save failed';
-              await file.writeAsString(content);
+              pendingContent = content;
+              await saved.future;
             },
           ),
         ),
@@ -116,8 +119,12 @@ void main() {
       await settle(tester);
       expect(find.byType(EditorPage), findsOneWidget);
       await tester.tap(find.byTooltip(AppLocalizations.current.save));
-      await settle(tester);
       expect(attempts, 2);
+      await tester.pump();
+      expect(find.byType(EditorPage), findsOneWidget);
+      expect(action.groupRefreshes, 0);
+      await tester.runAsync(() => file.writeAsString(pendingContent!));
+      saved.complete();
       await tester.pumpAndSettle();
       expect(find.byType(EditorPage), findsNothing);
       expect(

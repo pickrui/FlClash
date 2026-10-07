@@ -356,10 +356,18 @@ void main() {
       ),
       isNull,
     );
-    // An ABI with a single package never asks.
     expect(
       resolveLinuxUpdateFormat(
         published: linuxPackageFormatsFor(Abi.linuxArm64),
+        detected: null,
+        stored: LinuxPackageFormat.rpm,
+      ),
+      LinuxPackageFormat.rpm,
+    );
+    // A build with a single package never asks.
+    expect(
+      resolveLinuxUpdateFormat(
+        published: const [LinuxPackageFormat.deb],
         detected: null,
         stored: LinuxPackageFormat.rpm,
       ),
