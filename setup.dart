@@ -335,12 +335,10 @@ class BuildCommand extends Command {
       'libjsoncpp-dev',
       'libglib2.0-dev',
       'locate',
+      if (targets.contains('rpm')) 'rpm',
+      if (targets.contains('rpm') || targets.contains('appimage')) 'patchelf',
     ]);
-    if (targets.contains('rpm')) {
-      await Build.exec(['sudo', 'apt-get', 'install', '-y', 'rpm']);
-    }
     if (targets.contains('appimage')) {
-      await Build.exec(['sudo', 'apt-get', 'install', '-y', 'patchelf']);
       await _installAppImageTool(arch);
     }
   }
