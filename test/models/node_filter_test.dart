@@ -207,9 +207,9 @@ void main() {
 
   test('Chinese and Japanese node filter copy ends without 。', () {
     for (final locale in ['zh_CN', 'ja']) {
-      final arb =
-          jsonDecode(File('arb/intl_$locale.arb').readAsStringSync())
-              as Map<String, dynamic>;
+      final arb = jsonDecode(
+        File('arb/intl_$locale.arb').readAsStringSync(),
+      ) as Map<String, dynamic>;
       final copy = arb.entries.where(
         (entry) => entry.key.startsWith('nodeFilter'),
       );

@@ -11,8 +11,10 @@ import 'package:fl_clash/enum/enum.dart';
 
 import 'helper_client.dart';
 
-typedef LinuxHelperReadinessProbe =
-    Future<HelperReadiness> Function(Duration? timeout, bool logFailure);
+typedef LinuxHelperReadinessProbe = Future<HelperReadiness> Function(
+  Duration? timeout,
+  bool logFailure,
+);
 
 class LinuxHelperInstaller {
   LinuxHelperInstaller({

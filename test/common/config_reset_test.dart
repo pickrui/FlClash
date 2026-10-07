@@ -48,109 +48,94 @@ void main() {
     );
   }
 
-  Future<Map<String, dynamic>> readJournal() async =>
-      jsonDecode(
-            utf8.decode(
-              await backup.decrypt(
-                await File(p.join(home, ConfigReset.journalName)).readAsBytes(),
-              ),
-            ),
-          )
-          as Map<String, dynamic>;
+  Future<Map<String, dynamic>> readJournal() async => jsonDecode(
+    utf8.decode(
+      await backup.decrypt(
+        await File(p.join(home, ConfigReset.journalName)).readAsBytes(),
+      ),
+    ),
+  ) as Map<String, dynamic>;
   Future<String> prepare(List<String> names) async {
-    final location = await Directory(
-      directory.path,
-    ).createTemp('clash.recovery-');
+    final location = await Directory(directory.path)
+        .createTemp('clash.recovery-');
     await backup.create(home, names, location.path);
     await journal(p.basename(location.path), names);
     return location.path;
   }
 
-  test(
-    'encrypts all original data and names before reset while preserving the held lock',
-    () async {
-      final values = {
-        'config.age': 'encrypted config',
-        'flutter_secure_storage.dat': 'protected seed',
-        'shared_preferences.json': 'https://dns.example.invalid/dns-query',
-        'database.sqlite': 'private-node.example.invalid',
-        'database.sqlite-wal': 'wal',
-        p.join('profiles', 'private-node.yaml'): 'node-password-test',
-      };
+  test('encrypts all original data and names before reset while preserving the held lock', () async {
+    final values = {
+      'config.age': 'encrypted config',
+      'flutter_secure_storage.dat': 'protected seed',
+      'shared_preferences.json': 'https://dns.example.invalid/dns-query',
+      'database.sqlite': 'private-node.example.invalid',
+      'database.sqlite-wal': 'wal',
+      p.join('profiles', 'private-node.yaml'): 'node-password-test',
+    };
+    for (final entry in values.entries) {
+      final file = File(p.join(home, entry.key));
+      await file.parent.create(recursive: true);
+      await file.writeAsString(entry.value);
+    }
+    final heldLock = await File(p.join(home, 'FlClash.lock'))
+        .open(mode: FileMode.append);
+    await heldLock.lock(FileLock.exclusive);
+    try {
+      final operation = reset.backupAndReset();
+      expect(identical(reset.backupAndReset(), operation), isTrue);
+      final location = await operation;
+      final records = await backup.verify(location);
       for (final entry in values.entries) {
-        final file = File(p.join(home, entry.key));
-        await file.parent.create(recursive: true);
-        await file.writeAsString(entry.value);
+        final record = records.singleWhere((r) => r['path'] == entry.key);
+        final bytes = await backup
+            .readFile(location, record['stored'] as String)
+            .expand((b) => b)
+            .toList();
+        expect(utf8.decode(bytes), entry.value);
+        expect(await File(p.join(home, entry.key)).exists(), isFalse);
       }
-      final heldLock = await File(
-        p.join(home, 'FlClash.lock'),
-      ).open(mode: FileMode.append);
-      await heldLock.lock(FileLock.exclusive);
-      try {
-        final operation = reset.backupAndReset();
-        expect(identical(reset.backupAndReset(), operation), isTrue);
-        final location = await operation;
-        final records = await backup.verify(location);
-        for (final entry in values.entries) {
-          final record = records.singleWhere((r) => r['path'] == entry.key);
-          final bytes = await backup
-              .readFile(location, record['stored'] as String)
-              .expand((b) => b)
-              .toList();
-          expect(utf8.decode(bytes), entry.value);
-          expect(await File(p.join(home, entry.key)).exists(), isFalse);
+      await for (final file in Directory(location).list(recursive: true)) {
+        expect(file, isA<File>());
+        final bytes = await File(file.path).readAsBytes();
+        final text = utf8.decode(bytes, allowMalformed: true);
+        for (final secret in [...values.keys, ...values.values]) {
+          // Tiny fixtures such as 'wal' can occur by chance in ciphertext.
+          if (secret.length < 12) continue;
+          expect(text, isNot(contains(secret)));
+          expect(p.basename(file.path), isNot(contains(secret)));
         }
-        await for (final file in Directory(location).list(recursive: true)) {
-          expect(file, isA<File>());
-          final bytes = await File(file.path).readAsBytes();
-          final text = utf8.decode(bytes, allowMalformed: true);
-          for (final secret in [...values.keys, ...values.values]) {
-            // Tiny fixtures such as 'wal' can occur by chance in ciphertext.
-            if (secret.length < 12) continue;
-            expect(text, isNot(contains(secret)));
-            expect(p.basename(file.path), isNot(contains(secret)));
-          }
-        }
-        expect(await File(p.join(home, 'FlClash.lock')).exists(), isTrue);
-        // Windows enforces the held byte-range lock even against a second
-        // handle in this process. Read through the owning handle instead.
-        await heldLock.setPosition(0);
-        expect(
-          utf8.decode(await heldLock.read(await heldLock.length())),
-          'lock',
-        );
-        expect((await readJournal())['complete'], isTrue);
-        final rawJournal = await File(
-          p.join(home, ConfigReset.journalName),
-        ).readAsBytes();
-        expect(
-          utf8.decode(rawJournal, allowMalformed: true),
-          isNot(contains('shared_preferences.json')),
-        );
-      } finally {
-        await heldLock.close();
       }
-    },
-  );
-
-  test(
-    'an interrupted reset verifies the encrypted backup before deleting remaining originals',
-    () async {
-      await File(p.join(home, 'config.age')).writeAsString('config');
-      await File(
-        p.join(home, 'shared_preferences.json'),
-      ).writeAsString('preferences');
-      final location = await prepare(['config.age', 'shared_preferences.json']);
-      await File(p.join(home, 'config.age')).delete();
-      await reset.resumePending();
-      expect(
-        await File(p.join(home, 'shared_preferences.json')).exists(),
-        isFalse,
-      );
-      expect(await backup.verify(location), hasLength(2));
+      expect(await File(p.join(home, 'FlClash.lock')).exists(), isTrue);
+      // Windows enforces the held byte-range lock even against a second
+      // handle in this process. Read through the owning handle instead.
+      await heldLock.setPosition(0);
+      expect(utf8.decode(await heldLock.read(await heldLock.length())), 'lock');
       expect((await readJournal())['complete'], isTrue);
-    },
-  );
+      final rawJournal = await File(p.join(home, ConfigReset.journalName))
+          .readAsBytes();
+      expect(
+        utf8.decode(rawJournal, allowMalformed: true),
+        isNot(contains('shared_preferences.json')),
+      );
+    } finally {
+      await heldLock.close();
+    }
+  });
+
+  test('an interrupted reset verifies the encrypted backup before deleting remaining originals', () async {
+    await File(p.join(home, 'config.age')).writeAsString('config');
+    await File(p.join(home, 'shared_preferences.json'))
+        .writeAsString('preferences');
+    final location = await prepare(['config.age', 'shared_preferences.json']);
+    await File(p.join(home, 'config.age')).delete();
+    await reset.resumePending();
+    expect(
+      await File(p.join(home, 'shared_preferences.json')).exists(),
+      isFalse,
+    );
+    expect(await backup.verify(location), hasLength(2));
+    expect((await readJournal())['complete'], isTrue);
+  });
 
   test(
     'completed reset never removes new configuration on next launch',
@@ -222,9 +207,8 @@ void main() {
         throwsA(isA<FileSystemException>()),
       );
       await file.writeAsString('original');
-      await File(
-        p.join(home, 'profiles', 'new.yaml'),
-      ).writeAsString('new entry');
+      await File(p.join(home, 'profiles', 'new.yaml'))
+          .writeAsString('new entry');
       await expectLater(
         reset.resumePending(),
         throwsA(isA<FileSystemException>()),
@@ -253,9 +237,8 @@ void main() {
   test(
     'Windows reset verifies its native DPAPI backup before deleting data',
     () async {
-      await File(
-        p.join(home, 'config.yaml'),
-      ).writeAsString('private DNS and node data');
+      await File(p.join(home, 'config.yaml'))
+          .writeAsString('private DNS and node data');
       final location = await ConfigReset(home).backupAndReset();
       expect(await ConfigBackup().verify(location), hasLength(1));
       expect(await File(p.join(home, 'config.yaml')).exists(), isFalse);

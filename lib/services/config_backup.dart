@@ -41,9 +41,9 @@ class ConfigBackup {
       records.add(record);
       if (type == FileSystemEntityType.directory) {
         record['type'] = 'directory';
-        final children = await Directory(
-          source,
-        ).list(followLinks: false).toList();
+        final children = await Directory(source)
+            .list(followLinks: false)
+            .toList();
         children.sort((a, b) => a.path.compareTo(b.path));
         for (final child in children) {
           await visit(p.join(relative, p.basename(child.path)));
@@ -58,9 +58,8 @@ class ConfigBackup {
         final digest = _DigestSink();
         final hash = sha256.startChunkedConversion(digest);
         var length = 0;
-        final output = await File(
-          p.join(backupPath, stored),
-        ).open(mode: FileMode.write);
+        final output = await File(p.join(backupPath, stored))
+            .open(mode: FileMode.write);
         try {
           await for (final plain in _readChunks(source)) {
             length += plain.length;
@@ -90,18 +89,16 @@ class ConfigBackup {
     final manifest = utf8.encode(
       jsonEncode({'version': 1, 'records': records}),
     );
-    await File(
-      p.join(backupPath, manifestName),
-    ).writeAsBytes(await encrypt(manifest), flush: true);
+    await File(p.join(backupPath, manifestName))
+        .writeAsBytes(await encrypt(manifest), flush: true);
     // Verify ciphertext and still-current source data before reset is permitted.
     final verified = await verify(backupPath);
     await verifySources(sourcePath, verified);
   }
 
   Future<List<Map<String, dynamic>>> verify(String backupPath) async {
-    final encrypted = await File(
-      p.join(backupPath, manifestName),
-    ).readAsBytes();
+    final encrypted = await File(p.join(backupPath, manifestName))
+        .readAsBytes();
     final Object? data;
     try {
       data = jsonDecode(utf8.decode(await decrypt(encrypted)));
@@ -224,9 +221,9 @@ class ConfigBackup {
         }
       } else if (type == FileSystemEntityType.directory &&
           record['type'] == 'directory') {
-        final children = await Directory(
-          source,
-        ).list(followLinks: false).toList();
+        final children = await Directory(source)
+            .list(followLinks: false)
+            .toList();
         if (children.every(
           (child) =>
               expected.containsKey(p.relative(child.path, from: homePath)),

@@ -5,7 +5,9 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
+
 import '../../setup.dart' as setup;
 
 void main() {
@@ -33,22 +35,27 @@ void main() {
     },
   );
 
-  test('build commands preserve paths and arguments containing spaces', () async {
-    final temp = Directory.systemTemp.createTempSync('flclash setup fixture ');
-    addTearDown(() => temp.deleteSync(recursive: true));
-    final output = File('${temp.path}/received args.txt');
-    final script = File('${temp.path}/echo args.dart')
-      ..writeAsStringSync(
-        "import 'dart:io'; void main(List<String> args) { File(args[0]).writeAsStringSync(args[1]); }",
+  test(
+    'build commands preserve paths and arguments containing spaces',
+    () async {
+      final temp = Directory.systemTemp.createTempSync(
+        'flclash setup fixture ',
       );
-    await setup.Build.exec([
-      'dart',
-      script.path,
-      output.path,
-      'one argument with spaces',
-    ], runInShell: false);
-    expect(output.readAsStringSync(), 'one argument with spaces');
-  });
+      addTearDown(() => temp.deleteSync(recursive: true));
+      final output = File('${temp.path}/received args.txt');
+      final script = File('${temp.path}/echo args.dart')
+        ..writeAsStringSync(
+          "import 'dart:io'; void main(List<String> args) { File(args[0]).writeAsStringSync(args[1]); }",
+        );
+      await setup.Build.exec([
+        'dart',
+        script.path,
+        output.path,
+        'one argument with spaces',
+      ], runInShell: false);
+      expect(output.readAsStringSync(), 'one argument with spaces');
+    },
+  );
 
   test('build commands hide secret environment entries', () async {
     final lines = <String>[];

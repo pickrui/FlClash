@@ -26,9 +26,9 @@ void main() {
     return adapter;
   }
 
-  Future<void> waitForReads() => Future.wait(
-    readClients.map((client) => client.whenClosed),
-  ).timeout(const Duration(seconds: 5));
+  Future<void> waitForReads() =>
+      Future.wait(readClients.map((client) => client.whenClosed))
+          .timeout(const Duration(seconds: 5));
 
   final archive = ZipEncoder().encode(
     Archive()..addFile(ArchiveFile.string('config.json', '{"version":2}')),
@@ -355,9 +355,9 @@ void main() {
         switch (options.method) {
           case 'MOVE':
             stored.add(
-              Uri.parse(
-                options.headers['destination'] as String,
-              ).pathSegments.last,
+              Uri.parse(options.headers['destination'] as String)
+                  .pathSegments
+                  .last,
             );
           case 'DELETE':
             stored.remove(options.uri.pathSegments.last);

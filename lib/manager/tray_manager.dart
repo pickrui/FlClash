@@ -8,7 +8,9 @@ import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'dart:async';
+
 import 'package:tray/tray.dart' as native;
 
 class TrayManager extends ConsumerStatefulWidget {

@@ -48,15 +48,15 @@ void main() {
     addTearDown(() => root.delete(recursive: true));
     final legacy = Directory(p.join(root.path, 'legacy'));
     final current = Directory(p.join(root.path, 'current'));
-    await File(
-      p.join(legacy.path, 'database.sqlite'),
-    ).create(recursive: true).then((file) => file.writeAsString('database'));
-    await File(
-      p.join(legacy.path, 'profiles', '1.yaml'),
-    ).create(recursive: true).then((file) => file.writeAsString('profile'));
-    await File(
-      p.join(legacy.path, 'FlClash.lock'),
-    ).create(recursive: true).then((file) => file.writeAsString('lock'));
+    await File(p.join(legacy.path, 'database.sqlite'))
+        .create(recursive: true)
+        .then((file) => file.writeAsString('database'));
+    await File(p.join(legacy.path, 'profiles', '1.yaml'))
+        .create(recursive: true)
+        .then((file) => file.writeAsString('profile'));
+    await File(p.join(legacy.path, 'FlClash.lock'))
+        .create(recursive: true)
+        .then((file) => file.writeAsString('lock'));
     final externalFile = File(p.join(root.path, 'external'))
       ..writeAsStringSync('external');
     await Link(p.join(legacy.path, 'external-link')).create(externalFile.path);
@@ -80,9 +80,8 @@ void main() {
     expect(File(p.join(current.path, 'FlClash.lock')).existsSync(), isFalse);
     expect(File(p.join(current.path, 'external-link')).existsSync(), isFalse);
     expect(
-      await File(
-        p.join(current.path, identityMigrationMarkerName),
-      ).readAsString(),
+      await File(p.join(current.path, identityMigrationMarkerName))
+          .readAsString(),
       legacyPackageName,
     );
     expect(File(p.join(legacy.path, 'database.sqlite')).existsSync(), isTrue);

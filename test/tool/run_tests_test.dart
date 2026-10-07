@@ -35,23 +35,19 @@ void main() {
   }
 
   for (final status in [0, 17]) {
-    test(
-      'restores an edited CRLF pubspec after exit $status',
-      () async {
-        await stub(
-          'grep -q "build_assets: true" pubspec.yaml && exit 99\nexit $status',
-        );
-        final result = await Process.run(
-          dart,
-          [runner, '--no-pub'],
-          workingDirectory: temp.path,
-          environment: environment(),
-        );
-        expect(result.exitCode, status, reason: result.stderr.toString());
-        expect(pubspec.readAsBytesSync(), utf8.encode(original));
-      },
-      skip: Platform.isWindows,
-    );
+    test('restores an edited CRLF pubspec after exit $status', () async {
+      await stub(
+        'grep -q "build_assets: true" pubspec.yaml && exit 99\nexit $status',
+      );
+      final result = await Process.run(
+        dart,
+        [runner, '--no-pub'],
+        workingDirectory: temp.path,
+        environment: environment(),
+      );
+      expect(result.exitCode, status, reason: result.stderr.toString());
+      expect(pubspec.readAsBytesSync(), utf8.encode(original));
+    }, skip: Platform.isWindows);
   }
 
   test(

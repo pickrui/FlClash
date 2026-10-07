@@ -147,26 +147,20 @@ void main() {
     'certificate not trusted': 'Certificate chain is not trusted',
     'unspecified verification error': 'Certificate Verification Failed',
   }.entries) {
-    test(
-      'certificate diagnostic classifies ${entry.key} without raw details',
-      () {
-        final cause = HandshakeException(
-          'CERTIFICATE_VERIFY_FAILED: ${entry.key}; private-api.example secret-token',
-        );
-        final error = _networkError(cause, type: DioExceptionType.unknown);
-        expect(CloudApiException.clean(error), 'Direct: ${entry.value}');
-        expect(CloudApiException.clean(cause), entry.value);
-        expect(
-          CloudApiException.clean(Exception(cause.toString())),
-          entry.value,
-        );
-        final wrapped = CloudApiException(
-          CloudApiException.clean(error),
-          cause: error,
-        );
-        expect(CloudApiException.certificateMessage(wrapped), entry.value);
-      },
-    );
+    test('certificate diagnostic classifies ${entry.key} without raw details', () {
+      final cause = HandshakeException(
+        'CERTIFICATE_VERIFY_FAILED: ${entry.key}; private-api.example secret-token',
+      );
+      final error = _networkError(cause, type: DioExceptionType.unknown);
+      expect(CloudApiException.clean(error), 'Direct: ${entry.value}');
+      expect(CloudApiException.clean(cause), entry.value);
+      expect(CloudApiException.clean(Exception(cause.toString())), entry.value);
+      final wrapped = CloudApiException(
+        CloudApiException.clean(error),
+        cause: error,
+      );
+      expect(CloudApiException.certificateMessage(wrapped), entry.value);
+    });
   }
 
   for (final entry in {
@@ -439,10 +433,8 @@ void main() {
     },
   );
   for (final entry in {
-    'timestamp_expired':
-        'The device clock is too far from the server. Turn on automatic date and time, then retry.',
-    'signature_mismatch':
-        'The server rejected this app’s signature. Reinstall the latest official build.',
+    'timestamp_expired': 'The device clock is too far from the server. Turn on automatic date and time, then retry.',
+    'signature_mismatch': 'The server rejected this app’s signature. Reinstall the latest official build.',
     'server_unconfigured':
         'The server has no key configured for this app. Contact support.',
   }.entries) {

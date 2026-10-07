@@ -12,6 +12,7 @@ import 'package:fl_clash/common/http.dart';
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
+
 import 'network_diagnostic_platform.dart';
 
 enum DiagnosticStatus { passed, warning, failed, unknown, skipped }
@@ -167,9 +168,9 @@ class LiveNetworkDiagnosticBackend implements NetworkDiagnosticBackend {
       ['www.cloudflare.com', 'www.gstatic.com'].map((host) async {
         if (token.isCancelled) return false;
         try {
-          return (await InternetAddress.lookup(
-            host,
-          ).timeout(const Duration(seconds: 4))).isNotEmpty;
+          return (await InternetAddress.lookup(host)
+                  .timeout(const Duration(seconds: 4)))
+              .isNotEmpty;
         } catch (error) {
           if (!token.isCancelled) errors.add(CloudApiException.clean(error));
           return false;

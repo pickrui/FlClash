@@ -133,24 +133,21 @@ void main() {
     },
   );
 
-  test(
-    'normalized edits keep portable snapshots current and profile deletion cascades',
-    () async {
-      final db = Database(NativeDatabase.memory());
-      addTearDown(db.close);
-      await db.putProfile(sample);
-      final group = await db.proxyGroupsDao.query(1).getSingle();
-      await db.proxyGroupsDao.setAll(1, [group.copyWith(name: 'Renamed')]);
-      expect(
-        (await db.profilesDao.all().getSingle()).customProxyGroups.single.name,
-        'Renamed',
-      );
-      expect((await db.proxyGroupsDao.query(1).getSingle()).id, group.id);
-      await db.profiles.remove((row) => row.id.equals(1));
-      expect(await db.proxyGroupsDao.query(1).get(), isEmpty);
-      expect(await db.rulesDao.queryProfileCustomRules(1).get(), isEmpty);
-    },
-  );
+  test('normalized edits keep portable snapshots current and profile deletion cascades', () async {
+    final db = Database(NativeDatabase.memory());
+    addTearDown(db.close);
+    await db.putProfile(sample);
+    final group = await db.proxyGroupsDao.query(1).getSingle();
+    await db.proxyGroupsDao.setAll(1, [group.copyWith(name: 'Renamed')]);
+    expect(
+      (await db.profilesDao.all().getSingle()).customProxyGroups.single.name,
+      'Renamed',
+    );
+    expect((await db.proxyGroupsDao.query(1).getSingle()).id, group.id);
+    await db.profiles.remove((row) => row.id.equals(1));
+    expect(await db.proxyGroupsDao.query(1).get(), isEmpty);
+    expect(await db.rulesDao.queryProfileCustomRules(1).get(), isEmpty);
+  });
 
   test(
     'icon history evicts oldest entries while retaining recently used URLs',

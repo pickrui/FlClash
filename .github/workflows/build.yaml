@@ -75,6 +75,9 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Check Dart formatting
+        run: python3 tool/check_dart_format.py
+
       - name: Analyze
         run: dart analyze
 
@@ -512,6 +515,9 @@ jobs:
           pattern: artifact-*
           merge-multiple: true
 
+      - name: Generate release checksums
+        run: python3 tool/release_checksums.py dist
+
       - name: Generate release.md
         run: |
           tag="${{ github.ref_name }}"
@@ -614,7 +620,7 @@ jobs:
       AUR_MAINTAINER: ${{ vars.AUR_MAINTAINER || 'pickrui <pickrui@users.noreply.github.com>' }}
     steps:
       - name: Install packaging tools
-        run: pacman -Sy --needed --noconfirm git openssh github-cli
+        run: pacman -Sy --needed --noconfirm git openssh github-cli python
 
       - name: Checkout
         uses: actions/checkout@v7
@@ -639,8 +645,10 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: |
           set -euo pipefail
+          gh release download "$TAG" --pattern SHA256SUMS --dir dist/aur --clobber --repo "$GITHUB_REPOSITORY"
+          python3 tool/release_checksums.py dist/aur --append "$AUR_PKGNAME-aur.tar.gz"
           gh release upload "$TAG" \
-            "dist/aur/$AUR_PKGNAME-aur.tar.gz" --clobber --repo "$GITHUB_REPOSITORY"
+            "dist/aur/$AUR_PKGNAME-aur.tar.gz" dist/aur/SHA256SUMS --clobber --repo "$GITHUB_REPOSITORY"
 
       - name: Push to AUR
         env:

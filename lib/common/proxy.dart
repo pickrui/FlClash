@@ -13,8 +13,10 @@ import 'package:proxy/proxy.dart';
 
 final proxy = system.isDesktop && !safeModeBuild ? Proxy() : null;
 
-typedef SystemProxyStarter =
-    Future<bool?> Function(int port, List<String> bypassDomain);
+typedef SystemProxyStarter = Future<bool?> Function(
+  int port,
+  List<String> bypassDomain,
+);
 typedef SystemProxyStopper = Future<bool?> Function();
 typedef SystemProxyReadinessChecker = Future<bool> Function(int port);
 

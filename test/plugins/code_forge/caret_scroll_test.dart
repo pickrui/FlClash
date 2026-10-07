@@ -119,9 +119,8 @@ void main() {
       'once scrolled to', (tester) async {
     late ScrollController vertical;
     final controller = CodeForgeController()
-      ..text = [
-        for (var i = 0; i < 200; i++) i == 150 ? 'b' * 100 : 'a',
-      ].join('\n');
+      ..text = [for (var i = 0; i < 200; i++) i == 150 ? 'b' * 100 : 'a']
+          .join('\n');
     await pumpEditor(
       tester,
       controller,

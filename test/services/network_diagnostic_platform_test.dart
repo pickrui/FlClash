@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:fl_clash/services/network_diagnostic_platform.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -54,11 +55,8 @@ void main() {
       );
     }
     expect(
-      windows({
-        'flags': 2,
-        'proxyServer': '127.0.0.1:7890',
-        'autoConfig': true,
-      }).proxy,
+      windows({'flags': 2, 'proxyServer': '127.0.0.1:7890', 'autoConfig': true})
+          .proxy,
       DiagnosticProxyState.matching,
     );
     expect(

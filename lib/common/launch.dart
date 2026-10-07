@@ -20,9 +20,8 @@ Future<void> prepareDesktopApplication({
   required bool safeMode,
 }) async {
   if (!isMacOS) return;
-  await const MethodChannel(
-    'launch_at_startup',
-  ).invokeMethod<void>('prepareApplication', {'safeMode': safeMode});
+  await const MethodChannel('launch_at_startup')
+      .invokeMethod<void>('prepareApplication', {'safeMode': safeMode});
 }
 
 Future<List<String>> resolveLaunchArguments({
@@ -32,9 +31,8 @@ Future<List<String>> resolveLaunchArguments({
   if (!isMacOS || arguments.contains(silentLaunchArgument)) {
     return List.unmodifiable(arguments);
   }
-  final launchedAtLogin = await const MethodChannel(
-    'launch_at_startup',
-  ).invokeMethod<bool>('launchAtStartupWasLaunchedAtLogin');
+  final launchedAtLogin = await const MethodChannel('launch_at_startup')
+      .invokeMethod<bool>('launchAtStartupWasLaunchedAtLogin');
   return List.unmodifiable([
     ...arguments,
     if (launchedAtLogin == true) silentLaunchArgument,

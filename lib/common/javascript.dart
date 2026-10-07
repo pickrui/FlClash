@@ -8,11 +8,10 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:rust_api/rust_api.dart';
 
-typedef ScriptEvaluator =
-    Future<ScriptEvaluation> Function({
-      required String script,
-      required String config,
-    });
+typedef ScriptEvaluator = Future<ScriptEvaluation> Function({
+  required String script,
+  required String config,
+});
 
 @visibleForTesting
 ScriptEvaluator scriptEvaluator = evaluateScript;

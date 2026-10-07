@@ -401,9 +401,8 @@ void main() {
     'desktop listeners wait for the profile configuration to load',
     () async {
       final configured = Completer<String>();
-      when(
-        () => handler.setupConfig(setupParams),
-      ).thenAnswer((_) => configured.future);
+      when(() => handler.setupConfig(setupParams))
+          .thenAnswer((_) => configured.future);
       when(() => handler.startListener()).thenAnswer((_) async => true);
 
       final result = controller.setupConfig(
@@ -426,9 +425,8 @@ void main() {
   );
 
   test('rejected configuration does not open listeners', () async {
-    when(
-      () => handler.setupConfig(setupParams),
-    ).thenAnswer((_) async => 'invalid profile');
+    when(() => handler.setupConfig(setupParams))
+        .thenAnswer((_) async => 'invalid profile');
 
     final result = await controller.setupConfig(
       params: setupParams,
@@ -444,9 +442,8 @@ void main() {
 
   test('configuration transport failures do not start listeners', () async {
     final error = StateError('core disconnected');
-    when(
-      () => handler.setupConfig(setupParams),
-    ).thenAnswer((_) async => throw error);
+    when(() => handler.setupConfig(setupParams))
+        .thenAnswer((_) async => throw error);
 
     await expectLater(
       controller.setupConfig(
@@ -527,9 +524,8 @@ void main() {
 
     test('coalesces identical requests while downloading', () async {
       final completed = Completer<String>();
-      when(
-        () => handler.updateGeoData(params),
-      ).thenAnswer((_) => completed.future);
+      when(() => handler.updateGeoData(params))
+          .thenAnswer((_) => completed.future);
 
       final first = controller.updateGeoData(params);
       final duplicate = controller.updateGeoData(params.copyWith());
@@ -548,12 +544,10 @@ void main() {
       );
       final originalCompleted = Completer<String>();
       final fallbackCompleted = Completer<String>();
-      when(
-        () => handler.updateGeoData(params),
-      ).thenAnswer((_) => originalCompleted.future);
-      when(
-        () => handler.updateGeoData(fallback),
-      ).thenAnswer((_) => fallbackCompleted.future);
+      when(() => handler.updateGeoData(params))
+          .thenAnswer((_) => originalCompleted.future);
+      when(() => handler.updateGeoData(fallback))
+          .thenAnswer((_) => fallbackCompleted.future);
 
       final original = controller.updateGeoData(params);
       final recovery = controller.updateGeoData(fallback);

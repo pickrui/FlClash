@@ -78,9 +78,8 @@ void main() {
     expect(legacy.device, null);
     expect(legacy.time, time.toLocal());
     expect(
-      DavBackup.parse(
-        'backup_Pixel-8_20261399-000000-000000Z_$_deviceId.zip',
-      ).device,
+      DavBackup.parse('backup_Pixel-8_20261399-000000-000000Z_$_deviceId.zip')
+          .device,
       null,
     );
   });

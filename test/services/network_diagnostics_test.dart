@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/services/network_diagnostic_platform.dart';
@@ -94,9 +95,8 @@ void main() {
     FakeBackend backend, {
     NetworkDiagnosticSnapshot input = snapshot,
   }) async {
-    final checks = await NetworkDiagnosticService(
-      backend: backend,
-    ).run(input, CancelToken(), onResult: (_) {});
+    final checks = await NetworkDiagnosticService(backend: backend)
+        .run(input, CancelToken(), onResult: (_) {});
     return {for (final check in checks) check.id: check};
   }
 
@@ -474,9 +474,8 @@ void main() {
   test('cancel does not wait for a stalled core response', () async {
     final backend = FakeBackend()..pendingCore = Completer();
     final token = CancelToken();
-    final result = NetworkDiagnosticService(
-      backend: backend,
-    ).run(snapshot, token, onResult: (_) {});
+    final result = NetworkDiagnosticService(backend: backend)
+        .run(snapshot, token, onResult: (_) {});
     token.cancel();
     await result.timeout(const Duration(milliseconds: 100));
     expect(backend.calls, 1);
@@ -498,9 +497,8 @@ void main() {
       final backend = FakeBackend()..pendingCore = Completer();
       final token = CancelToken();
       final emitted = <String>[];
-      final future = NetworkDiagnosticService(
-        backend: backend,
-      ).run(snapshot, token, onResult: (check) => emitted.add(check.id));
+      final future = NetworkDiagnosticService(backend: backend)
+          .run(snapshot, token, onResult: (check) => emitted.add(check.id));
       token.cancel();
       backend.pendingCore!.complete(backend.state);
       await future;

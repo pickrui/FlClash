@@ -12,10 +12,9 @@ const _tagFile = 'tool/go_build_tags.env';
 const _harnessDefaults = 'plugins/setup/setup_hooks/lib/src/options.dart';
 
 String _sharedTags() {
-  final line = File(_tagFile).readAsLinesSync().firstWhere(
-    (line) => line.startsWith('GO_TAGS='),
-    orElse: () => '',
-  );
+  final line = File(_tagFile)
+      .readAsLinesSync()
+      .firstWhere((line) => line.startsWith('GO_TAGS='), orElse: () => '');
   expect(line, isNotEmpty, reason: '$_tagFile must define GO_TAGS');
   return line.substring('GO_TAGS='.length).trim();
 }
@@ -35,9 +34,8 @@ Iterable<File> _tagConsumers() sync* {
 void main() {
   test('the packaging harness ships the shared release build tags', () {
     final tags = _sharedTags();
-    final defaults = RegExp(
-      r"tags: '([^']*)'",
-    ).firstMatch(File(_harnessDefaults).readAsStringSync());
+    final defaults = RegExp(r"tags: '([^']*)'")
+        .firstMatch(File(_harnessDefaults).readAsStringSync());
     expect(defaults, isNotNull, reason: '$_harnessDefaults lost its tag list');
     expect(
       defaults!.group(1),

@@ -9,7 +9,7 @@ help:
 	@echo 'make submodules     # update git submodules (Clash.Meta core, flutter_distributor)'
 	@echo 'make hooks          # install the pre-commit, pre-push and commit-msg hooks'
 	@echo 'make analyze        # dart analyze lib test tool'
-	@echo 'make format         # dart format lib test tool'
+	@echo 'make format         # format owned Dart sources'
 	@echo 'make lint           # comment density gate over the working tree'
 	@echo 'make test           # flutter test with the native asset hooks switched off'
 	@echo 'make test-safe      # isolated desktop safe-mode checks'
@@ -32,7 +32,7 @@ analyze:
 	dart analyze lib test tool
 
 format:
-	dart format lib test tool
+	python3 tool/check_dart_format.py --write
 
 lint:
 	./tool/check_comment_density.sh < /dev/null

@@ -322,9 +322,8 @@ void main() {
       final api = _FakeApi(_catalog(const NodeFilter()));
       await _pumpEditor(tester, api, _Account());
       final context = tester.element(find.byType(CloudNodeFilterPage));
-      final hintColor = Theme.of(
-        context,
-      ).colorScheme.onSurfaceVariant.withValues(alpha: 0.6);
+      final hintColor = Theme.of(context).colorScheme.onSurfaceVariant
+          .withValues(alpha: 0.6);
 
       for (final (label, example) in [
         ('Name contains', '香港|日本'),

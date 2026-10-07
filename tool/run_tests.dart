@@ -53,9 +53,9 @@ Future<void> main(List<String> args) async {
     } else {
       var restored = current;
       for (final package in ['setup', 'rust_api']) {
-        final setting = RegExp(
-          '$package:\r?\n      build_assets: (true|false)',
-        ).firstMatch(source)!.group(1);
+        final setting = RegExp('$package:\r?\n      build_assets: (true|false)')
+            .firstMatch(source)!
+            .group(1);
         restored = configureBuildAssets(
           restored,
           setting == 'true',

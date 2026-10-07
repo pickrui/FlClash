@@ -142,108 +142,105 @@ void main() {
     }
   });
 
-  test(
-    'proxy credentials rotate, disable and never reach direct requests',
-    () async {
-      final proxy = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
-      final origin = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
-      addTearDown(() => proxy.close(force: true));
-      addTearDown(() => origin.close(force: true));
-      var auth = const AuthenticationProps(
-        enable: true,
-        username: 'local',
-        password: ' ;:@ 中文 ',
-      );
-      var direct = false;
-      var received = 0;
-      final tunnels = <Socket>[];
-      final proxyPorts = <int>{};
-      addTearDown(() {
-        for (final socket in tunnels) {
-          socket.destroy();
-        }
-      });
-      proxy.listen((request) async {
-        received++;
-        final expected = auth.enable
-            ? 'Basic ${base64Encode(utf8.encode('${auth.username}:${auth.password}'))}'
-            : null;
-        expect(
-          request.headers.value(HttpHeaders.proxyAuthorizationHeader),
-          expected,
-        );
-        expect(request.headers.value(HttpHeaders.authorizationHeader), isNull);
-        expect(request.headers.value(HttpHeaders.userAgentHeader), 'auth-test');
-        if (request.method == 'CONNECT') {
-          final upstream = await Socket.connect(
-            InternetAddress.loopbackIPv4,
-            origin.port,
-          );
-          proxyPorts.add(upstream.port);
-          request.response.statusCode = HttpStatus.ok;
-          request.response.contentLength = 0;
-          final downstream = await request.response.detachSocket();
-          tunnels.addAll([upstream, downstream]);
-          downstream.listen(
-            upstream.add,
-            onDone: upstream.destroy,
-            onError: (_) => upstream.destroy(),
-          );
-          upstream.listen(
-            downstream.add,
-            onDone: downstream.destroy,
-            onError: (_) => downstream.destroy(),
-          );
-        } else {
-          await request.drain<void>();
-          request.response.write('proxy');
-          await request.response.close();
-        }
-      });
-      origin.listen((request) async {
-        expect(
-          request.headers.value(HttpHeaders.proxyAuthorizationHeader),
-          isNull,
-        );
-        request.response.write(
-          proxyPorts.contains(request.connectionInfo!.remotePort)
-              ? 'proxy'
-              : 'direct',
-        );
-        await request.response.close();
-      });
-      final client =
-          ProxyAuthenticatedHttpClient(
-              create: () => _DirectHttpOverrides().createHttpClient(null),
-              read: () => (port: proxy.port, authentication: auth),
-            )
-            ..userAgent = 'auth-test'
-            ..findProxy = (_) =>
-                direct ? 'DIRECT' : 'PROXY localhost:${proxy.port}';
-      addTearDown(() => client.close(force: true));
-      final url = Uri.parse('http://localhost:${origin.port}/post');
-      Future<String> read() async {
-        final request = await client.postUrl(url);
-        request.write('payload');
-        return utf8.decoder.bind(await request.close()).join();
+  test('proxy credentials rotate, disable and never reach direct requests', () async {
+    final proxy = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    final origin = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    addTearDown(() => proxy.close(force: true));
+    addTearDown(() => origin.close(force: true));
+    var auth = const AuthenticationProps(
+      enable: true,
+      username: 'local',
+      password: ' ;:@ 中文 ',
+    );
+    var direct = false;
+    var received = 0;
+    final tunnels = <Socket>[];
+    final proxyPorts = <int>{};
+    addTearDown(() {
+      for (final socket in tunnels) {
+        socket.destroy();
       }
-
-      expect(await read(), 'proxy');
-      auth = auth.copyWith(password: 'new:password;@');
-      expect(await read(), 'proxy');
-      auth = auth.copyWith(enable: false);
-      expect(await read(), 'proxy');
-      auth = auth.copyWith(enable: true);
-      direct = true;
-      expect(await read(), 'direct');
+    });
+    proxy.listen((request) async {
+      received++;
+      final expected = auth.enable
+          ? 'Basic ${base64Encode(utf8.encode('${auth.username}:${auth.password}'))}'
+          : null;
       expect(
-        received,
-        3,
-      ); // Each POST reaches the proxy only once, no 407 replay.
-      client.close(force: true);
-      expect(() => client.getUrl(url), throwsStateError);
-    },
-  );
+        request.headers.value(HttpHeaders.proxyAuthorizationHeader),
+        expected,
+      );
+      expect(request.headers.value(HttpHeaders.authorizationHeader), isNull);
+      expect(request.headers.value(HttpHeaders.userAgentHeader), 'auth-test');
+      if (request.method == 'CONNECT') {
+        final upstream = await Socket.connect(
+          InternetAddress.loopbackIPv4,
+          origin.port,
+        );
+        proxyPorts.add(upstream.port);
+        request.response.statusCode = HttpStatus.ok;
+        request.response.contentLength = 0;
+        final downstream = await request.response.detachSocket();
+        tunnels.addAll([upstream, downstream]);
+        downstream.listen(
+          upstream.add,
+          onDone: upstream.destroy,
+          onError: (_) => upstream.destroy(),
+        );
+        upstream.listen(
+          downstream.add,
+          onDone: downstream.destroy,
+          onError: (_) => downstream.destroy(),
+        );
+      } else {
+        await request.drain<void>();
+        request.response.write('proxy');
+        await request.response.close();
+      }
+    });
+    origin.listen((request) async {
+      expect(
+        request.headers.value(HttpHeaders.proxyAuthorizationHeader),
+        isNull,
+      );
+      request.response.write(
+        proxyPorts.contains(request.connectionInfo!.remotePort)
+            ? 'proxy'
+            : 'direct',
+      );
+      await request.response.close();
+    });
+    final client =
+        ProxyAuthenticatedHttpClient(
+            create: () => _DirectHttpOverrides().createHttpClient(null),
+            read: () => (port: proxy.port, authentication: auth),
+          )
+          ..userAgent = 'auth-test'
+          ..findProxy = (_) =>
+              direct ? 'DIRECT' : 'PROXY localhost:${proxy.port}';
+    addTearDown(() => client.close(force: true));
+    final url = Uri.parse('http://localhost:${origin.port}/post');
+    Future<String> read() async {
+      final request = await client.postUrl(url);
+      request.write('payload');
+      return utf8.decoder.bind(await request.close()).join();
+    }
+
+    expect(await read(), 'proxy');
+    auth = auth.copyWith(password: 'new:password;@');
+    expect(await read(), 'proxy');
+    auth = auth.copyWith(enable: false);
+    expect(await read(), 'proxy');
+    auth = auth.copyWith(enable: true);
+    direct = true;
+    expect(await read(), 'direct');
+    expect(
+      received,
+      3,
+    ); // Each POST reaches the proxy only once, no 407 replay.
+    client.close(force: true);
+    expect(() => client.getUrl(url), throwsStateError);
+  });
   test('authenticated route falls back only before sending the POST', () async {
     final closed = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
     final proxyPort = closed.port;

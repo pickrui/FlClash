@@ -26,29 +26,26 @@ void main() {
   });
   tearDown(() => directory.delete(recursive: true));
 
-  test(
-    'large files stream across encrypted frames and empty files/directories survive',
-    () async {
-      final data = List.generate(160000, (i) => i % 251);
-      await File(p.join(source, 'large.bin')).writeAsBytes(data);
-      await File(p.join(source, 'empty.bin')).create();
-      await Directory(p.join(source, 'empty')).create();
-      await backup.create(source, [
-        'large.bin',
-        'empty.bin',
-        'empty',
-      ], destination);
-      final records = await backup.verify(destination);
-      expect(records, hasLength(3));
-      expect(
-        await backup
-            .readFile(destination, '1.enc')
-            .expand((bytes) => bytes)
-            .toList(),
-        data,
-      );
-    },
-  );
+  test('large files stream across encrypted frames and empty files/directories survive', () async {
+    final data = List.generate(160000, (i) => i % 251);
+    await File(p.join(source, 'large.bin')).writeAsBytes(data);
+    await File(p.join(source, 'empty.bin')).create();
+    await Directory(p.join(source, 'empty')).create();
+    await backup.create(source, [
+      'large.bin',
+      'empty.bin',
+      'empty',
+    ], destination);
+    final records = await backup.verify(destination);
+    expect(records, hasLength(3));
+    expect(
+      await backup
+          .readFile(destination, '1.enc')
+          .expand((bytes) => bytes)
+          .toList(),
+      data,
+    );
+  });
 
   test(
     'truncation, dropped frames and altered data fail integrity verification',

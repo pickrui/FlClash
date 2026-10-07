@@ -213,33 +213,28 @@ void main() {
     },
   );
 
-  test(
-    'an account switch before dispatch cannot send an old write as the new account',
-    () async {
-      final adapter = QueuedCloudAdapter();
-      final service = CloudApiService.forTesting(
-        client: adapter.createClient(),
-      );
-      service.setToken('account-a');
-      final request = service.activatePlan(1);
-      service.setToken('account-b');
+  test('an account switch before dispatch cannot send an old write as the new account', () async {
+    final adapter = QueuedCloudAdapter();
+    final service = CloudApiService.forTesting(client: adapter.createClient());
+    service.setToken('account-a');
+    final request = service.activatePlan(1);
+    service.setToken('account-b');
 
-      await expectLater(
-        request,
-        throwsA(predicate<Object>(CloudApiException.isStaleSession)),
-      );
-      expect(adapter.requestCount, 0);
+    await expectLater(
+      request,
+      throwsA(predicate<Object>(CloudApiException.isStaleSession)),
+    );
+    expect(adapter.requestCount, 0);
 
-      final next = service.fetchBought();
-      final current = await adapter.takeRequest();
-      expect(current.options.headers['Authorization'], 'Bearer account-b');
-      current.respond({
-        'ret': 200,
-        'data': {'boughts': []},
-      });
-      await next;
-    },
-  );
+    final next = service.fetchBought();
+    final current = await adapter.takeRequest();
+    expect(current.options.headers['Authorization'], 'Bearer account-b');
+    current.respond({
+      'ret': 200,
+      'data': {'boughts': []},
+    });
+    await next;
+  });
 
   for (final statusCode in [200, 401]) {
     test(

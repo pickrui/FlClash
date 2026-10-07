@@ -32,7 +32,8 @@ void main() {
           continue;
         }
         for (final entry in _forbiddenImports.entries) {
-          if (line.contains("'${entry.key}") || line.contains('"${entry.key}')) {
+          if (line.contains("'${entry.key}") ||
+              line.contains('"${entry.key}')) {
             offenders.add('$relative:${i + 1} — ${entry.value}');
           }
         }

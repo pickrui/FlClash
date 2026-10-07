@@ -106,9 +106,8 @@ class FileSecureStorage {
         if (await target.exists()) {
           final saved =
               '$path.unreadable-${DateTime.now().microsecondsSinceEpoch}.enc';
-          await File(
-            saved,
-          ).writeAsBytes(encrypt(await target.readAsBytes()), flush: true);
+          await File(saved)
+              .writeAsBytes(encrypt(await target.readAsBytes()), flush: true);
         }
         final repair = File('$path.repair');
         await repair.writeAsBytes(ciphertext, flush: true);

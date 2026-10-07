@@ -168,10 +168,8 @@ void main() {
       expect(encoded['cloud-domains'], params.cloudDomains);
       expect(InitParams.fromJson(encoded).cloudDomains, params.cloudDomains);
       expect(
-        InitParams.fromJson({
-          'home-dir': '/data/clash',
-          'version': 3,
-        }).cloudDomains,
+        InitParams.fromJson({'home-dir': '/data/clash', 'version': 3})
+            .cloudDomains,
         isEmpty,
       );
     });

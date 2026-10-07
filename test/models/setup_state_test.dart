@@ -148,9 +148,8 @@ void main() {
     );
     expect(buildState().needSetup(previous), isTrue);
     expect(
-      buildState(
-        tailscaleNetworks: [network.copyWith(exitNode: 'auto')],
-      ).needSetup(previous),
+      buildState(tailscaleNetworks: [network.copyWith(exitNode: 'auto')])
+          .needSetup(previous),
       isTrue,
     );
   });

@@ -101,13 +101,13 @@ class NodeFilter {
     final includeRegions = _asKeys(json['include_regions']);
     return NodeFilter(
       includeLines: includeLines,
-      excludeLines: _asKeys(
-        json['exclude_lines'],
-      ).where((key) => !includeLines.contains(key)).toList(),
+      excludeLines: _asKeys(json['exclude_lines'])
+          .where((key) => !includeLines.contains(key))
+          .toList(),
       includeRegions: includeRegions,
-      excludeRegions: _asKeys(
-        json['exclude_regions'],
-      ).where((code) => !includeRegions.contains(code)).toList(),
+      excludeRegions: _asKeys(json['exclude_regions'])
+          .where((code) => !includeRegions.contains(code))
+          .toList(),
       match: _asText(json['match']).trim(),
       nomatch: _asText(json['nomatch']).trim(),
     );

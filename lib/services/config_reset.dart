@@ -42,18 +42,17 @@ class ConfigReset {
   Future<String> _reset() async {
     var journal = await _readJournal();
     if (journal == null || journal['complete'] == true) {
-      final entries = await Directory(
-        homePath,
-      ).list(followLinks: false).toList();
+      final entries = await Directory(homePath)
+          .list(followLinks: false)
+          .toList();
       final names =
           entries
               .map((e) => p.basename(e.path))
               .where((name) => !_preservedNames.contains(name))
               .toList()
             ..sort();
-      final directory = await Directory(
-        p.dirname(homePath),
-      ).createTemp('${p.basename(homePath)}.recovery-');
+      final directory = await Directory(p.dirname(homePath))
+          .createTemp('${p.basename(homePath)}.recovery-');
       // Creation and validation never write plaintext copies, even on failure.
       try {
         await backup.create(homePath, names, directory.path);

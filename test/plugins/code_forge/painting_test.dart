@@ -340,9 +340,8 @@ void main() {
     );
     await tester.pump();
 
-    final longRow = _selectionRects(
-      tester,
-    ).firstWhere((rect) => rect.top > 0 && rect.width > viewWidth);
+    final longRow = _selectionRects(tester)
+        .firstWhere((rect) => rect.top > 0 && rect.width > viewWidth);
     expect(longRow.width, lessThan(4 * viewWidth));
     expect(longRow.left, lessThanOrEqualTo(0));
     expect(longRow.right, greaterThanOrEqualTo(viewWidth));

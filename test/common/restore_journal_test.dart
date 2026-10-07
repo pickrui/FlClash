@@ -191,12 +191,10 @@ void main() {
     final journalDirectory = Directory(
       p.join(home.path, '.restore-transaction'),
     )..createSync();
-    File(
-      p.join(journalDirectory.path, 'database.sqlite'),
-    ).writeAsStringSync('database');
-    File(
-      p.join(journalDirectory.path, 'config.age'),
-    ).writeAsStringSync('config');
+    File(p.join(journalDirectory.path, 'database.sqlite'))
+        .writeAsStringSync('database');
+    File(p.join(journalDirectory.path, 'config.age'))
+        .writeAsStringSync('config');
     File(p.join(journalDirectory.path, 'prepared.json')).writeAsStringSync(
       jsonEncode({
         'version': 1,

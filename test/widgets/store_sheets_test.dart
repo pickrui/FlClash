@@ -45,9 +45,8 @@ Future<List<T?>> _pumpSheet<T>(WidgetTester tester, Widget sheet) async {
         builder: (context) => Scaffold(
           body: TextButton(
             onPressed: () async => results.add(
-              await Navigator.of(
-                context,
-              ).push(MaterialPageRoute<T>(builder: (_) => sheet)),
+              await Navigator.of(context)
+                  .push(MaterialPageRoute<T>(builder: (_) => sheet)),
             ),
             child: const Text('open'),
           ),

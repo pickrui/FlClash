@@ -46,24 +46,21 @@ void main() {
     expect(scan(), isEmpty);
   });
 
-  test(
-    'collects obsolete profiles, runtime copies, scripts and provider directories',
-    () {
-      final old = write(profiles, '2.yaml');
-      final runtime = write(profiles, '.2.yaml');
-      final script = write(scripts, '4.js');
-      write(p.join(providers, '2'), 'proxy.yaml');
-      expect(
-        scan(),
-        unorderedEquals([
-          old.path,
-          runtime.path,
-          script.path,
-          p.join(providers, '2'),
-        ]),
-      );
-    },
-  );
+  test('collects obsolete profiles, runtime copies, scripts and provider directories', () {
+    final old = write(profiles, '2.yaml');
+    final runtime = write(profiles, '.2.yaml');
+    final script = write(scripts, '4.js');
+    write(p.join(providers, '2'), 'proxy.yaml');
+    expect(
+      scan(),
+      unorderedEquals([
+        old.path,
+        runtime.path,
+        script.path,
+        p.join(providers, '2'),
+      ]),
+    );
+  });
 
   test('preserves recovery artifacts and unrecognized user files', () {
     write(profiles, '1.yaml.write-backup-fixture');

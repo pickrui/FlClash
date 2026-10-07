@@ -13,11 +13,14 @@ import 'package:fl_clash/providers/state.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'dart:async';
+
 import 'package:rust_api/rust_api.dart';
 
-typedef HotKeyRegistrar =
-    Future<List<HotKeyFailure>> Function({required List<HotKeySpec> specs});
+typedef HotKeyRegistrar = Future<List<HotKeyFailure>> Function({
+  required List<HotKeySpec> specs,
+});
 
 class HotKeyManager extends ConsumerStatefulWidget {
   final HotKeyRegistrar? registerHotKeys;

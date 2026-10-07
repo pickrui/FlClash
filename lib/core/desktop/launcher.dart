@@ -12,8 +12,10 @@ import 'package:fl_clash/enum/enum.dart';
 
 import 'model.dart';
 
-typedef CoreProcessStarter =
-    Future<Process> Function(String executable, List<String> arguments);
+typedef CoreProcessStarter = Future<Process> Function(
+  String executable,
+  List<String> arguments,
+);
 
 abstract interface class CoreProcessLauncher {
   Future<CoreProcessLease> start({

@@ -193,9 +193,8 @@ void main() {
         await tester.runAsync(() async {
           final image = await boundary.toImage(pixelRatio: 2);
           final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-          await File(
-            '$screenshotDirectory/flclash-purchased-plan-$scale.png',
-          ).writeAsBytes(bytes!.buffer.asUint8List());
+          await File('$screenshotDirectory/flclash-purchased-plan-$scale.png')
+              .writeAsBytes(bytes!.buffer.asUint8List());
           image.dispose();
         });
       }

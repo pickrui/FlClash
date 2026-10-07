@@ -9,31 +9,28 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test(
-    'shortcuts have stable platform labels regardless of modifier insertion order',
-    () {
-      const mac = ShortcutLabels(isMacOS: true, isWindows: false);
-      const windows = ShortcutLabels(isMacOS: false, isWindows: true);
-      const linux = ShortcutLabels(isMacOS: false, isWindows: false);
-      final modifiers = {
+  test('shortcuts have stable platform labels regardless of modifier insertion order', () {
+    const mac = ShortcutLabels(isMacOS: true, isWindows: false);
+    const windows = ShortcutLabels(isMacOS: false, isWindows: true);
+    const linux = ShortcutLabels(isMacOS: false, isWindows: false);
+    final modifiers = {
+      KeyboardModifier.meta,
+      KeyboardModifier.shift,
+      KeyboardModifier.control,
+    };
+    expect(mac.text(modifiers, PhysicalKeyboardKey.keyK.usbHidUsage), '⌃⇧⌘K');
+    expect(
+      windows.text(modifiers, PhysicalKeyboardKey.keyK.usbHidUsage),
+      'Ctrl+Shift+Win+K',
+    );
+    expect(
+      linux.text({
         KeyboardModifier.meta,
-        KeyboardModifier.shift,
-        KeyboardModifier.control,
-      };
-      expect(mac.text(modifiers, PhysicalKeyboardKey.keyK.usbHidUsage), '⌃⇧⌘K');
-      expect(
-        windows.text(modifiers, PhysicalKeyboardKey.keyK.usbHidUsage),
-        'Ctrl+Shift+Win+K',
-      );
-      expect(
-        linux.text({
-          KeyboardModifier.meta,
-        }, PhysicalKeyboardKey.enter.usbHidUsage),
-        'Super+Enter',
-      );
-      expect(mac.key(PhysicalKeyboardKey.f24.usbHidUsage), 'F24');
-    },
-  );
+      }, PhysicalKeyboardKey.enter.usbHidUsage),
+      'Super+Enter',
+    );
+    expect(mac.key(PhysicalKeyboardKey.f24.usbHidUsage), 'F24');
+  });
   test('modifier-only and unsupported primary combinations are refused', () {
     expect(
       isValidHotKey({

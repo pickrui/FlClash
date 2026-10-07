@@ -69,9 +69,8 @@ void main() {
       final stream = StreamController<Uint8List>(
         onCancel: () => cancelled = true,
       );
-      final pending = _adapter(
-        ResponseBody(stream.stream, 200),
-      ).fetch(RequestOptions(), null, null);
+      final pending = _adapter(ResponseBody(stream.stream, 200))
+          .fetch(RequestOptions(), null, null);
       final expectation = expectLater(pending, throwsFormatException);
       stream.add(Uint8List(60));
       stream.add(Uint8List(60));
@@ -91,9 +90,8 @@ void main() {
           return Future<void>.error(StateError('cleanup failed'));
         },
       );
-      final pending = _adapter(
-        ResponseBody(stream.stream, 200),
-      ).fetch(RequestOptions(), null, cancel.future);
+      final pending = _adapter(ResponseBody(stream.stream, 200))
+          .fetch(RequestOptions(), null, cancel.future);
       final expectation = expectLater(
         pending,
         throwsA(

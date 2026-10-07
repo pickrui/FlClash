@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/update_download.dart';
 import 'package:fl_clash/common/update_download_task.dart';
@@ -44,9 +45,8 @@ void main() {
       final root = await Directory.systemTemp.createTemp('updater-task-test-');
       addTearDown(() => root.delete(recursive: true));
       final staging = await root.createTemp('flclash-update-');
-      final oldFile = await File(
-        '${staging.path}/update.exe',
-      ).writeAsString('fixture');
+      final oldFile = await File('${staging.path}/update.exe')
+          .writeAsString('fixture');
       final pending = Completer<File>();
       late CancelToken oldToken;
       final first = task.start((value, _) {

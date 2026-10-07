@@ -152,8 +152,7 @@ void main() {
     {"name": "office.tail1234.ts.net", "addresses": ["100.64.0.3"], "exitNodeOption": true}
   ]
 }
-''')
-            as Map<String, Object?>,
+''') as Map<String, Object?>,
       );
       expect(status.state, TailscaleState.running);
       expect(status.isRunning, isTrue);

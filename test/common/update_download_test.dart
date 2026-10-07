@@ -491,18 +491,15 @@ void main() {
   test(
     'sweeps stale staging directories but keeps the owned download',
     () async {
-      final stale = await Directory(
-        '${directory.path}/flclash-update-old',
-      ).create();
+      final stale = await Directory('${directory.path}/flclash-update-old')
+          .create();
       await File('${stale.path}/update.apk').writeAsBytes([1, 2, 3]);
-      final owned = await Directory(
-        '${directory.path}/flclash-update-now',
-      ).create();
+      final owned = await Directory('${directory.path}/flclash-update-now')
+          .create();
       final kept = await File('${owned.path}/update.apk').writeAsBytes([4]);
       final other = await Directory('${directory.path}/other').create();
-      final plain = await File(
-        '${directory.path}/flclash-update-file',
-      ).writeAsBytes([5]);
+      final plain = await File('${directory.path}/flclash-update-file')
+          .writeAsBytes([5]);
       await sweepStaleUpdateDownloads(directory, keep: kept);
       expect(await stale.exists(), isFalse);
       expect(await kept.exists(), isTrue);

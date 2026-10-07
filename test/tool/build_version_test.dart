@@ -121,9 +121,9 @@ void main() {
   test(
     'the real CI script ignores the future pubspec floor and matches setup',
     () async {
-      final workflow =
-          loadYaml(File('.github/workflows/build.yaml').readAsStringSync())
-              as YamlMap;
+      final workflow = loadYaml(
+        File('.github/workflows/build.yaml').readAsStringSync(),
+      ) as YamlMap;
       final job = (workflow['jobs'] as YamlMap)['version'] as YamlMap;
       final step = (job['steps'] as YamlList).cast<YamlMap>().singleWhere(
         (step) => step['id'] == 'version',

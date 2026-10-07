@@ -168,39 +168,35 @@ void main() {
     variant: TargetPlatformVariant.desktop(),
   );
 
-  testWidgets(
-    'starts polling on desktop when mounted in the inactive state',
-    (tester) async {
-      addTearDown(() => setLifecycle(tester, AppLifecycleState.resumed));
-      setLifecycle(tester, AppLifecycleState.inactive);
-      await mount(tester);
-      expect(polls, 1);
+  testWidgets('starts polling on desktop when mounted in the inactive state', (
+    tester,
+  ) async {
+    addTearDown(() => setLifecycle(tester, AppLifecycleState.resumed));
+    setLifecycle(tester, AppLifecycleState.inactive);
+    await mount(tester);
+    expect(polls, 1);
 
-      await tester.pumpWidget(const SizedBox.shrink());
-    },
-    variant: TargetPlatformVariant.desktop(),
-  );
+    await tester.pumpWidget(const SizedBox.shrink());
+  }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets(
-    'stops polling on mobile while the app is inactive',
-    (tester) async {
-      addTearDown(() => setLifecycle(tester, AppLifecycleState.resumed));
-      setLifecycle(tester, AppLifecycleState.resumed);
-      await mount(tester);
-      expect(polls, 1);
+  testWidgets('stops polling on mobile while the app is inactive', (
+    tester,
+  ) async {
+    addTearDown(() => setLifecycle(tester, AppLifecycleState.resumed));
+    setLifecycle(tester, AppLifecycleState.resumed);
+    await mount(tester);
+    expect(polls, 1);
 
-      setLifecycle(tester, AppLifecycleState.inactive);
-      await tick(tester, 3);
-      expect(polls, 1);
+    setLifecycle(tester, AppLifecycleState.inactive);
+    await tick(tester, 3);
+    expect(polls, 1);
 
-      setLifecycle(tester, AppLifecycleState.resumed);
-      await tester.pump();
-      expect(polls, 2);
+    setLifecycle(tester, AppLifecycleState.resumed);
+    await tester.pump();
+    expect(polls, 2);
 
-      await tester.pumpWidget(const SizedBox.shrink());
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.android),
-  );
+    await tester.pumpWidget(const SizedBox.shrink());
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 }
 
 class _Poller extends StatefulWidget {

@@ -85,12 +85,11 @@ ProxyConflictReport resolveProxyConflictSample(
       : previous?.vpnInterface,
 );
 
-typedef DiagnosticCommandRunner =
-    Future<String> Function(
-      String executable,
-      List<String> arguments,
-      CancelToken cancellation,
-    );
+typedef DiagnosticCommandRunner = Future<String> Function(
+  String executable,
+  List<String> arguments,
+  CancelToken cancellation,
+);
 
 class NetworkDiagnosticPlatform {
   final String platform;
@@ -491,10 +490,8 @@ Future<String> runDiagnosticCommand(
   final stderrDone = stderr.asFuture<void>();
   try {
     final code = await process.exitCode.timeout(const Duration(seconds: 5));
-    await Future.wait([
-      stdoutDone,
-      stderrDone,
-    ]).timeout(const Duration(seconds: 1));
+    await Future.wait([stdoutDone, stderrDone])
+        .timeout(const Duration(seconds: 1));
     if (code != 0 || exceeded || timedOut || cancellation.isCancelled) {
       throw StateError('Diagnostic command unavailable');
     }

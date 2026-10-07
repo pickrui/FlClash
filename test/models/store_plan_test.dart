@@ -357,9 +357,8 @@ void main() {
       expect(profile(planRank: 0).canFetchManagedConfig, false);
       expect(profile(nodeAccess: const []).canFetchManagedConfig, false);
       expect(
-        profile(
-          expireTime: DateTime.now().subtract(const Duration(seconds: 1)),
-        ).canFetchManagedConfig,
+        profile(expireTime: DateTime.now().subtract(const Duration(seconds: 1)))
+            .canFetchManagedConfig,
         false,
       );
     });

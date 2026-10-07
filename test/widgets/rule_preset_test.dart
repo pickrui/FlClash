@@ -17,22 +17,19 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 void main() {
-  test(
-    'presets precede catch-all rules without duplicating or moving existing rules',
-    () {
-      const existing = [
-        Rule(id: 1, value: 'DST-PORT,853,REJECT'),
-        Rule(id: 2, value: 'MATCH,DIRECT'),
-      ];
-      final added = insertRulePresets(existing, const [
-        Rule(id: 3, value: 'DST-PORT,853,REJECT'),
-        Rule(id: 4, value: 'GEOSITE,private,DIRECT'),
-        Rule(id: 5, value: 'GEOSITE,private,DIRECT'),
-      ]);
-      expect(added.map((rule) => rule.id), [4, 1, 2]);
-      expect(existing.map((rule) => rule.id), [1, 2]);
-    },
-  );
+  test('presets precede catch-all rules without duplicating or moving existing rules', () {
+    const existing = [
+      Rule(id: 1, value: 'DST-PORT,853,REJECT'),
+      Rule(id: 2, value: 'MATCH,DIRECT'),
+    ];
+    final added = insertRulePresets(existing, const [
+      Rule(id: 3, value: 'DST-PORT,853,REJECT'),
+      Rule(id: 4, value: 'GEOSITE,private,DIRECT'),
+      Rule(id: 5, value: 'GEOSITE,private,DIRECT'),
+    ]);
+    expect(added.map((rule) => rule.id), [4, 1, 2]);
+    expect(existing.map((rule) => rule.id), [1, 2]);
+  });
 
   testWidgets(
     'presets preview rules and retain selections after failed validation',

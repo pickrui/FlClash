@@ -100,12 +100,11 @@ final class CoreRpcClient implements CoreRpcChannel {
           )
           .timeout(sendTimeout);
       return await _awaitResponse(
-            method: method,
-            completer: completer,
-            idleTimeout: requestTimeout,
-            elapsed: stopwatch,
-          )
-          as T?;
+        method: method,
+        completer: completer,
+        idleTimeout: requestTimeout,
+        elapsed: stopwatch,
+      ) as T?;
     } on TimeoutException {
       commonPrint.log(
         'Core method ${method.name} timed out after '

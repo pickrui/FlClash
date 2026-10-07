@@ -64,9 +64,10 @@ void main() {
     api.packages = [installedPackage('new.app')];
     api.changes.add(null);
     expect(
-      (await container.read(
-        installedAppsProvider.future,
-      )).packages.single.packageName,
+      (await container.read(installedAppsProvider.future))
+          .packages
+          .single
+          .packageName,
       'new.app',
     );
     api.packages = [];
@@ -113,9 +114,10 @@ void main() {
     api.packages = [installedPackage('available')];
     container.invalidate(installedAppsProvider);
     expect(
-      (await container.read(
-        installedAppsProvider.future,
-      )).packages.single.packageName,
+      (await container.read(installedAppsProvider.future))
+          .packages
+          .single
+          .packageName,
       'available',
     );
   });

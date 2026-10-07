@@ -186,9 +186,8 @@ final class HelperClient {
         (isLinux
             ? linuxHelperInstalledPath(_coreSha256Cache!)
             : _defaultHelperPath());
-    final matches = p.Context(
-      style: isLinux ? p.Style.posix : p.Style.windows,
-    ).equals(helperPath.trim(), expected);
+    final matches = p.Context(style: isLinux ? p.Style.posix : p.Style.windows)
+        .equals(helperPath.trim(), expected);
     if (!matches) {
       _logPingFailure('helper executable path mismatch', logFailure);
       return HelperReadiness.notReady;

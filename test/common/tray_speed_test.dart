@@ -51,63 +51,55 @@ void main() {
     native.Tray.instance.resetForTesting();
   });
 
-  test(
-    'background speed survives menu changes and disabling then enabling its title',
-    () async {
-      final tray = Tray();
-      await tray.update(trayState: running.copyWith(isStart: false));
-      await tray.update(trayState: running);
-      const speed = Traffic(up: 1024, down: 8192);
-      await tray.updateTraffic(speed);
-      expect(calls.last.arguments['title'], speed.trayTitle);
-      await tray.update(trayState: running.copyWith(mode: Mode.global));
-      expect(
-        calls.where((call) => call.method == 'show').last.arguments['title'],
-        speed.trayTitle,
-      );
-      await tray.update(trayState: running.copyWith(showTrayTitle: false));
-      expect(calls.last.arguments['title'], '');
-      await tray.update(trayState: running);
-      expect(calls.last.arguments['title'], speed.trayTitle);
-      await tray.update(trayState: running.copyWith(isStart: false));
-      expect(calls.last.arguments['title'], const Traffic().trayTitle);
-      final stoppedCalls = calls.length;
-      await tray.updateTraffic(speed);
-      expect(calls.length, stoppedCalls);
-    },
-    skip: !Platform.isMacOS,
-  );
+  test('background speed survives menu changes and disabling then enabling its title', () async {
+    final tray = Tray();
+    await tray.update(trayState: running.copyWith(isStart: false));
+    await tray.update(trayState: running);
+    const speed = Traffic(up: 1024, down: 8192);
+    await tray.updateTraffic(speed);
+    expect(calls.last.arguments['title'], speed.trayTitle);
+    await tray.update(trayState: running.copyWith(mode: Mode.global));
+    expect(
+      calls.where((call) => call.method == 'show').last.arguments['title'],
+      speed.trayTitle,
+    );
+    await tray.update(trayState: running.copyWith(showTrayTitle: false));
+    expect(calls.last.arguments['title'], '');
+    await tray.update(trayState: running);
+    expect(calls.last.arguments['title'], speed.trayTitle);
+    await tray.update(trayState: running.copyWith(isStart: false));
+    expect(calls.last.arguments['title'], const Traffic().trayTitle);
+    final stoppedCalls = calls.length;
+    await tray.updateTraffic(speed);
+    expect(calls.length, stoppedCalls);
+  }, skip: !Platform.isMacOS);
 
-  test(
-    'an older menu refresh cannot restore a disabled title',
-    () async {
-      final tray = Tray();
-      await tray.update(trayState: running);
-      const speed = Traffic(up: 1024, down: 8192);
-      await tray.updateTraffic(speed);
-      final showStarted = Completer<void>();
-      final releaseShow = Completer<void>();
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(channel, (call) async {
-            calls.add(call);
-            if (call.method == 'show' && !showStarted.isCompleted) {
-              showStarted.complete();
-              await releaseShow.future;
-            }
-            return true;
-          });
-      final older = tray.update(trayState: running.copyWith(mode: Mode.global));
-      await showStarted.future;
-      final disabled = tray.update(
-        trayState: running.copyWith(showTrayTitle: false),
-      );
-      final refresh = tray.updateTraffic(const Traffic(up: 2048, down: 16384));
-      releaseShow.complete();
-      await Future.wait([older, disabled, refresh]);
-      expect(calls.last.arguments['title'], '');
-      await tray.updateTraffic(speed);
-      expect(calls.last.arguments['title'], '');
-    },
-    skip: !Platform.isMacOS,
-  );
+  test('an older menu refresh cannot restore a disabled title', () async {
+    final tray = Tray();
+    await tray.update(trayState: running);
+    const speed = Traffic(up: 1024, down: 8192);
+    await tray.updateTraffic(speed);
+    final showStarted = Completer<void>();
+    final releaseShow = Completer<void>();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          calls.add(call);
+          if (call.method == 'show' && !showStarted.isCompleted) {
+            showStarted.complete();
+            await releaseShow.future;
+          }
+          return true;
+        });
+    final older = tray.update(trayState: running.copyWith(mode: Mode.global));
+    await showStarted.future;
+    final disabled = tray.update(
+      trayState: running.copyWith(showTrayTitle: false),
+    );
+    final refresh = tray.updateTraffic(const Traffic(up: 2048, down: 16384));
+    releaseShow.complete();
+    await Future.wait([older, disabled, refresh]);
+    expect(calls.last.arguments['title'], '');
+    await tray.updateTraffic(speed);
+    expect(calls.last.arguments['title'], '');
+  }, skip: !Platform.isMacOS);
 }

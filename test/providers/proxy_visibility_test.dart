@@ -13,35 +13,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test(
-    'search matches all words across name and protocol without case sensitivity',
-    () {
-      expect(
-        SearchQuery(
-          '  hong \n SHADOW ',
-        ).matches(['Hong Kong 01', 'Shadowsocks']),
-        isTrue,
-      );
-      expect(
-        SearchQuery('hong vless').matches(['Hong Kong', 'Shadowsocks']),
-        isFalse,
-      );
-      expect(SearchQuery('香港 ss').matches(['香港 01', 'ss']), isTrue);
-      expect(SearchQuery(' \t ').isEmpty, isTrue);
-      expect(SearchQuery('unknown').matches([null, '']), isFalse);
-    },
-  );
+  test('search matches all words across name and protocol without case sensitivity', () {
+    expect(
+      SearchQuery('  hong \n SHADOW ').matches(['Hong Kong 01', 'Shadowsocks']),
+      isTrue,
+    );
+    expect(
+      SearchQuery('hong vless').matches(['Hong Kong', 'Shadowsocks']),
+      isFalse,
+    );
+    expect(SearchQuery('香港 ss').matches(['香港 01', 'ss']), isTrue);
+    expect(SearchQuery(' \t ').isEmpty, isTrue);
+    expect(SearchQuery('unknown').matches([null, '']), isFalse);
+  });
 
-  test(
-    'hide-timeout preference survives JSON and defaults off for existing configs',
-    () {
-      expect(ProxiesStyleProps.fromJson({}).hideTimeoutProxies, isFalse);
-      final saved = jsonDecode(
-        jsonEncode(const ProxiesStyleProps(hideTimeoutProxies: true)),
-      );
-      expect(ProxiesStyleProps.fromJson(saved).hideTimeoutProxies, isTrue);
-    },
-  );
+  test('hide-timeout preference survives JSON and defaults off for existing configs', () {
+    expect(ProxiesStyleProps.fromJson({}).hideTimeoutProxies, isFalse);
+    final saved = jsonDecode(
+      jsonEncode(const ProxiesStyleProps(hideTimeoutProxies: true)),
+    );
+    expect(ProxiesStyleProps.fromJson(saved).hideTimeoutProxies, isTrue);
+  });
 
   test(
     'filter keeps selection, unprobeable nodes, queued and untested nodes',
@@ -159,106 +151,100 @@ void main() {
     );
   });
 
-  test(
-    'visibility updates at batch completion, survives unrelated rebuilds and resets on clear',
-    () async {
-      const group = Group(
-        name: 'Group',
-        type: GroupType.Selector,
-        now: 'selected',
-        all: [
-          Proxy(name: 'selected', type: 'ss'),
-          Proxy(name: 'Hong Kong', type: 'Shadowsocks'),
-        ],
-      );
-      final container = ProviderContainer(
-        overrides: [
-          groupsProvider.overrideWithBuild((_, _) => [group]),
-          selectedMapProvider.overrideWith((_) => {}),
-          realTestUrlProvider().overrideWith((_) => 'url'),
-          proxiesStyleSettingProvider.overrideWithBuild(
-            (_, _) => const ProxiesStyleProps(hideTimeoutProxies: true),
-          ),
-        ],
-      );
-      addTearDown(container.dispose);
-      final watch = container.listen(
-        visibleGroupsStateProvider,
-        (_, _) {},
-        fireImmediately: true,
-      );
-      addTearDown(watch.close);
-      List<String> names() => container
-          .read(visibleGroupsStateProvider)
+  test('visibility updates at batch completion, survives unrelated rebuilds and resets on clear', () async {
+    const group = Group(
+      name: 'Group',
+      type: GroupType.Selector,
+      now: 'selected',
+      all: [
+        Proxy(name: 'selected', type: 'ss'),
+        Proxy(name: 'Hong Kong', type: 'Shadowsocks'),
+      ],
+    );
+    final container = ProviderContainer(
+      overrides: [
+        groupsProvider.overrideWithBuild((_, _) => [group]),
+        selectedMapProvider.overrideWith((_) => {}),
+        realTestUrlProvider().overrideWith((_) => 'url'),
+        proxiesStyleSettingProvider.overrideWithBuild(
+          (_, _) => const ProxiesStyleProps(hideTimeoutProxies: true),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    final watch = container.listen(
+      visibleGroupsStateProvider,
+      (_, _) {},
+      fireImmediately: true,
+    );
+    addTearDown(watch.close);
+    List<String> names() => container
+        .read(visibleGroupsStateProvider)
+        .value
+        .single
+        .all
+        .map((p) => p.name)
+        .toList();
+    expect(names(), ['selected', 'Hong Kong']);
+    final delays = container.read(delayDataSourceProvider.notifier);
+    delays.setDelay(const Delay(name: 'Hong Kong', url: 'url', value: -1));
+    expect(names(), ['selected', 'Hong Kong']);
+    container.read(groupsProvider.notifier).value = [
+      group.copyWith(icon: 'changed'),
+    ];
+    expect(names(), ['selected', 'Hong Kong']);
+    expect(
+      container
+          .read(filterGroupsStateProvider(' hong SHADOW '))
           .value
           .single
           .all
-          .map((p) => p.name)
-          .toList();
-      expect(names(), ['selected', 'Hong Kong']);
-      final delays = container.read(delayDataSourceProvider.notifier);
-      delays.setDelay(const Delay(name: 'Hong Kong', url: 'url', value: -1));
-      expect(names(), ['selected', 'Hong Kong']);
-      container.read(groupsProvider.notifier).value = [
-        group.copyWith(icon: 'changed'),
-      ];
-      expect(names(), ['selected', 'Hong Kong']);
-      expect(
-        container
-            .read(filterGroupsStateProvider(' hong SHADOW '))
-            .value
-            .single
-            .all
-            .single
-            .name,
-        'Hong Kong',
-      );
-      container.read(sortNumProvider.notifier).add();
-      expect(names(), ['selected']);
-      expect(container.read(filterGroupsStateProvider('hong')).value, isEmpty);
-      delays.clear();
-      await container.pump();
-      expect(names(), ['selected', 'Hong Kong']);
-      expect(container.read(groupsProvider).single.all, hasLength(2));
-    },
-  );
+          .single
+          .name,
+      'Hong Kong',
+    );
+    container.read(sortNumProvider.notifier).add();
+    expect(names(), ['selected']);
+    expect(container.read(filterGroupsStateProvider('hong')).value, isEmpty);
+    delays.clear();
+    await container.pump();
+    expect(names(), ['selected', 'Hong Kong']);
+    expect(container.read(groupsProvider).single.all, hasLength(2));
+  });
 
-  test(
-    'queued and running phases reject stale completions and clear with the generation',
-    () {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-      final delays = container.read(delayDataSourceProvider.notifier);
-      final phases = container.read(pendingDelayTestsProvider.notifier);
-      const target = (name: 'Node', url: 'url');
-      final first = delays.begin();
-      phases.queue([target], generation: first);
-      phases.start(target, generation: first);
-      expect(
-        container.read(pendingDelayTestsProvider)[target],
-        DelayTestPhase.running,
-      );
-      final next = delays.begin();
-      expect(container.read(pendingDelayTestsProvider), isEmpty);
-      phases.queue([target], generation: next);
-      phases.start(target, generation: first);
-      delays.setDelay(
-        const Delay(name: 'Node', url: 'url', value: 10),
-        generation: first,
-      );
-      expect(
-        container.read(pendingDelayTestsProvider)[target],
-        DelayTestPhase.queued,
-      );
-      phases.start(target, generation: next);
-      delays.setDelay(
-        const Delay(name: 'Node', url: 'url', value: null),
-        generation: next,
-      );
-      expect(container.read(pendingDelayTestsProvider), isEmpty);
-      phases.queue([target], generation: next);
-      delays.clear();
-      expect(container.read(pendingDelayTestsProvider), isEmpty);
-    },
-  );
+  test('queued and running phases reject stale completions and clear with the generation', () {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    final delays = container.read(delayDataSourceProvider.notifier);
+    final phases = container.read(pendingDelayTestsProvider.notifier);
+    const target = (name: 'Node', url: 'url');
+    final first = delays.begin();
+    phases.queue([target], generation: first);
+    phases.start(target, generation: first);
+    expect(
+      container.read(pendingDelayTestsProvider)[target],
+      DelayTestPhase.running,
+    );
+    final next = delays.begin();
+    expect(container.read(pendingDelayTestsProvider), isEmpty);
+    phases.queue([target], generation: next);
+    phases.start(target, generation: first);
+    delays.setDelay(
+      const Delay(name: 'Node', url: 'url', value: 10),
+      generation: first,
+    );
+    expect(
+      container.read(pendingDelayTestsProvider)[target],
+      DelayTestPhase.queued,
+    );
+    phases.start(target, generation: next);
+    delays.setDelay(
+      const Delay(name: 'Node', url: 'url', value: null),
+      generation: next,
+    );
+    expect(container.read(pendingDelayTestsProvider), isEmpty);
+    phases.queue([target], generation: next);
+    delays.clear();
+    expect(container.read(pendingDelayTestsProvider), isEmpty);
+  });
 }

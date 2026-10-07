@@ -256,9 +256,8 @@ Future<bool> migrateLegacyApplicationSupportDirectory({
   try {
     if (await _directoryHasEntries(destination)) return false;
     await _copyApplicationSupportDirectory(source, temporary);
-    await File(
-      join(temporary.path, identityMigrationMarkerName),
-    ).writeAsString(legacyPackageName, flush: true);
+    await File(join(temporary.path, identityMigrationMarkerName))
+        .writeAsString(legacyPackageName, flush: true);
     if (await _directoryHasEntries(destination)) return false;
     if (await destination.exists()) {
       await destination.delete(recursive: true);

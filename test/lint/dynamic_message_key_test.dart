@@ -56,7 +56,11 @@ void main() {
     expect(byFile, isNotEmpty, reason: 'no .arb files were read from $_arbDir');
 
     final reference = byFile[_referenceArb];
-    expect(reference, isNotNull, reason: '$_arbDir/$_referenceArb is the reference');
+    expect(
+      reference,
+      isNotNull,
+      reason: '$_arbDir/$_referenceArb is the reference',
+    );
 
     for (final entry in byFile.entries) {
       expect(

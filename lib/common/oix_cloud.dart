@@ -30,15 +30,16 @@ Future<T?> createAndActivateManagedProfile<T>({
 
 typedef ManagedProfileDeduplicator<T> = Future<void> Function(List<T> profiles);
 
-typedef ManagedProfileRefresher<T> =
-    Future<T> Function(
-      T profile, {
-      required bool showLoading,
-      required bool applyIfCurrent,
-    });
+typedef ManagedProfileRefresher<T> = Future<T> Function(
+  T profile, {
+  required bool showLoading,
+  required bool applyIfCurrent,
+});
 
-typedef ManagedProfileActivator<T> =
-    Future<void> Function(T profile, {required bool applyIfRunning});
+typedef ManagedProfileActivator<T> = Future<void> Function(
+  T profile, {
+  required bool applyIfRunning,
+});
 
 class CloudManagedProfileUpdateFlow<T> {
   final ManagedProfileDeduplicator<T> deduplicate;

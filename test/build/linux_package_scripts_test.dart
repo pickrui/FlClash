@@ -15,13 +15,9 @@ void main() {
       () async {
         final root = Directory.systemTemp.createTempSync('flclash-package-');
         addTearDown(() => root.deleteSync(recursive: true));
-        final config =
-            loadYaml(
-                  File(
-                    'linux/packaging/$format/make_config.yaml',
-                  ).readAsStringSync(),
-                )
-                as YamlMap;
+        final config = loadYaml(
+          File('linux/packaging/$format/make_config.yaml').readAsStringSync(),
+        ) as YamlMap;
         String script(String key) => (config[key] as YamlList)
             .join('\n')
             .replaceAll('/usr/share/FlClash', '${root.path}/app')
@@ -76,9 +72,8 @@ void main() {
         await run('postinstall_scripts', 'configure');
         expect(log.readAsStringSync(), contains('helper install owner=1000'));
         final installed = Directory('${root.path}/installed')..createSync();
-        File(
-          '${installed.path}/core',
-        ).writeAsStringSync('retained until removal');
+        File('${installed.path}/core')
+            .writeAsStringSync('retained until removal');
         log.writeAsStringSync('');
         await run('postuninstall_scripts', format == 'deb' ? 'upgrade' : '1');
         expect(unit.existsSync(), true);

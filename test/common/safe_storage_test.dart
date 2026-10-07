@@ -420,9 +420,8 @@ void main() {
       expect(await SafeStorage.read('cloud_token'), isNull);
       await SafeStorage.useLocalFileStorage();
       expect(keychainCalls, isEmpty);
-      final stored = await File(
-        '${storageDirectory.path}/storage.json',
-      ).readAsString();
+      final stored = await File('${storageDirectory.path}/storage.json')
+          .readAsString();
       expect(jsonDecode(stored), {'config_age_seed': 'seed'});
     }, skip: Platform.isWindows);
 

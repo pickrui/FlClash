@@ -5,7 +5,9 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
+
 import 'dart:ui' show Brightness, Size;
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'common.dart';

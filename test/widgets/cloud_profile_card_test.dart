@@ -101,9 +101,8 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     final profile = ValueNotifier(
-      _cloudProfile(
-        planRank: 40,
-      ).copyWith(balance: '123456.78', commission: '98765.43'),
+      _cloudProfile(planRank: 40)
+          .copyWith(balance: '123456.78', commission: '98765.43'),
     );
     addTearDown(profile.dispose);
     await _pumpCard(tester, profile);

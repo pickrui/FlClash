@@ -64,9 +64,8 @@ bool canRecoverGeoDownload(Object error) {
   }
   return message.startsWith('GEO download ') ||
       message.startsWith('invalid GEO download URL') ||
-      RegExp(
-        r'^invalid (MMDB|ASN|GEOIP|GEOSITE) database file:',
-      ).hasMatch(message) ||
+      RegExp(r'^invalid (MMDB|ASN|GEOIP|GEOSITE) database file:')
+          .hasMatch(message) ||
       failedGeoResource(error) != null ||
       failedGeoDownloadUrl(error) != null;
 }

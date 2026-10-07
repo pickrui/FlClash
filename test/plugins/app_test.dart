@@ -102,26 +102,23 @@ void main() {
     await completed.future;
   }
 
-  test(
-    'package events invalidate both cached missing icons and app list subscribers',
-    () async {
-      var calls = 0;
-      var changes = 0;
-      final api = App();
-      final subscription = api.packageChanges.listen((_) => changes++);
-      addTearDown(subscription.cancel);
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(
-            channel,
-            (_) async => ++calls == 1 ? null : '/icons/updated.png',
-          );
-      expect(await api.getPackageIcon('updated.app'), isNull);
-      await packagesChanged();
-      expect(changes, 1);
-      expect(await api.getPackageIcon('updated.app'), isNotNull);
-      expect(calls, 2);
-    },
-  );
+  test('package events invalidate both cached missing icons and app list subscribers', () async {
+    var calls = 0;
+    var changes = 0;
+    final api = App();
+    final subscription = api.packageChanges.listen((_) => changes++);
+    addTearDown(subscription.cancel);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          channel,
+          (_) async => ++calls == 1 ? null : '/icons/updated.png',
+        );
+    expect(await api.getPackageIcon('updated.app'), isNull);
+    await packagesChanged();
+    expect(changes, 1);
+    expect(await api.getPackageIcon('updated.app'), isNotNull);
+    expect(calls, 2);
+  });
 
   test(
     'an old icon completion cannot overwrite or remove a new lookup',
