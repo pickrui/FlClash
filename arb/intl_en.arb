@@ -1071,6 +1071,7 @@
   "overwriteIssueNoProxySource": "No proxies or proxy providers are selected, so the core rejects this group",
   "overwriteIssueMissingProxies": "These proxies or policies do not exist: {names}",
   "overwriteIssueMissingProviders": "These proxy providers do not exist: {names}",
+  "overwriteIssueEmptyFallback": "The empty-group fallback must be an existing node or built-in outbound, not a proxy group: {name}",
   "overwriteIssueGroupLoop": "Proxy groups reference each other in a loop: {path}",
   "invalidPolicy": "{target} is an invalid policy",
   "invalidRuleSet": "{ruleSet} is an invalid rule set",

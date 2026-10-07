@@ -163,6 +163,86 @@ void main() {
     expect(replaced.groups[0]!.single.kind, RoutingIssueKind.missingProxies);
   });
 
+  test('missing empty fallbacks are checked once source data is available', () {
+    final candidate = profile.copyWith(
+      customProxyGroups: const [
+        ProxyGroup(
+          name: 'Personal',
+          type: GroupType.Selector,
+          proxies: ['DIRECT'],
+          emptyFallback: 'Removed node',
+        ),
+      ],
+    );
+    expect(inspectCustomRouting(candidate).groups, isEmpty);
+    final issue = inspectCustomRouting(candidate, raw: {}).groups[0]!.single;
+    expect(issue.kind, RoutingIssueKind.invalidEmptyFallback);
+    expect(issue.names, ['Removed node']);
+  });
+
+  test('empty fallbacks reject groups including GLOBAL', () {
+    for (final fallback in ['Personal', 'Subscription', 'GLOBAL']) {
+      final candidate = profile.copyWith(
+        overwriteType: OverwriteType.merge,
+        customProxyGroups: [
+          ProxyGroup(
+            name: 'Personal',
+            type: GroupType.Selector,
+            proxies: const ['DIRECT'],
+            emptyFallback: fallback,
+          ),
+        ],
+      );
+      final issue = inspectCustomRouting(
+        candidate,
+        raw: {
+          'proxy-groups': [
+            {
+              'name': 'Subscription',
+              'proxies': ['DIRECT'],
+            },
+          ],
+        },
+      ).groups[0]!.single;
+      expect(issue.kind, RoutingIssueKind.invalidEmptyFallback);
+      expect(issue.names, [fallback]);
+    }
+  });
+
+  test('empty fallbacks accept nodes, built-ins and the default', () {
+    for (final fallback in [
+      null,
+      '',
+      ...reservedOutboundNames.where((name) => name != 'GLOBAL'),
+      'Node',
+      'Tailnet',
+    ]) {
+      final candidate = profile.copyWith(
+        customProxyGroups: [
+          ProxyGroup(
+            name: 'Personal',
+            type: GroupType.Selector,
+            proxies: const ['DIRECT'],
+            emptyFallback: fallback,
+          ),
+        ],
+      );
+      expect(
+        inspectCustomRouting(
+          candidate,
+          raw: {
+            'proxies': [
+              {'name': 'Node'},
+            ],
+          },
+          additionalTargets: ['Tailnet'],
+        ).groups,
+        isEmpty,
+        reason: '$fallback',
+      );
+    }
+  });
+
   test(
     'checks rule sets and sub-rules while preserving advanced rule syntax',
     () {

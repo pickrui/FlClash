@@ -1071,6 +1071,7 @@
   "overwriteIssueNoProxySource": "未选择任何代理或代理集，内核会拒绝该策略组",
   "overwriteIssueMissingProxies": "以下代理或策略不存在：{names}",
   "overwriteIssueMissingProviders": "以下代理集不存在：{names}",
+  "overwriteIssueEmptyFallback": "空组回退必须指向已有节点或内置出站，不能指向策略组：{name}",
   "overwriteIssueGroupLoop": "策略组之间存在循环引用：{path}",
   "invalidPolicy": "{target} 是一个无效的策略",
   "invalidRuleSet": "{ruleSet} 不是有效的规则集",

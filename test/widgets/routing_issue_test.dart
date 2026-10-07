@@ -43,6 +43,7 @@ void main() {
                 name: 'Personal',
                 type: GroupType.Selector,
                 proxies: ['Removed node'],
+                emptyFallback: 'Other',
               ),
             ],
           ),
@@ -91,7 +92,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       tester.widget<SelectableText>(find.byType(SelectableText)).data,
-      contains('Removed node'),
+      allOf(contains('Removed node'), contains('Other')),
     );
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox());

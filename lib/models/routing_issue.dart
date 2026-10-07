@@ -13,6 +13,7 @@ enum RoutingIssueKind {
   noProxySource,
   missingProxies,
   missingProviders,
+  invalidEmptyFallback,
   groupLoop,
   missingTarget,
   missingRuleSet,
@@ -64,6 +65,11 @@ RoutingIssues inspectCustomRouting(
     ...groups.map((group) => group.name),
     ...additionalTargets,
   };
+  final fallbackTargets = {
+    ...reservedOutboundNames.where((name) => name != 'GLOBAL'),
+    ...proxies,
+    ...additionalTargets,
+  };
   final groupNames = <String, int>{};
   for (final group in groups) {
     groupNames.update(group.name, (count) => count + 1, ifAbsent: () => 1);
@@ -106,6 +112,14 @@ RoutingIssues inspectCustomRouting(
               .where((name) => !providers.contains(name))
               .toList();
     final cycle = loop(group.name);
+    final fallback = group.emptyFallback;
+    final invalidFallback =
+        fallback != null &&
+        fallback.isNotEmpty &&
+        (fallback == 'GLOBAL' ||
+            groupNames.containsKey(fallback) ||
+            rawGroups.contains(fallback) ||
+            (raw != null && !fallbackTargets.contains(fallback)));
     final issues = <RoutingIssue>[
       if (group.name.trim().isEmpty)
         const RoutingIssue(RoutingIssueKind.emptyName)
@@ -127,6 +141,8 @@ RoutingIssues inspectCustomRouting(
         RoutingIssue(RoutingIssueKind.missingProxies, missing),
       if (missingProviders.isNotEmpty)
         RoutingIssue(RoutingIssueKind.missingProviders, missingProviders),
+      if (invalidFallback)
+        RoutingIssue(RoutingIssueKind.invalidEmptyFallback, [fallback]),
       if (cycle != null) RoutingIssue(RoutingIssueKind.groupLoop, cycle),
       if (group.type == GroupType.Relay)
         const RoutingIssue(RoutingIssueKind.relay),

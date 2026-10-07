@@ -1071,6 +1071,7 @@
   "overwriteIssueNoProxySource": "Не выбраны ни прокси, ни провайдеры прокси, поэтому ядро отклонит эту группу",
   "overwriteIssueMissingProxies": "Эти прокси или политики не существуют: {names}",
   "overwriteIssueMissingProviders": "Эти провайдеры прокси не существуют: {names}",
+  "overwriteIssueEmptyFallback": "Резервный выход пустой группы должен быть существующим узлом или встроенным выходом, а не группой прокси: {name}",
   "overwriteIssueGroupLoop": "Группы прокси ссылаются друг на друга по кругу: {path}",
   "invalidPolicy": "{target} — недопустимая политика",
   "invalidRuleSet": "{ruleSet} — недопустимый набор правил",

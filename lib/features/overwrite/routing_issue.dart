@@ -27,6 +27,9 @@ String routingIssueMessage(RoutingIssue issue, AppLocalizations l10n) =>
       RoutingIssueKind.missingProviders => l10n.overwriteIssueMissingProviders(
         issue.names.join(', '),
       ),
+      RoutingIssueKind.invalidEmptyFallback => l10n.overwriteIssueEmptyFallback(
+        issue.names.first,
+      ),
       RoutingIssueKind.groupLoop => l10n.overwriteIssueGroupLoop(
         issue.names.join(' › '),
       ),

@@ -1071,6 +1071,7 @@
   "overwriteIssueNoProxySource": "プロキシもプロキシプロバイダーも選択されていないため、コアはこのグループを拒否します",
   "overwriteIssueMissingProxies": "次のプロキシまたはポリシーは存在しません：{names}",
   "overwriteIssueMissingProviders": "次のプロキシプロバイダーは存在しません：{names}",
+  "overwriteIssueEmptyFallback": "空のグループのフォールバックには、プロキシグループではなく、既存のノードまたは組み込みアウトバウンドを指定してください：{name}",
   "overwriteIssueGroupLoop": "プロキシグループが循環参照しています：{path}",
   "invalidPolicy": "{target} は無効なポリシーです",
   "invalidRuleSet": "{ruleSet} は無効なルールセットです",

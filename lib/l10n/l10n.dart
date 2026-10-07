@@ -9210,6 +9210,16 @@ class AppLocalizations {
     );
   }
 
+  /// `The empty-group fallback must be an existing node or built-in outbound, not a proxy group: {name}`
+  String overwriteIssueEmptyFallback(Object name) {
+    return Intl.message(
+      'The empty-group fallback must be an existing node or built-in outbound, not a proxy group: $name',
+      name: 'overwriteIssueEmptyFallback',
+      desc: '',
+      args: [name],
+    );
+  }
+
   /// `Proxy groups reference each other in a loop: {path}`
   String overwriteIssueGroupLoop(Object path) {
     return Intl.message(
