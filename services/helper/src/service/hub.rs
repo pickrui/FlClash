@@ -19,6 +19,8 @@ use std::future::Future;
 use std::io::{BufRead, Error, Read};
 #[cfg(windows)]
 use std::os::windows::fs::OpenOptionsExt;
+#[cfg(windows)]
+use std::os::windows::io::AsRawHandle;
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 use std::sync::Mutex;
@@ -28,6 +30,15 @@ use warp::http::{HeaderMap, StatusCode};
 use warp::{Filter, Rejection, Reply};
 #[cfg(windows)]
 use windows_sys::Win32::Storage::FileSystem::FILE_SHARE_READ;
+#[cfg(windows)]
+use windows_sys::Win32::{
+    Foundation::{CloseHandle, HANDLE},
+    System::JobObjects::{
+        AssignProcessToJobObject, CreateJobObjectW, JobObjectExtendedLimitInformation,
+        SetInformationJobObject, JOBOBJECT_EXTENDED_LIMIT_INFORMATION,
+        JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE,
+    },
+};
 
 #[cfg(not(target_os = "linux"))]
 const LISTEN_PORT: u16 = 47890;
@@ -100,9 +111,30 @@ struct ErrorResponse {
 struct ManagedCore {
     session_id: String,
     child: Child,
+    #[cfg(windows)]
+    _job: CoreJob,
 }
 
 impl ManagedCore {
+    fn adopt(session_id: String, child: Child) -> Result<Self, Error> {
+        #[cfg(windows)]
+        let job = match CoreJob::bind(&child) {
+            Ok(job) => job,
+            Err(error) => {
+                let mut child = child;
+                let _ = child.kill();
+                let _ = child.wait();
+                return Err(error);
+            }
+        };
+        Ok(Self {
+            session_id,
+            child,
+            #[cfg(windows)]
+            _job: job,
+        })
+    }
+
     fn terminate(&mut self) -> Result<(), Error> {
         #[cfg(target_os = "linux")]
         {
@@ -129,6 +161,46 @@ impl ManagedCore {
                 return Err(Error::other("Core did not exit after termination"));
             }
             thread::sleep(CORE_EXIT_POLL_INTERVAL);
+        }
+    }
+}
+
+#[cfg(windows)]
+struct CoreJob(HANDLE);
+
+#[cfg(windows)]
+impl CoreJob {
+    fn bind(child: &Child) -> Result<Self, Error> {
+        unsafe {
+            let job = CreateJobObjectW(std::ptr::null(), std::ptr::null());
+            if job == 0 {
+                return Err(Error::last_os_error());
+            }
+            let job = Self(job);
+            let mut limits: JOBOBJECT_EXTENDED_LIMIT_INFORMATION = std::mem::zeroed();
+            limits.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+            if SetInformationJobObject(
+                job.0,
+                JobObjectExtendedLimitInformation,
+                &limits as *const _ as *const _,
+                std::mem::size_of::<JOBOBJECT_EXTENDED_LIMIT_INFORMATION>() as u32,
+            ) == 0
+            {
+                return Err(Error::last_os_error());
+            }
+            if AssignProcessToJobObject(job.0, child.as_raw_handle() as HANDLE) == 0 {
+                return Err(Error::last_os_error());
+            }
+            Ok(job)
+        }
+    }
+}
+
+#[cfg(windows)]
+impl Drop for CoreJob {
+    fn drop(&mut self) {
+        unsafe {
+            CloseHandle(self.0);
         }
     }
 }
@@ -363,15 +435,16 @@ fn start(start_params: StartParams) -> warp::reply::Response {
     }
 
     match core.spawn(&start_params.address) {
-        Ok(mut child) => {
-            let process_id = child.id();
-            if let Some(stderr) = child.stderr.take() {
+        Ok(child) => {
+            let mut owned = match ManagedCore::adopt(start_params.session_id.clone(), child) {
+                Ok(owned) => owned,
+                Err(error) => return launch_failure_response(&error),
+            };
+            let process_id = owned.child.id();
+            if let Some(stderr) = owned.child.stderr.take() {
                 thread::spawn(move || forward_core_stderr(io::BufReader::new(stderr)));
             }
-            *managed = Some(ManagedCore {
-                session_id: start_params.session_id.clone(),
-                child,
-            });
+            *managed = Some(owned);
             json_response(
                 &StartResponse {
                     session_id: start_params.session_id,
@@ -612,6 +685,13 @@ async fn handle_rejection(rejection: Rejection) -> Result<warp::reply::Response,
             StatusCode::BAD_REQUEST,
         ));
     }
+    if rejection.find::<warp::reject::MethodNotAllowed>().is_some() {
+        return Ok(error_response(
+            "methodNotAllowed",
+            "Helper method not allowed",
+            StatusCode::METHOD_NOT_ALLOWED,
+        ));
+    }
     if rejection.is_not_found() {
         return Ok(error_response(
             "notFound",
@@ -627,29 +707,29 @@ async fn handle_rejection(rejection: Rejection) -> Result<warp::reply::Response,
 }
 
 pub(super) fn routes() -> impl Filter<Extract = (impl Reply,), Error = Infallible> + Clone {
-    let api_ping = warp::get()
-        .and(warp::path("ping"))
+    let api_ping = warp::path("ping")
         .and(warp::path::end())
+        .and(warp::get())
         .and(warp::query::<PingParams>())
         .and_then(ping_request);
 
-    let api_start = warp::post()
-        .and(warp::path("start"))
+    let api_start = warp::path("start")
         .and(warp::path::end())
+        .and(warp::post())
         .and(warp::body::content_length_limit(MAX_REQUEST_BYTES))
         .and(warp::body::json())
         .and_then(start_request);
 
-    let api_stop = warp::post()
-        .and(warp::path("stop"))
+    let api_stop = warp::path("stop")
         .and(warp::path::end())
+        .and(warp::post())
         .and(warp::body::content_length_limit(MAX_REQUEST_BYTES))
         .and(warp::body::json())
         .and_then(stop_request);
 
-    let api_logs = warp::get()
-        .and(warp::path("logs"))
+    let api_logs = warp::path("logs")
         .and(warp::path::end())
+        .and(warp::get())
         .map(get_logs);
 
     // A loopback listener alone does not exclude browser requests or DNS rebinding.
@@ -759,10 +839,42 @@ mod tests {
     }
 
     fn adopt_core(session_id: &str) {
-        *MANAGED_CORE.lock().unwrap() = Some(ManagedCore {
-            session_id: session_id.to_string(),
-            child: spawn_running_core(),
-        });
+        *MANAGED_CORE.lock().unwrap() =
+            Some(ManagedCore::adopt(session_id.to_string(), spawn_running_core()).unwrap());
+    }
+
+    #[tokio::test]
+    async fn routes_distinguish_unknown_paths_from_wrong_methods() {
+        for (method, path, status) in [
+            ("GET", "/start", StatusCode::METHOD_NOT_ALLOWED),
+            ("POST", "/ping", StatusCode::METHOD_NOT_ALLOWED),
+            ("DELETE", "/unknown", StatusCode::NOT_FOUND),
+        ] {
+            let response = helper_request()
+                .method(method)
+                .path(path)
+                .reply(&routes())
+                .await;
+            assert_eq!(response.status(), status);
+        }
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn dropping_the_job_terminates_its_core() {
+        let mut child = spawn_running_core();
+        let job = CoreJob::bind(&child).unwrap();
+        drop(job);
+        let deadline = Instant::now() + Duration::from_secs(5);
+        while child.try_wait().unwrap().is_none() && Instant::now() < deadline {
+            thread::sleep(CORE_EXIT_POLL_INTERVAL);
+        }
+        let exited = child.try_wait().unwrap().is_some();
+        if !exited {
+            let _ = child.kill();
+            let _ = child.wait();
+        }
+        assert!(exited);
     }
 
     #[tokio::test]
@@ -990,10 +1102,13 @@ mod tests {
     #[allow(clippy::await_holding_lock)]
     async fn start_releases_the_managed_core_before_rejecting_an_unverified_core() {
         let _state = lock_process_state();
-        *MANAGED_CORE.lock().unwrap() = Some(ManagedCore {
-            session_id: "fedcba9876543210fedcba9876543210".to_string(),
-            child: spawn_placeholder_core(),
-        });
+        *MANAGED_CORE.lock().unwrap() = Some(
+            ManagedCore::adopt(
+                "fedcba9876543210fedcba9876543210".to_string(),
+                spawn_placeholder_core(),
+            )
+            .unwrap(),
+        );
 
         let response = helper_request()
             .method("POST")
@@ -1071,10 +1186,13 @@ mod tests {
 
     #[test]
     fn terminate_confirms_the_exit_of_a_running_core() {
-        let mut managed = Some(ManagedCore {
-            session_id: "0123456789abcdef0123456789abcdef".to_string(),
-            child: spawn_running_core(),
-        });
+        let mut managed = Some(
+            ManagedCore::adopt(
+                "0123456789abcdef0123456789abcdef".to_string(),
+                spawn_running_core(),
+            )
+            .unwrap(),
+        );
 
         release_managed_core(&mut managed).unwrap();
 

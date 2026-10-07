@@ -16,8 +16,10 @@ use tokio::sync::watch;
 use windows_service::{
     define_windows_service,
     service::{
-        Service, ServiceAccess, ServiceControl, ServiceControlAccept, ServiceErrorControl,
-        ServiceExitCode, ServiceInfo, ServiceStartType, ServiceState, ServiceStatus, ServiceType,
+        Service, ServiceAccess, ServiceAction, ServiceActionType, ServiceControl,
+        ServiceControlAccept, ServiceErrorControl, ServiceExitCode, ServiceFailureActions,
+        ServiceFailureResetPeriod, ServiceInfo, ServiceStartType, ServiceState, ServiceStatus,
+        ServiceType,
     },
     service_control_handler::{self, ServiceControlHandlerResult},
     service_dispatcher,
@@ -180,9 +182,21 @@ fn install_service() -> Result<()> {
     let service = manager
         .create_service(
             &service_info,
-            ServiceAccess::QUERY_STATUS | ServiceAccess::START,
+            ServiceAccess::QUERY_STATUS | ServiceAccess::START | ServiceAccess::CHANGE_CONFIG,
         )
         .context("create helper service")?;
+    let restart = ServiceAction {
+        action_type: ServiceActionType::Restart,
+        delay: Duration::from_secs(5),
+    };
+    service
+        .update_failure_actions(ServiceFailureActions {
+            reset_period: ServiceFailureResetPeriod::After(Duration::from_secs(24 * 60 * 60)),
+            reboot_msg: None,
+            command: None,
+            actions: Some(vec![restart.clone(), restart.clone(), restart]),
+        })
+        .context("configure helper service recovery")?;
     if let Err(error) = service.start::<&OsStr>(&[]) {
         if !has_error_code(&error, ERROR_SERVICE_ALREADY_RUNNING) {
             return Err(error).context("start helper service");
