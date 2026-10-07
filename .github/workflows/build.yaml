@@ -440,8 +440,8 @@ jobs:
         id: build
         shell: bash
         env:
-          FLUTTER_VERSION_NUMBER: ${{ needs.version.outputs.version_number }}
-          FLUTTER_BUILD_NUMBER: ${{ needs.version.outputs.build_number }}
+          FLCLASH_VERSION_NUMBER: ${{ needs.version.outputs.version_number }}
+          FLCLASH_BUILD_NUMBER: ${{ needs.version.outputs.build_number }}
           PROFILE_KEY: ${{ secrets.PROFILE_KEY }}
           BASE_DOMAIN: ${{ secrets.BASE_DOMAIN }}
           SPARE_DOMAIN: ${{ secrets.SPARE_DOMAIN }}

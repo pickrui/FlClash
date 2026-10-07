@@ -91,7 +91,7 @@ class Build {
     final sourceVersion = config['version'] as String?;
     final env = environment ?? Platform.environment;
     final version =
-        env['FLUTTER_VERSION_NUMBER'] ?? sourceVersion?.split('+').first;
+        env['FLCLASH_VERSION_NUMBER'] ?? sourceVersion?.split('+').first;
     if (version == null ||
         !RegExp(r'^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$').hasMatch(version)) {
       throw const FormatException('Invalid app version');
@@ -99,7 +99,7 @@ class Build {
     // CI supplies the shared batch timestamp. Local builds always read the
     // clock; an old or future pubspec suffix must never become a lower bound.
     final buildNumber =
-        env['FLUTTER_BUILD_NUMBER'] ??
+        env['FLCLASH_BUILD_NUMBER'] ??
         buildNumberForTime(now ?? DateTime.now());
     if (!RegExp(r'^\d{10}$').hasMatch(buildNumber)) {
       throw const FormatException('Build number must use yyyyMMddHH');

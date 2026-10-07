@@ -68,8 +68,8 @@ void main() {
         pubspecFile: pubspec,
         now: DateTime.utc(2026, 9, 16, 1),
         environment: {
-          'FLUTTER_VERSION_NUMBER': '0.8.97',
-          'FLUTTER_BUILD_NUMBER': '2026091519',
+          'FLCLASH_VERSION_NUMBER': '0.8.97',
+          'FLCLASH_BUILD_NUMBER': '2026091519',
         },
       );
       expect(pubspec.readAsStringSync(), 'version: 0.8.97+2026091519\n');
@@ -80,7 +80,7 @@ void main() {
       setup.Build.prepareAppVersion(
         pubspecFile: pubspec,
         now: DateTime.utc(2026, 9, 15, 11),
-        environment: {'FLUTTER_VERSION_NUMBER': '0.8.98-beta.1'},
+        environment: {'FLCLASH_VERSION_NUMBER': '0.8.98-beta.1'},
       );
       expect(pubspec.readAsStringSync(), 'version: 0.8.98-beta.1+2026091519\n');
     });
@@ -88,9 +88,9 @@ void main() {
     test('invalid overrides fail without changing the source', () {
       const source = 'version: 0.8.97+2026092919\n';
       for (final environment in [
-        {'FLUTTER_VERSION_NUMBER': 'invalid'},
-        {'FLUTTER_BUILD_NUMBER': 'invalid'},
-        {'FLUTTER_BUILD_NUMBER': '123'},
+        {'FLCLASH_VERSION_NUMBER': 'invalid'},
+        {'FLCLASH_BUILD_NUMBER': 'invalid'},
+        {'FLCLASH_BUILD_NUMBER': '123'},
       ]) {
         pubspec.writeAsStringSync(source);
         expect(
