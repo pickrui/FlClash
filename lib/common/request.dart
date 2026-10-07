@@ -208,6 +208,7 @@ class Request {
   final HttpClientAdapter Function()? _publicGitHubAdapter;
   final bool Function(String host) _isApiDomain;
   final Duration _readTimeout;
+  final HostLookup? _redirectLookup;
   static const _maxReadBytes = 64 * 1024 * 1024;
   final _apiOptions = BaseOptions(
     headers: {'User-Agent': browserUa},
@@ -223,6 +224,7 @@ class Request {
 
   Request({
     this._readRoutes,
+    this._redirectLookup,
     this._publicGitHubAdapter,
     bool Function(String host)? isApiDomain,
     this._readTimeout = const Duration(seconds: 30),
@@ -311,11 +313,25 @@ class Request {
     return raceHttpReads<Response<T>>(
       paths.map(
         (path) => (token) async {
+          final proxy = FlClashHttpOverrides.readProxyAuthentication();
+          final policy = RedirectPolicy(
+            uri,
+            lookup: _redirectLookup,
+            allowFakeIp:
+                proxy != null &&
+                [
+                  'PROXY localhost:${proxy.port}',
+                  'PROXY 127.0.0.1:${proxy.port}',
+                  'PROXY [::1]:${proxy.port}',
+                ].contains(path),
+          );
           final routed = Dio(clientOptions.copyWith());
           routed.httpClientAdapter = BoundedHttpClientAdapter(
             createFlClashHttpClientAdapter(
               findProxy: FlClashHttpOverrides.pinnedRoute(path),
               allowCertificateRetry: true,
+              resolver: policy,
+              proxyTargets: policy.proxyTargets,
               userAgent: isApiRequest
                   ? null
                   : () => appController.isAttach ? appController.ua : null,
@@ -328,6 +344,7 @@ class Request {
               options: options,
               client: routed,
               cancelToken: token,
+              policy: policy,
             );
             if (token.isCancelled) throw token.cancelError!;
             await validate?.call(response);
@@ -347,6 +364,7 @@ class Request {
     required Options options,
     required Dio client,
     required CancelToken cancelToken,
+    required RedirectPolicy policy,
   }) async {
     final request = _resolveBasicAuth(url, options.headers);
     final opts = options.copyWith(
@@ -372,7 +390,20 @@ class Request {
         redirectCount < 5) {
       final location = response.headers.value(HttpHeaders.locationHeader);
       if (location == null || location.isEmpty) break;
-      final redirectUrl = Uri.parse(requestUrl).resolve(location).toString();
+      final redirectUri = Uri.parse(requestUrl).resolve(location);
+      try {
+        await policy.approve(redirectUri);
+      } catch (error) {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          type: DioExceptionType.badResponse,
+          error: error,
+          message: 'Unsafe redirect target',
+        );
+      }
+      if (cancelToken.isCancelled) throw cancelToken.cancelError!;
+      final redirectUrl = redirectUri.toString();
       response = await client.get<T>(
         redirectUrl,
         cancelToken: cancelToken,

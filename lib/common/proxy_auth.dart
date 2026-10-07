@@ -46,6 +46,7 @@ bool needsVpnRestartForAuthentication({
 /// change; a mihomo 403 cannot trigger HttpClient's 407 credential refresh.
 class ProxyAuthenticatedHttpClient implements HttpClient {
   final HttpClient Function() _create;
+  List<Uri>? Function(Uri uri)? _tunnelTargets;
   final SecurityContext? _securityContext;
   bool Function(X509Certificate, String, int)? _badCertificateCallback;
   Function(String)? _keyLog;
@@ -64,13 +65,18 @@ class ProxyAuthenticatedHttpClient implements HttpClient {
     required this._create,
     required this._read,
     this._securityContext,
+    this._tunnelTargets,
   });
 
   static HttpClient wrap(
     HttpClient first,
-    ProxyAuthenticationState? Function() read,
-  ) {
-    if (first is ProxyAuthenticatedHttpClient) return first;
+    ProxyAuthenticationState? Function() read, {
+    List<Uri>? Function(Uri uri)? tunnelTargets,
+  }) {
+    if (first is ProxyAuthenticatedHttpClient) {
+      first._tunnelTargets = tunnelTargets ?? first._tunnelTargets;
+      return first;
+    }
     HttpClient? initial = first;
     return ProxyAuthenticatedHttpClient(
       create: () {
@@ -79,6 +85,7 @@ class ProxyAuthenticatedHttpClient implements HttpClient {
         return client ?? HttpClient();
       },
       read: read,
+      tunnelTargets: tunnelTargets,
     );
   }
 
@@ -95,11 +102,14 @@ class ProxyAuthenticatedHttpClient implements HttpClient {
       }
       final client = _createRaw();
       for (final entry in _settings.entries) {
-        if (auth?.enable != true || !entry.key.startsWith('proxy:')) {
+        if ((auth?.enable != true && _tunnelTargets == null) ||
+            !entry.key.startsWith('proxy:')) {
           entry.value(client);
         }
       }
-      if (auth?.enable == true) _installTunnel(client, next!);
+      if (auth?.enable == true || _tunnelTargets != null) {
+        _installTunnel(client, next);
+      }
       _current?.close(); // Let requests already in flight finish.
       _current = client;
       _authentication = next;
@@ -112,12 +122,14 @@ class ProxyAuthenticatedHttpClient implements HttpClient {
     if (_closed) throw StateError('HttpClient is closed');
     _settings[key] = configure;
     if (_current case final client?) {
-      if (_authentication?.authentication.enable != true ||
+      if ((_authentication?.authentication.enable != true &&
+              _tunnelTargets == null) ||
           !key.startsWith('proxy:')) {
         configure(client);
       }
-      if (_authentication?.authentication.enable == true) {
-        _installTunnel(client, _authentication!);
+      if (_authentication?.authentication.enable == true ||
+          _tunnelTargets != null) {
+        _installTunnel(client, _authentication);
       }
     }
   }
@@ -135,9 +147,17 @@ class ProxyAuthenticatedHttpClient implements HttpClient {
   // CONNECT client. The main client carries origin traffic on the detached
   // socket and never receives those credentials. dart:io validates TLS with the
   // caller's security context and certificate policy.
-  void _installTunnel(HttpClient client, ProxyAuthenticationState state) {
-    client.findProxy = (_) => 'DIRECT';
-    client.connectionFactory = (uri, _, _) async {
+  void _installTunnel(HttpClient client, ProxyAuthenticationState? state) {
+    client.findProxy = (uri) =>
+        state?.authentication.enable == true ||
+            _tunnelTargets?.call(uri) != null
+        ? 'DIRECT'
+        : (_findProxy?.call(uri) ?? 'DIRECT');
+    client.connectionFactory = (uri, proxyHost, proxyPort) async {
+      if (proxyHost != null) {
+        return _connectionFactory?.call(uri, proxyHost, proxyPort) ??
+            Socket.startConnect(proxyHost, proxyPort!);
+      }
       var canceled = false;
       HttpClient? connector;
       ConnectionTask<Socket>? directTask;
@@ -150,105 +170,122 @@ class ProxyAuthenticatedHttpClient implements HttpClient {
             throw const HttpException('Connection canceled');
           }
           final route = candidate.trim();
-          try {
-            if (route == 'DIRECT') {
-              directTask =
-                  await (_connectionFactory?.call(uri, null, null) ??
-                      Socket.startConnect(uri.host, uri.port));
-              if (canceled || _closed) directTask!.cancel();
-              connected = await directTask!.socket;
-            } else if (route.startsWith('PROXY ')) {
-              connector = _createRaw();
-              _connectors.add(connector!);
-              for (final entry in _settings.entries) {
-                if (!entry.key.startsWith('site:') &&
-                    entry.key != 'authenticate') {
-                  entry.value(connector!);
-                }
-              }
-              Socket? tunnelSocket;
-              connector!.connectionFactory =
-                  (target, proxyHost, proxyPort) async {
-                    final factory = _connectionFactory;
-                    directTask =
-                        await (factory?.call(target, proxyHost, proxyPort) ??
-                            Socket.startConnect(
-                              proxyHost ?? target.host,
-                              proxyPort ?? target.port,
-                            ));
-                    return ConnectionTask.fromSocket(
-                      directTask!.socket.then((socket) {
-                        tunnelSocket = socket;
-                        return socket;
-                      }),
-                      directTask!.cancel,
-                    );
-                  };
-              for (final host in ['localhost', '127.0.0.1', '::1']) {
-                connector!.addProxyCredentials(
-                  host,
-                  state.port,
-                  '',
-                  HttpClientBasicCredentials(
-                    state.authentication.username,
-                    state.authentication.password,
-                  ),
-                );
-              }
-              connector!.findProxy = (_) => route;
-              final request = await connector!.openUrl(
-                'CONNECT',
-                Uri(scheme: 'http', host: uri.host, port: uri.port),
-              );
-              request.followRedirects = false;
-              final response = await request.close();
-              if (response.statusCode != HttpStatus.ok) {
-                throw HttpException(
-                  'Proxy CONNECT failed (${response.statusCode})',
-                );
-              }
-              final detached = await response.detachSocket();
-              // HttpClient's DetachedSocket wrapper cannot be upgraded by
-              // SecureSocket.secure. Retain the native socket from our factory;
-              // detachSocket has already released the HTTP parser's ownership.
-              connected = uri.scheme == 'https' ? tunnelSocket! : detached;
-            } else {
-              throw const HttpException('Unsupported proxy configuration');
-            }
+          final targets = route.startsWith('PROXY ')
+              ? _tunnelTargets?.call(uri) ?? [uri]
+              : [uri];
+          for (final target in targets) {
             if (canceled || _closed) {
-              connected?.destroy();
               throw const HttpException('Connection canceled');
             }
-            if (uri.scheme == 'https' && connected is! SecureSocket) {
-              final certificateCallback = _badCertificateCallback;
-              connected = await SecureSocket.secure(
-                connected!,
-                host: uri.host,
-                context: _securityContext,
-                keyLog: _keyLog,
-                onBadCertificate: (certificate) =>
-                    certificateCallback?.call(
-                      certificate,
-                      uri.host,
-                      uri.port,
-                    ) ??
-                    false,
-              );
+            try {
+              if (route == 'DIRECT') {
+                directTask =
+                    await (_connectionFactory?.call(uri, null, null) ??
+                        Socket.startConnect(uri.host, uri.port));
+                if (canceled || _closed) directTask!.cancel();
+                connected = await directTask!.socket;
+              } else if (route.startsWith('PROXY ')) {
+                connector = _createRaw();
+                _connectors.add(connector!);
+                for (final entry in _settings.entries) {
+                  if (!entry.key.startsWith('site:') &&
+                      entry.key != 'authenticate') {
+                    entry.value(connector!);
+                  }
+                }
+                Socket? tunnelSocket;
+                connector!.connectionFactory =
+                    (target, proxyHost, proxyPort) async {
+                      final factory = _connectionFactory;
+                      directTask =
+                          await (factory?.call(target, proxyHost, proxyPort) ??
+                              Socket.startConnect(
+                                proxyHost ?? target.host,
+                                proxyPort ?? target.port,
+                              ));
+                      return ConnectionTask.fromSocket(
+                        directTask!.socket.then((socket) {
+                          tunnelSocket = socket;
+                          return socket;
+                        }),
+                        directTask!.cancel,
+                      );
+                    };
+                if (state?.authentication.enable == true) {
+                  for (final host in ['localhost', '127.0.0.1', '::1']) {
+                    connector!.addProxyCredentials(
+                      host,
+                      state!.port,
+                      '',
+                      HttpClientBasicCredentials(
+                        state.authentication.username,
+                        state.authentication.password,
+                      ),
+                    );
+                  }
+                }
+                connector!.findProxy = (_) => route;
+                final request = await connector!.openUrl(
+                  'CONNECT',
+                  Uri(scheme: 'http', host: target.host, port: target.port),
+                );
+                request.followRedirects = false;
+                final response = await request.close();
+                if ([
+                  HttpStatus.badGateway,
+                  HttpStatus.serviceUnavailable,
+                  HttpStatus.gatewayTimeout,
+                ].contains(response.statusCode)) {
+                  throw const SocketException('Proxy destination unavailable');
+                }
+                if (response.statusCode != HttpStatus.ok) {
+                  throw HttpException(
+                    'Proxy CONNECT failed (${response.statusCode})',
+                  );
+                }
+                final detached = await response.detachSocket();
+                // HttpClient's DetachedSocket wrapper cannot be upgraded by
+                // SecureSocket.secure. Retain the native socket from our factory;
+                // detachSocket has already released the HTTP parser's ownership.
+                connected = uri.scheme == 'https' ? tunnelSocket! : detached;
+              } else {
+                throw const HttpException('Unsupported proxy configuration');
+              }
+              if (canceled || _closed) {
+                connected?.destroy();
+                throw const HttpException('Connection canceled');
+              }
+              if (uri.scheme == 'https' && connected is! SecureSocket) {
+                final certificateCallback = _badCertificateCallback;
+                connected = await SecureSocket.secure(
+                  connected!,
+                  host: uri.host,
+                  context: _securityContext,
+                  keyLog: _keyLog,
+                  onBadCertificate: (certificate) =>
+                      certificateCallback?.call(
+                        certificate,
+                        uri.host,
+                        uri.port,
+                      ) ??
+                      false,
+                );
+              }
+              return connected!;
+            } on SocketException catch (error) {
+              connected?.destroy();
+              lastError = error;
+            } on TimeoutException catch (error) {
+              connected?.destroy();
+              lastError = error;
+            } catch (_) {
+              connected?.destroy();
+              rethrow;
+            } finally {
+              connector?.close(force: true);
+              _connectors.remove(connector);
+              connector = null;
             }
-            return connected!;
-          } on SocketException catch (error) {
-            connected?.destroy();
-            lastError = error;
-          } on TimeoutException catch (error) {
-            connected?.destroy();
-            lastError = error;
-          } catch (_) {
-            connected?.destroy();
-            rethrow;
-          } finally {
-            connector?.close(force: true);
-            _connectors.remove(connector);
-            connector = null;
           }
         }
         throw lastError ?? const HttpException('No proxy route available');

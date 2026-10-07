@@ -13,6 +13,7 @@ import 'package:dio/io.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/common/proxy_auth.dart';
+
 import 'tls_connection.dart';
 
 String resolveCloudApiProxy({required bool isCoreRunning, required int port}) {
@@ -172,6 +173,7 @@ HttpClientAdapter createFlClashHttpClientAdapter({
   bool allowCertificateRetry = false,
   String? Function()? userAgent,
   HostResolver? resolver,
+  List<Uri>? Function(Uri uri)? proxyTargets,
 }) {
   IOHttpClientAdapter create(
     bool Function(X509Certificate, String, int) onBadCertificate,
@@ -180,6 +182,7 @@ HttpClientAdapter createFlClashHttpClientAdapter({
       final client = ProxyAuthenticatedHttpClient.wrap(
         HttpClient(),
         FlClashHttpOverrides.readProxyAuthentication,
+        tunnelTargets: proxyTargets,
       );
       client.badCertificateCallback = onBadCertificate;
       if (resolver != null) {

@@ -7,11 +7,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-typedef HostLookup =
-    Future<List<InternetAddress>> Function(
-      String host, {
-      InternetAddressType type,
-    });
+typedef HostLookup = Future<List<InternetAddress>> Function(
+  String host, {
+  InternetAddressType type,
+});
 
 typedef HostAddressStore = ({
   Future<String?> Function() read,
@@ -153,4 +152,127 @@ class HostResolver {
   static String _key(String host) => host.toLowerCase();
 
   static const _noData = OSError('No address associated with hostname', 7);
+}
+
+class RedirectPolicy extends HostResolver {
+  RedirectPolicy(this.origin, {super.lookup, this.allowFakeIp = false}) {
+    _checkUri(origin);
+  }
+
+  final Uri origin;
+  final bool allowFakeIp;
+  final _addresses = <String, Future<List<InternetAddress>>>{};
+  final _redirectHosts = <String, List<InternetAddress>>{};
+  bool _originalPinned = false;
+
+  static String _key(String host) =>
+      host.toLowerCase().replaceFirst(RegExp(r'\.$'), '');
+  static void _checkUri(Uri uri) {
+    if (!['http', 'https'].contains(uri.scheme) ||
+        uri.host.isEmpty ||
+        uri.host.contains('%')) {
+      throw const HttpException('Unsafe redirect target');
+    }
+  }
+
+  Future<List<InternetAddress>> _pin(String host) =>
+      _addresses.putIfAbsent(_key(host), () async {
+        final literal = InternetAddress.tryParse(host);
+        final addresses = literal == null
+            ? await _lookup(host, type: InternetAddressType.any)
+            : [literal];
+        if (addresses.isEmpty) {
+          throw const SocketException('Redirect host has no address');
+        }
+        return List.unmodifiable(addresses);
+      });
+
+  @override
+  Future<List<InternetAddress>> resolve(String host) {
+    if (_key(host) == _key(origin.host) &&
+        !_redirectHosts.containsKey(_key(host))) {
+      _originalPinned = true;
+    }
+    return _pin(host);
+  }
+
+  @override
+  void confirm(String host, InternetAddress address) {}
+
+  Future<void> approve(Uri target) async {
+    _checkUri(target);
+    if (target.userInfo.isNotEmpty) {
+      throw const HttpException('Redirect credentials are not allowed');
+    }
+    final host = _key(target.host);
+    final sameOriginal = host == _key(origin.host) && _originalPinned;
+    final localName =
+        host == 'localhost' ||
+        host.endsWith('.localhost') ||
+        host.endsWith('.local') ||
+        host == 'home.arpa' ||
+        host.endsWith('.home.arpa');
+    if (!sameOriginal && localName) {
+      throw const HttpException('Local redirect target');
+    }
+    final addresses = await _pin(target.host);
+    final fakeAllowed =
+        allowFakeIp && InternetAddress.tryParse(target.host) == null;
+    if (!sameOriginal &&
+        addresses.any(
+          (address) =>
+              !isPublicRedirectAddress(address, allowFakeIp: fakeAllowed),
+        )) {
+      throw const HttpException('Local or special redirect target');
+    }
+    _redirectHosts[host] = addresses;
+  }
+
+  List<Uri>? proxyTargets(Uri uri) {
+    final addresses = _redirectHosts[_key(uri.host)];
+    return addresses == null
+        ? null
+        : [for (final address in addresses) uri.replace(host: address.address)];
+  }
+}
+
+bool isPublicRedirectAddress(
+  InternetAddress address, {
+  bool allowFakeIp = false,
+}) {
+  final bytes = address.rawAddress;
+  if (address.type == InternetAddressType.IPv6) {
+    if (bytes.take(10).every((byte) => byte == 0) &&
+        bytes[10] == 255 &&
+        bytes[11] == 255) {
+      return isPublicRedirectAddress(
+        InternetAddress.fromRawAddress(bytes.sublist(12)),
+        allowFakeIp: allowFakeIp,
+      );
+    }
+    return bytes[0] & 0xe0 == 0x20 &&
+        !(bytes[0] == 0x20 && bytes[1] == 0x01 && bytes[2] < 2) &&
+        !(bytes[0] == 0x20 &&
+            bytes[1] == 0x01 &&
+            bytes[2] == 0x0d &&
+            bytes[3] == 0xb8) &&
+        !(bytes[0] == 0x20 && bytes[1] == 0x02) &&
+        !(bytes[0] == 0x3f && bytes[1] == 0xff && bytes[2] & 0xf0 == 0);
+  }
+  if (address.type != InternetAddressType.IPv4) return false;
+  final a = bytes[0], b = bytes[1], c = bytes[2];
+  if (a == 198 && (b == 18 || b == 19)) return allowFakeIp;
+  return !(a == 0 ||
+      a == 10 ||
+      a == 127 ||
+      a >= 224 ||
+      (a == 100 && b >= 64 && b <= 127) ||
+      (a == 169 && b == 254) ||
+      (a == 172 && b >= 16 && b <= 31) ||
+      (a == 192 &&
+          (b == 168 ||
+              (b == 0 && (c == 0 || c == 2)) ||
+              (b == 88 && c == 99))) ||
+      (a == 198 && b == 51 && c == 100) ||
+      (a == 203 && b == 0 && c == 113));
 }

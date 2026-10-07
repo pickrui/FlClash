@@ -15,6 +15,8 @@ import 'package:fl_clash/common/proxy_auth.dart';
 import 'package:fl_clash/models/config.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/connect_proxy.dart';
+
 class _ChangedCertificate implements X509Certificate {
   @override
   Uint8List get der => Uint8List.fromList([1, 2, 3]);
@@ -65,7 +67,11 @@ void main() {
       await (using ?? client).getUri<String>(uri);
       fail('Untrusted certificate was accepted');
     } on DioException catch (error) {
-      expect(error.type, DioExceptionType.badCertificate);
+      expect(
+        error.type,
+        DioExceptionType.badCertificate,
+        reason: '${error.error}',
+      );
       return FlClashTemporaryTls.failureFor(error)!;
     }
   }
@@ -298,46 +304,26 @@ void main() {
     await rejected(uri, using: resolved);
   });
   test('authenticated CONNECT preserves the scoped TLS decision', () async {
-    final proxy = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
-    final tunnels = <Socket>[];
-    addTearDown(() async {
-      for (final socket in tunnels) {
-        socket.destroy();
-      }
-      await proxy.close(force: true);
-    });
     var connects = 0;
-    proxy.listen((request) async {
-      connects++;
-      expect(request.method, 'CONNECT');
-      expect(
-        request.headers.value(HttpHeaders.proxyAuthorizationHeader),
-        'Basic ${base64Encode(utf8.encode('fixture:password'))}',
-      );
-      final upstream = await Socket.connect(
-        InternetAddress.loopbackIPv4,
-        Uri.parse('http://${request.uri}').port,
-      );
-      request.response.statusCode = HttpStatus.ok;
-      request.response.contentLength = 0;
-      final downstream = await request.response.detachSocket();
-      tunnels.addAll([upstream, downstream]);
-      downstream.listen(
-        upstream.add,
-        onDone: upstream.destroy,
-        onError: (_) => upstream.destroy(),
-      );
-      upstream.listen(
-        downstream.add,
-        onDone: downstream.destroy,
-        onError: (_) => downstream.destroy(),
-      );
-    });
+    final proxy = await connectProxy(
+      fallbackPort: origin.port,
+      destination: (authority, headers) {
+        connects++;
+        final target = Uri.parse('http://$authority');
+        expect(target.host, '1.1.1.1');
+        expect(
+          headers[HttpHeaders.proxyAuthorizationHeader],
+          'Basic ${base64Encode(utf8.encode('fixture:password'))}',
+        );
+        return target.port;
+      },
+    );
     await HttpOverrides.runWithHttpOverrides(() async {
       final tunneled = Dio()
         ..httpClientAdapter = createFlClashHttpClientAdapter(
           findProxy: (_) => 'PROXY localhost:${proxy.port}',
           allowCertificateRetry: true,
+          proxyTargets: (uri) => [uri.replace(host: '1.1.1.1')],
         );
       addTearDown(() => tunneled.close(force: true));
       final failed = await rejected(target, using: tunneled);
