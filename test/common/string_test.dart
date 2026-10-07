@@ -113,22 +113,8 @@ void main() {
     });
   });
 
-  group('StringExtension.toMd5', () {
-    test('produces consistent hash', () {
-      final hash1 = 'hello'.toMd5();
-      final hash2 = 'hello'.toMd5();
-      expect(hash1, hash2);
-    });
-
-    test('different input produces different hash', () {
-      expect('hello'.toMd5(), isNot(equals('world'.toMd5())));
-    });
-
-    test('produces 32 char hex string', () {
-      final hash = 'test'.toMd5();
-      expect(hash.length, 32);
-      expect(RegExp(r'^[0-9a-f]{32}$').hasMatch(hash), isTrue);
-    });
+  test('MD5 matches the stored identifier format', () {
+    expect('hello'.toMd5(), '5d41402abc4b2a76b9719d911017c592');
   });
 
   group('StringExtension.value', () {

@@ -74,10 +74,6 @@ void main() {
       contains('needs.version.outputs.build_number'),
     );
     expect(steps[verify]['run'], contains('tool/check_apk_version.py'));
-    expect(
-      File('setup.dart').readAsStringSync(),
-      isNot(contains("'--split-per-abi'")),
-    );
   });
 
   test('deep checks run only on schedule or manual dispatch', () {

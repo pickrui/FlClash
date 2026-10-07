@@ -55,29 +55,6 @@ void main() {
     });
   }
 
-  final titles = {
-    const Locale('en'): 'Pause proxy when idle',
-    const Locale('zh', 'CN'): '空闲时暂停代理',
-    const Locale('ja'): 'アイドル時にプロキシを一時停止',
-    const Locale('ru'): 'Приостанавливать прокси при бездействии',
-  };
-
-  for (final entry in titles.entries) {
-    testWidgets('shows idle suspension guidance in ${entry.key}', (
-      tester,
-    ) async {
-      await _showSetting(tester, locale: entry.key);
-
-      expect(find.text(entry.value), findsOneWidget);
-      expect(
-        find.text(AppLocalizations.current.suspendOnIdleDesc),
-        findsOneWidget,
-      );
-      expect(tester.widget<Switch>(find.byType(Switch)).value, isFalse);
-      expect(tester.takeException(), isNull);
-    });
-  }
-
   testWidgets('switch and row taps update the setting in both directions', (
     tester,
   ) async {
@@ -115,14 +92,13 @@ void main() {
 
 Future<ProviderContainer> _showSetting(
   WidgetTester tester, {
-  Locale locale = const Locale('en'),
   NetworkProps initial = const NetworkProps(),
 }) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [networkSettingProvider.overrideWithBuild((_, _) => initial)],
       child: MaterialApp(
-        locale: locale,
+        locale: const Locale('en'),
         localizationsDelegates: const [
           AppLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,

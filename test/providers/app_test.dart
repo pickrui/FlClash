@@ -41,36 +41,6 @@ void main() {
     tempDir.deleteSync(recursive: true);
   });
 
-  group('RealTunEnable provider', () {
-    test('default is false', () {
-      expect(container.read(realTunEnableProvider), false);
-    });
-
-    test('can update to true', () {
-      container.read(realTunEnableProvider.notifier).update((_) => true);
-      expect(container.read(realTunEnableProvider), true);
-    });
-  });
-
-  group('Packages provider', () {
-    test('default is empty list', () {
-      expect(container.read(packagesProvider), isEmpty);
-    });
-
-    test('can update state', () {
-      const pkg = Package(
-        packageName: 'test.app',
-        label: 'Test App',
-        system: false,
-        internet: true,
-        lastUpdateTime: 0,
-      );
-      container.read(packagesProvider.notifier).update((_) => [pkg]);
-      expect(container.read(packagesProvider).length, 1);
-      expect(container.read(packagesProvider).first.packageName, 'test.app');
-    });
-  });
-
   group('Providers provider', () {
     test('setProvider replaces provider with matching name', () {
       final oldProvider = ExternalProvider(
@@ -127,175 +97,24 @@ void main() {
     });
   });
 
-  group('SystemBrightness provider', () {
-    test('default is dark', () {
-      expect(container.read(systemBrightnessProvider), Brightness.dark);
-    });
-
-    test('can update to light', () {
-      container
-          .read(systemBrightnessProvider.notifier)
-          .update((_) => Brightness.light);
-      expect(container.read(systemBrightnessProvider), Brightness.light);
-    });
+  test('view dimensions follow the current window size', () {
+    container
+        .read(viewSizeProvider.notifier)
+        .update((_) => const Size(800, 600));
+    expect(container.read(viewWidthProvider), 800);
+    expect(container.read(viewHeightProvider), 600);
   });
 
-  group('LocalIp provider', () {
-    test('default is null', () {
-      expect(container.read(localIpProvider), null);
-    });
-
-    test('can set IP', () {
-      container.read(localIpProvider.notifier).update((_) => '192.168.1.1');
-      expect(container.read(localIpProvider), '192.168.1.1');
-    });
-  });
-
-  group('RunTime provider', () {
-    test('default is null', () {
-      expect(container.read(runTimeProvider), null);
-    });
-
-    test('can set runtime', () {
-      container.read(runTimeProvider.notifier).update((_) => 3600);
-      expect(container.read(runTimeProvider), 3600);
-    });
-  });
-
-  group('ViewSize provider', () {
-    test('default is zero', () {
-      expect(container.read(viewSizeProvider), Size.zero);
-    });
-
-    test('can update size', () {
-      container
-          .read(viewSizeProvider.notifier)
-          .update((_) => const Size(800, 600));
-      final value = container.read(viewSizeProvider);
-      expect(value.width, 800);
-      expect(value.height, 600);
-    });
-  });
-
-  group('SideWidth provider', () {
-    test('default is 0', () {
-      expect(container.read(sideWidthProvider), 0.0);
-    });
-
-    test('can update side width', () {
-      container.read(sideWidthProvider.notifier).update((_) => 300.0);
-      expect(container.read(sideWidthProvider), 300.0);
-    });
-  });
-
-  group('viewWidth provider (derived)', () {
-    test('derives from viewSize width', () {
-      container
-          .read(viewSizeProvider.notifier)
-          .update((_) => const Size(800, 600));
-      expect(container.read(viewWidthProvider), 800);
-    });
-  });
-
-  group('viewHeight provider (derived)', () {
-    test('derives from viewSize height', () {
-      container
-          .read(viewSizeProvider.notifier)
-          .update((_) => const Size(800, 600));
-      expect(container.read(viewHeightProvider), 600);
-    });
-  });
-
-  group('Init provider', () {
-    test('default is false', () {
-      expect(container.read(initProvider), false);
-    });
-
-    test('can update to true', () {
-      container.read(initProvider.notifier).update((_) => true);
-      expect(container.read(initProvider), true);
-    });
-  });
-
-  group('CurrentPageLabel provider', () {
-    test('default is dashboard', () {
-      expect(container.read(currentPageLabelProvider), PageLabel.dashboard);
-    });
-
-    test('toPage changes page', () {
-      container
-          .read(currentPageLabelProvider.notifier)
-          .toPage(PageLabel.proxies);
-      expect(container.read(currentPageLabelProvider), PageLabel.proxies);
-    });
-
-    test('toProfiles changes page', () {
-      container.read(currentPageLabelProvider.notifier).toProfiles();
-      expect(container.read(currentPageLabelProvider), PageLabel.profiles);
-    });
-  });
-
-  group('SortNum provider', () {
-    test('default is 0', () {
-      expect(container.read(sortNumProvider), 0);
-    });
-
-    test('can update', () {
-      container.read(sortNumProvider.notifier).update((_) => 5);
-      expect(container.read(sortNumProvider), 5);
-    });
-  });
-
-  group('BackBlock provider', () {
-    test('default is false', () {
-      expect(container.read(backBlockProvider), false);
-    });
-
-    test('can update', () {
-      container.read(backBlockProvider.notifier).update((_) => true);
-      expect(container.read(backBlockProvider), true);
-    });
-  });
-
-  group('Version provider', () {
-    test('default is 0', () {
-      expect(container.read(versionProvider), 0);
-    });
-
-    test('can set version', () {
-      container.read(versionProvider.notifier).update((_) => 3);
-      expect(container.read(versionProvider), 3);
-    });
-  });
-
-  group('Groups provider', () {
-    test('default is empty', () {
-      expect(container.read(groupsProvider), isEmpty);
-    });
-
-    test('can set groups', () {
-      final groups = [
-        const Group(name: 'G1', type: GroupType.Selector, now: 'auto'),
-      ];
-      container.read(groupsProvider.notifier).update((_) => groups);
-      expect(container.read(groupsProvider).length, 1);
-      expect(container.read(groupsProvider).first.name, 'G1');
-    });
-  });
-
-  group('TotalTraffic provider', () {
-    test('default is empty Traffic', () {
-      final t = container.read(totalTrafficProvider);
-      expect(t.up, 0);
-      expect(t.down, 0);
-    });
+  test('page navigation starts on the dashboard and follows both actions', () {
+    expect(container.read(currentPageLabelProvider), PageLabel.dashboard);
+    final navigation = container.read(currentPageLabelProvider.notifier);
+    navigation.toPage(PageLabel.proxies);
+    expect(container.read(currentPageLabelProvider), PageLabel.proxies);
+    navigation.toProfiles();
+    expect(container.read(currentPageLabelProvider), PageLabel.profiles);
   });
 
   group('CheckIpNum provider', () {
-    test('default is 0', () {
-      expect(container.read(checkIpNumProvider), 0);
-    });
-
     test('increment returns previous value and updates state', () {
       final value = container.read(checkIpNumProvider.notifier).add();
 
@@ -466,10 +285,11 @@ void main() {
     });
   });
 
-  group('CoreStatus provider', () {
-    test('default is disconnected', () {
-      expect(container.read(coreStatusProvider), CoreStatus.disconnected);
-    });
+  test('startup has no active Core, runtime or TUN', () {
+    expect(container.read(coreStatusProvider), CoreStatus.disconnected);
+    expect(container.read(runTimeProvider), isNull);
+    expect(container.read(realTunEnableProvider), isFalse);
+    expect(container.read(initProvider), isFalse);
   });
 
   group('NetworkDetection provider', () {

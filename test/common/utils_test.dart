@@ -194,10 +194,5 @@ void main() {
     test('different input produces different hash', () {
       expect(utils.fastHash('hello'), isNot(equals(utils.fastHash('world'))));
     });
-
-    test('returns an integer', () {
-      final hash = utils.fastHash('test');
-      expect(hash, isA<int>());
-    });
   });
 }
