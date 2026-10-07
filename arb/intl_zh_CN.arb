@@ -375,7 +375,7 @@
   "importUrl": "通过URL导入",
   "autoSetSystemDns": "自动设置系统DNS",
   "suspendOnIdle": "空闲时暂停代理",
-  "suspendOnIdleDesc": "熄屏并进入系统空闲状态时暂停流量转发以节省电量，可能导致语音通话和实时音频断开",
+  "suspendOnIdleDesc": "熄屏并进入系统空闲状态时暂停流量转发和健康检查以节省电量，可能导致语音通话和实时音频断开、推送通知延迟",
   "details": "{label}详情",
   "creationTime": "创建时间",
   "process": "进程",

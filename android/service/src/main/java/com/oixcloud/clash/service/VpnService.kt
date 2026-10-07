@@ -248,7 +248,7 @@ class VpnService : SystemVpnService(), IBaseService {
                     }
                 }
             }
-            setSession("FlClash")
+            setSession(applicationInfo.loadLabel(packageManager).toString())
             setBlocking(false)
             if (Build.VERSION.SDK_INT >= 29) {
                 setMetered(false)

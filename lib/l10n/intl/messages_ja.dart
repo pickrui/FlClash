@@ -2064,7 +2064,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage("サブスクリプション情報"),
     "suspendOnIdle": MessageLookupByLibrary.simpleMessage("アイドル時にプロキシを一時停止"),
     "suspendOnIdleDesc": MessageLookupByLibrary.simpleMessage(
-      "画面がオフでシステムがアイドル状態のとき、通信の転送を一時停止して電力を節約します。通話やライブ音声が切断される場合があります",
+      "画面がオフでシステムがアイドル状態のとき、通信の転送とヘルスチェックを一時停止します。通話やライブ音声の切断、プッシュ通知の遅延が発生する場合があります",
     ),
     "suspended": MessageLookupByLibrary.simpleMessage("一時停止中…"),
     "switchProfile": MessageLookupByLibrary.simpleMessage("プロファイルを切り替え"),

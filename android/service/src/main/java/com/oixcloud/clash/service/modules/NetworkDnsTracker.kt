@@ -21,6 +21,9 @@ internal class NetworkDnsTracker<N>(
     private val networks = linkedMapOf<N, Info>()
     private var active = true
     private var previousDns = emptyList<String>()
+    private var pendingDns: List<String>? = null
+    private var publishRevision: Any? = null
+    private var cancelPublish: (() -> Unit)? = null
 
     @Synchronized
     fun available(network: N, priority: Int) {
@@ -75,7 +78,14 @@ internal class NetworkDnsTracker<N>(
         active = false
         networks.values.forEach { it.cancel?.invoke() }
         networks.clear()
-        update()
+        cancelPublish?.invoke()
+        cancelPublish = null
+        pendingDns = null
+        publishRevision = null
+        if (previousDns.isNotEmpty()) {
+            previousDns = emptyList()
+            publish(emptyList())
+        }
     }
 
     private fun update() {
@@ -84,8 +94,26 @@ internal class NetworkDnsTracker<N>(
             .filter { it.dns.isNotEmpty() }
             .minByOrNull { it.priority + if (time < it.losingUntil) 10 else 0 }
             ?.dns ?: emptyList()
-        if (dns == previousDns) return
-        previousDns = dns
-        publish(dns.toList())
+        if (dns == pendingDns) return
+        cancelPublish?.invoke()
+        cancelPublish = null
+        pendingDns = null
+        publishRevision = null
+        if (dns == previousDns || !active) return
+        val snapshot = dns.toList()
+        val revision = Any()
+        pendingDns = snapshot
+        publishRevision = revision
+        cancelPublish = schedule(200) {
+            synchronized(this) {
+                if (active && publishRevision === revision) {
+                    cancelPublish = null
+                    pendingDns = null
+                    publishRevision = null
+                    previousDns = snapshot
+                    publish(snapshot)
+                }
+            }
+        }
     }
 }

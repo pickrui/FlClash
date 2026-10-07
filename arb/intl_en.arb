@@ -375,7 +375,7 @@
   "importUrl": "Import from URL",
   "autoSetSystemDns": "Auto set system DNS",
   "suspendOnIdle": "Pause proxy when idle",
-  "suspendOnIdleDesc": "Pause traffic forwarding to save power when the screen is off and the system becomes idle. This may disconnect calls and live audio.",
+  "suspendOnIdleDesc": "Pause traffic forwarding and health checks when the screen is off and the system becomes idle. This may disconnect calls and live audio and delay push notifications.",
   "details": "{label} details",
   "creationTime": "Creation time",
   "process": "Process",

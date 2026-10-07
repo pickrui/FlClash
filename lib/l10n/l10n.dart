@@ -2900,10 +2900,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Pause traffic forwarding to save power when the screen is off and the system becomes idle. This may disconnect calls and live audio.`
+  /// `Pause traffic forwarding and health checks when the screen is off and the system becomes idle. This may disconnect calls and live audio and delay push notifications.`
   String get suspendOnIdleDesc {
     return Intl.message(
-      'Pause traffic forwarding to save power when the screen is off and the system becomes idle. This may disconnect calls and live audio.',
+      'Pause traffic forwarding and health checks when the screen is off and the system becomes idle. This may disconnect calls and live audio and delay push notifications.',
       name: 'suspendOnIdleDesc',
       desc: '',
       args: [],

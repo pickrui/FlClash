@@ -2604,7 +2604,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Приостанавливать прокси при бездействии",
     ),
     "suspendOnIdleDesc": MessageLookupByLibrary.simpleMessage(
-      "Приостанавливать передачу трафика для экономии энергии, когда экран выключен и система переходит в режим бездействия. Звонки и прямые аудиотрансляции могут прерываться.",
+      "Приостанавливать передачу трафика и проверки узлов, когда экран выключен и система бездействует. Звонки и прямые аудиотрансляции могут прерываться, а push-уведомления — задерживаться.",
     ),
     "suspended": MessageLookupByLibrary.simpleMessage("Приостановлено…"),
     "switchProfile": MessageLookupByLibrary.simpleMessage("Сменить профиль"),

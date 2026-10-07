@@ -34,7 +34,7 @@ import org.robolectric.util.ReflectionHelpers
 import android.net.VpnService as SystemVpnService
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [28], manifest = Config.NONE, application = Application::class)
+@Config(sdk = [28], application = Application::class)
 class VpnServiceBindingTest {
     @Before
     fun prepareState() {

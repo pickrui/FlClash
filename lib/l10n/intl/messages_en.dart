@@ -2475,7 +2475,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Pause proxy when idle",
     ),
     "suspendOnIdleDesc": MessageLookupByLibrary.simpleMessage(
-      "Pause traffic forwarding to save power when the screen is off and the system becomes idle. This may disconnect calls and live audio.",
+      "Pause traffic forwarding and health checks when the screen is off and the system becomes idle. This may disconnect calls and live audio and delay push notifications.",
     ),
     "suspended": MessageLookupByLibrary.simpleMessage("Suspended…"),
     "switchProfile": MessageLookupByLibrary.simpleMessage("Switch profile"),

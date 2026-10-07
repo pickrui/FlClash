@@ -37,12 +37,32 @@ class NetworkDnsTrackerTest {
         }
 
         fun advance(delay: Long) {
-            time += delay
-            pending.filter { !it.cancelled && !it.fired && it.at <= time }.forEach {
-                it.fired = true
-                it.action()
+            val target = time + delay
+            while (true) {
+                val next = pending.filter { !it.cancelled && !it.fired && it.at <= target }
+                    .minByOrNull { it.at } ?: break
+                time = next.at
+                next.fired = true
+                next.action()
             }
+            time = target
         }
+    }
+
+    @Test
+    fun burstsPublishOnlyTheLatestDnsAfterTwoHundredMilliseconds() {
+        val f = Fixture()
+        f.add("wifi", 0, listOf("192.0.2.1:53"))
+        f.advance(100)
+        f.tracker.linkPropertiesChanged("wifi", listOf("192.0.2.2:53"))
+        f.advance(199)
+        assertTrue(f.updates.isEmpty())
+        f.advance(1)
+        assertEquals(listOf(listOf("192.0.2.2:53")), f.updates)
+        f.tracker.linkPropertiesChanged("wifi", listOf("192.0.2.3:53"))
+        f.tracker.linkPropertiesChanged("wifi", listOf("192.0.2.2:53"))
+        f.advance(200)
+        assertEquals(1, f.updates.size)
     }
 
     @Test
@@ -50,7 +70,9 @@ class NetworkDnsTrackerTest {
         val f = Fixture()
         f.add("wifi", 0)
         f.add("cellular", 4)
+        f.advance(200)
         f.tracker.losing("wifi", 1000)
+        f.advance(200)
         assertEquals(listOf("cellular"), f.updates.last())
         f.advance(999)
         assertEquals(2, f.updates.size)
@@ -63,14 +85,14 @@ class NetworkDnsTrackerTest {
         val f = Fixture()
         f.add("wifi", 0)
         f.add("cellular", 4)
+        f.advance(200)
         f.tracker.losing("wifi", 1000)
-        val old = f.pending.single()
+        val old = f.pending.last()
         f.tracker.lost("wifi")
         assertTrue(old.cancelled)
         f.advance(2000)
         old.action()
-        assertEquals(listOf("cellular"), f.updates.last())
-        assertEquals(2, f.updates.size)
+        assertEquals(listOf(listOf("wifi"), listOf("cellular")), f.updates)
     }
 
     @Test
@@ -78,34 +100,38 @@ class NetworkDnsTrackerTest {
         val f = Fixture()
         f.add("wifi", 0)
         f.add("cellular", 4)
+        f.advance(200)
         f.tracker.losing("wifi", 1000)
-        val old = f.pending.single()
+        val old = f.pending.last()
         f.advance(500)
         f.tracker.losing("wifi", 2000)
         assertTrue(old.cancelled)
         f.advance(500)
         old.action()
         assertEquals(listOf("cellular"), f.updates.last())
-        f.advance(1500)
+        f.advance(1700)
         assertEquals(listOf("wifi"), f.updates.last())
     }
 
     @Test
-    fun stoppedSessionIgnoresEveryLateCallback() {
+    fun stoppedSessionCancelsPendingDnsAndIgnoresEveryLateCallback() {
         val f = Fixture()
         f.add("wifi", 0)
+        f.advance(200)
+        f.tracker.linkPropertiesChanged("wifi", listOf("pending"))
         f.tracker.losing("wifi", 1000)
-        val old = f.pending.single()
+        val old = f.pending.filter { !it.fired && !it.cancelled }
         f.tracker.stop()
         val stopped = f.updates.toList()
-        assertEquals(emptyList<String>(), stopped.last())
-        assertTrue(old.cancelled)
+        assertEquals(listOf(listOf("wifi"), emptyList<String>()), stopped)
+        assertTrue(old.all { it.cancelled })
         f.tracker.available("wifi", 0)
         f.tracker.capabilitiesChanged("wifi", 0)
         f.tracker.linkPropertiesChanged("wifi", listOf("stale"))
         f.tracker.losing("wifi", 1000)
         f.tracker.lost("wifi")
-        old.action()
+        old.forEach { it.action() }
+        f.advance(2000)
         f.tracker.stop()
         assertEquals(stopped, f.updates)
     }
@@ -115,15 +141,19 @@ class NetworkDnsTrackerTest {
         val f = Fixture()
         f.add("cellular", 4)
         f.tracker.available("wifi", 0)
+        f.advance(200)
         assertEquals(listOf(listOf("cellular")), f.updates)
         val dns = mutableListOf("[fe80::1%2]:53", "192.0.2.1:53", "192.0.2.1:53")
         f.tracker.linkPropertiesChanged("wifi", dns)
         dns.clear()
+        f.advance(200)
         assertEquals(listOf("[fe80::1%2]:53", "192.0.2.1:53"), f.updates.last())
         f.tracker.available("wifi", 0)
+        f.advance(200)
         assertEquals(2, f.updates.size)
         f.tracker.lost("wifi")
         f.tracker.lost("cellular")
+        f.advance(200)
         assertEquals(emptyList<String>(), f.updates.last())
     }
 
@@ -132,11 +162,13 @@ class NetworkDnsTrackerTest {
         val f = Fixture()
         f.add("unknown", 100)
         f.add("cellular", 4)
+        f.advance(200)
         f.tracker.capabilitiesChanged("unknown", 0)
+        f.advance(200)
         assertEquals(listOf("unknown"), f.updates.last())
         f.tracker.losing("unknown", 0)
         f.tracker.losing("unknown", -1)
-        assertTrue(f.pending.isEmpty())
-        assertEquals(3, f.updates.size)
+        assertTrue(f.pending.all { it.fired || it.cancelled })
+        assertEquals(2, f.updates.size)
     }
 }

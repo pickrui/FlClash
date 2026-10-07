@@ -64,7 +64,11 @@ class FilesProvider : DocumentsProvider() {
         val result = MatrixCursor(resolveDocumentProjection(projection))
         val parentFile = resolveFile(parentDocumentId)
         parentFile.listFiles()?.forEach { file ->
-            includeFile(result, file)
+            try {
+                includeFile(result, resolveFile(file.absolutePath))
+            } catch (_: FileNotFoundException) {
+                // A symlink may point outside the exported app directory.
+            }
         }
         return result
     }
@@ -91,8 +95,13 @@ class FilesProvider : DocumentsProvider() {
     }
 
     private fun resolveFile(documentId: String): File {
-        if (documentId != ROOT_DOCUMENT_ID) return File(documentId)
-        return context?.filesDir ?: throw FileNotFoundException("Root directory not found")
+        val root = context?.filesDir?.canonicalFile
+            ?: throw FileNotFoundException("Root directory not found")
+        val file = if (documentId == ROOT_DOCUMENT_ID) root else File(documentId).canonicalFile
+        if (file != root && !file.path.startsWith(root.path + File.separator)) {
+            throw FileNotFoundException("Document is outside the app directory")
+        }
+        return file
     }
 
     private fun includeFile(

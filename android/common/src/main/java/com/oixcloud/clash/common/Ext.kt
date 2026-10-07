@@ -87,15 +87,14 @@ val Intent.toPendingIntent: PendingIntent
 fun Service.startForeground(notification: Notification) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         val manager = getSystemService(NotificationManager::class.java)
-        var channel = manager?.getNotificationChannel(GlobalState.NOTIFICATION_CHANNEL)
-        if (channel == null) {
-            channel = NotificationChannel(
+        val channel = manager?.getNotificationChannel(GlobalState.NOTIFICATION_CHANNEL)
+            ?: NotificationChannel(
                 GlobalState.NOTIFICATION_CHANNEL,
-                "SERVICE_CHANNEL",
+                getString(R.string.service_notification_channel),
                 NotificationManager.IMPORTANCE_LOW
             )
-            manager?.createNotificationChannel(channel)
-        }
+        channel.name = getString(R.string.service_notification_channel)
+        manager?.createNotificationChannel(channel)
     }
     startForegroundCompat(GlobalState.NOTIFICATION_ID, notification)
 }

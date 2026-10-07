@@ -1817,7 +1817,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage("订阅信息"),
     "suspendOnIdle": MessageLookupByLibrary.simpleMessage("空闲时暂停代理"),
     "suspendOnIdleDesc": MessageLookupByLibrary.simpleMessage(
-      "熄屏并进入系统空闲状态时暂停流量转发以节省电量，可能导致语音通话和实时音频断开",
+      "熄屏并进入系统空闲状态时暂停流量转发和健康检查以节省电量，可能导致语音通话和实时音频断开、推送通知延迟",
     ),
     "suspended": MessageLookupByLibrary.simpleMessage("挂起中…"),
     "switchProfile": MessageLookupByLibrary.simpleMessage("切换配置"),

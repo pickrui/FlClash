@@ -375,7 +375,7 @@
   "importUrl": "URLからインポート",
   "autoSetSystemDns": "オートセットシステムDNS",
   "suspendOnIdle": "アイドル時にプロキシを一時停止",
-  "suspendOnIdleDesc": "画面がオフでシステムがアイドル状態のとき、通信の転送を一時停止して電力を節約します。通話やライブ音声が切断される場合があります",
+  "suspendOnIdleDesc": "画面がオフでシステムがアイドル状態のとき、通信の転送とヘルスチェックを一時停止します。通話やライブ音声の切断、プッシュ通知の遅延が発生する場合があります",
   "details": "{label}詳細",
   "creationTime": "作成時間",
   "process": "プロセス",
