@@ -117,6 +117,20 @@ void main() {
     },
   );
 
+  test('personal groups preserve an explicit empty fallback', () async {
+    final result = await makeRealProfileTask(
+      overlayState(
+        rawConfig: const {
+          'proxies': [],
+          'rules': ['MATCH,DIRECT'],
+        },
+        groups: [personalGroup.copyWith(emptyFallback: 'DIRECT')],
+        rules: personalRules,
+      ),
+    );
+    expect((result['proxy-groups'] as List).single['empty-fallback'], 'DIRECT');
+  });
+
   test(
     'added MATCH placeholders still follow the subscription final target',
     () async {

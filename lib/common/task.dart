@@ -193,9 +193,8 @@ void _mergeCustomProxyGroups(
     ...customProxyGroups.map(
       (group) => group.toJson()
         ..removeWhere((_, value) => value == null)
-        // Provider updates and filters may leave a personal group empty.
-        // Keep its traffic blocked instead of falling back to a direct route.
-        ..['empty-fallback'] = 'REJECT',
+        // Empty personal groups block traffic unless a fallback is explicit.
+        ..putIfAbsent('empty-fallback', () => 'REJECT'),
     ),
   ];
 }
