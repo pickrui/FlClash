@@ -585,6 +585,7 @@
   "commission": "コミッション",
   "points": "ポイント",
   "announcement": "お知らせ",
+  "readFullAnnouncement": "全文を読む",
   "serviceCheckFailed": "サービスチェック失敗",
   "apiAvailable": "APIサービスは正常です",
   "checkApi": "APIをチェック",
@@ -660,8 +661,10 @@
   "scanOrTransferPay": "スキャン／送金支払い",
   "close": "閉じる",
   "checkingPayment": "確認中...",
+  "paymentPending": "お支払いはまだ確認できていません。しばらくしてから再度確認してください",
   "iHavePaid": "支払い済み",
   "openInBrowser": "ブラウザで開く",
+  "openLinkFailed": "リンクを開けません。ブラウザがインストールされていることを確認して、もう一度お試しください",
   "scanToPayNotice": "Alipay / WeChat でスキャンして支払い",
   "paymentAmount": "支払い金額",
   "receivingAddress": "受取アドレス",
@@ -955,6 +958,34 @@
   "tunMtuInvalid": "1280〜65535 の整数を入力してください",
   "scriptOptions": "スクリプト設定",
   "scriptOptionsEmpty": "このスクリプトには設定可能なスイッチがありません",
+  "scriptChanges": "スクリプトの変更",
+  "scriptFullConfig": "設定全体",
+  "scriptChangesDescription": "スクリプトが追加・変更・削除した最上位の設定項目です。設定全体にはアプリの設定も含まれます。",
+  "scriptChangesEmpty": "スクリプトによる設定の変更はありません",
+  "scriptChangesAdded": "追加（{count}）",
+  "scriptChangesModified": "変更（{count}）",
+  "scriptChangesRemoved": "削除（{count}）",
+  "@scriptChangesAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@scriptChangesModified": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@scriptChangesRemoved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "excludeNetworks": "IP またはゲートウェイでプロキシを一時停止",
   "excludeNetworksDesc": "Wi-Fi／イーサネットの IPv4、サブネット、ゲートウェイに一致すると一時停止し、離れると再開。カンマ区切り、例: 192.168.1.0/24,gateway:192.168.1.1",
   "excludeNetworksInvalid": "最大 16 件。有効な IPv4、CIDR または gateway:アドレスを入力",
@@ -1105,7 +1136,6 @@
   "action_copyEnv": "プロキシ環境変数をコピー",
   "action_exit": "終了",
   "hotkeyUnavailable": "ショートカットを登録できません",
-  "outboundIp": "出口 IP",
   "runTime": "稼働時間",
   "floatingNavigationBar": "フローティングナビゲーション",
   "floatingNavigationBarDesc": "コンパクトな画面でフローティングドックを使用",

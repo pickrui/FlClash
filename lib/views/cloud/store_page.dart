@@ -62,7 +62,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
   }
 
   Future<void> _runGuarded(Future<void> Function() action) async {
-    if (_busy) return;
+    if (_busy || ref.read(storeProvider).isLoading) return;
     setState(() => _busy = true);
     try {
       await _reportFailures(action);
@@ -88,22 +88,24 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
   Widget build(BuildContext context) {
     final storeState = ref.watch(storeProvider);
     final profile = ref.watch(cloudAccountProvider.select((s) => s.profile));
+    final busy = _busy || storeState.isLoading;
 
     return CommonScaffold(
       title: appLocalizations.store,
-      isLoading: _busy,
+      isLoading: _busy || (storeState.isLoading && storeState.plans.isNotEmpty),
       actions: [
         IconButton(
           icon: const Icon(Icons.refresh),
           tooltip: appLocalizations.refresh,
-          onPressed: () => _runGuarded(_refresh),
+          onPressed: busy ? null : () => _runGuarded(_refresh),
         ),
       ],
       body: RefreshIndicator(
-        onRefresh: _refresh,
+        onRefresh: () => _runGuarded(_refresh),
         child: storeState.isLoading && storeState.plans.isEmpty
             ? const Center(child: CircularProgressIndicator())
             : ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 padding: EdgeInsets.fromLTRB(
                   16,
                   context.contentTopPadding,
@@ -117,13 +119,13 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
                       children: [
                         StoreBalanceCard(
                           profile: profile,
-                          onRecharge: _busy
+                          onRecharge: busy
                               ? null
                               : () => _runGuarded(_rechargeFlow),
                         ),
                         if (storeState.error case final error?) ...[
                           const SizedBox(height: 12),
-                          _buildErrorCard(error),
+                          _buildErrorCard(error, busy: busy),
                         ],
                         const SizedBox(height: 16),
                         _buildSectionPicker(),
@@ -146,6 +148,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
 
   List<Widget> _buildPlans(StoreState state) {
     if (state.plans.isEmpty) {
+      if (state.error != null) return const [];
       return [
         _buildEmptyHint(
           appLocalizations.noAvailablePlans,
@@ -159,7 +162,9 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
           padding: const EdgeInsets.only(bottom: 8),
           child: StorePlanCard(
             plan: plan,
-            onBuy: _busy ? null : () => _runGuarded(() => _purchaseFlow(plan)),
+            onBuy: _busy || state.isLoading
+                ? null
+                : () => _runGuarded(() => _purchaseFlow(plan)),
           ),
         ),
     ];
@@ -167,6 +172,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
 
   List<Widget> _buildOrders(StoreState state, CloudProfile? profile) {
     if (state.bought.isEmpty) {
+      if (state.error != null) return const [];
       return [
         _buildEmptyHint(
           appLocalizations.noPurchaseRecords,
@@ -185,7 +191,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
           child: StoreBoughtCard(
             bought: bought,
             profile: live,
-            actions: _buildBoughtActions(bought, state.plans),
+            actions: _buildBoughtActions(bought, state),
           ),
         ),
     ];
@@ -236,7 +242,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
     );
   }
 
-  Widget _buildErrorCard(String error) {
+  Widget _buildErrorCard(String error, {required bool busy}) {
     return CommonCard(
       isError: true,
       child: Padding(
@@ -247,7 +253,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
             const SizedBox(width: 12),
             Expanded(child: Text(error)),
             IconButton(
-              onPressed: _busy ? null : () => _runGuarded(_refresh),
+              onPressed: busy ? null : () => _runGuarded(_refresh),
               icon: const Icon(Icons.refresh),
               tooltip: appLocalizations.refresh,
             ),
@@ -257,11 +263,11 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
     );
   }
 
-  List<Widget> _buildBoughtActions(BoughtRecord bought, List<StorePlan> plans) {
+  List<Widget> _buildBoughtActions(BoughtRecord bought, StoreState state) {
     VoidCallback? guarded(Future<void> Function() action) =>
-        _busy ? null : () => _runGuarded(action);
+        _busy || state.isLoading ? null : () => _runGuarded(action);
     return [
-      if (storeUpgradeTargets(bought, plans).isNotEmpty)
+      if (storeUpgradeTargets(bought, state.plans).isNotEmpty)
         OutlinedButton.icon(
           onPressed: guarded(() => _upgradeFlow(bought)),
           icon: const Icon(Icons.upgrade),

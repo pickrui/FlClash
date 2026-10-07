@@ -170,19 +170,12 @@ class ClashProviderLibrary {
   Future<void> reorder(ProviderKind kind, List<int> ids) async {
     await _serialize(
       () => database.transaction(() async {
-        final all = (await database.clashProvidersDao.all().get())
-            .where((item) => item.kind == kind)
-            .toList();
-        if (ids.toSet().length != all.length ||
-            ids.length != all.length ||
-            !all.every((item) => ids.contains(item.id))) {
+        final storedIds = await database.clashProvidersDao.ids(kind);
+        if (ids.length != storedIds.length ||
+            !ids.toSet().containsAll(storedIds)) {
           throw const ProviderLibraryException('changed');
         }
-        for (final item in all) {
-          await database.clashProvidersDao.put(
-            item.copyWith(order: ids.indexOf(item.id)),
-          );
-        }
+        await database.clashProvidersDao.reorder(ids);
       }),
     );
     await _onChanged();

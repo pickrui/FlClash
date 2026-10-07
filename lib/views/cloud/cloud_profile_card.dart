@@ -6,10 +6,10 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'cloud_layout.dart';
 
@@ -33,8 +33,9 @@ class CloudProfileCard extends StatelessWidget {
               children: [
                 InkWell(
                   borderRadius: BorderRadius.circular(14),
-                  onTap: () => launchUrl(
-                    Uri.parse('https://${Secrets.primarySiteDomain}/user'),
+                  onTap: () => globalState.openUrl(
+                    'https://${Secrets.primarySiteDomain}/user',
+                    confirm: false,
                   ),
                   child: const CloudIconTile(
                     icon: Icons.account_circle,

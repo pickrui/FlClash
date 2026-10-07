@@ -221,31 +221,37 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m81(appName) => "${appName} (Safe mode)";
 
-  static String m82(count) => "${count} seconds";
+  static String m82(count) => "Added (${count})";
 
-  static String m83(count) => "${count} selected";
+  static String m83(count) => "Modified (${count})";
 
-  static String m84(label) => "${label} must be a single item";
+  static String m84(count) => "Removed (${count})";
 
-  static String m85(fields) => "Check these settings: ${fields}";
+  static String m85(count) => "${count} seconds";
 
-  static String m86(count) => "Devices (${count})";
+  static String m86(count) => "${count} selected";
 
-  static String m87(name, profile) =>
+  static String m87(label) => "${label} must be a single item";
+
+  static String m88(fields) => "Check these settings: ${fields}";
+
+  static String m89(count) => "Devices (${count})";
+
+  static String m90(name, profile) =>
       "${name} is still used by a rule or group in profile ${profile}";
 
-  static String m88(region) => "Relay ${region}";
+  static String m91(region) => "Relay ${region}";
 
-  static String m89(name) =>
+  static String m92(name) =>
       "This device will leave ${name} and its sign-in will be deleted from this device. If the network is unreachable now, remove the device in the Tailscale admin console.";
 
-  static String m90(build) => "Build: ${build}";
+  static String m93(build) => "Build: ${build}";
 
-  static String m91(version) => "Version: ${version}";
+  static String m94(version) => "Version: ${version}";
 
-  static String m92(label) => "${label} must be a url";
+  static String m95(label) => "${label} must be a url";
 
-  static String m93(count) =>
+  static String m96(count) =>
       "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1792,6 +1798,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "openDashboard": MessageLookupByLibrary.simpleMessage("Open dashboard"),
     "openInBrowser": MessageLookupByLibrary.simpleMessage("Open in browser"),
+    "openLinkFailed": MessageLookupByLibrary.simpleMessage(
+      "Unable to open the link. Check that a browser is installed and try again.",
+    ),
     "operationFailed": MessageLookupByLibrary.simpleMessage("Operation failed"),
     "operationSuccess": MessageLookupByLibrary.simpleMessage(
       "Operation successful",
@@ -1799,7 +1808,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "optional": MessageLookupByLibrary.simpleMessage("Optional"),
     "options": MessageLookupByLibrary.simpleMessage("Options"),
     "other": MessageLookupByLibrary.simpleMessage("Other"),
-    "outboundIp": MessageLookupByLibrary.simpleMessage("Outbound IP"),
     "outboundMode": MessageLookupByLibrary.simpleMessage("Outbound mode"),
     "outboundUnavailable": MessageLookupByLibrary.simpleMessage(
       "Unavailable in this configuration. Remove or replace it.",
@@ -1861,6 +1869,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "payWithBalance": MessageLookupByLibrary.simpleMessage("Pay with balance"),
     "paymentAmount": MessageLookupByLibrary.simpleMessage("Payment amount"),
     "paymentMethod": MessageLookupByLibrary.simpleMessage("Payment method"),
+    "paymentPending": MessageLookupByLibrary.simpleMessage(
+      "Payment has not been received yet. Please check again shortly.",
+    ),
     "paymentRequestFailed": MessageLookupByLibrary.simpleMessage(
       "Payment request failed",
     ),
@@ -2077,6 +2088,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "quickFill": MessageLookupByLibrary.simpleMessage("Quick fill"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("Rainbow"),
     "rawOutboundInUse": m75,
+    "readFullAnnouncement": MessageLookupByLibrary.simpleMessage(
+      "Read full announcement",
+    ),
     "receivingAddress": MessageLookupByLibrary.simpleMessage(
       "Receiving address",
     ),
@@ -2386,6 +2400,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "scriptChanged": MessageLookupByLibrary.simpleMessage(
       "The script changed or was deleted. Reopen it and try again.",
     ),
+    "scriptChanges": MessageLookupByLibrary.simpleMessage("Script changes"),
+    "scriptChangesAdded": m82,
+    "scriptChangesDescription": MessageLookupByLibrary.simpleMessage(
+      "Top-level configuration fields added, modified or removed by the script. The full configuration also includes app settings.",
+    ),
+    "scriptChangesEmpty": MessageLookupByLibrary.simpleMessage(
+      "The script did not change the configuration",
+    ),
+    "scriptChangesModified": m83,
+    "scriptChangesRemoved": m84,
+    "scriptFullConfig": MessageLookupByLibrary.simpleMessage("Full config"),
     "scriptModeDesc": MessageLookupByLibrary.simpleMessage(
       "Script mode, use external extension scripts, provide one-click override configuration capability",
     ),
@@ -2395,14 +2420,14 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "search": MessageLookupByLibrary.simpleMessage("Search"),
     "seconds": MessageLookupByLibrary.simpleMessage("Seconds"),
-    "secondsCount": m82,
+    "secondsCount": m85,
     "selectAll": MessageLookupByLibrary.simpleMessage("Select all"),
     "selectBackup": MessageLookupByLibrary.simpleMessage("Select a backup"),
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage(
       "Select upgrade target",
     ),
     "selected": MessageLookupByLibrary.simpleMessage("Selected"),
-    "selectedCountTitle": m83,
+    "selectedCountTitle": m86,
     "sendCode": MessageLookupByLibrary.simpleMessage("Send Code"),
     "sendResetEmail": MessageLookupByLibrary.simpleMessage("Send reset email"),
     "server": MessageLookupByLibrary.simpleMessage("Server"),
@@ -2426,7 +2451,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Start in the background",
     ),
     "singleAdd": MessageLookupByLibrary.simpleMessage("Single add"),
-    "singleValueTip": m84,
+    "singleValueTip": m87,
     "size": MessageLookupByLibrary.simpleMessage("Size"),
     "slide": MessageLookupByLibrary.simpleMessage("Slide"),
     "socksPort": MessageLookupByLibrary.simpleMessage("Socks Port"),
@@ -2528,7 +2553,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleAvailableExitNodes": MessageLookupByLibrary.simpleMessage(
       "Available exit nodes",
     ),
-    "tailscaleCheckSettings": m85,
+    "tailscaleCheckSettings": m88,
     "tailscaleConnected": MessageLookupByLibrary.simpleMessage("Connected"),
     "tailscaleConnecting": MessageLookupByLibrary.simpleMessage("Connecting"),
     "tailscaleControlUrl": MessageLookupByLibrary.simpleMessage("Control URL"),
@@ -2536,7 +2561,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Authentication and device identity stay on this device.",
     ),
     "tailscaleDeviceName": MessageLookupByLibrary.simpleMessage("Device name"),
-    "tailscaleDevices": m86,
+    "tailscaleDevices": m89,
     "tailscaleDirect": MessageLookupByLibrary.simpleMessage("Direct"),
     "tailscaleEmptyDesc": MessageLookupByLibrary.simpleMessage(
       "Add a network, sign in on this device, then start the proxy to reach your devices.",
@@ -2631,7 +2656,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleNeedsLogin": MessageLookupByLibrary.simpleMessage(
       "Login required",
     ),
-    "tailscaleNetworkInUse": m87,
+    "tailscaleNetworkInUse": m90,
     "tailscaleNetworkName": MessageLookupByLibrary.simpleMessage(
       "Network name",
     ),
@@ -2648,8 +2673,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleOpenLoginPage": MessageLookupByLibrary.simpleMessage(
       "Open login page",
     ),
-    "tailscaleRelay": m88,
-    "tailscaleRemoveConfirm": m89,
+    "tailscaleRelay": m91,
+    "tailscaleRemoveConfirm": m92,
     "tailscaleRemoveNetwork": MessageLookupByLibrary.simpleMessage(
       "Remove network",
     ),
@@ -2740,7 +2765,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
       "An AppImage cannot be installed automatically. Replace the running program with the downloaded file; its folder has been opened.",
     ),
-    "updateBuildNumber": m90,
+    "updateBuildNumber": m93,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
       "Cancel download",
     ),
@@ -2783,14 +2808,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseNotesFailed": MessageLookupByLibrary.simpleMessage(
       "Could not load release notes. Please try again.",
     ),
-    "updateVersionNumber": m91,
+    "updateVersionNumber": m94,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("Upgrade plan"),
     "upload": MessageLookupByLibrary.simpleMessage("Upload"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Obtain profile through URL",
     ),
-    "urlTip": m92,
+    "urlTip": m95,
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("Used traffic"),
@@ -2820,7 +2845,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Also set the system clock; Android ignores it",
     ),
-    "yearsAgo": m93,
+    "yearsAgo": m96,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };
 }

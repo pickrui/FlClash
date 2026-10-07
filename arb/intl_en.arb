@@ -585,6 +585,7 @@
   "commission": "Commission",
   "points": "Points",
   "announcement": "Announcement",
+  "readFullAnnouncement": "Read full announcement",
   "serviceCheckFailed": "Service Check Failed",
   "apiAvailable": "API service is operational",
   "checkApi": "Check API",
@@ -660,8 +661,10 @@
   "scanOrTransferPay": "Scan / Transfer payment",
   "close": "Close",
   "checkingPayment": "Checking...",
+  "paymentPending": "Payment has not been received yet. Please check again shortly.",
   "iHavePaid": "I have paid",
   "openInBrowser": "Open in browser",
+  "openLinkFailed": "Unable to open the link. Check that a browser is installed and try again.",
   "scanToPayNotice": "Scan with Alipay / WeChat to pay",
   "paymentAmount": "Payment amount",
   "receivingAddress": "Receiving address",
@@ -955,6 +958,34 @@
   "tunMtuInvalid": "Enter an integer from 1280 to 65535",
   "scriptOptions": "Script options",
   "scriptOptionsEmpty": "This script does not expose configurable switches",
+  "scriptChanges": "Script changes",
+  "scriptFullConfig": "Full config",
+  "scriptChangesDescription": "Top-level configuration fields added, modified or removed by the script. The full configuration also includes app settings.",
+  "scriptChangesEmpty": "The script did not change the configuration",
+  "scriptChangesAdded": "Added ({count})",
+  "scriptChangesModified": "Modified ({count})",
+  "scriptChangesRemoved": "Removed ({count})",
+  "@scriptChangesAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@scriptChangesModified": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@scriptChangesRemoved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "excludeNetworks": "Pause proxy by IP or gateway",
   "excludeNetworksDesc": "Pause on matching Wi-Fi/Ethernet IPv4 addresses, subnets or gateways; resume after leaving. Comma-separated, e.g. 192.168.1.0/24,gateway:192.168.1.1",
   "excludeNetworksInvalid": "Up to 16 rules; enter valid IPv4, CIDR or gateway:address",
@@ -1105,7 +1136,6 @@
   "action_copyEnv": "Copy proxy environment variables",
   "action_exit": "Exit",
   "hotkeyUnavailable": "Shortcut unavailable",
-  "outboundIp": "Outbound IP",
   "runTime": "Uptime",
   "floatingNavigationBar": "Floating navigation",
   "floatingNavigationBarDesc": "Use a floating dock for compact layouts",

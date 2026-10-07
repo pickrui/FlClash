@@ -79,9 +79,11 @@ class _CoreContainerState extends ConsumerState<CoreManager>
   Future<void> onDelay(Delay delay) async {
     super.onDelay(delay);
     appController.setDelay(delay);
-    debouncer.call(FunctionTag.updateDelay, () async {
-      appController.updateGroupsDebounce();
-    }, duration: const Duration(milliseconds: 5000));
+    debouncer.call(
+      FunctionTag.updateDelay,
+      appController.updateGroupsDebounce,
+      duration: const Duration(milliseconds: 5000),
+    );
   }
 
   @override

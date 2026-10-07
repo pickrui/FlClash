@@ -69,27 +69,3 @@ func probeProxiesLocked() map[string]constant.Proxy {
 	}
 	return proxies
 }
-
-func lookupProbeProxy(groupName, name string) constant.Proxy {
-	runLock.Lock()
-	defer runLock.Unlock()
-	selectionLock.Lock()
-	defer selectionLock.Unlock()
-	if groupName != "" {
-		parent := proxySnapshot[groupName]
-		if parent == nil {
-			return nil
-		}
-		group, ok := parent.Adapter().(interface{ Proxies() []constant.Proxy })
-		if !ok {
-			return nil
-		}
-		for _, proxy := range group.Proxies() {
-			if proxy.Name() == name {
-				return proxy
-			}
-		}
-		return nil
-	}
-	return probeProxiesLocked()[name]
-}

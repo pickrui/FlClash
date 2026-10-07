@@ -46,27 +46,58 @@ class ClashProvidersDao extends DatabaseAccessor<Database>
     await (delete(clashProviders)..where((row) => row.id.equals(id))).go();
   }
 
+  Future<Set<int>> ids(ProviderKind kind) async {
+    final query = selectOnly(clashProviders)
+      ..addColumns([clashProviders.id])
+      ..where(clashProviders.kind.equalsValue(kind));
+    return (await query.get())
+        .map((row) => row.read(clashProviders.id)!)
+        .toSet();
+  }
+
+  Future<void> reorder(List<int> ids) => batch((batch) {
+    for (var index = 0; index < ids.length; index++) {
+      batch.update(
+        clashProviders,
+        ClashProvidersCompanion(order: Value(index)),
+        where: (row) => row.id.equals(ids[index]),
+      );
+    }
+  });
+
   Future<void> restore(
     Iterable<ClashProvider> providers, {
     required bool replace,
   }) async {
     if (replace) await delete(clashProviders).go();
+    final query = selectOnly(clashProviders)
+      ..addColumns([
+        clashProviders.id,
+        clashProviders.kind,
+        clashProviders.label,
+      ]);
+    final existing = await query.get();
+    final namedIds = {
+      for (final row in existing)
+        (
+          row.readWithConverter(clashProviders.kind)!,
+          row.read(clashProviders.label)!,
+        ): row.read(
+          clashProviders.id,
+        )!,
+    };
+    final occupiedIds = namedIds.values.toSet();
     for (final provider in providers) {
-      final existing = await all().get();
-      final named = existing
-          .where(
-            (item) =>
-                item.kind == provider.kind && item.label == provider.label,
-          )
-          .firstOrNull;
-      final occupied = existing.any(
-        (item) => item.id == provider.id && item.id != named?.id,
-      );
-      await put(
-        provider.copyWith(
-          id: named?.id ?? (occupied ? snowflake.id : provider.id),
-        ),
-      );
+      final name = (provider.kind, provider.label);
+      var id = namedIds[name] ?? provider.id;
+      if (!namedIds.containsKey(name)) {
+        while (occupiedIds.contains(id)) {
+          id = snowflake.id;
+        }
+      }
+      await put(provider.copyWith(id: id));
+      namedIds[name] = id;
+      occupiedIds.add(id);
     }
   }
 }

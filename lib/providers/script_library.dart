@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/javascript.dart';
 import 'package:fl_clash/database/database.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
@@ -45,6 +46,7 @@ final scriptLibraryProvider = Provider<ScriptLibrary>((ref) {
     serialize: (action) =>
         storageLock.synchronized(() => runExclusiveDatabaseOperation(action)),
     onChanged: (id, removed, affected) async {
+      clearScriptOptionsCache();
       if (!ref.mounted) return;
       final profile = ref.read(currentProfileProvider);
       final inUse =

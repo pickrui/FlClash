@@ -14,6 +14,20 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'generated/database.g.dart';
 
+bool _asyncListChanged<T>(
+  AsyncValue<List<T>> previous,
+  AsyncValue<List<T>> next,
+  ListEquality<T> equality,
+) {
+  if (previous.isLoading ||
+      next.isLoading ||
+      previous.hasError ||
+      next.hasError) {
+    return previous != next;
+  }
+  return !equality.equals(previous.value, next.value);
+}
+
 Future<void> withRollback<T>({
   required T snapshot,
   required FutureOr<void> Function() action,
@@ -294,7 +308,7 @@ class Scripts extends _$Scripts with AsyncNotifierMixin {
     AsyncValue<List<Script>> previous,
     AsyncValue<List<Script>> next,
   ) {
-    return !scriptListEquality.equals(previous.value, next.value);
+    return _asyncListChanged(previous, next, scriptListEquality);
   }
 }
 
@@ -334,7 +348,7 @@ class GlobalRules extends _$GlobalRules with AsyncNotifierMixin {
     AsyncValue<List<Rule>> previous,
     AsyncValue<List<Rule>> next,
   ) {
-    return !ruleListEquality.equals(previous.value, next.value);
+    return _asyncListChanged(previous, next, ruleListEquality);
   }
 
   void delAll(Iterable<int> ruleIds) {
@@ -396,7 +410,7 @@ class ProfileAddedRules extends _$ProfileAddedRules with AsyncNotifierMixin {
     AsyncValue<List<Rule>> previous,
     AsyncValue<List<Rule>> next,
   ) {
-    return !ruleListEquality.equals(previous.value, next.value);
+    return _asyncListChanged(previous, next, ruleListEquality);
   }
 
   Future<void> addPresets(Iterable<Rule> rules) {

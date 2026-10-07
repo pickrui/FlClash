@@ -192,31 +192,37 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m81(appName) => "${appName}（セーフモード）";
 
-  static String m82(count) => "${count} 秒";
+  static String m82(count) => "追加（${count}）";
 
-  static String m83(count) => "${count} 件選択中";
+  static String m83(count) => "変更（${count}）";
 
-  static String m84(label) => "${label}は1項目のみ指定できます";
+  static String m84(count) => "削除（${count}）";
 
-  static String m85(fields) => "次の設定を確認してください：${fields}";
+  static String m85(count) => "${count} 秒";
 
-  static String m86(count) => "デバイス（${count}）";
+  static String m86(count) => "${count} 件選択中";
 
-  static String m87(name, profile) =>
+  static String m87(label) => "${label}は1項目のみ指定できます";
+
+  static String m88(fields) => "次の設定を確認してください：${fields}";
+
+  static String m89(count) => "デバイス（${count}）";
+
+  static String m90(name, profile) =>
       "${name} はプロファイル「${profile}」のルールまたはグループでまだ使われています";
 
-  static String m88(region) => "リレー ${region}";
+  static String m91(region) => "リレー ${region}";
 
-  static String m89(name) =>
+  static String m92(name) =>
       "このデバイスは ${name} から退出し、このデバイス上のログイン情報が削除されます。現在ネットワークに接続できない場合は、Tailscale の管理コンソールでデバイスを削除してください";
 
-  static String m90(build) => "ビルド番号: ${build}";
+  static String m93(build) => "ビルド番号: ${build}";
 
-  static String m91(version) => "バージョン：${version}";
+  static String m94(version) => "バージョン：${version}";
 
-  static String m92(label) => "${label}はURLである必要があります";
+  static String m95(label) => "${label}はURLである必要があります";
 
-  static String m93(count) => "${count}年前";
+  static String m96(count) => "${count}年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1493,12 +1499,14 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "openDashboard": MessageLookupByLibrary.simpleMessage("ダッシュボードを開く"),
     "openInBrowser": MessageLookupByLibrary.simpleMessage("ブラウザで開く"),
+    "openLinkFailed": MessageLookupByLibrary.simpleMessage(
+      "リンクを開けません。ブラウザがインストールされていることを確認して、もう一度お試しください",
+    ),
     "operationFailed": MessageLookupByLibrary.simpleMessage("操作に失敗しました"),
     "operationSuccess": MessageLookupByLibrary.simpleMessage("操作に成功しました"),
     "optional": MessageLookupByLibrary.simpleMessage("任意"),
     "options": MessageLookupByLibrary.simpleMessage("オプション"),
     "other": MessageLookupByLibrary.simpleMessage("その他"),
-    "outboundIp": MessageLookupByLibrary.simpleMessage("出口 IP"),
     "outboundMode": MessageLookupByLibrary.simpleMessage("アウトバウンドモード"),
     "outboundUnavailable": MessageLookupByLibrary.simpleMessage(
       "この設定では利用できません。削除または再選択してください",
@@ -1556,6 +1564,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "payWithBalance": MessageLookupByLibrary.simpleMessage("残高で支払う"),
     "paymentAmount": MessageLookupByLibrary.simpleMessage("支払い金額"),
     "paymentMethod": MessageLookupByLibrary.simpleMessage("支払い方法"),
+    "paymentPending": MessageLookupByLibrary.simpleMessage(
+      "お支払いはまだ確認できていません。しばらくしてから再度確認してください",
+    ),
     "paymentRequestFailed": MessageLookupByLibrary.simpleMessage(
       "支払いリクエストに失敗しました",
     ),
@@ -1740,6 +1751,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "quickFill": MessageLookupByLibrary.simpleMessage("クイック入力"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("レインボー"),
     "rawOutboundInUse": m75,
+    "readFullAnnouncement": MessageLookupByLibrary.simpleMessage("全文を読む"),
     "receivingAddress": MessageLookupByLibrary.simpleMessage("受取アドレス"),
     "recharge": MessageLookupByLibrary.simpleMessage("チャージ"),
     "rechargeAllowedRange": m76,
@@ -1997,6 +2009,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "scriptChanged": MessageLookupByLibrary.simpleMessage(
       "スクリプトが変更または削除されました。開き直して再試行してください。",
     ),
+    "scriptChanges": MessageLookupByLibrary.simpleMessage("スクリプトの変更"),
+    "scriptChangesAdded": m82,
+    "scriptChangesDescription": MessageLookupByLibrary.simpleMessage(
+      "スクリプトが追加・変更・削除した最上位の設定項目です。設定全体にはアプリの設定も含まれます。",
+    ),
+    "scriptChangesEmpty": MessageLookupByLibrary.simpleMessage(
+      "スクリプトによる設定の変更はありません",
+    ),
+    "scriptChangesModified": m83,
+    "scriptChangesRemoved": m84,
+    "scriptFullConfig": MessageLookupByLibrary.simpleMessage("設定全体"),
     "scriptModeDesc": MessageLookupByLibrary.simpleMessage(
       "スクリプトモード、外部拡張スクリプトを使用し、ワンクリックで設定を上書きする機能を提供",
     ),
@@ -2006,12 +2029,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "search": MessageLookupByLibrary.simpleMessage("検索"),
     "seconds": MessageLookupByLibrary.simpleMessage("秒"),
-    "secondsCount": m82,
+    "secondsCount": m85,
     "selectAll": MessageLookupByLibrary.simpleMessage("すべて選択"),
     "selectBackup": MessageLookupByLibrary.simpleMessage("バックアップを選択"),
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage("アップグレード対象を選択"),
     "selected": MessageLookupByLibrary.simpleMessage("選択済み"),
-    "selectedCountTitle": m83,
+    "selectedCountTitle": m86,
     "sendCode": MessageLookupByLibrary.simpleMessage("コードを送信"),
     "sendResetEmail": MessageLookupByLibrary.simpleMessage("リセットメールを送信"),
     "server": MessageLookupByLibrary.simpleMessage("サーバー"),
@@ -2031,7 +2054,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "silentLaunch": MessageLookupByLibrary.simpleMessage("バックグラウンド起動"),
     "silentLaunchDesc": MessageLookupByLibrary.simpleMessage("バックグラウンドで起動"),
     "singleAdd": MessageLookupByLibrary.simpleMessage("個別追加"),
-    "singleValueTip": m84,
+    "singleValueTip": m87,
     "size": MessageLookupByLibrary.simpleMessage("サイズ"),
     "slide": MessageLookupByLibrary.simpleMessage("スライド"),
     "socksPort": MessageLookupByLibrary.simpleMessage("Socksポート"),
@@ -2113,7 +2136,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleAvailableExitNodes": MessageLookupByLibrary.simpleMessage(
       "利用可能な出口ノード",
     ),
-    "tailscaleCheckSettings": m85,
+    "tailscaleCheckSettings": m88,
     "tailscaleConnected": MessageLookupByLibrary.simpleMessage("接続済み"),
     "tailscaleConnecting": MessageLookupByLibrary.simpleMessage("接続中"),
     "tailscaleControlUrl": MessageLookupByLibrary.simpleMessage(
@@ -2123,7 +2146,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "認証情報とデバイスの識別情報はこのデバイスにのみ保存されます",
     ),
     "tailscaleDeviceName": MessageLookupByLibrary.simpleMessage("デバイス名"),
-    "tailscaleDevices": m86,
+    "tailscaleDevices": m89,
     "tailscaleDirect": MessageLookupByLibrary.simpleMessage("直接接続"),
     "tailscaleEmptyDesc": MessageLookupByLibrary.simpleMessage(
       "ネットワークを追加してこのデバイスでログインし、プロキシを起動するとデバイスにアクセスできます",
@@ -2208,7 +2231,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "デバイスの承認待ちです",
     ),
     "tailscaleNeedsLogin": MessageLookupByLibrary.simpleMessage("ログインが必要です"),
-    "tailscaleNetworkInUse": m87,
+    "tailscaleNetworkInUse": m90,
     "tailscaleNetworkName": MessageLookupByLibrary.simpleMessage("ネットワーク名"),
     "tailscaleNetworks": MessageLookupByLibrary.simpleMessage("ネットワーク"),
     "tailscaleNotApplied": MessageLookupByLibrary.simpleMessage("未適用"),
@@ -2221,8 +2244,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleOpenLoginPage": MessageLookupByLibrary.simpleMessage(
       "ログインページを開く",
     ),
-    "tailscaleRelay": m88,
-    "tailscaleRemoveConfirm": m89,
+    "tailscaleRelay": m91,
+    "tailscaleRemoveConfirm": m92,
     "tailscaleRemoveNetwork": MessageLookupByLibrary.simpleMessage("ネットワークを削除"),
     "tailscaleSaveAndLogin": MessageLookupByLibrary.simpleMessage("保存してログイン"),
     "tailscaleSignedIn": MessageLookupByLibrary.simpleMessage("ログイン済み"),
@@ -2297,7 +2320,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
       "AppImage は自動インストールできません。ダウンロードしたファイルで現在のプログラムを置き換えてください。保存先のフォルダーを開きました。",
     ),
-    "updateBuildNumber": m90,
+    "updateBuildNumber": m93,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage("ダウンロードを中止"),
     "updateDownloadBackground": MessageLookupByLibrary.simpleMessage(
       "バックグラウンドでダウンロード",
@@ -2328,12 +2351,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseNotesFailed": MessageLookupByLibrary.simpleMessage(
       "更新履歴を読み込めませんでした。再試行してください",
     ),
-    "updateVersionNumber": m91,
+    "updateVersionNumber": m94,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("プランをアップグレード"),
     "upload": MessageLookupByLibrary.simpleMessage("アップロード"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("URL経由でプロファイルを取得"),
-    "urlTip": m92,
+    "urlTip": m95,
     "useHosts": MessageLookupByLibrary.simpleMessage("ホストを使用"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("システムホストを使用"),
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("使用済みデータ量"),
@@ -2357,7 +2380,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "システムクロックも設定します。Androidでは無視されます",
     ),
-    "yearsAgo": m93,
+    "yearsAgo": m96,
     "zh_CN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };
 }

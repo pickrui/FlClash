@@ -585,6 +585,7 @@
   "commission": "佣金",
   "points": "积分",
   "announcement": "公告",
+  "readFullAnnouncement": "阅读全文",
   "serviceCheckFailed": "服务检测失败",
   "apiAvailable": "API 服务正常",
   "checkApi": "检查 API",
@@ -660,8 +661,10 @@
   "scanOrTransferPay": "扫码 / 转账支付",
   "close": "关闭",
   "checkingPayment": "检测中...",
+  "paymentPending": "暂未收到付款，请稍后再查询",
   "iHavePaid": "我已支付",
   "openInBrowser": "在浏览器中打开",
+  "openLinkFailed": "无法打开链接，请确认已安装浏览器后重试",
   "scanToPayNotice": "请使用支付宝 / 微信扫一扫完成支付",
   "paymentAmount": "支付金额",
   "receivingAddress": "收款地址",
@@ -955,6 +958,34 @@
   "tunMtuInvalid": "请输入 1280–65535 之间的整数",
   "scriptOptions": "脚本选项",
   "scriptOptionsEmpty": "此脚本没有提供可配置的开关",
+  "scriptChanges": "脚本变更",
+  "scriptFullConfig": "完整配置",
+  "scriptChangesDescription": "此处列出脚本新增、修改和删除的顶层配置项，完整配置还包含应用设置",
+  "scriptChangesEmpty": "脚本未改变配置",
+  "scriptChangesAdded": "新增（{count}）",
+  "scriptChangesModified": "修改（{count}）",
+  "scriptChangesRemoved": "删除（{count}）",
+  "@scriptChangesAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@scriptChangesModified": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@scriptChangesRemoved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "excludeNetworks": "按 IP 或网关暂停代理",
   "excludeNetworksDesc": "匹配 Wi-Fi 或以太网的 IPv4 地址、网段或网关时暂停，离开后恢复；用逗号分隔，例如 192.168.1.0/24,gateway:192.168.1.1",
   "excludeNetworksInvalid": "最多 16 条规则，请输入有效的 IPv4、网段或 gateway:地址",
@@ -1105,7 +1136,6 @@
   "action_copyEnv": "复制代理环境变量",
   "action_exit": "退出",
   "hotkeyUnavailable": "快捷键注册失败",
-  "outboundIp": "出口 IP",
   "runTime": "运行时间",
   "floatingNavigationBar": "悬浮导航",
   "floatingNavigationBarDesc": "在紧凑布局中使用悬浮导航栏",

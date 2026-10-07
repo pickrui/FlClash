@@ -186,30 +186,36 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m81(appName) => "${appName}（安全模式）";
 
-  static String m82(count) => "${count} 秒";
+  static String m82(count) => "新增（${count}）";
 
-  static String m83(count) => "已选择 ${count} 项";
+  static String m83(count) => "修改（${count}）";
 
-  static String m84(label) => "${label}只能是一项";
+  static String m84(count) => "删除（${count}）";
 
-  static String m85(fields) => "请检查以下设置：${fields}";
+  static String m85(count) => "${count} 秒";
 
-  static String m86(count) => "设备（${count}）";
+  static String m86(count) => "已选择 ${count} 项";
 
-  static String m87(name, profile) => "${name} 仍被配置「${profile}」中的规则或策略组使用";
+  static String m87(label) => "${label}只能是一项";
 
-  static String m88(region) => "中继 ${region}";
+  static String m88(fields) => "请检查以下设置：${fields}";
 
-  static String m89(name) =>
+  static String m89(count) => "设备（${count}）";
+
+  static String m90(name, profile) => "${name} 仍被配置「${profile}」中的规则或策略组使用";
+
+  static String m91(region) => "中继 ${region}";
+
+  static String m92(name) =>
       "此设备将退出 ${name}，并删除此设备上的登录信息；如果当前无法连接该网络，请到 Tailscale 管理后台移除此设备";
 
-  static String m90(build) => "构建号：${build}";
+  static String m93(build) => "构建号：${build}";
 
-  static String m91(version) => "版本号：${version}";
+  static String m94(version) => "版本号：${version}";
 
-  static String m92(label) => "${label}必须为URL";
+  static String m95(label) => "${label}必须为URL";
 
-  static String m93(count) => "${count} 年前";
+  static String m96(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1307,12 +1313,14 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "openDashboard": MessageLookupByLibrary.simpleMessage("打开面板"),
     "openInBrowser": MessageLookupByLibrary.simpleMessage("在浏览器中打开"),
+    "openLinkFailed": MessageLookupByLibrary.simpleMessage(
+      "无法打开链接，请确认已安装浏览器后重试",
+    ),
     "operationFailed": MessageLookupByLibrary.simpleMessage("操作失败"),
     "operationSuccess": MessageLookupByLibrary.simpleMessage("操作成功"),
     "optional": MessageLookupByLibrary.simpleMessage("可选"),
     "options": MessageLookupByLibrary.simpleMessage("选项"),
     "other": MessageLookupByLibrary.simpleMessage("其他"),
-    "outboundIp": MessageLookupByLibrary.simpleMessage("出口 IP"),
     "outboundMode": MessageLookupByLibrary.simpleMessage("出站模式"),
     "outboundUnavailable": MessageLookupByLibrary.simpleMessage(
       "当前配置中不可用，请移除或重新选择",
@@ -1368,6 +1376,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "payWithBalance": MessageLookupByLibrary.simpleMessage("余额支付"),
     "paymentAmount": MessageLookupByLibrary.simpleMessage("支付金额"),
     "paymentMethod": MessageLookupByLibrary.simpleMessage("支付方式"),
+    "paymentPending": MessageLookupByLibrary.simpleMessage("暂未收到付款，请稍后再查询"),
     "paymentRequestFailed": MessageLookupByLibrary.simpleMessage("支付请求失败"),
     "paymentSuccess": MessageLookupByLibrary.simpleMessage("支付成功"),
     "paymentUnknownResponse": MessageLookupByLibrary.simpleMessage(
@@ -1526,6 +1535,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "quickFill": MessageLookupByLibrary.simpleMessage("一键填入"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("彩虹"),
     "rawOutboundInUse": m75,
+    "readFullAnnouncement": MessageLookupByLibrary.simpleMessage("阅读全文"),
     "receivingAddress": MessageLookupByLibrary.simpleMessage("收款地址"),
     "recharge": MessageLookupByLibrary.simpleMessage("充值"),
     "rechargeAllowedRange": m76,
@@ -1753,6 +1763,15 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "script": MessageLookupByLibrary.simpleMessage("脚本"),
     "scriptChanged": MessageLookupByLibrary.simpleMessage("脚本已修改或删除，请重新打开后再试"),
+    "scriptChanges": MessageLookupByLibrary.simpleMessage("脚本变更"),
+    "scriptChangesAdded": m82,
+    "scriptChangesDescription": MessageLookupByLibrary.simpleMessage(
+      "此处列出脚本新增、修改和删除的顶层配置项，完整配置还包含应用设置",
+    ),
+    "scriptChangesEmpty": MessageLookupByLibrary.simpleMessage("脚本未改变配置"),
+    "scriptChangesModified": m83,
+    "scriptChangesRemoved": m84,
+    "scriptFullConfig": MessageLookupByLibrary.simpleMessage("完整配置"),
     "scriptModeDesc": MessageLookupByLibrary.simpleMessage(
       "脚本模式，使用外部扩展脚本，提供一键覆写配置的能力",
     ),
@@ -1760,12 +1779,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "scriptOptionsEmpty": MessageLookupByLibrary.simpleMessage("此脚本没有提供可配置的开关"),
     "search": MessageLookupByLibrary.simpleMessage("搜索"),
     "seconds": MessageLookupByLibrary.simpleMessage("秒"),
-    "secondsCount": m82,
+    "secondsCount": m85,
     "selectAll": MessageLookupByLibrary.simpleMessage("全选"),
     "selectBackup": MessageLookupByLibrary.simpleMessage("选择备份"),
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage("选择升级目标套餐"),
     "selected": MessageLookupByLibrary.simpleMessage("已选择"),
-    "selectedCountTitle": m83,
+    "selectedCountTitle": m86,
     "sendCode": MessageLookupByLibrary.simpleMessage("获取验证码"),
     "sendResetEmail": MessageLookupByLibrary.simpleMessage("发送重置邮件"),
     "server": MessageLookupByLibrary.simpleMessage("服务器"),
@@ -1783,7 +1802,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "silentLaunch": MessageLookupByLibrary.simpleMessage("静默启动"),
     "silentLaunchDesc": MessageLookupByLibrary.simpleMessage("后台启动"),
     "singleAdd": MessageLookupByLibrary.simpleMessage("单条添加"),
-    "singleValueTip": m84,
+    "singleValueTip": m87,
     "size": MessageLookupByLibrary.simpleMessage("尺寸"),
     "slide": MessageLookupByLibrary.simpleMessage("滑动"),
     "socksPort": MessageLookupByLibrary.simpleMessage("Socks端口"),
@@ -1863,7 +1882,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleAvailableExitNodes": MessageLookupByLibrary.simpleMessage(
       "可用的出口节点",
     ),
-    "tailscaleCheckSettings": m85,
+    "tailscaleCheckSettings": m88,
     "tailscaleConnected": MessageLookupByLibrary.simpleMessage("已连接"),
     "tailscaleConnecting": MessageLookupByLibrary.simpleMessage("正在连接"),
     "tailscaleControlUrl": MessageLookupByLibrary.simpleMessage("控制服务器地址"),
@@ -1871,7 +1890,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "认证信息和设备身份仅保存在此设备",
     ),
     "tailscaleDeviceName": MessageLookupByLibrary.simpleMessage("设备名称"),
-    "tailscaleDevices": m86,
+    "tailscaleDevices": m89,
     "tailscaleDirect": MessageLookupByLibrary.simpleMessage("直连"),
     "tailscaleEmptyDesc": MessageLookupByLibrary.simpleMessage(
       "添加网络并在此设备上登录，启动代理后即可访问你的设备",
@@ -1946,7 +1965,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "tailscaleNeedsApproval": MessageLookupByLibrary.simpleMessage("等待设备审批"),
     "tailscaleNeedsLogin": MessageLookupByLibrary.simpleMessage("需要登录"),
-    "tailscaleNetworkInUse": m87,
+    "tailscaleNetworkInUse": m90,
     "tailscaleNetworkName": MessageLookupByLibrary.simpleMessage("网络名称"),
     "tailscaleNetworks": MessageLookupByLibrary.simpleMessage("网络"),
     "tailscaleNotApplied": MessageLookupByLibrary.simpleMessage("未生效"),
@@ -1957,8 +1976,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleOffline": MessageLookupByLibrary.simpleMessage("离线"),
     "tailscaleOnline": MessageLookupByLibrary.simpleMessage("在线"),
     "tailscaleOpenLoginPage": MessageLookupByLibrary.simpleMessage("打开登录页面"),
-    "tailscaleRelay": m88,
-    "tailscaleRemoveConfirm": m89,
+    "tailscaleRelay": m91,
+    "tailscaleRemoveConfirm": m92,
     "tailscaleRemoveNetwork": MessageLookupByLibrary.simpleMessage("移除网络"),
     "tailscaleSaveAndLogin": MessageLookupByLibrary.simpleMessage("保存并登录"),
     "tailscaleSignedIn": MessageLookupByLibrary.simpleMessage("已登录"),
@@ -2025,7 +2044,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
       "AppImage 无法自动安装，请用下载的文件替换当前程序，已打开文件所在目录",
     ),
-    "updateBuildNumber": m90,
+    "updateBuildNumber": m93,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage("取消下载"),
     "updateDownloadBackground": MessageLookupByLibrary.simpleMessage("移到后台下载"),
     "updateDownloadBrowser": MessageLookupByLibrary.simpleMessage("使用浏览器下载"),
@@ -2048,12 +2067,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseNotesFailed": MessageLookupByLibrary.simpleMessage(
       "更新日志加载失败，请重试",
     ),
-    "updateVersionNumber": m91,
+    "updateVersionNumber": m94,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("升级套餐"),
     "upload": MessageLookupByLibrary.simpleMessage("上传"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("通过URL获取配置文件"),
-    "urlTip": m92,
+    "urlTip": m95,
     "useHosts": MessageLookupByLibrary.simpleMessage("使用Hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("使用系统Hosts"),
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("已用流量"),
@@ -2077,7 +2096,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "同时设置系统时钟，Android上不生效",
     ),
-    "yearsAgo": m93,
+    "yearsAgo": m96,
     "zh_CN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };
 }

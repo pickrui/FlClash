@@ -16,6 +16,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+final paymentStatusQueryProvider = Provider(
+  (_) => CloudApiService().queryPaymentPaid,
+);
+
 class StorePaymentDialog extends ConsumerStatefulWidget {
   final PaymentInitiation init;
   final String payment;
@@ -33,6 +37,8 @@ class StorePaymentDialog extends ConsumerStatefulWidget {
 class _StorePaymentDialogState extends ConsumerState<StorePaymentDialog> {
   Timer? _timer;
   bool _checking = false;
+  String? _checkMessage;
+  bool _checkFailed = false;
 
   @override
   void initState() {
@@ -49,28 +55,57 @@ class _StorePaymentDialogState extends ConsumerState<StorePaymentDialog> {
     super.dispose();
   }
 
-  Future<void> _check({bool reportError = false}) async {
+  void _close(bool paid) {
+    if (!mounted || ModalRoute.of(context)?.isCurrent != true) return;
+    _timer?.cancel();
+    Navigator.of(context).pop(paid);
+  }
+
+  Future<void> _check({bool manual = false}) async {
     final pid = widget.init.pid;
-    if (pid == null || pid.isEmpty || _checking) return;
+    if (!mounted ||
+        ModalRoute.of(context)?.isCurrent != true ||
+        pid == null ||
+        pid.isEmpty ||
+        _checking) {
+      return;
+    }
     final accountNotifier = ref.read(cloudAccountProvider.notifier);
-    setState(() => _checking = true);
+    setState(() {
+      _checking = true;
+      if (manual) {
+        _checkMessage = null;
+        _checkFailed = false;
+      }
+    });
     try {
-      final paid = await CloudApiService().queryPaymentPaid(
+      final paid = await ref.read(paymentStatusQueryProvider)(
         pid,
         payment: widget.payment,
       );
-      if (paid && mounted) {
-        _timer?.cancel();
-        Navigator.of(context).pop(true);
+      if (!mounted) return;
+      if (paid) {
+        _close(true);
+      } else if (manual) {
+        setState(() => _checkMessage = appLocalizations.paymentPending);
       }
     } catch (e) {
+      if (CloudApiException.isHandledUnauthorized(e)) {
+        _timer?.cancel();
+        _close(false);
+        return;
+      }
       if (CloudApiException.isUnauthorized(e)) {
-        if (mounted) Navigator.of(context).pop(false);
+        _timer?.cancel();
+        _close(false);
         await accountNotifier.handleUnauthorized();
         return;
       }
-      if (reportError) {
-        globalState.showNotifier(CloudApiException.clean(e));
+      if (manual && mounted) {
+        setState(() {
+          _checkMessage = CloudApiException.clean(e);
+          _checkFailed = true;
+        });
       }
     } finally {
       if (mounted) setState(() => _checking = false);
@@ -87,7 +122,7 @@ class _StorePaymentDialogState extends ConsumerState<StorePaymentDialog> {
       title: appLocalizations.scanOrTransferPay,
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
+          onPressed: () => _close(false),
           child: Text(appLocalizations.close),
         ),
         if (isUrl && init.url != null)
@@ -97,7 +132,7 @@ class _StorePaymentDialogState extends ConsumerState<StorePaymentDialog> {
           ),
         if (hasPaymentId)
           TextButton(
-            onPressed: _checking ? null : () => _check(reportError: true),
+            onPressed: _checking ? null : () => _check(manual: true),
             child: Text(
               _checking
                   ? appLocalizations.checkingPayment
@@ -111,6 +146,21 @@ class _StorePaymentDialogState extends ConsumerState<StorePaymentDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            if (_checkMessage case final message?) ...[
+              Semantics(
+                liveRegion: true,
+                child: Text(
+                  message,
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    color: _checkFailed
+                        ? context.colorScheme.error
+                        : context.colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
             if (qrData != null && qrData.isNotEmpty) ...[
               Container(
                 padding: const EdgeInsets.all(12),

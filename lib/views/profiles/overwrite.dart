@@ -6,6 +6,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/javascript.dart';
 import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/features/overwrite/rule_preset.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -26,6 +27,7 @@ import 'package:fl_clash/features/overwrite/overwrite_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'custom_overwrite.dart';
+import 'script_config_preview.dart';
 
 class OverwriteView extends ConsumerStatefulWidget {
   final int profileId;
@@ -52,13 +54,23 @@ class _OverwriteViewState extends ConsumerState<OverwriteView> {
     if (profile == null || profile.isoixCloudProfile || _previewing) return;
     setState(() => _previewing = true);
     try {
-      final config = await _setupAction.getProfileWithId(profile.id);
+      ScriptConfigChanges? changes;
+      final config = await _setupAction.getProfileWithId(
+        profile.id,
+        onScriptChanges: (value) => changes = value,
+      );
       if (config.isEmpty) return;
       final text = await encodeYamlTask(config);
       if (!mounted) return;
       BaseNavigator.push(
         context,
-        EditorPage(title: profile.realLabel, content: text),
+        changes == null
+            ? EditorPage(title: profile.realLabel, content: text)
+            : ScriptConfigPreviewPage(
+                title: profile.realLabel,
+                content: text,
+                changes: changes!,
+              ),
       );
     } catch (error) {
       if (mounted) context.showNotifier(error.toString());
@@ -109,6 +121,7 @@ class _OverwriteViewState extends ConsumerState<OverwriteView> {
   Widget build(BuildContext context) {
     return CommonScaffold(
       title: appLocalizations.override,
+      isLoading: _previewing,
       actions: [
         if (ref.watch(profileProvider(widget.profileId)) case final profile?
             when !profile.isoixCloudProfile)
@@ -377,10 +390,10 @@ class _StandardContent extends ConsumerStatefulWidget {
   const _StandardContent(this.profileId);
 
   @override
-  ConsumerState createState() => __StandardContentState();
+  ConsumerState<_StandardContent> createState() => _StandardContentState();
 }
 
-class __StandardContentState extends ConsumerState<_StandardContent> {
+class _StandardContentState extends ConsumerState<_StandardContent> {
   final _key = utils.id;
 
   Future<void> _selectMatchTarget() async {
@@ -445,7 +458,7 @@ class __StandardContentState extends ConsumerState<_StandardContent> {
         targets: tailscaleRoutingTargets(ref.read(tailscaleNetworksProvider)),
       ),
     );
-    if (res == null) {
+    if (!mounted || res == null) {
       return;
     }
     ref.read(profileAddedRulesProvider(widget.profileId).notifier).put(res);
@@ -479,7 +492,7 @@ class __StandardContentState extends ConsumerState<_StandardContent> {
         text: appLocalizations.deleteMultipTip(appLocalizations.rule),
       ),
     );
-    if (res != true) {
+    if (!mounted || res != true) {
       return;
     }
     final selectedRules = ref.read(selectedItemsProvider(_key));
@@ -491,8 +504,9 @@ class __StandardContentState extends ConsumerState<_StandardContent> {
 
   @override
   Widget build(BuildContext context) {
-    final addedRules =
-        ref.watch(profileAddedRulesProvider(widget.profileId)).value ?? [];
+    final rulesState = ref.watch(profileAddedRulesProvider(widget.profileId));
+    final addedRules = rulesState.value ?? [];
+    final unavailable = rulesState.isLoading || rulesState.hasError;
     final selectedRules = ref.watch(selectedItemsProvider(_key));
     final profile = ref.watch(profileProvider(widget.profileId));
     final source = ref.watch(routingSourceProvider(widget.profileId));
@@ -546,16 +560,14 @@ class __StandardContentState extends ConsumerState<_StandardContent> {
                     if (selectedRules.isEmpty)
                       IconButton(
                         tooltip: appLocalizations.quickAdd,
-                        onPressed: _addPresets,
+                        onPressed: unavailable ? null : _addPresets,
                         icon: const GlyphIcon(AppGlyphs.listAdd),
                       ),
                     if (selectedRules.isNotEmpty) ...[
                       CommonMinIconButtonTheme(
                         child: IconButton.filledTonal(
                           tooltip: context.appLocalizations.delete,
-                          onPressed: () {
-                            _handleDelete();
-                          },
+                          onPressed: unavailable ? null : _handleDelete,
                           icon: const GlyphIcon(AppGlyphs.delete),
                         ),
                       ),
@@ -564,15 +576,13 @@ class __StandardContentState extends ConsumerState<_StandardContent> {
                     CommonMinFilledButtonTheme(
                       child: selectedRules.isNotEmpty
                           ? FilledButton(
-                              onPressed: () {
-                                _handleSelectAll();
-                              },
+                              onPressed: unavailable ? null : _handleSelectAll,
                               child: Text(appLocalizations.selectAll),
                             )
                           : FilledButton.tonal(
-                              onPressed: () {
-                                _handleAddOrUpdate();
-                              },
+                              onPressed: unavailable
+                                  ? null
+                                  : _handleAddOrUpdate,
                               child: Text(appLocalizations.add),
                             ),
                     ),
@@ -582,33 +592,35 @@ class __StandardContentState extends ConsumerState<_StandardContent> {
             ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 8)),
-          Consumer(
-            builder: (_, ref, _) {
-              return SliverReorderableList(
-                itemCount: addedRules.length,
-                itemBuilder: (_, index) {
-                  final rule = addedRules[index];
-                  return ReorderableDelayedDragStartListener(
-                    key: ObjectKey(rule),
-                    index: index,
-                    child: RuleItem(
-                      isEditing: selectedRules.isNotEmpty,
-                      isSelected: selectedRules.contains(rule.id),
-                      rule: rule,
-                      onSelected: () {
-                        _handleSelected(rule.id);
-                      },
-                      onEdit: (rule) {
-                        _handleAddOrUpdate(rule);
-                      },
-                    ),
-                  );
-                },
-                onReorderItem: ref
-                    .read(profileAddedRulesProvider(widget.profileId).notifier)
-                    .order,
-              );
-            },
+          _librarySliver(
+            state: rulesState,
+            onRetry: () =>
+                ref.invalidate(profileAddedRulesProvider(widget.profileId)),
+            emptyLabel: appLocalizations.nullTip(appLocalizations.rule),
+            child: SliverReorderableList(
+              itemCount: addedRules.length,
+              itemBuilder: (_, index) {
+                final rule = addedRules[index];
+                return ReorderableDelayedDragStartListener(
+                  key: ObjectKey(rule),
+                  index: index,
+                  child: RuleItem(
+                    isEditing: selectedRules.isNotEmpty,
+                    isSelected: selectedRules.contains(rule.id),
+                    rule: rule,
+                    onSelected: () {
+                      _handleSelected(rule.id);
+                    },
+                    onEdit: (rule) {
+                      _handleAddOrUpdate(rule);
+                    },
+                  ),
+                );
+              },
+              onReorderItem: ref
+                  .read(profileAddedRulesProvider(widget.profileId).notifier)
+                  .order,
+            ),
           ),
           SliverToBoxAdapter(
             child: Padding(
@@ -671,7 +683,8 @@ class _ScriptContent extends ConsumerWidget {
     final scriptId = ref.watch(
       profileProvider(profileId).select((state) => state?.scriptId),
     );
-    final scripts = ref.watch(scriptsProvider).value ?? [];
+    final scriptsState = ref.watch(scriptsProvider);
+    final scripts = scriptsState.value ?? [];
     return SliverMainAxisGroup(
       slivers: [
         const SliverToBoxAdapter(child: SizedBox(height: 24)),
@@ -683,58 +696,59 @@ class _ScriptContent extends ConsumerWidget {
           ),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 8)),
-        Consumer(
-          builder: (_, ref, _) {
-            return SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              sliver: SliverList.builder(
-                itemCount: scripts.length,
-                itemBuilder: (_, index) {
-                  final script = scripts[index];
-                  return Container(
-                    margin: const EdgeInsets.symmetric(vertical: 4),
-                    child: CommonCard(
-                      padding: EdgeInsets.zero,
-                      type: CommonCardType.filled,
-                      radius: 18,
-                      child: ListTile(
-                        minLeadingWidth: 0,
-                        minTileHeight: 0,
-                        minVerticalPadding: 16,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                        ),
-                        title: Row(
-                          children: [
-                            SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: Radio(
-                                materialTapTargetSize:
-                                    MaterialTapTargetSize.shrinkWrap,
-                                visualDensity: VisualDensity.compact,
-                                toggleable: true,
-                                value: script.id,
-                                groupValue: scriptId,
-                                onChanged: (_) {
-                                  _handleChange(ref, script.id);
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Flexible(child: Text(script.label)),
-                          ],
-                        ),
-                        onTap: () {
-                          _handleChange(ref, script.id);
-                        },
+        _librarySliver(
+          state: scriptsState,
+          onRetry: () => ref.invalidate(scriptsProvider),
+          emptyLabel: appLocalizations.nullTip(appLocalizations.script),
+          child: SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            sliver: SliverList.builder(
+              itemCount: scripts.length,
+              itemBuilder: (_, index) {
+                final script = scripts[index];
+                return Container(
+                  margin: const EdgeInsets.symmetric(vertical: 4),
+                  child: CommonCard(
+                    padding: EdgeInsets.zero,
+                    type: CommonCardType.filled,
+                    radius: 18,
+                    child: ListTile(
+                      minLeadingWidth: 0,
+                      minTileHeight: 0,
+                      minVerticalPadding: 16,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 14,
                       ),
+                      title: Row(
+                        children: [
+                          SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: Radio(
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
+                              visualDensity: VisualDensity.compact,
+                              toggleable: true,
+                              value: script.id,
+                              groupValue: scriptId,
+                              onChanged: (_) {
+                                _handleChange(ref, script.id);
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(child: Text(script.label)),
+                        ],
+                      ),
+                      onTap: () {
+                        _handleChange(ref, script.id);
+                      },
                     ),
-                  );
-                },
-              ),
-            );
-          },
+                  ),
+                );
+              },
+            ),
+          ),
         ),
         SliverToBoxAdapter(
           child: Padding(
@@ -775,6 +789,35 @@ class _ScriptContent extends ConsumerWidget {
   }
 }
 
+Widget _librarySliver<T>({
+  required AsyncValue<List<T>> state,
+  required VoidCallback onRetry,
+  required String emptyLabel,
+  required Widget child,
+}) {
+  if (state.hasError) {
+    return SliverToBoxAdapter(
+      child: ErrorStatus(
+        error: state.error!,
+        onRetry: state.isLoading ? null : onRetry,
+      ),
+    );
+  }
+  if (state.isLoading || (state.value?.isEmpty ?? true)) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Center(
+          child: state.isLoading
+              ? const CircularProgressIndicator()
+              : Text(emptyLabel),
+        ),
+      ),
+    );
+  }
+  return child;
+}
+
 class _EditGlobalAddedRules extends ConsumerWidget {
   final int profileId;
 
@@ -790,12 +833,29 @@ class _EditGlobalAddedRules extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final disabledRuleIds =
-        ref.watch(profileDisabledRuleIdsProvider(profileId)).value ?? [];
-    final rules = ref.watch(globalRulesProvider).value ?? [];
+    final disabledRulesState = ref.watch(
+      profileDisabledRuleIdsProvider(profileId),
+    );
+    final rulesState = ref.watch(globalRulesProvider);
+    final disabledRuleIds = disabledRulesState.value?.toSet() ?? <int>{};
+    final rules = rulesState.value ?? [];
+    final error = rulesState.error ?? disabledRulesState.error;
+    final loading = rulesState.isLoading || disabledRulesState.isLoading;
     return BaseScaffold(
       title: appLocalizations.editGlobalRules,
-      body: rules.isEmpty
+      body: error != null
+          ? ErrorStatus(
+              error: error,
+              onRetry: loading
+                  ? null
+                  : () {
+                      ref.invalidate(globalRulesProvider);
+                      ref.invalidate(profileDisabledRuleIdsProvider(profileId));
+                    },
+            )
+          : loading
+          ? const Center(child: CircularProgressIndicator())
+          : rules.isEmpty
           ? NullStatus(
               label: appLocalizations.nullTip(appLocalizations.rule),
               illustration: NullStatusIllustration.rules,

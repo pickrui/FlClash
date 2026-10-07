@@ -93,8 +93,11 @@ class SetupAction extends _$SetupAction {
   Future<Map<String, dynamic>> getProxyChainProfileConfig(int profileId) =>
       _controller.getProxyChainProfileConfig(profileId);
 
-  Future<Map> getProfileWithId(int profileId) =>
-      _controller.getProfileWithId(profileId);
+  Future<Map> getProfileWithId(
+    int profileId, {
+    void Function(ScriptConfigChanges changes)? onScriptChanges,
+  }) =>
+      _controller.getProfileWithId(profileId, onScriptChanges: onScriptChanges);
 }
 
 extension SetupControllerExt on AppController {
@@ -479,9 +482,10 @@ extension SetupControllerExt on AppController {
   }
 
   void applyProfileDebounce({bool silence = false, bool force = false}) {
-    debouncer.call(FunctionTag.applyProfile, (silence, force) {
-      applyProfile(silence: silence, force: force);
-    }, args: [silence, force]);
+    debouncer.call(
+      FunctionTag.applyProfile,
+      () => applyProfile(silence: silence, force: force),
+    );
   }
 
   void changeMode(Mode mode) {
@@ -653,6 +657,7 @@ extension SetupControllerExt on AppController {
     required SetupState setupState,
     required ClashConfig patchConfig,
     bool validateSnapshot = true,
+    void Function(ScriptConfigChanges changes)? onScriptChanges,
   }) async {
     final profileId = setupState.profileId;
     if (profileId == null) {
@@ -698,6 +703,7 @@ extension SetupControllerExt on AppController {
       rawConfig = await evaluateProfileScript(
         scriptContent!,
         rawConfig,
+        onChanges: onScriptChanges,
         options:
             _ref.read(appSettingProvider).scriptOptions[setupState.script?.id
                 .toString()] ??
@@ -759,7 +765,10 @@ extension SetupControllerExt on AppController {
     );
   }
 
-  Future<Map> getProfileWithId(int profileId) async {
+  Future<Map> getProfileWithId(
+    int profileId, {
+    void Function(ScriptConfigChanges changes)? onScriptChanges,
+  }) async {
     if (_ref.read(profilesProvider).getProfile(profileId)?.isoixCloudProfile ==
         true) {
       return {};
@@ -771,6 +780,7 @@ extension SetupControllerExt on AppController {
       res = await getProfile(
         setupState: setupState,
         patchConfig: patchClashConfig,
+        onScriptChanges: onScriptChanges,
       );
     } catch (e) {
       globalState.showNotifier(e.toString());

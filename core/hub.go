@@ -781,7 +781,6 @@ func init() {
 		}
 	})
 	statistic.DefaultRequestNotify = func(c statistic.Tracker) {
-		notifyProbeRoute(c)
 		sendMessage(requestMessage(c))
 	}
 	executor.DefaultProviderLoadedHook = func(providerName string) {

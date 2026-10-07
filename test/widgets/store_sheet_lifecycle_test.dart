@@ -17,6 +17,68 @@ import 'package:flutter_test/flutter_test.dart';
 import '../helpers/test_app.dart';
 
 void main() {
+  testWidgets(
+    'store loading blocks repeated actions and errors do not show empty results',
+    (tester) async {
+      final store = _Store();
+      final container = ProviderContainer(
+        overrides: [
+          storeProvider.overrideWith(() => store),
+          cloudAccountProvider.overrideWith(_Account.new),
+        ],
+      );
+      globalState.container = container;
+      addTearDown(container.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const TestApp(locale: Locale('en'), child: CloudStorePage()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      store.setLoading();
+      await tester.pump();
+      expect(
+        tester
+            .widget<IconButton>(
+              find.byWidgetPredicate(
+                (widget) => widget is IconButton && widget.tooltip == 'Refresh',
+              ),
+            )
+            .onPressed,
+        isNull,
+      );
+      expect(
+        tester
+            .widget<FilledButton>(find.widgetWithText(FilledButton, 'Buy'))
+            .onPressed,
+        isNull,
+      );
+      expect(
+        tester
+            .widget<FilledButton>(
+              find.widgetWithText(FilledButton, 'Recharge').first,
+            )
+            .onPressed,
+        isNull,
+      );
+      await tester
+          .widget<RefreshIndicator>(find.byType(RefreshIndicator))
+          .onRefresh();
+      expect(store.loads, 1);
+
+      store.fail();
+      await tester.pumpAndSettle();
+      expect(find.text('Fixture store failure'), findsOneWidget);
+      expect(find.text('No plans available'), findsNothing);
+      expect(
+        tester.widget<ListView>(find.byType(ListView)).physics,
+        isA<AlwaysScrollableScrollPhysics>(),
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
   for (final recharge in [false, true]) {
     testWidgets(
       '${recharge ? 'recharge' : 'purchase'} sheet survives keyboard changes during dismissal',
@@ -163,6 +225,10 @@ void main() {
 class _Store extends StoreNotifier {
   Completer<void>? loadGate;
   final methodErrors = <Object>[];
+  var loads = 0;
+
+  void setLoading() => state = state.copyWith(isLoading: true);
+  void fail() => state = const StoreState(error: 'Fixture store failure');
 
   @override
   Future<List<PaymentMethodOption>> ensurePaymentMethods({
@@ -194,7 +260,10 @@ class _Store extends StoreNotifier {
     ],
   );
   @override
-  Future<void> load() => loadGate?.future ?? Future.value();
+  Future<void> load() {
+    loads++;
+    return loadGate?.future ?? Future.value();
+  }
 }
 
 class _Account extends CloudAccountNotifier {

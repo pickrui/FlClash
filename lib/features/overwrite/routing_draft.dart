@@ -100,25 +100,31 @@ Future<String> validateCustomRoutingDraft(
     final context = ref.context;
     final patchConfig = ref.read(patchClashConfigProvider);
     final network = ref.read(networkSettingProvider);
+    final coreAction = context.coreAction;
+    final setupAction = context.setupAction;
+    final core = ref.read(coreHandlerProvider);
     final state = await ref.read(setupStateProvider(profile.id).future);
-    if (!context.mounted || !await context.coreAction.ensureCoreReady()) {
+    if (!context.mounted || !await coreAction.ensureCoreReady()) {
       return appLocalizations.routingApplyFailed;
     }
     if (!context.mounted) return appLocalizations.routingApplyFailed;
-    final config = await context.setupAction.getProfile(
+    final config = await setupAction.getProfile(
       setupState: state.copyWith(
         overwriteType: profile.overwriteType,
         customProxyGroups: profile.customProxyGroups,
         customRules: profile.customRules,
         proxyChains: profile.proxyChains,
         profileProxies: profile.profileProxies,
+        matchTarget: profile.matchTarget,
       ),
       patchConfig: patchConfig,
     );
+    if (!context.mounted) return appLocalizations.routingApplyFailed;
     final yaml = await encodeYamlTask(config);
-    final result = await ref
-        .read(coreHandlerProvider)
-        .validateConfigWithBytes(base64Encode(utf8.encode(yaml)));
+    if (!context.mounted) return appLocalizations.routingApplyFailed;
+    final result = await core.validateConfigWithBytes(
+      base64Encode(utf8.encode(yaml)),
+    );
     if (!context.mounted) return appLocalizations.routingApplyFailed;
     final currentState = await ref.read(setupStateProvider(profile.id).future);
     if (!context.mounted) return appLocalizations.routingApplyFailed;

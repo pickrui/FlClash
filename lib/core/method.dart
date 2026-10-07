@@ -12,8 +12,6 @@ enum CoreMethod {
   initClash,
   getIsInit,
   networkDiagnostics,
-  probe,
-  outboundIp,
   probeRoute,
   forceGc,
   shutdown,

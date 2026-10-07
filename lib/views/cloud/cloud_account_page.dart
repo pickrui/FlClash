@@ -12,11 +12,9 @@ import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
 
+import 'cloud_announcement_card.dart';
 import 'cloud_layout.dart';
 import 'cloud_profile_card.dart';
 import 'cloud_register_page.dart';
@@ -521,7 +519,7 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
               if (state.latestNotification case final notice?
                   when notice.cleanMessage.isNotEmpty) ...[
                 const SizedBox(height: 16),
-                _buildAnnouncement(notice),
+                CloudAnnouncementCard(notice: notice),
               ],
             ],
           ),
@@ -568,69 +566,6 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
             Icon(Icons.chevron_right, color: context.colorScheme.outline),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildAnnouncement(CloudNotification notice) {
-    return CommonCard(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.campaign, color: context.colorScheme.primary),
-                const SizedBox(width: 8),
-                Text(
-                  AppLocalizations.current.announcement,
-                  style: context.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: context.colorScheme.onSurface,
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  DateFormat('yyyy-MM-dd').format(notice.publishTime),
-                  style: context.textTheme.bodySmall?.copyWith(
-                    color: context.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            _buildAnnouncementBody(context, notice.cleanMessage),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAnnouncementBody(BuildContext context, String message) {
-    return SelectionArea(
-      child: Html(
-        data: message,
-        onLinkTap: (url, attributes, element) {
-          if (url != null) launchUrl(Uri.parse(url));
-        },
-        style: {
-          // The card is a disabled button, so inherited text would take its dimmed foreground.
-          'body': Style(
-            margin: Margins.zero,
-            padding: HtmlPaddings.zero,
-            color: context.colorScheme.onSurface,
-            lineHeight: const LineHeight(1.5),
-          ),
-          'p': Style(margin: Margins.only(top: 0, bottom: 8)),
-          'hr': Style(
-            margin: Margins.only(top: 8, bottom: 8),
-            padding: HtmlPaddings.zero,
-            height: Height(1),
-          ),
-          'a': Style(color: context.colorScheme.primary),
-          'img': Style(width: Width(100, Unit.percent)),
-        },
       ),
     );
   }

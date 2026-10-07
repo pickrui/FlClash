@@ -26,10 +26,18 @@ void main() {
     });
 
     test('rejects unsupported values', () {
-      expect(
-        () => GroupType.parseProfileType('unknown'),
-        throwsA(isA<UnimplementedError>()),
-      );
+      for (final value in ['unknown', '', '   ']) {
+        expect(
+          () => GroupType.parseProfileType(value),
+          throwsA(
+            isA<FormatException>().having(
+              (error) => error.source,
+              'source',
+              value,
+            ),
+          ),
+        );
+      }
     });
   });
 }

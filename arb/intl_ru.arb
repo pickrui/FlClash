@@ -585,6 +585,7 @@
   "commission": "Комиссия",
   "points": "Баллы",
   "announcement": "Объявление",
+  "readFullAnnouncement": "Читать полностью",
   "serviceCheckFailed": "Проверка сервиса не удалась",
   "apiAvailable": "API-сервис работает нормально",
   "checkApi": "Проверить API",
@@ -660,8 +661,10 @@
   "scanOrTransferPay": "Оплата сканированием / переводом",
   "close": "Закрыть",
   "checkingPayment": "Проверка...",
+  "paymentPending": "Платёж ещё не получен. Повторите проверку чуть позже.",
   "iHavePaid": "Я оплатил",
   "openInBrowser": "Открыть в браузере",
+  "openLinkFailed": "Не удалось открыть ссылку. Убедитесь, что браузер установлен, и повторите попытку.",
   "scanToPayNotice": "Отсканируйте через Alipay / WeChat",
   "paymentAmount": "Сумма платежа",
   "receivingAddress": "Адрес получателя",
@@ -955,6 +958,34 @@
   "tunMtuInvalid": "Введите целое число от 1280 до 65535",
   "scriptOptions": "Параметры скрипта",
   "scriptOptionsEmpty": "В этом скрипте нет настраиваемых переключателей",
+  "scriptChanges": "Изменения скрипта",
+  "scriptFullConfig": "Вся конфигурация",
+  "scriptChangesDescription": "Поля верхнего уровня, добавленные, изменённые или удалённые скриптом. Полная конфигурация также включает настройки приложения.",
+  "scriptChangesEmpty": "Скрипт не изменил конфигурацию",
+  "scriptChangesAdded": "Добавлено ({count})",
+  "scriptChangesModified": "Изменено ({count})",
+  "scriptChangesRemoved": "Удалено ({count})",
+  "@scriptChangesAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@scriptChangesModified": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@scriptChangesRemoved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "excludeNetworks": "Приостановка прокси по IP или шлюзу",
   "excludeNetworksDesc": "Пауза при совпадении IPv4, подсети или шлюза Wi-Fi/Ethernet; возобновление после выхода. Через запятую: 192.168.1.0/24,gateway:192.168.1.1",
   "excludeNetworksInvalid": "До 16 правил: допустимые IPv4, CIDR или gateway:адрес",
@@ -1105,7 +1136,6 @@
   "action_copyEnv": "Копировать переменные прокси",
   "action_exit": "Выход",
   "hotkeyUnavailable": "Не удалось зарегистрировать сочетание",
-  "outboundIp": "Исходящий IP",
   "runTime": "Время работы",
   "floatingNavigationBar": "Плавающая навигация",
   "floatingNavigationBarDesc": "Использовать плавающую панель в компактном режиме",

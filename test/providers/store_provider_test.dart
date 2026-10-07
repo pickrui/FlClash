@@ -12,6 +12,41 @@ import '../support/cloud_api_adapter.dart';
 
 void main() {
   test(
+    'concurrent payment-method queries share a request and can retry',
+    () async {
+      final adapter = QueuedCloudAdapter();
+      final service = CloudApiService.forTesting(
+        client: adapter.createClient(),
+      );
+      final notifier = _StoreNotifier(service);
+      final container = ProviderContainer(
+        overrides: [storeProvider.overrideWith(() => notifier)],
+      );
+      addTearDown(container.dispose);
+      container.read(storeProvider);
+      final first = notifier.ensurePaymentMethods();
+      final pending = await adapter.takeRequest();
+      final second = notifier.ensurePaymentMethods(force: true);
+      final failed = expectLater(
+        Future.wait([first, second]),
+        throwsA(anything),
+      );
+      pending.respond({'ret': 400, 'msg': 'Fixture failure'});
+      await failed;
+      expect(adapter.requestCount, 1);
+
+      final retry = notifier.ensurePaymentMethods();
+      (await adapter.takeRequest()).respond({
+        'result': [
+          {'payment': 'card', 'name': 'Card'},
+        ],
+      });
+      expect((await retry).single.payment, 'card');
+      expect(adapter.requestCount, 2);
+    },
+  );
+
+  test(
     'refreshing store data does not cancel payment-method loading',
     () async {
       final adapter = QueuedCloudAdapter();
@@ -133,6 +168,8 @@ void main() {
       methods,
       throwsA(isA<CloudApiStaleSessionException>()),
     );
+    final currentMethods = notifier.ensurePaymentMethods();
+    final currentPending = await adapter.takeRequest();
     pending.respond({
       'result': [
         {'payment': 'old-method', 'name': 'Old'},
@@ -141,6 +178,15 @@ void main() {
     await rejected;
 
     expect(container.read(storeProvider).paymentMethods, isEmpty);
+    final joinedMethods = notifier.ensurePaymentMethods();
+    currentPending.respond({
+      'result': [
+        {'payment': 'current-method', 'name': 'Current'},
+      ],
+    });
+    expect((await currentMethods).single.payment, 'current-method');
+    expect((await joinedMethods).single.payment, 'current-method');
+    expect(adapter.requestCount, 2);
   });
 }
 

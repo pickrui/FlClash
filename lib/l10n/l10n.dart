@@ -4775,6 +4775,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Read full announcement`
+  String get readFullAnnouncement {
+    return Intl.message(
+      'Read full announcement',
+      name: 'readFullAnnouncement',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Service Check Failed`
   String get serviceCheckFailed {
     return Intl.message(
@@ -5430,6 +5440,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Payment has not been received yet. Please check again shortly.`
+  String get paymentPending {
+    return Intl.message(
+      'Payment has not been received yet. Please check again shortly.',
+      name: 'paymentPending',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `I have paid`
   String get iHavePaid {
     return Intl.message('I have paid', name: 'iHavePaid', desc: '', args: []);
@@ -5440,6 +5460,16 @@ class AppLocalizations {
     return Intl.message(
       'Open in browser',
       name: 'openInBrowser',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unable to open the link. Check that a browser is installed and try again.`
+  String get openLinkFailed {
+    return Intl.message(
+      'Unable to open the link. Check that a browser is installed and try again.',
+      name: 'openLinkFailed',
       desc: '',
       args: [],
     );
@@ -8230,6 +8260,76 @@ class AppLocalizations {
     );
   }
 
+  /// `Script changes`
+  String get scriptChanges {
+    return Intl.message(
+      'Script changes',
+      name: 'scriptChanges',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Full config`
+  String get scriptFullConfig {
+    return Intl.message(
+      'Full config',
+      name: 'scriptFullConfig',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Top-level configuration fields added, modified or removed by the script. The full configuration also includes app settings.`
+  String get scriptChangesDescription {
+    return Intl.message(
+      'Top-level configuration fields added, modified or removed by the script. The full configuration also includes app settings.',
+      name: 'scriptChangesDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The script did not change the configuration`
+  String get scriptChangesEmpty {
+    return Intl.message(
+      'The script did not change the configuration',
+      name: 'scriptChangesEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Added ({count})`
+  String scriptChangesAdded(int count) {
+    return Intl.message(
+      'Added ($count)',
+      name: 'scriptChangesAdded',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Modified ({count})`
+  String scriptChangesModified(int count) {
+    return Intl.message(
+      'Modified ($count)',
+      name: 'scriptChangesModified',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Removed ({count})`
+  String scriptChangesRemoved(int count) {
+    return Intl.message(
+      'Removed ($count)',
+      name: 'scriptChangesRemoved',
+      desc: '',
+      args: [count],
+    );
+  }
+
   /// `Pause proxy by IP or gateway`
   String get excludeNetworks {
     return Intl.message(
@@ -9508,11 +9608,6 @@ class AppLocalizations {
       desc: '',
       args: [],
     );
-  }
-
-  /// `Outbound IP`
-  String get outboundIp {
-    return Intl.message('Outbound IP', name: 'outboundIp', desc: '', args: []);
   }
 
   /// `Uptime`

@@ -44,6 +44,7 @@ class StoreState {
 class StoreNotifier extends Notifier<StoreState> {
   int _loadRevision = 0;
   int _sessionRevision = 0;
+  Future<List<PaymentMethodOption>>? _paymentMethodsRequest;
 
   @protected
   CloudApiService get apiService => CloudApiService();
@@ -79,12 +80,22 @@ class StoreNotifier extends Notifier<StoreState> {
     }
   }
 
-  Future<List<PaymentMethodOption>> ensurePaymentMethods({
-    bool force = false,
-  }) async {
+  Future<List<PaymentMethodOption>> ensurePaymentMethods({bool force = false}) {
+    final pending = _paymentMethodsRequest;
+    if (pending != null) return pending;
     if (!force && state.paymentMethods.isNotEmpty) {
-      return state.paymentMethods;
+      return Future.value(state.paymentMethods);
     }
+    late final Future<List<PaymentMethodOption>> request;
+    request = _loadPaymentMethods().whenComplete(() {
+      if (identical(_paymentMethodsRequest, request)) {
+        _paymentMethodsRequest = null;
+      }
+    });
+    return _paymentMethodsRequest = request;
+  }
+
+  Future<List<PaymentMethodOption>> _loadPaymentMethods() async {
     final revision = _sessionRevision;
     final methods = await apiService.fetchPaymentMethods();
     if (!ref.mounted || revision != _sessionRevision) {
@@ -97,6 +108,7 @@ class StoreNotifier extends Notifier<StoreState> {
   void reset() {
     _loadRevision++;
     _sessionRevision++;
+    _paymentMethodsRequest = null;
     state = const StoreState();
   }
 }

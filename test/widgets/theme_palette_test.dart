@@ -7,6 +7,7 @@ import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
+import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/theme.dart';
 import 'package:fl_clash/widgets/palette.dart';
@@ -17,6 +18,52 @@ import 'package:material_ui/material_ui.dart';
 import '../helpers/test_app.dart';
 
 void main() {
+  test(
+    'system accent follows brightness while explicit colors keep priority',
+    () {
+      globalState.accentColor = Colors.green;
+      globalState.lightDynamicPrimary = Colors.blue;
+      globalState.darkDynamicPrimary = Colors.purple;
+      addTearDown(() {
+        globalState.lightDynamicPrimary = null;
+        globalState.darkDynamicPrimary = null;
+      });
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      container
+          .read(themeSettingProvider.notifier)
+          .update(
+            (state) => state.copyWith(primaryColor: Colors.orange.toARGB32()),
+          );
+      final variant = container.read(themeSettingProvider).schemeVariant;
+      for (final brightness in Brightness.values) {
+        final systemColor = brightness == Brightness.light
+            ? Colors.blue
+            : Colors.purple;
+        for (final settings in [
+          (ignore: false, color: null, seed: Colors.orange),
+          (ignore: true, color: null, seed: systemColor),
+          (ignore: true, color: Colors.red, seed: Colors.red),
+        ]) {
+          expect(
+            container.read(
+              genColorSchemeProvider(
+                brightness,
+                color: settings.color,
+                ignoreConfig: settings.ignore,
+              ),
+            ),
+            ColorScheme.fromSeed(
+              seedColor: settings.seed,
+              brightness: brightness,
+              dynamicSchemeVariant: variant,
+            ),
+          );
+        }
+      }
+    },
+  );
+
   testWidgets('a color picked on the palette is saved opaque', (tester) async {
     tester.view.physicalSize = const Size(800, 1200);
     tester.view.devicePixelRatio = 1;

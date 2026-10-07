@@ -327,14 +327,16 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
         .toList();
     return CommonScaffold(
       title: l.appProviderLibrary,
-      isLoading: _importing,
+      isLoading: _importing || state.isLoading,
       searchState: AppBarSearchState(
         onSearch: (value) => setState(() => _search = value),
       ),
       actions: [
         CommonPopupBox(
           targetBuilder: (open) => FilledButton.tonal(
-            onPressed: _importing ? null : () => open(),
+            onPressed: _importing || state.isLoading || state.hasError
+                ? null
+                : () => open(),
             child: Text(l.add),
           ),
           popup: CommonPopupMenu(
@@ -380,48 +382,55 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
                     : (value) => setState(() => _kind = value.single),
               ),
             ),
-            if (state.hasError)
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(state.error.toString()),
-              ),
             Expanded(
-              child: NullStatusSwitcher(
-                isLoading: state.isLoading,
-                isEmpty: visible.isEmpty,
-                isSearching: !query.isEmpty,
-                nullStatus: NullStatus(
-                  illustration: _kind == ProviderKind.proxy
-                      ? NullStatusIllustration.proxies
-                      : NullStatusIllustration.rules,
-                  label: l.nullTip(l.providers),
-                ),
-                child: ReorderableListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  buildDefaultDragHandles: false,
-                  itemCount: visible.length,
-                  itemBuilder: (_, index) =>
-                      ReorderableDelayedDragStartListener(
-                        key: ValueKey(visible[index].id),
-                        index: index,
-                        enabled: query.isEmpty,
-                        child: _item(visible[index], index, visible.length),
+              child: state.hasError
+                  ? ErrorStatus(
+                      error: providerLibraryError(context, state.error!),
+                      onRetry: state.isLoading
+                          ? null
+                          : () => ref.invalidate(clashProvidersProvider),
+                    )
+                  : NullStatusSwitcher(
+                      isLoading: state.isLoading,
+                      isEmpty: visible.isEmpty,
+                      isSearching: !query.isEmpty,
+                      nullStatus: NullStatus(
+                        illustration: _kind == ProviderKind.proxy
+                            ? NullStatusIllustration.proxies
+                            : NullStatusIllustration.rules,
+                        label: l.nullTip(l.providers),
                       ),
-                  proxyDecorator: (_, index, animation) => commonProxyDecorator(
-                    _item(visible[index], index, visible.length),
-                    index,
-                    animation,
-                  ),
-                  onReorderItem: (before, after) => _run(() async {
-                    if (!query.isEmpty) return;
-                    final ids = entries.map((item) => item.id).toList();
-                    ids.insert(after, ids.removeAt(before));
-                    await ref
-                        .read(clashProviderLibraryProvider)
-                        .reorder(_kind, ids);
-                  }),
-                ),
-              ),
+                      child: ReorderableListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        buildDefaultDragHandles: false,
+                        itemCount: visible.length,
+                        itemBuilder: (_, index) =>
+                            ReorderableDelayedDragStartListener(
+                              key: ValueKey(visible[index].id),
+                              index: index,
+                              enabled: query.isEmpty,
+                              child: _item(
+                                visible[index],
+                                index,
+                                visible.length,
+                              ),
+                            ),
+                        proxyDecorator: (_, index, animation) =>
+                            commonProxyDecorator(
+                              _item(visible[index], index, visible.length),
+                              index,
+                              animation,
+                            ),
+                        onReorderItem: (before, after) => _run(() async {
+                          if (!query.isEmpty) return;
+                          final ids = entries.map((item) => item.id).toList();
+                          ids.insert(after, ids.removeAt(before));
+                          await ref
+                              .read(clashProviderLibraryProvider)
+                              .reorder(_kind, ids);
+                        }),
+                      ),
+                    ),
             ),
           ],
         ),

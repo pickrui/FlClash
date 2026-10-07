@@ -21,6 +21,8 @@ class _Panel {
   var quotes = 0;
   var recharges = 0;
   var rechargeSucceeds = true;
+  String rowLabel = 'Amount payable';
+  double amount = 30;
 
   Future<StoreQuote> quote(String coupon) async {
     quotes++;
@@ -28,7 +30,7 @@ class _Panel {
       authorizedPrice: 30,
       sufficientBalance: sufficient,
       recurring: false,
-      rows: const [StoreQuoteRow('Amount payable', 30)],
+      rows: [StoreQuoteRow(rowLabel, amount)],
     );
   }
 
@@ -43,8 +45,10 @@ Future<List<StoreQuoteChoice?>> _open(
   WidgetTester tester,
   _Panel panel, {
   bool offerRecharge = true,
+  Size size = const Size(800, 1200),
+  double textScale = 1,
 }) async {
-  tester.view.physicalSize = const Size(800, 1200);
+  tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
@@ -52,8 +56,9 @@ Future<List<StoreQuoteChoice?>> _open(
   await tester.pumpWidget(
     TestApp(
       locale: const Locale('en'),
+      textScaler: TextScaler.linear(textScale),
       overrides: [
-        viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 1200)),
+        viewSizeProvider.overrideWithBuild((_, _) => size),
         cloudAccountProvider.overrideWith(_Account.new),
       ],
       child: Builder(
@@ -84,6 +89,19 @@ VoidCallback? _action(WidgetTester tester, String label) =>
     tester.widget<TextButton>(find.widgetWithText(TextButton, label)).onPressed;
 
 void main() {
+  testWidgets('long quote labels and amounts fit narrow enlarged text', (
+    tester,
+  ) async {
+    final panel = _Panel()
+      ..sufficient = true
+      ..rowLabel = 'Discounted renewal amount payable'
+      ..amount = 123456.78;
+    await _open(tester, panel, size: const Size(320, 800), textScale: 2);
+    expect(find.text(panel.rowLabel), findsOneWidget);
+    expect(find.textContaining('123456.78'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('a short balance offers a recharge, then quotes again', (
     tester,
   ) async {

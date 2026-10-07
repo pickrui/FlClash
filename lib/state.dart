@@ -11,7 +11,6 @@ import 'package:fl_clash/providers/state.dart';
 import 'package:animations/animations.dart';
 import 'package:fl_clash/services/config_reset.dart';
 import 'package:dynamic_color/dynamic_color.dart' show DynamicColorPlugin;
-import 'package:fl_clash/common/dynamic_color_scheme.dart';
 import 'package:fl_clash/common/periodic_task_runner.dart';
 import 'package:fl_clash/common/theme.dart';
 import 'package:fl_clash/core/core.dart';
@@ -88,8 +87,8 @@ class GlobalState {
   late CommonTheme theme;
   late Color accentColor;
   late ProviderContainer container;
-  ColorScheme? lightDynamicColorScheme;
-  ColorScheme? darkDynamicColorScheme;
+  Color? lightDynamicPrimary;
+  Color? darkDynamicPrimary;
   bool needInitStatus = true;
   DateTime? startTime;
   SetupState? lastSetupState;
@@ -122,10 +121,9 @@ class GlobalState {
   Future<void> _initDynamicColor() async {
     try {
       final corePalette = await DynamicColorPlugin.getCorePalette();
-      lightDynamicColorScheme = corePalette?.toMaterialColorScheme();
-      darkDynamicColorScheme = corePalette?.toMaterialColorScheme(
-        brightness: Brightness.dark,
-      );
+      final primary = corePalette?.primary;
+      lightDynamicPrimary = primary == null ? null : Color(primary.get(40));
+      darkDynamicPrimary = primary == null ? null : Color(primary.get(80));
     } catch (_) {}
     try {
       accentColor =
@@ -397,16 +395,19 @@ class GlobalState {
     );
   }
 
-  Future<void> openUrl(String url) async {
-    final res = await showMessage(
-      message: TextSpan(text: url),
-      title: appLocalizations.externalLink,
-      confirmText: appLocalizations.go,
-    );
-    if (res != true) {
-      return;
+  Future<void> openUrl(String url, {bool confirm = true}) async {
+    if (confirm) {
+      final res = await showMessage(
+        message: TextSpan(text: url),
+        title: appLocalizations.externalLink,
+        confirmText: appLocalizations.go,
+      );
+      if (res != true) return;
     }
-    launchUrl(Uri.parse(url));
+    try {
+      if (await launchUrl(Uri.parse(url))) return;
+    } catch (_) {}
+    showNotifier(appLocalizations.openLinkFailed);
   }
 }
 

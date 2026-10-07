@@ -219,31 +219,37 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m81(appName) => "${appName} (Безопасный режим)";
 
-  static String m82(count) => "${count} секунд";
+  static String m82(count) => "Добавлено (${count})";
 
-  static String m83(count) => "Выбрано: ${count}";
+  static String m83(count) => "Изменено (${count})";
 
-  static String m84(label) => "«${label}» — только одно значение";
+  static String m84(count) => "Удалено (${count})";
 
-  static String m85(fields) => "Проверьте настройки: ${fields}";
+  static String m85(count) => "${count} секунд";
 
-  static String m86(count) => "Устройства (${count})";
+  static String m86(count) => "Выбрано: ${count}";
 
-  static String m87(name, profile) =>
+  static String m87(label) => "«${label}» — только одно значение";
+
+  static String m88(fields) => "Проверьте настройки: ${fields}";
+
+  static String m89(count) => "Устройства (${count})";
+
+  static String m90(name, profile) =>
       "${name} все еще используется правилом или группой в профиле «${profile}»";
 
-  static String m88(region) => "Ретранслятор ${region}";
+  static String m91(region) => "Ретранслятор ${region}";
 
-  static String m89(name) =>
+  static String m92(name) =>
       "Это устройство выйдет из сети ${name}, а данные входа будут удалены с него. Если сеть сейчас недоступна, удалите устройство в консоли администратора Tailscale.";
 
-  static String m90(build) => "Номер сборки: ${build}";
+  static String m93(build) => "Номер сборки: ${build}";
 
-  static String m91(version) => "Версия: ${version}";
+  static String m94(version) => "Версия: ${version}";
 
-  static String m92(label) => "${label} должен быть URL";
+  static String m95(label) => "${label} должен быть URL";
 
-  static String m93(count) =>
+  static String m96(count) =>
       "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1863,6 +1869,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "openDashboard": MessageLookupByLibrary.simpleMessage("Открыть панель"),
     "openInBrowser": MessageLookupByLibrary.simpleMessage("Открыть в браузере"),
+    "openLinkFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось открыть ссылку. Убедитесь, что браузер установлен, и повторите попытку.",
+    ),
     "operationFailed": MessageLookupByLibrary.simpleMessage(
       "Операция не выполнена",
     ),
@@ -1872,7 +1881,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "optional": MessageLookupByLibrary.simpleMessage("Необязательно"),
     "options": MessageLookupByLibrary.simpleMessage("Опции"),
     "other": MessageLookupByLibrary.simpleMessage("Другое"),
-    "outboundIp": MessageLookupByLibrary.simpleMessage("Исходящий IP"),
     "outboundMode": MessageLookupByLibrary.simpleMessage(
       "Режим исходящего трафика",
     ),
@@ -1948,6 +1956,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "paymentAmount": MessageLookupByLibrary.simpleMessage("Сумма платежа"),
     "paymentMethod": MessageLookupByLibrary.simpleMessage("Способ оплаты"),
+    "paymentPending": MessageLookupByLibrary.simpleMessage(
+      "Платёж ещё не получен. Повторите проверку чуть позже.",
+    ),
     "paymentRequestFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось выполнить запрос оплаты",
     ),
@@ -2178,6 +2189,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "quickFill": MessageLookupByLibrary.simpleMessage("Быстрое заполнение"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("Радужные"),
     "rawOutboundInUse": m75,
+    "readFullAnnouncement": MessageLookupByLibrary.simpleMessage(
+      "Читать полностью",
+    ),
     "receivingAddress": MessageLookupByLibrary.simpleMessage(
       "Адрес получателя",
     ),
@@ -2511,6 +2525,19 @@ class MessageLookup extends MessageLookupByLibrary {
     "scriptChanged": MessageLookupByLibrary.simpleMessage(
       "Скрипт изменён или удалён. Откройте его заново и повторите попытку.",
     ),
+    "scriptChanges": MessageLookupByLibrary.simpleMessage("Изменения скрипта"),
+    "scriptChangesAdded": m82,
+    "scriptChangesDescription": MessageLookupByLibrary.simpleMessage(
+      "Поля верхнего уровня, добавленные, изменённые или удалённые скриптом. Полная конфигурация также включает настройки приложения.",
+    ),
+    "scriptChangesEmpty": MessageLookupByLibrary.simpleMessage(
+      "Скрипт не изменил конфигурацию",
+    ),
+    "scriptChangesModified": m83,
+    "scriptChangesRemoved": m84,
+    "scriptFullConfig": MessageLookupByLibrary.simpleMessage(
+      "Вся конфигурация",
+    ),
     "scriptModeDesc": MessageLookupByLibrary.simpleMessage(
       "Режим скрипта, использование внешних расширяющих скриптов, предоставление возможности переопределения конфигурации одним кликом",
     ),
@@ -2520,7 +2547,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "search": MessageLookupByLibrary.simpleMessage("Поиск"),
     "seconds": MessageLookupByLibrary.simpleMessage("Секунд"),
-    "secondsCount": m82,
+    "secondsCount": m85,
     "selectAll": MessageLookupByLibrary.simpleMessage("Выбрать все"),
     "selectBackup": MessageLookupByLibrary.simpleMessage(
       "Выберите резервную копию",
@@ -2529,7 +2556,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Выберите тариф для улучшения",
     ),
     "selected": MessageLookupByLibrary.simpleMessage("Выбрано"),
-    "selectedCountTitle": m83,
+    "selectedCountTitle": m86,
     "sendCode": MessageLookupByLibrary.simpleMessage("Отправить код"),
     "sendResetEmail": MessageLookupByLibrary.simpleMessage(
       "Отправить письмо для сброса",
@@ -2557,7 +2584,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Запуск в фоновом режиме",
     ),
     "singleAdd": MessageLookupByLibrary.simpleMessage("По одному"),
-    "singleValueTip": m84,
+    "singleValueTip": m87,
     "size": MessageLookupByLibrary.simpleMessage("Размер"),
     "slide": MessageLookupByLibrary.simpleMessage("Сдвиг"),
     "socksPort": MessageLookupByLibrary.simpleMessage("Socks-порт"),
@@ -2661,7 +2688,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleAvailableExitNodes": MessageLookupByLibrary.simpleMessage(
       "Доступные выходные узлы",
     ),
-    "tailscaleCheckSettings": m85,
+    "tailscaleCheckSettings": m88,
     "tailscaleConnected": MessageLookupByLibrary.simpleMessage("Подключено"),
     "tailscaleConnecting": MessageLookupByLibrary.simpleMessage("Подключение"),
     "tailscaleControlUrl": MessageLookupByLibrary.simpleMessage(
@@ -2673,7 +2700,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleDeviceName": MessageLookupByLibrary.simpleMessage(
       "Имя устройства",
     ),
-    "tailscaleDevices": m86,
+    "tailscaleDevices": m89,
     "tailscaleDirect": MessageLookupByLibrary.simpleMessage("Напрямую"),
     "tailscaleEmptyDesc": MessageLookupByLibrary.simpleMessage(
       "Добавьте сеть, войдите на этом устройстве и запустите прокси, чтобы получить доступ к своим устройствам.",
@@ -2768,7 +2795,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleNeedsLogin": MessageLookupByLibrary.simpleMessage(
       "Требуется вход",
     ),
-    "tailscaleNetworkInUse": m87,
+    "tailscaleNetworkInUse": m90,
     "tailscaleNetworkName": MessageLookupByLibrary.simpleMessage(
       "Название сети",
     ),
@@ -2785,8 +2812,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleOpenLoginPage": MessageLookupByLibrary.simpleMessage(
       "Открыть страницу входа",
     ),
-    "tailscaleRelay": m88,
-    "tailscaleRemoveConfirm": m89,
+    "tailscaleRelay": m91,
+    "tailscaleRemoveConfirm": m92,
     "tailscaleRemoveNetwork": MessageLookupByLibrary.simpleMessage(
       "Удалить сеть",
     ),
@@ -2887,7 +2914,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
       "AppImage нельзя установить автоматически. Замените текущую программу скачанным файлом; его папка открыта.",
     ),
-    "updateBuildNumber": m90,
+    "updateBuildNumber": m93,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
       "Отменить загрузку",
     ),
@@ -2932,14 +2959,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseNotesFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось загрузить список изменений. Повторите попытку.",
     ),
-    "updateVersionNumber": m91,
+    "updateVersionNumber": m94,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("Улучшить тариф"),
     "upload": MessageLookupByLibrary.simpleMessage("Загрузка"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Получить профиль через URL",
     ),
-    "urlTip": m92,
+    "urlTip": m95,
     "useHosts": MessageLookupByLibrary.simpleMessage("Использовать hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Использовать системные hosts",
@@ -2979,7 +3006,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Также устанавливать системные часы; Android это игнорирует",
     ),
-    "yearsAgo": m93,
+    "yearsAgo": m96,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Упрощенный китайский"),
   };
 }

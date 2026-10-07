@@ -116,8 +116,6 @@ const (
 	messageMethod                  CoreMethod = "message"
 	initClashMethod                CoreMethod = "initClash"
 	getIsInitMethod                CoreMethod = "getIsInit"
-	probeMethod                    CoreMethod = "probe"
-	outboundIpMethod               CoreMethod = "outboundIp"
 	probeRouteMethod               CoreMethod = "probeRoute"
 	networkDiagnosticsMethod       CoreMethod = "networkDiagnostics"
 	forceGcMethod                  CoreMethod = "forceGc"

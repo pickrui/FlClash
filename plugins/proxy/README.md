@@ -1,15 +1,12 @@
 # proxy
 
-A new Flutter plugin project.
+FlClash's bundled system proxy plugin for macOS, Linux and Windows.
 
-## Getting Started
+`Proxy.startProxy` configures the desktop proxy and bypass list;
+`Proxy.stopProxy` restores the saved settings. Windows uses the native
+method-channel implementation, while macOS and Linux use platform commands.
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/developing-packages/),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
-
-For help getting started with Flutter development, view the
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-
+Run `flutter test plugins/proxy/test/proxy_test.dart` from the repository root.
+The Dart tests inject command runners and temporary state files to avoid changing
+host networking. Windows native tests live under `windows/test` and require a
+Windows build environment.

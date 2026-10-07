@@ -572,26 +572,25 @@ ColorScheme genColorScheme(
   Color? color,
   bool ignoreConfig = false,
 }) {
-  final vm2 = ref.watch(
+  final settings = ref.watch(
     themeSettingProvider.select(
-      (state) => VM2(state.primaryColor, state.schemeVariant),
+      (state) =>
+          (primaryColor: state.primaryColor, variant: state.schemeVariant),
     ),
   );
-  if (color == null && (ignoreConfig == true || vm2.a == null)) {
-    final dynamicColorScheme = switch (brightness) {
-      Brightness.light => globalState.lightDynamicColorScheme,
-      Brightness.dark => globalState.darkDynamicColorScheme,
-    };
-    return ColorScheme.fromSeed(
-      seedColor: dynamicColorScheme?.primary ?? globalState.accentColor,
-      brightness: brightness,
-      dynamicSchemeVariant: vm2.b,
-    );
-  }
+  final configuredColor = ignoreConfig ? null : settings.primaryColor;
+  final systemColor = switch (brightness) {
+    Brightness.light => globalState.lightDynamicPrimary,
+    Brightness.dark => globalState.darkDynamicPrimary,
+  };
   return ColorScheme.fromSeed(
-    seedColor: color ?? Color(vm2.a!),
+    seedColor:
+        color ??
+        (configuredColor == null
+            ? systemColor ?? globalState.accentColor
+            : Color(configuredColor)),
     brightness: brightness,
-    dynamicSchemeVariant: vm2.b,
+    dynamicSchemeVariant: settings.variant,
   );
 }
 

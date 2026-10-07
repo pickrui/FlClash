@@ -11,7 +11,10 @@ import 'package:rust_api/rust_api.dart';
 
 void main() {
   final nativeEvaluator = scriptEvaluator;
-  tearDown(() => scriptEvaluator = nativeEvaluator);
+  tearDown(() {
+    scriptEvaluator = nativeEvaluator;
+    clearScriptOptionsCache();
+  });
 
   test('adds proxy providers without modifying the caller config', () async {
     final original = <String, dynamic>{'proxies': <dynamic>[]};
@@ -77,5 +80,37 @@ void main() {
           ScriptEvaluation(config: output, logs: []);
       await expectLater(evaluateProfileScript('', {}), throwsA(isA<String>()));
     }
+  });
+
+  test(
+    'summary compares exactly what the script received, including removals',
+    () async {
+      ScriptConfigChanges? changes;
+      scriptEvaluator = ({required script, required config}) async {
+        final input = jsonDecode(config) as Map<String, dynamic>;
+        input.remove('dns');
+        input['rules'] = ['MATCH,DIRECT'];
+        return ScriptEvaluation(config: jsonEncode(input), logs: []);
+      };
+      await evaluateProfileScript('', {
+        'dns': {'enable': true},
+      }, onChanges: (value) => changes = value);
+      expect(changes!.added, ['rules']);
+      expect(changes!.modified, isEmpty);
+      expect(changes!.removed, ['dns']);
+    },
+  );
+
+  test('failed scripts never publish a successful change summary', () async {
+    scriptEvaluator = ({required script, required config}) async =>
+        const ScriptEvaluation(error: 'failed', logs: []);
+    await expectLater(
+      evaluateProfileScript(
+        '',
+        {},
+        onChanges: (_) => fail('unexpected summary'),
+      ),
+      throwsA('failed'),
+    );
   });
 }

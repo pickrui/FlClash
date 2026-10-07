@@ -120,6 +120,24 @@ class _NullStatusSwitcherState extends State<NullStatusSwitcher> {
 
 enum _NullStatusSlot { empty, noResults, content }
 
+class ErrorStatus extends StatelessWidget {
+  final Object error;
+  final VoidCallback? onRetry;
+
+  const ErrorStatus({super.key, required this.error, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) => NullStatus(
+    illustration: NullStatusIllustration.error,
+    label: context.appLocalizations.operationFailed,
+    description: error.toString(),
+    action: FilledButton(
+      onPressed: onRetry,
+      child: Text(context.appLocalizations.refresh),
+    ),
+  );
+}
+
 class NullStatus extends StatelessWidget {
   final String label;
   final String? description;

@@ -245,11 +245,13 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
     final scripts = state.value ?? [];
     return CommonScaffold(
       title: l.script,
-      isLoading: _importing,
+      isLoading: _importing || state.isLoading,
       actions: [
         CommonPopupBox(
           targetBuilder: (open) => FilledButton.tonal(
-            onPressed: _importing ? null : () => open(),
+            onPressed: _importing || state.isLoading || state.hasError
+                ? null
+                : () => open(),
             child: Text(l.add),
           ),
           popup: CommonPopupMenu(
@@ -273,35 +275,42 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
           ),
         ),
       ],
-      body: NullStatusSwitcher(
-        isLoading: state.isLoading,
-        isEmpty: scripts.isEmpty,
-        nullStatus: NullStatus(
-          illustration: NullStatusIllustration.scripts,
-          label: l.nullTip(l.script),
-        ),
-        child: ReorderableListView.builder(
-          padding: const EdgeInsets.all(16)
-              .copyWith(top: context.contentTopPadding),
-          buildDefaultDragHandles: false,
-          itemCount: scripts.length,
-          itemBuilder: (_, index) => ReorderableDelayedDragStartListener(
-            key: ValueKey(scripts[index].id),
-            index: index,
-            child: _item(scripts[index], index, scripts.length),
-          ),
-          proxyDecorator: (_, index, animation) => commonProxyDecorator(
-            _item(scripts[index], index, scripts.length),
-            index,
-            animation,
-          ),
-          onReorderItem: (before, after) => _run(() {
-            final ids = scripts.map((item) => item.id).toList();
-            ids.insert(after, ids.removeAt(before));
-            return _library.reorder(ids);
-          }),
-        ),
-      ),
+      body: state.hasError
+          ? ErrorStatus(
+              error: state.error!,
+              onRetry: state.isLoading
+                  ? null
+                  : () => ref.invalidate(scriptsProvider),
+            )
+          : NullStatusSwitcher(
+              isLoading: state.isLoading,
+              isEmpty: scripts.isEmpty,
+              nullStatus: NullStatus(
+                illustration: NullStatusIllustration.scripts,
+                label: l.nullTip(l.script),
+              ),
+              child: ReorderableListView.builder(
+                padding: const EdgeInsets.all(16)
+                    .copyWith(top: context.contentTopPadding),
+                buildDefaultDragHandles: false,
+                itemCount: scripts.length,
+                itemBuilder: (_, index) => ReorderableDelayedDragStartListener(
+                  key: ValueKey(scripts[index].id),
+                  index: index,
+                  child: _item(scripts[index], index, scripts.length),
+                ),
+                proxyDecorator: (_, index, animation) => commonProxyDecorator(
+                  _item(scripts[index], index, scripts.length),
+                  index,
+                  animation,
+                ),
+                onReorderItem: (before, after) => _run(() {
+                  final ids = scripts.map((item) => item.id).toList();
+                  ids.insert(after, ids.removeAt(before));
+                  return _library.reorder(ids);
+                }),
+              ),
+            ),
     );
   }
 }
@@ -317,7 +326,9 @@ class ScriptOptionsPage extends ConsumerStatefulWidget {
 class _ScriptOptionsPageState extends ConsumerState<ScriptOptionsPage> {
   Map<String, bool>? _defaults;
   Map<String, bool> _values = {};
+  Map<String, bool>? _refreshOverrides;
   String? _error;
+  bool _loading = false;
   bool _saving = false;
 
   @override
@@ -326,13 +337,27 @@ class _ScriptOptionsPageState extends ConsumerState<ScriptOptionsPage> {
     _load();
   }
 
-  Future<void> _load() async {
+  Future<void> _load({bool refresh = false}) async {
+    if (_loading) return;
+    if (refresh && _defaults != null) {
+      _refreshOverrides = {
+        for (final entry in _values.entries)
+          if (entry.value != _defaults![entry.key]) entry.key: entry.value,
+      };
+    }
+    setState(() {
+      _loading = true;
+      _defaults = null;
+      _error = null;
+    });
     try {
       final content = await widget.script.content;
+      if (!mounted) return;
       if (content == null) throw StateError('Script file is unavailable');
-      final defaults = await extractScriptOptions(content);
+      final defaults = await extractScriptOptions(content, refresh: refresh);
       if (!mounted) return;
       final saved =
+          _refreshOverrides ??
           ref.read(appSettingProvider).scriptOptions['${widget.script.id}'] ??
           const {};
       setState(() {
@@ -341,13 +366,17 @@ class _ScriptOptionsPageState extends ConsumerState<ScriptOptionsPage> {
           for (final entry in defaults.entries)
             entry.key: saved[entry.key] ?? entry.value,
         };
+        _refreshOverrides = null;
       });
     } catch (error) {
       if (mounted) setState(() => _error = error.toString());
+    } finally {
+      if (mounted) setState(() => _loading = false);
     }
   }
 
   Future<void> _save() async {
+    if (_saving || _loading || _defaults == null) return;
     setState(() => _saving = true);
     final setup = context.setupAction;
     try {
@@ -369,7 +398,9 @@ class _ScriptOptionsPageState extends ConsumerState<ScriptOptionsPage> {
       if (ref.read(currentProfileProvider)?.scriptId == widget.script.id) {
         await setup.applyProfile(force: true);
       }
-      if (mounted) Navigator.of(context).pop();
+      if (mounted && ModalRoute.of(context)?.isCurrent == true) {
+        Navigator.of(context).pop();
+      }
     } catch (error) {
       if (mounted) context.showNotifier(error.toString());
     } finally {
@@ -382,7 +413,13 @@ class _ScriptOptionsPageState extends ConsumerState<ScriptOptionsPage> {
     final l10n = context.appLocalizations;
     return CommonScaffold(
       title: l10n.scriptOptions,
+      isLoading: _saving,
       actions: [
+        IconButton(
+          tooltip: l10n.refresh,
+          icon: const GlyphIcon(AppGlyphs.refresh),
+          onPressed: _loading || _saving ? null : () => _load(refresh: true),
+        ),
         if (_defaults?.isNotEmpty == true) ...[
           TextButton(
             onPressed: _saving
@@ -394,7 +431,7 @@ class _ScriptOptionsPageState extends ConsumerState<ScriptOptionsPage> {
         ],
       ],
       body: _error != null
-          ? Center(child: Text(_error!))
+          ? ErrorStatus(error: _error!, onRetry: () => _load(refresh: true))
           : _defaults == null
           ? const Center(child: CircularProgressIndicator())
           : _defaults!.isEmpty

@@ -52,7 +52,112 @@ void main() {
     expect(values, containsAll(['A', 'B']));
   });
 
+  for (final mode in ['debounce', 'throttle', 'immediate']) {
+    test(
+      '$mode handles late async failures and allows the next call',
+      () async {
+        final debouncer = Debouncer();
+        final throttler = Throttler();
+        void schedule(Function callback) {
+          if (mode == 'debounce') {
+            debouncer.call('fixture', callback, duration: Duration.zero);
+          } else {
+            throttler.call(
+              'fixture',
+              callback,
+              duration: Duration.zero,
+              fire: mode == 'immediate',
+            );
+          }
+        }
+
+        final errors = <Object>[];
+        runZonedGuarded(() {
+          schedule(() async {
+            await Future<void>.delayed(Duration.zero);
+            throw StateError('fixture scheduled failure');
+          });
+        }, (error, _) => errors.add(error));
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+        var calls = 0;
+        schedule(() => calls++);
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        expect(errors, isEmpty);
+        expect(calls, 1);
+      },
+    );
+  }
+
   group('Throttler', () {
+    for (final fire in [false, true]) {
+      test(
+        'replacing a running callback retains its new throttle (fire: $fire)',
+        () async {
+          final throttler = Throttler();
+          const duration = Duration(seconds: 1);
+          void replace() {
+            throttler.cancel('fixture');
+            throttler.call('fixture', () {}, duration: duration);
+            if (fire) throw StateError('fixture replaced failure');
+          }
+
+          void schedule() => throttler.call(
+            'fixture',
+            replace,
+            fire: fire,
+            duration: Duration.zero,
+          );
+          if (fire) {
+            expect(schedule, throwsStateError);
+          } else {
+            schedule();
+            await Future<void>.delayed(const Duration(milliseconds: 10));
+          }
+          expect(throttler.call('fixture', () {}), isTrue);
+          throttler.cancel('fixture');
+        },
+      );
+    }
+
+    test('an immediate callback cannot bypass its own throttle', () async {
+      final throttler = Throttler();
+      bool? reentrant;
+      throttler.call(
+        FunctionTag.vpnTip,
+        () {
+          reentrant = throttler.call(FunctionTag.vpnTip, () {}, fire: true);
+        },
+        fire: true,
+        duration: Duration.zero,
+      );
+      expect(reentrant, isTrue);
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      expect(
+        throttler.call(
+          FunctionTag.vpnTip,
+          () {},
+          fire: true,
+          duration: Duration.zero,
+        ),
+        isFalse,
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+    });
+
+    test('an immediate failure releases the throttle for a retry', () {
+      final throttler = Throttler();
+      expect(
+        () => throttler.call(
+          FunctionTag.vpnTip,
+          () => throw StateError('fixture'),
+          fire: true,
+        ),
+        throwsStateError,
+      );
+      expect(throttler.call(FunctionTag.vpnTip, () {}, fire: true), isFalse);
+      throttler.cancel(FunctionTag.vpnTip);
+    });
+
     test('a throwing deferred callback does not block its tag', () async {
       final throttler = Throttler();
       final errors = <Object>[];
@@ -75,7 +180,7 @@ void main() {
       );
       await Future<void>.delayed(const Duration(milliseconds: 10));
 
-      expect(errors, [isA<StateError>()]);
+      expect(errors, isEmpty);
       expect(throttled, isFalse);
       expect(values, [1]);
     });

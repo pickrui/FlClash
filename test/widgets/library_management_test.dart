@@ -14,8 +14,10 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/clash_providers.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/views/config/providers.dart';
+import 'package:fl_clash/views/config/rules.dart';
 import 'package:fl_clash/views/config/scripts.dart';
 import 'package:fl_clash/widgets/input_dialog.dart';
+import 'package:fl_clash/widgets/null_status.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -36,6 +38,84 @@ class _PreviewCore implements CoreController {
 
 void main() {
   setUpAll(initEditorNative);
+  for (final library in ['scripts', 'resources', 'rules']) {
+    final scripts = library == 'scripts';
+    final rules = library == 'rules';
+    testWidgets(
+      '$library retry loading errors without showing an empty result',
+      (tester) async {
+        var attempts = 0;
+        final ready = Completer<void>();
+        final recovered = Completer<void>();
+        Stream<List<T>> load<T>() async* {
+          if (++attempts == 1) {
+            await ready.future;
+            throw StateError('Fixture library failure');
+          }
+          await recovered.future;
+          yield [];
+        }
+
+        await tester.pumpWidget(
+          TestApp(
+            locale: const Locale('en'),
+            overrides: [
+              if (rules)
+                globalRulesProvider.overrideWithBuild((_, _) => load<Rule>())
+              else if (scripts)
+                scriptsProvider.overrideWithBuild((_, _) => load<Script>())
+              else
+                clashProvidersProvider.overrideWith(
+                  (_) => load<ClashProvider>(),
+                ),
+            ],
+            child: rules
+                ? const AddedRulesView()
+                : scripts
+                ? const ScriptsView()
+                : const ClashProvidersView(),
+          ),
+        );
+        await tester.pump();
+        final add = find.widgetWithText(FilledButton, 'Add').first;
+        expect(tester.widget<FilledButton>(add).onPressed, isNull);
+        ready.complete();
+        await tester.pumpAndSettle();
+        expect(find.byType(ErrorStatus), findsOneWidget);
+        expect(find.textContaining('Fixture library failure'), findsOneWidget);
+        final l10n = AppLocalizations.current;
+        final empty = l10n.nullTip(
+          rules
+              ? l10n.rule
+              : scripts
+              ? l10n.script
+              : l10n.providers,
+        );
+        expect(find.text(empty), findsNothing);
+        expect(tester.widget<FilledButton>(add).onPressed, isNull);
+
+        await tester.tap(find.text('Refresh'));
+        await tester.pump();
+        expect(tester.widget<FilledButton>(add).onPressed, isNull);
+        expect(
+          tester
+              .widget<FilledButton>(
+                find.widgetWithText(FilledButton, 'Refresh'),
+              )
+              .onPressed,
+          isNull,
+        );
+        recovered.complete();
+        await tester.pumpAndSettle();
+        expect(attempts, 2);
+        expect(find.byType(ErrorStatus), findsNothing);
+        expect(find.text(empty), findsOneWidget);
+        expect(tester.widget<FilledButton>(add).onPressed, isNotNull);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   testWidgets('named URL validates conflicts and allows an omitted name', (
     tester,
   ) async {

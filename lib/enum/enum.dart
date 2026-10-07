@@ -62,7 +62,7 @@ enum GroupType {
       'fallback' => Fallback,
       'load-balance' || 'loadbalance' => LoadBalance,
       'relay' => Relay,
-      String() => throw UnimplementedError(),
+      _ => throw FormatException('Unsupported proxy group type', type),
     };
   }
 }

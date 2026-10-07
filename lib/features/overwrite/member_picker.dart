@@ -62,9 +62,8 @@ class _ProxyMemberPickerState extends State<ProxyMemberPicker> {
       ),
     );
     if (added == null || !mounted) return;
-    setState(
-      () => _selected.addAll(added.where((name) => !_selected.contains(name))),
-    );
+    final selected = _selected.toSet();
+    setState(() => _selected.addAll(added.where(selected.add)));
   }
 
   @override

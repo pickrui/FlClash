@@ -183,8 +183,11 @@ class _StoreQuoteDialogState extends ConsumerState<StoreQuoteDialog> {
 
   Widget _summaryRow(StoreQuoteRow row) {
     final theme = Theme.of(context);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Wrap(
+      alignment: WrapAlignment.spaceBetween,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 12,
+      runSpacing: 4,
       children: [
         Text(row.label, style: theme.textTheme.bodyMedium),
         Text(storePriceText(row.amount), style: theme.textTheme.titleSmall),

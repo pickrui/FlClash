@@ -5,21 +5,48 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
-import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/enum/enum.dart';
+
+import 'constant.dart';
+import 'print.dart';
+
+void _invokeScheduledCallback(
+  Object tag,
+  Function callback,
+  List<dynamic>? args, {
+  bool propagateSyncError = false,
+}) {
+  void report(Object error, StackTrace stackTrace) {
+    commonPrint.log(
+      'Scheduled task $tag failed: $error\n$stackTrace',
+      logLevel: LogLevel.warning,
+    );
+  }
+
+  try {
+    final result = Function.apply(callback, args);
+    if (result is Future) {
+      unawaited(result.then<void>((_) {}, onError: report));
+    }
+  } catch (error, stackTrace) {
+    if (propagateSyncError) rethrow;
+    report(error, stackTrace);
+  }
+}
 
 class Debouncer {
   final Map<Object, Timer> _operations = {};
 
   void call(
     Object tag,
-    Function func, {
+    Function callback, {
     List<dynamic>? args,
     Duration? duration,
   }) {
     _operations[tag]?.cancel();
     _operations[tag] = Timer(duration ?? const Duration(milliseconds: 600), () {
       _operations.remove(tag);
-      Function.apply(func, args);
+      _invokeScheduledCallback(tag, callback, args);
     });
   }
 
@@ -31,7 +58,7 @@ class Throttler {
 
   bool call(
     Object tag,
-    Function func, {
+    Function callback, {
     List<dynamic>? args,
     Duration duration = const Duration(milliseconds: 600),
     bool fire = false,
@@ -39,17 +66,30 @@ class Throttler {
     if (_operations.containsKey(tag)) {
       return true;
     }
+    late final Timer operation;
+    void finish() {
+      if (identical(_operations[tag], operation)) _operations.remove(tag);
+    }
+
     if (fire) {
-      Function.apply(func, args);
-      _operations[tag] = Timer(duration, () => _operations.remove(tag));
+      operation = Timer(duration, finish);
+      _operations[tag] = operation;
+      try {
+        _invokeScheduledCallback(tag, callback, args, propagateSyncError: true);
+      } catch (_) {
+        operation.cancel();
+        finish();
+        rethrow;
+      }
     } else {
-      _operations[tag] = Timer(duration, () {
+      operation = Timer(duration, () {
         try {
-          Function.apply(func, args);
+          _invokeScheduledCallback(tag, callback, args);
         } finally {
-          _operations.remove(tag);
+          finish();
         }
       });
+      _operations[tag] = operation;
     }
     return false;
   }

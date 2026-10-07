@@ -6,8 +6,6 @@
 import 'dart:async';
 
 import 'package:fl_clash/icons/caption_icon.dart';
-export 'package:fl_clash/icons/caption_icon.dart';
-
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/config.dart';
@@ -18,6 +16,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window/window.dart';
 
+export 'package:fl_clash/icons/caption_icon.dart';
+
 const _windowGeometryDelay = Duration(milliseconds: 120);
 
 class WindowManager extends ConsumerStatefulWidget {
@@ -26,20 +26,15 @@ class WindowManager extends ConsumerStatefulWidget {
   const WindowManager({super.key, required this.child});
 
   @override
-  ConsumerState<WindowManager> createState() => _WindowContainerState();
+  ConsumerState<WindowManager> createState() => _WindowManagerState();
 }
 
-class _WindowContainerState extends ConsumerState<WindowManager>
+class _WindowManagerState extends ConsumerState<WindowManager>
     with WindowListener {
   Timer? _windowGeometryTimer;
   int _windowGeometryRevision = 0;
   int _windowBlurRevision = 0;
   Future<void> _windowBlurUpdate = Future.value();
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.child;
-  }
 
   @override
   void initState() {
@@ -49,9 +44,10 @@ class _WindowContainerState extends ConsumerState<WindowManager>
       next,
     ) {
       if (prev != next) {
-        debouncer.call(FunctionTag.autoLaunch, () {
-          autoLaunch?.updateStatus(next);
-        });
+        debouncer.call(
+          FunctionTag.autoLaunch,
+          () => autoLaunch?.updateStatus(next),
+        );
       }
     });
     ref.listenManual(windowBlurRequestProvider, (_, next) {
@@ -94,7 +90,6 @@ class _WindowContainerState extends ConsumerState<WindowManager>
   @override
   void onWindowFocus() {
     super.onWindowFocus();
-    commonPrint.log('focus');
     globalState.setUpdateVisibility(windowVisible: true);
     render?.resume();
   }
@@ -187,10 +182,9 @@ class _WindowContainerState extends ConsumerState<WindowManager>
   }
 
   @override
-  void onWindowMinimize() async {
+  void onWindowMinimize() {
     _invalidateWindowGeometryCapture();
     ref.read(storeActionProvider.notifier).savePreferencesDebounce();
-    commonPrint.log('minimize');
     globalState.setUpdateVisibility(windowVisible: false);
     render?.pause();
     super.onWindowMinimize();
@@ -198,7 +192,6 @@ class _WindowContainerState extends ConsumerState<WindowManager>
 
   @override
   void onWindowRestore() {
-    commonPrint.log('restore');
     globalState.setUpdateVisibility(windowVisible: true);
     render?.resume();
     super.onWindowRestore();
@@ -211,6 +204,9 @@ class _WindowContainerState extends ConsumerState<WindowManager>
     desktopWindow.removeListener(this);
     super.dispose();
   }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 class WindowHeaderContainer extends StatelessWidget {

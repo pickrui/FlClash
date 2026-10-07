@@ -267,14 +267,54 @@ void main() {
     await library.save(before);
     await db.clashProvidersDao.restore([
       before.copyWith(label: 'Other'),
+      before.copyWith(
+        id: 99,
+        label: 'Other',
+        url: 'https://example.com/latest',
+      ),
+      resource(kind: ProviderKind.proxy),
     ], replace: false);
+    final restored = await db.clashProvidersDao.all().get();
+    expect(restored.map((p) => p.label).toSet(), {'Rules', 'Other'});
+    expect(restored.map((p) => p.id).toSet(), hasLength(3));
+    expect(restored.singleWhere((p) => p.id == before.id), before);
     expect(
-      (await db.clashProvidersDao.all().get()).map((p) => p.label).toSet(),
-      {'Rules', 'Other'},
+      restored.singleWhere((p) => p.label == 'Other').url,
+      'https://example.com/latest',
     );
     await db.clashProvidersDao.restore([], replace: true);
     expect(await db.clashProvidersDao.all().get(), isEmpty);
   });
+
+  test(
+    'reordering changes only the selected resource kind and order',
+    () async {
+      final first = resource().copyWith(order: 5);
+      final second = resource(label: 'Second').copyWith(id: 2, order: 7);
+      final proxy = resource(kind: ProviderKind.proxy)
+          .copyWith(id: 3, order: 9);
+      for (final provider in [first, second, proxy]) {
+        await library.save(provider);
+      }
+      await library.reorder(ProviderKind.rule, [2, 1]);
+      final expected = [
+        second.copyWith(order: 0),
+        first.copyWith(order: 1),
+        proxy,
+      ];
+      expect(await db.clashProvidersDao.all().get(), expected);
+      for (final ids in [
+        [1, 1],
+        [1, 3],
+      ]) {
+        await expectLater(
+          library.reorder(ProviderKind.rule, ids),
+          fails('changed'),
+        );
+        expect(await db.clashProvidersDao.all().get(), expected);
+      }
+    },
+  );
 
   test(
     'portable resource JSON preserves local bytes and remote metadata',

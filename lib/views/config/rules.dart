@@ -53,7 +53,7 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
         targets: tailscaleRoutingTargets(ref.read(tailscaleNetworksProvider)),
       ),
     );
-    if (res == null) {
+    if (!mounted || res == null) {
       return;
     }
     ref.read(globalRulesProvider.notifier).put(res);
@@ -86,7 +86,7 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
         text: appLocalizations.deleteMultipTip(appLocalizations.rule),
       ),
     );
-    if (res != true) {
+    if (!mounted || res != true) {
       return;
     }
     final selectedRules = ref.read(selectedItemsProvider(_key));
@@ -97,6 +97,7 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
   @override
   Widget build(BuildContext context) {
     final source = ref.watch(globalRulesProvider);
+    final unavailable = source.isLoading || source.hasError;
     final rules = _filter(source.value ?? []);
     final searching = !SearchQuery(_query).isEmpty;
     final selectedRules = ref.watch(selectedItemsProvider(_key));
@@ -115,18 +116,19 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
         ),
 
         title: appLocalizations.addedRules,
+        isLoading: source.isLoading,
         actions: [
           if (selectedRules.isEmpty)
             IconButton(
               tooltip: appLocalizations.quickAdd,
-              onPressed: _addPresets,
+              onPressed: unavailable ? null : _addPresets,
               icon: const GlyphIcon(AppGlyphs.listAdd),
             ),
           if (selectedRules.isNotEmpty) ...[
             CommonMinIconButtonTheme(
               child: IconButton.filledTonal(
                 tooltip: context.appLocalizations.delete,
-                onPressed: _handleDelete,
+                onPressed: unavailable ? null : _handleDelete,
                 icon: const GlyphIcon(AppGlyphs.delete),
               ),
             ),
@@ -135,56 +137,61 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
           CommonMinFilledButtonTheme(
             child: selectedRules.isNotEmpty
                 ? FilledButton(
-                    onPressed: _handleSelectAll,
+                    onPressed: unavailable ? null : _handleSelectAll,
                     child: Text(appLocalizations.selectAll),
                   )
                 : FilledButton.tonal(
-                    onPressed: () {
-                      _handleAddOrUpdate();
-                    },
+                    onPressed: unavailable ? null : _handleAddOrUpdate,
                     child: Text(appLocalizations.add),
                   ),
           ),
           const SizedBox(width: 8),
         ],
-        body: NullStatusSwitcher(
-          isLoading: source.isLoading,
-          isEmpty: rules.isEmpty,
-          isSearching: searching,
-          nullStatus: NullStatus(
-            label: appLocalizations.nullTip(appLocalizations.rule),
-            illustration: NullStatusIllustration.rules,
-          ),
-          child: ReorderableList(
-            padding: EdgeInsets.only(
-              top: context.contentTopPadding,
-              bottom: 88,
-            ),
-            itemCount: rules.length,
-            itemBuilder: (context, index) {
-              final rule = rules[index];
-              return ReorderableDelayedDragStartListener(
-                key: ValueKey(rule.id),
-                index: index,
-                enabled: !searching,
-                child: RuleItem(
-                  isEditing: selectedRules.isNotEmpty,
-                  rule: rule,
-                  isSelected: selectedRules.contains(rule.id),
-                  onSelected: () => _handleSelected(rule.id),
-                  onEdit: _handleAddOrUpdate,
+        body: source.hasError
+            ? ErrorStatus(
+                error: source.error!,
+                onRetry: source.isLoading
+                    ? null
+                    : () => ref.invalidate(globalRulesProvider),
+              )
+            : NullStatusSwitcher(
+                isLoading: source.isLoading,
+                isEmpty: rules.isEmpty,
+                isSearching: searching,
+                nullStatus: NullStatus(
+                  label: appLocalizations.nullTip(appLocalizations.rule),
+                  illustration: NullStatusIllustration.rules,
                 ),
-              );
-            },
-            onReorderItem: (oldIndex, newIndex) {
-              if (!searching) {
-                ref
-                    .read(globalRulesProvider.notifier)
-                    .order(oldIndex, newIndex);
-              }
-            },
-          ),
-        ),
+                child: ReorderableList(
+                  padding: EdgeInsets.only(
+                    top: context.contentTopPadding,
+                    bottom: 88,
+                  ),
+                  itemCount: rules.length,
+                  itemBuilder: (context, index) {
+                    final rule = rules[index];
+                    return ReorderableDelayedDragStartListener(
+                      key: ValueKey(rule.id),
+                      index: index,
+                      enabled: !searching,
+                      child: RuleItem(
+                        isEditing: selectedRules.isNotEmpty,
+                        rule: rule,
+                        isSelected: selectedRules.contains(rule.id),
+                        onSelected: () => _handleSelected(rule.id),
+                        onEdit: _handleAddOrUpdate,
+                      ),
+                    );
+                  },
+                  onReorderItem: (oldIndex, newIndex) {
+                    if (!searching) {
+                      ref
+                          .read(globalRulesProvider.notifier)
+                          .order(oldIndex, newIndex);
+                    }
+                  },
+                ),
+              ),
       ),
     );
   }

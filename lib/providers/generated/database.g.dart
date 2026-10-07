@@ -198,7 +198,7 @@ final class ScriptsProvider
   Scripts create() => Scripts();
 }
 
-String _$scriptsHash() => r'a795988664359891947efa82c253865d21b50fd1';
+String _$scriptsHash() => r'3eb739da4d5ae975031c528c6f2a085dccdd50d5';
 
 abstract class _$Scripts extends $StreamNotifier<List<Script>> {
   Stream<List<Script>> build();
@@ -242,7 +242,7 @@ final class GlobalRulesProvider
   GlobalRules create() => GlobalRules();
 }
 
-String _$globalRulesHash() => r'656d59663b13a5e5db4b6dff9a54f0912bc6a59e';
+String _$globalRulesHash() => r'd0a28277c364490536aaff3438a9e6202c408fb7';
 
 abstract class _$GlobalRules extends $StreamNotifier<List<Rule>> {
   Stream<List<Rule>> build();
@@ -303,7 +303,7 @@ final class ProfileAddedRulesProvider
   }
 }
 
-String _$profileAddedRulesHash() => r'8565105ca02331228d02b5f89faf5cd740fe4c80';
+String _$profileAddedRulesHash() => r'03026d11d9733259f190bdecc6a64a043568fe75';
 
 final class ProfileAddedRulesFamily extends $Family
     with
