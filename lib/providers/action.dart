@@ -627,6 +627,28 @@ Future<void> runCleanupActions(
   }
 }
 
+class ExitCoordinator {
+  Future<void>? _pending;
+
+  Future<void> run({
+    required Future<void> Function() cleanup,
+    required Future<void> Function() terminate,
+    Duration timeout = const Duration(seconds: 10),
+  }) => _pending ??= _run(cleanup, terminate, timeout);
+
+  Future<void> _run(
+    Future<void> Function() cleanup,
+    Future<void> Function() terminate,
+    Duration timeout,
+  ) async {
+    try {
+      await cleanup().timeout(timeout, onTimeout: () {});
+    } finally {
+      await terminate();
+    }
+  }
+}
+
 Dio createAppUpdateDownloadClient() =>
     Dio(
         BaseOptions(
@@ -729,6 +751,7 @@ Future<void> openAppUpdateDownload({
 }
 
 class AppController {
+  final _exitCoordinator = ExitCoordinator();
   late final BuildContext _context;
   late final WidgetRef _ref;
   Future<void> _logFileWrite = Future.value();

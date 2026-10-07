@@ -79,6 +79,16 @@ class Preferences {
     return BootRecord.fromJson(json.decode(value));
   }
 
+  Future<String?> getDnsRecoverySnapshot() async =>
+      (await _loadSharedPreferences())?.getString('system_dns_recovery_v1');
+
+  Future<void> saveDnsRecoverySnapshot(String value) async {
+    final store = await _loadSharedPreferences();
+    if (await store?.setString('system_dns_recovery_v1', value) != true) {
+      throw StateError('failed to persist system DNS recovery snapshot');
+    }
+  }
+
   Future<void> saveBootRecord(BootRecord record) async {
     final store = await _loadSharedPreferences();
     if (await store?.setString(

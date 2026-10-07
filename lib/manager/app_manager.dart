@@ -121,7 +121,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
           }),
         );
       }
-    });
+    }, fireImmediately: true);
   }
 
   @override

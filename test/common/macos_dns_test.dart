@@ -33,6 +33,7 @@ void main() {
       system.device = 'en1';
       await controller.updateDns(false);
       expect(system.dns['USB Ethernet'], ['9.9.9.9', '223.5.5.5']);
+      expect(system.dns['Wi-Fi'], ['1.1.1.1']);
       await controller.updateDns(true);
       expect(system.dns, {
         'Wi-Fi': ['1.1.1.1'],
@@ -110,17 +111,18 @@ void main() {
   );
 
   test(
-    'failed restoration remains retryable and restores other services',
+    'network change waits for successful restoration of the old service',
     () async {
       final system = _FakeDnsSystem();
       final controller = MacosDnsController(runProcess: system.run);
       await controller.updateDns(false);
       system.device = 'en1';
-      await controller.updateDns(false);
       system.failingService = 'Wi-Fi';
-      await expectLater(controller.updateDns(true), throwsStateError);
+      await expectLater(controller.updateDns(false), throwsStateError);
       expect(system.dns['USB Ethernet'], ['9.9.9.9']);
       system.failingService = null;
+      await controller.updateDns(false);
+      expect(system.dns['Wi-Fi'], ['1.1.1.1']);
       await controller.updateDns(true);
       expect(system.dns['Wi-Fi'], ['1.1.1.1']);
     },
@@ -138,6 +140,51 @@ void main() {
       expect(system.dns['Wi-Fi'], ['1.1.1.1']);
     },
   );
+
+  test('a new process restores the persisted DHCP DNS snapshot', () async {
+    final system = _FakeDnsSystem()..dns['Wi-Fi'] = [];
+    String? snapshot;
+    MacosDnsController create() => MacosDnsController(
+      runProcess: system.run,
+      readSnapshot: () async => snapshot,
+      writeSnapshot: (value) async => snapshot = value,
+    );
+    await create().updateDns(false);
+    expect(snapshot, contains('"before":[]'));
+    expect(system.dns['Wi-Fi'], ['223.5.5.5']);
+    await create().updateDns(true);
+    expect(system.dns['Wi-Fi'], isEmpty);
+    expect(snapshot, contains('"services":{}'));
+  });
+
+  test('recovery leaves a user DNS change intact across processes', () async {
+    final system = _FakeDnsSystem();
+    String? snapshot;
+    MacosDnsController create() => MacosDnsController(
+      runProcess: system.run,
+      readSnapshot: () async => snapshot,
+      writeSnapshot: (value) async => snapshot = value,
+    );
+    await create().updateDns(false);
+    system.dns['Wi-Fi'] = ['192.0.2.1'];
+    await create().updateDns(true);
+    expect(system.dns['Wi-Fi'], ['192.0.2.1']);
+    expect(system.writes, hasLength(1));
+  });
+
+  test('a snapshot write failure prevents system DNS changes', () async {
+    final system = _FakeDnsSystem();
+    final controller = MacosDnsController(
+      runProcess: system.run,
+      writeSnapshot: (_) async => throw const FileSystemException('fixture'),
+    );
+    await expectLater(
+      controller.updateDns(false),
+      throwsA(isA<FileSystemException>()),
+    );
+    expect(system.writes, isEmpty);
+    expect(system.dns['Wi-Fi'], ['1.1.1.1']);
+  });
 
   test('invalid command output never becomes a DNS write', () async {
     final system = _FakeDnsSystem()..readOutput = 'networksetup failed';

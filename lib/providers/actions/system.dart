@@ -16,7 +16,7 @@ class SystemAction extends _$SystemAction {
 
   Future<List<Package>> getPackages() => _controller.getPackages();
 
-  Future<void> handleExit([bool needSave = false]) =>
+  Future<void> handleExit([bool needSave = true]) =>
       _controller.handleExit(needSave);
 
   Future<void> handleBackOrExit({bool forceBack = false}) =>
@@ -55,25 +55,18 @@ extension SystemControllerExt on AppController {
     return _ref.read(packagesProvider);
   }
 
-  Future<void> handleExit([bool needSave = false]) async {
-    Future.delayed(const Duration(seconds: 20), () {
-      system.exit();
-    });
-    try {
-      await runCleanupActions([
-        startupRecovery.markClosed,
-        waitForPendingDatabaseWrites,
-        if (needSave) savePreferences,
-        if (macOS != null) () => macOS!.updateDns(true),
-        stopSystemProxyIfNeeded,
-        if (tray != null) () => tray!.destroy(),
-        coreController.destroy,
-      ]);
-      commonPrint.log('exit');
-    } finally {
-      system.exit();
-    }
-  }
+  Future<void> handleExit([bool needSave = true]) => _exitCoordinator.run(
+    cleanup: () => runCleanupActions([
+      if (needSave) savePreferences,
+      startupRecovery.markClosed,
+      waitForPendingDatabaseWrites,
+      if (macOS != null) () => macOS!.updateDns(true),
+      stopSystemProxyIfNeeded,
+      if (tray != null) () => tray!.destroy(),
+      coreController.destroy,
+    ]),
+    terminate: system.exit,
+  );
 
   Future<void> handleBackOrExit({bool forceBack = false}) async {
     if (!system.isDesktop && _ref.read(backBlockProvider)) {

@@ -35,6 +35,7 @@ extension StoreControllerExt on AppController {
   }
 
   Future<void> savePreferences() async {
+    debouncer.cancel(FunctionTag.savePreferences);
     if (_preferencesWritesSuspended) {
       _preferencesWriteRequestedWhileSuspended = true;
       return;

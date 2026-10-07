@@ -109,6 +109,15 @@ class ApplicationState extends ConsumerState<Application> {
       child: CoreManager(
         child: ConnectivityManager(
           onConnectivityChanged: (results) async {
+            final dnsState = ref.read(autoSetSystemDnsStateProvider);
+            try {
+              await macOS?.updateDns(!(dnsState.a && dnsState.b));
+            } catch (error) {
+              commonPrint.log(
+                'System DNS recovery failed: ${error.runtimeType}',
+                logLevel: LogLevel.warning,
+              );
+            }
             commonPrint.log('connectivityChanged ${results.toString()}');
             appController.updateLocalIp();
             appController.autoUpdateIpv6();

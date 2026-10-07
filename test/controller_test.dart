@@ -19,6 +19,45 @@ import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 void main() {
+  test(
+    'concurrent exits flush pending settings once before termination',
+    () async {
+      final exit = ExitCoordinator();
+      final saved = Completer<void>();
+      final calls = <String>[];
+      Future<void> cleanup() async {
+        calls.add('save');
+        await saved.future;
+        calls.add('stop');
+      }
+
+      Future<void> terminate() async => calls.add('exit');
+      final first = exit.run(cleanup: cleanup, terminate: terminate);
+      final second = exit.run(cleanup: cleanup, terminate: terminate);
+      expect(identical(first, second), isTrue);
+      expect(calls, ['save']);
+      saved.complete();
+      await first;
+      expect(calls, ['save', 'stop', 'exit']);
+    },
+  );
+
+  test('exit timeout terminates once even if cleanup finishes later', () async {
+    final exit = ExitCoordinator();
+    final blocked = Completer<void>();
+    var exits = 0;
+    await exit.run(
+      cleanup: () => blocked.future,
+      terminate: () async {
+        exits++;
+      },
+      timeout: const Duration(milliseconds: 1),
+    );
+    blocked.complete();
+    await Future<void>.delayed(Duration.zero);
+    expect(exits, 1);
+  });
+
   group('port conflict recovery', () {
     test('waits for the new port to be applied before retrying', () async {
       var activePort = 7890;

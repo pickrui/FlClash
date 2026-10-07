@@ -320,7 +320,11 @@ final windows = system.isWindows ? Windows() : null;
 class MacOS extends MacosDnsController {
   static MacOS? _instance;
 
-  MacOS._internal();
+  MacOS._internal()
+    : super(
+        readSnapshot: preferences.getDnsRecoverySnapshot,
+        writeSnapshot: preferences.saveDnsRecoverySnapshot,
+      );
 
   factory MacOS() {
     _instance ??= MacOS._internal();
