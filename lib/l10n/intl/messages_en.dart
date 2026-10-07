@@ -867,15 +867,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "customRuleType": MessageLookupByLibrary.simpleMessage("Rule type"),
     "customRuleUnavailableProvider": m12,
     "customRuleUnavailableTarget": m13,
-    "customUserAgent": MessageLookupByLibrary.simpleMessage(
-      "Custom (enter manually)",
-    ),
-    "customUserAgentHint": MessageLookupByLibrary.simpleMessage(
-      "Enter the full User-Agent value",
-    ),
-    "customUserAgentInvalid": MessageLookupByLibrary.simpleMessage(
-      "Use only English letters, numbers, spaces, and standard punctuation",
-    ),
     "cut": MessageLookupByLibrary.simpleMessage("Cut"),
     "dark": MessageLookupByLibrary.simpleMessage("Dark"),
     "dashboard": MessageLookupByLibrary.simpleMessage("Dashboard"),
@@ -1230,7 +1221,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "excludeProxyFilter": MessageLookupByLibrary.simpleMessage(
       "Exclude proxy filter",
     ),
-    "excludeSsids": MessageLookupByLibrary.simpleMessage("Exclude SSIDs"),
+    "excludeSsids": MessageLookupByLibrary.simpleMessage(
+      "Wi-Fi networks that pause the proxy",
+    ),
     "excludeSsidsDesc": MessageLookupByLibrary.simpleMessage(
       "Pause proxying on the listed Wi-Fi networks; resume after leaving only while the app remains started.",
     ),
@@ -1588,7 +1581,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "mainlandNetworkWarning": MessageLookupByLibrary.simpleMessage(
       "May not be suitable for networks in mainland China",
     ),
-    "manageUserAgents": MessageLookupByLibrary.simpleMessage("Manage list"),
     "matchTarget": MessageLookupByLibrary.simpleMessage("MATCH-TARGET"),
     "matchTargetDesc": MessageLookupByLibrary.simpleMessage(
       "Where rules targeting MATCH-TARGET go. Defaults to the target of the final MATCH rule in this profile.",
@@ -1790,7 +1782,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "oixCloud": MessageLookupByLibrary.simpleMessage("oixCloud"),
     "onDemand": MessageLookupByLibrary.simpleMessage("On demand"),
     "onDemandDesc": MessageLookupByLibrary.simpleMessage(
-      "Configure the app\'s running state for specific scenarios",
+      "Automatically pause and resume the proxy based on Wi-Fi or network conditions",
     ),
     "onlyIcon": MessageLookupByLibrary.simpleMessage("Icon"),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage(
@@ -2450,6 +2442,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "ssidPermissionGuide": MessageLookupByLibrary.simpleMessage(
       "Allow location access to read Wi-Fi names. On Android, allow precise location all the time and enable system location services.",
     ),
+    "ssidPermissionMacosGuide": MessageLookupByLibrary.simpleMessage(
+      "Allow this app to use Location Services in System Settings to read Wi-Fi names.",
+    ),
     "ssidsEmpty": MessageLookupByLibrary.simpleMessage("SSIDs are empty"),
     "stackMode": MessageLookupByLibrary.simpleMessage("Stack mode"),
     "standard": MessageLookupByLibrary.simpleMessage("Standard"),
@@ -2801,7 +2796,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("Used traffic"),
-    "userAgent": MessageLookupByLibrary.simpleMessage("User-Agent"),
     "userCenter": MessageLookupByLibrary.simpleMessage("User Center"),
     "userCenterFallback": MessageLookupByLibrary.simpleMessage(
       "User Center (Backup)",

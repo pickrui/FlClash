@@ -656,13 +656,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "customRuleType": MessageLookupByLibrary.simpleMessage("规则类型"),
     "customRuleUnavailableProvider": m12,
     "customRuleUnavailableTarget": m13,
-    "customUserAgent": MessageLookupByLibrary.simpleMessage("自定义（手动输入）"),
-    "customUserAgentHint": MessageLookupByLibrary.simpleMessage(
-      "请输入完整的 User-Agent 值",
-    ),
-    "customUserAgentInvalid": MessageLookupByLibrary.simpleMessage(
-      "仅支持半角英文字母、数字、空格和标点符号",
-    ),
     "cut": MessageLookupByLibrary.simpleMessage("剪切"),
     "dark": MessageLookupByLibrary.simpleMessage("深色"),
     "dashboard": MessageLookupByLibrary.simpleMessage("仪表盘"),
@@ -907,7 +900,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "最多 16 条规则，请输入有效的 IPv4、网段或 gateway:地址",
     ),
     "excludeProxyFilter": MessageLookupByLibrary.simpleMessage("排除节点过滤器"),
-    "excludeSsids": MessageLookupByLibrary.simpleMessage("排除SSIDs"),
+    "excludeSsids": MessageLookupByLibrary.simpleMessage("暂停代理的 Wi-Fi"),
     "excludeSsidsDesc": MessageLookupByLibrary.simpleMessage(
       "连接所列 Wi-Fi 时暂停代理；离开后仅在应用仍为启动状态时恢复",
     ),
@@ -1167,7 +1160,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "mainlandNetworkWarning": MessageLookupByLibrary.simpleMessage(
       "可能不适用于中国大陆网络",
     ),
-    "manageUserAgents": MessageLookupByLibrary.simpleMessage("管理列表"),
     "matchTarget": MessageLookupByLibrary.simpleMessage("MATCH-TARGET"),
     "matchTargetDesc": MessageLookupByLibrary.simpleMessage(
       "目标为 MATCH-TARGET 的规则路由到这里，默认取本配置末尾 MATCH 规则的目标",
@@ -1306,7 +1298,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "numberTip": m49,
     "oixCloud": MessageLookupByLibrary.simpleMessage("oixCloud"),
     "onDemand": MessageLookupByLibrary.simpleMessage("按需运行"),
-    "onDemandDesc": MessageLookupByLibrary.simpleMessage("配置程序特定场景运行状态"),
+    "onDemandDesc": MessageLookupByLibrary.simpleMessage(
+      "按 Wi-Fi 或网络条件自动暂停和恢复代理",
+    ),
     "onlyIcon": MessageLookupByLibrary.simpleMessage("仅图标"),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage("仅统计代理"),
     "onlyStatisticsProxyDesc": MessageLookupByLibrary.simpleMessage(
@@ -1805,6 +1799,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "ssidPermissionGuide": MessageLookupByLibrary.simpleMessage(
       "读取 Wi-Fi 名称需要定位权限。Android 请允许始终使用精确位置，并开启系统定位服务",
     ),
+    "ssidPermissionMacosGuide": MessageLookupByLibrary.simpleMessage(
+      "读取 Wi-Fi 名称需要定位权限，请在系统设置中允许本应用使用定位服务",
+    ),
     "ssidsEmpty": MessageLookupByLibrary.simpleMessage("SSIDs为空"),
     "stackMode": MessageLookupByLibrary.simpleMessage("栈模式"),
     "standard": MessageLookupByLibrary.simpleMessage("标准"),
@@ -2062,7 +2059,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "useHosts": MessageLookupByLibrary.simpleMessage("使用Hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("使用系统Hosts"),
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("已用流量"),
-    "userAgent": MessageLookupByLibrary.simpleMessage("用户代理"),
     "userCenter": MessageLookupByLibrary.simpleMessage("用户中心"),
     "userCenterFallback": MessageLookupByLibrary.simpleMessage("用户中心（备用）"),
     "value": MessageLookupByLibrary.simpleMessage("值"),

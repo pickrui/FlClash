@@ -24,7 +24,7 @@ class AdvancedConfigView extends StatelessWidget {
       ListItem.open(
         title: Text(appLocalizations.network),
         subtitle: Text(appLocalizations.networkDesc),
-        leading: const GlyphIcon(AppGlyphs.key),
+        leading: const GlyphIcon(AppGlyphs.connections),
         delegate: OpenDelegate(
           blur: false,
           widget: BaseScaffold(
@@ -60,10 +60,9 @@ class AdvancedConfigView extends StatelessWidget {
     ];
     return BaseScaffold(
       title: appLocalizations.advancedConfig,
-      body: AppBarClearance(
-        child: generateListView(
-          items.separated(const Divider(height: 0)).toList(),
-        ),
+      body: ListView(
+        padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 16),
+        children: [generateSectionV3(items: items)],
       ),
     );
   }

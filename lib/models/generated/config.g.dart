@@ -16,9 +16,6 @@ _AppSettingProps _$AppSettingPropsFromJson(
   onlyStatisticsProxy: json['onlyStatisticsProxy'] as bool? ?? false,
   showNotificationStopAction:
       json['showNotificationStopAction'] as bool? ?? true,
-  userAgents: _readUserAgents(json, 'userAgents') == null
-      ? defaultUserAgents
-      : userAgentsFromJson(_readUserAgents(json, 'userAgents')),
   autoLaunch: json['autoLaunch'] as bool? ?? false,
   silentLaunch: json['silentLaunch'] as bool? ?? false,
   autoRun: json['autoRun'] as bool? ?? false,
@@ -49,7 +46,6 @@ _AppSettingProps _$AppSettingPropsFromJson(
       $enumDecodeNullable(_$RestoreStrategyEnumMap, json['restoreStrategy']) ??
       RestoreStrategy.compatible,
   showTrayTitle: json['showTrayTitle'] as bool? ?? true,
-  customUserAgent: json['customUserAgent'] as String? ?? '',
   scriptOptions:
       (json['scriptOptions'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(k, Map<String, bool>.from(e as Map)),
@@ -65,7 +61,6 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
           .toList(),
       'onlyStatisticsProxy': instance.onlyStatisticsProxy,
       'showNotificationStopAction': instance.showNotificationStopAction,
-      'userAgents': instance.userAgents,
       'autoLaunch': instance.autoLaunch,
       'silentLaunch': instance.silentLaunch,
       'autoRun': instance.autoRun,
@@ -84,7 +79,6 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'developerMode': instance.developerMode,
       'restoreStrategy': _$RestoreStrategyEnumMap[instance.restoreStrategy]!,
       'showTrayTitle': instance.showTrayTitle,
-      'customUserAgent': instance.customUserAgent,
       'scriptOptions': instance.scriptOptions,
     };
 

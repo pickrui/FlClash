@@ -6,17 +6,28 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/views/application_setting.dart';
 import 'package:fl_clash/views/config/general.dart';
-import 'package:fl_clash/views/config/network.dart' show OnDemandView;
+import 'package:fl_clash/views/config/network.dart'
+    show OnDemandView, SuspendOnIdleItem;
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:fl_clash/widgets/proxy_authentication.dart';
 import 'package:material_ui/material_ui.dart';
 
 class ConfigView extends StatelessWidget {
-  const ConfigView({super.key});
+  const ConfigView({super.key, this.platform});
+
+  final TargetPlatform? platform;
 
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
+    final target = platform ?? Theme.of(context).platform;
+    final isAndroid = target == TargetPlatform.android;
+    final isDesktop = switch (target) {
+      TargetPlatform.macOS ||
+      TargetPlatform.windows ||
+      TargetPlatform.linux => true,
+      _ => false,
+    };
     return BaseScaffold(
       title: l.general,
       body: ListView(
@@ -25,24 +36,23 @@ class ConfigView extends StatelessWidget {
           generateSectionV3(
             title: l.startupAndBackground,
             items: [
-              if (system.isDesktop) ...const [
-                AutoLaunchItem(),
-                SilentLaunchItem(),
-              ],
+              if (isDesktop) ...const [AutoLaunchItem(), SilentLaunchItem()],
               const AutoRunItem(),
+              if (isAndroid) const SuspendOnIdleItem(),
               ListItem.open(
                 title: Text(l.onDemand),
                 subtitle: Text(l.onDemandDesc),
-                delegate: const OpenDelegate(widget: OnDemandView()),
+                delegate: OpenDelegate(
+                  widget: OnDemandView(
+                    isAndroid: isAndroid,
+                    isMacOS: target == TargetPlatform.macOS,
+                  ),
+                ),
               ),
               const MinimizeItem(),
-              if (system.isAndroid) ...const [
-                HiddenItem(),
-                NotificationStopItem(),
-              ],
+              if (isAndroid) ...const [HiddenItem(), NotificationStopItem()],
             ],
           ),
-          generateSectionV3(title: l.requests, items: const [UaItem()]),
           generateSectionV3(
             title: l.inbound,
             items: const [
@@ -59,7 +69,7 @@ class ConfigView extends StatelessWidget {
               const UnifiedDelayItem(),
               const TcpConcurrentItem(),
               const InterfaceNameItem(),
-              if (system.isDesktop) const KeepAliveIntervalItem(),
+              if (isDesktop) const KeepAliveIntervalItem(),
               const FindProcessItem(),
               const CloseConnectionsItem(),
               const UsageItem(),

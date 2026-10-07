@@ -883,15 +883,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "customRuleType": MessageLookupByLibrary.simpleMessage("Тип правила"),
     "customRuleUnavailableProvider": m12,
     "customRuleUnavailableTarget": m13,
-    "customUserAgent": MessageLookupByLibrary.simpleMessage(
-      "Свой вариант (ввести вручную)",
-    ),
-    "customUserAgentHint": MessageLookupByLibrary.simpleMessage(
-      "Введите полное значение User-Agent",
-    ),
-    "customUserAgentInvalid": MessageLookupByLibrary.simpleMessage(
-      "Используйте только латинские буквы, цифры, пробелы и стандартные знаки препинания",
-    ),
     "cut": MessageLookupByLibrary.simpleMessage("Вырезать"),
     "dark": MessageLookupByLibrary.simpleMessage("Темный"),
     "dashboard": MessageLookupByLibrary.simpleMessage("Панель управления"),
@@ -1274,7 +1265,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "excludeProxyFilter": MessageLookupByLibrary.simpleMessage(
       "Исключить фильтр прокси",
     ),
-    "excludeSsids": MessageLookupByLibrary.simpleMessage("Исключённые SSID"),
+    "excludeSsids": MessageLookupByLibrary.simpleMessage(
+      "Сети Wi-Fi для приостановки прокси",
+    ),
     "excludeSsidsDesc": MessageLookupByLibrary.simpleMessage(
       "Приостанавливать прокси в указанных сетях Wi-Fi; возобновлять после отключения, только если приложение остаётся запущенным.",
     ),
@@ -1649,9 +1642,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "mainlandNetworkWarning": MessageLookupByLibrary.simpleMessage(
       "Может не подходить для сетей материкового Китая",
     ),
-    "manageUserAgents": MessageLookupByLibrary.simpleMessage(
-      "Управление списком",
-    ),
     "matchTarget": MessageLookupByLibrary.simpleMessage("MATCH-TARGET"),
     "matchTargetDesc": MessageLookupByLibrary.simpleMessage(
       "Куда направляются правила с целью MATCH-TARGET. По умолчанию — цель последнего правила MATCH этого профиля.",
@@ -1865,7 +1855,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "oixCloud": MessageLookupByLibrary.simpleMessage("oixCloud"),
     "onDemand": MessageLookupByLibrary.simpleMessage("По условию"),
     "onDemandDesc": MessageLookupByLibrary.simpleMessage(
-      "Настройте состояние работы приложения для определённых сценариев",
+      "Автоматически приостанавливать и возобновлять прокси в зависимости от Wi-Fi или сетевых условий",
     ),
     "onlyIcon": MessageLookupByLibrary.simpleMessage("Только иконка"),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage(
@@ -2587,6 +2577,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "ssidPermissionGuide": MessageLookupByLibrary.simpleMessage(
       "Разрешите доступ к геолокации для чтения имён Wi-Fi. На Android разрешите точное местоположение всегда и включите геолокацию.",
     ),
+    "ssidPermissionMacosGuide": MessageLookupByLibrary.simpleMessage(
+      "Для чтения имён Wi-Fi разрешите этому приложению использовать службы геолокации в системных настройках.",
+    ),
     "ssidsEmpty": MessageLookupByLibrary.simpleMessage("Список SSID пуст"),
     "stackMode": MessageLookupByLibrary.simpleMessage("Режим стека"),
     "standard": MessageLookupByLibrary.simpleMessage("Стандартный"),
@@ -2958,7 +2951,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage(
       "Использованный трафик",
     ),
-    "userAgent": MessageLookupByLibrary.simpleMessage("User-Agent"),
     "userCenter": MessageLookupByLibrary.simpleMessage("Центр пользователя"),
     "userCenterFallback": MessageLookupByLibrary.simpleMessage(
       "Центр пользователя (резервный)",

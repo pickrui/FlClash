@@ -390,7 +390,6 @@ _ClashConfig _$ClashConfigFromJson(Map<String, dynamic> json) => _ClashConfig(
   rule:
       (json['rule'] as List<dynamic>?)?.map((e) => e as String).toList() ??
       const [],
-  globalUa: json['global-ua'] as String?,
   interfaceName: json['interface-name'] as String?,
   externalController:
       $enumDecodeNullable(
@@ -441,7 +440,6 @@ Map<String, dynamic> _$ClashConfigToJson(_ClashConfig instance) =>
       'geodata-loader': _$GeodataLoaderEnumMap[instance.geodataLoader]!,
       'proxy-groups': instance.proxyGroups,
       'rule': instance.rule,
-      'global-ua': instance.globalUa,
       'interface-name': instance.interfaceName,
       'external-controller':
           _$ExternalControllerStatusEnumMap[instance.externalController]!,

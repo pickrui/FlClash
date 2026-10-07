@@ -5,14 +5,56 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/providers/config.dart';
+import 'package:fl_clash/providers/providers.dart';
+import 'package:fl_clash/views/config/config.dart';
 import 'package:fl_clash/views/config/network.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/test_app.dart';
+
 void main() {
+  for (final platform in [TargetPlatform.android, TargetPlatform.macOS]) {
+    testWidgets('idle switch is directly available only on $platform', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(420, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        TestApp(
+          overrides: [
+            backBlockActionProvider.overrideWith(TestBackBlockAction.new),
+            viewSizeProvider.overrideWithBuild((_, _) => const Size(420, 900)),
+          ],
+          locale: const Locale('zh', 'CN'),
+          textScaler: const TextScaler.linear(1.3),
+          child: ConfigView(platform: platform),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final idle = find.byType(SuspendOnIdleItem);
+      if (platform == TargetPlatform.android) {
+        expect(idle.hitTestable(), findsOneWidget);
+        final toggle = find.descendant(of: idle, matching: find.byType(Switch));
+        expect(tester.widget<Switch>(toggle).value, isFalse);
+        await tester.tap(toggle);
+        await tester.pumpAndSettle();
+        expect(
+          ProviderScope.containerOf(tester.element(idle))
+              .read(networkSettingProvider)
+              .suspendOnIdle,
+          isTrue,
+        );
+      } else {
+        expect(idle, findsNothing);
+      }
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   final titles = {
     const Locale('en'): 'Pause proxy when idle',
     const Locale('zh', 'CN'): '空闲时暂停代理',

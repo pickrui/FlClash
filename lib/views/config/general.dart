@@ -9,7 +9,6 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/widgets/ua_dialog.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -42,50 +41,6 @@ class LogLevelItem extends ConsumerWidget {
         textBuilder: (logLevel) => logLevel.name,
         value: logLevel,
       ),
-    );
-  }
-}
-
-class UaItem extends ConsumerWidget {
-  const UaItem({super.key});
-
-  Future<void> _handleShowUaDialog(WidgetRef ref) async {
-    final result = await globalState.showCommonDialog<UaDialogResult>(
-      child: UaDialog(
-        value: ref.read(patchClashConfigProvider).globalUa,
-        customValue: ref.read(appSettingProvider).customUserAgent,
-        userAgents: ref.read(appSettingProvider).userAgents,
-      ),
-    );
-    if (result == null || !ref.context.mounted) return;
-    final userAgent = result.value;
-    ref
-        .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(userAgents: result.userAgents));
-    if (result.isCustom) {
-      ref
-          .read(appSettingProvider.notifier)
-          .update((state) => state.copyWith(customUserAgent: userAgent));
-    }
-    ref
-        .read(patchClashConfigProvider.notifier)
-        .update(
-          (state) =>
-              state.copyWith(globalUa: userAgent.isEmpty ? null : userAgent),
-        );
-  }
-
-  @override
-  Widget build(BuildContext context, ref) {
-    final appLocalizations = context.appLocalizations;
-    final globalUa = ref.watch(
-      patchClashConfigProvider.select((state) => state.globalUa),
-    );
-    return ListItem(
-      leading: const GlyphIcon(AppGlyphs.devices),
-      title: Text(appLocalizations.userAgent),
-      subtitle: Text(globalUa ?? appLocalizations.defaultText),
-      onTap: () => _handleShowUaDialog(ref),
     );
   }
 }

@@ -59,9 +59,7 @@ extension StateControllerExt on AppController {
     return _ref.read(groupsProvider);
   }
 
-  String get ua => _ref.read(patchClashConfigProvider).globalUa.takeFirstValid([
-    globalState.packageInfo.ua,
-  ]);
+  String get ua => globalState.packageInfo.ua;
 
   Profile? get currentProfile {
     return _ref.read(currentProfileProvider);

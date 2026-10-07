@@ -55,21 +55,8 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     );
   }
 
-  Widget _buildNavigationMenu(List<NavigationItem> navigationItems) {
-    return Column(
-      children: [
-        for (final navigationItem in navigationItems) ...[
-          _buildNavigationMenuItem(navigationItem),
-          navigationItems.last != navigationItem
-              ? const Divider(height: 0)
-              : Container(),
-        ],
-      ],
-    );
-  }
-
-  List<Widget> _getOtherList(bool enableDeveloperMode) {
-    return generateSection(
+  Widget _getOtherList(bool enableDeveloperMode) {
+    return generateSectionV3(
       title: context.appLocalizations.other,
       items: [
         if (enableDeveloperMode) const _DeveloperItem(),
@@ -78,19 +65,29 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     );
   }
 
-  List<Widget> _getSettingList() {
-    return generateSection(
+  Widget _getSettingList() {
+    return generateSectionV3(
       title: context.appLocalizations.settings,
       items: [
+        const _ConfigItem(),
+        const _AdvancedConfigItem(),
         const _LocaleItem(),
         const _ThemeItem(),
-        const _BackupItem(),
+        if (system.isDesktop) const _HotkeyItem(),
         ListItem.open(
           leading: const GlyphIcon(AppGlyphs.resources),
           title: Text(context.appLocalizations.appProviderLibrary),
           delegate: const OpenDelegate(widget: ClashProvidersView()),
         ),
-        if (system.isDesktop) const _HotkeyItem(),
+        const _BackupItem(),
+      ],
+    );
+  }
+
+  Widget _getNetworkList() {
+    return generateSectionV3(
+      title: context.appLocalizations.network,
+      items: [
         if (system.isWindows) const _LoopbackItem(),
         if (system.isAndroid) const _AccessItem(),
         if (system.isWindows || system.isMacOS)
@@ -107,8 +104,6 @@ class _ToolViewState extends ConsumerState<ToolsView> {
             subtitle: Text(context.appLocalizations.tailscaleEntryHint),
             delegate: OpenDelegate(widget: Builder(builder: builder)),
           ),
-        const _ConfigItem(),
-        const _AdvancedConfigItem(),
       ],
     );
   }
@@ -125,18 +120,20 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         builder: (_, ref, _) {
           final state = ref.watch(moreToolsSelectorStateProvider);
           if (state.navigationItems.isEmpty) {
-            return Container();
+            return const SizedBox.shrink();
           }
-          return Column(
-            children: [
-              ListHeader(title: context.appLocalizations.more),
-              _buildNavigationMenu(state.navigationItems),
+          return generateSectionV3(
+            title: context.appLocalizations.more,
+            items: [
+              for (final item in state.navigationItems)
+                _buildNavigationMenuItem(item),
             ],
           );
         },
       ),
-      ..._getSettingList(),
-      ..._getOtherList(vm2.b),
+      _getSettingList(),
+      _getNetworkList(),
+      _getOtherList(vm2.b),
     ];
     return CommonScaffold(
       title: context.appLocalizations.tools,
@@ -144,9 +141,11 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         key: toolsStoreKey,
         itemCount: items.length,
         itemBuilder: (_, index) => items[index],
-        padding: EdgeInsets.only(
-          top: context.appBarInset,
-          bottom: 20 + BottomInsetScope.of(context),
+        padding: EdgeInsets.fromLTRB(
+          16,
+          context.contentTopPadding,
+          16,
+          20 + BottomInsetScope.of(context),
         ),
       ),
     );

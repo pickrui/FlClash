@@ -742,13 +742,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "customRuleType": MessageLookupByLibrary.simpleMessage("ルールの種類"),
     "customRuleUnavailableProvider": m12,
     "customRuleUnavailableTarget": m13,
-    "customUserAgent": MessageLookupByLibrary.simpleMessage("カスタム（手動入力）"),
-    "customUserAgentHint": MessageLookupByLibrary.simpleMessage(
-      "User-Agentの値を省略せずに入力",
-    ),
-    "customUserAgentInvalid": MessageLookupByLibrary.simpleMessage(
-      "半角英数字、スペース、標準的な記号のみ使用できます",
-    ),
     "cut": MessageLookupByLibrary.simpleMessage("切り取り"),
     "dark": MessageLookupByLibrary.simpleMessage("ダーク"),
     "dashboard": MessageLookupByLibrary.simpleMessage("ダッシュボード"),
@@ -1031,7 +1024,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "最大 16 件。有効な IPv4、CIDR または gateway:アドレスを入力",
     ),
     "excludeProxyFilter": MessageLookupByLibrary.simpleMessage("除外プロキシフィルター"),
-    "excludeSsids": MessageLookupByLibrary.simpleMessage("除外SSID"),
+    "excludeSsids": MessageLookupByLibrary.simpleMessage("プロキシを停止する Wi-Fi"),
     "excludeSsidsDesc": MessageLookupByLibrary.simpleMessage(
       "指定した Wi-Fi ではプロキシを一時停止し、アプリが開始状態の場合のみ離れると再開します",
     ),
@@ -1325,7 +1318,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "mainlandNetworkWarning": MessageLookupByLibrary.simpleMessage(
       "中国本土のネットワークには適さない可能性があります",
     ),
-    "manageUserAgents": MessageLookupByLibrary.simpleMessage("一覧を管理"),
     "matchTarget": MessageLookupByLibrary.simpleMessage("MATCH-TARGET"),
     "matchTargetDesc": MessageLookupByLibrary.simpleMessage(
       "MATCH-TARGET を対象にしたルールの行き先。既定ではこのプロファイル末尾の MATCH ルールのターゲットを使います",
@@ -1493,7 +1485,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "oixCloud": MessageLookupByLibrary.simpleMessage("oixCloud"),
     "onDemand": MessageLookupByLibrary.simpleMessage("オンデマンド"),
     "onDemandDesc": MessageLookupByLibrary.simpleMessage(
-      "特定のシナリオでのアプリの実行状態を設定します",
+      "Wi-Fi またはネットワークの条件に応じてプロキシを自動で停止・再開",
     ),
     "onlyIcon": MessageLookupByLibrary.simpleMessage("アイコンのみ"),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage("プロキシのみ統計"),
@@ -2055,6 +2047,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "ssidPermissionGuide": MessageLookupByLibrary.simpleMessage(
       "Wi-Fi 名の取得には位置情報の許可が必要です。Android では正確な位置情報を常に許可し、位置情報サービスを有効にしてください",
     ),
+    "ssidPermissionMacosGuide": MessageLookupByLibrary.simpleMessage(
+      "Wi-Fi 名を取得するには、システム設定でこのアプリの位置情報サービスを許可してください",
+    ),
     "ssidsEmpty": MessageLookupByLibrary.simpleMessage("SSIDが空です"),
     "stackMode": MessageLookupByLibrary.simpleMessage("スタックモード"),
     "standard": MessageLookupByLibrary.simpleMessage("標準"),
@@ -2344,7 +2339,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "useHosts": MessageLookupByLibrary.simpleMessage("ホストを使用"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("システムホストを使用"),
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("使用済みデータ量"),
-    "userAgent": MessageLookupByLibrary.simpleMessage("ユーザーエージェント"),
     "userCenter": MessageLookupByLibrary.simpleMessage("ユーザーセンター"),
     "userCenterFallback": MessageLookupByLibrary.simpleMessage("ユーザーセンター（予備）"),
     "value": MessageLookupByLibrary.simpleMessage("値"),

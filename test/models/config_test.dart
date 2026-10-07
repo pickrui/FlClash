@@ -62,13 +62,11 @@ void main() {
       'disabledServices': ['netflix'],
       'currentService': 'github',
       'hideIp': true,
-      'userAgents': ['Custom/1'],
       'autoRun': true,
     });
     expect(props.locale, 'ja');
     expect(props.autoRun, true);
     expect(props.hideIp, true);
-    expect(props.userAgents, ['Custom/1']);
     expect(props.dashboardWidgets, [
       DashboardWidget.networkDetection,
       DashboardWidget.runTime,
@@ -97,25 +95,22 @@ void main() {
       );
     },
   );
-  test(
-    'legacy UA migration preserves user choice and sanitizes stored headers',
-    () {
-      final old = AppSettingProps.fromJson({'customUserAgent': ' Legacy/1 '});
-      expect(old.userAgents, [...defaultUserAgents, 'Legacy/1']);
-      expect(old.showNotificationStopAction, true);
-      final explicit = AppSettingProps.fromJson({
-        'userAgents': ['B/2', 'A/1', 'B/2', 'bad\r\nheader', null],
-        'customUserAgent': 'Ignored/1',
-      });
-      expect(explicit.userAgents, ['B/2', 'A/1']);
-      expect(AppSettingProps.fromJson({'userAgents': []}).userAgents, isEmpty);
-      final disabled = old.copyWith(
-        showNotificationStopAction: false,
-        userAgents: ['Only/1'],
-      );
-      expect(roundTrip(disabled.toJson, AppSettingProps.fromJson), disabled);
-    },
-  );
+  test('retired UA preferences do not replace unrelated settings', () {
+    final props = AppSettingProps.fromJson({
+      'userAgents': ['Saved/1'],
+      'customUserAgent': 'Saved/1',
+      'locale': 'zh_CN',
+      'showNotificationStopAction': false,
+      'autoRun': true,
+    });
+    expect(props.locale, 'zh_CN');
+    expect(props.showNotificationStopAction, false);
+    expect(props.autoRun, true);
+    final saved = jsonDecode(jsonEncode(props)) as Map<String, dynamic>;
+    expect(saved, isNot(contains('userAgents')));
+    expect(saved, isNot(contains('customUserAgent')));
+    expect(AppSettingProps.fromJson(saved), props);
+  });
 
   group('AppSettingProps JSON round-trip', () {
     test(
@@ -148,7 +143,6 @@ void main() {
       expect(restored.minimizeOnExit, true);
       expect(restored.restoreStrategy, RestoreStrategy.compatible);
       expect(restored.testUrl, defaultTestUrl);
-      expect(restored.customUserAgent, '');
     });
 
     test('custom values survive round-trip', () {
@@ -158,7 +152,6 @@ void main() {
         autoLaunch: true,
         closeConnections: false,
         testUrl: 'https://custom.test',
-        customUserAgent: 'CustomUA/1.0',
       );
       final restored = roundTrip(
         () => props.toJson(),
@@ -169,7 +162,6 @@ void main() {
       expect(restored.autoLaunch, true);
       expect(restored.closeConnections, false);
       expect(restored.testUrl, 'https://custom.test');
-      expect(restored.customUserAgent, 'CustomUA/1.0');
     });
 
     test('missing test URL uses the Cloudflare default', () {

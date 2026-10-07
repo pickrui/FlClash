@@ -947,7 +947,6 @@ abstract class ClashConfig with _$ClashConfig {
     GeodataLoader geodataLoader,
     @Default([]) @JsonKey(name: 'proxy-groups') List<ProxyGroup> proxyGroups,
     @Default([]) List<String> rule,
-    @JsonKey(name: 'global-ua') String? globalUa,
     @JsonKey(name: 'interface-name') String? interfaceName,
     @Default(ExternalControllerStatus.close)
     @JsonKey(name: 'external-controller')

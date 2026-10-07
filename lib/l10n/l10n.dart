@@ -760,41 +760,6 @@ class AppLocalizations {
     );
   }
 
-  /// `User-Agent`
-  String get userAgent {
-    return Intl.message('User-Agent', name: 'userAgent', desc: '', args: []);
-  }
-
-  /// `Custom (enter manually)`
-  String get customUserAgent {
-    return Intl.message(
-      'Custom (enter manually)',
-      name: 'customUserAgent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Enter the full User-Agent value`
-  String get customUserAgentHint {
-    return Intl.message(
-      'Enter the full User-Agent value',
-      name: 'customUserAgentHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Use only English letters, numbers, spaces, and standard punctuation`
-  String get customUserAgentInvalid {
-    return Intl.message(
-      'Use only English letters, numbers, spaces, and standard punctuation',
-      name: 'customUserAgentInvalid',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Custom`
   String get custom {
     return Intl.message('Custom', name: 'custom', desc: '', args: []);
@@ -6720,10 +6685,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Exclude SSIDs`
+  /// `Wi-Fi networks that pause the proxy`
   String get excludeSsids {
     return Intl.message(
-      'Exclude SSIDs',
+      'Wi-Fi networks that pause the proxy',
       name: 'excludeSsids',
       desc: '',
       args: [],
@@ -6785,6 +6750,16 @@ class AppLocalizations {
     return Intl.message(
       'Allow location access to read Wi-Fi names. On Android, allow precise location all the time and enable system location services.',
       name: 'ssidPermissionGuide',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow this app to use Location Services in System Settings to read Wi-Fi names.`
+  String get ssidPermissionMacosGuide {
+    return Intl.message(
+      'Allow this app to use Location Services in System Settings to read Wi-Fi names.',
+      name: 'ssidPermissionMacosGuide',
       desc: '',
       args: [],
     );
@@ -9965,16 +9940,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Manage list`
-  String get manageUserAgents {
-    return Intl.message(
-      'Manage list',
-      name: 'manageUserAgents',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Hide IP`
   String get hideIp {
     return Intl.message('Hide IP', name: 'hideIp', desc: '', args: []);
@@ -11109,10 +11074,10 @@ class AppLocalizations {
     return Intl.message('On demand', name: 'onDemand', desc: '', args: []);
   }
 
-  /// `Configure the app's running state for specific scenarios`
+  /// `Automatically pause and resume the proxy based on Wi-Fi or network conditions`
   String get onDemandDesc {
     return Intl.message(
-      'Configure the app\'s running state for specific scenarios',
+      'Automatically pause and resume the proxy based on Wi-Fi or network conditions',
       name: 'onDemandDesc',
       desc: '',
       args: [],

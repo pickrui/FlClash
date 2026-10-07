@@ -269,7 +269,9 @@ class ExcludeSsidsItem extends ConsumerWidget {
 }
 
 class SsidPermissionItem extends ConsumerStatefulWidget {
-  const SsidPermissionItem({super.key});
+  const SsidPermissionItem({super.key, required this.isMacOS});
+
+  final bool isMacOS;
 
   @override
   ConsumerState<SsidPermissionItem> createState() => _SsidPermissionItemState();
@@ -293,7 +295,7 @@ class _SsidPermissionItemState extends ConsumerState<SsidPermissionItem> {
         final open = await globalState.showMessage(
           title: l10n.locationPermissionRequired,
           message: TextSpan(
-            text: system.isMacOS
+            text: widget.isMacOS
                 ? l10n.locationPermissionGuide(appName)
                 : l10n.ssidPermissionGuide,
           ),
@@ -312,7 +314,11 @@ class _SsidPermissionItemState extends ConsumerState<SsidPermissionItem> {
     final l10n = context.appLocalizations;
     return ListItem(
       title: Text(l10n.locationPermission),
-      subtitle: Text(l10n.ssidPermissionGuide),
+      subtitle: Text(
+        widget.isMacOS
+            ? l10n.ssidPermissionMacosGuide
+            : l10n.ssidPermissionGuide,
+      ),
       onTap: _requesting ? null : _request,
       trailing: _requesting
           ? const SizedBox.square(
@@ -765,13 +771,13 @@ class _OnDemandViewState extends ConsumerState<OnDemandView> {
                       title: l.prerequisites,
                       items: [
                         if (_isAndroid) const BatteryOptimizationItem(),
-                        const SsidPermissionItem(),
+                        SsidPermissionItem(isMacOS: _isMacOS),
                       ],
                     ),
                   if (_isAndroid)
                     generateSectionV3(
                       title: l.options,
-                      items: const [SuspendOnIdleItem(), ExcludeNetworksItem()],
+                      items: const [ExcludeNetworksItem()],
                     ),
                   ListHeader(
                     title: l.excludeSsids,
