@@ -20,11 +20,10 @@ import 'state.dart';
 part 'generated/profile.freezed.dart';
 part 'generated/profile.g.dart';
 
-typedef FetchManagedConfigCallback =
-    Future<(Uint8List, String?)> Function(
-      String paramString, {
-      Future<void> Function(Uint8List bytes)? validate,
-    });
+typedef FetchManagedConfigCallback = Future<(Uint8List, String?)> Function(
+  String paramString, {
+  Future<void> Function(Uint8List bytes)? validate,
+});
 FetchManagedConfigCallback? _fetchManagedConfigCallback;
 bool Function()? _canFetchManagedConfigCallback;
 
@@ -595,9 +594,8 @@ extension ProfileCustomOverwriteExt on Profile {
       }
       groups[index] = proxyGroup;
     }
-    return copyWith(
-      customProxyGroups: groups,
-    ).copyAndRenameOutboundReferences(previousName, nextName);
+    return copyWith(customProxyGroups: groups)
+        .copyAndRenameOutboundReferences(previousName, nextName);
   }
 
   Profile copyAndRenameOutboundReferences(
@@ -611,12 +609,16 @@ extension ProfileCustomOverwriteExt on Profile {
     }
     final renamedGroups = customProxyGroups.map((group) {
       final proxies = group.proxies;
-      if (proxies == null || !proxies.contains(previousName)) {
+      if ((proxies == null || !proxies.contains(previousName)) &&
+          group.emptyFallback != previousName) {
         return group;
       }
       return group.copyWith(
+        emptyFallback: group.emptyFallback == previousName
+            ? nextName
+            : group.emptyFallback,
         proxies: proxies
-            .map((name) => name == previousName ? nextName : name)
+            ?.map((name) => name == previousName ? nextName : name)
             .toList(),
       );
     }).toList();
@@ -655,7 +657,8 @@ extension ProfileCustomOverwriteExt on Profile {
   }) {
     final groupReference = customProxyGroups.any((group) {
       return group != excludingGroup &&
-          (group.proxies?.contains(name) ?? false);
+          ((group.proxies?.contains(name) ?? false) ||
+              group.emptyFallback == name);
     });
     final ruleReference = customRules.any(
       (rule) => ruleTarget(rule.value) == name,
@@ -826,6 +829,9 @@ String? findRawOutboundReference(
         final group = groups[groupIndex];
         if (group is! Map) {
           continue;
+        }
+        if (group['empty-fallback'] == name) {
+          return 'proxy-groups[$groupIndex].empty-fallback';
         }
         final members = group['proxies'];
         if (members is! List) {

@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/icons/icons.dart';
+import 'package:fl_clash/features/overwrite/rule_preset.dart';
 import 'package:fl_clash/features/features.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/database.dart';
@@ -29,6 +30,19 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
   List<Rule> _filter(List<Rule> rules) {
     final query = SearchQuery(_query);
     return rules.where((rule) => query.matches([rule.value])).toList();
+  }
+
+  Future<void> _addPresets() async {
+    final notifier = ref.read(globalRulesProvider.notifier);
+    await showOverwriteSheet<List<Rule>>(
+      context: context,
+      builder: (_) => RulePresetDialog(
+        validate: (rules) async {
+          await notifier.addPresets(rules);
+          return '';
+        },
+      ),
+    );
   }
 
   Future<void> _handleAddOrUpdate([Rule? rule]) async {
@@ -102,6 +116,12 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
 
         title: appLocalizations.addedRules,
         actions: [
+          if (selectedRules.isEmpty)
+            IconButton(
+              tooltip: appLocalizations.quickAdd,
+              onPressed: _addPresets,
+              icon: const GlyphIcon(AppGlyphs.listAdd),
+            ),
           if (selectedRules.isNotEmpty) ...[
             CommonMinIconButtonTheme(
               child: IconButton.filledTonal(

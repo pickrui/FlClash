@@ -244,6 +244,7 @@ abstract class ProxyGroup with _$ProxyGroup {
     String? filter,
     @JsonKey(name: 'exclude-filter') String? excludeFilter,
     @JsonKey(name: 'exclude-type') String? excludeType,
+    @JsonKey(name: 'empty-fallback') String? emptyFallback,
     @JsonKey(name: 'expected-status') dynamic expectedStatus,
     @JsonKey(name: 'include-all', fromJson: _parseBool) bool? includeAll,
     @JsonKey(name: 'include-all-proxies', fromJson: _parseBool)

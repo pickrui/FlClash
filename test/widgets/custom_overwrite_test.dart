@@ -52,6 +52,7 @@ void main() {
       includeAllProviders: true,
       excludeFilter: 'Blocked',
       strategy: 'future-strategy',
+      emptyFallback: 'REJECT',
       icon: 'https://example.com/icon.png',
       proxies: ['Node,A', 'Node B', 'Node B', ' Node C '],
     );
@@ -93,6 +94,7 @@ void main() {
     expect(result?.includeAllProviders, true);
     expect(result?.excludeFilter, 'Blocked');
     expect(result?.strategy, 'future-strategy');
+    expect(result?.emptyFallback, 'REJECT');
     expect(result?.icon, 'https://example.com/icon.png');
     expect(result?.lazy, true);
     expect(result?.proxies, ['Node,A', 'Node B', 'Node B', ' Node C ']);

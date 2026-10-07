@@ -10,6 +10,21 @@ import 'package:fl_clash/models/models.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('empty fallback survives JSON persistence', () {
+    final source = {
+      'name': 'Group',
+      'type': 'select',
+      'empty-fallback': 'REJECT',
+      'include-all': true,
+    };
+    final group = ProxyGroup.fromJson(source);
+    final restored = ProxyGroup.fromJson(
+      jsonDecode(jsonEncode(group)) as Map<String, dynamic>,
+    );
+    expect(restored, group);
+    expect(restored.emptyFallback, 'REJECT');
+  });
+
   group('TUN stack configuration', () {
     test('keeps mixed as the default for existing configurations', () {
       expect(const Tun().stack, TunStack.mixed);

@@ -2063,7 +2063,14 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "providerRemote": MessageLookupByLibrary.simpleMessage("Удалённый URL"),
     "providerRenameShadowed": m62,
+    "providerSourceApp": MessageLookupByLibrary.simpleMessage(
+      "Библиотека приложения",
+    ),
+    "providerSourceProfile": MessageLookupByLibrary.simpleMessage("Профиль"),
     "providerSourceReference": m63,
+    "providerSourceSubscription": MessageLookupByLibrary.simpleMessage(
+      "Подписка",
+    ),
     "providerSourceUnavailable": m64,
     "providerUrlTip": MessageLookupByLibrary.simpleMessage(
       "Введите HTTP/HTTPS URL без встроенных учётных данных",

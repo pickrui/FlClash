@@ -11433,6 +11433,36 @@ class AppLocalizations {
   String get proxyType {
     return Intl.message('Proxy type', name: 'proxyType', desc: '', args: []);
   }
+
+  /// `Subscription`
+  String get providerSourceSubscription {
+    return Intl.message(
+      'Subscription',
+      name: 'providerSourceSubscription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Profile`
+  String get providerSourceProfile {
+    return Intl.message(
+      'Profile',
+      name: 'providerSourceProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `App library`
+  String get providerSourceApp {
+    return Intl.message(
+      'App library',
+      name: 'providerSourceApp',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

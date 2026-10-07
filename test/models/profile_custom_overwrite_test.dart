@@ -8,6 +8,37 @@ import 'package:fl_clash/models/models.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('empty fallback participates in rename and deletion protection', () {
+    const profile = Profile(
+      id: 1,
+      autoUpdateDuration: Duration.zero,
+      customProxyGroups: [
+        ProxyGroup(
+          name: 'Group',
+          type: GroupType.Selector,
+          emptyFallback: 'Node',
+        ),
+      ],
+    );
+    expect(profile.hasCustomOutboundReferences('Node'), true);
+    expect(
+      profile
+          .copyAndRenameOutboundReferences('Node', 'Renamed')
+          .customProxyGroups
+          .single
+          .emptyFallback,
+      'Renamed',
+    );
+    expect(
+      findRawOutboundReference({
+        'proxy-groups': [
+          {'name': 'Group', 'empty-fallback': 'Node'},
+        ],
+      }, 'Node'),
+      'proxy-groups[0].empty-fallback',
+    );
+  });
+
   test(
     'managed profile skips fetch when account has no config access',
     () async {

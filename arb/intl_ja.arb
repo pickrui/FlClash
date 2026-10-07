@@ -1347,5 +1347,8 @@
   "helperCorruptTip": "Helper サービスが利用できないため、TUN モードを有効にできません。FlClash を再インストールしてください。",
   "changeProxyFailedTip": "プロキシの切り替えに失敗したため、前回の選択に戻しました",
   "databaseWriteFailedTip": "変更を保存できませんでした。現在の値を確認して再試行してください",
-  "proxyType": "ノードの種類"
+  "proxyType": "ノードの種類",
+  "providerSourceSubscription": "サブスクリプション",
+  "providerSourceProfile": "プロファイル",
+  "providerSourceApp": "アプリライブラリ"
 }

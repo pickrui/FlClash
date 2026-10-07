@@ -1347,5 +1347,8 @@
   "helperCorruptTip": "Helper 服务不可用，无法启用 TUN 模式，请重新安装 FlClash",
   "changeProxyFailedTip": "切换代理失败，已恢复上一次的选择",
   "databaseWriteFailedTip": "保存更改失败，请检查当前值后重试",
-  "proxyType": "节点类型"
+  "proxyType": "节点类型",
+  "providerSourceSubscription": "订阅",
+  "providerSourceProfile": "配置文件",
+  "providerSourceApp": "应用资源库"
 }

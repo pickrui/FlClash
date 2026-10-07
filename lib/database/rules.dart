@@ -211,6 +211,24 @@ class RulesDao extends DatabaseAccessor<Database> with _$RulesDaoMixin {
     return _put(rule, profileId: profileId, scene: RuleScene.added);
   }
 
+  Future<void> addPresets(Iterable<Rule> presets, {int? profileId}) =>
+      transaction(() async {
+        final existing =
+            await (profileId == null
+                    ? allGlobalAddedRules()
+                    : allProfileAddedRules(profileId))
+                .get();
+        final values = existing.map((rule) => rule.value).toSet();
+        final added = presets.where((rule) => values.add(rule.value)).toList();
+        for (final rule in added.reversed) {
+          await _put(
+            rule,
+            profileId: profileId,
+            scene: profileId == null ? null : RuleScene.added,
+          );
+        }
+      });
+
   Future<int> putDisabledLink(int profileId, int ruleId) async {
     return profileRuleLinks.insertOnConflictUpdate(
       ProfileRuleLink(

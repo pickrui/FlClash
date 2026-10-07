@@ -5,6 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:convert';
 
+import 'package:path/path.dart' as path;
+
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
@@ -36,6 +38,43 @@ List<String> customRoutingTargets(
     ...names('proxies'),
     ...tailscaleRoutingTargets(tailscaleNetworks),
   }.toList();
+}
+
+Map<String, String> routingGroupTypes(
+  Profile profile,
+  Map<String, dynamic> raw,
+) => {
+  if (profile.overwriteType != OverwriteType.custom &&
+      raw['proxy-groups'] is List)
+    for (final group in (raw['proxy-groups'] as List).whereType<Map>())
+      if (group['name'] is String)
+        group['name'] as String: group['type']?.toString() ?? '',
+  for (final group in profile.customProxyGroups) group.name: group.type.name,
+};
+
+Map<String, String> routingProviderSources(
+  Profile profile,
+  Map<String, dynamic> raw,
+  String profilesPath,
+) {
+  final providers = raw['proxy-providers'];
+  if (providers is! Map) return const {};
+  final libraryPath = path.join(profilesPath, 'providers', 'app', 'proxy');
+  return {
+    for (final entry in providers.entries)
+      if (entry.key is String)
+        entry.key as String:
+            entry.value is Map &&
+                (entry.value as Map)['path'] is String &&
+                path.isWithin(
+                  libraryPath,
+                  (entry.value as Map)['path'] as String,
+                )
+            ? appLocalizations.providerSourceApp
+            : profile.url.isNotEmpty
+            ? appLocalizations.providerSourceSubscription
+            : appLocalizations.providerSourceProfile,
+  };
 }
 
 /// Build and check the complete candidate without persisting or applying it.

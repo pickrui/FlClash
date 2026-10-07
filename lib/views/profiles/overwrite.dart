@@ -7,10 +7,13 @@
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/icons/icons.dart';
+import 'package:fl_clash/features/overwrite/rule_preset.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/overwrite/proxy_chain.dart';
 import 'package:fl_clash/features/overwrite/rule.dart';
 import 'package:fl_clash/features/overwrite/routing_draft.dart';
+import 'package:fl_clash/features/overwrite/routing_target_picker.dart';
+import 'package:fl_clash/providers/routing_issues.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/database.dart';
@@ -389,36 +392,27 @@ class __StandardContentState extends ConsumerState<_StandardContent> {
     final raw = await commonAction.safeRun(
       () => setupAction.getRawProfileConfig(widget.profileId),
     );
-    if (!mounted) return;
-    final names = <String>{
-      '',
-      ...customRoutingTargets(
-        profile,
-        raw ?? {},
-        tailscaleNetworks: ref.read(tailscaleNetworksProvider),
-      ),
-      if (profile.matchTarget != null) profile.matchTarget!,
-    }.toList();
-    final selected = await globalState.showCommonDialog<String>(
-      child: CommonDialog(
+    if (!mounted || raw == null) return;
+    final names = customRoutingTargets(
+      profile,
+      raw,
+      tailscaleNetworks: ref.read(tailscaleNetworksProvider),
+    );
+    final selected = await showOverwriteSheet<String>(
+      context: context,
+      builder: (_) => RoutingTargetPicker(
         title: appLocalizations.matchTargetTitle,
-        overrideScroll: true,
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: names.length,
-          itemBuilder: (context, index) => ListTile(
-            selected: names[index] == (profile.matchTarget ?? ''),
-            title: Text(
-              names[index].isEmpty
-                  ? appLocalizations.followProfile
-                  : names[index],
-            ),
-            onTap: () => Navigator.of(context).pop(names[index]),
-          ),
-        ),
+        options: names,
+        value: profile.matchTarget,
+        allowFollow: true,
+        groupNames: routingGroupTypes(profile, raw).keys.toSet(),
       ),
     );
     if (selected == null || !mounted) return;
+    if (ref.read(profileProvider(widget.profileId)) != profile) {
+      context.showNotifier(appLocalizations.routingChanged);
+      return;
+    }
     ref
         .read(profilesProvider.notifier)
         .updateProfile(
@@ -426,6 +420,21 @@ class __StandardContentState extends ConsumerState<_StandardContent> {
           (profile) =>
               profile.copyWith(matchTarget: selected.isEmpty ? null : selected),
         );
+  }
+
+  Future<void> _addPresets() async {
+    final notifier = ref.read(
+      profileAddedRulesProvider(widget.profileId).notifier,
+    );
+    await showOverwriteSheet<List<Rule>>(
+      context: context,
+      builder: (_) => RulePresetDialog(
+        validate: (rules) async {
+          await notifier.addPresets(rules);
+          return '';
+        },
+      ),
+    );
   }
 
   Future<void> _handleAddOrUpdate([Rule? rule]) async {
@@ -485,6 +494,21 @@ class __StandardContentState extends ConsumerState<_StandardContent> {
     final addedRules =
         ref.watch(profileAddedRulesProvider(widget.profileId)).value ?? [];
     final selectedRules = ref.watch(selectedItemsProvider(_key));
+    final profile = ref.watch(profileProvider(widget.profileId));
+    final source = ref.watch(routingSourceProvider(widget.profileId));
+    final raw = source.isLoading || source.hasError
+        ? null
+        : source.asData?.value;
+    final target = profile?.matchTarget;
+    final invalidTarget =
+        profile != null &&
+        raw != null &&
+        target != null &&
+        !customRoutingTargets(
+          profile,
+          raw,
+          tailscaleNetworks: ref.watch(tailscaleNetworksProvider),
+        ).contains(target);
     return CommonPopScope(
       onPop: (_) {
         if (selectedRules.isNotEmpty) {
@@ -501,8 +525,12 @@ class __StandardContentState extends ConsumerState<_StandardContent> {
               leading: const GlyphIcon(AppGlyphs.split),
               title: Text(appLocalizations.matchTargetTitle),
               subtitle: Text(
-                ref.watch(profileProvider(widget.profileId))?.matchTarget ??
-                    appLocalizations.followProfile,
+                invalidTarget
+                    ? '$target\n${appLocalizations.outboundUnavailable}'
+                    : target ?? appLocalizations.followProfile,
+                style: invalidTarget
+                    ? TextStyle(color: context.colorScheme.error)
+                    : null,
               ),
               trailing: const GlyphIcon(AppGlyphs.chevronForward),
               onTap: _selectMatchTarget,
@@ -515,6 +543,12 @@ class __StandardContentState extends ConsumerState<_StandardContent> {
                 InfoHeader(
                   info: Info(label: appLocalizations.addedRules),
                   actions: [
+                    if (selectedRules.isEmpty)
+                      IconButton(
+                        tooltip: appLocalizations.quickAdd,
+                        onPressed: _addPresets,
+                        icon: const GlyphIcon(AppGlyphs.listAdd),
+                      ),
                     if (selectedRules.isNotEmpty) ...[
                       CommonMinIconButtonTheme(
                         child: IconButton.filledTonal(

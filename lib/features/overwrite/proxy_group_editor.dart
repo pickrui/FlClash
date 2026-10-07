@@ -48,6 +48,8 @@ class ProxyGroupDialog extends StatefulWidget {
   final Set<String> reservedNames;
   final List<String> availableMembers;
   final List<String> availableProviders;
+  final Map<String, String> groupTypes;
+  final Map<String, String> providerSources;
   final Future<String> Function(ProxyGroup)? validate;
 
   const ProxyGroupDialog({
@@ -57,6 +59,8 @@ class ProxyGroupDialog extends StatefulWidget {
     this.reservedNames = const {},
     this.availableMembers = const [],
     this.availableProviders = const [],
+    this.groupTypes = const {},
+    this.providerSources = const {},
     this.validate,
   });
 
@@ -290,9 +294,13 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
             : available,
         selected: _parseList(controller.text) ?? [],
         providers: controller == _providersController,
+        sourceLabels: controller == _providersController
+            ? widget.providerSources
+            : const {},
         groupTypes: controller == _providersController
             ? const {}
             : {
+                ...widget.groupTypes,
                 for (final group in widget.existingGroups)
                   group.name: customProxyGroupTypeLabel(group.type),
               },
@@ -359,6 +367,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
       TextInputType? keyboardType,
       int maxLength = TextInputLimits.filter,
       String? Function(String? value)? validator,
+      String? unit,
     }) {
       return TextFormField(
         enabled: !_saving,
@@ -370,6 +379,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
         inputFormatters: TextInputLimits.limit(maxLength),
         decoration: InputDecoration(
           labelText: label,
+          suffixText: unit,
           border: const OutlineInputBorder(),
         ),
         validator: validator,
@@ -669,6 +679,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
                       textField(
                         controller: _intervalController,
                         label: appLocalizations.interval,
+                        unit: 's',
                         keyboardType: TextInputType.number,
                         maxLength: TextInputLimits.interval,
                         validator: positiveIntValidator,
@@ -678,6 +689,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
                         textField(
                           controller: _toleranceController,
                           label: appLocalizations.tolerance,
+                          unit: 'ms',
                           keyboardType: TextInputType.number,
                           maxLength: TextInputLimits.interval,
                           validator: toleranceValidator,
@@ -687,6 +699,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
                       textField(
                         controller: _timeoutController,
                         label: appLocalizations.timeout,
+                        unit: 'ms',
                         keyboardType: TextInputType.number,
                         maxLength: TextInputLimits.interval,
                         validator: positiveIntValidator,

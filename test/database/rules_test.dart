@@ -28,6 +28,56 @@ void main() {
     await database.close();
   });
 
+  for (final profileId in [null, 1]) {
+    test(
+      'presets preserve selection order and deduplicate for $profileId',
+      () async {
+        Future<List<Rule>> read() =>
+            (profileId == null
+                    ? database.rulesDao.allGlobalAddedRules()
+                    : database.rulesDao.allProfileAddedRules(profileId))
+                .get();
+        const existing = Rule(id: 9, value: 'DOMAIN,old.example,DIRECT');
+        await database.rulesDao.addPresets([existing], profileId: profileId);
+        const presets = [
+          Rule(id: 1, value: 'DOMAIN,first.example,DIRECT'),
+          Rule(id: 2, value: 'DOMAIN,second.example,DIRECT'),
+        ];
+        await database.rulesDao.addPresets([
+          ...presets,
+          existing,
+          presets.first,
+        ], profileId: profileId);
+        expect(
+          (await read()).map((rule) => rule.value),
+          [...presets, existing].map((rule) => rule.value),
+        );
+        await database.rulesDao.addPresets(
+          presets.map((rule) => rule.copyWith(id: rule.id + 10)),
+          profileId: profileId,
+        );
+        expect(await read(), hasLength(3));
+      },
+    );
+    test(
+      'a failed preset batch rolls back every insert for $profileId',
+      () async {
+        await database.customStatement(
+          "CREATE TRIGGER reject_test_rule BEFORE INSERT ON rules WHEN NEW.value = 'MATCH,REJECT' BEGIN SELECT RAISE(ABORT, 'test failure'); END",
+        );
+        await expectLater(
+          database.rulesDao.addPresets(const [
+            Rule(id: 1, value: 'MATCH,REJECT'),
+            Rule(id: 2, value: 'DOMAIN,first.example,DIRECT'),
+          ], profileId: profileId),
+          throwsA(isA<Exception>()),
+        );
+        expect(await database.select(database.rules).get(), isEmpty);
+        expect(await database.select(database.profileRuleLinks).get(), isEmpty);
+      },
+    );
+  }
+
   test('a rule target reports its profile, a global rule first', () async {
     expect(await database.rulesDao.findRuleTarget('Home'), isNull);
     await database.rulesDao.putProfileAddedRule(

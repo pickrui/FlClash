@@ -12,6 +12,7 @@ import 'package:fl_clash/models/clash_config.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'overwrite_sheet.dart';
+import 'routing_target_picker.dart';
 
 import 'package:collection/collection.dart';
 
@@ -23,6 +24,7 @@ class CustomRuleEditorDialog extends StatefulWidget {
   final List<String> targets;
   final List<String> ruleProviders;
   final List<String> subRules;
+  final Set<String> groupNames;
   final Future<String> Function(Rule)? validate;
 
   const CustomRuleEditorDialog({
@@ -31,6 +33,7 @@ class CustomRuleEditorDialog extends StatefulWidget {
     required this.targets,
     this.ruleProviders = const [],
     this.subRules = const [],
+    this.groupNames = const {},
     this.validate,
   });
 
@@ -436,10 +439,15 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
     required String title,
     required List<String> options,
     String? value,
+    bool grouped = false,
   }) => showOverwriteSheet<String>(
     context: context,
-    builder: (_) =>
-        _RuleOptionDialog(title: title, options: options, value: value),
+    builder: (_) => RoutingTargetPicker(
+      title: title,
+      options: options,
+      value: value,
+      groupNames: grouped ? widget.groupNames : null,
+    ),
   );
 
   Widget _selectionField({
@@ -451,6 +459,7 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
     required String? Function(String?) validator,
     required ValueChanged<String> onChanged,
     String? helperText,
+    bool grouped = false,
   }) => FormField<String>(
     key: key,
     initialValue: value,
@@ -467,6 +476,7 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
                   title: label,
                   options: options,
                   value: value,
+                  grouped: grouped,
                 );
                 if (selected != null && mounted) {
                   setState(() {
@@ -639,6 +649,7 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
               const SizedBox(height: 20),
               _selectionField(
                 key: const Key('custom-rule-target'),
+                grouped: _action != RuleAction.SUB_RULE,
                 label: _action == RuleAction.SUB_RULE
                     ? l10n.subRule
                     : l10n.ruleTarget,
@@ -703,84 +714,6 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
                 ),
               ),
             ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _RuleOptionDialog extends StatefulWidget {
-  final String title;
-  final List<String> options;
-  final String? value;
-
-  const _RuleOptionDialog({
-    required this.title,
-    required this.options,
-    this.value,
-  });
-
-  @override
-  State<_RuleOptionDialog> createState() => _RuleOptionDialogState();
-}
-
-class _RuleOptionDialogState extends State<_RuleOptionDialog> {
-  String _query = '';
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.appLocalizations;
-    final options = widget.options
-        .toSet()
-        .where(
-          (item) => item.toLowerCase().contains(_query.trim().toLowerCase()),
-        )
-        .toList();
-    return OverwriteEditorForm(
-      maxWidth: 480,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      title: widget.title,
-      overrideScroll: true,
-      actions: [
-        TextButton(
-          onPressed: () => context.safeNestedPop(),
-          child: Text(l10n.cancel),
-        ),
-      ],
-      child: SizedBox(
-        height: 360,
-        child: Column(
-          children: [
-            TextField(
-              key: const Key('custom-rule-option-search'),
-              autofocus: true,
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                labelText: l10n.search,
-                prefixIcon: const GlyphIcon(AppGlyphs.search),
-              ),
-              onChanged: (value) => setState(() => _query = value),
-            ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: options.isEmpty
-                  ? Center(child: Text(l10n.noData))
-                  : ListView.builder(
-                      itemCount: options.length,
-                      itemBuilder: (context, index) {
-                        final option = options[index];
-                        return ListTile(
-                          title: Text(option),
-                          selected: option == widget.value,
-                          trailing: option == widget.value
-                              ? const GlyphIcon(AppGlyphs.check)
-                              : null,
-                          onTap: () => context.safeNestedPop(option),
-                        );
-                      },
-                    ),
-            ),
           ],
         ),
       ),

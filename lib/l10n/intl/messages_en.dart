@@ -1964,7 +1964,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "providerRemote": MessageLookupByLibrary.simpleMessage("Remote URL"),
     "providerRenameShadowed": m62,
+    "providerSourceApp": MessageLookupByLibrary.simpleMessage("App library"),
+    "providerSourceProfile": MessageLookupByLibrary.simpleMessage("Profile"),
     "providerSourceReference": m63,
+    "providerSourceSubscription": MessageLookupByLibrary.simpleMessage(
+      "Subscription",
+    ),
     "providerSourceUnavailable": m64,
     "providerUrlTip": MessageLookupByLibrary.simpleMessage(
       "Enter an HTTP or HTTPS URL without embedded credentials",

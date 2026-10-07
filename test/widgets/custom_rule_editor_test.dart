@@ -542,7 +542,16 @@ Future<void> _chooseTarget(
     await tester.pumpAndSettle();
     expect(find.text('DIRECT'), findsNothing);
   }
-  await tester.tap(find.widgetWithText(ListTile, name));
+  final option = find.widgetWithText(ListTile, name);
+  if (option.evaluate().isEmpty) {
+    await tester.dragUntilVisible(
+      option,
+      find.byType(Scrollable).last,
+      const Offset(0, -160),
+    );
+  }
+  await tester.ensureVisible(option);
+  await tester.tap(option);
   await tester.pumpAndSettle();
 }
 

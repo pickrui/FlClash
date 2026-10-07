@@ -27,6 +27,7 @@ class ProxyMemberPicker extends StatefulWidget {
     required this.selected,
     this.groupTypes = const {},
     this.providers = false,
+    this.sourceLabels = const {},
   });
 
   final String title;
@@ -34,6 +35,7 @@ class ProxyMemberPicker extends StatefulWidget {
   final List<String> selected;
   final Map<String, String> groupTypes;
   final bool providers;
+  final Map<String, String> sourceLabels;
 
   @override
   State<ProxyMemberPicker> createState() => _ProxyMemberPickerState();
@@ -56,6 +58,7 @@ class _ProxyMemberPickerState extends State<ProxyMemberPicker> {
             .toList(),
         groupTypes: widget.groupTypes,
         providers: widget.providers,
+        sourceLabels: widget.sourceLabels,
       ),
     );
     if (added == null || !mounted) return;
@@ -153,9 +156,14 @@ class _ProxyMemberPickerState extends State<ProxyMemberPicker> {
                       ),
                       subtitle: !available.contains(name)
                           ? Text(l.outboundUnavailable)
-                          : widget.groupTypes[name] == null
+                          : (widget.sourceLabels[name] ??
+                                    widget.groupTypes[name]) ==
+                                null
                           ? null
-                          : Text(widget.groupTypes[name]!),
+                          : Text(
+                              (widget.sourceLabels[name] ??
+                                  widget.groupTypes[name])!,
+                            ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -200,11 +208,13 @@ class _MemberAddPicker extends StatefulWidget {
     required this.available,
     required this.groupTypes,
     required this.providers,
+    required this.sourceLabels,
   });
   final String title;
   final List<String> available;
   final Map<String, String> groupTypes;
   final bool providers;
+  final Map<String, String> sourceLabels;
 
   @override
   State<_MemberAddPicker> createState() => _MemberAddPickerState();
@@ -223,7 +233,11 @@ class _MemberAddPickerState extends State<_MemberAddPicker> {
         .where(
           (name) =>
               !_hidden.contains(name) &&
-              query.matches([name, widget.groupTypes[name] ?? '']),
+              query.matches([
+                name,
+                widget.groupTypes[name] ?? '',
+                widget.sourceLabels[name] ?? '',
+              ]),
         )
         .toList();
     final sections = widget.providers
@@ -316,9 +330,15 @@ class _MemberAddPickerState extends State<_MemberAddPicker> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        subtitle: widget.groupTypes[name] == null
+                        subtitle:
+                            (widget.sourceLabels[name] ??
+                                    widget.groupTypes[name]) ==
+                                null
                             ? null
-                            : Text(widget.groupTypes[name]!),
+                            : Text(
+                                (widget.sourceLabels[name] ??
+                                    widget.groupTypes[name])!,
+                              ),
                         trailing: IconButton(
                           tooltip: l.add,
                           icon: const GlyphIcon(AppGlyphs.add),

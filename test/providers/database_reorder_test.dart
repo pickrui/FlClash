@@ -72,6 +72,22 @@ void main() {
     _expectDescendingKeys(rules);
   });
 
+  test(
+    'preset insertion keeps optimistic order and skips duplicates',
+    () async {
+      final notifier = await _globalRules();
+      final presets = [
+        const Rule(id: 6, value: 'DOMAIN,new.example,DIRECT'),
+        const Rule(id: 7, value: 'DOMAIN,next.example,DIRECT'),
+      ];
+      unawaited(
+        notifier.addPresets([...presets, notifier.value.first, presets.first]),
+      );
+      expect(notifier.value.map((rule) => rule.id), [6, 7, 5, 4, 3, 2, 1]);
+      _expectDescendingKeys(notifier.value);
+    },
+  );
+
   test('an edited rule keeps its key', () async {
     final notifier = await _globalRules();
 

@@ -246,7 +246,7 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
         _ => _contentController.text.trim(),
       },
       ruleTarget: _ruleTargetController.text.trim(),
-      noResolve: _noResolve,
+      noResolve: _noResolve || _src,
       src: _src,
     );
     final rule = widget.rule != null
@@ -380,7 +380,7 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
                         ),
                         CommonCard(
                           radius: 8,
-                          isSelected: _noResolve,
+                          isSelected: _noResolve || _src,
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
@@ -393,7 +393,7 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
                           ),
                           onPressed: () {
                             setState(() {
-                              _noResolve = !_noResolve;
+                              if (!_src) _noResolve = !_noResolve;
                             });
                           },
                         ),

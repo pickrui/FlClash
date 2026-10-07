@@ -1347,5 +1347,8 @@
   "helperCorruptTip": "Служба Helper недоступна, поэтому TUN-режим включить нельзя. Переустановите FlClash.",
   "changeProxyFailedTip": "Не удалось переключить прокси; восстановлен предыдущий выбор",
   "databaseWriteFailedTip": "Не удалось сохранить изменение. Проверьте текущее значение и повторите попытку.",
-  "proxyType": "Тип прокси"
+  "proxyType": "Тип прокси",
+  "providerSourceSubscription": "Подписка",
+  "providerSourceProfile": "Профиль",
+  "providerSourceApp": "Библиотека приложения"
 }

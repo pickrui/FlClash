@@ -1442,7 +1442,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "providerRemote": MessageLookupByLibrary.simpleMessage("远程地址"),
     "providerRenameShadowed": m62,
+    "providerSourceApp": MessageLookupByLibrary.simpleMessage("应用资源库"),
+    "providerSourceProfile": MessageLookupByLibrary.simpleMessage("配置文件"),
     "providerSourceReference": m63,
+    "providerSourceSubscription": MessageLookupByLibrary.simpleMessage("订阅"),
     "providerSourceUnavailable": m64,
     "providerUrlTip": MessageLookupByLibrary.simpleMessage(
       "请输入不含内嵌账号密码的 HTTP 或 HTTPS 地址",

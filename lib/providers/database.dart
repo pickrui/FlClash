@@ -299,6 +299,18 @@ class Scripts extends _$Scripts with AsyncNotifierMixin {
 }
 
 extension on List<Rule> {
+  List<Rule> keyedForPrepend(Iterable<Rule> rules) {
+    final values = map((rule) => rule.value).toSet();
+    final unique = rules.where((rule) => values.add(rule.value)).toList();
+    final added = <Rule>[];
+    var top = map((rule) => rule.order).nonNulls.maxOrNull;
+    for (final rule in unique.reversed) {
+      top = indexing.generateKeyBetween(top, null);
+      added.add(rule.copyWith(order: top));
+    }
+    return added.reversed.toList();
+  }
+
   Rule keyedForPut(Rule rule) {
     final existing = firstWhereOrNull((item) => item.id == rule.id);
     if (existing != null) return rule.copyWith(order: existing.order);
@@ -330,6 +342,17 @@ class GlobalRules extends _$GlobalRules with AsyncNotifierMixin {
     queueDatabaseWrite(
       () => database.rulesDao.delRules(ruleIds),
       onError: () => reloadProviderAfterDatabaseError(ref),
+    );
+  }
+
+  Future<void> addPresets(Iterable<Rule> rules) {
+    final added = value.keyedForPrepend(rules);
+    if (added.isEmpty) return Future.value();
+    value = [...added, ...value];
+    return queueDatabaseWrite(
+      () => database.rulesDao.addPresets(added),
+      onError: () => reloadProviderAfterDatabaseError(ref),
+      reportOnWait: false,
     );
   }
 
@@ -374,6 +397,17 @@ class ProfileAddedRules extends _$ProfileAddedRules with AsyncNotifierMixin {
     AsyncValue<List<Rule>> next,
   ) {
     return !ruleListEquality.equals(previous.value, next.value);
+  }
+
+  Future<void> addPresets(Iterable<Rule> rules) {
+    final added = value.keyedForPrepend(rules);
+    if (added.isEmpty) return Future.value();
+    value = [...added, ...value];
+    return queueDatabaseWrite(
+      () => database.rulesDao.addPresets(added, profileId: profileId),
+      onError: () => reloadProviderAfterDatabaseError(ref),
+      reportOnWait: false,
+    );
   }
 
   void put(Rule rule) {

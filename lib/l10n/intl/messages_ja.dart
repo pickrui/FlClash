@@ -1643,7 +1643,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "providerRemote": MessageLookupByLibrary.simpleMessage("リモート URL"),
     "providerRenameShadowed": m62,
+    "providerSourceApp": MessageLookupByLibrary.simpleMessage("アプリライブラリ"),
+    "providerSourceProfile": MessageLookupByLibrary.simpleMessage("プロファイル"),
     "providerSourceReference": m63,
+    "providerSourceSubscription": MessageLookupByLibrary.simpleMessage(
+      "サブスクリプション",
+    ),
     "providerSourceUnavailable": m64,
     "providerUrlTip": MessageLookupByLibrary.simpleMessage(
       "認証情報を含まない HTTP または HTTPS URL を入力してください",

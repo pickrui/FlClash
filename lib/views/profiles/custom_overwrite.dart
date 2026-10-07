@@ -292,6 +292,8 @@ class CustomProxyGroupsView extends ConsumerStatefulWidget {
 class _CustomProxyGroupsViewState extends ConsumerState<CustomProxyGroupsView> {
   int get profileId => widget.profileId;
   String _query = '';
+  final Set<ProxyGroup> _selected = {};
+  bool _deleting = false;
 
   void _update(WidgetRef ref, List<ProxyGroup> groups) {
     ref.read(profilesProvider.notifier).updateProfile(profileId, (profile) {
@@ -310,12 +312,18 @@ class _CustomProxyGroupsViewState extends ConsumerState<CustomProxyGroupsView> {
     if (profile == null) return;
     final groups = profile.customProxyGroups;
     Map<String, dynamic> rawConfig;
+    Map<String, String> providerSources;
     final reservedNames = <String>{
       ...reservedOutboundNames,
       ...profile.profileProxies.map((item) => item.name),
     };
     try {
       rawConfig = await setupAction.getRoutingProfileConfig(profileId);
+      providerSources = routingProviderSources(
+        profile,
+        rawConfig,
+        await appPath.profilesPath,
+      );
       if (profile.overwriteType != OverwriteType.custom) {
         reservedNames.addAll(rawProxyGroupNames(rawConfig));
       }
@@ -346,6 +354,8 @@ class _CustomProxyGroupsViewState extends ConsumerState<CustomProxyGroupsView> {
       builder: (_) => ProxyGroupDialog(
         group: group,
         existingGroups: groups,
+        groupTypes: routingGroupTypes(profile, rawConfig),
+        providerSources: providerSources,
         reservedNames: reservedNames,
         availableMembers: customRoutingTargets(
           profile,
@@ -446,80 +456,83 @@ class _CustomProxyGroupsViewState extends ConsumerState<CustomProxyGroupsView> {
     });
   }
 
-  Future<void> _delete(
-    BuildContext context,
-    WidgetRef ref,
-    ProxyGroup group,
-  ) async {
-    final setupAction = context.setupAction;
-
+  Future<void> _delete(List<ProxyGroup> groups) async {
+    if (_deleting || groups.isEmpty) return;
     final profile = ref.read(profileProvider(profileId));
-    if (profile == null) {
+    if (profile == null || !groups.every(profile.customProxyGroups.contains)) {
       return;
     }
-    if (profile.hasCustomOutboundReferences(
-      group.name,
-      excludingGroup: group,
-    )) {
-      context.showNotifier(appLocalizations.customOutboundInUse(group.name));
-      return;
-    }
-    try {
-      final rawReference = await setupAction.findRawProfileOutboundReference(
-        profileId,
-        group.name,
-        includeTopLevelRules: profile.overwriteType != OverwriteType.custom,
-        includeProxyGroups: profile.overwriteType != OverwriteType.custom,
-      );
-      if (rawReference != null) {
-        if (context.mounted) {
-          context.showNotifier(
-            appLocalizations.rawOutboundInUse(group.name, rawReference),
-          );
-        }
+    final remaining = profile.copyWith(
+      customProxyGroups: profile.customProxyGroups
+          .where((item) => !groups.contains(item))
+          .toList(),
+    );
+    for (final group in groups) {
+      if (remaining.hasCustomOutboundReferences(group.name)) {
+        context.showNotifier(appLocalizations.customOutboundInUse(group.name));
         return;
       }
-    } catch (error) {
-      if (context.mounted) {
-        context.showNotifier(error.toString());
+    }
+    final setupAction = context.setupAction;
+    setState(() => _deleting = true);
+    try {
+      final setup = await ref.read(setupStateProvider(profileId).future);
+      final raw = await setupAction.getRoutingProfileConfig(profileId);
+      if (!mounted) return;
+      if (ref.read(profileProvider(profileId)) != profile) {
+        context.showNotifier(appLocalizations.routingChanged);
+        return;
       }
-      return;
+      for (final group in groups) {
+        if (profile.overwriteType == OverwriteType.merge &&
+            setup.addedRules.any(
+              (rule) => ruleTarget(rule.value) == group.name,
+            )) {
+          context.showNotifier(
+            appLocalizations.customOutboundInUse(group.name),
+          );
+          return;
+        }
+        final reference = findRawOutboundReference(
+          raw,
+          group.name,
+          includeTopLevelRules: profile.overwriteType != OverwriteType.custom,
+          includeProxyGroups: profile.overwriteType != OverwriteType.custom,
+        );
+        if (reference != null) {
+          context.showNotifier(
+            appLocalizations.rawOutboundInUse(group.name, reference),
+          );
+          return;
+        }
+      }
+      final confirmed = await globalState.showMessage(
+        message: TextSpan(
+          text: appLocalizations.deleteMultipTip(appLocalizations.proxyGroup),
+        ),
+      );
+      if (confirmed != true || !mounted) return;
+      final latestSetup = await ref.read(setupStateProvider(profileId).future);
+      if (!mounted) return;
+      if (ref.read(profileProvider(profileId)) != profile ||
+          latestSetup != setup) {
+        context.showNotifier(appLocalizations.routingChanged);
+        return;
+      }
+      ref
+          .read(profilesProvider.notifier)
+          .updateProfile(
+            profileId,
+            (_) => remaining.copyAndRemoveOutboundCaches(
+              groups.map((group) => group.name).toSet(),
+            ),
+          );
+      setState(() => _selected.removeAll(groups));
+    } catch (error) {
+      if (mounted) context.showNotifier(error.toString());
+    } finally {
+      if (mounted) setState(() => _deleting = false);
     }
-    if (!context.mounted) {
-      return;
-    }
-    final confirmed = await globalState.showMessage(
-      message: TextSpan(
-        text: appLocalizations.deleteMultipTip(appLocalizations.proxyGroup),
-      ),
-    );
-    if (confirmed != true || !context.mounted) {
-      return;
-    }
-    final current = ref.read(profileProvider(profileId));
-    if (current == null) return;
-    final setup = await ref.read(setupStateProvider(profileId).future);
-    if (!context.mounted) return;
-    final latest = ref.read(profileProvider(profileId));
-    if (latest == null ||
-        !latest.customProxyGroups.contains(group) ||
-        latest.overwriteType != profile.overwriteType ||
-        latest.lastUpdateDate != profile.lastUpdateDate) {
-      context.showNotifier(appLocalizations.routingChanged);
-      return;
-    }
-    if (latest.hasCustomOutboundReferences(group.name, excludingGroup: group)) {
-      context.showNotifier(appLocalizations.customOutboundInUse(group.name));
-      return;
-    }
-    if (latest.overwriteType == OverwriteType.merge &&
-        setup.addedRules.any((rule) => ruleTarget(rule.value) == group.name)) {
-      context.showNotifier(appLocalizations.customOutboundInUse(group.name));
-      return;
-    }
-    ref.read(profilesProvider.notifier).updateProfile(profileId, (profile) {
-      return profile.copyAndRemoveCustomProxyGroup(group);
-    });
   }
 
   void _reorder(
@@ -546,6 +559,7 @@ class _CustomProxyGroupsViewState extends ConsumerState<CustomProxyGroupsView> {
     final groups =
         ref.watch(profileProvider(profileId))?.customProxyGroups ??
         const <ProxyGroup>[];
+    final selected = _selected.intersection(groups.toSet());
     final issues = ref.watch(routingIssuesProvider(profileId)).groups;
     final query = SearchQuery(_query);
     final visible = groups.indexed
@@ -561,12 +575,34 @@ class _CustomProxyGroupsViewState extends ConsumerState<CustomProxyGroupsView> {
       searchState: AppBarSearchState(
         onSearch: (value) => setState(() => _query = value),
       ),
+      selectionActions: [
+        if (selected.isNotEmpty) ...[
+          IconButtonData(
+            tooltip: appLocalizations.cancel,
+            glyph: AppGlyphs.close,
+            onPressed: () => setState(_selected.clear),
+          ),
+          IconButtonData(
+            tooltip: appLocalizations.selectAll,
+            glyph: AppGlyphs.selectAll,
+            onPressed: () => setState(
+              () => _selected.addAll(visible.map((item) => item.$2)),
+            ),
+          ),
+          IconButtonData(
+            tooltip: appLocalizations.delete,
+            glyph: AppGlyphs.delete,
+            onPressed: _deleting ? null : () => _delete(selected.toList()),
+          ),
+        ],
+      ],
       iconActions: [
-        IconButtonData(
-          tooltip: appLocalizations.add,
-          onPressed: () => _edit(context, ref),
-          glyph: AppGlyphs.add,
-        ),
+        if (selected.isEmpty)
+          IconButtonData(
+            tooltip: appLocalizations.add,
+            onPressed: () => _edit(context, ref),
+            glyph: AppGlyphs.add,
+          ),
       ],
       body: NullStatusSwitcher(
         isEmpty: visible.isEmpty,
@@ -584,21 +620,38 @@ class _CustomProxyGroupsViewState extends ConsumerState<CustomProxyGroupsView> {
             return ReorderableDelayedDragStartListener(
               key: ObjectKey(group),
               index: index,
-              enabled: query.isEmpty,
+              enabled: query.isEmpty && selected.isEmpty && !_deleting,
               child: ListItem(
+                leading: Checkbox(
+                  value: selected.contains(group),
+                  onChanged: _deleting
+                      ? null
+                      : (value) => setState(() {
+                          value == true
+                              ? _selected.add(group)
+                              : _selected.remove(group);
+                        }),
+                ),
                 title: Text(group.name),
                 subtitle: Text(customProxyGroupTypeLabel(group.type)),
-                onTap: () => _edit(context, ref, group),
+                onTap: selected.isEmpty
+                    ? () => _edit(context, ref, group)
+                    : () => setState(
+                        () => _selected.contains(group)
+                            ? _selected.remove(group)
+                            : _selected.add(group),
+                      ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (issues[sourceIndex] case final groupIssues?)
                       RoutingIssueButton(issues: groupIssues),
-                    IconButton(
-                      tooltip: appLocalizations.delete,
-                      onPressed: () => _delete(context, ref, group),
-                      icon: const GlyphIcon(AppGlyphs.delete),
-                    ),
+                    if (selected.isEmpty)
+                      IconButton(
+                        tooltip: appLocalizations.delete,
+                        onPressed: _deleting ? null : () => _delete([group]),
+                        icon: const GlyphIcon(AppGlyphs.delete),
+                      ),
                     const Padding(
                       padding: EdgeInsets.all(12),
                       child: GlyphIcon(AppGlyphs.dragHandle),
@@ -609,7 +662,9 @@ class _CustomProxyGroupsViewState extends ConsumerState<CustomProxyGroupsView> {
             );
           },
           onReorderItem: (oldIndex, newIndex) {
-            if (query.isEmpty) _reorder(ref, oldIndex, newIndex, groups);
+            if (query.isEmpty && selected.isEmpty && !_deleting) {
+              _reorder(ref, oldIndex, newIndex, groups);
+            }
           },
         ),
       ),
@@ -627,6 +682,8 @@ class CustomRulesView extends ConsumerStatefulWidget {
 class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
   int get profileId => widget.profileId;
   String _query = '';
+  final Set<Rule> _selected = {};
+  bool _deleting = false;
 
   void _update(WidgetRef ref, List<Rule> rules) {
     ref.read(profilesProvider.notifier).updateProfile(profileId, (profile) {
@@ -682,6 +739,7 @@ class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
       context: context,
       builder: (_) => CustomRuleEditorDialog(
         rule: rule,
+        groupNames: routingGroupTypes(profile, raw).keys.toSet(),
         targets: customRoutingTargets(
           profile,
           raw,
@@ -741,17 +799,30 @@ class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
     _update(ref, rules);
   }
 
-  Future<void> _delete(BuildContext context, WidgetRef ref, Rule rule) async {
-    final confirmed = await globalState.showMessage(
-      message: TextSpan(
-        text: appLocalizations.deleteMultipTip(appLocalizations.rule),
-      ),
-    );
-    if (confirmed != true || !context.mounted) {
-      return;
+  Future<void> _delete(List<Rule> rules) async {
+    if (_deleting || rules.isEmpty) return;
+    final profile = ref.read(profileProvider(profileId));
+    if (profile == null || !rules.every(profile.customRules.contains)) return;
+    setState(() => _deleting = true);
+    try {
+      final confirmed = await globalState.showMessage(
+        message: TextSpan(
+          text: appLocalizations.deleteMultipTip(appLocalizations.rule),
+        ),
+      );
+      if (confirmed != true || !mounted) return;
+      if (ref.read(profileProvider(profileId)) != profile) {
+        context.showNotifier(appLocalizations.routingChanged);
+        return;
+      }
+      _update(
+        ref,
+        profile.customRules.where((item) => !rules.contains(item)).toList(),
+      );
+      setState(() => _selected.removeAll(rules));
+    } finally {
+      if (mounted) setState(() => _deleting = false);
     }
-    final rules = ref.read(profileProvider(profileId))?.customRules ?? [];
-    _update(ref, rules.where((item) => item != rule).toList());
   }
 
   void _reorder(
@@ -777,6 +848,7 @@ class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
   Widget build(BuildContext context) {
     final rules =
         ref.watch(profileProvider(profileId))?.customRules ?? const <Rule>[];
+    final selected = _selected.intersection(rules.toSet());
     final issues = ref.watch(routingIssuesProvider(profileId)).rules;
     final query = SearchQuery(_query);
     final visible = rules.where((rule) => query.matches([rule.value])).toList();
@@ -785,17 +857,38 @@ class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
       searchState: AppBarSearchState(
         onSearch: (value) => setState(() => _query = value),
       ),
+      selectionActions: [
+        if (selected.isNotEmpty) ...[
+          IconButtonData(
+            tooltip: appLocalizations.cancel,
+            glyph: AppGlyphs.close,
+            onPressed: () => setState(_selected.clear),
+          ),
+          IconButtonData(
+            tooltip: appLocalizations.selectAll,
+            glyph: AppGlyphs.selectAll,
+            onPressed: () => setState(() => _selected.addAll(visible)),
+          ),
+          IconButtonData(
+            tooltip: appLocalizations.delete,
+            glyph: AppGlyphs.delete,
+            onPressed: _deleting ? null : () => _delete(selected.toList()),
+          ),
+        ],
+      ],
       iconActions: [
-        IconButtonData(
-          tooltip: appLocalizations.quickAdd,
-          onPressed: () => _addPresets(context, ref),
-          glyph: AppGlyphs.listAdd,
-        ),
-        IconButtonData(
-          tooltip: appLocalizations.add,
-          onPressed: () => _edit(context, ref),
-          glyph: AppGlyphs.add,
-        ),
+        if (selected.isEmpty)
+          IconButtonData(
+            tooltip: appLocalizations.quickAdd,
+            onPressed: () => _addPresets(context, ref),
+            glyph: AppGlyphs.listAdd,
+          ),
+        if (selected.isEmpty)
+          IconButtonData(
+            tooltip: appLocalizations.add,
+            onPressed: () => _edit(context, ref),
+            glyph: AppGlyphs.add,
+          ),
       ],
       body: NullStatusSwitcher(
         isEmpty: visible.isEmpty,
@@ -813,20 +906,37 @@ class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
             return ReorderableDelayedDragStartListener(
               key: ObjectKey(rule),
               index: index,
-              enabled: query.isEmpty,
+              enabled: query.isEmpty && selected.isEmpty && !_deleting,
               child: ListItem(
+                leading: Checkbox(
+                  value: selected.contains(rule),
+                  onChanged: _deleting
+                      ? null
+                      : (value) => setState(() {
+                          value == true
+                              ? _selected.add(rule)
+                              : _selected.remove(rule);
+                        }),
+                ),
                 title: RuleSummary(rule: rule),
-                onTap: () => _edit(context, ref, rule),
+                onTap: selected.isEmpty
+                    ? () => _edit(context, ref, rule)
+                    : () => setState(
+                        () => _selected.contains(rule)
+                            ? _selected.remove(rule)
+                            : _selected.add(rule),
+                      ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (issues[rule.id] case final ruleIssues?)
                       RoutingIssueButton(issues: ruleIssues),
-                    IconButton(
-                      tooltip: appLocalizations.delete,
-                      onPressed: () => _delete(context, ref, rule),
-                      icon: const GlyphIcon(AppGlyphs.delete),
-                    ),
+                    if (selected.isEmpty)
+                      IconButton(
+                        tooltip: appLocalizations.delete,
+                        onPressed: _deleting ? null : () => _delete([rule]),
+                        icon: const GlyphIcon(AppGlyphs.delete),
+                      ),
                     const Padding(
                       padding: EdgeInsets.all(12),
                       child: GlyphIcon(AppGlyphs.dragHandle),
@@ -837,7 +947,9 @@ class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
             );
           },
           onReorderItem: (oldIndex, newIndex) {
-            if (query.isEmpty) _reorder(ref, oldIndex, newIndex, rules);
+            if (query.isEmpty && selected.isEmpty && !_deleting) {
+              _reorder(ref, oldIndex, newIndex, rules);
+            }
           },
         ),
       ),
