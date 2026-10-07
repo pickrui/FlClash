@@ -10,6 +10,7 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'constant.dart';
+import 'durable_file.dart';
 import 'system.dart';
 import 'utils.dart';
 
@@ -22,7 +23,7 @@ class AppPath {
 
   AppPath._internal() {
     if (safeModeBuild) {
-      final home = Directory.systemTemp.createTemp('flclash-safe-');
+      final home = createPrivateTempDirectory('flclash-safe-');
       _completeWith(dataDir, home);
       _completeWith(
         tempDir,

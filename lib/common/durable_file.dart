@@ -13,6 +13,27 @@ import 'package:win32/win32.dart';
 const _moveFileReplaceExisting = 0x1;
 const _moveFileWriteThrough = 0x8;
 
+Future<Directory> createPrivateTempDirectory(String prefix) async {
+  final directory = await Directory.systemTemp.createTemp(prefix);
+  if (Platform.isWindows) return directory;
+  final pathPointer = directory.path.toNativeUtf8();
+  try {
+    if (_UnixFileBindings.instance.chmod(pathPointer, 0x1C0) != 0 ||
+        (await directory.stat()).mode & 0x3F != 0) {
+      throw FileSystemException(
+        'Temporary directory is not private',
+        directory.path,
+      );
+    }
+    return directory;
+  } catch (_) {
+    await directory.delete();
+    rethrow;
+  } finally {
+    calloc.free(pathPointer);
+  }
+}
+
 Future<void> durableCreateDirectory(String path) async {
   final directory = Directory(path);
   if (await directory.exists()) {
@@ -117,6 +138,7 @@ class _UnixFileBindings {
   final int Function(Pointer<Utf8>, int) open;
   final int Function(int) fsync;
   final int Function(int) close;
+  final int Function(Pointer<Utf8>, int) chmod;
 
   _UnixFileBindings._(DynamicLibrary library)
     : open = library
@@ -129,7 +151,16 @@ class _UnixFileBindings {
       ),
       close = library.lookupFunction<Int32 Function(Int32), int Function(int)>(
         'close',
-      );
+      ),
+      chmod = Platform.isMacOS || Platform.isIOS
+          ? library.lookupFunction<
+              Int32 Function(Pointer<Utf8>, Uint16),
+              int Function(Pointer<Utf8>, int)
+            >('chmod')
+          : library.lookupFunction<
+              Int32 Function(Pointer<Utf8>, Uint32),
+              int Function(Pointer<Utf8>, int)
+            >('chmod');
 
   static final instance = _UnixFileBindings._(DynamicLibrary.process());
 }

@@ -58,7 +58,11 @@ void main() {
     test(
       'configuration, database and downloads stay in a new private directory',
       () async {
-        final home = await appPath.homeDirPath;
+        final systemTemp = Directory.systemTemp;
+        final home = await IOOverrides.runZoned(
+          () => appPath.homeDirPath,
+          getSystemTempDirectory: () => _PermissiveTempDirectory(systemTemp),
+        );
         expect(p.basename(home), startsWith('flclash-safe-'));
         if (!Platform.isWindows) {
           expect(p.dirname(unixSocketPath), Directory.systemTemp.path);
@@ -192,4 +196,26 @@ void main() {
       },
     );
   }, skip: safeModeBuild ? false : 'Requires --dart-define=SAFE_MODE=true');
+}
+
+class _PermissiveTempDirectory implements Directory {
+  final Directory directory;
+
+  _PermissiveTempDirectory(this.directory);
+
+  @override
+  String get path => directory.path;
+
+  @override
+  Future<Directory> createTemp([String? prefix]) async {
+    final created = await directory.createTemp(prefix);
+    if (!Platform.isWindows) {
+      final result = await Process.run('chmod', ['755', created.path]);
+      expect(result.exitCode, 0);
+    }
+    return created;
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
