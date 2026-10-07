@@ -110,12 +110,14 @@ void _saveBinding(WidgetRef ref, HotKeyAction binding) {
 }
 
 class HotKeyView extends StatelessWidget {
-  const HotKeyView({super.key});
+  const HotKeyView({super.key, this.labels});
+
+  final ShortcutLabels? labels;
 
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
-    final labels = ShortcutLabels.host();
+    final labels = this.labels ?? ShortcutLabels.host();
     return BaseScaffold(
       title: appLocalizations.hotkeyManagement,
       body: ListView(
@@ -193,9 +195,28 @@ class _HotKeyItem extends ConsumerWidget {
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),
-      subtitle: failure == null
-          ? null
-          : Tooltip(
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (key == null)
+            Text(
+              appLocalizations.hotkeyNotSet,
+              style: context.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.outline,
+              ),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.only(top: 6, bottom: 4),
+              child: _KeyCaps(
+                parts: labels.parts(hotKeyAction.modifiers, key),
+                isError: failure != null,
+                alignment: WrapAlignment.start,
+              ),
+            ),
+          if (failure != null)
+            Tooltip(
               message: failure,
               child: Text(
                 appLocalizations.hotkeyUnavailable,
@@ -204,29 +225,16 @@ class _HotKeyItem extends ConsumerWidget {
                 ),
               ),
             ),
+        ],
+      ),
       trailing: key == null
-          ? Text(
-              appLocalizations.hotkeyNotSet,
-              style: context.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.outline,
-              ),
-            )
-          : Row(
-              mainAxisSize: MainAxisSize.min,
-              spacing: 4,
-              children: [
-                _KeyCaps(
-                  parts: labels.parts(hotKeyAction.modifiers, key),
-                  isError: failure != null,
-                ),
-                IconButton(
-                  tooltip: appLocalizations.remove,
-                  onPressed: () {
-                    _saveBinding(ref, HotKeyAction(action: action));
-                  },
-                  icon: const GlyphIcon(AppGlyphs.close, size: 20),
-                ),
-              ],
+          ? null
+          : IconButton(
+              tooltip: appLocalizations.remove,
+              onPressed: () {
+                _saveBinding(ref, HotKeyAction(action: action));
+              },
+              icon: const GlyphIcon(AppGlyphs.close, size: 20),
             ),
       onPressed: () {
         globalState.showCommonDialog(
@@ -242,18 +250,20 @@ class _KeyCaps extends StatelessWidget {
     required this.parts,
     this.isLarge = false,
     this.isError = false,
+    this.alignment = WrapAlignment.center,
   });
 
   final List<String> parts;
   final bool isLarge;
   final bool isError;
+  final WrapAlignment alignment;
 
   @override
   Widget build(BuildContext context) {
     return Wrap(
       spacing: isLarge ? 8 : 4,
       runSpacing: isLarge ? 8 : 4,
-      alignment: WrapAlignment.center,
+      alignment: alignment,
       children: [
         for (final part in parts)
           _KeyCap(label: part, isLarge: isLarge, isError: isError),

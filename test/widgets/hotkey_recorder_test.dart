@@ -46,7 +46,9 @@ void main() {
             ],
           ),
         ],
-        child: const HotKeyView(),
+        child: const HotKeyView(
+          labels: ShortcutLabels(isMacOS: false, isWindows: false),
+        ),
       ),
     );
     await tester.pumpAndSettle();
