@@ -22,7 +22,7 @@ import tempfile
 
 CORE = Path(__file__).resolve().parents[1] / "core" / "Clash.Meta"
 MODULE = "github.com/enfein/mieru/v3"
-VERSION = "v3.37.0"
+VERSION = "v3.38.0"
 
 
 def main():
