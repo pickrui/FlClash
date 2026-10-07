@@ -455,25 +455,17 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
   var targetDns = Map<String, dynamic>.from(sourceDns);
   if (!isEnableDns) {
     targetDns = {
-      ...defaultDns.overrideJson(legacyDnsOverrideKeys),
+      ...defaultDns.overrideJson(baselineDnsOverrideKeys),
       ...sourceDns,
       'enable': true,
-      'enhanced-mode': defaultDns.toJson()['enhanced-mode'],
-      'nameserver': [...defaultDns.nameserver],
     };
   }
-  if (overrideDns) {
+  if (overrideDns || !isEnableDns) {
     targetDns = mergeDnsOverride(
       targetDns,
       realPatchConfig.dns.overrideJson(realPatchConfig.dnsOverrideKeys),
     );
     _preserveProxyDnsBootstrap(targetDns, sourceDns);
-  }
-  if (!isEnableDns && targetDns['enable'] == true) {
-    final nameservers = List<String>.from(targetDns['nameserver'] ?? []);
-    if (!nameservers.contains(systemDns)) {
-      targetDns['nameserver'] = [...nameservers, systemDns];
-    }
   }
   rawConfig['dns'] = targetDns;
   if (data.overrideNtp) {
@@ -1215,6 +1207,40 @@ Future<MigrationData> restoreTask(
   return compute<VM3<String, String, String>, MigrationData>(
     _restoreTask,
     VM3(backupFilePath, restoreDirPath, homeDirPath),
+  );
+}
+
+MigrationData prepareRestoredScripts(
+  MigrationData data, {
+  required String homePath,
+  Iterable<int> existingScriptIds = const [],
+}) {
+  final existing = existingScriptIds.toSet();
+  final used = {...existing, ...data.scripts.map((script) => script.id)};
+  final replacements = <String, String>{};
+  final scripts = data.scripts.map((script) {
+    if (!existing.contains(script.id)) return script;
+    int id;
+    do {
+      id = snowflake.id;
+    } while (!used.add(id));
+    replacements[_getScriptPath(homePath, script.id.toString())] =
+        _getScriptPath(homePath, id.toString());
+    return script.copyWith(id: id);
+  }).toList();
+  return data.copyWith(
+    profiles: data.profiles.map((profile) {
+      return profile.copyWith(
+        overwriteType: profile.overwriteType == OverwriteType.script
+            ? OverwriteType.standard
+            : profile.overwriteType,
+        scriptId: null,
+      );
+    }).toList(),
+    scripts: scripts,
+    fileMigrations: data.fileMigrations
+        .map((file) => VM2(file.a, replacements[file.b] ?? file.b))
+        .toList(),
   );
 }
 

@@ -16,6 +16,11 @@ const defaultClashConfig = ClashConfig();
 
 const defaultTun = Tun();
 const defaultDns = Dns();
+const baselineDnsOverrideKeys = {
+  DnsOverrideKey.enable,
+  DnsOverrideKey.enhancedMode,
+  DnsOverrideKey.nameserver,
+};
 const defaultNtp = Ntp();
 const defaultGeoXUrl = GeoXUrl();
 
@@ -327,7 +332,7 @@ abstract class FallbackFilter with _$FallbackFilter {
 abstract class Dns with _$Dns {
   const factory Dns({
     @Default(true) bool enable,
-    @Default('0.0.0.0:1053') String listen,
+    @Default('') String listen,
     @Default(0) @JsonKey(name: 'listen-routing-mark') int listenRoutingMark,
     @Default(false) @JsonKey(name: 'prefer-h3') bool preferH3,
     @Default(true) @JsonKey(name: 'use-hosts') bool useHosts,
@@ -367,20 +372,16 @@ abstract class Dns with _$Dns {
     @Default(['*.lan', 'localhost.ptlogin2.qq.com'])
     @JsonKey(name: 'fake-ip-filter')
     List<String> fakeIpFilter,
-    @Default({
-      'www.baidu.com': '114.114.114.114',
-      '+.internal.crop.com': '10.0.0.1',
-      'geosite:cn': 'https://doh.pub/dns-query',
-    })
+    @Default({})
     @JsonKey(name: 'nameserver-policy')
     Map<String, String> nameserverPolicy,
     @Default(['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'])
     List<String> nameserver,
-    @Default(['tls://8.8.4.4', 'tls://1.1.1.1']) List<String> fallback,
+    @Default([]) List<String> fallback,
     @Default(false)
     @JsonKey(name: 'fallback-lazy-query')
     bool fallbackLazyQuery,
-    @Default(['https://doh.pub/dns-query'])
+    @Default([])
     @JsonKey(name: 'proxy-server-nameserver')
     List<String> proxyServerNameserver,
     @Default(FallbackFilter())

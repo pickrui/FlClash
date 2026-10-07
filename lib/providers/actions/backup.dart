@@ -132,7 +132,7 @@ extension BackupControllerExt on AppController {
           debouncer.cancel(FunctionTag.savePreferences);
           await _preferencesWriteTail;
           await suspendDatabaseWrites();
-          final migrationData = await restoreTask(
+          var migrationData = await restoreTask(
             backupPath ?? await appPath.backupFilePath,
             restoreDirPath,
             await appPath.homeDirPath,
@@ -155,6 +155,13 @@ extension BackupControllerExt on AppController {
           previousProfileId = previousConfig.currentProfileId;
           final previousProfiles = await database.profilesDao.all().get();
           final previousScripts = await database.scriptsDao.all().get();
+          migrationData = prepareRestoredScripts(
+            migrationData,
+            homePath: await appPath.homeDirPath,
+            existingScriptIds: isOverride
+                ? const []
+                : previousScripts.map((script) => script.id),
+          );
           final previousProviders = await database.clashProvidersDao
               .all()
               .get();

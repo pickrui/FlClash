@@ -137,7 +137,7 @@ Map<String, dynamic> _$FallbackFilterToJson(_FallbackFilter instance) =>
 
 _Dns _$DnsFromJson(Map<String, dynamic> json) => _Dns(
   enable: json['enable'] as bool? ?? true,
-  listen: json['listen'] as String? ?? '0.0.0.0:1053',
+  listen: json['listen'] as String? ?? '',
   listenRoutingMark: (json['listen-routing-mark'] as num?)?.toInt() ?? 0,
   preferH3: json['prefer-h3'] as bool? ?? false,
   useHosts: json['use-hosts'] as bool? ?? true,
@@ -190,11 +190,7 @@ _Dns _$DnsFromJson(Map<String, dynamic> json) => _Dns(
       (json['nameserver-policy'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(k, e as String),
       ) ??
-      const {
-        'www.baidu.com': '114.114.114.114',
-        '+.internal.crop.com': '10.0.0.1',
-        'geosite:cn': 'https://doh.pub/dns-query',
-      },
+      const {},
   nameserver:
       (json['nameserver'] as List<dynamic>?)
           ?.map((e) => e as String)
@@ -202,13 +198,13 @@ _Dns _$DnsFromJson(Map<String, dynamic> json) => _Dns(
       const ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
   fallback:
       (json['fallback'] as List<dynamic>?)?.map((e) => e as String).toList() ??
-      const ['tls://8.8.4.4', 'tls://1.1.1.1'],
+      const [],
   fallbackLazyQuery: json['fallback-lazy-query'] as bool? ?? false,
   proxyServerNameserver:
       (json['proxy-server-nameserver'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList() ??
-      const ['https://doh.pub/dns-query'],
+      const [],
   fallbackFilter: json['fallback-filter'] == null
       ? const FallbackFilter()
       : FallbackFilter.fromJson(

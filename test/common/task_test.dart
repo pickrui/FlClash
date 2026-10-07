@@ -874,12 +874,12 @@ void main() {
   test('backupTask archives an immutable storage staging directory', () async {
     final staging = await Directory.systemTemp.createTemp('backup_staging_');
     await File('${staging.path}/$backupDatabaseName').writeAsString('database');
-    await File(
-      '${staging.path}/profiles/1.yaml',
-    ).create(recursive: true).then((file) => file.writeAsString('profile'));
-    await File(
-      '${staging.path}/scripts/2.js',
-    ).create(recursive: true).then((file) => file.writeAsString('script'));
+    await File('${staging.path}/profiles/1.yaml')
+        .create(recursive: true)
+        .then((file) => file.writeAsString('profile'));
+    await File('${staging.path}/scripts/2.js')
+        .create(recursive: true)
+        .then((file) => file.writeAsString('script'));
 
     final zipPath = await backupTask({'version': 'test'}, staging.path);
     addTearDown(() => File(zipPath).delete());
@@ -899,9 +899,8 @@ void main() {
 
   test('backupTask rejects files larger than the restore limit', () async {
     final staging = await Directory.systemTemp.createTemp('backup_oversized_');
-    final database = await File(
-      '${staging.path}/$backupDatabaseName',
-    ).open(mode: FileMode.write);
+    final database = await File('${staging.path}/$backupDatabaseName')
+        .open(mode: FileMode.write);
     await database.truncate(maxBackupFileBytes + 1);
     await database.close();
 
@@ -1028,9 +1027,9 @@ void main() {
   test('legacy migration produces stable ids when retried', () async {
     final root = await Directory.systemTemp.createTemp('legacy_stable_');
     addTearDown(() => root.delete(recursive: true));
-    await File(
-      '${root.path}/profiles/profile-a.yaml',
-    ).create(recursive: true).then((file) => file.writeAsString('profile'));
+    await File('${root.path}/profiles/profile-a.yaml')
+        .create(recursive: true)
+        .then((file) => file.writeAsString('profile'));
     Map<String, Object?> legacyData() => {
       'profiles': [
         {
@@ -1366,34 +1365,31 @@ void main() {
       );
     });
 
-    test(
-      'rejects future schemas but accepts repairable orphaned links',
-      () async {
-        final root = await Directory.systemTemp.createTemp('invalid_schema_');
-        addTearDown(() => root.delete(recursive: true));
-        final futurePath = '${root.path}/future.sqlite';
-        final futureDatabase = Database(NativeDatabase(File(futurePath)));
-        await futureDatabase.profilesDao.all().get();
-        await futureDatabase.close();
-        final futureSqlite = sqlite.sqlite3.open(futurePath);
-        futureSqlite.execute(
-          'PRAGMA user_version = ${currentDatabaseSchemaVersion + 1}',
-        );
-        futureSqlite.close();
-        expect(await validateBackupDatabase(futurePath), false);
+    test('rejects future schemas but accepts repairable orphaned links', () async {
+      final root = await Directory.systemTemp.createTemp('invalid_schema_');
+      addTearDown(() => root.delete(recursive: true));
+      final futurePath = '${root.path}/future.sqlite';
+      final futureDatabase = Database(NativeDatabase(File(futurePath)));
+      await futureDatabase.profilesDao.all().get();
+      await futureDatabase.close();
+      final futureSqlite = sqlite.sqlite3.open(futurePath);
+      futureSqlite.execute(
+        'PRAGMA user_version = ${currentDatabaseSchemaVersion + 1}',
+      );
+      futureSqlite.close();
+      expect(await validateBackupDatabase(futurePath), false);
 
-        final orphanPath = '${root.path}/orphan.sqlite';
-        final orphanDatabase = Database(NativeDatabase(File(orphanPath)));
-        await orphanDatabase.profilesDao.all().get();
-        await orphanDatabase.close();
-        final orphanSqlite = sqlite.sqlite3.open(orphanPath);
-        orphanSqlite.execute(
-          "INSERT INTO profile_rule_mapping (id, rule_id) VALUES ('orphan', 999)",
-        );
-        orphanSqlite.close();
-        expect(await validateBackupDatabase(orphanPath), true);
-      },
-    );
+      final orphanPath = '${root.path}/orphan.sqlite';
+      final orphanDatabase = Database(NativeDatabase(File(orphanPath)));
+      await orphanDatabase.profilesDao.all().get();
+      await orphanDatabase.close();
+      final orphanSqlite = sqlite.sqlite3.open(orphanPath);
+      orphanSqlite.execute(
+        "INSERT INTO profile_rule_mapping (id, rule_id) VALUES ('orphan', 999)",
+      );
+      orphanSqlite.close();
+      expect(await validateBackupDatabase(orphanPath), true);
+    });
   });
 
   test('schema v2 backup validation allows orphan repair', () async {
@@ -1470,45 +1466,39 @@ void main() {
     },
   );
 
-  test(
-    'disabled profile DNS ignores custom DNS when override is off',
-    () async {
-      final result = await makeRealProfileTask(
-        const MakeRealProfileState(
-          profilesPath: '/profiles',
-          profileId: 1,
-          overwriteType: OverwriteType.standard,
-          rawConfig: {
-            'dns': {'enable': false},
-            'rules': <String>[],
-          },
-          realPatchConfig: ClashConfig(
-            dns: Dns(
-              nameserver: ['https://unreachable.invalid/dns-query'],
-              proxyServerNameserver: ['https://unreachable.invalid/dns-query'],
-            ),
+  test('disabled profile DNS uses only the minimal baseline without selected overrides', () async {
+    final result = await makeRealProfileTask(
+      const MakeRealProfileState(
+        profilesPath: '/profiles',
+        profileId: 1,
+        overwriteType: OverwriteType.standard,
+        rawConfig: {
+          'dns': {'enable': false},
+          'rules': <String>[],
+        },
+        realPatchConfig: ClashConfig(
+          dns: Dns(
+            nameserver: ['https://unreachable.invalid/dns-query'],
+            proxyServerNameserver: ['https://unreachable.invalid/dns-query'],
           ),
-          overrideDns: false,
-          appendSystemDns: false,
-          addedRules: [],
-          proxyChains: [],
-          profileProxies: [],
-          customProxyGroups: [],
-          customRules: [],
-          defaultUA: 'FlClash',
         ),
-      );
+        overrideDns: false,
+        appendSystemDns: false,
+        addedRules: [],
+        proxyChains: [],
+        profileProxies: [],
+        customProxyGroups: [],
+        customRules: [],
+        defaultUA: 'FlClash',
+      ),
+    );
 
-      expect(result['dns']['nameserver'], [
-        ...defaultDns.nameserver,
-        'system://',
-      ]);
-      expect(
-        result['dns']['proxy-server-nameserver'],
-        defaultDns.proxyServerNameserver,
-      );
-    },
-  );
+    expect(result['dns'], {
+      'enable': true,
+      'enhanced-mode': 'fake-ip',
+      'nameserver': defaultDns.nameserver,
+    });
+  });
 
   test('disabled profile DNS applies custom DNS when override is on', () async {
     const customNameserver = 'https://dns.example/dns-query';
@@ -1539,7 +1529,7 @@ void main() {
       ),
     );
 
-    expect(result['dns']['nameserver'], [customNameserver, 'system://']);
+    expect(result['dns']['nameserver'], [customNameserver]);
     expect(result['dns']['proxy-server-nameserver'], [customNameserver]);
   });
 
@@ -1682,20 +1672,17 @@ void main() {
     expect(result['bind-address'], '127.0.0.1');
   });
 
-  test(
-    'explicit MATCH target overrides inference without rewriting subscription rules',
-    () async {
-      final original = _makeRealProfileState().copyWith(
-        addedRules: const [Rule(id: 1, value: 'DOMAIN,example.com,MATCH')],
-      );
-      final inferred = await makeRealProfileTask(original);
-      expect(inferred['rules'], ['DOMAIN,example.com,DIRECT', 'MATCH,DIRECT']);
-      final explicit = await makeRealProfileTask(
-        original.copyWith(matchTarget: 'REJECT'),
-      );
-      expect(explicit['rules'], ['DOMAIN,example.com,REJECT', 'MATCH,DIRECT']);
-    },
-  );
+  test('explicit MATCH target overrides inference without rewriting subscription rules', () async {
+    final original = _makeRealProfileState().copyWith(
+      addedRules: const [Rule(id: 1, value: 'DOMAIN,example.com,MATCH')],
+    );
+    final inferred = await makeRealProfileTask(original);
+    expect(inferred['rules'], ['DOMAIN,example.com,DIRECT', 'MATCH,DIRECT']);
+    final explicit = await makeRealProfileTask(
+      original.copyWith(matchTarget: 'REJECT'),
+    );
+    expect(explicit['rules'], ['DOMAIN,example.com,REJECT', 'MATCH,DIRECT']);
+  });
 
   test('makeRealProfileTask injects QUIC block rule when enabled', () async {
     final result = await makeRealProfileTask(
