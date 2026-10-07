@@ -6,7 +6,9 @@
 use crate::frb_generated::StreamSink;
 use flutter_rust_bridge::for_generated::SseCodec;
 use interprocess::local_socket::prelude::*;
-use interprocess::local_socket::{GenericFilePath, ListenerNonblockingMode, ListenerOptions};
+use interprocess::local_socket::{
+    GenericFilePath, Listener, ListenerNonblockingMode, ListenerOptions,
+};
 use std::io::{self, Read, Write};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::mpsc::{self, SyncSender, TrySendError};
@@ -15,7 +17,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 #[cfg(unix)]
-use std::path::Path;
+use interprocess::local_socket::Stream;
 #[cfg(windows)]
 use std::{
     os::windows::io::{AsHandle, AsRawHandle},
@@ -109,15 +111,64 @@ fn make_frame(ty: u8, payload: &[u8]) -> Vec<u8> {
 fn cleanup_socket(path: &str) -> io::Result<()> {
     #[cfg(unix)]
     {
-        if Path::new(path).exists() {
-            std::fs::remove_file(path)?;
+        use std::os::unix::fs::{FileTypeExt, MetadataExt};
+        let metadata = match std::fs::symlink_metadata(path) {
+            Ok(metadata) => metadata,
+            Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(()),
+            Err(error) => return Err(error),
+        };
+        if !metadata.file_type().is_socket() || metadata.uid() != unsafe { libc::geteuid() } {
+            return Err(io::Error::new(
+                io::ErrorKind::PermissionDenied,
+                "IPC path is not an owned socket",
+            ));
         }
+        std::fs::remove_file(path)?;
     }
     #[cfg(windows)]
     {
         let _ = path;
     }
     Ok(())
+}
+
+fn bind_listener(name: &str) -> io::Result<Listener> {
+    let options = ListenerOptions::new().name(name.to_fs_name::<GenericFilePath>()?);
+    #[cfg(target_os = "linux")]
+    let options = {
+        use interprocess::os::unix::local_socket::ListenerOptionsExt as _;
+        options.mode(0o600)
+    };
+    let listener = options.create_sync()?;
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        std::fs::set_permissions(name, std::fs::Permissions::from_mode(0o600))?;
+    }
+    Ok(listener)
+}
+
+#[cfg(unix)]
+fn is_permitted_uid(peer: libc::uid_t, owner: libc::uid_t) -> bool {
+    peer == owner || peer == 0
+}
+
+#[cfg(unix)]
+fn authorize_peer(stream: &Stream) -> io::Result<()> {
+    let peer = stream.peer_creds()?.euid().ok_or_else(|| {
+        io::Error::new(
+            io::ErrorKind::PermissionDenied,
+            "peer user ID is unavailable",
+        )
+    })?;
+    if is_permitted_uid(peer, unsafe { libc::geteuid() }) {
+        Ok(())
+    } else {
+        Err(io::Error::new(
+            io::ErrorKind::PermissionDenied,
+            "IPC peer belongs to another user",
+        ))
+    }
 }
 
 fn server_active() -> bool {
@@ -404,16 +455,7 @@ fn finish_server(name: &str) {
 }
 
 fn io_loop(name: String, sink: StreamSink<Vec<u8>, SseCodec>) {
-    let fs_name = match name.clone().to_fs_name::<GenericFilePath>() {
-        Ok(name) => name,
-        Err(e) => {
-            report_error(&sink, format!("name error: {e}"));
-            finish_server(&name);
-            return;
-        }
-    };
-
-    let listener = match ListenerOptions::new().name(fs_name).create_sync() {
+    let listener = match bind_listener(&name) {
         Ok(listener) => listener,
         Err(e) => {
             report_error(&sink, format!("bind error: {e}"));
@@ -447,6 +489,12 @@ fn io_loop(name: String, sink: StreamSink<Vec<u8>, SseCodec>) {
                 break;
             }
         };
+
+        #[cfg(unix)]
+        if let Err(error) = authorize_peer(&stream) {
+            ipc_debug!("[IPC] rejected peer: {error}");
+            continue;
+        }
 
         if let Err(e) = stream.set_nonblocking(true) {
             report_error(&sink, format!("stream nonblocking error: {e}"));
@@ -568,6 +616,41 @@ mod tests {
     use super::*;
     use std::collections::VecDeque;
     use std::io::Cursor;
+
+    #[test]
+    #[cfg(unix)]
+    fn unix_socket_is_private_and_checks_peer_ownership() {
+        use std::os::unix::fs::PermissionsExt;
+        let name = std::env::temp_dir().join(format!("fc-ipc-{}.sock", std::process::id()));
+        let path = name.to_str().unwrap();
+        let listener = bind_listener(path).unwrap();
+        assert_eq!(
+            std::fs::metadata(&name).unwrap().permissions().mode() & 0o777,
+            0o600
+        );
+        let client = Stream::connect(path.to_fs_name::<GenericFilePath>().unwrap()).unwrap();
+        let peer = listener.accept().unwrap();
+        authorize_peer(&peer).unwrap();
+        assert!(is_permitted_uid(501, 501));
+        assert!(is_permitted_uid(0, 501));
+        assert!(!is_permitted_uid(502, 501));
+        assert!(!is_permitted_uid(501, 0));
+        drop(client);
+        drop(peer);
+        drop(listener);
+        cleanup_socket(path).unwrap();
+    }
+
+    #[test]
+    #[cfg(unix)]
+    fn stale_socket_cleanup_preserves_regular_files() {
+        let path = std::env::temp_dir().join(format!("fc-ipc-file-{}", std::process::id()));
+        std::fs::write(&path, b"keep").unwrap();
+        let error = cleanup_socket(path.to_str().unwrap()).unwrap_err();
+        assert_eq!(error.kind(), io::ErrorKind::PermissionDenied);
+        assert_eq!(std::fs::read(&path).unwrap(), b"keep");
+        std::fs::remove_file(path).unwrap();
+    }
 
     enum ReadStep {
         Data(Vec<u8>),

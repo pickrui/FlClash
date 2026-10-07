@@ -32,6 +32,7 @@ void main() {
       );
       addTearDown(() => server.close(force: true));
       var wrongPath = false;
+      final coreAddress = createUnixSocketPath(isLinux: true, safeMode: false);
       final requests = <String>[];
       server.listen((request) async {
         requests.add(request.uri.path);
@@ -49,6 +50,9 @@ void main() {
         } else {
           final body = jsonDecode(await utf8.decoder.bind(request).join());
           expect(body['sessionId'], session);
+          if (request.uri.path == '/start') {
+            expect(body['address'], coreAddress);
+          }
           request.response.headers.contentType = ContentType.json;
           request.response.write(
             jsonEncode(
@@ -67,10 +71,7 @@ void main() {
       );
       expect(await client.readiness(), HelperReadiness.ready);
       expect(
-        (await client.start(
-          address: '/tmp/FlClashSocket_123.sock',
-          sessionId: session,
-        )).pid,
+        (await client.start(address: coreAddress, sessionId: session)).pid,
         1234,
       );
       expect((await client.stop(session)).stopped, true);

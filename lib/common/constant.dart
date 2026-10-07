@@ -29,9 +29,7 @@ const packageName = 'com.oixcloud.clash';
 const legacyPackageName = 'com.follow.clash';
 const identityMigrationMarkerName = '.identity-migrated-from-com.follow.clash';
 const releaseRepository = 'pickrui/FlClash';
-final unixSocketPath = safeModeBuild
-    ? '${Directory.systemTemp.path}/fc_${_randomPipeId().substring(0, 16)}.sock'
-    : '/tmp/FlClashSocket_${_randomPipeId()}.sock';
+final unixSocketPath = createUnixSocketPath(isLinux: Platform.isLinux);
 final windowsPipeName = '\\\\.\\pipe\\FlClashCore_${_randomPipeId()}';
 const helperPort = 47890;
 const helperProtocolVersionHeader = 'x-flclash-helper-protocol';
@@ -50,6 +48,20 @@ final listHeaderPadding = EdgeInsets.only(
 );
 
 const watchExecution = false;
+
+String createUnixSocketPath({
+  required bool isLinux,
+  bool safeMode = safeModeBuild,
+}) {
+  if (safeMode) {
+    return '${Directory.systemTemp.path}/fc_${_randomPipeId().substring(0, 16)}.sock';
+  }
+  // Installed Linux Helpers accept at most ten decimal digits.
+  final id = isLinux
+      ? Random.secure().nextInt(1 << 32).toString()
+      : _randomPipeId();
+  return '/tmp/FlClashSocket_$id.sock';
+}
 
 String _randomPipeId() {
   final random = Random.secure();

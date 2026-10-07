@@ -243,6 +243,11 @@ fn is_allowed_core_pipe(address: &str) -> bool {
 
 #[cfg(target_os = "linux")]
 fn is_allowed_core_pipe(address: &str) -> bool {
+    is_allowed_linux_core_pipe(address)
+}
+
+#[cfg(any(target_os = "linux", test))]
+fn is_allowed_linux_core_pipe(address: &str) -> bool {
     let Some(id) = address
         .strip_prefix("/tmp/FlClashSocket_")
         .and_then(|s| s.strip_suffix(".sock"))
@@ -1171,6 +1176,27 @@ mod tests {
             core_path().unwrap().file_name().unwrap(),
             std::ffi::OsStr::new(env!("CORE_NAME"))
         );
+    }
+
+    #[test]
+    fn linux_core_pipe_accepts_the_legacy_decimal_namespace() {
+        for id in ["0", "123", "4294967295", "9999999999"] {
+            assert!(is_allowed_linux_core_pipe(&format!(
+                "/tmp/FlClashSocket_{id}.sock"
+            )));
+        }
+        for id in [
+            "",
+            "10000000000",
+            "abcdef",
+            "0123456789abcdef0123456789abcdef",
+            "../123",
+        ] {
+            assert!(!is_allowed_linux_core_pipe(&format!(
+                "/tmp/FlClashSocket_{id}.sock"
+            )));
+        }
+        assert!(!is_allowed_linux_core_pipe("/tmp/Other_123.sock"));
     }
 
     #[test]
