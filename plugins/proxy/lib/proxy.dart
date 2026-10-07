@@ -1294,7 +1294,8 @@ class Proxy extends ProxyPlatform {
     if (values.isEmpty) {
       return '[]';
     }
-    final escaped = values.map((value) => "'${value.replaceAll("'", r"\'")}'");
+    final escaped = values.map(
+        (value) => "'${value.replaceAll(r"\", r"\\").replaceAll("'", r"\'")}'");
     return '[${escaped.join(', ')}]';
   }
 
@@ -1539,17 +1540,16 @@ class _UnixFileBindings {
   final int Function(int) close;
 
   _UnixFileBindings._(DynamicLibrary library)
-    : open = library
-          .lookupFunction<
-            Int32 Function(Pointer<Utf8>, Int32),
-            int Function(Pointer<Utf8>, int)
-          >('open'),
-      fsync = library.lookupFunction<Int32 Function(Int32), int Function(int)>(
-        'fsync',
-      ),
-      close = library.lookupFunction<Int32 Function(Int32), int Function(int)>(
-        'close',
-      );
+      : open = library.lookupFunction<Int32 Function(Pointer<Utf8>, Int32),
+            int Function(Pointer<Utf8>, int)>('open'),
+        fsync =
+            library.lookupFunction<Int32 Function(Int32), int Function(int)>(
+          'fsync',
+        ),
+        close =
+            library.lookupFunction<Int32 Function(Int32), int Function(int)>(
+          'close',
+        );
 
   static final instance = _UnixFileBindings._(DynamicLibrary.process());
 }

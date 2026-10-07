@@ -10,6 +10,13 @@ installed_size: 6604
 essential: false
 icon: ./assets/images/icon.png
 
+requires:
+  - libsecret
+
+spec_macros:
+  - '%global debug_package %{nil}'
+  - '%global __os_install_post %{nil}'
+
 keywords:
   - FlClash
   - Clash

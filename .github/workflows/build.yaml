@@ -78,6 +78,9 @@ jobs:
       - name: Analyze
         run: dart analyze
 
+      - name: Analyze bundled plugins
+        run: bash tool/check_plugins.sh
+
       - name: Check build notices
         run: bash tool/check_build_notices.sh
 

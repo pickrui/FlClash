@@ -69,6 +69,7 @@ docs/
 /core_sha256.json
 /core/*.exe
 /plugins/rust_api/.claude/
+/plugins/window/pubspec.lock
 devtools_options.yaml
 
 # FVM Version Cache

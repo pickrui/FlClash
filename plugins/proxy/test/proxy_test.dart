@@ -416,6 +416,19 @@ USB 10/100/1000 LAN
       expect(state, original);
     });
 
+    test('GNOME bypass hosts escape backslashes before apostrophes', () async {
+      final commands = await Proxy.buildLinuxStartCommandsForTest(
+        port: 7890,
+        bypassDomain: const [r"host\'name", r'other\host'],
+        desktop: 'GNOME',
+        homeDir: '/home/user',
+      );
+      final bypass = commands.singleWhere(
+        (command) => command.args.contains('ignore-hosts'),
+      );
+      expect(bypass.args.last, r"['host\\\'name', 'other\\host']");
+    });
+
     test('GNOME start failure rolls every changed value back', () async {
       final original = _gnomeProxyState();
       final state = Map<String, String>.from(original);

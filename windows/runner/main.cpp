@@ -6,6 +6,8 @@
 #include <flutter/dart_project.h>
 #include <flutter/flutter_view_controller.h>
 #include <windows.h>
+#include <app_links/app_links_plugin_c_api.h>
+#include <window/window_plugin_c_api.h>
 
 #include <algorithm>
 #include <string>
@@ -30,15 +32,18 @@ std::wstring LegacySingleInstanceMutexName() {
 
 // The title alone also matches an Explorer window opened on the install
 // folder, which carries the same name.
-bool ActivateExistingInstance() {
-  HWND existing_window =
-      ::FindWindowW(Win32Window::kWindowClassName, kWindowTitle);
+bool ActivateExistingInstance(bool show_window) {
+  HWND existing_window = WindowPluginFindRunningWindow();
+  if (existing_window == nullptr) {
+    existing_window = ::FindWindowW(Win32Window::kWindowClassName, kWindowTitle);
+  }
   if (existing_window == nullptr) {
     return false;
   }
-  ::ShowWindow(existing_window,
-               ::IsIconic(existing_window) ? SW_RESTORE : SW_SHOW);
-  ::SetForegroundWindow(existing_window);
+  SendAppLink(existing_window);
+  if (show_window) {
+    WindowPluginActivateWindow(existing_window);
+  }
   return true;
 }
 
@@ -62,9 +67,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
       single_instance_mutex != nullptr &&
       ::GetLastError() == ERROR_ALREADY_EXISTS;
   if (legacy_instance_exists || single_instance_exists) {
-    if (!is_silent_launch) {
-      ActivateExistingInstance();
-    }
+    ActivateExistingInstance(!is_silent_launch);
     if (single_instance_mutex != nullptr) {
       ::CloseHandle(single_instance_mutex);
     }

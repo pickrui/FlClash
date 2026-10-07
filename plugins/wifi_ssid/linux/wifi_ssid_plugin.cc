@@ -59,7 +59,7 @@ static GVariant* get_dbus_property(GDBusProxy* proxy,
   g_autoptr(GVariant) cached =
       g_dbus_proxy_get_cached_property(proxy, property_name);
   if (cached != nullptr) {
-    return g_steal_pointer(&cached);
+    return static_cast<GVariant*>(g_steal_pointer(&cached));
   }
 
   g_autoptr(GError) error = nullptr;
@@ -299,7 +299,11 @@ static gchar* get_ssid_from_nmcli() {
   if (!spawned || standard_output == nullptr) {
     return nullptr;
   }
+#if GLIB_CHECK_VERSION(2, 70, 0)
   if (!g_spawn_check_wait_status(wait_status, &error)) {
+#else
+  if (!g_spawn_check_exit_status(wait_status, &error)) {
+#endif
     return nullptr;
   }
 
@@ -331,7 +335,7 @@ static gchar* get_ssid_value() {
     return nullptr;
   }
 
-  return g_steal_pointer(&ssid);
+  return static_cast<gchar*>(g_steal_pointer(&ssid));
 }
 
 static void get_ssid_task(GTask* task, gpointer source_object,
