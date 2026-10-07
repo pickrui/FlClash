@@ -11139,6 +11139,16 @@ class AppLocalizations {
     return Intl.message('Enabled', name: 'enabled', desc: '', args: []);
   }
 
+  /// `Enable on start`
+  String get enabledOnStart {
+    return Intl.message(
+      'Enable on start',
+      name: 'enabledOnStart',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Disabled`
   String get disabled {
     return Intl.message('Disabled', name: 'disabled', desc: '', args: []);

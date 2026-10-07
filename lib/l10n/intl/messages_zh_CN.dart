@@ -894,6 +894,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "en": MessageLookupByLibrary.simpleMessage("英语"),
     "enableAutoRenew": MessageLookupByLibrary.simpleMessage("开启自动续费"),
     "enabled": MessageLookupByLibrary.simpleMessage("已开启"),
+    "enabledOnStart": MessageLookupByLibrary.simpleMessage("启动后启用"),
     "entries": MessageLookupByLibrary.simpleMessage("个条目"),
     "entriesCount": m20,
     "exclude": MessageLookupByLibrary.simpleMessage("从最近任务中隐藏"),

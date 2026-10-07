@@ -1312,6 +1312,7 @@
   "prerequisites": "Предварительные условия",
   "suspended": "Приостановлено…",
   "enabled": "Включено",
+  "enabledOnStart": "Включится при запуске",
   "disabled": "Выключено",
   "overwriteIssuesSummary": "Проблем: {count}, применение переопределения может завершиться ошибкой",
   "selectedCountTitle": "Выбрано: {count}",

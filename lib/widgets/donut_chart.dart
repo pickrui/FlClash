@@ -10,17 +10,14 @@ import 'package:material_ui/material_ui.dart';
 
 @immutable
 class DonutChartData {
-  final double _value;
+  final double value;
   final Color color;
 
-  const DonutChartData({required double value, required this.color})
-    : _value = value + 1;
-
-  double get value => _value;
+  const DonutChartData({required this.value, required this.color});
 
   @override
   String toString() {
-    return 'DonutChartData{_value: $_value}';
+    return 'DonutChartData{value: $value}';
   }
 
   @override
@@ -28,11 +25,11 @@ class DonutChartData {
       identical(this, other) ||
       other is DonutChartData &&
           runtimeType == other.runtimeType &&
-          _value == other._value &&
+          value == other.value &&
           color == other.color;
 
   @override
-  int get hashCode => _value.hashCode ^ color.hashCode;
+  int get hashCode => value.hashCode ^ color.hashCode;
 }
 
 class DonutChart extends StatefulWidget {
@@ -89,6 +86,7 @@ class _DonutChartState extends State<DonutChart>
             _oldData,
             widget.data,
             _animationController.value,
+            emptyColor: context.colorScheme.outlineVariant,
           ),
         );
       },
@@ -100,30 +98,32 @@ class DonutChartPainter extends CustomPainter {
   final List<DonutChartData> oldData;
   final List<DonutChartData> newData;
   final double progress;
+  final Color emptyColor;
 
   late final Paint _arcPaint;
 
   List<DonutChartData>? _cachedInterpolatedData;
   double? _cachedProgress;
 
-  DonutChartPainter(this.oldData, this.newData, this.progress) {
+  DonutChartPainter(
+    this.oldData,
+    this.newData,
+    this.progress, {
+    required this.emptyColor,
+  }) {
     _arcPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
   }
 
-  static const _logBase = 10.0;
-  static const _minValue = 0.1;
-  static final _logBaseInv = 1.0 / log(_logBase);
-
   double _logTransform(double value) {
-    if (value < _minValue) return 0;
-    return log(value) * _logBaseInv + 1;
+    if (value <= 0) return 0;
+    return log(value + 1);
   }
 
   double _expTransform(double value) {
     if (value <= 0) return 0;
-    return pow(_logBase, value - 1).toDouble();
+    return exp(value) - 1;
   }
 
   List<DonutChartData> get _interpolatedData {
@@ -142,6 +142,9 @@ class DonutChartPainter extends CustomPainter {
       _cachedProgress = progress;
       return newData;
     }
+
+    if (progress <= 0) return oldData;
+    if (progress >= 1) return newData;
 
     final result = <DonutChartData>[];
     for (var i = 0; i < newData.length; i++) {
@@ -166,27 +169,30 @@ class DonutChartPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final data = _interpolatedData;
-    if (data.isEmpty) return;
-
-    double total = 0;
-    for (final item in data) {
-      total += item.value;
-    }
-
-    if (total <= 0) return;
-
     final center = Offset(size.width / 2, size.height / 2);
     final strokeWidth = 10.0.ap;
     final radius = min(size.width / 2, size.height / 2) - strokeWidth / 2;
+    if (radius <= 0) return;
 
-    final gapAngle = 2 * asin(strokeWidth * 1 / (2 * radius)) * 1.2;
+    _arcPaint.strokeWidth = strokeWidth;
+    final data = _interpolatedData
+        .where((item) => item.value > 0 && item.value.isFinite)
+        .toList();
+    if (data.length <= 1) {
+      _arcPaint.color = data.isEmpty ? emptyColor : data.single.color;
+      canvas.drawCircle(center, radius, _arcPaint);
+      return;
+    }
+
+    final total = data.fold(0.0, (sum, item) => sum + item.value);
+    final gapAngle = min(
+      2 * asin(min(1.0, strokeWidth / (2 * radius))) * 1.2,
+      pi / data.length,
+    );
     final availableAngle = 2 * pi - (data.length * gapAngle);
     final totalInv = 1.0 / total;
 
     double startAngle = -pi / 2 + gapAngle / 2;
-
-    _arcPaint.strokeWidth = strokeWidth;
 
     for (final item in data) {
       final sweepAngle = availableAngle * (item.value * totalInv);
@@ -211,6 +217,7 @@ class DonutChartPainter extends CustomPainter {
   bool shouldRepaint(DonutChartPainter oldDelegate) {
     return oldDelegate.progress != progress ||
         oldDelegate.oldData != oldData ||
-        oldDelegate.newData != newData;
+        oldDelegate.newData != newData ||
+        oldDelegate.emptyColor != emptyColor;
   }
 }

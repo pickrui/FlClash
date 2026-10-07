@@ -1211,6 +1211,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Enable auto-renew",
     ),
     "enabled": MessageLookupByLibrary.simpleMessage("Enabled"),
+    "enabledOnStart": MessageLookupByLibrary.simpleMessage("Enable on start"),
     "entries": MessageLookupByLibrary.simpleMessage(" entries"),
     "entriesCount": m20,
     "exclude": MessageLookupByLibrary.simpleMessage("Hidden from recent tasks"),

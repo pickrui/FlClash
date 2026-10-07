@@ -26,6 +26,7 @@ class _QuickSwitchCard extends StatelessWidget {
     required this.onChanged,
     required this.sheetBuilder,
     this.canToggle,
+    this.requiresRunning = false,
   });
 
   final String label;
@@ -34,6 +35,7 @@ class _QuickSwitchCard extends StatelessWidget {
   final void Function(WidgetRef ref, bool value) onChanged;
   final WidgetBuilder sheetBuilder;
   final bool Function(WidgetRef)? canToggle;
+  final bool requiresRunning;
 
   /// A shrink-wrapped Switch still lays out 4 above and below its track, so
   /// the row may poke into the header's box while the track stays under it.
@@ -72,6 +74,17 @@ class _QuickSwitchCard extends StatelessWidget {
               builder: (_, ref, _) {
                 final enabled = canToggle?.call(ref) ?? true;
                 final value = ref.watch(selector) && enabled;
+                final localizations = context.appLocalizations;
+                var status = value
+                    ? localizations.enabled
+                    : localizations.disabled;
+                if (value && requiresRunning) {
+                  if (!ref.watch(isStartProvider)) {
+                    status = localizations.enabledOnStart;
+                  } else if (ref.watch(suspendProvider)) {
+                    status = localizations.suspended;
+                  }
+                }
                 return Row(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -80,9 +93,7 @@ class _QuickSwitchCard extends StatelessWidget {
                       flex: 1,
                       child: TooltipText(
                         text: Text(
-                          value
-                              ? context.appLocalizations.enabled
-                              : context.appLocalizations.disabled,
+                          status,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: context.textTheme.titleSmall
@@ -141,6 +152,7 @@ class TUNButton extends StatelessWidget {
       label: label,
       glyph: AppGlyphs.vpn,
       canToggle: (_) => !safeModeBuild,
+      requiresRunning: true,
       sheetBuilder: (_) => _NetworkSheet(
         title: label,
         sections: const [NetworkOptionsSection()],
@@ -164,6 +176,7 @@ class SystemProxyButton extends StatelessWidget {
     return _QuickSwitchCard(
       label: label,
       glyph: AppGlyphs.shuffle,
+      requiresRunning: true,
       canToggle: (ref) =>
           !safeModeBuild &&
           !ref.watch(
@@ -192,6 +205,7 @@ class VpnButton extends StatelessWidget {
       label: 'VPN',
       glyph: AppGlyphs.vpn,
       canToggle: (_) => !safeModeBuild,
+      requiresRunning: true,
       sheetBuilder: (_) => const _NetworkSheet(
         title: 'VPN',
         sections: [VpnSections(), NetworkOptionsSection()],

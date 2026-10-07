@@ -1251,6 +1251,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Включить автопродление",
     ),
     "enabled": MessageLookupByLibrary.simpleMessage("Включено"),
+    "enabledOnStart": MessageLookupByLibrary.simpleMessage(
+      "Включится при запуске",
+    ),
     "entries": MessageLookupByLibrary.simpleMessage(" записей"),
     "entriesCount": m20,
     "exclude": MessageLookupByLibrary.simpleMessage(

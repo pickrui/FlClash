@@ -1014,6 +1014,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "en": MessageLookupByLibrary.simpleMessage("英語"),
     "enableAutoRenew": MessageLookupByLibrary.simpleMessage("自動更新を有効にする"),
     "enabled": MessageLookupByLibrary.simpleMessage("有効"),
+    "enabledOnStart": MessageLookupByLibrary.simpleMessage("起動時に有効"),
     "entries": MessageLookupByLibrary.simpleMessage(" エントリ"),
     "entriesCount": m20,
     "exclude": MessageLookupByLibrary.simpleMessage("最近のタスクから非表示"),

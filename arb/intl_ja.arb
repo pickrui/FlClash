@@ -1312,6 +1312,7 @@
   "prerequisites": "前提条件",
   "suspended": "一時停止中…",
   "enabled": "有効",
+  "enabledOnStart": "起動時に有効",
   "disabled": "無効",
   "overwriteIssuesSummary": "{count} 件に問題があり、上書きの適用に失敗する可能性があります",
   "selectedCountTitle": "{count} 件選択中",
