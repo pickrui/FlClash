@@ -591,10 +591,11 @@ class _ExternalControllerDialogState
   }
 
   Future<void> _handleReset() async {
-    final res = await globalState.showMessage(
+    final route = ModalRoute.of(context);
+    final confirmed = await globalState.showMessage(
       message: TextSpan(text: context.appLocalizations.resetTip),
     );
-    if (res != true) {
+    if (!mounted || route?.isActive == false || confirmed != true) {
       return;
     }
     ref
@@ -605,9 +606,7 @@ class _ExternalControllerDialogState
             secret: defaultExternalControllerSecret,
           ),
         );
-    if (mounted) {
-      Navigator.of(context).pop();
-    }
+    BaseNavigator.close(context);
   }
 
   bool _save() {
@@ -803,10 +802,11 @@ class _PortDialogState extends ConsumerState<_PortDialog> {
   }
 
   Future<void> _handleReset() async {
-    final res = await globalState.showMessage(
+    final route = ModalRoute.of(context);
+    final confirmed = await globalState.showMessage(
       message: TextSpan(text: context.appLocalizations.resetTip),
     );
-    if (res != true) {
+    if (!mounted || route?.isActive == false || confirmed != true) {
       return;
     }
     ref
@@ -820,9 +820,7 @@ class _PortDialogState extends ConsumerState<_PortDialog> {
             tproxyPort: defaultClashConfig.tproxyPort,
           ),
         );
-    if (mounted) {
-      Navigator.of(context).pop();
-    }
+    BaseNavigator.close(context);
   }
 
   void _handleUpdate() {

@@ -204,17 +204,16 @@ class _AccessViewState extends ConsumerState<AccessView>
   }
 
   Future<void> _handleBack() async {
-    final res = await globalState.showMessage(
+    final route = ModalRoute.of(context);
+    final save = await globalState.showMessage(
       title: appLocalizations.tip,
       message: TextSpan(text: appLocalizations.saveChanges),
+      confirmText: appLocalizations.save,
+      cancelText: appLocalizations.discard,
     );
-    if (res == null) return;
-    if (res == true) {
-      _handleSave();
-    }
-    if (mounted) {
-      Navigator.of(context).pop();
-    }
+    if (!mounted || route?.isActive == false || save == null) return;
+    if (save) _handleSave();
+    BaseNavigator.close(context);
   }
 
   void _handleSave() {
@@ -235,13 +234,14 @@ class _AccessViewState extends ConsumerState<AccessView>
     });
   }
 
-  Future<void> _importFormClipboard() async {
+  Future<void> _importFromClipboard() async {
     final commonAction = context.commonAction;
+    final route = ModalRoute.of(context);
 
     await commonAction.safeRun(() async {
       final data = await Clipboard.getData('text/plain');
       final text = data?.text;
-      if (text == null) return;
+      if (!mounted || route?.isActive == false || text == null) return;
       ref
           .read(accessControlStateProvider.notifier)
           .update((state) => state.copyWithNewList(parsePackageNames(text)));
@@ -281,7 +281,7 @@ class _AccessViewState extends ConsumerState<AccessView>
         PopupMenuItemData(
           glyph: AppGlyphs.paste,
           label: appLocalizations.clipboardImport,
-          onPressed: _importFormClipboard,
+          onPressed: _importFromClipboard,
         ),
       ],
     ),
@@ -482,8 +482,8 @@ class _AccessViewState extends ConsumerState<AccessView>
         ref.watch(vpnSettingProvider).accessControlProps != accessControl;
     return CommonPopScope(
       onPop: hasChanges
-          ? (_) {
-              _handleBack();
+          ? (_) async {
+              await _handleBack();
               return false;
             }
           : null,
