@@ -10,34 +10,54 @@ import 'package:flutter/widgets.dart';
 
 import 'inherited.dart';
 
-class CommonPopScope extends StatelessWidget {
+class CommonPopScope extends StatefulWidget {
   final Widget child;
   final FutureOr<bool> Function(BuildContext context)? onPop;
 
   const CommonPopScope({super.key, required this.child, this.onPop});
 
   @override
+  State<CommonPopScope> createState() => _CommonPopScopeState();
+}
+
+class _CommonPopScopeState extends State<CommonPopScope> {
+  bool _handlingPop = false;
+
+  Future<void> _handlePop(bool didPop, Object? result) async {
+    final onPop = widget.onPop;
+    if (didPop || _handlingPop || onPop == null) return;
+    final route = ModalRoute.of(context);
+    if (route != null && !route.isCurrent) return;
+    _handlingPop = true;
+    try {
+      if (!await onPop(context) || !mounted) return;
+      if (route != null &&
+          (!route.isCurrent || !identical(route, ModalRoute.of(context)))) {
+        return;
+      }
+      Navigator.of(context).pop();
+    } catch (error, stackTrace) {
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: error,
+          stack: stackTrace,
+          library: 'navigation',
+          context: ErrorDescription('while handling a back request'),
+        ),
+      );
+    } finally {
+      _handlingPop = false;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final hasBackLayer =
         ModalRoute.of(context)?.willHandlePopInternally == true;
     return PopScope(
-      canPop: onPop == null || hasBackLayer,
-      onPopInvokedWithResult: onPop == null
-          ? null
-          : (didPop, _) async {
-              if (didPop) {
-                return;
-              }
-              final res = await onPop!(context);
-              if (!context.mounted) {
-                return;
-              }
-              if (!res) {
-                return;
-              }
-              Navigator.of(context).pop();
-            },
-      child: child,
+      canPop: widget.onPop == null || hasBackLayer,
+      onPopInvokedWithResult: widget.onPop == null ? null : _handlePop,
+      child: widget.child,
     );
   }
 }

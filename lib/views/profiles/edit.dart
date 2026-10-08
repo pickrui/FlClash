@@ -252,12 +252,13 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
         final confirmed = await globalState.showMessage(
           title: title,
           message: TextSpan(text: appLocalizations.hasCacheChange),
+          confirmText: appLocalizations.save,
+          cancelText: appLocalizations.discard,
         );
-        if (confirmed == true && context.mounted) {
-          await _handleSaveEdit(context, content);
-          return false;
-        }
-        return true;
+        if (!context.mounted || confirmed == null) return false;
+        if (!confirmed) return true;
+        await _handleSaveEdit(context, content);
+        return false;
       },
     );
     final data = await BaseNavigator.push<String>(context, editorPage);
@@ -284,18 +285,19 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     });
   });
 
-  Future<void> _handleBack() async {
-    final res = await globalState.showMessage(
+  Future<bool> _handleBack() async {
+    if (_saving || _fileBusy) return false;
+    if (_fileData == null) return true;
+    final save = await globalState.showMessage(
       title: appLocalizations.tip,
       message: TextSpan(text: appLocalizations.fileIsUpdate),
+      confirmText: appLocalizations.save,
+      cancelText: appLocalizations.discard,
     );
-    if (res == true) {
-      _handleConfirm();
-    } else {
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
-    }
+    if (!mounted || save == null) return false;
+    if (!save) return true;
+    await _handleConfirm();
+    return false;
   }
 
   @override
@@ -439,14 +441,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       policy: PageTraversalPolicy(),
       child: PageFocusScope(
         child: CommonPopScope(
-          onPop: (context) {
-            if (busy) return false;
-            if (_fileData == null) {
-              return true;
-            }
-            _handleBack();
-            return false;
-          },
+          onPop: (_) => _handleBack(),
           child: FloatLayout(
             floatingWidget: FloatWrapper(
               child: FloatingActionButton.extended(

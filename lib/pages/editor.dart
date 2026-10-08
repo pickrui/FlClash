@@ -59,8 +59,7 @@ class EditorPage extends ConsumerStatefulWidget {
   final bool supportRemoteDownload;
   final bool titleEditable;
 
-  /// A returned future is the save still running: until it completes the
-  /// page takes no second save and no pointer.
+  /// Return a future to keep the editor busy until the save completes.
   final FutureOr<void> Function(
     BuildContext context,
     String title,
@@ -98,9 +97,9 @@ class _EditorPageState extends ConsumerState<EditorPage> {
   final _editorKey = GlobalKey<EditorViewState>();
   late UndoRedoController _undoController;
   late TextEditingController _titleController;
-  late bool readOnly = false;
+  late final bool _readOnly;
   String? _loaded;
-  bool _loadStarted = false, _saving = false;
+  bool _loadStarted = false, _busy = false;
   ({bool isDirty, bool canUndo, bool canRedo}) _barState = (
     isDirty: false,
     canUndo: false,
@@ -144,7 +143,7 @@ class _EditorPageState extends ConsumerState<EditorPage> {
   @override
   void initState() {
     super.initState();
-    readOnly = widget.readOnly ?? widget.onSave == null;
+    _readOnly = widget.readOnly ?? widget.onSave == null;
     _undoController = UndoRedoController()..addListener(_syncBarState);
     _titleController = TextEditingController(text: widget.title)
       ..addListener(_syncBarState);
@@ -219,6 +218,7 @@ class _EditorPageState extends ConsumerState<EditorPage> {
   }
 
   void _handleSearch({bool replace = false}) {
+    if (_busy) return;
     _editor?.search(replace: replace);
   }
 
@@ -228,21 +228,21 @@ class _EditorPageState extends ConsumerState<EditorPage> {
 
   Future<void> _handleSave() async {
     final onSave = widget.onSave;
-    if (onSave == null || readOnly || _saving) return;
+    if (onSave == null || _readOnly || _busy) return;
     _commitComposing();
     if (!_isDirty) return;
     final route = ModalRoute.of(context);
     if (route != null && !route.isCurrent) {
       Navigator.of(context).popUntil((above) => above == route);
     }
-    setState(() => _saving = true);
+    setState(() => _busy = true);
     try {
       await context.commonAction.safeRun(
         () => onSave(context, _titleController.text, _content),
         silence: false,
       );
     } finally {
-      if (mounted) setState(() => _saving = false);
+      if (mounted) setState(() => _busy = false);
     }
   }
 
@@ -291,13 +291,19 @@ class _EditorPageState extends ConsumerState<EditorPage> {
   }
 
   Future<bool> _handlePop(BuildContext context) async {
+    if (_busy) return false;
     final onPop = widget.onPop;
     _commitComposing();
     if (onPop == null || !_isDirty) {
       return true;
     }
-    final res = await onPop(context, _titleController.text, _content);
-    return res && context.mounted;
+    setState(() => _busy = true);
+    try {
+      final res = await onPop(context, _titleController.text, _content);
+      return res && context.mounted;
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   @override
@@ -323,25 +329,30 @@ class _EditorPageState extends ConsumerState<EditorPage> {
           child: CommonScaffold(
             titleWidget: _EditorTitleField(
               controller: _titleController,
-              enabled: widget.titleEditable,
+              enabled: widget.titleEditable && !_busy,
             ),
             actions: [
               IconButton(
                 tooltip: appLocalizations.search,
                 icon: const GlyphIcon(AppGlyphs.search),
-                onPressed: isReady ? _handleSearch : null,
+                onPressed: isReady && !_busy ? _handleSearch : null,
               ),
               if (widget.onSave != null)
                 IconButton(
                   tooltip: appLocalizations.save,
-                  icon: const GlyphIcon(AppGlyphs.check),
-                  onPressed: _barState.isDirty && !_saving ? _handleSave : null,
+                  icon: _busy
+                      ? const SizedBox.square(
+                          dimension: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const GlyphIcon(AppGlyphs.check),
+                  onPressed: _barState.isDirty && !_busy ? _handleSave : null,
                 ),
               CommonPopupBox(
                 targetBuilder: (open) => IconButton(
                   icon: const GlyphIcon(AppGlyphs.more),
                   tooltip: appLocalizations.more,
-                  onPressed: () => open(),
+                  onPressed: _busy ? null : () => open(),
                 ),
                 popupBuilder: (_) => CommonPopupMenu(
                   items: [
@@ -386,7 +397,7 @@ class _EditorPageState extends ConsumerState<EditorPage> {
                                 state.copyWith(editorLineWrap: !lineWrap),
                           ),
                     ),
-                    if (widget.supportRemoteDownload && !readOnly) ...[
+                    if (widget.supportRemoteDownload && !_readOnly) ...[
                       PopupMenuItemData(
                         label: appLocalizations.importUrl,
                         glyph: AppGlyphs.cloudDownload,
@@ -404,13 +415,13 @@ class _EditorPageState extends ConsumerState<EditorPage> {
             ],
             body: AppBarClearance(
               child: AbsorbPointer(
-                absorbing: _saving,
+                absorbing: _busy,
                 child: EditorView(
                   key: _editorKey,
                   content: _original,
                   language: widget.language,
                   schema: widget.schema,
-                  readOnly: readOnly,
+                  readOnly: _readOnly || _busy,
                   undoController: _undoController,
                   onReady: _handleReady,
                 ),

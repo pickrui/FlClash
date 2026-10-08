@@ -257,6 +257,7 @@ void main() {
   Future<(CodeForgeController, List<String>)> pushSaving(
     WidgetTester tester, {
     FutureOr<void> Function(BuildContext context)? save,
+    Future<bool> Function(BuildContext, String, String)? onPop,
   }) async {
     late BuildContext home;
     await tester.pumpWidget(
@@ -279,6 +280,7 @@ void main() {
         EditorPage(
           title: 'Editor',
           content: 'mode: rule',
+          onPop: onPop,
           onSave: (context, _, content) {
             saved.add(content);
             return (save ?? (context) => Navigator.of(context).pop())(context);
@@ -306,7 +308,11 @@ void main() {
   }
 
   VoidCallback? saveButton(WidgetTester tester) => tester
-      .widget<IconButton>(find.widgetWithGlyph(IconButton, AppGlyphs.check))
+      .widget<IconButton>(
+        find.byWidgetPredicate(
+          (widget) => widget is IconButton && widget.tooltip == 'Save',
+        ),
+      )
       .onPressed;
 
   testWidgets('a held save shortcut saves once', (tester) async {
@@ -320,7 +326,9 @@ void main() {
     expect(saved, ['mode: rules']);
   });
 
-  testWidgets('a save still running takes no second one', (tester) async {
+  testWidgets('a save still running blocks editing and back navigation', (
+    tester,
+  ) async {
     final saving = Completer<void>();
     final (controller, saved) = await pushSaving(
       tester,
@@ -340,10 +348,48 @@ void main() {
     await settle(tester, 8);
     expect(saved, ['mode: rules']);
     expect(find.byType(CommonPopupMenu), findsNothing);
+    await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+    await tester.pump();
+    expect(controller.text, 'mode: rules');
+
+    await tester.binding.handlePopRoute();
+    await settle(tester, 8);
+    expect(find.byType(EditorPage), findsOneWidget);
+    expect(saved, ['mode: rules']);
 
     saving.complete();
     await settle(tester, 2);
     expect(saveButton(tester), isNotNull);
+    await tester.binding.handlePopRoute();
+    await settle(tester, 8);
+    expect(find.byType(EditorPage), findsNothing);
+  });
+
+  testWidgets('a pending close decision blocks a competing save', (
+    tester,
+  ) async {
+    final decision = Completer<bool>();
+    final (controller, saved) = await pushSaving(
+      tester,
+      save: (_) {},
+      onPop: (_, _, _) => decision.future,
+    );
+    controller.replaceRange(10, 10, 's');
+    await settle(tester, 2);
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+    expect(saveButton(tester), isNull);
+    await pressSaveShortcut(tester);
+    await tester.pump();
+    expect(saved, isEmpty);
+
+    decision.complete(false);
+    await settle(tester, 2);
+    expect(find.byType(EditorPage), findsOneWidget);
+    expect(saveButton(tester), isNotNull);
+    await pressSaveShortcut(tester);
+    await settle(tester, 2);
+    expect(saved, ['mode: rules']);
   });
 
   testWidgets('a name changed while the content loads can be saved', (
