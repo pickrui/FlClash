@@ -5,6 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:convert';
 
+import 'package:file_picker/file_picker.dart' show PlatformFile;
+
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -444,71 +446,70 @@ class EditClashProviderView extends ConsumerStatefulWidget {
     super.key,
     required this.provider,
     this.isNew = false,
+    this.pickFile,
   });
   final ClashProvider provider;
   final bool isNew;
+  final Future<PlatformFile?> Function()? pickFile;
   @override
   ConsumerState<EditClashProviderView> createState() =>
       _EditClashProviderViewState();
 }
 
 class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
-  late final TextEditingController _name = TextEditingController(
+  late final TextEditingController _nameController = TextEditingController(
     text: widget.provider.label,
   );
-  late final TextEditingController _url = TextEditingController(
+  late final TextEditingController _urlController = TextEditingController(
     text: widget.provider.url,
   )..addListener(_followUrlFormat);
   late ClashProvider _draft = widget.provider;
   late bool _remote = widget.provider.isRemote;
   bool _saving = false;
+  bool _importing = false;
 
-  void _followUrlFormat() {
-    final next = _draft.withFileFormat(_url.text.trim());
-    if (next != _draft) setState(() => _draft = next);
-  }
+  bool get _busy => _saving || _importing;
 
   @override
   void dispose() {
-    _name.dispose();
-    _url.dispose();
+    _nameController.dispose();
+    _urlController.dispose();
     super.dispose();
   }
 
+  void _followUrlFormat() {
+    final next = _draft.withFileFormat(_urlController.text.trim());
+    if (next != _draft) setState(() => _draft = next);
+  }
+
   Future<void> _import() async {
+    if (_busy) return;
+    setState(() => _importing = true);
     try {
-      final file = await picker.pickerFile();
+      final file = await (widget.pickFile ?? picker.pickerFile)();
       if (file == null || !mounted) return;
       if ((file.lengthSync() ?? 0) > maxProviderContentBytes) {
         throw const ProviderLibraryException('size');
       }
       final bytes = await file.readBytes(maxBytes: maxProviderContentBytes);
       if (!mounted) return;
-      final ext = file.extension?.toLowerCase();
-      final format = switch (ext) {
-        'mrs' => RuleProviderFormat.mrs,
-        'txt' || 'list' || 'conf' => RuleProviderFormat.text,
-        _ => RuleProviderFormat.yaml,
-      };
+      final format = ruleProviderFormatOf(file.name) ?? RuleProviderFormat.yaml;
       setState(() {
         _remote = false;
-        _draft = _draft.copyWith(
-          content: bytes,
-          format: format,
-          behavior:
-              format == RuleProviderFormat.mrs &&
-                  _draft.behavior == RuleProviderBehavior.classical
-              ? RuleProviderBehavior.domain
-              : _draft.behavior,
-        );
-        if (_name.text.trim().isEmpty) _name.text = file.name;
+        _draft = _draft.withFormat(format).copyWith(content: bytes);
+        if (_nameController.text.trim().isEmpty) {
+          _nameController.text = file.name;
+        }
       });
     } catch (error) {
       if (mounted) context.showNotifier(providerLibraryError(context, error));
+    } finally {
+      if (mounted) setState(() => _importing = false);
     }
   }
 
   void _editContent() {
+    if (_busy) return;
     final template = _draft.kind == ProviderKind.proxy
         ? 'proxies: []\n'
         : 'payload: []\n';
@@ -522,7 +523,7 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
     BaseNavigator.push(
       context,
       EditorPage(
-        title: _name.text,
+        title: _nameController.text,
         titleEditable: false,
         content: content,
         language: Language.yaml,
@@ -547,6 +548,7 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
           return true;
         },
         onSave: (editorContext, _, content) {
+          if (!mounted || !editorContext.mounted) return;
           final bytes = utf8.encode(content);
           if (bytes.length > maxProviderContentBytes) {
             editorContext.showNotifier(
@@ -562,13 +564,13 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
   }
 
   Future<void> _save() async {
-    if (_saving) return;
+    if (_busy) return;
     final route = ModalRoute.of(context);
     setState(() => _saving = true);
     try {
       final candidate = _draft.copyWith(
-        label: _name.text.trim(),
-        url: _remote ? _url.text.trim() : '',
+        label: _nameController.text.trim(),
+        url: _remote ? _urlController.text.trim() : '',
         content: _remote ? const [] : _draft.content,
       );
       await ref
@@ -585,116 +587,117 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
-    return BaseScaffold(
-      title: l.providers,
-      actions: [
-        IconButton(
-          tooltip: l.save,
-          onPressed: _saving ? null : _save,
-          icon: const GlyphIcon(AppGlyphs.save),
-        ),
-      ],
-      body: AppBarClearance(
-        child: AbsorbPointer(
-          absorbing: _saving,
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              TextField(
-                controller: _name,
-                decoration: InputDecoration(labelText: l.name),
-              ),
-              const SizedBox(height: 16),
-              SegmentedButton<bool>(
-                segments: [
-                  ButtonSegment(value: false, label: Text(l.providerLocal)),
-                  ButtonSegment(value: true, label: Text(l.providerRemote)),
-                ],
-                selected: {_remote},
-                onSelectionChanged: (value) =>
-                    setState(() => _remote = value.single),
-              ),
-              if (_remote)
-                Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: TextField(
-                    controller: _url,
-                    keyboardType: TextInputType.url,
-                    decoration: const InputDecoration(labelText: 'URL'),
+    return CommonPopScope(
+      onPop: (_) => !_saving,
+      child: ExcludeFocus(
+        excluding: _busy,
+        child: BaseScaffold(
+          title: l.providers,
+          actions: [
+            IconButton(
+              tooltip: l.save,
+              onPressed: _busy ? null : _save,
+              icon: const GlyphIcon(AppGlyphs.save),
+            ),
+          ],
+          body: AppBarClearance(
+            child: AbsorbPointer(
+              absorbing: _busy,
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  TextField(
+                    controller: _nameController,
+                    enabled: !_busy,
+                    decoration: InputDecoration(labelText: l.name),
                   ),
-                ),
-              if (_draft.kind == ProviderKind.rule) ...[
-                const SizedBox(height: 16),
-                DropdownButtonFormField<RuleProviderFormat>(
-                  key: ValueKey(_draft.format),
-                  initialValue: _draft.format,
-                  decoration: InputDecoration(labelText: l.format),
-                  items: [
-                    for (final format in RuleProviderFormat.values)
-                      DropdownMenuItem(value: format, child: Text(format.name)),
-                  ],
-                  onChanged: (format) {
-                    if (format == null) return;
-                    setState(
-                      () => _draft = _draft.copyWith(
-                        format: format,
-                        behavior:
-                            format == RuleProviderFormat.mrs &&
-                                _draft.behavior ==
-                                    RuleProviderBehavior.classical
-                            ? RuleProviderBehavior.domain
-                            : _draft.behavior,
+                  const SizedBox(height: 16),
+                  SegmentedButton<bool>(
+                    segments: [
+                      ButtonSegment(value: false, label: Text(l.providerLocal)),
+                      ButtonSegment(value: true, label: Text(l.providerRemote)),
+                    ],
+                    selected: {_remote},
+                    onSelectionChanged: (value) =>
+                        setState(() => _remote = value.single),
+                  ),
+                  if (_remote)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: TextField(
+                        controller: _urlController,
+                        enabled: !_busy,
+                        keyboardType: TextInputType.url,
+                        decoration: const InputDecoration(labelText: 'URL'),
                       ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<RuleProviderBehavior>(
-                  key: ValueKey(_draft.format),
-                  initialValue: _draft.behavior,
-                  decoration: InputDecoration(labelText: l.behavior),
-                  items: [
-                    for (final behavior in RuleProviderBehavior.values)
-                      if (_draft.format != RuleProviderFormat.mrs ||
-                          behavior != RuleProviderBehavior.classical)
-                        DropdownMenuItem(
-                          value: behavior,
-                          child: Text(behavior.name),
-                        ),
-                  ],
-                  onChanged: (behavior) {
-                    if (behavior == null) return;
-                    setState(
-                      () => _draft = _draft.copyWith(behavior: behavior),
-                    );
-                  },
-                ),
-              ],
-              const SizedBox(height: 16),
-              if (!_remote)
-                Wrap(
-                  spacing: 12,
-                  children: [
-                    TextButton.icon(
-                      onPressed: _import,
-                      icon: const GlyphIcon(AppGlyphs.importFile),
-                      label: Text(l.import),
                     ),
-                    if (_draft.isTextContent)
-                      TextButton.icon(
-                        onPressed: _editContent,
-                        icon: const GlyphIcon(AppGlyphs.edit),
-                        label: Text(l.providerContent),
-                      ),
+                  if (_draft.kind == ProviderKind.rule) ...[
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<RuleProviderFormat>(
+                      key: ValueKey(_draft.format),
+                      initialValue: _draft.format,
+                      decoration: InputDecoration(labelText: l.format),
+                      items: [
+                        for (final format in RuleProviderFormat.values)
+                          DropdownMenuItem(
+                            value: format,
+                            child: Text(format.name),
+                          ),
+                      ],
+                      onChanged: (format) {
+                        if (format == null) return;
+                        setState(() => _draft = _draft.withFormat(format));
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<RuleProviderBehavior>(
+                      key: ValueKey(_draft.format),
+                      initialValue: _draft.behavior,
+                      decoration: InputDecoration(labelText: l.behavior),
+                      items: [
+                        for (final behavior in RuleProviderBehavior.values)
+                          if (_draft.format != RuleProviderFormat.mrs ||
+                              behavior != RuleProviderBehavior.classical)
+                            DropdownMenuItem(
+                              value: behavior,
+                              child: Text(behavior.name),
+                            ),
+                      ],
+                      onChanged: (behavior) {
+                        if (behavior == null) return;
+                        setState(
+                          () => _draft = _draft.copyWith(behavior: behavior),
+                        );
+                      },
+                    ),
                   ],
-                ),
-              if (_draft.content.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: Text('${_draft.content.length} B'),
-                ),
-              if (_saving) const LinearProgressIndicator(),
-            ],
+                  const SizedBox(height: 16),
+                  if (!_remote)
+                    Wrap(
+                      spacing: 12,
+                      children: [
+                        TextButton.icon(
+                          onPressed: _busy ? null : _import,
+                          icon: const GlyphIcon(AppGlyphs.importFile),
+                          label: Text(l.import),
+                        ),
+                        if (_draft.isTextContent)
+                          TextButton.icon(
+                            onPressed: _busy ? null : _editContent,
+                            icon: const GlyphIcon(AppGlyphs.edit),
+                            label: Text(l.providerContent),
+                          ),
+                      ],
+                    ),
+                  if (_draft.content.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Text('${_draft.content.length} B'),
+                    ),
+                  if (_busy) const LinearProgressIndicator(),
+                ],
+              ),
+            ),
           ),
         ),
       ),
