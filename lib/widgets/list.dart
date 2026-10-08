@@ -555,63 +555,6 @@ Widget generateListView(List<Widget> items) {
   );
 }
 
-class CommonSelectedListItem extends StatelessWidget {
-  final bool isSelected;
-  final bool isEditing;
-  final Widget title;
-  final VoidCallback onSelected;
-  final VoidCallback onPressed;
-
-  const CommonSelectedListItem({
-    super.key,
-    required this.isSelected,
-    required this.onSelected,
-    this.isEditing = false,
-    required this.title,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-        color: Colors.transparent,
-        child: CommonCard(
-          radius: 18,
-          type: CommonCardType.filled,
-          isSelected: isSelected,
-          onPressed: () {
-            if (isEditing) {
-              onSelected();
-              return;
-            }
-            onPressed();
-          },
-          child: ListTile(
-            minTileHeight: 32 + globalState.measure.bodyMediumHeight,
-            minVerticalPadding: 12,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            trailing: SizedBox(
-              width: 24,
-              height: 24,
-              child: CommonCheckBox(
-                value: isSelected,
-                isCircle: true,
-                onChanged: (_) {
-                  onSelected();
-                },
-              ),
-            ),
-            title: title,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class DecorationListItem extends StatelessWidget {
   final Widget title;
   final Widget? subtitle;

@@ -97,12 +97,11 @@ void main() {
     });
   });
 
-  test('view dimensions follow the current window size', () {
+  test('view width follows the current window size', () {
     container
         .read(viewSizeProvider.notifier)
         .update((_) => const Size(800, 600));
     expect(container.read(viewWidthProvider), 800);
-    expect(container.read(viewHeightProvider), 600);
   });
 
   test('page navigation starts on the dashboard and follows both actions', () {

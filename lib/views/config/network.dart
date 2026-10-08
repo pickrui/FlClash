@@ -231,43 +231,6 @@ class SuspendOnIdleItem extends ConsumerWidget {
   }
 }
 
-class ExcludeSsidsItem extends ConsumerWidget {
-  const ExcludeSsidsItem({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.appLocalizations;
-    final ssids = ref.watch(
-      networkSettingProvider.select((s) => s.excludeSSIDs),
-    );
-    return ListItem.open(
-      title: Text(l10n.excludeSsids),
-      subtitle: Text(l10n.excludeSsidsDesc),
-      delegate: OpenDelegate(
-        blur: false,
-        widget: ListInputPage(
-          title: l10n.excludeSsids,
-          items: ssids,
-          itemMaxLength: 32,
-          titleBuilder: Text.new,
-        ),
-        onChanged: (items) {
-          ref
-              .read(networkSettingProvider.notifier)
-              .update(
-                (s) => s.copyWith(
-                  excludeSSIDs: List<String>.from(items)
-                      .where((s) => s.isNotEmpty)
-                      .toSet()
-                      .toList(),
-                ),
-              );
-        },
-      ),
-    );
-  }
-}
-
 class SsidPermissionItem extends ConsumerStatefulWidget {
   const SsidPermissionItem({super.key, required this.isMacOS});
 

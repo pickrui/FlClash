@@ -207,11 +207,6 @@ bool isMobileView(Ref ref) {
 }
 
 @Riverpod(keepAlive: true)
-double viewHeight(Ref ref) {
-  return ref.watch(viewSizeProvider).height;
-}
-
-@Riverpod(keepAlive: true)
 class Init extends _$Init with NotifierMixin<bool> {
   @override
   bool build() {
@@ -468,14 +463,6 @@ class SelectedItems extends _$SelectedItems with NotifierMixin<Set<dynamic>> {
   @override
   Set<dynamic> build(String key) {
     return {};
-  }
-}
-
-@riverpod
-class SelectedItem extends _$SelectedItem with NotifierMixin<dynamic> {
-  @override
-  dynamic build(String key) {
-    return null;
   }
 }
 
