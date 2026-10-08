@@ -16,6 +16,62 @@ void main() {
   setUp(() => task = AppUpdateDownloadTask());
   tearDown(() => task.dispose());
 
+  test('start listeners join the operation being announced', () async {
+    final pending = Completer<File>();
+    Future<void>? joined;
+    task.addListener(() {
+      if (task.value.phase == AppUpdateDownloadPhase.downloading) {
+        joined = task.start((_, _) => pending.future, url: 'fixture');
+      }
+    });
+
+    final operation = task.start((_, _) => pending.future, url: 'fixture');
+    expect(joined, same(operation));
+    pending.complete(File('/tmp/fixture-update.exe'));
+    await operation;
+  });
+
+  test('canceling the start notification prevents the transfer', () async {
+    final directory = await Directory.systemTemp.createTemp('updater-cancel-');
+    addTearDown(() => directory.delete(recursive: true));
+    var downloads = 0;
+    task.addListener(() {
+      if (task.value.phase == AppUpdateDownloadPhase.downloading) {
+        task.cancel();
+      }
+    });
+
+    await task.start((_, _) async {
+      downloads++;
+      return File('${directory.path}/update.exe');
+    }, url: 'fixture');
+
+    expect(downloads, 0);
+    expect(task.value.phase, AppUpdateDownloadPhase.canceled);
+  });
+
+  test('a synchronous failure cannot replace a reentrant retry', () async {
+    var attempts = 0;
+    final pending = Completer<File>();
+    Future<void>? retry;
+    task.addListener(() {
+      if (task.value.phase == AppUpdateDownloadPhase.failed) {
+        retry = task.retry();
+      }
+    });
+    await task.start((_, _) {
+      if (++attempts == 1) throw StateError('fixture failure');
+      return pending.future;
+    }, url: 'fixture');
+
+    final joined = task.start((_, _) => pending.future, url: 'fixture');
+    expect(joined, same(retry));
+    expect(attempts, 2);
+    pending.complete(File('/tmp/fixture-update.exe'));
+    await joined;
+    expect(task.value.phase, AppUpdateDownloadPhase.ready);
+  });
+
   test(
     'one application task owns automatic and manual download requests',
     () async {

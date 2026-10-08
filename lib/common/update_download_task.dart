@@ -72,8 +72,11 @@ class AppUpdateDownloadTask extends ValueNotifier<AppUpdateDownloadState> {
     _download = download;
     downloadUrl = url;
     final token = _token = CancelToken();
+    final completion = Completer<void>();
+    _operation = completion.future;
     value = const AppUpdateDownloadState(AppUpdateDownloadPhase.downloading);
-    return _operation = _run(download, token);
+    completion.complete(_run(download, token));
+    return completion.future;
   }
 
   /// Cleanup and transfer belong to the same new task. Reopening an active
@@ -114,6 +117,7 @@ class AppUpdateDownloadTask extends ValueNotifier<AppUpdateDownloadState> {
   Future<void> _run(AppUpdateDownloader download, CancelToken token) async {
     bool current() =>
         !_disposed && identical(token, _token) && !token.isCancelled;
+    if (!current()) return;
     try {
       final file = await download(token, (received, total) {
         if (!current()) return;
