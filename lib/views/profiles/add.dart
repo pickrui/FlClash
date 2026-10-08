@@ -15,24 +15,18 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 
 class AddProfileView extends ConsumerWidget {
-  final BuildContext context;
+  final BuildContext parentContext;
 
-  const AddProfileView({super.key, required this.context});
-
-  Future<void> _handleAddProfileFormFile() async {
-    final profileAction = context.profileAction;
-
-    profileAction.addProfileFormFile();
-  }
+  const AddProfileView({super.key, required this.parentContext});
 
   Future<void> _toScan() async {
-    final profileAction = context.profileAction;
+    final profileAction = parentContext.profileAction;
 
     if (system.isDesktop) {
-      profileAction.addProfileFormQrCode();
+      await profileAction.addProfileFormQrCode();
       return;
     }
-    final url = await BaseNavigator.push(context, const ScanPage());
+    final url = await BaseNavigator.push(parentContext, const ScanPage());
     if (url != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         profileAction.addProfileFormURL(url);
@@ -41,10 +35,10 @@ class AddProfileView extends ConsumerWidget {
   }
 
   Future<void> _toAdd(WidgetRef ref) async {
-    final profileAction = context.profileAction;
+    final profileAction = parentContext.profileAction;
     try {
       final providers = await ref.read(clashProvidersProvider.future);
-      if (!context.mounted) return;
+      if (!parentContext.mounted) return;
       final reserved = providers
           .where((item) => item.kind == ProviderKind.proxy)
           .map((item) => item.label)
@@ -52,10 +46,10 @@ class AddProfileView extends ConsumerWidget {
       final value = await globalState
           .showCommonDialog<({String label, String url})>(
             child: NamedUrlDialog(
-              title: context.appLocalizations.importFromURL,
+              title: parentContext.appLocalizations.importFromURL,
               labelValidator: (value) => reserved.contains(value?.trim())
-                  ? context.appLocalizations.existsTip(
-                      context.appLocalizations.name,
+                  ? parentContext.appLocalizations.existsTip(
+                      parentContext.appLocalizations.name,
                     )
                   : null,
             ),
@@ -64,7 +58,7 @@ class AddProfileView extends ConsumerWidget {
         await profileAction.addProfileFormURL(value.url, label: value.label);
       }
     } catch (error) {
-      if (context.mounted) context.showNotifier(error.toString());
+      if (parentContext.mounted) parentContext.showNotifier(error.toString());
     }
   }
 
@@ -83,7 +77,7 @@ class AddProfileView extends ConsumerWidget {
           leading: const GlyphIcon(AppGlyphs.importFile),
           title: Text(appLocalizations.file),
           subtitle: Text(appLocalizations.fileDesc),
-          onTap: _handleAddProfileFormFile,
+          onTap: parentContext.profileAction.addProfileFormFile,
         ),
         ListItem(
           leading: const GlyphIcon(AppGlyphs.cloudDownload),

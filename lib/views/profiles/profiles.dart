@@ -42,7 +42,7 @@ class _ProfilesViewState extends State<ProfilesView> {
         return AdaptiveSheetScaffold(
           type: type,
           body: AddProfileView(
-            context: globalState.navigatorKey.currentState!.context,
+            parentContext: globalState.navigatorKey.currentState!.context,
           ),
           title: appLocalizations.addProfile,
         );

@@ -160,7 +160,9 @@ void main() {
       TestApp(
         overrides: [profileActionProvider.overrideWith(() => action)],
         child: Scaffold(
-          body: Builder(builder: (context) => AddProfileView(context: context)),
+          body: Builder(
+            builder: (context) => AddProfileView(parentContext: context),
+          ),
         ),
       ),
     );

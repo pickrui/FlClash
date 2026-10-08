@@ -22,7 +22,10 @@ class _FakeScannerPlatform extends MobileScannerPlatform {
   final _zoom = StreamController<double>.broadcast();
 
   Completer<void>? permission;
+  Completer<void>? stopping;
+  Object? stopFailure;
   bool denied = false;
+  bool running = false;
   int startCalls = 0;
   int stopCalls = 0;
   int disposeCalls = 0;
@@ -50,6 +53,7 @@ class _FakeScannerPlatform extends MobileScannerPlatform {
         errorCode: MobileScannerErrorCode.permissionDenied,
       );
     }
+    running = true;
     return const MobileScannerViewAttributes(
       cameraDirection: CameraFacing.back,
       currentTorchMode: TorchState.off,
@@ -60,6 +64,9 @@ class _FakeScannerPlatform extends MobileScannerPlatform {
   @override
   Future<void> stop() async {
     stopCalls++;
+    await stopping?.future;
+    if (stopFailure case final error?) throw error;
+    running = false;
   }
 
   @override
@@ -68,6 +75,7 @@ class _FakeScannerPlatform extends MobileScannerPlatform {
   @override
   Future<void> dispose() async {
     disposeCalls++;
+    running = false;
   }
 
   Future<void> close() async {
@@ -142,6 +150,7 @@ void main() {
     bool settle = true,
     List<Override> overrides = const [],
   }) async {
+    await _sendLifecycle(tester, AppLifecycleState.resumed);
     late BuildContext hostContext;
     await tester.pumpWidget(
       ProviderScope(
@@ -249,6 +258,130 @@ void main() {
     expect(platform.stopCalls, 0);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'a camera that starts in the background is stopped before resuming',
+    (tester) async {
+      final permission = platform.permission = Completer<void>();
+      String? result;
+      await pumpScanPage(
+        tester,
+        settle: false,
+        onPopped: (value) => result = value,
+      );
+      await _sendLifecycles(tester, _leave);
+      permission.complete();
+      await tester.pumpAndSettle();
+      expect(platform.running, isFalse);
+      expect(platform.stopCalls, 1);
+      platform.emit(_capture(BarcodeType.url, 'https://background.example'));
+      await tester.pumpAndSettle();
+      expect(result, isNull);
+      await _sendLifecycles(tester, _return);
+      await tester.pumpAndSettle();
+      expect(platform.startCalls, 2);
+      platform.emit(_capture(BarcodeType.url, 'https://foreground.example'));
+      await tester.pumpAndSettle();
+      expect(result, 'https://foreground.example');
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('resuming waits for an unfinished camera stop', (tester) async {
+    await pumpScanPage(tester);
+    final stopping = platform.stopping = Completer<void>();
+    await _sendLifecycle(tester, AppLifecycleState.inactive);
+    await tester.pump();
+    await _sendLifecycle(tester, AppLifecycleState.resumed);
+    await tester.pump();
+    expect(platform.startCalls, 1);
+    stopping.complete();
+    await tester.pumpAndSettle();
+    expect(platform.startCalls, 2);
+    expect(platform.running, isTrue);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('closing while startup is pending releases the late camera', (
+    tester,
+  ) async {
+    final permission = platform.permission = Completer<void>();
+    await pumpScanPage(tester, settle: false);
+    await tester.pumpWidget(const SizedBox.shrink());
+    permission.complete();
+    await tester.pumpAndSettle();
+    expect(platform.running, isFalse);
+    expect(platform.disposeCalls, 1);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'covering the scanner releases its camera until the route returns',
+    (tester) async {
+      await pumpScanPage(tester);
+      final context = tester.element(find.byType(ScanPage));
+      final navigator = Navigator.of(context);
+      unawaited(
+        showDialog<void>(
+          context: context,
+          builder: (_) => const AlertDialog(content: Text('another route')),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(platform.running, isFalse);
+      expect(platform.stopCalls, 1);
+      navigator.pop();
+      await tester.pumpAndSettle();
+      expect(platform.startCalls, 2);
+      expect(platform.running, isTrue);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('native stop failures are observed and allow a later restart', (
+    tester,
+  ) async {
+    await pumpScanPage(tester);
+    platform.stopFailure = PlatformException(code: 'fixture-stop-failure');
+    await _sendLifecycle(tester, AppLifecycleState.inactive);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    platform.stopFailure = null;
+    await _sendLifecycle(tester, AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    expect(platform.startCalls, 2);
+    expect(platform.running, isTrue);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'choosing an image pauses barcode handling until the picker closes',
+    (tester) async {
+      final action = _PickerProfileAction();
+      var pops = 0;
+      await pumpScanPage(
+        tester,
+        onPopped: (_) => pops++,
+        overrides: [profileActionProvider.overrideWith(() => action)],
+      );
+      await tester.tap(find.byIcon(Icons.photo_camera_back));
+      await tester.pump();
+      expect(action.picks, 1);
+      expect(platform.running, isFalse);
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      platform.emit(_capture(BarcodeType.url, 'https://camera.example'));
+      await tester.pump();
+      expect(pops, 0);
+      action.picked.complete();
+      await tester.pumpAndSettle();
+      expect(platform.running, isTrue);
+      expect(platform.startCalls, 2);
+      platform.emit(_capture(BarcodeType.url, 'https://after-picker.example'));
+      await tester.pumpAndSettle();
+      expect(pops, 1);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('a denial is retried only after returning from outside the app', (
     tester,

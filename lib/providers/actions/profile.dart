@@ -376,8 +376,8 @@ extension ProfilesControllerExt on AppController {
   Future<void> addProfileFormFile() async {
     final platformFile = await safeRun(picker.pickerFile);
     if (platformFile == null) return;
-    final bytes = await platformFile.readBytes();
-    if (!_context.mounted) return;
+    final bytes = await safeRun(platformFile.readBytes);
+    if (bytes == null || !_context.mounted) return;
     globalState.navigatorKey.currentState?.popUntil((route) => route.isFirst);
     toProfiles();
     final profile = await loadingRun(tag: LoadingTag.profiles, () async {
@@ -392,7 +392,7 @@ extension ProfilesControllerExt on AppController {
   Future<void> addProfileFormQrCode() async {
     final url = await safeRun(picker.pickerConfigQRCode);
     if (url == null) return;
-    addProfileFormURL(url);
+    await addProfileFormURL(url);
   }
 
   void reorder(List<Profile> profiles) {

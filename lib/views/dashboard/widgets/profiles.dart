@@ -44,7 +44,7 @@ class DashboardProfilesCard extends ConsumerWidget {
                 builder: (_, type) => AdaptiveSheetScaffold(
                   type: type,
                   title: appLocalizations.addProfile,
-                  body: AddProfileView(context: context),
+                  body: AddProfileView(parentContext: context),
                 ),
               )
             : () => showProfileDetailSheet(context),

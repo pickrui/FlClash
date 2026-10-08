@@ -8,7 +8,9 @@ import 'dart:math';
 
 import 'package:fl_clash/common/color.dart';
 import 'package:fl_clash/common/context.dart';
+import 'package:fl_clash/common/print.dart';
 import 'package:fl_clash/common/string.dart';
+import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/plugins/app.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/widgets/activate_box.dart';
@@ -29,72 +31,35 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
     formats: const [BarcodeFormat.qrCode],
   );
 
-  StreamSubscription<Object?>? _subscription;
+  StreamSubscription<BarcodeCapture>? _subscription;
   bool _leftApp = false;
   bool _pickingImage = false;
   bool _completed = false;
+  bool _foreground = true;
+  bool _routeCurrent = true;
+  bool _retryDenied = false;
+  bool _cameraSyncing = false;
+  bool _cameraSyncRequested = false;
+  bool _disposed = false;
   Timer? _invalidTimer;
   final _invalid = ValueNotifier(false);
-
-  void _cancelSubscription() {
-    unawaited(_subscription?.cancel());
-    _subscription = null;
-  }
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _listen();
-    unawaited(_start());
+    final lifecycle = WidgetsBinding.instance.lifecycleState;
+    _foreground = lifecycle == null || lifecycle == AppLifecycleState.resumed;
+    _requestCameraSync();
   }
 
-  void _listen() {
-    _subscription ??= controller.barcodes.listen(
-      _handleBarcode,
-      onError: (Object _) => _showInvalid(),
-    );
-  }
-
-  Future<void> _start() async {
-    if (_completed ||
-        controller.value.isStarting ||
-        controller.value.isRunning) {
-      return;
-    }
-    try {
-      await controller.start();
-    } on MobileScannerException catch (_) {
-      // The controller exposes the camera error to the retry interface.
-    }
-  }
-
-  void _showInvalid() {
-    if (!mounted || _completed) return;
-    _invalidTimer?.cancel();
-    _invalid.value = true;
-    _invalidTimer = Timer(
-      const Duration(seconds: 2),
-      () => _invalid.value = false,
-    );
-  }
-
-  void _handleBarcode(BarcodeCapture capture) {
-    if (!mounted ||
-        _completed ||
-        _subscription == null ||
-        capture.barcodes.isEmpty ||
-        ModalRoute.isCurrentOf(context) == false) {
-      return;
-    }
-    final url = profileUrlFromQrCodes(capture.barcodes.map((b) => b.rawValue));
-    if (url == null) {
-      _showInvalid();
-      return;
-    }
-    _completed = true;
-    _cancelSubscription();
-    Navigator.pop<String>(context, url);
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final routeCurrent = ModalRoute.isCurrentOf(context) ?? true;
+    if (_routeCurrent == routeCurrent) return;
+    _routeCurrent = routeCurrent;
+    _requestCameraSync();
   }
 
   @override
@@ -106,41 +71,133 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
         value.error?.errorCode == MobileScannerErrorCode.permissionDenied;
     final retryDenied =
         state == AppLifecycleState.resumed && _leftApp && denialShown;
-    // A denial is retried only when the user left the app with it on screen,
-    // e.g. for Settings. Returning also passes through hidden, so only paused
-    // marks leaving; the permission prompt and the gallery picker do not count.
+    // Only leaving with a denial already visible permits another request;
+    // permission prompts and the gallery picker must not trigger retries.
     _leftApp = switch (state) {
       AppLifecycleState.paused => denialShown && !_pickingImage,
       AppLifecycleState.resumed => false,
       _ => _leftApp,
     };
-    if (value.isStarting || (!value.hasCameraPermission && !retryDenied)) {
-      return;
-    }
-    switch (state) {
-      case AppLifecycleState.detached:
-      case AppLifecycleState.hidden:
-      case AppLifecycleState.paused:
-        return;
-      case AppLifecycleState.resumed:
-        _listen();
-        unawaited(_start());
-      case AppLifecycleState.inactive:
-        _cancelSubscription();
-        if (controller.value.isRunning) {
-          unawaited(controller.stop());
+    _foreground = state == AppLifecycleState.resumed;
+    if (retryDenied) _retryDenied = true;
+    _requestCameraSync();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _disposed = true;
+    _requestCameraSync();
+    _invalidTimer?.cancel();
+    _invalid.dispose();
+    super.dispose();
+  }
+
+  void _cancelSubscription() {
+    unawaited(_subscription?.cancel());
+    _subscription = null;
+  }
+
+  void _listen() {
+    _subscription ??= controller.barcodes.listen(
+      _handleBarcode,
+      onError: (Object _) => _showInvalid(),
+    );
+  }
+
+  bool get _shouldRun =>
+      !_disposed &&
+      !_completed &&
+      _foreground &&
+      _routeCurrent &&
+      !_pickingImage;
+
+  void _start() {
+    _retryDenied = true;
+    _requestCameraSync();
+  }
+
+  void _requestCameraSync() {
+    _cameraSyncRequested = true;
+    if (!_shouldRun) _cancelSubscription();
+    if (!_cameraSyncing) unawaited(_syncCamera());
+  }
+
+  Future<void> _syncCamera() async {
+    _cameraSyncing = true;
+    try {
+      while (_cameraSyncRequested) {
+        _cameraSyncRequested = false;
+        try {
+          if (_disposed) {
+            await controller.dispose();
+            return;
+          }
+          if (!_shouldRun) {
+            await controller.stop();
+            continue;
+          }
+          final retryDenied = _retryDenied;
+          _retryDenied = false;
+          if (controller.value.error?.errorCode ==
+                  MobileScannerErrorCode.permissionDenied &&
+              !retryDenied) {
+            continue;
+          }
+          _listen();
+          if (!controller.value.isRunning) await controller.start();
+        } catch (error) {
+          commonPrint.log(
+            'Scanner lifecycle failed: ${error.runtimeType}',
+            logLevel: LogLevel.warning,
+          );
         }
+      }
+    } finally {
+      _cameraSyncing = false;
     }
   }
 
+  void _showInvalid() {
+    if (!_shouldRun) return;
+    _invalidTimer?.cancel();
+    _invalid.value = true;
+    _invalidTimer = Timer(
+      const Duration(seconds: 2),
+      () => _invalid.value = false,
+    );
+  }
+
+  void _handleBarcode(BarcodeCapture capture) {
+    if (!_shouldRun ||
+        _subscription == null ||
+        capture.barcodes.isEmpty ||
+        ModalRoute.isCurrentOf(context) == false) {
+      return;
+    }
+    final url = profileUrlFromQrCodes(capture.barcodes.map((b) => b.rawValue));
+    if (url == null) {
+      _showInvalid();
+      return;
+    }
+    _completed = true;
+    _requestCameraSync();
+    Navigator.pop<String>(context, url);
+  }
+
   Future<void> _pickImage() async {
-    if (_pickingImage || _completed) return;
+    if (_disposed || _pickingImage || _completed) return;
     final profileAction = context.profileAction;
-    _pickingImage = true;
+    setState(() => _pickingImage = true);
+    _requestCameraSync();
     try {
       await profileAction.addProfileFormQrCode();
     } finally {
       _pickingImage = false;
+      if (!_disposed) {
+        setState(() {});
+        _requestCameraSync();
+      }
     }
   }
 
@@ -209,7 +266,9 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
                                 if (error.errorCode !=
                                     MobileScannerErrorCode.unsupported)
                                   FilledButton.icon(
-                                    onPressed: denied
+                                    onPressed: state.isStarting
+                                        ? null
+                                        : denied
                                         ? () => app?.openAppSettings()
                                         : _start,
                                     icon: Icon(
@@ -289,8 +348,15 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
                     actions: [
                       IconButton(
                         tooltip: l.pickFromAlbum,
-                        onPressed: _pickImage,
-                        icon: const Icon(Icons.photo_camera_back),
+                        onPressed: _pickingImage ? null : _pickImage,
+                        icon: _pickingImage
+                            ? const SizedBox.square(
+                                dimension: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.photo_camera_back),
                       ),
                     ],
                   ),
@@ -301,16 +367,6 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    _cancelSubscription();
-    _invalidTimer?.cancel();
-    _invalid.dispose();
-    unawaited(controller.dispose());
-    super.dispose();
   }
 }
 
