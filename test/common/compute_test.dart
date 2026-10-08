@@ -207,6 +207,48 @@ void main() {
 
       expect(state.proxyName, isEmpty);
     });
+
+    for (final cyclic in [false, true]) {
+      test(
+        'resolves a deep selection chain without a stack overflow ($cyclic)',
+        () {
+          const depth = 60000;
+          final groups = [
+            for (var index = 0; index < depth; index++)
+              Group(
+                name: 'group-$index',
+                type: GroupType.Selector,
+                now: index == depth - 1
+                    ? (cyclic ? 'group-0' : 'leaf')
+                    : 'group-${index + 1}',
+                testUrl: index == depth ~/ 2
+                    ? 'https://example.test/check'
+                    : null,
+                all: [
+                  Proxy(
+                    name: index == depth - 1
+                        ? (cyclic ? 'group-0' : 'leaf')
+                        : 'group-${index + 1}',
+                    type: index == depth - 1 && !cyclic
+                        ? 'Shadowsocks'
+                        : 'Selector',
+                  ),
+                ],
+              ),
+          ];
+
+          final state = computeRealSelectedProxyState(
+            'group-0',
+            groups: groups,
+            selectedMap: {},
+          );
+
+          expect(state.proxyName, cyclic ? isEmpty : 'leaf');
+          expect(state.testUrl, 'https://example.test/check');
+          expect(state.group, isTrue);
+        },
+      );
+    }
   });
 
   group('computeProxyDelayState', () {
