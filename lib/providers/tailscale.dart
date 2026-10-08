@@ -89,6 +89,7 @@ class TailscaleAction {
   static const _applyPoll = Duration(milliseconds: 250);
 
   final Ref _ref;
+  final _statusRequests = <String, Object>{};
   int _statusRevision = 0;
 
   TailscaleAction(this._ref);
@@ -215,22 +216,31 @@ class TailscaleAction {
     final current = _currentNetwork(network);
     if (current == null || !_backend.isApplied(current)) return null;
     final revision = _statusRevision;
-    final status = await _backend.status(network.name);
-    final latest = _currentNetwork(network);
-    if (revision != _statusRevision ||
-        latest == null ||
-        !_backend.isApplied(latest)) {
-      return null;
-    }
-    final suffix = status?.magicDnsSuffix ?? '';
-    if (status != null && status.isRunning && suffix.endsWith('.ts.net')) {
-      if (latest.magicDnsSuffix != suffix) {
+    final request = Object();
+    _statusRequests[network.id] = request;
+    try {
+      final status = await _backend.status(network.name);
+      final latest = _currentNetwork(network);
+      if (!identical(_statusRequests[network.id], request) ||
+          revision != _statusRevision ||
+          latest == null ||
+          !_backend.isApplied(latest)) {
+        return null;
+      }
+      final suffix = status?.magicDnsSuffix ?? '';
+      if (status?.isRunning == true &&
+          suffix.endsWith('.ts.net') &&
+          latest.magicDnsSuffix != suffix) {
         _ref
             .read(tailscaleNetworksProvider.notifier)
             .put(latest.copyWith(magicDnsSuffix: suffix));
       }
+      return status;
+    } finally {
+      if (identical(_statusRequests[network.id], request)) {
+        _statusRequests.remove(network.id);
+      }
     }
-    return status;
   }
 
   Future<void> _ensureUnreferenced(String name) async {

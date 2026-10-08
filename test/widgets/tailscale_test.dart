@@ -78,6 +78,41 @@ Future<void> _unmount(WidgetTester tester) async {
   await tester.pumpWidget(const SizedBox());
 }
 
+Future<(FakeTailscaleBackend, ProviderContainer)> _openNetwork(
+  WidgetTester tester, {
+  TailscaleNetwork network = _home,
+  FakeTailscaleBackend? backend,
+}) async {
+  final fixture = await _pump(
+    tester,
+    Builder(
+      builder: (context) => Scaffold(
+        body: TextButton(
+          onPressed: () => openTailscaleNetwork(context, networkId: network.id),
+          child: const Text('Open network'),
+        ),
+      ),
+    ),
+    networks: [network],
+    status: const TailscaleStatus(rawState: 'Idle'),
+    testBackend: backend,
+  );
+  final networks = fixture.$2.listen(tailscaleNetworksProvider, (_, _) {});
+  addTearDown(networks.close);
+  await tester.tap(find.text('Open network'));
+  await tester.pumpAndSettle();
+  return fixture;
+}
+
+Future<void> _confirmRemoval(WidgetTester tester) async {
+  await tester.ensureVisible(find.text('Remove network'));
+  await tester.tap(find.text('Remove network'));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Remove'));
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 300));
+}
+
 void _setVisible(WidgetTester tester, bool visible) {
   tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
   tester.binding.handleAppLifecycleStateChanged(
@@ -449,4 +484,94 @@ void main() {
     expect(backend.forgotten, isEmpty);
     await _unmount(tester);
   });
+
+  testWidgets('a failed reference check keeps the network page retryable', (
+    tester,
+  ) async {
+    final (backend, container) = await _openNetwork(tester);
+    backend.ruleTargetError = StateError('fixture rule lookup unavailable');
+    await _confirmRemoval(tester);
+    expect(
+      find.textContaining('fixture rule lookup unavailable'),
+      findsOneWidget,
+    );
+    expect(container.read(tailscaleNetworksProvider), const [_home]);
+    await tester.tap(find.text('Confirm'));
+    await tester.pumpAndSettle();
+    expect(find.byType(TailscaleNetworkPage), findsOneWidget);
+    backend.ruleTargetError = null;
+    await _confirmRemoval(tester);
+    await tester.pumpAndSettle();
+    expect(container.read(tailscaleNetworksProvider), isEmpty);
+    expect(find.byType(TailscaleNetworkPage), findsNothing);
+    expect(tester.takeException(), isNull);
+    await _unmount(tester);
+  });
+
+  testWidgets('removal closes its own page beneath a newer dialog', (
+    tester,
+  ) async {
+    final pending = Completer<void>();
+    final (backend, _) = await _openNetwork(tester);
+    backend.forgetHandler = () => pending.future;
+    await _confirmRemoval(tester);
+    final context = tester.element(find.byType(TailscaleNetworkPage));
+    final navigator = Navigator.of(context);
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (_) => const AlertDialog(content: Text('Newer dialog')),
+      ),
+    );
+    await tester.pump();
+    pending.complete();
+    await tester.pumpAndSettle();
+    expect(find.text('Newer dialog'), findsOneWidget);
+    navigator.pop();
+    await tester.pumpAndSettle();
+    expect(find.byType(TailscaleNetworkPage), findsNothing);
+    expect(tester.takeException(), isNull);
+    await _unmount(tester);
+  });
+
+  for (final saving in [false, true]) {
+    testWidgets('leaving during ${saving ? 'save' : 'status'} prevents login', (
+      tester,
+    ) async {
+      final pendingKey = Completer<void>();
+      final pendingStatus = Completer<TailscaleStatus?>();
+      final backend = FakeTailscaleBackend();
+      await _openNetwork(
+        tester,
+        network: saving
+            ? _home.copyWith(loginMethod: TailscaleLoginMethod.authKey)
+            : _home,
+        backend: backend,
+      );
+      if (saving) {
+        backend.writeAuthKeyHandler = () => pendingKey.future;
+        await tester.enterText(
+          find.widgetWithText(TextField, 'Auth key'),
+          'tskey-auth-fixture',
+        );
+      } else {
+        backend.statusHandler = (_) => pendingStatus.future;
+      }
+      await tester.tap(find.widgetWithText(FilledButton, 'Save and log in'));
+      await tester.pump();
+      final context = tester.element(find.byType(TailscaleNetworkPage));
+      Navigator.of(context).pop();
+      expect(
+        context.mounted,
+        isTrue,
+        reason: 'the reverse transition is pending',
+      );
+      pendingKey.complete();
+      pendingStatus.complete(const TailscaleStatus(rawState: 'Idle'));
+      await tester.pumpAndSettle();
+      expect(backend.logins, isEmpty);
+      expect(tester.takeException(), isNull);
+      await _unmount(tester);
+    });
+  }
 }

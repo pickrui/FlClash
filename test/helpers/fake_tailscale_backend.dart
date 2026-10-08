@@ -12,7 +12,10 @@ class FakeTailscaleBackend extends TailscaleBackend {
   Future<TailscaleStatus?> Function(String)? statusHandler;
   Object? statusError;
   Future<String?> Function(String)? readAuthKeyHandler;
+  Future<void> Function()? writeAuthKeyHandler;
+  Future<void> Function()? forgetHandler;
   Object? forgetError;
+  Object? ruleTargetError;
   bool applied = true;
 
   /// Network name to the profile id of a rule using it; null for a global rule.
@@ -43,6 +46,7 @@ class FakeTailscaleBackend extends TailscaleBackend {
   @override
   Future<void> forget({required String name, required String stateDir}) async {
     if (forgetError case final error?) throw error;
+    await forgetHandler?.call();
     forgotten.add((name, stateDir));
   }
 
@@ -57,6 +61,7 @@ class FakeTailscaleBackend extends TailscaleBackend {
   @override
   Future<void> writeAuthKey(String key, String value) async {
     storageCalls.add('write $key');
+    await writeAuthKeyHandler?.call();
     authKeys[key] = value;
   }
 
@@ -70,8 +75,12 @@ class FakeTailscaleBackend extends TailscaleBackend {
   bool isApplied(TailscaleNetwork network) => applied;
 
   @override
-  Future<({int? profileId})?> findRuleTarget(String name) async =>
-      ruleTargets.containsKey(name) ? (profileId: ruleTargets[name]) : null;
+  Future<({int? profileId})?> findRuleTarget(String name) async {
+    if (ruleTargetError case final error?) throw error;
+    return ruleTargets.containsKey(name)
+        ? (profileId: ruleTargets[name])
+        : null;
+  }
 
   @override
   Future<void> deleteState(String stateId) async {

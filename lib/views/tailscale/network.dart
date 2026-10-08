@@ -69,6 +69,9 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
 
   TailscaleNetwork? get _saved => _action.network(_id);
 
+  bool get _isPageActive =>
+      mounted && (ModalRoute.of(context)?.isActive ?? true);
+
   @override
   void initState() {
     super.initState();
@@ -244,6 +247,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
       _authKey.text.trim().isEmpty;
 
   Future<void> _showError(String message, {String? title}) {
+    if (!_isPageActive) return Future.value();
     return globalState.showMessage(
       context: context,
       title: title ?? context.appLocalizations.tailscaleLoginFailed,
@@ -268,7 +272,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
   }
 
   Future<TailscaleNetwork?> _save() async {
-    if (_busy || !_authKeyStateReady) return null;
+    if (!_isPageActive || _busy || !_authKeyStateReady) return null;
     if (_invalidFields(context.appLocalizations).isNotEmpty) return null;
     final action = _action;
     setState(() => _busy = true);
@@ -279,7 +283,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
             ? _authKey.text
             : null,
       );
-      if (!mounted) return saved;
+      if (!mounted || !_isPageActive) return saved;
       final keyEntered = _authKey.text.trim().isNotEmpty;
       setState(() {
         _authKeyLoadRevision++;
@@ -294,7 +298,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
       startPolling();
       return saved;
     } catch (error) {
-      if (mounted) {
+      if (mounted && _isPageActive) {
         await _showError(
           _describeError(error),
           title: context.appLocalizations.tip,
@@ -315,7 +319,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
       return;
     }
     final saved = await _save();
-    if (saved == null || !mounted) return;
+    if (saved == null || !mounted || !_isPageActive) return;
     final action = _action;
     final attempt = ++_loginAttempt;
     setState(() {
@@ -325,11 +329,11 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
     try {
       await action.login(
         saved,
-        cancelled: () => !mounted || attempt != _loginAttempt,
+        cancelled: () => !_isPageActive || attempt != _loginAttempt,
       );
-      if (mounted) restartPolling();
+      if (_isPageActive) restartPolling();
     } catch (error) {
-      if (!mounted || attempt != _loginAttempt) return;
+      if (!mounted || !_isPageActive || attempt != _loginAttempt) return;
       setState(_endLogin);
       await _showError(_describeError(error));
     } finally {
@@ -364,33 +368,32 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
     if (saved == null) return;
     final l = context.appLocalizations;
     final action = _action;
-    final navigator = Navigator.of(context);
     final confirmed = await globalState.showMessage(
       context: context,
       title: l.tailscaleRemoveNetwork,
       message: TextSpan(text: l.tailscaleRemoveConfirm(saved.name)),
       confirmText: l.remove,
     );
-    if (confirmed != true || !mounted) return;
+    if (confirmed != true || !mounted || !_isPageActive) return;
     _removing = true;
     stopPolling();
     setState(() => _busy = true);
     try {
       await action.removeNetwork(saved);
-    } on TailscaleNetworkInUseException catch (error) {
-      if (!mounted) return;
-      setState(() => _busy = false);
-      _removing = false;
-      startPolling();
-      await _showError(_describeError(error), title: l.tip);
-      return;
     } catch (error) {
-      // The network is already gone from the config; only its cleanup failed.
-      if (mounted) await _showError(_describeError(error), title: l.tip);
+      if (!mounted || !_isPageActive) return;
+      final retained = _saved != null;
+      setState(() {
+        _busy = false;
+        _removing = !retained;
+      });
+      if (retained) startPolling();
+      await _showError(_describeError(error), title: l.tip);
+      if (retained) return;
     }
     if (!mounted) return;
     setState(() => _busy = false);
-    if (navigator.canPop()) navigator.pop();
+    BaseNavigator.close(context);
   }
 
   Future<void> _openLoginPage(String url) async {

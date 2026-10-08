@@ -179,6 +179,77 @@ void main() {
     expect(networks().single.magicDnsSuffix, isEmpty);
   });
 
+  for (final newerFails in [false, true]) {
+    test('a superseded status is ignored (newer fails: $newerFails)', () async {
+      await action.saveNetwork(home);
+      final oldReply = Completer<TailscaleStatus?>();
+      final newReply = Completer<TailscaleStatus?>();
+      backend.statusHandler = (_) => oldReply.future;
+      final oldStatus = action.status(home);
+      backend.statusHandler = (_) => newReply.future;
+      final newStatus = action.status(home);
+      if (newerFails) {
+        final rejected = expectLater(newStatus, throwsStateError);
+        newReply.completeError(StateError('fixture status unavailable'));
+        await rejected;
+      } else {
+        newReply.complete(
+          const TailscaleStatus(
+            rawState: 'Running',
+            magicDnsSuffix: 'new.ts.net',
+          ),
+        );
+        expect((await newStatus)?.magicDnsSuffix, 'new.ts.net');
+      }
+      oldReply.complete(
+        const TailscaleStatus(
+          rawState: 'Running',
+          magicDnsSuffix: 'old.ts.net',
+        ),
+      );
+      expect(await oldStatus, isNull);
+      expect(networks().single.magicDnsSuffix, newerFails ? '' : 'new.ts.net');
+      backend.statusHandler = (_) async => const TailscaleStatus(
+        rawState: 'Running',
+        magicDnsSuffix: 'retry.ts.net',
+      );
+      expect((await action.status(home))?.magicDnsSuffix, 'retry.ts.net');
+    });
+  }
+
+  test(
+    'concurrent status requests for different networks both apply',
+    () async {
+      final office = home.copyWith(
+        id: 'office',
+        name: 'Office',
+        stateId: 'state-b',
+      );
+      await action.saveNetwork(home);
+      await action.saveNetwork(office);
+      final homeReply = Completer<TailscaleStatus?>();
+      backend.statusHandler = (name) async => name == 'Home'
+          ? await homeReply.future
+          : const TailscaleStatus(
+              rawState: 'Running',
+              magicDnsSuffix: 'office.ts.net',
+            );
+      final homeStatus = action.status(home);
+      expect((await action.status(office))?.magicDnsSuffix, 'office.ts.net');
+      homeReply.complete(
+        const TailscaleStatus(
+          rawState: 'Running',
+          magicDnsSuffix: 'home.ts.net',
+        ),
+      );
+      expect((await homeStatus)?.magicDnsSuffix, 'home.ts.net');
+      expect(networks().map((network) => network.magicDnsSuffix), [
+        'home.ts.net',
+        'office.ts.net',
+      ]);
+    },
+  );
+
   test('removal cancels a login waiting for a Core response', () async {
     await action.saveNetwork(home);
     final reply = Completer<TailscaleStatus?>();
