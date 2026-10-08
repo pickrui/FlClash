@@ -10,6 +10,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:path/path.dart' as p;
 
 class Picker {
   Future<PlatformFile?> pickerFile() async =>
@@ -30,11 +31,17 @@ class Picker {
     return uri.toString();
   }
 
-  Future<String?> saveFileWithPath(String fileName, String localPath) async {
+  Future<String?> saveTemporaryFile(String fileName, String localPath) async {
     final file = File(localPath);
-    final path = await saveFile(fileName, await file.readAsBytes());
-    await file.safeDelete();
-    return path;
+    String? destination;
+    try {
+      return destination = await saveFile(fileName, await file.readAsBytes());
+    } finally {
+      if (destination == null ||
+          !p.equals(p.absolute(destination), p.absolute(localPath))) {
+        await file.safeDelete();
+      }
+    }
   }
 
   Future<String?> pickerConfigQRCode() async {

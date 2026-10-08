@@ -168,16 +168,11 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
         if (path.isEmpty) {
           return false;
         }
-        try {
-          final value = await picker.saveFileWithPath(
-            utils.getBackupFileName(),
-            path,
-          );
-          if (value == null) return false;
-          return true;
-        } finally {
-          await File(path).safeDelete();
-        }
+        return await picker.saveTemporaryFile(
+              utils.getBackupFileName(),
+              path,
+            ) !=
+            null;
       },
       title: appLocalizations.backup,
       tag: LoadingTag.backup_restore,

@@ -39,12 +39,7 @@ extension LogsControllerExt on AppController {
           .where((log) => !Secrets.shouldSuppressOutput(log.payload))
           .toList(),
     );
-    final tempFilePath = await appPath.tempFilePath;
-    final file = File(tempFilePath);
-    await file.safeWriteAsString(logString);
-    bool res = false;
-    res = await picker.saveFileWithPath(utils.logFile, tempFilePath) != null;
-    return res;
+    return await picker.saveFile(utils.logFile, utf8.encode(logString)) != null;
   }
 
   void writePersistentLog(Log log) {
