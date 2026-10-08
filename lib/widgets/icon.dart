@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:fl_clash/database/database.dart';
 import 'package:fl_clash/common/encoded_icon_cache.dart';
+import 'package:fl_clash/common/icon_history_recorder.dart';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/icons/icons.dart';
@@ -18,7 +19,9 @@ import 'package:flutter_svg/svg.dart';
 import 'package:fl_clash/common/icon_file_service.dart';
 
 final _decodedIcons = _IconCache();
-final _recordedIconUrls = <String>{};
+final _iconHistory = IconHistoryRecorder(
+  (url) => database.iconRecordsDao.put(url),
+);
 
 class _IconCache extends EncodedIconCache with WidgetsBindingObserver {
   _IconCache() {
@@ -26,7 +29,10 @@ class _IconCache extends EncodedIconCache with WidgetsBindingObserver {
   }
 
   @override
-  void didHaveMemoryPressure() => clear();
+  void didHaveMemoryPressure() {
+    clear();
+    _iconHistory.clear();
+  }
 }
 
 ImageProvider _resizeIcon(
@@ -92,7 +98,7 @@ class CommonTargetIcon extends StatelessWidget {
   }
 }
 
-final _cacheMange = CacheManager(
+final _cacheManager = CacheManager(
   Config(DefaultCacheManager.key, fileService: IconFileService()),
 );
 
@@ -122,7 +128,7 @@ class _ImageCacheWidgetState extends State<ImageCacheWidget> {
   @override
   void initState() {
     super.initState();
-    _getImageFormCache();
+    unawaited(_loadImage());
   }
 
   @override
@@ -132,23 +138,23 @@ class _ImageCacheWidgetState extends State<ImageCacheWidget> {
       _generation++;
       _retryCount = 0;
       _imageNotifier.value = null;
-      _getImageFormCache();
+      unawaited(_loadImage());
     }
   }
 
-  void _getImageFormCache() async {
+  Future<void> _loadImage() async {
     final src = widget.src;
     final generation = _generation;
     bool current() => mounted && generation == _generation;
     try {
-      final cacheFile = await _cacheMange.getFileFromCache(src);
+      final cacheFile = await _cacheManager.getFileFromCache(src);
       if (!current()) return;
       if (cacheFile != null) {
         _imageNotifier.value = cacheFile.file;
         _rememberIcon(src);
         if (cacheFile.validTill.isAfter(DateTime.now())) return;
       }
-      final file = (await _cacheMange.downloadFile(src, key: src)).file;
+      final file = (await _cacheManager.downloadFile(src, key: src)).file;
       if (!current()) return;
       _retryCount = 0;
       _imageNotifier.value = file;
@@ -159,16 +165,15 @@ class _ImageCacheWidgetState extends State<ImageCacheWidget> {
       }
       _retryCount++;
       await Future<void>.delayed(Duration(seconds: 2 * _retryCount));
-      if (current()) _getImageFormCache();
+      if (current()) unawaited(_loadImage());
     }
   }
 
   void _rememberIcon(String src) {
-    if (!widget.recordHistory || !_recordedIconUrls.add(src)) return;
+    if (!widget.recordHistory) return;
     unawaited(
-      database.iconRecordsDao.put(src).catchError((Object error) {
+      _iconHistory.record(src).catchError((Object error) {
         // History is optional; a storage error must not hide a downloaded icon.
-        _recordedIconUrls.remove(src);
         commonPrint.log('Icon history update failed (${error.runtimeType})');
       }),
     );

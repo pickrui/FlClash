@@ -1320,6 +1320,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Download uses the current network rules, or a direct connection when the proxy is unavailable. Retry the current address, choose another source, or enter a custom URL. After validation, the operation will continue automatically.",
     ),
     "geoDownloadUrl": MessageLookupByLibrary.simpleMessage("Download URL"),
+    "geoFileMissing": MessageLookupByLibrary.simpleMessage("Not downloaded"),
+    "geoFileReadFailed": MessageLookupByLibrary.simpleMessage(
+      "Could not read resource file",
+    ),
     "geoInvalidDownloadUrl": MessageLookupByLibrary.simpleMessage(
       "Enter a valid HTTP or HTTPS URL",
     ),

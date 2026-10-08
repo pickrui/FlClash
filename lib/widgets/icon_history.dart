@@ -11,16 +11,29 @@ import 'package:material_ui/material_ui.dart';
 
 import 'paged_sheet.dart';
 import 'icon.dart';
+import 'null_status.dart';
 
 class IconHistoryDialog extends StatefulWidget {
-  const IconHistoryDialog({super.key});
+  const IconHistoryDialog({super.key, @visibleForTesting this.query});
+
+  final Future<List<IconRecord>> Function(String query)? query;
 
   @override
   State<IconHistoryDialog> createState() => _IconHistoryDialogState();
 }
 
 class _IconHistoryDialogState extends State<IconHistoryDialog> {
-  late Future<List<IconRecord>> _records = database.iconRecordsDao.query('');
+  String _search = '';
+  late Future<List<IconRecord>> _records = _query('');
+
+  Future<List<IconRecord>> _query(String value) =>
+      Future.sync(() => (widget.query ?? database.iconRecordsDao.query)(value));
+
+  void _reload() {
+    setState(() {
+      _records = _query(_search);
+    });
+  }
 
   @override
   Widget build(BuildContext context) => PagedSheetForm(
@@ -43,18 +56,37 @@ class _IconHistoryDialogState extends State<IconHistoryDialog> {
               prefixIcon: const GlyphIcon(AppGlyphs.search),
               hintText: context.appLocalizations.search,
             ),
-            onChanged: (value) =>
-                setState(() => _records = database.iconRecordsDao.query(value)),
+            onChanged: (value) {
+              _search = value;
+              _reload();
+            },
           ),
           const SizedBox(height: 8),
           Expanded(
             child: FutureBuilder<List<IconRecord>>(
               future: _records,
               builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return Center(
+                    child: CircularProgressIndicator(
+                      semanticsLabel: context.appLocalizations.loading,
+                    ),
+                  );
+                }
+                if (snapshot.hasError) {
+                  return ErrorStatus(error: snapshot.error!, onRetry: _reload);
+                }
                 final records = snapshot.data ?? const [];
                 if (records.isEmpty) {
-                  return Center(
-                    child: Text(context.appLocalizations.noSearchResult),
+                  return NullStatus(
+                    label: _search.isEmpty
+                        ? context.appLocalizations.nullTip(
+                            context.appLocalizations.iconHistory,
+                          )
+                        : context.appLocalizations.noSearchResults,
+                    illustration: _search.isEmpty
+                        ? NullStatusIllustration.history
+                        : NullStatusIllustration.search,
                   );
                 }
                 return ListView.builder(

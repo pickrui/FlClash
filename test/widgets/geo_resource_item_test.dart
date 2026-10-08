@@ -25,9 +25,10 @@ void main() {
 
   late Directory tempDir;
 
-  setUpAll(() {
+  setUpAll(() async {
     tempDir = Directory.systemTemp.createTempSync('flclash_geo_resource_');
     PathProviderPlatform.instance = _FakePathProvider(tempDir.path);
+    await appPath.homeDirPath;
   });
 
   tearDownAll(() {
@@ -55,6 +56,54 @@ void main() {
     }
     fail('timed out waiting for $finder');
   }
+
+  Future<void> mount(WidgetTester tester) async {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    globalState.container = container;
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const TestApp(
+          locale: Locale('en'),
+          child: Scaffold(
+            body: GeoDataListItem(geoItem: GeoItem(type: GeoResource.MMDB)),
+          ),
+        ),
+      ),
+    );
+  }
+
+  testWidgets('missing resource has a readable empty state and a sync action', (
+    tester,
+  ) async {
+    await mount(tester);
+    await pumpUntilFound(tester, find.text('Not downloaded'));
+    expect(find.text('Sync'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('resource read failure can retry after the file is repaired', (
+    tester,
+  ) async {
+    final path = p.join(tempDir.path, geoFileName(GeoResource.MMDB));
+    final directory = Directory(path)..createSync();
+    addTearDown(() {
+      if (directory.existsSync()) directory.deleteSync();
+      final file = File(path);
+      if (file.existsSync()) file.deleteSync();
+    });
+    await mount(tester);
+    await pumpUntilFound(tester, find.text('Could not read resource file'));
+
+    directory.deleteSync();
+    File(path).writeAsBytesSync(List.filled(2048, 0));
+    await tester.tap(find.text('Retry'));
+    await pumpUntilFound(tester, find.textContaining(2048.traffic.show));
+
+    expect(find.text('Could not read resource file'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('refreshes the file info once the core finishes updating', (
     tester,

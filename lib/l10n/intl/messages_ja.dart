@@ -1107,6 +1107,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "現在のネットワークルールで取得し、プロキシが未起動の場合は直接接続します。再試行するか、別の配信元または URL を選択してください。検証後に自動で続行します",
     ),
     "geoDownloadUrl": MessageLookupByLibrary.simpleMessage("ダウンロード URL"),
+    "geoFileMissing": MessageLookupByLibrary.simpleMessage("未ダウンロード"),
+    "geoFileReadFailed": MessageLookupByLibrary.simpleMessage(
+      "リソースファイルを読み取れませんでした",
+    ),
     "geoInvalidDownloadUrl": MessageLookupByLibrary.simpleMessage(
       "有効な HTTP または HTTPS URL を入力してください",
     ),

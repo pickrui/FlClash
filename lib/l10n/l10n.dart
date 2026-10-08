@@ -5820,6 +5820,26 @@ class AppLocalizations {
     );
   }
 
+  /// `Not downloaded`
+  String get geoFileMissing {
+    return Intl.message(
+      'Not downloaded',
+      name: 'geoFileMissing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not read resource file`
+  String get geoFileReadFailed {
+    return Intl.message(
+      'Could not read resource file',
+      name: 'geoFileReadFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Download uses the current network rules, or a direct connection when the proxy is unavailable. Retry the current address, choose another source, or enter a custom URL. After validation, the operation will continue automatically.`
   String get geoDownloadRecoveryHint {
     return Intl.message(

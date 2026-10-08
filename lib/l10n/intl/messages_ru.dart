@@ -1368,6 +1368,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Загрузка использует текущие правила сети или прямое соединение, если прокси ещё не запущен. Повторите попытку, выберите другой источник или введите URL. После проверки операция продолжится.",
     ),
     "geoDownloadUrl": MessageLookupByLibrary.simpleMessage("URL загрузки"),
+    "geoFileMissing": MessageLookupByLibrary.simpleMessage("Не загружено"),
+    "geoFileReadFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось прочитать файл ресурса",
+    ),
     "geoInvalidDownloadUrl": MessageLookupByLibrary.simpleMessage(
       "Введите корректный HTTP или HTTPS URL",
     ),

@@ -136,12 +136,20 @@ class GeoDataListItem extends ConsumerStatefulWidget {
 class _GeoDataListItemState extends ConsumerState<GeoDataListItem> {
   GeoItem get geoItem => widget.geoItem;
   bool _updating = false;
-  late Future<FileInfo> _fileInfoFuture;
+  late Future<FileInfo?> _fileInfoFuture;
 
   @override
   void initState() {
     super.initState();
-    _fileInfoFuture = _getGeoFileLastModified(geoItem.fileName);
+    _fileInfoFuture = _readFileInfo();
+  }
+
+  @override
+  void didUpdateWidget(covariant GeoDataListItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.geoItem.type != geoItem.type) {
+      _fileInfoFuture = _readFileInfo();
+    }
   }
 
   Future<void> _updateUrl(String url) async {
@@ -168,12 +176,17 @@ class _GeoDataListItemState extends ConsumerState<GeoDataListItem> {
     });
   }
 
-  Future<FileInfo> _getGeoFileLastModified(String fileName) async {
+  Future<FileInfo?> _readFileInfo() async {
+    final fileName = geoItem.fileName;
     final homePath = await appPath.homeDirPath;
     final file = File(join(homePath, fileName));
-    final lastModified = await file.lastModified();
-    final size = await file.length();
-    return FileInfo(size: size, lastModified: lastModified);
+    try {
+      final lastModified = await file.lastModified();
+      final size = await file.length();
+      return FileInfo(size: size, lastModified: lastModified);
+    } on PathNotFoundException {
+      return null;
+    }
   }
 
   void _refreshFileInfo() {
@@ -181,7 +194,7 @@ class _GeoDataListItemState extends ConsumerState<GeoDataListItem> {
       return;
     }
     setState(() {
-      _fileInfoFuture = _getGeoFileLastModified(geoItem.fileName);
+      _fileInfoFuture = _readFileInfo();
     });
   }
 
@@ -200,18 +213,36 @@ class _GeoDataListItemState extends ConsumerState<GeoDataListItem> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 6),
-        FutureBuilder<FileInfo>(
+        FutureBuilder<FileInfo?>(
           future: _fileInfoFuture,
           builder: (_, snapshot) {
-            final height = globalState.measure.bodyMediumHeight;
-            return SizedBox(
-              height: height,
-              child: snapshot.data == null
-                  ? SizedBox(width: height, height: height)
-                  : Text(
-                      snapshot.data!.desc,
-                      style: context.textTheme.bodyMedium,
+            if (snapshot.connectionState != ConnectionState.done) {
+              return Text(
+                appLocalizations.loading,
+                style: context.textTheme.bodyMedium,
+              );
+            }
+            if (snapshot.hasError) {
+              return Wrap(
+                spacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Text(
+                    appLocalizations.geoFileReadFailed,
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      color: context.colorScheme.error,
                     ),
+                  ),
+                  TextButton(
+                    onPressed: _refreshFileInfo,
+                    child: Text(appLocalizations.retry),
+                  ),
+                ],
+              );
+            }
+            return Text(
+              snapshot.data?.desc ?? appLocalizations.geoFileMissing,
+              style: context.textTheme.bodyMedium,
             );
           },
         ),
