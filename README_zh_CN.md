@@ -119,7 +119,7 @@ macOS 和 Windows 上的 Docker Desktop 会为所有 Linux 容器运行一个共
    git submodule update --init --recursive
    ```
 
-2. 安装 Flutter 3.44+、Go 和 rustup（Rust API hook 固定 Rust 1.95.0），执行 `flutter pub get` 后再运行 setup.dart
+2. 安装 Flutter 3.47.4、Go 1.26.8 和 rustup（仓库固定 Rust 1.98.1），执行 `flutter pub get` 后再运行 setup.dart
 
    Core／Helper 和 Rust 现通过 Dart hooks 自动编译，setup.dart 继续作为整包入口
 
