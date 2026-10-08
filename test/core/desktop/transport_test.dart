@@ -134,6 +134,100 @@ void main() {
       expect(transport.state, DesktopTransportState.failed);
     });
 
+    for (final streamError in [false, true]) {
+      test(
+        'failed connections reject reuse (stream error=$streamError)',
+        () async {
+          final open = transport.open();
+          rawEvents.add(_frame(0x00));
+          await open;
+          final connected = transport.waitUntilConnected(
+            const Duration(seconds: 1),
+          );
+          rawEvents.add(_frame(0x01, _processIdPayload(4321)));
+          await connected;
+          final failure = transport.events
+              .where((event) => event is TransportFailed)
+              .cast<TransportFailed>()
+              .first;
+          if (streamError) {
+            rawEvents.addError(StateError('fixture IPC failure'));
+          } else {
+            rawEvents.add(_frame(0x04, utf8.encode('fixture IPC failure')));
+          }
+          final error = (await failure).error;
+
+          await expectLater(
+            transport.waitUntilConnected(const Duration(seconds: 1)),
+            throwsA(same(error)),
+          );
+          await expectLater(
+            transport.send('stale request'),
+            throwsA(same(error)),
+          );
+          await expectLater(transport.open(), throwsA(same(error)));
+          expect(sentMessages, isEmpty);
+          expect(transport.state, DesktopTransportState.failed);
+        },
+      );
+    }
+
+    test(
+      'late frames cannot revive or deliver data from a failed transport',
+      () async {
+        final events = <DesktopTransportEvent>[];
+        final frames = <Uint8List>[];
+        final eventSubscription = transport.events.listen(events.add);
+        final frameSubscription = transport.frames.listen(frames.add);
+        addTearDown(eventSubscription.cancel);
+        addTearDown(frameSubscription.cancel);
+        final open = transport.open();
+        rawEvents.add(_frame(0x00));
+        await open;
+        rawEvents.add(_frame(0x01, _processIdPayload(1234)));
+        rawEvents.add(_frame(0x04, utf8.encode('fixture IPC failure')));
+        rawEvents.add(_frame(0x00));
+        rawEvents.add(_frame(0x01, _processIdPayload(5678)));
+        rawEvents.add(_frame(0x03, utf8.encode('stale response')));
+        rawEvents.add(_frame(0x02));
+        await pumpEventQueue();
+
+        expect(transport.state, DesktopTransportState.failed);
+        expect(events.whereType<TransportReady>(), hasLength(1));
+        expect(events.whereType<TransportConnected>(), hasLength(1));
+        expect(events.whereType<TransportFailed>(), hasLength(1));
+        expect(frames, isEmpty);
+      },
+    );
+
+    test(
+      'stream completion preserves the original connected failure',
+      () async {
+        final events = <DesktopTransportEvent>[];
+        final subscription = transport.events.listen(events.add);
+        addTearDown(subscription.cancel);
+        final open = transport.open();
+        rawEvents.add(_frame(0x00));
+        await open;
+        rawEvents.add(_frame(0x01, _processIdPayload(1234)));
+        rawEvents.add(_frame(0x04, utf8.encode('original failure')));
+        await rawEvents.close();
+        await pumpEventQueue();
+
+        expect(events.whereType<TransportFailed>(), hasLength(1));
+        await expectLater(
+          transport.waitUntilConnected(const Duration(seconds: 1)),
+          throwsA(
+            isA<StateError>().having(
+              (error) => error.message,
+              'message',
+              contains('original failure'),
+            ),
+          ),
+        );
+      },
+    );
+
     test('propagates send failures', () async {
       final failingTransport = IPCCoreTransport(
         address: 'test-address',

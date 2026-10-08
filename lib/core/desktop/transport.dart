@@ -228,6 +228,10 @@ final class IPCCoreTransport implements DesktopCoreTransport {
     if (_state == DesktopTransportState.closed) {
       return Future.error(StateError('IPC transport is closed'));
     }
+    final failure = _failure;
+    if (failure != null) {
+      return Future.error(failure.error, failure.stackTrace);
+    }
     return _openOperation ??= _open();
   }
 
@@ -259,7 +263,9 @@ final class IPCCoreTransport implements DesktopCoreTransport {
   }
 
   void _handleFrame(Uint8List data) {
-    if (data.isEmpty || _state == DesktopTransportState.closed) {
+    if (data.isEmpty ||
+        _state == DesktopTransportState.failed ||
+        _state == DesktopTransportState.closed) {
       return;
     }
     final type = data[0];
@@ -342,6 +348,7 @@ final class IPCCoreTransport implements DesktopCoreTransport {
       return;
     }
     commonPrint.log('IPC error: $error', logLevel: LogLevel.debug);
+    _connection = null;
     _state = DesktopTransportState.failed;
     _failure = TransportFailed(error, stackTrace);
     _eventController.add(_failure!);
@@ -375,6 +382,10 @@ final class IPCCoreTransport implements DesktopCoreTransport {
   Future<void> send(String message) {
     if (_state == DesktopTransportState.closed) {
       return Future.error(StateError('IPC transport is closed'));
+    }
+    final failure = _failure;
+    if (failure != null) {
+      return Future.error(failure.error, failure.stackTrace);
     }
     return _sendMessage(utf8.encode(message));
   }
