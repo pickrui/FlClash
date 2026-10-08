@@ -49,6 +49,8 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
       widget.scrollController ?? ScrollController();
   int _refreshGeneration = 0;
   final _speedRanker = TrackerSpeedRanker();
+  final _closingConnectionIds = <String>{};
+  bool _closingAll = false;
 
   CoreController get _core => widget.core ?? ref.read(coreHandlerProvider);
 
@@ -57,10 +59,23 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
 
   List<Widget> _buildActions() {
     return [
-      IconButton(
-        tooltip: context.appLocalizations.closeAllConnections,
-        onPressed: () => _closeThenRefresh(_core.closeConnections()),
-        icon: const GlyphIcon(AppGlyphs.clearAll),
+      ValueListenableBuilder<TrackerInfosState>(
+        valueListenable: _connectionsStateNotifier,
+        builder: (context, state, _) => IconButton(
+          tooltip: context.appLocalizations.closeAllConnections,
+          onPressed:
+              _closingAll ||
+                  _closingConnectionIds.isNotEmpty ||
+                  state.trackerInfos.isEmpty
+              ? null
+              : () => _closeConnections(),
+          icon: _closingAll
+              ? const SizedBox.square(
+                  dimension: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const GlyphIcon(AppGlyphs.clearAll),
+        ),
       ),
     ];
   }
@@ -121,12 +136,38 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
     }
   }
 
-  Future<void> _closeThenRefresh(Future<void> close) async {
-    await close;
-    if (!mounted) {
+  Future<void> _closeConnections([String? id]) async {
+    if (_closingAll ||
+        (id == null
+            ? _closingConnectionIds.isNotEmpty
+            : _closingConnectionIds.contains(id))) {
       return;
     }
-    await _refreshConnections();
+    setState(() {
+      if (id == null) {
+        _closingAll = true;
+      } else {
+        _closingConnectionIds.add(id);
+      }
+    });
+    try {
+      if (id == null) {
+        await _core.closeConnections();
+      } else {
+        await _core.closeConnection(id);
+      }
+      if (canPoll) await _refreshConnections(() => canPoll);
+    } finally {
+      if (mounted) {
+        setState(() {
+          if (id == null) {
+            _closingAll = false;
+          } else {
+            _closingConnectionIds.remove(id);
+          }
+        });
+      }
+    }
   }
 
   @override
@@ -176,10 +217,17 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
                     padding: EdgeInsets.zero,
                     visualDensity: VisualDensity.compact,
                     style: IconButton.styleFrom(minimumSize: Size.zero),
-                    icon: const GlyphIcon(AppGlyphs.block),
-                    onPressed: () => _closeThenRefresh(
-                      _core.closeConnection(trackerInfo.id),
-                    ),
+                    icon: _closingConnectionIds.contains(trackerInfo.id)
+                        ? const SizedBox.square(
+                            dimension: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const GlyphIcon(AppGlyphs.block),
+                    onPressed:
+                        _closingAll ||
+                            _closingConnectionIds.contains(trackerInfo.id)
+                        ? null
+                        : () => _closeConnections(trackerInfo.id),
                   ),
                   detailTitle: appLocalizations.details(
                     appLocalizations.connection,

@@ -311,6 +311,133 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets(
+    'closing connections prevents duplicate and overlapping submissions',
+    (tester) async {
+      final handler = _MockCoreHandler();
+      final closeOne = Completer<bool>();
+      final closeAll = Completer<bool>();
+      when(() => handler.closeConnection('0'))
+          .thenAnswer((_) => closeOne.future);
+      when(() => handler.closeConnections()).thenAnswer((_) => closeAll.future);
+      await pumpConnections(
+        tester,
+        connectionsReader: () async => buildConnections(2),
+        core: CoreController.forTesting(handler: handler),
+      );
+      final closeButtons = find.byWidgetPredicate(
+        (widget) => widget is IconButton && widget.tooltip == 'Close',
+      );
+      final allButton = find.byWidgetPredicate(
+        (widget) =>
+            widget is IconButton && widget.tooltip == 'Close all connections',
+      );
+      final close = tester.widget<IconButton>(closeButtons.first).onPressed!;
+      close();
+      close();
+      await tester.pump();
+      verify(() => handler.closeConnection('0')).called(1);
+      expect(tester.widget<IconButton>(closeButtons.first).onPressed, isNull);
+      expect(
+        find.descendant(
+          of: closeButtons.first,
+          matching: find.byType(CircularProgressIndicator),
+        ),
+        findsOneWidget,
+      );
+      expect(tester.widget<IconButton>(allButton).onPressed, isNull);
+      closeOne.complete(true);
+      await tester.pump();
+      final closeEveryConnection = tester
+          .widget<IconButton>(allButton)
+          .onPressed!;
+      closeEveryConnection();
+      closeEveryConnection();
+      await tester.pump();
+      verify(() => handler.closeConnections()).called(1);
+      expect(tester.widget<IconButton>(allButton).onPressed, isNull);
+      for (final button in tester.widgetList<IconButton>(closeButtons)) {
+        expect(button.onPressed, isNull);
+      }
+      closeAll.complete(true);
+      await tester.pumpAndSettle();
+      expect(tester.widget<IconButton>(allButton).onPressed, isNotNull);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  testWidgets('closing after the app pauses does not refresh a hidden page', (
+    tester,
+  ) async {
+    final handler = _MockCoreHandler();
+    final closing = Completer<bool>();
+    var reads = 0;
+    when(() => handler.closeConnections()).thenAnswer((_) => closing.future);
+    await pumpConnections(
+      tester,
+      connectionsReader: () async {
+        reads++;
+        return buildConnections(1);
+      },
+      core: CoreController.forTesting(handler: handler),
+    );
+    await tester.tap(find.byTooltip('Close all connections'));
+    await tester.pump();
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    closing.complete(true);
+    await tester.pump();
+    expect(reads, 1);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+    expect(reads, 2);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('an empty connection list disables close all', (tester) async {
+    await pumpConnections(tester, connectionsReader: () async => []);
+    expect(
+      tester
+          .widget<IconButton>(
+            find.byWidgetPredicate(
+              (widget) =>
+                  widget is IconButton &&
+                  widget.tooltip == 'Close all connections',
+            ),
+          )
+          .onPressed,
+      isNull,
+    );
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('a failed close releases its busy state and remains retryable', (
+    tester,
+  ) async {
+    final handler = _MockCoreHandler();
+    final failed = Completer<bool>();
+    when(() => handler.closeConnections()).thenAnswer((_) => failed.future);
+    await pumpConnections(
+      tester,
+      connectionsReader: () async => buildConnections(1),
+      core: CoreController.forTesting(handler: handler),
+    );
+    await tester.tap(find.byTooltip('Close all connections'));
+    await tester.pump();
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    failed.completeError(StateError('fixture core disconnected'));
+    await tester.pumpAndSettle();
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(find.byType(TrackerInfoItem), findsOneWidget);
+    when(() => handler.closeConnections()).thenAnswer((_) async => true);
+    await tester.tap(find.byTooltip('Close all connections'));
+    await tester.pumpAndSettle();
+    verify(() => handler.closeConnections()).called(2);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('ConnectionsView drops a poll that ends after a later refresh', (
     tester,
   ) async {
