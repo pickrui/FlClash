@@ -100,6 +100,42 @@ void main() {
       );
     });
 
+    test('completes mesh protocols and their own options', () {
+      expect(_labels(_complete('proxies:\n  - type: easy|')), ['easytier']);
+      expect(
+        _labels(
+          _complete('type: easytier\nnetwork-|', schema: EditorSchema.proxy),
+        ),
+        unorderedEquals(['network-name', 'network-secret']),
+      );
+      expect(
+        _labels(
+          _complete(
+            'type: easytier\nno-listener: t|',
+            schema: EditorSchema.proxy,
+          ),
+        ),
+        ['true'],
+      );
+      expect(
+        _labels(
+          _complete(
+            'type: easytier\nno-listener: f|',
+            schema: EditorSchema.proxy,
+          ),
+        ),
+        ['false'],
+      );
+      expect(
+        _labels(_complete('proxies:\n  - type: zerotier\n    identity-|')),
+        ['identity-secret'],
+      );
+      expect(
+        _labels(_complete('proxies:\n  - type: easytier\n    identity-|')),
+        isNot(contains('identity-secret')),
+      );
+    });
+
     test('completes the keys of an item the caret line opens', () {
       final completion = _complete('proxies:\n  - na|');
       expect(_labels(completion).first, 'name');

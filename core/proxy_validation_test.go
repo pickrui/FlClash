@@ -40,24 +40,36 @@ func TestValidateProxiesPreservesRunningMeshResolver(t *testing.T) {
 	previousHome := constant.Path.HomeDir()
 	constant.SetHomeDir(t.TempDir())
 	t.Cleanup(func() { constant.SetHomeDir(previousHome) })
-	t.Cleanup(dns.RegisterTailscaleDnsClient("validation-fixture", validationDNSClient{}))
-	mapping := map[string]any{"name": "validation-fixture", "type": "tailscale", "state-dir": "fixture"}
-	results := handleValidateProxies([]map[string]any{mapping})
-	if len(results) != 1 || results[0] != "" {
-		t.Fatalf("validation: %v", results)
-	}
-	if mapping["name"] != "validation-fixture" {
-		t.Fatal("mutated source definition")
-	}
-	resolver := dns.NewResolver(dns.Config{Main: []dns.NameServer{{Net: "tailscale", Addr: "validation-fixture"}}})
-	_, err := resolver.ExchangeContext(context.Background(), new(D.Msg).SetQuestion("host.example.", D.TypeA))
-	if err != nil {
-		t.Fatalf("running resolver was changed: %v", err)
-	}
-	for _, result := range results {
-		if strings.Contains(result, "\x00") {
-			t.Fatal("validation name leaked")
-		}
+	for _, kind := range []string{"tailscale", "easytier"} {
+		t.Run(kind, func(t *testing.T) {
+			mapping := map[string]any{"name": "validation-fixture", "type": kind, "state-dir": "fixture"}
+			if kind == "easytier" {
+				mapping["network-name"] = "fixture"
+				mapping["peers"] = []string{"tcp://127.0.0.1:1"}
+			}
+			if kind == "easytier" {
+				t.Cleanup(dns.RegisterEasyTierDnsClient("validation-fixture", validationDNSClient{}))
+			} else {
+				t.Cleanup(dns.RegisterTailscaleDnsClient("validation-fixture", validationDNSClient{}))
+			}
+			results := handleValidateProxies([]map[string]any{mapping})
+			if len(results) != 1 || results[0] != "" {
+				t.Fatalf("validation: %v", results)
+			}
+			if mapping["name"] != "validation-fixture" {
+				t.Fatal("mutated source definition")
+			}
+			resolver := dns.NewResolver(dns.Config{Main: []dns.NameServer{{Net: kind, Addr: "validation-fixture"}}})
+			_, err := resolver.ExchangeContext(context.Background(), new(D.Msg).SetQuestion("host.example.", D.TypeA))
+			if err != nil {
+				t.Fatalf("running resolver was changed: %v", err)
+			}
+			for _, result := range results {
+				if strings.Contains(result, "\x00") {
+					t.Fatal("validation name leaked")
+				}
+			}
+		})
 	}
 }
 
