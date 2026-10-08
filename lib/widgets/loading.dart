@@ -78,6 +78,7 @@ class _CommonCircleLoadingState extends State<CommonCircleLoading>
 
   List<RoundedPolygon>? _cachedPolygons;
   List<Morph>? _cachedMorphs;
+  Timer? _morphTimer;
 
   var _currentMorphIndex = 0;
   var _morphRotationTargetAngle = _quarterRotation;
@@ -94,11 +95,12 @@ class _CommonCircleLoadingState extends State<CommonCircleLoading>
       _morphController,
       _globalRotationController,
     ]);
-    unawaited(_runMorphLoop());
+    unawaited(_animateMorph());
   }
 
   @override
   void dispose() {
+    _morphTimer?.cancel();
     _morphController.dispose();
     _globalRotationController.dispose();
     super.dispose();
@@ -237,30 +239,25 @@ class _CommonCircleLoadingState extends State<CommonCircleLoading>
     return CommonCircleLoading.defaultDimension;
   }
 
-  Future<void> _runMorphLoop() async {
-    while (mounted) {
-      final startedAt = DateTime.now();
-      try {
-        await _morphController.animateWith(_morphAnimation).orCancel;
-      } on TickerCanceled {
-        return;
-      }
-
-      final elapsed = DateTime.now().difference(startedAt);
-      if (elapsed < _morphInterval) {
-        await Future<void>.delayed(_morphInterval - elapsed);
-      }
-      if (!mounted) {
-        return;
-      }
-
+  Future<void> _animateMorph() async {
+    final stopwatch = Stopwatch()..start();
+    try {
+      await _morphController.animateWith(_morphAnimation).orCancel;
+    } on TickerCanceled {
+      return;
+    }
+    if (!mounted) return;
+    final remaining = _morphInterval - stopwatch.elapsed;
+    _morphTimer = Timer(remaining.isNegative ? Duration.zero : remaining, () {
+      _morphTimer = null;
       setState(() {
         _currentMorphIndex = (_currentMorphIndex + 1) % _shapeCount;
         _morphRotationTargetAngle =
             (_morphRotationTargetAngle + _quarterRotation) % _fullRotation;
         _morphController.value = 0;
       });
-    }
+      unawaited(_animateMorph());
+    });
   }
 }
 

@@ -38,12 +38,19 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
   final _updating = <int>{};
   bool _importing = false;
   ScriptLibrary get _library => ref.read(scriptLibraryProvider);
+  bool get _isCurrentPage => mounted && context.isCurrentPage;
 
-  Future<void> _run(Future<void> Function() action) async {
+  Future<void> _run(
+    Future<void> Function() action, {
+    BuildContext? errorContext,
+  }) async {
+    final source = errorContext ?? context;
     try {
       await action();
     } catch (error) {
-      if (mounted) context.showNotifier(error.toString());
+      if (mounted && source.mounted && source.isCurrentPage) {
+        context.showNotifier(error.toString());
+      }
     }
   }
 
@@ -85,7 +92,7 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
   }
 
   Future<void> _import({required bool fromUrl}) async {
-    if (_importing) return;
+    if (_importing || !_isCurrentPage) return;
     setState(() => _importing = true);
     try {
       await _run(() async {
@@ -95,18 +102,18 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
         late final String name;
         if (fromUrl) {
           url = (await _url())?.trim();
-          if (url == null || !mounted) return;
+          if (url == null || !_isCurrentPage) return;
           name = p.basenameWithoutExtension(Uri.parse(url).path);
           content = await library.fetch(url);
         } else {
           final file = await picker.pickerFile();
-          if (file == null || !mounted) return;
+          if (file == null || !_isCurrentPage) return;
           name = p.basenameWithoutExtension(file.name);
           content = utf8.decode(
             await file.readBytes(maxBytes: maxScriptContentBytes),
           );
         }
-        if (!mounted) return;
+        if (!mounted || !context.isCurrentPage) return;
         final base = name.isEmpty ? context.appLocalizations.script : name;
         final labels = (ref.read(scriptsProvider).value ?? [])
             .map((item) => item.label)
@@ -172,7 +179,10 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
           );
           if (answer == false) return true;
           if (answer == true && mounted && editorContext.mounted) {
-            await _run(() => _save(editorContext, title, content, script));
+            await _run(
+              () => _save(editorContext, title, content, script),
+              errorContext: editorContext,
+            );
           }
           return false;
         },

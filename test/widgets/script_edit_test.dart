@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:code_forge/code_forge.dart';
 import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/l10n/l10n.dart';
+import 'package:fl_clash/manager/status_manager.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/action.dart';
@@ -103,7 +104,7 @@ void main() {
           scriptLibraryProvider.overrideWithValue(library),
           viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 1000)),
         ],
-        child: const ScriptsView(),
+        child: const StatusManager(child: ScriptsView()),
       ),
     );
     await tester.pumpAndSettle();
@@ -189,6 +190,37 @@ void main() {
       tester.widget<CodeForge>(find.byType(CodeForge)).controller.text,
       '',
     );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('failed save on back reports on its editor and preserves text', (
+    tester,
+  ) async {
+    await tester.runAsync(() => file.writeAsString('const original = true;'));
+    await openLibrary(tester);
+    await tester.tap(find.text('Fixture'));
+    await settle(tester, 12);
+    final controller = tester
+        .widget<CodeForge>(find.byType(CodeForge))
+        .controller;
+    controller.text = 'const edited = true;';
+    library.completeSave = () async => throw StateError('fixture write failed');
+    await tester.pump();
+    await tester.binding.handlePopRoute();
+    await settle(tester);
+    await tester.tap(find.text(AppLocalizations.current.confirm));
+    await settle(tester, 12);
+    expect(find.byType(EditorPage), findsOneWidget);
+    expect(
+      find.textContaining('fixture write failed', skipOffstage: false),
+      findsOneWidget,
+    );
+    expect(controller.text, 'const edited = true;');
+    library.completeSave = null;
+    await tester.tap(find.byTooltip('Save'));
+    await settle(tester, 12);
+    expect(find.byType(EditorPage), findsNothing);
+    expect(library.saved, List.filled(2, 'const edited = true;'));
     expect(tester.takeException(), isNull);
   });
 

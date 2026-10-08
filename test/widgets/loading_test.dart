@@ -10,6 +10,18 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('disposing between morphs releases the pending delay', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: Center(child: CommonCircleLoading())),
+    );
+    await tester.pump(const Duration(milliseconds: 16));
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpWidget(const SizedBox.shrink());
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('CommonCircleLoading uses the M3E default size', (tester) async {
     await tester.pumpWidget(
       const MaterialApp(home: Center(child: CommonCircleLoading())),

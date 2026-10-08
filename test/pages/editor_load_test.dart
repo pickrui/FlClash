@@ -10,6 +10,7 @@ import 'package:fl_clash/common/navigator.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/pages/editor.dart';
+import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/widgets/popup.dart';
 import 'package:flutter/gestures.dart' show kSecondaryButton;
@@ -21,8 +22,67 @@ import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
 import '../plugins/code_forge/support.dart';
 
+class _CommonAction extends CommonAction {
+  final errors = <Object>[];
+  @override
+  void build() {}
+  @override
+  Future<T?> safeRun<T>(
+    FutureOr<T> Function() action, {
+    String? title,
+    VoidCallback? onStart,
+    VoidCallback? onEnd,
+    bool silence = true,
+  }) async {
+    try {
+      return await action();
+    } catch (error) {
+      errors.add(error);
+      return null;
+    }
+  }
+}
+
 void main() {
   setUpAll(initEditorNative);
+
+  testWidgets('load failure during exit does not report or remove the route', (
+    tester,
+  ) async {
+    final content = Completer<String>();
+    final actions = _CommonAction();
+    await tester.pumpWidget(
+      TestApp(
+        overrides: [
+          commonActionProvider.overrideWith(() => actions),
+          viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 600)),
+        ],
+        child: Builder(
+          builder: (context) => TextButton(
+            onPressed: () => BaseNavigator.push<void>(
+              context,
+              EditorPage(title: 'Loading editor', load: () => content.future),
+            ),
+            child: const Text('Open editor'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Open editor'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    final context = tester.element(find.byType(EditorPage));
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+    expect(context.mounted, isTrue);
+    expect(ModalRoute.of(context)!.isActive, isFalse);
+    content.completeError(StateError('late editor read failure'));
+    await tester.pump();
+    expect(actions.errors, isEmpty);
+    await tester.pumpAndSettle();
+    expect(find.text('Open editor'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('mounts the editor only once loaded content arrives', (
     tester,
@@ -52,6 +112,40 @@ void main() {
       editor.controller.selection,
       const TextSelection.collapsed(offset: 0),
     );
+  });
+
+  testWidgets('a covered editor finishes loading without dismissing a dialog', (
+    tester,
+  ) async {
+    final content = Completer<String>();
+    await tester.pumpWidget(
+      TestApp(
+        overrides: [
+          viewSizeProvider.overrideWithBuild((_, _) => const Size(1200, 1000)),
+        ],
+        child: EditorPage(title: 'Editor', load: () => content.future),
+      ),
+    );
+    await tester.pump();
+    final context = tester.element(find.byType(EditorPage));
+    final navigator = Navigator.of(context);
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (_) => const AlertDialog(content: Text('Other message')),
+      ),
+    );
+    await tester.pump();
+    content.complete('mode: rule');
+    await settle(tester);
+    expect(find.text('Other message'), findsOneWidget);
+    navigator.pop();
+    await settle(tester);
+    expect(
+      tester.widget<CodeForge>(find.byType(CodeForge)).controller.text,
+      'mode: rule',
+    );
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('loads only once the push transition has finished', (

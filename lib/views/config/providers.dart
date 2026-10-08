@@ -47,12 +47,19 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
   ProviderKind _kind = ProviderKind.proxy;
   String _search = '';
   bool _importing = false;
+  bool get _isCurrentPage => mounted && context.isCurrentPage;
 
-  Future<void> _run(Future<void> Function() action) async {
+  Future<void> _run(
+    Future<void> Function() action, {
+    BuildContext? errorContext,
+  }) async {
+    final source = errorContext ?? context;
     try {
       await action();
     } catch (error) {
-      if (mounted) context.showNotifier(providerLibraryError(context, error));
+      if (mounted && source.mounted && source.isCurrentPage) {
+        context.showNotifier(providerLibraryError(context, error));
+      }
     }
   }
 
@@ -95,7 +102,7 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
       );
 
   Future<void> _import({required bool fromUrl}) async {
-    if (_importing) return;
+    if (_importing || !_isCurrentPage) return;
     setState(() => _importing = true);
     try {
       await _run(() async {
@@ -124,7 +131,7 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
                   },
                 ),
               );
-          if (result == null || !mounted) return;
+          if (result == null || !_isCurrentPage) return;
           _options(
             _newProvider(
               label: result.label.isEmpty
@@ -136,9 +143,9 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
           );
         } else {
           final file = await picker.pickerFile();
-          if (file == null || !mounted) return;
+          if (file == null || !_isCurrentPage) return;
           final bytes = await file.readBytes(maxBytes: maxProviderContentBytes);
-          if (!mounted) return;
+          if (!_isCurrentPage) return;
           _options(
             _newProvider(
               label: _uniqueLabel(file.name),
@@ -222,7 +229,10 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
           );
           if (answer == false) return true;
           if (answer == true && mounted && editorContext.mounted) {
-            await _run(() => save(editorContext, title, content));
+            await _run(
+              () => save(editorContext, title, content),
+              errorContext: editorContext,
+            );
           }
           return false;
         },
@@ -469,6 +479,7 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
   bool _importing = false;
 
   bool get _busy => _saving || _importing;
+  bool get _isCurrentPage => mounted && context.isCurrentPage;
 
   @override
   void dispose() {
@@ -483,16 +494,16 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
   }
 
   Future<void> _import() async {
-    if (_busy) return;
+    if (_busy || !_isCurrentPage) return;
     setState(() => _importing = true);
     try {
       final file = await (widget.pickFile ?? picker.pickerFile)();
-      if (file == null || !mounted) return;
+      if (file == null || !_isCurrentPage) return;
       if ((file.lengthSync() ?? 0) > maxProviderContentBytes) {
         throw const ProviderLibraryException('size');
       }
       final bytes = await file.readBytes(maxBytes: maxProviderContentBytes);
-      if (!mounted) return;
+      if (!_isCurrentPage) return;
       final format = ruleProviderFormatOf(file.name) ?? RuleProviderFormat.yaml;
       setState(() {
         _remote = false;
@@ -502,7 +513,9 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
         }
       });
     } catch (error) {
-      if (mounted) context.showNotifier(providerLibraryError(context, error));
+      if (mounted && context.isCurrentPage) {
+        context.showNotifier(providerLibraryError(context, error));
+      }
     } finally {
       if (mounted) setState(() => _importing = false);
     }

@@ -271,4 +271,57 @@ void main() {
     expect(find.textContaining('fixture read cancelled'), findsNothing);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('import failure during the exit animation stays silent', (
+    tester,
+  ) async {
+    final bytes = Completer<Uint8List>();
+    pickFile = () async => _PickedResourceFile(bytes.future);
+    await open(tester);
+    await tester.tap(find.text('Import'));
+    await tester.pump();
+    final context = tester.element(find.byType(EditClashProviderView));
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+    expect(context.mounted, isTrue);
+    expect(ModalRoute.of(context)!.isActive, isFalse);
+    bytes.completeError(StateError('fixture cancelled read'));
+    await tester.pump();
+    await tester.pump();
+    expect(
+      find.textContaining('fixture cancelled read', skipOffstage: false),
+      findsNothing,
+    );
+    await tester.pumpAndSettle();
+    expect(library.saved, isEmpty);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('covered import preserves the draft for a later save', (
+    tester,
+  ) async {
+    final bytes = Completer<Uint8List>();
+    pickFile = () async => _PickedResourceFile(bytes.future);
+    await open(tester);
+    await tester.tap(find.text('Import'));
+    await tester.pump();
+    final context = tester.element(find.byType(EditClashProviderView));
+    final navigator = Navigator.of(context);
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (_) => const AlertDialog(content: Text('Other message')),
+      ),
+    );
+    await tester.pump();
+    bytes.complete(Uint8List.fromList(utf8.encode('new.example')));
+    await tester.pumpAndSettle();
+    expect(find.text('Other message'), findsOneWidget);
+    navigator.pop();
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Save'));
+    await tester.pumpAndSettle();
+    expect(library.saved.single.content, _original.content);
+    expect(tester.takeException(), isNull);
+  });
 }

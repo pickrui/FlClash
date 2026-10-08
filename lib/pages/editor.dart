@@ -178,26 +178,29 @@ class _EditorPageState extends ConsumerState<EditorPage> {
   }
 
   Future<void> _load(Future<String> Function() load) async {
+    final route = ModalRoute.of(context);
+    final navigator = Navigator.of(context);
+    final commonAction = context.commonAction;
+    bool isActive() => mounted && (route?.isActive ?? true);
     await whenRouteSettled(context);
-    if (!mounted) {
+    if (!isActive()) {
       return;
     }
-    final content = await context.commonAction.safeRun(() async {
+    final content = await commonAction.safeRun(() async {
       try {
         return await load();
       } catch (_) {
-        if (!mounted) return null;
+        if (!isActive()) return null;
         rethrow;
       }
     }, silence: false);
-    if (!mounted) {
+    if (!isActive()) {
       return;
     }
     if (content == null) {
       // The error dialog is on top, so pop() would close it instead.
-      final route = ModalRoute.of(context);
       if (route != null) {
-        Navigator.of(context).removeRoute(route);
+        navigator.removeRoute(route);
       }
       return;
     }

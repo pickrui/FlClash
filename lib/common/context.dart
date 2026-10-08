@@ -12,6 +12,11 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:material_ui/material_ui.dart';
 
 extension BuildContextExtension on BuildContext {
+  bool get isCurrentPage =>
+      mounted &&
+      (ModalRoute.of(this)?.isCurrent ?? true) &&
+      getInheritedWidgetOfExactType<PageActivityScope>()?.isActive != false;
+
   bool get disableAnimations => MediaQuery.disableAnimationsOf(this);
   Duration motionDuration(Duration duration) =>
       MediaQuery.disableAnimationsOf(this) ? Duration.zero : duration;
