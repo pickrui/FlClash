@@ -53,8 +53,18 @@ class DesktopWindow {
       if (!_listeners.contains(listener)) {
         continue;
       }
-      listener.onWindowEvent(event);
-      _dispatch(listener, event);
+      try {
+        listener.onWindowEvent(event);
+        if (_listeners.contains(listener)) _dispatch(listener, event);
+      } catch (error, stackTrace) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: error,
+            stack: stackTrace,
+            library: 'desktop window',
+          ),
+        );
+      }
     }
   }
 

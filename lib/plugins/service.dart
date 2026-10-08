@@ -43,26 +43,37 @@ class Service {
             Map<String, Object?>.from(json.decode(data) as Map),
           );
           for (final event in coreEventsFromData(methodCall.arguments)) {
-            for (final listener in _listeners) {
-              listener.onServiceEvent(event);
-            }
+            _notifyListeners((listener) => listener.onServiceEvent(event));
           }
           break;
         case 'stateChanged':
-          for (final listener in _listeners) {
-            listener.onServiceStateChanged();
-          }
+          _notifyListeners((listener) => listener.onServiceStateChanged());
           break;
         case 'crash':
           final message = call.arguments as String? ?? '';
-          for (final listener in _listeners) {
-            listener.onServiceCrash(message);
-          }
+          _notifyListeners((listener) => listener.onServiceCrash(message));
           break;
         default:
           throw MissingPluginException();
       }
     });
+  }
+
+  void _notifyListeners(void Function(ServiceListener) notify) {
+    for (final listener in _listeners.toList(growable: false)) {
+      if (!_listeners.contains(listener)) continue;
+      try {
+        notify(listener);
+      } catch (error, stackTrace) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: error,
+            stack: stackTrace,
+            library: 'android service',
+          ),
+        );
+      }
+    }
   }
 
   Future<CoreMethodResponse?> invokeMethod(CoreMethodCall call) async {

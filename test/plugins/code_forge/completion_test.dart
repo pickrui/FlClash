@@ -41,6 +41,34 @@ void main() {
     return (controller, popups);
   }
 
+  testWidgets('a failed completion source recovers on later input', (
+    tester,
+  ) async {
+    var fail = true;
+    final controller = CodeForgeController()
+      ..completionSource = (request) {
+        if (fail) {
+          fail = false;
+          throw StateError('fixture completion failed');
+        }
+        return CodeForgeCompletion(
+          prefix: request.textBeforeCaret,
+          suggestions: const [CodeForgeSuggestion(label: 'alpha')],
+        );
+      };
+    await pumpEditor(tester, controller);
+    await focusEditor(tester);
+    await typeText(tester, controller, 'a');
+    await settle(tester, 8);
+    expect(tester.takeException(), isStateError);
+    expect(controller.suggestions, isNull);
+    await typeText(tester, controller, 'l');
+    await settle(tester, 8);
+    expect(controller.suggestions?.single.label, 'alpha');
+    expect(controller.text, 'al');
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('typing a known prefix opens the popup with document words', (
     tester,
   ) async {

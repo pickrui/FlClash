@@ -85,9 +85,10 @@ extension _ControllerEditPipeline on CodeForgeController {
   }
 
   void _notifyEdit(int offset, int removed, int added) {
-    for (final listener in List.of(_editListeners)) {
-      listener(offset, removed, added);
-    }
+    _notifyCallbacks(
+      _editListeners,
+      (listener) => listener(offset, removed, added),
+    );
   }
 
   void _scheduleFlush() {

@@ -59,6 +59,32 @@ typedef CodeForgeCompletionSource = CodeForgeCompletion? Function(
 );
 
 extension CodeForgeControllerCompletion on CodeForgeController {
+  Future<void> _refreshCompletion(int revision) async {
+    bool isCurrent() => !_isDisposed && revision == _completionRevision;
+    try {
+      final version = _currentVersion;
+      if (enableLocalSuggestions && _wordCacheVersion != version) {
+        final words = await _extractWords();
+        if (!isCurrent()) return;
+        _wordCache = words;
+        _wordCacheVersion = version;
+      }
+      if (!isCurrent()) return;
+      final typing = _isTyping && (focusNode?.hasFocus ?? true);
+      _showCompletion(typing ? _complete() : null);
+    } catch (error, stackTrace) {
+      if (!isCurrent()) return;
+      _showCompletion(null);
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: error,
+          stack: stackTrace,
+          library: 'code forge completion',
+        ),
+      );
+    }
+  }
+
   /// Inserts the suggestion at [index], or the highlighted one, in place of
   /// the prefix it was matched against and closes the popup.
   void acceptSuggestion([int? index]) {

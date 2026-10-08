@@ -7,18 +7,30 @@ import 'dart:async';
 
 import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/plugins/service.dart';
+import 'package:fl_clash/models/models.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _Listener with ServiceListener {
+  void Function()? notify;
   int changes = 0;
   final crashes = <String>[];
 
   @override
-  void onServiceStateChanged() => changes++;
+  void onServiceStateChanged() {
+    changes++;
+    notify?.call();
+  }
 
   @override
-  void onServiceCrash(String message) => crashes.add(message);
+  void onServiceCrash(String message) {
+    crashes.add(message);
+    notify?.call();
+  }
+
+  @override
+  void onServiceEvent(CoreEvent event) => notify?.call();
 }
 
 void main() {
@@ -55,6 +67,51 @@ void main() {
     service.removeListener(listener);
     messenger.setMockMethodCallHandler(channel, null);
   });
+
+  for (final (method, arguments) in [
+    ('stateChanged', null),
+    ('crash', 'disconnected'),
+    (
+      'event',
+      '{"method":"message","arguments":[{"type":"loaded","data":"one"}]}',
+    ),
+  ]) {
+    test('$method tolerates listeners being removed during delivery', () async {
+      final calls = <String>[];
+      final removed = _Listener()..notify = () => calls.add('removed');
+      final remaining = _Listener()..notify = () => calls.add('remaining');
+      listener.notify = () {
+        calls.add('first');
+        service.removeListener(listener);
+        service.removeListener(removed);
+      };
+      service.addListener(removed);
+      service.addListener(remaining);
+      addTearDown(() {
+        service.removeListener(removed);
+        service.removeListener(remaining);
+      });
+      await sendNative(method, arguments);
+      expect(calls, ['first', 'remaining']);
+    });
+  }
+
+  test(
+    'one failed observer does not suppress other service observers',
+    () async {
+      final errors = <FlutterErrorDetails>[];
+      final original = FlutterError.onError;
+      FlutterError.onError = errors.add;
+      addTearDown(() => FlutterError.onError = original);
+      final remaining = _Listener();
+      service.addListener(remaining);
+      addTearDown(() => service.removeListener(remaining));
+      listener.notify = () => throw StateError('fixture observer failed');
+      await sendNative('stateChanged');
+      expect(remaining.changes, 1);
+      expect(errors.single.exception, isStateError);
+    },
+  );
 
   test(
     'VPN state changes do not report a Core crash or request stop',

@@ -121,24 +121,21 @@ class CodeForgeController implements DeltaTextInputClient {
   Set<String> _wordCache = {};
   int _wordCacheVersion = -1;
   int _completionStart = 0;
+  int _completionRevision = 0;
 
   CodeForgeController() {
     suggestionsNotifier.addListener(() {
       selectedSuggestionNotifier.value =
           suggestionsNotifier.value == null || _isMobile ? null : 0;
     });
-    _listeners.add(() async {
-      if (!enableLocalSuggestions && completionSource == null) return;
+    _listeners.add(() {
+      final revision = ++_completionRevision;
       _debounceTimer?.cancel();
-      _debounceTimer = Timer(const Duration(milliseconds: 200), () async {
-        if (enableLocalSuggestions && _wordCacheVersion != _currentVersion) {
-          _wordCacheVersion = _currentVersion;
-          _wordCache = await _extractWords();
-        }
-        if (_isDisposed) return;
-        final typing = _isTyping && (focusNode?.hasFocus ?? true);
-        _showCompletion(typing ? _complete() : null);
-      });
+      if (!enableLocalSuggestions && completionSource == null) return;
+      _debounceTimer = Timer(
+        const Duration(milliseconds: 200),
+        () => unawaited(_refreshCompletion(revision)),
+      );
     });
   }
 
@@ -366,9 +363,25 @@ class CodeForgeController implements DeltaTextInputClient {
   }
 
   void notifyListeners() {
+    _notifyCallbacks(_listeners, (listener) => listener());
+  }
+
+  void _notifyCallbacks<T>(List<T> listeners, void Function(T) notify) {
     if (_isDisposed) return;
-    for (final listener in _listeners) {
-      listener();
+    for (final listener in listeners.toList(growable: false)) {
+      if (_isDisposed) return;
+      if (!listeners.contains(listener)) continue;
+      try {
+        notify(listener);
+      } catch (error, stackTrace) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: error,
+            stack: stackTrace,
+            library: 'code forge',
+          ),
+        );
+      }
     }
   }
 

@@ -57,7 +57,8 @@ class CoreEventManager {
   CoreEventManager._() {
     _controller.stream
         .asyncMap((event) async {
-          for (final CoreEventListener listener in _listeners) {
+          for (final listener in _listeners.toList(growable: false)) {
+            if (!_listeners.contains(listener)) continue;
             try {
               switch (event.type) {
                 case CoreEventType.log:

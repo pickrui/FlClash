@@ -27,11 +27,15 @@ class Tile {
 
   final ObserverList<TileListener> _listeners = ObserverList<TileListener>();
   bool _ready = false;
+  int _readinessRevision = 0;
 
   Future<bool> _methodCallHandler(MethodCall call) async {
     if (call.method == 'start' || call.method == 'stop') {
       if (!_ready) return false;
-      for (final listener in _listeners.toList()) {
+      final readinessRevision = _readinessRevision;
+      for (final listener in _listeners.toList(growable: false)) {
+        if (!_ready || readinessRevision != _readinessRevision) return false;
+        if (!_listeners.contains(listener)) continue;
         final handled = await (call.method == 'start'
             ? listener.onStart()
             : listener.onStop());
@@ -43,7 +47,9 @@ class Tile {
   }
 
   Future<void> setReady(bool ready) async {
-    _ready = ready && _listeners.isNotEmpty;
+    final nextReady = ready && _listeners.isNotEmpty;
+    if (_ready != nextReady) _readinessRevision++;
+    _ready = nextReady;
     await _channel.invokeMethod<void>('setReady', _ready);
   }
 

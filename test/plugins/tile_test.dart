@@ -108,6 +108,40 @@ void main() {
     });
   }
 
+  for (final invalidation in ['remove', 'unready', 'restart']) {
+    test(
+      'pending shortcut skips invalidated listeners ($invalidation)',
+      () async {
+        final entered = Completer<void>();
+        final release = Completer<bool>();
+        final other = _Listener();
+        var calls = 0;
+        listener.start = () {
+          entered.complete();
+          return release.future;
+        };
+        other.start = () {
+          calls++;
+          return true;
+        };
+        tile.addListener(other);
+        addTearDown(() => tile.removeListener(other));
+        await tile.setReady(true);
+        final response = sendNative('start');
+        await entered.future;
+        if (invalidation == 'remove') {
+          tile.removeListener(other);
+        } else {
+          await tile.setReady(false);
+          if (invalidation == 'restart') await tile.setReady(true);
+        }
+        release.complete(false);
+        expect(await response, false);
+        expect(calls, 0);
+      },
+    );
+  }
+
   test('revokes readiness when the last listener is removed', () async {
     listener.start = () => true;
     await tile.setReady(true);

@@ -127,9 +127,6 @@ flutter:
     - family: Twemoji
       fonts:
         - asset: assets/fonts/Twemoji.Mozilla.ttf
-    - family: Icons
-      fonts:
-        - asset: assets/fonts/Icons.ttf
 flutter_intl:
   enabled: true
   class_name: AppLocalizations

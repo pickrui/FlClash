@@ -21,16 +21,11 @@ class CoreManager extends ConsumerStatefulWidget {
   const CoreManager({super.key, required this.child});
 
   @override
-  ConsumerState<CoreManager> createState() => _CoreContainerState();
+  ConsumerState<CoreManager> createState() => _CoreManagerState();
 }
 
-class _CoreContainerState extends ConsumerState<CoreManager>
+class _CoreManagerState extends ConsumerState<CoreManager>
     with CoreEventListener {
-  @override
-  Widget build(BuildContext context) {
-    return widget.child;
-  }
-
   @override
   void initState() {
     super.initState();
@@ -76,7 +71,7 @@ class _CoreContainerState extends ConsumerState<CoreManager>
   }
 
   @override
-  Future<void> onDelay(Delay delay) async {
+  void onDelay(Delay delay) {
     super.onDelay(delay);
     appController.setDelay(delay);
     debouncer.call(
@@ -97,7 +92,7 @@ class _CoreContainerState extends ConsumerState<CoreManager>
   }
 
   @override
-  void onRequest(TrackerInfo trackerInfo) async {
+  void onRequest(TrackerInfo trackerInfo) {
     ref.read(requestsProvider.notifier).addRequest(trackerInfo);
     super.onRequest(trackerInfo);
   }
@@ -194,4 +189,7 @@ class _CoreContainerState extends ConsumerState<CoreManager>
     }
     super.onGeoUpdate(geoType, updating, skipped, reload, error);
   }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }

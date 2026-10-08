@@ -47,6 +47,8 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
   late bool _autoRoute;
   late bool _allowLan;
   bool? _hasSavedAuthKey;
+  Object? _authKeyLoadError;
+  int _authKeyLoadRevision = 0;
   TailscaleStatus? _status;
   String? _statusError;
   bool _statusLoaded = false;
@@ -116,9 +118,24 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
       _hasSavedAuthKey = false;
       return;
     }
-    final hasKey = await _action.hasAuthKey(network);
-    if (mounted) setState(() => _hasSavedAuthKey = hasKey);
+    final revision = ++_authKeyLoadRevision;
+    setState(() {
+      _hasSavedAuthKey = null;
+      _authKeyLoadError = null;
+    });
+    try {
+      final hasKey = await _action.hasAuthKey(network);
+      if (!mounted || revision != _authKeyLoadRevision) return;
+      setState(() => _hasSavedAuthKey = hasKey);
+    } catch (error) {
+      if (!mounted || revision != _authKeyLoadRevision) return;
+      setState(() => _authKeyLoadError = error);
+    }
   }
+
+  bool get _authKeyStateReady =>
+      _loginMethod != TailscaleLoginMethod.authKey ||
+      (_hasSavedAuthKey != null && _authKeyLoadError == null);
 
   @override
   Future<void> poll(PollGuard isCurrent) async {
@@ -251,6 +268,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
   }
 
   Future<TailscaleNetwork?> _save() async {
+    if (_busy || !_authKeyStateReady) return null;
     if (_invalidFields(context.appLocalizations).isNotEmpty) return null;
     final action = _action;
     setState(() => _busy = true);
@@ -264,6 +282,8 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
       if (!mounted) return saved;
       final keyEntered = _authKey.text.trim().isNotEmpty;
       setState(() {
+        _authKeyLoadRevision++;
+        _authKeyLoadError = null;
         if (_loginMethod == TailscaleLoginMethod.interactive) {
           _hasSavedAuthKey = false;
         } else if (keyEntered) {
@@ -574,6 +594,23 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
           helper: _hasSavedAuthKey == true ? l.tailscaleAuthKeySaved : null,
           error: _authKeyValid ? null : l.tailscaleAuthKeyInvalid,
         ),
+      if (_loginMethod == TailscaleLoginMethod.authKey && !_authKeyStateReady)
+        ListItem(
+          title: Text(
+            _authKeyLoadError != null ? l.operationFailed : l.loading,
+          ),
+          trailing: _authKeyLoadError != null
+              ? TextButton(
+                  onPressed: _busy || _saved == null
+                      ? null
+                      : () => _loadSavedAuthKey(_saved!),
+                  child: Text(l.refresh),
+                )
+              : const SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+        ),
       _footnote(l.tailscaleLoginFooter),
       ListItem.switchItem(
         title: Text(l.tailscaleAutoRoute),
@@ -707,7 +744,9 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
         )
       else ...[
         FilledButton(
-          onPressed: _busy || invalid.isNotEmpty ? null : _saveAndLogin,
+          onPressed: _busy || !_authKeyStateReady || invalid.isNotEmpty
+              ? null
+              : _saveAndLogin,
           child: Text(l.tailscaleSaveAndLogin),
         ),
         const SizedBox(height: 8),
@@ -752,7 +791,8 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
       actions: [
         IconButton(
           tooltip: l.save,
-          onPressed: _busy || _invalidFields(l).isNotEmpty
+          onPressed:
+              _busy || !_authKeyStateReady || _invalidFields(l).isNotEmpty
               ? null
               : () => unawaited(_save()),
           icon: const Icon(Icons.check),

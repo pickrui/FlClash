@@ -46,11 +46,12 @@ Future<(FakeTailscaleBackend, ProviderContainer)> _pump(
   List<TailscaleNetwork> networks = const [],
   TailscaleStatus? status,
   Object? statusError,
+  FakeTailscaleBackend? testBackend,
 }) async {
   tester.view.physicalSize = const Size(1000, 2400);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
-  final backend = FakeTailscaleBackend()
+  final backend = (testBackend ?? FakeTailscaleBackend())
     ..nextStatus = status
     ..statusError = statusError;
   await tester.pumpWidget(
@@ -85,6 +86,63 @@ void _setVisible(WidgetTester tester, bool visible) {
 }
 
 void main() {
+  testWidgets('auth key storage failures can retry before saving', (
+    tester,
+  ) async {
+    final pending = Completer<String?>();
+    final backend = FakeTailscaleBackend()
+      ..readAuthKeyHandler = (_) => pending.future;
+    await _pump(
+      tester,
+      const TailscaleNetworkPage(networkId: 'home'),
+      networks: [_home.copyWith(loginMethod: TailscaleLoginMethod.authKey)],
+      testBackend: backend,
+    );
+    expect(
+      tester
+          .widget<IconButton>(find.widgetWithIcon(IconButton, Icons.check))
+          .onPressed,
+      isNull,
+    );
+    expect(
+      tester
+          .widget<FilledButton>(
+            find.widgetWithText(FilledButton, 'Save and log in'),
+          )
+          .onPressed,
+      isNull,
+    );
+    pending.completeError(StateError('fixture key storage unavailable'));
+    await tester.pumpAndSettle();
+    expect(find.text('Operation failed'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    expect(
+      tester
+          .widget<IconButton>(find.widgetWithIcon(IconButton, Icons.check))
+          .onPressed,
+      isNull,
+    );
+    backend.readAuthKeyHandler = (_) async => 'tskey-auth-fixture';
+    await tester.tap(find.text('Refresh'));
+    await tester.pumpAndSettle();
+    expect(find.text('Operation failed'), findsNothing);
+    expect(
+      tester
+          .widget<IconButton>(find.widgetWithIcon(IconButton, Icons.check))
+          .onPressed,
+      isNotNull,
+    );
+    expect(
+      tester
+          .widget<FilledButton>(
+            find.widgetWithText(FilledButton, 'Save and log in'),
+          )
+          .onPressed,
+      isNotNull,
+    );
+    await _unmount(tester);
+  });
+
   testWidgets('an empty list invites adding a network', (tester) async {
     await _pump(tester, const TailscaleView());
     expect(find.text('Access your tailnet'), findsOneWidget);

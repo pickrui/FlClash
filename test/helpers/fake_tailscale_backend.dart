@@ -11,6 +11,7 @@ class FakeTailscaleBackend extends TailscaleBackend {
   TailscaleStatus? nextStatus;
   Future<TailscaleStatus?> Function(String)? statusHandler;
   Object? statusError;
+  Future<String?> Function(String)? readAuthKeyHandler;
   Object? forgetError;
   bool applied = true;
 
@@ -48,7 +49,9 @@ class FakeTailscaleBackend extends TailscaleBackend {
   @override
   Future<String?> readAuthKey(String key) async {
     storageCalls.add('read $key');
-    return authKeys[key];
+    return readAuthKeyHandler != null
+        ? await readAuthKeyHandler!(key)
+        : authKeys[key];
   }
 
   @override
