@@ -111,6 +111,18 @@ void main() {
     return actions;
   }
 
+  Future<void> waitForEditor(WidgetTester tester) async {
+    final editor = find.byType(CodeForge);
+    for (
+      var attempt = 0;
+      attempt < 100 && editor.evaluate().isEmpty;
+      attempt++
+    ) {
+      await settle(tester, 1);
+    }
+    expect(editor, findsOneWidget);
+  }
+
   testWidgets(
     'missing saved script reports failure and can reopen after recovery',
     (tester) async {
@@ -125,7 +137,7 @@ void main() {
         () => file.writeAsString('const recovered = true;'),
       );
       await tester.tap(find.text('Fixture'));
-      await settle(tester, 12);
+      await waitForEditor(tester);
       expect(
         tester.widget<CodeForge>(find.byType(CodeForge)).controller.text,
         'const recovered = true;',
@@ -141,7 +153,7 @@ void main() {
       await tester.runAsync(() => file.writeAsString('const original = true;'));
       final actions = await openLibrary(tester);
       await tester.tap(find.text('Fixture'));
-      await settle(tester, 12);
+      await waitForEditor(tester);
       tester.widget<CodeForge>(find.byType(CodeForge)).controller.text =
           'const edited = true;';
       await settle(tester, 2);
@@ -184,7 +196,7 @@ void main() {
     await tester.runAsync(() => file.writeAsString(''));
     final actions = await openLibrary(tester);
     await tester.tap(find.text('Fixture'));
-    await settle(tester, 12);
+    await waitForEditor(tester);
     expect(actions.errors, isEmpty);
     expect(
       tester.widget<CodeForge>(find.byType(CodeForge)).controller.text,
@@ -199,7 +211,7 @@ void main() {
     await tester.runAsync(() => file.writeAsString('const original = true;'));
     await openLibrary(tester);
     await tester.tap(find.text('Fixture'));
-    await settle(tester, 12);
+    await waitForEditor(tester);
     final controller = tester
         .widget<CodeForge>(find.byType(CodeForge))
         .controller;
@@ -229,7 +241,7 @@ void main() {
     await tester.tap(find.text('Add'));
     await tester.pumpAndSettle();
     await tester.tap(find.text(AppLocalizations.current.startFromScratch));
-    await settle(tester, 12);
+    await waitForEditor(tester);
     expect(actions.errors, isEmpty);
     expect(
       tester.widget<CodeForge>(find.byType(CodeForge)).controller.text,
