@@ -192,13 +192,12 @@ extension ProfilesControllerExt on AppController {
 
   Future<void> updateProfiles() async {
     await ensureCoreReadyOrThrow();
-    final List<Profile> profiles = _ref.read(profilesProvider);
-    final List<Future<void>> tasks = [];
-    for (final profile in profiles) {
-      if (profile.type == ProfileType.file) {
-        continue;
-      }
-      tasks.add(() async {
+    await runWithConcurrency(
+      items: _ref
+          .read(profilesProvider)
+          .where((profile) => profile.type == ProfileType.url),
+      concurrency: maxConcurrentSubscriptionUpdates,
+      action: (profile) async {
         try {
           await updateProfile(profile);
         } catch (e, s) {
@@ -207,9 +206,8 @@ extension ProfilesControllerExt on AppController {
               : 'Failed to update profile ${profile.id}: $e\n$s';
           commonPrint.log(msg, logLevel: LogLevel.warning);
         }
-      }());
-    }
-    await Future.wait(tasks);
+      },
+    );
   }
 
   Future<Profile> updateProfile(

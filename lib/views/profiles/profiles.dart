@@ -51,31 +51,46 @@ class _ProfilesViewState extends State<ProfilesView> {
   }
 
   Future<void> _updateProfiles(List<Profile> profiles) async {
+    if (_isUpdating) return;
+    final remoteProfiles = profiles
+        .where((profile) => profile.type == ProfileType.url)
+        .toList();
+    if (remoteProfiles.isEmpty) return;
     final profileAction = context.profileAction;
-
-    if (_isUpdating == true) {
-      return;
+    final route = ModalRoute.of(context);
+    bool isCurrent() =>
+        mounted &&
+        (route?.isActive ?? true) &&
+        context.getInheritedWidgetOfExactType<PageActivityScope>()?.isActive !=
+            false;
+    setState(() => _isUpdating = true);
+    final messages = <UpdatingMessage>[];
+    try {
+      await runWithConcurrency(
+        items: remoteProfiles,
+        concurrency: maxConcurrentSubscriptionUpdates,
+        isCurrent: isCurrent,
+        action: (profile) async {
+          try {
+            await profileAction.updateProfile(profile, showLoading: true);
+          } catch (error) {
+            messages.add(
+              UpdatingMessage(
+                label: profile.realLabel,
+                message: profile.isoixCloudProfile
+                    ? error.runtimeType.toString()
+                    : error.toString(),
+              ),
+            );
+          }
+        },
+      );
+    } finally {
+      if (mounted) setState(() => _isUpdating = false);
     }
-    _isUpdating = true;
-    final List<UpdatingMessage> messages = [];
-    final updateProfiles = profiles.map<Future>((profile) async {
-      if (profile.type == ProfileType.file) return;
-      try {
-        await profileAction.updateProfile(profile, showLoading: true);
-      } catch (e) {
-        final message = profile.isoixCloudProfile
-            ? e.runtimeType.toString()
-            : e.toString();
-        messages.add(
-          UpdatingMessage(label: profile.realLabel, message: message),
-        );
-      }
-    });
-    await Future.wait(updateProfiles);
-    if (messages.isNotEmpty) {
-      globalState.showAllUpdatingMessagesDialog(messages);
+    if (isCurrent() && (route?.isCurrent ?? true) && messages.isNotEmpty) {
+      await globalState.showAllUpdatingMessagesDialog(messages);
     }
-    _isUpdating = false;
   }
 
   List<IconButtonData> _buildActions(List<Profile> profiles) {
@@ -83,9 +98,14 @@ class _ProfilesViewState extends State<ProfilesView> {
         ? [
             IconButtonData(
               tooltip: context.appLocalizations.update,
-              onPressed: () {
-                _updateProfiles(profiles);
-              },
+              isLoading: _isUpdating,
+              onPressed:
+                  _isUpdating ||
+                      !profiles.any(
+                        (profile) => profile.type == ProfileType.url,
+                      )
+                  ? null
+                  : () => _updateProfiles(profiles),
               glyph: AppGlyphs.sync,
             ),
             IconButtonData(

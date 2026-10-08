@@ -18,8 +18,10 @@ import 'package:fl_clash/models/core.dart';
 import 'package:fl_clash/models/profile.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/app.dart';
+import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/views/proxies/providers.dart';
 import 'package:fl_clash/widgets/sheet.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -38,13 +40,13 @@ final _providers = [
 
 class _ProxiesAction extends ProxiesAction {
   final calls = <String>[];
-  final pending = {for (final p in _providers) p.name: Completer<String>()};
+  final pending = <String, Completer<String>>{};
   int groupRefreshes = 0;
 
   @override
   Future<String> updateProvider(ExternalProvider provider) {
     calls.add(provider.name);
-    return pending[provider.name]!.future;
+    return (pending[provider.name] = Completer<String>()).future;
   }
 
   @override
@@ -227,22 +229,130 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  Future<_ProxiesAction> mount(WidgetTester tester) async {
+  Future<_ProxiesAction> mount(
+    WidgetTester tester, {
+    List<ExternalProvider>? providers,
+    bool pushRoute = false,
+  }) async {
     final action = _ProxiesAction();
     await tester.pumpWidget(
       TestApp(
         locale: const Locale('en'),
         overrides: [
           viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 600)),
-          providersProvider.overrideWithBuild((_, _) => _providers),
+          providersProvider.overrideWithBuild(
+            (_, _) => providers ?? _providers,
+          ),
           proxiesActionProvider.overrideWith(() => action),
         ],
-        child: const ProvidersView(type: SheetType.page),
+        child: pushRoute
+            ? Builder(
+                builder: (context) => TextButton(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const ProvidersView(type: SheetType.page),
+                    ),
+                  ),
+                  child: const Text('open providers'),
+                ),
+              )
+            : const ProvidersView(type: SheetType.page),
       ),
     );
     await tester.pumpAndSettle();
+    if (pushRoute) {
+      await tester.tap(find.text('open providers'));
+      await tester.pumpAndSettle();
+    }
     return action;
   }
+
+  for (final switchProfile in [false, true]) {
+    testWidgets(
+      'provider batches stop queued work when ownership changes (profile: $switchProfile)',
+      (tester) async {
+        final providers = [
+          for (var index = 0; index < 10; index++)
+            _providers.first.copyWith(name: 'provider-$index'),
+        ];
+        final action = await mount(
+          tester,
+          providers: providers,
+          pushRoute: true,
+        );
+        final context = tester.element(find.byType(ProvidersView));
+        final container = ProviderScope.containerOf(context, listen: false);
+        final subscription = container.listen(
+          currentProfileIdProvider,
+          (_, _) {},
+        );
+        addTearDown(subscription.close);
+        await tester.tap(find.byTooltip('Update').first);
+        await tester.pump();
+        expect(
+          action.calls,
+          providers.take(4).map((provider) => provider.name),
+        );
+        action.pending['provider-1']!.complete('');
+        await tester.pump();
+        expect(
+          action.calls,
+          providers.take(5).map((provider) => provider.name),
+        );
+        if (switchProfile) {
+          container.read(currentProfileIdProvider.notifier).value = 99;
+        } else {
+          Navigator.of(context).pop();
+        }
+        for (final index in [0, 2, 3, 4]) {
+          action.pending['provider-$index']!.complete('');
+        }
+        await tester.pumpAndSettle();
+        expect(
+          action.calls,
+          providers.take(5).map((provider) => provider.name),
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
+  testWidgets('provider errors cannot surface during the return animation', (
+    tester,
+  ) async {
+    final action = await mount(tester, pushRoute: true);
+    await tester.tap(find.byTooltip('Update').first);
+    await tester.pump();
+    Navigator.of(tester.element(find.byType(ProvidersView))).pop();
+    for (final pending in action.pending.values) {
+      pending.complete('fixture late provider failure');
+    }
+    await tester.pumpAndSettle();
+    expect(find.text('fixture late provider failure'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('empty providers show an empty state and disable refresh', (
+    tester,
+  ) async {
+    await mount(tester, providers: []);
+
+    expect(
+      find.text(
+        AppLocalizations.current.nullTip(AppLocalizations.current.providers),
+      ),
+      findsOneWidget,
+    );
+    final refresh = tester.widget<IconButton>(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is IconButton &&
+            widget.tooltip == AppLocalizations.current.update,
+      ),
+    );
+    expect(refresh.onPressed, isNull);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets(
     'batch refresh aggregates thrown and returned failures after all items finish',
@@ -279,6 +389,7 @@ void main() {
     );
     await tester.tap(buttons.first);
     await tester.pump();
+    expect(find.byType(LinearProgressIndicator), findsOneWidget);
     for (final button in tester.widgetList<IconButton>(buttons)) {
       expect(button.onPressed, isNull);
     }
@@ -286,6 +397,7 @@ void main() {
       pending.complete('');
     }
     await tester.pumpAndSettle();
+    expect(find.byType(LinearProgressIndicator), findsNothing);
     for (final button in tester.widgetList<IconButton>(buttons)) {
       expect(button.onPressed, isNotNull);
     }

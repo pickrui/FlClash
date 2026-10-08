@@ -104,6 +104,7 @@ int normalizeTunMtu(int? value) =>
 
 /// One spare RPC lets a new batch cancel saturated probes; network work stays at 150.
 const maxInFlightDelayTests = maxConcurrentDelayTests + 1;
+const maxConcurrentSubscriptionUpdates = 4;
 const animateDuration = Duration(milliseconds: 100);
 const midDuration = Duration(milliseconds: 200);
 const commonDuration = Duration(milliseconds: 300);

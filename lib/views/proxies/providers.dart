@@ -36,35 +36,46 @@ class _ProvidersViewState extends ConsumerState<ProvidersView> {
 
   Future<void> _updateProviders([String? type]) async {
     if (_updating) return;
+    final providers = ref
+        .read(providersProvider)
+        .where((provider) => type == null || provider.type == type)
+        .toList();
+    if (providers.isEmpty) return;
+    final proxiesAction = context.proxiesAction;
+    final profileId = ref.read(currentProfileIdProvider);
+    final route = ModalRoute.of(context);
+    bool isCurrent() =>
+        mounted &&
+        (route?.isActive ?? true) &&
+        context.getInheritedWidgetOfExactType<PageActivityScope>()?.isActive !=
+            false &&
+        ref.read(currentProfileIdProvider) == profileId;
+    final failures = <ExternalProvider, String>{};
     setState(() => _updating = true);
     try {
-      final proxiesAction = context.proxiesAction;
-
-      final providers = ref
-          .read(providersProvider)
-          .where((provider) => type == null || provider.type == type);
-      final results = await Future.wait(
-        providers.map((provider) async {
+      await runWithConcurrency(
+        items: providers,
+        concurrency: maxConcurrentSubscriptionUpdates,
+        isCurrent: isCurrent,
+        action: (provider) async {
           try {
             final message = await proxiesAction.updateProvider(provider);
-            return message.isEmpty
-                ? null
-                : UpdatingMessage(label: provider.name, message: message);
+            if (message.isNotEmpty) failures[provider] = message;
           } catch (error) {
-            return UpdatingMessage(
-              label: provider.name,
-              message: error.toString(),
-            );
+            failures[provider] = error.toString();
           }
-        }),
+        },
       );
       proxiesAction.updateGroupsDebounce();
-      final messages = results.whereType<UpdatingMessage>().toList();
-      if (mounted && messages.isNotEmpty) {
-        await globalState.showAllUpdatingMessagesDialog(messages);
-      }
     } finally {
       if (mounted) setState(() => _updating = false);
+    }
+    if (isCurrent() && (route?.isCurrent ?? true) && failures.isNotEmpty) {
+      await globalState.showAllUpdatingMessagesDialog([
+        for (final provider in providers)
+          if (failures[provider] case final message?)
+            UpdatingMessage(label: provider.name, message: message),
+      ]);
     }
   }
 
@@ -117,13 +128,24 @@ class _ProvidersViewState extends ConsumerState<ProvidersView> {
       actions: [
         IconButton(
           tooltip: context.appLocalizations.update,
-          onPressed: _updating ? null : () => _updateProviders(),
+          onPressed: _updating || providers.isEmpty
+              ? null
+              : () => _updateProviders(),
           icon: const GlyphIcon(AppGlyphs.sync),
         ),
       ],
       type: widget.type,
       body: CustomScrollView(
         slivers: [
+          if (_updating)
+            const SliverToBoxAdapter(child: LinearProgressIndicator()),
+          if (providers.isEmpty)
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: NullStatus(
+                label: appLocalizations.nullTip(appLocalizations.providers),
+              ),
+            ),
           ..._buildSection(
             'Proxy',
             appLocalizations.proxyProviders,
