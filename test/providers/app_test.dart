@@ -258,6 +258,92 @@ void main() {
   });
 
   group('Loading provider', () {
+    testWidgets('overlapping operations stay loading until both finish', (
+      tester,
+    ) async {
+      final provider = loadingProvider(LoadingTag.profiles);
+      final notifier = container.read(provider.notifier);
+      notifier.start();
+      notifier.start();
+
+      await notifier.stop();
+      await tester.pump(const Duration(seconds: 2));
+      final stillLoading = container.read(provider);
+      await notifier.stop();
+      await tester.pump(const Duration(seconds: 2));
+
+      expect(stillLoading, isTrue);
+      expect(container.read(provider), isFalse);
+    });
+
+    testWidgets('disposing a loading provider cancels its pending timer', (
+      tester,
+    ) async {
+      final owner = ProviderContainer();
+      final notifier = owner.read(
+        loadingProvider(LoadingTag.profiles).notifier,
+      );
+      notifier.start();
+      await notifier.stop();
+      owner.dispose();
+
+      await tester.pump(const Duration(seconds: 2));
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('repeated stops do not leave unowned timers on disposal', (
+      tester,
+    ) async {
+      final owner = ProviderContainer();
+      final notifier = owner.read(
+        loadingProvider(LoadingTag.profiles).notifier,
+      );
+      notifier.start();
+      await notifier.stop();
+      await notifier.stop();
+      owner.dispose();
+
+      await tester.pump(const Duration(seconds: 2));
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('a new operation restarts the minimum display interval', (
+      tester,
+    ) async {
+      final provider = loadingProvider(LoadingTag.profiles);
+      final notifier = container.read(provider.notifier);
+      notifier.start();
+      await notifier.stop();
+      await tester.pump(const Duration(milliseconds: 500));
+      notifier.start();
+      await notifier.stop();
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(container.read(provider), isTrue);
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(container.read(provider), isFalse);
+    });
+
+    testWidgets(
+      'long operations finish immediately and tags stay independent',
+      (tester) async {
+        final profiles = loadingProvider(LoadingTag.profiles);
+        final backup = loadingProvider(LoadingTag.backup_restore);
+        final profileLoading = container.read(profiles.notifier);
+        final backupLoading = container.read(backup.notifier);
+        profileLoading.start();
+        backupLoading.start();
+        await tester.pump(const Duration(seconds: 2));
+        expect(container.read(profiles), isTrue);
+        expect(container.read(backup), isTrue);
+
+        await profileLoading.stop();
+        expect(container.read(profiles), isFalse);
+        expect(container.read(backup), isTrue);
+        await backupLoading.stop();
+        expect(container.read(backup), isFalse);
+      },
+    );
+
     test('stop without start sets loading false immediately', () async {
       final notifier = container.read(
         loadingProvider(LoadingTag.profiles).notifier,

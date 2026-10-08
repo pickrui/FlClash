@@ -1732,7 +1732,7 @@ final class LoadingProvider extends $NotifierProvider<Loading, bool> {
   }
 }
 
-String _$loadingHash() => r'e2f7783de8bb780cfa75f949ac6e6e901d32b901';
+String _$loadingHash() => r'd8e7fc9983254949245f4d449b1b992f6ec5f38d';
 
 final class LoadingFamily extends $Family
     with $ClassFamilyOverride<Loading, bool, bool, bool, LoadingTag> {

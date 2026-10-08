@@ -422,39 +422,32 @@ class Query extends _$Query with NotifierMixin<String> {
 
 @Riverpod(keepAlive: true)
 class Loading extends _$Loading with NotifierMixin<bool> {
-  DateTime? _start;
+  int _operations = 0;
   Timer? _timer;
 
   @override
   bool build(LoadingTag tag) {
+    ref.onDispose(() {
+      _timer?.cancel();
+      _timer = null;
+      _operations = 0;
+    });
     return false;
   }
 
   void start() {
+    _operations++;
     _timer?.cancel();
-    _timer = null;
-    _start = DateTime.now();
+    _timer = Timer(const Duration(seconds: 1), () {
+      _timer = null;
+      if (_operations == 0) state = false;
+    });
     state = true;
   }
 
   Future<void> stop() async {
-    if (_start == null) {
-      state = false;
-      return;
-    }
-    final startedAt = _start!;
-    final elapsed = DateTime.now().difference(_start!).inMilliseconds;
-    const minDuration = 1000;
-    if (elapsed >= minDuration) {
-      state = false;
-      return;
-    }
-    _timer = Timer(Duration(milliseconds: minDuration - elapsed), () {
-      if (_start != startedAt) {
-        return;
-      }
-      state = false;
-    });
+    if (_operations > 0) _operations--;
+    if (_operations == 0 && _timer == null) state = false;
   }
 }
 
