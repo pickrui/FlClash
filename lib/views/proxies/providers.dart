@@ -374,8 +374,8 @@ class _ProviderEditorViewState extends ConsumerState<ProviderEditorView> {
     }
   }
 
-  Future<bool> _save(BuildContext context, String content) async {
-    if (_saving) return false;
+  Future<void> _save(BuildContext context, String content) async {
+    if (_saving) return;
     _saving = true;
     final action = context.proxiesAction;
     try {
@@ -383,8 +383,9 @@ class _ProviderEditorViewState extends ConsumerState<ProviderEditorView> {
         await widget.save(_decodeText(utf8.encode(content)));
         return true;
       }, silence: false);
-      if (saved == true) action.updateGroupsDebounce();
-      return saved == true;
+      if (saved != true) return;
+      action.updateGroupsDebounce();
+      if (context.mounted) BaseNavigator.close(context);
     } finally {
       _saving = false;
     }
@@ -397,7 +398,9 @@ class _ProviderEditorViewState extends ConsumerState<ProviderEditorView> {
       message: TextSpan(text: context.appLocalizations.saveChanges),
     );
     if (choice == null || !context.mounted) return false;
-    return !choice || await _save(context, content);
+    if (!choice) return true;
+    await _save(context, content);
+    return false;
   }
 
   @override
@@ -405,11 +408,7 @@ class _ProviderEditorViewState extends ConsumerState<ProviderEditorView> {
     title: widget.provider.name,
     load: _load,
     schema: EditorSchema.provider,
-    onSave: (context, _, content) async {
-      if (await _save(context, content) && context.mounted) {
-        Navigator.of(context).pop();
-      }
-    },
+    onSave: (context, _, content) => _save(context, content),
     onPop: (context, _, content) => _pop(context, content),
   );
 }

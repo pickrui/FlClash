@@ -55,6 +55,19 @@ class _CommonAction extends CommonAction {
   }
 }
 
+class _ScriptLibrary implements ScriptLibrary {
+  final saved = <String>[];
+  Future<void> Function()? completeSave;
+  @override
+  Future<void> save(Script script, String content, {Script? previous}) async {
+    saved.add(content);
+    await completeSave?.call();
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 void main() {
   final script = Script(
     id: 7,
@@ -63,6 +76,8 @@ void main() {
   );
   late Directory directory;
   late File file;
+  late _ScriptLibrary library;
+  setUp(() => library = _ScriptLibrary());
   final originalPaths = PathProviderPlatform.instance;
   setUpAll(() async {
     directory = await Directory.systemTemp.createTemp('script-editor-');
@@ -85,6 +100,7 @@ void main() {
         overrides: [
           scriptsProvider.overrideWithBuild((_, _) => Stream.value([script])),
           commonActionProvider.overrideWith(() => actions),
+          scriptLibraryProvider.overrideWithValue(library),
           viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 1000)),
         ],
         child: const ScriptsView(),
@@ -116,6 +132,52 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  for (final fails in [false, true]) {
+    testWidgets('script save leaves a newer dialog open (failure: $fails)', (
+      tester,
+    ) async {
+      await tester.runAsync(() => file.writeAsString('const original = true;'));
+      final actions = await openLibrary(tester);
+      await tester.tap(find.text('Fixture'));
+      await settle(tester, 12);
+      tester.widget<CodeForge>(find.byType(CodeForge)).controller.text =
+          'const edited = true;';
+      await settle(tester, 2);
+      final saving = Completer<void>();
+      library.completeSave = () => saving.future;
+      await tester.tap(find.byTooltip('Save'));
+      await tester.pump();
+      final editorContext = tester.element(find.byType(EditorPage));
+      final navigator = Navigator.of(editorContext);
+      unawaited(
+        showDialog<void>(
+          context: editorContext,
+          builder: (_) => const AlertDialog(content: Text('Other message')),
+        ),
+      );
+      await tester.pump();
+      if (fails) {
+        saving.completeError(StateError('fixture write failed'));
+      } else {
+        saving.complete();
+      }
+      await settle(tester, 12);
+      expect(find.text('Other message'), findsOneWidget);
+      expect(actions.errors, fails ? [isA<StateError>()] : isEmpty);
+      navigator.pop();
+      await tester.pumpAndSettle();
+      expect(find.byType(EditorPage), fails ? findsOneWidget : findsNothing);
+      if (fails) {
+        library.completeSave = null;
+        await tester.tap(find.byTooltip('Save'));
+        await settle(tester, 12);
+        expect(find.byType(EditorPage), findsNothing);
+      }
+      expect(library.saved, List.filled(fails ? 2 : 1, 'const edited = true;'));
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   testWidgets('an existing empty script stays empty', (tester) async {
     await tester.runAsync(() => file.writeAsString(''));

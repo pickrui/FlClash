@@ -166,8 +166,23 @@ void main() {
       findsOneWidget,
     );
     expect(tester.widget<Switch>(find.byType(Switch)).value, isFalse);
-    setup.apply = () async => true;
+    final saving = Completer<bool>();
+    setup.apply = () => saving.future;
     await tester.tap(find.text('Save'));
+    await tester.pump();
+    final optionsContext = tester.element(find.byType(ScriptOptionsPage));
+    final navigator = Navigator.of(optionsContext);
+    unawaited(
+      showDialog<void>(
+        context: optionsContext,
+        builder: (_) => const AlertDialog(content: Text('Other message')),
+      ),
+    );
+    await tester.pump();
+    saving.complete(true);
+    await tester.pumpAndSettle();
+    expect(find.text('Other message'), findsOneWidget);
+    navigator.pop();
     await tester.pumpAndSettle();
     expect(setup.calls, 2);
     expect(container.read(appSettingProvider).scriptOptions['4'], {

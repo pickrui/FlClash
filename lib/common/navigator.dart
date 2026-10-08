@@ -16,6 +16,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
 class BaseNavigator {
+  static bool close<T>(BuildContext context, [T? result]) {
+    if (!context.mounted) return false;
+    final route = ModalRoute.of(context);
+    final navigator = route?.navigator;
+    if (route == null ||
+        !route.isActive ||
+        route.isFirst ||
+        navigator == null) {
+      return false;
+    }
+    if (route.isCurrent) {
+      navigator.pop(result);
+    } else {
+      navigator.removeRoute(route, result);
+    }
+    return true;
+  }
+
   static Future<T?> push<T>(BuildContext context, Widget child) async {
     if (!ProviderScope.containerOf(
       context,

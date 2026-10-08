@@ -162,11 +162,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
         }
         return true;
       }, silence: false);
-      if (saved == true &&
-          mounted &&
-          (ModalRoute.of(context)?.isCurrent ?? false)) {
-        Navigator.of(context).pop();
-      }
+      if (saved == true && mounted) BaseNavigator.close(context);
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -214,7 +210,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       );
       return;
     }
-    Navigator.of(context).pop(data);
+    BaseNavigator.close(context, data);
   }
 
   Future<void> _runFileAction(Future<void> Function() action) async {

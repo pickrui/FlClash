@@ -7,10 +7,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:code_forge/code_forge.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/manager/status_manager.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/clash_providers.dart';
 import 'package:fl_clash/views/config/providers.dart';
@@ -19,6 +22,7 @@ import 'package:image_picker/image_picker.dart' show XFile;
 import 'package:material_ui/material_ui.dart';
 
 import '../helpers/test_app.dart';
+import '../plugins/code_forge/support.dart';
 
 final _original = ClashProvider(
   id: 1,
@@ -123,6 +127,82 @@ void main() {
     expect(utf8.decode(library.saved.single.content), 'example.test');
     expect(library.saved.single.format, RuleProviderFormat.text);
     expect(find.byType(EditClashProviderView), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'completed resource save closes its form beneath another dialog',
+    (tester) async {
+      final saving = Completer<void>();
+      library.completeSave = () => saving.future;
+      await open(tester);
+      await tester.tap(find.byTooltip('Save'));
+      await tester.pump();
+      final formContext = tester.element(find.byType(EditClashProviderView));
+      final navigator = Navigator.of(formContext);
+      unawaited(
+        showDialog<void>(
+          context: formContext,
+          builder: (_) => const AlertDialog(content: Text('Other message')),
+        ),
+      );
+      await tester.pump();
+      saving.complete();
+      await tester.pumpAndSettle();
+      expect(find.text('Other message'), findsOneWidget);
+      navigator.pop();
+      await tester.pumpAndSettle();
+      expect(find.byType(EditClashProviderView), findsNothing);
+      expect(find.text('Open resource'), findsOneWidget);
+      expect(library.saved, hasLength(1));
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('library content save preserves a newer dialog', (tester) async {
+    await tester.runAsync(initEditorNative);
+    final saving = Completer<void>();
+    library.completeSave = () => saving.future;
+    await tester.pumpWidget(
+      TestApp(
+        overrides: [
+          clashProviderLibraryProvider.overrideWithValue(library),
+          clashProvidersProvider.overrideWith((_) => Stream.value([_original])),
+          viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 600)),
+        ],
+        child: const ClashProvidersView(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(AppLocalizations.current.ruleProviders));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Fixture'));
+    await settle(tester, 12);
+    tester.widget<CodeForge>(find.byType(CodeForge)).controller.text =
+        'payload: [example.test]';
+    await tester.pump();
+    await tester.tap(find.byTooltip('Save'));
+    await tester.pump();
+    final editorContext = tester.element(find.byType(EditorPage));
+    final navigator = Navigator.of(editorContext);
+    unawaited(
+      showDialog<void>(
+        context: editorContext,
+        builder: (_) => const AlertDialog(content: Text('Other message')),
+      ),
+    );
+    await tester.pump();
+    saving.complete();
+    await tester.pumpAndSettle();
+    expect(find.text('Other message'), findsOneWidget);
+    navigator.pop();
+    await tester.pumpAndSettle();
+    expect(find.byType(EditorPage), findsNothing);
+    expect(find.byType(ClashProvidersView), findsOneWidget);
+    expect(
+      utf8.decode(library.saved.single.content),
+      'payload: [example.test]',
+    );
     expect(tester.takeException(), isNull);
   });
 

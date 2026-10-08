@@ -204,7 +204,7 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
       await ref
           .read(clashProviderLibraryProvider)
           .save(next, previous: provider);
-      if (editorContext.mounted) Navigator.of(editorContext).pop();
+      if (editorContext.mounted) BaseNavigator.close(editorContext);
     }
 
     BaseNavigator.push(
@@ -557,7 +557,7 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
             return;
           }
           setState(() => _draft = _draft.copyWith(content: bytes));
-          Navigator.of(editorContext).pop();
+          BaseNavigator.close(editorContext);
         },
       ),
     );
@@ -565,7 +565,6 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
 
   Future<void> _save() async {
     if (_busy) return;
-    final route = ModalRoute.of(context);
     setState(() => _saving = true);
     try {
       final candidate = _draft.copyWith(
@@ -576,7 +575,7 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
       await ref
           .read(clashProviderLibraryProvider)
           .save(candidate, previous: widget.isNew ? null : widget.provider);
-      if (mounted && (route?.isCurrent ?? false)) Navigator.of(context).pop();
+      if (mounted) BaseNavigator.close(context);
     } catch (error) {
       if (mounted) context.showNotifier(providerLibraryError(context, error));
     } finally {

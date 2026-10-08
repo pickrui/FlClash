@@ -149,7 +149,7 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
     }
     final next = script?.copyWith(label: label) ?? Script.create(label: label);
     await _library.save(next, content, previous: script);
-    if (editorContext.mounted) Navigator.of(editorContext).pop();
+    if (editorContext.mounted) BaseNavigator.close(editorContext);
   }
 
   void _edit([Script? script]) {
@@ -413,9 +413,7 @@ class _ScriptOptionsPageState extends ConsumerState<ScriptOptionsPage> {
           return;
         }
       }
-      if (mounted && ModalRoute.of(context)?.isCurrent == true) {
-        Navigator.of(context).pop();
-      }
+      if (mounted) BaseNavigator.close(context);
     } catch (error) {
       if (mounted) context.showNotifier(error.toString());
     } finally {

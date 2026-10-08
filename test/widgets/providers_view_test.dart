@@ -52,89 +52,112 @@ class _ProxiesAction extends ProxiesAction {
 }
 
 void main() {
-  testWidgets(
-    'failed provider saves retain the draft until a successful retry',
-    (tester) async {
-      await tester.runAsync(initEditorNative);
-      final file = (await tester.runAsync(() async {
-        final directory = await Directory.systemTemp.createTemp(
-          'provider-editor-fixture-',
+  for (final saveOnBack in [false, true]) {
+    testWidgets(
+      'failed provider saves retain the draft until retry (back: $saveOnBack)',
+      (tester) async {
+        await tester.runAsync(initEditorNative);
+        final file = (await tester.runAsync(() async {
+          final directory = await Directory.systemTemp.createTemp(
+            'provider-editor-fixture-',
+          );
+          return File('${directory.path}/provider.yaml')
+              .writeAsString('payload: [example.com]');
+        }))!;
+        addTearDown(() => file.parent.delete(recursive: true));
+        final action = _ProxiesAction();
+        late BuildContext home;
+        await tester.pumpWidget(
+          TestApp(
+            locale: const Locale('en'),
+            overrides: [
+              viewSizeProvider.overrideWithBuild(
+                (_, _) => const Size(800, 600),
+              ),
+              proxiesActionProvider.overrideWith(() => action),
+            ],
+            child: Builder(
+              builder: (context) {
+                home = context;
+                return const Scaffold(body: Text('Providers home'));
+              },
+            ),
+          ),
         );
-        return File('${directory.path}/provider.yaml')
-            .writeAsString('payload: [example.com]');
-      }))!;
-      addTearDown(() => file.parent.delete(recursive: true));
-      final action = _ProxiesAction();
-      late BuildContext home;
-      await tester.pumpWidget(
-        TestApp(
-          locale: const Locale('en'),
-          overrides: [
-            viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 600)),
-            proxiesActionProvider.overrideWith(() => action),
-          ],
-          child: Builder(
-            builder: (context) {
-              home = context;
-              return const Scaffold(body: Text('Providers home'));
-            },
+        var attempts = 0;
+        final saved = Completer<void>();
+        String? pendingContent;
+        unawaited(
+          BaseNavigator.push<void>(
+            home,
+            ProviderEditorView(
+              provider: _providers.first.copyWith(path: file.path),
+              save: (content) async {
+                if (++attempts == 1) throw 'fixture save failed';
+                pendingContent = content;
+                await saved.future;
+              },
+            ),
           ),
-        ),
-      );
-      var attempts = 0;
-      final saved = Completer<void>();
-      String? pendingContent;
-      unawaited(
-        BaseNavigator.push<void>(
-          home,
-          ProviderEditorView(
-            provider: _providers.first.copyWith(path: file.path),
-            save: (content) async {
-              if (++attempts == 1) throw 'fixture save failed';
-              pendingContent = content;
-              await saved.future;
-            },
+        );
+        await settle(tester, 16);
+        final editor = tester
+            .widget<CodeForge>(find.byType(CodeForge))
+            .controller;
+        editor.text = 'payload: [example.net]';
+        await settle(tester);
+        await tester.tap(find.byTooltip(AppLocalizations.current.save));
+        await settle(tester);
+        expect(
+          find.text('fixture save failed', findRichText: true),
+          findsOneWidget,
+        );
+        expect(editor.text, 'payload: [example.net]');
+        expect(
+          await tester.runAsync(file.readAsString),
+          'payload: [example.com]',
+        );
+        expect(action.groupRefreshes, 0);
+        await tester.tap(find.text(AppLocalizations.current.confirm));
+        await settle(tester);
+        expect(find.byType(EditorPage), findsOneWidget);
+        if (saveOnBack) {
+          await tester.binding.handlePopRoute();
+          await settle(tester);
+          await tester.tap(find.text(AppLocalizations.current.confirm));
+        } else {
+          await tester.tap(find.byTooltip(AppLocalizations.current.save));
+        }
+        await tester.pump();
+        expect(attempts, 2);
+        await tester.pump();
+        expect(find.byType(EditorPage), findsOneWidget);
+        expect(action.groupRefreshes, 0);
+        final editorContext = tester.element(find.byType(EditorPage));
+        final navigator = Navigator.of(editorContext);
+        unawaited(
+          showDialog<void>(
+            context: editorContext,
+            builder: (_) => const AlertDialog(content: Text('Other message')),
           ),
-        ),
-      );
-      await settle(tester, 16);
-      final editor = tester
-          .widget<CodeForge>(find.byType(CodeForge))
-          .controller;
-      editor.text = 'payload: [example.net]';
-      await settle(tester);
-      await tester.tap(find.byTooltip(AppLocalizations.current.save));
-      await settle(tester);
-      expect(
-        find.text('fixture save failed', findRichText: true),
-        findsOneWidget,
-      );
-      expect(editor.text, 'payload: [example.net]');
-      expect(
-        await tester.runAsync(file.readAsString),
-        'payload: [example.com]',
-      );
-      expect(action.groupRefreshes, 0);
-      await tester.tap(find.text(AppLocalizations.current.confirm));
-      await settle(tester);
-      expect(find.byType(EditorPage), findsOneWidget);
-      await tester.tap(find.byTooltip(AppLocalizations.current.save));
-      expect(attempts, 2);
-      await tester.pump();
-      expect(find.byType(EditorPage), findsOneWidget);
-      expect(action.groupRefreshes, 0);
-      await tester.runAsync(() => file.writeAsString(pendingContent!));
-      saved.complete();
-      await tester.pumpAndSettle();
-      expect(find.byType(EditorPage), findsNothing);
-      expect(
-        await tester.runAsync(file.readAsString),
-        'payload: [example.net]',
-      );
-      expect(action.groupRefreshes, 1);
-      expect(tester.takeException(), isNull);
-    },
-  );
+        );
+        await tester.pump();
+        await tester.runAsync(() => file.writeAsString(pendingContent!));
+        saved.complete();
+        await tester.pumpAndSettle();
+        expect(find.text('Other message'), findsOneWidget);
+        navigator.pop();
+        await tester.pumpAndSettle();
+        expect(find.byType(EditorPage), findsNothing);
+        expect(
+          await tester.runAsync(file.readAsString),
+          'payload: [example.net]',
+        );
+        expect(action.groupRefreshes, 1);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 
   testWidgets('subscription usage stays bounded and fits narrow large text', (
     tester,
