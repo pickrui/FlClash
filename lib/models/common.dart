@@ -473,17 +473,6 @@ extension ScriptExt on Script {
     }
     return null;
   }
-
-  Future<Script> save(String content) async {
-    return storageLock.synchronized(() async {
-      final file = File(await path);
-      if (!await file.exists()) {
-        await file.create(recursive: true);
-      }
-      await file.writeAsString(content);
-      return copyWith(lastUpdateTime: DateTime.now());
-    });
-  }
 }
 
 @freezed

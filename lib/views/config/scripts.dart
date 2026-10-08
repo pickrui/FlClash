@@ -22,6 +22,12 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 
+Future<String> _readScriptContent(Script script) async {
+  final content = await script.content;
+  if (content == null) throw const ScriptLibraryException('changed');
+  return content;
+}
+
 class ScriptsView extends ConsumerStatefulWidget {
   const ScriptsView({super.key});
   @override
@@ -154,7 +160,9 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
         title: script?.label ?? '',
         titleEditable: true,
         language: Language.javaScript,
-        load: () async => raw = (await script?.content) ?? scriptTemplate,
+        load: () async => raw = script == null
+            ? scriptTemplate
+            : await _readScriptContent(script),
         onSave: (context, title, content) =>
             _save(context, title, content, script),
         onPop: (editorContext, title, content) async {
@@ -338,7 +346,7 @@ class _ScriptOptionsPageState extends ConsumerState<ScriptOptionsPage> {
   }
 
   Future<void> _load({bool refresh = false}) async {
-    if (_loading) return;
+    if (_loading || _saving) return;
     if (refresh && _defaults != null) {
       _refreshOverrides = {
         for (final entry in _values.entries)
@@ -351,9 +359,8 @@ class _ScriptOptionsPageState extends ConsumerState<ScriptOptionsPage> {
       _error = null;
     });
     try {
-      final content = await widget.script.content;
+      final content = await _readScriptContent(widget.script);
       if (!mounted) return;
-      if (content == null) throw StateError('Script file is unavailable');
       final defaults = await extractScriptOptions(content, refresh: refresh);
       if (!mounted) return;
       final saved =
@@ -395,8 +402,16 @@ class _ScriptOptionsPageState extends ConsumerState<ScriptOptionsPage> {
         }
         return state.copyWith(scriptOptions: options);
       });
-      if (ref.read(currentProfileProvider)?.scriptId == widget.script.id) {
-        await setup.applyProfile(force: true);
+      final profile = ref.read(currentProfileProvider);
+      if (profile?.overwriteType == OverwriteType.script &&
+          profile?.scriptId == widget.script.id) {
+        final applied = await setup.applyProfile(force: true);
+        if (!applied) {
+          if (mounted) {
+            context.showNotifier(context.appLocalizations.routingApplyFailed);
+          }
+          return;
+        }
       }
       if (mounted && ModalRoute.of(context)?.isCurrent == true) {
         Navigator.of(context).pop();
@@ -411,46 +426,52 @@ class _ScriptOptionsPageState extends ConsumerState<ScriptOptionsPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.appLocalizations;
-    return CommonScaffold(
-      title: l10n.scriptOptions,
-      isLoading: _saving,
-      actions: [
-        IconButton(
-          tooltip: l10n.refresh,
-          icon: const GlyphIcon(AppGlyphs.refresh),
-          onPressed: _loading || _saving ? null : () => _load(refresh: true),
-        ),
-        if (_defaults?.isNotEmpty == true) ...[
-          TextButton(
-            onPressed: _saving
-                ? null
-                : () => setState(() => _values = Map.from(_defaults!)),
-            child: Text(l10n.reset),
+    return CommonPopScope(
+      onPop: (_) => !_saving,
+      child: CommonScaffold(
+        title: l10n.scriptOptions,
+        isLoading: _saving,
+        actions: [
+          IconButton(
+            tooltip: l10n.refresh,
+            icon: const GlyphIcon(AppGlyphs.refresh),
+            onPressed: _loading || _saving ? null : () => _load(refresh: true),
           ),
-          TextButton(onPressed: _saving ? null : _save, child: Text(l10n.save)),
-        ],
-      ],
-      body: _error != null
-          ? ErrorStatus(error: _error!, onRetry: () => _load(refresh: true))
-          : _defaults == null
-          ? const Center(child: CircularProgressIndicator())
-          : _defaults!.isEmpty
-          ? Center(child: Text(l10n.scriptOptionsEmpty))
-          : ListView(
-              children: [
-                for (final entry in _values.entries)
-                  ListItem.switchItem(
-                    title: Text(entry.key),
-                    delegate: SwitchDelegate(
-                      value: entry.value,
-                      onChanged: _saving
-                          ? null
-                          : (value) =>
-                                setState(() => _values[entry.key] = value),
-                    ),
-                  ),
-              ],
+          if (_defaults?.isNotEmpty == true) ...[
+            TextButton(
+              onPressed: _saving
+                  ? null
+                  : () => setState(() => _values = Map.from(_defaults!)),
+              child: Text(l10n.reset),
             ),
+            TextButton(
+              onPressed: _saving ? null : _save,
+              child: Text(l10n.save),
+            ),
+          ],
+        ],
+        body: _error != null
+            ? ErrorStatus(error: _error!, onRetry: () => _load(refresh: true))
+            : _defaults == null
+            ? const Center(child: CircularProgressIndicator())
+            : _defaults!.isEmpty
+            ? Center(child: Text(l10n.scriptOptionsEmpty))
+            : ListView(
+                children: [
+                  for (final entry in _values.entries)
+                    ListItem.switchItem(
+                      title: Text(entry.key),
+                      delegate: SwitchDelegate(
+                        value: entry.value,
+                        onChanged: _saving
+                            ? null
+                            : (value) =>
+                                  setState(() => _values[entry.key] = value),
+                      ),
+                    ),
+                ],
+              ),
+      ),
     );
   }
 }

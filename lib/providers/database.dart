@@ -264,43 +264,8 @@ class Scripts extends _$Scripts with AsyncNotifierMixin {
   @override
   List<Script> get value => state.value ?? [];
 
-  Future<void> put(Script script, {bool reportOnWait = true}) {
-    final list = List<Script>.from(value);
-    final index = value.indexWhere((item) => item.id == script.id);
-    if (index != -1) {
-      list[index] = script;
-    } else {
-      list.add(script);
-    }
-    value = list;
-    return queueDatabaseWrite(
-      () => database.scripts.put(script.toCompanion()),
-      onError: () => reloadProviderAfterDatabaseError(ref),
-      reportOnWait: reportOnWait,
-    );
-  }
-
   void replaceFromDatabase(List<Script> scripts) {
     value = List<Script>.from(scripts);
-  }
-
-  Future<void> del(int id, {bool reportOnWait = true}) {
-    final index = value.indexWhere((item) => item.id == id);
-    if (index == -1) {
-      return Future.value();
-    }
-    final list = List<Script>.from(value);
-    list.removeAt(index);
-    value = list;
-    return queueDatabaseWrite(
-      () => database.scripts.remove((t) => t.id.equals(id)),
-      onError: () => reloadProviderAfterDatabaseError(ref),
-      reportOnWait: reportOnWait,
-    );
-  }
-
-  bool isExits(String label) {
-    return value.indexWhere((item) => item.label == label) != -1;
   }
 
   @override
