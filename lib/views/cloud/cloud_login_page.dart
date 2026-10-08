@@ -22,8 +22,11 @@ Future<T?> showCloudLoginPage<T>(BuildContext context) {
 Future<bool> submitCloudAuth(
   Future<void> Function() submit, {
   required String errorTitle,
+  required bool Function() isActive,
 }) async {
+  if (!isActive()) return false;
   void showError(Object error) {
+    if (!isActive()) return;
     globalState.showMessage(
       title: errorTitle,
       message: TextSpan(text: CloudApiException.clean(error)),
@@ -32,17 +35,21 @@ Future<bool> submitCloudAuth(
 
   try {
     await submit();
-    return true;
+    return isActive();
   } catch (error) {
-    if (CloudApiException.isHandledUnauthorized(error)) return false;
+    if (!isActive() || CloudApiException.isHandledUnauthorized(error)) {
+      return false;
+    }
     final service = CloudApiService();
-    if (!await service.confirmInsecureTlsRetry(error)) {
+    final allow = await service.confirmInsecureTlsRetry(error);
+    if (!isActive()) return false;
+    if (!allow) {
       showError(error);
       return false;
     }
     try {
       await service.runWithInsecureTls(error, submit);
-      return true;
+      return isActive();
     } catch (retryError) {
       if (!CloudApiException.isHandledUnauthorized(retryError)) {
         showError(retryError);
@@ -84,16 +91,17 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
     }
     if (!_formKey.currentState!.validate()) return;
 
-    final navigator = Navigator.of(context);
     final submit = _loginSubmission();
+    final route = ModalRoute.of(context);
     setState(() => _isSubmitting = true);
     try {
       final signedIn = await submitCloudAuth(
         submit,
         errorTitle: AppLocalizations.current.loginFailed,
+        isActive: () => mounted && (route?.isActive ?? true),
       );
       if (signedIn && mounted) {
-        navigator.popUntil((route) => route.isFirst);
+        BaseNavigator.close(context);
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -316,11 +324,12 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
     if (_isSubmitting || !_formKey.currentState!.validate()) {
       return;
     }
+    final route = ModalRoute.of(context);
     setState(() => _isSubmitting = true);
     try {
       if (!_emailSent) {
         await CloudApiService().sendPasswordReset(_emailController.text.trim());
-        if (mounted) {
+        if (mounted && route?.isActive != false) {
           setState(() => _emailSent = true);
         }
       } else {
@@ -328,11 +337,12 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
           token: _extractToken(_tokenController.text),
           password: _passwordController.text,
         );
-        if (mounted) {
-          Navigator.of(context).pop(_emailController.text.trim());
+        if (mounted && route?.isActive != false) {
+          BaseNavigator.close(context, _emailController.text.trim());
         }
       }
     } catch (error) {
+      if (!mounted || route?.isActive == false) return;
       globalState.showMessage(
         title: AppLocalizations.current.resetPasswordTitle,
         message: TextSpan(text: CloudApiException.clean(error)),
@@ -340,8 +350,6 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
     } finally {
       if (mounted) {
         setState(() => _isSubmitting = false);
-      } else {
-        _isSubmitting = false;
       }
     }
   }

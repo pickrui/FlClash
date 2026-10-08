@@ -153,7 +153,7 @@ class _StoreQuoteDialogState extends ConsumerState<StoreQuoteDialog> {
       });
     } catch (e) {
       if (CloudApiException.isUnauthorized(e)) {
-        if (mounted) Navigator.of(context).pop();
+        if (mounted) BaseNavigator.close(context);
         await accountNotifier.handleUnauthorized();
         return;
       }

@@ -108,6 +108,8 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
 
   Future<void> _sendEmailCode() async {
     if (_sendingCode || _resendCountdown > 0) return;
+    final route = ModalRoute.of(context);
+    bool isActive() => mounted && (route?.isActive ?? true);
     final email = _emailController.text.trim();
     if (email.isEmpty || !RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
       globalState.showNotifier(AppLocalizations.current.emailFormatValidation);
@@ -116,10 +118,11 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
     setState(() => _sendingCode = true);
     try {
       await CloudApiService().sendEmailVerify(email);
+      if (!isActive()) return;
       globalState.showNotifier(AppLocalizations.current.codeSent);
-      if (!mounted) return;
       _startResendCountdown();
     } catch (e) {
+      if (!isActive()) return;
       globalState.showMessage(
         title: AppLocalizations.current.registerFailed,
         message: TextSpan(text: CloudApiException.clean(e)),
@@ -133,15 +136,16 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
     if (_isSubmitting || ref.read(cloudAccountProvider).isLoading) return;
     if (!_formKey.currentState!.validate()) return;
 
-    final navigator = Navigator.of(context);
     final submit = _registerSubmission();
+    final route = ModalRoute.of(context);
     setState(() => _isSubmitting = true);
     try {
       final registered = await submitCloudAuth(
         submit,
         errorTitle: AppLocalizations.current.registerFailed,
+        isActive: () => mounted && (route?.isActive ?? true),
       );
-      if (registered && mounted) navigator.popUntil((route) => route.isFirst);
+      if (registered && mounted) BaseNavigator.close(context);
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }

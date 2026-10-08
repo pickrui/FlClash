@@ -173,7 +173,7 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
       final catalog = await action();
       unawaited(_account.refreshManagedSubscription());
       if (!mounted) return;
-      Navigator.of(context).pop(catalog ?? _savedFallback(kind));
+      BaseNavigator.close(context, catalog ?? _savedFallback(kind));
     } catch (e) {
       if (await _handleUnauthorized(e)) return;
       globalState.showNotifier(CloudApiException.clean(e));
