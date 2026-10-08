@@ -61,6 +61,27 @@ void main() {
     await File('${temporaryDirectory.path}/window_plugin_visibility.inc')
         .writeAsString(visibilityMethods.join('\n\n'));
 
+    final styleHeader = await File('plugins/window/windows/window_style.h')
+        .readAsString();
+    final styleSource = await File('plugins/window/windows/window_style.cpp')
+        .readAsString();
+    final effectTypes = RegExp(r'enum class Effect \{[^}]*\};')
+        .allMatches(styleHeader)
+        .toList();
+    expect(effectTypes, hasLength(1));
+    final effectDefinitions = [effectTypes.single.group(0)!];
+    for (final name in ['IsWindows11OrGreater', 'IsEffectSupported']) {
+      final definition = RegExp(
+        '^bool $name\\([^;{]*\\) \\{.*?\n\\}',
+        dotAll: true,
+        multiLine: true,
+      ).allMatches(styleSource).toList();
+      expect(definition, hasLength(1));
+      effectDefinitions.add(definition.single.group(0)!);
+    }
+    await File('${temporaryDirectory.path}/window_plugin_effects.inc')
+        .writeAsString(effectDefinitions.join('\n\n'));
+
     final fixture = File('test/support/window_plugin_taskbar_test.cpp')
         .absolute
         .path
@@ -108,6 +129,9 @@ endif()
     'startup_hide',
     'startup_show_hidden',
     'startup_show_minimized',
+    'windows_10_blur_fallback',
+    'windows_11_acrylic',
+    'effects_without_composition',
   ]) {
     test('Windows window plugin: $scenario', () async {
       await run(executable, [scenario]);

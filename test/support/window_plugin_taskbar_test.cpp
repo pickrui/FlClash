@@ -80,6 +80,16 @@ class WindowController {
 };
 #include "window_plugin_methods.inc"
 
+namespace window {
+int windows_build = 19045;
+bool composition_available = true;
+int WindowsBuildNumber() { return windows_build; }
+void* GetSetWindowCompositionAttribute() {
+  return composition_available ? reinterpret_cast<void*>(1) : nullptr;
+}
+#include "window_plugin_effects.inc"
+}  // namespace window
+
 int main(int argc, char** argv) {
   Require(argc == 2, "Expected a scenario");
   const std::string scenario = argv[1];
@@ -124,6 +134,26 @@ int main(int argc, char** argv) {
     launcher_show_command = scenario == "startup_show_hidden" ? SW_HIDE : SW_SHOWMINIMIZED;
     manager.Show();
     Require(window_visible && !window_minimized, "Launcher mode overrode manual opening");
+  } else if (scenario == "windows_10_blur_fallback") {
+    for (const int build : {0, 17134, 18362, 19045, 21999}) {
+      window::windows_build = build;
+      Require(!window::IsEffectSupported(window::Effect::kAcrylic), "Laggy acrylic was offered on Windows 10 or an unknown build");
+      Require(window::IsEffectSupported(window::Effect::kBlur), "Windows 10 lost its blur fallback");
+    }
+  } else if (scenario == "windows_11_acrylic") {
+    for (const int build : {22000, 22621, 26100}) {
+      window::windows_build = build;
+      Require(window::IsEffectSupported(window::Effect::kAcrylic), "Windows 11 lost acrylic");
+      Require(window::IsEffectSupported(window::Effect::kBlur), "Windows 11 lost blur");
+    }
+  } else if (scenario == "effects_without_composition") {
+    window::composition_available = false;
+    for (const int build : {19045, 22000}) {
+      window::windows_build = build;
+      Require(!window::IsEffectSupported(window::Effect::kAcrylic), "Acrylic requires the composition API");
+      Require(!window::IsEffectSupported(window::Effect::kBlur), "Blur requires the composition API");
+      Require(window::IsEffectSupported(window::Effect::kNone), "Solid fallback became unavailable");
+    }
   } else { Require(false, "Unknown scenario"); }
   return EXIT_SUCCESS;
 }

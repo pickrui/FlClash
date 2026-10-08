@@ -139,7 +139,8 @@ bool IsEffectSupported(Effect effect) {
     case Effect::kBlur:
       return has_accent;
     case Effect::kAcrylic:
-      return has_accent && WindowsBuildNumber() >= 17134;
+      // Windows 10's acrylic compositor stalls native window dragging.
+      return has_accent && IsWindows11OrGreater();
     case Effect::kMica:
       return WindowsBuildNumber() >= 22000;
   }
