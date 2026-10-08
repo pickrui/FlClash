@@ -57,7 +57,6 @@ class BackupAndRestore extends ConsumerStatefulWidget {
 class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
   DAVProps? _clientDav;
   DAVClient? _client;
-  bool _operationInProgress = false;
 
   bool get _isCurrentPage => mounted && context.isCurrentPage;
 
@@ -67,26 +66,20 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
     required Future<bool> Function() task,
   }) async {
     if (!_isCurrentPage ||
-        _operationInProgress ||
         ref.read(loadingProvider(LoadingTag.backup_restore))) {
       return;
     }
-    setState(() => _operationInProgress = true);
-    try {
-      final succeeded = await _runBackupTask(
-        context,
-        task: task,
-        tag: LoadingTag.backup_restore,
-        title: title,
-      );
-      if (succeeded != true || !_isCurrentPage) return;
-      globalState.showMessage(
-        title: title,
-        message: TextSpan(text: successMessage),
-      );
-    } finally {
-      if (mounted) setState(() => _operationInProgress = false);
-    }
+    final succeeded = await _runBackupTask(
+      context,
+      task: task,
+      tag: LoadingTag.backup_restore,
+      title: title,
+    );
+    if (succeeded != true || !_isCurrentPage) return;
+    globalState.showMessage(
+      title: title,
+      message: TextSpan(text: successMessage),
+    );
   }
 
   String? _davSettingError(DAVProps dav) {
@@ -257,9 +250,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
   @override
   Widget build(BuildContext context) {
     final dav = ref.watch(davSettingProvider);
-    final isLoading =
-        ref.watch(loadingProvider(LoadingTag.backup_restore)) ||
-        _operationInProgress;
+    final isLoading = ref.watch(loadingProvider(LoadingTag.backup_restore));
     final davError = dav == null ? null : _davSettingError(dav);
     final client = dav == null || davError != null ? null : _clientFor(dav);
     return CommonScaffold(
