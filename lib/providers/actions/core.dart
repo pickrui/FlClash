@@ -18,8 +18,6 @@ class CoreAction extends _$CoreAction {
 
   Future<bool> ensureCoreReady() => _controller.ensureCoreReady();
 
-  Future<void> ensureCoreReadyOrThrow() => _controller.ensureCoreReadyOrThrow();
-
   Future<void> restartCore([bool start = false]) =>
       _controller.restartCore(start);
 

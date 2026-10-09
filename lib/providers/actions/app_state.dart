@@ -31,8 +31,6 @@ class AppStateAction extends _$AppStateAction {
   String? getSelectedProxyName(String groupName) =>
       _controller.getSelectedProxyName(groupName);
 
-  String getRealTestUrl(String? url) => _controller.getRealTestUrl(url);
-
   int getProxiesColumns() => _controller.getProxiesColumns();
 
   SharedState get sharedState => _controller.sharedState;

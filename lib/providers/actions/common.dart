@@ -27,8 +27,6 @@ class CommonAction extends _$CommonAction {
 
   void updateMode() => _controller.updateMode();
 
-  void updateRunTime() => _controller.updateRunTime();
-
   Future<void> updateTraffic() => _controller.updateTraffic();
 
   Future<T?> loadingRun<T>(

@@ -70,10 +70,6 @@ extension ActionContext on BuildContext {
     this,
     listen: false,
   ).read(updateActionProvider.notifier);
-  AppStateAction get appStateAction => ProviderScope.containerOf(
-    this,
-    listen: false,
-  ).read(appStateActionProvider.notifier);
   ProfileAction get profileAction => ProviderScope.containerOf(
     this,
     listen: false,

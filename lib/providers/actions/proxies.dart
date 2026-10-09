@@ -57,16 +57,8 @@ class ProxiesAction extends _$ProxiesAction {
   void updateCurrentGroupName(String groupName) =>
       _controller.updateCurrentGroupName(groupName);
 
-  void updateCurrentSelectedMap(String groupName, String proxyName) =>
-      _controller.updateCurrentSelectedMap(groupName, proxyName);
-
   void updateCurrentUnfoldSet(Set<String> value) =>
       _controller.updateCurrentUnfoldSet(value);
-
-  int beginDelayTest() => _controller.beginDelayTest();
-
-  bool isCurrentDelayGeneration(int generation) =>
-      _controller.isCurrentDelayGeneration(generation);
 
   void setDelay(Delay delay, {int? generation}) =>
       _controller.setDelay(delay, generation: generation);
@@ -108,8 +100,6 @@ class ProxiesAction extends _$ProxiesAction {
   Future<void> Function(String) providerEditorSaver(
     ExternalProvider provider,
   ) => _controller.providerEditorSaver(provider);
-
-  int addSortNum() => _controller.addSortNum();
 }
 
 extension ProxiesControllerExt on AppController {
