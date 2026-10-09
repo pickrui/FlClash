@@ -806,6 +806,7 @@ extension SetupControllerExt on AppController {
       return false;
     }
     var profile = _ref.read(profilesProvider).getProfile(profileId);
+    await waitForCloudBootstrapBeforeUpdate(profile);
     await storageLock.synchronized(() async {
       profile = _ref.read(profilesProvider).getProfile(profileId);
       final nextProfile = await _checkAndUpdateProfileWithCertificateRetry(

@@ -111,6 +111,14 @@ void registerEnsureCloudReady(Future<void> Function() ensure) {
   _ensureCloudReady = ensure;
 }
 
+/// Account bootstrap may remove expired profiles under storageLock, so an
+/// update that would wait for it has to do so before taking that lock.
+Future<void> waitForCloudBootstrapBeforeUpdate(Profile? profile) async {
+  if (profile == null || !profile.isoixCloudProfile) return;
+  if (await profile.hasLocalConfigSnapshot()) return;
+  await _ensureCloudReady?.call();
+}
+
 @freezed
 abstract class SubscriptionInfo with _$SubscriptionInfo {
   const factory SubscriptionInfo({
