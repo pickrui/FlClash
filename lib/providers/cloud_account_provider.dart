@@ -337,11 +337,12 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
     return _runSignIn(() async {
       final normalizedToken = _requireNormalizedToken(token);
       CloudApiService().setToken(normalizedToken);
-      final userInfo = await CloudApiService().getUserInfo();
+      final userInfo = await userInfoRequest();
       await _completeSignIn(
         token: normalizedToken,
         profile: userInfo.profile,
         announcement: userInfo.announcement,
+        tokenClient: userInfo.tokenClient,
       );
     });
   }
@@ -390,9 +391,13 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
     required String token,
     required CloudProfile profile,
     required CloudNotification? announcement,
+    String? tokenClient,
   }) async {
     CloudApiService().setToken(token);
     await SafeStorage.write('cloud_token', token);
+    // A pasted token may belong to another client; swap it before the managed
+    // subscription and node filter are bound to it.
+    await _adoptOwnClientToken(tokenClient);
     _lastRefreshTime = DateTime.now();
     await _saveCache(profile, announcement);
     state = state.copyWith(

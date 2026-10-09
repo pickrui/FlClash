@@ -6,11 +6,13 @@
 import 'dart:async';
 
 import 'package:fl_clash/common/oix_cloud.dart';
+import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/cloud_account_provider.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:fl_clash/utils/safe_storage.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,6 +39,32 @@ void main() {
       expect(api.sessionRevision, revision);
       expect(container.read(cloudAccountProvider).isLoggedIn, isTrue);
       expect(container.read(cloudAccountProvider).isLoading, isFalse);
+    },
+  );
+
+  test(
+    'token sign-in swaps another client\'s token before importing',
+    () async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      await AppLocalizations.load(const Locale('en'));
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
+      SharedPreferences.setMockInitialValues({});
+      final api = CloudApiService();
+      addTearDown(() => api.setToken(null));
+      final notifier = _TokenSignInNotifier();
+      final container = ProviderContainer(
+        overrides: [cloudAccountProvider.overrideWith(() => notifier)],
+      );
+      addTearDown(container.dispose);
+      container.read(cloudAccountProvider);
+      await notifier.ensureReady();
+
+      await notifier.signInWithToken('ios-token');
+
+      expect(notifier.rebinds, 1);
+      expect(notifier.importedWith, 'flclash-token');
+      expect(await SafeStorage.read('cloud_token'), 'flclash-token');
     },
   );
 
@@ -760,4 +788,28 @@ class _UnreadableTokenNotifier extends CloudAccountNotifier {
   @override
   Future<String?> readStoredToken() async =>
       throw StateError('secure storage is busy');
+}
+
+class _TokenSignInNotifier extends CloudAccountNotifier {
+  var rebinds = 0;
+  String? importedWith;
+
+  @override
+  Future<CloudUserInfo> Function() get userInfoRequest =>
+      () async => (
+        profile: _managedProfile,
+        announcement: null,
+        tokenClient: 'oixcloud',
+      );
+
+  @override
+  Future<String> Function() get rebindTokenRequest => () async {
+    rebinds++;
+    return 'flclash-token';
+  };
+
+  @override
+  Future<void> importManagedProfile(String url) async {
+    importedWith = await SafeStorage.read('cloud_token');
+  }
 }
