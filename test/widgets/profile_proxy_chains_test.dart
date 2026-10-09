@@ -476,6 +476,43 @@ void main() {
     expect(profiles.state.single.profileProxies, hasLength(1));
   });
 
+  testWidgets('deleting a node disables only the chain it shortens into a '
+      'duplicate', (tester) async {
+    final setupAction = _SetupAction(
+      rawConfig: {
+        'proxies': [
+          for (final name in ['A', 'B', 'D']) {'name': name, 'type': 'ss'},
+        ],
+      },
+    );
+    final (profiles, messages) = await _pump(
+      tester,
+      setupAction,
+      _baseProfile.copyWith(
+        profileProxies: const [
+          ProfileProxy(id: 11, proxy: {'name': 'Solo', 'type': 'ss'}),
+        ],
+        proxyChains: const [
+          ProxyChain(id: 20, proxies: ['A', 'B']),
+          ProxyChain(id: 21, proxies: ['A', 'B', 'Solo']),
+          ProxyChain(id: 22, proxies: ['A', 'B', 'Solo', 'D']),
+        ],
+      ),
+    );
+
+    await _deleteFromMenu(tester, 'Solo');
+
+    expect(messages, [_l10n.proxyChainRelatedChainsUpdated]);
+    final chains = profiles.state.single.proxyChains;
+    expect(chains.map((chain) => chain.enable), [true, false, true]);
+    expect(chains.map((chain) => chain.proxies), [
+      ['A', 'B'],
+      ['A', 'B'],
+      ['A', 'B', 'D'],
+    ]);
+    expect(findProxyChainConflictName(chains), isNull);
+  });
+
   testWidgets('closing the proxy chain page applies the profile', (
     tester,
   ) async {

@@ -926,6 +926,29 @@ Map<String, String> _rawDialerRelations(
   };
 }
 
+/// Removing X from [A, B, X] can leave a duplicate of another chain [A, B].
+List<ProxyChain> _removeProxiesFromChains(
+  List<ProxyChain> proxyChains,
+  Set<String> removedNames,
+) {
+  final remaining = proxyChains.copyAndRemoveProxies(removedNames);
+  if (findProxyChainConflictName(remaining) == null) {
+    return remaining;
+  }
+  bool shortened(int index) =>
+      proxyChains[index].normalizedProxies.any(removedNames.contains);
+  var next = [
+    for (final (index, chain) in remaining.indexed)
+      shortened(index) ? chain.copyWith(enable: false) : chain,
+  ];
+  for (final (index, chain) in remaining.indexed) {
+    if (!shortened(index) || !chain.enable) continue;
+    final candidate = [...next]..[index] = chain;
+    if (findProxyChainConflictName(candidate) == null) next = candidate;
+  }
+  return next;
+}
+
 /// A custom node drops `dialer-proxy`, so removing one that overrides a
 /// subscription node brings the subscription node's dialer back into the
 /// chain check; the chains through it are disabled when that conflicts.
@@ -1694,7 +1717,8 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
         .map((item) => item.name)
         .toSet()
         .difference(overrideNames);
-    final remainingProxyChains = profile.proxyChains.copyAndRemoveProxies(
+    final remainingProxyChains = _removeProxiesFromChains(
+      profile.proxyChains,
       deletedNames,
     );
     final (
