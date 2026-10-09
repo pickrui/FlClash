@@ -226,6 +226,15 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
     }
   }
 
+  String get _savedContent => switch (_ruleAction) {
+    RuleAction.DST_PORT ||
+    RuleAction.SRC_PORT ||
+    RuleAction.IN_PORT ||
+    RuleAction.UID ||
+    RuleAction.DSCP => _contentController.text.trim().replaceAll(',', '/'),
+    _ => _contentController.text.trim(),
+  };
+
   void _handleSubmit() {
     final res = _formKey.currentState?.validate();
     if (res == false) {
@@ -233,14 +242,7 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
     }
     final parsedRule = ParsedRule(
       ruleAction: _ruleAction,
-      content: switch (_ruleAction) {
-        RuleAction.DST_PORT ||
-        RuleAction.SRC_PORT ||
-        RuleAction.IN_PORT ||
-        RuleAction.UID ||
-        RuleAction.DSCP => _contentController.text.trim().replaceAll(',', '/'),
-        _ => _contentController.text.trim(),
-      },
+      content: _savedContent,
       ruleTarget: _ruleTarget.trim(),
       noResolve: _noResolve || _src,
       src: _src,
@@ -305,6 +307,11 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
               validator: (_) {
                 if (_contentController.text.trim().isEmpty) {
                   return appLocalizations.emptyTip(appLocalizations.content);
+                }
+                // Saved as "TYPE,content,target": a comma would move the target.
+                if (!_ruleAction.hasCommaPayload &&
+                    _savedContent.contains(',')) {
+                  return appLocalizations.customRuleInvalidSyntax;
                 }
                 return ParsedRule(
                   ruleAction: _ruleAction,

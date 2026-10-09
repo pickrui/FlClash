@@ -124,6 +124,50 @@ void main() {
     expect(result?.value, 'DST-PORT,80/443,DIRECT');
   });
 
+  testWidgets('a domain rule rejects a comma that would move its target', (
+    tester,
+  ) async {
+    Rule? result;
+    await tester.pumpWidget(
+      TestApp(
+        wrapInProviderScope: true,
+        child: Scaffold(
+          body: Builder(
+            builder: (context) => TextButton(
+              onPressed: () async {
+                result = await showDialog<Rule>(
+                  context: context,
+                  builder: (_) => AddOrEditRuleDialog(
+                    rule: Rule.value('DOMAIN-SUFFIX,google.com,DIRECT'),
+                  ),
+                );
+              },
+              child: const Text('Open'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byType(TextFormField),
+      'google.com,youtube.com',
+    );
+    await tester.tap(find.text('Confirm'));
+    await tester.pumpAndSettle();
+    expect(result, isNull);
+    final l = AppLocalizations.of(
+      tester.element(find.byType(AddOrEditRuleDialog)),
+    );
+    expect(find.text(l.customRuleInvalidSyntax), findsOneWidget);
+
+    await tester.enterText(find.byType(TextFormField), 'youtube.com');
+    await tester.tap(find.text('Confirm'));
+    await tester.pumpAndSettle();
+    expect(result?.value, 'DOMAIN-SUFFIX,youtube.com,DIRECT');
+  });
+
   testWidgets('an added rule can point to a Tailscale network', (tester) async {
     Rule? result;
     await tester.pumpWidget(
