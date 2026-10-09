@@ -267,10 +267,10 @@ extension _EditorStateKeyboard on _CodeForgeState {
   }) {
     final controller = _controller;
     switch (key) {
+      // A read-only editor has nothing to indent and must let focus move on.
       case LogicalKeyboardKey.tab when shift && !control:
-        if (!_readOnly && !controller.previousSnippetStop()) {
-          controller.unindent();
-        }
+        if (_readOnly) return false;
+        if (!controller.previousSnippetStop()) controller.unindent();
       case LogicalKeyboardKey.backspace:
         if (_readOnly) return true;
         controller.backspace();
@@ -301,9 +301,8 @@ extension _EditorStateKeyboard on _CodeForgeState {
         _findController.hide();
         _controller.suggestionsNotifier.value = null;
       case LogicalKeyboardKey.tab:
-        if (!_readOnly &&
-            _controller.suggestions == null &&
-            !controller.nextSnippetStop()) {
+        if (_readOnly) return false;
+        if (_controller.suggestions == null && !controller.nextSnippetStop()) {
           controller.indent();
         }
       case LogicalKeyboardKey.pageUp:

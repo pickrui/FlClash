@@ -6,6 +6,7 @@
 import 'package:code_forge/code_forge.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'support.dart';
 
@@ -95,6 +96,45 @@ void main() {
 
     await _chord(tester, LogicalKeyboardKey.keyC, control: true);
     expect(clipboard.text, '  - name: a\n');
+  });
+
+  testWidgets('Tab and Shift+Tab move focus out of a read-only editor', (
+    tester,
+  ) async {
+    final controller = CodeForgeController()..text = _document;
+    final before = FocusNode();
+    final after = FocusNode();
+    addTearDown(before.dispose);
+    addTearDown(after.dispose);
+    await pumpEditor(
+      tester,
+      controller,
+      readOnly: true,
+      wrap: (editor) => Column(
+        children: [
+          TextButton(
+            focusNode: before,
+            onPressed: () {},
+            child: const Text('Before'),
+          ),
+          Expanded(child: editor),
+          TextButton(
+            focusNode: after,
+            onPressed: () {},
+            child: const Text('After'),
+          ),
+        ],
+      ),
+    );
+
+    await focusEditor(tester);
+    await _chord(tester, LogicalKeyboardKey.tab);
+    expect(after.hasFocus, isTrue);
+
+    await focusEditor(tester);
+    await _chord(tester, LogicalKeyboardKey.tab, shift: true);
+    expect(before.hasFocus, isTrue);
+    expect(controller.text, _document);
   });
 
   testWidgets('select all, copy, cut, paste and undo, redo', (tester) async {
