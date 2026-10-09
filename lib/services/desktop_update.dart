@@ -74,9 +74,7 @@ class DesktopUpdater implements DesktopUpdateInstaller {
           ),
         );
         final bytes = <int>[];
-        await for (final chunk in response.data!.stream.timeout(
-          manifestTimeout,
-        )) {
+        await for (final chunk in response.data!.stream) {
           if (bytes.length + chunk.length > maxUpdateManifestBytes) {
             throw const FormatException('Update manifest is too large');
           }

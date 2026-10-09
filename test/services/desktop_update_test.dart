@@ -208,9 +208,16 @@ void main() {
 
   test('a stalled metadata body times out and releases the response', () async {
     final canceled = Completer<void>();
+    var responseClosed = false;
     final body = StreamController<Uint8List>(onCancel: canceled.complete);
     final client = Dio()
-      ..httpClientAdapter = _Adapter((_) => ResponseBody(body.stream, 200));
+      ..httpClientAdapter = _Adapter(
+        (_) => ResponseBody(
+          body.stream,
+          200,
+          onClose: () => responseClosed = true,
+        ),
+      );
     addTearDown(() => client.close(force: true));
     final installer = DesktopUpdater(
       loadScript: (_) async => '',
@@ -220,9 +227,17 @@ void main() {
     );
     await expectLater(
       loadManifest(client, installer: installer),
-      throwsA(isA<TimeoutException>()),
+      throwsA(
+        isA<DioException>().having(
+          (error) => error.type,
+          'type',
+          DioExceptionType.receiveTimeout,
+        ),
+      ),
     );
+    expect(responseClosed, isTrue);
     await canceled.future.timeout(const Duration(seconds: 1));
+    expect(await File('${file.path}.update.json').exists(), isFalse);
     await body.close();
   });
 
