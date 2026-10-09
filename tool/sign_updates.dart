@@ -54,13 +54,17 @@ Future<void> main(List<String> args) async {
     throw StateError('OTA signing key does not match the pinned public key');
   }
   var count = 0;
-  await for (final file in Directory(args[0]).list()) {
-    if (file is! File ||
+  for (final entry in await Directory(args[0]).list().toList()) {
+    if (entry is! File ||
         !RegExp(
-          r'^flclash-(?:windows|macos|linux)-[\w-]+\.(?:exe|dmg|deb|rpm|AppImage)$',
-        ).hasMatch(p.basename(file.path))) {
+          r'^flclash-(?:windows|macos|linux)-[\w-]+\.(?:exe|dmg|deb|rpm|AppImage|appimage)$',
+        ).hasMatch(p.basename(entry.path))) {
       continue;
     }
+    final name = releaseAssetName(p.basename(entry.path));
+    final file = name == p.basename(entry.path)
+        ? entry
+        : await entry.rename(p.join(p.dirname(entry.path), name));
     final payload = utf8.encode(
       jsonEncode({
         'schema': 1,
@@ -86,4 +90,14 @@ Future<void> main(List<String> args) async {
   }
   if (count == 0) throw StateError('No desktop update packages found');
   stdout.writeln('Signed $count desktop update packages');
+}
+
+String releaseAssetName(String name) {
+  if (name.endsWith('.exe') && !name.endsWith('-setup.exe')) {
+    return '${name.substring(0, name.length - 4)}-setup.exe';
+  }
+  if (name.endsWith('.appimage')) {
+    return '${name.substring(0, name.length - 9)}.AppImage';
+  }
+  return name;
 }
