@@ -150,4 +150,92 @@ void main() {
       await completion.timeout(const Duration(seconds: 2));
     },
   );
+
+  group('connectFirst', () {
+    final blackhole = InternetAddress('2001:db8::1');
+    final refused = InternetAddress('192.0.2.1');
+    final loopback = InternetAddress.loopbackIPv4;
+
+    ConnectionTask<Socket> stalled(void Function() onCancel) {
+      final socket = Completer<Socket>();
+      return ConnectionTask.fromSocket(socket.future, () {
+        onCancel();
+        socket.completeError(const SocketException('cancelled'));
+      });
+    }
+
+    test('a dropped first address does not hold up the next one', () async {
+      final connected = await Socket.connect(loopback, server.port);
+      addTearDown(connected.destroy);
+      final cancelled = <InternetAddress>[];
+      final confirmed = <InternetAddress>[];
+      final watch = Stopwatch()..start();
+      final task = connectFirst(
+        [blackhole, loopback],
+        (address) async => address == blackhole
+            ? stalled(() => cancelled.add(address))
+            : ConnectionTask.fromSocket(
+                Future.value(connected),
+                () => cancelled.add(address),
+              ),
+        onConnected: confirmed.add,
+        stagger: const Duration(milliseconds: 50),
+      );
+
+      expect(await task.socket, same(connected));
+      expect(
+        watch.elapsed,
+        greaterThanOrEqualTo(const Duration(milliseconds: 50)),
+      );
+      expect(confirmed, [loopback]);
+      expect(cancelled, [blackhole]);
+    });
+
+    test('a failed address hands over without waiting', () async {
+      final started = <InternetAddress>[];
+      final task = connectFirst([refused, loopback], (address) async {
+        started.add(address);
+        if (address == refused) throw const SocketException('refused');
+        return Socket.startConnect(address, server.port);
+      }, stagger: const Duration(minutes: 1));
+
+      final socket = await task.socket.timeout(const Duration(seconds: 5));
+      addTearDown(socket.destroy);
+      expect(socket.remotePort, server.port);
+      expect(started, [refused, loopback]);
+    });
+
+    test('the last error is reported once every address failed', () async {
+      final task = connectFirst([
+        refused,
+        blackhole,
+      ], (address) async => throw SocketException(address.address));
+
+      await expectLater(
+        task.socket,
+        throwsA(
+          isA<SocketException>().having(
+            (error) => error.message,
+            'message',
+            blackhole.address,
+          ),
+        ),
+      );
+    });
+
+    test('cancelling releases every attempt in flight', () async {
+      final cancelled = <InternetAddress>[];
+      final task = connectFirst(
+        [blackhole, refused],
+        (address) async => stalled(() => cancelled.add(address)),
+        stagger: Duration.zero,
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      task.cancel();
+
+      await expectLater(task.socket, throwsA(isA<SocketException>()));
+      expect(cancelled, unorderedEquals([blackhole, refused]));
+    });
+  });
 }

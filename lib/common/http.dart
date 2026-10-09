@@ -13,6 +13,7 @@ import 'package:dio/io.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/common/proxy_auth.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 
 import 'tls_connection.dart';
 
@@ -323,56 +324,93 @@ Future<ConnectionTask<Socket>> connectWithResolver(
   final secure = uri.isScheme('https');
   final port = uri.hasPort ? uri.port : (secure ? 443 : 80);
   final addresses = await resolver.resolve(uri.host);
-  ConnectionTask<Socket>? pending;
-  Socket? activeSocket;
-  var canceled = false;
-  Future<Socket> connect() async {
-    Object? lastError;
-    StackTrace? lastStackTrace;
-    for (final address in addresses) {
-      if (canceled) throw const SocketException('Connection attempt cancelled');
-      try {
-        final task = pending = await (secure
-            ? startTlsConnection(
-                address,
-                port,
-                host: uri.host,
-                onBadCertificate: (certificate) =>
-                    onBadCertificate?.call(certificate, uri.host, port) ??
-                    false,
-              )
-            : Socket.startConnect(address, port));
-        if (canceled) {
-          task.cancel();
-          throw const SocketException('Connection attempt cancelled');
-        }
-        final socket = activeSocket = await task.socket;
-        if (canceled) {
-          socket.destroy();
-          throw const SocketException('Connection attempt cancelled');
-        }
-        resolver.confirm(uri.host, address);
-        return socket;
-      } catch (error, stackTrace) {
-        activeSocket?.destroy();
-        activeSocket = null;
-        if (canceled) rethrow;
-        lastError = error;
-        lastStackTrace = stackTrace;
-      }
-    }
-    if (lastError != null) {
-      Error.throwWithStackTrace(lastError, lastStackTrace!);
-    }
+  if (addresses.isEmpty) {
     throw SocketException('No address for \'${uri.host}\'');
   }
+  return connectFirst(
+    addresses,
+    (address) => secure
+        ? startTlsConnection(
+            address,
+            port,
+            host: uri.host,
+            onBadCertificate: (certificate) =>
+                onBadCertificate?.call(certificate, uri.host, port) ?? false,
+          )
+        : Socket.startConnect(address, port),
+    onConnected: (address) => resolver.confirm(uri.host, address),
+  );
+}
 
-  return ConnectionTask.fromSocket<Socket>(connect(), () {
-    canceled = true;
-    pending?.cancel();
-    // A completed TCP task no longer owns its socket. Keep ownership through
-    // the TLS handshake so cancellation also releases that connection.
-    activeSocket?.destroy();
+/// Connects over the first address that answers. Like Dart's own connect by
+/// host name, the next address is tried once the previous attempt fails or
+/// has not answered within [stagger]; otherwise a first address the network
+/// drops, such as IPv6 without a route, uses up the whole connect timeout.
+@visibleForTesting
+ConnectionTask<Socket> connectFirst(
+  List<InternetAddress> addresses,
+  Future<ConnectionTask<Socket>> Function(InternetAddress address) start, {
+  void Function(InternetAddress address)? onConnected,
+  Duration stagger = const Duration(milliseconds: 250),
+}) {
+  final result = Completer<Socket>();
+  final attempts = <ConnectionTask<Socket>>{};
+  Timer? timer;
+  var next = 0;
+  var failed = 0;
+
+  void cancelAttempts() {
+    timer?.cancel();
+    for (final attempt in attempts.toList()) {
+      attempt.cancel();
+    }
+    attempts.clear();
+  }
+
+  void startNext() {
+    timer?.cancel();
+    if (result.isCompleted || next >= addresses.length) return;
+    final address = addresses[next++];
+    timer = Timer(stagger, startNext);
+    unawaited(() async {
+      ConnectionTask<Socket>? attempt;
+      try {
+        attempt = await start(address);
+        if (result.isCompleted) {
+          attempt.cancel();
+          return;
+        }
+        attempts.add(attempt);
+        final socket = await attempt.socket;
+        attempts.remove(attempt);
+        if (result.isCompleted) {
+          socket.destroy();
+          return;
+        }
+        cancelAttempts();
+        onConnected?.call(address);
+        result.complete(socket);
+      } catch (error, stackTrace) {
+        attempts.remove(attempt);
+        if (result.isCompleted) return;
+        if (++failed == addresses.length) {
+          timer?.cancel();
+          result.completeError(error, stackTrace);
+        } else {
+          startNext();
+        }
+      }
+    }());
+  }
+
+  startNext();
+  return ConnectionTask.fromSocket<Socket>(result.future, () {
+    if (!result.isCompleted) {
+      result.completeError(
+        const SocketException('Connection attempt cancelled'),
+      );
+    }
+    cancelAttempts();
   });
 }
 
