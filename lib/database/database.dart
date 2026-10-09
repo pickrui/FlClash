@@ -63,6 +63,16 @@ class Database extends _$Database {
           'DELETE FROM rules WHERE id NOT IN (SELECT rule_id FROM profile_rule_mapping)',
         );
         await rulesDao.repairOrders();
+        // createTable skips declared indexes, so tables the v4 upgrade added
+        // have none; those databases never run that upgrade step again.
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_profile_name_order '
+          'ON proxy_groups (profile_id, name, "order")',
+        );
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS last_accessed_url '
+          'ON icon_records (last_accessed, url)',
+        );
         await customStatement('PRAGMA foreign_keys = ON');
       },
       onUpgrade: (m, from, to) async {
