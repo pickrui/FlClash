@@ -36,7 +36,16 @@ class AppPath {
       return;
     }
     _completeWith(dataDir, getApplicationSupportDirectory());
-    _completeWith(tempDir, getTemporaryDirectory());
+    _completeWith(
+      tempDir,
+      // Linux hands out the shared /tmp, where backup snapshots and profiles
+      // written with the default umask are readable by other local users.
+      Platform.isLinux
+          ? dataDir.future.then(
+              (dir) => ensurePrivateDirectory(join(dir.path, 'tmp')),
+            )
+          : getTemporaryDirectory(),
+    );
     _completeWith(
       downloadDir,
       // Linux may return null (e.g. no xdg-user-dirs in containers)

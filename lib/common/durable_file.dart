@@ -15,6 +15,20 @@ const _moveFileWriteThrough = 0x8;
 
 Future<Directory> createPrivateTempDirectory(String prefix) async {
   final directory = await Directory.systemTemp.createTemp(prefix);
+  try {
+    return await _makePrivate(directory);
+  } catch (_) {
+    await directory.delete();
+    rethrow;
+  }
+}
+
+/// Creates [path] if needed and limits it to the current user.
+Future<Directory> ensurePrivateDirectory(String path) async {
+  return _makePrivate(await Directory(path).create(recursive: true));
+}
+
+Future<Directory> _makePrivate(Directory directory) async {
   if (Platform.isWindows) return directory;
   final pathPointer = directory.path.toNativeUtf8();
   try {
@@ -26,9 +40,6 @@ Future<Directory> createPrivateTempDirectory(String prefix) async {
       );
     }
     return directory;
-  } catch (_) {
-    await directory.delete();
-    rethrow;
   } finally {
     calloc.free(pathPointer);
   }
