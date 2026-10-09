@@ -9,6 +9,91 @@ import 'package:fl_clash/core/lifecycle_operations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('crash cleanup finishes before a later startup', () async {
+    final operations = CoreLifecycleOperations();
+    final restoringProxy = Completer<void>();
+    final proxyRestored = Completer<void>();
+    final events = <String>[];
+    final cleanup = operations.cleanupAfterCrash(
+      isDisconnected: () => true,
+      cleanup: () async {
+        events.add('restore-proxy');
+        restoringProxy.complete();
+        await proxyRestored.future;
+        events.add('shutdown-core');
+      },
+    );
+    await restoringProxy.future;
+    final startup = operations.run(() async => events.add('start-core'));
+    await pumpEventQueue();
+    final eventsWhileRestoring = List.of(events);
+    proxyRestored.complete();
+    await cleanup;
+    await startup;
+
+    expect(eventsWhileRestoring, ['restore-proxy']);
+    expect(events, ['restore-proxy', 'shutdown-core', 'start-core']);
+  });
+
+  test(
+    'recovery can supersede crash cleanup queued from its own zone',
+    () async {
+      final operations = CoreLifecycleOperations();
+      final entered = Completer<void>();
+      final recovered = Completer<void>();
+      var disconnected = true;
+      var cleanups = 0;
+      late Future<void> cleanup;
+      final recovery = operations.run(() async {
+        cleanup = operations.cleanupAfterCrash(
+          isDisconnected: () => disconnected,
+          cleanup: () async => cleanups++,
+        );
+        entered.complete();
+        await recovered.future;
+        disconnected = false;
+      });
+      await entered.future;
+      recovered.complete();
+      await recovery;
+      await cleanup;
+
+      expect(cleanups, 0);
+    },
+  );
+
+  test(
+    'failed recovery still permits crash cleanup and a later startup',
+    () async {
+      final operations = CoreLifecycleOperations();
+      final entered = Completer<void>();
+      final release = Completer<void>();
+      final events = <String>[];
+      final recovery = operations.run(() async {
+        entered.complete();
+        await release.future;
+        throw StateError('recovery failed');
+      });
+      final recoveryFailure = expectLater(recovery, throwsStateError);
+      await entered.future;
+      final cleanup = operations.cleanupAfterCrash(
+        isDisconnected: () => true,
+        cleanup: () async {
+          events.add('cleanup');
+          throw StateError('cleanup failed');
+        },
+      );
+      final cleanupFailure = expectLater(cleanup, throwsStateError);
+      final startup = operations.run(() async => events.add('start-core'));
+      release.complete();
+      await recoveryFailure;
+      await cleanupFailure;
+      await startup;
+
+      expect(events, ['cleanup', 'start-core']);
+    },
+  );
+
   test(
     'nested readiness does not await a check queued behind itself',
     () async {

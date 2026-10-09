@@ -169,6 +169,16 @@ extension CoreControllerExt on AppController {
     }
   }
 
+  Future<void> cleanupAfterCoreCrash() =>
+      _coreLifecycleOperations.cleanupAfterCrash(
+        isDisconnected: () =>
+            _ref.read(coreStatusProvider) == CoreStatus.disconnected,
+        cleanup: () => runCleanupActions([
+          stopSystemProxyIfNeeded,
+          () => coreController.shutdown(false),
+        ]),
+      );
+
   Future<void> syncAndroidServiceState() =>
       _coreLifecycleOperations.runExternal(() async {
         if (!system.isAndroid || !_ref.read(initProvider)) return;

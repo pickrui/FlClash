@@ -15,6 +15,13 @@ class CoreLifecycleOperations {
   Future<T> runExternal<T>(Future<T> Function() action) =>
       _lock.synchronized(action, reentrant: false);
 
+  Future<void> cleanupAfterCrash({
+    required bool Function() isDisconnected,
+    required Future<void> Function() cleanup,
+  }) => runExternal(() async {
+    if (isDisconnected()) await cleanup();
+  });
+
   Future<bool> ensureReady(Future<bool> Function() checkAndRecover) {
     // An external readiness check may be queued behind the current operation.
     // Waiting on its shared future here would make that operation await itself.

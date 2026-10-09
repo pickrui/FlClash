@@ -147,10 +147,7 @@ class _CoreManagerState extends ConsumerState<CoreManager>
       context.showNotifier(message);
     }
     globalState.clearRunState();
-    await runCleanupActions([
-      stopSystemProxyIfNeeded,
-      () => coreController.shutdown(false),
-    ]);
+    await appController.cleanupAfterCoreCrash();
     super.onCrash(message);
   }
 
