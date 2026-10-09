@@ -1398,6 +1398,12 @@ void main() {
         final proxy = await adapter.takeRequest().timeout(
           const Duration(milliseconds: 100),
         );
+        for (final request in [direct, proxy]) {
+          expect(
+            request.options.headers['X-oixCloud-Capabilities'],
+            'snell.ech.h3=1',
+          );
+        }
         final publicKey = _decodeAgeRecipient(
           proxy.options.headers['X-Flclash-Age-Pubkey'] as String,
         );

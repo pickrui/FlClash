@@ -136,6 +136,19 @@ void main() {
       );
     });
 
+    test('completes Snell ECH transport modes', () {
+      const prefix = 'type: snell\nobfs-opts:\n  mode: ech-tls\n  transport: ';
+      expect(_labels(_complete('${prefix}h|', schema: EditorSchema.proxy)), [
+        'h3',
+      ]);
+      expect(_labels(_complete('${prefix}a|', schema: EditorSchema.proxy)), [
+        'auto',
+      ]);
+      expect(_labels(_complete('${prefix}t|', schema: EditorSchema.proxy)), [
+        'tcp',
+      ]);
+    });
+
     test('completes the keys of an item the caret line opens', () {
       final completion = _complete('proxies:\n  - na|');
       expect(_labels(completion).first, 'name');

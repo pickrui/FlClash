@@ -29,6 +29,15 @@ const int _defaultReceiveTimeoutMs = 15000;
 const int _httpOk = 200;
 const int _httpServerError = 500;
 
+abstract final class _SubscriptionCapabilities {
+  static const headerName = 'X-oixCloud-Capabilities';
+  static const revisions = <String, int>{'snell.ech.h3': 1};
+
+  static String get headerValue =>
+      [for (final entry in revisions.entries) '${entry.key}=${entry.value}']
+          .join(', ');
+}
+
 // Non-idempotent requests are never hedged or normally retried. Login opts into
 // sequential domain failover only when the connection was never established.
 @visibleForTesting
@@ -1415,6 +1424,8 @@ class CloudApiService implements CloudNodeFilterApi {
         'X-Flclash-Timestamp': timestamp,
         'X-Flclash-Signature': signature,
         'X-Flclash-Age-Pubkey': identity.recipient,
+        _SubscriptionCapabilities.headerName:
+            _SubscriptionCapabilities.headerValue,
       };
 
       final decoded = <Response<Map<String, dynamic>>, (Uint8List, String?)>{};

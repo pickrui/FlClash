@@ -553,10 +553,21 @@ const _proxyVariants = <String, Map<String, YamlSchema>>{
   },
   'snell': {
     'psk': _str,
-    'version': YamlSchema.scalar(['1', '2', '3']),
+    'version': YamlSchema.scalar(['1', '2', '3', '4', '5']),
+    'reuse': _bool,
+    'identity': _bool,
     'obfs-opts': YamlSchema.map({
-      'mode': YamlSchema.scalar(['http', 'tls']),
+      'mode': YamlSchema.scalar(['http', 'tls', 'ech-tls']),
+      'transport': YamlSchema.scalar(['tcp', 'h3', 'auto']),
       'host': _str,
+      'sni': _str,
+      'alpn': YamlSchema.scalar(['snell-ech/1']),
+      'identity-version': YamlSchema.scalar(['1', '2']),
+      'legacy-fallback': _bool,
+      'preconnect': YamlSchema.scalar(['0', '1', '2', '3', '4']),
+      'ech-config': _str,
+      'ech-config-file': _str,
+      'ca-file': _str,
     }),
   },
   'ssh': {
