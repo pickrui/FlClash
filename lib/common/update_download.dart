@@ -182,21 +182,7 @@ Future<File> _downloadAppUpdateFromSource({
     final total = encoding == null || encoding == 'identity' ? expected : null;
     final writer = output = await partial.open(mode: FileMode.write);
     var received = 0;
-    final timeout = response.requestOptions.receiveTimeout!;
-    // Dio starts its body timer only after the first chunk has arrived.
-    final stream = response.data!.stream.timeout(
-      timeout,
-      onTimeout: (events) {
-        events.addError(
-          DioException.receiveTimeout(
-            timeout: timeout,
-            requestOptions: response.requestOptions,
-          ),
-        );
-        events.close();
-      },
-    );
-    await for (final chunk in stream) {
+    await for (final chunk in response.data!.stream) {
       if (cancelToken.isCancelled) throw cancelToken.cancelError!;
       received += chunk.length;
       if (received > maxBytes || (total != null && received > total)) {
