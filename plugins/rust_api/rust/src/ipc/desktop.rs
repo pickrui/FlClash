@@ -539,7 +539,8 @@ fn io_loop(name: String, sink: StreamSink<Vec<u8>, SseCodec>) {
         let (mut receiver, mut sender) = stream.split();
         let connection_running = Arc::new(AtomicBool::new(true));
         let writer_running = Arc::clone(&connection_running);
-        let writer = thread::spawn(move || {
+        let builder = thread::Builder::new().name("ipc-writer".into());
+        let spawned = builder.spawn(move || {
             let mut error = None;
             while writer_running.load(Ordering::SeqCst) && server_active() {
                 match rx.recv_timeout(IO_POLL_INTERVAL) {
@@ -559,6 +560,21 @@ fn io_loop(name: String, sink: StreamSink<Vec<u8>, SseCodec>) {
             writer_running.store(false, Ordering::SeqCst);
             error
         });
+        // The release profile aborts on panic, so thread::spawn would take the
+        // whole app down when the system is out of threads.
+        let writer = match spawned {
+            Ok(writer) => writer,
+            Err(e) => {
+                if let Ok(mut state) = STATE.lock() {
+                    state.sender = None;
+                }
+                report_error(&sink, format!("Failed to spawn IPC writer thread: {e}"));
+                if server_active() && sink.add(make_frame(TYPE_DISCONNECTED, &[])).is_err() {
+                    break;
+                }
+                continue;
+            }
+        };
 
         let mut frame_reader = FrameReader::default();
         let mut backoff = MIN_IO_BACKOFF;
