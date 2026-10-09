@@ -60,6 +60,7 @@ class TrayPlugin : public flutter::Plugin {
   bool visible_ = false;
 
   UINT taskbar_created_message_ = 0;
+  bool taskbar_created_allowed_ = false;
   int window_proc_id_ = -1;
 };
 

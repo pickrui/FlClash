@@ -258,6 +258,15 @@ std::optional<LRESULT> TrayPlugin::HandleWindowProc(HWND window,
                                                     UINT message,
                                                     WPARAM wparam,
                                                     LPARAM lparam) {
+  // An elevated app misses Explorer's restart broadcast unless UIPI admits it;
+  // the top-level window only exists once its messages arrive here.
+  if (!taskbar_created_allowed_ && taskbar_created_message_ != 0) {
+    taskbar_created_allowed_ = true;
+    ::ChangeWindowMessageFilterEx(::GetAncestor(window, GA_ROOT),
+                                  taskbar_created_message_, MSGFLT_ALLOW,
+                                  nullptr);
+  }
+
   if (message == WM_DESTROY) {
     Hide();
     return std::nullopt;
