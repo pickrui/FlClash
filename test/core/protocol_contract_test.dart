@@ -122,7 +122,6 @@ class _GeoListener with CoreEventListener {
     String geoType,
     bool updating,
     bool skipped,
-    bool reload,
     String? error, {
     bool silent = false,
   }) {

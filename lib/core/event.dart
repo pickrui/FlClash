@@ -43,7 +43,6 @@ abstract mixin class CoreEventListener {
     String geoType,
     bool updating,
     bool skipped,
-    bool reload,
     String? error, {
     bool silent = false,
   }) {}
@@ -85,7 +84,6 @@ class CoreEventManager {
                     data['type'] as String,
                     data['updating'] as bool,
                     data['skipped'] as bool? ?? false,
-                    data['reload'] as bool? ?? false,
                     data['error'] as String?,
                     silent: data['silent'] as bool? ?? false,
                   );

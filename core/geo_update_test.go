@@ -642,7 +642,7 @@ func TestManualGeoUpdateRefreshesReadersWithoutRestart(t *testing.T) {
 				event := <-events
 				status, ok := event.Data.(GeoUpdateStatus)
 				if event.Type != GeoUpdateMessage || !ok || status.Type != test.geoType ||
-					status.Updating != updating || status.Silent || status.Reload || status.Skipped || status.Error != "" {
+					status.Updating != updating || status.Silent || status.Skipped || status.Error != "" {
 					t.Fatalf("unexpected update event: %+v", event)
 				}
 			}

@@ -294,7 +294,6 @@ enum FunctionTag {
   autoLaunch,
   logs,
   loadedProvider,
-  geoReload,
   saveSharedFile,
 }
 

@@ -159,19 +159,9 @@ class _CoreManagerState extends ConsumerState<CoreManager>
     String geoType,
     bool updating,
     bool skipped,
-    bool reload,
     String? error, {
     bool silent = false,
   }) {
-    if (reload) {
-      if (ref.read(isStartProvider)) {
-        debouncer.call(
-          FunctionTag.geoReload,
-          () => appController.restartCore(),
-        );
-      }
-      return;
-    }
     final geoResource = GeoResource.fromJson(geoType.toLowerCase());
     ref.read(isUpdatingProvider(geoResource.updatingKey).notifier).value =
         updating;
@@ -187,7 +177,7 @@ class _CoreManagerState extends ConsumerState<CoreManager>
     } else {
       globalState.showNotifier(appLocalizations.geoUpdated(geoResource.name));
     }
-    super.onGeoUpdate(geoType, updating, skipped, reload, error);
+    super.onGeoUpdate(geoType, updating, skipped, error);
   }
 
   @override

@@ -175,7 +175,6 @@ type GeoUpdateStatus struct {
 	Type     string `json:"type"`
 	Updating bool   `json:"updating"`
 	Skipped  bool   `json:"skipped,omitempty"`
-	Reload   bool   `json:"reload,omitempty"`
 	Error    string `json:"error,omitempty"`
 }
 
