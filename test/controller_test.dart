@@ -58,6 +58,52 @@ void main() {
     expect(exits, 1);
   });
 
+  group('failed core restart', () {
+    Future<List<String>> restart({
+      required bool running,
+      Object? restartError,
+      Object? stopError,
+    }) async {
+      final calls = <String>[];
+      try {
+        await restartCoreOrStop(
+          restart: () async {
+            calls.add('restart');
+            if (restartError != null) throw restartError;
+          },
+          isRunning: () => running,
+          stop: () async {
+            calls.add('stop');
+            if (stopError != null) throw stopError;
+          },
+        );
+      } catch (error) {
+        calls.add('error:$error');
+      }
+      return calls;
+    }
+
+    test('stops a running session and keeps the restart error', () async {
+      expect(await restart(running: true, restartError: 'no core'), [
+        'restart',
+        'stop',
+        'error:no core',
+      ]);
+      expect(
+        await restart(running: true, restartError: 'no core', stopError: 'x'),
+        ['restart', 'stop', 'error:no core'],
+      );
+    });
+
+    test('leaves a stopped session and a good restart alone', () async {
+      expect(await restart(running: false, restartError: 'no core'), [
+        'restart',
+        'error:no core',
+      ]);
+      expect(await restart(running: true), ['restart']);
+    });
+  });
+
   group('port conflict recovery', () {
     test('waits for the new port to be applied before retrying', () async {
       var activePort = 7890;

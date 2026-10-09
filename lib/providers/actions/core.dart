@@ -153,13 +153,17 @@ extension CoreControllerExt on AppController {
       if (!start) return;
       startupRecovery.resumeAutomaticSetup();
     }
-    await _serializeCoreLifecycle(() async {
-      _ref.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
-      clearDelay();
-      await coreController.shutdown(true);
-      await _connectCore();
-      await _initCore();
-    });
+    await restartCoreOrStop(
+      restart: () => _serializeCoreLifecycle(() async {
+        _ref.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
+        clearDelay();
+        await coreController.shutdown(true);
+        await _connectCore();
+        await _initCore();
+      }),
+      isRunning: () => _ref.read(isStartProvider),
+      stop: () => updateStatus(false),
+    );
     if (start || _ref.read(isStartProvider)) {
       await updateStatus(true, isInit: true);
     } else {

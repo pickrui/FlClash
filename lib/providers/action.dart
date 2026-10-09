@@ -177,6 +177,30 @@ Future<bool> startCoreWithPortRecovery({
   return false;
 }
 
+/// A restart that leaves no core must end the running state too, or the
+/// start button, the tray and the system proxy keep pointing at nothing.
+Future<void> restartCoreOrStop({
+  required Future<void> Function() restart,
+  required bool Function() isRunning,
+  required Future<void> Function() stop,
+}) async {
+  try {
+    await restart();
+  } catch (error, stackTrace) {
+    if (isRunning()) {
+      try {
+        await stop();
+      } catch (stopError) {
+        commonPrint.log(
+          'Stopping after a failed core restart failed: $stopError',
+          logLevel: LogLevel.warning,
+        );
+      }
+    }
+    Error.throwWithStackTrace(error, stackTrace);
+  }
+}
+
 String formatConfigValidationMessage(
   String message,
   AppLocalizations localizations,
