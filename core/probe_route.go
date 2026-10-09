@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/tunnel"
+	"maps"
 	"sort"
 	"strings"
 )
@@ -53,7 +54,10 @@ func routeStamp() (uint64, uint64) {
 }
 
 func probeProxiesLocked() map[string]constant.Proxy {
-	proxies := tunnel.ProxiesSnapshot()
+	// Connections read the tunnel's map without a lock; it is only ever replaced.
+	snapshot := tunnel.ProxiesSnapshot()
+	proxies := make(map[string]constant.Proxy, len(snapshot))
+	maps.Copy(proxies, snapshot)
 	providers := tunnel.ProvidersSnapshot()
 	names := make([]string, 0, len(providers))
 	for name := range providers {
