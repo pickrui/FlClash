@@ -63,7 +63,7 @@ fun String.isIpv4(): Boolean {
     if (parts.size != 2) {
         throw IllegalArgumentException("Invalid CIDR format")
     }
-    val address = InetAddress.getByName(parts[0])
+    val address = numericAddress(parts[0])
     return address.address.size == 4
 }
 
@@ -72,8 +72,24 @@ fun String.isIpv6(): Boolean {
     if (parts.size != 2) {
         throw IllegalArgumentException("Invalid CIDR format")
     }
-    val address = InetAddress.getByName(parts[0])
+    val address = numericAddress(parts[0])
     return address.address.size == 16
+}
+
+// InetAddress.getByName resolves anything that is not a literal through DNS.
+private fun numericAddress(value: String): InetAddress {
+    val literal = if (':' in value) {
+        value.all { it.isDigit() || it in 'a'..'f' || it in 'A'..'F' || it == ':' || it == '.' }
+    } else {
+        val octets = value.split('.')
+        octets.size == 4 && octets.all { octet ->
+            octet.length in 1..3 && octet.all(Char::isDigit) && octet.toInt() <= 255
+        }
+    }
+    if (!literal) {
+        throw IllegalArgumentException("Invalid IP address")
+    }
+    return InetAddress.getByName(value)
 }
 
 fun String.toCIDR(): CIDR {
@@ -85,7 +101,7 @@ fun String.toCIDR(): CIDR {
     val prefixLength =
         parts[1].toIntOrNull() ?: throw IllegalArgumentException("Invalid prefix length")
 
-    val address = InetAddress.getByName(ipAddress)
+    val address = numericAddress(ipAddress)
 
     val maxPrefix = if (address.address.size == 4) 32 else 128
     if (prefixLength < 0 || prefixLength > maxPrefix) {

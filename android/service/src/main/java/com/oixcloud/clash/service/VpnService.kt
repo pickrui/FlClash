@@ -175,7 +175,8 @@ class VpnService : SystemVpnService(), IBaseService {
             Log.d(
                 "addAddress", "address: ${cidr.address} prefixLength:${cidr.prefixLength}"
             )
-            val routeAddress = options.getIpv4RouteAddress()
+            val routeAddress = runCatching { options.getIpv4RouteAddress() }
+                .getOrDefault(emptyList())
             if (routeAddress.isNotEmpty()) {
                 try {
                     routeAddress.forEach { i ->

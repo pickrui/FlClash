@@ -295,10 +295,13 @@ abstract class Tun with _$Tun {
 }
 
 extension TunExt on Tun {
+  List<String> resolveRouteAddress(RouteMode routeMode) =>
+      routeMode == RouteMode.bypassPrivate
+      ? defaultBypassPrivateRouteAddress
+      : routeAddress;
+
   Tun getRealTun(RouteMode routeMode) {
-    final mRouteAddress = routeMode == RouteMode.bypassPrivate
-        ? defaultBypassPrivateRouteAddress
-        : routeAddress;
+    final mRouteAddress = resolveRouteAddress(routeMode);
     return switch (system.isDesktop) {
       true => copyWith(
         autoRoute: true,
