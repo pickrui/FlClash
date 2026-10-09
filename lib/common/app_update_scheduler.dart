@@ -11,14 +11,16 @@ class AppUpdateScheduler with WidgetsBindingObserver {
   final Future<void> Function() checkForUpdates;
   final void Function(Object error, StackTrace stackTrace) onError;
   Timer? _timer;
-  AppLifecycleState? _lifecycleState;
+  bool _backgrounded = false;
   bool _checking = false;
 
   AppUpdateScheduler({required this.checkForUpdates, required this.onError});
 
   void start() {
     if (_timer != null) return;
-    _lifecycleState = WidgetsBinding.instance.lifecycleState;
+    final state = WidgetsBinding.instance.lifecycleState;
+    _backgrounded =
+        state == AppLifecycleState.hidden || state == AppLifecycleState.paused;
     WidgetsBinding.instance.addObserver(this);
     // Startup already checks once; foreground checks do not reset this timer.
     _timer = Timer.periodic(
@@ -35,12 +37,13 @@ class AppUpdateScheduler with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final previous = _lifecycleState;
-    _lifecycleState = state;
-    if (state == AppLifecycleState.resumed &&
-        (previous == AppLifecycleState.inactive ||
-            previous == AppLifecycleState.hidden ||
-            previous == AppLifecycleState.paused)) {
+    // Desktop windows pass through inactive on every focus change; only a
+    // return from hidden or paused counts as coming back to the app.
+    if (state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.paused) {
+      _backgrounded = true;
+    } else if (state == AppLifecycleState.resumed && _backgrounded) {
+      _backgrounded = false;
       unawaited(_check());
     }
   }

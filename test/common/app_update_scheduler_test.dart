@@ -31,8 +31,49 @@ void main() {
     scheduler.stop();
   });
 
+  testWidgets('a desktop focus change does not check', (tester) async {
+    var calls = 0;
+    final scheduler = AppUpdateScheduler(
+      checkForUpdates: () async => calls++,
+      onError: (error, _) => fail('$error'),
+    );
+    addTearDown(scheduler.stop);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    scheduler.start();
+    for (var i = 0; i < 3; i++) {
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
+    }
+    expect(calls, 0);
+    scheduler.stop();
+  });
+
+  testWidgets('a mobile return through inactive checks once', (tester) async {
+    var calls = 0;
+    final scheduler = AppUpdateScheduler(
+      checkForUpdates: () async => calls++,
+      onError: (error, _) => fail('$error'),
+    );
+    addTearDown(scheduler.stop);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    scheduler.start();
+    for (final state in [
+      AppLifecycleState.inactive,
+      AppLifecycleState.hidden,
+      AppLifecycleState.paused,
+      AppLifecycleState.hidden,
+      AppLifecycleState.inactive,
+      AppLifecycleState.resumed,
+    ]) {
+      tester.binding.handleAppLifecycleStateChanged(state);
+    }
+    await tester.pump();
+    expect(calls, 1);
+    scheduler.stop();
+  });
+
   for (final background in [
-    AppLifecycleState.inactive,
     AppLifecycleState.hidden,
     AppLifecycleState.paused,
   ]) {
