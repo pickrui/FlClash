@@ -84,6 +84,34 @@ class NetworkDiagnosticSnapshot {
     required this.port,
     this.authenticated = false,
   });
+
+  // The page cancels a run whenever the snapshot changes, and unrelated
+  // profile or config writes recompute an equal one.
+  @override
+  bool operator ==(Object other) =>
+      other is NetworkDiagnosticSnapshot &&
+      other.profileApplied == profileApplied &&
+      other.profileSelected == profileSelected &&
+      other.running == running &&
+      other.suspended == suspended &&
+      other.systemProxy == systemProxy &&
+      other.tun == tun &&
+      other.oixCloud == oixCloud &&
+      other.port == port &&
+      other.authenticated == authenticated;
+
+  @override
+  int get hashCode => Object.hash(
+    profileApplied,
+    profileSelected,
+    running,
+    suspended,
+    systemProxy,
+    tun,
+    oixCloud,
+    port,
+    authenticated,
+  );
 }
 
 class DiagnosticWebResult {

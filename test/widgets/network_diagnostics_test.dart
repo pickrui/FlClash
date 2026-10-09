@@ -176,6 +176,38 @@ void main() {
     expect(service.runs, 2);
     expect(find.text(AppLocalizations.current.diagCanceled), findsNothing);
   });
+  // Switching a group tab rewrites the profile, which recomputes an equal
+  // snapshot.
+  testWidgets('an unchanged snapshot keeps a run going', (tester) async {
+    final service = _ControlledService();
+    final container = await _pump(tester, service);
+    container.updateOverrides([
+      networkDiagnosticReportHeaderProvider.overrideWithValue(
+        'FlClash 0.8.97+fixture (windows)',
+      ),
+      networkDiagnosticServiceProvider.overrideWithValue(service),
+      networkDiagnosticFixHandlerProvider.overrideWithValue(
+        (fix) async => fail('unexpected fix $fix'),
+      ),
+      networkDiagnosticSnapshotProvider.overrideWithValue(
+        // ignore: prefer_const_constructors
+        NetworkDiagnosticSnapshot(
+          profileApplied: _snapshot.profileApplied,
+          profileSelected: _snapshot.profileSelected,
+          running: _snapshot.running,
+          suspended: _snapshot.suspended,
+          systemProxy: _snapshot.systemProxy,
+          tun: _snapshot.tun,
+          oixCloud: _snapshot.oixCloud,
+          port: _snapshot.port,
+        ),
+      ),
+    ]);
+    await tester.pump();
+    expect(service.token!.isCancelled, isFalse);
+    service.completion.complete();
+    await tester.pumpAndSettle();
+  });
   testWidgets('configuration changes cancel a running snapshot', (
     tester,
   ) async {
