@@ -43,4 +43,18 @@ void main() {
       expect(SubscriptionInfo.formHString(null), const SubscriptionInfo());
     });
   });
+
+  test('an expiry DateTime cannot hold reads as no expiry', () {
+    expect(
+      const SubscriptionInfo(expire: 1735660800).expireTime,
+      DateTime.fromMillisecondsSinceEpoch(1735660800000),
+    );
+    for (final expire in [0, -1, 9999999999999, 8640000000001]) {
+      expect(
+        SubscriptionInfo(expire: expire).expireTime,
+        isNull,
+        reason: '$expire',
+      );
+    }
+  });
 }

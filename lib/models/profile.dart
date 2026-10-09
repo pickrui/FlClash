@@ -155,6 +155,14 @@ abstract class SubscriptionInfo with _$SubscriptionInfo {
   }
 }
 
+extension SubscriptionInfoExt on SubscriptionInfo {
+  /// Null for no expiry, and for seconds beyond what DateTime can hold,
+  /// which only a broken subscription-userinfo header sends.
+  DateTime? get expireTime => expire > 0 && expire <= 8640000000000
+      ? DateTime.fromMillisecondsSinceEpoch(expire * 1000)
+      : null;
+}
+
 @freezed
 abstract class ProxyChain with _$ProxyChain {
   const factory ProxyChain({
