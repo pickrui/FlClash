@@ -231,8 +231,7 @@ class RedirectPolicy extends HostResolver {
   List<Uri>? proxyTargets(Uri uri) {
     final addresses = _redirectHosts[_key(uri.host)];
     if (addresses == null) return null;
-    // dart:io writes an IPv6 CONNECT target without brackets, which the core
-    // refuses, so IPv4 answers go first.
+    // dart:io leaves IPv6 CONNECT targets unbracketed; the core refuses them.
     return [
       for (final address in addresses)
         if (address.type == InternetAddressType.IPv4)

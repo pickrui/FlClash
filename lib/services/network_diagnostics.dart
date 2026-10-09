@@ -85,8 +85,7 @@ class NetworkDiagnosticSnapshot {
     this.authenticated = false,
   });
 
-  // The page cancels a run whenever the snapshot changes, and unrelated
-  // profile or config writes recompute an equal one.
+  // Unrelated profile writes recompute an equal snapshot; runs must survive.
   @override
   bool operator ==(Object other) =>
       other is NetworkDiagnosticSnapshot &&

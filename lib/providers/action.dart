@@ -173,8 +173,7 @@ Future<bool> startCoreWithPortRecovery({
   return false;
 }
 
-/// A restart that leaves no core must end the running state too, or the
-/// start button, the tray and the system proxy keep pointing at nothing.
+/// A failed restart must also end the running state, tray and system proxy.
 Future<void> restartCoreOrStop({
   required Future<void> Function() restart,
   required bool Function() isRunning,

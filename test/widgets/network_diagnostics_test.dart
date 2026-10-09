@@ -176,8 +176,7 @@ void main() {
     expect(service.runs, 2);
     expect(find.text(AppLocalizations.current.diagCanceled), findsNothing);
   });
-  // Switching a group tab rewrites the profile, which recomputes an equal
-  // snapshot.
+  // Switching a group tab rewrites the profile and recomputes the snapshot.
   testWidgets('an unchanged snapshot keeps a run going', (tester) async {
     final service = _ControlledService();
     final container = await _pump(tester, service);

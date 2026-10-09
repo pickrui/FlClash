@@ -129,8 +129,7 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
 
       await refreshProfile(force: true);
     } catch (e, s) {
-      // Every sign-in awaits this one-shot future; a storage error here must
-      // not fail them all until the app restarts.
+      // Sign-ins await this one-shot future; a storage error must not fail all.
       commonPrint.log(
         'failed to restore the oixCloud session: $e\n$s',
         logLevel: LogLevel.warning,
