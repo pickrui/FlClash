@@ -68,6 +68,13 @@ class DurableConfigStore {
       }
       return value;
     }
+    // Only a first write that never committed leaves a temporary file alone.
+    if (!readFailed && !candidateExists[0] && !candidateExists[2]) {
+      try {
+        await temporary.delete();
+      } catch (_) {}
+      return null;
+    }
     // Existing ciphertext must never be replaced by a sanitized preference
     // fallback just because its key is inaccessible or does not match.
     throw ConfigKeyUnavailableException(

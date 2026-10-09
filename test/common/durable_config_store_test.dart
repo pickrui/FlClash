@@ -71,6 +71,38 @@ void main() {
     expect(await old.exists(), false);
   });
 
+  test('an interrupted first write reads as no config', () async {
+    final directory = await Directory.systemTemp.createTemp('config_store_');
+    addTearDown(() => directory.delete(recursive: true));
+    final path = p.join(directory.path, 'config.age');
+    await store.write(path, {'value': 'first'});
+    final ciphertext = await File(path).readAsBytes();
+    await File(path).delete();
+    final temporary = File('$path.tmp');
+    await temporary.writeAsBytes(ciphertext.sublist(0, ciphertext.length ~/ 2));
+
+    expect(await store.read(path), isNull);
+    expect(await temporary.exists(), isFalse);
+
+    await temporary.writeAsBytes(ciphertext);
+    expect(await store.read(path), {'value': 'first'});
+    expect(await File(path).exists(), isTrue);
+  });
+
+  test('an unreadable temporary file beside a target is not dropped', () async {
+    final directory = await Directory.systemTemp.createTemp('config_store_');
+    addTearDown(() => directory.delete(recursive: true));
+    final path = p.join(directory.path, 'config.age');
+    await File(path).writeAsString('invalid');
+    await File('$path.tmp').writeAsString('invalid');
+
+    await expectLater(
+      store.read(path),
+      throwsA(isA<ConfigKeyUnavailableException>()),
+    );
+    expect(await File('$path.tmp').exists(), isTrue);
+  });
+
   test('clear removes target and recovery candidates', () async {
     final directory = await Directory.systemTemp.createTemp('config_store_');
     addTearDown(() => directory.delete(recursive: true));
