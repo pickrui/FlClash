@@ -14,6 +14,33 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+Future<void> _pumpDnsQueries(
+  WidgetTester tester,
+  ProviderContainer container,
+) async {
+  await tester.pumpWidget(
+    UncontrolledProviderScope(
+      container: container,
+      child: MaterialApp(
+        navigatorKey: globalState.navigatorKey,
+        locale: const Locale('en'),
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.delegate.supportedLocales,
+        builder: (context, child) {
+          globalState.measure = Measure.of(context, 1);
+          globalState.theme = CommonTheme.of(context, 1);
+          return child!;
+        },
+        home: const DnsQueriesView(),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
 void main() {
   testWidgets(
     'DNS history pauses, resumes, filters, shows details and clears',
@@ -34,27 +61,7 @@ void main() {
         delay: 21,
       );
       notifier.addQuery(cached);
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: MaterialApp(
-            navigatorKey: globalState.navigatorKey,
-            locale: const Locale('en'),
-            localizationsDelegates: const [
-              AppLocalizations.delegate,
-              ...GlobalMaterialLocalizations.delegates,
-            ],
-            supportedLocales: AppLocalizations.delegate.supportedLocales,
-            builder: (context, child) {
-              globalState.measure = Measure.of(context, 1);
-              globalState.theme = CommonTheme.of(context, 1);
-              return child!;
-            },
-            home: const DnsQueriesView(),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
+      await _pumpDnsQueries(tester, container);
       expect(find.text('cached.example'), findsOneWidget);
       await tester.tap(find.byTooltip('Pause updates'));
       notifier.addQuery(
@@ -89,4 +96,37 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('a filter that hides every query says nothing matched', (
+    tester,
+  ) async {
+    final container = ProviderContainer(
+      overrides: [
+        viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 600)),
+      ],
+    );
+    addTearDown(container.dispose);
+    final l10n = await AppLocalizations.load(const Locale('en'));
+    await _pumpDnsQueries(tester, container);
+    expect(find.text(l10n.nullTip(l10n.dnsQueries)), findsOneWidget);
+
+    container
+        .read(dnsQueriesProvider.notifier)
+        .addQuery(
+          DnsQuery(
+            domain: 'cached.example',
+            type: 'A',
+            time: DateTime.utc(2026),
+            cached: true,
+            answers: ['192.0.2.10'],
+            delay: 21,
+          ),
+        );
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.widgetWithText(ChoiceChip, l10n.dnsQueryFailures));
+    await tester.pumpAndSettle();
+
+    expect(find.text(l10n.noSearchResults), findsOneWidget);
+    expect(find.text(l10n.nullTip(l10n.dnsQueries)), findsNothing);
+  });
 }

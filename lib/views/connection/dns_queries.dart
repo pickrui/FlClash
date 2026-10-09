@@ -196,12 +196,12 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
             Expanded(
               child: queries.isEmpty
                   ? NullStatus(
-                      label: search.isEmpty
+                      label: _queries.isEmpty
                           ? appLocalizations.nullTip(
                               appLocalizations.dnsQueries,
                             )
                           : appLocalizations.noSearchResults,
-                      illustration: search.isEmpty
+                      illustration: _queries.isEmpty
                           ? NullStatusIllustration.dns
                           : NullStatusIllustration.search,
                     )
