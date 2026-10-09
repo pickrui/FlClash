@@ -403,20 +403,8 @@ class CoreController {
     return normalizeCoreRawConfig(await _interface.getConfig(path));
   }
 
-  Future<Map<String, dynamic>> getConfigFromBytes(String dataStr) async {
-    return normalizeCoreRawConfig(await _interface.getConfigFromBytes(dataStr));
-  }
-
   Future<Traffic> getTraffic(bool onlyStatisticsProxy) async {
     return _interface.getTraffic(onlyStatisticsProxy);
-  }
-
-  Future<IpInfo?> getCountryCode(String ip) async {
-    final countryCode = await _interface.getCountryCode(ip);
-    if (countryCode.isEmpty) {
-      return null;
-    }
-    return IpInfo(ip: ip, countryCode: countryCode);
   }
 
   Future<Traffic> getTotalTraffic(bool onlyStatisticsProxy) async {

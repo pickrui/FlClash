@@ -34,8 +34,6 @@ mixin CoreInterface {
 
   Future<Map<String, dynamic>> getConfig(String path);
 
-  Future<Map<String, dynamic>> getConfigFromBytes(String data);
-
   Future<Delay> asyncTestDelay(
     String url,
     String proxyName, {
@@ -82,8 +80,6 @@ mixin CoreInterface {
   FutureOr<Traffic> getTraffic(bool onlyStatisticsProxy);
 
   FutureOr<Traffic> getTotalTraffic(bool onlyStatisticsProxy);
-
-  FutureOr<String> getCountryCode(String ip);
 
   FutureOr<int> getMemory();
 
@@ -237,11 +233,6 @@ abstract class CoreHandlerInterface with CoreInterface {
   @override
   Future<Map<String, dynamic>> getConfig(String path) {
     return _getConfig(CoreMethod.getConfig, path);
-  }
-
-  @override
-  Future<Map<String, dynamic>> getConfigFromBytes(String data) {
-    return _getConfig(CoreMethod.getConfigFromBytes, data);
   }
 
   @override
@@ -485,15 +476,6 @@ abstract class CoreHandlerInterface with CoreInterface {
     return data == null
         ? Delay(name: proxyName, value: null, url: url)
         : Delay.fromJson(data);
-  }
-
-  @override
-  Future<String> getCountryCode(String ip) async {
-    return await _invokeMethod<String>(
-          method: CoreMethod.getCountryCode,
-          arguments: ip,
-        ) ??
-        '';
   }
 
   @override

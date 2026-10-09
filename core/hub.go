@@ -12,7 +12,6 @@ import (
 	"encoding/json"
 	"errors"
 	"iter"
-	"net"
 	"os"
 	"runtime"
 	"runtime/debug"
@@ -24,7 +23,6 @@ import (
 	"github.com/metacubex/mihomo/common/observable"
 	"github.com/metacubex/mihomo/common/utils"
 	"github.com/metacubex/mihomo/component/memory"
-	"github.com/metacubex/mihomo/component/mmdb"
 	"github.com/metacubex/mihomo/component/resolver"
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
@@ -689,22 +687,6 @@ func handleStopLog() {
 		log.UnSubscribe(logSubscriber)
 		logSubscriber = nil
 	}
-}
-
-func handleGetCountryCode(ip string, fn func(value string)) {
-	go func() {
-		parsedIP := net.ParseIP(ip)
-		if parsedIP == nil {
-			fn("")
-			return
-		}
-		codes := mmdb.IPInstance().LookupCode(parsedIP)
-		if len(codes) == 0 {
-			fn("")
-			return
-		}
-		fn(codes[0])
-	}()
 }
 
 func handleGetMemoryStats() (MemoryStats, error) {

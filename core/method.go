@@ -14,8 +14,6 @@ import (
 	"os"
 	"runtime"
 	"unsafe"
-
-	"github.com/metacubex/mihomo/config"
 )
 
 type MethodCall struct {
@@ -230,22 +228,6 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 			return
 		}
 		response.success(result)
-	case getConfigFromBytesMethod:
-		encoded := ""
-		if !decodeMethodArguments(call, response, &encoded) {
-			return
-		}
-		data, err := decodeAndDecrypt(encoded)
-		if err != nil {
-			response.failure("core_error", err.Error(), nil)
-			return
-		}
-		result, err := config.UnmarshalRawConfig(normalizeConfigShortIds(data))
-		if err != nil {
-			response.failure("core_error", err.Error(), nil)
-			return
-		}
-		response.success(result)
 	case getExternalProvidersMethod:
 		response.success(handleGetExternalProviders())
 	case getExternalProviderMethod:
@@ -321,11 +303,6 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 		response.success(handleStartListener())
 	case stopListenerMethod:
 		response.success(handleStopListener())
-	case getCountryCodeMethod:
-		ip := ""
-		if decodeMethodArguments(call, response, &ip) {
-			handleGetCountryCode(ip, func(value string) { response.success(value) })
-		}
 	case getMemoryStatsMethod:
 		stats, err := handleGetMemoryStats()
 		if err != nil {

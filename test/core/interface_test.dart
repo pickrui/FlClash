@@ -341,7 +341,6 @@ void main() {
 
       expect(await handler.isInit, isFalse);
       expect(await handler.getMemory(), 0);
-      expect(await handler.getCountryCode('127.0.0.1'), isEmpty);
       final delay = await handler.asyncTestDelay('https://example.com', 'node');
       expect(delay.value, isNull);
       expect(delay.name, 'node');
