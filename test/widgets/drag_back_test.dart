@@ -305,4 +305,31 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('a route popped mid-drag still finishes leaving', (tester) async {
+    late NavigatorState navigator;
+    await _pumpOpener(tester, (context) {
+      navigator = Navigator.of(context);
+      navigator.push(
+        CommonRoute<void>(
+          builder: (_) => const Scaffold(body: Center(child: Text('closing'))),
+        ),
+      );
+    });
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.text('closing')),
+    );
+    await gesture.moveBy(const Offset(100, 0));
+    await tester.pump();
+    navigator.pop();
+    await tester.pump(const Duration(milliseconds: 50));
+    await gesture.moveBy(const Offset(20, 0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.text('closing'), findsNothing);
+    expect(navigator.userGestureInProgress, isFalse);
+    expect(navigator.canPop(), isFalse);
+  });
 }
