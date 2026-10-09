@@ -26,8 +26,7 @@ import (
 // for release builds and restored here at process start. Plain values (dev
 // builds) pass through unchanged. Keystream = SHA256-CTR(master, nonce) with a
 // runtime-derived master, matching lib/common/secrets.dart and setup.dart.
-// (GlobalProfileKey is decoded on the Dart side before it reaches the core via
-// InitParams, so it is not touched here.)
+// (GlobalProfileKey arrives through InitParams and is decoded there.)
 func init() {
 	GlobalDNSAuthPrivateKey = deobSecret(GlobalDNSAuthPrivateKey)
 	GlobalDNSAuthDomains = deobSecret(GlobalDNSAuthDomains)

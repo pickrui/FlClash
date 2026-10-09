@@ -59,7 +59,11 @@ func publishProxySnapshotLocked(proxies map[string]constant.Proxy) {
 func handleInitClash(params *InitParams) bool {
 	runLock.Lock()
 	defer runLock.Unlock()
-	setCloudOutputDomains(params.CloudDomains)
+	// A native start (tile, shortcut, always-on) sends no domains, and the
+	// service process may outlive the app that set them.
+	if len(params.CloudDomains) != 0 {
+		setCloudOutputDomains(params.CloudDomains)
+	}
 	if params.HomeDir == "" {
 		return false
 	}
@@ -74,7 +78,8 @@ func handleInitClash(params *InitParams) bool {
 		GlobalValidationSourceHome = params.HomeDir
 	}
 	if params.ProfileKey != "" {
-		GlobalProfileKey = params.ProfileKey
+		// The app sends its decoded key; a native start sends the build value.
+		GlobalProfileKey = deobSecret(params.ProfileKey)
 	}
 	if params.ConfigAgeSecretKey != "" {
 		GlobalConfigAgeSecretKey = params.ConfigAgeSecretKey
