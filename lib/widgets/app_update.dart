@@ -279,6 +279,11 @@ class _UpdateDownloadBar extends StatelessWidget {
   static void _close(BuildContext context, [UpdateDownloadAction? action]) =>
       Navigator.of(context).pop(action);
 
+  bool get _willRestart =>
+      system.isWindows ||
+      system.isMacOS ||
+      (system.isLinux && task.value.file?.path.endsWith('.AppImage') == true);
+
   List<Widget> _status(
     BuildContext context,
     _DownloadStage stage,
@@ -298,7 +303,7 @@ class _UpdateDownloadBar extends StatelessWidget {
         const SizedBox(height: 16),
       ],
       _DownloadStage.ready => [
-        Text(l.updateReadyHint),
+        Text(_willRestart ? l.updateRestartHint : l.updateReadyHint),
         const SizedBox(height: 16),
       ],
       _DownloadStage.failed => [
@@ -326,7 +331,7 @@ class _UpdateDownloadBar extends StatelessWidget {
         TextButton(onPressed: close, child: Text(l.updateLater)),
         FilledButton(
           onPressed: () => _close(context, UpdateDownloadAction.install),
-          child: Text(l.updateInstall),
+          child: Text(_willRestart ? l.updateRestart : l.updateInstall),
         ),
       ],
       _DownloadStage.failed => [

@@ -78,3 +78,6 @@ jobs:
         shell: pwsh
         run: ./tool/check_windows_proxy.ps1
 
+      - name: Check desktop update handoff
+        shell: powershell
+        run: ./tool/check_desktop_update.ps1

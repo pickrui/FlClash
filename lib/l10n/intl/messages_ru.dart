@@ -2928,8 +2928,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("Без имени"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("Открепить окно"),
     "update": MessageLookupByLibrary.simpleMessage("Обновить"),
-    "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
-      "AppImage нельзя установить автоматически. Замените текущую программу скачанным файлом; его папка открыта.",
+    "updateApplyFailed": MessageLookupByLibrary.simpleMessage(
+      "Автоматическое обновление не завершено. Повторите попытку или обновите приложение со страницы загрузки.",
     ),
     "updateBuildNumber": m93,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
@@ -2975,6 +2975,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseNotes": MessageLookupByLibrary.simpleMessage("Что нового"),
     "updateReleaseNotesFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось загрузить список изменений. Повторите попытку.",
+    ),
+    "updateRestart": MessageLookupByLibrary.simpleMessage(
+      "Обновить и перезапустить",
+    ),
+    "updateRestartHint": MessageLookupByLibrary.simpleMessage(
+      "Приложение закроется, обновится и откроется снова. Ваши настройки сохранятся.",
     ),
     "updateVersionNumber": m94,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("Улучшить тариф"),

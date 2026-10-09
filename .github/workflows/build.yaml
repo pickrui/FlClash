@@ -495,6 +495,19 @@ jobs:
           RELEASE_BUILD: ${{ needs.version.outputs.build_number }}
         run: python3 tool/check_apk_version.py --version "$RELEASE_VERSION" --build "$RELEASE_BUILD" dist/*.apk
 
+      - name: Sign desktop updates
+        if: matrix.platform != 'android'
+        env:
+          FLCLASH_OTA_SIGNING_KEY: ${{ secrets.FLCLASH_OTA_SIGNING_KEY }}
+          RELEASE_BUILD: ${{ needs.version.outputs.build_number }}
+        shell: bash
+        run: |
+          if [ -z "$FLCLASH_OTA_SIGNING_KEY" ]; then
+            echo '::warning::OTA signing key is not configured; this release requires a manual download'
+          else
+            dart tool/sign_updates.dart dist "$RELEASE_BUILD"
+          fi
+
       - name: Upload
         uses: actions/upload-artifact@v7
         with:

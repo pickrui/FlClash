@@ -2330,8 +2330,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("無題"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("固定を解除"),
     "update": MessageLookupByLibrary.simpleMessage("更新"),
-    "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
-      "AppImage は自動インストールできません。ダウンロードしたファイルで現在のプログラムを置き換えてください。保存先のフォルダーを開きました。",
+    "updateApplyFailed": MessageLookupByLibrary.simpleMessage(
+      "自動更新を完了できませんでした。再試行するか、ダウンロードページから更新してください。",
     ),
     "updateBuildNumber": m93,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage("ダウンロードを中止"),
@@ -2363,6 +2363,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseNotes": MessageLookupByLibrary.simpleMessage("更新内容"),
     "updateReleaseNotesFailed": MessageLookupByLibrary.simpleMessage(
       "更新履歴を読み込めませんでした。再試行してください",
+    ),
+    "updateRestart": MessageLookupByLibrary.simpleMessage("更新して再起動"),
+    "updateRestartHint": MessageLookupByLibrary.simpleMessage(
+      "アプリを終了して更新し、再起動します。設定は保持されます。",
     ),
     "updateVersionNumber": m94,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("プランをアップグレード"),

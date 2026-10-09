@@ -680,7 +680,7 @@ Dio createAppUpdateDownloadClient() =>
       );
 
 /// [linuxFormat] picks the Linux package; every other platform publishes one
-/// installer per ABI, and arm64 Linux only ships a Debian package.
+/// installer per ABI.
 String? getAppUpdateDownloadUrl(
   Abi abi, {
   LinuxPackageFormat linuxFormat = LinuxPackageFormat.deb,
@@ -695,14 +695,12 @@ String? getAppUpdateDownloadUrl(
     Abi.androidArm64 => 'android-arm64-v8a.apk',
     Abi.androidX64 => 'android-x86_64.apk',
     Abi.linuxX64 => 'linux-amd64.${linuxFormat.extension}',
-    Abi.linuxArm64 => 'linux-arm64.${LinuxPackageFormat.deb.extension}',
+    Abi.linuxArm64 => 'linux-arm64.${linuxFormat.extension}',
     _ => null,
   };
   return name == null ? null : 'https://dl.dler.io/flclash-$name';
 }
 
-/// An AppImage is not installed by a package manager: running the download
-/// would only start a second copy, so the user replaces the image themselves.
 bool isAppImageInstaller(File file) =>
     p.extension(file.path) == '.${LinuxPackageFormat.appImage.extension}';
 
@@ -722,11 +720,16 @@ LinuxPackageFormat? resolveLinuxUpdateFormat({
   return null;
 }
 
-String getAppUpdateFallbackDownloadUrl(String downloadUrl) {
+String getAppUpdateFallbackDownloadUrl(
+  String downloadUrl, {
+  String? releaseTag,
+}) {
   final fileName = Uri.parse(downloadUrl).pathSegments.last;
   return Uri.https(
     'github.com',
-    '/$releaseRepository/releases/latest/download/$fileName',
+    releaseTag == null
+        ? '/$releaseRepository/releases/latest/download/$fileName'
+        : '/$releaseRepository/releases/download/$releaseTag/$fileName',
   ).toString();
 }
 
@@ -770,6 +773,7 @@ Future<void> openAppUpdateDownload({
 }
 
 class AppController {
+  DesktopUpdateInstaller? desktopUpdateInstaller;
   final _exitCoordinator = ExitCoordinator();
   late final BuildContext _context;
   late final WidgetRef _ref;

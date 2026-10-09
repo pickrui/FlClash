@@ -17,6 +17,15 @@ import 'package:fl_clash/providers/update_download.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('desktop fallback stays on the offered release when latest advances', () {
+    expect(
+      getAppUpdateFallbackDownloadUrl(
+        'https://dl.dler.io/flclash-macos-arm64.dmg',
+        releaseTag: 'v0.8.99',
+      ),
+      'https://github.com/$releaseRepository/releases/download/v0.8.99/flclash-macos-arm64.dmg',
+    );
+  });
   test(
     'manual checks queued behind an automatic check share one follow-up',
     () async {
@@ -297,11 +306,10 @@ void main() {
         reason: format.name,
       );
     }
-    // arm64 publishes a Debian package only, whatever is asked for.
-    for (final format in linuxPackageFormatsFor(Abi.linuxX64)) {
+    for (final format in linuxPackageFormatsFor(Abi.linuxArm64)) {
       expect(
         getAppUpdateDownloadUrl(Abi.linuxArm64, linuxFormat: format),
-        'https://dl.dler.io/flclash-linux-arm64.deb',
+        'https://dl.dler.io/flclash-linux-arm64.${format.extension}',
         reason: format.name,
       );
     }

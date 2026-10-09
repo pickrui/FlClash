@@ -2050,8 +2050,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("未命名"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("取消置顶"),
     "update": MessageLookupByLibrary.simpleMessage("更新"),
-    "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
-      "AppImage 无法自动安装，请用下载的文件替换当前程序，已打开文件所在目录",
+    "updateApplyFailed": MessageLookupByLibrary.simpleMessage(
+      "自动更新未完成，请重试或从下载页面更新",
     ),
     "updateBuildNumber": m93,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage("取消下载"),
@@ -2075,6 +2075,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseNotes": MessageLookupByLibrary.simpleMessage("更新日志"),
     "updateReleaseNotesFailed": MessageLookupByLibrary.simpleMessage(
       "更新日志加载失败，请重试",
+    ),
+    "updateRestart": MessageLookupByLibrary.simpleMessage("更新并重启"),
+    "updateRestartHint": MessageLookupByLibrary.simpleMessage(
+      "应用将退出、原位更新并重新打开，已有配置会保留",
     ),
     "updateVersionNumber": m94,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("升级套餐"),

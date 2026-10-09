@@ -22,6 +22,10 @@ const _release = AppUpdateInfo(
   remoteBuildNumber: 2026092110,
 );
 
+String get _installLabel => Platform.isWindows || Platform.isMacOS
+    ? AppLocalizations.current.updateRestart
+    : AppLocalizations.current.updateInstall;
+
 void main() {
   testWidgets('the details page downloads in place and then offers install', (
     tester,
@@ -43,10 +47,10 @@ void main() {
     pending.complete(file);
     await tester.pumpAndSettle();
     expect(task.value.file, same(file));
-    expect(find.text('Install update'), findsOneWidget);
+    expect(find.text(_installLabel), findsOneWidget);
     expect(find.byType(AppUpdatePage), findsOneWidget);
     expect(result, isNull);
-    await tester.tap(find.text('Install update'));
+    await tester.tap(find.text(_installLabel));
     await tester.pumpAndSettle();
     expect(result, UpdateDownloadAction.install);
     expect(task.value.phase, AppUpdateDownloadPhase.ready);
@@ -84,10 +88,10 @@ void main() {
       await tester.pumpAndSettle();
       expect(task.value.phase, AppUpdateDownloadPhase.ready);
       expect(task.value.file, same(file));
-      expect(find.text('Install update'), findsNothing);
+      expect(find.text(_installLabel), findsNothing);
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
-      expect(find.text('Install update'), findsOneWidget);
+      expect(find.text(_installLabel), findsOneWidget);
       expect(downloads, 1);
       expect(token.isCancelled, isFalse);
     },
@@ -188,12 +192,7 @@ void main() {
       pending.complete(File('/tmp/update.exe'));
       await tester.pumpAndSettle();
       expect(
-        find
-            .widgetWithText(
-              FilledButton,
-              AppLocalizations.current.updateInstall,
-            )
-            .hitTestable(),
+        find.widgetWithText(FilledButton, _installLabel).hitTestable(),
         findsOneWidget,
       );
       expect(tester.takeException(), isNull);
@@ -203,7 +202,7 @@ void main() {
       expect(task.value.phase, AppUpdateDownloadPhase.ready);
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
-      expect(find.text(AppLocalizations.current.updateInstall), findsOneWidget);
+      expect(find.text(_installLabel), findsOneWidget);
     });
 
     testWidgets('retry stays primary when download fails at 320px in $locale', (

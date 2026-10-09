@@ -19,6 +19,15 @@ ArchitecturesAllowed={{ARCH}}
 ArchitecturesInstallIn64BitMode={{ARCH}}
 
 [Code]
+var
+  RestoreHelperService: Boolean;
+  HelperRestoreFailed: Boolean;
+
+function IsAppUpdate: Boolean;
+begin
+  Result := ExpandConstant('{param:FLCLASHUPDATE|0}') = '1';
+end;
+
 procedure KillProcesses;
 var
   Processes: TArrayOfString;
@@ -33,28 +42,62 @@ begin
   end;
 end;
 
-procedure UnregisterHelperService;
+function UnregisterHelperService: Boolean;
 var
   HelperPath: String;
   ResultCode: Integer;
 begin
+  Result := True;
   HelperPath := ExpandConstant('{app}\FlClashHelperService.exe');
   if FileExists(HelperPath) then
   begin
-    Exec(HelperPath, 'uninstall', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Result := Exec(HelperPath, 'uninstall', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    if Result then Result := ResultCode = 0;
   end;
 end;
 
 function PrepareToInstall(var NeedsRestart: Boolean): String;
 begin
-  UnregisterHelperService;
-  KillProcesses;
   Result := '';
+  if IsAppUpdate and not FileExists(ExpandConstant('{app}\FlClash.exe')) then
+  begin
+    Result := 'The installed application could not be found';
+    Exit;
+  end;
+  RestoreHelperService := RestoreHelperService or
+    RegKeyExists(HKLM, 'SYSTEM\CurrentControlSet\Services\FlClashHelperService');
+  if not UnregisterHelperService then
+  begin
+    Result := 'Unable to stop the existing FlClash helper service';
+    Exit;
+  end;
+  if not IsAppUpdate then KillProcesses;
+end;
+
+procedure CurStepChanged(CurStep: TSetupStep);
+var
+  ResultCode: Integer;
+begin
+  if (CurStep = ssPostInstall) and RestoreHelperService then
+  begin
+    HelperRestoreFailed := not Exec(ExpandConstant('{app}\FlClashHelperService.exe'),
+      'install', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    if not HelperRestoreFailed then HelperRestoreFailed := ResultCode <> 0;
+  end;
+end;
+
+function GetCustomSetupExitCode: Integer;
+begin
+  if HelperRestoreFailed then Result := 1 else Result := 0;
 end;
 
 function InitializeUninstall(): Boolean;
 begin
-  UnregisterHelperService;
+  if not UnregisterHelperService then
+  begin
+    Result := False;
+    Exit;
+  end;
   KillProcesses;
   Result := True;
 end;

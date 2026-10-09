@@ -8195,6 +8195,36 @@ class AppLocalizations {
     );
   }
 
+  /// `Update and restart`
+  String get updateRestart {
+    return Intl.message(
+      'Update and restart',
+      name: 'updateRestart',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The app will close, update in place, and reopen. Your settings will be preserved.`
+  String get updateRestartHint {
+    return Intl.message(
+      'The app will close, update in place, and reopen. Your settings will be preserved.',
+      name: 'updateRestartHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Automatic update did not complete. Retry or update from the download page.`
+  String get updateApplyFailed {
+    return Intl.message(
+      'Automatic update did not complete. Retry or update from the download page.',
+      name: 'updateApplyFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `The update has been downloaded. Install when convenient.`
   String get updateReadyHint {
     return Intl.message(
@@ -8260,16 +8290,6 @@ class AppLocalizations {
     return Intl.message(
       'How this build was installed could not be determined. Pick the format that matches it.',
       name: 'updatePackageFormatTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `An AppImage cannot be installed automatically. Replace the running program with the downloaded file; its folder has been opened.`
-  String get updateAppImageTip {
-    return Intl.message(
-      'An AppImage cannot be installed automatically. Replace the running program with the downloaded file; its folder has been opened.',
-      name: 'updateAppImageTip',
       desc: '',
       args: [],
     );

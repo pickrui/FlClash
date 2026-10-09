@@ -9,6 +9,20 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:path/path.dart' as p;
 
+abstract interface class DesktopUpdateInstaller {
+  Future<void> verifyDownload({
+    required Dio client,
+    required File file,
+    required List<String> sources,
+    required int build,
+    required CancelToken cancelToken,
+  });
+
+  Future<void> install(File file, int build, Future<void> Function() exit);
+
+  Future<bool> takeFailure();
+}
+
 /// Streams an installer to an isolated directory; partial files are never opened.
 Future<File> downloadAppUpdate({
   required Dio client,
@@ -17,14 +31,16 @@ Future<File> downloadAppUpdate({
   required CancelToken cancelToken,
   required ProgressCallback onProgress,
   List<String> fallbackUrls = const [],
+  Future<void> Function(File file, String source)? verify,
   int maxBytes = 1024 * 1024 * 1024,
 }) async {
   if (maxBytes <= 0) throw ArgumentError.value(maxBytes, 'maxBytes');
   final sources = <String>{url, ...fallbackUrls}.toList();
   var sourceIndex = 0;
   while (true) {
+    File? file;
     try {
-      return await _downloadAppUpdateFromSource(
+      file = await _downloadAppUpdateFromSource(
         client: client,
         url: sources[sourceIndex],
         directory: directory,
@@ -32,7 +48,11 @@ Future<File> downloadAppUpdate({
         onProgress: onProgress,
         maxBytes: maxBytes,
       );
+      await verify?.call(file, sources[sourceIndex]);
+      if (cancelToken.isCancelled) throw cancelToken.cancelError!;
+      return file;
     } catch (error) {
+      if (file != null) await file.parent.delete(recursive: true);
       if (cancelToken.isCancelled) throw cancelToken.cancelError!;
       if (sourceIndex == sources.length - 1 || !_isUpdateSourceFailure(error)) {
         rethrow;

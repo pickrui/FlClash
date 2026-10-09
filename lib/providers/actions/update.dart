@@ -66,6 +66,10 @@ extension InitControllerExt on AppController {
     } else {
       await window?.hide();
     }
+    if (await desktopUpdateInstaller?.takeFailure() ?? false) {
+      await window?.show();
+      globalState.showNotifier(appLocalizations.updateApplyFailed);
+    }
     unawaited(checkUpdate());
     await _handleFailedPreference();
     final bootAttempt = await startupRecovery.begin(
@@ -341,6 +345,16 @@ extension InitControllerExt on AppController {
     }
     final task = _ref.read(appUpdateDownloadProvider);
     final directory = await appPath.tempDir.future;
+    final build = _appUpdateDownloadInfo?.remoteBuildNumber ?? 0;
+    final sources = [
+      downloadUrl,
+      getAppUpdateFallbackDownloadUrl(
+        downloadUrl,
+        releaseTag: system.isDesktop
+            ? releaseTagNameFromVersionData(_appUpdateDownloadInfo?.version)
+            : null,
+      ),
+    ];
     unawaited(
       task.startDownload(
         (token, onProgress) async {
@@ -351,13 +365,26 @@ extension InitControllerExt on AppController {
           );
           final client = createAppUpdateDownloadClient();
           try {
+            final installer = desktopUpdateInstaller;
+            if (system.isDesktop && installer == null) {
+              throw StateError('Desktop updater is unavailable');
+            }
             return await downloadAppUpdate(
               client: client,
               url: downloadUrl,
-              fallbackUrls: [getAppUpdateFallbackDownloadUrl(downloadUrl)],
+              fallbackUrls: sources.skip(1).toList(),
               directory: directory,
               cancelToken: token,
               onProgress: onProgress,
+              verify: system.isDesktop
+                  ? (file, source) => installer!.verifyDownload(
+                      client: client,
+                      file: file,
+                      sources: [source],
+                      build: build,
+                      cancelToken: token,
+                    )
+                  : null,
             );
           } catch (error) {
             commonPrint.log(
@@ -383,8 +410,16 @@ extension InitControllerExt on AppController {
     _openingUpdateInstaller = true;
     try {
       await safeRun(() async {
-        if (isAppImageInstaller(file)) {
-          await _revealAppImageUpdate(file);
+        if (system.isWindows || system.isMacOS || isAppImageInstaller(file)) {
+          final installer = desktopUpdateInstaller;
+          if (installer == null) {
+            throw StateError('Desktop updater is unavailable');
+          }
+          await installer.install(
+            file,
+            _appUpdateDownloadInfo?.remoteBuildNumber ?? 0,
+            () => handleExit(),
+          );
           return;
         }
         await openAppUpdateDownload(
@@ -412,19 +447,6 @@ extension InitControllerExt on AppController {
     await globalState.showMessage(
       title: appLocalizations.checkUpdate,
       message: TextSpan(text: appLocalizations.updatePackageManagerTip),
-      cancelable: false,
-    );
-  }
-
-  /// An AppImage replaces itself by hand, so the download is only shown.
-  Future<void> _revealAppImageUpdate(File file) async {
-    await launchUrl(
-      Uri.file(file.parent.path),
-      mode: LaunchMode.externalApplication,
-    );
-    await globalState.showMessage(
-      title: appLocalizations.updateReady,
-      message: TextSpan(text: appLocalizations.updateAppImageTip),
       cancelable: false,
     );
   }

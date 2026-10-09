@@ -32,6 +32,7 @@ void main() {
     CancelToken? token,
     ProgressCallback? progress,
     List<String> fallbackUrls = const [],
+    Future<void> Function(File, String)? verify,
     int maxBytes = 1024 * 1024 * 1024,
   }) => downloadAppUpdate(
     client: client,
@@ -41,6 +42,7 @@ void main() {
     onProgress: progress ?? (_, _) {},
     fallbackUrls: fallbackUrls,
     maxBytes: maxBytes,
+    verify: verify,
   );
 
   test('streams the complete installer and reports progress', () async {
@@ -69,6 +71,49 @@ void main() {
     await expectLater(download(), throwsFormatException);
     expect(await directory.list().toList(), isEmpty);
   });
+
+  test(
+    'verification failure discards a stale mirror and downloads the fallback',
+    () async {
+      server.listen((request) async {
+        request.response.headers.contentType = ContentType.binary;
+        request.response.add([request.uri.path == '/update.apk' ? 1 : 2]);
+        await request.response.close();
+      });
+      final verified = <String>[];
+      final file = await download(
+        fallbackUrls: [
+          'http://${server.address.address}:${server.port}/backup.apk',
+        ],
+        verify: (file, source) async {
+          verified.add(source);
+          if ((await file.readAsBytes()).single != 2) {
+            throw const FormatException('Stale mirror');
+          }
+        },
+      );
+      expect(await file.readAsBytes(), [2]);
+      expect(verified.length, 2);
+      expect(await directory.list().length, 1);
+    },
+  );
+
+  test(
+    'canceling signature verification removes the completed package',
+    () async {
+      server.listen((request) async {
+        request.response.headers.contentType = ContentType.binary;
+        request.response.add([1]);
+        await request.response.close();
+      });
+      final token = CancelToken();
+      await expectLater(
+        download(token: token, verify: (_, _) async => token.cancel()),
+        throwsA(isA<DioException>()),
+      );
+      expect(await directory.list().toList(), isEmpty);
+    },
+  );
 
   test('failed HTTP requests leave no installer', () async {
     server.listen((request) async {

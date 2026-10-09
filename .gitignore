@@ -76,6 +76,7 @@ devtools_options.yaml
 .fvm/
 .fvmrc
 .env.local
+.ota-signing-key
 AGENTS.md
 CLAUDE.md
 /core/core

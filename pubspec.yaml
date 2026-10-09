@@ -109,6 +109,8 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - path: assets/update/
+      platforms: [windows, macos, linux]
     - assets/data/
     - assets/fonts/
     - assets/images/

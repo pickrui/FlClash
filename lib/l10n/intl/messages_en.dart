@@ -2779,8 +2779,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("Unnamed"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("Unpin window"),
     "update": MessageLookupByLibrary.simpleMessage("Update"),
-    "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
-      "An AppImage cannot be installed automatically. Replace the running program with the downloaded file; its folder has been opened.",
+    "updateApplyFailed": MessageLookupByLibrary.simpleMessage(
+      "Automatic update did not complete. Retry or update from the download page.",
     ),
     "updateBuildNumber": m93,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
@@ -2824,6 +2824,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseNotes": MessageLookupByLibrary.simpleMessage("Release notes"),
     "updateReleaseNotesFailed": MessageLookupByLibrary.simpleMessage(
       "Could not load release notes. Please try again.",
+    ),
+    "updateRestart": MessageLookupByLibrary.simpleMessage("Update and restart"),
+    "updateRestartHint": MessageLookupByLibrary.simpleMessage(
+      "The app will close, update in place, and reopen. Your settings will be preserved.",
     ),
     "updateVersionNumber": m94,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("Upgrade plan"),

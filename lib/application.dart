@@ -10,6 +10,9 @@ import 'package:fl_clash/widgets/focus.dart';
 
 import 'dart:async';
 
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:fl_clash/services/desktop_update.dart';
+
 import 'package:fl_clash/widgets/app_update.dart';
 import 'package:fl_clash/widgets/input_dialog.dart';
 
@@ -56,6 +59,12 @@ class ApplicationState extends ConsumerState<Application> {
   @override
   void initState() {
     super.initState();
+    if (system.isDesktop && !safeModeBuild) {
+      appController.desktopUpdateInstaller = DesktopUpdater(
+        loadScript: (name) => rootBundle.loadString('assets/update/$name'),
+        directory: () => appPath.tempDir.future,
+      );
+    }
     system.requestAdminPassword = () => globalState.showCommonDialog<String>(
       child: InputDialog(
         obscureText: true,
