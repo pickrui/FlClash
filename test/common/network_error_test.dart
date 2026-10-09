@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:fl_clash/common/http_read_race.dart';
 import 'package:fl_clash/common/network_error.dart';
 import 'package:fl_clash/core/method.dart';
 import 'package:fl_clash/l10n/l10n.dart';
@@ -81,6 +82,13 @@ void main() {
         isNull,
       );
       expect(networkErrorMessage(TimeoutException('helper'), l), isNull);
+      expect(
+        networkErrorMessage(
+          HttpReadTimeoutException(const Duration(minutes: 1)),
+          l,
+        ),
+        l.networkTimeoutError,
+      );
       expect(
         networkErrorMessage(
           const CoreMethodException(code: 'transport_error', message: 'socket'),

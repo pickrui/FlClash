@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:fl_clash/common/http_read_race.dart';
 import 'package:fl_clash/core/desktop/launch_policy.dart';
 import 'package:fl_clash/core/method.dart';
 import 'package:fl_clash/l10n/l10n.dart';
@@ -42,6 +43,7 @@ _Failure? _failureOf(Object error) {
   return switch (error) {
     DioException() => _fromDio(error),
     CoreMethodException() => _fromCore(error),
+    HttpReadTimeoutException() => const _Failure(_Kind.timeout),
     _ => null,
   };
 }

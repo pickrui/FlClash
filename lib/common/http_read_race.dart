@@ -7,6 +7,12 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 
+/// A network timeout, unlike a bare [TimeoutException] from the Core channel.
+class HttpReadTimeoutException extends TimeoutException {
+  HttpReadTimeoutException(Duration timeout)
+    : super('HTTP read timed out', timeout);
+}
+
 /// Runs explicitly replayable reads. A candidate must finish receiving and
 /// validating its response before returning; the first valid result wins.
 /// Authentication does not change whether a read is replayable.
@@ -21,7 +27,7 @@ Future<T> raceHttpReads<T>(
   final cancelled = cancelToken?.cancelError;
   if (cancelled != null) throw cancelled;
   if (timeout <= Duration.zero) {
-    throw TimeoutException('HTTP read timed out', timeout);
+    throw HttpReadTimeoutException(timeout);
   }
   final result = Completer<T>();
   final tokens = [for (final _ in actions) CancelToken()];
@@ -29,7 +35,7 @@ Future<T> raceHttpReads<T>(
   var remaining = actions.length;
   final deadline = Timer(timeout, () {
     if (!result.isCompleted) {
-      result.completeError(TimeoutException('HTTP read timed out', timeout));
+      result.completeError(HttpReadTimeoutException(timeout));
     }
   });
   final cancellation = cancelToken?.whenCancel.asStream().listen((error) {
