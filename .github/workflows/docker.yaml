@@ -18,7 +18,7 @@ permissions:
 jobs:
   release:
     name: Check the release upload
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     # The run conclusion also counts the AUR job, which runs after publication.
     if: >-
@@ -51,7 +51,7 @@ jobs:
   docker:
     name: Build and push image
     needs: release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 90
     if: >-
       ${{ !cancelled() &&

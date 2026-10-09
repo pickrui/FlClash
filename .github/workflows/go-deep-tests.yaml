@@ -14,7 +14,7 @@ env:
 jobs:
   go-deep-test:
     name: Integrated mihomo core
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
@@ -43,7 +43,7 @@ jobs:
 
   go-deep-deps-test:
     name: Dependency and inbound regressions
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v7

@@ -74,9 +74,9 @@ GitHub, using the offered release tag when available. A failed verification
 leaves the explicit browser-download option available but never automatically
 opens the unverified package.
 
-Actions can sign using the `FLCLASH_OTA_SIGNING_KEY` repository secret. Without
-that secret, builds still publish normal packages, print a warning and do not
-provide automatic updates. The private key has not been uploaded to GitHub.
+Actions signs using the `FLCLASH_OTA_SIGNING_KEY` repository secret, configured
+with the same private seed as the local backup. Without that secret, builds still
+publish normal packages, print a warning and do not provide automatic updates.
 The first client containing this updater must be installed through the previous
 update flow; older clients cannot gain the new behavior before that upgrade.
 
