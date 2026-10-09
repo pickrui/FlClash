@@ -99,6 +99,41 @@ void main() {
     },
   );
 
+  testWidgets('a provider that never downloaded shows no update age', (
+    tester,
+  ) async {
+    final c = ProviderContainer(
+      overrides: [
+        currentProfileProvider.overrideWith((ref) => profile),
+        providersProvider.overrideWithBuild(
+          (_, _) => [
+            ExternalProvider(
+              name: 'Never fetched',
+              type: 'Proxy',
+              count: 0,
+              vehicleType: 'HTTP',
+              updateAt: DateTime.utc(1),
+            ),
+          ],
+        ),
+      ],
+    );
+    addTearDown(c.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: c,
+        child: const TestApp(locale: Locale('en'), child: ProfileDetailSheet()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('Never fetched', findRichText: true),
+      findsOneWidget,
+    );
+    expect(find.textContaining('years'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets(
     'group opens node list, switches and returns without leaving dashboard',
     (tester) async {

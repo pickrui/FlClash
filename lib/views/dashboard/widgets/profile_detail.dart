@@ -274,12 +274,15 @@ class _ProviderRow extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
       ),
       subtitle: Text(count),
-      trailing: Text(
-        provider.updateAt.lastUpdateTimeDesc,
-        style: context.textTheme.bodySmall?.copyWith(
-          color: context.colorScheme.onSurfaceVariant,
-        ),
-      ),
+      // A provider that never downloaded reports the zero time (year 1).
+      trailing: provider.updateAt.microsecondsSinceEpoch > 0
+          ? Text(
+              provider.updateAt.lastUpdateTimeDesc,
+              style: context.textTheme.bodySmall?.copyWith(
+                color: context.colorScheme.onSurfaceVariant,
+              ),
+            )
+          : null,
     );
   }
 }

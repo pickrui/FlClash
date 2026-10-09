@@ -646,7 +646,7 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
                   if (_draft.kind == ProviderKind.rule) ...[
                     const SizedBox(height: 16),
                     DropdownButtonFormField<RuleProviderFormat>(
-                      key: ValueKey(_draft.format),
+                      key: ValueKey(('format', _draft.format)),
                       initialValue: _draft.format,
                       decoration: InputDecoration(labelText: l.format),
                       items: [
@@ -663,7 +663,7 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<RuleProviderBehavior>(
-                      key: ValueKey(_draft.format),
+                      key: ValueKey(('behavior', _draft.format)),
                       initialValue: _draft.behavior,
                       decoration: InputDecoration(labelText: l.behavior),
                       items: [
