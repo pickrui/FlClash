@@ -88,7 +88,12 @@ final class _File extends PlatformFile {
 class _Scripts implements ScriptLibrary {
   final saved = <String>[];
   @override
-  Future<void> save(Script script, String content, {Script? previous}) async {
+  Future<void> save(
+    Script script,
+    String content, {
+    Script? previous,
+    List<int>? previousBytes,
+  }) async {
     saved.add(content);
   }
 

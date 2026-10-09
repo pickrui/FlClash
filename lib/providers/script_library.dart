@@ -11,6 +11,7 @@ import 'package:fl_clash/common/javascript.dart';
 import 'package:fl_clash/database/database.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'action.dart';
@@ -95,7 +96,17 @@ class ScriptLibrary {
     if (stored != previous) throw const ScriptLibraryException('changed');
   }
 
-  Future<void> save(Script script, String content, {Script? previous}) async {
+  Future<List<int>?> _readBytes(int id) async {
+    final file = File(await path(id));
+    return await file.exists() ? file.readAsBytes() : null;
+  }
+
+  Future<void> save(
+    Script script,
+    String content, {
+    Script? previous,
+    List<int>? previousBytes,
+  }) async {
     final name = script.label.trim();
     if (name.isEmpty) throw const ScriptLibraryException('name');
     final bytes = utf8.encode(content);
@@ -105,6 +116,10 @@ class ScriptLibrary {
     if (script.url case final url?) validateScriptUrl(url);
     await serialize(() async {
       await _checkPrevious(previous, script.id);
+      if (previous != null &&
+          !listEquals(await _readBytes(script.id), previousBytes)) {
+        throw const ScriptLibraryException('changed');
+      }
       final scripts = await database.scriptsDao.all().get();
       if (scripts.any((item) => item.id != script.id && item.label == name)) {
         throw const ScriptLibraryException('duplicate');
@@ -125,8 +140,18 @@ class ScriptLibrary {
     try {
       final source = url ?? script.url ?? '';
       validateScriptUrl(source);
+      List<int>? previousBytes;
+      await serialize(() async {
+        await _checkPrevious(script, script.id);
+        previousBytes = await _readBytes(script.id);
+      });
       final content = await fetch(source);
-      await save(script.copyWith(url: source), content, previous: script);
+      await save(
+        script.copyWith(url: source),
+        content,
+        previous: script,
+        previousBytes: previousBytes,
+      );
     } finally {
       _updating.remove(script.id);
     }

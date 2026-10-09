@@ -91,12 +91,15 @@ void main() {
     await library.save(script(1), 'original');
     final original = await database.scriptsDao.get(1).getSingle();
     final download = Completer<String>();
+    final started = Completer<void>();
     var requests = 0;
     fetch = (_) {
       requests++;
+      started.complete();
       return download.future;
     };
     final update = library.update(original);
+    await started.future;
     await library.update(original);
     expect(requests, 1);
     await library.remove(original);
@@ -108,6 +111,105 @@ void main() {
   });
 
   test(
+    'download preserves changed content when stored metadata is identical',
+    () async {
+      await library.save(script(1), 'original');
+      final original = await database.scriptsDao.get(1).getSingle();
+      final download = Completer<String>();
+      final started = Completer<void>();
+      fetch = (_) {
+        started.complete();
+        return download.future;
+      };
+      final update = library.update(original);
+      final failure = expectLater(
+        update,
+        throwsA(isA<ScriptLibraryException>()),
+      );
+      await started.future;
+      await library.serialize(() async {
+        await File('${directory.path}/1.js').writeAsString('new local edit');
+      });
+      expect(await database.scriptsDao.get(1).getSingle(), original);
+      download.complete('old remote content');
+      await failure;
+      expect(
+        await File('${directory.path}/1.js').readAsString(),
+        'new local edit',
+      );
+      expect(changed, [1]);
+    },
+  );
+
+  test('download preserves a file recreated while repairing it', () async {
+    await library.save(script(1), 'original');
+    final original = await database.scriptsDao.get(1).getSingle();
+    final file = File('${directory.path}/1.js');
+    await file.delete();
+    final download = Completer<String>();
+    final started = Completer<void>();
+    fetch = (_) {
+      started.complete();
+      return download.future;
+    };
+    final update = library.update(original);
+    final failure = expectLater(update, throwsA(isA<ScriptLibraryException>()));
+    await started.future;
+    await library.serialize(() async {
+      await file.writeAsString('recreated local script');
+    });
+    download.complete('old remote content');
+    await failure;
+    expect(await file.readAsString(), 'recreated local script');
+    expect(changed, [1]);
+  });
+
+  for (final content in ['', 'original']) {
+    test(
+      'stale editor preserves changed content (original: "$content")',
+      () async {
+        await library.save(script(1), content);
+        final original = await database.scriptsDao.get(1).getSingle();
+        final file = File('${directory.path}/1.js');
+        await library.serialize(() async {
+          await file.writeAsString('new content');
+        });
+        await expectLater(
+          library.save(
+            original,
+            'stale edit',
+            previous: original,
+            previousBytes: utf8.encode(content),
+          ),
+          throwsA(isA<ScriptLibraryException>()),
+        );
+        expect(await file.readAsString(), 'new content');
+        expect(changed, [1]);
+      },
+    );
+  }
+
+  test('remote update repairs a missing script file', () async {
+    await library.save(script(1), 'original');
+    final original = await database.scriptsDao.get(1).getSingle();
+    final file = File('${directory.path}/1.js');
+    await file.delete();
+    await library.update(original);
+    expect(await file.readAsString(), contains('function main'));
+    expect(changed, [1, 1]);
+  });
+
+  test('remote update repairs a non-UTF8 script file', () async {
+    await library.save(script(1), 'original');
+    final original = await database.scriptsDao.get(1).getSingle();
+    final file = File('${directory.path}/1.js');
+    await file.writeAsBytes([0xff]);
+    await library.update(original);
+    expect(await file.readAsString(), contains('function main'));
+    expect(changed, [1, 1]);
+  });
+
+  test(
     'stale edits and invalid reorders leave the stored script unchanged',
     () async {
       await library.save(script(1), 'first');
@@ -116,9 +218,15 @@ void main() {
         first.copyWith(label: 'Edited'),
         'second',
         previous: first,
+        previousBytes: utf8.encode('first'),
       );
       await expectLater(
-        library.save(first, 'old', previous: first),
+        library.save(
+          first,
+          'old',
+          previous: first,
+          previousBytes: utf8.encode('first'),
+        ),
         throwsA(isA<ScriptLibraryException>()),
       );
       await expectLater(
