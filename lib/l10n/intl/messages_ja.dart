@@ -947,6 +947,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "NTPサーバーへの接続に使用するアウトバウンド",
     ),
     "direct": MessageLookupByLibrary.simpleMessage("ダイレクト"),
+    "directNameserver": MessageLookupByLibrary.simpleMessage("直接接続ネームサーバー"),
+    "directNameserverFollowPolicy": MessageLookupByLibrary.simpleMessage(
+      "直接接続ネームサーバーにポリシーを適用",
+    ),
     "disableUDP": MessageLookupByLibrary.simpleMessage("UDPを無効化"),
     "disabled": MessageLookupByLibrary.simpleMessage("無効"),
     "discard": MessageLookupByLibrary.simpleMessage("破棄"),
@@ -1064,6 +1068,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "fallback": MessageLookupByLibrary.simpleMessage("フォールバック"),
     "fallbackDesc": MessageLookupByLibrary.simpleMessage("通常はオフショアDNSを使用"),
     "fallbackFilter": MessageLookupByLibrary.simpleMessage("フォールバックフィルター"),
+    "fallbackLazyQuery": MessageLookupByLibrary.simpleMessage("フォールバックの遅延クエリ"),
     "fetchOrdersFailed": MessageLookupByLibrary.simpleMessage("購入履歴の取得に失敗しました"),
     "fetchPlansFailed": MessageLookupByLibrary.simpleMessage("プランの取得に失敗しました"),
     "fidelityScheme": MessageLookupByLibrary.simpleMessage("ハイファイデリティー"),
@@ -1608,6 +1613,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "portTip": m60,
     "portUnavailableMessage": m61,
     "portUnavailableTitle": MessageLookupByLibrary.simpleMessage("ポートを使用できません"),
+    "preferH3": MessageLookupByLibrary.simpleMessage("HTTP/3を優先"),
     "preferH3Desc": MessageLookupByLibrary.simpleMessage("DOHのHTTP/3を優先使用"),
     "prerequisites": MessageLookupByLibrary.simpleMessage("前提条件"),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage("キーボードを押してください"),
@@ -1729,6 +1735,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyNameserver": MessageLookupByLibrary.simpleMessage("プロキシネームサーバー"),
     "proxyNameserverDesc": MessageLookupByLibrary.simpleMessage(
       "プロキシノード解決用ドメイン",
+    ),
+    "proxyNameserverPolicy": MessageLookupByLibrary.simpleMessage(
+      "プロキシネームサーバーポリシー",
     ),
     "proxyNode": MessageLookupByLibrary.simpleMessage("プロキシノード"),
     "proxyPort": MessageLookupByLibrary.simpleMessage("プロキシポート"),

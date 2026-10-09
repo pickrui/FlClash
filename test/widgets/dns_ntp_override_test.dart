@@ -94,4 +94,52 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
+
+  testWidgets('DNS override fields show localized names', (tester) async {
+    final container = ProviderContainer(
+      overrides: [
+        viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 900)),
+      ],
+    );
+    addTearDown(container.dispose);
+    container
+        .read(patchClashConfigProvider.notifier)
+        .update(
+          (state) => state.copyWith(
+            dnsOverrideKeys: {
+              DnsOverrideKey.preferH3,
+              DnsOverrideKey.defaultNameserver,
+              DnsOverrideKey.nameserverPolicy,
+              DnsOverrideKey.directNameserver,
+            },
+          ),
+        );
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          navigatorKey: globalState.navigatorKey,
+          locale: const Locale('zh', 'CN'),
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.delegate.supportedLocales,
+          builder: (context, child) {
+            globalState.measure = Measure.of(context, 1);
+            globalState.theme = CommonTheme.of(context, 1);
+            return child!;
+          },
+          home: const DnsView(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    for (final label in ['优先使用HTTP/3', '默认域名服务器', '域名服务器策略', '直连域名服务器']) {
+      expect(find.text(label), findsOneWidget);
+    }
+    expect(find.text('用于解析DNS服务器'), findsOneWidget);
+    expect(find.text('Default Nameserver'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
 }

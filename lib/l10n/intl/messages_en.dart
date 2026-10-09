@@ -1112,6 +1112,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "The outbound used to reach the NTP server",
     ),
     "direct": MessageLookupByLibrary.simpleMessage("Direct"),
+    "directNameserver": MessageLookupByLibrary.simpleMessage(
+      "Direct nameserver",
+    ),
+    "directNameserverFollowPolicy": MessageLookupByLibrary.simpleMessage(
+      "Direct nameserver follows policy",
+    ),
     "disableUDP": MessageLookupByLibrary.simpleMessage("Disable UDP"),
     "disabled": MessageLookupByLibrary.simpleMessage("Disabled"),
     "discard": MessageLookupByLibrary.simpleMessage("Discard"),
@@ -1271,6 +1277,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Generally use offshore DNS",
     ),
     "fallbackFilter": MessageLookupByLibrary.simpleMessage("Fallback filter"),
+    "fallbackLazyQuery": MessageLookupByLibrary.simpleMessage(
+      "Lazy fallback query",
+    ),
     "fetchOrdersFailed": MessageLookupByLibrary.simpleMessage(
       "Failed to load purchase records",
     ),
@@ -1921,6 +1930,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "portUnavailableTitle": MessageLookupByLibrary.simpleMessage(
       "Port unavailable",
     ),
+    "preferH3": MessageLookupByLibrary.simpleMessage("Prefer HTTP/3"),
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
       "Prioritize the use of DOH\'s http/3",
     ),
@@ -2056,6 +2066,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyNameserver": MessageLookupByLibrary.simpleMessage("Proxy nameserver"),
     "proxyNameserverDesc": MessageLookupByLibrary.simpleMessage(
       "Domain for resolving proxy nodes",
+    ),
+    "proxyNameserverPolicy": MessageLookupByLibrary.simpleMessage(
+      "Proxy nameserver policy",
     ),
     "proxyNode": MessageLookupByLibrary.simpleMessage("Proxy node"),
     "proxyPort": MessageLookupByLibrary.simpleMessage("ProxyPort"),

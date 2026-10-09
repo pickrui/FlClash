@@ -1140,6 +1140,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Исход, через который идёт обращение к NTP-серверу",
     ),
     "direct": MessageLookupByLibrary.simpleMessage("Прямой"),
+    "directNameserver": MessageLookupByLibrary.simpleMessage(
+      "Сервер имен для прямых соединений",
+    ),
+    "directNameserverFollowPolicy": MessageLookupByLibrary.simpleMessage(
+      "Сервер имен для прямых соединений следует политике",
+    ),
     "disableUDP": MessageLookupByLibrary.simpleMessage("Отключить UDP"),
     "disabled": MessageLookupByLibrary.simpleMessage("Выключено"),
     "discard": MessageLookupByLibrary.simpleMessage("Не сохранять"),
@@ -1316,6 +1322,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "fallbackFilter": MessageLookupByLibrary.simpleMessage(
       "Фильтр резервного DNS",
+    ),
+    "fallbackLazyQuery": MessageLookupByLibrary.simpleMessage(
+      "Отложенный запрос к резервному серверу",
     ),
     "fetchOrdersFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось загрузить записи о покупках",
@@ -2012,6 +2021,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "portUnavailableTitle": MessageLookupByLibrary.simpleMessage(
       "Порт недоступен",
     ),
+    "preferH3": MessageLookupByLibrary.simpleMessage("Предпочитать HTTP/3"),
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
       "Приоритетное использование HTTP/3 для DOH",
     ),
@@ -2159,6 +2169,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "proxyNameserverDesc": MessageLookupByLibrary.simpleMessage(
       "Домен для разрешения прокси-узлов",
+    ),
+    "proxyNameserverPolicy": MessageLookupByLibrary.simpleMessage(
+      "Политика прокси-сервера имен",
     ),
     "proxyNode": MessageLookupByLibrary.simpleMessage("Прокси-узел"),
     "proxyPort": MessageLookupByLibrary.simpleMessage("Порт прокси"),

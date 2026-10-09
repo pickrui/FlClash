@@ -1895,6 +1895,51 @@ class AppLocalizations {
     );
   }
 
+  /// `Prefer HTTP/3`
+  String get preferH3 {
+    return Intl.message('Prefer HTTP/3', name: 'preferH3', desc: '', args: []);
+  }
+
+  /// `Lazy fallback query`
+  String get fallbackLazyQuery {
+    return Intl.message(
+      'Lazy fallback query',
+      name: 'fallbackLazyQuery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Proxy nameserver policy`
+  String get proxyNameserverPolicy {
+    return Intl.message(
+      'Proxy nameserver policy',
+      name: 'proxyNameserverPolicy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Direct nameserver`
+  String get directNameserver {
+    return Intl.message(
+      'Direct nameserver',
+      name: 'directNameserver',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Direct nameserver follows policy`
+  String get directNameserverFollowPolicy {
+    return Intl.message(
+      'Direct nameserver follows policy',
+      name: 'directNameserverFollowPolicy',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Fallback filter`
   String get fallbackFilter {
     return Intl.message(
