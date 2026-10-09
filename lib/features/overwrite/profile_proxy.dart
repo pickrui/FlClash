@@ -1091,8 +1091,9 @@ class OverwriteEntryTile extends StatelessWidget {
 
 class ProfileProxyEditView extends ConsumerStatefulWidget {
   final ProfileProxy? profileProxy;
+  final Future<bool> Function(ProfileProxy next)? canSave;
 
-  const ProfileProxyEditView({super.key, this.profileProxy});
+  const ProfileProxyEditView({super.key, this.profileProxy, this.canSave});
 
   @override
   ConsumerState<ProfileProxyEditView> createState() =>
@@ -1279,6 +1280,9 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
                 uri: uri,
                 proxy: proxy,
               );
+      final canSave = widget.canSave;
+      if (canSave != null && !await canSave(next)) return;
+      if (!mounted || route?.isCurrent != true) return;
       context.safeNestedPop(next);
     } catch (error) {
       if (mounted) {
@@ -1538,7 +1542,10 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
   ]) async {
     final res = await showOverwriteSheet<ProfileProxy>(
       context: context,
-      builder: (_) => ProfileProxyEditView(profileProxy: profileProxy),
+      builder: (_) => ProfileProxyEditView(
+        profileProxy: profileProxy,
+        canSave: (next) => _canPutProfileProxy(next, profileProxy?.name),
+      ),
     );
     if (res == null) {
       return;
@@ -1546,32 +1553,42 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
     if (!mounted) {
       return;
     }
+    _putProfileProxy(res, previousName: profileProxy?.name);
+    _applyProfileChanges();
+  }
+
+  Future<bool> _canPutProfileProxy(
+    ProfileProxy res,
+    String? previousName,
+  ) async {
+    if (!mounted) {
+      return false;
+    }
     final profileProxies =
         ref.read(profileProvider(widget.profileId))?.profileProxies ?? [];
     if (hasDuplicateProfileProxyName(profileProxies, res)) {
       context.showNotifier(
         appLocalizations.existsTip(appLocalizations.proxies),
       );
-      return;
+      return false;
     }
     final profile = ref.read(profileProvider(widget.profileId));
     if (profile != null && hasProfileProxyCustomNameConflict(profile, res)) {
       context.showNotifier(
         appLocalizations.existsTip(appLocalizations.proxies),
       );
-      return;
+      return false;
     }
     final rawConfig = await _loadRawConfig();
     if (rawConfig == null || !mounted) {
-      return;
+      return false;
     }
     if (hasProfileProxyGroupNameConflict(rawConfig, res)) {
       context.showNotifier(
         appLocalizations.proxyChainUnavailableNodeTip(res.name),
       );
-      return;
+      return false;
     }
-    final previousName = profileProxy?.name;
     final nextName = res.name;
     if (previousName != null &&
         previousName.isNotEmpty &&
@@ -1579,7 +1596,7 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
         previousName != nextName) {
       final currentProfile = ref.read(profileProvider(widget.profileId));
       if (currentProfile == null) {
-        return;
+        return false;
       }
       final conflictName = findProxyChainRenameConflict(
         currentProfile.proxyChains,
@@ -1592,15 +1609,14 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
         context.showNotifier(
           appLocalizations.proxyChainConflictTip(conflictName),
         );
-        return;
+        return false;
       }
       if (!_rawProxyNames(rawConfig).contains(previousName) &&
           _isRawReferenced(rawConfig, [previousName])) {
-        return;
+        return false;
       }
     }
-    _putProfileProxy(res, previousName: profileProxy?.name);
-    _applyProfileChanges();
+    return true;
   }
 
   void _putProfileProxy(ProfileProxy profileProxy, {String? previousName}) {

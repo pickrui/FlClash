@@ -414,12 +414,26 @@ class _ProfileProxyChainsContentState
       rawConfig: rawConfig,
       profileProxies: profileProxies,
     );
+    ({bool hasDisabledConflicts, List<ProxyChain> proxyChains}) resolve(
+      ProxyChain next,
+    ) {
+      final proxyChains =
+          ref.read(profileProvider(widget.profileId))?.proxyChains ?? [];
+      return proxyChains.copyAndPutResolvingTargetConflicts(next);
+    }
+
     final res = await showOverwriteSheet<ProxyChain>(
       context: context,
       builder: (_) => ProxyChainEditView(
         profileId: widget.profileId,
         proxyChain: proxyChain,
         rawConfig: rawConfig,
+        canSave: (next) =>
+            mounted &&
+            _canPutProxyChains(
+              resolve(next).proxyChains,
+              rawContext.existingRelations,
+            ),
       ),
     );
     if (res == null) {
@@ -428,9 +442,7 @@ class _ProfileProxyChainsContentState
     if (!mounted) {
       return;
     }
-    final proxyChains =
-        ref.read(profileProvider(widget.profileId))?.proxyChains ?? [];
-    final resolved = proxyChains.copyAndPutResolvingTargetConflicts(res);
+    final resolved = resolve(res);
     if (!_canPutProxyChains(
       resolved.proxyChains,
       rawContext.existingRelations,
@@ -727,12 +739,14 @@ class ProxyChainEditView extends ConsumerStatefulWidget {
   final int profileId;
   final ProxyChain? proxyChain;
   final Map<String, dynamic> rawConfig;
+  final bool Function(ProxyChain next)? canSave;
 
   const ProxyChainEditView({
     super.key,
     required this.profileId,
     this.proxyChain,
     required this.rawConfig,
+    this.canSave,
   });
 
   @override
@@ -820,39 +834,14 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
 
     final res = await showOverwriteSheet<ProfileProxy>(
       context: context,
-      builder: (_) => const ProfileProxyEditView(),
+      builder: (_) => ProfileProxyEditView(
+        canSave: (next) async => mounted && _canAddProfileProxy(next),
+      ),
     );
     if (res == null || !mounted) {
       return;
     }
     final proxyName = res.name;
-    if (_containsProxy(proxyName)) {
-      context.showNotifier(
-        appLocalizations.existsTip(appLocalizations.proxies),
-      );
-      return;
-    }
-    final profileProxies =
-        ref.read(profileProvider(widget.profileId))?.profileProxies ?? [];
-    if (hasDuplicateProfileProxyName(profileProxies, res)) {
-      context.showNotifier(
-        appLocalizations.existsTip(appLocalizations.proxies),
-      );
-      return;
-    }
-    final profile = ref.read(profileProvider(widget.profileId));
-    if (profile != null && hasProfileProxyCustomNameConflict(profile, res)) {
-      context.showNotifier(
-        appLocalizations.existsTip(appLocalizations.proxies),
-      );
-      return;
-    }
-    if (_rawContext.groupNames.contains(res.name)) {
-      context.showNotifier(
-        appLocalizations.proxyChainUnavailableNodeTip(res.name),
-      );
-      return;
-    }
     ref.read(profilesProvider.notifier).updateProfile(widget.profileId, (
       state,
     ) {
@@ -865,6 +854,37 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
     setState(() {});
     setupAction.applyProfileDebounce(silence: true);
     context.showNotifier(appLocalizations.proxyChainNodeAdded);
+  }
+
+  bool _canAddProfileProxy(ProfileProxy res) {
+    if (_containsProxy(res.name)) {
+      context.showNotifier(
+        appLocalizations.existsTip(appLocalizations.proxies),
+      );
+      return false;
+    }
+    final profileProxies =
+        ref.read(profileProvider(widget.profileId))?.profileProxies ?? [];
+    if (hasDuplicateProfileProxyName(profileProxies, res)) {
+      context.showNotifier(
+        appLocalizations.existsTip(appLocalizations.proxies),
+      );
+      return false;
+    }
+    final profile = ref.read(profileProvider(widget.profileId));
+    if (profile != null && hasProfileProxyCustomNameConflict(profile, res)) {
+      context.showNotifier(
+        appLocalizations.existsTip(appLocalizations.proxies),
+      );
+      return false;
+    }
+    if (_rawContext.groupNames.contains(res.name)) {
+      context.showNotifier(
+        appLocalizations.proxyChainUnavailableNodeTip(res.name),
+      );
+      return false;
+    }
+    return true;
   }
 
   void _handleDelete(String value) {
@@ -905,6 +925,9 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
       name: _nameController.text.trim(),
       proxies: proxies,
     );
+    if (widget.canSave?.call(proxyChain) == false) {
+      return;
+    }
     context.safeNestedPop(proxyChain);
   }
 
