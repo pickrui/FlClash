@@ -105,14 +105,23 @@ class _EditorPageState extends ConsumerState<EditorPage> {
 
   EditorViewState? get _editor => _editorKey.currentState;
 
+  String? _normalizedSource, _normalized;
+
+  // Read on every edit and caret move; one copy also keeps the editor's
+  // modified check on its identical fast path.
   String? get _original {
     if (widget.load != null) {
       return _loaded;
     }
     final content = widget.content;
-    return content == null
-        ? null
-        : CodeForgeController.normalizeLineBreaks(content);
+    if (content == null) {
+      return null;
+    }
+    if (!identical(content, _normalizedSource)) {
+      _normalizedSource = content;
+      _normalized = CodeForgeController.normalizeLineBreaks(content);
+    }
+    return _normalized;
   }
 
   String get _content => _editor?.content ?? _original ?? '';
