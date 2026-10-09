@@ -142,16 +142,15 @@ class Tray {
     if (system.isMacOS) {
       for (final group in trayState.groups) {
         final subMenuItems = <native.TrayMenuItem>[];
+        final selectedName = group.getCurrentSelectedName(
+          trayState.selectedMap[group.name] ?? '',
+        );
         for (final proxy in group.all) {
           subMenuItems.add(
             native.TrayMenuCheckbox(
               label: proxy.name,
               detail: delayText(trayState.delays[group.name]?[proxy.name]),
-              checked:
-                  group.getCurrentSelectedName(
-                    trayState.selectedMap[group.name] ?? '',
-                  ) ==
-                  proxy.name,
+              checked: selectedName == proxy.name,
               onSelected: () {
                 appController.changeProxyDebounce(group.name, proxy.name);
               },
@@ -161,11 +160,7 @@ class Tray {
         menuItems.add(
           native.TrayMenuSubmenu(
             label: group.name,
-            detail: delayText(
-              trayState.delays[group.name]?[group.getCurrentSelectedName(
-                trayState.selectedMap[group.name] ?? '',
-              )],
-            ),
+            detail: delayText(trayState.delays[group.name]?[selectedName]),
             items: [
               native.TrayMenuAction(
                 label: appLocalizations.delayTest,

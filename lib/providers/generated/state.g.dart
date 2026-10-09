@@ -317,7 +317,7 @@ final class TrayDelaysProvider
   }
 }
 
-String _$trayDelaysHash() => r'266ed418b13319a7fcc6a3d8307b6786f6ce89bf';
+String _$trayDelaysHash() => r'664096baa9554042215d705aa5d344eab6ae6e03';
 
 @ProviderFor(trayState)
 final trayStateProvider = TrayStateProvider._();

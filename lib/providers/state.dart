@@ -164,17 +164,16 @@ Map<String, Map<String, int>> trayDelays(Ref ref) {
     appSettingProvider.select((state) => state.testUrl),
   );
   final delays = <String, Map<String, int>>{};
+  final delayOf = proxyDelayLookup(
+    groups: allGroups,
+    selectedMap: selectedMap,
+    delayMap: delayMap,
+  );
   for (final group in groups) {
     final testUrl = group.testUrl.takeFirstValid([defaultTestUrl]);
     final groupDelays = <String, int>{};
     for (final proxy in group.all) {
-      final delay = computeProxyDelayState(
-        proxyName: proxy.name,
-        testUrl: testUrl,
-        groups: allGroups,
-        selectedMap: selectedMap,
-        delayMap: delayMap,
-      ).delay;
+      final delay = delayOf(proxy.name, testUrl).delay;
       if (delay != 0) {
         groupDelays[proxy.name] = delay;
       }

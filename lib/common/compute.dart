@@ -166,10 +166,23 @@ DelayState computeProxyDelayState({
   required Map<String, String> selectedMap,
   required DelayMap delayMap,
 }) {
-  return _ProxySelectionResolver(
-    groups,
-    selectedMap,
-  ).delayState(proxyName, testUrl, delayMap);
+  return proxyDelayLookup(
+    groups: groups,
+    selectedMap: selectedMap,
+    delayMap: delayMap,
+  )(proxyName, testUrl);
+}
+
+/// Delay lookups that share one resolver, for callers walking many proxies;
+/// resolved selections do not depend on the test URL.
+DelayState Function(String proxyName, String testUrl) proxyDelayLookup({
+  required List<Group> groups,
+  required Map<String, String> selectedMap,
+  required DelayMap delayMap,
+}) {
+  final resolver = _ProxySelectionResolver(groups, selectedMap);
+  return (proxyName, testUrl) =>
+      resolver.delayState(proxyName, testUrl, delayMap);
 }
 
 List<Group> computeHideTimeout({
