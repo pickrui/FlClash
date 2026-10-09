@@ -31,8 +31,8 @@ G_DEFINE_TYPE(TrayPlugin, tray_plugin, g_object_get_type())
 static TrayPlugin* active_plugin = nullptr;
 
 static FlMethodResponse* respond(bool value) {
-  return FL_METHOD_RESPONSE(
-      fl_method_success_response_new(fl_value_new_bool(value)));
+  g_autoptr(FlValue) result = fl_value_new_bool(value);
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
 static const char* string_value(FlValue* map, const char* key) {
