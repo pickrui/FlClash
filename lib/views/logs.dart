@@ -31,6 +31,7 @@ class _LogsViewState extends ConsumerState<LogsView>
   late ScrollController _scrollController;
 
   List<Log> _logs = [];
+  bool _exporting = false;
 
   @override
   void initState() {
@@ -53,9 +54,7 @@ class _LogsViewState extends ConsumerState<LogsView>
     return [
       IconButton(
         tooltip: context.appLocalizations.exportLogs,
-        onPressed: () {
-          _handleExport();
-        },
+        onPressed: _exporting ? null : _handleExport,
         icon: const GlyphIcon(AppGlyphs.save),
       ),
     ];
@@ -82,9 +81,11 @@ class _LogsViewState extends ConsumerState<LogsView>
     final commonAction = context.commonAction;
     final logsAction = context.logsAction;
 
+    setState(() => _exporting = true);
     final res = await commonAction.safeRun<bool>(() async {
       return logsAction.exportLogs();
     }, title: appLocalizations.exportLogs);
+    if (mounted) setState(() => _exporting = false);
     if (res != true) return;
     globalState.showMessage(
       title: appLocalizations.tip,

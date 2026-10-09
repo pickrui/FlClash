@@ -5,7 +5,9 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:fl_clash/common/javascript.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/manager/status_manager.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/app.dart';
@@ -82,6 +84,35 @@ class _SetupAction extends SetupAction {
 
   @override
   void autoApplyProfile() => autoApplies++;
+}
+
+class _PreviewSetupAction extends SetupAction {
+  final previews = <Completer<Map>>[];
+
+  @override
+  Future<Map> getProfileWithId(
+    int profileId, {
+    void Function(ScriptConfigChanges changes)? onScriptChanges,
+  }) => (previews..add(Completer<Map>())).last.future;
+}
+
+class _Status extends StatusManager {
+  final List<String> messages;
+
+  const _Status({required this.messages, required super.child});
+
+  @override
+  State<StatusManager> createState() => _StatusState();
+}
+
+class _StatusState extends StatusManagerState {
+  @override
+  void message(String text, {MessageActionState? actionState}) {
+    (widget as _Status).messages.add(text);
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 class _Scripts extends Scripts {
@@ -162,6 +193,36 @@ void main() {
     await tester.pump();
     expect(action.calls, [1, 1]);
     action.pending[1]!.complete(_first);
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('a profile preview runs once at a time and reports failure', (
+    tester,
+  ) async {
+    final setup = _PreviewSetupAction();
+    final messages = <String>[];
+    await _pushRoute(tester, [
+      profilesProvider.overrideWith(() => _Profiles([_second])),
+      setupActionProvider.overrideWith(() => setup),
+    ], () => _Status(messages: messages, child: const ProfilesView()));
+    Future<void> preview() async {
+      await tester.tap(find.byTooltip('More'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Preview'));
+      await tester.pumpAndSettle();
+    }
+
+    await preview();
+    await preview();
+    expect(setup.previews, hasLength(1));
+
+    setup.previews.single.completeError(StateError('unreadable'));
+    await tester.pumpAndSettle();
+
+    expect(messages, ['Bad state: unreadable']);
+    await preview();
+    expect(setup.previews, hasLength(2));
+    setup.previews.last.complete({});
     await tester.pumpAndSettle();
   });
 

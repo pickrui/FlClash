@@ -223,31 +223,39 @@ class ProfileItem extends StatelessWidget {
     await profileAction.deleteProfile(profile.id);
   }
 
+  static final _previewing = <int>{};
+
   Future<void> _handlePreview(BuildContext context) async {
-    if (profile.isoixCloudProfile) return;
+    if (profile.isoixCloudProfile || !_previewing.add(profile.id)) return;
     final setupAction = context.setupAction;
 
-    ScriptConfigChanges? changes;
-    final configMap = await setupAction.getProfileWithId(
-      profile.id,
-      onScriptChanges: (value) => changes = value,
-    );
-    if (configMap.isEmpty) {
-      return;
-    }
-    final content = await encodeYamlTask(configMap);
-    if (!context.mounted) {
-      return;
-    }
+    try {
+      ScriptConfigChanges? changes;
+      final configMap = await setupAction.getProfileWithId(
+        profile.id,
+        onScriptChanges: (value) => changes = value,
+      );
+      if (configMap.isEmpty) {
+        return;
+      }
+      final content = await encodeYamlTask(configMap);
+      if (!context.mounted) {
+        return;
+      }
 
-    final previewPage = changes == null
-        ? EditorPage(title: profile.realLabel, content: content)
-        : ScriptConfigPreviewPage(
-            title: profile.realLabel,
-            content: content,
-            changes: changes!,
-          );
-    BaseNavigator.push<String>(context, previewPage);
+      final previewPage = changes == null
+          ? EditorPage(title: profile.realLabel, content: content)
+          : ScriptConfigPreviewPage(
+              title: profile.realLabel,
+              content: content,
+              changes: changes!,
+            );
+      BaseNavigator.push<String>(context, previewPage);
+    } catch (error) {
+      if (context.mounted) context.showNotifier(error.toString());
+    } finally {
+      _previewing.remove(profile.id);
+    }
   }
 
   Future updateProfile(BuildContext context) async {
