@@ -39,7 +39,14 @@ func stubExitCleanup(t *testing.T, cleanup func()) *bool {
 		called = true
 		cleanup()
 	}
-	t.Cleanup(func() { exitCleanup = previous; exitGuard = previousGuard })
+	previousStopTun := exitStopTun
+	exitStopTun = func() {}
+	t.Cleanup(func() {
+		exitCleanup = previous
+		exitGuard = previousGuard
+		exitStopTun = previousStopTun
+		exiting.Store(false)
+	})
 	return &called
 }
 
@@ -54,6 +61,34 @@ func TestReleaseOnExitSkipsCleanupBeforeInit(t *testing.T) {
 
 	if *called {
 		t.Fatal("cleanup ran although the core was never initialized")
+	}
+}
+
+// An apply downloading providers can hold runLock past the exit deadline.
+func TestReleaseOnExitClosesTheTunWhileCleanupWaits(t *testing.T) {
+	previousIsInit := isInit.Load()
+	isInit.Store(true)
+	previousTimeout := exitCleanupTimeout
+	exitCleanupTimeout = 50 * time.Millisecond
+	release := make(chan struct{})
+	stubExitCleanup(t, func() { <-release })
+	stopped := make(chan struct{}, 1)
+	exitStopTun = func() { stopped <- struct{}{} }
+	t.Cleanup(func() {
+		close(release)
+		isInit.Store(previousIsInit)
+		exitCleanupTimeout = previousTimeout
+	})
+
+	releaseOnExit()
+
+	select {
+	case <-stopped:
+	default:
+		t.Fatal("the TUN waited behind the blocked cleanup")
+	}
+	if !exiting.Load() {
+		t.Fatal("an apply could still recreate the TUN after exit began")
 	}
 }
 

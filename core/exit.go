@@ -15,6 +15,10 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/metacubex/mihomo/listener"
+	LC "github.com/metacubex/mihomo/listener/config"
+	"github.com/metacubex/mihomo/tunnel"
 )
 
 // sing-tun's routes outlive the process and only handleShutdown removes them;
@@ -22,8 +26,11 @@ import (
 var (
 	exitCleanupTimeout = 2 * time.Second
 	exitCleanup        = func() { handleShutdown() }
-	exitProcess        = os.Exit
-	exitGuard          = &exitCleanupGuard{done: make(chan struct{})}
+	// handleShutdown waits for runLock, which an apply downloading providers
+	// can hold past that deadline, so the TUN and its routes close first.
+	exitStopTun = func() { listener.ReCreateTun(LC.Tun{}, tunnel.Tunnel) }
+	exitProcess = os.Exit
+	exitGuard   = &exitCleanupGuard{done: make(chan struct{})}
 )
 
 type exitCleanupGuard struct {
@@ -38,9 +45,12 @@ func releaseOnExit() {
 			close(guard.done)
 			return
 		}
+		exiting.Store(true)
+		stopTun := exitStopTun
 		cleanup := exitCleanup
 		go func() {
 			defer close(guard.done)
+			stopTun()
 			cleanup()
 		}()
 	})

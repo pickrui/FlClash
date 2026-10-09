@@ -16,6 +16,7 @@ import (
 	"runtime"
 	"slices"
 	"sync"
+	"sync/atomic"
 
 	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/adapter/inbound"
@@ -48,6 +49,9 @@ var (
 	// runLock -> selectionLock; proxy changes must never wait for runLock.
 	selectionLock sync.Mutex
 	delaySem      = semaphore.NewWeighted(delayTestConcurrency)
+	// Set once the process exits, so an apply still holding runLock cannot
+	// bring back the TUN that exit cleanup closed first.
+	exiting atomic.Bool
 )
 
 // Probes the Core runs at once. The app keeps its own batch width at or below
@@ -115,7 +119,7 @@ func sideUpdateExternalProvider(p cp.Provider, data []byte) error {
 }
 
 func updateListeners() {
-	if !isRunning || networkExcluded {
+	if !isRunning || networkExcluded || exiting.Load() {
 		return
 	}
 	if currentConfig == nil {
