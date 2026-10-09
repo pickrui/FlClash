@@ -20,6 +20,7 @@ import 'cloud_login_page.dart';
 Future<T?> showCloudRegisterPage<T>(BuildContext context) {
   return showDialog<T>(
     context: context,
+    barrierDismissible: false,
     builder: (_) => const CloudRegisterPage(),
   );
 }
@@ -174,12 +175,15 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
     final accountState = ref.watch(cloudAccountProvider);
     final isLoading = accountState.isLoading || _isSubmitting;
 
-    return Dialog(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 450, maxHeight: 640),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: _buildContent(isLoading),
+    return PopScope(
+      canPop: !isLoading,
+      child: Dialog(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 450, maxHeight: 640),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: _buildContent(isLoading),
+          ),
         ),
       ),
     );

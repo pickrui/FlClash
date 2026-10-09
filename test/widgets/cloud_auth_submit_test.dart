@@ -98,6 +98,54 @@ Future<bool> _run(
 }
 
 void main() {
+  // A keyboard closing as the fields disable may deliver a system back.
+  testWidgets('back and outside taps cannot hide a login in flight', (
+    tester,
+  ) async {
+    final account = await _startLogin(tester);
+    final route = ModalRoute.of(tester.element(find.byType(CloudLoginPage)))!;
+    await tester.binding.handlePopRoute();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tapAt(const Offset(4, 4));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(route.isActive, isTrue);
+
+    account.pendingLogin.complete();
+    await tester.pumpAndSettle();
+    expect(find.byType(CloudLoginPage), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('an idle login keeps its input on outside taps', (tester) async {
+    await tester.pumpWidget(
+      TestApp(
+        locale: const Locale('en'),
+        overrides: [
+          viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 600)),
+          cloudAccountProvider.overrideWith(_Account.new),
+        ],
+        child: Builder(
+          builder: (context) => Scaffold(
+            body: TextButton(
+              onPressed: () => showCloudLoginPage<void>(context),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextFormField), 'fixture-token');
+    await tester.tapAt(const Offset(4, 4));
+    await tester.pumpAndSettle();
+    expect(find.text('fixture-token'), findsOneWidget);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.byType(CloudLoginPage), findsNothing);
+  });
+
   testWidgets('login completes without dismissing a newer route', (
     tester,
   ) async {

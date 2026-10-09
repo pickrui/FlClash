@@ -15,6 +15,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 Future<T?> showCloudLoginPage<T>(BuildContext context) {
   return showDialog<T>(
     context: context,
+    barrierDismissible: false,
     builder: (_) => const CloudLoginPage(),
   );
 }
@@ -127,69 +128,74 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
     final accountState = ref.watch(cloudAccountProvider);
     final isLoading = accountState.isLoading || _isSubmitting;
 
-    return Dialog(
-      child: Container(
-        width: 450,
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              AppLocalizations.current.loginTitle,
-              style: context.textTheme.headlineSmall,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            SegmentedButton<_LoginMode>(
-              selected: {_loginMode},
-              onSelectionChanged: isLoading
-                  ? null
-                  : (v) => setState(() => _loginMode = v.first),
-              segments: [
-                ButtonSegment(
-                  value: _LoginMode.token,
-                  label: Text(AppLocalizations.current.accessToken),
-                  icon: const Icon(Icons.key),
-                ),
-                ButtonSegment(
-                  value: _LoginMode.emailPassword,
-                  label: Text(AppLocalizations.current.emailPassword),
-                  icon: const Icon(Icons.mail_outline),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            Form(
-              key: _formKey,
-              child: _loginMode == _LoginMode.emailPassword
-                  ? _buildEmailPasswordForm(isLoading)
-                  : _buildTokenForm(isLoading),
-            ),
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: isLoading
-                      ? null
-                      : () => Navigator.of(context).pop(),
-                  child: Text(AppLocalizations.current.cancel),
-                ),
-                const SizedBox(width: 12),
-                FilledButton(
-                  onPressed: isLoading ? null : _handleLogin,
-                  child: isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(AppLocalizations.current.loginTitle),
-                ),
-              ],
-            ),
-          ],
+    // Cancel is disabled while a login runs; a stray back must not hide it
+    // either, or the result is dropped without a word.
+    return PopScope(
+      canPop: !isLoading,
+      child: Dialog(
+        child: Container(
+          width: 450,
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                AppLocalizations.current.loginTitle,
+                style: context.textTheme.headlineSmall,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              SegmentedButton<_LoginMode>(
+                selected: {_loginMode},
+                onSelectionChanged: isLoading
+                    ? null
+                    : (v) => setState(() => _loginMode = v.first),
+                segments: [
+                  ButtonSegment(
+                    value: _LoginMode.token,
+                    label: Text(AppLocalizations.current.accessToken),
+                    icon: const Icon(Icons.key),
+                  ),
+                  ButtonSegment(
+                    value: _LoginMode.emailPassword,
+                    label: Text(AppLocalizations.current.emailPassword),
+                    icon: const Icon(Icons.mail_outline),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              Form(
+                key: _formKey,
+                child: _loginMode == _LoginMode.emailPassword
+                    ? _buildEmailPasswordForm(isLoading)
+                    : _buildTokenForm(isLoading),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: isLoading
+                        ? null
+                        : () => Navigator.of(context).pop(),
+                    child: Text(AppLocalizations.current.cancel),
+                  ),
+                  const SizedBox(width: 12),
+                  FilledButton(
+                    onPressed: isLoading ? null : _handleLogin,
+                    child: isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(AppLocalizations.current.loginTitle),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -248,6 +254,7 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
   Future<void> _showForgotPasswordDialog() async {
     final email = await showDialog<String>(
       context: context,
+      barrierDismissible: false,
       builder: (_) =>
           _ForgotPasswordDialog(initialEmail: _emailController.text.trim()),
     );
@@ -356,109 +363,113 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(AppLocalizations.current.resetPasswordTitle),
-      content: SizedBox(
-        width: 400,
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextFormField(
-                controller: _emailController,
-                enabled: !_isSubmitting && !_emailSent,
-                decoration: InputDecoration(
-                  labelText: AppLocalizations.current.emailLabel,
-                  prefixIcon: const Icon(Icons.mail_outline),
-                  border: const OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.emailAddress,
-                autofocus: true,
-                validator: (v) => v?.isEmpty == true
-                    ? AppLocalizations.current.emailValidation
-                    : null,
-              ),
-              if (_emailSent) ...[
-                const SizedBox(height: 12),
-                Text(
-                  AppLocalizations.current.resetEmailSent,
-                  style: context.textTheme.bodySmall,
-                ),
-                const SizedBox(height: 12),
+    return PopScope(
+      canPop: !_isSubmitting,
+      child: AlertDialog(
+        title: Text(AppLocalizations.current.resetPasswordTitle),
+        content: SizedBox(
+          width: 400,
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
                 TextFormField(
-                  controller: _tokenController,
-                  enabled: !_isSubmitting,
-                  maxLines: _obscureToken ? 1 : 4,
-                  obscureText: _obscureToken,
-                  enableSuggestions: false,
-                  autocorrect: false,
+                  controller: _emailController,
+                  enabled: !_isSubmitting && !_emailSent,
                   decoration: InputDecoration(
-                    labelText: AppLocalizations.current.resetTokenLabel,
-                    prefixIcon: const Icon(Icons.key),
+                    labelText: AppLocalizations.current.emailLabel,
+                    prefixIcon: const Icon(Icons.mail_outline),
                     border: const OutlineInputBorder(),
-                    suffixIcon: VisibilityToggleButton(
-                      obscureText: _obscureToken,
-                      onPressed: _isSubmitting
-                          ? null
-                          : () =>
-                                setState(() => _obscureToken = !_obscureToken),
-                    ),
                   ),
-                  validator: (v) => v?.trim().isEmpty == true
-                      ? AppLocalizations.current.resetTokenValidation
-                      : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _passwordController,
-                  enabled: !_isSubmitting,
-                  obscureText: _obscurePassword,
-                  enableSuggestions: false,
-                  autocorrect: false,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.current.newPasswordLabel,
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    border: const OutlineInputBorder(),
-                    suffixIcon: VisibilityToggleButton(
-                      obscureText: _obscurePassword,
-                      onPressed: _isSubmitting
-                          ? null
-                          : () => setState(
-                              () => _obscurePassword = !_obscurePassword,
-                            ),
-                    ),
-                  ),
+                  keyboardType: TextInputType.emailAddress,
+                  autofocus: true,
                   validator: (v) => v?.isEmpty == true
-                      ? AppLocalizations.current.passwordValidation
+                      ? AppLocalizations.current.emailValidation
                       : null,
                 ),
+                if (_emailSent) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    AppLocalizations.current.resetEmailSent,
+                    style: context.textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _tokenController,
+                    enabled: !_isSubmitting,
+                    maxLines: _obscureToken ? 1 : 4,
+                    obscureText: _obscureToken,
+                    enableSuggestions: false,
+                    autocorrect: false,
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.current.resetTokenLabel,
+                      prefixIcon: const Icon(Icons.key),
+                      border: const OutlineInputBorder(),
+                      suffixIcon: VisibilityToggleButton(
+                        obscureText: _obscureToken,
+                        onPressed: _isSubmitting
+                            ? null
+                            : () => setState(
+                                () => _obscureToken = !_obscureToken,
+                              ),
+                      ),
+                    ),
+                    validator: (v) => v?.trim().isEmpty == true
+                        ? AppLocalizations.current.resetTokenValidation
+                        : null,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _passwordController,
+                    enabled: !_isSubmitting,
+                    obscureText: _obscurePassword,
+                    enableSuggestions: false,
+                    autocorrect: false,
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.current.newPasswordLabel,
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      border: const OutlineInputBorder(),
+                      suffixIcon: VisibilityToggleButton(
+                        obscureText: _obscurePassword,
+                        onPressed: _isSubmitting
+                            ? null
+                            : () => setState(
+                                () => _obscurePassword = !_obscurePassword,
+                              ),
+                      ),
+                    ),
+                    validator: (v) => v?.isEmpty == true
+                        ? AppLocalizations.current.passwordValidation
+                        : null,
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
+        actions: [
+          TextButton(
+            onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+            child: Text(AppLocalizations.current.cancel),
+          ),
+          FilledButton(
+            onPressed: _isSubmitting ? null : _handleSubmit,
+            child: _isSubmitting
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Text(
+                    _emailSent
+                        ? AppLocalizations.current.resetPasswordTitle
+                        : AppLocalizations.current.sendResetEmail,
+                  ),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-          child: Text(AppLocalizations.current.cancel),
-        ),
-        FilledButton(
-          onPressed: _isSubmitting ? null : _handleSubmit,
-          child: _isSubmitting
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(
-                  _emailSent
-                      ? AppLocalizations.current.resetPasswordTitle
-                      : AppLocalizations.current.sendResetEmail,
-                ),
-        ),
-      ],
     );
   }
 }
