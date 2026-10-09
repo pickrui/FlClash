@@ -90,6 +90,30 @@ using ScopedInterfaceList =
 using ScopedConnectionAttributes =
     std::unique_ptr<WLAN_CONNECTION_ATTRIBUTES, WlanMemoryDeleter>;
 
+// Dart rejects invalid UTF-8; Windows shows such SSIDs in the ANSI code page.
+std::string SsidToUtf8(const char *bytes, int length) {
+  if (::MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, bytes, length,
+                            nullptr, 0) > 0) {
+    return std::string(bytes, static_cast<size_t>(length));
+  }
+  const int wide_size =
+      ::MultiByteToWideChar(CP_ACP, 0, bytes, length, nullptr, 0);
+  if (wide_size <= 0) {
+    return std::string();
+  }
+  std::wstring wide(static_cast<size_t>(wide_size), L'\0');
+  ::MultiByteToWideChar(CP_ACP, 0, bytes, length, wide.data(), wide_size);
+  const int size = ::WideCharToMultiByte(CP_UTF8, 0, wide.data(), wide_size,
+                                         nullptr, 0, nullptr, nullptr);
+  if (size <= 0) {
+    return std::string();
+  }
+  std::string result(static_cast<size_t>(size), '\0');
+  ::WideCharToMultiByte(CP_UTF8, 0, wide.data(), wide_size, result.data(),
+                        size, nullptr, nullptr);
+  return result;
+}
+
 }  // namespace
 
 void WifiSsidPlugin::RegisterWithRegistrar(
@@ -190,8 +214,8 @@ void WifiSsidPlugin::GetSsid(
         dot11_ssid.uSSIDLength > DOT11_SSID_MAX_LENGTH) {
       continue;
     }
-    ssid.assign(reinterpret_cast<const char *>(dot11_ssid.ucSSID),
-                dot11_ssid.uSSIDLength);
+    ssid = SsidToUtf8(reinterpret_cast<const char *>(dot11_ssid.ucSSID),
+                      static_cast<int>(dot11_ssid.uSSIDLength));
     break;
   }
 
