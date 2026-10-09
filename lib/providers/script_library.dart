@@ -113,7 +113,7 @@ class ScriptLibrary {
       final next = script.copyWith(label: name, lastUpdateTime: DateTime.now());
       await withFileRollback(target, () async {
         await File(target).parent.create(recursive: true);
-        await File(target).writeAsBytes(bytes, flush: true);
+        await durableWriteBytes(target, bytes);
         await database.scripts.put(next.toCompanion());
       });
     });

@@ -1311,8 +1311,9 @@ extension ProfileExtension on Profile {
           throw ConfigValidationException(message);
         }
       }
-      final mFile = await file;
-      await tempFile.copy(mFile.path);
+      final mFile = await _getFile(false);
+      await durableCreateDirectory(mFile.parent.path);
+      await durableWriteBytes(mFile.path, bytes);
       return copyWith(lastUpdateDate: DateTime.now());
     } finally {
       await tempFile.safeDelete();

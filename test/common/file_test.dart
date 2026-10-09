@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:io';
 
+import 'package:fl_clash/common/durable_file.dart';
 import 'package:fl_clash/common/file.dart';
 import 'package:test/test.dart';
 
@@ -73,4 +74,36 @@ void main() {
       );
     },
   );
+
+  test(
+    'durableWriteBytes replaces a file without leaving a staging copy',
+    () async {
+      final root = await Directory.systemTemp.createTemp('durable_write_');
+      addTearDown(() => root.delete(recursive: true));
+      final file = File('${root.path}/1.yaml')..writeAsStringSync('old');
+
+      await durableWriteBytes(file.path, 'new'.codeUnits);
+
+      expect(await file.readAsString(), 'new');
+      expect(await root.list().map((entity) => entity.path).toList(), [
+        file.path,
+      ]);
+    },
+  );
+
+  test('a failed durableWriteBytes removes its staging copy', () async {
+    final root = await Directory.systemTemp.createTemp('durable_write_fail_');
+    addTearDown(() => root.delete(recursive: true));
+    final occupied = Directory('${root.path}/1.yaml')..createSync();
+
+    await expectLater(
+      durableWriteBytes(occupied.path, 'new'.codeUnits),
+      throwsA(isA<FileSystemException>()),
+    );
+
+    expect(await occupied.exists(), isTrue);
+    expect(await root.list().map((entity) => entity.path).toList(), [
+      occupied.path,
+    ]);
+  });
 }

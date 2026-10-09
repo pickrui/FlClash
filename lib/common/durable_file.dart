@@ -82,6 +82,19 @@ Future<void> durableDeleteEntity(String path) async {
   await syncDirectory(p.dirname(path));
 }
 
+/// Replaces [path] in one step: a crash leaves the old or the new content.
+Future<void> durableWriteBytes(String path, List<int> bytes) async {
+  final temporary = File('$path.${DateTime.now().microsecondsSinceEpoch}.tmp');
+  try {
+    await temporary.writeAsBytes(bytes, flush: true);
+    await durableRename(temporary.path, path);
+  } finally {
+    try {
+      if (await temporary.exists()) await temporary.delete();
+    } catch (_) {}
+  }
+}
+
 Future<void> durableRename(String source, String target) =>
     _durableMove(source, target, () => File(source).rename(target));
 
