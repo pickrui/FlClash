@@ -44,6 +44,31 @@ void main() {
       controller.text.substring(highlight.start, highlight.end),
   ];
 
+  testWidgets('moving the caret in the find field keeps the match', (
+    tester,
+  ) async {
+    final (controller, finder) = await pumpFind(tester);
+    finder.findInputController.text = 'port';
+    await settle(tester, 2);
+    finder.next();
+    finder.next();
+    await settle(tester, 2);
+    final selection = controller.selection;
+    final highlights = controller.searchHighlights;
+    var searches = 0;
+    finder.addListener(() => searches++);
+
+    finder.findInputController.selection = const TextSelection.collapsed(
+      offset: 0,
+    );
+    await settle(tester, 2);
+
+    expect(searches, 0);
+    expect(identical(controller.searchHighlights, highlights), isTrue);
+    expect(finder.currentMatchIndex, 2);
+    expect(controller.selection, selection);
+  });
+
   testWidgets('find counts matches, highlights them and moves the caret', (
     tester,
   ) async {

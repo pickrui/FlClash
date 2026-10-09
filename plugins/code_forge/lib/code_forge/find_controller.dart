@@ -47,6 +47,9 @@ class FindController extends ChangeNotifier {
   }
 
   void _onFindInputChanged() {
+    // Caret, selection and composing changes notify too; only a new query
+    // searches the document again.
+    if (findInputController.text == _lastQuery) return;
     _emptyMatchReplacedAt = null;
     find(findInputController.text);
   }
