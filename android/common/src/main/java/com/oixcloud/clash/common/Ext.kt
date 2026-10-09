@@ -146,6 +146,8 @@ fun Context.bindServiceFlow(
     }
 
     if (!success) {
+        // A refused bind still registers the connection until it is unbound.
+        withContext(Dispatchers.Main) { runCatching { unbindService(connection) } }
         throw IllegalStateException("bindService() failed, will retry")
     }
 
