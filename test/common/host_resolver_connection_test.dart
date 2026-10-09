@@ -223,6 +223,72 @@ void main() {
       );
     });
 
+    test('cancelling before an attempt starts observes its error', () async {
+      final starting = Completer<ConnectionTask<Socket>>();
+      var cancelled = false;
+      final task = connectFirst([blackhole], (_) => starting.future);
+      final completion = expectLater(
+        task.socket,
+        throwsA(isA<SocketException>()),
+      );
+
+      task.cancel();
+      await completion;
+      starting.complete(stalled(() => cancelled = true));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(cancelled, isTrue);
+    });
+
+    test('a late losing attempt observes its cancellation error', () async {
+      final starting = Completer<ConnectionTask<Socket>>();
+      final connected = await Socket.connect(loopback, server.port);
+      addTearDown(connected.destroy);
+      var cancelled = false;
+      final task = connectFirst(
+        [blackhole, loopback],
+        (address) => address == blackhole
+            ? starting.future
+            : Future.value(
+                ConnectionTask.fromSocket(Future.value(connected), () {}),
+              ),
+        stagger: Duration.zero,
+      );
+
+      expect(await task.socket, same(connected));
+      starting.complete(stalled(() => cancelled = true));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(cancelled, isTrue);
+    });
+
+    test('a late connected attempt is destroyed after cancellation', () async {
+      final listener = await ServerSocket.bind(loopback, 0);
+      addTearDown(listener.close);
+      final accepted = Completer<Socket>();
+      listener.listen(accepted.complete);
+      final connected = await Socket.connect(loopback, listener.port);
+      addTearDown(connected.destroy);
+      final peer = await accepted.future;
+      addTearDown(peer.destroy);
+      final closed = Completer<void>();
+      peer.listen((_) {}, onDone: closed.complete);
+      final starting = Completer<ConnectionTask<Socket>>();
+      final task = connectFirst([loopback], (_) => starting.future);
+      final completion = expectLater(
+        task.socket,
+        throwsA(isA<SocketException>()),
+      );
+
+      task.cancel();
+      await completion;
+      starting.complete(
+        ConnectionTask.fromSocket(Future.value(connected), () {}),
+      );
+
+      await closed.future.timeout(const Duration(seconds: 2));
+    });
+
     test('cancelling releases every attempt in flight', () async {
       final cancelled = <InternetAddress>[];
       final task = connectFirst(

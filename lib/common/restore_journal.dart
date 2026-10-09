@@ -254,6 +254,7 @@ Future<void> recoverPendingRestore({
     await durableDeleteFile('$databasePath-shm');
     await _replaceFile(databaseSnapshot, File(databasePath));
     await _replaceFile(configSnapshot, File(durableConfigPath));
+    await durableRename(prepared.path, rolledBack.path);
   }
   await _cleanupArtifacts(plan);
   await directory.delete(recursive: true);

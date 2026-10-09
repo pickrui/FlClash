@@ -378,9 +378,9 @@ ConnectionTask<Socket> connectFirst(
         attempt = await start(address);
         if (result.isCompleted) {
           attempt.cancel();
-          return;
+        } else {
+          attempts.add(attempt);
         }
-        attempts.add(attempt);
         final socket = await attempt.socket;
         attempts.remove(attempt);
         if (result.isCompleted) {

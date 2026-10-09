@@ -89,6 +89,47 @@ class DesktopUpdateWorkerTest(unittest.TestCase):
         self.assertEqual(self.marker.read_text(), 'old')
         self.assertEqual(self.result.read_text(), 'failed')
 
+    def test_unwritable_failure_status_still_restarts_restored_app(self):
+        self.result.mkdir()
+        mover = self.root / 'move'
+        mover.write_text('#!/bin/sh\ncase "$1" in */next) exit 1;; esac\nexec /bin/mv "$@"\n')
+        mover.chmod(0o755)
+        self.source = self.source.replace('/bin/mv', shlex.quote(str(mover)))
+        old = self.target.read_bytes()
+        worker = self.start()
+        self.wait_for(self.stage / 'ready')
+        self.stop_parent()
+        self.assertNotEqual(worker.wait(timeout=10), 0)
+        self.assertEqual(self.target.read_bytes(), old)
+        self.wait_for(self.marker)
+        self.assertEqual(self.marker.read_text(), 'old')
+        self.assertTrue((self.stage / 'error').exists())
+
+    def test_unwritable_success_status_does_not_roll_back_started_app(self):
+        self.result.mkdir()
+        new = self.next.read_bytes()
+        worker = self.start()
+        self.wait_for(self.stage / 'ready')
+        self.stop_parent()
+        self.assertEqual(worker.wait(timeout=10), 0)
+        self.assertEqual(self.target.read_bytes(), new)
+        self.wait_for(self.marker)
+        self.assertEqual(self.marker.read_text(), 'new')
+        self.assertFalse(self.stage.exists())
+
+    def test_error_marker_failure_still_restarts_original_app(self):
+        self.source = self.source.replace('touch "$stage/error"', 'false')
+        old = self.target.read_bytes()
+        worker = self.start()
+        self.wait_for(self.stage / 'ready')
+        self.next.write_text('tampered')
+        self.stop_parent()
+        self.assertNotEqual(worker.wait(timeout=10), 0)
+        self.assertEqual(self.target.read_bytes(), old)
+        self.wait_for(self.marker)
+        self.assertEqual(self.marker.read_text(), 'old')
+        self.assertEqual(self.result.read_text(), 'failed')
+
     def test_changed_payload_after_readiness_keeps_original(self):
         old = self.target.read_bytes()
         worker = self.start()

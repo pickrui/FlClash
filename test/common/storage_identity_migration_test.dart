@@ -13,21 +13,39 @@ import 'package:test/test.dart';
 
 void main() {
   group('legacyApplicationSupportPathFor', () {
-    test('maps macOS and Linux application identifiers', () {
+    test('maps Linux application identifiers', () {
       expect(
         legacyApplicationSupportPathFor(
-          '/Users/test/Library/Application Support/com.oixcloud.clash.debug',
+          '/home/test/.local/share/com.oixcloud.clash.debug',
           isWindows: false,
+          isMacOS: false,
         ),
-        '/Users/test/Library/Application Support/com.follow.clash.debug',
+        '/home/test/.local/share/com.follow.clash.debug',
       );
       expect(
         legacyApplicationSupportPathFor(
           '/Users/com.oixcloud.clash/Application Support/FlClash',
           isWindows: false,
+          isMacOS: false,
         ),
         isNull,
       );
+    });
+
+    test('does not select upstream application data on macOS', () {
+      for (final identifier in [
+        'com.oixcloud.clash',
+        'com.oixcloud.clash.debug',
+      ]) {
+        expect(
+          legacyApplicationSupportPathFor(
+            '/Users/test/Library/Application Support/$identifier',
+            isWindows: false,
+            isMacOS: true,
+          ),
+          isNull,
+        );
+      }
     });
 
     test('maps Windows company and product directories', () {
@@ -35,6 +53,7 @@ void main() {
         legacyApplicationSupportPathFor(
           r'C:\Users\test\AppData\Roaming\com.oixcloud\clash',
           isWindows: true,
+          isMacOS: false,
         ),
         r'C:\Users\test\AppData\Roaming\com.follow\clash',
       );

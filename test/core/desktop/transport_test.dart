@@ -88,6 +88,44 @@ void main() {
       expect(transport.state, DesktopTransportState.connected);
     });
 
+    testWidgets(
+      'connection timeout keeps its deadline and transport reusable',
+      (tester) async {
+        final open = transport.open();
+        final connected = transport.waitUntilConnected(
+          const Duration(seconds: 1),
+        );
+        var didConnect = false;
+        Object? connectionError;
+        final result = connected.then<void>(
+          (_) => didConnect = true,
+          onError: (Object error) {
+            connectionError = error;
+          },
+        );
+
+        await tester.pump(const Duration(milliseconds: 600));
+        rawEvents.add(_frame(0x00));
+        await tester.pump();
+        await open;
+        await tester.pump(const Duration(milliseconds: 400));
+        await result;
+
+        expect(didConnect, isFalse);
+        expect(connectionError, isA<TimeoutException>());
+        expect(transport.state, DesktopTransportState.ready);
+
+        final reconnected = transport.waitUntilConnected(
+          const Duration(seconds: 1),
+        );
+        rawEvents.add(_frame(0x01, _processIdPayload(4321)));
+        await tester.pump();
+
+        expect((await reconnected).pid, 4321);
+        expect(transport.state, DesktopTransportState.connected);
+      },
+    );
+
     test('forwards outgoing messages after ready', () async {
       final open = transport.open();
       rawEvents.add(_frame(0x00));

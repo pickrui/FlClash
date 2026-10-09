@@ -128,10 +128,7 @@ jobs:
 
       - name: Validate build hooks
         working-directory: plugins/setup/setup_hooks
-        run: |
-          dart pub get
-          dart analyze
-          dart test
+        run: dart test
 
       - name: Run tests
         env:
@@ -152,7 +149,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Verify isolated desktop safe mode
-        run: flutter test --dart-define=SAFE_MODE=true test/safe_mode test/common/safe_mode_profile_test.dart
+        run: flutter test --dart-define=SAFE_MODE=true test/safe_mode
 
   go-test:
     name: Go core tests

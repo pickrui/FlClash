@@ -530,19 +530,21 @@ func TestDelayProbeSupports150ConcurrentReachableNodes(t *testing.T) {
 	})
 	tunnel.UpdateProxies(map[string]constant.Proxy{"node": adapter.NewProxy(outbound.NewDirect())}, nil)
 	results := make(chan *Delay, count)
-	for range count {
+	deadline := time.NewTimer(4 * time.Second)
+	defer deadline.Stop()
+	// Keep all responses pending without overflowing the test listener's backlog.
+	for index := range count {
 		handleAsyncTestDelay(&TestDelayParams{
 			Session: "parallel-150", Generation: 1, ProxyName: "node", TestUrl: server.URL, Timeout: 5000,
 		}, func(delay *Delay) { results <- delay })
-	}
-	deadline := time.NewTimer(4 * time.Second)
-	defer deadline.Stop()
-	for index := range count {
 		select {
 		case <-started:
 		case <-deadline.C:
 			t.Fatalf("only %d of 150 probes could reach the server concurrently", index)
 		}
+	}
+	if len(results) != 0 {
+		t.Fatal("probe completed before all 150 requests were in flight")
 	}
 	unblock()
 	for range count {

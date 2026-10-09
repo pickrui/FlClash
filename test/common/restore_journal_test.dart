@@ -36,6 +36,42 @@ Future<void> recover(Directory home, Stores stores) {
   );
 }
 
+final class _InterruptedCleanupOverrides extends IOOverrides {
+  _InterruptedCleanupOverrides(this.journalPath);
+
+  final String journalPath;
+
+  @override
+  Directory createDirectory(String path) {
+    final directory = super.createDirectory(path);
+    return path == journalPath
+        ? _InterruptedCleanupDirectory(directory)
+        : directory;
+  }
+}
+
+class _InterruptedCleanupDirectory implements Directory {
+  _InterruptedCleanupDirectory(this.directory);
+
+  final Directory directory;
+
+  @override
+  String get path => directory.path;
+
+  @override
+  Future<bool> exists() => directory.exists();
+
+  @override
+  Future<Directory> delete({bool recursive = false}) async {
+    await File(p.join(path, 'database.sqlite')).delete();
+    await File(p.join(path, 'config.age')).delete();
+    throw const FileSystemException('interrupted journal cleanup');
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 void main() {
   test('prepared journal restores files database and config', () async {
     final home = await Directory.systemTemp.createTemp('restore_journal_');
@@ -73,6 +109,39 @@ void main() {
     expect(await File('${stores.database.path}-journal').exists(), false);
     expect(await File(backup).exists(), false);
   });
+
+  test(
+    'interrupted recovered journal cleanup can resume without snapshots',
+    () async {
+      final home = await Directory.systemTemp.createTemp('restore_journal_');
+      addTearDown(() => home.delete(recursive: true));
+      final stores = await createStores(home);
+      final journal = await beginJournal(home, stores);
+      await journal.prepare(
+        const RestoreFilePlan(replacements: [], deletions: []),
+      );
+      await stores.database.writeAsString('new-database');
+      await stores.config.writeAsString('new-config');
+
+      await expectLater(
+        IOOverrides.runWithIOOverrides(
+          () => recover(home, stores),
+          _InterruptedCleanupOverrides(journal.directory.path),
+        ),
+        throwsA(isA<FileSystemException>()),
+      );
+      expect(await stores.database.readAsString(), 'old-database');
+      expect(await stores.config.readAsString(), 'old-config');
+      expect(await File(journal.databaseSnapshotPath).exists(), isFalse);
+      expect(await File(journal.configSnapshotPath).exists(), isFalse);
+
+      await recover(home, stores);
+
+      expect(await stores.database.readAsString(), 'old-database');
+      expect(await stores.config.readAsString(), 'old-config');
+      expect(await journal.directory.exists(), isFalse);
+    },
+  );
 
   test('committed journal preserves new state and removes artifacts', () async {
     final home = await Directory.systemTemp.createTemp('restore_journal_');

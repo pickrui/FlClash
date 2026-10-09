@@ -46,6 +46,8 @@ guarantee recovery from power loss between renames. The next launch removes
 leftover staging directories unless one still holds a recovery copy, a disk
 image that could not be detached, or a ready worker without a terminal result.
 That last case may still be waiting for UAC or completing the replacement.
+A Unix status-file write failure does not undo a completed replacement or
+prevent restarting a restored application.
 
 ## Signing and release
 

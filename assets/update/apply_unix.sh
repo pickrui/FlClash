@@ -34,8 +34,8 @@ finish() {
       if [ "$installed" = 1 ]; then /bin/mv "$target" "$stage/failed" || true; fi
       if [ ! -e "$target" ]; then /bin/mv "$backup" "$target" || true; fi
     fi
-    if [ "$report" = 1 ]; then printf failed >"$result"; fi
-    touch "$stage/error"
+    if [ "$report" = 1 ]; then printf failed >"$result" || true; fi
+    touch "$stage/error" || true
     if [ "$exited" = 1 ] && [ -e "$target" ]; then launch || true; fi
   fi
 }
@@ -74,7 +74,7 @@ verify
 /bin/mv "$next" "$target"
 installed=1
 launch
-printf success >"$result"
+printf success >"$result" || true
 success=1
 trap - EXIT
 /bin/rm -rf "$stage"

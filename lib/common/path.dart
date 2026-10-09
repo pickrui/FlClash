@@ -106,6 +106,7 @@ class AppPath {
     final legacyPath = legacyApplicationSupportPathFor(
       currentPath,
       isWindows: system.isWindows,
+      isMacOS: system.isMacOS,
     );
     if (legacyPath == null) return false;
     final legacyDirectory = Directory(legacyPath);
@@ -214,7 +215,9 @@ class AppPath {
 String? legacyApplicationSupportPathFor(
   String currentPath, {
   required bool isWindows,
+  required bool isMacOS,
 }) {
+  if (isMacOS) return null;
   if (!isWindows) {
     final pathContext = Context(style: Style.platform);
     final directoryName = pathContext.basename(currentPath);

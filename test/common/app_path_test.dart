@@ -26,7 +26,14 @@ void main() {
       paths.downloadDirPath.timeout(const Duration(seconds: 5)),
       throwsA(isA<FileSystemException>()),
     );
-    expect(await paths.tempPath, Directory.systemTemp.path);
+    if (Platform.isLinux) {
+      await expectLater(
+        paths.tempPath.timeout(const Duration(seconds: 5)),
+        throwsA(isA<FileSystemException>()),
+      );
+    } else {
+      expect(await paths.tempPath, Directory.systemTemp.path);
+    }
   });
 
   test(

@@ -578,18 +578,16 @@ Future<void> commitRestoredFiles(
       try {
         final target = File(entry.key);
         final backupPath = entry.value;
-        await durableDeleteFile(target.path);
         if (backupPath == null) {
-          continue;
-        } else {
-          if (await File(backupPath).exists()) {
-            await durableRename(backupPath, target.path);
-          } else if (!await target.exists()) {
-            throw const FileSystemException(
-              'Restore replacement backup is missing',
-            );
-          }
+          await durableDeleteFile(target.path);
+        } else if (await File(backupPath).exists()) {
+          await durableDeleteFile(target.path);
+          await durableRename(backupPath, target.path);
           cleanupBackups.add(backupPath);
+        } else if (!await target.exists()) {
+          throw const FileSystemException(
+            'Restore replacement backup is missing',
+          );
         }
       } catch (rollbackFailure) {
         rollbackError ??= rollbackFailure;

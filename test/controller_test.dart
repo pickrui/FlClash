@@ -776,6 +776,49 @@ void main() {
       expect(await targetB.exists(), false);
     });
 
+    test('preserves original files when moving one to backup fails', () async {
+      final tempDir = await Directory.systemTemp.createTemp(
+        'restore_backup_failure_',
+      );
+      addTearDown(() => tempDir.delete(recursive: true));
+      final sourceA = File('${tempDir.path}/staging/a.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('new-a');
+      final sourceB = File('${tempDir.path}/staging/b.yaml')
+        ..writeAsStringSync('new-b');
+      final targetA = File('${tempDir.path}/live/a.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('old-a');
+      final targetB = File('${tempDir.path}/live/b.yaml')
+        ..writeAsStringSync('old-b');
+      var committed = false;
+      var rolledBack = false;
+      Object? failure;
+      late Directory blockedBackup;
+
+      try {
+        await commitRestoredFiles(
+          [VM2(sourceA.path, targetA.path), VM2(sourceB.path, targetB.path)],
+          () async => committed = true,
+          prepare: (plan) async {
+            blockedBackup = await Directory(plan.replacements.last.backup)
+                .create();
+          },
+          rollbackCompleted: () async => rolledBack = true,
+        );
+      } catch (error) {
+        failure = error;
+      }
+
+      expect(committed, isFalse);
+      expect(await targetA.readAsString(), 'old-a');
+      expect(await targetB.exists(), isTrue);
+      expect(await targetB.readAsString(), 'old-b');
+      expect(rolledBack, isTrue);
+      expect(failure, isA<FileSystemException>());
+      expect(await blockedBackup.exists(), isTrue);
+    });
+
     test('rejects duplicate targets before changing live files', () async {
       final tempDir = await Directory.systemTemp.createTemp(
         'restore_duplicate_',

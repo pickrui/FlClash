@@ -10,12 +10,14 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart';
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/dav_client.dart';
+import 'package:fl_clash/common/path.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  late Directory root;
   late Directory directory;
   late PathProviderPlatform originalPaths;
   final readClients = <_Adapter>[];
@@ -34,10 +36,11 @@ void main() {
     Archive()..addFile(ArchiveFile.string('config.json', '{"version":2}')),
   );
 
-  setUpAll(() {
-    directory = Directory.systemTemp.createTempSync('dav-race-');
+  setUpAll(() async {
+    root = Directory.systemTemp.createTempSync('dav-race-');
     originalPaths = PathProviderPlatform.instance;
-    PathProviderPlatform.instance = _Paths(directory.path);
+    PathProviderPlatform.instance = _Paths(root.path);
+    directory = await appPath.tempDir.future;
   });
   setUp(readClients.clear);
   tearDown(() async {
@@ -48,7 +51,7 @@ void main() {
   });
   tearDownAll(() {
     PathProviderPlatform.instance = originalPaths;
-    directory.deleteSync(recursive: true);
+    root.deleteSync(recursive: true);
   });
 
   test(
