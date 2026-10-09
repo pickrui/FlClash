@@ -473,7 +473,8 @@ class HomeBackScopeContainer extends ConsumerWidget {
             GlobalObjectKey(pageLabel).currentContext ?? context;
         final canPop = Navigator.canPop(realContext);
         if (canPop) {
-          Navigator.of(realContext).pop();
+          // maybePop runs the pushed page's own unsaved-changes guard.
+          await Navigator.of(realContext).maybePop();
         } else {
           await systemAction.handleBackOrExit();
         }
