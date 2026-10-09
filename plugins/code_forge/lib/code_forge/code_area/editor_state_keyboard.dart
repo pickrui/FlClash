@@ -69,14 +69,21 @@ extension _EditorStateKeyboard on _CodeForgeState {
 
   void _resetCursorBlink() {
     if (!mounted) return;
-    _caretBlinkController.stop();
+    _caretBlinkTimer?.cancel();
+    _caretBlinkTimer = null;
     if (!_focusNode.hasFocus || _readOnly) {
       _caretBlinkController.value = 0.0;
       return;
     }
-    _caretBlinkController
-      ..value = 1.0
-      ..repeat(reverse: true);
+    _caretBlinkController.value = 1.0;
+    // A repeating animation requests a frame on every vsync, while the caret
+    // only shows or hides twice a second.
+    _caretBlinkTimer = Timer.periodic(
+      const Duration(milliseconds: 500),
+      (_) => _caretBlinkController.value = _caretBlinkController.value > 0.5
+          ? 0.0
+          : 1.0,
+    );
   }
 
   List<({ShortcutActivator? keys, bool edits, VoidCallback run})>

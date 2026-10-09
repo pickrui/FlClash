@@ -137,6 +137,14 @@ void main() {
     expect(controller.text, _document);
   });
 
+  testWidgets('a focused idle editor schedules no frames between blinks', (
+    tester,
+  ) async {
+    await pump(tester);
+    await tester.pump(const Duration(seconds: 2));
+    expect(tester.binding.transientCallbackCount, 0);
+  });
+
   testWidgets('select all, copy, cut, paste and undo, redo', (tester) async {
     final (controller, _, undo) = await pump(tester);
     final clipboard = mockClipboard(tester);
