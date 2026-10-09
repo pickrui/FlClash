@@ -117,7 +117,7 @@ class RemoteService : Service(),
                 }.onFailure {
                     GlobalState.log("Background service stop failed: $it")
                 }
-                result.onResult(State.runTime)
+                result.deliver(State.runTime)
             }
         }
     }
@@ -201,7 +201,7 @@ class RemoteService : Service(),
                     NetworkPolicyController.stop()
                     0L
                 }
-                result.onResult(State.runTime)
+                result.deliver(State.runTime)
             }
         }
     }
@@ -321,5 +321,13 @@ class RemoteService : Service(),
                 super.onDestroy()
             }
         }
+    }
+}
+
+// A oneway reply still throws once the caller's process has died, and an
+// exception escaping the service scope would take the VPN and the core with it.
+internal fun IResultInterface.deliver(runTime: Long) {
+    runCatching { onResult(runTime) }.onFailure {
+        GlobalState.log("Service result was not delivered: $it")
     }
 }

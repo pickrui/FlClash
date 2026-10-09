@@ -6,17 +6,24 @@
 package com.oixcloud.clash.service
 
 import android.app.Application
+import android.os.DeadObjectException
+import com.oixcloud.clash.common.GlobalState
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
@@ -54,6 +61,31 @@ class RemoteServiceLifecycleTest {
             })
             assertFalse(service.isActive)
         } finally {
+            service.cancel()
+        }
+    }
+
+    @Test
+    fun aStopReplyToADeadCallerDoesNotEscapeTheService() {
+        GlobalState.init(RuntimeEnvironment.getApplication())
+        val service = Robolectric.buildService(RemoteService::class.java).get()
+        val binder = service.onBind(null) as IRemoteInterface
+        val escaped = AtomicReference<Throwable?>()
+        val previous = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler { _, error -> escaped.set(error) }
+        val replied = CountDownLatch(1)
+        try {
+            binder.stopService(object : IResultInterface.Stub() {
+                override fun onResult(runTime: Long) {
+                    replied.countDown()
+                    throw DeadObjectException()
+                }
+            })
+            assertTrue(replied.await(5, TimeUnit.SECONDS))
+            Thread.sleep(200)
+            assertNull(escaped.get())
+        } finally {
+            Thread.setDefaultUncaughtExceptionHandler(previous)
             service.cancel()
         }
     }
