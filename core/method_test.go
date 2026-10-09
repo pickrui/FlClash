@@ -15,7 +15,7 @@ import (
 func TestMethodResponseAnswersWhenResultCannotBeEncoded(t *testing.T) {
 	for _, result := range []any{
 		map[string]any{"max-streams": math.Inf(1)},
-		map[string]any{"plugin-opts": map[any]any{1: "x"}},
+		map[string]any{"plugin-opts": map[string]any{"version": math.NaN()}},
 	} {
 		data, err := MethodResponse{ID: "7", Result: result}.JSON()
 		if err != nil {
