@@ -28,6 +28,12 @@ class _CommonPopScopeState extends State<CommonPopScope> {
     if (didPop || _handlingPop || onPop == null) return;
     final route = ModalRoute.of(context);
     if (route != null && !route.isCurrent) return;
+    // An open search or edit layer closes first; its local history entry
+    // changes nothing this widget depends on, so canPop cannot track it.
+    if (route?.willHandlePopInternally == true) {
+      Navigator.of(context).pop();
+      return;
+    }
     _handlingPop = true;
     try {
       if (!await onPop(context) || !mounted) return;
@@ -52,10 +58,8 @@ class _CommonPopScopeState extends State<CommonPopScope> {
 
   @override
   Widget build(BuildContext context) {
-    final hasBackLayer =
-        ModalRoute.of(context)?.willHandlePopInternally == true;
     return PopScope(
-      canPop: widget.onPop == null || hasBackLayer,
+      canPop: widget.onPop == null,
       onPopInvokedWithResult: widget.onPop == null ? null : _handlePop,
       child: widget.child,
     );
