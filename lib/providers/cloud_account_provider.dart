@@ -94,36 +94,50 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
     return const CloudAccountState();
   }
 
+  @protected
+  Future<String?> readStoredToken() => SafeStorage.read('cloud_token');
+
   Future<void> _init() async {
-    final prefs = await _safePrefs;
-    String? token = await SafeStorage.read('cloud_token');
+    try {
+      final prefs = await _safePrefs;
+      String? token = await readStoredToken();
 
-    // Migrate plain-text token to secure storage if necessary.
-    if (token == null || token.isEmpty) {
-      final oldToken = prefs.getString('cloud_token');
-      if (oldToken != null && oldToken.isNotEmpty) {
-        token = oldToken;
-        await SafeStorage.write('cloud_token', token);
-        await prefs.remove('cloud_token');
+      // Migrate plain-text token to secure storage if necessary.
+      if (token == null || token.isEmpty) {
+        final oldToken = prefs.getString('cloud_token');
+        if (oldToken != null && oldToken.isNotEmpty) {
+          token = oldToken;
+          await SafeStorage.write('cloud_token', token);
+          await prefs.remove('cloud_token');
+        }
       }
-    }
 
-    if (token == null || token.isEmpty) {
+      if (token == null || token.isEmpty) {
+        CloudApiService().setToken(null);
+        await _clearCache(clearParams: false);
+        return;
+      }
+
+      CloudApiService().setToken(token);
+
+      final cached = _readCachedProfile(prefs);
+      state = state.copyWith(
+        isLoggedIn: true,
+        profile: cached.profile,
+        latestNotification: cached.notification,
+      );
+
+      await refreshProfile(force: true);
+    } catch (e, s) {
+      // Every sign-in awaits this one-shot future; a storage error here must
+      // not fail them all until the app restarts.
+      commonPrint.log(
+        'failed to restore the oixCloud session: $e\n$s',
+        logLevel: LogLevel.warning,
+      );
       CloudApiService().setToken(null);
-      await _clearCache(clearParams: false);
-      return;
+      state = CloudAccountState(error: CloudApiException.clean(e));
     }
-
-    CloudApiService().setToken(token);
-
-    final cached = _readCachedProfile(prefs);
-    state = state.copyWith(
-      isLoggedIn: true,
-      profile: cached.profile,
-      latestNotification: cached.notification,
-    );
-
-    await refreshProfile(force: true);
   }
 
   ({CloudProfile? profile, CloudNotification? notification}) _readCachedProfile(

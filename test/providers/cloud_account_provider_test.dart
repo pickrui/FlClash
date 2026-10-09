@@ -40,6 +40,33 @@ void main() {
     },
   );
 
+  test('a failed session restore does not block a later sign-in', () async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+    SharedPreferences.setMockInitialValues({});
+    final notifier = _UnreadableTokenNotifier();
+    final container = ProviderContainer(
+      overrides: [cloudAccountProvider.overrideWith(() => notifier)],
+    );
+    addTearDown(container.dispose);
+    container.read(cloudAccountProvider);
+
+    await notifier.ensureReady();
+    expect(container.read(cloudAccountProvider).isLoggedIn, isFalse);
+    expect(container.read(cloudAccountProvider).error, isNotNull);
+
+    // The sign-in reaches its own action instead of replaying the restore error.
+    await expectLater(
+      notifier.signInWithToken(''),
+      throwsA(
+        predicate<Object>(
+          (error) => error.toString().contains('Access token is empty'),
+        ),
+      ),
+    );
+  });
+
   test(
     'token sign-in waits for bootstrap before beginning its action',
     () async {
@@ -727,4 +754,10 @@ class _StaleRefreshNotifier extends CloudAccountNotifier {
     unauthorizedCalls++;
     state = const CloudAccountState();
   }
+}
+
+class _UnreadableTokenNotifier extends CloudAccountNotifier {
+  @override
+  Future<String?> readStoredToken() async =>
+      throw StateError('secure storage is busy');
 }
