@@ -161,6 +161,10 @@ class DesktopUpdater implements DesktopUpdateInstaller {
   /// A failed restore keeps the previous app here, and an image that would not
   /// detach must never be removed recursively.
   Future<bool> _holdsRecovery(Directory stage) async {
+    if (await File(p.join(stage.path, 'ready')).exists() &&
+        !await File(p.join(stage.path, 'error')).exists()) {
+      return true;
+    }
     final previous = p.join(stage.path, 'previous');
     if (await FileSystemEntity.type(previous, followLinks: false) !=
         FileSystemEntityType.notFound) {
@@ -173,11 +177,11 @@ class DesktopUpdater implements DesktopUpdateInstaller {
   }
 
   @override
-  Future<void> install(
-    File file,
-    int build,
-    Future<void> Function() exit,
-  ) async {
+  Future<void> verifyPackage(File file, int build) async {
+    await _verifiedPackage(file, build);
+  }
+
+  Future<SignedAppUpdate> _verifiedPackage(File file, int build) async {
     final update = await SignedAppUpdate.parse(
       await File('${file.path}.update.json').readAsString(),
       name: p.basename(file.path),
@@ -185,6 +189,16 @@ class DesktopUpdater implements DesktopUpdateInstaller {
       publicKey: publicKey,
     );
     await update.verifyFile(file);
+    return update;
+  }
+
+  @override
+  Future<void> install(
+    File file,
+    int build,
+    Future<void> Function() exit,
+  ) async {
+    final update = await _verifiedPackage(file, build);
     final result = await _result;
     await result.parent.create(recursive: true);
     if (await result.exists()) await result.delete();

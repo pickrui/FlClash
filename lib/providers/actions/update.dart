@@ -411,13 +411,10 @@ extension InitControllerExt on AppController {
     try {
       await safeRun(() async {
         final installer = desktopUpdateInstaller;
+        final build = _appUpdateDownloadInfo?.remoteBuildNumber ?? 0;
         if (installer != null && installer.appliesInPlace(file)) {
           try {
-            await installer.install(
-              file,
-              _appUpdateDownloadInfo?.remoteBuildNumber ?? 0,
-              () => handleExit(),
-            );
+            await installer.install(file, build, () => handleExit());
             return;
           } on FormatException {
             // A package that no longer matches its signature is never opened.
@@ -428,6 +425,12 @@ extension InitControllerExt on AppController {
               logLevel: LogLevel.warning,
             );
           }
+        }
+        if (system.isDesktop) {
+          if (installer == null) {
+            throw StateError('Desktop updater is unavailable');
+          }
+          await installer.verifyPackage(file, build);
         }
         if (isAppImageInstaller(file)) {
           await _revealAppImageUpdate(file);

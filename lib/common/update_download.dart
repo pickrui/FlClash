@@ -24,6 +24,8 @@ abstract interface class DesktopUpdateInstaller {
 
   bool appliesInPlace(File file);
 
+  Future<void> verifyPackage(File file, int build);
+
   Future<void> install(File file, int build, Future<void> Function() exit);
 
   Future<bool> takeFailure();

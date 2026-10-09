@@ -34,7 +34,8 @@ that fails before the app exits reports the error immediately, and the app
 keeps running. When the in-place update is unavailable or fails before exit for
 any reason other than a package that no longer matches its signature, the app
 falls back to the previous manual flow: it opens the verified installer or DMG,
-or shows the folder of a downloaded AppImage.
+or shows the folder of a downloaded AppImage. This flow rechecks the package
+and its signed metadata before opening anything, including when staging failed.
 
 macOS and AppImage require a writable installation parent. A read-only DMG,
 protected app directory, ad-hoc macOS build or portable Windows ZIP requires a
@@ -42,8 +43,9 @@ manual update. Unix replacements keep the previous app in the private staging
 directory until replacement and launch succeed. A failed replacement attempts
 to restore it. This is not a health check of the restarted app and does not
 guarantee recovery from power loss between renames. The next launch removes
-leftover staging directories unless one still holds a recovery copy or a disk
-image that could not be detached.
+leftover staging directories unless one still holds a recovery copy, a disk
+image that could not be detached, or a ready worker without a terminal result.
+That last case may still be waiting for UAC or completing the replacement.
 
 ## Signing and release
 

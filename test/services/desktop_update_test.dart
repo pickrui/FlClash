@@ -48,6 +48,11 @@ void main() {
     publicKey: publicKey,
   );
 
+  Future<List<FileSystemEntity>> stages() => root
+      .list()
+      .where((item) => p.basename(item.path).startsWith('.flclash-ota-'))
+      .toList();
+
   setUp(() async {
     root = await Directory.systemTemp.createTemp('flclash-ota-test-');
     file = await File(p.join(root.path, 'flclash-macos-arm64.dmg'))
@@ -221,6 +226,31 @@ void main() {
     await body.close();
   });
 
+  test(
+    'manual installs recheck metadata and payload without staging',
+    () async {
+      final installer = updater();
+      final metadata = File('${file.path}.update.json');
+      await metadata.writeAsString(await sign());
+      await installer.verifyPackage(file, build);
+      await expectLater(
+        installer.verifyPackage(file, build + 1),
+        throwsFormatException,
+      );
+      await file.writeAsBytes(List.filled(256, 0));
+      await expectLater(
+        installer.verifyPackage(file, build),
+        throwsFormatException,
+      );
+      await metadata.delete();
+      await expectLater(
+        installer.verifyPackage(file, build),
+        throwsA(isA<FileSystemException>()),
+      );
+      expect(await stages(), isEmpty);
+    },
+  );
+
   Future<ProcessResult> stagingRun(
     String command,
     List<String> arguments, {
@@ -251,11 +281,6 @@ void main() {
     }
     return ProcessResult(0, 0, output, 'TeamIdentifier=ABCDE12345\n');
   }
-
-  Future<List<FileSystemEntity>> stages() => root
-      .list()
-      .where((item) => p.basename(item.path).startsWith('.flclash-ota-'))
-      .toList();
 
   /// An installed app and a signed package this Unix host can stage.
   Future<(DesktopUpdater, File)> installable(String worker) async {
@@ -334,6 +359,11 @@ void main() {
         Directory(p.join(root.path, path)).create(recursive: true);
     final failed = await make('.flclash-ota-failed');
     await File(p.join(failed.path, 'update.log')).writeAsString('log');
+    await File(p.join(failed.path, 'ready')).writeAsString('ready');
+    await File(p.join(failed.path, 'error')).writeAsString('failed');
+    final waiting = await make('.flclash-ota-waiting');
+    await File(p.join(waiting.path, 'ready')).writeAsString('ready');
+    await File(p.join(waiting.path, 'next')).writeAsString('pending update');
     final unmounted = await make('.flclash-ota-unmounted/mount');
     final recovery = await make('.flclash-ota-recovery/previous');
     final mounted = await make('.flclash-ota-mounted/mount/FlClash.app');
@@ -344,7 +374,7 @@ void main() {
     await updater().sweepStages();
     expect(await failed.exists(), isFalse);
     expect(await unmounted.parent.exists(), isFalse);
-    for (final kept in [recovery, mounted, download, outside]) {
+    for (final kept in [waiting, recovery, mounted, download, outside]) {
       expect(await kept.exists(), isTrue, reason: kept.path);
     }
     expect(await link.exists(), isTrue);
