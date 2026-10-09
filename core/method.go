@@ -70,7 +70,15 @@ type MethodResponse struct {
 }
 
 func (response MethodResponse) JSON() ([]byte, error) {
-	return json.Marshal(response)
+	data, err := json.Marshal(response)
+	if err == nil {
+		return data, nil
+	}
+	// Without a reply the caller only gives up after its own timeout.
+	return json.Marshal(MethodResponse{
+		ID:    response.ID,
+		Error: &MethodError{Code: "marshal_error", Message: err.Error()},
+	})
 }
 
 func (response MethodResponse) success(result any) {
