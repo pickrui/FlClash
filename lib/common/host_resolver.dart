@@ -230,9 +230,17 @@ class RedirectPolicy extends HostResolver {
 
   List<Uri>? proxyTargets(Uri uri) {
     final addresses = _redirectHosts[_key(uri.host)];
-    return addresses == null
-        ? null
-        : [for (final address in addresses) uri.replace(host: address.address)];
+    if (addresses == null) return null;
+    // dart:io writes an IPv6 CONNECT target without brackets, which the core
+    // refuses, so IPv4 answers go first.
+    return [
+      for (final address in addresses)
+        if (address.type == InternetAddressType.IPv4)
+          uri.replace(host: address.address),
+      for (final address in addresses)
+        if (address.type != InternetAddressType.IPv4)
+          uri.replace(host: address.address),
+    ];
   }
 }
 
@@ -245,6 +253,17 @@ bool isPublicRedirectAddress(
     if (bytes.take(10).every((byte) => byte == 0) &&
         bytes[10] == 255 &&
         bytes[11] == 255) {
+      return isPublicRedirectAddress(
+        InternetAddress.fromRawAddress(bytes.sublist(12)),
+        allowFakeIp: allowFakeIp,
+      );
+    }
+    // NAT64's well-known prefix (64:ff9b::/96) carries the IPv4 destination.
+    if (bytes[0] == 0 &&
+        bytes[1] == 0x64 &&
+        bytes[2] == 0xff &&
+        bytes[3] == 0x9b &&
+        bytes.skip(4).take(8).every((byte) => byte == 0)) {
       return isPublicRedirectAddress(
         InternetAddress.fromRawAddress(bytes.sublist(12)),
         allowFakeIp: allowFakeIp,

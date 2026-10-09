@@ -242,12 +242,19 @@ class ProxyAuthenticatedHttpClient implements HttpClient {
                   }
                 }
                 connector!.findProxy = (_) => route;
-                final request = await connector!.openUrl(
-                  'CONNECT',
-                  Uri(scheme: 'http', host: target.host, port: target.port),
-                );
-                request.followRedirects = false;
-                final response = await request.close();
+                final HttpClientResponse response;
+                try {
+                  final request = await connector!.openUrl(
+                    'CONNECT',
+                    Uri(scheme: 'http', host: target.host, port: target.port),
+                  );
+                  request.followRedirects = false;
+                  response = await request.close();
+                } on HttpException catch (error) {
+                  // A proxy that refuses the CONNECT line just closes the
+                  // connection; another pinned address may still get through.
+                  throw SocketException(error.message);
+                }
                 if ([
                   HttpStatus.badGateway,
                   HttpStatus.serviceUnavailable,

@@ -49,6 +49,7 @@ void main() {
       '1.1.1.1',
       '8.8.8.8',
       '::ffff:1.1.1.1',
+      '64:ff9b::101:101',
       '2606:4700:4700::1111',
       '2001:4860:4860::8888',
     ]) {
@@ -77,6 +78,21 @@ void main() {
       expect(lookups, 1);
     },
   );
+  test('proxy tunnels try IPv4 answers before IPv6 ones', () async {
+    final policy = RedirectPolicy(
+      Uri.parse('https://source.example'),
+      lookup: (_, {type = InternetAddressType.any}) async => [
+        InternetAddress('2606:4700:4700::1111'),
+        InternetAddress('1.1.1.1'),
+      ],
+    );
+    final target = Uri.parse('https://cdn.example/file');
+    await policy.approve(target);
+    expect(policy.proxyTargets(target)!.map((uri) => uri.host), [
+      '1.1.1.1',
+      '2606:4700:4700::1111',
+    ]);
+  });
   for (final addresses in [
     <String>[],
     ['1.1.1.1', '192.168.1.1'],
