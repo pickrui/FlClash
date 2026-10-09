@@ -38,4 +38,27 @@ class AidlChunksTest {
         } catch (_: IllegalArgumentException) { }
         assertArrayEquals(bytes, bytes.chunkedForAidl(maxTotalBytes = 1025).single())
     }
+
+    @Test
+    fun chunkedRequestsReassembleWhileAbandonedOnesAreEvicted() {
+        val text = "中文😀".repeat(120_000)
+        val chunks = text.chunkedForAidl()
+        val buffer = AidlRequestBuffer(maxPending = 1)
+        assertNull(buffer.append("abandoned", "head".toByteArray(), false))
+        for ((index, chunk) in chunks.withIndex()) {
+            val request = buffer.append("request", chunk, index == chunks.lastIndex)
+            if (index < chunks.lastIndex) assertNull(request) else assertEquals(text, request)
+        }
+        assertEquals("tail", buffer.append("abandoned", "tail".toByteArray(), true))
+    }
+
+    @Test
+    fun anOversizedRequestIsDroppedWhole() {
+        val buffer = AidlRequestBuffer(maxTotalBytes = 4)
+        assertNull(buffer.append("request", "ab".toByteArray(), false))
+        assertThrows(IllegalArgumentException::class.java) {
+            buffer.append("request", "cde".toByteArray(), true)
+        }
+        assertEquals("cd", buffer.append("request", "cd".toByteArray(), true))
+    }
 }

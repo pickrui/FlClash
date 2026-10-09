@@ -16,4 +16,5 @@ interface IRemoteInterface {
     void setEventListener(in IEventInterface event);
     long getRunTime();
     void updateExcludeSSIDs(in String[] ssids, in String[] networks);
+    void invokeMethodChunk(in String requestId, in byte[] data, boolean isLast, in ICallbackInterface callback);
 }

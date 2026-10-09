@@ -30,6 +30,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
+import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -78,24 +79,34 @@ object Service {
         }
         val res = mutableListOf<ByteArray>()
         return delegate.useService {
-            it.invokeMethod(
-                data, object : ICallbackInterface.Stub() {
-                    override fun onResult(
-                        result: ByteArray?, isSuccess: Boolean, ack: IAckInterface?
-                    ) {
-                        res.add(result ?: byteArrayOf())
-                        ack?.onAck()
-                        if (isSuccess) {
-                            val output = res.formatString()
-                            if (method == INIT_METHOD && isSuccessfulInit(output)) {
-                                validatorInitAction = data
-                            }
-                            cb?.let { cb ->
-                                cb(output)
-                            }
+            val callback = object : ICallbackInterface.Stub() {
+                override fun onResult(
+                    result: ByteArray?, isSuccess: Boolean, ack: IAckInterface?
+                ) {
+                    res.add(result ?: byteArrayOf())
+                    ack?.onAck()
+                    if (isSuccess) {
+                        val output = res.formatString()
+                        if (method == INIT_METHOD && isSuccessfulInit(output)) {
+                            validatorInitAction = data
+                        }
+                        cb?.let { cb ->
+                            cb(output)
                         }
                     }
-                })
+                }
+            }
+            // Binder caps a transaction near 1 MB; rule sets and provider files exceed it.
+            val chunks = data.chunkedForAidl(maxTotalBytes = maxValidationMessageBytes)
+            if (chunks.size == 1) {
+                it.invokeMethod(data, callback)
+            } else {
+                val requestId = UUID.randomUUID().toString()
+                for ((index, chunk) in chunks.withIndex()) {
+                    val isLast = index == chunks.lastIndex
+                    it.invokeMethodChunk(requestId, chunk, isLast, callback.takeIf { isLast })
+                }
+            }
         }
     }
 

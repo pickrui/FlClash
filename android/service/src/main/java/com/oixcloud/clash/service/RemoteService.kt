@@ -8,6 +8,7 @@ package com.oixcloud.clash.service
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
+import com.oixcloud.clash.common.AidlRequestBuffer
 import com.oixcloud.clash.common.GlobalState
 import com.oixcloud.clash.common.BroadcastAction
 import com.oixcloud.clash.common.ServiceDelegate
@@ -45,6 +46,7 @@ class RemoteService : Service(),
 
     private val eventLock = Any()
     private var eventForwarder: EventForwarder? = null
+    private val requestBuffer = AidlRequestBuffer()
 
     private fun replaceEventForwarder(listener: IEventInterface?) {
         synchronized(eventLock) {
@@ -228,6 +230,16 @@ class RemoteService : Service(),
                     }
                 }
             }
+        }
+
+        override fun invokeMethodChunk(
+            requestId: String,
+            data: ByteArray,
+            isLast: Boolean,
+            callback: ICallbackInterface?,
+        ) {
+            val request = requestBuffer.append(requestId, data, isLast) ?: return
+            invokeMethod(request, requireNotNull(callback) { "missing callback" })
         }
 
         override fun quickSetup(

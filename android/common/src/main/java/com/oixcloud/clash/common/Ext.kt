@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset
 import kotlin.reflect.KClass
 
@@ -223,4 +224,23 @@ fun <T : List<ByteArray>> T.formatString(charset: Charset = Charsets.UTF_8): Str
         offset += byteArray.size
     }
     return String(combined, charset)
+}
+
+class AidlRequestBuffer(
+    private val maxTotalBytes: Int = maxValidationMessageBytes,
+    private val maxPending: Int = 4,
+) {
+    private val pending = LinkedHashMap<String, ByteArrayOutputStream>()
+
+    // A sender that died mid-request never finishes it, so the oldest one is evicted.
+    @Synchronized
+    fun append(id: String, chunk: ByteArray, isLast: Boolean): String? {
+        val buffer = pending.remove(id) ?: ByteArrayOutputStream()
+        require(buffer.size() <= maxTotalBytes - chunk.size) { "AIDL message exceeds byte limit" }
+        buffer.write(chunk)
+        if (isLast) return buffer.toString(Charsets.UTF_8.name())
+        if (pending.size >= maxPending) pending.remove(pending.keys.first())
+        pending[id] = buffer
+        return null
+    }
 }
