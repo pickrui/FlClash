@@ -306,6 +306,12 @@ class VpnService : SystemVpnService(), IBaseService {
             Core.stopTun()
             tunStarted = false
         } else if (!excluded && !tunStarted) {
+            // Another VPN app can take the slot while this one holds no
+            // tunnel, and the system sends no onRevoke for that.
+            if (prepare(this) != null) {
+                onRevoke()
+                return
+            }
             handleStart(checkNotNull(State.options) { "VPN options are missing" })
             tunStarted = true
         }

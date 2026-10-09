@@ -9,9 +9,12 @@ import android.app.Application
 import android.content.Intent
 import android.os.IBinder
 import android.os.Parcel
+import com.oixcloud.clash.common.AccessControlMode
 import com.oixcloud.clash.common.GlobalState
 import com.oixcloud.clash.common.ServiceDelegate
 import com.oixcloud.clash.common.action
+import com.oixcloud.clash.service.models.AccessControlProps
+import com.oixcloud.clash.service.models.VpnOptions
 import com.oixcloud.clash.service.modules.Module
 import com.oixcloud.clash.service.modules.moduleLoader
 import java.util.concurrent.CountDownLatch
@@ -30,6 +33,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
+import org.robolectric.shadows.ShadowVpnService
 import org.robolectric.util.ReflectionHelpers
 import android.net.VpnService as SystemVpnService
 
@@ -46,6 +50,8 @@ class VpnServiceBindingTest {
 
     @After
     fun clearState() = runBlocking {
+        ShadowVpnService.reset()
+        State.options = null
         State.runLock.withLock {
             State.delegate?.unbind()
             State.delegate = null
@@ -181,5 +187,37 @@ class VpnServiceBindingTest {
         assertSame(delegate, State.delegate)
         assertSame(replacement, delegate.serviceState.value?.first)
         assertEquals(123L, State.runTime)
+    }
+
+    @Test
+    fun resumingAfterAnotherVpnTookOverStopsInsteadOfStayingTunnelless() {
+        val service = service()
+        val delegate = bind(service)
+        val stopped = observeStop(service)
+        ReflectionHelpers.setField(service, "started", true)
+        ReflectionHelpers.setField(service, "tunStarted", false)
+        State.options = VpnOptions(
+            enable = true,
+            port = 7890,
+            ipv6 = false,
+            dnsHijacking = true,
+            accessControlProps = AccessControlProps(
+                false, AccessControlMode.REJECT_SELECTED, emptyList(), emptyList(),
+            ),
+            allowBypass = false,
+            systemProxy = false,
+            bypassDomain = emptyList(),
+            stack = "mixed",
+            routeAddress = emptyList(),
+        )
+        ShadowVpnService.setPrepareResult(Intent("another.vpn.took.over"))
+
+        service.setNetworkExcluded(false)
+
+        assertTrue("A lost VPN slot must stop the service", stopped.await(5, TimeUnit.SECONDS))
+        runBlocking { withTimeout(5_000) { State.runLock.withLock {} } }
+        assertNull(State.delegate)
+        assertEquals(0L, State.runTime)
+        assertNull(delegate.serviceState.value)
     }
 }
