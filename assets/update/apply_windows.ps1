@@ -13,25 +13,41 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $exited = $false
+$report = $false
 $success = $false
 $reboot = $false
+$lock = $null
 try {
     $parentProcess = Get-Process -Id $ParentProcessId
     if ($parentProcess.Path -ne $Target) { throw 'Update parent does not match the installed app' }
-    if ((Get-FileHash -LiteralPath $Installer -Algorithm SHA256).Hash -ne $Digest) {
-        throw 'Update verification failed'
+    # Until setup exits, the verified file can be neither replaced nor renamed.
+    $lock = [IO.File]::Open($Installer, 'Open', 'Read', 'Read')
+    $item = Get-Item -LiteralPath $Installer -Force
+    while ($item) {
+        if ($item.Attributes.HasFlag([IO.FileAttributes]::ReparsePoint)) {
+            throw 'Update path contains a reparse point'
+        }
+        $item = if ($item -is [IO.FileInfo]) { $item.Directory } else { $item.Parent }
     }
+    $sha256 = [Security.Cryptography.SHA256]::Create()
+    try {
+        $hash = [BitConverter]::ToString($sha256.ComputeHash($lock)).Replace('-', '')
+    } finally {
+        $sha256.Dispose()
+    }
+    if ($hash -ne $Digest) { throw 'Update verification failed' }
     [IO.File]::WriteAllText((Join-Path $Stage 'ready'), 'ready')
     $deadline = [DateTime]::UtcNow.AddSeconds(90)
     while (-not $parentProcess.WaitForExit(200)) {
         if (Test-Path -LiteralPath (Join-Path $Stage 'cancel')) { throw 'Update canceled' }
-        if ([DateTime]::UtcNow -ge $deadline) { throw 'App did not exit for update' }
+        if ([DateTime]::UtcNow -ge $deadline) {
+            $report = $true
+            throw 'App did not exit for update'
+        }
     }
     if (Test-Path -LiteralPath (Join-Path $Stage 'cancel')) { throw 'Update canceled' }
     $exited = $true
-    if ((Get-FileHash -LiteralPath $Installer -Algorithm SHA256).Hash -ne $Digest) {
-        throw 'Update changed after verification'
-    }
+    $report = $true
     $directory = Split-Path -Parent $Target
     $arguments = '/VERYSILENT /SUPPRESSMSGBOXES /SP- /NORESTART /RESTARTEXITCODE=3010 /NORESTARTAPPLICATIONS /FLCLASHUPDATE=1 /DIR="' + $directory + '" /LOG="' + (Join-Path $Stage 'install.log') + '"'
     $setup = Start-Process -FilePath $Installer -ArgumentList $arguments -Verb RunAs -Wait -PassThru
@@ -40,11 +56,13 @@ try {
     [IO.File]::WriteAllText($ResultFile, 'success')
     $success = $true
 } catch {
-    [IO.File]::WriteAllText($ResultFile, 'failed')
+    if ($lock) { $lock.Dispose() }
+    if ($report) { [IO.File]::WriteAllText($ResultFile, 'failed') }
     [IO.File]::WriteAllText((Join-Path $Stage 'error'), $_.Exception.Message)
 } finally {
+    if ($lock) { $lock.Dispose() }
     if ($exited -and -not $reboot -and (Test-Path -LiteralPath $Target)) {
         Start-Process -FilePath $Target -WorkingDirectory (Split-Path -Parent $Target)
     }
-    if ($success) { Remove-Item -LiteralPath $Stage -Recurse -Force }
+    if ($success) { Remove-Item -LiteralPath $Stage -Recurse -Force -ErrorAction SilentlyContinue }
 }

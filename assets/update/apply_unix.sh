@@ -14,6 +14,7 @@ verification=$6
 next="$stage/next"
 backup="$stage/previous"
 exited=0
+report=0
 installed=0
 success=0
 exec >>"$stage/update.log" 2>&1
@@ -33,7 +34,7 @@ finish() {
       if [ "$installed" = 1 ]; then /bin/mv "$target" "$stage/failed" || true; fi
       if [ ! -e "$target" ]; then /bin/mv "$backup" "$target" || true; fi
     fi
-    printf failed >"$result"
+    if [ "$report" = 1 ]; then printf failed >"$result"; fi
     touch "$stage/error"
     if [ "$exited" = 1 ] && [ -e "$target" ]; then launch || true; fi
   fi
@@ -53,17 +54,21 @@ verify() {
 }
 
 verify
-[ -e "$target" ] && [ ! -L "$target" ] && [ ! -e "$backup" ]
+if [ ! -e "$target" ] || [ -L "$target" ] || [ -e "$backup" ]; then exit 1; fi
 printf ready >"$stage/ready"
 attempt=0
 while kill -0 "$parent" 2>/dev/null; do
   [ ! -e "$stage/cancel" ] || exit 1
   attempt=$((attempt + 1))
-  [ "$attempt" -le 90 ] || exit 1
+  if [ "$attempt" -gt 90 ]; then
+    report=1
+    exit 1
+  fi
   sleep 1
 done
 [ ! -e "$stage/cancel" ] || exit 1
 exited=1
+report=1
 verify
 /bin/mv "$target" "$backup"
 /bin/mv "$next" "$target"

@@ -19,7 +19,16 @@ function Get-Process {
         param([int]$Milliseconds)
         $this.Checks++
         Assert-Update (Test-Path (Join-Path $global:FlClashUpdateTest_stagePath 'ready')) 'Worker did not report readiness before waiting'
-        if ($global:FlClashUpdateTest_scenario -eq 'tamper') { [IO.File]::WriteAllText($global:FlClashUpdateTest_installerFile, 'changed') }
+        if ($global:FlClashUpdateTest_scenario -eq 'replace') {
+            try {
+                [IO.File]::WriteAllText($global:FlClashUpdateTest_installerFile, 'changed')
+                $global:FlClashUpdateTest_replaced = $true
+            } catch { }
+            try {
+                Rename-Item -LiteralPath $global:FlClashUpdateTest_stagePath -NewName 'moved' -ErrorAction Stop
+                $global:FlClashUpdateTest_replaced = $true
+            } catch { }
+        }
         if ($global:FlClashUpdateTest_scenario -eq 'cancel') { [IO.File]::WriteAllText((Join-Path $global:FlClashUpdateTest_stagePath 'cancel'), 'cancel') }
         return $this.Checks -gt 1
     }
@@ -45,29 +54,45 @@ function Start-Process {
 }
 
 try {
-    foreach ($global:FlClashUpdateTest_scenario in @('success', 'uac-cancel', 'tamper', 'cancel')) {
-        $global:FlClashUpdateTest_stagePath = Join-Path $fixture $global:FlClashUpdateTest_scenario
-        New-Item -ItemType Directory -Path $global:FlClashUpdateTest_stagePath | Out-Null
+    foreach ($global:FlClashUpdateTest_scenario in @('success', 'uac-cancel', 'replace', 'cancel', 'mismatch', 'junction')) {
+        $scenario = $global:FlClashUpdateTest_scenario
+        $stage = Join-Path $fixture $scenario
+        New-Item -ItemType Directory -Path $stage | Out-Null
+        if ($scenario -eq 'junction') {
+            $link = Join-Path $fixture 'junction-link'
+            New-Item -ItemType Junction -Path $link -Target $stage | Out-Null
+            $stage = $link
+        }
+        $global:FlClashUpdateTest_stagePath = $stage
         $global:FlClashUpdateTest_targetFile = Join-Path $fixture "space ' & app\FlClash.exe"
         New-Item -ItemType Directory -Path (Split-Path -Parent $global:FlClashUpdateTest_targetFile) -Force | Out-Null
         [IO.File]::WriteAllText($global:FlClashUpdateTest_targetFile, 'old app')
-        $global:FlClashUpdateTest_installerFile = Join-Path $global:FlClashUpdateTest_stagePath 'update.exe'
+        $global:FlClashUpdateTest_installerFile = Join-Path $stage 'update.exe'
         [IO.File]::WriteAllText($global:FlClashUpdateTest_installerFile, 'signed fixture')
         $digest = (Get-FileHash -LiteralPath $global:FlClashUpdateTest_installerFile -Algorithm SHA256).Hash
+        if ($scenario -eq 'mismatch') { $digest = '0' * 64 }
         $resultPath = Join-Path $fixture 'result'
+        if (Test-Path -LiteralPath $resultPath) { Remove-Item -LiteralPath $resultPath }
         $global:FlClashUpdateTest_installCalls = 0
         $global:FlClashUpdateTest_restartCalls = 0
-        & $worker -Installer $global:FlClashUpdateTest_installerFile -Target $global:FlClashUpdateTest_targetFile -ParentProcessId 42 -Digest $digest -Stage $global:FlClashUpdateTest_stagePath -ResultFile $resultPath
-        $expected = if ($global:FlClashUpdateTest_scenario -eq 'success') { 'success' } else { 'failed' }
-        $errorPath = Join-Path $global:FlClashUpdateTest_stagePath 'error'
+        $global:FlClashUpdateTest_replaced = $false
+        & $worker -Installer $global:FlClashUpdateTest_installerFile -Target $global:FlClashUpdateTest_targetFile -ParentProcessId 42 -Digest $digest -Stage $stage -ResultFile $resultPath
+        $errorPath = Join-Path $stage 'error'
         $detail = if (Test-Path $errorPath) { Get-Content -Raw $errorPath } else { '' }
-        Assert-Update ((Get-Content -Raw $resultPath) -eq $expected) "Wrong result for $global:FlClashUpdateTest_scenario ($detail)"
-        $expectedInstalls = if ($global:FlClashUpdateTest_scenario -in @('success', 'uac-cancel')) { 1 } else { 0 }
-        $expectedRestarts = if ($global:FlClashUpdateTest_scenario -eq 'cancel') { 0 } else { 1 }
-        Assert-Update ($global:FlClashUpdateTest_installCalls -eq $expectedInstalls) "Unsafe install for $global:FlClashUpdateTest_scenario"
-        Assert-Update ($global:FlClashUpdateTest_restartCalls -eq $expectedRestarts) "Wrong restart for $global:FlClashUpdateTest_scenario"
+        # Only an attempt that closed the app is reported on the next launch.
+        $expected = @{ 'success' = 'success'; 'replace' = 'success'; 'uac-cancel' = 'failed' }[$scenario]
+        $actual = if (Test-Path -LiteralPath $resultPath) { Get-Content -Raw $resultPath } else { $null }
+        Assert-Update ($actual -eq $expected) "Wrong result for $scenario ($detail)"
+        $expectedCalls = if ($scenario -in @('success', 'uac-cancel', 'replace')) { 1 } else { 0 }
+        Assert-Update ($global:FlClashUpdateTest_installCalls -eq $expectedCalls) "Unsafe install for $scenario"
+        Assert-Update ($global:FlClashUpdateTest_restartCalls -eq $expectedCalls) "Wrong restart for $scenario"
+        Assert-Update (-not $global:FlClashUpdateTest_replaced) 'The verified installer could be replaced'
+        if ($scenario -in @('mismatch', 'junction')) {
+            Assert-Update (-not (Test-Path -LiteralPath (Join-Path $stage 'ready'))) "Unverified $scenario reported ready"
+        }
         Assert-Update ((Get-Content -Raw $global:FlClashUpdateTest_targetFile) -eq 'old app') 'Fixture modified the app'
-        Write-Output "Desktop update worker: $global:FlClashUpdateTest_scenario passed"
+        if ($scenario -eq 'junction') { [IO.Directory]::Delete($link) }
+        Write-Output "Desktop update worker: $scenario passed"
     }
 } finally {
     Remove-Item -LiteralPath $fixture -Recurse -Force

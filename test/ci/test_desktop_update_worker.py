@@ -104,8 +104,33 @@ class DesktopUpdateWorkerTest(unittest.TestCase):
         worker = self.start()
         self.assertNotEqual(worker.wait(timeout=10), 0)
         self.assertFalse((self.stage / 'ready').exists())
+        self.assertTrue((self.stage / 'error').exists())
+        self.assertFalse(self.result.exists())
         self.assertFalse(self.marker.exists())
         self.assertIsNone(self.parent.poll())
+
+    def test_missing_or_linked_target_never_reports_ready(self):
+        original = self.root / 'original'
+        self.target.rename(original)
+        for prepare in [lambda: None, lambda: self.target.symlink_to(original)]:
+            prepare()
+            worker = self.start()
+            self.assertNotEqual(worker.wait(timeout=10), 0)
+            self.assertFalse((self.stage / 'ready').exists())
+            self.assertFalse(self.result.exists())
+            self.assertTrue(self.next.exists())
+            (self.stage / 'error').unlink()
+        self.assertTrue(self.target.is_symlink())
+
+    def test_app_that_never_exits_is_reported_without_relaunch(self):
+        self.source = self.source.replace('-gt 90', '-gt 1')
+        old = self.target.read_bytes()
+        worker = self.start()
+        self.wait_for(self.stage / 'ready')
+        self.assertNotEqual(worker.wait(timeout=10), 0)
+        self.assertEqual(self.target.read_bytes(), old)
+        self.assertEqual(self.result.read_text(), 'failed')
+        self.assertFalse(self.marker.exists())
 
     def test_canceled_handoff_never_updates_on_a_later_exit(self):
         old = self.target.read_bytes()
@@ -116,6 +141,7 @@ class DesktopUpdateWorkerTest(unittest.TestCase):
         self.stop_parent()
         self.assertEqual(self.target.read_bytes(), old)
         self.assertFalse(self.marker.exists())
+        self.assertFalse(self.result.exists())
 
     def test_mac_bundle_replacement_preserves_internal_symlinks(self):
         self.target.unlink()
