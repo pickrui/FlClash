@@ -293,7 +293,6 @@ enum FunctionTag {
   vpnTip,
   autoLaunch,
   logs,
-  requests,
   loadedProvider,
   geoReload,
   saveSharedFile,
