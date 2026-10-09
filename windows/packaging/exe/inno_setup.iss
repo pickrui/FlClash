@@ -21,7 +21,6 @@ ArchitecturesInstallIn64BitMode={{ARCH}}
 [Code]
 var
   RestoreHelperService: Boolean;
-  HelperRestoreFailed: Boolean;
 
 function IsAppUpdate: Boolean;
 begin
@@ -56,6 +55,28 @@ begin
   end;
 end;
 
+procedure StopHelperService;
+var
+  ResultCode: Integer;
+begin
+  if UnregisterHelperService then Exit;
+  { A Helper stuck stopping holds its files; end it and remove the service again. }
+  Exec('taskkill', '/f /im FlClashHelperService.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  if not UnregisterHelperService then
+    Log('The FlClash helper service could not be removed');
+end;
+
+procedure RegisterHelperService;
+var
+  ResultCode: Integer;
+begin
+  RestoreHelperService := False;
+  { The app registers the Helper again when TUN is enabled. }
+  if not Exec(ExpandConstant('{app}\FlClashHelperService.exe'), 'install', '',
+    SW_HIDE, ewWaitUntilTerminated, ResultCode) or (ResultCode <> 0) then
+    Log('The FlClash helper service could not be registered');
+end;
+
 function PrepareToInstall(var NeedsRestart: Boolean): String;
 begin
   Result := '';
@@ -66,38 +87,24 @@ begin
   end;
   RestoreHelperService := RestoreHelperService or
     RegKeyExists(HKLM, 'SYSTEM\CurrentControlSet\Services\FlClashHelperService');
-  if not UnregisterHelperService then
-  begin
-    Result := 'Unable to stop the existing FlClash helper service';
-    Exit;
-  end;
+  StopHelperService;
   if not IsAppUpdate then KillProcesses;
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
-var
-  ResultCode: Integer;
 begin
-  if (CurStep = ssPostInstall) and RestoreHelperService then
-  begin
-    HelperRestoreFailed := not Exec(ExpandConstant('{app}\FlClashHelperService.exe'),
-      'install', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
-    if not HelperRestoreFailed then HelperRestoreFailed := ResultCode <> 0;
-  end;
+  if (CurStep = ssPostInstall) and RestoreHelperService then RegisterHelperService;
 end;
 
-function GetCustomSetupExitCode: Integer;
+procedure DeinitializeSetup;
 begin
-  if HelperRestoreFailed then Result := 1 else Result := 0;
+  { A failed or canceled copy never reaches ssPostInstall. }
+  if RestoreHelperService then RegisterHelperService;
 end;
 
 function InitializeUninstall(): Boolean;
 begin
-  if not UnregisterHelperService then
-  begin
-    Result := False;
-    Exit;
-  end;
+  StopHelperService;
   KillProcesses;
   Result := True;
 end;
