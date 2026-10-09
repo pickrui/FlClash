@@ -9,18 +9,26 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:path/path.dart' as p;
 
+typedef UpdatePackageCheck = Future<void> Function(File file);
+
 abstract interface class DesktopUpdateInstaller {
-  Future<void> verifyDownload({
+  /// Fetches the signed manifest before the package, from the first source
+  /// that serves one for this release.
+  Future<UpdatePackageCheck> loadManifest({
     required Dio client,
-    required File file,
+    required String name,
     required List<String> sources,
     required int build,
     required CancelToken cancelToken,
   });
 
+  bool appliesInPlace(File file);
+
   Future<void> install(File file, int build, Future<void> Function() exit);
 
   Future<bool> takeFailure();
+
+  Future<void> sweepStages();
 }
 
 /// Streams an installer to an isolated directory; partial files are never opened.
@@ -31,7 +39,7 @@ Future<File> downloadAppUpdate({
   required CancelToken cancelToken,
   required ProgressCallback onProgress,
   List<String> fallbackUrls = const [],
-  Future<void> Function(File file, String source)? verify,
+  UpdatePackageCheck? verify,
   int maxBytes = 1024 * 1024 * 1024,
 }) async {
   if (maxBytes <= 0) throw ArgumentError.value(maxBytes, 'maxBytes');
@@ -48,11 +56,17 @@ Future<File> downloadAppUpdate({
         onProgress: onProgress,
         maxBytes: maxBytes,
       );
-      await verify?.call(file, sources[sourceIndex]);
+      await verify?.call(file);
       if (cancelToken.isCancelled) throw cancelToken.cancelError!;
       return file;
     } catch (error) {
-      if (file != null) await file.parent.delete(recursive: true);
+      if (file != null) {
+        try {
+          await file.parent.delete(recursive: true);
+        } on FileSystemException {
+          // The next download sweeps it; the next source must still be tried.
+        }
+      }
       if (cancelToken.isCancelled) throw cancelToken.cancelError!;
       if (sourceIndex == sources.length - 1 || !_isUpdateSourceFailure(error)) {
         rethrow;

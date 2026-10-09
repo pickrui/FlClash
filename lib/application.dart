@@ -82,6 +82,9 @@ class ApplicationState extends ConsumerState<Application> {
             task: task,
             loadReleaseNotes: loadNotes,
             onDownload: download,
+            appliesInPlace: (file) =>
+                appController.desktopUpdateInstaller?.appliesInPlace(file) ??
+                false,
           ),
         );
     navigation.cloudLoginPresenter = (context) async {

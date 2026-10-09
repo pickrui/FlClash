@@ -21,8 +21,10 @@ class DesktopUpdater implements DesktopUpdateInstaller {
     this.manifestTimeout = const Duration(seconds: 15),
     Future<ProcessResult> Function(String, List<String>)? run,
     String? executable,
+    Map<String, String>? environment,
   }) : _run = run ?? Process.run,
-       executable = executable ?? Platform.resolvedExecutable;
+       executable = executable ?? Platform.resolvedExecutable,
+       _environment = environment ?? Platform.environment;
 
   final Future<String> Function(String) loadScript;
   final Future<Directory> Function() directory;
@@ -30,6 +32,8 @@ class DesktopUpdater implements DesktopUpdateInstaller {
   final Duration manifestTimeout;
   final String executable;
   final Future<ProcessResult> Function(String, List<String>) _run;
+  final Map<String, String> _environment;
+  late final bool _installed = _detectInstalled();
 
   Future<File> get _result async =>
       File(p.join((await directory()).path, 'ota-result'));
@@ -48,9 +52,9 @@ class DesktopUpdater implements DesktopUpdateInstaller {
   }
 
   @override
-  Future<void> verifyDownload({
+  Future<UpdatePackageCheck> loadManifest({
     required Dio client,
-    required File file,
+    required String name,
     required List<String> sources,
     required int build,
     required CancelToken cancelToken,
@@ -81,21 +85,91 @@ class DesktopUpdater implements DesktopUpdateInstaller {
         final source = utf8.decode(bytes);
         final update = await SignedAppUpdate.parse(
           source,
-          name: p.basename(file.path),
+          name: name,
           build: build,
           publicKey: publicKey,
         );
-        await update.verifyFile(file);
-        if (cancelToken.isCancelled) throw cancelToken.cancelError!;
-        await File('${file.path}.update.json')
-            .writeAsString(source, flush: true);
-        return;
+        return (file) async {
+          await update.verifyFile(file);
+          if (cancelToken.isCancelled) throw cancelToken.cancelError!;
+          await File('${file.path}.update.json')
+              .writeAsString(source, flush: true);
+        };
       } catch (_) {
         if (cancelToken.isCancelled) throw cancelToken.cancelError!;
         if (i == sources.length - 1) rethrow;
       }
     }
     throw const FormatException('No signed update source');
+  }
+
+  @override
+  bool appliesInPlace(File file) =>
+      _installed &&
+      (!Platform.isLinux || p.extension(file.path) == '.AppImage');
+
+  bool _detectInstalled() {
+    if (Platform.isWindows) {
+      return p.windows.basename(executable).toLowerCase() == 'flclash.exe' &&
+          File(p.join(p.dirname(executable), 'unins000.exe')).existsSync();
+    }
+    if (Platform.isMacOS) return _bundle != null;
+    final image = _appImage;
+    return image != null &&
+        FileSystemEntity.typeSync(image, followLinks: false) ==
+            FileSystemEntityType.file;
+  }
+
+  String? get _bundle {
+    try {
+      return macOSUpdateTarget(executable);
+    } on UnsupportedError {
+      return null;
+    }
+  }
+
+  String? get _appImage {
+    final image = _environment['APPIMAGE'];
+    return Platform.isLinux && image != null && p.isAbsolute(image)
+        ? image
+        : null;
+  }
+
+  @override
+  Future<void> sweepStages() async {
+    final bundle = Platform.isMacOS ? _bundle : null;
+    final image = _appImage;
+    final parents = {
+      (await directory()).path,
+      if (bundle != null) p.dirname(bundle),
+      if (image != null) p.dirname(image),
+    };
+    for (final parent in parents) {
+      final entries = Directory(parent)
+          .list(followLinks: false)
+          .handleError((Object _) {});
+      await for (final entry in entries) {
+        if (entry is Directory &&
+            p.basename(entry.path).startsWith(_stagePrefix) &&
+            !await _holdsRecovery(entry)) {
+          await _discard(entry);
+        }
+      }
+    }
+  }
+
+  /// A failed restore keeps the previous app here, and an image that would not
+  /// detach must never be removed recursively.
+  Future<bool> _holdsRecovery(Directory stage) async {
+    final previous = p.join(stage.path, 'previous');
+    if (await FileSystemEntity.type(previous, followLinks: false) !=
+        FileSystemEntityType.notFound) {
+      return true;
+    }
+    final mount = Directory(p.join(stage.path, 'mount'));
+    return await FileSystemEntity.type(mount.path, followLinks: false) ==
+            FileSystemEntityType.directory &&
+        !await mount.list().isEmpty.catchError((Object _) => false);
   }
 
   @override
@@ -114,33 +188,51 @@ class DesktopUpdater implements DesktopUpdateInstaller {
     final result = await _result;
     await result.parent.create(recursive: true);
     if (await result.exists()) await result.delete();
-    final prepared = Platform.isWindows
+    final (command, arguments, stage) = Platform.isWindows
         ? await _prepareWindows(file, update, result)
         : Platform.isMacOS
         ? await _prepareMacOS(file, update, result)
         : await _prepareAppImage(file, update, result);
     try {
+      // The worker removes the stage on success; it cannot run inside it.
       await Process.start(
-        prepared.$1,
-        prepared.$2,
+        command,
+        arguments,
         mode: ProcessStartMode.detached,
-        workingDirectory: prepared.$3.path,
+        workingDirectory: stage.parent.path,
       );
-      // The worker validates its inputs before allowing the app to exit.
-      final ready = File(p.join(prepared.$3.path, 'ready'));
-      final error = File(p.join(prepared.$3.path, 'error'));
-      for (var i = 0; i < 150; i++) {
-        if (await error.exists()) throw StateError('Update worker failed');
-        if (await ready.exists()) {
-          await exit();
-          return;
-        }
-        await Future<void>.delayed(const Duration(milliseconds: 200));
-      }
-      throw TimeoutException('Update worker did not become ready');
     } catch (_) {
-      await File(p.join(prepared.$3.path, 'cancel')).writeAsString('cancel');
+      await _discard(stage);
       rethrow;
+    }
+    final ready = File(p.join(stage.path, 'ready'));
+    final error = File(p.join(stage.path, 'error'));
+    final cancel = File(p.join(stage.path, 'cancel'));
+    for (var i = 0; i < 150; i++) {
+      if (await error.exists()) {
+        await _discard(stage);
+        throw StateError('Update worker failed');
+      }
+      if (await ready.exists()) {
+        try {
+          await exit();
+        } catch (_) {
+          await cancel.writeAsString('cancel');
+          rethrow;
+        }
+        return;
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+    }
+    await cancel.writeAsString('cancel');
+    throw TimeoutException('Update worker did not become ready');
+  }
+
+  Future<void> _discard(Directory stage) async {
+    try {
+      await stage.delete(recursive: true);
+    } on FileSystemException {
+      // Still held by an exiting worker; the next launch sweeps it.
     }
   }
 
@@ -161,8 +253,10 @@ class DesktopUpdater implements DesktopUpdateInstaller {
       final installer = await file.copy(p.join(stage.path, 'update.exe'));
       await update.verifyFile(installer);
       final worker = File(p.join(stage.path, 'apply.ps1'));
-      await worker.writeAsString(await loadScript('apply_windows.ps1'));
-      final windows = Platform.environment['SystemRoot'];
+      await worker.writeAsBytes(
+        windowsScriptBytes(await loadScript('apply_windows.ps1')),
+      );
+      final windows = _environment['SystemRoot'];
       if (windows == null) {
         throw StateError('Windows system directory is missing');
       }
@@ -199,7 +293,7 @@ class DesktopUpdater implements DesktopUpdateInstaller {
         stage,
       );
     } catch (_) {
-      await stage.delete(recursive: true);
+      await _discard(stage);
       rethrow;
     }
   }
@@ -262,7 +356,7 @@ class DesktopUpdater implements DesktopUpdateInstaller {
             0;
       }
       // Never recursively remove a directory containing a still-mounted image.
-      if (!mounted) await stage.delete(recursive: true);
+      if (!mounted) await _discard(stage);
       rethrow;
     }
   }
@@ -300,10 +394,8 @@ class DesktopUpdater implements DesktopUpdateInstaller {
     SignedAppUpdate update,
     File result,
   ) async {
-    final target = Platform.environment['APPIMAGE'];
-    if (!Platform.isLinux ||
-        target == null ||
-        !p.isAbsolute(target) ||
+    final target = _appImage;
+    if (target == null ||
         p.extension(file.path) != '.AppImage' ||
         await FileSystemEntity.type(target, followLinks: false) !=
             FileSystemEntityType.file) {
@@ -324,13 +416,13 @@ class DesktopUpdater implements DesktopUpdateInstaller {
         update.digest,
       );
     } catch (_) {
-      await stage.delete(recursive: true);
+      await _discard(stage);
       rethrow;
     }
   }
 
   Future<Directory> _privateStage(Directory parent) async {
-    final stage = await parent.createTemp('.flclash-ota-');
+    final stage = await parent.createTemp(_stagePrefix);
     if (!Platform.isWindows) await _checked('/bin/chmod', ['700', stage.path]);
     return stage;
   }
@@ -375,6 +467,17 @@ class DesktopUpdater implements DesktopUpdateInstaller {
     return result;
   }
 }
+
+const _stagePrefix = '.flclash-ota-';
+
+/// Windows PowerShell 5.1 reads a script without a BOM in the ANSI code page,
+/// where the multibyte header lines swallow the line breaks that follow them.
+List<int> windowsScriptBytes(String source) => [
+  0xEF,
+  0xBB,
+  0xBF,
+  ...utf8.encode(source),
+];
 
 String macOSUpdateTarget(String executable) {
   final binary = p.posix.dirname(executable);

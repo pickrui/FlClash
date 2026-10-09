@@ -2779,6 +2779,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("Unnamed"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("Unpin window"),
     "update": MessageLookupByLibrary.simpleMessage("Update"),
+    "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
+      "An AppImage cannot be installed automatically. Replace the running program with the downloaded file; its folder has been opened.",
+    ),
     "updateApplyFailed": MessageLookupByLibrary.simpleMessage(
       "Automatic update did not complete. Retry or update from the download page.",
     ),

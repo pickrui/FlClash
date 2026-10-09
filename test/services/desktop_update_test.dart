@@ -11,6 +11,7 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:dio/dio.dart';
+import 'package:fl_clash/common/update_download.dart';
 import 'package:fl_clash/services/desktop_update.dart';
 import 'package:fl_clash/services/update_signature.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -116,8 +117,21 @@ void main() {
     skip: Platform.isWindows,
   );
 
+  Future<UpdatePackageCheck> loadManifest(
+    Dio client, {
+    List<String>? sources,
+    CancelToken? cancelToken,
+    DesktopUpdater? installer,
+  }) => (installer ?? updater()).loadManifest(
+    client: client,
+    name: p.basename(file.path),
+    build: build,
+    cancelToken: cancelToken ?? CancelToken(),
+    sources: sources ?? ['https://release.example/${p.basename(file.path)}'],
+  );
+
   test(
-    'an unavailable mirror falls back to a signed manifest, then persists it',
+    'a manifest is fetched before the package, falling back past a mirror',
     () async {
       final source = await sign();
       final seen = <String>[];
@@ -129,11 +143,8 @@ void main() {
               : ResponseBody.fromString(source, 200);
         });
       addTearDown(() => client.close(force: true));
-      await updater().verifyDownload(
-        client: client,
-        file: file,
-        build: build,
-        cancelToken: CancelToken(),
+      final check = await loadManifest(
+        client,
         sources: [
           'https://mirror.example/${p.basename(file.path)}',
           'https://release.example/${p.basename(file.path)}',
@@ -141,7 +152,11 @@ void main() {
       );
       expect(seen.length, 2);
       expect(seen.every((url) => url.endsWith('.dmg.update.json')), isTrue);
+      expect(await File('${file.path}.update.json').exists(), isFalse);
+      await check(file);
       expect(await File('${file.path}.update.json').readAsString(), source);
+      await file.writeAsBytes(List.filled(256, 0));
+      await expectLater(check(file), throwsFormatException);
     },
   );
 
@@ -157,33 +172,18 @@ void main() {
             (_) => ResponseBody.fromString(source, 200),
           );
         addTearDown(() => client.close(force: true));
-        await expectLater(
-          updater().verifyDownload(
-            client: client,
-            file: file,
-            build: build,
-            cancelToken: CancelToken(),
-            sources: ['https://release.example/${p.basename(file.path)}'],
-          ),
-          throwsA(anything),
-        );
+        await expectLater(loadManifest(client), throwsA(anything));
         expect(await File('${file.path}.update.json').exists(), isFalse);
       }
     },
   );
 
-  test('canceling verification does not stage an update', () async {
+  test('canceling the manifest request does not stage an update', () async {
     final client = Dio()
       ..httpClientAdapter = _Adapter((_) => throw StateError('Canceled'));
     addTearDown(() => client.close(force: true));
     await expectLater(
-      updater().verifyDownload(
-        client: client,
-        file: file,
-        build: build,
-        cancelToken: CancelToken()..cancel(),
-        sources: ['https://release.example/${p.basename(file.path)}'],
-      ),
+      loadManifest(client, cancelToken: CancelToken()..cancel()),
       throwsA(isA<DioException>()),
     );
     expect(await File('${file.path}.update.json').exists(), isFalse);
@@ -214,17 +214,180 @@ void main() {
       manifestTimeout: const Duration(milliseconds: 20),
     );
     await expectLater(
-      installer.verifyDownload(
-        client: client,
-        file: file,
-        build: build,
-        cancelToken: CancelToken(),
-        sources: ['https://release.example/${p.basename(file.path)}'],
-      ),
+      loadManifest(client, installer: installer),
       throwsA(isA<TimeoutException>()),
     );
     await canceled.future.timeout(const Duration(seconds: 1));
     await body.close();
+  });
+
+  Future<ProcessResult> stagingRun(
+    String command,
+    List<String> arguments, {
+    String? failure,
+  }) async {
+    if (command == '/usr/bin/hdiutil' && arguments.first == 'attach') {
+      final mount = arguments[arguments.indexOf('-mountpoint') + 1];
+      await Directory(p.join(mount, 'FlClash.app')).create();
+    }
+    if (command == '/usr/bin/ditto') {
+      await Directory(arguments.last).create();
+    }
+    if (command == '/usr/bin/codesign' && arguments.contains('-R')) {
+      expect(
+        arguments[arguments.indexOf('-R') + 1],
+        contains('identifier "test.flclash"'),
+      );
+      expect(arguments[arguments.indexOf('-R') + 1], contains('"ABCDE12345"'));
+      if (failure == 'signature') {
+        return ProcessResult(0, 1, '', 'invalid signature');
+      }
+    }
+    var output = '';
+    if (command == '/usr/libexec/PlistBuddy') {
+      output = arguments[1].endsWith('CFBundleIdentifier')
+          ? 'test.flclash'
+          : '${build - (failure == 'build' ? 1 : 0)}';
+    }
+    return ProcessResult(0, 0, output, 'TeamIdentifier=ABCDE12345\n');
+  }
+
+  Future<List<FileSystemEntity>> stages() => root
+      .list()
+      .where((item) => p.basename(item.path).startsWith('.flclash-ota-'))
+      .toList();
+
+  /// An installed app and a signed package this Unix host can stage.
+  Future<(DesktopUpdater, File)> installable(String worker) async {
+    var package = file;
+    String? executable;
+    Map<String, String>? environment;
+    if (Platform.isMacOS) {
+      final binary = File(
+        p.join(root.path, 'FlClash.app', 'Contents', 'MacOS', 'FlClash'),
+      );
+      await binary.parent.create(recursive: true);
+      await binary.writeAsString('old application');
+      executable = binary.path;
+    } else {
+      package = await file.copy(
+        p.join(root.path, 'flclash-linux-amd64.AppImage'),
+      );
+      final image = File(p.join(root.path, 'FlClash.AppImage'));
+      await image.writeAsString('old application');
+      environment = {'APPIMAGE': image.path};
+    }
+    await File(
+      '${package.path}.update.json',
+    ).writeAsString(await sign({...payload, 'name': p.basename(package.path)}));
+    return (
+      DesktopUpdater(
+        loadScript: (_) async => worker,
+        directory: () async => root,
+        publicKey: publicKey,
+        executable: executable,
+        environment: environment,
+        run: stagingRun,
+      ),
+      package,
+    );
+  }
+
+  test(
+    'a worker that fails before exit leaves no stage and no failure',
+    () async {
+      final (installer, package) = await installable('touch "\$4/error"\n');
+      var exited = false;
+      await expectLater(
+        installer.install(package, build, () async => exited = true),
+        throwsA(
+          isA<StateError>().having(
+            (error) => error.message,
+            'message',
+            'Update worker failed',
+          ),
+        ),
+      );
+      expect(exited, isFalse);
+      expect(await stages(), isEmpty);
+      expect(await installer.takeFailure(), isFalse);
+    },
+    skip: Platform.isWindows,
+  );
+
+  test('the worker runs outside the stage it removes', () async {
+    final (installer, package) = await installable(
+      'pwd -P >"\$4/cwd"\nprintf ready >"\$4/ready"\n',
+    );
+    var exited = false;
+    await installer.install(package, build, () async => exited = true);
+    expect(exited, isTrue);
+    final stage = (await stages()).single;
+    expect(
+      (await File(p.join(stage.path, 'cwd')).readAsString()).trim(),
+      await root.resolveSymbolicLinks(),
+    );
+  }, skip: Platform.isWindows);
+
+  test('launch sweeps leftover stages but keeps recovery copies', () async {
+    Future<Directory> make(String path) =>
+        Directory(p.join(root.path, path)).create(recursive: true);
+    final failed = await make('.flclash-ota-failed');
+    await File(p.join(failed.path, 'update.log')).writeAsString('log');
+    final unmounted = await make('.flclash-ota-unmounted/mount');
+    final recovery = await make('.flclash-ota-recovery/previous');
+    final mounted = await make('.flclash-ota-mounted/mount/FlClash.app');
+    final download = await make('flclash-update-kept');
+    final outside = await make('outside');
+    final link = await Link(p.join(root.path, '.flclash-ota-link'))
+        .create(outside.path);
+    await updater().sweepStages();
+    expect(await failed.exists(), isFalse);
+    expect(await unmounted.parent.exists(), isFalse);
+    for (final kept in [recovery, mounted, download, outside]) {
+      expect(await kept.exists(), isTrue, reason: kept.path);
+    }
+    expect(await link.exists(), isTrue);
+  }, skip: Platform.isWindows);
+
+  test('only an installed build is updated in place', () async {
+    DesktopUpdater installer({String? executable, Map<String, String>? env}) =>
+        DesktopUpdater(
+          loadScript: (_) async => '',
+          directory: () async => root,
+          executable: executable,
+          environment: env,
+        );
+    if (Platform.isMacOS) {
+      expect(
+        installer(
+          executable: '/Applications/FlClash.app/Contents/MacOS/FlClash',
+        ).appliesInPlace(file),
+        isTrue,
+      );
+      expect(
+        installer(executable: '/usr/local/bin/FlClash').appliesInPlace(file),
+        isFalse,
+      );
+      return;
+    }
+    final image = File(p.join(root.path, 'FlClash.AppImage'));
+    await image.writeAsString('app');
+    final appImage = installer(env: {'APPIMAGE': image.path});
+    expect(appImage.appliesInPlace(File('/tmp/a.AppImage')), isTrue);
+    expect(appImage.appliesInPlace(File('/tmp/a.deb')), isFalse);
+    expect(
+      installer(env: const {}).appliesInPlace(File('/tmp/a.AppImage')),
+      isFalse,
+    );
+  }, skip: Platform.isWindows);
+
+  test('the Windows worker carries a UTF-8 byte order mark', () async {
+    final source = await File('assets/update/apply_windows.ps1').readAsString();
+    expect(source.codeUnits.any((unit) => unit > 0x7F), isTrue);
+    final bytes = windowsScriptBytes(source);
+    expect(bytes.take(3), [0xEF, 0xBB, 0xBF]);
+    expect(utf8.decode(bytes.skip(3).toList()), source);
   });
 
   for (final failure in ['build', 'signature']) {
@@ -239,35 +402,8 @@ void main() {
         directory: () async => root,
         publicKey: publicKey,
         executable: binary.path,
-        run: (command, arguments) async {
-          if (command == '/usr/bin/hdiutil' && arguments.first == 'attach') {
-            final mount = arguments[arguments.indexOf('-mountpoint') + 1];
-            await Directory(p.join(mount, 'FlClash.app')).create();
-          }
-          if (command == '/usr/bin/ditto') {
-            await Directory(arguments.last).create();
-          }
-          if (command == '/usr/bin/codesign' && arguments.contains('-R')) {
-            expect(
-              arguments[arguments.indexOf('-R') + 1],
-              contains('identifier "test.flclash"'),
-            );
-            expect(
-              arguments[arguments.indexOf('-R') + 1],
-              contains('"ABCDE12345"'),
-            );
-            if (failure == 'signature') {
-              return ProcessResult(0, 1, '', 'invalid signature');
-            }
-          }
-          var output = '';
-          if (command == '/usr/libexec/PlistBuddy') {
-            output = arguments[1].endsWith('CFBundleIdentifier')
-                ? 'test.flclash'
-                : '${build - (failure == 'build' ? 1 : 0)}';
-          }
-          return ProcessResult(0, 0, output, 'TeamIdentifier=ABCDE12345\n');
-        },
+        run: (command, arguments) =>
+            stagingRun(command, arguments, failure: failure),
       );
       await expectLater(
         installer.install(file, build, () => throw StateError('Must not exit')),
@@ -276,13 +412,7 @@ void main() {
             : throwsA(isA<ProcessException>()),
       );
       expect(await binary.readAsString(), 'old application');
-      expect(
-        await root
-            .list()
-            .where((item) => p.basename(item.path).startsWith('.flclash-ota-'))
-            .toList(),
-        isEmpty,
-      );
+      expect(await stages(), isEmpty);
     }, skip: !Platform.isMacOS);
   }
 

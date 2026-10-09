@@ -32,7 +32,7 @@ void main() {
     CancelToken? token,
     ProgressCallback? progress,
     List<String> fallbackUrls = const [],
-    Future<void> Function(File, String)? verify,
+    UpdatePackageCheck? verify,
     int maxBytes = 1024 * 1024 * 1024,
   }) => downloadAppUpdate(
     client: client,
@@ -80,23 +80,50 @@ void main() {
         request.response.add([request.uri.path == '/update.apk' ? 1 : 2]);
         await request.response.close();
       });
-      final verified = <String>[];
+      var verified = 0;
       final file = await download(
         fallbackUrls: [
           'http://${server.address.address}:${server.port}/backup.apk',
         ],
-        verify: (file, source) async {
-          verified.add(source);
+        verify: (file) async {
+          verified++;
           if ((await file.readAsBytes()).single != 2) {
             throw const FormatException('Stale mirror');
           }
         },
       );
       expect(await file.readAsBytes(), [2]);
-      expect(verified.length, 2);
+      expect(verified, 2);
       expect(await directory.list().length, 1);
     },
   );
+
+  test('a stale package that cannot be removed still falls back', () async {
+    server.listen((request) async {
+      request.response.headers.contentType = ContentType.binary;
+      request.response.add([request.uri.path == '/update.apk' ? 1 : 2]);
+      await request.response.close();
+    });
+    final locked = <Directory>[];
+    addTearDown(() async {
+      for (final staging in locked) {
+        await Process.run('chmod', ['755', staging.path]);
+      }
+    });
+    final file = await download(
+      fallbackUrls: [
+        'http://${server.address.address}:${server.port}/backup.apk',
+      ],
+      verify: (file) async {
+        if ((await file.readAsBytes()).single == 2) return;
+        locked.add(file.parent);
+        await Process.run('chmod', ['555', file.parent.path]);
+        throw const FormatException('Stale mirror');
+      },
+    );
+    expect(await file.readAsBytes(), [2]);
+    expect(await locked.single.exists(), isTrue);
+  }, skip: Platform.isWindows);
 
   test(
     'canceling signature verification removes the completed package',
@@ -108,7 +135,7 @@ void main() {
       });
       final token = CancelToken();
       await expectLater(
-        download(token: token, verify: (_, _) async => token.cancel()),
+        download(token: token, verify: (_) async => token.cancel()),
         throwsA(isA<DioException>()),
       );
       expect(await directory.list().toList(), isEmpty);

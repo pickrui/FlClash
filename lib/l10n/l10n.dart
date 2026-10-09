@@ -8295,6 +8295,16 @@ class AppLocalizations {
     );
   }
 
+  /// `An AppImage cannot be installed automatically. Replace the running program with the downloaded file; its folder has been opened.`
+  String get updateAppImageTip {
+    return Intl.message(
+      'An AppImage cannot be installed automatically. Replace the running program with the downloaded file; its folder has been opened.',
+      name: 'updateAppImageTip',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `This build was installed by a package manager; upgrade it the same way you installed it.`
   String get updatePackageManagerTip {
     return Intl.message(

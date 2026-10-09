@@ -2050,6 +2050,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("未命名"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("取消置顶"),
     "update": MessageLookupByLibrary.simpleMessage("更新"),
+    "updateAppImageTip": MessageLookupByLibrary.simpleMessage(
+      "AppImage 无法自动安装，请用下载的文件替换当前程序，已打开文件所在目录",
+    ),
     "updateApplyFailed": MessageLookupByLibrary.simpleMessage(
       "自动更新未完成，请重试或从下载页面更新",
     ),

@@ -22,9 +22,7 @@ const _release = AppUpdateInfo(
   remoteBuildNumber: 2026092110,
 );
 
-String get _installLabel => Platform.isWindows || Platform.isMacOS
-    ? AppLocalizations.current.updateRestart
-    : AppLocalizations.current.updateInstall;
+String get _installLabel => AppLocalizations.current.updateInstall;
 
 void main() {
   testWidgets('the details page downloads in place and then offers install', (
@@ -54,6 +52,24 @@ void main() {
     await tester.pumpAndSettle();
     expect(result, UpdateDownloadAction.install);
     expect(task.value.phase, AppUpdateDownloadPhase.ready);
+  });
+  testWidgets('only a package the installer applies in place says restart', (
+    tester,
+  ) async {
+    final pending = Completer<File>();
+    await openUpdatePage(
+      tester,
+      (_, _) => pending.future,
+      (_) {},
+      appliesInPlace: (file) => file.path.endsWith('.AppImage'),
+    );
+    await startDownload(tester);
+    pending.complete(File('/tmp/flclash-linux-amd64.AppImage'));
+    await tester.pumpAndSettle();
+    final l = AppLocalizations.current;
+    expect(find.text(l.updateRestart), findsOneWidget);
+    expect(find.text(l.updateRestartHint), findsOneWidget);
+    expect(find.text(l.updateInstall), findsNothing);
   });
   testWidgets(
     'background downloads can be reopened during transfer and after completion',
@@ -242,6 +258,7 @@ Future<AppUpdateDownloadTask> openUpdatePage(
   AppUpdateDownloader download,
   void Function(UpdateDownloadAction?) onResult, {
   Locale locale = const Locale('en'),
+  bool Function(File file)? appliesInPlace,
 }) async {
   final task = AppUpdateDownloadTask();
   addTearDown(task.dispose);
@@ -264,6 +281,7 @@ Future<AppUpdateDownloadTask> openUpdatePage(
                     onDownload: () async => unawaited(
                       task.start(download, url: 'https://fixture/update.exe'),
                     ),
+                    appliesInPlace: appliesInPlace ?? (_) => false,
                   ),
                 ),
               ),

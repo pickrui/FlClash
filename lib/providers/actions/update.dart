@@ -70,6 +70,7 @@ extension InitControllerExt on AppController {
       await window?.show();
       globalState.showNotifier(appLocalizations.updateApplyFailed);
     }
+    unawaited(desktopUpdateInstaller?.sweepStages());
     unawaited(checkUpdate());
     await _handleFailedPreference();
     final bootAttempt = await startupRecovery.begin(
@@ -369,6 +370,13 @@ extension InitControllerExt on AppController {
             if (system.isDesktop && installer == null) {
               throw StateError('Desktop updater is unavailable');
             }
+            final verify = await installer?.loadManifest(
+              client: client,
+              name: Uri.parse(downloadUrl).pathSegments.last,
+              sources: sources,
+              build: build,
+              cancelToken: token,
+            );
             return await downloadAppUpdate(
               client: client,
               url: downloadUrl,
@@ -376,15 +384,7 @@ extension InitControllerExt on AppController {
               directory: directory,
               cancelToken: token,
               onProgress: onProgress,
-              verify: system.isDesktop
-                  ? (file, source) => installer!.verifyDownload(
-                      client: client,
-                      file: file,
-                      sources: [source],
-                      build: build,
-                      cancelToken: token,
-                    )
-                  : null,
+              verify: verify,
             );
           } catch (error) {
             commonPrint.log(
@@ -410,16 +410,27 @@ extension InitControllerExt on AppController {
     _openingUpdateInstaller = true;
     try {
       await safeRun(() async {
-        if (system.isWindows || system.isMacOS || isAppImageInstaller(file)) {
-          final installer = desktopUpdateInstaller;
-          if (installer == null) {
-            throw StateError('Desktop updater is unavailable');
+        final installer = desktopUpdateInstaller;
+        if (installer != null && installer.appliesInPlace(file)) {
+          try {
+            await installer.install(
+              file,
+              _appUpdateDownloadInfo?.remoteBuildNumber ?? 0,
+              () => handleExit(),
+            );
+            return;
+          } on FormatException {
+            // A package that no longer matches its signature is never opened.
+            rethrow;
+          } catch (error) {
+            commonPrint.log(
+              'in-place update unavailable: $error',
+              logLevel: LogLevel.warning,
+            );
           }
-          await installer.install(
-            file,
-            _appUpdateDownloadInfo?.remoteBuildNumber ?? 0,
-            () => handleExit(),
-          );
+        }
+        if (isAppImageInstaller(file)) {
+          await _revealAppImageUpdate(file);
           return;
         }
         await openAppUpdateDownload(
@@ -447,6 +458,19 @@ extension InitControllerExt on AppController {
     await globalState.showMessage(
       title: appLocalizations.checkUpdate,
       message: TextSpan(text: appLocalizations.updatePackageManagerTip),
+      cancelable: false,
+    );
+  }
+
+  /// An AppImage replaces itself by hand, so the download is only shown.
+  Future<void> _revealAppImageUpdate(File file) async {
+    await launchUrl(
+      Uri.file(file.parent.path),
+      mode: LaunchMode.externalApplication,
+    );
+    await globalState.showMessage(
+      title: appLocalizations.updateReady,
+      message: TextSpan(text: appLocalizations.updateAppImageTip),
       cancelable: false,
     );
   }
