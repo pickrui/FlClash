@@ -2752,6 +2752,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "The system will confirm automatically after the transfer is completed, and the selected plan will be activated.",
     ),
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
+    "tunAdminAccountRequired": MessageLookupByLibrary.simpleMessage(
+      "TUN needs an administrator account on this Mac. Sign in with an administrator account to turn it on.",
+    ),
     "tunAuthorizationFailed": MessageLookupByLibrary.simpleMessage(
       "TUN could not be enabled because administrator authorization was denied. Allow the system permission prompt and try again.",
     ),

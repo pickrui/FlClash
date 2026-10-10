@@ -2307,6 +2307,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "送金完了後、システムが自動的に確認し、選択したプランが自動的に有効になります",
     ),
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
+    "tunAdminAccountRequired": MessageLookupByLibrary.simpleMessage(
+      "TUN を有効にするには、この Mac の管理者アカウントでログインする必要があります",
+    ),
     "tunAuthorizationFailed": MessageLookupByLibrary.simpleMessage(
       "管理者権限が拒否されたため、TUN を有効にできませんでした。システムの権限要求を許可して、もう一度お試しください",
     ),

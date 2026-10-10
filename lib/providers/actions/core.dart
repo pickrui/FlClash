@@ -130,6 +130,9 @@ extension CoreControllerExt on AppController {
         case AuthorizeCode.helperCorrupt:
           _setPatchTunEnable(false);
           throw appLocalizations.helperCorruptTip;
+        case AuthorizeCode.adminAccountRequired:
+          _setPatchTunEnable(false);
+          throw appLocalizations.tunAdminAccountRequired;
       }
     }
     _ref.read(realTunEnableProvider.notifier).value = enableTun;

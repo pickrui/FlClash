@@ -2265,6 +2265,16 @@ class AppLocalizations {
     );
   }
 
+  /// `TUN needs an administrator account on this Mac. Sign in with an administrator account to turn it on.`
+  String get tunAdminAccountRequired {
+    return Intl.message(
+      'TUN needs an administrator account on this Mac. Sign in with an administrator account to turn it on.',
+      name: 'tunAdminAccountRequired',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Copying environment variables`
   String get copyEnvVar {
     return Intl.message(

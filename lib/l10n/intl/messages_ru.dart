@@ -2899,6 +2899,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "После завершения перевода система подтвердит автоматически, и выбранный тариф будет активирован.",
     ),
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
+    "tunAdminAccountRequired": MessageLookupByLibrary.simpleMessage(
+      "Для TUN нужна учётная запись администратора этого Mac. Войдите как администратор и включите TUN.",
+    ),
     "tunAuthorizationFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось включить TUN: запрос прав администратора отклонён. Разрешите системный запрос прав и повторите попытку.",
     ),

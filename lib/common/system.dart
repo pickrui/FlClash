@@ -14,6 +14,7 @@ import 'package:fl_clash/core/desktop/helper_client.dart';
 import 'package:fl_clash/core/desktop/linux_helper.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/plugins/app.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/services.dart';
 
 bool isFlClashDockerEnvironment(Map<String, String> environment) {
@@ -75,29 +76,62 @@ class System {
     return Platform.localHostname.split('.').first;
   }
 
+  @visibleForTesting
+  Future<ProcessResult> Function(String, List<String>) runProcess = Process.run;
+
+  /// Execute for others would let any local account run the Core as root, so
+  /// a Core that older versions left that way is authorized again.
+  @visibleForTesting
+  static bool isPrivilegedStatOutput(
+    String output, {
+    required String ownerPrefix,
+  }) {
+    final trimmed = output.trim();
+    if (!trimmed.startsWith(ownerPrefix)) return false;
+    final mode = trimmed.split(RegExp(r'\s+')).last;
+    return mode.length >= 10 &&
+        mode[3] == 's' &&
+        mode[9] != 'x' &&
+        mode[9] != 't';
+  }
+
+  @visibleForTesting
+  static String macOSElevationShell(String corePath) {
+    final path = corePath.replaceAll("'", "'\\''");
+    return "chown root:admin '$path' && chmod 4750 '$path'";
+  }
+
+  @visibleForTesting
+  static List<String> linuxElevationCommand(String corePath, String group) => [
+    '/bin/sh',
+    '-c',
+    'chown "root:\$2" "\$1" && chmod 4750 "\$1" && sync',
+    'sh',
+    corePath,
+    group,
+  ];
+
   Future<bool> checkIsAdmin() async {
     if (safeModeBuild) return false;
     final corePath = appPath.corePath;
     if (system.isWindows) {
       return await windowsHelperClient.readiness() == HelperReadiness.ready;
     } else if (system.isMacOS) {
-      final result = await Process.run('stat', ['-f', '%Su:%Sg %Sp', corePath]);
-      final output = result.stdout.trim();
-      if (output.startsWith('root:admin') && output.contains('rws')) {
-        return true;
-      }
-      return false;
+      final result = await runProcess('stat', ['-f', '%Su:%Sg %Sp', corePath]);
+      return isPrivilegedStatOutput(
+        result.stdout.toString(),
+        ownerPrefix: 'root:admin',
+      );
     } else if (Platform.isLinux) {
       if (LinuxHelperInstaller().available) {
         return await linuxHelperClient.readiness(logFailure: false) ==
             HelperReadiness.ready;
       }
-      final result = await Process.run('stat', ['-c', '%U:%G %A', corePath]);
-      final output = result.stdout.trim();
-      if (output.startsWith('root:') && output.contains('rws')) {
-        return true;
-      }
-      return false;
+      final result = await runProcess('stat', ['-c', '%U:%G %A', corePath]);
+      return isPrivilegedStatOutput(
+        result.stdout.toString(),
+        ownerPrefix: 'root:',
+      );
     }
     return true;
   }
@@ -117,78 +151,68 @@ class System {
     }
 
     if (system.isMacOS) {
-      final escapedPath = corePath.replaceAll("'", "'\\''");
-      final bashString =
-          "chown root:admin '$escapedPath' && chmod +sx '$escapedPath'";
-      final appleScriptString = bashString
+      if (!await _isInAdminGroup()) {
+        return AuthorizeCode.adminAccountRequired;
+      }
+      final appleScriptString = macOSElevationShell(corePath)
           .replaceAll('\\', '\\\\')
           .replaceAll('"', '\\"');
       final arguments = [
         '-e',
         'do shell script "$appleScriptString" with administrator privileges',
       ];
-      final result = await Process.run('osascript', arguments);
+      final result = await runProcess('osascript', arguments);
       if (result.exitCode != 0) {
         return AuthorizeCode.error;
       }
       return AuthorizeCode.success;
     } else if (Platform.isLinux) {
-      final installer = LinuxHelperInstaller();
+      final installer = LinuxHelperInstaller(askPassword: _askAdminPassword);
       if (installer.available) return installer.install();
-      try {
-        final result = await Process.run('pkexec', [
-          'sh',
-          '-c',
-          'chown root:root "\$1" && chmod u+s "\$1" && sync',
-          'sh',
-          corePath,
-        ]);
-        if (result.exitCode == 0) {
-          return await checkIsAdmin()
-              ? AuthorizeCode.success
-              : AuthorizeCode.error;
-        }
-        if (result.exitCode != 127) {
-          return AuthorizeCode.error;
-        }
-      } catch (error) {
-        commonPrint.log('pkexec failed: $error');
-      }
-      await window?.show();
-      final password = await requestAdminPassword?.call();
-      if (password == null || password.isEmpty) {
+      final group = await _primaryGroupId();
+      if (group == null) {
         return AuthorizeCode.error;
       }
-      final chownResult = await _runSudo(password, [
-        'chown',
-        'root:root',
-        corePath,
-      ]);
-      if (!chownResult) {
+      final elevation = LinuxElevation(
+        runProcess: runProcess,
+        askPassword: _askAdminPassword,
+      );
+      if (!await elevation.elevate(linuxElevationCommand(corePath, group))) {
         return AuthorizeCode.error;
       }
-      final chmodResult = await _runSudo(password, ['chmod', 'u+s', corePath]);
-      if (!chmodResult) {
-        return AuthorizeCode.error;
-      }
-      await Process.run('sync', []);
       return await checkIsAdmin() ? AuthorizeCode.success : AuthorizeCode.error;
     }
     return AuthorizeCode.error;
   }
 
-  Future<bool> _runSudo(String password, List<String> arguments) async {
+  Future<String?> _askAdminPassword() async {
+    await window?.show();
+    return requestAdminPassword?.call();
+  }
+
+  Future<bool> _isInAdminGroup() async {
     try {
-      final process = await Process.start('sudo', ['-S', ...arguments]);
-      final stdoutDone = process.stdout.drain<void>();
-      final stderrDone = process.stderr.drain<void>();
-      process.stdin.writeln(password);
-      await process.stdin.close();
-      final exitCode = await process.exitCode;
-      await Future.wait([stdoutDone, stderrDone]);
-      return exitCode == 0;
-    } catch (_) {
+      final result = await runProcess('id', ['-Gn']);
+      return result.exitCode == 0 &&
+          result.stdout
+              .toString()
+              .trim()
+              .split(RegExp(r'\s+'))
+              .contains('admin');
+    } on ProcessException {
       return false;
+    }
+  }
+
+  Future<String?> _primaryGroupId() async {
+    try {
+      final result = await runProcess('id', ['-g']);
+      final group = result.stdout.toString().trim();
+      return result.exitCode == 0 && RegExp(r'^\d+$').hasMatch(group)
+          ? group
+          : null;
+    } on ProcessException {
+      return null;
     }
   }
 

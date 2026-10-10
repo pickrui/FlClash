@@ -2029,6 +2029,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "转账完成后系统会自动确认，确认后将自动开通已选套餐",
     ),
     "tun": MessageLookupByLibrary.simpleMessage("虚拟网卡"),
+    "tunAdminAccountRequired": MessageLookupByLibrary.simpleMessage(
+      "开启 TUN 需要本机管理员账户，请使用管理员账户登录后再开启",
+    ),
     "tunAuthorizationFailed": MessageLookupByLibrary.simpleMessage(
       "无法启用 TUN：管理员授权被拒绝，请允许系统权限请求后重试",
     ),

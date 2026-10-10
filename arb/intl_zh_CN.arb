@@ -293,6 +293,7 @@
   "routeAddressDesc": "配置监听路由地址",
   "pleaseInputAdminPassword": "请输入管理员密码",
   "tunAuthorizationFailed": "无法启用 TUN：管理员授权被拒绝，请允许系统权限请求后重试",
+  "tunAdminAccountRequired": "开启 TUN 需要本机管理员账户，请使用管理员账户登录后再开启",
   "copyEnvVar": "复制环境变量",
   "memoryInfo": "内存信息",
   "cancel": "取消",

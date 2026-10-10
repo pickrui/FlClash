@@ -293,6 +293,7 @@
   "routeAddressDesc": "ルートアドレスを設定",
   "pleaseInputAdminPassword": "管理者パスワードを入力",
   "tunAuthorizationFailed": "管理者権限が拒否されたため、TUN を有効にできませんでした。システムの権限要求を許可して、もう一度お試しください",
+  "tunAdminAccountRequired": "TUN を有効にするには、この Mac の管理者アカウントでログインする必要があります",
   "copyEnvVar": "環境変数をコピー",
   "memoryInfo": "メモリ情報",
   "cancel": "キャンセル",

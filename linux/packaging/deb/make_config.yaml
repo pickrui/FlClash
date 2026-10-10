@@ -34,16 +34,14 @@ postinstall_scripts:
     CORE_PATH="/usr/share/FlClash/FlClashCore"
     HELPER_PATH="/usr/share/FlClash/FlClashHelperService"
     UNIT_PATH="/etc/systemd/system/flclash-helper.service"
+    # The app grants setuid to its user's group when TUN is first enabled.
+    if [ -f "$CORE_PATH" ]; then chmod u-s "$CORE_PATH"; fi
     if [ -d /run/systemd/system ] && [ -x "$HELPER_PATH" ]; then
-      if [ -f "$CORE_PATH" ]; then chmod u-s "$CORE_PATH"; fi
       if [ -f "$UNIT_PATH" ]; then
         owner=$(sed -n 's/^Environment=FLCLASH_HELPER_OWNER_UID=//p' "$UNIT_PATH")
         case "$owner" in ''|*[!0-9]*|0) echo "Invalid FlClash Helper owner" >&2; exit 1 ;; esac
         PKEXEC_UID="$owner" "$HELPER_PATH" install
       fi
-    elif [ -f "$CORE_PATH" ]; then
-      chown root:root "$CORE_PATH"
-      chmod u+s "$CORE_PATH"
     fi
 postuninstall_scripts:
   - |

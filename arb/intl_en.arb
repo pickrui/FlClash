@@ -293,6 +293,7 @@
   "routeAddressDesc": "Config listen route address",
   "pleaseInputAdminPassword": "Please enter the admin password",
   "tunAuthorizationFailed": "TUN could not be enabled because administrator authorization was denied. Allow the system permission prompt and try again.",
+  "tunAdminAccountRequired": "TUN needs an administrator account on this Mac. Sign in with an administrator account to turn it on.",
   "copyEnvVar": "Copying environment variables",
   "memoryInfo": "Memory info",
   "cancel": "Cancel",

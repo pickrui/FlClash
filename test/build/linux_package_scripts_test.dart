@@ -11,7 +11,7 @@ import 'package:yaml/yaml.dart';
 void main() {
   for (final format in ['deb', 'rpm']) {
     test(
-      '$format migrates installed Helpers and retains non-systemd startup',
+      '$format migrates installed Helpers and never installs a setuid Core',
       () async {
         final root = Directory.systemTemp.createTempSync('flclash-package-');
         addTearDown(() => root.deleteSync(recursive: true));
@@ -61,7 +61,9 @@ void main() {
         }
 
         await run('postinstall_scripts', 'configure');
-        expect(log.readAsStringSync(), contains('chmod u+s'));
+        expect(log.readAsStringSync(), contains('chmod u-s'));
+        expect(log.readAsStringSync(), isNot(contains('u+s')));
+        expect(log.readAsStringSync(), isNot(contains('chown')));
         Directory('${root.path}/systemd').createSync();
         log.writeAsStringSync('');
         await run('postinstall_scripts', 'configure');
