@@ -1549,6 +1549,50 @@ void main() {
     });
   });
 
+  test(
+    'the DNS baseline replaces Core defaults of a disabled profile DNS',
+    () async {
+      final result = await makeRealProfileTask(
+        const MakeRealProfileState(
+          profilesPath: '/profiles',
+          profileId: 1,
+          overwriteType: OverwriteType.standard,
+          rawConfig: {
+            // Shape returned by Core getConfig for a profile without DNS.
+            'dns': {
+              'enable': false,
+              'enhanced-mode': 'redir-host',
+              'nameserver': [
+                'https://doh.pub/dns-query',
+                'tls://223.5.5.5:853',
+              ],
+              'default-nameserver': ['114.114.114.114', '223.5.5.5'],
+              'fake-ip-range': '198.18.0.1/16',
+            },
+            'rules': <String>[],
+          },
+          realPatchConfig: ClashConfig(),
+          overrideDns: false,
+          appendSystemDns: false,
+          addedRules: [],
+          proxyChains: [],
+          profileProxies: [],
+          customProxyGroups: [],
+          customRules: [],
+          defaultUA: 'FlClash',
+        ),
+      );
+
+      expect(result['dns'], {
+        'enable': true,
+        'enhanced-mode': 'fake-ip',
+        'nameserver': defaultDns.nameserver,
+        'default-nameserver': ['114.114.114.114', '223.5.5.5'],
+        'fake-ip-range': '198.18.0.1/16',
+      });
+    },
+  );
+
   test('disabled profile DNS applies custom DNS when override is on', () async {
     const customNameserver = 'https://dns.example/dns-query';
     final result = await makeRealProfileTask(

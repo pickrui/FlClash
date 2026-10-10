@@ -480,11 +480,11 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
   const systemDns = 'system://';
   var targetDns = Map<String, dynamic>.from(sourceDns);
   if (!isEnableDns) {
-    targetDns = {
-      ...defaultDns.overrideJson(baselineDnsOverrideKeys),
-      ...sourceDns,
-      'enable': true,
-    };
+    // Core getConfig fills a missing DNS section with mihomo defaults.
+    targetDns = mergeDnsOverride(
+      sourceDns,
+      defaultDns.overrideJson(baselineDnsOverrideKeys),
+    );
   }
   if (overrideDns || !isEnableDns) {
     targetDns = mergeDnsOverride(
