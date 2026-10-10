@@ -48,7 +48,7 @@ Future<void> main(List<String> arguments) async {
       isMacOS: system.isMacOS,
       safeMode: safeModeBuild,
     );
-    initializeSafeModePreferences();
+    initializePreferencesStore();
     await RustLib.init();
     registerFetchManagedConfig(CloudApiService().fetchManagedConfig);
     cloudStorePageBuilder = (_) => const CloudStorePage();

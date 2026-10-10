@@ -30,7 +30,7 @@ void main() {
     final nativeCalls = <String>[];
     setUpAll(() {
       SharedPreferencesStorePlatform.instance = normalPreferences;
-      initializeSafeModePreferences();
+      initializePreferencesStore();
       final messenger =
           TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
       for (final channel in [
