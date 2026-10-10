@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 
 const double _flingVelocity = 1.0;
 const Duration _settleDuration = Duration(milliseconds: 350);
+const double _dragEdge = 1e-6;
 
 final Animatable<Offset> _slideTween = Tween<Offset>(
   begin: const Offset(1.0, 0.0),
@@ -44,7 +45,13 @@ mixin DragBackRouteMixin<T> on ModalRoute<T> {
     );
   }
 
-  bool get _canDragBack => isCurrent && popGestureEnabled;
+  // popGestureEnabled no longer waits for the route to be uncovered or for
+  // another drag back to settle, and NavigatorResizable asserts on both.
+  bool get _canDragBack =>
+      isCurrent &&
+      popGestureEnabled &&
+      secondaryAnimation!.isDismissed &&
+      !popGestureInProgress;
 
   void _startDragBack() {
     _dragBackActive = true;
@@ -52,8 +59,15 @@ mixin DragBackRouteMixin<T> on ModalRoute<T> {
     navigator!.didStartUserGesture();
   }
 
+  // Reaching either end mid-drag flips the status, which routes read as a
+  // finished transition (opaque route, hidden OpenContainer tile).
   void _updateDragBack(double delta) {
-    controller!.value -= delta;
+    final controller = this.controller!;
+    controller.value = clampDouble(
+      controller.value - delta,
+      _dragEdge,
+      1 - _dragEdge,
+    );
   }
 
   void _endDragBack(double velocity) {
