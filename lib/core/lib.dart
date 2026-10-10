@@ -15,7 +15,7 @@ import 'desktop/model.dart';
 import 'interface.dart';
 import 'method.dart';
 
-class CoreLib extends CoreHandlerInterface {
+class CoreLib extends CoreHandlerInterface with ServiceListener {
   static CoreLib? _instance;
 
   Completer<bool> _connectedCompleter = Completer<bool>();
@@ -24,19 +24,41 @@ class CoreLib extends CoreHandlerInterface {
   int _lifecycleRevision = 0;
   int _methodCallId = 0;
   bool _closed = false;
+  final Set<Completer<CoreMethodResponse?>> _pendingCalls = {};
 
   final Service? _service;
   final SharedState Function() _readSharedState;
 
   CoreLib._internal()
     : _service = service,
-      _readSharedState = (() => appController.sharedState);
+      _readSharedState = (() => appController.sharedState) {
+    _service?.addListener(this);
+  }
 
   @visibleForTesting
   CoreLib.forTesting({
     required Service this._service,
     required this._readSharedState,
-  });
+  }) {
+    _service?.addListener(this);
+  }
+
+  /// The binder never answers a call whose :remote process died, so fail it
+  /// here as the desktop transport does instead of waiting for the timeout.
+  @override
+  void onServiceCrash(String message) {
+    final pending = _pendingCalls.toList(growable: false);
+    _pendingCalls.clear();
+    for (final call in pending) {
+      call.completeError(
+        CoreMethodException(
+          code: 'transport_disconnected',
+          message: 'Android Core service disconnected',
+          details: message,
+        ),
+      );
+    }
+  }
 
   @override
   bool get isConnected => _connectedCompleter.isCompleted;
@@ -153,6 +175,7 @@ class CoreLib extends CoreHandlerInterface {
 
   Future<CoreLifecycleResult> _close() async {
     _closed = true;
+    _service?.removeListener(this);
     return _stop(allowClosed: true);
   }
 
@@ -171,12 +194,34 @@ class CoreLib extends CoreHandlerInterface {
       );
       return null;
     }
+    final service = _service;
+    if (service == null) return null;
     final id = '${++_methodCallId}';
-    final result = await _service
-        ?.invokeMethod(
+    final response = Completer<CoreMethodResponse?>();
+    _pendingCalls.add(response);
+    service
+        .invokeMethod(
           CoreMethodCall(id: id, method: method, arguments: arguments),
         )
-        .withTimeout(timeout: timeout, onTimeout: () => null);
+        .then(
+          (result) {
+            if (!response.isCompleted) response.complete(result);
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            if (!response.isCompleted) {
+              response.completeError(error, stackTrace);
+            }
+          },
+        );
+    final CoreMethodResponse? result;
+    try {
+      result = await response.future.withTimeout(
+        timeout: timeout,
+        onTimeout: () => null,
+      );
+    } finally {
+      _pendingCalls.remove(response);
+    }
     if (result == null) {
       return null;
     }
