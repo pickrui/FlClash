@@ -109,27 +109,12 @@ class AppPath {
       isMacOS: system.isMacOS,
     );
     if (legacyPath == null) return false;
-    final legacyDirectory = Directory(legacyPath);
-    if (!await legacyDirectory.exists()) return false;
-    final legacyLock = await _tryLockLegacyApplicationSupport(legacyDirectory);
-    if (legacyLock == null) {
-      throw FileSystemException(
-        'Legacy application data is in use',
-        legacyPath,
-      );
-    }
-    try {
-      final migrated = await migrateLegacyApplicationSupportDirectory(
-        legacyPath: legacyPath,
-        currentPath: currentPath,
-        heldLegacyLock: legacyLock,
-      );
-      _legacyDataLock = legacyLock;
-      return migrated;
-    } catch (_) {
-      await _releaseLegacyApplicationSupportLock(legacyLock);
-      rethrow;
-    }
+    final legacyLock = await migrateLegacyApplicationSupport(
+      legacyPath: legacyPath,
+      currentPath: currentPath,
+    );
+    _legacyDataLock = legacyLock;
+    return legacyLock != null;
   }
 
   Future<String> get databasePath async {
@@ -246,6 +231,36 @@ String? legacyApplicationSupportPathFor(
     legacyPackageName.substring(0, legacySeparator),
     legacyPackageName.substring(legacySeparator + 1),
   );
+}
+
+/// Upstream FlClash holds this lock while running; only a migration takes it.
+Future<RandomAccessFile?> migrateLegacyApplicationSupport({
+  required String legacyPath,
+  required String currentPath,
+}) async {
+  final legacyDirectory = Directory(legacyPath);
+  if (!await legacyDirectory.exists() ||
+      await _directoryHasEntries(Directory(currentPath))) {
+    return null;
+  }
+  final legacyLock = await _tryLockLegacyApplicationSupport(legacyDirectory);
+  if (legacyLock == null) {
+    throw FileSystemException('Legacy application data is in use', legacyPath);
+  }
+  try {
+    if (await migrateLegacyApplicationSupportDirectory(
+      legacyPath: legacyPath,
+      currentPath: currentPath,
+      heldLegacyLock: legacyLock,
+    )) {
+      return legacyLock;
+    }
+  } catch (_) {
+    await _releaseLegacyApplicationSupportLock(legacyLock);
+    rethrow;
+  }
+  await _releaseLegacyApplicationSupportLock(legacyLock);
+  return null;
 }
 
 Future<bool> migrateLegacyApplicationSupportDirectory({

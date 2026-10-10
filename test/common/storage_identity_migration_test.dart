@@ -253,4 +253,126 @@ Future<void> main(List<String> arguments) async {
       } catch (_) {}
     }
   });
+
+  group('migrateLegacyApplicationSupport', () {
+    late Directory root;
+    late Directory legacy;
+    late Directory current;
+    late File legacyLockFile;
+
+    setUp(() async {
+      root = await Directory.systemTemp.createTemp('flclash_identity_owner_');
+      legacy = Directory(p.join(root.path, 'legacy'));
+      current = Directory(p.join(root.path, 'current'));
+      legacyLockFile = File(p.join(legacy.path, 'FlClash.lock'));
+      await legacyLockFile.create(recursive: true);
+      await File(p.join(legacy.path, 'config.yaml')).writeAsString('legacy');
+      await File(p.join(current.path, 'FlClash.lock')).create(recursive: true);
+    });
+
+    tearDown(() => root.delete(recursive: true));
+
+    Future<String> probeLegacyLock() async {
+      final probe = File(p.join(root.path, 'lock_probe.dart'));
+      await probe.writeAsString('''
+import 'dart:io';
+
+Future<void> main(List<String> arguments) async {
+  final lock = await File(arguments.single).open(mode: FileMode.write);
+  try {
+    await lock.lock(FileLock.exclusive);
+    stdout.writeln('locked');
+    await lock.unlock();
+  } catch (_) {
+    stdout.writeln('blocked');
+  } finally {
+    await lock.close();
+  }
+}
+''');
+      final result = await Process.run('dart', [
+        probe.path,
+        legacyLockFile.path,
+      ]);
+      return (result.stdout as String).trim();
+    }
+
+    test('leaves another FlClash unlocked once current data exists', () async {
+      final heldLock = await migrateLegacyApplicationSupport(
+        legacyPath: legacy.path,
+        currentPath: current.path,
+      );
+      addTearDown(() => heldLock?.close());
+
+      expect(heldLock, isNull);
+      expect(await probeLegacyLock(), 'locked');
+      expect(File(p.join(current.path, 'config.yaml')).existsSync(), isFalse);
+    });
+
+    test('starts while another FlClash runs on the legacy data', () async {
+      final holder = File(p.join(root.path, 'lock_holder.dart'));
+      await holder.writeAsString('''
+import 'dart:io';
+
+Future<void> main(List<String> arguments) async {
+  final lock = await File(arguments.single).open(mode: FileMode.write);
+  await lock.lock(FileLock.exclusive);
+  stdout.writeln('locked');
+  await stdin.first;
+  await lock.unlock();
+  await lock.close();
+}
+''');
+      final process = await Process.start('dart', [
+        holder.path,
+        legacyLockFile.path,
+      ]);
+      try {
+        await process.stdout
+            .transform(utf8.decoder)
+            .transform(const LineSplitter())
+            .first
+            .timeout(const Duration(seconds: 5));
+
+        final heldLock = await migrateLegacyApplicationSupport(
+          legacyPath: legacy.path,
+          currentPath: current.path,
+        );
+        addTearDown(() => heldLock?.close());
+        expect(heldLock, isNull);
+      } finally {
+        try {
+          process.stdin.writeln();
+          await process.stdin.close();
+        } catch (_) {}
+        await process.exitCode.timeout(
+          const Duration(seconds: 5),
+          onTimeout: () {
+            process.kill();
+            return -1;
+          },
+        );
+      }
+    });
+
+    test(
+      'keeps the legacy lock after moving data into an empty directory',
+      () async {
+        await current.delete(recursive: true);
+
+        final heldLock = await migrateLegacyApplicationSupport(
+          legacyPath: legacy.path,
+          currentPath: current.path,
+        );
+        addTearDown(() => heldLock?.close());
+
+        expect(heldLock, isNotNull);
+        expect(
+          await File(p.join(current.path, 'config.yaml')).readAsString(),
+          'legacy',
+        );
+        expect(await probeLegacyLock(), 'blocked');
+      },
+    );
+  });
 }
