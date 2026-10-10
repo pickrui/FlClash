@@ -69,6 +69,33 @@ void main() {
     expect(offsetOf(tester, second), Offset.zero);
   });
 
+  testWidgets('a grid narrower than its spacing lays children out empty', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 40,
+            child: Grid(
+              crossAxisCount: 8,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              children: [
+                GridItem(mainAxisCellCount: 1, child: SizedBox(key: first)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(tester.getSize(find.byKey(first)), Size.zero);
+  });
+
   testWidgets('a misplaced GridItem names Grid as its expected parent', (
     tester,
   ) async {
