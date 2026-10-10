@@ -112,6 +112,25 @@ void main() {
     },
   );
 
+  test('the app TUN MTU replaces the profile MTU at setup', () async {
+    final state = _makeRealProfileState(
+      rawConfig: {
+        'tun': <String, dynamic>{'mtu': 9000, 'udp-timeout': 300},
+        'rules': ['MATCH,DIRECT'],
+      },
+    );
+    final result = await makeRealProfileTask(
+      state.copyWith(
+        realPatchConfig: state.realPatchConfig.copyWith(
+          tun: state.realPatchConfig.tun.copyWith(mtu: 1480),
+        ),
+      ),
+    );
+
+    expect(result['tun']['mtu'], 1480);
+    expect(result['tun']['udp-timeout'], 300);
+  });
+
   group('remote provider cache', () {
     late Directory root;
     const url = 'https://fixture.invalid/resources';

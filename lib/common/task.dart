@@ -399,6 +399,7 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
   rawConfig['tun']['device'] = realPatchConfig.tun.device;
   rawConfig['tun']['dns-hijack'] = realPatchConfig.tun.dnsHijack;
   rawConfig['tun']['stack'] = realPatchConfig.tun.stack.name;
+  rawConfig['tun']['mtu'] = realPatchConfig.tun.mtu;
   rawConfig['tun']['route-address'] = realPatchConfig.tun.routeAddress;
   rawConfig['tun']['auto-route'] = realPatchConfig.tun.autoRoute;
   rawConfig['geodata-loader'] = realPatchConfig.geodataLoader.name;
