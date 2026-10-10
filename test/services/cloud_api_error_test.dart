@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/http.dart';
+import 'package:fl_clash/core/controller.dart' show ConfigValidationException;
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:flutter/widgets.dart' show Locale;
@@ -257,6 +258,32 @@ void main() {
     );
     expect(CloudApiException.clean(wrapped), contains('HTTP 401'));
     expect(CloudApiException.isUnauthorized(wrapped), isFalse);
+  });
+
+  test('error text mentioning 401 cannot invalidate the API account', () {
+    for (final error in <Object>[
+      const ConfigValidationException(
+        'Parse Error: proxy 401: unsupport proxy type: foo',
+      ),
+      const ConfigValidationException(
+        'Parse Error: rules[1401] [DOMAIN,unauthorized.example,DIRECT] '
+        'error: proxy [x] not found',
+      ),
+      const FileSystemException('Cannot open file', '/profiles/1401.yaml'),
+      const CloudApiException('Order 401 was not found'),
+      const CloudApiException('Unauthorized coupon'),
+    ]) {
+      expect(
+        CloudApiException.isUnauthorized(error),
+        isFalse,
+        reason: '$error',
+      );
+    }
+    expect(
+      CloudApiException.isUnauthorized(const CloudApiException('Unauthorized')),
+      isTrue,
+    );
+    expect(CloudApiException.isUnauthorized('Unauthorized'), isTrue);
   });
 
   for (final entry in {

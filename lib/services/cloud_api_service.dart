@@ -332,10 +332,9 @@ class CloudApiException implements Exception {
       return error.response?.statusCode == HttpStatus.unauthorized ||
           (error.response?.data is Map && error.response?.data['ret'] == 401);
     }
-    final message = clean(error).toLowerCase();
-    return message == 'unauthorized' ||
-        message.contains('unauthorized') ||
-        message.contains('401');
+    // Validation, storage and panel messages may quote a 401 or the word.
+    return (error is String || error is CloudApiException) &&
+        clean(error).toLowerCase() == 'unauthorized';
   }
 
   static String clean(Object error) {
