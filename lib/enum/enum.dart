@@ -67,7 +67,7 @@ enum GroupType {
   }
 }
 
-enum GroupName { GLOBAL, Proxy, Auto, Fallback }
+enum GroupName { GLOBAL }
 
 extension GroupTypeExtension on GroupType {
   static final List<String> valueList = List.unmodifiable(
@@ -79,7 +79,7 @@ extension GroupTypeExtension on GroupType {
   }
 }
 
-enum UsedProxy { GLOBAL, DIRECT, REJECT }
+enum UsedProxy { DIRECT }
 
 extension UsedProxyExtension on UsedProxy {
   String get value => name;
@@ -106,8 +106,6 @@ extension LogLevelExt on LogLevel {
 enum TrafficUnit { B, KB, MB, GB, TB }
 
 enum NavigationItemMode { mobile, desktop, more }
-
-enum Network { tcp, udp }
 
 enum ProxiesSortType { none, delay, name }
 
@@ -268,8 +266,7 @@ enum ProxiesIconStyle { none, standard, icon }
 
 enum FontFamily {
   twEmoji('Twemoji'),
-  jetBrainsMono('JetBrainsMono'),
-  icon('Icons');
+  jetBrainsMono('JetBrainsMono');
 
   final String value;
 
@@ -287,8 +284,6 @@ enum FunctionTag {
   applyProfile,
   savePreferences,
   changeProxy,
-  checkIp,
-  handleWill,
   updateDelay,
   vpnTip,
   autoLaunch,
@@ -522,7 +517,7 @@ enum RestoreStrategy { compatible, override }
 
 enum Language { yaml, javaScript, json }
 
-enum ScrollPositionCacheKey { tools, profiles, proxiesList, proxiesTabList }
+enum ScrollPositionCacheKey { proxiesTabList }
 
 enum QueryTag { proxies, access }
 
