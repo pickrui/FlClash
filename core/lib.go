@@ -253,12 +253,6 @@ func setEventListener(listener unsafe.Pointer) {
 	eventListener = listener
 }
 
-//export getTotalTraffic
-func getTotalTraffic(onlyStatisticsProxy bool) *C.char {
-	defer recoverExport("getTotalTraffic")
-	return C.CString(marshalResult(handleGetTotalTraffic(onlyStatisticsProxy)))
-}
-
 //export getTraffic
 func getTraffic(onlyStatisticsProxy bool) *C.char {
 	defer recoverExport("getTraffic")
