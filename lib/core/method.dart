@@ -43,7 +43,6 @@ enum CoreMethod {
   startListener,
   stopListener,
   setNetworkExcluded,
-  getMemory,
   getMemoryStats,
   crash,
   setupConfig,

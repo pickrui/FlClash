@@ -416,10 +416,6 @@ class CoreController {
 
   Future<CoreMemoryStats> getMemoryStats() => _interface.getMemoryStats();
 
-  Future<int> getMemory() async {
-    return _interface.getMemory();
-  }
-
   void resetTraffic() {
     _detach(CoreMethod.resetTraffic, _interface.resetTraffic);
   }

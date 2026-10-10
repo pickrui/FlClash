@@ -328,8 +328,6 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 		} else {
 			response.success(stats)
 		}
-	case getMemoryMethod:
-		handleGetMemory(func(value uint64) { response.success(value) })
 	case deleteFileMethod:
 		path := ""
 		if !decodeMethodArguments(call, response, &path) {

@@ -340,7 +340,6 @@ void main() {
       final handler = _FakeCoreHandler();
 
       expect(await handler.isInit, isFalse);
-      expect(await handler.getMemory(), 0);
       final delay = await handler.asyncTestDelay('https://example.com', 'node');
       expect(delay.value, isNull);
       expect(delay.name, 'node');

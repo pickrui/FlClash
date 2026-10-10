@@ -81,8 +81,6 @@ mixin CoreInterface {
 
   FutureOr<Traffic> getTotalTraffic(bool onlyStatisticsProxy);
 
-  FutureOr<int> getMemory();
-
   Future<CoreMemoryStats> getMemoryStats();
 
   FutureOr<void> resetTraffic();
@@ -484,10 +482,4 @@ abstract class CoreHandlerInterface with CoreInterface {
       method: CoreMethod.getMemoryStats,
     ),
   );
-
-  @override
-  Future<int> getMemory() async {
-    final value = await _invokeMethod<num>(method: CoreMethod.getMemory);
-    return value?.toInt() ?? 0;
-  }
 }

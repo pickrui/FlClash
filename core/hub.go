@@ -706,12 +706,6 @@ func handleGetMemoryStats() (MemoryStats, error) {
 	}, nil
 }
 
-func handleGetMemory(fn func(value uint64)) {
-	safeGo("getMemory", func() {
-		fn(statistic.DefaultManager.Memory())
-	})
-}
-
 func handleGetConfig(path string) (*config.RawConfig, error) {
 	data, err := readFile(path)
 	if err != nil {
