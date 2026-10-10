@@ -86,6 +86,11 @@ class NextClampingScrollPhysics extends ClampingScrollPhysics {
     return NextClampingScrollPhysics(parent: buildParent(ancestor));
   }
 
+  // macOS hands the list Bouncing as its parent, whose fling-on-fling boost
+  // would overshoot a clamping simulation.
+  @override
+  double carriedMomentum(double existingVelocity) => 0;
+
   @override
   Simulation? createBallisticSimulation(
     ScrollMetrics position,
