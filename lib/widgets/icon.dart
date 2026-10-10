@@ -19,6 +19,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:fl_clash/common/icon_file_service.dart';
 
 final _decodedIcons = _IconCache();
+final _svgDataUri = RegExp(r'data:image/svg\+xml', caseSensitive: false);
 final _iconHistory = IconHistoryRecorder(
   (url) => database.iconRecordsDao.put(url),
 );
@@ -75,6 +76,14 @@ class CommonTargetIcon extends StatelessWidget {
 
     final base64 = _decodedIcons.decode(src);
     if (base64 != null) {
+      if (src.startsWith(_svgDataUri)) {
+        return SvgPicture.memory(
+          base64,
+          width: size,
+          height: size,
+          errorBuilder: (_, _, _) => _defaultIcon(),
+        );
+      }
       return Image(
         image: _resizeIcon(MemoryImage(base64), context, size),
         gaplessPlayback: true,

@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'dart:ui' as ui;
 
 import 'package:fl_clash/widgets/icon.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -51,5 +52,24 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     tester.binding.imageCache.clear();
     tester.binding.imageCache.clearLiveImages();
+  });
+
+  testWidgets('base64 svg icons render as vectors', (tester) async {
+    const svg =
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1">'
+        '<rect width="1" height="1" fill="#123456"/></svg>';
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: CommonTargetIcon(
+            src: 'data:image/svg+xml;base64,${base64Encode(utf8.encode(svg))}',
+            size: 24,
+          ),
+        ),
+      ),
+    );
+    expect(find.byType(SvgPicture), findsOneWidget);
+    expect(find.byType(Image), findsNothing);
   });
 }
