@@ -111,6 +111,19 @@ func decodeAndDecrypt(base64Str string) ([]byte, error) {
 	return decryptFlClashIfNeeded(decoded)
 }
 
+func logPanic(name string, recovered any) {
+	buf := make([]byte, 4096)
+	n := runtime.Stack(buf, false)
+	log.Printf("panic in %s: %v\n%s", name, recovered, buf[:n])
+}
+
+// A panic that unwinds out of a cgo export or a goroutine ends the :remote process.
+func recoverExport(name string) {
+	if recovered := recover(); recovered != nil {
+		logPanic(name, recovered)
+	}
+}
+
 func handleMethodCall(call *MethodCall, response MethodResponse) {
 	if call.Method == crashMethod {
 		handleCrash()
@@ -118,9 +131,7 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 	}
 	defer func() {
 		if recovered := recover(); recovered != nil {
-			buf := make([]byte, 4096)
-			n := runtime.Stack(buf, false)
-			log.Printf("panic in handleMethodCall(%s): %v\n%s", call.Method, recovered, buf[:n])
+			logPanic(fmt.Sprintf("handleMethodCall(%s)", call.Method), recovered)
 			response.failure("internal_error", fmt.Sprintf("internal panic: %v", recovered), nil)
 		}
 	}()

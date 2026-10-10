@@ -192,6 +192,7 @@ func handleUpdateDns(value string) {
 		addresses = strings.Split(value, ",")
 	}
 	go func() {
+		defer recoverExport("updateDns")
 		log.Infoln("[DNS] updateDns %s", value)
 		dns.UpdateSystemDNS(addresses)
 		dns.FlushCacheWithDefaultResolver()
@@ -209,6 +210,7 @@ func (response MethodResponse) send() {
 
 //export invokeMethod
 func invokeMethod(callback unsafe.Pointer, paramsChar *C.char) {
+	defer recoverExport("invokeMethod")
 	params := takeCString(paramsChar)
 	call := &MethodCall{}
 	err := json.Unmarshal([]byte(params), call)
@@ -226,6 +228,7 @@ func invokeMethod(callback unsafe.Pointer, paramsChar *C.char) {
 
 //export startTUN
 func startTUN(callback unsafe.Pointer, fd, mtu C.int, stackChar, addressChar, dnsChar *C.char) bool {
+	defer recoverExport("startTUN")
 	return handleStartTun(callback, int(fd), takeCString(stackChar), takeCString(addressChar), takeCString(dnsChar), int(mtu))
 }
 
@@ -233,35 +236,15 @@ func startTUN(callback unsafe.Pointer, fd, mtu C.int, stackChar, addressChar, dn
 func quickSetup(callback unsafe.Pointer, initParamsChar *C.char, setupParamsChar *C.char) {
 	go func() {
 		defer releaseObject(callback)
-		initParamsString := takeCString(initParamsChar)
-		setupParamsString := takeCString(setupParamsChar)
-		initParams := InitParams{}
-		if err := UnmarshalJson([]byte(initParamsString), &initParams); err != nil {
-			invokeResult(callback, err.Error())
-			return
-		}
-		setupParams := defaultSetupParams()
-		if err := UnmarshalJson([]byte(setupParamsString), setupParams); err != nil {
-			invokeResult(callback, err.Error())
-			return
-		}
-		if !handleInitClash(&initParams) {
-			invokeResult(callback, "init failed")
-			return
-		}
-		runLock.Lock()
-		isRunning = true
-		runLock.Unlock()
-		message := handleSetupConfig(setupParams)
-		if message != "" {
-			handleStopListener()
-		}
-		invokeResult(callback, message)
+		runQuickSetup(takeCString(initParamsChar), takeCString(setupParamsChar), func(message string) {
+			invokeResult(callback, message)
+		})
 	}()
 }
 
 //export setEventListener
 func setEventListener(listener unsafe.Pointer) {
+	defer recoverExport("setEventListener")
 	eventListenerLock.Lock()
 	defer eventListenerLock.Unlock()
 	if eventListener != nil {
@@ -272,11 +255,13 @@ func setEventListener(listener unsafe.Pointer) {
 
 //export getTotalTraffic
 func getTotalTraffic(onlyStatisticsProxy bool) *C.char {
+	defer recoverExport("getTotalTraffic")
 	return C.CString(marshalResult(handleGetTotalTraffic(onlyStatisticsProxy)))
 }
 
 //export getTraffic
 func getTraffic(onlyStatisticsProxy bool) *C.char {
+	defer recoverExport("getTraffic")
 	return C.CString(marshalResult(handleGetTraffic(onlyStatisticsProxy)))
 }
 
@@ -308,20 +293,24 @@ func sendMessageBatch(messages []Message) {
 
 //export stopTun
 func stopTun() {
+	defer recoverExport("stopTun")
 	handleStopTun()
 }
 
 //export suspend
 func suspend(suspended bool) {
+	defer recoverExport("suspend")
 	handleSuspend(suspended)
 }
 
 //export forceGC
 func forceGC() {
+	defer recoverExport("forceGC")
 	handleForceGC()
 }
 
 //export updateDns
 func updateDns(s *C.char) {
+	defer recoverExport("updateDns")
 	handleUpdateDns(takeCString(s))
 }

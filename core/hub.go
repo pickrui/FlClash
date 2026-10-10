@@ -11,6 +11,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"iter"
 	"os"
 	"runtime"
@@ -737,6 +738,47 @@ func handleSetupConfig(params *SetupParams) string {
 		return err.Error()
 	}
 	return ""
+}
+
+var quickSetupConfig = handleSetupConfig
+
+func runQuickSetup(initParamsString, setupParamsString string, answer func(string)) {
+	answered := false
+	reply := func(message string) {
+		answered = true
+		answer(message)
+	}
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			logPanic("quickSetup", recovered)
+			handleStopListener()
+			if !answered {
+				answer(fmt.Sprintf("internal panic: %v", recovered))
+			}
+		}
+	}()
+	initParams := InitParams{}
+	if err := UnmarshalJson([]byte(initParamsString), &initParams); err != nil {
+		reply(err.Error())
+		return
+	}
+	setupParams := defaultSetupParams()
+	if err := UnmarshalJson([]byte(setupParamsString), setupParams); err != nil {
+		reply(err.Error())
+		return
+	}
+	if !handleInitClash(&initParams) {
+		reply("init failed")
+		return
+	}
+	runLock.Lock()
+	isRunning = true
+	runLock.Unlock()
+	message := quickSetupConfig(setupParams)
+	if message != "" {
+		handleStopListener()
+	}
+	reply(message)
 }
 
 func init() {
