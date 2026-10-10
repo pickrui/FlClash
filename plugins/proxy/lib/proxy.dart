@@ -1276,7 +1276,7 @@ class Proxy extends ProxyPlatform {
           'Proxy Settings',
           '--key',
           '${type.name}Proxy',
-          '${type.name}://$url:$port',
+          '${type == ProxyTypes.socks ? 'socks' : 'http'}://$url:$port',
         ]),
       );
     }

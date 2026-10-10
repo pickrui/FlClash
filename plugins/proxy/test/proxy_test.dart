@@ -155,6 +155,27 @@ void main() {
         'kwriteconfig5',
       });
     });
+
+    test('points every KDE proxy at the plain HTTP or SOCKS listener',
+        () async {
+      final commands = await Proxy.buildLinuxStartCommandsForTest(
+        port: 7890,
+        bypassDomain: ['localhost'],
+        desktop: 'KDE',
+        homeDir: '/home/user',
+        availableExecutables: {'kwriteconfig6', 'kreadconfig6'},
+      );
+
+      expect({
+        for (final command in commands)
+          if (command.args[5].endsWith('Proxy'))
+            command.args[5]: command.args[6],
+      }, {
+        'httpProxy': 'http://127.0.0.1:7890',
+        'httpsProxy': 'http://127.0.0.1:7890',
+        'socksProxy': 'socks://127.0.0.1:7890',
+      });
+    });
   });
 
   test('finds executables through PATH without spawning which', () async {
@@ -616,6 +637,47 @@ USB 10/100/1000 LAN
       expect(commands.toSet(), {'gsettings'});
     });
 
+    test('KDE stop restores an https:// proxy an older build persisted',
+        () async {
+      final root = await Directory.systemTemp.createTemp('proxy_kde_legacy_');
+      addTearDown(() => root.delete(recursive: true));
+      final statePath = '${root.path}/restore.json';
+      final original = _kdeProxyState();
+      final state = Map<String, String>.from(original);
+      final runner = _kdeRunner(state);
+      bool kdeTools(String executable) =>
+          {'kwriteconfig6', 'kreadconfig6'}.contains(executable);
+      expect(
+        await Proxy(
+          processRunner: runner,
+          executableChecker: (executable) async => kdeTools(executable),
+          stateFilePath: statePath,
+        ).startLinuxProxyForTest(
+          7890,
+          ['localhost'],
+          desktop: 'KDE',
+          homeDir: '/home/user',
+        ),
+        true,
+      );
+      final snapshot = jsonDecode(File(statePath).readAsStringSync()) as Map;
+      for (final command in snapshot['managedCommands'] as List) {
+        final args = (command as Map)['args'] as List;
+        if (args[5] == 'httpsProxy') args[6] = 'https://127.0.0.1:7890';
+      }
+      File(statePath).writeAsStringSync(jsonEncode(snapshot), flush: true);
+      state['httpsProxy'] = 'https://127.0.0.1:7890';
+
+      final nextProcess = Proxy(
+        processRunner: runner,
+        executableChecker: (executable) async => kdeTools(executable),
+        stateFilePath: statePath,
+      );
+      expect(await nextProcess.restoreProxyForTest(), true);
+      expect(state, original);
+      expect(File(statePath).existsSync(), false);
+    });
+
     test('macOS stop restores proxy endpoints, states, and bypass domains',
         () async {
       final calls = <List<String>>[];
@@ -961,6 +1023,16 @@ ProxyProcessRunner _gsettingsRunner(
       return ProcessResult(1, 0, '', '');
     }
     return ProcessResult(1, 1, '', 'unsupported command');
+  };
+}
+
+Map<String, String> _kdeProxyState() {
+  return {
+    'NoProxyFor': 'old.local',
+    'httpProxy': 'http://old:8080',
+    'httpsProxy': 'http://old:8443',
+    'ReversedException': 'true',
+    'ProxyType': '2',
   };
 }
 
