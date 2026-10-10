@@ -59,20 +59,16 @@ class GlobalState {
     unawaited(_updateTasks.setPaused(!isUiVisible && !needsTrayTraffic));
   }
 
-  late final _listeners = ListenerStateScheduler((running) async {
-    if (safeModeBuild) return;
-    if (coreController.isCompleted) {
-      if (running) {
-        if (!await coreController.startListener()) {
-          throw PortConflictException(appLocalizations.portConflictTip);
-        }
-      } else {
-        await coreController.stopListener();
-      }
-    } else if (running && system.isDesktop) {
-      throw StateError('Core is not connected');
-    }
-  });
+  late final _listeners = ListenerStateScheduler(
+    (running) => setListenersRunning(running),
+  );
+
+  @visibleForTesting
+  Future<void> Function(bool running) setListenersRunning =
+      _setCoreListenersRunning;
+
+  @visibleForTesting
+  Future<void> Function() startService = _startService;
 
   Future<void> syncNetworkSuspension() => system.isAndroid
       ? Future.value()
@@ -224,6 +220,7 @@ class GlobalState {
 
   Future<void> handleStart([UpdateTasks? tasks]) async {
     final request = ++_runRequest;
+    final resumesRunningService = startTime != null;
     startTime ??= DateTime.now();
     try {
       await _listeners.apply(
@@ -231,12 +228,23 @@ class GlobalState {
         suspended: !system.isAndroid && container.read(suspendProvider),
       );
       if (request != _runRequest) return;
-      await service?.start();
+      await startService();
       if (request != _runRequest) return;
       startUpdateTasks(tasks);
     } catch (_) {
-      if (request == _runRequest) startTime = null;
+      if (request == _runRequest) {
+        startTime = null;
+        if (!resumesRunningService) await _closeListenersAfterFailedStart();
+      }
       rethrow;
+    }
+  }
+
+  Future<void> _closeListenersAfterFailedStart() async {
+    try {
+      await _listeners.apply(running: false, suspended: false);
+    } catch (error) {
+      commonPrint.log('Closing listeners after a failed start failed: $error');
     }
   }
 
@@ -415,3 +423,22 @@ class GlobalState {
 }
 
 final globalState = GlobalState();
+
+Future<void> _setCoreListenersRunning(bool running) async {
+  if (safeModeBuild) return;
+  if (coreController.isCompleted) {
+    if (running) {
+      if (!await coreController.startListener()) {
+        throw PortConflictException(appLocalizations.portConflictTip);
+      }
+    } else {
+      await coreController.stopListener();
+    }
+  } else if (running && system.isDesktop) {
+    throw StateError('Core is not connected');
+  }
+}
+
+Future<void> _startService() async {
+  await service?.start();
+}

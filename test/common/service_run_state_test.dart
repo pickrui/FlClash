@@ -81,6 +81,67 @@ void main() {
     },
   );
 
+  group('failed service start', () {
+    final setListenersRunning = globalState.setListenersRunning;
+    final startService = globalState.startService;
+    final listenerStates = <bool>[];
+    setUp(() {
+      listenerStates.clear();
+      globalState.setListenersRunning = (running) async =>
+          listenerStates.add(running);
+      globalState.startService = () async =>
+          throw StateError('VPN permission was not granted');
+    });
+    tearDown(() {
+      globalState.setListenersRunning = setListenersRunning;
+      globalState.startService = startService;
+    });
+
+    test('closes the listeners it opened', () async {
+      await expectLater(globalState.handleStart([]), throwsStateError);
+      expect(listenerStates, [true, false]);
+      expect(globalState.startTime, isNull);
+      expect(container.read(runTimeProvider), isNull);
+    });
+
+    test('keeps the start error when closing the listeners fails', () async {
+      globalState.setListenersRunning = (running) async {
+        listenerStates.add(running);
+        if (!running) throw StateError('Core is not connected');
+      };
+      await expectLater(
+        globalState.handleStart([]),
+        throwsA(
+          isA<StateError>().having(
+            (error) => error.message,
+            'message',
+            'VPN permission was not granted',
+          ),
+        ),
+      );
+      expect(listenerStates, [true, false]);
+    });
+
+    test('keeps the listeners of a service that was already running', () async {
+      globalState.startTime = DateTime.now().subtract(
+        const Duration(minutes: 1),
+      );
+      await expectLater(globalState.handleStart([]), throwsStateError);
+      expect(listenerStates, [true]);
+    });
+
+    test('leaves the listeners to a stop that superseded it', () async {
+      final response = Completer<void>();
+      globalState.startService = () => response.future;
+      final start = globalState.handleStart([]);
+      await Future<void>.delayed(Duration.zero);
+      globalState.clearRunState();
+      response.completeError(StateError('VPN permission was not granted'));
+      await expectLater(start, throwsStateError);
+      expect(listenerStates, [true]);
+    });
+  });
+
   test('an in-flight running query cannot undo a newer local stop', () async {
     globalState.startTime = DateTime.now();
     final response = Completer<DateTime?>();
