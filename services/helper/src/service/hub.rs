@@ -354,6 +354,36 @@ static LOGS: Lazy<Mutex<VecDeque<String>>> =
     Lazy::new(|| Mutex::new(VecDeque::with_capacity(LOG_CAPACITY)));
 static MANAGED_CORE: Lazy<Mutex<Option<ManagedCore>>> = Lazy::new(|| Mutex::new(None));
 
+/// A Core whose app went away exits on its own, and stays a zombie until it is
+/// waited on; without this nothing waits before the next start or stop.
+fn reap_exited_core(session_id: &str) {
+    let deadline = Instant::now() + CORE_EXIT_TIMEOUT;
+    loop {
+        {
+            let mut managed = MANAGED_CORE.lock().unwrap();
+            let Some(core) = managed
+                .as_mut()
+                .filter(|core| core.session_id == session_id)
+            else {
+                return;
+            };
+            match core.child.try_wait() {
+                Ok(Some(status)) => {
+                    log_message(format!("Core exited on its own: {status}"));
+                    *managed = None;
+                    return;
+                }
+                Ok(None) => {}
+                Err(_) => return,
+            }
+        }
+        if Instant::now() >= deadline {
+            return;
+        }
+        thread::sleep(CORE_EXIT_POLL_INTERVAL);
+    }
+}
+
 fn release_managed_core(managed: &mut Option<ManagedCore>) -> Result<(), Error> {
     let Some(core) = managed.as_mut() else {
         return Ok(());
@@ -448,7 +478,11 @@ fn start(start_params: StartParams) -> warp::reply::Response {
             };
             let process_id = owned.child.id();
             if let Some(stderr) = owned.child.stderr.take() {
-                thread::spawn(move || forward_core_stderr(io::BufReader::new(stderr)));
+                let session_id = start_params.session_id.clone();
+                thread::spawn(move || {
+                    forward_core_stderr(io::BufReader::new(stderr));
+                    reap_exited_core(&session_id);
+                });
             }
             *managed = Some(owned);
             json_response(
@@ -1142,6 +1176,42 @@ mod tests {
         let body: serde_json::Value = serde_json::from_slice(response.body()).unwrap();
         assert_eq!(body["code"], "coreVerificationFailed");
         assert!(MANAGED_CORE.lock().unwrap().is_none());
+    }
+
+    #[test]
+    fn a_core_that_exits_on_its_own_is_reaped() {
+        let _state = lock_process_state();
+        let session_id = "0123456789abcdef0123456789abcdef";
+        *MANAGED_CORE.lock().unwrap() =
+            Some(ManagedCore::adopt(session_id.to_string(), spawn_placeholder_core()).unwrap());
+
+        reap_exited_core(session_id);
+
+        assert!(MANAGED_CORE.lock().unwrap().is_none());
+    }
+
+    #[test]
+    fn reaping_leaves_a_running_or_newer_core_owned() {
+        let _state = lock_process_state();
+        let session_id = "0123456789abcdef0123456789abcdef";
+        *MANAGED_CORE.lock().unwrap() =
+            Some(ManagedCore::adopt(session_id.to_string(), spawn_placeholder_core()).unwrap());
+
+        reap_exited_core("fedcba9876543210fedcba9876543210");
+        assert!(MANAGED_CORE.lock().unwrap().is_some());
+
+        adopt_core(session_id);
+        reap_exited_core(session_id);
+
+        let mut managed = MANAGED_CORE.lock().unwrap();
+        assert!(managed
+            .as_mut()
+            .unwrap()
+            .child
+            .try_wait()
+            .unwrap()
+            .is_none());
+        release_managed_core(&mut managed).unwrap();
     }
 
     #[tokio::test]
