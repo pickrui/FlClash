@@ -202,6 +202,62 @@ String? extractReleaseNotesFromChangelog(String source, String tagName) {
   return normalizeReleaseNotes(lines.sublist(start + 1, end).join('\n'));
 }
 
+class _InflatedBytes implements Sink<List<int>> {
+  _InflatedBytes(this.maxBytes);
+
+  final int maxBytes;
+  final bytes = BytesBuilder(copy: false);
+  bool exceeded = false;
+
+  @override
+  void add(List<int> chunk) {
+    if (bytes.length + chunk.length > maxBytes) {
+      exceeded = true;
+      throw const FormatException('HTTP response exceeds size limit');
+    }
+    bytes.add(chunk);
+  }
+
+  @override
+  void close() {}
+}
+
+/// Some panels serve gzip or zlib bodies without a Content-Encoding header.
+Uint8List inflateUnlabeledBytes(Uint8List bytes, {required int maxBytes}) {
+  final isGzip = bytes.length > 2 && bytes[0] == 0x1f && bytes[1] == 0x8b;
+  final isZlib =
+      bytes.length > 2 &&
+      bytes[0] & 0x0f == 8 &&
+      bytes[0] >> 4 <= 7 &&
+      (bytes[0] << 8 | bytes[1]) % 31 == 0;
+  if (!isGzip && !isZlib) return bytes;
+  final output = _InflatedBytes(maxBytes);
+  try {
+    ZLibDecoder().startChunkedConversion(output)
+      ..add(bytes)
+      ..close();
+  } catch (_) {
+    if (output.exceeded) rethrow;
+    return bytes;
+  }
+  final inflated = output.bytes.takeBytes();
+  // dart:io accepts a truncated stream; its trailer must match the output.
+  final trailer = ByteData.sublistView(bytes, bytes.length - 4);
+  final complete = isGzip
+      ? trailer.getUint32(0, Endian.little) == inflated.length & 0xffffffff
+      : trailer.getUint32(0) == _adler32(inflated);
+  return complete ? inflated : bytes;
+}
+
+int _adler32(Uint8List bytes) {
+  var a = 1, b = 0;
+  for (final byte in bytes) {
+    a = (a + byte) % 65521;
+    b = (b + a) % 65521;
+  }
+  return b << 16 | a;
+}
+
 class Request {
   late final Dio dio;
   final List<String> Function(Uri uri)? _readRoutes;
@@ -428,6 +484,7 @@ class Request {
     String url, {
     FutureOr<void> Function(Uint8List bytes)? validate,
     int maxBytes = _maxReadBytes,
+    bool inflateUnlabeled = false,
   }) async {
     final uri = Uri.tryParse(url);
     final isApiDomain = uri != null && _isApiDomain(uri.host);
@@ -437,9 +494,15 @@ class Request {
         isApiRequest: isApiDomain,
         maxBytes: maxBytes,
         validate: (response) async {
-          final bytes = response.data;
+          var bytes = response.data;
           if (bytes == null || bytes.isEmpty) {
             throw const FormatException('Subscription response is empty');
+          }
+          if (inflateUnlabeled) {
+            bytes = response.data = inflateUnlabeledBytes(
+              bytes,
+              maxBytes: maxBytes,
+            );
           }
           await validate?.call(bytes);
         },

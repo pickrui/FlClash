@@ -1264,6 +1264,7 @@ extension ProfileExtension on Profile {
     final response = await request.getFileResponseForUrl(
       url,
       validate: _validateProfileBytes,
+      inflateUnlabeled: true,
     );
     final disposition = response.headers.value('content-disposition');
     final userinfo = response.headers.value('subscription-userinfo');
