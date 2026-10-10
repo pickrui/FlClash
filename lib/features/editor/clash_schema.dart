@@ -681,7 +681,6 @@ const _proxyGroup = YamlSchema.map(
       'url-test',
       'fallback',
       'load-balance',
-      'relay',
     ]),
     'proxies': YamlSchema.list(_policy),
     'use': YamlSchema.list(YamlSchema.of(YamlScalar.proxyProvider)),
@@ -690,15 +689,15 @@ const _proxyGroup = YamlSchema.map(
     'lazy': _bool,
     'timeout': _str,
     'max-failed-times': _str,
+    'empty-fallback': _policy,
     'expected-status': _str,
     ..._groupFilters,
     'disable-udp': _bool,
-    'interface-name': _str,
-    'routing-mark': _str,
     'hidden': _bool,
     'icon': _str,
   },
   variants: {
+    'select': {'default-selected': _policy},
     'url-test': {'tolerance': _str},
     'load-balance': {
       'strategy': YamlSchema.scalar([
@@ -706,6 +705,7 @@ const _proxyGroup = YamlSchema.map(
         'round-robin',
         'sticky-sessions',
       ]),
+      'hash-key': YamlSchema.scalar(['in-user']),
     },
   },
 );

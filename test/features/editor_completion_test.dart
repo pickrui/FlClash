@@ -254,6 +254,35 @@ void main() {
       expect(completion!.suggestions.last.detail, 'trojan');
     });
 
+    test('completes the proxy group options the core accepts', () {
+      const select = 'proxy-groups:\n  - name: G\n    type: select\n    ';
+      const balance =
+          'proxy-groups:\n  - name: G\n    type: load-balance\n    ';
+      expect(_labels(_complete('${select}empty|')), contains('empty-fallback'));
+      expect(
+        _labels(_complete('${select}defa|')),
+        contains('default-selected'),
+      );
+      expect(
+        _labels(_complete('${balance}defa|')),
+        isNot(contains('default-selected')),
+      );
+      expect(_labels(_complete('${balance}hash|')), contains('hash-key'));
+      expect(_labels(_complete('${balance}hash-key: i|')), ['in-user']);
+      expect(
+        _labels(_complete('${select}interf|')),
+        isNot(contains('interface-name')),
+      );
+      expect(
+        _labels(_complete('${select}routing|')),
+        isNot(contains('routing-mark')),
+      );
+      expect(
+        _labels(_complete('proxy-groups:\n  - name: G\n    type: |')),
+        isNot(contains('relay')),
+      );
+    });
+
     test('completes a flow sequence member', () {
       const document =
           'proxy-groups:\n  - name: G\n    type: select\n'
