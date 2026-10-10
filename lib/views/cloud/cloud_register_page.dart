@@ -26,7 +26,9 @@ Future<T?> showCloudRegisterPage<T>(BuildContext context) {
 }
 
 class CloudRegisterPage extends ConsumerStatefulWidget {
-  const CloudRegisterPage({super.key});
+  const CloudRegisterPage({super.key, @visibleForTesting this.loadConfig});
+
+  final Future<CloudRegisterConfig> Function()? loadConfig;
 
   @override
   ConsumerState<CloudRegisterPage> createState() => _CloudRegisterPageState();
@@ -75,7 +77,8 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
       _configError = null;
     });
     try {
-      final config = await CloudApiService().fetchRegisterConfig();
+      final config =
+          await (widget.loadConfig ?? CloudApiService().fetchRegisterConfig)();
       if (!mounted) return;
       setState(() {
         _config = config;
@@ -191,9 +194,15 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
 
   Widget _buildContent(bool isLoading) {
     if (_loadingConfig) {
-      return const SizedBox(
-        height: 180,
-        child: Center(child: CircularProgressIndicator()),
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(
+            height: 180,
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          _buildCancel(isLoading),
+        ],
       );
     }
     if (_configError != null) {
@@ -414,7 +423,18 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
               ),
             ],
           ),
+          _buildCancel(isLoading),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCancel(bool isLoading) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: TextButton(
+        onPressed: isLoading ? null : () => Navigator.of(context).pop(),
+        child: Text(AppLocalizations.current.cancel),
       ),
     );
   }
