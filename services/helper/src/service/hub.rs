@@ -442,7 +442,16 @@ fn start(start_params: StartParams) -> warp::reply::Response {
             StatusCode::BAD_REQUEST,
         );
     }
+    #[cfg(target_os = "linux")]
+    if let Err(error) = super::linux::ensure_owner_socket(&start_params.address) {
+        return error_response("invalidRequest", error.to_string(), StatusCode::BAD_REQUEST);
+    }
+    launch(start_params)
+}
 
+/// Releases the managed Core before anything else, so a request reaching this
+/// point must already be accepted: a rejected one has to leave it running.
+fn launch(start_params: StartParams) -> warp::reply::Response {
     let mut managed = MANAGED_CORE.lock().unwrap();
     if let Err(error) = release_managed_core(&mut managed) {
         log_message(format!(
@@ -464,11 +473,6 @@ fn start(start_params: StartParams) -> warp::reply::Response {
             )
         }
     };
-
-    #[cfg(target_os = "linux")]
-    if let Err(error) = super::linux::ensure_owner_socket(&start_params.address) {
-        return error_response("invalidRequest", error.to_string(), StatusCode::BAD_REQUEST);
-    }
 
     match core.spawn(&start_params.address) {
         Ok(child) => {
@@ -1152,7 +1156,7 @@ mod tests {
 
     #[tokio::test]
     #[allow(clippy::await_holding_lock)]
-    async fn start_releases_the_managed_core_before_rejecting_an_unverified_core() {
+    async fn launch_releases_the_managed_core_before_rejecting_an_unverified_core() {
         let _state = lock_process_state();
         *MANAGED_CORE.lock().unwrap() = Some(
             ManagedCore::adopt(
@@ -1161,6 +1165,29 @@ mod tests {
             )
             .unwrap(),
         );
+
+        let response = launch(StartParams {
+            address: TEST_CORE_ADDRESS.to_string(),
+            session_id: "0123456789abcdef0123456789abcdef".to_string(),
+        });
+
+        assert_eq!(response.status(), StatusCode::CONFLICT);
+        assert!(MANAGED_CORE.lock().unwrap().is_none());
+        let body: serde_json::Value = serde_json::from_slice(
+            &warp::hyper::body::to_bytes(response.into_body())
+                .await
+                .unwrap(),
+        )
+        .unwrap();
+        assert_eq!(body["code"], "coreVerificationFailed");
+    }
+
+    #[cfg(target_os = "linux")]
+    #[tokio::test]
+    #[allow(clippy::await_holding_lock)]
+    async fn a_start_refused_for_its_socket_leaves_the_running_core_owned() {
+        let _state = lock_process_state();
+        adopt_core("fedcba9876543210fedcba9876543210");
 
         let response = helper_request()
             .method("POST")
@@ -1172,10 +1199,14 @@ mod tests {
             .reply(&routes())
             .await;
 
-        assert_eq!(response.status(), StatusCode::CONFLICT);
+        assert_eq!(response.status(), StatusCode::BAD_REQUEST);
         let body: serde_json::Value = serde_json::from_slice(response.body()).unwrap();
-        assert_eq!(body["code"], "coreVerificationFailed");
-        assert!(MANAGED_CORE.lock().unwrap().is_none());
+        assert_eq!(body["code"], "invalidRequest");
+        let mut managed = MANAGED_CORE.lock().unwrap();
+        let core = managed.as_mut().expect("Core stays owned");
+        assert_eq!(core.session_id, "fedcba9876543210fedcba9876543210");
+        assert!(core.child.try_wait().unwrap().is_none());
+        release_managed_core(&mut managed).unwrap();
     }
 
     #[test]
