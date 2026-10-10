@@ -17,6 +17,7 @@ import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/clash_providers.dart';
 import 'package:fl_clash/views/config/providers.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart' show XFile;
 import 'package:material_ui/material_ui.dart';
@@ -34,6 +35,14 @@ final _original = ClashProvider(
 class _ResourceLibrary implements ClashProviderLibrary {
   final saved = <ClashProvider>[];
   Future<void> Function()? completeSave;
+  final reordering = Completer<void>();
+  List<int>? reordered;
+  @override
+  Future<void> reorder(ProviderKind kind, List<int> ids) {
+    reordered = ids;
+    return reordering.future;
+  }
+
   @override
   Future<void> save(ClashProvider provider, {ClashProvider? previous}) async {
     saved.add(provider);
@@ -239,6 +248,47 @@ void main() {
     expect(find.text(l.existsTip(l.name), skipOffstage: false), findsOneWidget);
     expect(find.byType(EditorPage), findsOneWidget);
     await tester.pump(const Duration(seconds: 4));
+  });
+
+  testWidgets('a dropped resource stays where it lands while saving', (
+    tester,
+  ) async {
+    final second = _original.copyWith(id: 2, label: 'Second');
+    await tester.pumpWidget(
+      TestApp(
+        overrides: [
+          clashProviderLibraryProvider.overrideWithValue(library),
+          clashProvidersProvider.overrideWith(
+            (_) => Stream.value([_original, second]),
+          ),
+          viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 600)),
+        ],
+        child: const ClashProvidersView(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(AppLocalizations.current.ruleProviders));
+    await tester.pumpAndSettle();
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.text('Second')),
+    );
+    await tester.pump(kLongPressTimeout + const Duration(milliseconds: 100));
+    final distance =
+        tester.getCenter(find.text('Second')).dy -
+        tester.getTopLeft(find.text('Fixture')).dy;
+    for (var i = 0; i < 10; i++) {
+      await gesture.moveBy(Offset(0, -distance / 10));
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    double top(String label) => tester.getTopLeft(find.text(label)).dy;
+    expect(library.reordered, [2, 1]);
+    expect(top('Second'), lessThan(top('Fixture')));
+    library.reordering.complete();
+    await tester.pumpAndSettle();
   });
 
   testWidgets('saving blocks back navigation and retries after failure', (

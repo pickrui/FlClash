@@ -18,6 +18,7 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/script_library.dart';
 import 'package:fl_clash/views/config/scripts.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
@@ -61,6 +62,14 @@ class _ScriptLibrary implements ScriptLibrary {
   final saved = <String>[];
   final previousContents = <List<int>?>[];
   Future<void> Function()? completeSave;
+  final reordering = Completer<void>();
+  List<int>? reordered;
+  @override
+  Future<void> reorder(List<int> ids) {
+    reordered = ids;
+    return reordering.future;
+  }
+
   @override
   Future<void> save(
     Script script,
@@ -118,6 +127,48 @@ void main() {
     await tester.pumpAndSettle();
     return actions;
   }
+
+  testWidgets('a dropped script stays where it lands while saving', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(800, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final second = script.copyWith(id: 8, label: 'Second');
+    await tester.pumpWidget(
+      TestApp(
+        overrides: [
+          scriptsProvider.overrideWithBuild(
+            (_, _) => Stream.value([script, second]),
+          ),
+          commonActionProvider.overrideWith(_CommonAction.new),
+          scriptLibraryProvider.overrideWithValue(library),
+          viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 1000)),
+        ],
+        child: const StatusManager(child: ScriptsView()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.text('Second')),
+    );
+    await tester.pump(kLongPressTimeout + const Duration(milliseconds: 100));
+    final distance =
+        tester.getCenter(find.text('Second')).dy -
+        tester.getTopLeft(find.text('Fixture')).dy;
+    for (var i = 0; i < 10; i++) {
+      await gesture.moveBy(Offset(0, -distance / 10));
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    double top(String label) => tester.getTopLeft(find.text(label)).dy;
+    expect(library.reordered, [8, 7]);
+    expect(top('Second'), lessThan(top('Fixture')));
+    library.reordering.complete();
+    await tester.pumpAndSettle();
+  });
 
   Future<void> waitForEditor(WidgetTester tester) async {
     final editor = find.byType(CodeForge);

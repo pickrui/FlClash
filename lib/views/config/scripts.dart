@@ -332,10 +332,20 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
                   index,
                   animation,
                 ),
-                onReorderItem: (before, after) => _run(() {
-                  final ids = scripts.map((item) => item.id).toList();
-                  ids.insert(after, ids.removeAt(before));
-                  return _library.reorder(ids);
+                onReorderItem: (before, after) => _run(() async {
+                  final reordered = List.of(scripts);
+                  reordered.insert(after, reordered.removeAt(before));
+                  ref
+                      .read(scriptsProvider.notifier)
+                      .replaceFromDatabase(reordered);
+                  try {
+                    await _library.reorder([
+                      for (final item in reordered) item.id,
+                    ]);
+                  } catch (_) {
+                    if (mounted) ref.invalidate(scriptsProvider);
+                    rethrow;
+                  }
                 }),
               ),
             ),

@@ -47,6 +47,7 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
   ProviderKind _kind = ProviderKind.proxy;
   String _search = '';
   bool _importing = false;
+  List<int>? _pendingOrder;
   bool get _isCurrentPage => mounted && context.isCurrentPage;
 
   Future<void> _run(
@@ -332,10 +333,20 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
+    ref.listen(clashProvidersProvider, (_, _) {
+      if (_pendingOrder != null) setState(() => _pendingOrder = null);
+    });
     final state = ref.watch(clashProvidersProvider);
-    final entries = (state.value ?? [])
+    var entries = (state.value ?? [])
         .where((item) => item.kind == _kind)
         .toList();
+    final pending = _pendingOrder;
+    if (pending != null && pending.length == entries.length) {
+      final byId = {for (final item in entries) item.id: item};
+      if (pending.every(byId.containsKey)) {
+        entries = [for (final id in pending) byId[id]!];
+      }
+    }
     final query = SearchQuery(_search);
     final visible = entries
         .where((item) => query.matches([item.label, item.url]))
@@ -440,9 +451,17 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
                           if (!query.isEmpty) return;
                           final ids = entries.map((item) => item.id).toList();
                           ids.insert(after, ids.removeAt(before));
-                          await ref
-                              .read(clashProviderLibraryProvider)
-                              .reorder(_kind, ids);
+                          setState(() => _pendingOrder = ids);
+                          try {
+                            await ref
+                                .read(clashProviderLibraryProvider)
+                                .reorder(_kind, ids);
+                          } catch (_) {
+                            if (mounted && identical(_pendingOrder, ids)) {
+                              setState(() => _pendingOrder = null);
+                            }
+                            rethrow;
+                          }
                         }),
                       ),
                     ),
