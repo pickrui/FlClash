@@ -23,6 +23,8 @@ const _maxExtensionGrace = Duration(seconds: 30);
 
 const _connectTimeout = Duration(seconds: 10);
 
+final _frameDecoder = utf8.decoder.fuse(json.decoder);
+
 abstract interface class CoreRpcChannel {
   Future<T?> invoke<T>({
     required CoreMethod method,
@@ -174,7 +176,7 @@ final class CoreRpcClient implements CoreRpcChannel {
 
   void _handleFrame(Uint8List frame) {
     try {
-      final decoded = json.decode(utf8.decode(frame));
+      final decoded = _frameDecoder.convert(frame);
       if (decoded is! Map) {
         throw const FormatException('Core transport data is not an object');
       }

@@ -262,6 +262,63 @@ void main() {
     await transport.close();
   });
 
+  test(
+    'frames decode exactly like a UTF-8 decode followed by a JSON decode',
+    () async {
+      List<int> response(String id, [List<int> note = const []]) => [
+        ...utf8.encode('{"id":"$id","result":true,"note":"'),
+        ...note,
+        ...utf8.encode('"}'),
+      ];
+      final cases = <String, List<int> Function(String id)>{
+        'plain': (id) => response(id),
+        'byte order mark': (id) => [0xEF, 0xBB, 0xBF, ...response(id)],
+        'non-ASCII text': (id) => response(id, utf8.encode('é漢😀')),
+        'invalid byte in a string': (id) => response(id, [0xFF]),
+        'truncated sequence in a string': (id) => response(id, [0xE6, 0xBC]),
+        'encoded surrogate in a string': (id) =>
+            response(id, [0xED, 0xA0, 0x80]),
+        'overlong encoding in a string': (id) => response(id, [0xC0, 0x80]),
+        'code point above U+10FFFF': (id) =>
+            response(id, [0xF4, 0x90, 0x80, 0x80]),
+        'invalid byte after the object': (id) => [...response(id), 0xFF],
+        'lone invalid byte': (_) => [0xFF],
+        'empty frame': (_) => [],
+        'truncated JSON': (id) => utf8.encode('{"id":"$id","result":tr'),
+      };
+      final accepted = <String, bool>{};
+      for (final MapEntry(key: name, value: build) in cases.entries) {
+        final transport = FakeDesktopCoreTransport.connected();
+        final client = CoreRpcClient(transport);
+        final invocation = client.invoke<bool>(method: CoreMethod.getIsInit);
+        final id = (await _sentRequest(transport))['id'] as String;
+        final frame = build(id);
+        bool twoStepAccepts;
+        try {
+          final decoded = json.decode(utf8.decode(frame));
+          twoStepAccepts = decoded is Map && decoded['id'] == id;
+        } on FormatException {
+          twoStepAccepts = false;
+        }
+        var completed = false;
+        unawaited(invocation.whenComplete(() => completed = true));
+
+        transport.addFrame(Uint8List.fromList(frame));
+        await pumpEventQueue();
+        expect(completed, twoStepAccepts, reason: name);
+        accepted[name] = completed;
+        transport.addJson({'id': id, 'result': true});
+        expect(await invocation, isTrue, reason: name);
+        await client.close();
+        await transport.close();
+      }
+      expect(accepted['plain'], isTrue);
+      expect(accepted['byte order mark'], isTrue);
+      expect(accepted['invalid byte in a string'], isFalse);
+      expect(accepted['lone invalid byte'], isFalse);
+    },
+  );
+
   test('forwards Core message events', () async {
     final transport = FakeDesktopCoreTransport.connected();
     final client = CoreRpcClient(transport);
