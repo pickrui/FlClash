@@ -80,7 +80,7 @@ Future<void> main(List<String> arguments) async {
     );
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       try {
-        await window?.showInitFailure();
+        await window?.showInitFailure(onExit: () => exit(0));
       } catch (showError, showStack) {
         commonPrint.log(
           'show init error window failed: $showError stack: $showStack',
@@ -163,6 +163,9 @@ Future<Map<String, Object?>?> _loadStartupConfig() async {
 }
 
 class _RecoveryExitListener with WindowListener {
+  @override
+  void onWindowClose() => exit(0);
+
   @override
   void onWindowShouldTerminate() => exit(0);
 }

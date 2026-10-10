@@ -204,9 +204,14 @@ class Window implements WindowPort {
 
   /// Every desktop runner leaves the window hidden until [init] reveals it, so
   /// a failure before that point would leave the error screen with no window.
-  Future<void> showInitFailure() async {
+  Future<void> showInitFailure({VoidCallback? onExit}) async {
+    if (onExit != null) {
+      desktopWindow.addListener(_InitFailureWindowListener(onExit));
+    }
     try {
       await desktopWindow.ensureInitialized();
+      await desktopWindow.setPreventClose(true);
+      await desktopWindow.setTitleBarStyle(TitleBarStyle.normal);
       if (await desktopWindow.isVisible()) {
         return;
       }
@@ -263,6 +268,18 @@ class Window implements WindowPort {
   void forceExit() {
     exit(0);
   }
+}
+
+class _InitFailureWindowListener with WindowListener {
+  _InitFailureWindowListener(this.onExit);
+
+  final VoidCallback onExit;
+
+  @override
+  void onWindowClose() => onExit();
+
+  @override
+  void onWindowShouldTerminate() => onExit();
 }
 
 /// Serializes visibility requests so a burst of hotkey toggles lands in

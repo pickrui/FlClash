@@ -11,6 +11,7 @@ import 'package:fl_clash/common/window.dart';
 import 'package:fl_clash/models/config.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:window/window.dart' show desktopWindow;
 
 const _windowChannel = MethodChannel('window');
 
@@ -206,5 +207,68 @@ void main() {
     isFullScreen = false;
     isMinimized = true;
     expect(await Window().captureNormalGeometry(const WindowProps()), isNull);
+  });
+
+  Future<void> sendWindowEvent(String name) {
+    return binding.defaultBinaryMessenger.handlePlatformMessage(
+      _windowChannel.name,
+      _windowChannel.codec.encodeMethodCall(
+        MethodCall('onEvent', {'name': name}),
+      ),
+      null,
+    );
+  }
+
+  test('the init failure window closes and quits through onExit', () async {
+    final arguments = <String, Object?>{};
+    binding.defaultBinaryMessenger.setMockMethodCallHandler(_windowChannel, (
+      call,
+    ) async {
+      arguments[call.method] = call.arguments;
+      return call.method == 'isVisible' ? false : null;
+    });
+    final listeners = desktopWindow.listeners;
+    addTearDown(() {
+      for (final listener in desktopWindow.listeners) {
+        if (!listeners.contains(listener)) {
+          desktopWindow.removeListener(listener);
+        }
+      }
+    });
+    var exits = 0;
+
+    await Window().showInitFailure(onExit: () => exits++);
+
+    expect(arguments['setPreventClose'], {'value': true});
+    expect(
+      (arguments['setTitleBarStyle'] as Map)['style'],
+      'normal',
+      reason: 'the error screen draws no window header of its own',
+    );
+    for (final event in ['close', 'should-terminate']) {
+      await sendWindowEvent(event);
+    }
+    expect(
+      exits,
+      2,
+      reason:
+          'the macOS runner cancels every quit and outlives its last window, '
+          'so both have to end in onExit',
+    );
+  });
+
+  test('the recovery window leaves exit handling to its caller', () async {
+    final listeners = desktopWindow.listeners;
+
+    await Window().showInitFailure();
+
+    expect(
+      desktopWindow.listeners,
+      listeners,
+      reason:
+          'the exit listener is never removed, so a recovery that goes on to '
+          'start the app must keep handling close and quit itself',
+    );
+    expect(calls, containsAll(['setPreventClose', 'setTitleBarStyle']));
   });
 }
