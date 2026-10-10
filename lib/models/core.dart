@@ -73,6 +73,41 @@ abstract class VpnOptions with _$VpnOptions {
       _$VpnOptionsFromJson(json);
 }
 
+const _proxyOnlyVpnOptions = VpnOptions(
+  enable: false,
+  port: 0,
+  ipv6: false,
+  dnsHijacking: false,
+  accessControlProps: AccessControlProps(),
+  allowBypass: false,
+  systemProxy: false,
+  bypassDomain: [],
+  stack: '',
+);
+
+extension VpnOptionsExt on VpnOptions {
+  /// What the Android VPN service reads only when it builds the TUN.
+  VpnOptions get effective {
+    if (!enable) return _proxyOnlyVpnOptions;
+    final access = accessControlProps;
+    final accepts = access.mode == AccessControlMode.acceptSelected;
+    return copyWith(
+      port: systemProxy ? port : 0,
+      bypassDomain: systemProxy ? bypassDomain : const [],
+      excludeSSIDs: const [],
+      excludeNetworks: const [],
+      accessControlProps: access.enable
+          ? AccessControlProps(
+              enable: true,
+              mode: access.mode,
+              acceptList: accepts ? ([...access.acceptList]..sort()) : const [],
+              rejectList: accepts ? const [] : ([...access.rejectList]..sort()),
+            )
+          : const AccessControlProps(),
+    );
+  }
+}
+
 @freezed
 abstract class InitParams with _$InitParams {
   const factory InitParams({

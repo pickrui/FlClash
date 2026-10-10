@@ -11,6 +11,69 @@ import 'package:fl_clash/models/models.dart';
 import 'package:test/test.dart';
 
 void main() {
+  group('VpnOptions.effective', () {
+    const running = VpnOptions(
+      enable: true,
+      port: 7890,
+      ipv6: true,
+      dnsHijacking: false,
+      accessControlProps: AccessControlProps(
+        enable: true,
+        acceptList: ['accepted.app'],
+        rejectList: ['rejected.app', 'other.app'],
+      ),
+      allowBypass: true,
+      systemProxy: true,
+      bypassDomain: ['localhost'],
+      stack: 'mixed',
+      routeAddress: ['10.0.0.0/8'],
+      excludeSSIDs: ['home'],
+    );
+
+    test('keeps what the service reads when it builds the TUN', () {
+      for (final changed in [
+        running.copyWith(routeAddress: const []),
+        running.copyWith(port: 7891),
+        running.copyWith(bypassDomain: const ['example.com']),
+        running.copyWith(stack: 'gvisor'),
+        running.copyWith(mtu: 1400),
+        running.copyWith(
+          accessControlProps: running.accessControlProps.copyWith(
+            rejectList: const ['rejected.app'],
+          ),
+        ),
+        running.copyWith(enable: false),
+      ]) {
+        expect(changed.effective, isNot(running.effective), reason: '$changed');
+      }
+    });
+
+    test('ignores what a running service applies or never reads', () {
+      for (final changed in [
+        running.copyWith(excludeSSIDs: const [], excludeNetworks: const ['x']),
+        running.copyWith(
+          accessControlProps: running.accessControlProps.copyWith(
+            acceptList: const ['another.app'],
+            rejectList: const ['other.app', 'rejected.app'],
+            sort: AccessSortType.name,
+          ),
+        ),
+      ]) {
+        expect(changed.effective, running.effective, reason: '$changed');
+      }
+      final noSystemProxy = running.copyWith(systemProxy: false);
+      expect(
+        noSystemProxy.copyWith(port: 1, bypassDomain: const []).effective,
+        noSystemProxy.effective,
+      );
+      final proxyOnly = running.copyWith(enable: false);
+      expect(
+        proxyOnly.copyWith(stack: 'gvisor', routeAddress: const []).effective,
+        proxyOnly.effective,
+      );
+    });
+  });
+
   test(
     'delay failure categories round-trip and preserve older core responses',
     () {

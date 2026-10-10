@@ -88,7 +88,6 @@ class GlobalState {
   bool needInitStatus = true;
   DateTime? startTime;
   SetupState? lastSetupState;
-  VpnState? lastVpnState;
   List<String> launchArguments = const [];
 
   bool get isStart => startTime != null && startTime!.isBeforeNow;

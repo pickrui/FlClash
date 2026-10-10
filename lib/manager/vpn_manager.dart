@@ -22,21 +22,33 @@ class VpnManager extends ConsumerStatefulWidget {
 }
 
 class _VpnContainerState extends ConsumerState<VpnManager> {
+  VpnOptions? _runningOptions;
+
+  VpnOptions? get _currentOptions =>
+      ref.read(sharedStateProvider).vpnOptions?.effective;
+
   @override
   void initState() {
     super.initState();
-    ref.listenManual(vpnStateProvider, (prev, next) {
-      if (prev != next) {
-        showTip(next);
-      }
-    });
+    ref.listenManual(isStartProvider, (_, isStart) {
+      _runningOptions = isStart ? _currentOptions : null;
+    }, fireImmediately: true);
+    ref.listenManual(
+      sharedStateProvider.select((state) => state.vpnOptions?.effective),
+      (prev, next) {
+        final running = _runningOptions;
+        if (prev != next && running != null && next != running) {
+          showTip();
+        }
+      },
+    );
   }
 
-  void showTip(VpnState state) {
+  void showTip() {
     throttler.call(
       FunctionTag.vpnTip,
       () {
-        if (!ref.read(isStartProvider) || state == globalState.lastVpnState) {
+        if (!ref.read(isStartProvider)) {
           return;
         }
         globalState.showNotifier(
@@ -44,6 +56,7 @@ class _VpnContainerState extends ConsumerState<VpnManager> {
           actionState: MessageActionState(
             actionText: appLocalizations.restart,
             action: () async {
+              if (!ref.read(isStartProvider)) return;
               await globalState.handleStop();
               await appController.updateStatus(true);
             },
