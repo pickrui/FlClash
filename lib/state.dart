@@ -165,7 +165,7 @@ class GlobalState {
       scriptExists: (scriptId) async =>
           await database.scriptsDao.get(scriptId).getSingleOrNull() != null,
     );
-    final config = await migration.migrationIfNeeded(
+    final migratedConfig = await migration.migrationIfNeeded(
       configMap,
       sync: (data) async {
         final newConfigMap = data.configMap;
@@ -181,6 +181,9 @@ class GlobalState {
         await preferences.saveConfig(config);
         return config;
       },
+    );
+    final config = migratedConfig.copyWith(
+      patchClashConfig: migratedConfig.patchClashConfig.withControllerSecret(),
     );
     await preferences.saveConfig(config);
     final configOverrides = buildConfigOverrides(config);

@@ -103,7 +103,9 @@ UpdateParams updateParams(Ref ref) {
         logLevel: state.logLevel,
         ipv6: state.ipv6,
         tcpConcurrent: state.tcpConcurrent,
-        externalController: safeModeBuild
+        externalController:
+            safeModeBuild ||
+                resolveExternalControllerSecret(state.secret).isEmpty
             ? ''
             : resolveExternalController(
                 state.externalController,

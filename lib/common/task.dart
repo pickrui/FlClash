@@ -130,6 +130,10 @@ Map<String, dynamic> safeModeProfile(Map<String, dynamic> config) => {
   },
   'listeners': <dynamic>[],
   'tunnels': <dynamic>[],
+  'ss-config': '',
+  'vmess-config': '',
+  'tuic-server': {'enable': false},
+  'iptables': {'enable': false},
 };
 
 Future<Map<String, dynamic>> makeRealProfileTask(
@@ -334,11 +338,27 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
     );
   }
 
-  rawConfig['external-controller'] = resolveExternalController(
-    realPatchConfig.externalController,
-    realPatchConfig.externalControllerAddress,
+  final controllerSecret = resolveExternalControllerSecret(
+    realPatchConfig.secret,
   );
-  rawConfig['secret'] = resolveExternalControllerSecret(realPatchConfig.secret);
+  rawConfig['external-controller'] = controllerSecret.isEmpty
+      ? ''
+      : resolveExternalController(
+          realPatchConfig.externalController,
+          realPatchConfig.externalControllerAddress,
+        );
+  rawConfig['secret'] = controllerSecret;
+  // mihomo serves these without the secret; unix first unlinks its path.
+  rawConfig['external-controller-tls'] = '';
+  rawConfig['external-controller-unix'] = '';
+  rawConfig['external-controller-pipe'] = '';
+  final iptables = rawConfig['iptables'];
+  if (iptables is Map) {
+    final inboundInterface = iptables['inbound-interface'];
+    if (inboundInterface is String && inboundInterface.contains(' ')) {
+      rawConfig['iptables'] = {'enable': false};
+    }
+  }
   // The app owns local inbound auth, including after a profile script has run.
   rawConfig['authentication'] = data.authentication;
   rawConfig['skip-auth-prefixes'] = <String>[];

@@ -400,7 +400,7 @@ _ClashConfig _$ClashConfigFromJson(Map<String, dynamic> json) => _ClashConfig(
   externalControllerAddress:
       json['external-controller-address'] as String? ??
       defaultExternalControllerAddress,
-  secret: json['secret'] as String? ?? defaultExternalControllerSecret,
+  secret: json['secret'] as String? ?? '',
   hosts:
       (json['hosts'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(k, e as String),

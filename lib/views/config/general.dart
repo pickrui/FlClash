@@ -603,7 +603,7 @@ class _ExternalControllerDialogState
         .update(
           (state) => state.copyWith(
             externalControllerAddress: defaultExternalControllerAddress,
-            secret: defaultExternalControllerSecret,
+            secret: generateExternalControllerSecret(),
           ),
         );
     BaseNavigator.close(context);
@@ -706,6 +706,12 @@ class _ExternalControllerDialogState
                 minLines: 1,
                 controller: _secretController,
                 obscureText: _obscureSecret,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return appLocalizations.emptyTip(appLocalizations.password);
+                  }
+                  return null;
+                },
                 enableSuggestions: false,
                 autocorrect: false,
                 onFieldSubmitted: (_) {

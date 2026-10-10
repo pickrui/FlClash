@@ -866,8 +866,8 @@ class AppController {
     if (!restoreConfig) {
       return;
     }
-    _ref.read(patchClashConfigProvider.notifier).value =
-        config.patchClashConfig;
+    _ref.read(patchClashConfigProvider.notifier).value = config.patchClashConfig
+        .withControllerSecret();
     _ref.read(appSettingProvider.notifier).value = config.appSettingProps;
     _ref.read(davSettingProvider.notifier).value = config.davProps;
     _ref.read(themeSettingProvider.notifier).value = config.themeProps;

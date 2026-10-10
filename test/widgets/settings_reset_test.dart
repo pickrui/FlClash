@@ -99,10 +99,13 @@ void main() {
             ? defaultExternalControllerAddress
             : _original.externalControllerAddress,
       );
-      expect(
-        saved.secret,
-        external ? defaultExternalControllerSecret : _original.secret,
-      );
+      if (external) {
+        expect(saved.secret, hasLength(32));
+        expect(saved.secret, isNot(_original.secret));
+        expect(saved.secret, isNot(legacyExternalControllerSecret));
+      } else {
+        expect(saved.secret, _original.secret);
+      }
       navigator.pop();
       await tester.pumpAndSettle();
       expect(find.byType(CommonDialog), findsNothing);

@@ -72,6 +72,10 @@ void main() {
     expect(output['bind-address'], '127.0.0.1');
     expect(output['listeners'], isEmpty);
     expect(output['tunnels'], isEmpty);
+    expect(output['ss-config'], '');
+    expect(output['vmess-config'], '');
+    expect(output['tuic-server'], {'enable': false});
+    expect(output['iptables'], {'enable': false});
     expect(output['rules'], input['rules']);
     expect((input['tun'] as Map)['enable'], isTrue);
     expect((input['ntp'] as Map)['write-to-system'], isTrue);
