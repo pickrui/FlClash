@@ -1304,11 +1304,9 @@ extension ProfileExtension on Profile {
     final tempFile = File(path);
     try {
       await tempFile.safeWriteAsBytes(bytes);
-      commonPrint.log('====== saveFile bytes length: ${bytes.length}');
       if (!alreadyValidated) {
         final message = await coreController.validateConfig(path);
         if (message.isNotEmpty) {
-          commonPrint.log('====== validateConfig Message: $message');
           throw ConfigValidationException(message);
         }
       }
