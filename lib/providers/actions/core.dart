@@ -160,6 +160,7 @@ extension CoreControllerExt on AppController {
         clearDelay();
         await coreController.shutdown(true);
         await _connectCore();
+        if (!coreController.isCompleted) throw _coreDisconnectedMessage;
         await _initCore();
       }),
       isRunning: () => _ref.read(isStartProvider),

@@ -84,6 +84,7 @@ extension InitControllerExt on AppController {
     try {
       await _connectCore();
       if (!startupRecovery.isCurrent(bootAttempt)) return;
+      if (!coreController.isCompleted) throw _coreDisconnectedMessage;
       await _initCore();
       if (!startupRecovery.isCurrent(bootAttempt)) return;
       coreReady = true;
