@@ -21,8 +21,15 @@ import 'package:intl/intl.dart';
 
 class AppStateManager extends ConsumerStatefulWidget {
   final Widget child;
+  final bool? updateProfilesInBackground;
+  final PeriodicTask? autoUpdateProfiles;
 
-  const AppStateManager({super.key, required this.child});
+  const AppStateManager({
+    super.key,
+    required this.child,
+    @visibleForTesting this.updateProfilesInBackground,
+    @visibleForTesting this.autoUpdateProfiles,
+  });
 
   @override
   ConsumerState<AppStateManager> createState() => _AppStateManagerState();
@@ -52,9 +59,17 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
       state == AppLifecycleState.hidden ||
       (state == AppLifecycleState.inactive && !system.isDesktop);
 
+  // Desktop refreshes subscriptions while hidden or minimized, like upstream.
+  bool get _profileUpdatesPaused =>
+      _isBackground && !(widget.updateProfilesInBackground ?? system.isDesktop);
+
   void _startProfileUpdates() {
-    if (!mounted || _isBackground || !ref.read(initProvider)) return;
-    unawaited(_profileUpdates.start([appController.autoUpdateProfiles]));
+    if (!mounted || _profileUpdatesPaused || !ref.read(initProvider)) return;
+    unawaited(
+      _profileUpdates.start([
+        widget.autoUpdateProfiles ?? appController.autoUpdateProfiles,
+      ]),
+    );
   }
 
   @override
@@ -138,7 +153,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     if (_isBackgroundState(state)) {
       if (!_isBackground) {
         _isBackground = true;
-        _profileUpdates.stop();
+        if (_profileUpdatesPaused) _profileUpdates.stop();
         globalState.setUpdateVisibility(appVisible: false);
         await appController.savePreferences();
       }
