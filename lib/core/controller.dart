@@ -82,11 +82,14 @@ class CoreController {
           continue;
         }
         final data = await rootBundle.load('assets/data/$geoFileName');
-        final List<int> bytes = data.buffer.asUint8List();
-        await geoFile.writeAsBytes(bytes, flush: true);
+        await durableWriteBytes(geoFile.path, data.buffer.asUint8List());
       }
     } catch (e) {
-      exit(0);
+      commonPrint.log(
+        'Failed to initialize geo data: $e',
+        logLevel: LogLevel.error,
+      );
+      rethrow;
     }
   }
 
