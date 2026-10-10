@@ -169,13 +169,15 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
     private fun openBatteryOptimizationSettings(): Boolean {
         val activity = activityRef?.get() ?: return false
         // A continuous VPN connection is the user-requested core function.
-        return runCatching {
-            activity.startActivity(Intent(
-                Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
-                Uri.fromParts("package", activity.packageName, null),
-            ))
-            true
-        }.getOrDefault(false)
+        val prompt = Intent(
+            Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+            Uri.fromParts("package", activity.packageName, null),
+        )
+        // Some ROMs drop the direct prompt; the allowlist page still lets the user exempt the app.
+        val allowlist = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+        return listOf(prompt, allowlist).any { intent ->
+            runCatching { activity.startActivity(intent) }.isSuccess
+        }
     }
 
     private fun lastExitInfo(): Map<String, Any>? {
