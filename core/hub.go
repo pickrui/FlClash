@@ -401,7 +401,7 @@ func handleResetTraffic() {
 var anyDelayTestStatus utils.IntRanges[uint16]
 
 func handleAsyncTestDelay(params *TestDelayParams, fn func(*Delay)) {
-	go func() {
+	safeGo("asyncTestDelay", func() {
 		testUrl := cmp.Or(params.TestUrl, constant.DefaultTestURL)
 		delayData := &Delay{
 			Url:   testUrl,
@@ -467,7 +467,7 @@ func handleAsyncTestDelay(params *TestDelayParams, fn func(*Delay)) {
 		// member's health must be visible in the next groups snapshot.
 		resetURLTestSelections(testUrl)
 		fn(delayData)
-	}()
+	})
 }
 
 // resetURLTestSelections drops the cached choice of every url-test group that
@@ -620,18 +620,18 @@ func handleUpdateGeoData(
 }
 
 func handleUpdateExternalProvider(providerName, providerType string, fn func(*MethodError)) {
-	go func() {
+	safeGo("updateExternalProvider", func() {
 		externalProvider, exist := lookupExternalProvider(providerName, providerType)
 		if !exist {
 			fn(providerMethodError("provider_not_found", providerName, errors.New("external provider does not exist")))
 			return
 		}
 		fn(runProviderUpdate(providerName, externalProvider, externalProvider.Update))
-	}()
+	})
 }
 
 func handleSideLoadExternalProvider(providerName, providerType string, data []byte, fn func(*MethodError)) {
-	go func() {
+	safeGo("sideLoadExternalProvider", func() {
 		runLock.Lock()
 		defer runLock.Unlock()
 		externalProvider, exist := lookupExternalProviderLocked(providerName, providerType)
@@ -642,7 +642,7 @@ func handleSideLoadExternalProvider(providerName, providerType string, data []by
 		fn(runProviderUpdate(providerName, externalProvider, func() error {
 			return sideUpdateExternalProvider(externalProvider, data)
 		}))
-	}()
+	})
 }
 
 func handleSuspend(suspended bool) bool {
@@ -707,9 +707,9 @@ func handleGetMemoryStats() (MemoryStats, error) {
 }
 
 func handleGetMemory(fn func(value uint64)) {
-	go func() {
+	safeGo("getMemory", func() {
 		fn(statistic.DefaultManager.Memory())
-	}()
+	})
 }
 
 func handleGetConfig(path string) (*config.RawConfig, error) {

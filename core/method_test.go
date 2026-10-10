@@ -72,3 +72,12 @@ func TestQuickSetupAnswersOnceWhenSetupPanics(t *testing.T) {
 		t.Fatal("listeners stayed running after the failed quick setup")
 	}
 }
+
+func TestSafeGoKeepsTheProcessAliveAfterAPanic(t *testing.T) {
+	done := make(chan struct{})
+	safeGo("test", func() {
+		defer close(done)
+		panic("background work exploded")
+	})
+	<-done
+}
