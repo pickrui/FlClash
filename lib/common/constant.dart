@@ -32,6 +32,9 @@ const releaseRepository = 'pickrui/FlClash';
 final unixSocketPath = createUnixSocketPath(isLinux: Platform.isLinux);
 final windowsPipeName = '\\\\.\\pipe\\FlClashCore_${_randomPipeId()}';
 const helperPort = 47890;
+const helperPortKey =
+    'SYSTEM\\CurrentControlSet\\Services\\$appHelperService\\Runtime';
+const helperPortValue = 'Port';
 const helperProtocolVersionHeader = 'x-flclash-helper-protocol';
 final helperProtocolVersion = Platform.isWindows ? '8' : '6';
 const maxTextScale = 1.4;

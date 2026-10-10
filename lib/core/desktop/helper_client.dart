@@ -13,6 +13,7 @@ import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/common/print.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:path/path.dart' as p;
+import 'package:win32_registry/win32_registry.dart';
 
 import 'core_manifest.dart';
 import 'launcher.dart';
@@ -62,27 +63,50 @@ final class HelperClient {
   final String Function()? _expectedHelperPath;
   final bool isLinux;
   final Future<String> Function() _readCoreSha256;
-  final String baseUrl;
+  final String? _baseUrl;
+  final int? Function() _readHelperPort;
   String? _coreSha256Cache;
 
   HelperClient({
     Dio? dio,
     this._expectedHelperPath,
     Future<String> Function()? readCoreSha256,
-    String? baseUrl,
+    this._baseUrl,
     String? socketPath,
     this.isLinux = false,
+    int? Function()? readHelperPort,
   }) : _dio =
            dio ??
            _createLoopbackDio(
              socketPath: isLinux ? socketPath ?? linuxHelperSocketPath : null,
            ),
-       baseUrl =
-           baseUrl ??
-           (isLinux
-               ? 'http://flclash-helper'
-               : 'http://$localhost:$helperPort'),
+       _readHelperPort = readHelperPort ?? _readPublishedHelperPort,
        _readCoreSha256 = readCoreSha256 ?? _readBundledCoreSha256;
+
+  String get baseUrl =>
+      _baseUrl ??
+      (isLinux
+          ? 'http://flclash-helper'
+          : 'http://$localhost:${_helperPort()}');
+
+  /// Helpers installed before the port was published listen on [helperPort].
+  int _helperPort() {
+    try {
+      final port = _readHelperPort();
+      if (port != null && port > 0 && port <= 0xFFFF) return port;
+    } catch (_) {}
+    return helperPort;
+  }
+
+  static int? _readPublishedHelperPort() {
+    if (!Platform.isWindows) return null;
+    final key = LOCAL_MACHINE.open(helperPortKey);
+    try {
+      return key.getInt(helperPortValue);
+    } finally {
+      key.close();
+    }
+  }
 
   // The bundled manifest.json is a fixed build artifact; a usable value is read
   // once. An empty result means it is unusable now, so the Helper is skipped.

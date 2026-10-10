@@ -43,8 +43,11 @@ use windows_sys::Win32::{
     },
 };
 
-#[cfg(not(target_os = "linux"))]
-pub(super) const LISTEN_PORT: u16 = 47890;
+#[cfg(not(any(
+    all(feature = "windows-service", target_os = "windows"),
+    target_os = "linux"
+)))]
+const LISTEN_PORT: u16 = 47890;
 #[cfg(not(target_os = "linux"))]
 const CORE_PIPE_PREFIX: &str = r"\\.\pipe\FlClashCore_";
 const PROTOCOL_VERSION_HEADER: &str = "x-flclash-helper-protocol";
@@ -57,8 +60,6 @@ const LOG_CAPACITY: usize = 100;
 const MAX_REQUEST_BYTES: u64 = 4096;
 #[cfg(target_os = "linux")]
 const HELPER_AUTHORITY: &str = "flclash-helper";
-#[cfg(not(target_os = "linux"))]
-const HELPER_AUTHORITY: &str = "127.0.0.1:47890";
 const CORE_EXIT_TIMEOUT: Duration = Duration::from_millis(1500);
 const CORE_EXIT_POLL_INTERVAL: Duration = Duration::from_millis(20);
 
@@ -674,9 +675,29 @@ struct UntrustedRequest;
 
 impl warp::reject::Reject for UntrustedRequest {}
 
+#[cfg(target_os = "linux")]
+fn is_native_host(host: &str) -> bool {
+    host == HELPER_AUTHORITY
+}
+
+#[cfg(not(target_os = "linux"))]
+fn is_native_host(host: &str) -> bool {
+    is_loopback_authority(host)
+}
+
+/// The Windows service listens on whichever port the system assigned, so only
+/// the address is fixed; a name could be one rebound to loopback.
+#[cfg(any(not(target_os = "linux"), test))]
+fn is_loopback_authority(host: &str) -> bool {
+    host.strip_prefix("127.0.0.1:").is_some_and(|port| {
+        port.bytes().all(|byte| byte.is_ascii_digit())
+            && port.parse::<u16>().is_ok_and(|port| port != 0)
+    })
+}
+
 async fn require_native_request(headers: HeaderMap) -> Result<(), Rejection> {
     let host = headers.get("host").and_then(|value| value.to_str().ok());
-    if host != Some(HELPER_AUTHORITY)
+    if !host.is_some_and(is_native_host)
         || headers.contains_key("origin")
         || headers.contains_key("sec-fetch-site")
     {
@@ -979,6 +1000,49 @@ mod tests {
         }
         let response = warp::test::request().path("/logs").reply(&routes()).await;
         assert_eq!(response.status(), StatusCode::FORBIDDEN);
+    }
+
+    #[cfg(not(target_os = "linux"))]
+    #[tokio::test]
+    async fn native_requests_reach_the_helper_on_any_loopback_port() {
+        for host in ["127.0.0.1:47890", "127.0.0.1:51234", "127.0.0.1:1"] {
+            let response = helper_request()
+                .header("host", host)
+                .path("/logs")
+                .reply(&routes())
+                .await;
+            assert_eq!(response.status(), StatusCode::OK, "{host}");
+        }
+    }
+
+    #[test]
+    fn only_the_loopback_address_with_a_port_is_a_native_windows_host() {
+        for host in [
+            "127.0.0.1:47890",
+            "127.0.0.1:51234",
+            "127.0.0.1:1",
+            "127.0.0.1:65535",
+        ] {
+            assert!(is_loopback_authority(host), "{host}");
+        }
+        for host in [
+            "",
+            "127.0.0.1",
+            "127.0.0.1:",
+            "127.0.0.1:0",
+            "127.0.0.1:65536",
+            "127.0.0.1:+80",
+            "127.0.0.1:47890 ",
+            "127.0.0.1:47890.example.invalid",
+            "127.0.0.1.example.invalid:47890",
+            "127.0.0.2:47890",
+            "localhost:47890",
+            "example.invalid:47890",
+            "flclash-helper",
+            "[::1]:47890",
+        ] {
+            assert!(!is_loopback_authority(host), "{host:?}");
+        }
     }
 
     #[tokio::test]

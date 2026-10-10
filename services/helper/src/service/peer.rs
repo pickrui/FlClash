@@ -5,7 +5,6 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 use crate::service::hub::{
     ensure_core_sha256_configured, log_message, release_managed_core_on_shutdown, routes,
-    LISTEN_PORT,
 };
 use crate::service::owner::{client_pid, same_sid, TcpConnection};
 
@@ -14,7 +13,7 @@ use std::future::Future;
 use std::io::{Error, Result as IoResult};
 use std::net::{Ipv4Addr, SocketAddr, SocketAddrV4};
 use std::pin::Pin;
-use std::ptr::null_mut;
+use std::ptr::{null, null_mut};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::task::{Context, Poll};
 use std::time::Duration;
@@ -22,18 +21,26 @@ use tokio::net::{TcpListener, TcpStream};
 use tokio::time::Sleep;
 use tokio_stream::Stream;
 use windows_sys::Win32::Foundation::{
-    CloseHandle, LocalFree, ERROR_INSUFFICIENT_BUFFER, HANDLE, NO_ERROR,
+    CloseHandle, LocalFree, ERROR_INSUFFICIENT_BUFFER, ERROR_SUCCESS, HANDLE, NO_ERROR,
 };
 use windows_sys::Win32::NetworkManagement::IpHelper::{
     GetExtendedTcpTable, MIB_TCPTABLE_OWNER_PID, TCP_TABLE_OWNER_PID_ALL,
 };
 use windows_sys::Win32::Security::Authorization::ConvertSidToStringSidW;
 use windows_sys::Win32::Security::{GetTokenInformation, TokenUser, TOKEN_QUERY, TOKEN_USER};
+use windows_sys::Win32::System::Registry::{
+    RegCloseKey, RegCreateKeyExW, RegDeleteKeyW, RegSetValueExW, HKEY, HKEY_LOCAL_MACHINE,
+    KEY_SET_VALUE, REG_DWORD, REG_OPTION_VOLATILE,
+};
 use windows_sys::Win32::System::Threading::{
     OpenProcess, OpenProcessToken, PROCESS_QUERY_LIMITED_INFORMATION,
 };
 
 const AF_INET: u32 = 2;
+/// Hyper-V and WinNAT reserve ranges that can cover any fixed port; only admins
+/// write this volatile key under the service's own, and a reboot clears it.
+const PORT_KEY: &str = r"SYSTEM\CurrentControlSet\Services\FlClashHelperService\Runtime";
+const PORT_VALUE: &str = "Port";
 const TABLE_ATTEMPTS: usize = 5;
 const ACCEPT_RETRY_DELAY: Duration = Duration::from_secs(1);
 
@@ -204,6 +211,67 @@ impl Stream for AuthorizedIncoming {
     }
 }
 
+fn wide(value: &str) -> Vec<u16> {
+    value.encode_utf16().chain(std::iter::once(0)).collect()
+}
+
+struct PublishedPort {
+    root: HKEY,
+    key_path: Vec<u16>,
+}
+
+impl PublishedPort {
+    fn publish(port: u16) -> IoResult<Self> {
+        Self::publish_at(HKEY_LOCAL_MACHINE, PORT_KEY, port)
+    }
+
+    fn publish_at(root: HKEY, key_path: &str, port: u16) -> IoResult<Self> {
+        let key_path = wide(key_path);
+        let value_name = wide(PORT_VALUE);
+        let data = u32::from(port).to_le_bytes();
+        // SAFETY: the buffers outlive the calls, and the opened key is closed.
+        let status = unsafe {
+            let mut key: HKEY = 0;
+            let status = RegCreateKeyExW(
+                root,
+                key_path.as_ptr(),
+                0,
+                null(),
+                REG_OPTION_VOLATILE,
+                KEY_SET_VALUE,
+                null(),
+                &mut key,
+                null_mut(),
+            );
+            if status != ERROR_SUCCESS {
+                return Err(Error::from_raw_os_error(status as i32));
+            }
+            let status = RegSetValueExW(
+                key,
+                value_name.as_ptr(),
+                0,
+                REG_DWORD,
+                data.as_ptr(),
+                data.len() as u32,
+            );
+            RegCloseKey(key);
+            status
+        };
+        if status != ERROR_SUCCESS {
+            return Err(Error::from_raw_os_error(status as i32));
+        }
+        Ok(Self { root, key_path })
+    }
+}
+
+impl Drop for PublishedPort {
+    fn drop(&mut self) {
+        unsafe {
+            RegDeleteKeyW(self.root, self.key_path.as_ptr());
+        }
+    }
+}
+
 pub(super) async fn serve_until<F, S>(
     owner_sid: String,
     shutdown: F,
@@ -215,9 +283,15 @@ where
 {
     ensure_core_sha256_configured()?;
 
-    let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, LISTEN_PORT))
+    let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, 0))
         .await
         .map_err(|error| anyhow::anyhow!("bind helper server: {error}"))?;
+    let port = listener
+        .local_addr()
+        .map_err(|error| anyhow::anyhow!("read helper server port: {error}"))?
+        .port();
+    let published = PublishedPort::publish(port)
+        .map_err(|error| anyhow::anyhow!("publish helper server port: {error}"))?;
     on_started()?;
     let incoming = AuthorizedIncoming {
         listener,
@@ -227,6 +301,7 @@ where
     warp::serve(routes())
         .serve_incoming_with_graceful_shutdown(incoming, shutdown)
         .await;
+    drop(published);
     release_managed_core_on_shutdown();
 
     Ok(())
@@ -235,6 +310,72 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use windows_sys::Win32::Foundation::{ERROR_CHILD_MUST_BE_VOLATILE, ERROR_FILE_NOT_FOUND};
+    use windows_sys::Win32::System::Registry::{
+        RegGetValueW, HKEY_CURRENT_USER, REG_OPTION_NON_VOLATILE, RRF_RT_REG_DWORD,
+    };
+
+    const TEST_PORT_KEY: &str = r"Software\FlClashHelperPortTest";
+
+    fn read_test_port() -> IoResult<u32> {
+        let key_path = wide(TEST_PORT_KEY);
+        let value_name = wide(PORT_VALUE);
+        let mut port = 0u32;
+        let mut size = std::mem::size_of::<u32>() as u32;
+        let status = unsafe {
+            RegGetValueW(
+                HKEY_CURRENT_USER,
+                key_path.as_ptr(),
+                value_name.as_ptr(),
+                RRF_RT_REG_DWORD,
+                null_mut(),
+                &mut port as *mut u32 as *mut c_void,
+                &mut size,
+            )
+        };
+        if status != ERROR_SUCCESS {
+            return Err(Error::from_raw_os_error(status as i32));
+        }
+        Ok(port)
+    }
+
+    fn create_persistent_test_child() -> u32 {
+        let child = wide(&format!(r"{TEST_PORT_KEY}\Persistent"));
+        let mut key: HKEY = 0;
+        unsafe {
+            let status = RegCreateKeyExW(
+                HKEY_CURRENT_USER,
+                child.as_ptr(),
+                0,
+                null(),
+                REG_OPTION_NON_VOLATILE,
+                KEY_SET_VALUE,
+                null(),
+                &mut key,
+                null_mut(),
+            );
+            if status == ERROR_SUCCESS {
+                RegCloseKey(key);
+                RegDeleteKeyW(HKEY_CURRENT_USER, child.as_ptr());
+            }
+            status
+        }
+    }
+
+    #[test]
+    fn publishes_the_port_in_a_volatile_key_until_dropped() {
+        let published = PublishedPort::publish_at(HKEY_CURRENT_USER, TEST_PORT_KEY, 51234).unwrap();
+
+        assert_eq!(read_test_port().unwrap(), 51234);
+        assert_eq!(create_persistent_test_child(), ERROR_CHILD_MUST_BE_VOLATILE);
+
+        drop(published);
+
+        assert_eq!(
+            read_test_port().unwrap_err().raw_os_error(),
+            Some(ERROR_FILE_NOT_FOUND as i32)
+        );
+    }
 
     fn v4(address: SocketAddr) -> SocketAddrV4 {
         match address {

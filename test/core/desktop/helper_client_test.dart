@@ -23,6 +23,88 @@ const _coreSha256 =
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  test('reads the port from the key the Windows service publishes it in', () {
+    final peer = File('services/helper/src/service/peer.rs').readAsStringSync();
+
+    expect(peer, contains('const PORT_KEY: &str = r"$helperPortKey";'));
+    expect(peer, contains('const PORT_VALUE: &str = "$helperPortValue";'));
+  });
+
+  test('requests go to the port the Windows service published', () async {
+    final ports = <int>[];
+    final client = _client(
+      _ResponseAdapter((options) {
+        ports.add(options.uri.port);
+        expect(options.uri.host, localhost);
+        return options.path.endsWith('/stop')
+            ? _jsonResponse({'sessionId': _sessionId, 'stopped': true})
+            : _jsonResponse({'sessionId': _sessionId, 'pid': 6456});
+      }),
+      readHelperPort: () => 51234,
+    );
+
+    await client.readiness(logFailure: false);
+    await client.start(address: 'test-address', sessionId: _sessionId);
+    await client.stop(_sessionId);
+
+    expect(ports, [51234, 51234, 51234]);
+  });
+
+  test('every request reads the port the service published last', () async {
+    final published = [51234, 52345];
+    final ports = <int>[];
+    final client = _client(
+      _ResponseAdapter((options) {
+        ports.add(options.uri.port);
+        return _jsonResponse({'sessionId': _sessionId, 'stopped': true});
+      }),
+      readHelperPort: () => published.removeAt(0),
+    );
+
+    await client.stop(_sessionId);
+    await client.stop(_sessionId);
+
+    expect(ports, [51234, 52345]);
+  });
+
+  test('a missing or unusable published port falls back to 47890', () async {
+    for (final readHelperPort in <int? Function()>[
+      () => null,
+      () => throw const OSError('registry key not found', 2),
+      () => 0,
+      () => -1,
+      () => 65536,
+    ]) {
+      final ports = <int>[];
+      final client = _client(
+        _ResponseAdapter((options) {
+          ports.add(options.uri.port);
+          return _jsonResponse({'sessionId': _sessionId, 'stopped': true});
+        }),
+        readHelperPort: readHelperPort,
+      );
+
+      await client.stop(_sessionId);
+
+      expect(ports, [helperPort]);
+    }
+  });
+
+  test('the Linux Helper socket ignores a published port', () {
+    var reads = 0;
+    final client = HelperClient(
+      dio: Dio(),
+      isLinux: true,
+      readHelperPort: () {
+        reads++;
+        return 51234;
+      },
+    );
+
+    expect(client.baseUrl, 'http://flclash-helper');
+    expect(reads, 0);
+  });
+
   test(
     'start returns a Helper lease identity with matching session and PID',
     () async {
@@ -674,12 +756,14 @@ HelperClient _client(
   _ResponseAdapter adapter, {
   String Function()? expectedHelperPath,
   Future<String> Function()? readCoreSha256,
+  int? Function()? readHelperPort,
 }) {
   final dio = Dio()..httpClientAdapter = adapter;
   return HelperClient(
     dio: dio,
     expectedHelperPath: expectedHelperPath ?? () => r'C:\Helper.exe',
     readCoreSha256: readCoreSha256 ?? () async => _coreSha256,
+    readHelperPort: readHelperPort,
   );
 }
 
