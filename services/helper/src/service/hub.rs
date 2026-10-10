@@ -14,7 +14,10 @@ use std::fs::{File, OpenOptions};
     not(all(feature = "windows-service", target_os = "windows"))
 ))]
 use std::future::pending;
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(any(
+    all(feature = "windows-service", target_os = "windows"),
+    target_os = "linux"
+)))]
 use std::future::Future;
 use std::io::{BufRead, Error, Read};
 #[cfg(windows)]
@@ -41,10 +44,13 @@ use windows_sys::Win32::{
 };
 
 #[cfg(not(target_os = "linux"))]
-const LISTEN_PORT: u16 = 47890;
+pub(super) const LISTEN_PORT: u16 = 47890;
 #[cfg(not(target_os = "linux"))]
 const CORE_PIPE_PREFIX: &str = r"\\.\pipe\FlClashCore_";
 const PROTOCOL_VERSION_HEADER: &str = "x-flclash-helper-protocol";
+#[cfg(windows)]
+const PROTOCOL_VERSION: &str = "8";
+#[cfg(not(windows))]
 const PROTOCOL_VERSION: &str = "6";
 const EXPECTED_CORE_SHA256: &str = env!("CORE_SHA256");
 const LOG_CAPACITY: usize = 100;
@@ -740,6 +746,22 @@ pub(super) fn routes() -> impl Filter<Extract = (impl Reply,), Error = Infallibl
         .recover(handle_rejection)
 }
 
+pub(super) fn ensure_core_sha256_configured() -> anyhow::Result<()> {
+    if EXPECTED_CORE_SHA256.is_empty() {
+        anyhow::bail!("expected Core SHA256 is empty");
+    }
+    Ok(())
+}
+
+pub(super) fn release_managed_core_on_shutdown() {
+    let mut managed = MANAGED_CORE.lock().unwrap();
+    if let Err(error) = release_managed_core(&mut managed) {
+        log_message(format!(
+            "Helper could not stop its Core on shutdown: {error}"
+        ));
+    }
+}
+
 #[cfg(all(
     not(target_os = "linux"),
     not(all(feature = "windows-service", target_os = "windows"))
@@ -748,27 +770,23 @@ pub async fn run_service() -> anyhow::Result<()> {
     run_service_until(pending(), || Ok(())).await
 }
 
-#[cfg(not(target_os = "linux"))]
-pub(super) async fn run_service_until<F, S>(shutdown: F, on_started: S) -> anyhow::Result<()>
+#[cfg(not(any(
+    all(feature = "windows-service", target_os = "windows"),
+    target_os = "linux"
+)))]
+async fn run_service_until<F, S>(shutdown: F, on_started: S) -> anyhow::Result<()>
 where
     F: Future<Output = ()> + Send + 'static,
     S: FnOnce() -> anyhow::Result<()>,
 {
-    if EXPECTED_CORE_SHA256.is_empty() {
-        anyhow::bail!("expected Core SHA256 is empty");
-    }
+    ensure_core_sha256_configured()?;
 
     let (_, server) = warp::serve(routes())
         .try_bind_with_graceful_shutdown(([127, 0, 0, 1], LISTEN_PORT), shutdown)
         .map_err(|error| anyhow::anyhow!("bind helper server: {error}"))?;
     on_started()?;
     server.await;
-    let mut managed = MANAGED_CORE.lock().unwrap();
-    if let Err(error) = release_managed_core(&mut managed) {
-        log_message(format!(
-            "Helper could not stop the managed Core on shutdown: {error}"
-        ));
-    }
+    release_managed_core_on_shutdown();
 
     Ok(())
 }
@@ -954,8 +972,8 @@ mod tests {
     }
 
     #[test]
-    fn protocol_6_uses_lowercase_session_ownership() {
-        assert_eq!(PROTOCOL_VERSION, "6");
+    fn protocol_uses_lowercase_session_ownership() {
+        assert_eq!(PROTOCOL_VERSION, if cfg!(windows) { "8" } else { "6" });
         assert!(is_valid_session_id("0123456789abcdef0123456789abcdef"));
         assert!(!is_valid_session_id("ABCDEF0123456789abcdef0123456789"));
         assert!(!is_valid_session_id("0123456789abcdef"));
@@ -1364,24 +1382,6 @@ mod tests {
         .unwrap();
         assert_eq!(body["message"], "spawn refused");
         assert!(body.get("details").is_none());
-    }
-}
-
-#[cfg(target_os = "linux")]
-pub(super) fn ensure_core_sha256_configured() -> anyhow::Result<()> {
-    if EXPECTED_CORE_SHA256.is_empty() {
-        anyhow::bail!("expected Core SHA256 is empty");
-    }
-    Ok(())
-}
-
-#[cfg(target_os = "linux")]
-pub(super) fn release_managed_core_on_shutdown() {
-    let mut managed = MANAGED_CORE.lock().unwrap();
-    if let Err(error) = release_managed_core(&mut managed) {
-        log_message(format!(
-            "Helper could not stop its Core on shutdown: {error}"
-        ));
     }
 }
 

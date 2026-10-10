@@ -21,6 +21,7 @@ ArchitecturesInstallIn64BitMode={{ARCH}}
 [Code]
 var
   RestoreHelperService: Boolean;
+  HelperOwnerSid: String;
 
 function IsAppUpdate: Boolean;
 begin
@@ -66,13 +67,29 @@ begin
     Log('The FlClash helper service could not be removed');
 end;
 
+{ Setup cannot tell which account the Helper serves, so it keeps the one registered before. }
+procedure ReadHelperOwner;
+var
+  ImagePath: String;
+  FlagAt: Integer;
+begin
+  if not RegQueryStringValue(HKLM, 'SYSTEM\CurrentControlSet\Services\FlClashHelperService',
+    'ImagePath', ImagePath) then Exit;
+  FlagAt := Pos(' --owner-sid ', ImagePath);
+  if FlagAt > 0 then
+    HelperOwnerSid := Trim(Copy(ImagePath, FlagAt + Length(' --owner-sid '), Length(ImagePath)));
+end;
+
 procedure RegisterHelperService;
 var
   ResultCode: Integer;
 begin
   RestoreHelperService := False;
   { The app registers the Helper again when TUN is enabled. }
-  if not Exec(ExpandConstant('{app}\FlClashHelperService.exe'), 'install', '',
+  if HelperOwnerSid = '' then
+    Log('The FlClash helper service has no owner to restore')
+  else if not Exec(ExpandConstant('{app}\FlClashHelperService.exe'),
+    'install --owner-sid ' + HelperOwnerSid, '',
     SW_HIDE, ewWaitUntilTerminated, ResultCode) or (ResultCode <> 0) then
     Log('The FlClash helper service could not be registered');
 end;
@@ -87,6 +104,7 @@ begin
   end;
   RestoreHelperService := RestoreHelperService or
     RegKeyExists(HKLM, 'SYSTEM\CurrentControlSet\Services\FlClashHelperService');
+  ReadHelperOwner;
   StopHelperService;
   if not IsAppUpdate then KillProcesses;
 end;

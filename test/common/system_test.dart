@@ -18,6 +18,10 @@ void main() {
     expect(isAndroidTvFeatures([]), isFalse);
   });
 
+  test('the Windows Helper is installed for the account of this process', () {
+    expect(Windows.installArguments(4242), 'install --owner-pid 4242');
+  });
+
   test('recognizes the Docker runtime marker', () {
     expect(isFlClashDockerEnvironment({'FLCLASH_DOCKER': 'true'}), true);
     expect(isFlClashDockerEnvironment({'FLCLASH_DOCKER': '1'}), true);

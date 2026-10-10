@@ -294,6 +294,11 @@ class Windows {
     return true;
   }
 
+  /// The installer may be another administrator, so this process names the owner.
+  @visibleForTesting
+  static String installArguments(int ownerPid) =>
+      'install --owner-pid $ownerPid';
+
   Future<AuthorizeCode> registerService() async {
     if (safeModeBuild) return AuthorizeCode.error;
     final readiness = await windowsHelperClient.readiness();
@@ -309,7 +314,7 @@ class Windows {
       case HelperReadiness.notReady:
         break;
     }
-    if (!runas(appPath.helperPath, 'install')) {
+    if (!runas(appPath.helperPath, installArguments(pid))) {
       return AuthorizeCode.error;
     }
     return await _waitForHelperService()
