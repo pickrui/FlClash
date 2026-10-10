@@ -167,7 +167,10 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
         child: const RestoreOptionsDialog(),
       );
       if (option == null || !_isCurrentPage) return false;
-      final path = await client.restore(name);
+      final path = await client.restore(
+        name,
+        size: backups.where((backup) => backup.name == name).firstOrNull?.size,
+      );
       try {
         if (!_isCurrentPage) return false;
         await backupAction.restore(option, backupPath: path);

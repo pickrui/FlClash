@@ -267,6 +267,46 @@ void main() {
     expect(writes, isNot(contains('DELETE')));
   });
 
+  test('a large upload gets time in proportion to its size', () async {
+    final dav = DAVClient(
+      _props,
+      resolveRoutes: (_) => ['direct'],
+      createAdapter: (_) =>
+          readAdapter((options) async => ResponseBody.fromBytes([], 200)),
+    );
+    expect(await dav.pingCompleter.future, true);
+    final timeouts = <String, Duration?>{};
+    dav.client.c.httpClientAdapter = _Adapter((options) async {
+      timeouts[options.method] = options.sendTimeout;
+      return ResponseBody.fromBytes(
+        [],
+        options.method == 'OPTIONS' ? 200 : 201,
+      );
+    });
+    final file = File('${directory.path}/upload.zip');
+    await file.writeAsBytes(Uint8List(4 * 1024 * 1024));
+    await dav.backup(file.path, device: 'Pixel-8', deviceId: _deviceId);
+    expect(timeouts['PUT'], const Duration(seconds: 60 + 128));
+    expect(timeouts['MOVE'], const Duration(seconds: 60));
+  });
+
+  test('a large restore gets time in proportion to its size', () async {
+    final dav = DAVClient(
+      _props,
+      readTimeout: const Duration(seconds: 1),
+      resolveRoutes: (_) => ['direct'],
+      createAdapter: (_) => readAdapter((options) async {
+        if (options.method != 'GET') return ResponseBody.fromBytes([], 200);
+        await Future<void>.delayed(const Duration(milliseconds: 1500));
+        return ResponseBody.fromBytes(archive, 200);
+      }),
+    );
+    expect(await dav.pingCompleter.future, true);
+    final path = await dav.restore('backup.zip', size: 64 * 1024);
+    expect(await File(path).readAsBytes(), archive);
+    await File(path).delete();
+  });
+
   test('a backup keeps only the newest backups of this device', () async {
     final dav = DAVClient(
       _props,

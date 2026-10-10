@@ -118,7 +118,13 @@ List<String> expiredDavBackups(
       .where((backup) => backup.deviceId == deviceId),
 ).skip(max(keep, 0)).map((backup) => backup.name).toList();
 
+/// Both deadlines bound a whole transfer; allow 256 kbit/s for the archive.
+Duration _transferTimeout(Duration base, int? bytes) =>
+    base +
+    Duration(seconds: min(bytes ?? 0, maxBackupArchiveBytes) ~/ (32 * 1024));
+
 class DAVClient {
+  static const _sendTimeout = Duration(seconds: 60);
   static final _backupLock = AsyncStorageLock();
   late final Client client;
   final Completer<bool> pingCompleter = Completer();
@@ -156,7 +162,7 @@ class DAVClient {
     result.c.options.persistentConnection = false;
     result.setHeaders({'accept-charset': 'utf-8', 'Content-Type': 'text/xml'});
     result.setConnectTimeout(8000);
-    result.setSendTimeout(60000);
+    result.setSendTimeout(_sendTimeout.inMilliseconds);
     result.setReceiveTimeout(60000);
     final adapter = route != null && _createAdapter != null
         ? _createAdapter(route)
@@ -214,8 +220,9 @@ class DAVClient {
   }
 
   Future<T> _raceRead<T>(
-    Future<T> Function(Client client, CancelToken token) read,
-  ) => raceHttpReads<T>(
+    Future<T> Function(Client client, CancelToken token) read, {
+    Duration? timeout,
+  }) => raceHttpReads<T>(
     _resolveRoutes(Uri.parse(_dav.uri)).toSet().map(
       (route) => (token) async {
         final routed = _newClient(route: route);
@@ -226,7 +233,7 @@ class DAVClient {
         }
       },
     ),
-    timeout: readTimeout,
+    timeout: timeout ?? readTimeout,
   );
 
   Future<bool> _ping() async {
@@ -296,8 +303,16 @@ class DAVClient {
     final name = davBackupFileName(device, DateTime.now(), deviceId: deviceId);
     final backupFile = _pathOf(name);
     final temporaryRemotePath = '$backupFile.upload-${utils.id}';
+    final size = await io.File(localFilePath).length();
     try {
-      await client.writeFromFile(localFilePath, temporaryRemotePath);
+      client.setSendTimeout(
+        _transferTimeout(_sendTimeout, size).inMilliseconds,
+      );
+      try {
+        await client.writeFromFile(localFilePath, temporaryRemotePath);
+      } finally {
+        client.setSendTimeout(_sendTimeout.inMilliseconds);
+      }
       await client.rename(temporaryRemotePath, backupFile, false);
     } catch (_) {
       try {
@@ -333,7 +348,7 @@ class DAVClient {
     await client.remove(_pathOf(name));
   }
 
-  Future<String> restore(String name) async {
+  Future<String> restore(String name, {int? size}) async {
     final backupFile = _pathOf(name);
     final candidates = <String>{};
     String? winner;
@@ -367,7 +382,7 @@ class DAVClient {
             await io.File(candidate).safeDelete();
           }
         }
-      });
+      }, timeout: _transferTimeout(readTimeout, size));
       return winner;
     } finally {
       // Each branch owns its file; a late loser cannot remove the winner.
