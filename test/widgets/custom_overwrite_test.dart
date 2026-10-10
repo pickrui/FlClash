@@ -100,6 +100,50 @@ void main() {
     expect(result?.proxies, ['Node,A', 'Node B', 'Node B', ' Node C ']);
   });
 
+  testWidgets('ProxyGroupDialog drops empty filter parts that match all', (
+    tester,
+  ) async {
+    ProxyGroup? result;
+    const original = ProxyGroup(
+      name: 'Filtered',
+      type: GroupType.Selector,
+      includeAll: true,
+      filter: 'hk``jp`',
+      excludeFilter: '`',
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 1000)),
+        ],
+        child: _TestApp(
+          child: Builder(
+            builder: (context) => TextButton(
+              onPressed: () async {
+                result = await showDialog<ProxyGroup>(
+                  context: context,
+                  builder: (_) => const ProxyGroupDialog(
+                    group: original,
+                    existingGroups: [original],
+                  ),
+                );
+              },
+              child: const Text('Open group'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open group'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    expect(result?.filter, 'hk`jp');
+    expect(result?.excludeFilter, isNull);
+  });
+
   testWidgets('ProxyGroupDialog opens legacy Relay groups for migration', (
     tester,
   ) async {

@@ -184,6 +184,15 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
     return value.isEmpty ? null : value;
   }
 
+  // The core splits filters on backticks, and an empty part is an empty regex
+  // that matches every node.
+  String? _filterOrNull(TextEditingController controller) {
+    final parts = (_textOrNull(controller) ?? '')
+        .split('`')
+        .where((part) => part.isNotEmpty);
+    return parts.isEmpty ? null : parts.join('`');
+  }
+
   int? _intOrNull(TextEditingController controller) {
     final value = controller.text.trim();
     return value.isEmpty ? null : int.parse(value);
@@ -226,8 +235,8 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
           : null,
       timeout: _intOrNull(_timeoutController),
       maxFailedTimes: _intOrNull(_maxFailedTimesController),
-      filter: _textOrNull(_filterController),
-      excludeFilter: _textOrNull(_excludeFilterController),
+      filter: _filterOrNull(_filterController),
+      excludeFilter: _filterOrNull(_excludeFilterController),
       excludeType: _textOrNull(_excludeTypeController),
       expectedStatus: _textOrNull(_expectedStatusController),
       icon: _textOrNull(_iconController),
