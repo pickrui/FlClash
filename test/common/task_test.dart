@@ -1859,6 +1859,71 @@ void main() {
     },
   );
 
+  test('WebRTC block keeps the deprecated sniffing list working', () async {
+    const rawConfig = {
+      'sniffer': {
+        'enable': true,
+        'sniffing': ['tls', 'http'],
+        'port-whitelist': ['80', '443', '8000-9000'],
+        'sniff': {},
+      },
+      'rules': ['MATCH,DIRECT'],
+    };
+    final result = await makeRealProfileTask(
+      _makeRealProfileState(rawConfig: rawConfig, blockWebRtc: true),
+    );
+
+    expect(result['sniffer']['sniff'], {
+      'TLS': {
+        'ports': ['80', '443', '8000-9000'],
+      },
+      'HTTP': {
+        'ports': ['80', '443', '8000-9000'],
+      },
+      'STUN': {},
+    });
+    expect((rawConfig['sniffer'] as Map)['sniff'], isEmpty);
+  });
+
+  test('WebRTC block leaves a disabled deprecated list inactive', () async {
+    final result = await makeRealProfileTask(
+      _makeRealProfileState(
+        rawConfig: const {
+          'sniffer': {
+            'enable': false,
+            'sniffing': ['tls'],
+          },
+          'rules': ['MATCH,DIRECT'],
+        },
+        blockWebRtc: true,
+      ),
+    );
+
+    expect(result['sniffer']['sniff'], {'STUN': {}});
+  });
+
+  test('WebRTC block replaces a STUN entry in any letter case', () async {
+    final result = await makeRealProfileTask(
+      _makeRealProfileState(
+        rawConfig: const {
+          'sniffer': {
+            'enable': true,
+            'sniff': {
+              'stun': {
+                'ports': [3478],
+              },
+              'QUIC': {},
+            },
+          },
+          'rules': ['MATCH,DIRECT'],
+        },
+        blockWebRtc: true,
+      ),
+    );
+
+    expect(result['sniffer']['sniff'], {'QUIC': {}, 'STUN': {}});
+  });
+
   test(
     'makeRealProfileTask applies non-empty custom overwrite lists',
     () async {

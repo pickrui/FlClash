@@ -264,12 +264,24 @@ void _applyWebRtcBlock(Map<String, dynamic> rawConfig) {
   final snifferMap = rawSniffer is Map
       ? Map<dynamic, dynamic>.from(rawSniffer)
       : <String, dynamic>{};
+  final wasEnabled = snifferMap['enable'] == true;
   snifferMap['enable'] = true;
   snifferMap['parse-pure-ip'] = true;
   final rawSniff = snifferMap['sniff'];
   final sniffMap = rawSniff is Map
       ? Map<dynamic, dynamic>.from(rawSniff)
       : <String, dynamic>{};
+  final legacySniffing = snifferMap['sniffing'];
+  // mihomo reads the deprecated list only while sniff is empty.
+  if (wasEnabled && sniffMap.isEmpty && legacySniffing is List) {
+    final ports = snifferMap['port-whitelist'];
+    for (final protocol in legacySniffing) {
+      sniffMap[protocol.toString().toUpperCase()] = <String, dynamic>{
+        if (ports is List && ports.isNotEmpty) 'ports': List.of(ports),
+      };
+    }
+  }
+  sniffMap.removeWhere((key, _) => key.toString().toUpperCase() == 'STUN');
   sniffMap['STUN'] = <String, dynamic>{};
   for (final entry in sniffMap.entries.toList()) {
     final value = entry.value;
