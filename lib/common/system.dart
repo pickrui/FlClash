@@ -234,6 +234,8 @@ final system = System();
 
 class Windows {
   static Windows? _instance;
+  static const _swHide = 0;
+  static const _swShowNormal = 1;
   late DynamicLibrary _shell32;
 
   Windows._internal() {
@@ -245,7 +247,7 @@ class Windows {
     return _instance!;
   }
 
-  bool runas(String command, String arguments) {
+  bool runas(String command, String arguments, {bool showWindow = true}) {
     final commandPtr = command.toNativeUtf16();
     final argumentsPtr = arguments.toNativeUtf16();
     final operationPtr = 'runas'.toNativeUtf16();
@@ -276,7 +278,7 @@ class Windows {
       commandPtr,
       argumentsPtr,
       nullptr,
-      1,
+      showWindow ? _swShowNormal : _swHide,
     );
 
     calloc.free(commandPtr);
@@ -314,7 +316,7 @@ class Windows {
       case HelperReadiness.notReady:
         break;
     }
-    if (!runas(appPath.helperPath, installArguments(pid))) {
+    if (!runas(appPath.helperPath, installArguments(pid), showWindow: false)) {
       return AuthorizeCode.error;
     }
     return await _waitForHelperService()
