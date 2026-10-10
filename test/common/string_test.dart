@@ -71,6 +71,19 @@ void main() {
     test('plain text', () {
       expect('not a url'.isUrl, isFalse);
     });
+
+    test('a bare @ in the user info splits at the last @', () {
+      expect('https://user:pa@ss@example.com/sub'.isUrl, isTrue);
+      expect('https://me@mail.com:p:w@dav.example.com/a.yaml'.isUrl, isTrue);
+      expect(
+        'https://me@mail.com:p@dav.example.com/a.yaml'.withEncodedUserInfoAt,
+        'https://me%40mail.com:p@dav.example.com/a.yaml',
+      );
+      expect(
+        'https://example.com/a@b'.withEncodedUserInfoAt,
+        'https://example.com/a@b',
+      );
+    });
   });
 
   group('StringExtension.splitByMultipleSeparators', () {

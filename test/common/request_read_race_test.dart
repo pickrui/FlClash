@@ -85,6 +85,30 @@ void main() {
     );
   });
 
+  test('a bare @ in the user info is sent as Basic credentials', () async {
+    final auth = <String?>[];
+    final paths = <String>[];
+    final proxy = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    addTearDown(() => proxy.close(force: true));
+    proxy.listen((incoming) async {
+      paths.add(incoming.uri.toString());
+      auth.add(incoming.headers.value(HttpHeaders.authorizationHeader));
+      incoming.response.write('valid configuration');
+      await incoming.response.close();
+    });
+    final request = Request(
+      isApiDomain: (_) => false,
+      readRoutes: (_) => ['PROXY 127.0.0.1:${proxy.port}'],
+    );
+    addTearDown(() => request.dio.close(force: true));
+    final result = await request.getFileResponseForUrl(
+      'http://me@mail.com:p:w@subscription.invalid/profile',
+    );
+    expect(utf8.decode(result.data!), 'valid configuration');
+    expect(paths.single, 'http://subscription.invalid/profile');
+    expect(auth, ['Basic ${base64Encode(utf8.encode('me@mail.com:p:w'))}']);
+  });
+
   test(
     'all invalid subscriptions preserve the configuration validation error',
     () async {

@@ -357,6 +357,7 @@ class Request {
     int maxBytes = _maxReadBytes,
     FutureOr<void> Function(Response<T> response)? validate,
   }) async {
+    if (Uri.tryParse(url) == null) url = url.withEncodedUserInfoAt;
     final clientOptions = isApiRequest ? _apiOptions : _resourceOptions;
     final uri = Uri.parse(url);
     final paths =

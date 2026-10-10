@@ -10,12 +10,28 @@ import 'package:fl_clash/common/common.dart';
 
 extension StringExtension on String {
   bool get isUrl {
-    final uri = Uri.tryParse(this);
+    final uri = Uri.tryParse(this) ?? Uri.tryParse(withEncodedUserInfoAt);
     return uri != null &&
         (uri.scheme == 'http' ||
             uri.scheme == 'https' ||
             uri.scheme == 'ftp') &&
         uri.host.isNotEmpty;
+  }
+
+  /// Browsers split the authority at its last @, while Uri.parse rejects an
+  /// unencoded @ in the user info, such as an e-mail address as user name.
+  String get withEncodedUserInfoAt {
+    final schemeEnd = indexOf('://');
+    if (schemeEnd < 0) return this;
+    final start = schemeEnd + 3;
+    final authorityEnd = indexOf(RegExp(r'[/?#]'), start);
+    final end = authorityEnd < 0 ? length : authorityEnd;
+    final at = end > start ? lastIndexOf('@', end - 1) : -1;
+    if (at < start) return this;
+    final userInfo = substring(start, at);
+    if (!userInfo.contains('@')) return this;
+    return '${substring(0, start)}${userInfo.replaceAll('@', '%40')}'
+        '${substring(at)}';
   }
 
   dynamic get splitByMultipleSeparators {
