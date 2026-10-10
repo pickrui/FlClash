@@ -83,8 +83,9 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         private const val METHOD_REQUEST_PERMISSION = "requestPermission"
         private const val ERROR_UNAVAILABLE = "UNAVAILABLE"
         private const val ERROR_IN_PROGRESS = "IN_PROGRESS"
-        private const val REQUEST_CODE_LOCATION = 1001
-        private const val REQUEST_CODE_BACKGROUND_LOCATION = 1002
+        // Every plugin on the activity sees every result; stay clear of the app's codes.
+        private const val REQUEST_CODE_LOCATION = 2101
+        private const val REQUEST_CODE_BACKGROUND_LOCATION = 2102
         private const val SSID_TIMEOUT_MILLIS = 3_000L
 
         // Values must match WifiSsidPermission enum index in Dart
