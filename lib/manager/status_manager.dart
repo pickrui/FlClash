@@ -15,6 +15,8 @@ import 'package:fl_clash/widgets/theme.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+const _maxBufferedMessages = 8;
+
 class StatusManager extends StatefulWidget {
   final Widget child;
   final Widget updateNotice;
@@ -52,8 +54,23 @@ class StatusManagerState extends State<StatusManager> {
       text: text,
       actionState: actionState,
     );
-    _bufferMessages.add(commonMessage);
     commonPrint.log('message: $text');
+    if (actionState == null &&
+        [
+          ..._messagesNotifier.value,
+          ..._bufferMessages,
+        ].any((pending) => pending.text == text)) {
+      return;
+    }
+    _bufferMessages.add(commonMessage);
+    if (_bufferMessages.length > _maxBufferedMessages) {
+      _bufferMessages.remove(
+        _bufferMessages.firstWhere(
+          (pending) => pending.actionState == null,
+          orElse: () => _bufferMessages.first,
+        ),
+      );
+    }
     _processQueue();
   }
 

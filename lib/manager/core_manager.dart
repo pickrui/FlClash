@@ -86,7 +86,12 @@ class _CoreManagerState extends ConsumerState<CoreManager>
     if (Secrets.shouldSuppressOutput(log.payload)) return;
     appController.addLog(log);
     if (log.logLevel == LogLevel.error) {
-      globalState.showNotifier(log.payload);
+      throttler.call(
+        FunctionTag.coreErrorNotifier,
+        () => globalState.showNotifier(log.payload),
+        duration: const Duration(seconds: 3),
+        fire: true,
+      );
     }
     super.onLog(log);
   }

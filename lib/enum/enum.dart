@@ -295,6 +295,7 @@ enum FunctionTag {
   logs,
   loadedProvider,
   saveSharedFile,
+  coreErrorNotifier,
 }
 
 enum DashboardWidget {
