@@ -294,6 +294,14 @@ abstract class SetupState with _$SetupState {
     @Default(false) bool blockQuic,
     @Default(false) bool blockWebRtc,
     @Default([]) List<TailscaleNetwork> tailscaleNetworks,
+    @Default({}) Map<String, String> hosts,
+    @Default(false) bool appendSystemDns,
+    @Default(0) int port,
+    @Default(0) int socksPort,
+    @Default(0) int redirPort,
+    @Default(0) int tproxyPort,
+    @Default(defaultKeepAliveInterval) int keepAliveInterval,
+    @Default(GeodataLoader.memconservative) GeodataLoader geodataLoader,
   }) = _SetupState;
 }
 
@@ -392,7 +400,18 @@ extension SetupStateExt on SetupState {
     )) {
       return true;
     }
-    return false;
+    // Live config updates do not carry these; only a full setup applies them.
+    return !const MapEquality<String, String>().equals(
+          hosts,
+          lastSetupState.hosts,
+        ) ||
+        appendSystemDns != lastSetupState.appendSystemDns ||
+        port != lastSetupState.port ||
+        socksPort != lastSetupState.socksPort ||
+        redirPort != lastSetupState.redirPort ||
+        tproxyPort != lastSetupState.tproxyPort ||
+        keepAliveInterval != lastSetupState.keepAliveInterval ||
+        geodataLoader != lastSetupState.geodataLoader;
   }
 }
 

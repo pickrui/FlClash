@@ -772,6 +772,19 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
     networkSettingProvider.select((state) => state.blockWebRtc),
   );
   final tailscaleNetworks = ref.watch(tailscaleNetworksProvider);
+  final setupOnly = ref.watch(
+    patchClashConfigProvider.select(
+      (state) => (
+        hosts: state.hosts,
+        port: state.port,
+        socksPort: state.socksPort,
+        redirPort: state.redirPort,
+        tproxyPort: state.tproxyPort,
+        keepAliveInterval: state.keepAliveInterval,
+        geodataLoader: state.geodataLoader,
+      ),
+    ),
+  );
   final List<Rule> addedRules = profileId != null
       ? await ref.watch(addedRuleStreamProvider(profileId).future)
       : [];
@@ -803,6 +816,16 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
     blockQuic: blockQuic,
     blockWebRtc: blockWebRtc,
     tailscaleNetworks: tailscaleNetworks,
+    hosts: setupOnly.hosts,
+    appendSystemDns: ref.watch(
+      networkSettingProvider.select((state) => state.appendSystemDns),
+    ),
+    port: setupOnly.port,
+    socksPort: setupOnly.socksPort,
+    redirPort: setupOnly.redirPort,
+    tproxyPort: setupOnly.tproxyPort,
+    keepAliveInterval: setupOnly.keepAliveInterval,
+    geodataLoader: setupOnly.geodataLoader,
   );
 }
 

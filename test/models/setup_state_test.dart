@@ -139,6 +139,28 @@ void main() {
     });
   });
 
+  test('settings without a live update path require setup', () {
+    final previous = buildState().copyWith(hosts: const {'a.lan': '10.0.0.1'});
+    expect(
+      buildState()
+          .copyWith(hosts: const {'a.lan': '10.0.0.1'})
+          .needSetup(previous),
+      isFalse,
+    );
+    for (final next in [
+      previous.copyWith(hosts: const {'a.lan': '10.0.0.2'}),
+      previous.copyWith(appendSystemDns: true),
+      previous.copyWith(port: 7891),
+      previous.copyWith(socksPort: 7892),
+      previous.copyWith(redirPort: 7893),
+      previous.copyWith(tproxyPort: 7894),
+      previous.copyWith(keepAliveInterval: 15),
+      previous.copyWith(geodataLoader: GeodataLoader.standard),
+    ]) {
+      expect(next.needSetup(previous), isTrue, reason: '$next');
+    }
+  });
+
   test('a Tailscale network change requires setup', () {
     const network = TailscaleNetwork(id: 'n', name: 'Home', stateId: 's');
     final previous = buildState(tailscaleNetworks: const [network]);
