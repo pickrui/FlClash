@@ -7,6 +7,7 @@
 #include <flutter/flutter_view_controller.h>
 #include <windows.h>
 #include <app_links/app_links_plugin_c_api.h>
+#include <proxy/proxy_plugin_c_api.h>
 #include <window/window_plugin_c_api.h>
 
 #include <algorithm>
@@ -20,6 +21,8 @@ namespace {
 constexpr wchar_t kWindowTitle[] = L"FlClash for oixCloud";
 constexpr wchar_t kSingleInstanceMutex[] =
     L"Local\\FlClashForoixCloudSingleInstance";
+constexpr char kClearStaleProxyArgument[] = "--clear-stale-proxy";
+constexpr DWORD kInstanceExitWaitMilliseconds = 2000;
 
 std::wstring LegacySingleInstanceMutexName() {
   std::wstring name = kSingleInstanceMutex;
@@ -28,6 +31,19 @@ std::wstring LegacySingleInstanceMutexName() {
     name[brand_offset] = L'O';
   }
   return name;
+}
+
+// taskkill /f returns before the app releases them; a live app owns its proxy.
+bool ClearStaleProxy(HANDLE legacy_instance_mutex,
+                     HANDLE single_instance_mutex) {
+  HANDLE mutexes[] = {legacy_instance_mutex, single_instance_mutex};
+  const DWORD result =
+      ::WaitForMultipleObjects(static_cast<DWORD>(std::size(mutexes)), mutexes,
+                               TRUE, kInstanceExitWaitMilliseconds);
+  if (result == WAIT_TIMEOUT) {
+    return true;
+  }
+  return result != WAIT_FAILED && ProxyPluginClearStaleProxy();
 }
 
 // The title alone also matches an Explorer window opened on the install
@@ -66,6 +82,18 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   const bool single_instance_exists =
       single_instance_mutex != nullptr &&
       ::GetLastError() == ERROR_ALREADY_EXISTS;
+  if (std::find(command_line_arguments.begin(), command_line_arguments.end(),
+                kClearStaleProxyArgument) != command_line_arguments.end()) {
+    const bool cleared =
+        ClearStaleProxy(legacy_instance_mutex, single_instance_mutex);
+    if (single_instance_mutex != nullptr) {
+      ::CloseHandle(single_instance_mutex);
+    }
+    if (legacy_instance_mutex != nullptr) {
+      ::CloseHandle(legacy_instance_mutex);
+    }
+    return cleared ? EXIT_SUCCESS : EXIT_FAILURE;
+  }
   if (legacy_instance_exists || single_instance_exists) {
     ActivateExistingInstance(!is_silent_launch);
     if (single_instance_mutex != nullptr) {

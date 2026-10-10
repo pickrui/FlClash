@@ -15,6 +15,9 @@
 
 namespace proxy {
 
+// Restores the proxy fields a killed app still owns from its persisted snapshot.
+bool ClearStaleProxy();
+
 class ProxyPlugin : public flutter::Plugin {
  public:
   static void RegisterWithRegistrar(flutter::PluginRegistrarWindows *registrar);

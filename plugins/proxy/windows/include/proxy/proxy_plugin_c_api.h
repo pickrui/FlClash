@@ -21,6 +21,9 @@ extern "C" {
 FLUTTER_PLUGIN_EXPORT void ProxyPluginCApiRegisterWithRegistrar(
     FlutterDesktopPluginRegistrarRef registrar);
 
+// Safe pre-engine.
+FLUTTER_PLUGIN_EXPORT bool ProxyPluginClearStaleProxy();
+
 #if defined(__cplusplus)
 }  // extern "C"
 #endif

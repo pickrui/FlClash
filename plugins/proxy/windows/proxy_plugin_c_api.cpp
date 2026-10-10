@@ -15,3 +15,7 @@ void ProxyPluginCApiRegisterWithRegistrar(
       flutter::PluginRegistrarManager::GetInstance()
           ->GetRegistrar<flutter::PluginRegistrarWindows>(registrar));
 }
+
+bool ProxyPluginClearStaleProxy() {
+  return proxy::ClearStaleProxy();
+}
