@@ -848,6 +848,7 @@ class AppController {
   int _profileApplyGeneration = 0;
   int _pendingProfileApplies = 0;
   final ProfileApplyIntent _profileApplyIntent = ProfileApplyIntent();
+  bool _debouncedApplyForce = false;
   bool isAttach = false;
   bool _logsAttached = false;
   bool _isCloudLoginDialogShowing = false;

@@ -482,10 +482,12 @@ extension SetupControllerExt on AppController {
   }
 
   void applyProfileDebounce({bool silence = false, bool force = false}) {
-    debouncer.call(
-      FunctionTag.applyProfile,
-      () => applyProfile(silence: silence, force: force),
-    );
+    _debouncedApplyForce = _debouncedApplyForce || force;
+    debouncer.call(FunctionTag.applyProfile, () {
+      final forced = _debouncedApplyForce;
+      _debouncedApplyForce = false;
+      return applyProfile(silence: silence, force: forced);
+    });
   }
 
   void changeMode(Mode mode) {
