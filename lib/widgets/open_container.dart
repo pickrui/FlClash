@@ -283,6 +283,8 @@ class _OpenContainerRoute<T> extends ModalRoute<T> with DragBackRouteMixin<T> {
 
   AnimationStatus? _lastAnimationStatus;
   AnimationStatus? _currentAnimationStatus;
+  CurvedAnimation? _curvedAnimation;
+  CurvedAnimation? _interruptedCurvedAnimation;
 
   @override
   TickerFuture didPush() {
@@ -319,11 +321,14 @@ class _OpenContainerRoute<T> extends ModalRoute<T> with DragBackRouteMixin<T> {
 
   @override
   void dispose() {
-    if (hideableKey.currentState?.isVisible == false) {
+    final hideable = hideableKey.currentState;
+    if (hideable != null && (!hideable.isInTree || !hideable.isVisible)) {
       SchedulerBinding.instance.addPostFrameCallback(
         (Duration d) => _toggleHideable(hide: false),
       );
     }
+    _curvedAnimation?.dispose();
+    _interruptedCurvedAnimation?.dispose();
     super.dispose();
   }
 
@@ -449,13 +454,16 @@ class _OpenContainerRoute<T> extends ModalRoute<T> with DragBackRouteMixin<T> {
             );
           }
 
-          final Animation<double> curvedAnimation = CurvedAnimation(
-            parent: animation,
-            curve: Curves.fastOutSlowIn,
-            reverseCurve: _transitionWasInterrupted
-                ? null
-                : Curves.fastOutSlowIn.flipped,
-          );
+          final Animation<double> curvedAnimation = _transitionWasInterrupted
+              ? _interruptedCurvedAnimation ??= CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.fastOutSlowIn,
+                )
+              : _curvedAnimation ??= CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.fastOutSlowIn,
+                  reverseCurve: Curves.fastOutSlowIn.flipped,
+                );
           TweenSequence<Color?>? colorTween;
           TweenSequence<double>? closedOpacityTween, openOpacityTween;
           switch (animation.status) {
@@ -529,15 +537,19 @@ class _OpenContainerRoute<T> extends ModalRoute<T> with DragBackRouteMixin<T> {
                           maxWidth: _rectTween.end!.width,
                           maxHeight: _rectTween.end!.height,
                           alignment: Alignment.topLeft,
-                          child: FadeTransition(
-                            opacity: openOpacityTween!.animate(animation),
-                            child: Builder(
-                              key: _openBuilderKey,
-                              builder: (BuildContext context) {
-                                return KeyboardInsetHold(
-                                  child: openBuilder(context, closeContainer),
-                                );
-                              },
+                          child: IgnorePointer(
+                            ignoring:
+                                openOpacityTween!.evaluate(animation) == 0,
+                            child: FadeTransition(
+                              opacity: openOpacityTween.animate(animation),
+                              child: Builder(
+                                key: _openBuilderKey,
+                                builder: (BuildContext context) {
+                                  return KeyboardInsetHold(
+                                    child: openBuilder(context, closeContainer),
+                                  );
+                                },
+                              ),
                             ),
                           ),
                         ),
