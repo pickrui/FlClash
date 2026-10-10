@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="FlClash">FlClash</string>
     <string name="service_notification_channel">Proxy service</string>
 </resources>
