@@ -220,6 +220,7 @@ class ListInputPage extends ConsumerStatefulWidget {
   final Widget Function(String item)? leadingBuilder;
   final String? valueLabel;
   final int? itemMaxLength;
+  final String? Function(String item)? itemValidator;
 
   const ListInputPage({
     super.key,
@@ -230,6 +231,7 @@ class ListInputPage extends ConsumerStatefulWidget {
     this.valueLabel,
     this.subtitleBuilder,
     this.itemMaxLength,
+    this.itemValidator,
   });
 
   @override
@@ -250,7 +252,12 @@ class _ListInputPageState extends _EditViewState<ListInputPage, String> {
   Widget buildTitle(String entry) => widget.titleBuilder(entry);
 
   @override
-  Widget? buildSubtitle(String entry) => widget.subtitleBuilder?.call(entry);
+  Widget? buildSubtitle(String entry) {
+    if (widget.itemValidator?.call(entry) case final error?) {
+      return Text(error, style: TextStyle(color: context.colorScheme.error));
+    }
+    return widget.subtitleBuilder?.call(entry);
+  }
 
   @override
   Widget? buildLeading(String entry) => widget.leadingBuilder?.call(entry);
@@ -265,18 +272,25 @@ class _ListInputPageState extends _EditViewState<ListInputPage, String> {
   String get _valueLabel => widget.valueLabel ?? context.appLocalizations.value;
 
   ParsedInput<String> _parseBatch(String text) {
+    final itemValidator = widget.itemValidator;
     return parseListInput(
       text,
       existing: _entries.toSet(),
       maxLength: widget.itemMaxLength,
+      isValid: itemValidator == null
+          ? null
+          : (item) => itemValidator(item) == null,
     );
   }
 
   String _issueMessage(InputIssue issue) {
-    return context.appLocalizations.maxLengthTip(
-      _valueLabel,
-      widget.itemMaxLength!,
-    );
+    return switch (issue.kind) {
+      InputIssueKind.invalidValue => widget.itemValidator!(issue.raw)!,
+      _ => context.appLocalizations.maxLengthTip(
+        _valueLabel,
+        widget.itemMaxLength!,
+      ),
+    };
   }
 
   String _toEntry(String? key, String value) =>
@@ -305,7 +319,7 @@ class _ListInputPageState extends _EditViewState<ListInputPage, String> {
       if (next != entry && _entries.contains(next)) {
         return appLocalizations.existsTip(label);
       }
-      return null;
+      return widget.itemValidator?.call(next);
     }
 
     return globalState.showCommonDialog<List<String>>(
@@ -418,6 +432,7 @@ class _MapInputPageState
         widget.valueMaxLength!,
       ),
       InputIssueKind.missingValue => appLocalizations.emptyTip(_valueLabel),
+      InputIssueKind.invalidValue => appLocalizations.urlTip(_valueLabel),
     };
   }
 

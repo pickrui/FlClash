@@ -1509,8 +1509,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "invalidCertificateTitle": MessageLookupByLibrary.simpleMessage(
       "Certificate Verification Failed",
     ),
+    "invalidCidrContent": MessageLookupByLibrary.simpleMessage(
+      "Enter an IP range in CIDR form such as 192.168.0.0/16",
+    ),
     "invalidDscpContent": MessageLookupByLibrary.simpleMessage(
       "A DSCP mark cannot exceed 63",
+    ),
+    "invalidHostContent": MessageLookupByLibrary.simpleMessage(
+      "Enter a domain or an IP address",
+    ),
+    "invalidIpv6CidrContent": MessageLookupByLibrary.simpleMessage(
+      "Enter an IPv6 range in CIDR form such as fd00::/8",
+    ),
+    "invalidListenContent": MessageLookupByLibrary.simpleMessage(
+      "Enter an address and port such as 0.0.0.0:1053",
     ),
     "invalidNetworkContent": MessageLookupByLibrary.simpleMessage(
       "Only tcp or udp is supported",

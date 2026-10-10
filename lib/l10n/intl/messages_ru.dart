@@ -1560,8 +1560,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "invalidCertificateTitle": MessageLookupByLibrary.simpleMessage(
       "Ошибка проверки сертификата",
     ),
+    "invalidCidrContent": MessageLookupByLibrary.simpleMessage(
+      "Введите диапазон IP в формате CIDR, например 192.168.0.0/16",
+    ),
     "invalidDscpContent": MessageLookupByLibrary.simpleMessage(
       "Метка DSCP не может превышать 63",
+    ),
+    "invalidHostContent": MessageLookupByLibrary.simpleMessage(
+      "Введите домен или IP-адрес",
+    ),
+    "invalidIpv6CidrContent": MessageLookupByLibrary.simpleMessage(
+      "Введите диапазон IPv6 в формате CIDR, например fd00::/8",
+    ),
+    "invalidListenContent": MessageLookupByLibrary.simpleMessage(
+      "Введите адрес и порт, например 0.0.0.0:1053",
     ),
     "invalidNetworkContent": MessageLookupByLibrary.simpleMessage(
       "Поддерживаются только tcp и udp",

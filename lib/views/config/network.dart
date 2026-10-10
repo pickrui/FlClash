@@ -11,6 +11,7 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/plugins/app.dart';
 import 'package:fl_clash/state.dart';
 import 'package:wifi_ssid/wifi_ssid.dart';
+import 'package:fl_clash/widgets/config_item.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -510,6 +511,7 @@ class RouteAddressItem extends ConsumerWidget {
           title: appLocalizations.routeAddress,
           items: routeAddress,
           itemMaxLength: TextInputLimits.cidr,
+          itemValidator: (item) => validateCidr(item, appLocalizations),
           titleBuilder: (item) => Text(item),
         ),
         onChanged: (items) {

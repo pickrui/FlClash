@@ -243,6 +243,7 @@ class _OverrideItem extends StatelessWidget {
       String Function(Ntp ntp) select,
       _NtpUpdate<String> update, {
       required int maxLength,
+      ConfigValidator? validator,
     }) {
       return ConfigTextItem(
         leading: leading,
@@ -250,6 +251,8 @@ class _OverrideItem extends StatelessWidget {
         selector: _ntpSelector(select),
         onChanged: _ntpWriter(update),
         maxLength: maxLength,
+        normalize: (value) => value.trim(),
+        validator: validator,
       );
     }
 
@@ -288,6 +291,7 @@ class _OverrideItem extends StatelessWidget {
         (ntp) => ntp.server,
         (state, value) => state.copyWith.ntp(server: value),
         maxLength: TextInputLimits.domain,
+        validator: validateHost,
       ),
       NtpOverrideKey.port => number(
         (ntp) => ntp.port,

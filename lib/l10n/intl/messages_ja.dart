@@ -1258,8 +1258,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "invalidCertificateTitle": MessageLookupByLibrary.simpleMessage(
       "証明書の検証に失敗しました",
     ),
+    "invalidCidrContent": MessageLookupByLibrary.simpleMessage(
+      "192.168.0.0/16 のような CIDR 形式の IP 範囲を入力してください",
+    ),
     "invalidDscpContent": MessageLookupByLibrary.simpleMessage(
       "DSCP マークは 63 を超えられません",
+    ),
+    "invalidHostContent": MessageLookupByLibrary.simpleMessage(
+      "ドメインまたは IP アドレスを入力してください",
+    ),
+    "invalidIpv6CidrContent": MessageLookupByLibrary.simpleMessage(
+      "fd00::/8 のような CIDR 形式の IPv6 範囲を入力してください",
+    ),
+    "invalidListenContent": MessageLookupByLibrary.simpleMessage(
+      "0.0.0.0:1053 のようなアドレスとポートを入力してください",
     ),
     "invalidNetworkContent": MessageLookupByLibrary.simpleMessage(
       "tcp または udp のみ対応しています",

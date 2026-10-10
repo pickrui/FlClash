@@ -298,6 +298,7 @@ class _OverrideItem extends StatelessWidget {
       String Function(Dns dns) select,
       _DnsUpdate<String> update, {
       required int maxLength,
+      ConfigValidator? validator,
     }) {
       return ConfigTextItem(
         leading: leading,
@@ -305,6 +306,8 @@ class _OverrideItem extends StatelessWidget {
         selector: _dnsSelector(select),
         onChanged: _dnsWriter(update),
         maxLength: maxLength,
+        normalize: (value) => value.trim(),
+        validator: validator,
       );
     }
 
@@ -356,6 +359,7 @@ class _OverrideItem extends StatelessWidget {
       List<String> Function(Dns dns) select,
       _DnsUpdate<List<String>> update, {
       required int itemMaxLength,
+      ConfigValidator? itemValidator,
     }) {
       return ConfigListEditItem(
         leading: leading,
@@ -364,6 +368,7 @@ class _OverrideItem extends StatelessWidget {
         selector: _dnsSelector(select),
         onChanged: _dnsWriter(update),
         itemMaxLength: itemMaxLength,
+        itemValidator: itemValidator,
       );
     }
 
@@ -376,6 +381,7 @@ class _OverrideItem extends StatelessWidget {
         (dns) => dns.listen,
         (state, value) => state.copyWith.dns(listen: value),
         maxLength: TextInputLimits.dnsListen,
+        validator: validateListenAddress,
       ),
       DnsOverrideKey.listenRoutingMark => number(
         (dns) => dns.listenRoutingMark,
@@ -423,11 +429,13 @@ class _OverrideItem extends StatelessWidget {
         (dns) => dns.fakeIpRange,
         (state, value) => state.copyWith.dns(fakeIpRange: value),
         maxLength: TextInputLimits.cidr,
+        validator: validateIpv4Cidr,
       ),
       DnsOverrideKey.fakeIpRange6 => text(
         (dns) => dns.fakeIpRange6,
         (state, value) => state.copyWith.dns(fakeIpRange6: value),
         maxLength: TextInputLimits.cidr,
+        validator: validateIpv6Cidr,
       ),
       DnsOverrideKey.fakeIpFilter => list(
         (dns) => dns.fakeIpFilter,
@@ -504,6 +512,7 @@ class _OverrideItem extends StatelessWidget {
         (dns) => dns.fallbackFilter.ipcidr,
         (state, value) => state.copyWith.dns.fallbackFilter(ipcidr: value),
         itemMaxLength: TextInputLimits.cidr,
+        itemValidator: validateCidr,
       ),
       DnsOverrideKey.fallbackFilterDomain => list(
         (dns) => dns.fallbackFilter.domain,

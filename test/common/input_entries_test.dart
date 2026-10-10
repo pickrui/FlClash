@@ -63,6 +63,43 @@ void main() {
       ]);
       expect(parsed.isValid, isFalse);
     });
+
+    test('reports items the caller refuses with their line', () {
+      final parsed = parseListInput(
+        '1.2.3.0/24\nbad, 10.0.0.0/8\nbad',
+        isValid: (value) => value.contains('/'),
+      );
+
+      expect(parsed.entries, ['1.2.3.0/24', '10.0.0.0/8']);
+      expect(parsed.issues, [
+        const InputIssue(
+          line: 2,
+          raw: 'bad',
+          kind: InputIssueKind.invalidValue,
+        ),
+        const InputIssue(
+          line: 3,
+          raw: 'bad',
+          kind: InputIssueKind.invalidValue,
+        ),
+      ]);
+      expect(parsed.isValid, isFalse);
+    });
+
+    test('checks length before the caller sees an item', () {
+      final seen = <String>[];
+      final parsed = parseListInput(
+        'far-too-long\nok',
+        maxLength: 4,
+        isValid: (value) {
+          seen.add(value);
+          return true;
+        },
+      );
+
+      expect(seen, ['ok']);
+      expect(parsed.issues.single.kind, InputIssueKind.valueTooLong);
+    });
   });
 
   group('parseMapInput', () {

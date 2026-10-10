@@ -11189,6 +11189,46 @@ class AppLocalizations {
     );
   }
 
+  /// `Enter an IP range in CIDR form such as 192.168.0.0/16`
+  String get invalidCidrContent {
+    return Intl.message(
+      'Enter an IP range in CIDR form such as 192.168.0.0/16',
+      name: 'invalidCidrContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter an IPv6 range in CIDR form such as fd00::/8`
+  String get invalidIpv6CidrContent {
+    return Intl.message(
+      'Enter an IPv6 range in CIDR form such as fd00::/8',
+      name: 'invalidIpv6CidrContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter a domain or an IP address`
+  String get invalidHostContent {
+    return Intl.message(
+      'Enter a domain or an IP address',
+      name: 'invalidHostContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter an address and port such as 0.0.0.0:1053`
+  String get invalidListenContent {
+    return Intl.message(
+      'Enter an address and port such as 0.0.0.0:1053',
+      name: 'invalidListenContent',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Match the IP's ASN`
   String get ruleActionIpAsnDesc {
     return Intl.message(

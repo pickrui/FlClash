@@ -1102,8 +1102,18 @@ class MessageLookup extends MessageLookupByLibrary {
       "无法验证服务器证书，跳过校验后无法确认服务器身份，发送或接收的账号凭据、订阅等数据可能被窃取或篡改\n\n仅在信任当前网络和服务器时继续，本次例外仅适用于同一服务器和同一证书的本次重试，操作结束后自动恢复校验",
     ),
     "invalidCertificateTitle": MessageLookupByLibrary.simpleMessage("证书校验失败"),
+    "invalidCidrContent": MessageLookupByLibrary.simpleMessage(
+      "请输入 CIDR 格式的 IP 段，如 192.168.0.0/16",
+    ),
     "invalidDscpContent": MessageLookupByLibrary.simpleMessage(
       "DSCP 标记不能超过 63",
+    ),
+    "invalidHostContent": MessageLookupByLibrary.simpleMessage("请输入域名或 IP 地址"),
+    "invalidIpv6CidrContent": MessageLookupByLibrary.simpleMessage(
+      "请输入 CIDR 格式的 IPv6 段，如 fd00::/8",
+    ),
+    "invalidListenContent": MessageLookupByLibrary.simpleMessage(
+      "请输入地址和端口，如 0.0.0.0:1053",
     ),
     "invalidNetworkContent": MessageLookupByLibrary.simpleMessage(
       "仅支持 tcp 或 udp",
