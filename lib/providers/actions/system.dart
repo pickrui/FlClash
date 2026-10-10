@@ -14,8 +14,6 @@ class SystemAction extends _$SystemAction {
 
   late AppController _controller;
 
-  Future<List<Package>> getPackages() => _controller.getPackages();
-
   Future<void> handleExit([bool needSave = true]) =>
       _controller.handleExit(needSave);
 
@@ -44,17 +42,6 @@ class SystemAction extends _$SystemAction {
 }
 
 extension SystemControllerExt on AppController {
-  Future<List<Package>> getPackages() async {
-    if (_ref.read(isMobileViewProvider)) {
-      await Future.delayed(commonDuration);
-    }
-    if (_ref.read(packagesProvider).isEmpty) {
-      _ref.read(packagesProvider.notifier).value =
-          await app?.getPackages() ?? [];
-    }
-    return _ref.read(packagesProvider);
-  }
-
   Future<void> handleExit([bool needSave = true]) => _exitCoordinator.run(
     cleanup: () => runCleanupActions([
       if (needSave) savePreferences,

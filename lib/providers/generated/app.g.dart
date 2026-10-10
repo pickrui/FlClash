@@ -466,58 +466,6 @@ abstract class _$Providers extends $Notifier<List<ExternalProvider>> {
   }
 }
 
-@ProviderFor(Packages)
-final packagesProvider = PackagesProvider._();
-
-final class PackagesProvider
-    extends $NotifierProvider<Packages, List<Package>> {
-  PackagesProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'packagesProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$packagesHash();
-
-  @$internal
-  @override
-  Packages create() => Packages();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(List<Package> value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<List<Package>>(value),
-    );
-  }
-}
-
-String _$packagesHash() => r'edcd682f727fd93673c54f53cda7dbe24f5ff92d';
-
-abstract class _$Packages extends $Notifier<List<Package>> {
-  List<Package> build();
-  @$mustCallSuper
-  @override
-  WhenComplete runBuild() {
-    final ref = this.ref as $Ref<List<Package>, List<Package>>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<List<Package>, List<Package>>,
-              List<Package>,
-              Object?,
-              Object?
-            >;
-    return element.handleCreate(ref, build);
-  }
-}
-
 @ProviderFor(SystemBrightness)
 final systemBrightnessProvider = SystemBrightnessProvider._();
 

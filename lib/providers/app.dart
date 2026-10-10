@@ -119,14 +119,6 @@ class Providers extends _$Providers with NotifierMixin<List<ExternalProvider>> {
 }
 
 @Riverpod(keepAlive: true)
-class Packages extends _$Packages with NotifierMixin<List<Package>> {
-  @override
-  List<Package> build() {
-    return [];
-  }
-}
-
-@Riverpod(keepAlive: true)
 class SystemBrightness extends _$SystemBrightness
     with NotifierMixin<Brightness> {
   @override
@@ -554,7 +546,6 @@ List<Override> buildAppStateOverrides(AppState appState) {
     initProvider.overrideWithBuild((_, _) => appState.isInit),
     backBlockProvider.overrideWithBuild((_, _) => appState.backBlock),
     currentPageLabelProvider.overrideWithBuild((_, _) => appState.pageLabel),
-    packagesProvider.overrideWithBuild((_, _) => appState.packages),
     sortNumProvider.overrideWithBuild((_, _) => appState.sortNum),
     viewSizeProvider.overrideWithBuild((_, _) => appState.viewSize),
     sideWidthProvider.overrideWithBuild((_, _) => appState.sideWidth),
