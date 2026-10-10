@@ -206,6 +206,41 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('a rejected library save explains itself in the editor', (
+    tester,
+  ) async {
+    await tester.runAsync(initEditorNative);
+    library.completeSave = () async =>
+        throw const ProviderLibraryException('duplicate');
+    await tester.pumpWidget(
+      TestApp(
+        overrides: [
+          clashProviderLibraryProvider.overrideWithValue(library),
+          clashProvidersProvider.overrideWith((_) => Stream.value([_original])),
+          viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 600)),
+        ],
+        child: const StatusManager(child: ClashProvidersView()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(AppLocalizations.current.ruleProviders));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Fixture'));
+    await settle(tester, 12);
+    tester.widget<CodeForge>(find.byType(CodeForge)).controller.text =
+        'payload: [example.test]';
+    await tester.pump();
+    await tester.tap(find.byTooltip('Save'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    final l = AppLocalizations.current;
+    expect(find.text('duplicate', skipOffstage: false), findsNothing);
+    expect(find.text(l.existsTip(l.name), skipOffstage: false), findsOneWidget);
+    expect(find.byType(EditorPage), findsOneWidget);
+    await tester.pump(const Duration(seconds: 4));
+  });
+
   testWidgets('saving blocks back navigation and retries after failure', (
     tester,
   ) async {

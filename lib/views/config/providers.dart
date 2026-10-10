@@ -221,7 +221,10 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
         titleEditable: true,
         content: raw,
         schema: EditorSchema.provider,
-        onSave: save,
+        onSave: (editorContext, title, content) => _run(
+          () => save(editorContext, title, content),
+          errorContext: editorContext,
+        ),
         onPop: (editorContext, title, content) async {
           if (title == draft.label && content == raw) return true;
           final answer = await globalState.showMessage(
