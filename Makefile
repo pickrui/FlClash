@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 include tool/go_build_tags.env
 # The release harness builds with this toolchain; GOTOOLCHAIN=local overrides it.
-GOTOOLCHAIN ?= go1.26.8
+GOTOOLCHAIN ?= go1.26.9
 
 .PHONY: help submodules hooks analyze format lint test test-safe test-macos-isolated test-go test-tailscale test-rust test-all
 
