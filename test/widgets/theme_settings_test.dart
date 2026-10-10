@@ -70,6 +70,24 @@ void main() {
     },
   );
 
+  testWidgets('the system text scale follows a change at runtime', (
+    tester,
+  ) async {
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    tester.platformDispatcher.textScaleFactorTestValue = 1.3;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => Text('${systemTextScaleOf(context)}'),
+        ),
+      ),
+    );
+    expect(find.text('1.3'), findsOneWidget);
+    tester.platformDispatcher.textScaleFactorTestValue = 1.1;
+    await tester.pump();
+    expect(find.text('1.1'), findsOneWidget);
+  });
+
   testWidgets(
     'hex input and HCT controls save the same selected opaque color',
     (tester) async {

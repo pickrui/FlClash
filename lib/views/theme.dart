@@ -674,7 +674,7 @@ class _TextScaleFactorItemState extends ConsumerState<_TextScaleFactorItem> {
     final textScale = ref.watch(
       themeSettingProvider.select((state) => state.textScale),
     );
-    final systemScale = defaultTextScaleFactor
+    final systemScale = systemTextScaleOf(context)
         .clamp(minTextScale, maxTextScale)
         .toDouble();
     final scale = _draft ?? (textScale.enable ? textScale.scale : systemScale);
