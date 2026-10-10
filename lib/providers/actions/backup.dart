@@ -275,6 +275,10 @@ extension BackupControllerExt on AppController {
                         restoredConfig.davProps,
                         previousConfig.davProps,
                       ),
+                      vpnProps: mergeRestoredVpnProps(
+                        restoredConfig.vpnProps,
+                        previousConfig.vpnProps,
+                      ),
                     );
                   }
                   await _saveConfigSerialized(configToApply);

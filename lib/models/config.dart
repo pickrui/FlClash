@@ -142,6 +142,8 @@ abstract class AccessControlProps with _$AccessControlProps {
 }
 
 extension AccessControlPropsExt on AccessControlProps {
+  bool get hasPackages => acceptList.isNotEmpty || rejectList.isNotEmpty;
+
   List<String> get currentList => switch (mode) {
     AccessControlMode.acceptSelected => acceptList,
     AccessControlMode.rejectSelected => rejectList,

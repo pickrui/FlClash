@@ -927,6 +927,13 @@ DAVProps? mergeRestoredDavProps(DAVProps? restored, DAVProps? previous) {
   return restored.copyWith(password: canReusePassword ? previous.password : '');
 }
 
+/// Only Android edits per-app lists; a backup without any, as every desktop
+/// backup is, keeps the ones picked on this device.
+VpnProps mergeRestoredVpnProps(VpnProps restored, VpnProps previous) {
+  if (restored.accessControlProps.hasPackages) return restored;
+  return restored.copyWith(accessControlProps: previous.accessControlProps);
+}
+
 Future<void> deleteApplicationSupportData(
   String homePath, {
   required Set<String> preservePaths,

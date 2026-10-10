@@ -402,6 +402,31 @@ void main() {
     },
   );
 
+  test('restore keeps the per-app lists a desktop backup does not carry', () {
+    const previous = VpnProps(
+      ipv6: true,
+      accessControlProps: AccessControlProps(
+        enable: true,
+        mode: AccessControlMode.acceptSelected,
+        acceptList: ['com.example.browser'],
+        rejectList: ['com.example.bank'],
+      ),
+    );
+    const desktop = VpnProps(systemProxy: false);
+    const android = VpnProps(
+      accessControlProps: AccessControlProps(
+        enable: true,
+        rejectList: ['com.example.game'],
+      ),
+    );
+
+    expect(
+      mergeRestoredVpnProps(desktop, previous),
+      desktop.copyWith(accessControlProps: previous.accessControlProps),
+    );
+    expect(mergeRestoredVpnProps(android, previous), android);
+  });
+
   test('proxy group filters are checked by the core validator', () async {
     String? payload;
     final message = await validateProxyGroupFilters(
