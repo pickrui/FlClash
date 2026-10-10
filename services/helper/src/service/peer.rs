@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 use crate::service::hub::{
     ensure_core_sha256_configured, log_message, release_managed_core_on_shutdown, routes,
+    LISTEN_PORT,
 };
 use crate::service::owner::{client_pid, same_sid, TcpConnection};
 
@@ -232,7 +233,7 @@ impl PublishedPort {
         // SAFETY: the buffers outlive the calls, and the opened key is closed.
         let status = unsafe {
             let mut key: HKEY = 0;
-            let status = RegCreateKeyExW(
+            let mut status = RegCreateKeyExW(
                 root,
                 key_path.as_ptr(),
                 0,
@@ -243,21 +244,24 @@ impl PublishedPort {
                 &mut key,
                 null_mut(),
             );
-            if status != ERROR_SUCCESS {
-                return Err(Error::from_raw_os_error(status as i32));
+            if status == ERROR_SUCCESS {
+                status = RegSetValueExW(
+                    key,
+                    value_name.as_ptr(),
+                    0,
+                    REG_DWORD,
+                    data.as_ptr(),
+                    data.len() as u32,
+                );
+                RegCloseKey(key);
             }
-            let status = RegSetValueExW(
-                key,
-                value_name.as_ptr(),
-                0,
-                REG_DWORD,
-                data.as_ptr(),
-                data.len() as u32,
-            );
-            RegCloseKey(key);
             status
         };
         if status != ERROR_SUCCESS {
+            // A run that ended without dropping its key may have left a dead port there.
+            unsafe {
+                RegDeleteKeyW(root, key_path.as_ptr());
+            }
             return Err(Error::from_raw_os_error(status as i32));
         }
         Ok(Self { root, key_path })
@@ -272,6 +276,37 @@ impl Drop for PublishedPort {
     }
 }
 
+/// The app falls back to [`LISTEN_PORT`] when no port is published, so a blocked
+/// registry write keeps the Helper reachable unless that port is reserved too.
+async fn bind_published<P>(
+    publish: impl FnOnce(u16) -> IoResult<P>,
+    fallback_port: u16,
+) -> anyhow::Result<(TcpListener, Option<P>)> {
+    let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, 0))
+        .await
+        .map_err(|error| anyhow::anyhow!("bind helper server: {error}"))?;
+    let port = listener
+        .local_addr()
+        .map_err(|error| anyhow::anyhow!("read helper server port: {error}"))?
+        .port();
+    let error = match publish(port) {
+        Ok(published) => return Ok((listener, Some(published))),
+        Err(error) => error,
+    };
+    drop(listener);
+    let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, fallback_port))
+        .await
+        .map_err(|bind_error| {
+            anyhow::anyhow!(
+                "publish helper server port: {error}; bind port {fallback_port}: {bind_error}"
+            )
+        })?;
+    log_message(format!(
+        "Helper could not publish its port ({error}); listening on {fallback_port}"
+    ));
+    Ok((listener, None))
+}
+
 pub(super) async fn serve_until<F, S>(
     owner_sid: String,
     shutdown: F,
@@ -283,15 +318,7 @@ where
 {
     ensure_core_sha256_configured()?;
 
-    let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, 0))
-        .await
-        .map_err(|error| anyhow::anyhow!("bind helper server: {error}"))?;
-    let port = listener
-        .local_addr()
-        .map_err(|error| anyhow::anyhow!("read helper server port: {error}"))?
-        .port();
-    let published = PublishedPort::publish(port)
-        .map_err(|error| anyhow::anyhow!("publish helper server port: {error}"))?;
+    let (listener, published) = bind_published(PublishedPort::publish, LISTEN_PORT).await?;
     on_started()?;
     let incoming = AuthorizedIncoming {
         listener,
@@ -310,7 +337,9 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use windows_sys::Win32::Foundation::{ERROR_CHILD_MUST_BE_VOLATILE, ERROR_FILE_NOT_FOUND};
+    use windows_sys::Win32::Foundation::{
+        ERROR_ACCESS_DENIED, ERROR_CHILD_MUST_BE_VOLATILE, ERROR_FILE_NOT_FOUND,
+    };
     use windows_sys::Win32::System::Registry::{
         RegGetValueW, HKEY_CURRENT_USER, REG_OPTION_NON_VOLATILE, RRF_RT_REG_DWORD,
     };
@@ -374,6 +403,52 @@ mod tests {
         assert_eq!(
             read_test_port().unwrap_err().raw_os_error(),
             Some(ERROR_FILE_NOT_FOUND as i32)
+        );
+    }
+
+    fn refuse_to_publish(_port: u16) -> IoResult<()> {
+        Err(Error::from_raw_os_error(ERROR_ACCESS_DENIED as i32))
+    }
+
+    #[tokio::test]
+    async fn listens_on_the_published_port() {
+        let (listener, published) = bind_published(Ok, LISTEN_PORT).await.unwrap();
+
+        let port = listener.local_addr().unwrap().port();
+        assert_ne!(port, 0);
+        assert_eq!(published, Some(port));
+    }
+
+    #[tokio::test]
+    async fn listens_on_the_fixed_port_when_the_port_cannot_be_published() {
+        let fallback_port = std::net::TcpListener::bind((Ipv4Addr::LOCALHOST, 0))
+            .unwrap()
+            .local_addr()
+            .unwrap()
+            .port();
+
+        let (listener, published) = bind_published(refuse_to_publish, fallback_port)
+            .await
+            .unwrap();
+
+        assert_eq!(listener.local_addr().unwrap().port(), fallback_port);
+        assert!(published.is_none());
+    }
+
+    #[tokio::test]
+    async fn reports_the_publish_error_when_the_fixed_port_is_taken_too() {
+        let taken = TcpListener::bind((Ipv4Addr::LOCALHOST, 0)).await.unwrap();
+        let fallback_port = taken.local_addr().unwrap().port();
+
+        let error = bind_published(refuse_to_publish, fallback_port)
+            .await
+            .unwrap_err()
+            .to_string();
+
+        assert!(error.starts_with("publish helper server port: "), "{error}");
+        assert!(
+            error.contains(&format!("bind port {fallback_port}: ")),
+            "{error}"
         );
     }
 

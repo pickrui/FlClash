@@ -43,11 +43,8 @@ use windows_sys::Win32::{
     },
 };
 
-#[cfg(not(any(
-    all(feature = "windows-service", target_os = "windows"),
-    target_os = "linux"
-)))]
-const LISTEN_PORT: u16 = 47890;
+#[cfg(not(target_os = "linux"))]
+pub(super) const LISTEN_PORT: u16 = 47890;
 #[cfg(not(target_os = "linux"))]
 const CORE_PIPE_PREFIX: &str = r"\\.\pipe\FlClashCore_";
 const PROTOCOL_VERSION_HEADER: &str = "x-flclash-helper-protocol";
