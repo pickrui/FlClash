@@ -708,6 +708,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "coreBlockedBySmartAppControlTip": MessageLookupByLibrary.simpleMessage(
       "Windows が FlClashCore.exe をブロックし、スマート アプリ コントロールが有効になっています。Windows セキュリティ → アプリとブラウザーの制御で詳細を確認し、信頼できる検証済みのリリースを使用してください",
     ),
+    "coreNotConnected": MessageLookupByLibrary.simpleMessage("コアに接続されていません"),
     "coreStatus": MessageLookupByLibrary.simpleMessage("コアステータス"),
     "crashTest": MessageLookupByLibrary.simpleMessage("クラッシュテスト"),
     "create": MessageLookupByLibrary.simpleMessage("作成"),
@@ -1019,6 +1020,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "enabledOnStart": MessageLookupByLibrary.simpleMessage("起動時に有効"),
     "entries": MessageLookupByLibrary.simpleMessage(" エントリ"),
     "entriesCount": m20,
+    "errorDetails": MessageLookupByLibrary.simpleMessage("エラーの詳細"),
     "exclude": MessageLookupByLibrary.simpleMessage("最近のタスクから非表示"),
     "excludeDesc": MessageLookupByLibrary.simpleMessage(
       "アプリがバックグラウンド時に最近のタスクから非表示",
@@ -1216,6 +1218,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "infiniteTime": MessageLookupByLibrary.simpleMessage("長期有効"),
     "init": MessageLookupByLibrary.simpleMessage("初期化"),
+    "initFailed": MessageLookupByLibrary.simpleMessage("起動に失敗しました"),
+    "initFailedTip": MessageLookupByLibrary.simpleMessage(
+      "起動中に重大なエラーが発生したため、アプリを続行できません",
+    ),
     "inputCorrectHotkey": MessageLookupByLibrary.simpleMessage("正しいホットキーを入力"),
     "installedAppsLoadFailed": MessageLookupByLibrary.simpleMessage(
       "アプリ一覧を読み込めませんでした。再試行してください",
@@ -2086,6 +2092,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "ssidsEmpty": MessageLookupByLibrary.simpleMessage("SSIDが空です"),
     "stackMode": MessageLookupByLibrary.simpleMessage("スタックモード"),
+    "stackTrace": MessageLookupByLibrary.simpleMessage("スタックトレース"),
     "standard": MessageLookupByLibrary.simpleMessage("標準"),
     "standardModeDesc": MessageLookupByLibrary.simpleMessage(
       "標準モード、基本設定を上書きし、シンプルなルール追加機能を提供",

@@ -3295,6 +3295,16 @@ class AppLocalizations {
     return Intl.message('Core status', name: 'coreStatus', desc: '', args: []);
   }
 
+  /// `Core is not connected`
+  String get coreNotConnected {
+    return Intl.message(
+      'Core is not connected',
+      name: 'coreNotConnected',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Append System DNS`
   String get appendSystemDns {
     return Intl.message(
@@ -6563,6 +6573,41 @@ class AppLocalizations {
       desc: '',
       args: [],
     );
+  }
+
+  /// `Startup failed`
+  String get initFailed {
+    return Intl.message(
+      'Startup failed',
+      name: 'initFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The application encountered a critical error during startup and cannot continue.`
+  String get initFailedTip {
+    return Intl.message(
+      'The application encountered a critical error during startup and cannot continue.',
+      name: 'initFailedTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Error details`
+  String get errorDetails {
+    return Intl.message(
+      'Error details',
+      name: 'errorDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Stack trace`
+  String get stackTrace {
+    return Intl.message('Stack trace', name: 'stackTrace', desc: '', args: []);
   }
 
   /// `Local proxy authentication`

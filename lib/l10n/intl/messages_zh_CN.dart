@@ -624,6 +624,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "coreBlockedBySmartAppControlTip": MessageLookupByLibrary.simpleMessage(
       "Windows 阻止了 FlClashCore.exe，当前已开启智能应用控制，请在 Windows 安全中心 → 应用和浏览器控制中查看拦截详情，并使用来源可信、经过验证的发行版本",
     ),
+    "coreNotConnected": MessageLookupByLibrary.simpleMessage("内核未连接"),
     "coreStatus": MessageLookupByLibrary.simpleMessage("核心状态"),
     "crashTest": MessageLookupByLibrary.simpleMessage("崩溃测试"),
     "create": MessageLookupByLibrary.simpleMessage("创建"),
@@ -899,6 +900,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "enabledOnStart": MessageLookupByLibrary.simpleMessage("启动后启用"),
     "entries": MessageLookupByLibrary.simpleMessage("个条目"),
     "entriesCount": m20,
+    "errorDetails": MessageLookupByLibrary.simpleMessage("错误详情"),
     "exclude": MessageLookupByLibrary.simpleMessage("从最近任务中隐藏"),
     "excludeDesc": MessageLookupByLibrary.simpleMessage("应用在后台时,从最近任务中隐藏应用"),
     "excludeNetworks": MessageLookupByLibrary.simpleMessage("按 IP 或网关暂停代理"),
@@ -1064,6 +1066,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "includeAllProxyProviders": MessageLookupByLibrary.simpleMessage("包含所有代理集"),
     "infiniteTime": MessageLookupByLibrary.simpleMessage("长期有效"),
     "init": MessageLookupByLibrary.simpleMessage("初始化"),
+    "initFailed": MessageLookupByLibrary.simpleMessage("启动失败"),
+    "initFailedTip": MessageLookupByLibrary.simpleMessage("应用启动时遇到严重错误，无法继续运行"),
     "inputCorrectHotkey": MessageLookupByLibrary.simpleMessage("请输入正确的快捷键"),
     "installedAppsLoadFailed": MessageLookupByLibrary.simpleMessage(
       "无法读取应用列表，请重试",
@@ -1830,6 +1834,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "ssidsEmpty": MessageLookupByLibrary.simpleMessage("SSIDs为空"),
     "stackMode": MessageLookupByLibrary.simpleMessage("栈模式"),
+    "stackTrace": MessageLookupByLibrary.simpleMessage("堆栈信息"),
     "standard": MessageLookupByLibrary.simpleMessage("标准"),
     "standardModeDesc": MessageLookupByLibrary.simpleMessage(
       "标准模式，覆写基本配置，提供简单追加规则能力",

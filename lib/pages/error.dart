@@ -9,6 +9,25 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
+class InitErrorApp extends StatelessWidget {
+  final Object error;
+  final StackTrace stack;
+
+  const InitErrorApp({super.key, required this.error, required this.stack});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        ...GlobalMaterialLocalizations.delegates,
+      ],
+      supportedLocales: AppLocalizations.delegate.supportedLocales,
+      home: InitErrorScreen(error: error, stack: stack),
+    );
+  }
+}
+
 class InitErrorScreen extends StatelessWidget {
   final Object error;
   final StackTrace stack;
@@ -18,10 +37,11 @@ class InitErrorScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l = AppLocalizations.maybeOf(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Init Failed'),
+        title: Text(l?.initFailed ?? 'Startup failed'),
         backgroundColor: colorScheme.error,
         foregroundColor: colorScheme.onError,
         elevation: 0,
@@ -40,10 +60,10 @@ class InitErrorScreen extends StatelessWidget {
                     size: 32,
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'The application encountered a critical error during startup and cannot continue.',
-                      style: TextStyle(
+                      l?.initFailedTip ?? 'The application encountered a critical error during startup and cannot continue.',
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
@@ -52,7 +72,7 @@ class InitErrorScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 24),
-              _buildSectionLabel('Error Details:'),
+              _buildSectionLabel(l?.errorDetails ?? 'Error details'),
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
@@ -74,7 +94,7 @@ class InitErrorScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              _buildSectionLabel('Stack Trace:'),
+              _buildSectionLabel(l?.stackTrace ?? 'Stack trace'),
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
@@ -100,7 +120,7 @@ class InitErrorScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _copyToClipboard(context),
-        label: const Text('Copy Details'),
+        label: Text(l?.copy ?? 'Copy'),
         icon: const Icon(Icons.copy),
         backgroundColor: colorScheme.error,
         foregroundColor: colorScheme.onError,
@@ -123,9 +143,11 @@ class InitErrorScreen extends StatelessWidget {
     Clipboard.setData(ClipboardData(text: text));
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Error details copied to clipboard'),
-        duration: Duration(seconds: 2),
+      SnackBar(
+        content: Text(
+          AppLocalizations.maybeOf(context)?.copySuccess ?? 'Copy success',
+        ),
+        duration: const Duration(seconds: 2),
       ),
     );
   }

@@ -115,7 +115,7 @@ extension ActionContext on BuildContext {
 const _persistentLogFileName = 'app.log';
 const _persistentLogMaxBytes = 1024 * 1024;
 const _persistentLogKeepBytes = 768 * 1024;
-const _coreDisconnectedMessage = 'Core is not connected';
+String get _coreDisconnectedMessage => appLocalizations.coreNotConnected;
 
 @visibleForTesting
 Uint8List retainCompleteLogLines(Uint8List bytes, int keepBytes) {

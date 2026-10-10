@@ -831,6 +831,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "coreBlockedBySmartAppControlTip": MessageLookupByLibrary.simpleMessage(
       "Windows blocked FlClashCore.exe, and Smart App Control is enabled. Check the block details in Windows Security → App & browser control, and use a trusted, verified release.",
     ),
+    "coreNotConnected": MessageLookupByLibrary.simpleMessage(
+      "Core is not connected",
+    ),
     "coreStatus": MessageLookupByLibrary.simpleMessage("Core status"),
     "crashTest": MessageLookupByLibrary.simpleMessage("Crash test"),
     "create": MessageLookupByLibrary.simpleMessage("Create"),
@@ -1216,6 +1219,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "enabledOnStart": MessageLookupByLibrary.simpleMessage("Enable on start"),
     "entries": MessageLookupByLibrary.simpleMessage(" entries"),
     "entriesCount": m20,
+    "errorDetails": MessageLookupByLibrary.simpleMessage("Error details"),
     "exclude": MessageLookupByLibrary.simpleMessage("Hidden from recent tasks"),
     "excludeDesc": MessageLookupByLibrary.simpleMessage(
       "When the app is in the background, the app is hidden from the recent task",
@@ -1451,6 +1455,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "infiniteTime": MessageLookupByLibrary.simpleMessage("Long term effective"),
     "init": MessageLookupByLibrary.simpleMessage("Init"),
+    "initFailed": MessageLookupByLibrary.simpleMessage("Startup failed"),
+    "initFailedTip": MessageLookupByLibrary.simpleMessage(
+      "The application encountered a critical error during startup and cannot continue.",
+    ),
     "inputCorrectHotkey": MessageLookupByLibrary.simpleMessage(
       "Please enter the correct hotkey",
     ),
@@ -2487,6 +2495,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "ssidsEmpty": MessageLookupByLibrary.simpleMessage("SSIDs are empty"),
     "stackMode": MessageLookupByLibrary.simpleMessage("Stack mode"),
+    "stackTrace": MessageLookupByLibrary.simpleMessage("Stack trace"),
     "standard": MessageLookupByLibrary.simpleMessage("Standard"),
     "standardModeDesc": MessageLookupByLibrary.simpleMessage(
       "Standard mode, override basic configuration, provide simple rule addition capability",

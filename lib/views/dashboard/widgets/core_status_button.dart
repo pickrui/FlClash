@@ -82,11 +82,7 @@ class _CoreStatusButtonState extends ConsumerState<CoreStatusButton> {
       return;
     }
     if (!mounted) return;
-    try {
-      await context.coreAction.restartCore();
-    } catch (error) {
-      globalState.showNotifier(error.toString());
-    }
+    await context.commonAction.safeRun(context.coreAction.restartCore);
   }
 
   @override

@@ -73,11 +73,7 @@ Future<void> main(List<String> arguments) async {
   } catch (e, s) {
     commonPrint.log('init failed: $e stack: $s', logLevel: LogLevel.error);
     render?.resume();
-    runApp(
-      MaterialApp(
-        home: InitErrorScreen(error: e, stack: s),
-      ),
-    );
+    runApp(InitErrorApp(error: e, stack: s));
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       try {
         await window?.showInitFailure(onExit: () => exit(0));
