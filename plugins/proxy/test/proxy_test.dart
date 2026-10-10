@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:proxy/proxy.dart';
+import 'package:proxy/src/windows_proxy.dart';
 
 void main() {
   group('Linux proxy command builders', () {
@@ -172,6 +173,30 @@ void main() {
     expect(await Proxy.hasExecutableForTest('kreadconfig6', searchPath), false);
     expect(await Proxy.hasExecutableForTest('bin', root.path), false);
   }, testOn: '!windows');
+
+  group('windowsBypassList', () {
+    test('brackets bare IPv6 literals and drops blank entries', () {
+      expect(
+        windowsBypassList([' ::1 ', 'fe80::1', '', '[fd00::1]', '*.lan']),
+        ['[::1]', '[fe80::1]', '[fd00::1]', '*.lan'],
+      );
+    });
+
+    test('keeps other entries in order once', () {
+      expect(
+        windowsBypassList([
+          'localhost',
+          '127.*',
+          '192.168.1.1',
+          '<local>',
+          'localhost',
+          '::1',
+          '[::1]',
+        ]),
+        ['localhost', '127.*', '192.168.1.1', '<local>', '[::1]'],
+      );
+    });
+  });
 
   group('macOS proxy command builders', () {
     test('splits networksetup service list into enabled and existing services',

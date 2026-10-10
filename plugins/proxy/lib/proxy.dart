@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 
 import 'proxy_platform_interface.dart';
+import 'src/windows_proxy.dart';
 
 enum ProxyTypes { http, https, socks }
 
@@ -95,7 +96,10 @@ class Proxy extends ProxyPlatform {
     return switch (Platform.operatingSystem) {
       'macos' => await _startProxyWithMacos(port, bypassDomain),
       'linux' => await _startProxyWithLinux(port, bypassDomain),
-      'windows' => await ProxyPlatform.instance.startProxy(port, bypassDomain),
+      'windows' => await ProxyPlatform.instance.startProxy(
+          port,
+          windowsBypassList(bypassDomain),
+        ),
       String() => false,
     };
   }
