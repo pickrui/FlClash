@@ -378,6 +378,46 @@ class ProfileApplyIntent {
   }
 }
 
+/// A newer download of a profile supersedes an older one, so the per-minute
+/// auto refresh skips running updates and backs off failing profiles.
+class ProfileUpdateRuns {
+  ProfileUpdateRuns({DateTime Function()? now}) : _now = now ?? DateTime.now;
+
+  static const maxRetryDelay = Duration(minutes: 20);
+
+  final DateTime Function() _now;
+  final _running = <int, int>{};
+  final _failures = <int, ({int count, DateTime retryAt})>{};
+
+  void begin(int profileId) {
+    _running.update(profileId, (count) => count + 1, ifAbsent: () => 1);
+  }
+
+  void end(int profileId, {required bool succeeded}) {
+    final remaining = _running[profileId]! - 1;
+    if (remaining == 0) {
+      _running.remove(profileId);
+    } else {
+      _running[profileId] = remaining;
+    }
+    if (succeeded) _failures.remove(profileId);
+  }
+
+  bool canAutoUpdate(int profileId) {
+    if (_running.containsKey(profileId)) return false;
+    final retryAt = _failures[profileId]?.retryAt;
+    return retryAt == null || !retryAt.isAfter(_now());
+  }
+
+  void autoUpdateFailed(Profile profile) {
+    final count = (_failures[profile.id]?.count ?? 0) + 1;
+    var delay = Duration(minutes: 1 << (count < 6 ? count - 1 : 5));
+    if (delay > maxRetryDelay) delay = maxRetryDelay;
+    if (delay > profile.autoUpdateDuration) delay = profile.autoUpdateDuration;
+    _failures[profile.id] = (count: count, retryAt: _now().add(delay));
+  }
+}
+
 Map<String, dynamic> createBackupConfigMap(Config config, int version) {
   final configMap = Map<String, dynamic>.from(
     jsonDecode(jsonEncode(sanitizeConfigForPreferences(config))) as Map,
@@ -801,6 +841,7 @@ class AppController {
   final _providerUpdates = <(int?, int, String, String), Future<String>>{};
   final _providerUpdateCounts = <String, int>{};
   final _profileUpdateCounts = <String, int>{};
+  final _profileUpdateRuns = ProfileUpdateRuns();
   int _groupsUpdateGeneration = 0;
   bool _groupsRefreshRequested = false;
   final _delayTestRuns = DelayTestRuns();

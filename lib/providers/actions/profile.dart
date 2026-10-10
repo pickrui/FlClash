@@ -101,8 +101,14 @@ extension ProfilesControllerExt on AppController {
   }
 
   Future<void> autoUpdateProfiles() async {
-    for (final profile in _ref.read(profilesProvider)) {
-      if (!profile.autoUpdate || profile.type == ProfileType.file) continue;
+    final ids = _ref.read(profilesProvider).map((profile) => profile.id);
+    for (final id in ids.toList()) {
+      final profile = _ref.read(profilesProvider).getProfile(id);
+      if (profile == null ||
+          !profile.autoUpdate ||
+          profile.type == ProfileType.file) {
+        continue;
+      }
 
       bool shouldUpdate =
           profile.lastUpdateDate?.add(profile.autoUpdateDuration).isBeforeNow ??
@@ -113,11 +119,12 @@ extension ProfilesControllerExt on AppController {
         shouldUpdate = true;
       }
 
-      if (!shouldUpdate) continue;
+      if (!shouldUpdate || !_profileUpdateRuns.canAutoUpdate(id)) continue;
 
       try {
-        await updateProfile(profile);
+        await updateProfile(profile, promptCertificate: false);
       } catch (e) {
+        _profileUpdateRuns.autoUpdateFailed(profile);
         commonPrint.log(e.toString(), logLevel: LogLevel.warning);
       }
     }
@@ -216,6 +223,7 @@ extension ProfilesControllerExt on AppController {
     bool applyIfCurrent = true,
     bool forceApplyIfCurrent = false,
     bool preserveCurrentState = true,
+    bool promptCertificate = true,
   }) async {
     await ensureCoreReadyOrThrow();
     final key = profile.updatingKey;
@@ -223,11 +231,15 @@ extension ProfilesControllerExt on AppController {
       _profileUpdateCounts[key] = (_profileUpdateCounts[key] ?? 0) + 1;
       _ref.read(isUpdatingProvider(key).notifier).value = true;
     }
+    _profileUpdateRuns.begin(profile.id);
+    var succeeded = false;
     try {
       final newProfile = await _updateProfileWithCertificateRetry(
         profile,
         preserveCurrentState: preserveCurrentState,
+        prompt: promptCertificate,
       );
+      succeeded = true;
       await applyProfileAfterRefresh(
         isCurrent:
             applyIfCurrent && profile.id == _ref.read(currentProfileIdProvider),
@@ -237,6 +249,7 @@ extension ProfilesControllerExt on AppController {
       );
       return newProfile;
     } finally {
+      _profileUpdateRuns.end(profile.id, succeeded: succeeded);
       if (showLoading) {
         final remaining = _profileUpdateCounts[key]! - 1;
         if (remaining == 0) {
@@ -252,8 +265,9 @@ extension ProfilesControllerExt on AppController {
   Future<Profile> _updateProfileWithCertificateRetry(
     Profile profile, {
     bool preserveCurrentState = true,
+    bool prompt = true,
   }) {
-    return _runWithCertificateRetry(() async {
+    Future<Profile> update() async {
       if (profile.isoixCloudProfile) {
         await _ref
             .read(cloudAccountProvider.notifier)
@@ -277,19 +291,27 @@ extension ProfilesControllerExt on AppController {
         }
         return prepared.save();
       }, preserveCurrentState: preserveCurrentState);
-    }, handleCloudUnauthorized: profile.isoixCloudProfile);
+    }
+
+    return _runWithCertificateRetry(
+      update,
+      handleCloudUnauthorized: profile.isoixCloudProfile,
+      prompt: prompt,
+    );
   }
 
   Future<T> _runWithCertificateRetry<T>(
     Future<T> Function() action, {
     bool handleCloudUnauthorized = false,
+    bool prompt = true,
   }) async {
     try {
       return await action();
     } catch (error, stackTrace) {
       await _throwHandledCloudUnauthorized(error, handleCloudUnauthorized);
       final cloudApiService = CloudApiService();
-      final shouldRetry = await cloudApiService.confirmInsecureTlsRetry(error);
+      final shouldRetry =
+          prompt && await cloudApiService.confirmInsecureTlsRetry(error);
       if (!shouldRetry) {
         Error.throwWithStackTrace(error, stackTrace);
       }

@@ -753,6 +753,59 @@ void main() {
     expect(newStarts, 1);
   });
 
+  group('ProfileUpdateRuns', () {
+    test('an automatic refresh waits for every running update', () {
+      final runs = ProfileUpdateRuns()
+        ..begin(1)
+        ..begin(1);
+
+      expect(runs.canAutoUpdate(1), isFalse);
+      expect(runs.canAutoUpdate(2), isTrue);
+      runs.end(1, succeeded: false);
+      expect(runs.canAutoUpdate(1), isFalse);
+      runs.end(1, succeeded: true);
+      expect(runs.canAutoUpdate(1), isTrue);
+    });
+
+    test('failed refreshes back off up to 20 minutes', () {
+      var now = DateTime(2026, 10, 10);
+      final runs = ProfileUpdateRuns(now: () => now);
+      const profile = Profile(id: 1, autoUpdateDuration: Duration(hours: 24));
+      final delays = <int>[];
+      for (var attempt = 0; attempt < 8; attempt++) {
+        runs.autoUpdateFailed(profile);
+        var waited = 0;
+        while (!runs.canAutoUpdate(profile.id)) {
+          now = now.add(const Duration(minutes: 1));
+          waited++;
+        }
+        delays.add(waited);
+      }
+      expect(delays, [1, 2, 4, 8, 16, 20, 20, 20]);
+
+      runs
+        ..autoUpdateFailed(profile)
+        ..begin(profile.id)
+        ..end(profile.id, succeeded: true);
+      expect(runs.canAutoUpdate(profile.id), isTrue);
+      runs.autoUpdateFailed(profile);
+      now = now.add(const Duration(minutes: 1));
+      expect(runs.canAutoUpdate(profile.id), isTrue);
+    });
+
+    test('a short update interval caps the retry delay', () {
+      var now = DateTime(2026, 10, 10);
+      final runs = ProfileUpdateRuns(now: () => now);
+      const profile = Profile(id: 1, autoUpdateDuration: Duration(minutes: 3));
+      for (var attempt = 0; attempt < 4; attempt++) {
+        runs.autoUpdateFailed(profile);
+      }
+      expect(runs.canAutoUpdate(profile.id), isFalse);
+      now = now.add(const Duration(minutes: 3));
+      expect(runs.canAutoUpdate(profile.id), isTrue);
+    });
+  });
+
   group('commitRestoredFiles', () {
     test('commits staged files before database commit', () async {
       final tempDir = await Directory.systemTemp.createTemp('restore_commit_');
