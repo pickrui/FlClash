@@ -444,6 +444,13 @@ fn is_expected_disconnect_error(error: &io::Error) -> bool {
     )
 }
 
+fn writer_error_message(error: &io::Error) -> Option<String> {
+    if error.kind() == io::ErrorKind::Interrupted || is_expected_disconnect_error(error) {
+        return None;
+    }
+    Some(format!("write error: {error}"))
+}
+
 fn finish_server(name: &str) {
     RUNNING.store(false, Ordering::SeqCst);
     if let Ok(mut state) = STATE.lock() {
@@ -547,9 +554,7 @@ fn io_loop(name: String, sink: StreamSink<Vec<u8>, SseCodec>) {
                     Ok(data) => {
                         pending_bytes.fetch_sub(data.len(), Ordering::SeqCst);
                         if let Err(e) = write_frame(&mut sender, &data, &writer_running) {
-                            if e.kind() != io::ErrorKind::Interrupted {
-                                error = Some(format!("write error: {e}"));
-                            }
+                            error = writer_error_message(&e);
                             break;
                         }
                     }
@@ -967,5 +972,25 @@ mod tests {
         assert!(!is_expected_disconnect_error(&io::Error::from(
             io::ErrorKind::InvalidData,
         )));
+    }
+
+    #[test]
+    fn writer_reports_only_errors_other_than_a_departed_peer() {
+        for kind in [
+            io::ErrorKind::Interrupted,
+            io::ErrorKind::UnexpectedEof,
+            io::ErrorKind::ConnectionReset,
+            io::ErrorKind::BrokenPipe,
+        ] {
+            assert_eq!(writer_error_message(&io::Error::from(kind)), None);
+        }
+        for kind in [
+            io::ErrorKind::InvalidData,
+            io::ErrorKind::PermissionDenied,
+            io::ErrorKind::WriteZero,
+        ] {
+            let message = writer_error_message(&io::Error::from(kind));
+            assert!(message.is_some_and(|message| message.starts_with("write error: ")));
+        }
     }
 }
