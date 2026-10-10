@@ -52,6 +52,13 @@ class TempActivity : Activity() {
         dispatch(action)
     }
 
+    override fun onStart() {
+        super.onStart()
+        // A NoDisplay activity still open when onResume completes must show its
+        // empty window; performCreate resets the flag after onCreate.
+        if (intent.getBooleanExtra(REQUEST_VPN_PERMISSION, false)) setVisible(true)
+    }
+
     @Deprecated("Activity result callback")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
