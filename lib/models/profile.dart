@@ -1319,20 +1319,4 @@ extension ProfileExtension on Profile {
       await tempFile.safeDelete();
     }
   }
-
-  Future<Profile> saveFileWithPath(String path) async {
-    return withProfileStorageMutation(() async {
-      final message = await coreController.validateConfig(path);
-      if (message.isNotEmpty) {
-        throw ConfigValidationException(message);
-      }
-      if (isoixCloudProfile) {
-        await _replaceWithEncryptedSnapshot(await File(path).readAsBytes());
-      } else {
-        final mFile = await file;
-        await File(path).copy(mFile.path);
-      }
-      return copyWith(lastUpdateDate: DateTime.now());
-    }, profileId: id);
-  }
 }
