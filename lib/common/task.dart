@@ -52,7 +52,7 @@ Future<String> encodeYamlTask<T>(T data) async {
 }
 
 Future<String> _encodeYaml<T>(T content) async {
-  return yaml.encode(content);
+  return writeYaml(content);
 }
 
 Future<List<Group>> toGroupsTask(ComputeGroupsState data) async {
