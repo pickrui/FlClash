@@ -303,6 +303,7 @@ class ListItem<T> extends StatelessWidget {
       final child = openDelegate.widget;
       final onChanged = openDelegate.onChanged;
       return OpenContainer<T>(
+        tappable: false,
         closedBuilder: (context, action) {
           Future<void> openAction() async {
             final isMobile = ProviderScope.containerOf(

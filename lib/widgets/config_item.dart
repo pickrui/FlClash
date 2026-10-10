@@ -165,7 +165,7 @@ class ConfigTextItem extends _ConfigItem<String> {
     return ListItem.input(
       leading: leading,
       title: Text(label),
-      subtitle: showValueAsSubtitle
+      subtitle: showValueAsSubtitle && value.isNotEmpty
           ? Text(value)
           : buildSubtitle(appLocalizations),
       delegate: InputDelegate(
