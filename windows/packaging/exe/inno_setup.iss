@@ -127,6 +127,39 @@ begin
   Result := True;
 end;
 
+function PointsIntoApp(Value: String): Boolean;
+begin
+  Result := Pos(Lowercase(AddBackslash(ExpandConstant('{app}'))), Lowercase(Value)) > 0;
+end;
+
+{ The value name is appName in lib/common/constant.dart and the schemes are protocolSchemes in lib/common/protocol.dart. }
+procedure RemoveUserRegistrations;
+var
+  Schemes: TArrayOfString;
+  Value: String;
+  i: Integer;
+begin
+  if RegQueryStringValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', '{{APP_NAME}}', Value) and PointsIntoApp(Value) then
+  begin
+    RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', '{{APP_NAME}}');
+    RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run', '{{APP_NAME}}');
+  end;
+
+  Schemes := ['clash', 'clashmeta', 'flclash'];
+  for i := 0 to GetArrayLength(Schemes)-1 do
+  begin
+    if RegQueryStringValue(HKCU, 'Software\Classes\' + Schemes[i] + '\shell\open\command', '', Value) and PointsIntoApp(Value) then
+    begin
+      RegDeleteKeyIncludingSubkeys(HKCU, 'Software\Classes\' + Schemes[i]);
+    end;
+  end;
+end;
+
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+begin
+  if CurUninstallStep = usPostUninstall then RemoveUserRegistrations;
+end;
+
 [Languages]
 {% for locale in LOCALES %}
 {% if locale.lang == 'en' %}Name: "english"; MessagesFile: "compiler:Default.isl"{% endif %}
