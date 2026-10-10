@@ -90,8 +90,27 @@ class FilesProvider : DocumentsProvider() {
         signal: CancellationSignal?
     ): ParcelFileDescriptor {
         val file = resolveFile(documentId)
-        val accessMode = ParcelFileDescriptor.parseMode(mode)
+        val accessMode = try {
+            ParcelFileDescriptor.parseMode(mode)
+        } catch (error: IllegalArgumentException) {
+            // Before Android 10 parseMode takes only six spellings of these letters.
+            if (mode.isEmpty() || mode.any { it !in "rwta" }) throw error
+            ParcelFileDescriptor.parseMode(canonicalMode(mode))
+        }
         return ParcelFileDescriptor.open(file, accessMode)
+    }
+
+    private fun canonicalMode(mode: String): String {
+        val read = 'r' in mode
+        val truncate = 't' in mode
+        return when {
+            'w' !in mode -> "r"
+            read && truncate -> "rwt"
+            read -> "rw"
+            truncate -> "wt"
+            'a' in mode -> "wa"
+            else -> "w"
+        }
     }
 
     private fun resolveFile(documentId: String): File {

@@ -57,6 +57,20 @@ class FilesProviderTest {
     }
 
     @Test
+    fun nonCanonicalModesKeepTheirMeaning() {
+        val file = File(root, "notes.txt").apply { writeText("keep") }
+        provider.openDocument(file.path, "wr", null).use {
+            assertEquals(4L, it.statSize)
+        }
+        assertEquals("keep", file.readText())
+        provider.openDocument(file.path, "tw", null).close()
+        assertEquals("", file.readText())
+        assertThrows(IllegalArgumentException::class.java) {
+            provider.openDocument(file.path, "rx", null)
+        }
+    }
+
+    @Test
     fun traversalSiblingPrefixesAndOutsideSymlinksAreRejected() {
         val outside = File(root.parentFile, root.name + "-outside").apply {
             mkdirs()
