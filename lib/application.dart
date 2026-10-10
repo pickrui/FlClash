@@ -43,6 +43,11 @@ class Application extends ConsumerStatefulWidget {
 }
 
 class ApplicationState extends ConsumerState<Application> {
+  // Windows can only watch SIGINT and SIGHUP.
+  final _terminateSignals = system.isDesktop && !system.isWindows
+      ? ProcessSignal.sigterm.watch()
+      : null;
+
   final _pageTransitionsTheme = const PageTransitionsTheme(
     builders: <TargetPlatform, PageTransitionsBuilder>{
       TargetPlatform.android: commonSharedXPageTransitions,
@@ -108,6 +113,7 @@ class ApplicationState extends ConsumerState<Application> {
   Widget _buildPlatformState({required Widget child}) {
     if (system.isDesktop) {
       return WindowManager(
+        terminateSignals: _terminateSignals,
         child: TrayManager(
           child: HotKeyManager(child: ProxyManager(child: child)),
         ),
