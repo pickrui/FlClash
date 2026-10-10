@@ -142,10 +142,7 @@ func handleGetIsInit() bool {
 func handleForceGC() {
 	log.Infoln("[APP] request force GC")
 	tunnel.InvalidateAllProxies()
-	runtime.GC()
-	if features.Android {
-		debug.FreeOSMemory()
-	}
+	debug.FreeOSMemory()
 }
 
 func handleShutdown() bool {
