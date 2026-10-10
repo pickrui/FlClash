@@ -225,6 +225,7 @@ class Proxy extends ProxyPlatform {
     _restoreCommands = restoreCommands;
     _pendingCommands = appliedCommands;
     if (await _runCommands(appliedCommands)) {
+      await _notifyKdeProxyChange(appliedCommands);
       if (!await _persistRestoreCommands(
         restoreCommands,
         managedCommands,
@@ -261,6 +262,7 @@ class Proxy extends ProxyPlatform {
       rollbackCommands,
       continueOnError: true,
     );
+    await _notifyKdeProxyChange(rollbackCommands);
     if (!rolledBack) return false;
     if (ownsProxy) {
       if (!await _persistRestoreCommands(
@@ -327,6 +329,7 @@ class Proxy extends ProxyPlatform {
     final remainingCommands = <ProxyCommand>[];
     final remainingManaged = <ProxyCommand>[];
     final remainingPending = <ProxyCommand>[];
+    final executedCommands = <ProxyCommand>[];
     for (final command in commands) {
       final key = _commandStateKey(command);
       if (managedCommands != null && key == null) {
@@ -336,6 +339,7 @@ class Proxy extends ProxyPlatform {
           (key == null || !matchingKeys.contains(key))) {
         continue;
       }
+      executedCommands.add(command);
       if (!await _runCommands([command])) {
         remainingCommands.add(command);
         final managed = key == null ? null : managedByKey[key];
@@ -344,6 +348,7 @@ class Proxy extends ProxyPlatform {
         if (pending != null) remainingPending.add(pending);
       }
     }
+    await _notifyKdeProxyChange(executedCommands);
     if (remainingCommands.isEmpty) {
       if (!await _clearPersistedRestoreCommands()) {
         _restoreCommands = commands;
@@ -905,6 +910,24 @@ class Proxy extends ProxyPlatform {
       }
     }
     return success;
+  }
+
+  // Running KIO programs keep the proxy they read at startup until this signal.
+  Future<void> _notifyKdeProxyChange(Iterable<ProxyCommand> commands) async {
+    if (!commands.any(
+      (command) => command.executable.startsWith('kwriteconfig'),
+    )) {
+      return;
+    }
+    try {
+      await _processRunner('dbus-send', [
+        '--session',
+        '--type=signal',
+        '/KIO/Scheduler',
+        'org.kde.KIO.Scheduler.reparseSlaveConfiguration',
+        'string:',
+      ]);
+    } catch (_) {}
   }
 
   Future<String?> _readCommand(

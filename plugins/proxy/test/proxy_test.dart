@@ -678,6 +678,139 @@ USB 10/100/1000 LAN
       expect(File(statePath).existsSync(), false);
     });
 
+    test('KDE start and stop each tell running KIO programs to reload once',
+        () async {
+      final root = await Directory.systemTemp.createTemp('proxy_kde_kio_');
+      addTearDown(() => root.delete(recursive: true));
+      final statePath = '${root.path}/restore.json';
+      final original = _kdeProxyState();
+      final state = Map<String, String>.from(original);
+      final calls = <List<String>>[];
+      final executables = <String>[];
+      final proxy = Proxy(
+        processRunner: _kdeRunner(
+          state,
+          calls: calls,
+          executables: executables,
+        ),
+        executableChecker: (executable) async => {
+          'kwriteconfig6',
+          'kreadconfig6',
+        }.contains(executable),
+        stateFilePath: statePath,
+      );
+
+      expect(
+        await proxy.startLinuxProxyForTest(
+          7890,
+          ['localhost'],
+          desktop: 'KDE',
+          homeDir: '/home/user',
+        ),
+        true,
+      );
+      expect(executables.where((value) => value == 'dbus-send'), hasLength(1));
+      expect(executables.last, 'dbus-send');
+      expect(calls.last, _kioReparseArgs);
+      expect(File(statePath).readAsStringSync(), isNot(contains('dbus-send')));
+
+      calls.clear();
+      executables.clear();
+      expect(await proxy.restoreProxyForTest(), true);
+      expect(state, original);
+      expect(executables.where((value) => value == 'dbus-send'), hasLength(1));
+      expect(executables.last, 'dbus-send');
+      expect(calls.last, _kioReparseArgs);
+    });
+
+    test('KDE rollback tells running KIO programs to reload once', () async {
+      final original = _kdeProxyState();
+      final state = Map<String, String>.from(original);
+      final executables = <String>[];
+      final proxy = Proxy(
+        processRunner: _kdeRunner(
+          state,
+          executables: executables,
+          fail: (args) => args[5] == 'ProxyType' && args[6] == '1',
+        ),
+        executableChecker: (executable) async => {
+          'kwriteconfig6',
+          'kreadconfig6',
+        }.contains(executable),
+      );
+
+      expect(
+        await proxy.startLinuxProxyForTest(
+          7890,
+          ['localhost'],
+          desktop: 'KDE',
+          homeDir: '/home/user',
+        ),
+        false,
+      );
+      expect(state, original);
+      expect(executables.where((value) => value == 'dbus-send'), hasLength(1));
+      expect(executables.last, 'dbus-send');
+    });
+
+    test('a missing or failing dbus-send leaves KDE start and stop intact',
+        () async {
+      for (final missing in [true, false]) {
+        final original = _kdeProxyState();
+        final state = Map<String, String>.from(original);
+        final proxy = Proxy(
+          processRunner: _kdeRunner(
+            state,
+            dbusSend: (args) => missing
+                ? throw ProcessException('dbus-send', args)
+                : ProcessResult(1, 1, '', 'no session bus'),
+          ),
+          executableChecker: (executable) async => {
+            'kwriteconfig6',
+            'kreadconfig6',
+          }.contains(executable),
+        );
+
+        expect(
+          await proxy.startLinuxProxyForTest(
+            7890,
+            ['localhost'],
+            desktop: 'KDE',
+            homeDir: '/home/user',
+          ),
+          true,
+        );
+        expect(state['ProxyType'], '1');
+        expect(await proxy.restoreProxyForTest(), true);
+        expect(state, original);
+      }
+    });
+
+    test('GNOME start and stop do not signal KIO', () async {
+      final state = _gnomeProxyState();
+      final executables = <String>[];
+      final runner = _gsettingsRunner(state);
+      final proxy = Proxy(
+        processRunner: (executable, arguments, {runInShell = false}) {
+          executables.add(executable);
+          return runner(executable, arguments, runInShell: runInShell);
+        },
+        executableChecker: (executable) async => executable == 'gsettings',
+      );
+
+      expect(
+        await proxy.startLinuxProxyForTest(
+          7890,
+          const [],
+          desktop: 'GNOME',
+          homeDir: '/home/user',
+        ),
+        true,
+      );
+      expect(await proxy.restoreProxyForTest(), true);
+      expect(executables.toSet(), {'gsettings'});
+    });
+
     test('macOS stop restores proxy endpoints, states, and bypass domains',
         () async {
       final calls = <List<String>>[];
@@ -1026,6 +1159,14 @@ ProxyProcessRunner _gsettingsRunner(
   };
 }
 
+const _kioReparseArgs = [
+  '--session',
+  '--type=signal',
+  '/KIO/Scheduler',
+  'org.kde.KIO.Scheduler.reparseSlaveConfiguration',
+  'string:',
+];
+
 Map<String, String> _kdeProxyState() {
   return {
     'NoProxyFor': 'old.local',
@@ -1039,13 +1180,23 @@ Map<String, String> _kdeProxyState() {
 ProxyProcessRunner _kdeRunner(
   Map<String, String> state, {
   List<List<String>>? calls,
+  List<String>? executables,
+  bool Function(List<String> args)? fail,
+  ProcessResult Function(List<String> args)? dbusSend,
 }) {
   return (executable, arguments, {runInShell = false}) async {
     calls?.add(List<String>.from(arguments));
+    executables?.add(executable);
+    if (executable == 'dbus-send') {
+      return dbusSend?.call(arguments) ?? ProcessResult(1, 0, '', '');
+    }
     final key = arguments[arguments.indexOf('--key') + 1];
     if (executable.startsWith('kreadconfig')) {
       final defaultValue = arguments[arguments.indexOf('--default') + 1];
       return ProcessResult(1, 0, state[key] ?? defaultValue, '');
+    }
+    if (fail?.call(arguments) ?? false) {
+      return ProcessResult(1, 1, '', 'failed');
     }
     if (arguments.contains('--delete')) {
       state.remove(key);
