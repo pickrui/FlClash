@@ -216,6 +216,16 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('active blur outlasts the moment nothing watches it', (
+    tester,
+  ) async {
+    window.onBlur = (enabled) async => enabled;
+    await pumpWindowManager(tester);
+    await tester.pumpAndSettle();
+    expect(window.blurCalls, [true]);
+    expect(container.read(windowBlurProvider), isTrue);
+  });
+
   testWidgets('renders its child untouched', (tester) async {
     await pumpWindowManager(tester);
 

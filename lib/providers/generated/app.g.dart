@@ -2126,7 +2126,7 @@ final class WindowBlurProvider extends $NotifierProvider<WindowBlur, bool> {
         argument: null,
         retry: null,
         name: r'windowBlurProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -2147,7 +2147,7 @@ final class WindowBlurProvider extends $NotifierProvider<WindowBlur, bool> {
   }
 }
 
-String _$windowBlurHash() => r'b07b0f6a176a01587d02c9a3dd1eff86d99076dc';
+String _$windowBlurHash() => r'25bc5eaf3c436dc394df2897f87ed84d01627b4e';
 
 abstract class _$WindowBlur extends $Notifier<bool> {
   bool build();
