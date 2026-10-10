@@ -340,3 +340,36 @@ func TestApplyConfigRejectsCandidateWithoutReplacingLiveRouting(t *testing.T) {
 		}
 	}
 }
+
+func TestSetupCandidateKeepsSystemTimeWriteOnlyWhereAllowed(t *testing.T) {
+	setValidationTestHome(t)
+	previousWritable := systemTimeWritable
+	previousNames := slices.Clone(config.GetProxyNameList())
+	previousAuth := currentDNSAuth()
+	t.Cleanup(func() {
+		systemTimeWritable = previousWritable
+		config.SetProxyNameList(previousNames)
+		setDNSAuth(previousAuth)
+	})
+	profile := "ntp:\n  enable: true\n  write-to-system: true\n"
+	if err := os.WriteFile(filepath.Join(constant.Path.HomeDir(), "config.yaml"), []byte(profile), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	for _, raw := range []string{profile, ""} {
+		for _, writable := range []bool{true, false} {
+			systemTimeWritable = writable
+			params := defaultSetupParams()
+			params.RawConfig = raw
+			candidate, err := parseSetupCandidate(params)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if candidate.NTP.WriteToSystem != writable {
+				t.Errorf("raw %t writable %t: WriteToSystem = %t", raw != "", writable, candidate.NTP.WriteToSystem)
+			}
+			if !candidate.NTP.Enable {
+				t.Errorf("raw %t writable %t: NTP disabled, want only the system write dropped", raw != "", writable)
+			}
+		}
+	}
+}

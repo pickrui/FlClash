@@ -400,6 +400,28 @@ func externalControllerConfig(cfg *config.Config) *route.Config {
 	}
 }
 
+// Android's app seccomp policy kills the process on settimeofday instead of returning EPERM.
+var systemTimeWritable = !features.Android
+
+func parseSetupCandidate(params *SetupParams) (*config.Config, error) {
+	var candidate *config.Config
+	var err error
+	if params.RawConfig != "" {
+		applyDNSAuth()
+		candidate, err = executor.ParseWithBytes([]byte(params.RawConfig))
+	} else {
+		candidate, err = parseConfigPath(filepath.Join(constant.Path.HomeDir(), "config.yaml"))
+	}
+	if err != nil {
+		return nil, err
+	}
+	if candidate.NTP.WriteToSystem && !systemTimeWritable {
+		log.Warnln("ntp write-to-system ignored: Android does not let apps set the system time")
+		candidate.NTP.WriteToSystem = false
+	}
+	return candidate, nil
+}
+
 func applyConfig(params *SetupParams) error {
 	runLock.Lock()
 	defer runLock.Unlock()
@@ -409,12 +431,7 @@ func applyConfig(params *SetupParams) error {
 	previousTestURL := constant.DefaultTestURL
 	previousDNSAuth := currentDNSAuth()
 	constant.DefaultTestURL = params.TestURL
-	if params.RawConfig != "" {
-		applyDNSAuth()
-		candidate, err = executor.ParseWithBytes([]byte(params.RawConfig))
-	} else {
-		candidate, err = parseConfigPath(filepath.Join(constant.Path.HomeDir(), "config.yaml"))
-	}
+	candidate, err = parseSetupCandidate(params)
 	if err != nil {
 		config.SetProxyNameList(previousNames)
 		constant.DefaultTestURL = previousTestURL
