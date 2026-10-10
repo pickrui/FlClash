@@ -68,6 +68,39 @@ void main() {
     },
   );
 
+  test('a sign-in during unauthorized cleanup waits for the managed profile removal', () async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    await AppLocalizations.load(const Locale('en'));
+    debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+    SharedPreferences.setMockInitialValues({});
+    final api = CloudApiService();
+    addTearDown(() => api.setToken(null));
+    final removal = Completer<void>();
+    final notifier = _CleanupRaceNotifier(removal.future);
+    final container = ProviderContainer(
+      overrides: [cloudAccountProvider.overrideWith(() => notifier)],
+    );
+    addTearDown(container.dispose);
+    container.read(cloudAccountProvider);
+    await notifier.ensureReady();
+
+    final cleanup = notifier.handleUnauthorized();
+    await pumpEventQueue();
+    expect(container.read(cloudAccountProvider).isLoggedIn, isFalse);
+    final signIn = notifier.signInWithToken('new-session');
+    await pumpEventQueue();
+    final beforeRemoval = List.of(notifier.events);
+    removal.complete();
+    await cleanup;
+    await signIn;
+    await pumpEventQueue();
+
+    expect(beforeRemoval, isEmpty);
+    expect(notifier.events, ['removed', 'user info', 'import']);
+    expect(container.read(cloudAccountProvider).isLoggedIn, isTrue);
+  });
+
   test('a failed session restore does not block a later sign-in', () async {
     TestWidgetsFlutterBinding.ensureInitialized();
     debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
@@ -782,6 +815,41 @@ class _StaleRefreshNotifier extends CloudAccountNotifier {
     unauthorizedCalls++;
     state = const CloudAccountState();
   }
+}
+
+/// Mirrors clearSession: the account reads as signed out while the managed
+/// profile is still being removed.
+class _CleanupRaceNotifier extends CloudAccountNotifier {
+  _CleanupRaceNotifier(this.removal);
+
+  final Future<void> removal;
+  final events = <String>[];
+
+  @override
+  CloudAccountState build() => const CloudAccountState(isLoggedIn: true);
+
+  @override
+  Future<void> ensureReady() async {}
+
+  @override
+  Future<String?> clearSession() async {
+    state = const CloudAccountState();
+    await removal;
+    events.add('removed');
+    return null;
+  }
+
+  @override
+  Future<void> showUnauthorizedLogin() async => events.add('login');
+
+  @override
+  Future<CloudUserInfo> Function() get userInfoRequest => () async {
+    events.add('user info');
+    return (profile: _managedProfile, announcement: null, tokenClient: null);
+  };
+
+  @override
+  Future<void> importManagedProfile(String url) async => events.add('import');
 }
 
 class _UnreadableTokenNotifier extends CloudAccountNotifier {

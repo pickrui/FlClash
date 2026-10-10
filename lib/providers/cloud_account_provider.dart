@@ -27,6 +27,7 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
   Future<void>? _signInFuture;
   Future<void>? _managedProfileFuture;
   Future<void>? _unauthorizedFuture;
+  Future<String?>? _sessionCleanup;
   Future<void>? _refreshFuture;
 
   bool get _canFetchManagedConfig {
@@ -356,6 +357,8 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
       state = state.copyWith(isLoading: true, error: null);
       try {
         await ensureReady();
+        // Cleanup shows the account signed out before removing its profile.
+        await _sessionCleanup?.catchError((_) => null);
         // Bootstrap may clear an expired session and reset the loading flag.
         state = state.copyWith(isLoading: true, error: null);
         await action();
@@ -647,12 +650,20 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
       return false;
     }
     state = state.copyWith(isLoading: true, error: null);
-    final cleanupError = await clearSession();
+    final cleanupError = await _trackSessionCleanup();
     if (cleanupError != null) {
       state = state.copyWith(error: cleanupError);
       return false;
     }
     return true;
+  }
+
+  Future<String?> _trackSessionCleanup() {
+    final cleanup = clearSession();
+    _sessionCleanup = cleanup;
+    return cleanup.whenComplete(() {
+      if (identical(_sessionCleanup, cleanup)) _sessionCleanup = null;
+    });
   }
 
   @protected
@@ -700,7 +711,7 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
     }
 
     final future = () async {
-      final cleanupError = await clearSession();
+      final cleanupError = await _trackSessionCleanup();
       if (cleanupError != null) {
         state = state.copyWith(error: cleanupError);
       }
@@ -713,7 +724,7 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
     });
     _unauthorizedFuture = cleanup;
     unawaited(
-      cleanup.then((_) => showUnauthorizedLogin()).catchError((
+      cleanup.then((_) => _showLoginUnlessSigningIn()).catchError((
         Object error,
         StackTrace stack,
       ) {
@@ -727,6 +738,11 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
       }),
     );
     return cleanup;
+  }
+
+  Future<void> _showLoginUnlessSigningIn() async {
+    if (state.isLoggedIn || state.isLoading) return;
+    await showUnauthorizedLogin();
   }
 
   @protected
