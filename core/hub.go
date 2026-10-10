@@ -177,6 +177,9 @@ func retireCurrentProviders() {
 }
 
 func closeCurrentProviders() {
+	// A connection still arriving after the table is emptied finds no DIRECT
+	// proxy; ApplyConfig resumes routing once a config is in place again.
+	tunnel.OnSuspend()
 	retireCurrentProviders()
 	previousProxies := tunnel.ProxiesSnapshot()
 	tunnel.UpdateProxies(

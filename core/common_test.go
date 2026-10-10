@@ -373,3 +373,35 @@ func TestSetupCandidateKeepsSystemTimeWriteOnlyWhereAllowed(t *testing.T) {
 		}
 	}
 }
+
+func TestClosingProvidersStopsRoutingUntilTheNextSetup(t *testing.T) {
+	setValidationTestHome(t)
+	stubLiveConfig(t)
+	previousStatus := tunnel.Status()
+	previousURL := constant.DefaultTestURL
+	previousNames := slices.Clone(config.GetProxyNameList())
+	previousAuth := currentDNSAuth()
+	t.Cleanup(func() {
+		closeCurrentProviders()
+		constant.DefaultTestURL = previousURL
+		config.SetProxyNameList(previousNames)
+		setDNSAuth(previousAuth)
+		if previousStatus == tunnel.Running {
+			tunnel.OnRunning()
+		}
+	})
+	params := defaultSetupParams()
+	params.RawConfig = "mixed-port: 0\nexternal-controller: ''\nrules: ['MATCH,DIRECT']\n"
+	for range 2 {
+		if err := applyConfig(params); err != nil {
+			t.Fatal(err)
+		}
+		if got := tunnel.Status(); got != tunnel.Running {
+			t.Fatalf("status after setup = %v", got)
+		}
+		closeCurrentProviders()
+		if got := tunnel.Status(); got != tunnel.Suspend {
+			t.Fatalf("status with no proxies left = %v", got)
+		}
+	}
+}
