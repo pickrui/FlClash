@@ -10,26 +10,28 @@ import com.oixcloud.clash.common.AccessControlMode
 import kotlinx.parcelize.Parcelize
 import java.net.InetAddress
 
+// Every parameter has a default so Gson builds these through the no-argument
+// constructor; state saved by an older version has no newer fields.
 @Parcelize
 data class AccessControlProps(
-    val enable: Boolean,
-    val mode: AccessControlMode,
-    val acceptList: List<String>,
-    val rejectList: List<String>,
+    val enable: Boolean = false,
+    val mode: AccessControlMode = AccessControlMode.REJECT_SELECTED,
+    val acceptList: List<String> = emptyList(),
+    val rejectList: List<String> = emptyList(),
 ) : Parcelable
 
 @Parcelize
 data class VpnOptions(
-    val enable: Boolean,
-    val port: Int,
-    val ipv6: Boolean,
-    val dnsHijacking: Boolean,
-    val accessControlProps: AccessControlProps,
-    val allowBypass: Boolean,
-    val systemProxy: Boolean,
-    val bypassDomain: List<String>,
-    val stack: String,
-    val routeAddress: List<String>,
+    val enable: Boolean = true,
+    val port: Int = 7890,
+    val ipv6: Boolean = false,
+    val dnsHijacking: Boolean = false,
+    val accessControlProps: AccessControlProps = AccessControlProps(),
+    val allowBypass: Boolean = true,
+    val systemProxy: Boolean = true,
+    val bypassDomain: List<String> = emptyList(),
+    val stack: String = "mixed",
+    val routeAddress: List<String> = emptyList(),
     val excludeSSIDs: List<String> = emptyList(),
     val excludeNetworks: List<String> = emptyList(),
     val mtu: Int = DEFAULT_TUN_MTU,

@@ -9,7 +9,10 @@ import com.google.gson.Gson
 import com.google.gson.JsonParser
 import com.oixcloud.clash.models.SharedState
 import com.oixcloud.clash.common.AccessControlMode
+import com.oixcloud.clash.service.models.AccessControlProps
+import com.oixcloud.clash.service.models.DEFAULT_TUN_MTU
 import com.oixcloud.clash.service.models.Traffic
+import com.oixcloud.clash.service.models.VpnOptions
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -41,6 +44,33 @@ class SharedStateJsonTest {
             .asJsonObject["mode"].asString)
         assertEquals(AccessControlMode.REJECT_SELECTED,
             gson.fromJson("\"rejectSelected\"", AccessControlMode::class.java))
+    }
+
+    @Test
+    fun vpnOptionsSavedByOlderVersionsGetDefaultsForNewerFields() {
+        val gson = Gson()
+        val older = gson.fromJson(
+            """{"vpnOptions":{"enable":true,"port":7890,"ipv6":false,
+              "dnsHijacking":false,"allowBypass":true,"systemProxy":true,
+              "bypassDomain":[],"stack":"mixed",
+              "accessControlProps":{"enable":false,"mode":"rejectSelected"}}}""",
+            SharedState::class.java,
+        ).vpnOptions!!
+        assertEquals(emptyList<String>(), older.routeAddress)
+        assertEquals(emptyList<String>(), older.excludeSSIDs)
+        assertEquals(emptyList<String>(), older.excludeNetworks)
+        assertEquals(DEFAULT_TUN_MTU, older.mtu)
+        assertEquals(emptyList<String>(), older.accessControlProps.acceptList)
+        assertEquals(emptyList<String>(), older.accessControlProps.rejectList)
+        val withoutAccessControl = gson.fromJson(
+            """{"enable":true,"port":7890,"stack":"mixed"}""",
+            VpnOptions::class.java,
+        )
+        assertEquals(
+            AccessControlProps(false, AccessControlMode.REJECT_SELECTED, emptyList(), emptyList()),
+            withoutAccessControl.accessControlProps,
+        )
+        assertEquals(emptyList<String>(), withoutAccessControl.bypassDomain)
     }
 
     @Test
