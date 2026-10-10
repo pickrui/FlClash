@@ -583,8 +583,9 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
       provider.cacheKey,
     );
     if (definition is! Map || definition['path'] != expected) continue;
-    final file = File(expected);
-    if (!await file.exists()) await file.safeWriteAsBytes(provider.content);
+    if (await File(expected).exists()) continue;
+    await durableCreateDirectory(dirname(expected));
+    await durableWriteBytes(expected, provider.content);
   }
   return safeModeBuild
       ? safeModeProfile(rawConfig)

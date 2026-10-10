@@ -870,7 +870,8 @@ extension SetupControllerExt on AppController {
       if (!isCurrentApply()) return false;
       await writeEncryptedProfileSnapshot(configFilePath, encryptedBytes);
     } else if (!isoixCloud) {
-      await File(configFilePath).safeWriteAsString(yamlString);
+      await durableCreateDirectory(File(configFilePath).parent.path);
+      await durableWriteBytes(configFilePath, utf8.encode(yamlString));
     }
 
     final latestProfile = _ref.read(profilesProvider).getProfile(profileId);
