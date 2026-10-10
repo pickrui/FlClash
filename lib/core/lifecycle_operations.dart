@@ -12,6 +12,10 @@ class CoreLifecycleOperations {
 
   Future<T> run<T>(Future<T> Function() action) => _lock.synchronized(action);
 
+  /// Timers and provider listeners inherit the zone of the operation that
+  /// scheduled them; work they start later must queue instead of nesting.
+  R detached<R>(R Function() body) => _lock.runDetached(body);
+
   Future<T> runExternal<T>(Future<T> Function() action) =>
       _lock.synchronized(action, reentrant: false);
 

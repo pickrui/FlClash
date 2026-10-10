@@ -9,6 +9,29 @@ import 'package:fl_clash/core/lifecycle_operations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('detached work queues behind the operation that scheduled it', () async {
+    final operations = CoreLifecycleOperations();
+    final events = <String>[];
+    final scheduled = Completer<Future<void>>();
+    await operations.run(() async {
+      events.add('holder-start');
+      operations.detached(() {
+        Timer.run(() {
+          scheduled.complete(
+            operations.run<void>(() async {
+              events.add('scheduled');
+            }),
+          );
+        });
+      });
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      events.add('holder-end');
+    });
+    await (await scheduled.future);
+
+    expect(events, ['holder-start', 'holder-end', 'scheduled']);
+  });
+
   test('crash cleanup finishes before a later startup', () async {
     final operations = CoreLifecycleOperations();
     final restoringProxy = Completer<void>();

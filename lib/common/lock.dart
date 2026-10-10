@@ -141,6 +141,9 @@ class AsyncStorageLock {
         parentContext.active;
   }
 
+  R runDetached<R>(R Function() body) =>
+      runZoned(body, zoneValues: {_zoneKey: null});
+
   Future<T> synchronized<T>(
     Future<T> Function() action, {
     bool reentrant = true,

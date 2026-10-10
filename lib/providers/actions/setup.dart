@@ -192,7 +192,7 @@ extension SetupControllerExt on AppController {
       return;
     }
     clearDelay();
-    applyProfile(force: true);
+    _coreLifecycleOperations.detached(() => applyProfile(force: true));
     _ref.read(logsProvider.notifier).value = FixedList(maxLength);
     _ref.read(requestsProvider.notifier).value = FixedList(maxLength);
   }
@@ -382,7 +382,10 @@ extension SetupControllerExt on AppController {
         }
       });
 
-  Future<void> updateConfigDebounce() async {
+  Future<void> updateConfigDebounce() async =>
+      _coreLifecycleOperations.detached(_debounceConfigUpdate);
+
+  void _debounceConfigUpdate() {
     final generation = ++_configUpdateGeneration;
     debouncer.call(FunctionTag.updateConfig, () async {
       await safeRun(() async {
@@ -483,11 +486,13 @@ extension SetupControllerExt on AppController {
 
   void applyProfileDebounce({bool silence = false, bool force = false}) {
     _debouncedApplyForce = _debouncedApplyForce || force;
-    debouncer.call(FunctionTag.applyProfile, () {
-      final forced = _debouncedApplyForce;
-      _debouncedApplyForce = false;
-      return applyProfile(silence: silence, force: forced);
-    });
+    _coreLifecycleOperations.detached(
+      () => debouncer.call(FunctionTag.applyProfile, () {
+        final forced = _debouncedApplyForce;
+        _debouncedApplyForce = false;
+        return applyProfile(silence: silence, force: forced);
+      }),
+    );
   }
 
   void changeMode(Mode mode) {
