@@ -22,23 +22,11 @@ class SystemAction extends _$SystemAction {
 
   Future<void> updateVisible() => _controller.updateVisible();
 
-  void updateBrightness() => _controller.updateBrightness();
-
-  void updateViewSize(Size size) => _controller.updateViewSize(size);
-
-  void initLink() => _controller.initLink();
-
   void updateTun() => _controller.updateTun();
 
   /// Toggles the system proxy, or sets it to [enable] when given.
   void updateSystemProxy([bool? enable]) =>
       _controller.updateSystemProxy(enable);
-
-  void updateAutoLaunch() => _controller.updateAutoLaunch();
-
-  Future<void> updateTray() => _controller.updateTray();
-
-  Future<void> updateLocalIp() => _controller.updateLocalIp();
 }
 
 extension SystemControllerExt on AppController {

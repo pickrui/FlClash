@@ -20,9 +20,6 @@ class CoreAction extends _$CoreAction {
 
   Future<void> restartCore([bool start = false]) =>
       _controller.restartCore(start);
-
-  Future<bool> tryStartCore([bool start = false]) =>
-      _controller.tryStartCore(start);
 }
 
 extension CoreControllerExt on AppController {

@@ -16,23 +16,8 @@ class ProfileAction extends _$ProfileAction {
 
   Future<void> deleteProfile(int id) => _controller.deleteProfile(id);
 
-  Future<void> autoUpdateProfiles() => _controller.autoUpdateProfiles();
-
-  Future<void> putProfile(Profile profile, {bool reportOnWait = true}) =>
-      _controller.putProfile(profile, reportOnWait: reportOnWait);
-
   Future<Profile> saveProfileMetadata(Profile edited) =>
       _controller.saveProfileMetadata(edited);
-
-  Future<Profile> persistProfile(
-    Profile profile,
-    Future<Profile> Function() update, {
-    bool preserveCurrentState = false,
-  }) => _controller.persistProfile(
-    profile,
-    update,
-    preserveCurrentState: preserveCurrentState,
-  );
 
   Future<Profile> saveProfileFile(Profile profile, Uint8List bytes) =>
       _controller.saveProfileFile(profile, bytes);
@@ -53,8 +38,6 @@ class ProfileAction extends _$ProfileAction {
     preserveCurrentState: preserveCurrentState,
   );
 
-  Future<void> requestStartCore() => _controller.requestStartCore();
-
   Future<Profile?> addProfileFormURL(
     String url, {
     String? label,
@@ -70,8 +53,6 @@ class ProfileAction extends _$ProfileAction {
   Future<void> addProfileFormQrCode() => _controller.addProfileFormQrCode();
 
   void reorder(List<Profile> profiles) => _controller.reorder(profiles);
-
-  Future<void> clearEffect(int profileId) => _controller.clearEffect(profileId);
 }
 
 extension ProfilesControllerExt on AppController {

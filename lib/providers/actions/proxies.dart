@@ -52,21 +52,11 @@ class ProxiesAction extends _$ProxiesAction {
   void changeProxyDebounce(String groupName, String proxyName) =>
       _controller.changeProxyDebounce(groupName, proxyName);
 
-  Future<void> updateGroups() => _controller.updateGroups();
-
   void updateCurrentGroupName(String groupName) =>
       _controller.updateCurrentGroupName(groupName);
 
   void updateCurrentUnfoldSet(Set<String> value) =>
       _controller.updateCurrentUnfoldSet(value);
-
-  void setDelay(Delay delay, {int? generation}) =>
-      _controller.setDelay(delay, generation: generation);
-
-  void setDelays(Iterable<Delay> delays, {int? generation}) =>
-      _controller.setDelays(delays, generation: generation);
-
-  void clearDelay() => _controller.clearDelay();
 
   Future<bool> delayTest(List<Proxy> proxies, [String? testUrl]) =>
       _controller.delayTest(proxies, testUrl);
@@ -76,16 +66,6 @@ class ProxiesAction extends _$ProxiesAction {
 
   Future<void> proxyDelayTest(Proxy proxy, [String? testUrl]) =>
       _controller.proxyDelayTest(proxy, testUrl);
-
-  Future<bool> changeProxy({
-    required int profileId,
-    required String groupName,
-    required String proxyName,
-  }) => _controller.changeProxy(
-    profileId: profileId,
-    groupName: groupName,
-    proxyName: proxyName,
-  );
 
   Future<void> updateProviders() => _controller.updateProviders();
 

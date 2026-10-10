@@ -16,8 +16,6 @@ class StoreAction extends _$StoreAction {
 
   void savePreferencesDebounce() => _controller.savePreferencesDebounce();
 
-  Future<void> savePreferences() => _controller.savePreferences();
-
   Future handleClear() => _controller.handleClear();
 }
 

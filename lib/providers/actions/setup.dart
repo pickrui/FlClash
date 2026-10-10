@@ -26,8 +26,6 @@ class SetupAction extends _$SetupAction {
     shouldContinue: shouldContinue,
   );
 
-  void fullSetup() => _controller.fullSetup();
-
   Future<void> updateStatus(bool isStart, {bool isInit = false}) =>
       _controller.updateStatus(isStart, isInit: isInit);
 
@@ -52,20 +50,10 @@ class SetupAction extends _$SetupAction {
     includeProxyGroups: includeProxyGroups,
   );
 
-  Future<bool> needSetup() => _controller.needSetup();
-
   Future<void> updateProxyAuthentication(AuthenticationProps next) =>
       _controller.updateProxyAuthentication(next);
 
-  Future<void> updateConfigDebounce() => _controller.updateConfigDebounce();
-
-  Future<void> autoUpdateIpv6() => _controller.autoUpdateIpv6();
-
   Future<void> setAutoIpv6(bool value) => _controller.setAutoIpv6(value);
-
-  void addCheckIp() => _controller.addCheckIp();
-
-  void tryCheckIp() => _controller.tryCheckIp();
 
   void applyProfileDebounce({bool silence = false, bool force = false}) =>
       _controller.applyProfileDebounce(silence: silence, force: force);

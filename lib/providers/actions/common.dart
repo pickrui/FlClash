@@ -14,8 +14,6 @@ class CommonAction extends _$CommonAction {
 
   late AppController _controller;
 
-  void toPage(PageLabel pageLabel) => _controller.toPage(pageLabel);
-
   void toProfiles() => _controller.toProfiles();
 
   Future<void> openCloudLogin({bool navigateToCloud = true}) =>
@@ -23,11 +21,7 @@ class CommonAction extends _$CommonAction {
 
   void updateStart() => _controller.updateStart();
 
-  void updateSpeedStatistics() => _controller.updateSpeedStatistics();
-
   void updateMode() => _controller.updateMode();
-
-  Future<void> updateTraffic() => _controller.updateTraffic();
 
   Future<T?> loadingRun<T>(
     FutureOr<T> Function() futureFunction, {
