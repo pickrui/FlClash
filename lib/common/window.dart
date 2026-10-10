@@ -251,9 +251,7 @@ class Window implements WindowPort {
   }
 
   Future<bool> _isWindowVisible() async {
-    final value = await desktopWindow.isVisible();
-    commonPrint.log('window visible check: $value');
-    return value;
+    return desktopWindow.isVisible();
   }
 
   @override
