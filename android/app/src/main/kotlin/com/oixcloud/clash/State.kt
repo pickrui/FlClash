@@ -176,6 +176,8 @@ object State {
 
     suspend fun handleStartService() = withTimeout(60_000) {
         val request = startPreparation.begin()
+        // A running service needs no consent; a refused prompt would only fail a finished start.
+        if (runStateFlow.value == RunState.START) return@withTimeout
         val options = sharedState.vpnOptions
             ?: throw IllegalStateException("Open the app to configure the VPN first")
         val plugin = appPlugin
