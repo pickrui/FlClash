@@ -84,8 +84,10 @@ class _MemoryInfoState extends ConsumerState<MemoryInfo>
   Duration get pollInterval => const Duration(seconds: 2);
 
   @override
-  Future<void> poll(PollGuard isCurrent) async {
-    if (_releasing) return;
+  Future<void> poll(PollGuard isCurrent) => _refresh(isCurrent);
+
+  Future<void> _refresh(PollGuard isCurrent) async {
+    if (_releasing || !isCurrent()) return;
     final generation = ++_generation;
     final memory = await _readMemory();
     if (memory == null || !isCurrent() || generation != _generation) {
@@ -132,6 +134,7 @@ class _MemoryInfoState extends ConsumerState<MemoryInfo>
       builder: (_, _) => MemoryDetailSheet(
         snapshot: _memoryStateNotifier,
         onRelease: _releaseMemory,
+        onRefresh: () => _refresh(() => mounted),
       ),
     );
   }
@@ -211,9 +214,13 @@ class MemoryDetailSheet extends StatefulWidget {
     super.key,
     required this.snapshot,
     required this.onRelease,
+    this.onRefresh,
   });
 
   final ValueListenable<MemorySnapshot> snapshot;
+
+  /// Covered by the sheet, the card stops polling, so the sheet polls instead.
+  final Future<void> Function()? onRefresh;
 
   /// Resolves to the bytes freed.
   final Future<int> Function() onRelease;
@@ -222,9 +229,19 @@ class MemoryDetailSheet extends StatefulWidget {
   State<MemoryDetailSheet> createState() => _MemoryDetailSheetState();
 }
 
-class _MemoryDetailSheetState extends State<MemoryDetailSheet> {
+class _MemoryDetailSheetState extends State<MemoryDetailSheet>
+    with WidgetsBindingObserver, ActivePollingMixin<MemoryDetailSheet> {
   bool _releasing = false;
   String? _feedback;
+
+  @override
+  Duration get pollInterval => const Duration(seconds: 2);
+
+  @override
+  Future<void> poll(PollGuard isCurrent) async {
+    if (!_releasing) await widget.onRefresh?.call();
+  }
+
   Future<void> _release() async {
     if (_releasing) return;
     setState(() {

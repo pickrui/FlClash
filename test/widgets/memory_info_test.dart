@@ -188,6 +188,40 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets('the memory detail sheet keeps refreshing while open', (
+    tester,
+  ) async {
+    var readCount = 0;
+
+    Future<MemorySnapshot> readMemory() async {
+      readCount++;
+      return MemorySnapshot(app: readCount * 1024 * 1024);
+    }
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpWidget(
+      _TestApp(child: MemoryInfo(memoryReader: readMemory)),
+    );
+    await tester.pump();
+    await tester.tap(find.byType(MemoryInfo));
+    await tester.pumpAndSettle();
+    expect(find.byType(MemoryDetailSheet), findsOneWidget);
+    final opened = readCount;
+
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pump();
+
+    expect(readCount, greaterThan(opened));
+    final sheet = tester.widget<MemoryDetailSheet>(
+      find.byType(MemoryDetailSheet),
+    );
+    expect(sheet.snapshot.value.app, readCount * 1024 * 1024);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('MemoryInfo refreshes only while the page is active', (
     tester,
   ) async {
