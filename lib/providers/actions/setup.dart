@@ -336,7 +336,7 @@ extension SetupControllerExt on AppController {
     if (profileId == null) {
       return false;
     }
-    final setupState = await _ref.read(setupStateProvider(profileId).future);
+    final setupState = await _ref.readSetupState(profileId);
     return setupState.needSetup(globalState.lastSetupState) == true;
   }
 
@@ -759,7 +759,7 @@ extension SetupControllerExt on AppController {
   }
 
   Future<Map<String, dynamic>> getProxyChainProfileConfig(int profileId) async {
-    final setupState = await _ref.read(setupStateProvider(profileId).future);
+    final setupState = await _ref.readSetupState(profileId);
     final patchClashConfig = _ref.read(patchClashConfigProvider);
     return getProfile(
       setupState: setupState.copyWith(proxyChains: const []),
@@ -777,7 +777,7 @@ extension SetupControllerExt on AppController {
     }
     var res = {};
     try {
-      final setupState = await _ref.read(setupStateProvider(profileId).future);
+      final setupState = await _ref.readSetupState(profileId);
       final patchClashConfig = _ref.read(patchClashConfigProvider);
       res = await getProfile(
         setupState: setupState,
@@ -839,7 +839,7 @@ extension SetupControllerExt on AppController {
     }
     final realTunEnable = _ref.read(realTunEnableProvider);
     final realPatchConfig = patchConfig.copyWith.tun(enable: realTunEnable);
-    final setupState = await _ref.read(setupStateProvider(profile?.id).future);
+    final setupState = await _ref.readSetupState(profile?.id);
     final Map<String, dynamic> config;
     try {
       config = await getProfile(

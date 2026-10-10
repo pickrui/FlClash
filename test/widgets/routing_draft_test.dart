@@ -15,10 +15,13 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/app.dart';
+import 'package:fl_clash/providers/clash_providers.dart';
+import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:yaml/yaml.dart';
 
 import '../helpers/test_app.dart';
@@ -116,11 +119,12 @@ void main() {
   });
   tearDown(() => directory.deleteSync(recursive: true));
 
-  Future<void> open(WidgetTester tester) async {
+  Future<void> open(WidgetTester tester, {List<Override>? setupState}) async {
     await tester.pumpWidget(
       TestApp(
         overrides: [
-          setupStateProvider(1).overrideWith((_) async => _state),
+          ...setupState ??
+              [setupStateProvider(1).overrideWith((_) async => _state)],
           coreActionProvider.overrideWith(_Ready.new),
           setupActionProvider.overrideWith(() => setup),
           coreHandlerProvider.overrideWith((_) => core),
@@ -177,5 +181,31 @@ void main() {
     expect(result, AppLocalizations.current.routingApplyFailed);
     expect(core.configs, isEmpty);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a draft for a profile nobody watches still validates', (
+    tester,
+  ) async {
+    Stream<List<T>> later<T>(List<T> value) => Stream.fromFuture(
+      Future.delayed(const Duration(milliseconds: 20), () => value),
+    );
+    await open(
+      tester,
+      setupState: [
+        profileProvider(1).overrideWithValue(_profile),
+        scriptsProvider.overrideWithBuild((_, _) => later(<Script>[])),
+        addedRuleStreamProvider(1)
+            .overrideWith((_) => later(_state.addedRules)),
+        clashProvidersProvider.overrideWith((_) => later([])),
+      ],
+    );
+    final result = await tester.runAsync(
+      () => validateCustomRoutingDraft(editor, _profile),
+    );
+    expect(result, isEmpty);
+    expect(core.configs.single['rules'], [
+      'DOMAIN,example.test,Old',
+      'MATCH,DIRECT',
+    ]);
   });
 }

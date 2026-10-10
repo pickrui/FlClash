@@ -103,7 +103,7 @@ Future<String> validateCustomRoutingDraft(
     final coreAction = context.coreAction;
     final setupAction = context.setupAction;
     final core = ref.read(coreHandlerProvider);
-    final state = await ref.read(setupStateProvider(profile.id).future);
+    final state = await ref.readSetupState(profile.id);
     if (!context.mounted || !await coreAction.ensureCoreReady()) {
       return appLocalizations.routingApplyFailed;
     }
@@ -126,7 +126,7 @@ Future<String> validateCustomRoutingDraft(
       base64Encode(utf8.encode(yaml)),
     );
     if (!context.mounted) return appLocalizations.routingApplyFailed;
-    final currentState = await ref.read(setupStateProvider(profile.id).future);
+    final currentState = await ref.readSetupState(profile.id);
     if (!context.mounted) return appLocalizations.routingApplyFailed;
     final currentNetwork = ref.read(networkSettingProvider);
     if (currentState != state ||

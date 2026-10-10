@@ -95,7 +95,7 @@ class _OverwriteViewState extends ConsumerState<OverwriteView> {
         if (!mounted || ref.read(currentProfileIdProvider) != profile.id) {
           return;
         }
-        final latest = await ref.read(setupStateProvider(profile.id).future);
+        final latest = await ref.readSetupState(profile.id);
         if (!mounted || ref.read(currentProfileIdProvider) != profile.id) {
           return;
         }

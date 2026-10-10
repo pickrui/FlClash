@@ -829,6 +829,22 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
   );
 }
 
+extension SetupStateRead on WidgetRef {
+  // ref.read leaves an autoDispose provider without a listener mid-build, so
+  // a profile nobody watches is disposed or paused before it resolves.
+  Future<SetupState> readSetupState(int? profileId) async {
+    final subscription = listenManual(
+      setupStateProvider(profileId).future,
+      (_, _) {},
+    );
+    try {
+      return await subscription.read();
+    } finally {
+      subscription.close();
+    }
+  }
+}
+
 @riverpod
 class AccessControlState extends _$AccessControlState
     with AutoDisposeNotifierMixin {

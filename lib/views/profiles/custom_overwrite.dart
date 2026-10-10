@@ -476,7 +476,7 @@ class _CustomProxyGroupsViewState extends ConsumerState<CustomProxyGroupsView> {
     final setupAction = context.setupAction;
     setState(() => _deleting = true);
     try {
-      final setup = await ref.read(setupStateProvider(profileId).future);
+      final setup = await ref.readSetupState(profileId);
       final raw = await setupAction.getRoutingProfileConfig(profileId);
       if (!mounted) return;
       if (ref.read(profileProvider(profileId)) != profile) {
@@ -512,7 +512,7 @@ class _CustomProxyGroupsViewState extends ConsumerState<CustomProxyGroupsView> {
         ),
       );
       if (confirmed != true || !mounted) return;
-      final latestSetup = await ref.read(setupStateProvider(profileId).future);
+      final latestSetup = await ref.readSetupState(profileId);
       if (!mounted) return;
       if (ref.read(profileProvider(profileId)) != profile ||
           latestSetup != setup) {
