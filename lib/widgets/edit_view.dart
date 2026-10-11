@@ -437,7 +437,7 @@ class _MapInputPageState
   }
 
   static MapEntry<String, String> _toEntry(String? key, String value) =>
-      MapEntry(key!, value);
+      MapEntry(key!.trim(), value.trim());
 
   @override
   Future<List<MapEntry<String, String>>?> showEntryDialog(
@@ -445,8 +445,16 @@ class _MapInputPageState
   ) {
     final appLocalizations = context.appLocalizations;
 
+    String? blankValidator(String? value, String label) =>
+        value != null && value.isNotEmpty && value.trim().isEmpty
+        ? appLocalizations.emptyTip(label)
+        : null;
+
     String? keyValidator(String? value) {
-      final taken = value != entry?.key && _entries.any((e) => e.key == value);
+      final blank = blankValidator(value, _keyLabel);
+      if (blank != null) return blank;
+      final key = value?.trim();
+      final taken = key != entry?.key && _entries.any((e) => e.key == key);
       return taken ? appLocalizations.existsTip(_keyLabel) : null;
     }
 
@@ -458,7 +466,11 @@ class _MapInputPageState
           value: entry?.key ?? '',
           validator: keyValidator,
         ),
-        valueField: Field(label: _valueLabel, value: entry?.value ?? ''),
+        valueField: Field(
+          label: _valueLabel,
+          value: entry?.value ?? '',
+          validator: (value) => blankValidator(value, _valueLabel),
+        ),
         keyMaxLength: widget.keyMaxLength,
         valueMaxLength: widget.valueMaxLength,
         toEntry: _toEntry,

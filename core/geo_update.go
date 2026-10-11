@@ -199,6 +199,9 @@ func updateGeoDataLockedFromURL(
 		newHash := sha256.Sum256(data)
 		if err = ctx.Err(); err == nil {
 			if oldHashErr == nil && oldHash == newHash {
+				// The next check is due one interval from now, not at the next apply.
+				now := time.Now()
+				_ = os.Chtimes(path, now, now)
 				sendGeoUpdate(ctx, geoType, false, true, nil)
 				return nil
 			}

@@ -133,68 +133,70 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
     return PopScope(
       canPop: !isLoading,
       child: Dialog(
-        child: Container(
+        child: SizedBox(
           width: 450,
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                AppLocalizations.current.loginTitle,
-                style: context.textTheme.headlineSmall,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              SegmentedButton<_LoginMode>(
-                selected: {_loginMode},
-                onSelectionChanged: isLoading
-                    ? null
-                    : (v) => setState(() => _loginMode = v.first),
-                segments: [
-                  ButtonSegment(
-                    value: _LoginMode.token,
-                    label: Text(AppLocalizations.current.accessToken),
-                    icon: const Icon(Icons.key),
-                  ),
-                  ButtonSegment(
-                    value: _LoginMode.emailPassword,
-                    label: Text(AppLocalizations.current.emailPassword),
-                    icon: const Icon(Icons.mail_outline),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              Form(
-                key: _formKey,
-                child: _loginMode == _LoginMode.emailPassword
-                    ? _buildEmailPasswordForm(isLoading)
-                    : _buildTokenForm(isLoading),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: isLoading
-                        ? null
-                        : () => Navigator.of(context).pop(),
-                    child: Text(AppLocalizations.current.cancel),
-                  ),
-                  const SizedBox(width: 12),
-                  FilledButton(
-                    onPressed: isLoading ? null : _handleLogin,
-                    child: isLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text(AppLocalizations.current.loginTitle),
-                  ),
-                ],
-              ),
-            ],
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  AppLocalizations.current.loginTitle,
+                  style: context.textTheme.headlineSmall,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                SegmentedButton<_LoginMode>(
+                  selected: {_loginMode},
+                  onSelectionChanged: isLoading
+                      ? null
+                      : (v) => setState(() => _loginMode = v.first),
+                  segments: [
+                    ButtonSegment(
+                      value: _LoginMode.token,
+                      label: Text(AppLocalizations.current.accessToken),
+                      icon: const Icon(Icons.key),
+                    ),
+                    ButtonSegment(
+                      value: _LoginMode.emailPassword,
+                      label: Text(AppLocalizations.current.emailPassword),
+                      icon: const Icon(Icons.mail_outline),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                Form(
+                  key: _formKey,
+                  child: _loginMode == _LoginMode.emailPassword
+                      ? _buildEmailPasswordForm(isLoading)
+                      : _buildTokenForm(isLoading),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: isLoading
+                          ? null
+                          : () => Navigator.of(context).pop(),
+                      child: Text(AppLocalizations.current.cancel),
+                    ),
+                    const SizedBox(width: 12),
+                    FilledButton(
+                      onPressed: isLoading ? null : _handleLogin,
+                      child: isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(AppLocalizations.current.loginTitle),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

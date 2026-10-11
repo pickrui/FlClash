@@ -193,6 +193,67 @@ void main() {
     expect(system.writes, isEmpty);
   });
 
+  test('a deleted service no longer blocks DNS for the new default', () async {
+    final system = _FakeDnsSystem();
+    String? snapshot;
+    final controller = MacosDnsController(
+      runProcess: system.run,
+      writeSnapshot: (value) async => snapshot = value,
+    );
+    await controller.updateDns(false);
+    system
+      ..deleted.add('Wi-Fi')
+      ..device = 'en1';
+    await controller.updateDns(false);
+    expect(system.dns['USB Ethernet'], ['9.9.9.9', '223.5.5.5']);
+    expect(snapshot, isNot(contains('Wi-Fi')));
+    await controller.updateDns(true);
+    expect(system.dns['USB Ethernet'], ['9.9.9.9']);
+  });
+
+  test(
+    'a new process drops the persisted entry of a deleted service',
+    () async {
+      final system = _FakeDnsSystem();
+      String? snapshot;
+      MacosDnsController create() => MacosDnsController(
+        runProcess: system.run,
+        readSnapshot: () async => snapshot,
+        writeSnapshot: (value) async => snapshot = value,
+      );
+      await create().updateDns(false);
+      system.deleted.add('Wi-Fi');
+      await create().updateDns(true);
+      expect(snapshot, contains('"services":{}'));
+    },
+  );
+
+  test('an unreadable service that still exists keeps its entry', () async {
+    final system = _FakeDnsSystem();
+    final controller = MacosDnsController(runProcess: system.run);
+    await controller.updateDns(false);
+    system.unreadable.add('Wi-Fi');
+    await expectLater(controller.updateDns(true), throwsStateError);
+    system.unreadable.clear();
+    await controller.updateDns(true);
+    expect(system.dns['Wi-Fi'], ['1.1.1.1']);
+  });
+
+  test('an unknown service list never drops a recovery entry', () async {
+    final system = _FakeDnsSystem();
+    final controller = MacosDnsController(runProcess: system.run);
+    await controller.updateDns(false);
+    system
+      ..deleted.add('Wi-Fi')
+      ..listFails = true;
+    await expectLater(controller.updateDns(true), throwsStateError);
+    system
+      ..deleted.clear()
+      ..listFails = false;
+    await controller.updateDns(true);
+    expect(system.dns['Wi-Fi'], ['1.1.1.1']);
+  });
+
   test('a disabled service never reuses the previous service name', () async {
     final system = _FakeDnsSystem()
       ..device = 'en1'
@@ -213,6 +274,9 @@ class _FakeDnsSystem {
   String? failingService;
   String? readOutput;
   String? serviceOrder;
+  bool listFails = false;
+  final deleted = <String>{};
+  final unreadable = <String>{};
   Future<void> Function()? beforeWrite;
   void Function()? afterRead;
   final dns = <String, List<String>>{
@@ -241,7 +305,29 @@ An asterisk (*) denotes that a network service is disabled.
 ''',
           '',
         );
+      case '-listallnetworkservices':
+        if (listFails) return ProcessResult(1, 1, '', 'failed');
+        return ProcessResult(
+          1,
+          0,
+          [
+            'An asterisk (*) denotes that a network service is disabled.',
+            ...dns.keys.where((service) => !deleted.contains(service)),
+          ].join('\n'),
+          '',
+        );
       case '-getdnsservers':
+        if (deleted.contains(arguments[1])) {
+          return ProcessResult(
+            1,
+            4,
+            '',
+            '** Error: ${arguments[1]} is not a recognized network service.',
+          );
+        }
+        if (unreadable.contains(arguments[1])) {
+          return ProcessResult(1, 1, '', 'failed');
+        }
         final values = dns[arguments[1]]!;
         afterRead?.call();
         return ProcessResult(

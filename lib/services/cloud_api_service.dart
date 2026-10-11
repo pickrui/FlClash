@@ -337,6 +337,24 @@ class CloudApiException implements Exception {
         clean(error).toLowerCase() == 'unauthorized';
   }
 
+  /// A write that was sent and got no usable answer: it may have been applied.
+  static bool isOutcomeUnknown(Object error) {
+    if (isStaleSession(error)) return false;
+    if (error is CloudApiException) {
+      final cause = error.cause;
+      return cause != null && isOutcomeUnknown(cause);
+    }
+    if (error is! DioException) return error is TimeoutException;
+    return switch (error.type) {
+      DioExceptionType.connectionTimeout ||
+      DioExceptionType.badCertificate ||
+      DioExceptionType.cancel => false,
+      DioExceptionType.badResponse =>
+        (error.response?.statusCode ?? 0) >= HttpStatus.internalServerError,
+      _ => true,
+    };
+  }
+
   static String clean(Object error) {
     if (error is DioException) {
       return _cleanDioException(error);

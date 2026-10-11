@@ -146,6 +146,42 @@ void main() {
     expect(find.byType(CloudLoginPage), findsNothing);
   });
 
+  testWidgets('the email form stays reachable on a short landscape screen', (
+    tester,
+  ) async {
+    tester.view
+      ..physicalSize = const Size(800, 330)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      TestApp(
+        locale: const Locale('en'),
+        overrides: [
+          viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 330)),
+          cloudAccountProvider.overrideWith(_Account.new),
+        ],
+        child: Builder(
+          builder: (context) => Scaffold(
+            body: TextButton(
+              onPressed: () => showCloudLoginPage<void>(context),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Email & Password'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+
+    final login = find.widgetWithText(FilledButton, 'Login');
+    await tester.ensureVisible(login);
+    await tester.pumpAndSettle();
+    expect(tester.getRect(login).bottom, lessThanOrEqualTo(330));
+  });
+
   testWidgets('login completes without dismissing a newer route', (
     tester,
   ) async {

@@ -33,8 +33,10 @@ export FIXTURE="$fixture" PATH="$fixture/bin:$PATH" PKEXEC_UID=1000
 helper="$fixture/App Image 100%/FlClashHelperService"
 unit=/etc/systemd/system/flclash-helper.service
 installed="/usr/local/libexec/flclash/$CORE_SHA256/FlClashHelperService"
-"$helper" install
+# pkexec keeps the caller's umask, and user-private-group desktops use 0002.
+(umask 0002 && "$helper" install)
 [ -x "$installed" ]
+[ "$(stat -c %a /usr/local/libexec /usr/local/libexec/flclash "$(dirname "$installed")" | tr '\n' ' ')" = '755 755 755 ' ]
 [ "$(sha256sum "$(dirname "$installed")/FlClashCore" | cut -d ' ' -f 1)" = "$CORE_SHA256" ]
 grep -F "ExecStart=\"$installed\"" "$unit"
 cp "$unit" "$fixture/previous.unit"
@@ -50,6 +52,10 @@ sed -i 's/OWNER_UID=1000/OWNER_UID=1001/' "$unit"
 if "$helper" install; then echo 'foreign owner was accepted' >&2; exit 1; fi
 grep 'OWNER_UID=1001' "$unit"
 cp "$fixture/previous.unit" "$unit"
+# A group-writable parent can replace privileged code, even when its group is root.
+chmod 775 /usr/local/libexec
+if "$helper" install; then echo 'group-writable parent was accepted' >&2; exit 1; fi
+chmod 755 /usr/local/libexec
 # Reinstall succeeds, and removing the transient AppImage does not break it.
 "$helper" install
 # A Core upgrade stages under the new hash and drops the previous copy.

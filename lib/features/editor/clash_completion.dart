@@ -14,7 +14,7 @@ import 'clash_schema.dart';
 import 'completion_matcher.dart';
 import 'yaml_lines.dart';
 
-final _caretLinePattern = RegExp(r'^( *)(-(?: +|$))?(.*)$');
+final _caretLinePattern = RegExp(r'^( *)(-(?: +|$))?(.*)$', dotAll: true);
 final _keyTypedPattern = RegExp(r'^[\w.-]*$');
 final _valueTypedPattern = RegExp(
   r'''^('[^']*'|"[^"]*"|[^\s#'"{\[][^#]*?):\s+(.*)$''',

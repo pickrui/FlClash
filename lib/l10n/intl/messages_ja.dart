@@ -375,7 +375,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "blockWebRtc": MessageLookupByLibrary.simpleMessage("WebRTCをブロック"),
     "blockWebRtcDesc": MessageLookupByLibrary.simpleMessage(
-      "WebRTCのIP漏洩を抑えるためSTUN通信を拒否します。通話やライブ音声が利用できなくなる場合があります",
+      "WebRTCのIP漏洩を抑えるためSTUN通信を拒否します",
     ),
     "buy": MessageLookupByLibrary.simpleMessage("購入"),
     "bypassDomain": MessageLookupByLibrary.simpleMessage("バイパスドメイン"),
@@ -2081,6 +2081,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "stop": MessageLookupByLibrary.simpleMessage("停止"),
     "stopVpn": MessageLookupByLibrary.simpleMessage("VPNを停止中..."),
     "store": MessageLookupByLibrary.simpleMessage("ストア"),
+    "storeOutcomeUnknown": MessageLookupByLibrary.simpleMessage(
+      "リクエストは処理済みの可能性があるため、再試行する前に「購入済みプラン」を確認してください",
+    ),
     "storeSubtitle": MessageLookupByLibrary.simpleMessage("プランの購入・更新・アップグレード"),
     "strategy": MessageLookupByLibrary.simpleMessage("ストラテジー"),
     "style": MessageLookupByLibrary.simpleMessage("スタイル"),

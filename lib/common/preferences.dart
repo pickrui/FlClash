@@ -338,8 +338,12 @@ final preferences = Preferences();
 
 Config sanitizeConfigForPreferences(Config config) {
   final davProps = config.davProps;
+  final networkProps = config.networkProps;
   return config.copyWith(
     davProps: davProps?.copyWith(password: ''),
     patchClashConfig: config.patchClashConfig.copyWith(secret: ''),
+    networkProps: networkProps.copyWith(
+      authentication: networkProps.authentication.copyWith(password: ''),
+    ),
   );
 }

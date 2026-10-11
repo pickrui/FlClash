@@ -279,6 +279,12 @@ extension BackupControllerExt on AppController {
                         restoredConfig.vpnProps,
                         previousConfig.vpnProps,
                       ),
+                      networkProps: restoredConfig.networkProps.copyWith(
+                        authentication: recoverProxyAuthentication(
+                          restoredConfig.networkProps.authentication,
+                          previousConfig.networkProps.authentication,
+                        ),
+                      ),
                     );
                   }
                   await _saveConfigSerialized(configToApply);

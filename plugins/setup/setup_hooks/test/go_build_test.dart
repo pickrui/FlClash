@@ -17,6 +17,27 @@ void main() {
   } on ProcessException {
     goAvailable = false;
   }
+  test('64-bit Android libraries link with 16 KB segment alignment', () {
+    const flag = '-Wl,-z,max-page-size=16384';
+    expect(
+      androidPageSizeEnvironment(Target.androidArm64, environment: const {}),
+      {'CGO_LDFLAGS': flag},
+    );
+    expect(
+      androidPageSizeEnvironment(
+        Target.androidAmd64,
+        environment: const {'CGO_LDFLAGS': '-O2'},
+      ),
+      {'CGO_LDFLAGS': '-O2 $flag'},
+    );
+    for (final target in [Target.androidArm, Target.linuxAmd64]) {
+      expect(
+        androidPageSizeEnvironment(target, environment: const {}),
+        isEmpty,
+      );
+    }
+  });
+
   test('Windows Go cache fallback retains configured roots', () {
     final root = Directory.systemTemp.path;
     for (final environment in [

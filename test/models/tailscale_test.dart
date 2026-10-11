@@ -125,8 +125,8 @@ void main() {
       expect(isValidTailscaleExitNode('office.tail1234.ts.net'), isTrue);
       expect(isValidTailscaleExitNode('fd7a:115c:a1e0::1'), isTrue);
       expect(isValidTailscaleExitNode('two words'), isFalse);
-      expect(isValidTailscaleAuthKey('tskey-auth-k123-abc'), isTrue);
-      expect(isValidTailscaleAuthKey('  tskey-auth-k123  '), isTrue);
+      expect(isValidTailscaleAuthKey('fixture-auth-key'), isTrue);
+      expect(isValidTailscaleAuthKey('  fixture-auth-key  '), isTrue);
       expect(isValidTailscaleAuthKey(''), isFalse);
       expect(isValidTailscaleAuthKey('tskey auth'), isFalse);
     });

@@ -32,9 +32,42 @@ void main(List<String> args) async {
         ),
         if (input.config.code.targetOS == OS.macOS)
           'MACOSX_DEPLOYMENT_TARGET': '12.0',
+        ...androidPageSizeEnvironment(
+          isAndroid: input.config.code.targetOS == OS.android,
+          architecture: input.config.code.targetArchitecture.name,
+        ),
       },
     ).run(input: input, output: output);
   });
+}
+
+// NDK r27 and older link 4 KB segments, which a 16 KB page device cannot load.
+Map<String, String> androidPageSizeEnvironment({
+  required bool isAndroid,
+  required String architecture,
+  Map<String, String>? environment,
+}) {
+  if (!isAndroid) return const {};
+  final triple = switch (architecture) {
+    'arm64' => 'AARCH64_LINUX_ANDROID',
+    'x64' => 'X86_64_LINUX_ANDROID',
+    _ => null,
+  };
+  if (triple == null) return const {};
+  final env = environment ?? Platform.environment;
+  final key = env.containsKey('CARGO_ENCODED_RUSTFLAGS')
+      ? 'CARGO_ENCODED_RUSTFLAGS'
+      : env.containsKey('RUSTFLAGS')
+      ? 'RUSTFLAGS'
+      : 'CARGO_TARGET_${triple}_RUSTFLAGS';
+  final separator = key == 'CARGO_ENCODED_RUSTFLAGS' ? '\x1f' : ' ';
+  return {
+    key: [
+      if (env[key]?.isNotEmpty == true) env[key]!,
+      '-C',
+      'link-arg=-Wl,-z,max-page-size=16384',
+    ].join(separator),
+  };
 }
 
 // Bindgen is a host tool. Prefer an explicitly configured host libclang, then

@@ -93,6 +93,7 @@ class _RequestsViewState extends ConsumerState<RequestsView>
           );
         });
       });
+      WidgetsBinding.instance.ensureVisualUpdate();
     }, duration: commonDuration);
   }
 

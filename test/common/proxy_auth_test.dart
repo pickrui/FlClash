@@ -35,6 +35,43 @@ void main() {
     },
   );
 
+  test('a config stored without the password gets one back', () {
+    const local = AuthenticationProps(
+      enable: true,
+      username: 'device',
+      password: 'device-password',
+    );
+    const stored = AuthenticationProps(enable: true, username: 'backup');
+
+    expect(
+      recoverProxyAuthentication(stored, local),
+      stored.copyWith(password: 'device-password'),
+    );
+    expect(
+      recoverProxyAuthentication(
+        stored.copyWith(password: 'older-backup-password'),
+        local,
+      ).password,
+      'older-backup-password',
+    );
+
+    final fresh = recoverProxyAuthentication(stored);
+    expect(fresh.username, 'backup');
+    expect(AuthenticationProps.validPassword(fresh.password), isTrue);
+    expect(fresh.credentials, ['backup:${fresh.password}']);
+
+    final invalid = recoverProxyAuthentication(
+      const AuthenticationProps(enable: true, username: 'a:b'),
+    );
+    expect(invalid.credentials, hasLength(1));
+    expect(invalid.username, isNot('a:b'));
+
+    const off = AuthenticationProps(username: 'backup');
+    expect(recoverProxyAuthentication(off), off);
+    expect(recoverProxyAuthentication(off).credentials, isEmpty);
+    expect(recoverProxyAuthentication(off, local).password, 'device-password');
+  });
+
   test(
     'credential validation respects SOCKS5 byte lengths and fails closed',
     () {

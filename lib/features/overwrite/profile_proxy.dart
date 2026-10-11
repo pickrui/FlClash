@@ -71,6 +71,14 @@ int? _uriPort(Uri uri) {
   return uri.hasPort ? uri.port : null;
 }
 
+// Uri drops a port equal to the scheme's default, so :443 on https reads as none.
+int? _writtenPort(String raw) {
+  final authority = RegExp(r'^[^:]+://([^/?#]*)').firstMatch(raw)?.group(1);
+  if (authority == null) return null;
+  final host = authority.substring(authority.lastIndexOf('@') + 1);
+  return int.tryParse(RegExp(r':(\d+)$').firstMatch(host)?.group(1) ?? '');
+}
+
 bool _parseBoolOrPresence(String? value) {
   final normalized = value?.trim().toLowerCase();
   if (normalized == null || normalized.isEmpty) {
@@ -296,7 +304,11 @@ Map<String, Object?> _parseSimpleProxy(
       proxy['password'] = parts.sublist(1).join(':');
     }
   }
-  proxy['skip-cert-verify'] = true;
+  _putFirstQueryBool(proxy, uri.queryParameters, 'skip-cert-verify', [
+    'skip-cert-verify',
+    'allowInsecure',
+    'insecure',
+  ]);
   if (scheme == 'https') {
     proxy['tls'] = true;
   }
@@ -761,7 +773,12 @@ Map<String, Object?> parseProfileProxyUri(String value) {
     'hysteria2' || 'hy2' => _parseHysteria2(uri),
     'tuic' => _parseTUIC(uri),
     'wireguard' || 'wg' => _parseWireguard(uri),
-    'http' || 'https' => _parseSimpleProxy(uri, scheme, type: 'http'),
+    'http' || 'https' => _parseSimpleProxy(
+      uri,
+      scheme,
+      type: 'http',
+      defaultPort: _writtenPort(raw),
+    ),
     'socks' || 'socks5' || 'socks5h' => _parseSimpleProxy(
       uri,
       scheme,

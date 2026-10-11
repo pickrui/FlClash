@@ -16,6 +16,8 @@ requires:
 spec_macros:
   - '%global debug_package %{nil}'
   - '%global __os_install_post %{nil}'
+  # libdartjni.so names libjvm.so, but nothing on Linux ever loads it.
+  - '%global __requires_exclude ^libjvm\.so'
 
 keywords:
   - FlClash

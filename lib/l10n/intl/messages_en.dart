@@ -454,7 +454,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "blockWebRtc": MessageLookupByLibrary.simpleMessage("Block WebRTC"),
     "blockWebRtcDesc": MessageLookupByLibrary.simpleMessage(
-      "Reject STUN traffic to reduce WebRTC IP leaks. Calls and live audio may stop working.",
+      "Reject STUN traffic to reduce WebRTC IP leaks.",
     ),
     "buy": MessageLookupByLibrary.simpleMessage("Buy"),
     "bypassDomain": MessageLookupByLibrary.simpleMessage("Bypass domain"),
@@ -2484,6 +2484,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "stop": MessageLookupByLibrary.simpleMessage("Stop"),
     "stopVpn": MessageLookupByLibrary.simpleMessage("Stopping VPN..."),
     "store": MessageLookupByLibrary.simpleMessage("Store"),
+    "storeOutcomeUnknown": MessageLookupByLibrary.simpleMessage(
+      "The request may still have gone through. Check Purchased Plans before trying again.",
+    ),
     "storeSubtitle": MessageLookupByLibrary.simpleMessage(
       "Purchase, renew, and upgrade plans",
     ),

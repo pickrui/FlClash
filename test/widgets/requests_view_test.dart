@@ -74,4 +74,63 @@ void main() {
     );
     expect(tester.takeException(), isNull);
   });
+
+  // An idle window draws no other frame, and a post-frame callback asks for none.
+  testWidgets('a new request is drawn without waiting for another frame', (
+    tester,
+  ) async {
+    final container = ProviderContainer(
+      overrides: [
+        viewSizeProvider.overrideWithBuild((_, _) => const Size(1200, 800)),
+      ],
+    );
+    addTearDown(container.dispose);
+    container.read(requestsProvider.notifier).value = FixedList<TrackerInfo>(
+      10,
+    );
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          navigatorKey: globalState.navigatorKey,
+          locale: const Locale('en'),
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.delegate.supportedLocales,
+          builder: (context, child) {
+            globalState.measure = Measure.of(context, 1);
+            globalState.theme = CommonTheme.of(context, 1);
+            return child!;
+          },
+          home: const RequestsView(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    container
+        .read(requestsProvider.notifier)
+        .addRequest(
+          TrackerInfo(
+            id: 'idle',
+            start: DateTime(2026),
+            metadata: const Metadata(host: 'idle.example'),
+            chains: const ['DIRECT'],
+            rule: 'MATCH',
+            rulePayload: '',
+          ),
+        );
+    // The provider update is drawn first; the throttle then fires on its own.
+    await tester.pump();
+    await tester.pump(commonDuration);
+    await tester.pump();
+    await tester.pump();
+
+    expect(
+      find.textContaining('idle.example', findRichText: true),
+      findsOneWidget,
+    );
+  });
 }

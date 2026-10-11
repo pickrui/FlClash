@@ -3250,10 +3250,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Reject STUN traffic to reduce WebRTC IP leaks. Calls and live audio may stop working.`
+  /// `Reject STUN traffic to reduce WebRTC IP leaks.`
   String get blockWebRtcDesc {
     return Intl.message(
-      'Reject STUN traffic to reduce WebRTC IP leaks. Calls and live audio may stop working.',
+      'Reject STUN traffic to reduce WebRTC IP leaks.',
       name: 'blockWebRtcDesc',
       desc: '',
       args: [],
@@ -5595,6 +5595,16 @@ class AppLocalizations {
     return Intl.message(
       'Recharge and try again.',
       name: 'insufficientBalanceRecharge',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The request may still have gone through. Check Purchased Plans before trying again.`
+  String get storeOutcomeUnknown {
+    return Intl.message(
+      'The request may still have gone through. Check Purchased Plans before trying again.',
+      name: 'storeOutcomeUnknown',
       desc: '',
       args: [],
     );

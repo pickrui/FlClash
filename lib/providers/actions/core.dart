@@ -107,7 +107,9 @@ extension CoreControllerExt on AppController {
   }
 
   Future<AuthorizeCode> _requestAdmin(bool enableTun) async {
-    if (safeModeBuild) {
+    // Android's VpnService needs no elevation, and a TUN flag restored from a
+    // desktop backup must not turn into an authorization failure.
+    if (safeModeBuild || system.isAndroid) {
       _ref.read(realTunEnableProvider.notifier).value = false;
       return AuthorizeCode.none;
     }

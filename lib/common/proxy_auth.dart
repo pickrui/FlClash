@@ -35,6 +35,18 @@ AuthenticationProps enableProxyAuthentication(AuthenticationProps value) {
   );
 }
 
+/// Backups and the preference mirror leave the password out: take back the one
+/// this device has, or make a new one when the proxy requires it.
+AuthenticationProps recoverProxyAuthentication(
+  AuthenticationProps stored, [
+  AuthenticationProps? local,
+]) {
+  final recovered = AuthenticationProps.validPassword(stored.password)
+      ? stored
+      : stored.copyWith(password: local?.password ?? '');
+  return recovered.enable ? enableProxyAuthentication(recovered) : recovered;
+}
+
 bool needsVpnRestartForAuthentication({
   required bool android,
   required bool running,

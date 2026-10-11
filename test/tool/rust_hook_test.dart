@@ -58,6 +58,63 @@ void main() {
     );
   });
 
+  test('64-bit Android libraries link with 16 KB segment alignment', () {
+    const flags = '-C link-arg=-Wl,-z,max-page-size=16384';
+    expect(
+      hook.androidPageSizeEnvironment(
+        isAndroid: true,
+        architecture: 'arm64',
+        environment: const {},
+      ),
+      {'CARGO_TARGET_AARCH64_LINUX_ANDROID_RUSTFLAGS': flags},
+    );
+    expect(
+      hook.androidPageSizeEnvironment(
+        isAndroid: true,
+        architecture: 'x64',
+        environment: const {},
+      ),
+      {'CARGO_TARGET_X86_64_LINUX_ANDROID_RUSTFLAGS': flags},
+    );
+    for (final key in [
+      'CARGO_TARGET_AARCH64_LINUX_ANDROID_RUSTFLAGS',
+      'RUSTFLAGS',
+      'CARGO_ENCODED_RUSTFLAGS',
+    ]) {
+      final separator = key == 'CARGO_ENCODED_RUSTFLAGS' ? '\x1f' : ' ';
+      final existing = '-C${separator}opt-level=2';
+      expect(
+        hook.androidPageSizeEnvironment(
+          isAndroid: true,
+          architecture: 'arm64',
+          environment: {
+            'CARGO_TARGET_AARCH64_LINUX_ANDROID_RUSTFLAGS': 'unused',
+            if (key == 'CARGO_ENCODED_RUSTFLAGS') 'RUSTFLAGS': 'unused',
+            key: existing,
+          },
+        ),
+        {key: '$existing$separator${flags.replaceAll(' ', separator)}'},
+      );
+    }
+    for (final architecture in ['arm', 'ia32', 'riscv64']) {
+      expect(
+        hook.androidPageSizeEnvironment(
+          isAndroid: true,
+          architecture: architecture,
+        ),
+        isEmpty,
+      );
+    }
+    expect(
+      hook.androidPageSizeEnvironment(
+        isAndroid: false,
+        architecture: 'arm64',
+        environment: const {},
+      ),
+      isEmpty,
+    );
+  });
+
   test('desktop builds retain their existing bindgen environment', () {
     expect(
       hook.bindgenEnvironment(

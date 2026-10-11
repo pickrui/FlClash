@@ -244,6 +244,31 @@ func TestUpdateAllGeoDataDownloadsEveryResource(t *testing.T) {
 	}
 }
 
+func TestUnchangedGeoDataIsNotDownloadedAgainBeforeTheNextInterval(t *testing.T) {
+	_, requests := setupGeoUpdateServer(t, nil)
+	if err := updateAllGeoData(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	assertGeoRequests(t, requests, []string{"MMDB", "ASN", "GEOIP", "GEOSITE"})
+	stale := time.Now().Add(-25 * time.Hour)
+	for _, path := range geoTestPaths() {
+		if err := os.Chtimes(path, stale, stale); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if !shouldUpdateGeoData(24 * time.Hour) {
+		t.Fatal("fixture files were not made stale")
+	}
+
+	if err := updateAllGeoData(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	assertGeoRequests(t, requests, []string{"MMDB", "ASN", "GEOIP", "GEOSITE"})
+	if shouldUpdateGeoData(24 * time.Hour) {
+		t.Fatal("checked GEO files are due for another download straight away")
+	}
+}
+
 func TestUpdateAllGeoDataContinuesAfterResourceFailure(t *testing.T) {
 	for _, failed := range [][]string{{"ASN"}, {"ASN", "GEOIP"}} {
 		t.Run(strings.Join(failed, "+"), func(t *testing.T) {

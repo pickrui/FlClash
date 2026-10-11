@@ -83,6 +83,30 @@ void main() {
     expect(find.byType(AlertDialog), findsNothing);
   });
 
+  testWidgets('a pasted address loses its surrounding whitespace', (
+    tester,
+  ) async {
+    final container = await _pumpPage(
+      tester,
+      const DAVProps(uri: 'ftp://dav.example.com', user: 'me', password: 'p'),
+    );
+
+    await tester.tap(find.text(appLocalizations.edit));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextFormField, appLocalizations.address),
+      ' https://dav.example.com/dav \n',
+    );
+    await tester.tap(find.text(appLocalizations.save));
+    await tester.pumpAndSettle();
+
+    expect(
+      container.read(davSettingProvider)?.uri,
+      'https://dav.example.com/dav',
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('editing the account keeps the chosen backup count', (
     tester,
   ) async {

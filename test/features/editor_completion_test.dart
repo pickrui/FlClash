@@ -77,6 +77,22 @@ void main() {
       expect(labels, isNot(contains('enable')));
     });
 
+    test(
+      'lines with a stray carriage return or line separator still complete',
+      () {
+        for (final separator in ['\r', '\u2028', '\u2029']) {
+          final labels = _labels(
+            _complete('dns:\n  enable: tr${separator}ue\n  en|'),
+          );
+          expect(labels, contains('enhanced-mode'), reason: separator);
+        }
+        expect(
+          _labels(_complete('dns:\n  enable: true\r\n  en|')),
+          contains('enhanced-mode'),
+        );
+      },
+    );
+
     test('reads through a comment after a parent key', () {
       final labels = _labels(
         _complete('dns: # resolver\n  enable: true\n  en|'),
@@ -363,6 +379,16 @@ void main() {
       expect(_inserted(object, 'skip-cert-verify'), "'skip-cert-verify': ");
       final block = script('if (ok) {\n  ret|');
       expect(_labels(block), ['return']);
+    });
+
+    test('a long run of word characters does not stall the editor', () {
+      final run = 'a' * 30000;
+      final watch = Stopwatch()..start();
+      script('$run.fil|');
+      script('$run|');
+      script("config['$run|");
+      script("x = '$run|");
+      expect(watch.elapsed, lessThan(const Duration(seconds: 3)));
     });
 
     test('completes keywords, globals and document words', () {

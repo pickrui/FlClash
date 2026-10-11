@@ -32,7 +32,10 @@ class _SetupAction extends SetupAction {
   _SetupAction({this.rawConfig = const {}, this.chainConfig = const {}});
 
   @override
-  Future<Map<String, dynamic>> getRawProfileConfig(int profileId) async {
+  Future<Map<String, dynamic>> getRawProfileConfig(
+    int profileId, {
+    bool refetchCloud = true,
+  }) async {
     rawLoads++;
     return rawConfig;
   }

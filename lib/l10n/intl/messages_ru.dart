@@ -460,7 +460,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "blockWebRtc": MessageLookupByLibrary.simpleMessage("Блокировать WebRTC"),
     "blockWebRtcDesc": MessageLookupByLibrary.simpleMessage(
-      "Отклонять STUN-трафик для снижения утечек IP через WebRTC. Звонки и прямые аудиотрансляции могут перестать работать.",
+      "Отклонять STUN-трафик для снижения утечек IP через WebRTC.",
     ),
     "buy": MessageLookupByLibrary.simpleMessage("Купить"),
     "bypassDomain": MessageLookupByLibrary.simpleMessage("Обход домена"),
@@ -2613,6 +2613,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "stop": MessageLookupByLibrary.simpleMessage("Стоп"),
     "stopVpn": MessageLookupByLibrary.simpleMessage("Остановка VPN..."),
     "store": MessageLookupByLibrary.simpleMessage("Магазин"),
+    "storeOutcomeUnknown": MessageLookupByLibrary.simpleMessage(
+      "Запрос мог быть обработан. Прежде чем повторять, проверьте «Купленные тарифы».",
+    ),
     "storeSubtitle": MessageLookupByLibrary.simpleMessage(
       "Покупка, продление и улучшение тарифов",
     ),

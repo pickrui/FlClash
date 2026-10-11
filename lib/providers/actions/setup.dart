@@ -29,8 +29,10 @@ class SetupAction extends _$SetupAction {
   Future<void> updateStatus(bool isStart, {bool isInit = false}) =>
       _controller.updateStatus(isStart, isInit: isInit);
 
-  Future<Map<String, dynamic>> getRawProfileConfig(int profileId) =>
-      _controller.getRawProfileConfig(profileId);
+  Future<Map<String, dynamic>> getRawProfileConfig(
+    int profileId, {
+    bool refetchCloud = true,
+  }) => _controller.getRawProfileConfig(profileId, refetchCloud: refetchCloud);
 
   Future<Map<String, dynamic>> getRoutingProfileConfig(int profileId) async {
     final source = await getRawProfileConfig(profileId);
@@ -110,23 +112,26 @@ extension SetupControllerExt on AppController {
       initialError: initialError,
       download: () => download(url),
       shouldContinue: shouldContinue,
-      recover: (failure) async =>
-          await globalState.showCommonDialog<bool>(
-            child: GeoRecoveryDialog(
-              resource: resource,
-              url: url,
-              error: Secrets.redactApiDomains(failure.toString()),
-              shouldContinue: shouldContinue,
-              download: (selected) async {
-                try {
-                  return Secrets.redactApiDomains(await download(selected));
-                } catch (error) {
-                  return Secrets.redactApiDomains(error.toString());
-                }
-              },
-            ),
-          ) ==
-          true,
+      recover: (failure) async {
+        // The recovery dialog holds the geo lock until the user answers it.
+        await window?.show();
+        return await globalState.showCommonDialog<bool>(
+              child: GeoRecoveryDialog(
+                resource: resource,
+                url: url,
+                error: Secrets.redactApiDomains(failure.toString()),
+                shouldContinue: shouldContinue,
+                download: (selected) async {
+                  try {
+                    return Secrets.redactApiDomains(await download(selected));
+                  } catch (error) {
+                    return Secrets.redactApiDomains(error.toString());
+                  }
+                },
+              ),
+            ) ==
+            true;
+      },
     );
   });
 
@@ -149,6 +154,7 @@ extension SetupControllerExt on AppController {
           reserved: otherPorts,
         );
         if (!shouldContinue()) return false;
+        await window?.show();
         final port = await globalState.showCommonDialog<int>(
           child: PortConflictDialog(
             port: patchConfig.mixedPort,
@@ -285,13 +291,17 @@ extension SetupControllerExt on AppController {
   Future<Map<String, dynamic>> getRawProfileConfig(
     int profileId, {
     bool validateSnapshot = true,
+    bool refetchCloud = true,
   }) async {
     var profile = _ref.read(profilesProvider).getProfile(profileId);
     var existingPath = await profile?.getExistingFilePath(
       validate: validateSnapshot,
     );
 
-    if (profile != null && profile.isoixCloudProfile && existingPath == null) {
+    if (refetchCloud &&
+        profile != null &&
+        profile.isoixCloudProfile &&
+        existingPath == null) {
       profile = await _updateProfileWithCertificateRetry(profile);
       existingPath = await profile.getExistingFilePath();
     }

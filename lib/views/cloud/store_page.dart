@@ -21,7 +21,10 @@ import 'store_widgets.dart';
 typedef _ShopActionResult = ({bool success, String message});
 
 class CloudStorePage extends ConsumerStatefulWidget {
-  const CloudStorePage({super.key});
+  @visibleForTesting
+  final CloudApiService? api;
+
+  const CloudStorePage({super.key, this.api});
 
   @override
   ConsumerState<CloudStorePage> createState() => _CloudStorePageState();
@@ -30,6 +33,7 @@ class CloudStorePage extends ConsumerStatefulWidget {
 class _CloudStorePageState extends ConsumerState<CloudStorePage> {
   late final StoreNotifier _store;
   late final CloudAccountNotifier _account;
+  late final CloudApiService _api;
   bool _busy = false;
   _StoreSection _section = _StoreSection.plans;
 
@@ -38,6 +42,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
     super.initState();
     _store = ref.read(storeProvider.notifier);
     _account = ref.read(cloudAccountProvider.notifier);
+    _api = widget.api ?? CloudApiService();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _loadStore();
@@ -61,31 +66,55 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
     await _account.refreshManagedSubscription();
   }
 
-  Future<void> _runGuarded(Future<void> Function() action) async {
+  Future<void> _runGuarded(
+    Future<void> Function() action, {
+    bool writes = false,
+  }) async {
     if (_busy || ref.read(storeProvider).isLoading) return;
     setState(() => _busy = true);
     try {
-      await _reportFailures(action);
+      if (await _reportFailures(action, writes: writes)) await _reconcile();
     } finally {
       if (mounted) setState(() => _busy = false);
     }
   }
 
-  Future<void> _reportFailures(Future<void> Function() action) async {
+  /// Whether [action] was a write that may still have been applied.
+  Future<bool> _reportFailures(
+    Future<void> Function() action, {
+    bool writes = false,
+  }) async {
     try {
       await action();
     } catch (e) {
-      if (CloudApiException.isHandledUnauthorized(e)) return;
+      if (CloudApiException.isHandledUnauthorized(e)) return false;
       if (CloudApiException.isUnauthorized(e)) {
         await _account.handleUnauthorized();
-        return;
+        return false;
       }
-      await _showFailure(CloudApiException.clean(e));
+      final unsure = writes && CloudApiException.isOutcomeUnknown(e);
+      await _showFailure(CloudApiException.clean(e), outcomeUnknown: unsure);
+      return unsure;
     }
+    return false;
+  }
+
+  /// Refreshes the panel after an unknown write outcome before enabling actions.
+  Future<void> _reconcile() async {
+    try {
+      await _refresh();
+    } catch (_) {}
   }
 
   @override
   Widget build(BuildContext context) {
+    // A 401 clears the store, and a page left open would then show it as empty.
+    ref.listen(cloudAccountProvider.select((s) => s.isLoggedIn), (
+      previous,
+      next,
+    ) {
+      if (previous == false && next) _loadStore();
+    });
     final storeState = ref.watch(storeProvider);
     final profile = ref.watch(cloudAccountProvider.select((s) => s.profile));
     final busy = _busy || storeState.isLoading;
@@ -164,7 +193,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
             plan: plan,
             onBuy: _busy || state.isLoading
                 ? null
-                : () => _runGuarded(() => _purchaseFlow(plan)),
+                : () => _runGuarded(() => _purchaseFlow(plan), writes: true),
           ),
         ),
     ];
@@ -265,7 +294,9 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
 
   List<Widget> _buildBoughtActions(BoughtRecord bought, StoreState state) {
     VoidCallback? guarded(Future<void> Function() action) =>
-        _busy || state.isLoading ? null : () => _runGuarded(action);
+        _busy || state.isLoading
+        ? null
+        : () => _runGuarded(action, writes: true);
     return [
       if (storeUpgradeTargets(bought, state.plans).isNotEmpty)
         OutlinedButton.icon(
@@ -303,7 +334,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
     if (choice == null) return;
     final method = choice.method;
     if (method == null) {
-      final res = await CloudApiService().buyPlanWithBalance(
+      final res = await _api.buyPlanWithBalance(
         plan.id,
         billingPeriod: choice.billingPeriod,
         coupon: choice.coupon,
@@ -312,7 +343,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
       await _finishAction(res, showOrders: true);
       return;
     }
-    final init = await CloudApiService().createOrder(
+    final init = await _api.createOrder(
       shopId: plan.id,
       payment: method.payment,
       billingPeriod: choice.billingPeriod,
@@ -351,7 +382,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
     if (!mounted || !sheetContext.mounted) return false;
     final choice = await showStoreRechargeSheet(sheetContext, methods: methods);
     if (choice == null) return false;
-    final init = await CloudApiService().createRecharge(
+    final init = await _api.createRecharge(
       payment: choice.method.payment,
       amount: choice.amount,
       type: choice.method.type,
@@ -374,7 +405,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
       confirmText: appLocalizations.activate,
     );
     if (ok != true) return;
-    await _finishAction(await CloudApiService().activatePlan(bought.id));
+    await _finishAction(await _api.activatePlan(bought.id));
   }
 
   Future<void> _bindCouponFlow(BoughtRecord bought) async {
@@ -384,13 +415,12 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
         couponRequired: true,
         hint: appLocalizations.bindCouponIntro,
         onRecharge: _rechargeForQuote,
-        loadQuote: (coupon) async => storeBindCouponQuote(
-          await CloudApiService().bindCouponCheck(bought.id, coupon),
-        ),
+        loadQuote: (coupon) async =>
+            storeBindCouponQuote(await _api.bindCouponCheck(bought.id, coupon)),
       ),
     );
     if (choice == null) return;
-    final res = await CloudApiService().bindCoupon(
+    final res = await _api.bindCoupon(
       bought.id,
       coupon: choice.coupon,
       authorizedPrice: choice.authorizedPrice,
@@ -415,17 +445,13 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
         title: appLocalizations.upgradePlan,
         onRecharge: _rechargeForQuote,
         loadQuote: (coupon) async => storeShopQuote(
-          await CloudApiService().previewUpgrade(
-            bought.id,
-            target.id,
-            coupon: coupon,
-          ),
+          await _api.previewUpgrade(bought.id, target.id, coupon: coupon),
         ),
       ),
     );
     if (choice == null) return;
 
-    final res = await CloudApiService().upgradePlan(
+    final res = await _api.upgradePlan(
       bought.id,
       target.id,
       coupon: choice.coupon.isEmpty ? null : choice.coupon,
@@ -495,8 +521,24 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
   }
 
   /// A balance shortfall offers to recharge right away instead of a passing notice.
-  Future<void> _showFailure(String message) async {
+  Future<void> _showFailure(
+    String message, {
+    bool outcomeUnknown = false,
+  }) async {
     final plain = storeMessageText(message);
+    if (outcomeUnknown) {
+      await globalState.showMessage(
+        title: appLocalizations.operationFailed,
+        message: TextSpan(
+          text: [
+            if (plain.isNotEmpty) plain,
+            appLocalizations.storeOutcomeUnknown,
+          ].join('\n'),
+        ),
+        cancelable: false,
+      );
+      return;
+    }
     if (!isBalanceShortfallMessage(message)) {
       globalState.showNotifier(
         plain.isEmpty ? appLocalizations.operationFailed : plain,

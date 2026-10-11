@@ -73,9 +73,11 @@ fi
 
 body="$(tail -n +2 <<<"$cleaned")"
 
-agents='anthropic|claude|codex|copilot|cursor|devin|gemini|openai|\[bot\]'
+agents='anthropic|claude|codex|copilot|openai|\[bot\]'
+# Everyday words as well (a text cursor, the Gemini protocol): only the product names count.
+products='(^|[^[:alnum:]])(Cursor|Devin|Gemini)([^[:alnum:]]|$)'
 
-if grep -qiE "($agents)" <<<"$cleaned"; then
+if grep -qiE "($agents)" <<<"$cleaned" || grep -qE "$products" <<<"$cleaned"; then
   cat >&2 <<'MESSAGE'
 Do not mention a coding agent in the commit message.
 

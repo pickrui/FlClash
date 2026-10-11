@@ -594,6 +594,67 @@ void main() {
     expect(CloudApiException.isUnauthorized(error), true);
   });
 
+  test('a write is unsure unless failure establishes it was not applied', () {
+    final options = RequestOptions(path: '/api/v1/shop/buy');
+    DioException failure(DioExceptionType type, {int? status}) => DioException(
+      requestOptions: options,
+      type: type,
+      response: status == null
+          ? null
+          : Response<dynamic>(requestOptions: options, statusCode: status),
+    );
+
+    for (final type in [
+      DioExceptionType.connectionError,
+      DioExceptionType.sendTimeout,
+      DioExceptionType.receiveTimeout,
+      DioExceptionType.unknown,
+    ]) {
+      expect(CloudApiException.isOutcomeUnknown(failure(type)), isTrue);
+    }
+    for (final status in [500, 502, 504]) {
+      final error = failure(DioExceptionType.badResponse, status: status);
+      expect(CloudApiException.isOutcomeUnknown(error), isTrue);
+    }
+    expect(CloudApiException.isOutcomeUnknown(TimeoutException('x')), isTrue);
+    expect(
+      CloudApiException.isOutcomeUnknown(
+        CloudApiException(
+          'wrapped',
+          cause: failure(DioExceptionType.receiveTimeout),
+        ),
+      ),
+      isTrue,
+    );
+
+    for (final type in [
+      DioExceptionType.connectionTimeout,
+      DioExceptionType.badCertificate,
+      DioExceptionType.cancel,
+    ]) {
+      expect(CloudApiException.isOutcomeUnknown(failure(type)), isFalse);
+    }
+    for (final status in [400, 403, 404, 429]) {
+      final error = failure(DioExceptionType.badResponse, status: status);
+      expect(CloudApiException.isOutcomeUnknown(error), isFalse);
+    }
+    expect(
+      CloudApiException.isOutcomeUnknown(
+        const CloudApiException('Insufficient balance'),
+      ),
+      isFalse,
+    );
+    expect(
+      CloudApiException.isOutcomeUnknown(
+        DioException(
+          requestOptions: options,
+          error: const CloudApiStaleSessionException(),
+        ),
+      ),
+      isFalse,
+    );
+  });
+
   test('managed config offers both routes as soon as the core runs', () {
     expect(
       resolveCloudApiProxy(isCoreRunning: true, port: 7890),

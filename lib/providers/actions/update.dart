@@ -51,7 +51,15 @@ extension InitControllerExt on AppController {
       return false;
     };
     updateTray();
-    await autoLaunch?.updateStatus(_ref.read(appSettingProvider).autoLaunch);
+    try {
+      await autoLaunch?.updateStatus(_ref.read(appSettingProvider).autoLaunch);
+    } catch (error) {
+      // A read-only autostart entry must not keep the window and Core from starting.
+      commonPrint.log(
+        'auto launch sync failed: ${error.runtimeType}',
+        logLevel: LogLevel.warning,
+      );
+    }
     final silentLaunch = shouldLaunchSilently(
       enabled: _ref.read(appSettingProvider).silentLaunch,
       arguments: globalState.launchArguments,
@@ -130,6 +138,7 @@ extension InitControllerExt on AppController {
     if (await preferences.isInit) {
       return;
     }
+    await window?.show();
     final res = await globalState.showMessage(
       title: appLocalizations.tip,
       message: TextSpan(text: appLocalizations.cacheCorrupt),

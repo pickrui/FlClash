@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:crypto/crypto.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 import 'package:setup_hooks/setup_hooks.dart' as hooks;
@@ -31,6 +32,31 @@ String appImageArchitecture(Arch arch) => switch (arch) {
     'unsupported AppImage architecture',
   ),
 };
+
+/// The `continuous` releases move, so the build only accepts these digests.
+const appImageToolDigests = {
+  'appimagetool-x86_64.AppImage':
+      'b90f4a8b18967545fda78a445b27680a1642f1ef9488ced28b65398f2be7add2',
+  'appimagetool-aarch64.AppImage':
+      'a48972e5ae91c944c5a7c80214e7e0a42dd6aa3ae979d8756203512a74ff574d',
+  'runtime-x86_64':
+      '156f4bdbde9c52d01814600013e0a273f0118dc2de98975f3c8c63427ec79074',
+  'runtime-aarch64':
+      'b4ff0030242d0c3bb12ce40541828303cf167493f4793456f0436edd6255c39d',
+};
+
+Future<void> verifyDownloadDigest(
+  File file,
+  String expected, {
+  bool deleteOnMismatch = true,
+}) async {
+  final actual = (await sha256.bind(file.openRead()).single).toString();
+  if (actual == expected) return;
+  if (deleteOnMismatch) await file.delete();
+  throw StateError(
+    '${basename(file.path)} is $actual, not the pinned $expected',
+  );
+}
 
 extension TargetExt on Target {
   bool get same {
@@ -357,24 +383,31 @@ class BuildCommand extends Command {
 
     await Build.exec(['sudo', 'mkdir', '-p', toolDir]);
     if (!File(realTool).existsSync()) {
-      await Build.exec([
-        'wget',
-        '-O',
-        'appimagetool',
+      await _downloadAppImageTool(
         'https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-$toolArch.AppImage',
-      ]);
+        'appimagetool',
+      );
       await Build.exec(['chmod', '+x', 'appimagetool']);
       await Build.exec(['sudo', 'mv', 'appimagetool', realTool]);
     }
     if (!File(runtime).existsSync()) {
-      await Build.exec([
-        'wget',
-        '-O',
-        'appimage-runtime',
+      await _downloadAppImageTool(
         'https://github.com/AppImage/type2-runtime/releases/download/continuous/runtime-$runtimeArch',
-      ]);
+        'appimage-runtime',
+      );
       await Build.exec(['sudo', 'mv', 'appimage-runtime', runtime]);
     }
+
+    await verifyDownloadDigest(
+      File(realTool),
+      appImageToolDigests['appimagetool-$toolArch.AppImage']!,
+      deleteOnMismatch: false,
+    );
+    await verifyDownloadDigest(
+      File(runtime),
+      appImageToolDigests['runtime-$runtimeArch']!,
+      deleteOnMismatch: false,
+    );
 
     final wrapperFile = File(
       join(Directory.systemTemp.path, 'appimagetool-wrapper.sh'),
@@ -386,6 +419,15 @@ class BuildCommand extends Command {
     );
     await Build.exec(['chmod', '+x', wrapperFile.path]);
     await Build.exec(['sudo', 'mv', wrapperFile.path, wrapper]);
+  }
+
+  Future<void> _downloadAppImageTool(String url, String output) async {
+    await Build.exec(['wget', '-O', output, url]);
+    final asset = url.split('/').last;
+    final expected =
+        appImageToolDigests[asset] ??
+        (throw StateError('No pinned digest for $asset'));
+    await verifyDownloadDigest(File(output), expected);
   }
 
   /// Fails the build when the image still resolves libfuse.so.2 at startup.
@@ -421,7 +463,14 @@ class BuildCommand extends Command {
     if (appDmg.exitCode == 0) {
       return;
     }
-    await Build.exec(['npm', 'install', '-g', 'appdmg']);
+    // --before freezes the transitive packages at the date they were checked.
+    await Build.exec([
+      'npm',
+      'install',
+      '-g',
+      'appdmg@0.6.6',
+      '--before=2026-10-12',
+    ]);
   }
 
   Future<void> _buildDistributor({

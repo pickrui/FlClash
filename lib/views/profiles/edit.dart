@@ -123,7 +123,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     var profile = widget.profile.copyWith(
       url: widget.profile.isoixCloudProfile
           ? widget.profile.url
-          : _urlController.text,
+          : _urlController.text.trim(),
       label: widget.profile.isoixCloudProfile
           ? widget.profile.label
           : _labelController.text,
@@ -341,10 +341,11 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
               labelText: appLocalizations.url,
             ),
             validator: (String? value) {
-              if (value == null || value.isEmpty) {
+              final url = value?.trim() ?? '';
+              if (url.isEmpty) {
                 return appLocalizations.profileUrlNullValidationDesc;
               }
-              if (!value.isUrl) {
+              if (!url.isUrl) {
                 return appLocalizations.profileUrlInvalidValidationDesc;
               }
               return null;

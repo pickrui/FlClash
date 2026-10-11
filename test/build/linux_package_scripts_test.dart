@@ -89,4 +89,21 @@ void main() {
       skip: Platform.isWindows,
     );
   }
+
+  test('the rpm does not require a JVM for the unused JNI library', () {
+    final config = loadYaml(
+      File('linux/packaging/rpm/make_config.yaml').readAsStringSync(),
+    ) as YamlMap;
+    final macros = (config['spec_macros'] as YamlList).cast<String>();
+    final exclude = macros
+        .firstWhere((macro) => macro.startsWith('%global __requires_exclude '))
+        .substring('%global __requires_exclude '.length);
+    for (final dependency in [
+      'libjvm.so()(64bit)',
+      'libjvm.so(SUNWprivate_1.1)(64bit)',
+    ]) {
+      expect(RegExp(exclude).hasMatch(dependency), isTrue);
+    }
+    expect(RegExp(exclude).hasMatch('libsecret-1.so.0()(64bit)'), isFalse);
+  });
 }

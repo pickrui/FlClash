@@ -193,6 +193,56 @@ future-field: {enabled: true}
     });
   }
 
+  test(
+    'a simple proxy keeps certificate verification unless the link opts out',
+    () {
+      for (final uri in [
+        'http://1.2.3.4:8080',
+        'https://1.2.3.4:8443',
+        'https://user:pass@proxy.example:443#node',
+        'socks5://1.2.3.4',
+      ]) {
+        expect(
+          parseProfileProxyUri(uri).containsKey('skip-cert-verify'),
+          isFalse,
+          reason: uri,
+        );
+      }
+      for (final query in [
+        'insecure=1',
+        'allowInsecure=true',
+        'skip-cert-verify=yes',
+        'insecure',
+      ]) {
+        expect(
+          parseProfileProxyUri(
+            'https://1.2.3.4:8443?$query',
+          )['skip-cert-verify'],
+          isTrue,
+          reason: query,
+        );
+      }
+      expect(
+        parseProfileProxyUri(
+          'https://1.2.3.4:8443?insecure=0',
+        )['skip-cert-verify'],
+        isFalse,
+      );
+    },
+  );
+
+  test('keeps a port that equals the default of its scheme', () {
+    expect(
+      parseProfileProxyUri('https://user:pass@proxy.example:443#node')['port'],
+      443,
+    );
+    expect(parseProfileProxyUri('http://proxy.example:80')['port'], 80);
+    expect(parseProfileProxyUri('https://[2001:db8::1]:443')['port'], 443);
+    for (final uri in ['https://proxy.example', 'https://u:1@[::1]']) {
+      expect(() => parseProfileProxyUri(uri), throwsA(isA<FormatException>()));
+    }
+  });
+
   test('rejects an http URI without a port', () {
     expect(
       () => parseProfileProxyUri('http://1.2.3.4'),

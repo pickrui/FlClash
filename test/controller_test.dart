@@ -357,6 +357,33 @@ void main() {
     expect(((backup['patchClashConfig'] as Map)['secret'] as String), isEmpty);
   });
 
+  test('persistent config excludes the local proxy password', () {
+    const secret = 'local-proxy-password';
+    const config = Config(
+      themeProps: defaultThemeProps,
+      networkProps: NetworkProps(
+        authentication: AuthenticationProps(
+          enable: true,
+          username: 'proxy-user',
+          password: secret,
+        ),
+      ),
+    );
+
+    final backup = createBackupConfigMap(config, 3);
+    final authentication =
+        (backup['networkProps'] as Map)['authentication'] as Map;
+
+    expect(jsonEncode(backup), isNot(contains(secret)));
+    expect(
+      jsonEncode(sanitizeConfigForPreferences(config)),
+      isNot(contains(secret)),
+    );
+    expect(authentication['enable'], isTrue);
+    expect(authentication['username'], 'proxy-user');
+    expect(authentication['password'], isEmpty);
+  });
+
   test(
     'restore only reuses a WebDAV password for the same endpoint and user',
     () {

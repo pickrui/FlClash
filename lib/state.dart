@@ -12,6 +12,7 @@ import 'package:animations/animations.dart';
 import 'package:fl_clash/services/config_reset.dart';
 import 'package:dynamic_color/dynamic_color.dart' show DynamicColorPlugin;
 import 'package:fl_clash/common/periodic_task_runner.dart';
+import 'package:fl_clash/common/proxy_auth.dart';
 import 'package:fl_clash/common/theme.dart';
 import 'package:fl_clash/core/core.dart';
 import 'package:fl_clash/plugins/service.dart';
@@ -179,6 +180,11 @@ class GlobalState {
     );
     final config = migratedConfig.copyWith(
       patchClashConfig: migratedConfig.patchClashConfig.withControllerSecret(),
+      networkProps: migratedConfig.networkProps.copyWith(
+        authentication: recoverProxyAuthentication(
+          migratedConfig.networkProps.authentication,
+        ),
+      ),
     );
     await preferences.saveConfig(config);
     final configOverrides = buildConfigOverrides(config);

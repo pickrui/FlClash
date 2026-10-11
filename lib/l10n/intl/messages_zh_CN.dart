@@ -359,7 +359,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "blockWebRtc": MessageLookupByLibrary.simpleMessage("阻止 WebRTC"),
     "blockWebRtcDesc": MessageLookupByLibrary.simpleMessage(
-      "拦截 STUN 流量以减少 WebRTC IP 泄漏。通话和实时音频可能无法使用",
+      "拦截 STUN 流量以减少 WebRTC IP 泄漏",
     ),
     "buy": MessageLookupByLibrary.simpleMessage("购买"),
     "bypassDomain": MessageLookupByLibrary.simpleMessage("排除域名"),
@@ -1823,6 +1823,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "stop": MessageLookupByLibrary.simpleMessage("暂停"),
     "stopVpn": MessageLookupByLibrary.simpleMessage("正在停止VPN..."),
     "store": MessageLookupByLibrary.simpleMessage("商店"),
+    "storeOutcomeUnknown": MessageLookupByLibrary.simpleMessage(
+      "请求可能已被处理，请先在“已购套餐”中确认，再决定是否重试",
+    ),
     "storeSubtitle": MessageLookupByLibrary.simpleMessage("购买、续费与升级套餐"),
     "strategy": MessageLookupByLibrary.simpleMessage("策略"),
     "style": MessageLookupByLibrary.simpleMessage("风格"),

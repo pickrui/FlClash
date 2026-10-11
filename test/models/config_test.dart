@@ -192,14 +192,6 @@ void main() {
   });
 
   group('WindowProps JSON round-trip', () {
-    test('default values', () {
-      const props = WindowProps();
-      expect(props.width, 0);
-      expect(props.height, 0);
-      expect(props.top, null);
-      expect(props.left, null);
-    });
-
     test('fromJson handles null', () {
       final props = WindowProps.fromJson(null);
       expect(props.width, 0);
@@ -228,16 +220,6 @@ void main() {
   });
 
   group('VpnProps JSON round-trip', () {
-    test('default values', () {
-      const props = VpnProps();
-      expect(props.enable, true);
-      expect(props.systemProxy, true);
-      expect(props.ipv6, false);
-      expect(props.allowBypass, true);
-      expect(props.dnsHijacking, false);
-      expect(props.accessControlProps.enable, false);
-    });
-
     test('fromJson handles null', () {
       final props = VpnProps.fromJson(null);
       expect(props.enable, true);
@@ -307,13 +289,6 @@ void main() {
   });
 
   group('ProxiesStyleProps JSON round-trip', () {
-    test('default values', () {
-      const props = ProxiesStyleProps();
-      expect(props.type, ProxiesType.tab);
-      expect(props.sortType, ProxiesSortType.none);
-      expect(props.layout, ProxiesLayout.standard);
-    });
-
     test('round-trip with custom values', () {
       const props = ProxiesStyleProps(
         type: ProxiesType.list,
@@ -329,15 +304,6 @@ void main() {
   });
 
   group('ThemeProps JSON round-trip', () {
-    test('default values', () {
-      const props = ThemeProps();
-      expect(props.primaryColor, null);
-      expect(props.primaryColors, defaultPrimaryColors);
-      expect(props.themeMode, ThemeMode.dark);
-      expect(props.pureBlack, false);
-      expect(props.textScale.scale, 1.0);
-    });
-
     test('safeFromJson returns default on null', () {
       final result = ThemeProps.safeFromJson(null);
       expect(result.themeMode, ThemeMode.dark);

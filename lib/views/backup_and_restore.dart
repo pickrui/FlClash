@@ -539,7 +539,7 @@ class _WebDAVFormDialogState extends ConsumerState<WebDAVFormDialog> {
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
     ref.read(davSettingProvider.notifier).value = DAVProps(
-      uri: _uriController.text,
+      uri: _uriController.text.trim(),
       user: _userController.text,
       password: _passwordController.text,
       maxBackups: widget.dav?.maxBackups ?? defaultDavMaxBackups,
@@ -586,7 +586,7 @@ class _WebDAVFormDialogState extends ConsumerState<WebDAVFormDialog> {
                 helperText: appLocalizations.addressHelp,
               ),
               validator: (String? value) {
-                if (value == null || !isValidDavUri(value)) {
+                if (value == null || !isValidDavUri(value.trim())) {
                   return appLocalizations.addressTip;
                 }
                 return null;

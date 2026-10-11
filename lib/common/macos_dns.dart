@@ -162,13 +162,17 @@ class MacosDnsController {
     for (final entry in _overrides.entries.toList()) {
       if (entry.key == exceptService) continue;
       try {
-        final current = await _readDns(entry.key);
-        final applied = entry.value.applied;
-        final stillOwned =
-            current.length == applied.length &&
-            Iterable<int>.generate(current.length)
-                .every((index) => current[index] == applied[index]);
-        if (stillOwned) await _writeDns(entry.key, entry.value.before);
+        try {
+          final current = await _readDns(entry.key);
+          final applied = entry.value.applied;
+          final stillOwned =
+              current.length == applied.length &&
+              Iterable<int>.generate(current.length)
+                  .every((index) => current[index] == applied[index]);
+          if (stillOwned) await _writeDns(entry.key, entry.value.before);
+        } on StateError {
+          if (await _serviceExists(entry.key)) rethrow;
+        }
         _overrides.remove(entry.key);
         await _save();
       } catch (error, stackTrace) {
@@ -178,6 +182,24 @@ class MacosDnsController {
     }
     if (firstError != null) {
       Error.throwWithStackTrace(firstError, firstStackTrace!);
+    }
+  }
+
+  // A deleted or renamed service has nothing left to restore.
+  Future<bool> _serviceExists(String service) async {
+    try {
+      final result = await _runProcess('/usr/sbin/networksetup', [
+        '-listallnetworkservices',
+      ]);
+      if (result.exitCode != 0) return true;
+      return result.stdout
+          .toString()
+          .split('\n')
+          .any(
+            (line) => line.trim().replaceFirst(RegExp(r'^\*'), '') == service,
+          );
+    } on ProcessException {
+      return true;
     }
   }
 }

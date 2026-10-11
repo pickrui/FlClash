@@ -46,6 +46,17 @@ Map<String, String> goCacheEnvironment({
   };
 }
 
+/// NDK r27 and older link with 4 KB segment alignment, which a device with
+/// 16 KB pages cannot load. The 32-bit ABIs keep 4 KB pages.
+Map<String, String> androidPageSizeEnvironment(
+  Target target, {
+  Map<String, String>? environment,
+}) {
+  if (!target.isLib || target.abi == 'armeabi-v7a') return const {};
+  final existing = (environment ?? Platform.environment)['CGO_LDFLAGS'] ?? '';
+  return {'CGO_LDFLAGS': '$existing -Wl,-z,max-page-size=16384'.trim()};
+}
+
 class GoBuilder {
   GoBuilder({
     required this.rootDir,
@@ -154,7 +165,8 @@ class GoBuilder {
     if (target.isLib) {
       env
         ..['CGO_ENABLED'] = '1'
-        ..['CC'] = _resolveCc(target);
+        ..['CC'] = _resolveCc(target)
+        ..addAll(androidPageSizeEnvironment(target));
     } else {
       env['CGO_ENABLED'] = '0';
     }

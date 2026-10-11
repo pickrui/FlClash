@@ -267,14 +267,22 @@ class _CertificateRetryAdapter implements HttpClientAdapter {
         );
       }
       final stream = response.stream;
-      response.stream = () async* {
-        try {
-          yield* stream;
-        } finally {
-          release();
-        }
-      }();
-      return response;
+      return ResponseBody(
+        () async* {
+          try {
+            yield* stream;
+          } finally {
+            release();
+          }
+        }(),
+        response.statusCode,
+        statusMessage: response.statusMessage,
+        isRedirect: response.isRedirect,
+        redirects: response.redirects,
+        headers: response.headers,
+        // Dio closes a rejected status without reading it.
+        onClose: release,
+      )..extra = response.extra;
     } catch (error) {
       release();
       if (failure != null &&

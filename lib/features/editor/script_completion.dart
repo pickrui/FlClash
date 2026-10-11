@@ -14,12 +14,14 @@ import 'clash_schema.dart';
 import 'completion_matcher.dart';
 
 final _identifier = RegExp(r'^[A-Za-z_$][\w$]*$');
-final _bracketKey = RegExp(r'''([\w$]+)\s*\[\s*['"]([\w-]*)$''');
+// The lookbehinds keep a long run of word characters from being retried at
+// every offset, which is quadratic.
+final _bracketKey = RegExp(r'''(?<![\w$])([\w$]+)\s*\[\s*['"]([\w-]*)$''');
 final _stringValue = RegExp(
-  r'''(?:([\w$]+)|'([\w-]+)'|"([\w-]+)")\s*(?::|[!=]==?)\s*['"]([\w.\-]*)$''',
+  r'''(?:(?<![\w$])([\w$]+)|'([\w-]+)'|"([\w-]+)")\s*(?::|[!=]==?)\s*['"]([\w.\-]*)$''',
 );
-final _member = RegExp(r'([\w$]+|[\])])\s*(\.\s*([\w$]*))$');
-final _word = RegExp(r'[\w$]+$');
+final _member = RegExp(r'((?<![\w$])[\w$]+|[\])])\s*(\.\s*([\w$]*))$');
+final _word = RegExp(r'(?<![\w$])[\w$]+$');
 final _objectKeyStart = RegExp(r'(?:^|[{,])\s*([\w$]+)$');
 
 const _keywords = [

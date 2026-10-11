@@ -231,6 +231,11 @@ fn ensure_root() -> Result<()> {
     Ok(())
 }
 
+/// pkexec keeps the caller's umask; 0002 leaves install directories `secure_directory` refuses.
+fn ensure_installer_umask() {
+    unsafe { libc::umask(0o022) };
+}
+
 fn secure_directory(path: &Path) -> Result<()> {
     for ancestor in path.ancestors() {
         let metadata = fs::symlink_metadata(ancestor)?;
@@ -407,6 +412,7 @@ fn write_unit(contents: &[u8]) -> Result<()> {
 
 fn install_service() -> Result<()> {
     ensure_root()?;
+    ensure_installer_umask();
     let executable = std::env::current_exe().context("resolve helper executable path")?;
     let owner = invoking_owner()?;
     ensure_unit_is_free_for(owner)?;
@@ -442,6 +448,7 @@ fn install_service() -> Result<()> {
 
 fn uninstall_service() -> Result<()> {
     ensure_root()?;
+    ensure_installer_umask();
     if std::env::var_os("PKEXEC_UID").is_some() || std::env::var_os("SUDO_UID").is_some() {
         ensure_unit_is_free_for(invoking_owner()?)?;
     }

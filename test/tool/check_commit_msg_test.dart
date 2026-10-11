@@ -50,4 +50,29 @@ void main() {
     expect(result.exitCode, 1);
     expect('${result.stderr}', contains('Do not mention a coding agent'));
   });
+
+  test('accepts the everyday words that are also tool names', () async {
+    for (final message in [
+      'fix(editor): keep the text cursor in view after a paste',
+      'fix(ui): hide the mouse cursor while typing\n\nThe cursors differ.',
+      'docs(proxy): mention the gemini protocol',
+    ]) {
+      final result = await check(message);
+      expect(result.exitCode, 0, reason: '$message\n${result.stderr}');
+    }
+  });
+
+  test('rejects the product names of coding agents', () async {
+    for (final message in [
+      'docs: note from Cursor',
+      'fix(core): thanks to Devin\n\nbody',
+      'feat(x): ask Gemini, then fix',
+      'fix(x): tidy\n\nWritten with OpenAI tooling',
+      'fix(x): tidy\n\nCo-authored-by: someone [bot]',
+    ]) {
+      final result = await check(message);
+      expect(result.exitCode, 1, reason: message);
+      expect('${result.stderr}', contains('Do not mention a coding agent'));
+    }
+  });
 }

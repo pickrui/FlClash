@@ -353,7 +353,7 @@ class _UpdateGeoUrlFormDialogState extends State<UpdateGeoUrlFormDialog> {
   }
 
   Future<void> _handleUpdate() async {
-    final url = _urlController.value.text;
+    final url = _urlController.text.trim();
     if (url.isEmpty) return;
     Navigator.of(context).pop<String>(url);
   }

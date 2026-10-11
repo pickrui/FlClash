@@ -91,8 +91,10 @@ final clashProvidersProvider = StreamProvider<List<ClashProvider>>(
 final clashProviderLibraryProvider = Provider<ClashProviderLibrary>((ref) {
   return ClashProviderLibrary(
     database,
-    readSource: (id) =>
-        ref.read(setupActionProvider.notifier).getRawProfileConfig(id),
+    // The download would write the profile back through the queue this runs in.
+    readSource: (id) => ref
+        .read(setupActionProvider.notifier)
+        .getRawProfileConfig(id, refetchCloud: false),
     serialize: (action) =>
         storageLock.synchronized(() => runExclusiveDatabaseOperation(action)),
     onChanged: () async {

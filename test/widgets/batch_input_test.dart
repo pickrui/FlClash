@@ -58,6 +58,41 @@ void main() {
     },
   );
 
+  testWidgets('a single map entry drops surrounding whitespace', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      TestApp(
+        locale: const Locale('en'),
+        overrides: [
+          viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 600)),
+        ],
+        child: MapInputPage(
+          title: 'Fixture map',
+          entries: const {},
+          titleBuilder: (item) => Text('key[${item.key}]'),
+          subtitleBuilder: (item) => Text('value[${item.value}]'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Add'));
+    await tester.pumpAndSettle();
+    final fields = find.byType(TextFormField);
+    await tester.enterText(fields.first, '   ');
+    await tester.enterText(fields.last, ' https://doh.pub/dns-query ');
+    await tester.tap(find.text('Confirm'));
+    await tester.pumpAndSettle();
+    expect(find.byType(TextFormField), findsNWidgets(2));
+
+    await tester.enterText(fields.first, ' +.example.com ');
+    await tester.tap(find.text('Confirm'));
+    await tester.pumpAndSettle();
+    expect(find.text('key[+.example.com]'), findsOneWidget);
+    expect(find.text('value[https://doh.pub/dns-query]'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('route addresses take only CIDRs the core can parse', (
     tester,
   ) async {

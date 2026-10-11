@@ -114,6 +114,7 @@ class _LogsViewState extends ConsumerState<LogsView>
           );
         });
       });
+      WidgetsBinding.instance.ensureVisualUpdate();
     }, duration: commonDuration);
   }
 
