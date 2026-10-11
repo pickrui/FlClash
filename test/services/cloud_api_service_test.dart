@@ -1462,7 +1462,7 @@ void main() {
         for (final request in [direct, proxy]) {
           expect(
             request.options.headers['X-oixCloud-Capabilities'],
-            'snell.ech.h3=1',
+            'snell.ech.h3=1, snell.ech.v6=1',
           );
         }
         final publicKey = _decodeAgeRecipient(

@@ -152,7 +152,16 @@ void main() {
       );
     });
 
-    test('completes Snell ECH transport modes', () {
+    test('completes Snell connection options', () {
+      expect(
+        _labels(
+          _complete(
+            'type: snell\nobfs-opts:\n  alpn: snell-ech/|',
+            schema: EditorSchema.proxy,
+          ),
+        ),
+        unorderedEquals(['snell-ech/1', 'snell-ech/2']),
+      );
       const prefix = 'type: snell\nobfs-opts:\n  mode: ech-tls\n  transport: ';
       expect(_labels(_complete('${prefix}h|', schema: EditorSchema.proxy)), [
         'h3',

@@ -31,7 +31,7 @@ const int _httpServerError = 500;
 
 abstract final class _SubscriptionCapabilities {
   static const headerName = 'X-oixCloud-Capabilities';
-  static const revisions = <String, int>{'snell.ech.h3': 1};
+  static const revisions = <String, int>{'snell.ech.h3': 1, 'snell.ech.v6': 1};
 
   static String get headerValue =>
       [for (final entry in revisions.entries) '${entry.key}=${entry.value}']

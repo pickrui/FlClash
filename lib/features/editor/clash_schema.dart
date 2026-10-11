@@ -553,7 +553,7 @@ const _proxyVariants = <String, Map<String, YamlSchema>>{
   },
   'snell': {
     'psk': _str,
-    'version': YamlSchema.scalar(['1', '2', '3', '4', '5']),
+    'version': YamlSchema.scalar(['1', '2', '3', '4', '5', '6']),
     'reuse': _bool,
     'identity': _bool,
     'obfs-opts': YamlSchema.map({
@@ -561,7 +561,7 @@ const _proxyVariants = <String, Map<String, YamlSchema>>{
       'transport': YamlSchema.scalar(['tcp', 'h3', 'auto']),
       'host': _str,
       'sni': _str,
-      'alpn': YamlSchema.scalar(['snell-ech/1']),
+      'alpn': YamlSchema.scalar(['snell-ech/1', 'snell-ech/2']),
       'identity-version': YamlSchema.scalar(['1', '2']),
       'legacy-fallback': _bool,
       'preconnect': YamlSchema.scalar(['0', '1', '2', '3', '4']),
