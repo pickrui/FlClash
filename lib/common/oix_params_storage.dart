@@ -39,22 +39,25 @@ class CloudParamsStorage {
   static Future<CloudParams> _load(SharedPreferences prefs) async {
     final raw = prefs.getString(_kConfigParams) ?? '';
     var parsed = CloudParams.parse(raw);
-    final normalized = parsed.encode();
-    if (normalized != raw) {
-      await prefs.setString(_kConfigParams, normalized);
-    }
-    if (prefs.containsKey(_kLegacyDefaultParams)) {
-      await prefs.remove(_kLegacyDefaultParams);
-    }
-
-    if (parsed.tfo == null && prefs.containsKey(_kLegacyTfo)) {
+    final hasLegacyTfo = prefs.containsKey(_kLegacyTfo);
+    if (parsed.tfo == null && hasLegacyTfo) {
       parsed = CloudParams(
         tfo: prefs.getBool(_kLegacyTfo) ?? false,
         simplerules: parsed.simplerules,
       );
-      await prefs.remove(_kLegacyTfo);
-      await prefs.setString(_kConfigParams, parsed.encode());
     }
+    final normalized = parsed.encode();
+    // A failed write still changes the preferences cache; the retained legacy
+    // key forces a durable retry even when the cached value already matches.
+    if (normalized != raw || hasLegacyTfo) {
+      if (!await prefs.setString(_kConfigParams, normalized)) {
+        throw StateError('failed to persist migrated cloud parameters');
+      }
+    }
+    if (prefs.containsKey(_kLegacyDefaultParams)) {
+      await prefs.remove(_kLegacyDefaultParams);
+    }
+    if (hasLegacyTfo) await prefs.remove(_kLegacyTfo);
     return parsed;
   }
 

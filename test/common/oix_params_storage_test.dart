@@ -6,6 +6,7 @@
 import 'package:fl_clash/common/oix_params_storage.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -56,6 +57,76 @@ void main() {
     );
   });
 
+  test(
+    'legacy tfo remains recoverable if removing its old key fails',
+    () async {
+      SharedPreferences.setMockInitialValues({});
+      final store = _MigrationPreferences(failRemove: true);
+      SharedPreferencesStorePlatform.instance = store;
+
+      await expectLater(CloudParamsStorage.load(), throwsStateError);
+
+      final stored = await store.getAll();
+      expect(
+        stored['flutter.cloud_service_config_params'],
+        '&tfo=true&simplerules=true',
+      );
+      expect(stored['flutter.cloud_service_tfo'], isTrue);
+    },
+  );
+
+  for (final throwOnWrite in [false, true]) {
+    test(
+      'legacy tfo survives a failed migration write ($throwOnWrite)',
+      () async {
+        SharedPreferences.setMockInitialValues({});
+        final store = _MigrationPreferences(throwOnWrite: throwOnWrite);
+        SharedPreferencesStorePlatform.instance = store;
+
+        await expectLater(CloudParamsStorage.load(), throwsStateError);
+
+        final stored = await store.getAll();
+        expect(stored['flutter.cloud_service_tfo'], isTrue);
+        expect(
+          stored['flutter.cloud_service_config_params'],
+          '&simplerules=true',
+        );
+
+        store.throwOnWrite = null;
+        expect(
+          await CloudParamsStorage.load(),
+          const CloudParams(tfo: true, simplerules: true),
+        );
+        final retried = await store.getAll();
+        expect(
+          retried['flutter.cloud_service_config_params'],
+          '&tfo=true&simplerules=true',
+        );
+        expect(retried.containsKey('flutter.cloud_service_tfo'), isFalse);
+      },
+    );
+  }
+
+  test(
+    'an explicit current tfo value takes priority over the legacy value',
+    () async {
+      SharedPreferences.setMockInitialValues({
+        'cloud_service_config_params': '&tfo=false&simplerules=true',
+        'cloud_service_tfo': true,
+      });
+
+      expect(
+        await CloudParamsStorage.load(),
+        const CloudParams(tfo: false, simplerules: true),
+      );
+      final prefs = await SharedPreferences.getInstance();
+      expect(
+        prefs.getString('cloud_service_config_params'),
+        '&tfo=false&simplerules=true',
+      );
+    },
+  );
+
   test('a load queued behind a save reads what was saved', () async {
     SharedPreferences.setMockInitialValues({
       'cloud_service_config_params': '&tfo=false',
@@ -82,4 +153,28 @@ void main() {
     final prefs = await SharedPreferences.getInstance();
     expect(prefs.getKeys(), isEmpty);
   });
+}
+
+class _MigrationPreferences extends InMemorySharedPreferencesStore {
+  _MigrationPreferences({this.failRemove = false, this.throwOnWrite})
+    : super.withData({
+        'flutter.cloud_service_config_params': '&simplerules=true',
+        'flutter.cloud_service_tfo': true,
+      });
+
+  final bool failRemove;
+  bool? throwOnWrite;
+
+  @override
+  Future<bool> setValue(String valueType, String key, Object value) async {
+    if (throwOnWrite == true) throw StateError('migration write failed');
+    if (throwOnWrite == false) return false;
+    return super.setValue(valueType, key, value);
+  }
+
+  @override
+  Future<bool> remove(String key) async {
+    if (failRemove) throw StateError('legacy cleanup failed');
+    return super.remove(key);
+  }
 }

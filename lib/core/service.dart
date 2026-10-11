@@ -66,6 +66,13 @@ class CoreService extends CoreHandlerInterface {
           type: CoreEventType.crash,
           data: failure.cause?.toString() ?? 'core done',
         ),
+        isCurrent: () => switch (_lifecycle.state) {
+          DesktopCoreFailed(failure: final current) =>
+            identical(current, failure) ||
+                (failure.sessionId != null &&
+                    current.sessionId == failure.sessionId),
+          _ => false,
+        },
       );
     });
   }

@@ -51,14 +51,17 @@ abstract mixin class CoreEventListener {
 }
 
 class CoreEventManager {
-  final _controller = StreamController<CoreEvent>();
+  final _controller =
+      StreamController<({CoreEvent event, bool Function()? isCurrent})>();
 
   CoreEventManager._() {
     _controller.stream
-        .asyncMap((event) async {
+        .asyncMap((delivery) async {
+          final event = delivery.event;
           for (final listener in _listeners.toList(growable: false)) {
             if (!_listeners.contains(listener)) continue;
             try {
+              if (!(delivery.isCurrent?.call() ?? true)) break;
               switch (event.type) {
                 case CoreEventType.log:
                   listener.onLog(Log.fromJson(event.data));
@@ -112,8 +115,8 @@ class CoreEventManager {
   final ObserverList<CoreEventListener> _listeners =
       ObserverList<CoreEventListener>();
 
-  void sendEvent(CoreEvent event) {
-    _controller.add(event);
+  void sendEvent(CoreEvent event, {bool Function()? isCurrent}) {
+    _controller.add((event: event, isCurrent: isCurrent));
   }
 
   void addListener(CoreEventListener listener) {

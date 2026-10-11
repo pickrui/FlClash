@@ -85,18 +85,91 @@ void main() {
     final listener = _CrashListener();
     coreEventManager.addListener(listener);
 
-    crashes.add(
-      const DesktopCoreFailure(
-        code: 'unexpected_disconnect',
-        phase: DesktopCorePhase.running,
-        revision: 2,
-      ),
+    const failure = DesktopCoreFailure(
+      code: 'unexpected_disconnect',
+      phase: DesktopCorePhase.running,
+      revision: 2,
     );
+    when(() => lifecycle.state).thenReturn(const DesktopCoreFailed(failure));
+    crashes.add(failure);
     await pumpEventQueue();
 
     expect(listener.messages, ['core done']);
     coreEventManager.removeListener(listener);
   });
+
+  for (final replacement in [
+    'starting',
+    'running',
+    'failed',
+    'closed',
+    'same-session-failed',
+  ]) {
+    test('queued crash delivery after transition to $replacement', () async {
+      const failure = DesktopCoreFailure(
+        code: 'unexpected_disconnect',
+        phase: DesktopCorePhase.running,
+        revision: 2,
+        sessionId: 'old-session',
+      );
+      when(() => lifecycle.state).thenReturn(const DesktopCoreFailed(failure));
+      final blocked = _BlockingCrashListener();
+      final listener = _CrashListener();
+      coreEventManager.addListener(blocked);
+      coreEventManager.addListener(listener);
+      addTearDown(() {
+        if (!blocked.release.isCompleted) blocked.release.complete();
+        coreEventManager.removeListener(blocked);
+        coreEventManager.removeListener(listener);
+      });
+      crashes.add(failure);
+      await blocked.entered.future;
+      final state = switch (replacement) {
+        'starting' => const DesktopCoreStarting(
+          revision: 3,
+          sessionId: 'new-session',
+        ),
+        'running' => DesktopCoreRunning(
+          DesktopCoreSession(
+            sessionId: 'new-session',
+            lease: _MockProcessLease(),
+            connectionGeneration: 2,
+          ),
+        ),
+        'failed' => const DesktopCoreFailed(
+          DesktopCoreFailure(
+            code: 'unexpected_disconnect',
+            phase: DesktopCorePhase.running,
+            revision: 3,
+            sessionId: 'new-session',
+          ),
+        ),
+        'same-session-failed' => const DesktopCoreFailed(
+          DesktopCoreFailure(
+            code: 'process_exit_unconfirmed',
+            phase: DesktopCorePhase.failed,
+            revision: 3,
+            sessionId: 'old-session',
+          ),
+        ),
+        _ => const DesktopCoreClosed(3),
+      };
+      when(() => lifecycle.state).thenReturn(state);
+      blocked.release.complete();
+      await pumpEventQueue();
+
+      if (replacement == 'same-session-failed') {
+        expect(listener.messages, ['core done']);
+        return;
+      }
+      expect(listener.messages, isEmpty);
+      if (state case DesktopCoreFailed(:final failure)) {
+        crashes.add(failure);
+        await pumpEventQueue();
+        expect(listener.messages, ['core done']);
+      }
+    });
+  }
 
   test('missing shutdown response still stops the owned process', () async {
     when(() => lifecycle.state).thenReturn(
@@ -146,5 +219,16 @@ final class _CrashListener with CoreEventListener {
   @override
   void onCrash(String message) {
     messages.add(message);
+  }
+}
+
+final class _BlockingCrashListener with CoreEventListener {
+  final entered = Completer<void>();
+  final release = Completer<void>();
+
+  @override
+  Future<void> onCrash(String message) async {
+    if (!entered.isCompleted) entered.complete();
+    await release.future;
   }
 }

@@ -8,10 +8,13 @@ import 'dart:async';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/plugins/service.dart';
+import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/models/core.dart';
 import 'package:fl_clash/models/state.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 
 import 'desktop/model.dart';
+import 'event.dart';
 import 'interface.dart';
 import 'method.dart';
 
@@ -47,9 +50,14 @@ class CoreLib extends CoreHandlerInterface with ServiceListener {
   /// here as the desktop transport does instead of waiting for the timeout.
   @override
   void onServiceCrash(String message) {
+    ++_lifecycleRevision;
+    if (_connectedCompleter.isCompleted) {
+      _connectedCompleter = Completer<bool>();
+    }
     final pending = _pendingCalls.toList(growable: false);
     _pendingCalls.clear();
     for (final call in pending) {
+      if (call.isCompleted) continue;
       call.completeError(
         CoreMethodException(
           code: 'transport_disconnected',
@@ -58,6 +66,14 @@ class CoreLib extends CoreHandlerInterface with ServiceListener {
         ),
       );
     }
+    final disconnected = _connectedCompleter;
+    coreEventManager.sendEvent(
+      CoreEvent(type: CoreEventType.crash, data: message),
+      isCurrent: () =>
+          !_closed &&
+          !isConnected &&
+          identical(_connectedCompleter, disconnected),
+    );
   }
 
   @override
@@ -126,12 +142,20 @@ class CoreLib extends CoreHandlerInterface with ServiceListener {
     if (initializationError.isNotEmpty) {
       throw StateError(initializationError);
     }
+    if (revision != _lifecycleRevision) {
+      throw StateError('Android Core service disconnected during startup');
+    }
     _connectedCompleter.complete(true);
     try {
       final syncError = await _service?.syncState(_readSharedState()) ?? '';
       if (syncError.isNotEmpty) throw StateError(syncError);
+      if (revision != _lifecycleRevision) {
+        throw StateError('Android Core service disconnected during startup');
+      }
     } catch (_) {
-      _connectedCompleter = Completer<bool>();
+      if (_connectedCompleter.isCompleted) {
+        _connectedCompleter = Completer<bool>();
+      }
       try {
         await _service?.shutdown();
       } catch (error) {
