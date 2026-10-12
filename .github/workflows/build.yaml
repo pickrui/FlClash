@@ -173,7 +173,7 @@ jobs:
           go vet -tags "$GO_TAGS" ./...
           go test -tags "$GO_TAGS" ./...
           cd Clash.Meta
-          go test -tags "$GO_TAGS" ./component/mmdb ./component/updater
+          go test -tags "$GO_TAGS" ./component/mmdb ./component/updater ./tunnel
       - name: Check native callback and file ownership races
         working-directory: core
         run: |
