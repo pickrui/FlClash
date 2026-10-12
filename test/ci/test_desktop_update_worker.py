@@ -6,8 +6,11 @@
 import hashlib
 import os
 from pathlib import Path
+import plistlib
 import shlex
+import shutil
 import subprocess
+import sys
 import tempfile
 import time
 import unittest
@@ -208,3 +211,66 @@ class DesktopUpdateWorkerTest(unittest.TestCase):
         link = self.target / 'Contents/Resources/link'
         self.assertTrue(link.is_symlink())
         self.assertEqual(link.read_text(), 'new')
+
+    def prepare_signed_mac_bundles(self):
+        self.target.unlink()
+        self.target = self.root / 'FlClash.app'
+        self.next.unlink()
+        for bundle, value in [(self.target, 'old'), (self.next, 'new')]:
+            contents = bundle / 'Contents'
+            (contents / 'MacOS').mkdir(parents=True)
+            (contents / 'Resources').mkdir()
+            binary = contents / 'MacOS' / 'Fixture'
+            shutil.copyfile('/bin/echo', binary)
+            binary.chmod(0o755)
+            (contents / 'Resources' / 'version').write_text(value)
+            (contents / 'Info.plist').write_bytes(plistlib.dumps({
+                'CFBundleIdentifier': 'test.flclash.update',
+                'CFBundleExecutable': 'Fixture',
+                'CFBundlePackageType': 'APPL',
+                'CFBundleVersion': '1',
+            }))
+            subprocess.run(['/usr/bin/codesign', '--force', '--sign', '-', str(bundle)], check=True, capture_output=True)
+        launcher = self.root / 'open'
+        launcher.write_text(f'#!/bin/sh\ncat "$1/Contents/Resources/version" >{shlex.quote(str(self.marker))}\n')
+        launcher.chmod(0o755)
+        self.source = self.source.replace('/usr/bin/open', shlex.quote(str(launcher)))
+        self.digest = 'identifier "test.flclash.update"'
+
+    @unittest.skipUnless(sys.platform == 'darwin', 'Requires macOS codesign')
+    def test_mac_inline_requirement_uses_real_codesign(self):
+        self.prepare_signed_mac_bundles()
+        worker = self.start('macos')
+        self.wait_for(self.stage / 'ready')
+        self.assertEqual((self.target / 'Contents/Resources/version').read_text(), 'old')
+        self.assertFalse(self.marker.exists())
+        self.stop_parent()
+        self.assertEqual(worker.wait(timeout=10), 0)
+        self.assertEqual(self.marker.read_text(), 'new')
+        self.assertEqual(self.result.read_text(), 'success')
+        self.assertFalse(self.stage.exists())
+
+    @unittest.skipUnless(sys.platform == 'darwin', 'Requires macOS codesign')
+    def test_mac_wrong_identity_never_exits_or_replaces(self):
+        self.prepare_signed_mac_bundles()
+        self.digest = 'identifier "test.flclash.other"'
+        worker = self.start('macos')
+        self.assertNotEqual(worker.wait(timeout=10), 0)
+        self.assertFalse((self.stage / 'ready').exists())
+        self.assertTrue((self.stage / 'error').exists())
+        self.assertEqual((self.target / 'Contents/Resources/version').read_text(), 'old')
+        self.assertFalse(self.result.exists())
+        self.assertFalse(self.marker.exists())
+        self.assertIsNone(self.parent.poll())
+
+    @unittest.skipUnless(sys.platform == 'darwin', 'Requires macOS codesign')
+    def test_mac_tampered_bundle_after_readiness_keeps_original(self):
+        self.prepare_signed_mac_bundles()
+        worker = self.start('macos')
+        self.wait_for(self.stage / 'ready')
+        (self.next / 'Contents/Resources/version').write_text('tampered')
+        self.stop_parent()
+        self.assertNotEqual(worker.wait(timeout=10), 0)
+        self.assertEqual((self.target / 'Contents/Resources/version').read_text(), 'old')
+        self.assertEqual(self.marker.read_text(), 'old')
+        self.assertEqual(self.result.read_text(), 'failed')

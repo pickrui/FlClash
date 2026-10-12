@@ -281,9 +281,9 @@ void main() {
     if (command == '/usr/bin/codesign' && arguments.contains('-R')) {
       expect(
         arguments[arguments.indexOf('-R') + 1],
-        contains('identifier "test.flclash"'),
+        '=anchor apple generic and identifier "test.flclash" and '
+        'certificate leaf[subject.OU] = "ABCDE12345"',
       );
-      expect(arguments[arguments.indexOf('-R') + 1], contains('"ABCDE12345"'));
       if (failure == 'signature') {
         return ProcessResult(0, 1, '', 'invalid signature');
       }

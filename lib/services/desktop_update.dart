@@ -352,7 +352,7 @@ class DesktopUpdater implements DesktopUpdateInstaller {
         '--deep',
         '--strict',
         '-R',
-        identity,
+        '=$identity',
         next,
       ]);
       if (await _plist(next, 'CFBundleVersion') != '${update.build}') {

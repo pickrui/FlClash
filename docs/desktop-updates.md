@@ -86,6 +86,10 @@ update flow; older clients cannot gain the new behavior before that upgrade.
 and architecture binding, bounded metadata, cancellation and verification before
 handoff. `test/ci/test_desktop_update_worker.py` executes the Unix worker against
 temporary executable fixtures, including failed replacement and cancellation.
+On macOS it also uses real `codesign` checks on temporary ad-hoc bundles to
+cover inline requirement parsing, identity mismatch and post-readiness tampering;
+application launches remain mocked. Both macOS verification calls prefix the
+requirement with `=` so `codesign` reads it as an expression instead of a path.
 `tool/check_desktop_update.ps1` exercises the real PowerShell worker with mocked
 process/UAC operations; the existing Windows checks run it under Windows
 PowerShell. These tests do not replace signed release-to-release tests on

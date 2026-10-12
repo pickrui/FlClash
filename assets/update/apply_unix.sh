@@ -44,7 +44,7 @@ trap 'exit 1' HUP INT TERM
 
 verify() {
   if [ "$mode" = macos ]; then
-    /usr/bin/codesign --verify --deep --strict -R "$verification" "$next"
+    /usr/bin/codesign --verify --deep --strict -R "=$verification" "$next"
   elif [ "$mode" = appimage ]; then
     actual=$(/usr/bin/sha256sum "$next")
     [ "${actual%% *}" = "$verification" ]
