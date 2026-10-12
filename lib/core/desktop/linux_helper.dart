@@ -30,6 +30,9 @@ typedef LinuxInputProcessRunner = Future<ProcessResult> Function(
 /// pkexec exits 127 when no polkit agent can ask for authorization, as under
 /// many tiling window managers and in containers; 126 is a dismissed dialog.
 const _pkexecNotAuthorized = 127;
+const _helperFailed = 125;
+
+enum LinuxElevationResult { success, denied, failed }
 
 class LinuxElevation {
   LinuxElevation({
@@ -44,23 +47,35 @@ class LinuxElevation {
   final LinuxInputProcessRunner _runWithInput;
   final Future<String?> Function() _askPassword;
 
-  Future<bool> elevate(List<String> command) async {
+  Future<bool> elevate(List<String> command) async =>
+      await elevateResult(command) == LinuxElevationResult.success;
+
+  Future<LinuxElevationResult> elevateResult(List<String> command) async {
     try {
       final result = await _run('pkexec', command);
-      if (result.exitCode != _pkexecNotAuthorized) return result.exitCode == 0;
+      if (result.exitCode == 0) return LinuxElevationResult.success;
+      if (result.exitCode == 126) return LinuxElevationResult.denied;
+      if (result.exitCode != _pkexecNotAuthorized) {
+        return LinuxElevationResult.failed;
+      }
     } on ProcessException {
       // No pkexec at all: sudo below is the only way left.
     }
     return _sudo(command);
   }
 
-  Future<bool> _sudo(List<String> command) async {
+  Future<LinuxElevationResult> _sudo(List<String> command) async {
     try {
       final cached = await _run('sudo', ['-n', '--', ...command]);
-      if (cached.exitCode == 0) return true;
-      if ((await _run('sudo', ['-n', 'true'])).exitCode == 0) return false;
+      if (cached.exitCode == 0) return LinuxElevationResult.success;
+      if (cached.exitCode == _helperFailed) return LinuxElevationResult.failed;
+      if ((await _run('sudo', ['-n', 'true'])).exitCode == 0) {
+        return LinuxElevationResult.denied;
+      }
       final password = await _askPassword();
-      if (password == null || password.isEmpty) return false;
+      if (password == null || password.isEmpty) {
+        return LinuxElevationResult.denied;
+      }
       final result = await _runWithInput('sudo', [
         '-S',
         '-p',
@@ -68,9 +83,13 @@ class LinuxElevation {
         '--',
         ...command,
       ], '$password\n');
-      return result.exitCode == 0;
+      return switch (result.exitCode) {
+        0 => LinuxElevationResult.success,
+        1 => LinuxElevationResult.denied,
+        _ => LinuxElevationResult.failed,
+      };
     } on ProcessException {
-      return false;
+      return LinuxElevationResult.failed;
     }
   }
 
@@ -106,6 +125,7 @@ class LinuxHelperInstaller {
     LinuxInputProcessRunner? runWithInput,
     Future<String?> Function()? askPassword,
     bool Function()? hasSystemd,
+    this.readinessTimeout = const Duration(seconds: 10),
   }) : _readiness =
            probeReadiness ??
            ((timeout, logFailure) => (client ?? linuxHelperClient).readiness(
@@ -122,6 +142,7 @@ class LinuxHelperInstaller {
            hasSystemd ?? (() => Directory('/run/systemd/system').existsSync());
 
   final LinuxHelperReadinessProbe _readiness;
+  final Duration readinessTimeout;
   final String executable;
   final LinuxElevation _elevation;
   final bool Function() _hasSystemd;
@@ -129,16 +150,23 @@ class LinuxHelperInstaller {
   bool get available => _hasSystemd() && File(executable).existsSync();
 
   Future<AuthorizeCode> install() async {
-    if (!available) return AuthorizeCode.error;
+    if (!available) return AuthorizeCode.helperInstallFailed;
     final ready = await _readiness(null, true);
     if (ready == HelperReadiness.ready) return AuthorizeCode.none;
-    if (ready == HelperReadiness.manifestMissing) return AuthorizeCode.error;
+    if (ready == HelperReadiness.manifestMissing) {
+      return AuthorizeCode.helperInstallFailed;
+    }
     try {
-      if (!await _elevation.elevate([executable, 'install'])) {
-        return AuthorizeCode.error;
+      switch (await _elevation.elevateResult([executable, 'install'])) {
+        case LinuxElevationResult.denied:
+          return AuthorizeCode.error;
+        case LinuxElevationResult.failed:
+          return AuthorizeCode.helperInstallFailed;
+        case LinuxElevationResult.success:
+          break;
       }
       final deadline = Stopwatch()..start();
-      const timeout = Duration(seconds: 10);
+      final timeout = readinessTimeout;
       while (deadline.elapsed < timeout) {
         if (await _readiness(timeout - deadline.elapsed, false) ==
             HelperReadiness.ready) {
@@ -150,9 +178,9 @@ class LinuxHelperInstaller {
         await Future<void>.delayed(const Duration(milliseconds: 250));
       }
     } on ProcessException {
-      return AuthorizeCode.error;
+      return AuthorizeCode.helperInstallFailed;
     }
-    return AuthorizeCode.error;
+    return AuthorizeCode.helperInstallFailed;
   }
 
   Future<bool> uninstall() async {

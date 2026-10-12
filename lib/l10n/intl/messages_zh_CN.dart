@@ -2006,6 +2006,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "无法启用 TUN：管理员授权被拒绝，请允许系统权限请求后重试",
     ),
     "tunDesc": MessageLookupByLibrary.simpleMessage("仅在管理员模式生效"),
+    "tunHelperInstallFailed": MessageLookupByLibrary.simpleMessage(
+      "无法启用 TUN：Helper 安装或启动失败，请检查应用安装是否完整及系统服务状态后重试",
+    ),
     "tunMtuDesc": MessageLookupByLibrary.simpleMessage(
       "默认 9000，可尝试 1480 或 4064；Android VPN 需重启后生效",
     ),

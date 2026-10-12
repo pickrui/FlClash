@@ -2205,6 +2205,16 @@ class AppLocalizations {
     );
   }
 
+  /// `TUN could not be enabled: Helper installation or startup failed. Check that the app installation is complete and the system service is working, then try again.`
+  String get tunHelperInstallFailed {
+    return Intl.message(
+      'TUN could not be enabled: Helper installation or startup failed. Check that the app installation is complete and the system service is working, then try again.',
+      name: 'tunHelperInstallFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `TUN needs an administrator account on this Mac. Sign in with an administrator account to turn it on.`
   String get tunAdminAccountRequired {
     return Intl.message(

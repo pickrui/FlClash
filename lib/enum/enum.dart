@@ -275,7 +275,14 @@ enum FontFamily {
 
 enum RouteMode { bypassPrivate, config }
 
-enum AuthorizeCode { none, success, error, helperCorrupt, adminAccountRequired }
+enum AuthorizeCode {
+  none,
+  success,
+  error,
+  helperCorrupt,
+  adminAccountRequired,
+  helperInstallFailed,
+}
 
 enum FunctionTag {
   updateConfig,

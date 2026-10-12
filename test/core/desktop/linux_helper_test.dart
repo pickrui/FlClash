@@ -130,7 +130,7 @@ void main() {
         hasSystemd: () => true,
         runProcess: cancel,
       );
-      expect(await missing.install(), AuthorizeCode.error);
+      expect(await missing.install(), AuthorizeCode.helperInstallFailed);
       expect(calls, 1);
       final unsupported = LinuxHelperInstaller(
         executable: exe.path,
@@ -139,6 +139,155 @@ void main() {
       expect(unsupported.available, false);
     },
   );
+
+  test(
+    'Helper failure after pkexec authorization never retries sudo',
+    () async {
+      final dir = Directory.systemTemp.createTempSync('flclash-helper-');
+      addTearDown(() => dir.deleteSync(recursive: true));
+      final exe = File('${dir.path}/helper')..writeAsStringSync('fixture');
+      final installer = LinuxHelperInstaller(
+        executable: exe.path,
+        hasSystemd: () => true,
+        probeReadiness: _Client([HelperReadiness.notReady]).probe,
+        runProcess: (command, arguments) async {
+          expect(command, 'pkexec');
+          return ProcessResult(1, 125, '', 'installation failed');
+        },
+        askPassword: () async => fail('the Helper already ran'),
+      );
+      expect(await installer.install(), AuthorizeCode.helperInstallFailed);
+    },
+  );
+
+  test(
+    'cached sudo Helper failure does not request another password',
+    () async {
+      final dir = Directory.systemTemp.createTempSync('flclash-helper-');
+      addTearDown(() => dir.deleteSync(recursive: true));
+      final exe = File('${dir.path}/helper')..writeAsStringSync('fixture');
+      final calls = <String>[];
+      final installer = LinuxHelperInstaller(
+        executable: exe.path,
+        hasSystemd: () => true,
+        probeReadiness: _Client([HelperReadiness.notReady]).probe,
+        runProcess: (command, arguments) async {
+          calls.add(command);
+          if (command == 'sudo') {
+            expect(arguments, ['-n', '--', exe.path, 'install']);
+          }
+          return ProcessResult(1, command == 'pkexec' ? 127 : 125, '', '');
+        },
+        askPassword: () async => fail('the Helper already ran'),
+      );
+      expect(await installer.install(), AuthorizeCode.helperInstallFailed);
+      expect(calls, ['pkexec', 'sudo']);
+    },
+  );
+
+  test(
+    'sudo policy denial with cached credentials remains authorization failure',
+    () async {
+      final dir = Directory.systemTemp.createTempSync('flclash-helper-');
+      addTearDown(() => dir.deleteSync(recursive: true));
+      final exe = File('${dir.path}/helper')..writeAsStringSync('fixture');
+      final calls = <List<String>>[];
+      final installer = LinuxHelperInstaller(
+        executable: exe.path,
+        hasSystemd: () => true,
+        probeReadiness: _Client([HelperReadiness.notReady]).probe,
+        runProcess: (command, arguments) async {
+          calls.add([command, ...arguments]);
+          return ProcessResult(
+            1,
+            command == 'pkexec'
+                ? 127
+                : arguments.last == 'true'
+                ? 0
+                : 1,
+            '',
+            '',
+          );
+        },
+        askPassword: () async =>
+            fail('valid credentials cannot change sudo policy'),
+      );
+      expect(await installer.install(), AuthorizeCode.error);
+      expect(calls, [
+        ['pkexec', exe.path, 'install'],
+        ['sudo', '-n', '--', exe.path, 'install'],
+        ['sudo', '-n', 'true'],
+      ]);
+    },
+  );
+
+  for (final (exitCode, expected) in [
+    (125, AuthorizeCode.helperInstallFailed),
+    (1, AuthorizeCode.error),
+    (0, AuthorizeCode.success),
+  ]) {
+    test('password sudo exit $exitCode maps to $expected', () async {
+      final dir = Directory.systemTemp.createTempSync('flclash-helper-');
+      addTearDown(() => dir.deleteSync(recursive: true));
+      final exe = File('${dir.path}/helper')..writeAsStringSync('fixture');
+      final installer = LinuxHelperInstaller(
+        executable: exe.path,
+        hasSystemd: () => true,
+        probeReadiness: _Client([
+          HelperReadiness.notReady,
+          HelperReadiness.ready,
+        ]).probe,
+        runProcess: (command, _) async =>
+            ProcessResult(1, command == 'pkexec' ? 127 : 1, '', ''),
+        askPassword: () async => 'fixture-password',
+        runWithInput: (command, arguments, input) async {
+          expect(command, 'sudo');
+          expect(arguments, ['-S', '-p', '', '--', exe.path, 'install']);
+          expect(input, 'fixture-password\n');
+          return ProcessResult(1, exitCode, '', '');
+        },
+      );
+      expect(await installer.install(), expected);
+    });
+  }
+
+  test(
+    'successful install with an unavailable service is a Helper failure',
+    () async {
+      final dir = Directory.systemTemp.createTempSync('flclash-helper-');
+      addTearDown(() => dir.deleteSync(recursive: true));
+      final exe = File('${dir.path}/helper')..writeAsStringSync('fixture');
+      final probes = <bool>[];
+      final installer = LinuxHelperInstaller(
+        executable: exe.path,
+        hasSystemd: () => true,
+        readinessTimeout: const Duration(milliseconds: 100),
+        probeReadiness: (_, logFailure) async {
+          probes.add(logFailure);
+          return HelperReadiness.notReady;
+        },
+        runProcess: (_, _) async => ProcessResult(1, 0, '', ''),
+      );
+      expect(await installer.install(), AuthorizeCode.helperInstallFailed);
+      expect(probes, [true, false]);
+    },
+  );
+
+  test('missing Helper or elevation tools is a Helper failure', () async {
+    final dir = Directory.systemTemp.createTempSync('flclash-helper-');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final exe = File('${dir.path}/helper');
+    final installer = LinuxHelperInstaller(
+      executable: exe.path,
+      hasSystemd: () => true,
+      probeReadiness: _Client([HelperReadiness.notReady]).probe,
+      runProcess: (command, arguments) async =>
+          throw ProcessException(command, arguments),
+    );
+    expect(await installer.install(), AuthorizeCode.helperInstallFailed);
+    exe.writeAsStringSync('fixture');
+    expect(await installer.install(), AuthorizeCode.helperInstallFailed);
+  });
 }
 
 class _Client {

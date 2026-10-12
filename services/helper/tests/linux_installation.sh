@@ -40,22 +40,68 @@ installed="/usr/local/libexec/flclash/$CORE_SHA256/FlClashHelperService"
 [ "$(sha256sum "$(dirname "$installed")/FlClashCore" | cut -d ' ' -f 1)" = "$CORE_SHA256" ]
 grep -F "ExecStart=\"$installed\"" "$unit"
 cp "$unit" "$fixture/previous.unit"
+expect_failure() {
+  status=0
+  "$@" || status=$?
+  [ "$status" = 125 ] || { echo "expected Helper failure 125, got $status" >&2; exit 1; }
+}
+chmod 775 /usr/local/libexec /usr/local/libexec/flclash "$(dirname "$installed")"
+"$helper" install
+[ "$(stat -c %a /usr/local/libexec /usr/local/libexec/flclash "$(dirname "$installed")" | tr '\n' ' ')" = '755 755 755 ' ]
 # A helper-only upgrade must roll back both binaries as well as the unit.
 printf '\nprevious helper marker\n' >> "$installed"
 cp "$installed" "$fixture/previous.helper"
 touch "$fixture/fail-once"
-if "$helper" install; then echo 'failed activation was accepted' >&2; exit 1; fi
+expect_failure "$helper" install
 cmp "$unit" "$fixture/previous.unit"
 cmp "$installed" "$fixture/previous.helper"
 # Refuse another user's unit and retain it unchanged.
 sed -i 's/OWNER_UID=1000/OWNER_UID=1001/' "$unit"
-if "$helper" install; then echo 'foreign owner was accepted' >&2; exit 1; fi
+expect_failure "$helper" install
 grep 'OWNER_UID=1001' "$unit"
 cp "$fixture/previous.unit" "$unit"
-# A group-writable parent can replace privileged code, even when its group is root.
-chmod 775 /usr/local/libexec
-if "$helper" install; then echo 'group-writable parent was accepted' >&2; exit 1; fi
-chmod 755 /usr/local/libexec
+# Only known legacy directories may be tightened, never arbitrary ancestors or links.
+chmod 775 /usr/local
+expect_failure "$helper" install
+[ "$(stat -c %a /usr/local)" = 775 ]
+chmod 755 /usr/local
+root=/usr/local/libexec/flclash
+chmod 777 "$root"
+expect_failure "$helper" install
+[ "$(stat -c %a "$root")" = 777 ]
+chmod 775 "$root"
+chown 1000:0 "$root"
+expect_failure "$helper" install
+[ "$(stat -c %u:%g:%a "$root")" = 1000:0:775 ]
+chown 0:1000 "$root"
+expect_failure "$helper" install
+[ "$(stat -c %u:%g:%a "$root")" = 0:1000:775 ]
+chown 0:0 "$root"
+chmod 755 "$root"
+mv "$root" "$fixture/retained-installation"
+mkdir -m 775 "$fixture/link-target"
+ln -s "$fixture/link-target" "$root"
+expect_failure "$helper" install
+[ "$(stat -c %a "$fixture/link-target")" = 775 ]
+[ -z "$(ls -A "$fixture/link-target")" ]
+rm "$root"
+mv "$fixture/retained-installation" "$root"
+printf 'untouched' > "$fixture/lock-target"
+chmod 600 "$fixture/lock-target"
+rm "$root/.install.lock"
+ln -s "$fixture/lock-target" "$root/.install.lock"
+expect_failure "$helper" install
+[ "$(cat "$fixture/lock-target")" = untouched ]
+rm "$root/.install.lock"
+mkfifo "$root/.install.lock"
+expect_failure timeout 5 "$helper" install
+rm "$root/.install.lock"
+mv "$(dirname "$installed")/FlClashCore" "$fixture/previous.core"
+ln -s "$fixture/previous.core" "$(dirname "$installed")/FlClashCore"
+expect_failure "$helper" install
+[ "$(sha256sum "$fixture/previous.core" | cut -d ' ' -f 1)" = "$CORE_SHA256" ]
+rm "$(dirname "$installed")/FlClashCore"
+mv "$fixture/previous.core" "$(dirname "$installed")/FlClashCore"
 # Reinstall succeeds, and removing the transient AppImage does not break it.
 "$helper" install
 # A Core upgrade stages under the new hash and drops the previous copy.
@@ -69,6 +115,8 @@ installed="/usr/local/libexec/flclash/$CORE_SHA256/FlClashHelperService"
 [ -x "$installed" ] && [ ! -e "$previous" ]
 grep -F "ExecStart=\"$installed\"" "$unit"
 rm -rf "$fixture/App Image 100%"
+chmod 775 /usr/local/libexec "$root"
 "$installed" uninstall
+[ "$(stat -c %a /usr/local/libexec)" = 755 ]
 [ ! -e "$unit" ] && [ ! -e /usr/local/libexec/flclash ]
-echo 'Linux installation, same-Core rollback, owner isolation, upgrade cleanup and AppImage removal passed'
+echo 'Linux installation, legacy permissions, failure codes, path isolation, rollback and upgrade cleanup passed'

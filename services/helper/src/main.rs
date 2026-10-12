@@ -22,8 +22,15 @@ pub fn main() -> anyhow::Result<()> {
 }
 
 #[cfg(target_os = "linux")]
-pub fn main() -> anyhow::Result<()> {
-    service::linux::main()
+pub fn main() -> std::process::ExitCode {
+    match service::linux::main() {
+        Ok(()) => std::process::ExitCode::SUCCESS,
+        Err(error) => {
+            eprintln!("Error: {error:?}");
+            // sudo uses 1 for authorization errors; Dart distinguishes Helper failures with 125.
+            std::process::ExitCode::from(125)
+        }
+    }
 }
 
 #[cfg(not(any(

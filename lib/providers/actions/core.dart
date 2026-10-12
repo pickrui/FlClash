@@ -126,6 +126,9 @@ extension CoreControllerExt on AppController {
         case AuthorizeCode.error:
           _setPatchTunEnable(false);
           throw appLocalizations.tunAuthorizationFailed;
+        case AuthorizeCode.helperInstallFailed:
+          _setPatchTunEnable(false);
+          throw appLocalizations.tunHelperInstallFailed;
         case AuthorizeCode.helperCorrupt:
           _setPatchTunEnable(false);
           throw appLocalizations.helperCorruptTip;

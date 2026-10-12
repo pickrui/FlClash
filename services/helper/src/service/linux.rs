@@ -189,8 +189,14 @@ fn ensure_root_owned(executable: &Path) -> Result<()> {
         .parent()
         .context("helper executable has no parent directory")?;
     for path in [executable, directory] {
-        let metadata = fs::metadata(path).with_context(|| format!("inspect {}", path.display()))?;
-        if metadata.uid() != 0 || metadata.mode() & 0o022 != 0 {
+        let metadata =
+            fs::symlink_metadata(path).with_context(|| format!("inspect {}", path.display()))?;
+        let valid_type = if path == executable {
+            metadata.is_file()
+        } else {
+            metadata.is_dir()
+        };
+        if !valid_type || metadata.uid() != 0 || metadata.mode() & 0o022 != 0 {
             bail!(
                 "{} must be owned by root and not writable by group or others to run as a service; \
                  install the package instead of running an unpacked bundle",
@@ -249,6 +255,33 @@ fn secure_directory(path: &Path) -> Result<()> {
     Ok(())
 }
 
+fn prepare_installation_directory(path: &Path) -> Result<()> {
+    secure_directory(
+        path.parent()
+            .context("installation directory has no parent")?,
+    )?;
+    match fs::create_dir(path) {
+        Ok(()) => {}
+        Err(error) if error.kind() == ErrorKind::AlreadyExists => {}
+        Err(error) => return Err(error).with_context(|| format!("create {}", path.display())),
+    }
+    let directory = fs::OpenOptions::new()
+        .read(true)
+        .custom_flags(libc::O_DIRECTORY | libc::O_NOFOLLOW)
+        .open(path)?;
+    let metadata = directory.metadata()?;
+    if metadata.uid() == 0 && metadata.gid() == 0 && metadata.mode() & 0o7777 == 0o775 {
+        directory.set_permissions(fs::Permissions::from_mode(0o755))?;
+    }
+    secure_directory(path)
+}
+
+fn prepare_installation_root() -> Result<()> {
+    let root = Path::new(INSTALL_ROOT);
+    prepare_installation_directory(root.parent().unwrap())?;
+    prepare_installation_directory(root)
+}
+
 struct InstalledFiles {
     executable: PathBuf,
     backup: PathBuf,
@@ -294,15 +327,21 @@ fn is_core_sha256(value: &str) -> bool {
 
 /// Serializes installs so one run's cleanup cannot remove the copy that
 /// another run is staging or has just activated.
-fn lock_installations(root: &Path) -> Result<fs::File> {
-    fs::create_dir_all(root)?;
+fn lock_installations() -> Result<fs::File> {
+    prepare_installation_root()?;
+    let root = Path::new(INSTALL_ROOT);
     secure_directory(root)?;
     let lock = fs::OpenOptions::new()
         .write(true)
         .create(true)
         .truncate(false)
         .mode(0o600)
+        .custom_flags(libc::O_NOFOLLOW | libc::O_NONBLOCK)
         .open(root.join(".install.lock"))?;
+    let metadata = lock.metadata()?;
+    if !metadata.is_file() || metadata.uid() != 0 || metadata.mode() & 0o022 != 0 {
+        bail!("Helper installation lock is not a root-owned, non-writable file");
+    }
     lock.lock().context("wait for another Helper install")?;
     Ok(lock)
 }
@@ -340,8 +379,7 @@ fn stage_installation(executable: &Path) -> Result<InstalledFiles> {
     fs::create_dir_all(root)?;
     secure_directory(root)?;
     let destination = root.join(sha);
-    fs::create_dir_all(&destination)?;
-    secure_directory(&destination)?;
+    prepare_installation_directory(&destination)?;
     let stage = destination.join(format!(".install-{}", std::process::id()));
     fs::create_dir(&stage)?;
     fs::set_permissions(&stage, fs::Permissions::from_mode(0o700))?;
@@ -416,7 +454,7 @@ fn install_service() -> Result<()> {
     let executable = std::env::current_exe().context("resolve helper executable path")?;
     let owner = invoking_owner()?;
     ensure_unit_is_free_for(owner)?;
-    let _lock = lock_installations(Path::new(INSTALL_ROOT))?;
+    let _lock = lock_installations()?;
     let installed = stage_installation(&executable)?;
     let previous = fs::read(UNIT_PATH).ok();
     write_unit(unit_contents(&installed.executable, owner).as_bytes())?;
@@ -452,6 +490,15 @@ fn uninstall_service() -> Result<()> {
     if std::env::var_os("PKEXEC_UID").is_some() || std::env::var_os("SUDO_UID").is_some() {
         ensure_unit_is_free_for(invoking_owner()?)?;
     }
+    let root = Path::new(INSTALL_ROOT);
+    let has_installation = match fs::symlink_metadata(root) {
+        Ok(_) => true,
+        Err(error) if error.kind() == ErrorKind::NotFound => false,
+        Err(error) => return Err(error.into()),
+    };
+    if has_installation {
+        prepare_installation_root()?;
+    }
     if Path::new(UNIT_PATH).exists() {
         run_systemctl(&["disable", "--now", SERVICE_NAME])?;
     }
@@ -461,8 +508,7 @@ fn uninstall_service() -> Result<()> {
         Err(error) => return Err(error).with_context(|| format!("remove {UNIT_PATH}")),
     }
     run_systemctl(&["daemon-reload"])?;
-    let root = Path::new(INSTALL_ROOT);
-    if root.try_exists()? {
+    if has_installation {
         secure_directory(root)?;
         fs::remove_dir_all(root)?;
     }

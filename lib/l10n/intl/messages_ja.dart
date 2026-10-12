@@ -2284,6 +2284,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "管理者権限が拒否されたため、TUN を有効にできませんでした。システムの権限要求を許可して、もう一度お試しください",
     ),
     "tunDesc": MessageLookupByLibrary.simpleMessage("管理者モードでのみ有効"),
+    "tunHelperInstallFailed": MessageLookupByLibrary.simpleMessage(
+      "TUN を有効にできませんでした：Helper のインストールまたは起動に失敗しました。アプリが正しくインストールされていることと、システムサービスの状態を確認して再試行してください",
+    ),
     "tunMtuDesc": MessageLookupByLibrary.simpleMessage(
       "既定値は 9000、1480 または 4064 も選択可能。Android VPN の再起動後に適用",
     ),

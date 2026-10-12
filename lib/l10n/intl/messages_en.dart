@@ -2721,6 +2721,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "tunDesc": MessageLookupByLibrary.simpleMessage(
       "only effective in administrator mode",
     ),
+    "tunHelperInstallFailed": MessageLookupByLibrary.simpleMessage(
+      "TUN could not be enabled: Helper installation or startup failed. Check that the app installation is complete and the system service is working, then try again.",
+    ),
     "tunMtuDesc": MessageLookupByLibrary.simpleMessage(
       "Default: 9000; alternatives: 1480 or 4064. Restart the Android VPN to apply",
     ),
