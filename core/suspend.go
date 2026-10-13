@@ -22,7 +22,7 @@ var (
 // reconcileIdleSuspendLocked changes only the suspend state owned by the idle
 // policy. The caller must hold runLock so config loading cannot be resumed early.
 func reconcileIdleSuspendLocked() {
-	provider.SetHealthCheckSuspended(deviceIdle && suspendOnIdle)
+	provider.SetHealthCheckState(deviceIdle, deviceIdle && suspendOnIdle)
 	if !isRunning {
 		// Retain ownership until the next explicit start. A wake event or setting
 		// change while stopped must not restart the tunnel.

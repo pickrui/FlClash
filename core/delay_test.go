@@ -415,12 +415,15 @@ func TestDelayProbeBatchAfterFrontendRestart(t *testing.T) {
 		tunnel.UpdateProxies(previousProxies, previousProviders)
 		adapter.UnifiedDelay.Store(previousUnified)
 	})
-	tunnel.UpdateProxies(map[string]constant.Proxy{"node": adapter.NewProxy(outbound.NewDirect())}, nil)
+	tunnel.UpdateProxies(map[string]constant.Proxy{
+		"node":  adapter.NewProxy(outbound.NewDirect()),
+		"other": adapter.NewProxy(outbound.NewDirect()),
+	}, nil)
 
-	probe := func(generation int64) <-chan *Delay {
+	probe := func(generation int64, name string) <-chan *Delay {
 		result := make(chan *Delay, 1)
 		handleAsyncTestDelay(&TestDelayParams{
-			ProxyName: "node", TestUrl: server.URL, Timeout: 2000, Generation: generation,
+			ProxyName: name, TestUrl: server.URL, Timeout: 2000, Generation: generation,
 		}, func(delay *Delay) { result <- delay })
 		return result
 	}
@@ -435,15 +438,15 @@ func TestDelayProbeBatchAfterFrontendRestart(t *testing.T) {
 			t.Fatal("local probe did not finish")
 		}
 	}
-	awaitSuccess(probe(100))
+	awaitSuccess(probe(100, "node"))
 	hold.Store(true)
-	first := probe(1)
+	first := probe(1, "node")
 	select {
 	case <-started:
 	case <-time.After(3 * time.Second):
 		t.Fatal("first restarted probe never reached the server")
 	}
-	second := probe(1)
+	second := probe(1, "other")
 	select {
 	case <-started:
 	case <-time.After(3 * time.Second):
@@ -528,14 +531,18 @@ func TestDelayProbeSupports150ConcurrentReachableNodes(t *testing.T) {
 		tunnel.UpdateProxies(previousProxies, previousProviders)
 		adapter.UnifiedDelay.Store(previousUnified)
 	})
-	tunnel.UpdateProxies(map[string]constant.Proxy{"node": adapter.NewProxy(outbound.NewDirect())}, nil)
+	proxies := make(map[string]constant.Proxy, count)
+	for index := range count {
+		proxies[fmt.Sprintf("node-%d", index)] = adapter.NewProxy(outbound.NewDirect())
+	}
+	tunnel.UpdateProxies(proxies, nil)
 	results := make(chan *Delay, count)
 	deadline := time.NewTimer(4 * time.Second)
 	defer deadline.Stop()
 	// Keep all responses pending without overflowing the test listener's backlog.
 	for index := range count {
 		handleAsyncTestDelay(&TestDelayParams{
-			Session: "parallel-150", Generation: 1, ProxyName: "node", TestUrl: server.URL, Timeout: 5000,
+			Session: "parallel-150", Generation: 1, ProxyName: fmt.Sprintf("node-%d", index), TestUrl: server.URL, Timeout: 5000,
 		}, func(delay *Delay) { results <- delay })
 		select {
 		case <-started:

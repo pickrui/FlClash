@@ -44,7 +44,7 @@ func resetSuspendTestState(t *testing.T) {
 		isRunning = previousRunning
 		currentConfig = previousConfig
 		deviceIdle, suspendOnIdle, idleOwnsTunnelSuspend = previousIdle, previousOption, previousOwner
-		provider.SetHealthCheckSuspended(previousIdle && previousOption)
+		provider.SetHealthCheckState(previousIdle, previousIdle && previousOption)
 		setSuspendTestTunnelStatus(previousStatus)
 	})
 }

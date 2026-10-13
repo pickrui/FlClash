@@ -71,7 +71,7 @@ func TestDelayProbeCompletionOrdering(t *testing.T) {
 				newerURL = server.URL + "/new"
 			}
 			older := make(chan error, 1)
-			go func() { _, err := proxy.URLTest(ctx, olderURL, nil); older <- err }()
+			go func() { _, err := proxy.URLTest(adapter.WithBackgroundURLTest(ctx), olderURL, nil); older <- err }()
 			select {
 			case <-started:
 			case <-ctx.Done():
