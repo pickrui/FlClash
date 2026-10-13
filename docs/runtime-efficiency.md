@@ -396,3 +396,35 @@ Reproduce from `core/Clash.Meta/` with `GOTOOLCHAIN=go1.26.9 CGO_ENABLED=0 go te
 Validation covers shared-query cancellation, network resets, request ownership after return, repeated cache refresh, close before first use, fresh-cache rejection after close, concurrent close/first use, all configured resolver roles, replacement, DNS disable/re-enable and system-resolver reuse. The DNS, resolver component and executor packages pass race detection with release tags; the root Core integration suite passes and verifies configured DNS retirement through the actual shutdown entry point. The desktop integration package cannot run directly with `-race` on macOS because its existing CGO build selects Android-only platform code; no build constraints were changed for testing
 
 The requested UI cleanup removes the mips-only option subtitle and its four localized messages. All protocol-stack options now use the same name-only presentation. The affected Dart files pass analysis, localization/build-tag checks pass, and source-notice, comment-density and diff checks pass
+
+## Lazy private DNS for WireGuard and MASQUE
+
+This batch extends the ownership and deferred-construction approach in ProjectClash's [WireGuard device lifecycle](https://github.com/ProjectClash/Clash/blob/3891cc46092029c23f7fd0bfa1fe29e0e6e1dffb/adapter/outbound/clash_wireguard_lazy.go) and [MASQUE stack lifecycle](https://github.com/ProjectClash/Clash/blob/3891cc46092029c23f7fd0bfa1fe29e0e6e1dffb/adapter/outbound/clash_masque_lazy.go) to node-private DNS. The new DNS holder is a local adaptation of that approach, combined with the resolver query-lifetime support from the preceding batch
+
+WireGuard and both MASQUE modes now retain parsed private nameservers until the resolver is first acquired. Unused nodes avoid creating the main/bootstrap resolvers, their caches and upstream client objects. Nameserver parsing, malformed-address rejection, proxy-adapter binding and IPv6 selection still happen during node construction. TCP dialing acquires the private resolver, including for literal destinations; UDP acquires it when resolving a hostname. Concurrent first users share one resolver, subsequent requests reuse its cache, and a canceled first acquisition does not initialize it
+
+Terminal node close cancels private queries before device teardown, releases the holder's resolver and parsed-server references, and permanently rejects later acquisitions. The same mutex serializes construction and cancellation, so concurrent close calls cannot return while another closer is still canceling that resolver. A borrower already holding the resolver receives its terminal cancellation. Nodes without private DNS continue consulting the current default resolver; closing a private owner never switches it to that fallback or closes the shared default resolver
+
+Compared against Core `7e864f1c`, Go 1.26.9, release tags, macOS arm64 on Apple M4, three samples constructing and closing a node with `remote-dns-resolve` and one ordinary UDP nameserver:
+
+| Node | Before, allocated bytes/op | After, allocated bytes/op | Allocations before → after |
+| --- | --- | --- | --- |
+| WireGuard | 3,376 | 2,296 | 47 → 33 |
+| MASQUE L3 | 18,023–18,024 | 16,944 | 252 → 238 |
+| MASQUE L4 | 18,103–18,104 | 17,023–17,024 | 254 → 240 |
+
+Construction allocates approximately 1,080 fewer bytes and 14 fewer objects per node. The larger MASQUE TLS setup remains part of these measurements. Timing varied with concurrent host activity, so these samples support allocation comparisons, not a construction-speed claim
+
+A separate fixture retains 2,048 unused nodes and requests GC before and after construction. Each of the three samples below runs in its own test process, avoiding the previous node kind's cleanup and finalizers affecting the next heap delta:
+
+| Node | Before, retained heap bytes | After, retained heap bytes | Approximate reduction |
+| --- | --- | --- | --- |
+| WireGuard | 5,046,536–5,046,768 | 3,419,384–3,435,232 | 32% |
+| MASQUE L3 | 8,412,000–8,414,104 | 6,791,208–6,797,216 | 19% |
+| MASQUE L4 | 8,569,816–8,580,088 | 6,954,720–6,959,720 | 19% |
+
+The holder slice, input nameserver strings and shared warmed state are outside the measured delta. These figures cover unused nodes with private DNS enabled, not whole-app RSS or device power. First use pays the deferred construction cost; used nodes retain a small holder object and take its mutex when acquiring the resolver. No timer, background sweeper or production GC call is added. This batch cancels private queries and releases ownership; it does not add a general DNS transport-disposal API or change OpenVPN/ZeroTier ownership
+
+Reproduce construction allocations from `core/Clash.Meta/` with `GOTOOLCHAIN=go1.26.9 CGO_ENABLED=0 go test -tags with_gvisor,with_mips_low_memory ./adapter/outbound -run '^$' -bench '^BenchmarkUnusedNodeDNS$' -benchmem -benchtime=1s -count=3`. For retained heap, use the same environment/tags with `-run '^TestUnusedNodeDNSRetainedHeap$/^wireguard$' -count=1 -v`, replacing `wireguard` with `masque` or `masque-l4` and running each command three times in separate processes. Before samples use a temporary Go overlay with the prior WireGuard/MASQUE files and the new holder-specific test file omitted
+
+Validation uses the production nameserver parser and covers malformed inputs, no private DNS, canceled first use, concurrent initialization/close, rejection after close, cancellation of a blocked upstream, IPv4/IPv6 answers through the selected proxy, cache reuse/clear, connection reset and default-resolver isolation. The existing local MASQUE tunnel fixture now also serves DNS over the tunnel and verifies TCP/UDP echo by hostname on auto, mips and gVisor stacks. WireGuard, MASQUE and private-DNS tests pass race detection with release tags; the root Core integration suite, formatting, notice, comment-density and diff checks pass. Fixtures use in-memory connections or loopback tunnels and do not launch the application or change host networking
