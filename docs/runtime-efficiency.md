@@ -346,3 +346,29 @@ These ordinary-node fixtures reduce construction allocation bytes by approximate
 Reproduce from `core/Clash.Meta/` with `GOTOOLCHAIN=go1.26.9 CGO_ENABLED=0 go test -tags with_gvisor,with_mips_low_memory ./adapter/outbound -run '^TestTuicRetainedHeap$' -bench '^BenchmarkTuicConstruction$' -benchmem -benchtime=1s -count=3 -v`. Before measurements use the same benchmark/heap fixtures with the prior `tuic.go` and the new configuration helper/tests omitted through a temporary Go overlay
 
 Validation covers concurrent first initialization, cancellation before initialization, close racing with initialization, terminal TCP/UDP rejection, option compatibility, and a parsed client-certificate loader surviving source-file removal. Real loopback QUIC handshakes cover CA replacement between parse and dial, pinning, separate certificate names, disabled SNI and explicit verification skipping; incorrect names and pins still fail. TUIC outbound tests, TUIC transport packages and CA tests pass race detection with release tags. The root Core integration suite, formatting, notice, comment-density and diff checks pass
+
+## Compact classical IP indexes
+
+This batch adapts ProjectClash's [merged classical IP rule steps](https://github.com/ProjectClash/Clash/blob/3891cc46092029c23f7fd0bfa1fe29e0e6e1dffb/rules/provider/classical_strategy.go). Consecutive runs of at least 16 standard IP-CIDR rules become immutable sorted address ranges. Only destination rules with `no-resolve` and source-address rules qualify; source and destination runs remain separate. The configured parser still handles every input, including `IP-CIDR6` and the `src` parameter, before eligibility is checked
+
+Each run allocates one range array, sorts and merges overlapping/adjacent ranges in place, then shrinks substantially oversized storage. Matching uses binary search without allocation. The strategy releases the original rule objects and excess matcher capacity, while reported counts still include duplicate input rules. IPv4, IPv6, IPv4-mapped IPv6, noncanonical prefixes and address zones preserve the existing `netip.Prefix.Contains` behavior
+
+Resolving rules stay linear, including consecutive rules that could otherwise share a set: each DNS callback may change the metadata seen by the next rule. Domain indexes, process/logical rules, custom wrappers and source/destination changes remain ordering boundaries. Reset, repeated finishing, late insertion and atomic provider replacement continue to work. The change introduces no background workers, timers, forced GC or file-format changes
+
+Compared against Core `5ccb3345`, Go 1.26.9, release tags, macOS arm64 on Apple M4, three serial one-second samples with `GOMAXPROCS=1` and 10,000 disjoint IPv4 `/25` rules:
+
+| Operation | Before | After |
+| --- | --- | --- |
+| Construct the rule strategy | 1.91–1.95 ms/op | 2.39–2.42 ms/op |
+| Construction, allocated bytes / allocations | 2906016 B/op / 50019 | 3389392 B/op / 50022 |
+| Match the first rule | 5.30–5.39 ns/op | 35.96–36.21 ns/op |
+| Match the last rule | 44.67–45.23 µs/op | 35.34–35.72 ns/op |
+| Miss every rule | 44.94–45.36 µs/op | 35.61–35.88 ns/op |
+
+All matching fixtures allocate zero bytes. Construction costs approximately 24% more time at the median and 17% more allocated bytes; first-rule hits also cost more. The benefit applies to retained structures and repeated matching through longer eligible runs, especially late hits and misses. Small runs, interleaved rules and resolving destination rules keep their existing lookup behavior. Timings are operation-level measurements on a shared host, not device-power or whole-app throughput measurements
+
+A separate 20,000-rule fixture retains the source strings outside the measured delta and requests GC before/after strategy construction. Across three runs, disjoint prefixes retain 1,652,232–1,653,648 additional heap bytes and about 20,000 objects with the linear strategy, versus 966,752 bytes and 4 objects with the index, approximately 41% less retained structure memory. A fixture whose final `/8` covers the preceding prefixes retains 144–5,464 additional bytes after indexing, verifying that the large temporary range array is released; the small result includes normal GC measurement noise. These figures exclude source strings, unrelated app state and temporary construction storage, and do not measure whole-app RSS or peak memory
+
+Reproduce from `core/Clash.Meta/` with `GOTOOLCHAIN=go1.26.9 CGO_ENABLED=0 GOMAXPROCS=1 go test -tags with_gvisor,with_mips_low_memory ./rules/provider -run '^$' -bench '^BenchmarkClassicalIPRules$' -benchmem -benchtime=1s -count=3`. The retained-heap check uses the same Go version/tags without the `GOMAXPROCS` override and `-run '^TestClassicalIPIndexRetainedStorage$' -count=3 -v`. Before timings use the same fixtures with the prior strategy and per-rule matching implementation supplied through a temporary Go overlay
+
+Validation compares indexed results, metadata and callback traces against linear matching across mixed/randomized corpora. Focused cases cover overlapping/adjacent prefixes, zero/full-width masks, both address families and their extremes, mapped addresses, zones, nil resolvers, DNS callbacks changing an address partway through a resolving run, parser rewrites/rejection, a custom rule mutating the source address, duplicates, small-run boundaries, reset and late insertion. The provider update regression also publishes IP indexes while matching and exporting JSON concurrently. All rule packages pass race detection with release tags, the root Core integration suite passes, and formatting, notice, comment-density and diff checks pass
