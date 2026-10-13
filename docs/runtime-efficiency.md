@@ -73,3 +73,26 @@ The memory RPC now reads six `runtime/metrics` counters on demand, reusing a syn
 On the local Apple M4 with Go 1.26.9, three one-second runs measured runtime sampling at 379–459 ns/op versus 70–72 microseconds/op for `ReadMemStats`, with zero allocations on both paths. This comparison excludes OS RSS collection, IPC and UI work. Reproduce from `core/` with `GOTOOLCHAIN=go1.26.9 CGO_ENABLED=0 go test -run '^$' -bench '^BenchmarkRuntimeMemoryStats$' -benchtime=1s -count=3 -tags with_gvisor,with_mips_low_memory`
 
 Validation includes the root Core suite, race checks for pool/TLS/outbound/CA packages, concurrent memory sampling, buffer retention boundaries and the existing memory-widget/model tests. Device power and whole-app RSS have not been measured
+
+## Fake-IP storage
+
+This batch adapts ProjectClash's [atomic Fake-IP transaction](https://github.com/ProjectClash/Clash/blob/3891cc46092029c23f7fd0bfa1fe29e0e6e1dffb/component/profile/cachefile/clash_fakeip_batch.go) idea. Each new persistent mapping now replaces any conflicting forward/reverse pair in one synchronous database update. A fresh slot previously needed two sequential batch transactions; a recycled slot needed three. The new path commits once before returning and avoids their batch-delay timers. The existing bucket format, IPv4/IPv6 separation and allocation-state checkpoints through `StoreState` remain compatible
+
+The transaction rolls back both directions and any removed records if a write fails. Cleanup only removes a previous counterpart that still refers to the replaced mapping, preserving unrelated records left by an older partial write. Pending operations do not accumulate in a background queue
+
+The memory-only backend uses two lookup indexes pointing to one entry and one LRU list. Forward and reverse lookups share the same recency; full caches reuse the oldest entry on replacement. The pool mutex protects both indexes, including flush and state checkpoints. Cloning creates independent entries in recency order and honors the destination capacity. Clearing releases the old indexes and list; nonpositive capacities retain their existing unlimited behavior
+
+Local Apple M4 measurements with Go 1.26.9, three one-second runs, compared against Core `b230a693` with the same benchmark:
+
+| Memory pool operation | Before | After |
+| --- | --- | --- |
+| Build 1000 mappings, allocated bytes | 429745–429746 B/op | 333601–333602 B/op |
+| Build 1000 mappings, allocations | 4050/op | 1046/op |
+| Build 4096 mappings, allocated bytes | 1744764–1744773 B/op | 1351393–1351395 B/op |
+| Build 4096 mappings, allocations | 16486/op | 4194/op |
+| Hit one of 1000 retained mappings | 33.9–35.1 ns/op | 16.0–16.8 ns/op |
+| Repeated eviction at capacity 1000 | 191–194 ns/op, 160 B/op, 4 allocs/op | 96–101 ns/op, 0 B/op, 0 allocs/op |
+
+Pool construction allocates about 22% fewer bytes and 74% fewer objects in these fixtures. Host strings are prepared outside the timed region; the eviction benchmark cycles through one more host than the capacity. These are operation-level allocation and CPU measurements, not retained-heap, whole-app RSS or battery measurements. Reproduce from `core/Clash.Meta/` with `GOTOOLCHAIN=go1.26.9 CGO_ENABLED=0 go test -run '^$' -bench '^BenchmarkPoolMemory$' -benchmem -benchtime=1s -count=3 -tags with_gvisor,with_mips_low_memory ./component/fakeip`
+
+Validation covers legacy database replacement and reopen, rollback, one commit per new mapping and none for hits, IPv4/IPv6 wraparound and state restore, reverse-lookup recency, clone capacity/independence, missing database handles, and concurrent lookup/flush/state saves. Fake-IP, cachefile and DNS packages pass race detection, and the root Core suite passes. Database fixtures use temporary directories and close their handles during cleanup
