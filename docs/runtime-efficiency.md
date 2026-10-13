@@ -184,3 +184,25 @@ This batch also adapts ProjectClash's [all-down choice retention](https://github
 Selector, fallback and URL-test groups read atomic selected-name snapshots. URL-test calculations serialize writes to the cached node even when a cache reset overlaps another calculation. Fallback uses an available member when its pin fails, and clearing an old dead pin cannot erase a different selection set concurrently. Full JSON and paged summaries keep their existing fields and string values
 
 The new regressions reproduce the previous all-down switch, first-member tolerance failure and canceled-probe burst. Further tests cover 150 mixed successful/failed probes, timeout counter resets, idle/suspension, recovery after cooldown, high-delay tolerance, member replacement/removal, concurrent selection and JSON reads, and old-pin/new-selection ordering. Outbound-group, provider, adapter and single-flight packages pass race detection with release tags; the root Core integration suite and repository checks pass
+
+## Rotating background health checks
+
+This batch adapts ProjectClash's [bounded health-check windows](https://github.com/ProjectClash/Clash/blob/3891cc46092029c23f7fd0bfa1fe29e0e6e1dffb/adapter/provider/clash_healthcheck_window.go). Scheduled and provider-refresh checks select at most 1000 matching nodes per provider and test URL in each round. Up to 500 slots prioritize selected nodes, then up to 64 known fast nodes for that URL, then failed nodes. The remaining slots walk a rotating cursor, so a large set of selected or failed nodes cannot permanently exclude the rest. Priority selection also starts from the cursor; filters apply before admission, and each URL has an independent cursor
+
+Providers with at most 1000 nodes still receive a complete scheduled check. A large provider's matching subset is also checked completely when it fits the window. The global limit remains ten automatic probes, including failure recovery. Manual checks and connection-failure recovery continue to cover the complete matching list; recovery has its own merged execution so it cannot reuse a partial scheduled round. Overlapping probes retain the existing sharing and successful-result reuse
+
+A canceled round does not advance its cursors. Replacement lists and newly registered URLs appear in the next admitted round, while a running round keeps its original snapshot. Published node slices are owned by the health checker and reused without copying on each check. Extra URL/filter snapshots are created only by the admitted execution; duplicate requests no longer copy the full node list before being merged. An empty startup list does not cache a result that could suppress the first populated check. Cursor state stores only one integer per URL and adds no timers
+
+Local Apple M4 measurements with Go 1.26.9, three one-second runs, compared against Core `b02ab53f` with the same 10000-node scheduling fixture:
+
+| Operation | Before | After |
+| --- | --- | --- |
+| Automatic round, probe calls | 10000 | 1000 |
+| Automatic round, allocated bytes | 9273344–9281516 B/op | 937380–938521 B/op |
+| Automatic round, elapsed time | 13.62–14.04 ms/op | 1.43–1.50 ms/op |
+| Request reusing a completed round, allocated bytes | 164113 B/op | 272 B/op |
+| Request reusing a completed round, elapsed time | 22.23–23.23 microseconds/op | 228–229 ns/op |
+
+The fixture uses immediate in-memory probes; it measures scheduling, logging arguments and temporary allocations, without network handshakes. Automatic-round allocation bytes fall by about 90%; the tradeoff is that ordinary nodes in a large provider are refreshed over multiple intervals instead of every interval. Selection still scans the current list to find priority candidates, and the Core still retains the full routing configuration. These figures are not whole-app RSS or device battery measurements. Reproduce from `core/Clash.Meta/` with `GOTOOLCHAIN=go1.26.9 CGO_ENABLED=0 go test -tags with_gvisor,with_mips_low_memory ./adapter/provider -run '^$' -bench '^BenchmarkHealthCheckScheduling$' -benchtime=1s -count=3`
+
+Focused regressions cover complete rotation with many failures, selected and fast candidates, separate filtered URLs and expected statuses, whitespace-normalized URLs, cancellation before queued probes start, replacement during an active round, input-slice ownership, empty startup, regex timeout and complete manual/recovery checks. Provider, outbound-group and adapter packages pass race detection with release tags; the root Core suite and repository checks pass
