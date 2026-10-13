@@ -22,6 +22,7 @@ import (
 
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/hub/executor"
 	"github.com/metacubex/mihomo/hub/route"
 	"github.com/metacubex/mihomo/tunnel"
 )
@@ -375,6 +376,13 @@ func TestSetupCandidateKeepsSystemTimeWriteOnlyWhereAllowed(t *testing.T) {
 }
 
 func TestClosingProvidersStopsRoutingUntilTheNextSetup(t *testing.T) {
+	loaded := make(chan string, 1)
+	previousHook := executor.DefaultProviderLoadedHook
+	executor.DefaultProviderLoadedHook = func(name string) {
+		previousHook(name)
+		loaded <- name
+	}
+	t.Cleanup(func() { executor.DefaultProviderLoadedHook = previousHook })
 	setValidationTestHome(t)
 	stubLiveConfig(t)
 	previousStatus := tunnel.Status()
@@ -395,6 +403,14 @@ func TestClosingProvidersStopsRoutingUntilTheNextSetup(t *testing.T) {
 	for range 2 {
 		if err := applyConfig(params); err != nil {
 			t.Fatal(err)
+		}
+		select {
+		case name := <-loaded:
+			if name != "default" {
+				t.Fatalf("loaded provider = %q", name)
+			}
+		case <-time.After(3 * time.Second):
+			t.Fatal("provider loaded notification did not finish")
 		}
 		if got := tunnel.Status(); got != tunnel.Running {
 			t.Fatalf("status after setup = %v", got)

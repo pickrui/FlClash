@@ -41,11 +41,11 @@ type exitCleanupGuard struct {
 func releaseOnExit() {
 	guard := exitGuard
 	guard.once.Do(func() {
+		exiting.Store(true)
 		if !isInit.Load() {
 			close(guard.done)
 			return
 		}
-		exiting.Store(true)
 		stopTun := exitStopTun
 		cleanup := exitCleanup
 		go func() {

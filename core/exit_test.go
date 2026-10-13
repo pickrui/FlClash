@@ -51,9 +51,10 @@ func stubExitCleanup(t *testing.T, cleanup func()) *bool {
 }
 
 func TestReleaseOnExitSkipsCleanupBeforeInit(t *testing.T) {
-	previousIsInit := isInit.Load()
+	setValidationTestHome(t)
 	isInit.Store(false)
-	t.Cleanup(func() { isInit.Store(previousIsInit) })
+	previousVersion := version
+	t.Cleanup(func() { version = previousVersion })
 
 	called := stubExitCleanup(t, func() {})
 
@@ -61,6 +62,12 @@ func TestReleaseOnExitSkipsCleanupBeforeInit(t *testing.T) {
 
 	if *called {
 		t.Fatal("cleanup ran although the core was never initialized")
+	}
+	if !exiting.Load() {
+		t.Fatal("exit before initialization still permits late initialization")
+	}
+	if handleInitClash(&InitParams{HomeDir: GlobalValidationSourceHome}) {
+		t.Fatal("init accepted a request after process exit began")
 	}
 }
 

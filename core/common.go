@@ -425,6 +425,9 @@ func parseSetupCandidate(params *SetupParams) (*config.Config, error) {
 func applyConfig(params *SetupParams) error {
 	runLock.Lock()
 	defer runLock.Unlock()
+	if !isInit.Load() || exiting.Load() {
+		return errors.New("not initialized")
+	}
 	var err error
 	var candidate *config.Config
 	previousNames := slices.Clone(config.GetProxyNameList())

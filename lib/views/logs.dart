@@ -72,6 +72,7 @@ class _LogsViewState extends ConsumerState<LogsView>
 
   @override
   void dispose() {
+    throttler.cancel(this);
     _logsStateNotifier.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -94,7 +95,7 @@ class _LogsViewState extends ConsumerState<LogsView>
   }
 
   void updateLogsThrottler() {
-    throttler.call(FunctionTag.logs, () {
+    throttler.call(this, () {
       if (!mounted) {
         return;
       }

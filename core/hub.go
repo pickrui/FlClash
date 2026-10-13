@@ -58,6 +58,9 @@ func publishProxySnapshotLocked(proxies map[string]constant.Proxy) {
 func handleInitClash(params *InitParams) bool {
 	runLock.Lock()
 	defer runLock.Unlock()
+	if exiting.Load() {
+		return false
+	}
 	// A native start (tile, shortcut, always-on) sends no domains, and the
 	// service process may outlive the app that set them.
 	if len(params.CloudDomains) != 0 {
@@ -107,16 +110,16 @@ func handleSetNetworkExcluded(excluded bool) bool {
 func handleStartListener() bool {
 	runLock.Lock()
 	defer runLock.Unlock()
+	if !isInit.Load() || exiting.Load() || currentConfig == nil {
+		isRunning = false
+		listener.StopListener()
+		return false
+	}
 	isRunning = true
 	updateListeners()
 	resolver.ResetConnection()
 	if features.Android || networkExcluded {
 		return true
-	}
-	if currentConfig == nil {
-		isRunning = false
-		listener.StopListener()
-		return false
 	}
 	mixedPort := currentConfig.General.MixedPort
 	if mixedPort > 0 && listener.GetPorts().MixedPort != mixedPort {
@@ -156,6 +159,7 @@ func handleShutdown() bool {
 	listener.StopListener()
 	closeCurrentProviders()
 	executor.Shutdown()
+	currentConfig = nil
 	flushReclaimOwnership()
 	handleForceGC()
 	return true
@@ -727,9 +731,6 @@ func handleUpdateConfig(params *UpdateParams) string {
 
 func handleSetupConfig(params *SetupParams) string {
 	defer scheduleReclaimOwnership()
-	if !isInit.Load() {
-		return "not initialized"
-	}
 	err := applyConfig(params)
 	if err != nil {
 		return err.Error()

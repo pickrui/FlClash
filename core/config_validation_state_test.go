@@ -21,6 +21,9 @@ import (
 
 func setValidationTestHome(t *testing.T) {
 	t.Helper()
+	previousInit := isInit.Load()
+	isInit.Store(true)
+	t.Cleanup(func() { isInit.Store(previousInit) })
 	previousHome := constant.Path.HomeDir()
 	previousSource := GlobalValidationSourceHome
 	home := t.TempDir()

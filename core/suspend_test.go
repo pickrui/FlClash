@@ -28,6 +28,9 @@ import (
 
 func resetSuspendTestState(t *testing.T) {
 	t.Helper()
+	previousInit := isInit.Load()
+	isInit.Store(true)
+	t.Cleanup(func() { isInit.Store(previousInit) })
 	previousRunning := isRunning
 	previousConfig := currentConfig
 	previousIdle, previousOption, previousOwner := deviceIdle, suspendOnIdle, idleOwnsTunnelSuspend

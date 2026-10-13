@@ -51,32 +51,50 @@ void main() {
     }
   }
 
-  test('a lost service fails calls that are still waiting for it', () async {
-    final service = _Service();
-    final core = CoreLib.forTesting(
-      service: service,
-      readSharedState: () => _sharedState,
+  for (final close in [false, true]) {
+    test(
+      'a ${close ? 'closed' : 'lost'} service fails in-flight calls',
+      () async {
+        final service = _Service();
+        final core = CoreLib.forTesting(
+          service: service,
+          readSharedState: () => _sharedState,
+        );
+        addTearDown(core.destroy);
+        addTearDown(() {
+          if (!service.invocation.isCompleted) {
+            service.invocation.complete(null);
+          }
+        });
+        expect(await core.preload(), isEmpty);
+        final call = core.invokeMethod<bool>(method: CoreMethod.getIsInit);
+        final failure = expectLater(
+          call.timeout(const Duration(seconds: 1)),
+          throwsA(
+            isA<CoreMethodException>().having(
+              (error) => error.code,
+              'code',
+              'transport_disconnected',
+            ),
+          ),
+        );
+        await Future<void>.delayed(Duration.zero);
+        expect(service.calls, hasLength(1));
+        if (close) {
+          await core.destroy();
+        } else {
+          for (final listener in service.listeners.toList()) {
+            listener.onServiceCrash('service process died');
+          }
+        }
+        await failure;
+        service.invocation.complete(const CoreMethodResponse(result: true));
+        expect(core.isConnected, isFalse);
+        await core.destroy();
+        expect(service.listeners, isEmpty);
+      },
     );
-    expect(await core.preload(), isEmpty);
-    final call = core.invokeMethod<bool>(method: CoreMethod.getIsInit);
-    await Future<void>.delayed(Duration.zero);
-    for (final listener in service.listeners.toList()) {
-      listener.onServiceCrash('service process died');
-    }
-    await expectLater(
-      call.timeout(const Duration(seconds: 1)),
-      throwsA(
-        isA<CoreMethodException>().having(
-          (error) => error.code,
-          'code',
-          'transport_disconnected',
-        ),
-      ),
-    );
-    service.invocation.complete(null);
-    await core.destroy();
-    expect(service.listeners, isEmpty);
-  });
+  }
 
   test('a lost service invalidates the connection before restarting', () async {
     final service = _Service();
@@ -95,6 +113,46 @@ void main() {
     expect(service.starts, 2);
     expect(service.syncs, 2);
   });
+
+  for (final close in [false, true]) {
+    test(
+      'a ${close ? 'closed' : 'lost'} connection cannot send a queued call',
+      () async {
+        final service = _Service();
+        final core = CoreLib.forTesting(
+          service: service,
+          readSharedState: () => _sharedState,
+        );
+        addTearDown(core.destroy);
+        addTearDown(() {
+          if (!service.invocation.isCompleted) {
+            service.invocation.complete(null);
+          }
+        });
+        expect(await core.preload(), isEmpty);
+
+        final call = core.invokeMethod<bool>(method: CoreMethod.getIsInit);
+        final failure = expectLater(
+          call.timeout(const Duration(seconds: 1)),
+          throwsA(
+            isA<CoreMethodException>().having(
+              (error) => error.code,
+              'code',
+              'transport_disconnected',
+            ),
+          ),
+        );
+        if (close) {
+          await core.destroy();
+        } else {
+          core.onServiceCrash('service process died before send');
+        }
+
+        await failure;
+        expect(service.calls, isEmpty);
+      },
+    );
+  }
 
   for (final duringInit in [true, false]) {
     test(
@@ -270,6 +328,7 @@ class _Service extends Fake implements Service {
   Future<String>? initResult;
   Future<String>? syncResult;
   final listeners = <ServiceListener>[];
+  final calls = <CoreMethodCall>[];
   final invocation = Completer<CoreMethodResponse?>();
 
   @override
@@ -279,8 +338,10 @@ class _Service extends Fake implements Service {
   void removeListener(ServiceListener listener) => listeners.remove(listener);
 
   @override
-  Future<CoreMethodResponse?> invokeMethod(CoreMethodCall call) =>
-      invocation.future;
+  Future<CoreMethodResponse?> invokeMethod(CoreMethodCall call) {
+    calls.add(call);
+    return invocation.future;
+  }
 
   @override
   Future<String> init() async {
