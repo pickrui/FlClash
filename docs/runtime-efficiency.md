@@ -145,3 +145,26 @@ Cancellation happens before taking the locks held by connection setup. A handsha
 Open outbounds retain their existing connection reuse and heartbeat settings. Existing five-second stream-accounting callbacks may finish after shutdown; closed clients cannot establish another connection. The pool adds a cancellation context, with no polling loop or periodic cleanup timer
 
 Validation covers actual TCP/UDP echo over TLS-verified loopback TUIC v4/v5 in both QUIC and native UDP modes, closing active transports, refusing requests after close, canceling blocked handshakes and discarding late successful connections. ZeroTier fixtures cover unused-node shutdown, malformed stored identity, concurrent startup retry and identity-collision recovery with all physical dialing disabled. The complete outbound and TUIC transport packages pass race detection with release tags, and the root Core suite passes
+
+## Lazy shared Sudoku tables
+
+This batch adapts ProjectClash's [lazy shared tables](https://github.com/ProjectClash/Clash/blob/3891cc46092029c23f7fd0bfa1fe29e0e6e1dffb/adapter/outbound/clash_sudoku_tables.go) and [table specification validation](https://github.com/ProjectClash/Clash/blob/3891cc46092029c23f7fd0bfa1fe29e0e6e1dffb/transport/sudoku/clash_table_spec.go). Loading an outbound validates its options and byte layouts without generating the Sudoku encoding/decoding tables. TCP, UDP-over-TCP and session-multiplex connections fill a private connection configuration on first use
+
+Nodes share an immutable table set only when their canonical key seed, normalized table type and ordered rotation patterns match. Construction snapshots the pattern slice so later caller edits cannot change either the cache identity or the delayed build. Concurrent first requests share initialization; waiting callers can cancel without canceling another caller's build. A request already canceled on entry performs no table construction or dialing
+
+Each used outbound retains its table set. The global cache holds weak references and removes obsolete entries after collection, with an identity check preventing old cleanup work from deleting a replacement entry. Active connections retain their own table references. There is no periodic cache cleanup timer. Closing a node alone does not drop its tables while that node remains reachable
+
+Local Apple M4 measurements with Go 1.26.9, three one-second runs, compared against Core `611d4835` with equivalent benchmark operations:
+
+| Operation | Before | After |
+| --- | --- | --- |
+| Construct and close an unused entropy node, allocated bytes | 1038796–1039960 B/op | 2200 B/op |
+| Same operation, allocations / elapsed time | 3636–3637/op / 78.2–79.3 ms | 13/op / 0.783–0.792 microseconds |
+| Construct and close an unused directional node, allocated bytes | 2076640–2076651 B/op | 3376 B/op |
+| Same operation, allocations / elapsed time | 7265/op / 160.9–173.1 ms | 19/op / 1.224–1.233 microseconds |
+| Construct a matching entropy node, prepare its connection configuration and close it while another node holds the tables, allocated bytes | 1041768–1041771 B/op | 2448 B/op |
+| Same operation, allocations / elapsed time | 3648/op / 78.0–80.1 ms | 16/op / 0.927–0.934 microseconds |
+
+Unused-node allocation bytes fall by about 99.8% in these fixtures. The first used node of each distinct configuration still pays the table-generation cost; that CPU-only build runs synchronously and completes before observing a cancellation that arrives during construction. Subsequent nodes reuse the tables while an owner remains alive. These are operation-level allocations and timings, not whole-app RSS, network latency or device battery measurements. Reproduce from `core/Clash.Meta/` with `GOTOOLCHAIN=go1.26.9 CGO_ENABLED=0 go test -run '^$' -bench '^BenchmarkSudoku(Unused|SharedTables)$' -benchmem -benchtime=1s -count=3 -tags with_gvisor,with_mips_low_memory ./adapter/outbound`
+
+Validation covers 32 concurrent TCP/UDP requests across two keys, input-slice mutation, ordered and directional table identity, garbage collection and cache replacement, cancellation while waiting, and parse-time errors matched against the original table builder. Two independent outbounds exchange all byte values over directional, rotating Sudoku UDP frames through an in-memory pipe. The complete outbound and Sudoku transport packages pass race detection. Existing inbound TCP fixtures pass over loopback for PSK/private keys, custom tables, pure/packed downlink, HTTP masking and multiplexing; their high-volume concurrent stress branch is disabled for this compatibility check. The root Core suite and repository checks pass
