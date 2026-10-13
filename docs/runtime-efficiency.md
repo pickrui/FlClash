@@ -230,3 +230,21 @@ Local Apple M4 measurements with Go 1.26.9, three one-second runs, compared agai
 Construction plus inspection allocates about 97% fewer bytes, and the three snapshots allocate about 67% fewer bytes in these fixtures. Wrappers share one preconstructed outbound, so these figures exclude protocol-specific node allocations. Recording uses an invalid-scheme URL to exercise result publication without network access; URL parsing and error handling still allocate after the history ring is initialized. Snapshot fixtures retain ten results for one URL. These are operation-level allocation and CPU measurements, not retained-heap, whole-app RSS or device battery measurements. Reproduce from `core/Clash.Meta/` with `GOTOOLCHAIN=go1.26.9 CGO_ENABLED=0 go test -tags with_gvisor,with_mips_low_memory ./adapter -run '^$' -bench '^BenchmarkProxyHealthStorage$' -benchmem -benchtime=1s -count=3`
 
 The new allocation regression reproduces three allocations when first reading each untouched node before this change and zero afterward. Further tests cover chronological ring wraparound, independent global and per-URL snapshots, empty JSON, unexpected HTTP statuses, concurrent results across eight URLs and reads from result hooks. Adapter, provider and outbound-group packages pass race detection with release tags; the root Core suite, including cancellation and stale-result ordering coverage, passes
+
+## TUIC grace-period ownership and reconnect isolation
+
+This batch adapts ProjectClash's [weak grace callbacks](https://github.com/ProjectClash/Clash/blob/3891cc46092029c23f7fd0bfa1fe29e0e6e1dffb/transport/tuic/common/clash_grace.go). TUIC v4/v5 stream-close timers now hold weak references to both the client and its connection session. Once a retired session and client lose their ordinary owners and workers, the timer no longer keeps their state reachable for the rest of the five-second grace period. A live session still receives its delayed release; a collected owner or session needs no further work
+
+Each QUIC connection owns its stream count and UDP input map. Authentication, receive workers, stream failures and delayed closes keep the session they started with. Retiring an old connection clears the current-session pointer only when it still matches, and cleans only that connection's UDP inputs. Late callbacks can therefore neither decrement a replacement connection's stream count nor remove its UDP associations. Stream admission and graceful shutdown share the connection lock; UDP registration also checks that its reserved session remains current before publishing an input
+
+Compared against Core `e8b1ec67`, loopback regressions reproduce the following outcomes in both protocol versions:
+
+| Scenario | Before | After |
+| --- | --- | --- |
+| A retired TCP stream's grace callback runs after reconnecting | Replacement's active-stream count falls from 1 to 0 | Replacement's count stays at 1 |
+| An old UDP stream closes after reconnecting | Replacement's input pipe is closed | Replacement's input remains available |
+| An unused retired client is collected while its grace timer is pending | Still retained after the 2.5-second collection window | Client and session are collected within that window |
+
+The collection fixture opens and closes a real TLS-verified loopback QUIC transport and explicitly requests garbage collection. It establishes that the application state can be released before the grace timer expires; open streams and QUIC's own internal owners can still retain transport resources. The five-second grace duration and one timer per closed stream remain in place. Whole-app RSS and device power have not been measured
+
+Validation covers the reproduced reconnect failures, client/session collection, live-stream graceful shutdown, repeated close, rejected stream slots and the exact grace deadline. Existing TUIC TCP/UDP echo, QUIC/native UDP modes, handshake cancellation, late handshake completion and terminal pool-close checks also pass. The complete TUIC transport and outbound packages pass race detection with release tags, and the root Core integration suite passes
