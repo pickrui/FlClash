@@ -96,3 +96,26 @@ Local Apple M4 measurements with Go 1.26.9, three one-second runs, compared agai
 Pool construction allocates about 22% fewer bytes and 74% fewer objects in these fixtures. Host strings are prepared outside the timed region; the eviction benchmark cycles through one more host than the capacity. These are operation-level allocation and CPU measurements, not retained-heap, whole-app RSS or battery measurements. Reproduce from `core/Clash.Meta/` with `GOTOOLCHAIN=go1.26.9 CGO_ENABLED=0 go test -run '^$' -bench '^BenchmarkPoolMemory$' -benchmem -benchtime=1s -count=3 -tags with_gvisor,with_mips_low_memory ./component/fakeip`
 
 Validation covers legacy database replacement and reopen, rollback, one commit per new mapping and none for hits, IPv4/IPv6 wraparound and state restore, reverse-lookup recency, clone capacity/independence, missing database handles, and concurrent lookup/flush/state saves. Fake-IP, cachefile and DNS packages pass race detection, and the root Core suite passes. Database fixtures use temporary directories and close their handles during cleanup
+
+## Lazy MASQUE stacks
+
+This batch adapts ProjectClash's [lazy MASQUE construction](https://github.com/ProjectClash/Clash/blob/3891cc46092029c23f7fd0bfa1fe29e0e6e1dffb/adapter/outbound/clash_masque_lazy.go) and [configuration compatibility guard](https://github.com/ProjectClash/Clash/blob/3891cc46092029c23f7fd0bfa1fe29e0e6e1dffb/adapter/outbound/clash_lazy_ipstack.go). Ordinary MASQUE IP-tunnel nodes retain their parsed settings until the first TCP/UDP request, health check or remote DNS use. Loading unused nodes avoids their gVisor/mips stack allocations and the workers started by the gVisor constructor. This adds no background timer; once created, the stack remains available until the outbound closes
+
+The existing handshake lock shares the first initialization and reuses the stack after a failed tunnel handshake. Device creation/start and close also share a lock, preventing shutdown from missing a newly created stack or overlapping its start. Closing an unused node does not create a stack; later requests remain canceled. Constructor errors release resources already owned by the outbound, and close also clears idle HTTP/2 connections
+
+Address parsing, backend selection and congestion-controller validation still run at configuration load. Unusual addresses, duplicate addresses and MTUs that a backend may reject continue through its constructor immediately, preserving existing acceptance and error messages. Such accepted exceptional configurations can still allocate eagerly. The guard includes the current mips IPv6 minimum MTU of 1280. L4-proxy mode retains its separate existing client
+
+Local Apple M4 measurements with Go 1.26.9, three one-second runs, compared against Core `0b3cba0e` with the same benchmark:
+
+| Construct and close one unused node | Before | After |
+| --- | --- | --- |
+| auto (gVisor), allocated bytes | 87428–87451 B/op | 16450–16451 B/op |
+| auto (gVisor), allocations | 769/op | 227/op |
+| auto (gVisor), elapsed time | 118–120 microseconds/op | 65.9–66.9 microseconds/op |
+| mips, allocated bytes | 96547–96548 B/op | 16450 B/op |
+| mips, allocations | 259/op | 227/op |
+| mips, elapsed time | 78.5–80.1 microseconds/op | 68.0–73.4 microseconds/op |
+
+Allocated bytes fall by about 81–83% in this fixture. Key generation is outside the timed region; construction still parses the keys and builds TLS settings. These are construction/close measurements, not retained heap, whole-app RSS, first-connection latency or device battery measurements. First use now pays the deferred stack setup cost. Reproduce from `core/Clash.Meta/` with `GOTOOLCHAIN=go1.26.9 CGO_ENABLED=0 go test -run '^$' -bench '^BenchmarkMasqueUnused$' -benchmem -benchtime=1s -count=3 -tags with_gvisor,with_mips_low_memory ./adapter/outbound`
+
+Validation covers unused IPv4/IPv6/dual-stack nodes, cancellation and close races, concurrent first requests, handshake failure/retry, backend configuration outcomes, and actual TCP/UDP echo over a local HTTP/2 TLS tunnel with certificate pin verification and both handshake-timeout modes. The outbound package passes race detection with the release tags, MASQUE tests also pass without gVisor, and the root Core suite passes. Invalid-configuration parity runs in a child process because the current gVisor dependency retains workers on constructor errors; exiting that process prevents those workers from affecting later tests
