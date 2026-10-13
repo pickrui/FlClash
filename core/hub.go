@@ -14,7 +14,6 @@ import (
 	"fmt"
 	"iter"
 	"os"
-	"runtime"
 	"runtime/debug"
 	"sync"
 	"sync/atomic"
@@ -696,19 +695,13 @@ func handleStopLog() {
 }
 
 func handleGetMemoryStats() (MemoryStats, error) {
-	var stats runtime.MemStats
-	runtime.ReadMemStats(&stats)
+	stats := readRuntimeMemoryStats()
 	resident, err := memory.GetMemoryInfo(int32(os.Getpid()))
 	if err != nil {
 		return MemoryStats{}, err
 	}
-	return MemoryStats{
-		Rss:          resident.RSS,
-		HeapInuse:    stats.HeapInuse,
-		HeapIdle:     stats.HeapIdle - stats.HeapReleased,
-		StackInuse:   stats.StackInuse,
-		RuntimeOther: stats.Sys - stats.HeapSys - stats.StackInuse,
-	}, nil
+	stats.Rss = resident.RSS
+	return stats, nil
 }
 
 func handleGetConfig(path string) (*config.RawConfig, error) {
