@@ -268,3 +268,28 @@ Compared against Core `908bc923`, Go 1.26.9, release tags, macOS arm64 on Apple 
 The two hopping fixtures allocate approximately 97.0% and 99.5% fewer bytes during construction. Ordinary nodes pay 152 additional bytes and one allocation for terminal lifecycle ownership and cancellation. These are operation-level construction/close measurements, not retained-heap, whole-app RSS, active-request throughput or device-power measurements. TLS certificate state still exists on unused nodes, and a used hopping node still needs the complete port slice required by the dependency. Reproduce from `core/Clash.Meta/` with `GOTOOLCHAIN=go1.26.9 CGO_ENABLED=0 go test -tags with_gvisor,with_mips_low_memory ./adapter/outbound -run '^$' -bench '^BenchmarkHysteria2Unused$' -benchmem -benchtime=1s -count=3`
 
 The new regressions reproduce post-close TCP/UDP handshakes and close blocking on the default handshake before the change. They cover unused/initialized closure, canceled first use, concurrent initialization, port-range boundaries, load-time errors and Realm idle-connection cleanup. A TLS-verified loopback fixture starts through the hopping path, checks that later ALPN input mutation cannot change the prepared TLS settings, echoes fragmented UDP followed by TCP, and verifies that outbound close releases the UDP reader. Existing TLS, ECH, mTLS, Salamander, Gecko and Brutal round trips pass. The outbound and TUIC common packages pass their full race suites, the Hysteria2 inbound cases pass with race detection, and the root Core integration suite passes. The inbound fixtures run with `SKIP_CONCURRENT_TEST=true`; their high-fanout stress branch was not run
+
+## Compact classical domain indexes
+
+This batch adapts ProjectClash's [compact classical name tables](https://github.com/ProjectClash/Clash/blob/3891cc46092029c23f7fd0bfa1fe29e0e6e1dffb/rules/provider/classical_strategy.go). Consecutive runs of at least 16 standard `DOMAIN`/`DOMAIN-SUFFIX` rules become immutable exact-name and suffix indexes. Sorted unique names share compact 32-bit hash slots; small unique sets use binary search. Retired rule references are cleared, and substantially oversized matcher arrays are copied down to their remaining entries. Duplicate rules still contribute to the provider's reported count. Smaller runs retain their original representation
+
+Each run stays at its original position between other rules. DNS resolution, process lookup, logical rules, custom wrappers and metadata changes therefore keep the same ordering and short-circuit behavior. Every input still passes through the configured parser before eligibility is checked, preserving parse errors and custom normalization. Matching retains the existing case behavior, `SniffHost` preference and literal treatment of domain punctuation. Suffix candidate lengths are bounded by the longest indexed name, so an unusually long host only scans its final candidate span. Reset, repeated finishing, late insertion and atomic provider replacement remain supported. This change adds no workers, timers or on-disk format
+
+Compared against Core `d6cb97e8`, Go 1.26.9, release tags, macOS arm64 on Apple M4, three serial one-second samples using 10,000 alternating exact/suffix rules:
+
+| Operation | Before | After |
+| --- | --- | --- |
+| Construct the rule strategy | 1.02–1.05 ms/op | 1.73–1.81 ms/op |
+| Construction, allocated bytes / allocations | 1786023–1786045 B/op / 40019 | 2015539–2015573 B/op / 40025 |
+| Match the first rule | 10.9–11.2 ns/op | 12.5–12.7 ns/op |
+| Match the last exact rule | 60.6–62.2 µs/op | 20.6–32.9 ns/op |
+| Match a subdomain of the final suffix rule | 55.0–58.9 µs/op | 50.9–53.3 ns/op |
+| Miss every rule | 65.8–67.2 µs/op | 80.0–85.7 ns/op |
+
+All matching fixtures allocate zero bytes. Building the index costs approximately 13% more temporary allocation bytes and additional one-time CPU work; the first-rule hit is slightly slower. The gain applies to retained structures and repeated matching through longer domain runs, and does not accelerate interleaved non-domain rules
+
+A separate 20,000-rule fixture retains the source strings before measuring and requests GC before/after each strategy construction. Across three runs, the linear strategy retains 1,013,536–1,022,904 additional heap bytes and approximately 20,000 objects; the indexed strategy retains 458,944–459,056 bytes and 7–8 objects. This is approximately 55% less retained structure memory. The fixture excludes the already-retained source strings, unrelated app state and transient construction allocations; it does not measure whole-app RSS or device power
+
+Reproduce from `core/Clash.Meta/` with `GOTOOLCHAIN=go1.26.9 CGO_ENABLED=0 go test -tags with_gvisor,with_mips_low_memory ./rules/provider -run '^$' -bench '^BenchmarkClassicalDomainRules$' -benchmem -benchtime=1s -count=3`. The retained-heap check is `go test` with the same environment/tags and `-run '^TestClassicalIndexRetainedStorage$' -count=3 -v`. The before timing uses the same fixtures with the pre-change strategy implementation, compiled through a temporary Go overlay
+
+Validation compares indexed matching against an unbuilt linear strategy across mixed rule corpora, including DNS/process call traces, metadata results, Unicode, unusual dots, duplicates, long hosts and sniffed hosts. Focused cases cover custom parser rejection/rewrites, a custom rule changing later match metadata, small-run boundaries, reset and late insertion. The provider update regression now covers both domain and classical strategies while reads and JSON exports run concurrently. All rule packages pass race detection with release tags; the root Core integration suite and repository checks pass
