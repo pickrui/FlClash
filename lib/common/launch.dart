@@ -15,6 +15,95 @@ import 'system.dart';
 
 const silentLaunchArgument = '--silent-launch';
 
+class StartupDiagnostics {
+  StartupDiagnostics({void Function(String)? onLog})
+    : _onLog = onLog ?? debugPrint;
+
+  final void Function(String) _onLog;
+  final List<String> _lines = [];
+  TimeoutException? _timeout;
+  File? _file;
+  Future<void>? _write;
+
+  String get text => _lines.join('\n');
+  bool get hasTimedOut => _timeout != null;
+
+  void ensureActive() {
+    final timeout = _timeout;
+    if (timeout != null) throw timeout;
+  }
+
+  void record(String message) {
+    final line =
+        '${DateTime.now().toUtc().toIso8601String()} [Startup] $message';
+    _lines.add(line);
+    if (_lines.length > 100) _lines.removeAt(0);
+    _onLog(line);
+    _persist();
+  }
+
+  // Future.timeout cannot cancel native work; never run the next stage after it.
+  Future<T> run<T>(
+    String stage,
+    FutureOr<T> Function() action, {
+    int seconds = 15,
+    bool fatal = true,
+  }) async {
+    ensureActive();
+    final limit = Duration(seconds: seconds);
+    final elapsed = Stopwatch()..start();
+    record('stage=$stage begin timeout_ms=${limit.inMilliseconds}');
+    try {
+      final value = await Future<T>.sync(action).timeout(
+        limit,
+        onTimeout: () => throw TimeoutException('Startup stage: $stage', limit),
+      );
+      ensureActive();
+      record('stage=$stage done elapsed_ms=${elapsed.elapsedMilliseconds}');
+      return value;
+    } catch (error) {
+      if (fatal && error is TimeoutException) _timeout ??= error;
+      record(
+        'stage=$stage ${error is TimeoutException ? 'timeout' : 'failed'} '
+        'elapsed_ms=${elapsed.elapsedMilliseconds} error=${error.runtimeType}',
+      );
+      rethrow;
+    } finally {
+      elapsed.stop();
+    }
+  }
+
+  Future<void> persistTo(File file) async {
+    _file = file;
+    _persist();
+    while (_write != null) {
+      await _write;
+    }
+  }
+
+  void _persist() {
+    final file = _file;
+    if (file == null || _write != null) return;
+    final snapshot = text;
+    _write =
+        (() async {
+              await file.parent.create(recursive: true);
+              await file.writeAsString('$snapshot\n', flush: true);
+            })()
+            .timeout(const Duration(seconds: 2))
+            .catchError((Object error) {
+              _file = null;
+              record('diagnostic_file failed error=${error.runtimeType}');
+            })
+            .whenComplete(() {
+              _write = null;
+              if (_file != null && text != snapshot) _persist();
+            });
+  }
+}
+
+final startupDiagnostics = StartupDiagnostics();
+
 Future<void> prepareDesktopApplication({
   required bool isMacOS,
   required bool safeMode,

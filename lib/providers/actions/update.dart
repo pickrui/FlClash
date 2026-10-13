@@ -51,29 +51,16 @@ extension InitControllerExt on AppController {
       return false;
     };
     updateTray();
-    try {
-      await autoLaunch?.updateStatus(_ref.read(appSettingProvider).autoLaunch);
-    } catch (error) {
-      // A read-only autostart entry must not keep the window and Core from starting.
-      commonPrint.log(
-        'auto launch sync failed: ${error.runtimeType}',
-        logLevel: LogLevel.warning,
-      );
-    }
-    final silentLaunch = shouldLaunchSilently(
-      enabled: _ref.read(appSettingProvider).silentLaunch,
-      arguments: globalState.launchArguments,
-    );
-    commonPrint.log(
-      'startup window: automatic=${globalState.launchArguments.contains(silentLaunchArgument)}, '
-      'silentSetting=${_ref.read(appSettingProvider).silentLaunch}, '
-      'silent=$silentLaunch',
-    );
-    if (!silentLaunch) {
-      await window?.show();
-    } else {
-      await window?.hide();
-    }
+    startupDiagnostics
+        .run(
+          'autoLaunch',
+          () async => autoLaunch?.updateStatus(
+            _ref.read(appSettingProvider).autoLaunch,
+          ),
+          seconds: 5,
+          fatal: false,
+        )
+        .ignore();
     if (await desktopUpdateInstaller?.takeFailure() ?? false) {
       await window?.show();
       globalState.showNotifier(appLocalizations.updateApplyFailed);

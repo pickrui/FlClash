@@ -2600,11 +2600,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "startupAndBackground": MessageLookupByLibrary.simpleMessage(
       "Запуск и фоновая работа",
     ),
+    "startupDiagnostics": MessageLookupByLibrary.simpleMessage(
+      "Диагностика запуска",
+    ),
     "startupRecoveryTip": MessageLookupByLibrary.simpleMessage(
       "Предыдущий запуск не завершился. Автоматическое применение конфигурации и запуск VPN приостановлены на этот раз. Выбранный профиль и настройки сохранены. Проверьте конфигурацию и нажмите «Запустить»; уже работающий VPN останется подключённым.",
     ),
     "startupRecoveryTitle": MessageLookupByLibrary.simpleMessage(
       "Восстановление запуска",
+    ),
+    "startupTimeoutTip": MessageLookupByLibrary.simpleMessage(
+      "Время ожидания запуска истекло. Закройте и снова откройте приложение. Если проблема повторится, скопируйте диагностические сведения ниже.",
     ),
     "status": MessageLookupByLibrary.simpleMessage("Статус"),
     "statusDesc": MessageLookupByLibrary.simpleMessage(

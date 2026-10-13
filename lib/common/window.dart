@@ -7,7 +7,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/config.dart';
 import 'package:fl_clash/state.dart';
 import 'package:material_ui/material_ui.dart';
@@ -22,7 +21,9 @@ class Window implements WindowPort {
         showWindow: _showWindow,
         hideWindow: _hideWindow,
         isWindowVisible: _isWindowVisible,
-        setSkipTaskbar: (skip) => desktopWindow.setSkipTaskbar(skip),
+        setSkipTaskbar: (skip) => desktopWindow
+            .setSkipTaskbar(skip)
+            .timeout(const Duration(seconds: 3)),
         dockSettleDuration: system.isMacOS
             ? const Duration(seconds: 1)
             : Duration.zero,
@@ -37,12 +38,13 @@ class Window implements WindowPort {
     return _instance!;
   }
 
-  Future<void> init(
-    int version,
-    WindowProps props, {
-    bool silentLaunch = false,
-  }) async {
-    await ensureSingleInstance();
+  Future<void> init(int version, WindowProps props) async {
+    Future<T> step<T>(Future<T> operation) async {
+      final value = await operation;
+      startupDiagnostics.ensureActive();
+      return value;
+    }
+
     if (!system.isMacOS) unawaited(_startWakeupServer());
     if (system.isWindows && !safeModeBuild) {
       for (final scheme in protocolSchemes) {
@@ -52,42 +54,40 @@ class Window implements WindowPort {
     if (system.isLinux && !safeModeBuild) {
       unawaited(protocol.registerLinux(protocolSchemes));
     }
-    await desktopWindow.ensureInitialized();
+    await step(desktopWindow.ensureInitialized());
     _supportsPosition = !system.isMacOS;
     if (system.isLinux) {
-      _supportsPosition = await desktopWindow.isPositionSupported();
+      _supportsPosition = await step(desktopWindow.isPositionSupported());
     }
-    await desktopWindow.setTitle(
-      safeModeBuild ? appLocalizations.safeModeAppTitle(appName) : appName,
+    await step(
+      desktopWindow.setTitle(
+        safeModeBuild ? appLocalizations.safeModeAppTitle(appName) : appName,
+      ),
     );
-    await desktopWindow.setMinimumSize(const Size(380, 400));
-    await desktopWindow.setSize(props.size);
+    await step(desktopWindow.setMinimumSize(const Size(380, 400)));
+    await step(desktopWindow.setSize(props.size));
     if (!system.isMacOS || version > 10) {
-      await desktopWindow.setTitleBarStyle(TitleBarStyle.hidden);
+      await step(desktopWindow.setTitleBarStyle(TitleBarStyle.hidden));
     }
     // On Linux the compositor only honors positioning after the window is shown;
     // elsewhere position it pre-show to avoid a visible jump.
     if (system.isLinux) {
       _pendingInitialPosition = props;
     } else {
-      await _windowPosition(props);
+      await step(_windowPosition(props));
     }
-    await desktopWindow.setPreventClose(true);
-    if (system.isLinux) {
-      if (silentLaunch) {
-        await hide();
-      } else {
-        await show();
-      }
-    }
+    await step(desktopWindow.setPreventClose(true));
   }
 
   Future<void> ensureSingleInstance() async {
     // acquire() reads any failure as a running instance and exits quietly.
     await appPath.homeDirPath;
+    startupDiagnostics.ensureActive();
     final acquire = await singleInstanceLock.acquire();
+    startupDiagnostics.ensureActive();
     if (!acquire) {
       await _showExistingInstance();
+      startupDiagnostics.ensureActive();
       exit(0);
     }
   }
@@ -126,7 +126,9 @@ class Window implements WindowPort {
         final size = props.size;
         final right = left + size.width;
         final bottom = top + size.height;
-        final displays = await screenRetriever.getAllDisplays();
+        final displays = await screenRetriever.getAllDisplays().timeout(
+          const Duration(seconds: 3),
+        );
         final isPositionValid = displays.any((display) {
           final visiblePosition = display.visiblePosition;
           if (visiblePosition == null) {
@@ -202,29 +204,31 @@ class Window implements WindowPort {
     return effect != WindowEffect.none;
   }
 
-  /// Every desktop runner leaves the window hidden until [init] reveals it, so
-  /// a failure before that point would leave the error screen with no window.
   Future<void> showInitFailure({VoidCallback? onExit}) async {
     if (onExit != null) {
       desktopWindow.addListener(_InitFailureWindowListener(onExit));
     }
-    try {
-      await desktopWindow.ensureInitialized();
-      await desktopWindow.setPreventClose(true);
-      await desktopWindow.setTitleBarStyle(TitleBarStyle.normal);
-      if (await desktopWindow.isVisible()) {
-        return;
+    Future<void> attempt(String step, Future<void> Function() action) async {
+      try {
+        await Future<void>.sync(action).timeout(const Duration(seconds: 2));
+      } catch (error) {
+        startupDiagnostics.record(
+          'error_window step=$step failed error=${error.runtimeType}',
+        );
       }
-      await desktopWindow.setSize(const Size(680, 580));
-      await desktopWindow.center();
-      await desktopWindow.show();
-      await desktopWindow.focus();
-    } catch (e) {
-      commonPrint.log(
-        'show init failure window failed ${e.toString()}',
-        logLevel: LogLevel.warning,
-      );
     }
+
+    await attempt('initialize', desktopWindow.ensureInitialized);
+    await attempt('preventClose', () => desktopWindow.setPreventClose(true));
+    await attempt(
+      'titleBar',
+      () => desktopWindow.setTitleBarStyle(TitleBarStyle.normal),
+    );
+    await attempt('size', () => desktopWindow.setSize(const Size(680, 580)));
+    await attempt('center', desktopWindow.center);
+    await attempt('show', desktopWindow.show);
+    await attempt('taskbar', () => desktopWindow.setSkipTaskbar(false));
+    await attempt('focus', desktopWindow.focus);
   }
 
   @override
@@ -237,20 +241,21 @@ class Window implements WindowPort {
   Future<void> toggle() => _visibility.toggle();
 
   Future<void> _showWindow() async {
-    await desktopWindow.ensureInitialized();
+    await desktopWindow.ensureInitialized().timeout(const Duration(seconds: 3));
     render?.resume();
-    await desktopWindow.show();
+    await desktopWindow.show().timeout(const Duration(seconds: 3));
     final initialPosition = _pendingInitialPosition;
     if (initialPosition != null) {
-      await _windowPosition(initialPosition);
+      await _windowPosition(initialPosition)
+          .timeout(const Duration(seconds: 3));
       _pendingInitialPosition = null;
     }
-    await desktopWindow.focus();
+    await desktopWindow.focus().timeout(const Duration(seconds: 3));
     globalState.setUpdateVisibility(windowVisible: true);
   }
 
   Future<void> _hideWindow() async {
-    await desktopWindow.hide();
+    await desktopWindow.hide().timeout(const Duration(seconds: 3));
     render?.pause();
     globalState.setUpdateVisibility(windowVisible: false);
   }

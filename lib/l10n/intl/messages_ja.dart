@@ -2072,10 +2072,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "startSuccess": MessageLookupByLibrary.simpleMessage("起動しました"),
     "startVpn": MessageLookupByLibrary.simpleMessage("VPNを開始中..."),
     "startupAndBackground": MessageLookupByLibrary.simpleMessage("起動とバックグラウンド"),
+    "startupDiagnostics": MessageLookupByLibrary.simpleMessage("起動の診断情報"),
     "startupRecoveryTip": MessageLookupByLibrary.simpleMessage(
       "前回の起動が完了しませんでした。今回は設定の自動適用と VPN の自動起動を一時停止しています。選択中のプロファイルと設定は保持されています。設定を確認し、「開始」で再試行してください。実行中の VPN は接続を維持します",
     ),
     "startupRecoveryTitle": MessageLookupByLibrary.simpleMessage("起動の復旧"),
+    "startupTimeoutTip": MessageLookupByLibrary.simpleMessage(
+      "起動がタイムアウトしました。アプリを終了して再度開いてください。問題が続く場合は、以下の診断情報をコピーしてください。",
+    ),
     "status": MessageLookupByLibrary.simpleMessage("ステータス"),
     "statusDesc": MessageLookupByLibrary.simpleMessage("無効時はシステムDNSを使用"),
     "stop": MessageLookupByLibrary.simpleMessage("停止"),

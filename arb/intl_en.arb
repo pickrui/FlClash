@@ -771,6 +771,8 @@
   "startupRecoveryTip": "The previous startup did not finish. Automatic configuration setup and VPN startup are paused for this launch. Your selected profile and settings are unchanged. Check the configuration and tap Start to retry; an already running VPN will stay connected.",
   "initFailed": "Startup failed",
   "initFailedTip": "The application encountered a critical error during startup and cannot continue.",
+  "startupTimeoutTip": "Startup timed out. Quit and reopen the application. Copy the diagnostics below if the problem persists.",
+  "startupDiagnostics": "Startup diagnostics",
   "errorDetails": "Error details",
   "stackTrace": "Stack trace",
   "authentication": "Local proxy authentication",

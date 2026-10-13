@@ -97,7 +97,7 @@ class ApplicationState extends ConsumerState<Application> {
     };
     navigation.networkDiagnosticsPresenter = showNetworkDiagnostics;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!mounted) return;
+      if (!mounted || startupDiagnostics.hasTimedOut) return;
       final currentContext = globalState.navigatorKey.currentContext;
       if (currentContext != null) {
         await appController.attach(currentContext, ref);

@@ -6450,6 +6450,26 @@ class AppLocalizations {
     );
   }
 
+  /// `Startup timed out. Quit and reopen the application. Copy the diagnostics below if the problem persists.`
+  String get startupTimeoutTip {
+    return Intl.message(
+      'Startup timed out. Quit and reopen the application. Copy the diagnostics below if the problem persists.',
+      name: 'startupTimeoutTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Startup diagnostics`
+  String get startupDiagnostics {
+    return Intl.message(
+      'Startup diagnostics',
+      name: 'startupDiagnostics',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Error details`
   String get errorDetails {
     return Intl.message(

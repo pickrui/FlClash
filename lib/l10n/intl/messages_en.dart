@@ -2471,11 +2471,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "startupAndBackground": MessageLookupByLibrary.simpleMessage(
       "Startup and background",
     ),
+    "startupDiagnostics": MessageLookupByLibrary.simpleMessage(
+      "Startup diagnostics",
+    ),
     "startupRecoveryTip": MessageLookupByLibrary.simpleMessage(
       "The previous startup did not finish. Automatic configuration setup and VPN startup are paused for this launch. Your selected profile and settings are unchanged. Check the configuration and tap Start to retry; an already running VPN will stay connected.",
     ),
     "startupRecoveryTitle": MessageLookupByLibrary.simpleMessage(
       "Startup recovery",
+    ),
+    "startupTimeoutTip": MessageLookupByLibrary.simpleMessage(
+      "Startup timed out. Quit and reopen the application. Copy the diagnostics below if the problem persists.",
     ),
     "status": MessageLookupByLibrary.simpleMessage("Status"),
     "statusDesc": MessageLookupByLibrary.simpleMessage(

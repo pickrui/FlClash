@@ -5,8 +5,9 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 import 'dart:io';
+import 'dart:ffi' show Abi;
 
-import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/common/render_binding.dart';
 import 'package:fl_clash/pages/error.dart';
 import 'package:fl_clash/pages/config_recovery.dart';
@@ -44,17 +45,24 @@ Future<void> main(List<String> arguments) async {
     if (safeModeBuild && !system.isDesktop) {
       throw UnsupportedError('SAFE_MODE currently requires a desktop build');
     }
-    await prepareDesktopApplication(
-      isMacOS: system.isMacOS,
-      safeMode: safeModeBuild,
+    startupDiagnostics.record(
+      'platform=${Platform.operatingSystem} abi=${Abi.current()} '
+      'os=${Platform.operatingSystemVersion} safe_mode=$safeModeBuild',
+    );
+    await startupDiagnostics.run(
+      'prepareApplication',
+      () => prepareDesktopApplication(
+        isMacOS: system.isMacOS,
+        safeMode: safeModeBuild,
+      ),
     );
     initializePreferencesStore();
-    await RustLib.init();
+    await startupDiagnostics.run('rust', RustLib.init);
     registerFetchManagedConfig(CloudApiService().fetchManagedConfig);
     cloudStorePageBuilder = (_) => const CloudStorePage();
     cloudNodeFilterPageBuilder = (_) => const CloudNodeFilterPage();
     tailscalePageBuilder = (_) => const TailscaleView();
-    final version = await system.init();
+    final version = await startupDiagnostics.run('deviceInfo', system.init);
     final container = await globalState.init(
       version,
       arguments: arguments,
@@ -64,26 +72,35 @@ Future<void> main(List<String> arguments) async {
     // ensureCloudReady hook before any oixCloud profile setup runs.
     container.read(cloudAccountProvider);
     HttpOverrides.global = FlClashHttpOverrides();
+    final silentLaunch = shouldLaunchSilently(
+      enabled: container.read(appSettingProvider).silentLaunch,
+      arguments: globalState.launchArguments,
+    );
+    startupDiagnostics.record('window silent=$silentLaunch');
+    await startupDiagnostics.run('windowVisibility', () async {
+      if (silentLaunch) {
+        await window?.hide();
+      } else {
+        await window?.show();
+      }
+    });
+    final firstFrame = Completer<void>();
+    WidgetsBinding.instance.addPostFrameCallback((_) => firstFrame.complete());
     runApp(
       UncontrolledProviderScope(
         container: container,
         child: const Application(),
       ),
     );
+    await startupDiagnostics.run('firstFrame', () => firstFrame.future);
+    startupDiagnostics.record('first_frame_ready');
   } catch (e, s) {
-    commonPrint.log('init failed: $e stack: $s', logLevel: LogLevel.error);
+    startupDiagnostics.record('aborted error=${e.runtimeType}');
     render?.resume();
-    runApp(InitErrorApp(error: e, stack: s));
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      try {
-        await window?.showInitFailure(onExit: () => exit(0));
-      } catch (showError, showStack) {
-        commonPrint.log(
-          'show init error window failed: $showError stack: $showStack',
-          logLevel: LogLevel.error,
-        );
-      }
-    });
+    runApp(
+      InitErrorApp(error: e, stack: s, diagnostics: startupDiagnostics.text),
+    );
+    await window?.showInitFailure(onExit: () => exit(0));
   }
 }
 
@@ -92,15 +109,19 @@ Future<Map<String, Object?>?> _loadStartupConfig() async {
   try {
     return await loadWithConfigRecovery(
       load: (retry) async {
-        if (retry) {
-          await ConfigKeyStore.reload();
-        } else {
-          await ConfigKeyStore.seedBase64();
-        }
-        return preferences.getConfigMap();
+        await startupDiagnostics.run<void>(
+          'configurationKey',
+          retry ? ConfigKeyStore.reload : ConfigKeyStore.seedBase64,
+          seconds: 30,
+        );
+        return startupDiagnostics.run(
+          'configurationRead',
+          preferences.getConfigMap,
+          seconds: 30,
+        );
       },
       showRecovery: (retry, failure) async {
-        commonPrint.log('Waiting for local configuration recovery');
+        startupDiagnostics.record('configuration recovery waiting_for_user');
         render?.resume();
         if (system.isDesktop) {
           desktopWindow.addListener(exitListener);
@@ -109,13 +130,18 @@ Future<Map<String, Object?>?> _loadStartupConfig() async {
         var canUseLocalStorage = false;
         if (Platform.isLinux) {
           try {
-            usesSystemKeyring = !await SafeStorage.usesLocalFileStorage;
-            canUseLocalStorage = await ConfigKeyStore.canUseLocalStorage();
-          } catch (error) {
-            commonPrint.log(
-              'Could not inspect local secure storage: ${error.runtimeType}',
+            final options = await startupDiagnostics.run(
+              'recoveryOptions',
+              () async => (
+                usesKeyring: !await SafeStorage.usesLocalFileStorage,
+                canUseLocal: await ConfigKeyStore.canUseLocalStorage(),
+              ),
+              fatal: false,
+              seconds: 3,
             );
-          }
+            usesSystemKeyring = options.usesKeyring;
+            canUseLocalStorage = options.canUseLocal;
+          } catch (_) {}
         }
         runApp(
           MaterialApp(
@@ -140,15 +166,7 @@ Future<Map<String, Object?>?> _loadStartupConfig() async {
             ),
           ),
         );
-        WidgetsBinding.instance.addPostFrameCallback((_) async {
-          try {
-            await window?.showInitFailure();
-          } catch (error) {
-            commonPrint.log(
-              'Could not show configuration recovery window: ${error.runtimeType}',
-            );
-          }
-        });
+        await window?.showInitFailure();
       },
     );
   } finally {

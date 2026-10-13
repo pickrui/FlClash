@@ -170,4 +170,18 @@ void main() {
       await failedStartup;
     },
   );
+
+  test(
+    'failure to present recovery returns to startup error handling',
+    () async {
+      await expectLater(
+        loadWithConfigRecovery<String>(
+          load: (_) async => throw const ConfigKeyUnavailableException(),
+          showRecovery: (_, _) async =>
+              throw StateError('recovery unavailable'),
+        ),
+        throwsStateError,
+      );
+    },
+  );
 }

@@ -11,7 +11,7 @@ import 'package:fl_clash/services/config_key_store.dart';
 /// A retry resumes that startup, rather than initializing plugins and locks again.
 Future<T> loadWithConfigRecovery<T>({
   required Future<T> Function(bool retry) load,
-  required void Function(
+  required FutureOr<void> Function(
     Future<void> Function() retry,
     ConfigKeyUnavailableException failure,
   )
@@ -21,6 +21,7 @@ Future<T> loadWithConfigRecovery<T>({
     return await load(false);
   } on ConfigKeyUnavailableException catch (failure) {
     final recovered = Completer<T>();
+    recovered.future.ignore();
     Future<void>? pending;
     Future<void> retry() {
       if (recovered.isCompleted) return Future.value();
@@ -37,7 +38,7 @@ Future<T> loadWithConfigRecovery<T>({
       })().whenComplete(() => pending = null);
     }
 
-    showRecovery(retry, failure);
+    await showRecovery(retry, failure);
     return recovered.future;
   }
 }
