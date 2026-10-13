@@ -12,6 +12,8 @@ import (
 
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/constant/features"
+	"github.com/metacubex/mihomo/listener"
 	"github.com/metacubex/mihomo/tunnel"
 )
 
@@ -23,6 +25,7 @@ func TestShutdownDiscardsConfigurationBeforeLateControlCalls(t *testing.T) {
 	}
 	resetSuspendTestState(t)
 	previousInit, previousVersion := isInit.Load(), version
+	previousExiting := exiting.Load()
 	previousProxies, previousProviders := tunnel.Proxies(), tunnel.Providers()
 	previousRules, previousRuleProviders := tunnel.Rules(), tunnel.RuleProviders()
 	selectionLock.Lock()
@@ -30,6 +33,7 @@ func TestShutdownDiscardsConfigurationBeforeLateControlCalls(t *testing.T) {
 	selectionLock.Unlock()
 	t.Cleanup(func() {
 		isInit.Store(previousInit)
+		exiting.Store(previousExiting)
 		version = previousVersion
 		tunnel.UpdateProxies(previousProxies, previousProviders)
 		tunnel.UpdateRules(previousRules, previousSubRules, previousRuleProviders)
@@ -51,8 +55,15 @@ func TestShutdownDiscardsConfigurationBeforeLateControlCalls(t *testing.T) {
 	if !handleInitClash(&InitParams{HomeDir: GlobalValidationSourceHome}) {
 		t.Fatal("explicit initialization after shutdown failed")
 	}
-	if handleStartListener() || isRunning {
+	if started := handleStartListener(); started != features.Android || isRunning != features.Android {
+		t.Errorf("start before setup: started=%v, running=%v, android=%v", started, isRunning, features.Android)
+	}
+	if currentConfig != nil || *listener.GetPorts() != (listener.Ports{}) {
 		t.Error("reinitialization reused the retired configuration before setup")
+	}
+	exiting.Store(true)
+	if handleStartListener() || isRunning {
+		t.Error("a start revived the core while exiting")
 	}
 	handleStopListener()
 }

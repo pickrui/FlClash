@@ -110,7 +110,7 @@ func handleSetNetworkExcluded(excluded bool) bool {
 func handleStartListener() bool {
 	runLock.Lock()
 	defer runLock.Unlock()
-	if !isInit.Load() || exiting.Load() || currentConfig == nil {
+	if !isInit.Load() || exiting.Load() || (!features.Android && currentConfig == nil) {
 		isRunning = false
 		listener.StopListener()
 		return false
