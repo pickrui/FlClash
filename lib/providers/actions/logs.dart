@@ -47,11 +47,17 @@ extension LogsControllerExt on AppController {
         Secrets.shouldSuppressOutput(log.payload)) {
       return;
     }
+    log = log.copyWith(payload: limitLogPayload(log.payload));
+    final release = _logWriteBudget.reserve(
+      2 * (log.payload.length + log.dateTime.length),
+    );
+    if (release == null) return;
     _logFileWrite = _logFileWrite
         .then((_) => _appendPersistentLog(log))
         .catchError((error) {
           debugPrint('write persistent log failed: $error');
-        });
+        })
+        .whenComplete(release);
   }
 
   Future<void> _appendPersistentLog(Log log) async {

@@ -187,7 +187,7 @@ extension SetupControllerExt on AppController {
     }
     clearDelay();
     _coreLifecycleOperations.detached(() => applyProfile(force: true));
-    _ref.read(logsProvider.notifier).value = FixedList(maxLength);
+    _ref.read(logsProvider.notifier).value = createLogBuffer(maxLength);
     _ref.read(requestsProvider.notifier).value = FixedList(maxLength);
   }
 

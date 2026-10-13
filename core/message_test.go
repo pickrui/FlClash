@@ -9,11 +9,13 @@ package main
 import (
 	"encoding/json"
 	"runtime"
+	"strings"
 	"testing"
 	"testing/synctest"
 	"time"
 	"weak"
 
+	"github.com/metacubex/mihomo/log"
 	"github.com/metacubex/mihomo/tunnel/statistic"
 )
 
@@ -21,6 +23,30 @@ type messageTestTracker struct {
 	statistic.Tracker `json:"-"`
 	*statistic.TrackerInfo
 	buffer [1024]byte
+}
+
+func TestMessageBatcherBoundsEncodedLogBytes(t *testing.T) {
+	queue := make(chan Message, messageBatchSize)
+	payload := strings.Repeat("\x01", log.MaxPayloadBytes)
+	for range messageBatchSize {
+		queue <- Message{Type: LogMessage, Data: (log.Event{Payload: payload}).Bounded()}
+	}
+	close(queue)
+	delivered, batches := 0, 0
+	runMessageBatcher(nil, queue, func(messages []Message) {
+		encoded, err := json.Marshal(messages)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(encoded) > messageLogBatchBytes {
+			t.Fatalf("encoded log batch = %d bytes", len(encoded))
+		}
+		delivered += len(messages)
+		batches++
+	})
+	if delivered != messageBatchSize || batches <= 1 {
+		t.Fatal("byte-limited batching lost logs or ignored escaped JSON size")
+	}
 }
 
 func (tracker *messageTestTracker) Info() *statistic.TrackerInfo { return tracker.TrackerInfo }

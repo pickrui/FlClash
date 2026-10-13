@@ -7,8 +7,10 @@
 package main
 
 import (
+	"encoding/json"
 	"time"
 
+	"github.com/metacubex/mihomo/log"
 	"github.com/metacubex/mihomo/tunnel/statistic"
 )
 
@@ -17,6 +19,7 @@ const (
 	messageBatchSize     = 32
 	messageQueueSize     = 256
 	messagePriorityBurst = 8
+	messageLogBatchBytes = 256 * 1024
 )
 
 var (
@@ -34,6 +37,9 @@ func requestMessage(tracker statistic.Tracker) Message {
 }
 
 func sendMessage(message Message) {
+	if event, ok := message.Data.(log.Event); ok && message.Type == LogMessage {
+		message.Data = event.Bounded()
+	}
 	queue := priorityMessageQueue
 	if message.Type == LogMessage || message.Type == RequestMessage || message.Type == DnsMessage {
 		queue = bulkMessageQueue
@@ -70,6 +76,7 @@ func runMessageBatcher(
 		}
 	}()
 	batch := make([]Message, 0, messageBatchSize)
+	logBytes := 2
 	flush := func() {
 		if timer != nil {
 			timer.Stop()
@@ -82,8 +89,17 @@ func runMessageBatcher(
 		// Reslicing alone keeps payloads reachable while the batcher is idle.
 		clear(batch)
 		batch = batch[:0]
+		logBytes = 2
 	}
 	appendMessage := func(message Message) {
+		var size int
+		if message.Type == LogMessage {
+			encoded, _ := json.Marshal(message)
+			size = len(encoded) + 1
+			if logBytes+size > messageLogBatchBytes {
+				flush()
+			}
+		}
 		if len(batch) == 0 {
 			if timer == nil {
 				timer = time.NewTimer(messageBatchInterval)
@@ -93,6 +109,7 @@ func runMessageBatcher(
 			deadline = timer.C
 		}
 		batch = append(batch, message)
+		logBytes += size
 		if len(batch) >= messageBatchSize {
 			flush()
 		}

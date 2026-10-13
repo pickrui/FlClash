@@ -65,11 +65,12 @@ class RealTunEnable extends _$RealTunEnable with NotifierMixin<bool> {
 class Logs extends _$Logs with NotifierMixin<FixedList<Log>> {
   @override
   FixedList<Log> build() {
-    return FixedList(0);
+    return createLogBuffer(0);
   }
 
   void addLog(Log value) {
     if (Secrets.shouldSuppressOutput(value.payload)) return;
+    value = value.copyWith(payload: limitLogPayload(value.payload));
     state = state.copyWith()..add(value);
   }
 }

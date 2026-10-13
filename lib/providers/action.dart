@@ -816,6 +816,7 @@ class AppController {
   late final BuildContext _context;
   late final WidgetRef _ref;
   Future<void> _logFileWrite = Future.value();
+  final _logWriteBudget = LogWriteBudget(maxBytes: logBufferMaxBytes);
   Future<void> _preferencesWriteTail = Future.value();
   File? _persistentLogFile;
   int _persistentLogLength = 0;

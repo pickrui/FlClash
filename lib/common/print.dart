@@ -9,6 +9,61 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/common/secrets.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'fixed.dart';
+
+const logPayloadMaxBytes = 16 * 1024;
+const logBufferMaxBytes = 2 * 1024 * 1024;
+
+String limitLogPayload(String payload) {
+  if (payload.length <= logPayloadMaxBytes ~/ 3) return payload;
+  const suffix = '... [truncated]';
+  var bytes = 0;
+  var end = 0;
+  var cut = 0;
+  for (final rune in payload.runes) {
+    bytes += rune < 0x80 ? 1 : (rune < 0x800 ? 2 : (rune < 0x10000 ? 3 : 4));
+    end += rune > 0xffff ? 2 : 1;
+    if (bytes <= logPayloadMaxBytes - suffix.length) cut = end;
+    if (bytes > logPayloadMaxBytes) {
+      return '${payload.substring(0, cut)}$suffix';
+    }
+  }
+  return payload;
+}
+
+class LogWriteBudget {
+  final int maxBytes;
+  final int maxEntries;
+  int pendingBytes = 0;
+  int pendingEntries = 0;
+  int droppedEntries = 0;
+
+  LogWriteBudget({required this.maxBytes, this.maxEntries = 256});
+
+  void Function()? reserve(int bytes) {
+    if (bytes < 0) throw ArgumentError.value(bytes, 'bytes');
+    if (pendingEntries >= maxEntries || pendingBytes + bytes > maxBytes) {
+      droppedEntries++;
+      return null;
+    }
+    pendingEntries++;
+    pendingBytes += bytes;
+    var released = false;
+    return () {
+      if (released) return;
+      released = true;
+      pendingEntries--;
+      pendingBytes -= bytes;
+    };
+  }
+}
+
+FixedList<Log> createLogBuffer(int maxLength) => FixedList<Log>(
+  maxLength,
+  maxWeight: logBufferMaxBytes,
+  weightOf: (log) => 2 * (log.payload.length + log.dateTime.length),
+);
+
 class CommonPrint {
   static CommonPrint? _instance;
 
@@ -21,7 +76,7 @@ class CommonPrint {
 
   void log(String? text, {LogLevel logLevel = LogLevel.info}) {
     if (Secrets.shouldSuppressOutput(text ?? 'null')) return;
-    final payload = '[APP] ${text ?? 'null'}';
+    final payload = limitLogPayload('[APP] ${text ?? 'null'}');
     final log = Log.app(payload).copyWith(logLevel: logLevel);
     debugPrint(payload);
     if (!appController.canRecordLogs) {

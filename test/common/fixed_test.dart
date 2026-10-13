@@ -8,6 +8,27 @@ import 'package:test/test.dart';
 
 void main() {
   group('FixedList', () {
+    test('retains newest items within count and weight across copies', () {
+      final original = FixedList<String>(
+        2,
+        maxWeight: 5,
+        weightOf: (value) => value.length,
+        list: ['1234', '12', '123'],
+      );
+      expect(original.list, ['12', '123']);
+      expect(original.weight, 5);
+      final copy = original.copyWith()..add('1234');
+      expect(copy.list, ['1234']);
+      expect(copy.weight, 4);
+      expect(original.list, ['12', '123']);
+      copy.add('123456');
+      expect(copy.list, isEmpty);
+      expect(copy.weight, 0);
+      original.clear();
+      original.add('x');
+      expect(original.weight, 1);
+    });
+
     test('respects maxLength on creation', () {
       final list = FixedList(3, list: [1, 2, 3, 4, 5]);
       expect(list.length, 3);

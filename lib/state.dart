@@ -151,7 +151,7 @@ class GlobalState {
       version: version,
       viewSize: Size.zero,
       requests: FixedList(maxLength),
-      logs: FixedList(maxLength),
+      logs: createLogBuffer(maxLength),
       traffics: FixedList(30),
       totalTraffic: const Traffic(),
     );
