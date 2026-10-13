@@ -293,3 +293,31 @@ A separate 20,000-rule fixture retains the source strings before measuring and r
 Reproduce from `core/Clash.Meta/` with `GOTOOLCHAIN=go1.26.9 CGO_ENABLED=0 go test -tags with_gvisor,with_mips_low_memory ./rules/provider -run '^$' -bench '^BenchmarkClassicalDomainRules$' -benchmem -benchtime=1s -count=3`. The retained-heap check is `go test` with the same environment/tags and `-run '^TestClassicalIndexRetainedStorage$' -count=3 -v`. The before timing uses the same fixtures with the pre-change strategy implementation, compiled through a temporary Go overlay
 
 Validation compares indexed matching against an unbuilt linear strategy across mixed rule corpora, including DNS/process call traces, metadata results, Unicode, unusual dots, duplicates, long hosts and sniffed hosts. Focused cases cover custom parser rejection/rewrites, a custom rule changing later match metadata, small-run boundaries, reset and late insertion. The provider update regression now covers both domain and classical strategies while reads and JSON exports run concurrently. All rule packages pass race detection with release tags; the root Core integration suite and repository checks pass
+
+## GeoSite source retention and MRS decoding
+
+This batch adapts ProjectClash's [GeoSite source-list release](https://github.com/ProjectClash/Clash/blob/3891cc46092029c23f7fd0bfa1fe29e0e6e1dffb/component/geodata/utils.go) and the [single-worker, low-memory decoder and streamed extension skipping](https://github.com/ProjectClash/Clash/blob/3891cc46092029c23f7fd0bfa1fe29e0e6e1dffb/component/geodata/compiled/ipcidr.go) used by its compiled GeoIP reader
+
+The default `memconservative` GeoSite loader now shares raw protobuf lists only while a read is in flight. Once matching structures have been built, the cache no longer keeps the source domains, attributes and strings alive. Completed matchers remain cached, including attribute variants, so repeated access to the same matcher does not read the file again. Standard/custom loaders retain their existing source-list cache. Cache invalidation resets both list groups and the matcher group
+
+The transient group uses ordinary singleflight completion instead of deleting a cache entry after matcher construction. An older build therefore cannot evict a newer read for the same category. Different attribute variants still share overlapping reads, but a variant starting after a read has completed can read the category again, including while another variant is building. This trades some first-use file I/O and decoding work for lower retained memory; it introduces no timer or forced GC. Race detection during review also exposed an existing unlocked read of singleflight's duplicate counter when completed calls remain cached. The return path now reads that counter under the group mutex, covered by concurrent GeoSite matcher access
+
+MRS rule providers and the MRS preview/export path now use one streaming zstd decoder per parse, with low-memory mode explicitly selected. This removes asynchronous decoder workers and reduces block buffers; it does not serialize separate provider updates or retain a shared decoder. The low-memory flag was already the zstd version's default; the measured decoder reduction comes from the concurrency setting. Reserved extension bytes are copied to `io.Discard` instead of allocating a slice equal to their declared length. The decoder's own window and resulting rule structures still need memory, and the MRS wire format and existing size limits are unchanged
+
+Compared against Core `6e8c03b0`, Go 1.26.9, release tags, macOS arm64 on Apple M4, three serial one-second samples:
+
+| MRS input | Before, ms/op | After, ms/op | Before, allocated MB/op | After, allocated MB/op |
+| --- | --- | --- | --- | --- |
+| 10,000 domain rules | 0.647–0.779 | 0.498–0.533 | 1.452–1.453 | 1.040 |
+| 100,000 domain rules | 4.451–4.524 | 4.201–4.250 | 9.366–9.367 | 7.297 |
+| 10,000 IP rules | 2.299–2.370 | 2.097–2.134 | 2.175–2.176 | 1.634 |
+| 100,000 IP rules | 19.218–20.055 | 20.520–23.161 | 14.268–14.270 | 12.436 |
+| 20 domain rules plus an 8 MiB reserved extension | 0.870–0.884 | 0.841–0.872 | 18.410–18.411 | 9.609 |
+
+MB in the allocation columns means 1,000,000 bytes. These fixtures reduce allocated bytes by approximately 13–28% for normal inputs and 48% for the large reserved extension. The 100,000-IP fixture is slower: its median changes from 19.62 to 20.71 ms, approximately 5.5%. The table preserves the observed range rather than claiming a universal loading-speed gain
+
+A separate fixture generates 50,000 GeoSite suffix domains with attributes inside a test loader, then requests GC before and after building the matcher. Across three runs, `memconservative` retains 11,405,216–11,405,248 additional heap bytes and about 200,000 objects before the change, versus 603,728–604,272 bytes and 7–11 objects afterwards, approximately 95% fewer retained heap bytes. The standard-loader control continues retaining approximately 11.4 MB. This measures source-object and matcher retention with synthetic data; it excludes file parsing and does not represent whole-app RSS, peak heap or device power
+
+Reproduce from `core/Clash.Meta/` using `GOTOOLCHAIN=go1.26.9 CGO_ENABLED=0 go test -tags with_gvisor,with_mips_low_memory ./rules/provider -run '^$' -bench '^BenchmarkMrsDecode$' -benchmem -benchtime=1s -count=3`. The retained-heap fixture uses the same environment/tags with `./component/geodata -run '^TestGeoSiteRetainedHeap$' -count=3 -v`. Before measurements use the same fixtures with the two pre-change implementation files supplied through a temporary Go overlay
+
+Validation covers reclaiming source objects with live matchers, both succinct and MPH matching, attributes and negation, standard-loader reuse, cache invalidation, retry after read/build failures and concurrent matcher access. MRS tests cover both behaviors, byte-identical decoded structures, parallel parsing, reserved extensions, malformed/truncated input and a huge declared extension backed by a short input. Geodata and rule packages pass race detection with release tags; the root Core integration suite and repository checks pass
