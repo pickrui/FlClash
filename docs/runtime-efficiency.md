@@ -321,3 +321,28 @@ A separate fixture generates 50,000 GeoSite suffix domains with attributes insid
 Reproduce from `core/Clash.Meta/` using `GOTOOLCHAIN=go1.26.9 CGO_ENABLED=0 go test -tags with_gvisor,with_mips_low_memory ./rules/provider -run '^$' -bench '^BenchmarkMrsDecode$' -benchmem -benchtime=1s -count=3`. The retained-heap fixture uses the same environment/tags with `./component/geodata -run '^TestGeoSiteRetainedHeap$' -count=3 -v`. Before measurements use the same fixtures with the two pre-change implementation files supplied through a temporary Go overlay
 
 Validation covers reclaiming source objects with live matchers, both succinct and MPH matching, attributes and negation, standard-loader reuse, cache invalidation, retry after read/build failures and concurrent matcher access. MRS tests cover both behaviors, byte-identical decoded structures, parallel parsing, reserved extensions, malformed/truncated input and a huge declared extension backed by a short input. Geodata and rule packages pass race detection with release tags; the root Core integration suite and repository checks pass
+
+## Lazy TUIC dial configurations
+
+This batch adapts ProjectClash's [deferred TUIC TLS/QUIC configurations](https://github.com/ProjectClash/Clash/blob/3891cc46092029c23f7fd0bfa1fe29e0e6e1dffb/adapter/outbound/clash_tuic_lazy.go). Ordinary TUIC nodes capture the current CA pool when parsed and build their TLS/QUIC configurations on the first connection attempt. Concurrent first attempts share the completed configurations. Canceled attempts do not initialize them, and terminal close drops the cached configurations and pending CA reference under the same mutex. A configuration already acquired by an in-flight dial remains valid; pool shutdown retains responsibility for canceling and retiring connections
+
+Nodes with certificate pinning, `name-cert-verify` or client certificates still validate and retain their TLS state at parse time. This keeps malformed settings as configuration errors and preserves the original client-certificate loader, including its file watcher and last successfully loaded certificate. Only their QUIC configuration is deferred. Ordinary nodes build the simple TLS settings directly instead of constructing and discarding a TLS configuration during parsing. Keeping the parse-time CA reference also avoids silently switching an unused node to a later replacement trust pool
+
+The deferred builders preserve SNI and IP override behavior, disabled SNI, certificate verification, the NTP clock, nil versus explicitly empty ALPN, TLS 1.3, stream/connection windows, stream-count margins, heartbeat intervals, datagram limits and MTU discovery settings. The first connection pays the deferred construction cost. Used nodes keep a small additional mutex/closed-state/snapshot field overhead, while the mutex is acquired when establishing a QUIC connection rather than for each payload packet
+
+Compared against Core `3a04a4b0`, Go 1.26.9, release tags, macOS arm64 on Apple M4, three serial one-second samples after warming the shared CA pool:
+
+| Operation | Before | After |
+| --- | --- | --- |
+| Construct and close a TUIC v4 node | 740.8–748.5 ns/op | 639.3–645.1 ns/op |
+| v4 allocated bytes / allocations | 2032 B/op / 17 | 1408 B/op / 14 |
+| Construct and close a TUIC v5 node | 663.4–674.7 ns/op | 556.2–574.4 ns/op |
+| v5 allocated bytes / allocations | 2000 B/op / 16 | 1376 B/op / 13 |
+| Retained heap, 4096 unused v4 nodes | 7,860,976–7,875,520 bytes | 5,305,072–5,314,296 bytes |
+| Retained heap, 4096 unused v5 nodes | 7,795,536–7,795,552 bytes | 5,239,648–5,244,968 bytes |
+
+These ordinary-node fixtures reduce construction allocation bytes by approximately 31%, construction-time medians by 14–15%, and retained heap by approximately 33%. The heap fixture requests GC before and after creating the nodes; the shared CA pool and preallocated holder slice are outside the measured delta. Nodes with special TLS settings retain their validated TLS state and receive a smaller memory saving. This does not measure whole-app RSS, live traffic throughput, first-handshake latency or device power
+
+Reproduce from `core/Clash.Meta/` with `GOTOOLCHAIN=go1.26.9 CGO_ENABLED=0 go test -tags with_gvisor,with_mips_low_memory ./adapter/outbound -run '^TestTuicRetainedHeap$' -bench '^BenchmarkTuicConstruction$' -benchmem -benchtime=1s -count=3 -v`. Before measurements use the same benchmark/heap fixtures with the prior `tuic.go` and the new configuration helper/tests omitted through a temporary Go overlay
+
+Validation covers concurrent first initialization, cancellation before initialization, close racing with initialization, terminal TCP/UDP rejection, option compatibility, and a parsed client-certificate loader surviving source-file removal. Real loopback QUIC handshakes cover CA replacement between parse and dial, pinning, separate certificate names, disabled SNI and explicit verification skipping; incorrect names and pins still fail. TUIC outbound tests, TUIC transport packages and CA tests pass race detection with release tags. The root Core integration suite, formatting, notice, comment-density and diff checks pass
