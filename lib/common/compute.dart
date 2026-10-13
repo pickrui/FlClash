@@ -207,6 +207,7 @@ List<Group> computeHideTimeout({
   };
   final resolver = _ProxySelectionResolver(allGroups, selectedMap);
   return groups.map((group) {
+    if (group.nodeCount != null) return group;
     final selected = (resolver.groups[group.name] ?? group)
         .getCurrentSelectedName(selectedMap[group.name] ?? '');
     final visible = group.all.where((proxy) {

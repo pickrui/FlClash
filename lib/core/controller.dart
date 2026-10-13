@@ -165,6 +165,14 @@ class CoreController {
     required Map<String, String> selectedMap,
     required String defaultTestUrl,
   }) async {
+    final summaries = await _interface.invokeMethod<List<dynamic>>(
+      method: CoreMethod.getProxyGroups,
+    );
+    if (summaries != null) {
+      return summaries
+          .map((data) => Group.fromJson(Map<String, dynamic>.from(data as Map)))
+          .toList();
+    }
     final proxiesData = await _interface.getProxies();
     return toGroupsTask(
       ComputeGroupsState(
@@ -174,6 +182,65 @@ class CoreController {
         selectedMap: selectedMap,
         defaultTestUrl: defaultTestUrl,
       ),
+    );
+  }
+
+  Future<Map<String, dynamic>> getProxyPage(
+    Map<String, Object?> arguments,
+  ) async {
+    final result = await _interface.invokeMethod<Map>(
+      method: CoreMethod.getProxyPage,
+      arguments: arguments,
+    );
+    if (result == null) {
+      throw const CoreMethodException(
+        code: 'transport_disconnected',
+        message: 'Core node page unavailable',
+      );
+    }
+    return Map<String, dynamic>.from(result);
+  }
+
+  Future<Map<String, int>> getProxyGroupCounts(
+    Map<String, Object?> arguments,
+  ) async {
+    final result = await _interface.invokeMethod<Map>(
+      method: CoreMethod.getProxyGroupCounts,
+      arguments: arguments,
+    );
+    if (result == null) throw StateError('Core node counts unavailable');
+    return Map<String, int>.from(result);
+  }
+
+  Future<List<Proxy>> readGroupProxies(Group group, {String query = ''}) async {
+    if (group.nodeCount == null) return group.all;
+    var revision = group.revision;
+    for (var attempt = 0; attempt < 3; attempt++) {
+      final result = <Proxy>[];
+      while (true) {
+        final page = await getProxyPage({
+          'group': group.name,
+          'revision': revision,
+          'offset': result.length,
+          'limit': 128,
+          'query': query,
+        });
+        if (page['stale'] == true) {
+          revision = page['revision'] as String?;
+          break;
+        }
+        revision = page['revision'] as String;
+        result.addAll(
+          (page['items'] as List).map(
+            (raw) => Proxy.fromJson(Map<String, dynamic>.from(raw as Map)),
+          ),
+        );
+        if (result.length >= (page['total'] as int)) return result;
+      }
+    }
+    throw const CoreMethodException(
+      code: 'stale_nodes',
+      message: 'Node membership changed during enumeration',
     );
   }
 
@@ -194,6 +261,13 @@ class CoreController {
   Future<List<TrackerInfo>> getConnections() async {
     return _interface.getConnections();
   }
+
+  Future<T?> connectionStream<T>(CoreMethod method, String subscription) =>
+      _interface.invokeMethod<T>(
+        method: method,
+        arguments: subscription,
+        timeout: const Duration(seconds: 3),
+      );
 
   Future<void> closeConnection(String id) {
     return _guarded(

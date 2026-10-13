@@ -16,6 +16,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_clash/widgets/keyed_animated_list.dart';
 
 import 'package:fl_clash/features/connection/tracker_speed_ranker.dart';
+import 'package:fl_clash/features/connection/connection_feed.dart';
 
 import 'item.dart';
 
@@ -51,6 +52,13 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
   final _speedRanker = TrackerSpeedRanker();
   final _closingConnectionIds = <String>{};
   bool _closingAll = false;
+  late final _feed = ConnectionFeed(
+    invoke: (method, id) => _core.connectionStream<Object>(method, id),
+    newId: () => utils.uuidV4,
+    onSnapshot: (connections) {
+      if (canPoll) _publishConnections(connections, () => canPoll);
+    },
+  );
 
   CoreController get _core => widget.core ?? ref.read(coreHandlerProvider);
 
@@ -93,7 +101,9 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
   }
 
   @override
-  Future<void> poll(PollGuard isCurrent) => _refreshConnections(isCurrent);
+  Future<void> poll(PollGuard isCurrent) => widget.connectionsReader != null
+      ? _refreshConnections(isCurrent)
+      : _feed.maintain();
 
   Future<void> _refreshConnections([bool Function()? isCurrent]) async {
     final generation = ++_refreshGeneration;
@@ -103,6 +113,14 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
         !(isCurrent?.call() ?? mounted)) {
       return;
     }
+    _publishConnections(trackerInfos, isCurrent);
+  }
+
+  void _publishConnections(
+    List<TrackerInfo> trackerInfos,
+    bool Function()? isCurrent,
+  ) {
+    final generation = ++_refreshGeneration;
     final sampledAt = widget.now?.call() ?? DateTime.now();
     updateWhenRouteSettled(() {
       if (!mounted ||
@@ -118,6 +136,8 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
   @override
   void stopPolling() {
     super.stopPolling();
+    _refreshGeneration++;
+    _feed.stop();
     _speedRanker.reset();
   }
 
@@ -156,7 +176,21 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
       } else {
         await _core.closeConnection(id);
       }
-      if (canPoll) await _refreshConnections(() => canPoll);
+      if (canPoll) {
+        if (widget.connectionsReader != null) {
+          await _refreshConnections(() => canPoll);
+        } else {
+          _feed.refresh();
+          try {
+            await _feed.maintain();
+          } catch (error) {
+            commonPrint.log(
+              'Connection refresh failed: $error',
+              logLevel: coreFailureLogLevel(error),
+            );
+          }
+        }
+      }
     } finally {
       if (mounted) {
         setState(() {

@@ -624,7 +624,9 @@ extension SetupControllerExt on AppController {
         // A published group list is never empty (see _updateGroups).
         final groups = _ref.read(groupsProvider);
         final hasProxy = groups.any(
-          (g) => g.all.any((p) => !_groupOnlyProxyTypes.contains(p.type)),
+          (g) =>
+              g.hasUsableProxy ||
+              g.all.any((p) => !_groupOnlyProxyTypes.contains(p.type)),
         );
 
         if (!hasProxy) {

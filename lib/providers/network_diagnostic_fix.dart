@@ -63,8 +63,6 @@ Future<void> applyNetworkDiagnosticFix(Ref ref, DiagnosticFix fix) async {
         (group) => group.name == name,
         orElse: () => groups.first,
       );
-      await ref
-          .read(proxiesActionProvider.notifier)
-          .delayTest(group.all, group.testUrl);
+      await ref.read(proxiesActionProvider.notifier).delayTestGroups([group]);
   }
 }

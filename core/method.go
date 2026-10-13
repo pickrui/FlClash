@@ -197,6 +197,18 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 		response.success(handleSetupConfig(params))
 	case getProxiesMethod:
 		response.success(handleGetProxies())
+	case getProxyGroupsMethod:
+		response.success(handleGetProxyGroups())
+	case getProxyPageMethod:
+		var params nodePageRequest
+		if decodeMethodArguments(call, response, &params) {
+			response.success(handleGetProxyPage(params))
+		}
+	case getProxyGroupCountsMethod:
+		var params nodePageRequest
+		if decodeMethodArguments(call, response, &params) {
+			response.success(handleGetProxyGroupCounts(params))
+		}
 	case changeProxyMethod:
 		params := ChangeProxyParams{}
 		if !decodeMethodArguments(call, response, &params) {
@@ -226,6 +238,24 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 		response.success(handleGetConnectionCount())
 	case getConnectionsMethod:
 		response.success(handleGetConnections())
+	case startConnectionsMethod, renewConnectionsMethod, stopConnectionsMethod:
+		id := ""
+		if !decodeMethodArguments(call, response, &id) {
+			return
+		}
+		if len(id) == 0 || len(id) > 128 {
+			response.failure("invalid_arguments", "invalid connection subscription", nil)
+			return
+		}
+		switch call.Method {
+		case startConnectionsMethod:
+			response.success(liveConnections.start(id))
+		case renewConnectionsMethod:
+			response.success(liveConnections.renew(id))
+		case stopConnectionsMethod:
+			liveConnections.stop(id)
+			response.success(true)
+		}
 	case closeConnectionsMethod:
 		response.success(handleCloseConnections())
 	case resetConnectionsMethod:

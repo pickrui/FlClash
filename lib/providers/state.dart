@@ -28,7 +28,7 @@ GroupsState currentGroupsState(Ref ref) {
     groupsProvider.select(
       (state) => state.map((item) {
         return item.copyWith(
-          now: '',
+          now: item.nodeCount == null ? '' : item.now,
           all: item.all.map((proxy) => proxy.copyWith(now: '')).toList(),
         );
       }),
@@ -330,13 +330,33 @@ GroupsState visibleGroupsState(Ref ref) {
 }
 
 @riverpod
+Future<Map<String, int>> proxyGroupCounts(Ref ref, String query) async {
+  ref.watch(groupsProvider);
+  final hideTimeout = ref.watch(
+    proxiesStyleSettingProvider.select((style) => style.hideTimeoutProxies),
+  );
+  final delays = ref.watch(delaysAtLastTestBatchProvider);
+  final testUrl = ref.watch(realTestUrlProvider());
+  return ref.watch(coreHandlerProvider).getProxyGroupCounts({
+    'query': query,
+    'hideTimeout': hideTimeout,
+    'hiddenDelays': delays,
+    'testUrl': testUrl,
+  });
+}
+
+@riverpod
 GroupsState filterGroupsState(Ref ref, String query) {
   final currentGroups = ref.watch(visibleGroupsStateProvider);
   final search = SearchQuery(query);
   if (search.isEmpty) return currentGroups;
+  final counts = currentGroups.value.any((group) => group.nodeCount != null)
+      ? ref.watch(proxyGroupCountsProvider(query)).asData?.value
+      : null;
   final matches = <Proxy, bool>{};
   final groups = currentGroups.value
       .map((group) {
+        if (group.nodeCount != null) return group;
         return group.copyWith(
           all: group.all
               .where(
@@ -346,7 +366,11 @@ GroupsState filterGroupsState(Ref ref, String query) {
               .toList(),
         );
       })
-      .where((group) => group.all.isNotEmpty)
+      .where(
+        (group) => group.nodeCount != null
+            ? counts == null || (counts[group.name] ?? 0) > 0
+            : group.all.isNotEmpty,
+      )
       .toList();
   return currentGroups.copyWith(value: groups);
 }

@@ -25,6 +25,7 @@ class TrayManager extends ConsumerStatefulWidget {
 class _TrayContainerState extends ConsumerState<TrayManager> {
   StreamSubscription<native.TrayEvent>? _subscription;
   Timer? _refreshTimer;
+  bool _openingMenu = false;
   @override
   void initState() {
     super.initState();
@@ -43,7 +44,7 @@ class _TrayContainerState extends ConsumerState<TrayManager> {
       }
     });
     ref.listenManual(trayStateProvider, (prev, next) {
-      if (prev != next) {
+      if (prev != next && !_openingMenu) {
         _refreshTimer ??= Timer(const Duration(milliseconds: 200), () {
           _refreshTimer = null;
           if (mounted) appController.updateTray();
@@ -53,10 +54,17 @@ class _TrayContainerState extends ConsumerState<TrayManager> {
   }
 
   Future<void> _openMenu() async {
+    if (_openingMenu) return;
+    _openingMenu = true;
     _refreshTimer?.cancel();
     _refreshTimer = null;
-    await appController.updateTray();
-    if (mounted) await native.Tray.instance.openMenu();
+    try {
+      await appController.updateTray(includeNodes: true);
+      if (mounted) await native.Tray.instance.openMenu();
+    } finally {
+      _openingMenu = false;
+      if (mounted) await appController.updateTray();
+    }
   }
 
   @override

@@ -150,6 +150,7 @@ func handleForceGC() {
 }
 
 func handleShutdown() bool {
+	liveConnections.stop("")
 	stopGeoLifecycle()
 	runLock.Lock()
 	defer runLock.Unlock()

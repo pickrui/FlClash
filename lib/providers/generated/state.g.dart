@@ -49,7 +49,7 @@ final class CurrentGroupsStateProvider
 }
 
 String _$currentGroupsStateHash() =>
-    r'961dd6764417e29b47e213c85317ca47bf9e8d23';
+    r'c1b89c2f0e3ddd81b9b4643f81e42eda2d30d976';
 
 @ProviderFor(navigationItemsState)
 final navigationItemsStateProvider = NavigationItemsStateProvider._();
@@ -650,6 +650,81 @@ final class VisibleGroupsStateProvider
 String _$visibleGroupsStateHash() =>
     r'532e46d57014ecba5683c6cab71ec8798975fb8f';
 
+@ProviderFor(proxyGroupCounts)
+final proxyGroupCountsProvider = ProxyGroupCountsFamily._();
+
+final class ProxyGroupCountsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<Map<String, int>>,
+          Map<String, int>,
+          FutureOr<Map<String, int>>
+        >
+    with $FutureModifier<Map<String, int>>, $FutureProvider<Map<String, int>> {
+  ProxyGroupCountsProvider._({
+    required ProxyGroupCountsFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'proxyGroupCountsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$proxyGroupCountsHash();
+
+  @override
+  String toString() {
+    return r'proxyGroupCountsProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<Map<String, int>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<Map<String, int>> create(Ref ref) {
+    final argument = this.argument as String;
+    return proxyGroupCounts(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ProxyGroupCountsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$proxyGroupCountsHash() => r'1e3d6a8c8ad0dc56086042058fb00587aa7d07f7';
+
+final class ProxyGroupCountsFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<Map<String, int>>, String> {
+  ProxyGroupCountsFamily._()
+    : super(
+        retry: null,
+        name: r'proxyGroupCountsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  ProxyGroupCountsProvider call(String query) =>
+      ProxyGroupCountsProvider._(argument: query, from: this);
+
+  @override
+  String toString() => r'proxyGroupCountsProvider';
+}
+
 @ProviderFor(filterGroupsState)
 final filterGroupsStateProvider = FilterGroupsStateFamily._();
 
@@ -707,7 +782,7 @@ final class FilterGroupsStateProvider
   }
 }
 
-String _$filterGroupsStateHash() => r'de75e653c083829ea87bea5a00b0f5b30ebaeb51';
+String _$filterGroupsStateHash() => r'8eb4663bb46feb128a67aa85c88798258d08d9aa';
 
 final class FilterGroupsStateFamily extends $Family
     with $FunctionalFamilyOverride<GroupsState, String> {

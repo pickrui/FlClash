@@ -33,6 +33,8 @@ abstract mixin class CoreEventListener {
 
   void onRequest(TrackerInfo connection) {}
 
+  void onConnections(Map<String, dynamic> delta) {}
+
   void onDnsQuery(DnsQuery query) {}
 
   void onLoaded(String providerName) {}
@@ -71,6 +73,11 @@ class CoreEventManager {
                   break;
                 case CoreEventType.request:
                   listener.onRequest(TrackerInfo.fromJson(event.data));
+                  break;
+                case CoreEventType.connections:
+                  listener.onConnections(
+                    Map<String, dynamic>.from(event.data as Map),
+                  );
                   break;
                 case CoreEventType.dns:
                   listener.onDnsQuery(DnsQuery.fromJson(event.data));

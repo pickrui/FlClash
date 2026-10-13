@@ -15,6 +15,7 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/dashboard/widget_metrics.dart';
 import 'package:fl_clash/views/proxies/card.dart';
+import 'package:fl_clash/views/proxies/pages.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -169,9 +170,11 @@ class _ProxiesPaneState extends ConsumerState<_ProxiesPane> {
     }
     _revealedSelected = true;
     final selected = ref.read(getProxyNameProvider(widget.group.name));
-    final index = widget.group.all.indexWhere(
-      (proxy) => proxy.name == selected,
-    );
+    final index = widget.group.nodeCount != null
+        ? ref
+              .read(nodePagesProvider((group: widget.group.name, query: '')))
+              .selectedIndex
+        : widget.group.all.indexWhere((proxy) => proxy.name == selected);
     if (index <= 0) {
       return;
     }
@@ -188,6 +191,9 @@ class _ProxiesPaneState extends ConsumerState<_ProxiesPane> {
   @override
   Widget build(BuildContext context) {
     final group = widget.group;
+    final pages = group.nodeCount == null
+        ? null
+        : ref.watch(nodePagesProvider((group: group.name, query: '')));
     final selected = ref.watch(getProxyNameProvider(group.name));
     final colorScheme = context.colorScheme;
     final headerPadding = DashboardWidgetMetrics.paddingOf(context)
@@ -224,15 +230,20 @@ class _ProxiesPaneState extends ConsumerState<_ProxiesPane> {
         builder: (_, rowHeight, spacing) {
           final itemExtent = rowHeight + spacing;
           _controller.itemExtent = itemExtent;
-          _revealSelected(itemExtent);
+          if (pages == null || pages.initialized) _revealSelected(itemExtent);
           return ListView.builder(
             controller: _controller,
             padding: EdgeInsets.zero,
             physics: const RowSnapScrollPhysics(),
             itemExtent: itemExtent,
-            itemCount: group.all.length,
+            itemCount: pages == null
+                ? group.all.length
+                : max(pages.initialized ? 0 : 1, pages.total),
             itemBuilder: (_, index) {
-              final proxy = group.all[index];
+              final proxy = pages == null ? group.all[index] : pages.at(index);
+              if (proxy == null) {
+                return NodePagePlaceholder(pages: pages!, index: index);
+              }
               final isSelected = proxy.name == selected;
               return Padding(
                 padding: EdgeInsets.only(bottom: spacing),

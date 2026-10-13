@@ -125,6 +125,9 @@ const (
 	validateProxiesMethod          CoreMethod = "validateProxies"
 	updateConfigMethod             CoreMethod = "updateConfig"
 	getProxiesMethod               CoreMethod = "getProxies"
+	getProxyGroupsMethod           CoreMethod = "getProxyGroups"
+	getProxyPageMethod             CoreMethod = "getProxyPage"
+	getProxyGroupCountsMethod      CoreMethod = "getProxyGroupCounts"
 	changeProxyMethod              CoreMethod = "changeProxy"
 	getTrafficMethod               CoreMethod = "getTraffic"
 	getTotalTrafficMethod          CoreMethod = "getTotalTraffic"
@@ -132,6 +135,9 @@ const (
 	asyncTestDelayMethod           CoreMethod = "asyncTestDelay"
 	getConnectionCountMethod       CoreMethod = "getConnectionCount"
 	getConnectionsMethod           CoreMethod = "getConnections"
+	startConnectionsMethod         CoreMethod = "startConnections"
+	renewConnectionsMethod         CoreMethod = "renewConnections"
+	stopConnectionsMethod          CoreMethod = "stopConnections"
 	closeConnectionsMethod         CoreMethod = "closeConnections"
 	resetConnectionsMethod         CoreMethod = "resetConnections"
 	closeConnectionMethod          CoreMethod = "closeConnection"
@@ -183,13 +189,14 @@ type Message struct {
 }
 
 const (
-	LogMessage       MessageType = "log"
-	DelayMessage     MessageType = "delay"
-	RequestMessage   MessageType = "request"
-	DnsMessage       MessageType = "dns"
-	LoadedMessage    MessageType = "loaded"
-	GeoUpdateMessage MessageType = "geoUpdate"
-	ModeMessage      MessageType = "mode"
+	LogMessage         MessageType = "log"
+	DelayMessage       MessageType = "delay"
+	RequestMessage     MessageType = "request"
+	ConnectionsMessage MessageType = "connections"
+	DnsMessage         MessageType = "dns"
+	LoadedMessage      MessageType = "loaded"
+	GeoUpdateMessage   MessageType = "geoUpdate"
+	ModeMessage        MessageType = "mode"
 )
 
 type MemoryStats struct {

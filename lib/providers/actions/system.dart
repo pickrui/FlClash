@@ -130,10 +130,45 @@ extension SystemControllerExt on AppController {
         .update((state) => state.copyWith(autoLaunch: !state.autoLaunch));
   }
 
-  Future<void> updateTray() async {
+  Future<void> updateTray({bool includeNodes = false}) async {
     try {
-      await tray?.update(trayState: _ref.read(trayStateProvider));
+      var state = _ref.read(trayStateProvider);
+      if (includeNodes && system.isMacOS) {
+        final profileId = _ref.read(currentProfileIdProvider);
+        final expanded = <Group>[];
+        for (final group in state.groups) {
+          expanded.add(
+            group.copyWith(
+              all: await coreController.readGroupProxies(group),
+              nodeCount: null,
+            ),
+          );
+        }
+        if (profileId != _ref.read(currentProfileIdProvider)) {
+          throw StateError('profile changed while opening node menu');
+        }
+        final delayOf = proxyDelayLookup(
+          groups: groups,
+          selectedMap: state.selectedMap,
+          delayMap: _ref.read(delayDataSourceProvider),
+        );
+        state = state.copyWith(
+          groups: expanded,
+          delays: {
+            for (final group in expanded)
+              group.name: {
+                for (final proxy in group.all)
+                  proxy.name: delayOf(
+                    proxy.name,
+                    getRealTestUrl(group.testUrl),
+                  ).delay,
+              },
+          },
+        );
+      }
+      await tray?.update(trayState: state);
     } catch (error) {
+      if (includeNodes) rethrow;
       commonPrint.log('Tray update failed: $error', logLevel: LogLevel.warning);
     }
   }

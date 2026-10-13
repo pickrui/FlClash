@@ -352,15 +352,17 @@ extension ProxiesControllerExt on AppController {
   }
 
   Future<void> delayTestGroups(List<Group> testGroups) async {
+    final profileId = this.currentProfile?.id;
     final targets = <DelayTestTarget>{
       for (final group in testGroups)
         ...computeDelayTestTargets(
-          proxies: group.all,
+          proxies: await coreController.readGroupProxies(group),
           groups: groups,
           selectedMap: this.currentProfile?.selectedMap ?? {},
           defaultTestUrl: getRealTestUrl(group.testUrl),
         ),
     };
+    if (profileId != this.currentProfile?.id) return;
     if (targets.isEmpty) return;
     final generation = _joinDelayTest();
     try {

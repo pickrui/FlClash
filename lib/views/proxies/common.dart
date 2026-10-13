@@ -58,10 +58,18 @@ Future<void> delayTestGroup(WidgetRef ref, Group group) => ref
     .run(
       profileId: ref.read(currentProfileIdProvider),
       groupName: group.name,
-      test: () {
+      test: () async {
+        final profileId = ref.read(currentProfileIdProvider);
         final query = SearchQuery(ref.read(queryProvider(QueryTag.proxies)));
+        final proxies = await ref
+            .read(coreHandlerProvider)
+            .readGroupProxies(group, query: query.terms.join(' '));
+        if (!ref.context.mounted ||
+            profileId != ref.read(currentProfileIdProvider)) {
+          return;
+        }
         return delayTest(
-          group.all
+          proxies
               .where((proxy) => query.matches([proxy.name, proxy.type]))
               .toList(),
           group.testUrl,

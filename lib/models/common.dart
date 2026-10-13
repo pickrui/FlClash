@@ -290,6 +290,9 @@ abstract class Group with _$Group {
   const factory Group({
     @JsonKey(fromJson: GroupType.parseProfileType) required GroupType type,
     @Default([]) List<Proxy> all,
+    int? nodeCount,
+    String? revision,
+    @Default(false) bool hasUsableProxy,
     String? now,
     String? fixed,
     bool? hidden,
@@ -312,6 +315,7 @@ extension GroupExt on Group {
   String get realNow => now ?? '';
 
   String getCurrentSelectedName(String proxyName) {
+    if (nodeCount != null) return realNow;
     if (type.isComputedSelected) {
       return realNow.isNotEmpty ? realNow : proxyName;
     }

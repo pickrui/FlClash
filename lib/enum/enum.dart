@@ -124,7 +124,17 @@ enum ResultType {
   error,
 }
 
-enum CoreEventType { log, delay, request, dns, loaded, crash, geoUpdate, mode }
+enum CoreEventType {
+  log,
+  delay,
+  request,
+  connections,
+  dns,
+  loaded,
+  crash,
+  geoUpdate,
+  mode,
+}
 
 enum FindProcessMode { always, off }
 

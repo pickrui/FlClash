@@ -166,6 +166,9 @@ _Group _$GroupFromJson(Map<String, dynamic> json) => _Group(
           ?.map((e) => Proxy.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
+  nodeCount: (json['nodeCount'] as num?)?.toInt(),
+  revision: json['revision'] as String?,
+  hasUsableProxy: json['hasUsableProxy'] as bool? ?? false,
   now: json['now'] as String?,
   fixed: json['fixed'] as String?,
   hidden: json['hidden'] as bool?,
@@ -177,6 +180,9 @@ _Group _$GroupFromJson(Map<String, dynamic> json) => _Group(
 Map<String, dynamic> _$GroupToJson(_Group instance) => <String, dynamic>{
   'type': _$GroupTypeEnumMap[instance.type]!,
   'all': instance.all,
+  'nodeCount': instance.nodeCount,
+  'revision': instance.revision,
+  'hasUsableProxy': instance.hasUsableProxy,
   'now': instance.now,
   'fixed': instance.fixed,
   'hidden': instance.hidden,
