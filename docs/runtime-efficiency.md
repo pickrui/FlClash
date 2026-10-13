@@ -119,3 +119,29 @@ Local Apple M4 measurements with Go 1.26.9, three one-second runs, compared agai
 Allocated bytes fall by about 81–83% in this fixture. Key generation is outside the timed region; construction still parses the keys and builds TLS settings. These are construction/close measurements, not retained heap, whole-app RSS, first-connection latency or device battery measurements. First use now pays the deferred stack setup cost. Reproduce from `core/Clash.Meta/` with `GOTOOLCHAIN=go1.26.9 CGO_ENABLED=0 go test -run '^$' -bench '^BenchmarkMasqueUnused$' -benchmem -benchtime=1s -count=3 -tags with_gvisor,with_mips_low_memory ./adapter/outbound`
 
 Validation covers unused IPv4/IPv6/dual-stack nodes, cancellation and close races, concurrent first requests, handshake failure/retry, backend configuration outcomes, and actual TCP/UDP echo over a local HTTP/2 TLS tunnel with certificate pin verification and both handshake-timeout modes. The outbound package passes race detection with the release tags, MASQUE tests also pass without gVisor, and the root Core suite passes. Invalid-configuration parity runs in a child process because the current gVisor dependency retains workers on constructor errors; exiting that process prevents those workers from affecting later tests
+
+## Lazy ZeroTier frame queues
+
+This batch adapts ProjectClash's [deferred frame queue](https://github.com/ProjectClash/Clash/blob/3891cc46092029c23f7fd0bfa1fe29e0e6e1dffb/adapter/outbound/clash_zerotier_lazy.go). Loading a ZeroTier node no longer reserves its 2048-frame inbound queue. The first startup allocates it under the existing operation lock before installing frame callbacks. Its capacity and ordered consumer remain unchanged, and retries or identity recovery reuse the same queue because that consumer outlives individual runtimes
+
+An unused node can close without allocating the queue or creating its state directory. Startup failures retain an already allocated queue for retry; this change does not release queues from previously started nodes. Existing network configuration, identity persistence and transport maintenance behavior still apply once a node starts
+
+Local Apple M4 measurements with Go 1.26.9, three one-second runs, compared against Core `3c428579` with the same benchmark:
+
+| Construct and close one unused ZeroTier node | Before | After |
+| --- | --- | --- |
+| Allocated bytes | 134167–134169 B/op | 2889 B/op |
+| Allocations | 20/op | 18/op |
+| Elapsed time | 21.3–24.4 microseconds/op | 1.24–1.26 microseconds/op |
+
+The fixture allocates about 98% fewer bytes per unused node. It constructs and closes nodes with temporary home paths and never starts a network. These are operation-level allocations and elapsed time, not retained-heap, whole-app RSS or battery measurements. Reproduce from `core/Clash.Meta/` with `GOTOOLCHAIN=go1.26.9 CGO_ENABLED=0 go test -run '^$' -bench '^BenchmarkZeroTierUnused$' -benchmem -benchtime=1s -count=3 -tags with_gvisor,with_mips_low_memory ./adapter/outbound`
+
+## TUIC pool shutdown
+
+This batch adapts ProjectClash's [pool release](https://github.com/ProjectClash/Clash/blob/3891cc46092029c23f7fd0bfa1fe29e0e6e1dffb/transport/tuic/clash_pool_reset.go) and [forced client close](https://github.com/ProjectClash/Clash/blob/3891cc46092029c23f7fd0bfa1fe29e0e6e1dffb/transport/tuic/v5/clash_force_close.go) into a terminal outbound lifecycle. TUIC previously inherited the base outbound's no-op close. It now explicitly cancels pending pool handshakes, closes all TCP/UDP QUIC clients and clears both lists. Closing transport connections stops their keepalives and receive workers without waiting for the inner clients' finalizers
+
+Cancellation happens before taking the locks held by connection setup. A handshake returning a connection after cancellation closes that connection instead of publishing it. Pool admission and stream-limit retries reject new clients after close; previously selected clients also reject reuse. Concurrent initial acquisition of an empty pool creates one client under its pool lock. Repeated close calls share one completion
+
+Open outbounds retain their existing connection reuse and heartbeat settings. Existing five-second stream-accounting callbacks may finish after shutdown; closed clients cannot establish another connection. The pool adds a cancellation context, with no polling loop or periodic cleanup timer
+
+Validation covers actual TCP/UDP echo over TLS-verified loopback TUIC v4/v5 in both QUIC and native UDP modes, closing active transports, refusing requests after close, canceling blocked handshakes and discarding late successful connections. ZeroTier fixtures cover unused-node shutdown, malformed stored identity, concurrent startup retry and identity-collision recovery with all physical dialing disabled. The complete outbound and TUIC transport packages pass race detection with release tags, and the root Core suite passes
