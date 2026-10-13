@@ -268,7 +268,6 @@
   "iconStylePlain": "Plain",
   "iconStyleHidden": "Hidden",
   "stackMode": "Stack mode",
-  "mipsStackDesc": "Low-memory userspace stack; throughput may drop on high-latency links",
   "network": "Network",
   "networkDesc": "Modify network-related settings",
   "bypassDomain": "Bypass domain",

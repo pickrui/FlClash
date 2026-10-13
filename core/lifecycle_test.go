@@ -7,14 +7,20 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"strings"
 	"testing"
 
+	"github.com/metacubex/mihomo/component/resolver"
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/constant/features"
+	"github.com/metacubex/mihomo/dns"
 	"github.com/metacubex/mihomo/listener"
 	"github.com/metacubex/mihomo/tunnel"
+
+	D "github.com/miekg/dns"
 )
 
 func TestShutdownDiscardsConfigurationBeforeLateControlCalls(t *testing.T) {
@@ -28,6 +34,12 @@ func TestShutdownDiscardsConfigurationBeforeLateControlCalls(t *testing.T) {
 	previousExiting := exiting.Load()
 	previousProxies, previousProviders := tunnel.Proxies(), tunnel.Providers()
 	previousRules, previousRuleProviders := tunnel.Rules(), tunnel.RuleProviders()
+	previousDNS, previousProxyDNS, previousDirectDNS := resolver.DefaultResolver, resolver.ProxyServerHostResolver, resolver.DirectHostResolver
+	previousMapper, previousService := resolver.DefaultHostMapper, resolver.DefaultService
+	servers := []dns.NameServer{{Net: "rcode", Addr: "success"}}
+	retiredDNS := dns.NewResolver(dns.Config{Main: servers, ProxyServer: servers, DirectServer: servers})
+	resolver.DefaultResolver, resolver.ProxyServerHostResolver, resolver.DirectHostResolver = retiredDNS.Resolver, retiredDNS.ProxyResolver, retiredDNS.DirectResolver
+	resolver.DefaultHostMapper, resolver.DefaultService = nil, nil
 	selectionLock.Lock()
 	previousSnapshot := proxySnapshot
 	selectionLock.Unlock()
@@ -38,6 +50,9 @@ func TestShutdownDiscardsConfigurationBeforeLateControlCalls(t *testing.T) {
 		tunnel.UpdateProxies(previousProxies, previousProviders)
 		tunnel.UpdateRules(previousRules, previousSubRules, previousRuleProviders)
 		publishProxySnapshot(previousSnapshot)
+		retiredDNS.CloseQueries()
+		resolver.DefaultResolver, resolver.ProxyServerHostResolver, resolver.DirectHostResolver = previousDNS, previousProxyDNS, previousDirectDNS
+		resolver.DefaultHostMapper, resolver.DefaultService = previousMapper, previousService
 		resetGeoLifecycle()
 	})
 	isInit.Store(true)
@@ -47,6 +62,16 @@ func TestShutdownDiscardsConfigurationBeforeLateControlCalls(t *testing.T) {
 	}
 	if currentConfig != nil {
 		t.Error("shutdown retained the retired configuration and providers")
+	}
+	if resolver.DefaultResolver != nil || resolver.ProxyServerHostResolver != nil || resolver.DirectHostResolver != nil || resolver.DefaultHostMapper != nil || resolver.DefaultService != nil {
+		t.Error("shutdown retained configured DNS references")
+	}
+	query := new(D.Msg)
+	query.SetQuestion("after-shutdown.test.", D.TypeA)
+	for _, r := range []*dns.Resolver{retiredDNS.Resolver, retiredDNS.ProxyResolver, retiredDNS.DirectResolver} {
+		if _, err := r.ExchangeContext(context.Background(), query); !errors.Is(err, context.Canceled) {
+			t.Errorf("shutdown left a configured DNS resolver active: %v", err)
+		}
 	}
 	if handleStartListener() || isRunning {
 		t.Error("a late start revived the stopped core")
