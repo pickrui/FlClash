@@ -206,3 +206,27 @@ Local Apple M4 measurements with Go 1.26.9, three one-second runs, compared agai
 The fixture uses immediate in-memory probes; it measures scheduling, logging arguments and temporary allocations, without network handshakes. Automatic-round allocation bytes fall by about 90%; the tradeoff is that ordinary nodes in a large provider are refreshed over multiple intervals instead of every interval. Selection still scans the current list to find priority candidates, and the Core still retains the full routing configuration. These figures are not whole-app RSS or device battery measurements. Reproduce from `core/Clash.Meta/` with `GOTOOLCHAIN=go1.26.9 CGO_ENABLED=0 go test -tags with_gvisor,with_mips_low_memory ./adapter/provider -run '^$' -bench '^BenchmarkHealthCheckScheduling$' -benchtime=1s -count=3`
 
 Focused regressions cover complete rotation with many failures, selected and fast candidates, separate filtered URLs and expected statuses, whitespace-normalized URLs, cancellation before queued probes start, replacement during an active round, input-slice ownership, empty startup, regex timeout and complete manual/recovery checks. Provider, outbound-group and adapter packages pass race detection with release tags; the root Core suite and repository checks pass
+
+## Compact lazy node health storage
+
+This batch adapts ProjectClash's [lazy history allocation](https://github.com/ProjectClash/Clash/blob/3891cc46092029c23f7fd0bfa1fe29e0e6e1dffb/adapter/clash_history.go) and [lazy per-URL state registry](https://github.com/ProjectClash/Clash/blob/3891cc46092029c23f7fd0bfa1fe29e0e6e1dffb/adapter/clash_proxy_states.go). Constructing a node or inspecting its unmeasured health no longer allocates history queues or initializes a concurrent map's backing table. The first recorded test URL is published through an immutable atomic entry; additional URLs use a small map allocated only when needed. This keeps the usual single-URL health reads free of map lookups and registry locks
+
+Each global or per-URL history allocates a fixed ten-record ring on its first result. Later writes reuse that storage; one lock covers replacement and size accounting, so concurrent snapshots cannot temporarily exceed the ten-record limit. History snapshots copy records once in chronological order and remain independent of the stored records. Exporting all URLs takes a registry snapshot before visiting additional entries, with callbacks outside the registry lock
+
+Unknown nodes remain alive with no reusable result and an unknown delay. JSON still exposes empty history as `[]` and extra state as `{}`. Global transport health and URL-specific expected-status failures retain their existing distinction. Result ordering, cancellation, hook publication and successful-result reuse retain their existing guards. Used URL states remain until their node is released; this change adds no cleanup timers, workers or URL eviction
+
+Local Apple M4 measurements with Go 1.26.9, three one-second runs, compared against Core `fc345d92` with the same benchmark:
+
+| Operation | Before | After |
+| --- | --- | --- |
+| Construct an unused node wrapper, allocated bytes / allocations | 592 B/op / 3 | 112 B/op / 1 |
+| Construct and inspect an unmeasured wrapper, allocated bytes / allocations | 3472 B/op / 6 | 112 B/op / 1 |
+| Construct and record the first result, allocated bytes / allocations | 4555 B/op / 15 | 1529 B/op / 10 |
+| Record another result on a measured node, allocated bytes | 768 B/op | 640 B/op |
+| Read the first URL's health and last delay, elapsed time | 16.1–17.0 ns/op | 8.69 ns/op |
+| Read global, per-URL and all-URL history snapshots, allocated bytes / allocations | 4336 B/op / 18 | 1424 B/op / 5 |
+| Same three snapshots, elapsed time | 885–909 ns/op | 242–245 ns/op |
+
+Construction plus inspection allocates about 97% fewer bytes, and the three snapshots allocate about 67% fewer bytes in these fixtures. Wrappers share one preconstructed outbound, so these figures exclude protocol-specific node allocations. Recording uses an invalid-scheme URL to exercise result publication without network access; URL parsing and error handling still allocate after the history ring is initialized. Snapshot fixtures retain ten results for one URL. These are operation-level allocation and CPU measurements, not retained-heap, whole-app RSS or device battery measurements. Reproduce from `core/Clash.Meta/` with `GOTOOLCHAIN=go1.26.9 CGO_ENABLED=0 go test -tags with_gvisor,with_mips_low_memory ./adapter -run '^$' -bench '^BenchmarkProxyHealthStorage$' -benchmem -benchtime=1s -count=3`
+
+The new allocation regression reproduces three allocations when first reading each untouched node before this change and zero afterward. Further tests cover chronological ring wraparound, independent global and per-URL snapshots, empty JSON, unexpected HTTP statuses, concurrent results across eight URLs and reads from result hooks. Adapter, provider and outbound-group packages pass race detection with release tags; the root Core suite, including cancellation and stale-result ordering coverage, passes
