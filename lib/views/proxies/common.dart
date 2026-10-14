@@ -77,18 +77,3 @@ Future<void> delayTestGroup(WidgetRef ref, Group group) => ref
         );
       },
     );
-
-double getScrollToSelectedOffset({
-  required String groupName,
-  required List<Proxy> proxies,
-}) {
-  final columns = appController.getProxiesColumns();
-  final proxyCardType = appController.config.proxiesStyleProps.cardType;
-  final selectedProxyName = appController.getSelectedProxyName(groupName);
-  final findSelectedIndex = proxies.indexWhere(
-    (proxy) => proxy.name == selectedProxyName,
-  );
-  final selectedIndex = findSelectedIndex != -1 ? findSelectedIndex : 0;
-  final rows = (selectedIndex / columns).floor();
-  return rows * getItemHeight(proxyCardType) + (rows - 1) * 8;
-}

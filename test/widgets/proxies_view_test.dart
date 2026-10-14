@@ -11,6 +11,9 @@ import 'package:fl_clash/views/proxies/pages.dart';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/theme.dart';
+import 'package:fl_clash/core/controller.dart';
+import 'package:fl_clash/core/interface.dart';
+import 'package:fl_clash/core/method.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
@@ -32,6 +35,9 @@ import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+
+final class _MockCoreHandler extends Mock implements CoreHandlerInterface {}
 
 void main() {
   for (final tab in [true, false]) {
@@ -121,18 +127,46 @@ void main() {
   testWidgets(
     'group latency action follows the page search and keeps matching hidden nodes',
     (tester) async {
+      const nodes = [
+        Proxy(name: 'Tokyo', type: 'ss'),
+        Proxy(name: 'Tokyo hidden', type: 'ss'),
+        Proxy(name: 'Hong Kong', type: 'trojan'),
+      ];
       const group = Group(
         name: 'Fixture',
         type: GroupType.Selector,
-        all: [
-          Proxy(name: 'Tokyo', type: 'ss'),
-          Proxy(name: 'Tokyo hidden', type: 'ss'),
-          Proxy(name: 'Hong Kong', type: 'trojan'),
-        ],
+        now: 'Tokyo',
+        nodeCount: 3,
+        all: [Proxy(name: 'Tokyo', type: 'ss')],
       );
+      final handler = _MockCoreHandler();
+      when(
+        () => handler.invokeMethod<Map>(
+          method: CoreMethod.getProxyPage,
+          arguments: any(named: 'arguments'),
+          timeout: any(named: 'timeout'),
+        ),
+      ).thenAnswer((invocation) async {
+        final arguments = invocation.namedArguments[#arguments] as Map;
+        final query = SearchQuery(arguments['query'] as String);
+        final items = [
+          for (final proxy in nodes)
+            if (query.matches([proxy.name, proxy.type])) proxy.toJson(),
+        ];
+        return {
+          'revision': 'fixture',
+          'offset': 0,
+          'total': items.length,
+          'selectedIndex': 0,
+          'items': items,
+        };
+      });
       final action = _DelayAction();
       final container = ProviderContainer(
         overrides: [
+          coreHandlerProvider.overrideWithValue(
+            CoreController.forTesting(handler: handler),
+          ),
           proxiesActionProvider.overrideWith(() => action),
           groupsProvider.overrideWithBuild((_, _) => [group]),
           getSelectedProxyNameProvider('Fixture').overrideWith((_) => 'Tokyo'),
@@ -150,7 +184,7 @@ void main() {
                 width: 320,
                 height: 72,
                 child: ListHeader(
-                  group: group.copyWith(all: [group.all.first]),
+                  group: group,
                   enterAnimated: false,
                   isExpand: true,
                   onChange: (_) {},

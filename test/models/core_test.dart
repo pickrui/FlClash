@@ -299,48 +299,6 @@ void main() {
     });
   });
 
-  group('ProxiesData', () {
-    test(
-      'round trips scoped group members and accepts older core snapshots',
-      () {
-        const data = ProxiesData(
-          proxies: {},
-          all: ['Personal'],
-          groupMembers: {
-            'Personal': {
-              'Personal': Proxy(name: 'Personal', type: 'Shadowsocks'),
-            },
-          },
-        );
-        final decoded = ProxiesData.fromJson(
-          jsonDecode(jsonEncode(data.toJson())),
-        );
-        expect(decoded, data);
-        final legacy = ProxiesData.fromJson({
-          'proxies': <String, dynamic>{},
-          'all': <String>[],
-        });
-        expect(legacy.groupMembers, isEmpty);
-      },
-    );
-
-    test('fromJson with proxies and all list', () {
-      final json = {
-        'proxies': {
-          'G1': {
-            'type': 'Selector',
-            'now': 'auto',
-            'all': ['auto', 'P1'],
-          },
-        },
-        'all': ['G1'],
-      };
-      final data = ProxiesData.fromJson(json);
-      expect(data.all, ['G1']);
-      expect(data.proxies['G1'], isA<Map>());
-    });
-  });
-
   group('ExternalProvider', () {
     test('fromJson with subscription info', () {
       final json = {

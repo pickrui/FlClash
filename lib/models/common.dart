@@ -313,19 +313,6 @@ extension GroupsExt on List<Group> {
 
 extension GroupExt on Group {
   String get realNow => now ?? '';
-
-  String getCurrentSelectedName(String proxyName) {
-    if (nodeCount != null) return realNow;
-    if (type.isComputedSelected) {
-      return realNow.isNotEmpty ? realNow : proxyName;
-    }
-    if (type == GroupType.Selector &&
-        proxyName.isNotEmpty &&
-        !all.any((proxy) => proxy.name == proxyName)) {
-      return realNow;
-    }
-    return proxyName.isNotEmpty ? proxyName : realNow;
-  }
 }
 
 @freezed

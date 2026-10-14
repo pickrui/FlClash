@@ -106,12 +106,6 @@ type ProxyGroupMember struct {
 	Now  string `json:"now,omitempty"`
 }
 
-type ProxiesData struct {
-	Proxies      map[string]constant.Proxy              `json:"proxies"`
-	All          []string                               `json:"all"`
-	GroupMembers map[string]map[string]ProxyGroupMember `json:"groupMembers,omitempty"`
-}
-
 const (
 	messageMethod                  CoreMethod = "message"
 	initClashMethod                CoreMethod = "initClash"
@@ -124,7 +118,6 @@ const (
 	validateConfigMethod           CoreMethod = "validateConfig"
 	validateProxiesMethod          CoreMethod = "validateProxies"
 	updateConfigMethod             CoreMethod = "updateConfig"
-	getProxiesMethod               CoreMethod = "getProxies"
 	getProxyGroupsMethod           CoreMethod = "getProxyGroups"
 	getProxyPageMethod             CoreMethod = "getProxyPage"
 	getProxyGroupCountsMethod      CoreMethod = "getProxyGroupCounts"

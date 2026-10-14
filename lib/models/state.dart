@@ -9,7 +9,6 @@ import 'package:material_ui/material_ui.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:collection/collection.dart';
 
-import 'app.dart';
 import 'clash_config.dart';
 import 'common.dart';
 import 'config.dart';
@@ -95,7 +94,6 @@ abstract class TrayState with _$TrayState {
     required String? locale,
     required Brightness? brightness,
     required List<Group> groups,
-    required Map<String, String> selectedMap,
     required bool showTrayTitle,
     @Default({}) Map<String, Map<String, int>> delays,
     @Default({}) Map<HotAction, HotKeyAction> hotKeys,
@@ -216,17 +214,6 @@ abstract class SharedState with _$SharedState {
 
 extension SharedStateExt on SharedState {
   SharedState get needSyncSharedState => copyWith(setupParams: null);
-}
-
-@freezed
-abstract class ComputeGroupsState with _$ComputeGroupsState {
-  const factory ComputeGroupsState({
-    required ProxiesData proxiesData,
-    required ProxiesSortType sortType,
-    required DelayMap delayMap,
-    required Map<String, String> selectedMap,
-    required String defaultTestUrl,
-  }) = _ComputeGroupsState;
 }
 
 @freezed

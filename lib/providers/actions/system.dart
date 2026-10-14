@@ -144,11 +144,10 @@ extension SystemControllerExt on AppController {
           for (final (index, group) in state.groups.indexed)
             members[index] == null
                 ? group
-                : group.copyWith(all: members[index]!, nodeCount: null),
+                : group.copyWith(all: members[index]!),
         ];
         final delayOf = proxyDelayLookup(
           groups: groups,
-          selectedMap: state.selectedMap,
           delayMap: _ref.read(delayDataSourceProvider),
         );
         state = state.copyWith(

@@ -5,7 +5,6 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:convert';
 
-import 'package:fl_clash/common/task.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
@@ -15,38 +14,26 @@ import 'package:fl_clash/providers/state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:riverpod/riverpod.dart';
 
-Future<List<Group>> _decodeGroups(Map<String, dynamic> snapshot) {
-  return toGroupsTask(
-    ComputeGroupsState(
-      proxiesData: ProxiesData.fromJson(jsonDecode(jsonEncode(snapshot))),
-      sortType: ProxiesSortType.none,
-      delayMap: const {},
-      selectedMap: const {},
-      defaultTestUrl: '',
-    ),
-  );
-}
+List<Group> _decodeGroups(List<Map<String, dynamic>> summaries) => [
+  for (final summary in jsonDecode(jsonEncode(summaries)) as List)
+    Group.fromJson(summary as Map<String, dynamic>),
+];
 
-Map<String, dynamic> _collidingSnapshot(String selected) {
-  return {
-    'proxies': {
-      'Personal': {
-        'name': 'Personal',
-        'type': 'Selector',
-        'hidden': false,
-        'now': selected,
-        'all': ['Personal', 'Backup'],
-      },
-      'Backup': {'name': 'Backup', 'type': 'Vmess'},
-    },
-    'all': ['Personal', 'Backup'],
-    'groupMembers': {
-      'Personal': {
-        'Personal': {'name': 'Personal', 'type': 'Shadowsocks'},
-      },
-    },
-  };
-}
+List<Group> _collidingSummary(String selected) => _decodeGroups([
+  {
+    'name': 'Personal',
+    'type': 'Selector',
+    'hidden': false,
+    'now': selected,
+    'nodeCount': 2,
+    'revision': 'fixture',
+    'all': [
+      selected == 'Personal'
+          ? {'name': 'Personal', 'type': 'Shadowsocks'}
+          : {'name': 'Backup', 'type': 'Vmess'},
+    ],
+  },
+]);
 
 ProviderContainer _navigationContainer(List<Group> groups, double width) {
   return ProviderContainer(
@@ -85,11 +72,9 @@ void main() {
   for (final (layout, width) in [('mobile', 400.0), ('desktop', 1200.0)]) {
     group('$layout proxy navigation', () {
       test(
-        'survives repeated snapshots with a member sharing its group name',
-        () async {
-          final initialGroups = await _decodeGroups(
-            _collidingSnapshot('Personal'),
-          );
+        'survives repeated summaries with a member sharing its group name',
+        () {
+          final initialGroups = _collidingSummary('Personal');
           final container = _navigationContainer(initialGroups, width);
           addTearDown(container.dispose);
           final pageVisibility = <bool>[];
@@ -102,26 +87,20 @@ void main() {
           );
 
           for (final selected in ['Personal', 'Backup', 'Personal']) {
-            final groups = await _decodeGroups(_collidingSnapshot(selected));
+            final groups = _collidingSummary(selected);
             expect(groups.single.type, GroupType.Selector);
             expect(groups.single.now, selected);
-            expect(groups.single.all, const [
-              Proxy(name: 'Personal', type: 'Shadowsocks'),
-              Proxy(name: 'Backup', type: 'Vmess'),
-            ]);
 
             container.read(groupsProvider.notifier).update((_) => groups);
             _expectProxiesPage(container, 'Personal');
-            expect(
-              container
-                  .read(currentGroupsStateProvider)
-                  .value
-                  .single
-                  .all
-                  .first
-                  .type,
-              'Shadowsocks',
-            );
+            final member = container
+                .read(currentGroupsStateProvider)
+                .value
+                .single
+                .all
+                .single;
+            expect(member.name, selected);
+            expect(member.type, groups.single.all.single.type);
           }
 
           expect(pageVisibility, isNotEmpty);
@@ -129,27 +108,20 @@ void main() {
         },
       );
 
-      test('honors explicitly hidden groups in rule mode', () async {
-        final groups = await _decodeGroups({
-          'proxies': {
-            'Proxy': {
-              'name': 'Proxy',
+      test('honors explicitly hidden groups in rule mode', () {
+        final groups = _decodeGroups([
+          for (final hidden in [false, true])
+            {
+              'name': hidden ? 'Hidden' : 'Proxy',
               'type': 'Selector',
-              'hidden': false,
+              'hidden': hidden,
               'now': 'Node',
-              'all': ['Node'],
+              'nodeCount': 1,
+              'all': [
+                {'name': 'Node', 'type': 'Shadowsocks'},
+              ],
             },
-            'Hidden': {
-              'name': 'Hidden',
-              'type': 'Selector',
-              'hidden': true,
-              'now': 'Node',
-              'all': ['Node'],
-            },
-            'Node': {'name': 'Node', 'type': 'Shadowsocks'},
-          },
-          'all': ['Proxy', 'Hidden', 'Node'],
-        });
+        ]);
         final container = _navigationContainer(groups, width);
         addTearDown(container.dispose);
 
@@ -166,33 +138,6 @@ void main() {
           isNot(contains(PageLabel.proxies)),
         );
       });
-
-      test(
-        'keeps the proxy page for legacy snapshots without scoped members',
-        () async {
-          final groups = await _decodeGroups({
-            'proxies': {
-              'Proxy': {
-                'name': 'Proxy',
-                'type': 'Selector',
-                'now': 'Node',
-                'all': ['Node'],
-              },
-              'Node': {'name': 'Node', 'type': 'Shadowsocks'},
-            },
-            'all': ['Proxy', 'Node'],
-          });
-          final container = _navigationContainer(groups, width);
-          addTearDown(container.dispose);
-
-          expect(
-            groups.single.all.single,
-            const Proxy(name: 'Node', type: 'Shadowsocks'),
-          );
-          expect(groups.single.hidden, isNull);
-          _expectProxiesPage(container, 'Proxy');
-        },
-      );
     });
   }
 }

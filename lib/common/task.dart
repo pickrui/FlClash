@@ -55,54 +55,6 @@ Future<String> _encodeYaml<T>(T content) async {
   return writeYaml(content);
 }
 
-Future<List<Group>> toGroupsTask(ComputeGroupsState data) async {
-  return compute<ComputeGroupsState, List<Group>>(_toGroupsTask, data);
-}
-
-Future<List<Group>> _toGroupsTask(ComputeGroupsState state) async {
-  final proxiesData = state.proxiesData;
-  final all = proxiesData.all;
-  final sortType = state.sortType;
-  final delayMap = state.delayMap;
-  final selectedMap = state.selectedMap;
-  final defaultTestUrl = state.defaultTestUrl;
-  final proxies = proxiesData.proxies;
-  if (proxies.isEmpty) return [];
-  final parsedProxies = <String, Proxy>{};
-  final groups = all
-      .where((name) {
-        final proxy = proxies[name] ?? {};
-        return GroupTypeExtension.valueList.contains(proxy['type']);
-      })
-      .map((groupName) {
-        final group = Map<String, dynamic>.from(proxies[groupName]);
-        final members = proxiesData.groupMembers[groupName];
-        final nodes = <Proxy>[];
-        for (final name in (group['all'] ?? []) as List) {
-          final scoped = members?[name];
-          if (scoped != null) {
-            nodes.add(scoped);
-            continue;
-          }
-          final data = proxies[name];
-          if (data == null) continue;
-          nodes.add(
-            parsedProxies.putIfAbsent(name, () => Proxy.fromJson(data)),
-          );
-        }
-        group['all'] = const [];
-        return Group.fromJson(group).copyWith(all: nodes);
-      })
-      .toList();
-  return computeSort(
-    groups: groups,
-    sortType: sortType,
-    delayMap: delayMap,
-    selectedMap: selectedMap,
-    defaultTestUrl: defaultTestUrl,
-  );
-}
-
 Map<String, dynamic> safeModeProfile(Map<String, dynamic> config) => {
   ...config,
   for (final key in [

@@ -40,16 +40,8 @@ extension StateControllerExt on AppController {
     return _ref.read(currentProfileProvider);
   }
 
-  String? getSelectedProxyName(String groupName) {
-    return _ref.read(getSelectedProxyNameProvider(groupName));
-  }
-
   String getRealTestUrl(String? url) {
     return _ref.read(realTestUrlProvider(url));
-  }
-
-  int getProxiesColumns() {
-    return _ref.read(getProxiesColumnsProvider);
   }
 
   SharedState get sharedState {

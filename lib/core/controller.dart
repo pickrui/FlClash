@@ -159,30 +159,19 @@ class CoreController {
     return res;
   }
 
-  Future<List<Group>> getProxiesGroups({
-    required ProxiesSortType sortType,
-    required DelayMap delayMap,
-    required Map<String, String> selectedMap,
-    required String defaultTestUrl,
-  }) async {
+  Future<List<Group>> getProxiesGroups() async {
     final summaries = await _interface.invokeMethod<List<dynamic>>(
       method: CoreMethod.getProxyGroups,
     );
-    if (summaries != null) {
-      return summaries
-          .map((data) => Group.fromJson(Map<String, dynamic>.from(data as Map)))
-          .toList();
+    if (summaries == null) {
+      throw const CoreMethodException(
+        code: 'transport_disconnected',
+        message: 'Core node groups unavailable',
+      );
     }
-    final proxiesData = await _interface.getProxies();
-    return toGroupsTask(
-      ComputeGroupsState(
-        proxiesData: proxiesData,
-        sortType: sortType,
-        delayMap: delayMap,
-        selectedMap: selectedMap,
-        defaultTestUrl: defaultTestUrl,
-      ),
-    );
+    return summaries
+        .map((data) => Group.fromJson(Map<String, dynamic>.from(data as Map)))
+        .toList();
   }
 
   Future<Map<String, dynamic>> getProxyPage(
@@ -213,7 +202,6 @@ class CoreController {
   }
 
   Future<List<Proxy>> readGroupProxies(Group group, {String query = ''}) async {
-    if (group.nodeCount == null) return group.all;
     String? revision;
     for (var attempt = 0; attempt < 3; attempt++) {
       final result = <Proxy>[];

@@ -277,28 +277,6 @@ Map<String, dynamic> _$ExternalProviderToJson(_ExternalProvider instance) =>
       'update-at': instance.updateAt.toIso8601String(),
     };
 
-_ProxiesData _$ProxiesDataFromJson(Map<String, dynamic> json) => _ProxiesData(
-  proxies: json['proxies'] as Map<String, dynamic>,
-  all: (json['all'] as List<dynamic>).map((e) => e as String).toList(),
-  groupMembers:
-      (json['groupMembers'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(
-          k,
-          (e as Map<String, dynamic>).map(
-            (k, e) => MapEntry(k, Proxy.fromJson(e as Map<String, dynamic>)),
-          ),
-        ),
-      ) ??
-      const {},
-);
-
-Map<String, dynamic> _$ProxiesDataToJson(_ProxiesData instance) =>
-    <String, dynamic>{
-      'proxies': instance.proxies,
-      'all': instance.all,
-      'groupMembers': instance.groupMembers,
-    };
-
 _CoreMemoryStats _$CoreMemoryStatsFromJson(Map<String, dynamic> json) =>
     _CoreMemoryStats(
       rss: (json['rss'] as num?)?.toInt() ?? 0,

@@ -656,6 +656,37 @@ void main() {
   );
 
   test(
+    'group summaries parse runtime types and fail without a reply',
+    () async {
+      Future<List<dynamic>?> summaries() => handler.invokeMethod<List<dynamic>>(
+        method: CoreMethod.getProxyGroups,
+        arguments: any(named: 'arguments'),
+        timeout: any(named: 'timeout'),
+      );
+      when(summaries).thenAnswer(
+        (_) async => [
+          {'name': 'Auto', 'type': 'URLTest', 'now': 'Node', 'nodeCount': 300},
+        ],
+      );
+      final groups = await controller.getProxiesGroups();
+      expect(groups.single.type, GroupType.URLTest);
+      expect(groups.single.nodeCount, 300);
+
+      when(summaries).thenAnswer((_) async => null);
+      await expectLater(
+        controller.getProxiesGroups(),
+        throwsA(
+          isA<CoreMethodException>().having(
+            (error) => error.code,
+            'code',
+            'transport_disconnected',
+          ),
+        ),
+      );
+    },
+  );
+
+  test(
     'group reads skip a failed group and stop once the Core is unreachable',
     () async {
       final requested = <String>[];

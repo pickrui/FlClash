@@ -49,7 +49,7 @@ final class CurrentGroupsStateProvider
 }
 
 String _$currentGroupsStateHash() =>
-    r'c1b89c2f0e3ddd81b9b4643f81e42eda2d30d976';
+    r'40e520c5d82f405c0d538f8ae64d94b3b3703551';
 
 @ProviderFor(navigationItemsState)
 final navigationItemsStateProvider = NavigationItemsStateProvider._();
@@ -317,7 +317,7 @@ final class TrayDelaysProvider
   }
 }
 
-String _$trayDelaysHash() => r'664096baa9554042215d705aa5d344eab6ae6e03';
+String _$trayDelaysHash() => r'e0079dad461011b8baedf84006991bb22f2d8864';
 
 @ProviderFor(trayState)
 final trayStateProvider = TrayStateProvider._();
@@ -358,7 +358,7 @@ final class TrayStateProvider
   }
 }
 
-String _$trayStateHash() => r'9b3144df912ce4258ebba6017f59909bd817fada';
+String _$trayStateHash() => r'0682e03148ad6ddd2a84890d18766094c6ef5067';
 
 @ProviderFor(vpnState)
 final vpnStateProvider = VpnStateProvider._();
@@ -608,48 +608,6 @@ final class DelaysAtLastTestBatchProvider
 String _$delaysAtLastTestBatchHash() =>
     r'bb44aa9acbb67ac9f446a32f3d18fc26a13043eb';
 
-@ProviderFor(visibleGroupsState)
-final visibleGroupsStateProvider = VisibleGroupsStateProvider._();
-
-final class VisibleGroupsStateProvider
-    extends $FunctionalProvider<GroupsState, GroupsState, GroupsState>
-    with $Provider<GroupsState> {
-  VisibleGroupsStateProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'visibleGroupsStateProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$visibleGroupsStateHash();
-
-  @$internal
-  @override
-  $ProviderElement<GroupsState> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  GroupsState create(Ref ref) {
-    return visibleGroupsState(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(GroupsState value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<GroupsState>(value),
-    );
-  }
-}
-
-String _$visibleGroupsStateHash() =>
-    r'532e46d57014ecba5683c6cab71ec8798975fb8f';
-
 @ProviderFor(proxyGroupCounts)
 final proxyGroupCountsProvider = ProxyGroupCountsFamily._();
 
@@ -705,7 +663,7 @@ final class ProxyGroupCountsProvider
   }
 }
 
-String _$proxyGroupCountsHash() => r'1e3d6a8c8ad0dc56086042058fb00587aa7d07f7';
+String _$proxyGroupCountsHash() => r'f7ef62eae2bc14872d9f28cb208545b1c2abade7';
 
 final class ProxyGroupCountsFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<Map<String, int>>, String> {
@@ -782,7 +740,7 @@ final class FilterGroupsStateProvider
   }
 }
 
-String _$filterGroupsStateHash() => r'8eb4663bb46feb128a67aa85c88798258d08d9aa';
+String _$filterGroupsStateHash() => r'c43115c48a34af8dcd6905f975d602106b418191';
 
 final class FilterGroupsStateFamily extends $Family
     with $FunctionalFamilyOverride<GroupsState, String> {
@@ -1589,7 +1547,7 @@ final class RealSelectedProxyStateProvider
 }
 
 String _$realSelectedProxyStateHash() =>
-    r'42fa131419f0a26e30c4f5269bf020893b7f828c';
+    r'3a07ffb76ab0bc5ea05e6b63e94674a12a43d27a';
 
 final class RealSelectedProxyStateFamily extends $Family
     with $FunctionalFamilyOverride<SelectedProxyState, String> {
@@ -1744,7 +1702,7 @@ final class GetSelectedProxyNameProvider
 }
 
 String _$getSelectedProxyNameHash() =>
-    r'13aeae1fede234983d262d824a85c7375f9e4e78';
+    r'83f4ee3a0797653d0eba4608c6b80dbafcfe09b5';
 
 final class GetSelectedProxyNameFamily extends $Family
     with $FunctionalFamilyOverride<String?, String> {

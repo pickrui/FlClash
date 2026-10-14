@@ -46,7 +46,7 @@ class _DashboardGroupsCardState extends ConsumerState<DashboardGroupsCard> {
 
   @override
   Widget build(BuildContext context) {
-    final groups = ref.watch(visibleGroupsStateProvider).value;
+    final groups = ref.watch(currentGroupsStateProvider).value;
     final group = _groupName == null ? null : groups.getGroup(_groupName!);
     return RowCardFrame(
       child: PageTransitionSwitcher(
@@ -169,12 +169,9 @@ class _ProxiesPaneState extends ConsumerState<_ProxiesPane> {
       return;
     }
     _revealedSelected = true;
-    final selected = ref.read(getProxyNameProvider(widget.group.name));
-    final index = widget.group.nodeCount != null
-        ? ref
-              .read(nodePagesProvider((group: widget.group.name, query: '')))
-              .selectedIndex
-        : widget.group.all.indexWhere((proxy) => proxy.name == selected);
+    final index = ref
+        .read(nodePagesProvider((group: widget.group.name, query: '')))
+        .selectedIndex;
     if (index <= 0) {
       return;
     }
@@ -191,9 +188,7 @@ class _ProxiesPaneState extends ConsumerState<_ProxiesPane> {
   @override
   Widget build(BuildContext context) {
     final group = widget.group;
-    final pages = group.nodeCount == null
-        ? null
-        : ref.watch(nodePagesProvider((group: group.name, query: '')));
+    final pages = ref.watch(nodePagesProvider((group: group.name, query: '')));
     final selected = ref.watch(getProxyNameProvider(group.name));
     final colorScheme = context.colorScheme;
     final headerPadding = DashboardWidgetMetrics.paddingOf(context)
@@ -230,19 +225,17 @@ class _ProxiesPaneState extends ConsumerState<_ProxiesPane> {
         builder: (_, rowHeight, spacing) {
           final itemExtent = rowHeight + spacing;
           _controller.itemExtent = itemExtent;
-          if (pages == null || pages.initialized) _revealSelected(itemExtent);
+          if (pages.initialized) _revealSelected(itemExtent);
           return ListView.builder(
             controller: _controller,
             padding: EdgeInsets.zero,
             physics: const RowSnapScrollPhysics(),
             itemExtent: itemExtent,
-            itemCount: pages == null
-                ? group.all.length
-                : max(pages.initialized ? 0 : 1, pages.total),
+            itemCount: max(pages.initialized ? 0 : 1, pages.total),
             itemBuilder: (_, index) {
-              final proxy = pages == null ? group.all[index] : pages.at(index);
+              final proxy = pages.at(index);
               if (proxy == null) {
-                return NodePagePlaceholder(pages: pages!, index: index);
+                return NodePagePlaceholder(pages: pages, index: index);
               }
               final isSelected = proxy.name == selected;
               return Padding(

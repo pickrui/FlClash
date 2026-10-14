@@ -20,7 +20,6 @@ enum CoreMethod {
   validateConfigWithBytes,
   updateConfig,
   getConfig,
-  getProxies,
   getProxyGroups,
   getProxyPage,
   getProxyGroupCounts,

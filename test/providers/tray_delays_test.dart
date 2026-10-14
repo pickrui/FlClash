@@ -94,7 +94,6 @@ void main() {
           all: [Proxy(name: 'node', type: 'ss')],
         ),
       ],
-      selectedMap: const {},
       showTrayTitle: false,
       delays: const {
         'Group': {'node': 42},

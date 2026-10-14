@@ -29,7 +29,6 @@ void main() {
     locale: 'en',
     brightness: Brightness.light,
     groups: [],
-    selectedMap: {},
     showTrayTitle: true,
   );
   final calls = <MethodCall>[];

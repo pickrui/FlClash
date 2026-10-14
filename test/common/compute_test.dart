@@ -12,42 +12,30 @@ import 'package:test/test.dart';
 void main() {
   group('computeRealSelectedProxyState', () {
     test('returns state unchanged when proxyName is empty', () {
-      final state = computeRealSelectedProxyState(
-        '',
-        groups: [],
-        selectedMap: {},
-      );
+      final state = computeRealSelectedProxyState('', groups: []);
       expect(state.proxyName, '');
       expect(state.group, false);
     });
 
     test('resolves to leaf proxy not in any group', () {
-      final state = computeRealSelectedProxyState(
-        'proxy-a',
-        groups: [],
-        selectedMap: {},
-      );
+      final state = computeRealSelectedProxyState('proxy-a', groups: []);
       expect(state.proxyName, 'proxy-a');
       expect(state.group, true);
     });
 
-    test('resolves single-hop chain via selectedMap', () {
+    test('resolves a single-hop chain through the selection', () {
       final groups = [
         const Group(
           name: 'auto',
           type: GroupType.URLTest,
+          now: 'proxy-a',
           all: [
             Proxy(name: 'proxy-a', type: 'ss'),
             Proxy(name: 'proxy-b', type: 'ss'),
           ],
         ),
       ];
-      final selectedMap = {'auto': 'proxy-a'};
-      final state = computeRealSelectedProxyState(
-        'auto',
-        groups: groups,
-        selectedMap: selectedMap,
-      );
+      final state = computeRealSelectedProxyState('auto', groups: groups);
       expect(state.proxyName, 'proxy-a');
       expect(state.group, true);
       expect(state.testUrl, isNull);
@@ -58,6 +46,7 @@ void main() {
         const Group(
           name: 'group-a',
           type: GroupType.Selector,
+          now: 'group-b',
           testUrl: 'http://test-a.com',
           all: [
             Proxy(name: 'group-b', type: 'URLTest'),
@@ -67,16 +56,12 @@ void main() {
         const Group(
           name: 'group-b',
           type: GroupType.URLTest,
+          now: 'proxy-leaf',
           testUrl: 'http://test-b.com',
           all: [Proxy(name: 'proxy-leaf', type: 'ss')],
         ),
       ];
-      final selectedMap = {'group-a': 'group-b', 'group-b': 'proxy-leaf'};
-      final state = computeRealSelectedProxyState(
-        'group-a',
-        groups: groups,
-        selectedMap: selectedMap,
-      );
+      final state = computeRealSelectedProxyState('group-a', groups: groups);
       expect(state.proxyName, 'proxy-leaf');
       expect(state.group, true);
       expect(state.testUrl, 'http://test-b.com');
@@ -91,17 +76,18 @@ void main() {
             Group(
               name: 'group-a',
               type: GroupType.Selector,
+              now: 'group-b',
               testUrl: 'http://test-a.com',
               all: [Proxy(name: 'group-b', type: 'Selector')],
             ),
             Group(
               name: 'group-b',
               type: GroupType.Selector,
+              now: 'proxy-leaf',
               testUrl: '   ',
               all: [Proxy(name: 'proxy-leaf', type: 'ss')],
             ),
           ],
-          selectedMap: const {'group-a': 'group-b', 'group-b': 'proxy-leaf'},
         );
 
         expect(state.proxyName, 'proxy-leaf');
@@ -109,7 +95,7 @@ void main() {
       },
     );
 
-    test('stops at group when selectedMap has no entry', () {
+    test('stops at a group without a selection', () {
       final groups = [
         const Group(
           name: 'group-a',
@@ -117,53 +103,9 @@ void main() {
           all: [Proxy(name: 'proxy-a', type: 'ss')],
         ),
       ];
-      final state = computeRealSelectedProxyState(
-        'group-a',
-        groups: groups,
-        selectedMap: {},
-      );
+      final state = computeRealSelectedProxyState('group-a', groups: groups);
       expect(state.proxyName, 'group-a');
       expect(state.group, true);
-    });
-
-    test('URLTest group prefers realNow over selectedMap value', () {
-      final groups = [
-        const Group(
-          name: 'auto',
-          type: GroupType.URLTest,
-          now: 'proxy-fast',
-          all: [
-            Proxy(name: 'proxy-fast', type: 'ss'),
-            Proxy(name: 'proxy-slow', type: 'ss'),
-          ],
-        ),
-      ];
-      final state = computeRealSelectedProxyState(
-        'auto',
-        groups: groups,
-        selectedMap: {'auto': 'proxy-slow'},
-      );
-      expect(state.proxyName, 'proxy-fast');
-    });
-
-    test('Selector group prefers selectedMap value over realNow', () {
-      final groups = [
-        const Group(
-          name: 'selector',
-          type: GroupType.Selector,
-          now: 'proxy-a',
-          all: [
-            Proxy(name: 'proxy-a', type: 'ss'),
-            Proxy(name: 'proxy-b', type: 'ss'),
-          ],
-        ),
-      ];
-      final state = computeRealSelectedProxyState(
-        'selector',
-        groups: groups,
-        selectedMap: {'selector': 'proxy-b'},
-      );
-      expect(state.proxyName, 'proxy-b');
     });
 
     for (final type in ['Shadowsocks', 'Selector']) {
@@ -179,7 +121,6 @@ void main() {
               all: [Proxy(name: 'Personal', type: type)],
             ),
           ],
-          selectedMap: const {'Personal': 'Personal'},
         );
 
         expect(state.proxyName, type == 'Shadowsocks' ? 'Personal' : '');
@@ -194,15 +135,16 @@ void main() {
           Group(
             name: 'group-a',
             type: GroupType.Selector,
+            now: 'group-b',
             all: [Proxy(name: 'group-b', type: 'Selector')],
           ),
           Group(
             name: 'group-b',
             type: GroupType.Selector,
+            now: 'group-a',
             all: [Proxy(name: 'group-a', type: 'Selector')],
           ),
         ],
-        selectedMap: const {'group-a': 'group-b', 'group-b': 'group-a'},
       );
 
       expect(state.proxyName, isEmpty);
@@ -240,7 +182,6 @@ void main() {
           final state = computeRealSelectedProxyState(
             'group-0',
             groups: groups,
-            selectedMap: {},
           );
 
           expect(state.proxyName, cyclic ? isEmpty : 'leaf');
@@ -257,6 +198,7 @@ void main() {
         const Group(
           name: 'auto',
           type: GroupType.URLTest,
+          now: 'proxy-a',
           all: [Proxy(name: 'proxy-a', type: 'ss')],
         ),
       ];
@@ -267,7 +209,6 @@ void main() {
         proxyName: 'auto',
         testUrl: 'http://test.com',
         groups: groups,
-        selectedMap: {'auto': 'proxy-a'},
         delayMap: delayMap,
       );
       expect(state.delay, 120);
@@ -279,7 +220,6 @@ void main() {
         proxyName: 'proxy-x',
         testUrl: 'http://test.com',
         groups: [],
-        selectedMap: {},
         delayMap: {},
       );
       expect(state.delay, 0);
@@ -290,6 +230,7 @@ void main() {
         const Group(
           name: 'auto',
           type: GroupType.URLTest,
+          now: 'proxy-a',
           testUrl: 'http://group-test.com',
           all: [Proxy(name: 'proxy-a', type: 'ss')],
         ),
@@ -301,7 +242,6 @@ void main() {
         proxyName: 'auto',
         testUrl: 'http://default.com',
         groups: groups,
-        selectedMap: {'auto': 'proxy-a'},
         delayMap: delayMap,
       );
       expect(state.delay, 50);
@@ -312,6 +252,7 @@ void main() {
         const Group(
           name: 'auto',
           type: GroupType.URLTest,
+          now: 'proxy-a',
           all: [Proxy(name: 'proxy-a', type: 'ss')],
         ),
       ];
@@ -322,7 +263,6 @@ void main() {
         proxyName: 'auto',
         testUrl: 'http://default.com',
         groups: groups,
-        selectedMap: {'auto': 'proxy-a'},
         delayMap: delayMap,
       );
       expect(state.delay, 80);
@@ -341,7 +281,6 @@ void main() {
             testUrl: 'https://example.com/generate_204',
           ),
         ],
-        selectedMap: const {},
         defaultTestUrl: 'https://default.example.com/generate_204',
       );
 
@@ -362,7 +301,6 @@ void main() {
             testUrl: 'https://example.com/generate_204',
           ),
         ],
-        selectedMap: const {},
         defaultTestUrl: 'https://default.example.com/generate_204',
       );
 
@@ -378,6 +316,7 @@ void main() {
           Group(
             name: 'selector',
             type: GroupType.Selector,
+            now: 'auto',
             all: [Proxy(name: 'auto', type: 'URLTest')],
           ),
           Group(
@@ -387,7 +326,6 @@ void main() {
             testUrl: 'https://example.com/generate_204',
           ),
         ],
-        selectedMap: const {'selector': 'auto'},
         defaultTestUrl: 'https://default.example.com/generate_204',
       );
 
@@ -412,7 +350,6 @@ void main() {
             all: [Proxy(name: 'proxy-fast', type: 'ss')],
           ),
         ],
-        selectedMap: const {},
         defaultTestUrl: testUrl,
       );
 
@@ -433,7 +370,6 @@ void main() {
             testUrl: 'https://group.example.com/generate_204',
           ),
         ],
-        selectedMap: const {},
         defaultTestUrl: 'https://default.example.com/generate_204',
       );
 
@@ -456,20 +392,18 @@ void main() {
           Group(
             name: 'selector-a',
             type: GroupType.Selector,
+            now: 'proxy-fast',
             testUrl: 'https://a.example.com/generate_204',
             all: [Proxy(name: 'proxy-fast', type: 'ss')],
           ),
           Group(
             name: 'selector-b',
             type: GroupType.Selector,
+            now: 'proxy-fast',
             testUrl: 'https://b.example.com/generate_204',
             all: [Proxy(name: 'proxy-fast', type: 'ss')],
           ),
         ],
-        selectedMap: const {
-          'selector-a': 'proxy-fast',
-          'selector-b': 'proxy-fast',
-        },
         defaultTestUrl: 'https://default.example.com/generate_204',
       );
 
@@ -486,167 +420,10 @@ void main() {
       final target = computeDelayTestTarget(
         proxy: const Proxy(name: 'DIRECT', type: 'Direct'),
         groups: const [],
-        selectedMap: const {},
         defaultTestUrl: 'https://example.com/generate_204',
       );
 
       expect(target, const (name: 'DIRECT', url: defaultDirectTestUrl));
-    });
-  });
-
-  group('computeSort', () {
-    late List<Group> groups;
-    late DelayMap delayMap;
-
-    setUp(() {
-      groups = [
-        const Group(
-          name: 'proxies',
-          type: GroupType.Selector,
-          all: [
-            Proxy(name: 'proxy-c', type: 'ss'),
-            Proxy(name: 'proxy-a', type: 'ss'),
-            Proxy(name: 'proxy-b', type: 'ss'),
-          ],
-        ),
-      ];
-      delayMap = <String, Map<String, int?>>{
-        'http://test.com': {'proxy-a': 100, 'proxy-b': 50, 'proxy-c': 0},
-      };
-    });
-
-    test('ProxiesSortType.none preserves original order', () {
-      final result = computeSort(
-        groups: groups,
-        sortType: ProxiesSortType.none,
-        delayMap: delayMap,
-        selectedMap: {},
-        defaultTestUrl: 'http://test.com',
-      );
-      expect(result[0].all.map((p) => p.name).toList(), [
-        'proxy-c',
-        'proxy-a',
-        'proxy-b',
-      ]);
-    });
-
-    test('ProxiesSortType.name sorts alphabetically', () {
-      final result = computeSort(
-        groups: groups,
-        sortType: ProxiesSortType.name,
-        delayMap: delayMap,
-        selectedMap: {},
-        defaultTestUrl: 'http://test.com',
-      );
-      expect(result[0].all.map((p) => p.name).toList(), [
-        'proxy-a',
-        'proxy-b',
-        'proxy-c',
-      ]);
-    });
-
-    test('ProxiesSortType.delay sorts by delay value', () {
-      final result = computeSort(
-        groups: groups,
-        sortType: ProxiesSortType.delay,
-        delayMap: delayMap,
-        selectedMap: {},
-        defaultTestUrl: 'http://test.com',
-      );
-      final names = result[0].all.map((p) => p.name).toList();
-      expect(names.indexOf('proxy-b'), lessThan(names.indexOf('proxy-a')));
-    });
-
-    test('preserves group count in result', () {
-      final multiGroups = [
-        ...groups,
-        const Group(
-          name: 'other',
-          type: GroupType.Selector,
-          all: [Proxy(name: 'p1', type: 'ss')],
-        ),
-      ];
-      final result = computeSort(
-        groups: multiGroups,
-        sortType: ProxiesSortType.none,
-        delayMap: {},
-        selectedMap: {},
-        defaultTestUrl: '',
-      );
-      expect(result.length, 2);
-    });
-  });
-
-  group('Group.getCurrentSelectedName', () {
-    test('URLTest group returns realNow when non-empty', () {
-      const group = Group(
-        name: 'auto',
-        type: GroupType.URLTest,
-        now: 'proxy-fast',
-      );
-      expect(group.getCurrentSelectedName('proxy-input'), 'proxy-fast');
-    });
-
-    test('URLTest group falls back to proxyName when now is null', () {
-      const group = Group(name: 'auto', type: GroupType.URLTest);
-      expect(group.getCurrentSelectedName('proxy-input'), 'proxy-input');
-    });
-
-    test('URLTest group returns empty when both now and proxyName empty', () {
-      const group = Group(name: 'auto', type: GroupType.URLTest);
-      expect(group.getCurrentSelectedName(''), '');
-    });
-
-    test('Selector group returns proxyName when it still exists', () {
-      const group = Group(
-        name: 'sel',
-        type: GroupType.Selector,
-        now: 'proxy-now',
-        all: [
-          Proxy(name: 'proxy-now', type: 'Shadowsocks'),
-          Proxy(name: 'proxy-selected', type: 'Shadowsocks'),
-        ],
-      );
-      expect(group.getCurrentSelectedName('proxy-selected'), 'proxy-selected');
-    });
-
-    test('Selector group falls back to realNow when proxyName empty', () {
-      const group = Group(
-        name: 'sel',
-        type: GroupType.Selector,
-        now: 'proxy-now',
-      );
-      expect(group.getCurrentSelectedName(''), 'proxy-now');
-    });
-
-    test('Selector group falls back when selected proxy no longer exists', () {
-      const group = Group(
-        name: 'sel',
-        type: GroupType.Selector,
-        now: 'proxy-first',
-        all: [
-          Proxy(name: 'proxy-first', type: 'Shadowsocks'),
-          Proxy(name: 'proxy-second', type: 'Shadowsocks'),
-        ],
-      );
-      expect(group.getCurrentSelectedName('proxy-removed'), 'proxy-first');
-    });
-
-    test('Selector group does not infer selection from display order', () {
-      const group = Group(
-        name: 'sel',
-        type: GroupType.Selector,
-        all: [
-          Proxy(name: 'proxy-first', type: 'Shadowsocks'),
-          Proxy(name: 'proxy-second', type: 'Shadowsocks'),
-        ],
-      );
-      expect(group.getCurrentSelectedName('proxy-removed'), '');
-    });
-
-    test('Selector group returns empty when both empty', () {
-      const group = Group(name: 'sel', type: GroupType.Selector);
-      expect(group.getCurrentSelectedName(''), '');
     });
   });
 }

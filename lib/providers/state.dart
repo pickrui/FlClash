@@ -28,7 +28,6 @@ GroupsState currentGroupsState(Ref ref) {
     groupsProvider.select(
       (state) => state.map((item) {
         return item.copyWith(
-          now: item.nodeCount == null ? '' : item.now,
           all: item.all.map((proxy) => proxy.copyWith(now: '')).toList(),
         );
       }),
@@ -161,16 +160,11 @@ Map<String, Map<String, int>> trayDelays(Ref ref) {
   }
   final groups = ref.watch(currentGroupsStateProvider).value;
   final allGroups = ref.watch(groupsProvider);
-  final selectedMap = ref.watch(selectedMapProvider);
   final defaultTestUrl = ref.watch(
     appSettingProvider.select((state) => state.testUrl),
   );
   final delays = <String, Map<String, int>>{};
-  final delayOf = proxyDelayLookup(
-    groups: allGroups,
-    selectedMap: selectedMap,
-    delayMap: delayMap,
-  );
+  final delayOf = proxyDelayLookup(groups: allGroups, delayMap: delayMap);
   for (final group in groups) {
     final testUrl = group.testUrl.takeFirstValid([defaultTestUrl]);
     final groupDelays = <String, int>{};
@@ -205,7 +199,6 @@ TrayState trayState(Ref ref) {
   );
   final groups = ref.watch(currentGroupsStateProvider).value;
   final brightness = ref.watch(systemBrightnessProvider);
-  final selectedMap = ref.watch(selectedMapProvider);
 
   return TrayState(
     mode: clashConfigVm3.a,
@@ -217,7 +210,6 @@ TrayState trayState(Ref ref) {
     locale: ref.watch(loadedLocaleProvider)?.toLanguageTag() ?? appSettingVm3.b,
     brightness: brightness,
     groups: groups,
-    selectedMap: selectedMap,
     showTrayTitle: appSettingVm3.c,
     delays: ref.watch(trayDelaysProvider),
     hotKeys: {
@@ -311,25 +303,6 @@ DelayMap delaysAtLastTestBatch(Ref ref) {
 }
 
 @riverpod
-GroupsState visibleGroupsState(Ref ref) {
-  final current = ref.watch(currentGroupsStateProvider);
-  if (!ref.watch(
-    proxiesStyleSettingProvider.select((state) => state.hideTimeoutProxies),
-  )) {
-    return current;
-  }
-  return current.copyWith(
-    value: computeHideTimeout(
-      groups: current.value,
-      allGroups: ref.watch(groupsProvider),
-      delayMap: ref.watch(delaysAtLastTestBatchProvider),
-      selectedMap: ref.watch(selectedMapProvider),
-      defaultTestUrl: ref.watch(realTestUrlProvider()),
-    ),
-  );
-}
-
-@riverpod
 Future<Map<String, int>> proxyGroupCounts(Ref ref, String query) async {
   ref.watch(groupsProvider);
   final hideTimeout = ref.watch(
@@ -352,32 +325,15 @@ Map<String, Object?> delayArguments(Ref ref) => {
 
 @riverpod
 GroupsState filterGroupsState(Ref ref, String query) {
-  final currentGroups = ref.watch(visibleGroupsStateProvider);
-  final search = SearchQuery(query);
-  if (search.isEmpty) return currentGroups;
-  final counts = currentGroups.value.any((group) => group.nodeCount != null)
-      ? ref.watch(proxyGroupCountsProvider(query)).asData?.value
-      : null;
-  final matches = <Proxy, bool>{};
-  final groups = currentGroups.value
-      .map((group) {
-        if (group.nodeCount != null) return group;
-        return group.copyWith(
-          all: group.all
-              .where(
-                (proxy) =>
-                    matches[proxy] ??= search.matches([proxy.name, proxy.type]),
-              )
-              .toList(),
-        );
-      })
-      .where(
-        (group) => group.nodeCount != null
-            ? counts == null || (counts[group.name] ?? 0) > 0
-            : group.all.isNotEmpty,
-      )
-      .toList();
-  return currentGroups.copyWith(value: groups);
+  final currentGroups = ref.watch(currentGroupsStateProvider);
+  if (SearchQuery(query).isEmpty) return currentGroups;
+  final counts = ref.watch(proxyGroupCountsProvider(query)).asData?.value;
+  if (counts == null) return currentGroups;
+  return currentGroups.copyWith(
+    value: currentGroups.value
+        .where((group) => (counts[group.name] ?? 0) > 0)
+        .toList(),
+  );
 }
 
 @riverpod
@@ -543,12 +499,9 @@ int getProxiesColumns(Ref ref) {
 
 @riverpod
 SelectedProxyState realSelectedProxyState(Ref ref, String proxyName) {
-  final groups = ref.watch(groupsProvider);
-  final selectedMap = ref.watch(selectedMapProvider);
   return computeRealSelectedProxyState(
     proxyName,
-    groups: groups,
-    selectedMap: selectedMap,
+    groups: ref.watch(groupsProvider),
   );
 }
 
@@ -562,11 +515,9 @@ String? getProxyName(Ref ref, String groupName) {
 
 @riverpod
 String? getSelectedProxyName(Ref ref, String groupName) {
-  final proxyName = ref.watch(getProxyNameProvider(groupName));
-  final group = ref.watch(
-    groupsProvider.select((state) => state.getGroup(groupName)),
+  return ref.watch(
+    groupsProvider.select((state) => state.getGroup(groupName)?.realNow),
   );
-  return group?.getCurrentSelectedName(proxyName ?? '');
 }
 
 @riverpod

@@ -110,7 +110,7 @@ extension ProxiesControllerExt on AppController {
       if (group == null) {
         continue;
       }
-      final proxyName = group.getCurrentSelectedName(entry.value);
+      final proxyName = group.realNow;
       if (proxyName.isNotEmpty) {
         nextSelectedMap[entry.key] = proxyName;
       }
@@ -187,24 +187,7 @@ extension ProxiesControllerExt on AppController {
         return false;
       }
       final groups = await retry(
-        task: () async {
-          final sortType = _ref.read(
-            proxiesStyleSettingProvider.select((state) => state.sortType),
-          );
-          final delayMap = _ref.read(delayDataSourceProvider);
-          final testUrl = _ref.read(
-            appSettingProvider.select((state) => state.testUrl),
-          );
-          final selectedMap = _ref.read(
-            currentProfileProvider.select((state) => state?.selectedMap ?? {}),
-          );
-          return coreController.getProxiesGroups(
-            selectedMap: selectedMap,
-            sortType: sortType,
-            delayMap: delayMap,
-            defaultTestUrl: testUrl,
-          );
-        },
+        task: coreController.getProxiesGroups,
         retryIf: (res) => res.isEmpty,
       );
       if (groups.isEmpty || !_isCurrentGroupsUpdate(profileId, generation)) {
@@ -285,7 +268,6 @@ extension ProxiesControllerExt on AppController {
     final target = computeDelayTestTarget(
       proxy: proxy,
       groups: groups,
-      selectedMap: this.currentProfile?.selectedMap ?? {},
       defaultTestUrl: getRealTestUrl(testUrl),
     );
     if (target == null) return;
@@ -313,7 +295,6 @@ extension ProxiesControllerExt on AppController {
     final targets = computeDelayTestTargets(
       proxies: proxies,
       groups: groups,
-      selectedMap: this.currentProfile?.selectedMap ?? {},
       defaultTestUrl: getRealTestUrl(testUrl),
     );
     if (targets.isEmpty) return false;
@@ -360,7 +341,6 @@ extension ProxiesControllerExt on AppController {
           ...computeDelayTestTargets(
             proxies: proxies,
             groups: groups,
-            selectedMap: this.currentProfile?.selectedMap ?? {},
             defaultTestUrl: getRealTestUrl(group.testUrl),
           ),
     };

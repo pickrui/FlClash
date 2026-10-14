@@ -133,10 +133,8 @@ class _ProxiesListViewState extends State<ProxiesListView> {
       );
       items.addSection(1, 8, (_) => const SizedBox(height: 8));
       if (!isExpand) continue;
-      final source = pages[groupName];
-      final count = source == null
-          ? group.all.length
-          : max(source.initialized ? 0 : 1, source.total);
+      final source = pages[groupName]!;
+      final count = max(source.initialized ? 0 : 1, source.total);
       items.addSection((count / columns).ceil(), getItemHeight(cardType) + 8, (
         row,
       ) {
@@ -151,13 +149,11 @@ class _ProxiesListViewState extends State<ProxiesListView> {
                     builder: (_) {
                       final index = row * columns + column;
                       if (index >= count) return const SizedBox();
-                      final proxy = source == null
-                          ? group.all[index]
-                          : source.at(index);
+                      final proxy = source.at(index);
                       return SizedBox(
                         height: getItemHeight(cardType),
                         child: proxy == null
-                            ? NodePagePlaceholder(pages: source!, index: index)
+                            ? NodePagePlaceholder(pages: source, index: index)
                             : ProxyCard(
                                 testUrl: group.testUrl,
                                 type: cardType,
@@ -267,34 +263,23 @@ class _ProxiesListViewState extends State<ProxiesListView> {
   Future<void> _scrollToGroupSelected(String groupName) async {
     final currentInitOffset = _getGroupOffset(groupName);
     if (currentInitOffset == null) return;
-    final group = _groups.getGroup(groupName);
-    final proxies = group?.all;
-    double? pagedOffset;
-    if (group?.nodeCount != null) {
-      final container = ProviderScope.containerOf(context, listen: false);
-      final pages = container.read(
-        nodePagesProvider((
-          group: groupName,
-          query: container.read(queryProvider(QueryTag.proxies)),
-        )),
-      );
-      await pages.load(0);
-      if (!mounted) return;
-      final columns = container.read(getProxiesColumnsProvider);
-      final cardType = container.read(proxiesStyleSettingProvider).cardType;
-      pagedOffset =
-          max(0, pages.selectedIndex) ~/
-          columns *
-          (getItemHeight(cardType) + 8);
-    }
+    final container = ProviderScope.containerOf(context, listen: false);
+    final pages = container.read(
+      nodePagesProvider((
+        group: groupName,
+        query: container.read(queryProvider(QueryTag.proxies)),
+      )),
+    );
+    await pages.load(0);
+    if (!mounted) return;
+    final columns = container.read(getProxiesColumnsProvider);
+    final cardType = container.read(proxiesStyleSettingProvider).cardType;
     _jumpTo(
       currentInitOffset +
           8 +
-          (pagedOffset ??
-              getScrollToSelectedOffset(
-                groupName: groupName,
-                proxies: proxies ?? [],
-              )),
+          max(0, pages.selectedIndex) ~/
+              columns *
+              (getItemHeight(cardType) + 8),
     );
   }
 
@@ -328,8 +313,7 @@ class _ProxiesListViewState extends State<ProxiesListView> {
         final query = ref.watch(queryProvider(QueryTag.proxies));
         final pages = <String, NodePages>{
           for (final group in state.groups)
-            if (group.nodeCount != null &&
-                state.currentUnfoldSet.contains(group.name))
+            if (state.currentUnfoldSet.contains(group.name))
               group.name: ref.watch(
                 nodePagesProvider((group: group.name, query: query)),
               ),

@@ -330,32 +330,24 @@ class _ProxyGroupViewState extends ConsumerState<ProxyGroupView> {
   }
 
   Future<void> scrollToSelected() async {
-    double? pagedOffset;
-    if (widget.group.nodeCount != null) {
-      final pages = ref.read(
-        nodePagesProvider((
-          group: widget.group.name,
-          query: ref.read(queryProvider(QueryTag.proxies)),
-        )),
-      );
-      await pages.load(0);
-      if (!mounted) return;
-      pagedOffset =
-          max(0, pages.selectedIndex) ~/
-          widget.columns *
-          (getItemHeight(widget.cardType) + 8);
-    }
-    if (!_controller.hasClients || _controller.position.maxScrollExtent == 0) {
+    final pages = ref.read(
+      nodePagesProvider((
+        group: widget.group.name,
+        query: ref.read(queryProvider(QueryTag.proxies)),
+      )),
+    );
+    await pages.load(0);
+    if (!mounted ||
+        !_controller.hasClients ||
+        _controller.position.maxScrollExtent == 0) {
       return;
     }
     _controller.animateTo(
       min(
         16 +
-            (pagedOffset ??
-                getScrollToSelectedOffset(
-                  groupName: widget.group.name,
-                  proxies: widget.group.all,
-                )),
+            max(0, pages.selectedIndex) ~/
+                widget.columns *
+                (getItemHeight(widget.cardType) + 8),
         _controller.position.maxScrollExtent,
       ),
       duration: const Duration(milliseconds: 300),
@@ -366,16 +358,13 @@ class _ProxyGroupViewState extends ConsumerState<ProxyGroupView> {
   @override
   Widget build(BuildContext context) {
     final group = widget.group;
-    final proxies = group.all;
-    final pages = group.nodeCount == null
-        ? null
-        : ref.watch(
-            nodePagesProvider((
-              group: group.name,
-              query: ref.watch(queryProvider(QueryTag.proxies)),
-            )),
-          );
-    if (pages != null && pages.initialized && pages.total == 0) {
+    final pages = ref.watch(
+      nodePagesProvider((
+        group: group.name,
+        query: ref.watch(queryProvider(QueryTag.proxies)),
+      )),
+    );
+    if (pages.initialized && pages.total == 0) {
       return NullStatus(
         label: context.appLocalizations.nullTip(
           context.appLocalizations.proxies,
@@ -400,13 +389,11 @@ class _ProxyGroupViewState extends ConsumerState<ProxyGroupView> {
           crossAxisSpacing: 8,
           mainAxisExtent: getItemHeight(widget.cardType),
         ),
-        itemCount: pages == null
-            ? proxies.length
-            : max(pages.initialized ? 0 : 1, pages.total),
+        itemCount: max(pages.initialized ? 0 : 1, pages.total),
         itemBuilder: (_, index) {
-          final proxy = pages == null ? proxies[index] : pages.at(index);
+          final proxy = pages.at(index);
           if (proxy == null) {
-            return NodePagePlaceholder(pages: pages!, index: index);
+            return NodePagePlaceholder(pages: pages, index: index);
           }
           return ProxyCard(
             testUrl: group.testUrl,

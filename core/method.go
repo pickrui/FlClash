@@ -195,8 +195,6 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 			return
 		}
 		response.success(handleSetupConfig(params))
-	case getProxiesMethod:
-		response.success(handleGetProxies())
 	case getProxyGroupsMethod:
 		response.success(handleGetProxyGroups())
 	case getProxyPageMethod:

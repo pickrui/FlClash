@@ -142,9 +142,7 @@ class Tray {
     if (system.isMacOS) {
       for (final group in trayState.groups) {
         final subMenuItems = <native.TrayMenuItem>[];
-        final selectedName = group.getCurrentSelectedName(
-          trayState.selectedMap[group.name] ?? '',
-        );
+        final selectedName = group.realNow;
         for (final proxy in group.all) {
           subMenuItems.add(
             native.TrayMenuCheckbox(

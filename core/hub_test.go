@@ -7,8 +7,6 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"slices"
 	"testing"
 	"time"
@@ -98,66 +96,6 @@ rules: ['MATCH,Personal']
 	}
 }
 
-func proxyListPayloadFixture() ProxiesData {
-	proxies := make(map[string]constant.Proxy, 1000)
-	for index := range 1000 {
-		proxies[fmt.Sprintf("node-%04d", index)] = adapter.NewProxy(outbound.NewDirect())
-	}
-	return ProxiesData{Proxies: proxies}
-}
-
-func TestProxyListPayloadOmitsUnusedNodeMetadata(t *testing.T) {
-	data := proxyListPayloadFixture()
-	type fullProxiesData ProxiesData
-	full, err := json.Marshal(fullProxiesData(data))
-	if err != nil {
-		t.Fatal(err)
-	}
-	compact, err := json.Marshal(data)
-	if err != nil {
-		t.Fatal(err)
-	}
-	var wire struct {
-		Proxies map[string]map[string]any `json:"proxies"`
-	}
-	if err := json.Unmarshal(compact, &wire); err != nil {
-		t.Fatal(err)
-	}
-	if len(wire.Proxies) != len(data.Proxies) {
-		t.Fatal("compact snapshot dropped nodes")
-	}
-	for _, node := range wire.Proxies {
-		if len(node) != 2 || node["name"] != "DIRECT" || node["type"] != "Direct" {
-			t.Fatalf("unexpected node payload: %#v", node)
-		}
-	}
-	if len(compact)*2 >= len(full) {
-		t.Fatalf("compact snapshot is not substantially smaller: %d vs %d bytes", len(compact), len(full))
-	}
-	t.Logf("1000-node payload: %d -> %d bytes", len(full), len(compact))
-}
-
-func BenchmarkProxyListSnapshot(b *testing.B) {
-	data := proxyListPayloadFixture()
-	type fullProxiesData ProxiesData
-	for _, test := range []struct {
-		name string
-		data any
-	}{
-		{name: "full", data: fullProxiesData(data)},
-		{name: "compact", data: data},
-	} {
-		b.Run(test.name, func(b *testing.B) {
-			b.ReportAllocs()
-			for b.Loop() {
-				if _, err := json.Marshal(test.data); err != nil {
-					b.Fatal(err)
-				}
-			}
-		})
-	}
-}
-
 func TestHandleChangeProxyDoesNotWaitForConfigApply(t *testing.T) {
 	runLock.Lock()
 	defer runLock.Unlock()
@@ -181,7 +119,7 @@ func TestHandleChangeProxyDoesNotWaitForConfigApply(t *testing.T) {
 	}
 }
 
-func TestHandleGetProxiesPreservesGroupsWhenProviderNodesShareTheirNames(t *testing.T) {
+func TestNodeGroupsKeepGroupsWhenProviderNodesShareTheirNames(t *testing.T) {
 	setValidationTestHome(t)
 	previousNames := slices.Clone(config.GetProxyNameList())
 	previousProxies, previousProviders := tunnel.Proxies(), tunnel.Providers()
@@ -218,49 +156,29 @@ rules: ['MATCH,Personal']
 	patchSelectGroup(nil)
 
 	for range 128 {
-		data := handleGetProxies()
+		groups := map[string]bool{}
+		for _, group := range handleGetProxyGroups() {
+			groups[group["name"].(string)] = true
+		}
 		for _, name := range []string{"GLOBAL", "Personal", "Nested"} {
-			if !slices.Contains(data.All, name) || data.Proxies[name] != parsed.Proxies[name] {
-				t.Fatalf("provider node replaced live group %q: all=%v", name, data.All)
+			if !groups[name] {
+				t.Fatalf("provider node replaced live group %q: %v", name, groups)
 			}
 		}
-		personal := data.GroupMembers["Personal"]
-		if len(personal) != 2 || personal["Personal"].Name != "Personal" || personal["Personal"].Type != "Shadowsocks" || personal["GLOBAL"].Name != "GLOBAL" || personal["GLOBAL"].Type != "Shadowsocks" {
-			t.Fatalf("personal members do not match the live provider nodes: %#v", personal)
+		page := handleGetProxyPage(nodePageRequest{Group: "Personal"})
+		if len(page.Items) != 3 || page.Items[0] != (ProxyGroupMember{Name: "Personal", Type: "Shadowsocks"}) || page.Items[1] != (ProxyGroupMember{Name: "GLOBAL", Type: "Shadowsocks"}) {
+			t.Fatalf("personal members do not match the live provider nodes: %#v", page.Items)
 		}
-		nested := data.GroupMembers["Nested"]
-		if len(nested) != 0 {
-			t.Fatalf("unambiguous nested members were duplicated in the snapshot: %#v", nested)
+		if nested := handleGetProxyPage(nodePageRequest{Group: "Nested"}); len(nested.Items) != 1 || nested.Items[0].Type != "Selector" {
+			t.Fatalf("nested group lost its group member: %#v", nested.Items)
 		}
 		groupName, proxyName := "Personal", "GLOBAL"
 		if message := handleChangeProxy(&ChangeProxyParams{GroupName: &groupName, ProxyName: &proxyName}); message != "" {
-			t.Fatalf("valid selection failed after reading a snapshot: %s", message)
+			t.Fatalf("valid selection failed after reading a page: %s", message)
 		}
 		proxyName = "Personal"
 		if message := handleChangeProxy(&ChangeProxyParams{GroupName: &groupName, ProxyName: &proxyName}); message != "" {
 			t.Fatal(message)
 		}
-	}
-
-	encoded, err := json.Marshal(handleGetProxies())
-	if err != nil {
-		t.Fatal(err)
-	}
-	var wire struct {
-		Proxies      map[string]map[string]any              `json:"proxies"`
-		GroupMembers map[string]map[string]ProxyGroupMember `json:"groupMembers"`
-	}
-	if err := json.Unmarshal(encoded, &wire); err != nil {
-		t.Fatal(err)
-	}
-	personal := wire.Proxies["Personal"]
-	if personal["type"] != "Selector" || personal["hidden"] != false || personal["icon"] != "custom-icon" || personal["testUrl"] != "https://example.test/check" || personal["now"] != "Personal" {
-		t.Fatalf("group metadata changed in the wire snapshot: %#v", personal)
-	}
-	if members, ok := personal["all"].([]any); !ok || len(members) != 3 || members[0] != "Personal" || members[1] != "GLOBAL" || members[2] != "Unique" {
-		t.Fatalf("wire snapshot lost original member names: %#v", personal["all"])
-	}
-	if members := wire.GroupMembers["Personal"]; len(members) != 2 || members["Personal"].Type != "Shadowsocks" {
-		t.Fatalf("scoped members were lost during serialization: %#v", members)
 	}
 }
