@@ -236,8 +236,6 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 		handleAsyncTestDelay(&params, func(value *Delay) { response.success(value) })
 	case getConnectionCountMethod:
 		response.success(handleGetConnectionCount())
-	case getConnectionsMethod:
-		response.success(handleGetConnections())
 	case startConnectionsMethod, renewConnectionsMethod, stopConnectionsMethod:
 		id := ""
 		if !decodeMethodArguments(call, response, &id) {

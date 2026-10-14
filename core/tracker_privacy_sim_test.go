@@ -195,12 +195,14 @@ rules:
 	openThroughCore(t, mixedPort, "public.example")
 	openThroughCore(t, mixedPort, "api.example")
 
-	data, err := json.Marshal(handleGetConnections())
+	streams := connectionStreams{rangeTrackers: liveConnections.rangeTrackers, send: func(Message) {}}
+	defer streams.stop("")
+	data, err := json.Marshal(streams.start("privacy"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	var snapshot struct {
-		Connections []simulatedConnection `json:"connections"`
+		Connections []simulatedConnection `json:"added"`
 	}
 	if err := json.Unmarshal(data, &snapshot); err != nil {
 		t.Fatal(err)

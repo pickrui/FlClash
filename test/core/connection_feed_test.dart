@@ -126,6 +126,55 @@ void main() {
   });
 
   test(
+    'a lost or failed snapshot cancels its subscription and backs off',
+    () async {
+      var now = DateTime.utc(2026);
+      var serial = 0;
+      final stops = <String>[];
+      Object? Function(String id) answer = (_) => null;
+      final feed = ConnectionFeed(
+        newId: () => '${++serial}',
+        now: () => now,
+        onSnapshot: (_) {},
+        invoke: (method, id) async {
+          if (method == CoreMethod.stopConnections) {
+            stops.add(id);
+            return true;
+          }
+          return answer(id);
+        },
+      );
+      addTearDown(feed.stop);
+      final disconnected = isA<CoreMethodException>().having(
+        (error) => error.isCoreUnavailable,
+        'isCoreUnavailable',
+        isTrue,
+      );
+      await expectLater(feed.maintain(), throwsA(disconnected));
+      expect(stops, ['1']);
+      answer = (_) => throw const CoreMethodException(
+        code: 'transport_error',
+        message: 'fixture failure',
+      );
+      now = now.add(const Duration(seconds: 1));
+      await expectLater(feed.maintain(), throwsA(disconnected));
+      expect(stops, ['1', '2']);
+      now = now.add(const Duration(seconds: 1));
+      await feed.maintain();
+      expect(serial, 2);
+      answer = (id) => snapshot(id, 'live');
+      now = now.add(const Duration(seconds: 1));
+      await feed.maintain();
+      expect(serial, 3);
+      expect(stops, ['1', '2']);
+      feed.stop();
+      answer = (_) => null;
+      await expectLater(feed.maintain(), throwsA(disconnected));
+      expect(serial, 4);
+    },
+  );
+
+  test(
     'a silent restart is detected even if its final event was dropped',
     () async {
       var now = DateTime.utc(2026);

@@ -258,15 +258,15 @@ class CoreController {
       ) ??
       0;
 
-  Future<List<TrackerInfo>> getConnections() async {
-    return _interface.getConnections();
-  }
-
   Future<T?> connectionStream<T>(CoreMethod method, String subscription) =>
       _interface.invokeMethod<T>(
         method: method,
         arguments: subscription,
-        timeout: const Duration(seconds: 3),
+        // Core leases a subscription for 15 s and the feed first renews it 5 s
+        // after the snapshot lands, so a full snapshot may not take over 8 s.
+        timeout: Duration(
+          seconds: method == CoreMethod.startConnections ? 8 : 3,
+        ),
       );
 
   Future<void> closeConnection(String id) {

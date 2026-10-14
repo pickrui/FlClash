@@ -22,14 +22,12 @@ import 'item.dart';
 
 class ConnectionsView extends ConsumerStatefulWidget {
   final ScrollController? scrollController;
-  final Future<List<TrackerInfo>> Function()? connectionsReader;
   final CoreController? core;
   final DateTime Function()? now;
 
   const ConnectionsView({
     super.key,
     this.scrollController,
-    @visibleForTesting this.connectionsReader,
     @visibleForTesting this.core,
     @visibleForTesting this.now,
   });
@@ -56,7 +54,7 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
     invoke: (method, id) => _core.connectionStream<Object>(method, id),
     newId: () => utils.uuidV4,
     onSnapshot: (connections) {
-      if (canPoll) _publishConnections(connections, () => canPoll);
+      if (canPoll) _publishConnections(connections);
     },
   );
 
@@ -101,33 +99,22 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
   }
 
   @override
-  Future<void> poll(PollGuard isCurrent) => widget.connectionsReader != null
-      ? _refreshConnections(isCurrent)
-      : _feed.maintain();
-
-  Future<void> _refreshConnections([bool Function()? isCurrent]) async {
-    final generation = ++_refreshGeneration;
-    final trackerInfos = await _readConnections();
-    if (trackerInfos == null ||
-        generation != _refreshGeneration ||
-        !(isCurrent?.call() ?? mounted)) {
-      return;
+  Future<void> poll(PollGuard isCurrent) async {
+    try {
+      await _feed.maintain();
+    } catch (error) {
+      commonPrint.log(
+        'Connections update failed: $error',
+        logLevel: coreFailureLogLevel(error),
+      );
     }
-    _publishConnections(trackerInfos, isCurrent);
   }
 
-  void _publishConnections(
-    List<TrackerInfo> trackerInfos,
-    bool Function()? isCurrent,
-  ) {
+  void _publishConnections(List<TrackerInfo> trackerInfos) {
     final generation = ++_refreshGeneration;
     final sampledAt = widget.now?.call() ?? DateTime.now();
     updateWhenRouteSettled(() {
-      if (!mounted ||
-          generation != _refreshGeneration ||
-          !(isCurrent?.call() ?? true)) {
-        return;
-      }
+      if (!canPoll || generation != _refreshGeneration) return;
       _connectionsStateNotifier.value = _connectionsStateNotifier.value
           .copyWith(trackerInfos: _speedRanker.rank(trackerInfos, sampledAt));
     });
@@ -139,21 +126,6 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
     _refreshGeneration++;
     _feed.stop();
     _speedRanker.reset();
-  }
-
-  Future<List<TrackerInfo>?> _readConnections() async {
-    try {
-      final connectionsReader = widget.connectionsReader;
-      return connectionsReader != null
-          ? await connectionsReader()
-          : await _core.getConnections();
-    } catch (error) {
-      commonPrint.log(
-        'updateConnections error: $error',
-        logLevel: coreFailureLogLevel(error),
-      );
-      return null;
-    }
   }
 
   Future<void> _closeConnections([String? id]) async {
@@ -175,21 +147,6 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
         await _core.closeConnections();
       } else {
         await _core.closeConnection(id);
-      }
-      if (canPoll) {
-        if (widget.connectionsReader != null) {
-          await _refreshConnections(() => canPoll);
-        } else {
-          _feed.refresh();
-          try {
-            await _feed.maintain();
-          } catch (error) {
-            commonPrint.log(
-              'Connection refresh failed: $error',
-              logLevel: coreFailureLogLevel(error),
-            );
-          }
-        }
       }
     } finally {
       if (mounted) {

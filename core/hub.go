@@ -513,12 +513,6 @@ func handleGetConnectionCount() int {
 	return count
 }
 
-func handleGetConnections() any {
-	runLock.Lock()
-	defer runLock.Unlock()
-	return statistic.DefaultManager.Snapshot()
-}
-
 func handleCloseConnections() bool {
 	runLock.Lock()
 	defer runLock.Unlock()

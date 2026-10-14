@@ -28,7 +28,69 @@ import 'package:mocktail/mocktail.dart';
 
 final class _MockCoreHandler extends Mock implements CoreHandlerInterface {}
 
+class _StreamCore {
+  _StreamCore(this.read) {
+    for (final method in const [
+      CoreMethod.startConnections,
+      CoreMethod.renewConnections,
+      CoreMethod.stopConnections,
+    ]) {
+      when(
+        () => handler.invokeMethod<Object>(
+          method: method,
+          arguments: any(named: 'arguments'),
+          timeout: any(named: 'timeout'),
+        ),
+      ).thenAnswer(
+        (call) => _answer(method, call.namedArguments[#arguments] as String),
+      );
+    }
+  }
+
+  final handler = _MockCoreHandler();
+  late final core = CoreController.forTesting(handler: handler);
+  final FutureOr<List<TrackerInfo>> Function() read;
+  var lost = false;
+  var subscription = '';
+  var sequence = 0;
+  var starts = 0;
+  var stops = 0;
+
+  Future<Object?> _answer(CoreMethod method, String id) async {
+    if (method == CoreMethod.stopConnections) stops++;
+    if (method != CoreMethod.startConnections) return true;
+    starts++;
+    subscription = id;
+    sequence = 0;
+    if (lost) return null;
+    return {
+      'subscription': id,
+      'sequence': 0,
+      'reset': true,
+      'added': jsonDecode(jsonEncode(await read())),
+    };
+  }
+
+  Future<void> send(WidgetTester tester, Map<String, Object?> delta) =>
+      tester.runAsync(() async {
+        coreEventManager.sendEvent(
+          CoreEvent(
+            type: CoreEventType.connections,
+            data: {
+              'subscription': subscription,
+              'sequence': ++sequence,
+              ...delta,
+            },
+          ),
+        );
+        await Future<void>.delayed(Duration.zero);
+      });
+}
+
 void main() {
+  // Dispatch lives in the zone that first reads the manager; a test's fake
+  // zone would strand every later delivery.
+  coreEventManager;
   late ProviderContainer container;
 
   setUp(() {
@@ -58,31 +120,19 @@ void main() {
     );
   }
 
-  Future<void> pumpConnections(
-    WidgetTester tester, {
-    required Future<List<TrackerInfo>> Function() connectionsReader,
-    bool isPageActive = true,
-    CoreController? core,
+  Future<void> show(
+    WidgetTester tester,
+    _StreamCore stream, {
+    bool active = true,
     DateTime Function()? now,
   }) async {
-    tester.view.physicalSize = const Size(600, 800);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-
-    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
         child: _TestApp(
           child: PageActivityScope(
-            isActive: isPageActive,
-            child: ConnectionsView(
-              connectionsReader: connectionsReader,
-              core: core,
-              now: now,
-            ),
+            isActive: active,
+            child: ConnectionsView(core: stream.core, now: now),
           ),
         ),
       ),
@@ -90,96 +140,81 @@ void main() {
     await tester.pump();
   }
 
+  Future<_StreamCore> pumpConnections(
+    WidgetTester tester,
+    FutureOr<List<TrackerInfo>> Function() read, {
+    bool isPageActive = true,
+    DateTime Function()? now,
+  }) async {
+    tester.view.physicalSize = const Size(600, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    final stream = _StreamCore(read);
+    await show(tester, stream, active: isPageActive, now: now);
+    await tester.pump();
+    return stream;
+  }
+
   testWidgets(
     'visible connections consume deltas and hidden pages unsubscribe',
     (tester) async {
-      final handler = _MockCoreHandler();
-      final core = CoreController.forTesting(handler: handler);
-      var subscription = '';
-      var starts = 0;
-      var stops = 0;
-      when(
-        () => handler.invokeMethod<Object>(
-          method: CoreMethod.startConnections,
-          arguments: any(named: 'arguments'),
-          timeout: any(named: 'timeout'),
-        ),
-      ).thenAnswer((call) async {
-        subscription = call.namedArguments[#arguments] as String;
-        starts++;
-        return {
-          'subscription': subscription,
-          'sequence': 0,
-          'reset': true,
-          'added': jsonDecode(jsonEncode(buildConnections(1))),
-        };
-      });
-      when(
-        () => handler.invokeMethod<Object>(
-          method: CoreMethod.stopConnections,
-          arguments: any(named: 'arguments'),
-          timeout: any(named: 'timeout'),
-        ),
-      ).thenAnswer((_) async {
-        stops++;
-        return true;
-      });
-      when(
-        () => handler.invokeMethod<Object>(
-          method: CoreMethod.renewConnections,
-          arguments: any(named: 'arguments'),
-          timeout: any(named: 'timeout'),
-        ),
-      ).thenAnswer((_) async => true);
-      Future<void> show(bool active) async {
-        tester.binding.handleAppLifecycleStateChanged(
-          AppLifecycleState.resumed,
-        );
-        await tester.pumpWidget(
-          UncontrolledProviderScope(
-            container: container,
-            child: _TestApp(
-              child: PageActivityScope(
-                isActive: active,
-                child: ConnectionsView(core: core),
-              ),
-            ),
-          ),
-        );
-        await tester.pump();
-      }
-
-      await show(true);
-      await tester.pump();
+      final stream = await pumpConnections(tester, () => buildConnections(1));
       expect(find.byType(TrackerInfoItem), findsOneWidget);
-      coreEventManager.sendEvent(
-        CoreEvent(
-          type: CoreEventType.connections,
-          data: {
-            'subscription': subscription,
-            'sequence': 1,
-            'removed': ['0'],
-          },
-        ),
-      );
+      await stream.send(tester, {
+        'removed': ['0'],
+      });
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
       expect(find.byType(TrackerInfoItem), findsNothing);
-      expect(starts, 1);
-      await show(false);
-      expect(stops, 1);
+      expect(stream.starts, 1);
+      await show(tester, stream, active: false);
+      expect(stream.stops, 1);
       await tester.pump(const Duration(seconds: 5));
-      expect(starts, 1);
-      await show(true);
-      expect(starts, 2);
+      expect(stream.starts, 1);
+      await show(tester, stream);
+      expect(stream.starts, 2);
       await tester.pumpWidget(const SizedBox.shrink());
     },
   );
 
+  testWidgets('a lost snapshot is cancelled and logged as a disconnect', (
+    tester,
+  ) async {
+    final previous = debugPrint;
+    final messages = <String>[];
+    debugPrint = (message, {wrapWidth}) => messages.add(message ?? '');
+    try {
+      final stream = await pumpConnections(tester, () => const []);
+      stream.lost = true;
+      await show(tester, stream, active: false);
+      await show(tester, stream);
+      expect(stream.starts, 2);
+      expect(stream.stops, 2);
+      expect(
+        messages.where((message) => message.contains('poll error')),
+        isEmpty,
+      );
+      expect(
+        messages.where(
+          (message) =>
+              message.contains('Connections update failed') &&
+              message.contains('transport_disconnected'),
+        ),
+        isNotEmpty,
+      );
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    } finally {
+      debugPrint = previous;
+    }
+  });
+
   testWidgets('ConnectionsView lazily builds every connection', (tester) async {
     final connections = buildConnections(100);
 
-    await pumpConnections(tester, connectionsReader: () async => connections);
+    await pumpConnections(tester, () => connections);
     await tester.pump();
 
     final builtItems = find.byType(TrackerInfoItem).evaluate().length;
@@ -210,15 +245,18 @@ void main() {
     var now = DateTime.utc(2026);
     final connections = buildConnections(2);
     connections[0] = connections[0].copyWith(download: 1 << 30);
-    await pumpConnections(
+    final stream = await pumpConnections(
       tester,
-      connectionsReader: () async => connections,
+      () => connections,
       now: () => now,
     );
-    await tester.pump();
     now = now.add(const Duration(seconds: 1));
-    connections[1] = connections[1].copyWith(upload: 1024, download: 4096);
-    await tester.pump(const Duration(seconds: 1));
+    await stream.send(tester, {
+      'updated': [
+        {'id': '1', 'upload': 1024, 'download': 4096},
+      ],
+    });
+    await tester.pump();
     await tester.pump();
     final items = tester
         .widgetList<TrackerInfoItem>(find.byType(TrackerInfoItem))
@@ -233,101 +271,55 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
-  testWidgets('ConnectionsView polls only while the page is active', (
+  testWidgets('ConnectionsView subscribes only while the page is active', (
     tester,
   ) async {
-    var readCount = 0;
-
-    Future<List<TrackerInfo>> readConnections() async {
-      readCount++;
-      return const [];
-    }
-
-    await pumpConnections(
+    final stream = await pumpConnections(
       tester,
-      connectionsReader: readConnections,
+      () => const [],
       isPageActive: false,
     );
     await tester.pump(const Duration(seconds: 3));
+    expect(stream.starts, 0);
 
-    expect(readCount, 0);
+    await show(tester, stream);
+    expect(stream.starts, 1);
 
-    await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: _TestApp(
-          child: PageActivityScope(
-            isActive: true,
-            child: ConnectionsView(connectionsReader: readConnections),
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
-
-    expect(readCount, 1);
-
-    await tester.pump(const Duration(seconds: 1));
-    await tester.pump();
-
-    expect(readCount, 2);
-
-    await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: _TestApp(
-          child: PageActivityScope(
-            isActive: false,
-            child: ConnectionsView(connectionsReader: readConnections),
-          ),
-        ),
-      ),
-    );
+    await show(tester, stream, active: false);
+    expect(stream.stops, 1);
     await tester.pump(const Duration(seconds: 3));
-
-    expect(readCount, 2);
+    expect(stream.starts, 1);
     expect(tester.takeException(), null);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
-  testWidgets('ConnectionsView stops polling while the app is paused', (
+  testWidgets('ConnectionsView unsubscribes while the app is paused', (
     tester,
   ) async {
-    var readCount = 0;
-
-    Future<List<TrackerInfo>> readConnections() async {
-      readCount++;
-      return const [];
-    }
-
-    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-    await pumpConnections(tester, connectionsReader: readConnections);
-    await tester.pump();
-
-    expect(readCount, 1);
+    final stream = await pumpConnections(tester, () => const []);
+    expect(stream.starts, 1);
 
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
     await tester.pump(const Duration(seconds: 4));
-
-    expect(readCount, 1);
+    expect(stream.stops, 1);
+    expect(stream.starts, 1);
 
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pump();
-
-    expect(readCount, 2);
+    expect(stream.starts, 2);
     expect(tester.takeException(), null);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
-  testWidgets('paused polling discards a response held by a route gesture', (
+  testWidgets('pausing discards a delta held by a route gesture', (
     tester,
   ) async {
     var count = 0;
-    await pumpConnections(
+    final stream = await pumpConnections(
       tester,
-      connectionsReader: () async => buildConnections(++count),
+      () => buildConnections(++count),
     );
     final navigator = Navigator.of(
       tester.element(find.byType(ConnectionsView)),
@@ -335,9 +327,11 @@ void main() {
     expect(find.text('host-0.com:443', findRichText: true), findsOneWidget);
 
     navigator.didStartUserGesture();
-    await tester.pump(const Duration(seconds: 1));
+    await stream.send(tester, {
+      'added': jsonDecode(jsonEncode(buildConnections(2).sublist(1))),
+    });
     await tester.pump();
-    expect(count, 2);
+    await tester.pump();
     expect(find.text('host-1.com:443', findRichText: true), findsNothing);
 
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
@@ -348,40 +342,29 @@ void main() {
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pump();
     await tester.pump();
-    expect(find.text('host-2.com:443', findRichText: true), findsOneWidget);
+    expect(stream.starts, 2);
+    expect(find.text('host-1.com:443', findRichText: true), findsOneWidget);
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
-  testWidgets('ConnectionsView refreshes only after the Core closes', (
+  testWidgets('closing leaves removal to the stream without resnapshotting', (
     tester,
   ) async {
-    final handler = _MockCoreHandler();
-    var connections = buildConnections(3);
-    var readCount = 0;
+    final stream = await pumpConnections(tester, () => buildConnections(3));
+    final handler = stream.handler;
     final closeAll = Completer<bool>();
     final closeOne = Completer<bool>();
     when(() => handler.closeConnections()).thenAnswer((_) => closeAll.future);
     when(() => handler.closeConnection('0')).thenAnswer((_) => closeOne.future);
 
-    await pumpConnections(
-      tester,
-      connectionsReader: () async {
-        readCount++;
-        return connections;
-      },
-      core: CoreController.forTesting(handler: handler),
-    );
-    await tester.pump();
-    expect(readCount, 1);
-
     await tester.tap(find.byTooltip('Close').first);
     await tester.pump();
-    expect(readCount, 1);
-
-    connections = connections.sublist(1);
     closeOne.complete(true);
     await tester.pump();
-    expect(readCount, 2);
+    await stream.send(tester, {
+      'removed': ['0'],
+    });
+    await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
     await tester.pump();
     expect(find.text('host-0.com:443', findRichText: true), findsNothing);
@@ -389,14 +372,14 @@ void main() {
 
     await tester.tap(find.byTooltip('Close all connections'));
     await tester.pump();
-    expect(readCount, 2);
-
-    connections = const [];
     closeAll.complete(true);
     await tester.pump();
-    expect(readCount, 3);
+    await stream.send(tester, {
+      'removed': ['1', '2'],
+    });
     await tester.pumpAndSettle();
     expect(find.byType(TrackerInfoItem), findsNothing);
+    expect(stream.starts, 1);
     expect(tester.takeException(), null);
 
     await tester.pumpWidget(const SizedBox.shrink());
@@ -405,17 +388,13 @@ void main() {
   testWidgets(
     'closing connections prevents duplicate and overlapping submissions',
     (tester) async {
-      final handler = _MockCoreHandler();
+      final stream = await pumpConnections(tester, () => buildConnections(2));
+      final handler = stream.handler;
       final closeOne = Completer<bool>();
       final closeAll = Completer<bool>();
       when(() => handler.closeConnection('0'))
           .thenAnswer((_) => closeOne.future);
       when(() => handler.closeConnections()).thenAnswer((_) => closeAll.future);
-      await pumpConnections(
-        tester,
-        connectionsReader: () async => buildConnections(2),
-        core: CoreController.forTesting(handler: handler),
-      );
       final closeButtons = find.byWidgetPredicate(
         (widget) => widget is IconButton && widget.tooltip == 'Close',
       );
@@ -458,36 +437,29 @@ void main() {
     },
   );
 
-  testWidgets('closing after the app pauses does not refresh a hidden page', (
+  testWidgets('a close finishing after the app pauses stays unsubscribed', (
     tester,
   ) async {
-    final handler = _MockCoreHandler();
+    final stream = await pumpConnections(tester, () => buildConnections(1));
     final closing = Completer<bool>();
-    var reads = 0;
-    when(() => handler.closeConnections()).thenAnswer((_) => closing.future);
-    await pumpConnections(
-      tester,
-      connectionsReader: () async {
-        reads++;
-        return buildConnections(1);
-      },
-      core: CoreController.forTesting(handler: handler),
-    );
+    when(() => stream.handler.closeConnections())
+        .thenAnswer((_) => closing.future);
     await tester.tap(find.byTooltip('Close all connections'));
     await tester.pump();
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
     closing.complete(true);
     await tester.pump();
-    expect(reads, 1);
+    expect(stream.starts, 1);
+    expect(stream.stops, 1);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pump();
-    expect(reads, 2);
+    expect(stream.starts, 2);
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
   testWidgets('an empty connection list disables close all', (tester) async {
-    await pumpConnections(tester, connectionsReader: () async => []);
+    await pumpConnections(tester, () => const []);
     expect(
       tester
           .widget<IconButton>(
@@ -506,14 +478,10 @@ void main() {
   testWidgets('a failed close releases its busy state and remains retryable', (
     tester,
   ) async {
-    final handler = _MockCoreHandler();
+    final stream = await pumpConnections(tester, () => buildConnections(1));
+    final handler = stream.handler;
     final failed = Completer<bool>();
     when(() => handler.closeConnections()).thenAnswer((_) => failed.future);
-    await pumpConnections(
-      tester,
-      connectionsReader: () async => buildConnections(1),
-      core: CoreController.forTesting(handler: handler),
-    );
     await tester.tap(find.byTooltip('Close all connections'));
     await tester.pump();
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
@@ -526,45 +494,6 @@ void main() {
     await tester.pumpAndSettle();
     verify(() => handler.closeConnections()).called(2);
     expect(tester.takeException(), isNull);
-    await tester.pumpWidget(const SizedBox.shrink());
-  });
-
-  testWidgets('ConnectionsView drops a poll that ends after a later refresh', (
-    tester,
-  ) async {
-    final handler = _MockCoreHandler();
-    when(() => handler.closeConnections()).thenAnswer((_) async => true);
-    final reads = <Completer<List<TrackerInfo>>>[];
-
-    await pumpConnections(
-      tester,
-      connectionsReader: () {
-        final read = Completer<List<TrackerInfo>>();
-        reads.add(read);
-        return read.future;
-      },
-      core: CoreController.forTesting(handler: handler),
-    );
-    reads.single.complete(buildConnections(3));
-    await tester.pump();
-    expect(find.text('host-0.com:443', findRichText: true), findsOneWidget);
-
-    await tester.pump(const Duration(seconds: 1));
-    expect(reads, hasLength(2));
-
-    await tester.tap(find.byTooltip('Close all connections'));
-    await tester.pump();
-    expect(reads, hasLength(3));
-
-    reads[2].complete(const []);
-    await tester.pumpAndSettle();
-    expect(find.byType(TrackerInfoItem), findsNothing);
-
-    reads[1].complete(buildConnections(3));
-    await tester.pump();
-    expect(find.byType(TrackerInfoItem), findsNothing);
-    expect(tester.takeException(), null);
-
     await tester.pumpWidget(const SizedBox.shrink());
   });
 }

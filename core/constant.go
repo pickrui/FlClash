@@ -134,7 +134,6 @@ const (
 	resetTrafficMethod             CoreMethod = "resetTraffic"
 	asyncTestDelayMethod           CoreMethod = "asyncTestDelay"
 	getConnectionCountMethod       CoreMethod = "getConnectionCount"
-	getConnectionsMethod           CoreMethod = "getConnections"
 	startConnectionsMethod         CoreMethod = "startConnections"
 	renewConnectionsMethod         CoreMethod = "renewConnections"
 	stopConnectionsMethod          CoreMethod = "stopConnections"

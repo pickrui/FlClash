@@ -91,8 +91,6 @@ mixin CoreInterface {
 
   Future<bool> crash();
 
-  FutureOr<List<TrackerInfo>> getConnections();
-
   FutureOr<bool> closeConnection(String id);
 
   FutureOr<String> deleteFile(String path);
@@ -354,22 +352,6 @@ abstract class CoreHandlerInterface with CoreInterface {
           ? providerName
           : {'providerName': providerName, 'providerType': providerType},
     );
-  }
-
-  @override
-  Future<List<TrackerInfo>> getConnections() async {
-    final data = await _invokeMethod<Map<String, dynamic>>(
-      method: CoreMethod.getConnections,
-    );
-    final connections = data?['connections'];
-    if (connections is! List) {
-      return [];
-    }
-    return connections
-        .whereType<Map>()
-        .map((item) => TrackerInfo.fromJson(Map<String, Object?>.from(item)))
-        .where((tracker) => !tracker.shouldSuppressOutput)
-        .toList();
   }
 
   @override
