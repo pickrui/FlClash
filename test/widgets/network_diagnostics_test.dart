@@ -7,6 +7,8 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:fl_clash/l10n/l10n.dart';
+import 'package:fl_clash/common/theme.dart';
+import 'package:fl_clash/state.dart';
 import 'package:fl_clash/providers/network_diagnostic_fix.dart';
 import 'package:fl_clash/services/network_diagnostics.dart';
 import 'package:fl_clash/views/network_diagnostics.dart';
@@ -31,6 +33,7 @@ class _ControlledService extends NetworkDiagnosticService {
   final completion = Completer<void>();
   CancelToken? token;
   int runs = 0;
+  List<NetworkDiagnosticCheck> extraChecks = [];
   @override
   Future<List<NetworkDiagnosticCheck>> run(
     NetworkDiagnosticSnapshot state,
@@ -39,6 +42,9 @@ class _ControlledService extends NetworkDiagnosticService {
   }) async {
     runs++;
     token = cancellation;
+    for (final check in extraChecks) {
+      onResult(check);
+    }
     onResult(
       const NetworkDiagnosticCheck(
         'fixture',
@@ -109,7 +115,12 @@ Future<ProviderContainer> _pump(
           ...GlobalMaterialLocalizations.delegates,
         ],
         supportedLocales: AppLocalizations.delegate.supportedLocales,
-        home: const NetworkDiagnosticsPage(),
+        home: Builder(
+          builder: (context) {
+            globalState.theme = CommonTheme.of(context, 1);
+            return const NetworkDiagnosticsPage();
+          },
+        ),
       ),
     ),
   );
@@ -159,6 +170,79 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+  testWidgets('PAC guidance is read-only and rechecks only on request', (
+    tester,
+  ) async {
+    final service = _ControlledService()
+      ..completion.complete()
+      ..extraChecks = [
+        const NetworkDiagnosticCheck(
+          'systemProxy',
+          'System proxy',
+          DiagnosticStatus.warning,
+          'Automatic configuration detected',
+        ),
+      ];
+    await _pump(tester, service);
+    await tester.pumpAndSettle();
+    final l = AppLocalizations.current;
+    expect(find.text(l.diagFixSystemProxy), findsNothing);
+    await tester.tap(find.text(l.diagProxyGuide));
+    await tester.pumpAndSettle();
+    expect(service.runs, 1);
+    await tester.tap(find.text(l.close));
+    await tester.pumpAndSettle();
+    expect(service.runs, 1);
+    await tester.tap(find.text(l.diagProxyGuide));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l.diagRecheck));
+    await tester.pumpAndSettle();
+    expect(service.runs, 2);
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final id in ['listener', 'coreDns', 'tun']) {
+    testWidgets('$id settings open and returning reruns diagnostics', (
+      tester,
+    ) async {
+      final service = _ControlledService()
+        ..completion.complete()
+        ..extraChecks = [
+          if (id != 'tun')
+            NetworkDiagnosticCheck(
+              id,
+              'Failed check',
+              DiagnosticStatus.failed,
+              'Check failed',
+            ),
+        ];
+      await _pump(tester, service);
+      await tester.pumpAndSettle();
+      final l = AppLocalizations.current;
+      final label = switch (id) {
+        'listener' => l.diagOpenPortSettings,
+        'coreDns' => l.diagOpenDnsSettings,
+        _ => l.diagOpenNetworkSettings,
+      };
+      final setting = switch (id) {
+        'listener' => l.port,
+        'coreDns' => l.overrideDns,
+        _ => l.tun,
+      };
+      await tester.ensureVisible(find.text(label));
+      await tester.tap(find.text(label));
+      await tester.pumpAndSettle();
+      expect(find.text(setting), findsOneWidget);
+      expect(service.runs, 1);
+      Navigator.of(tester.element(find.text(setting))).pop();
+      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+      expect(service.runs, 2);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets('cancel prevents late results and allows a fresh run', (
     tester,
   ) async {

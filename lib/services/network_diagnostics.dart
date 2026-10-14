@@ -422,7 +422,9 @@ class NetworkDiagnosticService {
                 DiagnosticProxyState.unknown => l.diagUnknown,
               },
         state.systemProxy && proxy != DiagnosticProxyState.matching
-            ? l.diagProxyHint
+            ? proxy == DiagnosticProxyState.automatic
+                  ? l.diagProxyAutomaticHint
+                  : l.diagProxyHint
             : null,
         // A PAC or unknown state may be an organization policy; only rewrite
         // settings the app itself is expected to own, and only while the
@@ -572,7 +574,7 @@ class NetworkDiagnosticService {
                   : l.cloudApiDnsFailed,
               ...resolved.errors.toSet(),
             ].join('\n'),
-            resolved.passed == 2 ? null : l.diagDnsHint,
+            resolved.passed == 2 ? null : l.diagSystemDnsHint,
           ),
         );
       }(),

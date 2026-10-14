@@ -341,7 +341,12 @@ void main() {
         FakeBackend()..os = DiagnosticSystemState(proxy: proxy, tunRoute: true),
       );
       expect(checks['systemProxy']!.status, DiagnosticStatus.warning);
-      expect(checks['systemProxy']!.suggestion, isNotEmpty);
+      expect(
+        checks['systemProxy']!.suggestion,
+        proxy == DiagnosticProxyState.automatic
+            ? AppLocalizations.current.diagProxyAutomaticHint
+            : AppLocalizations.current.diagProxyHint,
+      );
     }
   });
   test(
@@ -420,6 +425,14 @@ void main() {
       );
       expect(checks['systemDns']!.status, DiagnosticStatus.warning);
       expect(checks['systemDns']!.detail, contains('11001'));
+      expect(
+        checks['systemDns']!.suggestion,
+        AppLocalizations.current.diagSystemDnsHint,
+      );
+      expect(
+        checks['coreDns']!.suggestion,
+        AppLocalizations.current.diagDnsHint,
+      );
       expect(checks['coreDns']!.status, DiagnosticStatus.warning);
     },
   );

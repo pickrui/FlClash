@@ -7650,10 +7650,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Check for a port conflict or a stopped listener. Restart the connection; if needed, change the mixed port in network settings.`
+  /// `Check for port conflicts or a stopped listener. Reconnect first; if it still fails, open Ports and authentication to check or change the mixed port.`
   String get diagListenerHint {
     return Intl.message(
-      'Check for a port conflict or a stopped listener. Restart the connection; if needed, change the mixed port in network settings.',
+      'Check for port conflicts or a stopped listener. Reconnect first; if it still fails, open Ports and authentication to check or change the mixed port.',
       name: 'diagListenerHint',
       desc: '',
       args: [],
@@ -7710,11 +7710,226 @@ class AppLocalizations {
     );
   }
 
-  /// `Toggle the system proxy again and check whether another proxy app or an organization policy controls these settings. Some apps use their own proxy settings.`
+  /// `Open Troubleshoot and manual setup to compare the system proxy address and port. If settings keep reverting, check other proxy apps or device management policies.`
   String get diagProxyHint {
     return Intl.message(
-      'Toggle the system proxy again and check whether another proxy app or an organization policy controls these settings. Some apps use their own proxy settings.',
+      'Open Troubleshoot and manual setup to compare the system proxy address and port. If settings keep reverting, check other proxy apps or device management policies.',
       name: 'diagProxyHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A PAC script or auto-discovery may choose a different proxy for each website. This does not necessarily mean the connection is broken. Check who provided the configuration before changing it.`
+  String get diagProxyAutomaticHint {
+    return Intl.message(
+      'A PAC script or auto-discovery may choose a different proxy for each website. This does not necessarily mean the connection is broken. Check who provided the configuration before changing it.',
+      name: 'diagProxyAutomaticHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Try another network and check the DNS servers for the active connection in your operating system. Changing only the client DNS overrides may not fix system lookups.`
+  String get diagSystemDnsHint {
+    return Intl.message(
+      'Try another network and check the DNS servers for the active connection in your operating system. Changing only the client DNS overrides may not fix system lookups.',
+      name: 'diagSystemDnsHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Troubleshoot and manual setup`
+  String get diagProxyGuide {
+    return Intl.message(
+      'Troubleshoot and manual setup',
+      name: 'diagProxyGuide',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check again`
+  String get diagRecheck {
+    return Intl.message('Check again', name: 'diagRecheck', desc: '', args: []);
+  }
+
+  /// `Ports and authentication`
+  String get diagOpenPortSettings {
+    return Intl.message(
+      'Ports and authentication',
+      name: 'diagOpenPortSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Network and TUN settings`
+  String get diagOpenNetworkSettings {
+    return Intl.message(
+      'Network and TUN settings',
+      name: 'diagOpenNetworkSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `DNS override settings`
+  String get diagOpenDnsSettings {
+    return Intl.message(
+      'DNS override settings',
+      name: 'diagOpenDnsSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open system settings`
+  String get diagOpenSystemSettings {
+    return Intl.message(
+      'Open system settings',
+      name: 'diagOpenSystemSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not open system settings. Follow the path above to open them manually.`
+  String get diagOpenSettingsFailed {
+    return Intl.message(
+      'Could not open system settings. Follow the path above to open them manually.',
+      name: 'diagOpenSettingsFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copy proxy address`
+  String get diagCopyProxyAddress {
+    return Intl.message(
+      'Copy proxy address',
+      name: 'diagCopyProxyAddress',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `1. Check the local proxy first`
+  String get diagProxyGuidePrepareTitle {
+    return Intl.message(
+      '1. Check the local proxy first',
+      name: 'diagProxyGuidePrepareTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select a valid profile, start the connection in FlClash, and make sure Local proxy listener passes before entering the proxy address.\nQuit other proxy apps that may keep changing system settings. If your company or school manages the settings, or they are locked or keep reverting, check with the administrator.`
+  String get diagProxyGuidePrepare {
+    return Intl.message(
+      'Select a valid profile, start the connection in FlClash, and make sure Local proxy listener passes before entering the proxy address.\nQuit other proxy apps that may keep changing system settings. If your company or school manages the settings, or they are locked or keep reverting, check with the administrator.',
+      name: 'diagProxyGuidePrepare',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `2. Check or enter the proxy settings`
+  String get diagProxyGuideManualTitle {
+    return Intl.message(
+      '2. Check or enter the proxy settings',
+      name: 'diagProxyGuideManualTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Settings → Network & internet → Proxy\nIf automatic settings are left over from another app and your network no longer needs them, turn off Use setup script and Automatically detect settings.\nUnder Manual proxy setup, enable Use a proxy server, enter the address and port below in their separate fields, and save. Do not prefix the address with http://. Keep any exceptions your network needs.`
+  String get diagProxyGuideWindows {
+    return Intl.message(
+      'Settings → Network & internet → Proxy\nIf automatic settings are left over from another app and your network no longer needs them, turn off Use setup script and Automatically detect settings.\nUnder Manual proxy setup, enable Use a proxy server, enter the address and port below in their separate fields, and save. Do not prefix the address with http://. Keep any exceptions your network needs.',
+      name: 'diagProxyGuideWindows',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `System Settings → Network → active Wi-Fi or Ethernet service → Details → Proxies\nmacOS 12: System Preferences → Network → active service → Advanced → Proxies\nIf automatic settings are left over from another app and your network no longer needs them, turn off Auto proxy discovery and Automatic proxy configuration.\nEnable Web proxy (HTTP) and Secure web proxy (HTTPS). Enter the address and port below for both, then save. Keep any bypass entries your network needs.`
+  String get diagProxyGuideMacos {
+    return Intl.message(
+      'System Settings → Network → active Wi-Fi or Ethernet service → Details → Proxies\nmacOS 12: System Preferences → Network → active service → Advanced → Proxies\nIf automatic settings are left over from another app and your network no longer needs them, turn off Auto proxy discovery and Automatic proxy configuration.\nEnable Web proxy (HTTP) and Secure web proxy (HTTPS). Enter the address and port below for both, then save. Keep any bypass entries your network needs.',
+      name: 'diagProxyGuideMacos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open your desktop settings → Network → Network Proxy and select Manual (names vary by desktop).\nEnter the address and port below for both HTTP and HTTPS, then apply. If there is no system proxy panel, configure the target app instead.\nBefore replacing an automatic configuration, check its source and whether your network still needs it.`
+  String get diagProxyGuideLinux {
+    return Intl.message(
+      'Open your desktop settings → Network → Network Proxy and select Manual (names vary by desktop).\nEnter the address and port below for both HTTP and HTTPS, then apply. If there is no system proxy panel, configure the target app instead.\nBefore replacing an automatic configuration, check its source and whether your network still needs it.',
+      name: 'diagProxyGuideLinux',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `On this device, open the target app’s proxy settings, choose HTTP or SOCKS5, and enter the address and port below.\nAndroid provides the system proxy through the VPN service. For VPN access, check the VPN switch and app access control in FlClash network settings.`
+  String get diagProxyGuideApp {
+    return Intl.message(
+      'On this device, open the target app’s proxy settings, choose HTTP or SOCKS5, and enter the address and port below.\nAndroid provides the system proxy through the VPN service. For VPN access, check the VPN switch and app access control in FlClash network settings.',
+      name: 'diagProxyGuideApp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Local proxy authentication is enabled, so FlClash does not apply a system proxy automatically.\nIn an app that supports proxy authentication, choose HTTP or SOCKS5 and enter the address and port below. Use the username and password from FlClash → Override → General → Inbound → Authentication.\nDo not include credentials in diagnostic reports.`
+  String get diagProxyGuideAuthenticated {
+    return Intl.message(
+      'Local proxy authentication is enabled, so FlClash does not apply a system proxy automatically.\nIn an app that supports proxy authentication, choose HTTP or SOCKS5 and enter the address and port below. Use the username and password from FlClash → Override → General → Inbound → Authentication.\nDo not include credentials in diagnostic reports.',
+      name: 'diagProxyGuideAuthenticated',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Local address: 127.0.0.1\nMixed port (current configuration): {port}\nUse this mixed port for HTTP, HTTPS website proxying, or SOCKS5 on this device only.`
+  String diagProxyGuideValues(Object port) {
+    return Intl.message(
+      'Local address: 127.0.0.1\nMixed port (current configuration): $port\nUse this mixed port for HTTP, HTTPS website proxying, or SOCKS5 on this device only.',
+      name: 'diagProxyGuideValues',
+      desc: '',
+      args: [port],
+    );
+  }
+
+  /// `The mixed port is unavailable. Set a valid port in Ports and authentication, then start the connection.`
+  String get diagProxyGuideInvalidPort {
+    return Intl.message(
+      'The mixed port is unavailable. Set a valid port in Ports and authentication, then start the connection.',
+      name: 'diagProxyGuideInvalidPort',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `3. Save and verify the actual app`
+  String get diagProxyGuideVerifyTitle {
+    return Intl.message(
+      '3. Save and verify the actual app',
+      name: 'diagProxyGuideVerifyTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Return and select Check again, then retry in the browser or app you use.\nIf the local proxy check passes but an app still fails, check its system proxy, custom proxy, or proxy extension settings. System proxy settings do not capture every app.\nYou may need to turn off a manually configured proxy or restore its previous settings when stopping FlClash to keep internet access.`
+  String get diagProxyGuideVerify {
+    return Intl.message(
+      'Return and select Check again, then retry in the browser or app you use.\nIf the local proxy check passes but an app still fails, check its system proxy, custom proxy, or proxy extension settings. System proxy settings do not capture every app.\nYou may need to turn off a manually configured proxy or restore its previous settings when stopping FlClash to keep internet access.',
+      name: 'diagProxyGuideVerify',
       desc: '',
       args: [],
     );

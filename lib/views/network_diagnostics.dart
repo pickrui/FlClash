@@ -16,9 +16,15 @@ import 'package:fl_clash/models/profile.dart';
 import 'package:fl_clash/services/network_diagnostics.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/scaffold.dart';
+import 'package:fl_clash/widgets/proxy_authentication.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+
+import 'config/dns.dart';
+import 'config/general.dart' show PortItem;
+import 'config/network.dart' show NetworkListView, OnDemandView;
+import 'network_diagnostic_proxy_guide.dart';
 
 final networkDiagnosticReportHeaderProvider = Provider<String>((ref) {
   final info = globalState.packageInfo;
@@ -80,9 +86,10 @@ class _NetworkDiagnosticsPageState
   bool _running = false;
   bool _canceled = false;
   bool _fixing = false;
+  bool _editing = false;
   DateTime? _started;
 
-  bool get _busy => _running || _fixing;
+  bool get _busy => _running || _fixing || _editing;
 
   @override
   void initState() {
@@ -174,6 +181,60 @@ class _NetworkDiagnosticsPageState
     setState(() => _fixing = false);
     // Re-check either way: a failed fix may still have changed the state.
     await _run();
+  }
+
+  Future<void> _showProxyGuide(NetworkDiagnosticCheck check) async {
+    final recheck = await showDialog<bool>(
+      context: context,
+      builder: (context) => Consumer(
+        builder: (context, ref, _) => NetworkDiagnosticProxyGuide(
+          snapshot: ref.watch(networkDiagnosticSnapshotProvider),
+          check: check,
+        ),
+      ),
+    );
+    if (mounted && recheck == true) await _run();
+  }
+
+  (String, Widget)? _settingsFor(NetworkDiagnosticCheck check) {
+    if (check.status == DiagnosticStatus.passed) return null;
+    final l = context.appLocalizations;
+    return switch (check.id) {
+      'listener' => (
+        l.diagOpenPortSettings,
+        CommonScaffold(
+          title: l.inbound,
+          body: ListView(
+            padding: const EdgeInsets.all(16),
+            children: const [PortItem(), ProxyAuthenticationItem()],
+          ),
+        ),
+      ),
+      'tun' || 'capture' => (
+        l.diagOpenNetworkSettings,
+        CommonScaffold(title: l.network, body: const NetworkListView()),
+      ),
+      'coreDns' => (l.diagOpenDnsSettings, const DnsView()),
+      'core' when ref.read(networkDiagnosticSnapshotProvider).suspended => (
+        l.onDemand,
+        const OnDemandView(),
+      ),
+      _ => null,
+    };
+  }
+
+  Future<void> _openSettings(Widget page) async {
+    if (_busy) return;
+    setState(() => _editing = true);
+    try {
+      await Navigator.of(context)
+          .push<void>(MaterialPageRoute(builder: (_) => page));
+      await _settleSystemProxy();
+      await Future<void>.delayed(_fixSettleDelay);
+    } finally {
+      if (mounted) setState(() => _editing = false);
+    }
+    if (mounted) await _run();
   }
 
   String _status(DiagnosticStatus status) => switch (status) {
@@ -304,15 +365,39 @@ class _NetworkDiagnosticsPageState
                       const SizedBox(height: 8),
                       Text(check.suggestion!),
                     ],
-                    if (check.fix case final fix?) ...[
+                    if (check.fix != null ||
+                        check.id == 'systemProxy' ||
+                        check.id == 'capture' ||
+                        _settingsFor(check) != null) ...[
                       const SizedBox(height: 12),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: FilledButton.tonalIcon(
-                          onPressed: _busy ? null : () => _fix(fix),
-                          icon: const GlyphIcon(AppGlyphs.sparkle),
-                          label: Text(_fixLabel(fix)),
-                        ),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          if (check.id == 'systemProxy' ||
+                              check.id == 'capture')
+                            OutlinedButton.icon(
+                              onPressed: _busy
+                                  ? null
+                                  : () => _showProxyGuide(check),
+                              icon: const GlyphIcon(AppGlyphs.info),
+                              label: Text(l.diagProxyGuide),
+                            ),
+                          if (_settingsFor(check) case final settings?)
+                            OutlinedButton.icon(
+                              onPressed: _busy
+                                  ? null
+                                  : () => _openSettings(settings.$2),
+                              icon: const GlyphIcon(AppGlyphs.settings),
+                              label: Text(settings.$1),
+                            ),
+                          if (check.fix case final fix?)
+                            FilledButton.tonalIcon(
+                              onPressed: _busy ? null : () => _fix(fix),
+                              icon: const GlyphIcon(AppGlyphs.sparkle),
+                              label: Text(_fixLabel(fix)),
+                            ),
+                        ],
                       ),
                     ],
                   ],
