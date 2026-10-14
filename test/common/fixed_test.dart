@@ -29,6 +29,24 @@ void main() {
       expect(original.weight, 1);
     });
 
+    test('copies carry the weight without measuring every entry', () {
+      var measured = 0;
+      final list = FixedList<String>(
+        10,
+        maxWeight: 100,
+        weightOf: (value) {
+          measured++;
+          return value.length;
+        },
+        list: ['a', 'bb'],
+      );
+      measured = 0;
+      final copy = list.copyWith()..add('ccc');
+      expect(measured, 1);
+      expect(copy.weight, 6);
+      expect(list.weight, 3);
+    });
+
     test('respects maxLength on creation', () {
       final list = FixedList(3, list: [1, 2, 3, 4, 5]);
       expect(list.length, 3);

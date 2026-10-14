@@ -11,6 +11,8 @@ class FixedList<T> {
   int _revision = 0;
   int _weight = 0;
 
+  FixedList._copy(this.maxLength, this._list, this.maxWeight, this.weightOf);
+
   FixedList(this.maxLength, {List<T>? list, this.maxWeight, this.weightOf})
     : assert(maxLength >= 0),
       assert(maxWeight == null || maxWeight >= 0),
@@ -58,11 +60,8 @@ class FixedList<T> {
   T operator [](int index) => _list[index];
 
   FixedList<T> copyWith() {
-    return FixedList(
-      maxLength,
-      list: List.of(_list),
-      maxWeight: maxWeight,
-      weightOf: weightOf,
-    ).._revision = _revision;
+    return FixedList._copy(maxLength, List.of(_list), maxWeight, weightOf)
+      .._weight = _weight
+      .._revision = _revision;
   }
 }

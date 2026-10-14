@@ -25,6 +25,7 @@ class LogsAction extends _$LogsAction {
 extension LogsControllerExt on AppController {
   void addLog(Log log, {bool persist = true}) {
     if (Secrets.shouldSuppressOutput(log.payload)) return;
+    log = limitLog(log);
     _ref.read(logsProvider.notifier).addLog(log);
     if (persist) {
       writePersistentLog(log);
@@ -47,7 +48,7 @@ extension LogsControllerExt on AppController {
         Secrets.shouldSuppressOutput(log.payload)) {
       return;
     }
-    log = log.copyWith(payload: limitLogPayload(log.payload));
+    log = limitLog(log);
     final release = _logWriteBudget.reserve(
       2 * (log.payload.length + log.dateTime.length),
     );

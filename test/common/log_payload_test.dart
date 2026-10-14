@@ -7,6 +7,7 @@ import 'dart:convert';
 
 import 'package:fl_clash/common/log_payload.dart';
 import 'package:fl_clash/common/print.dart';
+import 'package:fl_clash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -18,6 +19,9 @@ void main() {
     expect(limited, endsWith('... [truncated]'));
     final exact = List.filled(logPayloadMaxBytes, 'a').join();
     expect(limitLogPayload(exact), exact);
+    final log = Log.app(exact);
+    expect(identical(limitLog(log), log), isTrue);
+    expect(limitLog(Log.app(payload)).payload, limited);
   });
 
   test(
@@ -39,9 +43,7 @@ void main() {
       );
       expect(budget.pendingBytes, 0);
       expect(budget.pendingEntries, 0);
-      final next = budget.reserve(10)!;
-      expect(budget.droppedEntries, 2);
-      next();
+      budget.reserve(10)!();
     },
   );
 

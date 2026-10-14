@@ -31,19 +31,22 @@ String limitLogPayload(String payload) {
   return payload;
 }
 
+Log limitLog(Log log) {
+  final payload = limitLogPayload(log.payload);
+  return identical(payload, log.payload) ? log : log.copyWith(payload: payload);
+}
+
 class LogWriteBudget {
   final int maxBytes;
   final int maxEntries;
   int pendingBytes = 0;
   int pendingEntries = 0;
-  int droppedEntries = 0;
 
   LogWriteBudget({required this.maxBytes, this.maxEntries = 256});
 
   void Function()? reserve(int bytes) {
     if (bytes < 0) throw ArgumentError.value(bytes, 'bytes');
     if (pendingEntries >= maxEntries || pendingBytes + bytes > maxBytes) {
-      droppedEntries++;
       return null;
     }
     pendingEntries++;

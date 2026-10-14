@@ -29,7 +29,7 @@ func TestMessageBatcherBoundsEncodedLogBytes(t *testing.T) {
 	queue := make(chan Message, messageBatchSize)
 	payload := strings.Repeat("\x01", log.MaxPayloadBytes)
 	for range messageBatchSize {
-		queue <- Message{Type: LogMessage, Data: (log.Event{Payload: payload}).Bounded()}
+		queue <- Message{Type: LogMessage, Data: log.Event{Payload: payload}}
 	}
 	close(queue)
 	delivered, batches := 0, 0
@@ -46,6 +46,13 @@ func TestMessageBatcherBoundsEncodedLogBytes(t *testing.T) {
 	})
 	if delivered != messageBatchSize || batches <= 1 {
 		t.Fatal("byte-limited batching lost logs or ignored escaped JSON size")
+	}
+	for _, payload := range []string{"", "plain", "\x01<>&\xff\u2028", strings.Repeat("\xff", 4096)} {
+		message := Message{Type: LogMessage, Data: log.Event{LogLevel: log.WARNING, Payload: payload}}
+		encoded, _ := json.Marshal(message)
+		if estimate := logMessageSize(message, 0); estimate < len(encoded)+1 {
+			t.Fatalf("estimate %d below encoded %d for %q", estimate, len(encoded)+1, payload)
+		}
 	}
 }
 

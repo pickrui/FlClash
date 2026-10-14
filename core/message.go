@@ -37,9 +37,6 @@ func requestMessage(tracker statistic.Tracker) Message {
 }
 
 func sendMessage(message Message) {
-	if event, ok := message.Data.(log.Event); ok && message.Type == LogMessage {
-		message.Data = event.Bounded()
-	}
 	queue := priorityMessageQueue
 	if message.Type == LogMessage || message.Type == RequestMessage || message.Type == DnsMessage {
 		queue = bulkMessageQueue
@@ -61,6 +58,18 @@ func enqueueLatest(queue chan Message, message Message) {
 	case queue <- message:
 	default:
 	}
+}
+
+// JSON spends at most six bytes on a payload byte, so a log only needs encoding
+// when that bound could cross the batch limit.
+func logMessageSize(message Message, used int) int {
+	if event, ok := message.Data.(log.Event); ok {
+		if estimate := len(event.Payload)*6 + 128; used+estimate <= messageLogBatchBytes {
+			return estimate
+		}
+	}
+	encoded, _ := json.Marshal(message)
+	return len(encoded) + 1
 }
 
 func runMessageBatcher(
@@ -94,8 +103,7 @@ func runMessageBatcher(
 	appendMessage := func(message Message) {
 		var size int
 		if message.Type == LogMessage {
-			encoded, _ := json.Marshal(message)
-			size = len(encoded) + 1
+			size = logMessageSize(message, logBytes)
 			if logBytes+size > messageLogBatchBytes {
 				flush()
 			}

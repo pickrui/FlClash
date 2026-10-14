@@ -70,8 +70,7 @@ class Logs extends _$Logs with NotifierMixin<FixedList<Log>> {
 
   void addLog(Log value) {
     if (Secrets.shouldSuppressOutput(value.payload)) return;
-    value = value.copyWith(payload: limitLogPayload(value.payload));
-    state = state.copyWith()..add(value);
+    state = state.copyWith()..add(limitLog(value));
   }
 }
 
