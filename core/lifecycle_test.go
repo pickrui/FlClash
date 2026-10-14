@@ -39,7 +39,8 @@ func TestShutdownDiscardsConfigurationBeforeLateControlCalls(t *testing.T) {
 	servers := []dns.NameServer{{Net: "rcode", Addr: "success"}}
 	retiredDNS := dns.NewResolver(dns.Config{Main: servers, ProxyServer: servers, DirectServer: servers})
 	resolver.DefaultResolver, resolver.ProxyServerHostResolver, resolver.DirectHostResolver = retiredDNS.Resolver, retiredDNS.ProxyResolver, retiredDNS.DirectResolver
-	resolver.DefaultHostMapper, resolver.DefaultService = nil, nil
+	mapper := dns.NewEnhancer(dns.EnhancerConfig{})
+	resolver.DefaultHostMapper, resolver.DefaultService = mapper, nil
 	selectionLock.Lock()
 	previousSnapshot := proxySnapshot
 	selectionLock.Unlock()
@@ -63,8 +64,11 @@ func TestShutdownDiscardsConfigurationBeforeLateControlCalls(t *testing.T) {
 	if currentConfig != nil {
 		t.Error("shutdown retained the retired configuration and providers")
 	}
-	if resolver.DefaultResolver != nil || resolver.ProxyServerHostResolver != nil || resolver.DirectHostResolver != nil || resolver.DefaultHostMapper != nil || resolver.DefaultService != nil {
+	if resolver.DefaultResolver != nil || resolver.ProxyServerHostResolver != nil || resolver.DirectHostResolver != nil || resolver.DefaultService != nil {
 		t.Error("shutdown retained configured DNS references")
+	}
+	if resolver.DefaultHostMapper != mapper {
+		t.Error("shutdown dropped the fake-IP mapper an in-process restart patches from")
 	}
 	query := new(D.Msg)
 	query.SetQuestion("after-shutdown.test.", D.TypeA)
