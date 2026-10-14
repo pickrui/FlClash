@@ -13,7 +13,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/metacubex/mihomo/adapter"
+	"github.com/metacubex/mihomo/adapter/outbound"
 	"github.com/metacubex/mihomo/config"
+	C "github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/tunnel"
 )
 
@@ -198,5 +201,57 @@ func TestNodePageRevisionFollowsOnlyTheSelectionsItDependsOn(t *testing.T) {
 	})
 	if direct.Items[0].Name != "DIRECT" {
 		t.Fatalf("DIRECT was not ordered by its own test URL: %v", direct.Items)
+	}
+}
+
+func nodePageFixture(size int) *nodeGroup {
+	members := make([]C.Proxy, size)
+	for i := range members {
+		members[i] = adapter.NewProxy(outbound.NewBase(outbound.BaseOption{
+			Name: fmt.Sprintf("Node-%04d", size-i-1), Type: C.Shadowsocks,
+		}))
+	}
+	return &nodeGroup{proxy: members[0], members: members, now: members[size-1].Name(), loaded: true}
+}
+
+func TestNodePageFilteringPreservesSharedMembers(t *testing.T) {
+	for _, request := range []nodePageRequest{
+		{Query: "node-0099"},
+		{Sort: "name"},
+		{Sort: "delay"},
+		{HideTimeout: true},
+		{HideTimeout: true, Query: "node-000", Sort: "name"},
+	} {
+		t.Run(fmt.Sprintf("query=%s/sort=%s/hide=%t", request.Query, request.Sort, request.HideTimeout), func(t *testing.T) {
+			group := nodePageFixture(100)
+			original := slices.Clone(group.members)
+			groups := map[string]*nodeGroup{"Paged": group}
+			request.Group = "Paged"
+			request.Delays = map[string]map[string]int{"": {"Node-0099": -1, "Node-0002": 20, "Node-0003": 5}}
+			buildNodePage(request, groups)
+			if !slices.Equal(group.members, original) {
+				t.Fatal("filtered page changed shared group membership or order")
+			}
+			plain := buildNodePage(nodePageRequest{Group: "Paged"}, groups)
+			if plain.Total != len(original) || plain.Items[0].Name != original[0].Name() || plain.SelectedIndex != len(original)-1 {
+				t.Fatal("filtered page changed later unfiltered reads")
+			}
+		})
+	}
+}
+
+func BenchmarkNodePageRead(b *testing.B) {
+	for _, size := range []int{1000, 10000} {
+		b.Run(fmt.Sprint(size), func(b *testing.B) {
+			groups := map[string]*nodeGroup{"Paged": nodePageFixture(size)}
+			request := nodePageRequest{Group: "Paged", Limit: 128}
+			b.ReportAllocs()
+			b.ResetTimer()
+			for b.Loop() {
+				if page := buildNodePage(request, groups); len(page.Items) != request.Limit || page.SelectedIndex != size-1 {
+					b.Fatal("invalid page")
+				}
+			}
+		})
 	}
 }

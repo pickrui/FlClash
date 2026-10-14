@@ -29,7 +29,8 @@ class NodePages extends ChangeNotifier {
   int _generation = 0;
 
   int get cachedNodeCount =>
-      _pages.values.fold(0, (sum, page) => sum + page.length);
+      _pages.values.fold(0, (sum, page) => sum + page.length) +
+      _previous.values.fold(0, (sum, page) => sum + page.length);
 
   Object? errorAt(int index) => _errors[index ~/ pageSize];
 
@@ -41,8 +42,10 @@ class NodePages extends ChangeNotifier {
       _pages[page] = items;
       return offset < items.length ? items[offset] : null;
     }
-    if (!_errors.containsKey(page)) unawaited(load(index));
-    final previous = _previous[page];
+    if (_errors.containsKey(page)) return null;
+    unawaited(load(index));
+    final previous = _previous.remove(page);
+    if (previous != null) _previous[page] = previous;
     return previous != null && offset < previous.length
         ? previous[offset]
         : null;
@@ -52,14 +55,19 @@ class NodePages extends ChangeNotifier {
     if (_disposed) return;
     _generation++;
     _previous.addAll(_pages);
-    while (_previous.length > maxPages) {
-      _previous.remove(_previous.keys.first);
-    }
     _pages.clear();
+    _trimCache();
     _clearPending();
     _errors.clear();
     revision = nextRevision;
     notifyListeners();
+  }
+
+  void _trimCache() {
+    while (_pages.length + _previous.length > maxPages) {
+      final cache = _previous.isNotEmpty ? _previous : _pages;
+      cache.remove(cache.keys.first);
+    }
   }
 
   /// A selection made elsewhere leaves cached pages valid but moves the
@@ -133,7 +141,13 @@ class NodePages extends ChangeNotifier {
         }
         return;
       }
-      revision = data['revision'] as String;
+      final nextRevision = data['revision'] as String;
+      if (revision != null && revision != nextRevision) {
+        reload();
+        unawaited(load(0));
+        return;
+      }
+      revision = nextRevision;
       total = data['total'] as int;
       selectedIndex = data['selectedIndex'] as int;
       initialized = true;
@@ -143,9 +157,7 @@ class NodePages extends ChangeNotifier {
         _pages[page] = (data['items'] as List)
             .map((raw) => Proxy.fromJson(Map<String, dynamic>.from(raw as Map)))
             .toList();
-        while (_pages.length > maxPages) {
-          _pages.remove(_pages.keys.first);
-        }
+        _trimCache();
       }
     } catch (error) {
       if (!_disposed && generation == _generation) {

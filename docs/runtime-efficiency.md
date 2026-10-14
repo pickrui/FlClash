@@ -48,15 +48,21 @@ backoff up to eight seconds. Leaving the page or backgrounding the app unsubscri
 
 Group refreshes carry summaries (counts, selection, presentation metadata); full member lists come from `getProxyPage`,
 128 entries per reply for views and up to 2048 for on-demand enumeration. Each mounted group/query keeps at most six
-pages, four pending and two concurrent requests. Search and sorting run in the Core over the whole group and return the
-selected index.
+pages including previous rows during a reload, four pending and two concurrent requests. Search and sorting run in the
+Core over the whole group and return the selected index.
 
 Each group has its own revision covering its members and configuration, so a selection or another group's change keeps
 cached pages. Requests sorted by latency or hiding timeouts also cover the selections their order depends on, and only
 they carry the delay map. A page request hashes only its group: 0.64 ms instead of 15.4 ms for a 10,000-node group in a
-100,000-membership fixture. Changed inputs reload a page source in place, keeping shown rows until replacements arrive;
-late replies are ignored. Manual group tests and the macOS tray enumerate pages on demand, and a group that cannot be
-read falls back to its summary so the tray menu still opens.
+100,000-membership fixture. Changed inputs reload a page source in place, keeping shown rows until replacements arrive
+or fail, when a retry replaces the old row. Late replies are ignored; conflicting initial revisions trigger a fresh
+read instead of mixing versions. Manual group tests and the macOS tray enumerate pages on demand, and a group that
+cannot be read falls back to its summary so the tray menu still opens.
+
+Unfiltered, unsorted reads reuse the group's immutable membership; operations that change order or membership own
+their slice, and result arrays are allocated to the exact page size. In a prepared 10,000-node group, a 128-node read
+uses 6704 B / 3 allocations instead of 179716 B / 11, taking 140–141 µs instead of 181–183 µs
+(`BenchmarkNodePageRead/10000`, `core/`, `GOMAXPROCS=1`).
 
 ### Memory sampling
 

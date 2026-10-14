@@ -101,6 +101,94 @@ void main() {
     expect(await located, 7);
   });
 
+  test('replacement pages share the cache budget with previous rows', () async {
+    var revision = 'a';
+    final pages = NodePages(
+      total: 2000,
+      read: (offset, _) async => page(offset, revision: revision),
+    );
+    addTearDown(pages.dispose);
+    for (var i = 0; i < NodePages.maxPages; i++) {
+      await pages.load(i * NodePages.pageSize);
+    }
+    revision = 'b';
+    pages.reload();
+    expect(pages.cachedNodeCount, NodePages.maxPages * NodePages.pageSize);
+    for (var i = NodePages.maxPages; i < NodePages.maxPages * 2; i++) {
+      await pages.load(i * NodePages.pageSize);
+      expect(pages.cachedNodeCount, NodePages.maxPages * NodePages.pageSize);
+    }
+    expect(pages.at(0), isNull);
+    await pages.load(0);
+    expect(pages.at(0)?.name, 'b-0');
+  });
+
+  for (final firstOffset in [0, 128]) {
+    test('conflicting initial revisions refresh after $firstOffset', () async {
+      final replies = {
+        0: Completer<Map<String, dynamic>>(),
+        128: Completer<Map<String, dynamic>>(),
+      };
+      var calls = 0;
+      final pages = NodePages(
+        total: 2000,
+        read: (offset, _) async {
+          if (++calls <= 2) return replies[offset]!.future;
+          return page(offset, revision: 'b');
+        },
+      );
+      addTearDown(pages.dispose);
+      final pending = Future.wait([pages.load(0), pages.load(128)]);
+      replies[firstOffset]!.complete(
+        page(firstOffset, revision: firstOffset == 0 ? 'a' : 'b'),
+      );
+      await Future<void>.delayed(Duration.zero);
+      final secondOffset = 128 - firstOffset;
+      replies[secondOffset]!.complete(
+        page(secondOffset, revision: secondOffset == 0 ? 'a' : 'b'),
+      );
+      await pending;
+      await Future<void>.delayed(Duration.zero);
+      await Future.wait([pages.load(0), pages.load(128)]);
+      expect(pages.revision, 'b');
+      expect(pages.at(0)?.name, 'b-0');
+      expect(pages.at(128)?.name, 'b-128');
+    });
+  }
+
+  test(
+    'failed replacement exposes retry instead of showing stale rows',
+    () async {
+      final replies = <Completer<Map<String, dynamic>>>[];
+      final pages = NodePages(
+        total: 2000,
+        read: (offset, _) {
+          final reply = Completer<Map<String, dynamic>>();
+          replies.add(reply);
+          return reply.future;
+        },
+      );
+      addTearDown(pages.dispose);
+      final first = pages.load(0);
+      replies[0].complete(page(0));
+      await first;
+      pages.reload();
+      expect(pages.at(1)?.name, 'a-1');
+      final failed = pages.load(0);
+      replies[1].completeError(StateError('disconnected'));
+      await failed;
+      expect(pages.errorAt(0), isNotNull);
+      expect(pages.at(1), isNull);
+      expect(replies, hasLength(2));
+      final retry = pages.load(0);
+      expect(pages.at(1)?.name, 'a-1');
+      replies[2].complete(page(0, revision: 'b'));
+      await retry;
+      expect(pages.errorAt(0), isNull);
+      expect(pages.at(1)?.name, 'b-1');
+    },
+  );
+
   test(
     'fast scroll limits pending work and disposal ignores late replies',
     () async {

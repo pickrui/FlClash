@@ -257,7 +257,8 @@ func filterNodes(request nodePageRequest, group *nodeGroup, groups map[string]*n
 	if url == "" {
 		url = request.TestURL
 	}
-	members := slices.Clone(group.load())
+	members := group.load()
+	owned := false
 	if request.HideTimeout {
 		visible := make([]C.Proxy, 0, len(members))
 		for _, proxy := range members {
@@ -268,9 +269,13 @@ func filterNodes(request nodePageRequest, group *nodeGroup, groups map[string]*n
 		}
 		if len(visible) != 0 {
 			members = visible
+			owned = true
 		}
 	}
 	terms := strings.Fields(strings.ToLower(request.Query))
+	if !owned && (len(terms) != 0 || request.Sort == "name" || request.Sort == "delay") {
+		members = slices.Clone(members)
+	}
 	if len(terms) != 0 {
 		members = slices.DeleteFunc(members, func(proxy C.Proxy) bool {
 			text := strings.ToLower(proxy.Name() + "\n" + proxy.Type().String())
@@ -329,8 +334,10 @@ func buildNodePage(request nodePageRequest, groups map[string]*nodeGroup) nodePa
 	if limit <= 0 || limit > nodePageLimit {
 		limit = nodePageLimit
 	}
-	for _, proxy := range members[page.Offset:min(page.Offset+limit, page.Total)] {
-		page.Items = append(page.Items, nodeMember(proxy))
+	end := min(page.Offset+limit, page.Total)
+	page.Items = make([]ProxyGroupMember, end-page.Offset)
+	for i, proxy := range members[page.Offset:end] {
+		page.Items[i] = nodeMember(proxy)
 	}
 	return page
 }
