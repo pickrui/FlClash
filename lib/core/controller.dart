@@ -244,6 +244,33 @@ class CoreController {
     );
   }
 
+  /// Reads each group's members, yielding null for a group that fails. Once
+  /// the Core is unreachable the remaining groups are not attempted, so a
+  /// restart costs one request timeout rather than one per group.
+  Future<List<List<Proxy>?>> readGroupsProxies(List<Group> groups) async {
+    final result = <List<Proxy>?>[];
+    var unavailable = false;
+    for (final group in groups) {
+      if (unavailable) {
+        result.add(null);
+        continue;
+      }
+      try {
+        result.add(await readGroupProxies(group));
+      } catch (error) {
+        commonPrint.log(
+          'Read ${group.name} nodes failed: $error',
+          logLevel: coreFailureLogLevel(error),
+        );
+        unavailable =
+            error is TimeoutException ||
+            error is CoreMethodException && error.isCoreUnavailable;
+        result.add(null);
+      }
+    }
+    return result;
+  }
+
   Future<void> changeProxy(ChangeProxyParams changeProxyParams) async {
     final message = await _interface.changeProxy(changeProxyParams);
     if (message.isNotEmpty) {

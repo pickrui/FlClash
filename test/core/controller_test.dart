@@ -655,6 +655,50 @@ void main() {
     },
   );
 
+  test(
+    'group reads skip a failed group and stop once the Core is unreachable',
+    () async {
+      final requested = <String>[];
+      var reachable = true;
+      when(
+        () => handler.invokeMethod<Map>(
+          method: CoreMethod.getProxyPage,
+          arguments: any(named: 'arguments'),
+          timeout: any(named: 'timeout'),
+        ),
+      ).thenAnswer((invocation) async {
+        final name = (invocation.namedArguments[#arguments] as Map)['group'];
+        requested.add(name as String);
+        if (name == 'Broken') throw StateError('decode failed');
+        if (!reachable) return null;
+        return {
+          'revision': name,
+          'offset': 0,
+          'total': 1,
+          'selectedIndex': 0,
+          'items': [
+            {'name': '$name-node', 'type': 'Shadowsocks'},
+          ],
+        };
+      });
+      Group group(String name) =>
+          Group(name: name, type: GroupType.Selector, nodeCount: 1);
+      final groups = [group('A'), group('Broken'), group('B')];
+
+      final read = await controller.readGroupsProxies(groups);
+      expect(read.map((proxies) => proxies?.single.name), [
+        'A-node',
+        null,
+        'B-node',
+      ]);
+
+      requested.clear();
+      reachable = false;
+      expect(await controller.readGroupsProxies(groups), [null, null, null]);
+      expect(requested, ['A']);
+    },
+  );
+
   test('a silent Core is not mistaken for an absent network', () async {
     Future<Map<String, dynamic>?> status() =>
         handler.invokeMethod<Map<String, dynamic>>(

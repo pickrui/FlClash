@@ -133,20 +133,19 @@ extension SystemControllerExt on AppController {
   Future<void> updateTray({bool includeNodes = false}) async {
     try {
       var state = _ref.read(trayStateProvider);
-      if (includeNodes && system.isMacOS) {
-        final profileId = _ref.read(currentProfileIdProvider);
-        final expanded = <Group>[];
-        for (final group in state.groups) {
-          expanded.add(
-            group.copyWith(
-              all: await coreController.readGroupProxies(group),
-              nodeCount: null,
-            ),
-          );
-        }
-        if (profileId != _ref.read(currentProfileIdProvider)) {
-          throw StateError('profile changed while opening node menu');
-        }
+      final profileId = _ref.read(currentProfileIdProvider);
+      final members = includeNodes && system.isMacOS
+          ? await coreController.readGroupsProxies(state.groups)
+          : null;
+      if (profileId != _ref.read(currentProfileIdProvider)) {
+        state = _ref.read(trayStateProvider);
+      } else if (members != null) {
+        final expanded = [
+          for (final (index, group) in state.groups.indexed)
+            members[index] == null
+                ? group
+                : group.copyWith(all: members[index]!, nodeCount: null),
+        ];
         final delayOf = proxyDelayLookup(
           groups: groups,
           selectedMap: state.selectedMap,
@@ -168,7 +167,6 @@ extension SystemControllerExt on AppController {
       }
       await tray?.update(trayState: state);
     } catch (error) {
-      if (includeNodes) rethrow;
       commonPrint.log('Tray update failed: $error', logLevel: LogLevel.warning);
     }
   }
