@@ -14,8 +14,8 @@ struct PluginError: Error {
 public extension NSWindow {
     private static var hiddenAtLaunchKey = false
 
-    // MainFlutterWindow.order(_:relativeTo:) calls this on every order call;
-    // only the first one should hide the still-being-configured window.
+    // AppKit can reenter MainFlutterWindow.order while visibility changes;
+    // mark the initial hide before calling back into it.
     private var hiddenAtLaunchConfigured: Bool {
         get { objc_getAssociatedObject(self, &Self.hiddenAtLaunchKey) as? Bool ?? false }
         set { objc_setAssociatedObject(self, &Self.hiddenAtLaunchKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
@@ -23,8 +23,8 @@ public extension NSWindow {
 
     func hiddenWindowAtLaunch() {
         if !hiddenAtLaunchConfigured {
-            setIsVisible(false)
             hiddenAtLaunchConfigured = true
+            setIsVisible(false)
         }
     }
 }
