@@ -496,3 +496,28 @@ The 1,000-node fixture allocates approximately 49.2% fewer bytes and takes 3.12�
 Reproduce from `core/Clash.Meta/` with `GOTOOLCHAIN=go1.26.9 CGO_ENABLED=0 GOMAXPROCS=1 go test -tags with_gvisor,with_mips_low_memory ./adapter -run '^$' -bench '^BenchmarkProxyJSON$' -benchmem -benchtime=1s -count=3`. Before samples use the same benchmark with only the prior `adapter/adapter.go` supplied through a temporary Go overlay
 
 Validation compares output bytes and errors against the previous marshaler across canonical/custom objects, metadata collisions, duplicate keys, numeric edge cases, escaped and invalid UTF-8 strings, empty/full histories, deep nesting and invalid timestamps. Production selector, URL-test, fallback and load-balance groups retain their fields in both node lists and provider payloads. A 20-second fuzz run executes 354,354 inputs and checks that every accepted canonical object is byte-identical after the standard decode/encode round trip. Concurrent health writers and JSON readers, the full adapter/group/provider packages and the root Core integration suite pass their relevant tests, including race detection for those three Core packages. Formatting, notice, comment-density and diff checks pass
+
+## Streaming controller node and provider responses
+
+This batch adapts ProjectClash's [streamed proxy map](https://github.com/ProjectClash/Clash/blob/3891cc46092029c23f7fd0bfa1fe29e0e6e1dffb/adapter/clash_proxy_json.go), [provider header and node-list writer](https://github.com/ProjectClash/Clash/blob/3891cc46092029c23f7fd0bfa1fe29e0e6e1dffb/adapter/provider/clash_provider_json.go) and [controller integration](https://github.com/ProjectClash/Clash/blob/3891cc46092029c23f7fd0bfa1fe29e0e6e1dffb/hub/route/clash_proxies_json.go). The external controller's `/proxies`, `/providers/proxies` and `/providers/proxies/{name}` endpoints write their lists incrementally. Ordinary node encoding reuses the output buffer's available space, removing the per-node merged-result copy as well as the complete-list response buffers
+
+The local implementation uses a 4 KiB writer buffer to keep the fixed cost small for ordinary responses. Map keys still require a sorted name slice, and individual nodes, group member arrays and health snapshots can allocate beyond the buffer size. Custom proxy/provider marshalers retain standard JSON validation and escaping; unknown provider implementations use their complete custom marshaler. The 4 KiB buffer is therefore not a whole-request or process memory bound. This adds no response cache, timer or background worker
+
+Successful response bytes, sorted map keys, field order, HTML/UTF-8 escaping, `null` versus empty lists, content type, configured HTTP status and trailing newline match the prior renderer. Provider streaming and ordinary marshaling share the same metadata snapshot definition. A slow reader holds neither the provider mutex nor a live mutable member list; concurrent replacement affects later responses. Inline-provider timestamp updates now share the snapshot lock
+
+Cancellation and write errors stop subsequent node encoding. Before the first transport write, encoding errors retain the HTTP 500 response and marshaler error chain. Once output has started, an encoding/write failure aborts the HTTP transfer instead of completing a truncated JSON response or appending an error object. This is an intentional late-error behavior change required by streaming; an HTTP/1 client observes an incomplete body. Oversized individual nodes are still supported
+
+Go 1.26.9, release tags, `GOMAXPROCS=1`, macOS arm64 on Apple M4, three serial one-second samples compare the existing buffered `render.JSON` path and the new stream in the same build:
+
+| Response fixture | Buffered, allocated bytes/op | Streamed, allocated bytes/op | Conservative reduction |
+| --- | --- | --- | --- |
+| 10 nodes | 26,117 | 24,161 | 7.5% |
+| 1,000 nodes | 2,567,987–2,571,890 | 2,019,477–2,019,479 | 21.4% |
+| One provider with 1,000 nodes | 2,757,269–2,763,343 | 1,971,108–1,971,110 | 28.5% |
+| Three provider entries, each with 1,000 nodes | 8,255,043–8,412,388 | 5,904,948–5,904,950 | 28.5% |
+
+Fixtures and request writers are prepared outside the timed loop; response bytes are discarded so client-side storage is excluded. The three-provider fixture reuses the same immutable provider in all three entries, encoding it three times. Allocation counts remain similar and can rise slightly at buffer boundaries: the 1,000-node response uses 33,071 allocations versus 33,011, while the provider response uses 31,073 versus 31,010–31,011. The improvement is fewer allocated bytes and no complete-list encoding buffer, not a reduction in every allocation count. Elapsed times varied on the shared host; these measurements do not establish retained heap, whole-app RSS or device battery savings
+
+Reproduce from `core/Clash.Meta/` with `GOTOOLCHAIN=go1.26.9 CGO_ENABLED=0 GOMAXPROCS=1 go test -tags with_gvisor,with_mips_low_memory ./hub/route -run '^$' -bench '^BenchmarkControllerProxyJSON$' -benchmem -benchtime=1s -count=3`
+
+Validation covers byte-for-byte compatibility for all three endpoints, large lists, custom marshalers, early error bodies, tiny/normal buffer boundaries, cancellation, short writes, failed writes, provider replacement during a blocked response, concurrent timestamp/subscription updates and an actual loopback HTTP response aborted after a late encoding failure. The full adapter, provider and controller-route packages pass race detection, and the root Core integration suite passes. Manual review, formatting, notice, comment-density and diff checks complete the batch
