@@ -335,15 +335,20 @@ Future<Map<String, int>> proxyGroupCounts(Ref ref, String query) async {
   final hideTimeout = ref.watch(
     proxiesStyleSettingProvider.select((style) => style.hideTimeoutProxies),
   );
-  final delays = ref.watch(delaysAtLastTestBatchProvider);
-  final testUrl = ref.watch(realTestUrlProvider());
   return ref.watch(coreHandlerProvider).getProxyGroupCounts({
     'query': query,
     'hideTimeout': hideTimeout,
-    'hiddenDelays': delays,
-    'testUrl': testUrl,
+    if (hideTimeout) ...delayArguments(ref),
   });
 }
+
+/// Delay inputs for node pages whose order or visibility depends on latency;
+/// other requests leave them out so the Core is not sent the delay map.
+Map<String, Object?> delayArguments(Ref ref) => {
+  'testUrl': ref.watch(realTestUrlProvider()),
+  'directTestUrl': defaultDirectTestUrl,
+  'delays': ref.watch(delaysAtLastTestBatchProvider),
+};
 
 @riverpod
 GroupsState filterGroupsState(Ref ref, String query) {

@@ -214,7 +214,7 @@ class CoreController {
 
   Future<List<Proxy>> readGroupProxies(Group group, {String query = ''}) async {
     if (group.nodeCount == null) return group.all;
-    var revision = group.revision;
+    String? revision;
     for (var attempt = 0; attempt < 3; attempt++) {
       final result = <Proxy>[];
       while (true) {
@@ -222,7 +222,7 @@ class CoreController {
           'group': group.name,
           'revision': revision,
           'offset': result.length,
-          'limit': 128,
+          'limit': 2048,
           'query': query,
         });
         if (page['stale'] == true) {

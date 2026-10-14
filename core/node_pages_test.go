@@ -93,10 +93,13 @@ func TestNodePagesSummarySearchSortSelectionAndRevision(t *testing.T) {
 	if strings.Contains(string(encoded), "Node-000") {
 		t.Fatal("summary leaked the complete node list")
 	}
-	request := nodePageRequest{Group: "Paged", Revision: summary["revision"].(string), Limit: 1000}
+	request := nodePageRequest{Group: "Paged", Revision: summary["revision"].(string), Limit: 128}
 	first := handleGetProxyPage(request)
-	if first.Stale || len(first.Items) != nodePageLimit || first.SelectedIndex != 299 {
+	if first.Stale || len(first.Items) != 128 || first.SelectedIndex != 299 {
 		t.Fatalf("invalid first page: %#v", first)
+	}
+	if whole := handleGetProxyPage(nodePageRequest{Group: "Paged", Limit: 1 << 20}); len(whole.Items) != 301 {
+		t.Fatalf("enumeration page holds %d nodes", len(whole.Items))
 	}
 	request.Offset = 256
 	last := handleGetProxyPage(request)
@@ -112,14 +115,16 @@ func TestNodePagesSummarySearchSortSelectionAndRevision(t *testing.T) {
 	if found.Total != 10 || found.Items[0].Name != "Node-290" || found.SelectedIndex != 9 {
 		t.Fatalf("search missed later pages: %#v", found)
 	}
-	request.Query, request.Sort = "", "delay"
+	request.Query, request.Sort, request.Revision = "", "delay", ""
 	request.Delays = map[string]map[string]int{"https://example.test/check": {"Node-250": 3, "Node-002": 20, "Node-001": -1}}
 	sorted := handleGetProxyPage(request)
 	if sorted.Items[0].Name != "Node-250" || sorted.Items[1].Name != "Node-002" {
 		t.Fatalf("wrong delay ordering: %v", sorted.Items[:2])
 	}
-	request.HideTimeout, request.HiddenDelays = true, map[string]map[string]int{"https://example.test/check": {"Node-299": -1, "Node-250": -1}}
+	request.Sort = ""
+	request.HideTimeout, request.Delays = true, map[string]map[string]int{"https://example.test/check": {"Node-299": -1, "Node-250": -1}}
 	filtered := handleGetProxyPage(request)
+	request.Revision = filtered.Revision
 	if filtered.Total != 300 || filtered.SelectedIndex < 0 {
 		t.Fatal("hide-timeout removed selection or kept failure")
 	}
@@ -144,5 +149,54 @@ func TestNodePagesConfigReplacementInvalidatesRevision(t *testing.T) {
 	next := handleGetProxyPage(nodePageRequest{Group: "Paged", Revision: old.Revision})
 	if !next.Stale || next.Revision == old.Revision {
 		t.Fatal("provider replacement reused cached pages")
+	}
+}
+
+func TestNodePageRevisionFollowsOnlyTheSelectionsItDependsOn(t *testing.T) {
+	installNodePageFixture(t)
+	selectNode := func(group, node string) {
+		t.Helper()
+		if message := handleChangeProxy(&ChangeProxyParams{GroupName: &group, ProxyName: &node}); message != "" {
+			t.Fatal(message)
+		}
+	}
+	fresh := func(request nodePageRequest) nodePageRequest {
+		request.Revision = handleGetProxyPage(request).Revision
+		return request
+	}
+	plain := fresh(nodePageRequest{Group: "Paged", Sort: "name"})
+	nested := fresh(nodePageRequest{Group: "Nested", Sort: "delay"})
+	hidden := fresh(nodePageRequest{Group: "Paged", HideTimeout: true})
+	unrelated := fresh(nodePageRequest{Group: "Auto", Sort: "delay", HideTimeout: true})
+	summary := func() string {
+		for _, group := range handleGetProxyGroups() {
+			if group["name"] == "Paged" {
+				return group["revision"].(string)
+			}
+		}
+		t.Fatal("missing summary")
+		return ""
+	}
+	before := summary()
+
+	selectNode("Paged", "Node-001")
+	if summary() != before || handleGetProxyPage(plain).Stale {
+		t.Fatal("a selection invalidated membership-only pages")
+	}
+	if !handleGetProxyPage(nested).Stale || !handleGetProxyPage(hidden).Stale {
+		t.Fatal("delay order or timeout visibility kept a changed selection")
+	}
+	if handleGetProxyPage(unrelated).Stale {
+		t.Fatal("another group's selection invalidated an independent group")
+	}
+	if handleGetProxyPage(nodePageRequest{Group: "Paged", Revision: before}).Stale {
+		t.Fatal("summary revision does not match its first page")
+	}
+	direct := handleGetProxyPage(nodePageRequest{
+		Group: "Nested", Sort: "delay", TestURL: "https://default.test", DirectTestURL: "https://direct.test",
+		Delays: map[string]map[string]int{"https://direct.test": {"DIRECT": 5}},
+	})
+	if direct.Items[0].Name != "DIRECT" {
+		t.Fatalf("DIRECT was not ordered by its own test URL: %v", direct.Items)
 	}
 }

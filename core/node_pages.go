@@ -9,8 +9,9 @@ package main
 import (
 	"cmp"
 	"fmt"
-	"hash/fnv"
+	"hash/maphash"
 	"slices"
+	"strconv"
 	"strings"
 	"unicode/utf16"
 
@@ -20,20 +21,27 @@ import (
 	"github.com/metacubex/mihomo/tunnel"
 )
 
-const nodePageLimit = 128
+// Views request 128 nodes per page; group tests and the tray enumerate with
+// larger replies, which stay far below the IPC frame limit.
+const nodePageLimit = 2048
+
+var nodeRevisionSeed = maphash.MakeSeed()
 
 type nodePageRequest struct {
-	Group        string                    `json:"group"`
-	Offset       int                       `json:"offset"`
-	Limit        int                       `json:"limit"`
-	Revision     string                    `json:"revision"`
-	Query        string                    `json:"query"`
-	Sort         string                    `json:"sort"`
-	Selected     string                    `json:"selected"`
-	HideTimeout  bool                      `json:"hideTimeout"`
-	TestURL      string                    `json:"testUrl"`
-	Delays       map[string]map[string]int `json:"delays"`
-	HiddenDelays map[string]map[string]int `json:"hiddenDelays"`
+	Group         string                    `json:"group"`
+	Offset        int                       `json:"offset"`
+	Limit         int                       `json:"limit"`
+	Revision      string                    `json:"revision"`
+	Query         string                    `json:"query"`
+	Sort          string                    `json:"sort"`
+	HideTimeout   bool                      `json:"hideTimeout"`
+	TestURL       string                    `json:"testUrl"`
+	DirectTestURL string                    `json:"directTestUrl"`
+	Delays        map[string]map[string]int `json:"delays"`
+}
+
+func (request nodePageRequest) dependsOnSelection() bool {
+	return request.Sort == "delay" || request.HideTimeout
 }
 
 type nodePage struct {
@@ -46,10 +54,75 @@ type nodePage struct {
 }
 
 type nodeGroup struct {
+	proxy    C.Proxy
+	holder   interface{ Proxies() []C.Proxy }
 	data     map[string]any
+	now      string
 	members  []C.Proxy
 	selected C.Proxy
-	revision string
+	loaded   bool
+}
+
+func (group *nodeGroup) load() []C.Proxy {
+	if !group.loaded {
+		group.loaded = true
+		group.members = group.holder.Proxies()
+		for _, member := range group.members {
+			if member.Name() == group.now {
+				group.selected = member
+				break
+			}
+		}
+	}
+	return group.members
+}
+
+func (group *nodeGroup) testURL() string {
+	url, _ := group.data["testUrl"].(string)
+	return strings.TrimSpace(url)
+}
+
+// revision covers the members a page lists and, for delay order or hidden
+// timeouts, the selections that order and visibility resolve through.
+func (group *nodeGroup) revision(request nodePageRequest, groups map[string]*nodeGroup) string {
+	var hash maphash.Hash
+	hash.SetSeed(nodeRevisionSeed)
+	fmt.Fprintf(&hash, "%p\x00", group.proxy)
+	for _, member := range group.load() {
+		hash.WriteString(member.Name())
+		hash.WriteByte(0)
+		hash.WriteString(member.Type().String())
+		hash.WriteByte(0)
+	}
+	if request.dependsOnSelection() {
+		hash.WriteString(group.now)
+		hash.WriteByte(1)
+		for _, member := range group.members {
+			resolveSelection(member, groups, func(nested *nodeGroup) {
+				hash.WriteString(nested.now)
+				hash.WriteByte(0)
+			})
+		}
+	}
+	return strconv.FormatUint(hash.Sum64(), 16)
+}
+
+func (group *nodeGroup) summary() map[string]any {
+	members := group.load()
+	usable := slices.ContainsFunc(members, func(member C.Proxy) bool {
+		switch member.Type() {
+		case C.Selector, C.URLTest, C.Fallback, C.LoadBalance, C.Direct, C.Reject, C.Pass:
+			return false
+		}
+		return true
+	})
+	data := group.data
+	data["revision"], data["nodeCount"], data["hasUsableProxy"] = group.revision(nodePageRequest{}, nil), len(members), usable
+	data["all"] = []ProxyGroupMember{}
+	if group.selected != nil {
+		data["all"] = []ProxyGroupMember{nodeMember(group.selected)}
+	}
+	return data
 }
 
 func nodeGroupsLocked() ([]string, map[string]*nodeGroup) {
@@ -74,40 +147,9 @@ func nodeGroupsLocked() ([]string, map[string]*nodeGroup) {
 		if data == nil {
 			continue
 		}
-		members := holder.Proxies()
-		group := &nodeGroup{data: data, members: members}
-		hash := fnv.New64a()
-		fmt.Fprintf(hash, "%p\x00", proxy)
-		usable := false
-		for _, member := range members {
-			fmt.Fprintf(hash, "%p\x00%s\x00%s\x00", member, member.Name(), member.Type())
-			if member.Name() == data["now"] && group.selected == nil {
-				group.selected = member
-			}
-			switch member.Type() {
-			case C.Selector, C.URLTest, C.Fallback, C.LoadBalance, C.Direct, C.Reject, C.Pass:
-			default:
-				usable = true
-			}
-		}
-		group.revision = fmt.Sprintf("%x", hash.Sum64())
-		data["revision"], data["nodeCount"], data["hasUsableProxy"] = group.revision, len(members), usable
-		data["all"] = []ProxyGroupMember{}
-		if group.selected != nil {
-			data["all"] = []ProxyGroupMember{nodeMember(group.selected)}
-		}
-		groups[name] = group
+		now, _ := data["now"].(string)
+		groups[name] = &nodeGroup{proxy: proxy, holder: holder, data: data, now: now}
 		order = append(order, name)
-	}
-	hash := fnv.New64a()
-	for _, name := range order {
-		group := groups[name]
-		fmt.Fprintf(hash, "%s\x00%s\x00%v\x00", name, group.revision, group.data["now"])
-	}
-	revision := fmt.Sprintf("%x", hash.Sum64())
-	for _, group := range groups {
-		group.revision = revision
-		group.data["revision"] = revision
 	}
 	return order, groups
 }
@@ -129,7 +171,7 @@ func handleGetProxyGroups() []map[string]any {
 	order, groups := nodeGroupsLocked()
 	result := make([]map[string]any, 0, len(order))
 	for _, name := range order {
-		result = append(result, groups[name].data)
+		result = append(result, groups[name].summary())
 	}
 	return result
 }
@@ -150,12 +192,29 @@ func handleGetProxyGroupCounts(request nodePageRequest) map[string]int {
 	defer selectionLock.Unlock()
 	_, groups := nodeGroupsLocked()
 	counts := make(map[string]int, len(groups))
-	request.Offset, request.Sort = int(^uint(0)>>1), ""
-	for name := range groups {
-		request.Group = name
-		counts[name] = buildNodePage(request, groups).Total
+	request.Sort = ""
+	for name, group := range groups {
+		counts[name] = len(filterNodes(request, group, groups))
 	}
 	return counts
+}
+
+// resolveSelection follows the selections of nested groups from proxy to the
+// node they currently use; it reports false for a cycle.
+func resolveSelection(proxy C.Proxy, groups map[string]*nodeGroup, visit func(*nodeGroup)) (C.Proxy, bool) {
+	for range len(groups) + 1 {
+		group := groups[proxy.Name()]
+		if group == nil || proxy.Type().String() != group.data["type"] {
+			return proxy, true
+		}
+		group.load()
+		visit(group)
+		if group.selected == nil {
+			return proxy, true
+		}
+		proxy = group.selected
+	}
+	return nil, false
 }
 
 type nodeDelay struct {
@@ -163,35 +222,24 @@ type nodeDelay struct {
 	probeable bool
 }
 
-func resolveNodeDelay(proxy C.Proxy, testURL string, delays map[string]map[string]int, groups map[string]*nodeGroup) nodeDelay {
-	seen := map[string]bool{}
-	for {
-		name := proxy.Name()
-		if seen[name] {
-			return nodeDelay{}
+func resolveNodeDelay(proxy C.Proxy, testURL string, request nodePageRequest, groups map[string]*nodeGroup) nodeDelay {
+	leaf, ok := resolveSelection(proxy, groups, func(group *nodeGroup) {
+		if url := group.testURL(); url != "" && group.selected != nil {
+			testURL = url
 		}
-		seen[name] = true
-		group := groups[name]
-		if group == nil || proxy.Type().String() != group.data["type"] {
-			break
-		}
-		if group.selected == nil {
-			break
-		}
-		if url, _ := group.data["testUrl"].(string); strings.TrimSpace(url) != "" {
-			testURL = strings.TrimSpace(url)
-		}
-		proxy = group.selected
+	})
+	if !ok {
+		return nodeDelay{}
 	}
-	if proxy.Name() == "DIRECT" {
-		testURL = "https://wifi.vivo.com.cn/generate_204"
+	if leaf.Name() == "DIRECT" && request.DirectTestURL != "" {
+		testURL = request.DirectTestURL
 	}
 	probeable := true
-	switch proxy.Type().String() {
+	switch leaf.Type().String() {
 	case "Reject", "RejectDrop", "Pass", "PassRule", "Rematch", "Compatible", "Dns":
 		probeable = false
 	}
-	return nodeDelay{value: delays[testURL][proxy.Name()], probeable: probeable}
+	return nodeDelay{value: request.Delays[testURL][leaf.Name()], probeable: probeable}
 }
 
 func delayPriority(delay int) int {
@@ -204,32 +252,17 @@ func delayPriority(delay int) int {
 	return 2
 }
 
-func buildNodePage(request nodePageRequest, groups map[string]*nodeGroup) nodePage {
-	page := nodePage{SelectedIndex: -1, Items: []ProxyGroupMember{}}
-	group := groups[request.Group]
-	if group == nil {
-		page.Stale = true
-		return page
-	}
-	page.Revision = group.revision
-	if request.Revision != "" && request.Revision != group.revision {
-		page.Stale = true
-		return page
-	}
-	url, _ := group.data["testUrl"].(string)
-	if strings.TrimSpace(url) == "" {
+func filterNodes(request nodePageRequest, group *nodeGroup, groups map[string]*nodeGroup) []C.Proxy {
+	url := group.testURL()
+	if url == "" {
 		url = request.TestURL
 	}
-	selected, _ := group.data["now"].(string)
-	if request.Selected != "" {
-		selected = request.Selected
-	}
-	members := slices.Clone(group.members)
+	members := slices.Clone(group.load())
 	if request.HideTimeout {
 		visible := make([]C.Proxy, 0, len(members))
 		for _, proxy := range members {
-			delay := resolveNodeDelay(proxy, url, request.HiddenDelays, groups)
-			if proxy.Name() == selected || !delay.probeable || delay.value >= 0 {
+			delay := resolveNodeDelay(proxy, url, request, groups)
+			if proxy.Name() == group.now || !delay.probeable || delay.value >= 0 {
 				visible = append(visible, proxy)
 			}
 		}
@@ -261,26 +294,36 @@ func buildNodePage(request nodePageRequest, groups map[string]*nodeGroup) nodePa
 	case "delay":
 		delays := make(map[C.Proxy]nodeDelay, len(members))
 		for _, proxy := range members {
-			delays[proxy] = resolveNodeDelay(proxy, url, request.Delays, groups)
+			delays[proxy] = resolveNodeDelay(proxy, url, request, groups)
 		}
 		slices.SortStableFunc(members, func(a, b C.Proxy) int {
 			x, y := delays[a], delays[b]
 			if c := cmp.Compare(delayPriority(x.value), delayPriority(y.value)); c != 0 {
 				return c
 			}
-			if c := cmp.Compare(x.value, y.value); c != 0 {
-				return c
-			}
-			return 0
+			return cmp.Compare(x.value, y.value)
 		})
 	}
-	page.Total = len(members)
-	for i, proxy := range members {
-		if proxy.Name() == selected {
-			page.SelectedIndex = i
-			break
-		}
+	return members
+}
+
+func buildNodePage(request nodePageRequest, groups map[string]*nodeGroup) nodePage {
+	page := nodePage{SelectedIndex: -1, Items: []ProxyGroupMember{}}
+	group := groups[request.Group]
+	if group == nil {
+		page.Stale = true
+		return page
 	}
+	page.Revision = group.revision(request, groups)
+	if request.Revision != "" && request.Revision != page.Revision {
+		page.Stale = true
+		return page
+	}
+	members := filterNodes(request, group, groups)
+	page.Total = len(members)
+	page.SelectedIndex = slices.IndexFunc(members, func(proxy C.Proxy) bool {
+		return proxy.Name() == group.now
+	})
 	page.Offset = min(max(request.Offset, 0), page.Total)
 	limit := request.Limit
 	if limit <= 0 || limit > nodePageLimit {

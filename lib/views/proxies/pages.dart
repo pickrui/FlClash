@@ -6,6 +6,7 @@
 import 'dart:async';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/proxies/node_pages.dart';
 import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/models/models.dart';
@@ -17,23 +18,17 @@ final nodePagesProvider = ChangeNotifierProvider.autoDispose
     .family<NodePages, ({String group, String query})>((ref, key) {
       final group = ref.watch(groupsProvider).getGroup(key.group);
       final style = ref.watch(proxiesStyleSettingProvider);
-      final delays = ref.watch(delaysAtLastTestBatchProvider);
-      final selected = ref.watch(getSelectedProxyNameProvider(key.group));
-      final testUrl = ref.watch(realTestUrlProvider());
       final core = ref.watch(coreHandlerProvider);
       final arguments = <String, Object?>{
         'group': key.group,
         'query': key.query,
         'sort': style.sortType.name,
         'hideTimeout': style.hideTimeoutProxies,
-        'selected': selected,
-        'testUrl': testUrl,
-        'delays': delays,
-        'hiddenDelays': delays,
+        if (style.sortType == ProxiesSortType.delay || style.hideTimeoutProxies)
+          ...delayArguments(ref),
       };
       final pages = NodePages(
         total: group?.nodeCount ?? 0,
-        revision: group?.revision,
         read: (offset, revision) => core.getProxyPage({
           ...arguments,
           'offset': offset,
