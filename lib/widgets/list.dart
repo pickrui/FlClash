@@ -67,14 +67,12 @@ class OptionsDelegate<T> extends Delegate {
   final String title;
   final T value;
   final String Function(T value) textBuilder;
-  final String? Function(T value)? subtitleBuilder;
   final Function(T? value) onChanged;
 
   const OptionsDelegate({
     required this.title,
     required this.options,
     required this.textBuilder,
-    this.subtitleBuilder,
     required this.value,
     required this.onChanged,
   });
@@ -341,7 +339,6 @@ class ListItem<T> extends StatelessWidget {
     if (delegate is OptionsDelegate) {
       final optionsDelegate = delegate as OptionsDelegate<T>;
       final options = optionsDelegate.options;
-      final subtitleBuilder = optionsDelegate.subtitleBuilder;
       return _buildListTile(
         position: position,
         onTap: () async {
@@ -352,9 +349,6 @@ class ListItem<T> extends StatelessWidget {
               options: List.generate(options.length, (index) => index),
               textBuilder: (index) =>
                   optionsDelegate.textBuilder(options[index]),
-              subtitleBuilder: subtitleBuilder == null
-                  ? null
-                  : (index) => subtitleBuilder(options[index]),
               value: options.indexOf(optionsDelegate.value),
             ),
           );
