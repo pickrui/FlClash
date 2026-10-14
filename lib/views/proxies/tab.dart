@@ -336,7 +336,7 @@ class _ProxyGroupViewState extends ConsumerState<ProxyGroupView> {
         query: ref.read(queryProvider(QueryTag.proxies)),
       )),
     );
-    await pages.load(0);
+    final selected = await pages.locateSelected();
     if (!mounted ||
         !_controller.hasClients ||
         _controller.position.maxScrollExtent == 0) {
@@ -345,7 +345,7 @@ class _ProxyGroupViewState extends ConsumerState<ProxyGroupView> {
     _controller.animateTo(
       min(
         16 +
-            max(0, pages.selectedIndex) ~/
+            max(0, selected) ~/
                 widget.columns *
                 (getItemHeight(widget.cardType) + 8),
         _controller.position.maxScrollExtent,

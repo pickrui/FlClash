@@ -28,6 +28,7 @@ GroupsState currentGroupsState(Ref ref) {
     groupsProvider.select(
       (state) => state.map((item) {
         return item.copyWith(
+          revision: null,
           all: item.all.map((proxy) => proxy.copyWith(now: '')).toList(),
         );
       }),

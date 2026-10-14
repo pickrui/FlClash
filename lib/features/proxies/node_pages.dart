@@ -16,6 +16,7 @@ class NodePages extends ChangeNotifier {
   final Future<Map<String, dynamic>> Function(int offset, String? revision)
   read;
   final _pages = <int, List<Proxy>>{};
+  final _previous = <int, List<Proxy>>{};
   final _pending = <int, Completer<void>>{};
   final _queue = <int>[];
   int _active = 0;
@@ -34,14 +35,40 @@ class NodePages extends ChangeNotifier {
 
   Proxy? at(int index) {
     final page = index ~/ pageSize;
+    final offset = index % pageSize;
     final items = _pages.remove(page);
     if (items != null) {
       _pages[page] = items;
-      final offset = index % pageSize;
       return offset < items.length ? items[offset] : null;
     }
     if (!_errors.containsKey(page)) unawaited(load(index));
-    return null;
+    final previous = _previous[page];
+    return previous != null && offset < previous.length
+        ? previous[offset]
+        : null;
+  }
+
+  void reload([String? nextRevision]) {
+    if (_disposed) return;
+    _generation++;
+    _previous.addAll(_pages);
+    while (_previous.length > maxPages) {
+      _previous.remove(_previous.keys.first);
+    }
+    _pages.clear();
+    _clearPending();
+    _errors.clear();
+    revision = nextRevision;
+    notifyListeners();
+  }
+
+  /// A selection made elsewhere leaves cached pages valid but moves the
+  /// selected index, so the first page is read again.
+  Future<int> locateSelected() async {
+    final first = _pages.remove(0);
+    if (first != null) _previous[0] = first;
+    await load(0);
+    return selectedIndex;
   }
 
   Future<void> load(int index) {
@@ -89,17 +116,19 @@ class NodePages extends ChangeNotifier {
       final data = await read(page * pageSize, revision);
       if (_disposed || generation != _generation) return;
       if (data['stale'] == true) {
-        _generation++;
-        initialized = false;
-        selectedIndex = -1;
-        _pages.clear();
-        _clearPending();
-        _errors.clear();
-        revision = data['revision'] as String?;
-        if (revision == null || revision!.isEmpty) {
+        final next = data['revision'] as String?;
+        if (next == null || next.isEmpty) {
+          _generation++;
+          _pages.clear();
+          _previous.clear();
+          _clearPending();
+          _errors.clear();
+          revision = null;
           total = 0;
+          selectedIndex = -1;
           initialized = true;
         } else {
+          reload(next);
           unawaited(load(0));
         }
         return;
@@ -110,6 +139,7 @@ class NodePages extends ChangeNotifier {
       initialized = true;
       final offset = data['offset'] as int;
       if (offset == page * pageSize) {
+        _previous.remove(page);
         _pages[page] = (data['items'] as List)
             .map((raw) => Proxy.fromJson(Map<String, dynamic>.from(raw as Map)))
             .toList();
@@ -136,6 +166,7 @@ class NodePages extends ChangeNotifier {
     _disposed = true;
     _generation++;
     _pages.clear();
+    _previous.clear();
     _clearPending();
     _errors.clear();
     super.dispose();

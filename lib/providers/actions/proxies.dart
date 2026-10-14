@@ -455,9 +455,22 @@ extension ProxiesControllerExt on AppController {
         _pendingProfileApplies > 0 ||
         applyGeneration != _profileApplyGeneration) {
       _reconcileProxyChange(profileId, groupName, proxyName);
+    } else if (proxyName.isNotEmpty) {
+      _showSelection(groupName, proxyName);
     }
     _handleProxyChangeApplied();
     return true;
+  }
+
+  /// Shows an applied selection before the next group refresh reports it.
+  void _showSelection(String groupName, String proxyName) {
+    final groups = _ref.read(groupsProvider);
+    final index = groups.indexWhere((group) => group.name == groupName);
+    if (index == -1 || groups[index].now == proxyName) return;
+    _ref.read(groupsProvider.notifier).value = [
+      for (final (i, group) in groups.indexed)
+        i == index ? group.copyWith(now: proxyName) : group,
+    ];
   }
 
   void _handleProxyChangeApplied() {

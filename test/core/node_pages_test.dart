@@ -69,6 +69,38 @@ void main() {
     expect(pages.cachedNodeCount, 128);
   });
 
+  test('reloads keep rows until their replacement arrives', () async {
+    var revision = 'a';
+    var selected = 1500;
+    final reply = <Completer<Map<String, dynamic>>>[];
+    final pages = NodePages(
+      total: 2000,
+      read: (offset, _) {
+        final completion = Completer<Map<String, dynamic>>();
+        reply.add(completion);
+        return completion.future.then(
+          (page) => {...page, 'selectedIndex': selected},
+        );
+      },
+    );
+    addTearDown(pages.dispose);
+    final first = pages.load(0);
+    reply.removeAt(0).complete(page(0));
+    await first;
+    revision = 'b';
+    pages.reload();
+    expect(pages.at(1)?.name, 'a-1');
+    reply.removeAt(0).complete(page(0, revision: revision));
+    await pages.load(0);
+    expect(pages.at(1)?.name, 'b-1');
+
+    selected = 7;
+    final located = pages.locateSelected();
+    expect(pages.at(1)?.name, 'b-1');
+    reply.removeAt(0).complete(page(0, revision: revision));
+    expect(await located, 7);
+  });
+
   test(
     'fast scroll limits pending work and disposal ignores late replies',
     () async {

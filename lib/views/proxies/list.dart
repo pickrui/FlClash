@@ -270,16 +270,14 @@ class _ProxiesListViewState extends State<ProxiesListView> {
         query: container.read(queryProvider(QueryTag.proxies)),
       )),
     );
-    await pages.load(0);
+    final selected = await pages.locateSelected();
     if (!mounted) return;
     final columns = container.read(getProxiesColumnsProvider);
     final cardType = container.read(proxiesStyleSettingProvider).cardType;
     _jumpTo(
       currentInitOffset +
           8 +
-          max(0, pages.selectedIndex) ~/
-              columns *
-              (getItemHeight(cardType) + 8),
+          max(0, selected) ~/ columns * (getItemHeight(cardType) + 8),
     );
   }
 

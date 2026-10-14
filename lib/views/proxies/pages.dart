@@ -11,26 +11,57 @@ import 'package:fl_clash/features/proxies/node_pages.dart';
 import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:material_ui/material_ui.dart';
 
-final nodePagesProvider = ChangeNotifierProvider.autoDispose
-    .family<NodePages, ({String group, String query})>((ref, key) {
-      final group = ref.watch(groupsProvider).getGroup(key.group);
-      final style = ref.watch(proxiesStyleSettingProvider);
-      final core = ref.watch(coreHandlerProvider);
-      final arguments = <String, Object?>{
+typedef NodePageKey = ({String group, String query});
+
+final _nodePageArgumentsProvider = Provider.autoDispose
+    .family<Map<String, Object?>, NodePageKey>((ref, key) {
+      final (sort, hideTimeout) = ref.watch(
+        proxiesStyleSettingProvider.select(
+          (style) => (style.sortType, style.hideTimeoutProxies),
+        ),
+      );
+      final dependsOnSelection = sort == ProxiesSortType.delay || hideTimeout;
+      ref.watch(
+        groupsProvider.select((groups) {
+          final group = groups.getGroup(key.group);
+          return (
+            group?.nodeCount,
+            group?.revision,
+            dependsOnSelection
+                ? groups.map((group) => group.now).join('\n')
+                : '',
+          );
+        }),
+      );
+      return {
         'group': key.group,
         'query': key.query,
-        'sort': style.sortType.name,
-        'hideTimeout': style.hideTimeoutProxies,
-        if (style.sortType == ProxiesSortType.delay || style.hideTimeoutProxies)
-          ...delayArguments(ref),
+        'sort': sort.name,
+        'hideTimeout': hideTimeout,
+        if (dependsOnSelection) ...delayArguments(ref),
       };
-      final pages = NodePages(
-        total: group?.nodeCount ?? 0,
+    });
+
+final nodePagesProvider = ChangeNotifierProvider.autoDispose
+    .family<NodePages, NodePageKey>((ref, key) {
+      final core = ref.watch(coreHandlerProvider);
+      late final NodePages pages;
+      final arguments = ref.listen(
+        _nodePageArgumentsProvider(key),
+        (_, _) => scheduleMicrotask(pages.reload),
+      );
+      final filtered =
+          key.query.isNotEmpty || arguments.read()['hideTimeout'] == true;
+      pages = NodePages(
+        total: filtered
+            ? 0
+            : ref.read(groupsProvider).getGroup(key.group)?.nodeCount ?? 0,
         read: (offset, revision) => core.getProxyPage({
-          ...arguments,
+          ...arguments.read(),
           'offset': offset,
           'limit': NodePages.pageSize,
           'revision': revision,

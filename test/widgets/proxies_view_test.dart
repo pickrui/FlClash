@@ -124,6 +124,80 @@ void main() {
     );
   }
 
+  test('node pages keep their rows across unrelated changes and send delays only when ordering needs them', () async {
+    final requests = <Map>[];
+    final handler = _MockCoreHandler();
+    when(
+      () => handler.invokeMethod<Map>(
+        method: CoreMethod.getProxyPage,
+        arguments: any(named: 'arguments'),
+        timeout: any(named: 'timeout'),
+      ),
+    ).thenAnswer((invocation) async {
+      final arguments = invocation.namedArguments[#arguments] as Map;
+      requests.add(arguments);
+      return {
+        'revision': 'fixture',
+        'offset': 0,
+        'total': 2,
+        'selectedIndex': 0,
+        'items': [
+          for (final name in ['A', 'B'])
+            {'name': '$name-${requests.length}', 'type': 'Shadowsocks'},
+        ],
+      };
+    });
+    const paged = Group(
+      name: 'Paged',
+      type: GroupType.Selector,
+      nodeCount: 2,
+      revision: 'members',
+      now: 'A-1',
+    );
+    const other = Group(name: 'Other', type: GroupType.Selector, now: 'X');
+    final container = ProviderContainer(
+      overrides: [
+        coreHandlerProvider.overrideWithValue(
+          CoreController.forTesting(handler: handler),
+        ),
+        groupsProvider.overrideWithBuild((_, _) => [paged, other]),
+      ],
+    );
+    addTearDown(container.dispose);
+    const key = (group: 'Paged', query: '');
+    final watch = container.listen(nodePagesProvider(key), (_, _) {});
+    addTearDown(watch.close);
+    final pages = container.read(nodePagesProvider(key));
+    await pages.load(0);
+    expect(pages.at(1)?.name, 'B-1');
+    expect(requests.single.containsKey('delays'), isFalse);
+
+    container.read(groupsProvider.notifier).value = [
+      paged.copyWith(now: 'B-1'),
+      other.copyWith(now: 'Y'),
+    ];
+    container
+        .read(proxiesStyleSettingProvider.notifier)
+        .update((style) => style.copyWith(cardType: ProxyCardType.min));
+    await container.pump();
+    await Future<void>.delayed(Duration.zero);
+    expect(container.read(nodePagesProvider(key)), same(pages));
+    expect(pages.at(1)?.name, 'B-1');
+    expect(requests, hasLength(1));
+
+    container
+        .read(proxiesStyleSettingProvider.notifier)
+        .update((style) => style.copyWith(sortType: ProxiesSortType.delay));
+    await container.pump();
+    await Future<void>.delayed(Duration.zero);
+    expect(container.read(nodePagesProvider(key)), same(pages));
+    expect(pages.at(1)?.name, 'B-1');
+    await pages.load(0);
+    expect(pages.at(1)?.name, 'B-2');
+    expect(requests.last['sort'], 'delay');
+    expect(requests.last['delays'], isA<Map>());
+  });
+
   testWidgets(
     'group latency action follows the page search and keeps matching hidden nodes',
     (tester) async {
