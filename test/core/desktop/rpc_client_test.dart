@@ -63,6 +63,45 @@ void main() {
     await transport.close();
   });
 
+  for (final closeClient in [false, true]) {
+    test(
+      '${closeClient ? 'close' : 'disconnect'} releases requests while a send is blocked',
+      () async {
+        final gate = Completer<void>();
+        final transport = FakeDesktopCoreTransport.connected()
+          ..sendGate = gate.future;
+        final client = CoreRpcClient(transport);
+        Object? failure;
+        final observed = client
+            .invoke<bool>(method: CoreMethod.getIsInit)
+            .then<void>((_) {}, onError: (Object error) => failure = error);
+        try {
+          await _sentRequest(transport);
+          if (closeClient) {
+            await client.close();
+          } else {
+            transport.disconnect(1);
+          }
+          await pumpEventQueue();
+          expect(
+            failure,
+            isA<CoreMethodException>().having(
+              (error) => error.code,
+              'code',
+              'transport_disconnected',
+            ),
+          );
+          expect(client.pendingCount, 0);
+        } finally {
+          gate.complete();
+          await observed;
+          await client.close();
+          await transport.close();
+        }
+      },
+    );
+  }
+
   test('maps a Core error envelope to CoreMethodException', () async {
     final transport = FakeDesktopCoreTransport.connected();
     final client = CoreRpcClient(transport);

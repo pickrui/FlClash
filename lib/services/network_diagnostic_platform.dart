@@ -500,9 +500,10 @@ Future<String> runDiagnosticCommand(
         .replaceFirst('\ufeff', '');
   } finally {
     deadline.cancel();
-    process.kill();
+    process.kill(ProcessSignal.sigkill);
     await canceled.cancel();
     await stdout.cancel();
     await stderr.cancel();
+    await process.exitCode.timeout(const Duration(seconds: 1));
   }
 }

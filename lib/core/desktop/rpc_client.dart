@@ -94,13 +94,16 @@ final class CoreRpcClient implements CoreRpcChannel {
       if (sendTimeout <= Duration.zero) {
         throw TimeoutException('Core method ${method.name} timed out');
       }
-      await transport
-          .send(
-            json.encode(
-              CoreMethodCall(id: id, method: method, arguments: arguments),
-            ),
-          )
-          .timeout(sendTimeout);
+      await Future.any<Object?>([
+        transport
+            .send(
+              json.encode(
+                CoreMethodCall(id: id, method: method, arguments: arguments),
+              ),
+            )
+            .timeout(sendTimeout),
+        completer.future,
+      ]);
       return await _awaitResponse(
         method: method,
         completer: completer,

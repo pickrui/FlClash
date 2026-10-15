@@ -17,6 +17,7 @@ final class FakeDesktopCoreTransport implements DesktopCoreTransport {
 
   final List<String> sentMessages = [];
   Object? sendError;
+  Future<void>? sendGate;
   final StreamController<DesktopTransportEvent> _eventController =
       StreamController<DesktopTransportEvent>.broadcast();
   final StreamController<Uint8List> _frameController =
@@ -141,6 +142,7 @@ final class FakeDesktopCoreTransport implements DesktopCoreTransport {
       throw error;
     }
     sentMessages.add(message);
+    await sendGate;
   }
 
   @override

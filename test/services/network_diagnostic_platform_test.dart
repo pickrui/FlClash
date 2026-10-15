@@ -259,6 +259,41 @@ void main() {
     },
     skip: Platform.isWindows,
   );
+  test('canceled diagnostic reaps a child that ignores termination', () async {
+    final directory = await Directory.systemTemp.createTemp(
+      'diagnostic-child-',
+    );
+    final pidFile = File('${directory.path}/pid');
+    final token = CancelToken();
+    int? pid;
+    var exited = false;
+    final observed = runDiagnosticCommand('/bin/sh', [
+      '-c',
+      'trap "" TERM; echo \$\$ > "\$1"; exec sleep 30',
+      'diagnostic-child',
+      pidFile.path,
+    ], token).then<Object?>((_) => null, onError: (Object error) => error);
+    try {
+      final ready = Stopwatch()..start();
+      while (!await pidFile.exists() || await pidFile.length() == 0) {
+        if (ready.elapsed > const Duration(seconds: 3)) {
+          fail('diagnostic fixture did not start');
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+      pid = int.parse((await pidFile.readAsString()).trim());
+      token.cancel();
+      expect(await observed, isNotNull);
+      final alive = await Process.run('/bin/kill', ['-0', '$pid']);
+      exited = alive.exitCode != 0;
+      expect(exited, isTrue, reason: 'diagnostic child still running');
+    } finally {
+      if (pid != null && !exited) Process.killPid(pid, ProcessSignal.sigkill);
+      await observed;
+      await directory.delete(recursive: true);
+    }
+  }, skip: Platform.isWindows);
+
   test('canceled command never starts', () async {
     final token = CancelToken()..cancel();
     await expectLater(
