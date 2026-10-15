@@ -23,6 +23,75 @@ import '../support/cloud_api_adapter.dart';
 
 void main() {
   setUpAll(() => AppLocalizations.load(const Locale('en')));
+  test('Google exchange is unauthenticated, single-use and leaves session adoption to the notifier', () async {
+    final adapter = QueuedCloudAdapter();
+    final service = CloudApiService.forTesting(client: adapter.createClient())
+      ..setToken('old-session');
+    final revision = service.sessionRevision;
+    final result = service.loginWithGoogle(code: 'a' * 64, verifier: 'v' * 43);
+    final pending = await adapter.takeRequest();
+    expect(pending.options.path, '/login/google');
+    expect(pending.options.headers['X-oixCloud-Client'], 'flclash');
+    expect(pending.options.headers.containsKey('Authorization'), isFalse);
+    expect(pending.options.followRedirects, isFalse);
+    expect(canReplayCloudRequest(pending.options), isFalse);
+    expect(pending.options.extra[cloudSequentialFailoverExtraKey], isNot(true));
+    expect(Map.fromEntries((pending.options.data as FormData).fields), {
+      'code': 'a' * 64,
+      'code_verifier': 'v' * 43,
+    });
+    pending.respond({
+      'ret': 200,
+      'data': {
+        'token': 'google-token',
+        'plan': 'No plan',
+        'plan_time': '2020-01-01',
+        'used': '0',
+        'traffic': '0',
+        'today_used': '0',
+        'unused': '0',
+        'money': '0',
+        'aff_money': '0',
+        'integral': '0',
+      },
+    });
+    expect((await result).token, 'google-token');
+    expect(service.sessionRevision, revision);
+    expect(adapter.requestCount, 1);
+  });
+
+  for (final response in [
+    {'ret': 403, 'msg': 'Expired'},
+    {
+      'ret': 200,
+      'data': {'token': '  '},
+    },
+    {
+      'ret': 200,
+      'data': {'token': 123},
+    },
+    {'ret': 200},
+  ]) {
+    test(
+      'Google exchange rejects $response without retries or session replacement',
+      () async {
+        final adapter = QueuedCloudAdapter();
+        final service = CloudApiService.forTesting(
+          client: adapter.createClient(),
+        )..setToken('old-session');
+        final revision = service.sessionRevision;
+        final failed = expectLater(
+          service.loginWithGoogle(code: 'a' * 64, verifier: 'v' * 43),
+          throwsA(isA<CloudApiException>()),
+        );
+        (await adapter.takeRequest()).respond(response);
+        await failed;
+        expect(adapter.requestCount, 1);
+        expect(service.sessionRevision, revision);
+      },
+    );
+  }
+
   for (final initialToken in [null, 'session']) {
     test(
       'public health check survives ${initialToken == null ? 'token restoration' : 'logout'}',

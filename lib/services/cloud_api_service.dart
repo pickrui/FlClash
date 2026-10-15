@@ -1130,6 +1130,35 @@ class CloudApiService implements CloudNodeFilterApi {
     throw Exception(responseDto.msg ?? 'Login failed: Invalid response');
   }
 
+  Future<
+    ({String token, CloudProfile profile, CloudNotification? announcement})
+  >
+  loginWithGoogle({required String code, required String verifier}) async {
+    final res = await _client.post(
+      '/login/google',
+      data: FormData.fromMap({'code': code, 'code_verifier': verifier}),
+      options: _writeOptions(
+        Options(
+          followRedirects: false,
+          validateStatus: (status) => status == HttpStatus.ok,
+          extra: {'skipAuth': true},
+        ),
+      ),
+    );
+    final dto = CloudApiResponse<Map<dynamic, dynamic>>.fromJson(res.data);
+    final info = dto.data;
+    final token = info?['token'];
+    if (!dto.isSuccess || token is! String || normalizeToken(token) == null) {
+      throw CloudApiException(dto.msg ?? 'Google sign-in failed');
+    }
+    final parsed = _parseUserInfo(info!);
+    return (
+      token: token,
+      profile: parsed.profile,
+      announcement: parsed.announcement,
+    );
+  }
+
   Future<CloudRegisterConfig> fetchRegisterConfig() async {
     final res = await _syncRead(
       (token, options) => _client.post(

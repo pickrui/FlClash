@@ -4230,6 +4230,56 @@ class AppLocalizations {
     );
   }
 
+  /// `Sign in with Google`
+  String get signInWithGoogle {
+    return Intl.message(
+      'Sign in with Google',
+      name: 'signInWithGoogle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Complete Google sign-in in your browser`
+  String get googleLoginWaiting {
+    return Intl.message(
+      'Complete Google sign-in in your browser',
+      name: 'googleLoginWaiting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not open Google sign-in. Please try again.`
+  String get googleLoginUnavailable {
+    return Intl.message(
+      'Could not open Google sign-in. Please try again.',
+      name: 'googleLoginUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Google sign-in timed out. Please try again.`
+  String get googleLoginTimedOut {
+    return Intl.message(
+      'Google sign-in timed out. Please try again.',
+      name: 'googleLoginTimedOut',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not verify Google sign-in. Please try again.`
+  String get googleLoginInvalidCallback {
+    return Intl.message(
+      'Could not verify Google sign-in. Please try again.',
+      name: 'googleLoginInvalidCallback',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Login`
   String get loginTitle {
     return Intl.message('Login', name: 'loginTitle', desc: '', args: []);

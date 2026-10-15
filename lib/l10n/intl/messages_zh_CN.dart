@@ -1036,6 +1036,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "goLogin": MessageLookupByLibrary.simpleMessage("去登录"),
     "goPay": MessageLookupByLibrary.simpleMessage("去支付"),
     "goToConfigureScript": MessageLookupByLibrary.simpleMessage("前往配置脚本"),
+    "googleLoginInvalidCallback": MessageLookupByLibrary.simpleMessage(
+      "无法验证 Google 登录，请重试",
+    ),
+    "googleLoginTimedOut": MessageLookupByLibrary.simpleMessage(
+      "Google 登录已超时，请重试",
+    ),
+    "googleLoginUnavailable": MessageLookupByLibrary.simpleMessage(
+      "无法打开 Google 登录，请重试",
+    ),
+    "googleLoginWaiting": MessageLookupByLibrary.simpleMessage(
+      "请在浏览器中完成 Google 登录",
+    ),
     "groupCycleError": m26,
     "groupFilterHint": MessageLookupByLibrary.simpleMessage(
       "筛选自动加入及提供器中的节点；手动选择的成员始终保留",
@@ -1830,6 +1842,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "shrink": MessageLookupByLibrary.simpleMessage("紧凑"),
     "sidebarBlur": MessageLookupByLibrary.simpleMessage("侧边栏模糊"),
     "sidebarBlurDesc": MessageLookupByLibrary.simpleMessage("在侧边栏显示半透明系统背景"),
+    "signInWithGoogle": MessageLookupByLibrary.simpleMessage("使用 Google 登录"),
     "silentLaunch": MessageLookupByLibrary.simpleMessage("静默启动"),
     "silentLaunchDesc": MessageLookupByLibrary.simpleMessage("后台启动"),
     "singleAdd": MessageLookupByLibrary.simpleMessage("单条添加"),

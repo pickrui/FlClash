@@ -7,6 +7,7 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
+import 'package:fl_clash/services/cloud_google_login.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/input.dart';
 import 'package:material_ui/material_ui.dart';
@@ -73,6 +74,8 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
   final _passwordController = TextEditingController();
   final _tokenController = TextEditingController();
 
+  CloudGoogleLogin? _googleLogin;
+
   var _loginMode = _LoginMode.token;
   var _obscurePassword = true;
   var _obscureToken = true;
@@ -80,6 +83,7 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
 
   @override
   void dispose() {
+    _googleLogin?.cancel();
     _emailController.dispose();
     _passwordController.dispose();
     _tokenController.dispose();
@@ -109,6 +113,55 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
     }
   }
 
+  Future<void> _handleGoogleLogin() async {
+    if (_isSubmitting || ref.read(cloudAccountProvider).isLoading) return;
+    final flow = ref.read(cloudGoogleLoginProvider)();
+    final route = ModalRoute.of(context);
+    final notifier = ref.read(cloudAccountProvider.notifier);
+    setState(() {
+      _googleLogin = flow;
+      _isSubmitting = true;
+    });
+    try {
+      final grant = await flow.authorize();
+      if (grant == null || !mounted || route?.isActive == false) return;
+      setState(() => _googleLogin = null);
+      await window?.show();
+      if (!mounted || route?.isActive == false) return;
+      // An authorization code is single-use, so a failed exchange needs a new login.
+      await notifier.signInWithGoogle(
+        code: grant.code,
+        verifier: grant.verifier,
+      );
+      if (mounted && route?.isActive != false) BaseNavigator.close(context);
+    } catch (error) {
+      if (!mounted ||
+          route?.isActive == false ||
+          CloudApiException.isHandledUnauthorized(error)) {
+        return;
+      }
+      final l = AppLocalizations.current;
+      final message = switch (error) {
+        CloudGoogleLoginFailure.unavailable => l.googleLoginUnavailable,
+        CloudGoogleLoginFailure.timedOut => l.googleLoginTimedOut,
+        CloudGoogleLoginFailure.invalidCallback => l.googleLoginInvalidCallback,
+        _ => CloudApiException.clean(error),
+      };
+      globalState.showMessage(
+        title: l.loginFailed,
+        message: TextSpan(text: message),
+      );
+    } finally {
+      flow.cancel();
+      if (mounted) {
+        setState(() {
+          _googleLogin = null;
+          _isSubmitting = false;
+        });
+      }
+    }
+  }
+
   Future<void> Function() _loginSubmission() {
     final notifier = ref.read(cloudAccountProvider.notifier);
     switch (_loginMode) {
@@ -128,8 +181,7 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
     final accountState = ref.watch(cloudAccountProvider);
     final isLoading = accountState.isLoading || _isSubmitting;
 
-    // Cancel is disabled while a login runs; a stray back must not hide it
-    // either, or the result is dropped without a word.
+    // Keep the dialog open once credentials are being exchanged.
     return PopScope(
       canPop: !isLoading,
       child: Dialog(
@@ -146,6 +198,18 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
                   style: context.textTheme.headlineSmall,
                   textAlign: TextAlign.center,
                 ),
+                const SizedBox(height: 24),
+                OutlinedButton(
+                  onPressed: isLoading ? null : _handleGoogleLogin,
+                  child: Text(AppLocalizations.current.signInWithGoogle),
+                ),
+                if (_googleLogin != null) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    AppLocalizations.current.googleLoginWaiting,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
                 const SizedBox(height: 24),
                 SegmentedButton<_LoginMode>(
                   selected: {_loginMode},
@@ -177,7 +241,9 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                      onPressed: isLoading
+                      onPressed: _googleLogin != null
+                          ? () => _googleLogin?.cancel()
+                          : isLoading
                           ? null
                           : () => Navigator.of(context).pop(),
                       child: Text(AppLocalizations.current.cancel),

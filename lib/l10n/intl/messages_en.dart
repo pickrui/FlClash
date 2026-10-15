@@ -1407,6 +1407,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "goToConfigureScript": MessageLookupByLibrary.simpleMessage(
       "Go to configure script",
     ),
+    "googleLoginInvalidCallback": MessageLookupByLibrary.simpleMessage(
+      "Could not verify Google sign-in. Please try again.",
+    ),
+    "googleLoginTimedOut": MessageLookupByLibrary.simpleMessage(
+      "Google sign-in timed out. Please try again.",
+    ),
+    "googleLoginUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Could not open Google sign-in. Please try again.",
+    ),
+    "googleLoginWaiting": MessageLookupByLibrary.simpleMessage(
+      "Complete Google sign-in in your browser",
+    ),
     "groupCycleError": m26,
     "groupFilterHint": MessageLookupByLibrary.simpleMessage(
       "Filters automatically included and provider nodes. Manually selected members are always kept.",
@@ -2488,6 +2500,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "sidebarBlur": MessageLookupByLibrary.simpleMessage("Blur sidebar"),
     "sidebarBlurDesc": MessageLookupByLibrary.simpleMessage(
       "Show a translucent system backdrop behind the sidebar",
+    ),
+    "signInWithGoogle": MessageLookupByLibrary.simpleMessage(
+      "Sign in with Google",
     ),
     "silentLaunch": MessageLookupByLibrary.simpleMessage("SilentLaunch"),
     "silentLaunchDesc": MessageLookupByLibrary.simpleMessage(

@@ -5,7 +5,6 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/http.dart';
@@ -14,6 +13,8 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/cloud_account_provider.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
+import 'package:fl_clash/services/cloud_google_login.dart';
+import 'package:flutter/services.dart';
 import 'package:fl_clash/views/cloud/cloud_login_page.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -22,6 +23,16 @@ import '../helpers/test_app.dart';
 
 class _Account extends CloudAccountNotifier {
   final pendingLogin = Completer<void>();
+  CloudGoogleGrant? googleGrant;
+
+  @override
+  Future<void> signInWithGoogle({
+    required String code,
+    required String verifier,
+  }) {
+    googleGrant = (code: code, verifier: verifier);
+    return pendingLogin.future;
+  }
 
   @override
   CloudAccountState build() => const CloudAccountState();
@@ -98,6 +109,108 @@ Future<bool> _run(
 }
 
 void main() {
+  for (final cancel in [false, true]) {
+    testWidgets(
+      'Google login ${cancel ? 'can be cancelled without accepting a late callback' : 'exchanges once without validating the token form'}',
+      (tester) async {
+        final account = _Account();
+        final links = StreamController<Uri>.broadcast();
+        addTearDown(links.close);
+        Uri? browser;
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          const MethodChannel('window'),
+          (_) async => null,
+        );
+        addTearDown(
+          () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+            const MethodChannel('window'),
+            null,
+          ),
+        );
+        await tester.pumpWidget(
+          TestApp(
+            locale: const Locale('en'),
+            overrides: [
+              viewSizeProvider.overrideWithBuild(
+                (_, _) => const Size(800, 600),
+              ),
+              cloudAccountProvider.overrideWith(() => account),
+              cloudGoogleLoginProvider.overrideWithValue(
+                () => CloudGoogleLogin(
+                  siteDomain: 'cloud.test',
+                  links: links.stream,
+                  openBrowser: (uri) async {
+                    browser = uri;
+                    return true;
+                  },
+                ),
+              ),
+            ],
+            child: Builder(
+              builder: (context) => Scaffold(
+                body: TextButton(
+                  onPressed: () => showCloudLoginPage<void>(context),
+                  child: const Text('open'),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.tap(find.text('open'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Sign in with Google'));
+        await tester.pump();
+        expect(browser, isNotNull);
+        expect(
+          find.text('Complete Google sign-in in your browser'),
+          findsOneWidget,
+        );
+        if (cancel) {
+          await tester.tap(find.text('Cancel'));
+          await tester.pumpAndSettle();
+        }
+        final callback = Uri.parse('flclash://auth/google').replace(
+          queryParameters: {
+            'code': 'a' * 64,
+            'state': browser!.queryParameters['state']!,
+          },
+        );
+        links.add(callback);
+        links.add(callback);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 400));
+        if (cancel) {
+          expect(account.googleGrant, isNull);
+          expect(find.byType(CloudLoginPage), findsOneWidget);
+          expect(
+            tester
+                .widget<OutlinedButton>(
+                  find.widgetWithText(OutlinedButton, 'Sign in with Google'),
+                )
+                .onPressed,
+            isNotNull,
+          );
+          await tester.tap(find.text('Cancel'));
+        } else {
+          expect(account.googleGrant?.code, 'a' * 64);
+          expect(account.googleGrant?.verifier.length, 43);
+          expect(
+            tester
+                .widget<TextButton>(find.widgetWithText(TextButton, 'Cancel'))
+                .onPressed,
+            isNull,
+          );
+          account.pendingLogin.complete();
+        }
+        await tester.pumpAndSettle();
+        expect(find.byType(CloudLoginPage), findsNothing);
+        expect(links.hasListener, isFalse);
+        await tester.pump(const Duration(seconds: 1));
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   // A keyboard closing as the fields disable may deliver a system back.
   testWidgets('back and outside taps cannot hide a login in flight', (
     tester,

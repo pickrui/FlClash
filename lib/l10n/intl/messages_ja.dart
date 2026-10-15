@@ -238,7 +238,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "選択したアプリをVPNから除外",
     ),
     "accessControlSettings": MessageLookupByLibrary.simpleMessage("アクセス制御設定"),
-    "accessToken": MessageLookupByLibrary.simpleMessage("アクセストークン"),
+    "accessToken": MessageLookupByLibrary.simpleMessage("Access Token"),
     "account": MessageLookupByLibrary.simpleMessage("アカウント"),
     "accountBalance": MessageLookupByLibrary.simpleMessage("残高"),
     "action": MessageLookupByLibrary.simpleMessage("アクション"),
@@ -1178,6 +1178,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "goLogin": MessageLookupByLibrary.simpleMessage("ログイン"),
     "goPay": MessageLookupByLibrary.simpleMessage("支払いへ"),
     "goToConfigureScript": MessageLookupByLibrary.simpleMessage("スクリプト設定に移動"),
+    "googleLoginInvalidCallback": MessageLookupByLibrary.simpleMessage(
+      "Google ログインを確認できませんでした。再試行してください。",
+    ),
+    "googleLoginTimedOut": MessageLookupByLibrary.simpleMessage(
+      "Google ログインがタイムアウトしました。再試行してください。",
+    ),
+    "googleLoginUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Google ログインを開けませんでした。再試行してください。",
+    ),
+    "googleLoginWaiting": MessageLookupByLibrary.simpleMessage(
+      "ブラウザで Google ログインを完了してください",
+    ),
     "groupCycleError": m26,
     "groupFilterHint": MessageLookupByLibrary.simpleMessage(
       "自動追加とプロバイダーのノードを絞り込みます。手動選択したメンバーは保持されます",
@@ -2090,6 +2102,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "sidebarBlurDesc": MessageLookupByLibrary.simpleMessage(
       "サイドバーに半透明のシステム背景を表示",
     ),
+    "signInWithGoogle": MessageLookupByLibrary.simpleMessage("Google でログイン"),
     "silentLaunch": MessageLookupByLibrary.simpleMessage("バックグラウンド起動"),
     "silentLaunchDesc": MessageLookupByLibrary.simpleMessage("バックグラウンドで起動"),
     "singleAdd": MessageLookupByLibrary.simpleMessage("個別追加"),
@@ -2321,7 +2334,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "todayUsed": MessageLookupByLibrary.simpleMessage("今日の使用量"),
     "toggle": MessageLookupByLibrary.simpleMessage("トグル"),
     "toggleFlashlight": MessageLookupByLibrary.simpleMessage("ライト切替"),
-    "tokenLabel": MessageLookupByLibrary.simpleMessage("アクセストークン"),
+    "tokenLabel": MessageLookupByLibrary.simpleMessage("Access Token"),
     "tokenValidation": MessageLookupByLibrary.simpleMessage(
       "アクセストークンを入力してください",
     ),

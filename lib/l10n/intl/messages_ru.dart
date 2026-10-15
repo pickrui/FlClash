@@ -268,7 +268,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "accessControlSettings": MessageLookupByLibrary.simpleMessage(
       "Настройки контроля доступа",
     ),
-    "accessToken": MessageLookupByLibrary.simpleMessage("Токен доступа"),
+    "accessToken": MessageLookupByLibrary.simpleMessage("Access Token"),
     "account": MessageLookupByLibrary.simpleMessage("Аккаунт"),
     "accountBalance": MessageLookupByLibrary.simpleMessage("Баланс"),
     "action": MessageLookupByLibrary.simpleMessage("Действие"),
@@ -1453,6 +1453,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "goToConfigureScript": MessageLookupByLibrary.simpleMessage(
       "Перейти к настройке скрипта",
     ),
+    "googleLoginInvalidCallback": MessageLookupByLibrary.simpleMessage(
+      "Не удалось подтвердить вход через Google. Повторите попытку.",
+    ),
+    "googleLoginTimedOut": MessageLookupByLibrary.simpleMessage(
+      "Время ожидания входа через Google истекло. Повторите попытку.",
+    ),
+    "googleLoginUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Не удалось открыть вход через Google. Повторите попытку.",
+    ),
+    "googleLoginWaiting": MessageLookupByLibrary.simpleMessage(
+      "Завершите вход через Google в браузере",
+    ),
     "groupCycleError": m26,
     "groupFilterHint": MessageLookupByLibrary.simpleMessage(
       "Фильтрует автоматически добавленные узлы и провайдеры. Участники, выбранные вручную, сохраняются.",
@@ -2620,6 +2632,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "sidebarBlurDesc": MessageLookupByLibrary.simpleMessage(
       "Показывать полупрозрачный системный фон боковой панели",
     ),
+    "signInWithGoogle": MessageLookupByLibrary.simpleMessage(
+      "Войти через Google",
+    ),
     "silentLaunch": MessageLookupByLibrary.simpleMessage("Тихий запуск"),
     "silentLaunchDesc": MessageLookupByLibrary.simpleMessage(
       "Запуск в фоновом режиме",
@@ -2909,7 +2924,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toggleFlashlight": MessageLookupByLibrary.simpleMessage(
       "Переключить фонарик",
     ),
-    "tokenLabel": MessageLookupByLibrary.simpleMessage("Токен доступа"),
+    "tokenLabel": MessageLookupByLibrary.simpleMessage("Access Token"),
     "tokenValidation": MessageLookupByLibrary.simpleMessage(
       "Пожалуйста, введите токен доступа",
     ),

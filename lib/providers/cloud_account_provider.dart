@@ -310,6 +310,24 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
     });
   }
 
+  Future<void> signInWithGoogle({
+    required String code,
+    required String verifier,
+  }) {
+    return _runSignIn(() async {
+      final result = await CloudApiService().loginWithGoogle(
+        code: code,
+        verifier: verifier,
+      );
+      await _completeSignIn(
+        token: _requireNormalizedToken(result.token),
+        profile: result.profile,
+        announcement: result.announcement,
+        tokenClient: CloudApiService.clientId,
+      );
+    });
+  }
+
   Future<void> signUp({
     required String name,
     required String email,
