@@ -11,8 +11,37 @@ import 'package:fl_clash/common/launch.dart';
 import 'package:fl_clash/services/config_key_store.dart';
 import 'package:fl_clash/services/config_recovery.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/services.dart';
 
 void main() {
+  test(
+    'platform failures retain stable codes without native error payloads',
+    () async {
+      final diagnostics = StartupDiagnostics(onLog: (_) {});
+      final error = PlatformException(
+        code: 'not_initialized',
+        message: 'subscription=https://secret.example/token',
+        details: {'secret': 'private-value'},
+        stacktrace: 'private-stack',
+      );
+      await expectLater(
+        diagnostics.run<void>('windowVisibility', () => throw error),
+        throwsA(same(error)),
+      );
+      expect(
+        diagnostics.text,
+        contains('error=PlatformException code=not_initialized'),
+      );
+      expect(diagnostics.text, isNot(contains('secret.example')));
+      expect(diagnostics.text, isNot(contains('private-value')));
+      expect(diagnostics.text, isNot(contains('private-stack')));
+      expect(
+        startupErrorLabel(PlatformException(code: 'token=private-value')),
+        'PlatformException code=other',
+      );
+    },
+  );
+
   testWidgets('a timed out stage rejects late continuation and later stages', (
     tester,
   ) async {

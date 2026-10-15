@@ -213,7 +213,7 @@ class Window implements WindowPort {
         await Future<void>.sync(action).timeout(const Duration(seconds: 2));
       } catch (error) {
         startupDiagnostics.record(
-          'error_window step=$step failed error=${error.runtimeType}',
+          'error_window step=$step failed error=${startupErrorLabel(error)}',
         );
       }
     }

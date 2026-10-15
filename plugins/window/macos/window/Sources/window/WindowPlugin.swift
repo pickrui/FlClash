@@ -188,10 +188,10 @@ public class WindowPlugin: NSObject, FlutterPlugin {
         ]
 
         handlers["ensureInitialized"] = { [weak self] _ in
-            guard let self, let window = self.registrar?.view?.window else {
+            guard let self else {
                 throw PluginError(code: "not_initialized", message: "no window for the Flutter view")
             }
-            controller.ensureInitialized(with: window)
+            try controller.ensureInitialized(with: self.registrar?.view?.window)
             return nil
         }
 

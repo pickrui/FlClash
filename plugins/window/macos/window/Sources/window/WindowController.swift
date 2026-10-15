@@ -18,7 +18,10 @@ final class WindowController: NSObject, NSWindowDelegate {
 
     private static let geometrySettleDelay: DispatchTimeInterval = .milliseconds(150)
 
-    func ensureInitialized(with window: NSWindow) {
+    func ensureInitialized(with candidate: NSWindow?) throws {
+        guard let window = candidate ?? self.window else {
+            throw PluginError(code: "not_initialized", message: "no window for the Flutter view")
+        }
         guard self.window !== window else { return }
         self.window = window
         previousDelegate = window.delegate

@@ -64,6 +64,8 @@ enum WindowEffectView {
             return
         }
         let frame = window.frame
+        // Older AppKit may detach the old view after the new host has adopted it.
+        window.contentViewController = nil
         window.contentViewController = EffectHostViewController(hosting: flutterViewController)
         window.setFrame(frame, display: true)
     }

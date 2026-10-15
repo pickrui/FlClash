@@ -15,6 +15,21 @@ import 'system.dart';
 
 const silentLaunchArgument = '--silent-launch';
 
+String startupErrorLabel(Object error) {
+  if (error is PlatformException) {
+    const codes = {
+      'not_initialized',
+      'bad_args',
+      'unsupported',
+      'bad_result',
+      'safe_mode',
+      'invalid_startup',
+    };
+    return 'PlatformException code=${codes.contains(error.code) ? error.code : 'other'}';
+  }
+  return error.runtimeType.toString();
+}
+
 class StartupDiagnostics {
   StartupDiagnostics({void Function(String)? onLog})
     : _onLog = onLog ?? debugPrint;
@@ -65,7 +80,7 @@ class StartupDiagnostics {
       if (fatal && error is TimeoutException) _timeout ??= error;
       record(
         'stage=$stage ${error is TimeoutException ? 'timeout' : 'failed'} '
-        'elapsed_ms=${elapsed.elapsedMilliseconds} error=${error.runtimeType}',
+        'elapsed_ms=${elapsed.elapsedMilliseconds} error=${startupErrorLabel(error)}',
       );
       rethrow;
     } finally {
@@ -93,7 +108,9 @@ class StartupDiagnostics {
             .timeout(const Duration(seconds: 2))
             .catchError((Object error) {
               _file = null;
-              record('diagnostic_file failed error=${error.runtimeType}');
+              record(
+                'diagnostic_file failed error=${startupErrorLabel(error)}',
+              );
             })
             .whenComplete(() {
               _write = null;

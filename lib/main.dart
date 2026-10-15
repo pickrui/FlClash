@@ -95,7 +95,7 @@ Future<void> main(List<String> arguments) async {
     await startupDiagnostics.run('firstFrame', () => firstFrame.future);
     startupDiagnostics.record('first_frame_ready');
   } catch (e, s) {
-    startupDiagnostics.record('aborted error=${e.runtimeType}');
+    startupDiagnostics.record('aborted error=${startupErrorLabel(e)}');
     render?.resume();
     runApp(
       InitErrorApp(error: e, stack: s, diagnostics: startupDiagnostics.text),
