@@ -76,6 +76,18 @@
 
                 <data android:host="install-config" />
             </intent-filter>
+            <!-- Data tags merge within a filter, so the Google callback needs its own. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="auth"
+                    android:path="/google"
+                    android:scheme="flclash" />
+            </intent-filter>
         </activity>
 
         <activity
