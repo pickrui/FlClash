@@ -313,6 +313,7 @@
   "noResolve": "IPを解決しない",
   "saveChanges": "変更を保存しますか？",
   "findProcessModeDesc": "有効化するとパフォーマンスが若干低下します",
+  "findProcessModeAutomaticDesc": "現在のルールに合わせてプロセス識別が自動的に有効になっています",
   "colorSchemes": "カラースキーム",
   "palette": "パレット",
   "tonalSpotScheme": "トーンスポット",

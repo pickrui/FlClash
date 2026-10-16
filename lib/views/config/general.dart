@@ -386,29 +386,33 @@ class FindProcessItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final appLocalizations = context.appLocalizations;
-    final findProcess = ref.watch(
-      patchClashConfigProvider.select(
-        (state) => state.findProcessMode == FindProcessMode.always,
-      ),
-    );
+    final automatic = ref.watch(appliedProcessLookupRequiredProvider);
+    final findProcess =
+        ref.watch(effectiveFindProcessModeProvider) == FindProcessMode.always;
 
     return ListItem.switchItem(
       leading: const GlyphIcon(AppGlyphs.cpu),
       title: Text(appLocalizations.findProcessMode),
-      subtitle: Text(appLocalizations.findProcessModeDesc),
+      subtitle: Text(
+        automatic
+            ? appLocalizations.findProcessModeAutomaticDesc
+            : appLocalizations.findProcessModeDesc,
+      ),
       delegate: SwitchDelegate(
         value: findProcess,
-        onChanged: (bool value) async {
-          ref
-              .read(patchClashConfigProvider.notifier)
-              .update(
-                (state) => state.copyWith(
-                  findProcessMode: value
-                      ? FindProcessMode.always
-                      : FindProcessMode.off,
-                ),
-              );
-        },
+        onChanged: automatic
+            ? null
+            : (bool value) async {
+                ref
+                    .read(patchClashConfigProvider.notifier)
+                    .update(
+                      (state) => state.copyWith(
+                        findProcessMode: value
+                            ? FindProcessMode.always
+                            : FindProcessMode.off,
+                      ),
+                    );
+              },
       ),
     );
   }

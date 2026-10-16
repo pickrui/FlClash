@@ -1342,6 +1342,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "The file has been modified. Do you want to save the changes?",
     ),
     "findProcessMode": MessageLookupByLibrary.simpleMessage("Find process"),
+    "findProcessModeAutomaticDesc": MessageLookupByLibrary.simpleMessage(
+      "Process lookup is enabled automatically for the active rules",
+    ),
     "findProcessModeDesc": MessageLookupByLibrary.simpleMessage(
       "There is a certain performance loss after opening",
     ),

@@ -1390,6 +1390,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "findProcessMode": MessageLookupByLibrary.simpleMessage(
       "Режим поиска процесса",
     ),
+    "findProcessModeAutomaticDesc": MessageLookupByLibrary.simpleMessage(
+      "Определение процессов включено автоматически для действующих правил",
+    ),
     "findProcessModeDesc": MessageLookupByLibrary.simpleMessage(
       "При включении возможны небольшие потери производительности",
     ),

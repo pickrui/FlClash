@@ -313,6 +313,7 @@
   "noResolve": "No resolve IP",
   "saveChanges": "Do you want to save the changes?",
   "findProcessModeDesc": "There is a certain performance loss after opening",
+  "findProcessModeAutomaticDesc": "Process lookup is enabled automatically for the active rules",
   "colorSchemes": "Color schemes",
   "palette": "Palette",
   "tonalSpotScheme": "TonalSpot",

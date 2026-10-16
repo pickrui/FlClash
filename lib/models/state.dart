@@ -293,6 +293,13 @@ abstract class SetupState with _$SetupState {
 }
 
 extension SetupStateExt on SetupState {
+  bool get hasUserRules => switch (overwriteType) {
+    OverwriteType.standard => addedRules.isNotEmpty,
+    OverwriteType.custom => customRules.isNotEmpty,
+    OverwriteType.merge => addedRules.isNotEmpty || customRules.isNotEmpty,
+    OverwriteType.script => false,
+  };
+
   bool needSetup(SetupState? lastSetupState) {
     if (lastSetupState == null) {
       return false;

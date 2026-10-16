@@ -735,6 +735,43 @@ abstract class GeoXUrl with _$GeoXUrl {
   }
 }
 
+final _processRulePattern = RegExp(
+  r'(?:^|\()\s*(?:PROCESS-(?:NAME|PATH)(?:-REGEX|-WILDCARD)?|UID)\s*,',
+  caseSensitive: false,
+);
+final _providerRulePattern = RegExp(
+  r'(?:^|\()\s*RULE-SET\s*,\s*([^,()]+)',
+  caseSensitive: false,
+);
+
+bool rulesRequireProcessLookup(Map<String, dynamic> config) {
+  final providers = config['rule-providers'];
+  bool requiresLookup(Object? value) {
+    if (value is! String) return false;
+    final type = value.split(',').first.trim().toUpperCase();
+    if (type != 'RULE-SET' &&
+        type != 'AND' &&
+        type != 'OR' &&
+        type != 'NOT' &&
+        type != 'SUB-RULE') {
+      return _processRulePattern.matchAsPrefix(value.trimLeft()) != null;
+    }
+    if (_processRulePattern.hasMatch(value)) return true;
+    // Remote classical providers may gain process rules on a later refresh.
+    return providers is Map &&
+        _providerRulePattern.allMatches(value).any((match) {
+          final provider = providers[match.group(1)!.trim()];
+          return provider is Map && provider['behavior'] == 'classical';
+        });
+  }
+
+  final subRules = config['sub-rules'];
+  return [
+    config['rules'],
+    if (subRules is Map) ...subRules.values,
+  ].whereType<List>().any((rules) => rules.any(requiresLookup));
+}
+
 @freezed
 abstract class ParsedRule with _$ParsedRule {
   const factory ParsedRule({

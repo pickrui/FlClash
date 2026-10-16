@@ -2400,6 +2400,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Process lookup is enabled automatically for the active rules`
+  String get findProcessModeAutomaticDesc {
+    return Intl.message(
+      'Process lookup is enabled automatically for the active rules',
+      name: 'findProcessModeAutomaticDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Color schemes`
   String get colorSchemes {
     return Intl.message(

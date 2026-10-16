@@ -187,7 +187,7 @@ final class UpdateParamsProvider
   }
 }
 
-String _$updateParamsHash() => r'2fb3aa4068a591ac43dfdb29fbb279b6f6cabe42';
+String _$updateParamsHash() => r'ce166f1da426cbed8b36e3e3541570b0d5b4efaa';
 
 @ProviderFor(suspend)
 final suspendProvider = SuspendProvider._();

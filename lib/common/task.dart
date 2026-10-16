@@ -538,6 +538,11 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
     profilesPath,
     referencedOnly: true,
   );
+  if (addedRules.isNotEmpty ||
+      customRules.isNotEmpty ||
+      rulesRequireProcessLookup(rawConfig)) {
+    rawConfig['find-process-mode'] = FindProcessMode.always.name;
+  }
   for (final provider in data.clashProviders.where((item) => !item.isRemote)) {
     final definition = (rawConfig[provider.section] as Map?)?[provider.label];
     final expected = join(

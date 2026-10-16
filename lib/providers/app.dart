@@ -588,6 +588,20 @@ class WindowBlur extends _$WindowBlur with NotifierMixin<bool> {
   bool build() => false;
 }
 
+final appliedProcessLookupRequiredProvider =
+    NotifierProvider<AppliedProcessLookupRequirement, bool>(
+      AppliedProcessLookupRequirement.new,
+    );
+
+class AppliedProcessLookupRequirement extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void applied(Map<String, dynamic> config, {bool hasUserRules = false}) {
+    state = hasUserRules || rulesRequireProcessLookup(config);
+  }
+}
+
 typedef AppliedConfigCounts = ({
   int? profileId,
   int groups,

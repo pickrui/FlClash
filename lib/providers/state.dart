@@ -80,8 +80,17 @@ NavigationItemsState currentNavigationItemsState(Ref ref) {
   );
 }
 
+final effectiveFindProcessModeProvider = Provider<FindProcessMode>((ref) {
+  final required = ref.watch(appliedProcessLookupRequiredProvider);
+  final manual = ref.watch(
+    patchClashConfigProvider.select((state) => state.findProcessMode),
+  );
+  return required ? FindProcessMode.always : manual;
+});
+
 @riverpod
 UpdateParams updateParams(Ref ref) {
+  final findProcessMode = ref.watch(effectiveFindProcessModeProvider);
   final authentication = ref.watch(
     networkSettingProvider.select((state) => state.authentication),
   );
@@ -98,7 +107,7 @@ UpdateParams updateParams(Ref ref) {
             ? state.tun.copyWith(enable: false)
             : state.tun.getRealTun(routeMode),
         allowLan: !safeModeBuild && (system.isDocker || state.allowLan),
-        findProcessMode: state.findProcessMode,
+        findProcessMode: findProcessMode,
         mode: state.mode,
         logLevel: state.logLevel,
         ipv6: state.ipv6,
