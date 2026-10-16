@@ -9,9 +9,10 @@ import 'package:test/test.dart';
 
 const _manifest = 'android/app/src/main/AndroidManifest.xml';
 
-Iterable<String> _attributes(String block, String name) => RegExp(
-  'android:$name="([^"]*)"',
-).allMatches(block).map((match) => match.group(1)!);
+Iterable<String> _attributes(String block, String name) =>
+    RegExp('android:$name="([^"]*)"')
+        .allMatches(block)
+        .map((match) => match.group(1)!);
 
 /// Android merges every data tag of one filter into a single
 /// scheme × host × path match set.
