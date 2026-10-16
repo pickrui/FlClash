@@ -208,3 +208,19 @@ func TestConnectionCountAppliesTrackerPrivacy(t *testing.T) {
 		statistic.DefaultManager.Leave(cloudTestTracker{})
 	}
 }
+
+func BenchmarkSuppressCloudOutputConnectionLine(b *testing.B) {
+	previous := currentDNSAuth()
+	setDNSAuth(&dnsAuthSettings{suffixes: []string{"managed.example", "nodes.example"}})
+	b.Cleanup(func() { setDNSAuth(previous) })
+	previousDomains := cloudOutputDomains.Load()
+	setCloudOutputDomains([]string{"api.example", "backup.example"})
+	b.Cleanup(func() { cloudOutputDomains.Store(previousDomains) })
+	line := "[TCP] 192.168.1.10:53211(chrome) --> www.google.com:443 match DomainSuffix(google.com) using Proxy[HK 01]"
+	b.ReportAllocs()
+	for b.Loop() {
+		if shouldSuppressCloudOutput(line) {
+			b.Fatal("ordinary traffic was suppressed")
+		}
+	}
+}

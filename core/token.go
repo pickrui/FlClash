@@ -118,7 +118,7 @@ func dnsAuthMessage(basename string, window int64) []byte {
 
 func (s *dnsAuthSettings) matchSuffix(name string) (string, bool) {
 	for _, suf := range s.suffixes {
-		if name == suf || strings.HasSuffix(name, "."+suf) {
+		if isDomainOrSubdomain(name, suf) {
 			return suf, true
 		}
 	}
@@ -157,8 +157,10 @@ func maskManagedDomain(host string) (string, bool) {
 	}
 	name := strings.ToLower(strings.TrimSuffix(host, "."))
 	port := ""
-	if h, p, err := net.SplitHostPort(name); err == nil {
-		name, port = h, p
+	if strings.Contains(name, ":") {
+		if h, p, err := net.SplitHostPort(name); err == nil {
+			name, port = h, p
+		}
 	}
 	suf, ok := s.matchSuffix(name)
 	if !ok {

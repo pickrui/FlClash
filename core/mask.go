@@ -48,9 +48,7 @@ func setCloudOutputDomains(domains []string) {
 
 func isCloudHost(host string) bool {
 	host = strings.ToLower(strings.TrimSpace(host))
-	if parsed, _, err := net.SplitHostPort(host); err == nil {
-		host = parsed
-	}
+	host = trimPort(host)
 	host = strings.TrimSuffix(strings.Trim(host, "[]"), ".")
 	if matchManagedSuffix(host) || isCloudIP(host) {
 		return true
@@ -63,11 +61,29 @@ func isCloudHost(host string) bool {
 
 func hasDomainSuffix(host string, domains []string) bool {
 	for _, domain := range domains {
-		if host == domain || strings.HasSuffix(host, "."+domain) {
+		if isDomainOrSubdomain(host, domain) {
 			return true
 		}
 	}
 	return false
+}
+
+func isDomainOrSubdomain(host, domain string) bool {
+	if !strings.HasSuffix(host, domain) {
+		return false
+	}
+	prefix := len(host) - len(domain)
+	return prefix == 0 || prefix > 0 && host[prefix-1] == '.'
+}
+
+func trimPort(host string) string {
+	if !strings.Contains(host, ":") {
+		return host
+	}
+	if parsed, _, err := net.SplitHostPort(host); err == nil {
+		return parsed
+	}
+	return host
 }
 
 func shouldSuppressCloudOutput(value string) bool {
@@ -130,8 +146,10 @@ func markCloudIPs(ips []netip.Addr) {
 }
 
 func isCloudIP(host string) bool {
-	if h, _, err := net.SplitHostPort(host); err == nil {
-		host = h
+	host = trimPort(host)
+	// Every address ParseAddr accepts has a colon or starts with a digit.
+	if host == "" || !strings.Contains(host, ":") && (host[0] < '0' || host[0] > '9') {
+		return false
 	}
 	ip, err := netip.ParseAddr(host)
 	if err != nil {
