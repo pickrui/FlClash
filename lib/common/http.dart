@@ -11,9 +11,11 @@ import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/common/proxy_auth.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:flutter/services.dart' show AssetBundle, rootBundle;
 
 import 'tls_connection.dart';
 
@@ -442,6 +444,32 @@ class _FlClashHttpClientAdapter extends IOHttpClientAdapter {
 }
 
 class FlClashHttpOverrides extends HttpOverrides {
+  static const bundledRootsAsset = 'assets/data/ca-certificates.crt';
+
+  /// Release CI ships the Core's root bundle for stores lacking current roots.
+  static Future<void> trustBundledRoots({
+    AssetBundle? bundle,
+    void Function(List<int> bytes)? trust,
+  }) async {
+    final ByteData data;
+    try {
+      data = await (bundle ?? rootBundle).load(bundledRootsAsset);
+    } catch (_) {
+      return;
+    }
+    if (data.lengthInBytes == 0) return;
+    try {
+      (trust ?? SecurityContext.defaultContext.setTrustedCertificatesBytes)(
+        data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
+      );
+    } catch (error) {
+      commonPrint.log(
+        'Bundled CA roots rejected: $error',
+        logLevel: LogLevel.warning,
+      );
+    }
+  }
+
   static ProxyAuthenticationState? readProxyAuthentication() {
     if (!appController.isAttach || !appController.isProxyActive) return null;
     final config = appController.config;

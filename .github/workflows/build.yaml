@@ -427,6 +427,17 @@ jobs:
         if: matrix.platform == 'android'
         run: sudo apt-get update && sudo apt-get install -y libclang-dev
 
+      # The core embeds this bundle; the app loads the asset copy for its own requests.
+      - name: Fetch CA certificates
+        shell: bash
+        run: |
+          bundle=core/Clash.Meta/component/ca/ca-certificates.crt
+          curl -fsSL --retry 3 -o "$bundle" https://curl.se/ca/cacert.pem
+          count=$(grep -c 'BEGIN CERTIFICATE' "$bundle")
+          echo "$count CA certificates"
+          test "$count" -ge 100
+          cp "$bundle" assets/data/ca-certificates.crt
+
       - name: Download Go modules with retries
         working-directory: core
         shell: bash

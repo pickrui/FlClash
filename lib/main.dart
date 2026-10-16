@@ -57,6 +57,8 @@ Future<void> main(List<String> arguments) async {
       ),
     );
     initializePreferencesStore();
+    // Startup may already reach the cloud API before HttpOverrides is set.
+    await FlClashHttpOverrides.trustBundledRoots();
     await startupDiagnostics.run('rust', RustLib.init);
     registerFetchManagedConfig(CloudApiService().fetchManagedConfig);
     cloudStorePageBuilder = (_) => const CloudStorePage();

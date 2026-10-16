@@ -83,3 +83,6 @@ CLAUDE.md
 
 # Generated test coverage
 /coverage/
+
+# Release CI fetches the CA bundle that the core embeds and the app loads
+/assets/data/ca-certificates.crt
