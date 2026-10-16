@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:fl_clash/common/path.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:path/path.dart' as p;
 
 import 'helper_client.dart';
 
@@ -125,8 +126,12 @@ class LinuxHelperInstaller {
     LinuxInputProcessRunner? runWithInput,
     Future<String?> Function()? askPassword,
     bool Function()? hasSystemd,
+    Map<String, String>? environment,
+    Future<String> Function()? stagingParent,
     this.readinessTimeout = const Duration(seconds: 10),
-  }) : _readiness =
+  }) : _environment = environment ?? Platform.environment,
+       _stagingParent = stagingParent ?? (() => appPath.homeDirPath),
+       _readiness =
            probeReadiness ??
            ((timeout, logFailure) => (client ?? linuxHelperClient).readiness(
              timeout: timeout,
@@ -146,6 +151,8 @@ class LinuxHelperInstaller {
   final String executable;
   final LinuxElevation _elevation;
   final bool Function() _hasSystemd;
+  final Map<String, String> _environment;
+  final Future<String> Function() _stagingParent;
 
   bool get available => _hasSystemd() && File(executable).existsSync();
 
@@ -157,7 +164,10 @@ class LinuxHelperInstaller {
       return AuthorizeCode.helperInstallFailed;
     }
     try {
-      switch (await _elevation.elevateResult([executable, 'install'])) {
+      final elevated = await _withElevatableHelper(
+        (helper) => _elevation.elevateResult([helper, 'install']),
+      );
+      switch (elevated) {
         case LinuxElevationResult.denied:
           return AuthorizeCode.error;
         case LinuxElevationResult.failed:
@@ -179,12 +189,44 @@ class LinuxHelperInstaller {
       }
     } on ProcessException {
       return AuthorizeCode.helperInstallFailed;
+    } on FileSystemException {
+      return AuthorizeCode.helperInstallFailed;
     }
     return AuthorizeCode.helperInstallFailed;
   }
 
   Future<bool> uninstall() async {
     if (!available) return false;
-    return _elevation.elevate([executable, 'uninstall']);
+    try {
+      return await _withElevatableHelper(
+        (helper) => _elevation.elevate([helper, 'uninstall']),
+      );
+    } on FileSystemException {
+      return false;
+    }
+  }
+
+  /// An AppImage's FUSE mount admits only the user who mounted it, not even
+  /// root, so pkexec and sudo run a private copy of the Helper and its Core.
+  Future<T> _withElevatableHelper<T>(
+    Future<T> Function(String helper) elevate,
+  ) async {
+    final appDir = _environment['APPDIR'] ?? '';
+    if ((_environment['APPIMAGE'] ?? '').isEmpty ||
+        appDir.isEmpty ||
+        !p.isWithin(appDir, executable)) {
+      return elevate(executable);
+    }
+    final stage = await Directory(await _stagingParent())
+        .createTemp('helper-install-');
+    try {
+      final helper = p.join(stage.path, p.basename(executable));
+      await File(executable).copy(helper);
+      await File(p.join(p.dirname(executable), 'FlClashCore'))
+          .copy(p.join(stage.path, 'FlClashCore'));
+      return await elevate(helper);
+    } finally {
+      await stage.delete(recursive: true).catchError((_) => stage);
+    }
   }
 }

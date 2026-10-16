@@ -105,6 +105,45 @@ void main() {
   );
 
   test(
+    'an AppImage elevates a private copy of the Helper and its Core',
+    () async {
+      final dir = Directory.systemTemp.createTempSync('flclash-helper-');
+      addTearDown(() => dir.deleteSync(recursive: true));
+      final mount = Directory('${dir.path}/mount')..createSync();
+      final data = Directory('${dir.path}/data')..createSync();
+      final exe = File('${mount.path}/FlClashHelperService')
+        ..writeAsStringSync('helper');
+      File('${mount.path}/FlClashCore').writeAsStringSync('core');
+      final installer = LinuxHelperInstaller(
+        probeReadiness: _Client([
+          HelperReadiness.notReady,
+          HelperReadiness.ready,
+        ]).probe,
+        executable: exe.path,
+        hasSystemd: () => true,
+        environment: {
+          'APPIMAGE': '${dir.path}/FlClash.AppImage',
+          'APPDIR': mount.path,
+        },
+        stagingParent: () async => data.path,
+        runProcess: (command, arguments) async {
+          final helper = File(arguments.first);
+          expect(arguments.last, 'install');
+          expect(helper.path, startsWith('${data.path}/'));
+          expect(helper.readAsStringSync(), 'helper');
+          expect(
+            File('${helper.parent.path}/FlClashCore').readAsStringSync(),
+            'core',
+          );
+          return ProcessResult(1, 0, '', '');
+        },
+      );
+      expect(await installer.install(), AuthorizeCode.success);
+      expect(data.listSync(), isEmpty);
+    },
+  );
+
+  test(
     'cancelled elevation is final and missing manifest never elevates',
     () async {
       final dir = Directory.systemTemp.createTempSync('flclash-helper-');
