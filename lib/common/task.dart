@@ -538,10 +538,10 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
     profilesPath,
     referencedOnly: true,
   );
-  if (addedRules.isNotEmpty ||
-      customRules.isNotEmpty ||
+  if (rawConfig['find-process-mode'] == FindProcessMode.off.name &&
       rulesRequireProcessLookup(rawConfig)) {
-    rawConfig['find-process-mode'] = FindProcessMode.always.name;
+    // Strict looks a process up only when a process rule is evaluated.
+    rawConfig['find-process-mode'] = FindProcessMode.strict.name;
   }
   for (final provider in data.clashProviders.where((item) => !item.isRemote)) {
     final definition = (rawConfig[provider.section] as Map?)?[provider.label];

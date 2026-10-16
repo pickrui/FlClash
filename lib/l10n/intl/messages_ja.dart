@@ -1122,7 +1122,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "findProcessMode": MessageLookupByLibrary.simpleMessage("プロセス検出"),
     "findProcessModeAutomaticDesc": MessageLookupByLibrary.simpleMessage(
-      "現在のルールに合わせてプロセス識別が自動的に有効になっています",
+      "プロセスルールの照合時にのみプロセスを検出します",
     ),
     "findProcessModeDesc": MessageLookupByLibrary.simpleMessage(
       "有効化するとパフォーマンスが若干低下します",

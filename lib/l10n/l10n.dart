@@ -2400,10 +2400,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Process lookup is enabled automatically for the active rules`
+  /// `Process rules look up the process only when they are checked`
   String get findProcessModeAutomaticDesc {
     return Intl.message(
-      'Process lookup is enabled automatically for the active rules',
+      'Process rules look up the process only when they are checked',
       name: 'findProcessModeAutomaticDesc',
       desc: '',
       args: [],

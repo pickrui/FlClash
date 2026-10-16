@@ -58,7 +58,7 @@ void main() {
           },
         ),
       );
-      expect(config['find-process-mode'], 'always', reason: rule);
+      expect(config['find-process-mode'], 'strict', reason: rule);
       expect(config['rules'], [rule, 'MATCH,DIRECT']);
     }
     final config = await makeRealProfileTask(
@@ -71,36 +71,36 @@ void main() {
         },
       ),
     );
-    expect(config['find-process-mode'], 'always');
+    expect(config['find-process-mode'], 'strict');
   });
 
-  test(
-    'any active user rule enables lookup without changing manual preferences',
-    () async {
-      const domain = Rule(
-        id: 1,
-        value: 'DOMAIN-SUFFIX,made-in-china.com,DIRECT',
-      );
-      for (final state in [
-        _profile(added: [domain]),
-        _profile(custom: [domain]),
-      ]) {
-        final config = await makeRealProfileTask(state);
-        expect(config['find-process-mode'], 'always');
-        expect(state.realPatchConfig.findProcessMode, FindProcessMode.off);
-      }
-      expect(
-        (await makeRealProfileTask(_profile()))['find-process-mode'],
-        'off',
-      );
-      expect(
-        (await makeRealProfileTask(
-          _profile(manual: FindProcessMode.always),
-        ))['find-process-mode'],
-        'always',
-      );
-    },
-  );
+  test('only process rules among user rules enable lookup, without changing '
+      'manual preferences', () async {
+    const domain = Rule(id: 1, value: 'DOMAIN-SUFFIX,made-in-china.com,DIRECT');
+    const process = Rule(id: 2, value: 'PROCESS-NAME,AliApp.exe,DIRECT');
+    for (final state in [
+      _profile(added: [domain]),
+      _profile(custom: [domain]),
+    ]) {
+      final config = await makeRealProfileTask(state);
+      expect(config['find-process-mode'], 'off');
+    }
+    for (final state in [
+      _profile(added: [process]),
+      _profile(custom: [process]),
+    ]) {
+      final config = await makeRealProfileTask(state);
+      expect(config['find-process-mode'], 'strict');
+      expect(state.realPatchConfig.findProcessMode, FindProcessMode.off);
+    }
+    expect((await makeRealProfileTask(_profile()))['find-process-mode'], 'off');
+    expect(
+      (await makeRealProfileTask(
+        _profile(manual: FindProcessMode.always, added: [process]),
+      ))['find-process-mode'],
+      'always',
+    );
+  });
 
   test(
     'referenced classical providers can acquire process rules on refresh',
@@ -123,7 +123,7 @@ void main() {
   );
 
   testWidgets(
-    'the process switch shows automatic lookup without altering the preference',
+    'the process switch keeps the preference and notes on-demand lookup',
     (tester) async {
       await tester.pumpWidget(
         const TestApp(
@@ -146,11 +146,11 @@ void main() {
         'rules': ['PROCESS-NAME,AliApp.exe,DIRECT'],
       });
       await tester.pump();
-      expect(tester.widget<Switch>(find.byType(Switch)).value, isTrue);
-      expect(tester.widget<Switch>(find.byType(Switch)).onChanged, isNull);
+      expect(tester.widget<Switch>(find.byType(Switch)).value, isFalse);
+      expect(tester.widget<Switch>(find.byType(Switch)).onChanged, isNotNull);
       expect(
         find.text(
-          'Process lookup is enabled automatically for the active rules',
+          'Process rules look up the process only when they are checked',
         ),
         findsOneWidget,
       );
@@ -189,12 +189,12 @@ void main() {
       });
       expect(
         container.read(updateParamsProvider).findProcessMode,
-        FindProcessMode.always,
+        FindProcessMode.strict,
       );
       preference.update((state) => state.copyWith(ipv6: !state.ipv6));
       expect(
         container.read(updateParamsProvider).findProcessMode,
-        FindProcessMode.always,
+        FindProcessMode.strict,
       );
       expect(
         container.read(patchClashConfigProvider).findProcessMode,
@@ -209,11 +209,14 @@ void main() {
       );
       applied.applied({
         'rules': ['DOMAIN,example.com,DIRECT'],
-      }, hasUserRules: true);
+      });
       expect(
         container.read(updateParamsProvider).findProcessMode,
-        FindProcessMode.always,
+        FindProcessMode.off,
       );
+      applied.applied({
+        'rules': ['PROCESS-NAME,AliApp.exe,DIRECT'],
+      });
       preference.update(
         (state) => state.copyWith(findProcessMode: FindProcessMode.always),
       );

@@ -136,7 +136,7 @@ enum CoreEventType {
   mode,
 }
 
-enum FindProcessMode { always, off }
+enum FindProcessMode { always, off, strict }
 
 enum RestoreOption { all, onlyProfiles }
 

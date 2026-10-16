@@ -994,7 +994,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "fileIsUpdate": MessageLookupByLibrary.simpleMessage("文件有修改，是否保存修改"),
     "findProcessMode": MessageLookupByLibrary.simpleMessage("查找进程"),
     "findProcessModeAutomaticDesc": MessageLookupByLibrary.simpleMessage(
-      "当前规则已自动开启进程识别",
+      "当前规则含进程规则，仅在检查这些规则时查找进程",
     ),
     "findProcessModeDesc": MessageLookupByLibrary.simpleMessage("开启后会有一定性能损耗"),
     "floating": MessageLookupByLibrary.simpleMessage("悬浮"),

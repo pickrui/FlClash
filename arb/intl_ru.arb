@@ -313,7 +313,7 @@
   "noResolve": "Не разрешать IP",
   "saveChanges": "Сохранить изменения?",
   "findProcessModeDesc": "При включении возможны небольшие потери производительности",
-  "findProcessModeAutomaticDesc": "Определение процессов включено автоматически для действующих правил",
+  "findProcessModeAutomaticDesc": "Процесс определяется только при проверке правил процессов",
   "colorSchemes": "Цветовые схемы",
   "palette": "Палитра",
   "tonalSpotScheme": "Тональный акцент",

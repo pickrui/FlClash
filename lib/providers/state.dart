@@ -85,7 +85,9 @@ final effectiveFindProcessModeProvider = Provider<FindProcessMode>((ref) {
   final manual = ref.watch(
     patchClashConfigProvider.select((state) => state.findProcessMode),
   );
-  return required ? FindProcessMode.always : manual;
+  return required && manual == FindProcessMode.off
+      ? FindProcessMode.strict
+      : manual;
 });
 
 @riverpod

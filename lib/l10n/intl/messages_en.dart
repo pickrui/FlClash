@@ -1343,7 +1343,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "findProcessMode": MessageLookupByLibrary.simpleMessage("Find process"),
     "findProcessModeAutomaticDesc": MessageLookupByLibrary.simpleMessage(
-      "Process lookup is enabled automatically for the active rules",
+      "Process rules look up the process only when they are checked",
     ),
     "findProcessModeDesc": MessageLookupByLibrary.simpleMessage(
       "There is a certain performance loss after opening",

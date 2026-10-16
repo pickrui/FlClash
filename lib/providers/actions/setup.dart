@@ -917,9 +917,7 @@ extension SetupControllerExt on AppController {
     if (message.isNotEmpty) {
       throw message;
     }
-    _ref
-        .read(appliedProcessLookupRequiredProvider.notifier)
-        .applied(config, hasUserRules: setupState.hasUserRules);
+    _ref.read(appliedProcessLookupRequiredProvider.notifier).applied(config);
     if (!isCurrentApply()) {
       return false;
     }

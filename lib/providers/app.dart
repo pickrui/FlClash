@@ -597,8 +597,8 @@ class AppliedProcessLookupRequirement extends Notifier<bool> {
   @override
   bool build() => false;
 
-  void applied(Map<String, dynamic> config, {bool hasUserRules = false}) {
-    state = hasUserRules || rulesRequireProcessLookup(config);
+  void applied(Map<String, dynamic> config) {
+    state = rulesRequireProcessLookup(config);
   }
 }
 

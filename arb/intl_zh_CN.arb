@@ -313,7 +313,7 @@
   "noResolve": "不解析IP",
   "saveChanges": "是否保存更改？",
   "findProcessModeDesc": "开启后会有一定性能损耗",
-  "findProcessModeAutomaticDesc": "当前规则已自动开启进程识别",
+  "findProcessModeAutomaticDesc": "当前规则含进程规则，仅在检查这些规则时查找进程",
   "colorSchemes": "配色方案",
   "palette": "调色板",
   "tonalSpotScheme": "调性点缀",
