@@ -848,6 +848,7 @@ class AppController {
   final _delayTestRuns = DelayTestRuns();
   int _profileApplyGeneration = 0;
   int _pendingProfileApplies = 0;
+  int _runningProfileApplies = 0;
   final ProfileApplyIntent _profileApplyIntent = ProfileApplyIntent();
   bool _debouncedApplyForce = false;
   bool isAttach = false;

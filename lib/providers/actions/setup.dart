@@ -519,13 +519,18 @@ extension SetupControllerExt on AppController {
     final generation = ++_profileApplyGeneration;
     _groupsUpdateGeneration++;
     _pendingProfileApplies++;
-    return _serializeCoreLifecycle(
-      () => _applyProfileUnlocked(
-        generation: generation,
-        silence: silence,
-        preloadInvoke: _profileApplyIntent.preloadInvoke,
-      ),
-    ).whenComplete(() {
+    return _serializeCoreLifecycle(() async {
+      _runningProfileApplies++;
+      try {
+        return await _applyProfileUnlocked(
+          generation: generation,
+          silence: silence,
+          preloadInvoke: _profileApplyIntent.preloadInvoke,
+        );
+      } finally {
+        _runningProfileApplies--;
+      }
+    }).whenComplete(() {
       _pendingProfileApplies--;
       if (_pendingProfileApplies == 0 && _groupsRefreshRequested) {
         updateGroupsDebounce();

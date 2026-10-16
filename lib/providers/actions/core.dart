@@ -92,9 +92,13 @@ extension CoreControllerExt on AppController {
   /// A freshly initialized Core holds no profile, so the applied state is gone.
   Future<bool> _reinitializedCoreReady() async {
     if (!await _isCoreInitialized()) return false;
+    final hadProfile = globalState.lastSetupState != null;
     globalState.lastSetupState = null;
-    // A pending apply checks needSetup itself; otherwise reload the profile.
-    if (_pendingProfileApplies == 0) applyProfileDebounce();
+    // needSetup skips a null state, so reload by force unless an apply is
+    // already running and will set it.
+    if (hadProfile && _runningProfileApplies == 0) {
+      applyProfileDebounce(force: true);
+    }
     return true;
   }
 
