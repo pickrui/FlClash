@@ -77,11 +77,16 @@ extension InitControllerExt on AppController {
     if (!startupRecovery.isCurrent(bootAttempt)) return;
     var coreReady = false;
     try {
-      await _connectCore();
-      if (!startupRecovery.isCurrent(bootAttempt)) return;
-      if (!coreController.isCompleted) throw _coreDisconnectedMessage;
-      await _initCore();
-      if (!startupRecovery.isCurrent(bootAttempt)) return;
+      // A Start tapped during launch must queue behind this Core, not stop it
+      // as disconnected while it is still starting.
+      final connected = await _serializeCoreLifecycle(() async {
+        await _connectCore();
+        if (!startupRecovery.isCurrent(bootAttempt)) return false;
+        if (!coreController.isCompleted) throw _coreDisconnectedMessage;
+        await _initCore();
+        return true;
+      });
+      if (!connected || !startupRecovery.isCurrent(bootAttempt)) return;
       coreReady = true;
       await _initStatus();
       if (!startupRecovery.isCurrent(bootAttempt)) return;

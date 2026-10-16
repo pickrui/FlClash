@@ -1180,17 +1180,18 @@ extension ProfileExtension on Profile {
     });
   }
 
-  Future<Profile?> checkAndUpdateAndCopy() async {
+  /// Downloads a missing snapshot without installing it; null when one exists.
+  Future<PreparedProfileUpdate?> prepareMissingSnapshot() async {
     if (isoixCloudProfile) {
       if (await hasLocalConfigSnapshot()) return null;
-      return update();
+      return prepareUpdate();
     }
     final mFile = await _getFile(false);
     final isExists = await mFile.exists();
     if (isExists || url.isEmpty) {
       return null;
     }
-    return update();
+    return prepareUpdate();
   }
 
   Future<File> _getFile([bool autoCreate = true]) async {

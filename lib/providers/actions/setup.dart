@@ -633,10 +633,12 @@ extension SetupControllerExt on AppController {
           if (!_ref.read(initProvider)) return false;
           throw appLocalizations.noProxy;
         }
-        unawaited(
-          updateProviders().catchError((Object error) {
-            commonPrint.log('Provider refresh failed: $error');
-          }),
+        _coreLifecycleOperations.detached(
+          () => unawaited(
+            updateProviders().catchError((Object error) {
+              commonPrint.log('Provider refresh failed: $error');
+            }),
+          ),
         );
         return true;
       },
@@ -814,23 +816,32 @@ extension SetupControllerExt on AppController {
     }
     var profile = _ref.read(profilesProvider).getProfile(profileId);
     await waitForCloudBootstrapBeforeUpdate(profile);
-    await storageLock.synchronized(() async {
-      profile = _ref.read(profilesProvider).getProfile(profileId);
-      final nextProfile = await _checkAndUpdateProfileWithCertificateRetry(
-        profile,
-      );
-      if (nextProfile == null || !isCurrentApply()) {
-        return;
-      }
-      final currentProfile = _ref.read(profilesProvider).getProfile(profileId);
-      if (currentProfile == null) {
-        return;
-      }
-      profile = mergeRefreshedProfile(currentProfile, nextProfile);
-      await _ref
-          .read(profilesProvider.notifier)
-          .put(profile!, reportOnWait: false);
-    });
+    // Outside storageLock: a 401 awaits account cleanup, which needs that lock.
+    final prepared = await _prepareMissingSnapshotWithCertificateRetry(profile);
+    profile = _ref.read(profilesProvider).getProfile(profileId);
+    if (prepared != null) {
+      await storageLock.synchronized(() async {
+        final Profile nextProfile;
+        try {
+          nextProfile = await prepared.save();
+        } on StateError {
+          return;
+        }
+        if (!isCurrentApply()) {
+          return;
+        }
+        final currentProfile = _ref
+            .read(profilesProvider)
+            .getProfile(profileId);
+        if (currentProfile == null) {
+          return;
+        }
+        profile = mergeRefreshedProfile(currentProfile, nextProfile);
+        await _ref
+            .read(profilesProvider.notifier)
+            .put(profile!, reportOnWait: false);
+      });
+    }
     if (!isCurrentApply()) {
       return false;
     }

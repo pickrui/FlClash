@@ -78,7 +78,7 @@ extension CoreControllerExt on AppController {
     }
     if (coreController.isCompleted) {
       await _initCore();
-      return _isCoreInitialized();
+      return _reinitializedCoreReady();
     }
     commonPrint.log('Core disconnected, reconnecting');
     _ref.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
@@ -86,7 +86,16 @@ extension CoreControllerExt on AppController {
     await _connectCore();
     if (!coreController.isCompleted) return false;
     await _initCore();
-    return _isCoreInitialized();
+    return _reinitializedCoreReady();
+  }
+
+  /// A freshly initialized Core holds no profile, so the applied state is gone.
+  Future<bool> _reinitializedCoreReady() async {
+    if (!await _isCoreInitialized()) return false;
+    globalState.lastSetupState = null;
+    // A pending apply checks needSetup itself; otherwise reload the profile.
+    if (_pendingProfileApplies == 0) applyProfileDebounce();
+    return true;
   }
 
   Future<bool> _isCoreInitialized() async {
@@ -94,14 +103,14 @@ extension CoreControllerExt on AppController {
     return coreController.isInit;
   }
 
-  Future<Profile?> _checkAndUpdateProfileWithCertificateRetry(
+  Future<PreparedProfileUpdate?> _prepareMissingSnapshotWithCertificateRetry(
     Profile? profile,
   ) {
     if (profile == null) {
       return Future.value();
     }
     return _runWithCertificateRetry(
-      profile.checkAndUpdateAndCopy,
+      profile.prepareMissingSnapshot,
       handleCloudUnauthorized: profile.isoixCloudProfile,
     );
   }
