@@ -58,7 +58,9 @@ fn run(
     runtime.set_interrupt_handler(Some(Box::new(move || Instant::now() >= deadline)));
     let context = Context::full(&runtime).map_err(|e| e.to_string())?;
     let result = context.with(|ctx| {
-        console::install(&ctx, logs).catch(&ctx).map_err(describe)?;
+        console::install(&ctx, logs, deadline)
+            .catch(&ctx)
+            .map_err(describe)?;
         ctx.eval::<Value, _>(script.as_bytes())
             .catch(&ctx)
             .map_err(describe)?;
@@ -238,6 +240,25 @@ mod tests {
 
         assert!(!error.is_empty());
         assert!(started.elapsed() < Duration::from_secs(5));
+    }
+
+    #[test]
+    fn console_formatting_cannot_outlive_the_deadline() {
+        let started = Instant::now();
+        let error = evaluate_within(
+            "const slow = { toJSON() { for (;;) {} }, toString() { return '' } };
+             function main() { for (;;) console.log(...new Array(4096).fill(slow)) }",
+            "{}",
+            Duration::from_millis(100),
+        )
+        .unwrap_err();
+
+        assert!(error.contains("timed out"), "{error}");
+        assert!(
+            started.elapsed() < Duration::from_secs(2),
+            "{:?}",
+            started.elapsed()
+        );
     }
 
     #[test]

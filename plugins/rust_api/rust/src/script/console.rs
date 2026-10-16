@@ -9,19 +9,20 @@ use rquickjs::function::Rest;
 use rquickjs::{CatchResultExt, Ctx, Function, Object, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::time::Instant;
 
 const MAX_LINES: usize = 256;
 const MAX_LINE_BYTES: usize = 4096;
 const MAX_BYTES: usize = 128 * 1024;
 
-pub fn install(ctx: &Ctx<'_>, logs: Rc<RefCell<Vec<ScriptLog>>>) -> Result<()> {
+pub fn install(ctx: &Ctx<'_>, logs: Rc<RefCell<Vec<ScriptLog>>>, deadline: Instant) -> Result<()> {
     let console = Object::new(ctx.clone())?;
     let bytes = Rc::new(RefCell::new(0usize));
     for level in ["log", "info", "warn", "error", "debug", "trace"] {
         let logs = logs.clone();
         let bytes = bytes.clone();
         let print = Function::new(ctx.clone(), move |ctx, args| {
-            write(level, ctx, args, &logs, &bytes)
+            write(level, ctx, args, &logs, &bytes, deadline)
         })?;
         console.set(level, print)?;
     }
@@ -34,6 +35,7 @@ fn write<'js>(
     args: Rest<Value<'js>>,
     logs: &RefCell<Vec<ScriptLog>>,
     bytes: &RefCell<usize>,
+    deadline: Instant,
 ) {
     // Never stream unbounded native logs or enqueue one Dart event per call.
     if logs.borrow().len() >= MAX_LINES || *bytes.borrow() >= MAX_BYTES {
@@ -42,6 +44,11 @@ fn write<'js>(
     let limit = MAX_LINE_BYTES.min(MAX_BYTES - *bytes.borrow());
     let mut line = String::new();
     for value in args.iter() {
+        // format() clears the interrupt raised inside a user toJSON or toString;
+        // stop here so the next interrupt check ends the script.
+        if Instant::now() >= deadline {
+            return;
+        }
         if !line.is_empty() {
             line.push(' ');
         }
