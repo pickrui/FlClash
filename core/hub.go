@@ -116,16 +116,21 @@ func handleStartListener() bool {
 	isRunning = true
 	updateListeners()
 	resolver.ResetConnection()
-	if features.Android || networkExcluded {
-		return true
-	}
-	mixedPort := currentConfig.General.MixedPort
-	if mixedPort > 0 && listener.GetPorts().MixedPort != mixedPort {
+	if !mixedPortBoundLocked() {
 		isRunning = false
 		listener.StopListener()
 		return false
 	}
 	return true
+}
+
+// ReCreateMixed only logs a failed bind, after closing the previous listener.
+func mixedPortBoundLocked() bool {
+	if features.Android || networkExcluded || !isRunning || currentConfig == nil {
+		return true
+	}
+	mixedPort := currentConfig.General.MixedPort
+	return mixedPort <= 0 || listener.GetPorts().MixedPort == mixedPort
 }
 
 func handleStopListener() bool {
@@ -153,6 +158,8 @@ func handleShutdown() bool {
 	runLock.Lock()
 	defer runLock.Unlock()
 	isInit.Store(false)
+	// An apply that held runLock may have restarted the scheduler after stopGeoLifecycle.
+	stopGeoScheduler()
 	handleStopLog()
 	isRunning = false
 	listener.StopListener()
@@ -266,7 +273,7 @@ var anyDelayTestStatus utils.IntRanges[uint16]
 
 func handleAsyncTestDelay(params *TestDelayParams, fn func(*Delay)) {
 	safeGo("asyncTestDelay", func() {
-		testUrl := cmp.Or(params.TestUrl, constant.DefaultTestURL)
+		testUrl := cmp.Or(params.TestUrl, *probeTestURL.Load())
 		delayData := &Delay{
 			Url:   testUrl,
 			Name:  params.ProxyName,

@@ -146,7 +146,7 @@ func TestHandleAsyncTestDelayPreservesURLForMissingProxy(t *testing.T) {
 		}, func(delay *Delay) { result <- delay })
 		wantURL := url
 		if wantURL == "" {
-			wantURL = constant.DefaultTestURL
+			wantURL = *probeTestURL.Load()
 		}
 		select {
 		case got := <-result:

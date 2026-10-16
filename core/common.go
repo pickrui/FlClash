@@ -11,6 +11,7 @@ import (
 	t "core/tun"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -60,8 +61,16 @@ const delayTestConcurrency = 150
 
 const defaultTestURL = "http://cp.cloudflare.com/generate_204"
 
+// constant.DefaultTestURL changes while a candidate parses; probes read this copy.
+var probeTestURL atomic.Pointer[string]
+
 func init() {
 	constant.DefaultTestURL = defaultTestURL
+	setProbeTestURL(defaultTestURL)
+}
+
+func setProbeTestURL(url string) {
+	probeTestURL.Store(&url)
 }
 
 func getExternalProvidersRaw() []cp.Provider {
@@ -241,8 +250,12 @@ func decryptFlClashIfNeeded(data []byte) ([]byte, error) {
 func parseConfigPath(path string) (*config.Config, error) {
 	data, err := os.ReadFile(path)
 	if err != nil || !isEncryptedConfig(data) {
-		setDNSAuth(nil)
-		return executor.ParseWithPath(path)
+		// The live config keeps signing managed lookups while this one parses.
+		candidate, err := executor.ParseWithPath(path)
+		if err == nil {
+			setDNSAuth(nil)
+		}
+		return candidate, err
 	}
 	data, err = decryptFlClashIfNeeded(data)
 	if err != nil {
@@ -373,6 +386,9 @@ func updateConfig(params *UpdateParams) error {
 	if restartGeo {
 		restartGeoScheduler()
 	}
+	if !mixedPortBoundLocked() {
+		return fmt.Errorf("mixed port %d is unavailable", general.MixedPort)
+	}
 	return nil
 }
 
@@ -445,6 +461,7 @@ func applyConfig(params *SetupParams) error {
 	stopGeoScheduler()
 	retireCurrentProviders()
 	currentConfig = candidate
+	setProbeTestURL(constant.DefaultTestURL)
 	resetCloudIPs()
 	// Config loading owns all tunnel status transitions until ApplyConfig returns.
 	idleOwnsTunnelSuspend = false
