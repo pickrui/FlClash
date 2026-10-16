@@ -26,6 +26,16 @@ const maxIPCFrameSize = 64 * 1024 * 1024
 
 func (response MethodResponse) send() {
 	data, err := response.JSON()
+	if err == nil && len(data) > maxIPCFrameSize {
+		// The frame would be dropped and the caller would wait for its RPC timeout.
+		data, err = MethodResponse{
+			ID: response.ID,
+			Error: &MethodError{
+				Code:    "response_too_large",
+				Message: fmt.Sprintf("response of %d bytes exceeds the %d byte IPC limit", len(data), maxIPCFrameSize),
+			},
+		}.JSON()
+	}
 	if err != nil {
 		log.Printf("MethodResponse marshal error: id=%s err=%v", response.ID, err)
 		return

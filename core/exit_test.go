@@ -11,11 +11,13 @@ package main
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/json"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"syscall"
@@ -296,6 +298,10 @@ type exitTestConn struct {
 func (c *exitTestConn) Write(p []byte) (int, error) { return len(p), nil }
 func (c *exitTestConn) Close() error                { c.closed = true; return nil }
 
+type recordingConn struct{ bytes.Buffer }
+
+func (c *recordingConn) Close() error { return nil }
+
 func TestServeCleansUpOnDisconnect(t *testing.T) {
 	oversized := make([]byte, 4)
 	binary.LittleEndian.PutUint32(oversized, maxIPCFrameSize+1)
@@ -319,5 +325,26 @@ func TestServeCleansUpOnDisconnect(t *testing.T) {
 				t.Fatal("IPC disconnect skipped cleanup")
 			}
 		})
+	}
+}
+
+func TestOversizedResponseAnswersWithAnError(t *testing.T) {
+	previousConn := conn
+	var written recordingConn
+	conn = &written
+	t.Cleanup(func() { conn = previousConn })
+
+	MethodResponse{ID: "9", Result: strings.Repeat("x", maxIPCFrameSize)}.send()
+
+	frame, err := readFrame(&written.Buffer)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var decoded MethodResponse
+	if err := json.Unmarshal(frame, &decoded); err != nil {
+		t.Fatal(err)
+	}
+	if decoded.ID != "9" || decoded.Error == nil || decoded.Error.Code != "response_too_large" {
+		t.Fatalf("got %s", frame)
 	}
 }
