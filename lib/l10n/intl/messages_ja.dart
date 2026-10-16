@@ -1182,13 +1182,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "goPay": MessageLookupByLibrary.simpleMessage("支払いへ"),
     "goToConfigureScript": MessageLookupByLibrary.simpleMessage("スクリプト設定に移動"),
     "googleLoginInvalidCallback": MessageLookupByLibrary.simpleMessage(
-      "Google ログインを確認できませんでした。再試行してください。",
+      "Google ログインを確認できませんでした、再試行してください",
     ),
     "googleLoginTimedOut": MessageLookupByLibrary.simpleMessage(
-      "Google ログインがタイムアウトしました。再試行してください。",
+      "Google ログインがタイムアウトしました、再試行してください",
     ),
     "googleLoginUnavailable": MessageLookupByLibrary.simpleMessage(
-      "Google ログインを開けませんでした。再試行してください。",
+      "Google ログインを開けませんでした、再試行してください",
     ),
     "googleLoginWaiting": MessageLookupByLibrary.simpleMessage(
       "ブラウザで Google ログインを完了してください",
