@@ -95,6 +95,7 @@ class SearchQuery {
   bool get isEmpty => terms.isEmpty;
 
   bool matches(Iterable<String?> fields) {
+    if (terms.isEmpty) return true;
     final text = fields.nonNulls.join('\n').toLowerCase();
     return terms.every(text.contains);
   }

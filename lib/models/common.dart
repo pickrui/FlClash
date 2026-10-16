@@ -178,7 +178,7 @@ extension LogsStateExt on LogsState {
     final search = SearchQuery(query);
     return logs.where((log) {
       final logLevelName = log.logLevel.name;
-      return {logLevelName}.containsAll(keywords) &&
+      return (keywords.isEmpty || {logLevelName}.containsAll(keywords)) &&
           search.matches([log.payload, logLevelName]);
     }).toList();
   }
@@ -200,7 +200,7 @@ extension TrackerInfosStateExt on TrackerInfosState {
     return trackerInfos.where((trackerInfo) {
       final chains = trackerInfo.chains;
       final process = trackerInfo.metadata.process;
-      return {...chains, process}.containsAll(keywords) &&
+      return (keywords.isEmpty || {...chains, process}.containsAll(keywords)) &&
           search.matches([
             trackerInfo.metadata.network,
             trackerInfo.metadata.host,

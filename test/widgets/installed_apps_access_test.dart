@@ -317,11 +317,33 @@ void main() {
     expect(api.settings, 1);
     api.granted = true;
     api.packages = [installedPackage('after.settings')];
-    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
-    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    for (final state in [
+      AppLifecycleState.inactive,
+      AppLifecycleState.hidden,
+      AppLifecycleState.paused,
+      AppLifecycleState.hidden,
+      AppLifecycleState.inactive,
+      AppLifecycleState.resumed,
+    ]) {
+      tester.binding.handleAppLifecycleStateChanged(state);
+    }
     await tester.pumpAndSettle();
     expect(find.text('after.settings'), findsWidgets);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a focus change alone does not reload installed apps', (
+    tester,
+  ) async {
+    final api = InstalledAppsFake()
+      ..packages = [installedPackage('fixture.app')];
+    await openAccess(tester, api);
+    final queries = api.queries;
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    expect(api.queries, queries);
+    expect(find.text('fixture.app'), findsWidgets);
   });
 
   testWidgets('query failure has a retry action and is not shown as no data', (

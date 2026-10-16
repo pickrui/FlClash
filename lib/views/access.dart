@@ -42,6 +42,7 @@ class _AccessViewState extends ConsumerState<AccessView>
 
   bool _requestingPermission = false;
   bool _permissionDenied = false;
+  bool _leftForeground = false;
 
   @override
   void initState() {
@@ -67,7 +68,17 @@ class _AccessViewState extends ConsumerState<AccessView>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) _reloadPackages();
+    // Android also reports inactive -> resumed for a focus change such as the
+    // notification shade; only a return from settings or another app reloads.
+    switch (state) {
+      case AppLifecycleState.hidden || AppLifecycleState.paused:
+        _leftForeground = true;
+      case AppLifecycleState.resumed when _leftForeground:
+        _leftForeground = false;
+        _reloadPackages();
+      default:
+        break;
+    }
   }
 
   void _reloadPackages() {
