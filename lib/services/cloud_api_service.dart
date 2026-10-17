@@ -739,18 +739,37 @@ class CloudApiService implements CloudNodeFilterApi {
   final Duration _syncRequestTimeout;
   final List<String> Function(Uri uri) _readRoutes;
 
+  // Read off the request path: awaiting preferences there would hold every
+  // request behind storage I/O. Requests sent before it is ready go without it.
+  final bool _loadsDeviceId;
+  String? _deviceId;
+  Future<void>? _deviceIdLoad;
+
   CloudApiService._()
     : _syncRequestTimeout = const Duration(seconds: 30),
-      _readRoutes = _cloudReadRoutes;
+      _readRoutes = _cloudReadRoutes,
+      _loadsDeviceId = true {
+    _loadDeviceId();
+  }
 
   @visibleForTesting
   CloudApiService.forTesting({
     required Dio client,
     this._syncRequestTimeout = const Duration(seconds: 30),
     List<String> readRoutes = const ['DIRECT'],
+    this._deviceId,
   }) : _dio = client,
-       _readRoutes = ((_) => List<String>.of(readRoutes)) {
+       _readRoutes = ((_) => List<String>.of(readRoutes)),
+       _loadsDeviceId = false {
     _installInterceptors(client);
+  }
+
+  void _loadDeviceId() {
+    if (!_loadsDeviceId || _deviceId != null || _deviceIdLoad != null) return;
+    _deviceIdLoad = preferences
+        .getOixDeviceId()
+        .then<void>((id) => _deviceId = id, onError: (Object _) {})
+        .whenComplete(() => _deviceIdLoad = null);
   }
 
   int get sessionRevision => _sessionRevision;
@@ -823,7 +842,8 @@ class CloudApiService implements CloudNodeFilterApi {
           options.headers['Accept-Language'] = Intl.getCurrentLocale()
               .replaceAll('_', '-');
           options.headers['X-oixCloud-Client'] = clientId;
-          final deviceId = await preferences.getOixDeviceId();
+          _loadDeviceId();
+          final deviceId = _deviceId;
           if (deviceId != null) {
             options.headers[deviceHeader] = deviceId;
           }

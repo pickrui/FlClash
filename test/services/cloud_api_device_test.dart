@@ -44,10 +44,12 @@ void main() {
   );
 
   test('signed-in and anonymous panel requests carry the identifier', () async {
-    final deviceId = await Preferences().getOixDeviceId();
+    const deviceId = '3f2b8c1e-9a4d-4e7b-8c21-5d6f0a9b1c3e';
     final adapter = QueuedCloudAdapter();
-    final service = CloudApiService.forTesting(client: adapter.createClient())
-      ..setToken('session');
+    final service = CloudApiService.forTesting(
+      client: adapter.createClient(),
+      deviceId: deviceId,
+    )..setToken('session');
 
     final info = service.getUserInfo();
     final signedIn = await adapter.takeRequest();
@@ -63,5 +65,20 @@ void main() {
     expect(anonymous.options.headers[CloudApiService.deviceHeader], deviceId);
     anonymous.respond({'ret': 403, 'msg': 'expired'}, statusCode: 403);
     await expectLater(login, throwsA(anything));
+  });
+
+  test('requests are not held back while no identifier is ready', () async {
+    final adapter = QueuedCloudAdapter();
+    final service = CloudApiService.forTesting(client: adapter.createClient())
+      ..setToken('session');
+
+    final info = service.getUserInfo();
+    final pending = await adapter.takeRequest();
+    expect(
+      pending.options.headers.containsKey(CloudApiService.deviceHeader),
+      isFalse,
+    );
+    pending.respond({'ret': 401, 'msg': 'expired'}, statusCode: 401);
+    await expectLater(info, throwsA(anything));
   });
 }
