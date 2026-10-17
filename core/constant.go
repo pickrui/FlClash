@@ -112,6 +112,7 @@ const (
 	getIsInitMethod                CoreMethod = "getIsInit"
 	probeRouteMethod               CoreMethod = "probeRoute"
 	networkDiagnosticsMethod       CoreMethod = "networkDiagnostics"
+	getProtectedDirectProxyMethod  CoreMethod = "getProtectedDirectProxy"
 	forceGcMethod                  CoreMethod = "forceGc"
 	shutdownMethod                 CoreMethod = "shutdown"
 	validateConfigWithBytesMethod  CoreMethod = "validateConfigWithBytes"

@@ -158,6 +158,10 @@ func handleShutdown() bool {
 	runLock.Lock()
 	defer runLock.Unlock()
 	isInit.Store(false)
+	if protectedDirect != nil {
+		protectedDirect.Close()
+		protectedDirect = nil
+	}
 	// An apply that held runLock may have restarted the scheduler after stopGeoLifecycle.
 	stopGeoScheduler()
 	handleStopLog()

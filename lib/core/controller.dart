@@ -174,6 +174,15 @@ class CoreController {
         .toList();
   }
 
+  Future<Map<String, dynamic>> getProtectedDirectProxy() async {
+    final result = await _interface.invokeMethod<Map>(
+      method: CoreMethod.getProtectedDirectProxy,
+      timeout: const Duration(seconds: 2),
+    );
+    if (result == null) throw StateError('Direct connection unavailable');
+    return Map<String, dynamic>.from(result);
+  }
+
   Future<Map<String, dynamic>> getProxyPage(
     Map<String, Object?> arguments,
   ) async {

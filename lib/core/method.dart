@@ -12,6 +12,7 @@ enum CoreMethod {
   initClash,
   getIsInit,
   networkDiagnostics,
+  getProtectedDirectProxy,
   probeRoute,
   forceGc,
   shutdown,

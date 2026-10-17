@@ -16,6 +16,7 @@ import 'package:fl_clash/common/cloud_panel_time.dart';
 import 'package:fl_clash/common/bounded_http_client_adapter.dart';
 import 'package:fl_clash/common/http_read_race.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/services/age_crypto.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/foundation.dart';
@@ -45,6 +46,7 @@ const String cloudNonIdempotentExtraKey = 'flclash_non_idempotent';
 
 @visibleForTesting
 const String cloudReadRouteExtraKey = 'flclash_cloud_read_route';
+const String _cloudManagedConfigExtraKey = 'flclash_managed_config';
 const String _cloudReadRaceExtraKey = 'flclash_cloud_read_race';
 const String _cloudReadDomainExtraKey = 'flclash_cloud_read_domain';
 
@@ -145,17 +147,41 @@ HttpClientAdapter _createCloudApiAdapter() => CloudReadRouteAdapter(
     allowCertificateRetry: true,
     resolver: _cloudHostResolver,
   ),
-  createRouteAdapter: (route) => createFlClashHttpClientAdapter(
-    findProxy: (uri) {
-      final host = uri.host.toLowerCase();
-      return host == 'localhost' ||
-              (InternetAddress.tryParse(host)?.isLoopback ?? false)
-          ? 'DIRECT'
-          : route;
-    },
-    allowCertificateRetry: true,
-    resolver: _cloudHostResolver,
-  ),
+  createRouteAdapter: (route, options) async {
+    if (route == 'DIRECT' &&
+        options.extra[_cloudManagedConfigExtraKey] == true &&
+        system.isAndroid &&
+        coreController.isCompleted &&
+        await coreController.isInit) {
+      final endpoint = await coreController.getProtectedDirectProxy();
+      final port = endpoint['port'];
+      final password = endpoint['password'];
+      if (port is! int ||
+          port <= 0 ||
+          port > 65535 ||
+          password is! String ||
+          !AuthenticationProps.validPassword(password)) {
+        throw StateError('Invalid direct connection endpoint');
+      }
+      return createFlClashHttpClientAdapter(
+        findProxy: (_) => 'PROXY 127.0.0.1:$port',
+        proxyAuthentication: () => (
+          port: port,
+          authentication: AuthenticationProps(
+            enable: true,
+            username: 'direct',
+            password: password,
+          ),
+        ),
+        allowCertificateRetry: true,
+      );
+    }
+    return createFlClashHttpClientAdapter(
+      findProxy: FlClashHttpOverrides.pinnedRoute(route),
+      allowCertificateRetry: true,
+      resolver: _cloudHostResolver,
+    );
+  },
 );
 
 // Each explicit read attempt uses a separate connection pool for its route.
@@ -168,7 +194,11 @@ class CloudReadRouteAdapter implements HttpClientAdapter {
   });
 
   final HttpClientAdapter _fallback;
-  final HttpClientAdapter Function(String route) _createRouteAdapter;
+  final FutureOr<HttpClientAdapter> Function(
+    String route,
+    RequestOptions options,
+  )
+  _createRouteAdapter;
   final _active = <HttpClientAdapter>{};
   bool _closed = false;
 
@@ -183,8 +213,7 @@ class CloudReadRouteAdapter implements HttpClientAdapter {
     if (!canReplayCloudRequest(options) || route is! String) {
       return _fallback.fetch(options, requestStream, cancelFuture);
     }
-    final adapter = _createRouteAdapter(route);
-    _active.add(adapter);
+    HttpClientAdapter? activeAdapter;
     var released = false;
     StreamSubscription<void>? cancellation;
     void release() {
@@ -192,12 +221,25 @@ class CloudReadRouteAdapter implements HttpClientAdapter {
       released = true;
       final subscription = cancellation;
       if (subscription != null) unawaited(subscription.cancel());
-      _active.remove(adapter);
-      adapter.close(force: true);
+      final adapter = activeAdapter;
+      if (adapter != null) {
+        _active.remove(adapter);
+        adapter.close(force: true);
+      }
     }
 
     cancellation = cancelFuture?.asStream().listen((_) => release());
     try {
+      final adapter = await _createRouteAdapter(route, options);
+      if (_closed || released || options.cancelToken?.isCancelled == true) {
+        adapter.close(force: true);
+        throw DioException.requestCancelled(
+          requestOptions: options,
+          reason: 'Cloud read route canceled',
+        );
+      }
+      activeAdapter = adapter;
+      _active.add(adapter);
       final response = await adapter.fetch(
         options,
         requestStream,
@@ -1544,7 +1586,11 @@ class CloudApiService implements CloudNodeFilterApi {
           options: options.copyWith(
             headers: headers,
             responseType: ResponseType.json,
-            extra: {...?options.extra, _sessionRevisionKey: revision},
+            extra: {
+              ...?options.extra,
+              _sessionRevisionKey: revision,
+              _cloudManagedConfigExtraKey: true,
+            },
           ),
         ),
         directFirst: true,

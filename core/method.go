@@ -153,6 +153,13 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 	case probeRouteMethod:
 		epoch, picks := routeStamp()
 		response.success(map[string]uint64{"core-epoch": epoch, "picks-version": picks})
+	case getProtectedDirectProxyMethod:
+		endpoint, err := handleGetProtectedDirectProxy()
+		if err != nil {
+			response.failure("direct_connection_unavailable", "Direct connection unavailable", nil)
+		} else {
+			response.success(endpoint)
+		}
 	case networkDiagnosticsMethod:
 		response.success(handleNetworkDiagnostics())
 	case getIsInitMethod:

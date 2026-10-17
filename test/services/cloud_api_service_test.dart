@@ -1242,7 +1242,7 @@ void main() {
       final routes = <String, _CountingAdapter>{};
       final adapter = CloudReadRouteAdapter(
         fallback: native,
-        createRouteAdapter: (route) => routes[route] = _CountingAdapter(),
+        createRouteAdapter: (route, _) => routes[route] = _CountingAdapter(),
       );
       for (final route in ['DIRECT', 'PROXY localhost:7890']) {
         final response = await adapter.fetch(
@@ -1724,13 +1724,53 @@ void main() {
     );
   }
 
+  for (final close in [false, true]) {
+    test('route preparation respects ${close ? 'close' : 'cancel'}', () async {
+      final prepared = Completer<HttpClientAdapter>();
+      final cancellation = Completer<void>();
+      final pool = _BodyPoolAdapter();
+      final adapter = CloudReadRouteAdapter(
+        fallback: _CountingAdapter(),
+        createRouteAdapter: (_, _) => prepared.future,
+      );
+      addTearDown(() => adapter.close(force: true));
+      final pending = adapter.fetch(
+        RequestOptions(
+          path: 'https://cloud.test/api/v1/managed/flclash/direct',
+          extra: {cloudReadRouteExtraKey: 'DIRECT'},
+        ),
+        null,
+        cancellation.future,
+      );
+      final rejected = expectLater(
+        pending,
+        throwsA(
+          isA<DioException>().having(
+            (error) => error.type,
+            'type',
+            DioExceptionType.cancel,
+          ),
+        ),
+      );
+      if (close) {
+        adapter.close(force: true);
+      } else {
+        cancellation.complete();
+        await Future<void>.delayed(Duration.zero);
+      }
+      prepared.complete(pool);
+      await rejected;
+      expect(pool.closed, isTrue);
+    });
+  }
+
   test(
     'cloud route pools stay alive through the body and close independently',
     () async {
       final pools = <_BodyPoolAdapter>[];
       final adapter = CloudReadRouteAdapter(
         fallback: _CountingAdapter(),
-        createRouteAdapter: (_) {
+        createRouteAdapter: (_, _) {
           final pool = _BodyPoolAdapter();
           pools.add(pool);
           return pool;

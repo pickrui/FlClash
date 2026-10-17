@@ -177,16 +177,23 @@ HttpClientAdapter createFlClashHttpClientAdapter({
   String? Function()? userAgent,
   HostResolver? resolver,
   List<Uri>? Function(Uri uri)? proxyTargets,
+  ProxyAuthenticationState? Function()? proxyAuthentication,
 }) {
   IOHttpClientAdapter create(
     bool Function(X509Certificate, String, int) onBadCertificate,
   ) => _FlClashHttpClientAdapter(
     createHttpClient: () {
-      final client = ProxyAuthenticatedHttpClient.wrap(
-        HttpClient(),
-        FlClashHttpOverrides.readProxyAuthentication,
-        tunnelTargets: proxyTargets,
-      );
+      final client = proxyAuthentication == null
+          ? ProxyAuthenticatedHttpClient.wrap(
+              HttpClient(),
+              FlClashHttpOverrides.readProxyAuthentication,
+              tunnelTargets: proxyTargets,
+            )
+          : ProxyAuthenticatedHttpClient(
+              create: HttpClient.new,
+              read: proxyAuthentication,
+              tunnelTargets: proxyTargets,
+            );
       client.badCertificateCallback = onBadCertificate;
       if (resolver != null) {
         client.connectionFactory = (uri, proxyHost, proxyPort) =>

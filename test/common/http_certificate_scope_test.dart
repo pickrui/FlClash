@@ -374,38 +374,59 @@ void main() {
     }
   }
 
-  test('authenticated CONNECT preserves the scoped TLS decision', () async {
-    var connects = 0;
-    final proxy = await connectProxy(
-      fallbackPort: origin.port,
-      destination: (authority, headers) {
-        connects++;
-        final target = Uri.parse('http://$authority');
-        expect(target.host, '1.1.1.1');
-        expect(
-          headers[HttpHeaders.proxyAuthorizationHeader],
-          'Basic ${base64Encode(utf8.encode('fixture:password'))}',
+  for (final customAuthentication in [false, true]) {
+    test(
+      'authenticated CONNECT preserves TLS with custom auth $customAuthentication',
+      () async {
+        var connects = 0;
+        final credentials = customAuthentication
+            ? 'direct:private'
+            : 'fixture:password';
+        final proxy = await connectProxy(
+          fallbackPort: origin.port,
+          destination: (authority, headers) {
+            connects++;
+            final target = Uri.parse('http://$authority');
+            expect(target.host, '1.1.1.1');
+            expect(
+              headers[HttpHeaders.proxyAuthorizationHeader],
+              'Basic ${base64Encode(utf8.encode(credentials))}',
+            );
+            return target.port;
+          },
         );
-        return target.port;
+        await HttpOverrides.runWithHttpOverrides(() async {
+          final tunneled = Dio()
+            ..httpClientAdapter = createFlClashHttpClientAdapter(
+              findProxy: (_) => 'PROXY localhost:${proxy.port}',
+              allowCertificateRetry: true,
+              proxyAuthentication: customAuthentication
+                  ? () => (
+                      port: proxy.port,
+                      authentication: const AuthenticationProps(
+                        enable: true,
+                        username: 'direct',
+                        password: 'private',
+                      ),
+                    )
+                  : null,
+              proxyTargets: (uri) => [uri.replace(host: '1.1.1.1')],
+            );
+          addTearDown(() => tunneled.close(force: true));
+          final failed = await rejected(target, using: tunneled);
+          await FlClashTemporaryTls.runWithBadCertificateAllowed(
+            failed,
+            () async {
+              expect((await tunneled.getUri<String>(target)).data, 'accepted');
+              await rejected(otherTarget, using: tunneled);
+            },
+          );
+          await rejected(target, using: tunneled);
+        }, _AuthenticatedProxy(proxy.port));
+        expect(connects, 4);
       },
     );
-    await HttpOverrides.runWithHttpOverrides(() async {
-      final tunneled = Dio()
-        ..httpClientAdapter = createFlClashHttpClientAdapter(
-          findProxy: (_) => 'PROXY localhost:${proxy.port}',
-          allowCertificateRetry: true,
-          proxyTargets: (uri) => [uri.replace(host: '1.1.1.1')],
-        );
-      addTearDown(() => tunneled.close(force: true));
-      final failed = await rejected(target, using: tunneled);
-      await FlClashTemporaryTls.runWithBadCertificateAllowed(failed, () async {
-        expect((await tunneled.getUri<String>(target)).data, 'accepted');
-        await rejected(otherTarget, using: tunneled);
-      });
-      await rejected(target, using: tunneled);
-    }, _AuthenticatedProxy(proxy.port));
-    expect(connects, 4);
-  });
+  }
 
   for (final revoke in [false, true]) {
     test(
