@@ -721,6 +721,10 @@ class CloudApiService implements CloudNodeFilterApi {
   /// identifier, not by the User-Agent.
   static const clientId = 'flclash';
 
+  /// The panel counts an account's devices by this random per-install
+  /// identifier; it never authorizes anything.
+  static const deviceHeader = 'X-oixCloud-Device';
+
   Dio? _dio;
   String? _cachedToken;
   int _sessionRevision = 0;
@@ -819,6 +823,10 @@ class CloudApiService implements CloudNodeFilterApi {
           options.headers['Accept-Language'] = Intl.getCurrentLocale()
               .replaceAll('_', '-');
           options.headers['X-oixCloud-Client'] = clientId;
+          final deviceId = await preferences.getOixDeviceId();
+          if (deviceId != null) {
+            options.headers[deviceHeader] = deviceId;
+          }
           if (options.extra['skipAuth'] != true) {
             final revision = options.extra[_sessionRevisionKey];
             if (revision != null && revision != _sessionRevision) {

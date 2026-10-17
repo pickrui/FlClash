@@ -160,6 +160,10 @@ class Preferences {
   static Preferences? _instance;
   Future<SharedPreferences?>? _sharedPreferences;
   final _davDeviceLock = AsyncStorageLock();
+  final _oixDeviceLock = AsyncStorageLock();
+  static final _uuidV4Pattern = RegExp(
+    r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$',
+  );
 
   Future<bool> get isInit async => await _loadSharedPreferences() != null;
 
@@ -198,6 +202,37 @@ class Preferences {
       throw StateError('failed to persist WebDAV device ID');
     }
     return id;
+  });
+
+  /// Random per-install identifier the panel counts an account's devices by.
+  /// It has its own key, outside the config that backups carry, so a restore
+  /// on another device does not copy it. Null when it cannot be kept: a new
+  /// identifier on every launch would count as another device.
+  Future<String?> getOixDeviceId() => _oixDeviceLock.synchronized(() async {
+    final store = await _loadSharedPreferences();
+    String? stored() {
+      final value = store?.get('oix_device_id');
+      return value is String && _uuidV4Pattern.hasMatch(value) ? value : null;
+    }
+
+    final cached = stored();
+    if (cached != null) return cached;
+    await store?.reload();
+    final existing = stored();
+    if (existing != null) return existing;
+    final random = Random.secure();
+    final bytes = List.generate(16, (_) => random.nextInt(256));
+    bytes[6] = bytes[6] & 0x0f | 0x40;
+    bytes[8] = bytes[8] & 0x3f | 0x80;
+    final hex = bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+    final id = [
+      hex.substring(0, 8),
+      hex.substring(8, 12),
+      hex.substring(12, 16),
+      hex.substring(16, 20),
+      hex.substring(20),
+    ].join('-');
+    return await store?.setString('oix_device_id', id) == true ? id : null;
   });
 
   Future<BootRecord?> getBootRecord() async {
