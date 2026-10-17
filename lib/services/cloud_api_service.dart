@@ -1318,11 +1318,50 @@ class CloudApiService implements CloudNodeFilterApi {
     Future<Response<T>> Function(CancelToken token, Options options) read, {
     FutureOr<void> Function(Response<T> response)? validate,
     bool bindToSession = true,
+    bool directFirst = false,
+    Set<String>? routeOverride,
+    Duration? timeout,
   }) async {
     final revision = _sessionRevision;
     final client = _client;
     final uri = Uri.parse(client.options.baseUrl);
-    final routes = _readRoutes(uri).toSet();
+    final routes = routeOverride ?? _readRoutes(uri).toSet();
+    final budget = timeout ?? _syncRequestTimeout;
+    bool isTerminalError(Object error) => !bindToSession
+        ? isTerminalPublicHttpReadError(error)
+        : isTerminalHttpReadError(error) ||
+              CloudApiException.isUnauthorized(error) ||
+              CloudApiException.isHandledUnauthorized(error) ||
+              CloudApiException.isStaleSession(error) ||
+              (error is _CloudReadResponseException &&
+                  (error.status == 401 || error.status == 403));
+
+    if (directFirst && routes.contains('DIRECT') && routes.length > 1) {
+      final elapsed = Stopwatch()..start();
+      try {
+        return await _syncRead(
+          read,
+          validate: validate,
+          bindToSession: bindToSession,
+          routeOverride: {'DIRECT'},
+          timeout: budget ~/ 2,
+        );
+      } catch (error) {
+        if (isTerminalError(error)) {
+          rethrow;
+        }
+        if (bindToSession && revision != _sessionRevision) {
+          throw const CloudApiStaleSessionException();
+        }
+        return _syncRead(
+          read,
+          validate: validate,
+          bindToSession: bindToSession,
+          routeOverride: routes.difference({'DIRECT'}),
+          timeout: budget - elapsed.elapsed,
+        );
+      }
+    }
     final adapter = client.httpClientAdapter;
     final domains = adapter is CloudApiAdapter
         ? adapter._readDomainsFor(uri)
@@ -1358,7 +1397,8 @@ class CloudApiService implements CloudNodeFilterApi {
                     if (!bindToSession) 'skipAuth': true,
                     cloudReadRouteExtraKey: candidate.route,
                     _cloudReadDomainExtraKey: candidate.domain,
-                    _cloudReadRaceExtraKey: candidates.length > 1,
+                    _cloudReadRaceExtraKey:
+                        routeOverride != null || candidates.length > 1,
                   },
                 ),
               );
@@ -1396,15 +1436,8 @@ class CloudApiService implements CloudNodeFilterApi {
             }
           },
         ),
-        timeout: _syncRequestTimeout,
-        isTerminalError: (error) => !bindToSession
-            ? isTerminalPublicHttpReadError(error)
-            : isTerminalHttpReadError(error) ||
-                  CloudApiException.isUnauthorized(error) ||
-                  CloudApiException.isHandledUnauthorized(error) ||
-                  CloudApiException.isStaleSession(error) ||
-                  (error is _CloudReadResponseException &&
-                      (error.status == 401 || error.status == 403)),
+        timeout: budget,
+        isTerminalError: isTerminalError,
       );
       final unauthorized = operation.unauthorizedError;
       if (unauthorized != null) throw unauthorized;
@@ -1514,6 +1547,7 @@ class CloudApiService implements CloudNodeFilterApi {
             extra: {...?options.extra, _sessionRevisionKey: revision},
           ),
         ),
+        directFirst: true,
         validate: (res) async {
           if (res.statusCode != 200) {
             throw CloudApiException(

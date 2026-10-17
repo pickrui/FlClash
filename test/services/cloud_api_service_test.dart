@@ -1514,9 +1514,76 @@ void main() {
     expect(adapter.requestCount, 2);
   });
 
+  for (final outcome in [
+    'success',
+    'network',
+    'timeout',
+    'deadline',
+    '401',
+    '403',
+    'logout',
+  ]) {
+    test('managed direct first: $outcome', () async {
+      final adapter = QueuedCloudAdapter();
+      final service = CloudApiService.forTesting(
+        client: adapter.createClient(),
+        syncRequestTimeout: const Duration(seconds: 2),
+        readRoutes: const ['DIRECT', 'PROXY localhost:7890'],
+      )..setToken('session');
+      final result = service.fetchManagedConfig('token=query-token');
+      final fails = ['deadline', '401', '403', 'logout'].contains(outcome);
+      final failure = fails ? expectLater(result, throwsException) : null;
+      final direct = await adapter.takeRequest();
+      expect(direct.options.extra[cloudReadRouteExtraKey], 'DIRECT');
+      await pumpEventQueue();
+      expect(adapter.requestCount, 1);
+      if (outcome == '401' || outcome == '403') {
+        direct.respond({}, statusCode: int.parse(outcome));
+      } else if (outcome == 'logout') {
+        service.setToken(null);
+      } else {
+        var target = direct;
+        if (outcome != 'success') {
+          if (outcome == 'network') {
+            direct.response.completeError(
+              DioException(
+                requestOptions: direct.options,
+                type: DioExceptionType.connectionError,
+              ),
+            );
+          }
+          target = await adapter.takeRequest().timeout(
+            const Duration(seconds: 2),
+          );
+          expect(direct.options.cancelToken?.isCancelled, isTrue);
+          expect(
+            target.options.extra[cloudReadRouteExtraKey],
+            'PROXY localhost:7890',
+          );
+        }
+        if (outcome != 'deadline') {
+          final bytes = await AgeCrypto.encrypt(
+            utf8.encode('proxies: []'),
+            _decodeAgeRecipient(
+              target.options.headers['X-Flclash-Age-Pubkey'] as String,
+            ),
+          );
+          target.response.complete(_managedResponse(target.options, bytes));
+          expect(utf8.decode((await result).$1), 'proxies: []');
+        }
+      }
+      await failure;
+      expect(
+        adapter.requestCount,
+        ['network', 'timeout', 'deadline'].contains(outcome) ? 2 : 1,
+      );
+      expect(direct.options.cancelToken?.isCancelled, isTrue);
+    });
+  }
+
   for (final failure in ['signature', 'decryption']) {
     test(
-      'managed configuration $failure failure cannot beat a valid route',
+      'managed configuration $failure failure falls back to proxy',
       () async {
         final adapter = QueuedCloudAdapter();
         final service = CloudApiService.forTesting(
@@ -1525,17 +1592,10 @@ void main() {
         )..setToken('session');
         final result = service.fetchManagedConfig('token=query-token');
         final direct = await adapter.takeRequest();
-        final proxy = await adapter.takeRequest().timeout(
-          const Duration(milliseconds: 100),
-        );
-        for (final request in [direct, proxy]) {
-          expect(
-            request.options.headers['X-oixCloud-Capabilities'],
-            'snell.ech.h3=1, snell.ech.v6=1',
-          );
-        }
+        await pumpEventQueue();
+        expect(adapter.requestCount, 1);
         final publicKey = _decodeAgeRecipient(
-          proxy.options.headers['X-Flclash-Age-Pubkey'] as String,
+          direct.options.headers['X-Flclash-Age-Pubkey'] as String,
         );
         final invalidRecipient =
             (await AgeCrypto.generateIdentity()).publicKeyBytes;
@@ -1550,7 +1610,14 @@ void main() {
             validSignature: failure != 'signature',
           ),
         );
-        await pumpEventQueue();
+        final proxy = await adapter.takeRequest();
+        for (final request in [direct, proxy]) {
+          expect(
+            request.options.headers['X-oixCloud-Capabilities'],
+            'snell.ech.h3=1, snell.ech.v6=1',
+          );
+        }
+        expect(direct.options.cancelToken?.isCancelled, isTrue);
         expect(proxy.options.cancelToken?.isCancelled, isFalse);
         final validBytes = await AgeCrypto.encrypt(
           utf8.encode('proxies: []'),
@@ -1650,7 +1717,7 @@ void main() {
         expect(userinfo, 'upload=0; download=0');
         expect(
           inner.hosts.where((host) => host == 'primary.test'),
-          hasLength(2),
+          hasLength(1),
         );
         expect(inner.hosts, contains('spare.test'));
       },
