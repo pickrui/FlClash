@@ -13,6 +13,7 @@ import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/view_scope.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'form_sheet.dart';
 import 'sheet_navigator.dart';
 import 'side_sheet.dart';
 import 'snap_sheet.dart';
@@ -62,6 +63,26 @@ Future<T?> showSheet<T>({
     backgroundColor: props.backgroundColor,
     blur: props.blur,
     builder: builder,
+  );
+}
+
+/// A bottom sheet on mobile; elsewhere a card centered as iPad does a form.
+Future<T?> showFormSheet<T>({
+  required BuildContext context,
+  required SheetBuilder builder,
+  SheetProps props = const SheetProps(),
+}) {
+  if (ViewScope.isMobileOf(context, listen: false)) {
+    return _showBottomSheet<T>(context, builder: builder, props: props);
+  }
+  final navigator = sheetNavigatorOf(context);
+  return navigator.push(
+    FormSheetRoute<T>(
+      builder: (sheetContext) => builder(sheetContext, SheetType.formSheet),
+      backgroundColor: props.backgroundColor,
+      barrierColor: context.colorScheme.modalScrim,
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    ),
   );
 }
 

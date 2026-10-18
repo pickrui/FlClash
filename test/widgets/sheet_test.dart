@@ -152,6 +152,14 @@ void main() {
       (BuildContext context) =>
           showSnapSheet<void>(context, builder: (_, _) => const Text('sheet')),
     ),
+    (
+      'form sheet',
+      const Size(1200, 800),
+      (BuildContext context) => showFormSheet<void>(
+        context: context,
+        builder: (_, _) => const Text('sheet'),
+      ),
+    ),
   ]) {
     testWidgets('an open $kind takes a new app theme a level above the '
         'page', (tester) async {
