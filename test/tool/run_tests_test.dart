@@ -23,6 +23,9 @@ void main() {
     temp = Directory.systemTemp.createTempSync('flclash-test-runner-');
     pubspec = File('${temp.path}/pubspec.yaml')..writeAsStringSync(original);
     flutter = File('${temp.path}/flutter');
+    File('${temp.path}/test/a_test.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('void main() {}\n');
   });
   tearDown(() => temp.deleteSync(recursive: true));
 
@@ -87,6 +90,50 @@ void main() {
         '$original'
         'description: concurrent edit\n',
       );
+    },
+    skip: Platform.isWindows,
+  );
+
+  test(
+    'a file that only fails in a shared isolate fails the run unless allowed',
+    () async {
+      File('${temp.path}/test/b_test.dart')
+          .writeAsStringSync('void main() {}\n');
+      await stub(r'''
+report=; coverage=coverage/lcov.info; bundle=
+for argument in "$@"; do
+  case "$argument" in
+    --file-reporter=json:*) report="${argument#--file-reporter=json:}" ;;
+    --coverage-path=*) coverage="${argument#--coverage-path=}" ;;
+    *bundle_00_test.dart) bundle="$argument" ;;
+  esac
+done
+mkdir -p "$(dirname "$coverage")"
+if [ -z "$bundle" ]; then
+  printf 'SF:lib/a.dart\nDA:2,3\nLF:1\nLH:1\nend_of_record\n' > "$coverage"
+  exit 0
+fi
+printf 'SF:lib/a.dart\nDA:1,1\nDA:2,0\nLF:2\nLH:1\nend_of_record\n' > "$coverage"
+printf '%s\n' '{"type":"suite","suite":{"id":0,"path":"'"$bundle"'"}}' \
+  '{"type":"testStart","test":{"id":1,"suiteID":0,"name":"test/b_test.dart b"}}' \
+  '{"type":"testDone","testID":1,"result":"failure"}' > "$report"
+exit 1''');
+      Future<ProcessResult> run([String? allow]) => Process.run(
+        dart,
+        [runner, ?allow, '--coverage'],
+        workingDirectory: temp.path,
+        environment: environment(),
+      );
+
+      final strict = await run();
+      expect(strict.exitCode, 1, reason: strict.stderr.toString());
+      expect(strict.stdout, contains('test/b_test.dart  ('));
+      expect(
+        File('${temp.path}/coverage/lcov.info').readAsStringSync(),
+        'SF:lib/a.dart\nDA:1,1\nDA:2,3\nLF:2\nLH:2\nend_of_record\n',
+      );
+      final allowed = await run('--allow-shared-isolate-failures');
+      expect(allowed.exitCode, 0, reason: allowed.stderr.toString());
     },
     skip: Platform.isWindows,
   );

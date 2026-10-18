@@ -8,6 +8,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'set_native_build_assets.dart';
+import 'test.dart' show runBundledTests;
+
+const _plain = '--plain';
 
 Future<void> main(List<String> args) async {
   final pubspec = File('pubspec.yaml');
@@ -35,14 +38,21 @@ Future<void> main(List<String> args) async {
       );
     }
     pubspec.writeAsStringSync(disabled);
-    process = await Process.start(
-      Platform.isWindows ? 'flutter.bat' : 'flutter',
-      ['test', ...args],
-      mode: ProcessStartMode.inheritStdio,
-      runInShell: Platform.isWindows,
-    );
-    if (interruption != null) process.kill(interruption!);
-    status = await process.exitCode;
+    Future<int> flutterTest(List<String> arguments) async {
+      if (interrupted case final code?) return code;
+      final started = process = await Process.start(
+        Platform.isWindows ? 'flutter.bat' : 'flutter',
+        ['test', ...arguments],
+        mode: ProcessStartMode.inheritStdio,
+        runInShell: Platform.isWindows,
+      );
+      if (interruption != null) started.kill(interruption!);
+      return started.exitCode;
+    }
+
+    status = args.contains(_plain)
+        ? await flutterTest([...args.where((argument) => argument != _plain)])
+        : await runBundledTests(args, flutterTest: flutterTest);
   } finally {
     for (final subscription in signals) {
       await subscription.cancel();

@@ -55,7 +55,7 @@ jobs:
       - name: Check Windows runtime and recovery
         shell: bash
         run: |
-          flutter test --no-pub \
+          dart tool/test.dart --no-pub \
             test/core/desktop/process_probe_test.dart \
             test/core/desktop/helper_client_test.dart \
             test/core/desktop/launch_policy_test.dart \
