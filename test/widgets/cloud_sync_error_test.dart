@@ -8,6 +8,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/common/http.dart';
 
 import 'package:fl_clash/enum/enum.dart';
@@ -40,6 +41,7 @@ void main() {
             locale: const Locale('en'),
             localizationsDelegates: const [
               AppLocalizations.delegate,
+              AppUiLocalizations.delegate,
               ...GlobalMaterialLocalizations.delegates,
             ],
             supportedLocales: AppLocalizations.delegate.supportedLocales,

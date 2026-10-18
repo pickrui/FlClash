@@ -23,7 +23,6 @@ export 'launch.dart';
 export 'link.dart';
 export 'linux_package_format.dart';
 export 'lock.dart';
-export 'measure.dart';
 export 'migration.dart';
 export 'mixin.dart';
 export 'navigation.dart';
@@ -54,6 +53,7 @@ export 'secrets.dart';
 export 'oix_params_storage.dart';
 
 export 'package:fl_clash/ui/color.dart';
+export 'package:fl_clash/ui/measure.dart';
 export 'package:fl_clash/ui/metrics.dart';
 export 'package:fl_clash/ui/shape.dart';
 

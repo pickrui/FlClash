@@ -1154,6 +1154,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "hide": MessageLookupByLibrary.simpleMessage("隐藏"),
     "hideFromList": MessageLookupByLibrary.simpleMessage("从列表中隐藏"),
     "hideIp": MessageLookupByLibrary.simpleMessage("隐藏 IP"),
+    "hidePassword": MessageLookupByLibrary.simpleMessage("隐藏密码"),
     "hideTimeoutProxies": MessageLookupByLibrary.simpleMessage("隐藏测速失败的节点"),
     "hideTimeoutProxiesDesc": MessageLookupByLibrary.simpleMessage(
       "保留当前选中节点和尚未完成测速的节点",
@@ -1964,6 +1965,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "showNotificationStopAction": MessageLookupByLibrary.simpleMessage(
       "通知栏显示停止按钮",
     ),
+    "showPassword": MessageLookupByLibrary.simpleMessage("显示密码"),
     "shrink": MessageLookupByLibrary.simpleMessage("紧凑"),
     "sidebarBlur": MessageLookupByLibrary.simpleMessage("侧边栏模糊"),
     "sidebarBlurDesc": MessageLookupByLibrary.simpleMessage("在侧边栏显示半透明系统背景"),

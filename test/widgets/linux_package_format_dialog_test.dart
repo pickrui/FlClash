@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:ffi' hide Size;
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/common/linux_package_format.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/providers/app.dart';
@@ -28,6 +29,7 @@ Future<List<LinuxPackageFormat?>> _openDialog(
         locale: const Locale('en'),
         localizationsDelegates: const [
           AppLocalizations.delegate,
+          AppUiLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
         supportedLocales: AppLocalizations.delegate.supportedLocales,

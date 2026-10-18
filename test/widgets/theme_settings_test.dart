@@ -22,6 +22,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../helpers/test_app.dart';
+
 String? _font;
 void main() {
   setUpAll(() async {
@@ -273,16 +275,20 @@ Future<ProviderContainer> _pump(
         supportedLocales: AppLocalizations.delegate.supportedLocales,
         localizationsDelegates: const [
           AppLocalizations.delegate,
+          AppUiLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
         theme: ThemeData(fontFamily: _font),
         builder: (context, child) {
-          globalState.measure = Measure.of(context, scale);
           globalState.theme = CommonTheme.of(context, scale);
-          return MediaQuery(
-            data: MediaQuery.of(context)
-                .copyWith(textScaler: TextScaler.linear(scale)),
-            child: RepaintBoundary(key: boundary, child: child!),
+          return wrapAppScopes(
+            context,
+            MediaQuery(
+              data: MediaQuery.of(context)
+                  .copyWith(textScaler: TextScaler.linear(scale)),
+              child: RepaintBoundary(key: boundary, child: child!),
+            ),
+            textScaleFactor: scale,
           );
         },
         home: const ThemeView(),

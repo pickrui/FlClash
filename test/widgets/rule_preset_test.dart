@@ -5,8 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/common/theme.dart';
-import 'package:fl_clash/common/measure.dart';
 import 'package:fl_clash/features/overwrite/rule_preset.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
@@ -15,6 +15,8 @@ import 'package:fl_clash/state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+
+import '../helpers/test_app.dart';
 
 void main() {
   test('presets precede catch-all rules without duplicating or moving existing rules', () {
@@ -48,13 +50,13 @@ void main() {
           child: MaterialApp(
             localizationsDelegates: const [
               AppLocalizations.delegate,
+              AppUiLocalizations.delegate,
               ...GlobalMaterialLocalizations.delegates,
             ],
             supportedLocales: AppLocalizations.delegate.supportedLocales,
             builder: (context, child) {
-              globalState.measure = Measure.of(context, 1);
               globalState.theme = CommonTheme.of(context, 1);
-              return child!;
+              return wrapAppScopes(context, child!);
             },
             home: Builder(
               builder: (context) => Scaffold(

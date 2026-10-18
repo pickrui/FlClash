@@ -1270,6 +1270,8 @@
   "changelogReverts": "Reverts",
   "showMore": "Expand",
   "showLess": "Collapse",
+  "showPassword": "Show password",
+  "hidePassword": "Hide password",
   "switchProfile": "Switch profile",
   "subscriptionInfo": "Subscription info",
   "lastUpdated": "Last updated",

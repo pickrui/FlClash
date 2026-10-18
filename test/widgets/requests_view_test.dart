@@ -15,6 +15,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../helpers/test_app.dart';
+
 TrackerInfo _request(
   String id,
   String host, {
@@ -55,13 +57,13 @@ Future<ProviderContainer> _pumpRequests(
         locale: const Locale('en'),
         localizationsDelegates: const [
           AppLocalizations.delegate,
+          AppUiLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
         supportedLocales: AppLocalizations.delegate.supportedLocales,
         builder: (context, child) {
-          globalState.measure = Measure.of(context, 1);
           globalState.theme = CommonTheme.of(context, 1);
-          return child!;
+          return wrapAppScopes(context, child!);
         },
         home: const RequestsView(),
       ),
@@ -151,13 +153,13 @@ void main() {
           locale: const Locale('en'),
           localizationsDelegates: const [
             AppLocalizations.delegate,
+            AppUiLocalizations.delegate,
             ...GlobalMaterialLocalizations.delegates,
           ],
           supportedLocales: AppLocalizations.delegate.supportedLocales,
           builder: (context, child) {
-            globalState.measure = Measure.of(context, 1);
             globalState.theme = CommonTheme.of(context, 1);
-            return child!;
+            return wrapAppScopes(context, child!);
           },
           home: const Row(
             children: [
@@ -213,13 +215,13 @@ void main() {
           locale: const Locale('en'),
           localizationsDelegates: const [
             AppLocalizations.delegate,
+            AppUiLocalizations.delegate,
             ...GlobalMaterialLocalizations.delegates,
           ],
           supportedLocales: AppLocalizations.delegate.supportedLocales,
           builder: (context, child) {
-            globalState.measure = Measure.of(context, 1);
             globalState.theme = CommonTheme.of(context, 1);
-            return child!;
+            return wrapAppScopes(context, child!);
           },
           home: const RequestsView(),
         ),

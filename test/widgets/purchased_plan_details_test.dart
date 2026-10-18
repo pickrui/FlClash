@@ -6,6 +6,7 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/common/cloud_panel_time.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
@@ -128,6 +129,7 @@ void main() {
           locale: const Locale('zh', 'CN'),
           localizationsDelegates: const [
             AppLocalizations.delegate,
+            AppUiLocalizations.delegate,
             ...GlobalMaterialLocalizations.delegates,
           ],
           supportedLocales: AppLocalizations.delegate.supportedLocales,

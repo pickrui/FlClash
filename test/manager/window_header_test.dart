@@ -514,6 +514,7 @@ void main() {
         MaterialApp(
           localizationsDelegates: const [
             AppLocalizations.delegate,
+            AppUiLocalizations.delegate,
             ...GlobalMaterialLocalizations.delegates,
           ],
           supportedLocales: AppLocalizations.delegate.supportedLocales,

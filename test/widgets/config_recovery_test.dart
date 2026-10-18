@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/pages/config_recovery.dart';
 import 'package:fl_clash/services/config_key_store.dart';
@@ -373,6 +374,7 @@ Future<void> _showRecovery(
       locale: locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
+        AppUiLocalizations.delegate,
         ...GlobalMaterialLocalizations.delegates,
       ],
       supportedLocales: AppLocalizations.delegate.supportedLocales,

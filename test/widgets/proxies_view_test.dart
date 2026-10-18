@@ -39,6 +39,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
+import '../helpers/test_app.dart';
+
 final class _MockCoreHandler extends Mock implements CoreHandlerInterface {}
 
 void main() {
@@ -1018,13 +1020,13 @@ class _TestApp extends StatelessWidget {
       locale: const Locale('en'),
       localizationsDelegates: const [
         AppLocalizations.delegate,
+        AppUiLocalizations.delegate,
         ...GlobalMaterialLocalizations.delegates,
       ],
       supportedLocales: AppLocalizations.delegate.supportedLocales,
       builder: (context, child) {
-        globalState.measure = Measure.of(context, 1);
         globalState.theme = CommonTheme.of(context, 1);
-        return child!;
+        return wrapAppScopes(context, child!);
       },
       home: Scaffold(body: child),
     );

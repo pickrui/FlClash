@@ -43,11 +43,11 @@ class TestApp extends StatelessWidget {
       locale: locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
+        AppUiLocalizations.delegate,
         ...GlobalMaterialLocalizations.delegates,
       ],
       supportedLocales: AppLocalizations.delegate.supportedLocales,
       builder: (context, child) {
-        globalState.measure = Measure.of(context, 1);
         if (setTheme) {
           globalState.theme = CommonTheme.of(context, 1);
         }
@@ -61,7 +61,7 @@ class TestApp extends StatelessWidget {
             child: wrapped,
           );
         }
-        return wrapped;
+        return wrapAppScopes(context, wrapped);
       },
       home: homeBuilder(child),
     );
@@ -69,6 +69,17 @@ class TestApp extends StatelessWidget {
         ? ProviderScope(overrides: overrides, child: app)
         : app;
   }
+}
+
+/// The scopes ThemeManager provides, for a test with its own MaterialApp.
+Widget wrapAppScopes(
+  BuildContext context,
+  Widget child, {
+  double textScaleFactor = 1,
+}) {
+  final measure = Measure.of(context, textScaleFactor);
+  globalState.measure = measure;
+  return MeasureScope(measure: measure, child: child);
 }
 
 class TestBackBlockAction extends BackBlockAction {

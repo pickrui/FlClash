@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/features/overwrite/custom_rule_editor.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/clash_config.dart';
@@ -577,6 +578,7 @@ Future<void> _open(
         locale: const Locale('en'),
         localizationsDelegates: const [
           AppLocalizations.delegate,
+          AppUiLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
         supportedLocales: AppLocalizations.delegate.supportedLocales,

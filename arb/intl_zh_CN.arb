@@ -1270,6 +1270,8 @@
   "changelogReverts": "已回滚",
   "showMore": "展开",
   "showLess": "收起",
+  "showPassword": "显示密码",
+  "hidePassword": "隐藏密码",
   "switchProfile": "切换配置",
   "subscriptionInfo": "订阅信息",
   "lastUpdated": "上次更新",

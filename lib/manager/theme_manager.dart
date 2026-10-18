@@ -156,20 +156,24 @@ class ThemeManager extends ConsumerWidget {
       minTextScale,
     );
 
-    globalState.measure = Measure.of(context, textScaleFactor);
+    final measure = Measure.of(context, textScaleFactor);
+    globalState.measure = measure;
     globalState.theme = CommonTheme.of(context, textScaleFactor);
     final viewSize = ref.read(viewSizeProvider.notifier);
-    return _AppMediaQuery(
-      textScaler: TextScaler.linear(textScaleFactor),
-      child: _LiquidGlassSetting(
-        child: LayoutBuilder(
-          builder: (_, container) {
-            final size = Size(container.maxWidth, container.maxHeight);
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              viewSize.value = size;
-            });
-            return _buildSystemUi(child);
-          },
+    return MeasureScope(
+      measure: measure,
+      child: _AppMediaQuery(
+        textScaler: TextScaler.linear(textScaleFactor),
+        child: _LiquidGlassSetting(
+          child: LayoutBuilder(
+            builder: (_, container) {
+              final size = Size(container.maxWidth, container.maxHeight);
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                viewSize.value = size;
+              });
+              return _buildSystemUi(child);
+            },
+          ),
         ),
       ),
     );

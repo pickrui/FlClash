@@ -24,6 +24,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart' show Override;
 
 import '../helpers/test_profiles.dart';
 import '../plugins/code_forge/support.dart';
+import '../helpers/test_app.dart';
 
 const _cidrTip = 'Enter an IP range in CIDR form such as 192.168.0.0/16';
 
@@ -49,13 +50,13 @@ Future<ProviderContainer> _pumpOverrides(
         locale: const Locale('en'),
         localizationsDelegates: const [
           AppLocalizations.delegate,
+          AppUiLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
         supportedLocales: AppLocalizations.delegate.supportedLocales,
         builder: (context, child) {
-          globalState.measure = Measure.of(context, 1);
           globalState.theme = CommonTheme.of(context, 1);
-          return child!;
+          return wrapAppScopes(context, child!);
         },
         home: home,
       ),
@@ -91,13 +92,13 @@ void main() {
             locale: const Locale('en'),
             localizationsDelegates: const [
               AppLocalizations.delegate,
+              AppUiLocalizations.delegate,
               ...GlobalMaterialLocalizations.delegates,
             ],
             supportedLocales: AppLocalizations.delegate.supportedLocales,
             builder: (context, child) {
-              globalState.measure = Measure.of(context, 1);
               globalState.theme = CommonTheme.of(context, 1);
-              return child!;
+              return wrapAppScopes(context, child!);
             },
             home: ntp ? const NtpView() : const DnsView(),
           ),
@@ -221,13 +222,13 @@ void main() {
           locale: const Locale('zh', 'CN'),
           localizationsDelegates: const [
             AppLocalizations.delegate,
+            AppUiLocalizations.delegate,
             ...GlobalMaterialLocalizations.delegates,
           ],
           supportedLocales: AppLocalizations.delegate.supportedLocales,
           builder: (context, child) {
-            globalState.measure = Measure.of(context, 1);
             globalState.theme = CommonTheme.of(context, 1);
-            return child!;
+            return wrapAppScopes(context, child!);
           },
           home: const DnsView(),
         ),

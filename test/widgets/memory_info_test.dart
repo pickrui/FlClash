@@ -17,6 +17,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../helpers/test_app.dart';
+
 void main() {
   test('Android shares process RSS and never counts Core twice', () {
     const core = CoreMemoryStats(
@@ -278,13 +280,13 @@ class _TestApp extends StatelessWidget {
         navigatorKey: globalState.navigatorKey,
         localizationsDelegates: const [
           AppLocalizations.delegate,
+          AppUiLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
         supportedLocales: AppLocalizations.delegate.supportedLocales,
         builder: (context, child) {
-          globalState.measure = Measure.of(context, 1);
           globalState.theme = CommonTheme.of(context, 1);
-          return child!;
+          return wrapAppScopes(context, child!);
         },
         home: Scaffold(body: child),
       ),

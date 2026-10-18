@@ -19,6 +19,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/test_app.dart';
+
 void main() {
   tearDown(() => debouncer.cancel(FunctionTag.updateStatus));
 
@@ -126,13 +128,13 @@ Future<void> _pumpButton(
         ),
         localizationsDelegates: const [
           AppLocalizations.delegate,
+          AppUiLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
         supportedLocales: AppLocalizations.delegate.supportedLocales,
         builder: (context, child) {
           globalState.theme = CommonTheme.of(context, 1);
-          globalState.measure = Measure.of(context, 1);
-          return child!;
+          return wrapAppScopes(context, child!);
         },
         home: Scaffold(body: StartButton(statusUpdater: statusUpdater)),
       ),

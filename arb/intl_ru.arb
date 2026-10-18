@@ -1270,6 +1270,8 @@
   "changelogReverts": "Откаты",
   "showMore": "Развернуть",
   "showLess": "Свернуть",
+  "showPassword": "Показать пароль",
+  "hidePassword": "Скрыть пароль",
   "switchProfile": "Сменить профиль",
   "subscriptionInfo": "Информация о подписке",
   "lastUpdated": "Последнее обновление",

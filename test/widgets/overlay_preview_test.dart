@@ -6,6 +6,7 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/common/theme.dart';
 import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -303,6 +304,7 @@ Future<GlobalKey> _open(
         theme: ThemeData(fontFamily: previewFont).withAppShapes,
         localizationsDelegates: const [
           AppLocalizations.delegate,
+          AppUiLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
         supportedLocales: AppLocalizations.delegate.supportedLocales,

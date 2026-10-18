@@ -1613,6 +1613,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "hide": MessageLookupByLibrary.simpleMessage("Скрыть"),
     "hideFromList": MessageLookupByLibrary.simpleMessage("Скрыть из списка"),
     "hideIp": MessageLookupByLibrary.simpleMessage("Скрыть IP"),
+    "hidePassword": MessageLookupByLibrary.simpleMessage("Скрыть пароль"),
     "hideTimeoutProxies": MessageLookupByLibrary.simpleMessage(
       "Скрывать узлы с ошибкой проверки",
     ),
@@ -2792,6 +2793,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "showNotificationStopAction": MessageLookupByLibrary.simpleMessage(
       "Кнопка остановки в уведомлении",
     ),
+    "showPassword": MessageLookupByLibrary.simpleMessage("Показать пароль"),
     "shrink": MessageLookupByLibrary.simpleMessage("Сжать"),
     "sidebarBlur": MessageLookupByLibrary.simpleMessage(
       "Размытие боковой панели",

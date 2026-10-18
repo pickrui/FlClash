@@ -1306,6 +1306,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "hide": MessageLookupByLibrary.simpleMessage("非表示"),
     "hideFromList": MessageLookupByLibrary.simpleMessage("リストから隠す"),
     "hideIp": MessageLookupByLibrary.simpleMessage("IP を隠す"),
+    "hidePassword": MessageLookupByLibrary.simpleMessage("パスワードを隠す"),
     "hideTimeoutProxies": MessageLookupByLibrary.simpleMessage(
       "測定に失敗したノードを非表示",
     ),
@@ -2232,6 +2233,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "showNotificationStopAction": MessageLookupByLibrary.simpleMessage(
       "通知に停止ボタンを表示",
     ),
+    "showPassword": MessageLookupByLibrary.simpleMessage("パスワードを表示"),
     "shrink": MessageLookupByLibrary.simpleMessage("縮小"),
     "sidebarBlur": MessageLookupByLibrary.simpleMessage("サイドバーのぼかし"),
     "sidebarBlurDesc": MessageLookupByLibrary.simpleMessage(

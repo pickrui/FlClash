@@ -6,6 +6,7 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/common/theme.dart';
 import 'package:fl_clash/features/overwrite/member_picker.dart';
 import 'package:fl_clash/l10n/l10n.dart';
@@ -238,6 +239,7 @@ Future<void> _open(
         theme: ThemeData(fontFamily: previewFont),
         localizationsDelegates: const [
           AppLocalizations.delegate,
+          AppUiLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
         supportedLocales: AppLocalizations.delegate.supportedLocales,

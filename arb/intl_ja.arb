@@ -1270,6 +1270,8 @@
   "changelogReverts": "取り消し",
   "showMore": "展開",
   "showLess": "折りたたむ",
+  "showPassword": "パスワードを表示",
+  "hidePassword": "パスワードを隠す",
   "switchProfile": "プロファイルを切り替え",
   "subscriptionInfo": "サブスクリプション情報",
   "lastUpdated": "最終更新",

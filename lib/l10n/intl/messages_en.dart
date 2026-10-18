@@ -1557,6 +1557,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "hide": MessageLookupByLibrary.simpleMessage("Hide"),
     "hideFromList": MessageLookupByLibrary.simpleMessage("Hide from list"),
     "hideIp": MessageLookupByLibrary.simpleMessage("Hide IP"),
+    "hidePassword": MessageLookupByLibrary.simpleMessage("Hide password"),
     "hideTimeoutProxies": MessageLookupByLibrary.simpleMessage(
       "Hide failed nodes",
     ),
@@ -2655,6 +2656,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "showNotificationStopAction": MessageLookupByLibrary.simpleMessage(
       "Stop button in notification",
     ),
+    "showPassword": MessageLookupByLibrary.simpleMessage("Show password"),
     "shrink": MessageLookupByLibrary.simpleMessage("Shrink"),
     "sidebarBlur": MessageLookupByLibrary.simpleMessage("Blur sidebar"),
     "sidebarBlurDesc": MessageLookupByLibrary.simpleMessage(

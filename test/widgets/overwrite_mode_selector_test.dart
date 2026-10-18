@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
-import 'package:fl_clash/common/measure.dart';
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/common/theme.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/overwrite/routing_draft.dart';
@@ -20,6 +20,8 @@ import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../helpers/test_app.dart';
 
 const _profile = Profile(
   id: 1,
@@ -358,16 +360,20 @@ Future<_TestProfiles> _pumpSelector(
         navigatorKey: globalState.navigatorKey,
         localizationsDelegates: const [
           AppLocalizations.delegate,
+          AppUiLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
         supportedLocales: AppLocalizations.delegate.supportedLocales,
         builder: (context, child) {
           globalState.theme = CommonTheme.of(context, textScale);
-          globalState.measure = Measure.of(context, textScale);
-          return MediaQuery(
-            data: MediaQuery.of(context)
-                .copyWith(textScaler: TextScaler.linear(textScale)),
-            child: child!,
+          return wrapAppScopes(
+            context,
+            MediaQuery(
+              data: MediaQuery.of(context)
+                  .copyWith(textScaler: TextScaler.linear(textScale)),
+              child: child!,
+            ),
+            textScaleFactor: textScale,
           );
         },
         home: Scaffold(

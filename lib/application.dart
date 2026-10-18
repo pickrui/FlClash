@@ -163,6 +163,7 @@ class ApplicationState extends ConsumerState<Application> {
           navigatorKey: globalState.navigatorKey,
           localizationsDelegates: const [
             AppLocalizations.delegate,
+            AppUiLocalizations.delegate,
             ...GlobalMaterialLocalizations.delegates,
           ],
           builder: (context, child) {

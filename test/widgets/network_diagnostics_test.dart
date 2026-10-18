@@ -6,6 +6,7 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/common/theme.dart';
 import 'package:fl_clash/state.dart';
@@ -113,6 +114,7 @@ Future<ProviderContainer> _pump(
         locale: const Locale('en'),
         localizationsDelegates: const [
           AppLocalizations.delegate,
+          AppUiLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
         supportedLocales: AppLocalizations.delegate.supportedLocales,

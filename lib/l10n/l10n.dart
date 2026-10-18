@@ -10570,6 +10570,26 @@ class AppLocalizations {
     return Intl.message('Collapse', name: 'showLess', desc: '', args: []);
   }
 
+  /// `Show password`
+  String get showPassword {
+    return Intl.message(
+      'Show password',
+      name: 'showPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hide password`
+  String get hidePassword {
+    return Intl.message(
+      'Hide password',
+      name: 'hidePassword',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Switch profile`
   String get switchProfile {
     return Intl.message(
