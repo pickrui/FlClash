@@ -27,9 +27,7 @@ class LogLevelItem extends ConsumerWidget {
     return ListItem<LogLevel>.options(
       leading: const GlyphIcon(AppGlyphs.info),
       title: Text(appLocalizations.logLevel),
-      subtitle: Text(logLevel.name),
       delegate: OptionsDelegate<LogLevel>(
-        title: appLocalizations.logLevel,
         options: LogLevel.values,
         onChanged: (LogLevel? value) {
           if (value == null) {

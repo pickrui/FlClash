@@ -379,7 +379,6 @@ class TunStackItem extends ConsumerWidget {
 
     return ListItem.options(
       title: Text(appLocalizations.stackMode),
-      subtitle: Text(stack.name),
       delegate: OptionsDelegate<TunStack>(
         value: stack,
         options: TunStack.values,
@@ -392,7 +391,6 @@ class TunStackItem extends ConsumerWidget {
               .read(patchClashConfigProvider.notifier)
               .update((state) => state.copyWith.tun(stack: value));
         },
-        title: appLocalizations.stackMode,
       ),
     );
   }

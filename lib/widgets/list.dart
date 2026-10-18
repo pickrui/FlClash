@@ -20,11 +20,12 @@ import 'package:material_ui/material_ui.dart';
 import 'package:collection/collection.dart';
 
 import 'package:fl_clash/ui/card.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
 
 import 'button.dart';
 import 'input_dialog.dart';
 import 'navigation_dock.dart';
-import 'options_dialog.dart';
+import 'popup.dart';
 import 'scaffold.dart';
 import 'sheet.dart';
 
@@ -69,13 +70,11 @@ class OpenDelegate<T> extends Delegate {
 
 class OptionsDelegate<T> extends Delegate {
   final List<T> options;
-  final String title;
   final T value;
   final String Function(T value) textBuilder;
   final Function(T? value) onChanged;
 
   const OptionsDelegate({
-    required this.title,
     required this.options,
     required this.textBuilder,
     required this.value,
@@ -341,25 +340,31 @@ class ListItem<T> extends StatelessWidget {
     }
     if (delegate is OptionsDelegate) {
       final optionsDelegate = delegate as OptionsDelegate<T>;
-      final options = optionsDelegate.options;
+      PopupOpen? openMenu;
       return _buildListTile(
         position: position,
-        onTap: () async {
-          // Options may hold null; an index tells a pick from a dismissal.
-          final index = await globalState.showCommonDialog<int>(
-            child: OptionsDialog<int>(
-              title: optionsDelegate.title,
-              options: List.generate(options.length, (index) => index),
-              textBuilder: (index) =>
-                  optionsDelegate.textBuilder(options[index]),
-              value: options.indexOf(optionsDelegate.value),
-            ),
-          );
-          if (index == null) {
-            return;
-          }
-          optionsDelegate.onChanged(options[index]);
-        },
+        // As an iOS pop-up row does, a tap anywhere on the row opens the
+        // menu out of its value.
+        onTap: () => openMenu?.call(),
+        trailing: CommonPopupBox(
+          targetBuilder: (open) {
+            openMenu = open;
+            return _OptionsValueButton(
+              label: optionsDelegate.textBuilder(optionsDelegate.value),
+              onPressed: open,
+            );
+          },
+          popupBuilder: (_) => CommonPopupMenu(
+            items: [
+              for (final option in optionsDelegate.options)
+                PopupMenuItemData(
+                  label: optionsDelegate.textBuilder(option),
+                  checked: option == optionsDelegate.value,
+                  onPressed: () => optionsDelegate.onChanged(option),
+                ),
+            ],
+          ),
+        ),
       );
     }
     if (delegate is InputDelegate) {
@@ -428,6 +433,43 @@ class ListItem<T> extends StatelessWidget {
     }
 
     return _buildListTile(position: position, onTap: onTap);
+  }
+}
+
+const _optionsValueMaxWidth = 160.0;
+
+class _OptionsValueButton extends StatelessWidget {
+  const _OptionsValueButton({required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        foregroundColor: context.colorScheme.onSurfaceVariant,
+        textStyle: context.listTitleStyle,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 4,
+        children: [
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: _optionsValueMaxWidth),
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.end,
+            ),
+          ),
+          const GlyphIcon(AppGlyphs.picker),
+        ],
+      ),
+    );
   }
 }
 

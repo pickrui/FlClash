@@ -191,12 +191,12 @@ class ConfigOptionsItem<T> extends _ConfigItem<T> {
     return ListItem<T>.options(
       leading: leading,
       title: Text(title(appLocalizations)),
-      subtitle: Text(
-        subtitle?.call(appLocalizations) ??
-            _describe(textBuilder(value), description, appLocalizations),
-      ),
+      subtitle: switch (subtitle?.call(appLocalizations) ??
+          description?.call(appLocalizations)) {
+        final text? => Text(text),
+        null => null,
+      },
       delegate: OptionsDelegate<T>(
-        title: title(appLocalizations),
         options: options,
         value: value,
         textBuilder: textBuilder,

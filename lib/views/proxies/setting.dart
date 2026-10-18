@@ -356,10 +356,9 @@ class DelayConcurrencySetting extends ConsumerWidget {
     return ListItem<int>.options(
       title: Text(l.delayConcurrency),
       subtitle: Text(
-        '$value · ${isAndroid ? l.delayConcurrencyAndroidDesc : l.delayConcurrencyDesc}',
+        isAndroid ? l.delayConcurrencyAndroidDesc : l.delayConcurrencyDesc,
       ),
       delegate: OptionsDelegate<int>(
-        title: l.delayConcurrency,
         options: delayTestConcurrencyOptions,
         value: value,
         textBuilder: (value) => '$value',

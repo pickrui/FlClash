@@ -134,7 +134,6 @@ void main() {
             body: ListItem<String?>.options(
               title: const Text('Language'),
               delegate: OptionsDelegate<String?>(
-                title: 'Language',
                 options: const [null, 'ja'],
                 value: 'ja',
                 textBuilder: (value) => value ?? 'Default',
@@ -148,15 +147,10 @@ void main() {
 
     await tester.tap(find.text('Language'));
     await tester.pumpAndSettle();
+    expect(find.text('Default'), findsOneWidget);
     await tester.tapAt(const Offset(4, 4));
     await tester.pumpAndSettle();
     expect(find.text('Default'), findsNothing);
-    expect(changes, isEmpty);
-
-    await tester.tap(find.text('Language'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byType(Radio<int>).last);
-    await tester.pumpAndSettle();
     expect(changes, isEmpty);
 
     await tester.tap(find.text('Language'));

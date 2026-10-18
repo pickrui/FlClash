@@ -305,11 +305,10 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(
-          find.textContaining(
-            isAndroid ? '16 · Default: 16' : '50 · Default: 50',
-          ),
+          find.textContaining(isAndroid ? 'Default: 16' : 'Default: 50'),
           findsOneWidget,
         );
+        expect(find.text(isAndroid ? '16' : '50'), findsOneWidget);
         await tester.tap(find.text('Concurrent batch latency tests'));
         await tester.pumpAndSettle();
         await tester.tap(find.text('32').last);
