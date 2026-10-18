@@ -10,6 +10,7 @@ import 'package:fl_clash/common/navigator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fl_clash/ui/sheet_navigator.dart';
+import 'package:fl_clash/ui/side_sheet.dart';
 import 'package:fl_clash/ui/surface.dart';
 
 import 'snap_sheet.dart';
@@ -21,7 +22,6 @@ import 'package:material_ui/material_ui.dart';
 export 'package:fl_clash/enum/enum.dart' show SheetType;
 
 import 'scaffold.dart';
-import 'side_sheet.dart';
 
 @immutable
 class SheetProps {

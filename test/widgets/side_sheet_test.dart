@@ -7,7 +7,7 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/widgets/paged_sheet.dart';
 import 'package:fl_clash/widgets/scaffold.dart';
 import 'package:fl_clash/widgets/sheet.dart';
-import 'package:fl_clash/widgets/side_sheet.dart';
+import 'package:fl_clash/ui/side_sheet.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';

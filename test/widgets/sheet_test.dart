@@ -10,7 +10,7 @@ import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/inherited.dart';
 import 'package:fl_clash/widgets/scaffold.dart';
 import 'package:fl_clash/widgets/sheet.dart';
-import 'package:fl_clash/widgets/side_sheet.dart';
+import 'package:fl_clash/ui/side_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';

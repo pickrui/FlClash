@@ -9,7 +9,7 @@ import 'dart:math';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/widgets/sheet.dart';
 import 'package:fl_clash/ui/inherited.dart';
-import 'package:fl_clash/widgets/side_sheet.dart';
+import 'package:fl_clash/ui/side_sheet.dart';
 import 'package:fl_clash/widgets/snap_sheet.dart';
 import 'package:flutter/gestures.dart';
 import 'package:material_ui/material_ui.dart';
