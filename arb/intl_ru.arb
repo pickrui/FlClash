@@ -1287,6 +1287,7 @@
   "cacheMaxSize": "Размер кэша",
   "dialerProxy": "Прокси для подключения",
   "dialerProxyDesc": "Исход, через который идёт обращение к NTP-серверу",
+  "dialerProxyLoopStopped": "Подключение через {name} ведёт обратно к прокси, который его использует, поэтому соединение остановлено",
   "discardChanges": "Отменить изменения?",
   "fakeipFilterMode": "Режим фильтра Fake-IP",
   "fakeipFilterModeDesc": "blacklist исключает совпадения, whitelist — только их, rule — по правилам",

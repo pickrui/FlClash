@@ -10744,6 +10744,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Dialing through {name} leads back to the proxy that uses it, so the connection was stopped`
+  String dialerProxyLoopStopped(Object name) {
+    return Intl.message(
+      'Dialing through $name leads back to the proxy that uses it, so the connection was stopped',
+      name: 'dialerProxyLoopStopped',
+      desc: '',
+      args: [name],
+    );
+  }
+
   /// `Discard the changes?`
   String get discardChanges {
     return Intl.message(

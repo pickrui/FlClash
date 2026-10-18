@@ -23,6 +23,7 @@ import (
 	"github.com/metacubex/mihomo/common/observable"
 	"github.com/metacubex/mihomo/common/utils"
 	"github.com/metacubex/mihomo/component/memory"
+	"github.com/metacubex/mihomo/component/proxydialer"
 	"github.com/metacubex/mihomo/component/resolver"
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
@@ -718,4 +719,27 @@ func init() {
 			Data: providerName,
 		})
 	}
+	proxydialer.DefaultLoopNotify = func(proxyName string) {
+		if dialerLoopReportDue(proxyName, time.Now()) {
+			sendMessage(Message{Type: DialerLoopMessage, Data: proxyName})
+		}
+	}
+}
+
+// Every dial through a looping dialer fails; one report stands for the burst.
+const dialerLoopReportInterval = 3 * time.Second
+
+var dialerLoopReports = struct {
+	sync.Mutex
+	last map[string]time.Time
+}{last: map[string]time.Time{}}
+
+func dialerLoopReportDue(proxyName string, now time.Time) bool {
+	dialerLoopReports.Lock()
+	defer dialerLoopReports.Unlock()
+	if last, ok := dialerLoopReports.last[proxyName]; ok && now.Sub(last) < dialerLoopReportInterval {
+		return false
+	}
+	dialerLoopReports.last[proxyName] = now
+	return true
 }

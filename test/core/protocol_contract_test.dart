@@ -99,6 +99,19 @@ void main() {
     expect(events.last.type, CoreEventType.delay);
   });
 
+  test('dialer loop events reach listeners with the looping proxy', () async {
+    final listener = _DialerLoopListener();
+    coreEventManager.addListener(listener);
+    addTearDown(() => coreEventManager.removeListener(listener));
+    for (final event in coreEventsFromData([
+      {'type': 'dialerLoop', 'data': 'relay-a'},
+    ])) {
+      coreEventManager.sendEvent(event);
+    }
+    await pumpEventQueue();
+    expect(listener.proxies, ['relay-a']);
+  });
+
   test('Dart methods match the Go protocol and Action is removed', () async {
     final constants = await File('core/constant.go').readAsString();
     for (final method in CoreMethod.values) {
@@ -127,4 +140,11 @@ class _GeoListener with CoreEventListener {
   }) {
     silentValues.add(silent);
   }
+}
+
+class _DialerLoopListener with CoreEventListener {
+  final proxies = <String>[];
+
+  @override
+  void onDialerLoop(String proxyName) => proxies.add(proxyName);
 }

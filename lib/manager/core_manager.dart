@@ -97,6 +97,19 @@ class _CoreManagerState extends ConsumerState<CoreManager>
   }
 
   @override
+  void onDialerLoop(String proxyName) {
+    throttler.call(
+      FunctionTag.dialerLoopNotifier,
+      () => globalState.showNotifier(
+        appLocalizations.dialerProxyLoopStopped(proxyName),
+      ),
+      duration: const Duration(seconds: 3),
+      fire: true,
+    );
+    super.onDialerLoop(proxyName);
+  }
+
+  @override
   void onRequest(TrackerInfo trackerInfo) {
     ref.read(requestsProvider.notifier).addRequest(trackerInfo);
     super.onRequest(trackerInfo);

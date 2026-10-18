@@ -134,6 +134,7 @@ enum CoreEventType {
   crash,
   geoUpdate,
   mode,
+  dialerLoop,
 }
 
 enum FindProcessMode { always, off, strict }
@@ -308,6 +309,7 @@ enum FunctionTag {
   loadedProvider,
   saveSharedFile,
   coreErrorNotifier,
+  dialerLoopNotifier,
 }
 
 enum DashboardWidget {

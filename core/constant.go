@@ -191,6 +191,7 @@ const (
 	LoadedMessage      MessageType = "loaded"
 	GeoUpdateMessage   MessageType = "geoUpdate"
 	ModeMessage        MessageType = "mode"
+	DialerLoopMessage  MessageType = "dialerLoop"
 )
 
 type MemoryStats struct {

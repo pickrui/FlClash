@@ -1287,6 +1287,7 @@
   "cacheMaxSize": "Cache size",
   "dialerProxy": "Dialer proxy",
   "dialerProxyDesc": "The outbound used to reach the NTP server",
+  "dialerProxyLoopStopped": "Dialing through {name} leads back to the proxy that uses it, so the connection was stopped",
   "discardChanges": "Discard the changes?",
   "fakeipFilterMode": "Fake-IP filter mode",
   "fakeipFilterModeDesc": "blacklist excludes matches, whitelist fakes only matches, rule matches as rules",

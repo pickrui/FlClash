@@ -14,6 +14,7 @@ import (
 	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/adapter/outbound"
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
+	"github.com/metacubex/mihomo/component/proxydialer"
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/tunnel"
@@ -221,5 +222,31 @@ func TestLoadMemoryReleaseCoalescesABurst(t *testing.T) {
 	case <-released:
 		t.Fatal("one burst released twice")
 	case <-time.After(200 * time.Millisecond):
+	}
+}
+
+func TestDialerLoopNoticeReportsEachProxyOncePerBurst(t *testing.T) {
+	if proxydialer.DefaultLoopNotify == nil {
+		t.Fatal("dialer-proxy loops are not reported to the app")
+	}
+	t.Cleanup(func() {
+		dialerLoopReports.Lock()
+		defer dialerLoopReports.Unlock()
+		clear(dialerLoopReports.last)
+	})
+	start := time.Now()
+	for i, step := range []struct {
+		proxy string
+		after time.Duration
+		due   bool
+	}{
+		{"loop-a", 0, true},
+		{"loop-a", time.Second, false},
+		{"loop-b", time.Second, true},
+		{"loop-a", dialerLoopReportInterval, true},
+	} {
+		if due := dialerLoopReportDue(step.proxy, start.Add(step.after)); due != step.due {
+			t.Errorf("step %d: report due = %v, want %v", i, due, step.due)
+		}
 	}
 }

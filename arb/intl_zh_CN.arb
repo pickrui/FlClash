@@ -1287,6 +1287,7 @@
   "cacheMaxSize": "缓存大小",
   "dialerProxy": "拨号代理",
   "dialerProxyDesc": "用于连接NTP服务器的出站",
+  "dialerProxyLoopStopped": "经 {name} 拨号会绕回使用它的代理，连接已中止",
   "discardChanges": "是否放弃更改？",
   "fakeipFilterMode": "Fake-IP过滤模式",
   "fakeipFilterModeDesc": "blacklist排除匹配项，whitelist仅用于匹配项，rule按规则匹配",

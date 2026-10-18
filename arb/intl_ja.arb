@@ -1287,6 +1287,7 @@
   "cacheMaxSize": "キャッシュサイズ",
   "dialerProxy": "ダイヤラープロキシ",
   "dialerProxyDesc": "NTPサーバーへの接続に使用するアウトバウンド",
+  "dialerProxyLoopStopped": "{name} 経由の接続が使用元のプロキシに戻るため、接続を中止しました",
   "discardChanges": "変更を破棄しますか？",
   "fakeipFilterMode": "Fake-IPフィルターモード",
   "fakeipFilterModeDesc": "blacklistは一致を除外、whitelistは一致のみ、ruleはルールで判定",

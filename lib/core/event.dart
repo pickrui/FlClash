@@ -50,6 +50,8 @@ abstract mixin class CoreEventListener {
   }) {}
 
   void onModeChanged(String mode) {}
+
+  void onDialerLoop(String proxyName) {}
 }
 
 class CoreEventManager {
@@ -100,6 +102,9 @@ class CoreEventManager {
                   break;
                 case CoreEventType.mode:
                   listener.onModeChanged(event.data as String);
+                  break;
+                case CoreEventType.dialerLoop:
+                  listener.onDialerLoop(event.data as String);
                   break;
               }
             } catch (error, stackTrace) {
