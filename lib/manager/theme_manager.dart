@@ -7,6 +7,8 @@ import 'dart:math';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/navigator.dart';
+import 'package:fl_clash/ui/surface.dart';
+import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/common/theme.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
@@ -34,10 +36,13 @@ ThemeData watchAppTheme(WidgetRef ref, Brightness brightness) {
   final pureBlack =
       brightness == Brightness.dark &&
       ref.watch(themeSettingProvider.select((state) => state.pureBlack));
-  final colorScheme = ref
-      .watch(genColorSchemeProvider(brightness))
-      .toPureBlack(pureBlack);
-  final inputs = (platform: defaultTargetPlatform, colorScheme: colorScheme);
+  final seeded = ref.watch(genColorSchemeProvider(brightness));
+  final colorScheme = seeded.toPureBlack(pureBlack);
+  final inputs = (
+    platform: defaultTargetPlatform,
+    seeded: seeded,
+    pureBlack: pureBlack,
+  );
   if (_appThemes[brightness] case (inputs: final cached, :final theme)
       when cached == inputs) {
     return theme;
@@ -47,7 +52,12 @@ ThemeData watchAppTheme(WidgetRef ref, Brightness brightness) {
       useMaterial3: true,
       pageTransitionsTheme: _pageTransitionsTheme,
       colorScheme: colorScheme,
-    ),
+      extensions: [
+        if (brightness == Brightness.dark)
+          // Pure black steps up to the plain dark scheme, keeping its tint.
+          ElevatedColorScheme(pureBlack ? seeded : colorScheme.elevated),
+      ],
+    ).withAppShapes.withAppSurfaces.withAppTypography,
   );
   _appThemes[brightness] = (inputs: inputs, theme: theme);
   return theme;
@@ -60,29 +70,28 @@ ButtonStyle _clickable(ButtonStyle? style) =>
     style?.merge(_clickButton) ?? _clickButton;
 
 ThemeData _withAppControls(ThemeData theme) {
-  final shaped = theme.withAppShapes;
-  return shaped.copyWith(
-    listTileTheme: shaped.listTileTheme.copyWith(mouseCursor: _clickCursor),
-    checkboxTheme: shaped.checkboxTheme.copyWith(mouseCursor: _clickCursor),
-    radioTheme: shaped.radioTheme.copyWith(mouseCursor: _clickCursor),
-    switchTheme: shaped.switchTheme.copyWith(mouseCursor: _clickCursor),
-    sliderTheme: shaped.sliderTheme.copyWith(mouseCursor: _clickCursor),
+  return theme.copyWith(
+    listTileTheme: theme.listTileTheme.copyWith(mouseCursor: _clickCursor),
+    checkboxTheme: theme.checkboxTheme.copyWith(mouseCursor: _clickCursor),
+    radioTheme: theme.radioTheme.copyWith(mouseCursor: _clickCursor),
+    switchTheme: theme.switchTheme.copyWith(mouseCursor: _clickCursor),
+    sliderTheme: theme.sliderTheme.copyWith(mouseCursor: _clickCursor),
     textButtonTheme: TextButtonThemeData(
-      style: _clickable(shaped.textButtonTheme.style),
+      style: _clickable(theme.textButtonTheme.style),
     ),
     filledButtonTheme: FilledButtonThemeData(
-      style: _clickable(shaped.filledButtonTheme.style),
+      style: _clickable(theme.filledButtonTheme.style),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
-      style: _clickable(shaped.elevatedButtonTheme.style),
+      style: _clickable(theme.elevatedButtonTheme.style),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
-      style: _clickable(shaped.outlinedButtonTheme.style),
+      style: _clickable(theme.outlinedButtonTheme.style),
     ),
     iconButtonTheme: IconButtonThemeData(
-      style: _clickable(shaped.iconButtonTheme.style),
+      style: _clickable(theme.iconButtonTheme.style),
     ),
-    navigationBarTheme: shaped.navigationBarTheme.copyWith(
+    navigationBarTheme: theme.navigationBarTheme.copyWith(
       labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
     ),
   );

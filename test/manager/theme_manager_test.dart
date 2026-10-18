@@ -7,7 +7,9 @@ import 'package:fl_clash/manager/theme_manager.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/ui/color.dart';
 import 'package:fl_clash/ui/shape.dart';
+import 'package:fl_clash/ui/surface.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -46,11 +48,58 @@ void main() {
     expect(themes, hasLength(3));
     expect(themes[1], same(themes[0]));
     expect(themes[2], isNot(same(themes[1])));
+    expect(
+      themes[2].extension<ElevatedColorScheme>()?.colorScheme,
+      themes[0].colorScheme,
+    );
   });
 
-  testWidgets('the app theme keeps pill buttons alongside the click cursor', (
+  testWidgets('the app theme layers surfaces and follows the iOS type scale', (
     tester,
   ) async {
+    final themes = <Brightness, ThemeData>{};
+    await tester.pumpWidget(
+      ProviderScope(
+        child: Consumer(
+          builder: (_, ref, _) {
+            for (final brightness in Brightness.values) {
+              themes[brightness] = watchAppTheme(ref, brightness);
+            }
+            return const SizedBox.shrink();
+          },
+        ),
+      ),
+    );
+    final light = themes[Brightness.light]!;
+    final dark = themes[Brightness.dark]!;
+
+    expect(light.scaffoldBackgroundColor, light.colorScheme.surfaceContainer);
+    expect(light.cardTheme.color, light.colorScheme.surfaceBright);
+    expect(light.dialogTheme.backgroundColor, light.colorScheme.surfaceBright);
+    expect(dark.scaffoldBackgroundColor, dark.colorScheme.surface);
+    expect(
+      dark.dialogTheme.backgroundColor,
+      dark.colorScheme.surfaceContainerHigh,
+    );
+    expect(
+      light.dividerTheme.color,
+      light.colorScheme.onSurface.withValues(alpha: 0.14),
+    );
+    final body = light.textTheme.bodyLarge!;
+    expect(body.fontSize, 17);
+    expect(body.height! * body.fontSize!, closeTo(22, 1e-9));
+    expect(body.letterSpacing, 0);
+    expect(light.textTheme.titleMedium!.fontWeight, FontWeight.w600);
+    expect(light.textTheme.labelSmall!.fontSize, 11);
+    expect(light.extension<ElevatedColorScheme>(), isNull);
+    expect(
+      dark.extension<ElevatedColorScheme>()!.colorScheme.surface.tone,
+      closeTo(SurfaceLevel.card.colorOf(dark.colorScheme).tone, 0.5),
+    );
+  });
+
+  testWidgets('the app theme keeps pill buttons, the click cursor and the '
+      'focus ring', (tester) async {
     late ThemeData theme;
     await tester.pumpWidget(
       ProviderScope(
@@ -72,6 +121,17 @@ void main() {
     ]) {
       expect(style?.shape?.resolve({}), AppShape.full);
       expect(style?.mouseCursor?.resolve({}), SystemMouseCursors.click);
+    }
+    for (final (style, standsOff) in [
+      (theme.textButtonTheme.style, false),
+      (theme.filledButtonTheme.style, true),
+      (theme.outlinedButtonTheme.style, false),
+      (theme.iconButtonTheme.style, false),
+    ]) {
+      expect(
+        style?.side?.resolve({WidgetState.focused}),
+        focusRingSide(theme.colorScheme, standsOff: standsOff),
+      );
     }
   });
 
