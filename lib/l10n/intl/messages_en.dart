@@ -316,6 +316,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "addRule": MessageLookupByLibrary.simpleMessage("Add rule"),
     "addSsid": MessageLookupByLibrary.simpleMessage("Add SSID"),
     "addedRules": MessageLookupByLibrary.simpleMessage("Added rules"),
+    "additionalPrefix": MessageLookupByLibrary.simpleMessage("Name prefix"),
+    "additionalSuffix": MessageLookupByLibrary.simpleMessage("Name suffix"),
     "address": MessageLookupByLibrary.simpleMessage("Address"),
     "addressCopied": MessageLookupByLibrary.simpleMessage("Address copied"),
     "addressHelp": MessageLookupByLibrary.simpleMessage(
@@ -848,7 +850,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "customOutboundInUse": m10,
     "customProfile": MessageLookupByLibrary.simpleMessage("Custom profile"),
     "customProfileDesc": MessageLookupByLibrary.simpleMessage(
-      "Assemble proxy groups and rules from your own nodes and the provider library",
+      "Assemble proxy groups and rules from your own nodes, the provider library and other profiles",
     ),
     "customRoutingDraftHint": MessageLookupByLibrary.simpleMessage(
       "Fill in your custom routing, then switch to Custom mode. Editing this draft does not change the current mode.",
@@ -1511,6 +1513,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "haveAccountAlready": MessageLookupByLibrary.simpleMessage(
       "Already have an account?",
     ),
+    "healthCheck": MessageLookupByLibrary.simpleMessage("Health check"),
     "helperCorruptTip": MessageLookupByLibrary.simpleMessage(
       "Helper service unavailable; TUN mode cannot be enabled. Reinstall FlClash to restore it.",
     ),
@@ -1664,6 +1667,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "inviteCodeValidation": MessageLookupByLibrary.simpleMessage(
       "Please enter the invite code",
     ),
+    "ipVersion": MessageLookupByLibrary.simpleMessage("IP version"),
     "ipcidr": MessageLookupByLibrary.simpleMessage("Ipcidr"),
     "ipv6Desc": MessageLookupByLibrary.simpleMessage(
       "When turned on it will be able to receive IPv6 traffic",

@@ -12054,10 +12054,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Assemble proxy groups and rules from your own nodes and the provider library`
+  /// `Assemble proxy groups and rules from your own nodes, the provider library and other profiles`
   String get customProfileDesc {
     return Intl.message(
-      'Assemble proxy groups and rules from your own nodes and the provider library',
+      'Assemble proxy groups and rules from your own nodes, the provider library and other profiles',
       name: 'customProfileDesc',
       desc: '',
       args: [],
@@ -12092,6 +12092,41 @@ class AppLocalizations {
       desc: '',
       args: [profiles],
     );
+  }
+
+  /// `Health check`
+  String get healthCheck {
+    return Intl.message(
+      'Health check',
+      name: 'healthCheck',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Name prefix`
+  String get additionalPrefix {
+    return Intl.message(
+      'Name prefix',
+      name: 'additionalPrefix',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Name suffix`
+  String get additionalSuffix {
+    return Intl.message(
+      'Name suffix',
+      name: 'additionalSuffix',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `IP version`
+  String get ipVersion {
+    return Intl.message('IP version', name: 'ipVersion', desc: '', args: []);
   }
 }
 

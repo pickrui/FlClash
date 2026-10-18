@@ -264,6 +264,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "addRule": MessageLookupByLibrary.simpleMessage("添加规则"),
     "addSsid": MessageLookupByLibrary.simpleMessage("添加SSID"),
     "addedRules": MessageLookupByLibrary.simpleMessage("附加规则"),
+    "additionalPrefix": MessageLookupByLibrary.simpleMessage("名称前缀"),
+    "additionalSuffix": MessageLookupByLibrary.simpleMessage("名称后缀"),
     "address": MessageLookupByLibrary.simpleMessage("地址"),
     "addressCopied": MessageLookupByLibrary.simpleMessage("地址已复制"),
     "addressHelp": MessageLookupByLibrary.simpleMessage("WebDAV服务器地址"),
@@ -636,7 +638,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "customOutboundInUse": m10,
     "customProfile": MessageLookupByLibrary.simpleMessage("自定义配置"),
     "customProfileDesc": MessageLookupByLibrary.simpleMessage(
-      "基于自有节点和资源库组建策略组与规则",
+      "基于自有节点、资源库和其他配置组建策略组与规则",
     ),
     "customRoutingDraftHint": MessageLookupByLibrary.simpleMessage(
       "先填写自定义内容，再切换至自定义模式。编辑草稿不会切换当前模式",
@@ -1117,6 +1119,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage("是否缓存修改"),
     "haveAccountAlready": MessageLookupByLibrary.simpleMessage("已有账号？"),
+    "healthCheck": MessageLookupByLibrary.simpleMessage("健康检查"),
     "helperCorruptTip": MessageLookupByLibrary.simpleMessage(
       "Helper 服务不可用，无法启用 TUN 模式，请重新安装 FlClash",
     ),
@@ -1232,6 +1235,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "inviteCodeHint": MessageLookupByLibrary.simpleMessage("请输入邀请码"),
     "inviteCodeLabel": MessageLookupByLibrary.simpleMessage("邀请码"),
     "inviteCodeValidation": MessageLookupByLibrary.simpleMessage("请输入邀请码"),
+    "ipVersion": MessageLookupByLibrary.simpleMessage("IP 版本"),
     "ipcidr": MessageLookupByLibrary.simpleMessage("IP/掩码"),
     "ipv6Desc": MessageLookupByLibrary.simpleMessage("开启后将可以接收IPv6流量"),
     "ipv6InboundDesc": MessageLookupByLibrary.simpleMessage("允许IPv6入站"),

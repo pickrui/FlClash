@@ -322,6 +322,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "addRule": MessageLookupByLibrary.simpleMessage("Добавить правило"),
     "addSsid": MessageLookupByLibrary.simpleMessage("Добавить SSID"),
     "addedRules": MessageLookupByLibrary.simpleMessage("Добавленные правила"),
+    "additionalPrefix": MessageLookupByLibrary.simpleMessage("Префикс имени"),
+    "additionalSuffix": MessageLookupByLibrary.simpleMessage("Суффикс имени"),
     "address": MessageLookupByLibrary.simpleMessage("Адрес"),
     "addressCopied": MessageLookupByLibrary.simpleMessage("Адрес скопирован"),
     "addressHelp": MessageLookupByLibrary.simpleMessage("Адрес сервера WebDAV"),
@@ -866,7 +868,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Пользовательский профиль",
     ),
     "customProfileDesc": MessageLookupByLibrary.simpleMessage(
-      "Группы прокси и правила из своих узлов и библиотеки провайдеров",
+      "Группы прокси и правила из своих узлов, библиотеки провайдеров и других профилей",
     ),
     "customRoutingDraftHint": MessageLookupByLibrary.simpleMessage(
       "Заполните свои настройки маршрутизации, затем выберите режим «Пользовательский». Редактирование черновика не меняет текущий режим.",
@@ -1563,6 +1565,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "haveAccountAlready": MessageLookupByLibrary.simpleMessage(
       "Уже есть аккаунт?",
     ),
+    "healthCheck": MessageLookupByLibrary.simpleMessage("Проверка состояния"),
     "helperCorruptTip": MessageLookupByLibrary.simpleMessage(
       "Служба Helper недоступна, поэтому TUN-режим включить нельзя. Переустановите FlClash.",
     ),
@@ -1721,6 +1724,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "inviteCodeValidation": MessageLookupByLibrary.simpleMessage(
       "Введите код приглашения",
     ),
+    "ipVersion": MessageLookupByLibrary.simpleMessage("Версия IP"),
     "ipcidr": MessageLookupByLibrary.simpleMessage("IPCIDR"),
     "ipv6Desc": MessageLookupByLibrary.simpleMessage(
       "При включении будет возможно получать IPv6 трафик",

@@ -1434,8 +1434,12 @@
   "excludeDstPortDesc": "除外宛先ポートへの通信は TUN を通りません",
   "numberRangeTip": "{label}は{min}から{max}の範囲で指定してください",
   "customProfile": "カスタムプロファイル",
-  "customProfileDesc": "自分のノードとプロバイダーライブラリからプロキシグループとルールを組み立てます",
+  "customProfileDesc": "自分のノード、プロバイダーライブラリ、他のプロファイルからプロキシグループとルールを組み立てます",
   "emptyCustomProfile": "このカスタムプロファイルに先にプロキシグループかルールを追加してください",
   "nameCustomProfileTip": "このカスタムプロファイルに名前を付けてください",
-  "profileProviderInUse": "このプロファイルは {profiles} のプロキシプロバイダーです。先にそちらから外してください"
+  "profileProviderInUse": "このプロファイルは {profiles} のプロキシプロバイダーです。先にそちらから外してください",
+  "healthCheck": "ヘルスチェック",
+  "additionalPrefix": "名前のプレフィックス",
+  "additionalSuffix": "名前のサフィックス",
+  "ipVersion": "IP バージョン"
 }

@@ -1434,8 +1434,12 @@
   "excludeDstPortDesc": "发往这些目标端口的流量不经过虚拟网卡",
   "numberRangeTip": "{label}必须在 {min} 到 {max} 之间",
   "customProfile": "自定义配置",
-  "customProfileDesc": "基于自有节点和资源库组建策略组与规则",
+  "customProfileDesc": "基于自有节点、资源库和其他配置组建策略组与规则",
   "emptyCustomProfile": "请先为该自定义配置添加策略组或规则",
   "nameCustomProfileTip": "为该自定义配置命名",
-  "profileProviderInUse": "该配置仍是 {profiles} 的代理提供者，请先在其中移除"
+  "profileProviderInUse": "该配置仍是 {profiles} 的代理提供者，请先在其中移除",
+  "healthCheck": "健康检查",
+  "additionalPrefix": "名称前缀",
+  "additionalSuffix": "名称后缀",
+  "ipVersion": "IP 版本"
 }

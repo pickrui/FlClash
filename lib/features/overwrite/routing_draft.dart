@@ -55,25 +55,28 @@ Map<String, String> routingGroupTypes(
 Map<String, String> routingProviderSources(
   Profile profile,
   Map<String, dynamic> raw,
-  String profilesPath,
-) {
+  String profilesPath, {
+  Iterable<Profile> profiles = const [],
+}) {
   final providers = raw['proxy-providers'];
   if (providers is! Map) return const {};
   final libraryPath = path.join(profilesPath, 'providers', 'app', 'proxy');
+  final profileFiles = {
+    for (final item in profiles) path.join(profilesPath, item.fileName): item,
+  };
+  String subscriptionOr(bool subscription) => subscription
+      ? appLocalizations.providerSourceSubscription
+      : appLocalizations.providerSourceProfile;
   return {
     for (final entry in providers.entries)
       if (entry.key is String)
-        entry.key as String:
-            entry.value is Map &&
-                (entry.value as Map)['path'] is String &&
-                path.isWithin(
-                  libraryPath,
-                  (entry.value as Map)['path'] as String,
-                )
-            ? appLocalizations.providerSourceApp
-            : profile.url.isNotEmpty
-            ? appLocalizations.providerSourceSubscription
-            : appLocalizations.providerSourceProfile,
+        entry.key as String: switch (entry.value) {
+          {'path': final String file} when path.isWithin(libraryPath, file) =>
+            appLocalizations.providerSourceApp,
+          {'path': final String file} when profileFiles[file] != null =>
+            subscriptionOr(profileFiles[file]!.type == ProfileType.url),
+          _ => subscriptionOr(profile.url.isNotEmpty),
+        },
   };
 }
 

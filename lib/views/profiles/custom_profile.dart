@@ -6,9 +6,14 @@
 import 'dart:async';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/features/overwrite/overwrite_sheet.dart';
+import 'package:fl_clash/features/overwrite/profile_provider_options.dart';
 import 'package:fl_clash/features/overwrite/proxy_chain.dart';
+import 'package:fl_clash/features/overwrite/routing_draft.dart';
 import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/providers/clash_providers.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
@@ -156,6 +161,7 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
               profileId: widget.profileId,
               customProfile: true,
             ),
+            _ProfileProviders(widget.profileId),
             ProfileProxyChainsContent(profileId: widget.profileId),
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
             const SliverToBoxAdapter(child: _Resources()),
@@ -182,6 +188,98 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
       setupAction.autoApplyProfile();
     }
     super.dispose();
+  }
+}
+
+class _ProfileProviders extends ConsumerWidget {
+  final int profileId;
+
+  const _ProfileProviders(this.profileId);
+
+  Future<void> _edit(BuildContext context, WidgetRef ref, String label) async {
+    final profile = ref.read(profileProvider(profileId));
+    if (profile == null) return;
+    ProfileOverrides withOptions(
+      Profile profile,
+      ProxyProviderOptions options,
+    ) => profile.overrides.copyWith(
+      proxyProviders: {
+        for (final MapEntry(:key, :value)
+            in profile.overrides.proxyProviders.entries)
+          if (key != label) key: value,
+        if (options != const ProxyProviderOptions()) label: options,
+      },
+    );
+    final result = await showOverwriteSheet<ProxyProviderOptions>(
+      context: context,
+      builder: (_) => ProfileProviderOptionsDialog(
+        label: label,
+        options:
+            profile.overrides.proxyProviders[label] ??
+            const ProxyProviderOptions(),
+        validate: (options) async {
+          final current = ref.read(profileProvider(profileId));
+          if (!context.mounted || current == null) {
+            return appLocalizations.routingChanged;
+          }
+          return validateCustomRoutingDraft(
+            ref,
+            current.copyWith(overrides: withOptions(current, options)),
+          );
+        },
+      ),
+    );
+    if (result == null || !context.mounted) return;
+    ref
+        .read(profilesProvider.notifier)
+        .updateProfile(
+          profileId,
+          (profile) =>
+              profile.copyWith(overrides: withOptions(profile, result)),
+        );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profile = ref.watch(profileProvider(profileId));
+    final profiles = ref.watch(profilesProvider);
+    final ids = profileProviderIds(
+      profiles,
+      reserved: libraryProxyProviderLabels(
+        ref.watch(clashProvidersProvider).value ?? const [],
+      ),
+    );
+    final used = {
+      for (final group in profile?.customProxyGroups ?? const <ProxyGroup>[])
+        for (final name in group.use ?? const <String>[])
+          if (ids.containsKey(name)) name,
+    };
+    if (profile == null || used.isEmpty) {
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
+    final appLocalizations = context.appLocalizations;
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.only(top: 24),
+        child: generateSectionV3(
+          title: appLocalizations.proxyProviders,
+          items: [
+            for (final label in used)
+              ListItem(
+                leading: const GlyphIcon(AppGlyphs.layers),
+                title: Text(label),
+                subtitle: Text(
+                  profiles.getProfile(ids[label])?.type == ProfileType.url
+                      ? appLocalizations.providerSourceSubscription
+                      : appLocalizations.providerSourceProfile,
+                ),
+                trailing: const GlyphIcon(AppGlyphs.chevronForward),
+                onTap: () => _edit(context, ref, label),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

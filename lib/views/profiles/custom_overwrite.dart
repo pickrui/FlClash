@@ -326,6 +326,7 @@ class _CustomProxyGroupsViewState extends ConsumerState<CustomProxyGroupsView> {
         profile,
         rawConfig,
         await appPath.profilesPath,
+        profiles: ref.read(profilesProvider),
       );
       if (profile.overwriteType != OverwriteType.custom) {
         reservedNames.addAll(rawProxyGroupNames(rawConfig));

@@ -1434,8 +1434,12 @@
   "excludeDstPortDesc": "Трафик на исключённые порты назначения идёт в обход TUN",
   "numberRangeTip": "Значение «{label}» должно быть от {min} до {max}",
   "customProfile": "Пользовательский профиль",
-  "customProfileDesc": "Группы прокси и правила из своих узлов и библиотеки провайдеров",
+  "customProfileDesc": "Группы прокси и правила из своих узлов, библиотеки провайдеров и других профилей",
   "emptyCustomProfile": "Сначала добавьте в этот профиль группу прокси или правило",
   "nameCustomProfileTip": "Назовите этот профиль",
-  "profileProviderInUse": "Этот профиль — провайдер прокси в {profiles}. Сначала удалите его там."
+  "profileProviderInUse": "Этот профиль — провайдер прокси в {profiles}. Сначала удалите его там.",
+  "healthCheck": "Проверка состояния",
+  "additionalPrefix": "Префикс имени",
+  "additionalSuffix": "Суффикс имени",
+  "ipVersion": "Версия IP"
 }

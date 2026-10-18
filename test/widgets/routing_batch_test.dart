@@ -158,6 +158,30 @@ void main() {
         }, '/test')['Local'],
         AppLocalizations.current.providerSourceProfile,
       );
+      expect(
+        routingProviderSources(
+          Profile.custom(label: 'Built'),
+          {
+            'proxy-providers': {
+              'Remote': {'type': 'file', 'path': '/test/profiles/2.yaml'},
+              'File': {'type': 'file', 'path': '/test/profiles/3.yaml'},
+            },
+          },
+          '/test/profiles',
+          profiles: const [
+            Profile(
+              id: 2,
+              url: 'https://example.com/sub',
+              autoUpdateDuration: Duration.zero,
+            ),
+            Profile(id: 3, autoUpdateDuration: Duration.zero),
+          ],
+        ),
+        {
+          'Remote': AppLocalizations.current.providerSourceSubscription,
+          'File': AppLocalizations.current.providerSourceProfile,
+        },
+      );
     },
   );
 

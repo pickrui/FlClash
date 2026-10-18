@@ -274,6 +274,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "addRule": MessageLookupByLibrary.simpleMessage("ルールを追加"),
     "addSsid": MessageLookupByLibrary.simpleMessage("SSIDを追加"),
     "addedRules": MessageLookupByLibrary.simpleMessage("追加ルール"),
+    "additionalPrefix": MessageLookupByLibrary.simpleMessage("名前のプレフィックス"),
+    "additionalSuffix": MessageLookupByLibrary.simpleMessage("名前のサフィックス"),
     "address": MessageLookupByLibrary.simpleMessage("アドレス"),
     "addressCopied": MessageLookupByLibrary.simpleMessage("アドレスをコピーしました"),
     "addressHelp": MessageLookupByLibrary.simpleMessage("WebDAVサーバーアドレス"),
@@ -723,7 +725,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "customOutboundInUse": m10,
     "customProfile": MessageLookupByLibrary.simpleMessage("カスタムプロファイル"),
     "customProfileDesc": MessageLookupByLibrary.simpleMessage(
-      "自分のノードとプロバイダーライブラリからプロキシグループとルールを組み立てます",
+      "自分のノード、プロバイダーライブラリ、他のプロファイルからプロキシグループとルールを組み立てます",
     ),
     "customRoutingDraftHint": MessageLookupByLibrary.simpleMessage(
       "カスタム設定を入力してから、カスタムモードに切り替えてください。下書きの編集では現在のモードは変わりません",
@@ -1266,6 +1268,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "haveAccountAlready": MessageLookupByLibrary.simpleMessage(
       "すでにアカウントをお持ちですか？",
     ),
+    "healthCheck": MessageLookupByLibrary.simpleMessage("ヘルスチェック"),
     "helperCorruptTip": MessageLookupByLibrary.simpleMessage(
       "Helper サービスが利用できないため、TUN モードを有効にできません。FlClash を再インストールしてください。",
     ),
@@ -1399,6 +1402,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "inviteCodeValidation": MessageLookupByLibrary.simpleMessage(
       "招待コードを入力してください",
     ),
+    "ipVersion": MessageLookupByLibrary.simpleMessage("IP バージョン"),
     "ipcidr": MessageLookupByLibrary.simpleMessage("IPCIDR"),
     "ipv6Desc": MessageLookupByLibrary.simpleMessage("有効化するとIPv6トラフィックを受信可能"),
     "ipv6InboundDesc": MessageLookupByLibrary.simpleMessage("IPv6インバウンドを許可"),
