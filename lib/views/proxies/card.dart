@@ -82,8 +82,9 @@ class ProxyCard extends StatelessWidget {
       children: [
         Consumer(
           builder: (_, ref, child) {
-            final selectedProxyName = ref.watch(
-              getSelectedProxyNameProvider(groupName),
+            final isSelected = ref.watch(
+              getSelectedProxyNameProvider(groupName)
+                  .select((name) => name == proxy.name),
             );
             return CommonCard(
               radius: AppCorner.lg,
@@ -92,7 +93,7 @@ class ProxyCard extends StatelessWidget {
               onPressed: () {
                 _changeProxy(ref);
               },
-              isSelected: selectedProxyName == proxy.name,
+              isSelected: isSelected,
               child: child!,
             );
           },
@@ -349,8 +350,10 @@ class _ProxyComputedMark extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final proxyName = ref.watch(getProxyNameProvider(groupName));
-    if (proxyName != proxy.name) {
+    final inUse = ref.watch(
+      getProxyNameProvider(groupName).select((name) => name == proxy.name),
+    );
+    if (!inUse) {
       return const SizedBox();
     }
     return Container(

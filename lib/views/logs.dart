@@ -188,6 +188,7 @@ class _LogsViewState extends ConsumerState<LogsView>
                       );
                     },
                     separatorBuilder: (_, _) => const Divider(height: 0),
+                    extentEstimation: recordListExtentEstimation,
                     itemCount: logs.length,
                   ),
                 ),

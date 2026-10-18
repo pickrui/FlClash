@@ -484,6 +484,48 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  testWidgets('the delay test button stays hidden while the current group '
+      'is tested from elsewhere', (tester) async {
+    final container = ProviderContainer(
+      overrides: [
+        currentProfileIdProvider.overrideWithBuild((_, _) => 1),
+        proxiesTabControllerStateProvider.overrideWith(
+          (_) => const VM2(['First', 'Second'], 'First'),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    var clicks = 0;
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: _TestApp(
+          child: Consumer(
+            builder: (_, ref, _) => DelayTestButton(
+              isTesting: ref.watch(currentGroupDelayTestingProvider),
+              onClick: () async => clicks++,
+            ),
+          ),
+        ),
+      ),
+    );
+    final testing = Completer<void>();
+    final run = container
+        .read(delayTestingGroupsProvider.notifier)
+        .run(profileId: 1, groupName: 'First', test: () => testing.future);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(FloatingActionButton), warnIfMissed: false);
+    expect(clicks, 0);
+
+    testing.complete();
+    await run;
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+    expect(clicks, 1);
+  });
+
   testWidgets(
     'delay test completion after disposal does not restart animation',
     (tester) async {

@@ -9,6 +9,7 @@ import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/common/scroll.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
+import 'package:fl_clash/widgets/record.dart';
 import 'package:fl_clash/widgets/record_table.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
@@ -167,7 +168,8 @@ class _RequestsViewState extends ConsumerState<RequestsView>
                       physics: const NextClampingScrollPhysics(),
                       controller: _scrollController,
                       itemCount: requests.length,
-                      extentEstimation: table?.estimateExtent,
+                      extentEstimation:
+                          table?.estimateExtent ?? recordListExtentEstimation,
                       separatorBuilder: (_, _) => table == null
                           ? const Divider(height: 0)
                           : const SizedBox.shrink(),

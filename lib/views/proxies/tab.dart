@@ -411,7 +411,14 @@ class _ProxyGroupViewState extends ConsumerState<ProxyGroupView> {
 class DelayTestButton extends StatefulWidget {
   final Future<void> Function() onClick;
 
-  const DelayTestButton({super.key, required this.onClick});
+  /// A test of the current group still running, whoever started it.
+  final bool isTesting;
+
+  const DelayTestButton({
+    super.key,
+    required this.onClick,
+    this.isTesting = false,
+  });
 
   @override
   State<DelayTestButton> createState() => _DelayTestButtonState();
@@ -424,7 +431,7 @@ class _DelayTestButtonState extends State<DelayTestButton>
   bool _isRunning = false;
 
   Future<void> _healthcheck() async {
-    if (_isRunning || _controller.isAnimating) {
+    if (_isRunning || widget.isTesting || _controller.isAnimating) {
       return;
     }
     _isRunning = true;
@@ -433,7 +440,7 @@ class _DelayTestButtonState extends State<DelayTestButton>
       await widget.onClick();
     } finally {
       _isRunning = false;
-      if (mounted) {
+      if (mounted && !widget.isTesting) {
         _controller.reverse();
       }
     }
@@ -445,10 +452,24 @@ class _DelayTestButtonState extends State<DelayTestButton>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 400),
+      value: widget.isTesting ? 1 : 0,
     );
     _animation = Tween<double>(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOutBack),
     );
+  }
+
+  @override
+  void didUpdateWidget(covariant DelayTestButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isTesting == oldWidget.isTesting || _isRunning) {
+      return;
+    }
+    if (widget.isTesting) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
   }
 
   @override

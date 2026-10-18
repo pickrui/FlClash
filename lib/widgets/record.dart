@@ -31,6 +31,16 @@ class RecordTextStyles {
   }
 }
 
+/// For a list separated by zero-height dividers, which sit at odd indexes.
+double recordListExtentEstimation(int? index, double crossAxisExtent) {
+  return switch (index) {
+    // SuperSliverList gives every child the null estimate unless it is 0.
+    null => 0,
+    _ when index.isEven => 100,
+    _ => 0,
+  };
+}
+
 class RecordListItem extends StatelessWidget {
   final Widget header;
   final Widget body;

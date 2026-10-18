@@ -5,11 +5,13 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/ui/table_layout.dart';
+import 'package:fl_clash/widgets/record.dart';
 import 'package:fl_clash/widgets/record_table.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:super_sliver_list/super_sliver_list.dart';
 
 typedef _Row = ({String name, int size});
 
@@ -28,6 +30,32 @@ List<RecordColumn<_Row>> _columns(double _) => [
 ];
 
 void main() {
+  testWidgets('zero-height dividers between records do not misjudge a list', (
+    tester,
+  ) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SuperListView.separated(
+          controller: controller,
+          itemCount: 200,
+          extentEstimation: recordListExtentEstimation,
+          separatorBuilder: (_, _) => const Divider(height: 0),
+          itemBuilder: (_, index) =>
+              SizedBox(height: 100, child: Text('$index')),
+        ),
+      ),
+    );
+    final extent = 200 * 100 - controller.position.viewportDimension;
+
+    expect(controller.position.maxScrollExtent, extent);
+    controller.jumpTo(controller.position.maxScrollExtent);
+    await tester.pump();
+    expect(controller.position.maxScrollExtent, extent);
+    expect(controller.offset, extent);
+  });
+
   test('a bottom-up list sorts with its ties kept in their shown order', () {
     const a = (name: 'a', size: 1);
     const b = (name: 'b', size: 1);

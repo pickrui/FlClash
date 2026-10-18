@@ -400,6 +400,20 @@ VM2<List<String>, String?> proxiesTabControllerState(Ref ref) {
 }
 
 @riverpod
+bool currentGroupDelayTesting(Ref ref) {
+  final profileId = ref.watch(currentProfileIdProvider);
+  final groupName = ref.watch(
+    proxiesTabControllerStateProvider.select((state) => state.b),
+  );
+  return ref.watch(
+    delayTestingGroupsProvider.select(
+      (state) =>
+          state.contains((profileId: profileId, groupName: groupName ?? '')),
+    ),
+  );
+}
+
+@riverpod
 MoreToolsSelectorState moreToolsSelectorState(Ref ref) {
   final viewMode = ref.watch(viewModeProvider);
   final navigationItems = ref.watch(
