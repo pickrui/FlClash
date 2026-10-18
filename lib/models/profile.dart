@@ -682,6 +682,75 @@ Map<String, Object?> profileProviderDefinition(
   ProxyProviderOptions? options,
 ) => {'type': 'file', 'path': path, ...?options?.definition};
 
+/// The custom profiles whose groups use [provider] as a proxy provider.
+List<Profile> profileProviderUsers(
+  List<Profile> profiles,
+  Profile provider, {
+  Set<String> reserved = const {},
+}) {
+  final label = provider.realLabel;
+  if (profileProviderIds(profiles, reserved: reserved)[label] != provider.id) {
+    return const [];
+  }
+  return [
+    for (final profile in profiles)
+      if (profile.type == ProfileType.custom &&
+          profile.customProxyGroups.any(
+            (group) => group.use?.contains(label) ?? false,
+          ))
+        profile,
+  ];
+}
+
+/// The users of [previous] as a proxy provider, moved to the label of [next].
+List<Profile> renameProfileProviderUsers(
+  List<Profile> profiles,
+  Profile previous,
+  Profile next, {
+  Set<String> reserved = const {},
+}) {
+  final before = previous.realLabel;
+  final after = next.realLabel;
+  if (before == after) return const [];
+  return [
+    for (final user in profileProviderUsers(
+      profiles,
+      previous,
+      reserved: reserved,
+    ))
+      user.copyWith(
+        customProxyGroups: [
+          for (final group in user.customProxyGroups)
+            if (group.use?.contains(before) ?? false)
+              group.copyWith(
+                use: {
+                  for (final name in group.use!) name == before ? after : name,
+                }.toList(),
+              )
+            else
+              group,
+        ],
+        overrides: user.overrides.copyWith(
+          proxyProviders: {
+            for (final MapEntry(:key, :value)
+                in user.overrides.proxyProviders.entries)
+              if (key != before) key: value,
+            after: ?user.overrides.proxyProviders[before],
+          },
+        ),
+      ),
+  ];
+}
+
+class ProfileInUseException implements Exception {
+  const ProfileInUseException(this.users);
+
+  final List<String> users;
+
+  @override
+  String toString() => 'profile is used by ${users.join(', ')}';
+}
+
 @freezed
 abstract class Profile with _$Profile {
   const factory Profile({

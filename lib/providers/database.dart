@@ -201,6 +201,26 @@ class Profiles extends _$Profiles {
     );
   }
 
+  /// Saves [profiles] in one transaction.
+  Future<void> putAll(List<Profile> profiles, {bool reportOnWait = true}) {
+    var next = state;
+    final saved = <Profile>[];
+    for (final profile in profiles) {
+      final vm2 = next.copyAndAddProfile(profile);
+      next = vm2.a;
+      saved.add(vm2.b);
+    }
+    state = next;
+    return _queueWrite(
+      () => database.transaction(() async {
+        for (final profile in saved) {
+          await database.putProfile(profile);
+        }
+      }),
+      reportOnWait: reportOnWait,
+    );
+  }
+
   void replaceFromDatabase(List<Profile> profiles) {
     state = List<Profile>.from(profiles);
   }

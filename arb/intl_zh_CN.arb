@@ -1436,5 +1436,6 @@
   "customProfile": "自定义配置",
   "customProfileDesc": "基于自有节点和资源库组建策略组与规则",
   "emptyCustomProfile": "请先为该自定义配置添加策略组或规则",
-  "nameCustomProfileTip": "为该自定义配置命名"
+  "nameCustomProfileTip": "为该自定义配置命名",
+  "profileProviderInUse": "该配置仍是 {profiles} 的代理提供者，请先在其中移除"
 }

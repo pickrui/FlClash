@@ -95,6 +95,16 @@ void main() {
     );
   }
 
+  test('a library proxy provider cannot take the name of a profile', () async {
+    await db.putProfile(profile);
+
+    await expectLater(
+      library.save(resource(kind: ProviderKind.proxy, label: profile.label)),
+      fails('duplicate'),
+    );
+    await library.save(resource(label: profile.label));
+  });
+
   test('a custom profile uses a library proxy provider only by name', () async {
     final nodes = resource(kind: ProviderKind.proxy, label: 'Nodes');
     await library.save(nodes);

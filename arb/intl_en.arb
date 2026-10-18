@@ -1436,5 +1436,6 @@
   "customProfile": "Custom profile",
   "customProfileDesc": "Assemble proxy groups and rules from your own nodes and the provider library",
   "emptyCustomProfile": "Add a proxy group or a rule to this custom profile first",
-  "nameCustomProfileTip": "Name this custom profile"
+  "nameCustomProfileTip": "Name this custom profile",
+  "profileProviderInUse": "This profile is a proxy provider of {profiles}. Remove it there first."
 }

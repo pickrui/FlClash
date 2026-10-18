@@ -56,6 +56,15 @@ class ClashProvidersDao extends DatabaseAccessor<Database>
         .toSet();
   }
 
+  Future<Set<String>> labels(ProviderKind kind) async {
+    final query = selectOnly(clashProviders)
+      ..addColumns([clashProviders.label])
+      ..where(clashProviders.kind.equalsValue(kind));
+    return (await query.get())
+        .map((row) => row.read(clashProviders.label)!)
+        .toSet();
+  }
+
   Future<void> reorder(List<int> ids) => batch((batch) {
     for (var index = 0; index < ids.length; index++) {
       batch.update(

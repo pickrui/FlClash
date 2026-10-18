@@ -12083,6 +12083,16 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `This profile is a proxy provider of {profiles}. Remove it there first.`
+  String profileProviderInUse(Object profiles) {
+    return Intl.message(
+      'This profile is a proxy provider of $profiles. Remove it there first.',
+      name: 'profileProviderInUse',
+      desc: '',
+      args: [profiles],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

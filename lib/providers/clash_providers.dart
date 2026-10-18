@@ -138,6 +138,12 @@ class ClashProviderLibrary {
         )) {
           throw const ProviderLibraryException('duplicate');
         }
+        if (provider.kind == ProviderKind.proxy &&
+            previous?.label != provider.label &&
+            profileProviderIds(await database.profilesDao.all().get())
+                .containsKey(provider.label)) {
+          throw const ProviderLibraryException('duplicate');
+        }
         if (previous != null && previous.label != provider.label) {
           await _rename(previous, provider);
         }

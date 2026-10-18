@@ -223,7 +223,16 @@ class ProfileItem extends StatelessWidget {
     if (res != true) {
       return;
     }
-    await profileAction.deleteProfile(profile.id);
+    try {
+      await profileAction.deleteProfile(profile.id);
+    } on ProfileInUseException catch (error) {
+      globalState.showMessage(
+        title: appLocalizations.tip,
+        message: TextSpan(
+          text: appLocalizations.profileProviderInUse(error.users.join(', ')),
+        ),
+      );
+    }
   }
 
   static final _previewing = <int>{};

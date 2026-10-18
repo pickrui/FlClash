@@ -61,6 +61,22 @@ class ProfileAction extends _$ProfileAction {
 extension ProfilesControllerExt on AppController {
   Future<void> deleteProfile(int id) async {
     await storageLock.synchronized(() async {
+      final reserved = await database.clashProvidersDao.labels(
+        ProviderKind.proxy,
+      );
+      final profiles = _ref.read(profilesProvider);
+      if (profiles.getProfile(id) case final profile?) {
+        final users = profileProviderUsers(
+          profiles,
+          profile,
+          reserved: reserved,
+        );
+        if (users.isNotEmpty) {
+          throw ProfileInUseException([
+            for (final user in users) user.realLabel,
+          ]);
+        }
+      }
       await _ref.read(profilesProvider.notifier).del(id, reportOnWait: false);
       final currentProfileId = _ref.read(currentProfileIdProvider);
       if (currentProfileId == id) {
@@ -113,9 +129,30 @@ extension ProfilesControllerExt on AppController {
   }
 
   Future<void> putProfile(Profile profile, {bool reportOnWait = true}) async {
-    await _ref
-        .read(profilesProvider.notifier)
-        .put(profile, reportOnWait: reportOnWait);
+    final reserved = _ref.read(profilesProvider).getProfile(profile.id) == null
+        ? const <String>{}
+        : await database.clashProvidersDao.labels(ProviderKind.proxy);
+    final profiles = _ref.read(profilesProvider);
+    final previous = profiles.getProfile(profile.id);
+    final next = profiles.copyAndAddProfile(profile).b;
+    if (previous != null &&
+        previous.realLabel != next.realLabel &&
+        profileProviderIds([next]).isNotEmpty &&
+        reserved.contains(next.realLabel)) {
+      throw appLocalizations.existsTip(appLocalizations.name);
+    }
+    final users = previous == null
+        ? const <Profile>[]
+        : renameProfileProviderUsers(
+            profiles,
+            previous,
+            next,
+            reserved: reserved,
+          );
+    await _ref.read(profilesProvider.notifier).putAll([
+      profile,
+      ...users,
+    ], reportOnWait: reportOnWait);
     if (_ref.read(currentProfileIdProvider) != null) return;
     _ref.read(currentProfileIdProvider.notifier).value = profile.id;
   }

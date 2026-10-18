@@ -115,6 +115,70 @@ void main() {
     expect(const ProxyProviderOptions().definition, isEmpty);
   });
 
+  group('profiles as proxy providers', () {
+    const subscription = Profile(
+      id: 1,
+      label: 'Sub',
+      url: 'https://example.com/sub',
+      autoUpdateDuration: Duration.zero,
+    );
+    const sameLabel = Profile(
+      id: 2,
+      label: 'Sub',
+      autoUpdateDuration: Duration.zero,
+    );
+    const managed = Profile(
+      id: 3,
+      label: 'Cloud',
+      url: 'oixcloud://managed',
+      autoUpdateDuration: Duration.zero,
+    );
+    final user = Profile.custom(label: 'Built').copyWith(
+      id: 4,
+      customProxyGroups: const [
+        ProxyGroup(
+          name: 'Out',
+          type: GroupType.Selector,
+          use: ['Sub', 'Cloud'],
+        ),
+      ],
+      overrides: const ProfileOverrides(
+        proxyProviders: {'Sub': ProxyProviderOptions(filter: 'JP')},
+      ),
+    );
+    final profiles = [subscription, sameLabel, managed, user];
+
+    test('only the profile owning a label is protected by its users', () {
+      expect(profileProviderUsers(profiles, subscription), [user]);
+      expect(profileProviderUsers(profiles, sameLabel), isEmpty);
+      expect(profileProviderUsers(profiles, managed), isEmpty);
+      expect(
+        profileProviderUsers(profiles, subscription, reserved: {'Sub'}),
+        isEmpty,
+      );
+    });
+
+    test('a renamed provider takes its users and their options along', () {
+      final next = subscription.copyWith(label: 'Renamed');
+
+      final renamed = renameProfileProviderUsers(profiles, subscription, next);
+
+      expect(renamed.single.customProxyGroups.single.use, ['Renamed', 'Cloud']);
+      expect(renamed.single.overrides.proxyProviders, {
+        'Renamed': const ProxyProviderOptions(filter: 'JP'),
+      });
+      expect(
+        renameProfileProviderUsers(
+          profiles,
+          subscription,
+          next,
+          reserved: {'Sub'},
+        ),
+        isEmpty,
+      );
+    });
+  });
+
   test('an exported profile is named as a yaml file', () {
     const profile = Profile(id: 7, autoUpdateDuration: Duration.zero);
 
