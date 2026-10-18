@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/ui/keyboard_inset_hold.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/icons/navigation_glyph.dart';
 import 'package:fl_clash/manager/app_manager.dart';
@@ -98,7 +99,7 @@ class _HomeShell extends ConsumerWidget {
     final isDashboard =
         navigationItems[state.currentIndex].label == PageLabel.dashboard;
     return Material(
-      color: context.colorScheme.surface,
+      color: SurfaceLevel.page.colorOf(context.colorScheme),
       child: Column(
         children: [
           Expanded(

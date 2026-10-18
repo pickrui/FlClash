@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'dart:ui' show ImageFilter, lerpDouble;
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/ui/surface.dart';
 
 import 'spring_curve.dart';
 
@@ -996,7 +997,7 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
         shadows: _dockShadows(colorScheme),
       ),
       child: Material(
-        color: colorScheme.surfaceContainer,
+        color: SurfaceLevel.floatingOf(colorScheme).colorOf(colorScheme),
         shape: AppShape.full,
         child: Listener(
           behavior: HitTestBehavior.opaque,
@@ -1153,10 +1154,10 @@ class _Lens extends StatelessWidget {
       child: DecoratedBox(
         decoration: ShapeDecoration(
           color: Color.alphaBlend(
-            colorScheme.onSecondaryContainer.withValues(
+            colorScheme.onSurface.withValues(
               alpha: 0.08 * lift.clamp(0.0, 1.0),
             ),
-            colorScheme.secondaryContainer,
+            SurfaceLevel.floatingOf(colorScheme).next.colorOf(colorScheme),
           ),
           shape: AppShape.full,
         ),

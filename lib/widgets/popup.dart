@@ -10,6 +10,7 @@ import 'dart:ui' show ImageFilter, lerpDouble;
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/models/common.dart';
+import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/widgets/spring_curve.dart';
 import 'package:flutter/foundation.dart' show ValueListenable, listEquals;
 import 'package:flutter/rendering.dart';
@@ -153,6 +154,7 @@ class CommonPopupRoute<T> extends PopupRoute<T> {
     this.sourceImage,
     this.modal = true,
     this.avoid,
+    this.elevated = false,
   }) : super(requestFocus: modal ? null : false);
 
   final WidgetBuilder builder;
@@ -176,6 +178,9 @@ class CommonPopupRoute<T> extends PopupRoute<T> {
 
   /// A rect the popup keeps clear of when there is room above or below it.
   final Rect? avoid;
+
+  /// Opened from a sheet's [ElevatedSurfaceTheme], below this route's navigator.
+  final bool elevated;
 
   @override
   final String? barrierLabel;
@@ -263,7 +268,10 @@ class CommonPopupRoute<T> extends PopupRoute<T> {
     Animation<double> animation,
     Animation<double> secondaryAnimation,
   ) {
-    return builder(context);
+    return SurfaceScope(
+      level: SurfaceLevel.floatingOf(context.colorScheme),
+      child: builder(context),
+    );
   }
 
   @override
@@ -271,6 +279,21 @@ class CommonPopupRoute<T> extends PopupRoute<T> {
     BuildContext context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    if (elevated) {
+      return ElevatedSurfaceTheme(
+        child: Builder(
+          builder: (context) => _buildPopup(context, animation, child),
+        ),
+      );
+    }
+    return _buildPopup(context, animation, child);
+  }
+
+  Widget _buildPopup(
+    BuildContext context,
+    Animation<double> animation,
     Widget child,
   ) {
     final colorScheme = context.colorScheme;
@@ -296,7 +319,8 @@ class CommonPopupRoute<T> extends PopupRoute<T> {
               unfolded: _unfolded,
               sourceColor: sourceColor,
               sourceImage: sourceImage,
-              surfaceColor: colorScheme.surfaceContainer,
+              surfaceColor: SurfaceLevel.floatingOf(colorScheme)
+                  .colorOf(colorScheme),
               shadows: _cardShadows(colorScheme),
               child: child,
             ),
@@ -841,7 +865,8 @@ class _CommonPopupBoxState extends State<CommonPopupBox> {
     context.visitChildElements(visit);
     final resolved = color;
     if (resolved == null || resolved.a == 0) {
-      return context.colorScheme.surfaceContainer;
+      final colorScheme = context.colorScheme;
+      return SurfaceLevel.floatingOf(colorScheme).colorOf(colorScheme);
     }
     return resolved;
   }
@@ -874,6 +899,7 @@ class _CommonPopupBoxState extends State<CommonPopupBox> {
       anchorShift: offset,
       sourceColor: _sourceColor(),
       sourceImage: snapshot,
+      elevated: ElevatedSurfaceTheme.isIn(context),
     );
     Navigator.of(context).push(route);
     void reveal() {
@@ -1373,7 +1399,8 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
                       child: Material(
                         type: MaterialType.card,
                         animationDuration: Duration.zero,
-                        color: colorScheme.surfaceContainer,
+                        color: SurfaceLevel.floatingOf(colorScheme)
+                            .colorOf(colorScheme),
                         clipBehavior: Clip.antiAlias,
                         shape: shape,
                         child: ConstrainedBox(

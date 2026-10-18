@@ -8,6 +8,7 @@ import 'dart:math';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/scroll.dart';
+import 'package:fl_clash/ui/surface.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -563,10 +564,9 @@ class _ScrollbarHintPill extends StatelessWidget {
     return DecoratedBox(
       key: const ValueKey('scrollbarHintPill'),
       decoration: ShapeDecoration(
-        color: colorScheme.surfaceContainerHighest,
-        shape: AppShape.sm.copyWith(
-          side: BorderSide(color: colorScheme.outlineVariant),
-        ),
+        color: SurfaceLevel.floatingOf(colorScheme).colorOf(colorScheme),
+        shape: AppShape.sm,
+        shadows: kElevationToShadow[2],
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

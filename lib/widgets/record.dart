@@ -241,9 +241,7 @@ extension RecordToneExt on RecordTone {
   Color? tintColor(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return switch (this) {
-      RecordTone.warning => colorScheme.tertiaryContainer.withValues(
-        alpha: 0.2,
-      ),
+      RecordTone.warning => colorScheme.warningContainer.withValues(alpha: 0.2),
       RecordTone.error => colorScheme.errorContainer.withValues(alpha: 0.2),
       RecordTone.muted || RecordTone.neutral => null,
     };
@@ -254,7 +252,7 @@ extension RecordToneExt on RecordTone {
     return switch (this) {
       RecordTone.muted => colorScheme.outline,
       RecordTone.neutral => colorScheme.onSurfaceVariant,
-      RecordTone.warning => colorScheme.onTertiaryContainer,
+      RecordTone.warning => colorScheme.onWarningContainer,
       RecordTone.error => colorScheme.onErrorContainer,
     };
   }
@@ -264,7 +262,7 @@ extension RecordToneExt on RecordTone {
     return switch (this) {
       RecordTone.muted => colorScheme.surfaceContainerHigh,
       RecordTone.neutral => colorScheme.surfaceContainerHighest,
-      RecordTone.warning => colorScheme.tertiaryContainer,
+      RecordTone.warning => colorScheme.warningContainer,
       RecordTone.error => colorScheme.errorContainer,
     };
   }

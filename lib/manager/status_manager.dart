@@ -10,6 +10,7 @@ import 'dart:math';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
+import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/widgets/fade_box.dart';
 import 'package:fl_clash/widgets/theme.dart';
 import 'package:material_ui/material_ui.dart';
@@ -143,65 +144,71 @@ class StatusManagerState extends MessageHostState<StatusManager> {
                                     onDismissed: (_) {
                                       _cancelMessage(messages.last.id);
                                     },
-                                    child: Card(
-                                      shape: const RoundedSuperellipseBorder(
-                                        borderRadius: BorderRadius.all(
-                                          Radius.circular(14),
-                                        ),
+                                    child: SurfaceScope(
+                                      level: SurfaceLevel.floatingOf(
+                                        context.colorScheme,
                                       ),
-                                      elevation: 10,
-                                      color: context
-                                          .colorScheme
-                                          .surfaceContainerHigh,
-                                      child: Container(
-                                        width: min(constraints.maxWidth, 500),
-                                        constraints: const BoxConstraints(
-                                          minHeight: 54,
+                                      child: Card(
+                                        shape: const RoundedSuperellipseBorder(
+                                          borderRadius: BorderRadius.all(
+                                            Radius.circular(14),
+                                          ),
                                         ),
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 16,
-                                          vertical: 8,
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Flexible(
-                                              child: Text(
-                                                messages.last.text,
-                                                maxLines: 3,
-                                                style: context
-                                                    .textTheme
-                                                    .labelLarge
-                                                    ?.copyWith(
-                                                      color: context
-                                                          .colorScheme
-                                                          .onSurfaceVariant,
-                                                    ),
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 16),
-                                            if (messages.last.actionState !=
-                                                null)
-                                              CommonMinFilledButtonTheme(
-                                                child: FilledButton.tonal(
-                                                  onPressed: () async {
-                                                    _cancelMessage(
-                                                      messages.last.id,
-                                                    );
-                                                    messages.last.actionState!
-                                                        .action();
-                                                  },
-                                                  child: Text(
-                                                    messages
-                                                        .last
-                                                        .actionState!
-                                                        .actionText,
-                                                  ),
+                                        elevation: 10,
+                                        color: SurfaceLevel.floatingOf(
+                                          context.colorScheme,
+                                        ).colorOf(context.colorScheme),
+                                        child: Container(
+                                          width: min(constraints.maxWidth, 500),
+                                          constraints: const BoxConstraints(
+                                            minHeight: 54,
+                                          ),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 8,
+                                          ),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Flexible(
+                                                child: Text(
+                                                  messages.last.text,
+                                                  maxLines: 3,
+                                                  style: context
+                                                      .textTheme
+                                                      .labelLarge
+                                                      ?.copyWith(
+                                                        color: context
+                                                            .colorScheme
+                                                            .onSurfaceVariant,
+                                                      ),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
                                                 ),
                                               ),
-                                          ],
+                                              const SizedBox(width: 16),
+                                              if (messages.last.actionState !=
+                                                  null)
+                                                CommonMinFilledButtonTheme(
+                                                  child: FilledButton.tonal(
+                                                    onPressed: () async {
+                                                      _cancelMessage(
+                                                        messages.last.id,
+                                                      );
+                                                      messages.last.actionState!
+                                                          .action();
+                                                    },
+                                                    child: Text(
+                                                      messages
+                                                          .last
+                                                          .actionState!
+                                                          .actionText,
+                                                    ),
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),

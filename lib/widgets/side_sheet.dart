@@ -8,6 +8,7 @@ import 'dart:ui';
 
 import 'package:fl_clash/ui/drag_back.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
+import 'package:fl_clash/ui/surface.dart';
 
 import 'package:fl_clash/ui/color.dart';
 
@@ -63,7 +64,8 @@ class SideSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final Color color = backgroundColor ?? colorScheme.surface;
+    final Color color =
+        backgroundColor ?? SurfaceLevel.page.colorOf(colorScheme);
     final Color surfaceTintColor = colorScheme.surfaceTint;
     final Color shadowColor = this.shadowColor ?? Colors.transparent;
     final double elevation = this.elevation ?? 0;
@@ -447,7 +449,8 @@ class ModalSideSheetRoute<T> extends PopupRoute<T> with DragBackRouteMixin<T> {
           final colorScheme = Theme.of(context).colorScheme;
           return _ModalSideSheet<T>(
             route: this,
-            backgroundColor: backgroundColor ?? colorScheme.surface,
+            backgroundColor:
+                backgroundColor ?? SurfaceLevel.page.colorOf(colorScheme),
             elevation: elevation ?? 0,
             shape: shape,
             clipBehavior: clipBehavior,
@@ -456,7 +459,10 @@ class ModalSideSheetRoute<T> extends PopupRoute<T> with DragBackRouteMixin<T> {
       ),
     );
 
-    return SheetDismissScope(handler: _dismissHandler, child: content);
+    return SheetDismissScope(
+      handler: _dismissHandler,
+      child: ElevatedSurfaceTheme(child: content),
+    );
   }
 
   void _dismiss() {

@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/ui/surface.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
@@ -201,7 +202,7 @@ class SnapSheetRoute<T> extends PopupRoute<T> {
     Animation<double> animation,
     Animation<double> secondaryAnimation,
   ) {
-    return _SnapSheet(
+    final sheet = _SnapSheet(
       detents: detents,
       fitMaxHeight: fitMaxHeight,
       collapsedDetent: collapsedDetent,
@@ -213,6 +214,7 @@ class SnapSheetRoute<T> extends PopupRoute<T> {
       dismissHandler: _dismissHandler,
       builder: builder,
     );
+    return ElevatedSurfaceTheme(child: sheet);
   }
 }
 
@@ -353,7 +355,7 @@ class _SnapSheetState extends State<_SnapSheet>
 
   @override
   Widget build(BuildContext context) {
-    final sheetColor = context.colorScheme.surfaceContainerLow;
+    final sheetColor = SurfaceLevel.page.colorOf(context.colorScheme);
     final theme = Theme.of(context);
     final fitMaxHeight = widget.fitMaxHeight;
     Widget content = widget.builder(context, _scrollController);

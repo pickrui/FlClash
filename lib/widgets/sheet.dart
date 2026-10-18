@@ -10,6 +10,7 @@ import 'package:fl_clash/common/navigator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fl_clash/ui/sheet_navigator.dart';
+import 'package:fl_clash/ui/surface.dart';
 
 import 'snap_sheet.dart';
 
@@ -81,7 +82,7 @@ Future<T?> _showBottomSheet<T>(
 }) {
   final localizations = MaterialLocalizations.of(context);
   return Navigator.of(context).push(
-    ModalBottomSheetRoute<T>(
+    _BottomSheetRoute<T>(
       isScrollControlled: props.isScrollControlled,
       builder: (sheetContext) {
         return SheetProvider(
@@ -99,6 +100,30 @@ Future<T?> _showBottomSheet<T>(
       modalBarrierColor: Theme.of(context).bottomSheetTheme.modalBarrierColor,
     ),
   );
+}
+
+class _BottomSheetRoute<T> extends ModalBottomSheetRoute<T> {
+  _BottomSheetRoute({
+    required super.builder,
+    required super.isScrollControlled,
+    super.backgroundColor,
+    super.showDragHandle,
+    super.useSafeArea,
+    super.barrierLabel,
+    super.barrierOnTapHint,
+    super.modalBarrierColor,
+  });
+
+  @override
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
+    return ElevatedSurfaceTheme(
+      child: super.buildPage(context, animation, secondaryAnimation),
+    );
+  }
 }
 
 Future<T?> showExtend<T>(

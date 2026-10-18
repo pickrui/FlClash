@@ -6,6 +6,7 @@
 import 'dart:async';
 
 import 'package:fl_clash/ui/shape.dart';
+import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/common/context.dart';
 
 import 'dialog.dart';
@@ -21,11 +22,8 @@ import 'package:fl_clash/widgets/sheet.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:material_ui/material_ui.dart';
 
-Color _sheetColorOf(BuildContext context) {
-  return SheetProvider.of(context)?.type == SheetType.bottomSheet
-      ? ColorScheme.of(context).surfaceContainerLow
-      : ColorScheme.of(context).surface;
-}
+Color _sheetColorOf(BuildContext context) =>
+    SurfaceLevel.page.colorOf(ColorScheme.of(context));
 
 class PagedSheetRoute<T> extends PageRoute<T>
     with

@@ -6,6 +6,7 @@
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/common/context.dart';
 import 'package:fl_clash/ui/shape.dart';
+import 'package:fl_clash/ui/surface.dart';
 import 'package:material_ui/material_ui.dart';
 
 class CommonChip extends StatelessWidget {
@@ -95,10 +96,8 @@ class MetaChip extends StatelessWidget {
     final colorScheme = context.colorScheme;
     return DecoratedBox(
       decoration: ShapeDecoration(
-        color: colorScheme.surfaceContainerHighest,
-        shape: AppShape.sm.copyWith(
-          side: BorderSide(color: colorScheme.outlineVariant),
-        ),
+        color: context.raisedSurfaceLevel.colorOf(colorScheme),
+        shape: AppShape.sm,
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),

@@ -6,6 +6,7 @@
 import 'package:fl_clash/ui/deferred_push.dart';
 import 'package:fl_clash/ui/drag_back.dart';
 import 'package:fl_clash/ui/keyboard_inset_hold.dart';
+import 'package:fl_clash/ui/surface.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -316,7 +317,7 @@ class _OpenContainerRoute<T> extends ModalRoute<T>
     Animation<double> secondaryAnimation,
   ) {
     final theme = Theme.of(context);
-    final surface = theme.colorScheme.surface;
+    final surface = SurfaceLevel.page.colorOf(theme.colorScheme);
     final open = FadeTransition(
       opacity: _openOpacity,
       child: RepaintBoundary(

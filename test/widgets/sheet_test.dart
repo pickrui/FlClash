@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/providers/app.dart';
+import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/widgets/inherited.dart';
 import 'package:fl_clash/widgets/scaffold.dart';
 import 'package:fl_clash/widgets/sheet.dart';
@@ -54,12 +55,19 @@ Future<void> _openSheet(
   };
 }
 
-ThemeData _theme(Brightness brightness) => ThemeData(
-  colorScheme: ColorScheme.fromSeed(
+ThemeData _theme(Brightness brightness) {
+  final colorScheme = ColorScheme.fromSeed(
     seedColor: Colors.blue,
     brightness: brightness,
-  ),
-);
+  );
+  return ThemeData(
+    colorScheme: colorScheme,
+    extensions: [
+      if (brightness == Brightness.dark)
+        ElevatedColorScheme(colorScheme.elevated),
+    ],
+  ).withAppSurfaces;
+}
 
 Future<ValueNotifier<ThemeMode>> _openFromPage(
   WidgetTester tester, {
@@ -113,12 +121,14 @@ Color? _sheetColor(WidgetTester tester) => tester
     .color;
 
 void main() {
-  final dark = _theme(Brightness.dark).colorScheme;
-  for (final (kind, size, darkColor, open) in [
+  final dark = _theme(Brightness.dark);
+  final darkColor = SurfaceLevel.page.colorOf(
+    dark.extension<ElevatedColorScheme>()!.colorScheme,
+  );
+  for (final (kind, size, open) in [
     (
       'bottom sheet',
       const Size(400, 800),
-      dark.surfaceContainerLow,
       (BuildContext context) => showSheet<void>(
         context: context,
         builder: (_, _) => const Text('sheet'),
@@ -127,7 +137,6 @@ void main() {
     (
       'side sheet',
       const Size(1200, 800),
-      dark.surface,
       (BuildContext context) => showSheet<void>(
         context: context,
         builder: (_, _) => const Text('sheet'),
@@ -136,18 +145,19 @@ void main() {
     (
       'snap sheet',
       const Size(400, 800),
-      dark.surfaceContainerLow,
       (BuildContext context) =>
           showSnapSheet<void>(context, builder: (_, _) => const Text('sheet')),
     ),
   ]) {
-    testWidgets('an open $kind takes a new app theme', (tester) async {
+    testWidgets('an open $kind takes a new app theme a level above the '
+        'page', (tester) async {
       final mode = await _openFromPage(tester, size: size, open: open);
       expect(_sheetColor(tester), isNot(darkColor));
 
       mode.value = ThemeMode.dark;
       await tester.pumpAndSettle();
 
+      expect(darkColor, isNot(SurfaceLevel.page.colorOf(dark.colorScheme)));
       expect(_sheetColor(tester), darkColor);
     });
   }

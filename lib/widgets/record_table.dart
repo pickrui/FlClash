@@ -9,6 +9,7 @@ import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/builder.dart';
+import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/table_layout.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
@@ -315,7 +316,7 @@ class _RecordTableHeader<T> extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: _recordTableMargin),
       child: Material(
-        color: colorScheme.surfaceContainerHigh,
+        color: context.raisedSurfaceLevel.colorOf(colorScheme),
         shape: AppShape.all(AppCorner.fit(height)),
         clipBehavior: Clip.antiAlias,
         child: TableColumnResizer(
@@ -447,6 +448,7 @@ class RecordTableRow extends StatelessWidget {
     final colorScheme = context.colorScheme;
     final style = context.textTheme.bodyMedium ?? const TextStyle(fontSize: 14);
     final shape = AppShape.all(AppCorner.fit(table.rowHeight));
+    final level = striped ? context.raisedSurfaceLevel : context.surfaceLevel;
     Widget row = Material(
       type: MaterialType.transparency,
       child: InkWell(
@@ -473,7 +475,7 @@ class RecordTableRow extends StatelessWidget {
     if (striped) {
       row = DecoratedBox(
         decoration: ShapeDecoration(
-          color: colorScheme.surfaceContainer,
+          color: level.colorOf(colorScheme),
           shape: shape,
         ),
         child: row,
@@ -481,7 +483,7 @@ class RecordTableRow extends StatelessWidget {
     }
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: _recordTableMargin),
-      child: row,
+      child: SurfaceScope(level: level, child: row),
     );
   }
 }

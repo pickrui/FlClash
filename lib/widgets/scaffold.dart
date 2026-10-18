@@ -10,6 +10,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/pop_scope.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
+import 'package:fl_clash/ui/surface.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -188,9 +189,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
   }
 
   Color get _searchingBackgroundColor =>
-      context.colorScheme.brightness == Brightness.dark
-      ? Colors.grey.shade900
-      : Colors.white;
+      SurfaceLevel.card.colorOf(context.colorScheme);
 
   Widget _buildSearchingAppBarTheme(Widget child) {
     return Builder(
@@ -208,7 +207,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
               border: InputBorder.none,
             ),
           ),
-          child: child,
+          child: SurfaceScope(level: SurfaceLevel.card, child: child),
         );
       },
     );
@@ -305,6 +304,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
 
   Widget _buildDockedSearch(AppBarSearchState searchState) {
     final theme = Theme.of(context);
+    final pill = AppShape.input.copyWith(borderRadius: AppRadius.full);
     final fieldPadding =
         (BottomInsetScope.dockedSearchHeight -
             globalState.measure.bodyLargeHeight) /
@@ -323,8 +323,15 @@ class CommonScaffoldState extends State<CommonScaffold> {
         data: theme.copyWith(
           inputDecorationTheme: theme.inputDecorationTheme.copyWith(
             filled: true,
-            fillColor: theme.colorScheme.surfaceContainerHigh,
-            border: AppShape.input.copyWith(borderRadius: AppRadius.full),
+            fillColor: SurfaceLevel.floatingOf(theme.colorScheme)
+                .colorOf(theme.colorScheme),
+            border: pill.copyWith(borderSide: BorderSide.none),
+            focusedBorder: pill.copyWith(
+              borderSide: BorderSide(
+                color: theme.colorScheme.primary,
+                width: 2,
+              ),
+            ),
             contentPadding: EdgeInsets.symmetric(
               horizontal: 12,
               vertical: fieldPadding,
@@ -524,7 +531,9 @@ class CommonScaffoldState extends State<CommonScaffold> {
   Widget _buildFloatingHeader(Widget appBar) {
     final top = MediaQuery.paddingOf(context).top;
     return FloatingHeader(
-      backgroundColor: widget.backgroundColor ?? context.colorScheme.surface,
+      backgroundColor:
+          widget.backgroundColor ??
+          SurfaceLevel.page.colorOf(context.colorScheme),
       fadeStart: top / (top + pageToolbarHeight),
       overhang: _headerOverhang,
       child: appBar,
@@ -754,7 +763,8 @@ class CommonScaffoldState extends State<CommonScaffold> {
     }
     final sheetBody = FloatingHeaderBody(
       backgroundColor:
-          widget.backgroundColor ?? context.colorScheme.surfaceContainerLow,
+          widget.backgroundColor ??
+          SurfaceLevel.page.colorOf(context.colorScheme),
       header: SheetToolBar(appBar: appBar),
       footer: form.dockedSearch == null
           ? null
