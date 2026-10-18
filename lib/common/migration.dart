@@ -13,6 +13,9 @@ class Migration {
 
   final currentVersion = 2;
 
+  /// Apart from [currentVersion], which backups carry and older apps refuse.
+  static const upgradeVersion = 1;
+
   factory Migration() {
     _instance ??= Migration._internal();
     return _instance!;
@@ -24,6 +27,33 @@ class Migration {
     Future<void> Function(Config config)? persist,
   }) async {
     final persistConfig = persist ?? preferences.saveConfig;
+    final installed = configMap != null;
+    final config = await _migrate(configMap, sync, persistConfig);
+    return _upgrade(config, installed: installed, persist: persistConfig);
+  }
+
+  Future<Config> _upgrade(
+    Config config, {
+    required bool installed,
+    required Future<void> Function(Config config) persist,
+  }) async {
+    final from = await preferences.getUpgradeVersion();
+    if (from >= upgradeVersion) {
+      return config;
+    }
+    final upgraded = installed ? _moveLegacyThemeDefaults(config) : config;
+    if (upgraded != config) {
+      await persist(upgraded);
+    }
+    await preferences.setUpgradeVersion(upgradeVersion);
+    return upgraded;
+  }
+
+  Future<Config> _migrate(
+    Map<String, Object?>? configMap,
+    Future<Config> Function(MigrationData data) sync,
+    Future<void> Function(Config config) persistConfig,
+  ) async {
     var oldVersion = await preferences.getVersion();
     if (oldVersion == 0 && isCurrentConfigShape(configMap)) {
       final narrowed = narrowLegacy172Bypass(configMap);
@@ -77,6 +107,33 @@ class Migration {
     }
     return res;
   }
+}
+
+const _legacyPrimaryColor = 0xFFD8C0C3;
+
+const _legacyPrimaryColors = [
+  0xFF795548,
+  0xFF03A9F4,
+  0xFFFFFF00,
+  0xFFBBC9CC,
+  0xFFABD397,
+  _legacyPrimaryColor,
+  0xFF665390,
+];
+
+/// Both pre-0.9 color defaults still in place mean no color was ever picked.
+Config _moveLegacyThemeDefaults(Config config) {
+  final theme = config.themeProps;
+  if (theme.primaryColor != _legacyPrimaryColor ||
+      !intListEquality.equals(theme.primaryColors, _legacyPrimaryColors)) {
+    return config;
+  }
+  return config.copyWith(
+    themeProps: theme.copyWith(
+      primaryColor: defaultPrimaryColor,
+      primaryColors: defaultPrimaryColors,
+    ),
+  );
 }
 
 bool isCurrentConfigShape(Map<String, Object?>? config) {

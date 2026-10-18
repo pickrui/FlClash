@@ -367,9 +367,11 @@ void main() {
   });
 
   group('ThemeProps JSON round-trip', () {
-    test('safeFromJson returns default on null', () {
+    test('a new install follows the system theme in iOS blue', () {
       final result = ThemeProps.safeFromJson(null);
-      expect(result.themeMode, ThemeMode.dark);
+      expect(result.themeMode, ThemeMode.system);
+      expect(result.primaryColor, 0xFF007AFF);
+      expect(result.primaryColors.first, 0xFF007AFF);
     });
 
     test('round-trip with custom values', () {

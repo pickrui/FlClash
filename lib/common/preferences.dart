@@ -280,6 +280,16 @@ class Preferences {
     await preferences?.setInt('version', version);
   }
 
+  Future<int> getUpgradeVersion() async {
+    final preferences = await _loadSharedPreferences();
+    return preferences?.getInt('upgradeVersion') ?? 0;
+  }
+
+  Future<void> setUpgradeVersion(int version) async {
+    final preferences = await _loadSharedPreferences();
+    await preferences?.setInt('upgradeVersion', version);
+  }
+
   /// The Linux package format the user picked when detection came up empty.
   Future<String?> getLinuxPackageFormat() async {
     final preferences = await _loadSharedPreferences();

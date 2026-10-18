@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../helpers/preferences.dart';
 
@@ -159,5 +160,79 @@ void main() {
 
     expect(narrowLegacy172Bypass(null), isNull);
     expect(identical(narrowLegacy172Bypass(config), config), isTrue);
+  });
+
+  group('theme color defaults', () {
+    const legacyColor = 0xFFD8C0C3;
+    const legacyColors = [
+      0xFF795548,
+      0xFF03A9F4,
+      0xFFFFFF00,
+      0xFFBBC9CC,
+      0xFFABD397,
+      legacyColor,
+      0xFF665390,
+    ];
+
+    Map<String, Object?> stored(ThemeProps theme) =>
+        (jsonDecode(jsonEncode(Config(themeProps: theme))) as Map)
+            .cast<String, Object?>();
+
+    Future<ThemeProps> load(
+      Map<String, Object?> configMap,
+      List<ThemeProps> saved,
+    ) async {
+      final config = await migration.migrationIfNeeded(
+        configMap,
+        sync: (_) => throw StateError('current configs must not be resynced'),
+        persist: (config) async => saved.add(config.themeProps),
+      );
+      return config.themeProps;
+    }
+
+    test('a theme still on the old color defaults moves to the new ones '
+        'once', () async {
+      await mockPreferences({'version': migration.currentVersion});
+      final legacy = stored(
+        const ThemeProps(
+          primaryColor: legacyColor,
+          primaryColors: legacyColors,
+          themeMode: ThemeMode.dark,
+          pureBlack: true,
+        ),
+      );
+      final saved = <ThemeProps>[];
+
+      final theme = await load(legacy, saved);
+
+      expect(theme.primaryColor, defaultPrimaryColor);
+      expect(theme.primaryColors, defaultPrimaryColors);
+      expect(theme.themeMode, ThemeMode.dark);
+      expect(theme.pureBlack, isTrue);
+      expect(saved, [theme]);
+      expect(await preferences.getUpgradeVersion(), Migration.upgradeVersion);
+
+      saved.clear();
+      expect((await load(legacy, saved)).primaryColor, legacyColor);
+      expect(saved, isEmpty);
+    });
+
+    test('colors the user picked stay as they are', () async {
+      for (final theme in const [
+        ThemeProps(primaryColor: 0xFF123456, primaryColors: legacyColors),
+        ThemeProps(
+          primaryColor: legacyColor,
+          primaryColors: [...legacyColors, 0xFF123456],
+        ),
+        ThemeProps(primaryColors: legacyColors),
+      ]) {
+        await mockPreferences({'version': migration.currentVersion});
+        final saved = <ThemeProps>[];
+
+        expect(await load(stored(theme), saved), theme);
+        expect(saved, isEmpty);
+        expect(await preferences.getUpgradeVersion(), Migration.upgradeVersion);
+      }
+    });
   });
 }
