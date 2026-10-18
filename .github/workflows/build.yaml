@@ -428,14 +428,16 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libclang-dev
 
       # The core embeds this bundle; the app loads the asset copy for its own requests.
+      # Pinned by hash, so a new bundle from https://curl.se/docs/caextract.html is a reviewed bump.
       - name: Fetch CA certificates
         shell: bash
+        env:
+          CA_BUNDLE: cacert-2026-09-25.pem
+          CA_BUNDLE_SHA256: a41b5d356aea97a529fe27e0f7316d2f9d946d75927476cf9cf1b90637d00505
         run: |
           bundle=core/Clash.Meta/component/ca/ca-certificates.crt
-          curl -fsSL --retry 3 -o "$bundle" https://curl.se/ca/cacert.pem
-          count=$(grep -c 'BEGIN CERTIFICATE' "$bundle")
-          echo "$count CA certificates"
-          test "$count" -ge 100
+          curl -fsSL --retry 3 -o "$bundle" "https://curl.se/ca/$CA_BUNDLE"
+          echo "$CA_BUNDLE_SHA256  $bundle" | sha256sum -c -
           cp "$bundle" assets/data/ca-certificates.crt
 
       - name: Download Go modules with retries
