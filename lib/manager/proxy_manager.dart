@@ -30,6 +30,7 @@ class _ProxyManagerState extends ConsumerState<ProxyManager> {
       final result = await startSystemProxy(port, proxyState.bassDomain);
       switch (result) {
         case SystemProxyStartResult.success:
+        case SystemProxyStartResult.closed:
           break;
         case SystemProxyStartResult.mixedProxyUnavailable:
           commonPrint.log(

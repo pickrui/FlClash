@@ -36,7 +36,7 @@ extension SystemControllerExt on AppController {
       startupRecovery.markClosed,
       waitForPendingDatabaseWrites,
       if (macOS != null) () => macOS!.updateDns(true),
-      stopSystemProxyIfNeeded,
+      closeSystemProxy,
       if (tray != null) () => tray!.destroy(),
       coreController.destroy,
     ]),

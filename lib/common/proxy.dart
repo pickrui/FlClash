@@ -25,6 +25,7 @@ enum SystemProxyStartResult {
   mixedProxyUnavailable,
   systemProxySetupFailed,
   systemProxyRestoreFailed,
+  closed,
 }
 
 class SystemProxyController {
@@ -36,6 +37,7 @@ class SystemProxyController {
 
   bool _startedByFlClash = false;
   bool _checkedPersistedState = false;
+  bool _closed = false;
   Future<void> _task = Future.value();
 
   SystemProxyController({
@@ -59,6 +61,7 @@ class SystemProxyController {
     }
 
     return _queue(() async {
+      if (_closed) return SystemProxyStartResult.closed;
       _checkedPersistedState = false;
       final readinessChecker = _readinessChecker;
       var isReady = true;
@@ -108,6 +111,12 @@ class SystemProxyController {
       }
       return success == true;
     });
+  }
+
+  /// Exit's stop: no start that runs after it turns the proxy back on.
+  Future<bool> close() {
+    _closed = true;
+    return stopIfNeeded();
   }
 
   Future<T> _queue<T>(Future<T> Function() task) {
@@ -188,6 +197,10 @@ Future<SystemProxyStartResult> startSystemProxy(
 
 Future<bool> stopSystemProxyIfNeeded() {
   return systemProxyController.stopIfNeeded();
+}
+
+Future<bool> closeSystemProxy() {
+  return systemProxyController.close();
 }
 
 final systemProxyController = SystemProxyController(

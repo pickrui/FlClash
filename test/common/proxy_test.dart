@@ -281,4 +281,36 @@ void main() {
     expect(events, ['start', 'started', 'stop']);
     expect(controller.startedByFlClash, false);
   });
+
+  test('no start queued around exit turns the proxy back on', () async {
+    final startEntered = Completer<void>();
+    final releaseStart = Completer<void>();
+    final events = <String>[];
+    final controller = SystemProxyController(
+      startProxy: (_, _) async {
+        events.add('start');
+        if (!startEntered.isCompleted) startEntered.complete();
+        await releaseStart.future;
+        return true;
+      },
+      stopProxy: () async {
+        events.add('stop');
+        return true;
+      },
+    );
+
+    final inFlight = controller.start(7890, const []);
+    await startEntered.future;
+    final queuedBefore = controller.start(7890, const []);
+    final closed = controller.close();
+    final queuedAfter = controller.start(7890, const []);
+    releaseStart.complete();
+
+    expect(await inFlight, SystemProxyStartResult.success);
+    expect(await queuedBefore, SystemProxyStartResult.closed);
+    expect(await closed, true);
+    expect(await queuedAfter, SystemProxyStartResult.closed);
+    expect(events, ['start', 'stop']);
+    expect(controller.startedByFlClash, false);
+  });
 }
