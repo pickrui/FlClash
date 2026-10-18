@@ -7,7 +7,7 @@ import 'package:fl_clash/views/network_diagnostics.dart';
 import 'package:fl_clash/views/cloud/cloud_login_page.dart';
 import 'package:fl_clash/ui/theme_cross_fade.dart';
 import 'package:fl_clash/ui/keyboard_inset_hold.dart';
-import 'package:fl_clash/widgets/focus.dart';
+import 'package:fl_clash/ui/focus.dart';
 
 import 'dart:async';
 

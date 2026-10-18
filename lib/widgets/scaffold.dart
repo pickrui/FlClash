@@ -15,11 +15,14 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'button.dart';
+
 import 'package:fl_clash/ui/chip.dart';
 
 import 'package:fl_clash/ui/inherited.dart';
+import 'package:fl_clash/ui/keyboard.dart';
 
 import 'package:fl_clash/ui/loading.dart';
+
 import 'navigation_dock.dart';
 import 'popup.dart';
 
@@ -153,8 +156,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
     if (event is! KeyDownEvent ||
         _appBarState.value.searchState == null ||
         _isEdit ||
-        !utils
-            .controlSingleActivator(LogicalKeyboardKey.keyF)
+        !controlSingleActivator(LogicalKeyboardKey.keyF)
             .accepts(event, HardwareKeyboard.instance) ||
         !_isFrontmost) {
       return false;

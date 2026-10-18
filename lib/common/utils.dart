@@ -11,7 +11,6 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter/services.dart';
 
 class Utils {
   static Utils? _instance;
@@ -201,11 +200,6 @@ class Utils {
       }
     } catch (_) {}
     return false;
-  }
-
-  SingleActivator controlSingleActivator(LogicalKeyboardKey trigger) {
-    final control = system.isMacOS ? false : true;
-    return SingleActivator(trigger, control: control, meta: !control);
   }
 
   FutureOr<T> handleWatch<T>({

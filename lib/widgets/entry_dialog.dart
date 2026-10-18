@@ -11,7 +11,8 @@ import 'package:fl_clash/models/common.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'dialog.dart';
-import 'theme.dart';
+
+import 'package:fl_clash/ui/theme.dart';
 
 class BatchInput<T> {
   final String label;

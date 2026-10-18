@@ -67,7 +67,9 @@ void main() {
       expect(find.text('Edit'), findsNothing);
       expect(
         tester
-            .widget<CommonActionChip>(find.widgetWithText(CommonActionChip, 'Upload'))
+            .widget<CommonActionChip>(
+              find.widgetWithText(CommonActionChip, 'Upload'),
+            )
             .onPressed,
         isNotNull,
       );

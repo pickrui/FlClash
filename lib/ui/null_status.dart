@@ -223,9 +223,8 @@ class NullStatus extends StatelessWidget {
                 _EnterItem(
                   delay: _staggerStep * (description != null ? 3 : 2),
                   child: Theme(
-                    data: Theme.of(
-                      context,
-                    ).copyWith(visualDensity: VisualDensity.standard),
+                    data: Theme.of(context)
+                        .copyWith(visualDensity: VisualDensity.standard),
                     child: action,
                   ),
                 ),

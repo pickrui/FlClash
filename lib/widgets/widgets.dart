@@ -35,8 +35,10 @@ export 'package:fl_clash/ui/keep_scope.dart';
 export 'package:fl_clash/ui/line_chart.dart';
 
 export 'list.dart';
+
 export 'package:fl_clash/ui/loading.dart';
 export 'package:fl_clash/ui/null_status.dart';
+
 export 'error_status.dart';
 export 'palette.dart';
 
@@ -56,7 +58,7 @@ export 'super_grid.dart';
 
 export 'package:fl_clash/ui/text.dart';
 
-export 'theme.dart';
+export 'package:fl_clash/ui/theme.dart';
 
 export 'package:fl_clash/ui/search_field.dart';
 export 'package:fl_clash/ui/segmented_control.dart';

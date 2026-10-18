@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:fl_clash/ui/chip.dart';
+
 import 'list.dart';
 
 class RecordTextStyles {

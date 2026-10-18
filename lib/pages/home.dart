@@ -19,7 +19,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_clash/views/dashboard/widgets/start_button.dart';
 
-import 'package:fl_clash/widgets/focus.dart';
+import 'package:fl_clash/ui/focus.dart';
 import 'package:fl_clash/ui/animated_visibility.dart';
 
 class HomePage extends ConsumerWidget {
