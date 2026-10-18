@@ -431,7 +431,52 @@ void main() {
       proxyOptions: {'Nodes': const ProxyProviderOptions(filter: 'HK')},
     );
     expect(withOptions['proxy-providers']['Nodes']['filter'], 'HK');
+    final matched = withLibraryProviders(
+      {
+        'dns': {
+          'nameserver-policy': {'rule-set:Rules,Other': '192.0.2.1'},
+          'fake-ip-filter': ['RULE-SET,Filter,real-ip'],
+        },
+      },
+      [
+        rule,
+        resource(id: 4, label: 'Other'),
+        resource(id: 5, label: 'Filter'),
+        resource(id: 6, label: 'Unused'),
+      ],
+      '/fixture',
+      referencedOnly: true,
+    );
+    expect((matched['rule-providers'] as Map).keys, [
+      'Rules',
+      'Other',
+      'Filter',
+    ]);
   });
+
+  test(
+    'a custom profile keeps the rule sets its DNS and sniffer match',
+    () async {
+      final rules = resource();
+      await library.save(rules);
+      final custom = Profile.custom(label: 'Built').copyWith(
+        id: 12,
+        overrides: const ProfileOverrides(
+          dns: Dns(nameserverPolicy: {'rule-set:Rules': '192.0.2.1'}),
+          dnsOverrideKeys: {DnsOverrideKey.nameserverPolicy},
+          sniffer: Sniffer(skipDomain: ['rule-set:Rules']),
+          snifferOverrideKeys: {SnifferOverrideKey.skipDomain},
+        ),
+      );
+      await db.putProfile(custom);
+
+      await expectLater(library.remove(rules), fails('inUse'));
+      await library.save(rules.copyWith(label: 'Renamed'), previous: rules);
+      final renamed = (await db.profilesDao.all().getSingle()).overrides;
+      expect(renamed.dns.nameserverPolicy, {'rule-set:Renamed': '192.0.2.1'});
+      expect(renamed.sniffer.skipDomain, ['rule-set:Renamed']);
+    },
+  );
 
   test(
     'validation catches malformed local resources and invalid remote URLs',

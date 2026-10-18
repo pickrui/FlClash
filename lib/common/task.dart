@@ -615,13 +615,8 @@ Map<String, dynamic> withLibraryProviders(
   final groups = source['proxy-groups'] is List
       ? (source['proxy-groups'] as List).whereType<Map>()
       : const <Map>[];
-  final rules = <String>[
-    if (source['rules'] is List)
-      ...(source['rules'] as List).whereType<String>(),
-    if (source['sub-rules'] is Map)
-      for (final entries in (source['sub-rules'] as Map).values)
-        if (entries is List) ...entries.whereType<String>(),
-  ];
+  final rules = configRules(source);
+  final matcherRuleSets = configMatcherRuleSets(source);
   for (final provider in providers) {
     final referenced = provider.kind == ProviderKind.proxy
         ? groups.any(
@@ -632,7 +627,8 @@ Map<String, dynamic> withLibraryProviders(
                 (group['use'] is List &&
                     (group['use'] as List).contains(provider.label)),
           )
-        : rules.any((rule) => ruleReferencesProvider(rule, provider.label));
+        : matcherRuleSets.contains(provider.label) ||
+              rules.any((rule) => ruleReferencesProvider(rule, provider.label));
     if (referencedOnly && !referenced) continue;
     final section = result[provider.section] is Map
         ? Map<String, dynamic>.from(result[provider.section] as Map)

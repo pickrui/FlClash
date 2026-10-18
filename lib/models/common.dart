@@ -625,6 +625,87 @@ String renameRuleProvider(String rule, String before, String after) =>
       (match) => '${match[1]}RULE-SET,$after',
     );
 
+const _ruleSetPrefix = 'rule-set:';
+
+/// mihomo reads `rule-set:a,b` up to a second colon, the prefix in any case,
+/// except a policy key naming one set, which it takes whole.
+(int, int)? _ruleSetRange(String entry, {bool policyKey = false}) {
+  if (!entry.toLowerCase().startsWith(_ruleSetPrefix)) {
+    return null;
+  }
+  const start = _ruleSetPrefix.length;
+  if (policyKey && !entry.contains(',', start)) {
+    return (start, entry.length);
+  }
+  final colon = entry.indexOf(':', start);
+  return (start, colon < 0 ? entry.length : colon);
+}
+
+List<String> ruleSetsIn(String entry, {bool policyKey = false}) =>
+    switch (_ruleSetRange(entry, policyKey: policyKey)) {
+      (final start, final end) => entry.substring(start, end).split(','),
+      null => const [],
+    };
+
+String renamedRuleSetsIn(
+  String entry,
+  Map<String, String> names, {
+  bool policyKey = false,
+}) {
+  final range = _ruleSetRange(entry, policyKey: policyKey);
+  if (range == null) {
+    return entry;
+  }
+  final (start, end) = range;
+  return entry.replaceRange(
+    start,
+    end,
+    [
+      for (final name in entry.substring(start, end).split(','))
+        names[name] ?? name,
+    ].join(','),
+  );
+}
+
+const _dnsPolicyKeys = ['nameserver-policy', 'proxy-server-nameserver-policy'];
+
+const _snifferMatcherKeys = [
+  'force-domain',
+  'skip-domain',
+  'skip-src-address',
+  'skip-dst-address',
+];
+
+/// The rule sets a config's DNS and sniffer match with, which the core
+/// refuses the config without; rule-mode fake-ip filters are [configRules].
+Set<String> configMatcherRuleSets(Map<String, dynamic> config) {
+  final dns = config['dns'];
+  final sniffer = config['sniffer'];
+  return {
+    if (dns is Map) ...[
+      for (final key in _dnsPolicyKeys)
+        if (dns[key] case final Map policy)
+          for (final domain in policy.keys)
+            ...ruleSetsIn('$domain', policyKey: true),
+      if (dns['fake-ip-filter'] case final List filter)
+        for (final entry in filter) ...ruleSetsIn('$entry'),
+    ],
+    if (sniffer is Map)
+      for (final key in _snifferMatcherKeys)
+        if (sniffer[key] case final List entries)
+          for (final entry in entries) ...ruleSetsIn('$entry'),
+  };
+}
+
+List<String> configRules(Map<String, dynamic> config) => [
+  if (config['rules'] case final List rules) ...rules.whereType<String>(),
+  if (config['sub-rules'] case final Map subRules)
+    for (final entries in subRules.values)
+      if (entries is List) ...entries.whereType<String>(),
+  if (config['dns'] case {'fake-ip-filter': final List filter})
+    ...filter.whereType<String>(),
+];
+
 @freezed
 abstract class IconButtonData with _$IconButtonData {
   const factory IconButtonData({

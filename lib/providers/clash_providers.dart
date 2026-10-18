@@ -206,9 +206,12 @@ class ClashProviderLibrary {
                       group.includeAllProviders == true)) ||
               (group.use?.contains(provider.label) ?? false),
         ),
-        ProviderKind.rule => profile.customRules.any(
-          (rule) => ruleReferencesProvider(rule.value, provider.label),
-        ),
+        ProviderKind.rule =>
+          profile.customRules.any(
+                (rule) => ruleReferencesProvider(rule.value, provider.label),
+              ) ||
+              (profile.type == ProfileType.custom &&
+                  profile.overrides.usesRuleSet(provider.label)),
       };
 
   bool _sourceReferences(
@@ -321,15 +324,18 @@ class ClashProviderLibrary {
       final options = profile.overrides.proxyProviders;
       await database.putProfile(
         profile.copyWith(
-          overrides: previous.kind == ProviderKind.proxy
-              ? profile.overrides.copyWith(
-                  proxyProviders: {
-                    for (final MapEntry(:key, :value) in options.entries)
-                      if (key != previous.label) key: value,
-                    next.label: ?options[previous.label],
-                  },
-                )
-              : profile.overrides,
+          overrides: switch (previous.kind) {
+            ProviderKind.proxy => profile.overrides.copyWith(
+              proxyProviders: {
+                for (final MapEntry(:key, :value) in options.entries)
+                  if (key != previous.label) key: value,
+                next.label: ?options[previous.label],
+              },
+            ),
+            ProviderKind.rule => profile.overrides.renamedRuleSets({
+              previous.label: next.label,
+            }),
+          },
           customProxyGroups: [
             for (final group in profile.customProxyGroups)
               if (previous.kind == ProviderKind.proxy && group.use != null)

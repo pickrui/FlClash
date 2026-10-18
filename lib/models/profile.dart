@@ -15,6 +15,7 @@ import 'package:fl_clash/services/config_key_store.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'clash_config.dart';
+import 'common.dart';
 import 'state.dart';
 
 part 'generated/profile.freezed.dart';
@@ -686,6 +687,66 @@ abstract class ProfileOverrides with _$ProfileOverrides {
 }
 
 extension ProfileOverridesExt on ProfileOverrides {
+  Iterable<Map<String, String>> get _pickedPolicies => [
+    if (dnsOverrideKeys.contains(DnsOverrideKey.nameserverPolicy))
+      dns.nameserverPolicy,
+    if (dnsOverrideKeys.contains(DnsOverrideKey.proxyServerNameserverPolicy))
+      dns.proxyServerNameserverPolicy,
+  ];
+
+  Iterable<String> get _pickedSnifferMatchers => [
+    if (snifferOverrideKeys.contains(SnifferOverrideKey.forceDomain))
+      ...sniffer.forceDomain,
+    if (snifferOverrideKeys.contains(SnifferOverrideKey.skipDomain))
+      ...sniffer.skipDomain,
+    if (snifferOverrideKeys.contains(SnifferOverrideKey.skipSrcAddress))
+      ...sniffer.skipSrcAddress,
+    if (snifferOverrideKeys.contains(SnifferOverrideKey.skipDstAddress))
+      ...sniffer.skipDstAddress,
+  ];
+
+  /// Whether the picked DNS or sniffer keys match with the rule set [name].
+  bool usesRuleSet(String name) =>
+      _pickedPolicies.any(
+        (policy) => policy.keys.any(
+          (domain) => ruleSetsIn(domain, policyKey: true).contains(name),
+        ),
+      ) ||
+      (dnsOverrideKeys.contains(DnsOverrideKey.fakeIpFilter) &&
+          dns.fakeIpFilter.any(
+            (entry) =>
+                ruleSetsIn(entry).contains(name) ||
+                ruleReferencesProvider(entry, name),
+          )) ||
+      _pickedSnifferMatchers.any((entry) => ruleSetsIn(entry).contains(name));
+
+  ProfileOverrides renamedRuleSets(Map<String, String> names) {
+    Map<String, String> policy(Map<String, String> map) => {
+      for (final MapEntry(:key, :value) in map.entries)
+        renamedRuleSetsIn(key, names, policyKey: true): value,
+    };
+    List<String> entries(List<String> list) => [
+      for (final entry in list) renamedRuleSetsIn(entry, names),
+    ];
+    String rule(String entry) => names.entries.fold(
+      renamedRuleSetsIn(entry, names),
+      (text, name) => renameRuleProvider(text, name.key, name.value),
+    );
+    return copyWith(
+      dns: dns.copyWith(
+        nameserverPolicy: policy(dns.nameserverPolicy),
+        proxyServerNameserverPolicy: policy(dns.proxyServerNameserverPolicy),
+        fakeIpFilter: [for (final entry in dns.fakeIpFilter) rule(entry)],
+      ),
+      sniffer: sniffer.copyWith(
+        forceDomain: entries(sniffer.forceDomain),
+        skipDomain: entries(sniffer.skipDomain),
+        skipSrcAddress: entries(sniffer.skipSrcAddress),
+        skipDstAddress: entries(sniffer.skipDstAddress),
+      ),
+    );
+  }
+
   /// The profile's own TUN keys win over the app-wide [keys]; an emptied one
   /// leaves the app's value.
   ProfileOverrides overAppTun(ProfileTun tun, Set<TunOverrideKey> keys) {
