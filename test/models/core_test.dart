@@ -46,6 +46,11 @@ void main() {
       ]) {
         expect(changed.effective, isNot(running.effective), reason: '$changed');
       }
+      final mips = running.copyWith(stack: 'mips');
+      expect(
+        mips.copyWith(congestionController: 'bbr').effective,
+        isNot(mips.effective),
+      );
     });
 
     test('ignores what a running service applies or never reads', () {
@@ -61,6 +66,11 @@ void main() {
       ]) {
         expect(changed.effective, running.effective, reason: '$changed');
       }
+      expect(
+        running.copyWith(congestionController: 'bbr').effective,
+        running.effective,
+        reason: 'only the mips stack reads the congestion controller',
+      );
       final noSystemProxy = running.copyWith(systemProxy: false);
       expect(
         noSystemProxy.copyWith(port: 1, bypassDomain: const []).effective,

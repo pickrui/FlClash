@@ -45,11 +45,11 @@ type TunHandler struct {
 	callbacks tunCallbackLease
 }
 
-func (th *TunHandler) start(fd int, stack, address, dns string, mtu int) bool {
+func (th *TunHandler) start(fd int, stack, address, dns, options string) bool {
 	runLock.Lock()
 	defer runLock.Unlock()
 	th.initHook()
-	tunListener := t.Start(fd, stack, address, dns, mtu)
+	tunListener := t.Start(fd, stack, address, dns, options)
 	if tunListener != nil {
 		log.Infoln("TUN address: %v", tunListener.Address())
 		th.listener = tunListener
@@ -151,7 +151,7 @@ func handleStopTun() {
 	handleStopListener()
 }
 
-func handleStartTun(callback unsafe.Pointer, fd int, stack, address, dns string, mtu int) bool {
+func handleStartTun(callback unsafe.Pointer, fd int, stack, address, dns, options string) bool {
 	tunLock.Lock()
 	defer tunLock.Unlock()
 	if tunHandler != nil {
@@ -172,7 +172,7 @@ func handleStartTun(callback unsafe.Pointer, fd int, stack, address, dns string,
 		callback:  callback,
 		callbacks: tunCallbackLease{release: func() { releaseObject(callback) }},
 	}
-	if !tunHandler.start(fd, stack, address, dns, mtu) {
+	if !tunHandler.start(fd, stack, address, dns, options) {
 		tunHandler = nil
 		handleStopListener()
 		return false
@@ -228,9 +228,9 @@ func invokeMethod(callback unsafe.Pointer, paramsChar *C.char) {
 }
 
 //export startTUN
-func startTUN(callback unsafe.Pointer, fd, mtu C.int, stackChar, addressChar, dnsChar *C.char) bool {
+func startTUN(callback unsafe.Pointer, fd C.int, stackChar, addressChar, dnsChar, optionsChar *C.char) bool {
 	defer recoverExport("startTUN")
-	return handleStartTun(callback, int(fd), takeCString(stackChar), takeCString(addressChar), takeCString(dnsChar), int(mtu))
+	return handleStartTun(callback, int(fd), takeCString(stackChar), takeCString(addressChar), takeCString(dnsChar), takeCString(optionsChar))
 }
 
 //export quickSetup

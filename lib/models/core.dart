@@ -69,6 +69,7 @@ abstract class VpnOptions with _$VpnOptions {
     @Default([]) List<String> excludeSSIDs,
     @Default([]) List<String> excludeNetworks,
     @Default(defaultTunMtu) @JsonKey(fromJson: normalizeTunMtu) int mtu,
+    @Default('') String congestionController,
   }) = _VpnOptions;
 
   factory VpnOptions.fromJson(Map<String, Object?> json) =>
@@ -98,6 +99,9 @@ extension VpnOptionsExt on VpnOptions {
       bypassDomain: systemProxy ? bypassDomain : const [],
       excludeSSIDs: const [],
       excludeNetworks: const [],
+      congestionController: stack == TunStack.mips.name
+          ? congestionController
+          : '',
       accessControlProps: access.enable
           ? AccessControlProps(
               enable: true,

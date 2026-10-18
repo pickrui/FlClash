@@ -45,6 +45,7 @@ void main() {
             'stack': stack.name,
             'route-address': ['0.0.0.0/0'],
             'mtu': 1480,
+            'congestion-controller': 'bbr',
           };
           final config = ClashConfig.fromJson({'tun': source});
           final saved = jsonDecode(jsonEncode(config)) as Map<String, dynamic>;

@@ -7,6 +7,7 @@
 package tun
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/netip"
 	"strings"
@@ -30,7 +31,17 @@ func NormalizeMTU(mtu int) uint32 {
 	return uint32(mtu)
 }
 
-func parseOptions(fd int, stack, address, dns string, mtu int) (LC.Tun, error) {
+// The TUN settings the VPN service hands over beside the builder's own.
+type startOptions struct {
+	MTU                  int    `json:"mtu"`
+	CongestionController string `json:"congestion-controller"`
+}
+
+func parseOptions(fd int, stack, address, dns, rawOptions string) (LC.Tun, error) {
+	var settings startOptions
+	if err := json.Unmarshal([]byte(rawOptions), &settings); err != nil {
+		return LC.Tun{}, fmt.Errorf("invalid TUN options: %w", err)
+	}
 	var prefix4 []netip.Prefix
 	var prefix6 []netip.Prefix
 	tunStack, ok := constant.StackTypeMapping[strings.ToLower(stack)]
@@ -67,15 +78,16 @@ func parseOptions(fd int, stack, address, dns string, mtu int) (LC.Tun, error) {
 	}
 
 	return LC.Tun{
-		Enable:              true,
-		Device:              "FlClash",
-		Stack:               tunStack,
-		DNSHijack:           dnsHijack,
-		AutoRoute:           false,
-		AutoDetectInterface: false,
-		Inet4Address:        prefix4,
-		Inet6Address:        prefix6,
-		MTU:                 NormalizeMTU(mtu),
-		FileDescriptor:      fd,
+		Enable:               true,
+		Device:               "FlClash",
+		Stack:                tunStack,
+		DNSHijack:            dnsHijack,
+		AutoRoute:            false,
+		AutoDetectInterface:  false,
+		Inet4Address:         prefix4,
+		Inet6Address:         prefix6,
+		MTU:                  NormalizeMTU(settings.MTU),
+		CongestionController: settings.CongestionController,
+		FileDescriptor:       fd,
 	}, nil
 }

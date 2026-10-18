@@ -26,6 +26,7 @@ import com.oixcloud.clash.common.sendBroadcast
 import com.oixcloud.clash.common.startForeground
 import com.oixcloud.clash.core.Core
 import com.oixcloud.clash.service.models.normalizeTunMtu
+import com.oixcloud.clash.service.models.tunOptions
 import com.oixcloud.clash.service.models.VpnOptions
 import com.oixcloud.clash.service.models.getIpv4RouteAddress
 import com.oixcloud.clash.service.models.getIpv6RouteAddress
@@ -276,7 +277,7 @@ class VpnService : SystemVpnService(), IBaseService {
             options.stack,
             options.address,
             options.dns,
-            normalizeTunMtu(options.mtu)
+            options.tunOptions,
         )) { "Core TUN initialization failed" }
     }
 

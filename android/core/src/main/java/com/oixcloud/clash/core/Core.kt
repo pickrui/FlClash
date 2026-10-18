@@ -16,7 +16,7 @@ data object Core {
         stack: String,
         address: String,
         dns: String,
-        mtu: Int,
+        options: String,
     ): Boolean
 
     external fun forceGC(
@@ -40,7 +40,7 @@ data object Core {
         stack: String,
         address: String,
         dns: String,
-        mtu: Int,
+        options: String,
     ): Boolean {
         return startTun(
             fd,
@@ -64,7 +64,7 @@ data object Core {
             stack,
             address,
             dns,
-            mtu
+            options
         )
     }
 

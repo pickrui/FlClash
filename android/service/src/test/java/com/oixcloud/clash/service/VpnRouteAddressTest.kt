@@ -8,8 +8,10 @@ package com.oixcloud.clash.service
 import com.oixcloud.clash.common.AccessControlMode
 import com.oixcloud.clash.service.models.AccessControlProps
 import com.oixcloud.clash.service.models.VpnOptions
+import com.google.gson.JsonParser
 import com.oixcloud.clash.service.models.getIpv4RouteAddress
 import com.oixcloud.clash.service.models.getIpv6RouteAddress
+import com.oixcloud.clash.service.models.tunOptions
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
@@ -40,6 +42,17 @@ class VpnRouteAddressTest {
             listOf(8),
             routes.getIpv6RouteAddress().map { it.prefixLength },
         )
+    }
+
+    @Test fun handsTheCoreItsTunOptionsAsJson() {
+        val json = JsonParser.parseString(
+            options().copy(mtu = 1480, congestionController = "bbr").tunOptions,
+        ).asJsonObject
+        assertEquals(1480, json["mtu"].asInt)
+        assertEquals("bbr", json["congestion-controller"].asString)
+        val fallback = JsonParser.parseString(options().copy(mtu = 0).tunOptions).asJsonObject
+        assertEquals(9000, fallback["mtu"].asInt)
+        assertEquals("", fallback["congestion-controller"].asString)
     }
 
     @Test fun rejectsEntriesThatAreNotIpLiterals() {

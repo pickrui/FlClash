@@ -6,6 +6,7 @@
 package com.oixcloud.clash.service.models
 
 import android.os.Parcelable
+import com.google.gson.JsonObject
 import com.oixcloud.clash.common.AccessControlMode
 import kotlinx.parcelize.Parcelize
 import java.net.InetAddress
@@ -35,12 +36,20 @@ data class VpnOptions(
     val excludeSSIDs: List<String> = emptyList(),
     val excludeNetworks: List<String> = emptyList(),
     val mtu: Int = DEFAULT_TUN_MTU,
+    val congestionController: String = "",
 ) : Parcelable
 
 const val DEFAULT_TUN_MTU = 9000
 private val TUN_MTU_RANGE = 1280..65535
 
 fun normalizeTunMtu(value: Int): Int = if (value in TUN_MTU_RANGE) value else DEFAULT_TUN_MTU
+
+/** What the Core's TUN takes beside the builder's settings; tun/options.go reads it. */
+val VpnOptions.tunOptions: String
+    get() = JsonObject().apply {
+        addProperty("mtu", normalizeTunMtu(mtu))
+        addProperty("congestion-controller", congestionController)
+    }.toString()
 
 data class CIDR(val address: InetAddress, val prefixLength: Int)
 

@@ -35,4 +35,20 @@ void main() {
         .update((s) => s.copyWith(bypassPrivateRoute: false));
     expect(routes(), ['10.0.0.0/8']);
   });
+
+  test('the Android VPN receives the app TUN congestion controller', () {
+    final c = ProviderContainer(
+      overrides: [currentProfileProvider.overrideWith((_) => null)],
+    );
+    addTearDown(c.dispose);
+    c
+        .read(patchClashConfigProvider.notifier)
+        .update((s) => s.copyWith.tun(congestionController: 'bbr'));
+    expect(
+      jsonDecode(
+        jsonEncode(c.read(sharedStateProvider)),
+      )['vpnOptions']['congestionController'],
+      'bbr',
+    );
+  });
 }

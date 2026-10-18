@@ -662,6 +662,9 @@ SharedState sharedState(Ref ref) {
       (state) => VM2(state.tun.stack.name, state.mixedPort),
     ),
   );
+  final congestionController = ref.watch(
+    patchClashConfigProvider.select((state) => state.tun.congestionController),
+  );
   final routeAddress = ref.watch(
     patchClashConfigProvider.select(
       (state) =>
@@ -699,6 +702,7 @@ SharedState sharedState(Ref ref) {
       mtu: normalizeTunMtu(
         ref.watch(patchClashConfigProvider.select((state) => state.tun.mtu)),
       ),
+      congestionController: congestionController,
       enable: vpnSetting.enable,
       stack: stack,
       systemProxy: vpnSetting.systemProxy,

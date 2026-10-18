@@ -28,6 +28,7 @@ class SharedStateJsonTest {
             "dnsHijacking":true,"allowBypass":false,"systemProxy":true,
             "bypassDomain":["localhost"],"stack":"mixed","routeAddress":["0.0.0.0/0"],
             "excludeSSIDs":["fixture"],"excludeNetworks":["192.0.2.0/24"],"mtu":1500,
+            "congestionController":"bbr",
             "accessControlProps":{"enable":true,"mode":"acceptSelected",
               "acceptList":["example.app"],"rejectList":[]}}
         }"""
@@ -38,6 +39,7 @@ class SharedStateJsonTest {
         assertEquals(AccessControlMode.ACCEPT_SELECTED, state.vpnOptions!!.accessControlProps.mode)
         assertEquals(listOf("fixture"), state.vpnOptions!!.excludeSSIDs)
         assertEquals(1500, state.vpnOptions!!.mtu)
+        assertEquals("bbr", state.vpnOptions!!.congestionController)
         val wire = JsonParser.parseString(gson.toJson(state)).asJsonObject
         assertTrue(wire["setupParams"].asJsonObject["suspend-on-idle"].asBoolean)
         assertEquals("acceptSelected", wire["vpnOptions"].asJsonObject["accessControlProps"]
@@ -60,6 +62,7 @@ class SharedStateJsonTest {
         assertEquals(emptyList<String>(), older.excludeSSIDs)
         assertEquals(emptyList<String>(), older.excludeNetworks)
         assertEquals(DEFAULT_TUN_MTU, older.mtu)
+        assertEquals("", older.congestionController)
         assertEquals(emptyList<String>(), older.accessControlProps.acceptList)
         assertEquals(emptyList<String>(), older.accessControlProps.rejectList)
         val withoutAccessControl = gson.fromJson(

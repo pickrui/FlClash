@@ -39,6 +39,12 @@ const congestionControllers = [
 const defaultDnsHijack = ['any:53'];
 const defaultTunUdpTimeout = 300;
 
+/// mipstack refuses to start on a name it does not register.
+String normalizeCongestionController(String? value) =>
+    congestionControllers.contains(value)
+    ? value!
+    : defaultCongestionController;
+
 const defaultMixedPort = 7890;
 const defaultKeepAliveInterval = 30;
 const defaultGeoUpdateInterval = 24;
@@ -316,6 +322,12 @@ abstract class Tun with _$Tun {
     @Default(TunStack.mixed) TunStack stack,
     @Default(defaultTunMtu) @JsonKey(fromJson: normalizeTunMtu) int mtu,
     @JsonKey(name: 'route-address') @Default([]) List<String> routeAddress,
+    @Default(defaultCongestionController)
+    @JsonKey(
+      name: 'congestion-controller',
+      fromJson: normalizeCongestionController,
+    )
+    String congestionController,
   }) = _Tun;
 
   factory Tun.fromJson(Map<String, Object?> json) => _$TunFromJson(json);
@@ -345,7 +357,10 @@ abstract class ProfileTun with _$ProfileTun {
   const factory ProfileTun({
     @Default(defaultTunMtu) @JsonKey(fromJson: normalizeTunMtu) int mtu,
     @Default(defaultCongestionController)
-    @JsonKey(name: 'congestion-controller')
+    @JsonKey(
+      name: 'congestion-controller',
+      fromJson: normalizeCongestionController,
+    )
     String congestionController,
     @Default(false) @JsonKey(name: 'strict-route') bool strictRoute,
     @Default([]) @JsonKey(name: 'route-address') List<String> routeAddress,
