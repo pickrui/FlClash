@@ -221,6 +221,36 @@ void main() {
     expect(tun['dns-hijack'], defaultDnsHijack);
   });
 
+  test('a custom profile keeps the members its selectors list', () async {
+    Future<List> membersOf({required bool customProfile}) async {
+      final result = await makeRealProfileTask(
+        _makeRealProfileState(rawConfig: const {}).copyWith(
+          overwriteType: OverwriteType.custom,
+          customProfile: customProfile,
+          profileProxies: const [
+            ProfileProxy(id: 1, proxy: {'name': 'Hong Kong', 'type': 'direct'}),
+            ProfileProxy(id: 2, proxy: {'name': 'Tokyo', 'type': 'direct'}),
+          ],
+          customProxyGroups: const [
+            ProxyGroup(
+              name: 'HK',
+              type: GroupType.Selector,
+              proxies: ['Hong Kong'],
+            ),
+          ],
+        ),
+      );
+      return (result['proxy-groups'] as List).single['proxies'] as List;
+    }
+
+    expect(await membersOf(customProfile: true), ['Hong Kong']);
+    expect(
+      await membersOf(customProfile: false),
+      ['Hong Kong', 'Tokyo'],
+      reason: 'a subscription overwrite still lists personal nodes everywhere',
+    );
+  });
+
   group('remote provider cache', () {
     late Directory root;
     const url = 'https://fixture.invalid/resources';

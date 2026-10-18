@@ -414,7 +414,11 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
       return group.toJson()..removeWhere((_, value) => value == null);
     }).toList();
   }
-  _applyProfileProxies(rawConfig, profileProxies);
+  _applyProfileProxies(
+    rawConfig,
+    profileProxies,
+    appendToSelectors: !data.customProfile,
+  );
   if (data.overwriteType == OverwriteType.merge) {
     // Personal selectors keep their explicit member selection; the automatic
     // insertion of personal nodes above only applies to subscription groups.
@@ -765,7 +769,13 @@ void _applyTailscaleDnsPolicy(
   }
 }
 
-void _applyProfileProxies(Map rawConfig, List<ProfileProxy> profileProxies) {
+// A custom profile's selectors hold the members picked for them, as upstream's
+// do; only groups from a subscription take personal nodes automatically.
+void _applyProfileProxies(
+  Map rawConfig,
+  List<ProfileProxy> profileProxies, {
+  required bool appendToSelectors,
+}) {
   final customProxies = profileProxies
       .where((profileProxy) => profileProxy.isValid)
       .map((profileProxy) => profileProxy.normalizedProxy)
@@ -790,7 +800,9 @@ void _applyProfileProxies(Map rawConfig, List<ProfileProxy> profileProxies) {
     }
   }
   rawConfig['proxies'] = [...customProxies, ...nextProxies];
-  _appendProfileProxyNamesToSelectorGroups(rawConfig, customNames);
+  if (appendToSelectors) {
+    _appendProfileProxyNamesToSelectorGroups(rawConfig, customNames);
+  }
 }
 
 void _appendProfileProxyNamesToSelectorGroups(
