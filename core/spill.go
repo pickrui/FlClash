@@ -53,6 +53,7 @@ func (response MethodResponse) frame() ([]byte, error) {
 	if err != nil || len(data) <= spillThreshold || !spillEnabled.Load() {
 		return data, err
 	}
+	defer scheduleLoadMemoryRelease()
 	path, key, err := writeSpilledResponse(data)
 	if err != nil {
 		log.Warnln("[APP] response %s stays inline: %v", response.ID, err)

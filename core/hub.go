@@ -16,6 +16,7 @@ import (
 	"runtime/debug"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
@@ -155,6 +156,30 @@ func handleForceGC() {
 	debug.FreeOSMemory()
 }
 
+// Provider loads finish after ApplyConfig, past mihomo's own collection there.
+var (
+	loadReleaseDelay  = 2 * time.Second
+	releaseLoadMemory = debug.FreeOSMemory
+
+	loadReleaseMu    sync.Mutex
+	loadReleaseTimer *time.Timer
+)
+
+func scheduleLoadMemoryRelease() {
+	loadReleaseMu.Lock()
+	defer loadReleaseMu.Unlock()
+	if loadReleaseTimer == nil {
+		loadReleaseTimer = time.AfterFunc(loadReleaseDelay, func() {
+			loadReleaseMu.Lock()
+			release := releaseLoadMemory
+			loadReleaseMu.Unlock()
+			release()
+		})
+		return
+	}
+	loadReleaseTimer.Reset(loadReleaseDelay)
+}
+
 func handleShutdown() bool {
 	liveConnections.stop("")
 	stopGeoLifecycle()
@@ -226,6 +251,7 @@ func handleValidateConfig(path string) string {
 }
 
 func validateConfigData(data []byte) string {
+	defer scheduleLoadMemoryRelease()
 	if !isInit.Load() {
 		return "not initialized"
 	}
@@ -586,6 +612,7 @@ func handleGetMemoryStats() (MemoryStats, error) {
 }
 
 func handleGetConfig(path string) (*config.RawConfig, error) {
+	defer scheduleLoadMemoryRelease()
 	data, err := readFile(path)
 	if err != nil {
 		return nil, err
@@ -606,6 +633,7 @@ func handleUpdateConfig(params *UpdateParams) string {
 
 func handleSetupConfig(params *SetupParams) string {
 	defer scheduleReclaimOwnership()
+	defer scheduleLoadMemoryRelease()
 	err := applyConfig(params)
 	if err != nil {
 		return err.Error()
@@ -684,6 +712,7 @@ func init() {
 	}
 	executor.DefaultProviderLoadedHook = func(providerName string) {
 		scheduleReclaimOwnership()
+		scheduleLoadMemoryRelease()
 		sendMessage(Message{
 			Type: LoadedMessage,
 			Data: providerName,

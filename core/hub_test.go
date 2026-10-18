@@ -182,3 +182,44 @@ rules: ['MATCH,Personal']
 		}
 	}
 }
+
+func TestLoadMemoryReleaseCoalescesABurst(t *testing.T) {
+	released := make(chan struct{}, 4)
+	configure := func(delay time.Duration, release func()) {
+		loadReleaseMu.Lock()
+		defer loadReleaseMu.Unlock()
+		if loadReleaseTimer != nil {
+			loadReleaseTimer.Stop()
+			loadReleaseTimer = nil
+		}
+		loadReleaseDelay, releaseLoadMemory = delay, release
+	}
+	previousDelay, previousRelease := loadReleaseDelay, releaseLoadMemory
+	t.Cleanup(func() { configure(previousDelay, previousRelease) })
+	configure(time.Hour, func() { released <- struct{}{} })
+
+	scheduleLoadMemoryRelease()
+	loadReleaseMu.Lock()
+	first := loadReleaseTimer
+	loadReleaseMu.Unlock()
+	scheduleLoadMemoryRelease()
+	loadReleaseMu.Lock()
+	coalesced := loadReleaseTimer == first
+	loadReleaseDelay = 10 * time.Millisecond
+	loadReleaseMu.Unlock()
+	if !coalesced {
+		t.Fatal("a load during the countdown started a second release")
+	}
+	scheduleLoadMemoryRelease()
+
+	select {
+	case <-released:
+	case <-time.After(2 * time.Second):
+		t.Fatal("never released once the loads went quiet")
+	}
+	select {
+	case <-released:
+		t.Fatal("one burst released twice")
+	case <-time.After(200 * time.Millisecond):
+	}
+}
