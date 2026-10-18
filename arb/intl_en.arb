@@ -1468,5 +1468,15 @@
   "skipDstAddress": "Skip destination addresses",
   "sniffProtocols": "Protocols",
   "ports": "Ports",
-  "invalidPortRangeContent": "Enter a port or a range such as 443 or 8000-9000"
+  "invalidPortRangeContent": "Enter a port or a range such as 443 or 8000-9000",
+  "importConfig": "Import config",
+  "importConfigDesc": "Build a custom profile from a config's proxies, groups, rules and settings",
+  "importText": "Import from text",
+  "importConfigInvalid": "This is not a config that can be imported",
+  "importConfigReplaceTip": "Importing replaces the nodes, proxy groups, rules and settings this profile has now",
+  "customImportCloudRefused": "oixCloud addresses cannot be imported into a custom profile",
+  "customImportNotImported": "Not imported",
+  "customImportDroppedSubRules": "{count, plural, =1{1 SUB-RULE rule was dropped, since custom profiles do not support sub-rules} other{{count} SUB-RULE rules were dropped, since custom profiles do not support sub-rules}}",
+  "customImportUnnamedProxies": "{count, plural, =1{1 proxy had no name or type} other{{count} proxies had no name or type}}",
+  "failedItem": "{label}: {message}"
 }

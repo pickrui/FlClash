@@ -17,6 +17,20 @@ bool isoixCloudProfileUrl(String url) {
       Secrets.cloudDomains.contains(parsed.host);
 }
 
+/// A custom profile never takes in an oixCloud config, which stays encrypted
+/// in its own managed profile.
+bool refusesCustomImportUrl(String url, {Iterable<String>? cloudHosts}) {
+  final normalizedUrl = url.trim().toLowerCase();
+  final parsed = Uri.tryParse(normalizedUrl);
+  if (normalizedUrl == oixCloudManagedProfileUrl ||
+      parsed?.scheme == 'oixcloud') {
+    return true;
+  }
+  final host = parsed?.host ?? '';
+  return host.isNotEmpty &&
+      isCloudHost(host, cloudHosts ?? Secrets.cloudDomains);
+}
+
 Future<T?> createAndActivateManagedProfile<T>({
   required Future<T?> Function({required bool requestStartIfNeeded}) create,
   required Future<void> Function(T profile) activate,

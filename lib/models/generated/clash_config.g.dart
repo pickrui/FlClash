@@ -30,6 +30,8 @@ _ProxyGroup _$ProxyGroupFromJson(Map<String, dynamic> json) => _ProxyGroup(
   includeAllProxies: _parseBool(json['include-all-proxies']),
   includeAllProviders: _parseBool(json['include-all-providers']),
   strategy: json['strategy'] as String?,
+  hashKey: json['hash-key'] as String?,
+  defaultSelected: json['default-selected'] as String?,
   hidden: _parseBool(json['hidden']),
   icon: json['icon'] as String?,
 );
@@ -56,6 +58,8 @@ Map<String, dynamic> _$ProxyGroupToJson(_ProxyGroup instance) =>
       'include-all-proxies': instance.includeAllProxies,
       'include-all-providers': instance.includeAllProviders,
       'strategy': instance.strategy,
+      'hash-key': instance.hashKey,
+      'default-selected': instance.defaultSelected,
       'hidden': instance.hidden,
       'icon': instance.icon,
     };

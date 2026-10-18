@@ -27,4 +27,31 @@ void main() {
       expect(isoixCloudProfileUrl(''), isFalse);
     });
   });
+
+  test('a custom profile imports no oixCloud address, subdomains included', () {
+    const hosts = ['cloud.example'];
+    for (final url in [
+      oixCloudManagedProfileUrl,
+      'oixcloud://profile/42',
+      'https://cloud.example/sub?token=1',
+      'https://API.cloud.example./sub',
+    ]) {
+      expect(
+        refusesCustomImportUrl(url, cloudHosts: hosts),
+        isTrue,
+        reason: url,
+      );
+    }
+    for (final url in [
+      'https://notcloud.example/sub',
+      'https://example.invalid/cloud.example',
+      '',
+    ]) {
+      expect(
+        refusesCustomImportUrl(url, cloudHosts: hosts),
+        isFalse,
+        reason: url,
+      );
+    }
+  });
 }

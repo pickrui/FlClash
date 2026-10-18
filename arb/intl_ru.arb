@@ -1468,5 +1468,15 @@
   "skipDstAddress": "Пропускаемые адреса назначения",
   "sniffProtocols": "Протоколы",
   "ports": "Порты",
-  "invalidPortRangeContent": "Введите порт или диапазон, например 443 или 8000-9000"
+  "invalidPortRangeContent": "Введите порт или диапазон, например 443 или 8000-9000",
+  "importConfig": "Импорт конфигурации",
+  "importConfigDesc": "Собрать пользовательский профиль из прокси, групп, правил и настроек конфигурации",
+  "importText": "Импорт из текста",
+  "importConfigInvalid": "Это не конфигурация, которую можно импортировать",
+  "importConfigReplaceTip": "Импорт заменит текущие узлы, группы прокси, правила и настройки этого профиля",
+  "customImportCloudRefused": "Адреса oixCloud нельзя импортировать в пользовательский профиль",
+  "customImportNotImported": "Не импортировано",
+  "customImportDroppedSubRules": "{count, plural, one{Пользовательские профили не поддерживают подправила, поэтому отброшено {count} правило SUB-RULE} few{Пользовательские профили не поддерживают подправила, поэтому отброшено {count} правила SUB-RULE} many{Пользовательские профили не поддерживают подправила, поэтому отброшено {count} правил SUB-RULE} other{Пользовательские профили не поддерживают подправила, поэтому отброшено {count} правила SUB-RULE}}",
+  "customImportUnnamedProxies": "{count, plural, one{{count} прокси без имени или типа} few{{count} прокси без имени или типа} many{{count} прокси без имени или типа} other{{count} прокси без имени или типа}}",
+  "failedItem": "{label}: {message}"
 }

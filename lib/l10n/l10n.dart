@@ -12350,6 +12350,111 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Import config`
+  String get importConfig {
+    return Intl.message(
+      'Import config',
+      name: 'importConfig',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Build a custom profile from a config's proxies, groups, rules and settings`
+  String get importConfigDesc {
+    return Intl.message(
+      'Build a custom profile from a config\'s proxies, groups, rules and settings',
+      name: 'importConfigDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Import from text`
+  String get importText {
+    return Intl.message(
+      'Import from text',
+      name: 'importText',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This is not a config that can be imported`
+  String get importConfigInvalid {
+    return Intl.message(
+      'This is not a config that can be imported',
+      name: 'importConfigInvalid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Importing replaces the nodes, proxy groups, rules and settings this profile has now`
+  String get importConfigReplaceTip {
+    return Intl.message(
+      'Importing replaces the nodes, proxy groups, rules and settings this profile has now',
+      name: 'importConfigReplaceTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `oixCloud addresses cannot be imported into a custom profile`
+  String get customImportCloudRefused {
+    return Intl.message(
+      'oixCloud addresses cannot be imported into a custom profile',
+      name: 'customImportCloudRefused',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not imported`
+  String get customImportNotImported {
+    return Intl.message(
+      'Not imported',
+      name: 'customImportNotImported',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, =1{1 SUB-RULE rule was dropped, since custom profiles do not support sub-rules} other{{count} SUB-RULE rules were dropped, since custom profiles do not support sub-rules}}`
+  String customImportDroppedSubRules(num count) {
+    return Intl.plural(
+      count,
+      one: '1 SUB-RULE rule was dropped, since custom profiles do not support sub-rules',
+      other:
+          '$count SUB-RULE rules were dropped, since custom profiles do not support sub-rules',
+      name: 'customImportDroppedSubRules',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, =1{1 proxy had no name or type} other{{count} proxies had no name or type}}`
+  String customImportUnnamedProxies(num count) {
+    return Intl.plural(
+      count,
+      one: '1 proxy had no name or type',
+      other: '$count proxies had no name or type',
+      name: 'customImportUnnamedProxies',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{label}: {message}`
+  String failedItem(Object label, Object message) {
+    return Intl.message(
+      '$label: $message',
+      name: 'failedItem',
+      desc: '',
+      args: [label, message],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

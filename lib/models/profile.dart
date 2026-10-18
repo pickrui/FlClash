@@ -728,15 +728,14 @@ extension ProfileOverridesExt on ProfileOverrides {
     List<String> entries(List<String> list) => [
       for (final entry in list) renamedRuleSetsIn(entry, names),
     ];
-    String rule(String entry) => names.entries.fold(
-      renamedRuleSetsIn(entry, names),
-      (text, name) => renameRuleProvider(text, name.key, name.value),
-    );
     return copyWith(
       dns: dns.copyWith(
         nameserverPolicy: policy(dns.nameserverPolicy),
         proxyServerNameserverPolicy: policy(dns.proxyServerNameserverPolicy),
-        fakeIpFilter: [for (final entry in dns.fakeIpFilter) rule(entry)],
+        fakeIpFilter: [
+          for (final entry in dns.fakeIpFilter)
+            renamedRuleSetReferences(renamedRuleSetsIn(entry, names), names),
+        ],
       ),
       sniffer: sniffer.copyWith(
         forceDomain: entries(sniffer.forceDomain),
@@ -941,13 +940,17 @@ extension ProfileCustomOverwriteExt on Profile {
     final renamedGroups = customProxyGroups.map((group) {
       final proxies = group.proxies;
       if ((proxies == null || !proxies.contains(previousName)) &&
-          group.emptyFallback != previousName) {
+          group.emptyFallback != previousName &&
+          group.defaultSelected != previousName) {
         return group;
       }
       return group.copyWith(
         emptyFallback: group.emptyFallback == previousName
             ? nextName
             : group.emptyFallback,
+        defaultSelected: group.defaultSelected == previousName
+            ? nextName
+            : group.defaultSelected,
         proxies: proxies
             ?.map((name) => name == previousName ? nextName : name)
             .toList(),
@@ -989,7 +992,8 @@ extension ProfileCustomOverwriteExt on Profile {
     final groupReference = customProxyGroups.any((group) {
       return group != excludingGroup &&
           ((group.proxies?.contains(name) ?? false) ||
-              group.emptyFallback == name);
+              group.emptyFallback == name ||
+              group.defaultSelected == name);
     });
     final ruleReference = customRules.any(
       (rule) => ruleTarget(rule.value) == name,

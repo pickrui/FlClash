@@ -1468,5 +1468,15 @@
   "skipDstAddress": "スキップする宛先アドレス",
   "sniffProtocols": "プロトコル",
   "ports": "ポート",
-  "invalidPortRangeContent": "443 や 8000-9000 のようなポートまたは範囲を入力してください"
+  "invalidPortRangeContent": "443 や 8000-9000 のようなポートまたは範囲を入力してください",
+  "importConfig": "設定をインポート",
+  "importConfigDesc": "設定のプロキシ、グループ、ルール、各種設定からカスタムプロファイルを作成します",
+  "importText": "テキストからインポート",
+  "importConfigInvalid": "インポートできる設定ではありません",
+  "importConfigReplaceTip": "インポートすると、このプロファイルの現在のノード、プロキシグループ、ルール、設定が置き換えられます",
+  "customImportCloudRefused": "oixCloud のアドレスはカスタムプロファイルにインポートできません",
+  "customImportNotImported": "インポートされなかった項目",
+  "customImportDroppedSubRules": "カスタムプロファイルはサブルールに対応していないため、SUB-RULE ルール {count} 件を破棄しました",
+  "customImportUnnamedProxies": "名前または種類のないプロキシ {count} 件",
+  "failedItem": "{label}：{message}"
 }

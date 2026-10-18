@@ -67,7 +67,10 @@ class AddProfileView extends ConsumerWidget {
     }
   }
 
-  Future<void> _toAddCustom(BuildContext context) async {
+  Future<void> _toAddCustom(
+    BuildContext context, [
+    CustomImportSource? importSource,
+  ]) async {
     final profileAction = parentContext.profileAction;
     final navigator = Navigator.of(context);
     final id = await parentContext.commonAction.safeRun(
@@ -79,7 +82,11 @@ class AddProfileView extends ConsumerWidget {
     unawaited(
       BaseNavigator.push(
         parentContext,
-        CustomProfileView(profileId: id, isNew: true),
+        CustomProfileView(
+          profileId: id,
+          isNew: true,
+          importSource: importSource,
+        ),
       ),
     );
   }
@@ -112,6 +119,20 @@ class AddProfileView extends ConsumerWidget {
           title: Text(appLocalizations.customProfile),
           subtitle: Text(appLocalizations.customProfileDesc),
           onTap: () => _toAddCustom(context),
+        ),
+        CommonPopupBox(
+          targetBuilder: (open) => ListItem(
+            leading: const GlyphIcon(AppGlyphs.importFile),
+            title: Text(appLocalizations.importConfig),
+            subtitle: Text(appLocalizations.importConfigDesc),
+            onTap: () => open(),
+          ),
+          popup: CommonPopupMenu(
+            items: customImportMenuItems(
+              appLocalizations,
+              (source) => _toAddCustom(context, source),
+            ),
+          ),
         ),
       ],
     );

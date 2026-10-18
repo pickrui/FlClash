@@ -625,6 +625,18 @@ String renameRuleProvider(String rule, String before, String after) =>
       (match) => '${match[1]}RULE-SET,$after',
     );
 
+final _ruleSetReference = RegExp(
+  r'(^|[,(])RULE-SET,(\s*)([^,()]+?)(?=\s*[,)])',
+);
+
+/// Renames every RULE-SET of [rule] in one pass, so renames cannot chain.
+String renamedRuleSetReferences(String rule, Map<String, String> names) =>
+    rule.replaceAllMapped(
+      _ruleSetReference,
+      (match) =>
+          '${match[1]}RULE-SET,${match[2]}${names[match[3]] ?? match[3]}',
+    );
+
 const _ruleSetPrefix = 'rule-set:';
 
 /// mihomo reads `rule-set:a,b` up to a second colon, the prefix in any case,

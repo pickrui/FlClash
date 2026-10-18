@@ -315,6 +315,8 @@ abstract class ProxyGroup with _$ProxyGroup {
     @JsonKey(name: 'include-all-providers', fromJson: _parseBool)
     bool? includeAllProviders,
     String? strategy,
+    @JsonKey(name: 'hash-key') String? hashKey,
+    @JsonKey(name: 'default-selected') String? defaultSelected,
     @JsonKey(fromJson: _parseBool) bool? hidden,
     String? icon,
   }) = _ProxyGroup;

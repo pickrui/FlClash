@@ -53,6 +53,9 @@ class ProfileAction extends _$ProfileAction {
   Future<int> addCustomProfile(String label) =>
       _controller.addCustomProfile(label);
 
+  Future<Uint8List> downloadCustomImport(String url) =>
+      _controller.downloadCustomImport(url);
+
   Future<void> addProfileFormQrCode() => _controller.addProfileFormQrCode();
 
   void reorder(List<Profile> profiles) => _controller.reorder(profiles);
@@ -427,6 +430,17 @@ extension ProfilesControllerExt on AppController {
       globalState.showNotifier(appLocalizations.getProfileSuccess);
       await requestStartCore();
     }
+  }
+
+  /// Goes through the subscription download and its certificate prompt.
+  Future<Uint8List> downloadCustomImport(String url) async {
+    if (refusesCustomImportUrl(url)) {
+      throw appLocalizations.customImportCloudRefused;
+    }
+    final response = await _runWithCertificateRetry(
+      () => request.getFileResponseForUrl(url, inflateUnlabeled: true),
+    );
+    return response.data!;
   }
 
   Future<int> addCustomProfile(String label) {

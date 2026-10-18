@@ -1468,5 +1468,15 @@
   "skipDstAddress": "跳过目标地址",
   "sniffProtocols": "协议",
   "ports": "端口",
-  "invalidPortRangeContent": "请输入端口或范围，如 443 或 8000-9000"
+  "invalidPortRangeContent": "请输入端口或范围，如 443 或 8000-9000",
+  "importConfig": "导入配置",
+  "importConfigDesc": "用配置中的节点、策略组、规则和设置组建自定义配置",
+  "importText": "从文本导入",
+  "importConfigInvalid": "这不是可导入的配置",
+  "importConfigReplaceTip": "导入会替换此配置现有的节点、策略组、规则和设置",
+  "customImportCloudRefused": "oixCloud 地址不能导入自定义配置",
+  "customImportNotImported": "未导入",
+  "customImportDroppedSubRules": "自定义配置不支持子规则，已丢弃 {count} 条 SUB-RULE 规则",
+  "customImportUnnamedProxies": "{count} 个节点缺少名称或类型",
+  "failedItem": "{label}：{message}"
 }
