@@ -250,7 +250,6 @@ void main() {
       tester,
       (context) => showModalSideSheet<void>(
         context: context,
-        constraints: const BoxConstraints(maxWidth: 300),
         builder: (_) =>
             const SizedBox.expand(child: Center(child: Text('side'))),
       ),

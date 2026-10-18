@@ -131,7 +131,6 @@ class PagedSheet extends StatelessWidget {
 const nestedPagedSheetProps = SheetProps(
   isScrollControlled: true,
   backgroundColor: Colors.transparent,
-  maxWidth: double.maxFinite,
 );
 
 /// Opened with [nestedPagedSheetProps]. [onDismiss] is told whether a page is
@@ -225,7 +224,6 @@ class _NestedPagedSheetState extends State<NestedPagedSheet> {
         child: sheetProvider.type == SheetType.bottomSheet
             ? sheet
             : SizedBox(
-                width: sheetProvider.type == SheetType.sideSheet ? 400 : null,
                 height: double.infinity,
                 child: Stack(
                   children: [

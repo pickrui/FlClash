@@ -11,7 +11,7 @@ import 'package:material_ui/material_ui.dart';
 
 import 'store_widgets.dart';
 
-const _sheetProps = SheetProps(isScrollControlled: true, maxWidth: 420);
+const _sheetProps = SheetProps(isScrollControlled: true);
 const _quickRechargeAmounts = [10.0, 30.0, 50.0, 100.0, 200.0];
 
 /// What the purchase sheet returns; a null [method] pays from the balance.

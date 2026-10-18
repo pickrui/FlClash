@@ -25,14 +25,12 @@ import 'side_sheet.dart';
 
 @immutable
 class SheetProps {
-  final double? maxWidth;
   final bool isScrollControlled;
   final bool useSafeArea;
   final Color? backgroundColor;
   final bool blur;
 
   const SheetProps({
-    this.maxWidth,
     this.backgroundColor,
     this.useSafeArea = true,
     this.isScrollControlled = false,
@@ -42,11 +40,10 @@ class SheetProps {
 
 @immutable
 class ExtendProps {
-  final double? maxWidth;
   final bool blur;
   final bool forceFull;
 
-  const ExtendProps({this.maxWidth, this.blur = true, this.forceFull = false});
+  const ExtendProps({this.blur = true, this.forceFull = false});
 }
 
 typedef SheetBuilder = Widget Function(BuildContext context, SheetType type);
@@ -65,7 +62,6 @@ Future<T?> showSheet<T>({
     false => showModalSideSheet<T>(
       context: context,
       backgroundColor: props.backgroundColor,
-      constraints: BoxConstraints(maxWidth: props.maxWidth ?? 360),
       filter: props.blur ? commonFilter : null,
       builder: (sheetContext) {
         return SheetProvider(
@@ -124,7 +120,6 @@ Future<T?> showExtend<T>(
     ),
     false => showModalSideSheet<T>(
       context: context,
-      constraints: BoxConstraints(maxWidth: props.maxWidth ?? 360),
       filter: props.blur ? commonFilter : null,
       builder: (sheetContext) {
         return SheetProvider(
@@ -250,7 +245,6 @@ Future<T?> showSnapSheet<T>(
       controller?.attachSide();
       closed = showModalSideSheet<T>(
         context: context,
-        constraints: const BoxConstraints(maxWidth: 360),
         barrierColor: barrierColor,
         aside: controller?.aside,
         builder: (context) {

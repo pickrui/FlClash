@@ -48,14 +48,12 @@ class CheckboxDelegate<T> extends Delegate {
 
 class OpenDelegate<T> extends Delegate {
   final Widget widget;
-  final double? maxWidth;
   final bool blur;
   final bool forceFull;
   final ValueChanged<T?>? onChanged;
 
   const OpenDelegate({
     required this.widget,
-    this.maxWidth,
     this.blur = true,
     this.forceFull = true,
     this.onChanged,
@@ -312,7 +310,6 @@ class ListItem<T> extends StatelessWidget {
                 context,
                 props: ExtendProps(
                   blur: openDelegate.blur,
-                  maxWidth: openDelegate.maxWidth,
                   forceFull: openDelegate.forceFull,
                 ),
                 builder: (_, _) {

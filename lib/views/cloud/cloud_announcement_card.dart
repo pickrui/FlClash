@@ -24,7 +24,7 @@ class CloudAnnouncementCard extends StatelessWidget {
     return CommonCard(
       onPressed: () => showSheet<void>(
         context: context,
-        props: const SheetProps(isScrollControlled: true, maxWidth: 720),
+        props: const SheetProps(isScrollControlled: true),
         builder: (context, type) => AdaptiveSheetScaffold(
           type: type,
           title: context.appLocalizations.announcement,

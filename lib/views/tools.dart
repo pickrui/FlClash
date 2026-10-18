@@ -49,7 +49,6 @@ class _ToolViewState extends ConsumerState<ToolsView> {
           : null,
       delegate: OpenDelegate(
         widget: navigationItem.builder(context),
-        maxWidth: 400,
         forceFull: false,
       ),
     );

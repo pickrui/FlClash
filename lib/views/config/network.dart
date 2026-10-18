@@ -504,7 +504,6 @@ class RouteAddressItem extends ConsumerWidget {
       subtitle: Text(appLocalizations.routeAddressDesc),
       delegate: OpenDelegate(
         blur: false,
-        maxWidth: 360,
         widget: ListInputPage(
           title: appLocalizations.routeAddress,
           items: routeAddress,
