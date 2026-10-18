@@ -415,7 +415,7 @@ class _GroupTabState extends State<_GroupTab> {
     );
     return CommonCard(
       isSelected: selected,
-      shape: const StadiumBorder(),
+      shape: AppShape.full,
       padding: const EdgeInsets.symmetric(horizontal: _tabPadding),
       onPressed: widget.onPressed,
       child: Row(
