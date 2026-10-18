@@ -8,6 +8,8 @@ import 'package:fl_clash/common/theme.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/manager/theme_manager.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/ui/alert_scope.dart';
+import 'package:fl_clash/ui/dialog.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -94,7 +96,10 @@ Widget wrapAppScopes(
       null;
   return MeasureScope(
     measure: measure,
-    child: hasProviders ? AppViewScope(child: child) : child,
+    child: AlertScope(
+      presenter: const CommonAlertPresenter(),
+      child: hasProviders ? AppViewScope(child: child) : child,
+    ),
   );
 }
 

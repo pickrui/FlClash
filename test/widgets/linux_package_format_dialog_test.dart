@@ -12,6 +12,8 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/widgets/linux_package_format_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fl_clash/ui/alert_scope.dart';
+import 'package:fl_clash/ui/dialog.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// Collects what the dialog answers, one entry per time it is closed.
@@ -33,6 +35,8 @@ Future<List<LinuxPackageFormat?>> _openDialog(
           ...GlobalMaterialLocalizations.delegates,
         ],
         supportedLocales: AppLocalizations.delegate.supportedLocales,
+        builder: (context, child) =>
+            AlertScope(presenter: const CommonAlertPresenter(), child: child!),
         home: Scaffold(
           body: Builder(
             builder: (context) => TextButton(

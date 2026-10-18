@@ -25,7 +25,7 @@ import 'package:fl_clash/ui/sheet.dart';
 
 import 'package:fl_clash/ui/button.dart';
 
-import 'input_dialog.dart';
+import 'package:fl_clash/ui/input.dart';
 
 import 'package:fl_clash/ui/navigation_dock.dart';
 

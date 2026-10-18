@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/input_limits.dart';
 import 'package:fl_clash/l10n/l10n.dart';
-import 'package:fl_clash/widgets/dialog.dart';
+import 'package:fl_clash/ui/alert_scope.dart';
 import 'package:material_ui/material_ui.dart';
 
 class PortConflictDialog extends StatefulWidget {
@@ -54,7 +54,7 @@ class _PortConflictDialogState extends State<PortConflictDialog> {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
-    return CommonDialog(
+    return AlertScope.of(context).dialog(
       title: localizations.portUnavailableTitle,
       actions: [
         TextButton(

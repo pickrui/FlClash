@@ -11,7 +11,7 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/installed_apps.dart';
 import 'package:fl_clash/views/access.dart';
-import 'package:fl_clash/widgets/dialog.dart';
+import 'package:fl_clash/ui/dialog.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter/services.dart';

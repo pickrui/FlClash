@@ -15,7 +15,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:fl_clash/services/desktop_update.dart';
 
 import 'package:fl_clash/widgets/app_update.dart';
-import 'package:fl_clash/widgets/input_dialog.dart';
+import 'package:fl_clash/ui/input.dart';
 
 import 'dart:io';
 

@@ -9,7 +9,6 @@ import 'dart:io';
 import 'package:fl_clash/common/listener_state_scheduler.dart';
 import 'package:fl_clash/providers/state.dart';
 
-import 'package:animations/animations.dart';
 import 'package:fl_clash/services/config_reset.dart';
 import 'package:dynamic_color/dynamic_color.dart' show DynamicColorPlugin;
 import 'package:fl_clash/common/periodic_task_runner.dart';
@@ -20,7 +19,7 @@ import 'package:fl_clash/plugins/service.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/database.dart';
-import 'package:fl_clash/widgets/dialog.dart';
+import 'package:fl_clash/ui/alert_scope.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -375,14 +374,16 @@ class GlobalState {
     String? cancelText,
     bool cancelable = true,
     bool? dismissible,
+    bool destructive = false,
   }) async {
     return showCommonDialog<bool>(
       context: context,
       dismissible: dismissible,
       child: Builder(
         builder: (context) {
-          return CommonDialog(
+          return AlertScope.of(context).dialog(
             title: title ?? appLocalizations.tip,
+            destructive: destructive,
             actions: [
               if (cancelable)
                 TextButton(
@@ -398,18 +399,9 @@ class GlobalState {
                 child: Text(confirmText ?? appLocalizations.confirm),
               ),
             ],
-            child: Container(
-              width: 300,
-              constraints: const BoxConstraints(maxHeight: 200),
-              child: SingleChildScrollView(
-                child: SelectableText.rich(
-                  TextSpan(
-                    style: Theme.of(context).textTheme.labelLarge,
-                    children: [message],
-                  ),
-                  style: const TextStyle(overflow: TextOverflow.visible),
-                ),
-              ),
+            child: SelectableText.rich(
+              TextSpan(children: [message]),
+              style: const TextStyle(overflow: TextOverflow.visible),
             ),
           );
         },
@@ -423,7 +415,7 @@ class GlobalState {
     return showCommonDialog<bool>(
       child: Builder(
         builder: (context) {
-          return CommonDialog(
+          return AlertScope.of(context).dialog(
             padding: EdgeInsets.zero,
             title: appLocalizations.tip,
             actions: [
@@ -462,17 +454,13 @@ class GlobalState {
     required Widget child,
     BuildContext? context,
     bool? dismissible,
-    bool filter = true,
   }) async {
-    return showModal<T>(
-      useRootNavigator: false,
-      context: context ?? globalState.navigatorKey.currentContext!,
-      configuration: FadeScaleTransitionConfiguration(
-        barrierColor: Colors.black38,
-        barrierDismissible: dismissible ?? true,
-      ),
-      builder: (_) => child,
-      filter: filter ? commonFilter : null,
+    final root = context ?? navigatorKey.currentContext!;
+    return AlertScope.of(root).show<T>(
+      context: context,
+      root: navigatorKey.currentContext ?? root,
+      dismissible: dismissible ?? true,
+      child: child,
     );
   }
 

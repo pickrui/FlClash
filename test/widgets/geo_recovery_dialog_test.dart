@@ -10,6 +10,8 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/widgets/geo_recovery_dialog.dart';
+import 'package:fl_clash/ui/alert_scope.dart';
+import 'package:fl_clash/ui/dialog.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -275,6 +277,8 @@ Future<void> _openDialog(
           ...GlobalMaterialLocalizations.delegates,
         ],
         supportedLocales: AppLocalizations.delegate.supportedLocales,
+        builder: (context, child) =>
+            AlertScope(presenter: const CommonAlertPresenter(), child: child!),
         home: Scaffold(
           body: Builder(
             builder: (context) => TextButton(

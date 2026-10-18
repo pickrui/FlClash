@@ -12,10 +12,17 @@ import 'package:fl_clash/providers/cloud_account_provider.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/cloud/cloud_login_page.dart';
 import 'package:fl_clash/widgets/widgets.dart';
+import 'package:fl_clash/ui/alert_scope.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../helpers/test_app.dart';
+
+final _viewSizeOverride = viewSizeProvider.overrideWithBuild(
+  (_, _) => const Size(1200, 1000),
+);
 
 void main() {
   testWidgets('InputDialog toggles obscured text visibility', (tester) async {
@@ -38,18 +45,16 @@ void main() {
       tester.widget<EditableText>(find.byType(EditableText)).obscureText,
       isTrue,
     );
-    expect(find.byTooltip('Show'), findsOneWidget);
-    expect(find.byTooltip('Show'), findsOneWidget);
+    expect(find.byTooltip('Show password'), findsOneWidget);
 
-    await tester.tap(find.byTooltip('Show'));
+    await tester.tap(find.byTooltip('Show password'));
     await tester.pump();
 
     expect(
       tester.widget<EditableText>(find.byType(EditableText)).obscureText,
       isFalse,
     );
-    expect(find.byTooltip('Hide'), findsOneWidget);
-    expect(find.byTooltip('Hide'), findsOneWidget);
+    expect(find.byTooltip('Hide password'), findsOneWidget);
   });
 
   testWidgets('access token visibility does not reveal the password', (
@@ -159,6 +164,162 @@ void main() {
     await tester.pumpAndSettle();
     expect(changes, [null]);
   });
+  testWidgets('InputDialog validates, submits, and resets values', (
+    tester,
+  ) async {
+    String? result;
+
+    await tester.pumpWidget(
+      TestApp(
+        overrides: [_viewSizeOverride],
+        child: Builder(
+          builder: (context) {
+            return FilledButton(
+              onPressed: () async {
+                result = await showDialog<String>(
+                  context: context,
+                  builder: (_) => InputDialog(
+                    title: 'Value',
+                    value: 'changed',
+                    resetValue: 'default',
+                    labelText: 'Value',
+                    suffixText: 'unit',
+                    hintText: 'hint',
+                    validator: (value) => value == 'valid' ? null : 'Invalid',
+                  ),
+                );
+              },
+              child: const Text('Open'),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Submit'));
+    await tester.pump();
+    expect(find.text('Invalid'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextFormField), 'valid');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    expect(result, 'valid');
+
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Reset'));
+    await tester.pumpAndSettle();
+    expect(result, 'default');
+  });
+
+  testWidgets('InputDialog offers reset only while the text differs from it', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      TestApp(
+        overrides: [_viewSizeOverride],
+        child: Builder(
+          builder: (context) {
+            return FilledButton(
+              onPressed: () => showDialog<String>(
+                context: context,
+                builder: (_) => const InputDialog(
+                  title: 'Value',
+                  value: 'changed',
+                  resetValue: 'default',
+                ),
+              ),
+              child: const Text('Open'),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    expect(find.text('Reset'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextFormField), 'default');
+    await tester.pump();
+    expect(find.text('Reset'), findsNothing);
+    expect(find.text('Cancel'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextFormField), 'other');
+    await tester.pump();
+    expect(find.text('Reset'), findsOneWidget);
+  });
+
+  testWidgets('InputDialog grows with a long value instead of scrolling it', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      TestApp(
+        overrides: [_viewSizeOverride],
+        child: Builder(
+          builder: (context) {
+            return FilledButton(
+              onPressed: () => showDialog<String>(
+                context: context,
+                builder: (_) => const InputDialog(title: 'Value', value: ''),
+              ),
+              child: const Text('Open'),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byType(TextFormField),
+      List.filled(6, 'https://a.example').join('/'),
+    );
+    await tester.pumpAndSettle();
+
+    final scrollables = find.descendant(
+      of: find.byType(AlertDialog),
+      matching: find.byType(Scrollable),
+    );
+    expect(scrollables, findsWidgets);
+    for (final element in scrollables.evaluate()) {
+      final position = (element as StatefulElement).state as ScrollableState;
+      expect(position.position.maxScrollExtent, 0);
+    }
+  });
+
+  testWidgets('SecretTextFormField hides the text until revealed', (
+    tester,
+  ) async {
+    final controller = TextEditingController(text: 'AGE-SECRET-KEY-1A');
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      TestApp(
+        overrides: [_viewSizeOverride],
+        child: Material(
+          child: SecretTextFormField(controller: controller, maxLines: 5),
+        ),
+      ),
+    );
+
+    EditableText editable() => tester.widget(find.byType(EditableText));
+    expect(editable().obscureText, isTrue);
+    expect(editable().maxLines, 1);
+
+    await tester.tap(find.byTooltip('Show password'));
+    await tester.pump();
+    expect(editable().obscureText, isFalse);
+    expect(editable().maxLines, 5);
+
+    await tester.tap(find.byTooltip('Hide password'));
+    await tester.pump();
+    expect(editable().obscureText, isTrue);
+    expect(controller.text, 'AGE-SECRET-KEY-1A');
+  });
 }
 
 class _TestCloudAccountNotifier extends CloudAccountNotifier {
@@ -183,7 +344,10 @@ class _TestApp extends StatelessWidget {
       supportedLocales: AppLocalizations.delegate.supportedLocales,
       builder: (context, child) {
         globalState.theme = CommonTheme.of(context, 1);
-        return child!;
+        return AlertScope(
+          presenter: const CommonAlertPresenter(),
+          child: child!,
+        );
       },
       home: child,
     );

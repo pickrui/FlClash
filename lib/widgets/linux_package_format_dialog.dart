@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/l10n/l10n.dart';
-import 'package:fl_clash/widgets/dialog.dart';
+import 'package:fl_clash/ui/alert_scope.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// Asked once, when neither the AppImage runtime nor a package manager can say
@@ -18,7 +18,7 @@ class LinuxPackageFormatDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
-    return CommonDialog(
+    return AlertScope.of(context).dialog(
       title: localizations.updatePackageFormat,
       actions: [
         TextButton(

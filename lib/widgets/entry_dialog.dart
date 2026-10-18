@@ -10,7 +10,7 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/common.dart';
 import 'package:material_ui/material_ui.dart';
 
-import 'dialog.dart';
+import 'package:fl_clash/ui/dialog.dart';
 
 import 'package:fl_clash/ui/theme.dart';
 

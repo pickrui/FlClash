@@ -7,6 +7,8 @@ import 'dart:math';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/ui/alert_scope.dart';
+import 'package:fl_clash/ui/dialog.dart';
 import 'package:fl_clash/ui/font.dart';
 import 'package:fl_clash/ui/liquid_glass.dart';
 import 'package:fl_clash/ui/navigator.dart';
@@ -221,7 +223,10 @@ class _LiquidGlassSetting extends ConsumerWidget {
           : LiquidGlassQuality.standard,
       child: LiquidGlassHost(
         enabled: mode != LiquidGlassMode.none,
-        child: child,
+        child: AlertScope(
+          presenter: const CommonAlertPresenter(),
+          child: child,
+        ),
       ),
     );
   }

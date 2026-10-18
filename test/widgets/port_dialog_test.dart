@@ -12,6 +12,7 @@ import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/config/general.dart';
 import 'package:fl_clash/widgets/widgets.dart';
+import 'package:fl_clash/ui/alert_scope.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -86,7 +87,10 @@ Future<ProviderContainer> _openPortDialog(WidgetTester tester) async {
         supportedLocales: AppLocalizations.delegate.supportedLocales,
         builder: (context, child) {
           globalState.theme = CommonTheme.of(context, 1);
-          return child!;
+          return AlertScope(
+            presenter: const CommonAlertPresenter(),
+            child: child!,
+          );
         },
         home: const Scaffold(body: PortItem()),
       ),

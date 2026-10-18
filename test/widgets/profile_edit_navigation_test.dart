@@ -14,7 +14,7 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/views/profiles/edit.dart';
-import 'package:fl_clash/widgets/dialog.dart';
+import 'package:fl_clash/ui/dialog.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';

@@ -17,7 +17,7 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/widgets/dialog.dart';
+import 'package:fl_clash/ui/dialog.dart';
 import 'package:fl_clash/features/overwrite/proxy_group_editor.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';

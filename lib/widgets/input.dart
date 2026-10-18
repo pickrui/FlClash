@@ -26,6 +26,9 @@ import 'scaffold.dart';
 import 'package:fl_clash/ui/effect.dart';
 
 import 'list.dart';
+
+export 'package:fl_clash/ui/input.dart';
+
 export 'input_dialog.dart';
 export 'options_dialog.dart';
 part 'edit_view.dart';

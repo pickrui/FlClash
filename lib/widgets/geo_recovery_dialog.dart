@@ -6,7 +6,7 @@
 import 'package:fl_clash/common/geo_recovery.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/l10n/l10n.dart';
-import 'package:fl_clash/widgets/dialog.dart';
+import 'package:fl_clash/ui/alert_scope.dart';
 import 'package:material_ui/material_ui.dart';
 
 class GeoRecoveryDialog extends StatefulWidget {
@@ -94,7 +94,7 @@ class _GeoRecoveryDialogState extends State<GeoRecoveryDialog> {
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) _dismissed = true;
       },
-      child: CommonDialog(
+      child: AlertScope.of(context).dialog(
         title: l.geoDownloadFailed,
         actions: [
           TextButton(onPressed: () => _close(false), child: Text(l.cancel)),
