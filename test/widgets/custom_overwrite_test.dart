@@ -12,6 +12,7 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/features/overwrite/profile_provider_options.dart';
 import 'package:fl_clash/features/overwrite/proxy_group_editor.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -570,6 +571,77 @@ void main() {
       );
     },
   );
+
+  testWidgets('provider options keep what is set and a check that passes', (
+    tester,
+  ) async {
+    ProxyProviderOptions? result;
+    final checked = <ProxyProviderOptions>[];
+    await tester.binding.setSurfaceSize(const Size(800, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 1400)),
+        ],
+        child: _TestApp(
+          child: Builder(
+            builder: (context) => TextButton(
+              onPressed: () async {
+                result = await showDialog<ProxyProviderOptions>(
+                  context: context,
+                  builder: (_) => ProfileProviderOptionsDialog(
+                    label: 'Subscription',
+                    options: const ProxyProviderOptions(
+                      filter: 'HK',
+                      proxyOverride: ProviderOverride(udp: true),
+                    ),
+                    validate: (options) async {
+                      checked.add(options);
+                      return checked.length == 1 ? 'fixture rejection' : '';
+                    },
+                  ),
+                );
+              },
+              child: const Text('Open options'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Open options'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Exclude proxy filter'),
+      ' expired ',
+    );
+    await tester.tap(find.widgetWithText(SwitchListTile, 'Health check'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Interval'),
+      '600',
+    );
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(find.text('fixture rejection'), findsOneWidget);
+    expect(result, isNull);
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    const expected = ProxyProviderOptions(
+      filter: 'HK',
+      excludeFilter: 'expired',
+      healthCheck: ProviderHealthCheck(
+        url: defaultTestUrl,
+        interval: 600,
+        lazy: true,
+      ),
+      proxyOverride: ProviderOverride(udp: true),
+    );
+    expect(checked, [expected, expected]);
+    expect(result, expected);
+  });
 }
 
 Future<void> _openGroupDialog(
