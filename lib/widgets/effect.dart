@@ -6,8 +6,8 @@
 import 'dart:ui';
 
 import 'package:fl_clash/widgets/inherited.dart';
-import 'package:fl_clash/icons/app_glyphs.dart';
-import 'package:fl_clash/icons/glyph_icon.dart';
+import 'package:fl_clash/ui/icons/app_glyphs.dart';
+import 'package:fl_clash/ui/icons/glyph_icon.dart';
 import 'package:material_ui/material_ui.dart';
 
 class EffectGestureDetector extends StatefulWidget {

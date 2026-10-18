@@ -13,8 +13,8 @@ export 'package:fl_clash/common/update_download_task.dart'
     show UpdateDownloadAction;
 
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/icons/app_glyphs.dart';
-import 'package:fl_clash/icons/glyph_icon.dart';
+import 'package:fl_clash/ui/icons/app_glyphs.dart';
+import 'package:fl_clash/ui/icons/glyph_icon.dart';
 import 'package:fl_clash/common/update_download_task.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/update_download.dart';

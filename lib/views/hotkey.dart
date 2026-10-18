@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/icons/icons.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';

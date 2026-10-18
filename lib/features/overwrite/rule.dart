@@ -6,7 +6,7 @@
 library;
 
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/icons/icons.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/clash_config.dart';
 import 'package:fl_clash/widgets/card.dart';

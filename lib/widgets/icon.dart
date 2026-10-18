@@ -11,7 +11,7 @@ import 'package:fl_clash/common/encoded_icon_cache.dart';
 import 'package:fl_clash/common/icon_history_recorder.dart';
 
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/icons/icons.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/plugins/app.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';

@@ -6,9 +6,9 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/metrics.dart';
 import 'package:fl_clash/ui/surface.dart';
-import 'package:fl_clash/icons/app_glyphs.dart';
-import 'package:fl_clash/icons/glyph_icon.dart';
-import 'package:fl_clash/icons/glyph.dart';
+import 'package:fl_clash/ui/icons/app_glyphs.dart';
+import 'package:fl_clash/ui/icons/glyph_icon.dart';
+import 'package:fl_clash/ui/icons/glyph.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/state.dart';
 import 'package:material_ui/material_ui.dart';

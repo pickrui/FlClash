@@ -6,7 +6,7 @@
 import 'dart:math';
 
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/icons/icons.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/config/network.dart';

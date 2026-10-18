@@ -11,7 +11,7 @@ import 'package:fl_clash/features/overwrite/overwrite_sheet.dart';
 import 'package:fl_clash/features/overwrite/profile_provider_options.dart';
 import 'package:fl_clash/features/overwrite/proxy_chain.dart';
 import 'package:fl_clash/features/overwrite/routing_draft.dart';
-import 'package:fl_clash/icons/icons.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/clash_providers.dart';
 import 'package:fl_clash/providers/database.dart';

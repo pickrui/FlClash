@@ -11,7 +11,7 @@ import 'package:fl_clash/features/proxies/node_pages.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/metrics.dart';
 import 'package:fl_clash/ui/surface.dart';
-import 'package:fl_clash/icons/icons.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/common/scroll.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/app.dart';

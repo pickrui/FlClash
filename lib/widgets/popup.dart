@@ -8,7 +8,7 @@ import 'dart:ui' as ui show Image;
 import 'dart:ui' show ImageFilter, lerpDouble;
 
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/icons/icons.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/models/common.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/widgets/spring_curve.dart';

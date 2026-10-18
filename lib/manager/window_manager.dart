@@ -6,7 +6,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:fl_clash/icons/caption_icon.dart';
+import 'package:fl_clash/ui/icons/caption_icon.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -18,7 +18,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window/window.dart';
 
-export 'package:fl_clash/icons/caption_icon.dart';
+export 'package:fl_clash/ui/icons/caption_icon.dart';
 
 const _windowGeometryDelay = Duration(milliseconds: 120);
 

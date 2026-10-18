@@ -6,7 +6,7 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/navigator.dart';
 import 'package:fl_clash/common/javascript.dart';
-import 'package:fl_clash/icons/icons.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/widgets/scaffold.dart';
 import 'package:material_ui/material_ui.dart';
