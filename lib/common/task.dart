@@ -540,11 +540,15 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
     if (blockQuic) 'AND,((NETWORK,udp),(DST-PORT,443)),REJECT',
     ...rules,
   ];
-  rawConfig = withLibraryProviders(
-    rawConfig,
-    data.clashProviders,
-    profilesPath,
-    referencedOnly: true,
+  rawConfig = withProfileProviders(
+    withLibraryProviders(
+      rawConfig,
+      data.clashProviders,
+      profilesPath,
+      referencedOnly: true,
+      implicitReferences: !data.customProfile,
+    ),
+    data.profileProviders,
   );
   if (rawConfig['find-process-mode'] == FindProcessMode.off.name &&
       rulesRequireProcessLookup(rawConfig)) {
@@ -570,11 +574,13 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
       : Map<String, dynamic>.from(rawConfig);
 }
 
+/// Without [implicitReferences], include-all pulls in no unnamed provider.
 Map<String, dynamic> withLibraryProviders(
   Map<String, dynamic> source,
   Iterable<ClashProvider> providers,
   String profilesPath, {
   bool referencedOnly = false,
+  bool implicitReferences = true,
 }) {
   final result = Map<String, dynamic>.from(source);
   final groups = source['proxy-groups'] is List
@@ -591,8 +597,9 @@ Map<String, dynamic> withLibraryProviders(
     final referenced = provider.kind == ProviderKind.proxy
         ? groups.any(
             (group) =>
-                group['include-all'] == true ||
-                group['include-all-providers'] == true ||
+                (implicitReferences &&
+                    (group['include-all'] == true ||
+                        group['include-all-providers'] == true)) ||
                 (group['use'] is List &&
                     (group['use'] as List).contains(provider.label)),
           )
@@ -614,6 +621,20 @@ Map<String, dynamic> withLibraryProviders(
     result[provider.section] = section;
   }
   return result;
+}
+
+Map<String, dynamic> withProfileProviders(
+  Map<String, dynamic> source,
+  Map<String, Map<String, Object?>> definitions,
+) {
+  if (definitions.isEmpty) return source;
+  final section = source['proxy-providers'] is Map
+      ? Map<String, dynamic>.from(source['proxy-providers'] as Map)
+      : <String, dynamic>{};
+  for (final MapEntry(key: label, value: definition) in definitions.entries) {
+    section.putIfAbsent(label, () => Map<String, Object?>.from(definition));
+  }
+  return {...source, 'proxy-providers': section};
 }
 
 List<String> _applyTailscaleNetworks(

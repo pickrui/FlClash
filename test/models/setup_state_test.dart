@@ -68,6 +68,57 @@ void main() {
     );
   });
 
+  test('a custom profile follows updates of the providers it uses', () {
+    final previous =
+        buildState(
+          customProxyGroups: const [
+            ProxyGroup(
+              name: 'Out',
+              type: GroupType.Selector,
+              use: ['Subscription'],
+            ),
+          ],
+        ).copyWith(
+          profileType: ProfileType.custom,
+          profileProviders: const {
+            'Subscription': (profileId: 2, lastUpdate: 1),
+            'Other': (profileId: 3, lastUpdate: 1),
+          },
+        );
+    for (final (next, expected) in [
+      (
+        previous.copyWith(
+          profileProviders: {
+            ...previous.profileProviders,
+            'Subscription': (profileId: 2, lastUpdate: 2),
+          },
+        ),
+        isTrue,
+      ),
+      (
+        previous.copyWith(
+          profileProviders: {
+            ...previous.profileProviders,
+            'Other': (profileId: 3, lastUpdate: 2),
+          },
+        ),
+        isFalse,
+      ),
+      (
+        previous.copyWith(
+          overrides: const ProfileOverrides(
+            proxyProviders: {
+              'Subscription': ProxyProviderOptions(filter: 'JP'),
+            },
+          ),
+        ),
+        isTrue,
+      ),
+    ]) {
+      expect(next.needSetup(previous), expected, reason: '$next');
+    }
+  });
+
   group('SetupState personal overlay changes', () {
     final previous = buildState(overwriteType: OverwriteType.merge);
 

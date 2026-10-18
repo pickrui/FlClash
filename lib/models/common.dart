@@ -598,6 +598,11 @@ extension ClashProviderExt on ClashProvider {
   };
 }
 
+Set<String> libraryProxyProviderLabels(Iterable<ClashProvider> providers) => {
+  for (final provider in providers)
+    if (provider.kind == ProviderKind.proxy) provider.label,
+};
+
 RuleProviderFormat? ruleProviderFormatOf(String source) {
   final path = Uri.tryParse(source)?.path ?? source;
   return switch (path.toLowerCase().split('.').last) {

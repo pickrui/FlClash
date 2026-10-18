@@ -45,6 +45,28 @@ void main() {
     expect(restored.customRules, profile.customRules);
   });
 
+  test('custom profile provider options survive the database', () async {
+    final database = Database(NativeDatabase.memory());
+    addTearDown(database.close);
+    final profile = Profile.custom(label: 'Built').copyWith(
+      id: 3,
+      lastUpdateDate: DateTime(2026),
+      overrides: const ProfileOverrides(
+        proxyProviders: {
+          'Subscription': ProxyProviderOptions(
+            filter: 'JP',
+            healthCheck: ProviderHealthCheck(interval: 300, lazy: true),
+            proxyOverride: ProviderOverride(additionalPrefix: 'Sub '),
+          ),
+        },
+      ),
+    );
+
+    await database.putProfile(profile);
+
+    expect(await database.profilesDao.all().getSingle(), profile);
+  });
+
   test('Profile JSON defaults custom overwrite data to empty lists', () {
     final profile = Profile.fromJson({
       'id': 1,

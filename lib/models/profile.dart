@@ -565,14 +565,122 @@ String? findProxyChainConflictName(
   return null;
 }
 
+@freezed
+abstract class ProviderHealthCheck with _$ProviderHealthCheck {
+  const factory ProviderHealthCheck({
+    String? url,
+    int? interval,
+    int? timeout,
+    bool? lazy,
+    @JsonKey(name: 'expected-status') String? expectedStatus,
+  }) = _ProviderHealthCheck;
+
+  factory ProviderHealthCheck.fromJson(Map<String, Object?> json) =>
+      _$ProviderHealthCheckFromJson(json);
+}
+
+/// Certificate checks stay on: there is deliberately no skip-cert-verify.
+@freezed
+abstract class ProviderOverride with _$ProviderOverride {
+  const factory ProviderOverride({
+    @JsonKey(name: 'additional-prefix') String? additionalPrefix,
+    @JsonKey(name: 'additional-suffix') String? additionalSuffix,
+    bool? udp,
+    @JsonKey(name: 'ip-version') String? ipVersion,
+  }) = _ProviderOverride;
+
+  factory ProviderOverride.fromJson(Map<String, Object?> json) =>
+      _$ProviderOverrideFromJson(json);
+}
+
+@freezed
+abstract class ProxyProviderOptions with _$ProxyProviderOptions {
+  const factory ProxyProviderOptions({
+    @Default(ProviderHealthCheck())
+    @JsonKey(name: 'health-check')
+    ProviderHealthCheck healthCheck,
+    String? filter,
+    @JsonKey(name: 'exclude-filter') String? excludeFilter,
+    @Default(ProviderOverride())
+    @JsonKey(name: 'override')
+    ProviderOverride proxyOverride,
+  }) = _ProxyProviderOptions;
+
+  factory ProxyProviderOptions.fromJson(Map<String, Object?> json) =>
+      _$ProxyProviderOptionsFromJson(json);
+}
+
+extension ProxyProviderOptionsExt on ProxyProviderOptions {
+  Map<String, Object?> get definition {
+    String? text(String? value) =>
+        value?.trim().isNotEmpty == true ? value!.trim() : null;
+    final healthCheck = this.healthCheck.copyWith(
+      url: text(this.healthCheck.url),
+      expectedStatus: text(this.healthCheck.expectedStatus),
+    );
+    final proxyOverride = this.proxyOverride.copyWith(
+      additionalPrefix: text(this.proxyOverride.additionalPrefix),
+      additionalSuffix: text(this.proxyOverride.additionalSuffix),
+      ipVersion: text(this.proxyOverride.ipVersion),
+    );
+    return {
+      if (healthCheck != const ProviderHealthCheck())
+        'health-check': {
+          'enable': true,
+          'url': healthCheck.url ?? defaultTestUrl,
+          'interval': ?healthCheck.interval,
+          'timeout': ?healthCheck.timeout,
+          'lazy': ?healthCheck.lazy,
+          'expected-status': ?healthCheck.expectedStatus,
+        },
+      'filter': ?text(filter),
+      'exclude-filter': ?text(excludeFilter),
+      if (proxyOverride != const ProviderOverride())
+        'override': {
+          'additional-prefix': ?proxyOverride.additionalPrefix,
+          'additional-suffix': ?proxyOverride.additionalSuffix,
+          'udp': ?proxyOverride.udp,
+          'ip-version': ?proxyOverride.ipVersion,
+        },
+    };
+  }
+}
+
 /// Settings a profile keeps for itself in its `overrides` column.
 @freezed
 abstract class ProfileOverrides with _$ProfileOverrides {
-  const factory ProfileOverrides() = _ProfileOverrides;
+  const factory ProfileOverrides({
+    @Default({})
+    @JsonKey(name: 'proxy-providers')
+    Map<String, ProxyProviderOptions> proxyProviders,
+  }) = _ProfileOverrides;
 
   factory ProfileOverrides.fromJson(Map<String, Object?> json) =>
       _$ProfileOverridesFromJson(json);
 }
+
+/// The subscription and file profiles a custom profile can use as proxy
+/// providers, by label: the first profile keeps a label shared by several,
+/// and a label of the provider library stays with the library.
+Map<String, int> profileProviderIds(
+  Iterable<Profile> profiles, {
+  Set<String> reserved = const {},
+}) {
+  final ids = <String, int>{};
+  for (final profile in profiles) {
+    if (profile.type == ProfileType.custom || profile.isoixCloudProfile) {
+      continue;
+    }
+    final label = profile.realLabel;
+    if (!reserved.contains(label)) ids.putIfAbsent(label, () => profile.id);
+  }
+  return ids;
+}
+
+Map<String, Object?> profileProviderDefinition(
+  String path,
+  ProxyProviderOptions? options,
+) => {'type': 'file', 'path': path, ...?options?.definition};
 
 @freezed
 abstract class Profile with _$Profile {

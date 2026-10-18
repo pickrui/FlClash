@@ -195,8 +195,9 @@ class ClashProviderLibrary {
       switch (provider.kind) {
         ProviderKind.proxy => profile.customProxyGroups.any(
           (group) =>
-              group.includeAll == true ||
-              group.includeAllProviders == true ||
+              (profile.type != ProfileType.custom &&
+                  (group.includeAll == true ||
+                      group.includeAllProviders == true)) ||
               (group.use?.contains(provider.label) ?? false),
         ),
         ProviderKind.rule => profile.customRules.any(

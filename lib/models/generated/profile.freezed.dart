@@ -863,9 +863,890 @@ as Map<String, Object?>,
 
 
 /// @nodoc
+mixin _$ProviderHealthCheck {
+
+ String? get url; int? get interval; int? get timeout; bool? get lazy;@JsonKey(name: 'expected-status') String? get expectedStatus;
+/// Create a copy of ProviderHealthCheck
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ProviderHealthCheckCopyWith<ProviderHealthCheck> get copyWith => _$ProviderHealthCheckCopyWithImpl<ProviderHealthCheck>(this as ProviderHealthCheck, _$identity);
+
+  /// Serializes this ProviderHealthCheck to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as ProviderHealthCheck;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProviderHealthCheck&&(identical(other.url, _this.url) || other.url == _this.url)&&(identical(other.interval, _this.interval) || other.interval == _this.interval)&&(identical(other.timeout, _this.timeout) || other.timeout == _this.timeout)&&(identical(other.lazy, _this.lazy) || other.lazy == _this.lazy)&&(identical(other.expectedStatus, _this.expectedStatus) || other.expectedStatus == _this.expectedStatus));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as ProviderHealthCheck;
+  return Object.hash(runtimeType,_this.url,_this.interval,_this.timeout,_this.lazy,_this.expectedStatus);
+}
+
+@override
+String toString() {
+  final _this = this as ProviderHealthCheck;
+  return 'ProviderHealthCheck(url: ${_this.url}, interval: ${_this.interval}, timeout: ${_this.timeout}, lazy: ${_this.lazy}, expectedStatus: ${_this.expectedStatus})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ProviderHealthCheckCopyWith<$Res>  {
+  factory $ProviderHealthCheckCopyWith(ProviderHealthCheck value, $Res Function(ProviderHealthCheck) _then) = _$ProviderHealthCheckCopyWithImpl;
+@useResult
+$Res call({
+ String? url, int? interval, int? timeout, bool? lazy,@JsonKey(name: 'expected-status') String? expectedStatus
+});
+
+
+
+
+}
+/// @nodoc
+class _$ProviderHealthCheckCopyWithImpl<$Res>
+    implements $ProviderHealthCheckCopyWith<$Res> {
+  _$ProviderHealthCheckCopyWithImpl(this._self, this._then);
+
+  final ProviderHealthCheck _self;
+  final $Res Function(ProviderHealthCheck) _then;
+
+/// Create a copy of ProviderHealthCheck
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? url = freezed,Object? interval = freezed,Object? timeout = freezed,Object? lazy = freezed,Object? expectedStatus = freezed,}) {
+  return _then(ProviderHealthCheck(
+url: freezed == url ? _self.url : url // ignore: cast_nullable_to_non_nullable
+as String?,interval: freezed == interval ? _self.interval : interval // ignore: cast_nullable_to_non_nullable
+as int?,timeout: freezed == timeout ? _self.timeout : timeout // ignore: cast_nullable_to_non_nullable
+as int?,lazy: freezed == lazy ? _self.lazy : lazy // ignore: cast_nullable_to_non_nullable
+as bool?,expectedStatus: freezed == expectedStatus ? _self.expectedStatus : expectedStatus // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [ProviderHealthCheck].
+extension ProviderHealthCheckPatterns on ProviderHealthCheck {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ProviderHealthCheck value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ProviderHealthCheck() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ProviderHealthCheck value)  $default,){
+final _that = this;
+switch (_that) {
+case _ProviderHealthCheck():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ProviderHealthCheck value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ProviderHealthCheck() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? url,  int? interval,  int? timeout,  bool? lazy, @JsonKey(name: 'expected-status')  String? expectedStatus)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ProviderHealthCheck() when $default != null:
+return $default(_that.url,_that.interval,_that.timeout,_that.lazy,_that.expectedStatus);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? url,  int? interval,  int? timeout,  bool? lazy, @JsonKey(name: 'expected-status')  String? expectedStatus)  $default,) {final _that = this;
+switch (_that) {
+case _ProviderHealthCheck():
+return $default(_that.url,_that.interval,_that.timeout,_that.lazy,_that.expectedStatus);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? url,  int? interval,  int? timeout,  bool? lazy, @JsonKey(name: 'expected-status')  String? expectedStatus)?  $default,) {final _that = this;
+switch (_that) {
+case _ProviderHealthCheck() when $default != null:
+return $default(_that.url,_that.interval,_that.timeout,_that.lazy,_that.expectedStatus);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _ProviderHealthCheck implements ProviderHealthCheck {
+  const _ProviderHealthCheck({this.url, this.interval, this.timeout, this.lazy, @JsonKey(name: 'expected-status') this.expectedStatus});
+  factory _ProviderHealthCheck.fromJson(Map<String, dynamic> json) => _$ProviderHealthCheckFromJson(json);
+
+@override final  String? url;
+@override final  int? interval;
+@override final  int? timeout;
+@override final  bool? lazy;
+@override@JsonKey(name: 'expected-status') final  String? expectedStatus;
+
+/// Create a copy of ProviderHealthCheck
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ProviderHealthCheckCopyWith<_ProviderHealthCheck> get copyWith => __$ProviderHealthCheckCopyWithImpl<_ProviderHealthCheck>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$ProviderHealthCheckToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProviderHealthCheck&&(identical(other.url, url) || other.url == url)&&(identical(other.interval, interval) || other.interval == interval)&&(identical(other.timeout, timeout) || other.timeout == timeout)&&(identical(other.lazy, lazy) || other.lazy == lazy)&&(identical(other.expectedStatus, expectedStatus) || other.expectedStatus == expectedStatus));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,url,interval,timeout,lazy,expectedStatus);
+}
+
+@override
+String toString() {
+    return 'ProviderHealthCheck(url: $url, interval: $interval, timeout: $timeout, lazy: $lazy, expectedStatus: $expectedStatus)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ProviderHealthCheckCopyWith<$Res> implements $ProviderHealthCheckCopyWith<$Res> {
+  factory _$ProviderHealthCheckCopyWith(_ProviderHealthCheck value, $Res Function(_ProviderHealthCheck) _then) = __$ProviderHealthCheckCopyWithImpl;
+@override @useResult
+$Res call({
+ String? url, int? interval, int? timeout, bool? lazy,@JsonKey(name: 'expected-status') String? expectedStatus
+});
+
+
+
+
+}
+/// @nodoc
+class __$ProviderHealthCheckCopyWithImpl<$Res>
+    implements _$ProviderHealthCheckCopyWith<$Res> {
+  __$ProviderHealthCheckCopyWithImpl(this._self, this._then);
+
+  final _ProviderHealthCheck _self;
+  final $Res Function(_ProviderHealthCheck) _then;
+
+/// Create a copy of ProviderHealthCheck
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? url = freezed,Object? interval = freezed,Object? timeout = freezed,Object? lazy = freezed,Object? expectedStatus = freezed,}) {
+  return _then(_ProviderHealthCheck(
+url: freezed == url ? _self.url : url // ignore: cast_nullable_to_non_nullable
+as String?,interval: freezed == interval ? _self.interval : interval // ignore: cast_nullable_to_non_nullable
+as int?,timeout: freezed == timeout ? _self.timeout : timeout // ignore: cast_nullable_to_non_nullable
+as int?,lazy: freezed == lazy ? _self.lazy : lazy // ignore: cast_nullable_to_non_nullable
+as bool?,expectedStatus: freezed == expectedStatus ? _self.expectedStatus : expectedStatus // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$ProviderOverride {
+
+@JsonKey(name: 'additional-prefix') String? get additionalPrefix;@JsonKey(name: 'additional-suffix') String? get additionalSuffix; bool? get udp;@JsonKey(name: 'ip-version') String? get ipVersion;
+/// Create a copy of ProviderOverride
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ProviderOverrideCopyWith<ProviderOverride> get copyWith => _$ProviderOverrideCopyWithImpl<ProviderOverride>(this as ProviderOverride, _$identity);
+
+  /// Serializes this ProviderOverride to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as ProviderOverride;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProviderOverride&&(identical(other.additionalPrefix, _this.additionalPrefix) || other.additionalPrefix == _this.additionalPrefix)&&(identical(other.additionalSuffix, _this.additionalSuffix) || other.additionalSuffix == _this.additionalSuffix)&&(identical(other.udp, _this.udp) || other.udp == _this.udp)&&(identical(other.ipVersion, _this.ipVersion) || other.ipVersion == _this.ipVersion));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as ProviderOverride;
+  return Object.hash(runtimeType,_this.additionalPrefix,_this.additionalSuffix,_this.udp,_this.ipVersion);
+}
+
+@override
+String toString() {
+  final _this = this as ProviderOverride;
+  return 'ProviderOverride(additionalPrefix: ${_this.additionalPrefix}, additionalSuffix: ${_this.additionalSuffix}, udp: ${_this.udp}, ipVersion: ${_this.ipVersion})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ProviderOverrideCopyWith<$Res>  {
+  factory $ProviderOverrideCopyWith(ProviderOverride value, $Res Function(ProviderOverride) _then) = _$ProviderOverrideCopyWithImpl;
+@useResult
+$Res call({
+@JsonKey(name: 'additional-prefix') String? additionalPrefix,@JsonKey(name: 'additional-suffix') String? additionalSuffix, bool? udp,@JsonKey(name: 'ip-version') String? ipVersion
+});
+
+
+
+
+}
+/// @nodoc
+class _$ProviderOverrideCopyWithImpl<$Res>
+    implements $ProviderOverrideCopyWith<$Res> {
+  _$ProviderOverrideCopyWithImpl(this._self, this._then);
+
+  final ProviderOverride _self;
+  final $Res Function(ProviderOverride) _then;
+
+/// Create a copy of ProviderOverride
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? additionalPrefix = freezed,Object? additionalSuffix = freezed,Object? udp = freezed,Object? ipVersion = freezed,}) {
+  return _then(ProviderOverride(
+additionalPrefix: freezed == additionalPrefix ? _self.additionalPrefix : additionalPrefix // ignore: cast_nullable_to_non_nullable
+as String?,additionalSuffix: freezed == additionalSuffix ? _self.additionalSuffix : additionalSuffix // ignore: cast_nullable_to_non_nullable
+as String?,udp: freezed == udp ? _self.udp : udp // ignore: cast_nullable_to_non_nullable
+as bool?,ipVersion: freezed == ipVersion ? _self.ipVersion : ipVersion // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [ProviderOverride].
+extension ProviderOverridePatterns on ProviderOverride {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ProviderOverride value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ProviderOverride() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ProviderOverride value)  $default,){
+final _that = this;
+switch (_that) {
+case _ProviderOverride():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ProviderOverride value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ProviderOverride() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'additional-prefix')  String? additionalPrefix, @JsonKey(name: 'additional-suffix')  String? additionalSuffix,  bool? udp, @JsonKey(name: 'ip-version')  String? ipVersion)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ProviderOverride() when $default != null:
+return $default(_that.additionalPrefix,_that.additionalSuffix,_that.udp,_that.ipVersion);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'additional-prefix')  String? additionalPrefix, @JsonKey(name: 'additional-suffix')  String? additionalSuffix,  bool? udp, @JsonKey(name: 'ip-version')  String? ipVersion)  $default,) {final _that = this;
+switch (_that) {
+case _ProviderOverride():
+return $default(_that.additionalPrefix,_that.additionalSuffix,_that.udp,_that.ipVersion);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'additional-prefix')  String? additionalPrefix, @JsonKey(name: 'additional-suffix')  String? additionalSuffix,  bool? udp, @JsonKey(name: 'ip-version')  String? ipVersion)?  $default,) {final _that = this;
+switch (_that) {
+case _ProviderOverride() when $default != null:
+return $default(_that.additionalPrefix,_that.additionalSuffix,_that.udp,_that.ipVersion);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _ProviderOverride implements ProviderOverride {
+  const _ProviderOverride({@JsonKey(name: 'additional-prefix') this.additionalPrefix, @JsonKey(name: 'additional-suffix') this.additionalSuffix, this.udp, @JsonKey(name: 'ip-version') this.ipVersion});
+  factory _ProviderOverride.fromJson(Map<String, dynamic> json) => _$ProviderOverrideFromJson(json);
+
+@override@JsonKey(name: 'additional-prefix') final  String? additionalPrefix;
+@override@JsonKey(name: 'additional-suffix') final  String? additionalSuffix;
+@override final  bool? udp;
+@override@JsonKey(name: 'ip-version') final  String? ipVersion;
+
+/// Create a copy of ProviderOverride
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ProviderOverrideCopyWith<_ProviderOverride> get copyWith => __$ProviderOverrideCopyWithImpl<_ProviderOverride>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$ProviderOverrideToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProviderOverride&&(identical(other.additionalPrefix, additionalPrefix) || other.additionalPrefix == additionalPrefix)&&(identical(other.additionalSuffix, additionalSuffix) || other.additionalSuffix == additionalSuffix)&&(identical(other.udp, udp) || other.udp == udp)&&(identical(other.ipVersion, ipVersion) || other.ipVersion == ipVersion));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,additionalPrefix,additionalSuffix,udp,ipVersion);
+}
+
+@override
+String toString() {
+    return 'ProviderOverride(additionalPrefix: $additionalPrefix, additionalSuffix: $additionalSuffix, udp: $udp, ipVersion: $ipVersion)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ProviderOverrideCopyWith<$Res> implements $ProviderOverrideCopyWith<$Res> {
+  factory _$ProviderOverrideCopyWith(_ProviderOverride value, $Res Function(_ProviderOverride) _then) = __$ProviderOverrideCopyWithImpl;
+@override @useResult
+$Res call({
+@JsonKey(name: 'additional-prefix') String? additionalPrefix,@JsonKey(name: 'additional-suffix') String? additionalSuffix, bool? udp,@JsonKey(name: 'ip-version') String? ipVersion
+});
+
+
+
+
+}
+/// @nodoc
+class __$ProviderOverrideCopyWithImpl<$Res>
+    implements _$ProviderOverrideCopyWith<$Res> {
+  __$ProviderOverrideCopyWithImpl(this._self, this._then);
+
+  final _ProviderOverride _self;
+  final $Res Function(_ProviderOverride) _then;
+
+/// Create a copy of ProviderOverride
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? additionalPrefix = freezed,Object? additionalSuffix = freezed,Object? udp = freezed,Object? ipVersion = freezed,}) {
+  return _then(_ProviderOverride(
+additionalPrefix: freezed == additionalPrefix ? _self.additionalPrefix : additionalPrefix // ignore: cast_nullable_to_non_nullable
+as String?,additionalSuffix: freezed == additionalSuffix ? _self.additionalSuffix : additionalSuffix // ignore: cast_nullable_to_non_nullable
+as String?,udp: freezed == udp ? _self.udp : udp // ignore: cast_nullable_to_non_nullable
+as bool?,ipVersion: freezed == ipVersion ? _self.ipVersion : ipVersion // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$ProxyProviderOptions {
+
+@JsonKey(name: 'health-check') ProviderHealthCheck get healthCheck; String? get filter;@JsonKey(name: 'exclude-filter') String? get excludeFilter;@JsonKey(name: 'override') ProviderOverride get proxyOverride;
+/// Create a copy of ProxyProviderOptions
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ProxyProviderOptionsCopyWith<ProxyProviderOptions> get copyWith => _$ProxyProviderOptionsCopyWithImpl<ProxyProviderOptions>(this as ProxyProviderOptions, _$identity);
+
+  /// Serializes this ProxyProviderOptions to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as ProxyProviderOptions;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProxyProviderOptions&&(identical(other.healthCheck, _this.healthCheck) || other.healthCheck == _this.healthCheck)&&(identical(other.filter, _this.filter) || other.filter == _this.filter)&&(identical(other.excludeFilter, _this.excludeFilter) || other.excludeFilter == _this.excludeFilter)&&(identical(other.proxyOverride, _this.proxyOverride) || other.proxyOverride == _this.proxyOverride));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as ProxyProviderOptions;
+  return Object.hash(runtimeType,_this.healthCheck,_this.filter,_this.excludeFilter,_this.proxyOverride);
+}
+
+@override
+String toString() {
+  final _this = this as ProxyProviderOptions;
+  return 'ProxyProviderOptions(healthCheck: ${_this.healthCheck}, filter: ${_this.filter}, excludeFilter: ${_this.excludeFilter}, proxyOverride: ${_this.proxyOverride})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ProxyProviderOptionsCopyWith<$Res>  {
+  factory $ProxyProviderOptionsCopyWith(ProxyProviderOptions value, $Res Function(ProxyProviderOptions) _then) = _$ProxyProviderOptionsCopyWithImpl;
+@useResult
+$Res call({
+@JsonKey(name: 'health-check') ProviderHealthCheck healthCheck, String? filter,@JsonKey(name: 'exclude-filter') String? excludeFilter,@JsonKey(name: 'override') ProviderOverride proxyOverride
+});
+
+
+$ProviderHealthCheckCopyWith<$Res> get healthCheck;$ProviderOverrideCopyWith<$Res> get proxyOverride;
+
+}
+/// @nodoc
+class _$ProxyProviderOptionsCopyWithImpl<$Res>
+    implements $ProxyProviderOptionsCopyWith<$Res> {
+  _$ProxyProviderOptionsCopyWithImpl(this._self, this._then);
+
+  final ProxyProviderOptions _self;
+  final $Res Function(ProxyProviderOptions) _then;
+
+/// Create a copy of ProxyProviderOptions
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? healthCheck = null,Object? filter = freezed,Object? excludeFilter = freezed,Object? proxyOverride = null,}) {
+  return _then(ProxyProviderOptions(
+healthCheck: null == healthCheck ? _self.healthCheck : healthCheck // ignore: cast_nullable_to_non_nullable
+as ProviderHealthCheck,filter: freezed == filter ? _self.filter : filter // ignore: cast_nullable_to_non_nullable
+as String?,excludeFilter: freezed == excludeFilter ? _self.excludeFilter : excludeFilter // ignore: cast_nullable_to_non_nullable
+as String?,proxyOverride: null == proxyOverride ? _self.proxyOverride : proxyOverride // ignore: cast_nullable_to_non_nullable
+as ProviderOverride,
+  ));
+}
+/// Create a copy of ProxyProviderOptions
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ProviderHealthCheckCopyWith<$Res> get healthCheck {
+  
+  return $ProviderHealthCheckCopyWith<$Res>(_self.healthCheck, (value) {
+    return _then(_self.copyWith(healthCheck: value));
+  });
+}/// Create a copy of ProxyProviderOptions
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ProviderOverrideCopyWith<$Res> get proxyOverride {
+  
+  return $ProviderOverrideCopyWith<$Res>(_self.proxyOverride, (value) {
+    return _then(_self.copyWith(proxyOverride: value));
+  });
+}
+}
+
+
+/// Adds pattern-matching-related methods to [ProxyProviderOptions].
+extension ProxyProviderOptionsPatterns on ProxyProviderOptions {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ProxyProviderOptions value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ProxyProviderOptions() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ProxyProviderOptions value)  $default,){
+final _that = this;
+switch (_that) {
+case _ProxyProviderOptions():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ProxyProviderOptions value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ProxyProviderOptions() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'health-check')  ProviderHealthCheck healthCheck,  String? filter, @JsonKey(name: 'exclude-filter')  String? excludeFilter, @JsonKey(name: 'override')  ProviderOverride proxyOverride)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ProxyProviderOptions() when $default != null:
+return $default(_that.healthCheck,_that.filter,_that.excludeFilter,_that.proxyOverride);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'health-check')  ProviderHealthCheck healthCheck,  String? filter, @JsonKey(name: 'exclude-filter')  String? excludeFilter, @JsonKey(name: 'override')  ProviderOverride proxyOverride)  $default,) {final _that = this;
+switch (_that) {
+case _ProxyProviderOptions():
+return $default(_that.healthCheck,_that.filter,_that.excludeFilter,_that.proxyOverride);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'health-check')  ProviderHealthCheck healthCheck,  String? filter, @JsonKey(name: 'exclude-filter')  String? excludeFilter, @JsonKey(name: 'override')  ProviderOverride proxyOverride)?  $default,) {final _that = this;
+switch (_that) {
+case _ProxyProviderOptions() when $default != null:
+return $default(_that.healthCheck,_that.filter,_that.excludeFilter,_that.proxyOverride);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _ProxyProviderOptions implements ProxyProviderOptions {
+  const _ProxyProviderOptions({@JsonKey(name: 'health-check') this.healthCheck = const ProviderHealthCheck(), this.filter, @JsonKey(name: 'exclude-filter') this.excludeFilter, @JsonKey(name: 'override') this.proxyOverride = const ProviderOverride()});
+  factory _ProxyProviderOptions.fromJson(Map<String, dynamic> json) => _$ProxyProviderOptionsFromJson(json);
+
+@override@JsonKey(name: 'health-check') final  ProviderHealthCheck healthCheck;
+@override final  String? filter;
+@override@JsonKey(name: 'exclude-filter') final  String? excludeFilter;
+@override@JsonKey(name: 'override') final  ProviderOverride proxyOverride;
+
+/// Create a copy of ProxyProviderOptions
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ProxyProviderOptionsCopyWith<_ProxyProviderOptions> get copyWith => __$ProxyProviderOptionsCopyWithImpl<_ProxyProviderOptions>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$ProxyProviderOptionsToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProxyProviderOptions&&(identical(other.healthCheck, healthCheck) || other.healthCheck == healthCheck)&&(identical(other.filter, filter) || other.filter == filter)&&(identical(other.excludeFilter, excludeFilter) || other.excludeFilter == excludeFilter)&&(identical(other.proxyOverride, proxyOverride) || other.proxyOverride == proxyOverride));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,healthCheck,filter,excludeFilter,proxyOverride);
+}
+
+@override
+String toString() {
+    return 'ProxyProviderOptions(healthCheck: $healthCheck, filter: $filter, excludeFilter: $excludeFilter, proxyOverride: $proxyOverride)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ProxyProviderOptionsCopyWith<$Res> implements $ProxyProviderOptionsCopyWith<$Res> {
+  factory _$ProxyProviderOptionsCopyWith(_ProxyProviderOptions value, $Res Function(_ProxyProviderOptions) _then) = __$ProxyProviderOptionsCopyWithImpl;
+@override @useResult
+$Res call({
+@JsonKey(name: 'health-check') ProviderHealthCheck healthCheck, String? filter,@JsonKey(name: 'exclude-filter') String? excludeFilter,@JsonKey(name: 'override') ProviderOverride proxyOverride
+});
+
+
+@override $ProviderHealthCheckCopyWith<$Res> get healthCheck;@override $ProviderOverrideCopyWith<$Res> get proxyOverride;
+
+}
+/// @nodoc
+class __$ProxyProviderOptionsCopyWithImpl<$Res>
+    implements _$ProxyProviderOptionsCopyWith<$Res> {
+  __$ProxyProviderOptionsCopyWithImpl(this._self, this._then);
+
+  final _ProxyProviderOptions _self;
+  final $Res Function(_ProxyProviderOptions) _then;
+
+/// Create a copy of ProxyProviderOptions
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? healthCheck = null,Object? filter = freezed,Object? excludeFilter = freezed,Object? proxyOverride = null,}) {
+  return _then(_ProxyProviderOptions(
+healthCheck: null == healthCheck ? _self.healthCheck : healthCheck // ignore: cast_nullable_to_non_nullable
+as ProviderHealthCheck,filter: freezed == filter ? _self.filter : filter // ignore: cast_nullable_to_non_nullable
+as String?,excludeFilter: freezed == excludeFilter ? _self.excludeFilter : excludeFilter // ignore: cast_nullable_to_non_nullable
+as String?,proxyOverride: null == proxyOverride ? _self.proxyOverride : proxyOverride // ignore: cast_nullable_to_non_nullable
+as ProviderOverride,
+  ));
+}
+
+/// Create a copy of ProxyProviderOptions
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ProviderHealthCheckCopyWith<$Res> get healthCheck {
+  
+  return $ProviderHealthCheckCopyWith<$Res>(_self.healthCheck, (value) {
+    return _then(_self.copyWith(healthCheck: value));
+  });
+}/// Create a copy of ProxyProviderOptions
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ProviderOverrideCopyWith<$Res> get proxyOverride {
+  
+  return $ProviderOverrideCopyWith<$Res>(_self.proxyOverride, (value) {
+    return _then(_self.copyWith(proxyOverride: value));
+  });
+}
+}
+
+
+/// @nodoc
 mixin _$ProfileOverrides {
 
-
+@JsonKey(name: 'proxy-providers') Map<String, ProxyProviderOptions> get proxyProviders;
+/// Create a copy of ProfileOverrides
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ProfileOverridesCopyWith<ProfileOverrides> get copyWith => _$ProfileOverridesCopyWithImpl<ProfileOverrides>(this as ProfileOverrides, _$identity);
 
   /// Serializes this ProfileOverrides to a JSON map.
   Map<String, dynamic> toJson();
@@ -873,24 +1754,55 @@ mixin _$ProfileOverrides {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is ProfileOverrides);
+  final _this = this as ProfileOverrides;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProfileOverrides&&const DeepCollectionEquality().equals(other.proxyProviders, _this.proxyProviders));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode {
+  final _this = this as ProfileOverrides;
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.proxyProviders));
+}
 
 @override
 String toString() {
-    return 'ProfileOverrides()';
+  final _this = this as ProfileOverrides;
+  return 'ProfileOverrides(proxyProviders: ${_this.proxyProviders})';
 }
 
 
 }
 
 /// @nodoc
-class $ProfileOverridesCopyWith<$Res>  {
-$ProfileOverridesCopyWith(ProfileOverrides _, $Res Function(ProfileOverrides) __);
+abstract mixin class $ProfileOverridesCopyWith<$Res>  {
+  factory $ProfileOverridesCopyWith(ProfileOverrides value, $Res Function(ProfileOverrides) _then) = _$ProfileOverridesCopyWithImpl;
+@useResult
+$Res call({
+@JsonKey(name: 'proxy-providers') Map<String, ProxyProviderOptions> proxyProviders
+});
+
+
+
+
+}
+/// @nodoc
+class _$ProfileOverridesCopyWithImpl<$Res>
+    implements $ProfileOverridesCopyWith<$Res> {
+  _$ProfileOverridesCopyWithImpl(this._self, this._then);
+
+  final ProfileOverrides _self;
+  final $Res Function(ProfileOverrides) _then;
+
+/// Create a copy of ProfileOverrides
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? proxyProviders = null,}) {
+  return _then(ProfileOverrides(
+proxyProviders: null == proxyProviders ? _self.proxyProviders : proxyProviders // ignore: cast_nullable_to_non_nullable
+as Map<String, ProxyProviderOptions>,
+  ));
+}
+
 }
 
 
@@ -972,10 +1884,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function()?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'proxy-providers')  Map<String, ProxyProviderOptions> proxyProviders)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ProfileOverrides() when $default != null:
-return $default();case _:
+return $default(_that.proxyProviders);case _:
   return orElse();
 
 }
@@ -993,10 +1905,10 @@ return $default();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function()  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'proxy-providers')  Map<String, ProxyProviderOptions> proxyProviders)  $default,) {final _that = this;
 switch (_that) {
 case _ProfileOverrides():
-return $default();case _:
+return $default(_that.proxyProviders);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1013,10 +1925,10 @@ return $default();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function()?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'proxy-providers')  Map<String, ProxyProviderOptions> proxyProviders)?  $default,) {final _that = this;
 switch (_that) {
 case _ProfileOverrides() when $default != null:
-return $default();case _:
+return $default(_that.proxyProviders);case _:
   return null;
 
 }
@@ -1028,11 +1940,22 @@ return $default();case _:
 @JsonSerializable()
 
 class _ProfileOverrides implements ProfileOverrides {
-  const _ProfileOverrides();
+  const _ProfileOverrides({@JsonKey(name: 'proxy-providers')  Map<String, ProxyProviderOptions> proxyProviders = const {}}): _proxyProviders = proxyProviders;
   factory _ProfileOverrides.fromJson(Map<String, dynamic> json) => _$ProfileOverridesFromJson(json);
 
+ final  Map<String, ProxyProviderOptions> _proxyProviders;
+@override@JsonKey(name: 'proxy-providers') Map<String, ProxyProviderOptions> get proxyProviders {
+  if (_proxyProviders is EqualUnmodifiableMapView) return _proxyProviders;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_proxyProviders);
+}
 
 
+/// Create a copy of ProfileOverrides
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ProfileOverridesCopyWith<_ProfileOverrides> get copyWith => __$ProfileOverridesCopyWithImpl<_ProfileOverrides>(this, _$identity);
 
 @override
 Map<String, dynamic> toJson() {
@@ -1041,23 +1964,54 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProfileOverrides);
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProfileOverrides&&const DeepCollectionEquality().equals(other.proxyProviders, _proxyProviders));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode {
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_proxyProviders));
+}
 
 @override
 String toString() {
-    return 'ProfileOverrides()';
+    return 'ProfileOverrides(proxyProviders: $proxyProviders)';
 }
 
 
 }
 
+/// @nodoc
+abstract mixin class _$ProfileOverridesCopyWith<$Res> implements $ProfileOverridesCopyWith<$Res> {
+  factory _$ProfileOverridesCopyWith(_ProfileOverrides value, $Res Function(_ProfileOverrides) _then) = __$ProfileOverridesCopyWithImpl;
+@override @useResult
+$Res call({
+@JsonKey(name: 'proxy-providers') Map<String, ProxyProviderOptions> proxyProviders
+});
 
 
+
+
+}
+/// @nodoc
+class __$ProfileOverridesCopyWithImpl<$Res>
+    implements _$ProfileOverridesCopyWith<$Res> {
+  __$ProfileOverridesCopyWithImpl(this._self, this._then);
+
+  final _ProfileOverrides _self;
+  final $Res Function(_ProfileOverrides) _then;
+
+/// Create a copy of ProfileOverrides
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? proxyProviders = null,}) {
+  return _then(_ProfileOverrides(
+proxyProviders: null == proxyProviders ? _self._proxyProviders : proxyProviders // ignore: cast_nullable_to_non_nullable
+as Map<String, ProxyProviderOptions>,
+  ));
+}
+
+
+}
 
 
 /// @nodoc

@@ -95,6 +95,29 @@ void main() {
     );
   }
 
+  test('a custom profile uses a library proxy provider only by name', () async {
+    final nodes = resource(kind: ProviderKind.proxy, label: 'Nodes');
+    await library.save(nodes);
+    final custom = Profile.custom(label: 'Built').copyWith(
+      id: 11,
+      customProxyGroups: const [
+        ProxyGroup(name: 'All', type: GroupType.Selector, includeAll: true),
+      ],
+    );
+    await db.putProfile(custom);
+    await library.remove(nodes);
+    await library.save(nodes);
+    await db.putProfile(
+      custom.copyWith(
+        customProxyGroups: const [
+          ProxyGroup(name: 'All', type: GroupType.Selector, use: ['Nodes']),
+        ],
+      ),
+    );
+
+    await expectLater(library.remove(nodes), fails('inUse'));
+  });
+
   test('rename updates snapshots, normalized custom rules and global added rules together', () async {
     final before = resource();
     await library.save(before);

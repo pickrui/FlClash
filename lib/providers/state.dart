@@ -798,6 +798,14 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
   final List<Rule> addedRules = profileId != null
       ? await ref.watch(addedRuleStreamProvider(profileId).future)
       : [];
+  final clashProviders = await ref.watch(clashProvidersProvider.future);
+  final profiles = profileType == ProfileType.custom
+      ? ref.watch(profilesProvider)
+      : const <Profile>[];
+  final profileProviders = profileProviderIds(
+    profiles,
+    reserved: libraryProxyProviderLabels(clashProviders),
+  );
   return SetupState(
     interfaceName: ref.watch(
       patchClashConfigProvider.select((state) => state.interfaceName),
@@ -809,9 +817,22 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
     addedRules: addedRules,
     proxyChains: proxyChains,
     profileProxies: profileProxies,
-    clashProviders: await ref.watch(clashProvidersProvider.future),
+    clashProviders: clashProviders,
     customProxyGroups: customProxyGroups,
     customRules: customRules,
+    profileProviders: {
+      for (final MapEntry(key: label, value: id) in profileProviders.entries)
+        label: (
+          profileId: id,
+          lastUpdate: profiles
+              .getProfile(id)
+              ?.lastUpdateDate
+              ?.millisecondsSinceEpoch,
+        ),
+    },
+    overrides: profileType == ProfileType.custom
+        ? profile!.overrides
+        : const ProfileOverrides(),
     matchTarget: profile?.matchTarget,
     script: script,
     dns: dns,

@@ -55,11 +55,79 @@ Map<String, dynamic> _$ProfileProxyToJson(_ProfileProxy instance) =>
       'proxy': instance.proxy,
     };
 
+_ProviderHealthCheck _$ProviderHealthCheckFromJson(Map<String, dynamic> json) =>
+    _ProviderHealthCheck(
+      url: json['url'] as String?,
+      interval: (json['interval'] as num?)?.toInt(),
+      timeout: (json['timeout'] as num?)?.toInt(),
+      lazy: json['lazy'] as bool?,
+      expectedStatus: json['expected-status'] as String?,
+    );
+
+Map<String, dynamic> _$ProviderHealthCheckToJson(
+  _ProviderHealthCheck instance,
+) => <String, dynamic>{
+  'url': instance.url,
+  'interval': instance.interval,
+  'timeout': instance.timeout,
+  'lazy': instance.lazy,
+  'expected-status': instance.expectedStatus,
+};
+
+_ProviderOverride _$ProviderOverrideFromJson(Map<String, dynamic> json) =>
+    _ProviderOverride(
+      additionalPrefix: json['additional-prefix'] as String?,
+      additionalSuffix: json['additional-suffix'] as String?,
+      udp: json['udp'] as bool?,
+      ipVersion: json['ip-version'] as String?,
+    );
+
+Map<String, dynamic> _$ProviderOverrideToJson(_ProviderOverride instance) =>
+    <String, dynamic>{
+      'additional-prefix': instance.additionalPrefix,
+      'additional-suffix': instance.additionalSuffix,
+      'udp': instance.udp,
+      'ip-version': instance.ipVersion,
+    };
+
+_ProxyProviderOptions _$ProxyProviderOptionsFromJson(
+  Map<String, dynamic> json,
+) => _ProxyProviderOptions(
+  healthCheck: json['health-check'] == null
+      ? const ProviderHealthCheck()
+      : ProviderHealthCheck.fromJson(
+          json['health-check'] as Map<String, dynamic>,
+        ),
+  filter: json['filter'] as String?,
+  excludeFilter: json['exclude-filter'] as String?,
+  proxyOverride: json['override'] == null
+      ? const ProviderOverride()
+      : ProviderOverride.fromJson(json['override'] as Map<String, dynamic>),
+);
+
+Map<String, dynamic> _$ProxyProviderOptionsToJson(
+  _ProxyProviderOptions instance,
+) => <String, dynamic>{
+  'health-check': instance.healthCheck,
+  'filter': instance.filter,
+  'exclude-filter': instance.excludeFilter,
+  'override': instance.proxyOverride,
+};
+
 _ProfileOverrides _$ProfileOverridesFromJson(Map<String, dynamic> json) =>
-    _ProfileOverrides();
+    _ProfileOverrides(
+      proxyProviders:
+          (json['proxy-providers'] as Map<String, dynamic>?)?.map(
+            (k, e) => MapEntry(
+              k,
+              ProxyProviderOptions.fromJson(e as Map<String, dynamic>),
+            ),
+          ) ??
+          const {},
+    );
 
 Map<String, dynamic> _$ProfileOverridesToJson(_ProfileOverrides instance) =>
-    <String, dynamic>{};
+    <String, dynamic>{'proxy-providers': instance.proxyProviders};
 
 _Profile _$ProfileFromJson(Map<String, dynamic> json) => _Profile(
   id: (json['id'] as num).toInt(),

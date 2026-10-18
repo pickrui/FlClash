@@ -37,7 +37,23 @@ class SetupAction extends _$SetupAction {
   Future<Map<String, dynamic>> getRoutingProfileConfig(int profileId) async {
     final source = await getRawProfileConfig(profileId);
     final providers = await database.clashProvidersDao.all().get();
-    return withLibraryProviders(source, providers, await appPath.profilesPath);
+    final profilesPath = await appPath.profilesPath;
+    final config = withLibraryProviders(source, providers, profilesPath);
+    final profiles = ref.read(profilesProvider);
+    if (profiles.getProfile(profileId)?.type != ProfileType.custom) {
+      return config;
+    }
+    final ids = profileProviderIds(
+      profiles,
+      reserved: libraryProxyProviderLabels(providers),
+    );
+    return withProfileProviders(config, {
+      for (final MapEntry(key: label, value: id) in ids.entries)
+        label: profileProviderDefinition(
+          p.join(profilesPath, '$id.yaml'),
+          null,
+        ),
+    });
   }
 
   Future<String?> findRawProfileOutboundReference(
@@ -737,6 +753,15 @@ extension SetupControllerExt on AppController {
         profileId: profileId,
         rawConfig: rawConfig,
         overwriteType: setupState.overwriteType,
+        customProfile: setupState.profileType == ProfileType.custom,
+        profileProviders: {
+          for (final MapEntry(key: label, value: source)
+              in setupState.usedProfileProviders.entries)
+            label: profileProviderDefinition(
+              p.join(directory, '${source.profileId}.yaml'),
+              setupState.overrides.proxyProviders[label],
+            ),
+        },
         realPatchConfig: realPatchConfig,
         appendSystemDns: appendSystemDns,
         addedRules: addedRules,

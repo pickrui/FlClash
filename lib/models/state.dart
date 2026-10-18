@@ -232,6 +232,8 @@ abstract class MakeRealProfileState with _$MakeRealProfileState {
     @Default([]) List<ClashProvider> clashProviders,
     required List<ProxyGroup> customProxyGroups,
     required List<Rule> customRules,
+    @Default(false) bool customProfile,
+    @Default({}) Map<String, Map<String, Object?>> profileProviders,
     String? matchTarget,
     required String defaultUA,
     @Default(false) bool dockerMode,
@@ -271,6 +273,8 @@ abstract class SetupState with _$SetupState {
     @Default([]) List<ClashProvider> clashProviders,
     required List<ProxyGroup> customProxyGroups,
     required List<Rule> customRules,
+    @Default({}) Map<String, ProfileProviderSource> profileProviders,
+    @Default(ProfileOverrides()) ProfileOverrides overrides,
     String? matchTarget,
     required Script? script,
     required Dns dns,
@@ -294,7 +298,15 @@ abstract class SetupState with _$SetupState {
   }) = _SetupState;
 }
 
+typedef ProfileProviderSource = ({int profileId, int? lastUpdate});
+
 extension SetupStateExt on SetupState {
+  Map<String, ProfileProviderSource> get usedProfileProviders => {
+    for (final group in customProxyGroups)
+      for (final name in group.use ?? const <String>[])
+        name: ?profileProviders[name],
+  };
+
   bool needSetup(SetupState? lastSetupState) {
     if (lastSetupState == null) {
       return false;
@@ -325,9 +337,14 @@ extension SetupStateExt on SetupState {
       return true;
     }
     if (!const DeepCollectionEquality().equals(
-      clashProviders,
-      lastSetupState.clashProviders,
-    )) {
+          clashProviders,
+          lastSetupState.clashProviders,
+        ) ||
+        overrides != lastSetupState.overrides ||
+        !const MapEquality<String, ProfileProviderSource>().equals(
+          usedProfileProviders,
+          lastSetupState.usedProfileProviders,
+        )) {
       return true;
     }
     final scriptIsChange = script != lastSetupState.script;
