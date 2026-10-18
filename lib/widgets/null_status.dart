@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/icons/glyph.dart';
 import 'package:fl_clash/icons/glyph_painter.dart';
 import 'package:fl_clash/icons/app_glyphs.dart';
@@ -218,13 +219,8 @@ const _compactHeight = 560.0;
 const _staggerStep = Duration(milliseconds: 60);
 const _enterRise = 12.0;
 
-bool _skipsEntrance(BuildContext context) {
-  final route = ModalRoute.of(context);
-  final routeEntering =
-      route != null &&
-      (route.offstage || (route.animation?.isAnimating ?? false));
-  return context.disableAnimations || routeEntering;
-}
+bool _skipsEntrance(BuildContext context) =>
+    context.disableAnimations || isRouteArriving(context);
 
 class _EnterItem extends StatefulWidget {
   final Duration delay;

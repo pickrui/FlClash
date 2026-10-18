@@ -11,7 +11,9 @@ import 'package:fl_clash/common/context.dart';
 import 'dialog.dart';
 import 'scaffold.dart';
 
+import 'package:fl_clash/ui/deferred_push.dart';
 import 'package:fl_clash/ui/drag_back.dart';
+import 'package:fl_clash/ui/page_transition.dart';
 import 'package:fl_clash/widgets/inherited.dart';
 import 'package:fl_clash/widgets/pop_scope.dart';
 import 'package:fl_clash/widgets/sheet.dart';
@@ -26,29 +28,16 @@ Color _sheetColorOf(BuildContext context) {
 }
 
 class PagedSheetRoute<T> extends PageRoute<T>
-    with ObservableRouteMixin<T>, DragBackRouteMixin<T> {
-  PagedSheetRoute({
-    super.settings,
-    super.fullscreenDialog,
-    super.allowSnapshotting,
-    super.requestFocus,
-    this.maintainState = true,
-    this.duration = const Duration(milliseconds: 350),
-    this.backgroundColor,
-    this.transitionsBuilder,
-    required this.builder,
-  });
+    with
+        ObservableRouteMixin<T>,
+        DragBackRouteMixin<T>,
+        DeferredPushRouteMixin<T>,
+        SharedXPageRouteMixin<T> {
+  PagedSheetRoute({required this.builder});
 
   final WidgetBuilder builder;
 
   ScrollController? _sheetScroll;
-
-  @override
-  final bool maintainState;
-
-  final Duration duration;
-  final Color? backgroundColor;
-  final RouteTransitionsBuilder? transitionsBuilder;
 
   @override
   void dispose() {
@@ -57,16 +46,14 @@ class PagedSheetRoute<T> extends PageRoute<T>
   }
 
   @override
-  Color? get barrierColor => null;
+  bool sharesMotionWith(Route<dynamic>? route) => route is PagedSheetRoute;
 
   @override
-  String? get barrierLabel => null;
+  Color backdropOf(Color surface, {required bool dragging}) =>
+      dragging ? surface : Colors.transparent;
 
   @override
-  Duration get transitionDuration => duration;
-
-  @override
-  Duration get reverseTransitionDuration => duration;
+  Color surfaceOf(BuildContext context) => _sheetColorOf(context);
 
   @override
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
@@ -106,27 +93,6 @@ class PagedSheetRoute<T> extends PageRoute<T>
               ),
       ),
     );
-  }
-
-  @override
-  Widget buildTransitions(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    final color = backgroundColor ?? _sheetColorOf(context);
-    return dragBackDetector(switch (transitionsBuilder) {
-      _ when isDragBackActive => dragBackSlide(
-        context,
-        animation,
-        ColoredBox(color: color, child: child),
-      ),
-      final builder? => builder(context, animation, secondaryAnimation, child),
-      null => FadeForwardsPageTransitionsBuilder(
-        backgroundColor: color,
-      ).buildTransitions(this, context, animation, secondaryAnimation, child),
-    });
   }
 }
 

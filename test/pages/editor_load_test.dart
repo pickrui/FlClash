@@ -70,6 +70,7 @@ void main() {
     );
     await tester.tap(find.text('Open editor'));
     await tester.pump();
+    await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     final context = tester.element(find.byType(EditorPage));
     await tester.binding.handlePopRoute();

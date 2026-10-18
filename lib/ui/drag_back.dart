@@ -15,6 +15,7 @@ final Animatable<Offset> _slideTween = Tween<Offset>(
   begin: const Offset(1.0, 0.0),
   end: Offset.zero,
 );
+const Animation<Offset> _noSlide = AlwaysStoppedAnimation(Offset.zero);
 
 /// Lets a press anywhere on the route drag it toward the reading end to pop.
 /// A horizontal scrollable, slider or text field under the pointer is deeper
@@ -33,13 +34,15 @@ mixin DragBackRouteMixin<T> on ModalRoute<T> {
     return _DragBackDetector(route: this, child: child);
   }
 
+  /// Follows the finger only while a drag back is active, so a route can keep
+  /// it in its tree without moving the page to a new parent when a drag starts.
   Widget dragBackSlide(
     BuildContext context,
     Animation<double> animation,
     Widget child,
   ) {
     return SlideTransition(
-      position: animation.drive(_slideTween),
+      position: _dragBackActive ? animation.drive(_slideTween) : _noSlide,
       textDirection: Directionality.of(context),
       child: child,
     );
