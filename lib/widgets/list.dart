@@ -8,6 +8,7 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/ui/open_container.dart';
 import 'package:fl_clash/widgets/inherited.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
@@ -17,7 +18,6 @@ import 'package:collection/collection.dart';
 import 'card.dart';
 import 'input_dialog.dart';
 import 'options_dialog.dart';
-import 'open_container.dart';
 import 'scaffold.dart';
 import 'sheet.dart';
 
@@ -301,7 +301,6 @@ class ListItem<T> extends StatelessWidget {
       final child = openDelegate.widget;
       final onChanged = openDelegate.onChanged;
       return OpenContainer<T>(
-        tappable: false,
         closedBuilder: (context, action) {
           Future<void> openAction() async {
             final isMobile = ProviderScope.containerOf(
