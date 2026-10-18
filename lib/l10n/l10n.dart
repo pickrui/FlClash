@@ -2130,26 +2130,11 @@ class AppLocalizations {
     return Intl.message('System', name: 'system', desc: '', args: []);
   }
 
-  /// `Route mode`
-  String get routeMode {
-    return Intl.message('Route mode', name: 'routeMode', desc: '', args: []);
-  }
-
-  /// `Bypass private route address`
-  String get routeMode_bypassPrivate {
+  /// `Bypass private addresses`
+  String get bypassPrivateRoute {
     return Intl.message(
-      'Bypass private route address',
-      name: 'routeMode_bypassPrivate',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Use config`
-  String get routeMode_config {
-    return Intl.message(
-      'Use config',
-      name: 'routeMode_config',
+      'Bypass private addresses',
+      name: 'bypassPrivateRoute',
       desc: '',
       args: [],
     );

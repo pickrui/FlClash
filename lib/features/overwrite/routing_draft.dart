@@ -132,7 +132,7 @@ Future<String> validateCustomRoutingDraft(
     if (currentState != state ||
         ref.read(patchClashConfigProvider) != patchConfig ||
         currentNetwork.appendSystemDns != network.appendSystemDns ||
-        currentNetwork.routeMode != network.routeMode) {
+        currentNetwork.bypassPrivateRoute != network.bypassPrivateRoute) {
       return appLocalizations.routingChanged;
     }
     return result;

@@ -467,6 +467,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "bypassDomainDesc": MessageLookupByLibrary.simpleMessage(
       "Only takes effect when the system proxy is enabled",
     ),
+    "bypassPrivateRoute": MessageLookupByLibrary.simpleMessage(
+      "Bypass private addresses",
+    ),
     "cacheAlgorithm": MessageLookupByLibrary.simpleMessage("Cache algorithm"),
     "cacheCorrupt": MessageLookupByLibrary.simpleMessage(
       "The cache is corrupt. Do you want to clear it?",
@@ -2294,11 +2297,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "routeAddressDesc": MessageLookupByLibrary.simpleMessage(
       "Config listen route address",
     ),
-    "routeMode": MessageLookupByLibrary.simpleMessage("Route mode"),
-    "routeMode_bypassPrivate": MessageLookupByLibrary.simpleMessage(
-      "Bypass private route address",
-    ),
-    "routeMode_config": MessageLookupByLibrary.simpleMessage("Use config"),
     "routingApplied": MessageLookupByLibrary.simpleMessage(
       "Personal settings applied.",
     ),

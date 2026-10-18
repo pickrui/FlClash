@@ -369,6 +369,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "buy": MessageLookupByLibrary.simpleMessage("购买"),
     "bypassDomain": MessageLookupByLibrary.simpleMessage("排除域名"),
     "bypassDomainDesc": MessageLookupByLibrary.simpleMessage("仅在系统代理启用时生效"),
+    "bypassPrivateRoute": MessageLookupByLibrary.simpleMessage("绕过私有路由地址"),
     "cacheAlgorithm": MessageLookupByLibrary.simpleMessage("缓存算法"),
     "cacheCorrupt": MessageLookupByLibrary.simpleMessage("缓存已损坏，是否清空？"),
     "cacheMaxSize": MessageLookupByLibrary.simpleMessage("缓存大小"),
@@ -1678,9 +1679,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "routeAddress": MessageLookupByLibrary.simpleMessage("路由地址"),
     "routeAddressDesc": MessageLookupByLibrary.simpleMessage("配置监听路由地址"),
-    "routeMode": MessageLookupByLibrary.simpleMessage("路由模式"),
-    "routeMode_bypassPrivate": MessageLookupByLibrary.simpleMessage("绕过私有路由地址"),
-    "routeMode_config": MessageLookupByLibrary.simpleMessage("使用配置"),
     "routingApplied": MessageLookupByLibrary.simpleMessage("个人设置已生效"),
     "routingApplyFailed": MessageLookupByLibrary.simpleMessage(
       "更改已保存，但未能应用。请检查配置后重试",

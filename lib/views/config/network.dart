@@ -15,7 +15,6 @@ import 'package:fl_clash/widgets/config_item.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import 'battery_optimization.dart';
 
@@ -438,7 +437,7 @@ class DNSHijackingItem extends ConsumerWidget {
     final dnsHijacking = ref.watch(
       vpnSettingProvider.select((state) => state.dnsHijacking),
     );
-    return ListItem<RouteMode>.switchItem(
+    return ListItem.switchItem(
       title: Text(appLocalizations.dnsHijacking),
       delegate: SwitchDelegate(
         value: dnsHijacking,
@@ -452,31 +451,23 @@ class DNSHijackingItem extends ConsumerWidget {
   }
 }
 
-class RouteModeItem extends ConsumerWidget {
-  const RouteModeItem({super.key});
+class BypassPrivateRouteItem extends ConsumerWidget {
+  const BypassPrivateRouteItem({super.key});
 
   @override
   Widget build(BuildContext context, ref) {
-    final appLocalizations = context.appLocalizations;
-    final routeMode = ref.watch(
-      networkSettingProvider.select((state) => state.routeMode),
+    final bypassPrivateRoute = ref.watch(
+      networkSettingProvider.select((state) => state.bypassPrivateRoute),
     );
-    return ListItem<RouteMode>.options(
-      title: Text(appLocalizations.routeMode),
-      subtitle: Text(Intl.message('routeMode_${routeMode.name}')),
-      delegate: OptionsDelegate<RouteMode>(
-        title: appLocalizations.routeMode,
-        options: RouteMode.values,
-        onChanged: (RouteMode? value) {
-          if (value == null) {
-            return;
-          }
+    return ListItem.switchItem(
+      title: Text(context.appLocalizations.bypassPrivateRoute),
+      delegate: SwitchDelegate(
+        value: bypassPrivateRoute,
+        onChanged: (value) {
           ref
               .read(networkSettingProvider.notifier)
-              .update((state) => state.copyWith(routeMode: value));
+              .update((state) => state.copyWith(bypassPrivateRoute: value));
         },
-        textBuilder: (routeMode) => Intl.message('routeMode_${routeMode.name}'),
-        value: routeMode,
       ),
     );
   }
@@ -488,12 +479,10 @@ class RouteAddressItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final appLocalizations = context.appLocalizations;
-    final bypassPrivate = ref.watch(
-      networkSettingProvider.select(
-        (state) => state.routeMode == RouteMode.bypassPrivate,
-      ),
+    final bypassPrivateRoute = ref.watch(
+      networkSettingProvider.select((state) => state.bypassPrivateRoute),
     );
-    if (bypassPrivate) {
+    if (bypassPrivateRoute) {
       return Container();
     }
     final routeAddress = ref.watch(
@@ -618,7 +607,10 @@ class NetworkOptionsSection extends StatelessWidget {
       const TunMtuItem(),
       const BlockQuicItem(),
       const BlockWebRtcItem(),
-      if (!system.isDesktop) ...const [RouteModeItem(), RouteAddressItem()],
+      if (!system.isDesktop) ...const [
+        BypassPrivateRouteItem(),
+        RouteAddressItem(),
+      ],
     ],
   );
 }

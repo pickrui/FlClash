@@ -230,7 +230,7 @@ abstract class NetworkProps with _$NetworkProps {
   const factory NetworkProps({
     @Default(true) bool systemProxy,
     @Default(defaultBypassDomain) List<String> bypassDomain,
-    @Default(RouteMode.config) RouteMode routeMode,
+    @Default(true) bool bypassPrivateRoute,
     @Default(true) bool autoSetSystemDns,
     @Default(false) bool appendSystemDns,
     @Default(false) bool autoSetIpv6,
@@ -243,8 +243,18 @@ abstract class NetworkProps with _$NetworkProps {
     @Default(AuthenticationProps()) AuthenticationProps authentication,
   }) = _NetworkProps;
 
-  factory NetworkProps.fromJson(Map<String, Object?>? json) =>
-      json == null ? const NetworkProps() : _$NetworkPropsFromJson(json);
+  factory NetworkProps.fromJson(Map<String, Object?>? json) => json == null
+      ? const NetworkProps()
+      : _$NetworkPropsFromJson(_withLegacyRouteMode(json));
+}
+
+/// The route mode either bypassed private addresses or kept the route address.
+Map<String, Object?> _withLegacyRouteMode(Map<String, Object?> json) {
+  if (!json.containsKey('routeMode') ||
+      json.containsKey('bypassPrivateRoute')) {
+    return json;
+  }
+  return {...json, 'bypassPrivateRoute': json['routeMode'] == 'bypassPrivate'};
 }
 
 ProxiesIconStyle proxiesIconStyleFromJson(Object? value) => switch (value) {

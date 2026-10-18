@@ -26,14 +26,13 @@ Set<String> _runtimeKeys() => {
   for (final action in HotAction.values) 'action_${action.name}',
   for (final strategy in RestoreStrategy.values)
     'restoreStrategy_${strategy.name}',
-  for (final mode in RouteMode.values) 'routeMode_${mode.name}',
   for (final locale in AppLocalizations.delegate.supportedLocales)
     locale.toString(),
   for (final item in Navigation().getItems(openLogs: true, hasProxies: true))
     if (item.description != null) item.description!,
 };
 
-const _coveredPrefixes = {'action_', 'restoreStrategy_', 'routeMode_'};
+const _coveredPrefixes = {'action_', 'restoreStrategy_'};
 
 Map<String, Set<String>> _arbKeys() {
   final result = <String, Set<String>>{};

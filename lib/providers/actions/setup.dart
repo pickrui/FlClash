@@ -680,11 +680,11 @@ extension SetupControllerExt on AppController {
     final defaultUA = globalState.packageInfo.ua;
     final networkVM2 = _ref.read(
       networkSettingProvider.select(
-        (state) => VM2(state.appendSystemDns, state.routeMode),
+        (state) => VM2(state.appendSystemDns, state.bypassPrivateRoute),
       ),
     );
     final appendSystemDns = networkVM2.a;
-    final routeMode = networkVM2.b;
+    final bypassPrivateRoute = networkVM2.b;
     final configMap = await getRawProfileConfig(
       profileId,
       validateSnapshot: validateSnapshot,
@@ -708,7 +708,7 @@ extension SetupControllerExt on AppController {
       }
     }
     final realPatchConfig = patchConfig.copyWith(
-      tun: patchConfig.tun.getRealTun(routeMode),
+      tun: patchConfig.tun.getRealTun(bypassPrivateRoute: bypassPrivateRoute),
       allowLan: system.isDocker || patchConfig.allowLan,
     );
     Map<String, dynamic> rawConfig = configMap;

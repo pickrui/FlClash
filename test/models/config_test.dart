@@ -297,7 +297,7 @@ void main() {
       const props = NetworkProps();
       expect(props.systemProxy, true);
       expect(props.bypassDomain, defaultBypassDomain);
-      expect(props.routeMode, RouteMode.config);
+      expect(props.bypassPrivateRoute, true);
       expect(props.autoSetSystemDns, true);
       expect(props.appendSystemDns, false);
       expect(props.autoSetIpv6, false);
@@ -312,7 +312,7 @@ void main() {
       const props = NetworkProps(
         systemProxy: false,
         bypassDomain: ['example.com'],
-        routeMode: RouteMode.bypassPrivate,
+        bypassPrivateRoute: false,
         autoSetIpv6: true,
         manualIpv6: true,
         blockQuic: true,
@@ -322,13 +322,27 @@ void main() {
       final restored = roundTrip(() => props.toJson(), NetworkProps.fromJson);
       expect(restored.systemProxy, false);
       expect(restored.bypassDomain, ['example.com']);
-      expect(restored.routeMode, RouteMode.bypassPrivate);
+      expect(restored.bypassPrivateRoute, false);
       expect(restored.autoSetIpv6, true);
       expect(restored.manualIpv6, true);
       expect(restored.toJson()['manualIpv6'], true);
       expect(restored.blockQuic, true);
       expect(restored.blockWebRtc, true);
       expect(restored.suspendOnIdle, true);
+    });
+
+    test('the route mode becomes the bypass private route switch', () {
+      for (final (json, bypass) in [
+        ({'routeMode': 'bypassPrivate'}, true),
+        ({'routeMode': 'config'}, false),
+        ({'routeMode': 'bypassPrivate', 'bypassPrivateRoute': false}, false),
+      ]) {
+        expect(
+          NetworkProps.fromJson(json).bypassPrivateRoute,
+          bypass,
+          reason: '$json',
+        );
+      }
     });
 
     test('older settings keep idle suspension disabled', () {

@@ -104,6 +104,9 @@ void main() {
     );
     addTearDown(container.dispose);
     container
+        .read(networkSettingProvider.notifier)
+        .update((state) => state.copyWith(bypassPrivateRoute: false));
+    container
         .read(patchClashConfigProvider.notifier)
         .update(
           (state) =>

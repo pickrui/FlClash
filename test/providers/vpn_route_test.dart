@@ -5,7 +5,6 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:convert';
 
-import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
@@ -17,7 +16,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() async => AppLocalizations.load(const Locale('en')));
 
-  test('the Android VPN receives the routes the route mode selects', () {
+  test('the Android VPN receives the routes the bypass switch selects', () {
     final c = ProviderContainer(
       overrides: [currentProfileProvider.overrideWith((_) => null)],
     );
@@ -26,14 +25,14 @@ void main() {
       jsonEncode(c.read(sharedStateProvider)),
     )['vpnOptions']['routeAddress'];
 
-    expect(routes(), isEmpty);
+    expect(routes(), defaultBypassPrivateRouteAddress);
     c
         .read(patchClashConfigProvider.notifier)
         .update((s) => s.copyWith.tun(routeAddress: ['10.0.0.0/8']));
-    expect(routes(), ['10.0.0.0/8']);
+    expect(routes(), defaultBypassPrivateRouteAddress);
     c
         .read(networkSettingProvider.notifier)
-        .update((s) => s.copyWith(routeMode: RouteMode.bypassPrivate));
-    expect(routes(), defaultBypassPrivateRouteAddress);
+        .update((s) => s.copyWith(bypassPrivateRoute: false));
+    expect(routes(), ['10.0.0.0/8']);
   });
 }

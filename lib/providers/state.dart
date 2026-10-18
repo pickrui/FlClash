@@ -92,8 +92,8 @@ UpdateParams updateParams(Ref ref) {
   final authentication = ref.watch(
     networkSettingProvider.select((state) => state.authentication),
   );
-  final routeMode = ref.watch(
-    networkSettingProvider.select((state) => state.routeMode),
+  final bypassPrivateRoute = ref.watch(
+    networkSettingProvider.select((state) => state.bypassPrivateRoute),
   );
   final suspendOnIdle = ref.watch(
     networkSettingProvider.select((state) => state.suspendOnIdle),
@@ -103,7 +103,7 @@ UpdateParams updateParams(Ref ref) {
       (state) => UpdateParams(
         tun: safeModeBuild
             ? state.tun.copyWith(enable: false)
-            : state.tun.getRealTun(routeMode),
+            : state.tun.getRealTun(bypassPrivateRoute: bypassPrivateRoute),
         allowLan: !safeModeBuild && (system.isDocker || state.allowLan),
         findProcessMode: findProcessMode,
         mode: state.mode,
@@ -659,8 +659,8 @@ SharedState sharedState(Ref ref) {
   final bypassDomain = ref.watch(
     networkSettingProvider.select((state) => state.bypassDomain),
   );
-  final routeMode = ref.watch(
-    networkSettingProvider.select((state) => state.routeMode),
+  final bypassPrivateRoute = ref.watch(
+    networkSettingProvider.select((state) => state.bypassPrivateRoute),
   );
   final clashConfigVM2 = ref.watch(
     patchClashConfigProvider.select(
@@ -669,7 +669,8 @@ SharedState sharedState(Ref ref) {
   );
   final routeAddress = ref.watch(
     patchClashConfigProvider.select(
-      (state) => state.tun.resolveRouteAddress(routeMode),
+      (state) =>
+          state.tun.resolveRouteAddress(bypassPrivateRoute: bypassPrivateRoute),
     ),
   );
   final vpnSetting = ref.watch(vpnStateProvider).vpnProps;

@@ -385,6 +385,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "buy": MessageLookupByLibrary.simpleMessage("購入"),
     "bypassDomain": MessageLookupByLibrary.simpleMessage("バイパスドメイン"),
     "bypassDomainDesc": MessageLookupByLibrary.simpleMessage("システムプロキシ有効時のみ適用"),
+    "bypassPrivateRoute": MessageLookupByLibrary.simpleMessage(
+      "プライベートアドレスをバイパス",
+    ),
     "cacheAlgorithm": MessageLookupByLibrary.simpleMessage("キャッシュアルゴリズム"),
     "cacheCorrupt": MessageLookupByLibrary.simpleMessage(
       "キャッシュが破損しています。クリアしますか？",
@@ -1912,11 +1915,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "routeAddress": MessageLookupByLibrary.simpleMessage("ルートアドレス"),
     "routeAddressDesc": MessageLookupByLibrary.simpleMessage("ルートアドレスを設定"),
-    "routeMode": MessageLookupByLibrary.simpleMessage("ルートモード"),
-    "routeMode_bypassPrivate": MessageLookupByLibrary.simpleMessage(
-      "プライベートルートをバイパス",
-    ),
-    "routeMode_config": MessageLookupByLibrary.simpleMessage("設定を使用"),
     "routingApplied": MessageLookupByLibrary.simpleMessage("個人設定を適用しました"),
     "routingApplyFailed": MessageLookupByLibrary.simpleMessage(
       "変更は保存されましたが適用できませんでした。設定を確認して再試行してください",
