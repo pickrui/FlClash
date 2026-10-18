@@ -47,6 +47,23 @@ MakeRealProfileState _makeRealProfileState({
   );
 }
 
+bool _covers(String cidr, String address) {
+  final [network, prefix] = cidr.split('/');
+  final range = InternetAddress(network).rawAddress;
+  final target = InternetAddress(address).rawAddress;
+  if (range.length != target.length) {
+    return false;
+  }
+  var bits = int.parse(prefix);
+  for (var index = 0; bits > 0; index++, bits -= 8) {
+    final mask = bits >= 8 ? 0xff : (0xff << (8 - bits)) & 0xff;
+    if ((range[index] & mask) != (target[index] & mask)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -112,23 +129,78 @@ void main() {
     },
   );
 
-  test('the app TUN MTU replaces the profile MTU at setup', () async {
+  test('desktop TUN keys follow the profile unless picked', () async {
     final state = _makeRealProfileState(
       rawConfig: {
-        'tun': <String, dynamic>{'mtu': 9000, 'udp-timeout': 300},
+        'tun': <String, dynamic>{
+          'enable': false,
+          'device': 'utun9',
+          'stack': 'system',
+          'auto-route': false,
+          'mtu': 1400,
+          'udp-timeout': 60,
+          'strict-route': true,
+          'dns-hijack': ['192.0.2.53:53'],
+          'route-exclude-address': ['203.0.113.0/24'],
+        },
         'rules': ['MATCH,DIRECT'],
       },
     );
-    final result = await makeRealProfileTask(
-      state.copyWith(
-        realPatchConfig: state.realPatchConfig.copyWith(
-          tun: state.realPatchConfig.tun.copyWith(mtu: 1480),
-        ),
+    Future<Map> tunOf(ClashConfig patch, {bool bypass = false}) async {
+      final result = await makeRealProfileTask(
+        state.copyWith(realPatchConfig: patch, bypassPrivateRoute: bypass),
+      );
+      return result['tun'] as Map;
+    }
+
+    expect(
+      await tunOf(
+        const ClashConfig(tun: Tun(enable: true, stack: TunStack.mips)),
       ),
+      {
+        'enable': true,
+        'device': defaultTun.device,
+        'stack': 'mips',
+        'auto-route': true,
+        'auto-detect-interface': true,
+        'mtu': 1400,
+        'udp-timeout': 60,
+        'strict-route': true,
+        'dns-hijack': defaultDnsHijack,
+        'route-exclude-address': ['203.0.113.0/24'],
+      },
     );
 
-    expect(result['tun']['mtu'], 1480);
-    expect(result['tun']['udp-timeout'], 300);
+    final picked = await tunOf(
+      const ClashConfig(
+        tunOverride: ProfileTun(
+          mtu: 1480,
+          dnsHijack: ['tcp://any:53'],
+          routeExcludeAddress: [],
+        ),
+        tunOverrideKeys: {
+          TunOverrideKey.mtu,
+          TunOverrideKey.strictRoute,
+          TunOverrideKey.dnsHijack,
+          TunOverrideKey.routeExcludeAddress,
+        },
+      ),
+      bypass: true,
+    );
+    expect(picked['enable'], false);
+    expect(picked['mtu'], 1480);
+    expect(picked['strict-route'], false);
+    expect(picked['udp-timeout'], 60);
+    expect(picked['dns-hijack'], ['tcp://any:53']);
+    expect(picked['route-exclude-address'], privateRouteAddress);
+    expect(
+      [
+        for (final cidr in picked['route-exclude-address'] as List)
+          if (_covers(cidr as String, '100.100.100.100')) cidr,
+      ],
+      isEmpty,
+      reason: 'tailnet peers must stay on the TUN',
+    );
   });
 
   group('remote provider cache', () {

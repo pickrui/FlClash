@@ -814,6 +814,18 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
     ntpOverrideKeys: ref.watch(
       patchClashConfigProvider.select((state) => state.ntpOverrideKeys),
     ),
+    tunOverride: ref.watch(
+      patchClashConfigProvider.select((state) => state.tunOverride),
+    ),
+    tunOverrideKeys: ref.watch(
+      patchClashConfigProvider.select((state) => state.tunOverrideKeys),
+    ),
+    // Android takes it as VPN routes, which a restart applies.
+    bypassPrivateRoute:
+        system.isDesktop &&
+        ref.watch(
+          networkSettingProvider.select((state) => state.bypassPrivateRoute),
+        ),
     blockQuic: blockQuic,
     blockWebRtc: blockWebRtc,
     tailscaleNetworks: tailscaleNetworks,

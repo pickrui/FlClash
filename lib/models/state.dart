@@ -240,6 +240,7 @@ abstract class MakeRealProfileState with _$MakeRealProfileState {
     @Default([]) List<String> authentication,
     @Default([]) List<TailscaleNetwork> tailscaleNetworks,
     @Default('flclash') String tailscaleHostname,
+    @Default(false) bool bypassPrivateRoute,
   }) = _MakeRealProfileState;
 }
 
@@ -275,6 +276,9 @@ abstract class SetupState with _$SetupState {
     @Default({}) Set<DnsOverrideKey> dnsOverrideKeys,
     @Default(defaultNtp) Ntp ntp,
     @Default({}) Set<NtpOverrideKey> ntpOverrideKeys,
+    @Default(defaultProfileTun) ProfileTun tunOverride,
+    @Default({}) Set<TunOverrideKey> tunOverrideKeys,
+    @Default(false) bool bypassPrivateRoute,
     @Default(false) bool blockQuic,
     @Default(false) bool blockWebRtc,
     @Default([]) List<TailscaleNetwork> tailscaleNetworks,
@@ -359,6 +363,12 @@ extension SetupStateExt on SetupState {
         !const DeepCollectionEquality().equals(
           ntp.overrideJson(ntpOverrideKeys),
           lastSetupState.ntp.overrideJson(lastSetupState.ntpOverrideKeys),
+        ) ||
+        !const DeepCollectionEquality().equals(
+          tunOverride.overrideJson(tunOverrideKeys),
+          lastSetupState.tunOverride.overrideJson(
+            lastSetupState.tunOverrideKeys,
+          ),
         )) {
       return true;
     }
@@ -380,6 +390,7 @@ extension SetupStateExt on SetupState {
           lastSetupState.hosts,
         ) ||
         appendSystemDns != lastSetupState.appendSystemDns ||
+        bypassPrivateRoute != lastSetupState.bypassPrivateRoute ||
         port != lastSetupState.port ||
         socksPort != lastSetupState.socksPort ||
         redirPort != lastSetupState.redirPort ||

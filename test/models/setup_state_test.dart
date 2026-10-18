@@ -35,22 +35,25 @@ void main() {
   }
 
   test(
-    'only a change to what the picked DNS and NTP keys apply needs setup',
+    'only a change to what the picked DNS, NTP and TUN keys apply needs setup',
     () {
       final picked = buildState().copyWith(
         dnsOverrideKeys: {DnsOverrideKey.ipv6},
         ntpOverrideKeys: {NtpOverrideKey.server},
+        tunOverrideKeys: {TunOverrideKey.mtu},
       );
       for (final next in [
         buildState(),
         picked.copyWith(dns: const Dns(ipv6: true)),
         picked.copyWith(ntp: const Ntp(server: 'time.example')),
+        picked.copyWith(tunOverride: const ProfileTun(mtu: 1480)),
       ]) {
         expect(next.needSetup(picked), isTrue, reason: '$next');
       }
       for (final next in [
         picked.copyWith(dns: const Dns(listen: '0.0.0.0:53')),
         picked.copyWith(ntp: const Ntp(port: 1123)),
+        picked.copyWith(tunOverride: const ProfileTun(gso: true)),
       ]) {
         expect(next.needSetup(picked), isFalse, reason: '$next');
       }
@@ -145,6 +148,7 @@ void main() {
     for (final next in [
       previous.copyWith(hosts: const {'a.lan': '10.0.0.2'}),
       previous.copyWith(appendSystemDns: true),
+      previous.copyWith(bypassPrivateRoute: true),
       previous.copyWith(port: 7891),
       previous.copyWith(socksPort: 7892),
       previous.copyWith(redirPort: 7893),

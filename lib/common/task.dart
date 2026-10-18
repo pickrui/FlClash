@@ -343,16 +343,17 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
     rawConfig['bind-address'] = '*';
   }
   rawConfig['mode'] = realPatchConfig.mode.name;
-  if (rawConfig['tun'] == null) {
-    rawConfig['tun'] = {};
-  }
-  rawConfig['tun']['enable'] = realPatchConfig.tun.enable;
-  rawConfig['tun']['device'] = realPatchConfig.tun.device;
-  rawConfig['tun']['dns-hijack'] = realPatchConfig.tun.dnsHijack;
-  rawConfig['tun']['stack'] = realPatchConfig.tun.stack.name;
-  rawConfig['tun']['mtu'] = realPatchConfig.tun.mtu;
-  rawConfig['tun']['route-address'] = realPatchConfig.tun.routeAddress;
-  rawConfig['tun']['auto-route'] = realPatchConfig.tun.autoRoute;
+  // Only a picked dns-hijack replaces any:53; a profile's own may miss some.
+  final tun = <String, dynamic>{
+    if (rawConfig['tun'] is Map)
+      ...Map<String, dynamic>.from(rawConfig['tun'] as Map),
+    'dns-hijack': defaultDnsHijack,
+    ...realPatchConfig.tunOverride.overrideJson(
+      realPatchConfig.tunOverrideKeys,
+    ),
+    ...realPatchConfig.tun.coreJson,
+  };
+  rawConfig['tun'] = tun;
   rawConfig['geodata-loader'] = realPatchConfig.geodataLoader.name;
   rawConfig['geo-auto-update'] = realPatchConfig.geoAutoUpdate;
   rawConfig['geo-update-interval'] = normalizeGeoUpdateInterval(
@@ -420,12 +421,17 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
       rawConfig['interface-name'] = realPatchConfig.interfaceName;
     }
   }
-  if ((Platform.isMacOS || Platform.isWindows || Platform.isLinux) &&
-      rawConfig['tun']['enable'] == true &&
-      rawConfig['tun']['auto-route'] == true) {
+  final isDesktop = Platform.isMacOS || Platform.isWindows || Platform.isLinux;
+  if (isDesktop && tun['enable'] == true) {
     final interfaceName = rawConfig['interface-name'];
-    rawConfig['tun']['auto-detect-interface'] =
+    tun['auto-detect-interface'] =
         interfaceName is! String || interfaceName.trim().isEmpty;
+  }
+  if (isDesktop && data.bypassPrivateRoute) {
+    tun['route-exclude-address'] = [
+      if (tun['route-exclude-address'] case final List routes) ...routes,
+      ...privateRouteAddress,
+    ];
   }
   final existingFingerprint = rawConfig['global-client-fingerprint'];
   if (existingFingerprint is! String || existingFingerprint.isEmpty) {

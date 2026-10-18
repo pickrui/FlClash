@@ -131,6 +131,21 @@ String resolveExternalControllerDashboardUrl(String address, String secret) {
   return '$externalControllerDashboardBaseUrl/#/setup?$query';
 }
 
+/// Leaves out Tailscale's 100.64.0.0/10, so tailnet peers stay on the TUN.
+const privateRouteAddress = [
+  '0.0.0.0/8',
+  '10.0.0.0/8',
+  '127.0.0.0/8',
+  '169.254.0.0/16',
+  '172.16.0.0/12',
+  '192.168.0.0/16',
+  '224.0.0.0/4',
+  '255.255.255.255/32',
+  'fc00::/7',
+  'fe80::/10',
+  'ff00::/8',
+];
+
 const defaultBypassPrivateRouteAddress = [
   '1.0.0.0/8',
   '2.0.0.0/7',
@@ -318,6 +333,13 @@ abstract class Tun with _$Tun {
 extension TunExt on Tun {
   List<String> resolveRouteAddress({required bool bypassPrivateRoute}) =>
       bypassPrivateRoute ? defaultBypassPrivateRouteAddress : routeAddress;
+
+  Map<String, Object?> get coreJson => {
+    'enable': enable,
+    'device': device,
+    'stack': stack.name,
+    'auto-route': true,
+  };
 
   Tun getRealTun({required bool bypassPrivateRoute}) {
     final mRouteAddress = resolveRouteAddress(

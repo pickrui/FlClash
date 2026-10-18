@@ -708,7 +708,6 @@ extension SetupControllerExt on AppController {
       }
     }
     final realPatchConfig = patchConfig.copyWith(
-      tun: patchConfig.tun.getRealTun(bypassPrivateRoute: bypassPrivateRoute),
       allowLan: system.isDocker || patchConfig.allowLan,
     );
     Map<String, dynamic> rawConfig = configMap;
@@ -752,6 +751,7 @@ extension SetupControllerExt on AppController {
         blockWebRtc: setupState.blockWebRtc,
         tailscaleNetworks: setupState.tailscaleNetworks,
         tailscaleHostname: defaultTailscaleHostname(Platform.operatingSystem),
+        bypassPrivateRoute: bypassPrivateRoute,
         authentication: _ref
             .read(networkSettingProvider)
             .authentication
