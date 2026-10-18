@@ -50,6 +50,7 @@ class NetworkObserveModule(private val service: Service) : Module() {
                 cancel
             },
             publish = { Core.updateDNS(it.joinToString(",")) },
+            reset = { Core.invokeMethod("{\"method\":\"resetNetwork\"}") {} },
         )
         val listener = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {

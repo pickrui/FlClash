@@ -20,6 +20,7 @@ class NetworkDnsTrackerTest {
         var time = 100L
         val pending = mutableListOf<Pending>()
         val updates = mutableListOf<List<String>>()
+        var resets = 0
         val tracker = NetworkDnsTracker<String>(
             now = { time },
             schedule = { delay, action ->
@@ -29,6 +30,7 @@ class NetworkDnsTrackerTest {
                 cancel
             },
             publish = { updates.add(it) },
+            reset = { resets++ },
         )
 
         fun add(name: String, priority: Int, dns: List<String> = listOf(name)) {
@@ -155,6 +157,26 @@ class NetworkDnsTrackerTest {
         f.tracker.lost("cellular")
         f.advance(200)
         assertEquals(emptyList<String>(), f.updates.last())
+    }
+
+    @Test
+    fun onlyASettledMoveToAnotherNetworkResetsConnections() {
+        val f = Fixture()
+        f.add("cellular", 4)
+        f.add("wifi", 0)
+        f.advance(200)
+        f.tracker.losing("wifi", 100)
+        f.advance(300)
+        assertEquals(0, f.resets)
+        f.tracker.lost("wifi")
+        f.advance(199)
+        assertEquals(0, f.resets)
+        f.advance(1)
+        assertEquals(1, f.resets)
+        f.tracker.lost("cellular")
+        f.add("wifi", 0)
+        f.advance(200)
+        assertEquals(2, f.resets)
     }
 
     @Test

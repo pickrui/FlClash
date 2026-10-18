@@ -401,6 +401,19 @@ func handleResetConnections() bool {
 	return true
 }
 
+// A connection that went out over a network the device has left hangs until
+// TCP gives up on it, and so do the DNS clients' pooled connections.
+func handleResetNetwork() bool {
+	runLock.Lock()
+	defer runLock.Unlock()
+	statistic.DefaultManager.Range(func(c statistic.Tracker) bool {
+		_ = c.Close()
+		return true
+	})
+	resolver.ResetConnection()
+	return true
+}
+
 func handleCloseConnection(connectionId string) bool {
 	runLock.Lock()
 	defer runLock.Unlock()

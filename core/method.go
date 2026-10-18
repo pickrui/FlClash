@@ -263,6 +263,8 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 		response.success(handleCloseConnections())
 	case resetConnectionsMethod:
 		response.success(handleResetConnections())
+	case resetNetworkMethod:
+		response.success(handleResetNetwork())
 	case closeConnectionMethod:
 		id := ""
 		if decodeMethodArguments(call, response, &id) {

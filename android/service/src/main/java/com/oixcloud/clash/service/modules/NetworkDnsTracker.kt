@@ -10,6 +10,7 @@ internal class NetworkDnsTracker<N>(
     private val now: () -> Long,
     private val schedule: (Long, () -> Unit) -> (() -> Unit),
     private val publish: (List<String>) -> Unit,
+    private val reset: () -> Unit,
 ) {
     private class Info(var priority: Int) {
         var dns = emptyList<String>()
@@ -24,6 +25,10 @@ internal class NetworkDnsTracker<N>(
     private var pendingDns: List<String>? = null
     private var publishRevision: Any? = null
     private var cancelPublish: (() -> Unit)? = null
+    private var currentNetwork: N? = null
+    private var pendingNetwork: N? = null
+    private var networkRevision: Any? = null
+    private var cancelNetwork: (() -> Unit)? = null
 
     @Synchronized
     fun available(network: N, priority: Int) {
@@ -82,17 +87,29 @@ internal class NetworkDnsTracker<N>(
         cancelPublish = null
         pendingDns = null
         publishRevision = null
+        cancelNetwork?.invoke()
+        cancelNetwork = null
+        pendingNetwork = null
+        networkRevision = null
+        currentNetwork = null
         if (previousDns.isNotEmpty()) {
             previousDns = emptyList()
             publish(emptyList())
         }
     }
 
+    private fun Info.score(time: Long) = priority + if (time < losingUntil) 10 else 0
+
     private fun update() {
         val time = now()
+        updateDns(time)
+        updateNetwork(time)
+    }
+
+    private fun updateDns(time: Long) {
         val dns = networks.values.asSequence()
             .filter { it.dns.isNotEmpty() }
-            .minByOrNull { it.priority + if (time < it.losingUntil) 10 else 0 }
+            .minByOrNull { it.score(time) }
             ?.dns ?: emptyList()
         if (dns == pendingDns) return
         cancelPublish?.invoke()
@@ -104,7 +121,7 @@ internal class NetworkDnsTracker<N>(
         val revision = Any()
         pendingDns = snapshot
         publishRevision = revision
-        cancelPublish = schedule(200) {
+        cancelPublish = schedule(SETTLE_DELAY_MILLIS) {
             synchronized(this) {
                 if (active && publishRevision === revision) {
                     cancelPublish = null
@@ -116,4 +133,33 @@ internal class NetworkDnsTracker<N>(
             }
         }
     }
+
+    // Sockets protected onto a network the device left stay bound to it, so a
+    // settled move to another network has the Core close every connection.
+    private fun updateNetwork(time: Long) {
+        val network = networks.entries.minByOrNull { it.value.score(time) }?.key
+        if (network != null && network == pendingNetwork) return
+        cancelNetwork?.invoke()
+        cancelNetwork = null
+        pendingNetwork = null
+        networkRevision = null
+        if (network == null || network == currentNetwork || !active) return
+        val revision = Any()
+        pendingNetwork = network
+        networkRevision = revision
+        cancelNetwork = schedule(SETTLE_DELAY_MILLIS) {
+            synchronized(this) {
+                if (active && networkRevision === revision) {
+                    cancelNetwork = null
+                    pendingNetwork = null
+                    networkRevision = null
+                    val previous = currentNetwork
+                    currentNetwork = network
+                    if (previous != null) reset()
+                }
+            }
+        }
+    }
 }
+
+private const val SETTLE_DELAY_MILLIS = 200L

@@ -133,6 +133,7 @@ const (
 	stopConnectionsMethod          CoreMethod = "stopConnections"
 	closeConnectionsMethod         CoreMethod = "closeConnections"
 	resetConnectionsMethod         CoreMethod = "resetConnections"
+	resetNetworkMethod             CoreMethod = "resetNetwork"
 	closeConnectionMethod          CoreMethod = "closeConnection"
 	getExternalProvidersMethod     CoreMethod = "getExternalProviders"
 	getExternalProviderMethod      CoreMethod = "getExternalProvider"
