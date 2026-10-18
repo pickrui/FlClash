@@ -8,6 +8,7 @@ import 'dart:math';
 import 'package:fl_clash/common/scroll.dart';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/metrics.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/dashboard/widget_metrics.dart';
@@ -38,21 +39,15 @@ class RowCardFrame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
+    final level = context.raisedSurfaceLevel;
     final shape = AppShape.all(DashboardWidgetMetrics.radiusOf(context));
     return SizedBox(
       height: DashboardWidgetMetrics.heightOf(context, 2),
       child: Container(
         clipBehavior: Clip.antiAlias,
         decoration: ShapeDecoration(
-          color: colorScheme.surfaceContainerLow,
+          color: level.colorOf(context.colorScheme),
           shape: shape,
-        ),
-        // A border on the decoration would inset the content by its width.
-        foregroundDecoration: ShapeDecoration(
-          shape: shape.copyWith(
-            side: BorderSide(color: colorScheme.surfaceContainerHighest),
-          ),
         ),
         // The page's safe-area padding would otherwise inset the rows'
         // scrollbar track as if the card spanned the window.
@@ -66,7 +61,7 @@ class RowCardFrame extends StatelessWidget {
             behavior: const HiddenBarScrollBehavior(),
             child: IconTheme.merge(
               data: const IconThemeData(size: 24),
-              child: child,
+              child: SurfaceScope(level: level, child: child),
             ),
           ),
         ),
@@ -175,7 +170,8 @@ class RowCardPill extends StatelessWidget {
           ),
         );
         return Material(
-          color: color ?? context.colorScheme.surfaceContainer,
+          color:
+              color ?? context.raisedSurfaceLevel.colorOf(context.colorScheme),
           shape: shape,
           clipBehavior: Clip.antiAlias,
           child: InkWell(

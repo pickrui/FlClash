@@ -11,6 +11,7 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -709,10 +710,8 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
     );
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: context.colorScheme.surface,
-        border: Border(
-          top: BorderSide(color: context.colorScheme.outlineVariant),
-        ),
+        color: context.surfaceLevel.colorOf(context.colorScheme),
+        border: Border(top: Divider.createBorderSide(context)),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

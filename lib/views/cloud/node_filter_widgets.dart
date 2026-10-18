@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/ui/surface.dart';
 import 'package:material_ui/material_ui.dart';
 
 class NodeFilterPanel extends StatelessWidget {
@@ -14,15 +15,13 @@ class NodeFilterPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
+    final level = context.raisedSurfaceLevel;
     return DecoratedBox(
       decoration: ShapeDecoration(
-        color: colorScheme.surfaceContainerLow,
-        shape: AppShape.all(AppCorner.md).copyWith(
-          side: BorderSide(color: colorScheme.surfaceContainerHighest),
-        ),
+        color: level.colorOf(context.colorScheme),
+        shape: AppShape.all(AppCorner.md),
       ),
-      child: child,
+      child: SurfaceScope(level: level, child: child),
     );
   }
 }
