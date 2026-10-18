@@ -9,12 +9,14 @@ import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/common/scroll.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
+import 'package:fl_clash/widgets/record_table.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:super_sliver_list/super_sliver_list.dart';
 
 import 'item.dart';
+import 'tracker_info_table.dart';
 
 class RequestsView extends ConsumerStatefulWidget {
   final ScrollController? scrollController;
@@ -135,43 +137,64 @@ class _RequestsViewState extends ConsumerState<RequestsView>
               label: appLocalizations.nullTip(appLocalizations.requests),
               illustration: NullStatusIllustration.requests,
             ),
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: CommonScrollBar(
-                trackVisibility: false,
-                controller: _scrollController,
-                child: ScrollToEndBox(
+            child: RecordTableFrame<TrackerInfo>(
+              tableId: 'requests',
+              items: requests,
+              reverse: true,
+              columnsOf: (width) =>
+                  trackerInfoColumns(context, width: width, isLive: false),
+              builder: (context, table, requests) => Align(
+                alignment: Alignment.topCenter,
+                child: CommonScrollBar(
+                  trackVisibility: false,
                   controller: _scrollController,
-                  dataSource: requests,
-                  enable: state.autoScrollToEnd,
-                  onCancelToEnd: () {
-                    _requestsStateNotifier.value = _requestsStateNotifier.value
-                        .copyWith(autoScrollToEnd: false);
-                  },
-                  child: SuperListView.separated(
-                    padding: EdgeInsets.only(
-                      top: context.contentTopPadding,
-                      bottom: BottomInsetScope.of(context) + 16,
-                    ),
-                    reverse: true,
-                    shrinkWrap: true,
-                    physics: const NextClampingScrollPhysics(),
+                  child: ScrollToEndBox(
                     controller: _scrollController,
-                    itemCount: requests.length,
-                    separatorBuilder: (_, _) => const Divider(height: 0),
-                    itemBuilder: (_, index) {
-                      final trackerInfo = requests[index];
-                      return TrackerInfoItem(
-                        key: Key(trackerInfo.id),
-                        trackerInfo: trackerInfo,
-                        onClickKeyword: (value) {
-                          context.commonScaffoldState?.addKeyword(value);
-                        },
-                        detailTitle: appLocalizations.details(
-                          appLocalizations.request,
-                        ),
-                      );
+                    dataSource: requests,
+                    enable: state.autoScrollToEnd,
+                    onCancelToEnd: () {
+                      _requestsStateNotifier.value = _requestsStateNotifier
+                          .value
+                          .copyWith(autoScrollToEnd: false);
                     },
+                    child: SuperListView.separated(
+                      padding: EdgeInsets.only(
+                        top: context.contentTopPadding,
+                        bottom: BottomInsetScope.of(context) + 16,
+                      ),
+                      reverse: true,
+                      shrinkWrap: true,
+                      physics: const NextClampingScrollPhysics(),
+                      controller: _scrollController,
+                      itemCount: requests.length,
+                      extentEstimation: table?.estimateExtent,
+                      separatorBuilder: (_, _) => table == null
+                          ? const Divider(height: 0)
+                          : const SizedBox.shrink(),
+                      itemBuilder: (_, index) {
+                        final trackerInfo = requests[index];
+                        final detailTitle = appLocalizations.details(
+                          appLocalizations.request,
+                        );
+                        if (table != null) {
+                          return TrackerInfoTableRow(
+                            key: Key(trackerInfo.id),
+                            trackerInfo: trackerInfo,
+                            table: table,
+                            striped: index.isOdd,
+                            detailTitle: detailTitle,
+                          );
+                        }
+                        return TrackerInfoItem(
+                          key: Key(trackerInfo.id),
+                          trackerInfo: trackerInfo,
+                          onClickKeyword: (value) {
+                            context.commonScaffoldState?.addKeyword(value);
+                          },
+                          detailTitle: detailTitle,
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),

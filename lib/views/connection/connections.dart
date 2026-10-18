@@ -10,6 +10,7 @@ import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/core/method.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/widgets/record_table.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,6 +20,7 @@ import 'package:fl_clash/features/connection/tracker_speed_ranker.dart';
 import 'package:fl_clash/features/connection/connection_feed.dart';
 
 import 'item.dart';
+import 'tracker_info_table.dart';
 
 class ConnectionsView extends ConsumerStatefulWidget {
   final ScrollController? scrollController;
@@ -50,6 +52,7 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
   final _speedRanker = TrackerSpeedRanker();
   final _closingConnectionIds = <String>{};
   bool _closingAll = false;
+  bool _loaded = false;
   late final _feed = ConnectionFeed(
     invoke: (method, id) => _core.connectionStream<Object>(method, id),
     newId: () => utils.uuidV4,
@@ -107,17 +110,26 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
         'Connections update failed: $error',
         logLevel: coreFailureLogLevel(error),
       );
+      if (isCurrent() && !_loaded) setState(() => _loaded = true);
     }
   }
 
   void _publishConnections(List<TrackerInfo> trackerInfos) {
     final generation = ++_refreshGeneration;
     final sampledAt = widget.now?.call() ?? DateTime.now();
-    updateWhenRouteSettled(() {
+    void apply() {
       if (!canPoll || generation != _refreshGeneration) return;
       _connectionsStateNotifier.value = _connectionsStateNotifier.value
           .copyWith(trackerInfos: _speedRanker.rank(trackerInfos, sampledAt));
-    });
+    }
+
+    // Holding the first snapshot would leave the page blank for the whole push.
+    if (!_loaded) {
+      setState(() => _loaded = true);
+      apply();
+      return;
+    }
+    updateWhenRouteSettled(apply);
   }
 
   @override
@@ -179,50 +191,81 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
         valueListenable: _connectionsStateNotifier,
         builder: (context, state, _) {
           final connections = state.list;
+          final detailTitle = appLocalizations.details(
+            appLocalizations.connection,
+          );
+          Widget buildAction(TrackerInfo trackerInfo) {
+            final closing = _closingConnectionIds.contains(trackerInfo.id);
+            return IconButton(
+              tooltip: context.appLocalizations.close,
+              padding: EdgeInsets.zero,
+              visualDensity: VisualDensity.compact,
+              style: IconButton.styleFrom(minimumSize: Size.zero),
+              icon: closing
+                  ? const SizedBox.square(
+                      dimension: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const GlyphIcon(AppGlyphs.block),
+              onPressed: _closingAll || closing
+                  ? null
+                  : () => _closeConnections(trackerInfo.id),
+            );
+          }
+
           return NullStatusSwitcher(
+            isLoading: !_loaded,
             isEmpty: connections.isEmpty,
             isSearching: state.query.isNotEmpty || state.keywords.isNotEmpty,
             nullStatus: NullStatus(
               label: appLocalizations.nullTip(appLocalizations.connections),
               illustration: NullStatusIllustration.connections,
             ),
-            child: KeyedAnimatedList<TrackerInfo>(
-              padding: EdgeInsets.only(
-                top: context.contentTopPadding,
-                bottom: BottomInsetScope.of(context) + 16,
-              ),
-              controller: _scrollController,
+            child: RecordTableFrame<TrackerInfo>(
+              tableId: 'connections',
               items: connections,
-              keyOf: (item) => item.id,
-              separator: const Divider(height: 0),
-              itemBuilder: (_, trackerInfo) {
-                return TrackerInfoItem(
-                  key: Key(trackerInfo.id),
-                  trackerInfo: trackerInfo,
-                  isLive: true,
-                  onClickKeyword: (value) {
-                    context.commonScaffoldState?.addKeyword(value);
+              columnsOf: (width) => trackerInfoColumns(
+                context,
+                width: width,
+                isLive: true,
+                actionBuilder: buildAction,
+              ),
+              builder: (context, table, connections) {
+                final positions = {
+                  if (table != null)
+                    for (final (index, trackerInfo) in connections.indexed)
+                      trackerInfo.id: index,
+                };
+                return KeyedAnimatedList<TrackerInfo>(
+                  padding: EdgeInsets.only(
+                    top: context.contentTopPadding,
+                    bottom: BottomInsetScope.of(context) + 16,
+                  ),
+                  controller: _scrollController,
+                  items: connections,
+                  keyOf: (item) => item.id,
+                  separator: table == null ? const Divider(height: 0) : null,
+                  itemBuilder: (_, trackerInfo) {
+                    if (table != null) {
+                      return TrackerInfoTableRow(
+                        key: Key(trackerInfo.id),
+                        trackerInfo: trackerInfo,
+                        table: table,
+                        striped: positions[trackerInfo.id]?.isOdd ?? false,
+                        detailTitle: detailTitle,
+                      );
+                    }
+                    return TrackerInfoItem(
+                      key: Key(trackerInfo.id),
+                      trackerInfo: trackerInfo,
+                      isLive: true,
+                      onClickKeyword: (value) {
+                        context.commonScaffoldState?.addKeyword(value);
+                      },
+                      trailing: buildAction(trackerInfo),
+                      detailTitle: detailTitle,
+                    );
                   },
-                  trailing: IconButton(
-                    tooltip: context.appLocalizations.close,
-                    padding: EdgeInsets.zero,
-                    visualDensity: VisualDensity.compact,
-                    style: IconButton.styleFrom(minimumSize: Size.zero),
-                    icon: _closingConnectionIds.contains(trackerInfo.id)
-                        ? const SizedBox.square(
-                            dimension: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const GlyphIcon(AppGlyphs.block),
-                    onPressed:
-                        _closingAll ||
-                            _closingConnectionIds.contains(trackerInfo.id)
-                        ? null
-                        : () => _closeConnections(trackerInfo.id),
-                  ),
-                  detailTitle: appLocalizations.details(
-                    appLocalizations.connection,
-                  ),
                 );
               },
             ),

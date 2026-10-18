@@ -915,6 +915,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "docked": MessageLookupByLibrary.simpleMessage("固定"),
     "domain": MessageLookupByLibrary.simpleMessage("域名"),
     "download": MessageLookupByLibrary.simpleMessage("下载"),
+    "duration": MessageLookupByLibrary.simpleMessage("时长"),
     "dynamicMembersHint": MessageLookupByLibrary.simpleMessage(
       "订阅更新时自动纳入当前配置的节点，可使用名称筛选，例如 日本|JP",
     ),
@@ -926,6 +927,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "editRule": MessageLookupByLibrary.simpleMessage("编辑规则"),
     "editSsid": MessageLookupByLibrary.simpleMessage("编辑SSID"),
     "editorUnavailable": MessageLookupByLibrary.simpleMessage("编辑器不可用"),
+    "elapsed": MessageLookupByLibrary.simpleMessage("耗时"),
     "emailCodeHint": MessageLookupByLibrary.simpleMessage("请输入 6 位验证码"),
     "emailCodeLabel": MessageLookupByLibrary.simpleMessage("邮箱验证码"),
     "emailCodeValidation": MessageLookupByLibrary.simpleMessage("请输入邮箱验证码"),
@@ -1121,6 +1123,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "init": MessageLookupByLibrary.simpleMessage("初始化"),
     "initFailed": MessageLookupByLibrary.simpleMessage("启动失败"),
     "initFailedTip": MessageLookupByLibrary.simpleMessage("应用启动时遇到严重错误，无法继续运行"),
+    "initiatorShort": MessageLookupByLibrary.simpleMessage("发起"),
     "installedAppsLoadFailed": MessageLookupByLibrary.simpleMessage(
       "无法读取应用列表，请重试",
     ),
@@ -1381,6 +1384,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "optional": MessageLookupByLibrary.simpleMessage("可选"),
     "options": MessageLookupByLibrary.simpleMessage("选项"),
     "other": MessageLookupByLibrary.simpleMessage("其他"),
+    "outboundExit": MessageLookupByLibrary.simpleMessage("出口"),
     "outboundMode": MessageLookupByLibrary.simpleMessage("出站模式"),
     "outboundUnavailable": MessageLookupByLibrary.simpleMessage(
       "当前配置中不可用，请移除或重新选择",
@@ -1486,6 +1490,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "profiles": MessageLookupByLibrary.simpleMessage("配置"),
     "profilesSort": MessageLookupByLibrary.simpleMessage("配置排序"),
     "project": MessageLookupByLibrary.simpleMessage("项目"),
+    "protocol": MessageLookupByLibrary.simpleMessage("协议"),
     "providerChanged": MessageLookupByLibrary.simpleMessage("资源已发生变化，请重新打开后编辑"),
     "providerContent": MessageLookupByLibrary.simpleMessage("资源内容"),
     "providerContentInvalid": MessageLookupByLibrary.simpleMessage("资源内容或格式无效"),
@@ -1661,6 +1666,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "restoreStrategy_compatible": MessageLookupByLibrary.simpleMessage("兼容"),
     "restoreStrategy_override": MessageLookupByLibrary.simpleMessage("覆盖"),
     "restoreSuccess": MessageLookupByLibrary.simpleMessage("恢复成功"),
+    "result": MessageLookupByLibrary.simpleMessage("结果"),
     "resumeUpdates": MessageLookupByLibrary.simpleMessage("恢复刷新"),
     "retry": MessageLookupByLibrary.simpleMessage("重试"),
     "retryCloudSyncWithCertificateException":
@@ -2042,6 +2048,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleThisDevice": MessageLookupByLibrary.simpleMessage("此设备"),
     "tailscaleUnavailable": MessageLookupByLibrary.simpleMessage("连接不可用"),
     "tapToAuthorize": MessageLookupByLibrary.simpleMessage("点击授权"),
+    "target": MessageLookupByLibrary.simpleMessage("目标"),
     "tcpConcurrent": MessageLookupByLibrary.simpleMessage("TCP并发"),
     "tcpConcurrentDesc": MessageLookupByLibrary.simpleMessage("开启后允许TCP并发"),
     "tcpFastOpen": MessageLookupByLibrary.simpleMessage("TCP Fast Open"),
@@ -2068,7 +2075,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "tonalSpotScheme": MessageLookupByLibrary.simpleMessage("调性点缀"),
     "tools": MessageLookupByLibrary.simpleMessage("工具"),
     "total": MessageLookupByLibrary.simpleMessage("总计"),
+    "totalDownload": MessageLookupByLibrary.simpleMessage("下载总量"),
+    "totalUpload": MessageLookupByLibrary.simpleMessage("上传总量"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxy端口"),
+    "traffic": MessageLookupByLibrary.simpleMessage("流量"),
     "trafficUsage": MessageLookupByLibrary.simpleMessage("流量统计"),
     "transferConfirmNotice": MessageLookupByLibrary.simpleMessage(
       "转账完成后系统会自动确认，确认后将自动开通已选套餐",

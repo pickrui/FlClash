@@ -43,4 +43,8 @@ extension DateTimeExtension on DateTime {
   String get showFull {
     return toString().substring(0, 19);
   }
+
+  String get showTime {
+    return toLocal().toString().substring(11, 19);
+  }
 }

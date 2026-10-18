@@ -136,6 +136,14 @@ extension TrackerInfoExt on TrackerInfo {
     return text;
   }
 
+  String get title {
+    final host = metadata.host;
+    if (host.isNotEmpty) {
+      return host;
+    }
+    return metadata.destinationIP;
+  }
+
   String get progressText {
     final process = metadata.process;
     final uid = metadata.uid;

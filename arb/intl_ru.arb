@@ -1401,5 +1401,15 @@
   "proxyType": "Тип прокси",
   "providerSourceSubscription": "Подписка",
   "providerSourceProfile": "Профиль",
-  "providerSourceApp": "Библиотека приложения"
+  "providerSourceApp": "Библиотека приложения",
+  "target": "Цель",
+  "outboundExit": "Выход",
+  "protocol": "Протокол",
+  "traffic": "Трафик",
+  "totalDownload": "Скачано",
+  "totalUpload": "Загружено",
+  "duration": "Длительность",
+  "initiatorShort": "Источник",
+  "result": "Результат",
+  "elapsed": "Время"
 }

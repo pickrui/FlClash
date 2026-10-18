@@ -1401,5 +1401,15 @@
   "proxyType": "节点类型",
   "providerSourceSubscription": "订阅",
   "providerSourceProfile": "配置文件",
-  "providerSourceApp": "应用资源库"
+  "providerSourceApp": "应用资源库",
+  "target": "目标",
+  "outboundExit": "出口",
+  "protocol": "协议",
+  "traffic": "流量",
+  "totalDownload": "下载总量",
+  "totalUpload": "上传总量",
+  "duration": "时长",
+  "initiatorShort": "发起",
+  "result": "结果",
+  "elapsed": "耗时"
 }

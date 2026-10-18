@@ -1225,6 +1225,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "docked": MessageLookupByLibrary.simpleMessage("Docked"),
     "domain": MessageLookupByLibrary.simpleMessage("Domain"),
     "download": MessageLookupByLibrary.simpleMessage("Download"),
+    "duration": MessageLookupByLibrary.simpleMessage("Duration"),
     "dynamicMembersHint": MessageLookupByLibrary.simpleMessage(
       "Automatically include nodes from this configuration as the subscription updates. Use a name filter, such as Japan|JP.",
     ),
@@ -1242,6 +1243,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "editorUnavailable": MessageLookupByLibrary.simpleMessage(
       "Editor unavailable",
     ),
+    "elapsed": MessageLookupByLibrary.simpleMessage("Took"),
     "emailCodeHint": MessageLookupByLibrary.simpleMessage(
       "Enter the 6-digit code",
     ),
@@ -1519,6 +1521,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "initFailedTip": MessageLookupByLibrary.simpleMessage(
       "The application encountered a critical error during startup and cannot continue.",
     ),
+    "initiatorShort": MessageLookupByLibrary.simpleMessage("From"),
     "installedAppsLoadFailed": MessageLookupByLibrary.simpleMessage(
       "Could not load installed apps. Please try again.",
     ),
@@ -1885,6 +1888,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "optional": MessageLookupByLibrary.simpleMessage("Optional"),
     "options": MessageLookupByLibrary.simpleMessage("Options"),
     "other": MessageLookupByLibrary.simpleMessage("Other"),
+    "outboundExit": MessageLookupByLibrary.simpleMessage("Exit"),
     "outboundMode": MessageLookupByLibrary.simpleMessage("Outbound mode"),
     "outboundUnavailable": MessageLookupByLibrary.simpleMessage(
       "Unavailable in this configuration. Remove or replace it.",
@@ -2020,6 +2024,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "profiles": MessageLookupByLibrary.simpleMessage("Profiles"),
     "profilesSort": MessageLookupByLibrary.simpleMessage("Profiles sort"),
     "project": MessageLookupByLibrary.simpleMessage("Project"),
+    "protocol": MessageLookupByLibrary.simpleMessage("Protocol"),
     "providerChanged": MessageLookupByLibrary.simpleMessage(
       "The resource changed while editing; reopen it and try again",
     ),
@@ -2273,6 +2278,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Override",
     ),
     "restoreSuccess": MessageLookupByLibrary.simpleMessage("Restore success"),
+    "result": MessageLookupByLibrary.simpleMessage("Result"),
     "resumeUpdates": MessageLookupByLibrary.simpleMessage("Resume updates"),
     "retry": MessageLookupByLibrary.simpleMessage("Retry"),
     "retryCloudSyncWithCertificateException":
@@ -2760,6 +2766,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Connection unavailable",
     ),
     "tapToAuthorize": MessageLookupByLibrary.simpleMessage("Tap to authorize"),
+    "target": MessageLookupByLibrary.simpleMessage("Target"),
     "tcpConcurrent": MessageLookupByLibrary.simpleMessage("TCP concurrent"),
     "tcpConcurrentDesc": MessageLookupByLibrary.simpleMessage(
       "Enabling it will allow TCP concurrency",
@@ -2796,7 +2803,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "tonalSpotScheme": MessageLookupByLibrary.simpleMessage("TonalSpot"),
     "tools": MessageLookupByLibrary.simpleMessage("Tools"),
     "total": MessageLookupByLibrary.simpleMessage("Total"),
+    "totalDownload": MessageLookupByLibrary.simpleMessage("Downloaded"),
+    "totalUpload": MessageLookupByLibrary.simpleMessage("Uploaded"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxy Port"),
+    "traffic": MessageLookupByLibrary.simpleMessage("Traffic"),
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Traffic usage"),
     "transferConfirmNotice": MessageLookupByLibrary.simpleMessage(
       "The system will confirm automatically after the transfer is completed, and the selected plan will be activated.",

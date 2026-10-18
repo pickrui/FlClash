@@ -34,6 +34,22 @@ String _endpointText(String ip, String port) {
   return ip;
 }
 
+void showTrackerInfoDetail(
+  BuildContext context,
+  TrackerInfo trackerInfo,
+  String title,
+) {
+  showExtend(
+    context,
+    builder: (_, _) {
+      return CommonScaffold(
+        body: TrackerInfoDetailView(trackerInfo: trackerInfo),
+        title: title,
+      );
+    },
+  );
+}
+
 class TrackerInfoItem extends ConsumerWidget {
   final TrackerInfo trackerInfo;
   final bool isLive;
@@ -56,17 +72,7 @@ class TrackerInfoItem extends ConsumerWidget {
         ref.watch(effectiveFindProcessModeProvider) == FindProcessMode.always &&
         system.isAndroid;
     return RecordListItem(
-      onTap: () {
-        showExtend(
-          context,
-          builder: (_, _) {
-            return CommonScaffold(
-              body: TrackerInfoDetailView(trackerInfo: trackerInfo),
-              title: detailTitle,
-            );
-          },
-        );
-      },
+      onTap: () => showTrackerInfoDetail(context, trackerInfo, detailTitle),
       header: _buildHeader(context),
       body: _buildBody(showIcon: showIcon),
     );

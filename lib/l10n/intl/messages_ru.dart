@@ -1257,6 +1257,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "docked": MessageLookupByLibrary.simpleMessage("Закреплённая"),
     "domain": MessageLookupByLibrary.simpleMessage("Домен"),
     "download": MessageLookupByLibrary.simpleMessage("Скачивание"),
+    "duration": MessageLookupByLibrary.simpleMessage("Длительность"),
     "dynamicMembersHint": MessageLookupByLibrary.simpleMessage(
       "Автоматически добавляет узлы конфигурации при обновлении подписки. Фильтр имени, например Japan|JP.",
     ),
@@ -1278,6 +1279,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "editorUnavailable": MessageLookupByLibrary.simpleMessage(
       "Редактор недоступен",
     ),
+    "elapsed": MessageLookupByLibrary.simpleMessage("Время"),
     "emailCodeHint": MessageLookupByLibrary.simpleMessage(
       "Введите 6-значный код",
     ),
@@ -1569,6 +1571,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "initFailedTip": MessageLookupByLibrary.simpleMessage(
       "При запуске приложения произошла критическая ошибка, и работа не может быть продолжена.",
     ),
+    "initiatorShort": MessageLookupByLibrary.simpleMessage("Источник"),
     "installedAppsLoadFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось загрузить список приложений. Повторите попытку.",
     ),
@@ -1956,6 +1959,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "optional": MessageLookupByLibrary.simpleMessage("Необязательно"),
     "options": MessageLookupByLibrary.simpleMessage("Опции"),
     "other": MessageLookupByLibrary.simpleMessage("Другое"),
+    "outboundExit": MessageLookupByLibrary.simpleMessage("Выход"),
     "outboundMode": MessageLookupByLibrary.simpleMessage(
       "Режим исходящего трафика",
     ),
@@ -2113,6 +2117,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "profiles": MessageLookupByLibrary.simpleMessage("Профили"),
     "profilesSort": MessageLookupByLibrary.simpleMessage("Сортировка профилей"),
     "project": MessageLookupByLibrary.simpleMessage("Проект"),
+    "protocol": MessageLookupByLibrary.simpleMessage("Протокол"),
     "providerChanged": MessageLookupByLibrary.simpleMessage(
       "Ресурс изменился во время редактирования. Откройте его снова",
     ),
@@ -2380,6 +2385,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "restoreSuccess": MessageLookupByLibrary.simpleMessage(
       "Восстановление успешно",
     ),
+    "result": MessageLookupByLibrary.simpleMessage("Результат"),
     "resumeUpdates": MessageLookupByLibrary.simpleMessage(
       "Возобновить обновление",
     ),
@@ -2903,6 +2909,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tapToAuthorize": MessageLookupByLibrary.simpleMessage(
       "Нажмите, чтобы разрешить",
     ),
+    "target": MessageLookupByLibrary.simpleMessage("Цель"),
     "tcpConcurrent": MessageLookupByLibrary.simpleMessage("TCP параллелизм"),
     "tcpConcurrentDesc": MessageLookupByLibrary.simpleMessage(
       "Включение позволит использовать параллелизм TCP",
@@ -2939,7 +2946,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "tonalSpotScheme": MessageLookupByLibrary.simpleMessage("Тональный акцент"),
     "tools": MessageLookupByLibrary.simpleMessage("Инструменты"),
     "total": MessageLookupByLibrary.simpleMessage("Всего"),
+    "totalDownload": MessageLookupByLibrary.simpleMessage("Скачано"),
+    "totalUpload": MessageLookupByLibrary.simpleMessage("Загружено"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxy-порт"),
+    "traffic": MessageLookupByLibrary.simpleMessage("Трафик"),
     "trafficUsage": MessageLookupByLibrary.simpleMessage(
       "Использование трафика",
     ),

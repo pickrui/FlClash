@@ -1401,5 +1401,15 @@
   "proxyType": "ノードの種類",
   "providerSourceSubscription": "サブスクリプション",
   "providerSourceProfile": "プロファイル",
-  "providerSourceApp": "アプリライブラリ"
+  "providerSourceApp": "アプリライブラリ",
+  "target": "宛先",
+  "outboundExit": "出口",
+  "protocol": "プロトコル",
+  "traffic": "通信量",
+  "totalDownload": "ダウンロード量",
+  "totalUpload": "アップロード量",
+  "duration": "経過時間",
+  "initiatorShort": "発信元",
+  "result": "結果",
+  "elapsed": "所要時間"
 }

@@ -1401,5 +1401,15 @@
   "proxyType": "Proxy type",
   "providerSourceSubscription": "Subscription",
   "providerSourceProfile": "Profile",
-  "providerSourceApp": "App library"
+  "providerSourceApp": "App library",
+  "target": "Target",
+  "outboundExit": "Exit",
+  "protocol": "Protocol",
+  "traffic": "Traffic",
+  "totalDownload": "Downloaded",
+  "totalUpload": "Uploaded",
+  "duration": "Duration",
+  "initiatorShort": "From",
+  "result": "Result",
+  "elapsed": "Took"
 }

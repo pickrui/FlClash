@@ -22,6 +22,8 @@ const _recordCellInset = 8.0;
 const _recordCellLineHeight = 20.0;
 const _recordHeaderLineHeight = 16.0;
 const _recordRowPadding = 8.0;
+// The horizontal padding TonalChip puts around a RecordLabel.
+const _recordLabelInset = 6.0;
 
 class RecordColumn<T> {
   final TableColumn layout;
@@ -353,6 +355,15 @@ double recordHeaderWidth(BuildContext context, String label) =>
         .computeTextSize(Text(label, style: _headerLabelStyle(context)))
         .width
         .ceilToDouble() +
+    _recordCellInset * 2;
+
+/// The width a fixed column takes to show a RecordLabel of [label] whole.
+double recordLabelWidth(BuildContext context, String label) =>
+    globalState.measure
+        .computeTextSize(Text(label, style: context.textTheme.labelMedium))
+        .width
+        .ceilToDouble() +
+    _recordLabelInset * 2 +
     _recordCellInset * 2;
 
 class RecordHeaderCell extends StatelessWidget {

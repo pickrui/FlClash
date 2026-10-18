@@ -1033,6 +1033,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "docked": MessageLookupByLibrary.simpleMessage("固定"),
     "domain": MessageLookupByLibrary.simpleMessage("ドメイン"),
     "download": MessageLookupByLibrary.simpleMessage("ダウンロード"),
+    "duration": MessageLookupByLibrary.simpleMessage("経過時間"),
     "dynamicMembersHint": MessageLookupByLibrary.simpleMessage(
       "更新時にこの設定のノードを自動追加します。Japan|JP などの名前フィルターを使用できます",
     ),
@@ -1044,6 +1045,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "editRule": MessageLookupByLibrary.simpleMessage("ルールを編集"),
     "editSsid": MessageLookupByLibrary.simpleMessage("SSIDを編集"),
     "editorUnavailable": MessageLookupByLibrary.simpleMessage("エディターを利用できません"),
+    "elapsed": MessageLookupByLibrary.simpleMessage("所要時間"),
     "emailCodeHint": MessageLookupByLibrary.simpleMessage("6桁のコードを入力"),
     "emailCodeLabel": MessageLookupByLibrary.simpleMessage("メール認証コード"),
     "emailCodeValidation": MessageLookupByLibrary.simpleMessage(
@@ -1277,6 +1279,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "initFailedTip": MessageLookupByLibrary.simpleMessage(
       "起動中に重大なエラーが発生したため、アプリを続行できません",
     ),
+    "initiatorShort": MessageLookupByLibrary.simpleMessage("発信元"),
     "installedAppsLoadFailed": MessageLookupByLibrary.simpleMessage(
       "アプリ一覧を読み込めませんでした。再試行してください",
     ),
@@ -1575,6 +1578,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "optional": MessageLookupByLibrary.simpleMessage("任意"),
     "options": MessageLookupByLibrary.simpleMessage("オプション"),
     "other": MessageLookupByLibrary.simpleMessage("その他"),
+    "outboundExit": MessageLookupByLibrary.simpleMessage("出口"),
     "outboundMode": MessageLookupByLibrary.simpleMessage("アウトバウンドモード"),
     "outboundUnavailable": MessageLookupByLibrary.simpleMessage(
       "この設定では利用できません。削除または再選択してください",
@@ -1690,6 +1694,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "profiles": MessageLookupByLibrary.simpleMessage("プロファイル一覧"),
     "profilesSort": MessageLookupByLibrary.simpleMessage("プロファイルの並び替え"),
     "project": MessageLookupByLibrary.simpleMessage("プロジェクト"),
+    "protocol": MessageLookupByLibrary.simpleMessage("プロトコル"),
     "providerChanged": MessageLookupByLibrary.simpleMessage(
       "編集中にリソースが変更されました。開き直してください",
     ),
@@ -1895,6 +1900,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "restoreStrategy_compatible": MessageLookupByLibrary.simpleMessage("互換"),
     "restoreStrategy_override": MessageLookupByLibrary.simpleMessage("上書き"),
     "restoreSuccess": MessageLookupByLibrary.simpleMessage("復元に成功しました"),
+    "result": MessageLookupByLibrary.simpleMessage("結果"),
     "resumeUpdates": MessageLookupByLibrary.simpleMessage("更新を再開"),
     "retry": MessageLookupByLibrary.simpleMessage("再試行"),
     "retryCloudSyncWithCertificateException":
@@ -2318,6 +2324,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleThisDevice": MessageLookupByLibrary.simpleMessage("このデバイス"),
     "tailscaleUnavailable": MessageLookupByLibrary.simpleMessage("接続できません"),
     "tapToAuthorize": MessageLookupByLibrary.simpleMessage("タップして許可"),
+    "target": MessageLookupByLibrary.simpleMessage("宛先"),
     "tcpConcurrent": MessageLookupByLibrary.simpleMessage("TCP並列処理"),
     "tcpConcurrentDesc": MessageLookupByLibrary.simpleMessage("TCP並列処理を許可"),
     "tcpFastOpen": MessageLookupByLibrary.simpleMessage("TCP Fast Open"),
@@ -2348,7 +2355,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "tonalSpotScheme": MessageLookupByLibrary.simpleMessage("トーンスポット"),
     "tools": MessageLookupByLibrary.simpleMessage("ツール"),
     "total": MessageLookupByLibrary.simpleMessage("合計"),
+    "totalDownload": MessageLookupByLibrary.simpleMessage("ダウンロード量"),
+    "totalUpload": MessageLookupByLibrary.simpleMessage("アップロード量"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxyポート"),
+    "traffic": MessageLookupByLibrary.simpleMessage("通信量"),
     "trafficUsage": MessageLookupByLibrary.simpleMessage("トラフィック使用量"),
     "transferConfirmNotice": MessageLookupByLibrary.simpleMessage(
       "送金完了後、システムが自動的に確認し、選択したプランが自動的に有効になります",

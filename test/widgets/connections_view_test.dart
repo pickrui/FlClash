@@ -19,6 +19,7 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/connection/connections.dart';
 import 'package:fl_clash/views/connection/item.dart';
+import 'package:fl_clash/views/connection/tracker_info_table.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -140,13 +141,37 @@ void main() {
     await tester.pump();
   }
 
+  TrackerInfo tracker(
+    String id,
+    String host, {
+    List<String> chains = const ['proxy-a'],
+    String process = 'curl',
+    int upload = 0,
+    int download = 0,
+  }) => TrackerInfo(
+    id: id,
+    upload: upload,
+    download: download,
+    start: DateTime(2024),
+    metadata: Metadata(
+      network: 'tcp',
+      host: host,
+      destinationPort: '443',
+      process: process,
+    ),
+    chains: chains,
+    rule: 'MATCH',
+    rulePayload: '',
+  );
+
   Future<_StreamCore> pumpConnections(
     WidgetTester tester,
     FutureOr<List<TrackerInfo>> Function() read, {
     bool isPageActive = true,
     DateTime Function()? now,
+    Size size = const Size(600, 800),
   }) async {
-    tester.view.physicalSize = const Size(600, 800);
+    tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -178,6 +203,174 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
     },
   );
+
+  testWidgets('shows nothing until the core answers, then its connections', (
+    tester,
+  ) async {
+    final pending = Completer<List<TrackerInfo>>();
+    await pumpConnections(tester, () => pending.future);
+    expect(find.byType(NullStatus), findsNothing);
+
+    pending.complete(buildConnections(1));
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.byType(NullStatus), findsNothing);
+    expect(find.byType(TrackerInfoItem), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('the first connections show while the page is pushed in', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(600, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final stream = _StreamCore(() => buildConnections(1));
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: _TestApp(
+          child: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => ConnectionsView(core: stream.core),
+                ),
+              ),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.pump(const Duration(milliseconds: 50));
+
+    final route = ModalRoute.of(tester.element(find.byType(ConnectionsView)))!;
+    expect(route.animation!.isAnimating, isTrue);
+    expect(find.byType(TrackerInfoItem), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('a wide page lays the connections out as a table and closes '
+      'a row from it', (tester) async {
+    final stream = await pumpConnections(
+      tester,
+      () => [
+        tracker('a', 'alpha.test', chains: const ['Tokyo', 'Proxy']),
+        tracker('b', 'beta.test'),
+      ],
+      size: const Size(1400, 800),
+    );
+    when(() => stream.handler.closeConnection('a'))
+        .thenAnswer((_) async => true);
+
+    for (final label in [
+      'Process',
+      'Target',
+      'Protocol',
+      'Rule',
+      'Exit',
+      'Download',
+      'Upload',
+      'Downloaded',
+      'Uploaded',
+      'Duration',
+    ]) {
+      expect(find.text(label), findsOneWidget);
+    }
+    expect(find.byType(TrackerInfoItem), findsNothing);
+    expect(
+      tester
+          .widgetList<TrackerInfoTableRow>(find.byType(TrackerInfoTableRow))
+          .map((row) => row.striped)
+          .toSet(),
+      {true, false},
+    );
+    expect(find.text('Tokyo'), findsOneWidget);
+
+    await tester.tap(
+      find.descendant(
+        of: find.ancestor(
+          of: find.textContaining('alpha.test', findRichText: true).first,
+          matching: find.byType(TrackerInfoTableRow),
+        ),
+        matching: find.byTooltip('Close'),
+      ),
+    );
+    await tester.pump();
+    verify(() => stream.handler.closeConnection('a')).called(1);
+    await stream.send(tester, {
+      'removed': ['a'],
+    });
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('alpha.test', findRichText: true), findsNothing);
+    expect(find.textContaining('beta.test', findRichText: true), findsWidgets);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('a live table spends its first extra width on the totals', (
+    tester,
+  ) async {
+    await pumpConnections(
+      tester,
+      () => [tracker('a', 'alpha.test', upload: 512, download: 1536)],
+      size: const Size(1100, 800),
+    );
+
+    expect(find.text('Downloaded'), findsOneWidget);
+    expect(find.text('Uploaded'), findsOneWidget);
+    expect(find.text(1536.traffic.show), findsOneWidget);
+    expect(find.text('Protocol'), findsNothing);
+    expect(find.text('Duration'), findsNothing);
+
+    tester.view.physicalSize = const Size(900, 800);
+    await tester.pump();
+
+    expect(find.text('Traffic'), findsOneWidget);
+    expect(find.text(2048.traffic.show), findsOneWidget);
+    expect(find.text('Downloaded'), findsNothing);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('a sorted table keeps its order as the connections update', (
+    tester,
+  ) async {
+    final stream = await pumpConnections(
+      tester,
+      () => [
+        tracker('a', 'alpha.test', process: 'zsh', download: 300),
+        tracker('b', 'beta.test', process: 'curl', download: 200),
+        tracker('c', 'gamma.test', process: 'make', download: 100),
+      ],
+      size: const Size(1400, 800),
+    );
+    double topOf(String host) => tester
+        .getTopLeft(find.textContaining(host, findRichText: true).first)
+        .dy;
+
+    await tester.tap(find.text('Process'));
+    await tester.pumpAndSettle();
+    expect(topOf('beta.test'), lessThan(topOf('gamma.test')));
+    expect(topOf('gamma.test'), lessThan(topOf('alpha.test')));
+
+    await stream.send(tester, {
+      'updated': [
+        {'id': 'a', 'upload': 0, 'download': 900},
+      ],
+    });
+    await tester.pumpAndSettle();
+    expect(topOf('beta.test'), lessThan(topOf('gamma.test')));
+    expect(topOf('gamma.test'), lessThan(topOf('alpha.test')));
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 
   testWidgets('a lost snapshot is cancelled and logged as a disconnect', (
     tester,

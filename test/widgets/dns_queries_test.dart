@@ -10,6 +10,7 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/connection/dns_queries.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -81,7 +82,7 @@ void main() {
       expect(find.text('failed.example'), findsNothing);
       await tester.tap(find.text('cached.example'));
       await tester.pumpAndSettle();
-      expect(find.text('192.0.2.10'), findsNWidgets(2));
+      expect(find.textContaining('192.0.2.10'), findsNWidgets(2));
       expect(find.text('21 ms'), findsNWidgets(2));
       await tester.tap(find.text('Close'));
       await tester.pumpAndSettle();
@@ -96,6 +97,53 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('a wide page lays the queries out under a column header', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final container = ProviderContainer(
+      overrides: [
+        viewSizeProvider.overrideWithBuild((_, _) => const Size(1200, 800)),
+      ],
+    );
+    addTearDown(container.dispose);
+    container
+        .read(dnsQueriesProvider.notifier)
+        .addQuery(
+          DnsQuery(
+            domain: 'app.example',
+            type: 'AAAA',
+            time: DateTime.utc(2026),
+            initiator: 'app',
+            upstream: 'udp://192.0.2.53',
+            answers: ['2001:db8::1'],
+            delay: 9,
+          ),
+        );
+    await _pumpDnsQueries(tester, container);
+
+    for (final label in [
+      'Time',
+      'Domain',
+      'Query type',
+      'From',
+      'Result',
+      'Upstream',
+      'Took',
+    ]) {
+      expect(find.text(label), findsOneWidget);
+    }
+    final initiator = tester.renderObject<RenderParagraph>(
+      find.text('Application'),
+    );
+    expect(initiator.didExceedMaxLines, isFalse);
+    expect(find.text('9 ms'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('a filter that hides every query says nothing matched', (
     tester,
