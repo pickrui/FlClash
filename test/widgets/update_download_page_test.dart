@@ -178,7 +178,7 @@ void main() {
     },
   );
   for (final locale in AppLocalizations.delegate.supportedLocales) {
-    testWidgets('download and install actions fit 320px in $locale', (
+    testWidgets('download and install actions fit 320 dp in $locale', (
       tester,
     ) async {
       tester.view.physicalSize = const Size(320, 640);
@@ -221,7 +221,7 @@ void main() {
       expect(find.text(_installLabel), findsOneWidget);
     });
 
-    testWidgets('retry stays primary when download fails at 320px in $locale', (
+    testWidgets('retry stays primary if download fails at 320 dp in $locale', (
       tester,
     ) async {
       tester.view.physicalSize = const Size(320, 640);

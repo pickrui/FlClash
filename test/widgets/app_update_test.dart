@@ -281,7 +281,7 @@ void main() {
   });
 
   for (final locale in AppLocalizations.delegate.supportedLocales) {
-    testWidgets('long notes keep confirmation visible at 320px in $locale', (
+    testWidgets('long notes keep confirmation visible at 320 dp in $locale', (
       tester,
     ) async {
       tester.view.physicalSize = const Size(320, 640);

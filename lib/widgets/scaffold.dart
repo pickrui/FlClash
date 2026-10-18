@@ -1105,7 +1105,7 @@ enum AppBarActionEdge {
   };
 }
 
-/// Only the touch platforms ask for the 48px target that pads the container out.
+/// Only touch platforms ask for the 48 dp target that pads the container out.
 double _tapPaddingOf(BuildContext context) =>
     Theme.of(context).materialTapTargetSize == MaterialTapTargetSize.padded
     ? _iconButtonTapPadding
