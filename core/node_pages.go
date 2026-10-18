@@ -16,6 +16,7 @@ import (
 	"unicode/utf16"
 
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
+	"github.com/metacubex/mihomo/adapter/provider"
 	"github.com/metacubex/mihomo/config"
 	C "github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/tunnel"
@@ -147,11 +148,29 @@ func nodeGroupsLocked() ([]string, map[string]*nodeGroup) {
 		if data == nil {
 			continue
 		}
+		if isBuiltInGlobal(proxy) {
+			data["hidden"] = true
+		}
 		now, _ := data["now"].(string)
 		groups[name] = &nodeGroup{proxy: proxy, holder: holder, data: data, now: now}
 		order = append(order, name)
 	}
 	return order, groups
+}
+
+// mihomo builds its own GLOBAL over the reserved provider unless the config
+// defines one; only that built-in group stays out of rule mode.
+func isBuiltInGlobal(proxy C.Proxy) bool {
+	group, ok := proxy.Adapter().(outboundgroup.ProxyGroup)
+	if !ok || proxy.Name() != "GLOBAL" {
+		return false
+	}
+	for _, pd := range group.Providers() {
+		if pd.Name() == provider.ReservedName {
+			return true
+		}
+	}
+	return false
 }
 
 func nodeMember(proxy C.Proxy) ProxyGroupMember {

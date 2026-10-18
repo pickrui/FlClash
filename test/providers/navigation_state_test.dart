@@ -108,7 +108,7 @@ void main() {
         },
       );
 
-      test('honors explicitly hidden groups in rule mode', () {
+      test('honors hidden flags rather than names in rule mode', () {
         final groups = _decodeGroups([
           for (final hidden in [false, true])
             {
@@ -137,6 +137,11 @@ void main() {
               .map((item) => item.label),
           isNot(contains(PageLabel.proxies)),
         );
+
+        container
+            .read(groupsProvider.notifier)
+            .update((_) => [groups.first.copyWith(name: 'GLOBAL')]);
+        _expectProxiesPage(container, 'GLOBAL');
       });
     });
   }

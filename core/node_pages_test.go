@@ -20,7 +20,7 @@ import (
 	"github.com/metacubex/mihomo/tunnel"
 )
 
-func installNodePageFixture(t *testing.T) {
+func installNodeConfig(t *testing.T, yaml string) {
 	t.Helper()
 	setValidationTestHome(t)
 	names := slices.Clone(config.GetProxyNameList())
@@ -33,6 +33,20 @@ func installNodePageFixture(t *testing.T) {
 		tunnel.UpdateProxies(proxies, providers)
 		publishProxySnapshot(previous)
 	})
+	raw, err := config.UnmarshalRawConfig([]byte(yaml))
+	if err != nil {
+		t.Fatal(err)
+	}
+	parsed, err := config.ParseRawConfig(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { closeParsedProviders(parsed) })
+	tunnel.UpdateProxies(parsed.Proxies, parsed.Providers)
+}
+
+func installNodePageFixture(t *testing.T) {
+	t.Helper()
 	var yaml strings.Builder
 	yaml.WriteString("proxy-providers:\n  fixture:\n    type: inline\n    payload:\n")
 	for i := range 300 {
@@ -47,16 +61,7 @@ proxy-groups:
   - {name: Balance, type: load-balance, use: [fixture], url: 'https://example.test/check'}
 rules: ['MATCH,Paged']
 `)
-	raw, err := config.UnmarshalRawConfig([]byte(yaml.String()))
-	if err != nil {
-		t.Fatal(err)
-	}
-	parsed, err := config.ParseRawConfig(raw)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { closeParsedProviders(parsed) })
-	tunnel.UpdateProxies(parsed.Proxies, parsed.Providers)
+	installNodeConfig(t, yaml.String())
 	patchSelectGroup(map[string]string{"Paged": "Node-299"})
 }
 
@@ -75,6 +80,9 @@ func TestNodePagesSummarySearchSortSelectionAndRevision(t *testing.T) {
 		}
 		for _, key := range []string{"type", "now", "fixed", "hidden", "icon", "testUrl"} {
 			want, got := legacy[key], group[key]
+			if key == "hidden" && name == "GLOBAL" {
+				want = true
+			}
 			if want == "" && got == nil {
 				continue
 			}
@@ -143,6 +151,19 @@ func TestNodePagesSummarySearchSortSelectionAndRevision(t *testing.T) {
 	if next := handleGetProxyPage(request); len(next.Items) != 0 || next.Offset != next.Total {
 		t.Fatal("out-of-range offset not clamped")
 	}
+}
+
+func TestNodeGroupsKeepAConfiguredGlobalVisible(t *testing.T) {
+	installNodeConfig(t, "proxy-groups:\n  - {name: GLOBAL, type: select, proxies: [DIRECT]}\nrules: ['MATCH,GLOBAL']\n")
+	for _, group := range handleGetProxyGroups() {
+		if group["name"] == "GLOBAL" {
+			if group["hidden"] != false {
+				t.Fatalf("configured GLOBAL hidden = %v", group["hidden"])
+			}
+			return
+		}
+	}
+	t.Fatal("configured GLOBAL is missing")
 }
 
 func TestNodePagesConfigReplacementInvalidatesRevision(t *testing.T) {
