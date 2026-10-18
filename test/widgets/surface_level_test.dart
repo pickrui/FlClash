@@ -6,8 +6,9 @@
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/ui/surface.dart';
-import 'package:fl_clash/widgets/button.dart';
+import 'package:fl_clash/ui/button.dart';
 import 'package:fl_clash/ui/card.dart';
+import 'package:fl_clash/ui/liquid_glass.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -73,6 +74,59 @@ void main() {
         _materialOf(tester, action).color,
         SurfaceLevel.block.colorOf(colorScheme),
       );
+    });
+  }
+
+  for (final glass in [false, true]) {
+    testWidgets('bar buttons ${glass ? 'stand on glass' : 'take a fill'} and '
+        'a group shares one', (tester) async {
+      final theme = ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+      ).withAppShapes.withAppSurfaces;
+      Widget button(String tooltip) => IconButton(
+        tooltip: tooltip,
+        onPressed: () {},
+        icon: const GlyphIcon(AppGlyphs.add),
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: Scaffold(
+            body: Center(
+              child: TonalButtonTheme(
+                glass: glass,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    button('alone'),
+                    TonalButtonGroup(
+                      children: [button('first'), button('second')],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(LiquidGlass), findsNWidgets(glass ? 2 : 0));
+      expect(
+        tester.getSize(find.byTooltip('alone')),
+        Size.square(TonalButtonSize.bar.button),
+      );
+      final group = tester.element(find.byType(TonalButtonGroup));
+      final groupFill = find.descendant(
+        of: find.byType(TonalButtonGroup),
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is DecoratedBox &&
+              widget.decoration is ShapeDecoration &&
+              (widget.decoration as ShapeDecoration).color ==
+                  group.raisedSurfaceLevel.colorOf(theme.colorScheme),
+        ),
+      );
+      expect(groupFill, glass ? findsNothing : findsOneWidget);
     });
   }
 }

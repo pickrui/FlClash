@@ -14,12 +14,13 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
-import 'button.dart';
+import 'package:fl_clash/ui/button.dart';
 
 import 'package:fl_clash/ui/chip.dart';
 
 import 'package:fl_clash/ui/inherited.dart';
 import 'package:fl_clash/ui/keyboard.dart';
+import 'package:fl_clash/ui/liquid_glass.dart';
 
 import 'package:fl_clash/ui/loading.dart';
 
@@ -525,6 +526,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
 
   Widget _buildAppBarWrap(Widget child) {
     final appBar = TonalButtonTheme(
+      glass: LiquidGlassScope.of(context),
       child: _isSearch ? _buildSearchingAppBarTheme(child) : child,
     );
     if (_isEdit || _isSearch) {

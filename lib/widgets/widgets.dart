@@ -9,7 +9,7 @@ export 'active_polling.dart';
 
 export 'package:fl_clash/ui/builder.dart';
 
-export 'button.dart';
+export 'package:fl_clash/ui/button.dart';
 
 export 'package:fl_clash/ui/card.dart';
 

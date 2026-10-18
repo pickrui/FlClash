@@ -23,7 +23,8 @@ import 'package:fl_clash/ui/card.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/sheet.dart';
 
-import 'button.dart';
+import 'package:fl_clash/ui/button.dart';
+
 import 'input_dialog.dart';
 
 import 'package:fl_clash/ui/navigation_dock.dart';
