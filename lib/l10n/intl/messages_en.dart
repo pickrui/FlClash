@@ -722,6 +722,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "collapseList": MessageLookupByLibrary.simpleMessage("Collapse"),
     "color": MessageLookupByLibrary.simpleMessage("Color"),
     "colorSchemes": MessageLookupByLibrary.simpleMessage("Color schemes"),
+    "colorStyle": MessageLookupByLibrary.simpleMessage("Color style"),
     "columns": MessageLookupByLibrary.simpleMessage("Columns"),
     "commission": MessageLookupByLibrary.simpleMessage("Commission"),
     "commissionBalance": m6,
@@ -824,7 +825,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "connectivity": MessageLookupByLibrary.simpleMessage("Connectivity："),
     "content": MessageLookupByLibrary.simpleMessage("Content"),
-    "contentScheme": MessageLookupByLibrary.simpleMessage("Content"),
     "controlGlobalAddedRules": MessageLookupByLibrary.simpleMessage(
       "Control global added rules",
     ),
@@ -1361,7 +1361,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "exportFile": MessageLookupByLibrary.simpleMessage("Export file"),
     "exportLogs": MessageLookupByLibrary.simpleMessage("Export logs"),
     "exportSuccess": MessageLookupByLibrary.simpleMessage("Export Success"),
-    "expressiveScheme": MessageLookupByLibrary.simpleMessage("Expressive"),
     "externalController": MessageLookupByLibrary.simpleMessage(
       "ExternalController",
     ),
@@ -1396,7 +1395,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "fetchPlansFailed": MessageLookupByLibrary.simpleMessage(
       "Failed to load plans",
     ),
-    "fidelityScheme": MessageLookupByLibrary.simpleMessage("Fidelity"),
     "file": MessageLookupByLibrary.simpleMessage("File"),
     "fileDesc": MessageLookupByLibrary.simpleMessage("Directly upload profile"),
     "fileIsUpdate": MessageLookupByLibrary.simpleMessage(
@@ -1422,7 +1420,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "forgotPassword": MessageLookupByLibrary.simpleMessage("Forgot password?"),
     "format": MessageLookupByLibrary.simpleMessage("Format"),
-    "fruitSaladScheme": MessageLookupByLibrary.simpleMessage("FruitSalad"),
     "general": MessageLookupByLibrary.simpleMessage("General"),
     "geoAutoUpdate": MessageLookupByLibrary.simpleMessage("Auto Update"),
     "geoAutoUpdateInterval": MessageLookupByLibrary.simpleMessage(
@@ -1844,7 +1841,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Secure connection failed. The server\'s certificate may be invalid, or the connection is being intercepted",
     ),
     "networkType": MessageLookupByLibrary.simpleMessage("Network type"),
-    "neutralScheme": MessageLookupByLibrary.simpleMessage("Neutral"),
     "newPasswordLabel": MessageLookupByLibrary.simpleMessage("New password"),
     "nextMatch": MessageLookupByLibrary.simpleMessage("Next match"),
     "nicknameHint": MessageLookupByLibrary.simpleMessage(
@@ -2229,7 +2225,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "quickAdd": MessageLookupByLibrary.simpleMessage("Quick add"),
     "quickEdit": MessageLookupByLibrary.simpleMessage("Quick edit"),
     "quickFill": MessageLookupByLibrary.simpleMessage("Quick fill"),
-    "rainbowScheme": MessageLookupByLibrary.simpleMessage("Rainbow"),
     "rawOutboundInUse": m76,
     "readFullAnnouncement": MessageLookupByLibrary.simpleMessage(
       "Read full announcement",
@@ -2597,6 +2592,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "size": MessageLookupByLibrary.simpleMessage("Size"),
     "slide": MessageLookupByLibrary.simpleMessage("Slide"),
     "socksPort": MessageLookupByLibrary.simpleMessage("Socks Port"),
+    "softStyle": MessageLookupByLibrary.simpleMessage("Soft"),
     "soldOut": MessageLookupByLibrary.simpleMessage("Sold out"),
     "sort": MessageLookupByLibrary.simpleMessage("Sort"),
     "source": MessageLookupByLibrary.simpleMessage("Source"),
@@ -2864,6 +2860,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tight": MessageLookupByLibrary.simpleMessage("Tight"),
     "time": MessageLookupByLibrary.simpleMessage("Time"),
     "timeout": MessageLookupByLibrary.simpleMessage("Timeout"),
+    "tintedStyle": MessageLookupByLibrary.simpleMessage("Tinted"),
     "tip": MessageLookupByLibrary.simpleMessage("tip"),
     "todayUsed": MessageLookupByLibrary.simpleMessage("Today\'s Usage"),
     "toggle": MessageLookupByLibrary.simpleMessage("Toggle"),
@@ -2875,7 +2872,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Please enter Access Token",
     ),
     "tolerance": MessageLookupByLibrary.simpleMessage("Tolerance"),
-    "tonalSpotScheme": MessageLookupByLibrary.simpleMessage("TonalSpot"),
     "tools": MessageLookupByLibrary.simpleMessage("Tools"),
     "total": MessageLookupByLibrary.simpleMessage("Total"),
     "totalDownload": MessageLookupByLibrary.simpleMessage("Downloaded"),
@@ -2998,8 +2994,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "userGuide": MessageLookupByLibrary.simpleMessage("User Guide"),
     "value": MessageLookupByLibrary.simpleMessage("Value"),
     "verifyCoupon": MessageLookupByLibrary.simpleMessage("Verify"),
-    "vibrantScheme": MessageLookupByLibrary.simpleMessage("Vibrant"),
     "view": MessageLookupByLibrary.simpleMessage("View"),
+    "vividStyle": MessageLookupByLibrary.simpleMessage("Vivid"),
     "vpnConfigChangeDetected": MessageLookupByLibrary.simpleMessage(
       "VPN configuration change detected",
     ),

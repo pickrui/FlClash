@@ -36,12 +36,14 @@ ThemeData watchAppTheme(WidgetRef ref, Brightness brightness) {
   final pureBlack =
       brightness == Brightness.dark &&
       ref.watch(themeSettingProvider.select((state) => state.pureBlack));
-  final seeded = ref.watch(genColorSchemeProvider(brightness));
-  final colorScheme = seeded.toPureBlack(pureBlack);
+  final colorScheme = ref.watch(genColorSchemeProvider(brightness));
+  final plainDark = pureBlack
+      ? ref.watch(genColorSchemeProvider(brightness, pureBlack: false))
+      : null;
   final inputs = (
     platform: defaultTargetPlatform,
-    seeded: seeded,
-    pureBlack: pureBlack,
+    colorScheme: colorScheme,
+    plainDark: plainDark,
   );
   if (_appThemes[brightness] case (inputs: final cached, :final theme)
       when cached == inputs) {
@@ -55,7 +57,7 @@ ThemeData watchAppTheme(WidgetRef ref, Brightness brightness) {
       extensions: [
         if (brightness == Brightness.dark)
           // Pure black steps up to the plain dark scheme, keeping its tint.
-          ElevatedColorScheme(pureBlack ? seeded : colorScheme.elevated),
+          ElevatedColorScheme(plainDark ?? colorScheme.elevated),
       ],
     ).withAppShapes.withAppSurfaces.withAppTypography,
   );

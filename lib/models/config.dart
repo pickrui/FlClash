@@ -312,13 +312,27 @@ abstract class TextScale with _$TextScale {
       _$TextScaleFromJson(json);
 }
 
+// Older configs name one of Material's nine scheme variants instead.
+Object? _readColorStyle(Map<dynamic, dynamic> json, String key) {
+  if (json.containsKey(key)) {
+    return json[key];
+  }
+  return switch (json['schemeVariant']) {
+    'monochrome' => ColorStyle.monochrome.name,
+    'tonalSpot' || 'neutral' => ColorStyle.soft.name,
+    _ => null,
+  };
+}
+
 @freezed
 abstract class ThemeProps with _$ThemeProps {
   const factory ThemeProps({
     int? primaryColor,
     @Default(defaultPrimaryColors) List<int> primaryColors,
     @Default(ThemeMode.dark) ThemeMode themeMode,
-    @Default(DynamicSchemeVariant.content) DynamicSchemeVariant schemeVariant,
+    @Default(ColorStyle.vivid)
+    @JsonKey(readValue: _readColorStyle)
+    ColorStyle colorStyle,
     @Default(false) bool pureBlack,
     @Default(true) bool sidebarBlur,
     @Default(TextScale()) TextScale textScale,

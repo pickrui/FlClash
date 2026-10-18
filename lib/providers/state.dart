@@ -564,33 +564,66 @@ VM3<bool, int, bool> checkIp(Ref ref) {
   return VM3(isInit, checkIpNum, containsDetection);
 }
 
+/// The color the system offers as its accent for [brightness].
+Color systemSeedColor(Brightness brightness) =>
+    switch (brightness) {
+      Brightness.light => globalState.lightDynamicPrimary,
+      Brightness.dark => globalState.darkDynamicPrimary,
+    } ??
+    globalState.accentColor;
+
 @riverpod
 ColorScheme genColorScheme(
   Ref ref,
   Brightness brightness, {
   Color? color,
   bool ignoreConfig = false,
+  bool? pureBlack,
 }) {
   final settings = ref.watch(
     themeSettingProvider.select(
-      (state) =>
-          (primaryColor: state.primaryColor, variant: state.schemeVariant),
+      (state) => (
+        primaryColor: state.primaryColor,
+        colorStyle: state.colorStyle,
+        pureBlack: state.pureBlack,
+      ),
     ),
   );
   final configuredColor = ignoreConfig ? null : settings.primaryColor;
-  final systemColor = switch (brightness) {
-    Brightness.light => globalState.lightDynamicPrimary,
-    Brightness.dark => globalState.darkDynamicPrimary,
-  };
-  return ColorScheme.fromSeed(
-    seedColor:
-        color ??
+  return _cachedColorScheme(
+    color ??
         (configuredColor == null
-            ? systemColor ?? globalState.accentColor
+            ? systemSeedColor(brightness)
             : Color(configuredColor)),
-    brightness: brightness,
-    dynamicSchemeVariant: settings.variant,
+    brightness,
+    settings.colorStyle,
+    pureBlack ?? settings.pureBlack,
   );
+}
+
+const _maxCachedColorSchemes = 64;
+
+final _colorSchemes = <(Color, Brightness, ColorStyle, bool), ColorScheme>{};
+
+ColorScheme _cachedColorScheme(
+  Color seedColor,
+  Brightness brightness,
+  ColorStyle style,
+  bool pureBlack,
+) {
+  final key = (seedColor, brightness, style, pureBlack);
+  final colorScheme =
+      _colorSchemes.remove(key) ??
+      seededColorScheme(
+        seedColor: seedColor,
+        brightness: brightness,
+        style: style,
+      ).toPureBlack(pureBlack);
+  _colorSchemes[key] = colorScheme;
+  if (_colorSchemes.length > _maxCachedColorSchemes) {
+    _colorSchemes.remove(_colorSchemes.keys.first);
+  }
+  return colorScheme;
 }
 
 @riverpod

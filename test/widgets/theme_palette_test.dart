@@ -9,6 +9,7 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/ui/color.dart';
 import 'package:fl_clash/views/theme.dart';
 import 'package:fl_clash/widgets/palette.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,7 +36,7 @@ void main() {
           .update(
             (state) => state.copyWith(primaryColor: Colors.orange.toARGB32()),
           );
-      final variant = container.read(themeSettingProvider).schemeVariant;
+      final style = container.read(themeSettingProvider).colorStyle;
       for (final brightness in Brightness.values) {
         final systemColor = brightness == Brightness.light
             ? Colors.blue
@@ -53,10 +54,10 @@ void main() {
                 ignoreConfig: settings.ignore,
               ),
             ),
-            ColorScheme.fromSeed(
+            seededColorScheme(
               seedColor: settings.seed,
               brightness: brightness,
-              dynamicSchemeVariant: variant,
+              style: style,
             ),
           );
         }

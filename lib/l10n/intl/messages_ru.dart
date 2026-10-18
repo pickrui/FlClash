@@ -734,6 +734,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "collapseList": MessageLookupByLibrary.simpleMessage("Свернуть"),
     "color": MessageLookupByLibrary.simpleMessage("Цвет"),
     "colorSchemes": MessageLookupByLibrary.simpleMessage("Цветовые схемы"),
+    "colorStyle": MessageLookupByLibrary.simpleMessage("Стиль палитры"),
     "columns": MessageLookupByLibrary.simpleMessage("Столбцы"),
     "commission": MessageLookupByLibrary.simpleMessage("Комиссия"),
     "commissionBalance": m6,
@@ -840,7 +841,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "connectivity": MessageLookupByLibrary.simpleMessage("Связь："),
     "content": MessageLookupByLibrary.simpleMessage("Содержание"),
-    "contentScheme": MessageLookupByLibrary.simpleMessage("Контентная тема"),
     "controlGlobalAddedRules": MessageLookupByLibrary.simpleMessage(
       "Управление глобальными добавленными правилами",
     ),
@@ -1409,7 +1409,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "exportFile": MessageLookupByLibrary.simpleMessage("Экспорт файла"),
     "exportLogs": MessageLookupByLibrary.simpleMessage("Экспорт логов"),
     "exportSuccess": MessageLookupByLibrary.simpleMessage("Экспорт успешен"),
-    "expressiveScheme": MessageLookupByLibrary.simpleMessage("Экспрессивные"),
     "externalController": MessageLookupByLibrary.simpleMessage(
       "Внешний контроллер",
     ),
@@ -1446,7 +1445,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "fetchPlansFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось загрузить тарифы",
     ),
-    "fidelityScheme": MessageLookupByLibrary.simpleMessage("Точная передача"),
     "file": MessageLookupByLibrary.simpleMessage("Файл"),
     "fileDesc": MessageLookupByLibrary.simpleMessage("Прямая загрузка профиля"),
     "fileIsUpdate": MessageLookupByLibrary.simpleMessage(
@@ -1474,7 +1472,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "forgotPassword": MessageLookupByLibrary.simpleMessage("Забыли пароль?"),
     "format": MessageLookupByLibrary.simpleMessage("Формат"),
-    "fruitSaladScheme": MessageLookupByLibrary.simpleMessage("Фруктовый микс"),
     "general": MessageLookupByLibrary.simpleMessage("Общие"),
     "geoAutoUpdate": MessageLookupByLibrary.simpleMessage("Автообновление"),
     "geoAutoUpdateInterval": MessageLookupByLibrary.simpleMessage(
@@ -1919,7 +1916,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Не удалось установить защищённое соединение. Сертификат сервера может быть недействителен, или соединение перехватывается",
     ),
     "networkType": MessageLookupByLibrary.simpleMessage("Тип сети"),
-    "neutralScheme": MessageLookupByLibrary.simpleMessage("Нейтральные"),
     "newPasswordLabel": MessageLookupByLibrary.simpleMessage("Новый пароль"),
     "nextMatch": MessageLookupByLibrary.simpleMessage("Следующее совпадение"),
     "nicknameHint": MessageLookupByLibrary.simpleMessage(
@@ -2334,7 +2330,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "quickAdd": MessageLookupByLibrary.simpleMessage("Быстрое добавление"),
     "quickEdit": MessageLookupByLibrary.simpleMessage("Быстрое редактирование"),
     "quickFill": MessageLookupByLibrary.simpleMessage("Быстрое заполнение"),
-    "rainbowScheme": MessageLookupByLibrary.simpleMessage("Радужные"),
     "rawOutboundInUse": m76,
     "readFullAnnouncement": MessageLookupByLibrary.simpleMessage(
       "Читать полностью",
@@ -2732,6 +2727,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "size": MessageLookupByLibrary.simpleMessage("Размер"),
     "slide": MessageLookupByLibrary.simpleMessage("Сдвиг"),
     "socksPort": MessageLookupByLibrary.simpleMessage("Socks-порт"),
+    "softStyle": MessageLookupByLibrary.simpleMessage("Мягкий"),
     "soldOut": MessageLookupByLibrary.simpleMessage("Распродано"),
     "sort": MessageLookupByLibrary.simpleMessage("Сортировка"),
     "source": MessageLookupByLibrary.simpleMessage("Источник"),
@@ -3013,6 +3009,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tight": MessageLookupByLibrary.simpleMessage("Плотный"),
     "time": MessageLookupByLibrary.simpleMessage("Время"),
     "timeout": MessageLookupByLibrary.simpleMessage("Таймаут"),
+    "tintedStyle": MessageLookupByLibrary.simpleMessage("Тонированный"),
     "tip": MessageLookupByLibrary.simpleMessage("подсказка"),
     "todayUsed": MessageLookupByLibrary.simpleMessage("Использовано сегодня"),
     "toggle": MessageLookupByLibrary.simpleMessage("Переключить"),
@@ -3024,7 +3021,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Пожалуйста, введите токен доступа",
     ),
     "tolerance": MessageLookupByLibrary.simpleMessage("Допуск"),
-    "tonalSpotScheme": MessageLookupByLibrary.simpleMessage("Тональный акцент"),
     "tools": MessageLookupByLibrary.simpleMessage("Инструменты"),
     "total": MessageLookupByLibrary.simpleMessage("Всего"),
     "totalDownload": MessageLookupByLibrary.simpleMessage("Скачано"),
@@ -3161,8 +3157,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "value": MessageLookupByLibrary.simpleMessage("Значение"),
     "verifyCoupon": MessageLookupByLibrary.simpleMessage("Проверить"),
-    "vibrantScheme": MessageLookupByLibrary.simpleMessage("Яркие"),
     "view": MessageLookupByLibrary.simpleMessage("Просмотр"),
+    "vividStyle": MessageLookupByLibrary.simpleMessage("Яркий"),
     "vpnConfigChangeDetected": MessageLookupByLibrary.simpleMessage(
       "Обнаружено изменение конфигурации VPN",
     ),

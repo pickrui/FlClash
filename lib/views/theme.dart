@@ -12,7 +12,6 @@ import 'package:fl_clash/widgets/slider_theme.dart';
 import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/views/theme_preview.dart';
@@ -161,7 +160,7 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
       return state.copyWith(
         primaryColors: defaultPrimaryColors,
         primaryColor: defaultPrimaryColor,
-        schemeVariant: DynamicSchemeVariant.content,
+        colorStyle: ColorStyle.vivid,
       );
     });
   }
@@ -224,26 +223,6 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
     });
   }
 
-  Future<void> _handleChangeSchemeVariant() async {
-    final schemeVariant = ref.read(
-      themeSettingProvider.select((state) => state.schemeVariant),
-    );
-    final value = await globalState.showCommonDialog<DynamicSchemeVariant>(
-      child: OptionsDialog<DynamicSchemeVariant>(
-        title: context.appLocalizations.colorSchemes,
-        options: DynamicSchemeVariant.values,
-        textBuilder: (item) => Intl.message('${item.name}Scheme'),
-        value: schemeVariant,
-      ),
-    );
-    if (value == null || !mounted) {
-      return;
-    }
-    ref.read(themeSettingProvider.notifier).update((state) {
-      return state.copyWith(schemeVariant: value);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
@@ -252,21 +231,19 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
         (state) => (
           primaryColor: state.primaryColor,
           primaryColors: state.primaryColors,
-          schemeVariant: state.schemeVariant,
+          colorStyle: state.colorStyle,
           isDefault:
               state.primaryColor == defaultPrimaryColor &&
               intListEquality.equals(
                 state.primaryColors,
                 defaultPrimaryColors,
               ) &&
-              state.schemeVariant == DynamicSchemeVariant.content,
+              state.colorStyle == ColorStyle.vivid,
         ),
       ),
     );
     final primaryColor = themeColors.primaryColor;
     final primaryColors = [null, ...themeColors.primaryColors];
-    final schemeVariant = themeColors.schemeVariant;
-    final schemeLabel = Intl.message('${schemeVariant.name}Scheme');
     final isEquals = themeColors.isDefault;
 
     return SliverToBoxAdapter(
@@ -284,24 +261,6 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
           ),
           space: 8,
           actions: [
-            if (_removablePrimaryColor == null)
-              Tooltip(
-                message: schemeLabel,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 160),
-                  child: ElasticButton(
-                    child: FilledButton.tonal(
-                      style: _headerButtonStyle,
-                      onPressed: _handleChangeSchemeVariant,
-                      child: Text(
-                        schemeLabel,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
             if (_removablePrimaryColor != null)
               ElasticButton(
                 child: FilledButton(
@@ -328,14 +287,21 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
           ],
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 16),
-            child: _PrimaryColorGrid(
-              colors: primaryColors,
-              selectedColor: primaryColor,
-              removableColor: _removablePrimaryColor,
-              onSelect: _handleSelectColor,
-              onRequestRemove: _markRemovable,
-              onDelete: _handleDel,
-              onAdd: _handleAdd,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 16,
+              children: [
+                _PrimaryColorGrid(
+                  colors: primaryColors,
+                  selectedColor: primaryColor,
+                  removableColor: _removablePrimaryColor,
+                  onSelect: _handleSelectColor,
+                  onRequestRemove: _markRemovable,
+                  onDelete: _handleDel,
+                  onAdd: _handleAdd,
+                ),
+                _ColorStyleItem(value: themeColors.colorStyle),
+              ],
             ),
           ),
         ),
@@ -360,6 +326,45 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
     ref
         .read(themeSettingProvider.notifier)
         .update((state) => state.copyWith(primaryColor: color));
+  }
+}
+
+class _ColorStyleItem extends ConsumerWidget {
+  const _ColorStyleItem({required this.value});
+
+  final ColorStyle value;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    String labelOf(ColorStyle style) => switch (style) {
+      ColorStyle.vivid => appLocalizations.vividStyle,
+      ColorStyle.tinted => appLocalizations.tintedStyle,
+      ColorStyle.soft => appLocalizations.softStyle,
+      ColorStyle.monochrome => appLocalizations.monochromeScheme,
+    };
+    return generateSectionV3(
+      items: [
+        ListItem<ColorStyle>.options(
+          title: Text(appLocalizations.colorStyle),
+          subtitle: Text(labelOf(value)),
+          delegate: OptionsDelegate<ColorStyle>(
+            title: appLocalizations.colorStyle,
+            options: ColorStyle.values,
+            value: value,
+            textBuilder: labelOf,
+            onChanged: (style) {
+              if (style == null) {
+                return;
+              }
+              ref
+                  .read(themeSettingProvider.notifier)
+                  .update((state) => state.copyWith(colorStyle: style));
+            },
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -486,9 +491,9 @@ class _PureBlackItem extends ConsumerWidget {
     final floatingBar = ref.watch(_floatingBarProvider);
     Widget preview(bool pureBlack) => MiniScreenThumb(
       screen: MiniScreen(
-        colorScheme: ref
-            .watch(genColorSchemeProvider(Brightness.dark))
-            .toPureBlack(pureBlack),
+        colorScheme: ref.watch(
+          genColorSchemeProvider(Brightness.dark, pureBlack: pureBlack),
+        ),
         floatingBar: floatingBar,
       ),
     );

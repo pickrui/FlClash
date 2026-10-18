@@ -38,9 +38,10 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.byType(ThemeLivePreview), findsOneWidget);
-      await Scrollable.ensureVisible(
-        tester.element(find.text('Slide')),
-        alignment: 0.5,
+      await tester.scrollUntilVisible(
+        find.text('Slide'),
+        200,
+        scrollable: find.byType(Scrollable).first,
       );
       await tester.pumpAndSettle();
       await tester.tap(find.text('Slide'));

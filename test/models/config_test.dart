@@ -385,6 +385,26 @@ void main() {
       expect(restored.pureBlack, true);
       expect(restored.textScale.scale, 1.5);
     });
+
+    test('reads an old scheme variant as the nearest color style', () {
+      ColorStyle styleOf(String variant) =>
+          ThemeProps.fromJson({'schemeVariant': variant}).colorStyle;
+
+      expect(styleOf('content'), ColorStyle.vivid);
+      expect(styleOf('fidelity'), ColorStyle.vivid);
+      expect(styleOf('vibrant'), ColorStyle.vivid);
+      expect(styleOf('tonalSpot'), ColorStyle.soft);
+      expect(styleOf('neutral'), ColorStyle.soft);
+      expect(styleOf('monochrome'), ColorStyle.monochrome);
+      expect(
+        ThemeProps.fromJson({
+          'schemeVariant': 'monochrome',
+          'colorStyle': 'tinted',
+        }).colorStyle,
+        ColorStyle.tinted,
+      );
+      expect(const ThemeProps().toJson(), isNot(contains('schemeVariant')));
+    });
   });
 
   group('AccessControlProps', () {

@@ -2410,21 +2410,6 @@ class AppLocalizations {
     return Intl.message('Palette', name: 'palette', desc: '', args: []);
   }
 
-  /// `TonalSpot`
-  String get tonalSpotScheme {
-    return Intl.message(
-      'TonalSpot',
-      name: 'tonalSpotScheme',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Fidelity`
-  String get fidelityScheme {
-    return Intl.message('Fidelity', name: 'fidelityScheme', desc: '', args: []);
-  }
-
   /// `Monochrome`
   String get monochromeScheme {
     return Intl.message(
@@ -2435,44 +2420,24 @@ class AppLocalizations {
     );
   }
 
-  /// `Neutral`
-  String get neutralScheme {
-    return Intl.message('Neutral', name: 'neutralScheme', desc: '', args: []);
+  /// `Color style`
+  String get colorStyle {
+    return Intl.message('Color style', name: 'colorStyle', desc: '', args: []);
   }
 
-  /// `Vibrant`
-  String get vibrantScheme {
-    return Intl.message('Vibrant', name: 'vibrantScheme', desc: '', args: []);
+  /// `Vivid`
+  String get vividStyle {
+    return Intl.message('Vivid', name: 'vividStyle', desc: '', args: []);
   }
 
-  /// `Expressive`
-  String get expressiveScheme {
-    return Intl.message(
-      'Expressive',
-      name: 'expressiveScheme',
-      desc: '',
-      args: [],
-    );
+  /// `Tinted`
+  String get tintedStyle {
+    return Intl.message('Tinted', name: 'tintedStyle', desc: '', args: []);
   }
 
-  /// `Content`
-  String get contentScheme {
-    return Intl.message('Content', name: 'contentScheme', desc: '', args: []);
-  }
-
-  /// `Rainbow`
-  String get rainbowScheme {
-    return Intl.message('Rainbow', name: 'rainbowScheme', desc: '', args: []);
-  }
-
-  /// `FruitSalad`
-  String get fruitSaladScheme {
-    return Intl.message(
-      'FruitSalad',
-      name: 'fruitSaladScheme',
-      desc: '',
-      args: [],
-    );
+  /// `Soft`
+  String get softStyle {
+    return Intl.message('Soft', name: 'softStyle', desc: '', args: []);
   }
 
   /// `Developer mode`
