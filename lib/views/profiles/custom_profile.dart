@@ -531,7 +531,7 @@ class _ProfileProviders extends ConsumerWidget {
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.only(top: 24),
-        child: generateSectionV3(
+        child: generateSection(
           title: appLocalizations.proxyProviders,
           items: [
             for (final label in used)
@@ -588,7 +588,7 @@ class _ProfileSettings extends ConsumerWidget {
     );
     String enabled(bool value) =>
         value ? appLocalizations.enabled : appLocalizations.disabled;
-    return generateSectionV3(
+    return generateSection(
       title: appLocalizations.settings,
       items: [
         ListItem.open(
@@ -631,7 +631,7 @@ class _Resources extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
-    return generateSectionV3(
+    return generateSection(
       title: appLocalizations.resources,
       items: [
         ListItem.open(

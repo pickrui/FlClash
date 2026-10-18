@@ -789,7 +789,3 @@ class CommonInputListItem extends StatelessWidget {
     return KeyedSubtree(key: itemKey, child: child);
   }
 }
-
-// The custom profile editor still calls it by this name.
-Widget generateSectionV3({String? title, required Iterable<Widget> items}) =>
-    generateSection(title: title, items: items);

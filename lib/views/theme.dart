@@ -273,13 +273,11 @@ class _PrimaryColorItem extends ConsumerWidget {
                 onDelete: (color) => _handleDelete(context, ref, color),
                 onAdd: () => _handleAdd(context, ref),
               ),
-              generateSectionV3(
+              generateSection(
                 items: [
                   ListItem<ColorStyle>.options(
                     title: Text(appLocalizations.colorStyle),
-                    subtitle: Text(_colorStyleLabel(themeColors.colorStyle)),
                     delegate: OptionsDelegate<ColorStyle>(
-                      title: appLocalizations.colorStyle,
                       options: ColorStyle.values,
                       value: themeColors.colorStyle,
                       textBuilder: _colorStyleLabel,
@@ -879,10 +877,12 @@ class _TextScaleFactorItemState extends ConsumerState<_TextScaleFactorItem> {
           child: Column(
             spacing: 8,
             children: [
-              _SegmentedToggle(
+              SegmentedControl<bool>(
+                segments: [
+                  (false, appLocalizations.followSystem),
+                  (true, appLocalizations.custom),
+                ],
                 value: textScale.enable,
-                offLabel: appLocalizations.followSystem,
-                onLabel: appLocalizations.custom,
                 onChanged: (value) =>
                     _update((state) => state.copyWith(enable: value)),
               ),
@@ -1155,98 +1155,6 @@ class _CustomColorPreview extends ConsumerWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _SegmentedToggle extends StatelessWidget {
-  const _SegmentedToggle({
-    required this.value,
-    required this.offLabel,
-    required this.onLabel,
-    required this.onChanged,
-  });
-
-  static const double _height = 44;
-  static const double _inset = 4;
-
-  final bool value;
-  final String offLabel;
-  final String onLabel;
-  final ValueChanged<bool> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    return Container(
-      height: _height,
-      padding: const EdgeInsets.all(_inset),
-      decoration: ShapeDecoration(
-        color: colorScheme.surfaceContainerHigh,
-        shape: AppShape.full,
-      ),
-      child: Stack(
-        children: [
-          AnimatedAlign(
-            duration: const Duration(milliseconds: 250),
-            curve: Curves.easeOutCubic,
-            alignment: value
-                ? AlignmentDirectional.centerEnd
-                : AlignmentDirectional.centerStart,
-            child: FractionallySizedBox(
-              widthFactor: 0.5,
-              heightFactor: 1,
-              child: DecoratedBox(
-                decoration: ShapeDecoration(
-                  color: colorScheme.secondaryContainer,
-                  shape: AppShape.full,
-                ),
-              ),
-            ),
-          ),
-          Row(
-            children: [
-              for (final (option, label) in [
-                (false, offLabel),
-                (true, onLabel),
-              ])
-                Expanded(
-                  child: Semantics(
-                    selected: option == value,
-                    button: true,
-                    child: Material(
-                      type: MaterialType.transparency,
-                      shape: AppShape.full,
-                      clipBehavior: Clip.antiAlias,
-                      child: InkWell(
-                        customBorder: AppShape.full,
-                        onTap: option == value ? null : () => onChanged(option),
-                        child: Center(
-                          child: AnimatedDefaultTextStyle(
-                            duration: const Duration(milliseconds: 200),
-                            style: context.textTheme.labelLarge!.copyWith(
-                              color: option == value
-                                  ? colorScheme.onSecondaryContainer
-                                  : colorScheme.onSurfaceVariant,
-                              fontWeight: option == value
-                                  ? FontWeight.w600
-                                  : FontWeight.w500,
-                            ),
-                            child: Text(
-                              label,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ],
       ),
     );
   }

@@ -10,7 +10,6 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/state.dart';
-import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/liquid_glass.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/widgets/widgets.dart';
@@ -51,7 +50,7 @@ class PreviewChoiceGroup<T> extends StatelessWidget {
         InfoHeader(info: info),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-          child: generateSectionV3(
+          child: generateSection(
             items: [
               for (final choice in choices)
                 DecorationListItem(
@@ -59,12 +58,7 @@ class PreviewChoiceGroup<T> extends StatelessWidget {
                   title: Text(choice.label),
                   isSelected: choice.value == value,
                   trailing: choice.value == value
-                      ? GlyphIcon(
-                          AppGlyphs.check,
-                          size: 24,
-                          fill: 1,
-                          color: context.colorScheme.primary,
-                        )
+                      ? const SelectionCheck()
                       : null,
                   onPressed: () => onChanged(choice.value),
                 ),

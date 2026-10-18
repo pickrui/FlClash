@@ -274,7 +274,7 @@ class _SniffView extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16)
             .copyWith(top: context.contentTopPadding, bottom: 16),
         children: [
-          generateSectionV3(
+          generateSection(
             items: [
               ConfigListEditItem(
                 title: (l) => l.ports,
