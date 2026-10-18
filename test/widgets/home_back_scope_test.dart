@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/pages/home.dart';
 import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/widgets/pop_scope.dart';
+import 'package:fl_clash/ui/pop_scope.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';

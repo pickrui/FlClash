@@ -8,12 +8,13 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/views/profiles/add.dart';
-import 'package:fl_clash/widgets/pop_scope.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../helpers/test_app.dart';
+
+import 'package:fl_clash/widgets/system_back_block.dart';
 
 class _ProfileAction extends ProfileAction {
   int imports = 0;

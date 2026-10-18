@@ -5,9 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:ui';
 
+import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/inherited.dart';
-import 'package:fl_clash/ui/icons/app_glyphs.dart';
-import 'package:fl_clash/ui/icons/glyph_icon.dart';
 import 'package:material_ui/material_ui.dart';
 
 class EffectGestureDetector extends StatefulWidget {
@@ -116,16 +115,17 @@ Widget commonProxyDecorator(
   int index,
   Animation<double> animation,
 ) {
-  return ProxyDecoratorProvider(
-    isProxyDecorator: true,
-    child: AnimatedBuilder(
-      animation: animation,
-      builder: (_, Widget? child) {
-        final double animValue = Curves.easeInOut.transform(animation.value);
-        final double scale = lerpDouble(1, 1.02, animValue)!;
-        return Transform.scale(scale: scale, child: child);
-      },
-      child: child,
-    ),
+  return AnimatedBuilder(
+    animation: animation,
+    builder: (_, Widget? child) {
+      final double animValue = Curves.easeInOut.transform(animation.value);
+      final double scale = lerpDouble(1, 1.02, animValue)!;
+      return ProxyDecoratorProvider(
+        isProxyDecorator: true,
+        lift: animValue,
+        child: Transform.scale(scale: scale, child: child),
+      );
+    },
+    child: child,
   );
 }

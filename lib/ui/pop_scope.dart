@@ -5,16 +5,26 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
-import 'package:fl_clash/providers/action.dart';
 import 'package:flutter/widgets.dart';
 
 import 'package:fl_clash/ui/inherited.dart';
 
 class CommonPopScope extends StatefulWidget {
   final Widget child;
-  final FutureOr<bool> Function(BuildContext context)? onPop;
 
-  const CommonPopScope({super.key, required this.child, this.onPop});
+  /// Any handler vetoes the pop up front, which also turns off the drag back,
+  /// so pass one only while there is something to intercept.
+  /// Any handler vetoes the pop up front, which also turns off the drag back,
+  /// so pass one only while there is something to intercept.
+  final FutureOr<bool> Function(BuildContext context)? onPop;
+  final FutureOr<void> Function()? onPopSuccess;
+
+  const CommonPopScope({
+    super.key,
+    required this.child,
+    this.onPop,
+    this.onPopSuccess,
+  });
 
   @override
   State<CommonPopScope> createState() => _CommonPopScopeState();
@@ -42,6 +52,7 @@ class _CommonPopScopeState extends State<CommonPopScope> {
         return;
       }
       Navigator.of(context).pop();
+      await widget.onPopSuccess?.call();
     } catch (error, stackTrace) {
       FlutterError.reportError(
         FlutterErrorDetails(
@@ -63,46 +74,6 @@ class _CommonPopScopeState extends State<CommonPopScope> {
       onPopInvokedWithResult: widget.onPop == null ? null : _handlePop,
       child: widget.child,
     );
-  }
-}
-
-class SystemBackBlock extends StatefulWidget {
-  final Widget child;
-
-  const SystemBackBlock({super.key, required this.child});
-
-  @override
-  State<SystemBackBlock> createState() => _SystemBackBlockState();
-}
-
-class _SystemBackBlockState extends State<SystemBackBlock> {
-  late final BackBlockAction _action;
-  bool _blocked = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _action = context.backBlockAction;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      _blocked = true;
-      _action.backBlock();
-    });
-  }
-
-  @override
-  void dispose() {
-    if (_blocked) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _action.unBackBlock();
-      });
-    }
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.child;
   }
 }
 

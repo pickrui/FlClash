@@ -13,7 +13,8 @@ import 'package:fl_clash/state.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
-import 'fade_box.dart';
+import 'package:fl_clash/ui/fade_box.dart';
+
 import 'scaffold.dart' show appBarActionSpace;
 import 'text.dart';
 

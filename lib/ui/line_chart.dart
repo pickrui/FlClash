@@ -5,7 +5,6 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:math' as math;
 
-import 'package:fl_clash/common/common.dart';
 import 'package:material_ui/material_ui.dart';
 
 class LineChart extends StatefulWidget {
@@ -16,6 +15,7 @@ class LineChart extends StatefulWidget {
     required this.capacity,
     required this.minScale,
     required this.color,
+    required this.baselineRatio,
   }) : assert(capacity > 1),
        assert(minScale > 0);
 
@@ -28,6 +28,9 @@ class LineChart extends StatefulWidget {
   final double minScale;
 
   final Color color;
+
+  /// Where the zero line sits, as a share of the height from the top.
+  final double baselineRatio;
 
   @override
   State<LineChart> createState() => _LineChartState();
@@ -69,6 +72,7 @@ class _LineChartState extends State<LineChart> {
             capacity: widget.capacity,
             minScale: widget.minScale,
             color: widget.color,
+            baselineRatio: widget.baselineRatio,
           ),
         ),
       ),
@@ -140,6 +144,7 @@ class _LineChartPainter extends CustomPainter {
     required this.capacity,
     required this.minScale,
     required this.color,
+    required this.baselineRatio,
   }) : _strokePaint = Paint()
          ..color = color
          ..strokeWidth = _strokeWidth
@@ -148,20 +153,20 @@ class _LineChartPainter extends CustomPainter {
          ..style = PaintingStyle.stroke;
 
   static const _strokeWidth = 2.0;
-
-  static const _baselineRatio = 0.7;
+  static const _fillOpacity = 0.14;
 
   final _Series series;
   final int capacity;
   final double minScale;
   final Color color;
+  final double baselineRatio;
 
   final Paint _strokePaint;
 
   @override
   void paint(Canvas canvas, Size size) {
     final step = size.width / (capacity - 1);
-    final baseline = size.height * _baselineRatio;
+    final baseline = size.height * baselineRatio;
     final heights = series.heights;
     final slopes = _Series.slopesOf(heights);
     final firstX = size.width - (heights.length - 1) * step;
@@ -196,11 +201,7 @@ class _LineChartPainter extends CustomPainter {
       ..lineTo(firstX, size.height)
       ..close();
     final fillPaint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [color.opacity38, color.opacity10],
-      ).createShader(Offset.zero & size);
+      ..color = color.withValues(alpha: color.a * _fillOpacity);
     canvas
       ..save()
       ..clipRect(Offset.zero & size)
@@ -214,6 +215,7 @@ class _LineChartPainter extends CustomPainter {
     return oldDelegate.series != series ||
         oldDelegate.capacity != capacity ||
         oldDelegate.minScale != minScale ||
-        oldDelegate.color != color;
+        oldDelegate.color != color ||
+        oldDelegate.baselineRatio != baselineRatio;
   }
 }

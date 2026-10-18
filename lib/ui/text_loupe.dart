@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:math' as math;
 
-import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/ui/shape.dart';
 import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:material_ui/material_ui.dart';
 
@@ -25,14 +25,12 @@ class TextLoupe extends StatefulWidget {
   final MagnifierController controller;
   final ValueListenable<MagnifierInfo> magnifierInfo;
   final Color borderColor;
-  final double magnificationScale;
 
   const TextLoupe({
     super.key,
     required this.controller,
     required this.magnifierInfo,
     required this.borderColor,
-    this.magnificationScale = 1.25,
   });
 
   @override
@@ -126,7 +124,7 @@ class _TextLoupeState extends State<TextLoupe>
             offset: Offset(0, _loupeGapAboveLineCenter * (1 - t)),
             child: RawMagnifier(
               size: _loupeSize,
-              magnificationScale: widget.magnificationScale,
+              magnificationScale: 1.25,
               focalPointOffset: Offset(
                 0,
                 _loupeSize.height / 2 +

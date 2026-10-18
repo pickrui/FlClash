@@ -13,7 +13,7 @@ import 'package:fl_clash/common/string.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/plugins/app.dart';
 import 'package:fl_clash/providers/action.dart';
-import 'package:fl_clash/widgets/activate_box.dart';
+import 'package:fl_clash/ui/activate_box.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 

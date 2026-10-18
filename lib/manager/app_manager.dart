@@ -12,7 +12,7 @@ import 'package:fl_clash/common/periodic_task_runner.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/icons/navigation_glyph.dart';
 import 'package:fl_clash/widgets/sidebar.dart';
-import 'package:fl_clash/widgets/animated_visibility.dart';
+import 'package:fl_clash/ui/animated_visibility.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/foundation.dart';

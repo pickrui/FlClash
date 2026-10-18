@@ -17,7 +17,7 @@ import 'package:fl_clash/ui/drag_back.dart';
 import 'package:fl_clash/ui/navigator_resizable.dart';
 import 'package:fl_clash/ui/page_transition.dart';
 import 'package:fl_clash/ui/inherited.dart';
-import 'package:fl_clash/widgets/pop_scope.dart';
+import 'package:fl_clash/ui/pop_scope.dart';
 import 'package:fl_clash/widgets/sheet.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:material_ui/material_ui.dart';

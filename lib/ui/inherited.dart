@@ -129,10 +129,12 @@ class ItemPositionProvider extends InheritedWidget {
 
 class ProxyDecoratorProvider extends InheritedWidget {
   final bool isProxyDecorator;
+  final double lift;
 
   const ProxyDecoratorProvider({
     super.key,
     required this.isProxyDecorator,
+    required this.lift,
     required super.child,
   });
 
@@ -142,7 +144,7 @@ class ProxyDecoratorProvider extends InheritedWidget {
 
   @override
   bool updateShouldNotify(ProxyDecoratorProvider oldWidget) =>
-      isProxyDecorator != oldWidget.isProxyDecorator;
+      isProxyDecorator != oldWidget.isProxyDecorator || lift != oldWidget.lift;
 }
 
 class SheetProvider<T> extends InheritedWidget {

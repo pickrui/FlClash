@@ -7,8 +7,9 @@ import 'dart:async';
 
 import 'package:fl_clash/enum/enum.dart';
 
-import 'constant.dart';
 import 'print.dart';
+
+import 'package:fl_clash/ui/metrics.dart';
 
 void _invokeScheduledCallback(
   Object tag,

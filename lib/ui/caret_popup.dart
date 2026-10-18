@@ -7,33 +7,30 @@ import 'dart:math' as math;
 
 import 'package:material_ui/material_ui.dart';
 
+const _maxWidth = 400.0;
+const _maxHeight = 400.0;
+const _gap = 4.0;
+const _margin = 8.0;
+
 /// Opens a popup below the caret line when it fits there or that side has
 /// more room, and above it otherwise, measuring the popup rather than
 /// estimating its height, inside the area it is laid over less [padding].
 class CaretPopupLayout extends SingleChildLayoutDelegate {
   final Rect caretRect;
   final EdgeInsets padding;
-  final double maxWidth;
-  final double maxHeight;
-  final double gap;
-  final double margin;
 
   const CaretPopupLayout({
     required this.caretRect,
     this.padding = EdgeInsets.zero,
-    this.maxWidth = 400,
-    this.maxHeight = 400,
-    this.gap = 4,
-    this.margin = 8,
   });
 
-  double get _below => caretRect.bottom + gap;
+  double get _below => caretRect.bottom + _gap;
 
-  double get _above => caretRect.top - gap;
+  double get _above => caretRect.top - _gap;
 
-  double get _top => padding.top + margin;
+  double get _top => padding.top + _margin;
 
-  double _bottom(double height) => height - padding.bottom - margin;
+  double _bottom(double height) => height - padding.bottom - _margin;
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
@@ -43,10 +40,10 @@ class CaretPopupLayout extends SingleChildLayoutDelegate {
     );
     return BoxConstraints(
       maxWidth: math.min(
-        maxWidth,
-        math.max(0.0, constraints.maxWidth - padding.horizontal - margin * 2),
+        _maxWidth,
+        math.max(0.0, constraints.maxWidth - padding.horizontal - _margin * 2),
       ),
-      maxHeight: room.clamp(0.0, maxHeight),
+      maxHeight: room.clamp(0.0, _maxHeight),
     );
   }
 
@@ -61,8 +58,8 @@ class CaretPopupLayout extends SingleChildLayoutDelegate {
       _clampInto(
         caretRect.left,
         childSize.width,
-        padding.left + margin,
-        size.width - padding.right - margin,
+        padding.left + _margin,
+        size.width - padding.right - _margin,
       ),
       _clampInto(top, childSize.height, _top, _bottom(size.height)),
     );
@@ -73,11 +70,6 @@ class CaretPopupLayout extends SingleChildLayoutDelegate {
 
   @override
   bool shouldRelayout(CaretPopupLayout oldDelegate) {
-    return caretRect != oldDelegate.caretRect ||
-        padding != oldDelegate.padding ||
-        maxWidth != oldDelegate.maxWidth ||
-        maxHeight != oldDelegate.maxHeight ||
-        gap != oldDelegate.gap ||
-        margin != oldDelegate.margin;
+    return caretRect != oldDelegate.caretRect || padding != oldDelegate.padding;
   }
 }

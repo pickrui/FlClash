@@ -14,7 +14,7 @@ import 'package:fl_clash/widgets/record_table.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fl_clash/widgets/keyed_animated_list.dart';
+import 'package:fl_clash/ui/keyed_animated_list.dart';
 
 import 'package:fl_clash/features/connection/tracker_speed_ranker.dart';
 import 'package:fl_clash/features/connection/connection_feed.dart';

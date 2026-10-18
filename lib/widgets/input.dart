@@ -14,11 +14,17 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'entry_dialog.dart';
+
 import 'package:fl_clash/ui/inherited.dart';
+
 import 'null_status.dart';
-import 'pop_scope.dart';
+
+import 'package:fl_clash/ui/pop_scope.dart';
+
 import 'scaffold.dart';
-import 'effect.dart';
+
+import 'package:fl_clash/ui/effect.dart';
+
 import 'list.dart';
 export 'input_dialog.dart';
 export 'options_dialog.dart';

@@ -72,6 +72,7 @@ class NetworkSpeed extends StatelessWidget {
                         capacity: traffics.maxLength,
                         minScale: _minSpeedScale,
                         color: context.colorScheme.primary,
+                        baselineRatio: 0.7,
                       ),
                     ),
                   ),

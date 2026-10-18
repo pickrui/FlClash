@@ -729,7 +729,11 @@ class CommonInputListItem extends StatelessWidget {
       child = ItemPositionProvider(position: position, child: child);
     }
     if (isDecorator) {
-      child = ProxyDecoratorProvider(isProxyDecorator: true, child: child);
+      child = ProxyDecoratorProvider(
+        isProxyDecorator: true,
+        lift: 1,
+        child: child,
+      );
     }
     return KeyedSubtree(key: itemKey, child: child);
   }

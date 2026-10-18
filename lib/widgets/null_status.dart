@@ -11,7 +11,7 @@ import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/icons/glyph.dart';
 import 'package:fl_clash/ui/icons/glyph_painter.dart';
 import 'package:fl_clash/ui/icons/app_glyphs.dart';
-import 'package:fl_clash/widgets/fade_box.dart';
+import 'package:fl_clash/ui/fade_box.dart';
 import 'package:material_new_shapes/material_new_shapes.dart';
 import 'package:material_ui/material_ui.dart';
 
