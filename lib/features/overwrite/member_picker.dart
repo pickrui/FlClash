@@ -7,6 +7,7 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/widgets/dismissible.dart';
+import 'package:fl_clash/widgets/effect.dart';
 import 'package:fl_clash/widgets/null_status.dart';
 import 'package:fl_clash/widgets/super_reorderable_list.dart';
 import 'package:material_ui/material_ui.dart';
@@ -121,12 +122,17 @@ class _ProxyMemberPickerState extends State<ProxyMemberPicker> {
                     _selected.insert(newIndex, name);
                   });
                 },
-                proxyDecorator: (child, _, _) => Material(
-                  elevation: 4,
-                  color: context.colorScheme.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(16),
-                  child: child,
-                ),
+                proxyDecorator: (child, index, animation) =>
+                    commonProxyDecorator(
+                      Material(
+                        elevation: 4,
+                        color: context.colorScheme.surfaceContainerHigh,
+                        borderRadius: BorderRadius.circular(16),
+                        child: child,
+                      ),
+                      index,
+                      animation,
+                    ),
                 itemBuilder: (context, index) {
                   final name = _selected[index];
                   final removing = _removing.contains(name);

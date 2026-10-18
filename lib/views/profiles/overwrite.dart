@@ -617,6 +617,7 @@ class _StandardContentState extends ConsumerState<_StandardContent> {
                   ),
                 );
               },
+              proxyDecorator: commonProxyDecorator,
               onReorderItem: ref
                   .read(profileAddedRulesProvider(widget.profileId).notifier)
                   .order,

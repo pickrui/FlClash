@@ -707,6 +707,7 @@ class _ProfileProxyChainsContentState
                 ),
               );
             },
+            proxyDecorator: commonProxyDecorator,
             onReorderItem: _handleProxyChainReorder,
           ),
         ] else if (widget.showEmptyStatus)

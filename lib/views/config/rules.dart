@@ -183,6 +183,7 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
                       ),
                     );
                   },
+                  proxyDecorator: commonProxyDecorator,
                   onReorderItem: (oldIndex, newIndex) {
                     if (!searching) {
                       ref

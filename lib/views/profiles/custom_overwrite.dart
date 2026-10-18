@@ -614,6 +614,11 @@ class _CustomProxyGroupsViewState extends ConsumerState<CustomProxyGroupsView> {
         child: ReorderableListView.builder(
           padding: EdgeInsets.only(top: context.contentTopPadding, bottom: 88),
           buildDefaultDragHandles: false,
+          proxyDecorator: (child, index, animation) => commonProxyDecorator(
+            Material(elevation: 6, child: child),
+            index,
+            animation,
+          ),
           itemCount: visible.length,
           itemBuilder: (context, index) {
             final (sourceIndex, group) = visible[index];
@@ -900,6 +905,11 @@ class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
         child: ReorderableListView.builder(
           padding: EdgeInsets.only(top: context.contentTopPadding, bottom: 88),
           buildDefaultDragHandles: false,
+          proxyDecorator: (child, index, animation) => commonProxyDecorator(
+            Material(elevation: 6, child: child),
+            index,
+            animation,
+          ),
           itemCount: visible.length,
           itemBuilder: (context, index) {
             final rule = visible[index];
