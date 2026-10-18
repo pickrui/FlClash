@@ -107,7 +107,7 @@ func parseAndValidateConfigData(data []byte) error {
 }
 
 func prepareValidationConfig(data []byte) (*config.RawConfig, error) {
-	rawConfig, err := config.UnmarshalRawConfig(normalizeConfigShortIds(data))
+	rawConfig, err := unmarshalRawConfig(data)
 	if err != nil {
 		return nil, err
 	}

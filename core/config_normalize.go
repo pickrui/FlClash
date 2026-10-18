@@ -7,22 +7,27 @@
 package main
 
 import (
+	"bytes"
+
+	"github.com/metacubex/mihomo/config"
 	"go.yaml.in/yaml/v3"
 )
 
-func normalizeConfigShortIds(data []byte) []byte {
+// mihomo decodes an unquoted REALITY short-id as a YAML number (0123 is 83);
+// the scalar keeps its literal text, so retagging it restores the id.
+func unmarshalRawConfig(data []byte) (*config.RawConfig, error) {
+	if !bytes.Contains(data, []byte("short-id")) {
+		return config.UnmarshalRawConfig(data)
+	}
 	var root yaml.Node
-	if err := yaml.Unmarshal(data, &root); err != nil {
-		return data
+	if yaml.Unmarshal(data, &root) != nil || !retagShortIds(&root, "") {
+		return config.UnmarshalRawConfig(data)
 	}
-	if !retagShortIds(&root, "") {
-		return data
+	rawConfig := config.DefaultRawConfig()
+	if err := root.Decode(rawConfig); err != nil {
+		return nil, err
 	}
-	out, err := yaml.Marshal(&root)
-	if err != nil {
-		return data
-	}
-	return out
+	return rawConfig, nil
 }
 
 func retagShortIds(node *yaml.Node, parentKey string) bool {
@@ -43,7 +48,6 @@ func retagShortIds(node *yaml.Node, parentKey string) bool {
 				value.Kind == yaml.ScalarNode &&
 				(value.Tag == "!!int" || value.Tag == "!!float") {
 				value.Tag = "!!str"
-				value.Style = yaml.DoubleQuotedStyle
 				changed = true
 				continue
 			}

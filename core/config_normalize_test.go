@@ -7,14 +7,26 @@
 package main
 
 import (
-	"strings"
+	"reflect"
 	"testing"
 
-	"go.yaml.in/yaml/v3"
+	"github.com/metacubex/mihomo/config"
 )
 
-func TestNormalizeConfigShortIdsRetagsNumericScalars(t *testing.T) {
-	input := []byte(`proxies:
+func realityShortID(t *testing.T, raw *config.RawConfig, index int) any {
+	t.Helper()
+	opts, ok := raw.Proxy[index]["reality-opts"].(map[string]any)
+	if !ok {
+		t.Fatalf("proxy %d has no reality-opts: %v", index, raw.Proxy[index])
+	}
+	return opts["short-id"]
+}
+
+func TestUnmarshalRawConfigRetagsNumericShortIds(t *testing.T) {
+	input := []byte(`mixed-port: 7890
+dns:
+  enable: true
+proxies:
   - name: a
     type: vless
     reality-opts:
@@ -29,31 +41,26 @@ func TestNormalizeConfigShortIdsRetagsNumericScalars(t *testing.T) {
     reality-opts:
       short-id: 1e2
 `)
-	out := normalizeConfigShortIds(input)
-	var parsed struct {
-		Proxies []struct {
-			RealityOpts struct {
-				ShortID string `yaml:"short-id"`
-			} `yaml:"reality-opts"`
-		} `yaml:"proxies"`
+	raw, err := unmarshalRawConfig(input)
+	if err != nil {
+		t.Fatal(err)
 	}
-	if err := yaml.Unmarshal(out, &parsed); err != nil {
-		t.Fatalf("normalized output is not valid yaml: %v", err)
+	plain, err := config.UnmarshalRawConfig(input)
+	if err != nil {
+		t.Fatal(err)
 	}
-	got := []string{
-		parsed.Proxies[0].RealityOpts.ShortID,
-		parsed.Proxies[1].RealityOpts.ShortID,
-		parsed.Proxies[2].RealityOpts.ShortID,
-	}
-	want := []string{"0123", "123456", "1e2"}
-	for i := range want {
-		if got[i] != want[i] {
-			t.Fatalf("short-id[%d] = %q, want %q", i, got[i], want[i])
+	for i, want := range []string{"0123", "123456", "1e2"} {
+		if got := realityShortID(t, raw, i); got != want {
+			t.Fatalf("short-id[%d] = %#v, want %q", i, got, want)
 		}
+		plain.Proxy[i]["reality-opts"].(map[string]any)["short-id"] = want
+	}
+	if !reflect.DeepEqual(raw, plain) {
+		t.Fatalf("got %+v, want the plain decode apart from the short-ids %+v", raw, plain)
 	}
 }
 
-func TestNormalizeConfigShortIdsLeavesOtherValuesAlone(t *testing.T) {
+func TestUnmarshalRawConfigLeavesOtherValuesAlone(t *testing.T) {
 	input := []byte(`mixed-port: 7890
 proxies:
   - name: a
@@ -63,25 +70,37 @@ proxies:
       public-key: pk
       short-id: abcd12
 `)
-	out := normalizeConfigShortIds(input)
-	if string(out) != string(input) {
-		t.Fatalf("expected untouched config to be returned as-is, got:\n%s", out)
+	raw, err := unmarshalRawConfig(input)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want, err := config.UnmarshalRawConfig(input)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(raw, want) {
+		t.Fatalf("got %+v, want the plain decode %+v", raw, want)
 	}
 }
 
-func TestNormalizeConfigShortIdsIgnoresInvalidYaml(t *testing.T) {
-	input := []byte("proxies: [::bad")
-	if got := normalizeConfigShortIds(input); string(got) != string(input) {
-		t.Fatalf("invalid yaml should be returned unchanged")
+func TestUnmarshalRawConfigReportsInvalidYaml(t *testing.T) {
+	for _, input := range []string{"proxies: [::bad", "proxies: [{reality-opts: {short-id: 0123}"} {
+		if _, err := unmarshalRawConfig([]byte(input)); err == nil {
+			t.Fatalf("%q decoded without an error", input)
+		}
 	}
 }
 
-func TestNormalizeConfigShortIdsIgnoresShortIdOutsideRealityOpts(t *testing.T) {
-	input := []byte(`some-map:
-  short-id: 1234
-`)
-	out := normalizeConfigShortIds(input)
-	if strings.Contains(string(out), `"1234"`) {
-		t.Fatalf("short-id outside reality-opts should not be retagged, got:\n%s", out)
+func TestUnmarshalRawConfigIgnoresShortIdOutsideRealityOpts(t *testing.T) {
+	raw, err := unmarshalRawConfig([]byte(`proxies:
+  - name: a
+    type: vless
+    short-id: 1234
+`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := raw.Proxy[0]["short-id"]; got != 1234 {
+		t.Fatalf("short-id outside reality-opts = %#v, want the number 1234", got)
 	}
 }
