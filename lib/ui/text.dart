@@ -34,6 +34,26 @@ class TooltipText extends StatelessWidget {
   }
 }
 
+class TooltipLabel extends StatelessWidget {
+  final String text;
+  final TextStyle? style;
+  final int maxLines;
+
+  const TooltipLabel(this.text, {super.key, this.style, this.maxLines = 2});
+
+  @override
+  Widget build(BuildContext context) {
+    return TooltipText(
+      text: Text(
+        text,
+        maxLines: maxLines,
+        overflow: TextOverflow.ellipsis,
+        style: DefaultTextStyle.of(context).style.merge(style),
+      ),
+    );
+  }
+}
+
 class EmojiText extends StatelessWidget {
   final String text;
   final TextStyle? style;

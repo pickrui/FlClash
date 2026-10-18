@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/navigator.dart';
-import 'package:fl_clash/features/overwrite/overwrite_selection_sheet.dart';
+import 'package:fl_clash/features/form/selection_sheet.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
@@ -497,14 +497,14 @@ Future<void> showOverrideAddSheet<K extends Enum, M>(
   final remaining = spec.values.where((key) => !added.contains(key));
   final key = await showSheet<K>(
     context: context,
-    builder: (context, _) => OverwriteSelectionSheet<K>(
+    builder: (context, _) => SelectionSheet<K>(
       title: spec.target.addEntry(appLocalizations),
       sections: [
         for (final (label, keys) in spec.sectionsOf(
           appLocalizations,
           remaining,
         ))
-          OverwriteSelectionSection(
+          SelectionSection(
             label: label,
             items: keys,
             subtitleBuilder: (context, key) =>
