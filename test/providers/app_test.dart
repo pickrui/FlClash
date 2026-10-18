@@ -9,6 +9,7 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/constant.dart';
+import 'package:fl_clash/common/fixed.dart';
 import 'package:fl_clash/common/request.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
@@ -95,6 +96,45 @@ void main() {
 
       expect(container.read(providersProvider).single, provider);
     });
+  });
+
+  test('Requests.updateTraffic updates the requests it names', () {
+    TrackerInfo request(String id) => TrackerInfo(
+      id: id,
+      upload: 460,
+      start: DateTime.utc(2026),
+      metadata: const Metadata(network: 'tcp', host: 'example.com'),
+      chains: const ['Proxy'],
+      rule: 'DOMAIN',
+      rulePayload: 'example.com',
+    );
+    final notifier = container.read(requestsProvider.notifier);
+    notifier.value = FixedList(3);
+    notifier.addRequest(request('a'));
+    notifier.addRequest(request('b'));
+    var notifications = 0;
+    final subscription = container.listen(
+      requestsProvider.select((state) => state.revision),
+      (_, _) => notifications++,
+    );
+    addTearDown(subscription.close);
+
+    notifier.updateTraffic({'gone': (upload: 1, download: 1)});
+    expect(notifications, 0);
+
+    notifier.updateTraffic({
+      'a': (upload: 520, download: 257835),
+      'gone': (upload: 1, download: 1),
+    });
+
+    expect(notifications, 1);
+    expect(
+      container
+          .read(requestsProvider)
+          .list
+          .map((request) => (request.id, request.upload, request.download)),
+      [('a', 520, 257835), ('b', 460, 0)],
+    );
   });
 
   test('view width follows the current window size', () {

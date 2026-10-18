@@ -128,6 +128,7 @@ enum CoreEventType {
   log,
   delay,
   request,
+  requestTraffic,
   connections,
   dns,
   loaded,

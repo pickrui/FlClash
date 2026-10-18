@@ -117,6 +117,8 @@ abstract class TrackerInfo with _$TrackerInfo {
       _$TrackerInfoFromJson(json);
 }
 
+typedef RequestTraffic = ({int upload, int download});
+
 extension TrackerInfoExt on TrackerInfo {
   bool get shouldSuppressOutput => hasCloudDestination(Secrets.isCloudHost);
 

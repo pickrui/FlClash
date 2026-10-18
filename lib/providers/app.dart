@@ -85,6 +85,28 @@ class Requests extends _$Requests with NotifierMixin<FixedList<TrackerInfo>> {
     if (value.shouldSuppressOutput) return;
     state = state.copyWith()..add(value);
   }
+
+  void updateTraffic(Map<String, RequestTraffic> traffic) {
+    final pending = Map.of(traffic);
+    final updated = <int, TrackerInfo>{};
+    for (
+      var index = state.length - 1;
+      index >= 0 && pending.isNotEmpty;
+      index--
+    ) {
+      final request = state[index];
+      final item = pending.remove(request.id);
+      if (item != null) {
+        updated[index] = request.copyWith(
+          upload: item.upload,
+          download: item.download,
+        );
+      }
+    }
+    if (updated.isNotEmpty) {
+      state = state.copyWith()..replace(updated);
+    }
+  }
 }
 
 @Riverpod(keepAlive: true)

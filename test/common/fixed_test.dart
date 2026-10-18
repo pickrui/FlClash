@@ -47,6 +47,24 @@ void main() {
       expect(list.weight, 3);
     });
 
+    test('replace keeps the weight and revision of the items it swaps', () {
+      final original = FixedList<String>(
+        3,
+        maxWeight: 8,
+        weightOf: (value) => value.length,
+        list: ['a', 'bb', 'c'],
+      );
+      final copy = original.copyWith()..replace({0: 'aaa', 2: 'cc'});
+      expect(copy.list, ['aaa', 'bb', 'cc']);
+      expect(copy.weight, 7);
+      expect(copy.revision, original.revision + 1);
+      expect(original.list, ['a', 'bb', 'c']);
+      expect(original.weight, 4);
+      copy.replace({1: 'bbbb'});
+      expect(copy.list, ['bbbb', 'cc']);
+      expect(copy.weight, 6);
+    });
+
     test('respects maxLength on creation', () {
       final list = FixedList(3, list: [1, 2, 3, 4, 5]);
       expect(list.length, 3);

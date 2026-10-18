@@ -33,6 +33,8 @@ abstract mixin class CoreEventListener {
 
   void onRequest(TrackerInfo connection) {}
 
+  void onRequestTraffic(Map<String, RequestTraffic> traffic) {}
+
   void onConnections(Map<String, dynamic> delta) {}
 
   void onDnsQuery(DnsQuery query) {}
@@ -75,6 +77,15 @@ class CoreEventManager {
                   break;
                 case CoreEventType.request:
                   listener.onRequest(TrackerInfo.fromJson(event.data));
+                  break;
+                case CoreEventType.requestTraffic:
+                  listener.onRequestTraffic({
+                    for (final Map item in event.data as List)
+                      item['id'] as String: (
+                        upload: (item['upload'] as num).toInt(),
+                        download: (item['download'] as num).toInt(),
+                      ),
+                  });
                   break;
                 case CoreEventType.connections:
                   listener.onConnections(

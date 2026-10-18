@@ -710,6 +710,9 @@ func init() {
 	})
 	statistic.DefaultRequestNotify = func(c statistic.Tracker) {
 		sendMessage(requestMessage(c))
+		if hasEventListener() {
+			watchRequestTraffic(c)
+		}
 	}
 	executor.DefaultProviderLoadedHook = func(providerName string) {
 		scheduleReclaimOwnership()

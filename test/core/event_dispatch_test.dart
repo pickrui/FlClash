@@ -46,6 +46,26 @@ void main() {
     expect(calls, ['first', 'remaining', 'remaining', 'added']);
   });
 
+  test('the traffic of requests reaches the listeners by id', () async {
+    final received = <Map<String, RequestTraffic>>[];
+    final listener = _Listener(requestTraffic: received.add);
+    coreEventManager.addListener(listener);
+    addTearDown(() => coreEventManager.removeListener(listener));
+
+    coreEventsFromData({
+      'type': 'requestTraffic',
+      'data': [
+        {'id': 'a', 'upload': 460, 'download': 257835},
+        {'id': 'b', 'upload': 0, 'download': 12},
+      ],
+    }).forEach(coreEventManager.sendEvent);
+    await pumpEventQueue();
+
+    expect(received, [
+      {'a': (upload: 460, download: 257835), 'b': (upload: 0, download: 12)},
+    ]);
+  });
+
   test(
     'unregistered listeners are skipped while crash cleanup awaits',
     () async {
@@ -83,13 +103,18 @@ void main() {
 }
 
 class _Listener with CoreEventListener {
-  _Listener({this.loaded, this.crash});
+  _Listener({this.loaded, this.crash, this.requestTraffic});
   final void Function(String)? loaded;
   final FutureOr<void> Function(String)? crash;
+  final void Function(Map<String, RequestTraffic>)? requestTraffic;
 
   @override
   void onLoaded(String providerName) => loaded?.call(providerName);
 
   @override
   FutureOr<void> onCrash(String message) => crash?.call(message);
+
+  @override
+  void onRequestTraffic(Map<String, RequestTraffic> traffic) =>
+      requestTraffic?.call(traffic);
 }

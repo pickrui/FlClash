@@ -33,6 +33,18 @@ class FixedList<T> {
     _revision++;
   }
 
+  void replace(Map<int, T> items) {
+    final weightOf = this.weightOf;
+    items.forEach((index, item) {
+      if (weightOf != null) {
+        _weight += weightOf(item) - weightOf(_list[index]);
+      }
+      _list[index] = item;
+    });
+    _trim();
+    _revision++;
+  }
+
   void _trim() {
     var remove = 0;
     while (remove < _list.length &&

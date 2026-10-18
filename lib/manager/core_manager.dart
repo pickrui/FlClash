@@ -116,6 +116,12 @@ class _CoreManagerState extends ConsumerState<CoreManager>
   }
 
   @override
+  void onRequestTraffic(Map<String, RequestTraffic> traffic) {
+    ref.read(requestsProvider.notifier).updateTraffic(traffic);
+    super.onRequestTraffic(traffic);
+  }
+
+  @override
   void onDnsQuery(DnsQuery query) {
     ref.read(dnsQueriesProvider.notifier).addQuery(query);
   }
