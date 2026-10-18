@@ -28,6 +28,7 @@ const listRowVerticalPadding = 10.0;
 const pageToolbarHeight = 64.0;
 const sheetToolbarHeight = 48.0;
 const sheetAppBarHeight = 68.0;
+const double appBarActionSpace = 4;
 
 const midDuration = Duration(milliseconds: 200);
 const commonDuration = Duration(milliseconds: 300);

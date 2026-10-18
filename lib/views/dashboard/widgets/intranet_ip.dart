@@ -7,6 +7,7 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 
 import '../widget_metrics.dart';
+import 'info_card.dart';
 
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/state.dart';
@@ -22,10 +23,7 @@ class IntranetIP extends StatelessWidget {
     final appLocalizations = context.appLocalizations;
     return SizedBox(
       height: DashboardWidgetMetrics.heightOf(context, 1),
-      child: CommonCard(
-        radius: DashboardWidgetMetrics.radiusOf(context),
-        infoPadding: DashboardWidgetMetrics.paddingOf(context)
-            .copyWith(bottom: 0),
+      child: DashboardInfoCard(
         info: Info(
           label: appLocalizations.intranetIP,
           glyph: AppGlyphs.devices,

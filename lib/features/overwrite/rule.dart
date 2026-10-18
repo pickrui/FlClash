@@ -9,7 +9,7 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/clash_config.dart';
-import 'package:fl_clash/widgets/card.dart';
+import 'package:fl_clash/ui/card.dart';
 import 'package:fl_clash/widgets/input.dart';
 import 'package:fl_clash/widgets/list.dart';
 import 'package:material_ui/material_ui.dart';
@@ -376,6 +376,7 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
                   CommonCard(
                     radius: 8,
                     isSelected: _src,
+                    fillsSelection: true,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -383,7 +384,9 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
                       ),
                       child: Text(
                         appLocalizations.sourceIp,
-                        style: context.textTheme.bodyMedium,
+                        style: context.textTheme.bodyMedium?.copyWith(
+                          color: _src ? context.colorScheme.onPrimary : null,
+                        ),
                       ),
                     ),
                     onPressed: () {
@@ -395,6 +398,7 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
                   CommonCard(
                     radius: 8,
                     isSelected: _noResolve || _src,
+                    fillsSelection: true,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -402,7 +406,11 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
                       ),
                       child: Text(
                         appLocalizations.noResolve,
-                        style: context.textTheme.bodyMedium,
+                        style: context.textTheme.bodyMedium?.copyWith(
+                          color: _noResolve || _src
+                              ? context.colorScheme.onPrimary
+                              : null,
+                        ),
                       ),
                     ),
                     onPressed: () {

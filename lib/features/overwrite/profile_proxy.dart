@@ -1041,7 +1041,6 @@ class OverwriteEntryTile extends StatelessWidget {
         child: CommonCard(
           padding: EdgeInsets.zero,
           radius: 18,
-          type: CommonCardType.filled,
           isSelected: isSelected,
           onPressed: onSelected,
           child: ListTile(

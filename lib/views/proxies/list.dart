@@ -487,7 +487,6 @@ class ListHeader extends ConsumerWidget {
       enterAnimated: enterAnimated,
       key: key,
       radius: AppCorner.xl.ap(context),
-      type: CommonCardType.filled,
       child: Padding(
         padding: const EdgeInsets.all(_headerInset),
         child: Row(

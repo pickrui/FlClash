@@ -22,7 +22,7 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/proxies/card.dart';
 import 'package:fl_clash/views/proxies/common.dart';
 import 'package:fl_clash/widgets/loading.dart';
-import 'package:fl_clash/widgets/card.dart';
+import 'package:fl_clash/ui/card.dart';
 import 'package:fl_clash/widgets/popup.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:flutter/services.dart';

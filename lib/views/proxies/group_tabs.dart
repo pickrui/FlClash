@@ -409,12 +409,11 @@ class _GroupTabState extends State<_GroupTab> {
     final selected = _isSelected;
     final colorScheme = context.colorScheme;
     final style = _labelStyleOf(context).copyWith(
-      color: selected
-          ? colorScheme.onSecondaryContainer
-          : colorScheme.onSurfaceVariant,
+      color: selected ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
     );
     return CommonCard(
       isSelected: selected,
+      fillsSelection: true,
       shape: AppShape.full,
       padding: const EdgeInsets.symmetric(horizontal: _tabPadding),
       onPressed: widget.onPressed,

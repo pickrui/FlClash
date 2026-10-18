@@ -366,10 +366,11 @@ class ProfileItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isCustom = profile.type == ProfileType.custom;
+    final isSelected = profile.id == groupValue;
     return CommonCard(
       enterActionsOnRight: true,
       radius: AppCorner.xl,
-      isSelected: profile.id == groupValue,
+      isSelected: isSelected,
       onPressed: () {
         onChanged(profile.id);
       },
@@ -521,11 +522,19 @@ class ProfileItem extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              profile.realLabel,
-              style: context.textTheme.titleMedium,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            Row(
+              spacing: 8,
+              children: [
+                Flexible(
+                  child: Text(
+                    profile.realLabel,
+                    style: context.textTheme.titleMedium,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (isSelected) const SelectionBadge(size: 20),
+              ],
             ),
             const SizedBox(height: 6),
             ...switch (profile.type) {

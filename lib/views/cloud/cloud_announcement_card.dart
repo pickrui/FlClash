@@ -6,7 +6,7 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/widgets/card.dart';
+import 'package:fl_clash/ui/card.dart';
 import 'package:fl_clash/widgets/sheet.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:intl/intl.dart';

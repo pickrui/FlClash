@@ -11,6 +11,7 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/config/network.dart';
 import 'package:fl_clash/views/dashboard/widget_metrics.dart';
+import 'package:fl_clash/views/dashboard/widgets/info_card.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -50,15 +51,12 @@ class _QuickSwitchCard extends StatelessWidget {
     final overhang = max(0.0, (_switchHeight - lineHeight) / 2);
     return SizedBox(
       height: DashboardWidgetMetrics.heightOf(context, 1),
-      child: CommonCard(
-        radius: DashboardWidgetMetrics.radiusOf(context),
-        infoPadding: DashboardWidgetMetrics.paddingOf(context)
-            .copyWith(bottom: 0),
+      child: DashboardInfoCard(
+        info: Info(label: label, glyph: glyph),
         onPressed: () => showSheet(
           context: context,
           builder: (context, _) => sheetBuilder(context),
         ),
-        info: Info(label: label, glyph: glyph),
         child: Padding(
           padding: EdgeInsets.fromLTRB(
             inset,

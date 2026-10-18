@@ -15,10 +15,10 @@ import 'package:material_ui/material_ui.dart';
 
 import 'package:collection/collection.dart';
 
-import 'card.dart';
+import 'package:fl_clash/ui/card.dart';
+
 import 'input_dialog.dart';
 import 'options_dialog.dart';
-import 'scaffold.dart';
 import 'sheet.dart';
 
 class Delegate {
@@ -520,11 +520,7 @@ Widget generateSectionV2({
       .map<Widget>((item) {
         return ClipRSuperellipse(
           borderRadius: AppRadius.xs,
-          child: CommonCard(
-            type: CommonCardType.filled,
-            radius: 0,
-            child: item,
-          ),
+          child: CommonCard(radius: 0, child: item),
         );
       })
       .separated(const Divider(height: 2, color: Colors.transparent));
@@ -598,7 +594,6 @@ class DecorationListItem extends StatelessWidget {
       isError: invalid,
       isSelected: isSelected,
       padding: EdgeInsets.zero,
-      type: CommonCardType.filled,
       onPressed: proxyDecorator ? null : onPressed,
       child: LayoutBuilder(
         builder: (_, constraints) {

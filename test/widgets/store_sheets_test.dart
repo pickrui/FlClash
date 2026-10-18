@@ -59,6 +59,11 @@ Future<List<T?>> _pumpSheet<T>(WidgetTester tester, Widget sheet) async {
   return results;
 }
 
+/// The button holding [label], not a card around it that is a button too.
+Finder _filledButton(String label) => find
+    .ancestor(of: find.text(label), matching: find.byType(FilledButton))
+    .first;
+
 void main() {
   testWidgets('purchase defaults to the balance with auto-renew on', (
     tester,
@@ -77,7 +82,7 @@ void main() {
 
     await tester.tap(find.text('Yearly · ¥150'));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'Buy'));
+    await tester.tap(_filledButton('Buy'));
     await tester.pumpAndSettle();
 
     final choice = results.single!;
@@ -101,7 +106,7 @@ void main() {
     await tester.tap(find.text('Alipay'));
     await tester.pumpAndSettle();
     expect(find.widgetWithText(FilledButton, 'Buy'), findsNothing);
-    await tester.tap(find.widgetWithText(FilledButton, 'Pay'));
+    await tester.tap(_filledButton('Pay'));
     await tester.pumpAndSettle();
 
     final choice = results.single!;
@@ -116,8 +121,7 @@ void main() {
       tester,
       const StoreRechargeSheet(type: SheetType.page, methods: [_alipay]),
     );
-    FilledButton pay() =>
-        tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Pay'));
+    FilledButton pay() => tester.widget<FilledButton>(_filledButton('Pay'));
     expect(pay().onPressed, isNull);
     expect(find.text('Allowed range ¥5 – ¥500'), findsOneWidget);
 
@@ -141,7 +145,7 @@ void main() {
     expect(find.widgetWithText(TextField, '30'), findsOneWidget);
     await tester.enterText(find.byType(TextField), '12,5');
     await tester.pump();
-    await tester.tap(find.widgetWithText(FilledButton, 'Pay'));
+    await tester.tap(_filledButton('Pay'));
     await tester.pumpAndSettle();
 
     final choice = results.single!;
@@ -168,6 +172,6 @@ void main() {
     );
     expect(find.text('Sold out'), findsOneWidget);
     expect(find.text('Unavailable'), findsOneWidget);
-    expect(find.widgetWithText(FilledButton, 'Buy'), findsOneWidget);
+    expect(_filledButton('Buy'), findsOneWidget);
   });
 }

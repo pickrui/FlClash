@@ -6,7 +6,6 @@
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/providers/action.dart';
-import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/common.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
@@ -97,7 +96,6 @@ class DeveloperView extends ConsumerWidget {
         child: Column(
           children: [
             CommonCard(
-              type: CommonCardType.filled,
               radius: 18,
               child: ListItem.switchItem(
                 padding: const EdgeInsets.only(left: 16, right: 16),

@@ -6,6 +6,7 @@
 import 'package:fl_clash/common/common.dart';
 
 import '../widget_metrics.dart';
+import 'info_card.dart';
 export 'profiles.dart';
 export 'proxy_groups.dart';
 
@@ -39,11 +40,8 @@ class InspectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SizedBox(
     height: DashboardWidgetMetrics.heightOf(context, rows),
-    child: CommonCard(
-      radius: DashboardWidgetMetrics.radiusOf(context),
+    child: DashboardInfoCard(
       info: Info(label: label, glyph: glyph),
-      infoPadding: DashboardWidgetMetrics.paddingOf(context)
-          .copyWith(bottom: 0),
       onPressed: onPressed,
       child: Padding(
         padding: DashboardWidgetMetrics.paddingOf(context).copyWith(top: 0),

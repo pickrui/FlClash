@@ -10,6 +10,7 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/dashboard/widget_metrics.dart';
+import 'package:fl_clash/views/dashboard/widgets/info_card.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,10 +24,7 @@ class TrafficUsage extends StatelessWidget {
     return SizedBox(
       height: DashboardWidgetMetrics.heightOf(context, 2),
       child: RepaintBoundary(
-        child: CommonCard(
-          radius: DashboardWidgetMetrics.radiusOf(context),
-          infoPadding: DashboardWidgetMetrics.paddingOf(context)
-              .copyWith(bottom: 0),
+        child: DashboardInfoCard(
           info: Info(
             label: appLocalizations.trafficUsage,
             glyph: AppGlyphs.dataUsage,

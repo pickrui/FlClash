@@ -1120,8 +1120,6 @@ class _SheetPop {
   final bool asSuffix;
 }
 
-const double appBarActionSpace = 4;
-
 const double _barButtonGap = 8;
 const double _headerOverhang = 16;
 const double _iconButtonTapPadding = 4;

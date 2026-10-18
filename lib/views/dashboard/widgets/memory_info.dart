@@ -16,6 +16,7 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 
 import '../widget_metrics.dart';
+import 'info_card.dart';
 
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/core/method.dart';
@@ -145,10 +146,7 @@ class _MemoryInfoState extends ConsumerState<MemoryInfo>
     return SizedBox(
       height: DashboardWidgetMetrics.heightOf(context, 1),
       child: RepaintBoundary(
-        child: CommonCard(
-          radius: DashboardWidgetMetrics.radiusOf(context),
-          infoPadding: DashboardWidgetMetrics.paddingOf(context)
-              .copyWith(bottom: 0),
+        child: DashboardInfoCard(
           info: Info(
             glyph: AppGlyphs.memory,
             label: appLocalizations.memoryInfo,

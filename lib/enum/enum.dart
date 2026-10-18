@@ -146,8 +146,6 @@ enum RestoreOption { all, onlyProfiles }
 
 enum ChipType { action, delete }
 
-enum CommonCardType { plain, filled }
-
 enum ProxiesType { tab, list }
 
 enum ProxiesLayout { loose, standard, tight }

@@ -327,6 +327,7 @@ class _OverwriteModeSelectorState extends ConsumerState<OverwriteModeSelector> {
                   CommonCard(
                     key: ValueKey('overwrite-mode-${type.name}'),
                     isSelected: overwriteType == type,
+                    fillsSelection: true,
                     onPressed: _checkingType != null
                         ? null
                         : () => _handleChangeType(type),
@@ -733,7 +734,6 @@ class _ScriptContent extends ConsumerWidget {
                   margin: const EdgeInsets.symmetric(vertical: 4),
                   child: CommonCard(
                     padding: EdgeInsets.zero,
-                    type: CommonCardType.filled,
                     radius: 18,
                     child: ListTile(
                       minLeadingWidth: 0,

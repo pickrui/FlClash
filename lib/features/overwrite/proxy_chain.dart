@@ -5,7 +5,6 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/overwrite/profile_proxy.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/database.dart';
@@ -981,7 +980,6 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
           CommonCard(
             padding: EdgeInsets.zero,
             radius: 18,
-            type: CommonCardType.filled,
             child: ListTile(
               minTileHeight: 32 + globalState.measure.bodyMediumHeight,
               minVerticalPadding: 12,
@@ -1048,7 +1046,6 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: CommonCard(
-        type: CommonCardType.filled,
         radius: 18,
         child: ListTile(
           minTileHeight: 64,
@@ -1155,7 +1152,6 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
                   children: [
                     CommonCard(
                       padding: EdgeInsets.zero,
-                      type: CommonCardType.filled,
                       radius: 18,
                       child: ListTile(
                         minTileHeight: 64,
@@ -1211,7 +1207,6 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: CommonCard(
-                    type: CommonCardType.filled,
                     radius: 18,
                     child: ListTile(
                       minTileHeight: 64,
@@ -1257,7 +1252,6 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   child: CommonCard(
-                    type: CommonCardType.filled,
                     radius: 18,
                     child: ListTile(
                       minTileHeight: 64,

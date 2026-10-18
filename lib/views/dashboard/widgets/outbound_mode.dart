@@ -13,6 +13,7 @@ import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_clash/views/dashboard/widget_metrics.dart';
+import 'package:fl_clash/views/dashboard/widgets/info_card.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_color_utilities/palettes/tonal_palette.dart';
 import 'package:material_color_utilities/hct/hct.dart';
@@ -26,7 +27,7 @@ const _pillInset = 8.0;
 const _rowGlyphSize = 18.0;
 // Matches the gap InfoHeader leaves between its glyph and its label, so the
 // rows share the header's icon column and text column.
-const _headerGlyphGap = 8.0;
+const _headerGlyphGap = 12.0;
 const _selectDuration = Duration(milliseconds: 320);
 const _selectCurve = Curves.easeInOutCubic;
 
@@ -39,7 +40,6 @@ class OutboundMode extends ConsumerWidget {
       patchClashConfigProvider.select((state) => state.mode),
     );
     final inset = DashboardWidgetMetrics.insetOf(context);
-    final radius = DashboardWidgetMetrics.radiusOf(context);
     final pillInset = min(_pillInset.mAp(context), inset);
     return SizedBox(
       height: DashboardWidgetMetrics.heightOf(context, 2),
@@ -49,16 +49,12 @@ class OutboundMode extends ConsumerWidget {
           highlightColor: Colors.transparent,
           hoverColor: Colors.transparent,
         ),
-        child: CommonCard(
-          radius: radius,
-          infoPadding: DashboardWidgetMetrics.paddingOf(context)
-              .copyWith(bottom: 0),
-          onPressed: () {},
-          skipTraversal: true,
+        child: DashboardInfoCard(
           info: Info(
             label: context.appLocalizations.outboundMode,
             glyph: AppGlyphs.split,
           ),
+          inert: true,
           child: Padding(
             padding: EdgeInsets.only(
               top: _rowGap.mAp(context),
@@ -296,8 +292,6 @@ class OutboundModeV2 extends StatelessWidget {
       height: height,
       child: CommonCard(
         radius: DashboardWidgetMetrics.radiusOf(context),
-        infoPadding: DashboardWidgetMetrics.paddingOf(context)
-            .copyWith(bottom: 0),
         padding: EdgeInsets.zero,
         child: Consumer(
           builder: (_, ref, _) {

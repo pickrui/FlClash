@@ -10,7 +10,8 @@ import 'package:material_ui/material_ui.dart';
 
 import 'package:fl_clash/ui/builder.dart';
 
-import 'card.dart';
+import 'package:fl_clash/ui/card.dart';
+
 import 'navigation_dock.dart';
 
 class CommonFloatingActionButton extends StatefulWidget {

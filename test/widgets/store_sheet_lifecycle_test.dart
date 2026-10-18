@@ -19,6 +19,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_app.dart';
 
+/// The button holding [label], not a card around it that is a button too.
+Finder _filledButton(String label) => find
+    .ancestor(of: find.text(label), matching: find.byType(FilledButton))
+    .first;
+
 void main() {
   testWidgets(
     'store loading blocks repeated actions and errors do not show empty results',
@@ -52,17 +57,11 @@ void main() {
         isNull,
       );
       expect(
-        tester
-            .widget<FilledButton>(find.widgetWithText(FilledButton, 'Buy'))
-            .onPressed,
+        tester.widget<FilledButton>(_filledButton('Buy')).onPressed,
         isNull,
       );
       expect(
-        tester
-            .widget<FilledButton>(
-              find.widgetWithText(FilledButton, 'Recharge').first,
-            )
-            .onPressed,
+        tester.widget<FilledButton>(_filledButton('Recharge')).onPressed,
         isNull,
       );
       await tester
@@ -310,9 +309,8 @@ void main() {
     }
   }
 
-  VoidCallback? activatePressed(WidgetTester tester) => tester
-      .widget<FilledButton>(find.widgetWithText(FilledButton, 'Activate'))
-      .onPressed;
+  VoidCallback? activatePressed(WidgetTester tester) =>
+      tester.widget<FilledButton>(_filledButton('Activate')).onPressed;
 
   testWidgets(
     'a write losing its response headers is checked against the panel first',
@@ -326,7 +324,7 @@ void main() {
       );
       final loads = store.loads;
 
-      await tester.tap(find.widgetWithText(FilledButton, 'Activate'));
+      await tester.tap(_filledButton('Activate'));
       await settle(tester);
       await tester.tap(find.widgetWithText(TextButton, 'Activate'));
       await settle(tester);
@@ -374,7 +372,7 @@ void main() {
       final (adapter, store, account) = await openPurchased(tester, answer);
       final loads = store.loads;
 
-      await tester.tap(find.widgetWithText(FilledButton, 'Activate'));
+      await tester.tap(_filledButton('Activate'));
       await settle(tester);
       await tester.tap(find.widgetWithText(TextButton, 'Activate'));
       await settle(tester);
