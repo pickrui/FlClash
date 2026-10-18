@@ -51,6 +51,28 @@ void main() {
     expect(openings, 1);
   });
 
+  testWidgets('a pushed exemption change shows without a resume', (
+    tester,
+  ) async {
+    final changes = StreamController<bool>();
+    addTearDown(changes.close);
+    await tester.pumpWidget(
+      TestApp(
+        wrapInProviderScope: true,
+        homeBuilder: (child) => Scaffold(body: child),
+        child: BatteryOptimizationItem(
+          readPermission: () async => false,
+          changes: changes.stream,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Authorized'), findsNothing);
+    changes.add(true);
+    await tester.pumpAndSettle();
+    expect(find.text('Authorized'), findsOneWidget);
+  });
+
   testWidgets('battery status ignores a late result after disposal', (
     tester,
   ) async {

@@ -26,6 +26,7 @@ const _allowed = {
   // The platform-channel singleton broadcasts these until the app exits.
   'lib/plugins/app.dart#_packageChanges',
   'lib/plugins/app.dart#_iconChanges',
+  'lib/plugins/app.dart#_batteryOptimizationChanges',
 };
 
 final _declaration = RegExp(

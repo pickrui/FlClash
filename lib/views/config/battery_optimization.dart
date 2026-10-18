@@ -17,10 +17,12 @@ class BatteryOptimizationItem extends ConsumerStatefulWidget {
     super.key,
     this.readPermission,
     this.openSettings,
+    this.changes,
   });
 
   final Future<bool> Function()? readPermission;
   final Future<bool> Function()? openSettings;
+  final Stream<bool>? changes;
 
   @override
   ConsumerState<BatteryOptimizationItem> createState() =>
@@ -36,19 +38,38 @@ class _BatteryOptimizationItemState
   bool _failed = false;
   bool _waitingSettings = false;
   int _generation = 0;
+  StreamSubscription<bool>? _changes;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    if (!safeModeBuild) {
+      _changes = (widget.changes ?? app?.batteryOptimizationChanges)?.listen(
+        _onChanged,
+      );
+    }
     unawaited(_check());
   }
 
   @override
   void dispose() {
     _generation++;
+    _changes?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  // Android's push is newer than any read still in flight.
+  void _onChanged(bool allowed) {
+    if (!mounted) return;
+    _generation++;
+    setState(() {
+      _allowed = allowed;
+      _loading = false;
+      _failed = false;
+      _waitingSettings = false;
+    });
   }
 
   @override

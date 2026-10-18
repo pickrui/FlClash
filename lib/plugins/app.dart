@@ -19,6 +19,14 @@ class App {
   Stream<void> get packageChanges => _packageChanges.stream;
   final _iconChanges = StreamController<void>.broadcast(sync: true);
   Stream<void> get iconChanges => _iconChanges.stream;
+  final _batteryOptimizationChanges = StreamController<bool>.broadcast(
+    sync: true,
+  );
+
+  /// Pushed when the battery allowlist changes, or on Xiaomi the battery
+  /// saver's "No restrictions" list.
+  Stream<bool> get batteryOptimizationChanges =>
+      _batteryOptimizationChanges.stream;
 
   App._internal() {
     methodChannel = const MethodChannel('$packageName/app');
@@ -27,6 +35,8 @@ class App {
         case 'packagesChanged':
           clearPackageIconCache();
           _packageChanges.add(null);
+        case 'batteryOptimizationChanged':
+          _batteryOptimizationChanges.add(call.arguments == true);
         default:
           throw MissingPluginException();
       }
