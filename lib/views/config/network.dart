@@ -6,10 +6,12 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/models.dart' show AppBarEditState;
+import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/plugins/app.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/views/config/override.dart';
+import 'package:fl_clash/views/config/tun.dart';
 import 'package:wifi_ssid/wifi_ssid.dart';
 import 'package:fl_clash/widgets/config_item.dart';
 import 'package:fl_clash/widgets/widgets.dart';
@@ -479,12 +481,6 @@ class RouteAddressItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final appLocalizations = context.appLocalizations;
-    final bypassPrivateRoute = ref.watch(
-      networkSettingProvider.select((state) => state.bypassPrivateRoute),
-    );
-    if (bypassPrivateRoute) {
-      return Container();
-    }
     final routeAddress = ref.watch(
       patchClashConfigProvider.select((state) => state.tun.routeAddress),
     );
@@ -604,15 +600,85 @@ class NetworkOptionsSection extends StatelessWidget {
       if (system.isDesktop) const TUNItem(),
       if (system.isMacOS) const AutoSetSystemDnsItem(),
       const TunStackItem(),
-      const TunMtuItem(),
       const BlockQuicItem(),
       const BlockWebRtcItem(),
-      if (!system.isDesktop) ...const [
-        BypassPrivateRouteItem(),
-        RouteAddressItem(),
-      ],
     ],
   );
+}
+
+/// Android's VPN starts from the app TUN values; the desktop TUN follows each
+/// profile except for the keys picked here.
+class TunSection extends ConsumerWidget {
+  const TunSection({
+    super.key,
+    required this.isDesktop,
+    required this.isLinux,
+    required this.isWindows,
+  });
+
+  final bool isDesktop;
+  final bool isLinux;
+  final bool isWindows;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    if (!isDesktop) {
+      final bypassPrivateRoute = ref.watch(
+        networkSettingProvider.select((state) => state.bypassPrivateRoute),
+      );
+      return generateSectionV3(
+        title: appLocalizations.tun,
+        items: [
+          const TunMtuItem(),
+          const BypassPrivateRouteItem(),
+          if (!bypassPrivateRoute) const RouteAddressItem(),
+        ],
+      );
+    }
+    final spec = appTunOverrideSpec(isLinux: isLinux, isWindows: isWindows);
+    final picked = ref.watch(
+      patchClashConfigProvider.select((state) => state.tunOverrideKeys),
+    );
+    final listed = [
+      for (final key in spec.values)
+        if (picked.contains(key)) key,
+    ];
+    return generateSectionV3(
+      title: appLocalizations.tun,
+      subTitle: appLocalizations.tunOverrideDesc,
+      items: [
+        const BypassPrivateRouteItem(),
+        for (final key in listed)
+          OverrideEntry(key: ValueKey(key), spec: spec, overrideKey: key),
+        if (listed.length < spec.values.length) _AddOverrideItem(spec: spec),
+      ],
+    );
+  }
+}
+
+class _AddOverrideItem<K extends Enum, M> extends ConsumerWidget {
+  const _AddOverrideItem({required this.spec});
+
+  final OverrideSpec<K, M> spec;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    void handleAdd() => showOverrideAddSheet(context, ref, spec);
+    return ListItem(
+      leading: OverrideEntryButton(
+        glyph: AppGlyphs.add,
+        tooltip: appLocalizations.add,
+        onPressed: handleAdd,
+      ),
+      title: Text(
+        appLocalizations.addOverrideEntry,
+        style: TextStyle(color: context.colorScheme.primary),
+      ),
+      onTap: handleAdd,
+    );
+  }
 }
 
 class NetworkListView extends StatelessWidget {
@@ -624,6 +690,11 @@ class NetworkListView extends StatelessWidget {
       if (system.isAndroid) const VpnSections(),
       if (system.isDesktop) const SystemProxySection(),
       const NetworkOptionsSection(),
+      TunSection(
+        isDesktop: system.isDesktop,
+        isLinux: system.isLinux,
+        isWindows: system.isWindows,
+      ),
     ],
   );
 }

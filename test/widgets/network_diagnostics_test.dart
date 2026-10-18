@@ -233,9 +233,10 @@ void main() {
       await tester.ensureVisible(find.text(label));
       await tester.tap(find.text(label));
       await tester.pumpAndSettle();
-      expect(find.text(setting), findsOneWidget);
+      // The network page titles both the TUN switch and its section TUN.
+      expect(find.text(setting), id == 'tun' ? findsWidgets : findsOneWidget);
       expect(service.runs, 1);
-      Navigator.of(tester.element(find.text(setting))).pop();
+      Navigator.of(tester.element(find.text(setting).first)).pop();
       await tester.pumpAndSettle();
       await tester.pump(const Duration(seconds: 1));
       await tester.pumpAndSettle();

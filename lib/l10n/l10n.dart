@@ -11808,6 +11808,241 @@ class AppLocalizations {
   String get elapsed {
     return Intl.message('Took', name: 'elapsed', desc: '', args: []);
   }
+
+  /// `Entries added here replace the TUN settings of every profile; anything not added keeps the profile's own setting`
+  String get tunOverrideDesc {
+    return Intl.message(
+      'Entries added here replace the TUN settings of every profile; anything not added keeps the profile\'s own setting',
+      name: 'tunOverrideDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `TCP congestion control`
+  String get congestionController {
+    return Intl.message(
+      'TCP congestion control',
+      name: 'congestionController',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `TCP congestion control works only with the mips stack`
+  String get congestionControllerDesc {
+    return Intl.message(
+      'TCP congestion control works only with the mips stack',
+      name: 'congestionControllerDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Strict route`
+  String get strictRoute {
+    return Intl.message(
+      'Strict route',
+      name: 'strictRoute',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Strict route keeps traffic such as DNS from bypassing TUN, and with IPv6 off it blocks this device's IPv6 connections`
+  String get strictRouteDesc {
+    return Intl.message(
+      'Strict route keeps traffic such as DNS from bypassing TUN, and with IPv6 off it blocks this device\'s IPv6 connections',
+      name: 'strictRouteDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Route exclude addresses`
+  String get routeExcludeAddress {
+    return Intl.message(
+      'Route exclude addresses',
+      name: 'routeExcludeAddress',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `UDP timeout`
+  String get udpTimeout {
+    return Intl.message('UDP timeout', name: 'udpTimeout', desc: '', args: []);
+  }
+
+  /// `The UDP timeout is in seconds and works only with the gvisor, system and mixed stacks`
+  String get udpTimeoutDesc {
+    return Intl.message(
+      'The UDP timeout is in seconds and works only with the gvisor, system and mixed stacks',
+      name: 'udpTimeoutDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Without this entry, TUN hijacks every DNS query to port 53 (any:53)`
+  String get dnsHijackDesc {
+    return Intl.message(
+      'Without this entry, TUN hijacks every DNS query to port 53 (any:53)',
+      name: 'dnsHijackDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Disable ICMP forwarding`
+  String get disableIcmpForwarding {
+    return Intl.message(
+      'Disable ICMP forwarding',
+      name: 'disableIcmpForwarding',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `With ICMP forwarding disabled, TUN answers ping itself, so ping no longer shows the real latency`
+  String get disableIcmpForwardingDesc {
+    return Intl.message(
+      'With ICMP forwarding disabled, TUN answers ping itself, so ping no longer shows the real latency',
+      name: 'disableIcmpForwardingDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Included interfaces`
+  String get includeInterface {
+    return Intl.message(
+      'Included interfaces',
+      name: 'includeInterface',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Only traffic arriving on included interfaces goes through TUN, and excluded interfaces no longer apply`
+  String get includeInterfaceDesc {
+    return Intl.message(
+      'Only traffic arriving on included interfaces goes through TUN, and excluded interfaces no longer apply',
+      name: 'includeInterfaceDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Excluded interfaces`
+  String get excludeInterface {
+    return Intl.message(
+      'Excluded interfaces',
+      name: 'excludeInterface',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Traffic arriving on excluded interfaces, such as docker0, skips TUN`
+  String get excludeInterfaceDesc {
+    return Intl.message(
+      'Traffic arriving on excluded interfaces, such as docker0, skips TUN',
+      name: 'excludeInterfaceDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Included user IDs`
+  String get includeUid {
+    return Intl.message(
+      'Included user IDs',
+      name: 'includeUid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Only traffic from processes of included user IDs goes through TUN`
+  String get includeUidDesc {
+    return Intl.message(
+      'Only traffic from processes of included user IDs goes through TUN',
+      name: 'includeUidDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Excluded user IDs`
+  String get excludeUid {
+    return Intl.message(
+      'Excluded user IDs',
+      name: 'excludeUid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Traffic from processes of excluded user IDs skips TUN`
+  String get excludeUidDesc {
+    return Intl.message(
+      'Traffic from processes of excluded user IDs skips TUN',
+      name: 'excludeUidDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Excluded source ports`
+  String get excludeSrcPort {
+    return Intl.message(
+      'Excluded source ports',
+      name: 'excludeSrcPort',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Traffic from excluded source ports skips TUN`
+  String get excludeSrcPortDesc {
+    return Intl.message(
+      'Traffic from excluded source ports skips TUN',
+      name: 'excludeSrcPortDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Excluded destination ports`
+  String get excludeDstPort {
+    return Intl.message(
+      'Excluded destination ports',
+      name: 'excludeDstPort',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Traffic to excluded destination ports skips TUN`
+  String get excludeDstPortDesc {
+    return Intl.message(
+      'Traffic to excluded destination ports skips TUN',
+      name: 'excludeDstPortDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{label} must be between {min} and {max}`
+  String numberRangeTip(Object label, Object min, Object max) {
+    return Intl.message(
+      '$label must be between $min and $max',
+      name: 'numberRangeTip',
+      desc: '',
+      args: [label, min, max],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

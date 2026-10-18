@@ -121,6 +121,19 @@ abstract class _ConfigItem<T> extends ConsumerWidget {
   }
 }
 
+String _describe(
+  String value,
+  ConfigLabel? description,
+  AppLocalizations appLocalizations,
+) {
+  final text = description?.call(appLocalizations);
+  return text == null
+      ? value
+      : value.isEmpty
+      ? text
+      : '$value · $text';
+}
+
 class ConfigToggleItem extends _ConfigItem<bool> {
   const ConfigToggleItem({
     super.key,
@@ -158,12 +171,15 @@ class ConfigOptionsItem<T> extends _ConfigItem<T> {
     required super.onChanged,
     required this.options,
     required this.textBuilder,
+    this.description,
     super.subtitle,
     super.leading,
   });
 
   final List<T> options;
   final String Function(T value) textBuilder;
+
+  final ConfigLabel? description;
 
   @override
   Widget buildItem(
@@ -175,7 +191,10 @@ class ConfigOptionsItem<T> extends _ConfigItem<T> {
     return ListItem<T>.options(
       leading: leading,
       title: Text(title(appLocalizations)),
-      subtitle: Text(subtitle?.call(appLocalizations) ?? textBuilder(value)),
+      subtitle: Text(
+        subtitle?.call(appLocalizations) ??
+            _describe(textBuilder(value), description, appLocalizations),
+      ),
       delegate: OptionsDelegate<T>(
         title: title(appLocalizations),
         options: options,
@@ -204,6 +223,7 @@ class ConfigTextItem extends _ConfigItem<String> {
     this.normalize,
     this.showValueAsSubtitle = true,
     this.allowEmpty = false,
+    this.description,
     super.subtitle,
     super.leading,
   });
@@ -214,6 +234,8 @@ class ConfigTextItem extends _ConfigItem<String> {
   final String Function(String value)? normalize;
   final bool showValueAsSubtitle;
   final bool allowEmpty;
+
+  final ConfigLabel? description;
 
   String? _normalize(String? value) {
     if (value == null) {
@@ -234,8 +256,8 @@ class ConfigTextItem extends _ConfigItem<String> {
     return ListItem.input(
       leading: leading,
       title: Text(label),
-      subtitle: showValueAsSubtitle && value.isNotEmpty
-          ? Text(value)
+      subtitle: showValueAsSubtitle && (value.isNotEmpty || description != null)
+          ? Text(_describe(value, description, appLocalizations))
           : buildSubtitle(appLocalizations),
       delegate: InputDelegate(
         title: label,

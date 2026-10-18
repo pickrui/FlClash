@@ -6,12 +6,14 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/theme.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/features/overwrite/overwrite_selection_sheet.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/config/dns.dart';
+import 'package:fl_clash/views/config/network.dart';
 import 'package:fl_clash/widgets/null_status.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -303,6 +305,73 @@ void main() {
     ]);
     expect(tester.takeException(), isNull);
   });
+
+  for (final (isLinux, isWindows) in [
+    (false, false),
+    (false, true),
+    (true, false),
+  ]) {
+    testWidgets(
+      'desktop TUN keys are picked and dropped: Linux=$isLinux Windows=$isWindows',
+      (tester) async {
+        final container = await _pumpOverrides(
+          tester,
+          Scaffold(
+            body: SingleChildScrollView(
+              child: TunSection(
+                isDesktop: true,
+                isLinux: isLinux,
+                isWindows: isWindows,
+              ),
+            ),
+          ),
+          (state) => state.copyWith(tunOverride: const ProfileTun(mtu: 1400)),
+        );
+        ClashConfig patch() => container.read(patchClashConfigProvider);
+
+        await tester.tap(find.text('Add override entry'));
+        await tester.pumpAndSettle();
+        expect(
+          find.text('Strict route'),
+          isLinux || isWindows ? findsOneWidget : findsNothing,
+        );
+        await tester.tap(find.text('MTU'));
+        await tester.pumpAndSettle();
+        expect(patch().tunOverrideKeys, {TunOverrideKey.mtu});
+        expect(patch().tunOverride.mtu, defaultTunMtu);
+
+        await tester.tap(find.text('MTU'));
+        await tester.pumpAndSettle();
+        await _submitText(tester, '1279');
+        expect(find.text('MTU must be between 1280 and 65535'), findsOneWidget);
+        await _submitText(tester, '1480');
+        expect(patch().tunOverride.mtu, 1480);
+
+        await tester.tap(find.byTooltip('Remove'));
+        await tester.pumpAndSettle();
+        expect(patch().tunOverrideKeys, isEmpty);
+        expect(patch().tunOverride.mtu, defaultTunMtu);
+
+        await tester.tap(find.text('Add override entry'));
+        await tester.pumpAndSettle();
+        final gso = find.text('GSO');
+        if (isLinux) {
+          await tester.scrollUntilVisible(
+            gso,
+            100,
+            scrollable: find
+                .descendant(
+                  of: find.byType(OverwriteSelectionSheet<TunOverrideKey>),
+                  matching: find.byType(Scrollable),
+                )
+                .first,
+          );
+        }
+        expect(gso, isLinux ? findsOneWidget : findsNothing);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 
   testWidgets('the NTP server must be a bare host and is trimmed', (
     tester,

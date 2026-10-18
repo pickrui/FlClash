@@ -735,6 +735,7 @@ class CommonInputListItem extends StatelessWidget {
 
 Widget generateSectionV3({
   String? title,
+  String? subTitle,
   required Iterable<Widget> items,
   List<Widget>? actions,
 }) {
@@ -747,7 +748,7 @@ Widget generateSectionV3({
   return Column(
     children: [
       if (items.isNotEmpty && title != null)
-        ListHeader(title: title, actions: actions),
+        ListHeader(title: title, subTitle: subTitle, actions: actions),
       Column(children: [...genItems]),
     ],
   );
