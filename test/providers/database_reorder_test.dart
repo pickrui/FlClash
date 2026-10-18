@@ -43,10 +43,17 @@ void _expectDescendingKeys(List<Rule> rules) {
 }
 
 void main() {
+  final pendingWrite = Completer<void>();
   // Writes stay queued behind this, so the notifiers keep their optimistic
   // state, as they do while a real write is still pending.
   setUpAll(() {
-    unawaited(databaseWriteQueue.add(() => Completer<void>().future));
+    unawaited(databaseWriteQueue.add(() => pendingWrite.future));
+  });
+  tearDownAll(() async {
+    pendingWrite.complete();
+    try {
+      await databaseWriteQueue.wait();
+    } catch (_) {}
   });
 
   test('a rule moved twice before its write lands keeps valid keys', () async {
