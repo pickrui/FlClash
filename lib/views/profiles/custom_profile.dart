@@ -240,7 +240,10 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
           ),
         ));
       } on CustomImportException {
-        throw appLocalizations.importConfigInvalid;
+        if (!await _addShareLinks(utf8.decode(bytes, allowMalformed: true))) {
+          throw appLocalizations.importConfigInvalid;
+        }
+        return;
       }
       if (!mounted) return;
       if (!_isEmpty) {
@@ -266,6 +269,46 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
     } finally {
       if (mounted) setState(() => _importing = false);
     }
+  }
+
+  /// Share links add nodes to the profile rather than replacing it.
+  Future<bool> _addShareLinks(String text) async {
+    final links = readShareLinks(text);
+    if (links.nodes.isEmpty) return false;
+    var nodes = links.nodes;
+    final core = ref.read(coreHandlerProvider);
+    if (core.isCompleted) {
+      final errors = await core.validateProxies([
+        for (final node in nodes) node.proxy,
+      ]);
+      nodes = [
+        for (final (index, node) in nodes.indexed)
+          if (errors[index].isEmpty) node,
+      ];
+    }
+    if (!mounted) return true;
+    ref
+        .read(profilesProvider.notifier)
+        .updateProfile(
+          widget.profileId,
+          (profile) => profile.copyWith(
+            profileProxies: [
+              ...profile.profileProxies,
+              for (final (:uri, :proxy) in withFreeNodeNames(nodes, {
+                for (final node in profile.profileProxies) node.name,
+              }))
+                ProfileProxy.create(uri: uri, proxy: proxy),
+            ],
+          ),
+        );
+    final invalid = links.invalid + links.nodes.length - nodes.length;
+    context.showNotifier(
+      [
+        appLocalizations.shareLinkNodesAdded(nodes.length),
+        if (invalid > 0) appLocalizations.shareLinksNotRead(invalid),
+      ].join('\n'),
+    );
+    return true;
   }
 
   /// The providers go into the library before the profile names them.

@@ -246,27 +246,33 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m91(count) =>
       "${Intl.plural(count, one: '${count} настройка', few: '${count} настройки', many: '${count} настроек', other: '${count} настройки')}";
 
-  static String m92(label) => "«${label}» — только одно значение";
+  static String m92(count) =>
+      "${Intl.plural(count, one: 'Из ссылок добавлен ${count} узел', few: 'Из ссылок добавлено ${count} узла', many: 'Из ссылок добавлено ${count} узлов', other: 'Из ссылок добавлено ${count} узла')}";
 
-  static String m93(fields) => "Проверьте настройки: ${fields}";
+  static String m93(count) =>
+      "${Intl.plural(count, one: 'Не удалось прочитать ${count} ссылку', few: 'Не удалось прочитать ${count} ссылки', many: 'Не удалось прочитать ${count} ссылок', other: 'Не удалось прочитать ${count} ссылки')}";
 
-  static String m94(count) => "Устройства (${count})";
+  static String m94(label) => "«${label}» — только одно значение";
 
-  static String m95(name, profile) =>
+  static String m95(fields) => "Проверьте настройки: ${fields}";
+
+  static String m96(count) => "Устройства (${count})";
+
+  static String m97(name, profile) =>
       "${name} все еще используется правилом или группой в профиле «${profile}»";
 
-  static String m96(region) => "Ретранслятор ${region}";
+  static String m98(region) => "Ретранслятор ${region}";
 
-  static String m97(name) =>
+  static String m99(name) =>
       "Это устройство выйдет из сети ${name}, а данные входа будут удалены с него. Если сеть сейчас недоступна, удалите устройство в консоли администратора Tailscale.";
 
-  static String m98(build) => "Номер сборки: ${build}";
+  static String m100(build) => "Номер сборки: ${build}";
 
-  static String m99(version) => "Версия: ${version}";
+  static String m101(version) => "Версия: ${version}";
 
-  static String m100(label) => "${label} должен быть URL";
+  static String m102(label) => "${label} должен быть URL";
 
-  static String m101(count) =>
+  static String m103(count) =>
       "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2778,6 +2784,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "settingEntries": MessageLookupByLibrary.simpleMessage("параметры"),
     "settings": MessageLookupByLibrary.simpleMessage("Настройки"),
     "settingsCount": m91,
+    "shareLinkNodesAdded": m92,
+    "shareLinksNotRead": m93,
     "show": MessageLookupByLibrary.simpleMessage("Показать"),
     "showLess": MessageLookupByLibrary.simpleMessage("Свернуть"),
     "showMore": MessageLookupByLibrary.simpleMessage("Развернуть"),
@@ -2799,7 +2807,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Запуск в фоновом режиме",
     ),
     "singleAdd": MessageLookupByLibrary.simpleMessage("По одному"),
-    "singleValueTip": m92,
+    "singleValueTip": m94,
     "size": MessageLookupByLibrary.simpleMessage("Размер"),
     "skipDomain": MessageLookupByLibrary.simpleMessage("Пропускаемые домены"),
     "skipDomainDesc": MessageLookupByLibrary.simpleMessage(
@@ -2932,7 +2940,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleAvailableExitNodes": MessageLookupByLibrary.simpleMessage(
       "Доступные выходные узлы",
     ),
-    "tailscaleCheckSettings": m93,
+    "tailscaleCheckSettings": m95,
     "tailscaleConnected": MessageLookupByLibrary.simpleMessage("Подключено"),
     "tailscaleConnecting": MessageLookupByLibrary.simpleMessage("Подключение"),
     "tailscaleControlUrl": MessageLookupByLibrary.simpleMessage(
@@ -2944,7 +2952,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleDeviceName": MessageLookupByLibrary.simpleMessage(
       "Имя устройства",
     ),
-    "tailscaleDevices": m94,
+    "tailscaleDevices": m96,
     "tailscaleDirect": MessageLookupByLibrary.simpleMessage("Напрямую"),
     "tailscaleEmptyDesc": MessageLookupByLibrary.simpleMessage(
       "Добавьте сеть, войдите на этом устройстве и запустите прокси, чтобы получить доступ к своим устройствам.",
@@ -3039,7 +3047,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleNeedsLogin": MessageLookupByLibrary.simpleMessage(
       "Требуется вход",
     ),
-    "tailscaleNetworkInUse": m95,
+    "tailscaleNetworkInUse": m97,
     "tailscaleNetworkName": MessageLookupByLibrary.simpleMessage(
       "Название сети",
     ),
@@ -3056,8 +3064,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleOpenLoginPage": MessageLookupByLibrary.simpleMessage(
       "Открыть страницу входа",
     ),
-    "tailscaleRelay": m96,
-    "tailscaleRemoveConfirm": m97,
+    "tailscaleRelay": m98,
+    "tailscaleRemoveConfirm": m99,
     "tailscaleRemoveNetwork": MessageLookupByLibrary.simpleMessage(
       "Удалить сеть",
     ),
@@ -3176,7 +3184,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateApplyFailed": MessageLookupByLibrary.simpleMessage(
       "Автоматическое обновление не завершено. Повторите попытку или обновите приложение со страницы загрузки.",
     ),
-    "updateBuildNumber": m98,
+    "updateBuildNumber": m100,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
       "Отменить загрузку",
     ),
@@ -3227,14 +3235,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateRestartHint": MessageLookupByLibrary.simpleMessage(
       "Приложение закроется, обновится и откроется снова. Ваши настройки сохранятся.",
     ),
-    "updateVersionNumber": m99,
+    "updateVersionNumber": m101,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("Улучшить тариф"),
     "upload": MessageLookupByLibrary.simpleMessage("Загрузка"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Получить профиль через URL",
     ),
-    "urlTip": m100,
+    "urlTip": m102,
     "useHosts": MessageLookupByLibrary.simpleMessage("Использовать hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Использовать системные hosts",
@@ -3274,7 +3282,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Также устанавливать системные часы; Android это игнорирует",
     ),
-    "yearsAgo": m101,
+    "yearsAgo": m103,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Упрощенный китайский"),
   };
 }

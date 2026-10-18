@@ -1478,5 +1478,7 @@
   "customImportNotImported": "インポートされなかった項目",
   "customImportDroppedSubRules": "カスタムプロファイルはサブルールに対応していないため、SUB-RULE ルール {count} 件を破棄しました",
   "customImportUnnamedProxies": "名前または種類のないプロキシ {count} 件",
-  "failedItem": "{label}：{message}"
+  "failedItem": "{label}：{message}",
+  "shareLinkNodesAdded": "共有リンクからノードを {count} 件追加しました",
+  "shareLinksNotRead": "{count} 件のリンクを読み取れませんでした"
 }

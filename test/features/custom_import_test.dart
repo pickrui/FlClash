@@ -266,6 +266,31 @@ proxies:
     expect(config.report.dialers, unorderedEquals(['D', 'A', 'B']));
   });
 
+  test('share links become nodes, a base64 list too', () {
+    const links =
+        'trojan://secret@hk.example:443#HK\n'
+        'not a link\n'
+        'ss://YWVzLTEyOC1nY206c2VjcmV0@jp.example:8388#JP';
+    for (final text in [links, base64.encode(utf8.encode(links))]) {
+      final read = readShareLinks(text);
+      expect(read.nodes.map((node) => node.proxy['name']), ['HK', 'JP']);
+      expect(read.invalid, 1);
+      expect(read.nodes.first.proxy, isNot(contains('skip-cert-verify')));
+    }
+    expect(
+      [
+        for (final node in withFreeNodeNames(readShareLinks(links).nodes, {
+          'HK',
+        }))
+          (node.uri, node.proxy['name']),
+      ],
+      [
+        ('', 'HK 2'),
+        ('ss://YWVzLTEyOC1nY206c2VjcmV0@jp.example:8388#JP', 'JP'),
+      ],
+    );
+  });
+
   test('only a config with something to import is read', () {
     for (final content in ['', 'just text', '[1, 2]', 'mode: rule', ': :']) {
       expect(

@@ -1478,5 +1478,7 @@
   "customImportNotImported": "Not imported",
   "customImportDroppedSubRules": "{count, plural, =1{1 SUB-RULE rule was dropped, since custom profiles do not support sub-rules} other{{count} SUB-RULE rules were dropped, since custom profiles do not support sub-rules}}",
   "customImportUnnamedProxies": "{count, plural, =1{1 proxy had no name or type} other{{count} proxies had no name or type}}",
-  "failedItem": "{label}: {message}"
+  "failedItem": "{label}: {message}",
+  "shareLinkNodesAdded": "{count, plural, =1{1 node was added from the share links} other{{count} nodes were added from the share links}}",
+  "shareLinksNotRead": "{count, plural, =1{1 link could not be read} other{{count} links could not be read}}"
 }

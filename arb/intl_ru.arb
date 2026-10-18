@@ -1478,5 +1478,7 @@
   "customImportNotImported": "Не импортировано",
   "customImportDroppedSubRules": "{count, plural, one{Пользовательские профили не поддерживают подправила, поэтому отброшено {count} правило SUB-RULE} few{Пользовательские профили не поддерживают подправила, поэтому отброшено {count} правила SUB-RULE} many{Пользовательские профили не поддерживают подправила, поэтому отброшено {count} правил SUB-RULE} other{Пользовательские профили не поддерживают подправила, поэтому отброшено {count} правила SUB-RULE}}",
   "customImportUnnamedProxies": "{count, plural, one{{count} прокси без имени или типа} few{{count} прокси без имени или типа} many{{count} прокси без имени или типа} other{{count} прокси без имени или типа}}",
-  "failedItem": "{label}: {message}"
+  "failedItem": "{label}: {message}",
+  "shareLinkNodesAdded": "{count, plural, one{Из ссылок добавлен {count} узел} few{Из ссылок добавлено {count} узла} many{Из ссылок добавлено {count} узлов} other{Из ссылок добавлено {count} узла}}",
+  "shareLinksNotRead": "{count, plural, one{Не удалось прочитать {count} ссылку} few{Не удалось прочитать {count} ссылки} many{Не удалось прочитать {count} ссылок} other{Не удалось прочитать {count} ссылки}}"
 }

@@ -12455,6 +12455,30 @@ class AppLocalizations {
       args: [label, message],
     );
   }
+
+  /// `{count, plural, =1{1 node was added from the share links} other{{count} nodes were added from the share links}}`
+  String shareLinkNodesAdded(num count) {
+    return Intl.plural(
+      count,
+      one: '1 node was added from the share links',
+      other: '$count nodes were added from the share links',
+      name: 'shareLinkNodesAdded',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, =1{1 link could not be read} other{{count} links could not be read}}`
+  String shareLinksNotRead(num count) {
+    return Intl.plural(
+      count,
+      one: '1 link could not be read',
+      other: '$count links could not be read',
+      name: 'shareLinksNotRead',
+      desc: '',
+      args: [count],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

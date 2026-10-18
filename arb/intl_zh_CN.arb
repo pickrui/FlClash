@@ -1478,5 +1478,7 @@
   "customImportNotImported": "未导入",
   "customImportDroppedSubRules": "自定义配置不支持子规则，已丢弃 {count} 条 SUB-RULE 规则",
   "customImportUnnamedProxies": "{count} 个节点缺少名称或类型",
-  "failedItem": "{label}：{message}"
+  "failedItem": "{label}：{message}",
+  "shareLinkNodesAdded": "已从分享链接添加 {count} 个节点",
+  "shareLinksNotRead": "{count} 条链接无法识别"
 }

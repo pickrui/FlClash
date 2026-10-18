@@ -10,6 +10,8 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 
+import 'profile_proxy.dart';
+
 /// The app's providers a config is matched against: a label stays unique
 /// and a source the app already has is used under its label.
 typedef CustomImportContext = ({
@@ -164,6 +166,56 @@ CustomProfileImport readCustomProfileImport(
     throw const CustomImportException();
   }
   return _Importer(input.context).read(document);
+}
+
+typedef ShareLinkNode = ({String uri, Map<String, Object?> proxy});
+
+/// Plain or base64; a link keeps only the certificate check it asks for.
+({List<ShareLinkNode> nodes, int invalid}) readShareLinks(String text) {
+  var content = text.trim();
+  if (!content.contains('://')) {
+    try {
+      content = utf8.decode(
+        base64.decode(base64.normalize(content.replaceAll(RegExp(r'\s'), ''))),
+      );
+    } on FormatException {
+      return (nodes: const [], invalid: 0);
+    }
+  }
+  final nodes = <ShareLinkNode>[];
+  var invalid = 0;
+  for (final line in const LineSplitter().convert(content)) {
+    final uri = line.trim();
+    if (uri.isEmpty) {
+      continue;
+    }
+    try {
+      nodes.add((uri: uri, proxy: parseProfileProxyUri(uri)));
+    } catch (_) {
+      invalid++;
+    }
+  }
+  return (nodes: nodes, invalid: invalid);
+}
+
+/// A renamed node drops its link, whose edit would bring the name back.
+List<ShareLinkNode> withFreeNodeNames(
+  Iterable<ShareLinkNode> nodes,
+  Set<String> taken,
+) {
+  final names = {...reservedOutboundNames, ...taken};
+  final result = <ShareLinkNode>[];
+  for (final (:uri, :proxy) in nodes) {
+    final name = _textOf(proxy['name']);
+    final free = _freeName(name, names);
+    names.add(free);
+    result.add(
+      free == name
+          ? (uri: uri, proxy: proxy)
+          : (uri: '', proxy: {...proxy, 'name': free}),
+    );
+  }
+  return result;
 }
 
 List<Object?> _listOf(Object? value) => value is List ? value : const [];
