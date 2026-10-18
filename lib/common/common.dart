@@ -54,6 +54,7 @@ export 'secrets.dart';
 export 'oix_params_storage.dart';
 
 export 'package:fl_clash/ui/color.dart';
+export 'package:fl_clash/ui/metrics.dart';
 export 'package:fl_clash/ui/shape.dart';
 
 export 'window_port.dart';

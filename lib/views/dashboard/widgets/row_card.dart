@@ -9,7 +9,6 @@ import 'package:fl_clash/common/scroll.dart';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/surface.dart';
-import 'package:fl_clash/ui/metrics.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/dashboard/widget_metrics.dart';
 import 'package:fl_clash/widgets/widgets.dart';

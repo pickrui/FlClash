@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/context.dart';
 import 'package:fl_clash/ui/shape.dart';
-import 'package:fl_clash/common/constant.dart';
+import 'package:fl_clash/ui/metrics.dart';
 import 'package:fl_clash/common/scroll.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/foundation.dart';

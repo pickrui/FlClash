@@ -5,9 +5,10 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/state.dart';
-import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/ui/inherited.dart';
 import 'package:material_ui/material_ui.dart';
+
+export 'package:fl_clash/ui/context.dart';
 
 /// The state [BuildContextExtension.showNotifier] hands its messages to.
 abstract class MessageHostState<T extends StatefulWidget> extends State<T> {
@@ -20,39 +21,12 @@ extension BuildContextExtension on BuildContext {
       (ModalRoute.of(this)?.isCurrent ?? true) &&
       getInheritedWidgetOfExactType<PageActivityScope>()?.isActive != false;
 
-  bool get disableAnimations => MediaQuery.disableAnimationsOf(this);
-  Duration motionDuration(Duration duration) =>
-      MediaQuery.disableAnimationsOf(this) ? Duration.zero : duration;
-
-  bool get isMobileView => MediaQuery.sizeOf(this).width < 600;
-  bool get isInBottomSheet =>
-      SheetProvider.of(this)?.type == SheetType.bottomSheet;
-  void safeNestedPop<T extends Object?>([T? result]) {
-    final nestedPop = SheetProvider.of(this)?.nestedNavigatorPop;
-    if (nestedPop != null && ModalRoute.of(this)?.isFirst == true) {
-      nestedPop(result);
-    } else {
-      Navigator.of(this).pop(result);
-    }
-  }
-
-  double get appBarInset =>
-      FloatingBarScope.of(this) ??
-      (isInBottomSheet
-          ? sheetAppBarHeight
-          : MediaQuery.paddingOf(this).top + pageToolbarHeight);
-  double get contentTopPadding =>
-      TopInsetScope.of(this) ??
-      (isInBottomSheet ? sheetAppBarHeight : appBarInset + 12);
-
   void showNotifier(String text, {MessageActionState? actionState}) {
     return findAncestorStateOfType<MessageHostState>()?.message(
       text,
       actionState: actionState,
     );
   }
-
-  ColorScheme get colorScheme => Theme.of(this).colorScheme;
 
   TextTheme get textTheme => Theme.of(this).textTheme;
 

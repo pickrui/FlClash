@@ -25,3 +25,6 @@ EdgeInsets listHeaderPaddingOf(BuildContext context) =>
 
 const listRowMinHeight = 56.0;
 const listRowVerticalPadding = 10.0;
+const pageToolbarHeight = 64.0;
+const sheetToolbarHeight = 48.0;
+const sheetAppBarHeight = 68.0;

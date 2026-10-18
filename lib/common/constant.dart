@@ -15,10 +15,6 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:material_ui/material_ui.dart';
 
-const pageToolbarHeight = 64.0;
-const sheetToolbarHeight = 48.0;
-const sheetAppBarHeight = 68.0;
-
 const safeModeBuild = bool.fromEnvironment('SAFE_MODE');
 const appName = 'FlClash for oixCloud';
 const appHelperService = 'FlClashHelperService';
