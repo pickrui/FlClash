@@ -205,7 +205,7 @@ class GlobalState {
       () async => recoverPendingScriptDeletions(
         scriptsPath: await appPath.scriptsDirPath,
         scriptExists: (scriptId) async =>
-            await database.scriptsDao.get(scriptId).getSingleOrNull() != null,
+            (await database.scriptsDao.ids().get()).contains(scriptId),
       ),
       seconds: 30,
     );

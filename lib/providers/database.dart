@@ -226,26 +226,26 @@ class Profiles extends _$Profiles {
     _queueWrite(() => database.putProfile(newProfile));
   }
 
-  Future<void> setAndReorder(List<Profile> profiles) {
-    final newProfiles = List<Profile>.from(profiles);
-    state = newProfiles;
-    return _queueWrite(() => database.profilesDao.setAll(profiles));
-  }
+  /// [profiles] lacks the rows this version cannot read, which therefore stay
+  /// untouched: only the order of the listed rows is written.
+  Future<void> setAndReorder(List<Profile> profiles) => _writeOrder(profiles);
 
   void reorder(List<Profile> profiles) {
     final current = {for (final profile in state) profile.id: profile};
-    final ordered = [
+    _writeOrder([
       for (final profile in profiles) ?current.remove(profile.id),
       ...current.values,
-    ];
+    ]);
+  }
+
+  Future<void> _writeOrder(List<Profile> ordered) {
     final orders = <int, int>{};
-    final newProfiles = ordered.mapIndexed((index, item) {
+    state = ordered.mapIndexed((index, item) {
       if (item.order == index) return item;
       orders[item.id] = index;
       return item.copyWith(order: index);
     }).toList();
-    state = newProfiles;
-    _queueWrite(() => database.profilesDao.setOrders(orders));
+    return _queueWrite(() => database.profilesDao.setOrders(orders));
   }
 
   @override

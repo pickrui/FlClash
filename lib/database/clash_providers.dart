@@ -30,12 +30,13 @@ class ClashProvidersDao extends DatabaseAccessor<Database>
   ClashProvidersDao(super.attachedDatabase);
 
   Selectable<ClashProvider> all() {
-    final query = select(clashProviders)
-      ..orderBy([
+    return clashProviders.readable(
+      (row) => row.toClashProvider(),
+      orderBy: [
         (row) => OrderingTerm.asc(row.order),
         (row) => OrderingTerm.asc(row.id),
-      ]);
-    return query.map((row) => row.toClashProvider());
+      ],
+    );
   }
 
   Future<void> put(ClashProvider provider) async {
@@ -77,18 +78,15 @@ class ClashProvidersDao extends DatabaseAccessor<Database>
         clashProviders.label,
       ]);
     final existing = await query.get();
-    final namedIds = {
+    // Read as text, since a kind this version cannot read would throw.
+    final namedIds = <(String, String), int>{
       for (final row in existing)
-        (
-          row.readWithConverter(clashProviders.kind)!,
-          row.read(clashProviders.label)!,
-        ): row.read(
-          clashProviders.id,
-        )!,
+        (row.read(clashProviders.kind)!, row.read(clashProviders.label)!): row
+            .read(clashProviders.id)!,
     };
     final occupiedIds = namedIds.values.toSet();
     for (final provider in providers) {
-      final name = (provider.kind, provider.label);
+      final name = (provider.kind.name, provider.label);
       var id = namedIds[name] ?? provider.id;
       if (!namedIds.containsKey(name)) {
         while (occupiedIds.contains(id)) {

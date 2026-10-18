@@ -9,9 +9,12 @@ import 'dart:typed_data';
 
 import 'package:fl_clash/common/lock.dart';
 import 'package:fl_clash/common/path.dart';
+import 'package:fl_clash/database/database.dart';
 import 'package:fl_clash/providers/action.dart';
+import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/models/profile.dart';
 import 'package:fl_clash/services/age_crypto.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -332,6 +335,33 @@ void main() {
     await next.save();
     expect(await file.readAsBytes(), bytes);
   });
+
+  test(
+    'startup ordering keeps a profile row this version cannot read',
+    () async {
+      await database.putProfile(
+        const Profile(id: 21, autoUpdateDuration: Duration.zero, order: 9),
+      );
+      await database.customStatement(
+        'INSERT INTO profiles (id, label, url, overwrite_type, '
+        'auto_update_duration_millis, auto_update, selected_map, unfold_set, '
+        '"order") '
+        "VALUES (22, 'Future', '', 'future', 0, 1, '{}', '[]', 0)",
+      );
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final profiles = await database.profilesDao.all().get();
+      await container.read(profilesProvider.notifier).setAndReorder(profiles);
+
+      expect(profiles.map((profile) => profile.id), isNot(contains(22)));
+      expect(await database.profilesDao.ids().get(), containsAll([21, 22]));
+      final kept = await database
+          .customSelect('SELECT label, "order" FROM profiles WHERE id = 22')
+          .getSingle();
+      expect(kept.data, {'label': 'Future', 'order': 0});
+    },
+  );
 
   test('snapshot inspection waits for a concurrent replacement', () async {
     const profile = Profile(

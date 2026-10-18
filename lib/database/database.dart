@@ -282,6 +282,38 @@ extension TableInfoExt<Tbl extends Table, Row> on TableInfo<Tbl, Row> {
     return query.map((row) => row.read(expression));
   }
 
+  /// [select] that skips a row this version cannot read instead of failing the
+  /// whole query; the row itself stays in the table.
+  Selectable<R> readable<R extends Object>(
+    R Function(Row row) read, {
+    Expression<bool> Function(Tbl tbl)? where,
+    List<OrderingTerm Function(Tbl tbl)> orderBy = const [],
+  }) {
+    final query = selectOnly()..addColumns($columns);
+    if (where != null) {
+      query.where(where(asDslTable));
+    }
+    query.orderBy([for (final term in orderBy) term(asDslTable)]);
+    return _NonNullSelectable(
+      query.map((row) => _readRow(row.rawData.data, read)),
+    );
+  }
+
+  R? _readRow<R extends Object>(
+    Map<String, Object?> data,
+    R Function(Row row) read,
+  ) {
+    try {
+      return read(map(data, tablePrefix: aliasedName) as Row);
+    } catch (error) {
+      commonPrint.log(
+        'Skipped unreadable $actualTableName row: $error',
+        logLevel: LogLevel.warning,
+      );
+      return null;
+    }
+  }
+
   Future<int> remove(Expression<bool> Function(Tbl tbl) filter) async {
     return (delete()..where(filter)).go();
   }
@@ -289,6 +321,19 @@ extension TableInfoExt<Tbl extends Table, Row> on TableInfo<Tbl, Row> {
   Future<int> put(Insertable<Row> item) async {
     return insertOnConflictUpdate(item);
   }
+}
+
+class _NonNullSelectable<T extends Object> extends Selectable<T> {
+  _NonNullSelectable(this._source);
+
+  final Selectable<T?> _source;
+
+  @override
+  Future<List<T>> get() async => (await _source.get()).nonNulls.toList();
+
+  @override
+  Stream<List<T>> watch() =>
+      _source.watch().map((rows) => rows.nonNulls.toList());
 }
 
 final database = Database();

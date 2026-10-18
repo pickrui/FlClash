@@ -1692,6 +1692,7 @@ Future<MigrationData> _restoreTask(VM3<String, String, String> paths) async {
     ]);
     final profiles = results[0].cast<Profile>();
     final scripts = results[1].cast<Script>();
+    final profileIds = {for (final profile in profiles) profile.id};
     final profilesMigration = profiles
         .where((item) => item.includeInPortableBackup)
         .map(
@@ -1716,7 +1717,12 @@ Future<MigrationData> _restoreTask(VM3<String, String, String> paths) async {
       profiles: profiles,
       scripts: scripts,
       rules: results[2].cast<Rule>(),
-      links: results[3].cast<ProfileRuleLink>(),
+      // A link to a profile skipped as unreadable would fail its foreign key.
+      links: [
+        for (final link in results[3].cast<ProfileRuleLink>())
+          if (link.profileId == null || profileIds.contains(link.profileId))
+            link,
+      ],
       clashProviders: results[4].cast<ClashProvider>(),
       fileMigrations: fileMigrations,
     );

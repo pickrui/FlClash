@@ -26,12 +26,8 @@ extension BackupControllerExt on AppController {
   Future<void> shakingStore() {
     return storageLock.synchronized(
       () => runExclusiveDatabaseOperation(() async {
-        final profileIds = (await database.profilesDao.all().get())
-            .map((item) => item.id)
-            .toList();
-        final scriptIds = (await database.scriptsDao.all().get())
-            .map((item) => item.id)
-            .toList();
+        final profileIds = await database.profilesDao.ids().get();
+        final scriptIds = await database.scriptsDao.ids().get();
         final pathsToDelete = await shakingProfileTask(
           VM2(profileIds, scriptIds),
         );
@@ -174,6 +170,14 @@ extension BackupControllerExt on AppController {
               .select(database.profileRuleLinks)
               .map((row) => row.toLink())
               .get();
+          // Only the journal snapshot holds the rows the lists above skip.
+          final rollbackNeedsJournal =
+              previousProfiles.length !=
+                  await database.profiles.count.getSingle() ||
+              previousScripts.length !=
+                  await database.scripts.count.getSingle() ||
+              previousProviders.length !=
+                  await database.clashProviders.count.getSingle();
           await preferences.saveDurableConfig(previousConfig);
           restoreJournal = await RestoreJournal.begin(
             homePath: await appPath.homeDirPath,
@@ -320,7 +324,8 @@ extension BackupControllerExt on AppController {
                       stackTrace,
                     );
                   }
-                  durableRollbackConfirmed = true;
+                  durableRollbackConfirmed =
+                      !databaseChanged || !rollbackNeedsJournal;
                   Error.throwWithStackTrace(error, stackTrace);
                 }
               },

@@ -10,7 +10,11 @@ class StringMapConverter extends TypeConverter<Map<String, String>, String> {
 
   @override
   Map<String, String> fromSql(String fromDb) {
-    return Map<String, String>.from(json.decode(fromDb));
+    return decodeOrRestoreDefault(
+      'string map',
+      () => Map<String, String>.from(json.decode(fromDb)),
+      () => {},
+    );
   }
 
   @override
@@ -24,7 +28,11 @@ class StringListConverter extends TypeConverter<List<String>, String> {
 
   @override
   List<String> fromSql(String fromDb) {
-    return List<String>.from(json.decode(fromDb));
+    return decodeOrRestoreDefault(
+      'string list',
+      () => List<String>.from(json.decode(fromDb)),
+      () => [],
+    );
   }
 
   @override
@@ -38,7 +46,11 @@ class StringSetConverter extends TypeConverter<Set<String>, String> {
 
   @override
   Set<String> fromSql(String fromDb) {
-    return Set<String>.from(json.decode(fromDb));
+    return decodeOrRestoreDefault(
+      'string set',
+      () => Set<String>.from(json.decode(fromDb)),
+      () => {},
+    );
   }
 
   @override
@@ -50,8 +62,13 @@ class StringSetConverter extends TypeConverter<Set<String>, String> {
 class JsonValueConverter extends TypeConverter<Object?, String?> {
   const JsonValueConverter();
   @override
-  Object? fromSql(String? fromDb) =>
-      fromDb == null ? null : json.decode(fromDb);
+  Object? fromSql(String? fromDb) => fromDb == null
+      ? null
+      : decodeOrRestoreDefault(
+          'JSON value',
+          () => json.decode(fromDb),
+          () => null,
+        );
   @override
   String? toSql(Object? value) => value == null ? null : json.encode(value);
 }

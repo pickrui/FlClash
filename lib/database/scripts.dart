@@ -29,18 +29,26 @@ class ScriptsDao extends DatabaseAccessor<Database> with _$ScriptsDaoMixin {
   ScriptsDao(super.attachedDatabase);
 
   Selectable<Script> all() {
-    final query = scripts.select()
-      ..orderBy([
+    return scripts.readable(
+      (row) => row.toScript(),
+      orderBy: [
         (t) => OrderingTerm(expression: t.order, nulls: NullsOrder.last),
         (t) => OrderingTerm.asc(t.id),
-      ]);
-    return query.map((item) => item.toScript());
+      ],
+    );
   }
 
   Selectable<Script> get(int scriptId) {
-    final stmt = scripts.select();
-    stmt.where((t) => t.id.equals(scriptId));
-    return stmt.map((it) => it.toScript());
+    return scripts.readable(
+      (row) => row.toScript(),
+      where: (t) => t.id.equals(scriptId),
+    );
+  }
+
+  /// Every stored id, including rows [all] skips.
+  Selectable<int> ids() {
+    final query = selectOnly(scripts)..addColumns([scripts.id]);
+    return query.map((row) => row.read(scripts.id)!);
   }
 
   void setAllWithBatch(Batch batch, Iterable<Script> scripts) {

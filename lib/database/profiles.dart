@@ -65,7 +65,11 @@ class SubscriptionInfoConverter
   @override
   SubscriptionInfo? fromSql(String? fromDb) {
     if (fromDb == null) return null;
-    return SubscriptionInfo.fromJson(json.decode(fromDb));
+    return decodeOrRestoreDefault(
+      'subscription info',
+      () => SubscriptionInfo.fromJson(json.decode(fromDb)),
+      () => null,
+    );
   }
 
   @override
@@ -80,24 +84,19 @@ class ProfilesDao extends DatabaseAccessor<Database> with _$ProfilesDaoMixin {
   ProfilesDao(super.attachedDatabase);
 
   Selectable<Profile> all() {
-    final stmt = profiles.select();
-    stmt.orderBy([
-      (t) => OrderingTerm(expression: t.order, nulls: NullsOrder.last),
-      (t) => OrderingTerm.asc(t.id),
-    ]);
-    return stmt.map((item) => item.toProfile());
+    return profiles.readable(
+      (row) => row.toProfile(),
+      orderBy: [
+        (t) => OrderingTerm(expression: t.order, nulls: NullsOrder.last),
+        (t) => OrderingTerm.asc(t.id),
+      ],
+    );
   }
 
-  Future<void> setAll(Iterable<Profile> profiles) async {
-    await transaction(() async {
-      await batch((b) => setAllWithBatch(b, profiles));
-      await batch((b) async {
-        for (final profile in profiles) {
-          await attachedDatabase.proxyGroupsDao.replaceWithBatch(b, profile);
-          await attachedDatabase.rulesDao.replaceCustomWithBatch(b, profile);
-        }
-      });
-    });
+  /// Every stored id, including rows [all] skips.
+  Selectable<int> ids() {
+    final query = selectOnly(profiles)..addColumns([profiles.id]);
+    return query.map((row) => row.read(profiles.id)!);
   }
 
   Future<void> putAll(Iterable<Insertable<RawProfile>> items) =>
@@ -129,18 +128,27 @@ class ProfilesDao extends DatabaseAccessor<Database> with _$ProfilesDaoMixin {
   }
 }
 
-List<T> _jsonListFromSql<T>(
+List<T> _jsonListFromSql<T extends Object>(
+  String label,
   String fromDb,
   T Function(Map<String, Object?> item) fromJson,
 ) {
-  final value = json.decode(fromDb);
+  final value = decodeOrRestoreDefault<Object?>(
+    label,
+    () => json.decode(fromDb),
+    () => null,
+  );
   if (value is! List) {
     return [];
   }
-  return value
-      .whereType<Map>()
-      .map((item) => fromJson(Map<String, Object?>.from(item)))
-      .toList();
+  return [
+    for (final item in value.whereType<Map>())
+      ?decodeOrRestoreDefault<T?>(
+        label,
+        () => fromJson(Map<String, Object?>.from(item)),
+        () => null,
+      ),
+  ];
 }
 
 String _jsonListToSql<T>(List<T> value, Object? Function(T item) toJson) {
@@ -152,7 +160,7 @@ class ProxyChainListConverter extends TypeConverter<List<ProxyChain>, String> {
 
   @override
   List<ProxyChain> fromSql(String fromDb) {
-    return _jsonListFromSql(fromDb, ProxyChain.fromJson);
+    return _jsonListFromSql('proxy chains', fromDb, ProxyChain.fromJson);
   }
 
   @override
@@ -167,7 +175,7 @@ class ProfileProxyListConverter
 
   @override
   List<ProfileProxy> fromSql(String fromDb) {
-    return _jsonListFromSql(fromDb, ProfileProxy.fromJson);
+    return _jsonListFromSql('profile proxies', fromDb, ProfileProxy.fromJson);
   }
 
   @override
@@ -181,7 +189,7 @@ class ProxyGroupListConverter extends TypeConverter<List<ProxyGroup>, String> {
 
   @override
   List<ProxyGroup> fromSql(String fromDb) {
-    return _jsonListFromSql(fromDb, ProxyGroup.fromJson);
+    return _jsonListFromSql('custom proxy groups', fromDb, ProxyGroup.fromJson);
   }
 
   @override
@@ -195,7 +203,7 @@ class RuleListConverter extends TypeConverter<List<Rule>, String> {
 
   @override
   List<Rule> fromSql(String fromDb) {
-    return _jsonListFromSql(fromDb, Rule.fromJson);
+    return _jsonListFromSql('custom rules', fromDb, Rule.fromJson);
   }
 
   @override
