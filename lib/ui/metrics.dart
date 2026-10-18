@@ -21,7 +21,7 @@ EdgeInsets baseInfoEdgeInsetsOf(BuildContext context) =>
     EdgeInsets.all(16.mAp(context));
 
 EdgeInsets listHeaderPaddingOf(BuildContext context) =>
-    const EdgeInsets.only(left: 16, right: 8, top: 24, bottom: 8) *
+    const EdgeInsets.only(left: 16, right: 16, top: 24, bottom: 8) *
     1.mAp(context);
 
 const listRowMinHeight = 56.0;

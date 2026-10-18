@@ -11,7 +11,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod/misc.dart' show ProviderListenable;
 
 import 'input.dart';
-import 'list.dart';
+
+import 'package:fl_clash/ui/list.dart';
 
 export 'package:riverpod/misc.dart' show ProviderListenable;
 
@@ -151,14 +152,12 @@ class ConfigToggleItem extends _ConfigItem<bool> {
     AppLocalizations appLocalizations,
     bool value,
   ) {
-    return ListItem.switchItem(
+    return ListItem.toggle(
       leading: leading,
       title: Text(title(appLocalizations)),
       subtitle: buildSubtitle(appLocalizations),
-      delegate: SwitchDelegate(
-        value: value,
-        onChanged: (value) => onChanged(ref, value),
-      ),
+      value: value,
+      onChanged: (value) => onChanged(ref, value),
     );
   }
 }
@@ -196,17 +195,15 @@ class ConfigOptionsItem<T> extends _ConfigItem<T> {
         final text? => Text(text),
         null => null,
       },
-      delegate: OptionsDelegate<T>(
-        options: options,
-        value: value,
-        textBuilder: textBuilder,
-        onChanged: (value) {
-          if (value == null) {
-            return;
-          }
-          onChanged(ref, value);
-        },
-      ),
+      options: options,
+      value: value,
+      textBuilder: textBuilder,
+      onChanged: (value) {
+        if (value == null) {
+          return;
+        }
+        onChanged(ref, value);
+      },
     );
   }
 }
@@ -259,26 +256,24 @@ class ConfigTextItem extends _ConfigItem<String> {
       subtitle: showValueAsSubtitle && (value.isNotEmpty || description != null)
           ? Text(_describe(value, description, appLocalizations))
           : buildSubtitle(appLocalizations),
-      delegate: InputDelegate(
-        title: label,
-        value: value,
-        maxLength: maxLength,
-        keyboardType: keyboardType,
-        validator: (text) {
-          final normalized = _normalize(text);
-          if (normalized == null || normalized.isEmpty) {
-            return allowEmpty ? null : appLocalizations.emptyTip(label);
-          }
-          return validator?.call(normalized, appLocalizations);
-        },
-        onChanged: (text) {
-          final normalized = _normalize(text);
-          if (normalized == null || normalized == value) {
-            return;
-          }
-          onChanged(ref, normalized);
-        },
-      ),
+      dialogTitle: label,
+      value: value,
+      maxLength: maxLength,
+      keyboardType: keyboardType,
+      validator: (text) {
+        final normalized = _normalize(text);
+        if (normalized == null || normalized.isEmpty) {
+          return allowEmpty ? null : appLocalizations.emptyTip(label);
+        }
+        return validator?.call(normalized, appLocalizations);
+      },
+      onChanged: (text) {
+        final normalized = _normalize(text);
+        if (normalized == null || normalized == value) {
+          return;
+        }
+        onChanged(ref, normalized);
+      },
     );
   }
 }
@@ -317,20 +312,18 @@ class ConfigListEditItem extends _ConfigItem<List<String>> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-      delegate: OpenDelegate(
-        widget: ListInputPage(
-          title: label,
-          items: value,
-          itemMaxLength: itemMaxLength,
-          itemValidator: itemValidator == null
-              ? null
-              : (item) => itemValidator(item, appLocalizations),
-          titleBuilder: (item) => Text(item),
-        ),
-        onChanged: (items) {
-          if (items is List) onChanged(ref, List<String>.from(items));
-        },
+      widget: ListInputPage(
+        title: label,
+        items: value,
+        itemMaxLength: itemMaxLength,
+        itemValidator: itemValidator == null
+            ? null
+            : (item) => itemValidator(item, appLocalizations),
+        titleBuilder: (item) => Text(item),
       ),
+      onChanged: (items) {
+        if (items is List) onChanged(ref, List<String>.from(items));
+      },
     );
   }
 }

@@ -6,6 +6,7 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/features/form/selection_sheet.dart';
+import 'package:fl_clash/ui/animated_entries.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
@@ -403,21 +404,19 @@ class MapOverrideField<M> extends ValueOverrideField<M, Map<String, String>> {
           subtitle: description == null
               ? null
               : Text(description(appLocalizations)),
-          delegate: OpenDelegate(
-            widget: MapInputPage(
-              title: label,
-              entries: entries,
-              keyMaxLength: keyMaxLength,
-              valueMaxLength: valueMaxLength,
-              titleBuilder: (item) => Text(item.key),
-              subtitleBuilder: (item) => Text(item.value),
-            ),
-            onChanged: (value) {
-              if (value is Map) {
-                model.modelWriter(update)(ref, Map<String, String>.from(value));
-              }
-            },
+          widget: MapInputPage(
+            title: label,
+            entries: entries,
+            keyMaxLength: keyMaxLength,
+            valueMaxLength: valueMaxLength,
+            titleBuilder: (item) => Text(item.key),
+            subtitleBuilder: (item) => Text(item.value),
           ),
+          onChanged: (value) {
+            if (value is Map) {
+              model.modelWriter(update)(ref, Map<String, String>.from(value));
+            }
+          },
         );
       },
     );
@@ -634,21 +633,28 @@ class _OverrideList<K extends Enum, M> extends ConsumerWidget {
           ),
           sliver: SliverList.list(
             children: [
-              for (final (title, keys) in spec.sectionsOf(
-                appLocalizations,
-                entries,
-              ))
-                generateSection(
-                  title: title,
-                  items: [
-                    for (final key in keys)
-                      OverrideEntry(
-                        key: ValueKey(key),
-                        spec: spec,
-                        overrideKey: key,
+              AnimatedEntries(
+                children: [
+                  for (final (title, keys) in spec.sectionsOf(
+                    appLocalizations,
+                    entries,
+                  ))
+                    KeyedSubtree(
+                      key: ValueKey(title),
+                      child: generateAnimatedSection(
+                        title: title,
+                        items: [
+                          for (final key in keys)
+                            OverrideEntry(
+                              key: ValueKey(key),
+                              spec: spec,
+                              overrideKey: key,
+                            ),
+                        ],
                       ),
-                  ],
-                ),
+                    ),
+                ],
+              ),
               if (entries.isNotEmpty && description != null)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),

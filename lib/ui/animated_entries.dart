@@ -5,8 +5,13 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:fl_clash/ui/context.dart';
 import 'package:fl_clash/ui/item_position.dart';
+import 'package:fl_clash/ui/metrics.dart';
 import 'package:material_ui/material_ui.dart';
+
+import 'inherited.dart';
+import 'list.dart';
 
 /// Each entry runs on a controller of its own, so a change made while another
 /// entry still moves leaves that one running.
@@ -156,4 +161,95 @@ class EntryTransition extends StatelessWidget {
       ),
     );
   }
+}
+
+/// With [grouped], a child collapsing out keeps its place in the run of
+/// rounded rows while the others close up around it.
+class AnimatedEntries extends StatefulWidget {
+  final List<Widget> children;
+  final bool grouped;
+
+  const AnimatedEntries({
+    super.key,
+    required this.children,
+    this.grouped = false,
+  });
+
+  @override
+  State<AnimatedEntries> createState() => _AnimatedEntriesState();
+}
+
+class _AnimatedEntriesState extends State<AnimatedEntries>
+    with TickerProviderStateMixin {
+  late final _transitions = EntryTransitions<Key?>(
+    vsync: this,
+    onLeft: _handleLeft,
+  );
+  late var _entries = widget.children;
+
+  @override
+  void didUpdateWidget(covariant AnimatedEntries oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _entries = _transitions.sync(
+      _entries,
+      widget.children,
+      (child) => child.key,
+      context.motionDuration(commonDuration),
+    );
+  }
+
+  @override
+  void dispose() {
+    _transitions.dispose();
+    super.dispose();
+  }
+
+  void _handleLeft(Key? key) {
+    if (!mounted || widget.children.any((child) => child.key == key)) {
+      return;
+    }
+    setState(() {
+      _entries = [
+        for (final entry in _entries)
+          if (entry.key != key) entry,
+      ];
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.grouped) {
+      _transitions.place(_entries.map((entry) => entry.key));
+    }
+    return Column(
+      children: [
+        for (final entry in _entries)
+          EntryTransition(
+            key: entry.key,
+            animation: _transitions.animationOf(entry.key),
+            leaving: _transitions.isLeaving(entry.key),
+            child: widget.grouped
+                ? ItemPositionProvider(
+                    position: _transitions.positionOf(entry.key),
+                    child: entry,
+                  )
+                : entry,
+          ),
+      ],
+    );
+  }
+}
+
+Widget generateAnimatedSection({
+  String? title,
+  required List<Widget> items,
+  String? footer,
+}) {
+  return Column(
+    children: [
+      if (items.isNotEmpty && title != null) ListHeader(title: title),
+      AnimatedEntries(grouped: true, children: items),
+      if (items.isNotEmpty && footer != null) ListFooter(text: footer),
+    ],
+  );
 }

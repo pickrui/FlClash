@@ -34,7 +34,7 @@ export 'input.dart';
 export 'package:fl_clash/ui/keep_scope.dart';
 export 'package:fl_clash/ui/line_chart.dart';
 
-export 'list.dart';
+export 'package:fl_clash/ui/list.dart';
 
 export 'package:fl_clash/ui/loading.dart';
 export 'package:fl_clash/ui/models.dart';

@@ -218,9 +218,7 @@ class _SniffItem extends ConsumerWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
-      delegate: OpenDelegate(
-        widget: _SniffView(model: model, overrideKey: overrideKey),
-      ),
+      widget: _SniffView(model: model, overrideKey: overrideKey),
     );
   }
 }

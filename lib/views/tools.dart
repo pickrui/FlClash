@@ -47,10 +47,8 @@ class _ToolViewState extends ConsumerState<ToolsView> {
       subtitle: navigationItem.description != null
           ? Text(Intl.message(navigationItem.description!))
           : null,
-      delegate: OpenDelegate(
-        widget: navigationItem.builder(context),
-        forceFull: false,
-      ),
+      widget: navigationItem.builder(context),
+      forceFull: false,
     );
   }
 
@@ -76,7 +74,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         ListItem.open(
           leading: const GlyphIcon(AppGlyphs.resources),
           title: Text(context.appLocalizations.appProviderLibrary),
-          delegate: const OpenDelegate(widget: ClashProvidersView()),
+          widget: const ClashProvidersView(),
         ),
         const _BackupItem(),
       ],
@@ -94,14 +92,14 @@ class _ToolViewState extends ConsumerState<ToolsView> {
             leading: const GlyphIcon(AppGlyphs.networkCheck),
             title: Text(context.appLocalizations.diagTitle),
             subtitle: Text(context.appLocalizations.diagEntryHint),
-            delegate: const OpenDelegate(widget: NetworkDiagnosticsPage()),
+            widget: const NetworkDiagnosticsPage(),
           ),
         if (tailscalePageBuilder case final builder?)
           ListItem.open(
             leading: const GlyphIcon(AppGlyphs.connections),
             title: const Text('Tailscale'),
             subtitle: Text(context.appLocalizations.tailscaleEntryHint),
-            delegate: OpenDelegate(widget: Builder(builder: builder)),
+            widget: Builder(builder: builder),
           ),
       ],
     );
@@ -170,16 +168,14 @@ class _LocaleItem extends ConsumerWidget {
     return ListItem<Locale?>.options(
       leading: const GlyphIcon(AppGlyphs.language),
       title: Text(context.appLocalizations.language),
-      delegate: OptionsDelegate(
-        options: [null, ...AppLocalizations.delegate.supportedLocales],
-        onChanged: (Locale? locale) {
-          ref
-              .read(appSettingProvider.notifier)
-              .update((state) => state.copyWith(locale: locale?.toString()));
-        },
-        textBuilder: (locale) => _getLocaleString(locale),
-        value: currentLocale,
-      ),
+      options: [null, ...AppLocalizations.delegate.supportedLocales],
+      onChanged: (Locale? locale) {
+        ref
+            .read(appSettingProvider.notifier)
+            .update((state) => state.copyWith(locale: locale?.toString()));
+      },
+      textBuilder: (locale) => _getLocaleString(locale),
+      value: currentLocale,
     );
   }
 }
@@ -193,7 +189,7 @@ class _ThemeItem extends StatelessWidget {
       leading: const GlyphIcon(AppGlyphs.palette),
       title: Text(context.appLocalizations.theme),
       subtitle: Text(context.appLocalizations.themeDesc),
-      delegate: const OpenDelegate(widget: ThemeView()),
+      widget: const ThemeView(),
     );
   }
 }
@@ -207,7 +203,7 @@ class _BackupItem extends StatelessWidget {
       leading: const GlyphIcon(AppGlyphs.cloudSync),
       title: Text(context.appLocalizations.backupAndRestore),
       subtitle: Text(context.appLocalizations.backupAndRestoreDesc),
-      delegate: const OpenDelegate(widget: BackupAndRestore()),
+      widget: const BackupAndRestore(),
     );
   }
 }
@@ -221,7 +217,7 @@ class _HotkeyItem extends StatelessWidget {
       leading: const GlyphIcon(AppGlyphs.keyboard),
       title: Text(context.appLocalizations.hotkeyManagement),
       subtitle: Text(context.appLocalizations.hotkeyManagementDesc),
-      delegate: const OpenDelegate(widget: HotKeyView()),
+      widget: const HotKeyView(),
     );
   }
 }
@@ -254,7 +250,7 @@ class _AccessItem extends StatelessWidget {
       leading: const GlyphIcon(AppGlyphs.layoutList),
       title: Text(context.appLocalizations.accessControl),
       subtitle: Text(context.appLocalizations.accessControlDesc),
-      delegate: const OpenDelegate(widget: AccessView()),
+      widget: const AccessView(),
     );
   }
 }
@@ -267,7 +263,7 @@ class _ConfigItem extends StatelessWidget {
     return ListItem.open(
       leading: const GlyphIcon(AppGlyphs.edit),
       title: Text(context.appLocalizations.general),
-      delegate: const OpenDelegate(widget: ConfigView()),
+      widget: const ConfigView(),
     );
   }
 }
@@ -281,7 +277,7 @@ class _AdvancedConfigItem extends StatelessWidget {
       leading: const GlyphIcon(AppGlyphs.wrench),
       title: Text(context.appLocalizations.advancedConfig),
       subtitle: Text(context.appLocalizations.advancedConfigDesc),
-      delegate: const OpenDelegate(widget: AdvancedConfigView()),
+      widget: const AdvancedConfigView(),
     );
   }
 }
@@ -294,7 +290,7 @@ class _InfoItem extends StatelessWidget {
     return ListItem.open(
       leading: const GlyphIcon(AppGlyphs.info),
       title: Text(context.appLocalizations.about),
-      delegate: const OpenDelegate(widget: AboutView()),
+      widget: const AboutView(),
     );
   }
 }
@@ -307,7 +303,7 @@ class _DeveloperItem extends StatelessWidget {
     return ListItem.open(
       leading: const GlyphIcon(AppGlyphs.cpu),
       title: Text(context.appLocalizations.developerMode),
-      delegate: const OpenDelegate(widget: DeveloperView()),
+      widget: const DeveloperView(),
     );
   }
 }

@@ -13,7 +13,7 @@ import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/dialog.dart';
 import 'package:fl_clash/widgets/input_dialog.dart';
-import 'package:fl_clash/widgets/list.dart';
+import 'package:fl_clash/ui/list.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -59,14 +59,12 @@ class _ProxyAuthenticationItemState
     );
     return Column(
       children: [
-        ListItem.switchItem(
+        ListItem.toggle(
           leading: const GlyphIcon(AppGlyphs.key),
           title: Text(l.authentication),
           subtitle: Text(l.authenticationDesc),
-          delegate: SwitchDelegate(
-            value: auth.enable,
-            onChanged: _busy ? null : (value) => _toggle(auth, value),
-          ),
+          value: auth.enable,
+          onChanged: _busy ? null : (value) => _toggle(auth, value),
         ),
         if (auth.enable)
           ListItem(

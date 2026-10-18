@@ -25,7 +25,7 @@ import 'package:fl_clash/ui/scaffold.dart';
 
 import 'package:fl_clash/ui/effect.dart';
 
-import 'list.dart';
+import 'package:fl_clash/ui/list.dart';
 
 export 'package:fl_clash/ui/input.dart';
 

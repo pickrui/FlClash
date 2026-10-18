@@ -355,12 +355,10 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
         ),
       ],
       if (widget.profile.type == ProfileType.url || isoixCloud) ...[
-        ListItem.switchItem(
+        ListItem.toggle(
           title: Text(appLocalizations.autoUpdate),
-          delegate: SwitchDelegate<bool>(
-            value: _autoUpdate,
-            onChanged: _setAutoUpdate,
-          ),
+          value: _autoUpdate,
+          onChanged: _setAutoUpdate,
         ),
         if (_autoUpdate)
           ListItem(
@@ -420,19 +418,18 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
           ),
         ),
       if (isoixCloud)
-        ListItem.switchItem(
+        ListItem.toggle(
           title: Text(appLocalizations.tcpFastOpen),
           subtitle: Text(appLocalizations.tcpFastOpenDesc),
-          delegate: SwitchDelegate<bool>(value: _tfo, onChanged: _setTfo),
+          value: _tfo,
+          onChanged: _setTfo,
         ),
       if (isoixCloud)
-        ListItem.switchItem(
+        ListItem.toggle(
           title: Text(appLocalizations.minimalConfiguration),
           subtitle: Text(appLocalizations.minimalConfigurationDesc),
-          delegate: SwitchDelegate<bool>(
-            value: _minimalConfig,
-            onChanged: _setMinimalConfig,
-          ),
+          value: _minimalConfig,
+          onChanged: _setMinimalConfig,
         ),
     ];
     return FocusTraversalGroup(

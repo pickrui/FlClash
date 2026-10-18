@@ -56,7 +56,8 @@ void main() {
             onChanged: (_) {},
             child: ListItem.radio(
               title: const Text('Rule'),
-              delegate: RadioDelegate(value: 0, onTap: () => activations++),
+              value: 0,
+              onTap: () => activations++,
             ),
           ),
         ),

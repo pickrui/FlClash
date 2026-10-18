@@ -358,21 +358,18 @@ class DelayConcurrencySetting extends ConsumerWidget {
       subtitle: Text(
         isAndroid ? l.delayConcurrencyAndroidDesc : l.delayConcurrencyDesc,
       ),
-      delegate: OptionsDelegate<int>(
-        options: delayTestConcurrencyOptions,
-        value: value,
-        textBuilder: (value) => '$value',
-        onChanged: (value) {
-          if (value == null) return;
-          ref
-              .read(proxiesStyleSettingProvider.notifier)
-              .update(
-                (state) => isAndroid
-                    ? state.copyWith(androidConcurrencyLimit: value)
-                    : state.copyWith(concurrencyLimit: value),
-              );
-        },
-      ),
+      options: delayTestConcurrencyOptions,
+      value: value,
+      textBuilder: (value) => '$value',
+      onChanged: (value) {
+        ref
+            .read(proxiesStyleSettingProvider.notifier)
+            .update(
+              (state) => isAndroid
+                  ? state.copyWith(androidConcurrencyLimit: value)
+                  : state.copyWith(concurrencyLimit: value),
+            );
+      },
     );
   }
 }

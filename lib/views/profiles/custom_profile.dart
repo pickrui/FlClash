@@ -595,19 +595,19 @@ class _ProfileSettings extends ConsumerWidget {
           leading: const GlyphIcon(AppGlyphs.dns),
           title: const Text('DNS'),
           subtitle: Text(enabled(status.dns)),
-          delegate: OpenDelegate(widget: DnsView.profile(profileId)),
+          widget: DnsView.profile(profileId),
         ),
         ListItem.open(
           leading: const GlyphIcon(AppGlyphs.clock),
           title: const Text('NTP'),
           subtitle: Text(enabled(status.ntp)),
-          delegate: OpenDelegate(widget: NtpView.profile(profileId)),
+          widget: NtpView.profile(profileId),
         ),
         ListItem.open(
           leading: const GlyphIcon(AppGlyphs.eye),
           title: Text(appLocalizations.sniffer),
           subtitle: Text(enabled(status.sniffer)),
-          delegate: OpenDelegate(widget: SnifferView(profileId)),
+          widget: SnifferView(profileId),
         ),
         if (system.isDesktop)
           ListItem.open(
@@ -618,7 +618,7 @@ class _ProfileSettings extends ConsumerWidget {
                   ? appLocalizations.settingsCount(status.tunKeys)
                   : appLocalizations.defaultText,
             ),
-            delegate: OpenDelegate(widget: TunView(profileId)),
+            widget: TunView(profileId),
           ),
       ],
     );
@@ -637,14 +637,14 @@ class _Resources extends StatelessWidget {
         ListItem.open(
           leading: const GlyphIcon(AppGlyphs.resources),
           title: Text(appLocalizations.appProviderLibrary),
-          delegate: const OpenDelegate(widget: ClashProvidersView()),
+          widget: const ClashProvidersView(),
         ),
         if (tailscalePageBuilder case final builder?)
           ListItem.open(
             leading: const GlyphIcon(AppGlyphs.connections),
             title: const Text('Tailscale'),
             subtitle: Text(appLocalizations.tailscaleEntryHint),
-            delegate: OpenDelegate(widget: Builder(builder: builder)),
+            widget: Builder(builder: builder),
           ),
       ],
     );

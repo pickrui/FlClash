@@ -11,7 +11,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/clash_config.dart';
 import 'package:fl_clash/ui/card.dart';
 import 'package:fl_clash/widgets/input.dart';
-import 'package:fl_clash/widgets/list.dart';
+import 'package:fl_clash/ui/list.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'overwrite_sheet.dart';

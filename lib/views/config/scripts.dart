@@ -488,15 +488,13 @@ class _ScriptOptionsPageState extends ConsumerState<ScriptOptionsPage> {
             : ListView(
                 children: [
                   for (final entry in _values.entries)
-                    ListItem.switchItem(
+                    ListItem.toggle(
                       title: Text(entry.key),
-                      delegate: SwitchDelegate(
-                        value: entry.value,
-                        onChanged: _saving
-                            ? null
-                            : (value) =>
-                                  setState(() => _values[entry.key] = value),
-                      ),
+                      value: entry.value,
+                      onChanged: _saving
+                          ? null
+                          : (value) =>
+                                setState(() => _values[entry.key] = value),
                     ),
                 ],
               ),

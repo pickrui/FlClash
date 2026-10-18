@@ -9,7 +9,7 @@ import 'sheet_scaffold.dart';
 
 import 'package:fl_clash/common/context.dart';
 
-import 'list.dart';
+import 'package:fl_clash/ui/list.dart';
 
 class OptionsDialog<T> extends StatelessWidget {
   final String title;
@@ -49,12 +49,10 @@ class OptionsDialog<T> extends StatelessWidget {
                   }
                   final subtitle = subtitleBuilder?.call(option);
                   return ListItem.radio(
-                    delegate: RadioDelegate(
-                      value: option,
-                      onTap: () {
-                        context.safeNestedPop(option);
-                      },
-                    ),
+                    value: option,
+                    onTap: () {
+                      context.safeNestedPop(option);
+                    },
                     title: Text(textBuilder(option)),
                     subtitle: subtitle != null ? Text(subtitle) : null,
                   );

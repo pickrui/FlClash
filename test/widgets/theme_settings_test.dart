@@ -270,6 +270,10 @@ void main() {
     }
 
     Future<void> tapFontCard(WidgetTester tester) async {
+      while (find.text('Aa').evaluate().isEmpty) {
+        await tester.drag(find.byType(Scrollable).first, const Offset(0, -200));
+        await tester.pump();
+      }
       await _scrollTo(tester, find.text('Aa').first);
       await tester.tap(find.text('Aa').first);
     }

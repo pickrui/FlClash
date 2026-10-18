@@ -12,7 +12,7 @@ import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/update_download.dart';
 import 'package:fl_clash/common/update_download_task.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/widgets/list.dart';
+import 'package:fl_clash/ui/list.dart';
 import 'package:fl_clash/ui/scaffold.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

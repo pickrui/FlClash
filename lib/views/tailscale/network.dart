@@ -616,13 +616,11 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
                 ),
         ),
       _footnote(l.tailscaleLoginFooter),
-      ListItem.switchItem(
+      ListItem.toggle(
         title: Text(l.tailscaleAutoRoute),
         subtitle: Text(l.tailscaleAutoRouteDesc),
-        delegate: SwitchDelegate(
-          value: _autoRoute,
-          onChanged: (value) => setState(() => _autoRoute = value),
-        ),
+        value: _autoRoute,
+        onChanged: (value) => setState(() => _autoRoute = value),
       ),
       _textField(
         controller: _exitNode,
@@ -656,12 +654,10 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
           ),
         ),
       if (_normalizedExitNode().isNotEmpty)
-        ListItem.switchItem(
+        ListItem.toggle(
           title: Text(l.tailscaleExitNodeAllowLan),
-          delegate: SwitchDelegate(
-            value: _allowLan,
-            onChanged: (value) => setState(() => _allowLan = value),
-          ),
+          value: _allowLan,
+          onChanged: (value) => setState(() => _allowLan = value),
         ),
       ExpansionTile(
         title: Text(l.tailscaleAdvanced),

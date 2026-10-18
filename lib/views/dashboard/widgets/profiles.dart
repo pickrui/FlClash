@@ -206,10 +206,8 @@ class _ProfilePickerSheet extends ConsumerWidget {
               return ItemPositionProvider(
                 position: ItemPosition.get(index, profiles.length),
                 child: ListItem.radio(
-                  delegate: RadioDelegate(
-                    value: profile.id,
-                    onTap: () => select(profile.id),
-                  ),
+                  value: profile.id,
+                  onTap: () => select(profile.id),
                   title: EmojiText(
                     profile.realLabel,
                     maxLines: 1,

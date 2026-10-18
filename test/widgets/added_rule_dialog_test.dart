@@ -9,7 +9,7 @@ import 'package:fl_clash/features/overwrite/overwrite_sheet.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/clash_config.dart';
 import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/widgets/list.dart';
+import 'package:fl_clash/ui/list.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';

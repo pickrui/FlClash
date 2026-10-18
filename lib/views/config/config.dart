@@ -42,11 +42,9 @@ class ConfigView extends StatelessWidget {
               ListItem.open(
                 title: Text(l.onDemand),
                 subtitle: Text(l.onDemandDesc),
-                delegate: OpenDelegate(
-                  widget: OnDemandView(
-                    isAndroid: isAndroid,
-                    isMacOS: target == TargetPlatform.macOS,
-                  ),
+                widget: OnDemandView(
+                  isAndroid: isAndroid,
+                  isMacOS: target == TargetPlatform.macOS,
                 ),
               ),
               const MinimizeItem(),

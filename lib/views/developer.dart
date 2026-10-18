@@ -97,19 +97,15 @@ class DeveloperView extends ConsumerWidget {
           children: [
             CommonCard(
               radius: 18,
-              child: ListItem.switchItem(
+              child: ListItem.toggle(
                 padding: const EdgeInsets.only(left: 16, right: 16),
                 title: Text(appLocalizations.developerMode),
-                delegate: SwitchDelegate(
-                  value: enable,
-                  onChanged: (value) {
-                    ref
-                        .read(appSettingProvider.notifier)
-                        .update(
-                          (state) => state.copyWith(developerMode: value),
-                        );
-                  },
-                ),
+                value: enable,
+                onChanged: (value) {
+                  ref
+                      .read(appSettingProvider.notifier)
+                      .update((state) => state.copyWith(developerMode: value));
+                },
               ),
             ),
             const SizedBox(height: 16),

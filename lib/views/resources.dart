@@ -59,18 +59,16 @@ class ResourcesView extends StatelessWidget {
                 generateSection(
                   title: appLocalizations.geoOptions,
                   items: [
-                    ListItem.switchItem(
+                    ListItem.toggle(
                       title: Text(appLocalizations.geoAutoUpdate),
-                      delegate: SwitchDelegate(
-                        value: vm2.a,
-                        onChanged: (value) {
-                          ref
-                              .read(patchClashConfigProvider.notifier)
-                              .update(
-                                (state) => state.copyWith(geoAutoUpdate: value),
-                              );
-                        },
-                      ),
+                      value: vm2.a,
+                      onChanged: (value) {
+                        ref
+                            .read(patchClashConfigProvider.notifier)
+                            .update(
+                              (state) => state.copyWith(geoAutoUpdate: value),
+                            );
+                      },
                     ),
                     ListItem.input(
                       title: Text(appLocalizations.geoAutoUpdateInterval),
@@ -78,36 +76,34 @@ class ResourcesView extends StatelessWidget {
                         appLocalizations.hoursCount(vm2.b),
                         style: context.textTheme.bodyMedium?.toSoftBold,
                       ),
-                      delegate: InputDelegate(
-                        title: appLocalizations.geoAutoUpdateInterval,
-                        value: vm2.b.toString(),
-                        suffixText: appLocalizations.hours,
-                        maxLength: TextInputLimits.interval,
-                        keyboardType: TextInputType.number,
-                        validator: (value) {
-                          final interval = int.tryParse(value ?? '');
-                          if (interval == null ||
-                              interval <= 0 ||
-                              interval > maxGeoUpdateInterval) {
-                            return appLocalizations.geoAutoUpdateIntervalTip;
-                          }
-                          return null;
-                        },
-                        onChanged: (value) {
-                          final interval = int.tryParse(value ?? '');
-                          if (interval == null ||
-                              interval <= 0 ||
-                              interval > maxGeoUpdateInterval) {
-                            return;
-                          }
-                          ref
-                              .read(patchClashConfigProvider.notifier)
-                              .update(
-                                (state) =>
-                                    state.copyWith(geoUpdateInterval: interval),
-                              );
-                        },
-                      ),
+                      dialogTitle: appLocalizations.geoAutoUpdateInterval,
+                      value: vm2.b.toString(),
+                      suffixText: appLocalizations.hours,
+                      maxLength: TextInputLimits.interval,
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        final interval = int.tryParse(value ?? '');
+                        if (interval == null ||
+                            interval <= 0 ||
+                            interval > maxGeoUpdateInterval) {
+                          return appLocalizations.geoAutoUpdateIntervalTip;
+                        }
+                        return null;
+                      },
+                      onChanged: (value) {
+                        final interval = int.tryParse(value ?? '');
+                        if (interval == null ||
+                            interval <= 0 ||
+                            interval > maxGeoUpdateInterval) {
+                          return;
+                        }
+                        ref
+                            .read(patchClashConfigProvider.notifier)
+                            .update(
+                              (state) =>
+                                  state.copyWith(geoUpdateInterval: interval),
+                            );
+                      },
                     ),
                   ],
                 ),

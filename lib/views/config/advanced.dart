@@ -8,7 +8,7 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/views/config/dns.dart';
 import 'package:fl_clash/views/config/network.dart';
 import 'package:fl_clash/views/config/scripts.dart';
-import 'package:fl_clash/widgets/list.dart';
+import 'package:fl_clash/ui/list.dart';
 import 'package:fl_clash/ui/scaffold.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -25,37 +25,34 @@ class AdvancedConfigView extends StatelessWidget {
         title: Text(appLocalizations.network),
         subtitle: Text(appLocalizations.networkDesc),
         leading: const GlyphIcon(AppGlyphs.connections),
-        delegate: OpenDelegate(
-          blur: false,
-          widget: BaseScaffold(
-            title: appLocalizations.network,
-            body: const AppBarClearance(child: NetworkListView()),
-          ),
+        widget: BaseScaffold(
+          title: appLocalizations.network,
+          body: const AppBarClearance(child: NetworkListView()),
         ),
       ),
       ListItem.open(
         title: const Text('DNS'),
         subtitle: Text(appLocalizations.dnsDesc),
         leading: const GlyphIcon(AppGlyphs.dns),
-        delegate: const OpenDelegate(widget: DnsView(), blur: false),
+        widget: const DnsView(),
       ),
       ListItem.open(
         title: const Text('NTP'),
         subtitle: Text(appLocalizations.ntpDesc),
         leading: const GlyphIcon(AppGlyphs.clock),
-        delegate: const OpenDelegate(widget: NtpView(), blur: false),
+        widget: const NtpView(),
       ),
       ListItem.open(
         title: Text(appLocalizations.addedRules),
         subtitle: Text(appLocalizations.controlGlobalAddedRules),
         leading: const GlyphIcon(AppGlyphs.rules),
-        delegate: const OpenDelegate(widget: AddedRulesView(), blur: false),
+        widget: const AddedRulesView(),
       ),
       ListItem.open(
         title: Text(appLocalizations.script),
         subtitle: Text(appLocalizations.overrideScript),
         leading: const GlyphIcon(AppGlyphs.bolt),
-        delegate: const OpenDelegate(widget: ScriptsView(), blur: false),
+        widget: const ScriptsView(),
       ),
     ];
     return BaseScaffold(

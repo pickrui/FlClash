@@ -101,14 +101,12 @@ void main() {
           child: Scaffold(
             body: ListItem.input(
               title: const Text('Port'),
-              delegate: InputDelegate(
-                title: 'Port',
-                value: '',
-                maxLength: 5,
-                onChanged: (value) {
-                  changedValue = value;
-                },
-              ),
+              dialogTitle: 'Port',
+              value: '',
+              maxLength: 5,
+              onChanged: (value) {
+                changedValue = value;
+              },
             ),
           ),
         ),
@@ -138,12 +136,10 @@ void main() {
           child: Scaffold(
             body: ListItem<String?>.options(
               title: const Text('Language'),
-              delegate: OptionsDelegate<String?>(
-                options: const [null, 'ja'],
-                value: 'ja',
-                textBuilder: (value) => value ?? 'Default',
-                onChanged: changes.add,
-              ),
+              options: const [null, 'ja'],
+              value: 'ja',
+              textBuilder: (value) => value ?? 'Default',
+              onChanged: changes.add,
             ),
           ),
         ),

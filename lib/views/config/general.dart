@@ -27,19 +27,17 @@ class LogLevelItem extends ConsumerWidget {
     return ListItem<LogLevel>.options(
       leading: const GlyphIcon(AppGlyphs.info),
       title: Text(appLocalizations.logLevel),
-      delegate: OptionsDelegate<LogLevel>(
-        options: LogLevel.values,
-        onChanged: (LogLevel? value) {
-          if (value == null) {
-            return;
-          }
-          ref
-              .read(patchClashConfigProvider.notifier)
-              .update((state) => state.copyWith(logLevel: value));
-        },
-        textBuilder: (logLevel) => logLevel.name,
-        value: logLevel,
-      ),
+      options: LogLevel.values,
+      onChanged: (LogLevel? value) {
+        if (value == null) {
+          return;
+        }
+        ref
+            .read(patchClashConfigProvider.notifier)
+            .update((state) => state.copyWith(logLevel: value));
+      },
+      textBuilder: (logLevel) => logLevel.name,
+      value: logLevel,
     );
   }
 }
@@ -124,33 +122,31 @@ class KeepAliveIntervalItem extends ConsumerWidget {
       leading: const GlyphIcon(AppGlyphs.clock),
       title: Text(appLocalizations.keepAliveIntervalDesc),
       subtitle: Text(appLocalizations.secondsCount(keepAliveInterval)),
-      delegate: InputDelegate(
-        title: appLocalizations.keepAliveIntervalDesc,
-        suffixText: appLocalizations.seconds,
-        resetValue: '$defaultKeepAliveInterval',
-        value: '$keepAliveInterval',
-        maxLength: TextInputLimits.interval,
-        keyboardType: TextInputType.number,
-        validator: (String? value) {
-          if (value == null || value.isEmpty) {
-            return appLocalizations.emptyTip(appLocalizations.interval);
-          }
-          final intValue = int.tryParse(value);
-          if (intValue == null) {
-            return appLocalizations.numberTip(appLocalizations.interval);
-          }
-          return null;
-        },
-        onChanged: (String? value) {
-          if (value == null) {
-            return;
-          }
-          final intValue = int.parse(value);
-          ref
-              .read(patchClashConfigProvider.notifier)
-              .update((state) => state.copyWith(keepAliveInterval: intValue));
-        },
-      ),
+      dialogTitle: appLocalizations.keepAliveIntervalDesc,
+      suffixText: appLocalizations.seconds,
+      resetValue: '$defaultKeepAliveInterval',
+      value: '$keepAliveInterval',
+      maxLength: TextInputLimits.interval,
+      keyboardType: TextInputType.number,
+      validator: (String? value) {
+        if (value == null || value.isEmpty) {
+          return appLocalizations.emptyTip(appLocalizations.interval);
+        }
+        final intValue = int.tryParse(value);
+        if (intValue == null) {
+          return appLocalizations.numberTip(appLocalizations.interval);
+        }
+        return null;
+      },
+      onChanged: (String? value) {
+        if (value == null) {
+          return;
+        }
+        final intValue = int.parse(value);
+        ref
+            .read(patchClashConfigProvider.notifier)
+            .update((state) => state.copyWith(keepAliveInterval: intValue));
+      },
     );
   }
 }
@@ -168,29 +164,27 @@ class TestUrlItem extends ConsumerWidget {
       leading: const GlyphIcon(AppGlyphs.history),
       title: Text(appLocalizations.testUrl),
       subtitle: Text(testUrl),
-      delegate: InputDelegate(
-        resetValue: defaultTestUrl,
-        title: appLocalizations.testUrl,
-        value: testUrl,
-        maxLength: TextInputLimits.url,
-        validator: (String? value) {
-          if (value == null || value.isEmpty) {
-            return appLocalizations.emptyTip(appLocalizations.testUrl);
-          }
-          if (!value.isUrl) {
-            return appLocalizations.urlTip(appLocalizations.testUrl);
-          }
-          return null;
-        },
-        onChanged: (String? value) {
-          if (value == null) {
-            return;
-          }
-          ref
-              .read(appSettingProvider.notifier)
-              .update((state) => state.copyWith(testUrl: value));
-        },
-      ),
+      resetValue: defaultTestUrl,
+      dialogTitle: appLocalizations.testUrl,
+      value: testUrl,
+      maxLength: TextInputLimits.url,
+      validator: (String? value) {
+        if (value == null || value.isEmpty) {
+          return appLocalizations.emptyTip(appLocalizations.testUrl);
+        }
+        if (!value.isUrl) {
+          return appLocalizations.urlTip(appLocalizations.testUrl);
+        }
+        return null;
+      },
+      onChanged: (String? value) {
+        if (value == null) {
+          return;
+        }
+        ref
+            .read(appSettingProvider.notifier)
+            .update((state) => state.copyWith(testUrl: value));
+      },
     );
   }
 }
@@ -228,22 +222,19 @@ class HostsItem extends ConsumerWidget {
       leading: const GlyphIcon(AppGlyphs.layoutList),
       title: const Text('Hosts'),
       subtitle: Text(appLocalizations.hostsDesc),
-      delegate: OpenDelegate(
-        blur: false,
-        widget: MapInputPage(
-          title: 'Hosts',
-          entries: hosts,
-          keyMaxLength: TextInputLimits.domain,
-          valueMaxLength: TextInputLimits.hostValue,
-          titleBuilder: (item) => Text(item.key),
-          subtitleBuilder: (item) => Text(item.value),
-        ),
-        onChanged: (value) {
-          ref
-              .read(patchClashConfigProvider.notifier)
-              .update((state) => state.copyWith(hosts: value));
-        },
+      widget: MapInputPage(
+        title: 'Hosts',
+        entries: hosts,
+        keyMaxLength: TextInputLimits.domain,
+        valueMaxLength: TextInputLimits.hostValue,
+        titleBuilder: (item) => Text(item.key),
+        subtitleBuilder: (item) => Text(item.value),
       ),
+      onChanged: (value) {
+        ref
+            .read(patchClashConfigProvider.notifier)
+            .update((state) => state.copyWith(hosts: value));
+      },
     );
   }
 }
@@ -259,16 +250,14 @@ class AutoIpv6Item extends ConsumerWidget {
     final autoSetIpv6 = ref.watch(
       networkSettingProvider.select((state) => state.autoSetIpv6),
     );
-    return ListItem.switchItem(
+    return ListItem.toggle(
       leading: const GlyphIcon(AppGlyphs.sync),
       title: Text(appLocalizations.autoIpv6),
       subtitle: Text(appLocalizations.autoIpv6Desc),
-      delegate: SwitchDelegate(
-        value: autoSetIpv6,
-        onChanged: (bool value) async {
-          await setupAction.setAutoIpv6(value);
-        },
-      ),
+      value: autoSetIpv6,
+      onChanged: (bool value) async {
+        await setupAction.setAutoIpv6(value);
+      },
     );
   }
 }
@@ -285,20 +274,18 @@ class Ipv6Item extends ConsumerWidget {
     final autoSetIpv6 = ref.watch(
       networkSettingProvider.select((state) => state.autoSetIpv6),
     );
-    return ListItem.switchItem(
+    return ListItem.toggle(
       leading: const GlyphIcon(AppGlyphs.dataUsage),
       title: const Text('IPv6'),
       subtitle: Text(appLocalizations.ipv6Desc),
-      delegate: SwitchDelegate(
-        value: ipv6,
-        onChanged: autoSetIpv6
-            ? null
-            : (bool value) async {
-                ref
-                    .read(patchClashConfigProvider.notifier)
-                    .update((state) => state.copyWith(ipv6: value));
-              },
-      ),
+      value: ipv6,
+      onChanged: autoSetIpv6
+          ? null
+          : (bool value) async {
+              ref
+                  .read(patchClashConfigProvider.notifier)
+                  .update((state) => state.copyWith(ipv6: value));
+            },
     );
   }
 }
@@ -312,18 +299,16 @@ class AppendSystemDNSItem extends ConsumerWidget {
     final appendSystemDNS = ref.watch(
       networkSettingProvider.select((state) => state.appendSystemDns),
     );
-    return ListItem.switchItem(
+    return ListItem.toggle(
       leading: const GlyphIcon(AppGlyphs.dns),
       title: Text(appLocalizations.appendSystemDns),
       subtitle: Text(appLocalizations.appendSystemDnsTip),
-      delegate: SwitchDelegate(
-        value: appendSystemDNS,
-        onChanged: (bool value) async {
-          ref
-              .read(networkSettingProvider.notifier)
-              .update((state) => state.copyWith(appendSystemDns: value));
-        },
-      ),
+      value: appendSystemDNS,
+      onChanged: (bool value) async {
+        ref
+            .read(networkSettingProvider.notifier)
+            .update((state) => state.copyWith(appendSystemDns: value));
+      },
     );
   }
 }
@@ -337,18 +322,16 @@ class AllowLanItem extends ConsumerWidget {
     final allowLan = ref.watch(
       patchClashConfigProvider.select((state) => state.allowLan),
     );
-    return ListItem.switchItem(
+    return ListItem.toggle(
       leading: const GlyphIcon(AppGlyphs.split),
       title: Text(appLocalizations.allowLan),
       subtitle: Text(appLocalizations.allowLanDesc),
-      delegate: SwitchDelegate(
-        value: allowLan,
-        onChanged: (bool value) async {
-          ref
-              .read(patchClashConfigProvider.notifier)
-              .update((state) => state.copyWith(allowLan: value));
-        },
-      ),
+      value: allowLan,
+      onChanged: (bool value) async {
+        ref
+            .read(patchClashConfigProvider.notifier)
+            .update((state) => state.copyWith(allowLan: value));
+      },
     );
   }
 }
@@ -363,18 +346,16 @@ class UnifiedDelayItem extends ConsumerWidget {
       patchClashConfigProvider.select((state) => state.unifiedDelay),
     );
 
-    return ListItem.switchItem(
+    return ListItem.toggle(
       leading: const GlyphIcon(AppGlyphs.layers),
       title: Text(appLocalizations.unifiedDelay),
       subtitle: Text(appLocalizations.unifiedDelayDesc),
-      delegate: SwitchDelegate(
-        value: unifiedDelay,
-        onChanged: (bool value) async {
-          ref
-              .read(patchClashConfigProvider.notifier)
-              .update((state) => state.copyWith(unifiedDelay: value));
-        },
-      ),
+      value: unifiedDelay,
+      onChanged: (bool value) async {
+        ref
+            .read(patchClashConfigProvider.notifier)
+            .update((state) => state.copyWith(unifiedDelay: value));
+      },
     );
   }
 }
@@ -393,7 +374,7 @@ class FindProcessItem extends ConsumerWidget {
     final automatic =
         !findProcess && ref.watch(appliedProcessLookupRequiredProvider);
 
-    return ListItem.switchItem(
+    return ListItem.toggle(
       leading: const GlyphIcon(AppGlyphs.cpu),
       title: Text(appLocalizations.findProcessMode),
       subtitle: Text(
@@ -401,20 +382,18 @@ class FindProcessItem extends ConsumerWidget {
             ? appLocalizations.findProcessModeAutomaticDesc
             : appLocalizations.findProcessModeDesc,
       ),
-      delegate: SwitchDelegate(
-        value: findProcess,
-        onChanged: (bool value) async {
-          ref
-              .read(patchClashConfigProvider.notifier)
-              .update(
-                (state) => state.copyWith(
-                  findProcessMode: value
-                      ? FindProcessMode.always
-                      : FindProcessMode.off,
-                ),
-              );
-        },
-      ),
+      value: findProcess,
+      onChanged: (bool value) async {
+        ref
+            .read(patchClashConfigProvider.notifier)
+            .update(
+              (state) => state.copyWith(
+                findProcessMode: value
+                    ? FindProcessMode.always
+                    : FindProcessMode.off,
+              ),
+            );
+      },
     );
   }
 }
@@ -428,18 +407,16 @@ class TcpConcurrentItem extends ConsumerWidget {
     final tcpConcurrent = ref.watch(
       patchClashConfigProvider.select((state) => state.tcpConcurrent),
     );
-    return ListItem.switchItem(
+    return ListItem.toggle(
       leading: const GlyphIcon(AppGlyphs.speed),
       title: Text(appLocalizations.tcpConcurrent),
       subtitle: Text(appLocalizations.tcpConcurrentDesc),
-      delegate: SwitchDelegate(
-        value: tcpConcurrent,
-        onChanged: (value) async {
-          ref
-              .read(patchClashConfigProvider.notifier)
-              .update((state) => state.copyWith(tcpConcurrent: value));
-        },
-      ),
+      value: tcpConcurrent,
+      onChanged: (value) async {
+        ref
+            .read(patchClashConfigProvider.notifier)
+            .update((state) => state.copyWith(tcpConcurrent: value));
+      },
     );
   }
 }
@@ -455,24 +432,22 @@ class GeodataLoaderItem extends ConsumerWidget {
         (state) => state.geodataLoader == GeodataLoader.memconservative,
       ),
     );
-    return ListItem.switchItem(
+    return ListItem.toggle(
       leading: const GlyphIcon(AppGlyphs.memory),
       title: Text(appLocalizations.geodataLoader),
       subtitle: Text(appLocalizations.geodataLoaderDesc),
-      delegate: SwitchDelegate(
-        value: isMemconservative,
-        onChanged: (bool value) async {
-          ref
-              .read(patchClashConfigProvider.notifier)
-              .update(
-                (state) => state.copyWith(
-                  geodataLoader: value
-                      ? GeodataLoader.memconservative
-                      : GeodataLoader.standard,
-                ),
-              );
-        },
-      ),
+      value: isMemconservative,
+      onChanged: (bool value) async {
+        ref
+            .read(patchClashConfigProvider.notifier)
+            .update(
+              (state) => state.copyWith(
+                geodataLoader: value
+                    ? GeodataLoader.memconservative
+                    : GeodataLoader.standard,
+              ),
+            );
+      },
     );
   }
 }
@@ -488,24 +463,22 @@ class ExternalControllerItem extends ConsumerWidget {
         (state) => state.externalController == ExternalControllerStatus.open,
       ),
     );
-    final item = ListItem.switchItem(
+    final item = ListItem.toggle(
       leading: const GlyphIcon(AppGlyphs.code),
       title: Text(appLocalizations.externalController),
       subtitle: Text(appLocalizations.externalControllerDesc),
-      delegate: SwitchDelegate(
-        value: hasExternalController,
-        onChanged: (bool value) async {
-          ref
-              .read(patchClashConfigProvider.notifier)
-              .update(
-                (state) => state.copyWith(
-                  externalController: value
-                      ? ExternalControllerStatus.open
-                      : ExternalControllerStatus.close,
-                ),
-              );
-        },
-      ),
+      value: hasExternalController,
+      onChanged: (bool value) async {
+        ref
+            .read(patchClashConfigProvider.notifier)
+            .update(
+              (state) => state.copyWith(
+                externalController: value
+                    ? ExternalControllerStatus.open
+                    : ExternalControllerStatus.close,
+              ),
+            );
+      },
     );
     if (!hasExternalController) {
       return item;

@@ -282,18 +282,12 @@ class _PrimaryColorItem extends ConsumerWidget {
                 items: [
                   ListItem<ColorStyle>.options(
                     title: Text(appLocalizations.colorStyle),
-                    delegate: OptionsDelegate<ColorStyle>(
-                      options: ColorStyle.values,
-                      value: themeColors.colorStyle,
-                      textBuilder: _colorStyleLabel,
-                      onChanged: (style) {
-                        if (style != null) {
-                          _update(
-                            ref,
-                            (state) => state.copyWith(colorStyle: style),
-                          );
-                        }
-                      },
+                    options: ColorStyle.values,
+                    value: themeColors.colorStyle,
+                    textBuilder: _colorStyleLabel,
+                    onChanged: (style) => _update(
+                      ref,
+                      (state) => state.copyWith(colorStyle: style),
                     ),
                   ),
                 ],
@@ -800,7 +794,7 @@ class _SidebarBlurItem extends ConsumerWidget {
     final sidebarBlur = ref.watch(
       themeSettingProvider.select((state) => state.sidebarBlur),
     );
-    return ListItem.switchItem(
+    return ListItem.toggle(
       leading: const GlyphIcon(AppGlyphs.blur),
       horizontalTitleGap: 12,
       title: Text(
@@ -810,14 +804,12 @@ class _SidebarBlurItem extends ConsumerWidget {
             .copyWith(color: context.colorScheme.onSurfaceVariant),
       ),
       subtitle: Text(appLocalizations.sidebarBlurDesc),
-      delegate: SwitchDelegate(
-        value: sidebarBlur,
-        onChanged: (value) {
-          ref
-              .read(themeSettingProvider.notifier)
-              .update((state) => state.copyWith(sidebarBlur: value));
-        },
-      ),
+      value: sidebarBlur,
+      onChanged: (value) {
+        ref
+            .read(themeSettingProvider.notifier)
+            .update((state) => state.copyWith(sidebarBlur: value));
+      },
     );
   }
 }
