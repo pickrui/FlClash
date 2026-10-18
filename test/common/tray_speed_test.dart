@@ -84,6 +84,9 @@ void main() {
         calls.where((call) => call.method == 'hide'),
         isMacOS ? isEmpty : hasLength(1),
       );
+      calls.clear();
+      await tray.update(trayState: running.copyWith(isStart: false));
+      expect(calls, isEmpty, reason: 'exit leaves no icon behind to refresh');
     }
   });
 

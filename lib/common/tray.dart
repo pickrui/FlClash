@@ -23,6 +23,7 @@ class Tray {
   Traffic _lastTraffic = const Traffic();
   bool _showTrayTitle = false;
   bool _isStarted = false;
+  bool _isShutDown = false;
 
   Tray._internal({required this.isMacOS});
 
@@ -40,6 +41,7 @@ class Tray {
   }
 
   Future<void> destroy() async {
+    _isShutDown = true;
     // A removed macOS status item loses the menu bar place the user gave it.
     if (isMacOS) return;
     await native.Tray.instance.hide();
@@ -65,7 +67,7 @@ class Tray {
   }
 
   Future<void> update({required TrayState trayState}) async {
-    if (system.isAndroid) {
+    if (system.isAndroid || _isShutDown) {
       return;
     }
     _showTrayTitle = trayState.showTrayTitle;
@@ -255,7 +257,7 @@ class Tray {
   }
 
   Future<void> _updateTitle() async {
-    if (!isMacOS) return;
+    if (!isMacOS || _isShutDown) return;
     await native.Tray.instance.setTitle(
       _showTrayTitle ? _lastTraffic.trayTitle : '',
     );
