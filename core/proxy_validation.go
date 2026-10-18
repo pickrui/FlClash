@@ -13,6 +13,7 @@ import (
 	"sync/atomic"
 
 	"github.com/metacubex/mihomo/adapter"
+	"github.com/metacubex/mihomo/common/utils"
 )
 
 var proxyValidationSequence atomic.Uint64
@@ -34,6 +35,21 @@ func handleValidateProxies(mappings []map[string]any) []string {
 			continue
 		}
 		_ = proxy.Close()
+	}
+	return results
+}
+
+// Splits and compiles each value as adapter/outboundgroup reads a filter, so
+// a bad pattern is reported before the group panics or fails a config load.
+func handleValidateFilters(filters []string) []string {
+	results := make([]string, len(filters))
+	for i, filter := range filters {
+		for _, part := range strings.Split(filter, "`") {
+			if _, err := utils.CompileNameRegex(part); err != nil {
+				results[i] = err.Error()
+				break
+			}
+		}
 	}
 	return results
 }

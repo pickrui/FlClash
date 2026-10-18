@@ -24,6 +24,7 @@ enum CoreMethod {
   shutdown,
   validateConfig,
   validateProxies,
+  validateFilters,
   validateConfigWithBytes,
   updateConfig,
   getConfig,

@@ -30,6 +30,8 @@ mixin CoreInterface {
 
   Future<List<String>> validateProxies(List<Map<String, Object?>> proxies);
 
+  Future<List<String>> validateFilters(List<String> filters);
+
   Future<String> validateConfigWithBytes(String data);
 
   Future<Map<String, dynamic>> getConfig(String path);
@@ -197,6 +199,19 @@ abstract class CoreHandlerInterface with CoreInterface {
     if (results.length != proxies.length ||
         results.any((value) => value is! String)) {
       throw const FormatException('Invalid proxy validation response');
+    }
+    return results.cast<String>();
+  }
+
+  @override
+  Future<List<String>> validateFilters(List<String> filters) async {
+    final results = await _invokeRequiredMethod<List<dynamic>>(
+      method: CoreMethod.validateFilters,
+      arguments: filters,
+    );
+    if (results.length != filters.length ||
+        results.any((value) => value is! String)) {
+      throw const FormatException('Invalid filter validation response');
     }
     return results.cast<String>();
   }

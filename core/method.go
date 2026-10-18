@@ -176,6 +176,11 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 		if decodeMethodArguments(call, response, &mappings) {
 			response.success(handleValidateProxies(mappings))
 		}
+	case validateFiltersMethod:
+		var filters []string
+		if decodeMethodArguments(call, response, &filters) {
+			response.success(handleValidateFilters(filters))
+		}
 	case validateConfigMethod:
 		path := ""
 		if decodeMethodArguments(call, response, &path) {

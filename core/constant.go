@@ -118,6 +118,7 @@ const (
 	validateConfigWithBytesMethod  CoreMethod = "validateConfigWithBytes"
 	validateConfigMethod           CoreMethod = "validateConfig"
 	validateProxiesMethod          CoreMethod = "validateProxies"
+	validateFiltersMethod          CoreMethod = "validateFilters"
 	updateConfigMethod             CoreMethod = "updateConfig"
 	getProxyGroupsMethod           CoreMethod = "getProxyGroups"
 	getProxyPageMethod             CoreMethod = "getProxyPage"

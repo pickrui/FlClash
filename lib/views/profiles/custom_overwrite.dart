@@ -367,6 +367,7 @@ class _CustomProxyGroupsViewState extends ConsumerState<CustomProxyGroupsView> {
                   .whereType<String>()
                   .toList()
             : const [],
+        validateFilters: ref.read(coreHandlerProvider).validateFilters,
         validate: (result) async {
           if (!context.mounted) {
             throw ProxyGroupEditBlocked(appLocalizations.routingChanged);

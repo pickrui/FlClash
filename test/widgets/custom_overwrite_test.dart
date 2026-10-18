@@ -492,6 +492,52 @@ void main() {
   );
 
   testWidgets(
+    'ProxyGroupDialog shows rejected filters inline and keeps them unsaved',
+    (tester) async {
+      ProxyGroup? result;
+      var validations = 0;
+      final checked = <List<String>>[];
+      await _openGroupDialog(
+        tester,
+        group: const ProxyGroup(
+          name: 'Filtered',
+          type: GroupType.Selector,
+          includeAll: true,
+          filter: 'hk',
+        ),
+        validateFilters: (filters) async {
+          checked.add(filters);
+          return [for (final filter in filters) filter == '(hk' ? 'bad' : ''];
+        },
+        validate: (_) async {
+          validations++;
+          return '';
+        },
+        onResult: (value) => result = value,
+      );
+      final field = find.widgetWithText(TextFormField, 'Proxy filter');
+      await tester.enterText(field, '(');
+      await tester.enterText(field, '(hk');
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(checked.map((filters) => filters.first), isNot(contains('(')));
+      expect(checked.last, ['(hk', '']);
+      expect(find.text('bad'), findsOneWidget);
+
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+      expect(find.text('Proxy filter: bad'), findsOneWidget);
+      expect(validations, 0);
+      expect(find.byType(ProxyGroupDialog), findsOneWidget);
+
+      await tester.enterText(field, 'hk|jp');
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+      expect(validations, 1);
+      expect(result?.filter, 'hk|jp');
+    },
+  );
+
+  testWidgets(
     'manual provider edits update candidates and filter controls immediately',
     (tester) async {
       await _openGroupDialog(
@@ -531,6 +577,7 @@ Future<void> _openGroupDialog(
   required ProxyGroup group,
   List<String> availableProviders = const [],
   Future<String> Function(ProxyGroup)? validate,
+  Future<List<String>> Function(List<String> filters)? validateFilters,
   ValueChanged<ProxyGroup?>? onResult,
 }) async {
   await tester.pumpWidget(
@@ -550,6 +597,7 @@ Future<void> _openGroupDialog(
                   availableMembers: const ['DIRECT'],
                   availableProviders: availableProviders,
                   validate: validate,
+                  validateFilters: validateFilters,
                 ),
               );
               onResult?.call(result);

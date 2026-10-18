@@ -117,6 +117,13 @@ class CoreController {
   Future<List<String>> validateProxies(List<Map<String, Object?>> proxies) =>
       _interface.validateProxies(proxies);
 
+  /// What the Core's regexp2 rejects in each proxy-group filter, '' where it
+  /// accepts one.
+  Future<List<String>> validateFilters(List<String> filters) async {
+    if (filters.isEmpty) return const [];
+    return _interface.validateFilters(filters);
+  }
+
   Future<String> validateConfig(String path) async {
     final res = await _interface.validateConfig(path);
     return res;
