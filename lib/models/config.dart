@@ -109,6 +109,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(RestoreStrategy.compatible) RestoreStrategy restoreStrategy,
     @Default(true) bool showTrayTitle,
     @Default({}) Map<String, Map<String, bool>> scriptOptions,
+    @Default({}) Map<String, Map<String, double>> tableColumnWidths,
   }) = _AppSettingProps;
 
   factory AppSettingProps.fromJson(Map<String, Object?> json) =>

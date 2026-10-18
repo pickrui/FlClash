@@ -51,6 +51,16 @@ _AppSettingProps _$AppSettingPropsFromJson(
         (k, e) => MapEntry(k, Map<String, bool>.from(e as Map)),
       ) ??
       const {},
+  tableColumnWidths:
+      (json['tableColumnWidths'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(
+          k,
+          (e as Map<String, dynamic>).map(
+            (k, e) => MapEntry(k, (e as num).toDouble()),
+          ),
+        ),
+      ) ??
+      const {},
 );
 
 Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
@@ -80,6 +90,7 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'restoreStrategy': _$RestoreStrategyEnumMap[instance.restoreStrategy]!,
       'showTrayTitle': instance.showTrayTitle,
       'scriptOptions': instance.scriptOptions,
+      'tableColumnWidths': instance.tableColumnWidths,
     };
 
 const _$TabAnimationEnumMap = {
