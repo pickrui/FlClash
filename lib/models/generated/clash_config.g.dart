@@ -112,6 +112,82 @@ const _$TunStackEnumMap = {
   TunStack.mips: 'mips',
 };
 
+_ProfileTun _$ProfileTunFromJson(Map<String, dynamic> json) => _ProfileTun(
+  mtu: json['mtu'] == null
+      ? defaultTunMtu
+      : normalizeTunMtu((json['mtu'] as num?)?.toInt()),
+  congestionController:
+      json['congestion-controller'] as String? ?? defaultCongestionController,
+  strictRoute: json['strict-route'] as bool? ?? false,
+  routeAddress:
+      (json['route-address'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  routeExcludeAddress:
+      (json['route-exclude-address'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  dnsHijack:
+      (json['dns-hijack'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      defaultDnsHijack,
+  udpTimeout: (json['udp-timeout'] as num?)?.toInt() ?? defaultTunUdpTimeout,
+  disableIcmpForwarding: json['disable-icmp-forwarding'] as bool? ?? false,
+  gso: json['gso'] as bool? ?? false,
+  includeInterface:
+      (json['include-interface'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  excludeInterface:
+      (json['exclude-interface'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  includeUid:
+      (json['include-uid'] as List<dynamic>?)
+          ?.map((e) => (e as num).toInt())
+          .toList() ??
+      const [],
+  excludeUid:
+      (json['exclude-uid'] as List<dynamic>?)
+          ?.map((e) => (e as num).toInt())
+          .toList() ??
+      const [],
+  excludeSrcPort:
+      (json['exclude-src-port'] as List<dynamic>?)
+          ?.map((e) => (e as num).toInt())
+          .toList() ??
+      const [],
+  excludeDstPort:
+      (json['exclude-dst-port'] as List<dynamic>?)
+          ?.map((e) => (e as num).toInt())
+          .toList() ??
+      const [],
+);
+
+Map<String, dynamic> _$ProfileTunToJson(_ProfileTun instance) =>
+    <String, dynamic>{
+      'mtu': instance.mtu,
+      'congestion-controller': instance.congestionController,
+      'strict-route': instance.strictRoute,
+      'route-address': instance.routeAddress,
+      'route-exclude-address': instance.routeExcludeAddress,
+      'dns-hijack': instance.dnsHijack,
+      'udp-timeout': instance.udpTimeout,
+      'disable-icmp-forwarding': instance.disableIcmpForwarding,
+      'gso': instance.gso,
+      'include-interface': instance.includeInterface,
+      'exclude-interface': instance.excludeInterface,
+      'include-uid': instance.includeUid,
+      'exclude-uid': instance.excludeUid,
+      'exclude-src-port': instance.excludeSrcPort,
+      'exclude-dst-port': instance.excludeDstPort,
+    };
+
 _FallbackFilter _$FallbackFilterFromJson(
   Map<String, dynamic> json,
 ) => _FallbackFilter(
@@ -376,6 +452,12 @@ _ClashConfig _$ClashConfigFromJson(Map<String, dynamic> json) => _ClashConfig(
   ntpOverrideKeys: json['ntp-override-keys'] == null
       ? const {}
       : _ntpOverrideKeysFromJson(json['ntp-override-keys'] as List),
+  tunOverride: json['tun-override'] == null
+      ? defaultProfileTun
+      : ProfileTun.safeFromJson(json['tun-override'] as Map<String, Object?>),
+  tunOverrideKeys: json['tun-override-keys'] == null
+      ? const {}
+      : _tunOverrideKeysFromJson(json['tun-override-keys'] as List),
   geoXUrl: json['geox-url'] == null
       ? defaultGeoXUrl
       : GeoXUrl.safeFormJson(json['geox-url'] as Map<String, Object?>?),
@@ -435,6 +517,10 @@ Map<String, dynamic> _$ClashConfigToJson(_ClashConfig instance) =>
       'ntp': instance.ntp,
       'ntp-override-keys': instance.ntpOverrideKeys
           .map((e) => _$NtpOverrideKeyEnumMap[e]!)
+          .toList(),
+      'tun-override': instance.tunOverride,
+      'tun-override-keys': instance.tunOverrideKeys
+          .map((e) => _$TunOverrideKeyEnumMap[e]!)
           .toList(),
       'geox-url': instance.geoXUrl,
       'geodata-loader': _$GeodataLoaderEnumMap[instance.geodataLoader]!,
@@ -522,4 +608,22 @@ const _$NtpOverrideKeyEnumMap = {
   NtpOverrideKey.interval: 'interval',
   NtpOverrideKey.dialerProxy: 'dialer-proxy',
   NtpOverrideKey.writeToSystem: 'write-to-system',
+};
+
+const _$TunOverrideKeyEnumMap = {
+  TunOverrideKey.mtu: 'mtu',
+  TunOverrideKey.congestionController: 'congestion-controller',
+  TunOverrideKey.strictRoute: 'strict-route',
+  TunOverrideKey.routeAddress: 'route-address',
+  TunOverrideKey.routeExcludeAddress: 'route-exclude-address',
+  TunOverrideKey.dnsHijack: 'dns-hijack',
+  TunOverrideKey.udpTimeout: 'udp-timeout',
+  TunOverrideKey.disableIcmpForwarding: 'disable-icmp-forwarding',
+  TunOverrideKey.gso: 'gso',
+  TunOverrideKey.includeInterface: 'include-interface',
+  TunOverrideKey.excludeInterface: 'exclude-interface',
+  TunOverrideKey.includeUid: 'include-uid',
+  TunOverrideKey.excludeUid: 'exclude-uid',
+  TunOverrideKey.excludeSrcPort: 'exclude-src-port',
+  TunOverrideKey.excludeDstPort: 'exclude-dst-port',
 };

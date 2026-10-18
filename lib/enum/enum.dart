@@ -226,6 +226,31 @@ enum NtpOverrideKey {
   final String path;
 }
 
+/// Written over the profile's `tun` section, which Android's VPN never reads,
+/// so these apply on desktop only, beside the keys the core owns.
+@JsonEnum(valueField: 'path')
+enum TunOverrideKey {
+  mtu('mtu'),
+  congestionController('congestion-controller'),
+  strictRoute('strict-route'),
+  routeAddress('route-address'),
+  routeExcludeAddress('route-exclude-address'),
+  dnsHijack('dns-hijack'),
+  udpTimeout('udp-timeout'),
+  disableIcmpForwarding('disable-icmp-forwarding'),
+  gso('gso'),
+  includeInterface('include-interface'),
+  excludeInterface('exclude-interface'),
+  includeUid('include-uid'),
+  excludeUid('exclude-uid'),
+  excludeSrcPort('exclude-src-port'),
+  excludeDstPort('exclude-dst-port');
+
+  const TunOverrideKey(this.path);
+
+  final String path;
+}
+
 enum ExternalControllerStatus {
   @JsonValue('')
   close,

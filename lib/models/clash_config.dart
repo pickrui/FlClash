@@ -24,7 +24,20 @@ const baselineDnsOverrideKeys = {
   DnsOverrideKey.nameserver,
 };
 const defaultNtp = Ntp();
+const defaultProfileTun = ProfileTun();
 const defaultGeoXUrl = GeoXUrl();
+
+const defaultCongestionController = 'cubic';
+
+/// The congestion controls mipstack registers, its default first.
+const congestionControllers = [
+  defaultCongestionController,
+  'reno',
+  'bbr',
+  'bbr3',
+];
+const defaultDnsHijack = ['any:53'];
+const defaultTunUdpTimeout = 300;
 
 const defaultMixedPort = 7890;
 const defaultKeepAliveInterval = 30;
@@ -323,6 +336,85 @@ extension TunExt on Tun {
       ),
     };
   }
+}
+
+@freezed
+abstract class ProfileTun with _$ProfileTun {
+  const factory ProfileTun({
+    @Default(defaultTunMtu) @JsonKey(fromJson: normalizeTunMtu) int mtu,
+    @Default(defaultCongestionController)
+    @JsonKey(name: 'congestion-controller')
+    String congestionController,
+    @Default(false) @JsonKey(name: 'strict-route') bool strictRoute,
+    @Default([]) @JsonKey(name: 'route-address') List<String> routeAddress,
+    @Default([])
+    @JsonKey(name: 'route-exclude-address')
+    List<String> routeExcludeAddress,
+    @Default(defaultDnsHijack)
+    @JsonKey(name: 'dns-hijack')
+    List<String> dnsHijack,
+    @Default(defaultTunUdpTimeout) @JsonKey(name: 'udp-timeout') int udpTimeout,
+    @Default(false)
+    @JsonKey(name: 'disable-icmp-forwarding')
+    bool disableIcmpForwarding,
+    @Default(false) bool gso,
+    @Default([])
+    @JsonKey(name: 'include-interface')
+    List<String> includeInterface,
+    @Default([])
+    @JsonKey(name: 'exclude-interface')
+    List<String> excludeInterface,
+    @Default([]) @JsonKey(name: 'include-uid') List<int> includeUid,
+    @Default([]) @JsonKey(name: 'exclude-uid') List<int> excludeUid,
+    @Default([]) @JsonKey(name: 'exclude-src-port') List<int> excludeSrcPort,
+    @Default([]) @JsonKey(name: 'exclude-dst-port') List<int> excludeDstPort,
+  }) = _ProfileTun;
+
+  factory ProfileTun.fromJson(Map<String, Object?> json) =>
+      _$ProfileTunFromJson(json);
+
+  factory ProfileTun.safeFromJson(Map<String, Object?> json) {
+    return decodeSalvaging('tun override', json, ProfileTun.fromJson);
+  }
+}
+
+const _tunOverrideKeysJsonKey = 'tun-override-keys';
+
+Set<TunOverrideKey> _tunOverrideKeysFromJson(List<Object?> json) => {
+  for (final path in json)
+    ?TunOverrideKey.values.firstWhereOrNull((key) => key.path == path),
+};
+
+extension TunOverrideExt on ProfileTun {
+  /// What [keys] write over a profile's own `tun` section; as with DNS, an
+  /// emptied key replaces the profile's value.
+  Map<String, Object?> overrideJson(Set<TunOverrideKey> keys) {
+    final json = toJson();
+    return {
+      for (final key in TunOverrideKey.values)
+        if (keys.contains(key)) key.path: json[key.path],
+    };
+  }
+}
+
+/// The app MTU replaced every desktop profile's own before keys could be
+/// picked, so one changed from the default carries over as a picked key.
+Map<String, Object?> _withLegacyTunOverride(Map<String, Object?> json) {
+  final raw = json['tun'];
+  if (json.containsKey(_tunOverrideKeysJsonKey) || raw is! Map) {
+    return json;
+  }
+  final mtu = normalizeTunMtu(switch (raw['mtu']) {
+    final num value => value.toInt(),
+    _ => null,
+  });
+  return {
+    ...json,
+    if (mtu != defaultTunMtu) 'tun-override': ProfileTun(mtu: mtu).toJson(),
+    _tunOverrideKeysJsonKey: [
+      if (mtu != defaultTunMtu) TunOverrideKey.mtu.path,
+    ],
+  };
 }
 
 @freezed
@@ -992,6 +1084,12 @@ abstract class ClashConfig with _$ClashConfig {
     @Default({})
     @JsonKey(name: _ntpOverrideKeysJsonKey, fromJson: _ntpOverrideKeysFromJson)
     Set<NtpOverrideKey> ntpOverrideKeys,
+    @Default(defaultProfileTun)
+    @JsonKey(name: 'tun-override', fromJson: ProfileTun.safeFromJson)
+    ProfileTun tunOverride,
+    @Default({})
+    @JsonKey(name: _tunOverrideKeysJsonKey, fromJson: _tunOverrideKeysFromJson)
+    Set<TunOverrideKey> tunOverrideKeys,
     @Default(defaultGeoXUrl)
     @JsonKey(name: 'geox-url', fromJson: GeoXUrl.safeFormJson)
     GeoXUrl geoXUrl,
@@ -1016,7 +1114,9 @@ abstract class ClashConfig with _$ClashConfig {
   }) = _ClashConfig;
 
   factory ClashConfig.fromJson(Map<String, Object?> json) =>
-      _$ClashConfigFromJson(_withLegacyDnsOverrideKeys(json));
+      _$ClashConfigFromJson(
+        _withLegacyTunOverride(_withLegacyDnsOverrideKeys(json)),
+      );
 
   factory ClashConfig.safeFormJson(Map<String, Object?>? json) {
     if (json == null) {

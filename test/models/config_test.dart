@@ -496,6 +496,43 @@ void main() {
       expect(backup.patchClashConfig.ntpOverrideKeys, {NtpOverrideKey.server});
     });
 
+    test('only a changed app MTU carries over as a picked TUN key', () {
+      Config load(Map<String, Object?> json) =>
+          Config.fromJson(jsonDecode(jsonEncode(json)));
+
+      final changed = load({
+        'patchClashConfig': {
+          'tun': {
+            'mtu': 1480,
+            'route-address': ['10.0.0.0/8'],
+            'dns-hijack': ['198.18.0.2:53'],
+          },
+        },
+      }).patchClashConfig;
+      expect(changed.tunOverrideKeys, {TunOverrideKey.mtu});
+      expect(changed.tunOverride, const ProfileTun(mtu: 1480));
+      expect(changed.tun.mtu, 1480);
+      expect(changed.tun.routeAddress, ['10.0.0.0/8']);
+
+      for (final tun in [
+        {'mtu': 9000},
+        {'mtu': 70000},
+        <String, Object?>{},
+      ]) {
+        final kept = load({
+          'patchClashConfig': {'tun': tun},
+        }).patchClashConfig;
+        expect(kept.tunOverrideKeys, isEmpty, reason: '$tun');
+        expect(kept.tunOverride, defaultProfileTun, reason: '$tun');
+      }
+
+      final removed = load({
+        'patchClashConfig': changed.copyWith(tunOverrideKeys: {}).toJson(),
+      }).patchClashConfig;
+      expect(removed.tunOverrideKeys, isEmpty);
+      expect(removed.tun.mtu, 1480);
+    });
+
     test('realFromJson handles null', () {
       final result = Config.realFromJson(null);
       expect(result.appSettingProps.onlyStatisticsProxy, false);
