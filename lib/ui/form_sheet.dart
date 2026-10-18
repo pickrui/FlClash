@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
-import 'package:animations/animations.dart';
+import 'package:fl_clash/ui/dialog.dart';
 import 'package:fl_clash/ui/inherited.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:fl_clash/ui/shape.dart';
@@ -17,7 +17,8 @@ const double _maxHeight = 720;
 const double _margin = 40;
 
 /// A form in a card centered over the navigator, moving as a dialog does.
-class FormSheetRoute<T> extends PopupRoute<T> with SheetCoverRouteMixin<T> {
+class FormSheetRoute<T> extends PopupRoute<T>
+    with SheetCoverRouteMixin<T>, AlertMotionRouteMixin<T>, AlertHostRoute<T> {
   FormSheetRoute({
     required this.builder,
     required this.barrierColor,
@@ -37,13 +38,11 @@ class FormSheetRoute<T> extends PopupRoute<T> with SheetCoverRouteMixin<T> {
   @override
   bool get barrierDismissible => true;
 
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 150);
-
-  @override
-  Duration get reverseTransitionDuration => const Duration(milliseconds: 75);
-
   final _dismissHandler = ValueNotifier<SheetDismissHandler?>(null);
+
+  @override
+  VoidCallback get onBarrierDismiss =>
+      () => unawaited(_dismiss());
 
   Future<void>? _pendingDismiss;
 
@@ -59,41 +58,6 @@ class FormSheetRoute<T> extends PopupRoute<T> with SheetCoverRouteMixin<T> {
     } else {
       await navigator?.maybePop();
     }
-  }
-
-  @override
-  Widget buildModalBarrier() {
-    void onDismiss() => unawaited(_dismiss());
-    if (offstage) {
-      return ModalBarrier(
-        dismissible: barrierDismissible,
-        semanticsLabel: barrierLabel,
-        barrierSemanticsDismissible: semanticsDismissible,
-        onDismiss: onDismiss,
-      );
-    }
-    return AnimatedModalBarrier(
-      color: animation!.drive(
-        ColorTween(
-          begin: barrierColor.withValues(alpha: 0),
-          end: barrierColor,
-        ).chain(CurveTween(curve: barrierCurve)),
-      ),
-      dismissible: barrierDismissible,
-      semanticsLabel: barrierLabel,
-      barrierSemanticsDismissible: semanticsDismissible,
-      onDismiss: onDismiss,
-    );
-  }
-
-  @override
-  Widget buildTransitions(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    return FadeScaleTransition(animation: animation, child: child);
   }
 
   @override
