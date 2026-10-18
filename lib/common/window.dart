@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/models/config.dart';
 import 'package:fl_clash/state.dart';
+import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:screen_retriever/screen_retriever.dart';
 import 'package:window/window.dart';
@@ -117,40 +118,27 @@ class Window implements WindowPort {
   }
 
   Future<void> _windowPosition(WindowProps props) async {
-    if (_supportsPosition) {
-      final left = props.left;
-      final top = props.top;
-      if (left == null || top == null) {
-        await desktopWindow.setAlignment(Alignment.center);
-      } else {
-        final size = props.size;
-        final right = left + size.width;
-        final bottom = top + size.height;
-        final displays = await screenRetriever.getAllDisplays().timeout(
-          const Duration(seconds: 3),
-        );
-        final isPositionValid = displays.any((display) {
-          final visiblePosition = display.visiblePosition;
-          if (visiblePosition == null) {
-            return false;
-          }
-          final displayBounds = Rect.fromLTWH(
-            visiblePosition.dx,
-            visiblePosition.dy,
-            display.size.width,
-            display.size.height,
+    if (!_supportsPosition) {
+      return;
+    }
+    final position = props.left == null || props.top == null
+        ? null
+        : restoredWindowPosition(
+            props,
+            displays: await screenRetriever.getAllDisplays().timeout(
+              const Duration(seconds: 3),
+            ),
+            currentScale: system.isWindows ? _windowScale : null,
           );
-          return displayBounds.contains(Offset(left, top)) ||
-              displayBounds.contains(Offset(right, bottom));
-        });
-        if (isPositionValid) {
-          await desktopWindow.setPosition(Offset(left, top));
-        } else {
-          await desktopWindow.setAlignment(Alignment.center);
-        }
-      }
+    if (position == null) {
+      await desktopWindow.setAlignment(Alignment.center);
+    } else {
+      await desktopWindow.setPosition(position);
     }
   }
+
+  double get _windowScale =>
+      PlatformDispatcher.instance.implicitView?.devicePixelRatio ?? 1;
 
   @override
   Future<WindowProps?> captureNormalGeometry(WindowProps current) async {
@@ -177,6 +165,9 @@ class Window implements WindowPort {
       height: bounds.height,
       left: hasValidPosition ? bounds.left : current.left,
       top: hasValidPosition ? bounds.top : current.top,
+      scale: hasValidPosition && system.isWindows
+          ? _windowScale
+          : current.scale,
     );
   }
 
@@ -273,6 +264,38 @@ class Window implements WindowPort {
   void forceExit() {
     exit(0);
   }
+}
+
+/// On Windows the plugin scales by the window's monitor and screen_retriever by
+/// each display's own, so only physical pixels compare across mixed scales.
+@visibleForTesting
+Offset? restoredWindowPosition(
+  WindowProps props, {
+  required List<Display> displays,
+  double? currentScale,
+}) {
+  final savedScale = currentScale == null ? 1.0 : props.scale ?? currentScale;
+  final topLeft = Offset(props.left!, props.top!) * savedScale;
+  final bottomRight =
+      topLeft + props.size.bottomRight(Offset.zero) * savedScale;
+  final isVisible = displays.any((display) {
+    final position = display.visiblePosition;
+    if (position == null) {
+      return false;
+    }
+    final scale = currentScale == null
+        ? 1.0
+        : display.scaleFactor?.toDouble() ?? 1.0;
+    final bounds = position & display.size;
+    final physical = Rect.fromLTRB(
+      bounds.left * scale,
+      bounds.top * scale,
+      bounds.right * scale,
+      bounds.bottom * scale,
+    );
+    return physical.contains(topLeft) || physical.contains(bottomRight);
+  });
+  return isVisible ? topLeft / (currentScale ?? 1.0) : null;
 }
 
 class _InitFailureWindowListener with WindowListener {

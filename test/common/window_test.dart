@@ -12,6 +12,7 @@ import 'package:fl_clash/common/window.dart';
 import 'package:fl_clash/models/config.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:screen_retriever/screen_retriever.dart';
 import 'package:window/window.dart' show desktopWindow;
 
 const _windowChannel = MethodChannel('window');
@@ -193,6 +194,89 @@ void main() {
       );
     },
   );
+
+  group('restoredWindowPosition', () {
+    const primary = Display(
+      id: 'primary',
+      size: Size(1920, 1080),
+      visiblePosition: Offset.zero,
+      scaleFactor: 1,
+    );
+    // 2560x1440 physical at 150%, right of the primary: screen_retriever
+    // divides its origin by its own scale.
+    const secondary = Display(
+      id: 'secondary',
+      size: Size(1707, 960),
+      visiblePosition: Offset(1280, 0),
+      scaleFactor: 1.5,
+    );
+
+    test('places a window saved on a 150% monitor back on it', () {
+      const props = WindowProps(
+        width: 800,
+        height: 600,
+        left: 2200 / 1.5,
+        top: 150 / 1.5,
+        scale: 1.5,
+      );
+
+      final position = restoredWindowPosition(
+        props,
+        displays: const [primary, secondary],
+        currentScale: 1,
+      );
+
+      expect(position!.dx, closeTo(2200, 0.001));
+      expect(position.dy, closeTo(150, 0.001));
+    });
+
+    test('rejects a position no display shows any more', () {
+      const props = WindowProps(
+        width: 800,
+        height: 600,
+        left: 2200,
+        top: 100,
+        scale: 1,
+      );
+
+      expect(
+        restoredWindowPosition(
+          props,
+          displays: const [primary],
+          currentScale: 1,
+        ),
+        isNull,
+      );
+    });
+
+    test('reads a position saved without a scale at the current one', () {
+      const props = WindowProps(width: 800, height: 600, left: 100, top: 50);
+
+      expect(
+        restoredWindowPosition(
+          props,
+          displays: const [primary],
+          currentScale: 1.25,
+        ),
+        const Offset(100, 50),
+      );
+    });
+
+    test('keeps logical coordinates where the platform has them', () {
+      const props = WindowProps(
+        width: 800,
+        height: 600,
+        left: 1500,
+        top: 100,
+        scale: 2,
+      );
+
+      expect(
+        restoredWindowPosition(props, displays: const [primary, secondary]),
+        const Offset(1500, 100),
+      );
+    });
+  });
 
   test('maximized geometry is not captured', () async {
     isMaximized = true;
