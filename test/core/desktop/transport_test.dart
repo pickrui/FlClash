@@ -131,7 +131,7 @@ void main() {
       rawEvents.add(_frame(0x00));
       await open;
 
-      await transport.send('hello');
+      await transport.send(utf8.encode('hello'));
 
       expect(sentMessages, [utf8.encode('hello')]);
     });
@@ -200,7 +200,7 @@ void main() {
             throwsA(same(error)),
           );
           await expectLater(
-            transport.send('stale request'),
+            transport.send(utf8.encode('stale request')),
             throwsA(same(error)),
           );
           await expectLater(transport.open(), throwsA(same(error)));
@@ -278,7 +278,7 @@ void main() {
       await open;
 
       await expectLater(
-        failingTransport.send('hello'),
+        failingTransport.send(utf8.encode('hello')),
         throwsA(
           isA<StateError>().having(
             (error) => error.message,

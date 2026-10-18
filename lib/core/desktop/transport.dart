@@ -64,7 +64,7 @@ abstract interface class DesktopCoreTransport {
 
   Future<TransportConnected> waitUntilConnected(Duration timeout);
 
-  Future<void> send(String message);
+  Future<void> send(List<int> message);
 
   Future<void> close();
 }
@@ -149,7 +149,7 @@ final class DesktopCoreTransportBinding implements DesktopCoreTransport {
   }
 
   @override
-  Future<void> send(String message) => _transport.send(message);
+  Future<void> send(List<int> message) => _transport.send(message);
 
   @override
   Future<void> close() {
@@ -380,7 +380,7 @@ final class IPCCoreTransport implements DesktopCoreTransport {
   }
 
   @override
-  Future<void> send(String message) {
+  Future<void> send(List<int> message) {
     if (_state == DesktopTransportState.closed) {
       return Future.error(StateError('IPC transport is closed'));
     }
@@ -388,7 +388,7 @@ final class IPCCoreTransport implements DesktopCoreTransport {
     if (failure != null) {
       return Future.error(failure.error, failure.stackTrace);
     }
-    return _sendMessage(utf8.encode(message));
+    return _sendMessage(message);
   }
 
   @override

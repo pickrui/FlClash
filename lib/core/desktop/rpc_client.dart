@@ -25,6 +25,8 @@ const _connectTimeout = Duration(seconds: 10);
 
 final _frameDecoder = utf8.decoder.fuse(json.decoder);
 
+final _requestEncoder = JsonUtf8Encoder();
+
 abstract interface class CoreRpcChannel {
   Future<T?> invoke<T>({
     required CoreMethod method,
@@ -97,7 +99,7 @@ final class CoreRpcClient implements CoreRpcChannel {
       await Future.any<Object?>([
         transport
             .send(
-              json.encode(
+              _requestEncoder.convert(
                 CoreMethodCall(id: id, method: method, arguments: arguments),
               ),
             )

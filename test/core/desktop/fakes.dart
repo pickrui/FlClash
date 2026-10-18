@@ -133,7 +133,7 @@ final class FakeDesktopCoreTransport implements DesktopCoreTransport {
   }
 
   @override
-  Future<void> send(String message) async {
+  Future<void> send(List<int> message) async {
     if (state == DesktopTransportState.closed) {
       throw StateError('IPC transport is closed');
     }
@@ -141,7 +141,7 @@ final class FakeDesktopCoreTransport implements DesktopCoreTransport {
     if (error != null) {
       throw error;
     }
-    sentMessages.add(message);
+    sentMessages.add(utf8.decode(message));
     await sendGate;
   }
 
