@@ -86,12 +86,12 @@ final class FakeDesktopCoreTransport implements DesktopCoreTransport {
     _eventController.add(connection);
   }
 
-  void disconnect(int generation) {
+  void disconnect(int generation, {Object? error}) {
     if (_connection?.generation == generation) {
       _connection = null;
       state = DesktopTransportState.ready;
     }
-    _eventController.add(TransportDisconnected(generation));
+    _eventController.add(TransportDisconnected(generation, error: error));
   }
 
   void addJson(Map<String, Object?> value) {

@@ -482,10 +482,13 @@ void main() {
       );
       await _startConnected(lifecycle, transport, launcher, pid: 42);
       final crash = lifecycle.crashEvents.first;
+      final cause = StateError('IPC error: frame exceeds the limit');
 
-      transport.disconnect(1);
+      transport.disconnect(1, error: cause);
 
-      expect((await crash).code, 'unexpected_disconnect');
+      final failure = await crash;
+      expect(failure.code, 'unexpected_disconnect');
+      expect(failure.cause, same(cause));
       await launcher.lease.stopStarted;
       await pumpEventQueue();
       expect(launcher.lease.stopCount, 1);
