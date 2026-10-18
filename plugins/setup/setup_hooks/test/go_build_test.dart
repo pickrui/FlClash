@@ -17,27 +17,6 @@ void main() {
   } on ProcessException {
     goAvailable = false;
   }
-  test('64-bit Android libraries link with 16 KB segment alignment', () {
-    const flag = '-Wl,-z,max-page-size=16384';
-    expect(
-      androidPageSizeEnvironment(Target.androidArm64, environment: const {}),
-      {'CGO_LDFLAGS': flag},
-    );
-    expect(
-      androidPageSizeEnvironment(
-        Target.androidAmd64,
-        environment: const {'CGO_LDFLAGS': '-O2'},
-      ),
-      {'CGO_LDFLAGS': '-O2 $flag'},
-    );
-    for (final target in [Target.androidArm, Target.linuxAmd64]) {
-      expect(
-        androidPageSizeEnvironment(target, environment: const {}),
-        isEmpty,
-      );
-    }
-  });
-
   test('Windows Go cache fallback retains configured roots', () {
     final root = Directory.systemTemp.path;
     for (final environment in [
@@ -124,10 +103,13 @@ void main() {
       ).writeAsStringSync('name: fixture\n');
       File(
         p.join(core.path, 'go.mod'),
-      ).writeAsStringSync('module example.invalid/fixture\n\ngo 1.23\n');
-      File(
-        p.join(core.path, 'main.go'),
-      ).writeAsStringSync('package main\nfunc main() {}\n');
+      ).writeAsStringSync('module core\n\ngo 1.23\n');
+      File(p.join(core.path, 'core.go')).writeAsStringSync('package core\n');
+      File(p.join(core.path, 'cmd', 'core', 'main.go'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync(
+          'package main\n\nimport _ "core"\n\nfunc main() {}\n',
+        );
       final request = BuildRequest(
         rootDir: root.path,
         target: Target.macosArm64,
@@ -148,7 +130,7 @@ void main() {
       expect(first.inputs, isNot(contains(p.join(root.path, '.dart_tool'))));
       expect((await buildPlatform(request)).rebuilt, isFalse);
       final added = File(p.join(core.path, 'extra.go'))
-        ..writeAsStringSync('package main\nconst extra = 1\n');
+        ..writeAsStringSync('package core\nconst extra = 1\n');
       final changed = await buildPlatform(request);
       expect(changed.rebuilt, isTrue);
       expect(changed.inputs, contains(added.path));

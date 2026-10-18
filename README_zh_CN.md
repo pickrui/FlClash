@@ -135,9 +135,9 @@ macOS 和 Windows 上的 Docker Desktop 会为所有 Linux 容器运行一个共
 
     - android
 
-        1. 安装  `Android SDK` ,  `Android NDK`
+        1. 安装 `Android SDK`（含 `android/gradle/libs.versions.toml` 指定版本的 NDK）和 JDK 17
 
-        2. 设置 `ANDROID_NDK` 环境变量
+        2. `:core` Gradle 模块用 gomobile 绑定 Go 核心，gomobile 由 `core/go.mod` 作为 Go 工具固定版本
 
         3. 运行构建脚本
 

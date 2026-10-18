@@ -6,7 +6,7 @@
 final _encodedSecret = RegExp(r'v2:[A-Za-z0-9+/]+={0,2}');
 
 final _linkerSecret = RegExp(
-  r'(-X\s+main\.GlobalDNSAuth(?:PrivateKey|Domains)=)\S+',
+  r'(-X\s+core\.GlobalDNSAuth(?:PrivateKey|Domains)=)\S+',
 );
 
 final _namedSecret = RegExp(

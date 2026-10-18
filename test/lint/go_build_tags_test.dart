@@ -10,6 +10,7 @@ import 'package:test/test.dart';
 
 const _tagFile = 'tool/go_build_tags.env';
 const _harnessDefaults = 'plugins/setup/setup_hooks/lib/src/options.dart';
+const _androidCoreBuild = 'android/core/build.gradle.kts';
 
 String _sharedTags() {
   final line = File(_tagFile)
@@ -43,6 +44,55 @@ void main() {
       reason:
           'BuildConfig defaults and $_tagFile must name the same build tags; '
           'CI would otherwise validate a binary the release never ships',
+    );
+  });
+
+  test('the Android Core binds like the desktop harness builds', () {
+    String single(String path, String pattern) {
+      final match = RegExp(pattern).firstMatch(File(path).readAsStringSync());
+      expect(match, isNotNull, reason: '$path lost /$pattern/');
+      return match!.group(1)!;
+    }
+
+    Map<String, String> pairs(String path, String block, String pair) => {
+      for (final match in RegExp(pair).allMatches(single(path, block)))
+        match.group(1)!: match.group(2)!,
+    };
+
+    const secrets = 'plugins/setup/setup_hooks/lib/src/secrets.dart';
+    const goBuilder = 'plugins/setup/setup_hooks/lib/src/go_builder.dart';
+    expect(
+      single(_androidCoreBuild, r'val goLdflags = "([^"]*)"'),
+      single(_harnessDefaults, r"goLdflags: '([^']*)'"),
+    );
+    expect(
+      single(_androidCoreBuild, r'goToolchain\.set\("([^"]+)"\)'),
+      single(goBuilder, r"'GOTOOLCHAIN': '([^']+)'"),
+    );
+    final symbols = pairs(
+      secrets,
+      r'static const keys = \{([^}]*)\}',
+      r"'(\w+)': '(\w+)'",
+    );
+    expect(symbols, isNotEmpty);
+    expect(
+      pairs(
+        _androidCoreBuild,
+        r'val coreSecretSymbols = mapOf\(([^)]*)\)',
+        r'"(\w+)" to "(\w+)"',
+      ),
+      symbols,
+    );
+    // The linker silently skips an -X that names no variable.
+    final globals = File('core/globals.go').readAsStringSync();
+    expect(globals, contains('\npackage core\n'));
+    for (final symbol in symbols.values) {
+      expect(globals, contains('var $symbol string'));
+    }
+    expect(File(secrets).readAsStringSync(), contains("'-X core.\${e.key}="));
+    expect(
+      File(_androidCoreBuild).readAsStringSync(),
+      contains(r'"-X core.$symbol=$encoded"'),
     );
   });
 

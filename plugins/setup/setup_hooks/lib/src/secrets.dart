@@ -172,5 +172,5 @@ class CoreBuildSecrets {
   }
 
   String get ldflags =>
-      values.entries.map((e) => '-X main.${e.key}=${e.value}').join(' ');
+      values.entries.map((e) => '-X core.${e.key}=${e.value}').join(' ');
 }

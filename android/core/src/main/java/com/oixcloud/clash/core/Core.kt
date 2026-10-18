@@ -5,26 +5,19 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 package com.oixcloud.clash.core
 
+import com.oixcloud.clash.core.mobile.Mobile
+import com.oixcloud.clash.core.mobile.ResultHandler
+import com.oixcloud.clash.core.mobile.TunHandler
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.URL
 
 data object Core {
-    private external fun startTun(
-        fd: Int,
-        cb: TunInterface,
-        stack: String,
-        address: String,
-        dns: String,
-        options: String,
-    ): Boolean
+    fun forceGC() = Mobile.forceGC()
 
-    external fun forceGC(
-    )
-
-    external fun updateDNS(
+    fun updateDNS(
         dns: String,
-    )
+    ) = Mobile.updateDns(dns)
 
     private fun parseInetSocketAddress(address: String): InetSocketAddress {
         val url = URL("https://$address")
@@ -42,9 +35,9 @@ data object Core {
         dns: String,
         options: String,
     ): Boolean {
-        return startTun(
+        return Mobile.startTun(
             fd,
-            object : TunInterface {
+            object : TunHandler {
                 override fun protect(fd: Int): Boolean = protect(fd)
 
                 override fun resolveUid(
@@ -68,45 +61,21 @@ data object Core {
         )
     }
 
-    external fun suspended(
+    fun suspended(
         suspended: Boolean,
-    )
-
-    private external fun invokeMethod(
-        data: String,
-        cb: InvokeInterface
-    )
+    ) = Mobile.suspend(suspended)
 
     fun invokeMethod(
         data: String,
         cb: (result: ByteArray?) -> Unit
     ) {
-        invokeMethod(
-            data,
-            object : InvokeInterface {
-                override fun onResult(result: ByteArray?) {
-                    cb(result)
-                }
-            },
-        )
+        Mobile.invokeMethod(data, ResultHandler { result -> cb(result) })
     }
-
-    private external fun setEventListener(cb: InvokeInterface?)
 
     fun callSetEventListener(
         cb: ((result: ByteArray) -> Unit)?
     ) {
-        when (cb != null) {
-            true -> setEventListener(
-                object : InvokeInterface {
-                    override fun onResult(result: ByteArray?) {
-                        result?.let(cb)
-                    }
-                },
-            )
-
-            false -> setEventListener(null)
-        }
+        Mobile.setEventListener(cb?.let { ResultHandler { result -> result?.let(it) } })
     }
 
     fun quickSetup(
@@ -114,28 +83,14 @@ data object Core {
         setupParamsString: String,
         cb: (result: String?) -> Unit,
     ) {
-        quickSetup(
+        Mobile.quickSetup(
             initParamsString,
             setupParamsString,
-            object : InvokeInterface {
-                override fun onResult(result: ByteArray?) {
-                    cb(result?.decodeToString())
-                }
-            },
+            ResultHandler { result -> cb(result?.decodeToString()) },
         )
     }
 
-    private external fun quickSetup(
-        initParamsString: String,
-        setupParamsString: String,
-        cb: InvokeInterface
-    )
+    fun stopTun() = Mobile.stopTun()
 
-    external fun stopTun()
-
-    external fun getTraffic(onlyStatisticsProxy: Boolean): String
-
-    init {
-        System.loadLibrary("core")
-    }
+    fun getTraffic(onlyStatisticsProxy: Boolean): String = Mobile.getTraffic(onlyStatisticsProxy)
 }

@@ -6,7 +6,7 @@
 
 //go:build windows
 
-package main
+package core
 
 import "golang.org/x/sys/windows"
 

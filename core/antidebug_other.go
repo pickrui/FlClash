@@ -6,7 +6,7 @@
 
 //go:build !linux && !darwin
 
-package main
+package core
 
 func debuggerPresent() bool {
 	return false

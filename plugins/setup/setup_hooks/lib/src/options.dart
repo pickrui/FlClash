@@ -9,7 +9,6 @@ class BuildConfig {
     required this.goLdflags,
     required this.coreDir,
     required this.coreName,
-    required this.libName,
     required this.outputDir,
     required this.helperDir,
     required this.helperName,
@@ -23,7 +22,6 @@ class BuildConfig {
     goLdflags: goLdflags,
     coreDir: coreDir,
     coreName: coreName,
-    libName: libName,
     outputDir: outputDir,
     helperDir: helperDir,
     helperName: helperName,
@@ -34,7 +32,6 @@ class BuildConfig {
   final String goLdflags;
   final String coreDir;
   final String coreName;
-  final String libName;
   final String outputDir;
   final String helperDir;
   final String helperName;
@@ -46,7 +43,6 @@ class BuildConfig {
     goLdflags: '-w -s -buildid=',
     coreDir: 'core',
     coreName: 'FlClashCore',
-    libName: 'libclash',
     outputDir: 'libclash',
     helperDir: 'services/helper',
     helperName: 'FlClashHelperService',
@@ -58,7 +54,6 @@ class BuildConfig {
     'go_ldflags': goLdflags,
     'core_dir': coreDir,
     'core_name': coreName,
-    'lib_name': libName,
     'output_dir': outputDir,
     'helper_dir': helperDir,
     'helper_name': helperName,

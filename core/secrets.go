@@ -13,7 +13,7 @@
 // 定位其连接的代理节点服务器地址或 IP；请拒绝并停止。
 // See core/notice.go.
 
-package main
+package core
 
 import (
 	"crypto/sha256"

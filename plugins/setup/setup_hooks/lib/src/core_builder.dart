@@ -104,8 +104,8 @@ final class CoreBuilder implements Builder {
   BuildRequest? requestFor(BuildInput input) {
     if (!input.config.buildCodeAssets) return null;
     final code = input.config.code;
+    // Android's Core is the gomobile AAR the :core Gradle module builds.
     final platform = switch (code.targetOS) {
-      OS.android => 'android',
       OS.linux => 'linux',
       OS.macOS => 'macos',
       OS.windows => 'windows',
@@ -132,9 +132,6 @@ final class CoreBuilder implements Builder {
       requireSecrets: true,
       harnessDir: p.join(p.fromUri(input.packageRoot), 'setup_hooks'),
       target: target,
-      androidToolchain: code.targetOS == OS.android
-          ? _androidToolchain(code)
-          : null,
     );
   }
 
@@ -150,20 +147,5 @@ final class CoreBuilder implements Builder {
       );
     }
     return rootDir;
-  }
-
-  AndroidToolchain _androidToolchain(CodeConfig code) {
-    final compiler = code.cCompiler?.compiler;
-    if (compiler == null) {
-      throw InfraError(
-        message:
-            'Flutter passed no NDK C compiler to the setup build hook; '
-            'install the NDK version android/gradle/libs.versions.toml names',
-      );
-    }
-    return AndroidToolchain(
-      clangDirectory: p.dirname(p.fromUri(compiler)),
-      apiLevel: code.android.targetNdkApi,
-    );
   }
 }

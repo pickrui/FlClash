@@ -4,7 +4,6 @@ targetSdk = "37"
 compileSdk = "37"
 ndkVersion = "28.2.13676358"
 coreKtx = "1.18.0"
-annotationJvm = "1.10.0"
 coreSplashscreen = "1.2.0"
 gson = "2.14.0"
 kotlin = "2.4.20"
@@ -13,7 +12,6 @@ smaliDexlib2 = "3.0.10"
 [libraries]
 build-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 androidx-core = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
-annotation-jvm = { module = "androidx.annotation:annotation-jvm", version.ref = "annotationJvm" }
 core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 smali-dexlib2 = { module = "com.android.tools.smali:smali-dexlib2", version.ref = "smaliDexlib2" }

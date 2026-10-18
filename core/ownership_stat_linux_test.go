@@ -6,7 +6,7 @@
 
 //go:build linux && !android
 
-package main
+package core
 
 import (
 	"reflect"

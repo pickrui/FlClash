@@ -151,29 +151,6 @@ class Build {
 
   static String get distPath => join(current, 'dist');
 
-  static int get _androidApiLevel {
-    final source = File('android/gradle/libs.versions.toml').readAsStringSync();
-    final match = RegExp(
-      r'^minSdk\s*=\s*"(\d+)"',
-      multiLine: true,
-    ).firstMatch(source);
-    if (match == null) throw StateError('Android minSdk is missing');
-    return int.parse(match[1]!);
-  }
-
-  /// The per-ABI clang wrappers live in the NDK host toolchain's bin folder.
-  static String get _androidClangDirectory {
-    final ndk = Platform.environment['ANDROID_NDK'];
-    if (ndk == null || ndk.isEmpty) {
-      throw 'Set ANDROID_NDK to the Android NDK directory';
-    }
-    final hosts = Directory(join(ndk, 'toolchains', 'llvm', 'prebuilt'))
-        .listSync()
-        .where((entity) => !basename(entity.path).startsWith('.'));
-    if (hosts.isEmpty) throw 'No LLVM toolchain found under $ndk';
-    return join(hosts.first.path, 'bin');
-  }
-
   static void requireEnvironment(Iterable<String> keys) {
     final missing = keys
         .where((key) => Platform.environment[key]?.trim().isNotEmpty != true)
@@ -230,6 +207,12 @@ class Build {
     Arch? arch,
     bool includeHelper = false,
   }) async {
+    if (target == Target.android) {
+      // The :core Gradle module binds the Core with gomobile and embeds these.
+      hooks.CoreBuildSecrets.load(rootDir: current, requireSecrets: true);
+      print('Prepared the Core build settings for the Android Gradle build');
+      return;
+    }
     final items = buildItems.where(
       (item) => item.target == target && (arch == null || item.arch == arch),
     );
@@ -246,12 +229,6 @@ class Build {
             harnessDir: join(current, 'plugins', 'setup', 'setup_hooks'),
             includeHelper: includeHelper,
             requireSecrets: true,
-            androidToolchain: target == Target.android
-                ? hooks.AndroidToolchain(
-                    clangDirectory: _androidClangDirectory,
-                    apiLevel: _androidApiLevel,
-                  )
-                : null,
           ),
         );
       }
@@ -594,11 +571,7 @@ class BuildCommand extends Command {
       throw 'Invalid arch parameter';
     }
 
-    Build.requireEnvironment([
-      'DNS_AUTH_PRIVATE_KEY',
-      'DNS_AUTH_DOMAINS',
-      if (target == Target.android) 'ANDROID_NDK',
-    ]);
+    Build.requireEnvironment(['DNS_AUTH_PRIVATE_KEY', 'DNS_AUTH_DOMAINS']);
     if (out == 'app') {
       final config =
           loadYaml(File('pubspec.yaml').readAsStringSync()) as YamlMap;

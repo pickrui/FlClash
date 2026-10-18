@@ -141,9 +141,9 @@ exposure, updates, and troubleshooting.
 
     - android
 
-        1. Install `Android SDK`, `Android NDK`
+        1. Install the `Android SDK` with the NDK version `android/gradle/libs.versions.toml` names, and JDK 17
 
-        2. Set `ANDROID_NDK` environment variable
+        2. The `:core` Gradle module binds the Go core with gomobile, which `core/go.mod` pins as a Go tool
 
         3. Run build script
 
