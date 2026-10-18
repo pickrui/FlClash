@@ -27,6 +27,7 @@ const _allowed = {
   'lib/plugins/app.dart#_packageChanges',
   'lib/plugins/app.dart#_iconChanges',
   'lib/plugins/app.dart#_batteryOptimizationChanges',
+  'lib/plugins/app.dart#floatingKeyboard',
 };
 
 final _declaration = RegExp(

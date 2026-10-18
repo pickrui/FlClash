@@ -153,6 +153,22 @@ void main() {
     expect(changes, [true]);
   });
 
+  test('forwards a floating TV keyboard from Android', () async {
+    final keyboard = App().floatingKeyboard;
+    addTearDown(() => keyboard.value = false);
+    final delivered = Completer<void>();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .handlePlatformMessage(
+          channel.name,
+          const StandardMethodCodec().encodeMethodCall(
+            const MethodCall('floatingImeChanged', true),
+          ),
+          (_) => delivered.complete(),
+        );
+    await delivered.future;
+    expect(keyboard.value, isTrue);
+  });
+
   test('package events invalidate both cached missing icons and app list subscribers', () async {
     var calls = 0;
     var changes = 0;

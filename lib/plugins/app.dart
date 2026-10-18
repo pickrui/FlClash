@@ -28,6 +28,9 @@ class App {
   Stream<bool> get batteryOptimizationChanges =>
       _batteryOptimizationChanges.stream;
 
+  /// Whether a TV keyboard floats over the app without insetting it.
+  final floatingKeyboard = ValueNotifier(false);
+
   App._internal() {
     methodChannel = const MethodChannel('$packageName/app');
     methodChannel.setMethodCallHandler((call) async {
@@ -37,6 +40,8 @@ class App {
           _packageChanges.add(null);
         case 'batteryOptimizationChanged':
           _batteryOptimizationChanges.add(call.arguments == true);
+        case 'floatingImeChanged':
+          floatingKeyboard.value = call.arguments == true;
         default:
           throw MissingPluginException();
       }

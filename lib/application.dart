@@ -184,6 +184,7 @@ class ApplicationState extends ConsumerState<Application> {
                                     system.isTV ||
                                     MediaQuery.navigationModeOf(context) ==
                                         NavigationMode.directional,
+                                floatingKeyboard: app?.floatingKeyboard,
                                 child: child!,
                               ),
                             ),
