@@ -765,7 +765,10 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
   final profile = ref.watch(profileProvider(profileId));
   final scriptId = profile?.scriptId;
   final profileLastUpdateDate = profile?.lastUpdateDate?.millisecondsSinceEpoch;
-  final overwriteType = profile?.overwriteType ?? OverwriteType.standard;
+  final profileType = profile?.type;
+  final overwriteType = profileType == ProfileType.custom
+      ? OverwriteType.custom
+      : profile?.overwriteType ?? OverwriteType.standard;
   final proxyChains = profile?.proxyChains ?? [];
   final profileProxies = profile?.profileProxies ?? [];
   final customProxyGroups = profile?.customProxyGroups ?? [];
@@ -801,6 +804,7 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
     ),
     profileId: profileId,
     profileLastUpdateDate: profileLastUpdateDate,
+    profileType: profileType,
     overwriteType: overwriteType,
     addedRules: addedRules,
     proxyChains: proxyChains,

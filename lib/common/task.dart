@@ -1703,7 +1703,7 @@ Future<MigrationData> _restoreTask(VM3<String, String, String> paths) async {
     final scripts = results[1].cast<Script>();
     final profileIds = {for (final profile in profiles) profile.id};
     final profilesMigration = profiles
-        .where((item) => item.includeInPortableBackup)
+        .where((item) => item.includeConfigFileInPortableBackup)
         .map(
           (item) => VM2(
             _getProfilePath(restoreDirPath, item.id.toString()),

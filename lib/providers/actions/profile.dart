@@ -85,9 +85,7 @@ extension ProfilesControllerExt on AppController {
     final ids = _ref.read(profilesProvider).map((profile) => profile.id);
     for (final id in ids.toList()) {
       final profile = _ref.read(profilesProvider).getProfile(id);
-      if (profile == null ||
-          !profile.autoUpdate ||
-          profile.type == ProfileType.file) {
+      if (profile == null || !profile.autoUpdate || !profile.isUpdatable) {
         continue;
       }
 
@@ -183,7 +181,7 @@ extension ProfilesControllerExt on AppController {
     await runWithConcurrency(
       items: _ref
           .read(profilesProvider)
-          .where((profile) => profile.type == ProfileType.url),
+          .where((profile) => profile.isUpdatable),
       concurrency: maxConcurrentSubscriptionUpdates,
       action: (profile) async {
         try {
@@ -206,6 +204,7 @@ extension ProfilesControllerExt on AppController {
     bool preserveCurrentState = true,
     bool promptCertificate = true,
   }) async {
+    if (profile.type == ProfileType.custom) return profile;
     await ensureCoreReadyOrThrow();
     final key = profile.updatingKey;
     if (showLoading) {

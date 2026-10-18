@@ -294,6 +294,7 @@ extension SetupControllerExt on AppController {
     bool refetchCloud = true,
   }) async {
     var profile = _ref.read(profilesProvider).getProfile(profileId);
+    if (profile?.type == ProfileType.custom) return <String, dynamic>{};
     var existingPath = await profile?.getExistingFilePath(
       validate: validateSnapshot,
     );

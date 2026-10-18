@@ -60,6 +60,14 @@ void main() {
     },
   );
 
+  test('a change of profile type needs setup', () {
+    final previous = buildState().copyWith(profileType: ProfileType.url);
+    expect(
+      previous.copyWith(profileType: ProfileType.custom).needSetup(previous),
+      isTrue,
+    );
+  });
+
   group('SetupState personal overlay changes', () {
     final previous = buildState(overwriteType: OverwriteType.merge);
 

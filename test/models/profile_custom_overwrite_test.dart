@@ -85,6 +85,16 @@ void main() {
     },
   );
 
+  test('a custom profile has no config file to back up or update', () {
+    final custom = Profile.custom(label: 'Built');
+
+    expect(custom.type, ProfileType.custom);
+    expect(custom.overwriteType, OverwriteType.custom);
+    expect(custom.includeInPortableBackup, true);
+    expect(custom.includeConfigFileInPortableBackup, false);
+    expect(custom.isUpdatable, false);
+  });
+
   test('an exported profile is named as a yaml file', () {
     const profile = Profile(id: 7, autoUpdateDuration: Duration.zero);
 

@@ -298,6 +298,40 @@ void main() {
       ),
     );
   });
+
+  test('a custom profile backup restores without a config file', () async {
+    final root = await Directory.systemTemp.createTemp('flclash_v7_backup_');
+    addTearDown(() => root.delete(recursive: true));
+    final databaseFile = File('${root.path}/$backupDatabaseName');
+    final custom = Profile(
+      id: 9,
+      label: 'Built',
+      autoUpdateDuration: const Duration(hours: 1),
+      profileType: ProfileType.custom,
+      overwriteType: OverwriteType.custom,
+      lastUpdateDate: DateTime(2026),
+      customProxyGroups: const [
+        ProxyGroup(name: 'Out', type: GroupType.Selector, proxies: ['DIRECT']),
+      ],
+      customRules: const [Rule(id: 7, value: 'MATCH,Out')],
+    );
+    final local = _v6Profiles[1];
+    await _createDatabase(databaseFile, [custom, local], schemaVersion: 7);
+    final backup = await _createBackup(root, databaseFile, {
+      local.id: 'proxies: []',
+    });
+
+    final migration = await restoreTask(
+      backup,
+      '${root.path}/restore',
+      '${root.path}/live',
+    );
+
+    expect(migration.profiles, [local, custom]);
+    expect(migration.fileMigrations.map((file) => file.b), [
+      '${root.path}/live/profiles/${local.id}.yaml',
+    ]);
+  });
 }
 
 Future<void> _createV2Database(

@@ -263,6 +263,7 @@ abstract class SetupState with _$SetupState {
     String? interfaceName,
     required int? profileId,
     required int? profileLastUpdateDate,
+    ProfileType? profileType,
     required OverwriteType overwriteType,
     required List<Rule> addedRules,
     required List<ProxyChain> proxyChains,
@@ -302,7 +303,8 @@ extension SetupStateExt on SetupState {
     if (profileId != lastSetupState.profileId) {
       return true;
     }
-    if (profileLastUpdateDate != lastSetupState.profileLastUpdateDate) {
+    if (profileLastUpdateDate != lastSetupState.profileLastUpdateDate ||
+        profileType != lastSetupState.profileType) {
       return true;
     }
     if (!proxyChainListEquality.equals(

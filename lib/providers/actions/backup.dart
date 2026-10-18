@@ -59,7 +59,7 @@ extension BackupControllerExt on AppController {
             p.join(snapshotPath, backupDatabaseName),
           );
           for (final profile in profiles.where(
-            (item) => item.includeInPortableBackup,
+            (item) => item.includeConfigFileInPortableBackup,
           )) {
             final source = File(
               await appPath.getProfilePath(profile.id.toString()),

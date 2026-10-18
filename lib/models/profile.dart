@@ -612,6 +612,18 @@ abstract class Profile with _$Profile {
       autoUpdateDuration: defaultUpdateDuration,
     );
   }
+
+  factory Profile.custom({required String label}) {
+    return Profile(
+      id: snowflake.id,
+      label: label,
+      profileType: ProfileType.custom,
+      overwriteType: OverwriteType.custom,
+      autoUpdate: false,
+      autoUpdateDuration: defaultUpdateDuration,
+      lastUpdateDate: DateTime.now(),
+    );
+  }
 }
 
 extension ProfileCustomOverwriteExt on Profile {
@@ -1174,6 +1186,12 @@ extension ProfileExtension on Profile {
   String get updatingKey => 'profile_$id';
 
   bool get includeInPortableBackup => !isoixCloudProfile;
+
+  /// A custom profile is built from its row alone and has no file to carry.
+  bool get includeConfigFileInPortableBackup =>
+      includeInPortableBackup && type != ProfileType.custom;
+
+  bool get isUpdatable => type == ProfileType.url;
 
   Future<bool> hasLocalConfigSnapshot() async {
     return await getExistingFilePath() != null;
