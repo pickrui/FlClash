@@ -7,7 +7,7 @@ import 'dart:math';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/theme.dart';
-import 'package:fl_clash/providers/action.dart';
+import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
 import 'package:material_ui/material_ui.dart';
@@ -146,23 +146,41 @@ class ThemeManager extends ConsumerWidget {
 
     globalState.measure = Measure.of(context, textScaleFactor);
     globalState.theme = CommonTheme.of(context, textScaleFactor);
-    final padding = MediaQuery.of(context).padding;
-    final height = MediaQuery.of(context).size.height;
-    return MediaQuery(
-      data: MediaQuery.of(context).copyWith(
-        textScaler: TextScaler.linear(textScaleFactor),
-        padding: padding.copyWith(
-          top: padding.top > height * 0.3 ? 20.0 : padding.top,
-        ),
-      ),
+    final viewSize = ref.read(viewSizeProvider.notifier);
+    return _AppMediaQuery(
+      textScaler: TextScaler.linear(textScaleFactor),
       child: LayoutBuilder(
         builder: (_, container) {
-          appController.updateViewSize(
-            Size(container.maxWidth, container.maxHeight),
-          );
+          final size = Size(container.maxWidth, container.maxHeight);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            viewSize.value = size;
+          });
           return _buildSystemUi(child);
         },
       ),
+    );
+  }
+}
+
+/// Depends on the whole MediaQuery, which every keyboard frame changes.
+class _AppMediaQuery extends StatelessWidget {
+  const _AppMediaQuery({required this.textScaler, required this.child});
+
+  final TextScaler textScaler;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final data = MediaQuery.of(context);
+    final padding = data.padding;
+    return MediaQuery(
+      data: data.copyWith(
+        textScaler: textScaler,
+        padding: padding.copyWith(
+          top: padding.top > data.size.height * 0.3 ? 20.0 : padding.top,
+        ),
+      ),
+      child: child,
     );
   }
 }

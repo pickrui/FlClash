@@ -46,4 +46,32 @@ void main() {
     expect(themes[1], same(themes[0]));
     expect(themes[2], isNot(same(themes[1])));
   });
+
+  testWidgets('a keyboard frame reaches the page without rebuilding the '
+      'manager', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    double? inset;
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: ThemeManager(
+            child: Builder(
+              builder: (context) {
+                inset = MediaQuery.viewInsetsOf(context).bottom;
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    final measure = globalState.measure;
+
+    tester.view.viewInsets = const FakeViewPadding(bottom: 120);
+    await tester.pump();
+
+    expect(inset, 120);
+    expect(globalState.measure, same(measure));
+  });
 }

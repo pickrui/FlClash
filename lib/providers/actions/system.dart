@@ -68,12 +68,6 @@ extension SystemControllerExt on AppController {
     });
   }
 
-  void updateViewSize(Size size) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _ref.read(viewSizeProvider.notifier).value = size;
-    });
-  }
-
   void initLink() {
     if (safeModeBuild) return;
     linkManager.initAppLinksListen((url) async {
