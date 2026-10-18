@@ -54,11 +54,14 @@ class _FakeApi implements CloudNodeFilterApi {
   NodeFilterCatalog catalog;
   Object? fetchError;
   Object? previewError;
+  var previewAvailable = true;
   var fetches = 0;
   final previews = <NodeFilter>[];
   final saves = <NodeFilter>[];
   var resets = 0;
   Completer<NodeFilterCatalog?>? pendingSave;
+  final pendingPreviews = <Completer<NodeFilterCatalog>>[];
+  var delayPreviews = false;
   int Function(NodeFilter filter) keptFor = (_) => 3;
 
   @override
@@ -71,8 +74,13 @@ class _FakeApi implements CloudNodeFilterApi {
   @override
   Future<NodeFilterCatalog> previewNodeFilter(NodeFilter filter) async {
     previews.add(filter);
+    if (delayPreviews) {
+      final pending = Completer<NodeFilterCatalog>();
+      pendingPreviews.add(pending);
+      return pending.future;
+    }
     if (previewError case final error?) throw error;
-    return _catalog(filter, kept: keptFor(filter));
+    return _catalog(filter, kept: keptFor(filter), available: previewAvailable);
   }
 
   @override
@@ -271,6 +279,116 @@ void main() {
   });
 
   group('node filter editor', () {
+    testWidgets('unavailable previews cannot supply counts or enable save', (
+      tester,
+    ) async {
+      final api = _FakeApi(_catalog(const NodeFilter()))
+        ..previewAvailable = false;
+      await _pumpEditor(tester, api, _Account());
+      await tester.tap(find.text('GIA'));
+      await tester.pumpAndSettle();
+      expect(find.text('Unavailable'), findsOneWidget);
+      expect(find.textContaining('nodes kept'), findsNothing);
+      expect(_onPressed<FilledButton>(tester, 'Save'), isNull);
+    });
+
+    for (final fails in [false, true]) {
+      testWidgets('editing discards an older preview immediately ($fails)', (
+        tester,
+      ) async {
+        final api = _FakeApi(_catalog(const NodeFilter()))
+          ..delayPreviews = true;
+        await _pumpEditor(tester, api, _Account());
+        await tester.tap(find.text('GIA'));
+        await tester.pump(const Duration(milliseconds: 400));
+        expect(api.previews, hasLength(1));
+
+        await tester.tap(find.text('Fusion'));
+        if (fails) {
+          api.pendingPreviews.single.completeError(
+            const CloudApiException('Obsolete preview'),
+          );
+        } else {
+          api.pendingPreviews.single.complete(
+            _catalog(api.previews.single, kept: 1),
+          );
+        }
+        await tester.pump();
+        expect(find.text('Obsolete preview'), findsNothing);
+        expect(find.textContaining('nodes kept'), findsNothing);
+        expect(_onPressed<FilledButton>(tester, 'Save'), isNull);
+
+        await tester.pump(const Duration(milliseconds: 400));
+        expect(api.previews, hasLength(2));
+        api.pendingPreviews.last.complete(_catalog(api.previews.last, kept: 2));
+        await tester.pumpAndSettle();
+        expect(find.text('Customized · 2 of 4 nodes kept'), findsOneWidget);
+        expect(_onPressed<FilledButton>(tester, 'Save'), isNotNull);
+      });
+    }
+
+    testWidgets('returning to the displayed filter reuses its preview', (
+      tester,
+    ) async {
+      final api = _FakeApi(_catalog(const NodeFilter()))..delayPreviews = true;
+      await _pumpEditor(tester, api, _Account());
+      final field = find.widgetWithText(TextField, 'Name contains');
+      await tester.enterText(field, 'HK');
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.enterText(field, '');
+      await tester.pump();
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.text('Smart Selection · 3 of 4 nodes kept'), findsOneWidget);
+
+      api.pendingPreviews.single.complete(
+        _catalog(api.previews.single, kept: 1),
+      );
+      await tester.pumpAndSettle();
+      expect(api.previews, hasLength(1));
+      expect(find.text('Smart Selection · 3 of 4 nodes kept'), findsOneWidget);
+    });
+
+    testWidgets('restore default only updates the draft until save', (
+      tester,
+    ) async {
+      final api = _FakeApi(_catalog(const NodeFilter(includeLines: ['gia'])));
+      final account = _Account();
+      final route = await _pumpEditor(tester, api, account);
+      await tester.tap(find.text('Fusion'));
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Restore Default'));
+      await tester.pumpAndSettle();
+      expect(api.previews, const [NodeFilter()]);
+      expect(api.resets, 0);
+      expect(account.refreshes, 0);
+      expect(route.popped, isFalse);
+      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      await tester.pumpAndSettle();
+      expect(api.resets, 1);
+      expect(route.popped, isTrue);
+      expect(account.refreshes, 1);
+    });
+
+    testWidgets('an empty catalog still lets a saved filter be reset', (
+      tester,
+    ) async {
+      final api = _FakeApi(
+        const NodeFilterCatalog(
+          customized: true,
+          filter: NodeFilter(includeLines: ['gia']),
+        ),
+      )..keptFor = (_) => 0;
+      final route = await _pumpEditor(tester, api, _Account());
+      expect(_onPressed<OutlinedButton>(tester, 'Restore Default'), isNotNull);
+      expect(_onPressed<FilledButton>(tester, 'Save'), isNull);
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Restore Default'));
+      await tester.pumpAndSettle();
+      expect(api.resets, 0);
+      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      await tester.pumpAndSettle();
+      expect(api.resets, 1);
+      expect(route.popped, isTrue);
+    });
+
     testWidgets('saving closes only the filter route under a newer dialog', (
       tester,
     ) async {
@@ -412,7 +530,7 @@ void main() {
 
       await tester.tap(find.text('GIA'));
       await tester.pump();
-      expect(find.text('Smart Selection · 1 of 4 nodes kept'), findsOneWidget);
+      expect(find.text('Smart Selection'), findsOneWidget);
       await tester.pumpAndSettle();
       expect(find.text('Smart Selection · 3 of 4 nodes kept'), findsOneWidget);
 
@@ -421,7 +539,7 @@ void main() {
         'test',
       );
       await tester.pump();
-      expect(find.text('Customized · 3 of 4 nodes kept'), findsOneWidget);
+      expect(find.text('Customized'), findsOneWidget);
       await tester.enterText(
         find.widgetWithText(TextField, 'Name excludes'),
         '  ',
@@ -453,28 +571,20 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('restore default clears a saved filter', (tester) async {
-      final api = _FakeApi(
-        _catalog(const NodeFilter(includeLines: ['gia']), kept: 1),
-      );
-      final account = _Account();
-      final route = await _pumpEditor(tester, api, account);
-      expect(_onPressed<FilledButton>(tester, 'Save'), isNull);
-
-      await tester.tap(find.widgetWithText(OutlinedButton, 'Restore Default'));
-      await tester.pumpAndSettle();
-
-      expect(api.resets, 1);
-      expect(account.refreshes, 1);
-      expect(route.popped, isTrue);
-      expect(route.result?.customized, isFalse);
-    });
-
-    testWidgets('restore default waits for a saved filter', (tester) async {
+    testWidgets('restore default is enabled for unsaved choices', (
+      tester,
+    ) async {
       final api = _FakeApi(_catalog(const NodeFilter()));
       await _pumpEditor(tester, api, _Account());
 
       expect(_onPressed<OutlinedButton>(tester, 'Restore Default'), isNull);
+      await tester.tap(find.text('GIA'));
+      await tester.pumpAndSettle();
+      expect(_onPressed<OutlinedButton>(tester, 'Restore Default'), isNotNull);
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Restore Default'));
+      await tester.pumpAndSettle();
+      expect(_onPressed<FilledButton>(tester, 'Save'), isNull);
+      expect(api.resets, 0);
     });
 
     testWidgets('preview rows tell screen readers whether a node is kept', (

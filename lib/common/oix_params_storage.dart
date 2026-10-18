@@ -64,7 +64,14 @@ class CloudParamsStorage {
   static Future<void> save(CloudParams params) {
     return _synchronized(() async {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_kConfigParams, params.encode());
+      try {
+        if (!await prefs.setString(_kConfigParams, params.encode())) {
+          throw StateError('failed to persist cloud parameters');
+        }
+      } catch (_) {
+        await prefs.reload();
+        rethrow;
+      }
     });
   }
 

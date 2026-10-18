@@ -102,24 +102,7 @@ bool canReplayCloudRequest(RequestOptions options) {
 /// present, so the keys that used to choose them are never sent.
 @visibleForTesting
 Map<String, String> managedConfigQuery(String paramString) {
-  final cleaned = paramString.trim().replaceFirst(RegExp(r'^[?&]+'), '');
-  final query = cleaned.isEmpty
-      ? <String, String>{}
-      : Map<String, String>.of(Uri.splitQueryString(cleaned));
-  const nodeKeys = {
-    'mode',
-    'lv',
-    'nolv',
-    'type',
-    'area',
-    'noarea',
-    'match',
-    'nomatch',
-    'nodes',
-  };
-  query.removeWhere((key, _) => nodeKeys.contains(key.toLowerCase()));
-  query['nodes'] = 'auto';
-  return query;
+  return {...CloudParams.parse(paramString).queryParameters, 'nodes': 'auto'};
 }
 
 List<String> _cloudReadRoutes(Uri uri) {

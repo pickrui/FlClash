@@ -35,12 +35,14 @@ class CloudParams {
   }
 
   String encode() {
-    final segments = [
-      if (tfo != null) 'tfo=$tfo',
-      if (simplerules) 'simplerules=true',
-    ];
-    return segments.isEmpty ? '' : '&${segments.join('&')}';
+    final query = Uri(queryParameters: queryParameters).query;
+    return query.isEmpty ? '' : '&$query';
   }
+
+  Map<String, String> get queryParameters => {
+    if (tfo != null) 'tfo': '$tfo',
+    if (simplerules) 'simplerules': 'true',
+  };
 
   /// The fetcher always wants an explicit `tfo`, so a missing one is false.
   String encodeWithTfo() =>
@@ -59,6 +61,8 @@ class CloudParams {
     try {
       return Uri.decodeQueryComponent(value);
     } on FormatException {
+      return value;
+    } on ArgumentError {
       return value;
     }
   }
@@ -143,7 +147,7 @@ class NodeFilter {
       includeLines,
       excludeLines,
     );
-    return _copy(includeLines: include, excludeLines: exclude);
+    return copyWith(includeLines: include, excludeLines: exclude);
   }
 
   NodeFilter cycleRegion(String code) {
@@ -153,13 +157,10 @@ class NodeFilter {
       includeRegions,
       excludeRegions,
     );
-    return _copy(includeRegions: include, excludeRegions: exclude);
+    return copyWith(includeRegions: include, excludeRegions: exclude);
   }
 
-  NodeFilter copyWith({String? match, String? nomatch}) =>
-      _copy(match: match, nomatch: nomatch);
-
-  NodeFilter _copy({
+  NodeFilter copyWith({
     List<String>? includeLines,
     List<String>? excludeLines,
     List<String>? includeRegions,
@@ -217,16 +218,19 @@ class NodeFilter {
 
   @override
   int get hashCode => Object.hash(
-    Object.hashAllUnordered(includeLines),
-    Object.hashAllUnordered(excludeLines),
-    Object.hashAllUnordered(includeRegions),
-    Object.hashAllUnordered(excludeRegions),
+    Object.hashAllUnordered(includeLines.toSet()),
+    Object.hashAllUnordered(excludeLines.toSet()),
+    Object.hashAllUnordered(includeRegions.toSet()),
+    Object.hashAllUnordered(excludeRegions.toSet()),
     match.trim(),
     nomatch.trim(),
   );
 
-  static bool _sameItems(List<String> a, List<String> b) =>
-      a.length == b.length && a.toSet().containsAll(b);
+  static bool _sameItems(List<String> a, List<String> b) {
+    final left = a.toSet();
+    final right = b.toSet();
+    return left.length == right.length && left.containsAll(right);
+  }
 }
 
 class NodeFilterLine {
@@ -326,6 +330,16 @@ class NodeFilterCatalog {
 
   factory NodeFilterCatalog.fromJson(Map<dynamic, dynamic> json) {
     final filter = NodeFilter.fromJson(json['filter']);
+    final lines = _uniqueBy(
+      _asMaps(json['lines']).map(NodeFilterLine.fromJson),
+      (line) => line.key,
+    );
+    final lineKeys = lines.map((line) => line.key).toSet();
+    final regions = _uniqueBy(
+      _asMaps(json['regions']).map(NodeFilterRegion.fromJson),
+      (region) => region.code,
+    );
+    final regionCodes = regions.map((region) => region.code).toSet();
     final nodes = _asMaps(json['nodes'])
         .map(NodeFilterNode.fromJson)
         .where((node) => node.name.isNotEmpty)
@@ -337,14 +351,23 @@ class NodeFilterCatalog {
           : _asBool(json['customized']),
       systemLink: _asBool(json['system_link']),
       filter: filter,
-      lines: _uniqueBy(
-        _asMaps(json['lines']).map(NodeFilterLine.fromJson),
-        (line) => line.key,
-      ),
-      regions: _uniqueBy(
-        _asMaps(json['regions']).map(NodeFilterRegion.fromJson),
-        (region) => region.code,
-      ),
+      lines: [
+        ...lines,
+        for (final key in [...filter.includeLines, ...filter.excludeLines])
+          if (!lineKeys.contains(key))
+            NodeFilterLine(key: key, name: key.toUpperCase(), count: 0),
+      ],
+      regions: [
+        ...regions,
+        for (final code in [...filter.includeRegions, ...filter.excludeRegions])
+          if (!regionCodes.contains(code))
+            NodeFilterRegion(
+              code: code,
+              name: code.toUpperCase(),
+              emoji: '',
+              count: 0,
+            ),
+      ],
       nodes: nodes,
       kept: _tryCount(json['kept']) ?? nodes.where((node) => node.kept).length,
       total: _tryCount(json['total']) ?? nodes.length,
@@ -375,8 +398,8 @@ List<Map<dynamic, dynamic>> _asMaps(Object? value) =>
 List<String> _asKeys(Object? value) {
   if (value is! List) return const [];
   return value
-      .whereType<Object>()
-      .map((item) => item.toString().trim().toLowerCase())
+      .whereType<String>()
+      .map((item) => item.trim().toLowerCase())
       .where((item) => item.isNotEmpty)
       .toSet()
       .toList();

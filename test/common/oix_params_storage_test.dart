@@ -153,6 +153,27 @@ void main() {
     final prefs = await SharedPreferences.getInstance();
     expect(prefs.getKeys(), isEmpty);
   });
+
+  for (final throwOnWrite in [false, true]) {
+    test(
+      'failed save restores cached parameters for retry ($throwOnWrite)',
+      () async {
+        SharedPreferences.setMockInitialValues({});
+        final store = _MigrationPreferences();
+        SharedPreferencesStorePlatform.instance = store;
+        final previous = await CloudParamsStorage.load();
+        const edited = CloudParams(tfo: false);
+        store.throwOnWrite = throwOnWrite;
+
+        await expectLater(CloudParamsStorage.save(edited), throwsStateError);
+
+        store.throwOnWrite = null;
+        expect(await CloudParamsStorage.load(), previous);
+        await CloudParamsStorage.save(edited);
+        expect(await CloudParamsStorage.load(), edited);
+      },
+    );
+  }
 }
 
 class _MigrationPreferences extends InMemorySharedPreferencesStore {

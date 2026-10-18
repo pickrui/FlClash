@@ -83,7 +83,7 @@ void main() {
         'nomatch': null,
       });
 
-      expect(filter.includeLines, ['fusion', 'gia', '3']);
+      expect(filter.includeLines, ['fusion', 'gia']);
       expect(filter.excludeLines, ['cia']);
       expect(filter.includeRegions, isEmpty);
       expect(filter.excludeRegions, ['jp']);
@@ -142,6 +142,16 @@ void main() {
       );
       expect(const NodeFilter(match: '  ').isEmpty, isTrue);
     });
+
+    test('duplicate keys cannot make equality asymmetric', () {
+      const repeated = NodeFilter(includeLines: ['a', 'a']);
+      const distinct = NodeFilter(includeLines: ['a', 'b']);
+      const single = NodeFilter(includeLines: ['a']);
+      expect(repeated == distinct, isFalse);
+      expect(distinct == repeated, isFalse);
+      expect(repeated, single);
+      expect(repeated.hashCode, single.hashCode);
+    });
   });
 
   group('node filter catalog', () {
@@ -158,8 +168,10 @@ void main() {
         'Fusion Premium',
         'GIA',
       ]);
-      expect(catalog.regions.single.emoji, '🇭🇰');
-      expect(catalog.regions.single.count, 28);
+      expect(catalog.regions.first.emoji, '🇭🇰');
+      expect(catalog.regions.first.count, 28);
+      expect(catalog.regions.last.code, 'jp');
+      expect(catalog.regions.last.count, 0);
       expect(catalog.nodes.first.kept, isTrue);
       expect(catalog.nodes.last.line, 'gia');
       expect(catalog.kept, 40);

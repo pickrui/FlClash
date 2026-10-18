@@ -209,4 +209,12 @@ void main() {
     request.respond({'ret': 403}, statusCode: 403);
     await result;
   });
+
+  test('managed query shares the stored switch normalization', () {
+    expect(
+      managedConfigQuery('?TFO=true&simplerules=true&custom=1&token=old'),
+      {'tfo': 'true', 'simplerules': 'true', 'nodes': 'auto'},
+    );
+    expect(managedConfigQuery('tfo=bad&simplerules=%ZZ'), {'nodes': 'auto'});
+  });
 }

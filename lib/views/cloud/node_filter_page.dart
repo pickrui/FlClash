@@ -25,8 +25,6 @@ const _patternMaxLength = 255;
 const _nameContainsExample = '香港|日本';
 const _nameExcludesExample = '测试|维护';
 
-enum _Submission { save, reset }
-
 /// Edits the account's node filter. Pops with the catalog the panel returned
 /// after a save or reset, or with nothing when the filter was left alone.
 class CloudNodeFilterPage extends ConsumerStatefulWidget {
@@ -52,9 +50,8 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
   NodeFilter _draft = const NodeFilter();
   NodeFilterCatalog? _preview;
   NodeFilter _previewFilter = const NodeFilter();
-  var _previewInFlight = false;
   String? _previewError;
-  _Submission? _submitting;
+  var _submitting = false;
 
   @override
   void initState() {
@@ -92,7 +89,6 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
         _draft = catalog.filter;
         _preview = catalog;
         _previewFilter = catalog.filter;
-        _previewInFlight = false;
         _previewError = null;
       });
     } catch (e) {
@@ -111,81 +107,87 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
   }
 
   void _edit(NodeFilter draft) {
+    _previewTimer?.cancel();
+    _previewRequest++;
     setState(() {
       _draft = draft;
       _previewError = null;
     });
-    _previewTimer?.cancel();
-    _previewTimer = Timer(_previewDelay, _runPreview);
+    if (_draft != _previewFilter) {
+      _previewTimer = Timer(_previewDelay, _runPreview);
+    }
   }
 
   Future<void> _runPreview() async {
     final filter = _draft;
     final request = ++_previewRequest;
     if (filter == _previewFilter) {
-      setState(() {
-        _previewInFlight = false;
-        _previewError = null;
-      });
+      setState(() => _previewError = null);
       return;
     }
-    setState(() => _previewInFlight = true);
     try {
       final catalog = await _api.previewNodeFilter(filter);
       if (!mounted || request != _previewRequest) return;
+      if (!catalog.available) {
+        throw CloudApiException(context.appLocalizations.planUnavailable);
+      }
       setState(() {
         _preview = catalog;
         _previewFilter = filter;
-        _previewInFlight = false;
       });
     } catch (e) {
       if (!mounted || request != _previewRequest) return;
       final handled = await _handleUnauthorized(e);
       if (!mounted || request != _previewRequest) return;
       setState(() {
-        _previewInFlight = false;
         _previewError = handled ? null : CloudApiException.clean(e);
       });
     }
   }
 
-  bool get _previewSettled =>
-      !_previewInFlight &&
-      _previewError == null &&
-      (_previewTimer?.isActive != true) &&
-      _draft == _previewFilter;
+  bool get _previewSettled => _previewError == null && _draft == _previewFilter;
 
   bool get _canSave =>
-      _submitting == null &&
+      !_submitting &&
       _previewSettled &&
       _draft != _base?.filter &&
-      (_preview?.kept ?? 0) > 0;
+      _preview?.available == true &&
+      (_draft.isEmpty || (_preview?.kept ?? 0) > 0);
 
-  bool get _canReset => _submitting == null && _base?.customized == true;
+  bool get _canReset => !_submitting && !_draft.isEmpty;
 
-  Future<void> _submit(
-    _Submission kind,
-    Future<NodeFilterCatalog?> Function() action,
-  ) async {
-    if (_submitting != null) return;
-    setState(() => _submitting = kind);
+  void _restoreDefault() {
+    _matchController.clear();
+    _nomatchController.clear();
+    _edit(const NodeFilter());
+  }
+
+  Future<void> _submit() async {
+    if (!_canSave) return;
+    _previewTimer?.cancel();
+    _previewRequest++;
+    setState(() => _submitting = true);
     try {
-      final catalog = await action();
+      final catalog = _draft.isEmpty
+          ? await _api.resetNodeFilter()
+          : await _api.saveNodeFilter(_draft);
       unawaited(_account.refreshManagedSubscription());
       if (!mounted) return;
-      BaseNavigator.close(context, catalog ?? _savedFallback(kind));
+      BaseNavigator.close(context, catalog ?? _savedFallback());
     } catch (e) {
       if (await _handleUnauthorized(e)) return;
       globalState.showNotifier(CloudApiException.clean(e));
     } finally {
-      if (mounted) setState(() => _submitting = null);
+      if (mounted) setState(() => _submitting = false);
     }
   }
 
-  NodeFilterCatalog? _savedFallback(_Submission kind) {
+  NodeFilterCatalog? _savedFallback() {
     final preview = _preview;
-    if (kind == _Submission.reset || preview == null) return null;
+    if (preview == null) return null;
     return NodeFilterCatalog(
+      available: preview.available,
+      systemLink: preview.systemLink,
       customized: !_draft.isEmpty,
       filter: _draft,
       lines: preview.lines,
@@ -200,7 +202,7 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
   Widget build(BuildContext context) {
     return CommonScaffold(
       title: context.appLocalizations.nodeFilter,
-      isLoading: _submitting != null,
+      isLoading: _submitting,
       body: AppBarClearance(child: _buildBody(context)),
     );
   }
@@ -218,7 +220,7 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
         isError: true,
       );
     }
-    if (!base.available || base.nodes.isEmpty) {
+    if (!base.available) {
       return _buildMessage(
         context,
         icon: Icons.filter_alt_off_outlined,
@@ -372,7 +374,7 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
   Widget _buildFilters(BuildContext context) {
     final l10n = context.appLocalizations;
     final catalog = _preview ?? _base!;
-    final editable = _submitting == null;
+    final editable = !_submitting;
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -514,8 +516,7 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
         : catalog.nodes
               .where((node) => node.name.toLowerCase().contains(query))
               .toList();
-    final keptNone = settled && catalog.kept == 0;
-    // A failed preview leaves counts and marks from another draft.
+    final keptNone = settled && !_draft.isEmpty && catalog.kept == 0;
     final failed = _previewError != null;
     final state = _draft.isEmpty
         ? l10n.nodeFilterSmartSelection
@@ -540,7 +541,7 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
                   ],
                   Flexible(
                     child: Text(
-                      failed
+                      !settled
                           ? state
                           : '$state · ${l10n.nodeFilterKept(catalog.kept, catalog.total)}',
                       textAlign: TextAlign.end,
@@ -619,7 +620,7 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
                     ? [empty]
                     : [
                         for (final node in nodes)
-                          NodeFilterNodeRow(node: node, showKept: !failed),
+                          NodeFilterNodeRow(node: node, showKept: settled),
                       ],
               ),
             ),
@@ -644,7 +645,7 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
                       itemCount: nodes.length,
                       itemBuilder: (_, index) => NodeFilterNodeRow(
                         node: nodes[index],
-                        showKept: !failed,
+                        showKept: settled,
                       ),
                     ),
             ),
@@ -686,23 +687,18 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
 
   Widget _buildActions(BuildContext context) {
     final l10n = context.appLocalizations;
-    Widget label(_Submission kind, String text) => _submitting == kind
-        ? const SizedBox.square(
-            dimension: 18,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          )
-        : Text(text);
     final reset = OutlinedButton(
-      onPressed: _canReset
-          ? () => _submit(_Submission.reset, _api.resetNodeFilter)
-          : null,
-      child: label(_Submission.reset, l10n.restoreDefault),
+      onPressed: _canReset ? _restoreDefault : null,
+      child: Text(l10n.restoreDefault),
     );
     final save = FilledButton(
-      onPressed: _canSave
-          ? () => _submit(_Submission.save, () => _api.saveNodeFilter(_draft))
-          : null,
-      child: label(_Submission.save, l10n.save),
+      onPressed: _canSave ? _submit : null,
+      child: _submitting
+          ? const SizedBox.square(
+              dimension: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : Text(l10n.save),
     );
     final buttons = Row(
       children: [
