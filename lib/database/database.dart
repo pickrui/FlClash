@@ -23,7 +23,7 @@ part 'profiles.dart';
 part 'rules.dart';
 part 'scripts.dart';
 
-const currentDatabaseSchemaVersion = 6;
+const currentDatabaseSchemaVersion = 7;
 
 @DriftDatabase(
   tables: [
@@ -93,6 +93,15 @@ class Database extends _$Database {
           if (existing.isEmpty) await m.createTable(clashProviders);
         }
         final profileColumns = await _profileColumnNames();
+        // Ahead of the older steps: the v4 step reads every profile column.
+        if (from < 7) {
+          if (profileColumns.add('profile_type')) {
+            await m.addColumn(profiles, profiles.profileType);
+          }
+          if (profileColumns.add('overrides')) {
+            await m.addColumn(profiles, profiles.overrides);
+          }
+        }
         if (from < 2) {
           if (profileColumns.add('proxy_chains')) {
             await m.addColumn(profiles, profiles.proxyChains);

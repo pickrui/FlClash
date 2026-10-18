@@ -1462,6 +1462,7 @@ Future<BackupFailure?> _backupDatabaseFailure(String path) async {
         if (schemaVersion >= 2) ...{'proxy_chains', 'profile_proxies'},
         if (schemaVersion >= 3) ...{'custom_proxy_groups', 'custom_rules'},
         if (schemaVersion >= 4) 'match_target',
+        if (schemaVersion >= 7) ...{'profile_type', 'overrides'},
       },
       'scripts': {'id', 'label', 'last_update_time'},
       'rules': {

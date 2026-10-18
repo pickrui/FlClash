@@ -565,6 +565,15 @@ String? findProxyChainConflictName(
   return null;
 }
 
+/// Settings a profile keeps for itself in its `overrides` column.
+@freezed
+abstract class ProfileOverrides with _$ProfileOverrides {
+  const factory ProfileOverrides() = _ProfileOverrides;
+
+  factory ProfileOverrides.fromJson(Map<String, Object?> json) =>
+      _$ProfileOverridesFromJson(json);
+}
+
 @freezed
 abstract class Profile with _$Profile {
   const factory Profile({
@@ -586,6 +595,9 @@ abstract class Profile with _$Profile {
     int? scriptId,
     String? matchTarget,
     int? order,
+    // Null for file and subscription profiles, which [type] tells by url.
+    ProfileType? profileType,
+    @Default(ProfileOverrides()) ProfileOverrides overrides,
   }) = _Profile;
 
   factory Profile.fromJson(Map<String, Object?> json) =>
@@ -1136,7 +1148,11 @@ class PreparedProfileUpdate {
 }
 
 extension ProfileExtension on Profile {
-  ProfileType get type => url.isEmpty ? ProfileType.file : ProfileType.url;
+  ProfileType get type => profileType == ProfileType.custom
+      ? ProfileType.custom
+      : url.isEmpty
+      ? ProfileType.file
+      : ProfileType.url;
 
   String get realLabel => label.takeFirstValid([id.toString()]);
 

@@ -55,6 +55,12 @@ Map<String, dynamic> _$ProfileProxyToJson(_ProfileProxy instance) =>
       'proxy': instance.proxy,
     };
 
+_ProfileOverrides _$ProfileOverridesFromJson(Map<String, dynamic> json) =>
+    _ProfileOverrides();
+
+Map<String, dynamic> _$ProfileOverridesToJson(_ProfileOverrides instance) =>
+    <String, dynamic>{};
+
 _Profile _$ProfileFromJson(Map<String, dynamic> json) => _Profile(
   id: (json['id'] as num).toInt(),
   label: json['label'] as String? ?? '',
@@ -106,6 +112,10 @@ _Profile _$ProfileFromJson(Map<String, dynamic> json) => _Profile(
   scriptId: (json['scriptId'] as num?)?.toInt(),
   matchTarget: json['matchTarget'] as String?,
   order: (json['order'] as num?)?.toInt(),
+  profileType: $enumDecodeNullable(_$ProfileTypeEnumMap, json['profileType']),
+  overrides: json['overrides'] == null
+      ? const ProfileOverrides()
+      : ProfileOverrides.fromJson(json['overrides'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$ProfileToJson(_Profile instance) => <String, dynamic>{
@@ -127,6 +137,8 @@ Map<String, dynamic> _$ProfileToJson(_Profile instance) => <String, dynamic>{
   'scriptId': instance.scriptId,
   'matchTarget': instance.matchTarget,
   'order': instance.order,
+  'profileType': _$ProfileTypeEnumMap[instance.profileType],
+  'overrides': instance.overrides,
 };
 
 const _$OverwriteTypeEnumMap = {
@@ -134,4 +146,10 @@ const _$OverwriteTypeEnumMap = {
   OverwriteType.script: 'script',
   OverwriteType.custom: 'custom',
   OverwriteType.merge: 'merge',
+};
+
+const _$ProfileTypeEnumMap = {
+  ProfileType.file: 'file',
+  ProfileType.url: 'url',
+  ProfileType.custom: 'custom',
 };

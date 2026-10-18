@@ -54,8 +54,38 @@ class Profiles extends Table {
 
   IntColumn get order => integer().nullable()();
 
+  TextColumn get profileType => textEnum<ProfileType>().nullable()();
+
+  TextColumn get overrides =>
+      text().map(const ProfileOverridesConverter()).nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
+}
+
+class ProfileOverridesConverter
+    extends TypeConverter<ProfileOverrides?, String?> {
+  const ProfileOverridesConverter();
+
+  @override
+  ProfileOverrides? fromSql(String? fromDb) {
+    if (fromDb == null) return null;
+    return decodeOrRestoreDefault(
+      'profile overrides',
+      () => decodeSalvaging(
+        'profile overrides',
+        Map<String, Object?>.from(json.decode(fromDb) as Map),
+        ProfileOverrides.fromJson,
+      ),
+      () => null,
+    );
+  }
+
+  @override
+  String? toSql(ProfileOverrides? value) {
+    if (value == null || value == const ProfileOverrides()) return null;
+    return json.encode(value.toJson());
+  }
 }
 
 class SubscriptionInfoConverter
@@ -225,7 +255,6 @@ extension RawProfilExt on RawProfile {
       autoUpdate: autoUpdate,
       selectedMap: selectedMap,
       unfoldSet: unfoldSet,
-      overwriteType: overwriteType,
       proxyChains: proxyChains,
       profileProxies: profileProxies,
       customProxyGroups: customProxyGroups,
@@ -233,6 +262,12 @@ extension RawProfilExt on RawProfile {
       scriptId: scriptId,
       matchTarget: matchTarget,
       order: order,
+      profileType: profileType,
+      // A custom profile has no subscription to overwrite: always replace.
+      overwriteType: profileType == ProfileType.custom
+          ? OverwriteType.custom
+          : overwriteType,
+      overrides: overrides ?? const ProfileOverrides(),
     );
   }
 }
@@ -258,6 +293,8 @@ extension ProfilesCompanionExt on Profile {
       scriptId: Value(scriptId),
       matchTarget: Value(matchTarget),
       order: Value(order ?? this.order),
+      profileType: Value(profileType),
+      overrides: Value(overrides),
     );
   }
 }

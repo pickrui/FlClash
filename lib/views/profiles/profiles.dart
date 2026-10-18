@@ -488,7 +488,8 @@ class ProfileItem extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             ...switch (profile.type) {
-              ProfileType.file => _buildFileProfileInfo(context),
+              ProfileType.file ||
+              ProfileType.custom => _buildFileProfileInfo(context),
               ProfileType.url => _buildUrlProfileInfo(context),
             },
           ],

@@ -192,6 +192,24 @@ class $ProfilesTable extends Profiles
     requiredDuringInsert: false,
   );
   @override
+  late final GeneratedColumnWithTypeConverter<ProfileType?, String>
+  profileType = GeneratedColumn<String>(
+    'profile_type',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  ).withConverter<ProfileType?>($ProfilesTable.$converterprofileTypen);
+  @override
+  late final GeneratedColumnWithTypeConverter<ProfileOverrides?, String>
+  overrides = GeneratedColumn<String>(
+    'overrides',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  ).withConverter<ProfileOverrides?>($ProfilesTable.$converteroverrides);
+  @override
   List<GeneratedColumn> get $columns => [
     id,
     label,
@@ -211,6 +229,8 @@ class $ProfilesTable extends Profiles
     customProxyGroups,
     customRules,
     order,
+    profileType,
+    overrides,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -398,6 +418,18 @@ class $ProfilesTable extends Profiles
         DriftSqlType.int,
         data['${effectivePrefix}order'],
       ),
+      profileType: $ProfilesTable.$converterprofileTypen.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}profile_type'],
+        ),
+      ),
+      overrides: $ProfilesTable.$converteroverrides.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}overrides'],
+        ),
+      ),
     );
   }
 
@@ -424,6 +456,12 @@ class $ProfilesTable extends Profiles
       const ProxyGroupListConverter();
   static TypeConverter<List<Rule>, String> $convertercustomRules =
       const RuleListConverter();
+  static JsonTypeConverter2<ProfileType, String, String> $converterprofileType =
+      const EnumNameConverter<ProfileType>(ProfileType.values);
+  static JsonTypeConverter2<ProfileType?, String?, String?>
+  $converterprofileTypen = JsonTypeConverter2.asNullable($converterprofileType);
+  static TypeConverter<ProfileOverrides?, String?> $converteroverrides =
+      const ProfileOverridesConverter();
 }
 
 class RawProfile extends DataClass implements Insertable<RawProfile> {
@@ -445,6 +483,8 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
   final List<ProxyGroup> customProxyGroups;
   final List<Rule> customRules;
   final int? order;
+  final ProfileType? profileType;
+  final ProfileOverrides? overrides;
   const RawProfile({
     required this.id,
     required this.label,
@@ -464,6 +504,8 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     required this.customProxyGroups,
     required this.customRules,
     this.order,
+    this.profileType,
+    this.overrides,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -530,6 +572,16 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     if (!nullToAbsent || order != null) {
       map['order'] = Variable<int>(order);
     }
+    if (!nullToAbsent || profileType != null) {
+      map['profile_type'] = Variable<String>(
+        $ProfilesTable.$converterprofileTypen.toSql(profileType),
+      );
+    }
+    if (!nullToAbsent || overrides != null) {
+      map['overrides'] = Variable<String>(
+        $ProfilesTable.$converteroverrides.toSql(overrides),
+      );
+    }
     return map;
   }
 
@@ -565,6 +617,12 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       order: order == null && nullToAbsent
           ? const Value.absent()
           : Value(order),
+      profileType: profileType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(profileType),
+      overrides: overrides == null && nullToAbsent
+          ? const Value.absent()
+          : Value(overrides),
     );
   }
 
@@ -604,6 +662,10 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       ),
       customRules: serializer.fromJson<List<Rule>>(json['customRules']),
       order: serializer.fromJson<int?>(json['order']),
+      profileType: $ProfilesTable.$converterprofileTypen.fromJson(
+        serializer.fromJson<String?>(json['profileType']),
+      ),
+      overrides: serializer.fromJson<ProfileOverrides?>(json['overrides']),
     );
   }
   @override
@@ -636,6 +698,10 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       ),
       'customRules': serializer.toJson<List<Rule>>(customRules),
       'order': serializer.toJson<int?>(order),
+      'profileType': serializer.toJson<String?>(
+        $ProfilesTable.$converterprofileTypen.toJson(profileType),
+      ),
+      'overrides': serializer.toJson<ProfileOverrides?>(overrides),
     };
   }
 
@@ -658,6 +724,8 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     List<ProxyGroup>? customProxyGroups,
     List<Rule>? customRules,
     Value<int?> order = const Value.absent(),
+    Value<ProfileType?> profileType = const Value.absent(),
+    Value<ProfileOverrides?> overrides = const Value.absent(),
   }) => RawProfile(
     id: id ?? this.id,
     label: label ?? this.label,
@@ -684,6 +752,8 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     customProxyGroups: customProxyGroups ?? this.customProxyGroups,
     customRules: customRules ?? this.customRules,
     order: order.present ? order.value : this.order,
+    profileType: profileType.present ? profileType.value : this.profileType,
+    overrides: overrides.present ? overrides.value : this.overrides,
   );
   RawProfile copyWithCompanion(ProfilesCompanion data) {
     return RawProfile(
@@ -729,6 +799,10 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
           ? data.customRules.value
           : this.customRules,
       order: data.order.present ? data.order.value : this.order,
+      profileType: data.profileType.present
+          ? data.profileType.value
+          : this.profileType,
+      overrides: data.overrides.present ? data.overrides.value : this.overrides,
     );
   }
 
@@ -752,7 +826,9 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
           ..write('profileProxies: $profileProxies, ')
           ..write('customProxyGroups: $customProxyGroups, ')
           ..write('customRules: $customRules, ')
-          ..write('order: $order')
+          ..write('order: $order, ')
+          ..write('profileType: $profileType, ')
+          ..write('overrides: $overrides')
           ..write(')'))
         .toString();
   }
@@ -777,6 +853,8 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     customProxyGroups,
     customRules,
     order,
+    profileType,
+    overrides,
   );
   @override
   bool operator ==(Object other) =>
@@ -799,7 +877,9 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
           other.profileProxies == this.profileProxies &&
           other.customProxyGroups == this.customProxyGroups &&
           other.customRules == this.customRules &&
-          other.order == this.order);
+          other.order == this.order &&
+          other.profileType == this.profileType &&
+          other.overrides == this.overrides);
 }
 
 class ProfilesCompanion extends UpdateCompanion<RawProfile> {
@@ -821,6 +901,8 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
   final Value<List<ProxyGroup>> customProxyGroups;
   final Value<List<Rule>> customRules;
   final Value<int?> order;
+  final Value<ProfileType?> profileType;
+  final Value<ProfileOverrides?> overrides;
   const ProfilesCompanion({
     this.id = const Value.absent(),
     this.label = const Value.absent(),
@@ -840,6 +922,8 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     this.customProxyGroups = const Value.absent(),
     this.customRules = const Value.absent(),
     this.order = const Value.absent(),
+    this.profileType = const Value.absent(),
+    this.overrides = const Value.absent(),
   });
   ProfilesCompanion.insert({
     this.id = const Value.absent(),
@@ -860,6 +944,8 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     this.customProxyGroups = const Value.absent(),
     this.customRules = const Value.absent(),
     this.order = const Value.absent(),
+    this.profileType = const Value.absent(),
+    this.overrides = const Value.absent(),
   }) : label = Value(label),
        url = Value(url),
        overwriteType = Value(overwriteType),
@@ -886,6 +972,8 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     Expression<String>? customProxyGroups,
     Expression<String>? customRules,
     Expression<int>? order,
+    Expression<String>? profileType,
+    Expression<String>? overrides,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -907,6 +995,8 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
       if (customProxyGroups != null) 'custom_proxy_groups': customProxyGroups,
       if (customRules != null) 'custom_rules': customRules,
       if (order != null) 'order': order,
+      if (profileType != null) 'profile_type': profileType,
+      if (overrides != null) 'overrides': overrides,
     });
   }
 
@@ -929,6 +1019,8 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     Value<List<ProxyGroup>>? customProxyGroups,
     Value<List<Rule>>? customRules,
     Value<int?>? order,
+    Value<ProfileType?>? profileType,
+    Value<ProfileOverrides?>? overrides,
   }) {
     return ProfilesCompanion(
       id: id ?? this.id,
@@ -950,6 +1042,8 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
       customProxyGroups: customProxyGroups ?? this.customProxyGroups,
       customRules: customRules ?? this.customRules,
       order: order ?? this.order,
+      profileType: profileType ?? this.profileType,
+      overrides: overrides ?? this.overrides,
     );
   }
 
@@ -1030,6 +1124,16 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     if (order.present) {
       map['order'] = Variable<int>(order.value);
     }
+    if (profileType.present) {
+      map['profile_type'] = Variable<String>(
+        $ProfilesTable.$converterprofileTypen.toSql(profileType.value),
+      );
+    }
+    if (overrides.present) {
+      map['overrides'] = Variable<String>(
+        $ProfilesTable.$converteroverrides.toSql(overrides.value),
+      );
+    }
     return map;
   }
 
@@ -1053,7 +1157,9 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
           ..write('profileProxies: $profileProxies, ')
           ..write('customProxyGroups: $customProxyGroups, ')
           ..write('customRules: $customRules, ')
-          ..write('order: $order')
+          ..write('order: $order, ')
+          ..write('profileType: $profileType, ')
+          ..write('overrides: $overrides')
           ..write(')'))
         .toString();
   }
@@ -4553,6 +4659,8 @@ typedef $$ProfilesTableCreateCompanionBuilder = ProfilesCompanion Function({
   Value<List<ProxyGroup>> customProxyGroups,
   Value<List<Rule>> customRules,
   Value<int?> order,
+  Value<ProfileType?> profileType,
+  Value<ProfileOverrides?> overrides,
 });
 typedef $$ProfilesTableUpdateCompanionBuilder = ProfilesCompanion Function({
   Value<int> id,
@@ -4573,6 +4681,8 @@ typedef $$ProfilesTableUpdateCompanionBuilder = ProfilesCompanion Function({
   Value<List<ProxyGroup>> customProxyGroups,
   Value<List<Rule>> customRules,
   Value<int?> order,
+  Value<ProfileType?> profileType,
+  Value<ProfileOverrides?> overrides,
 });
 
 final class $$ProfilesTableReferences
@@ -4729,6 +4839,18 @@ class $$ProfilesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnWithTypeConverterFilters<ProfileType?, ProfileType, String>
+  get profileType => $composableBuilder(
+    column: $table.profileType,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<ProfileOverrides?, ProfileOverrides, String>
+  get overrides => $composableBuilder(
+    column: $table.overrides,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
   Expression<bool> profileRuleLinksRefs(
     Expression<bool> Function($$ProfileRuleLinksTableFilterComposer f) f,
   ) {
@@ -4878,6 +5000,16 @@ class $$ProfilesTableOrderingComposer
     column: $table.order,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get profileType => $composableBuilder(
+    column: $table.profileType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get overrides => $composableBuilder(
+    column: $table.overrides,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ProfilesTableAnnotationComposer
@@ -4973,6 +5105,15 @@ class $$ProfilesTableAnnotationComposer
 
   GeneratedColumn<int> get order =>
       $composableBuilder(column: $table.order, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<ProfileType?, String> get profileType =>
+      $composableBuilder(
+        column: $table.profileType,
+        builder: (column) => column,
+      );
+
+  GeneratedColumnWithTypeConverter<ProfileOverrides?, String> get overrides =>
+      $composableBuilder(column: $table.overrides, builder: (column) => column);
 
   Expression<T> profileRuleLinksRefs<T extends Object>(
     Expression<T> Function($$ProfileRuleLinksTableAnnotationComposer a) f,
@@ -5076,6 +5217,8 @@ class $$ProfilesTableTableManager
                     const Value.absent(),
                 Value<List<Rule>> customRules = const Value.absent(),
                 Value<int?> order = const Value.absent(),
+                Value<ProfileType?> profileType = const Value.absent(),
+                Value<ProfileOverrides?> overrides = const Value.absent(),
               }) => ProfilesCompanion(
                 id: id,
                 label: label,
@@ -5095,6 +5238,8 @@ class $$ProfilesTableTableManager
                 customProxyGroups: customProxyGroups,
                 customRules: customRules,
                 order: order,
+                profileType: profileType,
+                overrides: overrides,
               ),
           createCompanionCallback:
               ({
@@ -5118,6 +5263,8 @@ class $$ProfilesTableTableManager
                     const Value.absent(),
                 Value<List<Rule>> customRules = const Value.absent(),
                 Value<int?> order = const Value.absent(),
+                Value<ProfileType?> profileType = const Value.absent(),
+                Value<ProfileOverrides?> overrides = const Value.absent(),
               }) => ProfilesCompanion.insert(
                 id: id,
                 label: label,
@@ -5137,6 +5284,8 @@ class $$ProfilesTableTableManager
                 customProxyGroups: customProxyGroups,
                 customRules: customRules,
                 order: order,
+                profileType: profileType,
+                overrides: overrides,
               ),
           withReferenceMapper: (p0) => p0
               .map(
