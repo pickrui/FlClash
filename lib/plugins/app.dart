@@ -117,6 +117,7 @@ class App {
   int _iconRevision = 0;
   final Map<String, ImageProvider?> _packageIcons = {};
   final Map<String, Future<ImageProvider?>> _packageIconTasks = {};
+  final _packageIconPool = TaskPool(maxConcurrentIconLoads);
 
   bool hasPackageIcon(String packageName) {
     return _packageIcons.containsKey(packageName);
@@ -140,9 +141,11 @@ class App {
     final revision = _iconRevision;
     ImageProvider? icon;
     try {
-      final path = await methodChannel.invokeMethod<String>('getPackageIcon', {
-        'packageName': packageName,
-      });
+      final path = await _packageIconPool.run(
+        () => methodChannel.invokeMethod<String>('getPackageIcon', {
+          'packageName': packageName,
+        }),
+      );
       icon = path == null || path.isEmpty ? null : FileImage(File(path));
     } catch (error) {
       commonPrint.log('getPackageIcon error: $error');
