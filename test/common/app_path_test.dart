@@ -9,6 +9,8 @@ import 'package:fl_clash/common/path.dart';
 import 'package:fl_clash/common/window.dart';
 import 'package:test/test.dart';
 
+import '../helpers/app_paths.dart';
+
 void main() {
   setUpAll(() {
     AppPath.supportDirectory = () async =>
@@ -16,6 +18,14 @@ void main() {
     AppPath.temporaryDirectory = () async => Directory.systemTemp;
     AppPath.downloadDirectory = () async => null;
     return appPath.rebind();
+  });
+
+  // The failed resolution belongs to this file's zone; a later file in the
+  // same isolate that opens the database would surface it here.
+  tearDownAll(() async {
+    final home = Directory.systemTemp.createTempSync('flclash_app_path_test_');
+    await useAppPaths(home);
+    home.deleteSync(recursive: true);
   });
 
   test('an unavailable data directory fails its callers', () async {
