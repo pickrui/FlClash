@@ -490,7 +490,6 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
       enabled: enabled,
       onChanged: onChanged,
       autocorrect: false,
-      enableSuggestions: false,
       inputFormatters: [LengthLimitingTextInputFormatter(_patternMaxLength)],
       decoration: InputDecoration(
         labelText: label,

@@ -160,7 +160,6 @@ class _ProxyAuthenticationDialogState extends State<ProxyAuthenticationDialog> {
                 enabled: !_busy,
                 maxLength: 255,
                 autocorrect: false,
-                enableSuggestions: false,
                 decoration: InputDecoration(labelText: l.account),
                 validator: (value) =>
                     AuthenticationProps.validUsername(value ?? '')

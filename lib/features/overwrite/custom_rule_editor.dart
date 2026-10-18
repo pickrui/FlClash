@@ -566,7 +566,6 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
                 maxLines: 8,
                 keyboardType: TextInputType.multiline,
                 autocorrect: false,
-                enableSuggestions: false,
                 smartDashesType: SmartDashesType.disabled,
                 smartQuotesType: SmartQuotesType.disabled,
                 style: context.textTheme.bodyMedium?.toJetBrainsMono,
@@ -630,7 +629,6 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
                   controller: _payloadController,
                   enabled: !_saving,
                   autocorrect: false,
-                  enableSuggestions: false,
                   smartDashesType: SmartDashesType.disabled,
                   smartQuotesType: SmartQuotesType.disabled,
                   decoration: InputDecoration(
