@@ -15,7 +15,9 @@ void main() {
         dashboardWidgetsSafeFormJson([
           'networkDetection',
           'serviceStatus',
+          'overrideDnsButton',
           'future-card',
+          'overrideNtpButton',
           'runTime',
           'networkDetection',
           23,

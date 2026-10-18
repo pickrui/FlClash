@@ -29,7 +29,6 @@ MakeRealProfileState _profile({
   rawConfig: raw,
   overwriteType: OverwriteType.merge,
   realPatchConfig: ClashConfig(findProcessMode: manual),
-  overrideDns: false,
   appendSystemDns: false,
   addedRules: added,
   customRules: custom,

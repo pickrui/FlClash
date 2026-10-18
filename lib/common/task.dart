@@ -273,7 +273,6 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
   final realPatchConfig = data.realPatchConfig;
   final profilesPath = data.profilesPath;
   final profileId = data.profileId;
-  final overrideDns = data.overrideDns;
   final addedRules = data.addedRules;
   final proxyChains = data.proxyChains;
   final profileProxies = data.profileProxies;
@@ -451,19 +450,22 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
       defaultDns.overrideJson(baselineDnsOverrideKeys),
     );
   }
-  if (overrideDns || !isEnableDns) {
-    targetDns = mergeDnsOverride(
-      targetDns,
-      realPatchConfig.dns.overrideJson(realPatchConfig.dnsOverrideKeys),
-    );
+  final dnsOverride = realPatchConfig.dns.overrideJson(
+    realPatchConfig.dnsOverrideKeys,
+  );
+  if (dnsOverride.isNotEmpty || !isEnableDns) {
+    targetDns = mergeDnsOverride(targetDns, dnsOverride);
     _preserveProxyDnsBootstrap(targetDns, sourceDns);
   }
   rawConfig['dns'] = targetDns;
-  if (data.overrideNtp) {
+  final ntpOverride = realPatchConfig.ntp.overrideJson(
+    realPatchConfig.ntpOverrideKeys,
+  );
+  if (ntpOverride.isNotEmpty) {
     rawConfig['ntp'] = {
       if (rawConfig['ntp'] is Map)
         ...Map<String, dynamic>.from(rawConfig['ntp']),
-      ...realPatchConfig.ntp.overrideJson(realPatchConfig.ntpOverrideKeys),
+      ...ntpOverride,
     };
   }
   if (appendSystemDns) {

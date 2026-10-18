@@ -329,8 +329,6 @@ abstract class ThemeProps with _$ThemeProps {
 abstract class Config with _$Config {
   const factory Config({
     int? currentProfileId,
-    @Default(false) bool overrideDns,
-    @Default(false) bool overrideNtp,
     @Default([]) List<HotKeyAction> hotKeyActions,
     @JsonKey(fromJson: AppSettingProps.safeFromJson)
     @Default(defaultAppSettingProps)
@@ -349,7 +347,7 @@ abstract class Config with _$Config {
       decodeSalvaging('config', json, Config.strictFromJson);
 
   factory Config.strictFromJson(Map<String, Object?> json) =>
-      _$ConfigFromJson(json);
+      _withLegacyOverrideSwitches(_$ConfigFromJson(json), json);
 
   factory Config.realFromJson(Map<String, Object?>? json) {
     if (json == null) {
@@ -357,6 +355,23 @@ abstract class Config with _$Config {
     }
     return Config.fromJson(json);
   }
+}
+
+/// Picked DNS and NTP keys once applied only while their removed switch was
+/// on, so a key behind an off switch is dropped instead of starting to apply.
+Config _withLegacyOverrideSwitches(Config config, Map<String, Object?> json) {
+  bool cleared(String key) => json.containsKey(key) && json[key] != true;
+  final patch = config.patchClashConfig;
+  return config.copyWith(
+    patchClashConfig: patch.copyWith(
+      dnsOverrideKeys: cleared('overrideDns')
+          ? const {}
+          : patch.dnsOverrideKeys,
+      ntpOverrideKeys: cleared('overrideNtp')
+          ? const {}
+          : patch.ntpOverrideKeys,
+    ),
+  );
 }
 
 Object? _readTabAnimation(Map json, String key) =>

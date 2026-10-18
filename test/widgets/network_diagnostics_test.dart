@@ -226,7 +226,7 @@ void main() {
       };
       final setting = switch (id) {
         'listener' => l.port,
-        'coreDns' => l.overrideDns,
+        'coreDns' => l.nullTip(l.overrideEntries),
         _ => l.tun,
       };
       await tester.ensureVisible(find.text(label));

@@ -1854,6 +1854,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "The current proxy group cannot be selected.",
     ),
+    "ntpDesc": MessageLookupByLibrary.simpleMessage(
+      "Update NTP related settings",
+    ),
     "ntpInterval": MessageLookupByLibrary.simpleMessage(
       "Sync interval (minutes)",
     ),
@@ -1898,10 +1901,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "overlayNameConflict": m50,
     "override": MessageLookupByLibrary.simpleMessage("Override"),
-    "overrideDns": MessageLookupByLibrary.simpleMessage("Override Dns"),
     "overrideEntries": MessageLookupByLibrary.simpleMessage("Override entries"),
     "overrideMode": MessageLookupByLibrary.simpleMessage("Override mode"),
-    "overrideNtp": MessageLookupByLibrary.simpleMessage("Override NTP"),
     "overrideScript": MessageLookupByLibrary.simpleMessage("Override script"),
     "overwriteIssueDuplicateName": m51,
     "overwriteIssueEmptyFallback": m52,

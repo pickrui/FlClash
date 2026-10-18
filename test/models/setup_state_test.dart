@@ -27,7 +27,6 @@ void main() {
       customProxyGroups: customProxyGroups,
       customRules: customRules,
       script: null,
-      overrideDns: false,
       dns: const Dns(),
       blockQuic: blockQuic,
       blockWebRtc: blockWebRtc,
@@ -35,32 +34,28 @@ void main() {
     );
   }
 
-  test('DNS and NTP key selection triggers setup only while enabled', () {
-    final off = buildState();
-    final dns = off.copyWith(overrideDns: true);
-    final ntp = off.copyWith(overrideNtp: true);
-    expect(
-      off.copyWith(dnsOverrideKeys: {DnsOverrideKey.ipv6}).needSetup(off),
-      isFalse,
-    );
-    expect(
-      dns.copyWith(dnsOverrideKeys: {DnsOverrideKey.ipv6}).needSetup(dns),
-      isTrue,
-    );
-    expect(ntp.needSetup(off), isTrue);
-    expect(
-      ntp.copyWith(ntpOverrideKeys: {NtpOverrideKey.server}).needSetup(ntp),
-      isTrue,
-    );
-    expect(
-      ntp.copyWith(ntp: const Ntp(server: 'time.example')).needSetup(ntp),
-      isTrue,
-    );
-    expect(
-      off.copyWith(ntp: const Ntp(server: 'time.example')).needSetup(off),
-      isFalse,
-    );
-  });
+  test(
+    'only a change to what the picked DNS and NTP keys apply needs setup',
+    () {
+      final picked = buildState().copyWith(
+        dnsOverrideKeys: {DnsOverrideKey.ipv6},
+        ntpOverrideKeys: {NtpOverrideKey.server},
+      );
+      for (final next in [
+        buildState(),
+        picked.copyWith(dns: const Dns(ipv6: true)),
+        picked.copyWith(ntp: const Ntp(server: 'time.example')),
+      ]) {
+        expect(next.needSetup(picked), isTrue, reason: '$next');
+      }
+      for (final next in [
+        picked.copyWith(dns: const Dns(listen: '0.0.0.0:53')),
+        picked.copyWith(ntp: const Ntp(port: 1123)),
+      ]) {
+        expect(next.needSetup(picked), isFalse, reason: '$next');
+      }
+    },
+  );
 
   group('SetupState personal overlay changes', () {
     final previous = buildState(overwriteType: OverwriteType.merge);

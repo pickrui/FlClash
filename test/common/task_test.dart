@@ -34,7 +34,6 @@ MakeRealProfileState _makeRealProfileState({
     overwriteType: OverwriteType.standard,
     rawConfig: rawConfig,
     realPatchConfig: const ClashConfig(),
-    overrideDns: false,
     appendSystemDns: false,
     addedRules: const [],
     proxyChains: const [],
@@ -322,7 +321,7 @@ void main() {
       'dns': {'enable': true, 'fallback-lazy-query': true},
     });
     final overriddenResult = await makeRealProfileTask(
-      state.copyWith(overrideDns: true, realPatchConfig: override),
+      state.copyWith(realPatchConfig: override),
     );
     expect(overriddenResult['dns']['fallback-lazy-query'], true);
   });
@@ -342,6 +341,7 @@ void main() {
       OverwriteType overwriteType = OverwriteType.standard,
       List<Rule> customRules = const [],
       List<ProxyGroup> customProxyGroups = const [],
+      ClashConfig realPatchConfig = const ClashConfig(),
     }) {
       return makeRealProfileTask(
         _makeRealProfileState(
@@ -373,6 +373,7 @@ void main() {
           overwriteType: overwriteType,
           customRules: customRules,
           customProxyGroups: customProxyGroups,
+          realPatchConfig: realPatchConfig,
         ),
       );
     }
@@ -554,6 +555,36 @@ void main() {
       final policy = result['dns']['nameserver-policy'] as Map;
       // Policy entries match in order, so the tailnet goes ahead of the rest.
       expect(policy.keys.toList(), ['+.tail1234.ts.net', 'geosite:private']);
+    });
+
+    test('picked DNS keys apply before the tailnet policy and the bootstrap '
+        'policy', () async {
+      final result = await apply(
+        const [home],
+        rawConfig: {
+          'dns': {
+            'enable': true,
+            'nameserver-policy': {'geosite:private': 'system'},
+            'proxy-server-nameserver-policy': {
+              '+.nodes.example': ['192.0.2.53'],
+            },
+          },
+          'rules': ['MATCH,DIRECT'],
+        },
+        realPatchConfig: const ClashConfig(
+          dns: Dns(nameserverPolicy: {'+.corp.example': '10.0.0.53'}),
+          dnsOverrideKeys: {
+            DnsOverrideKey.nameserverPolicy,
+            DnsOverrideKey.proxyServerNameserverPolicy,
+          },
+        ),
+      );
+      final policy = result['dns']['nameserver-policy'] as Map;
+      expect(policy.keys.toList(), ['+.tail1234.ts.net', '+.corp.example']);
+      expect(policy['+.corp.example'], '10.0.0.53');
+      expect(result['dns']['proxy-server-nameserver-policy'], {
+        '+.nodes.example': ['192.0.2.53'],
+      });
     });
 
     test('keeps a profile policy for the same suffix', () async {
@@ -1424,7 +1455,6 @@ void main() {
             geoAutoUpdate: false,
             geoUpdateInterval: 2562048,
           ),
-          overrideDns: false,
           appendSystemDns: false,
           addedRules: [],
           proxyChains: [],
@@ -1456,7 +1486,6 @@ void main() {
             proxyServerNameserver: ['https://unreachable.invalid/dns-query'],
           ),
         ),
-        overrideDns: false,
         appendSystemDns: false,
         addedRules: [],
         proxyChains: [],
@@ -1497,7 +1526,6 @@ void main() {
             'rules': <String>[],
           },
           realPatchConfig: ClashConfig(),
-          overrideDns: false,
           appendSystemDns: false,
           addedRules: [],
           proxyChains: [],
@@ -1518,7 +1546,7 @@ void main() {
     },
   );
 
-  test('disabled profile DNS applies custom DNS when override is on', () async {
+  test('disabled profile DNS applies the picked DNS keys', () async {
     const customNameserver = 'https://dns.example/dns-query';
     final result = await makeRealProfileTask(
       const MakeRealProfileState(
@@ -1536,7 +1564,6 @@ void main() {
             proxyServerNameserver: [customNameserver],
           ),
         ),
-        overrideDns: true,
         appendSystemDns: false,
         addedRules: [],
         proxyChains: [],
@@ -1578,7 +1605,6 @@ void main() {
             proxyServerNameserver: [],
           ),
         ),
-        overrideDns: true,
         appendSystemDns: false,
         addedRules: [],
         proxyChains: [],
@@ -1621,7 +1647,6 @@ void main() {
           dnsOverrideKeys: legacyDnsOverrideKeys,
           dns: Dns(proxyServerNameserver: [customNameserver]),
         ),
-        overrideDns: true,
         appendSystemDns: false,
         addedRules: [],
         proxyChains: [],
@@ -1651,7 +1676,6 @@ void main() {
           'rules': <String>[],
         },
         realPatchConfig: ClashConfig(),
-        overrideDns: false,
         appendSystemDns: false,
         addedRules: [],
         proxyChains: [],
@@ -1675,7 +1699,6 @@ void main() {
         overwriteType: OverwriteType.standard,
         rawConfig: {'bind-address': '127.0.0.1', 'rules': <String>[]},
         realPatchConfig: ClashConfig(),
-        overrideDns: false,
         appendSystemDns: false,
         addedRules: [],
         proxyChains: [],
@@ -1868,7 +1891,6 @@ void main() {
             'rules': ['MATCH,Original'],
           },
           realPatchConfig: ClashConfig(),
-          overrideDns: false,
           appendSystemDns: false,
           addedRules: [],
           proxyChains: [],
@@ -1915,7 +1937,6 @@ void main() {
             'rules': ['MATCH,Original'],
           },
           realPatchConfig: ClashConfig(),
-          overrideDns: false,
           appendSystemDns: false,
           addedRules: [],
           proxyChains: [],
@@ -1948,7 +1969,6 @@ void main() {
           'rules': ['MATCH,Original'],
         },
         realPatchConfig: ClashConfig(),
-        overrideDns: false,
         appendSystemDns: false,
         addedRules: [],
         proxyChains: [],

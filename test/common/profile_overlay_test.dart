@@ -21,7 +21,6 @@ MakeRealProfileState overlayState({
   overwriteType: overwriteType,
   rawConfig: rawConfig,
   realPatchConfig: const ClashConfig(),
-  overrideDns: false,
   appendSystemDns: false,
   addedRules: addedRules,
   proxyChains: const [],

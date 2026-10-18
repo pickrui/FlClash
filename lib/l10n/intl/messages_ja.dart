@@ -1550,6 +1550,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "現在のプロキシグループは選択できません",
     ),
+    "ntpDesc": MessageLookupByLibrary.simpleMessage("NTP関連設定の更新"),
     "ntpInterval": MessageLookupByLibrary.simpleMessage("同期間隔（分）"),
     "ntpStatusDesc": MessageLookupByLibrary.simpleMessage(
       "システムクロックではなくNTPサーバーから時刻を取得します",
@@ -1588,10 +1589,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "overlayNameConflict": m50,
     "override": MessageLookupByLibrary.simpleMessage("上書き"),
-    "overrideDns": MessageLookupByLibrary.simpleMessage("DNS上書き"),
     "overrideEntries": MessageLookupByLibrary.simpleMessage("上書き項目"),
     "overrideMode": MessageLookupByLibrary.simpleMessage("上書きモード"),
-    "overrideNtp": MessageLookupByLibrary.simpleMessage("NTP を上書き"),
     "overrideScript": MessageLookupByLibrary.simpleMessage("上書きスクリプト"),
     "overwriteIssueDuplicateName": m51,
     "overwriteIssueEmptyFallback": m52,

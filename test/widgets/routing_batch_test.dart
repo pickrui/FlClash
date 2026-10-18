@@ -86,7 +86,6 @@ Future<_Profiles> _open(
             customProxyGroups: _groups,
             customRules: _rules,
             script: null,
-            overrideDns: false,
             dns: Dns(),
           ),
         ),

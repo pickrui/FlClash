@@ -919,7 +919,6 @@ class AppController {
     _ref.read(vpnSettingProvider.notifier).value = config.vpnProps;
     _ref.read(proxiesStyleSettingProvider.notifier).value =
         config.proxiesStyleProps;
-    _ref.read(overrideDnsProvider.notifier).value = config.overrideDns;
     _ref.read(networkSettingProvider.notifier).value = config.networkProps;
     _ref.read(hotKeyActionsProvider.notifier).value = config.hotKeyActions;
     _ref.read(tailscaleNetworksProvider.notifier).value =

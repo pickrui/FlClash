@@ -128,17 +128,4 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     c.dispose();
   });
-  testWidgets('override card updates only its own saved switch', (
-    tester,
-  ) async {
-    final c = ProviderContainer();
-    await tester.pumpWidget(app(const OverrideCard(ntp: true), container: c));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byType(Switch));
-    await tester.pumpAndSettle();
-    expect(c.read(overrideNtpProvider), true);
-    expect(c.read(overrideDnsProvider), false);
-    await tester.pumpWidget(const SizedBox());
-    c.dispose();
-  });
 }

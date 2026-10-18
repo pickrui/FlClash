@@ -327,8 +327,6 @@ enum DashboardWidget {
   dnsQueries,
   requests,
   connections,
-  overrideDnsButton,
-  overrideNtpButton,
   runTime,
   proxyGroups,
   profiles;

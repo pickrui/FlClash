@@ -41,7 +41,7 @@ class AdvancedConfigView extends StatelessWidget {
       ),
       ListItem.open(
         title: const Text('NTP'),
-        subtitle: Text(appLocalizations.overrideNtp),
+        subtitle: Text(appLocalizations.ntpDesc),
         leading: const GlyphIcon(AppGlyphs.clock),
         delegate: const OpenDelegate(widget: NtpView(), blur: false),
       ),

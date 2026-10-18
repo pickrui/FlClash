@@ -47,7 +47,6 @@ const _state = SetupState(
   customRules: [],
   matchTarget: 'Old',
   script: null,
-  overrideDns: false,
   dns: Dns(),
 );
 
@@ -93,7 +92,6 @@ class _Setup extends SetupAction {
         },
         overwriteType: setupState.overwriteType,
         realPatchConfig: patchConfig,
-        overrideDns: false,
         appendSystemDns: false,
         addedRules: setupState.addedRules,
         proxyChains: setupState.proxyChains,

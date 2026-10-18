@@ -529,7 +529,6 @@ void main() {
       customProxyGroups: [],
       customRules: [],
       script: null,
-      overrideDns: false,
       dns: Dns(),
     );
 

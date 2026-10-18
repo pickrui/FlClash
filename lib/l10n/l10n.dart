@@ -1595,6 +1595,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Update NTP related settings`
+  String get ntpDesc {
+    return Intl.message(
+      'Update NTP related settings',
+      name: 'ntpDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Key`
   String get key {
     return Intl.message('Key', name: 'key', desc: '', args: []);
@@ -1675,16 +1685,6 @@ class AppLocalizations {
     return Intl.message(
       'Rule providers',
       name: 'ruleProviders',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Override Dns`
-  String get overrideDns {
-    return Intl.message(
-      'Override Dns',
-      name: 'overrideDns',
       desc: '',
       args: [],
     );
@@ -9770,16 +9770,6 @@ class AppLocalizations {
     return Intl.message(
       'Other',
       name: 'dnsQueryInitiatorOther',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Override NTP`
-  String get overrideNtp {
-    return Intl.message(
-      'Override NTP',
-      name: 'overrideNtp',
       desc: '',
       args: [],
     );

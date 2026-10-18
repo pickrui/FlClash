@@ -225,8 +225,6 @@ abstract class MakeRealProfileState with _$MakeRealProfileState {
     required Map<String, dynamic> rawConfig,
     required OverwriteType overwriteType,
     required ClashConfig realPatchConfig,
-    required bool overrideDns,
-    @Default(false) bool overrideNtp,
     required bool appendSystemDns,
     required List<Rule> addedRules,
     required List<ProxyChain> proxyChains,
@@ -273,8 +271,6 @@ abstract class SetupState with _$SetupState {
     required List<Rule> customRules,
     String? matchTarget,
     required Script? script,
-    required bool overrideDns,
-    @Default(false) bool overrideNtp,
     required Dns dns,
     @Default({}) Set<DnsOverrideKey> dnsOverrideKeys,
     @Default(defaultNtp) Ntp ntp,
@@ -356,24 +352,14 @@ extension SetupStateExt on SetupState {
         }
       }
     }
-    if (overrideDns != lastSetupState.overrideDns) {
-      return true;
-    }
-    if (overrideNtp != lastSetupState.overrideNtp ||
-        overrideNtp &&
-            (ntp != lastSetupState.ntp ||
-                !const SetEquality<NtpOverrideKey>().equals(
-                  ntpOverrideKeys,
-                  lastSetupState.ntpOverrideKeys,
-                ))) {
-      return true;
-    }
-    if (overrideDns &&
-        (dns != lastSetupState.dns ||
-            !const SetEquality<DnsOverrideKey>().equals(
-              dnsOverrideKeys,
-              lastSetupState.dnsOverrideKeys,
-            ))) {
+    if (!const DeepCollectionEquality().equals(
+          dns.overrideJson(dnsOverrideKeys),
+          lastSetupState.dns.overrideJson(lastSetupState.dnsOverrideKeys),
+        ) ||
+        !const DeepCollectionEquality().equals(
+          ntp.overrideJson(ntpOverrideKeys),
+          lastSetupState.ntp.overrideJson(lastSetupState.ntpOverrideKeys),
+        )) {
       return true;
     }
     if (blockQuic != lastSetupState.blockQuic) {

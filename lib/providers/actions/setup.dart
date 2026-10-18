@@ -683,7 +683,6 @@ extension SetupControllerExt on AppController {
         (state) => VM2(state.appendSystemDns, state.routeMode),
       ),
     );
-    final overrideDns = _ref.read(overrideDnsProvider);
     final appendSystemDns = networkVM2.a;
     final routeMode = networkVM2.b;
     final configMap = await getRawProfileConfig(
@@ -739,8 +738,6 @@ extension SetupControllerExt on AppController {
         rawConfig: rawConfig,
         overwriteType: setupState.overwriteType,
         realPatchConfig: realPatchConfig,
-        overrideDns: overrideDns,
-        overrideNtp: setupState.overrideNtp,
         appendSystemDns: appendSystemDns,
         addedRules: addedRules,
         proxyChains: proxyChains,

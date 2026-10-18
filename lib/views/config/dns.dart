@@ -238,16 +238,6 @@ class _OverrideList extends ConsumerWidget {
           ),
           sliver: SliverList.list(
             children: [
-              generateSectionV3(
-                items: [
-                  ConfigToggleItem(
-                    title: (l) => l.overrideDns,
-                    selector: overrideDnsProvider,
-                    onChanged: (ref, value) =>
-                        ref.read(overrideDnsProvider.notifier).value = value,
-                  ),
-                ],
-              ),
               for (final (title, keys) in _sectionsOf(
                 appLocalizations,
                 entries,

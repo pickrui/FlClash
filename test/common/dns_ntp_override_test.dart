@@ -12,27 +12,21 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-MakeRealProfileState state(
-  Map<String, dynamic> raw,
-  ClashConfig patch, {
-  bool dns = true,
-  bool ntp = true,
-}) => MakeRealProfileState(
-  profilesPath: '/profiles',
-  profileId: 1,
-  overwriteType: OverwriteType.standard,
-  rawConfig: raw,
-  realPatchConfig: patch,
-  overrideDns: dns,
-  overrideNtp: ntp,
-  appendSystemDns: false,
-  addedRules: [],
-  proxyChains: [],
-  profileProxies: [],
-  customProxyGroups: [],
-  customRules: [],
-  defaultUA: 'fixture',
-);
+MakeRealProfileState state(Map<String, dynamic> raw, ClashConfig patch) =>
+    MakeRealProfileState(
+      profilesPath: '/profiles',
+      profileId: 1,
+      overwriteType: OverwriteType.standard,
+      rawConfig: raw,
+      realPatchConfig: patch,
+      appendSystemDns: false,
+      addedRules: [],
+      proxyChains: [],
+      profileProxies: [],
+      customProxyGroups: [],
+      customRules: [],
+      defaultUA: 'fixture',
+    );
 
 void main() {
   test(
@@ -97,11 +91,6 @@ void main() {
       });
       expect(result['ntp'], {...raw['ntp'], 'server': 'time.new.example'});
       expect(jsonEncode(raw), before);
-      final disabled = await makeRealProfileTask(
-        state(raw, patch, dns: false, ntp: false),
-      );
-      expect(disabled['dns'], raw['dns']);
-      expect(disabled['ntp'], raw['ntp']);
       final empty = await makeRealProfileTask(state(raw, const ClashConfig()));
       expect(empty['dns'], raw['dns']);
       expect(empty['ntp'], raw['ntp']);
@@ -109,15 +98,16 @@ void main() {
   );
 
   test(
-    'NTP is absent without an override and adds only selected values',
+    'NTP is absent without picked keys and adds only selected values',
     () async {
       const patch = ClashConfig(
         ntp: Ntp(interval: 60),
         ntpOverrideKeys: {NtpOverrideKey.interval},
       );
       expect(
-        (await makeRealProfileTask(state({}, patch, ntp: false)))
-            .containsKey('ntp'),
+        (await makeRealProfileTask(
+          state({}, patch.copyWith(ntpOverrideKeys: const {})),
+        )).containsKey('ntp'),
         isFalse,
       );
       expect((await makeRealProfileTask(state({}, patch)))['ntp'], {
@@ -193,35 +183,30 @@ void main() {
     }
   });
 
-  test(
-    'NTP preference and field selection persist through provider restoration',
-    () {
-      final config = Config.fromJson(
-        jsonDecode(
-          jsonEncode(
-            const Config(
-              themeProps: ThemeProps(),
-              overrideNtp: true,
-              patchClashConfig: ClashConfig(
-                ntp: Ntp(server: 'time.example'),
-                ntpOverrideKeys: {NtpOverrideKey.server},
-              ),
+  test('NTP field selection persists through provider restoration', () {
+    final config = Config.fromJson(
+      jsonDecode(
+        jsonEncode(
+          const Config(
+            themeProps: ThemeProps(),
+            patchClashConfig: ClashConfig(
+              ntp: Ntp(server: 'time.example'),
+              ntpOverrideKeys: {NtpOverrideKey.server},
             ),
           ),
         ),
-      );
-      final container = ProviderContainer(
-        overrides: buildConfigOverrides(config),
-      );
-      addTearDown(container.dispose);
-      expect(container.read(overrideNtpProvider), isTrue);
-      expect(
-        container.read(configProvider).patchClashConfig.ntp.server,
-        'time.example',
-      );
-      expect(container.read(configProvider).patchClashConfig.ntpOverrideKeys, {
-        NtpOverrideKey.server,
-      });
-    },
-  );
+      ),
+    );
+    final container = ProviderContainer(
+      overrides: buildConfigOverrides(config),
+    );
+    addTearDown(container.dispose);
+    expect(
+      container.read(configProvider).patchClashConfig.ntp.server,
+      'time.example',
+    );
+    expect(container.read(configProvider).patchClashConfig.ntpOverrideKeys, {
+      NtpOverrideKey.server,
+    });
+  });
 }

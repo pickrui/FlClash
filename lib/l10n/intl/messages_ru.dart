@@ -1923,6 +1923,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "Текущая группа прокси не может быть выбрана.",
     ),
+    "ntpDesc": MessageLookupByLibrary.simpleMessage(
+      "Обновление настроек, связанных с NTP",
+    ),
     "ntpInterval": MessageLookupByLibrary.simpleMessage(
       "Интервал синхронизации (минуты)",
     ),
@@ -1971,14 +1974,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "overlayNameConflict": m50,
     "override": MessageLookupByLibrary.simpleMessage("Переопределить"),
-    "overrideDns": MessageLookupByLibrary.simpleMessage("Переопределить DNS"),
     "overrideEntries": MessageLookupByLibrary.simpleMessage(
       "Переопределяемые параметры",
     ),
     "overrideMode": MessageLookupByLibrary.simpleMessage(
       "Режим переопределения",
     ),
-    "overrideNtp": MessageLookupByLibrary.simpleMessage("Переопределить NTP"),
     "overrideScript": MessageLookupByLibrary.simpleMessage(
       "Скрипт переопределения",
     ),

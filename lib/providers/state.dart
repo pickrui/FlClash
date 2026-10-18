@@ -767,7 +767,6 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
   final customRules = profile?.customRules ?? [];
   final dns = ref.watch(patchClashConfigProvider.select((state) => state.dns));
   final script = await ref.watch(scriptProvider(scriptId).future);
-  final overrideDns = ref.watch(overrideDnsProvider);
   final blockQuic = ref.watch(
     networkSettingProvider.select((state) => state.blockQuic),
   );
@@ -806,12 +805,10 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
     customRules: customRules,
     matchTarget: profile?.matchTarget,
     script: script,
-    overrideDns: overrideDns,
     dns: dns,
     dnsOverrideKeys: ref.watch(
       patchClashConfigProvider.select((state) => state.dnsOverrideKeys),
     ),
-    overrideNtp: ref.watch(overrideNtpProvider),
     ntp: ref.watch(patchClashConfigProvider.select((state) => state.ntp)),
     ntpOverrideKeys: ref.watch(
       patchClashConfigProvider.select((state) => state.ntpOverrideKeys),

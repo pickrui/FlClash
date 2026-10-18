@@ -91,16 +91,6 @@ extension DashboardWidgetView on DashboardWidget {
       crossAxisCellCount: 4,
       child: FeedCountCard(page: PageLabel.connections),
     ),
-    DashboardWidget.overrideDnsButton => const GridItem(
-      key: ValueKey(DashboardWidget.overrideDnsButton),
-      crossAxisCellCount: 4,
-      child: OverrideCard(),
-    ),
-    DashboardWidget.overrideNtpButton => const GridItem(
-      key: ValueKey(DashboardWidget.overrideNtpButton),
-      crossAxisCellCount: 4,
-      child: OverrideCard(ntp: true),
-    ),
     DashboardWidget.runTime => const GridItem(
       key: ValueKey(DashboardWidget.runTime),
       crossAxisCellCount: 4,

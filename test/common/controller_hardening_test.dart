@@ -26,7 +26,6 @@ Future<Map<String, dynamic>> _make(
       overwriteType: OverwriteType.standard,
       rawConfig: {'rules': <String>[], ...rawConfig},
       realPatchConfig: patch,
-      overrideDns: false,
       appendSystemDns: false,
       addedRules: const [],
       proxyChains: const [],

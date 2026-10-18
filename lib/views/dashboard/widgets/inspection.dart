@@ -13,8 +13,6 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 
-import 'quick_options.dart';
-
 import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/views/connection/connections.dart';
 import 'package:fl_clash/views/connection/requests.dart';
@@ -135,14 +133,6 @@ class _FeedCountCardState extends ConsumerState<FeedCountCard>
       ),
     );
   }
-}
-
-class OverrideCard extends StatelessWidget {
-  final bool ntp;
-  const OverrideCard({super.key, this.ntp = false});
-  @override
-  Widget build(BuildContext context) =>
-      ntp ? const OverrideNtpButton() : const OverrideDnsButton();
 }
 
 class RuntimeCard extends ConsumerWidget {

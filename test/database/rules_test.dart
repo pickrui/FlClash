@@ -364,7 +364,6 @@ void main() {
         },
         overwriteType: OverwriteType.standard,
         realPatchConfig: const ClashConfig(),
-        overrideDns: false,
         appendSystemDns: false,
         addedRules: addedRules,
         proxyChains: const [],

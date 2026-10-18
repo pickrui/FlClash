@@ -37,8 +37,6 @@ void main() {
     container.read(themeSettingProvider.notifier).update((_) => theme);
     container.read(proxiesStyleSettingProvider.notifier).update((_) => style);
     container.read(currentProfileIdProvider.notifier).update((_) => 99);
-    container.read(overrideDnsProvider.notifier).update((_) => true);
-    container.read(overrideNtpProvider.notifier).update((_) => true);
 
     expect(
       container.read(configProvider),
@@ -50,8 +48,6 @@ void main() {
         themeProps: theme,
         proxiesStyleProps: style,
         currentProfileId: 99,
-        overrideDns: true,
-        overrideNtp: true,
       ),
     );
   });
@@ -74,8 +70,6 @@ void main() {
       ),
       hotKeyActions: [HotKeyAction(action: HotAction.values.first, key: 65)],
       currentProfileId: 7,
-      overrideDns: true,
-      overrideNtp: true,
       tailscaleNetworks: const [
         TailscaleNetwork(id: 'n', name: 'Home', stateId: 's'),
       ],
