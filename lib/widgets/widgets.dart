@@ -53,13 +53,13 @@ export 'sheet.dart';
 export 'side_sheet.dart';
 export 'subscription_info_view.dart';
 export 'super_grid.dart';
-export 'tab.dart';
 
 export 'package:fl_clash/ui/text.dart';
 
 export 'theme.dart';
 
 export 'package:fl_clash/ui/search_field.dart';
+export 'package:fl_clash/ui/segmented_control.dart';
 export 'package:fl_clash/ui/selection_mark.dart';
 export 'package:fl_clash/ui/sheet_header.dart';
 

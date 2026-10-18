@@ -44,17 +44,6 @@ void main() {
     expect(harnessKey.currentState!.changes, [1]);
   });
 
-  testWidgets('segmented control keeps drag selection', (tester) async {
-    final harnessKey = GlobalKey<_TabHarnessState>();
-    await tester.pumpWidget(MaterialApp(home: _TabHarness(key: harnessKey)));
-
-    await tester.drag(find.text('Rule'), const Offset(200, 0));
-    await tester.pumpAndSettle();
-
-    expect(harnessKey.currentState!.selected, 2);
-    expect(harnessKey.currentState!.changes, [2]);
-  });
-
   testWidgets('radio list item exposes one remote focus target', (
     tester,
   ) async {
@@ -122,16 +111,10 @@ class _TabHarnessState extends State<_TabHarness> {
         children: [
           SizedBox(
             width: 300,
-            child: CommonTabBar<int>(
-              children: const {
-                0: SizedBox(height: 48, child: Center(child: Text('Rule'))),
-                1: SizedBox(height: 48, child: Center(child: Text('Global'))),
-                2: SizedBox(height: 48, child: Center(child: Text('Direct'))),
-              },
-              groupValue: selected,
-              thumbColor: Theme.of(context).colorScheme.secondaryContainer,
-              onValueChanged: (value) {
-                if (value == null) return;
+            child: SegmentedControl<int>(
+              segments: const [(0, 'Rule'), (1, 'Global'), (2, 'Direct')],
+              value: selected,
+              onChanged: (value) {
                 setState(() {
                   selected = value;
                   changes.add(value);

@@ -275,14 +275,6 @@ class _ModeRow extends StatelessWidget {
 class OutboundModeV2 extends StatelessWidget {
   const OutboundModeV2({super.key});
 
-  Color _getTextColor(BuildContext context, Mode mode) {
-    return switch (mode) {
-      Mode.rule => context.colorScheme.onSecondaryContainer,
-      Mode.global => context.colorScheme.onPrimaryContainer,
-      Mode.direct => context.colorScheme.onTertiaryContainer,
-    };
-  }
-
   @override
   Widget build(BuildContext context) {
     final setupAction = context.setupAction;
@@ -298,65 +290,31 @@ class OutboundModeV2 extends StatelessWidget {
             final mode = ref.watch(
               patchClashConfigProvider.select((state) => state.mode),
             );
-            final thumbColor = switch (mode) {
+            final stripColor = switch (mode) {
               Mode.rule => context.colorScheme.secondaryContainer,
               Mode.global => globalState.theme.darken3PrimaryContainer,
               Mode.direct => context.colorScheme.tertiaryContainer,
             };
-            return LayoutBuilder(
-              builder: (_, constraints) {
-                return Column(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        constraints: const BoxConstraints.expand(),
-                        child: CommonTabBar<Mode>(
-                          children: Map.fromEntries(
-                            Mode.values.map(
-                              (item) => MapEntry(
-                                item,
-                                Container(
-                                  alignment: Alignment.center,
-                                  height: height - 8.ap(context) - 24,
-                                  padding: const EdgeInsets.all(4),
-                                  child: Text(
-                                    Intl.message(item.name),
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleSmall
-                                        ?.adjustSize(1)
-                                        .copyWith(
-                                          color: item == mode
-                                              ? _getTextColor(context, item)
-                                              : null,
-                                        ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          padding: EdgeInsets.zero,
-                          groupValue: mode,
-                          onValueChanged: (value) {
-                            if (value == null) {
-                              return;
-                            }
-                            setupAction.changeMode(value);
-                          },
-                          thumbColor: thumbColor,
-                        ),
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Center(
+                      child: SegmentedControl<Mode>(
+                        segments: [
+                          for (final item in Mode.values)
+                            (item, Intl.message(item.name)),
+                        ],
+                        value: mode,
+                        onChanged: (value) => setupAction.changeMode(value),
                       ),
                     ),
-                    Container(
-                      color: thumbColor.opacity50,
-                      height: 8.ap(context),
-                      width: constraints.maxWidth,
-                    ),
-                  ],
-                );
-              },
+                  ),
+                ),
+                Container(color: stripColor.opacity50, height: 8.ap(context)),
+              ],
             );
           },
         ),
