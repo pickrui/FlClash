@@ -199,7 +199,14 @@ void main() {
     test('brackets bare IPv6 literals and drops blank entries', () {
       expect(
         windowsBypassList([' ::1 ', 'fe80::1', '', '[fd00::1]', '*.lan']),
-        ['[::1]', '[fe80::1]', '[fd00::1]', '*.lan'],
+        ['[::1]', '[fe80::1]', '[fd00::1]', '*.lan', '<local>'],
+      );
+    });
+
+    test('drops trailing slashes that fail the whole list', () {
+      expect(
+        windowsBypassList(['example.test/', 'example.test', 'nas//', '/']),
+        ['example.test', 'nas', '<local>'],
       );
     });
 

@@ -5,15 +5,18 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:io';
 
-/// WinINet rejects the whole list over one bare IPv6 literal.
+/// WinINet rejects the whole list over one bare IPv6 literal or one entry
+/// ending in `/`; its `<local>` token bypasses single-label hosts like `nas`.
 List<String> windowsBypassList(List<String> bypassDomain) {
   final entries = <String>{};
   for (final domain in bypassDomain) {
-    final entry = domain.trim();
+    final entry = domain.trim().replaceFirst(_trailingSlashes, '');
     if (entry.isEmpty) continue;
     final isBareIPv6 =
         InternetAddress.tryParse(entry)?.type == InternetAddressType.IPv6;
     entries.add(isBareIPv6 ? '[$entry]' : entry);
   }
-  return entries.toList();
+  return {...entries, '<local>'}.toList();
 }
+
+final _trailingSlashes = RegExp(r'/+$');
