@@ -448,8 +448,12 @@ class OverrideView<K extends Enum, M> extends ConsumerWidget {
       return true;
     }
     try {
-      final next = spec.applyOverrideYaml(spec.target.read(ref).model, content);
-      spec.target.update(ref, (_) => next);
+      final current = spec.target.read(ref);
+      final next = spec.applyOverrideYaml(current.model, content);
+      spec.target.update(
+        ref,
+        (_) => spec.withoutKeys(next, current.keys.difference(next.keys)),
+      );
       return true;
     } catch (error) {
       final res = await globalState.showMessage(
