@@ -34,6 +34,20 @@ void main() {
         .read(networkSettingProvider.notifier)
         .update((s) => s.copyWith(bypassPrivateRoute: false));
     expect(routes(), ['10.0.0.0/8']);
+    c
+        .read(patchClashConfigProvider.notifier)
+        .update((s) => s.copyWith.tun(routeExcludeAddress: ['10.1.0.0/16']));
+    expect(routes(), [
+      '10.0.0.0/16',
+      '10.2.0.0/15',
+      '10.4.0.0/14',
+      '10.8.0.0/13',
+      '10.16.0.0/12',
+      '10.32.0.0/11',
+      '10.64.0.0/10',
+      '10.128.0.0/9',
+      '::/0',
+    ]);
   });
 
   test('the Android VPN receives the app TUN congestion controller', () {

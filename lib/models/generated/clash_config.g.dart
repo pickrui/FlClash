@@ -87,6 +87,11 @@ _Tun _$TunFromJson(Map<String, dynamic> json) => _Tun(
           ?.map((e) => e as String)
           .toList() ??
       const [],
+  routeExcludeAddress:
+      (json['route-exclude-address'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
   congestionController: json['congestion-controller'] == null
       ? defaultCongestionController
       : normalizeCongestionController(json['congestion-controller'] as String?),
@@ -98,6 +103,7 @@ Map<String, dynamic> _$TunToJson(_Tun instance) => <String, dynamic>{
   'stack': _$TunStackEnumMap[instance.stack]!,
   'mtu': instance.mtu,
   'route-address': instance.routeAddress,
+  'route-exclude-address': instance.routeExcludeAddress,
   'congestion-controller': instance.congestionController,
 };
 

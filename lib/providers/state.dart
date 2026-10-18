@@ -665,12 +665,9 @@ SharedState sharedState(Ref ref) {
   final congestionController = ref.watch(
     patchClashConfigProvider.select((state) => state.tun.congestionController),
   );
-  final routeAddress = ref.watch(
-    patchClashConfigProvider.select(
-      (state) =>
-          state.tun.resolveRouteAddress(bypassPrivateRoute: bypassPrivateRoute),
-    ),
-  );
+  final routeAddress = ref
+      .watch(patchClashConfigProvider.select((state) => state.tun))
+      .vpnRouteAddress(bypassPrivateRoute: bypassPrivateRoute);
   final vpnSetting = ref.watch(vpnStateProvider).vpnProps;
   final suspendOnIdle = ref.watch(
     networkSettingProvider.select((state) => state.suspendOnIdle),

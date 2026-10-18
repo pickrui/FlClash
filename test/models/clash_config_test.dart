@@ -44,6 +44,7 @@ void main() {
             'device': 'test-tun',
             'stack': stack.name,
             'route-address': ['0.0.0.0/0'],
+            'route-exclude-address': ['10.0.0.0/8'],
             'mtu': 1480,
             'congestion-controller': 'bbr',
           };

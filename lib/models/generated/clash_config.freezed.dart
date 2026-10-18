@@ -644,7 +644,7 @@ as String,
 /// @nodoc
 mixin _$Tun {
 
- bool get enable; String get device; TunStack get stack;@JsonKey(fromJson: normalizeTunMtu) int get mtu;@JsonKey(name: 'route-address') List<String> get routeAddress;@JsonKey(name: 'congestion-controller', fromJson: normalizeCongestionController) String get congestionController;
+ bool get enable; String get device; TunStack get stack;@JsonKey(fromJson: normalizeTunMtu) int get mtu;@JsonKey(name: 'route-address') List<String> get routeAddress;@JsonKey(name: 'route-exclude-address') List<String> get routeExcludeAddress;@JsonKey(name: 'congestion-controller', fromJson: normalizeCongestionController) String get congestionController;
 /// Create a copy of Tun
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -658,20 +658,20 @@ $TunCopyWith<Tun> get copyWith => _$TunCopyWithImpl<Tun>(this as Tun, _$identity
 @override
 bool operator ==(Object other) {
   final _this = this as Tun;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Tun&&(identical(other.enable, _this.enable) || other.enable == _this.enable)&&(identical(other.device, _this.device) || other.device == _this.device)&&(identical(other.stack, _this.stack) || other.stack == _this.stack)&&(identical(other.mtu, _this.mtu) || other.mtu == _this.mtu)&&const DeepCollectionEquality().equals(other.routeAddress, _this.routeAddress)&&(identical(other.congestionController, _this.congestionController) || other.congestionController == _this.congestionController));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Tun&&(identical(other.enable, _this.enable) || other.enable == _this.enable)&&(identical(other.device, _this.device) || other.device == _this.device)&&(identical(other.stack, _this.stack) || other.stack == _this.stack)&&(identical(other.mtu, _this.mtu) || other.mtu == _this.mtu)&&const DeepCollectionEquality().equals(other.routeAddress, _this.routeAddress)&&const DeepCollectionEquality().equals(other.routeExcludeAddress, _this.routeExcludeAddress)&&(identical(other.congestionController, _this.congestionController) || other.congestionController == _this.congestionController));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as Tun;
-  return Object.hash(runtimeType,_this.enable,_this.device,_this.stack,_this.mtu,const DeepCollectionEquality().hash(_this.routeAddress),_this.congestionController);
+  return Object.hash(runtimeType,_this.enable,_this.device,_this.stack,_this.mtu,const DeepCollectionEquality().hash(_this.routeAddress),const DeepCollectionEquality().hash(_this.routeExcludeAddress),_this.congestionController);
 }
 
 @override
 String toString() {
   final _this = this as Tun;
-  return 'Tun(enable: ${_this.enable}, device: ${_this.device}, stack: ${_this.stack}, mtu: ${_this.mtu}, routeAddress: ${_this.routeAddress}, congestionController: ${_this.congestionController})';
+  return 'Tun(enable: ${_this.enable}, device: ${_this.device}, stack: ${_this.stack}, mtu: ${_this.mtu}, routeAddress: ${_this.routeAddress}, routeExcludeAddress: ${_this.routeExcludeAddress}, congestionController: ${_this.congestionController})';
 }
 
 
@@ -682,7 +682,7 @@ abstract mixin class $TunCopyWith<$Res>  {
   factory $TunCopyWith(Tun value, $Res Function(Tun) _then) = _$TunCopyWithImpl;
 @useResult
 $Res call({
- bool enable, String device, TunStack stack,@JsonKey(fromJson: normalizeTunMtu) int mtu,@JsonKey(name: 'route-address') List<String> routeAddress,@JsonKey(name: 'congestion-controller', fromJson: normalizeCongestionController) String congestionController
+ bool enable, String device, TunStack stack,@JsonKey(fromJson: normalizeTunMtu) int mtu,@JsonKey(name: 'route-address') List<String> routeAddress,@JsonKey(name: 'route-exclude-address') List<String> routeExcludeAddress,@JsonKey(name: 'congestion-controller', fromJson: normalizeCongestionController) String congestionController
 });
 
 
@@ -699,13 +699,14 @@ class _$TunCopyWithImpl<$Res>
 
 /// Create a copy of Tun
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? enable = null,Object? device = null,Object? stack = null,Object? mtu = null,Object? routeAddress = null,Object? congestionController = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? enable = null,Object? device = null,Object? stack = null,Object? mtu = null,Object? routeAddress = null,Object? routeExcludeAddress = null,Object? congestionController = null,}) {
   return _then(Tun(
 enable: null == enable ? _self.enable : enable // ignore: cast_nullable_to_non_nullable
 as bool,device: null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
 as String,stack: null == stack ? _self.stack : stack // ignore: cast_nullable_to_non_nullable
 as TunStack,mtu: null == mtu ? _self.mtu : mtu // ignore: cast_nullable_to_non_nullable
 as int,routeAddress: null == routeAddress ? _self.routeAddress : routeAddress // ignore: cast_nullable_to_non_nullable
+as List<String>,routeExcludeAddress: null == routeExcludeAddress ? _self.routeExcludeAddress : routeExcludeAddress // ignore: cast_nullable_to_non_nullable
 as List<String>,congestionController: null == congestionController ? _self.congestionController : congestionController // ignore: cast_nullable_to_non_nullable
 as String,
   ));
@@ -792,10 +793,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool enable,  String device,  TunStack stack, @JsonKey(fromJson: normalizeTunMtu)  int mtu, @JsonKey(name: 'route-address')  List<String> routeAddress, @JsonKey(name: 'congestion-controller', fromJson: normalizeCongestionController)  String congestionController)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool enable,  String device,  TunStack stack, @JsonKey(fromJson: normalizeTunMtu)  int mtu, @JsonKey(name: 'route-address')  List<String> routeAddress, @JsonKey(name: 'route-exclude-address')  List<String> routeExcludeAddress, @JsonKey(name: 'congestion-controller', fromJson: normalizeCongestionController)  String congestionController)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Tun() when $default != null:
-return $default(_that.enable,_that.device,_that.stack,_that.mtu,_that.routeAddress,_that.congestionController);case _:
+return $default(_that.enable,_that.device,_that.stack,_that.mtu,_that.routeAddress,_that.routeExcludeAddress,_that.congestionController);case _:
   return orElse();
 
 }
@@ -813,10 +814,10 @@ return $default(_that.enable,_that.device,_that.stack,_that.mtu,_that.routeAddre
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool enable,  String device,  TunStack stack, @JsonKey(fromJson: normalizeTunMtu)  int mtu, @JsonKey(name: 'route-address')  List<String> routeAddress, @JsonKey(name: 'congestion-controller', fromJson: normalizeCongestionController)  String congestionController)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool enable,  String device,  TunStack stack, @JsonKey(fromJson: normalizeTunMtu)  int mtu, @JsonKey(name: 'route-address')  List<String> routeAddress, @JsonKey(name: 'route-exclude-address')  List<String> routeExcludeAddress, @JsonKey(name: 'congestion-controller', fromJson: normalizeCongestionController)  String congestionController)  $default,) {final _that = this;
 switch (_that) {
 case _Tun():
-return $default(_that.enable,_that.device,_that.stack,_that.mtu,_that.routeAddress,_that.congestionController);case _:
+return $default(_that.enable,_that.device,_that.stack,_that.mtu,_that.routeAddress,_that.routeExcludeAddress,_that.congestionController);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -833,10 +834,10 @@ return $default(_that.enable,_that.device,_that.stack,_that.mtu,_that.routeAddre
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool enable,  String device,  TunStack stack, @JsonKey(fromJson: normalizeTunMtu)  int mtu, @JsonKey(name: 'route-address')  List<String> routeAddress, @JsonKey(name: 'congestion-controller', fromJson: normalizeCongestionController)  String congestionController)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool enable,  String device,  TunStack stack, @JsonKey(fromJson: normalizeTunMtu)  int mtu, @JsonKey(name: 'route-address')  List<String> routeAddress, @JsonKey(name: 'route-exclude-address')  List<String> routeExcludeAddress, @JsonKey(name: 'congestion-controller', fromJson: normalizeCongestionController)  String congestionController)?  $default,) {final _that = this;
 switch (_that) {
 case _Tun() when $default != null:
-return $default(_that.enable,_that.device,_that.stack,_that.mtu,_that.routeAddress,_that.congestionController);case _:
+return $default(_that.enable,_that.device,_that.stack,_that.mtu,_that.routeAddress,_that.routeExcludeAddress,_that.congestionController);case _:
   return null;
 
 }
@@ -848,7 +849,7 @@ return $default(_that.enable,_that.device,_that.stack,_that.mtu,_that.routeAddre
 @JsonSerializable()
 
 class _Tun implements Tun {
-  const _Tun({this.enable = false, this.device = appName, this.stack = TunStack.mixed, @JsonKey(fromJson: normalizeTunMtu) this.mtu = defaultTunMtu, @JsonKey(name: 'route-address')  List<String> routeAddress = const [], @JsonKey(name: 'congestion-controller', fromJson: normalizeCongestionController) this.congestionController = defaultCongestionController}): _routeAddress = routeAddress;
+  const _Tun({this.enable = false, this.device = appName, this.stack = TunStack.mixed, @JsonKey(fromJson: normalizeTunMtu) this.mtu = defaultTunMtu, @JsonKey(name: 'route-address')  List<String> routeAddress = const [], @JsonKey(name: 'route-exclude-address')  List<String> routeExcludeAddress = const [], @JsonKey(name: 'congestion-controller', fromJson: normalizeCongestionController) this.congestionController = defaultCongestionController}): _routeAddress = routeAddress,_routeExcludeAddress = routeExcludeAddress;
   factory _Tun.fromJson(Map<String, dynamic> json) => _$TunFromJson(json);
 
 @override@JsonKey() final  bool enable;
@@ -860,6 +861,13 @@ class _Tun implements Tun {
   if (_routeAddress is EqualUnmodifiableListView) return _routeAddress;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_routeAddress);
+}
+
+ final  List<String> _routeExcludeAddress;
+@override@JsonKey(name: 'route-exclude-address') List<String> get routeExcludeAddress {
+  if (_routeExcludeAddress is EqualUnmodifiableListView) return _routeExcludeAddress;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_routeExcludeAddress);
 }
 
 @override@JsonKey(name: 'congestion-controller', fromJson: normalizeCongestionController) final  String congestionController;
@@ -877,18 +885,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Tun&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.device, device) || other.device == device)&&(identical(other.stack, stack) || other.stack == stack)&&(identical(other.mtu, mtu) || other.mtu == mtu)&&const DeepCollectionEquality().equals(other.routeAddress, _routeAddress)&&(identical(other.congestionController, congestionController) || other.congestionController == congestionController));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Tun&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.device, device) || other.device == device)&&(identical(other.stack, stack) || other.stack == stack)&&(identical(other.mtu, mtu) || other.mtu == mtu)&&const DeepCollectionEquality().equals(other.routeAddress, _routeAddress)&&const DeepCollectionEquality().equals(other.routeExcludeAddress, _routeExcludeAddress)&&(identical(other.congestionController, congestionController) || other.congestionController == congestionController));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,enable,device,stack,mtu,const DeepCollectionEquality().hash(_routeAddress),congestionController);
+    return Object.hash(runtimeType,enable,device,stack,mtu,const DeepCollectionEquality().hash(_routeAddress),const DeepCollectionEquality().hash(_routeExcludeAddress),congestionController);
 }
 
 @override
 String toString() {
-    return 'Tun(enable: $enable, device: $device, stack: $stack, mtu: $mtu, routeAddress: $routeAddress, congestionController: $congestionController)';
+    return 'Tun(enable: $enable, device: $device, stack: $stack, mtu: $mtu, routeAddress: $routeAddress, routeExcludeAddress: $routeExcludeAddress, congestionController: $congestionController)';
 }
 
 
@@ -899,7 +907,7 @@ abstract mixin class _$TunCopyWith<$Res> implements $TunCopyWith<$Res> {
   factory _$TunCopyWith(_Tun value, $Res Function(_Tun) _then) = __$TunCopyWithImpl;
 @override @useResult
 $Res call({
- bool enable, String device, TunStack stack,@JsonKey(fromJson: normalizeTunMtu) int mtu,@JsonKey(name: 'route-address') List<String> routeAddress,@JsonKey(name: 'congestion-controller', fromJson: normalizeCongestionController) String congestionController
+ bool enable, String device, TunStack stack,@JsonKey(fromJson: normalizeTunMtu) int mtu,@JsonKey(name: 'route-address') List<String> routeAddress,@JsonKey(name: 'route-exclude-address') List<String> routeExcludeAddress,@JsonKey(name: 'congestion-controller', fromJson: normalizeCongestionController) String congestionController
 });
 
 
@@ -916,13 +924,14 @@ class __$TunCopyWithImpl<$Res>
 
 /// Create a copy of Tun
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? enable = null,Object? device = null,Object? stack = null,Object? mtu = null,Object? routeAddress = null,Object? congestionController = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? enable = null,Object? device = null,Object? stack = null,Object? mtu = null,Object? routeAddress = null,Object? routeExcludeAddress = null,Object? congestionController = null,}) {
   return _then(_Tun(
 enable: null == enable ? _self.enable : enable // ignore: cast_nullable_to_non_nullable
 as bool,device: null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
 as String,stack: null == stack ? _self.stack : stack // ignore: cast_nullable_to_non_nullable
 as TunStack,mtu: null == mtu ? _self.mtu : mtu // ignore: cast_nullable_to_non_nullable
 as int,routeAddress: null == routeAddress ? _self._routeAddress : routeAddress // ignore: cast_nullable_to_non_nullable
+as List<String>,routeExcludeAddress: null == routeExcludeAddress ? _self._routeExcludeAddress : routeExcludeAddress // ignore: cast_nullable_to_non_nullable
 as List<String>,congestionController: null == congestionController ? _self.congestionController : congestionController // ignore: cast_nullable_to_non_nullable
 as String,
   ));

@@ -373,6 +373,35 @@ void main() {
     );
   }
 
+  testWidgets('Android offers the congestion controller only on mips', (
+    tester,
+  ) async {
+    final container = await _pumpOverrides(
+      tester,
+      const Scaffold(
+        body: SingleChildScrollView(
+          child: TunSection(isDesktop: false, isLinux: false, isWindows: false),
+        ),
+      ),
+      (state) => state,
+    );
+    expect(find.text('TCP congestion control'), findsNothing);
+    expect(find.text('Route exclude addresses'), findsOneWidget);
+    container
+        .read(patchClashConfigProvider.notifier)
+        .update((state) => state.copyWith.tun(stack: TunStack.mips));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('TCP congestion control'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('bbr3'));
+    await tester.pumpAndSettle();
+    expect(
+      container.read(patchClashConfigProvider).tun.congestionController,
+      'bbr3',
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('the NTP server must be a bare host and is trimmed', (
     tester,
   ) async {

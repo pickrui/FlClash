@@ -508,6 +508,44 @@ class RouteAddressItem extends ConsumerWidget {
   }
 }
 
+class RouteExcludeAddressItem extends StatelessWidget {
+  const RouteExcludeAddressItem({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ConfigListEditItem(
+      title: (l) => l.routeExcludeAddress,
+      itemMaxLength: TextInputLimits.cidr,
+      itemValidator: validateCidr,
+      selector: patchClashConfigProvider.select(
+        (state) => state.tun.routeExcludeAddress,
+      ),
+      onChanged: (ref, value) => ref
+          .read(patchClashConfigProvider.notifier)
+          .update((state) => state.copyWith.tun(routeExcludeAddress: value)),
+    );
+  }
+}
+
+class CongestionControllerItem extends StatelessWidget {
+  const CongestionControllerItem({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ConfigOptionsItem<String>(
+      title: (l) => l.congestionController,
+      options: congestionControllers,
+      textBuilder: (value) => value,
+      selector: patchClashConfigProvider.select(
+        (state) => state.tun.congestionController,
+      ),
+      onChanged: (ref, value) => ref
+          .read(patchClashConfigProvider.notifier)
+          .update((state) => state.copyWith.tun(congestionController: value)),
+    );
+  }
+}
+
 class BlockQuicItem extends ConsumerWidget {
   const BlockQuicItem({super.key});
 
@@ -627,12 +665,19 @@ class TunSection extends ConsumerWidget {
       final bypassPrivateRoute = ref.watch(
         networkSettingProvider.select((state) => state.bypassPrivateRoute),
       );
+      final isMipsStack = ref.watch(
+        patchClashConfigProvider.select(
+          (state) => state.tun.stack == TunStack.mips,
+        ),
+      );
       return generateSectionV3(
         title: appLocalizations.tun,
         items: [
           const TunMtuItem(),
+          if (isMipsStack) const CongestionControllerItem(),
           const BypassPrivateRouteItem(),
           if (!bypassPrivateRoute) const RouteAddressItem(),
+          const RouteExcludeAddressItem(),
         ],
       );
     }

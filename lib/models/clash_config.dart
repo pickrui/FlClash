@@ -322,6 +322,9 @@ abstract class Tun with _$Tun {
     @Default(TunStack.mixed) TunStack stack,
     @Default(defaultTunMtu) @JsonKey(fromJson: normalizeTunMtu) int mtu,
     @JsonKey(name: 'route-address') @Default([]) List<String> routeAddress,
+    @JsonKey(name: 'route-exclude-address')
+    @Default([])
+    List<String> routeExcludeAddress,
     @Default(defaultCongestionController)
     @JsonKey(
       name: 'congestion-controller',
@@ -343,6 +346,15 @@ abstract class Tun with _$Tun {
 extension TunExt on Tun {
   List<String> resolveRouteAddress({required bool bypassPrivateRoute}) =>
       bypassPrivateRoute ? defaultBypassPrivateRouteAddress : routeAddress;
+
+  /// The Android VPN routes: those the bypass switch selects, less
+  /// [routeExcludeAddress].
+  List<String> vpnRouteAddress({required bool bypassPrivateRoute}) {
+    final routes = resolveRouteAddress(bypassPrivateRoute: bypassPrivateRoute);
+    return routeExcludeAddress.isEmpty
+        ? routes
+        : subtractCidrs(routes, routeExcludeAddress, wholeWhenEmpty: true);
+  }
 
   Map<String, Object?> get coreJson => {
     'enable': enable,
