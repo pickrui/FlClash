@@ -12,6 +12,7 @@ import 'package:fl_clash/ui/liquid_glass.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/typography.dart';
+import 'package:fl_clash/ui/view_scope.dart';
 import 'package:fl_clash/common/theme.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
@@ -162,20 +163,37 @@ class ThemeManager extends ConsumerWidget {
     final viewSize = ref.read(viewSizeProvider.notifier);
     return MeasureScope(
       measure: measure,
-      child: _AppMediaQuery(
-        textScaler: TextScaler.linear(textScaleFactor),
-        child: _LiquidGlassSetting(
-          child: LayoutBuilder(
-            builder: (_, container) {
-              final size = Size(container.maxWidth, container.maxHeight);
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                viewSize.value = size;
-              });
-              return _buildSystemUi(child);
-            },
+      child: AppViewScope(
+        child: _AppMediaQuery(
+          textScaler: TextScaler.linear(textScaleFactor),
+          child: _LiquidGlassSetting(
+            child: LayoutBuilder(
+              builder: (_, container) {
+                final size = Size(container.maxWidth, container.maxHeight);
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  viewSize.value = size;
+                });
+                return _buildSystemUi(child);
+              },
+            ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class AppViewScope extends ConsumerWidget {
+  const AppViewScope({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ViewScope(
+      size: ref.watch(viewSizeProvider),
+      isMobile: ref.watch(isMobileViewProvider),
+      child: child,
     );
   }
 }

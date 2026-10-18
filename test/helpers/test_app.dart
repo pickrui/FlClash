@@ -6,6 +6,7 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/theme.dart';
 import 'package:fl_clash/l10n/l10n.dart';
+import 'package:fl_clash/manager/theme_manager.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:material_ui/material_ui.dart';
@@ -79,7 +80,13 @@ Widget wrapAppScopes(
 }) {
   final measure = Measure.of(context, textScaleFactor);
   globalState.measure = measure;
-  return MeasureScope(measure: measure, child: child);
+  final hasProviders =
+      context.findAncestorWidgetOfExactType<UncontrolledProviderScope>() !=
+      null;
+  return MeasureScope(
+    measure: measure,
+    child: hasProviders ? AppViewScope(child: child) : child,
+  );
 }
 
 class TestBackBlockAction extends BackBlockAction {
