@@ -181,6 +181,17 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 		if decodeMethodArguments(call, response, &filters) {
 			response.success(handleValidateFilters(filters))
 		}
+	case convertProxiesMethod:
+		encoded := ""
+		if !decodeMethodArguments(call, response, &encoded) {
+			return
+		}
+		proxies, err := handleConvertProxies(encoded)
+		if err != nil {
+			response.failure("core_error", err.Error(), nil)
+			return
+		}
+		response.success(proxies)
 	case validateConfigMethod:
 		path := ""
 		if decodeMethodArguments(call, response, &path) {

@@ -8,12 +8,14 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"strings"
 	"testing"
 
 	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/dns"
 	D "github.com/miekg/dns"
+	"go.yaml.in/yaml/v3"
 )
 
 type validationDNSClient struct{}
@@ -49,6 +51,48 @@ func TestValidateFiltersReadsEachBacktickPart(t *testing.T) {
 		if (results[i] == "") != valid {
 			t.Errorf("filter %d: got %q, want valid=%v", i, results[i], valid)
 		}
+	}
+}
+
+func TestConvertProxiesReadsShareLinksWithCertificateChecksOn(t *testing.T) {
+	setValidationTestHome(t)
+	links := strings.Join([]string{
+		"trojan://secret@example.com:443?allowInsecure=1#first",
+		"ss://YWVzLTEyOC1nY206cGFzcw@example.com:8388#second",
+		"socks5://dXNlcjpwYXNz@example.com:1080#socks",
+		"https://dXNlcjpwYXNz@example.com:443#https",
+	}, "\n")
+	subscription := base64.StdEncoding.EncodeToString([]byte(links))
+	proxies, err := handleConvertProxies(base64.StdEncoding.EncodeToString([]byte(subscription)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(proxies) != 4 || proxies[0]["name"] != "first" || proxies[3]["name"] != "https" {
+		t.Fatalf("converted proxies: %v", proxies)
+	}
+	for _, proxy := range proxies {
+		insecure, set := proxy["skip-cert-verify"]
+		switch proxy["type"] {
+		case "socks5", "http":
+			if set {
+				t.Errorf("%v skips certificate checks it never asked to skip", proxy["name"])
+			}
+		case "trojan":
+			if insecure != true {
+				t.Errorf("trojan lost its explicit allowInsecure")
+			}
+		}
+	}
+	config, err := yaml.Marshal(map[string]any{"proxies": proxies})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := parseAndValidateConfigData(config); err != nil {
+		t.Fatalf("converted share links do not validate: %v", err)
+	}
+	plain := base64.StdEncoding.EncodeToString([]byte("proxies:\n  - {name: a, type: direct}\n"))
+	if _, err := handleConvertProxies(plain); err == nil {
+		t.Fatal("a config was read as a share-link list")
 	}
 }
 

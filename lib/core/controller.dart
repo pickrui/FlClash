@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 import 'dart:collection';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
@@ -132,6 +133,22 @@ class CoreController {
   Future<String> validateConfigWithBytes(String data) async {
     final res = await _interface.validateConfigWithBytes(data);
     return res;
+  }
+
+  /// A config of the proxies in a share-link list, plain or base64, once the
+  /// Core accepts it; null when [bytes] hold no share links.
+  Future<Uint8List?> shareLinkConfig(Uint8List bytes) async {
+    final List<Map<String, Object?>> proxies;
+    try {
+      proxies = await _interface.convertProxies(base64Encode(bytes));
+    } on Exception {
+      return null;
+    }
+    if (proxies.isEmpty) return null;
+    final config = utf8.encode(await encodeYamlTask({'proxies': proxies}));
+    final message = await validateConfigWithBytes(base64Encode(config));
+    if (message.isNotEmpty) throw ConfigValidationException(message);
+    return config;
   }
 
   Future<String> validateConfigWithData(String data) async {

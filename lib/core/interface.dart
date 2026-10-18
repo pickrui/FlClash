@@ -32,6 +32,8 @@ mixin CoreInterface {
 
   Future<List<String>> validateFilters(List<String> filters);
 
+  Future<List<Map<String, Object?>>> convertProxies(String data);
+
   Future<String> validateConfigWithBytes(String data);
 
   Future<Map<String, dynamic>> getConfig(String path);
@@ -214,6 +216,18 @@ abstract class CoreHandlerInterface with CoreInterface {
       throw const FormatException('Invalid filter validation response');
     }
     return results.cast<String>();
+  }
+
+  @override
+  Future<List<Map<String, Object?>>> convertProxies(String data) async {
+    final proxies = await _invokeRequiredMethod<List<dynamic>>(
+      method: CoreMethod.convertProxies,
+      arguments: data,
+    );
+    return [
+      for (final proxy in proxies)
+        if (proxy is Map) Map<String, Object?>.from(proxy),
+    ];
   }
 
   @override

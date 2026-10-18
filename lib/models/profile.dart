@@ -40,6 +40,15 @@ Future<void> _validateProfileBytes(Uint8List bytes) async {
   if (message.isNotEmpty) throw ConfigValidationException(message);
 }
 
+Future<Uint8List> _subscriptionConfig(Uint8List bytes) async {
+  final message = await coreController.validateConfigWithBytes(
+    base64Encode(bytes),
+  );
+  if (message.isEmpty) return bytes;
+  return await coreController.shareLinkConfig(bytes) ??
+      (throw ConfigValidationException(message));
+}
+
 const reservedOutboundNames = {
   'DIRECT',
   'REJECT',
@@ -1271,13 +1280,18 @@ extension ProfileExtension on Profile {
       );
     }
 
+    // Each raced route validates its own response; only the winner's counts.
+    final configs = Expando<Uint8List>();
     final response = await request.getFileResponseForUrl(
       url,
-      validate: _validateProfileBytes,
+      validate: (bytes) async {
+        configs[bytes] = await _subscriptionConfig(bytes);
+      },
       inflateUnlabeled: true,
     );
     final disposition = response.headers.value('content-disposition');
     final userinfo = response.headers.value('subscription-userinfo');
+    final data = response.data!;
     return PreparedProfileUpdate._(
       copyWith(
         label: label.takeFirstValid([
@@ -1286,7 +1300,7 @@ extension ProfileExtension on Profile {
         ]),
         subscriptionInfo: SubscriptionInfo.formHString(userinfo),
       ),
-      response.data!,
+      configs[data] ?? data,
       token,
     );
   }
@@ -1314,15 +1328,18 @@ extension ProfileExtension on Profile {
     final tempFile = File(path);
     try {
       await tempFile.safeWriteAsBytes(bytes);
+      var config = bytes;
       if (!alreadyValidated) {
         final message = await coreController.validateConfig(path);
         if (message.isNotEmpty) {
-          throw ConfigValidationException(message);
+          config =
+              await coreController.shareLinkConfig(bytes) ??
+              (throw ConfigValidationException(message));
         }
       }
       final mFile = await _getFile(false);
       await durableCreateDirectory(mFile.parent.path);
-      await durableWriteBytes(mFile.path, bytes);
+      await durableWriteBytes(mFile.path, config);
       return copyWith(lastUpdateDate: DateTime.now());
     } finally {
       await tempFile.safeDelete();
