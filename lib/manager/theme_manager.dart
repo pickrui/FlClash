@@ -7,6 +7,7 @@ import 'dart:math';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/ui/font.dart';
 import 'package:fl_clash/ui/liquid_glass.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/surface.dart';
@@ -35,6 +36,7 @@ const _pageTransitionsTheme = PageTransitionsTheme(
 final _appThemes = <Brightness, ({Object inputs, ThemeData theme})>{};
 
 ThemeData watchAppTheme(WidgetRef ref, Brightness brightness) {
+  final locale = ref.watch(appSettingProvider.select((state) => state.locale));
   final pureBlack =
       brightness == Brightness.dark &&
       ref.watch(themeSettingProvider.select((state) => state.pureBlack));
@@ -42,10 +44,15 @@ ThemeData watchAppTheme(WidgetRef ref, Brightness brightness) {
   final plainDark = pureBlack
       ? ref.watch(genColorSchemeProvider(brightness, pureBlack: false))
       : null;
+  final locales = [
+    ?utils.getLocaleForString(locale),
+    ...WidgetsBinding.instance.platformDispatcher.locales,
+  ];
   final inputs = (
     platform: defaultTargetPlatform,
     colorScheme: colorScheme,
     plainDark: plainDark,
+    locales: locales.join(','),
   );
   if (_appThemes[brightness] case (inputs: final cached, :final theme)
       when cached == inputs) {
@@ -56,6 +63,10 @@ ThemeData watchAppTheme(WidgetRef ref, Brightness brightness) {
       useMaterial3: true,
       pageTransitionsTheme: _pageTransitionsTheme,
       colorScheme: colorScheme,
+      fontFamilyFallback: appFontFamilyFallback(
+        platform: defaultTargetPlatform,
+        locales: locales,
+      ),
       extensions: [
         if (brightness == Brightness.dark)
           // Pure black steps up to the plain dark scheme, keeping its tint.
