@@ -8,6 +8,7 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/scroll.dart';
+import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/icons/icons.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
@@ -216,10 +217,12 @@ class _SidebarOverlay extends StatelessWidget {
               child: FocusScope(
                 autofocus: true,
                 child: Material(
-                  color: colorScheme.surfaceContainer,
+                  color: colorScheme.chromeSurface,
                   shape: BorderDirectional(
-                    end: BorderSide(color: colorScheme.outlineVariant),
+                    end: Divider.createBorderSide(context),
                   ),
+                  elevation: 8,
+                  shadowColor: colorScheme.shadow,
                   child: AnimatedBuilder(
                     animation: progress,
                     builder: (_, _) => builder(progress.value),

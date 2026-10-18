@@ -7,6 +7,7 @@ import 'dart:async';
 
 import 'package:fl_clash/common/app_update_scheduler.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/common/periodic_task_runner.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/icons/navigation_glyph.dart';
@@ -281,8 +282,9 @@ class AppSidebarContainer extends ConsumerWidget {
           visible: !isMobileView,
           child: Material(
             color: ref.watch(windowBlurProvider)
-                ? context.colorScheme.surfaceContainer.withValues(alpha: 0.72)
-                : context.colorScheme.surfaceContainer,
+                ? context.colorScheme.chromeSurface.withValues(alpha: 0.72)
+                : context.colorScheme.chromeSurface,
+            shape: BorderDirectional(end: Divider.createBorderSide(context)),
             child: NavigationSidebar(
               destinations: [
                 for (final item in navigationItems)

@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:fl_clash/icons/caption_icon.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/config.dart';
 import 'package:fl_clash/state.dart';
@@ -462,9 +463,7 @@ class WindowHeaderBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      shape: Border(
-        bottom: BorderSide(color: context.colorScheme.outlineVariant),
-      ),
+      shape: Border(bottom: Divider.createBorderSide(context)),
       child: SizedBox(
         height: height,
         child: Stack(
@@ -476,9 +475,7 @@ class WindowHeaderBar extends StatelessWidget {
                   onDragStart();
                 },
                 onDoubleTap: onDoubleTap,
-                child: ColoredBox(
-                  color: context.colorScheme.surfaceContainerHighest,
-                ),
+                child: ColoredBox(color: context.colorScheme.chromeSurface),
               ),
             ),
             if (title != null)

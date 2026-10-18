@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/icons/icons.dart';
+import 'package:fl_clash/ui/surface.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'builder.dart';
@@ -180,7 +181,7 @@ class TonalButtonGroup extends StatelessWidget {
     return ElasticPress(
       child: DecoratedBox(
         decoration: ShapeDecoration(
-          color: context.colorScheme.secondaryContainer,
+          color: context.raisedSurfaceLevel.colorOf(context.colorScheme),
           shape: AppShape.full,
         ),
         child: TonalButtonTheme(
@@ -210,20 +211,22 @@ class TonalButtonTheme extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    final fill = grouped ? Colors.transparent : colorScheme.secondaryContainer;
-    final foreground = colorScheme.onSecondaryContainer;
+    final fill = grouped
+        ? Colors.transparent
+        : context.raisedSurfaceLevel.colorOf(colorScheme);
+    final foreground = colorScheme.onSurface;
     final disabledForeground = foreground.withValues(alpha: 0.38);
-    ButtonStyle feedback(Color? tint) => ButtonStyle(
+    ButtonStyle feedback(Color? tint, {required bool standsOff}) => ButtonStyle(
       splashFactory: NoSplash.splashFactory,
       overlayColor: WidgetStateProperty<Color?>.fromMap({
         if (tint != null) WidgetState.focused: tint.withValues(alpha: 0.1),
         WidgetState.pressed: Colors.transparent,
         if (tint != null) WidgetState.hovered: tint.withValues(alpha: 0.08),
       }),
-    );
+    ).merge(focusRingStyle(colorScheme, standsOff: standsOff));
     return IconButtonTheme(
       data: IconButtonThemeData(
-        style: feedback(foreground).merge(
+        style: feedback(foreground, standsOff: false).merge(
           IconButton.styleFrom(
             backgroundColor: fill,
             foregroundColor: foreground,
@@ -240,19 +243,20 @@ class TonalButtonTheme extends StatelessWidget {
       ),
       child: FilledButtonTheme(
         data: FilledButtonThemeData(
-          style: feedback(grouped ? foreground : null).merge(
-            FilledButton.styleFrom(
-              backgroundColor: grouped ? fill : null,
-              foregroundColor: grouped ? foreground : null,
-              disabledBackgroundColor: grouped ? fill : null,
-              disabledForegroundColor: grouped ? disabledForeground : null,
-              minimumSize: Size.square(size.button),
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              shape: AppShape.full,
-              visualDensity: VisualDensity.standard,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-          ),
+          style: feedback(grouped ? foreground : null, standsOff: !grouped)
+              .merge(
+                FilledButton.styleFrom(
+                  backgroundColor: grouped ? fill : null,
+                  foregroundColor: grouped ? foreground : null,
+                  disabledBackgroundColor: grouped ? fill : null,
+                  disabledForegroundColor: grouped ? disabledForeground : null,
+                  minimumSize: Size.square(size.button),
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  shape: AppShape.full,
+                  visualDensity: VisualDensity.standard,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
         ),
         child: IconTheme.merge(
           data: const IconThemeData(fill: 1),

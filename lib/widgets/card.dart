@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/metrics.dart';
+import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/icons/app_glyphs.dart';
 import 'package:fl_clash/icons/glyph_icon.dart';
 import 'package:fl_clash/icons/glyph.dart';
@@ -141,67 +142,29 @@ class CommonCard extends StatelessWidget {
   final OutlinedBorder? shape;
 
   BorderSide _buildBorderSide(BuildContext context, Set<WidgetState> states) {
-    final colorScheme = context.colorScheme;
-    if (isError) {
-      if (type == CommonCardType.filled) {
-        return BorderSide(color: colorScheme.error);
-      }
-      final hoverColor = isSelected
-          ? colorScheme.error.opacity80
-          : colorScheme.error.opacity38;
-      if (states.contains(WidgetState.hovered) ||
-          states.contains(WidgetState.focused) ||
-          states.contains(WidgetState.pressed)) {
-        return BorderSide(color: hoverColor);
-      }
-      return BorderSide(
-        color: isSelected
-            ? colorScheme.error.opacity60
-            : colorScheme.error.opacity30,
-      );
-    }
-    if (type == CommonCardType.filled) {
+    if (!states.contains(WidgetState.focused)) {
       return BorderSide.none;
     }
-    final hoverColor = isSelected
-        ? colorScheme.primary.opacity80
-        : colorScheme.primary.opacity60;
-    if (states.contains(WidgetState.hovered) ||
-        states.contains(WidgetState.focused) ||
-        states.contains(WidgetState.pressed)) {
-      return BorderSide(color: hoverColor);
-    }
-    return BorderSide(
-      color: isSelected
-          ? colorScheme.primary
-          : colorScheme.surfaceContainerHighest,
-    );
+    final colorScheme = context.colorScheme;
+    final side = focusRingSide(colorScheme);
+    return isError ? side.copyWith(color: colorScheme.error) : side;
   }
 
-  Color? _buildBackgroundColor(BuildContext context) {
+  Color _buildBackgroundColor(BuildContext context, SurfaceLevel level) {
     final colorScheme = context.colorScheme;
-    if (type == CommonCardType.filled) {
-      if (isSelected) {
-        return colorScheme.secondaryContainer.opacity80;
-      }
-      return colorScheme.surfaceContainerHigh;
+    if (isError) {
+      return colorScheme.errorContainer;
     }
     if (isSelected) {
       return colorScheme.secondaryContainer;
     }
-    return colorScheme.surfaceContainerLow;
+    return level.colorOf(colorScheme);
   }
 
-  Color? _buildForegroundColor(BuildContext context) {
+  Color _buildForegroundColor(BuildContext context) {
     final colorScheme = context.colorScheme;
     if (isError) {
-      return colorScheme.error;
-    }
-    if (type == CommonCardType.filled) {
-      if (isSelected) {
-        return colorScheme.onSecondaryContainer;
-      }
-      return colorScheme.onSurfaceVariant;
+      return colorScheme.onErrorContainer;
     }
     if (isSelected) {
       return colorScheme.onSecondaryContainer;
@@ -209,10 +172,10 @@ class CommonCard extends StatelessWidget {
     return colorScheme.onSurfaceVariant;
   }
 
-  Color? _buildIconColor(BuildContext context) {
+  Color _buildIconColor(BuildContext context) {
     final colorScheme = context.colorScheme;
     if (isError) {
-      return colorScheme.error;
+      return colorScheme.onErrorContainer;
     }
     return colorScheme.primary;
   }
@@ -222,51 +185,40 @@ class CommonCard extends StatelessWidget {
     Widget childWidget,
     FocusNode? focusNode,
   ) {
-    return switch (type == CommonCardType.filled) {
-      true => FilledButton(
+    final level = context.raisedSurfaceLevel;
+    final style =
+        FilledButton.styleFrom(
+          padding: padding ?? EdgeInsets.zero,
+          shape: shape ?? AppShape.all(radius ?? AppCorner.md),
+          iconSize: 20,
+          iconColor: _buildIconColor(context),
+          foregroundColor: _buildForegroundColor(context),
+          elevation: 0,
+        ).copyWith(
+          backgroundColor: WidgetStatePropertyAll(
+            _buildBackgroundColor(context, level),
+          ),
+          side: WidgetStateProperty.resolveWith(
+            (states) => _buildBorderSide(context, states),
+          ),
+        );
+    final content = SurfaceScope(level: level, child: childWidget);
+    return switch (type) {
+      CommonCardType.filled => FilledButton(
         focusNode: focusNode,
         onLongPress: onLongPress,
         clipBehavior: Clip.antiAlias,
-        style:
-            FilledButton.styleFrom(
-              padding: padding ?? EdgeInsets.zero,
-              shape: shape ?? AppShape.all(radius ?? AppCorner.md),
-              iconSize: 20,
-              iconColor: _buildIconColor(context),
-              foregroundColor: _buildForegroundColor(context),
-              side: BorderSide.none,
-              elevation: 0,
-            ).copyWith(
-              backgroundColor: WidgetStatePropertyAll(
-                _buildBackgroundColor(context),
-              ),
-              side: WidgetStateProperty.resolveWith(
-                (states) => _buildBorderSide(context, states),
-              ),
-            ),
+        style: style,
         onPressed: onPressed,
-        child: childWidget,
+        child: content,
       ),
-      false => OutlinedButton(
+      CommonCardType.plain => OutlinedButton(
         focusNode: focusNode,
         onLongPress: onLongPress,
         clipBehavior: Clip.antiAlias,
-        style:
-            OutlinedButton.styleFrom(
-              padding: padding ?? EdgeInsets.zero,
-              shape: shape ?? AppShape.all(radius ?? AppCorner.md),
-              iconSize: 20,
-              iconColor: _buildIconColor(context),
-              backgroundColor: _buildBackgroundColor(context),
-              foregroundColor: _buildForegroundColor(context),
-              elevation: 0,
-            ).copyWith(
-              side: WidgetStateProperty.resolveWith(
-                (states) => _buildBorderSide(context, states),
-              ),
-            ),
+        style: style,
         onPressed: onPressed,
-        child: childWidget,
+        child: content,
       ),
     };
   }

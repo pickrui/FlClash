@@ -6,6 +6,7 @@
 import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/ui/surface.dart';
+import 'package:fl_clash/widgets/button.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -126,6 +127,37 @@ void main() {
     expect(_buttonSide(tester, filled), _ring(standsOff: true));
     await _focus(tester, nodes[3]);
     expect(_buttonSide(tester, outlined), _ring(standsOff: false));
+  });
+
+  testWidgets('tonal bar buttons keep the ring their own theme replaces', (
+    tester,
+  ) async {
+    const icon = Key('icon');
+    const filled = Key('filled');
+    final nodes = await _pump(tester, [
+      (node) => TonalButtonTheme(
+        child: IconButton(
+          key: icon,
+          focusNode: node,
+          tooltip: 'icon',
+          onPressed: () {},
+          icon: const GlyphIcon(AppGlyphs.add),
+        ),
+      ),
+      (node) => TonalButtonTheme(
+        child: FilledButton(
+          key: filled,
+          focusNode: node,
+          onPressed: () {},
+          child: const Text('filled'),
+        ),
+      ),
+    ]);
+
+    await _focus(tester, nodes[0]);
+    expect(_buttonSide(tester, icon), _ring(standsOff: false));
+    await _focus(tester, nodes[1]);
+    expect(_buttonSide(tester, filled), _ring(standsOff: true));
   });
 
   testWidgets('a focus ring follows focus into its ink control', (
