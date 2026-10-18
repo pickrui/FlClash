@@ -261,6 +261,14 @@ func resolveNodeDelay(proxy C.Proxy, testURL string, request nodePageRequest, gr
 	return nodeDelay{value: request.Delays[testURL][leaf.Name()], probeable: probeable}
 }
 
+func isGroupProxy(proxy C.Proxy) bool {
+	switch proxy.Type() {
+	case C.Selector, C.URLTest, C.Fallback, C.LoadBalance, C.Relay:
+		return true
+	}
+	return false
+}
+
 func delayPriority(delay int) int {
 	if delay > 0 {
 		return 0
@@ -278,25 +286,8 @@ func filterNodes(request nodePageRequest, group *nodeGroup, groups map[string]*n
 	}
 	members := group.load()
 	owned := false
-	if request.HideTimeout {
-		visible := make([]C.Proxy, 0, len(members))
-		for _, proxy := range members {
-			delay := resolveNodeDelay(proxy, url, request, groups)
-			if proxy.Name() == group.now || !delay.probeable || delay.value >= 0 {
-				visible = append(visible, proxy)
-			}
-		}
-		if len(visible) != 0 {
-			members = visible
-			owned = true
-		}
-	}
-	terms := strings.Fields(strings.ToLower(request.Query))
-	if !owned && (len(terms) != 0 || request.Sort == "name" || request.Sort == "delay") {
-		members = slices.Clone(members)
-	}
-	if len(terms) != 0 {
-		members = slices.DeleteFunc(members, func(proxy C.Proxy) bool {
+	if terms := strings.Fields(strings.ToLower(request.Query)); len(terms) != 0 {
+		members = slices.DeleteFunc(slices.Clone(members), func(proxy C.Proxy) bool {
 			text := strings.ToLower(proxy.Name() + "\n" + proxy.Type().String())
 			for _, term := range terms {
 				if !strings.Contains(text, term) {
@@ -305,6 +296,25 @@ func filterNodes(request nodePageRequest, group *nodeGroup, groups map[string]*n
 			}
 			return false
 		})
+		owned = true
+	}
+	// After the search, so timed-out matches still show; a group's delay is only its pick's.
+	if request.HideTimeout {
+		visible := make([]C.Proxy, 0, len(members))
+		for _, proxy := range members {
+			if proxy.Name() == group.now || isGroupProxy(proxy) {
+				visible = append(visible, proxy)
+			} else if delay := resolveNodeDelay(proxy, url, request, groups); !delay.probeable || delay.value >= 0 {
+				visible = append(visible, proxy)
+			}
+		}
+		if len(visible) != 0 {
+			members = visible
+			owned = true
+		}
+	}
+	if !owned && (request.Sort == "name" || request.Sort == "delay") {
+		members = slices.Clone(members)
 	}
 	switch request.Sort {
 	case "name":

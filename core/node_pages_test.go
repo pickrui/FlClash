@@ -166,6 +166,28 @@ func TestNodeGroupsKeepAConfiguredGlobalVisible(t *testing.T) {
 	t.Fatal("configured GLOBAL is missing")
 }
 
+func TestNodePagesHideTimeoutKeepsGroupsAndSearchesFirst(t *testing.T) {
+	installNodePageFixture(t)
+	group, direct := "Nested", "DIRECT"
+	if message := handleChangeProxy(&ChangeProxyParams{GroupName: &group, ProxyName: &direct}); message != "" {
+		t.Fatal(message)
+	}
+	timedOut := map[string]int{"Node-299": -1}
+	for i := range 10 {
+		timedOut[fmt.Sprintf("Node-00%d", i)] = -1
+	}
+	request := nodePageRequest{HideTimeout: true, Delays: map[string]map[string]int{"https://example.test/check": timedOut}}
+	nested := request
+	nested.Group = "Nested"
+	if page := handleGetProxyPage(nested); page.Total != 2 {
+		t.Fatalf("a group whose pick timed out was hidden: %v", page.Items)
+	}
+	request.Query = "node-00"
+	if counts := handleGetProxyGroupCounts(request); counts["Paged"] != 10 {
+		t.Fatalf("search lost the matches that all timed out: %v", counts)
+	}
+}
+
 func TestNodePagesConfigReplacementInvalidatesRevision(t *testing.T) {
 	installNodePageFixture(t)
 	old := handleGetProxyPage(nodePageRequest{Group: "Paged"})
