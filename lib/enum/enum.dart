@@ -15,6 +15,7 @@ import 'package:rust_api/rust_api.dart' show HotKeyModifier;
 
 export 'package:fl_clash/ui/item_position.dart';
 export 'package:fl_clash/ui/inherited.dart' show SheetType;
+export 'package:fl_clash/ui/text_style.dart' show FontFamily;
 
 enum DelayTestPhase { queued, running }
 
@@ -327,15 +328,6 @@ enum HotAction {
 }
 
 enum ProxiesIconStyle { none, standard, icon }
-
-enum FontFamily {
-  twEmoji('Twemoji'),
-  jetBrainsMono('JetBrainsMono');
-
-  final String value;
-
-  const FontFamily(this.value);
-}
 
 enum AuthorizeCode {
   none,

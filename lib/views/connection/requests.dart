@@ -6,7 +6,7 @@
 import 'package:fl_clash/widgets/route_motion_hold.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/common/scroll.dart';
+import 'package:fl_clash/ui/scroll_behavior.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/widgets/record.dart';
@@ -34,6 +34,9 @@ class _RequestsViewState extends ConsumerState<RequestsView>
   );
   List<TrackerInfo> _requests = [];
   late final ScrollController _scrollController;
+  late final _physics = FollowEndScrollPhysics(
+    isFollowing: () => _requestsStateNotifier.value.autoScrollToEnd,
+  );
 
   void _onSearch(String value) {
     _requestsStateNotifier.value = _requestsStateNotifier.value.copyWith(
@@ -151,7 +154,6 @@ class _RequestsViewState extends ConsumerState<RequestsView>
                   controller: _scrollController,
                   child: ScrollToEndBox(
                     controller: _scrollController,
-                    dataSource: requests,
                     enable: state.autoScrollToEnd,
                     onCancelToEnd: () {
                       _requestsStateNotifier.value = _requestsStateNotifier
@@ -165,7 +167,7 @@ class _RequestsViewState extends ConsumerState<RequestsView>
                       ),
                       reverse: true,
                       shrinkWrap: true,
-                      physics: const NextClampingScrollPhysics(),
+                      physics: _physics,
                       controller: _scrollController,
                       itemCount: requests.length,
                       extentEstimation:

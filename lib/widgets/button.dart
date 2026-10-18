@@ -8,7 +8,8 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:material_ui/material_ui.dart';
 
-import 'builder.dart';
+import 'package:fl_clash/ui/builder.dart';
+
 import 'card.dart';
 import 'navigation_dock.dart';
 

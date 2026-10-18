@@ -6,10 +6,13 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/common/scroll.dart';
-import 'package:fl_clash/ui/surface.dart';
+import 'package:fl_clash/ui/context.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
+import 'package:fl_clash/ui/l10n.dart';
+import 'package:fl_clash/ui/scroll_behavior.dart';
+import 'package:fl_clash/ui/shape.dart';
+import 'package:fl_clash/ui/surface.dart';
+import 'package:fl_clash/ui/typography.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -279,7 +282,7 @@ class _SidebarPane extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = _SidebarColors(context.colorScheme);
-    final fontSize = context.textTheme.bodyMedium?.fontSize ?? 14;
+    final fontSize = AppTextStyle.subheadline.size;
     final labelOpacity = ((progress - 0.4) / 0.6).clamp(0.0, 1.0);
     final compactWidth = math.max(_compactWidth, windowControls.width);
     final sideInset = math.min(_maxSideInset, (compactWidth - _itemSize) / 2);
@@ -288,9 +291,9 @@ class _SidebarPane extends StatelessWidget {
     final itemHeight =
         _itemSize + MediaQuery.textScalerOf(context).scale(fontSize) - fontSize;
     final rowWidth = _expandedWidth - sideInset * 2;
-    final labelStyle = context.textTheme.bodyMedium?.copyWith(
-      color: colors.label,
-    );
+    final labelStyle = AppTextStyle.subheadline
+        .of(context)
+        .copyWith(color: colors.label);
     final labelWidth = rowWidth - iconInset - _iconSize - _labelGap * 2;
     String rowTooltip(String label) =>
         expanded &&
@@ -311,8 +314,8 @@ class _SidebarPane extends StatelessWidget {
               height: itemHeight,
               sideInset: sideInset,
               tooltip: expanded
-                  ? context.appLocalizations.showLess
-                  : context.appLocalizations.showMore,
+                  ? UiLocalizations.of(context).showLess
+                  : UiLocalizations.of(context).showMore,
               tooltipIsLabel: true,
               onTap: onToggle,
               child: SizedBox(
@@ -403,21 +406,24 @@ class _SidebarButton extends StatelessWidget {
         container: true,
         button: true,
         selected: selected,
-        child: Material(
-          color: selected == true ? colors.selectedFill : Colors.transparent,
+        child: FocusRing(
           shape: _itemShape,
-          child: InkWell(
-            onTap: onTap,
-            customBorder: _itemShape,
-            mouseCursor: SystemMouseCursors.basic,
-            splashFactory: NoSplash.splashFactory,
-            overlayColor: colors.overlay,
-            child: Tooltip(
-              message: tooltip,
-              excludeFromSemantics: !tooltipIsLabel,
-              child: IconTheme.merge(
-                data: IconThemeData(size: _iconSize, color: colors.icon),
-                child: SizedBox(height: height, child: child),
+          child: Material(
+            color: selected == true ? colors.selectedFill : Colors.transparent,
+            shape: _itemShape,
+            child: InkWell(
+              onTap: onTap,
+              customBorder: _itemShape,
+              mouseCursor: SystemMouseCursors.basic,
+              splashFactory: NoSplash.splashFactory,
+              overlayColor: colors.overlay,
+              child: Tooltip(
+                message: tooltip,
+                excludeFromSemantics: !tooltipIsLabel,
+                child: IconTheme.merge(
+                  data: IconThemeData(size: _iconSize, color: colors.icon),
+                  child: SizedBox(height: height, child: child),
+                ),
               ),
             ),
           ),

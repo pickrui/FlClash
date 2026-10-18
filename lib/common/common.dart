@@ -44,7 +44,6 @@ export 'snowflake.dart';
 export 'string.dart';
 export 'system.dart';
 export 'task.dart';
-export 'text.dart';
 export 'tray.dart';
 export 'utils.dart';
 export 'window.dart';
@@ -56,6 +55,7 @@ export 'package:fl_clash/ui/color.dart';
 export 'package:fl_clash/ui/measure.dart';
 export 'package:fl_clash/ui/metrics.dart';
 export 'package:fl_clash/ui/shape.dart';
+export 'package:fl_clash/ui/text_style.dart';
 
 export 'window_port.dart';
 export 'window_layout.dart';

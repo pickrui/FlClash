@@ -16,7 +16,8 @@ import 'package:flutter/services.dart';
 import 'package:fl_clash/ui/fade_box.dart';
 
 import 'scaffold.dart' show appBarActionSpace;
-import 'text.dart';
+
+import 'package:fl_clash/ui/text.dart';
 
 class Info {
   final String label;

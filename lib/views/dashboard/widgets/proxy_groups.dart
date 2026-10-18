@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:math';
 
-import 'package:fl_clash/common/scroll.dart';
+import 'package:fl_clash/ui/scroll_behavior.dart';
 
 import 'package:animations/animations.dart';
 import 'package:fl_clash/common/common.dart';

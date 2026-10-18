@@ -20,7 +20,7 @@ import 'package:fl_clash/ui/fade_box.dart';
 import 'package:fl_clash/widgets/input.dart';
 import 'package:fl_clash/widgets/list.dart';
 import 'package:fl_clash/widgets/scaffold.dart';
-import 'package:fl_clash/widgets/text.dart';
+import 'package:fl_clash/ui/text.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';

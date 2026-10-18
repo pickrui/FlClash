@@ -21,7 +21,7 @@ import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/navigator.dart';
-import 'package:fl_clash/common/scroll.dart';
+import 'package:fl_clash/ui/scroll_behavior.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/views/views.dart';

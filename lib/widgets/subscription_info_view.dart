@@ -8,7 +8,8 @@ import 'package:fl_clash/models/models.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'list.dart';
-import 'text.dart';
+
+import 'package:fl_clash/ui/text.dart';
 
 const _expireGap = 12.0;
 

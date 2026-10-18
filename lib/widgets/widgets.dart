@@ -6,7 +6,9 @@
 export 'package:fl_clash/ui/activate_box.dart';
 
 export 'active_polling.dart';
-export 'builder.dart';
+
+export 'package:fl_clash/ui/builder.dart';
+
 export 'button.dart';
 export 'card.dart';
 export 'chip.dart';
@@ -39,16 +41,21 @@ export 'package:fl_clash/ui/pop_scope.dart';
 
 export 'popup.dart';
 export 'scaffold.dart';
-export 'scroll.dart';
+
+export 'package:fl_clash/ui/scroll.dart';
+
 export 'setting.dart';
 export 'sheet.dart';
 export 'side_sheet.dart';
 export 'subscription_info_view.dart';
 export 'super_grid.dart';
 export 'tab.dart';
-export 'text.dart';
+
+export 'package:fl_clash/ui/text.dart';
+
 export 'theme.dart';
 
-export 'search_field.dart';
-export 'sheet_header.dart';
+export 'package:fl_clash/ui/search_field.dart';
+export 'package:fl_clash/ui/sheet_header.dart';
+
 export 'system_back_block.dart';

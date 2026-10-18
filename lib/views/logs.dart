@@ -6,7 +6,7 @@
 import 'package:fl_clash/widgets/route_motion_hold.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/common/scroll.dart';
+import 'package:fl_clash/ui/scroll_behavior.dart';
 import 'package:fl_clash/common/log_payload.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
@@ -29,6 +29,9 @@ class _LogsViewState extends ConsumerState<LogsView>
     with RouteMotionHoldMixin<LogsView> {
   final _logsStateNotifier = ValueNotifier<LogsState>(const LogsState());
   late ScrollController _scrollController;
+  late final _physics = FollowEndScrollPhysics(
+    isFollowing: () => _logsStateNotifier.value.autoScrollToEnd,
+  );
 
   List<Log> _logs = [];
   bool _exporting = false;
@@ -166,7 +169,6 @@ class _LogsViewState extends ConsumerState<LogsView>
                 },
                 controller: _scrollController,
                 enable: state.autoScrollToEnd,
-                dataSource: logs,
                 child: CommonScrollBar(
                   controller: _scrollController,
                   child: SuperListView.separated(
@@ -174,7 +176,7 @@ class _LogsViewState extends ConsumerState<LogsView>
                       top: context.contentTopPadding,
                       bottom: BottomInsetScope.of(context) + 16,
                     ),
-                    physics: const NextClampingScrollPhysics(),
+                    physics: _physics,
                     reverse: true,
                     shrinkWrap: true,
                     controller: _scrollController,

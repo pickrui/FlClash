@@ -7,7 +7,7 @@ import 'dart:math' as math;
 
 import 'package:code_forge/code_forge.dart' show CodeForgeSuggestionDetails;
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/common/scroll.dart';
+import 'package:fl_clash/ui/scroll_behavior.dart';
 import 'package:material_ui/material_ui.dart';
 
 const _suggestionInset = 8.0;
