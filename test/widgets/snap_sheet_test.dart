@@ -16,7 +16,7 @@ import 'package:fl_clash/ui/sheet_header.dart';
 import 'package:fl_clash/ui/side_sheet.dart';
 import 'package:fl_clash/ui/snap_sheet.dart';
 import 'package:fl_clash/ui/surface.dart';
-import 'package:fl_clash/widgets/scaffold.dart';
+import 'package:fl_clash/ui/scaffold.dart';
 import 'package:flutter/gestures.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

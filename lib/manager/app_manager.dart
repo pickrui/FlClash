@@ -304,9 +304,10 @@ class AppSidebarContainer extends ConsumerWidget {
                               state.copyWith(showLabel: !state.showLabel),
                         )
                   : null,
-              windowControls: system.isMacOS && version > 10
-                  ? const Size(78, 32)
-                  : Size.zero,
+              windowControls: windowControlsOverSidebar(
+                isMacOS: system.isMacOS,
+                version: version,
+              ),
             ),
           ),
         ),

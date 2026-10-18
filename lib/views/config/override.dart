@@ -592,19 +592,19 @@ class OverrideView<K extends Enum, M> extends ConsumerWidget {
         (state) => spec.values.any((key) => !state.keys.contains(key)),
       ),
     );
-    return BaseScaffold(
+    return CommonScaffold(
       title: spec.title(appLocalizations),
-      actions: [
-        IconButton(
-          icon: const GlyphIcon(AppGlyphs.add),
+      iconActions: [
+        IconButtonData(
+          glyph: AppGlyphs.add,
           tooltip: appLocalizations.add,
           onPressed: canAdd
               ? () => showOverrideAddSheet(context, ref, spec)
               : null,
         ),
         if (spec is OverrideQuickEdit<K, M>)
-          IconButton(
-            icon: const GlyphIcon(AppGlyphs.compose),
+          IconButtonData(
+            glyph: AppGlyphs.compose,
             tooltip: appLocalizations.quickEdit,
             onPressed: () => _handleQuickEdit(context, ref, spec),
           ),

@@ -12,7 +12,7 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/dialog.dart';
 import 'package:fl_clash/widgets/list.dart';
-import 'package:fl_clash/widgets/scaffold.dart';
+import 'package:fl_clash/ui/scaffold.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

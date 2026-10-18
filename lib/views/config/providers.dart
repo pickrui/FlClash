@@ -626,15 +626,14 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
       onPop: (_) => !_saving,
       child: ExcludeFocus(
         excluding: _busy,
-        child: BaseScaffold(
+        child: CommonScaffold(
           title: l.providers,
-          actions: [
-            IconButton(
-              tooltip: l.save,
-              onPressed: _busy ? null : _save,
-              icon: const GlyphIcon(AppGlyphs.save),
-            ),
-          ],
+          confirmationAction: IconButtonData(
+            glyph: AppGlyphs.check,
+            tooltip: l.save,
+            isLoading: _saving,
+            onPressed: _busy ? null : _save,
+          ),
           body: AppBarClearance(
             child: AbsorbPointer(
               absorbing: _busy,

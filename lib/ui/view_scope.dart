@@ -5,18 +5,22 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:flutter/widgets.dart';
 
-enum ViewScopeAspect { size, isMobile }
+enum ViewScopeAspect { size, isMobile, windowControls }
 
 class ViewScope extends InheritedModel<ViewScopeAspect> {
   const ViewScope({
     super.key,
     required this.size,
     required this.isMobile,
+    this.windowControls = Size.zero,
     required super.child,
   });
 
   final Size size;
   final bool isMobile;
+
+  /// Caption controls the window draws over a page's top trailing corner.
+  final Size windowControls;
 
   static ViewScope _of(BuildContext context, ViewScopeAspect aspect) {
     final scope = InheritedModel.inheritFrom<ViewScope>(
@@ -39,9 +43,14 @@ class ViewScope extends InheritedModel<ViewScopeAspect> {
     return scope!.isMobile;
   }
 
+  static Size windowControlsOf(BuildContext context) =>
+      _of(context, ViewScopeAspect.windowControls).windowControls;
+
   @override
   bool updateShouldNotify(ViewScope oldWidget) =>
-      size != oldWidget.size || isMobile != oldWidget.isMobile;
+      size != oldWidget.size ||
+      isMobile != oldWidget.isMobile ||
+      windowControls != oldWidget.windowControls;
 
   @override
   bool updateShouldNotifyDependent(
@@ -51,6 +60,8 @@ class ViewScope extends InheritedModel<ViewScopeAspect> {
     (aspect) => switch (aspect) {
       ViewScopeAspect.size => size != oldWidget.size,
       ViewScopeAspect.isMobile => isMobile != oldWidget.isMobile,
+      ViewScopeAspect.windowControls =>
+        windowControls != oldWidget.windowControls,
     },
   );
 }

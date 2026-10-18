@@ -79,7 +79,7 @@ void main() {
         continue;
       }
       final path = p.relative(entity.path).replaceAll(r'\', '/');
-      if (path == 'lib/widgets/scaffold.dart') {
+      if (path == 'lib/ui/scaffold.dart') {
         continue;
       }
       final lines = entity.readAsLinesSync();

@@ -22,6 +22,25 @@ const pinIconSize = 16.0;
 Size getCaptionButtonSize(double headerHeight) =>
     Size(captionButtonWidth, headerHeight);
 
+/// Measured on macOS 27, the traffic lights span 9 to 69 from the left edge
+/// of the hidden 32 tall title bar; macOS 10 keeps its title bar instead.
+const macOSTrafficLightsArea = Size(78, 32);
+
+Size windowControlsOverSidebar({required bool isMacOS, required int version}) {
+  return isMacOS && version > 10 ? macOSTrafficLightsArea : Size.zero;
+}
+
+/// The mobile view holds the traffic lights in its window header, so only a
+/// page filling a wider window meets them.
+Size windowControlsOverPage({
+  required bool isMacOS,
+  required int version,
+  required bool isMobileView,
+}) {
+  if (isMobileView) return Size.zero;
+  return windowControlsOverSidebar(isMacOS: isMacOS, version: version);
+}
+
 bool showsWindowHeader({
   required bool isDesktop,
   required bool isMacOS,

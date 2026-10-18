@@ -12,7 +12,7 @@ import 'package:fl_clash/ui/paged_sheet.dart';
 import 'package:fl_clash/ui/sheet.dart';
 import 'package:fl_clash/ui/sheet_header.dart';
 import 'package:fl_clash/ui/snap_sheet.dart';
-import 'package:fl_clash/widgets/scaffold.dart';
+import 'package:fl_clash/ui/scaffold.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:material_ui/material_ui.dart';

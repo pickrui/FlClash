@@ -198,9 +198,15 @@ class AppViewScope extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isMobile = ref.watch(isMobileViewProvider);
     return ViewScope(
       size: ref.watch(viewSizeProvider),
-      isMobile: ref.watch(isMobileViewProvider),
+      isMobile: isMobile,
+      windowControls: windowControlsOverPage(
+        isMacOS: system.isMacOS,
+        version: ref.watch(versionProvider),
+        isMobileView: isMobile,
+      ),
       child: child,
     );
   }

@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/ui/paged_sheet.dart';
-import 'package:fl_clash/widgets/scaffold.dart';
+import 'package:fl_clash/ui/scaffold.dart';
 import 'package:fl_clash/ui/sheet.dart';
 import 'package:fl_clash/ui/side_sheet.dart';
 import 'package:flutter/semantics.dart';

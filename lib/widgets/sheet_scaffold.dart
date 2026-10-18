@@ -9,7 +9,7 @@ import 'package:fl_clash/ui/inherited.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:material_ui/material_ui.dart';
 
-import 'scaffold.dart';
+import 'package:fl_clash/ui/scaffold.dart';
 
 class AdaptiveSheetScaffold extends StatelessWidget {
   final SheetType? type;
@@ -35,7 +35,6 @@ class AdaptiveSheetScaffold extends StatelessWidget {
             ? const ValueKey('adaptive-sheet')
             : null,
         title: title,
-        centerTitle: true,
         actions: actions,
         body: AppBarClearance(child: body),
       ),

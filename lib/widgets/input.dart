@@ -21,7 +21,7 @@ import 'package:fl_clash/ui/null_status.dart';
 
 import 'package:fl_clash/ui/pop_scope.dart';
 
-import 'scaffold.dart';
+import 'package:fl_clash/ui/scaffold.dart';
 
 import 'package:fl_clash/ui/effect.dart';
 

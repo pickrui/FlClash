@@ -31,7 +31,7 @@ import 'package:fl_clash/ui/navigation_dock.dart';
 
 import 'package:fl_clash/ui/popup.dart';
 
-import 'scaffold.dart';
+import 'package:fl_clash/ui/scaffold.dart';
 
 class Delegate {
   const Delegate();

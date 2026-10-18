@@ -8,7 +8,7 @@ import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/common/javascript.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/pages/editor.dart';
-import 'package:fl_clash/widgets/scaffold.dart';
+import 'package:fl_clash/ui/scaffold.dart';
 import 'package:material_ui/material_ui.dart';
 
 class ScriptConfigPreviewPage extends StatelessWidget {

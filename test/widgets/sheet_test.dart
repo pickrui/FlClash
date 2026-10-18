@@ -8,7 +8,7 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/inherited.dart';
-import 'package:fl_clash/widgets/scaffold.dart';
+import 'package:fl_clash/ui/scaffold.dart';
 import 'package:fl_clash/ui/sheet.dart';
 import 'package:fl_clash/ui/side_sheet.dart';
 import 'package:fl_clash/widgets/sheet_scaffold.dart';

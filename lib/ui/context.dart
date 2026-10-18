@@ -20,9 +20,6 @@ extension UiBuildContextExtension on BuildContext {
 
   bool get isMobileView => ViewScope.isMobileOf(this, listen: false);
 
-  bool get isInBottomSheet =>
-      SheetProvider.of(this)?.type == SheetType.bottomSheet;
-
   bool get isInCompactSheet => SheetProvider.of(this)?.type.isCompact ?? false;
 
   void safeNestedPop<T extends Object?>([T? result]) {
@@ -37,14 +34,14 @@ extension UiBuildContextExtension on BuildContext {
   /// Where a page's app bar ends, for a body built outside the scaffold's.
   double get appBarInset =>
       FloatingBarScope.of(this) ??
-      (isInBottomSheet
+      (isInCompactSheet
           ? sheetAppBarHeight
           : MediaQuery.paddingOf(this).top + pageToolbarHeight);
 
   /// A compact sheet's header already trails its own gap.
   double get contentTopPadding =>
       TopInsetScope.of(this) ??
-      (isInBottomSheet ? sheetAppBarHeight : appBarInset + 12);
+      (isInCompactSheet ? sheetAppBarHeight : appBarInset + 12);
 
   TextStyle get listTitleStyle =>
       AppTextStyle.body.of(this).copyWith(color: colorScheme.onSurface);
