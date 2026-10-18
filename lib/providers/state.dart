@@ -219,6 +219,7 @@ TrayState trayState(Ref ref) {
     systemProxy: systemProxy,
     tunEnable: clashConfigVm3.c,
     isStart: isStart,
+    suspended: isStart && ref.watch(suspendProvider),
     locale: ref.watch(loadedLocaleProvider)?.toLanguageTag() ?? appSettingVm3.b,
     brightness: brightness,
     groups: groups,

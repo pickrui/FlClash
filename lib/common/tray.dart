@@ -19,22 +19,31 @@ import 'window.dart';
 
 class Tray {
   static Tray? _instance;
+  final bool isMacOS;
   Traffic _lastTraffic = const Traffic();
   bool _showTrayTitle = false;
   bool _isStarted = false;
 
-  Tray._internal();
+  Tray._internal({required this.isMacOS});
 
   factory Tray() {
-    _instance ??= Tray._internal();
+    _instance ??= Tray._internal(isMacOS: system.isMacOS);
     return _instance!;
   }
+
+  @visibleForTesting
+  factory Tray.forPlatform({required bool isMacOS}) =>
+      Tray._internal(isMacOS: isMacOS);
 
   String get trayIconSuffix {
     return system.isWindows ? 'ico' : 'png';
   }
 
-  Future<void> destroy() => native.Tray.instance.hide();
+  Future<void> destroy() async {
+    // A removed macOS status item loses the menu bar place the user gave it.
+    if (isMacOS) return;
+    await native.Tray.instance.hide();
+  }
 
   String getTryIcon({
     required bool isStart,
@@ -43,10 +52,10 @@ class Tray {
   }) {
     final directory = system.isWindows
         ? 'windows'
-        : system.isMacOS
+        : isMacOS
         ? 'macos'
         : 'unix';
-    final status = switch ((safeMode, system.isMacOS || !isStart, tunEnable)) {
+    final status = switch ((safeMode, isMacOS || !isStart, tunEnable)) {
       (true, _, _) => 4,
       (false, true, _) => 1,
       (false, false, false) => 2,
@@ -66,10 +75,10 @@ class Tray {
       native.TraySpec(
         icon: native.TrayIcon.asset(
           getTryIcon(
-            isStart: trayState.isStart,
+            isStart: trayState.isStart && !trayState.suspended,
             tunEnable: trayState.tunEnable,
           ),
-          isTemplate: system.isMacOS,
+          isTemplate: isMacOS,
         ),
         toolTip: safeModeBuild
             ? appLocalizations.safeModeAppTitle(appName)
@@ -111,7 +120,7 @@ class Tray {
       checked: false,
     );
     menuItems.add(startMenuItem);
-    if (system.isMacOS) {
+    if (isMacOS) {
       final speedStatistics = native.TrayMenuCheckbox(
         label: appLocalizations.speedStatistics,
         onSelected: () async {
@@ -139,7 +148,7 @@ class Tray {
       );
     }
     menuItems.add(const native.TrayMenuSeparator());
-    if (system.isMacOS) {
+    if (isMacOS) {
       for (final group in trayState.groups) {
         final subMenuItems = <native.TrayMenuItem>[];
         final selectedName = group.realNow;
@@ -240,13 +249,13 @@ class Tray {
   }
 
   Future<void> updateTraffic(Traffic traffic) async {
-    if (!system.isMacOS || !_isStarted) return;
+    if (!isMacOS || !_isStarted) return;
     _lastTraffic = traffic;
     await _updateTitle();
   }
 
   Future<void> _updateTitle() async {
-    if (!system.isMacOS) return;
+    if (!isMacOS) return;
     await native.Tray.instance.setTitle(
       _showTrayTitle ? _lastTraffic.trayTitle : '',
     );

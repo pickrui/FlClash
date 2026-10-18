@@ -73,6 +73,35 @@ void main() {
     expect(calls.length, stoppedCalls);
   }, skip: !Platform.isMacOS);
 
+  test('exit leaves the macOS status item in its menu bar place', () async {
+    for (final isMacOS in [true, false]) {
+      native.Tray.instance.resetForTesting();
+      calls.clear();
+      final tray = Tray.forPlatform(isMacOS: isMacOS);
+      await tray.update(trayState: running);
+      await tray.destroy();
+      expect(
+        calls.where((call) => call.method == 'hide'),
+        isMacOS ? isEmpty : hasLength(1),
+      );
+    }
+  });
+
+  test(
+    'a core suspended on an excluded network shows the stopped icon',
+    () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.windows;
+      final tray = Tray.forPlatform(isMacOS: false);
+      String shownIcon() => calls
+          .lastWhere((call) => call.method == 'show')
+          .arguments['icon']['path'];
+      await tray.update(trayState: running);
+      expect(shownIcon(), contains('status_2.'));
+      await tray.update(trayState: running.copyWith(suspended: true));
+      expect(shownIcon(), contains('status_1.'));
+    },
+  );
+
   test('an older menu refresh cannot restore a disabled title', () async {
     final tray = Tray();
     await tray.update(trayState: running);

@@ -52,6 +52,28 @@ void main() {
     },
   );
 
+  test('the tray marks only a running core as suspended', () {
+    final c = ProviderContainer(
+      overrides: [
+        currentProfileProvider.overrideWith((_) => null),
+        currentGroupsStateProvider.overrideWith(
+          (_) => const GroupsState(value: []),
+        ),
+        selectedMapProvider.overrideWith((_) => {}),
+      ],
+    );
+    addTearDown(c.dispose);
+    c
+        .read(networkSettingProvider.notifier)
+        .update((s) => s.copyWith(excludeSSIDs: ['Home']));
+    c.read(currentSSIDProvider.notifier).value = 'Home';
+    expect(c.read(trayStateProvider).suspended, false);
+    c.read(runTimeProvider.notifier).value = 1;
+    expect(c.read(trayStateProvider).suspended, true);
+    c.read(currentSSIDProvider.notifier).value = 'Office';
+    expect(c.read(trayStateProvider).suspended, false);
+  });
+
   test('headless Android shortcuts persist the exclusion list', () {
     final c = ProviderContainer(
       overrides: [currentProfileProvider.overrideWith((_) => null)],
