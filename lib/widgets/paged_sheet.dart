@@ -11,11 +11,11 @@ import 'package:fl_clash/common/context.dart';
 import 'dialog.dart';
 import 'scaffold.dart';
 
-import 'package:fl_clash/widgets/drag_back.dart';
+import 'package:fl_clash/ui/drag_back.dart';
 import 'package:fl_clash/widgets/inherited.dart';
 import 'package:fl_clash/widgets/pop_scope.dart';
 import 'package:fl_clash/widgets/sheet.dart';
-import 'package:fl_clash/widgets/sheet_navigator.dart';
+import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:navigator_resizable/navigator_resizable.dart';
 

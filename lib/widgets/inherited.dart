@@ -7,27 +7,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 
-class PageActivityScope extends InheritedWidget {
-  final bool isActive;
-
-  const PageActivityScope({
-    super.key,
-    required this.isActive,
-    required super.child,
-  });
-
-  static bool isActiveOf(BuildContext context) {
-    return context
-            .dependOnInheritedWidgetOfExactType<PageActivityScope>()
-            ?.isActive ??
-        true;
-  }
-
-  @override
-  bool updateShouldNotify(PageActivityScope oldWidget) {
-    return isActive != oldWidget.isActive;
-  }
-}
+export 'package:fl_clash/ui/inherited.dart';
 
 class CommonScaffoldBackActionProvider extends InheritedWidget {
   final VoidCallback? backAction;

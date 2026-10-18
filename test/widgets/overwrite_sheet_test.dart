@@ -16,7 +16,7 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/widgets/sheet_navigator.dart';
+import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 

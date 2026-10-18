@@ -6,7 +6,7 @@
 import 'package:fl_clash/views/network_diagnostics.dart';
 import 'package:fl_clash/views/cloud/cloud_login_page.dart';
 import 'package:fl_clash/ui/theme_cross_fade.dart';
-import 'package:fl_clash/widgets/keyboard_inset_hold.dart';
+import 'package:fl_clash/ui/keyboard_inset_hold.dart';
 import 'package:fl_clash/widgets/focus.dart';
 
 import 'dart:async';
@@ -20,6 +20,7 @@ import 'package:fl_clash/widgets/input_dialog.dart';
 import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/navigator.dart';
 import 'package:fl_clash/common/scroll.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/enum/enum.dart';

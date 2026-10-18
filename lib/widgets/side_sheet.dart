@@ -5,8 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:ui';
 
-import 'package:fl_clash/widgets/drag_back.dart';
-import 'package:fl_clash/widgets/sheet_navigator.dart';
+import 'package:fl_clash/ui/drag_back.dart';
+import 'package:fl_clash/ui/sheet_navigator.dart';
 
 import 'package:fl_clash/common/color.dart';
 

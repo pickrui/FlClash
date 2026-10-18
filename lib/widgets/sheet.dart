@@ -6,9 +6,11 @@
 import 'dart:async';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/navigator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'sheet_navigator.dart';
+import 'package:fl_clash/ui/sheet_navigator.dart';
+
 import 'snap_sheet.dart';
 
 import 'package:fl_clash/providers/app.dart';
