@@ -10,6 +10,7 @@ import android.os.RemoteException
 import com.oixcloud.clash.common.GlobalState
 import com.oixcloud.clash.common.ServiceDelegate
 import com.oixcloud.clash.common.chunkedForAidl
+import com.oixcloud.clash.common.concatBytes
 import com.oixcloud.clash.common.formatString
 import com.oixcloud.clash.common.intent
 import com.oixcloud.clash.common.maxValidationMessageBytes
@@ -68,7 +69,7 @@ object Service {
         delegate.unbind()
     }
 
-    suspend fun invokeMethod(data: String, cb: ((result: String) -> Unit)?): Result<Unit> {
+    suspend fun invokeMethod(data: String, cb: ((result: ByteArray) -> Unit)?): Result<Unit> {
         val method = runCatching {
             JsonParser.parseString(data).asJsonObject.getAsJsonPrimitive("method").asString
         }.getOrNull()
@@ -86,8 +87,8 @@ object Service {
                     res.add(result ?: byteArrayOf())
                     ack?.onAck()
                     if (isSuccess) {
-                        val output = res.formatString()
-                        if (method == INIT_METHOD && isSuccessfulInit(output)) {
+                        val output = res.concatBytes()
+                        if (method == INIT_METHOD && isSuccessfulInit(output.decodeToString())) {
                             validatorInitAction = data
                         }
                         cb?.let { cb ->
@@ -112,7 +113,7 @@ object Service {
 
     private suspend fun invokeValidatorMethod(
         data: String,
-        cb: ((result: String) -> Unit)?,
+        cb: ((result: ByteArray) -> Unit)?,
     ): Result<Unit> {
         val initAction = validatorInitAction
             ?: return Result.failure(IllegalStateException("validator is not initialized"))
@@ -153,7 +154,7 @@ object Service {
                         responseChunks.add(chunk)
                         ack?.onAck()
                         if (isSuccess) {
-                            runCatching { cb?.invoke(responseChunks.formatString()) }
+                            runCatching { cb?.invoke(responseChunks.concatBytes()) }
                                 .onSuccess { response.complete(Unit) }
                                 .onFailure(response::completeExceptionally)
                         }
@@ -275,13 +276,13 @@ object Service {
     }
 
     suspend fun stopListener() {
-        val completion = CompletableDeferred<String>()
+        val completion = CompletableDeferred<ByteArray>()
         val request = JsonObject().apply {
             addProperty("id", "shortcut-stop-listener")
             addProperty("method", "stopListener")
         }
         invokeMethod(request.toString()) { completion.complete(it) }.getOrThrow()
-        val response = JsonParser.parseString(completion.await()).asJsonObject
+        val response = JsonParser.parseString(completion.await().decodeToString()).asJsonObject
         check(!response.has("error") && response.get("result")?.asBoolean == true) {
             "Core listener cleanup failed"
         }
@@ -290,7 +291,7 @@ object Service {
     suspend fun setEventListener(
         owner: Any,
         isCurrent: () -> Boolean,
-        cb: (result: String?) -> Unit,
+        cb: (result: ByteArray) -> Unit,
     ): Result<Unit> = eventListenerMutex.withLock {
         val results = HashMap<String, MutableList<ByteArray>>()
         delegate.useService {
@@ -306,8 +307,7 @@ object Service {
                         results[id]?.add(data ?: byteArrayOf())
                         ack?.onAck()
                         if (isSuccess) {
-                            cb(results[id]?.formatString())
-                            results.remove(id)
+                            results.remove(id)?.let { cb(it.concatBytes()) }
                         }
                     }
                 },

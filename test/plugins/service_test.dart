@@ -44,6 +44,7 @@ class _Listener with ServiceListener {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   const channel = MethodChannel('$packageName/service');
+  const coreChannel = MethodChannel('$packageName/core');
   const codec = StandardMethodCodec();
   final messenger =
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
@@ -60,8 +61,9 @@ void main() {
   Future<(File, String)> seal(Object? reply, {bool forge = false}) =>
       sealSpilledReply(home.path, reply, forge: forge);
 
-  String envelope(File file, String key) =>
-      json.encode(CoreMethodResponse(id: '1', file: file.path, key: key));
+  Uint8List envelope(File file, String key) => utf8.encode(
+    json.encode(CoreMethodResponse(id: '1', file: file.path, key: key)),
+  );
 
   Future<void> sendNative(String method, [Object? arguments]) {
     final response = Completer<void>();
@@ -87,6 +89,7 @@ void main() {
   tearDown(() {
     service.removeListener(listener);
     messenger.setMockMethodCallHandler(channel, null);
+    messenger.setMockMethodCallHandler(coreChannel, null);
   });
 
   for (final (method, arguments) in [
@@ -94,7 +97,9 @@ void main() {
     ('crash', 'disconnected'),
     (
       'event',
-      '{"method":"message","arguments":[{"type":"loaded","data":"one"}]}',
+      utf8.encode(
+        '{"method":"message","arguments":[{"type":"loaded","data":"one"}]}',
+      ),
     ),
   ]) {
     test('$method tolerates listeners being removed during delivery', () async {
@@ -181,9 +186,9 @@ void main() {
   test(
     'a spilled reply opens like the reference AEAD and refuses forgery',
     () async {
-      final replies = <String>[];
+      final replies = <Uint8List>[];
       messenger.setMockMethodCallHandler(
-        channel,
+        coreChannel,
         (_) async => replies.removeAt(0),
       );
       const call = CoreMethodCall(id: '1', method: CoreMethod.getConfig);
@@ -211,7 +216,7 @@ void main() {
       ..createSync(recursive: true);
     for (final file in [outside, misnamed]) {
       messenger.setMockMethodCallHandler(
-        channel,
+        coreChannel,
         (_) async => envelope(file, base64Encode(List.filled(32, 0))),
       );
       final response = await service.invokeMethod(
@@ -223,14 +228,12 @@ void main() {
   });
 
   test('a call that timed out deletes its late spilled reply', () async {
-    var reply = Completer<String>();
-    messenger.setMockMethodCallHandler(channel, (call) async {
-      return switch (call.method) {
-        'invokeMethod' => reply.future,
-        'shutdown' => true,
-        _ => '',
-      };
-    });
+    var reply = Completer<Uint8List>();
+    messenger.setMockMethodCallHandler(coreChannel, (_) => reply.future);
+    messenger.setMockMethodCallHandler(
+      channel,
+      (call) async => call.method == 'shutdown' ? true : '',
+    );
     final core = CoreLib.forTesting(
       service: service,
       readSharedState: () => const SharedState(
@@ -264,6 +267,25 @@ void main() {
     expect(abandoned, isNull);
     expect(unread.existsSync(), isFalse);
   });
+
+  test(
+    'replies arrive as UTF-8 bytes, large ones decoded off the isolate',
+    () async {
+      for (final count in [1, 5000]) {
+        final names = List.generate(count, (index) => '节点-$index');
+        messenger.setMockMethodCallHandler(
+          coreChannel,
+          (_) async => utf8.encode(
+            json.encode(CoreMethodResponse(id: '3', result: names)),
+          ),
+        );
+        final response = await service.invokeMethod(
+          const CoreMethodCall(id: '3', method: CoreMethod.getProxyGroups),
+        );
+        expect(response!.result, names);
+      }
+    },
+  );
 
   test('missing or failed queries are not interpreted as stopped', () async {
     messenger.setMockMethodCallHandler(channel, (_) async => null);

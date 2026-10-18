@@ -297,10 +297,21 @@ func suspend(suspended bool) {
 	handleSuspend(suspended)
 }
 
+var forceGCPending atomic.Bool
+
+// Android calls this from onLowMemory and onTrimMemory on the :remote main
+// thread, which a full collection of a large profile would stall.
+//
 //export forceGC
 func forceGC() {
 	defer recoverExport("forceGC")
-	handleForceGC()
+	if !forceGCPending.CompareAndSwap(false, true) {
+		return
+	}
+	safeGo("forceGC", func() {
+		defer forceGCPending.Store(false)
+		handleForceGC()
+	})
 }
 
 //export updateDns

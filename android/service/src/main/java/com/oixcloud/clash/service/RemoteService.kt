@@ -42,7 +42,7 @@ private const val EVENT_ACK_TIMEOUT_MILLIS = 5_000L
 
 class RemoteService : Service(),
     CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.Default) {
-    private class EventForwarder(val events: Channel<String?>, val job: Job)
+    private class EventForwarder(val events: Channel<ByteArray>, val job: Job)
 
     private val eventLock = Any()
     private var eventForwarder: EventForwarder? = null
@@ -59,7 +59,7 @@ class RemoteService : Service(),
                 Core.callSetEventListener(null)
             } else {
                 // Go's single batcher goroutine calls back here and must never block.
-                val events = Channel<String?>(Channel.UNLIMITED)
+                val events = Channel<ByteArray>(Channel.UNLIMITED)
                 val job = launch {
                     val stalled = AtomicBoolean(false)
                     for (event in events) forwardEvent(listener, event, stalled)
@@ -72,12 +72,12 @@ class RemoteService : Service(),
 
     private suspend fun forwardEvent(
         listener: IEventInterface,
-        event: String?,
+        event: ByteArray,
         stalled: AtomicBoolean,
     ) {
         runCatching {
             val id = UUID.randomUUID().toString()
-            val chunks = event?.chunkedForAidl() ?: listOf()
+            val chunks = event.chunkedForAidl()
             for ((index, chunk) in chunks.withIndex()) {
                 val acknowledged = CompletableDeferred<Unit>()
                 listener.onEvent(

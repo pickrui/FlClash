@@ -13,6 +13,13 @@ import 'package:fl_clash/models/models.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+const _isolateDecodeBytes = 51200;
+
+final _utf8JsonDecoder = utf8.decoder.fuse(json.decoder);
+
+Map<String, Object?> _decodeEnvelope(Uint8List data) =>
+    Map<String, Object?>.from(_utf8JsonDecoder.convert(data) as Map);
+
 abstract mixin class ServiceListener {
   void onServiceEvent(CoreEvent event) {}
 
@@ -24,6 +31,7 @@ abstract mixin class ServiceListener {
 class Service {
   static Service? _instance;
   late MethodChannel methodChannel;
+  static const _coreChannel = MethodChannel('$packageName/core');
 
   final ObserverList<ServiceListener> _listeners =
       ObserverList<ServiceListener>();
@@ -38,9 +46,8 @@ class Service {
     methodChannel.setMethodCallHandler((call) async {
       switch (call.method) {
         case 'event':
-          final data = call.arguments as String? ?? '';
           final methodCall = CoreMethodCall.fromJson(
-            Map<String, Object?>.from(json.decode(data) as Map),
+            _decodeEnvelope(call.arguments as Uint8List),
           );
           for (final event in coreEventsFromData(methodCall.arguments)) {
             _notifyListeners((listener) => listener.onServiceEvent(event));
@@ -81,15 +88,18 @@ class Service {
     CoreMethodCall call, {
     bool Function()? isPending,
   }) async {
-    final data = await methodChannel.invokeMethod<String>(
+    final data = await _coreChannel.invokeMethod<Uint8List>(
       'invokeMethod',
       json.encode(call),
     );
     if (data == null) {
       return null;
     }
-    final dataJson = await data.commonToJSON<dynamic>();
-    final response = CoreMethodResponse.fromJson(dataJson);
+    final response = CoreMethodResponse.fromJson(
+      data.length < _isolateDecodeBytes
+          ? _decodeEnvelope(data)
+          : await compute(_decodeEnvelope, data),
+    );
     if (response.file != null && isPending?.call() == false) {
       await discardSpilledResponse(response);
       return null;

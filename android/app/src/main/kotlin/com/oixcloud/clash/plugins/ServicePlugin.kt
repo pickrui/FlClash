@@ -12,8 +12,10 @@ import com.oixcloud.clash.invokeMethodOnMainThread
 import com.oixcloud.clash.models.SharedState
 import com.google.gson.Gson
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugin.common.StandardMethodCodec
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -21,20 +23,30 @@ import kotlinx.coroutines.launch
 
 class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
     CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.Default) {
+    private lateinit var messenger: BinaryMessenger
     private lateinit var flutterMethodChannel: MethodChannel
+    private lateinit var coreChannel: MethodChannel
     @Volatile private var attached = false
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-        flutterMethodChannel = MethodChannel(
-            flutterPluginBinding.binaryMessenger, "${Components.PACKAGE_NAME}/service"
-        )
+        messenger = flutterPluginBinding.binaryMessenger
+        flutterMethodChannel = MethodChannel(messenger, SERVICE_CHANNEL)
         flutterMethodChannel.setMethodCallHandler(this)
+        // Requests reach 64 MiB; decoding one on the platform thread drops frames.
+        coreChannel = MethodChannel(
+            messenger,
+            CORE_CHANNEL,
+            StandardMethodCodec.INSTANCE,
+            messenger.makeBackgroundTaskQueue(),
+        )
+        coreChannel.setMethodCallHandler(::onCoreMethodCall)
         attached = true
     }
 
     override fun onDetachedFromEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         attached = false
         flutterMethodChannel.setMethodCallHandler(null)
+        coreChannel.setMethodCallHandler(null)
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) = when (call.method) {
@@ -44,10 +56,6 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
 
         "shutdown" -> {
             handleShutdown(result)
-        }
-
-        "invokeMethod" -> {
-            handleInvokeMethod(call, result)
         }
 
         "syncRunState" -> {
@@ -75,9 +83,20 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
         }
     }
 
+    private fun onCoreMethodCall(call: MethodCall, result: MethodChannel.Result) {
+        when (call.method) {
+            "invokeMethod" -> handleInvokeMethod(call, result)
+            else -> result.notImplemented()
+        }
+    }
+
     private fun handleInvokeMethod(call: MethodCall, result: MethodChannel.Result) {
+        val data = call.arguments as? String
+        if (data == null) {
+            result.error("invalid_argument", "Core method call must be a string", null)
+            return
+        }
         launch {
-            val data = call.arguments<String>()!!
             Service.invokeMethod(data) {
                 result.success(it)
             }.onFailure {
@@ -119,9 +138,10 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
         }
     }
 
-    fun handleSendEvent(value: String?) {
+    fun handleSendEvent(value: ByteArray) {
+        val message = StandardMethodCodec.INSTANCE.encodeMethodCall(MethodCall("event", value))
         launch(Dispatchers.Main) {
-            flutterMethodChannel.invokeMethod("event", value)
+            messenger.send(SERVICE_CHANNEL, message)
         }
     }
 
@@ -173,5 +193,10 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
                 result.success(State.runTime)
             }
         }
+    }
+
+    private companion object {
+        val SERVICE_CHANNEL = "${Components.PACKAGE_NAME}/service"
+        val CORE_CHANNEL = "${Components.PACKAGE_NAME}/core"
     }
 }

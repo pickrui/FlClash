@@ -223,15 +223,19 @@ fun ByteArray.chunkedForAidl(maxTotalBytes: Int = Int.MAX_VALUE): List<ByteArray
 }
 
 
-fun <T : List<ByteArray>> T.formatString(charset: Charset = Charsets.UTF_8): String {
-    val totalSize = this.sumOf { it.size }
-    val combined = ByteArray(totalSize)
+fun <T : List<ByteArray>> T.concatBytes(): ByteArray {
+    if (size == 1) return single()
+    val combined = ByteArray(sumOf { it.size })
     var offset = 0
     forEach { byteArray ->
         byteArray.copyInto(combined, offset)
         offset += byteArray.size
     }
-    return String(combined, charset)
+    return combined
+}
+
+fun <T : List<ByteArray>> T.formatString(charset: Charset = Charsets.UTF_8): String {
+    return String(concatBytes(), charset)
 }
 
 class AidlRequestBuffer(

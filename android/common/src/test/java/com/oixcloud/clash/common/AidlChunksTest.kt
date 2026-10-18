@@ -15,6 +15,7 @@ class AidlChunksTest {
             val chunks = bytes.chunkedForAidl()
             assertEquals(1, chunks.size)
             assertSame(bytes, chunks.single())
+            assertSame(bytes, chunks.concatBytes())
         }
     }
 
@@ -25,6 +26,7 @@ class AidlChunksTest {
         val chunks = bytes.chunkedForAidl()
         assertTrue(chunks.size > 1)
         assertTrue(chunks.all { it.size <= 128 * 1024 })
+        assertArrayEquals(bytes, chunks.concatBytes())
         assertEquals(text, chunks.formatString())
         assertEquals(text, text.chunkedForAidl().formatString())
     }

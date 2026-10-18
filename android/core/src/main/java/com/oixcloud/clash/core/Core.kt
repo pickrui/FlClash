@@ -94,13 +94,13 @@ data object Core {
     private external fun setEventListener(cb: InvokeInterface?)
 
     fun callSetEventListener(
-        cb: ((result: String?) -> Unit)?
+        cb: ((result: ByteArray) -> Unit)?
     ) {
         when (cb != null) {
             true -> setEventListener(
                 object : InvokeInterface {
                     override fun onResult(result: ByteArray?) {
-                        cb(result?.decodeToString())
+                        result?.let(cb)
                     }
                 },
             )
