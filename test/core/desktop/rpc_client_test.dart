@@ -5,13 +5,16 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:fl_clash/core/desktop/rpc_client.dart';
 import 'package:fl_clash/core/event.dart';
 import 'package:fl_clash/core/method.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 
+import '../../helpers/spill.dart';
 import 'fakes.dart';
 
 Future<Map<String, Object?>> _sentRequest(
@@ -23,6 +26,13 @@ Future<Map<String, Object?>> _sentRequest(
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  late Directory home;
+
+  setUpAll(() async {
+    home = await Directory.systemTemp.createTemp('rpc-spill-');
+    PathProviderPlatform.instance = TempAppPaths(home.path);
+  });
+  tearDownAll(() => home.delete(recursive: true));
 
   test('correlates a response and ignores a late duplicate', () async {
     final transport = FakeDesktopCoreTransport.connected();
@@ -357,6 +367,40 @@ void main() {
       expect(accepted['lone invalid byte'], isFalse);
     },
   );
+
+  test('a spilled reply resolves and one nobody awaits is deleted', () async {
+    final transport = FakeDesktopCoreTransport.connected();
+    final client = CoreRpcClient(transport);
+    addTearDown(() async {
+      await client.close();
+      await transport.close();
+    });
+    Future<File> answer(Object? id, String result) async {
+      final (file, key) = await sealSpilledReply(home.path, {
+        'id': id,
+        'result': result,
+      });
+      transport.addJson({'id': id, 'file': file.path, 'key': key});
+      return file;
+    }
+
+    final invocation = client.invoke<String>(method: CoreMethod.getConfig);
+    final spilled = await answer((await _sentRequest(transport))['id'], 'big');
+    expect(await invocation, 'big');
+    expect(spilled.existsSync(), isFalse);
+
+    final timedOut = await client.invoke<String>(
+      method: CoreMethod.getConfig,
+      timeout: const Duration(milliseconds: 20),
+    );
+    final late = await answer(
+      (jsonDecode(transport.sentMessages.last) as Map)['id'],
+      'late',
+    );
+    expect(timedOut, isNull);
+    await waitUntilDeleted(late);
+    expect(late.existsSync(), isFalse);
+  });
 
   test('forwards Core message events', () async {
     final transport = FakeDesktopCoreTransport.connected();

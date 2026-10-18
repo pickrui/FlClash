@@ -241,6 +241,7 @@ class CoreLib extends CoreHandlerInterface with ServiceListener {
     service
         .invokeMethod(
           CoreMethodCall(id: id, method: method, arguments: arguments),
+          isPending: () => _pendingCalls.contains(response),
         )
         .then(
           (result) {

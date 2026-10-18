@@ -64,6 +64,8 @@ type MethodResponse struct {
 	ID       string       `json:"id,omitempty"`
 	Result   any          `json:"result"`
 	Error    *MethodError `json:"error,omitempty"`
+	File     string       `json:"file,omitempty"`
+	Key      []byte       `json:"key,omitempty"`
 	callback unsafe.Pointer
 }
 

@@ -338,7 +338,10 @@ class _Service extends Fake implements Service {
   void removeListener(ServiceListener listener) => listeners.remove(listener);
 
   @override
-  Future<CoreMethodResponse?> invokeMethod(CoreMethodCall call) {
+  Future<CoreMethodResponse?> invokeMethod(
+    CoreMethodCall call, {
+    bool Function()? isPending,
+  }) {
     calls.add(call);
     return invocation.future;
   }

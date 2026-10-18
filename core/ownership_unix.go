@@ -12,10 +12,12 @@ import (
 	"errors"
 	"io"
 	"os"
+	"path/filepath"
 	"sync"
 	"sync/atomic"
 	"time"
 
+	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/log"
 	"golang.org/x/sys/unix"
 )
@@ -210,4 +212,88 @@ func scheduleReclaimOwnership() {
 			}
 		}
 	}()
+}
+
+// An elevated Core writes where the app user can swap entries for links, so
+// every step goes through a verified descriptor and hands the result to that user.
+func openSpillDirectory(create bool) (*os.File, error) {
+	uid, gid := os.Getuid(), os.Getgid()
+	home, err := openReclaimHome(constant.Path.HomeDir(), uid)
+	if err != nil {
+		return nil, err
+	}
+	defer home.Close()
+	if create {
+		err = unix.Mkdirat(int(home.Fd()), spilledResponseDirName, 0o700)
+		if err != nil && !errors.Is(err, unix.EEXIST) {
+			return nil, err
+		}
+	}
+	fd, err := unix.Openat(int(home.Fd()), spilledResponseDirName, unix.O_RDONLY|unix.O_DIRECTORY|unix.O_NOFOLLOW|unix.O_CLOEXEC, 0)
+	if err != nil {
+		return nil, err
+	}
+	dir := os.NewFile(uintptr(fd), spilledResponseDir())
+	var stat unix.Stat_t
+	if err = unix.Fstat(fd, &stat); err == nil {
+		switch int(stat.Uid) {
+		case uid:
+		case 0:
+			err = unix.Fchown(fd, uid, gid)
+		default:
+			err = unix.EPERM
+		}
+	}
+	if err != nil {
+		dir.Close()
+		return nil, err
+	}
+	return dir, nil
+}
+
+func createSpillFile(name string) (*os.File, error) {
+	if !isElevated() {
+		return createSpillFileIn(spilledResponseDir(), name)
+	}
+	return createVerifiedSpillFile(name)
+}
+
+func createVerifiedSpillFile(name string) (*os.File, error) {
+	dir, err := openSpillDirectory(true)
+	if err != nil {
+		return nil, err
+	}
+	defer dir.Close()
+	fd, err := unix.Openat(int(dir.Fd()), name, unix.O_WRONLY|unix.O_CREAT|unix.O_EXCL|unix.O_NOFOLLOW|unix.O_CLOEXEC, 0o600)
+	if err != nil {
+		return nil, err
+	}
+	if err := unix.Fchown(fd, os.Getuid(), os.Getgid()); err != nil {
+		unix.Close(fd)
+		_ = unix.Unlinkat(int(dir.Fd()), name, 0)
+		return nil, err
+	}
+	return os.NewFile(uintptr(fd), filepath.Join(spilledResponseDir(), name)), nil
+}
+
+func clearSpilledResponses() {
+	if !isElevated() {
+		clearSpilledResponsesIn(spilledResponseDir())
+		return
+	}
+	clearVerifiedSpills()
+}
+
+func clearVerifiedSpills() {
+	dir, err := openSpillDirectory(false)
+	if err != nil {
+		return
+	}
+	defer dir.Close()
+	names, _ := dir.Readdirnames(-1)
+	for _, name := range names {
+		if isSpilledResponseName(name) {
+			_ = unix.Unlinkat(int(dir.Fd()), name, 0)
+		}
+	}
 }

@@ -76,7 +76,11 @@ class Service {
     }
   }
 
-  Future<CoreMethodResponse?> invokeMethod(CoreMethodCall call) async {
+  /// A spilled reply nobody waits for any more is deleted unread.
+  Future<CoreMethodResponse?> invokeMethod(
+    CoreMethodCall call, {
+    bool Function()? isPending,
+  }) async {
     final data = await methodChannel.invokeMethod<String>(
       'invokeMethod',
       json.encode(call),
@@ -85,7 +89,12 @@ class Service {
       return null;
     }
     final dataJson = await data.commonToJSON<dynamic>();
-    return CoreMethodResponse.fromJson(dataJson);
+    final response = CoreMethodResponse.fromJson(dataJson);
+    if (response.file != null && isPending?.call() == false) {
+      await discardSpilledResponse(response);
+      return null;
+    }
+    return resolveSpilledResponse(response);
   }
 
   Future<bool> start() async {

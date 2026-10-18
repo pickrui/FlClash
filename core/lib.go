@@ -201,7 +201,7 @@ func handleUpdateDns(value string) {
 
 func (response MethodResponse) send() {
 	defer releaseObject(response.callback)
-	data, err := response.JSON()
+	data, err := response.frame()
 	if err != nil {
 		return
 	}

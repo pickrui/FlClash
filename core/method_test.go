@@ -7,12 +7,17 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"math"
+	"os"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
 	"github.com/metacubex/mihomo/constant"
+	"golang.org/x/crypto/chacha20poly1305"
 )
 
 func TestMethodResponseAnswersWhenResultCannotBeEncoded(t *testing.T) {
@@ -31,6 +36,67 @@ func TestMethodResponseAnswersWhenResultCannotBeEncoded(t *testing.T) {
 		if decoded.ID != "7" || decoded.Result != nil || decoded.Error == nil || decoded.Error.Code != "marshal_error" {
 			t.Fatalf("got %s", data)
 		}
+	}
+}
+
+func TestLargeResponseTravelsAsASealedFile(t *testing.T) {
+	previousHome, previousThreshold, previousEnabled := constant.Path.HomeDir(), spillThreshold, spillEnabled.Load()
+	t.Cleanup(func() {
+		constant.SetHomeDir(previousHome)
+		spillThreshold = previousThreshold
+		spillEnabled.Store(previousEnabled)
+	})
+	home := t.TempDir()
+	constant.SetHomeDir(home)
+	spillThreshold = 64
+	spillEnabled.Store(true)
+	response := MethodResponse{ID: "7", Result: map[string]any{
+		"rules": []string{strings.Repeat("DOMAIN,managed.example,DIRECT", 8)},
+	}}
+	want, err := response.JSON()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	frame, err := response.frame()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var envelope MethodResponse
+	if err := json.Unmarshal(frame, &envelope); err != nil {
+		t.Fatal(err)
+	}
+	if envelope.ID != "7" || envelope.Result != nil || len(envelope.Key) != chacha20poly1305.KeySize ||
+		filepath.Dir(envelope.File) != filepath.Join(home, spilledResponseDirName) ||
+		!isSpilledResponseName(filepath.Base(envelope.File)) {
+		t.Fatalf("envelope = %s", frame)
+	}
+	sealed, err := os.ReadFile(envelope.File)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bytes.Contains(sealed, []byte("managed.example")) {
+		t.Fatal("the spill file holds the reply in plaintext")
+	}
+	if info, err := os.Stat(envelope.File); err != nil || runtime.GOOS != "windows" && info.Mode().Perm() != 0o600 {
+		t.Fatalf("stat = %v, %v; want a file only its owner can read", info, err)
+	}
+	aead, err := chacha20poly1305.New(envelope.Key)
+	if err != nil {
+		t.Fatal(err)
+	}
+	plain, err := aead.Open(nil, sealed[:aead.NonceSize()], sealed[aead.NonceSize():], nil)
+	if err != nil || !bytes.Equal(plain, want) {
+		t.Fatalf("opened %q, %v; want the whole reply", plain, err)
+	}
+
+	spillEnabled.Store(false)
+	if inline, err := response.frame(); err != nil || !bytes.Equal(inline, want) {
+		t.Fatalf("validator reply = %s, %v; want it inline", inline, err)
+	}
+	clearSpilledResponses()
+	if _, err := os.Stat(envelope.File); !os.IsNotExist(err) {
+		t.Fatalf("stat after clear = %v, want the spill file gone", err)
 	}
 }
 

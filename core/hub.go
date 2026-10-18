@@ -73,6 +73,9 @@ func handleInitClash(params *InitParams) bool {
 	version = params.Version
 	constant.SetHomeDir(params.HomeDir)
 	initOwnership(params.HomeDir)
+	// The Android validator relays its answers whole from a home deleted after use.
+	spillEnabled.Store(params.ValidationSourceHome == "")
+	clearSpilledResponses()
 	GlobalValidationSourceHome = params.ValidationSourceHome
 	if GlobalValidationSourceHome == "" {
 		GlobalValidationSourceHome = params.HomeDir

@@ -8,6 +8,14 @@
 
 package main
 
+import "os"
+
 func initOwnership(homeDir string) {}
 func scheduleReclaimOwnership()    {}
 func flushReclaimOwnership()       {}
+
+func createSpillFile(name string) (*os.File, error) {
+	return createSpillFileIn(spilledResponseDir(), name)
+}
+
+func clearSpilledResponses() { clearSpilledResponsesIn(spilledResponseDir()) }

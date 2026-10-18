@@ -25,9 +25,9 @@ var (
 const maxIPCFrameSize = 64 * 1024 * 1024
 
 func (response MethodResponse) send() {
-	data, err := response.JSON()
+	data, err := response.frame()
 	if err == nil && len(data) > maxIPCFrameSize {
-		// The frame would be dropped and the caller would wait for its RPC timeout.
+		// Only a reply whose spill file could not be written reaches this.
 		data, err = MethodResponse{
 			ID: response.ID,
 			Error: &MethodError{

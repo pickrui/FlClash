@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/metacubex/mihomo/constant"
 	"golang.org/x/sys/unix"
 )
 
@@ -262,5 +263,46 @@ func TestReclaimReportsFchownFailureWithoutClaimingSuccess(t *testing.T) {
 	count, err := reclaimChildren(root, os.Getuid(), os.Getgid(), 0, ops)
 	if count != 0 || err != unix.EPERM {
 		t.Fatalf("count %d error %v", count, err)
+	}
+}
+
+func TestElevatedSpillNeverFollowsAResponsesLink(t *testing.T) {
+	if os.Getuid() == 0 {
+		t.Skip("test models a non-root desktop user")
+	}
+	previousHome := constant.Path.HomeDir()
+	t.Cleanup(func() { constant.SetHomeDir(previousHome) })
+	home, outside := t.TempDir(), t.TempDir()
+	constant.SetHomeDir(home)
+	name := "0123456789abcdef0123456789abcdef" + spilledResponseSuffix
+	planted := filepath.Join(outside, name)
+	if err := os.WriteFile(planted, nil, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(outside, filepath.Join(home, spilledResponseDirName)); err != nil {
+		t.Fatal(err)
+	}
+
+	if file, err := createVerifiedSpillFile("fedcba9876543210fedcba9876543210" + spilledResponseSuffix); err == nil {
+		file.Close()
+		t.Fatal("created a spill file through a link")
+	}
+	clearVerifiedSpills()
+	if entries, _ := os.ReadDir(outside); len(entries) != 1 {
+		t.Fatalf("outside entries = %v, want only the planted file", entries)
+	}
+
+	os.Remove(filepath.Join(home, spilledResponseDirName))
+	file, err := createVerifiedSpillFile(name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	file.Close()
+	if info, err := os.Stat(filepath.Join(home, spilledResponseDirName, name)); err != nil || info.Mode().Perm() != 0o600 {
+		t.Fatalf("stat = %v, %v; want a private file in the home", info, err)
+	}
+	clearVerifiedSpills()
+	if entries, _ := os.ReadDir(filepath.Join(home, spilledResponseDirName)); len(entries) != 0 {
+		t.Fatalf("entries after clear = %v", entries)
 	}
 }
