@@ -290,6 +290,7 @@ class _OverrideItem extends StatelessWidget {
       _DnsUpdate<String> update, {
       required int maxLength,
       ConfigValidator? validator,
+      bool allowEmpty = false,
     }) {
       return ConfigTextItem(
         leading: leading,
@@ -299,6 +300,7 @@ class _OverrideItem extends StatelessWidget {
         maxLength: maxLength,
         normalize: (value) => value.trim(),
         validator: validator,
+        allowEmpty: allowEmpty,
       );
     }
 
@@ -373,6 +375,7 @@ class _OverrideItem extends StatelessWidget {
         (state, value) => state.copyWith.dns(listen: value),
         maxLength: TextInputLimits.dnsListen,
         validator: validateListenAddress,
+        allowEmpty: true,
       ),
       DnsOverrideKey.listenRoutingMark => number(
         (dns) => dns.listenRoutingMark,
@@ -427,6 +430,7 @@ class _OverrideItem extends StatelessWidget {
         (state, value) => state.copyWith.dns(fakeIpRange6: value),
         maxLength: TextInputLimits.cidr,
         validator: validateIpv6Cidr,
+        allowEmpty: true,
       ),
       DnsOverrideKey.fakeIpFilter => list(
         (dns) => dns.fakeIpFilter,

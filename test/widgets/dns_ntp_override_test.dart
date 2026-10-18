@@ -219,6 +219,11 @@ void main() {
     await _submitText(tester, ' 127.0.0.1:1053 ');
     expect(find.byType(TextFormField), findsNothing);
     expect(dns().listen, '127.0.0.1:1053');
+    await tester.tap(find.text('Listen'));
+    await tester.pumpAndSettle();
+    await _submitText(tester, ' ');
+    expect(find.byType(TextFormField), findsNothing);
+    expect(dns().listen, '');
 
     await tester.tap(find.text('Fakeip range'));
     await tester.pumpAndSettle();
@@ -305,7 +310,10 @@ void main() {
     final container = await _pumpOverrides(
       tester,
       const NtpView(),
-      (state) => state.copyWith(ntpOverrideKeys: {NtpOverrideKey.server}),
+      (state) => state.copyWith(
+        ntp: state.ntp.copyWith(dialerProxy: 'Proxy'),
+        ntpOverrideKeys: {NtpOverrideKey.server, NtpOverrideKey.dialerProxy},
+      ),
     );
 
     await tester.tap(find.text('Server'));
@@ -327,6 +335,18 @@ void main() {
       container.read(patchClashConfigProvider).ntp.server,
       '162.159.200.1',
     );
+
+    await tester.tap(find.text('Server'));
+    await tester.pumpAndSettle();
+    await _submitText(tester, '');
+    expect(find.byType(TextFormField), findsOneWidget);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Dialer proxy'));
+    await tester.pumpAndSettle();
+    await _submitText(tester, '');
+    expect(find.byType(TextFormField), findsNothing);
+    expect(container.read(patchClashConfigProvider).ntp.dialerProxy, '');
     expect(tester.takeException(), isNull);
   });
 }

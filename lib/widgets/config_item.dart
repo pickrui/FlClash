@@ -203,6 +203,7 @@ class ConfigTextItem extends _ConfigItem<String> {
     this.validator,
     this.normalize,
     this.showValueAsSubtitle = true,
+    this.allowEmpty = false,
     super.subtitle,
     super.leading,
   });
@@ -212,6 +213,7 @@ class ConfigTextItem extends _ConfigItem<String> {
   final ConfigValidator? validator;
   final String Function(String value)? normalize;
   final bool showValueAsSubtitle;
+  final bool allowEmpty;
 
   String? _normalize(String? value) {
     if (value == null) {
@@ -240,16 +242,16 @@ class ConfigTextItem extends _ConfigItem<String> {
         value: value,
         maxLength: maxLength,
         keyboardType: keyboardType,
-        validator: (value) {
-          final normalized = _normalize(value);
+        validator: (text) {
+          final normalized = _normalize(text);
           if (normalized == null || normalized.isEmpty) {
-            return appLocalizations.emptyTip(label);
+            return allowEmpty ? null : appLocalizations.emptyTip(label);
           }
           return validator?.call(normalized, appLocalizations);
         },
-        onChanged: (value) {
-          final normalized = _normalize(value);
-          if (normalized == null) {
+        onChanged: (text) {
+          final normalized = _normalize(text);
+          if (normalized == null || normalized == value) {
             return;
           }
           onChanged(ref, normalized);

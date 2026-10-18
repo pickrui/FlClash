@@ -235,6 +235,7 @@ class _OverrideItem extends StatelessWidget {
       _NtpUpdate<String> update, {
       required int maxLength,
       ConfigValidator? validator,
+      bool allowEmpty = false,
     }) {
       return ConfigTextItem(
         leading: leading,
@@ -244,6 +245,7 @@ class _OverrideItem extends StatelessWidget {
         maxLength: maxLength,
         normalize: (value) => value.trim(),
         validator: validator,
+        allowEmpty: allowEmpty,
       );
     }
 
@@ -300,6 +302,7 @@ class _OverrideItem extends StatelessWidget {
         (ntp) => ntp.dialerProxy,
         (state, value) => state.copyWith.ntp(dialerProxy: value),
         maxLength: TextInputLimits.groupName,
+        allowEmpty: true,
       ),
       NtpOverrideKey.writeToSystem => toggle(
         (ntp) => ntp.writeToSystem,
