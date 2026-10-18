@@ -920,11 +920,16 @@ class CommonPopupMenu extends StatefulWidget {
     required this.items,
     this.minWidth = 160,
     this.maxWidth = 280,
+    this.maxVisibleItems,
   });
 
   final List<PopupMenuItemData> items;
   final double minWidth;
   final double maxWidth;
+
+  /// Half of the next row shows past these, so the cut tells the menu scrolls.
+  /// Setting them builds only the rows in view, which needs rows of one height.
+  final int? maxVisibleItems;
 
   @override
   State<CommonPopupMenu> createState() => _CommonPopupMenuState();
@@ -994,6 +999,7 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
 
   final List<_MenuStep> _path = [];
   bool _folding = false;
+  ScrollController? _lazyController;
 
   @override
   void initState() {
@@ -1014,6 +1020,7 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
     _reveal.dispose();
     _unfold.dispose();
     _controller.dispose();
+    _lazyController?.dispose();
     super.dispose();
   }
 
@@ -1237,6 +1244,90 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
     );
   }
 
+  bool _buildsLazily(_MenuLevel level) =>
+      widget.maxVisibleItems != null &&
+      level.owner == null &&
+      level.items.every((item) => item.subItems.isEmpty);
+
+  TextStyle _labelStyleOf(BuildContext context) {
+    final style = DefaultTextStyle.of(context).style
+        .merge(context.textTheme.bodyMedium);
+    return MediaQuery.boldTextOf(context)
+        ? style.merge(const TextStyle(fontWeight: FontWeight.bold))
+        : style;
+  }
+
+  double _rowExtentOf(BuildContext context) {
+    final painter = TextPainter(
+      text: TextSpan(text: ' ', style: _labelStyleOf(context)),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: 1,
+    )..layout();
+    try {
+      return _itemPadding.vertical + painter.height;
+    } finally {
+      painter.dispose();
+    }
+  }
+
+  double _lazyWidthOf(BuildContext context, List<PopupMenuItemData> items) {
+    final style = _labelStyleOf(context);
+    final limit = widget.maxWidth - 2 * _cardInset;
+    var width = 0.0;
+    for (final item in items) {
+      final painter = TextPainter(
+        text: TextSpan(text: item.label, style: style),
+        textDirection: Directionality.of(context),
+        textScaler: MediaQuery.textScalerOf(context),
+        maxLines: 1,
+      )..layout();
+      final label = painter.maxIntrinsicWidth;
+      painter.dispose();
+      final checked = item.checked == true;
+      width = math.max(
+        width,
+        (checked ? _itemArrowPadding : _itemPadding).horizontal +
+            (item.glyph != null || item.icon != null ? _itemIconSize + 12 : 0) +
+            label +
+            (checked ? 8 + _submenuArrowSize : 0),
+      );
+      if (width >= limit) {
+        return limit;
+      }
+    }
+    return width.ceilToDouble();
+  }
+
+  Widget _buildLazyContent(BuildContext context, _MenuLevel level) {
+    final items = level.items;
+    final extent = _rowExtentOf(context);
+    final visible = widget.maxVisibleItems!;
+    final height = math.min(items.length, visible + 0.5) * extent;
+    final controller = _lazyController ??= () {
+      final checked = items.indexWhere((item) => item.checked == true);
+      return ScrollController(
+        initialScrollOffset: ((checked - visible ~/ 2) * extent).clamp(
+          0.0,
+          math.max(0.0, items.length * extent - height),
+        ),
+      );
+    }();
+    return SizedBox(
+      width: _lazyWidthOf(context, items),
+      height: height,
+      child: ListView.builder(
+        controller: controller,
+        padding: EdgeInsets.zero,
+        physics: const ClampingScrollPhysics(),
+        itemExtent: extent,
+        itemCount: items.length,
+        itemBuilder: (context, index) =>
+            _buildItem(context, items[index], index),
+      ),
+    );
+  }
+
   Widget _buildLevel(
     BuildContext context,
     _MenuLevel level, {
@@ -1307,12 +1398,18 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
               },
               child: Padding(
                 padding: const EdgeInsets.all(_cardInset),
-                child: SingleChildScrollView(
-                  physics: const ClampingScrollPhysics(),
-                  child: IntrinsicWidth(
-                    child: _buildContent(context, level, active: !receding),
-                  ),
-                ),
+                child: _buildsLazily(level)
+                    ? _buildLazyContent(context, level)
+                    : SingleChildScrollView(
+                        physics: const ClampingScrollPhysics(),
+                        child: IntrinsicWidth(
+                          child: _buildContent(
+                            context,
+                            level,
+                            active: !receding,
+                          ),
+                        ),
+                      ),
               ),
             ),
           ),

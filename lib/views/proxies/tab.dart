@@ -16,6 +16,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'card.dart';
 import 'common.dart';
+import 'group_tabs.dart';
 import 'pages.dart';
 
 class ProxiesTabView extends ConsumerStatefulWidget {
@@ -30,7 +31,6 @@ class ProxiesTabView extends ConsumerStatefulWidget {
 class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
     with TickerProviderStateMixin {
   TabController? _tabController;
-  final _hasMoreButtonNotifier = ValueNotifier<bool>(false);
   final _groupViewKeys = <String, GlobalKey<_ProxyGroupViewState>>{};
   int? _groupViewKeysProfileId;
 
@@ -58,7 +58,6 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
   @override
   void dispose() {
     _destroyTabController();
-    _hasMoreButtonNotifier.dispose();
     super.dispose();
   }
 
@@ -81,66 +80,6 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
       final source = ref.read(groupsProvider).getGroup(group.name) ?? group;
       await delayTestGroup(ref, source);
     }
-  }
-
-  Widget _buildMoreButton() {
-    return Consumer(
-      builder: (_, ref, _) {
-        final isMobileView = ref.watch(isMobileViewProvider);
-        return IconButton(
-          tooltip: context.appLocalizations.more,
-          onPressed: _showMoreMenu,
-          icon: isMobileView
-              ? const GlyphIcon(AppGlyphs.chevronDown)
-              : const GlyphIcon(AppGlyphs.chevronForward),
-        );
-      },
-    );
-  }
-
-  void _showMoreMenu() {
-    showSnapSheet(
-      context,
-      builder: (_, controller) {
-        return AdaptiveSheetScaffold(
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Consumer(
-              builder: (_, ref, _) {
-                final state = ref.watch(proxiesTabControllerStateProvider);
-                final groupNames = state.a;
-                final currentGroupName = state.b;
-                return SizedBox(
-                  width: double.infinity,
-                  child: Wrap(
-                    alignment: WrapAlignment.center,
-                    runSpacing: 8,
-                    spacing: 8,
-                    children: [
-                      for (final groupName in groupNames)
-                        SettingTextCard(
-                          groupName,
-                          onPressed: () {
-                            final index = groupNames.indexWhere(
-                              (item) => item == groupName,
-                            );
-                            if (index == -1) return;
-                            _tabController?.animateTo(index);
-                            _updateCurrentGroupName(groupName);
-                            Navigator.of(context).pop();
-                          },
-                          isSelected: groupName == currentGroupName,
-                        ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-          title: appLocalizations.proxyGroup,
-        );
-      },
-    );
   }
 
   void _updateCurrentGroupName(String groupName) {
@@ -195,13 +134,21 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
   @override
   Widget build(BuildContext context) {
     ref.watch(themeSettingProvider.select((state) => state.textScale));
-    final state = ref.watch(proxiesTabStateProvider);
+    final groups = ref.watch(
+      proxiesTabStateProvider.select((state) => state.groups),
+    );
+    final columns = ref.watch(
+      proxiesTabStateProvider.select((state) => state.columns),
+    );
+    final cardType = ref.watch(
+      proxiesTabStateProvider.select((state) => state.proxyCardType),
+    );
     final profileId = ref.watch(
       currentProfileProvider.select((profile) => profile?.id),
     );
-    final groups = state.groups;
     _retainGroupViewKeys(profileId, groups);
-    if (groups.isEmpty || _tabController == null) {
+    final controller = _tabController;
+    if (groups.isEmpty || controller == null) {
       return NullStatus(
         illustration: NullStatusIllustration.proxies,
         label: appLocalizations.nullTip(appLocalizations.proxies),
@@ -211,79 +158,13 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        NotificationListener<ScrollMetricsNotification>(
-          onNotification: (scrollNotification) {
-            _hasMoreButtonNotifier.value =
-                scrollNotification.metrics.maxScrollExtent > 0;
-            return false;
-          },
-          child: ValueListenableBuilder(
-            valueListenable: _hasMoreButtonNotifier,
-            builder: (_, value, child) {
-              return Stack(
-                alignment: AlignmentDirectional.centerStart,
-                children: [
-                  TabBar(
-                    controller: _tabController,
-                    padding: EdgeInsets.only(
-                      left: 16,
-                      right: 16 + (value ? 16 : 0),
-                    ),
-                    dividerColor: Colors.transparent,
-                    isScrollable: true,
-                    tabAlignment: TabAlignment.start,
-                    overlayColor: const WidgetStatePropertyAll(
-                      Colors.transparent,
-                    ),
-                    tabs: [
-                      for (final group in groups)
-                        Tab(
-                          child: Builder(
-                            builder: (context) {
-                              final style = DefaultTextStyle.of(context).style;
-                              return Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  EmojiText(group.name, style: style),
-                                  if (group.fixed?.isNotEmpty == true)
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 4),
-                                      child: GlyphIcon(
-                                        AppGlyphs.lock,
-                                        size: 14,
-                                        color: style.color,
-                                      ),
-                                    ),
-                                ],
-                              );
-                            },
-                          ),
-                        ),
-                    ],
-                  ),
-                  if (value) Positioned(right: 0, child: child!),
-                ],
-              );
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [
-                    context.colorScheme.surface.opacity10,
-                    context.colorScheme.surface,
-                  ],
-                  stops: const [0.0, 0.1],
-                ),
-              ),
-              child: _buildMoreButton(),
-            ),
-          ),
+        Padding(
+          padding: const EdgeInsets.only(top: 4, bottom: 4),
+          child: GroupTabs(controller: controller, groups: groups),
         ),
         Expanded(
           child: TabBarView(
-            controller: _tabController,
+            controller: controller,
             children: [
               for (final group in groups)
                 ProxyGroupView(
@@ -291,8 +172,8 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
                   storageKey:
                       '${profileId}_${ScrollPositionCacheKey.proxiesTabList.name}_${group.name}',
                   group: group,
-                  columns: state.columns,
-                  cardType: state.proxyCardType,
+                  columns: columns,
+                  cardType: cardType,
                 ),
             ],
           ),

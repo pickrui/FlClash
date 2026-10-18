@@ -23,11 +23,13 @@ import 'package:fl_clash/views/proxies/card.dart';
 import 'package:fl_clash/views/proxies/common.dart';
 import 'package:fl_clash/widgets/loading.dart';
 import 'package:fl_clash/widgets/card.dart';
+import 'package:fl_clash/widgets/popup.dart';
 import 'package:fl_clash/icons/icons.dart';
 import 'package:flutter/services.dart';
 
 import '../helpers/glyph_finders.dart';
 
+import 'package:fl_clash/views/proxies/group_tabs.dart';
 import 'package:fl_clash/views/proxies/list.dart';
 import 'package:fl_clash/views/proxies/tab.dart';
 import 'package:fl_clash/views/proxies/setting.dart';
@@ -584,13 +586,17 @@ void main() {
       state = state.copyWith(currentGroupName: 'Third');
       container.invalidate(proxiesTabStateProvider);
       await tester.pumpAndSettle();
-      expect(tester.widget<TabBar>(find.byType(TabBar)).controller!.index, 1);
+      expect(
+        tester.widget<GroupTabs>(find.byType(GroupTabs)).controller.index,
+        1,
+      );
+      expect(_isTabSelected(tester, 'Third'), isTrue);
       expect(selectedGroups.last, 'Third');
 
       state = state.copyWith(groups: []);
       container.invalidate(proxiesTabStateProvider);
       await tester.pumpAndSettle();
-      expect(find.byType(TabBar), findsNothing);
+      expect(find.byType(GroupTabs), findsNothing);
       expect(tester.takeException(), isNull);
 
       state = state.copyWith(groups: [third]);
@@ -603,6 +609,188 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  Future<
+    ({
+      ProviderContainer container,
+      List<String> selected,
+      void Function(ProxiesTabState) set,
+    })
+  >
+  pumpGroupTabs(
+    WidgetTester tester,
+    List<Group> groups, {
+    String? current,
+    Size size = const Size(800, 600),
+  }) async {
+    tester.view.physicalSize = size;
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    var state = ProxiesTabState(
+      groups: groups,
+      currentGroupName: current ?? groups.first.name,
+      proxyCardType: ProxyCardType.min,
+      columns: 1,
+    );
+    final container = ProviderContainer(
+      overrides: [
+        currentProfileProvider.overrideWith((_) => null),
+        proxiesTabStateProvider.overrideWith((_) => state),
+      ],
+    );
+    addTearDown(container.dispose);
+    final selected = <String>[];
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: _TestApp(child: ProxiesTabView(onGroupChanged: selected.add)),
+      ),
+    );
+    await tester.pumpAndSettle();
+    return (
+      container: container,
+      selected: selected,
+      set: (ProxiesTabState next) {
+        state = next;
+        container.invalidate(proxiesTabStateProvider);
+      },
+    );
+  }
+
+  Group tabGroup(String name, {String? fixed}) =>
+      Group(name: name, type: GroupType.Selector, fixed: fixed);
+
+  testWidgets('group chips follow a tap and a swipe between pages', (
+    tester,
+  ) async {
+    final tabs = await pumpGroupTabs(tester, [
+      for (final name in ['A', 'B', 'C']) tabGroup(name),
+    ], current: 'B');
+    expect(_isTabSelected(tester, 'B'), isTrue);
+
+    await tester.tap(find.text('C', findRichText: true));
+    await tester.pumpAndSettle();
+    expect(tabs.selected.last, 'C');
+    expect(_isTabSelected(tester, 'C'), isTrue);
+    expect(_isTabSelected(tester, 'B'), isFalse);
+
+    await tester.drag(find.byType(TabBarView), const Offset(500, 0));
+    await tester.pumpAndSettle();
+    expect(tabs.selected.last, 'B');
+    expect(_isTabSelected(tester, 'B'), isTrue);
+    expect(_isTabSelected(tester, 'C'), isFalse);
+  });
+
+  testWidgets('each chip is laid out at the width its label and lock take', (
+    tester,
+  ) async {
+    final groups = [
+      tabGroup('A'),
+      tabGroup('🚀 节点选择'),
+      tabGroup('Pinned group', fixed: 'Node'),
+    ];
+    await pumpGroupTabs(tester, groups);
+
+    expect(
+      find.descendant(
+        of: _tabOf('Pinned group'),
+        matching: find.byWidgetPredicate(
+          (widget) => widget is GlyphIcon && widget.glyph == AppGlyphs.lock,
+        ),
+      ),
+      findsOneWidget,
+    );
+    for (final group in groups) {
+      final tab = _tabOf(group.name);
+      expect(
+        tester.getSize(tab).width,
+        closeTo(
+          tester
+              .renderObject<RenderBox>(tab)
+              .getMaxIntrinsicWidth(double.infinity),
+          1,
+        ),
+        reason: group.name,
+      );
+    }
+  });
+
+  testWidgets('only the chips in view are built and a far current group '
+      'opens in view beside the more button', (tester) async {
+    await pumpGroupTabs(tester, [
+      for (var i = 0; i < 200; i++) tabGroup('Group $i'),
+    ], current: 'Group 180');
+
+    expect(
+      find
+          .descendant(
+            of: find.byType(GroupTabs),
+            matching: find.byType(CommonCard),
+            skipOffstage: false,
+          )
+          .evaluate()
+          .length,
+      lessThan(30),
+    );
+    final current = tester.getRect(_tabOf('Group 180'));
+    final more = tester.getRect(find.byTooltip('Proxy group'));
+    expect(_isTabSelected(tester, 'Group 180'), isTrue);
+    expect(current.left, greaterThanOrEqualTo(0));
+    expect(current.right, lessThan(more.left));
+  });
+
+  testWidgets('the more menu stays short and switches to the picked group', (
+    tester,
+  ) async {
+    final tabs = await pumpGroupTabs(
+      tester,
+      [for (var i = 0; i < 20; i++) tabGroup('Group $i')],
+      current: 'Group 12',
+      size: const Size(800, 1000),
+    );
+
+    await tester.tap(find.byTooltip('Proxy group'));
+    await tester.pumpAndSettle();
+    final menu = find.byType(CommonPopupMenu);
+    final bounds = tester.getRect(menu);
+    expect(bounds.height, lessThan(1000 / 2));
+    final current = tester.getCenter(
+      find.descendant(of: menu, matching: find.text('Group 12')),
+    );
+    expect(current.dy, inExclusiveRange(bounds.top, bounds.bottom));
+
+    await tester.tap(
+      find.descendant(of: menu, matching: find.text('Group 15')),
+    );
+    await tester.pumpAndSettle();
+    expect(menu, findsNothing);
+    expect(tabs.selected.last, 'Group 15');
+    expect(_isTabSelected(tester, 'Group 15'), isTrue);
+  });
+
+  testWidgets('a new current group leaves the chip strip as it was', (
+    tester,
+  ) async {
+    final groups = [
+      for (final name in ['A', 'B']) tabGroup(name),
+    ];
+    final tabs = await pumpGroupTabs(tester, groups, current: 'B');
+    final strip = tester.widget(find.byType(GroupTabs));
+
+    tabs.set(
+      ProxiesTabState(
+        groups: groups,
+        currentGroupName: 'A',
+        proxyCardType: ProxyCardType.min,
+        columns: 1,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.widget(find.byType(GroupTabs)), same(strip));
+    expect(_isTabSelected(tester, 'A'), isTrue);
+  });
 
   testWidgets(
     'a groups refresh keeps the tab page state until the profile changes',
@@ -809,6 +997,14 @@ void main() {
     },
   );
 }
+
+Finder _tabOf(String name) => find.ancestor(
+  of: find.text(name, findRichText: true),
+  matching: find.byType(CommonCard),
+);
+
+bool _isTabSelected(WidgetTester tester, String name) =>
+    tester.widget<CommonCard>(_tabOf(name)).isSelected;
 
 class _TestApp extends StatelessWidget {
   final Widget child;
