@@ -450,7 +450,7 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
       defaultDns.overrideJson(baselineDnsOverrideKeys),
     );
   }
-  final dnsOverride = realPatchConfig.dns.overrideJson(
+  final dnsOverride = realPatchConfig.dns.appliedOverrideJson(
     realPatchConfig.dnsOverrideKeys,
   );
   if (dnsOverride.isNotEmpty || !isEnableDns) {

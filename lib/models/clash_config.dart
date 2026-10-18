@@ -496,6 +496,18 @@ extension DnsOverrideExt on Dns {
     return result;
   }
 
+  /// What [keys] write over a profile: an emptied key replaces its value,
+  /// save the nameserver lists the core refuses empty.
+  Map<String, Object?> appliedOverrideJson(Set<DnsOverrideKey> keys) {
+    final json = overrideJson(keys);
+    for (final key in _nonEmptyDnsOverrideKeys) {
+      if (json[key.path] case List(isEmpty: true)) {
+        json.remove(key.path);
+      }
+    }
+    return json;
+  }
+
   String overrideYaml(Set<DnsOverrideKey> keys) =>
       yaml.encode(overrideJson(keys));
 
@@ -561,6 +573,11 @@ Object? _plainYaml(Object? node) => switch (node) {
 const _policyKeys = [
   DnsOverrideKey.nameserverPolicy,
   DnsOverrideKey.proxyServerNameserverPolicy,
+];
+
+const _nonEmptyDnsOverrideKeys = [
+  DnsOverrideKey.nameserver,
+  DnsOverrideKey.defaultNameserver,
 ];
 
 Map<String, Object> _splitPolicyServers(Map<String, String> policy) => {

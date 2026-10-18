@@ -98,6 +98,47 @@ void main() {
   );
 
   test(
+    'an emptied pick replaces the profile value save its nameservers',
+    () async {
+      const raw = <String, dynamic>{
+        'dns': {
+          'enable': true,
+          'listen': ':5353',
+          'nameserver': ['192.0.2.1'],
+          'default-nameserver': ['192.0.2.53'],
+          'fallback': ['192.0.2.9'],
+        },
+      };
+      final result = await makeRealProfileTask(
+        state(
+          raw,
+          const ClashConfig(
+            dns: Dns(
+              listen: '',
+              nameserver: [],
+              defaultNameserver: [],
+              fallback: [],
+            ),
+            dnsOverrideKeys: {
+              DnsOverrideKey.listen,
+              DnsOverrideKey.nameserver,
+              DnsOverrideKey.defaultNameserver,
+              DnsOverrideKey.fallback,
+            },
+          ),
+        ),
+      );
+      expect(result['dns'], {
+        'enable': true,
+        'listen': '',
+        'nameserver': ['192.0.2.1'],
+        'default-nameserver': ['192.0.2.53'],
+        'fallback': <String>[],
+      });
+    },
+  );
+
+  test(
     'NTP is absent without picked keys and adds only selected values',
     () async {
       const patch = ClashConfig(
