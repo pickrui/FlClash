@@ -6,6 +6,7 @@
 import 'dart:async';
 
 import 'package:animations/animations.dart';
+import 'package:fl_clash/ui/context.dart';
 import 'package:fl_clash/ui/deferred_push.dart';
 import 'package:fl_clash/ui/drag_back.dart';
 import 'package:fl_clash/ui/keyboard_inset_hold.dart';
@@ -13,6 +14,84 @@ import 'package:fl_clash/ui/page_transition.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:material_ui/material_ui.dart';
+
+class BaseNavigator {
+  static PageRoute<T> _routeOf<T>(BuildContext context, Widget child) {
+    if (!context.isMobileView) {
+      return CommonDesktopRoute(builder: (context) => child);
+    }
+    return CommonRoute(builder: (context) => child);
+  }
+
+  /// The mobile layout drops a home page's navigator, pages and all, so a
+  /// desktop page left open reopens in the mobile form while its opener stays.
+  static Future<T?> push<T>(BuildContext context, Widget child) {
+    final navigator = Navigator.of(context);
+    if (context.isMobileView) {
+      return navigator.push<T>(_routeOf(context, child));
+    }
+    final completer = Completer<T?>();
+    var popped = false;
+    void reopenIfDropped() {
+      if (popped) {
+        return;
+      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        completer.complete(context.mounted ? push<T>(context, child) : null);
+      });
+    }
+
+    final route = CommonDesktopRoute<T>(
+      builder: (_) => _DropWatch(onDropped: reopenIfDropped, child: child),
+    );
+    unawaited(
+      navigator.push<T>(route).then((value) {
+        popped = true;
+        completer.complete(value);
+      }),
+    );
+    return completer.future;
+  }
+
+  static bool close<T>(BuildContext context, [T? result]) {
+    if (!context.mounted) return false;
+    final route = ModalRoute.of(context);
+    final navigator = route?.navigator;
+    if (route == null ||
+        !route.isActive ||
+        route.isFirst ||
+        navigator == null) {
+      return false;
+    }
+    if (route.isCurrent) {
+      navigator.pop(result);
+    } else {
+      navigator.removeRoute(route, result);
+    }
+    return true;
+  }
+}
+
+class _DropWatch extends StatefulWidget {
+  const _DropWatch({required this.onDropped, required this.child});
+
+  final VoidCallback onDropped;
+  final Widget child;
+
+  @override
+  State<_DropWatch> createState() => _DropWatchState();
+}
+
+class _DropWatchState extends State<_DropWatch> {
+  @override
+  void dispose() {
+    widget.onDropped();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
 
 /// The page's route and, inside a sheet, the routes of the sheets carrying it.
 Iterable<ModalRoute<Object?>> routesCarrying(BuildContext context) sync* {

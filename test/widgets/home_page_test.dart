@@ -12,6 +12,7 @@ import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/ui/inherited.dart';
 import 'package:fl_clash/ui/navigation_dock.dart';
+import 'package:fl_clash/ui/navigator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -36,6 +37,27 @@ NavigationItem _item(PageLabel label) => NavigationItem(
   keep: false,
   builder: (_) => _Probe(label),
 );
+
+class _PageOpener extends StatelessWidget {
+  final ValueChanged<String?> onClosed;
+
+  const _PageOpener({super.key, required this.onClosed});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: FilledButton(
+        onPressed: () async => onClosed(
+          await BaseNavigator.push<String>(
+            context,
+            const Scaffold(body: Center(child: Text('Sub page'))),
+          ),
+        ),
+        child: const Text('Open page'),
+      ),
+    );
+  }
+}
 
 Override _items(List<PageLabel> labels) =>
     currentNavigationItemsStateProvider.overrideWithValue(
@@ -194,6 +216,66 @@ void main() {
     ]);
     await tester.pumpAndSettle();
     expect(find.text('proxies:true'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a desktop page left open reopens in the mobile layout', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final results = <String?>[];
+    final container = ProviderContainer(
+      overrides: [
+        profilesProvider.overrideWithValue([]),
+        currentNavigationItemsStateProvider.overrideWithValue(
+          NavigationItemsState(
+            value: [
+              NavigationItem(
+                icon: const Icon(Icons.circle),
+                label: PageLabel.dashboard,
+                builder: (_) => _PageOpener(
+                  key: const GlobalObjectKey(PageLabel.dashboard),
+                  onClosed: results.add,
+                ),
+              ),
+              _item(PageLabel.tools),
+            ],
+          ),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    container.read(viewSizeProvider.notifier).value = const Size(1200, 800);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const TestApp(includeNavigatorKey: false, child: HomePage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Open page'));
+    await tester.pumpAndSettle();
+    expect(
+      ModalRoute.of(tester.element(find.text('Sub page'))),
+      isA<CommonDesktopRoute<String>>(),
+    );
+
+    tester.view.physicalSize = const Size(500, 800);
+    container.read(viewSizeProvider.notifier).value = const Size(500, 800);
+    await tester.pumpAndSettle();
+
+    final reopened = tester.element(find.text('Sub page'));
+    expect(ModalRoute.of(reopened), isA<CommonRoute<String>>());
+    expect(results, isEmpty);
+
+    Navigator.of(reopened).pop('done');
+    await tester.pumpAndSettle();
+    expect(find.text('Sub page'), findsNothing);
+    expect(results, ['done']);
     expect(tester.takeException(), isNull);
   });
 }

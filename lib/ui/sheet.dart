@@ -135,14 +135,12 @@ Future<T?> showExtend<T>(
   if (!isMobile && !props.forceFull) {
     return _showSideSheet<T>(context, blur: props.blur, builder: builder);
   }
-  final page = SheetProvider(
-    type: SheetType.page,
-    child: builder(context, SheetType.page),
-  );
-  return Navigator.of(context).push<T>(
-    isMobile
-        ? CommonRoute(builder: (_) => page)
-        : CommonDesktopRoute(builder: (_) => page),
+  return BaseNavigator.push<T>(
+    context,
+    SheetProvider(
+      type: SheetType.page,
+      child: builder(context, SheetType.page),
+    ),
   );
 }
 

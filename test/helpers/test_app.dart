@@ -10,6 +10,7 @@ import 'package:fl_clash/manager/theme_manager.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/alert_scope.dart';
 import 'package:fl_clash/ui/dialog.dart';
+import 'package:fl_clash/ui/view_scope.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -94,11 +95,18 @@ Widget wrapAppScopes(
   final hasProviders =
       context.findAncestorWidgetOfExactType<UncontrolledProviderScope>() !=
       null;
+  final size = MediaQuery.sizeOf(context);
   return MeasureScope(
     measure: measure,
     child: AlertScope(
       presenter: const CommonAlertPresenter(),
-      child: hasProviders ? AppViewScope(child: child) : child,
+      child: hasProviders
+          ? AppViewScope(child: child)
+          : ViewScope(
+              size: size,
+              isMobile: size.width <= maxMobileWidth,
+              child: child,
+            ),
     ),
   );
 }

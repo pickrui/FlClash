@@ -10,6 +10,7 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/pop_scope.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:fl_clash/ui/surface.dart';
+import 'package:fl_clash/ui/view_scope.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -1145,7 +1146,9 @@ class _ActionEdgeGap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(width: edge.spaceOf(context, context.isMobileView));
+    return SizedBox(
+      width: edge.spaceOf(context, ViewScope.isMobileOf(context)),
+    );
   }
 }
 
@@ -1157,7 +1160,7 @@ class AppBarInsetScope extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final compact = _isCompactBar(context, context.isMobileView);
+    final compact = _isCompactBar(context, ViewScope.isMobileOf(context));
     return Theme(
       data: theme.copyWith(
         appBarTheme: theme.appBarTheme.copyWith(

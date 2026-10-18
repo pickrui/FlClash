@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
-import 'package:fl_clash/common/navigator.dart';
+import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:fl_clash/ui/surface.dart';
@@ -14,6 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../helpers/hand_over.dart';
+import '../helpers/test_app.dart';
 
 void main() {
   group('a page pushed in the mobile layout', () {
@@ -30,6 +31,7 @@ void main() {
           container: container,
           child: MaterialApp(
             theme: ThemeData().withAppSurfaces,
+            builder: (context, child) => wrapAppScopes(context, child!),
             home: Builder(
               builder: (context) {
                 home = context;

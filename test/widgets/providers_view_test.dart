@@ -7,7 +7,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:code_forge/code_forge.dart';
-import 'package:fl_clash/common/navigator.dart';
+import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/widgets/subscription_info_view.dart';

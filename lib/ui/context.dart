@@ -7,6 +7,7 @@ import 'package:fl_clash/ui/color.dart';
 import 'package:fl_clash/ui/inherited.dart';
 import 'package:fl_clash/ui/metrics.dart';
 import 'package:fl_clash/ui/typography.dart';
+import 'package:fl_clash/ui/view_scope.dart';
 import 'package:material_ui/material_ui.dart';
 
 extension UiBuildContextExtension on BuildContext {
@@ -17,7 +18,7 @@ extension UiBuildContextExtension on BuildContext {
   Duration motionDuration(Duration duration) =>
       disableAnimations ? Duration.zero : duration;
 
-  bool get isMobileView => MediaQuery.sizeOf(this).width < 600;
+  bool get isMobileView => ViewScope.isMobileOf(this, listen: false);
 
   bool get isInBottomSheet =>
       SheetProvider.of(this)?.type == SheetType.bottomSheet;

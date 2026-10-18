@@ -187,6 +187,7 @@ void main() {
       UncontrolledProviderScope(
         container: container,
         child: MaterialApp(
+          builder: (context, child) => wrapAppScopes(context, child!),
           localizationsDelegates: const [
             AppLocalizations.delegate,
             AppUiLocalizations.delegate,
@@ -236,6 +237,7 @@ void main() {
       UncontrolledProviderScope(
         container: container,
         child: MaterialApp(
+          builder: (context, child) => wrapAppScopes(context, child!),
           localizationsDelegates: const [
             AppLocalizations.delegate,
             AppUiLocalizations.delegate,

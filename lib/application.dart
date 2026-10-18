@@ -20,7 +20,7 @@ import 'package:fl_clash/ui/input.dart';
 import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/common/navigator.dart';
+import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/scroll_behavior.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/enum/enum.dart';

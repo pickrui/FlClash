@@ -6,7 +6,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/common/navigator.dart';
+import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/common/javascript.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/features/overwrite/rule_preset.dart';

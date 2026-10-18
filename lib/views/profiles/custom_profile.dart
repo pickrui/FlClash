@@ -8,7 +8,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/common/navigator.dart';
+import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/overwrite/custom_import.dart';
 import 'package:fl_clash/features/overwrite/overwrite_sheet.dart';

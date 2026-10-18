@@ -45,6 +45,7 @@ void main() {
               ...GlobalMaterialLocalizations.delegates,
             ],
             supportedLocales: AppLocalizations.delegate.supportedLocales,
+            builder: (context, child) => wrapAppScopes(context, child!),
             home: const CloudAccountPage(),
           ),
         ),

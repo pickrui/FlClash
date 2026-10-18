@@ -6,7 +6,7 @@
 import 'dart:convert';
 
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/common/navigator.dart';
+import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
