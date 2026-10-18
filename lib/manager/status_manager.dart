@@ -31,7 +31,7 @@ class StatusManager extends StatefulWidget {
   State<StatusManager> createState() => StatusManagerState();
 }
 
-class StatusManagerState extends State<StatusManager> {
+class StatusManagerState extends MessageHostState<StatusManager> {
   final _messagesNotifier = ValueNotifier<List<CommonMessage>>([]);
   final _bufferMessages = Queue<CommonMessage>();
   final _activeTimers = <String, Timer>{};
@@ -48,6 +48,7 @@ class StatusManagerState extends State<StatusManager> {
     super.dispose();
   }
 
+  @override
   void message(String text, {MessageActionState? actionState}) {
     final commonMessage = CommonMessage(
       id: utils.uuidV4,
