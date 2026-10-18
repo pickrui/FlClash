@@ -16,8 +16,9 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:riverpod/riverpod.dart';
+
+import '../helpers/app_paths.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -25,9 +26,9 @@ void main() {
   late Directory tempDir;
   late ProviderContainer container;
 
-  setUpAll(() {
+  setUpAll(() async {
     tempDir = Directory.systemTemp.createTempSync('flclash_test_paths_');
-    PathProviderPlatform.instance = _FakePathProvider(tempDir.path);
+    await useAppPaths(tempDir);
   });
 
   setUp(() {
@@ -602,24 +603,6 @@ class _DelayedCancelIpAdapter implements HttpClientAdapter {
 
   @override
   void close({bool force = false}) {}
-}
-
-class _FakePathProvider extends PathProviderPlatform {
-  final String path;
-
-  _FakePathProvider(this.path);
-
-  @override
-  Future<String?> getTemporaryPath() async => path;
-
-  @override
-  Future<String?> getApplicationSupportPath() async => path;
-
-  @override
-  Future<String?> getApplicationCachePath() async => path;
-
-  @override
-  Future<String?> getDownloadsPath() async => path;
 }
 
 /// Waits for the debounced check to reach the adapter; a fixed delay is too

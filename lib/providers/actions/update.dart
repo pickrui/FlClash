@@ -116,7 +116,7 @@ extension InitControllerExt on AppController {
   Future<void> _sweepUpdateDownloads() async {
     final task = _ref.read(appUpdateDownloadProvider);
     try {
-      final directory = await appPath.tempDir.future;
+      final directory = await appPath.tempDir;
       await task.cleanStaleDownloads(directory);
     } catch (error) {
       commonPrint.log(
@@ -347,7 +347,7 @@ extension InitControllerExt on AppController {
       return;
     }
     final task = _ref.read(appUpdateDownloadProvider);
-    final directory = await appPath.tempDir.future;
+    final directory = await appPath.tempDir;
     final build = _appUpdateDownloadInfo?.remoteBuildNumber ?? 0;
     final sources = [
       downloadUrl,

@@ -8,7 +8,8 @@ import 'dart:convert';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+import '../helpers/preferences.dart';
 
 const _narrowed172 = [
   '172.20.*',
@@ -49,7 +50,7 @@ Future<List<String>> _load(
 }
 
 void main() {
-  setUpAll(() => SharedPreferences.setMockInitialValues({}));
+  setUpAll(mockPreferences);
   setUp(_savedAtVersion.clear);
 
   test('v1 config expands 172.2* in place and keeps user entries', () async {

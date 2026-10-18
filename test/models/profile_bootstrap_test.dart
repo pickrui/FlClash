@@ -10,31 +10,18 @@ import 'package:fl_clash/common/lock.dart';
 import 'package:fl_clash/common/oix_cloud.dart';
 import 'package:fl_clash/models/profile.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 
-class _Paths extends PathProviderPlatform {
-  _Paths(this.path);
-  final String path;
-  @override
-  Future<String?> getApplicationSupportPath() async => path;
-  @override
-  Future<String?> getApplicationCachePath() async => path;
-  @override
-  Future<String?> getTemporaryPath() async => path;
-}
+import '../helpers/app_paths.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late Directory directory;
-  late PathProviderPlatform originalPaths;
   setUpAll(() async {
     directory = await Directory.systemTemp.createTemp('profile-bootstrap-');
-    originalPaths = PathProviderPlatform.instance;
-    PathProviderPlatform.instance = _Paths(directory.path);
+    await useAppPaths(directory);
   });
   tearDownAll(() async {
     registerEnsureCloudReady(() async {});
-    PathProviderPlatform.instance = originalPaths;
     await directory.delete(recursive: true);
   });
 

@@ -13,13 +13,13 @@ import 'package:fl_clash/common/dav_client.dart';
 import 'package:fl_clash/common/path.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+
+import '../helpers/app_paths.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late Directory root;
   late Directory directory;
-  late PathProviderPlatform originalPaths;
   final readClients = <_Adapter>[];
 
   _Adapter readAdapter(Future<ResponseBody> Function(RequestOptions) respond) {
@@ -38,9 +38,8 @@ void main() {
 
   setUpAll(() async {
     root = Directory.systemTemp.createTempSync('dav-race-');
-    originalPaths = PathProviderPlatform.instance;
-    PathProviderPlatform.instance = _Paths(root.path);
-    directory = await appPath.tempDir.future;
+    await useAppPaths(root);
+    directory = await appPath.tempDir;
   });
   setUp(readClients.clear);
   tearDown(() async {
@@ -50,7 +49,6 @@ void main() {
     }
   });
   tearDownAll(() {
-    PathProviderPlatform.instance = originalPaths;
     root.deleteSync(recursive: true);
   });
 
@@ -783,17 +781,4 @@ class _Adapter implements HttpClientAdapter {
   void close({bool force = false}) {
     if (!_closed.isCompleted) _closed.complete();
   }
-}
-
-class _Paths extends PathProviderPlatform {
-  _Paths(this.path);
-  final String path;
-  @override
-  Future<String?> getApplicationSupportPath() async => path;
-  @override
-  Future<String?> getApplicationCachePath() async => path;
-  @override
-  Future<String?> getTemporaryPath() async => path;
-  @override
-  Future<String?> getDownloadsPath() async => path;
 }

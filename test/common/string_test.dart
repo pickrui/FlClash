@@ -7,7 +7,8 @@ import 'dart:io';
 
 import 'package:fl_clash/common/string.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+
+import '../helpers/app_paths.dart';
 
 void main() {
   test(
@@ -38,9 +39,9 @@ void main() {
 
   late Directory tempDir;
 
-  setUpAll(() {
+  setUpAll(() async {
     tempDir = Directory.systemTemp.createTempSync('flclash_string_test_paths_');
-    PathProviderPlatform.instance = _FakePathProvider(tempDir.path);
+    await useAppPaths(tempDir);
   });
 
   tearDownAll(() {
@@ -164,22 +165,4 @@ void main() {
       expect('  hello  '.takeFirstValid([]), 'hello');
     });
   });
-}
-
-class _FakePathProvider extends PathProviderPlatform {
-  final String path;
-
-  _FakePathProvider(this.path);
-
-  @override
-  Future<String?> getTemporaryPath() async => path;
-
-  @override
-  Future<String?> getApplicationSupportPath() async => path;
-
-  @override
-  Future<String?> getApplicationCachePath() async => path;
-
-  @override
-  Future<String?> getDownloadsPath() async => path;
 }

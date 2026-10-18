@@ -11,6 +11,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/services/config_key_store.dart';
 import 'package:fl_clash/services/durable_config_store.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
@@ -19,6 +20,7 @@ import 'package:shared_preferences_platform_interface/types.dart';
 import 'boot_record.dart';
 import 'constant.dart';
 import 'durable_file.dart';
+import 'future.dart';
 import 'lock.dart';
 import 'path.dart';
 import 'print.dart';
@@ -158,7 +160,7 @@ class AtomicFilePreferencesStore extends SharedPreferencesStorePlatform {
 
 class Preferences {
   static Preferences? _instance;
-  Future<SharedPreferences?>? _sharedPreferences;
+  var _store = ResolveOnce(_open);
   final _davDeviceLock = AsyncStorageLock();
   final _oixDeviceLock = AsyncStorageLock();
   static final _uuidV4Pattern = RegExp(
@@ -174,11 +176,16 @@ class Preferences {
     return _instance!;
   }
 
-  Future<SharedPreferences?> _loadSharedPreferences() {
-    return _sharedPreferences ??= _createSharedPreferences();
+  /// Opens the store again; await it outside any fake-async zone.
+  @visibleForTesting
+  Future<void> rebind() async {
+    _store = ResolveOnce(_open);
+    await _store.value;
   }
 
-  Future<SharedPreferences?> _createSharedPreferences() async {
+  Future<SharedPreferences?> _loadSharedPreferences() => _store.value;
+
+  static Future<SharedPreferences?> _open() async {
     try {
       return await SharedPreferences.getInstance();
     } catch (_) {

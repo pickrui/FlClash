@@ -11,6 +11,8 @@ import 'package:fl_clash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../helpers/preferences.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -128,7 +130,7 @@ void main() {
   });
 
   test('concurrent backups share a persisted installation identity', () async {
-    SharedPreferences.setMockInitialValues({});
+    await mockPreferences();
     final ids = await Future.wait(
       List.generate(8, (_) => Preferences().getDavDeviceId()),
     );

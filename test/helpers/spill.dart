@@ -10,23 +10,6 @@ import 'dart:math';
 import 'package:cryptography/cryptography.dart';
 import 'package:fl_clash/core/method.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
-
-/// Install before anything reads appPath, which resolves its folders once.
-class TempAppPaths extends PathProviderPlatform {
-  TempAppPaths(this.path);
-
-  final String path;
-
-  @override
-  Future<String?> getApplicationSupportPath() async => path;
-
-  @override
-  Future<String?> getTemporaryPath() async => path;
-
-  @override
-  Future<String?> getDownloadsPath() async => path;
-}
 
 /// Seals [reply] as core/spill.go does, using the reference AEAD.
 Future<(File, String)> sealSpilledReply(

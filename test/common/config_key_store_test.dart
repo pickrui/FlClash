@@ -13,8 +13,9 @@ import 'package:fl_clash/utils/safe_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../helpers/app_paths.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -38,7 +39,7 @@ void main() {
 
   setUpAll(() async {
     directory = await Directory.systemTemp.createTemp('config_key_store_test_');
-    PathProviderPlatform.instance = _FakePathProvider(directory.path);
+    await useAppPaths(directory);
     configPath = await appPath.durableConfigPath;
   });
 
@@ -298,22 +299,4 @@ void main() {
       );
     },
   );
-}
-
-class _FakePathProvider extends PathProviderPlatform {
-  final String path;
-
-  _FakePathProvider(this.path);
-
-  @override
-  Future<String?> getTemporaryPath() async => path;
-
-  @override
-  Future<String?> getApplicationSupportPath() async => path;
-
-  @override
-  Future<String?> getApplicationCachePath() async => path;
-
-  @override
-  Future<String?> getDownloadsPath() async => path;
 }

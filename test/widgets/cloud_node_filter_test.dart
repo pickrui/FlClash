@@ -13,8 +13,8 @@ import 'package:fl_clash/views/cloud/cloud_account_page.dart';
 import 'package:fl_clash/views/cloud/node_filter_page.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import '../helpers/preferences.dart';
 import '../helpers/test_app.dart';
 
 NodeFilterCatalog _catalog(
@@ -193,7 +193,7 @@ Future<void> _pumpAccountPage(
   _Account? account,
 }) async {
   _setView(tester);
-  SharedPreferences.setMockInitialValues({});
+  await mockPreferences();
   await tester.pumpWidget(const SizedBox.shrink());
   await tester.pumpWidget(
     TestApp(

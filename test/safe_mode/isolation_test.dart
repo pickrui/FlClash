@@ -52,17 +52,17 @@ void main() {
         'flutter.config': 'normal-config',
         'flutter.cloud_token': 'normal-token',
       });
-      await (await appPath.dataDir.future).delete(recursive: true);
+      await (await appPath.dataDir).delete(recursive: true);
     });
 
     test(
       'configuration, database and downloads stay in a new private directory',
       () async {
         final systemTemp = Directory.systemTemp;
-        final home = await IOOverrides.runZoned(
-          () => appPath.homeDirPath,
-          getSystemTempDirectory: () => _PermissiveTempDirectory(systemTemp),
-        );
+        final home = await IOOverrides.runZoned(() async {
+          await appPath.rebind();
+          return appPath.homeDirPath;
+        }, getSystemTempDirectory: () => _PermissiveTempDirectory(systemTemp));
         expect(p.basename(home), startsWith('flclash-safe-'));
         if (!Platform.isWindows) {
           expect(p.dirname(unixSocketPath), Directory.systemTemp.path);

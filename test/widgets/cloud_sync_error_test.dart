@@ -20,15 +20,15 @@ import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import '../helpers/preferences.dart';
 import '../helpers/test_app.dart';
 
 void main() {
   testWidgets(
     'failed account refresh ends the empty-page spinner and allows retry',
     (tester) async {
-      SharedPreferences.setMockInitialValues({});
+      await mockPreferences();
       final account = _FailedAccount();
       await tester.pumpWidget(
         ProviderScope(
@@ -563,7 +563,7 @@ Future<ProviderContainer> _pumpCloudPage(
   CloudAccountNotifier? account,
   CloudNodeFilterApi? nodeFilterApi,
 }) async {
-  SharedPreferences.setMockInitialValues({});
+  await mockPreferences();
   await tester.pumpWidget(
     TestApp(
       locale: locale,

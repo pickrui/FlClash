@@ -16,7 +16,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+import '../helpers/preferences.dart';
 
 const _snapshot = NetworkDiagnosticSnapshot(
   profileApplied: true,
@@ -95,7 +96,7 @@ Future<ProviderContainer> _pump(
   _ControlledService service, {
   NetworkDiagnosticFixHandler? onFix,
 }) async {
-  SharedPreferences.setMockInitialValues({});
+  await mockPreferences();
   await tester.pumpWidget(
     ProviderScope(
       overrides: [

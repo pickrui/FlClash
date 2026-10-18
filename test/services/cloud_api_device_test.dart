@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart' show Locale;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../helpers/preferences.dart';
 import '../support/cloud_api_adapter.dart';
 
 final _uuidV4 = RegExp(
@@ -18,7 +19,7 @@ final _uuidV4 = RegExp(
 
 void main() {
   setUpAll(() async {
-    SharedPreferences.setMockInitialValues({});
+    await mockPreferences();
     await AppLocalizations.load(const Locale('en'));
   });
 

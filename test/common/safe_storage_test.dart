@@ -11,8 +11,10 @@ import 'package:fl_clash/utils/safe_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../helpers/app_paths.dart';
+import '../helpers/preferences.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -24,16 +26,16 @@ void main() {
 
   setUpAll(() async {
     tempDir = await Directory.systemTemp.createTemp('safe_storage_test_');
-    PathProviderPlatform.instance = _FakePathProvider(tempDir.path);
+    await useAppPaths(tempDir);
   });
 
   tearDownAll(() async {
     await tempDir.delete(recursive: true);
   });
 
-  setUp(() {
+  setUp(() async {
     debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
-    SharedPreferences.setMockInitialValues({});
+    await mockPreferences();
     keychainCalls = [];
     messenger.setMockMethodCallHandler(channel, (call) async {
       keychainCalls.add(call);
@@ -88,9 +90,7 @@ void main() {
   });
 
   test('macOS fallback write clears a previous deletion marker', () async {
-    SharedPreferences.setMockInitialValues({
-      SafeStorage.deletionMarkerKey('cloud_token'): true,
-    });
+    await mockPreferences({SafeStorage.deletionMarkerKey('cloud_token'): true});
 
     await SafeStorage.write('cloud_token', 'new-token');
 
@@ -167,7 +167,7 @@ void main() {
       'invalid macOS preference $invalidValue recovers a valid legacy seed',
       () async {
         const key = 'config_age_seed';
-        SharedPreferences.setMockInitialValues({key: invalidValue});
+        await mockPreferences({key: invalidValue});
         messenger.setMockMethodCallHandler(channel, (call) async {
           keychainCalls.add(call);
           return 'valid-seed';
@@ -190,7 +190,7 @@ void main() {
 
   test('invalid legacy seed does not replace a damaged preference', () async {
     const key = 'invalid_legacy_seed';
-    SharedPreferences.setMockInitialValues({key: 'damaged-seed'});
+    await mockPreferences({key: 'damaged-seed'});
     messenger.setMockMethodCallHandler(channel, (call) async => 'also-damaged');
 
     expect(
@@ -232,10 +232,7 @@ void main() {
   test('retry and legacy evidence cannot override a deletion marker', () async {
     const key = 'deleted_seed';
     final deletionKey = SafeStorage.deletionMarkerKey(key);
-    SharedPreferences.setMockInitialValues({
-      key: 'deleted-seed',
-      deletionKey: true,
-    });
+    await mockPreferences({key: 'deleted-seed', deletionKey: true});
 
     expect(
       await SafeStorage.read(key, retry: true, legacyEvidence: true),
@@ -320,7 +317,7 @@ void main() {
     test('$platform deletion follows an in-flight migration write', () async {
       debugDefaultTargetPlatformOverride = platform;
       const key = 'deleted_migrating_token';
-      SharedPreferences.setMockInitialValues({key: 'old-token'});
+      await mockPreferences({key: 'old-token'});
       final started = Completer<void>();
       final releaseWrite = Completer<void>();
       String? secureValue;
@@ -440,22 +437,4 @@ void main() {
       expect(keychainCalls, isEmpty);
     }, skip: Platform.isWindows);
   });
-}
-
-class _FakePathProvider extends PathProviderPlatform {
-  final String path;
-
-  _FakePathProvider(this.path);
-
-  @override
-  Future<String?> getTemporaryPath() async => path;
-
-  @override
-  Future<String?> getApplicationSupportPath() async => path;
-
-  @override
-  Future<String?> getApplicationCachePath() async => path;
-
-  @override
-  Future<String?> getDownloadsPath() async => path;
 }

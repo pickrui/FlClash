@@ -16,8 +16,9 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:yaml/yaml.dart';
+
+import '../helpers/app_paths.dart';
 
 final class _MockCoreHandler extends Mock implements CoreHandlerInterface {}
 
@@ -26,7 +27,7 @@ void main() {
   setUpAll(() async {
     registerFallbackValue(Duration.zero);
     tempDirectory = await Directory.systemTemp.createTemp('core-controller-');
-    PathProviderPlatform.instance = _TempPaths(tempDirectory.path);
+    await useAppPaths(tempDirectory);
   });
   tearDownAll(() => tempDirectory.delete(recursive: true));
   const setupParams = SetupParams(
@@ -788,19 +789,4 @@ void main() {
       throwsA(isA<CoreMethodException>()),
     );
   });
-}
-
-class _TempPaths extends PathProviderPlatform {
-  _TempPaths(this.path);
-
-  final String path;
-
-  @override
-  Future<String?> getApplicationSupportPath() async => path;
-
-  @override
-  Future<String?> getTemporaryPath() async => path;
-
-  @override
-  Future<String?> getDownloadsPath() async => path;
 }

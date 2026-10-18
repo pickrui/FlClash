@@ -16,8 +16,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 
+import '../helpers/app_paths.dart';
 import '../helpers/spill.dart';
 
 class _Listener with ServiceListener {
@@ -54,7 +54,7 @@ void main() {
 
   setUpAll(() async {
     home = await Directory.systemTemp.createTemp('service-spill-');
-    PathProviderPlatform.instance = TempAppPaths(home.path);
+    await useAppPaths(home);
   });
   tearDownAll(() => home.delete(recursive: true));
 

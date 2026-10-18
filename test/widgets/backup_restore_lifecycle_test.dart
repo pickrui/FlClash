@@ -20,20 +20,9 @@ import 'package:fl_clash/widgets/list.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart' show XFile;
 import 'package:material_ui/material_ui.dart';
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 
+import '../helpers/app_paths.dart';
 import '../helpers/test_app.dart';
-
-class _Paths extends PathProviderPlatform {
-  _Paths(this.path);
-  final String path;
-  @override
-  Future<String> getApplicationSupportPath() async => path;
-  @override
-  Future<String> getTemporaryPath() async => path;
-  @override
-  Future<String> getDownloadsPath() async => path;
-}
 
 class _Files extends FilePickerPlatform {
   Future<PlatformFile?> Function() select = () async => null;
@@ -151,16 +140,14 @@ void main() {
   late _Backups backups;
   late _Common common;
   late ValueNotifier<bool> active;
-  final originalPaths = PathProviderPlatform.instance;
   final originalFiles = FilePickerPlatform.instance;
 
   setUpAll(() async {
     directory = await Directory.systemTemp.createTemp('backup-lifecycle-');
-    PathProviderPlatform.instance = _Paths(directory.path);
+    await useAppPaths(directory);
     await Future.wait([appPath.downloadDirPath, appPath.tempPath]);
   });
   tearDownAll(() async {
-    PathProviderPlatform.instance = originalPaths;
     FilePickerPlatform.instance = originalFiles;
     await directory.delete(recursive: true);
   });

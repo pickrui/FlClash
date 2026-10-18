@@ -12,7 +12,6 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/views/profiles/edit.dart';
 import 'package:fl_clash/widgets/null_status.dart';
 import 'package:fl_clash/widgets/chip.dart';
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,18 +19,19 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
 
+import '../helpers/app_paths.dart';
+import '../helpers/preferences.dart';
+
 void main() {
   testWidgets(
     'missing local file stays absent and keeps the upload recovery action',
     (tester) async {
-      SharedPreferences.setMockInitialValues({});
+      await mockPreferences();
       final directory = (await tester.runAsync(
         () => Directory.systemTemp.createTemp('profile-edit-'),
       ))!;
-      final originalPaths = PathProviderPlatform.instance;
-      PathProviderPlatform.instance = _Paths(directory.path);
+      await tester.runAsync(() => useAppPaths(directory));
       addTearDown(() async {
-        PathProviderPlatform.instance = originalPaths;
         await directory.delete(recursive: true);
       });
       await tester.runAsync(() async {
@@ -146,7 +146,7 @@ void main() {
   testWidgets(
     'managed profile exposes automatic updates and rejects zero minutes',
     (tester) async {
-      SharedPreferences.setMockInitialValues({});
+      await mockPreferences();
       await tester.binding.setSurfaceSize(const Size(800, 1200));
       addTearDown(() => tester.binding.setSurfaceSize(null));
       await _openProfile(tester);
@@ -210,11 +210,4 @@ class _ControlledPreferences extends InMemorySharedPreferencesStore {
   final Future<Map<String, Object>> Function() read;
   @override
   Future<Map<String, Object>> getAll() => read();
-}
-
-class _Paths extends PathProviderPlatform {
-  _Paths(this.path);
-  final String path;
-  @override
-  Future<String> getApplicationSupportPath() async => path;
 }

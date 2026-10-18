@@ -16,8 +16,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 
+import '../helpers/app_paths.dart';
 import '../helpers/test_app.dart';
 
 void main() {
@@ -27,7 +27,7 @@ void main() {
 
   setUpAll(() async {
     tempDir = Directory.systemTemp.createTempSync('flclash_geo_resource_');
-    PathProviderPlatform.instance = _FakePathProvider(tempDir.path);
+    await useAppPaths(tempDir);
     await appPath.homeDirPath;
   });
 
@@ -156,22 +156,4 @@ void main() {
 
     await tester.pumpWidget(const SizedBox.shrink());
   });
-}
-
-class _FakePathProvider extends PathProviderPlatform {
-  final String path;
-
-  _FakePathProvider(this.path);
-
-  @override
-  Future<String?> getTemporaryPath() async => path;
-
-  @override
-  Future<String?> getApplicationSupportPath() async => path;
-
-  @override
-  Future<String?> getApplicationCachePath() async => path;
-
-  @override
-  Future<String?> getDownloadsPath() async => path;
 }

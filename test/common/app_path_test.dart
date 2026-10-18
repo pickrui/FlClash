@@ -7,12 +7,15 @@ import 'dart:io';
 
 import 'package:fl_clash/common/path.dart';
 import 'package:fl_clash/common/window.dart';
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:test/test.dart';
 
 void main() {
   setUpAll(() {
-    PathProviderPlatform.instance = _UnwritableDataPathProvider();
+    AppPath.supportDirectory = () async =>
+        throw const FileSystemException('Creation failed', '/config/data');
+    AppPath.temporaryDirectory = () async => Directory.systemTemp;
+    AppPath.downloadDirectory = () async => null;
+    return appPath.rebind();
   });
 
   test('an unavailable data directory fails its callers', () async {
@@ -45,17 +48,4 @@ void main() {
       );
     },
   );
-}
-
-class _UnwritableDataPathProvider extends PathProviderPlatform {
-  @override
-  Future<String?> getApplicationSupportPath() async {
-    throw const FileSystemException('Creation failed', '/config/data');
-  }
-
-  @override
-  Future<String?> getTemporaryPath() async => Directory.systemTemp.path;
-
-  @override
-  Future<String?> getDownloadsPath() async => null;
 }

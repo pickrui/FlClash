@@ -16,36 +16,21 @@ import 'package:fl_clash/models/profile.dart';
 import 'package:fl_clash/services/age_crypto.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-class _Paths extends PathProviderPlatform {
-  _Paths(this.path);
-  final String path;
-  @override
-  Future<String?> getApplicationSupportPath() async => path;
-  @override
-  Future<String?> getApplicationCachePath() async => path;
-  @override
-  Future<String?> getTemporaryPath() async => path;
-  @override
-  Future<String?> getDownloadsPath() async => path;
-}
+import '../helpers/app_paths.dart';
+import '../helpers/preferences.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late Directory directory;
-  late PathProviderPlatform originalPaths;
   setUpAll(() async {
     directory = await Directory.systemTemp.createTemp('profile-persistence-');
-    originalPaths = PathProviderPlatform.instance;
-    PathProviderPlatform.instance = _Paths(directory.path);
-    SharedPreferences.setMockInitialValues({});
+    await useAppPaths(directory);
+    await mockPreferences();
     registerEnsureCloudReady(() async {});
     registerCanFetchManagedConfig(() => true);
   });
   tearDownAll(() async {
-    PathProviderPlatform.instance = originalPaths;
     await directory.delete(recursive: true);
   });
 

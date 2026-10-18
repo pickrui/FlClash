@@ -14,8 +14,8 @@ import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 
+import '../helpers/app_paths.dart';
 import '../helpers/test_app.dart';
 
 class _ProxiesAction extends ProxiesAction {
@@ -33,37 +33,16 @@ class _ProxiesAction extends ProxiesAction {
   void updateGroupsDebounce() => groups++;
 }
 
-class _Paths extends PathProviderPlatform {
-  _Paths(this.path);
-
-  final String path;
-
-  @override
-  Future<String?> getApplicationSupportPath() async => path;
-
-  @override
-  Future<String?> getApplicationCachePath() async => path;
-
-  @override
-  Future<String?> getTemporaryPath() async => path;
-
-  @override
-  Future<String?> getDownloadsPath() async => path;
-}
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late Directory directory;
-  late PathProviderPlatform originalPaths;
 
   setUpAll(() async {
     directory = await Directory.systemTemp.createTemp('core-manager-');
-    originalPaths = PathProviderPlatform.instance;
-    PathProviderPlatform.instance = _Paths(directory.path);
+    await useAppPaths(directory);
   });
 
   tearDownAll(() async {
-    PathProviderPlatform.instance = originalPaths;
     await directory.delete(recursive: true);
   });
 

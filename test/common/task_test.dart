@@ -17,9 +17,10 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart' show TestWidgetsFlutterBinding;
 import 'package:path/path.dart' show basename;
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite;
 import 'package:test/test.dart';
+
+import '../helpers/app_paths.dart';
 
 MakeRealProfileState _makeRealProfileState({
   Map<String, dynamic> rawConfig = const {
@@ -51,11 +52,11 @@ void main() {
 
   late Directory pathProviderDir;
 
-  setUpAll(() {
+  setUpAll(() async {
     pathProviderDir = Directory.systemTemp.createTempSync(
       'flclash_task_test_paths_',
     );
-    PathProviderPlatform.instance = _FakePathProvider(pathProviderDir.path);
+    await useAppPaths(pathProviderDir);
   });
 
   tearDownAll(() {
@@ -1981,22 +1982,4 @@ void main() {
 
     await expectLater(result, throwsA(isA<EmptyCustomOverwriteException>()));
   });
-}
-
-class _FakePathProvider extends PathProviderPlatform {
-  final String path;
-
-  _FakePathProvider(this.path);
-
-  @override
-  Future<String?> getTemporaryPath() async => path;
-
-  @override
-  Future<String?> getApplicationSupportPath() async => path;
-
-  @override
-  Future<String?> getApplicationCachePath() async => path;
-
-  @override
-  Future<String?> getDownloadsPath() async => path;
 }

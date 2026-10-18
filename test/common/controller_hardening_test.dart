@@ -9,8 +9,9 @@ import 'package:fl_clash/common/task.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart' show TestWidgetsFlutterBinding;
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:test/test.dart';
+
+import '../helpers/app_paths.dart';
 
 Future<Map<String, dynamic>> _make(
   Map<String, dynamic> rawConfig, {
@@ -41,9 +42,9 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late Directory paths;
 
-  setUpAll(() {
+  setUpAll(() async {
     paths = Directory.systemTemp.createTempSync('flclash_controller_test_');
-    PathProviderPlatform.instance = _FakePathProvider(paths.path);
+    await useAppPaths(paths);
   });
 
   tearDownAll(() => paths.deleteSync(recursive: true));
@@ -113,22 +114,4 @@ void main() {
       expect(ClashConfig.fromJson({}).secret, isEmpty);
     });
   });
-}
-
-class _FakePathProvider extends PathProviderPlatform {
-  final String path;
-
-  _FakePathProvider(this.path);
-
-  @override
-  Future<String?> getTemporaryPath() async => path;
-
-  @override
-  Future<String?> getApplicationSupportPath() async => path;
-
-  @override
-  Future<String?> getApplicationCachePath() async => path;
-
-  @override
-  Future<String?> getDownloadsPath() async => path;
 }

@@ -12,8 +12,8 @@ import 'package:fl_clash/core/desktop/rpc_client.dart';
 import 'package:fl_clash/core/event.dart';
 import 'package:fl_clash/core/method.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 
+import '../../helpers/app_paths.dart';
 import '../../helpers/spill.dart';
 import 'fakes.dart';
 
@@ -30,7 +30,7 @@ void main() {
 
   setUpAll(() async {
     home = await Directory.systemTemp.createTemp('rpc-spill-');
-    PathProviderPlatform.instance = TempAppPaths(home.path);
+    await useAppPaths(home);
   });
   tearDownAll(() => home.delete(recursive: true));
 

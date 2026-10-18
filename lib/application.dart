@@ -56,7 +56,7 @@ class ApplicationState extends ConsumerState<Application> {
     if (system.isDesktop && !safeModeBuild) {
       appController.desktopUpdateInstaller = DesktopUpdater(
         loadScript: (name) => rootBundle.loadString('assets/update/$name'),
-        directory: () => appPath.tempDir.future,
+        directory: () => appPath.tempDir,
       );
     }
     system.requestAdminPassword = () => globalState.showCommonDialog<String>(

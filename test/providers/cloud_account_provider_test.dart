@@ -17,6 +17,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../helpers/preferences.dart';
+
 void main() {
   test(
     'a superseded sign-in still fails without clearing the new session',
@@ -49,7 +51,7 @@ void main() {
       await AppLocalizations.load(const Locale('en'));
       debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
       addTearDown(() => debugDefaultTargetPlatformOverride = null);
-      SharedPreferences.setMockInitialValues({});
+      await mockPreferences();
       final api = CloudApiService();
       addTearDown(() => api.setToken(null));
       final notifier = _TokenSignInNotifier();
@@ -73,7 +75,7 @@ void main() {
     await AppLocalizations.load(const Locale('en'));
     debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
     addTearDown(() => debugDefaultTargetPlatformOverride = null);
-    SharedPreferences.setMockInitialValues({});
+    await mockPreferences();
     final api = CloudApiService();
     addTearDown(() => api.setToken(null));
     final removal = Completer<void>();
@@ -105,7 +107,7 @@ void main() {
     TestWidgetsFlutterBinding.ensureInitialized();
     debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
     addTearDown(() => debugDefaultTargetPlatformOverride = null);
-    SharedPreferences.setMockInitialValues({});
+    await mockPreferences();
     final notifier = _UnreadableTokenNotifier();
     final container = ProviderContainer(
       overrides: [cloudAccountProvider.overrideWith(() => notifier)],
@@ -134,7 +136,7 @@ void main() {
       TestWidgetsFlutterBinding.ensureInitialized();
       debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
       addTearDown(() => debugDefaultTargetPlatformOverride = null);
-      SharedPreferences.setMockInitialValues({});
+      await mockPreferences();
       final ready = Completer<void>();
       final notifier = _InitializingNotifier(ready.future);
       final container = ProviderContainer(
@@ -481,7 +483,7 @@ void main() {
       'an account reply is discarded when its session changes during caching: $duringCache',
       () async {
         TestWidgetsFlutterBinding.ensureInitialized();
-        SharedPreferences.setMockInitialValues({});
+        await mockPreferences();
         final api = CloudApiService()..setToken('old-session');
         addTearDown(() => api.setToken(null));
         final notifier = _StaleRefreshNotifier();
@@ -540,7 +542,7 @@ void main() {
       'disposing an account during refresh ignores its result: $fails',
       () async {
         TestWidgetsFlutterBinding.ensureInitialized();
-        SharedPreferences.setMockInitialValues({});
+        await mockPreferences();
         final notifier = _StaleRefreshNotifier();
         final container = ProviderContainer(
           overrides: [cloudAccountProvider.overrideWith(() => notifier)],
@@ -572,7 +574,7 @@ void main() {
     setUp(() async {
       TestWidgetsFlutterBinding.ensureInitialized();
       debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
-      SharedPreferences.setMockInitialValues({});
+      await mockPreferences();
       await SafeStorage.write('cloud_token', 'ios-token');
       api = CloudApiService()..setToken('ios-token');
     });

@@ -64,6 +64,24 @@ Future<void> runWithConcurrency<T>({
   }
 }
 
+/// Resolves once, then hands out the value rather than the future that
+/// resolved it: a completed future runs its listeners in the zone it was
+/// created in, which under test may be a fake-async zone nothing drives.
+class ResolveOnce<T> {
+  ResolveOnce(this._resolve);
+
+  final Future<T> Function() _resolve;
+  Future<T>? _pending;
+  ({T value})? _resolved;
+
+  Future<T> get value async {
+    if (_resolved case (:final value)) return value;
+    final value = await (_pending ??= _resolve());
+    _resolved = (value: value);
+    return value;
+  }
+}
+
 extension FutureExt<T> on Future<T> {
   Future<T> withTimeout({
     Duration? timeout,

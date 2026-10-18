@@ -21,21 +21,10 @@ import 'package:fl_clash/views/config/scripts.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 
+import '../helpers/app_paths.dart';
 import '../helpers/test_app.dart';
 import '../plugins/code_forge/support.dart';
-
-class _Paths extends PathProviderPlatform {
-  _Paths(this.path);
-  final String path;
-  @override
-  Future<String> getApplicationSupportPath() async => path;
-  @override
-  Future<String> getTemporaryPath() async => path;
-  @override
-  Future<String> getDownloadsPath() async => path;
-}
 
 class _CommonAction extends CommonAction {
   final errors = <Object>[];
@@ -96,16 +85,14 @@ void main() {
   late File file;
   late _ScriptLibrary library;
   setUp(() => library = _ScriptLibrary());
-  final originalPaths = PathProviderPlatform.instance;
   setUpAll(() async {
     directory = await Directory.systemTemp.createTemp('script-editor-');
-    PathProviderPlatform.instance = _Paths(directory.path);
+    await useAppPaths(directory);
     file = File(await script.path);
     await file.parent.create(recursive: true);
     await initEditorNative();
   });
   tearDownAll(() async {
-    PathProviderPlatform.instance = originalPaths;
     await directory.delete(recursive: true);
   });
 

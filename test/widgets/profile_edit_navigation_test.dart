@@ -18,9 +18,9 @@ import 'package:fl_clash/widgets/dialog.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import '../helpers/app_paths.dart';
+import '../helpers/preferences.dart';
 import '../helpers/test_app.dart';
 import '../plugins/code_forge/support.dart';
 
@@ -52,29 +52,15 @@ class _ProfileAction extends ProfileAction {
   }
 }
 
-class _Paths extends PathProviderPlatform {
-  _Paths(this.path);
-  final String path;
-  @override
-  Future<String> getApplicationSupportPath() async => path;
-  @override
-  Future<String> getDownloadsPath() async => path;
-  @override
-  Future<String> getTemporaryPath() async => path;
-}
-
 void main() {
   late Directory directory;
-  late PathProviderPlatform originalPaths;
   setUpAll(() async {
     directory = await Directory.systemTemp.createTemp('profile-navigation-');
-    originalPaths = PathProviderPlatform.instance;
-    PathProviderPlatform.instance = _Paths(directory.path);
+    await useAppPaths(directory);
     await initEditorNative();
     await (await _profile.file).writeAsString('mode: rule');
   });
   tearDownAll(() async {
-    PathProviderPlatform.instance = originalPaths;
     await directory.delete(recursive: true);
   });
 
@@ -82,7 +68,7 @@ void main() {
     WidgetTester tester, {
     Future<String> Function()? validate,
   }) async {
-    SharedPreferences.setMockInitialValues({});
+    await mockPreferences();
     await tester.binding.setSurfaceSize(const Size(800, 1200));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final core = _Core();

@@ -20,22 +20,10 @@ import 'package:fl_clash/widgets/null_status.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:rust_api/rust_api.dart';
 
+import '../helpers/app_paths.dart';
 import '../helpers/test_app.dart';
-
-class _Paths extends PathProviderPlatform {
-  final String path;
-  _Paths(this.path);
-
-  @override
-  Future<String> getApplicationSupportPath() async => path;
-  @override
-  Future<String> getTemporaryPath() async => path;
-  @override
-  Future<String> getDownloadsPath() async => path;
-}
 
 class _SetupAction extends SetupAction {
   int calls = 0;
@@ -55,13 +43,12 @@ class _SetupAction extends SetupAction {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  final originalPaths = PathProviderPlatform.instance;
   final originalEvaluator = scriptEvaluator;
   late Directory directory;
   final files = <int, File>{};
   setUpAll(() async {
     directory = await Directory.systemTemp.createTemp('script-options-');
-    PathProviderPlatform.instance = _Paths(directory.path);
+    await useAppPaths(directory);
     for (final id in [1, 2, 3, 4]) {
       files[id] = File(await appPath.getScriptPath('$id'));
     }
@@ -73,7 +60,6 @@ void main() {
     clearScriptOptionsCache();
   });
   tearDownAll(() async {
-    PathProviderPlatform.instance = originalPaths;
     await directory.delete(recursive: true);
   });
 
