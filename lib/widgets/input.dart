@@ -17,7 +17,7 @@ import 'entry_dialog.dart';
 
 import 'package:fl_clash/ui/inherited.dart';
 
-import 'null_status.dart';
+import 'package:fl_clash/ui/null_status.dart';
 
 import 'package:fl_clash/ui/pop_scope.dart';
 

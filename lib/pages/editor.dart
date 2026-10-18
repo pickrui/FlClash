@@ -644,10 +644,7 @@ class _EditorBody extends StatelessWidget {
               ? Container(
                   color: context.colorScheme.surface,
                   alignment: Alignment.center,
-                  child: const SizedBox.square(
-                    dimension: 200,
-                    child: CommonCircleLoading(),
-                  ),
+                  child: const CommonCircleLoading.page(),
                 )
               : const SizedBox.shrink(),
         ),

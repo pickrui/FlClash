@@ -7,7 +7,7 @@ import 'package:fl_clash/common/common.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
-import 'chip.dart';
+import 'package:fl_clash/ui/chip.dart';
 import 'list.dart';
 
 class RecordTextStyles {

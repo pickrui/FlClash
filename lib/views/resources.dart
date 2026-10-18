@@ -254,7 +254,7 @@ class _GeoDataListItemState extends ConsumerState<GeoDataListItem> {
           spacing: 12,
           runAlignment: WrapAlignment.center,
           children: [
-            CommonChip(
+            CommonActionChip(
               avatar: const GlyphIcon(AppGlyphs.edit),
               label: appLocalizations.edit,
               onPressed: () {
@@ -271,7 +271,7 @@ class _GeoDataListItemState extends ConsumerState<GeoDataListItem> {
                         child: CircularProgressIndicator(),
                       ),
                     )
-                  : CommonChip(
+                  : CommonActionChip(
                       avatar: const GlyphIcon(AppGlyphs.sync),
                       label: appLocalizations.sync,
                       onPressed: () => _handleUpdateGeoDataItem(url),

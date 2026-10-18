@@ -9,7 +9,7 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/views/config/override.dart';
 import 'package:fl_clash/widgets/config_item.dart';
-import 'package:fl_clash/widgets/null_status.dart';
+import 'package:fl_clash/ui/null_status.dart';
 import 'package:material_ui/material_ui.dart';
 
 extension on TunOverrideKey {

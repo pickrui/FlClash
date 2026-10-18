@@ -17,7 +17,7 @@ import 'package:fl_clash/views/config/providers.dart';
 import 'package:fl_clash/views/config/rules.dart';
 import 'package:fl_clash/views/config/scripts.dart';
 import 'package:fl_clash/widgets/input_dialog.dart';
-import 'package:fl_clash/widgets/null_status.dart';
+import 'package:fl_clash/widgets/error_status.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 

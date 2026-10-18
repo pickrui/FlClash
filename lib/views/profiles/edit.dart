@@ -404,12 +404,12 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
                 spacing: 12,
                 children: [
                   if (_fileInfo != null)
-                    CommonChip(
+                    CommonActionChip(
                       avatar: const GlyphIcon(AppGlyphs.edit),
                       label: appLocalizations.edit,
                       onPressed: _editProfileFile,
                     ),
-                  CommonChip(
+                  CommonActionChip(
                     avatar: const GlyphIcon(AppGlyphs.upload),
                     label: appLocalizations.upload,
                     onPressed: _uploadProfileFile,

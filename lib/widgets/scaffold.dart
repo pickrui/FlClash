@@ -6,7 +6,6 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/pop_scope.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
@@ -16,11 +15,11 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'button.dart';
-import 'chip.dart';
+import 'package:fl_clash/ui/chip.dart';
 
 import 'package:fl_clash/ui/inherited.dart';
 
-import 'loading.dart';
+import 'package:fl_clash/ui/loading.dart';
 import 'navigation_dock.dart';
 import 'popup.dart';
 
@@ -673,8 +672,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
                       for (final keyword in keywords)
                         CommonChip(
                           label: keyword,
-                          type: ChipType.delete,
-                          onPressed: () => _deleteKeyword(keyword),
+                          onDeleted: () => _deleteKeyword(keyword),
                         ),
                     ],
                   ),

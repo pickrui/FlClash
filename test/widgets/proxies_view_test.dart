@@ -21,7 +21,7 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/proxies/card.dart';
 import 'package:fl_clash/views/proxies/common.dart';
-import 'package:fl_clash/widgets/loading.dart';
+import 'package:fl_clash/ui/loading.dart';
 import 'package:fl_clash/ui/card.dart';
 import 'package:fl_clash/widgets/popup.dart';
 import 'package:fl_clash/ui/icons/icons.dart';

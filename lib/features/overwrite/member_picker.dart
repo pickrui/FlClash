@@ -8,7 +8,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/widgets/dismissible.dart';
 import 'package:fl_clash/ui/effect.dart';
-import 'package:fl_clash/widgets/null_status.dart';
+import 'package:fl_clash/ui/null_status.dart';
 import 'package:fl_clash/ui/super_reorderable_list.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:super_sliver_list/super_sliver_list.dart';

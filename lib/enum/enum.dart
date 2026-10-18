@@ -144,8 +144,6 @@ enum FindProcessMode { always, off, strict }
 
 enum RestoreOption { all, onlyProfiles }
 
-enum ChipType { action, delete }
-
 enum ProxiesType { tab, list }
 
 enum ProxiesLayout { loose, standard, tight }

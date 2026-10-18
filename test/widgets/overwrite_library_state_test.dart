@@ -14,7 +14,7 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/routing_issues.dart';
 import 'package:fl_clash/views/profiles/overwrite.dart';
-import 'package:fl_clash/widgets/null_status.dart';
+import 'package:fl_clash/widgets/error_status.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';

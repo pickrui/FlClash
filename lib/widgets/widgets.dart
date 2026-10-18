@@ -13,7 +13,7 @@ export 'button.dart';
 
 export 'package:fl_clash/ui/card.dart';
 
-export 'chip.dart';
+export 'package:fl_clash/ui/chip.dart';
 export 'dialog.dart';
 
 export 'package:fl_clash/ui/disabled_mask.dart';
@@ -35,8 +35,9 @@ export 'package:fl_clash/ui/keep_scope.dart';
 export 'package:fl_clash/ui/line_chart.dart';
 
 export 'list.dart';
-export 'loading.dart';
-export 'null_status.dart';
+export 'package:fl_clash/ui/loading.dart';
+export 'package:fl_clash/ui/null_status.dart';
+export 'error_status.dart';
 export 'palette.dart';
 
 export 'package:fl_clash/ui/pop_scope.dart';
