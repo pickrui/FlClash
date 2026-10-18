@@ -58,15 +58,6 @@ abstract class MessageActionState with _$MessageActionState {
 }
 
 @freezed
-abstract class AppBarSearchState with _$AppBarSearchState {
-  const factory AppBarSearchState({
-    required Function(String) onSearch,
-    @Default(true) bool autoAddSearch,
-    @Default(null) String? query,
-  }) = _AppBarSearchState;
-}
-
-@freezed
 abstract class ProfilesState with _$ProfilesState {
   const factory ProfilesState({
     required List<Profile> profiles,
@@ -418,20 +409,4 @@ extension SetupStateExt on SetupState {
         keepAliveInterval != lastSetupState.keepAliveInterval ||
         geodataLoader != lastSetupState.geodataLoader;
   }
-}
-
-@freezed
-abstract class AppBarState with _$AppBarState {
-  const factory AppBarState({
-    AppBarSearchState? searchState,
-    AppBarEditState? editState,
-  }) = _AppBarState;
-}
-
-@freezed
-abstract class AppBarEditState with _$AppBarEditState {
-  const factory AppBarEditState({
-    @Default(0) int editCount,
-    required Function() onExit,
-  }) = _AppBarEditState;
 }

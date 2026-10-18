@@ -1368,7 +1368,6 @@
   "enabledOnStart": "Enable on start",
   "disabled": "Disabled",
   "overwriteIssuesSummary": "{count} items have problems, and applying this override may fail",
-  "selectedCountTitle": "{count} selected",
   "ignoreBatteryOptimization": "Ignore battery optimization",
   "batteryOptimizationDesc": "To keep the app running in the background, disable battery optimization for it. Tap to open settings.",
   "batteryOptimizationStatusTip": "Due to system limitations, the battery optimization status cannot be read correctly while running",

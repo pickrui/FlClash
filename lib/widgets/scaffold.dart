@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/ui/models.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/pop_scope.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
@@ -63,7 +63,6 @@ class CommonScaffold extends StatefulWidget {
   /// keeps the first of them in sight instead.
   final bool foldPrimaryAction;
   final bool? isTV;
-  final AppBarEditState? editState;
   final AppBarSearchState? searchState;
   final List<IconButtonData> searchActions;
 
@@ -82,7 +81,6 @@ class CommonScaffold extends StatefulWidget {
     this.actions,
     this.centerTitle,
     this.backAction,
-    this.editState,
     this.isLoading = false,
     this.searchState,
     this.searchActions = const [],
@@ -113,14 +111,6 @@ class CommonScaffoldState extends State<CommonScaffold> {
     return _appBarState.value.searchState?.query != null;
   }
 
-  bool get _isEdit {
-    final editState = _appBarState.value.editState;
-    if (editState == null) {
-      return false;
-    }
-    return editState.editCount > 0;
-  }
-
   bool get _hasActions {
     return _appBarState.value.searchState != null ||
         widget.primaryAction != null ||
@@ -132,9 +122,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
   @override
   void initState() {
     super.initState();
-    _appBarState = ValueNotifier(
-      AppBarState(editState: widget.editState, searchState: widget.searchState),
-    );
+    _appBarState = ValueNotifier(AppBarState(searchState: widget.searchState));
     _loadingNotifier.value = widget.isLoading;
     _keywordsNotifier.addListener(_handleKeywordsChanged);
     _textController.text = widget.searchState?.query ?? '';
@@ -157,7 +145,6 @@ class CommonScaffoldState extends State<CommonScaffold> {
   bool _handleSearchShortcut(KeyEvent event) {
     if (event is! KeyDownEvent ||
         _appBarState.value.searchState == null ||
-        _isEdit ||
         !controlSingleActivator(LogicalKeyboardKey.keyF)
             .accepts(event, HardwareKeyboard.instance) ||
         !_isFrontmost) {
@@ -224,11 +211,6 @@ class CommonScaffoldState extends State<CommonScaffold> {
   @override
   void didUpdateWidget(CommonScaffold oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.editState != widget.editState) {
-      _appBarState.value = _appBarState.value.copyWith(
-        editState: widget.editState,
-      );
-    }
     if (oldWidget.searchState != widget.searchState) {
       final next = widget.searchState;
       final query = oldWidget.searchState?.query == next?.query
@@ -271,13 +253,10 @@ class CommonScaffoldState extends State<CommonScaffold> {
 
   void _handleExitAppBarLayer() {
     handleExitSearching();
-    if (_isEdit) {
-      _appBarState.value.editState?.onExit();
-    }
   }
 
   void _popAppBarLayer() {
-    if (!_isEdit && !_isSearch) {
+    if (!_isSearch) {
       return;
     }
     Navigator.of(context).pop();
@@ -384,13 +363,6 @@ class CommonScaffoldState extends State<CommonScaffold> {
     VoidCallback? backAction, {
     required _SheetPop? pop,
   }) {
-    if (_isEdit) {
-      return IconButton(
-        tooltip: context.appLocalizations.close,
-        onPressed: _popAppBarLayer,
-        icon: const GlyphIcon(AppGlyphs.close),
-      );
-    }
     if (_isSearch) {
       return IconButton(
         tooltip: context.appLocalizations.back,
@@ -439,12 +411,6 @@ class CommonScaffoldState extends State<CommonScaffold> {
             },
             decoration: InputDecoration(hintText: appLocalizations.search),
           )
-        : _isEdit
-        ? Text(
-            appLocalizations.selectedCountTitle(
-              '${_appBarState.value.editState?.editCount ?? 0}',
-            ),
-          )
         : widget.titleWidget ?? Text(widget.title!);
   }
 
@@ -462,9 +428,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
             tooltip: appLocalizations.clearSearch,
             onPressed: _handleClear,
           )
-        : hasSearch &&
-              widget.searchState?.autoAddSearch == true &&
-              !form.hasDockedSearch
+        : hasSearch && !form.hasDockedSearch
         ? IconButtonData(
             glyph: AppGlyphs.search,
             tooltip: appLocalizations.search,
@@ -490,7 +454,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
             widgetCount: widgets.length + selectionCount,
             menuItems: widget.menuItems,
           );
-    final popAsSuffix = !_isSearch && !_isEdit && pop?.asSuffix == true;
+    final popAsSuffix = !_isSearch && pop?.asSuffix == true;
     final shown = [?lead, ...fold.shown];
     final grouped = shown.length > 1 ? shown.take(_maxGroupedActions) : null;
     return genActions([
@@ -529,7 +493,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
       glass: LiquidGlassScope.of(context),
       child: _isSearch ? _buildSearchingAppBarTheme(child) : child,
     );
-    if (_isEdit || _isSearch) {
+    if (_isSearch) {
       return SystemBackBlock(
         child: BackLayerScope(onBack: _handleExitAppBarLayer, child: appBar),
       );

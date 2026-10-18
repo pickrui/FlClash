@@ -8,7 +8,6 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/ui/icons/glyph.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -697,13 +696,3 @@ List<String> configRules(Map<String, dynamic> config) => [
   if (config['dns'] case {'fake-ip-filter': final List filter})
     ...filter.whereType<String>(),
 ];
-
-@freezed
-abstract class IconButtonData with _$IconButtonData {
-  const factory IconButtonData({
-    required Glyph glyph,
-    required VoidCallback? onPressed,
-    String? tooltip,
-    @Default(false) bool isLoading,
-  }) = _IconButtonData;
-}

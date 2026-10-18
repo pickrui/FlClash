@@ -243,38 +243,36 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m89(count) => "${count} seconds";
 
-  static String m90(count) => "${count} selected";
-
-  static String m91(count) =>
+  static String m90(count) =>
       "${Intl.plural(count, one: '1 setting', other: '${count} settings')}";
 
-  static String m92(count) =>
+  static String m91(count) =>
       "${Intl.plural(count, one: '1 node was added from the share links', other: '${count} nodes were added from the share links')}";
 
-  static String m93(count) =>
+  static String m92(count) =>
       "${Intl.plural(count, one: '1 link could not be read', other: '${count} links could not be read')}";
 
-  static String m94(label) => "${label} must be a single item";
+  static String m93(label) => "${label} must be a single item";
 
-  static String m95(fields) => "Check these settings: ${fields}";
+  static String m94(fields) => "Check these settings: ${fields}";
 
-  static String m96(count) => "Devices (${count})";
+  static String m95(count) => "Devices (${count})";
 
-  static String m97(name, profile) =>
+  static String m96(name, profile) =>
       "${name} is still used by a rule or group in profile ${profile}";
 
-  static String m98(region) => "Relay ${region}";
+  static String m97(region) => "Relay ${region}";
 
-  static String m99(name) =>
+  static String m98(name) =>
       "This device will leave ${name} and its sign-in will be deleted from this device. If the network is unreachable now, remove the device in the Tailscale admin console.";
 
-  static String m100(build) => "Build: ${build}";
+  static String m99(build) => "Build: ${build}";
 
-  static String m101(version) => "Version: ${version}";
+  static String m100(version) => "Version: ${version}";
 
-  static String m102(label) => "${label} must be a url";
+  static String m101(label) => "${label} must be a url";
 
-  static String m103(count) =>
+  static String m102(count) =>
       "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2639,7 +2637,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Select upgrade target",
     ),
     "selected": MessageLookupByLibrary.simpleMessage("Selected"),
-    "selectedCountTitle": m90,
     "sendCode": MessageLookupByLibrary.simpleMessage("Send Code"),
     "sendResetEmail": MessageLookupByLibrary.simpleMessage("Send reset email"),
     "server": MessageLookupByLibrary.simpleMessage("Server"),
@@ -2648,9 +2645,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "settingEntries": MessageLookupByLibrary.simpleMessage("settings"),
     "settings": MessageLookupByLibrary.simpleMessage("Settings"),
-    "settingsCount": m91,
-    "shareLinkNodesAdded": m92,
-    "shareLinksNotRead": m93,
+    "settingsCount": m90,
+    "shareLinkNodesAdded": m91,
+    "shareLinksNotRead": m92,
     "show": MessageLookupByLibrary.simpleMessage("Show"),
     "showLess": MessageLookupByLibrary.simpleMessage("Collapse"),
     "showMore": MessageLookupByLibrary.simpleMessage("Expand"),
@@ -2671,7 +2668,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Start in the background",
     ),
     "singleAdd": MessageLookupByLibrary.simpleMessage("Single add"),
-    "singleValueTip": m94,
+    "singleValueTip": m93,
     "size": MessageLookupByLibrary.simpleMessage("Size"),
     "skipDomain": MessageLookupByLibrary.simpleMessage("Skip domains"),
     "skipDomainDesc": MessageLookupByLibrary.simpleMessage(
@@ -2800,7 +2797,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleAvailableExitNodes": MessageLookupByLibrary.simpleMessage(
       "Available exit nodes",
     ),
-    "tailscaleCheckSettings": m95,
+    "tailscaleCheckSettings": m94,
     "tailscaleConnected": MessageLookupByLibrary.simpleMessage("Connected"),
     "tailscaleConnecting": MessageLookupByLibrary.simpleMessage("Connecting"),
     "tailscaleControlUrl": MessageLookupByLibrary.simpleMessage("Control URL"),
@@ -2808,7 +2805,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Authentication and device identity stay on this device.",
     ),
     "tailscaleDeviceName": MessageLookupByLibrary.simpleMessage("Device name"),
-    "tailscaleDevices": m96,
+    "tailscaleDevices": m95,
     "tailscaleDirect": MessageLookupByLibrary.simpleMessage("Direct"),
     "tailscaleEmptyDesc": MessageLookupByLibrary.simpleMessage(
       "Add a network, sign in on this device, then start the proxy to reach your devices.",
@@ -2903,7 +2900,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleNeedsLogin": MessageLookupByLibrary.simpleMessage(
       "Login required",
     ),
-    "tailscaleNetworkInUse": m97,
+    "tailscaleNetworkInUse": m96,
     "tailscaleNetworkName": MessageLookupByLibrary.simpleMessage(
       "Network name",
     ),
@@ -2920,8 +2917,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleOpenLoginPage": MessageLookupByLibrary.simpleMessage(
       "Open login page",
     ),
-    "tailscaleRelay": m98,
-    "tailscaleRemoveConfirm": m99,
+    "tailscaleRelay": m97,
+    "tailscaleRemoveConfirm": m98,
     "tailscaleRemoveNetwork": MessageLookupByLibrary.simpleMessage(
       "Remove network",
     ),
@@ -3030,7 +3027,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateApplyFailed": MessageLookupByLibrary.simpleMessage(
       "Automatic update did not complete. Retry or update from the download page.",
     ),
-    "updateBuildNumber": m100,
+    "updateBuildNumber": m99,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
       "Cancel download",
     ),
@@ -3077,14 +3074,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateRestartHint": MessageLookupByLibrary.simpleMessage(
       "The app will close, update in place, and reopen. Your settings will be preserved.",
     ),
-    "updateVersionNumber": m101,
+    "updateVersionNumber": m100,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("Upgrade plan"),
     "upload": MessageLookupByLibrary.simpleMessage("Upload"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Obtain profile through URL",
     ),
-    "urlTip": m102,
+    "urlTip": m101,
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("Used traffic"),
@@ -3114,7 +3111,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Also set the system clock; Android ignores it",
     ),
-    "yearsAgo": m103,
+    "yearsAgo": m102,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };
 }

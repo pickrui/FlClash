@@ -203,34 +203,32 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m89(count) => "${count} 秒";
 
-  static String m90(count) => "已选择 ${count} 项";
+  static String m90(count) => "${count} 项设置";
 
-  static String m91(count) => "${count} 项设置";
+  static String m91(count) => "已从分享链接添加 ${count} 个节点";
 
-  static String m92(count) => "已从分享链接添加 ${count} 个节点";
+  static String m92(count) => "${count} 条链接无法识别";
 
-  static String m93(count) => "${count} 条链接无法识别";
+  static String m93(label) => "${label}只能是一项";
 
-  static String m94(label) => "${label}只能是一项";
+  static String m94(fields) => "请检查以下设置：${fields}";
 
-  static String m95(fields) => "请检查以下设置：${fields}";
+  static String m95(count) => "设备（${count}）";
 
-  static String m96(count) => "设备（${count}）";
+  static String m96(name, profile) => "${name} 仍被配置「${profile}」中的规则或策略组使用";
 
-  static String m97(name, profile) => "${name} 仍被配置「${profile}」中的规则或策略组使用";
+  static String m97(region) => "中继 ${region}";
 
-  static String m98(region) => "中继 ${region}";
-
-  static String m99(name) =>
+  static String m98(name) =>
       "此设备将退出 ${name}，并删除此设备上的登录信息；如果当前无法连接该网络，请到 Tailscale 管理后台移除此设备";
 
-  static String m100(build) => "构建号：${build}";
+  static String m99(build) => "构建号：${build}";
 
-  static String m101(version) => "版本号：${version}";
+  static String m100(version) => "版本号：${version}";
 
-  static String m102(label) => "${label}必须为URL";
+  static String m101(label) => "${label}必须为URL";
 
-  static String m103(count) => "${count} 年前";
+  static String m102(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1950,16 +1948,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "selectBackup": MessageLookupByLibrary.simpleMessage("选择备份"),
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage("选择升级目标套餐"),
     "selected": MessageLookupByLibrary.simpleMessage("已选择"),
-    "selectedCountTitle": m90,
     "sendCode": MessageLookupByLibrary.simpleMessage("获取验证码"),
     "sendResetEmail": MessageLookupByLibrary.simpleMessage("发送重置邮件"),
     "server": MessageLookupByLibrary.simpleMessage("服务器"),
     "serviceCheckFailed": MessageLookupByLibrary.simpleMessage("服务检测失败"),
     "settingEntries": MessageLookupByLibrary.simpleMessage("设置项"),
     "settings": MessageLookupByLibrary.simpleMessage("设置"),
-    "settingsCount": m91,
-    "shareLinkNodesAdded": m92,
-    "shareLinksNotRead": m93,
+    "settingsCount": m90,
+    "shareLinkNodesAdded": m91,
+    "shareLinksNotRead": m92,
     "show": MessageLookupByLibrary.simpleMessage("显示"),
     "showLess": MessageLookupByLibrary.simpleMessage("收起"),
     "showMore": MessageLookupByLibrary.simpleMessage("展开"),
@@ -1974,7 +1971,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "silentLaunch": MessageLookupByLibrary.simpleMessage("静默启动"),
     "silentLaunchDesc": MessageLookupByLibrary.simpleMessage("后台启动"),
     "singleAdd": MessageLookupByLibrary.simpleMessage("单条添加"),
-    "singleValueTip": m94,
+    "singleValueTip": m93,
     "size": MessageLookupByLibrary.simpleMessage("尺寸"),
     "skipDomain": MessageLookupByLibrary.simpleMessage("跳过域名"),
     "skipDomainDesc": MessageLookupByLibrary.simpleMessage("嗅探到跳过域名中的域名时不予采用"),
@@ -2075,7 +2072,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleAvailableExitNodes": MessageLookupByLibrary.simpleMessage(
       "可用的出口节点",
     ),
-    "tailscaleCheckSettings": m95,
+    "tailscaleCheckSettings": m94,
     "tailscaleConnected": MessageLookupByLibrary.simpleMessage("已连接"),
     "tailscaleConnecting": MessageLookupByLibrary.simpleMessage("正在连接"),
     "tailscaleControlUrl": MessageLookupByLibrary.simpleMessage("控制服务器地址"),
@@ -2083,7 +2080,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "认证信息和设备身份仅保存在此设备",
     ),
     "tailscaleDeviceName": MessageLookupByLibrary.simpleMessage("设备名称"),
-    "tailscaleDevices": m96,
+    "tailscaleDevices": m95,
     "tailscaleDirect": MessageLookupByLibrary.simpleMessage("直连"),
     "tailscaleEmptyDesc": MessageLookupByLibrary.simpleMessage(
       "添加网络并在此设备上登录，启动代理后即可访问你的设备",
@@ -2158,7 +2155,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "tailscaleNeedsApproval": MessageLookupByLibrary.simpleMessage("等待设备审批"),
     "tailscaleNeedsLogin": MessageLookupByLibrary.simpleMessage("需要登录"),
-    "tailscaleNetworkInUse": m97,
+    "tailscaleNetworkInUse": m96,
     "tailscaleNetworkName": MessageLookupByLibrary.simpleMessage("网络名称"),
     "tailscaleNetworks": MessageLookupByLibrary.simpleMessage("网络"),
     "tailscaleNotApplied": MessageLookupByLibrary.simpleMessage("未生效"),
@@ -2169,8 +2166,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleOffline": MessageLookupByLibrary.simpleMessage("离线"),
     "tailscaleOnline": MessageLookupByLibrary.simpleMessage("在线"),
     "tailscaleOpenLoginPage": MessageLookupByLibrary.simpleMessage("打开登录页面"),
-    "tailscaleRelay": m98,
-    "tailscaleRemoveConfirm": m99,
+    "tailscaleRelay": m97,
+    "tailscaleRemoveConfirm": m98,
     "tailscaleRemoveNetwork": MessageLookupByLibrary.simpleMessage("移除网络"),
     "tailscaleSaveAndLogin": MessageLookupByLibrary.simpleMessage("保存并登录"),
     "tailscaleSignedIn": MessageLookupByLibrary.simpleMessage("已登录"),
@@ -2257,7 +2254,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateApplyFailed": MessageLookupByLibrary.simpleMessage(
       "自动更新未完成，请重试或从下载页面更新",
     ),
-    "updateBuildNumber": m100,
+    "updateBuildNumber": m99,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage("取消下载"),
     "updateDownloadBackground": MessageLookupByLibrary.simpleMessage("移到后台下载"),
     "updateDownloadBrowser": MessageLookupByLibrary.simpleMessage("使用浏览器下载"),
@@ -2284,12 +2281,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateRestartHint": MessageLookupByLibrary.simpleMessage(
       "应用将退出、原位更新并重新打开，已有配置会保留",
     ),
-    "updateVersionNumber": m101,
+    "updateVersionNumber": m100,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("升级套餐"),
     "upload": MessageLookupByLibrary.simpleMessage("上传"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("通过URL获取配置文件"),
-    "urlTip": m102,
+    "urlTip": m101,
     "useHosts": MessageLookupByLibrary.simpleMessage("使用Hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("使用系统Hosts"),
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("已用流量"),
@@ -2313,7 +2310,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "同时设置系统时钟，Android上不生效",
     ),
-    "yearsAgo": m103,
+    "yearsAgo": m102,
     "zh_CN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };
 }

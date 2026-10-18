@@ -11474,16 +11474,6 @@ class AppLocalizations {
     );
   }
 
-  /// `{count} selected`
-  String selectedCountTitle(Object count) {
-    return Intl.message(
-      '$count selected',
-      name: 'selectedCountTitle',
-      desc: '',
-      args: [count],
-    );
-  }
-
   /// `Ignore battery optimization`
   String get ignoreBatteryOptimization {
     return Intl.message(
