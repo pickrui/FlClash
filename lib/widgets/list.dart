@@ -29,7 +29,8 @@ import 'input_dialog.dart';
 
 import 'package:fl_clash/ui/navigation_dock.dart';
 
-import 'popup.dart';
+import 'package:fl_clash/ui/popup.dart';
+
 import 'scaffold.dart';
 
 class Delegate {
@@ -360,7 +361,7 @@ class ListItem<T> extends StatelessWidget {
           popupBuilder: (_) => CommonPopupMenu(
             items: [
               for (final option in optionsDelegate.options)
-                PopupMenuItemData(
+                CommonPopupMenuItem(
                   label: optionsDelegate.textBuilder(option),
                   checked: option == optionsDelegate.value,
                   onPressed: () => optionsDelegate.onChanged(option),
@@ -462,11 +463,9 @@ class _OptionsValueButton extends StatelessWidget {
         children: [
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: _optionsValueMaxWidth),
-            child: Text(
+            child: PopupValueText(
               label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.end,
+              alignment: AlignmentDirectional.centerEnd,
             ),
           ),
           const GlyphIcon(AppGlyphs.picker),

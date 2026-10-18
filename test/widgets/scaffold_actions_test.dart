@@ -53,7 +53,10 @@ Future<List<String>> _pumpBar(
           selectionActions: [for (final label in selection) action(label)],
           menuItems: [
             for (final label in menuItems)
-              PopupMenuItemData(label: label, onPressed: () => taps.add(label)),
+              CommonPopupMenuItem(
+                label: label,
+                onPressed: () => taps.add(label),
+              ),
           ],
           body: const SizedBox.expand(),
         ),

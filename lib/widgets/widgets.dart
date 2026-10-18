@@ -45,7 +45,8 @@ export 'palette.dart';
 
 export 'package:fl_clash/ui/pop_scope.dart';
 
-export 'popup.dart';
+export 'package:fl_clash/ui/popup.dart';
+
 export 'scaffold.dart';
 
 export 'package:fl_clash/ui/scroll.dart';

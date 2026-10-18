@@ -26,7 +26,7 @@ import 'package:fl_clash/ui/loading.dart';
 
 import 'package:fl_clash/ui/navigation_dock.dart';
 
-import 'popup.dart';
+import 'package:fl_clash/ui/popup.dart';
 
 import 'package:fl_clash/ui/search_field.dart';
 import 'package:fl_clash/ui/sheet_header.dart';
@@ -57,7 +57,7 @@ class CommonScaffold extends StatefulWidget {
   /// Folded into the overflow menu once the bar would hold more than three
   /// buttons, as [primaryAction] and [menuItems] are; [actions] never fold.
   final List<IconButtonData> iconActions;
-  final List<PopupMenuItemData> menuItems;
+  final List<CommonPopupMenuItem> menuItems;
 
   /// Folds [primaryAction] ahead of [iconActions], so a bar without search
   /// keeps the first of them in sight instead.
@@ -978,14 +978,14 @@ class _PrimaryActionFab extends StatelessWidget {
 const _maxBarButtons = 3;
 const _maxGroupedActions = 2;
 
-({List<IconButtonData> shown, List<PopupMenuItemData> overflow})
+({List<IconButtonData> shown, List<CommonPopupMenuItem> overflow})
 _foldBarActions({
   required bool hasLead,
   IconButtonData? primary,
   bool foldPrimary = false,
   List<IconButtonData> icons = const [],
   int widgetCount = 0,
-  List<PopupMenuItemData> menuItems = const [],
+  List<CommonPopupMenuItem> menuItems = const [],
 }) {
   final foldable = [?primary, ...icons];
   final fixed = (hasLead ? 1 : 0) + widgetCount;
@@ -1005,7 +1005,7 @@ _foldBarActions({
     overflow: [
       for (final data in foldable)
         if (!isKept(data))
-          PopupMenuItemData(
+          CommonPopupMenuItem(
             glyph: data.glyph,
             label: data.tooltip ?? '',
             onPressed: data.isLoading ? null : data.onPressed,
@@ -1018,14 +1018,14 @@ _foldBarActions({
 class _OverflowMenuButton extends StatelessWidget {
   const _OverflowMenuButton({required this.items});
 
-  final List<PopupMenuItemData> items;
+  final List<CommonPopupMenuItem> items;
 
   @override
   Widget build(BuildContext context) {
     return CommonPopupBox(
       targetBuilder: (open) => IconButton(
         tooltip: context.appLocalizations.more,
-        onPressed: () => open(offset: Offset(0, context.isMobileView ? 0 : 20)),
+        onPressed: open,
         icon: const GlyphIcon(AppGlyphs.more),
       ),
       popup: CommonPopupMenu(items: items),
@@ -1209,7 +1209,7 @@ class AppBarInsetScope extends StatelessWidget {
 class BaseScaffold extends StatelessWidget {
   final String title;
   final List<Widget> actions;
-  final List<PopupMenuItemData> menuItems;
+  final List<CommonPopupMenuItem> menuItems;
   final Widget body;
 
   const BaseScaffold({

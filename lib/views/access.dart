@@ -259,37 +259,37 @@ class _AccessViewState extends ConsumerState<AccessView>
     });
   }
 
-  List<PopupMenuItemData> _buildMenuItems({required bool enable}) => [
-    PopupMenuItemData(
+  List<CommonPopupMenuItem> _buildMenuItems({required bool enable}) => [
+    CommonPopupMenuItem(
       glyph: AppGlyphs.shuffle,
       label: enable ? appLocalizations.turnOff : appLocalizations.turnOn,
       onPressed: _handleToggle,
     ),
-    PopupMenuItemData(
+    CommonPopupMenuItem(
       glyph: AppGlyphs.refresh,
       label: appLocalizations.refresh,
       onPressed: _reloadPackages,
     ),
-    PopupMenuItemData(
+    CommonPopupMenuItem(
       glyph: AppGlyphs.sliders,
       label: appLocalizations.settings,
       onPressed: _handleToSetting,
     ),
-    PopupMenuItemData(
+    CommonPopupMenuItem(
       glyph: AppGlyphs.moreCircle,
       label: appLocalizations.action,
       subItems: [
-        PopupMenuItemData(
+        CommonPopupMenuItem(
           glyph: AppGlyphs.sparkle,
           label: appLocalizations.intelligentSelected,
           onPressed: _intelligentSelected,
         ),
-        PopupMenuItemData(
+        CommonPopupMenuItem(
           glyph: AppGlyphs.copy,
           label: appLocalizations.clipboardExport,
           onPressed: _exportToClipboard,
         ),
-        PopupMenuItemData(
+        CommonPopupMenuItem(
           glyph: AppGlyphs.paste,
           label: appLocalizations.clipboardImport,
           onPressed: _importFromClipboard,
@@ -515,7 +515,7 @@ class _AccessViewState extends ConsumerState<AccessView>
         menuItems: [
           ..._buildMenuItems(enable: accessControl.enable),
           if (selectAll != null)
-            PopupMenuItemData(
+            CommonPopupMenuItem(
               glyph: selectAll.glyph,
               label: selectAll.tooltip!,
               onPressed: selectAll.onPressed,

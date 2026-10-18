@@ -12,6 +12,7 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/ui/context_menu.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/open_container.dart';
 import 'package:fl_clash/ui/surface.dart';
@@ -375,12 +376,12 @@ class _ColorSwatches extends StatelessWidget {
                     menuItems: color == null
                         ? null
                         : [
-                            PopupMenuItemData(
+                            CommonPopupMenuItem(
                               glyph: AppGlyphs.edit,
                               label: appLocalizations.edit,
                               onPressed: () => onEdit(color),
                             ),
-                            PopupMenuItemData(
+                            CommonPopupMenuItem(
                               danger: true,
                               glyph: AppGlyphs.delete,
                               label: appLocalizations.delete,
@@ -421,7 +422,7 @@ class _ColorSwatch extends StatefulWidget {
   final bool isSelected;
   final String label;
   final VoidCallback onPressed;
-  final List<PopupMenuItemData>? menuItems;
+  final List<CommonPopupMenuItem>? menuItems;
 
   @override
   State<_ColorSwatch> createState() => _ColorSwatchState();
@@ -438,7 +439,7 @@ class _ColorSwatchState extends State<_ColorSwatch> {
     final check = ThemeData.estimateBrightnessForColor(fill) == Brightness.dark
         ? Colors.white
         : Colors.black;
-    Widget swatch(VoidCallback? openMenu) => Semantics(
+    final swatch = Semantics(
       button: true,
       selected: selected,
       label: widget.label,
@@ -451,8 +452,6 @@ class _ColorSwatchState extends State<_ColorSwatch> {
           child: InkWell(
             customBorder: AppShape.circle,
             onTap: widget.onPressed,
-            onLongPress: openMenu,
-            onSecondaryTap: openMenu,
             onFocusChange: (value) => setState(() => _focused = value),
             child: Stack(
               alignment: Alignment.center,
@@ -506,12 +505,9 @@ class _ColorSwatchState extends State<_ColorSwatch> {
     );
     final menuItems = widget.menuItems;
     if (menuItems == null) {
-      return swatch(null);
+      return swatch;
     }
-    return CommonPopupBox(
-      targetBuilder: (open) => swatch(() => open()),
-      popup: CommonPopupMenu(items: menuItems),
-    );
+    return ContextMenuRegion(menuItems: menuItems, child: swatch);
   }
 }
 

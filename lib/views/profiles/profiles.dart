@@ -399,7 +399,7 @@ class ProfileItem extends StatelessWidget {
                         key: const ValueKey('menu'),
                         popup: CommonPopupMenu(
                           items: [
-                            PopupMenuItemData(
+                            CommonPopupMenuItem(
                               glyph: AppGlyphs.edit,
                               label: appLocalizations.edit,
                               onPressed: () {
@@ -411,7 +411,7 @@ class ProfileItem extends StatelessWidget {
                               },
                             ),
                             if (isCustom)
-                              PopupMenuItemData(
+                              CommonPopupMenuItem(
                                 glyph: AppGlyphs.textShort,
                                 label: appLocalizations.rename,
                                 onPressed: () {
@@ -419,7 +419,7 @@ class ProfileItem extends StatelessWidget {
                                 },
                               ),
                             if (!profile.isoixCloudProfile)
-                              PopupMenuItemData(
+                              CommonPopupMenuItem(
                                 glyph: AppGlyphs.eye,
                                 label: appLocalizations.preview,
                                 onPressed: () {
@@ -427,7 +427,7 @@ class ProfileItem extends StatelessWidget {
                                 },
                               ),
                             if (profile.type == ProfileType.url) ...[
-                              PopupMenuItemData(
+                              CommonPopupMenuItem(
                                 glyph: AppGlyphs.sync,
                                 label: appLocalizations.sync,
                                 onPressed: () {
@@ -436,7 +436,7 @@ class ProfileItem extends StatelessWidget {
                               ),
                             ],
                             if (!isCustom)
-                              PopupMenuItemData(
+                              CommonPopupMenuItem(
                                 glyph: AppGlyphs.split,
                                 label: appLocalizations.proxyChains,
                                 onPressed: () {
@@ -447,7 +447,7 @@ class ProfileItem extends StatelessWidget {
                                 },
                               ),
                             if (profile.isoixCloudProfile)
-                              PopupMenuItemData(
+                              CommonPopupMenuItem(
                                 glyph: AppGlyphs.puzzle,
                                 label: appLocalizations.override,
                                 onPressed: () {
@@ -458,11 +458,11 @@ class ProfileItem extends StatelessWidget {
                                 },
                               )
                             else if (!isCustom)
-                              PopupMenuItemData(
+                              CommonPopupMenuItem(
                                 glyph: AppGlyphs.moreCircle,
                                 label: appLocalizations.more,
                                 subItems: [
-                                  PopupMenuItemData(
+                                  CommonPopupMenuItem(
                                     glyph: AppGlyphs.puzzle,
                                     label: appLocalizations.override,
                                     onPressed: () {
@@ -473,7 +473,7 @@ class ProfileItem extends StatelessWidget {
                                     },
                                   ),
                                   if (profile.type == ProfileType.url) ...[
-                                    PopupMenuItemData(
+                                    CommonPopupMenuItem(
                                       glyph: AppGlyphs.copy,
                                       label: appLocalizations.copyLink,
                                       onPressed: () {
@@ -481,7 +481,7 @@ class ProfileItem extends StatelessWidget {
                                       },
                                     ),
                                   ],
-                                  PopupMenuItemData(
+                                  CommonPopupMenuItem(
                                     glyph: AppGlyphs.copy,
                                     label: appLocalizations.exportFile,
                                     onPressed: () {
@@ -490,7 +490,7 @@ class ProfileItem extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                            PopupMenuItemData(
+                            CommonPopupMenuItem(
                               danger: true,
                               glyph: AppGlyphs.delete,
                               label: appLocalizations.delete,

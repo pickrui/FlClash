@@ -76,21 +76,21 @@ Future<void> showRenameProfileDialog(
 
 enum CustomImportSource { url, file, text }
 
-List<PopupMenuItemData> customImportMenuItems(
+List<CommonPopupMenuItem> customImportMenuItems(
   AppLocalizations appLocalizations,
   void Function(CustomImportSource source) onSelected,
 ) => [
-  PopupMenuItemData(
+  CommonPopupMenuItem(
     label: appLocalizations.importUrl,
     glyph: AppGlyphs.cloudDownload,
     onPressed: () => onSelected(CustomImportSource.url),
   ),
-  PopupMenuItemData(
+  CommonPopupMenuItem(
     label: appLocalizations.importFile,
     glyph: AppGlyphs.importFile,
     onPressed: () => onSelected(CustomImportSource.file),
   ),
-  PopupMenuItemData(
+  CommonPopupMenuItem(
     label: appLocalizations.importText,
     glyph: AppGlyphs.compose,
     onPressed: () => onSelected(CustomImportSource.text),

@@ -165,6 +165,10 @@ void main() {
     await tester.runAsync(
       () => tester.tap(find.text(AppLocalizations.current.importFile)),
     );
+    // A pick runs once the menu has returned into its button.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
     expect(files.calls, callsBefore + 1);

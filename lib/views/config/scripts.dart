@@ -229,12 +229,12 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
                 ),
                 popup: CommonPopupMenu(
                   items: [
-                    PopupMenuItemData(
+                    CommonPopupMenuItem(
                       label: l.edit,
                       glyph: AppGlyphs.edit,
                       onPressed: () => _edit(script),
                     ),
-                    PopupMenuItemData(
+                    CommonPopupMenuItem(
                       label: l.scriptOptions,
                       glyph: AppGlyphs.sliders,
                       onPressed: () => BaseNavigator.push(
@@ -243,18 +243,18 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
                       ),
                     ),
                     if (script.url != null) ...[
-                      PopupMenuItemData(
+                      CommonPopupMenuItem(
                         label: l.url,
                         glyph: AppGlyphs.link,
                         onPressed: () => _update(script, editUrl: true),
                       ),
-                      PopupMenuItemData(
+                      CommonPopupMenuItem(
                         label: l.sync,
                         glyph: AppGlyphs.sync,
                         onPressed: () => _update(script),
                       ),
                     ],
-                    PopupMenuItemData(
+                    CommonPopupMenuItem(
                       label: l.delete,
                       glyph: AppGlyphs.delete,
                       danger: true,
@@ -285,17 +285,17 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
           ),
           popup: CommonPopupMenu(
             items: [
-              PopupMenuItemData(
+              CommonPopupMenuItem(
                 label: l.startFromScratch,
                 glyph: AppGlyphs.compose,
                 onPressed: _edit,
               ),
-              PopupMenuItemData(
+              CommonPopupMenuItem(
                 label: l.importUrl,
                 glyph: AppGlyphs.cloudDownload,
                 onPressed: () => _import(fromUrl: true),
               ),
-              PopupMenuItemData(
+              CommonPopupMenuItem(
                 label: l.importFile,
                 glyph: AppGlyphs.importFile,
                 onPressed: () => _import(fromUrl: false),

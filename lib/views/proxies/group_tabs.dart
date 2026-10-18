@@ -156,7 +156,7 @@ class _GroupTabsState extends State<GroupTabs> {
         maxVisibleItems: 7,
         items: [
           for (final (index, group) in widget.groups.indexed)
-            PopupMenuItemData(
+            CommonPopupMenuItem(
               label: group.name,
               checked: index == widget.controller.index,
               onPressed: () => _select(index),

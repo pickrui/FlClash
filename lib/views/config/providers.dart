@@ -302,23 +302,23 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
           popup: CommonPopupMenu(
             items: [
               if (editable)
-                PopupMenuItemData(
+                CommonPopupMenuItem(
                   label: l.edit,
                   glyph: AppGlyphs.edit,
                   onPressed: () => _editContent(item),
                 ),
               if (!item.isTextContent)
-                PopupMenuItemData(
+                CommonPopupMenuItem(
                   label: l.preview,
                   glyph: AppGlyphs.eye,
                   onPressed: () => _preview(item),
                 ),
-              PopupMenuItemData(
+              CommonPopupMenuItem(
                 label: l.options,
                 glyph: AppGlyphs.settings,
                 onPressed: () => _options(item),
               ),
-              PopupMenuItemData(
+              CommonPopupMenuItem(
                 label: l.delete,
                 glyph: AppGlyphs.delete,
                 danger: true,
@@ -368,17 +368,17 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
           ),
           popup: CommonPopupMenu(
             items: [
-              PopupMenuItemData(
+              CommonPopupMenuItem(
                 label: l.startFromScratch,
                 glyph: AppGlyphs.compose,
                 onPressed: _editContent,
               ),
-              PopupMenuItemData(
+              CommonPopupMenuItem(
                 label: l.importUrl,
                 glyph: AppGlyphs.cloudDownload,
                 onPressed: () => _import(fromUrl: true),
               ),
-              PopupMenuItemData(
+              CommonPopupMenuItem(
                 label: l.importFile,
                 glyph: AppGlyphs.importFile,
                 onPressed: () => _import(fromUrl: false),

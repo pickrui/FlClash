@@ -390,26 +390,6 @@ abstract class Field with _$Field {
   }) = _Field;
 }
 
-class PopupMenuItemData {
-  const PopupMenuItemData({
-    this.icon,
-    this.glyph,
-    required this.label,
-    this.onPressed,
-    this.danger = false,
-    this.checked,
-    this.subItems = const [],
-  });
-
-  final String label;
-  final VoidCallback? onPressed;
-  final IconData? icon;
-  final Glyph? glyph;
-  final bool danger;
-  final bool? checked;
-  final List<PopupMenuItemData> subItems;
-}
-
 class CloseWindowIntent extends Intent {
   const CloseWindowIntent();
 }

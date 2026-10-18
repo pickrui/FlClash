@@ -315,31 +315,31 @@ class _ProviderItemState extends ConsumerState<ProviderItem> {
                   popup: CommonPopupMenu(
                     items: [
                       if (_file == ProviderFileType.text)
-                        PopupMenuItemData(
+                        CommonPopupMenuItem(
                           glyph: AppGlyphs.edit,
                           label: l.edit,
                           onPressed: _edit,
                         ),
                       if (_file == ProviderFileType.ruleSet &&
                           provider.type == 'Rule')
-                        PopupMenuItemData(
+                        CommonPopupMenuItem(
                           glyph: AppGlyphs.eye,
                           label: l.preview,
                           onPressed: _preview,
                         ),
-                      PopupMenuItemData(
+                      CommonPopupMenuItem(
                         glyph: AppGlyphs.upload,
                         label: l.upload,
                         onPressed: _handleSideLoadProvider,
                       ),
                       if (provider.vehicleType == 'HTTP')
-                        PopupMenuItemData(
+                        CommonPopupMenuItem(
                           glyph: AppGlyphs.sync,
                           label: l.sync,
                           onPressed: _handleUpdateProvider,
                         ),
                       if ((provider.subscriptionInfo?.total ?? 0) > 0)
-                        PopupMenuItemData(
+                        CommonPopupMenuItem(
                           glyph: AppGlyphs.dataUsage,
                           label: l.subscriptionInfo,
                           onPressed: _subscriptionInfo,

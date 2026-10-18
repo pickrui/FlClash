@@ -153,6 +153,13 @@ class PageTraversalPolicy extends ReadingOrderTraversalPolicy {
   }
 }
 
+final remoteSelectKeys = {
+  LogicalKeyboardKey.select,
+  LogicalKeyboardKey.enter,
+  LogicalKeyboardKey.numpadEnter,
+  LogicalKeyboardKey.gameButtonA,
+};
+
 class RemoteFocusAdapter extends StatefulWidget {
   final bool enabled;
   final Widget child;
@@ -162,6 +169,10 @@ class RemoteFocusAdapter extends StatefulWidget {
     required this.enabled,
     required this.child,
   });
+
+  static bool isEnabledOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<_RemoteScope>()?.enabled ??
+      false;
 
   @override
   State<RemoteFocusAdapter> createState() => _RemoteFocusAdapterState();
@@ -259,12 +270,25 @@ class _RemoteFocusAdapterState extends State<RemoteFocusAdapter> {
 
   @override
   Widget build(BuildContext context) {
-    return Focus(
-      canRequestFocus: false,
-      skipTraversal: true,
-      includeSemantics: false,
-      onKeyEvent: _handleKeyEvent,
-      child: widget.child,
+    return _RemoteScope(
+      enabled: widget.enabled,
+      child: Focus(
+        canRequestFocus: false,
+        skipTraversal: true,
+        includeSemantics: false,
+        onKeyEvent: _handleKeyEvent,
+        child: widget.child,
+      ),
     );
   }
+}
+
+class _RemoteScope extends InheritedWidget {
+  const _RemoteScope({required this.enabled, required super.child});
+
+  final bool enabled;
+
+  @override
+  bool updateShouldNotify(_RemoteScope oldWidget) =>
+      enabled != oldWidget.enabled;
 }

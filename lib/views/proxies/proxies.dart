@@ -7,7 +7,6 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/common.dart';
 import 'package:fl_clash/models/state.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/views/proxies/list.dart';
@@ -47,16 +46,13 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
         targetBuilder: (open) {
           return IconButton(
             tooltip: context.appLocalizations.more,
-            onPressed: () {
-              final isMobile = ref.read(isMobileViewProvider);
-              open(offset: Offset(0, isMobile ? 0 : 20));
-            },
+            onPressed: open,
             icon: const GlyphIcon(AppGlyphs.more),
           );
         },
         popup: CommonPopupMenu(
           items: [
-            PopupMenuItemData(
+            CommonPopupMenuItem(
               glyph: AppGlyphs.sliders,
               label: appLocalizations.settings,
               onPressed: () {
@@ -72,7 +68,7 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
               },
             ),
             if (hasProviders)
-              PopupMenuItemData(
+              CommonPopupMenuItem(
                 glyph: AppGlyphs.dataUsage,
                 label: appLocalizations.providers,
                 onPressed: () {

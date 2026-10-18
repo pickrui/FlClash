@@ -167,6 +167,26 @@ void main() {
       expect(swatch(0xFFFF9500), findsNothing);
     });
 
+    testWidgets('opens a color menu from the keyboard', (tester) async {
+      await _pump(tester, const Size(900, 1800));
+      await _scrollTo(tester, swatch(0xFFFF9500));
+      final content = find.descendant(
+        of: find.descendant(
+          of: swatch(0xFFFF9500),
+          matching: find.byType(InkWell),
+        ),
+        matching: find.byType(Stack),
+      );
+      Focus.of(tester.element(content.first)).requestFocus();
+      await tester.pump();
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.contextMenu);
+      await tester.pumpAndSettle();
+
+      expect(find.text(AppLocalizations.current.edit), findsOneWidget);
+      expect(find.text(AppLocalizations.current.delete), findsOneWidget);
+    });
+
     testWidgets('edits a color in place from its long-press menu', (
       tester,
     ) async {

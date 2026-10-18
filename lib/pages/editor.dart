@@ -10,7 +10,6 @@ import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/common.dart';
 import 'package:fl_clash/features/editor/editor.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/providers/app.dart';
@@ -322,26 +321,26 @@ class _EditorPageState extends ConsumerState<EditorPage> {
                 ),
                 popupBuilder: (_) => CommonPopupMenu(
                   items: [
-                    PopupMenuItemData(
+                    CommonPopupMenuItem(
                       label: appLocalizations.undo,
                       glyph: AppGlyphs.undo,
                       onPressed: _barState.canUndo
                           ? _undoController.undo
                           : null,
                     ),
-                    PopupMenuItemData(
+                    CommonPopupMenuItem(
                       label: appLocalizations.redo,
                       glyph: AppGlyphs.redo,
                       onPressed: _barState.canRedo
                           ? _undoController.redo
                           : null,
                     ),
-                    PopupMenuItemData(
+                    CommonPopupMenuItem(
                       label: appLocalizations.fontSize,
                       glyph: AppGlyphs.textSize,
                       subItems: [
                         for (final size in EditorFontSize.values)
-                          PopupMenuItemData(
+                          CommonPopupMenuItem(
                             label: '${size.value.toInt()}',
                             checked: size == fontSize,
                             onPressed: () => ref
@@ -353,7 +352,7 @@ class _EditorPageState extends ConsumerState<EditorPage> {
                           ),
                       ],
                     ),
-                    PopupMenuItemData(
+                    CommonPopupMenuItem(
                       label: appLocalizations.lineWrap,
                       checked: lineWrap,
                       onPressed: () => ref
@@ -778,26 +777,26 @@ class _CodeEditorState extends ConsumerState<_CodeEditor> {
     final appLocalizations = context.appLocalizations;
     final items = [
       if (request.hasSelection && !request.readOnly)
-        PopupMenuItemData(
-          icon: Icons.content_cut,
+        CommonPopupMenuItem(
+          glyph: AppGlyphs.cut,
           label: appLocalizations.cut,
           onPressed: request.cut,
         ),
       if (request.hasSelection)
-        PopupMenuItemData(
-          icon: Icons.content_copy,
+        CommonPopupMenuItem(
+          glyph: AppGlyphs.copy,
           label: appLocalizations.copy,
           onPressed: request.copy,
         ),
       if (!request.readOnly)
-        PopupMenuItemData(
-          icon: Icons.content_paste,
+        CommonPopupMenuItem(
+          glyph: AppGlyphs.paste,
           label: appLocalizations.paste,
           onPressed: request.paste,
         ),
       if (!request.isAllSelected)
-        PopupMenuItemData(
-          icon: Icons.select_all,
+        CommonPopupMenuItem(
+          glyph: AppGlyphs.selectAll,
           label: appLocalizations.selectAll,
           onPressed: request.selectAll,
         ),
