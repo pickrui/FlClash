@@ -703,20 +703,25 @@ async fn require_native_request(headers: HeaderMap) -> Result<(), Rejection> {
     Ok(())
 }
 
+/// The rejected body is left unread, so the connection cannot carry another request.
+fn closing_connection(response: warp::reply::Response) -> warp::reply::Response {
+    warp::reply::with_header(response, "connection", "close").into_response()
+}
+
 async fn handle_rejection(rejection: Rejection) -> Result<warp::reply::Response, Infallible> {
     if rejection.find::<UntrustedRequest>().is_some() {
-        return Ok(error_response(
+        return Ok(closing_connection(error_response(
             "untrustedRequest",
             "Helper accepts only native local requests",
             StatusCode::FORBIDDEN,
-        ));
+        )));
     }
     if rejection.find::<warp::reject::PayloadTooLarge>().is_some() {
-        return Ok(error_response(
+        return Ok(closing_connection(error_response(
             "requestTooLarge",
             "Helper request body exceeds the size limit",
             StatusCode::PAYLOAD_TOO_LARGE,
-        ));
+        )));
     }
     if rejection.find::<warp::reject::LengthRequired>().is_some() {
         return Ok(error_response(
@@ -981,6 +986,7 @@ mod tests {
             };
             assert!(running, "a browser request stopped the owned Core");
             assert_eq!(response.status(), StatusCode::FORBIDDEN);
+            assert_eq!(response.headers()["connection"], "close");
         }
     }
 
@@ -994,6 +1000,7 @@ mod tests {
         ] {
             let response = request.path("/logs").reply(&routes()).await;
             assert_eq!(response.status(), StatusCode::FORBIDDEN);
+            assert_eq!(response.headers()["connection"], "close");
         }
         let response = warp::test::request().path("/logs").reply(&routes()).await;
         assert_eq!(response.status(), StatusCode::FORBIDDEN);
@@ -1053,6 +1060,7 @@ mod tests {
                 .reply(&routes())
                 .await;
             assert_eq!(response.status(), StatusCode::PAYLOAD_TOO_LARGE);
+            assert_eq!(response.headers()["connection"], "close");
         }
     }
 
