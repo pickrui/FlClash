@@ -24,6 +24,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:fl_clash/widgets/navigation_dock.dart';
 
 import 'add.dart';
+import 'custom_profile.dart';
 import 'edit.dart';
 import 'script_config_preview.dart';
 
@@ -264,7 +265,7 @@ class ProfileItem extends StatelessWidget {
     final commonAction = context.commonAction;
     final profileAction = context.profileAction;
 
-    if (profile.type == ProfileType.file) return;
+    if (!profile.isUpdatable) return;
     await commonAction.loadingRun(() async {
       await profileAction.updateProfile(profile, showLoading: true);
     }, tag: LoadingTag.profiles);
@@ -277,7 +278,9 @@ class ProfileItem extends StatelessWidget {
         return AdaptiveSheetScaffold(
           type: type,
           body: EditProfileView(profile: profile),
-          title: appLocalizations.editProfile,
+          title: profile.type == ProfileType.custom
+              ? appLocalizations.rename
+              : appLocalizations.editProfile,
         );
       },
     );
@@ -301,6 +304,15 @@ class ProfileItem extends StatelessWidget {
     return [
       Text(
         profile.lastUpdateDate?.lastUpdateTimeDesc ?? '',
+        style: context.textTheme.bodySmall?.toLighter,
+      ),
+    ];
+  }
+
+  List<Widget> _buildCustomProfileInfo(BuildContext context) {
+    return [
+      Text(
+        appLocalizations.customProfile,
         style: context.textTheme.bodySmall?.toLighter,
       ),
     ];
@@ -339,8 +351,13 @@ class ProfileItem extends StatelessWidget {
     BaseNavigator.push(context, ProfileProxyChainsView(profileId: id));
   }
 
+  void _handlePushCustomProfilePage(BuildContext context) {
+    BaseNavigator.push(context, CustomProfileView(profileId: profile.id));
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isCustom = profile.type == ProfileType.custom;
     return CommonCard(
       enterActionsOnRight: true,
       radius: AppCorner.xl,
@@ -377,9 +394,21 @@ class ProfileItem extends StatelessWidget {
                               glyph: AppGlyphs.edit,
                               label: appLocalizations.edit,
                               onPressed: () {
-                                _handleShowEditExtendPage(context);
+                                if (isCustom) {
+                                  _handlePushCustomProfilePage(context);
+                                } else {
+                                  _handleShowEditExtendPage(context);
+                                }
                               },
                             ),
+                            if (isCustom)
+                              PopupMenuItemData(
+                                glyph: AppGlyphs.textShort,
+                                label: appLocalizations.rename,
+                                onPressed: () {
+                                  _handleShowEditExtendPage(context);
+                                },
+                              ),
                             if (!profile.isoixCloudProfile)
                               PopupMenuItemData(
                                 glyph: AppGlyphs.eye,
@@ -397,13 +426,17 @@ class ProfileItem extends StatelessWidget {
                                 },
                               ),
                             ],
-                            PopupMenuItemData(
-                              glyph: AppGlyphs.split,
-                              label: appLocalizations.proxyChains,
-                              onPressed: () {
-                                _handlePushProxyChainsPage(context, profile.id);
-                              },
-                            ),
+                            if (!isCustom)
+                              PopupMenuItemData(
+                                glyph: AppGlyphs.split,
+                                label: appLocalizations.proxyChains,
+                                onPressed: () {
+                                  _handlePushProxyChainsPage(
+                                    context,
+                                    profile.id,
+                                  );
+                                },
+                              ),
                             if (profile.isoixCloudProfile)
                               PopupMenuItemData(
                                 glyph: AppGlyphs.puzzle,
@@ -415,7 +448,7 @@ class ProfileItem extends StatelessWidget {
                                   );
                                 },
                               )
-                            else
+                            else if (!isCustom)
                               PopupMenuItemData(
                                 glyph: AppGlyphs.moreCircle,
                                 label: appLocalizations.more,
@@ -488,8 +521,8 @@ class ProfileItem extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             ...switch (profile.type) {
-              ProfileType.file ||
-              ProfileType.custom => _buildFileProfileInfo(context),
+              ProfileType.file => _buildFileProfileInfo(context),
+              ProfileType.custom => _buildCustomProfileInfo(context),
               ProfileType.url => _buildUrlProfileInfo(context),
             },
           ],

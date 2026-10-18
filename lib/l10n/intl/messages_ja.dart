@@ -718,6 +718,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "creationTime": MessageLookupByLibrary.simpleMessage("作成時間"),
     "custom": MessageLookupByLibrary.simpleMessage("カスタム"),
     "customOutboundInUse": m10,
+    "customProfile": MessageLookupByLibrary.simpleMessage("カスタムプロファイル"),
+    "customProfileDesc": MessageLookupByLibrary.simpleMessage(
+      "自分のノードとプロバイダーライブラリからプロキシグループとルールを組み立てます",
+    ),
     "customRoutingDraftHint": MessageLookupByLibrary.simpleMessage(
       "カスタム設定を入力してから、カスタムモードに切り替えてください。下書きの編集では現在のモードは変わりません",
     ),
@@ -1078,6 +1082,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "emailValidation": MessageLookupByLibrary.simpleMessage("メールを入力してください"),
     "emptyCustomOverwrite": MessageLookupByLibrary.simpleMessage(
       "カスタム上書きが空です。クイック入力を使うか、ルールとプロキシグループを追加してください。サブスクリプションの内容を保つには、追加モードを使ってください",
+    ),
+    "emptyCustomProfile": MessageLookupByLibrary.simpleMessage(
+      "このカスタムプロファイルに先にプロキシグループかルールを追加してください",
     ),
     "emptyTip": m21,
     "en": MessageLookupByLibrary.simpleMessage("英語"),
@@ -1491,6 +1498,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "more": MessageLookupByLibrary.simpleMessage("その他"),
     "myOrders": MessageLookupByLibrary.simpleMessage("購入済みプラン"),
     "name": MessageLookupByLibrary.simpleMessage("名前"),
+    "nameCustomProfileTip": MessageLookupByLibrary.simpleMessage(
+      "このカスタムプロファイルに名前を付けてください",
+    ),
     "nameserver": MessageLookupByLibrary.simpleMessage("ネームサーバー"),
     "nameserverDesc": MessageLookupByLibrary.simpleMessage("ドメイン解決用"),
     "nameserverPolicy": MessageLookupByLibrary.simpleMessage("ネームサーバーポリシー"),

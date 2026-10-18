@@ -39,24 +39,28 @@ class OverwriteView extends ConsumerStatefulWidget {
   ConsumerState<OverwriteView> createState() => _OverwriteViewState();
 }
 
-class _OverwriteViewState extends ConsumerState<OverwriteView> {
-  late final SetupAction _setupAction;
-  bool _checking = false;
-  bool _previewing = false;
+/// Preview and check-and-apply for a page that edits one profile's routing.
+mixin ProfileRoutingActions<T extends ConsumerStatefulWidget>
+    on ConsumerState<T> {
+  late final SetupAction setupAction;
+  bool checking = false;
+  bool previewing = false;
+
+  int get routingProfileId;
 
   @override
   void initState() {
     super.initState();
-    _setupAction = context.setupAction;
+    setupAction = context.setupAction;
   }
 
-  Future<void> _preview() async {
-    final profile = ref.read(profileProvider(widget.profileId));
-    if (profile == null || profile.isoixCloudProfile || _previewing) return;
-    setState(() => _previewing = true);
+  Future<void> previewRouting() async {
+    final profile = ref.read(profileProvider(routingProfileId));
+    if (profile == null || profile.isoixCloudProfile || previewing) return;
+    setState(() => previewing = true);
     try {
       ScriptConfigChanges? changes;
-      final config = await _setupAction.getProfileWithId(
+      final config = await setupAction.getProfileWithId(
         profile.id,
         onScriptChanges: (value) => changes = value,
       );
@@ -76,14 +80,14 @@ class _OverwriteViewState extends ConsumerState<OverwriteView> {
     } catch (error) {
       if (mounted) context.showNotifier(error.toString());
     } finally {
-      if (mounted) setState(() => _previewing = false);
+      if (mounted) setState(() => previewing = false);
     }
   }
 
-  Future<void> _checkAndApply() async {
-    final profile = ref.read(profileProvider(widget.profileId));
-    if (profile == null || _checking) return;
-    setState(() => _checking = true);
+  Future<void> checkAndApplyRouting() async {
+    final profile = ref.read(profileProvider(routingProfileId));
+    if (profile == null || checking) return;
+    setState(() => checking = true);
     try {
       final error = await validateCustomRoutingDraft(ref, profile);
       if (!mounted) return;
@@ -92,7 +96,7 @@ class _OverwriteViewState extends ConsumerState<OverwriteView> {
         return;
       }
       if (ref.read(currentProfileIdProvider) == profile.id) {
-        final applied = await _setupAction.applyProfile(force: true);
+        final applied = await setupAction.applyProfile(force: true);
         if (!mounted || ref.read(currentProfileIdProvider) != profile.id) {
           return;
         }
@@ -114,56 +118,73 @@ class _OverwriteViewState extends ConsumerState<OverwriteView> {
     } catch (error) {
       if (mounted) context.showNotifier(error.toString());
     } finally {
-      if (mounted) setState(() => _checking = false);
+      if (mounted) setState(() => checking = false);
     }
   }
+
+  List<Widget> buildRoutingActions(Profile? profile) => [
+    if (profile != null && !profile.isoixCloudProfile)
+      TextButton(
+        onPressed: previewing ? null : previewRouting,
+        child: Text(context.appLocalizations.preview),
+      ),
+    IconButton(
+      tooltip: appLocalizations.checkRouting,
+      onPressed: checking ? null : checkAndApplyRouting,
+      icon: checking
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const GlyphIcon(AppGlyphs.rules),
+    ),
+  ];
+}
+
+class RulesRequireRuleModeHint extends ConsumerWidget {
+  const RulesRequireRuleModeHint({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mode = ref.watch(
+      patchClashConfigProvider.select((config) => config.mode),
+    );
+    if (mode == Mode.rule) {
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Text(
+          appLocalizations.rulesRequireRuleMode,
+          style: TextStyle(color: context.colorScheme.error),
+        ),
+      ),
+    );
+  }
+}
+
+class _OverwriteViewState extends ConsumerState<OverwriteView>
+    with ProfileRoutingActions<OverwriteView> {
+  @override
+  int get routingProfileId => widget.profileId;
 
   @override
   Widget build(BuildContext context) {
     return CommonScaffold(
       title: appLocalizations.override,
-      isLoading: _previewing,
-      actions: [
-        if (ref.watch(profileProvider(widget.profileId)) case final profile?
-            when !profile.isoixCloudProfile)
-          TextButton(
-            onPressed: _previewing ? null : _preview,
-            child: Text(context.appLocalizations.preview),
-          ),
-        IconButton(
-          tooltip: appLocalizations.checkRouting,
-          onPressed: _checking ? null : _checkAndApply,
-          icon: _checking
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const GlyphIcon(AppGlyphs.rules),
-        ),
-      ],
+      isLoading: previewing,
+      actions: buildRoutingActions(
+        ref.watch(profileProvider(widget.profileId)),
+      ),
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
             child: SizedBox(height: context.contentTopPadding),
           ),
           OverwriteModeSelector(profileId: widget.profileId),
-          if (ref.watch(
-                patchClashConfigProvider.select((config) => config.mode),
-              ) !=
-              Mode.rule)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                child: Text(
-                  appLocalizations.rulesRequireRuleMode,
-                  style: TextStyle(color: context.colorScheme.error),
-                ),
-              ),
-            ),
+          const RulesRequireRuleModeHint(),
           ProfileProxyChainsContent(profileId: widget.profileId),
           _Content(widget.profileId),
         ],
@@ -174,7 +195,7 @@ class _OverwriteViewState extends ConsumerState<OverwriteView> {
   @override
   void dispose() {
     super.dispose();
-    _setupAction.autoApplyProfile();
+    setupAction.autoApplyProfile();
   }
 }
 

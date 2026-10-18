@@ -12043,6 +12043,46 @@ class AppLocalizations {
       args: [label, min, max],
     );
   }
+
+  /// `Custom profile`
+  String get customProfile {
+    return Intl.message(
+      'Custom profile',
+      name: 'customProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Assemble proxy groups and rules from your own nodes and the provider library`
+  String get customProfileDesc {
+    return Intl.message(
+      'Assemble proxy groups and rules from your own nodes and the provider library',
+      name: 'customProfileDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add a proxy group or a rule to this custom profile first`
+  String get emptyCustomProfile {
+    return Intl.message(
+      'Add a proxy group or a rule to this custom profile first',
+      name: 'emptyCustomProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Name this custom profile`
+  String get nameCustomProfileTip {
+    return Intl.message(
+      'Name this custom profile',
+      name: 'nameCustomProfileTip',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

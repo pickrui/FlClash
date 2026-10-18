@@ -859,6 +859,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "creationTime": MessageLookupByLibrary.simpleMessage("Время создания"),
     "custom": MessageLookupByLibrary.simpleMessage("Пользовательский"),
     "customOutboundInUse": m10,
+    "customProfile": MessageLookupByLibrary.simpleMessage(
+      "Пользовательский профиль",
+    ),
+    "customProfileDesc": MessageLookupByLibrary.simpleMessage(
+      "Группы прокси и правила из своих узлов и библиотеки провайдеров",
+    ),
     "customRoutingDraftHint": MessageLookupByLibrary.simpleMessage(
       "Заполните свои настройки маршрутизации, затем выберите режим «Пользовательский». Редактирование черновика не меняет текущий режим.",
     ),
@@ -1321,6 +1327,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "emptyCustomOverwrite": MessageLookupByLibrary.simpleMessage(
       "Пользовательское переопределение пусто. Используйте быстрое заполнение или добавьте правила и группы прокси. Чтобы сохранить содержимое подписки, выберите режим «Дополнение».",
+    ),
+    "emptyCustomProfile": MessageLookupByLibrary.simpleMessage(
+      "Сначала добавьте в этот профиль группу прокси или правило",
     ),
     "emptyTip": m21,
     "en": MessageLookupByLibrary.simpleMessage("Английский"),
@@ -1855,6 +1864,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "more": MessageLookupByLibrary.simpleMessage("Ещё"),
     "myOrders": MessageLookupByLibrary.simpleMessage("Купленные тарифы"),
     "name": MessageLookupByLibrary.simpleMessage("Имя"),
+    "nameCustomProfileTip": MessageLookupByLibrary.simpleMessage(
+      "Назовите этот профиль",
+    ),
     "nameserver": MessageLookupByLibrary.simpleMessage("Сервер имен"),
     "nameserverDesc": MessageLookupByLibrary.simpleMessage(
       "Для разрешения домена",

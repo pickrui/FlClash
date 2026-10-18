@@ -86,7 +86,9 @@ Future<String> validateCustomRoutingDraft(
     if (profile.overwriteType == OverwriteType.custom &&
         profile.customProxyGroups.isEmpty &&
         profile.customRules.isEmpty) {
-      return appLocalizations.emptyCustomOverwrite;
+      return profile.type == ProfileType.custom
+          ? appLocalizations.emptyCustomProfile
+          : appLocalizations.emptyCustomOverwrite;
     }
     if ((profile.overwriteType == OverwriteType.custom ||
             profile.overwriteType == OverwriteType.merge) &&

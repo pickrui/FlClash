@@ -843,6 +843,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "creationTime": MessageLookupByLibrary.simpleMessage("Creation time"),
     "custom": MessageLookupByLibrary.simpleMessage("Custom"),
     "customOutboundInUse": m10,
+    "customProfile": MessageLookupByLibrary.simpleMessage("Custom profile"),
+    "customProfileDesc": MessageLookupByLibrary.simpleMessage(
+      "Assemble proxy groups and rules from your own nodes and the provider library",
+    ),
     "customRoutingDraftHint": MessageLookupByLibrary.simpleMessage(
       "Fill in your custom routing, then switch to Custom mode. Editing this draft does not change the current mode.",
     ),
@@ -1283,6 +1287,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "emptyCustomOverwrite": MessageLookupByLibrary.simpleMessage(
       "Custom override is empty. Use Quick fill or add rules and proxy groups first. To keep subscription content, use Overlay mode.",
+    ),
+    "emptyCustomProfile": MessageLookupByLibrary.simpleMessage(
+      "Add a proxy group or a rule to this custom profile first",
     ),
     "emptyTip": m21,
     "en": MessageLookupByLibrary.simpleMessage("English"),
@@ -1782,6 +1789,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "more": MessageLookupByLibrary.simpleMessage("More"),
     "myOrders": MessageLookupByLibrary.simpleMessage("Purchased Plans"),
     "name": MessageLookupByLibrary.simpleMessage("Name"),
+    "nameCustomProfileTip": MessageLookupByLibrary.simpleMessage(
+      "Name this custom profile",
+    ),
     "nameserver": MessageLookupByLibrary.simpleMessage("Nameserver"),
     "nameserverDesc": MessageLookupByLibrary.simpleMessage(
       "For resolving domain",

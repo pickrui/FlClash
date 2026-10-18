@@ -1432,5 +1432,9 @@
   "excludeSrcPortDesc": "Трафик с исключённых исходных портов идёт в обход TUN",
   "excludeDstPort": "Исключённые порты назначения",
   "excludeDstPortDesc": "Трафик на исключённые порты назначения идёт в обход TUN",
-  "numberRangeTip": "Значение «{label}» должно быть от {min} до {max}"
+  "numberRangeTip": "Значение «{label}» должно быть от {min} до {max}",
+  "customProfile": "Пользовательский профиль",
+  "customProfileDesc": "Группы прокси и правила из своих узлов и библиотеки провайдеров",
+  "emptyCustomProfile": "Сначала добавьте в этот профиль группу прокси или правило",
+  "nameCustomProfileTip": "Назовите этот профиль"
 }

@@ -50,6 +50,9 @@ class ProfileAction extends _$ProfileAction {
 
   Future<void> addProfileFormFile() => _controller.addProfileFormFile();
 
+  Future<int> addCustomProfile(String label) =>
+      _controller.addCustomProfile(label);
+
   Future<void> addProfileFormQrCode() => _controller.addProfileFormQrCode();
 
   void reorder(List<Profile> profiles) => _controller.reorder(profiles);
@@ -387,6 +390,14 @@ extension ProfilesControllerExt on AppController {
       globalState.showNotifier(appLocalizations.getProfileSuccess);
       await requestStartCore();
     }
+  }
+
+  Future<int> addCustomProfile(String label) {
+    return storageLock.synchronized(() async {
+      final profile = Profile.custom(label: label);
+      await putProfile(profile, reportOnWait: false);
+      return profile.id;
+    });
   }
 
   Future<void> addProfileFormQrCode() async {

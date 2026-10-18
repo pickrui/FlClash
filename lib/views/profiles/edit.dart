@@ -390,7 +390,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
             ),
           ),
       ],
-      if (!isoixCloud)
+      if (!isoixCloud && widget.profile.type != ProfileType.custom)
         ListItem(
           title: Text(appLocalizations.profile),
           subtitle: Column(

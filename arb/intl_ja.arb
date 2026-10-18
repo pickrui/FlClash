@@ -1432,5 +1432,9 @@
   "excludeSrcPortDesc": "除外送信元ポートからの通信は TUN を通りません",
   "excludeDstPort": "除外宛先ポート",
   "excludeDstPortDesc": "除外宛先ポートへの通信は TUN を通りません",
-  "numberRangeTip": "{label}は{min}から{max}の範囲で指定してください"
+  "numberRangeTip": "{label}は{min}から{max}の範囲で指定してください",
+  "customProfile": "カスタムプロファイル",
+  "customProfileDesc": "自分のノードとプロバイダーライブラリからプロキシグループとルールを組み立てます",
+  "emptyCustomProfile": "このカスタムプロファイルに先にプロキシグループかルールを追加してください",
+  "nameCustomProfileTip": "このカスタムプロファイルに名前を付けてください"
 }

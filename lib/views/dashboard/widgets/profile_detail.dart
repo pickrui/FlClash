@@ -56,13 +56,18 @@ class ProfileDetailSheet extends ConsumerWidget {
 
   void _handlePreview(BuildContext context, Profile profile) {
     if (profile.isoixCloudProfile) return;
+    final setupAction = context.setupAction;
     unawaited(
       BaseNavigator.push<String>(
         context,
         EditorPage(
           title: profile.realLabel,
           readOnly: true,
-          load: () async => readTextFileTask((await profile.file).path),
+          load: profile.type == ProfileType.custom
+              ? () async => encodeYamlTask(
+                  await setupAction.getProfileWithId(profile.id),
+                )
+              : () async => readTextFileTask((await profile.file).path),
         ),
       ),
     );
@@ -128,7 +133,11 @@ class ProfileDetailSheet extends ConsumerWidget {
               ),
               _InfoRow(
                 label: appLocalizations.overrideMode,
-                value: Text(_overwriteLabel(context, profile.overwriteType)),
+                value: Text(
+                  profile.type == ProfileType.custom
+                      ? appLocalizations.customProfile
+                      : _overwriteLabel(context, profile.overwriteType),
+                ),
               ),
             ],
           ),

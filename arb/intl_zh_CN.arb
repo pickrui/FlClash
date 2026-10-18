@@ -1432,5 +1432,9 @@
   "excludeSrcPortDesc": "源端口为这些端口的流量不经过虚拟网卡",
   "excludeDstPort": "排除目标端口",
   "excludeDstPortDesc": "发往这些目标端口的流量不经过虚拟网卡",
-  "numberRangeTip": "{label}必须在 {min} 到 {max} 之间"
+  "numberRangeTip": "{label}必须在 {min} 到 {max} 之间",
+  "customProfile": "自定义配置",
+  "customProfileDesc": "基于自有节点和资源库组建策略组与规则",
+  "emptyCustomProfile": "请先为该自定义配置添加策略组或规则",
+  "nameCustomProfileTip": "为该自定义配置命名"
 }

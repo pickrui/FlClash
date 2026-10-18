@@ -632,6 +632,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "creationTime": MessageLookupByLibrary.simpleMessage("创建时间"),
     "custom": MessageLookupByLibrary.simpleMessage("自定义"),
     "customOutboundInUse": m10,
+    "customProfile": MessageLookupByLibrary.simpleMessage("自定义配置"),
+    "customProfileDesc": MessageLookupByLibrary.simpleMessage(
+      "基于自有节点和资源库组建策略组与规则",
+    ),
     "customRoutingDraftHint": MessageLookupByLibrary.simpleMessage(
       "先填写自定义内容，再切换至自定义模式。编辑草稿不会切换当前模式",
     ),
@@ -952,6 +956,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "emailValidation": MessageLookupByLibrary.simpleMessage("请输入邮箱"),
     "emptyCustomOverwrite": MessageLookupByLibrary.simpleMessage(
       "自定义覆写内容为空，请先一键填入或添加规则和策略组；如需保留订阅内容，请使用叠加模式",
+    ),
+    "emptyCustomProfile": MessageLookupByLibrary.simpleMessage(
+      "请先为该自定义配置添加策略组或规则",
     ),
     "emptyTip": m21,
     "en": MessageLookupByLibrary.simpleMessage("英语"),
@@ -1317,6 +1324,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "more": MessageLookupByLibrary.simpleMessage("更多"),
     "myOrders": MessageLookupByLibrary.simpleMessage("已购套餐"),
     "name": MessageLookupByLibrary.simpleMessage("名称"),
+    "nameCustomProfileTip": MessageLookupByLibrary.simpleMessage("为该自定义配置命名"),
     "nameserver": MessageLookupByLibrary.simpleMessage("域名服务器"),
     "nameserverDesc": MessageLookupByLibrary.simpleMessage("用于解析域名"),
     "nameserverPolicy": MessageLookupByLibrary.simpleMessage("域名服务器策略"),

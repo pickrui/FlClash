@@ -54,10 +54,13 @@ class CustomOverwriteContent extends ConsumerWidget {
 
   final bool merge;
 
+  final bool customProfile;
+
   const CustomOverwriteContent({
     super.key,
     required this.profileId,
     this.merge = false,
+    this.customProfile = false,
   });
 
   bool _hasSameRouting(Profile original, Profile? latest) {
@@ -231,7 +234,7 @@ class CustomOverwriteContent extends ConsumerWidget {
           ),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 24)),
-        if (!merge)
+        if (!merge && !customProfile)
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),

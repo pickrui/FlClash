@@ -1432,5 +1432,9 @@
   "excludeSrcPortDesc": "Traffic from excluded source ports skips TUN",
   "excludeDstPort": "Excluded destination ports",
   "excludeDstPortDesc": "Traffic to excluded destination ports skips TUN",
-  "numberRangeTip": "{label} must be between {min} and {max}"
+  "numberRangeTip": "{label} must be between {min} and {max}",
+  "customProfile": "Custom profile",
+  "customProfileDesc": "Assemble proxy groups and rules from your own nodes and the provider library",
+  "emptyCustomProfile": "Add a proxy group or a rule to this custom profile first",
+  "nameCustomProfileTip": "Name this custom profile"
 }

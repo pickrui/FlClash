@@ -11,8 +11,10 @@ import 'package:fl_clash/manager/status_manager.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/app.dart';
+import 'package:fl_clash/providers/clash_providers.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/database.dart';
+import 'package:fl_clash/views/profiles/custom_profile.dart';
 import 'package:fl_clash/views/profiles/overwrite.dart';
 import 'package:fl_clash/views/profiles/profiles.dart';
 import 'package:fl_clash/widgets/scaffold.dart';
@@ -84,6 +86,20 @@ class _SetupAction extends SetupAction {
 
   @override
   void autoApplyProfile() => autoApplies++;
+}
+
+class _CustomProfileAction extends ProfileAction {
+  final deleted = <int>[];
+  final saved = <Profile>[];
+
+  @override
+  Future<void> deleteProfile(int id) async => deleted.add(id);
+
+  @override
+  Future<Profile> saveProfileMetadata(Profile edited) async {
+    saved.add(edited);
+    return edited;
+  }
 }
 
 class _PreviewSetupAction extends SetupAction {
@@ -414,5 +430,64 @@ void main() {
     expect(find.byType(OverwriteView), findsNothing);
     expect(setup.autoApplies, 1);
     expect(tester.takeException(), isNull);
+  });
+
+  group('a new custom profile', () {
+    final created = Profile.custom(label: 'Unnamed').copyWith(id: 9);
+
+    Future<_CustomProfileAction> openEditor(
+      WidgetTester tester,
+      _Profiles profiles,
+      _SetupAction setup,
+    ) async {
+      final action = _CustomProfileAction();
+      await _pushRoute(tester, [
+        profilesProvider.overrideWith(() => profiles),
+        profileActionProvider.overrideWith(() => action),
+        setupActionProvider.overrideWith(() => setup),
+        clashProvidersProvider.overrideWith((_) => Stream.value([])),
+      ], () => CustomProfileView(profileId: created.id, isNew: true));
+      return action;
+    }
+
+    testWidgets('is discarded when left as created', (tester) async {
+      final setup = _SetupAction();
+      final action = await openEditor(tester, _Profiles([created]), setup);
+
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      await tester.pump(Duration.zero);
+
+      expect(find.byType(CustomProfileView), findsNothing);
+      expect(action.deleted, [created.id]);
+      expect(setup.autoApplies, 0);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('is named before leaving once edited', (tester) async {
+      final profiles = _Profiles([created]);
+      final setup = _SetupAction();
+      final action = await openEditor(tester, profiles, setup);
+      profiles.replace([
+        created.copyWith(
+          customRules: const [Rule(id: 1, value: 'MATCH,DIRECT')],
+        ),
+      ]);
+      await tester.pump();
+
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(find.text('Name this custom profile'), findsOneWidget);
+      await tester.enterText(find.byType(TextFormField), 'Built');
+      await tester.tap(find.text('Submit'));
+      await tester.pumpAndSettle();
+      await tester.pump(Duration.zero);
+
+      expect(find.byType(CustomProfileView), findsNothing);
+      expect(action.saved.single.label, 'Built');
+      expect(action.deleted, isEmpty);
+      expect(setup.autoApplies, 1);
+      expect(tester.takeException(), isNull);
+    });
   });
 }
