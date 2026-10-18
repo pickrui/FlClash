@@ -9,7 +9,7 @@ import 'package:fl_clash/ui/icons/glyph_icon.dart';
 import 'package:fl_clash/database/database.dart';
 import 'package:material_ui/material_ui.dart';
 
-import 'paged_sheet.dart';
+import 'sheet_scaffold.dart';
 import 'icon.dart';
 
 import 'package:fl_clash/ui/null_status.dart';

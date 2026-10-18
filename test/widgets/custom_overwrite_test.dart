@@ -20,6 +20,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/test_app.dart';
+
 void main() {
   testWidgets('ProxyGroupDialog scrolls on narrow screens', (tester) async {
     await tester.binding.setSurfaceSize(const Size(360, 640));
@@ -702,7 +704,7 @@ class _TestApp extends StatelessWidget {
       supportedLocales: AppLocalizations.delegate.supportedLocales,
       builder: (context, child) {
         globalState.theme = CommonTheme.of(context, 1);
-        return child!;
+        return wrapAppScopes(context, child!);
       },
       home: Scaffold(body: child),
     );

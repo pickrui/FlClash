@@ -260,7 +260,7 @@ class SheetDismissScope extends InheritedWidget {
 /// inside it: a controller shared by pages kept alive together fails the
 /// scrollbar's single position check.
 class SheetScrollScope extends InheritedWidget {
-  final ScrollController Function() createController;
+  final SheetScrollControllerFactory createController;
 
   const SheetScrollScope({
     super.key,
@@ -268,7 +268,7 @@ class SheetScrollScope extends InheritedWidget {
     required super.child,
   });
 
-  static ScrollController Function()? of(BuildContext context) {
+  static SheetScrollControllerFactory? of(BuildContext context) {
     return context
         .getInheritedWidgetOfExactType<SheetScrollScope>()
         ?.createController;
@@ -277,6 +277,21 @@ class SheetScrollScope extends InheritedWidget {
   @override
   bool updateShouldNotify(SheetScrollScope oldWidget) =>
       createController != oldWidget.createController;
+}
+
+typedef SheetScrollControllerFactory = ScrollController Function({
+  double initialScrollOffset,
+});
+
+ScrollController sheetScrollController(
+  BuildContext context, {
+  double initialScrollOffset = 0.0,
+}) {
+  final createController = SheetScrollScope.of(context);
+  if (createController == null) {
+    return ScrollController(initialScrollOffset: initialScrollOffset);
+  }
+  return createController(initialScrollOffset: initialScrollOffset);
 }
 
 class CommonScaffoldBackActionProvider extends InheritedWidget {

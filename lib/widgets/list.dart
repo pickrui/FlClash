@@ -21,13 +21,13 @@ import 'package:collection/collection.dart';
 
 import 'package:fl_clash/ui/card.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
+import 'package:fl_clash/ui/sheet.dart';
 
 import 'button.dart';
 import 'input_dialog.dart';
 import 'navigation_dock.dart';
 import 'popup.dart';
 import 'scaffold.dart';
-import 'sheet.dart';
 
 class Delegate {
   const Delegate();

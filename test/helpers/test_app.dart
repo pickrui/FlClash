@@ -22,6 +22,9 @@ class TestApp extends StatelessWidget {
   final Widget Function(Widget child) homeBuilder;
   final Locale? locale;
   final TextScaler? textScaler;
+  final ThemeData? theme;
+  final ThemeData? darkTheme;
+  final ThemeMode? themeMode;
 
   const TestApp({
     super.key,
@@ -33,6 +36,9 @@ class TestApp extends StatelessWidget {
     this.homeBuilder = _identity,
     this.locale,
     this.textScaler,
+    this.theme,
+    this.darkTheme,
+    this.themeMode,
   });
 
   static Widget _identity(Widget child) => child;
@@ -42,6 +48,9 @@ class TestApp extends StatelessWidget {
     final app = MaterialApp(
       navigatorKey: includeNavigatorKey ? globalState.navigatorKey : null,
       locale: locale,
+      theme: theme,
+      darkTheme: darkTheme,
+      themeMode: themeMode,
       localizationsDelegates: const [
         AppLocalizations.delegate,
         AppUiLocalizations.delegate,

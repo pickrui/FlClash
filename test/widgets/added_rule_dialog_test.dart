@@ -58,6 +58,9 @@ void main() {
         );
         await tester.tap(find.text('Open'));
         await tester.pumpAndSettle();
+        // A sheet opens at its shorter detent, below which the form scrolls.
+        await tester.ensureVisible(find.byKey(const Key('added-rule-target')));
+        await tester.pumpAndSettle();
         await tester.tap(find.byKey(const Key('added-rule-target')));
         await tester.pumpAndSettle();
 
@@ -184,6 +187,7 @@ void main() {
             ...GlobalMaterialLocalizations.delegates,
           ],
           supportedLocales: AppLocalizations.delegate.supportedLocales,
+          builder: (context, child) => wrapAppScopes(context, child!),
           home: Scaffold(
             body: Builder(
               builder: (context) => TextButton(

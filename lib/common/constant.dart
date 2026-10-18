@@ -7,7 +7,6 @@
 
 import 'dart:io';
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:fl_clash/common/common.dart';
@@ -123,12 +122,6 @@ const defaultDirectTestUrl = 'https://wifi.vivo.com.cn/generate_204';
 String getDelayTestUrl({required String proxyName, required String testUrl}) {
   return proxyName == UsedProxy.DIRECT.value ? defaultDirectTestUrl : testUrl;
 }
-
-final commonFilter = ImageFilter.blur(
-  sigmaX: 5,
-  sigmaY: 5,
-  tileMode: TileMode.clamp,
-);
 
 const trackerInfoListEquality = ListEquality<TrackerInfo>();
 const stringListEquality = ListEquality<String>();

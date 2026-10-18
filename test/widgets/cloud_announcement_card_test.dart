@@ -6,7 +6,7 @@
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/views/cloud/cloud_announcement_card.dart';
-import 'package:fl_clash/widgets/sheet.dart';
+import 'package:fl_clash/widgets/sheet_scaffold.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';

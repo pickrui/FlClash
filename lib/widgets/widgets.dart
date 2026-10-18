@@ -52,7 +52,7 @@ export 'package:fl_clash/ui/scroll.dart';
 
 export 'package:fl_clash/ui/setting.dart';
 
-export 'sheet.dart';
+export 'sheet_scaffold.dart';
 export 'subscription_info_view.dart';
 export 'super_grid.dart';
 
@@ -63,6 +63,7 @@ export 'package:fl_clash/ui/theme.dart';
 export 'package:fl_clash/ui/search_field.dart';
 export 'package:fl_clash/ui/segmented_control.dart';
 export 'package:fl_clash/ui/selection_mark.dart';
+export 'package:fl_clash/ui/sheet.dart';
 export 'package:fl_clash/ui/sheet_header.dart';
 export 'package:fl_clash/ui/side_sheet.dart';
 

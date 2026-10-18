@@ -10,6 +10,7 @@ import 'dart:ui' show lerpDouble;
 import 'package:fl_clash/ui/context.dart';
 import 'package:fl_clash/ui/fade_box.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
+import 'package:fl_clash/ui/inherited.dart';
 import 'package:fl_clash/ui/l10n.dart';
 import 'package:fl_clash/ui/metrics.dart';
 import 'package:fl_clash/ui/navigator.dart';
@@ -155,7 +156,7 @@ class _NullStatusSwitcherState extends State<NullStatusSwitcher> {
 
 enum _NullStatusSlot { loading, empty, noResults, content }
 
-class NullStatus extends StatelessWidget {
+class NullStatus extends StatefulWidget {
   final String? label;
   final String? description;
   final Widget? action;
@@ -170,16 +171,33 @@ class NullStatus extends StatelessWidget {
   });
 
   @override
+  State<NullStatus> createState() => _NullStatusState();
+}
+
+class _NullStatusState extends State<NullStatus> {
+  late final ScrollController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = sheetScrollController(context);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final label = this.label;
-    final description = this.description;
-    final action = this.action;
+    final NullStatus(:label, :description, :action, :illustration) = widget;
     final colorScheme = context.colorScheme;
     final compact = MediaQuery.sizeOf(context).height < _compactHeight;
     return Align(
       alignment: const Alignment(0.0, -0.2),
       child: SingleChildScrollView(
-        primary: false,
+        controller: _controller,
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 320),

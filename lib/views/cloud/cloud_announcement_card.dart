@@ -7,7 +7,8 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/card.dart';
-import 'package:fl_clash/widgets/sheet.dart';
+import 'package:fl_clash/ui/sheet.dart';
+import 'package:fl_clash/widgets/sheet_scaffold.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
@@ -24,7 +25,6 @@ class CloudAnnouncementCard extends StatelessWidget {
     return CommonCard(
       onPressed: () => showSheet<void>(
         context: context,
-        props: const SheetProps(isScrollControlled: true),
         builder: (context, type) => AdaptiveSheetScaffold(
           type: type,
           title: context.appLocalizations.announcement,

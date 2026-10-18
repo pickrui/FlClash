@@ -497,7 +497,6 @@ Future<void> showOverrideAddSheet<K extends Enum, M>(
   final remaining = spec.values.where((key) => !added.contains(key));
   final key = await showSheet<K>(
     context: context,
-    props: const SheetProps(isScrollControlled: true),
     builder: (context, _) => OverwriteSelectionSheet<K>(
       title: spec.target.addEntry(appLocalizations),
       sections: [

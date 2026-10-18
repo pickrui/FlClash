@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:material_ui/material_ui.dart';
 
-import 'paged_sheet.dart';
+import 'sheet_scaffold.dart';
 
 import 'package:fl_clash/common/context.dart';
 

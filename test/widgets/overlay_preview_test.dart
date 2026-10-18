@@ -9,6 +9,7 @@ import 'dart:ui' as ui;
 import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/common/theme.dart';
 import 'package:fl_clash/ui/shape.dart';
+import 'package:fl_clash/ui/sheet_header.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/overwrite/custom_rule_editor.dart';
 import 'package:fl_clash/features/overwrite/member_picker.dart';
@@ -24,6 +25,8 @@ import 'package:flutter/services.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../helpers/test_app.dart';
 
 void main() {
   final screenshotDirectory =
@@ -210,6 +213,13 @@ void main() {
             find.text(AppLocalizations.current.add).hitTestable(),
           );
           await tester.pumpAndSettle();
+          final handle = find.byType(SheetDragHandle);
+          if (handle.evaluate().isNotEmpty) {
+            // A bottom sheet opens at its shorter detent; the reader drags
+            // it up for the list.
+            await tester.drag(handle.last, const Offset(0, -600));
+            await tester.pumpAndSettle();
+          }
           await tester.enterText(
             find.byType(TextField).hitTestable(),
             'residential',
@@ -317,7 +327,7 @@ Future<GlobalKey> _open(
                 textScaler: TextScaler.linear(textScale),
                 viewInsets: EdgeInsets.only(bottom: keyboardHeight),
               ),
-              child: child!,
+              child: wrapAppScopes(context, child!),
             ),
           );
         },

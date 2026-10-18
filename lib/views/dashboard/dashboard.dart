@@ -17,7 +17,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fl_clash/widgets/motion_grid.dart';
-import 'package:fl_clash/widgets/snap_sheet.dart';
+import 'package:fl_clash/ui/snap_sheet.dart';
 
 import 'widget_metrics.dart';
 import 'widgets/start_button.dart';

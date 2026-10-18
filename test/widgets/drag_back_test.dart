@@ -6,7 +6,7 @@
 import 'package:fl_clash/common/navigator.dart';
 import 'package:fl_clash/ui/inherited.dart';
 import 'package:fl_clash/ui/open_container.dart';
-import 'package:fl_clash/widgets/paged_sheet.dart';
+import 'package:fl_clash/ui/paged_sheet.dart';
 import 'package:fl_clash/ui/side_sheet.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';

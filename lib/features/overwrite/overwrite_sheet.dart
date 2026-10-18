@@ -9,11 +9,12 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/inherited.dart';
-import 'package:fl_clash/widgets/paged_sheet.dart';
+import 'package:fl_clash/ui/paged_sheet.dart';
 import 'package:fl_clash/ui/pop_scope.dart';
-import 'package:fl_clash/widgets/sheet.dart';
+import 'package:fl_clash/ui/sheet.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
-import 'package:fl_clash/widgets/snap_sheet.dart';
+import 'package:fl_clash/ui/snap_sheet.dart';
+import 'package:fl_clash/widgets/sheet_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -34,7 +35,7 @@ Future<T?> showOverwriteSheet<T>({
     return navigator.push(
       SnapSheetRoute<T>(
         builder: (context, _) => sheet(context),
-        fitMaxHeight: 1,
+        fitsContent: true,
         sheetBarrierColor: context.colorScheme.modalScrim,
         barrierLabel: MaterialLocalizations.of(context)
             .modalBarrierDismissLabel,

@@ -190,7 +190,6 @@ class _AccessViewState extends ConsumerState<AccessView>
   Future<void> _handleToSetting() async {
     await showSheet<int>(
       context: context,
-      props: const SheetProps(isScrollControlled: true),
       builder: (_, type) {
         return AdaptiveSheetScaffold(
           type: type,

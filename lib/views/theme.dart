@@ -164,7 +164,6 @@ class _PrimaryColorItem extends ConsumerWidget {
     unawaited(
       showSheet<void>(
         context: context,
-        props: const SheetProps(isScrollControlled: true),
         builder: (_, type) => _CustomColorSheet(
           type: type,
           initialColor: initialColor,

@@ -5,21 +5,16 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
-import 'package:fl_clash/ui/shape.dart';
-import 'package:fl_clash/ui/surface.dart';
-import 'package:fl_clash/common/context.dart';
-
-import 'dialog.dart';
-import 'scaffold.dart';
-
 import 'package:fl_clash/ui/deferred_push.dart';
 import 'package:fl_clash/ui/drag_back.dart';
+import 'package:fl_clash/ui/inherited.dart';
 import 'package:fl_clash/ui/navigator_resizable.dart';
 import 'package:fl_clash/ui/page_transition.dart';
-import 'package:fl_clash/ui/inherited.dart';
 import 'package:fl_clash/ui/pop_scope.dart';
-import 'package:fl_clash/widgets/sheet.dart';
+import 'package:fl_clash/ui/shape.dart';
+import 'package:fl_clash/ui/sheet.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
+import 'package:fl_clash/ui/surface.dart';
 import 'package:material_ui/material_ui.dart';
 
 Color _sheetColorOf(BuildContext context) =>
@@ -95,17 +90,7 @@ class PagedSheetRoute<T> extends PageRoute<T>
 }
 
 class PagedSheet extends StatelessWidget {
-  const PagedSheet({
-    super.key,
-    this.color,
-    this.shape,
-    this.clipBehavior = Clip.antiAlias,
-    required this.child,
-  });
-
-  final Color? color;
-  final ShapeBorder? shape;
-  final Clip clipBehavior;
+  const PagedSheet({super.key, required this.child});
 
   final Widget child;
 
@@ -114,22 +99,17 @@ class PagedSheet extends StatelessWidget {
     final type = SheetProvider.of(context)?.type;
     return Material(
       animationDuration: Duration.zero,
-      color: color ?? _sheetColorOf(context),
-      shape:
-          shape ??
-          (type == SheetType.bottomSheet
-              ? AppShape.top(AppCorner.xxl)
-              : AppShape.none),
-      clipBehavior: clipBehavior,
+      color: _sheetColorOf(context),
+      shape: type == SheetType.bottomSheet
+          ? AppShape.top(AppCorner.xxl)
+          : AppShape.none,
+      clipBehavior: Clip.antiAlias,
       child: NavigatorResizable(child: child),
     );
   }
 }
 
-const nestedPagedSheetProps = SheetProps(
-  isScrollControlled: true,
-  backgroundColor: Colors.transparent,
-);
+const nestedPagedSheetProps = SheetProps(backgroundColor: Colors.transparent);
 
 /// Opened with [nestedPagedSheetProps]. [onDismiss] is told whether a page is
 /// pushed over the root; with no callbacks, back on the root and a tap outside
@@ -183,12 +163,15 @@ class _NestedPagedSheetState extends State<NestedPagedSheet> {
 
   void _close() => Navigator.of(context).pop();
 
+  void _popSheet([Object? result]) => Navigator.of(context).pop(result);
+
+  /// A pushed page's own pop scope gets its say before it goes.
   Future<void> _handlePop() async {
     if (_hasPushedPages) {
       await _navigatorKey.currentState!.maybePop();
-    } else {
-      (widget.onExit ?? _close)();
+      return;
     }
+    (widget.onExit ?? _close)();
   }
 
   Future<void> _handleDismiss() async {
@@ -217,9 +200,10 @@ class _NestedPagedSheetState extends State<NestedPagedSheet> {
         return false;
       },
       child: sheetProvider.copyWith(
-        nestedNavigatorPop: ([data]) => Navigator.of(context).pop(data),
-        // A bottom sheet's route takes the taps outside it and the drag away.
-        child: sheetProvider.type == SheetType.bottomSheet
+        nestedNavigatorPop: _popSheet,
+        onClose: () => unawaited(_handlePop()),
+        // A compact sheet's route takes the taps outside it and the drag away.
+        child: sheetProvider.type.isCompact
             ? sheet
             : SizedBox(
                 height: double.infinity,
@@ -243,67 +227,6 @@ class _NestedPagedSheetState extends State<NestedPagedSheet> {
                   ],
                 ),
               ),
-      ),
-    );
-  }
-}
-
-class PagedSheetForm extends StatelessWidget {
-  const PagedSheetForm({
-    super.key,
-    required this.title,
-    required this.child,
-    this.actions = const [],
-    this.overrideScroll = false,
-    this.maxWidth = 480,
-    this.insetPadding,
-    this.padding,
-  });
-  final String title;
-  final Widget child;
-  final List<Widget> actions;
-  final bool overrideScroll;
-  final double maxWidth;
-  final EdgeInsets? insetPadding;
-  final EdgeInsets? padding;
-
-  @override
-  Widget build(BuildContext context) {
-    if (!isSheetPage(context)) {
-      return CommonDialog(
-        title: title,
-        actions: actions,
-        overrideScroll: overrideScroll,
-        maxWidth: maxWidth,
-        insetPadding: insetPadding,
-        padding: padding,
-        child: child,
-      );
-    }
-    return CommonScaffold(
-      title: title,
-      body: Padding(
-        padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Flexible(
-              child: overrideScroll
-                  ? child
-                  : SingleChildScrollView(child: child),
-            ),
-            if (actions.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              Wrap(
-                alignment: WrapAlignment.end,
-                spacing: 8,
-                runSpacing: 8,
-                children: actions,
-              ),
-            ],
-          ],
-        ),
       ),
     );
   }

@@ -19,6 +19,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/test_app.dart';
+
 void main() {
   testWidgets('grouped additions keep search selection and fallback order', (
     tester,
@@ -245,7 +247,10 @@ Future<void> _open(
         supportedLocales: AppLocalizations.delegate.supportedLocales,
         builder: (context, child) {
           globalState.theme = CommonTheme.of(context, 1);
-          return RepaintBoundary(key: screenshotKey, child: child!);
+          return RepaintBoundary(
+            key: screenshotKey,
+            child: wrapAppScopes(context, child!),
+          );
         },
         home: Scaffold(
           body: Builder(

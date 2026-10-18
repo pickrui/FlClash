@@ -15,6 +15,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/test_app.dart';
+
 void main() {
   testWidgets('chooses a searched policy group without typing its name', (
     tester,
@@ -582,6 +584,7 @@ Future<void> _open(
           ...GlobalMaterialLocalizations.delegates,
         ],
         supportedLocales: AppLocalizations.delegate.supportedLocales,
+        builder: (context, child) => wrapAppScopes(context, child!),
         home: Scaffold(
           body: Builder(
             builder: (context) => TextButton(

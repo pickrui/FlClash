@@ -9,8 +9,9 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/inherited.dart';
 import 'package:fl_clash/widgets/scaffold.dart';
-import 'package:fl_clash/widgets/sheet.dart';
+import 'package:fl_clash/ui/sheet.dart';
 import 'package:fl_clash/ui/side_sheet.dart';
+import 'package:fl_clash/widgets/sheet_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -96,6 +97,7 @@ Future<ValueNotifier<ThemeMode>> _openFromPage(
             ...GlobalMaterialLocalizations.delegates,
           ],
           supportedLocales: AppLocalizations.delegate.supportedLocales,
+          builder: (context, child) => wrapAppScopes(context, child!),
           home: CommonScaffold(
             title: 'Page',
             body: Builder(
