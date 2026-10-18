@@ -24,6 +24,7 @@ const baselineDnsOverrideKeys = {
   DnsOverrideKey.nameserver,
 };
 const defaultNtp = Ntp();
+const defaultSniffer = Sniffer();
 const defaultProfileTun = ProfileTun();
 const defaultGeoXUrl = GeoXUrl();
 
@@ -435,9 +436,9 @@ abstract class ProfileTun with _$ProfileTun {
   }
 }
 
-const _tunOverrideKeysJsonKey = 'tun-override-keys';
+const tunOverrideKeysJsonKey = 'tun-override-keys';
 
-Set<TunOverrideKey> _tunOverrideKeysFromJson(List<Object?> json) => {
+Set<TunOverrideKey> tunOverrideKeysFromJson(List<Object?> json) => {
   for (final path in json)
     ?TunOverrideKey.values.firstWhereOrNull((key) => key.path == path),
 };
@@ -452,13 +453,30 @@ extension TunOverrideExt on ProfileTun {
         if (keys.contains(key)) key.path: json[key.path],
     };
   }
+
+  Set<TunOverrideKey> setKeys(Set<TunOverrideKey> keys) {
+    final json = toJson();
+    return {
+      for (final key in keys)
+        if (!isUnsetOverrideValue(json[key.path])) key,
+    };
+  }
 }
+
+/// A custom profile's picked key holding such a value is left out, since
+/// emptying a key takes it off the profile's list.
+bool isUnsetOverrideValue(Object? value) => switch (value) {
+  String() => value.isEmpty,
+  Iterable() => value.isEmpty,
+  Map() => value.isEmpty,
+  _ => false,
+};
 
 /// The app MTU replaced every desktop profile's own before keys could be
 /// picked, so one changed from the default carries over as a picked key.
 Map<String, Object?> _withLegacyTunOverride(Map<String, Object?> json) {
   final raw = json['tun'];
-  if (json.containsKey(_tunOverrideKeysJsonKey) || raw is! Map) {
+  if (json.containsKey(tunOverrideKeysJsonKey) || raw is! Map) {
     return json;
   }
   final mtu = normalizeTunMtu(switch (raw['mtu']) {
@@ -468,9 +486,7 @@ Map<String, Object?> _withLegacyTunOverride(Map<String, Object?> json) {
   return {
     ...json,
     if (mtu != defaultTunMtu) 'tun-override': ProfileTun(mtu: mtu).toJson(),
-    _tunOverrideKeysJsonKey: [
-      if (mtu != defaultTunMtu) TunOverrideKey.mtu.path,
-    ],
+    tunOverrideKeysJsonKey: [if (mtu != defaultTunMtu) TunOverrideKey.mtu.path],
   };
 }
 
@@ -557,9 +573,9 @@ abstract class Dns with _$Dns {
   }
 }
 
-const _dnsOverrideKeysJsonKey = 'dns-override-keys';
+const dnsOverrideKeysJsonKey = 'dns-override-keys';
 
-Set<DnsOverrideKey> _dnsOverrideKeysFromJson(List<Object?> json) => {
+Set<DnsOverrideKey> dnsOverrideKeysFromJson(List<Object?> json) => {
   for (final path in json)
     ?DnsOverrideKey.values.firstWhereOrNull((key) => key.path == path),
 };
@@ -591,14 +607,12 @@ const legacyDnsOverrideKeys = {
 };
 
 Map<String, Object?> _withLegacyDnsOverrideKeys(Map<String, Object?> json) {
-  if (json.containsKey(_dnsOverrideKeysJsonKey) || !json.containsKey('dns')) {
+  if (json.containsKey(dnsOverrideKeysJsonKey) || !json.containsKey('dns')) {
     return json;
   }
   return {
     ...json,
-    _dnsOverrideKeysJsonKey: [
-      for (final key in legacyDnsOverrideKeys) key.path,
-    ],
+    dnsOverrideKeysJsonKey: [for (final key in legacyDnsOverrideKeys) key.path],
   };
 }
 
@@ -623,6 +637,11 @@ extension DnsOverrideExt on Dns {
     final section = json[DnsOverrideKey.fallbackFilterSection] as Map;
     return section[key.jsonKey];
   }
+
+  Set<DnsOverrideKey> setKeys(Set<DnsOverrideKey> keys) => {
+    for (final key in keys)
+      if (!isUnsetOverrideValue(valueOf(key))) key,
+  };
 
   Map<String, Object?> overrideJson(Set<DnsOverrideKey> keys) {
     final json = _json;
@@ -781,9 +800,9 @@ abstract class Ntp with _$Ntp {
   }
 }
 
-const _ntpOverrideKeysJsonKey = 'ntp-override-keys';
+const ntpOverrideKeysJsonKey = 'ntp-override-keys';
 
-Set<NtpOverrideKey> _ntpOverrideKeysFromJson(List<Object?> json) => {
+Set<NtpOverrideKey> ntpOverrideKeysFromJson(List<Object?> json) => {
   for (final path in json)
     ?NtpOverrideKey.values.firstWhereOrNull((key) => key.path == path),
 };
@@ -794,6 +813,14 @@ extension NtpOverrideExt on Ntp {
     return {
       for (final key in NtpOverrideKey.values)
         if (keys.contains(key)) key.path: json[key.path],
+    };
+  }
+
+  Set<NtpOverrideKey> setKeys(Set<NtpOverrideKey> keys) {
+    final json = toJson();
+    return {
+      for (final key in keys)
+        if (!isUnsetOverrideValue(json[key.path])) key,
     };
   }
 
@@ -851,6 +878,218 @@ void _validateOverrideValue(String path, Object? value, Object? template) {
       path == 'server' && (value as String).trim().isEmpty) {
     throw FormatException('Invalid value for $path');
   }
+}
+
+@freezed
+abstract class Sniffer with _$Sniffer {
+  const factory Sniffer({
+    @Default(false) bool enable,
+    @Default(true) @JsonKey(name: 'override-destination') bool overrideDest,
+    @Default(true) @JsonKey(name: 'force-dns-mapping') bool forceDnsMapping,
+    @Default(true) @JsonKey(name: 'parse-pure-ip') bool parsePureIp,
+    @Default([]) @JsonKey(name: 'force-domain') List<String> forceDomain,
+    @Default([]) @JsonKey(name: 'skip-domain') List<String> skipDomain,
+    @Default([]) @JsonKey(name: 'skip-src-address') List<String> skipSrcAddress,
+    @Default([]) @JsonKey(name: 'skip-dst-address') List<String> skipDstAddress,
+    @Default({}) Map<String, SnifferConfig> sniff,
+  }) = _Sniffer;
+
+  factory Sniffer.fromJson(Map<String, Object?> json) =>
+      _$SnifferFromJson(json);
+
+  factory Sniffer.safeSnifferFromJson(Map<String, Object?> json) {
+    return decodeSalvaging('sniffer config', json, Sniffer.fromJson);
+  }
+}
+
+List<String> _portsFromJson(List? ports) =>
+    ports?.map((item) => item.toString()).toList() ?? [];
+
+@freezed
+abstract class SnifferConfig with _$SnifferConfig {
+  const factory SnifferConfig({
+    @Default([]) @JsonKey(fromJson: _portsFromJson) List<String> ports,
+    @JsonKey(name: 'override-destination', includeIfNull: false)
+    bool? overrideDest,
+  }) = _SnifferConfig;
+
+  factory SnifferConfig.fromJson(Map<String, Object?> json) =>
+      _$SnifferConfigFromJson(json);
+}
+
+const snifferOverrideKeysJsonKey = 'sniffer-override-keys';
+
+Set<SnifferOverrideKey> snifferOverrideKeysFromJson(List<Object?> json) => {
+  for (final path in json)
+    ?SnifferOverrideKey.values.firstWhereOrNull((key) => key.path == path),
+};
+
+final _portRange = RegExp(r'^([0-9]{1,5})(?:-([0-9]{1,5}))?$');
+
+/// A port or a range such as `8000-9000`, as mihomo reads sniff ports.
+bool isPortRange(String value) {
+  final match = _portRange.firstMatch(value);
+  return match != null &&
+      [?match[1], ?match[2]].every((port) => int.parse(port) <= 65535);
+}
+
+extension SnifferOverrideExt on Sniffer {
+  SnifferConfig sniffOf(SnifferOverrideKey key) =>
+      sniff[key.field] ?? const SnifferConfig();
+
+  Sniffer withSniff(SnifferOverrideKey key, SnifferConfig config) =>
+      copyWith(sniff: {...sniff, key.field: config});
+
+  Map<String, Object?> overrideJson(Set<SnifferOverrideKey> keys) {
+    final json = toJson();
+    final result = <String, Object?>{};
+    for (final key in SnifferOverrideKey.values) {
+      if (!keys.contains(key)) {
+        continue;
+      }
+      if (key.parent == null) {
+        result[key.path] = json[key.path];
+        continue;
+      }
+      final sniff = result.putIfAbsent(
+        SnifferOverrideKey.sniffSection,
+        () => <String, Object?>{},
+      ) as Map<String, Object?>;
+      sniff[key.field] = sniffOf(key).toJson();
+    }
+    return result;
+  }
+
+  /// A protocol listed without ports is sniffed on its standard port.
+  Set<SnifferOverrideKey> setKeys(Set<SnifferOverrideKey> keys) {
+    final json = toJson();
+    return {
+      for (final key in keys)
+        if (key.parent != null || !isUnsetOverrideValue(json[key.path])) key,
+    };
+  }
+
+  String overrideYaml(Set<SnifferOverrideKey> keys) =>
+      yaml.encode(overrideJson(keys));
+
+  ({Sniffer sniffer, Set<SnifferOverrideKey> keys}) applyOverrideYaml(
+    String content,
+  ) {
+    final document = _plainYaml(loadYaml(content));
+    if (document == null) {
+      return (sniffer: this, keys: const {});
+    }
+    if (document is! Map) {
+      throw const FormatException('The override must be a map of sniffer keys');
+    }
+    final keys = <SnifferOverrideKey>{};
+    final json = toJson();
+    final sniff = <String, Object?>{
+      for (final MapEntry(:key, :value) in this.sniff.entries)
+        key: value.toJson(),
+    };
+    for (final entry in document.entries) {
+      final name = entry.key.toString();
+      if (name != SnifferOverrideKey.sniffSection) {
+        final key = SnifferOverrideKey.values.firstWhereOrNull(
+          (key) => key.parent == null && key.path == name,
+        );
+        if (key == null) {
+          throw FormatException('Unknown sniffer key: $name');
+        }
+        _validateOverrideValue(name, entry.value, json[name]);
+        keys.add(key);
+        json[name] = entry.value;
+        continue;
+      }
+      if (entry.value is! Map) {
+        throw FormatException('$name must be a map');
+      }
+      for (final protocol in (entry.value as Map).entries) {
+        // mihomo matches sniff protocols in any case.
+        final field = protocol.key.toString().toUpperCase();
+        final key = SnifferOverrideKey.values.firstWhereOrNull(
+          (key) => key.parent != null && key.field == field,
+        );
+        if (key == null) {
+          throw FormatException('Unknown sniffer key: $name.${protocol.key}');
+        }
+        sniff[field] = _sniffConfigJson('$name.$field', protocol.value);
+        keys.add(key);
+      }
+    }
+    json[SnifferOverrideKey.sniffSection] = sniff;
+    return (sniffer: Sniffer.fromJson(json), keys: keys);
+  }
+}
+
+Map<String, Object?> _sniffConfigJson(String path, Object? value) {
+  if (value == null) {
+    return const {};
+  }
+  final ports = value is Map ? value['ports'] : null;
+  final overrideDest = value is Map ? value['override-destination'] : null;
+  final valid =
+      value is Map &&
+      value.keys.every(
+        (key) => key == 'ports' || key == 'override-destination',
+      ) &&
+      (ports == null ||
+          ports is List &&
+              ports.every(
+                (port) =>
+                    (port is int || port is String) && isPortRange('$port'),
+              )) &&
+      (overrideDest == null || overrideDest is bool);
+  if (!valid) {
+    throw FormatException('Invalid value for $path');
+  }
+  return {
+    if (ports != null) 'ports': [for (final port in ports as List) '$port'],
+    'override-destination': ?overrideDest,
+  };
+}
+
+/// mihomo matches sniff protocols case-insensitively, so an overridden
+/// protocol replaces the profile's entry whatever its case.
+Map<String, dynamic> mergeSnifferOverride(
+  Map<String, dynamic> raw,
+  Map<String, Object?> override,
+) {
+  final merged = Map<String, dynamic>.from(raw);
+  for (final entry in override.entries) {
+    final value = entry.value;
+    if (entry.key != SnifferOverrideKey.sniffSection || value is! Map) {
+      merged[entry.key] = value;
+      continue;
+    }
+    final overridden = {for (final name in value.keys) '$name'.toUpperCase()};
+    merged[entry.key] = {
+      for (final current in _rawSniff(raw).entries)
+        if (!overridden.contains('${current.key}'.toUpperCase()))
+          '${current.key}': current.value,
+      ...value,
+    };
+  }
+  return merged;
+}
+
+/// mihomo reads the deprecated `sniffing` list only while `sniff` is empty, so
+/// its protocols are carried into `sniff` before an override fills it.
+Map<Object?, Object?> _rawSniff(Map<String, dynamic> raw) {
+  final sniff = raw[SnifferOverrideKey.sniffSection];
+  if (sniff is Map && sniff.isNotEmpty) {
+    return sniff;
+  }
+  final sniffing = raw['sniffing'];
+  if (sniffing is! List) {
+    return const {};
+  }
+  final ports = raw['port-whitelist'];
+  return {
+    for (final name in sniffing)
+      '$name'.toUpperCase(): {if (ports is List) 'ports': ports},
+  };
 }
 
 @freezed
@@ -1135,17 +1374,17 @@ abstract class ClashConfig with _$ClashConfig {
     @Default(defaultTun) @JsonKey(fromJson: Tun.safeFormJson) Tun tun,
     @Default(defaultDns) @JsonKey(fromJson: Dns.safeDnsFromJson) Dns dns,
     @Default({})
-    @JsonKey(name: _dnsOverrideKeysJsonKey, fromJson: _dnsOverrideKeysFromJson)
+    @JsonKey(name: dnsOverrideKeysJsonKey, fromJson: dnsOverrideKeysFromJson)
     Set<DnsOverrideKey> dnsOverrideKeys,
     @Default(defaultNtp) @JsonKey(fromJson: Ntp.safeNtpFromJson) Ntp ntp,
     @Default({})
-    @JsonKey(name: _ntpOverrideKeysJsonKey, fromJson: _ntpOverrideKeysFromJson)
+    @JsonKey(name: ntpOverrideKeysJsonKey, fromJson: ntpOverrideKeysFromJson)
     Set<NtpOverrideKey> ntpOverrideKeys,
     @Default(defaultProfileTun)
     @JsonKey(name: 'tun-override', fromJson: ProfileTun.safeFromJson)
     ProfileTun tunOverride,
     @Default({})
-    @JsonKey(name: _tunOverrideKeysJsonKey, fromJson: _tunOverrideKeysFromJson)
+    @JsonKey(name: tunOverrideKeysJsonKey, fromJson: tunOverrideKeysFromJson)
     Set<TunOverrideKey> tunOverrideKeys,
     @Default(defaultGeoXUrl)
     @JsonKey(name: 'geox-url', fromJson: GeoXUrl.safeFormJson)

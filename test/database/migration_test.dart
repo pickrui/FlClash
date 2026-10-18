@@ -314,6 +314,24 @@ void main() {
         ProxyGroup(name: 'Out', type: GroupType.Selector, proxies: ['DIRECT']),
       ],
       customRules: const [Rule(id: 7, value: 'MATCH,Out')],
+      overrides: const ProfileOverrides(
+        dns: Dns(enhancedMode: DnsMode.redirHost),
+        dnsOverrideKeys: {DnsOverrideKey.enhancedMode},
+        ntp: Ntp(enable: true),
+        ntpOverrideKeys: {NtpOverrideKey.enable},
+        sniffer: Sniffer(
+          enable: true,
+          sniff: {
+            'QUIC': SnifferConfig(ports: ['443']),
+          },
+        ),
+        snifferOverrideKeys: {
+          SnifferOverrideKey.enable,
+          SnifferOverrideKey.sniffQuic,
+        },
+        tun: ProfileTun(strictRoute: true),
+        tunOverrideKeys: {TunOverrideKey.strictRoute},
+      ),
     );
     final local = _v6Profiles[1];
     await _createDatabase(databaseFile, [custom, local], schemaVersion: 7);

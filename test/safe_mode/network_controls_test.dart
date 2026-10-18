@@ -51,6 +51,37 @@ void main() {
     },
   );
 
+  test('safe mode still wins over a custom profile own keys', () async {
+    final config = await makeRealProfileTask(
+      const MakeRealProfileState(
+        profilesPath: '/profiles',
+        profileId: 1,
+        overwriteType: OverwriteType.custom,
+        customProfile: true,
+        rawConfig: {},
+        realPatchConfig: ClashConfig(),
+        overrides: ProfileOverrides(
+          dns: Dns(listen: '127.0.0.1:1053'),
+          dnsOverrideKeys: {DnsOverrideKey.listen},
+          ntp: Ntp(enable: true, writeToSystem: true),
+          ntpOverrideKeys: {
+            NtpOverrideKey.enable,
+            NtpOverrideKey.writeToSystem,
+          },
+        ),
+        appendSystemDns: false,
+        addedRules: [],
+        proxyChains: [],
+        profileProxies: [],
+        customProxyGroups: [],
+        customRules: [],
+        defaultUA: 'FlClash',
+      ),
+    );
+    expect(config['dns']['listen'], safeModeBuild ? '' : '127.0.0.1:1053');
+    expect(config['ntp'], {'enable': true, 'write-to-system': !safeModeBuild});
+  });
+
   for (final entry in const <String, Widget>{
     'system proxy card': SystemProxyButton(),
     'TUN card': TUNButton(),

@@ -343,14 +343,17 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
     rawConfig['bind-address'] = '*';
   }
   rawConfig['mode'] = realPatchConfig.mode.name;
+  final overrides = data.overrides;
+  final tunPicks = overrides.overAppTun(
+    realPatchConfig.tunOverride,
+    realPatchConfig.tunOverrideKeys,
+  );
   // Only a picked dns-hijack replaces any:53; a profile's own may miss some.
   final tun = <String, dynamic>{
     if (rawConfig['tun'] is Map)
       ...Map<String, dynamic>.from(rawConfig['tun'] as Map),
     'dns-hijack': defaultDnsHijack,
-    ...realPatchConfig.tunOverride.overrideJson(
-      realPatchConfig.tunOverrideKeys,
-    ),
+    ...tunPicks.tun.overrideJson(tunPicks.tunOverrideKeys),
     ...realPatchConfig.tun.coreJson,
   };
   rawConfig['tun'] = tun;
@@ -359,6 +362,18 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
   rawConfig['geo-update-interval'] = normalizeGeoUpdateInterval(
     realPatchConfig.geoUpdateInterval,
   );
+  final snifferOverride = overrides.sniffer.overrideJson(
+    overrides.sniffer.setKeys(overrides.snifferOverrideKeys),
+  );
+  if (snifferOverride.isNotEmpty) {
+    rawConfig['sniffer'] = mergeSnifferOverride(
+      rawConfig['sniffer'] is Map
+          ? Map<String, dynamic>.from(rawConfig['sniffer'] as Map)
+          : <String, dynamic>{},
+      snifferOverride,
+    );
+  }
+  // After the profile's sniffer keys, which must not undo what it forces.
   if (blockWebRtc) {
     _applyWebRtcBlock(rawConfig);
   }
@@ -459,14 +474,23 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
   final dnsOverride = realPatchConfig.dns.appliedOverrideJson(
     realPatchConfig.dnsOverrideKeys,
   );
-  if (dnsOverride.isNotEmpty || !isEnableDns) {
-    targetDns = mergeDnsOverride(targetDns, dnsOverride);
+  final profileDnsOverride = overrides.dns.overrideJson(
+    overrides.dns.setKeys(overrides.dnsOverrideKeys),
+  );
+  if (dnsOverride.isNotEmpty || profileDnsOverride.isNotEmpty || !isEnableDns) {
+    targetDns = mergeDnsOverride(
+      mergeDnsOverride(targetDns, dnsOverride),
+      profileDnsOverride,
+    );
     _preserveProxyDnsBootstrap(targetDns, sourceDns);
   }
   rawConfig['dns'] = targetDns;
-  final ntpOverride = realPatchConfig.ntp.overrideJson(
-    realPatchConfig.ntpOverrideKeys,
-  );
+  final ntpOverride = {
+    ...realPatchConfig.ntp.overrideJson(realPatchConfig.ntpOverrideKeys),
+    ...overrides.ntp.overrideJson(
+      overrides.ntp.setKeys(overrides.ntpOverrideKeys),
+    ),
+  };
   if (ntpOverride.isNotEmpty) {
     rawConfig['ntp'] = {
       if (rawConfig['ntp'] is Map)

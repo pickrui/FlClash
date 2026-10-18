@@ -138,6 +138,57 @@ void main() {
     },
   );
 
+  test('a custom profile picks DNS and NTP keys over the app picks', () async {
+    final result = await makeRealProfileTask(
+      state(
+        {},
+        const ClashConfig(
+          dns: Dns(
+            enhancedMode: DnsMode.normal,
+            nameserver: ['192.0.2.1'],
+            fallback: ['192.0.2.9'],
+          ),
+          dnsOverrideKeys: {
+            DnsOverrideKey.enhancedMode,
+            DnsOverrideKey.nameserver,
+            DnsOverrideKey.fallback,
+          },
+          ntp: Ntp(enable: true, server: 'time.app.example'),
+          ntpOverrideKeys: {NtpOverrideKey.enable, NtpOverrideKey.server},
+        ),
+      ).copyWith(
+        overwriteType: OverwriteType.custom,
+        customProfile: true,
+        overrides: const ProfileOverrides(
+          dns: Dns(
+            nameserver: ['192.0.2.2'],
+            fallback: [],
+            fallbackFilter: FallbackFilter(geoip: false),
+          ),
+          dnsOverrideKeys: {
+            DnsOverrideKey.nameserver,
+            DnsOverrideKey.fallback,
+            DnsOverrideKey.fallbackFilterGeoip,
+          },
+          ntp: Ntp(server: 'time.profile.example', interval: 60),
+          ntpOverrideKeys: {NtpOverrideKey.server, NtpOverrideKey.interval},
+        ),
+      ),
+    );
+    expect(result['dns'], {
+      'enable': true,
+      'enhanced-mode': 'normal',
+      'nameserver': ['192.0.2.2'],
+      'fallback': ['192.0.2.9'],
+      'fallback-filter': {'geoip': false},
+    });
+    expect(result['ntp'], {
+      'enable': true,
+      'server': 'time.profile.example',
+      'interval': 60,
+    });
+  });
+
   test(
     'NTP is absent without picked keys and adds only selected values',
     () async {

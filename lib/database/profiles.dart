@@ -72,10 +72,8 @@ class ProfileOverridesConverter
     if (fromDb == null) return null;
     return decodeOrRestoreDefault(
       'profile overrides',
-      () => decodeSalvaging(
-        'profile overrides',
+      () => ProfileOverrides.safeFromJson(
         Map<String, Object?>.from(json.decode(fromDb) as Map),
-        ProfileOverrides.fromJson,
       ),
       () => null,
     );

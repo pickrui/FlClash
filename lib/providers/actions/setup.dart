@@ -762,6 +762,7 @@ extension SetupControllerExt on AppController {
               setupState.overrides.proxyProviders[label],
             ),
         },
+        overrides: setupState.overrides,
         realPatchConfig: realPatchConfig,
         appendSystemDns: appendSystemDns,
         addedRules: addedRules,

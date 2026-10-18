@@ -200,6 +200,27 @@ void main() {
     );
   });
 
+  test('a custom profile picks TUN keys over the app picks', () async {
+    final result = await makeRealProfileTask(
+      _makeRealProfileState(rawConfig: const {}).copyWith(
+        overwriteType: OverwriteType.custom,
+        customProfile: true,
+        realPatchConfig: const ClashConfig(
+          tunOverride: ProfileTun(mtu: 1480, udpTimeout: 60),
+          tunOverrideKeys: {TunOverrideKey.mtu, TunOverrideKey.udpTimeout},
+        ),
+        overrides: const ProfileOverrides(
+          tun: ProfileTun(mtu: 1400, dnsHijack: []),
+          tunOverrideKeys: {TunOverrideKey.mtu, TunOverrideKey.dnsHijack},
+        ),
+      ),
+    );
+    final tun = result['tun'] as Map;
+    expect(tun['mtu'], 1400);
+    expect(tun['udp-timeout'], 60);
+    expect(tun['dns-hijack'], defaultDnsHijack);
+  });
+
   group('remote provider cache', () {
     late Directory root;
     const url = 'https://fixture.invalid/resources';
@@ -1949,6 +1970,53 @@ void main() {
 
     expect(result['sniffer']['sniff'], {'STUN': {}});
   });
+
+  test(
+    'a custom profile sniffer yields to what the WebRTC block forces',
+    () async {
+      final state = _makeRealProfileState(rawConfig: const {}).copyWith(
+        overwriteType: OverwriteType.custom,
+        customProfile: true,
+        overrides: const ProfileOverrides(
+          sniffer: Sniffer(
+            parsePureIp: false,
+            sniff: {
+              'TLS': SnifferConfig(ports: ['443', '8443']),
+            },
+          ),
+          snifferOverrideKeys: {
+            SnifferOverrideKey.enable,
+            SnifferOverrideKey.parsePureIp,
+            SnifferOverrideKey.skipDomain,
+            SnifferOverrideKey.sniffTls,
+            SnifferOverrideKey.sniffQuic,
+          },
+        ),
+      );
+      const sniff = {
+        'TLS': {
+          'ports': ['443', '8443'],
+        },
+        'QUIC': {'ports': <String>[]},
+      };
+
+      expect((await makeRealProfileTask(state))['sniffer'], {
+        'enable': false,
+        'parse-pure-ip': false,
+        'sniff': sniff,
+      });
+      expect(
+        (await makeRealProfileTask(
+          state.copyWith(blockWebRtc: true),
+        ))['sniffer'],
+        {
+          'enable': true,
+          'parse-pure-ip': true,
+          'sniff': {...sniff, 'STUN': {}},
+        },
+      );
+    },
+  );
 
   test('WebRTC block replaces a STUN entry in any letter case', () async {
     final result = await makeRealProfileTask(

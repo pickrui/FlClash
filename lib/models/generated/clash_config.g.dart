@@ -359,6 +359,65 @@ Map<String, dynamic> _$NtpToJson(_Ntp instance) => <String, dynamic>{
   'write-to-system': instance.writeToSystem,
 };
 
+_Sniffer _$SnifferFromJson(Map<String, dynamic> json) => _Sniffer(
+  enable: json['enable'] as bool? ?? false,
+  overrideDest: json['override-destination'] as bool? ?? true,
+  forceDnsMapping: json['force-dns-mapping'] as bool? ?? true,
+  parsePureIp: json['parse-pure-ip'] as bool? ?? true,
+  forceDomain:
+      (json['force-domain'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  skipDomain:
+      (json['skip-domain'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  skipSrcAddress:
+      (json['skip-src-address'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  skipDstAddress:
+      (json['skip-dst-address'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  sniff:
+      (json['sniff'] as Map<String, dynamic>?)?.map(
+        (k, e) =>
+            MapEntry(k, SnifferConfig.fromJson(e as Map<String, dynamic>)),
+      ) ??
+      const {},
+);
+
+Map<String, dynamic> _$SnifferToJson(_Sniffer instance) => <String, dynamic>{
+  'enable': instance.enable,
+  'override-destination': instance.overrideDest,
+  'force-dns-mapping': instance.forceDnsMapping,
+  'parse-pure-ip': instance.parsePureIp,
+  'force-domain': instance.forceDomain,
+  'skip-domain': instance.skipDomain,
+  'skip-src-address': instance.skipSrcAddress,
+  'skip-dst-address': instance.skipDstAddress,
+  'sniff': instance.sniff,
+};
+
+_SnifferConfig _$SnifferConfigFromJson(Map<String, dynamic> json) =>
+    _SnifferConfig(
+      ports: json['ports'] == null
+          ? const []
+          : _portsFromJson(json['ports'] as List?),
+      overrideDest: json['override-destination'] as bool?,
+    );
+
+Map<String, dynamic> _$SnifferConfigToJson(_SnifferConfig instance) =>
+    <String, dynamic>{
+      'ports': instance.ports,
+      'override-destination': ?instance.overrideDest,
+    };
+
 _GeoXUrl _$GeoXUrlFromJson(Map<String, dynamic> json) => _GeoXUrl(
   mmdb: json['mmdb'] as String? ?? 'https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.metadb',
   asn: json['asn'] as String? ?? 'https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/GeoLite2-ASN.mmdb',
@@ -448,19 +507,19 @@ _ClashConfig _$ClashConfigFromJson(Map<String, dynamic> json) => _ClashConfig(
       : Dns.safeDnsFromJson(json['dns'] as Map<String, Object?>),
   dnsOverrideKeys: json['dns-override-keys'] == null
       ? const {}
-      : _dnsOverrideKeysFromJson(json['dns-override-keys'] as List),
+      : dnsOverrideKeysFromJson(json['dns-override-keys'] as List),
   ntp: json['ntp'] == null
       ? defaultNtp
       : Ntp.safeNtpFromJson(json['ntp'] as Map<String, Object?>),
   ntpOverrideKeys: json['ntp-override-keys'] == null
       ? const {}
-      : _ntpOverrideKeysFromJson(json['ntp-override-keys'] as List),
+      : ntpOverrideKeysFromJson(json['ntp-override-keys'] as List),
   tunOverride: json['tun-override'] == null
       ? defaultProfileTun
       : ProfileTun.safeFromJson(json['tun-override'] as Map<String, Object?>),
   tunOverrideKeys: json['tun-override-keys'] == null
       ? const {}
-      : _tunOverrideKeysFromJson(json['tun-override-keys'] as List),
+      : tunOverrideKeysFromJson(json['tun-override-keys'] as List),
   geoXUrl: json['geox-url'] == null
       ? defaultGeoXUrl
       : GeoXUrl.safeFormJson(json['geox-url'] as Map<String, Object?>?),

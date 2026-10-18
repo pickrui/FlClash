@@ -227,6 +227,32 @@ enum NtpOverrideKey {
   final String path;
 }
 
+@JsonEnum(valueField: 'path')
+enum SnifferOverrideKey {
+  enable('enable'),
+  overrideDest('override-destination'),
+  forceDnsMapping('force-dns-mapping'),
+  parsePureIp('parse-pure-ip'),
+  forceDomain('force-domain'),
+  skipDomain('skip-domain'),
+  skipSrcAddress('skip-src-address'),
+  skipDstAddress('skip-dst-address'),
+  sniffHttp('sniff.HTTP'),
+  sniffTls('sniff.TLS'),
+  sniffQuic('sniff.QUIC');
+
+  const SnifferOverrideKey(this.path);
+
+  final String path;
+
+  static const sniffSection = 'sniff';
+
+  /// [sniffSection] for a protocol's key, null for the sniffer's own keys.
+  String? get parent => path.startsWith('$sniffSection.') ? sniffSection : null;
+
+  String get field => path.substring(path.indexOf('.') + 1);
+}
+
 /// Written over the profile's `tun` section, which Android's VPN never reads,
 /// so these apply on desktop only, beside the keys the core owns.
 @JsonEnum(valueField: 'path')

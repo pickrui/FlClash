@@ -650,6 +650,29 @@ extension ProxyProviderOptionsExt on ProxyProviderOptions {
 @freezed
 abstract class ProfileOverrides with _$ProfileOverrides {
   const factory ProfileOverrides({
+    @Default(defaultDns) @JsonKey(fromJson: Dns.safeDnsFromJson) Dns dns,
+    @Default({})
+    @JsonKey(name: dnsOverrideKeysJsonKey, fromJson: dnsOverrideKeysFromJson)
+    Set<DnsOverrideKey> dnsOverrideKeys,
+    @Default(defaultNtp) @JsonKey(fromJson: Ntp.safeNtpFromJson) Ntp ntp,
+    @Default({})
+    @JsonKey(name: ntpOverrideKeysJsonKey, fromJson: ntpOverrideKeysFromJson)
+    Set<NtpOverrideKey> ntpOverrideKeys,
+    @Default(defaultSniffer)
+    @JsonKey(fromJson: Sniffer.safeSnifferFromJson)
+    Sniffer sniffer,
+    @Default({})
+    @JsonKey(
+      name: snifferOverrideKeysJsonKey,
+      fromJson: snifferOverrideKeysFromJson,
+    )
+    Set<SnifferOverrideKey> snifferOverrideKeys,
+    @Default(defaultProfileTun)
+    @JsonKey(fromJson: ProfileTun.safeFromJson)
+    ProfileTun tun,
+    @Default({})
+    @JsonKey(name: tunOverrideKeysJsonKey, fromJson: tunOverrideKeysFromJson)
+    Set<TunOverrideKey> tunOverrideKeys,
     @Default({})
     @JsonKey(name: 'proxy-providers')
     Map<String, ProxyProviderOptions> proxyProviders,
@@ -657,6 +680,25 @@ abstract class ProfileOverrides with _$ProfileOverrides {
 
   factory ProfileOverrides.fromJson(Map<String, Object?> json) =>
       _$ProfileOverridesFromJson(json);
+
+  factory ProfileOverrides.safeFromJson(Map<String, Object?> json) =>
+      decodeSalvaging('profile overrides', json, ProfileOverrides.fromJson);
+}
+
+extension ProfileOverridesExt on ProfileOverrides {
+  /// The profile's own TUN keys win over the app-wide [keys]; an emptied one
+  /// leaves the app's value.
+  ProfileOverrides overAppTun(ProfileTun tun, Set<TunOverrideKey> keys) {
+    final own = this.tun.toJson();
+    final picked = this.tun.setKeys(tunOverrideKeys);
+    return copyWith(
+      tun: ProfileTun.fromJson({
+        ...tun.toJson(),
+        for (final key in picked) key.path: own[key.path],
+      }),
+      tunOverrideKeys: {...keys, ...picked},
+    );
+  }
 }
 
 /// The subscription and file profiles a custom profile can use as proxy
@@ -774,7 +816,9 @@ abstract class Profile with _$Profile {
     int? order,
     // Null for file and subscription profiles, which [type] tells by url.
     ProfileType? profileType,
-    @Default(ProfileOverrides()) ProfileOverrides overrides,
+    @Default(ProfileOverrides())
+    @JsonKey(fromJson: ProfileOverrides.safeFromJson)
+    ProfileOverrides overrides,
   }) = _Profile;
 
   factory Profile.fromJson(Map<String, Object?> json) =>

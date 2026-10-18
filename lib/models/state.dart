@@ -234,6 +234,7 @@ abstract class MakeRealProfileState with _$MakeRealProfileState {
     required List<Rule> customRules,
     @Default(false) bool customProfile,
     @Default({}) Map<String, Map<String, Object?>> profileProviders,
+    @Default(ProfileOverrides()) ProfileOverrides overrides,
     String? matchTarget,
     required String defaultUA,
     @Default(false) bool dockerMode,

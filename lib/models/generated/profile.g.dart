@@ -116,6 +116,32 @@ Map<String, dynamic> _$ProxyProviderOptionsToJson(
 
 _ProfileOverrides _$ProfileOverridesFromJson(Map<String, dynamic> json) =>
     _ProfileOverrides(
+      dns: json['dns'] == null
+          ? defaultDns
+          : Dns.safeDnsFromJson(json['dns'] as Map<String, Object?>),
+      dnsOverrideKeys: json['dns-override-keys'] == null
+          ? const {}
+          : dnsOverrideKeysFromJson(json['dns-override-keys'] as List),
+      ntp: json['ntp'] == null
+          ? defaultNtp
+          : Ntp.safeNtpFromJson(json['ntp'] as Map<String, Object?>),
+      ntpOverrideKeys: json['ntp-override-keys'] == null
+          ? const {}
+          : ntpOverrideKeysFromJson(json['ntp-override-keys'] as List),
+      sniffer: json['sniffer'] == null
+          ? defaultSniffer
+          : Sniffer.safeSnifferFromJson(
+              json['sniffer'] as Map<String, Object?>,
+            ),
+      snifferOverrideKeys: json['sniffer-override-keys'] == null
+          ? const {}
+          : snifferOverrideKeysFromJson(json['sniffer-override-keys'] as List),
+      tun: json['tun'] == null
+          ? defaultProfileTun
+          : ProfileTun.safeFromJson(json['tun'] as Map<String, Object?>),
+      tunOverrideKeys: json['tun-override-keys'] == null
+          ? const {}
+          : tunOverrideKeysFromJson(json['tun-override-keys'] as List),
       proxyProviders:
           (json['proxy-providers'] as Map<String, dynamic>?)?.map(
             (k, e) => MapEntry(
@@ -127,7 +153,101 @@ _ProfileOverrides _$ProfileOverridesFromJson(Map<String, dynamic> json) =>
     );
 
 Map<String, dynamic> _$ProfileOverridesToJson(_ProfileOverrides instance) =>
-    <String, dynamic>{'proxy-providers': instance.proxyProviders};
+    <String, dynamic>{
+      'dns': instance.dns,
+      'dns-override-keys': instance.dnsOverrideKeys
+          .map((e) => _$DnsOverrideKeyEnumMap[e]!)
+          .toList(),
+      'ntp': instance.ntp,
+      'ntp-override-keys': instance.ntpOverrideKeys
+          .map((e) => _$NtpOverrideKeyEnumMap[e]!)
+          .toList(),
+      'sniffer': instance.sniffer,
+      'sniffer-override-keys': instance.snifferOverrideKeys
+          .map((e) => _$SnifferOverrideKeyEnumMap[e]!)
+          .toList(),
+      'tun': instance.tun,
+      'tun-override-keys': instance.tunOverrideKeys
+          .map((e) => _$TunOverrideKeyEnumMap[e]!)
+          .toList(),
+      'proxy-providers': instance.proxyProviders,
+    };
+
+const _$DnsOverrideKeyEnumMap = {
+  DnsOverrideKey.enable: 'enable',
+  DnsOverrideKey.listen: 'listen',
+  DnsOverrideKey.listenRoutingMark: 'listen-routing-mark',
+  DnsOverrideKey.useHosts: 'use-hosts',
+  DnsOverrideKey.useSystemHosts: 'use-system-hosts',
+  DnsOverrideKey.ipv6: 'ipv6',
+  DnsOverrideKey.ipv6Timeout: 'ipv6-timeout',
+  DnsOverrideKey.respectRules: 'respect-rules',
+  DnsOverrideKey.preferH3: 'prefer-h3',
+  DnsOverrideKey.cacheAlgorithm: 'cache-algorithm',
+  DnsOverrideKey.cacheMaxSize: 'cache-max-size',
+  DnsOverrideKey.enhancedMode: 'enhanced-mode',
+  DnsOverrideKey.fakeIpRange: 'fake-ip-range',
+  DnsOverrideKey.fakeIpRange6: 'fake-ip-range6',
+  DnsOverrideKey.fakeIpFilter: 'fake-ip-filter',
+  DnsOverrideKey.fakeIpFilterMode: 'fake-ip-filter-mode',
+  DnsOverrideKey.fakeIpTtl: 'fake-ip-ttl',
+  DnsOverrideKey.defaultNameserver: 'default-nameserver',
+  DnsOverrideKey.nameserverPolicy: 'nameserver-policy',
+  DnsOverrideKey.nameserver: 'nameserver',
+  DnsOverrideKey.fallback: 'fallback',
+  DnsOverrideKey.fallbackLazyQuery: 'fallback-lazy-query',
+  DnsOverrideKey.proxyServerNameserver: 'proxy-server-nameserver',
+  DnsOverrideKey.proxyServerNameserverPolicy: 'proxy-server-nameserver-policy',
+  DnsOverrideKey.directNameserver: 'direct-nameserver',
+  DnsOverrideKey.directNameserverFollowPolicy:
+      'direct-nameserver-follow-policy',
+  DnsOverrideKey.fallbackFilterGeoip: 'fallback-filter.geoip',
+  DnsOverrideKey.fallbackFilterGeoipCode: 'fallback-filter.geoip-code',
+  DnsOverrideKey.fallbackFilterGeosite: 'fallback-filter.geosite',
+  DnsOverrideKey.fallbackFilterIpcidr: 'fallback-filter.ipcidr',
+  DnsOverrideKey.fallbackFilterDomain: 'fallback-filter.domain',
+};
+
+const _$NtpOverrideKeyEnumMap = {
+  NtpOverrideKey.enable: 'enable',
+  NtpOverrideKey.server: 'server',
+  NtpOverrideKey.port: 'port',
+  NtpOverrideKey.interval: 'interval',
+  NtpOverrideKey.dialerProxy: 'dialer-proxy',
+  NtpOverrideKey.writeToSystem: 'write-to-system',
+};
+
+const _$SnifferOverrideKeyEnumMap = {
+  SnifferOverrideKey.enable: 'enable',
+  SnifferOverrideKey.overrideDest: 'override-destination',
+  SnifferOverrideKey.forceDnsMapping: 'force-dns-mapping',
+  SnifferOverrideKey.parsePureIp: 'parse-pure-ip',
+  SnifferOverrideKey.forceDomain: 'force-domain',
+  SnifferOverrideKey.skipDomain: 'skip-domain',
+  SnifferOverrideKey.skipSrcAddress: 'skip-src-address',
+  SnifferOverrideKey.skipDstAddress: 'skip-dst-address',
+  SnifferOverrideKey.sniffHttp: 'sniff.HTTP',
+  SnifferOverrideKey.sniffTls: 'sniff.TLS',
+  SnifferOverrideKey.sniffQuic: 'sniff.QUIC',
+};
+
+const _$TunOverrideKeyEnumMap = {
+  TunOverrideKey.mtu: 'mtu',
+  TunOverrideKey.congestionController: 'congestion-controller',
+  TunOverrideKey.strictRoute: 'strict-route',
+  TunOverrideKey.routeAddress: 'route-address',
+  TunOverrideKey.routeExcludeAddress: 'route-exclude-address',
+  TunOverrideKey.dnsHijack: 'dns-hijack',
+  TunOverrideKey.udpTimeout: 'udp-timeout',
+  TunOverrideKey.disableIcmpForwarding: 'disable-icmp-forwarding',
+  TunOverrideKey.gso: 'gso',
+  TunOverrideKey.includeInterface: 'include-interface',
+  TunOverrideKey.excludeInterface: 'exclude-interface',
+  TunOverrideKey.includeUid: 'include-uid',
+  TunOverrideKey.excludeUid: 'exclude-uid',
+  TunOverrideKey.excludeSrcPort: 'exclude-src-port',
+  TunOverrideKey.excludeDstPort: 'exclude-dst-port',
+};
 
 _Profile _$ProfileFromJson(Map<String, dynamic> json) => _Profile(
   id: (json['id'] as num).toInt(),
@@ -183,7 +303,9 @@ _Profile _$ProfileFromJson(Map<String, dynamic> json) => _Profile(
   profileType: $enumDecodeNullable(_$ProfileTypeEnumMap, json['profileType']),
   overrides: json['overrides'] == null
       ? const ProfileOverrides()
-      : ProfileOverrides.fromJson(json['overrides'] as Map<String, dynamic>),
+      : ProfileOverrides.safeFromJson(
+          json['overrides'] as Map<String, Object?>,
+        ),
 );
 
 Map<String, dynamic> _$ProfileToJson(_Profile instance) => <String, dynamic>{

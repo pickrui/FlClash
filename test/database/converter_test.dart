@@ -133,6 +133,49 @@ void main() {
       expect(group.disableUdp, false);
     });
 
+    test('ProfileOverridesConverter reads older and damaged rows', () {
+      const converter = ProfileOverridesConverter();
+      expect(
+        converter.fromSql('{"proxy-providers":{"Sub":{"filter":"HK"}}}'),
+        const ProfileOverrides(
+          proxyProviders: {'Sub': ProxyProviderOptions(filter: 'HK')},
+        ),
+      );
+      final salvaged = converter.fromSql(
+        json.encode({
+          'dns': {
+            'enable': 'yes',
+            'nameserver': ['192.0.2.1'],
+          },
+          'dns-override-keys': ['nameserver', 'future-key'],
+          'sniffer': 'damaged',
+          'tun-override-keys': ['mtu'],
+          'tun': {'mtu': 1400},
+        }),
+      );
+      expect(salvaged?.dns.enable, defaultDns.enable);
+      expect(salvaged?.dns.nameserver, ['192.0.2.1']);
+      expect(salvaged?.dnsOverrideKeys, {DnsOverrideKey.nameserver});
+      expect(salvaged?.sniffer, defaultSniffer);
+      expect(salvaged?.tun.mtu, 1400);
+      const picked = ProfileOverrides(
+        sniffer: Sniffer(
+          enable: true,
+          sniff: {
+            'TLS': SnifferConfig(ports: ['443'], overrideDest: false),
+          },
+        ),
+        snifferOverrideKeys: {
+          SnifferOverrideKey.enable,
+          SnifferOverrideKey.sniffTls,
+        },
+        ntp: Ntp(server: 'time.example'),
+        ntpOverrideKeys: {NtpOverrideKey.server},
+      );
+      expect(converter.fromSql(converter.toSql(picked)), picked);
+      expect(converter.toSql(const ProfileOverrides()), isNull);
+    });
+
     test('RuleListConverter preserves rule values and order', () {
       const converter = RuleListConverter();
       const rules = [
