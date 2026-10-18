@@ -40,6 +40,7 @@ import com.oixcloud.clash.common.PendingCallback
 import com.oixcloud.clash.common.QuickAction
 import com.oixcloud.clash.common.quickIntent
 import com.oixcloud.clash.common.registerReceiverCompat
+import com.oixcloud.clash.common.shortcutId
 import com.oixcloud.clash.getPackageIconPath
 import com.oixcloud.clash.latestMainProcessExit
 import com.oixcloud.clash.models.Package
@@ -69,6 +70,7 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
         const val VPN_PERMISSION_REQUEST_CODE = 1001
         const val NOTIFICATION_PERMISSION_REQUEST_CODE = 1002
         private const val GET_INSTALLED_APPS = "com.android.permission.GET_INSTALLED_APPS"
+        private val SHORTCUT_ORDER = listOf(QuickAction.START, QuickAction.STOP, QuickAction.TOGGLE)
     }
 
     private var activityRef: WeakReference<Activity>? = null
@@ -109,8 +111,17 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
             }
 
             "initShortcuts" -> {
-                initShortcuts(call.arguments as String)
-                result.success(true)
+                val labels = shortcutLabels(call.arguments)
+                if (labels == null) {
+                    result.error(
+                        "INVALID_ARGUMENT",
+                        "Shortcut labels must map every quick action to a string",
+                        null,
+                    )
+                } else {
+                    initShortcuts(labels)
+                    result.success(true)
+                }
             }
 
             "getPackages" -> platformCalls.submit(result) {
@@ -241,22 +252,33 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
         }
     }
 
-    private fun initShortcuts(label: String) {
-        val shortcut = with(ShortcutInfoCompat.Builder(GlobalState.application, "toggle")) {
-            setShortLabel(label)
-            setIcon(
-                IconCompat.createWithResource(
-                    GlobalState.application,
-                    R.mipmap.ic_launcher_round,
-                )
-            )
-            setIntent(QuickAction.TOGGLE.quickIntent)
-            build()
+    private fun shortcutLabels(arguments: Any?): Map<QuickAction, String>? {
+        val map = arguments as? Map<*, *> ?: return null
+        return QuickAction.entries.associateWith { action ->
+            map[action.shortcutId] as? String ?: return null
         }
-        ShortcutManagerCompat.setDynamicShortcuts(
-            GlobalState.application, listOf(shortcut)
-        )
     }
+
+    private fun initShortcuts(labels: Map<QuickAction, String>) {
+        val shortcuts = SHORTCUT_ORDER.mapIndexed { rank, action ->
+            with(ShortcutInfoCompat.Builder(GlobalState.application, action.shortcutId)) {
+                setShortLabel(labels.getValue(action))
+                setIcon(IconCompat.createWithResource(GlobalState.application, action.shortcutIcon))
+                setIntent(action.quickIntent)
+                setRank(rank)
+                build()
+            }
+        }
+        ShortcutManagerCompat.setDynamicShortcuts(GlobalState.application, shortcuts)
+    }
+
+    // Plain circles: an adaptive shortcut icon takes the launcher's mask, often a square.
+    private val QuickAction.shortcutIcon: Int
+        get() = when (this) {
+            QuickAction.START -> R.drawable.ic_shortcut_start
+            QuickAction.STOP -> R.drawable.ic_shortcut_stop
+            QuickAction.TOGGLE -> R.drawable.ic_shortcut_toggle
+        }
 
     private fun tip(message: String?) {
         GlobalState.application.showToast(message)

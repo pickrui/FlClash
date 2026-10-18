@@ -6,8 +6,10 @@
 import 'dart:async';
 
 import 'package:fl_clash/common/constant.dart';
+import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/plugins/app.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -147,6 +149,20 @@ void main() {
       expect(calls, 2);
     },
   );
+
+  test('labels the shortcut for every Android quick action', () async {
+    await AppLocalizations.load(const Locale('en'));
+    Object? labels;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          if (call.method == 'initShortcuts') labels = call.arguments;
+          return true;
+        });
+
+    expect(await App().initShortcuts(), isTrue);
+
+    expect(labels, {'start': 'Start', 'stop': 'Stop', 'toggle': 'Toggle'});
+  });
 
   test(
     'permission and settings methods preserve denial and missing results',

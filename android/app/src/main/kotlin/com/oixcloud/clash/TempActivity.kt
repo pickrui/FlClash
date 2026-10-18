@@ -13,6 +13,7 @@ import androidx.core.content.pm.ShortcutManagerCompat
 import com.oixcloud.clash.common.GlobalState
 import com.oixcloud.clash.common.QuickAction
 import com.oixcloud.clash.common.action
+import com.oixcloud.clash.common.shortcutId
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.launch
@@ -46,9 +47,7 @@ class TempActivity : Activity() {
             finish()
             return
         }
-        if (action == QuickAction.TOGGLE) {
-            ShortcutManagerCompat.reportShortcutUsed(this, "toggle")
-        }
+        ShortcutManagerCompat.reportShortcutUsed(this, action.shortcutId)
         dispatch(action)
     }
 

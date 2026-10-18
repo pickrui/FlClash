@@ -56,6 +56,9 @@ val ComponentName.intent: Intent
 val QuickAction.action: String
     get() = "${GlobalState.application.packageName}.action.${this.name}"
 
+val QuickAction.shortcutId: String
+    get() = name.lowercase()
+
 val QuickAction.quickIntent: Intent
     get() = Components.TEMP_ACTIVITY.intent.apply {
         action = this@quickIntent.action
