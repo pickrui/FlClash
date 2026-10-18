@@ -21,7 +21,7 @@ class DeveloperView extends ConsumerWidget {
     final storeAction = context.storeAction;
     final backupAction = context.backupAction;
 
-    return generateSectionV2(
+    return generateSection(
       title: appLocalizations.options,
       items: [
         ListItem(

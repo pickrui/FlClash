@@ -122,7 +122,7 @@ class SubscriptionInfoDetailView extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          generateSectionV3(
+          generateSection(
             title: appLocalizations.trafficUsage,
             items: [
               _buildItem(
@@ -137,7 +137,7 @@ class SubscriptionInfoDetailView extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          generateSectionV3(
+          generateSection(
             title: appLocalizations.expiresAtLabel,
             items: [_buildItem(value: expire)],
           ),

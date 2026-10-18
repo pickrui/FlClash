@@ -258,7 +258,7 @@ class TrackerInfoDetailView extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16)
           .copyWith(bottom: 20, top: 16),
       children: [
-        generateSectionV3(
+        generateSection(
           title: appLocalizations.basicInfo,
           items: _buildRows([
             (appLocalizations.creationTime, trackerInfo.start.showFull),
@@ -269,7 +269,7 @@ class TrackerInfoDetailView extends StatelessWidget {
             (appLocalizations.download, trackerInfo.download.traffic.show),
           ]),
         ),
-        generateSectionV3(
+        generateSection(
           title: appLocalizations.address,
           items: _buildRows([
             (appLocalizations.host, metadata.host),
@@ -289,7 +289,7 @@ class TrackerInfoDetailView extends StatelessWidget {
             (appLocalizations.remoteDestination, metadata.remoteDestination),
           ]),
         ),
-        generateSectionV3(
+        generateSection(
           title: appLocalizations.proxies,
           items: [
             ..._buildRows([

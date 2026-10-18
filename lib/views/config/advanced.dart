@@ -62,7 +62,7 @@ class AdvancedConfigView extends StatelessWidget {
       title: appLocalizations.advancedConfig,
       body: ListView(
         padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 16),
-        children: [generateSectionV3(items: items)],
+        children: [generateSection(items: items)],
       ),
     );
   }

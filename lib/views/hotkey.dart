@@ -126,7 +126,7 @@ class HotKeyView extends StatelessWidget {
         children: [
           const _HotKeyIntro(),
           for (final (title, actions) in _sections(appLocalizations))
-            generateSectionV3(
+            generateSection(
               title: title,
               items: [
                 for (final action in actions)

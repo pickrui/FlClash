@@ -57,7 +57,7 @@ class _AboutViewState extends State<AboutView> {
     final baseDomain = Secrets.primarySiteDomain;
     final spareDomain = Secrets.spareSiteDomain;
     return [
-      generateSectionV3(
+      generateSection(
         title: appLocalizations.more,
         items: [
           if (baseDomain.isNotEmpty)

@@ -114,7 +114,7 @@ class ProfileDetailSheet extends ConsumerWidget {
             failed: activeCounts == null,
           ),
           if (subscriptionInfo != null && subscriptionInfo.total > 0)
-            generateSectionV3(
+            generateSection(
               title: appLocalizations.subscriptionInfo,
               items: [
                 ListItem(
@@ -124,7 +124,7 @@ class ProfileDetailSheet extends ConsumerWidget {
                 ),
               ],
             ),
-          generateSectionV3(
+          generateSection(
             title: appLocalizations.profile,
             items: [
               _InfoRow(
@@ -142,7 +142,7 @@ class ProfileDetailSheet extends ConsumerWidget {
             ],
           ),
           if (providers.isNotEmpty)
-            generateSectionV3(
+            generateSection(
               title: appLocalizations.providers,
               items: [
                 for (final provider in providers)

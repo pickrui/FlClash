@@ -19,6 +19,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../helpers/preferences.dart';
+import '../helpers/test_app.dart';
 
 const _snapshot = NetworkDiagnosticSnapshot(
   profileApplied: true,
@@ -118,6 +119,7 @@ Future<ProviderContainer> _pump(
           ...GlobalMaterialLocalizations.delegates,
         ],
         supportedLocales: AppLocalizations.delegate.supportedLocales,
+        builder: (context, child) => wrapAppScopes(context, child!),
         home: Builder(
           builder: (context) {
             globalState.theme = CommonTheme.of(context, 1);

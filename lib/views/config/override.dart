@@ -639,7 +639,7 @@ class _OverrideList<K extends Enum, M> extends ConsumerWidget {
                 appLocalizations,
                 entries,
               ))
-                generateSectionV3(
+                generateSection(
                   title: title,
                   items: [
                     for (final key in keys)

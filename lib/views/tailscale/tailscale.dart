@@ -168,14 +168,15 @@ class _TailscaleViewState extends ConsumerState<TailscaleView>
       body: networks.isEmpty
           ? _buildEmpty(l)
           : ListView(
-              padding: EdgeInsets.only(
-                top: context.contentTopPadding,
-                bottom: 20,
+              padding: EdgeInsets.fromLTRB(
+                16,
+                context.contentTopPadding,
+                16,
+                20,
               ),
               children: [
-                ...generateSection(
+                generateSection(
                   title: l.tailscaleNetworks,
-                  isFirst: true,
                   items: [
                     for (final network in networks)
                       ListItem(
@@ -197,7 +198,7 @@ class _TailscaleViewState extends ConsumerState<TailscaleView>
                       ),
                   ],
                 ),
-                ...generateSection(
+                generateSection(
                   items: [
                     ListItem(
                       leading: const Icon(Icons.help_outline),

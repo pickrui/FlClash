@@ -53,70 +53,73 @@ class ResourcesView extends StatelessWidget {
                 (state) => VM2(state.geoAutoUpdate, state.geoUpdateInterval),
               ),
             );
-            return generateListView([
-              ...generateSection(
-                title: appLocalizations.geoOptions,
-                items: [
-                  ListItem.switchItem(
-                    title: Text(appLocalizations.geoAutoUpdate),
-                    delegate: SwitchDelegate(
-                      value: vm2.a,
-                      onChanged: (value) {
-                        ref
-                            .read(patchClashConfigProvider.notifier)
-                            .update(
-                              (state) => state.copyWith(geoAutoUpdate: value),
-                            );
-                      },
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              children: [
+                generateSection(
+                  title: appLocalizations.geoOptions,
+                  items: [
+                    ListItem.switchItem(
+                      title: Text(appLocalizations.geoAutoUpdate),
+                      delegate: SwitchDelegate(
+                        value: vm2.a,
+                        onChanged: (value) {
+                          ref
+                              .read(patchClashConfigProvider.notifier)
+                              .update(
+                                (state) => state.copyWith(geoAutoUpdate: value),
+                              );
+                        },
+                      ),
                     ),
-                  ),
-                  ListItem.input(
-                    title: Text(appLocalizations.geoAutoUpdateInterval),
-                    trailing: Text(
-                      appLocalizations.hoursCount(vm2.b),
-                      style: context.textTheme.bodyMedium?.toSoftBold,
+                    ListItem.input(
+                      title: Text(appLocalizations.geoAutoUpdateInterval),
+                      trailing: Text(
+                        appLocalizations.hoursCount(vm2.b),
+                        style: context.textTheme.bodyMedium?.toSoftBold,
+                      ),
+                      delegate: InputDelegate(
+                        title: appLocalizations.geoAutoUpdateInterval,
+                        value: vm2.b.toString(),
+                        suffixText: appLocalizations.hours,
+                        maxLength: TextInputLimits.interval,
+                        keyboardType: TextInputType.number,
+                        validator: (value) {
+                          final interval = int.tryParse(value ?? '');
+                          if (interval == null ||
+                              interval <= 0 ||
+                              interval > maxGeoUpdateInterval) {
+                            return appLocalizations.geoAutoUpdateIntervalTip;
+                          }
+                          return null;
+                        },
+                        onChanged: (value) {
+                          final interval = int.tryParse(value ?? '');
+                          if (interval == null ||
+                              interval <= 0 ||
+                              interval > maxGeoUpdateInterval) {
+                            return;
+                          }
+                          ref
+                              .read(patchClashConfigProvider.notifier)
+                              .update(
+                                (state) =>
+                                    state.copyWith(geoUpdateInterval: interval),
+                              );
+                        },
+                      ),
                     ),
-                    delegate: InputDelegate(
-                      title: appLocalizations.geoAutoUpdateInterval,
-                      value: vm2.b.toString(),
-                      suffixText: appLocalizations.hours,
-                      maxLength: TextInputLimits.interval,
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        final interval = int.tryParse(value ?? '');
-                        if (interval == null ||
-                            interval <= 0 ||
-                            interval > maxGeoUpdateInterval) {
-                          return appLocalizations.geoAutoUpdateIntervalTip;
-                        }
-                        return null;
-                      },
-                      onChanged: (value) {
-                        final interval = int.tryParse(value ?? '');
-                        if (interval == null ||
-                            interval <= 0 ||
-                            interval > maxGeoUpdateInterval) {
-                          return;
-                        }
-                        ref
-                            .read(patchClashConfigProvider.notifier)
-                            .update(
-                              (state) =>
-                                  state.copyWith(geoUpdateInterval: interval),
-                            );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              ...generateSection(
-                title: appLocalizations.geoResources,
-                items: [
-                  for (final geoItem in geoItems)
-                    GeoDataListItem(geoItem: geoItem),
-                ],
-              ),
-            ]);
+                  ],
+                ),
+                generateSection(
+                  title: appLocalizations.geoResources,
+                  items: [
+                    for (final geoItem in geoItems)
+                      GeoDataListItem(geoItem: geoItem),
+                  ],
+                ),
+              ],
+            );
           },
         ),
       ),

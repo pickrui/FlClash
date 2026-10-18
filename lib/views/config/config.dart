@@ -33,7 +33,7 @@ class ConfigView extends StatelessWidget {
       body: ListView(
         padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 88),
         children: [
-          generateSectionV3(
+          generateSection(
             title: l.startupAndBackground,
             items: [
               if (isDesktop) ...const [AutoLaunchItem(), SilentLaunchItem()],
@@ -53,7 +53,7 @@ class ConfigView extends StatelessWidget {
               if (isAndroid) ...const [HiddenItem(), NotificationStopItem()],
             ],
           ),
-          generateSectionV3(
+          generateSection(
             title: l.inbound,
             items: const [
               PortItem(),
@@ -62,7 +62,7 @@ class ConfigView extends StatelessWidget {
               ProxyAuthenticationItem(),
             ],
           ),
-          generateSectionV3(
+          generateSection(
             title: l.connection,
             items: [
               const TestUrlItem(),
@@ -75,7 +75,7 @@ class ConfigView extends StatelessWidget {
               const UsageItem(),
             ],
           ),
-          generateSectionV3(
+          generateSection(
             title: l.core,
             items: const [
               AutoIpv6Item(),
@@ -85,7 +85,7 @@ class ConfigView extends StatelessWidget {
               GeodataLoaderItem(),
             ],
           ),
-          generateSectionV3(
+          generateSection(
             title: l.logsAndDiagnostics,
             items: const [LogLevelItem(), OpenLogsItem()],
           ),

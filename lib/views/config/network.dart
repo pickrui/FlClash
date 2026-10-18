@@ -605,8 +605,8 @@ class VpnSections extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(
     children: [
-      generateSectionV3(items: const [VPNItem()]),
-      generateSectionV3(
+      generateSection(items: const [VPNItem()]),
+      generateSection(
         title: 'VPN',
         items: const [
           VpnSystemProxyItem(),
@@ -623,7 +623,7 @@ class VpnSections extends StatelessWidget {
 class SystemProxySection extends StatelessWidget {
   const SystemProxySection({super.key});
   @override
-  Widget build(BuildContext context) => generateSectionV3(
+  Widget build(BuildContext context) => generateSection(
     title: context.appLocalizations.system,
     items: const [SystemProxyItem(), BypassDomainItem()],
   );
@@ -632,7 +632,7 @@ class SystemProxySection extends StatelessWidget {
 class NetworkOptionsSection extends StatelessWidget {
   const NetworkOptionsSection({super.key});
   @override
-  Widget build(BuildContext context) => generateSectionV3(
+  Widget build(BuildContext context) => generateSection(
     title: context.appLocalizations.options,
     items: [
       if (system.isDesktop) const TUNItem(),
@@ -670,7 +670,7 @@ class TunSection extends ConsumerWidget {
           (state) => state.tun.stack == TunStack.mips,
         ),
       );
-      return generateSectionV3(
+      return generateSection(
         title: appLocalizations.tun,
         items: [
           const TunMtuItem(),
@@ -689,9 +689,9 @@ class TunSection extends ConsumerWidget {
       for (final key in spec.values)
         if (picked.contains(key)) key,
     ];
-    return generateSectionV3(
+    return generateSection(
       title: appLocalizations.tun,
-      subTitle: appLocalizations.tunOverrideDesc,
+      footer: appLocalizations.tunOverrideDesc,
       items: [
         const BypassPrivateRouteItem(),
         for (final key in listed)
@@ -837,7 +837,7 @@ class _OnDemandViewState extends ConsumerState<OnDemandView> {
               child: Column(
                 children: [
                   if (_isAndroid || _isMacOS)
-                    generateSectionV3(
+                    generateSection(
                       title: l.prerequisites,
                       items: [
                         if (_isAndroid) const BatteryOptimizationItem(),
@@ -845,34 +845,38 @@ class _OnDemandViewState extends ConsumerState<OnDemandView> {
                       ],
                     ),
                   if (_isAndroid)
-                    generateSectionV3(
+                    generateSection(
                       title: l.options,
                       items: const [ExcludeNetworksItem()],
                     ),
                   ListHeader(
                     title: l.excludeSsids,
-                    subTitle: l.excludeSsidsDesc,
-                    actions: [
-                      if (editing)
-                        IconButton.filledTonal(
-                          tooltip: l.delete,
-                          onPressed: _deleteSelected,
-                          icon: const GlyphIcon(AppGlyphs.delete),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      spacing: appBarActionSpace,
+                      children: [
+                        if (editing)
+                          IconButton.filledTonal(
+                            tooltip: l.delete,
+                            onPressed: _deleteSelected,
+                            icon: const GlyphIcon(AppGlyphs.delete),
+                          ),
+                        FilledButton.tonal(
+                          onPressed: editing
+                              ? () => setState(() {
+                                  if (selected.length == ssids.length) {
+                                    _selected.clear();
+                                  } else {
+                                    _selected.addAll(ssids);
+                                  }
+                                })
+                              : _edit,
+                          child: Text(editing ? l.selectAll : l.add),
                         ),
-                      FilledButton.tonal(
-                        onPressed: editing
-                            ? () => setState(() {
-                                if (selected.length == ssids.length) {
-                                  _selected.clear();
-                                } else {
-                                  _selected.addAll(ssids);
-                                }
-                              })
-                            : _edit,
-                        child: Text(editing ? l.selectAll : l.add),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
+                  ListFooter(text: l.excludeSsidsDesc),
                 ],
               ),
             ),

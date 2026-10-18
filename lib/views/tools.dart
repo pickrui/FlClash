@@ -55,7 +55,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
   }
 
   Widget _getOtherList(bool enableDeveloperMode) {
-    return generateSectionV3(
+    return generateSection(
       title: context.appLocalizations.other,
       items: [
         if (enableDeveloperMode) const _DeveloperItem(),
@@ -65,7 +65,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
   }
 
   Widget _getSettingList() {
-    return generateSectionV3(
+    return generateSection(
       title: context.appLocalizations.settings,
       items: [
         const _ConfigItem(),
@@ -84,7 +84,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
   }
 
   Widget _getNetworkList() {
-    return generateSectionV3(
+    return generateSection(
       title: context.appLocalizations.network,
       items: [
         if (system.isWindows) const _LoopbackItem(),
@@ -121,7 +121,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
           if (state.navigationItems.isEmpty) {
             return const SizedBox.shrink();
           }
-          return generateSectionV3(
+          return generateSection(
             title: context.appLocalizations.more,
             items: [
               for (final item in state.navigationItems)

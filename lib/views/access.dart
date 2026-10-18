@@ -615,9 +615,8 @@ class _AccessControlPanelState extends ConsumerState<AccessControlPanel> {
     };
   }
 
-  List<Widget> _buildModeSetting() {
+  Widget _buildModeSetting() {
     return generateSection(
-      isFirst: true,
       title: appLocalizations.mode,
       items: [
         SingleChildScrollView(
@@ -653,7 +652,7 @@ class _AccessControlPanelState extends ConsumerState<AccessControlPanel> {
     );
   }
 
-  List<Widget> _buildSortSetting() {
+  Widget _buildSortSetting() {
     return generateSection(
       title: appLocalizations.sort,
       items: [
@@ -690,7 +689,7 @@ class _AccessControlPanelState extends ConsumerState<AccessControlPanel> {
     );
   }
 
-  List<Widget> _buildSourceSetting() {
+  Widget _buildSourceSetting() {
     return generateSection(
       title: appLocalizations.source,
       items: [
@@ -752,9 +751,9 @@ class _AccessControlPanelState extends ConsumerState<AccessControlPanel> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ..._buildModeSetting(),
-            ..._buildSortSetting(),
-            ..._buildSourceSetting(),
+            _buildModeSetting(),
+            _buildSortSetting(),
+            _buildSourceSetting(),
           ],
         ),
       ),

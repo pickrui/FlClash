@@ -80,13 +80,11 @@ class _ProvidersViewState extends ConsumerState<ProvidersView> {
     }
   }
 
-  Widget _buildSectionSyncButton(String type) {
-    return IconButton(
+  IconButtonData _buildSectionSyncAction(String type) {
+    return IconButtonData(
+      glyph: AppGlyphs.sync,
       tooltip: context.appLocalizations.update,
-      iconSize: 20,
-      visualDensity: VisualDensity.compact,
       onPressed: _updating ? null : () => _updateProviders(type),
-      icon: const GlyphIcon(AppGlyphs.sync),
     );
   }
 
@@ -102,7 +100,7 @@ class _ProvidersViewState extends ConsumerState<ProvidersView> {
         sliver: SliverToBoxAdapter(
           child: ListHeader(
             title: title,
-            actions: [_buildSectionSyncButton(type)],
+            actions: [_buildSectionSyncAction(type)],
           ),
         ),
       ),

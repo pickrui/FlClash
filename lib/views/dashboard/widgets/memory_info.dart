@@ -386,14 +386,12 @@ class _MemorySection extends StatelessWidget {
       children: [
         ListHeader(
           title: title,
-          actions: [
-            Text(
-              bytes.traffic.show,
-              style: context.textTheme.bodySmall?.copyWith(
-                color: context.colorScheme.outline,
-              ),
+          trailing: Text(
+            bytes.traffic.show,
+            style: context.textTheme.bodySmall?.copyWith(
+              color: context.colorScheme.outline,
             ),
-          ],
+          ),
         ),
         AnimatedSize(
           alignment: Alignment.topCenter,
@@ -403,7 +401,7 @@ class _MemorySection extends StatelessWidget {
             alignment: Alignment.topCenter,
             child: KeyedSubtree(
               key: contentKey,
-              child: generateSectionV3(items: items),
+              child: generateSection(items: items),
             ),
           ),
         ),
