@@ -30,6 +30,7 @@ import 'package:fl_clash/ui/input.dart';
 import 'package:fl_clash/ui/navigation_dock.dart';
 
 import 'package:fl_clash/ui/popup.dart';
+import 'package:fl_clash/ui/sortable.dart';
 
 import 'package:fl_clash/ui/scaffold.dart';
 
@@ -632,6 +633,8 @@ class DecorationListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final proxyDecorator =
         ProxyDecoratorProvider.of(context)?.isProxyDecorator ?? false;
+    final sortable = SortableItem.maybeOf(context);
+    final sorting = sortable?.sorting ?? false;
     final position = ItemPositionProvider.of(context)?.position;
     final isStart = [
       ItemPosition.start,
@@ -652,12 +655,15 @@ class DecorationListItem extends StatelessWidget {
       isError: invalid,
       isSelected: isSelected,
       padding: EdgeInsets.zero,
+      inert: sorting,
       onPressed: proxyDecorator ? null : onPressed,
       child: LayoutBuilder(
         builder: (_, constraints) {
           final isInfinite = constraints.maxHeight >= double.infinity;
           final tile = ListTile(
-            leading: leading,
+            leading: leading == null
+                ? null
+                : IgnorePointer(ignoring: sorting, child: leading),
             contentPadding:
                 contentPadding ?? const EdgeInsets.only(right: 16, left: 16),
             title: title,
@@ -665,7 +671,9 @@ class DecorationListItem extends StatelessWidget {
             minVerticalPadding: minVerticalPadding ?? 6,
             minTileHeight: 54,
             horizontalTitleGap: horizontalTitleGap,
-            trailing: trailing,
+            trailing: sortable == null
+                ? trailing
+                : SortableTrailing(item: sortable, child: trailing),
           );
           return Column(
             mainAxisSize: MainAxisSize.min,
