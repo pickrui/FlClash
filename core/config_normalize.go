@@ -7,7 +7,7 @@
 package main
 
 import (
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v3"
 )
 
 func normalizeConfigShortIds(data []byte) []byte {

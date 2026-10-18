@@ -6,6 +6,7 @@ replace github.com/metacubex/mihomo => ./Clash.Meta
 
 require (
 	github.com/Microsoft/go-winio v0.6.2
+	github.com/gofrs/uuid/v5 v5.5.1
 	github.com/klauspost/compress v1.20.1
 	github.com/metacubex/chi v0.1.1
 	github.com/metacubex/http v0.1.8
@@ -15,12 +16,12 @@ require (
 	github.com/miekg/dns v1.1.73
 	github.com/oschwald/maxminddb-golang v1.13.1
 	github.com/sirupsen/logrus v1.10.2
+	go.yaml.in/yaml/v3 v3.0.5
 	golang.org/x/crypto v0.57.0
 	golang.org/x/exp v0.0.0-20260908205506-85c1c2202aba
 	golang.org/x/sync v0.23.0
 	golang.org/x/sys v0.48.0
 	google.golang.org/protobuf v1.36.12
-	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -37,7 +38,7 @@ require (
 	github.com/dlclark/regexp2 v1.12.0 // indirect
 	github.com/dunglas/httpsfv v1.1.2 // indirect
 	github.com/easytier/easytier/easytier-go v0.0.0-20260910071355-3d0c9c3ca5e2 // indirect
-	github.com/enfein/mieru/v3 v3.38.0 // indirect
+	github.com/enfein/mieru/v3 v3.38.1 // indirect
 	github.com/ericlagergren/aegis v0.0.0-20250325060835-cd0defd64358 // indirect
 	github.com/ericlagergren/polyval v0.0.0-20230805202542-18692a1b76f9 // indirect
 	github.com/ericlagergren/siv v0.0.0-20220507050439-0b757b3aa5f1 // indirect
@@ -49,7 +50,6 @@ require (
 	github.com/gobwas/httphead v0.1.0 // indirect
 	github.com/gobwas/pool v0.2.1 // indirect
 	github.com/gobwas/ws v1.4.0 // indirect
-	github.com/gofrs/uuid/v5 v5.5.1 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/google/btree v1.1.3 // indirect
