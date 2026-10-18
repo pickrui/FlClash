@@ -12,7 +12,7 @@ import 'package:fl_clash/ui/builder.dart';
 
 import 'package:fl_clash/ui/card.dart';
 
-import 'navigation_dock.dart';
+import 'package:fl_clash/ui/navigation_dock.dart';
 
 class CommonFloatingActionButton extends StatefulWidget {
   final VoidCallback? onPressed;

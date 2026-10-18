@@ -19,7 +19,7 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:fl_clash/ui/caret_popup.dart';
 import 'package:fl_clash/ui/text_loupe.dart';
-import 'package:fl_clash/widgets/navigation_dock.dart';
+import 'package:fl_clash/ui/navigation_dock.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;

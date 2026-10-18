@@ -11,7 +11,7 @@ import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/ui/inherited.dart';
-import 'package:fl_clash/widgets/navigation_dock.dart';
+import 'package:fl_clash/ui/navigation_dock.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';

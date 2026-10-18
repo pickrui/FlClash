@@ -12,7 +12,7 @@ import 'package:fl_clash/ui/icons/glyph_icon.dart';
 import 'package:fl_clash/ui/activate_box.dart';
 import 'package:defer_pointer/defer_pointer.dart';
 import 'package:fl_clash/widgets/motion_grid.dart';
-import 'package:fl_clash/widgets/navigation_dock.dart';
+import 'package:fl_clash/ui/navigation_dock.dart';
 import 'package:fl_clash/widgets/grid.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';

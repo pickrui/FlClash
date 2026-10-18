@@ -23,7 +23,8 @@ import 'package:fl_clash/ui/keyboard.dart';
 
 import 'package:fl_clash/ui/loading.dart';
 
-import 'navigation_dock.dart';
+import 'package:fl_clash/ui/navigation_dock.dart';
+
 import 'popup.dart';
 
 import 'package:fl_clash/ui/search_field.dart';

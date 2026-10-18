@@ -19,7 +19,7 @@ import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/ui/view_scope.dart';
 import 'package:fl_clash/views/font_family.dart';
 import 'package:fl_clash/views/theme_preview.dart';
-import 'package:fl_clash/widgets/navigation_dock.dart';
+import 'package:fl_clash/ui/navigation_dock.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
