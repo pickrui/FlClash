@@ -162,7 +162,7 @@ class _ProfilesViewState extends State<ProfilesView> {
               ),
             ),
             child: LayoutBuilder(
-              builder: (_, constraints) => MasonryGridView.count(
+              builder: (context, constraints) => MasonryGridView.count(
                 key: profilesStoreKey,
                 padding: EdgeInsets.only(
                   left: 16,
