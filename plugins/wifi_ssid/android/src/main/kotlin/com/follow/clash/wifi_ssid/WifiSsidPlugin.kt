@@ -20,6 +20,7 @@ import android.os.Handler
 import android.os.Looper
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -38,6 +39,7 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private var connectivityManager: ConnectivityManager? = null
     private var activityBinding: ActivityPluginBinding? = null
     private var pendingPermissionResult: Result? = null
+    private var rationaleBeforeRequest: Map<String, Boolean> = emptyMap()
     private var wifiNetworkCallback: ConnectivityManager.NetworkCallback? = null
     private val wifiInfoByNetwork = ConcurrentHashMap<Network, WifiInfo>()
     private val pendingSsidResults = mutableListOf<Result>()
@@ -56,23 +58,18 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             result.error(ERROR_UNAVAILABLE, "Activity not available", null)
             return@RequestPermissionsResultListener true
         }
+        // R+ dialogs never offer "Allow all the time"; asking for it alone opens Settings.
         if (
             requestCode == REQUEST_CODE_LOCATION &&
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
             hasForegroundLocation(currentActivity) &&
-            !hasBackgroundLocation(currentActivity) &&
-            Build.VERSION.SDK_INT < Build.VERSION_CODES.R
+            !hasBackgroundLocation(currentActivity)
         ) {
             requestBackgroundLocation(currentActivity)
             return@RequestPermissionsResultListener true
         }
         pendingPermissionResult = null
-        val state = permissionState(currentActivity, afterRequest = true)
-        if (hasForegroundLocation(currentActivity)) {
-            refreshWifiNetworkCallback()
-        } else {
-            unregisterWifiNetworkCallback()
-        }
-        result.success(state)
+        result.success(settleRequest(currentActivity))
         true
     }
 
@@ -86,6 +83,7 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         // Every plugin on the activity sees every result; stay clear of the app's codes.
         private const val REQUEST_CODE_LOCATION = 2101
         private const val REQUEST_CODE_BACKGROUND_LOCATION = 2102
+        private const val DENIED_PERMISSIONS_PREFERENCES = "wifi_ssid_denied_permissions"
         private const val SSID_TIMEOUT_MILLIS = 3_000L
 
         // Values must match WifiSsidPermission enum index in Dart
@@ -152,12 +150,11 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             result.error(ERROR_UNAVAILABLE, "Context not available", null)
             return
         }
-        if (hasForegroundLocation(ctx)) {
-            refreshWifiNetworkCallback()
-        } else {
-            unregisterWifiNetworkCallback()
-        }
-        result.success(permissionState(ctx))
+        refreshWifiNetworkCallback()
+        forgetGrantedDenials(ctx)
+        result.success(
+            if (missingPermission(ctx) == null) PERMISSION_GRANTED else PERMISSION_DENIED,
+        )
     }
 
     private fun requestPermission(result: Result) {
@@ -169,8 +166,9 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             result.error(ERROR_UNAVAILABLE, "Context not available", null)
             return
         }
-        if (permissionState(ctx) == PERMISSION_GRANTED) {
+        if (missingPermission(ctx) == null) {
             refreshWifiNetworkCallback()
+            forgetGrantedDenials(ctx)
             result.success(PERMISSION_GRANTED)
             return
         }
@@ -178,17 +176,15 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             result.error(ERROR_IN_PROGRESS, "A permission request is already active", null)
             return
         }
-        // R+ can't grant background location from a runtime dialog once foreground is held.
-        if (hasForegroundLocation(ctx) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            refreshWifiNetworkCallback()
-            result.success(permissionState(ctx, afterRequest = true))
-            return
-        }
         pendingPermissionResult = result
         if (hasForegroundLocation(ctx)) {
             requestBackgroundLocation(act)
-            return
+        } else {
+            requestForegroundLocation(act)
         }
+    }
+
+    private fun requestForegroundLocation(activity: Activity) {
         // Q accepts the background permission in the same dialog; R+ rejects the
         // combined request and needs it asked separately once foreground is granted.
         val permissions = if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
@@ -203,16 +199,67 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 Manifest.permission.ACCESS_COARSE_LOCATION,
             )
         }
-        ActivityCompat.requestPermissions(act, permissions, REQUEST_CODE_LOCATION)
+        launchPermissionRequest(activity, permissions, REQUEST_CODE_LOCATION)
     }
 
     private fun requestBackgroundLocation(activity: Activity) {
-        ActivityCompat.requestPermissions(
+        launchPermissionRequest(
             activity,
             arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
             REQUEST_CODE_BACKGROUND_LOCATION,
         )
     }
+
+    private fun launchPermissionRequest(
+        activity: Activity,
+        permissions: Array<String>,
+        requestCode: Int,
+    ) {
+        rationaleBeforeRequest = permissions.associateWith {
+            ActivityCompat.shouldShowRequestPermissionRationale(activity, it)
+        }
+        ActivityCompat.requestPermissions(activity, permissions, requestCode)
+    }
+
+    private fun settleRequest(activity: Activity): Int {
+        val rationaleBefore = rationaleBeforeRequest
+        rationaleBeforeRequest = emptyMap()
+        refreshWifiNetworkCallback()
+        forgetGrantedDenials(activity)
+        val missing = missingPermission(activity) ?: return PERMISSION_GRANTED
+        return resolveDenial(activity, missing, rationaleBefore[missing] == true)
+    }
+
+    // Rationale is false both before the first prompt and after a permanent denial;
+    // how it moved across the request and a persisted earlier denial tell them apart.
+    private fun resolveDenial(
+        activity: Activity,
+        permission: String,
+        rationaleBefore: Boolean,
+    ): Int {
+        val preferences = deniedPermissions(activity)
+        val deniedBefore = preferences.getBoolean(permission, false)
+        if (ActivityCompat.shouldShowRequestPermissionRationale(activity, permission)) {
+            preferences.edit { putBoolean(permission, true) }
+            return PERMISSION_DENIED
+        }
+        if (rationaleBefore) {
+            preferences.edit { putBoolean(permission, true) }
+            return PERMISSION_PERMANENTLY_DENIED
+        }
+        return if (deniedBefore) PERMISSION_PERMANENTLY_DENIED else PERMISSION_DENIED
+    }
+
+    private fun forgetGrantedDenials(context: Context) {
+        val preferences = deniedPermissions(context)
+        val granted = preferences.all.keys.filter { isGranted(context, it) }
+        if (granted.isNotEmpty()) {
+            preferences.edit { granted.forEach(::remove) }
+        }
+    }
+
+    private fun deniedPermissions(context: Context) =
+        context.getSharedPreferences(DENIED_PERMISSIONS_PREFERENCES, Context.MODE_PRIVATE)
 
     private fun isGranted(context: Context, permission: String): Boolean =
         ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
@@ -226,19 +273,10 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ||
             isGranted(context, Manifest.permission.ACCESS_BACKGROUND_LOCATION)
 
-    private fun permissionState(context: Context, afterRequest: Boolean = false): Int {
-        val missing = when {
-            !hasForegroundLocation(context) -> Manifest.permission.ACCESS_FINE_LOCATION
-            !hasBackgroundLocation(context) -> Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            else -> return PERMISSION_GRANTED
-        }
-        if (!afterRequest) return PERMISSION_DENIED
-        val activity = activity ?: return PERMISSION_DENIED
-        return if (ActivityCompat.shouldShowRequestPermissionRationale(activity, missing)) {
-            PERMISSION_DENIED
-        } else {
-            PERMISSION_PERMANENTLY_DENIED
-        }
+    private fun missingPermission(context: Context): String? = when {
+        !hasForegroundLocation(context) -> Manifest.permission.ACCESS_FINE_LOCATION
+        !hasBackgroundLocation(context) -> Manifest.permission.ACCESS_BACKGROUND_LOCATION
+        else -> null
     }
 
     private fun getSsid(result: Result) {
@@ -387,6 +425,7 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         activityBinding = null
         activity = null
         if (cancelPermissionRequest) {
+            rationaleBeforeRequest = emptyMap()
             completePendingPermissionRequest(
                 "Activity detached before permission request completed",
             )
