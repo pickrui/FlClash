@@ -430,7 +430,7 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
   if (isDesktop && data.bypassPrivateRoute) {
     tun['route-exclude-address'] = [
       if (tun['route-exclude-address'] case final List routes) ...routes,
-      ...privateRouteAddress,
+      ...(tailnetRules.isEmpty ? privateRouteAddress : nonRoutableRouteAddress),
     ];
   }
   final existingFingerprint = rawConfig['global-client-fingerprint'];

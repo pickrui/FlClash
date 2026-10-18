@@ -152,6 +152,22 @@ const privateRouteAddress = [
   'ff00::/8',
 ];
 
+/// A tailnet's IPv6 peers and approved subnets sit in the private ranges.
+const nonRoutableRouteAddress = [
+  '0.0.0.0/8',
+  '127.0.0.0/8',
+  '169.254.0.0/16',
+  '224.0.0.0/4',
+  '255.255.255.255/32',
+  'fe80::/10',
+  'ff00::/8',
+];
+
+final _tailnetBypassRouteAddress = subtractCidrs(const [
+  '0.0.0.0/0',
+  '::/0',
+], nonRoutableRouteAddress);
+
 const defaultBypassPrivateRouteAddress = [
   '1.0.0.0/8',
   '2.0.0.0/7',
@@ -344,13 +360,25 @@ abstract class Tun with _$Tun {
 }
 
 extension TunExt on Tun {
-  List<String> resolveRouteAddress({required bool bypassPrivateRoute}) =>
-      bypassPrivateRoute ? defaultBypassPrivateRouteAddress : routeAddress;
+  List<String> resolveRouteAddress({
+    required bool bypassPrivateRoute,
+    bool keepTailnet = false,
+  }) => switch ((bypassPrivateRoute, keepTailnet)) {
+    (false, _) => routeAddress,
+    (true, false) => defaultBypassPrivateRouteAddress,
+    (true, true) => _tailnetBypassRouteAddress,
+  };
 
   /// The Android VPN routes: those the bypass switch selects, less
   /// [routeExcludeAddress].
-  List<String> vpnRouteAddress({required bool bypassPrivateRoute}) {
-    final routes = resolveRouteAddress(bypassPrivateRoute: bypassPrivateRoute);
+  List<String> vpnRouteAddress({
+    required bool bypassPrivateRoute,
+    bool keepTailnet = false,
+  }) {
+    final routes = resolveRouteAddress(
+      bypassPrivateRoute: bypassPrivateRoute,
+      keepTailnet: keepTailnet,
+    );
     return routeExcludeAddress.isEmpty
         ? routes
         : subtractCidrs(routes, routeExcludeAddress, wholeWhenEmpty: true);

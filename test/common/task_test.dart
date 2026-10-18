@@ -448,6 +448,36 @@ void main() {
       );
     }
 
+    test(
+      'keeps tailnet peers and subnets on the desktop TUN while bypassing',
+      () async {
+        final result = await makeRealProfileTask(
+          _makeRealProfileState().copyWith(
+            tailscaleNetworks: const [home],
+            tailscaleHostname: 'flclash-test',
+            realPatchConfig: const ClashConfig(tun: Tun(enable: true)),
+            bypassPrivateRoute: true,
+          ),
+        );
+        final excluded = result['tun']['route-exclude-address'] as List;
+        for (final peer in [
+          'fd7a:115c:a1e0::1',
+          '10.20.0.1',
+          '100.100.100.100',
+        ]) {
+          expect(
+            [
+              for (final cidr in excluded)
+                if (_covers(cidr as String, peer)) cidr,
+            ],
+            isEmpty,
+            reason: peer,
+          );
+        }
+        expect(excluded, contains('169.254.0.0/16'));
+      },
+    );
+
     test('leaves a profile without networks unchanged', () async {
       final result = await apply(const []);
       expect(result['rules'], ['GEOIP,private,DIRECT', 'MATCH,Proxy']);
