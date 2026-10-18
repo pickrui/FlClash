@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
-import 'package:fl_clash/common/shape.dart';
+import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/common/context.dart';
 
 import 'dialog.dart';

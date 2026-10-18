@@ -516,8 +516,8 @@ Widget generateSectionV2({
 }) {
   final genItems = items
       .map<Widget>((item) {
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(4),
+        return ClipRSuperellipse(
+          borderRadius: AppRadius.xs,
           child: CommonCard(
             type: CommonCardType.filled,
             radius: 0,
@@ -530,8 +530,8 @@ Widget generateSectionV2({
     children: [
       if (items.isNotEmpty && title != null)
         ListHeader(title: title, actions: actions),
-      ClipRRect(
-        borderRadius: BorderRadius.circular(18),
+      ClipRSuperellipse(
+        borderRadius: AppRadius.all(18),
         child: Column(children: [...genItems]),
       ),
     ],

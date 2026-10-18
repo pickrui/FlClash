@@ -16,6 +16,9 @@ abstract final class AppCorner {
   static const double lg = 20;
   static const double xl = 24;
   static const double xxl = 28;
+
+  /// UIAlertController's corner on iOS 27, rounder than a sheet's.
+  static const double alert = 34;
   static const double full = 1000;
 
   static double fit(double shortestSide) {
@@ -88,7 +91,9 @@ abstract final class AppShape {
   static const RoundedSuperellipseBorder xxl = RoundedSuperellipseBorder(
     borderRadius: AppRadius.xxl,
   );
-  static const StadiumBorder full = StadiumBorder();
+  static const RoundedSuperellipseBorder full = RoundedSuperellipseBorder(
+    borderRadius: AppRadius.full,
+  );
   static const CircleBorder circle = CircleBorder();
   static const AppInputBorder input = AppInputBorder();
 
@@ -204,7 +209,7 @@ class AppInputBorder extends InputBorder {
   }) {
     final outline = rect.deflate(borderSide.width / 2);
     if (gapStart == null || gapExtent <= 0.0 || gapPercentage == 0.0) {
-      _shape.paint(canvas, outline, textDirection: textDirection);
+      _shape.paint(canvas, rect, textDirection: textDirection);
       return;
     }
     final extent = lerpDouble(
@@ -231,7 +236,7 @@ class AppInputBorder extends InputBorder {
         ),
         clipOp: ClipOp.difference,
       );
-    _shape.paint(canvas, outline, textDirection: textDirection);
+    _shape.paint(canvas, rect, textDirection: textDirection);
     canvas.restore();
   }
 
@@ -253,11 +258,21 @@ class AppInputBorder extends InputBorder {
 extension AppShapeThemeExt on ThemeData {
   ThemeData get withAppShapes => copyWith(
     cardTheme: cardTheme.copyWith(shape: AppShape.md),
-    dialogTheme: dialogTheme.copyWith(shape: AppShape.xxl),
+    dialogTheme: dialogTheme.copyWith(shape: AppShape.all(AppCorner.alert)),
     bottomSheetTheme: bottomSheetTheme.copyWith(
       shape: AppShape.top(AppCorner.xxl),
     ),
     snackBarTheme: snackBarTheme.copyWith(shape: AppShape.xs),
+    tooltipTheme: tooltipTheme.copyWith(
+      // A decoration replaces Material's tooltip colours too, so restate them.
+      decoration: ShapeDecoration(
+        shape: AppShape.xs,
+        color: switch (brightness) {
+          Brightness.dark => Colors.white.withAlpha(230),
+          Brightness.light => Colors.grey[700]!.withAlpha(230),
+        },
+      ),
+    ),
     chipTheme: chipTheme.copyWith(shape: AppShape.sm),
     popupMenuTheme: popupMenuTheme.copyWith(shape: AppShape.md),
     menuTheme: MenuThemeData(
@@ -278,5 +293,22 @@ extension AppShapeThemeExt on ThemeData {
     progressIndicatorTheme: progressIndicatorTheme.copyWith(
       borderRadius: AppRadius.full,
     ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: filledButtonTheme.style?.merge(_pillButton) ?? _pillButton,
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: textButtonTheme.style?.merge(_pillButton) ?? _pillButton,
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: outlinedButtonTheme.style?.merge(_pillButton) ?? _pillButton,
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: elevatedButtonTheme.style?.merge(_pillButton) ?? _pillButton,
+    ),
+    iconButtonTheme: IconButtonThemeData(
+      style: iconButtonTheme.style?.merge(_pillButton) ?? _pillButton,
+    ),
   );
 }
+
+const _pillButton = ButtonStyle(shape: WidgetStatePropertyAll(AppShape.full));

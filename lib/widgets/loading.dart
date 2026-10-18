@@ -6,7 +6,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:fl_clash/common/shape.dart';
+import 'package:fl_clash/ui/shape.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_new_shapes/material_new_shapes.dart';
 import 'package:material_ui/material_ui.dart';
@@ -151,9 +151,9 @@ class _CommonCircleLoadingState extends State<CommonCircleLoading>
             label: widget.semanticLabel,
             value: widget.semanticValue,
             child: DecoratedBox(
-              decoration: BoxDecoration(
+              decoration: ShapeDecoration(
                 color: backgroundColor,
-                borderRadius: AppRadius.full,
+                shape: AppShape.full,
               ),
               child: Padding(
                 padding: padding,

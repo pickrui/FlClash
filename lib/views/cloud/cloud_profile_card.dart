@@ -32,7 +32,7 @@ class CloudProfileCard extends StatelessWidget {
             Row(
               children: [
                 InkWell(
-                  borderRadius: BorderRadius.circular(14),
+                  customBorder: AppShape.all(14),
                   onTap: () => globalState.openUrl(
                     'https://${Secrets.primarySiteDomain}/user',
                     confirm: false,

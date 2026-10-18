@@ -164,9 +164,9 @@ class _StorePaymentDialogState extends ConsumerState<StorePaymentDialog> {
             if (qrData != null && qrData.isNotEmpty) ...[
               Container(
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
+                decoration: ShapeDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
+                  shape: AppShape.all(12),
                 ),
                 child: QrImageView(
                   data: qrData,

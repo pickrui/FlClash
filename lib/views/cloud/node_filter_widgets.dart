@@ -87,10 +87,7 @@ class NodeFilterChoiceChip extends StatelessWidget {
         l10n.nodeFilterExclude,
       ),
     };
-    final shape = RoundedRectangleBorder(
-      borderRadius: AppRadius.sm,
-      side: BorderSide(color: border),
-    );
+    final shape = AppShape.sm.copyWith(side: BorderSide(color: border));
     final textStyle =
         (dense ? context.textTheme.labelMedium : context.textTheme.labelLarge)
             ?.copyWith(

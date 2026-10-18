@@ -468,7 +468,7 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
       button: true,
       enabled: !_saving,
       child: InkWell(
-        borderRadius: BorderRadius.circular(4),
+        customBorder: AppShape.xs,
         onTap: _saving
             ? null
             : () async {

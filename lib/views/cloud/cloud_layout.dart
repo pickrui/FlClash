@@ -37,9 +37,9 @@ class CloudIconTile extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
+      decoration: ShapeDecoration(
         color: context.colorScheme.primaryContainer,
-        borderRadius: BorderRadius.circular(size * 0.28),
+        shape: AppShape.all(size * 0.28),
       ),
       child: Icon(
         icon,

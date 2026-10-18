@@ -6,7 +6,7 @@
 import 'dart:math';
 
 import 'package:fl_clash/common/context.dart';
-import 'package:fl_clash/common/shape.dart';
+import 'package:fl_clash/ui/shape.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:material_color_utilities/hct/hct.dart';
 

@@ -7,7 +7,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:fl_clash/common/theme.dart';
-import 'package:fl_clash/common/shape.dart';
+import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/overwrite/custom_rule_editor.dart';
 import 'package:fl_clash/features/overwrite/member_picker.dart';

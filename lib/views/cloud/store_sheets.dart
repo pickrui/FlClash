@@ -406,8 +406,7 @@ class StorePaymentOptionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = context.colorScheme;
-    final shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
+    final shape = AppShape.all(12).copyWith(
       side: BorderSide(
         color: selected ? scheme.primary : scheme.outlineVariant,
         width: selected ? 1.5 : 1,

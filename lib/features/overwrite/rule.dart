@@ -333,7 +333,7 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
                   button: true,
                   child: InkWell(
                     key: const Key('added-rule-target'),
-                    borderRadius: AppShape.input.borderRadius,
+                    customBorder: AppShape.of(AppShape.input.borderRadius),
                     onTap: () async {
                       FocusScope.of(context).unfocus();
                       final selected = await showOverwriteSheet<String>(

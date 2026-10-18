@@ -54,7 +54,7 @@ export 'yaml.dart';
 export 'secrets.dart';
 export 'oix_params_storage.dart';
 
-export 'shape.dart';
+export 'package:fl_clash/ui/shape.dart';
 
 export 'window_port.dart';
 export 'window_layout.dart';

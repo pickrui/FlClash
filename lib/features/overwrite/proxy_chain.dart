@@ -197,10 +197,7 @@ class ProxyChainRoleBadge extends StatelessWidget {
     return Container(
       constraints: const BoxConstraints(minWidth: 42),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(999),
-      ),
+      decoration: ShapeDecoration(color: color, shape: AppShape.full),
       child: Text(
         _getProxyChainRoleLabel(index, totalLength),
         textAlign: TextAlign.center,
@@ -278,15 +275,16 @@ class _ProxyChainPathChip extends StatelessWidget {
     return Container(
       constraints: const BoxConstraints(maxWidth: 220),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(999),
+      decoration: ShapeDecoration(
         color: isRole
             ? roleColor.opacity15
             : context.colorScheme.surfaceContainerHighest,
-        border: Border.all(
-          color: isRole
-              ? roleColor.opacity80
-              : context.colorScheme.outlineVariant,
+        shape: AppShape.full.copyWith(
+          side: BorderSide(
+            color: isRole
+                ? roleColor.opacity80
+                : context.colorScheme.outlineVariant,
+          ),
         ),
       ),
       child: Row(

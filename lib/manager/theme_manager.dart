@@ -53,49 +53,36 @@ ThemeData watchAppTheme(WidgetRef ref, Brightness brightness) {
   return theme;
 }
 
+const _clickCursor = WidgetStatePropertyAll(SystemMouseCursors.click);
+const _clickButton = ButtonStyle(mouseCursor: _clickCursor);
+
+ButtonStyle _clickable(ButtonStyle? style) =>
+    style?.merge(_clickButton) ?? _clickButton;
+
 ThemeData _withAppControls(ThemeData theme) {
-  return theme.withAppShapes.copyWith(
-    listTileTheme: const ListTileThemeData(
-      mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
+  final shaped = theme.withAppShapes;
+  return shaped.copyWith(
+    listTileTheme: shaped.listTileTheme.copyWith(mouseCursor: _clickCursor),
+    checkboxTheme: shaped.checkboxTheme.copyWith(mouseCursor: _clickCursor),
+    radioTheme: shaped.radioTheme.copyWith(mouseCursor: _clickCursor),
+    switchTheme: shaped.switchTheme.copyWith(mouseCursor: _clickCursor),
+    sliderTheme: shaped.sliderTheme.copyWith(mouseCursor: _clickCursor),
+    textButtonTheme: TextButtonThemeData(
+      style: _clickable(shaped.textButtonTheme.style),
     ),
-    checkboxTheme: const CheckboxThemeData(
-      mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
+    filledButtonTheme: FilledButtonThemeData(
+      style: _clickable(shaped.filledButtonTheme.style),
     ),
-    radioTheme: const RadioThemeData(
-      mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: _clickable(shaped.elevatedButtonTheme.style),
     ),
-    switchTheme: const SwitchThemeData(
-      mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: _clickable(shaped.outlinedButtonTheme.style),
     ),
-    sliderTheme: const SliderThemeData(
-      mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
+    iconButtonTheme: IconButtonThemeData(
+      style: _clickable(shaped.iconButtonTheme.style),
     ),
-    textButtonTheme: const TextButtonThemeData(
-      style: ButtonStyle(
-        mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
-      ),
-    ),
-    filledButtonTheme: const FilledButtonThemeData(
-      style: ButtonStyle(
-        mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
-      ),
-    ),
-    elevatedButtonTheme: const ElevatedButtonThemeData(
-      style: ButtonStyle(
-        mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
-      ),
-    ),
-    outlinedButtonTheme: const OutlinedButtonThemeData(
-      style: ButtonStyle(
-        mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
-      ),
-    ),
-    iconButtonTheme: const IconButtonThemeData(
-      style: ButtonStyle(
-        mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
-      ),
-    ),
-    navigationBarTheme: const NavigationBarThemeData(
+    navigationBarTheme: shaped.navigationBarTheme.copyWith(
       labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
     ),
   );

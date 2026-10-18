@@ -7,6 +7,7 @@ import 'package:fl_clash/manager/theme_manager.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/ui/shape.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -45,6 +46,33 @@ void main() {
     expect(themes, hasLength(3));
     expect(themes[1], same(themes[0]));
     expect(themes[2], isNot(same(themes[1])));
+  });
+
+  testWidgets('the app theme keeps pill buttons alongside the click cursor', (
+    tester,
+  ) async {
+    late ThemeData theme;
+    await tester.pumpWidget(
+      ProviderScope(
+        child: Consumer(
+          builder: (_, ref, _) {
+            theme = watchAppTheme(ref, Brightness.light);
+            return const SizedBox.shrink();
+          },
+        ),
+      ),
+    );
+
+    for (final style in [
+      theme.textButtonTheme.style,
+      theme.filledButtonTheme.style,
+      theme.outlinedButtonTheme.style,
+      theme.elevatedButtonTheme.style,
+      theme.iconButtonTheme.style,
+    ]) {
+      expect(style?.shape?.resolve({}), AppShape.full);
+      expect(style?.mouseCursor?.resolve({}), SystemMouseCursors.click);
+    }
   });
 
   testWidgets('a keyboard frame reaches the page without rebuilding the '

@@ -299,9 +299,9 @@ class _StatusBadge extends StatelessWidget {
           );
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
+      decoration: ShapeDecoration(
         color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(12),
+        shape: AppShape.all(12),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
