@@ -121,8 +121,9 @@ static void my_application_before_emit(GApplication* application, GVariant* plat
 }
 
 // Implements GApplication::after_emit. A relaunch reaches the primary as a
-// command-line signal that the gtk plugin consumes first, so the window is
-// raised here, while the launcher's activation token is still current.
+// command-line signal whose activate returns early on the existing window, so
+// the window is raised here, while the launcher's activation token is still
+// current.
 static void my_application_after_emit(GApplication* application, GVariant* platform_data) {
   MyApplication* self = MY_APPLICATION(application);
   if (self->had_window_before_emit) {
