@@ -15,6 +15,7 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/features/overwrite/proxy_chain.dart';
 import 'package:fl_clash/views/profiles/overwrite.dart';
+import 'package:fl_clash/ui/sortable.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
@@ -115,12 +116,8 @@ class _ProfilesViewState extends State<ProfilesView> {
               onPressed: () {
                 showSheet(
                   context: context,
-                  builder: (_, type) {
-                    return ReorderableProfilesSheet(
-                      type: type,
-                      profiles: profiles,
-                    );
-                  },
+                  builder: (_, _) =>
+                      ReorderableProfilesSheet(profiles: profiles),
                 );
               },
               glyph: AppGlyphs.sort,
@@ -541,13 +538,8 @@ class ProfileItem extends StatelessWidget {
 
 class ReorderableProfilesSheet extends ConsumerStatefulWidget {
   final List<Profile> profiles;
-  final SheetType type;
 
-  const ReorderableProfilesSheet({
-    super.key,
-    required this.profiles,
-    required this.type,
-  });
+  const ReorderableProfilesSheet({super.key, required this.profiles});
 
   @override
   ConsumerState<ReorderableProfilesSheet> createState() =>
@@ -569,12 +561,10 @@ class _ReorderableProfilesSheetState
     return ItemPositionProvider(
       key: Key(profile.id.toString()),
       position: ItemPosition.get(index, profiles.length),
-      child: ReorderableDelayedDragStartListener(
-        index: index,
-        child: DecorationListItem(
-          trailing: const GlyphIcon(AppGlyphs.dragHandle),
-          title: Text(profile.realLabel),
-        ),
+      child: DecorationListItem(
+        contentPadding: const EdgeInsets.only(left: 16),
+        trailing: SortHandle(index: index),
+        title: Text(profile.realLabel),
       ),
     );
   }
@@ -595,22 +585,18 @@ class _ReorderableProfilesSheetState
 
   @override
   Widget build(BuildContext context) {
-    return AdaptiveSheetScaffold(
-      type: widget.type,
-      actions: [
-        AppBarActionButton(
-          data: IconButtonData(
-            glyph: AppGlyphs.check,
-            onPressed: _handleSave,
-            tooltip: context.appLocalizations.save,
-          ),
-        ),
-      ],
+    return CommonScaffold(
+      confirmationAction: IconButtonData(
+        glyph: AppGlyphs.check,
+        onPressed: _handleSave,
+        tooltip: context.appLocalizations.save,
+      ),
       body: Padding(
-        padding: const EdgeInsets.only(bottom: 32, top: 12),
+        padding: const EdgeInsets.only(bottom: 32),
         child: ReorderableListView.builder(
           buildDefaultDragHandles: false,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 16)
+              .copyWith(top: context.contentTopPadding),
           proxyDecorator: (child, index, animation) {
             return commonProxyDecorator(_buildItem(index), index, animation);
           },

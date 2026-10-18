@@ -383,10 +383,7 @@ void main() {
         ),
         profileActionProvider.overrideWith(() => action),
       ],
-      () => const ReorderableProfilesSheet(
-        type: SheetType.page,
-        profiles: [_first, _second, _third],
-      ),
+      () => const ReorderableProfilesSheet(profiles: [_first, _second, _third]),
     );
 
     tester
