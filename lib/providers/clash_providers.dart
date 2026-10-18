@@ -318,8 +318,18 @@ class ClashProviderLibrary {
   Future<void> _rename(ClashProvider previous, ClashProvider next) async {
     final usage = await _usage(previous, renamedTo: next);
     for (final profile in usage.profiles.keys) {
+      final options = profile.overrides.proxyProviders;
       await database.putProfile(
         profile.copyWith(
+          overrides: previous.kind == ProviderKind.proxy
+              ? profile.overrides.copyWith(
+                  proxyProviders: {
+                    for (final MapEntry(:key, :value) in options.entries)
+                      if (key != previous.label) key: value,
+                    next.label: ?options[previous.label],
+                  },
+                )
+              : profile.overrides,
           customProxyGroups: [
             for (final group in profile.customProxyGroups)
               if (previous.kind == ProviderKind.proxy && group.use != null)

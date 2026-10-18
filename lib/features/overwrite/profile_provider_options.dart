@@ -11,7 +11,8 @@ import 'overwrite_sheet.dart';
 
 const _ipVersions = ['dual', 'ipv4', 'ipv6', 'ipv4-prefer', 'ipv6-prefer'];
 
-/// Edits how a custom profile reads another profile as a proxy provider.
+/// Edits how a custom profile reads a proxy provider: another profile or one
+/// from the provider library.
 class ProfileProviderOptionsDialog extends StatefulWidget {
   final String label;
   final ProxyProviderOptions options;

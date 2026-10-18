@@ -571,6 +571,9 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
       profilesPath,
       referencedOnly: true,
       implicitReferences: !data.customProfile,
+      proxyOptions: data.customProfile
+          ? data.overrides.proxyProviders
+          : const {},
     ),
     data.profileProviders,
   );
@@ -599,12 +602,14 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
 }
 
 /// Without [implicitReferences], include-all pulls in no unnamed provider.
+/// [proxyOptions] are a custom profile's options for the proxy providers.
 Map<String, dynamic> withLibraryProviders(
   Map<String, dynamic> source,
   Iterable<ClashProvider> providers,
   String profilesPath, {
   bool referencedOnly = false,
   bool implicitReferences = true,
+  Map<String, ProxyProviderOptions> proxyOptions = const {},
 }) {
   final result = Map<String, dynamic>.from(source);
   final groups = source['proxy-groups'] is List
@@ -633,15 +638,19 @@ Map<String, dynamic> withLibraryProviders(
         ? Map<String, dynamic>.from(result[provider.section] as Map)
         : <String, dynamic>{};
     if (section.containsKey(provider.label)) continue;
-    section[provider.label] = provider.definition(
-      join(
-        profilesPath,
-        'providers',
-        'app',
-        provider.kind.name,
-        provider.cacheKey,
+    section[provider.label] = {
+      ...provider.definition(
+        join(
+          profilesPath,
+          'providers',
+          'app',
+          provider.kind.name,
+          provider.cacheKey,
+        ),
       ),
-    );
+      if (provider.kind == ProviderKind.proxy)
+        ...?proxyOptions[provider.label]?.definition,
+    };
     result[provider.section] = section;
   }
   return result;

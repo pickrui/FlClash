@@ -122,10 +122,19 @@ void main() {
         customProxyGroups: const [
           ProxyGroup(name: 'All', type: GroupType.Selector, use: ['Nodes']),
         ],
+        overrides: const ProfileOverrides(
+          proxyProviders: {'Nodes': ProxyProviderOptions(filter: 'HK')},
+        ),
       ),
     );
 
     await expectLater(library.remove(nodes), fails('inUse'));
+    await library.save(nodes.copyWith(label: 'Renamed'), previous: nodes);
+    final renamed = await db.profilesDao.all().getSingle();
+    expect(renamed.customProxyGroups.single.use, ['Renamed']);
+    expect(renamed.overrides.proxyProviders, {
+      'Renamed': const ProxyProviderOptions(filter: 'HK'),
+    });
   });
 
   test('rename updates snapshots, normalized custom rules and global added rules together', () async {
@@ -414,6 +423,14 @@ void main() {
       ),
       true,
     );
+    final withOptions = withLibraryProviders(
+      {'proxy-groups': raw['proxy-groups']},
+      [proxy],
+      '/fixture',
+      referencedOnly: true,
+      proxyOptions: {'Nodes': const ProxyProviderOptions(filter: 'HK')},
+    );
+    expect(withOptions['proxy-providers']['Nodes']['filter'], 'HK');
   });
 
   test(

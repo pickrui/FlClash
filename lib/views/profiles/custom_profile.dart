@@ -248,16 +248,14 @@ class _ProfileProviders extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(profileProvider(profileId));
     final profiles = ref.watch(profilesProvider);
-    final ids = profileProviderIds(
-      profiles,
-      reserved: libraryProxyProviderLabels(
-        ref.watch(clashProvidersProvider).value ?? const [],
-      ),
+    final library = libraryProxyProviderLabels(
+      ref.watch(clashProvidersProvider).value ?? const [],
     );
+    final ids = profileProviderIds(profiles, reserved: library);
     final used = {
       for (final group in profile?.customProxyGroups ?? const <ProxyGroup>[])
         for (final name in group.use ?? const <String>[])
-          if (ids.containsKey(name)) name,
+          if (ids.containsKey(name) || library.contains(name)) name,
     };
     if (profile == null || used.isEmpty) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
@@ -274,7 +272,9 @@ class _ProfileProviders extends ConsumerWidget {
                 leading: const GlyphIcon(AppGlyphs.layers),
                 title: Text(label),
                 subtitle: Text(
-                  profiles.getProfile(ids[label])?.type == ProfileType.url
+                  library.contains(label)
+                      ? appLocalizations.providerSourceApp
+                      : profiles.getProfile(ids[label])?.type == ProfileType.url
                       ? appLocalizations.providerSourceSubscription
                       : appLocalizations.providerSourceProfile,
                 ),
