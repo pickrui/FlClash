@@ -2115,9 +2115,19 @@ class AppLocalizations {
     return Intl.message('No data', name: 'noData', desc: '', args: []);
   }
 
-  /// `FontFamily`
+  /// `Font family`
   String get fontFamily {
-    return Intl.message('FontFamily', name: 'fontFamily', desc: '', args: []);
+    return Intl.message('Font family', name: 'fontFamily', desc: '', args: []);
+  }
+
+  /// `Installed fonts`
+  String get installedFonts {
+    return Intl.message(
+      'Installed fonts',
+      name: 'installedFonts',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Toggle`

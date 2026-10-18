@@ -13,8 +13,11 @@ import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
+import 'package:fl_clash/ui/open_container.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/typography.dart';
+import 'package:fl_clash/ui/view_scope.dart';
+import 'package:fl_clash/views/font_family.dart';
 import 'package:fl_clash/views/theme_preview.dart';
 import 'package:fl_clash/widgets/navigation_dock.dart';
 import 'package:fl_clash/widgets/widgets.dart';
@@ -47,6 +50,8 @@ class ThemeView extends StatelessWidget {
           _LiquidGlassItem(),
           SizedBox(height: 16),
           _SidebarBlurItem(),
+          _FontFamilyItem(),
+          SizedBox(height: 16),
           _TextScaleFactorItem(),
         ],
       ),
@@ -817,6 +822,82 @@ class _SidebarBlurItem extends ConsumerWidget {
               .update((state) => state.copyWith(sidebarBlur: value));
         },
       ),
+    );
+  }
+}
+
+class _FontFamilyItem extends ConsumerWidget {
+  const _FontFamilyItem();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    final colorScheme = context.colorScheme;
+    final fontFamily = ref.watch(
+      themeSettingProvider.select((state) => state.fontFamily),
+    );
+    final preview = Padding(
+      padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+      child: Row(
+        spacing: 12,
+        children: [
+          Text(
+            'Aa',
+            style: AppTextStyle.headline
+                .of(context)
+                .copyWith(fontFamily: fontFamily),
+          ),
+          Expanded(
+            child: Text(
+              fontFamily ?? appLocalizations.defaultText,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyle.subheadline
+                  .of(context)
+                  .copyWith(
+                    fontFamily: fontFamily,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+            ),
+          ),
+          GlyphIcon(
+            AppGlyphs.chevronForward,
+            size: 20,
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ],
+      ),
+    );
+    final cardColor = context.raisedSurfaceLevel.colorOf(colorScheme);
+    Widget card(VoidCallback onTap) => Material(
+      color: cardColor,
+      shape: AppShape.lg,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(customBorder: AppShape.lg, onTap: onTap, child: preview),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        InfoHeader(
+          info: Info(label: appLocalizations.fontFamily, glyph: AppGlyphs.font),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: ViewScope.isMobileOf(context)
+              ? OpenContainer<void>(
+                  closedShape: AppShape.lg,
+                  closedColor: cardColor,
+                  closedBuilder: (_, open) => card(open),
+                  openBuilder: (_, _) => const FontFamilyView(),
+                )
+              : card(
+                  () => showSheet<void>(
+                    context: context,
+                    builder: (_, _) => const FontFamilyView(),
+                  ),
+                ),
+        ),
+      ],
     );
   }
 }

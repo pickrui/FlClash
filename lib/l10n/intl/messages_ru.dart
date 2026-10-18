@@ -1495,7 +1495,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "followProfile": MessageLookupByLibrary.simpleMessage("Как в профиле"),
     "followSystem": MessageLookupByLibrary.simpleMessage("Как в системе"),
-    "fontFamily": MessageLookupByLibrary.simpleMessage("Семейство шрифтов"),
+    "fontFamily": MessageLookupByLibrary.simpleMessage("Шрифт"),
     "fontSize": MessageLookupByLibrary.simpleMessage("Размер"),
     "forceDnsMapping": MessageLookupByLibrary.simpleMessage(
       "Принудительно для DNS-сопоставлений",
@@ -1712,6 +1712,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "installedAppsPermissionRequired": MessageLookupByLibrary.simpleMessage(
       "Нужно разрешение на доступ к списку приложений",
+    ),
+    "installedFonts": MessageLookupByLibrary.simpleMessage(
+      "Установленные шрифты",
     ),
     "insufficientBalanceHint": MessageLookupByLibrary.simpleMessage(
       "Недостаточно средств. Пополните баланс, чтобы продолжить.",

@@ -276,6 +276,7 @@
   "icon": "图片",
   "noData": "暂无数据",
   "fontFamily": "字体",
+  "installedFonts": "已安装字体",
   "toggle": "切换",
   "system": "系统",
   "bypassPrivateRoute": "绕过私有路由地址",

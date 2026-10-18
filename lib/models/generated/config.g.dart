@@ -375,6 +375,7 @@ _ThemeProps _$ThemePropsFromJson(Map<String, dynamic> json) => _ThemeProps(
   textScale: json['textScale'] == null
       ? const TextScale()
       : TextScale.fromJson(json['textScale'] as Map<String, dynamic>),
+  fontFamily: json['systemFontFamily'] as String?,
 );
 
 Map<String, dynamic> _$ThemePropsToJson(_ThemeProps instance) =>
@@ -387,6 +388,7 @@ Map<String, dynamic> _$ThemePropsToJson(_ThemeProps instance) =>
       'sidebarBlur': instance.sidebarBlur,
       'liquidGlass': _$LiquidGlassModeEnumMap[instance.liquidGlass]!,
       'textScale': instance.textScale,
+      'systemFontFamily': instance.fontFamily,
     };
 
 const _$ThemeModeEnumMap = {

@@ -38,9 +38,12 @@ final _appThemes = <Brightness, ({Object inputs, ThemeData theme})>{};
 
 ThemeData watchAppTheme(WidgetRef ref, Brightness brightness) {
   final locale = ref.watch(appSettingProvider.select((state) => state.locale));
-  final pureBlack =
-      brightness == Brightness.dark &&
-      ref.watch(themeSettingProvider.select((state) => state.pureBlack));
+  final themeSetting = ref.watch(
+    themeSettingProvider.select(
+      (state) => (fontFamily: state.fontFamily, pureBlack: state.pureBlack),
+    ),
+  );
+  final pureBlack = brightness == Brightness.dark && themeSetting.pureBlack;
   final colorScheme = ref.watch(genColorSchemeProvider(brightness));
   final plainDark = pureBlack
       ? ref.watch(genColorSchemeProvider(brightness, pureBlack: false))
@@ -51,6 +54,7 @@ ThemeData watchAppTheme(WidgetRef ref, Brightness brightness) {
   ];
   final inputs = (
     platform: defaultTargetPlatform,
+    fontFamily: themeSetting.fontFamily,
     colorScheme: colorScheme,
     plainDark: plainDark,
     locales: locales.join(','),
@@ -64,9 +68,11 @@ ThemeData watchAppTheme(WidgetRef ref, Brightness brightness) {
       useMaterial3: true,
       pageTransitionsTheme: _pageTransitionsTheme,
       colorScheme: colorScheme,
+      fontFamily: themeSetting.fontFamily,
       fontFamilyFallback: appFontFamilyFallback(
         platform: defaultTargetPlatform,
         locales: locales,
+        fontFamily: themeSetting.fontFamily,
       ),
       extensions: [
         if (brightness == Brightness.dark)

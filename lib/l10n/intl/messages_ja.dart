@@ -1206,7 +1206,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "followProfile": MessageLookupByLibrary.simpleMessage("プロファイルに従う"),
     "followSystem": MessageLookupByLibrary.simpleMessage("システムに従う"),
-    "fontFamily": MessageLookupByLibrary.simpleMessage("フォントファミリー"),
+    "fontFamily": MessageLookupByLibrary.simpleMessage("フォント"),
     "fontSize": MessageLookupByLibrary.simpleMessage("サイズ"),
     "forceDnsMapping": MessageLookupByLibrary.simpleMessage("DNSマッピングを強制"),
     "forceDnsMappingDesc": MessageLookupByLibrary.simpleMessage(
@@ -1393,6 +1393,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "installedAppsPermissionRequired": MessageLookupByLibrary.simpleMessage(
       "アプリ一覧へのアクセス許可が必要です",
     ),
+    "installedFonts": MessageLookupByLibrary.simpleMessage("インストール済みのフォント"),
     "insufficientBalanceHint": MessageLookupByLibrary.simpleMessage(
       "残高が不足しています。チャージしてから続行してください",
     ),

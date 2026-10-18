@@ -1441,7 +1441,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "followProfile": MessageLookupByLibrary.simpleMessage("Follow profile"),
     "followSystem": MessageLookupByLibrary.simpleMessage("Follow system"),
-    "fontFamily": MessageLookupByLibrary.simpleMessage("FontFamily"),
+    "fontFamily": MessageLookupByLibrary.simpleMessage("Font family"),
     "fontSize": MessageLookupByLibrary.simpleMessage("Size"),
     "forceDnsMapping": MessageLookupByLibrary.simpleMessage(
       "Force DNS mapping",
@@ -1654,6 +1654,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "installedAppsPermissionRequired": MessageLookupByLibrary.simpleMessage(
       "Installed apps permission required",
     ),
+    "installedFonts": MessageLookupByLibrary.simpleMessage("Installed fonts"),
     "insufficientBalanceHint": MessageLookupByLibrary.simpleMessage(
       "Insufficient balance. Top up before continuing.",
     ),

@@ -1227,6 +1227,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "installedAppsPermissionRequired": MessageLookupByLibrary.simpleMessage(
       "需要读取应用列表的权限",
     ),
+    "installedFonts": MessageLookupByLibrary.simpleMessage("已安装字体"),
     "insufficientBalanceHint": MessageLookupByLibrary.simpleMessage(
       "余额不足，请先充值后再继续",
     ),

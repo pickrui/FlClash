@@ -337,6 +337,9 @@ abstract class ThemeProps with _$ThemeProps {
     @Default(true) bool sidebarBlur,
     @Default(LiquidGlassMode.none) LiquidGlassMode liquidGlass,
     @Default(TextScale()) TextScale textScale,
+    // `fontFamily` held the names of a removed enum, which old configs may
+    // still carry.
+    @JsonKey(name: 'systemFontFamily') String? fontFamily,
   }) = _ThemeProps;
 
   factory ThemeProps.fromJson(Map<String, Object?> json) =>
