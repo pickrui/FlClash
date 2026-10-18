@@ -210,7 +210,8 @@ class _RenderListRowSeparator extends RenderProxyBox {
     }
     final states = _states.value;
     return states.contains(WidgetState.pressed) ||
-        (states.contains(WidgetState.focused) && _remote);
+        (states.contains(WidgetState.focused) &&
+            (_remote || FocusMovedByKey.instance.value));
   }
 
   void _updateHighlighted() {
@@ -262,6 +263,7 @@ class _RenderListRowSeparator extends RenderProxyBox {
   void attach(PipelineOwner owner) {
     super.attach(owner);
     _states.addListener(_updateHighlighted);
+    FocusMovedByKey.instance.addListener(_updateHighlighted);
     _highlighted = _resolveHighlighted();
     _PixelRealignment.watch(this);
   }
@@ -270,6 +272,7 @@ class _RenderListRowSeparator extends RenderProxyBox {
   void detach() {
     _PixelRealignment.unwatch(this);
     _states.removeListener(_updateHighlighted);
+    FocusMovedByKey.instance.removeListener(_updateHighlighted);
     super.detach();
   }
 
