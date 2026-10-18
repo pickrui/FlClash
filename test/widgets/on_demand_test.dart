@@ -135,7 +135,7 @@ void main() {
   });
 
   testWidgets(
-    'inline SSIDs preserve edit order and support selection deletion',
+    'inline SSIDs keep their order and select from the section header',
     (tester) async {
       final c = ProviderContainer(
         overrides: [
@@ -175,15 +175,20 @@ void main() {
         'Office',
         'House',
       ]);
+      expect(find.byTooltip('Add'), findsOneWidget);
+      expect(find.byTooltip('Select all'), findsNothing);
       tester
           .widget<SelectedDecorationListItem>(
             find.byType(SelectedDecorationListItem).first,
           )
           .onSelected();
       await tester.pumpAndSettle();
+      expect(find.byTooltip('Select all'), findsOneWidget);
+      expect(find.byTooltip('Add'), findsNothing);
       await tester.tap(find.byTooltip('Delete'));
       await tester.pumpAndSettle();
       expect(c.read(networkSettingProvider).excludeSSIDs, ['Office', 'House']);
+      expect(find.byTooltip('Add'), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );

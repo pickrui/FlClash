@@ -821,12 +821,6 @@ class _OnDemandViewState extends ConsumerState<OnDemandView> {
     final editing = selected.isNotEmpty;
     return CommonScaffold(
       title: l.onDemand,
-      editState: editing
-          ? AppBarEditState(
-              editCount: selected.length,
-              onExit: () => setState(_selected.clear),
-            )
-          : null,
       body: CustomScrollView(
         slivers: [
           SliverPadding(
@@ -849,30 +843,31 @@ class _OnDemandViewState extends ConsumerState<OnDemandView> {
                     ),
                   ListHeader(
                     title: l.excludeSsids,
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      spacing: appBarActionSpace,
-                      children: [
-                        if (editing)
-                          IconButton.filledTonal(
-                            tooltip: l.delete,
-                            onPressed: _deleteSelected,
-                            icon: const GlyphIcon(AppGlyphs.delete),
-                          ),
-                        FilledButton.tonal(
-                          onPressed: editing
-                              ? () => setState(() {
-                                  if (selected.length == ssids.length) {
-                                    _selected.clear();
-                                  } else {
-                                    _selected.addAll(ssids);
-                                  }
-                                })
-                              : _edit,
-                          child: Text(editing ? l.selectAll : l.add),
+                    actions: [
+                      if (editing) ...[
+                        IconButtonData(
+                          glyph: AppGlyphs.delete,
+                          tooltip: l.delete,
+                          onPressed: _deleteSelected,
                         ),
-                      ],
-                    ),
+                        IconButtonData(
+                          glyph: AppGlyphs.selectAll,
+                          tooltip: l.selectAll,
+                          onPressed: () => setState(() {
+                            if (selected.length == ssids.length) {
+                              _selected.clear();
+                            } else {
+                              _selected.addAll(ssids);
+                            }
+                          }),
+                        ),
+                      ] else
+                        IconButtonData(
+                          glyph: AppGlyphs.addCircle,
+                          tooltip: l.add,
+                          onPressed: _edit,
+                        ),
+                    ],
                   ),
                   ListFooter(text: l.excludeSsidsDesc),
                 ],
