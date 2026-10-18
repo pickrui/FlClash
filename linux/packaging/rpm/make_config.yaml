@@ -30,6 +30,7 @@ generic_name: FlClash
 group: Applications/Internet
 
 startup_notify: true
+startup_wm_class: com.oixcloud.clash
 postinstall_scripts:
   - |
     set -eu

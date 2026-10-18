@@ -90,6 +90,20 @@ void main() {
     );
   }
 
+  test('every Linux package names the GTK application id as its window '
+      'class', () {
+    final applicationId = RegExp(r'set\(APPLICATION_ID "([^"]+)"\)')
+        .firstMatch(File('linux/CMakeLists.txt').readAsStringSync())!
+        .group(1);
+
+    for (final format in ['deb', 'rpm', 'appimage']) {
+      final config = loadYaml(
+        File('linux/packaging/$format/make_config.yaml').readAsStringSync(),
+      ) as YamlMap;
+      expect(config['startup_wm_class'], applicationId, reason: format);
+    }
+  });
+
   test('the rpm does not require a JVM for the unused JNI library', () {
     final config = loadYaml(
       File('linux/packaging/rpm/make_config.yaml').readAsStringSync(),

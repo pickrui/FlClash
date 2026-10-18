@@ -26,6 +26,7 @@ categories:
   - Network
 
 startup_notify: true
+startup_wm_class: com.oixcloud.clash
 
 
 postinstall_scripts:
