@@ -8,7 +8,15 @@
 
 package main
 
-import "golang.org/x/sys/unix"
+import (
+	"reflect"
 
-func setTestStatMode(stat *unix.Stat_t, value uint16)  { stat.Mode = uint32(value) }
-func setTestStatLinks(stat *unix.Stat_t, value uint64) { stat.Nlink = value }
+	"golang.org/x/sys/unix"
+)
+
+func setTestStatMode(stat *unix.Stat_t, value uint16) { stat.Mode = uint32(value) }
+
+// Nlink is uint64 on linux/amd64 but uint32 on arm64 and the 32-bit ports.
+func setTestStatLinks(stat *unix.Stat_t, value uint64) {
+	reflect.ValueOf(&stat.Nlink).Elem().SetUint(value)
+}
