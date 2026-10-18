@@ -11,7 +11,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
-import 'inherited.dart';
+import 'package:fl_clash/ui/inherited.dart';
 
 class SheetDragHandle extends StatelessWidget {
   const SheetDragHandle({super.key});

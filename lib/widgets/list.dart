@@ -10,7 +10,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/open_container.dart';
-import 'package:fl_clash/widgets/inherited.dart';
+import 'package:fl_clash/ui/inherited.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 

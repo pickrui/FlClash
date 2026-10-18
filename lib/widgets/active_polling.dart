@@ -8,7 +8,7 @@ import 'dart:async';
 import 'package:fl_clash/common/periodic_task_runner.dart';
 import 'package:fl_clash/common/print.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/widgets/inherited.dart';
+import 'package:fl_clash/ui/inherited.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 

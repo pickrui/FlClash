@@ -15,10 +15,9 @@ import 'package:fl_clash/ui/surface.dart';
 import 'snap_sheet.dart';
 
 import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/widgets/inherited.dart';
+import 'package:fl_clash/ui/inherited.dart';
 import 'package:material_ui/material_ui.dart';
 
-import 'package:fl_clash/enum/enum.dart';
 export 'package:fl_clash/enum/enum.dart' show SheetType;
 
 import 'scaffold.dart';

@@ -6,8 +6,7 @@
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/state.dart';
 import 'package:fl_clash/common/constant.dart';
-import 'package:fl_clash/widgets/inherited.dart';
-import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/ui/inherited.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// The state [BuildContextExtension.showNotifier] hands its messages to.

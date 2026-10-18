@@ -17,7 +17,7 @@ import 'package:flutter/services.dart';
 
 import 'button.dart';
 import 'chip.dart';
-import 'inherited.dart';
+import 'package:fl_clash/ui/inherited.dart';
 import 'loading.dart';
 import 'navigation_dock.dart';
 import 'popup.dart';

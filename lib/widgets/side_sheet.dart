@@ -12,7 +12,7 @@ import 'package:fl_clash/ui/surface.dart';
 
 import 'package:fl_clash/ui/color.dart';
 
-import 'inherited.dart';
+import 'package:fl_clash/ui/inherited.dart';
 
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';

@@ -14,8 +14,7 @@ import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:material_ui/material_ui.dart';
 
-import 'inherited.dart';
-import 'sheet.dart';
+import 'package:fl_clash/ui/inherited.dart';
 
 typedef SnapSheetBuilder = Widget Function(
   BuildContext context,

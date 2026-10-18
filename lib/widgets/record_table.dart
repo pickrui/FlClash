@@ -14,7 +14,7 @@ import 'package:fl_clash/ui/table_layout.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
-import 'inherited.dart';
+import 'package:fl_clash/ui/inherited.dart';
 
 const _recordTableMinWidth = 720.0;
 const recordWideTableWidth = 1000.0;

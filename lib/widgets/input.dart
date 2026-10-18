@@ -14,7 +14,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'entry_dialog.dart';
-import 'inherited.dart';
+import 'package:fl_clash/ui/inherited.dart';
 import 'null_status.dart';
 import 'pop_scope.dart';
 import 'scaffold.dart';

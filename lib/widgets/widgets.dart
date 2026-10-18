@@ -18,7 +18,7 @@ export 'fade_box.dart';
 export 'float_layout.dart';
 export 'grid.dart';
 export 'icon.dart';
-export 'inherited.dart';
+export 'package:fl_clash/ui/inherited.dart';
 export 'input.dart';
 export 'keep_scope.dart';
 export 'line_chart.dart';

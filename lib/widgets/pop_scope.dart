@@ -8,7 +8,7 @@ import 'dart:async';
 import 'package:fl_clash/providers/action.dart';
 import 'package:flutter/widgets.dart';
 
-import 'inherited.dart';
+import 'package:fl_clash/ui/inherited.dart';
 
 class CommonPopScope extends StatefulWidget {
   final Widget child;

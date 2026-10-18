@@ -15,7 +15,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
-import 'inherited.dart';
+import 'package:fl_clash/ui/inherited.dart';
 
 const _restThickness = 6.0;
 const _activeThickness = 10.0;

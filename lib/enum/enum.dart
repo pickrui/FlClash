@@ -13,7 +13,8 @@ import 'package:flutter/services.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:rust_api/rust_api.dart' show HotKeyModifier;
 
-enum SheetType { page, bottomSheet, sideSheet }
+export 'package:fl_clash/ui/item_position.dart';
+export 'package:fl_clash/ui/inherited.dart' show SheetType;
 
 enum DelayTestPhase { queued, running }
 
@@ -567,26 +568,6 @@ enum LoadingTag { profiles, backup_restore, access, proxies }
 enum CoreStatus { connecting, connected, disconnected }
 
 enum RuleScene { added, disabled, custom }
-
-enum ItemPosition {
-  start,
-  middle,
-  end,
-  startAndEnd;
-
-  static ItemPosition get(int index, int length) {
-    if (length == 1) {
-      return ItemPosition.startAndEnd;
-    }
-    if (index == length - 1) {
-      return ItemPosition.end;
-    }
-    if (index == 0) {
-      return ItemPosition.start;
-    }
-    return ItemPosition.middle;
-  }
-}
 
 enum EditorFontSize {
   standard(16),
