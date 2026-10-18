@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/views/network_diagnostics.dart';
 import 'package:fl_clash/views/cloud/cloud_login_page.dart';
+import 'package:fl_clash/ui/theme_cross_fade.dart';
 import 'package:fl_clash/widgets/keyboard_inset_hold.dart';
 import 'package:fl_clash/widgets/focus.dart';
 
@@ -47,19 +48,6 @@ class ApplicationState extends ConsumerState<Application> {
   final _terminateSignals = system.isDesktop && !system.isWindows
       ? ProcessSignal.sigterm.watch()
       : null;
-
-  final _pageTransitionsTheme = const PageTransitionsTheme(
-    builders: <TargetPlatform, PageTransitionsBuilder>{
-      TargetPlatform.android: commonSharedXPageTransitions,
-      TargetPlatform.windows: commonSharedXPageTransitions,
-      TargetPlatform.linux: commonSharedXPageTransitions,
-      TargetPlatform.macOS: commonSharedXPageTransitions,
-    },
-  );
-
-  ColorScheme _getAppColorScheme(Brightness brightness) {
-    return ref.read(genColorSchemeProvider(brightness));
-  }
 
   @override
   void initState() {
@@ -161,54 +149,6 @@ class ApplicationState extends ConsumerState<Application> {
     );
   }
 
-  ThemeData _getAppTheme(ThemeData theme) {
-    return theme.withAppShapes.copyWith(
-      listTileTheme: const ListTileThemeData(
-        mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
-      ),
-      checkboxTheme: const CheckboxThemeData(
-        mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
-      ),
-      radioTheme: const RadioThemeData(
-        mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
-      ),
-      switchTheme: const SwitchThemeData(
-        mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
-      ),
-      sliderTheme: const SliderThemeData(
-        mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
-      ),
-      textButtonTheme: const TextButtonThemeData(
-        style: ButtonStyle(
-          mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
-        ),
-      ),
-      filledButtonTheme: const FilledButtonThemeData(
-        style: ButtonStyle(
-          mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
-        ),
-      ),
-      elevatedButtonTheme: const ElevatedButtonThemeData(
-        style: ButtonStyle(
-          mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
-        ),
-      ),
-      outlinedButtonTheme: const OutlinedButtonThemeData(
-        style: ButtonStyle(
-          mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
-        ),
-      ),
-      iconButtonTheme: const IconButtonThemeData(
-        style: ButtonStyle(
-          mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
-        ),
-      ),
-      navigationBarTheme: const NavigationBarThemeData(
-        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-      ),
-    );
-  }
-
   @override
   Widget build(context) {
     return Consumer(
@@ -225,23 +165,25 @@ class ApplicationState extends ConsumerState<Application> {
             ...GlobalMaterialLocalizations.delegates,
           ],
           builder: (context, child) {
-            // Keep legacy package widgets themed while preserving modern icon colors.
-            // ignore: deprecated_member_use
-            return MaterialUiCompatibilityBridge(
-              child: IconTheme(
-                data: Theme.of(context).iconTheme,
-                child: LocaleManager(
-                  child: AppEnvManager(
-                    child: _buildApp(
-                      child: _buildPlatformState(
-                        child: _buildState(
-                          child: _buildPlatformApp(
-                            child: RemoteFocusAdapter(
-                              enabled:
-                                  system.isTV ||
-                                  MediaQuery.navigationModeOf(context) ==
-                                      NavigationMode.directional,
-                              child: child!,
+            return ThemeCrossFade(
+              // Keep legacy package widgets themed while preserving modern icon colors.
+              // ignore: deprecated_member_use
+              child: MaterialUiCompatibilityBridge(
+                child: IconTheme(
+                  data: Theme.of(context).iconTheme,
+                  child: LocaleManager(
+                    child: AppEnvManager(
+                      child: _buildApp(
+                        child: _buildPlatformState(
+                          child: _buildState(
+                            child: _buildPlatformApp(
+                              child: RemoteFocusAdapter(
+                                enabled:
+                                    system.isTV ||
+                                    MediaQuery.navigationModeOf(context) ==
+                                        NavigationMode.directional,
+                                child: child!,
+                              ),
                             ),
                           ),
                         ),
@@ -259,21 +201,9 @@ class ApplicationState extends ConsumerState<Application> {
           locale: utils.getLocaleForString(locale),
           supportedLocales: AppLocalizations.delegate.supportedLocales,
           themeMode: themeProps.themeMode,
-          theme: _getAppTheme(
-            ThemeData(
-              useMaterial3: true,
-              pageTransitionsTheme: _pageTransitionsTheme,
-              colorScheme: _getAppColorScheme(Brightness.light),
-            ),
-          ),
-          darkTheme: _getAppTheme(
-            ThemeData(
-              useMaterial3: true,
-              pageTransitionsTheme: _pageTransitionsTheme,
-              colorScheme: _getAppColorScheme(Brightness.dark)
-                  .toPureBlack(themeProps.pureBlack),
-            ),
-          ),
+          theme: watchAppTheme(ref, Brightness.light),
+          darkTheme: watchAppTheme(ref, Brightness.dark),
+          themeAnimationStyle: AnimationStyle.noAnimation,
           home: KeyboardInsetHold(child: child!),
         );
       },

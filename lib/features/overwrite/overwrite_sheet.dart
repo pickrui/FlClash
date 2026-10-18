@@ -38,10 +38,6 @@ Future<T?> showOverwriteSheet<T>({
         sheetBarrierColor: context.colorScheme.modalScrim,
         barrierLabel: MaterialLocalizations.of(context)
             .modalBarrierDismissLabel,
-        capturedThemes: InheritedTheme.capture(
-          from: context,
-          to: navigator.context,
-        ),
       ),
     );
   }

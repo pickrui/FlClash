@@ -11,10 +11,94 @@ import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/state.dart';
+
+const _pageTransitionsTheme = PageTransitionsTheme(
+  builders: <TargetPlatform, PageTransitionsBuilder>{
+    TargetPlatform.android: commonSharedXPageTransitions,
+    TargetPlatform.windows: commonSharedXPageTransitions,
+    TargetPlatform.linux: commonSharedXPageTransitions,
+    TargetPlatform.macOS: commonSharedXPageTransitions,
+  },
+);
+
+/// A rebuilt ThemeData never equals the last, and ThemeCrossFade fades on that.
+final _appThemes = <Brightness, ({Object inputs, ThemeData theme})>{};
+
+ThemeData watchAppTheme(WidgetRef ref, Brightness brightness) {
+  final pureBlack =
+      brightness == Brightness.dark &&
+      ref.watch(themeSettingProvider.select((state) => state.pureBlack));
+  final colorScheme = ref
+      .watch(genColorSchemeProvider(brightness))
+      .toPureBlack(pureBlack);
+  final inputs = (platform: defaultTargetPlatform, colorScheme: colorScheme);
+  if (_appThemes[brightness] case (inputs: final cached, :final theme)
+      when cached == inputs) {
+    return theme;
+  }
+  final theme = _withAppControls(
+    ThemeData(
+      useMaterial3: true,
+      pageTransitionsTheme: _pageTransitionsTheme,
+      colorScheme: colorScheme,
+    ),
+  );
+  _appThemes[brightness] = (inputs: inputs, theme: theme);
+  return theme;
+}
+
+ThemeData _withAppControls(ThemeData theme) {
+  return theme.withAppShapes.copyWith(
+    listTileTheme: const ListTileThemeData(
+      mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
+    ),
+    checkboxTheme: const CheckboxThemeData(
+      mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
+    ),
+    radioTheme: const RadioThemeData(
+      mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
+    ),
+    switchTheme: const SwitchThemeData(
+      mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
+    ),
+    sliderTheme: const SliderThemeData(
+      mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
+    ),
+    textButtonTheme: const TextButtonThemeData(
+      style: ButtonStyle(
+        mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
+      ),
+    ),
+    filledButtonTheme: const FilledButtonThemeData(
+      style: ButtonStyle(
+        mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
+      ),
+    ),
+    elevatedButtonTheme: const ElevatedButtonThemeData(
+      style: ButtonStyle(
+        mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
+      ),
+    ),
+    outlinedButtonTheme: const OutlinedButtonThemeData(
+      style: ButtonStyle(
+        mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
+      ),
+    ),
+    iconButtonTheme: const IconButtonThemeData(
+      style: ButtonStyle(
+        mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
+      ),
+    ),
+    navigationBarTheme: const NavigationBarThemeData(
+      labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+    ),
+  );
+}
 
 class ThemeManager extends ConsumerWidget {
   final Widget child;

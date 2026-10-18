@@ -105,7 +105,6 @@ class SnapSheetController extends ChangeNotifier
 class SnapSheetRoute<T> extends PopupRoute<T> {
   SnapSheetRoute({
     required this.builder,
-    required this.capturedThemes,
     required this.sheetBarrierColor,
     required this.barrierLabel,
     this.detents = snapSheetDetents,
@@ -116,7 +115,6 @@ class SnapSheetRoute<T> extends PopupRoute<T> {
   });
 
   final SnapSheetBuilder builder;
-  final CapturedThemes capturedThemes;
   final Color sheetBarrierColor;
   final List<double> detents;
 
@@ -203,19 +201,17 @@ class SnapSheetRoute<T> extends PopupRoute<T> {
     Animation<double> animation,
     Animation<double> secondaryAnimation,
   ) {
-    return capturedThemes.wrap(
-      _SnapSheet(
-        detents: detents,
-        fitMaxHeight: fitMaxHeight,
-        collapsedDetent: collapsedDetent,
-        initialScrollOffset: initialScrollOffset,
-        animation: animation,
-        controller: sheetController,
-        scrimColor: collapsedDetent == null ? null : sheetBarrierColor,
-        dismiss: _dismiss,
-        dismissHandler: _dismissHandler,
-        builder: builder,
-      ),
+    return _SnapSheet(
+      detents: detents,
+      fitMaxHeight: fitMaxHeight,
+      collapsedDetent: collapsedDetent,
+      initialScrollOffset: initialScrollOffset,
+      animation: animation,
+      controller: sheetController,
+      scrimColor: collapsedDetent == null ? null : sheetBarrierColor,
+      dismiss: _dismiss,
+      dismissHandler: _dismissHandler,
+      builder: builder,
     );
   }
 }

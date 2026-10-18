@@ -326,7 +326,6 @@ class _ModalSideSheetState<T> extends State<_ModalSideSheet<T>> {
 class ModalSideSheetRoute<T> extends PopupRoute<T> with DragBackRouteMixin<T> {
   ModalSideSheetRoute({
     required this.builder,
-    this.capturedThemes,
     this.barrierLabel,
     this.barrierOnTapHint,
     this.backgroundColor,
@@ -344,8 +343,6 @@ class ModalSideSheetRoute<T> extends PopupRoute<T> with DragBackRouteMixin<T> {
   });
 
   final WidgetBuilder builder;
-
-  final CapturedThemes? capturedThemes;
 
   final Color? backgroundColor;
 
@@ -443,8 +440,7 @@ class ModalSideSheetRoute<T> extends PopupRoute<T> with DragBackRouteMixin<T> {
       ),
     );
 
-    final scoped = SheetDismissScope(handler: _dismissHandler, child: content);
-    return capturedThemes?.wrap(scoped) ?? scoped;
+    return SheetDismissScope(handler: _dismissHandler, child: content);
   }
 
   void _dismiss() {
@@ -517,10 +513,6 @@ Future<T?> showModalSideSheet<T>({
     ModalSideSheetRoute<T>(
       builder: builder,
       filter: filter,
-      capturedThemes: InheritedTheme.capture(
-        from: context,
-        to: navigator.context,
-      ),
       barrierLabel: barrierLabel ?? localizations.scrimLabel,
       barrierOnTapHint: localizations.scrimOnTapHint(localizations.dialogLabel),
       backgroundColor: backgroundColor,

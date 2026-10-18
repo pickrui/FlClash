@@ -59,19 +59,7 @@ Future<T?> showSheet<T>({
     listen: false,
   ).read(isMobileViewProvider);
   return switch (isMobile) {
-    true => showModalBottomSheet<T>(
-      context: context,
-      isScrollControlled: props.isScrollControlled,
-      builder: (sheetContext) {
-        return SheetProvider(
-          type: SheetType.bottomSheet,
-          child: builder(sheetContext, SheetType.bottomSheet),
-        );
-      },
-      backgroundColor: props.backgroundColor,
-      showDragHandle: false,
-      useSafeArea: props.useSafeArea,
-    ),
+    true => _showBottomSheet<T>(context, builder: builder, props: props),
     false => showModalSideSheet<T>(
       context: context,
       backgroundColor: props.backgroundColor,
@@ -85,6 +73,34 @@ Future<T?> showSheet<T>({
       },
     ),
   };
+}
+
+/// showModalBottomSheet pins an open sheet to the themes around its opener.
+Future<T?> _showBottomSheet<T>(
+  BuildContext context, {
+  required SheetBuilder builder,
+  required SheetProps props,
+}) {
+  final localizations = MaterialLocalizations.of(context);
+  return Navigator.of(context).push(
+    ModalBottomSheetRoute<T>(
+      isScrollControlled: props.isScrollControlled,
+      builder: (sheetContext) {
+        return SheetProvider(
+          type: SheetType.bottomSheet,
+          child: builder(sheetContext, SheetType.bottomSheet),
+        );
+      },
+      backgroundColor: props.backgroundColor,
+      showDragHandle: false,
+      useSafeArea: props.useSafeArea,
+      barrierLabel: localizations.scrimLabel,
+      barrierOnTapHint: localizations.scrimOnTapHint(
+        localizations.bottomSheetLabel,
+      ),
+      modalBarrierColor: Theme.of(context).bottomSheetTheme.modalBarrierColor,
+    ),
+  );
 }
 
 Future<T?> showExtend<T>(
@@ -226,10 +242,6 @@ Future<T?> showSnapSheet<T>(
           sheetBarrierColor: barrierColor,
           barrierLabel: MaterialLocalizations.of(context)
               .modalBarrierDismissLabel,
-          capturedThemes: InheritedTheme.capture(
-            from: context,
-            to: navigator.context,
-          ),
         ),
       );
     } else {
