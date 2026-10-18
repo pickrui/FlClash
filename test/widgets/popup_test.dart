@@ -2112,6 +2112,59 @@ void main() {
     );
   }
 
+  testWidgets('a level behind a sub menu takes no focus', (tester) async {
+    await pumpReducedMenu(tester, []);
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    final edit = find.text('Edit');
+    expect(Focus.of(tester.element(edit)).canRequestFocus, isTrue);
+
+    await tester.tap(find.text('More'));
+    await tester.pumpAndSettle();
+
+    expect(Focus.of(tester.element(edit)).canRequestFocus, isFalse);
+  });
+
+  testWidgets('an open popup follows its anchor as it moves', (tester) async {
+    final shift = ValueNotifier(0.0);
+    addTearDown(shift.dispose);
+    late PopupOpen open;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ValueListenableBuilder<double>(
+            valueListenable: shift,
+            builder: (_, dx, child) => Padding(
+              padding: EdgeInsets.only(left: 100 + dx, top: 200),
+              child: child,
+            ),
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: CommonPopupBox(
+                targetBuilder: (value) {
+                  open = value;
+                  return const SizedBox(width: 40, height: 40);
+                },
+                popupBuilder: (_) =>
+                    const SizedBox(width: 80, height: 80, key: Key('popup')),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    open();
+    await tester.pumpAndSettle();
+    final popup = find.byKey(const Key('popup'));
+    final before = tester.getTopLeft(popup);
+
+    shift.value = 60;
+    await tester.pump();
+    await tester.pump();
+
+    expect(tester.getTopLeft(popup).dx, before.dx + 60);
+  });
+
   testWidgets('reduced motion menus can unfold and execute an item', (
     tester,
   ) async {

@@ -265,6 +265,35 @@ void main() {
     );
   });
 
+  testWidgets('a dialog shows at once under reduced motion', (tester) async {
+    tester.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(disableAnimations: true);
+    addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
+    await tester.pumpWidget(
+      TestApp(
+        overrides: [_viewSizeOverride],
+        child: Scaffold(
+          body: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => showFloatingDialog<void>(
+                context: context,
+                child: const CommonDialog(title: 'Title', child: Text('Body')),
+              ),
+              child: const Text('Open'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open'));
+    await tester.pump();
+    await tester.pump();
+
+    expect(_dialogScale(tester), 1);
+    expect(_dialogOpacity(tester), 1);
+  });
+
   testWidgets('a tap on the scrim dismisses a dismissible dialog', (
     tester,
   ) async {

@@ -314,6 +314,8 @@ void main() {
     await tester.pump();
     expect(editable().obscureText, isFalse);
     expect(editable().maxLines, 5);
+    expect(editable().enableSuggestions, isFalse);
+    expect(editable().autocorrect, isFalse);
 
     await tester.tap(find.byTooltip('Hide password'));
     await tester.pump();
