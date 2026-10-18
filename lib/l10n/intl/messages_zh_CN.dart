@@ -372,6 +372,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "blockWebRtcDesc": MessageLookupByLibrary.simpleMessage(
       "拦截 STUN 流量以减少 WebRTC IP 泄漏",
     ),
+    "brightness": MessageLookupByLibrary.simpleMessage("亮度"),
     "buy": MessageLookupByLibrary.simpleMessage("购买"),
     "bypassDomain": MessageLookupByLibrary.simpleMessage("排除域名"),
     "bypassDomainDesc": MessageLookupByLibrary.simpleMessage("仅在系统代理启用时生效"),
@@ -543,7 +544,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "codeSent": MessageLookupByLibrary.simpleMessage("验证码已发送"),
     "collapseList": MessageLookupByLibrary.simpleMessage("收起"),
     "color": MessageLookupByLibrary.simpleMessage("颜色"),
-    "colorSchemes": MessageLookupByLibrary.simpleMessage("配色方案"),
     "colorStyle": MessageLookupByLibrary.simpleMessage("配色风格"),
     "columns": MessageLookupByLibrary.simpleMessage("列数"),
     "commission": MessageLookupByLibrary.simpleMessage("佣金"),
@@ -635,6 +635,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "create": MessageLookupByLibrary.simpleMessage("创建"),
     "creationTime": MessageLookupByLibrary.simpleMessage("创建时间"),
     "custom": MessageLookupByLibrary.simpleMessage("自定义"),
+    "customColor": MessageLookupByLibrary.simpleMessage("自定义颜色"),
     "customOutboundInUse": m10,
     "customProfile": MessageLookupByLibrary.simpleMessage("自定义配置"),
     "customProfileDesc": MessageLookupByLibrary.simpleMessage(
@@ -1094,6 +1095,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "googleLoginWaiting": MessageLookupByLibrary.simpleMessage(
       "请在浏览器中完成 Google 登录",
     ),
+    "grid": MessageLookupByLibrary.simpleMessage("网格"),
     "groupCycleError": m27,
     "groupFilterHint": MessageLookupByLibrary.simpleMessage(
       "筛选自动加入及提供器中的节点；手动选择的成员始终保留",
@@ -1120,6 +1122,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "helperCorruptTip": MessageLookupByLibrary.simpleMessage(
       "Helper 服务不可用，无法启用 TUN 模式，请重新安装 FlClash",
     ),
+    "hex": MessageLookupByLibrary.simpleMessage("十六进制"),
     "hide": MessageLookupByLibrary.simpleMessage("隐藏"),
     "hideFromList": MessageLookupByLibrary.simpleMessage("从列表中隐藏"),
     "hideIp": MessageLookupByLibrary.simpleMessage("隐藏 IP"),
@@ -1141,6 +1144,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "hours": MessageLookupByLibrary.simpleMessage("小时"),
     "hoursAgo": m30,
     "hoursCount": m31,
+    "hue": MessageLookupByLibrary.simpleMessage("色相"),
     "iHavePaid": MessageLookupByLibrary.simpleMessage("我已支付"),
     "icon": MessageLookupByLibrary.simpleMessage("图片"),
     "iconHistory": MessageLookupByLibrary.simpleMessage("最近使用的图标"),
@@ -1248,6 +1252,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "light": MessageLookupByLibrary.simpleMessage("浅色"),
     "lineIssueTip": m35,
     "lineWrap": MessageLookupByLibrary.simpleMessage("自动换行"),
+    "liquidGlass": MessageLookupByLibrary.simpleMessage("液态玻璃"),
     "list": MessageLookupByLibrary.simpleMessage("列表"),
     "listen": MessageLookupByLibrary.simpleMessage("监听"),
     "listenRoutingMark": MessageLookupByLibrary.simpleMessage("监听路由标记"),
@@ -1466,7 +1471,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "overwriteTypeMergeDesc": MessageLookupByLibrary.simpleMessage(
       "保留订阅规则和策略组，再叠加个人设置。个人规则优先于订阅规则，已有的附加规则保持优先",
     ),
-    "palette": MessageLookupByLibrary.simpleMessage("调色板"),
     "password": MessageLookupByLibrary.simpleMessage("密码"),
     "passwordLabel": MessageLookupByLibrary.simpleMessage("密码"),
     "passwordMismatch": MessageLookupByLibrary.simpleMessage("两次输入的密码不一致"),
@@ -1854,6 +1858,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "runTime": MessageLookupByLibrary.simpleMessage("运行时间"),
     "safeMode": MessageLookupByLibrary.simpleMessage("安全模式"),
     "safeModeAppTitle": m82,
+    "saturation": MessageLookupByLibrary.simpleMessage("饱和度"),
     "save": MessageLookupByLibrary.simpleMessage("保存"),
     "saveAndRetry": MessageLookupByLibrary.simpleMessage("保存并重试"),
     "saveChanges": MessageLookupByLibrary.simpleMessage("是否保存更改？"),
@@ -1907,6 +1912,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "singleValueTip": m88,
     "size": MessageLookupByLibrary.simpleMessage("尺寸"),
     "slide": MessageLookupByLibrary.simpleMessage("滑动"),
+    "sliders": MessageLookupByLibrary.simpleMessage("滑块"),
     "socksPort": MessageLookupByLibrary.simpleMessage("Socks端口"),
     "softStyle": MessageLookupByLibrary.simpleMessage("柔和"),
     "soldOut": MessageLookupByLibrary.simpleMessage("已售罄"),
@@ -1915,6 +1921,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "sourceIp": MessageLookupByLibrary.simpleMessage("源IP"),
     "specialProxy": MessageLookupByLibrary.simpleMessage("特殊代理"),
     "specialRules": MessageLookupByLibrary.simpleMessage("特殊规则"),
+    "spectrum": MessageLookupByLibrary.simpleMessage("光谱"),
     "speedStatistics": MessageLookupByLibrary.simpleMessage("网速统计"),
     "ssidPermissionGuide": MessageLookupByLibrary.simpleMessage(
       "读取 Wi-Fi 名称需要定位权限。Android 请允许始终使用精确位置，并开启系统定位服务",
@@ -2160,6 +2167,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "udpTimeoutDesc": MessageLookupByLibrary.simpleMessage(
       "UDP 超时以秒为单位，仅在 gvisor、system 和 mixed 栈生效",
     ),
+    "ultra": MessageLookupByLibrary.simpleMessage("极致"),
     "undo": MessageLookupByLibrary.simpleMessage("撤销"),
     "unifiedDelay": MessageLookupByLibrary.simpleMessage("统一延迟"),
     "unifiedDelayDesc": MessageLookupByLibrary.simpleMessage("去除握手等额外延迟"),

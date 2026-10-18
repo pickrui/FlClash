@@ -10,7 +10,6 @@ export 'builder.dart';
 export 'button.dart';
 export 'card.dart';
 export 'chip.dart';
-export 'color_scheme_box.dart';
 export 'dialog.dart';
 
 export 'package:fl_clash/ui/disabled_mask.dart';

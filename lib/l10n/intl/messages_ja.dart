@@ -389,6 +389,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "blockWebRtcDesc": MessageLookupByLibrary.simpleMessage(
       "WebRTCのIP漏洩を抑えるためSTUN通信を拒否します",
     ),
+    "brightness": MessageLookupByLibrary.simpleMessage("明度"),
     "buy": MessageLookupByLibrary.simpleMessage("購入"),
     "bypassDomain": MessageLookupByLibrary.simpleMessage("バイパスドメイン"),
     "bypassDomainDesc": MessageLookupByLibrary.simpleMessage("システムプロキシ有効時のみ適用"),
@@ -616,7 +617,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "codeSent": MessageLookupByLibrary.simpleMessage("認証コードを送信しました"),
     "collapseList": MessageLookupByLibrary.simpleMessage("折りたたむ"),
     "color": MessageLookupByLibrary.simpleMessage("カラー"),
-    "colorSchemes": MessageLookupByLibrary.simpleMessage("カラースキーム"),
     "colorStyle": MessageLookupByLibrary.simpleMessage("配色スタイル"),
     "columns": MessageLookupByLibrary.simpleMessage("列"),
     "commission": MessageLookupByLibrary.simpleMessage("コミッション"),
@@ -722,6 +722,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "create": MessageLookupByLibrary.simpleMessage("作成"),
     "creationTime": MessageLookupByLibrary.simpleMessage("作成時間"),
     "custom": MessageLookupByLibrary.simpleMessage("カスタム"),
+    "customColor": MessageLookupByLibrary.simpleMessage("カスタムカラー"),
     "customOutboundInUse": m10,
     "customProfile": MessageLookupByLibrary.simpleMessage("カスタムプロファイル"),
     "customProfileDesc": MessageLookupByLibrary.simpleMessage(
@@ -1241,6 +1242,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "googleLoginWaiting": MessageLookupByLibrary.simpleMessage(
       "ブラウザで Google ログインを完了してください",
     ),
+    "grid": MessageLookupByLibrary.simpleMessage("グリッド"),
     "groupCycleError": m27,
     "groupFilterHint": MessageLookupByLibrary.simpleMessage(
       "自動追加とプロバイダーのノードを絞り込みます。手動選択したメンバーは保持されます",
@@ -1269,6 +1271,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "helperCorruptTip": MessageLookupByLibrary.simpleMessage(
       "Helper サービスが利用できないため、TUN モードを有効にできません。FlClash を再インストールしてください。",
     ),
+    "hex": MessageLookupByLibrary.simpleMessage("16進数"),
     "hide": MessageLookupByLibrary.simpleMessage("非表示"),
     "hideFromList": MessageLookupByLibrary.simpleMessage("リストから隠す"),
     "hideIp": MessageLookupByLibrary.simpleMessage("IP を隠す"),
@@ -1296,6 +1299,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "hours": MessageLookupByLibrary.simpleMessage("時間"),
     "hoursAgo": m30,
     "hoursCount": m31,
+    "hue": MessageLookupByLibrary.simpleMessage("色相"),
     "iHavePaid": MessageLookupByLibrary.simpleMessage("支払い済み"),
     "icon": MessageLookupByLibrary.simpleMessage("アイコン"),
     "iconHistory": MessageLookupByLibrary.simpleMessage("最近使用したアイコン"),
@@ -1417,6 +1421,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "light": MessageLookupByLibrary.simpleMessage("ライト"),
     "lineIssueTip": m35,
     "lineWrap": MessageLookupByLibrary.simpleMessage("折り返し"),
+    "liquidGlass": MessageLookupByLibrary.simpleMessage("リキッドグラス"),
     "list": MessageLookupByLibrary.simpleMessage("リスト"),
     "listen": MessageLookupByLibrary.simpleMessage("リスン"),
     "listenRoutingMark": MessageLookupByLibrary.simpleMessage("リッスンのルーティングマーク"),
@@ -1667,7 +1672,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "overwriteTypeMergeDesc": MessageLookupByLibrary.simpleMessage(
       "サブスクリプションのルールとグループを保ち、個人設定を追加します。個人ルールはサブスクリプションより優先され、既存の追加ルールの優先順位は維持されます",
     ),
-    "palette": MessageLookupByLibrary.simpleMessage("パレット"),
     "password": MessageLookupByLibrary.simpleMessage("パスワード"),
     "passwordLabel": MessageLookupByLibrary.simpleMessage("パスワード"),
     "passwordMismatch": MessageLookupByLibrary.simpleMessage("パスワードが一致しません"),
@@ -2111,6 +2115,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "runTime": MessageLookupByLibrary.simpleMessage("稼働時間"),
     "safeMode": MessageLookupByLibrary.simpleMessage("セーフモード"),
     "safeModeAppTitle": m82,
+    "saturation": MessageLookupByLibrary.simpleMessage("彩度"),
     "save": MessageLookupByLibrary.simpleMessage("保存"),
     "saveAndRetry": MessageLookupByLibrary.simpleMessage("保存して再試行"),
     "saveChanges": MessageLookupByLibrary.simpleMessage("変更を保存しますか？"),
@@ -2172,6 +2177,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "singleValueTip": m88,
     "size": MessageLookupByLibrary.simpleMessage("サイズ"),
     "slide": MessageLookupByLibrary.simpleMessage("スライド"),
+    "sliders": MessageLookupByLibrary.simpleMessage("スライダ"),
     "socksPort": MessageLookupByLibrary.simpleMessage("Socksポート"),
     "softStyle": MessageLookupByLibrary.simpleMessage("ソフト"),
     "soldOut": MessageLookupByLibrary.simpleMessage("売り切れ"),
@@ -2180,6 +2186,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "sourceIp": MessageLookupByLibrary.simpleMessage("送信元IP"),
     "specialProxy": MessageLookupByLibrary.simpleMessage("特殊プロキシ"),
     "specialRules": MessageLookupByLibrary.simpleMessage("特殊ルール"),
+    "spectrum": MessageLookupByLibrary.simpleMessage("スペクトル"),
     "speedStatistics": MessageLookupByLibrary.simpleMessage("速度統計"),
     "ssidPermissionGuide": MessageLookupByLibrary.simpleMessage(
       "Wi-Fi 名の取得には位置情報の許可が必要です。Android では正確な位置情報を常に許可し、位置情報サービスを有効にしてください",
@@ -2445,6 +2452,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "udpTimeoutDesc": MessageLookupByLibrary.simpleMessage(
       "UDP タイムアウトは秒単位で、gvisor・system・mixed スタックでのみ有効です",
     ),
+    "ultra": MessageLookupByLibrary.simpleMessage("最高"),
     "undo": MessageLookupByLibrary.simpleMessage("元に戻す"),
     "unifiedDelay": MessageLookupByLibrary.simpleMessage("統一遅延"),
     "unifiedDelayDesc": MessageLookupByLibrary.simpleMessage(

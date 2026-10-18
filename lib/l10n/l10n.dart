@@ -2305,9 +2305,9 @@ class AppLocalizations {
     return Intl.message('redo', name: 'redo', desc: '', args: []);
   }
 
-  /// `none`
+  /// `None`
   String get none {
-    return Intl.message('none', name: 'none', desc: '', args: []);
+    return Intl.message('None', name: 'none', desc: '', args: []);
   }
 
   /// `Advanced configuration`
@@ -2395,21 +2395,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Color schemes`
-  String get colorSchemes {
-    return Intl.message(
-      'Color schemes',
-      name: 'colorSchemes',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Palette`
-  String get palette {
-    return Intl.message('Palette', name: 'palette', desc: '', args: []);
-  }
-
   /// `Monochrome`
   String get monochromeScheme {
     return Intl.message(
@@ -2438,6 +2423,66 @@ class AppLocalizations {
   /// `Soft`
   String get softStyle {
     return Intl.message('Soft', name: 'softStyle', desc: '', args: []);
+  }
+
+  /// `Custom color`
+  String get customColor {
+    return Intl.message(
+      'Custom color',
+      name: 'customColor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Grid`
+  String get grid {
+    return Intl.message('Grid', name: 'grid', desc: '', args: []);
+  }
+
+  /// `Spectrum`
+  String get spectrum {
+    return Intl.message('Spectrum', name: 'spectrum', desc: '', args: []);
+  }
+
+  /// `Sliders`
+  String get sliders {
+    return Intl.message('Sliders', name: 'sliders', desc: '', args: []);
+  }
+
+  /// `Hue`
+  String get hue {
+    return Intl.message('Hue', name: 'hue', desc: '', args: []);
+  }
+
+  /// `Saturation`
+  String get saturation {
+    return Intl.message('Saturation', name: 'saturation', desc: '', args: []);
+  }
+
+  /// `Brightness`
+  String get brightness {
+    return Intl.message('Brightness', name: 'brightness', desc: '', args: []);
+  }
+
+  /// `Hex`
+  String get hex {
+    return Intl.message('Hex', name: 'hex', desc: '', args: []);
+  }
+
+  /// `Liquid Glass`
+  String get liquidGlass {
+    return Intl.message(
+      'Liquid Glass',
+      name: 'liquidGlass',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ultra`
+  String get ultra {
+    return Intl.message('Ultra', name: 'ultra', desc: '', args: []);
   }
 
   /// `Developer mode`

@@ -94,7 +94,7 @@ void main() {
       const Offset(4, 4),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text(AppLocalizations.current.confirm));
+    await tester.tap(find.byTooltip(AppLocalizations.current.confirm));
     await tester.pumpAndSettle();
 
     final added = container

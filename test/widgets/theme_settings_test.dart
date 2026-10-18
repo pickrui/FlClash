@@ -8,11 +8,13 @@ import 'dart:ui' as ui;
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/theme.dart';
+import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/theme.dart';
+import 'package:fl_clash/views/theme_preview.dart';
 import 'package:fl_clash/widgets/palette.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -88,24 +90,132 @@ void main() {
     expect(find.text('1.1'), findsOneWidget);
   });
 
-  testWidgets(
-    'hex input and HCT controls save the same selected opaque color',
-    (tester) async {
-      final c = await _pump(tester, const Size(900, 1100));
-      await _scrollTo(tester, find.byTooltip(AppLocalizations.current.add));
-      await tester.tap(find.byTooltip(AppLocalizations.current.add));
-      await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextField).last, '#123456');
-      await tester.pump();
-      expect(
-        tester.widget<Palette>(find.byType(Palette)).controller.value,
-        const Color(0xFF123456),
+  group('theme color', () {
+    Finder swatch(int color) => find.byWidgetPredicate(
+      (widget) =>
+          widget is Semantics && widget.properties.label == Color(color).hex,
+    );
+
+    Future<void> enterHex(WidgetTester tester, String hex) async {
+      await tester.enterText(
+        find.descendant(
+          of: find.byType(HexColorField),
+          matching: find.byType(TextField),
+        ),
+        hex,
       );
-      await tester.tap(find.text(AppLocalizations.current.confirm));
+      await tester.pump();
+      await tester.tap(find.byTooltip(AppLocalizations.current.confirm));
       await tester.pumpAndSettle();
-      expect(c.read(themeSettingProvider).primaryColors, contains(0xFF123456));
-    },
-  );
+    }
+
+    Future<void> openMenu(WidgetTester tester, int color) async {
+      await _scrollTo(tester, swatch(color));
+      await tester.longPress(swatch(color));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('picks a color, follows the system and picks a style', (
+      tester,
+    ) async {
+      final c = await _pump(tester, const Size(900, 1800));
+      await _scrollTo(tester, swatch(0xFFAF52DE));
+
+      await tester.tap(swatch(0xFFAF52DE));
+      await tester.pumpAndSettle();
+      expect(c.read(themeSettingProvider).primaryColor, 0xFFAF52DE);
+
+      await tester.tap(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is Semantics &&
+              widget.properties.label == AppLocalizations.current.followSystem,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(c.read(themeSettingProvider).primaryColor, isNull);
+
+      await tester.tap(find.text(AppLocalizations.current.colorStyle));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(AppLocalizations.current.softStyle).last);
+      await tester.pumpAndSettle();
+      expect(c.read(themeSettingProvider).colorStyle, ColorStyle.soft);
+    });
+
+    testWidgets('deletes a color from its long-press menu', (tester) async {
+      final c = await _pump(tester, const Size(900, 1800));
+      await _scrollTo(tester, swatch(0xFFFF9500));
+      await tester.tap(swatch(0xFFFF9500));
+      await tester.pumpAndSettle();
+
+      await openMenu(tester, 0xFFFF9500);
+      await tester.tap(find.text(AppLocalizations.current.delete));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(AppLocalizations.current.delete));
+      await tester.pumpAndSettle();
+
+      final theme = c.read(themeSettingProvider);
+      expect(theme.primaryColors, isNot(contains(0xFFFF9500)));
+      expect(theme.primaryColor, defaultPrimaryColor);
+      expect(swatch(0xFFFF9500), findsNothing);
+    });
+
+    testWidgets('edits a color in place from its long-press menu', (
+      tester,
+    ) async {
+      final c = await _pump(tester, const Size(900, 1800));
+      await _scrollTo(tester, swatch(0xFFFF9500));
+      await tester.tap(swatch(0xFFFF9500));
+      await tester.pumpAndSettle();
+      final index = c
+          .read(themeSettingProvider)
+          .primaryColors
+          .indexOf(0xFFFF9500);
+
+      await openMenu(tester, 0xFFFF9500);
+      await tester.tap(find.text(AppLocalizations.current.edit));
+      await tester.pumpAndSettle();
+      await enterHex(tester, '123456');
+
+      final theme = c.read(themeSettingProvider);
+      expect(theme.primaryColors, isNot(contains(0xFFFF9500)));
+      expect(theme.primaryColors[index], 0xFF123456);
+      expect(theme.primaryColor, 0xFF123456);
+    });
+
+    testWidgets('adds a hex color once and picks it', (tester) async {
+      final c = await _pump(tester, const Size(900, 1800));
+      final count = c.read(themeSettingProvider).primaryColors.length;
+
+      for (var i = 0; i < 2; i++) {
+        await _scrollTo(tester, find.byTooltip(AppLocalizations.current.add));
+        await tester.tap(find.byTooltip(AppLocalizations.current.add));
+        await tester.pumpAndSettle();
+        await enterHex(tester, '123456');
+      }
+
+      final theme = c.read(themeSettingProvider);
+      expect(theme.primaryColors, hasLength(count + 1));
+      expect(theme.primaryColors.last, 0xFF123456);
+      expect(theme.primaryColor, 0xFF123456);
+    });
+  });
+
+  testWidgets('liquid glass stays off until a tier is picked', (tester) async {
+    final c = await _pump(tester, const Size(900, 1800));
+    final group = find.byType(PreviewChoiceGroup<LiquidGlassMode>);
+    Finder choice(String label) =>
+        find.descendant(of: group, matching: find.text(label));
+    await _scrollTo(tester, choice(AppLocalizations.current.ultra));
+
+    expect(c.read(themeSettingProvider).liquidGlass, LiquidGlassMode.none);
+    await tester.tap(choice(AppLocalizations.current.ultra));
+    await tester.pumpAndSettle();
+    expect(c.read(themeSettingProvider).liquidGlass, LiquidGlassMode.ultra);
+    await tester.tap(choice(AppLocalizations.current.none));
+    await tester.pumpAndSettle();
+    expect(c.read(themeSettingProvider).liquidGlass, LiquidGlassMode.none);
+  });
 
   for (final locale in [
     const Locale('en'),
@@ -127,10 +237,7 @@ void main() {
       await _scrollTo(tester, find.byType(Slider));
       expect(tester.takeException(), isNull);
       await _capture(tester, boundary, 'theme-text-${locale.toString()}');
-      await tester.drag(
-        find.byType(CustomScrollView).first,
-        const Offset(0, 3000),
-      );
+      await tester.drag(find.byType(ListView).first, const Offset(0, 3000));
       await tester.pumpAndSettle();
       await _scrollTo(tester, find.byTooltip(AppLocalizations.current.add));
       await tester.tap(find.byTooltip(AppLocalizations.current.add));

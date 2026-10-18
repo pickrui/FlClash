@@ -470,6 +470,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "blockWebRtcDesc": MessageLookupByLibrary.simpleMessage(
       "Reject STUN traffic to reduce WebRTC IP leaks.",
     ),
+    "brightness": MessageLookupByLibrary.simpleMessage("Brightness"),
     "buy": MessageLookupByLibrary.simpleMessage("Buy"),
     "bypassDomain": MessageLookupByLibrary.simpleMessage("Bypass domain"),
     "bypassDomainDesc": MessageLookupByLibrary.simpleMessage(
@@ -721,7 +722,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "codeSent": MessageLookupByLibrary.simpleMessage("Verification code sent"),
     "collapseList": MessageLookupByLibrary.simpleMessage("Collapse"),
     "color": MessageLookupByLibrary.simpleMessage("Color"),
-    "colorSchemes": MessageLookupByLibrary.simpleMessage("Color schemes"),
     "colorStyle": MessageLookupByLibrary.simpleMessage("Color style"),
     "columns": MessageLookupByLibrary.simpleMessage("Columns"),
     "commission": MessageLookupByLibrary.simpleMessage("Commission"),
@@ -847,6 +847,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "create": MessageLookupByLibrary.simpleMessage("Create"),
     "creationTime": MessageLookupByLibrary.simpleMessage("Creation time"),
     "custom": MessageLookupByLibrary.simpleMessage("Custom"),
+    "customColor": MessageLookupByLibrary.simpleMessage("Custom color"),
     "customOutboundInUse": m10,
     "customProfile": MessageLookupByLibrary.simpleMessage("Custom profile"),
     "customProfileDesc": MessageLookupByLibrary.simpleMessage(
@@ -1480,6 +1481,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "googleLoginWaiting": MessageLookupByLibrary.simpleMessage(
       "Complete Google sign-in in your browser",
     ),
+    "grid": MessageLookupByLibrary.simpleMessage("Grid"),
     "groupCycleError": m27,
     "groupFilterHint": MessageLookupByLibrary.simpleMessage(
       "Filters automatically included and provider nodes. Manually selected members are always kept.",
@@ -1514,6 +1516,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "helperCorruptTip": MessageLookupByLibrary.simpleMessage(
       "Helper service unavailable; TUN mode cannot be enabled. Reinstall FlClash to restore it.",
     ),
+    "hex": MessageLookupByLibrary.simpleMessage("Hex"),
     "hide": MessageLookupByLibrary.simpleMessage("Hide"),
     "hideFromList": MessageLookupByLibrary.simpleMessage("Hide from list"),
     "hideIp": MessageLookupByLibrary.simpleMessage("Hide IP"),
@@ -1543,6 +1546,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "hours": MessageLookupByLibrary.simpleMessage("Hours"),
     "hoursAgo": m30,
     "hoursCount": m31,
+    "hue": MessageLookupByLibrary.simpleMessage("Hue"),
     "iHavePaid": MessageLookupByLibrary.simpleMessage("I have paid"),
     "icon": MessageLookupByLibrary.simpleMessage("Icon"),
     "iconHistory": MessageLookupByLibrary.simpleMessage("Recent icons"),
@@ -1686,6 +1690,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "light": MessageLookupByLibrary.simpleMessage("Light"),
     "lineIssueTip": m35,
     "lineWrap": MessageLookupByLibrary.simpleMessage("Word wrap"),
+    "liquidGlass": MessageLookupByLibrary.simpleMessage("Liquid Glass"),
     "list": MessageLookupByLibrary.simpleMessage("List"),
     "listen": MessageLookupByLibrary.simpleMessage("Listen"),
     "listenRoutingMark": MessageLookupByLibrary.simpleMessage(
@@ -1916,7 +1921,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "nonTextProviderFile": MessageLookupByLibrary.simpleMessage(
       "This external resource is not a text file",
     ),
-    "none": MessageLookupByLibrary.simpleMessage("none"),
+    "none": MessageLookupByLibrary.simpleMessage("None"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "The current proxy group cannot be selected.",
     ),
@@ -1992,7 +1997,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "overwriteTypeMergeDesc": MessageLookupByLibrary.simpleMessage(
       "Keep subscription rules and groups, then add your own. Personal rules take priority over subscription rules; existing added rules keep their priority.",
     ),
-    "palette": MessageLookupByLibrary.simpleMessage("Palette"),
     "password": MessageLookupByLibrary.simpleMessage("Password"),
     "passwordLabel": MessageLookupByLibrary.simpleMessage("Password"),
     "passwordMismatch": MessageLookupByLibrary.simpleMessage(
@@ -2518,6 +2522,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "runTime": MessageLookupByLibrary.simpleMessage("Uptime"),
     "safeMode": MessageLookupByLibrary.simpleMessage("Safe mode"),
     "safeModeAppTitle": m82,
+    "saturation": MessageLookupByLibrary.simpleMessage("Saturation"),
     "save": MessageLookupByLibrary.simpleMessage("Save"),
     "saveAndRetry": MessageLookupByLibrary.simpleMessage("Save and retry"),
     "saveChanges": MessageLookupByLibrary.simpleMessage(
@@ -2591,6 +2596,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "singleValueTip": m88,
     "size": MessageLookupByLibrary.simpleMessage("Size"),
     "slide": MessageLookupByLibrary.simpleMessage("Slide"),
+    "sliders": MessageLookupByLibrary.simpleMessage("Sliders"),
     "socksPort": MessageLookupByLibrary.simpleMessage("Socks Port"),
     "softStyle": MessageLookupByLibrary.simpleMessage("Soft"),
     "soldOut": MessageLookupByLibrary.simpleMessage("Sold out"),
@@ -2599,6 +2605,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "sourceIp": MessageLookupByLibrary.simpleMessage("Source IP"),
     "specialProxy": MessageLookupByLibrary.simpleMessage("Special proxy"),
     "specialRules": MessageLookupByLibrary.simpleMessage("special rules"),
+    "spectrum": MessageLookupByLibrary.simpleMessage("Spectrum"),
     "speedStatistics": MessageLookupByLibrary.simpleMessage("Speed statistics"),
     "ssidPermissionGuide": MessageLookupByLibrary.simpleMessage(
       "Allow location access to read Wi-Fi names. On Android, allow precise location all the time and enable system location services.",
@@ -2910,6 +2917,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "udpTimeoutDesc": MessageLookupByLibrary.simpleMessage(
       "The UDP timeout is in seconds and works only with the gvisor, system and mixed stacks",
     ),
+    "ultra": MessageLookupByLibrary.simpleMessage("Ultra"),
     "undo": MessageLookupByLibrary.simpleMessage("undo"),
     "unifiedDelay": MessageLookupByLibrary.simpleMessage("Unified delay"),
     "unifiedDelayDesc": MessageLookupByLibrary.simpleMessage(

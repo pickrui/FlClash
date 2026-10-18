@@ -476,6 +476,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "blockWebRtcDesc": MessageLookupByLibrary.simpleMessage(
       "Отклонять STUN-трафик для снижения утечек IP через WebRTC.",
     ),
+    "brightness": MessageLookupByLibrary.simpleMessage("Яркость"),
     "buy": MessageLookupByLibrary.simpleMessage("Купить"),
     "bypassDomain": MessageLookupByLibrary.simpleMessage("Обход домена"),
     "bypassDomainDesc": MessageLookupByLibrary.simpleMessage(
@@ -733,7 +734,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "collapseList": MessageLookupByLibrary.simpleMessage("Свернуть"),
     "color": MessageLookupByLibrary.simpleMessage("Цвет"),
-    "colorSchemes": MessageLookupByLibrary.simpleMessage("Цветовые схемы"),
     "colorStyle": MessageLookupByLibrary.simpleMessage("Стиль палитры"),
     "columns": MessageLookupByLibrary.simpleMessage("Столбцы"),
     "commission": MessageLookupByLibrary.simpleMessage("Комиссия"),
@@ -863,6 +863,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "create": MessageLookupByLibrary.simpleMessage("Создать"),
     "creationTime": MessageLookupByLibrary.simpleMessage("Время создания"),
     "custom": MessageLookupByLibrary.simpleMessage("Пользовательский"),
+    "customColor": MessageLookupByLibrary.simpleMessage("Свой цвет"),
     "customOutboundInUse": m10,
     "customProfile": MessageLookupByLibrary.simpleMessage(
       "Пользовательский профиль",
@@ -1530,6 +1531,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "googleLoginWaiting": MessageLookupByLibrary.simpleMessage(
       "Завершите вход через Google в браузере",
     ),
+    "grid": MessageLookupByLibrary.simpleMessage("Сетка"),
     "groupCycleError": m27,
     "groupFilterHint": MessageLookupByLibrary.simpleMessage(
       "Фильтрует автоматически добавленные узлы и провайдеры. Участники, выбранные вручную, сохраняются.",
@@ -1566,6 +1568,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "helperCorruptTip": MessageLookupByLibrary.simpleMessage(
       "Служба Helper недоступна, поэтому TUN-режим включить нельзя. Переустановите FlClash.",
     ),
+    "hex": MessageLookupByLibrary.simpleMessage("Hex"),
     "hide": MessageLookupByLibrary.simpleMessage("Скрыть"),
     "hideFromList": MessageLookupByLibrary.simpleMessage("Скрыть из списка"),
     "hideIp": MessageLookupByLibrary.simpleMessage("Скрыть IP"),
@@ -1595,6 +1598,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "hours": MessageLookupByLibrary.simpleMessage("Часов"),
     "hoursAgo": m30,
     "hoursCount": m31,
+    "hue": MessageLookupByLibrary.simpleMessage("Оттенок"),
     "iHavePaid": MessageLookupByLibrary.simpleMessage("Я оплатил"),
     "icon": MessageLookupByLibrary.simpleMessage("Иконка"),
     "iconHistory": MessageLookupByLibrary.simpleMessage("Недавние значки"),
@@ -1743,6 +1747,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "light": MessageLookupByLibrary.simpleMessage("Светлый"),
     "lineIssueTip": m35,
     "lineWrap": MessageLookupByLibrary.simpleMessage("Перенос строк"),
+    "liquidGlass": MessageLookupByLibrary.simpleMessage("Жидкое стекло"),
     "list": MessageLookupByLibrary.simpleMessage("Список"),
     "listen": MessageLookupByLibrary.simpleMessage("Слушать"),
     "listenRoutingMark": MessageLookupByLibrary.simpleMessage(
@@ -2079,7 +2084,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "overwriteTypeMergeDesc": MessageLookupByLibrary.simpleMessage(
       "Сохраняет правила и группы подписки и добавляет ваши настройки. Личные правила имеют приоритет над подпиской; существующие дополнительные правила сохраняют свой приоритет.",
     ),
-    "palette": MessageLookupByLibrary.simpleMessage("Палитра"),
     "password": MessageLookupByLibrary.simpleMessage("Пароль"),
     "passwordLabel": MessageLookupByLibrary.simpleMessage("Пароль"),
     "passwordMismatch": MessageLookupByLibrary.simpleMessage(
@@ -2643,6 +2647,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "runTime": MessageLookupByLibrary.simpleMessage("Время работы"),
     "safeMode": MessageLookupByLibrary.simpleMessage("Безопасный режим"),
     "safeModeAppTitle": m82,
+    "saturation": MessageLookupByLibrary.simpleMessage("Насыщенность"),
     "save": MessageLookupByLibrary.simpleMessage("Сохранить"),
     "saveAndRetry": MessageLookupByLibrary.simpleMessage(
       "Сохранить и повторить",
@@ -2726,6 +2731,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "singleValueTip": m88,
     "size": MessageLookupByLibrary.simpleMessage("Размер"),
     "slide": MessageLookupByLibrary.simpleMessage("Сдвиг"),
+    "sliders": MessageLookupByLibrary.simpleMessage("Ползунки"),
     "socksPort": MessageLookupByLibrary.simpleMessage("Socks-порт"),
     "softStyle": MessageLookupByLibrary.simpleMessage("Мягкий"),
     "soldOut": MessageLookupByLibrary.simpleMessage("Распродано"),
@@ -2734,6 +2740,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "sourceIp": MessageLookupByLibrary.simpleMessage("Исходный IP"),
     "specialProxy": MessageLookupByLibrary.simpleMessage("Специальный прокси"),
     "specialRules": MessageLookupByLibrary.simpleMessage("Специальные правила"),
+    "spectrum": MessageLookupByLibrary.simpleMessage("Спектр"),
     "speedStatistics": MessageLookupByLibrary.simpleMessage(
       "Статистика скорости",
     ),
@@ -3061,6 +3068,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "udpTimeoutDesc": MessageLookupByLibrary.simpleMessage(
       "Тайм-аут UDP задаётся в секундах и действует только со стеками gvisor, system и mixed",
     ),
+    "ultra": MessageLookupByLibrary.simpleMessage("Максимум"),
     "undo": MessageLookupByLibrary.simpleMessage("Отменить"),
     "unifiedDelay": MessageLookupByLibrary.simpleMessage(
       "Унифицированная задержка",

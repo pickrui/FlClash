@@ -47,7 +47,7 @@ void main() {
       await tester.tap(find.text('Slide'));
       await tester.pumpAndSettle();
       expect(c.read(appSettingProvider).tabAnimation, TabAnimation.slide);
-      await tester.drag(find.byType(CustomScrollView), const Offset(0, 1000));
+      await tester.drag(find.byType(ListView), const Offset(0, 1000));
       await tester.pumpAndSettle();
       final preview = tester.widget<MiniScreen>(
         find.descendant(
