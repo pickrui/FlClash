@@ -14,6 +14,7 @@ import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
+import android.content.Context.RECEIVER_EXPORTED
 import android.content.Context.RECEIVER_NOT_EXPORTED
 import android.content.Intent
 import android.content.IntentFilter
@@ -104,13 +105,15 @@ fun Service.startForeground(notification: Notification) {
 fun Context.registerReceiverCompat(
     receiver: BroadcastReceiver,
     filter: IntentFilter,
+    exported: Boolean = false,
 ) = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-    registerReceiver(receiver, filter, RECEIVER_NOT_EXPORTED)
+    registerReceiver(receiver, filter, if (exported) RECEIVER_EXPORTED else RECEIVER_NOT_EXPORTED)
 } else {
     registerReceiver(receiver, filter)
 }
 
 fun Context.receiveBroadcastFlow(
+    exported: Boolean = false,
     configure: IntentFilter.() -> Unit,
 ): Flow<Intent> = callbackFlow {
     val filter = IntentFilter().apply(configure)
@@ -120,7 +123,7 @@ fun Context.receiveBroadcastFlow(
             trySend(intent)
         }
     }
-    registerReceiverCompat(receiver, filter)
+    registerReceiverCompat(receiver, filter, exported)
     awaitClose { unregisterReceiver(receiver) }
 }
 

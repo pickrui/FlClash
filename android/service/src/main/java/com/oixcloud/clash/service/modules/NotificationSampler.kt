@@ -20,8 +20,9 @@ internal fun <T : Any, R> notificationSamples(
     screenOn: Flow<Boolean>,
     ticks: () -> Flow<Unit>,
     sample: (T) -> R,
-): Flow<R> = combine(params, screenOn) { value, visible ->
-    if (visible) value else null
-}.distinctUntilChanged().flatMapLatest { value ->
-    if (value == null) emptyFlow() else ticks().map { sample(value) }.distinctUntilChanged()
+): Flow<R> = combine(params, screenOn.map { visible -> if (visible) Any() else null }) { value, shown ->
+    // A fresh token per visible event lets a repeated one restart sampling and post again.
+    if (value == null || shown == null) null else value to shown
+}.distinctUntilChanged().flatMapLatest { visible ->
+    if (visible == null) emptyFlow() else ticks().map { sample(visible.first) }.distinctUntilChanged()
 }.buffer(0)

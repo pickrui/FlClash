@@ -6,10 +6,12 @@
 package com.oixcloud.clash.service
 
 import com.oixcloud.clash.service.modules.notificationSamples
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -91,5 +93,24 @@ class NotificationSamplerTest {
         assertEquals(listOf(1, 1), updates)
         job.cancelAndJoin()
         assertEquals(0, active)
+    }
+
+    @Test fun unlockAfterScreenOnPostsUnchangedTextAgain() = runBlocking {
+        val screen = Channel<Boolean>(Channel.UNLIMITED)
+        val updates = mutableListOf<Int>()
+        val job = launch {
+            notificationSamples(MutableStateFlow<Int?>(1), screen.receiveAsFlow(), ticks = {
+                flow {
+                    emit(Unit)
+                    awaitCancellation()
+                }
+            }, sample = { it }).collect { updates.add(it) }
+        }
+        screen.send(true)
+        settleUntil { updates.size == 1 }
+        screen.send(true)
+        settleUntil { updates.size == 2 }
+        assertEquals(listOf(1, 1), updates)
+        job.cancelAndJoin()
     }
 }
