@@ -40,15 +40,14 @@ class Migration {
           ? narrowLegacy172Bypass(configMap)
           : configMap;
       Config? config;
-      try {
-        config = Config.realFromJson(narrowed);
-      } catch (_) {
-        final isV0 = configMap?['proxiesStyle'] != null;
-        if (isV0) {
+      if (narrowed != null && narrowed['proxiesStyle'] != null) {
+        try {
+          config = Config.strictFromJson(narrowed);
+        } catch (_) {
           oldVersion = 0;
-        } else {
-          throw 'Local data is damaged. A reset is required to fix this issue.';
         }
+      } else {
+        config = Config.realFromJson(narrowed);
       }
       if (config != null) {
         if (oldVersion != currentVersion) {

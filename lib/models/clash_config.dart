@@ -298,11 +298,7 @@ abstract class Tun with _$Tun {
     if (json == null) {
       return defaultTun;
     }
-    try {
-      return Tun.fromJson(json);
-    } catch (_) {
-      return defaultTun;
-    }
+    return decodeSalvaging('tun config', json, Tun.fromJson);
   }
 }
 
@@ -408,11 +404,7 @@ abstract class Dns with _$Dns {
   factory Dns.fromJson(Map<String, Object?> json) => _$DnsFromJson(json);
 
   factory Dns.safeDnsFromJson(Map<String, Object?> json) {
-    try {
-      return Dns.fromJson(json);
-    } catch (_) {
-      return const Dns();
-    }
+    return decodeSalvaging('dns config', json, Dns.fromJson);
   }
 }
 
@@ -619,11 +611,7 @@ abstract class Ntp with _$Ntp {
   factory Ntp.fromJson(Map<String, Object?> json) => _$NtpFromJson(json);
 
   factory Ntp.safeNtpFromJson(Map<String, Object?> json) {
-    try {
-      return Ntp.fromJson(json);
-    } catch (_) {
-      return const Ntp();
-    }
+    return decodeSalvaging('ntp config', json, Ntp.fromJson);
   }
 }
 
@@ -727,11 +715,7 @@ abstract class GeoXUrl with _$GeoXUrl {
     if (json == null) {
       return defaultGeoXUrl;
     }
-    try {
-      return GeoXUrl.fromJson(json);
-    } catch (_) {
-      return defaultGeoXUrl;
-    }
+    return decodeSalvaging('geo urls', json, GeoXUrl.fromJson);
   }
 }
 
@@ -1021,11 +1005,7 @@ abstract class ClashConfig with _$ClashConfig {
     if (json == null) {
       return defaultClashConfig;
     }
-    try {
-      return ClashConfig.fromJson(json);
-    } catch (_) {
-      return defaultClashConfig;
-    }
+    return decodeSalvaging('clash config', json, ClashConfig.fromJson);
   }
 }
 

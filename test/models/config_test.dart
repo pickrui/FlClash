@@ -36,6 +36,55 @@ void main() {
       expect(result.appSettingProps, defaultAppSettingProps);
     }
   });
+  test('fromJson keeps everything but the values it cannot read', () {
+    final json = <String, Object?>{
+      'currentProfileId': 'one',
+      'appSettingProps': {'locale': 1, 'autoRun': true},
+      'vpnProps': {
+        'ipv6': 'yes',
+        'accessControlProps': {
+          'enable': true,
+          'mode': 'future',
+          'acceptList': ['a', 1],
+        },
+      },
+      'patchClashConfig': {
+        'mixed-port': 7891,
+        'mode': 'future',
+        'tun': {'enable': true, 'stack': 'future'},
+        'dns': {
+          'nameserver': ['192.0.2.1', 2],
+          'ipv6': 'yes',
+        },
+      },
+      'hotKeyActions': [
+        {'action': 'future'},
+        {'action': 'mode', 'key': 1},
+      ],
+    };
+
+    expect(() => Config.strictFromJson(json), throwsA(anything));
+    final config = Config.fromJson(json);
+    expect(config.currentProfileId, isNull);
+    expect(config.appSettingProps.locale, isNull);
+    expect(config.appSettingProps.autoRun, true);
+    expect(config.vpnProps.ipv6, false);
+    expect(config.vpnProps.accessControlProps.enable, true);
+    expect(
+      config.vpnProps.accessControlProps.mode,
+      AccessControlMode.rejectSelected,
+    );
+    expect(config.vpnProps.accessControlProps.acceptList, ['a']);
+    expect(config.patchClashConfig.mixedPort, 7891);
+    expect(config.patchClashConfig.mode, Mode.rule);
+    expect(config.patchClashConfig.tun.enable, true);
+    expect(config.patchClashConfig.tun.stack, TunStack.mixed);
+    expect(config.patchClashConfig.dns.nameserver, ['192.0.2.1']);
+    expect(config.patchClashConfig.dns.ipv6, false);
+    expect(config.hotKeyActions, [
+      const HotKeyAction(action: HotAction.mode, key: 1),
+    ]);
+  });
   test(
     'upstream filled icon style and unknown styles use the filled default',
     () {

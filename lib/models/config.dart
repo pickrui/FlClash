@@ -116,13 +116,9 @@ abstract class AppSettingProps with _$AppSettingProps {
       _$AppSettingPropsFromJson(json);
 
   factory AppSettingProps.safeFromJson(Object? json) {
-    try {
-      return json is Map<String, Object?>
-          ? AppSettingProps.fromJson(json)
-          : defaultAppSettingProps;
-    } catch (_) {
-      return defaultAppSettingProps;
-    }
+    return json is Map<String, Object?>
+        ? decodeSalvaging('app settings', json, AppSettingProps.fromJson)
+        : defaultAppSettingProps;
   }
 }
 
@@ -325,11 +321,7 @@ abstract class ThemeProps with _$ThemeProps {
     if (json == null) {
       return defaultThemeProps;
     }
-    try {
-      return ThemeProps.fromJson(json);
-    } catch (_) {
-      return defaultThemeProps;
-    }
+    return decodeSalvaging('theme settings', json, ThemeProps.fromJson);
   }
 }
 
@@ -353,13 +345,17 @@ abstract class Config with _$Config {
     @Default([]) List<TailscaleNetwork> tailscaleNetworks,
   }) = _Config;
 
-  factory Config.fromJson(Map<String, Object?> json) => _$ConfigFromJson(json);
+  factory Config.fromJson(Map<String, Object?> json) =>
+      decodeSalvaging('config', json, Config.strictFromJson);
+
+  factory Config.strictFromJson(Map<String, Object?> json) =>
+      _$ConfigFromJson(json);
 
   factory Config.realFromJson(Map<String, Object?>? json) {
     if (json == null) {
       return const Config(themeProps: defaultThemeProps);
     }
-    return _$ConfigFromJson(json);
+    return Config.fromJson(json);
   }
 }
 

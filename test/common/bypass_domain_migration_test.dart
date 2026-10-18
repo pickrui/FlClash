@@ -109,6 +109,24 @@ void main() {
     );
   }
 
+  test('a damaged current config keeps what it can read', () async {
+    await preferences.setVersion(migration.currentVersion);
+    final stored = _storedConfig(['corp.example'])..['currentProfileId'] = 7;
+    (stored['networkProps'] as Map)
+      ..['systemProxy'] = false
+      ..['blockQuic'] = 'yes';
+
+    final config = await migration.migrationIfNeeded(
+      stored,
+      sync: (_) => throw StateError('current configs must not be resynced'),
+    );
+
+    expect(config.currentProfileId, 7);
+    expect(config.networkProps.systemProxy, isFalse);
+    expect(config.networkProps.blockQuic, isFalse);
+    expect(config.networkProps.bypassDomain, ['corp.example']);
+  });
+
   test('config without a stored version is narrowed as well', () async {
     await preferences.setVersion(0);
 
