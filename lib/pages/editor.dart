@@ -421,6 +421,7 @@ class EditorViewState extends ConsumerState<EditorView> {
   String? _pendingContent;
   bool _canCreateController = false;
   bool _routeWaitStarted = false;
+  bool _building = false;
 
   CodeForgeController? get controller => _controller;
 
@@ -466,7 +467,7 @@ class EditorViewState extends ConsumerState<EditorView> {
               return;
             }
             _canCreateController = true;
-            _createController();
+            unawaited(_createController());
           },
           onError: (Object error) {
             if (!mounted) {
@@ -481,13 +482,28 @@ class EditorViewState extends ConsumerState<EditorView> {
 
   // Filling the controller before CodeForge mounts spares it laying out an
   // empty document only to replace it.
-  void _createController() {
-    final content = _pendingContent;
-    if (!_canCreateController || _controller != null || content == null) {
+  Future<void> _createController() async {
+    var content = _pendingContent;
+    if (!_canCreateController ||
+        _controller != null ||
+        _building ||
+        content == null) {
       return;
     }
+    _building = true;
     final controller = CodeForgeController();
-    _loadContent(controller, content);
+    while (true) {
+      await _loadContent(controller, content!);
+      if (!mounted) {
+        controller.dispose();
+        return;
+      }
+      if (_pendingContent == content) {
+        break;
+      }
+      content = _pendingContent;
+    }
+    _building = false;
     setState(() {
       _controller = controller;
       _findController = FindController(controller);
@@ -506,11 +522,16 @@ class EditorViewState extends ConsumerState<EditorView> {
       final controller = _controller;
       if (controller == null) {
         _pendingContent = content;
-        _createController();
+        unawaited(_createController());
         return;
       }
-      _loadContent(controller, content);
-      _undoController.clear();
+      unawaited(
+        _loadContent(controller, content).then((_) {
+          if (mounted) {
+            _undoController.clear();
+          }
+        }),
+      );
     });
   }
 
@@ -522,10 +543,15 @@ class EditorViewState extends ConsumerState<EditorView> {
     super.dispose();
   }
 
-  void _loadContent(CodeForgeController controller, String content) {
-    controller
-      ..text = content
-      ..selection = const TextSelection.collapsed(offset: 0);
+  Future<void> _loadContent(
+    CodeForgeController controller,
+    String content,
+  ) async {
+    await controller.loadText(content);
+    if (!mounted) {
+      return;
+    }
+    controller.selection = const TextSelection.collapsed(offset: 0);
     _loadedLength = controller.length;
   }
 
