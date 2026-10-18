@@ -11819,10 +11819,10 @@ class AppLocalizations {
     return Intl.message('Took', name: 'elapsed', desc: '', args: []);
   }
 
-  /// `Entries added here replace the TUN settings of every profile; anything not added keeps the profile's own setting`
+  /// `Entries added here replace the TUN settings of every profile; anything not added keeps the profile's own setting. Entries a custom profile adds itself take precedence`
   String get tunOverrideDesc {
     return Intl.message(
-      'Entries added here replace the TUN settings of every profile; anything not added keeps the profile\'s own setting',
+      'Entries added here replace the TUN settings of every profile; anything not added keeps the profile\'s own setting. Entries a custom profile adds itself take precedence',
       name: 'tunOverrideDesc',
       desc: '',
       args: [],
@@ -12137,6 +12137,218 @@ class AppLocalizations {
   /// `IP version`
   String get ipVersion {
     return Intl.message('IP version', name: 'ipVersion', desc: '', args: []);
+  }
+
+  /// `Applies to this profile only; anything not added uses its default`
+  String get profileSettingsDesc {
+    return Intl.message(
+      'Applies to this profile only; anything not added uses its default',
+      name: 'profileSettingsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Applies to this profile only and takes precedence over the override entries in the app's DNS and NTP settings; anything not added follows those entries`
+  String get profileOverrideSettingsDesc {
+    return Intl.message(
+      'Applies to this profile only and takes precedence over the override entries in the app\'s DNS and NTP settings; anything not added follows those entries',
+      name: 'profileOverrideSettingsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Applies to this profile only and takes precedence over the TUN override entries in the network settings`
+  String get profileTunSettingsDesc {
+    return Intl.message(
+      'Applies to this profile only and takes precedence over the TUN override entries in the network settings',
+      name: 'profileTunSettingsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `settings`
+  String get settingEntries {
+    return Intl.message('settings', name: 'settingEntries', desc: '', args: []);
+  }
+
+  /// `Add setting`
+  String get addSettingEntry {
+    return Intl.message(
+      'Add setting',
+      name: 'addSettingEntry',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, =1{1 setting} other{{count} settings}}`
+  String settingsCount(num count) {
+    return Intl.plural(
+      count,
+      one: '1 setting',
+      other: '$count settings',
+      name: 'settingsCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Sniffer`
+  String get sniffer {
+    return Intl.message('Sniffer', name: 'sniffer', desc: '', args: []);
+  }
+
+  /// `The sniffer reads the domain from TLS, HTTP and QUIC traffic so rules can match it`
+  String get snifferStatusDesc {
+    return Intl.message(
+      'The sniffer reads the domain from TLS, HTTP and QUIC traffic so rules can match it',
+      name: 'snifferStatusDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Override destination`
+  String get overrideDestination {
+    return Intl.message(
+      'Override destination',
+      name: 'overrideDestination',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Override destination connects to the sniffed domain instead of the original address`
+  String get overrideDestinationDesc {
+    return Intl.message(
+      'Override destination connects to the sniffed domain instead of the original address',
+      name: 'overrideDestinationDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Force DNS mapping`
+  String get forceDnsMapping {
+    return Intl.message(
+      'Force DNS mapping',
+      name: 'forceDnsMapping',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Force DNS mapping also sniffs connections whose domain came from a DNS mapping`
+  String get forceDnsMappingDesc {
+    return Intl.message(
+      'Force DNS mapping also sniffs connections whose domain came from a DNS mapping',
+      name: 'forceDnsMappingDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Parse pure IP`
+  String get parsePureIp {
+    return Intl.message(
+      'Parse pure IP',
+      name: 'parsePureIp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Parse pure IP sniffs connections that carry only an IP address`
+  String get parsePureIpDesc {
+    return Intl.message(
+      'Parse pure IP sniffs connections that carry only an IP address',
+      name: 'parsePureIpDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Force domains`
+  String get forceDomain {
+    return Intl.message(
+      'Force domains',
+      name: 'forceDomain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Force domains are sniffed too; other connections that already have a domain are left alone`
+  String get forceDomainDesc {
+    return Intl.message(
+      'Force domains are sniffed too; other connections that already have a domain are left alone',
+      name: 'forceDomainDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Skip domains`
+  String get skipDomain {
+    return Intl.message('Skip domains', name: 'skipDomain', desc: '', args: []);
+  }
+
+  /// `A sniffed domain on the Skip domains list is not used`
+  String get skipDomainDesc {
+    return Intl.message(
+      'A sniffed domain on the Skip domains list is not used',
+      name: 'skipDomainDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Skip source addresses`
+  String get skipSrcAddress {
+    return Intl.message(
+      'Skip source addresses',
+      name: 'skipSrcAddress',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Skip destination addresses`
+  String get skipDstAddress {
+    return Intl.message(
+      'Skip destination addresses',
+      name: 'skipDstAddress',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Protocols`
+  String get sniffProtocols {
+    return Intl.message(
+      'Protocols',
+      name: 'sniffProtocols',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ports`
+  String get ports {
+    return Intl.message('Ports', name: 'ports', desc: '', args: []);
+  }
+
+  /// `Enter a port or a range such as 443 or 8000-9000`
+  String get invalidPortRangeContent {
+    return Intl.message(
+      'Enter a port or a range such as 443 or 8000-9000',
+      name: 'invalidPortRangeContent',
+      desc: '',
+      args: [],
+    );
   }
 }
 

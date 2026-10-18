@@ -237,27 +237,30 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m87(count) => "${count} selected";
 
-  static String m88(label) => "${label} must be a single item";
+  static String m88(count) =>
+      "${Intl.plural(count, one: '1 setting', other: '${count} settings')}";
 
-  static String m89(fields) => "Check these settings: ${fields}";
+  static String m89(label) => "${label} must be a single item";
 
-  static String m90(count) => "Devices (${count})";
+  static String m90(fields) => "Check these settings: ${fields}";
 
-  static String m91(name, profile) =>
+  static String m91(count) => "Devices (${count})";
+
+  static String m92(name, profile) =>
       "${name} is still used by a rule or group in profile ${profile}";
 
-  static String m92(region) => "Relay ${region}";
+  static String m93(region) => "Relay ${region}";
 
-  static String m93(name) =>
+  static String m94(name) =>
       "This device will leave ${name} and its sign-in will be deleted from this device. If the network is unreachable now, remove the device in the Tailscale admin console.";
 
-  static String m94(build) => "Build: ${build}";
+  static String m95(build) => "Build: ${build}";
 
-  static String m95(version) => "Version: ${version}";
+  static String m96(version) => "Version: ${version}";
 
-  static String m96(label) => "${label} must be a url";
+  static String m97(label) => "${label} must be a url";
 
-  static String m97(count) =>
+  static String m98(count) =>
       "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -314,6 +317,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "addProxyChainNode": MessageLookupByLibrary.simpleMessage("Add"),
     "addProxyGroup": MessageLookupByLibrary.simpleMessage("Add proxy group"),
     "addRule": MessageLookupByLibrary.simpleMessage("Add rule"),
+    "addSettingEntry": MessageLookupByLibrary.simpleMessage("Add setting"),
     "addSsid": MessageLookupByLibrary.simpleMessage("Add SSID"),
     "addedRules": MessageLookupByLibrary.simpleMessage("Added rules"),
     "additionalPrefix": MessageLookupByLibrary.simpleMessage("Name prefix"),
@@ -1416,6 +1420,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "followSystem": MessageLookupByLibrary.simpleMessage("Follow system"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("FontFamily"),
     "fontSize": MessageLookupByLibrary.simpleMessage("Size"),
+    "forceDnsMapping": MessageLookupByLibrary.simpleMessage(
+      "Force DNS mapping",
+    ),
+    "forceDnsMappingDesc": MessageLookupByLibrary.simpleMessage(
+      "Force DNS mapping also sniffs connections whose domain came from a DNS mapping",
+    ),
+    "forceDomain": MessageLookupByLibrary.simpleMessage("Force domains"),
+    "forceDomainDesc": MessageLookupByLibrary.simpleMessage(
+      "Force domains are sniffed too; other connections that already have a domain are left alone",
+    ),
     "forceRestartCoreTip": MessageLookupByLibrary.simpleMessage(
       "Are you sure you want to force restart the core?",
     ),
@@ -1655,6 +1669,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Only tcp or udp is supported",
     ),
     "invalidPolicy": m32,
+    "invalidPortRangeContent": MessageLookupByLibrary.simpleMessage(
+      "Enter a port or a range such as 443 or 8000-9000",
+    ),
     "invalidProfileQrcode": MessageLookupByLibrary.simpleMessage(
       "This QR code doesn\'t contain a profile link",
     ),
@@ -1973,6 +1990,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "overlayNameConflict": m51,
     "override": MessageLookupByLibrary.simpleMessage("Override"),
+    "overrideDestination": MessageLookupByLibrary.simpleMessage(
+      "Override destination",
+    ),
+    "overrideDestinationDesc": MessageLookupByLibrary.simpleMessage(
+      "Override destination connects to the sniffed domain instead of the original address",
+    ),
     "overrideEntries": MessageLookupByLibrary.simpleMessage("Override entries"),
     "overrideMode": MessageLookupByLibrary.simpleMessage("Override mode"),
     "overrideScript": MessageLookupByLibrary.simpleMessage("Override script"),
@@ -1996,6 +2019,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "overwriteTypeMerge": MessageLookupByLibrary.simpleMessage("Overlay"),
     "overwriteTypeMergeDesc": MessageLookupByLibrary.simpleMessage(
       "Keep subscription rules and groups, then add your own. Personal rules take priority over subscription rules; existing added rules keep their priority.",
+    ),
+    "parsePureIp": MessageLookupByLibrary.simpleMessage("Parse pure IP"),
+    "parsePureIpDesc": MessageLookupByLibrary.simpleMessage(
+      "Parse pure IP sniffs connections that carry only an IP address",
     ),
     "password": MessageLookupByLibrary.simpleMessage("Password"),
     "passwordLabel": MessageLookupByLibrary.simpleMessage("Password"),
@@ -2058,6 +2085,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "portUnavailableTitle": MessageLookupByLibrary.simpleMessage(
       "Port unavailable",
     ),
+    "ports": MessageLookupByLibrary.simpleMessage("Ports"),
     "preferH3": MessageLookupByLibrary.simpleMessage("Prefer HTTP/3"),
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
       "Prioritize the use of DOH\'s http/3",
@@ -2084,10 +2112,19 @@ class MessageLookup extends MessageLookupByLibrary {
     "profileNameNullValidationDesc": MessageLookupByLibrary.simpleMessage(
       "Please input the profile name",
     ),
+    "profileOverrideSettingsDesc": MessageLookupByLibrary.simpleMessage(
+      "Applies to this profile only and takes precedence over the override entries in the app\'s DNS and NTP settings; anything not added follows those entries",
+    ),
     "profileParseErrorDesc": MessageLookupByLibrary.simpleMessage(
       "Profile parse error",
     ),
     "profileProviderInUse": m63,
+    "profileSettingsDesc": MessageLookupByLibrary.simpleMessage(
+      "Applies to this profile only; anything not added uses its default",
+    ),
+    "profileTunSettingsDesc": MessageLookupByLibrary.simpleMessage(
+      "Applies to this profile only and takes precedence over the TUN override entries in the network settings",
+    ),
     "profileUrlInvalidValidationDesc": MessageLookupByLibrary.simpleMessage(
       "Please input a valid profile URL",
     ),
@@ -2573,7 +2610,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "serviceCheckFailed": MessageLookupByLibrary.simpleMessage(
       "Service Check Failed",
     ),
+    "settingEntries": MessageLookupByLibrary.simpleMessage("settings"),
     "settings": MessageLookupByLibrary.simpleMessage("Settings"),
+    "settingsCount": m88,
     "show": MessageLookupByLibrary.simpleMessage("Show"),
     "showLess": MessageLookupByLibrary.simpleMessage("Collapse"),
     "showMore": MessageLookupByLibrary.simpleMessage("Expand"),
@@ -2593,10 +2632,25 @@ class MessageLookup extends MessageLookupByLibrary {
       "Start in the background",
     ),
     "singleAdd": MessageLookupByLibrary.simpleMessage("Single add"),
-    "singleValueTip": m88,
+    "singleValueTip": m89,
     "size": MessageLookupByLibrary.simpleMessage("Size"),
+    "skipDomain": MessageLookupByLibrary.simpleMessage("Skip domains"),
+    "skipDomainDesc": MessageLookupByLibrary.simpleMessage(
+      "A sniffed domain on the Skip domains list is not used",
+    ),
+    "skipDstAddress": MessageLookupByLibrary.simpleMessage(
+      "Skip destination addresses",
+    ),
+    "skipSrcAddress": MessageLookupByLibrary.simpleMessage(
+      "Skip source addresses",
+    ),
     "slide": MessageLookupByLibrary.simpleMessage("Slide"),
     "sliders": MessageLookupByLibrary.simpleMessage("Sliders"),
+    "sniffProtocols": MessageLookupByLibrary.simpleMessage("Protocols"),
+    "sniffer": MessageLookupByLibrary.simpleMessage("Sniffer"),
+    "snifferStatusDesc": MessageLookupByLibrary.simpleMessage(
+      "The sniffer reads the domain from TLS, HTTP and QUIC traffic so rules can match it",
+    ),
     "socksPort": MessageLookupByLibrary.simpleMessage("Socks Port"),
     "softStyle": MessageLookupByLibrary.simpleMessage("Soft"),
     "soldOut": MessageLookupByLibrary.simpleMessage("Sold out"),
@@ -2707,7 +2761,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleAvailableExitNodes": MessageLookupByLibrary.simpleMessage(
       "Available exit nodes",
     ),
-    "tailscaleCheckSettings": m89,
+    "tailscaleCheckSettings": m90,
     "tailscaleConnected": MessageLookupByLibrary.simpleMessage("Connected"),
     "tailscaleConnecting": MessageLookupByLibrary.simpleMessage("Connecting"),
     "tailscaleControlUrl": MessageLookupByLibrary.simpleMessage("Control URL"),
@@ -2715,7 +2769,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Authentication and device identity stay on this device.",
     ),
     "tailscaleDeviceName": MessageLookupByLibrary.simpleMessage("Device name"),
-    "tailscaleDevices": m90,
+    "tailscaleDevices": m91,
     "tailscaleDirect": MessageLookupByLibrary.simpleMessage("Direct"),
     "tailscaleEmptyDesc": MessageLookupByLibrary.simpleMessage(
       "Add a network, sign in on this device, then start the proxy to reach your devices.",
@@ -2810,7 +2864,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleNeedsLogin": MessageLookupByLibrary.simpleMessage(
       "Login required",
     ),
-    "tailscaleNetworkInUse": m91,
+    "tailscaleNetworkInUse": m92,
     "tailscaleNetworkName": MessageLookupByLibrary.simpleMessage(
       "Network name",
     ),
@@ -2827,8 +2881,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleOpenLoginPage": MessageLookupByLibrary.simpleMessage(
       "Open login page",
     ),
-    "tailscaleRelay": m92,
-    "tailscaleRemoveConfirm": m93,
+    "tailscaleRelay": m93,
+    "tailscaleRemoveConfirm": m94,
     "tailscaleRemoveNetwork": MessageLookupByLibrary.simpleMessage(
       "Remove network",
     ),
@@ -2909,7 +2963,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Enter an integer from 1280 to 65535",
     ),
     "tunOverrideDesc": MessageLookupByLibrary.simpleMessage(
-      "Entries added here replace the TUN settings of every profile; anything not added keeps the profile\'s own setting",
+      "Entries added here replace the TUN settings of every profile; anything not added keeps the profile\'s own setting. Entries a custom profile adds itself take precedence",
     ),
     "turnOff": MessageLookupByLibrary.simpleMessage("Turn Off"),
     "turnOn": MessageLookupByLibrary.simpleMessage("Turn On"),
@@ -2937,7 +2991,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateApplyFailed": MessageLookupByLibrary.simpleMessage(
       "Automatic update did not complete. Retry or update from the download page.",
     ),
-    "updateBuildNumber": m94,
+    "updateBuildNumber": m95,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
       "Cancel download",
     ),
@@ -2984,14 +3038,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateRestartHint": MessageLookupByLibrary.simpleMessage(
       "The app will close, update in place, and reopen. Your settings will be preserved.",
     ),
-    "updateVersionNumber": m95,
+    "updateVersionNumber": m96,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("Upgrade plan"),
     "upload": MessageLookupByLibrary.simpleMessage("Upload"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Obtain profile through URL",
     ),
-    "urlTip": m96,
+    "urlTip": m97,
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("Used traffic"),
@@ -3021,7 +3075,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Also set the system clock; Android ignores it",
     ),
-    "yearsAgo": m97,
+    "yearsAgo": m98,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };
 }

@@ -9,6 +9,8 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/views/config/override.dart';
 import 'package:fl_clash/widgets/config_item.dart';
+import 'package:fl_clash/widgets/null_status.dart';
+import 'package:material_ui/material_ui.dart';
 
 extension on TunOverrideKey {
   String label(AppLocalizations l) => switch (this) {
@@ -67,28 +69,72 @@ const _maxUid = 0xFFFFFFFF;
 
 const _maxPort = 65535;
 
-OverrideState<TunOverrideKey, ProfileTun> _getTun(ClashConfig config) =>
+typedef _TunState = OverrideState<TunOverrideKey, ProfileTun>;
+
+_TunState _getTun(ClashConfig config) =>
     (model: config.tunOverride, keys: config.tunOverrideKeys);
 
-ClashConfig _setTun(
-  ClashConfig config,
-  OverrideState<TunOverrideKey, ProfileTun> state,
-) => config.copyWith(tunOverride: state.model, tunOverrideKeys: state.keys);
+ClashConfig _setTun(ClashConfig config, _TunState state) =>
+    config.copyWith(tunOverride: state.model, tunOverrideKeys: state.keys);
+
+_TunState _profileTun(ProfileOverrides overrides) =>
+    (model: overrides.tun, keys: overrides.tunOverrideKeys);
+
+ProfileOverrides _setProfileTun(ProfileOverrides overrides, _TunState state) =>
+    overrides.copyWith(tun: state.model, tunOverrideKeys: state.keys);
+
+String _profileTunDescription(AppLocalizations l) => l.profileTunSettingsDesc;
 
 OverrideSpec<TunOverrideKey, ProfileTun> appTunOverrideSpec({
   required bool isLinux,
   required bool isWindows,
-}) => _TunOverrideSpec(isLinux: isLinux, isWindows: isWindows);
+}) => _TunOverrideSpec(
+  const PatchOverrideTarget(get: _getTun, set: _setTun),
+  isLinux: isLinux,
+  isWindows: isWindows,
+);
+
+/// A custom profile's own desktop TUN keys, which win over the app's.
+class TunView extends StatelessWidget {
+  const TunView(this.profileId, {super.key, this.isLinux, this.isWindows});
+
+  final int profileId;
+  final bool? isLinux;
+  final bool? isWindows;
+
+  @override
+  Widget build(BuildContext context) => OverrideView(
+    spec: _TunOverrideSpec(
+      ProfileOverrideTarget(
+        profileId,
+        get: _profileTun,
+        set: _setProfileTun,
+        description: _profileTunDescription,
+      ),
+      isLinux: isLinux ?? system.isLinux,
+      isWindows: isWindows ?? system.isWindows,
+    ),
+  );
+}
 
 class _TunOverrideSpec extends OverrideSpec<TunOverrideKey, ProfileTun> {
-  const _TunOverrideSpec({required this.isLinux, required this.isWindows});
+  const _TunOverrideSpec(
+    this.target, {
+    required this.isLinux,
+    required this.isWindows,
+  });
+
+  @override
+  final OverrideTarget<TunOverrideKey, ProfileTun> target;
 
   final bool isLinux;
   final bool isWindows;
 
   @override
-  OverrideTarget<TunOverrideKey, ProfileTun> get target =>
-      const OverrideTarget(get: _getTun, set: _setTun);
+  String title(AppLocalizations l) => l.tun;
+
+  @override
+  NullStatusIllustration get illustration => NullStatusIllustration.connections;
 
   @override
   List<TunOverrideKey> get values => [

@@ -84,6 +84,7 @@ enum EditorSchema {
   config(clashConfigSchema),
   dns(_dns),
   ntp(_ntp),
+  sniffer(_sniffer),
   proxy(_proxy),
   provider(_providerFile);
 

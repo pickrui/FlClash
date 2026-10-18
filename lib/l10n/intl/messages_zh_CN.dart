@@ -199,26 +199,28 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m87(count) => "已选择 ${count} 项";
 
-  static String m88(label) => "${label}只能是一项";
+  static String m88(count) => "${count} 项设置";
 
-  static String m89(fields) => "请检查以下设置：${fields}";
+  static String m89(label) => "${label}只能是一项";
 
-  static String m90(count) => "设备（${count}）";
+  static String m90(fields) => "请检查以下设置：${fields}";
 
-  static String m91(name, profile) => "${name} 仍被配置「${profile}」中的规则或策略组使用";
+  static String m91(count) => "设备（${count}）";
 
-  static String m92(region) => "中继 ${region}";
+  static String m92(name, profile) => "${name} 仍被配置「${profile}」中的规则或策略组使用";
 
-  static String m93(name) =>
+  static String m93(region) => "中继 ${region}";
+
+  static String m94(name) =>
       "此设备将退出 ${name}，并删除此设备上的登录信息；如果当前无法连接该网络，请到 Tailscale 管理后台移除此设备";
 
-  static String m94(build) => "构建号：${build}";
+  static String m95(build) => "构建号：${build}";
 
-  static String m95(version) => "版本号：${version}";
+  static String m96(version) => "版本号：${version}";
 
-  static String m96(label) => "${label}必须为URL";
+  static String m97(label) => "${label}必须为URL";
 
-  static String m97(count) => "${count} 年前";
+  static String m98(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -262,6 +264,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "addProxyChainNode": MessageLookupByLibrary.simpleMessage("新增"),
     "addProxyGroup": MessageLookupByLibrary.simpleMessage("添加策略组"),
     "addRule": MessageLookupByLibrary.simpleMessage("添加规则"),
+    "addSettingEntry": MessageLookupByLibrary.simpleMessage("添加设置项"),
     "addSsid": MessageLookupByLibrary.simpleMessage("添加SSID"),
     "addedRules": MessageLookupByLibrary.simpleMessage("附加规则"),
     "additionalPrefix": MessageLookupByLibrary.simpleMessage("名称前缀"),
@@ -1048,6 +1051,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "followSystem": MessageLookupByLibrary.simpleMessage("跟随系统"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("字体"),
     "fontSize": MessageLookupByLibrary.simpleMessage("大小"),
+    "forceDnsMapping": MessageLookupByLibrary.simpleMessage("强制DNS映射"),
+    "forceDnsMappingDesc": MessageLookupByLibrary.simpleMessage(
+      "强制 DNS 映射对通过 DNS 映射得到域名的连接也进行嗅探",
+    ),
+    "forceDomain": MessageLookupByLibrary.simpleMessage("强制嗅探域名"),
+    "forceDomainDesc": MessageLookupByLibrary.simpleMessage(
+      "强制嗅探域名中的域名同样会被嗅探，其余已有域名的连接不嗅探",
+    ),
     "forceRestartCoreTip": MessageLookupByLibrary.simpleMessage("您确定要强制重启核心吗？"),
     "forgotPassword": MessageLookupByLibrary.simpleMessage("忘记密码？"),
     "format": MessageLookupByLibrary.simpleMessage("格式"),
@@ -1225,6 +1236,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "仅支持 tcp 或 udp",
     ),
     "invalidPolicy": m32,
+    "invalidPortRangeContent": MessageLookupByLibrary.simpleMessage(
+      "请输入端口或范围，如 443 或 8000-9000",
+    ),
     "invalidProfileQrcode": MessageLookupByLibrary.simpleMessage(
       "该二维码不包含配置文件链接",
     ),
@@ -1449,6 +1463,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "overlayNameConflict": m51,
     "override": MessageLookupByLibrary.simpleMessage("覆写"),
+    "overrideDestination": MessageLookupByLibrary.simpleMessage("覆盖目标地址"),
+    "overrideDestinationDesc": MessageLookupByLibrary.simpleMessage(
+      "覆盖目标地址使用嗅探到的域名替换原目标地址发起连接",
+    ),
     "overrideEntries": MessageLookupByLibrary.simpleMessage("覆写项"),
     "overrideMode": MessageLookupByLibrary.simpleMessage("覆写模式"),
     "overrideScript": MessageLookupByLibrary.simpleMessage("覆写脚本"),
@@ -1470,6 +1488,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "overwriteTypeMerge": MessageLookupByLibrary.simpleMessage("叠加"),
     "overwriteTypeMergeDesc": MessageLookupByLibrary.simpleMessage(
       "保留订阅规则和策略组，再叠加个人设置。个人规则优先于订阅规则，已有的附加规则保持优先",
+    ),
+    "parsePureIp": MessageLookupByLibrary.simpleMessage("解析纯IP"),
+    "parsePureIpDesc": MessageLookupByLibrary.simpleMessage(
+      "解析纯 IP 会嗅探只有 IP 地址的连接",
     ),
     "password": MessageLookupByLibrary.simpleMessage("密码"),
     "passwordLabel": MessageLookupByLibrary.simpleMessage("密码"),
@@ -1514,6 +1536,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "portTip": m61,
     "portUnavailableMessage": m62,
     "portUnavailableTitle": MessageLookupByLibrary.simpleMessage("端口不可用"),
+    "ports": MessageLookupByLibrary.simpleMessage("端口"),
     "preferH3": MessageLookupByLibrary.simpleMessage("优先使用HTTP/3"),
     "preferH3Desc": MessageLookupByLibrary.simpleMessage("优先使用DOH的http/3"),
     "prerequisites": MessageLookupByLibrary.simpleMessage("前置条件"),
@@ -1532,8 +1555,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "profileNameNullValidationDesc": MessageLookupByLibrary.simpleMessage(
       "请输入配置名称",
     ),
+    "profileOverrideSettingsDesc": MessageLookupByLibrary.simpleMessage(
+      "仅作用于当前配置，并优先于应用 DNS、NTP 设置中的覆写项，未添加的项沿用这些覆写项",
+    ),
     "profileParseErrorDesc": MessageLookupByLibrary.simpleMessage("配置文件解析错误"),
     "profileProviderInUse": m63,
+    "profileSettingsDesc": MessageLookupByLibrary.simpleMessage(
+      "仅作用于当前配置，未添加的项使用默认值",
+    ),
+    "profileTunSettingsDesc": MessageLookupByLibrary.simpleMessage(
+      "仅作用于当前配置，并优先于网络设置中的虚拟网卡覆写项",
+    ),
     "profileUrlInvalidValidationDesc": MessageLookupByLibrary.simpleMessage(
       "请输入有效配置URL",
     ),
@@ -1895,7 +1927,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "sendResetEmail": MessageLookupByLibrary.simpleMessage("发送重置邮件"),
     "server": MessageLookupByLibrary.simpleMessage("服务器"),
     "serviceCheckFailed": MessageLookupByLibrary.simpleMessage("服务检测失败"),
+    "settingEntries": MessageLookupByLibrary.simpleMessage("设置项"),
     "settings": MessageLookupByLibrary.simpleMessage("设置"),
+    "settingsCount": m88,
     "show": MessageLookupByLibrary.simpleMessage("显示"),
     "showLess": MessageLookupByLibrary.simpleMessage("收起"),
     "showMore": MessageLookupByLibrary.simpleMessage("展开"),
@@ -1909,10 +1943,19 @@ class MessageLookup extends MessageLookupByLibrary {
     "silentLaunch": MessageLookupByLibrary.simpleMessage("静默启动"),
     "silentLaunchDesc": MessageLookupByLibrary.simpleMessage("后台启动"),
     "singleAdd": MessageLookupByLibrary.simpleMessage("单条添加"),
-    "singleValueTip": m88,
+    "singleValueTip": m89,
     "size": MessageLookupByLibrary.simpleMessage("尺寸"),
+    "skipDomain": MessageLookupByLibrary.simpleMessage("跳过域名"),
+    "skipDomainDesc": MessageLookupByLibrary.simpleMessage("嗅探到跳过域名中的域名时不予采用"),
+    "skipDstAddress": MessageLookupByLibrary.simpleMessage("跳过目标地址"),
+    "skipSrcAddress": MessageLookupByLibrary.simpleMessage("跳过来源地址"),
     "slide": MessageLookupByLibrary.simpleMessage("滑动"),
     "sliders": MessageLookupByLibrary.simpleMessage("滑块"),
+    "sniffProtocols": MessageLookupByLibrary.simpleMessage("协议"),
+    "sniffer": MessageLookupByLibrary.simpleMessage("域名嗅探"),
+    "snifferStatusDesc": MessageLookupByLibrary.simpleMessage(
+      "域名嗅探从 TLS、HTTP、QUIC 流量中识别域名，供规则匹配",
+    ),
     "socksPort": MessageLookupByLibrary.simpleMessage("Socks端口"),
     "softStyle": MessageLookupByLibrary.simpleMessage("柔和"),
     "soldOut": MessageLookupByLibrary.simpleMessage("已售罄"),
@@ -2001,7 +2044,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleAvailableExitNodes": MessageLookupByLibrary.simpleMessage(
       "可用的出口节点",
     ),
-    "tailscaleCheckSettings": m89,
+    "tailscaleCheckSettings": m90,
     "tailscaleConnected": MessageLookupByLibrary.simpleMessage("已连接"),
     "tailscaleConnecting": MessageLookupByLibrary.simpleMessage("正在连接"),
     "tailscaleControlUrl": MessageLookupByLibrary.simpleMessage("控制服务器地址"),
@@ -2009,7 +2052,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "认证信息和设备身份仅保存在此设备",
     ),
     "tailscaleDeviceName": MessageLookupByLibrary.simpleMessage("设备名称"),
-    "tailscaleDevices": m90,
+    "tailscaleDevices": m91,
     "tailscaleDirect": MessageLookupByLibrary.simpleMessage("直连"),
     "tailscaleEmptyDesc": MessageLookupByLibrary.simpleMessage(
       "添加网络并在此设备上登录，启动代理后即可访问你的设备",
@@ -2084,7 +2127,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "tailscaleNeedsApproval": MessageLookupByLibrary.simpleMessage("等待设备审批"),
     "tailscaleNeedsLogin": MessageLookupByLibrary.simpleMessage("需要登录"),
-    "tailscaleNetworkInUse": m91,
+    "tailscaleNetworkInUse": m92,
     "tailscaleNetworkName": MessageLookupByLibrary.simpleMessage("网络名称"),
     "tailscaleNetworks": MessageLookupByLibrary.simpleMessage("网络"),
     "tailscaleNotApplied": MessageLookupByLibrary.simpleMessage("未生效"),
@@ -2095,8 +2138,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleOffline": MessageLookupByLibrary.simpleMessage("离线"),
     "tailscaleOnline": MessageLookupByLibrary.simpleMessage("在线"),
     "tailscaleOpenLoginPage": MessageLookupByLibrary.simpleMessage("打开登录页面"),
-    "tailscaleRelay": m92,
-    "tailscaleRemoveConfirm": m93,
+    "tailscaleRelay": m93,
+    "tailscaleRemoveConfirm": m94,
     "tailscaleRemoveNetwork": MessageLookupByLibrary.simpleMessage("移除网络"),
     "tailscaleSaveAndLogin": MessageLookupByLibrary.simpleMessage("保存并登录"),
     "tailscaleSignedIn": MessageLookupByLibrary.simpleMessage("已登录"),
@@ -2159,7 +2202,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "请输入 1280–65535 之间的整数",
     ),
     "tunOverrideDesc": MessageLookupByLibrary.simpleMessage(
-      "添加的项会覆写所有配置的虚拟网卡设置，未添加的项沿用配置自身的设置",
+      "添加的项会覆写所有配置的虚拟网卡设置，未添加的项沿用配置自身的设置。自定义配置自己添加的项优先",
     ),
     "turnOff": MessageLookupByLibrary.simpleMessage("关闭"),
     "turnOn": MessageLookupByLibrary.simpleMessage("开启"),
@@ -2183,7 +2226,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateApplyFailed": MessageLookupByLibrary.simpleMessage(
       "自动更新未完成，请重试或从下载页面更新",
     ),
-    "updateBuildNumber": m94,
+    "updateBuildNumber": m95,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage("取消下载"),
     "updateDownloadBackground": MessageLookupByLibrary.simpleMessage("移到后台下载"),
     "updateDownloadBrowser": MessageLookupByLibrary.simpleMessage("使用浏览器下载"),
@@ -2210,12 +2253,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateRestartHint": MessageLookupByLibrary.simpleMessage(
       "应用将退出、原位更新并重新打开，已有配置会保留",
     ),
-    "updateVersionNumber": m95,
+    "updateVersionNumber": m96,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("升级套餐"),
     "upload": MessageLookupByLibrary.simpleMessage("上传"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("通过URL获取配置文件"),
-    "urlTip": m96,
+    "urlTip": m97,
     "useHosts": MessageLookupByLibrary.simpleMessage("使用Hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("使用系统Hosts"),
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("已用流量"),
@@ -2239,7 +2282,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "同时设置系统时钟，Android上不生效",
     ),
-    "yearsAgo": m97,
+    "yearsAgo": m98,
     "zh_CN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };
 }

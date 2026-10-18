@@ -206,27 +206,29 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m87(count) => "${count} 件選択中";
 
-  static String m88(label) => "${label}は1項目のみ指定できます";
+  static String m88(count) => "設定 ${count} 件";
 
-  static String m89(fields) => "次の設定を確認してください：${fields}";
+  static String m89(label) => "${label}は1項目のみ指定できます";
 
-  static String m90(count) => "デバイス（${count}）";
+  static String m90(fields) => "次の設定を確認してください：${fields}";
 
-  static String m91(name, profile) =>
+  static String m91(count) => "デバイス（${count}）";
+
+  static String m92(name, profile) =>
       "${name} はプロファイル「${profile}」のルールまたはグループでまだ使われています";
 
-  static String m92(region) => "リレー ${region}";
+  static String m93(region) => "リレー ${region}";
 
-  static String m93(name) =>
+  static String m94(name) =>
       "このデバイスは ${name} から退出し、このデバイス上のログイン情報が削除されます。現在ネットワークに接続できない場合は、Tailscale の管理コンソールでデバイスを削除してください";
 
-  static String m94(build) => "ビルド番号: ${build}";
+  static String m95(build) => "ビルド番号: ${build}";
 
-  static String m95(version) => "バージョン：${version}";
+  static String m96(version) => "バージョン：${version}";
 
-  static String m96(label) => "${label}はURLである必要があります";
+  static String m97(label) => "${label}はURLである必要があります";
 
-  static String m97(count) => "${count}年前";
+  static String m98(count) => "${count}年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -272,6 +274,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "addProxyChainNode": MessageLookupByLibrary.simpleMessage("追加"),
     "addProxyGroup": MessageLookupByLibrary.simpleMessage("プロキシグループを追加"),
     "addRule": MessageLookupByLibrary.simpleMessage("ルールを追加"),
+    "addSettingEntry": MessageLookupByLibrary.simpleMessage("設定項目を追加"),
     "addSsid": MessageLookupByLibrary.simpleMessage("SSIDを追加"),
     "addedRules": MessageLookupByLibrary.simpleMessage("追加ルール"),
     "additionalPrefix": MessageLookupByLibrary.simpleMessage("名前のプレフィックス"),
@@ -1185,6 +1188,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "followSystem": MessageLookupByLibrary.simpleMessage("システムに従う"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("フォントファミリー"),
     "fontSize": MessageLookupByLibrary.simpleMessage("サイズ"),
+    "forceDnsMapping": MessageLookupByLibrary.simpleMessage("DNSマッピングを強制"),
+    "forceDnsMappingDesc": MessageLookupByLibrary.simpleMessage(
+      "DNS マッピングを強制すると、DNS マッピングでドメインを得た接続もスニッフィングします",
+    ),
+    "forceDomain": MessageLookupByLibrary.simpleMessage("強制するドメイン"),
+    "forceDomainDesc": MessageLookupByLibrary.simpleMessage(
+      "強制するドメインもスニッフィングします。ドメインを持つその他の接続は対象外です",
+    ),
     "forceRestartCoreTip": MessageLookupByLibrary.simpleMessage(
       "コアを強制再起動してもよろしいですか？",
     ),
@@ -1390,6 +1401,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "tcp または udp のみ対応しています",
     ),
     "invalidPolicy": m32,
+    "invalidPortRangeContent": MessageLookupByLibrary.simpleMessage(
+      "443 や 8000-9000 のようなポートまたは範囲を入力してください",
+    ),
     "invalidProfileQrcode": MessageLookupByLibrary.simpleMessage(
       "このQRコードにはプロファイルのリンクが含まれていません",
     ),
@@ -1650,6 +1664,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "overlayNameConflict": m51,
     "override": MessageLookupByLibrary.simpleMessage("上書き"),
+    "overrideDestination": MessageLookupByLibrary.simpleMessage("宛先を上書き"),
+    "overrideDestinationDesc": MessageLookupByLibrary.simpleMessage(
+      "宛先を上書きすると、元のアドレスではなく検出したドメインに接続します",
+    ),
     "overrideEntries": MessageLookupByLibrary.simpleMessage("上書き項目"),
     "overrideMode": MessageLookupByLibrary.simpleMessage("上書きモード"),
     "overrideScript": MessageLookupByLibrary.simpleMessage("上書きスクリプト"),
@@ -1671,6 +1689,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "overwriteTypeMerge": MessageLookupByLibrary.simpleMessage("追加"),
     "overwriteTypeMergeDesc": MessageLookupByLibrary.simpleMessage(
       "サブスクリプションのルールとグループを保ち、個人設定を追加します。個人ルールはサブスクリプションより優先され、既存の追加ルールの優先順位は維持されます",
+    ),
+    "parsePureIp": MessageLookupByLibrary.simpleMessage("純粋なIPを解析"),
+    "parsePureIpDesc": MessageLookupByLibrary.simpleMessage(
+      "純粋な IP を解析すると、IP アドレスしかない接続をスニッフィングします",
     ),
     "password": MessageLookupByLibrary.simpleMessage("パスワード"),
     "passwordLabel": MessageLookupByLibrary.simpleMessage("パスワード"),
@@ -1723,6 +1745,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "portTip": m61,
     "portUnavailableMessage": m62,
     "portUnavailableTitle": MessageLookupByLibrary.simpleMessage("ポートを使用できません"),
+    "ports": MessageLookupByLibrary.simpleMessage("ポート"),
     "preferH3": MessageLookupByLibrary.simpleMessage("HTTP/3を優先"),
     "preferH3Desc": MessageLookupByLibrary.simpleMessage("DOHのHTTP/3を優先使用"),
     "prerequisites": MessageLookupByLibrary.simpleMessage("前提条件"),
@@ -1741,10 +1764,19 @@ class MessageLookup extends MessageLookupByLibrary {
     "profileNameNullValidationDesc": MessageLookupByLibrary.simpleMessage(
       "プロファイル名を入力してください",
     ),
+    "profileOverrideSettingsDesc": MessageLookupByLibrary.simpleMessage(
+      "このプロファイルにのみ適用され、アプリの DNS・NTP 設定の上書き項目より優先されます。追加していない項目はそれらの上書き項目に従います",
+    ),
     "profileParseErrorDesc": MessageLookupByLibrary.simpleMessage(
       "プロファイル解析エラー",
     ),
     "profileProviderInUse": m63,
+    "profileSettingsDesc": MessageLookupByLibrary.simpleMessage(
+      "このプロファイルにのみ適用されます。追加していない項目はデフォルト値を使用します",
+    ),
+    "profileTunSettingsDesc": MessageLookupByLibrary.simpleMessage(
+      "このプロファイルにのみ適用され、ネットワーク設定の TUN 上書き項目より優先されます",
+    ),
     "profileUrlInvalidValidationDesc": MessageLookupByLibrary.simpleMessage(
       "有効なプロファイルURLを入力してください",
     ),
@@ -2158,7 +2190,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "sendResetEmail": MessageLookupByLibrary.simpleMessage("リセットメールを送信"),
     "server": MessageLookupByLibrary.simpleMessage("サーバー"),
     "serviceCheckFailed": MessageLookupByLibrary.simpleMessage("サービスチェック失敗"),
+    "settingEntries": MessageLookupByLibrary.simpleMessage("設定項目"),
     "settings": MessageLookupByLibrary.simpleMessage("設定"),
+    "settingsCount": m88,
     "show": MessageLookupByLibrary.simpleMessage("表示"),
     "showLess": MessageLookupByLibrary.simpleMessage("折りたたむ"),
     "showMore": MessageLookupByLibrary.simpleMessage("展開"),
@@ -2174,10 +2208,21 @@ class MessageLookup extends MessageLookupByLibrary {
     "silentLaunch": MessageLookupByLibrary.simpleMessage("バックグラウンド起動"),
     "silentLaunchDesc": MessageLookupByLibrary.simpleMessage("バックグラウンドで起動"),
     "singleAdd": MessageLookupByLibrary.simpleMessage("個別追加"),
-    "singleValueTip": m88,
+    "singleValueTip": m89,
     "size": MessageLookupByLibrary.simpleMessage("サイズ"),
+    "skipDomain": MessageLookupByLibrary.simpleMessage("スキップするドメイン"),
+    "skipDomainDesc": MessageLookupByLibrary.simpleMessage(
+      "スキップするドメインにあるドメインを検出しても使用しません",
+    ),
+    "skipDstAddress": MessageLookupByLibrary.simpleMessage("スキップする宛先アドレス"),
+    "skipSrcAddress": MessageLookupByLibrary.simpleMessage("スキップする送信元アドレス"),
     "slide": MessageLookupByLibrary.simpleMessage("スライド"),
     "sliders": MessageLookupByLibrary.simpleMessage("スライダ"),
+    "sniffProtocols": MessageLookupByLibrary.simpleMessage("プロトコル"),
+    "sniffer": MessageLookupByLibrary.simpleMessage("スニッファー"),
+    "snifferStatusDesc": MessageLookupByLibrary.simpleMessage(
+      "スニッファーは TLS・HTTP・QUIC の通信からドメインを読み取り、ルールで照合できるようにします",
+    ),
     "socksPort": MessageLookupByLibrary.simpleMessage("Socksポート"),
     "softStyle": MessageLookupByLibrary.simpleMessage("ソフト"),
     "soldOut": MessageLookupByLibrary.simpleMessage("売り切れ"),
@@ -2268,7 +2313,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleAvailableExitNodes": MessageLookupByLibrary.simpleMessage(
       "利用可能な出口ノード",
     ),
-    "tailscaleCheckSettings": m89,
+    "tailscaleCheckSettings": m90,
     "tailscaleConnected": MessageLookupByLibrary.simpleMessage("接続済み"),
     "tailscaleConnecting": MessageLookupByLibrary.simpleMessage("接続中"),
     "tailscaleControlUrl": MessageLookupByLibrary.simpleMessage(
@@ -2278,7 +2323,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "認証情報とデバイスの識別情報はこのデバイスにのみ保存されます",
     ),
     "tailscaleDeviceName": MessageLookupByLibrary.simpleMessage("デバイス名"),
-    "tailscaleDevices": m90,
+    "tailscaleDevices": m91,
     "tailscaleDirect": MessageLookupByLibrary.simpleMessage("直接接続"),
     "tailscaleEmptyDesc": MessageLookupByLibrary.simpleMessage(
       "ネットワークを追加してこのデバイスでログインし、プロキシを起動するとデバイスにアクセスできます",
@@ -2363,7 +2408,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "デバイスの承認待ちです",
     ),
     "tailscaleNeedsLogin": MessageLookupByLibrary.simpleMessage("ログインが必要です"),
-    "tailscaleNetworkInUse": m91,
+    "tailscaleNetworkInUse": m92,
     "tailscaleNetworkName": MessageLookupByLibrary.simpleMessage("ネットワーク名"),
     "tailscaleNetworks": MessageLookupByLibrary.simpleMessage("ネットワーク"),
     "tailscaleNotApplied": MessageLookupByLibrary.simpleMessage("未適用"),
@@ -2376,8 +2421,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleOpenLoginPage": MessageLookupByLibrary.simpleMessage(
       "ログインページを開く",
     ),
-    "tailscaleRelay": m92,
-    "tailscaleRemoveConfirm": m93,
+    "tailscaleRelay": m93,
+    "tailscaleRemoveConfirm": m94,
     "tailscaleRemoveNetwork": MessageLookupByLibrary.simpleMessage("ネットワークを削除"),
     "tailscaleSaveAndLogin": MessageLookupByLibrary.simpleMessage("保存してログイン"),
     "tailscaleSignedIn": MessageLookupByLibrary.simpleMessage("ログイン済み"),
@@ -2444,7 +2489,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "1280〜65535 の整数を入力してください",
     ),
     "tunOverrideDesc": MessageLookupByLibrary.simpleMessage(
-      "ここで追加した項目は、すべてのプロファイルの TUN 設定を上書きします。追加していない項目はプロファイル自身の設定のままです",
+      "ここで追加した項目は、すべてのプロファイルの TUN 設定を上書きします。追加していない項目はプロファイル自身の設定のままです。カスタムプロファイル自身が追加した項目が優先されます",
     ),
     "turnOff": MessageLookupByLibrary.simpleMessage("オフ"),
     "turnOn": MessageLookupByLibrary.simpleMessage("オン"),
@@ -2470,7 +2515,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateApplyFailed": MessageLookupByLibrary.simpleMessage(
       "自動更新を完了できませんでした。再試行するか、ダウンロードページから更新してください。",
     ),
-    "updateBuildNumber": m94,
+    "updateBuildNumber": m95,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage("ダウンロードを中止"),
     "updateDownloadBackground": MessageLookupByLibrary.simpleMessage(
       "バックグラウンドでダウンロード",
@@ -2505,12 +2550,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateRestartHint": MessageLookupByLibrary.simpleMessage(
       "アプリを終了して更新し、再起動します。設定は保持されます。",
     ),
-    "updateVersionNumber": m95,
+    "updateVersionNumber": m96,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("プランをアップグレード"),
     "upload": MessageLookupByLibrary.simpleMessage("アップロード"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("URL経由でプロファイルを取得"),
-    "urlTip": m96,
+    "urlTip": m97,
     "useHosts": MessageLookupByLibrary.simpleMessage("ホストを使用"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("システムホストを使用"),
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("使用済みデータ量"),
@@ -2534,7 +2579,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "システムクロックも設定します。Androidでは無視されます",
     ),
-    "yearsAgo": m97,
+    "yearsAgo": m98,
     "zh_CN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };
 }

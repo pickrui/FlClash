@@ -70,13 +70,22 @@ extension on DnsOverrideKey {
 // enhanced-mode.
 const _enhancedModes = [DnsMode.normal, DnsMode.fakeIp, DnsMode.redirHost];
 
-OverrideState<DnsOverrideKey, Dns> _getDns(ClashConfig config) =>
+typedef _DnsState = OverrideState<DnsOverrideKey, Dns>;
+
+_DnsState _getDns(ClashConfig config) =>
     (model: config.dns, keys: config.dnsOverrideKeys);
 
-ClashConfig _setDns(
-  ClashConfig config,
-  OverrideState<DnsOverrideKey, Dns> state,
-) => config.copyWith(dns: state.model, dnsOverrideKeys: state.keys);
+ClashConfig _setDns(ClashConfig config, _DnsState state) =>
+    config.copyWith(dns: state.model, dnsOverrideKeys: state.keys);
+
+_DnsState _profileDns(ProfileOverrides overrides) =>
+    (model: overrides.dns, keys: overrides.dnsOverrideKeys);
+
+ProfileOverrides _setProfileDns(ProfileOverrides overrides, _DnsState state) =>
+    overrides.copyWith(dns: state.model, dnsOverrideKeys: state.keys);
+
+String _profileDnsDescription(AppLocalizations l) =>
+    l.profileOverrideSettingsDesc;
 
 ListOverrideField<Dns> _servers(
   List<String> Function(Dns dns) select,
@@ -96,11 +105,10 @@ MapOverrideField<Dns> _policy(
 
 class _DnsOverrideSpec extends OverrideSpec<DnsOverrideKey, Dns>
     with OverrideQuickEdit<DnsOverrideKey, Dns> {
-  const _DnsOverrideSpec();
+  const _DnsOverrideSpec(this.target);
 
   @override
-  OverrideTarget<DnsOverrideKey, Dns> get target =>
-      const OverrideTarget(get: _getDns, set: _setDns);
+  final OverrideTarget<DnsOverrideKey, Dns> target;
 
   @override
   List<DnsOverrideKey> get values => DnsOverrideKey.values;
@@ -109,7 +117,7 @@ class _DnsOverrideSpec extends OverrideSpec<DnsOverrideKey, Dns>
   Dns get defaults => defaultDns;
 
   @override
-  String get title => 'DNS';
+  String title(AppLocalizations l) => 'DNS';
 
   @override
   NullStatusIllustration get illustration => NullStatusIllustration.dns;
@@ -132,10 +140,7 @@ class _DnsOverrideSpec extends OverrideSpec<DnsOverrideKey, Dns>
       model.overrideYaml(keys);
 
   @override
-  OverrideState<DnsOverrideKey, Dns> applyOverrideYaml(
-    Dns model,
-    String content,
-  ) {
+  _DnsState applyOverrideYaml(Dns model, String content) {
     final result = model.applyOverrideYaml(content);
     return (model: result.dns, keys: result.keys);
   }
@@ -287,9 +292,23 @@ class _DnsOverrideSpec extends OverrideSpec<DnsOverrideKey, Dns>
 }
 
 class DnsView extends StatelessWidget {
-  const DnsView({super.key});
+  const DnsView({super.key}) : profileId = null;
+
+  /// The keys [profileId], a custom profile, picks over the app's.
+  const DnsView.profile(int this.profileId, {super.key});
+
+  final int? profileId;
 
   @override
-  Widget build(BuildContext context) =>
-      const OverrideView(spec: _DnsOverrideSpec());
+  Widget build(BuildContext context) => OverrideView(
+    spec: _DnsOverrideSpec(switch (profileId) {
+      null => const PatchOverrideTarget(get: _getDns, set: _setDns),
+      final profileId => ProfileOverrideTarget(
+        profileId,
+        get: _profileDns,
+        set: _setProfileDns,
+        description: _profileDnsDescription,
+      ),
+    }),
+  );
 }

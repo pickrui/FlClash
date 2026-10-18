@@ -31,21 +31,29 @@ extension on NtpOverrideKey {
   };
 }
 
-OverrideState<NtpOverrideKey, Ntp> _getNtp(ClashConfig config) =>
+typedef _NtpState = OverrideState<NtpOverrideKey, Ntp>;
+
+_NtpState _getNtp(ClashConfig config) =>
     (model: config.ntp, keys: config.ntpOverrideKeys);
 
-ClashConfig _setNtp(
-  ClashConfig config,
-  OverrideState<NtpOverrideKey, Ntp> state,
-) => config.copyWith(ntp: state.model, ntpOverrideKeys: state.keys);
+ClashConfig _setNtp(ClashConfig config, _NtpState state) =>
+    config.copyWith(ntp: state.model, ntpOverrideKeys: state.keys);
+
+_NtpState _profileNtp(ProfileOverrides overrides) =>
+    (model: overrides.ntp, keys: overrides.ntpOverrideKeys);
+
+ProfileOverrides _setProfileNtp(ProfileOverrides overrides, _NtpState state) =>
+    overrides.copyWith(ntp: state.model, ntpOverrideKeys: state.keys);
+
+String _profileNtpDescription(AppLocalizations l) =>
+    l.profileOverrideSettingsDesc;
 
 class _NtpOverrideSpec extends OverrideSpec<NtpOverrideKey, Ntp>
     with OverrideQuickEdit<NtpOverrideKey, Ntp> {
-  const _NtpOverrideSpec();
+  const _NtpOverrideSpec(this.target);
 
   @override
-  OverrideTarget<NtpOverrideKey, Ntp> get target =>
-      const OverrideTarget(get: _getNtp, set: _setNtp);
+  final OverrideTarget<NtpOverrideKey, Ntp> target;
 
   @override
   List<NtpOverrideKey> get values => NtpOverrideKey.values;
@@ -54,7 +62,7 @@ class _NtpOverrideSpec extends OverrideSpec<NtpOverrideKey, Ntp>
   Ntp get defaults => defaultNtp;
 
   @override
-  String get title => 'NTP';
+  String title(AppLocalizations l) => 'NTP';
 
   @override
   NullStatusIllustration get illustration => NullStatusIllustration.ntp;
@@ -73,10 +81,7 @@ class _NtpOverrideSpec extends OverrideSpec<NtpOverrideKey, Ntp>
       model.overrideYaml(keys);
 
   @override
-  OverrideState<NtpOverrideKey, Ntp> applyOverrideYaml(
-    Ntp model,
-    String content,
-  ) {
+  _NtpState applyOverrideYaml(Ntp model, String content) {
     final result = model.applyOverrideYaml(content);
     return (model: result.ntp, keys: result.keys);
   }
@@ -119,9 +124,23 @@ class _NtpOverrideSpec extends OverrideSpec<NtpOverrideKey, Ntp>
 }
 
 class NtpView extends StatelessWidget {
-  const NtpView({super.key});
+  const NtpView({super.key}) : profileId = null;
+
+  /// The keys [profileId], a custom profile, picks over the app's.
+  const NtpView.profile(int this.profileId, {super.key});
+
+  final int? profileId;
 
   @override
-  Widget build(BuildContext context) =>
-      const OverrideView(spec: _NtpOverrideSpec());
+  Widget build(BuildContext context) => OverrideView(
+    spec: _NtpOverrideSpec(switch (profileId) {
+      null => const PatchOverrideTarget(get: _getNtp, set: _setNtp),
+      final profileId => ProfileOverrideTarget(
+        profileId,
+        get: _profileNtp,
+        set: _setProfileNtp,
+        description: _profileNtpDescription,
+      ),
+    }),
+  );
 }

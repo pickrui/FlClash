@@ -10,6 +10,7 @@ import 'package:fl_clash/features/overwrite/overwrite_selection_sheet.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/editor.dart';
+import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/config/dns.dart';
@@ -19,7 +20,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:code_forge/code_forge.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart' show Override;
 
+import '../helpers/test_profiles.dart';
 import '../plugins/code_forge/support.dart';
 
 const _cidrTip = 'Enter an IP range in CIDR form such as 192.168.0.0/16';
@@ -27,11 +30,13 @@ const _cidrTip = 'Enter an IP range in CIDR form such as 192.168.0.0/16';
 Future<ProviderContainer> _pumpOverrides(
   WidgetTester tester,
   Widget home,
-  ClashConfig Function(ClashConfig state) seed,
-) async {
+  ClashConfig Function(ClashConfig state) seed, {
+  List<Override> overrides = const [],
+}) async {
   final container = ProviderContainer(
     overrides: [
       viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 900)),
+      ...overrides,
     ],
   );
   addTearDown(container.dispose);
@@ -141,6 +146,53 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
+
+  testWidgets('emptying a custom profile key takes it off the list', (
+    tester,
+  ) async {
+    final profile = Profile.custom(label: 'Built').copyWith(
+      overrides: const ProfileOverrides(
+        dns: Dns(listen: '127.0.0.1:1053', fallback: ['192.0.2.9']),
+        dnsOverrideKeys: {
+          DnsOverrideKey.listen,
+          DnsOverrideKey.fallback,
+          DnsOverrideKey.ipv6,
+        },
+      ),
+    );
+    final container = await _pumpOverrides(
+      tester,
+      DnsView.profile(profile.id),
+      (state) => state,
+      overrides: [
+        profilesProvider.overrideWith(() => TestProfiles([profile])),
+      ],
+    );
+    ProfileOverrides overrides() =>
+        container.read(profilesProvider).single.overrides;
+
+    await tester.tap(find.text('Listen'));
+    await tester.pumpAndSettle();
+    await _submitText(tester, ' ');
+    expect(overrides().dnsOverrideKeys, {
+      DnsOverrideKey.fallback,
+      DnsOverrideKey.ipv6,
+    });
+    expect(overrides().dns.listen, defaultDns.listen);
+
+    await tester.tap(find.byTooltip('Quick edit'));
+    await tester.pumpAndSettle();
+    tester.widget<CodeForge>(find.byType(CodeForge)).controller.text =
+        'fallback: []\nipv6: true';
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Save'));
+    await tester.pumpAndSettle();
+    expect(overrides().dnsOverrideKeys, {DnsOverrideKey.ipv6});
+    expect(overrides().dns.ipv6, isTrue);
+    expect(overrides().dns.fallback, defaultDns.fallback);
+    expect(container.read(patchClashConfigProvider).dnsOverrideKeys, isEmpty);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('DNS override fields show localized names', (tester) async {
     final container = ProviderContainer(

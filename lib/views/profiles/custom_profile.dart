@@ -17,7 +17,10 @@ import 'package:fl_clash/providers/clash_providers.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/views/config/dns.dart';
 import 'package:fl_clash/views/config/providers.dart';
+import 'package:fl_clash/views/config/sniffer.dart';
+import 'package:fl_clash/views/config/tun.dart';
 import 'package:fl_clash/views/tools.dart' show tailscalePageBuilder;
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -164,6 +167,8 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
             _ProfileProviders(widget.profileId),
             ProfileProxyChainsContent(profileId: widget.profileId),
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            SliverToBoxAdapter(child: _ProfileSettings(widget.profileId)),
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
             const SliverToBoxAdapter(child: _Resources()),
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
           ],
@@ -279,6 +284,76 @@ class _ProfileProviders extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+typedef _SettingsStatus = ({bool dns, bool ntp, bool sniffer, int tunKeys});
+
+/// The app's DNS and NTP picks apply here too, under the profile's own.
+_SettingsStatus _settingsStatus(ProfileOverrides own, ClashConfig app) => (
+  dns: own.dnsOverrideKeys.contains(DnsOverrideKey.enable)
+      ? own.dns.enable
+      : !app.dnsOverrideKeys.contains(DnsOverrideKey.enable) || app.dns.enable,
+  ntp: own.ntpOverrideKeys.contains(NtpOverrideKey.enable)
+      ? own.ntp.enable
+      : app.ntpOverrideKeys.contains(NtpOverrideKey.enable) && app.ntp.enable,
+  sniffer:
+      own.snifferOverrideKeys.contains(SnifferOverrideKey.enable) &&
+      own.sniffer.enable,
+  tunKeys: own.tunOverrideKeys.length,
+);
+
+class _ProfileSettings extends ConsumerWidget {
+  final int profileId;
+
+  const _ProfileSettings(this.profileId);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    final own = ref.watch(
+      profileProvider(profileId)
+          .select((profile) => profile?.overrides ?? const ProfileOverrides()),
+    );
+    final status = ref.watch(
+      patchClashConfigProvider.select((app) => _settingsStatus(own, app)),
+    );
+    String enabled(bool value) =>
+        value ? appLocalizations.enabled : appLocalizations.disabled;
+    return generateSectionV3(
+      title: appLocalizations.settings,
+      items: [
+        ListItem.open(
+          leading: const GlyphIcon(AppGlyphs.dns),
+          title: const Text('DNS'),
+          subtitle: Text(enabled(status.dns)),
+          delegate: OpenDelegate(widget: DnsView.profile(profileId)),
+        ),
+        ListItem.open(
+          leading: const GlyphIcon(AppGlyphs.clock),
+          title: const Text('NTP'),
+          subtitle: Text(enabled(status.ntp)),
+          delegate: OpenDelegate(widget: NtpView.profile(profileId)),
+        ),
+        ListItem.open(
+          leading: const GlyphIcon(AppGlyphs.eye),
+          title: Text(appLocalizations.sniffer),
+          subtitle: Text(enabled(status.sniffer)),
+          delegate: OpenDelegate(widget: SnifferView(profileId)),
+        ),
+        if (system.isDesktop)
+          ListItem.open(
+            leading: const GlyphIcon(AppGlyphs.vpn),
+            title: Text(appLocalizations.tun),
+            subtitle: Text(
+              status.tunKeys > 0
+                  ? appLocalizations.settingsCount(status.tunKeys)
+                  : appLocalizations.defaultText,
+            ),
+            delegate: OpenDelegate(widget: TunView(profileId)),
+          ),
+      ],
     );
   }
 }

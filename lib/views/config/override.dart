@@ -11,6 +11,8 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/config.dart';
+import 'package:fl_clash/providers/database.dart';
+import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/config_item.dart';
 import 'package:fl_clash/widgets/navigation_dock.dart';
@@ -24,30 +26,29 @@ abstract interface class OverrideModel<M> {
   ProviderListenable<T> selectModel<T>(T Function(M model) select);
 
   ConfigWriter<T> modelWriter<T>(M Function(M model, T value) update);
+
+  /// Whether emptying a value takes its key off the list.
+  bool get emptyCancels;
 }
 
-/// Where the app config keeps one section and the keys picked from it.
-class OverrideTarget<K extends Enum, M> implements OverrideModel<M> {
-  const OverrideTarget({required this.get, required this.set});
+/// Where an override page keeps its model and the keys picked from it.
+abstract class OverrideTarget<K extends Enum, M> implements OverrideModel<M> {
+  const OverrideTarget();
 
-  final OverrideState<K, M> Function(ClashConfig config) get;
-  final ClashConfig Function(ClashConfig config, OverrideState<K, M> state) set;
+  ConfigLabel? get description => null;
 
-  ProviderListenable<T> select<T>(
-    T Function(OverrideState<K, M> state) select,
-  ) => patchClashConfigProvider.select((config) => select(get(config)));
+  ConfigLabel get entries;
 
-  OverrideState<K, M> read(WidgetRef ref) =>
-      get(ref.read(patchClashConfigProvider));
+  ConfigLabel get addEntry;
+
+  ProviderListenable<T> select<T>(T Function(OverrideState<K, M> state) select);
+
+  OverrideState<K, M> read(WidgetRef ref);
 
   void update(
     WidgetRef ref,
     OverrideState<K, M> Function(OverrideState<K, M> state) update,
-  ) {
-    ref
-        .read(patchClashConfigProvider.notifier)
-        .update((config) => set(config, update(get(config))));
-  }
+  );
 
   @override
   ProviderListenable<T> selectModel<T>(T Function(M model) select) =>
@@ -59,6 +60,106 @@ class OverrideTarget<K extends Enum, M> implements OverrideModel<M> {
         ref,
         (state) => (model: update(state.model, value), keys: state.keys),
       );
+
+  @override
+  bool get emptyCancels => true;
+}
+
+/// The app config's picks, which apply to every profile; an emptied entry
+/// replaces the profile's own value with nothing.
+class PatchOverrideTarget<K extends Enum, M> extends OverrideTarget<K, M> {
+  const PatchOverrideTarget({required this.get, required this.set});
+
+  final OverrideState<K, M> Function(ClashConfig config) get;
+  final ClashConfig Function(ClashConfig config, OverrideState<K, M> state) set;
+
+  @override
+  ConfigLabel get entries =>
+      (l) => l.overrideEntries;
+
+  @override
+  ConfigLabel get addEntry =>
+      (l) => l.addOverrideEntry;
+
+  @override
+  bool get emptyCancels => false;
+
+  @override
+  ProviderListenable<T> select<T>(
+    T Function(OverrideState<K, M> state) select,
+  ) => patchClashConfigProvider.select((config) => select(get(config)));
+
+  @override
+  OverrideState<K, M> read(WidgetRef ref) =>
+      get(ref.read(patchClashConfigProvider));
+
+  @override
+  void update(
+    WidgetRef ref,
+    OverrideState<K, M> Function(OverrideState<K, M> state) update,
+  ) {
+    ref
+        .read(patchClashConfigProvider.notifier)
+        .update((config) => set(config, update(get(config))));
+  }
+}
+
+/// A custom profile's own picks, kept in its overrides.
+class ProfileOverrideTarget<K extends Enum, M> extends OverrideTarget<K, M> {
+  const ProfileOverrideTarget(
+    this.profileId, {
+    required this.get,
+    required this.set,
+    this._description,
+  });
+
+  final int profileId;
+  final OverrideState<K, M> Function(ProfileOverrides overrides) get;
+  final ProfileOverrides Function(
+    ProfileOverrides overrides,
+    OverrideState<K, M> state,
+  )
+  set;
+  final ConfigLabel? _description;
+
+  @override
+  ConfigLabel get description => _description ?? (l) => l.profileSettingsDesc;
+
+  @override
+  ConfigLabel get entries =>
+      (l) => l.settingEntries;
+
+  @override
+  ConfigLabel get addEntry =>
+      (l) => l.addSettingEntry;
+
+  static ProfileOverrides _of(Profile? profile) =>
+      profile?.overrides ?? const ProfileOverrides();
+
+  @override
+  ProviderListenable<T> select<T>(
+    T Function(OverrideState<K, M> state) select,
+  ) =>
+      profileProvider(profileId).select((profile) => select(get(_of(profile))));
+
+  @override
+  OverrideState<K, M> read(WidgetRef ref) =>
+      get(_of(ref.read(profileProvider(profileId))));
+
+  @override
+  void update(
+    WidgetRef ref,
+    OverrideState<K, M> Function(OverrideState<K, M> state) update,
+  ) {
+    ref
+        .read(profilesProvider.notifier)
+        .updateProfile(
+          profileId,
+          (profile) => profile.copyWith(
+            overrides: set(profile.overrides, update(get(profile.overrides))),
+          ),
+        );
+  }
 }
 
 abstract class OverrideField<M> {
@@ -186,6 +287,7 @@ class NumberOverrideField<M> extends ValueOverrideField<M, int> {
       normalize: (value) => value.trim(),
       validator: (value, l) =>
           _validateNumber(value, l, title(l), min: min, max: max),
+      allowEmpty: model.emptyCancels,
     );
   }
 }
@@ -219,7 +321,7 @@ class TextOverrideField<M> extends ValueOverrideField<M, String> {
       maxLength: maxLength,
       normalize: (value) => value.trim(),
       validator: validator,
-      allowEmpty: allowEmpty,
+      allowEmpty: allowEmpty || model.emptyCancels,
     );
   }
 }
@@ -327,6 +429,10 @@ abstract class OverrideSpec<K extends Enum, M> {
 
   OverrideTarget<K, M> get target;
 
+  String title(AppLocalizations l);
+
+  NullStatusIllustration get illustration;
+
   List<K> get values;
 
   /// What a newly added key starts from.
@@ -354,6 +460,13 @@ abstract class OverrideSpec<K extends Enum, M> {
     return (model: model, keys: state.keys.difference(keys));
   }
 
+  Set<K> emptyKeys(OverrideState<K, M> state) => {
+    for (final key in state.keys)
+      if (fieldOf(key) case final ValueOverrideField<M, Object?> field
+          when isUnsetOverrideValue(field.select(state.model)))
+        key,
+  };
+
   List<(String, List<K>)> sectionsOf(AppLocalizations l, Iterable<K> keys) {
     final sections = <String, List<K>>{};
     for (final key in keys) {
@@ -366,10 +479,6 @@ abstract class OverrideSpec<K extends Enum, M> {
 }
 
 mixin OverrideQuickEdit<K extends Enum, M> on OverrideSpec<K, M> {
-  String get title;
-
-  NullStatusIllustration get illustration;
-
   EditorSchema get schema;
 
   String overrideYaml(M model, Set<K> keys);
@@ -390,7 +499,7 @@ Future<void> showOverrideAddSheet<K extends Enum, M>(
     context: context,
     props: const SheetProps(isScrollControlled: true),
     builder: (context, _) => OverwriteSelectionSheet<K>(
-      title: appLocalizations.addOverrideEntry,
+      title: spec.target.addEntry(appLocalizations),
       sections: [
         for (final (label, keys) in spec.sectionsOf(
           appLocalizations,
@@ -417,30 +526,37 @@ Future<void> showOverrideAddSheet<K extends Enum, M>(
 class OverrideView<K extends Enum, M> extends ConsumerWidget {
   const OverrideView({super.key, required this.spec});
 
-  final OverrideQuickEdit<K, M> spec;
+  final OverrideSpec<K, M> spec;
 
-  Future<void> _handleQuickEdit(BuildContext context, WidgetRef ref) {
+  Future<void> _handleQuickEdit(
+    BuildContext context,
+    WidgetRef ref,
+    OverrideQuickEdit<K, M> quickEdit,
+  ) {
     final state = spec.target.read(ref);
-    final raw = spec.overrideYaml(state.model, state.keys);
+    final raw = quickEdit.overrideYaml(state.model, state.keys);
     return BaseNavigator.push(
       context,
       EditorPage(
-        title: spec.title,
+        title: spec.title(context.appLocalizations),
         content: raw,
-        schema: spec.schema,
+        schema: quickEdit.schema,
         readOnly: false,
         onSave: (context, _, content) async {
-          if (await _handleQuickEditPop(ref, content, raw) && context.mounted) {
+          if (await _handleQuickEditPop(ref, quickEdit, content, raw) &&
+              context.mounted) {
             Navigator.of(context).pop();
           }
         },
-        onPop: (_, _, content) => _handleQuickEditPop(ref, content, raw),
+        onPop: (_, _, content) =>
+            _handleQuickEditPop(ref, quickEdit, content, raw),
       ),
     );
   }
 
   Future<bool> _handleQuickEditPop(
     WidgetRef ref,
+    OverrideQuickEdit<K, M> quickEdit,
     String content,
     String raw,
   ) async {
@@ -449,11 +565,12 @@ class OverrideView<K extends Enum, M> extends ConsumerWidget {
     }
     try {
       final current = spec.target.read(ref);
-      final next = spec.applyOverrideYaml(current.model, content);
-      spec.target.update(
-        ref,
-        (_) => spec.withoutKeys(next, current.keys.difference(next.keys)),
-      );
+      var next = quickEdit.applyOverrideYaml(current.model, content);
+      next = spec.withoutKeys(next, current.keys.difference(next.keys));
+      if (spec.target.emptyCancels) {
+        next = spec.withoutKeys(next, spec.emptyKeys(next));
+      }
+      spec.target.update(ref, (_) => next);
       return true;
     } catch (error) {
       final res = await globalState.showMessage(
@@ -470,13 +587,14 @@ class OverrideView<K extends Enum, M> extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
+    final spec = this.spec;
     final canAdd = ref.watch(
       spec.target.select(
         (state) => spec.values.any((key) => !state.keys.contains(key)),
       ),
     );
     return BaseScaffold(
-      title: spec.title,
+      title: spec.title(appLocalizations),
       actions: [
         IconButton(
           icon: const GlyphIcon(AppGlyphs.add),
@@ -485,11 +603,12 @@ class OverrideView<K extends Enum, M> extends ConsumerWidget {
               ? () => showOverrideAddSheet(context, ref, spec)
               : null,
         ),
-        IconButton(
-          icon: const GlyphIcon(AppGlyphs.compose),
-          tooltip: appLocalizations.quickEdit,
-          onPressed: () => _handleQuickEdit(context, ref),
-        ),
+        if (spec is OverrideQuickEdit<K, M>)
+          IconButton(
+            icon: const GlyphIcon(AppGlyphs.compose),
+            tooltip: appLocalizations.quickEdit,
+            onPressed: () => _handleQuickEdit(context, ref, spec),
+          ),
       ],
       body: _OverrideList(spec: spec),
     );
@@ -499,13 +618,14 @@ class OverrideView<K extends Enum, M> extends ConsumerWidget {
 class _OverrideList<K extends Enum, M> extends ConsumerWidget {
   const _OverrideList({required this.spec});
 
-  final OverrideQuickEdit<K, M> spec;
+  final OverrideSpec<K, M> spec;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     final keys = ref.watch(spec.target.select((state) => state.keys));
     final entries = spec.values.where(keys.contains);
+    final description = spec.target.description?.call(appLocalizations);
     return CustomScrollView(
       slivers: [
         SliverPadding(
@@ -530,6 +650,16 @@ class _OverrideList<K extends Enum, M> extends ConsumerWidget {
                       ),
                   ],
                 ),
+              if (entries.isNotEmpty && description != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  child: Text(
+                    description,
+                    style: context.textTheme.bodySmall?.copyWith(
+                      color: context.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
@@ -537,7 +667,10 @@ class _OverrideList<K extends Enum, M> extends ConsumerWidget {
           SliverFillRemaining(
             hasScrollBody: false,
             child: NullStatus(
-              label: appLocalizations.nullTip(appLocalizations.overrideEntries),
+              label: appLocalizations.nullTip(
+                spec.target.entries(appLocalizations),
+              ),
+              description: description,
               illustration: spec.illustration,
             ),
           ),
@@ -559,24 +692,49 @@ class OverrideEntry<K extends Enum, M> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return spec
-        .fieldOf(overrideKey)
-        .build(
-          spec.target,
-          title: (l) => spec.label(overrideKey, l),
-          description: spec.description(overrideKey),
-          leading: Consumer(
-            builder: (context, ref, _) => OverrideEntryButton(
-              glyph: AppGlyphs.remove,
-              tooltip: context.appLocalizations.remove,
-              onPressed: () => spec.target.update(
-                ref,
-                (state) => spec.withoutKeys(state, {overrideKey}),
-              ),
-            ),
+    final field = spec.fieldOf(overrideKey);
+    return field.build(
+      field is ValueOverrideField && spec.target.emptyCancels
+          ? _ListedValue(spec, overrideKey)
+          : spec.target,
+      title: (l) => spec.label(overrideKey, l),
+      description: spec.description(overrideKey),
+      leading: Consumer(
+        builder: (context, ref, _) => OverrideEntryButton(
+          glyph: AppGlyphs.remove,
+          tooltip: context.appLocalizations.remove,
+          onPressed: () => spec.target.update(
+            ref,
+            (state) => spec.withoutKeys(state, {overrideKey}),
           ),
-        );
+        ),
+      ),
+    );
   }
+}
+
+/// A key's own value; emptying it takes the key off the list.
+class _ListedValue<K extends Enum, M> implements OverrideModel<M> {
+  const _ListedValue(this.spec, this.overrideKey);
+
+  final OverrideSpec<K, M> spec;
+  final K overrideKey;
+
+  @override
+  bool get emptyCancels => true;
+
+  @override
+  ProviderListenable<T> selectModel<T>(T Function(M model) select) =>
+      spec.target.selectModel(select);
+
+  @override
+  ConfigWriter<T> modelWriter<T>(M Function(M model, T value) update) =>
+      (ref, value) => spec.target.update(
+        ref,
+        (state) => isUnsetOverrideValue(value)
+            ? spec.withoutKeys(state, {overrideKey})
+            : (model: update(state.model, value), keys: state.keys),
+      );
 }
 
 class OverrideEntryButton extends StatelessWidget {
