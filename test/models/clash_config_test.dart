@@ -42,9 +42,7 @@ void main() {
           final source = {
             'enable': true,
             'device': 'test-tun',
-            'auto-route': true,
             'stack': stack.name,
-            'dns-hijack': ['any:53'],
             'route-address': ['0.0.0.0/0'],
             'mtu': 1480,
           };

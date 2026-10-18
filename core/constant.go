@@ -7,7 +7,6 @@
 package main
 
 import (
-	"net/netip"
 	"time"
 
 	"github.com/metacubex/mihomo/adapter/provider"
@@ -54,14 +53,13 @@ type UpdateParams struct {
 	SuspendOnIdle      *bool              `json:"suspend-on-idle"`
 }
 
+// Only the TUN keys the app owns on every profile; the rest come from the
+// profile and its picked keys, which a live update must not overwrite.
 type tunSchema struct {
-	MTU          *int               `yaml:"mtu" json:"mtu,omitempty"`
-	Enable       bool               `yaml:"enable" json:"enable"`
-	Device       *string            `yaml:"device" json:"device"`
-	Stack        *constant.TUNStack `yaml:"stack" json:"stack"`
-	DNSHijack    *[]string          `yaml:"dns-hijack" json:"dns-hijack"`
-	AutoRoute    *bool              `yaml:"auto-route" json:"auto-route"`
-	RouteAddress *[]netip.Prefix    `yaml:"route-address" json:"route-address,omitempty"`
+	Enable    bool               `yaml:"enable" json:"enable"`
+	Device    *string            `yaml:"device" json:"device"`
+	Stack     *constant.TUNStack `yaml:"stack" json:"stack"`
+	AutoRoute *bool              `yaml:"auto-route" json:"auto-route"`
 }
 
 type ChangeProxyParams struct {

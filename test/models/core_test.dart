@@ -218,6 +218,33 @@ void main() {
         expect(UpdateParams.fromJson(disabledJson).geoAutoUpdate, false);
       },
     );
+
+    test('carries only the TUN keys the app owns over each profile', () {
+      const params = UpdateParams(
+        tun: Tun(
+          enable: true,
+          stack: TunStack.mips,
+          mtu: 1480,
+          routeAddress: ['10.0.0.0/8'],
+        ),
+        mixedPort: 7890,
+        allowLan: false,
+        findProcessMode: FindProcessMode.off,
+        mode: Mode.rule,
+        logLevel: LogLevel.error,
+        ipv6: false,
+        tcpConcurrent: true,
+        externalController: '',
+        secret: '',
+        unifiedDelay: true,
+      );
+      expect(jsonDecode(jsonEncode(params.toJson()))['tun'], {
+        'enable': true,
+        'device': defaultTun.device,
+        'stack': 'mips',
+        'auto-route': true,
+      });
+    });
   });
 
   group('InitParams', () {

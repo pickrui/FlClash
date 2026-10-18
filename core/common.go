@@ -8,7 +8,6 @@ package main
 
 import (
 	"bytes"
-	t "core/tun"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -364,17 +363,8 @@ func updateConfig(params *UpdateParams) error {
 		if params.Tun.Device != nil {
 			general.Tun.Device = *params.Tun.Device
 		}
-		if params.Tun.RouteAddress != nil {
-			general.Tun.RouteAddress = *params.Tun.RouteAddress
-		}
-		if params.Tun.DNSHijack != nil {
-			general.Tun.DNSHijack = *params.Tun.DNSHijack
-		}
 		if params.Tun.Stack != nil {
 			general.Tun.Stack = *params.Tun.Stack
-		}
-		if params.Tun.MTU != nil {
-			general.Tun.MTU = t.NormalizeMTU(*params.Tun.MTU)
 		}
 	}
 

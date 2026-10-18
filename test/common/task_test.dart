@@ -117,10 +117,7 @@ void main() {
           state.copyWith(
             realPatchConfig: state.realPatchConfig.copyWith(
               interfaceName: override,
-              tun: state.realPatchConfig.tun.copyWith(
-                enable: true,
-                autoRoute: true,
-              ),
+              tun: state.realPatchConfig.tun.copyWith(enable: true),
             ),
           ),
         );

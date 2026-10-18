@@ -25,10 +25,12 @@ abstract class SetupParams with _$SetupParams {
       _$SetupParamsFromJson(json);
 }
 
+Map<String, Object?> _tunCoreJson(Tun tun) => tun.coreJson;
+
 @freezed
 abstract class UpdateParams with _$UpdateParams {
   const factory UpdateParams({
-    required Tun tun,
+    @JsonKey(toJson: _tunCoreJson) required Tun tun,
     @JsonKey(name: 'mixed-port') required int mixedPort,
     @JsonKey(name: 'allow-lan') required bool allowLan,
     @JsonKey(name: 'find-process-mode')

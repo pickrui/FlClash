@@ -92,18 +92,13 @@ UpdateParams updateParams(Ref ref) {
   final authentication = ref.watch(
     networkSettingProvider.select((state) => state.authentication),
   );
-  final bypassPrivateRoute = ref.watch(
-    networkSettingProvider.select((state) => state.bypassPrivateRoute),
-  );
   final suspendOnIdle = ref.watch(
     networkSettingProvider.select((state) => state.suspendOnIdle),
   );
   return ref.watch(
     patchClashConfigProvider.select(
       (state) => UpdateParams(
-        tun: safeModeBuild
-            ? state.tun.copyWith(enable: false)
-            : state.tun.getRealTun(bypassPrivateRoute: bypassPrivateRoute),
+        tun: safeModeBuild ? state.tun.copyWith(enable: false) : state.tun,
         allowLan: !safeModeBuild && (system.isDocker || state.allowLan),
         findProcessMode: findProcessMode,
         mode: state.mode,

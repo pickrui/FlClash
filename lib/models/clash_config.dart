@@ -313,10 +313,8 @@ abstract class Tun with _$Tun {
   const factory Tun({
     @Default(false) bool enable,
     @Default(appName) String device,
-    @JsonKey(name: 'auto-route') @Default(false) bool autoRoute,
     @Default(TunStack.mixed) TunStack stack,
     @Default(defaultTunMtu) @JsonKey(fromJson: normalizeTunMtu) int mtu,
-    @JsonKey(name: 'dns-hijack') @Default(['any:53']) List<String> dnsHijack,
     @JsonKey(name: 'route-address') @Default([]) List<String> routeAddress,
   }) = _Tun;
 
@@ -340,24 +338,6 @@ extension TunExt on Tun {
     'stack': stack.name,
     'auto-route': true,
   };
-
-  Tun getRealTun({required bool bypassPrivateRoute}) {
-    final mRouteAddress = resolveRouteAddress(
-      bypassPrivateRoute: bypassPrivateRoute,
-    );
-    return switch (system.isDesktop) {
-      true => copyWith(
-        autoRoute: true,
-        routeAddress: [],
-        mtu: normalizeTunMtu(mtu),
-      ),
-      false => copyWith(
-        autoRoute: mRouteAddress.isEmpty ? true : false,
-        routeAddress: mRouteAddress,
-        mtu: normalizeTunMtu(mtu),
-      ),
-    };
-  }
 }
 
 @freezed

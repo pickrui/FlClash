@@ -77,17 +77,11 @@ Map<String, dynamic> _$RuleProviderToJson(_RuleProvider instance) =>
 _Tun _$TunFromJson(Map<String, dynamic> json) => _Tun(
   enable: json['enable'] as bool? ?? false,
   device: json['device'] as String? ?? appName,
-  autoRoute: json['auto-route'] as bool? ?? false,
   stack:
       $enumDecodeNullable(_$TunStackEnumMap, json['stack']) ?? TunStack.mixed,
   mtu: json['mtu'] == null
       ? defaultTunMtu
       : normalizeTunMtu((json['mtu'] as num?)?.toInt()),
-  dnsHijack:
-      (json['dns-hijack'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList() ??
-      const ['any:53'],
   routeAddress:
       (json['route-address'] as List<dynamic>?)
           ?.map((e) => e as String)
@@ -98,10 +92,8 @@ _Tun _$TunFromJson(Map<String, dynamic> json) => _Tun(
 Map<String, dynamic> _$TunToJson(_Tun instance) => <String, dynamic>{
   'enable': instance.enable,
   'device': instance.device,
-  'auto-route': instance.autoRoute,
   'stack': _$TunStackEnumMap[instance.stack]!,
   'mtu': instance.mtu,
-  'dns-hijack': instance.dnsHijack,
   'route-address': instance.routeAddress,
 };
 
