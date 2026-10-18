@@ -174,6 +174,8 @@ class _NestedPagedSheetState extends State<NestedPagedSheet> {
     (widget.onExit ?? _close)();
   }
 
+  void _handleClose() => unawaited(_handlePop());
+
   Future<void> _handleDismiss() async {
     final onDismiss = widget.onDismiss;
     if (onDismiss == null) {
@@ -201,7 +203,7 @@ class _NestedPagedSheetState extends State<NestedPagedSheet> {
       },
       child: sheetProvider.copyWith(
         nestedNavigatorPop: _popSheet,
-        onClose: () => unawaited(_handlePop()),
+        onClose: _handleClose,
         // A compact sheet's route takes the taps outside it and the drag away.
         child: sheetProvider.type.isCompact
             ? sheet
