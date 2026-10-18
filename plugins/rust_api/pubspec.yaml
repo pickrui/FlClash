@@ -13,6 +13,7 @@ dependencies:
     sdk: flutter
   flutter_rust_bridge: 2.13.0
   flutter_rust_bridge_hooks: 2.13.0
+  native_toolchain_rust: ^1.0.6
 
 dev_dependencies:
   flutter_test:
