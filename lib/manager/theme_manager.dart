@@ -6,6 +6,8 @@
 import 'dart:math';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/ui/liquid_glass.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/typography.dart';
@@ -148,14 +150,39 @@ class ThemeManager extends ConsumerWidget {
     final viewSize = ref.read(viewSizeProvider.notifier);
     return _AppMediaQuery(
       textScaler: TextScaler.linear(textScaleFactor),
-      child: LayoutBuilder(
-        builder: (_, container) {
-          final size = Size(container.maxWidth, container.maxHeight);
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            viewSize.value = size;
-          });
-          return _buildSystemUi(child);
-        },
+      child: _LiquidGlassSetting(
+        child: LayoutBuilder(
+          builder: (_, container) {
+            final size = Size(container.maxWidth, container.maxHeight);
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              viewSize.value = size;
+            });
+            return _buildSystemUi(child);
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _LiquidGlassSetting extends ConsumerWidget {
+  const _LiquidGlassSetting({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mode = ref.watch(
+      themeSettingProvider.select((state) => state.liquidGlass),
+    );
+    return LiquidGlassScope(
+      enabled: mode != LiquidGlassMode.none,
+      quality: mode == LiquidGlassMode.ultra
+          ? LiquidGlassQuality.ultra
+          : LiquidGlassQuality.standard,
+      child: LiquidGlassHost(
+        enabled: mode != LiquidGlassMode.none,
+        child: child,
       ),
     );
   }

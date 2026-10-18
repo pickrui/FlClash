@@ -407,6 +407,19 @@ void main() {
       );
       expect(const ThemeProps().toJson(), isNot(contains('schemeVariant')));
     });
+
+    test('keeps the liquid glass tier, off by default', () {
+      expect(ThemeProps.fromJson(const {}).liquidGlass, LiquidGlassMode.none);
+      for (final mode in LiquidGlassMode.values) {
+        expect(
+          roundTrip(
+            ThemeProps(liquidGlass: mode).toJson,
+            ThemeProps.fromJson,
+          ).liquidGlass,
+          mode,
+        );
+      }
+    });
   });
 
   group('AccessControlProps', () {
