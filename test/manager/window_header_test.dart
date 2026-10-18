@@ -140,6 +140,44 @@ void main() {
     });
   });
 
+  group('windowControlsOverSidebar', () {
+    test('only macOS 11 and later draw the traffic lights over it', () {
+      expect(
+        windowControlsOverSidebar(isMacOS: true, version: 15),
+        macOSTrafficLightsArea,
+      );
+      expect(windowControlsOverSidebar(isMacOS: true, version: 10), Size.zero);
+      expect(windowControlsOverSidebar(isMacOS: false, version: 11), Size.zero);
+    });
+  });
+
+  group('windowControlsOverPage', () {
+    test('a wide macOS window meets the traffic lights at its top left', () {
+      expect(
+        windowControlsOverPage(isMacOS: true, version: 15, isMobileView: false),
+        macOSTrafficLightsArea,
+      );
+    });
+
+    test('a window header or a native title bar keeps them off the page', () {
+      for (final (isMacOS, version, isMobileView) in [
+        (true, 15, true),
+        (true, 10, false),
+        (false, 11, false),
+      ]) {
+        expect(
+          windowControlsOverPage(
+            isMacOS: isMacOS,
+            version: version,
+            isMobileView: isMobileView,
+          ),
+          Size.zero,
+          reason: 'macOS=$isMacOS $version mobileView=$isMobileView',
+        );
+      }
+    });
+  });
+
   group('WindowHeaderBar on Windows', () {
     late ValueNotifier<WindowCaptionState> caption;
     late List<String> events;
