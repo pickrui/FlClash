@@ -16,6 +16,7 @@ import 'package:fl_clash/models/config.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/connect_proxy.dart';
+import '../helpers/http.dart';
 
 class _ChangedCertificate implements X509Certificate {
   @override
@@ -45,6 +46,7 @@ class _AuthenticatedProxy extends HttpOverrides {
 }
 
 void main() {
+  useRealHttpClient();
   late HttpServer origin;
   late HttpServer other;
   late Dio client;

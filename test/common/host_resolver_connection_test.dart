@@ -11,6 +11,8 @@ import 'package:fl_clash/common/host_resolver.dart';
 import 'package:fl_clash/common/http.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/http.dart';
+
 /// A resolver that serves the query and answers with no address, which is what
 /// a tunnel's DNS does while the core is down.
 Future<List<InternetAddress>> _deadResolver(
@@ -22,6 +24,7 @@ Future<List<InternetAddress>> _deadResolver(
 );
 
 void main() {
+  useRealHttpClient();
   late HttpServer server;
   late Uri origin;
   var requests = <String?>[];

@@ -12,13 +12,14 @@ import 'package:fl_clash/core/desktop/linux_helper.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../helpers/http.dart';
+
 const sha = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 const session = '0123456789abcdef0123456789abcdef';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  // Exercise the real Unix transport instead of Flutter's HTTP 400 override.
-  HttpOverrides.global = null;
+  useRealHttpClient();
 
   test(
     'Linux Helper uses a Unix socket and verifies path, SHA, session and protocol',

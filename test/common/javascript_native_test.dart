@@ -8,18 +8,14 @@ import 'dart:convert';
 
 import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/common/javascript.dart';
-import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart'
-    show ExternalLibrary;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:rust_api/rust_api.dart';
+
+import '../plugins/code_forge/support.dart' show initEditorNative;
 
 void main() {
   final library = Platform.environment['FLCLASH_TEST_SCRIPT_LIB'];
   group('native script bridge', () {
-    setUpAll(
-      () async => RustLib.init(externalLibrary: ExternalLibrary.open(library!)),
-    );
-    tearDownAll(RustLib.dispose);
+    setUpAll(initEditorNative);
 
     test('extracts boolean switches without calling the user main', () async {
       expect(

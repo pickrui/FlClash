@@ -11,7 +11,10 @@ import 'package:fl_clash/common/http.dart';
 import 'package:fl_clash/common/http_read_race.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/http.dart';
+
 void main() {
+  useRealHttpClient();
   test(
     'resource fallback preserves preferred route and rejects invalid ports',
     () {

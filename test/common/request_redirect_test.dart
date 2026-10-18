@@ -14,8 +14,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../helpers/connect_proxy.dart';
+import '../helpers/http.dart';
 
 void main() {
+  useRealHttpClient();
   late Request request;
 
   setUpAll(() {

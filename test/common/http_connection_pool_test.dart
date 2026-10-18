@@ -14,7 +14,10 @@ import 'package:fl_clash/models/config.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/http.dart';
+
 void main() {
+  useRealHttpClient();
   test(
     'HTTPS CONNECT authenticates without leaking credentials to the origin',
     () async {

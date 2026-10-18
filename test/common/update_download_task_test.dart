@@ -11,7 +11,10 @@ import 'package:fl_clash/common/update_download.dart';
 import 'package:fl_clash/common/update_download_task.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/http.dart';
+
 void main() {
+  useRealHttpClient();
   late AppUpdateDownloadTask task;
   setUp(() => task = AppUpdateDownloadTask());
   tearDown(() => task.dispose());

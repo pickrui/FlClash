@@ -10,23 +10,16 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/views/profiles/script_config_preview.dart';
-import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart'
-    show ExternalLibrary;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:rust_api/rust_api.dart';
 
 import '../helpers/test_app.dart';
+import '../plugins/code_forge/support.dart' show initEditorNative;
 
 void main() {
   final library = Platform.environment['FLCLASH_TEST_SCRIPT_LIB'];
   setUpAll(() async {
-    if (library != null) {
-      await RustLib.init(externalLibrary: ExternalLibrary.open(library));
-    }
-  });
-  tearDownAll(() {
-    if (library != null) RustLib.dispose();
+    if (library != null) await initEditorNative();
   });
 
   for (final locale in [

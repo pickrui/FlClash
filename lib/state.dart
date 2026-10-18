@@ -80,7 +80,7 @@ class GlobalState {
         );
 
   bool isPre = true;
-  late final PackageInfo packageInfo;
+  late PackageInfo packageInfo;
   late Measure measure;
   late CommonTheme theme;
   late Color accentColor;

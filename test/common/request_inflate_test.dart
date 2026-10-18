@@ -12,7 +12,10 @@ import 'package:fl_clash/state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+import '../helpers/http.dart';
+
 void main() {
+  useRealHttpClient();
   final yaml = Uint8List.fromList(utf8.encode('proxies: []\nrules: []\n'));
 
   setUpAll(() {

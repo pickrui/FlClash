@@ -10,7 +10,10 @@ import 'package:dio/dio.dart';
 import 'package:fl_clash/common/http_read_race.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/http.dart';
+
 void main() {
+  useRealHttpClient();
   test('both routes start before either response completes', () async {
     final reads = [Completer<String>(), Completer<String>()];
     final tokens = <CancelToken>[];

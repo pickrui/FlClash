@@ -12,8 +12,10 @@ import 'package:fl_clash/common/tls_connection.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/connect_proxy.dart';
+import '../helpers/http.dart';
 
 void main() {
+  useRealHttpClient();
   late HttpServer server;
   late SecurityContext trust;
   setUp(() async {

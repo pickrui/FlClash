@@ -98,6 +98,18 @@ class ConfigKeyStore {
   static int _generation = 0;
   static bool _cleared = false;
 
+  /// Forgets every cached and cleared state, as a new process would.
+  @visibleForTesting
+  static void reset() {
+    _generation++;
+    _cachedSeedBase64 = null;
+    _cachedIdentity = null;
+    _seedLoad = null;
+    _identityLoad = null;
+    _clearOperation = null;
+    _cleared = false;
+  }
+
   /// Base64 of the 32-byte seed, generating and persisting one on first use.
   /// Injected into the core via `InitParams.configAgeSecretKey`.
   static Future<String> seedBase64({bool retry = false}) async {

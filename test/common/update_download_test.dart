@@ -11,7 +11,10 @@ import 'package:dio/dio.dart';
 import 'package:fl_clash/common/update_download.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/http.dart';
+
 void main() {
+  useRealHttpClient();
   late Directory directory;
   late HttpServer server;
   late Dio client;

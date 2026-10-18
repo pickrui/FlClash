@@ -10,7 +10,10 @@ import 'dart:io';
 import 'package:fl_clash/common/proxy_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/http.dart';
+
 void main() {
+  useRealHttpClient();
   test('a refused CONNECT target falls through to the next address', () async {
     final origin = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     addTearDown(() => origin.close(force: true));

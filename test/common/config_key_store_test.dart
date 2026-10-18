@@ -38,12 +38,14 @@ void main() {
   Future<void> Function()? beforeSeedWrite;
 
   setUpAll(() async {
+    ConfigKeyStore.reset();
     directory = await Directory.systemTemp.createTemp('config_key_store_test_');
     await useAppPaths(directory);
     configPath = await appPath.durableConfigPath;
   });
 
   tearDownAll(() async {
+    ConfigKeyStore.reset();
     await directory.delete(recursive: true);
   });
 
@@ -267,7 +269,7 @@ void main() {
     );
   }
 
-  // Clearing intentionally invalidates the store for this isolate permanently.
+  // Clearing invalidates the store until tearDownAll resets it.
   test(
     'clear waits for an in-flight recovery and prevents seed resurrection',
     () async {
