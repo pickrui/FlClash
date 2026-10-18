@@ -121,6 +121,9 @@ Future<String> validateCustomRoutingDraft(
         proxyChains: profile.proxyChains,
         profileProxies: profile.profileProxies,
         matchTarget: profile.matchTarget,
+        overrides: state.profileType == ProfileType.custom
+            ? profile.overrides
+            : state.overrides,
       ),
       patchConfig: patchConfig,
     );

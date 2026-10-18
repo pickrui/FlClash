@@ -72,6 +72,7 @@ class _Ready extends CoreAction {
 class _Setup extends SetupAction {
   final String path;
   final started = Completer<void>();
+  final states = <SetupState>[];
   Completer<void>? resume;
   _Setup(this.path);
   @override
@@ -81,6 +82,7 @@ class _Setup extends SetupAction {
     required SetupState setupState,
     required ClashConfig patchConfig,
   }) async {
+    states.add(setupState);
     started.complete();
     await resume?.future;
     return makeRealProfileTask(
@@ -160,6 +162,34 @@ void main() {
       ]);
     });
   }
+
+  testWidgets('a custom profile draft is checked with its provider options', (
+    tester,
+  ) async {
+    const overrides = ProfileOverrides(
+      proxyProviders: {'Subscription': ProxyProviderOptions(filter: 'JP')},
+    );
+    await open(
+      tester,
+      setupState: [
+        setupStateProvider(1).overrideWith(
+          (_) async => _state.copyWith(
+            profileType: ProfileType.custom,
+            overwriteType: OverwriteType.custom,
+          ),
+        ),
+      ],
+    );
+    final draft = Profile.custom(label: 'Built')
+        .copyWith(id: 1, customProxyGroups: _groups, overrides: overrides);
+
+    final result = await tester.runAsync(
+      () => validateCustomRoutingDraft(editor, draft),
+    );
+
+    expect(result, isEmpty);
+    expect(setup.states.single.overrides, overrides);
+  });
 
   testWidgets('closing a draft during generation skips core validation', (
     tester,
