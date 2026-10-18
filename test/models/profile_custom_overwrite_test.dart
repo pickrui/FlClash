@@ -85,6 +85,14 @@ void main() {
     },
   );
 
+  test('an exported profile is named as a yaml file', () {
+    const profile = Profile(id: 7, autoUpdateDuration: Duration.zero);
+
+    expect(profile.exportFileName, '7.yaml');
+    expect(profile.copyWith(label: 'Remote').exportFileName, 'Remote.yaml');
+    expect(profile.copyWith(label: 'a.YML').exportFileName, 'a.YML');
+  });
+
   test('renaming a custom proxy group updates all profile references', () {
     const previous = ProxyGroup(
       name: 'Old',

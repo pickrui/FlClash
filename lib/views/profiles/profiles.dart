@@ -318,7 +318,7 @@ class ProfileItem extends StatelessWidget {
     final res = await commonAction.safeRun<bool>(() async {
       final mFile = await profile.file;
       final value = await picker.saveFile(
-        profile.realLabel,
+        profile.exportFileName,
         await mFile.readAsBytes(),
       );
       if (value == null) return false;
