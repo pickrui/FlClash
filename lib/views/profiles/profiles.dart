@@ -280,18 +280,7 @@ class ProfileItem extends StatelessWidget {
   }
 
   void _handleShowEditExtendPage(BuildContext context) {
-    showExtend(
-      context,
-      builder: (_, type) {
-        return AdaptiveSheetScaffold(
-          type: type,
-          body: EditProfileView(profile: profile),
-          title: profile.type == ProfileType.custom
-              ? appLocalizations.rename
-              : appLocalizations.editProfile,
-        );
-      },
-    );
+    showExtend(context, builder: (_, _) => EditProfileView(profile: profile));
   }
 
   List<Widget> _buildUrlProfileInfo(BuildContext context) {

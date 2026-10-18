@@ -137,7 +137,7 @@ void main() {
 
       final saving = Completer<void>();
       profiles.completeSave = () => saving.future;
-      await tester.tap(find.text('Save'));
+      await tester.tap(find.byTooltip('Save'));
       await tester.pump();
       unawaited(
         showDialog<void>(
@@ -201,7 +201,7 @@ void main() {
     await tester.tap(find.byTooltip('Save'));
     await settle(tester, 12);
     expect(find.byType(EditorPage), findsNothing);
-    await tester.tap(find.text('Save'));
+    await tester.tap(find.byTooltip('Save'));
     await settle(tester, 12);
     expect(profiles.saved, ['mode: direct']);
     expect(find.byType(EditProfileView), findsNothing);
@@ -223,7 +223,7 @@ void main() {
     expect(find.byType(EditProfileView), findsOneWidget);
     expect(profiles.saved, isEmpty);
 
-    await tester.tap(find.text('Save'));
+    await tester.tap(find.byTooltip('Save'));
     await settle(tester, 12);
     expect(profiles.saved, ['mode: direct']);
     expect(find.byType(EditProfileView), findsNothing);

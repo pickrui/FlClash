@@ -149,17 +149,22 @@ class InitErrorScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 80),
             ],
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _copyToClipboard(context),
-        label: Text(l?.copy ?? 'Copy'),
-        icon: const Icon(Icons.copy),
-        backgroundColor: colorScheme.error,
-        foregroundColor: colorScheme.onError,
+      bottomNavigationBar: _ErrorActionBar(
+        children: [
+          FilledButton.icon(
+            onPressed: () => _copyToClipboard(context),
+            style: FilledButton.styleFrom(
+              backgroundColor: colorScheme.error,
+              foregroundColor: colorScheme.onError,
+            ),
+            icon: const Icon(Icons.copy),
+            label: Text(l?.copy ?? 'Copy'),
+          ),
+        ],
       ),
     );
   }
@@ -187,6 +192,40 @@ class InitErrorScreen extends StatelessWidget {
           AppLocalizations.maybeOf(context)?.copySuccess ?? 'Copy success',
         ),
         duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+}
+
+class _ErrorActionBar extends StatelessWidget {
+  static const _maxWidth = 720.0;
+
+  final List<Widget> children;
+
+  const _ErrorActionBar({required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: Theme.of(context).colorScheme.surface,
+      child: SafeArea(
+        top: false,
+        child: Center(
+          heightFactor: 1,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: _maxWidth),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+              child: OverflowBar(
+                alignment: MainAxisAlignment.end,
+                spacing: 8,
+                overflowSpacing: 8,
+                overflowAlignment: OverflowBarAlignment.end,
+                children: children,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -31,6 +31,7 @@ import '../helpers/glyph_finders.dart';
 
 import 'package:fl_clash/views/proxies/group_tabs.dart';
 import 'package:fl_clash/views/proxies/list.dart';
+import 'package:fl_clash/views/proxies/proxies.dart';
 import 'package:fl_clash/views/proxies/tab.dart';
 import 'package:fl_clash/views/proxies/setting.dart';
 import 'package:material_ui/material_ui.dart';
@@ -452,103 +453,66 @@ void main() {
     },
   );
 
-  testWidgets('delay test button stays locked until the request completes', (
-    tester,
-  ) async {
-    final requests = <Completer<void>>[];
-    await tester.pumpWidget(
-      ProviderScope(
-        child: _TestApp(
-          child: DelayTestButton(
-            onClick: () {
-              final request = Completer<void>();
-              requests.add(request);
-              return request.future;
-            },
-          ),
-        ),
-      ),
-    );
-    final button = tester.widget<FloatingActionButton>(
-      find.byType(FloatingActionButton),
-    );
-
-    button.onPressed!();
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    button.onPressed!();
-    expect(requests, hasLength(1));
-
-    requests.single.complete();
-    await tester.pumpAndSettle();
-    button.onPressed!();
-    expect(requests, hasLength(2));
-    requests.last.complete();
-    await tester.pumpAndSettle();
-  });
-
-  testWidgets('the delay test button stays hidden while the current group '
-      'is tested from elsewhere', (tester) async {
+  testWidgets('the bar delay test spins while the current group is tested '
+      'and leaves the tab view built', (tester) async {
+    const first = Group(name: 'First', type: GroupType.Selector);
     final container = ProviderContainer(
       overrides: [
         currentProfileIdProvider.overrideWithBuild((_, _) => 1),
-        proxiesTabControllerStateProvider.overrideWith(
-          (_) => const VM2(['First', 'Second'], 'First'),
+        currentProfileProvider.overrideWith((_) => null),
+        currentGroupsStateProvider.overrideWith(
+          (_) => const GroupsState(value: [first]),
         ),
+        proxiesTabStateProvider.overrideWith(
+          (_) => const ProxiesTabState(
+            groups: [first],
+            currentGroupName: 'First',
+            proxyCardType: ProxyCardType.min,
+            columns: 1,
+          ),
+        ),
+        proxiesTabControllerStateProvider.overrideWith(
+          (_) => const VM2(['First'], 'First'),
+        ),
+        proxiesActionProvider.overrideWith(_DelayAction.new),
       ],
     );
     addTearDown(container.dispose);
-    var clicks = 0;
+    container
+        .read(proxiesStyleSettingProvider.notifier)
+        .update((state) => state.copyWith(type: ProxiesType.tab));
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: _TestApp(
-          child: Consumer(
-            builder: (_, ref, _) => DelayTestButton(
-              isTesting: ref.watch(currentGroupDelayTestingProvider),
-              onClick: () async => clicks++,
-            ),
-          ),
+        child: const _TestApp(child: ProxiesView()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    IconButton delayTest() => tester.widget<IconButton>(
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byWidgetPredicate(
+          (widget) => widget is IconButton && widget.tooltip == 'Delay Test',
         ),
       ),
     );
+    expect(delayTest().onPressed, isNotNull);
+    final tabView = tester.widget(find.byType(ProxiesTabView));
+
     final testing = Completer<void>();
     final run = container
         .read(delayTestingGroupsProvider.notifier)
         .run(profileId: 1, groupName: 'First', test: () => testing.future);
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byType(FloatingActionButton), warnIfMissed: false);
-    expect(clicks, 0);
+    await tester.pump();
+    expect(delayTest().onPressed, isNull);
+    expect(tester.widget(find.byType(ProxiesTabView)), same(tabView));
 
     testing.complete();
     await run;
-    await tester.pumpAndSettle();
-    await tester.tap(find.byType(FloatingActionButton));
-    await tester.pumpAndSettle();
-    expect(clicks, 1);
+    await tester.pump();
+    expect(delayTest().onPressed, isNotNull);
+    await tester.pumpWidget(const SizedBox.shrink());
   });
-
-  testWidgets(
-    'delay test completion after disposal does not restart animation',
-    (tester) async {
-      final request = Completer<void>();
-      await tester.pumpWidget(
-        ProviderScope(
-          child: _TestApp(
-            child: DelayTestButton(onClick: () => request.future),
-          ),
-        ),
-      );
-      tester
-          .widget<FloatingActionButton>(find.byType(FloatingActionButton))
-          .onPressed!();
-      await tester.pumpWidget(const SizedBox.shrink());
-      request.complete();
-      await tester.pump();
-      expect(tester.takeException(), isNull);
-    },
-  );
 
   testWidgets(
     'filtered tabs report the visible group and follow saved selection',
@@ -1035,6 +999,9 @@ class _TestApp extends StatelessWidget {
 class _DelayAction extends ProxiesAction {
   final delays = <String>[];
   final selections = <String>[];
+
+  @override
+  void updateCurrentGroupName(String groupName) {}
   @override
   Future<bool> delayTest(List<Proxy> proxies, [String? testUrl]) async {
     delays.addAll(proxies.map((item) => item.name));

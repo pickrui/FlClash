@@ -6,7 +6,6 @@
 import 'dart:math';
 
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/common.dart';
 import 'package:fl_clash/providers/providers.dart';
@@ -284,95 +283,6 @@ class _ProxyGroupViewState extends ConsumerState<ProxyGroupView> {
             groupName: group.name,
           );
         },
-      ),
-    );
-  }
-}
-
-class DelayTestButton extends StatefulWidget {
-  final Future<void> Function() onClick;
-
-  /// A test of the current group still running, whoever started it.
-  final bool isTesting;
-
-  const DelayTestButton({
-    super.key,
-    required this.onClick,
-    this.isTesting = false,
-  });
-
-  @override
-  State<DelayTestButton> createState() => _DelayTestButtonState();
-}
-
-class _DelayTestButtonState extends State<DelayTestButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-  bool _isRunning = false;
-
-  Future<void> _healthcheck() async {
-    if (_isRunning || widget.isTesting || _controller.isAnimating) {
-      return;
-    }
-    _isRunning = true;
-    _controller.forward();
-    try {
-      await widget.onClick();
-    } finally {
-      _isRunning = false;
-      if (mounted && !widget.isTesting) {
-        _controller.reverse();
-      }
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-      value: widget.isTesting ? 1 : 0,
-    );
-    _animation = Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOutBack),
-    );
-  }
-
-  @override
-  void didUpdateWidget(covariant DelayTestButton oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.isTesting == oldWidget.isTesting || _isRunning) {
-      return;
-    }
-    if (widget.isTesting) {
-      _controller.forward();
-    } else {
-      _controller.reverse();
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller.view,
-      builder: (_, child) {
-        return FadeTransition(
-          opacity: _animation,
-          child: ScaleTransition(scale: _animation, child: child),
-        );
-      },
-      child: CommonFloatingActionButton(
-        onPressed: _healthcheck,
-        label: appLocalizations.delayTest,
-        icon: const GlyphIcon(AppGlyphs.bolt),
       ),
     );
   }

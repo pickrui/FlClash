@@ -53,12 +53,13 @@ class _LogsViewState extends ConsumerState<LogsView>
     });
   }
 
-  List<Widget> _buildActions() {
+  List<IconButtonData> _buildActions() {
     return [
-      IconButton(
+      IconButtonData(
+        glyph: AppGlyphs.export,
         tooltip: context.appLocalizations.exportLogs,
-        onPressed: _exporting ? null : _handleExport,
-        icon: const GlyphIcon(AppGlyphs.save),
+        isLoading: _exporting,
+        onPressed: _handleExport,
       ),
     ];
   }
@@ -125,29 +126,10 @@ class _LogsViewState extends ConsumerState<LogsView>
   @override
   Widget build(BuildContext context) {
     return CommonScaffold(
-      actions: _buildActions(),
+      iconActions: _buildActions(),
       onKeywordsUpdate: _onKeywordsUpdate,
       searchState: AppBarSearchState(onSearch: _onSearch),
       title: appLocalizations.logs,
-      floatingActionButton: ValueListenableBuilder(
-        valueListenable: _logsStateNotifier,
-        builder: (_, state, _) {
-          final autoScrollToEnd = state.autoScrollToEnd;
-          return FadeRotationScaleBox(
-            child: FloatingActionButton(
-              key: ValueKey(autoScrollToEnd),
-              onPressed: () {
-                _logsStateNotifier.value = _logsStateNotifier.value.copyWith(
-                  autoScrollToEnd: !_logsStateNotifier.value.autoScrollToEnd,
-                );
-              },
-              child: autoScrollToEnd
-                  ? const GlyphIcon(AppGlyphs.block)
-                  : const GlyphIcon(AppGlyphs.scrollToTop),
-            ),
-          );
-        },
-      ),
       body: ValueListenableBuilder<LogsState>(
         valueListenable: _logsStateNotifier,
         builder: (context, state, _) {
@@ -165,6 +147,11 @@ class _LogsViewState extends ConsumerState<LogsView>
                 onCancelToEnd: () {
                   _logsStateNotifier.value = _logsStateNotifier.value.copyWith(
                     autoScrollToEnd: false,
+                  );
+                },
+                onResumeToEnd: () {
+                  _logsStateNotifier.value = _logsStateNotifier.value.copyWith(
+                    autoScrollToEnd: true,
                   );
                 },
                 controller: _scrollController,

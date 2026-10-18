@@ -17,6 +17,9 @@ import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../helpers/test_app.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
 
@@ -101,12 +104,7 @@ void main() {
         await _openProfile(tester);
         await tester.pump();
         expect(reads, hasLength(1));
-        expect(
-          tester
-              .widget<FloatingActionButton>(find.byType(FloatingActionButton))
-              .onPressed,
-          isNull,
-        );
+        expect(_saveButton(tester).onPressed, isNull);
         expect(find.byType(CircularProgressIndicator), findsOneWidget);
         expect(find.byType(Switch), findsNothing);
         if (failFirst) {
@@ -114,12 +112,7 @@ void main() {
           await tester.pumpAndSettle();
           expect(find.byType(ErrorStatus), findsOneWidget);
           expect(tester.takeException(), isNull);
-          expect(
-            tester
-                .widget<FloatingActionButton>(find.byType(FloatingActionButton))
-                .onPressed,
-            isNull,
-          );
+          expect(_saveButton(tester).onPressed, isNull);
           await tester.tap(find.text('Refresh'));
           await tester.pump();
           expect(reads, hasLength(2));
@@ -129,12 +122,7 @@ void main() {
         });
         await tester.pumpAndSettle();
         expect(find.byType(ErrorStatus), findsNothing);
-        expect(
-          tester
-              .widget<FloatingActionButton>(find.byType(FloatingActionButton))
-              .onPressed,
-          isNotNull,
-        );
+        expect(_saveButton(tester).onPressed, isNotNull);
         expect(
           tester
               .widgetList<Switch>(find.byType(Switch))
@@ -203,6 +191,7 @@ Future<void> _openProfile(
           ...GlobalMaterialLocalizations.delegates,
         ],
         supportedLocales: AppLocalizations.delegate.supportedLocales,
+        builder: (context, child) => wrapAppScopes(context, child!),
         home: Scaffold(body: EditProfileView(profile: profile)),
       ),
     ),
@@ -215,3 +204,9 @@ class _ControlledPreferences extends InMemorySharedPreferencesStore {
   @override
   Future<Map<String, Object>> getAll() => read();
 }
+
+IconButton _saveButton(WidgetTester tester) => tester.widget<IconButton>(
+  find.byWidgetPredicate(
+    (widget) => widget is IconButton && widget.tooltip == 'Save',
+  ),
+);

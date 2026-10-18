@@ -5,7 +5,6 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/ui/route_motion_hold.dart';
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/scroll_behavior.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
@@ -109,27 +108,6 @@ class _RequestsViewState extends ConsumerState<RequestsView>
       title: appLocalizations.requests,
       searchState: AppBarSearchState(onSearch: _onSearch),
       onKeywordsUpdate: _onKeywordsUpdate,
-      floatingActionButton: ValueListenableBuilder(
-        valueListenable: _requestsStateNotifier,
-        builder: (_, state, _) {
-          final autoScrollToEnd = state.autoScrollToEnd;
-          return FadeRotationScaleBox(
-            child: FloatingActionButton(
-              key: ValueKey(autoScrollToEnd),
-              onPressed: () {
-                _requestsStateNotifier.value = _requestsStateNotifier.value
-                    .copyWith(
-                      autoScrollToEnd:
-                          !_requestsStateNotifier.value.autoScrollToEnd,
-                    );
-              },
-              child: autoScrollToEnd
-                  ? const GlyphIcon(AppGlyphs.block)
-                  : const GlyphIcon(AppGlyphs.scrollToTop),
-            ),
-          );
-        },
-      ),
       body: ValueListenableBuilder<TrackerInfosState>(
         valueListenable: _requestsStateNotifier,
         builder: (context, state, _) {
@@ -159,6 +137,11 @@ class _RequestsViewState extends ConsumerState<RequestsView>
                       _requestsStateNotifier.value = _requestsStateNotifier
                           .value
                           .copyWith(autoScrollToEnd: false);
+                    },
+                    onResumeToEnd: () {
+                      _requestsStateNotifier.value = _requestsStateNotifier
+                          .value
+                          .copyWith(autoScrollToEnd: true);
                     },
                     child: SuperListView.separated(
                       padding: EdgeInsets.only(

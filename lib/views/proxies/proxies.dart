@@ -28,74 +28,55 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
   final GlobalKey<CommonScaffoldState> _scaffoldKey = GlobalKey();
   final GlobalKey<ProxiesTabViewState> _proxiesTabKey = GlobalKey();
 
-  List<Widget> _buildActions({
-    required bool isTab,
-    required bool hasProviders,
-  }) {
+  // The same instance on every build, so the bar changing with the current
+  // group or its delay test leaves the page alone.
+  late final _tabView = ProxiesTabView(key: _proxiesTabKey);
+
+  List<CommonPopupMenuItem> _buildMenuItems({required bool hasProviders}) {
     return [
-      if (isTab)
-        IconButton(
-          tooltip: context.appLocalizations.locateSelected,
-          onPressed: () {
-            _proxiesTabKey.currentState?.scrollToGroupSelected();
-          },
-          icon: const GlyphIcon(AppGlyphs.target),
-        ),
-      CommonPopupBox(
-        targetBuilder: (open) {
-          return IconButton(
-            tooltip: context.appLocalizations.more,
-            onPressed: open,
-            icon: const GlyphIcon(AppGlyphs.more),
+      CommonPopupMenuItem(
+        glyph: AppGlyphs.sliders,
+        label: appLocalizations.settings,
+        onPressed: () {
+          showSnapSheet(
+            context,
+            builder: (_, controller) {
+              return AdaptiveSheetScaffold(
+                body: const ProxiesSetting(),
+                title: appLocalizations.settings,
+              );
+            },
           );
         },
-        popup: CommonPopupMenu(
-          items: [
-            CommonPopupMenuItem(
-              glyph: AppGlyphs.sliders,
-              label: appLocalizations.settings,
-              onPressed: () {
-                showSnapSheet(
-                  context,
-                  builder: (_, controller) {
-                    return AdaptiveSheetScaffold(
-                      body: const ProxiesSetting(),
-                      title: appLocalizations.settings,
-                    );
-                  },
-                );
-              },
-            ),
-            if (hasProviders)
-              CommonPopupMenuItem(
-                glyph: AppGlyphs.dataUsage,
-                label: appLocalizations.providers,
-                onPressed: () {
-                  showExtend(
-                    context,
-                    builder: (_, type) {
-                      return ProvidersView(type: type);
-                    },
-                  );
-                },
-              ),
-          ],
-        ),
       ),
+      if (hasProviders)
+        CommonPopupMenuItem(
+          glyph: AppGlyphs.dataUsage,
+          label: appLocalizations.providers,
+          onPressed: () {
+            showExtend(
+              context,
+              builder: (_, type) {
+                return ProvidersView(type: type);
+              },
+            );
+          },
+        ),
     ];
   }
 
-  Widget? _buildFAB(bool isTab) {
-    return isTab
-        ? Consumer(
-            builder: (_, ref, _) => DelayTestButton(
-              isTesting: ref.watch(currentGroupDelayTestingProvider),
-              onClick: () async {
-                await _proxiesTabKey.currentState?.delayTestCurrentGroup();
-              },
-            ),
-          )
-        : null;
+  IconButtonData? _buildPrimaryAction(bool isTab) {
+    if (!isTab) {
+      return null;
+    }
+    return IconButtonData(
+      glyph: AppGlyphs.bolt,
+      onPressed: () {
+        _proxiesTabKey.currentState?.delayTestCurrentGroup();
+      },
+      tooltip: appLocalizations.delayTest,
+      isLoading: ref.watch(currentGroupDelayTestingProvider),
+    );
   }
 
   void _onSearch(String value) {
@@ -125,17 +106,29 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
     );
     final isLoading = ref.watch(loadingProvider(LoadingTag.proxies));
     final isTab = proxiesType == ProxiesType.tab;
+    final primaryAction = _buildPrimaryAction(isTab);
     return CommonScaffold(
       key: _scaffoldKey,
       isLoading: isLoading,
       resizeToAvoidBottomInset: false,
-      floatingActionButton: _buildFAB(isTab),
-      actions: _buildActions(isTab: isTab, hasProviders: hasProviders),
+      primaryAction: primaryAction,
+      searchActions: [?primaryAction],
+      iconActions: [
+        if (isTab)
+          IconButtonData(
+            glyph: AppGlyphs.target,
+            onPressed: () {
+              _proxiesTabKey.currentState?.scrollToGroupSelected();
+            },
+            tooltip: appLocalizations.locateSelected,
+          ),
+      ],
+      menuItems: _buildMenuItems(hasProviders: hasProviders),
       title: appLocalizations.proxies,
       searchState: AppBarSearchState(onSearch: _onSearch),
       body: AppBarClearance(
         child: switch (proxiesType) {
-          ProxiesType.tab => ProxiesTabView(key: _proxiesTabKey),
+          ProxiesType.tab => _tabView,
           ProxiesType.list => const ProxiesListView(),
         },
       ),

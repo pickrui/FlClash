@@ -313,27 +313,6 @@ class CommonScaffoldBackActionProvider extends InheritedWidget {
       backAction != oldWidget.backAction;
 }
 
-class CommonScaffoldFabExtendedProvider extends InheritedWidget {
-  final bool isExtended;
-
-  const CommonScaffoldFabExtendedProvider({
-    super.key,
-    required this.isExtended,
-    required super.child,
-  });
-
-  static CommonScaffoldFabExtendedProvider? of(BuildContext context) {
-    return context
-        .dependOnInheritedWidgetOfExactType<
-          CommonScaffoldFabExtendedProvider
-        >();
-  }
-
-  @override
-  bool updateShouldNotify(CommonScaffoldFabExtendedProvider oldWidget) =>
-      isExtended != oldWidget.isExtended;
-}
-
 class SheetSettlingScope extends InheritedWidget {
   final ValueListenable<bool> settling;
 

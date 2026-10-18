@@ -440,46 +440,42 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       child: PageFocusScope(
         child: CommonPopScope(
           onPop: (_) => _handleBack(),
-          child: FloatLayout(
-            floatingWidget: FloatWrapper(
-              child: FloatingActionButton.extended(
-                heroTag: null,
-                onPressed: busy || _loading || _loadError != null
-                    ? null
-                    : _handleConfirm,
-                label: Text(appLocalizations.save),
-                icon: busy
-                    ? const SizedBox.square(
-                        dimension: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const GlyphIcon(AppGlyphs.save),
-              ),
+          child: CommonScaffold(
+            title: widget.profile.type == ProfileType.custom
+                ? appLocalizations.rename
+                : appLocalizations.editProfile,
+            confirmationAction: IconButtonData(
+              glyph: AppGlyphs.check,
+              tooltip: appLocalizations.save,
+              isLoading: busy,
+              onPressed: _loading || _loadError != null ? null : _handleConfirm,
             ),
-            child: ExcludeFocus(
-              excluding: busy,
-              child: AbsorbPointer(
-                absorbing: busy,
-                child: _loading
-                    ? const Center(child: CircularProgressIndicator())
-                    : _loadError != null
-                    ? ErrorStatus(error: _loadError!, onRetry: _loadProfile)
-                    : Form(
-                        key: _formKey,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: ListView.separated(
-                            padding: kMaterialListPadding.copyWith(bottom: 72),
-                            itemBuilder: (_, index) {
-                              return items[index];
-                            },
-                            separatorBuilder: (_, _) {
-                              return const SizedBox(height: 24);
-                            },
-                            itemCount: items.length,
+            body: AppBarClearance(
+              child: ExcludeFocus(
+                excluding: busy,
+                child: AbsorbPointer(
+                  absorbing: busy,
+                  child: _loading
+                      ? const Center(child: CircularProgressIndicator())
+                      : _loadError != null
+                      ? ErrorStatus(error: _loadError!, onRetry: _loadProfile)
+                      : Form(
+                          key: _formKey,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: ListView.separated(
+                              padding: kMaterialListPadding,
+                              itemBuilder: (_, index) {
+                                return items[index];
+                              },
+                              separatorBuilder: (_, _) {
+                                return const SizedBox(height: 24);
+                              },
+                              itemCount: items.length,
+                            ),
                           ),
                         ),
-                      ),
+                ),
               ),
             ),
           ),
