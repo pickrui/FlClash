@@ -186,17 +186,18 @@ func handleStartTun(callback unsafe.Pointer, fd int, stack, address, dns string,
 	return true
 }
 
+var systemDnsUpdates latestUpdates
+
 func handleUpdateDns(value string) {
 	var addresses []string
 	if value != "" {
 		addresses = strings.Split(value, ",")
 	}
-	go func() {
-		defer recoverExport("updateDns")
+	systemDnsUpdates.run("updateDns", func() {
 		log.Infoln("[DNS] updateDns %s", value)
 		dns.UpdateSystemDNS(addresses)
 		dns.FlushCacheWithDefaultResolver()
-	}()
+	})
 }
 
 func (response MethodResponse) send() {
