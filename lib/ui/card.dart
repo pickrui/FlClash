@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:fl_clash/ui/context.dart';
 import 'package:fl_clash/ui/fade_box.dart';
+import 'package:fl_clash/ui/focus.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/measure.dart';
 import 'package:fl_clash/ui/metrics.dart';
@@ -134,8 +135,12 @@ class CommonCard extends StatelessWidget {
   final OutlinedBorder? shape;
   final WidgetStatesController? statesController;
 
-  BorderSide _buildBorderSide(BuildContext context, Set<WidgetState> states) {
-    if (!states.contains(WidgetState.focused)) {
+  BorderSide _buildBorderSide(
+    BuildContext context,
+    Set<WidgetState> states, {
+    required bool ringed,
+  }) {
+    if (!ringed || !states.contains(WidgetState.focused)) {
       return BorderSide.none;
     }
     final colorScheme = context.colorScheme;
@@ -181,28 +186,37 @@ class CommonCard extends StatelessWidget {
   Widget _buildButton(BuildContext context, SurfaceLevel level) {
     final iconColor = _buildIconColor(context);
     final foregroundColor = _buildForegroundColor(context);
-    return FilledButton(
-      statesController: statesController,
-      clipBehavior: Clip.antiAlias,
-      style:
-          FilledButton.styleFrom(
-            padding: padding ?? EdgeInsets.zero,
-            shape: shape ?? AppShape.all(radius ?? AppCorner.md),
-            iconSize: commonCardIconSize,
-            iconColor: iconColor,
-            foregroundColor: foregroundColor,
-            disabledIconColor: inert ? iconColor : null,
-            disabledForegroundColor: inert ? foregroundColor : null,
-            elevation: 0,
-          ).copyWith(
-            backgroundColor: WidgetStatePropertyAll(
-              _buildBackgroundColor(context, level),
+    final remote = RemoteFocusAdapter.isEnabledOf(context);
+    return ValueListenableBuilder(
+      valueListenable: FocusMovedByKey.instance,
+      builder: (context, movedByKey, content) => FilledButton(
+        statesController: statesController,
+        clipBehavior: Clip.antiAlias,
+        style:
+            FilledButton.styleFrom(
+              padding: padding ?? EdgeInsets.zero,
+              shape: shape ?? AppShape.all(radius ?? AppCorner.md),
+              iconSize: commonCardIconSize,
+              iconColor: iconColor,
+              foregroundColor: foregroundColor,
+              disabledIconColor: inert ? iconColor : null,
+              disabledForegroundColor: inert ? foregroundColor : null,
+              elevation: 0,
+            ).copyWith(
+              backgroundColor: WidgetStatePropertyAll(
+                _buildBackgroundColor(context, level),
+              ),
+              side: WidgetStateProperty.resolveWith(
+                (states) => _buildBorderSide(
+                  context,
+                  states,
+                  ringed: remote || movedByKey,
+                ),
+              ),
             ),
-            side: WidgetStateProperty.resolveWith(
-              (states) => _buildBorderSide(context, states),
-            ),
-          ),
-      onPressed: inert ? null : onPressed,
+        onPressed: inert ? null : onPressed,
+        child: content,
+      ),
       child: Semantics(
         selected: isSelected ? true : null,
         child: SurfaceScope(level: level, child: child),

@@ -6,7 +6,8 @@
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/ui/surface.dart';
-import 'package:fl_clash/ui/button.dart';
+import 'package:fl_clash/ui/focus.dart';
+import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -186,5 +187,63 @@ void main() {
     await _focus(tester, nodes[1]);
     expect(_ringSide(tester, plain).style, BorderStyle.none);
     expect(_ringSide(tester, standing), _ring(standsOff: true));
+  });
+
+  Future<void> pumpRow(WidgetTester tester, {required bool remote}) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: _theme,
+        home: RemoteFocusAdapter(
+          enabled: remote,
+          child: Scaffold(
+            body: Column(
+              children: [
+                const TextField(key: Key('before')),
+                generateSection(
+                  items: [
+                    const DecorationListItem(
+                      key: Key('row'),
+                      title: TextField(key: Key('field')),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  testWidgets('a row rings a field a key moved focus to, not one tapped', (
+    tester,
+  ) async {
+    const row = Key('row');
+    await pumpRow(tester, remote: false);
+
+    await tester.tap(find.byKey(const Key('field')));
+    await tester.pumpAndSettle();
+    expect(_buttonSide(tester, row).style, BorderStyle.none);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(_buttonSide(tester, row).style, BorderStyle.none);
+
+    await tester.tap(find.byKey(const Key('before')));
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+    expect(_buttonSide(tester, row), _ring(standsOff: false));
+
+    await tester.tap(find.byKey(const Key('field')));
+    await tester.pumpAndSettle();
+    expect(_buttonSide(tester, row).style, BorderStyle.none);
+  });
+
+  testWidgets('a row rings any focus while a remote drives it', (tester) async {
+    await pumpRow(tester, remote: true);
+
+    await tester.showKeyboard(find.byKey(const Key('field')));
+    await tester.pumpAndSettle();
+    expect(_buttonSide(tester, const Key('row')), _ring(standsOff: false));
   });
 }
