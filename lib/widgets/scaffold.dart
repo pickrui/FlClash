@@ -745,7 +745,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
         child: Scaffold(
           appBar: appBar,
           extendBodyBehindAppBar: barFloats,
-          body: content,
+          body: _BodyScope(child: content),
           resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
           backgroundColor: widget.backgroundColor,
           floatingActionButton: fab,
@@ -786,6 +786,42 @@ class CommonScaffoldState extends State<CommonScaffold> {
         ),
       ),
     );
+  }
+}
+
+/// Keeps relayouts and repaints in the body from reaching the bar and page.
+class _BodyScope extends StatelessWidget {
+  const _BodyScope({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return _BodyBoundary(child: LayoutBuilder(builder: (_, _) => child));
+  }
+}
+
+class _BodyBoundary extends SingleChildRenderObjectWidget {
+  const _BodyBoundary({super.child});
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderBodyBoundary();
+}
+
+class _RenderBodyBoundary extends RenderProxyBox {
+  @override
+  bool get isRepaintBoundary => true;
+
+  @override
+  bool get sizedByParent => true;
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) => constraints.biggest;
+
+  @override
+  void performLayout() {
+    child?.layout(constraints);
   }
 }
 
