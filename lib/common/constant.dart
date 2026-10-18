@@ -39,16 +39,6 @@ const helperProtocolVersionHeader = 'x-flclash-helper-protocol';
 final helperProtocolVersion = Platform.isWindows ? '8' : '6';
 const maxTextScale = 1.4;
 const minTextScale = 0.8;
-final baseInfoEdgeInsets = EdgeInsets.symmetric(
-  vertical: 16.mAp,
-  horizontal: 16.mAp,
-);
-final listHeaderPadding = EdgeInsets.only(
-  left: 16.mAp,
-  right: 8.mAp,
-  top: 24.mAp,
-  bottom: 8.mAp,
-);
 
 const watchExecution = false;
 

@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/ui/metrics.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/state.dart';
@@ -444,7 +445,7 @@ class ListHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.centerLeft,
-      padding: padding ?? listHeaderPadding,
+      padding: padding ?? listHeaderPaddingOf(context),
       child: Row(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -497,12 +498,14 @@ List<Widget> generateSection({
       : items;
   return [
     if (items.isNotEmpty && title != null)
-      ListHeader(
-        title: title,
-        actions: actions,
-        padding: isFirst
-            ? listHeaderPadding.copyWith(top: 8.ap)
-            : listHeaderPadding,
+      Builder(
+        builder: (context) => ListHeader(
+          title: title,
+          actions: actions,
+          padding: isFirst
+              ? listHeaderPaddingOf(context).copyWith(top: 8.ap(context))
+              : null,
+        ),
       ),
     ...genItems,
   ];

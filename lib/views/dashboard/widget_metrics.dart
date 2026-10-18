@@ -6,10 +6,11 @@
 import 'dart:math';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/ui/metrics.dart';
 import 'package:material_ui/material_ui.dart';
 
 const dashboardCellCrossAxisCount = 4;
-double get dashboardCardSpacing => 12.mAp;
+double dashboardCardSpacingOf(BuildContext context) => 12.mAp(context);
 const _minUnitHeight = 80.0;
 const _maxUnitHeight = 120.0;
 const _maxTextScale = 1.15;
@@ -39,11 +40,13 @@ enum DashboardGridBand {
 final dashboardMaxGridWidth =
     280.0 * DashboardGridBand.wide.columns / dashboardCellCrossAxisCount;
 
-double dashboardUnitHeight(double gridWidth) {
+double dashboardUnitHeight(BuildContext context, double gridWidth) {
   const start = 600.0;
   final progress = ((gridWidth - start) / (dashboardMaxGridWidth - start))
       .clamp(0.0, 1.0);
-  return (_minUnitHeight + progress * (_maxUnitHeight - _minUnitHeight)).ap;
+  return (_minUnitHeight + progress * (_maxUnitHeight - _minUnitHeight)).ap(
+    context,
+  );
 }
 
 class DashboardWidgetMetrics extends InheritedTheme {
@@ -59,12 +62,12 @@ class DashboardWidgetMetrics extends InheritedTheme {
     return context
             .dependOnInheritedWidgetOfExactType<DashboardWidgetMetrics>()
             ?.unitHeight ??
-        _minUnitHeight.ap;
+        _minUnitHeight.ap(context);
   }
 
   static double progressOf(BuildContext context) {
-    final minUnitHeight = _minUnitHeight.ap;
-    final maxUnitHeight = _maxUnitHeight.ap;
+    final minUnitHeight = _minUnitHeight.ap(context);
+    final maxUnitHeight = _maxUnitHeight.ap(context);
     final progress =
         (_unitHeightOf(context) - minUnitHeight) /
         (maxUnitHeight - minUnitHeight);
@@ -84,7 +87,7 @@ class DashboardWidgetMetrics extends InheritedTheme {
   }
 
   static double _lerpInset(BuildContext context, double base) {
-    return (base + progressOf(context) * (_maxInset - base)).mAp;
+    return (base + progressOf(context) * (_maxInset - base)).mAp(context);
   }
 
   static EdgeInsets paddingOf(BuildContext context) {
@@ -96,14 +99,12 @@ class DashboardWidgetMetrics extends InheritedTheme {
 
   static double heightOf(BuildContext context, num lines) {
     final unitHeight = _unitHeightOf(context);
-    return max(
-      lines * (unitHeight + dashboardCardSpacing) - dashboardCardSpacing,
-      0,
-    );
+    final spacing = dashboardCardSpacingOf(context);
+    return max(lines * (unitHeight + spacing) - spacing, 0);
   }
 
   static double radiusOf(BuildContext context) {
-    return AppCorner.lg * _unitHeightOf(context) / _minUnitHeight.ap;
+    return AppCorner.lg * _unitHeightOf(context) / _minUnitHeight.ap(context);
   }
 
   /// A row inset by [inset] inside the card stays concentric with it until

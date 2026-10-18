@@ -6,6 +6,7 @@
 import 'dart:math';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/ui/metrics.dart';
 import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/state.dart';
@@ -111,10 +112,10 @@ class _TrafficChart extends StatelessWidget {
       child: LayoutBuilder(
         builder: (_, constraints) {
           final besideLegend = constraints.maxWidth - legendWidth - 8;
-          final showsLegend = besideLegend >= _minChartSize.ap;
+          final showsLegend = besideLegend >= _minChartSize.ap(context);
           final chartSize = showsLegend
-              ? min(_maxChartSize.ap, besideLegend)
-              : _maxChartSize.ap;
+              ? min(_maxChartSize.ap(context), besideLegend)
+              : _maxChartSize.ap(context);
           return Row(
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

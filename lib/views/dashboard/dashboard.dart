@@ -169,7 +169,7 @@ class _DashboardViewState extends ConsumerState<DashboardView>
   @override
   Widget build(BuildContext context) {
     final dashboardState = ref.watch(dashboardStateProvider);
-    final spacing = dashboardCardSpacing;
+    final spacing = dashboardCardSpacingOf(context);
     final children = dashboardState.dashboardWidgets
         .where(
           (item) => item.platforms.contains(SupportPlatform.currentPlatform),
@@ -206,7 +206,7 @@ class _DashboardViewState extends ConsumerState<DashboardView>
               return SizedBox(
                 width: width,
                 child: DashboardWidgetMetrics(
-                  unitHeight: dashboardUnitHeight(gridWidth),
+                  unitHeight: dashboardUnitHeight(context, gridWidth),
                   child: SingleChildScrollView(
                     padding: EdgeInsets.fromLTRB(
                       16,

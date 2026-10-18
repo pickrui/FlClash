@@ -6,6 +6,7 @@
 import 'dart:math';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/ui/metrics.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/providers/action.dart';
@@ -40,7 +41,7 @@ class OutboundMode extends ConsumerWidget {
     );
     final inset = DashboardWidgetMetrics.insetOf(context);
     final radius = DashboardWidgetMetrics.radiusOf(context);
-    final pillInset = min(_pillInset.mAp, inset);
+    final pillInset = min(_pillInset.mAp(context), inset);
     return SizedBox(
       height: DashboardWidgetMetrics.heightOf(context, 2),
       child: Theme(
@@ -60,7 +61,10 @@ class OutboundMode extends ConsumerWidget {
             glyph: AppGlyphs.split,
           ),
           child: Padding(
-            padding: EdgeInsets.only(top: _rowGap.mAp, bottom: pillInset),
+            padding: EdgeInsets.only(
+              top: _rowGap.mAp(context),
+              bottom: pillInset,
+            ),
             child: _ModeRows(
               mode: mode,
               inset: inset,
@@ -94,7 +98,7 @@ class _ModeRows extends StatelessWidget {
     return LayoutBuilder(
       builder: (_, constraints) {
         final count = Mode.values.length;
-        final spacing = _rowSpacing.mAp;
+        final spacing = _rowSpacing.mAp(context);
         final rowHeight = max(
           (constraints.maxHeight - spacing * (count - 1)) / count,
           0.0,
@@ -322,7 +326,7 @@ class OutboundModeV2 extends StatelessWidget {
                                 item,
                                 Container(
                                   alignment: Alignment.center,
-                                  height: height - 8.ap - 24,
+                                  height: height - 8.ap(context) - 24,
                                   padding: const EdgeInsets.all(4),
                                   child: Text(
                                     Intl.message(item.name),
@@ -354,7 +358,7 @@ class OutboundModeV2 extends StatelessWidget {
                     ),
                     Container(
                       color: thumbColor.opacity50,
-                      height: 8.ap,
+                      height: 8.ap(context),
                       width: constraints.maxWidth,
                     ),
                   ],

@@ -8,6 +8,7 @@ import 'dart:math';
 import 'package:fl_clash/common/scroll.dart';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/ui/metrics.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/dashboard/widget_metrics.dart';
 import 'package:fl_clash/widgets/widgets.dart';
@@ -19,14 +20,14 @@ const _pillInset = 8.0;
 const _lineRowVerticalPadding = 8.0;
 
 double _pillInsetOf(BuildContext context) {
-  return min(_pillInset.mAp, DashboardWidgetMetrics.insetOf(context));
+  return min(_pillInset.mAp(context), DashboardWidgetMetrics.insetOf(context));
 }
 
 /// The shortest row that holds one line of body text.
 double rowCardLineExtentOf(BuildContext context) {
   return globalState.measure.bodyMediumHeight *
           DashboardWidgetMetrics.textScaleOf(context) +
-      _lineRowVerticalPadding.mAp * 2;
+      _lineRowVerticalPadding.mAp(context) * 2;
 }
 
 /// A two-line dashboard card whose rows, not the card, take the taps.
@@ -96,7 +97,7 @@ class RowCardPane extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.fromLTRB(
               pillInset,
-              _rowGap.mAp - headerOverhang,
+              _rowGap.mAp(context) - headerOverhang,
               pillInset,
               pillInset,
             ),
@@ -124,7 +125,7 @@ class RowCardSlots extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final spacing = _rowSpacing.mAp;
+    final spacing = _rowSpacing.mAp(context);
     return LayoutBuilder(
       builder: (_, constraints) {
         final fit = max(
@@ -220,7 +221,7 @@ class RowCardEmpty extends StatelessWidget {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        spacing: _rowGap.mAp,
+        spacing: _rowGap.mAp(context),
         children: [
           Flexible(
             child: LayoutBuilder(

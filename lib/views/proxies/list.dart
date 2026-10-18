@@ -9,6 +9,7 @@ import 'dart:collection';
 import 'package:fl_clash/features/proxies/node_pages.dart';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/ui/metrics.dart';
 import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/common/scroll.dart';
 import 'package:fl_clash/providers/action.dart';
@@ -483,7 +484,7 @@ class ListHeader extends ConsumerWidget {
       enterActionsOnRight: true,
       enterAnimated: enterAnimated,
       key: key,
-      radius: AppCorner.xl.ap,
+      radius: AppCorner.xl.ap(context),
       type: CommonCardType.filled,
       child: Padding(
         padding: const EdgeInsets.all(_headerInset),
@@ -551,15 +552,15 @@ class _GroupIcon extends ConsumerWidget {
                 height: constraints.maxHeight,
                 width: constraints.maxWidth,
                 alignment: Alignment.center,
-                padding: EdgeInsets.all(6.ap),
+                padding: EdgeInsets.all(6.ap(context)),
                 decoration: ShapeDecoration(
                   color: context.colorScheme.secondaryContainer,
-                  shape: AppShape.all(AppCorner.xl.ap - _headerInset),
+                  shape: AppShape.all(AppCorner.xl.ap(context) - _headerInset),
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: CommonTargetIcon(
                   src: src,
-                  size: constraints.maxHeight - 12.ap,
+                  size: constraints.maxHeight - 12.ap(context),
                 ),
               ),
             ),
@@ -572,7 +573,7 @@ class _GroupIcon extends ConsumerWidget {
           builder: (_, constraints) {
             return CommonTargetIcon(
               src: src,
-              size: constraints.maxHeight - 16.ap,
+              size: constraints.maxHeight - 16.ap(context),
             );
           },
         ),
