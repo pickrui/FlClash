@@ -150,7 +150,6 @@ HttpClientAdapter _createCloudApiAdapter() => CloudReadRouteAdapter(
   createRouteAdapter: (route, options) async {
     if (route == 'DIRECT' &&
         options.extra[_cloudManagedConfigExtraKey] == true &&
-        system.isAndroid &&
         coreController.isCompleted &&
         await coreController.isInit) {
       final endpoint = await coreController.getProtectedDirectProxy();
@@ -1378,18 +1377,22 @@ class CloudApiService implements CloudNodeFilterApi {
               (error is _CloudReadResponseException &&
                   (error.status == 401 || error.status == 403));
 
-    if (directFirst && routes.contains('DIRECT') && routes.length > 1) {
+    if (directFirst && routes.contains('DIRECT')) {
       final elapsed = Stopwatch()..start();
+      final available = routes.length > 1 ? budget ~/ 2 : budget;
+      final directBudget = available < const Duration(seconds: 5)
+          ? available
+          : const Duration(seconds: 5);
       try {
         return await _syncRead(
           read,
           validate: validate,
           bindToSession: bindToSession,
           routeOverride: {'DIRECT'},
-          timeout: budget ~/ 2,
+          timeout: directBudget,
         );
       } catch (error) {
-        if (isTerminalError(error)) {
+        if (routes.length == 1 || isTerminalError(error)) {
           rethrow;
         }
         if (bindToSession && revision != _sessionRevision) {
@@ -1584,7 +1587,13 @@ class CloudApiService implements CloudNodeFilterApi {
           cancelToken: token,
           queryParameters: queryParameters,
           options: options.copyWith(
-            headers: headers,
+            headers: {
+              ...headers,
+              'X-oixCloud-Subscription-Route':
+                  options.extra?[cloudReadRouteExtraKey] == 'DIRECT'
+                  ? 'direct'
+                  : 'proxy-fallback',
+            },
             responseType: ResponseType.json,
             extra: {
               ...?options.extra,

@@ -127,6 +127,55 @@ func TestProtectedDirectUsesSocketProtectionAndBypassesGlobalRouting(t *testing.
 	}
 }
 
+func TestProtectedDirectHonorsDesktopInterfaceBinding(t *testing.T) {
+	echo, err := net.Listen("tcp4", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = echo.Close() })
+	go func() {
+		conn, err := echo.Accept()
+		if err == nil {
+			defer conn.Close()
+			_, _ = io.Copy(conn, conn)
+		}
+	}()
+	server, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer server.Close()
+	previousHook, previousInterface, previousMode := dialer.DefaultSocketHook, dialer.DefaultInterface.Load(), tunnel.Mode()
+	defer func() {
+		dialer.DefaultSocketHook = previousHook
+		dialer.DefaultInterface.Store(previousInterface)
+		tunnel.SetMode(previousMode)
+	}()
+	dialer.DefaultSocketHook = nil
+	tunnel.SetMode(tunnel.Global)
+	dialer.DefaultInterface.Store("flclash-nonexistent-interface")
+	conn, _, status := openProtectedTestTunnel(t, server.endpoint, echo.Addr().String(), server.endpoint.Password)
+	_ = conn.Close()
+	if status != http.StatusBadGateway {
+		t.Fatalf("unavailable egress silently used the system route: %d", status)
+	}
+	dialer.DefaultInterface.Store("")
+	conn, reader, status := openProtectedTestTunnel(t, server.endpoint, echo.Addr().String(), server.endpoint.Password)
+	if status != http.StatusOK {
+		t.Fatalf("desktop direct dial failed in global mode: %d", status)
+	}
+	if _, err := conn.Write([]byte("subscription")); err != nil {
+		t.Fatal(err)
+	}
+	result := make([]byte, len("subscription"))
+	if _, err := io.ReadFull(reader, result); err != nil || string(result) != "subscription" {
+		t.Fatalf("desktop direct relay failed: %q %v", result, err)
+	}
+	if tunnel.Mode() != tunnel.Global {
+		t.Fatal("changed configured routing")
+	}
+}
+
 func TestProtectedDirectRotatesCredentials(t *testing.T) {
 	first, err := New()
 	if err != nil {

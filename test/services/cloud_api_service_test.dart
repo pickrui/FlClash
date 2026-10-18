@@ -1527,14 +1527,16 @@ void main() {
       final adapter = QueuedCloudAdapter();
       final service = CloudApiService.forTesting(
         client: adapter.createClient(),
-        syncRequestTimeout: const Duration(seconds: 2),
+        syncRequestTimeout: Duration(seconds: outcome == 'timeout' ? 30 : 2),
         readRoutes: const ['DIRECT', 'PROXY localhost:7890'],
       )..setToken('session');
+      final started = Stopwatch()..start();
       final result = service.fetchManagedConfig('token=query-token');
       final fails = ['deadline', '401', '403', 'logout'].contains(outcome);
       final failure = fails ? expectLater(result, throwsException) : null;
       final direct = await adapter.takeRequest();
       expect(direct.options.extra[cloudReadRouteExtraKey], 'DIRECT');
+      expect(direct.options.headers['X-oixCloud-Subscription-Route'], 'direct');
       await pumpEventQueue();
       expect(adapter.requestCount, 1);
       if (outcome == '401' || outcome == '403') {
@@ -1553,7 +1555,14 @@ void main() {
             );
           }
           target = await adapter.takeRequest().timeout(
-            const Duration(seconds: 2),
+            const Duration(seconds: 6),
+          );
+          if (outcome == 'timeout') {
+            expect(started.elapsedMilliseconds, inInclusiveRange(4800, 6000));
+          }
+          expect(
+            target.options.headers['X-oixCloud-Subscription-Route'],
+            'proxy-fallback',
           );
           expect(direct.options.cancelToken?.isCancelled, isTrue);
           expect(
