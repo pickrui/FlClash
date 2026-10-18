@@ -126,7 +126,7 @@ void main() {
           },
           onError: (_) {},
         );
-      });
+      }, onError: (_) {});
       final client = Dio()
         ..httpClientAdapter = createFlClashHttpClientAdapter(
           findProxy: (_) => 'DIRECT',
