@@ -6,7 +6,7 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:fl_clash/common/color.dart';
+import 'package:fl_clash/ui/color.dart';
 import 'package:fl_clash/common/context.dart';
 import 'package:fl_clash/common/print.dart';
 import 'package:fl_clash/common/string.dart';

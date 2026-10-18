@@ -9,7 +9,7 @@ import 'dart:ui';
 import 'package:fl_clash/ui/drag_back.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
 
-import 'package:fl_clash/common/color.dart';
+import 'package:fl_clash/ui/color.dart';
 
 import 'inherited.dart';
 

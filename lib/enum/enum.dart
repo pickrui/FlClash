@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 // ignore_for_file: constant_identifier_names
 
-import 'package:fl_clash/common/color.dart';
+import 'package:fl_clash/ui/color.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/common/system.dart';
 import 'package:material_ui/material_ui.dart';

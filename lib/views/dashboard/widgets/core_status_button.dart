@@ -98,12 +98,8 @@ class _CoreStatusButtonState extends ConsumerState<CoreStatusButton> {
                 tooltip: appLocalizations.coreStatus,
                 style: ElasticPress.buttonStyle.merge(
                   IconButton.styleFrom(
-                    backgroundColor: context.colorScheme.success,
-                    foregroundColor: switch (Theme.brightnessOf(context)) {
-                      Brightness.light => context.colorScheme.onSurfaceVariant,
-                      Brightness.dark =>
-                        context.colorScheme.onPrimaryFixedVariant,
-                    },
+                    backgroundColor: context.colorScheme.successContainer,
+                    foregroundColor: context.colorScheme.onSuccessContainer,
                   ),
                 ),
                 onPressed: _handleConnection,
@@ -116,19 +112,17 @@ class _CoreStatusButtonState extends ConsumerState<CoreStatusButton> {
                   FilledButton.styleFrom(
                     backgroundColor: switch (coreStatus) {
                       CoreStatus.connecting => null,
-                      CoreStatus.connected => context.colorScheme.success,
-                      CoreStatus.disconnected => context.colorScheme.error,
+                      CoreStatus.connected =>
+                        context.colorScheme.successContainer,
+                      CoreStatus.disconnected =>
+                        context.colorScheme.errorContainer,
                     },
                     foregroundColor: switch (coreStatus) {
                       CoreStatus.connecting => null,
-                      CoreStatus.connected => switch (Theme.brightnessOf(
-                        context,
-                      )) {
-                        Brightness.light =>
-                          context.colorScheme.onSurfaceVariant,
-                        Brightness.dark => null,
-                      },
-                      CoreStatus.disconnected => context.colorScheme.onError,
+                      CoreStatus.connected =>
+                        context.colorScheme.onSuccessContainer,
+                      CoreStatus.disconnected =>
+                        context.colorScheme.onErrorContainer,
                     },
                   ),
                 ),

@@ -5,46 +5,67 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:math';
 
-import 'package:dynamic_color/dynamic_color.dart';
-import 'package:material_color_utilities/hct/hct.dart';
-
+import 'package:flutter/foundation.dart' show clampDouble;
+import 'package:material_color_utilities/material_color_utilities.dart'
+    show Hct, TonalPalette;
 import 'package:material_ui/material_ui.dart';
+
+final _successPalette = TonalPalette.fromHct(
+  Hct.fromInt(Colors.green.toARGB32()),
+);
+
+final _warningPalette = TonalPalette.fromHct(
+  Hct.fromInt(Colors.orange.toARGB32()),
+);
 
 extension ColorExtension on Color {
   Color get opacity80 {
-    return withAlpha(204);
+    return withValues(alpha: 0.8);
   }
 
   Color get opacity60 {
-    return withAlpha(153);
+    return withValues(alpha: 0.6);
   }
 
   Color get opacity50 {
-    return withAlpha(128);
+    return withValues(alpha: 0.5);
   }
 
   Color get opacity38 {
-    return withAlpha(97);
+    return withValues(alpha: 0.38);
   }
 
   Color get opacity30 {
-    return withAlpha(77);
+    return withValues(alpha: 0.3);
   }
 
   Color get opacity12 {
-    return withAlpha(31);
+    return withValues(alpha: 0.12);
   }
 
   Color get opacity15 {
-    return withAlpha(38);
+    return withValues(alpha: 0.15);
   }
 
   Color get opacity10 {
-    return withAlpha(15);
+    return withValues(alpha: 0.1);
   }
 
   Color get opacity0 {
-    return withAlpha(0);
+    return withValues(alpha: 0);
+  }
+
+  double get tone => Hct.fromInt(toARGB32()).tone;
+
+  Color shiftTone(double delta) {
+    final hct = Hct.fromInt(toARGB32());
+    return Color(
+      Hct.from(
+        hct.hue,
+        hct.chroma,
+        clampDouble(hct.tone + delta, 0, 100),
+      ).toInt(),
+    );
   }
 
   String get hex {
@@ -82,13 +103,8 @@ extension ColorSchemeExtension on ColorScheme {
     if (!isPureBlack || brightness != Brightness.dark) {
       return this;
     }
-    final shift = Hct.fromInt(surface.toARGB32()).tone;
-    Color lower(Color color) {
-      final hct = Hct.fromInt(color.toARGB32());
-      return Color(
-        Hct.from(hct.hue, hct.chroma, max(0, hct.tone - shift)).toInt(),
-      );
-    }
+    final shift = surface.tone;
+    Color lower(Color color) => color.shiftTone(-shift);
 
     return copyWith(
       surface: Colors.black,
@@ -104,9 +120,28 @@ extension ColorSchemeExtension on ColorScheme {
 
   Color get modalScrim => scrim.withValues(alpha: 0.32);
 
-  Color get success => Colors.green.harmonizeWith(primary);
+  /// How far iOS 27 dims behind an alert.
+  Color get alertScrim =>
+      scrim.withValues(alpha: brightness == Brightness.dark ? 0.48 : 0.2);
 
-  Color get warning => Colors.orange.harmonizeWith(primary);
+  /// iOS 27's systemRed, which an alert's destructive action takes.
+  Color get destructive =>
+      Color(brightness == Brightness.dark ? 0xFFFF4245 : 0xFFFF383C);
+
+  Color _toneOf(TonalPalette palette, int light, int dark) =>
+      Color(palette.get(brightness == Brightness.dark ? dark : light));
+
+  Color get success => _toneOf(_successPalette, 40, 80);
+
+  Color get successContainer => _toneOf(_successPalette, 90, 30);
+
+  Color get onSuccessContainer => _toneOf(_successPalette, 30, 90);
+
+  Color get warning => _toneOf(_warningPalette, 40, 80);
+
+  Color get warningContainer => _toneOf(_warningPalette, 90, 30);
+
+  Color get onWarningContainer => _toneOf(_warningPalette, 30, 90);
 
   Color? delayColor(int? delay) {
     if (delay == null) return null;
