@@ -30,6 +30,10 @@ mixin DragBackRouteMixin<T> on ModalRoute<T> {
   @protected
   void didStartDragBack() {}
 
+  /// Called once the route has settled after a drag back, popped or not.
+  @protected
+  void didEndDragBack() {}
+
   Widget dragBackDetector(Widget child) {
     return _DragBackDetector(route: this, child: child);
   }
@@ -49,7 +53,8 @@ mixin DragBackRouteMixin<T> on ModalRoute<T> {
   }
 
   // popGestureEnabled no longer waits for the route to be uncovered or for
-  // another drag back to settle, and NavigatorResizable asserts on both.
+  // another drag back to settle, and NavigatorResizable would settle on a
+  // pop still running under the drag.
   bool get _canDragBack =>
       isCurrent &&
       popGestureEnabled &&
@@ -129,6 +134,7 @@ mixin DragBackRouteMixin<T> on ModalRoute<T> {
       return;
     }
     _dragBackActive = false;
+    didEndDragBack();
     navigator.didStopUserGesture();
   }
 
@@ -144,6 +150,7 @@ mixin DragBackRouteMixin<T> on ModalRoute<T> {
       return;
     }
     _dragBackActive = false;
+    didEndDragBack();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (navigator.mounted) {
         navigator.didStopUserGesture();

@@ -13,13 +13,13 @@ import 'scaffold.dart';
 
 import 'package:fl_clash/ui/deferred_push.dart';
 import 'package:fl_clash/ui/drag_back.dart';
+import 'package:fl_clash/ui/navigator_resizable.dart';
 import 'package:fl_clash/ui/page_transition.dart';
 import 'package:fl_clash/widgets/inherited.dart';
 import 'package:fl_clash/widgets/pop_scope.dart';
 import 'package:fl_clash/widgets/sheet.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:navigator_resizable/navigator_resizable.dart';
 
 Color _sheetColorOf(BuildContext context) {
   return SheetProvider.of(context)?.type == SheetType.bottomSheet
@@ -29,8 +29,8 @@ Color _sheetColorOf(BuildContext context) {
 
 class PagedSheetRoute<T> extends PageRoute<T>
     with
-        ObservableRouteMixin<T>,
         DragBackRouteMixin<T>,
+        ResizableNavigatorRouteMixin<T>,
         DeferredPushRouteMixin<T>,
         SharedXPageRouteMixin<T> {
   PagedSheetRoute({required this.builder});
@@ -83,8 +83,8 @@ class PagedSheetRoute<T> extends PageRoute<T>
     return Semantics(
       scopesRoute: true,
       explicitChildNodes: true,
-      child: ResizableNavigatorRouteContentBoundary(
-        child: sheetScroll == null
+      child: resizableContent(
+        sheetScroll == null
             ? page
             : PrimaryScrollController(
                 controller: sheetScroll,
