@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
+import 'package:fl_clash/ui/item_position.dart';
 import 'package:fl_clash/features/overwrite/rule_preset.dart';
 import 'package:fl_clash/features/features.dart';
 import 'package:fl_clash/models/models.dart';
@@ -79,31 +80,64 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
     });
   }
 
+  /// Only the rules in view are deleted; a search leaves the others alone.
   Future<void> _handleDelete() async {
+    final appLocalizations = context.appLocalizations;
     final res = await globalState.showMessage(
       title: appLocalizations.tip,
       message: TextSpan(
         text: appLocalizations.deleteMultipTip(appLocalizations.rule),
       ),
+      destructive: true,
+      confirmText: appLocalizations.delete,
     );
     if (!mounted || res != true) {
       return;
     }
     final selectedRules = ref.read(selectedItemsProvider(_key));
-    ref.read(globalRulesProvider.notifier).delAll(selectedRules.cast<int>());
-    ref.read(selectedItemsProvider(_key).notifier).value = {};
+    final deletedIds = _filter(ref.read(globalRulesProvider).value ?? [])
+        .map((item) => item.id)
+        .where(selectedRules.contains)
+        .toSet();
+    ref.read(globalRulesProvider.notifier).delAll(deletedIds);
+    ref.read(selectedItemsProvider(_key).notifier).value = selectedRules
+        .difference(deletedIds);
   }
+
+  Widget _buildRuleItem(List<Rule> rules, int index, Set<dynamic> selected) {
+    final rule = rules[index];
+    return ItemPositionProvider(
+      key: ValueKey(rule.id),
+      position: ItemPosition.get(index, rules.length),
+      child: RuleItem(
+        isEditing: selected.isNotEmpty,
+        rule: rule,
+        isSelected: selected.contains(rule.id),
+        onSelected: () => _handleSelected(rule.id),
+        onEdit: _handleAddOrUpdate,
+      ),
+    );
+  }
+
+  EdgeInsets _listPadding(BuildContext context) => EdgeInsets.fromLTRB(
+    16,
+    context.contentTopPadding,
+    16,
+    16 + BottomInsetScope.of(context),
+  );
 
   @override
   Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
     final source = ref.watch(globalRulesProvider);
     final unavailable = source.isLoading || source.hasError;
     final rules = _filter(source.value ?? []);
     final searching = !SearchQuery(_query).isEmpty;
     final selectedRules = ref.watch(selectedItemsProvider(_key));
+    final isSelecting = selectedRules.isNotEmpty;
     return CommonPopScope(
       onPop: (_) {
-        if (selectedRules.isNotEmpty) {
+        if (isSelecting) {
           ref.read(selectedItemsProvider(_key).notifier).value = {};
           return false;
         }
@@ -111,42 +145,41 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
         return false;
       },
       child: CommonScaffold(
+        title: appLocalizations.addedRules,
+        isLoading: source.isLoading,
         searchState: AppBarSearchState(
           onSearch: (value) => setState(() => _query = value),
         ),
-
-        title: appLocalizations.addedRules,
-        isLoading: source.isLoading,
         actions: [
-          if (selectedRules.isEmpty)
+          if (!isSelecting)
             IconButton(
+              tooltip: appLocalizations.add,
+              onPressed: unavailable ? null : _handleAddOrUpdate,
+              icon: const GlyphIcon(AppGlyphs.addCircle),
+            ),
+        ],
+        iconActions: [
+          if (!isSelecting)
+            IconButtonData(
+              glyph: AppGlyphs.rulePresets,
               tooltip: appLocalizations.quickAdd,
               onPressed: unavailable ? null : _addPresets,
-              icon: const GlyphIcon(AppGlyphs.listAdd),
             ),
-          if (selectedRules.isNotEmpty) ...[
-            CommonMinIconButtonTheme(
-              child: IconButton.filledTonal(
-                tooltip: context.appLocalizations.delete,
-                onPressed: unavailable ? null : _handleDelete,
-                icon: const GlyphIcon(AppGlyphs.delete),
-              ),
-            ),
-            const SizedBox(width: 2),
-          ],
-          CommonMinFilledButtonTheme(
-            child: selectedRules.isNotEmpty
-                ? FilledButton(
-                    onPressed: unavailable ? null : _handleSelectAll,
-                    child: Text(appLocalizations.selectAll),
-                  )
-                : FilledButton.tonal(
-                    onPressed: unavailable ? null : _handleAddOrUpdate,
-                    child: Text(appLocalizations.add),
-                  ),
-          ),
-          const SizedBox(width: 8),
         ],
+        selectionActions: isSelecting
+            ? [
+                IconButtonData(
+                  glyph: AppGlyphs.delete,
+                  tooltip: appLocalizations.delete,
+                  onPressed: unavailable ? null : _handleDelete,
+                ),
+                IconButtonData(
+                  glyph: AppGlyphs.selectAll,
+                  tooltip: appLocalizations.selectAll,
+                  onPressed: unavailable ? null : _handleSelectAll,
+                ),
+              ]
+            : const [],
         body: source.hasError
             ? ErrorStatus(
                 error: source.error!,
@@ -162,35 +195,37 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
                   label: appLocalizations.nullTip(appLocalizations.rule),
                   illustration: NullStatusIllustration.rules,
                 ),
-                child: ReorderableList(
-                  padding: EdgeInsets.only(
-                    top: context.contentTopPadding,
-                    bottom: 88,
-                  ),
-                  itemCount: rules.length,
-                  itemBuilder: (context, index) {
-                    final rule = rules[index];
-                    return ReorderableDelayedDragStartListener(
-                      key: ValueKey(rule.id),
-                      index: index,
-                      enabled: !searching,
-                      child: RuleItem(
-                        isEditing: selectedRules.isNotEmpty,
-                        rule: rule,
-                        isSelected: selectedRules.contains(rule.id),
-                        onSelected: () => _handleSelected(rule.id),
-                        onEdit: _handleAddOrUpdate,
-                      ),
-                    );
-                  },
-                  proxyDecorator: commonProxyDecorator,
-                  onReorderItem: (oldIndex, newIndex) {
-                    if (!searching) {
-                      ref
-                          .read(globalRulesProvider.notifier)
-                          .order(oldIndex, newIndex);
-                    }
-                  },
+                child: Builder(
+                  builder: (context) => searching
+                      ? ListView.builder(
+                          padding: _listPadding(context),
+                          itemCount: rules.length,
+                          itemBuilder: (_, index) =>
+                              _buildRuleItem(rules, index, selectedRules),
+                        )
+                      : ReorderableList(
+                          padding: _listPadding(context),
+                          itemCount: rules.length,
+                          itemBuilder: (_, index) =>
+                              ReorderableDelayedDragStartListener(
+                                key: ValueKey(rules[index].id),
+                                index: index,
+                                child: _buildRuleItem(
+                                  rules,
+                                  index,
+                                  selectedRules,
+                                ),
+                              ),
+                          proxyDecorator: (_, index, animation) =>
+                              commonProxyDecorator(
+                                _buildRuleItem(rules, index, selectedRules),
+                                index,
+                                animation,
+                              ),
+                          onReorderItem: ref
+                              .read(globalRulesProvider.notifier)
+                              .order,
+                        ),
                 ),
               ),
       ),

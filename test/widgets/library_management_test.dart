@@ -77,13 +77,14 @@ void main() {
           ),
         );
         await tester.pump();
-        final add = scripts
+        final iconAdd = scripts || rules;
+        final add = iconAdd
             ? find.ancestor(
                 of: find.byTooltip('Add'),
                 matching: find.byType(IconButton),
               )
             : find.widgetWithText(FilledButton, 'Add').first;
-        VoidCallback? onAdd() => scripts
+        VoidCallback? onAdd() => iconAdd
             ? tester.widget<IconButton>(add).onPressed
             : tester.widget<FilledButton>(add).onPressed;
         expect(onAdd(), isNull);

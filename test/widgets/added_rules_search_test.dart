@@ -40,17 +40,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(RuleItem), findsOneWidget);
     expect(tester.widget<RuleItem>(find.byType(RuleItem)).rule.id, 1);
-    expect(
-      tester
-          .widget<ReorderableDelayedDragStartListener>(
-            find.byType(ReorderableDelayedDragStartListener),
-          )
-          .enabled,
-      isFalse,
-    );
+    expect(find.byType(ReorderableDelayedDragStartListener), findsNothing);
     tester.widget<RuleItem>(find.byType(RuleItem)).onSelected();
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Select all'));
+    await tester.tap(find.byTooltip('Select all'));
     await tester.pumpAndSettle();
     expect(tester.widget<RuleItem>(find.byType(RuleItem)).isSelected, isFalse);
     tester
@@ -59,14 +52,51 @@ void main() {
         .onSearch('');
     await tester.pumpAndSettle();
     expect(find.byType(RuleItem), findsNWidgets(3));
-    expect(
-      tester
-          .widget<ReorderableDelayedDragStartListener>(
-            find.byType(ReorderableDelayedDragStartListener).first,
-          )
-          .enabled,
-      isTrue,
-    );
+    expect(find.byType(ReorderableDelayedDragStartListener), findsNWidgets(3));
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('deleting while searching removes only the matching rules', (
+    tester,
+  ) async {
+    final rules = _Rules();
+    await tester.pumpWidget(
+      TestApp(
+        locale: const Locale('en'),
+        overrides: [globalRulesProvider.overrideWith(() => rules)],
+        child: const AddedRulesView(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    tester.widget<RuleItem>(find.byType(RuleItem).last).onSelected();
+    await tester.pumpAndSettle();
+    tester
+        .widget<CommonScaffold>(find.byType(CommonScaffold))
+        .searchState!
+        .onSearch('example');
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Select all'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Delete'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Delete').last);
+    await tester.pumpAndSettle();
+
+    expect(rules.deleted, {1, 2});
+  });
+}
+
+class _Rules extends GlobalRules {
+  final deleted = <int>{};
+
+  @override
+  Stream<List<Rule>> build() => Stream.value(const [
+    Rule(id: 1, value: 'DOMAIN,example.com,DIRECT'),
+    Rule(id: 2, value: 'DOMAIN,example.net,REJECT'),
+    Rule(id: 3, value: 'NETWORK,TCP,DIRECT'),
+  ]);
+
+  @override
+  void delAll(Iterable<int> ruleIds) => deleted.addAll(ruleIds);
 }
