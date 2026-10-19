@@ -8,7 +8,9 @@ import 'dart:io';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/services/network_diagnostics.dart';
+import 'package:fl_clash/ui/button.dart';
 import 'package:fl_clash/ui/dialog.dart';
+import 'package:fl_clash/ui/typography.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
@@ -92,6 +94,10 @@ class _NetworkDiagnosticProxyGuideState
             TargetPlatform.linux => l.diagProxyGuideLinux,
             _ => l.diagProxyGuideApp,
           };
+    final colorScheme = context.colorScheme;
+    final heading = AppTextStyle.subheadline
+        .of(context, emphasized: true)
+        .copyWith(color: colorScheme.onSurface);
     return CommonDialog(
       title: l.diagProxyGuide,
       maxWidth: 580,
@@ -100,60 +106,61 @@ class _NetworkDiagnosticProxyGuideState
           onPressed: () => Navigator.of(context).pop(),
           child: Text(l.close),
         ),
-        FilledButton.icon(
+        TextButton(
           onPressed: () => Navigator.of(context).pop(true),
-          icon: const GlyphIcon(AppGlyphs.refresh),
-          label: Text(l.diagRecheck),
+          child: Text(l.diagRecheck),
         ),
       ],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(widget.check.detail, style: context.textTheme.titleSmall),
+          Text(widget.check.detail, style: heading),
           if (widget.check.suggestion case final suggestion?) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             Text(suggestion),
           ],
           const SizedBox(height: 16),
-          Text(
-            l.diagProxyGuidePrepareTitle,
-            style: context.textTheme.titleSmall,
-          ),
-          const SizedBox(height: 8),
+          Text(l.diagProxyGuidePrepareTitle, style: heading),
+          const SizedBox(height: 6),
           Text(l.diagProxyGuidePrepare),
           const SizedBox(height: 16),
-          Text(
-            l.diagProxyGuideManualTitle,
-            style: context.textTheme.titleSmall,
-          ),
-          const SizedBox(height: 8),
+          Text(l.diagProxyGuideManualTitle, style: heading),
+          const SizedBox(height: 6),
           Text(manualSteps),
           const SizedBox(height: 12),
           if (validPort) ...[
             SelectableText(l.diagProxyGuideValues(port)),
-            TextButton.icon(
+            const SizedBox(height: 10),
+            TonalButton(
+              size: TonalButtonSize.compact,
+              glyph: AppGlyphs.copy,
+              label: l.diagCopyProxyAddress,
               onPressed: () async {
                 await Clipboard.setData(ClipboardData(text: '127.0.0.1:$port'));
                 if (context.mounted) context.showNotifier(l.copySuccess);
               },
-              icon: const GlyphIcon(AppGlyphs.copy),
-              label: Text(l.diagCopyProxyAddress),
             ),
           ] else
             Text(l.diagProxyGuideInvalidPort),
-          if (canOpen)
-            OutlinedButton.icon(
+          if (canOpen) ...[
+            const SizedBox(height: 8),
+            TonalButton(
+              size: TonalButtonSize.compact,
+              glyph: AppGlyphs.openExternal,
+              label: l.diagOpenSystemSettings,
               onPressed: _opening ? null : () => _openSettings(platform),
-              icon: const GlyphIcon(AppGlyphs.openExternal),
-              label: Text(l.diagOpenSystemSettings),
             ),
-          if (_openFailed) Text(l.diagOpenSettingsFailed),
+          ],
+          if (_openFailed) ...[
+            const SizedBox(height: 8),
+            Text(
+              l.diagOpenSettingsFailed,
+              style: TextStyle(color: colorScheme.error),
+            ),
+          ],
           const SizedBox(height: 16),
-          Text(
-            l.diagProxyGuideVerifyTitle,
-            style: context.textTheme.titleSmall,
-          ),
-          const SizedBox(height: 8),
+          Text(l.diagProxyGuideVerifyTitle, style: heading),
+          const SizedBox(height: 6),
           Text(l.diagProxyGuideVerify),
         ],
       ),

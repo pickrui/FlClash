@@ -15,8 +15,11 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/models/profile.dart';
 import 'package:fl_clash/services/network_diagnostics.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/ui/scaffold.dart';
+import 'package:fl_clash/ui/navigator.dart';
+import 'package:fl_clash/ui/surface.dart';
+import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/proxy_authentication.dart';
+import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
@@ -63,9 +66,7 @@ Future<void> _settleSystemProxy() => systemProxyController.idle.timeout(
 );
 
 void showNetworkDiagnostics(BuildContext context) {
-  Navigator.of(context).push(
-    MaterialPageRoute<void>(builder: (_) => const NetworkDiagnosticsPage()),
-  );
+  BaseNavigator.push<void>(context, const NetworkDiagnosticsPage());
 }
 
 class NetworkDiagnosticsPage extends ConsumerStatefulWidget {
@@ -184,9 +185,9 @@ class _NetworkDiagnosticsPageState
   }
 
   Future<void> _showProxyGuide(NetworkDiagnosticCheck check) async {
-    final recheck = await showDialog<bool>(
+    final recheck = await globalState.showCommonDialog<bool>(
       context: context,
-      builder: (context) => Consumer(
+      child: Consumer(
         builder: (context, ref, _) => NetworkDiagnosticProxyGuide(
           snapshot: ref.watch(networkDiagnosticSnapshotProvider),
           check: check,
@@ -204,9 +205,20 @@ class _NetworkDiagnosticsPageState
         l.diagOpenPortSettings,
         CommonScaffold(
           title: l.inbound,
-          body: ListView(
-            padding: const EdgeInsets.all(16),
-            children: const [PortItem(), ProxyAuthenticationItem()],
+          body: Builder(
+            builder: (context) => ListView(
+              padding: EdgeInsets.fromLTRB(
+                16,
+                context.contentTopPadding,
+                16,
+                24,
+              ),
+              children: [
+                generateSection(
+                  items: const [PortItem(), ProxyAuthenticationItem()],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -227,8 +239,7 @@ class _NetworkDiagnosticsPageState
     if (_busy) return;
     setState(() => _editing = true);
     try {
-      await Navigator.of(context)
-          .push<void>(MaterialPageRoute(builder: (_) => page));
+      await BaseNavigator.push<void>(context, page);
       await _settleSystemProxy();
       await Future<void>.delayed(_fixSettleDelay);
     } finally {
@@ -271,140 +282,174 @@ class _NetworkDiagnosticsPageState
     ],
   ].join('\n');
 
+  Future<void> _copyReport() async {
+    await Clipboard.setData(ClipboardData(text: _report()));
+    if (mounted) context.showNotifier(context.appLocalizations.copySuccess);
+  }
+
+  void _cancel() {
+    _token?.cancel();
+    setState(() => _canceled = true);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
+    final caption = context.listCaptionStyle;
     return CommonScaffold(
       title: l.diagTitle,
-      actions: [
-        IconButton(
+      isLoading: _busy,
+      iconActions: [
+        IconButtonData(
+          glyph: AppGlyphs.copy,
           tooltip: l.diagCopy,
-          onPressed: _checks.isEmpty || _busy
-              ? null
-              : () async {
-                  await Clipboard.setData(ClipboardData(text: _report()));
-                  if (context.mounted) context.showNotifier(l.copySuccess);
-                },
-          icon: const GlyphIcon(AppGlyphs.copy),
+          onPressed: _checks.isEmpty || _busy ? null : _copyReport,
         ),
       ],
-      body: ListView(
-        padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 88),
-        children: [
-          Text(l.diagScope),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              FilledButton.icon(
-                onPressed: _busy ? null : _run,
-                icon: const GlyphIcon(AppGlyphs.networkCheck),
-                label: Text(l.diagRun),
-              ),
-              if (_running)
-                OutlinedButton(
-                  onPressed: () {
-                    _token?.cancel();
-                    setState(() {
-                      _canceled = true;
-                    });
-                  },
-                  child: Text(l.cancel),
-                ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          if (_busy) const LinearProgressIndicator(),
-          if (_fixing)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Text(l.diagFixing),
+      primaryAction: _running
+          ? IconButtonData(
+              glyph: AppGlyphs.close,
+              tooltip: l.cancel,
+              onPressed: _cancel,
+            )
+          : IconButtonData(
+              glyph: AppGlyphs.networkCheck,
+              tooltip: l.diagRun,
+              onPressed: _busy ? null : _run,
             ),
-          if (_canceled)
+      body: ListView(
+        padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 24),
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(l.diagScope, style: caption),
+          ),
+          if (_fixing || _canceled)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Text(l.diagCanceled),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              child: Text(
+                _fixing ? l.diagFixing : l.diagCanceled,
+                style: AppTextStyle.subheadline
+                    .of(context, emphasized: true)
+                    .copyWith(color: context.colorScheme.onSurface),
+              ),
             ),
           for (final check in _checks)
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: _buildCheck(check),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCheck(NetworkDiagnosticCheck check) {
+    final l = context.appLocalizations;
+    final colorScheme = context.colorScheme;
+    final level = context.raisedSurfaceLevel;
+    final (glyph, color, container, onContainer) = switch (check.status) {
+      DiagnosticStatus.passed => (
+        AppGlyphs.checkCircle,
+        colorScheme.success,
+        colorScheme.successContainer,
+        colorScheme.onSuccessContainer,
+      ),
+      DiagnosticStatus.failed => (
+        AppGlyphs.error,
+        colorScheme.error,
+        colorScheme.errorContainer,
+        colorScheme.onErrorContainer,
+      ),
+      DiagnosticStatus.warning => (
+        AppGlyphs.warning,
+        colorScheme.warning,
+        colorScheme.warningContainer,
+        colorScheme.onWarningContainer,
+      ),
+      _ => (
+        AppGlyphs.info,
+        colorScheme.onSurfaceVariant,
+        level.next.colorOf(colorScheme),
+        colorScheme.onSurfaceVariant,
+      ),
+    };
+    final settings = _settingsFor(check);
+    final guide = check.id == 'systemProxy' || check.id == 'capture';
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: ShapeDecoration(
+        color: level.colorOf(colorScheme),
+        shape: AppShape.xl,
+      ),
+      child: SurfaceScope(
+        level: level,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 8,
+          children: [
+            Row(
+              spacing: 10,
+              children: [
+                GlyphIcon(glyph, fill: 1, color: color),
+                Expanded(
+                  child: Text(
+                    check.title,
+                    style: AppTextStyle.headline
+                        .of(context)
+                        .copyWith(color: colorScheme.onSurface),
+                  ),
+                ),
+                TonalChip(
+                  label: _status(check.status),
+                  color: container,
+                  foregroundColor: onContainer,
+                ),
+              ],
+            ),
+            SelectableText(
+              check.detail,
+              style: AppTextStyle.subheadline
+                  .of(context)
+                  .copyWith(color: colorScheme.onSurface),
+            ),
+            if (check.suggestion case final suggestion?)
+              Text(suggestion, style: context.listSubtitleStyle),
+            if (check.fix != null || guide || settings != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
                   children: [
-                    Row(
-                      children: [
-                        GlyphIcon(
-                          switch (check.status) {
-                            DiagnosticStatus.passed => AppGlyphs.checkCircle,
-                            DiagnosticStatus.failed => AppGlyphs.error,
-                            DiagnosticStatus.warning => AppGlyphs.warning,
-                            _ => AppGlyphs.info,
-                          },
-                          color: switch (check.status) {
-                            DiagnosticStatus.passed => Colors.green,
-                            DiagnosticStatus.failed =>
-                              context.colorScheme.error,
-                            DiagnosticStatus.warning => Colors.orange,
-                            _ => context.colorScheme.onSurfaceVariant,
-                          },
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            '${check.title} · ${_status(check.status)}',
-                            style: context.textTheme.titleSmall,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    SelectableText(check.detail),
-                    if (check.suggestion != null) ...[
-                      const SizedBox(height: 8),
-                      Text(check.suggestion!),
-                    ],
-                    if (check.fix != null ||
-                        check.id == 'systemProxy' ||
-                        check.id == 'capture' ||
-                        _settingsFor(check) != null) ...[
-                      const SizedBox(height: 12),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          if (check.id == 'systemProxy' ||
-                              check.id == 'capture')
-                            OutlinedButton.icon(
-                              onPressed: _busy
-                                  ? null
-                                  : () => _showProxyGuide(check),
-                              icon: const GlyphIcon(AppGlyphs.info),
-                              label: Text(l.diagProxyGuide),
-                            ),
-                          if (_settingsFor(check) case final settings?)
-                            OutlinedButton.icon(
-                              onPressed: _busy
-                                  ? null
-                                  : () => _openSettings(settings.$2),
-                              icon: const GlyphIcon(AppGlyphs.settings),
-                              label: Text(settings.$1),
-                            ),
-                          if (check.fix case final fix?)
-                            FilledButton.tonalIcon(
-                              onPressed: _busy ? null : () => _fix(fix),
-                              icon: const GlyphIcon(AppGlyphs.sparkle),
-                              label: Text(_fixLabel(fix)),
-                            ),
-                        ],
+                    if (guide)
+                      TonalButton(
+                        size: TonalButtonSize.compact,
+                        glyph: AppGlyphs.info,
+                        label: l.diagProxyGuide,
+                        onPressed: _busy ? null : () => _showProxyGuide(check),
                       ),
-                    ],
+                    if (settings != null)
+                      TonalButton(
+                        size: TonalButtonSize.compact,
+                        glyph: AppGlyphs.settings,
+                        label: settings.$1,
+                        onPressed: _busy
+                            ? null
+                            : () => _openSettings(settings.$2),
+                      ),
+                    if (check.fix case final fix?)
+                      TonalButton(
+                        size: TonalButtonSize.compact,
+                        glyph: AppGlyphs.sparkle,
+                        label: _fixLabel(fix),
+                        onPressed: _busy ? null : () => _fix(fix),
+                      ),
                   ],
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

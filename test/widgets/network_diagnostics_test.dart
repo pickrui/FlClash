@@ -254,14 +254,14 @@ void main() {
   ) async {
     final service = _ControlledService();
     await _pump(tester, service);
-    await tester.tap(find.text(AppLocalizations.current.cancel));
+    await tester.tap(find.byTooltip(AppLocalizations.current.cancel));
     await tester.pump();
     expect(service.token!.isCancelled, isTrue);
     service.completion.complete();
     await tester.pumpAndSettle();
     expect(find.text('Late result'), findsNothing);
     expect(find.text(AppLocalizations.current.diagCanceled), findsOneWidget);
-    await tester.tap(find.text(AppLocalizations.current.diagRun));
+    await tester.tap(find.byTooltip(AppLocalizations.current.diagRun));
     await tester.pumpAndSettle();
     expect(service.runs, 2);
     expect(find.text(AppLocalizations.current.diagCanceled), findsNothing);
