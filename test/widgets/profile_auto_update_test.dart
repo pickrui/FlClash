@@ -17,6 +17,7 @@ import 'package:fl_clash/ui/list.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_app.dart';
@@ -132,6 +133,66 @@ void main() {
     );
   }
 
+  for (final running in [true, false]) {
+    testWidgets('the running profile lists its providers to update '
+        '(running: $running)', (tester) async {
+      await mockPreferences();
+      final directory = (await tester.runAsync(
+        () => Directory.systemTemp.createTemp('profile-providers-'),
+      ))!;
+      await tester.runAsync(() => useAppPaths(directory));
+      addTearDown(() => directory.delete(recursive: true));
+      await tester.binding.setSurfaceSize(const Size(800, 1200));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final action = _ProxiesAction();
+      await _openProfile(
+        tester,
+        profile: const Profile(
+          id: 2,
+          label: 'Local',
+          autoUpdateDuration: Duration(minutes: 60),
+        ),
+        overrides: [
+          currentProfileIdProvider.overrideWithBuild((_, _) => running ? 2 : 3),
+          providersProvider.overrideWithBuild(
+            (_, _) => [
+              for (final name in ['Remote nodes', 'Rule set'])
+                ExternalProvider(
+                  name: name,
+                  type: name == 'Rule set' ? 'Rule' : 'Proxy',
+                  count: 3,
+                  vehicleType: 'HTTP',
+                  updateAt: DateTime(2026),
+                ),
+            ],
+          ),
+          proxiesActionProvider.overrideWith(() => action),
+        ],
+      );
+      for (
+        var attempt = 0;
+        attempt < 40 &&
+            find.byType(CircularProgressIndicator).evaluate().isNotEmpty;
+        attempt++
+      ) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 10)),
+        );
+        await tester.pump();
+      }
+      expect(
+        find.text('Remote nodes'),
+        running ? findsOneWidget : findsNothing,
+      );
+      if (!running) return;
+      expect(find.text('3 rules'), findsOneWidget);
+      await tester.tap(find.byTooltip('Update'));
+      await tester.pumpAndSettle();
+      expect(action.calls, unorderedEquals(['Remote nodes', 'Rule set']));
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets(
     'managed profile exposes automatic updates and rejects zero minutes',
     (tester) async {
@@ -165,6 +226,19 @@ void main() {
   );
 }
 
+class _ProxiesAction extends ProxiesAction {
+  final calls = <String>[];
+
+  @override
+  Future<String> updateProvider(ExternalProvider provider) async {
+    calls.add(provider.name);
+    return '';
+  }
+
+  @override
+  void updateGroupsDebounce() {}
+}
+
 class _IdleAccount extends CloudAccountNotifier {
   @override
   CloudAccountState build() => const CloudAccountState();
@@ -178,12 +252,14 @@ Future<void> _openProfile(
     url: 'oixcloud://managed',
     autoUpdateDuration: Duration(minutes: 60),
   ),
+  List<Override> overrides = const [],
 }) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
         cloudAccountProvider.overrideWith(_IdleAccount.new),
         viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 1200)),
+        ...overrides,
       ],
       child: MaterialApp(
         locale: const Locale('en'),

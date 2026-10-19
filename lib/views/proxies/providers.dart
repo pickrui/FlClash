@@ -19,11 +19,118 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/models/common.dart';
 import 'package:fl_clash/models/core.dart';
+import 'package:fl_clash/models/profile.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/widgets/chip_title.dart';
+import 'package:fl_clash/widgets/last_update_time_text.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+/// Updates [providers] of the running profile a few at a time; the failures
+/// come back once all have settled, none if the page or the profile changed.
+Future<List<UpdatingMessage>> updateExternalProviders(
+  BuildContext context,
+  WidgetRef ref,
+  List<ExternalProvider> providers,
+) async {
+  final proxiesAction = context.proxiesAction;
+  final profileId = ref.read(currentProfileIdProvider);
+  final route = ModalRoute.of(context);
+  bool isCurrent() =>
+      context.mounted &&
+      (route?.isActive ?? true) &&
+      context.getInheritedWidgetOfExactType<PageActivityScope>()?.isActive !=
+          false &&
+      ref.read(currentProfileIdProvider) == profileId;
+  final failures = <ExternalProvider, String>{};
+  await runWithConcurrency(
+    items: providers,
+    concurrency: maxConcurrentSubscriptionUpdates,
+    isCurrent: isCurrent,
+    action: (provider) async {
+      try {
+        final message = await proxiesAction.updateProvider(provider);
+        if (message.isNotEmpty) failures[provider] = message;
+      } catch (error) {
+        failures[provider] = error.toString();
+      }
+    },
+  );
+  proxiesAction.updateGroupsDebounce();
+  if (!isCurrent() || !(route?.isCurrent ?? true)) return const [];
+  return [
+    for (final provider in providers)
+      if (failures[provider] case final message?)
+        UpdatingMessage(label: provider.name, message: message),
+  ];
+}
+
+/// The running profile's providers under one header that updates them all.
+class ExternalProvidersSliver extends ConsumerStatefulWidget {
+  final List<ExternalProvider> providers;
+
+  const ExternalProvidersSliver({super.key, required this.providers});
+
+  @override
+  ConsumerState<ExternalProvidersSliver> createState() =>
+      _ExternalProvidersSliverState();
+}
+
+class _ExternalProvidersSliverState
+    extends ConsumerState<ExternalProvidersSliver> {
+  bool _isUpdating = false;
+
+  Future<void> _updateProviders() async {
+    if (_isUpdating || widget.providers.isEmpty) return;
+    setState(() => _isUpdating = true);
+    var failures = const <UpdatingMessage>[];
+    try {
+      failures = await updateExternalProviders(context, ref, widget.providers);
+    } finally {
+      if (mounted) setState(() => _isUpdating = false);
+    }
+    if (failures.isNotEmpty) {
+      await globalState.showAllUpdatingMessagesDialog(failures);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final providers = widget.providers;
+    return SliverMainAxisGroup(
+      slivers: [
+        SliverToBoxAdapter(
+          child: ListHeader(
+            title: context.appLocalizations.providers,
+            actions: [
+              IconButtonData(
+                glyph: AppGlyphs.sync,
+                tooltip: context.appLocalizations.update,
+                isLoading: _isUpdating,
+                onPressed: _isUpdating ? null : _updateProviders,
+              ),
+            ],
+          ),
+        ),
+        SliverList.builder(
+          itemCount: providers.length,
+          itemBuilder: (_, index) {
+            final provider = providers[index];
+            return ItemPositionProvider(
+              position: ItemPosition.get(index, providers.length),
+              child: ProviderItem(
+                key: ValueKey((provider.type, provider.name)),
+                provider: provider,
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
 
 class ProvidersView extends ConsumerStatefulWidget {
   final SheetType type;
@@ -44,41 +151,15 @@ class _ProvidersViewState extends ConsumerState<ProvidersView> {
         .where((provider) => type == null || provider.type == type)
         .toList();
     if (providers.isEmpty) return;
-    final proxiesAction = context.proxiesAction;
-    final profileId = ref.read(currentProfileIdProvider);
-    final route = ModalRoute.of(context);
-    bool isCurrent() =>
-        mounted &&
-        (route?.isActive ?? true) &&
-        context.getInheritedWidgetOfExactType<PageActivityScope>()?.isActive !=
-            false &&
-        ref.read(currentProfileIdProvider) == profileId;
-    final failures = <ExternalProvider, String>{};
     setState(() => _updating = true);
+    var failures = const <UpdatingMessage>[];
     try {
-      await runWithConcurrency(
-        items: providers,
-        concurrency: maxConcurrentSubscriptionUpdates,
-        isCurrent: isCurrent,
-        action: (provider) async {
-          try {
-            final message = await proxiesAction.updateProvider(provider);
-            if (message.isNotEmpty) failures[provider] = message;
-          } catch (error) {
-            failures[provider] = error.toString();
-          }
-        },
-      );
-      proxiesAction.updateGroupsDebounce();
+      failures = await updateExternalProviders(context, ref, providers);
     } finally {
       if (mounted) setState(() => _updating = false);
     }
-    if (isCurrent() && (route?.isCurrent ?? true) && failures.isNotEmpty) {
-      await globalState.showAllUpdatingMessagesDialog([
-        for (final provider in providers)
-          if (failures[provider] case final message?)
-            UpdatingMessage(label: provider.name, message: message),
-      ]);
+    if (failures.isNotEmpty) {
+      await globalState.showAllUpdatingMessagesDialog(failures);
     }
   }
 
@@ -326,31 +407,20 @@ class _ProviderItemState extends ConsumerState<ProviderItem> {
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
     final isUpdating = ref.watch(isUpdatingProvider(provider.updatingKey));
-    final metadata = <Widget>[
-      if (provider.updateAt.microsecondsSinceEpoch > 0)
-        MetaChip(label: provider.updateAt.lastUpdateTimeDesc),
-      if (provider.count > 0)
-        MetaChip(
-          label: provider.type == 'Rule'
-              ? l.rulesCount(provider.count)
-              : l.proxiesCount(provider.count),
-        ),
-    ];
+    final updateAt = provider.updateAt;
     return ContextMenuRegion(
       menuItems: isUpdating ? null : _menuItems(l),
       child: DecorationListItem(
         onPressed: isUpdating || !_previewable ? null : _preview,
-        title: Text(
-          provider.name,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+        title: ChipTitle(
+          title: provider.name,
+          expire: provider.subscriptionInfo?.expireTime,
         ),
-        subtitle: metadata.isEmpty
-            ? null
-            : Padding(
-                padding: const EdgeInsets.only(top: 4, bottom: 2),
-                child: Wrap(spacing: 4, runSpacing: 4, children: metadata),
-              ),
+        subtitle: Text(
+          provider.type == 'Rule'
+              ? l.rulesCount(provider.count)
+              : l.proxiesCount(provider.count),
+        ),
         trailing: AnimatedSwitcher(
           duration: context.motionDuration(commonDuration),
           layoutBuilder: (current, previous) => Stack(
@@ -359,7 +429,14 @@ class _ProviderItemState extends ConsumerState<ProviderItem> {
           ),
           child: isUpdating
               ? const CommonCircleLoading(key: ValueKey('loading'), size: 24)
-              : const SizedBox.shrink(),
+              : LastUpdateTimeText(
+                  key: const ValueKey('time'),
+                  lastUpdateDate: updateAt.microsecondsSinceEpoch > 0
+                      ? updateAt
+                      : null,
+                  compact: true,
+                  style: context.listCaptionStyle,
+                ),
         ),
       ),
     );

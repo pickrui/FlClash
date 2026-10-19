@@ -16,6 +16,7 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/app.dart';
+import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/context_menu.dart';
 import 'package:fl_clash/ui/focus.dart';
@@ -23,6 +24,7 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/sortable.dart';
 import 'package:fl_clash/ui/typography.dart';
+import 'package:fl_clash/views/proxies/providers.dart';
 import 'package:fl_clash/widgets/last_update_time_text.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/services.dart';
@@ -373,6 +375,10 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     final appLocalizations = context.appLocalizations;
     final isoixCloud = widget.profile.isoixCloudProfile;
     final busy = _saving || _fileBusy;
+    final isCurrent = ref.watch(currentProfileIdProvider) == widget.profile.id;
+    final providers = isCurrent && !isoixCloud
+        ? ref.watch(providersProvider)
+        : const <ExternalProvider>[];
     final issue = _attempted ? _issue(appLocalizations) : null;
     final sections = [
       generateSection(
@@ -468,15 +474,38 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
                         ),
                       )
                     : Builder(
-                        builder: (context) => ListView(
-                          padding: const EdgeInsets.symmetric(horizontal: 16)
-                              .copyWith(
-                                top: context.contentTopPadding,
-                                bottom: BottomInsetScope.of(context) + 16,
+                        builder: (context) => CustomScrollView(
+                          slivers: [
+                            SliverPadding(
+                              padding: EdgeInsets.fromLTRB(
+                                16,
+                                context.contentTopPadding,
+                                16,
+                                0,
                               ),
-                          children: [
-                            ErrorBanner(message: issue?.message),
-                            ...sections.separated(const SizedBox(height: 24)),
+                              sliver: SliverList.list(
+                                children: [
+                                  ErrorBanner(message: issue?.message),
+                                  ...sections.separated(
+                                    const SizedBox(height: 24),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (providers.isNotEmpty)
+                              SliverPadding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                ),
+                                sliver: ExternalProvidersSliver(
+                                  providers: providers,
+                                ),
+                              ),
+                            SliverToBoxAdapter(
+                              child: SizedBox(
+                                height: BottomInsetScope.of(context) + 16,
+                              ),
+                            ),
                           ],
                         ),
                       ),
