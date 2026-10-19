@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:io';
 
+import 'package:fl_clash/common/preferences_store.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/core/desktop/launcher.dart';
 import 'package:fl_clash/database/database.dart';

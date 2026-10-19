@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ffi' show Abi;
 
+import 'package:fl_clash/common/preferences_store.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/common/render_binding.dart';
 import 'package:fl_clash/pages/error.dart';

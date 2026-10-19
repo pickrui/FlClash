@@ -6,7 +6,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:fl_clash/common/preferences.dart';
+import 'package:fl_clash/common/preferences_store.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
