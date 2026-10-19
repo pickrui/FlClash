@@ -122,7 +122,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Route address'));
+    await tester.tap(find.text('Route addresses'));
     await tester.pumpAndSettle();
     expect(find.text('10.0.0.0/33'), findsOneWidget);
     expect(find.text(tip), findsOneWidget);

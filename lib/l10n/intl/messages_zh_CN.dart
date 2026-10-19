@@ -1074,12 +1074,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "externalLink": MessageLookupByLibrary.simpleMessage("外部链接"),
     "fade": MessageLookupByLibrary.simpleMessage("淡入"),
     "failedItem": m26,
-    "fakeipFilter": MessageLookupByLibrary.simpleMessage("Fakeip过滤"),
+    "fakeipFilter": MessageLookupByLibrary.simpleMessage("Fake-IP过滤"),
     "fakeipFilterMode": MessageLookupByLibrary.simpleMessage("Fake-IP过滤模式"),
     "fakeipFilterModeDesc": MessageLookupByLibrary.simpleMessage(
       "Fake-IP 过滤模式中，blacklist 排除匹配项，whitelist 仅用于匹配项，rule 按规则匹配",
     ),
-    "fakeipRange": MessageLookupByLibrary.simpleMessage("Fakeip范围"),
+    "fakeipRange": MessageLookupByLibrary.simpleMessage("Fake-IP范围"),
     "fakeipRange6": MessageLookupByLibrary.simpleMessage("Fake-IP范围（IPv6）"),
     "fakeipTtl": MessageLookupByLibrary.simpleMessage("Fake-IP TTL"),
     "fallback": MessageLookupByLibrary.simpleMessage("Fallback"),
@@ -1523,7 +1523,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "onDemandDesc": MessageLookupByLibrary.simpleMessage(
       "按需运行会按 Wi-Fi 或网络条件自动暂停和恢复代理",
     ),
-    "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage("仅统计代理"),
+    "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage("仅统计代理流量"),
     "onlyStatisticsProxyDesc": MessageLookupByLibrary.simpleMessage(
       "开启后，将只统计代理流量",
     ),

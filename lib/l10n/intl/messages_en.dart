@@ -371,12 +371,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Provide diverse configuration options",
     ),
     "allowBypass": MessageLookupByLibrary.simpleMessage(
-      "Allow applications to bypass VPN",
+      "Allow apps to bypass VPN",
     ),
     "allowBypassDesc": MessageLookupByLibrary.simpleMessage(
       "Some apps can bypass VPN when turned on",
     ),
-    "allowLan": MessageLookupByLibrary.simpleMessage("AllowLan"),
+    "allowLan": MessageLookupByLibrary.simpleMessage("Allow LAN"),
     "allowLanDesc": MessageLookupByLibrary.simpleMessage(
       "Allow access proxy through the LAN",
     ),
@@ -401,7 +401,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Provider library",
     ),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage(
-      "Append System DNS",
+      "Append system DNS",
     ),
     "appendSystemDnsTip": MessageLookupByLibrary.simpleMessage(
       "Forcefully append system DNS to the configuration",
@@ -441,12 +441,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "autoLaunchDesc": MessageLookupByLibrary.simpleMessage(
       "Follow the system self startup",
     ),
-    "autoRun": MessageLookupByLibrary.simpleMessage("AutoRun"),
+    "autoRun": MessageLookupByLibrary.simpleMessage("Auto run"),
     "autoRunDesc": MessageLookupByLibrary.simpleMessage(
       "Auto run when the application is opened",
     ),
     "autoSetSystemDns": MessageLookupByLibrary.simpleMessage(
-      "Auto set system DNS",
+      "Auto-set system DNS",
     ),
     "autoUpdate": MessageLookupByLibrary.simpleMessage("Auto update"),
     "autoUpdateInterval": MessageLookupByLibrary.simpleMessage(
@@ -510,7 +510,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "brightness": MessageLookupByLibrary.simpleMessage("Brightness"),
     "buy": MessageLookupByLibrary.simpleMessage("Buy"),
-    "bypassDomain": MessageLookupByLibrary.simpleMessage("Bypass domain"),
+    "bypassDomain": MessageLookupByLibrary.simpleMessage("Bypass domains"),
     "bypassDomainDesc": MessageLookupByLibrary.simpleMessage(
       "Bypass domains apply only while the system proxy is on",
     ),
@@ -1371,7 +1371,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "enabledOnStart": MessageLookupByLibrary.simpleMessage("Enable on start"),
     "entries": MessageLookupByLibrary.simpleMessage(" entries"),
     "errorDetails": MessageLookupByLibrary.simpleMessage("Error details"),
-    "exclude": MessageLookupByLibrary.simpleMessage("Hidden from recent tasks"),
+    "exclude": MessageLookupByLibrary.simpleMessage("Hide from recent tasks"),
     "excludeDesc": MessageLookupByLibrary.simpleMessage(
       "When the app is in the background, the app is hidden from the recent task",
     ),
@@ -1435,14 +1435,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "externalLink": MessageLookupByLibrary.simpleMessage("External link"),
     "fade": MessageLookupByLibrary.simpleMessage("Fade"),
     "failedItem": m26,
-    "fakeipFilter": MessageLookupByLibrary.simpleMessage("Fakeip filter"),
+    "fakeipFilter": MessageLookupByLibrary.simpleMessage("Fake-IP filter"),
     "fakeipFilterMode": MessageLookupByLibrary.simpleMessage(
       "Fake-IP filter mode",
     ),
     "fakeipFilterModeDesc": MessageLookupByLibrary.simpleMessage(
       "In Fake-IP filter mode, blacklist excludes matches, whitelist fakes only matches, and rule matches as rules",
     ),
-    "fakeipRange": MessageLookupByLibrary.simpleMessage("Fakeip range"),
+    "fakeipRange": MessageLookupByLibrary.simpleMessage("Fake-IP range"),
     "fakeipRange6": MessageLookupByLibrary.simpleMessage(
       "Fake-IP range (IPv6)",
     ),
@@ -1529,7 +1529,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "geoUpdated": m28,
     "geoUpdating": m29,
     "geodataLoader": MessageLookupByLibrary.simpleMessage(
-      "Geo Low Memory Mode",
+      "Geo low-memory mode",
     ),
     "geodataLoaderDesc": MessageLookupByLibrary.simpleMessage(
       "Enabling will use the Geo low memory loader",
@@ -1822,7 +1822,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Location permission required",
     ),
     "log": MessageLookupByLibrary.simpleMessage("Log"),
-    "logLevel": MessageLookupByLibrary.simpleMessage("LogLevel"),
+    "logLevel": MessageLookupByLibrary.simpleMessage("Log level"),
     "logcat": MessageLookupByLibrary.simpleMessage("Logcat"),
     "logcatDesc": MessageLookupByLibrary.simpleMessage(
       "Disabling will hide the log entry",
@@ -1899,7 +1899,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Modify the default system exit event",
     ),
     "minutesAgo": m45,
-    "mixedPort": MessageLookupByLibrary.simpleMessage("Mixed Port"),
+    "mixedPort": MessageLookupByLibrary.simpleMessage("Mixed port"),
     "mode": MessageLookupByLibrary.simpleMessage("Mode"),
     "monochromeScheme": MessageLookupByLibrary.simpleMessage("Monochrome"),
     "monthsAgo": m46,
@@ -2059,7 +2059,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "On demand pauses and resumes the proxy by Wi-Fi or network conditions",
     ),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage(
-      "Only statistics proxy",
+      "Only count proxy traffic",
     ),
     "onlyStatisticsProxyDesc": MessageLookupByLibrary.simpleMessage(
       "When turned on, only statistics proxy traffic",
@@ -2388,7 +2388,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "recurringRenewalHint": MessageLookupByLibrary.simpleMessage(
       "Future automatic renewals keep this discount",
     ),
-    "redirPort": MessageLookupByLibrary.simpleMessage("Redir Port"),
+    "redirPort": MessageLookupByLibrary.simpleMessage("Redir port"),
     "redo": MessageLookupByLibrary.simpleMessage("redo"),
     "refresh": MessageLookupByLibrary.simpleMessage("Refresh"),
     "refreshAfterPayment": MessageLookupByLibrary.simpleMessage(
@@ -2503,7 +2503,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "reverseEngineeringNotice": MessageLookupByLibrary.simpleMessage(
       "Reverse engineering, decompilation, disassembly, or AI-assisted analysis of this application is strictly prohibited.",
     ),
-    "routeAddress": MessageLookupByLibrary.simpleMessage("Route address"),
+    "routeAddress": MessageLookupByLibrary.simpleMessage("Route addresses"),
     "routeAddressDesc": MessageLookupByLibrary.simpleMessage(
       "Config listen route address",
     ),
@@ -2735,7 +2735,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "signInWithGoogle": MessageLookupByLibrary.simpleMessage(
       "Sign in with Google",
     ),
-    "silentLaunch": MessageLookupByLibrary.simpleMessage("SilentLaunch"),
+    "silentLaunch": MessageLookupByLibrary.simpleMessage("Silent launch"),
     "silentLaunchDesc": MessageLookupByLibrary.simpleMessage(
       "Start in the background",
     ),
@@ -2759,7 +2759,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "snifferStatusDesc": MessageLookupByLibrary.simpleMessage(
       "The sniffer reads the domain from TLS, HTTP and QUIC traffic so rules can match it",
     ),
-    "socksPort": MessageLookupByLibrary.simpleMessage("Socks Port"),
+    "socksPort": MessageLookupByLibrary.simpleMessage("SOCKS port"),
     "softStyle": MessageLookupByLibrary.simpleMessage("Soft"),
     "soldOut": MessageLookupByLibrary.simpleMessage("Sold out"),
     "sort": MessageLookupByLibrary.simpleMessage("Sort"),
@@ -3018,7 +3018,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tcpFastOpenDesc": MessageLookupByLibrary.simpleMessage(
       "Enable this option to accelerate TCP connection establishment",
     ),
-    "testUrl": MessageLookupByLibrary.simpleMessage("Test url"),
+    "testUrl": MessageLookupByLibrary.simpleMessage("Test URL"),
     "textScale": MessageLookupByLibrary.simpleMessage("Text Scaling"),
     "textScalePreview": MessageLookupByLibrary.simpleMessage(
       "Text in the app will look like this",
@@ -3048,7 +3048,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "total": MessageLookupByLibrary.simpleMessage("Total"),
     "totalDownload": MessageLookupByLibrary.simpleMessage("Downloaded"),
     "totalUpload": MessageLookupByLibrary.simpleMessage("Uploaded"),
-    "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxy Port"),
+    "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy port"),
     "traffic": MessageLookupByLibrary.simpleMessage("Traffic"),
     "trafficPeak": m106,
     "trafficTotal": m107,

@@ -375,7 +375,7 @@ void main() {
     expect(find.byType(TextFormField), findsNothing);
     expect(dns().listen, '');
 
-    await tester.tap(find.text('Fakeip range'));
+    await tester.tap(find.text('Fake-IP range'));
     await tester.pumpAndSettle();
     await _submitText(tester, 'fdfe:dcba:9876::1/64');
     expect(find.text(_cidrTip), findsOneWidget);

@@ -265,9 +265,9 @@ class AppLocalizations {
     return Intl.message('Override', name: 'override', desc: '', args: []);
   }
 
-  /// `AllowLan`
+  /// `Allow LAN`
   String get allowLan {
-    return Intl.message('AllowLan', name: 'allowLan', desc: '', args: []);
+    return Intl.message('Allow LAN', name: 'allowLan', desc: '', args: []);
   }
 
   /// `Allow access proxy through the LAN`
@@ -330,10 +330,10 @@ class AppLocalizations {
     );
   }
 
-  /// `SilentLaunch`
+  /// `Silent launch`
   String get silentLaunch {
     return Intl.message(
-      'SilentLaunch',
+      'Silent launch',
       name: 'silentLaunch',
       desc: '',
       args: [],
@@ -350,9 +350,9 @@ class AppLocalizations {
     );
   }
 
-  /// `AutoRun`
+  /// `Auto run`
   String get autoRun {
-    return Intl.message('AutoRun', name: 'autoRun', desc: '', args: []);
+    return Intl.message('Auto run', name: 'autoRun', desc: '', args: []);
   }
 
   /// `Auto run when the application is opened`
@@ -720,9 +720,9 @@ class AppLocalizations {
     return Intl.message('Port', name: 'port', desc: '', args: []);
   }
 
-  /// `LogLevel`
+  /// `Log level`
   String get logLevel {
-    return Intl.message('LogLevel', name: 'logLevel', desc: '', args: []);
+    return Intl.message('Log level', name: 'logLevel', desc: '', args: []);
   }
 
   /// `Show`
@@ -975,10 +975,10 @@ class AppLocalizations {
     return Intl.message('Search', name: 'search', desc: '', args: []);
   }
 
-  /// `Allow applications to bypass VPN`
+  /// `Allow apps to bypass VPN`
   String get allowBypass {
     return Intl.message(
-      'Allow applications to bypass VPN',
+      'Allow apps to bypass VPN',
       name: 'allowBypass',
       desc: '',
       args: [],
@@ -1105,10 +1105,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Geo Low Memory Mode`
+  /// `Geo low-memory mode`
   String get geodataLoader {
     return Intl.message(
-      'Geo Low Memory Mode',
+      'Geo low-memory mode',
       name: 'geodataLoader',
       desc: '',
       args: [],
@@ -1205,9 +1205,9 @@ class AppLocalizations {
     return Intl.message('Paste', name: 'paste', desc: '', args: []);
   }
 
-  /// `Test url`
+  /// `Test URL`
   String get testUrl {
-    return Intl.message('Test url', name: 'testUrl', desc: '', args: []);
+    return Intl.message('Test URL', name: 'testUrl', desc: '', args: []);
   }
 
   /// `Sync`
@@ -1215,10 +1215,10 @@ class AppLocalizations {
     return Intl.message('Sync', name: 'sync', desc: '', args: []);
   }
 
-  /// `Hidden from recent tasks`
+  /// `Hide from recent tasks`
   String get exclude {
     return Intl.message(
-      'Hidden from recent tasks',
+      'Hide from recent tasks',
       name: 'exclude',
       desc: '',
       args: [],
@@ -1320,10 +1320,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Only statistics proxy`
+  /// `Only count proxy traffic`
   String get onlyStatisticsProxy {
     return Intl.message(
-      'Only statistics proxy',
+      'Only count proxy traffic',
       name: 'onlyStatisticsProxy',
       desc: '',
       args: [],
@@ -1747,20 +1747,20 @@ class AppLocalizations {
     return Intl.message('DNS mode', name: 'dnsMode', desc: '', args: []);
   }
 
-  /// `Fakeip range`
+  /// `Fake-IP range`
   String get fakeipRange {
     return Intl.message(
-      'Fakeip range',
+      'Fake-IP range',
       name: 'fakeipRange',
       desc: '',
       args: [],
     );
   }
 
-  /// `Fakeip filter`
+  /// `Fake-IP filter`
   String get fakeipFilter {
     return Intl.message(
-      'Fakeip filter',
+      'Fake-IP filter',
       name: 'fakeipFilter',
       desc: '',
       args: [],
@@ -2082,10 +2082,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Bypass domain`
+  /// `Bypass domains`
   String get bypassDomain {
     return Intl.message(
-      'Bypass domain',
+      'Bypass domains',
       name: 'bypassDomain',
       desc: '',
       args: [],
@@ -2167,10 +2167,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Route address`
+  /// `Route addresses`
   String get routeAddress {
     return Intl.message(
-      'Route address',
+      'Route addresses',
       name: 'routeAddress',
       desc: '',
       args: [],
@@ -2722,24 +2722,24 @@ class AppLocalizations {
     return Intl.message('Unnamed', name: 'unnamed', desc: '', args: []);
   }
 
-  /// `Mixed Port`
+  /// `Mixed port`
   String get mixedPort {
-    return Intl.message('Mixed Port', name: 'mixedPort', desc: '', args: []);
+    return Intl.message('Mixed port', name: 'mixedPort', desc: '', args: []);
   }
 
-  /// `Socks Port`
+  /// `SOCKS port`
   String get socksPort {
-    return Intl.message('Socks Port', name: 'socksPort', desc: '', args: []);
+    return Intl.message('SOCKS port', name: 'socksPort', desc: '', args: []);
   }
 
-  /// `Redir Port`
+  /// `Redir port`
   String get redirPort {
-    return Intl.message('Redir Port', name: 'redirPort', desc: '', args: []);
+    return Intl.message('Redir port', name: 'redirPort', desc: '', args: []);
   }
 
-  /// `Tproxy Port`
+  /// `TProxy port`
   String get tproxyPort {
-    return Intl.message('Tproxy Port', name: 'tproxyPort', desc: '', args: []);
+    return Intl.message('TProxy port', name: 'tproxyPort', desc: '', args: []);
   }
 
   /// `{label} must be between 1024 and 49151`
@@ -2837,10 +2837,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Auto set system DNS`
+  /// `Auto-set system DNS`
   String get autoSetSystemDns {
     return Intl.message(
-      'Auto set system DNS',
+      'Auto-set system DNS',
       name: 'autoSetSystemDns',
       desc: '',
       args: [],
@@ -3242,10 +3242,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Append System DNS`
+  /// `Append system DNS`
   String get appendSystemDns {
     return Intl.message(
-      'Append System DNS',
+      'Append system DNS',
       name: 'appendSystemDns',
       desc: '',
       args: [],
