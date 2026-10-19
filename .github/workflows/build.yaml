@@ -387,18 +387,6 @@ jobs:
         if: matrix.platform == 'macos' && matrix.arch == 'amd64'
         run: plutil -replace FLTEnableImpeller -bool NO macos/Runner/Info.plist
 
-      - name: Cache CocoaPods
-        if: matrix.platform == 'macos'
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
-        with:
-          path: |
-            ~/.cocoapods
-            ~/Library/Caches/CocoaPods
-            macos/Pods
-          key: ${{ runner.os }}-cocoapods-${{ hashFiles('macos/Podfile', 'macos/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cocoapods-
-
       - name: Cache npm
         if: matrix.platform == 'macos'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
