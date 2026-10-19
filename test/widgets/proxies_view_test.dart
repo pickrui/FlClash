@@ -575,6 +575,53 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets('a picker leaves the bar only its search and delay test', (
+    tester,
+  ) async {
+    const first = Group(name: 'First', type: GroupType.Selector);
+    final container = ProviderContainer(
+      overrides: [
+        currentProfileIdProvider.overrideWithBuild((_, _) => 1),
+        currentProfileProvider.overrideWith((_) => null),
+        proxiesTabStateProvider.overrideWith(
+          (_) => const ProxiesTabState(
+            groups: [first],
+            currentGroupName: 'First',
+            proxyCardType: ProxyCardType.compact,
+          ),
+        ),
+        proxiesTabControllerStateProvider.overrideWith(
+          (_) => const VM2(['First'], 'First'),
+        ),
+        proxiesActionProvider.overrideWith(_DelayAction.new),
+      ],
+    );
+    addTearDown(container.dispose);
+    container
+        .read(proxiesStyleSettingProvider.notifier)
+        .update((state) => state.copyWith(type: ProxiesType.tab));
+    Finder inBar(Finder finder) =>
+        find.descendant(of: find.byType(AppBar), matching: finder);
+    for (final picker in [false, true]) {
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: _TestApp(child: ProxiesView(picker: picker)),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        inBar(find.byTooltip(AppLocalizations.current.delayTest)),
+        findsOneWidget,
+      );
+      expect(
+        inBar(find.widgetWithGlyph(IconButton, AppGlyphs.more)),
+        picker ? findsNothing : findsOneWidget,
+      );
+    }
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets(
     'filtered tabs report the visible group and follow saved selection',
     (tester) async {

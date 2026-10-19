@@ -18,7 +18,11 @@ import 'setting.dart';
 import 'tab.dart';
 
 class ProxiesView extends ConsumerStatefulWidget {
-  const ProxiesView({super.key});
+  const ProxiesView({super.key, this.picker = false});
+
+  /// Leaves the bar only its search and delay test, for picking a proxy from a
+  /// sheet.
+  final bool picker;
 
   @override
   ConsumerState<ProxiesView> createState() => _ProxiesViewState();
@@ -106,6 +110,7 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
     );
     final isLoading = ref.watch(loadingProvider(LoadingTag.proxies));
     final isTab = proxiesType == ProxiesType.tab;
+    final picker = widget.picker;
     final primaryAction = _buildPrimaryAction(isTab);
     return CommonScaffold(
       key: _scaffoldKey,
@@ -114,16 +119,18 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
       primaryAction: primaryAction,
       searchActions: [?primaryAction],
       iconActions: [
-        if (isTab)
+        if (isTab && !picker)
           IconButtonData(
-            glyph: AppGlyphs.target,
+            glyph: AppGlyphs.locate,
             onPressed: () {
               _proxiesTabKey.currentState?.scrollToGroupSelected();
             },
             tooltip: appLocalizations.locateSelected,
           ),
       ],
-      menuItems: _buildMenuItems(hasProviders: hasProviders),
+      menuItems: picker
+          ? const []
+          : _buildMenuItems(hasProviders: hasProviders),
       title: appLocalizations.proxies,
       searchState: AppBarSearchState(onSearch: _onSearch),
       body: switch (proxiesType) {
