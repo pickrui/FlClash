@@ -213,7 +213,7 @@ class _InflatedBytes implements Sink<List<int>> {
   void add(List<int> chunk) {
     if (bytes.length + chunk.length > maxBytes) {
       exceeded = true;
-      throw const FormatException('HTTP response exceeds size limit');
+      throw ReadSizeLimitException(maxBytes);
     }
     bytes.add(chunk);
   }
@@ -518,7 +518,11 @@ class Request {
             ? 'oixCloud profile request failed: ${e is DioException ? e.type.name : e.runtimeType}'
             : 'Profile request failed: ${e is DioException ? '${e.type.name}, HTTP ${e.response?.statusCode ?? 0}' : e.runtimeType}',
       );
-      if (e is ConfigValidationException) rethrow;
+      if (e is ConfigValidationException ||
+          e is ReadSizeLimitException ||
+          (e is DioException && e.error is ReadSizeLimitException)) {
+        rethrow;
+      }
       if (e is DioException) {
         if (FlClashTemporaryTls.isCertificateVerifyFailed(e)) {
           rethrow;

@@ -9,8 +9,25 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/bounded_http_client_adapter.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
+import 'package:fl_clash/common/network_error.dart';
+import 'package:fl_clash/l10n/l10n.dart';
+import 'package:flutter/widgets.dart' show Locale;
 
 void main() {
+  late AppLocalizations strings;
+  final previousLocale = Intl.defaultLocale;
+  tearDownAll(() => Intl.defaultLocale = previousLocale);
+  setUpAll(() async {
+    strings = await AppLocalizations.load(const Locale('en'));
+  });
+  Matcher sizeFailure() => throwsA(
+    isA<FormatException>().having(
+      (error) => userFacingErrorMessage(error, strings),
+      'localized limit',
+      strings.resourceSizeLimitTip('100 B'),
+    ),
+  );
   test('waits for the whole body and retains response metadata', () async {
     final stream = StreamController<Uint8List>();
     final response = ResponseBody(
@@ -56,7 +73,7 @@ void main() {
             )
             .fetch(RequestOptions(), null, null)
             .timeout(const Duration(seconds: 1)),
-        throwsFormatException,
+        sizeFailure(),
       );
       expect(cancelled, true);
     },
@@ -71,7 +88,7 @@ void main() {
       );
       final pending = _adapter(ResponseBody(stream.stream, 200))
           .fetch(RequestOptions(), null, null);
-      final expectation = expectLater(pending, throwsFormatException);
+      final expectation = expectLater(pending, sizeFailure());
       stream.add(Uint8List(60));
       stream.add(Uint8List(60));
       await expectation;
@@ -171,7 +188,7 @@ void main() {
       final stream = _SynchronousStream();
       await expectLater(
         _adapter(ResponseBody(stream, 200)).fetch(RequestOptions(), null, null),
-        throwsFormatException,
+        sizeFailure(),
       );
       expect(stream.subscription.cancelled, true);
     },

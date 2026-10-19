@@ -8,6 +8,7 @@ import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/http_read_race.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:path/path.dart' as p;
@@ -65,12 +66,18 @@ extension PlatformFileExt on PlatformFile {
   Future<Uint8List> readBytes({int? maxBytes}) async {
     if (maxBytes == null) return readAsBytes();
     if ((lengthSync() ?? 0) > maxBytes) {
-      throw const FormatException('File exceeds size limit');
+      throw ReadSizeLimitException(
+        maxBytes,
+        message: 'File exceeds size limit',
+      );
     }
     final bytes = BytesBuilder(copy: false);
     await for (final chunk in readAsByteStream()) {
       if (bytes.length + chunk.length > maxBytes) {
-        throw const FormatException('File exceeds size limit');
+        throw ReadSizeLimitException(
+          maxBytes,
+          message: 'File exceeds size limit',
+        );
       }
       bytes.add(chunk);
     }

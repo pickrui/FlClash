@@ -8,9 +8,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:fl_clash/common/request.dart';
+import 'package:fl_clash/common/network_error.dart';
+import 'package:fl_clash/l10n/l10n.dart';
+import 'package:flutter/widgets.dart' show Locale;
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../helpers/http.dart';
@@ -25,6 +29,42 @@ void main() {
       buildNumber: '1',
     );
   });
+
+  for (final apiDomain in [false, true]) {
+    for (final compressed in [false, true]) {
+      test(
+        'download size errors retain their limit (api=$apiDomain, compressed=$compressed)',
+        () async {
+          final previousLocale = Intl.defaultLocale;
+          addTearDown(() => Intl.defaultLocale = previousLocale);
+          final strings = await AppLocalizations.load(const Locale('en'));
+          final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+          addTearDown(() => server.close(force: true));
+          server.listen((incoming) async {
+            final bytes = List.filled(2048, 65);
+            incoming.response.add(compressed ? gzip.encode(bytes) : bytes);
+            await incoming.response.close();
+          });
+          final request = Request(isApiDomain: (_) => apiDomain);
+          addTearDown(() => request.dio.close(force: true));
+          await expectLater(
+            request.getFileResponseForUrl(
+              'http://127.0.0.1:${server.port}/resource',
+              maxBytes: 1024,
+              inflateUnlabeled: compressed,
+            ),
+            throwsA(
+              predicate<Object>(
+                (error) =>
+                    userFacingErrorMessage(error, strings) ==
+                    strings.resourceSizeLimitTip('1 KiB'),
+              ),
+            ),
+          );
+        },
+      );
+    }
+  }
 
   test('authenticated subscription routes race until a fully validated response wins', () async {
     final bothStarted = Completer<void>();

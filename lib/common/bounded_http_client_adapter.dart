@@ -9,6 +9,8 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 
+import 'http_read_race.dart';
+
 /// Receives a complete, bounded response before a read can win a route race.
 class BoundedHttpClientAdapter implements HttpClientAdapter {
   BoundedHttpClientAdapter(this._inner, {required this.maxBytes})
@@ -36,7 +38,7 @@ class BoundedHttpClientAdapter implements HttpClientAdapter {
     );
     if (declaredLength != null && declaredLength > maxBytes) {
       _discard(response.stream);
-      throw const FormatException('HTTP response exceeds size limit');
+      throw ReadSizeLimitException(maxBytes);
     }
     final bytes = await _read(response, options, cancelFuture);
     return _withBytes(response, bytes);
@@ -92,7 +94,7 @@ class BoundedHttpClientAdapter implements HttpClientAdapter {
         (chunk) {
           if (result.isCompleted) return;
           if (bytes.length + chunk.length > maxBytes) {
-            fail(const FormatException('HTTP response exceeds size limit'));
+            fail(ReadSizeLimitException(maxBytes));
             return;
           }
           bytes.add(chunk);

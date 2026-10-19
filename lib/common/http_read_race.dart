@@ -7,6 +7,15 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 
+class ReadSizeLimitException extends FormatException {
+  const ReadSizeLimitException(
+    this.maxBytes, {
+    String message = 'HTTP response exceeds size limit',
+  }) : super(message);
+
+  final int maxBytes;
+}
+
 /// A network timeout, unlike a bare [TimeoutException] from the Core channel.
 class HttpReadTimeoutException extends TimeoutException {
   HttpReadTimeoutException(Duration timeout)

@@ -17,15 +17,25 @@ abstract interface class LocalizedException implements Exception {
   String messageFor(AppLocalizations localizations);
 }
 
-String userFacingErrorMessage(Object error, AppLocalizations localizations) =>
-    Secrets.redactApiDomains(
-      networkErrorMessage(error, localizations) ??
-          coreLaunchBlockedMessage(error, localizations) ??
-          switch (error) {
-            LocalizedException() => error.messageFor(localizations),
-            _ => error.toString(),
-          },
-    );
+String userFacingErrorMessage(Object error, AppLocalizations localizations) {
+  final cause = error is DioException ? error.error : error;
+  return Secrets.redactApiDomains(
+    cause is ReadSizeLimitException
+        ? localizations.resourceSizeLimitTip(_readLimitLabel(cause.maxBytes))
+        : networkErrorMessage(error, localizations) ??
+              coreLaunchBlockedMessage(error, localizations) ??
+              switch (error) {
+                LocalizedException() => error.messageFor(localizations),
+                _ => error.toString(),
+              },
+  );
+}
+
+String _readLimitLabel(int bytes) {
+  if (bytes % (1024 * 1024) == 0) return '${bytes ~/ (1024 * 1024)} MiB';
+  if (bytes % 1024 == 0) return '${bytes ~/ 1024} KiB';
+  return '$bytes B';
+}
 
 enum _Kind {
   timeout,

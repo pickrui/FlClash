@@ -7,10 +7,12 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:fl_clash/common/picker.dart';
+import 'package:fl_clash/common/network_error.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart' show Locale;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart' show XFile;
 import 'package:mobile_scanner/mobile_scanner.dart';
 
@@ -76,6 +78,8 @@ final class _PickedFile extends PlatformFile {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  final previousLocale = Intl.defaultLocale;
+  tearDownAll(() => Intl.defaultLocale = previousLocale);
   setUpAll(() => AppLocalizations.load(const Locale('en')));
 
   test('platform bytes work for content URIs without a local path', () async {
@@ -85,9 +89,21 @@ void main() {
   test(
     'bounded reads reject streams even when the picker omits length',
     () async {
-      final file = _PickedFile(Uint8List(16));
-      await expectLater(file.readBytes(maxBytes: 8), throwsFormatException);
-      expect(await file.readBytes(maxBytes: 16), hasLength(16));
+      for (final size in [null, 16]) {
+        final file = _PickedFile(Uint8List(16), knownSize: size);
+        await expectLater(
+          file.readBytes(maxBytes: 8),
+          throwsA(
+            isA<FormatException>().having(
+              (error) =>
+                  userFacingErrorMessage(error, AppLocalizations.current),
+              'localized limit',
+              AppLocalizations.current.resourceSizeLimitTip('8 B'),
+            ),
+          ),
+        );
+        expect(await file.readBytes(maxBytes: 16), hasLength(16));
+      }
     },
   );
 
