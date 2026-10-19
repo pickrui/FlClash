@@ -8,6 +8,8 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:yaml/yaml.dart';
 
+import 'package:fl_clash/common/protocol.dart';
+
 void main() {
   for (final format in ['deb', 'rpm']) {
     test(
@@ -90,8 +92,7 @@ void main() {
     );
   }
 
-  test('every Linux package names the GTK application id as its window '
-      'class', () {
+  test('every Linux launcher declares the window class and supported URLs', () {
     final applicationId = RegExp(r'set\(APPLICATION_ID "([^"]+)"\)')
         .firstMatch(File('linux/CMakeLists.txt').readAsStringSync())!
         .group(1);
@@ -101,6 +102,11 @@ void main() {
         File('linux/packaging/$format/make_config.yaml').readAsStringSync(),
       ) as YamlMap;
       expect(config['startup_wm_class'], applicationId, reason: format);
+      expect(
+        config['supported_mime_type'],
+        protocolSchemes.map((scheme) => 'x-scheme-handler/$scheme').toList(),
+        reason: format,
+      );
     }
   });
 

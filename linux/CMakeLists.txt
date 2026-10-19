@@ -108,15 +108,15 @@ foreach(bundled_library ${PLUGIN_BUNDLED_LIBRARIES})
     COMPONENT Runtime)
 endforeach(bundled_library)
 
-# Core
-set(CLASH_DIR "../libclash/linux")
-install(PROGRAMS "${CLASH_DIR}/FlClashCore" DESTINATION "${BUILD_BUNDLE_DIR}"
+set(CLASH_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../libclash/linux")
+install(PROGRAMS
+  "${CLASH_DIR}/FlClashCore"
+  "${CLASH_DIR}/FlClashHelperService"
+  DESTINATION "${CMAKE_INSTALL_PREFIX}"
   COMPONENT Runtime)
-
-# Hooks run after CMake configures; evaluate optional development artifacts at
-# install time so a first build includes its freshly generated Helper.
-install(PROGRAMS "${CLASH_DIR}/FlClashHelperService" DESTINATION "${BUILD_BUNDLE_DIR}" COMPONENT Runtime OPTIONAL)
-install(FILES "${CLASH_DIR}/manifest.json" DESTINATION "${BUILD_BUNDLE_DIR}" COMPONENT Runtime OPTIONAL)
+install(FILES "${CLASH_DIR}/manifest.json"
+  DESTINATION "${CMAKE_INSTALL_PREFIX}"
+  COMPONENT Runtime)
 
 # Copy the native assets provided by the build.dart from all packages.
 set(NATIVE_ASSETS_DIR "${PROJECT_BUILD_DIR}native_assets/linux/")
