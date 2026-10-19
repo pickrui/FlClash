@@ -9,17 +9,14 @@ import 'package:fl_clash/widgets/config_item.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// A switch over one app setting, as upstream's general settings build theirs;
-/// the fork keeps a line on what each one does.
+/// A switch over one app setting, as upstream's general settings build theirs.
 ConfigToggleItem _appSettingToggle({
   required ConfigLabel title,
-  ConfigLabel? subtitle,
   required bool Function(AppSettingProps state) select,
   required AppSettingProps Function(AppSettingProps state, bool value) update,
 }) {
   return ConfigToggleItem(
     title: title,
-    subtitle: subtitle,
     selector: appSettingProvider.select(select),
     onChanged: (ref, value) => ref
         .read(appSettingProvider.notifier)
@@ -33,7 +30,6 @@ class CloseConnectionsItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) => _appSettingToggle(
     title: (l) => l.autoCloseConnections,
-    subtitle: (l) => l.autoCloseConnectionsDesc,
     select: (state) => state.closeConnections,
     update: (state, value) => state.copyWith(closeConnections: value),
   );
@@ -45,7 +41,6 @@ class UsageItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) => _appSettingToggle(
     title: (l) => l.onlyStatisticsProxy,
-    subtitle: (l) => l.onlyStatisticsProxyDesc,
     select: (state) => state.onlyStatisticsProxy,
     update: (state, value) => state.copyWith(onlyStatisticsProxy: value),
   );
@@ -57,7 +52,6 @@ class MinimizeItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) => _appSettingToggle(
     title: (l) => l.minimizeOnExit,
-    subtitle: (l) => l.minimizeOnExitDesc,
     select: (state) => state.minimizeOnExit,
     update: (state, value) => state.copyWith(minimizeOnExit: value),
   );
@@ -69,7 +63,6 @@ class AutoLaunchItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) => _appSettingToggle(
     title: (l) => l.autoLaunch,
-    subtitle: (l) => l.autoLaunchDesc,
     select: (state) => state.autoLaunch,
     update: (state, value) => state.copyWith(autoLaunch: value),
   );
@@ -81,7 +74,6 @@ class SilentLaunchItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) => _appSettingToggle(
     title: (l) => l.silentLaunch,
-    subtitle: (l) => l.silentLaunchDesc,
     select: (state) => state.silentLaunch,
     update: (state, value) => state.copyWith(silentLaunch: value),
   );
@@ -93,7 +85,6 @@ class AutoRunItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) => _appSettingToggle(
     title: (l) => l.autoRun,
-    subtitle: (l) => l.autoRunDesc,
     select: (state) => state.autoRun,
     update: (state, value) => state.copyWith(autoRun: value),
   );
@@ -105,7 +96,6 @@ class HiddenItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) => _appSettingToggle(
     title: (l) => l.exclude,
-    subtitle: (l) => l.excludeDesc,
     select: (state) => state.hidden,
     update: (state, value) => state.copyWith(hidden: value),
   );
@@ -117,7 +107,6 @@ class OpenLogsItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) => _appSettingToggle(
     title: (l) => l.logcat,
-    subtitle: (l) => l.logcatDesc,
     select: (state) => state.openLogs,
     update: (state, value) => state.copyWith(openLogs: value),
   );

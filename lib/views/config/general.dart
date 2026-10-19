@@ -580,6 +580,8 @@ class GeneralView extends ConsumerWidget {
               isMacOS: target == TargetPlatform.macOS,
             ),
             footer: [
+              if (isDesktop) appLocalizations.silentLaunchDesc,
+              appLocalizations.autoRunDesc,
               if (isAndroid) appLocalizations.suspendOnIdleDesc,
               appLocalizations.onDemandDesc,
             ].join('\n'),
@@ -598,6 +600,7 @@ class GeneralView extends ConsumerWidget {
           generateSection(
             title: appLocalizations.connection,
             items: _connectionItems(),
+            footer: appLocalizations.autoCloseConnectionsDesc,
           ),
           generateSection(
             title: appLocalizations.core,
@@ -610,6 +613,7 @@ class GeneralView extends ConsumerWidget {
           generateSection(
             title: appLocalizations.logsAndDiagnostics,
             items: const [LogLevelItem(), OpenLogsItem()],
+            footer: appLocalizations.logcatDesc,
           ),
         ],
       ),

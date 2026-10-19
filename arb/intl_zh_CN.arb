@@ -1514,6 +1514,5 @@
   "tapIconToRetry": "点击图标重试",
   "trafficPeak": "峰值 {value}",
   "trafficTotal": "累计 {value}",
-  "usedShort": "已用",
-  "required": "必填"
+  "usedShort": "已用"
 }
