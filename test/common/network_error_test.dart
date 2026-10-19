@@ -10,6 +10,10 @@ import 'package:dio/dio.dart';
 import 'package:fl_clash/common/http_read_race.dart';
 import 'package:fl_clash/common/network_error.dart';
 import 'package:fl_clash/core/method.dart';
+import 'package:fl_clash/providers/clash_providers.dart';
+import 'package:fl_clash/providers/icon_sets.dart';
+import 'package:fl_clash/providers/script_library.dart';
+import 'package:intl/intl.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -107,6 +111,72 @@ void main() {
         ),
         l.networkHostLookupError,
       );
+    },
+  );
+  test(
+    'resource failures use the selected language and actual size limits',
+    () async {
+      final previousLocale = Intl.defaultLocale;
+      addTearDown(() => Intl.defaultLocale = previousLocale);
+      for (final locale in AppLocalizations.delegate.supportedLocales) {
+        final strings = await AppLocalizations.load(locale);
+        expect(
+          userFacingErrorMessage(dio(DioExceptionType.receiveTimeout), strings),
+          strings.networkTimeoutError,
+        );
+        expect(
+          userFacingErrorMessage(
+            const ProviderLibraryException('changed'),
+            strings,
+          ),
+          strings.providerChanged,
+        );
+        expect(
+          userFacingErrorMessage(
+            const ProviderLibraryException('content'),
+            strings,
+          ),
+          strings.providerContentInvalid,
+        );
+        expect(
+          userFacingErrorMessage(
+            const IconSetLibraryException('content'),
+            strings,
+          ),
+          strings.providerContentInvalid,
+        );
+        expect(
+          userFacingErrorMessage(
+            const IconSetLibraryException('size'),
+            strings,
+          ),
+          strings.resourceSizeLimitTip('4 MiB'),
+        );
+        expect(
+          userFacingErrorMessage(const ScriptLibraryException('size'), strings),
+          strings.resourceSizeLimitTip('8 MiB'),
+        );
+        expect(
+          userFacingErrorMessage(
+            const ProviderLibraryException('size'),
+            strings,
+          ),
+          strings.providerContentTooLarge,
+        );
+        expect(
+          userFacingErrorMessage(
+            const CoreMethodException(
+              code: 'transport_error',
+              message: 'local IPC',
+            ),
+            strings,
+          ),
+          const CoreMethodException(
+            code: 'transport_error',
+            message: 'local IPC',
+          ).toString(),
+        );
+      }
     },
   );
 }

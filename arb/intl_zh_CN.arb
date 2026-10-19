@@ -1607,5 +1607,6 @@
   "linkDesc": "通过订阅链接或代理分享链接获取配置文件",
   "resetDns": "重置 DNS",
   "resetDnsSuccess": "DNS 状态已清理",
-  "resetDnsFailed": "无法重置 DNS，请确认内核已连接后重试"
+  "resetDnsFailed": "无法重置 DNS，请确认内核已连接后重试",
+  "resourceSizeLimitTip": "资源大小超过 {limit}"
 }

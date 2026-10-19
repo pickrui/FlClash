@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:file_picker/file_picker.dart' show PlatformFile;
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/network_error.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -26,22 +27,8 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
-String providerLibraryError(BuildContext context, Object error) {
-  final l = context.appLocalizations;
-  if (error is! ProviderLibraryException) return error.toString();
-  return switch (error.code) {
-    'name' => l.providerNameInvalid,
-    'url' => l.providerUrlTip,
-    'size' => l.providerContentTooLarge,
-    'changed' => l.providerChanged,
-    'duplicate' => l.existsTip(l.name),
-    'inUse' => l.providerInUse(error.labels.join(', ')),
-    'shadowed' => l.providerRenameShadowed(error.labels.join(', ')),
-    'sourceReference' => l.providerSourceReference(error.labels.join(', ')),
-    'sourceUnavailable' => l.providerSourceUnavailable(error.labels.join(', ')),
-    _ => l.providerContentInvalid,
-  };
-}
+String providerLibraryError(BuildContext context, Object error) =>
+    userFacingErrorMessage(error, context.appLocalizations);
 
 class ClashProvidersView extends ConsumerStatefulWidget {
   const ClashProvidersView({super.key});

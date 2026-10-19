@@ -6,6 +6,8 @@
 import 'dart:convert';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/network_error.dart';
+import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/database/database.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
@@ -17,12 +19,26 @@ import 'database.dart';
 
 const maxProviderContentBytes = 32 * 1024 * 1024;
 
-class ProviderLibraryException implements Exception {
+class ProviderLibraryException implements LocalizedException {
   const ProviderLibraryException(this.code, [this.labels = const []]);
   final String code;
   final List<String> labels;
   @override
   String toString() => code;
+
+  @override
+  String messageFor(AppLocalizations l) => switch (code) {
+    'name' => l.providerNameInvalid,
+    'url' => l.providerUrlTip,
+    'size' => l.providerContentTooLarge,
+    'changed' => l.providerChanged,
+    'duplicate' => l.existsTip(l.name),
+    'inUse' => l.providerInUse(labels.join(', ')),
+    'shadowed' => l.providerRenameShadowed(labels.join(', ')),
+    'sourceReference' => l.providerSourceReference(labels.join(', ')),
+    'sourceUnavailable' => l.providerSourceUnavailable(labels.join(', ')),
+    _ => l.providerContentInvalid,
+  };
 }
 
 void validateLibraryProvider(ClashProvider provider) {

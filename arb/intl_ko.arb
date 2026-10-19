@@ -1607,5 +1607,6 @@
   "linkDesc": "구독 링크 또는 프록시 공유 링크로 프로필 가져오기",
   "resetDns": "DNS 초기화",
   "resetDnsSuccess": "DNS 상태를 초기화했습니다",
-  "resetDnsFailed": "DNS를 초기화하지 못했습니다. 코어 연결을 확인하고 다시 시도하세요."
+  "resetDnsFailed": "DNS를 초기화하지 못했습니다. 코어 연결을 확인하고 다시 시도하세요.",
+  "resourceSizeLimitTip": "리소스가 {limit}를 초과합니다"
 }

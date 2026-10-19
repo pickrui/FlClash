@@ -267,58 +267,60 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m98(seconds) => "Resend in ${seconds}s";
 
-  static String m99(count) =>
+  static String m99(limit) => "The resource exceeds ${limit}";
+
+  static String m100(count) =>
       "${Intl.plural(count, one: '1 rule', other: '${count} rules')}";
 
-  static String m100(appName) => "${appName} (Safe mode)";
+  static String m101(appName) => "${appName} (Safe mode)";
 
-  static String m101(count) => "Added (${count})";
+  static String m102(count) => "Added (${count})";
 
-  static String m102(count) => "Modified (${count})";
+  static String m103(count) => "Modified (${count})";
 
-  static String m103(count) => "Removed (${count})";
+  static String m104(count) => "Removed (${count})";
 
-  static String m104(count) => "${count} seconds";
+  static String m105(count) => "${count} seconds";
 
-  static String m105(count) => "${count} in effect";
-
-  static String m106(count) =>
-      "${Intl.plural(count, one: '1 setting', other: '${count} settings')}";
+  static String m106(count) => "${count} in effect";
 
   static String m107(count) =>
-      "${Intl.plural(count, one: '1 node was added from the share links', other: '${count} nodes were added from the share links')}";
+      "${Intl.plural(count, one: '1 setting', other: '${count} settings')}";
 
   static String m108(count) =>
+      "${Intl.plural(count, one: '1 node was added from the share links', other: '${count} nodes were added from the share links')}";
+
+  static String m109(count) =>
       "${Intl.plural(count, one: '1 link could not be read', other: '${count} links could not be read')}";
 
-  static String m109(label) => "${label} must be a single item";
+  static String m110(label) => "${label} must be a single item";
 
-  static String m110(fields) => "Check these settings: ${fields}";
+  static String m111(fields) => "Check these settings: ${fields}";
 
-  static String m111(count) => "Devices (${count})";
+  static String m112(count) => "Devices (${count})";
 
-  static String m112(name, profile) =>
+  static String m113(name, profile) =>
       "${name} is still used by a rule or group in profile ${profile}";
 
-  static String m113(region) => "Relay ${region}";
+  static String m114(region) => "Relay ${region}";
 
-  static String m114(name) =>
+  static String m115(name) =>
       "This device will leave ${name} and its sign-in will be deleted from this device. If the network is unreachable now, remove the device in the Tailscale admin console.";
 
-  static String m115(value) => "Peak ${value}";
+  static String m116(value) => "Peak ${value}";
 
-  static String m116(value) => "Total ${value}";
+  static String m117(value) => "Total ${value}";
 
-  static String m117(build) => "Build: ${build}";
+  static String m118(build) => "Build: ${build}";
 
-  static String m118(version) => "Version: ${version}";
+  static String m119(version) => "Version: ${version}";
 
-  static String m119(label) => "${label} must be a url";
+  static String m120(label) => "${label} must be a url";
 
-  static String m120(count) =>
+  static String m121(count) =>
       "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
-  static String m121(count) => "${Intl.plural(count, other: '${count}y ago')}";
+  static String m122(count) => "${Intl.plural(count, other: '${count}y ago')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -2606,6 +2608,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "resetTokenValidation": MessageLookupByLibrary.simpleMessage(
       "Please enter the reset link or code",
     ),
+    "resourceSizeLimitTip": m99,
     "resources": MessageLookupByLibrary.simpleMessage("Resources"),
     "resourcesDesc": MessageLookupByLibrary.simpleMessage(
       "External resource related info",
@@ -2810,7 +2813,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "ruleProviders": MessageLookupByLibrary.simpleMessage("Rule providers"),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("Rule target"),
     "rules": MessageLookupByLibrary.simpleMessage("Rules"),
-    "rulesCount": m99,
+    "rulesCount": m100,
     "rulesRequireRuleMode": MessageLookupByLibrary.simpleMessage(
       "Personal routing rules take effect in Rule mode.",
     ),
@@ -2818,7 +2821,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "running": MessageLookupByLibrary.simpleMessage("Running"),
     "runtimeConfig": MessageLookupByLibrary.simpleMessage("Runtime config"),
     "safeMode": MessageLookupByLibrary.simpleMessage("Safe mode"),
-    "safeModeAppTitle": m100,
+    "safeModeAppTitle": m101,
     "saturation": MessageLookupByLibrary.simpleMessage("Saturation"),
     "save": MessageLookupByLibrary.simpleMessage("Save"),
     "saveAndRetry": MessageLookupByLibrary.simpleMessage("Save and retry"),
@@ -2837,15 +2840,15 @@ class MessageLookup extends MessageLookupByLibrary {
       "The script changed or was deleted. Reopen it and try again.",
     ),
     "scriptChanges": MessageLookupByLibrary.simpleMessage("Script changes"),
-    "scriptChangesAdded": m101,
+    "scriptChangesAdded": m102,
     "scriptChangesDescription": MessageLookupByLibrary.simpleMessage(
       "Top-level configuration fields added, modified or removed by the script. The full configuration also includes app settings.",
     ),
     "scriptChangesEmpty": MessageLookupByLibrary.simpleMessage(
       "The script did not change the configuration",
     ),
-    "scriptChangesModified": m102,
-    "scriptChangesRemoved": m103,
+    "scriptChangesModified": m103,
+    "scriptChangesRemoved": m104,
     "scriptFullConfig": MessageLookupByLibrary.simpleMessage("Full config"),
     "scriptModeDesc": MessageLookupByLibrary.simpleMessage(
       "Script mode, use external extension scripts, provide one-click override configuration capability",
@@ -2856,9 +2859,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "search": MessageLookupByLibrary.simpleMessage("Search"),
     "seconds": MessageLookupByLibrary.simpleMessage("Seconds"),
-    "secondsCount": m104,
+    "secondsCount": m105,
     "secretKey": MessageLookupByLibrary.simpleMessage("Key"),
-    "sectionsInEffect": m105,
+    "sectionsInEffect": m106,
     "selectAll": MessageLookupByLibrary.simpleMessage("Select all"),
     "selectBackup": MessageLookupByLibrary.simpleMessage("Select a backup"),
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage(
@@ -2874,9 +2877,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "serviceFailed": MessageLookupByLibrary.simpleMessage("Check failed"),
     "settingEntries": MessageLookupByLibrary.simpleMessage("settings"),
     "settings": MessageLookupByLibrary.simpleMessage("Settings"),
-    "settingsCount": m106,
-    "shareLinkNodesAdded": m107,
-    "shareLinksNotRead": m108,
+    "settingsCount": m107,
+    "shareLinkNodesAdded": m108,
+    "shareLinksNotRead": m109,
     "show": MessageLookupByLibrary.simpleMessage("Show"),
     "showLess": MessageLookupByLibrary.simpleMessage("Collapse"),
     "showMore": MessageLookupByLibrary.simpleMessage("Expand"),
@@ -2896,7 +2899,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Start in the background",
     ),
     "singleAdd": MessageLookupByLibrary.simpleMessage("Single add"),
-    "singleValueTip": m109,
+    "singleValueTip": m110,
     "size": MessageLookupByLibrary.simpleMessage("Size"),
     "skipCertVerify": MessageLookupByLibrary.simpleMessage(
       "Skip certificate verification",
@@ -3028,7 +3031,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleAvailableExitNodes": MessageLookupByLibrary.simpleMessage(
       "Available exit nodes",
     ),
-    "tailscaleCheckSettings": m110,
+    "tailscaleCheckSettings": m111,
     "tailscaleConnected": MessageLookupByLibrary.simpleMessage("Connected"),
     "tailscaleConnecting": MessageLookupByLibrary.simpleMessage("Connecting"),
     "tailscaleControlUrl": MessageLookupByLibrary.simpleMessage("Control URL"),
@@ -3036,7 +3039,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Authentication and device identity stay on this device.",
     ),
     "tailscaleDeviceName": MessageLookupByLibrary.simpleMessage("Device name"),
-    "tailscaleDevices": m111,
+    "tailscaleDevices": m112,
     "tailscaleDirect": MessageLookupByLibrary.simpleMessage("Direct"),
     "tailscaleEmptyDesc": MessageLookupByLibrary.simpleMessage(
       "Add a network, sign in on this device, then start the proxy to reach your devices.",
@@ -3131,7 +3134,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleNeedsLogin": MessageLookupByLibrary.simpleMessage(
       "Login required",
     ),
-    "tailscaleNetworkInUse": m112,
+    "tailscaleNetworkInUse": m113,
     "tailscaleNetworkName": MessageLookupByLibrary.simpleMessage(
       "Network name",
     ),
@@ -3148,8 +3151,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleOpenLoginPage": MessageLookupByLibrary.simpleMessage(
       "Open login page",
     ),
-    "tailscaleRelay": m113,
-    "tailscaleRemoveConfirm": m114,
+    "tailscaleRelay": m114,
+    "tailscaleRemoveConfirm": m115,
     "tailscaleRemoveNetwork": MessageLookupByLibrary.simpleMessage(
       "Remove network",
     ),
@@ -3211,8 +3214,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("Uploaded"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy port"),
     "traffic": MessageLookupByLibrary.simpleMessage("Traffic"),
-    "trafficPeak": m115,
-    "trafficTotal": m116,
+    "trafficPeak": m116,
+    "trafficTotal": m117,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Traffic usage"),
     "transferConfirmNotice": MessageLookupByLibrary.simpleMessage(
       "The system will confirm automatically after the transfer is completed, and the selected plan will be activated.",
@@ -3267,7 +3270,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateApplyFailed": MessageLookupByLibrary.simpleMessage(
       "Automatic update did not complete. Retry or update from the download page.",
     ),
-    "updateBuildNumber": m117,
+    "updateBuildNumber": m118,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
       "Cancel download",
     ),
@@ -3314,7 +3317,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateRestartHint": MessageLookupByLibrary.simpleMessage(
       "The app will close, update in place, and reopen. Your settings will be preserved.",
     ),
-    "updateVersionNumber": m118,
+    "updateVersionNumber": m119,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("Upgrade plan"),
     "upload": MessageLookupByLibrary.simpleMessage("Upload"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("Upload bandwidth"),
@@ -3322,7 +3325,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Obtain profile through URL",
     ),
-    "urlTip": m119,
+    "urlTip": m120,
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),
     "usedShort": MessageLookupByLibrary.simpleMessage("used"),
@@ -3355,8 +3358,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Write to system also sets the system clock; Android ignores it",
     ),
-    "yearsAgo": m120,
-    "yearsAgoShort": m121,
+    "yearsAgo": m121,
+    "yearsAgoShort": m122,
     "yes": MessageLookupByLibrary.simpleMessage("Yes"),
     "zh_CN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };

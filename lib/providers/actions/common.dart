@@ -191,9 +191,7 @@ extension CommonControllerExt on AppController {
       final isConfigValidationError = e is ConfigValidationException;
       final message = isConfigValidationError
           ? formatConfigValidationMessage(e.message, appLocalizations)
-          : networkErrorMessage(e, appLocalizations) ??
-                coreLaunchBlockedMessage(e, appLocalizations) ??
-                Secrets.redactApiDomains(e.toString());
+          : userFacingErrorMessage(e, appLocalizations);
       if (silence) {
         globalState.showNotifier(message);
       } else {

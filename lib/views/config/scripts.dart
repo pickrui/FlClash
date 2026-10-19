@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/network_error.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/common/javascript.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
@@ -53,7 +54,9 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
       await action();
     } catch (error) {
       if (mounted && source.mounted && source.isCurrentPage) {
-        context.showNotifier(error.toString());
+        context.showNotifier(
+          userFacingErrorMessage(error, context.appLocalizations),
+        );
       }
     }
   }
@@ -438,7 +441,12 @@ class _ScriptOptionsPageState extends ConsumerState<ScriptOptionsPage> {
         _refreshOverrides = null;
       });
     } catch (error) {
-      if (mounted) setState(() => _error = error.toString());
+      if (mounted) {
+        setState(
+          () =>
+              _error = userFacingErrorMessage(error, context.appLocalizations),
+        );
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -477,7 +485,11 @@ class _ScriptOptionsPageState extends ConsumerState<ScriptOptionsPage> {
       }
       if (mounted) BaseNavigator.close(context);
     } catch (error) {
-      if (mounted) context.showNotifier(error.toString());
+      if (mounted) {
+        context.showNotifier(
+          userFacingErrorMessage(error, context.appLocalizations),
+        );
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }

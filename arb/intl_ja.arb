@@ -1607,5 +1607,6 @@
   "linkDesc": "サブスクリプションリンクまたはプロキシの共有リンクからプロファイルを取得します",
   "resetDns": "DNS をリセット",
   "resetDnsSuccess": "DNS の状態をクリアしました",
-  "resetDnsFailed": "DNS をリセットできませんでした。コアの接続を確認して、もう一度お試しください。"
+  "resetDnsFailed": "DNS をリセットできませんでした。コアの接続を確認して、もう一度お試しください。",
+  "resourceSizeLimitTip": "リソースが {limit} を超えています"
 }

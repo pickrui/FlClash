@@ -7,6 +7,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/network_error.dart';
+import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/common/javascript.dart';
 import 'package:fl_clash/database/database.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -21,16 +23,20 @@ import 'state.dart';
 
 const maxScriptContentBytes = 8 * 1024 * 1024;
 
-class ScriptLibraryException implements Exception {
+class ScriptLibraryException implements LocalizedException {
   const ScriptLibraryException(this.code);
   final String code;
   @override
-  String toString() => switch (code) {
-    'changed' => appLocalizations.scriptChanged,
-    'duplicate' => appLocalizations.existsTip(appLocalizations.name),
-    'name' => appLocalizations.emptyTip(appLocalizations.name),
-    'url' => appLocalizations.urlTip(''),
-    _ => appLocalizations.providerContentTooLarge,
+  String toString() => messageFor(appLocalizations);
+
+  @override
+  String messageFor(AppLocalizations l) => switch (code) {
+    'changed' => l.scriptChanged,
+    'duplicate' => l.existsTip(l.name),
+    'name' => l.emptyTip(l.name),
+    'url' => l.urlTip(''),
+    'size' => l.resourceSizeLimitTip('8 MiB'),
+    _ => l.providerContentInvalid,
   };
 }
 

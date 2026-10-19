@@ -8,9 +8,24 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/http_read_race.dart';
+import 'package:fl_clash/common/secrets.dart';
 import 'package:fl_clash/core/desktop/launch_policy.dart';
 import 'package:fl_clash/core/method.dart';
 import 'package:fl_clash/l10n/l10n.dart';
+
+abstract interface class LocalizedException implements Exception {
+  String messageFor(AppLocalizations localizations);
+}
+
+String userFacingErrorMessage(Object error, AppLocalizations localizations) =>
+    Secrets.redactApiDomains(
+      networkErrorMessage(error, localizations) ??
+          coreLaunchBlockedMessage(error, localizations) ??
+          switch (error) {
+            LocalizedException() => error.messageFor(localizations),
+            _ => error.toString(),
+          },
+    );
 
 enum _Kind {
   timeout,

@@ -8,6 +8,14 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/native.dart';
+import 'package:dio/dio.dart';
+import 'package:fl_clash/l10n/l10n.dart';
+import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
+import 'package:fl_clash/providers/action.dart';
+import 'package:fl_clash/providers/config.dart';
+import 'package:fl_clash/providers/database.dart';
+import 'package:fl_clash/providers/icon_sets.dart';
 import 'package:fl_clash/common/path.dart';
 import 'package:fl_clash/database/database.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -49,6 +57,13 @@ void main() {
     downloads = 0;
     container = ProviderContainer(
       overrides: [
+        iconSetsProvider.overrideWithBuild((_, _) => Stream.value([])),
+        scriptsProvider.overrideWithBuild((_, _) => Stream.value([])),
+        clashProvidersProvider.overrideWith((_) => Stream.value([item])),
+        patchClashConfigProvider.overrideWithBuild(
+          (_, _) => const ClashConfig(),
+        ),
+        setupActionProvider.overrideWith(_NoGeoUpdates.new),
         resourcesProvider.overrideWith(
           (ref) => ResourceUpdates(
             ref,
@@ -71,6 +86,37 @@ void main() {
       await appPath.rebind();
       await root.delete(recursive: true);
     });
+  });
+
+  test('bulk failures translate network and library errors without replacing cache', () async {
+    final previousLocale = Intl.defaultLocale;
+    addTearDown(() => Intl.defaultLocale = previousLocale);
+    final l = await AppLocalizations.load(const Locale('en'));
+    final file = File(await item.resourcePath);
+    await file.parent.create(recursive: true);
+    await file.writeAsBytes(valid);
+    container.listen(iconSetsProvider, (_, _) {});
+    container.listen(scriptsProvider, (_, _) {});
+    container.listen(clashProvidersProvider, (_, _) {});
+    final service = container.read(resourcesProvider);
+    final updating = service.updateAll(shouldContinue: () => true);
+    await requested.future;
+    response.completeError(
+      DioException(
+        requestOptions: RequestOptions(
+          path: 'https://user:password@example.invalid/private',
+        ),
+        type: DioExceptionType.receiveTimeout,
+      ),
+    );
+    expect(await updating, [l.failedItem(item.label, l.networkTimeoutError)]);
+    response = Completer<List<int>>()
+      ..complete(utf8.encode('<html>failed</html>'));
+    expect(await service.updateAll(shouldContinue: () => true), [
+      l.failedItem(item.label, l.providerContentInvalid),
+    ]);
+    expect(await file.readAsBytes(), valid);
+    expect(container.read(isUpdatingProvider(item.updatingKey)), isFalse);
   });
 
   test(
@@ -141,4 +187,17 @@ void main() {
       },
     );
   }
+}
+
+class _NoGeoUpdates extends SetupAction {
+  @override
+  void build() {}
+
+  @override
+  Future<bool> updateGeoResource(
+    GeoResource resource,
+    String url, {
+    Object? initialError,
+    required bool Function() shouldContinue,
+  }) async => true;
 }

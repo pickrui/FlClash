@@ -1607,5 +1607,6 @@
   "linkDesc": "Obtain a profile from a subscription link or a proxy share link",
   "resetDns": "Reset DNS",
   "resetDnsSuccess": "DNS state cleared",
-  "resetDnsFailed": "Could not reset DNS. Check that the core is connected and try again."
+  "resetDnsFailed": "Could not reset DNS. Check that the core is connected and try again.",
+  "resourceSizeLimitTip": "The resource exceeds {limit}"
 }

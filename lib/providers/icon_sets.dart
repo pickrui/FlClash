@@ -6,6 +6,8 @@
 import 'dart:convert';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/network_error.dart';
+import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/database/database.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -70,6 +72,20 @@ class IconSetsAction extends _$IconSetsAction {
       _library.sync(iconSet, previousUrl: previousUrl);
 }
 
+class IconSetLibraryException extends FormatException
+    implements LocalizedException {
+  const IconSetLibraryException(this.code) : super(code);
+  final String code;
+
+  @override
+  String messageFor(AppLocalizations l) => switch (code) {
+    'size' => l.resourceSizeLimitTip('4 MiB'),
+    'url' => l.providerUrlTip,
+    'duplicate' => l.existsTip(l.url),
+    _ => l.providerContentInvalid,
+  };
+}
+
 class IconSetLibrary {
   IconSetLibrary(
     this.database, {
@@ -82,9 +98,13 @@ class IconSetLibrary {
 
   ({String name, List<IconSetIcon> icons}) _parse(String content) {
     if (utf8.encode(content).length > maxIconSetBytes) {
-      throw const FormatException('Icon set exceeds 4 MiB');
+      throw const IconSetLibraryException('size');
     }
-    return parseIconSet(content);
+    try {
+      return parseIconSet(content);
+    } on FormatException {
+      throw const IconSetLibraryException('content');
+    }
   }
 
   Future<({String name, List<IconSetIcon> icons})> _download(String url) async {
@@ -93,7 +113,7 @@ class IconSetLibrary {
         !['http', 'https'].contains(uri.scheme) ||
         uri.host.isEmpty ||
         uri.userInfo.isNotEmpty) {
-      throw const FormatException('Invalid icon set URL');
+      throw const IconSetLibraryException('url');
     }
     return _parse(await download(url));
   }
@@ -155,7 +175,7 @@ class IconSetLibrary {
         (row) => row.id != item.id && row.url == item.url,
       );
       if (duplicates) {
-        throw const FormatException('Icon set URL already exists');
+        throw const IconSetLibraryException('duplicate');
       }
       final updated = current.copyWith(
         name: item.name == before.name ? current.name : item.name,

@@ -1607,5 +1607,6 @@
   "linkDesc": "Obtenir un profil depuis un lien d’abonnement ou un lien de partage de proxy",
   "resetDns": "Réinitialiser le DNS",
   "resetDnsSuccess": "État DNS effacé",
-  "resetDnsFailed": "Impossible de réinitialiser le DNS. Vérifiez la connexion au noyau, puis réessayez."
+  "resetDnsFailed": "Impossible de réinitialiser le DNS. Vérifiez la connexion au noyau, puis réessayez.",
+  "resourceSizeLimitTip": "La ressource dépasse {limit}"
 }

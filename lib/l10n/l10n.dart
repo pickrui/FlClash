@@ -13562,6 +13562,16 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `The resource exceeds {limit}`
+  String resourceSizeLimitTip(Object limit) {
+    return Intl.message(
+      'The resource exceeds $limit',
+      name: 'resourceSizeLimitTip',
+      desc: '',
+      args: [limit],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {
