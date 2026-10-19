@@ -88,7 +88,10 @@ extension BackupControllerExt on AppController {
       });
       return VM2(configMap, storageSnapshotPath);
     });
-    return backupTask(backupData.a, backupData.b);
+    return backupTask(
+      configMap: backupData.a,
+      storageSnapshotPath: backupData.b,
+    );
   }
 
   Future<void> restore(RestoreOption option, {String? backupPath}) {
@@ -129,9 +132,9 @@ extension BackupControllerExt on AppController {
           await _preferencesWriteTail;
           await suspendDatabaseWrites();
           var migrationData = await restoreTask(
-            backupPath ?? await appPath.backupFilePath,
-            restoreDirPath,
-            await appPath.homeDirPath,
+            archivePath: backupPath ?? await appPath.backupFilePath,
+            stagingDirPath: restoreDirPath,
+            homeDirPath: await appPath.homeDirPath,
           );
           if (!await restoreDir.exists()) {
             throw appLocalizations.restoreException;

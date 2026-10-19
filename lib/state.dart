@@ -6,6 +6,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:fl_clash/common/backup.dart';
+import 'package:fl_clash/common/restore_journal.dart';
 import 'package:fl_clash/common/listener_state_scheduler.dart';
 import 'package:fl_clash/providers/state.dart';
 

@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
+import 'package:fl_clash/common/backup.dart';
 import 'package:fl_clash/common/indexing.dart';
 import 'package:fl_clash/common/task.dart';
 import 'package:fl_clash/database/database.dart';
