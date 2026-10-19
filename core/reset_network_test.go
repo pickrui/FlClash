@@ -30,25 +30,21 @@ func (tracker resetNetworkTracker) Close() error {
 
 // Android's NetworkObserveModule sends this method name through Core.invokeMethod.
 func TestResetNetworkClosesEveryTrackedConnection(t *testing.T) {
-	previousManager, previousNotify, previousConn := statistic.DefaultManager, statistic.DefaultRequestNotify, conn
+	previousManager, previousNotify := statistic.DefaultManager, statistic.DefaultRequestNotify
 	var written recordingConn
 	statistic.DefaultManager = &statistic.Manager{}
 	statistic.DefaultRequestNotify = nil
-	conn = &written
+	useTestConnection(t, &written)
 	t.Cleanup(func() {
 		statistic.DefaultManager = previousManager
 		statistic.DefaultRequestNotify = previousNotify
-		conn = previousConn
 	})
 	var closed atomic.Int32
 	statistic.DefaultManager.Join(resetNetworkTracker{closed: &closed})
 
 	handleMethodCall(&MethodCall{ID: "1", Method: "resetNetwork"}, MethodResponse{ID: "1"})
 
-	frame, err := readFrame(&written.Buffer)
-	if err != nil {
-		t.Fatal(err)
-	}
+	frame := written.responseFrame(t, "1")
 	var response MethodResponse
 	if err := json.Unmarshal(frame, &response); err != nil {
 		t.Fatal(err)

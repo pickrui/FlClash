@@ -101,12 +101,12 @@ func readFrame(reader io.Reader) ([]byte, error) {
 }
 
 func send(data []byte) {
+	connMu.Lock()
+	defer connMu.Unlock()
 	if conn == nil {
 		log.Printf("send conn nil")
 		return
 	}
-	connMu.Lock()
-	defer connMu.Unlock()
 	if err := writeFrame(conn, data); err != nil {
 		log.Printf("server write error: %v", err)
 	}
@@ -121,7 +121,9 @@ func StartServer(address string) {
 }
 
 func serve(dialed io.ReadWriteCloser) {
+	connMu.Lock()
 	conn = dialed
+	connMu.Unlock()
 	defer releaseOnExit()
 	defer dialed.Close()
 	for {

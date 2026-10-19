@@ -34,17 +34,17 @@ func (c *clearDNSClient) ExchangeContext(_ context.Context, query *D.Msg) (*D.Ms
 
 func TestClearDnsStateRPCRequeriesWithoutClosingConnections(t *testing.T) {
 	previousResolver, previousSystem := resolver.DefaultResolver, resolver.SystemResolver
-	previousManager, previousNotify, previousConn := statistic.DefaultManager, statistic.DefaultRequestNotify, conn
+	previousManager, previousNotify := statistic.DefaultManager, statistic.DefaultRequestNotify
 	client := &clearDNSClient{}
 	r := dns.NewResolverFromClient(client)
 	resolver.DefaultResolver, resolver.SystemResolver = r, nil
 	statistic.DefaultManager, statistic.DefaultRequestNotify = &statistic.Manager{}, nil
 	var written recordingConn
-	conn = &written
+	useTestConnection(t, &written)
 	t.Cleanup(func() {
 		r.CloseQueries()
 		resolver.DefaultResolver, resolver.SystemResolver = previousResolver, previousSystem
-		statistic.DefaultManager, statistic.DefaultRequestNotify, conn = previousManager, previousNotify, previousConn
+		statistic.DefaultManager, statistic.DefaultRequestNotify = previousManager, previousNotify
 	})
 	var closed atomic.Int32
 	statistic.DefaultManager.Join(resetNetworkTracker{closed: &closed})
@@ -57,10 +57,7 @@ func TestClearDnsStateRPCRequeriesWithoutClosingConnections(t *testing.T) {
 		t.Fatal("fixture did not cache its answer")
 	}
 	handleMethodCall(&MethodCall{ID: "dns-clear", Method: "clearDnsState"}, MethodResponse{ID: "dns-clear"})
-	frame, err := readFrame(&written.Buffer)
-	if err != nil {
-		t.Fatal(err)
-	}
+	frame := written.responseFrame(t, "dns-clear")
 	var response MethodResponse
 	if err := json.Unmarshal(frame, &response); err != nil {
 		t.Fatal(err)

@@ -302,6 +302,40 @@ type recordingConn struct{ bytes.Buffer }
 
 func (c *recordingConn) Close() error { return nil }
 
+func useTestConnection(t *testing.T, connection io.ReadWriteCloser) {
+	t.Helper()
+	connMu.Lock()
+	previous := conn
+	conn = connection
+	connMu.Unlock()
+	t.Cleanup(func() {
+		connMu.Lock()
+		conn = previous
+		connMu.Unlock()
+	})
+}
+
+func (c *recordingConn) responseFrame(t *testing.T, id string) []byte {
+	t.Helper()
+	connMu.Lock()
+	defer connMu.Unlock()
+	for c.Len() > 0 {
+		frame, err := readFrame(&c.Buffer)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var response MethodResponse
+		if err := json.Unmarshal(frame, &response); err != nil {
+			t.Fatal(err)
+		}
+		if response.ID == id {
+			return frame
+		}
+	}
+	t.Fatalf("missing response %s", id)
+	return nil
+}
+
 func TestServeCleansUpOnDisconnect(t *testing.T) {
 	oversized := make([]byte, 4)
 	binary.LittleEndian.PutUint32(oversized, maxIPCFrameSize+1)
@@ -311,9 +345,10 @@ func TestServeCleansUpOnDisconnect(t *testing.T) {
 		"oversized frame":  oversized,
 	} {
 		t.Run(name, func(t *testing.T) {
-			previousInit, previousConn := isInit.Load(), conn
+			previousInit := isInit.Load()
+			useTestConnection(t, nil)
 			isInit.Store(true)
-			t.Cleanup(func() { isInit.Store(previousInit); conn = previousConn })
+			t.Cleanup(func() { isInit.Store(previousInit) })
 			connection := &exitTestConn{Reader: bytes.NewReader(data)}
 			called := stubExitCleanup(t, func() {
 				if !connection.closed {
@@ -329,17 +364,12 @@ func TestServeCleansUpOnDisconnect(t *testing.T) {
 }
 
 func TestOversizedResponseAnswersWithAnError(t *testing.T) {
-	previousConn := conn
 	var written recordingConn
-	conn = &written
-	t.Cleanup(func() { conn = previousConn })
+	useTestConnection(t, &written)
 
 	MethodResponse{ID: "9", Result: strings.Repeat("x", maxIPCFrameSize)}.send()
 
-	frame, err := readFrame(&written.Buffer)
-	if err != nil {
-		t.Fatal(err)
-	}
+	frame := written.responseFrame(t, "9")
 	var decoded MethodResponse
 	if err := json.Unmarshal(frame, &decoded); err != nil {
 		t.Fatal(err)
