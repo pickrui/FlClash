@@ -83,13 +83,19 @@ _TunState _profileTun(ProfileOverrides overrides) =>
 ProfileOverrides _setProfileTun(ProfileOverrides overrides, _TunState state) =>
     overrides.copyWith(tun: state.model, tunOverrideKeys: state.keys);
 
+String _patchTunDescription(AppLocalizations l) => l.tunOverrideDesc;
+
 String _profileTunDescription(AppLocalizations l) => l.profileTunSettingsDesc;
 
 OverrideSpec<TunOverrideKey, ProfileTun> appTunOverrideSpec({
   required bool isLinux,
   required bool isWindows,
 }) => _TunOverrideSpec(
-  const PatchOverrideTarget(get: _getTun, set: _setTun),
+  const PatchOverrideTarget(
+    get: _getTun,
+    set: _setTun,
+    description: _patchTunDescription,
+  ),
   isLinux: isLinux,
   isWindows: isWindows,
 );
@@ -134,7 +140,7 @@ class _TunOverrideSpec extends OverrideSpec<TunOverrideKey, ProfileTun> {
   String title(AppLocalizations l) => l.tun;
 
   @override
-  NullStatusIllustration get illustration => NullStatusIllustration.connections;
+  NullStatusIllustration get illustration => NullStatusIllustration.tun;
 
   @override
   List<TunOverrideKey> get values => [

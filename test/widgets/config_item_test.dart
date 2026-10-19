@@ -22,7 +22,6 @@ Future<void> _pump(WidgetTester tester, ProviderListenable<String> selector) {
         body: ConfigTextItem(
           selector: selector,
           title: (_) => 'Server',
-          subtitle: (_) => 'Fallback',
           onChanged: (_, _) {},
         ),
       ),
@@ -36,7 +35,7 @@ void main() {
   ) async {
     await _pump(tester, _empty);
     final tile = tester.widget<ListTile>(find.byType(ListTile));
-    expect((tile.subtitle as Text?)?.data, 'Fallback');
+    expect(tile.subtitle, isNull);
 
     await _pump(tester, _filled);
     expect(find.text('example.test'), findsOneWidget);

@@ -64,11 +64,52 @@ extension on DnsOverrideKey {
     DnsOverrideKey.proxyServerNameserver => (l) => l.proxyNameserverDesc,
     _ => null,
   };
+
+  String section(AppLocalizations l) => switch (this) {
+    DnsOverrideKey.enable ||
+    DnsOverrideKey.listen ||
+    DnsOverrideKey.listenRoutingMark ||
+    DnsOverrideKey.useHosts ||
+    DnsOverrideKey.useSystemHosts ||
+    DnsOverrideKey.ipv6 ||
+    DnsOverrideKey.ipv6Timeout ||
+    DnsOverrideKey.respectRules ||
+    DnsOverrideKey.preferH3 ||
+    DnsOverrideKey.cacheAlgorithm ||
+    DnsOverrideKey.cacheMaxSize ||
+    DnsOverrideKey.enhancedMode => l.options,
+    DnsOverrideKey.fakeIpRange ||
+    DnsOverrideKey.fakeIpRange6 ||
+    DnsOverrideKey.fakeIpFilter ||
+    DnsOverrideKey.fakeIpFilterMode ||
+    DnsOverrideKey.fakeIpTtl => 'Fake-IP',
+    DnsOverrideKey.defaultNameserver ||
+    DnsOverrideKey.nameserverPolicy ||
+    DnsOverrideKey.nameserver ||
+    DnsOverrideKey.fallback ||
+    DnsOverrideKey.fallbackLazyQuery ||
+    DnsOverrideKey.proxyServerNameserver ||
+    DnsOverrideKey.proxyServerNameserverPolicy ||
+    DnsOverrideKey.directNameserver ||
+    DnsOverrideKey.directNameserverFollowPolicy => l.nameserver,
+    DnsOverrideKey.fallbackFilterGeoip ||
+    DnsOverrideKey.fallbackFilterGeoipCode ||
+    DnsOverrideKey.fallbackFilterGeosite ||
+    DnsOverrideKey.fallbackFilterIpcidr ||
+    DnsOverrideKey.fallbackFilterDomain => l.fallbackFilter,
+  };
 }
 
 // mihomo reports `hosts` in connection metadata but rejects it as an
 // enhanced-mode.
 const _enhancedModes = [DnsMode.normal, DnsMode.fakeIp, DnsMode.redirHost];
+
+String _enhancedModeValue(DnsMode mode) => switch (mode) {
+  DnsMode.normal => 'normal',
+  DnsMode.fakeIp => 'fake-ip',
+  DnsMode.redirHost => 'redir-host',
+  DnsMode.hosts => 'hosts',
+};
 
 typedef _DnsState = OverrideState<DnsOverrideKey, Dns>;
 
@@ -83,6 +124,8 @@ _DnsState _profileDns(ProfileOverrides overrides) =>
 
 ProfileOverrides _setProfileDns(ProfileOverrides overrides, _DnsState state) =>
     overrides.copyWith(dns: state.model, dnsOverrideKeys: state.keys);
+
+String _patchDnsDescription(AppLocalizations l) => l.dnsOverrideDesc;
 
 String _profileDnsDescription(AppLocalizations l) =>
     l.profileOverrideSettingsDesc;
@@ -132,8 +175,7 @@ class _DnsOverrideSpec extends OverrideSpec<DnsOverrideKey, Dns>
   ConfigLabel? description(DnsOverrideKey key) => key.description;
 
   @override
-  String sectionOf(DnsOverrideKey key, AppLocalizations l) =>
-      key.isFallbackFilter ? l.fallbackFilter : l.options;
+  String sectionOf(DnsOverrideKey key, AppLocalizations l) => key.section(l);
 
   @override
   String overrideYaml(Dns model, Set<DnsOverrideKey> keys) =>
@@ -199,6 +241,7 @@ class _DnsOverrideSpec extends OverrideSpec<DnsOverrideKey, Dns>
       _enhancedModes,
       (dns) => dns.enhancedMode,
       (dns, value) => dns.copyWith(enhancedMode: value),
+      labelOf: _enhancedModeValue,
     ),
     DnsOverrideKey.fakeIpRange => TextOverrideField(
       (dns) => dns.fakeIpRange,
@@ -302,7 +345,11 @@ class DnsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) => OverrideView(
     spec: _DnsOverrideSpec(switch (profileId) {
-      null => const PatchOverrideTarget(get: _getDns, set: _setDns),
+      null => const PatchOverrideTarget(
+        get: _getDns,
+        set: _setDns,
+        description: _patchDnsDescription,
+      ),
       final profileId => ProfileOverrideTarget(
         profileId,
         get: _profileDns,

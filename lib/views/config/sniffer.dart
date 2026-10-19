@@ -91,7 +91,7 @@ class _SnifferOverrideSpec extends OverrideSpec<SnifferOverrideKey, Sniffer>
   String title(AppLocalizations l) => l.sniffer;
 
   @override
-  NullStatusIllustration get illustration => NullStatusIllustration.search;
+  NullStatusIllustration get illustration => NullStatusIllustration.sniffer;
 
   @override
   List<SnifferOverrideKey> get values => SnifferOverrideKey.values;
@@ -179,7 +179,6 @@ class _SniffField extends OverrideField<Sniffer> {
   Widget build(
     OverrideModel<Sniffer> model, {
     required ConfigLabel title,
-    ConfigLabel? description,
     required Widget leading,
   }) {
     return _SniffItem(model: model, overrideKey: overrideKey, leading: leading);
@@ -190,8 +189,9 @@ class _SniffField extends OverrideField<Sniffer> {
       model.withSniff(overrideKey, defaults.sniffOf(overrideKey));
 }
 
+/// mihomo sniffs a protocol listed without ports on its standard port.
 String _portsText(AppLocalizations l, List<String> ports) =>
-    ports.isEmpty ? l.defaultText : ports.join(', ');
+    ports.isEmpty ? l.defaultText : l.itemsCount(ports.length);
 
 class _SniffItem extends ConsumerWidget {
   const _SniffItem({

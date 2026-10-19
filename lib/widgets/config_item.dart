@@ -6,6 +6,7 @@
 import 'package:fl_clash/common/cidr.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/l10n/l10n.dart';
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod/misc.dart' show ProviderListenable;
@@ -122,26 +123,12 @@ abstract class _ConfigItem<T> extends ConsumerWidget {
   }
 }
 
-String _describe(
-  String value,
-  ConfigLabel? description,
-  AppLocalizations appLocalizations,
-) {
-  final text = description?.call(appLocalizations);
-  return text == null
-      ? value
-      : value.isEmpty
-      ? text
-      : '$value · $text';
-}
-
 class ConfigToggleItem extends _ConfigItem<bool> {
   const ConfigToggleItem({
     super.key,
     required super.selector,
     required super.title,
     required super.onChanged,
-    super.subtitle,
     super.leading,
   });
 
@@ -155,7 +142,6 @@ class ConfigToggleItem extends _ConfigItem<bool> {
     return ListItem.toggle(
       leading: leading,
       title: Text(title(appLocalizations)),
-      subtitle: buildSubtitle(appLocalizations),
       value: value,
       onChanged: (value) => onChanged(ref, value),
     );
@@ -170,15 +156,12 @@ class ConfigOptionsItem<T> extends _ConfigItem<T> {
     required super.onChanged,
     required this.options,
     required this.textBuilder,
-    this.description,
     super.subtitle,
     super.leading,
   });
 
   final List<T> options;
   final String Function(T value) textBuilder;
-
-  final ConfigLabel? description;
 
   @override
   Widget buildItem(
@@ -190,20 +173,11 @@ class ConfigOptionsItem<T> extends _ConfigItem<T> {
     return ListItem<T>.options(
       leading: leading,
       title: Text(title(appLocalizations)),
-      subtitle: switch (subtitle?.call(appLocalizations) ??
-          description?.call(appLocalizations)) {
-        final text? => Text(text),
-        null => null,
-      },
+      subtitle: buildSubtitle(appLocalizations),
       options: options,
       value: value,
       textBuilder: textBuilder,
-      onChanged: (value) {
-        if (value == null) {
-          return;
-        }
-        onChanged(ref, value);
-      },
+      onChanged: (value) => onChanged(ref, value),
     );
   }
 }
@@ -218,10 +192,7 @@ class ConfigTextItem extends _ConfigItem<String> {
     this.keyboardType,
     this.validator,
     this.normalize,
-    this.showValueAsSubtitle = true,
     this.allowEmpty = false,
-    this.description,
-    super.subtitle,
     super.leading,
   });
 
@@ -229,10 +200,7 @@ class ConfigTextItem extends _ConfigItem<String> {
   final TextInputType? keyboardType;
   final ConfigValidator? validator;
   final String Function(String value)? normalize;
-  final bool showValueAsSubtitle;
   final bool allowEmpty;
-
-  final ConfigLabel? description;
 
   String? _normalize(String? value) {
     if (value == null) {
@@ -253,9 +221,7 @@ class ConfigTextItem extends _ConfigItem<String> {
     return ListItem.input(
       leading: leading,
       title: Text(label),
-      subtitle: showValueAsSubtitle && (value.isNotEmpty || description != null)
-          ? Text(_describe(value, description, appLocalizations))
-          : buildSubtitle(appLocalizations),
+      subtitle: value.isEmpty ? null : Text(value),
       dialogTitle: label,
       value: value,
       maxLength: maxLength,
@@ -308,9 +274,9 @@ class ConfigListEditItem extends _ConfigItem<List<String>> {
       subtitle:
           buildSubtitle(appLocalizations) ??
           Text(
-            value.isEmpty ? appLocalizations.none : value.join(', '),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+            value.isEmpty
+                ? appLocalizations.none
+                : appLocalizations.itemsCount(value.length),
           ),
       widget: ListInputPage(
         title: label,
@@ -322,7 +288,13 @@ class ConfigListEditItem extends _ConfigItem<List<String>> {
         titleBuilder: (item) => Text(item),
       ),
       onChanged: (items) {
-        if (items is List) onChanged(ref, List<String>.from(items));
+        if (items is! List) {
+          return;
+        }
+        final next = List<String>.from(items);
+        if (!listEquals(next, value)) {
+          onChanged(ref, next);
+        }
       },
     );
   }

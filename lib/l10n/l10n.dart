@@ -1375,6 +1375,18 @@ class AppLocalizations {
     );
   }
 
+  /// `{count, plural, =1{1 item} other{{count} items}}`
+  String itemsCount(num count) {
+    return Intl.plural(
+      count,
+      one: '1 item',
+      other: '$count items',
+      name: 'itemsCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
   /// `Geo Options`
   String get geoOptions {
     return Intl.message('Geo Options', name: 'geoOptions', desc: '', args: []);
@@ -11839,6 +11851,26 @@ class AppLocalizations {
     return Intl.message(
       'Entries added here replace the TUN settings of every profile; anything not added keeps the profile\'s own setting. Entries a custom profile adds itself take precedence',
       name: 'tunOverrideDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Entries added here replace the DNS settings of every profile; anything not added keeps the profile's own setting. Entries a custom profile adds itself take precedence`
+  String get dnsOverrideDesc {
+    return Intl.message(
+      'Entries added here replace the DNS settings of every profile; anything not added keeps the profile\'s own setting. Entries a custom profile adds itself take precedence',
+      name: 'dnsOverrideDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Entries added here replace the NTP settings of every profile; anything not added keeps the profile's own setting. Entries a custom profile adds itself take precedence`
+  String get ntpOverrideDesc {
+    return Intl.message(
+      'Entries added here replace the NTP settings of every profile; anything not added keeps the profile\'s own setting. Entries a custom profile adds itself take precedence',
+      name: 'ntpOverrideDesc',
       desc: '',
       args: [],
     );

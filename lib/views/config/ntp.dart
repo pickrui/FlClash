@@ -45,6 +45,8 @@ _NtpState _profileNtp(ProfileOverrides overrides) =>
 ProfileOverrides _setProfileNtp(ProfileOverrides overrides, _NtpState state) =>
     overrides.copyWith(ntp: state.model, ntpOverrideKeys: state.keys);
 
+String _patchNtpDescription(AppLocalizations l) => l.ntpOverrideDesc;
+
 String _profileNtpDescription(AppLocalizations l) =>
     l.profileOverrideSettingsDesc;
 
@@ -134,7 +136,11 @@ class NtpView extends StatelessWidget {
   @override
   Widget build(BuildContext context) => OverrideView(
     spec: _NtpOverrideSpec(switch (profileId) {
-      null => const PatchOverrideTarget(get: _getNtp, set: _setNtp),
+      null => const PatchOverrideTarget(
+        get: _getNtp,
+        set: _setNtp,
+        description: _patchNtpDescription,
+      ),
       final profileId => ProfileOverrideTarget(
         profileId,
         get: _profileNtp,

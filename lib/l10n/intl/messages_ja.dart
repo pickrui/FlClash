@@ -104,156 +104,158 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m39(subRule) => "${subRule} は無効な SUB_RULE です";
 
-  static String m40(line, message) => "${line}行目：${message}";
+  static String m40(count) => "${count} 件";
 
-  static String m41(appName) =>
+  static String m41(line, message) => "${line}行目：${message}";
+
+  static String m42(appName) =>
       "1. システム設定 > プライバシーとセキュリティ を開く\n2. 位置情報サービス を選択\n3. リストで ${appName} を見つけてチェックを入れる\n\n設定が完了したらアプリに戻ると、通常どおり使用できます。ご協力ありがとうございます";
 
-  static String m42(label, max) => "${label}は最大${max}文字です";
+  static String m43(label, max) => "${label}は最大${max}文字です";
 
-  static String m43(size) => "${size} を解放しました";
+  static String m44(size) => "${size} を解放しました";
 
-  static String m44(count) => "${count}分前";
+  static String m45(count) => "${count}分前";
 
-  static String m45(count) => "${count}ヶ月前";
+  static String m46(count) => "${count}ヶ月前";
 
-  static String m46(code) =>
+  static String m47(code) =>
       "サーバーがアクセスを拒否しました（HTTP ${code}）。リンクの期限切れか、認証情報が誤っている可能性があります";
 
-  static String m47(code) => "サーバーがリクエストを拒否しました（HTTP ${code}）";
+  static String m48(code) => "サーバーがリクエストを拒否しました（HTTP ${code}）";
 
-  static String m48(code) =>
+  static String m49(code) =>
       "このアドレスには何も見つかりませんでした（HTTP ${code}）。URL が正しいか確認してください";
 
-  static String m49(code) => "サーバーで問題が発生しました（HTTP ${code}）。しばらくしてから再試行してください";
+  static String m50(code) => "サーバーで問題が発生しました（HTTP ${code}）。しばらくしてから再試行してください";
 
-  static String m50(kept, total) => "${kept} / ${total} 件のノードを保持";
+  static String m51(kept, total) => "${kept} / ${total} 件のノードを保持";
 
-  static String m51(name) => "${name}、除外";
+  static String m52(name) => "${name}、除外";
 
-  static String m52(name) => "${name}、保持";
+  static String m53(name) => "${name}、保持";
 
-  static String m53(label) => "まだ${label}はありません";
+  static String m54(label) => "まだ${label}はありません";
 
-  static String m54(label, min, max) => "${label}は${min}から${max}の範囲で指定してください";
+  static String m55(label, min, max) => "${label}は${min}から${max}の範囲で指定してください";
 
-  static String m55(label) => "${label}は数字でなければなりません";
+  static String m56(label) => "${label}は数字でなければなりません";
 
-  static String m56(name) => "「${name}」は使用済みです。個人グループの名前を変更してください";
+  static String m57(name) => "「${name}」は使用済みです。個人グループの名前を変更してください";
 
-  static String m57(name) => "名前 ${name} は他のプロキシまたはプロキシグループで使用されています";
+  static String m58(name) => "名前 ${name} は他のプロキシまたはプロキシグループで使用されています";
 
-  static String m58(name) =>
+  static String m59(name) =>
       "空のグループのフォールバックには、プロキシグループではなく、既存のノードまたは組み込みアウトバウンドを指定してください：${name}";
 
-  static String m59(path) => "プロキシグループが循環参照しています：${path}";
+  static String m60(path) => "プロキシグループが循環参照しています：${path}";
 
-  static String m60(names) => "次のプロキシプロバイダーは存在しません：${names}";
+  static String m61(names) => "次のプロキシプロバイダーは存在しません：${names}";
 
-  static String m61(names) => "次のプロキシまたはポリシーは存在しません：${names}";
+  static String m62(names) => "次のプロキシまたはポリシーは存在しません：${names}";
 
-  static String m62(name) => "${name} は組み込みポリシー名のため使用できません";
+  static String m63(name) => "${name} は組み込みポリシー名のため使用できません";
 
-  static String m63(count) => "${count} 件に問題があり、上書きの適用に失敗する可能性があります";
+  static String m64(count) => "${count} 件に問題があり、上書きの適用に失敗する可能性があります";
 
-  static String m64(id) => "プラン #${id}";
+  static String m65(id) => "プラン #${id}";
 
-  static String m65(port) => "推奨ポート ${port} を入力しました";
+  static String m66(port) => "推奨ポート ${port} を入力しました";
 
-  static String m66(label) => "${label} は 1024 から 49151 の間でなければなりません";
+  static String m67(label) => "${label} は 1024 から 49151 の間でなければなりません";
 
-  static String m67(port) =>
+  static String m68(port) =>
       "混合ポート ${port} で待ち受けを開始できませんでした。他のアプリが使用している可能性があります。ポートを変更すると、すぐに再試行できます";
 
-  static String m68(port) => "ポート ${port}";
+  static String m69(port) => "ポート ${port}";
 
-  static String m69(days) => "残り ${days} 日";
+  static String m70(days) => "残り ${days} 日";
 
-  static String m70(date, days) => "${date} に期限切れ、残り ${days} 日";
+  static String m71(date, days) => "${date} に期限切れ、残り ${days} 日";
 
-  static String m71(profiles) =>
+  static String m72(profiles) =>
       "このプロファイルは ${profiles} のプロキシプロバイダーです。先にそちらから外してください";
 
-  static String m72(time) => "${time}に更新";
+  static String m73(time) => "${time}に更新";
 
-  static String m73(profiles) => "このリソースは ${profiles} で使用中です";
+  static String m74(profiles) => "このリソースは ${profiles} で使用中です";
 
-  static String m74(profiles) => "名前の変更で ${profiles} の参照先が変わります";
+  static String m75(profiles) => "名前の変更で ${profiles} の参照先が変わります";
 
-  static String m75(profiles) => "名前を変更する前に元のプロファイルの参照を編集してください：${profiles}";
+  static String m76(profiles) => "名前を変更する前に元のプロファイルの参照を編集してください：${profiles}";
 
-  static String m76(profiles) => "参照の確認に必要なプロファイルを読み取れません：${profiles}";
+  static String m77(profiles) => "参照の確認に必要なプロファイルを読み取れません：${profiles}";
 
-  static String m77(count) => "プロキシ ${count} 件";
+  static String m78(count) => "プロキシ ${count} 件";
 
-  static String m78(name) =>
+  static String m79(name) =>
       "ノード ${name} は別の有効なチェーンで使用されているか、プロキシチェーン関係の競合があります";
 
-  static String m79(name) => "ノード ${name} はこの位置では使用できません";
+  static String m80(name) => "ノード ${name} はこの位置では使用できません";
 
-  static String m80(address) => "起動前、システムプロキシは ${address} に設定されていました";
+  static String m81(address) => "起動前、システムプロキシは ${address} に設定されていました";
 
-  static String m81(name) => "起動前、通信は別の VPN または仮想アダプター ${name} を経由していました";
+  static String m82(name) => "起動前、通信は別の VPN または仮想アダプター ${name} を経由していました";
 
-  static String m82(count) => "${count}日";
+  static String m83(count) => "${count}日";
 
-  static String m83(count) => "${count}時間";
+  static String m84(count) => "${count}時間";
 
-  static String m84(count) => "${count}分";
+  static String m85(count) => "${count}分";
 
-  static String m85(name, path) => "${name} は元の設定の ${path} で参照されています";
+  static String m86(name, path) => "${name} は元の設定の ${path} で参照されています";
 
-  static String m86(min, max) => "利用可能な範囲 ${min} – ${max}";
+  static String m87(min, max) => "利用可能な範囲 ${min} – ${max}";
 
-  static String m87(value) => "残り: ${value}";
+  static String m88(value) => "残り: ${value}";
 
-  static String m88(count) => "残り${count}";
+  static String m89(count) => "残り${count}";
 
-  static String m89(seconds) => "${seconds}秒後に再送信";
+  static String m90(seconds) => "${seconds}秒後に再送信";
 
-  static String m90(count) => "ルール ${count} 件";
+  static String m91(count) => "ルール ${count} 件";
 
-  static String m91(appName) => "${appName}（セーフモード）";
+  static String m92(appName) => "${appName}（セーフモード）";
 
-  static String m92(count) => "追加（${count}）";
+  static String m93(count) => "追加（${count}）";
 
-  static String m93(count) => "変更（${count}）";
+  static String m94(count) => "変更（${count}）";
 
-  static String m94(count) => "削除（${count}）";
+  static String m95(count) => "削除（${count}）";
 
-  static String m95(count) => "${count} 秒";
+  static String m96(count) => "${count} 秒";
 
-  static String m96(count) => "設定 ${count} 件";
+  static String m97(count) => "設定 ${count} 件";
 
-  static String m97(count) => "共有リンクからノードを ${count} 件追加しました";
+  static String m98(count) => "共有リンクからノードを ${count} 件追加しました";
 
-  static String m98(count) => "${count} 件のリンクを読み取れませんでした";
+  static String m99(count) => "${count} 件のリンクを読み取れませんでした";
 
-  static String m99(label) => "${label}は1項目のみ指定できます";
+  static String m100(label) => "${label}は1項目のみ指定できます";
 
-  static String m100(fields) => "次の設定を確認してください：${fields}";
+  static String m101(fields) => "次の設定を確認してください：${fields}";
 
-  static String m101(count) => "デバイス（${count}）";
+  static String m102(count) => "デバイス（${count}）";
 
-  static String m102(name, profile) =>
+  static String m103(name, profile) =>
       "${name} はプロファイル「${profile}」のルールまたはグループでまだ使われています";
 
-  static String m103(region) => "リレー ${region}";
+  static String m104(region) => "リレー ${region}";
 
-  static String m104(name) =>
+  static String m105(name) =>
       "このデバイスは ${name} から退出し、このデバイス上のログイン情報が削除されます。現在ネットワークに接続できない場合は、Tailscale の管理コンソールでデバイスを削除してください";
 
-  static String m105(value) => "ピーク ${value}";
+  static String m106(value) => "ピーク ${value}";
 
-  static String m106(value) => "累計 ${value}";
+  static String m107(value) => "累計 ${value}";
 
-  static String m107(build) => "ビルド番号: ${build}";
+  static String m108(build) => "ビルド番号: ${build}";
 
-  static String m108(version) => "バージョン：${version}";
+  static String m109(version) => "バージョン：${version}";
 
-  static String m109(label) => "${label}はURLである必要があります";
+  static String m110(label) => "${label}はURLである必要があります";
 
-  static String m110(count) => "${count}年前";
+  static String m111(count) => "${count}年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1086,6 +1088,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "dnsHijacking": MessageLookupByLibrary.simpleMessage("DNSハイジャッキング"),
     "dnsMode": MessageLookupByLibrary.simpleMessage("DNSモード"),
+    "dnsOverrideDesc": MessageLookupByLibrary.simpleMessage(
+      "ここで追加した項目は、すべてのプロファイルの DNS 設定を上書きします。追加していない項目はプロファイル自身の設定のままです。カスタムプロファイル自身が追加した項目が優先されます",
+    ),
     "dnsQueries": MessageLookupByLibrary.simpleMessage("DNS クエリ"),
     "dnsQueriesDesc": MessageLookupByLibrary.simpleMessage(
       "最新 500 件の名前解決クエリを表示",
@@ -1484,6 +1489,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "ipv6Desc": MessageLookupByLibrary.simpleMessage("有効化するとIPv6トラフィックを受信可能"),
     "ipv6InboundDesc": MessageLookupByLibrary.simpleMessage("IPv6インバウンドを許可"),
     "ipv6Timeout": MessageLookupByLibrary.simpleMessage("IPv6タイムアウト（ms）"),
+    "itemsCount": m40,
     "ja": MessageLookupByLibrary.simpleMessage("日本語"),
     "justNow": MessageLookupByLibrary.simpleMessage("たった今"),
     "keepAliveIntervalDesc": MessageLookupByLibrary.simpleMessage(
@@ -1495,7 +1501,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "layout": MessageLookupByLibrary.simpleMessage("レイアウト"),
     "lazy": MessageLookupByLibrary.simpleMessage("遅延読み込み"),
     "light": MessageLookupByLibrary.simpleMessage("ライト"),
-    "lineIssueTip": m40,
+    "lineIssueTip": m41,
     "lineWrap": MessageLookupByLibrary.simpleMessage("折り返し"),
     "liquidGlass": MessageLookupByLibrary.simpleMessage("リキッドグラス"),
     "list": MessageLookupByLibrary.simpleMessage("リスト"),
@@ -1511,7 +1517,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "locateSelected": MessageLookupByLibrary.simpleMessage("選択中のノードへ移動"),
     "locationPermission": MessageLookupByLibrary.simpleMessage("位置情報の権限"),
-    "locationPermissionGuide": m41,
+    "locationPermissionGuide": m42,
     "locationPermissionRequired": MessageLookupByLibrary.simpleMessage(
       "位置情報の権限が必要です",
     ),
@@ -1541,7 +1547,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "matchTarget": MessageLookupByLibrary.simpleMessage("MATCH-TARGET"),
     "matchTargetTitle": MessageLookupByLibrary.simpleMessage("マッチ先"),
     "maxFailedTimes": MessageLookupByLibrary.simpleMessage("最大失敗回数"),
-    "maxLengthTip": m42,
+    "maxLengthTip": m43,
     "maximize": MessageLookupByLibrary.simpleMessage("最大化"),
     "memberOrderHint": MessageLookupByLibrary.simpleMessage(
       "選択順がフォールバック順になります。選び直すと末尾に移動します",
@@ -1564,7 +1570,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "memoryInfo": MessageLookupByLibrary.simpleMessage("メモリ情報"),
     "memoryInfoDesc": MessageLookupByLibrary.simpleMessage("アプリとコアが使用するメモリ"),
     "memoryReleased": MessageLookupByLibrary.simpleMessage("メモリを解放しました"),
-    "memoryReleasedSize": m43,
+    "memoryReleasedSize": m44,
     "messageTest": MessageLookupByLibrary.simpleMessage("メッセージテスト"),
     "messageTestTip": MessageLookupByLibrary.simpleMessage("これはメッセージです"),
     "minimalConfiguration": MessageLookupByLibrary.simpleMessage("最小構成"),
@@ -1576,11 +1582,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "minimizeOnExitDesc": MessageLookupByLibrary.simpleMessage(
       "システムの終了イベントを変更",
     ),
-    "minutesAgo": m44,
+    "minutesAgo": m45,
     "mixedPort": MessageLookupByLibrary.simpleMessage("混合ポート"),
     "mode": MessageLookupByLibrary.simpleMessage("モード"),
     "monochromeScheme": MessageLookupByLibrary.simpleMessage("モノクローム"),
-    "monthsAgo": m45,
+    "monthsAgo": m46,
     "more": MessageLookupByLibrary.simpleMessage("その他"),
     "myOrders": MessageLookupByLibrary.simpleMessage("購入済みプラン"),
     "name": MessageLookupByLibrary.simpleMessage("名前"),
@@ -1595,8 +1601,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "navigationBarStyle": MessageLookupByLibrary.simpleMessage("ボトムバー"),
     "network": MessageLookupByLibrary.simpleMessage("ネットワーク"),
-    "networkAccessDeniedError": m46,
-    "networkBadResponseError": m47,
+    "networkAccessDeniedError": m47,
+    "networkBadResponseError": m48,
     "networkCancelledError": MessageLookupByLibrary.simpleMessage(
       "リクエストはキャンセルされました",
     ),
@@ -1611,11 +1617,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "networkHostLookupError": MessageLookupByLibrary.simpleMessage(
       "サーバーのアドレスを解決できませんでした。URL が正しいこと、DNS が使えることを確認してください",
     ),
-    "networkNotFoundError": m48,
+    "networkNotFoundError": m49,
     "networkRateLimitedError": MessageLookupByLibrary.simpleMessage(
       "リクエストが多すぎます（HTTP 429）。しばらく待ってから再試行してください",
     ),
-    "networkServerError": m49,
+    "networkServerError": m50,
     "networkSpeed": MessageLookupByLibrary.simpleMessage("ネットワーク速度"),
     "networkTakeover": MessageLookupByLibrary.simpleMessage("トラフィックの引き継ぎ"),
     "networkTimeoutError": MessageLookupByLibrary.simpleMessage(
@@ -1665,12 +1671,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "nodeFilterKeepOne": MessageLookupByLibrary.simpleMessage(
       "少なくとも 1 つのノードを残してください",
     ),
-    "nodeFilterKept": m50,
+    "nodeFilterKept": m51,
     "nodeFilterLines": MessageLookupByLibrary.simpleMessage("回線"),
     "nodeFilterNameContains": MessageLookupByLibrary.simpleMessage("名前に含む"),
     "nodeFilterNameExcludes": MessageLookupByLibrary.simpleMessage("名前から除外"),
-    "nodeFilterNodeExcluded": m51,
-    "nodeFilterNodeKept": m52,
+    "nodeFilterNodeExcluded": m52,
+    "nodeFilterNodeKept": m53,
     "nodeFilterOnly": MessageLookupByLibrary.simpleMessage("のみ残す"),
     "nodeFilterPreview": MessageLookupByLibrary.simpleMessage("プレビュー"),
     "nodeFilterRegions": MessageLookupByLibrary.simpleMessage("地域"),
@@ -1691,15 +1697,18 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "ntpDesc": MessageLookupByLibrary.simpleMessage("NTP関連設定の更新"),
     "ntpInterval": MessageLookupByLibrary.simpleMessage("同期間隔（分）"),
+    "ntpOverrideDesc": MessageLookupByLibrary.simpleMessage(
+      "ここで追加した項目は、すべてのプロファイルの NTP 設定を上書きします。追加していない項目はプロファイル自身の設定のままです。カスタムプロファイル自身が追加した項目が優先されます",
+    ),
     "ntpStatusDesc": MessageLookupByLibrary.simpleMessage(
       "システムクロックではなくNTPサーバーから時刻を取得します",
     ),
     "nullProfileDesc": MessageLookupByLibrary.simpleMessage(
       "プロファイルがありません。追加してください",
     ),
-    "nullTip": m53,
-    "numberRangeTip": m54,
-    "numberTip": m55,
+    "nullTip": m54,
+    "numberRangeTip": m55,
+    "numberTip": m56,
     "oixCloud": MessageLookupByLibrary.simpleMessage("oixCloud"),
     "onDemand": MessageLookupByLibrary.simpleMessage("オンデマンド"),
     "onDemandDesc": MessageLookupByLibrary.simpleMessage(
@@ -1727,7 +1736,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "overlayHint": MessageLookupByLibrary.simpleMessage(
       "個人設定は別に保存され、更新後に再適用されます。新しいグループに一致するメンバーがない場合、接続をブロックします",
     ),
-    "overlayNameConflict": m56,
+    "overlayNameConflict": m57,
     "override": MessageLookupByLibrary.simpleMessage("上書き"),
     "overrideDestination": MessageLookupByLibrary.simpleMessage("宛先を上書き"),
     "overrideDestinationDesc": MessageLookupByLibrary.simpleMessage(
@@ -1736,17 +1745,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "overrideEntries": MessageLookupByLibrary.simpleMessage("上書き項目"),
     "overrideMode": MessageLookupByLibrary.simpleMessage("上書きモード"),
     "overrideScript": MessageLookupByLibrary.simpleMessage("上書きスクリプト"),
-    "overwriteIssueDuplicateName": m57,
-    "overwriteIssueEmptyFallback": m58,
+    "overwriteIssueDuplicateName": m58,
+    "overwriteIssueEmptyFallback": m59,
     "overwriteIssueEmptyName": MessageLookupByLibrary.simpleMessage("名前が空です"),
-    "overwriteIssueGroupLoop": m59,
-    "overwriteIssueMissingProviders": m60,
-    "overwriteIssueMissingProxies": m61,
+    "overwriteIssueGroupLoop": m60,
+    "overwriteIssueMissingProviders": m61,
+    "overwriteIssueMissingProxies": m62,
     "overwriteIssueNoProxySource": MessageLookupByLibrary.simpleMessage(
       "プロキシもプロキシプロバイダーも選択されていないため、コアはこのグループを拒否します",
     ),
-    "overwriteIssueReservedName": m62,
-    "overwriteIssuesSummary": m63,
+    "overwriteIssueReservedName": m63,
+    "overwriteIssuesSummary": m64,
     "overwriteTypeCustom": MessageLookupByLibrary.simpleMessage("カスタム"),
     "overwriteTypeCustomDesc": MessageLookupByLibrary.simpleMessage(
       "カスタムモード、プロキシグループとルールを完全にカスタマイズ可能",
@@ -1789,7 +1798,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "planEnded": MessageLookupByLibrary.simpleMessage("終了"),
     "planInUse": MessageLookupByLibrary.simpleMessage("使用中"),
     "planNotActivated": MessageLookupByLibrary.simpleMessage("有効化待ち"),
-    "planNumber": m64,
+    "planNumber": m65,
     "planUnavailable": MessageLookupByLibrary.simpleMessage("購入不可"),
     "pleaseBindWebDAV": MessageLookupByLibrary.simpleMessage(
       "WebDAVをバインドしてください",
@@ -1806,11 +1815,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "portProxyAppTip": MessageLookupByLibrary.simpleMessage(
       "他のプロキシアプリが起動している場合は、先に終了してください",
     ),
-    "portSuggestionTip": m65,
-    "portTip": m66,
-    "portUnavailableMessage": m67,
+    "portSuggestionTip": m66,
+    "portTip": m67,
+    "portUnavailableMessage": m68,
     "portUnavailableTitle": MessageLookupByLibrary.simpleMessage("ポートを使用できません"),
-    "portValue": m68,
+    "portValue": m69,
     "ports": MessageLookupByLibrary.simpleMessage("ポート"),
     "preferH3": MessageLookupByLibrary.simpleMessage("HTTP/3を優先"),
     "preferH3Desc": MessageLookupByLibrary.simpleMessage("DOHのHTTP/3を優先使用"),
@@ -1824,8 +1833,8 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage("有効な間隔形式を入力してください"),
     "profileAutoUpdateIntervalNullValidationDesc":
         MessageLookupByLibrary.simpleMessage("自動更新間隔を入力してください"),
-    "profileDaysLeft": m69,
-    "profileExpiresIn": m70,
+    "profileDaysLeft": m70,
+    "profileExpiresIn": m71,
     "profileHasUpdate": MessageLookupByLibrary.simpleMessage(
       "プロファイルが変更されました。自動更新を無効化しますか？",
     ),
@@ -1838,14 +1847,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "profileParseErrorDesc": MessageLookupByLibrary.simpleMessage(
       "プロファイル解析エラー",
     ),
-    "profileProviderInUse": m71,
+    "profileProviderInUse": m72,
     "profileSettingsDesc": MessageLookupByLibrary.simpleMessage(
       "このプロファイルにのみ適用されます。追加していない項目はデフォルト値を使用します",
     ),
     "profileTunSettingsDesc": MessageLookupByLibrary.simpleMessage(
       "このプロファイルにのみ適用され、ネットワーク設定の TUN 上書き項目より優先されます",
     ),
-    "profileUpdatedAt": m72,
+    "profileUpdatedAt": m73,
     "profileUrlInvalidValidationDesc": MessageLookupByLibrary.simpleMessage(
       "有効なプロファイルURLを入力してください",
     ),
@@ -1866,30 +1875,30 @@ class MessageLookup extends MessageLookupByLibrary {
     "providerContentTooLarge": MessageLookupByLibrary.simpleMessage(
       "リソースが 32 MiB を超えています",
     ),
-    "providerInUse": m73,
+    "providerInUse": m74,
     "providerLocal": MessageLookupByLibrary.simpleMessage("ローカルファイル"),
     "providerNameInvalid": MessageLookupByLibrary.simpleMessage(
       "空でなく、カンマや改行を含まない名前を入力してください",
     ),
     "providerRemote": MessageLookupByLibrary.simpleMessage("リモート URL"),
-    "providerRenameShadowed": m74,
+    "providerRenameShadowed": m75,
     "providerSourceApp": MessageLookupByLibrary.simpleMessage("アプリライブラリ"),
     "providerSourceProfile": MessageLookupByLibrary.simpleMessage("プロファイル"),
-    "providerSourceReference": m75,
+    "providerSourceReference": m76,
     "providerSourceSubscription": MessageLookupByLibrary.simpleMessage(
       "サブスクリプション",
     ),
-    "providerSourceUnavailable": m76,
+    "providerSourceUnavailable": m77,
     "providerUrlTip": MessageLookupByLibrary.simpleMessage(
       "認証情報を含まない HTTP または HTTPS URL を入力してください",
     ),
     "providers": MessageLookupByLibrary.simpleMessage("プロバイダー"),
     "proxies": MessageLookupByLibrary.simpleMessage("プロキシ"),
-    "proxiesCount": m77,
+    "proxiesCount": m78,
     "proxyChainAvailableNodes": MessageLookupByLibrary.simpleMessage(
       "利用可能なノード",
     ),
-    "proxyChainConflictTip": m78,
+    "proxyChainConflictTip": m79,
     "proxyChainCustomNode": MessageLookupByLibrary.simpleMessage("カスタムノード"),
     "proxyChainCustomNodes": MessageLookupByLibrary.simpleMessage("カスタムノード"),
     "proxyChainEmpty": MessageLookupByLibrary.simpleMessage(
@@ -1917,7 +1926,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "プロキシチェーンを保存して適用しました。使用するには出口ノードを選択してください",
     ),
     "proxyChainSelectedNodes": MessageLookupByLibrary.simpleMessage("プロキシチェーン"),
-    "proxyChainUnavailableNodeTip": m79,
+    "proxyChainUnavailableNodeTip": m80,
     "proxyChainUriNodeSupportedFormats": MessageLookupByLibrary.simpleMessage(
       "対応形式：ss://、ssr://、vmess://、vless://、trojan://、anytls://、hysteria:// / hy://、hysteria2:// / hy2://、tuic://、wireguard:// / wg://、http(s)://、socks(5)://",
     ),
@@ -1931,11 +1940,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyConflictHint": MessageLookupByLibrary.simpleMessage(
       "同時に使用すると接続に問題が起きるため、他のプロキシアプリや VPN であれば終了してください",
     ),
-    "proxyConflictSystemProxy": m80,
+    "proxyConflictSystemProxy": m81,
     "proxyConflictTitle": MessageLookupByLibrary.simpleMessage(
       "プロキシが競合している可能性があります",
     ),
-    "proxyConflictVpn": m81,
+    "proxyConflictVpn": m82,
     "proxyFilter": MessageLookupByLibrary.simpleMessage("プロキシフィルター"),
     "proxyGroup": MessageLookupByLibrary.simpleMessage("プロキシグループ"),
     "proxyGroupEmpty": MessageLookupByLibrary.simpleMessage("プロキシグループが空です"),
@@ -1961,9 +1970,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyType": MessageLookupByLibrary.simpleMessage("ノードの種類"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("キャッシュの削除"),
     "purchaseAutoRenewLabel": MessageLookupByLibrary.simpleMessage("自動更新"),
-    "purchaseDays": m82,
-    "purchaseHours": m83,
-    "purchaseMinutes": m84,
+    "purchaseDays": m83,
+    "purchaseHours": m84,
+    "purchaseMinutes": m85,
     "purchasePriceLabel": MessageLookupByLibrary.simpleMessage("購入価格"),
     "purchaseRenewOff": MessageLookupByLibrary.simpleMessage("オフ"),
     "purchaseRenewOn": MessageLookupByLibrary.simpleMessage("オン"),
@@ -1976,11 +1985,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "quickAdd": MessageLookupByLibrary.simpleMessage("クイック追加"),
     "quickEdit": MessageLookupByLibrary.simpleMessage("クイック編集"),
     "quickFill": MessageLookupByLibrary.simpleMessage("クイック入力"),
-    "rawOutboundInUse": m85,
+    "rawOutboundInUse": m86,
     "readFullAnnouncement": MessageLookupByLibrary.simpleMessage("全文を読む"),
     "receivingAddress": MessageLookupByLibrary.simpleMessage("受取アドレス"),
     "recharge": MessageLookupByLibrary.simpleMessage("チャージ"),
-    "rechargeAllowedRange": m86,
+    "rechargeAllowedRange": m87,
     "rechargeAmount": MessageLookupByLibrary.simpleMessage("チャージ金額（¥）"),
     "rechargeAmountOutOfRange": MessageLookupByLibrary.simpleMessage(
       "金額がこの支払い方法で利用できる範囲外です",
@@ -2006,8 +2015,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "releaseMemoryFailed": MessageLookupByLibrary.simpleMessage(
       "メモリの解放に失敗しました",
     ),
-    "remaining": m87,
-    "remainingStock": m88,
+    "remaining": m88,
+    "remainingStock": m89,
     "remainingTimeLabel": MessageLookupByLibrary.simpleMessage("残り時間"),
     "remainingTrafficLabel": MessageLookupByLibrary.simpleMessage("残りデータ量"),
     "remote": MessageLookupByLibrary.simpleMessage("リモート"),
@@ -2024,7 +2033,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "requests": MessageLookupByLibrary.simpleMessage("リクエスト"),
     "requestsDesc": MessageLookupByLibrary.simpleMessage("最近のリクエスト記録を表示"),
     "required": MessageLookupByLibrary.simpleMessage("必須"),
-    "resendCodeIn": m89,
+    "resendCodeIn": m90,
     "reset": MessageLookupByLibrary.simpleMessage("リセット"),
     "resetEmailSent": MessageLookupByLibrary.simpleMessage(
       "リセットメールを送信しました。メール内のリセットリンクまたはコードを下に貼り付けてください",
@@ -2213,14 +2222,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "ruleProviders": MessageLookupByLibrary.simpleMessage("ルールプロバイダー"),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("ルール対象"),
     "rules": MessageLookupByLibrary.simpleMessage("ルール"),
-    "rulesCount": m90,
+    "rulesCount": m91,
     "rulesRequireRuleMode": MessageLookupByLibrary.simpleMessage(
       "個人ルールはルールモードで有効になります",
     ),
     "runTime": MessageLookupByLibrary.simpleMessage("稼働時間"),
     "running": MessageLookupByLibrary.simpleMessage("実行中"),
     "safeMode": MessageLookupByLibrary.simpleMessage("セーフモード"),
-    "safeModeAppTitle": m91,
+    "safeModeAppTitle": m92,
     "saturation": MessageLookupByLibrary.simpleMessage("彩度"),
     "save": MessageLookupByLibrary.simpleMessage("保存"),
     "saveAndRetry": MessageLookupByLibrary.simpleMessage("保存して再試行"),
@@ -2235,15 +2244,15 @@ class MessageLookup extends MessageLookupByLibrary {
       "スクリプトが変更または削除されました。開き直して再試行してください。",
     ),
     "scriptChanges": MessageLookupByLibrary.simpleMessage("スクリプトの変更"),
-    "scriptChangesAdded": m92,
+    "scriptChangesAdded": m93,
     "scriptChangesDescription": MessageLookupByLibrary.simpleMessage(
       "スクリプトが追加・変更・削除した最上位の設定項目です。設定全体にはアプリの設定も含まれます。",
     ),
     "scriptChangesEmpty": MessageLookupByLibrary.simpleMessage(
       "スクリプトによる設定の変更はありません",
     ),
-    "scriptChangesModified": m93,
-    "scriptChangesRemoved": m94,
+    "scriptChangesModified": m94,
+    "scriptChangesRemoved": m95,
     "scriptFullConfig": MessageLookupByLibrary.simpleMessage("設定全体"),
     "scriptModeDesc": MessageLookupByLibrary.simpleMessage(
       "スクリプトモード、外部拡張スクリプトを使用し、ワンクリックで設定を上書きする機能を提供",
@@ -2254,7 +2263,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "search": MessageLookupByLibrary.simpleMessage("検索"),
     "seconds": MessageLookupByLibrary.simpleMessage("秒"),
-    "secondsCount": m95,
+    "secondsCount": m96,
     "selectAll": MessageLookupByLibrary.simpleMessage("すべて選択"),
     "selectBackup": MessageLookupByLibrary.simpleMessage("バックアップを選択"),
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage("アップグレード対象を選択"),
@@ -2266,9 +2275,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "serviceFailed": MessageLookupByLibrary.simpleMessage("検出に失敗しました"),
     "settingEntries": MessageLookupByLibrary.simpleMessage("設定項目"),
     "settings": MessageLookupByLibrary.simpleMessage("設定"),
-    "settingsCount": m96,
-    "shareLinkNodesAdded": m97,
-    "shareLinksNotRead": m98,
+    "settingsCount": m97,
+    "shareLinkNodesAdded": m98,
+    "shareLinksNotRead": m99,
     "show": MessageLookupByLibrary.simpleMessage("表示"),
     "showLess": MessageLookupByLibrary.simpleMessage("折りたたむ"),
     "showMore": MessageLookupByLibrary.simpleMessage("展開"),
@@ -2284,7 +2293,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "silentLaunch": MessageLookupByLibrary.simpleMessage("バックグラウンド起動"),
     "silentLaunchDesc": MessageLookupByLibrary.simpleMessage("バックグラウンドで起動"),
     "singleAdd": MessageLookupByLibrary.simpleMessage("個別追加"),
-    "singleValueTip": m99,
+    "singleValueTip": m100,
     "size": MessageLookupByLibrary.simpleMessage("サイズ"),
     "skipDomain": MessageLookupByLibrary.simpleMessage("スキップするドメイン"),
     "skipDomainDesc": MessageLookupByLibrary.simpleMessage(
@@ -2389,7 +2398,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleAvailableExitNodes": MessageLookupByLibrary.simpleMessage(
       "利用可能な出口ノード",
     ),
-    "tailscaleCheckSettings": m100,
+    "tailscaleCheckSettings": m101,
     "tailscaleConnected": MessageLookupByLibrary.simpleMessage("接続済み"),
     "tailscaleConnecting": MessageLookupByLibrary.simpleMessage("接続中"),
     "tailscaleControlUrl": MessageLookupByLibrary.simpleMessage(
@@ -2399,7 +2408,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "認証情報とデバイスの識別情報はこのデバイスにのみ保存されます",
     ),
     "tailscaleDeviceName": MessageLookupByLibrary.simpleMessage("デバイス名"),
-    "tailscaleDevices": m101,
+    "tailscaleDevices": m102,
     "tailscaleDirect": MessageLookupByLibrary.simpleMessage("直接接続"),
     "tailscaleEmptyDesc": MessageLookupByLibrary.simpleMessage(
       "ネットワークを追加してこのデバイスでログインし、プロキシを起動するとデバイスにアクセスできます",
@@ -2484,7 +2493,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "デバイスの承認待ちです",
     ),
     "tailscaleNeedsLogin": MessageLookupByLibrary.simpleMessage("ログインが必要です"),
-    "tailscaleNetworkInUse": m102,
+    "tailscaleNetworkInUse": m103,
     "tailscaleNetworkName": MessageLookupByLibrary.simpleMessage("ネットワーク名"),
     "tailscaleNetworks": MessageLookupByLibrary.simpleMessage("ネットワーク"),
     "tailscaleNotApplied": MessageLookupByLibrary.simpleMessage("未適用"),
@@ -2497,8 +2506,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleOpenLoginPage": MessageLookupByLibrary.simpleMessage(
       "ログインページを開く",
     ),
-    "tailscaleRelay": m103,
-    "tailscaleRemoveConfirm": m104,
+    "tailscaleRelay": m104,
+    "tailscaleRemoveConfirm": m105,
     "tailscaleRemoveNetwork": MessageLookupByLibrary.simpleMessage("ネットワークを削除"),
     "tailscaleSaveAndLogin": MessageLookupByLibrary.simpleMessage("保存してログイン"),
     "tailscaleSignedIn": MessageLookupByLibrary.simpleMessage("ログイン済み"),
@@ -2544,8 +2553,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("アップロード量"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxyポート"),
     "traffic": MessageLookupByLibrary.simpleMessage("通信量"),
-    "trafficPeak": m105,
-    "trafficTotal": m106,
+    "trafficPeak": m106,
+    "trafficTotal": m107,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("トラフィック使用量"),
     "transferConfirmNotice": MessageLookupByLibrary.simpleMessage(
       "送金完了後、システムが自動的に確認し、選択したプランが自動的に有効になります",
@@ -2594,7 +2603,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateApplyFailed": MessageLookupByLibrary.simpleMessage(
       "自動更新を完了できませんでした。再試行するか、ダウンロードページから更新してください。",
     ),
-    "updateBuildNumber": m107,
+    "updateBuildNumber": m108,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage("ダウンロードを中止"),
     "updateDownloadBackground": MessageLookupByLibrary.simpleMessage(
       "バックグラウンドでダウンロード",
@@ -2629,12 +2638,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateRestartHint": MessageLookupByLibrary.simpleMessage(
       "アプリを終了して更新し、再起動します。設定は保持されます。",
     ),
-    "updateVersionNumber": m108,
+    "updateVersionNumber": m109,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("プランをアップグレード"),
     "upload": MessageLookupByLibrary.simpleMessage("アップロード"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("URL経由でプロファイルを取得"),
-    "urlTip": m109,
+    "urlTip": m110,
     "useHosts": MessageLookupByLibrary.simpleMessage("ホストを使用"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("システムホストを使用"),
     "usedShort": MessageLookupByLibrary.simpleMessage("使用済み"),
@@ -2659,7 +2668,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "システムクロックも設定します。Androidでは無視されます",
     ),
-    "yearsAgo": m110,
+    "yearsAgo": m111,
     "zh_CN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };
 }

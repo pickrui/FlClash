@@ -241,3 +241,69 @@ class FormRowTextField extends StatelessWidget {
     );
   }
 }
+
+/// A [FormRowTextField] for a secret, with the button that shows it.
+class FormRowSecretTextField extends StatefulWidget {
+  final TextEditingController controller;
+  final FocusNode? focusNode;
+  final String? hintText;
+  final TextInputAction? textInputAction;
+  final List<TextInputFormatter>? inputFormatters;
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onFieldSubmitted;
+
+  const FormRowSecretTextField({
+    super.key,
+    required this.controller,
+    this.focusNode,
+    this.hintText,
+    this.textInputAction,
+    this.inputFormatters,
+    this.onChanged,
+    this.onFieldSubmitted,
+  });
+
+  @override
+  State<FormRowSecretTextField> createState() => _FormRowSecretTextFieldState();
+}
+
+class _FormRowSecretTextFieldState extends State<FormRowSecretTextField> {
+  bool _obscure = true;
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: FormRowTextField(
+            controller: widget.controller,
+            focusNode: widget.focusNode,
+            hintText: widget.hintText,
+            obscureText: _obscure,
+            textInputAction: widget.textInputAction,
+            autocorrect: false,
+            enableSuggestions: false,
+            inputFormatters: widget.inputFormatters,
+            onChanged: widget.onChanged,
+            onFieldSubmitted: widget.onFieldSubmitted,
+          ),
+        ),
+        CommonMinIconButtonTheme(
+          child: IconButton(
+            tooltip: _obscure
+                ? appLocalizations.showPassword
+                : appLocalizations.hidePassword,
+            icon: GlyphIcon(_obscure ? AppGlyphs.eye : AppGlyphs.eyeOff),
+            onPressed: () {
+              setState(() {
+                _obscure = !_obscure;
+              });
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}

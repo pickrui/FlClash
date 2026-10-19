@@ -15,6 +15,7 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/config/dns.dart';
 import 'package:fl_clash/views/config/network.dart';
+import 'package:fl_clash/ui/list.dart';
 import 'package:fl_clash/ui/null_status.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -106,11 +107,19 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.byType(NullStatus), findsOneWidget);
-      await tester.tap(find.byTooltip('Add'));
+      expect(find.byTooltip('Add override entry'), findsNothing);
+      await tester.tap(find.text('Add override entry'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Status'));
       await tester.pumpAndSettle();
+      expect(
+        find.byWidgetPredicate((widget) => widget is SelectionSheet),
+        findsOneWidget,
+      );
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
       expect(find.text('Status'), findsOneWidget);
+      expect(find.byTooltip('Add override entry'), findsOneWidget);
       await tester.tap(find.byType(Switch).last);
       await tester.pumpAndSettle();
       var patch = container.read(patchClashConfigProvider);
@@ -195,6 +204,92 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('the DNS mode options read as mihomo writes them', (
+    tester,
+  ) async {
+    await _pumpOverrides(
+      tester,
+      const DnsView(),
+      (state) => state.copyWith(dnsOverrideKeys: {DnsOverrideKey.enhancedMode}),
+    );
+
+    await tester.tap(find.text('DNS mode'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('fake-ip'), findsWidgets);
+    expect(find.text('redir-host'), findsWidgets);
+    expect(find.text(DnsMode.fakeIp.name), findsNothing);
+    expect(find.text(DnsMode.redirHost.name), findsNothing);
+    expect(find.text(DnsMode.hosts.name), findsNothing);
+  });
+
+  testWidgets('a custom profile groups its DNS entries by what they set', (
+    tester,
+  ) async {
+    final profile = Profile.custom(label: 'Built').copyWith(
+      overrides: const ProfileOverrides(
+        dnsOverrideKeys: {
+          DnsOverrideKey.fallbackFilterDomain,
+          DnsOverrideKey.nameserver,
+          DnsOverrideKey.fakeIpTtl,
+          DnsOverrideKey.enable,
+        },
+      ),
+    );
+    await _pumpOverrides(
+      tester,
+      DnsView.profile(profile.id),
+      (state) => state,
+      overrides: [
+        profilesProvider.overrideWith(() => TestProfiles([profile])),
+      ],
+    );
+
+    double header(String title) =>
+        tester.getTopLeft(find.widgetWithText(ListHeader, title)).dy;
+    final headers = [
+      'Options',
+      'Fake-IP',
+      'Nameserver',
+      'Fallback filter',
+    ].map(header).toList();
+    for (var i = 1; i < headers.length; i++) {
+      expect(headers[i - 1], lessThan(headers[i]));
+    }
+    expect(
+      tester.getTopLeft(find.text('Fake-IP TTL')).dy,
+      inExclusiveRange(headers[1], headers[2]),
+    );
+    expect(tester.getTopLeft(find.text('Domain')).dy, greaterThan(headers[3]));
+  });
+
+  testWidgets('a custom profile list entry closed unchanged stays listed', (
+    tester,
+  ) async {
+    final profile = Profile.custom(label: 'Built').copyWith(
+      overrides: const ProfileOverrides(
+        dnsOverrideKeys: {DnsOverrideKey.fallback},
+      ),
+    );
+    final container = await _pumpOverrides(
+      tester,
+      DnsView.profile(profile.id),
+      (state) => state,
+      overrides: [
+        profilesProvider.overrideWith(() => TestProfiles([profile])),
+      ],
+    );
+
+    await tester.tap(find.text('Fallback'));
+    await tester.pumpAndSettle();
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(container.read(profilesProvider).single.overrides.dnsOverrideKeys, {
+      DnsOverrideKey.fallback,
+    });
+  });
+
   testWidgets('DNS override fields show localized names', (tester) async {
     final container = ProviderContainer(
       overrides: [
@@ -238,7 +333,7 @@ void main() {
     for (final label in ['优先使用HTTP/3', '默认域名服务器', '域名服务器策略', '直连域名服务器']) {
       expect(find.text(label), findsOneWidget);
     }
-    expect(find.text('用于解析DNS服务器'), findsOneWidget);
+    expect(find.textContaining('用于解析DNS服务器'), findsOneWidget);
     expect(find.text('Default Nameserver'), findsNothing);
     expect(tester.takeException(), isNull);
   });
@@ -392,6 +487,8 @@ void main() {
         await tester.pumpAndSettle();
         expect(patch().tunOverrideKeys, {TunOverrideKey.mtu});
         expect(patch().tunOverride.mtu, defaultTunMtu);
+        await tester.binding.handlePopRoute();
+        await tester.pumpAndSettle();
 
         await tester.tap(find.text('MTU'));
         await tester.pumpAndSettle();
