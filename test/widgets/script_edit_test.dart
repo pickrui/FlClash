@@ -19,6 +19,7 @@ import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/script_library.dart';
 import 'package:fl_clash/views/config/scripts.dart';
 import 'package:flutter/gestures.dart';
+import 'package:fl_clash/ui/sortable.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -136,10 +137,12 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await tester.tap(find.byTooltip('Sort'));
+    await tester.pumpAndSettle();
     final gesture = await tester.startGesture(
-      tester.getCenter(find.text('Second')),
+      tester.getCenter(find.byType(SortHandle).last),
     );
-    await tester.pump(kLongPressTimeout + const Duration(milliseconds: 100));
+    await tester.pump(kPressTimeout);
     final distance =
         tester.getCenter(find.text('Second')).dy -
         tester.getTopLeft(find.text('Fixture')).dy;
@@ -320,7 +323,7 @@ void main() {
 
   testWidgets('a new script starts from the template', (tester) async {
     final actions = await openLibrary(tester);
-    await tester.tap(find.text('Add'));
+    await tester.tap(find.byTooltip('Add'));
     await tester.pumpAndSettle();
     await tester.tap(find.text(AppLocalizations.current.startFromScratch));
     await waitForEditor(tester);

@@ -77,8 +77,16 @@ void main() {
           ),
         );
         await tester.pump();
-        final add = find.widgetWithText(FilledButton, 'Add').first;
-        expect(tester.widget<FilledButton>(add).onPressed, isNull);
+        final add = scripts
+            ? find.ancestor(
+                of: find.byTooltip('Add'),
+                matching: find.byType(IconButton),
+              )
+            : find.widgetWithText(FilledButton, 'Add').first;
+        VoidCallback? onAdd() => scripts
+            ? tester.widget<IconButton>(add).onPressed
+            : tester.widget<FilledButton>(add).onPressed;
+        expect(onAdd(), isNull);
         ready.complete();
         await tester.pumpAndSettle();
         expect(find.byType(ErrorStatus), findsOneWidget);
@@ -92,11 +100,11 @@ void main() {
               : l10n.providers,
         );
         expect(find.text(empty), findsNothing);
-        expect(tester.widget<FilledButton>(add).onPressed, isNull);
+        expect(onAdd(), isNull);
 
         await tester.tap(find.text('Refresh'));
         await tester.pump();
-        expect(tester.widget<FilledButton>(add).onPressed, isNull);
+        expect(onAdd(), isNull);
         expect(
           tester
               .widget<FilledButton>(
@@ -110,7 +118,7 @@ void main() {
         expect(attempts, 2);
         expect(find.byType(ErrorStatus), findsNothing);
         expect(find.text(empty), findsOneWidget);
-        expect(tester.widget<FilledButton>(add).onPressed, isNotNull);
+        expect(onAdd(), isNotNull);
         expect(tester.takeException(), isNull);
       },
     );
@@ -214,7 +222,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip(AppLocalizations.current.more));
+    await tester.longPress(find.text('Remote script'));
     await tester.pumpAndSettle();
     expect(find.text(AppLocalizations.current.sync), findsOneWidget);
     expect(find.text(AppLocalizations.current.url), findsOneWidget);

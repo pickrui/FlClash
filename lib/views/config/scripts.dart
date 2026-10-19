@@ -19,6 +19,8 @@ import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/script_library.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/ui/context_menu.dart';
+import 'package:fl_clash/ui/sortable.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -57,8 +59,12 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
   }
 
   Future<void> _delete(Script script) async {
+    final appLocalizations = context.appLocalizations;
     final accepted = await globalState.showMessage(
-      message: TextSpan(text: context.appLocalizations.deleteTip(script.label)),
+      title: appLocalizations.tip,
+      message: TextSpan(text: appLocalizations.deleteTip(script.label)),
+      destructive: true,
+      confirmText: appLocalizations.delete,
     );
     if (accepted == true && mounted) await _run(() => _library.remove(script));
   }
@@ -201,87 +207,100 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
     );
   }
 
-  Widget _item(Script script, int index, int length) {
+  List<CommonPopupMenuItem> _buildMenuItems(Script script) {
     final l = context.appLocalizations;
-    return ItemPositionProvider(
-      position: ItemPosition.get(index, length),
-      child: DecorationListItem(
-        contentPadding: const EdgeInsets.only(left: 16, right: 6),
-        title: Text(script.label, maxLines: 1, overflow: TextOverflow.ellipsis),
-        subtitle: script.url == null
-            ? null
-            : Text(
-                script.lastUpdateTime.show,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+    return [
+      CommonPopupMenuItem(
+        label: l.edit,
+        glyph: AppGlyphs.edit,
         onPressed: () => _edit(script),
-        trailing: _updating.contains(script.id)
-            ? const Padding(
-                padding: EdgeInsets.all(12),
-                child: CommonCircleLoading(),
-              )
-            : CommonPopupBox(
-                targetBuilder: (open) => IconButton(
-                  tooltip: l.more,
-                  onPressed: () => open(),
-                  icon: const GlyphIcon(AppGlyphs.more),
-                ),
-                popup: CommonPopupMenu(
-                  items: [
-                    CommonPopupMenuItem(
-                      label: l.edit,
-                      glyph: AppGlyphs.edit,
-                      onPressed: () => _edit(script),
-                    ),
-                    CommonPopupMenuItem(
-                      label: l.scriptOptions,
-                      glyph: AppGlyphs.sliders,
-                      onPressed: () => BaseNavigator.push(
-                        context,
-                        ScriptOptionsPage(script: script),
-                      ),
-                    ),
-                    if (script.url != null) ...[
-                      CommonPopupMenuItem(
-                        label: l.url,
-                        glyph: AppGlyphs.link,
-                        onPressed: () => _update(script, editUrl: true),
-                      ),
-                      CommonPopupMenuItem(
-                        label: l.sync,
-                        glyph: AppGlyphs.sync,
-                        onPressed: () => _update(script),
-                      ),
-                    ],
-                    CommonPopupMenuItem(
-                      label: l.delete,
-                      glyph: AppGlyphs.delete,
-                      danger: true,
-                      onPressed: () => _delete(script),
-                    ),
-                  ],
-                ),
-              ),
+      ),
+      CommonPopupMenuItem(
+        label: l.scriptOptions,
+        glyph: AppGlyphs.sliders,
+        onPressed: () =>
+            BaseNavigator.push(context, ScriptOptionsPage(script: script)),
+      ),
+      if (script.url != null) ...[
+        CommonPopupMenuItem(
+          label: l.url,
+          glyph: AppGlyphs.link,
+          onPressed: () => _update(script, editUrl: true),
+        ),
+        CommonPopupMenuItem(
+          label: l.sync,
+          glyph: AppGlyphs.sync,
+          onPressed: () => _update(script),
+        ),
+      ],
+      CommonPopupMenuItem(
+        label: l.delete,
+        glyph: AppGlyphs.delete,
+        danger: true,
+        onPressed: () => _delete(script),
+      ),
+    ];
+  }
+
+  Widget _buildItem(List<Script> scripts, int index) {
+    final l = context.appLocalizations;
+    final script = scripts[index];
+    final updating = _updating.contains(script.id);
+    return SortableItem(
+      key: ValueKey(script.id),
+      index: index,
+      child: ContextMenuRegion(
+        menuItems: updating ? null : _buildMenuItems(script),
+        child: ItemPositionProvider(
+          position: ItemPosition.get(index, scripts.length),
+          child: DecorationListItem(
+            contentPadding: const EdgeInsets.only(left: 16),
+            title: Text(
+              script.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: Text(
+              script.url != null ? l.remote : l.local,
+              style: context.listCaptionStyle,
+            ),
+            trailing: _ScriptTrailing(script: script, updating: updating),
+            onPressed: () => _edit(script),
+          ),
+        ),
       ),
     );
   }
+
+  Future<void> _reorder(List<Script> scripts, int before, int after) =>
+      _run(() async {
+        final reordered = List.of(scripts);
+        reordered.insert(after, reordered.removeAt(before));
+        ref.read(scriptsProvider.notifier).replaceFromDatabase(reordered);
+        try {
+          await _library.reorder([for (final item in reordered) item.id]);
+        } catch (_) {
+          if (mounted) ref.invalidate(scriptsProvider);
+          rethrow;
+        }
+      });
 
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
     final state = ref.watch(scriptsProvider);
     final scripts = state.value ?? [];
+    final unavailable = _importing || state.isLoading || state.hasError;
     return CommonScaffold(
       title: l.script,
+      canSort: !state.hasError && scripts.length > 1,
       isLoading: _importing || state.isLoading,
       actions: [
         CommonPopupBox(
-          targetBuilder: (open) => FilledButton.tonal(
-            onPressed: _importing || state.isLoading || state.hasError
-                ? null
-                : () => open(),
-            child: Text(l.add),
+          targetBuilder: (open) => IconButton(
+            tooltip: l.add,
+            onPressed: unavailable ? null : () => open(),
+            icon: const GlyphIcon(AppGlyphs.addCircle),
           ),
           popup: CommonPopupMenu(
             items: [
@@ -323,33 +342,45 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
                     .copyWith(top: context.contentTopPadding),
                 buildDefaultDragHandles: false,
                 itemCount: scripts.length,
-                itemBuilder: (_, index) => ReorderableDelayedDragStartListener(
-                  key: ValueKey(scripts[index].id),
-                  index: index,
-                  child: _item(scripts[index], index, scripts.length),
-                ),
+                itemBuilder: (_, index) => _buildItem(scripts, index),
                 proxyDecorator: (_, index, animation) => commonProxyDecorator(
-                  _item(scripts[index], index, scripts.length),
+                  _buildItem(scripts, index),
                   index,
                   animation,
                 ),
-                onReorderItem: (before, after) => _run(() async {
-                  final reordered = List.of(scripts);
-                  reordered.insert(after, reordered.removeAt(before));
-                  ref
-                      .read(scriptsProvider.notifier)
-                      .replaceFromDatabase(reordered);
-                  try {
-                    await _library.reorder([
-                      for (final item in reordered) item.id,
-                    ]);
-                  } catch (_) {
-                    if (mounted) ref.invalidate(scriptsProvider);
-                    rethrow;
-                  }
-                }),
+                onReorderItem: (before, after) =>
+                    _reorder(scripts, before, after),
               ),
             ),
+    );
+  }
+}
+
+class _ScriptTrailing extends StatelessWidget {
+  const _ScriptTrailing({required this.script, required this.updating});
+
+  final Script script;
+  final bool updating;
+
+  @override
+  Widget build(BuildContext context) {
+    // Inset here, not in the row, so the sort handle that replaces it sits flush.
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(end: 16),
+      child: AnimatedSwitcher(
+        duration: context.motionDuration(commonDuration),
+        layoutBuilder: (current, previous) => Stack(
+          alignment: AlignmentDirectional.centerEnd,
+          children: [...previous, ?current],
+        ),
+        child: updating
+            ? const CommonCircleLoading(key: ValueKey('loading'), size: 24)
+            : Text(
+                script.lastUpdateTime.lastUpdateTimeDesc,
+                key: const ValueKey('time'),
+                style: context.listCaptionStyle,
+              ),
+      ),
     );
   }
 }
@@ -455,47 +486,64 @@ class _ScriptOptionsPageState extends ConsumerState<ScriptOptionsPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.appLocalizations;
+    final defaults = _defaults;
     return CommonPopScope(
       onPop: (_) => !_saving,
       child: CommonScaffold(
         title: l10n.scriptOptions,
         isLoading: _saving,
-        actions: [
-          IconButton(
+        iconActions: [
+          IconButtonData(
+            glyph: AppGlyphs.refresh,
             tooltip: l10n.refresh,
-            icon: const GlyphIcon(AppGlyphs.refresh),
             onPressed: _loading || _saving ? null : () => _load(refresh: true),
           ),
-          if (_defaults?.isNotEmpty == true) ...[
-            TextButton(
-              onPressed: _saving
-                  ? null
-                  : () => setState(() => _values = Map.from(_defaults!)),
-              child: Text(l10n.reset),
-            ),
-            TextButton(
-              onPressed: _saving ? null : _save,
-              child: Text(l10n.save),
-            ),
-          ],
         ],
+        confirmationAction: defaults?.isNotEmpty == true
+            ? IconButtonData(
+                glyph: AppGlyphs.check,
+                tooltip: l10n.save,
+                isLoading: _saving,
+                onPressed: _saving ? null : _save,
+              )
+            : null,
         body: _error != null
             ? ErrorStatus(error: _error!, onRetry: () => _load(refresh: true))
-            : _defaults == null
+            : defaults == null
             ? const Center(child: CircularProgressIndicator())
-            : _defaults!.isEmpty
-            ? Center(child: Text(l10n.scriptOptionsEmpty))
+            : defaults.isEmpty
+            ? NullStatus(
+                label: l10n.scriptOptionsEmpty,
+                illustration: NullStatusIllustration.scripts,
+              )
             : ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 16)
+                    .copyWith(top: context.contentTopPadding, bottom: 16),
                 children: [
-                  for (final entry in _values.entries)
-                    ListItem.toggle(
-                      title: Text(entry.key),
-                      value: entry.value,
-                      onChanged: _saving
-                          ? null
-                          : (value) =>
-                                setState(() => _values[entry.key] = value),
-                    ),
+                  generateSection(
+                    items: [
+                      for (final entry in _values.entries)
+                        ListItem.toggle(
+                          title: Text(entry.key),
+                          value: entry.value,
+                          onChanged: _saving
+                              ? null
+                              : (value) =>
+                                    setState(() => _values[entry.key] = value),
+                        ),
+                    ],
+                  ),
+                  generateSection(
+                    items: [
+                      ListItem(
+                        title: Text(l10n.reset),
+                        onTap: _saving
+                            ? null
+                            : () =>
+                                  setState(() => _values = Map.from(defaults)),
+                      ),
+                    ],
+                  ),
                 ],
               ),
       ),

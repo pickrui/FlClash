@@ -124,7 +124,7 @@ void main() {
     ) async {
       final setup = _SetupAction();
       final container = await openSavingOptions(tester, setup, mode);
-      await tester.tap(find.text('Save'));
+      await tester.tap(find.byTooltip('Save'));
       await tester.pumpAndSettle();
       expect(setup.calls, 0);
       expect(container.read(appSettingProvider).scriptOptions['4'], {
@@ -144,7 +144,7 @@ void main() {
       setup,
       OverwriteType.script,
     );
-    await tester.tap(find.text('Save'));
+    await tester.tap(find.byTooltip('Save'));
     await tester.pumpAndSettle();
     expect(find.byType(ScriptOptionsPage), findsOneWidget);
     expect(
@@ -154,7 +154,7 @@ void main() {
     expect(tester.widget<Switch>(find.byType(Switch)).value, isFalse);
     final saving = Completer<bool>();
     setup.apply = () => saving.future;
-    await tester.tap(find.text('Save'));
+    await tester.tap(find.byTooltip('Save'));
     await tester.pump();
     final optionsContext = tester.element(find.byType(ScriptOptionsPage));
     final navigator = Navigator.of(optionsContext);
@@ -184,7 +184,7 @@ void main() {
     final saving = Completer<bool>();
     final setup = _SetupAction()..apply = () => saving.future;
     await openSavingOptions(tester, setup, OverwriteType.script);
-    await tester.tap(find.text('Save'));
+    await tester.tap(find.byTooltip('Save'));
     await tester.pump();
     await tester.binding.handlePopRoute();
     await tester.pump();
@@ -195,7 +195,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('fixture apply failed'), findsOneWidget);
     setup.apply = () async => true;
-    await tester.tap(find.text('Save'));
+    await tester.tap(find.byTooltip('Save'));
     await tester.pumpAndSettle();
     expect(setup.calls, 2);
     expect(find.byType(ScriptOptionsPage), findsNothing);
@@ -274,7 +274,7 @@ void main() {
         );
         await _pumpUntil(tester, find.byType(ErrorStatus));
         expect(find.byType(ErrorStatus), findsOneWidget);
-        expect(find.text('Save'), findsNothing);
+        expect(find.byTooltip('Save'), findsNothing);
 
         final evaluation = Completer<ScriptEvaluation>();
         var evaluations = 0;
@@ -297,7 +297,7 @@ void main() {
         expect(evaluations, 1);
         expect(find.byType(ErrorStatus), findsNothing);
         expect(find.byType(CircularProgressIndicator), findsOneWidget);
-        expect(find.text('Save'), findsNothing);
+        expect(find.byTooltip('Save'), findsNothing);
         evaluation.complete(
           ScriptEvaluation(config: empty ? '{}' : '{"Allow":true}', logs: []),
         );
@@ -308,10 +308,10 @@ void main() {
             find.text(AppLocalizations.current.scriptOptionsEmpty),
             findsOneWidget,
           );
-          expect(find.text('Save'), findsNothing);
+          expect(find.byTooltip('Save'), findsNothing);
         } else {
           expect(find.text('Allow'), findsOneWidget);
-          expect(find.text('Save'), findsOneWidget);
+          expect(find.byTooltip('Save'), findsOneWidget);
         }
         expect(tester.takeException(), isNull);
         await tester.pumpWidget(const SizedBox.shrink());
