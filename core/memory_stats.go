@@ -7,9 +7,56 @@
 package core
 
 import (
+	"os"
+	"runtime/debug"
 	"runtime/metrics"
 	"sync"
+	"time"
+
+	"github.com/metacubex/mihomo/component/memory"
+	"github.com/metacubex/mihomo/log"
+	"github.com/metacubex/mihomo/tunnel"
 )
+
+func handleForceGC() {
+	log.Infoln("[APP] request force GC")
+	tunnel.InvalidateAllProxies()
+	debug.FreeOSMemory()
+}
+
+// Provider loads finish after ApplyConfig, past mihomo's own collection there.
+var (
+	loadReleaseDelay  = 2 * time.Second
+	releaseLoadMemory = debug.FreeOSMemory
+
+	loadReleaseMu    sync.Mutex
+	loadReleaseTimer *time.Timer
+)
+
+func scheduleLoadMemoryRelease() {
+	loadReleaseMu.Lock()
+	defer loadReleaseMu.Unlock()
+	if loadReleaseTimer == nil {
+		loadReleaseTimer = time.AfterFunc(loadReleaseDelay, func() {
+			loadReleaseMu.Lock()
+			release := releaseLoadMemory
+			loadReleaseMu.Unlock()
+			release()
+		})
+		return
+	}
+	loadReleaseTimer.Reset(loadReleaseDelay)
+}
+
+func handleGetMemoryStats() (MemoryStats, error) {
+	stats := readRuntimeMemoryStats()
+	resident, err := memory.GetMemoryInfo(int32(os.Getpid()))
+	if err != nil {
+		return MemoryStats{}, err
+	}
+	stats.Rss = resident.RSS
+	return stats, nil
+}
 
 var memorySamples = struct {
 	sync.Mutex

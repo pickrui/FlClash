@@ -11,6 +11,14 @@ import (
 	"github.com/metacubex/mihomo/tunnel"
 )
 
+func handleSuspend(suspended bool) bool {
+	runLock.Lock()
+	defer runLock.Unlock()
+	deviceIdle = suspended
+	reconcileIdleSuspendLocked()
+	return true
+}
+
 // All idle state is protected by runLock, including calls from Android's idle
 // receiver and configuration changes. Keeping traffic active is the default.
 var (

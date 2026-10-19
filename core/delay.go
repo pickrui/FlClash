@@ -7,14 +7,43 @@
 package core
 
 import (
+	"cmp"
 	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
+	"iter"
 	"net"
 	"sync"
+	"sync/atomic"
 	"time"
+
+	"github.com/metacubex/mihomo/adapter"
+	"github.com/metacubex/mihomo/adapter/outboundgroup"
+	"github.com/metacubex/mihomo/common/utils"
+	"github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/tunnel"
+	"golang.org/x/sync/semaphore"
 )
+
+var delaySem = semaphore.NewWeighted(delayTestConcurrency)
+
+// Keep the app batch width (maxConcurrentDelayTests) at or below this limit.
+const delayTestConcurrency = 150
+
+const defaultTestURL = "http://cp.cloudflare.com/generate_204"
+
+// constant.DefaultTestURL changes while a candidate parses; probes read this copy.
+var probeTestURL atomic.Pointer[string]
+
+func init() {
+	constant.DefaultTestURL = defaultTestURL
+	setProbeTestURL(defaultTestURL)
+}
+
+func setProbeTestURL(url string) {
+	probeTestURL.Store(&url)
+}
 
 // A probe without a caller-supplied budget still needs one.
 const defaultDelayTestTimeout = 5 * time.Second
@@ -181,4 +210,93 @@ func (r *delayProbeRegistry) end(id int64) {
 	r.mu.Lock()
 	delete(r.active, id)
 	r.mu.Unlock()
+}
+
+// Manual probes accept any status, independent of a group's expected-status policy.
+var anyDelayTestStatus utils.IntRanges[uint16]
+
+func handleAsyncTestDelay(params *TestDelayParams, fn func(*Delay)) {
+	safeGo("asyncTestDelay", func() {
+		testUrl := cmp.Or(params.TestUrl, *probeTestURL.Load())
+		delayData := &Delay{
+			Url:   testUrl,
+			Name:  params.ProxyName,
+			Value: -1,
+		}
+		timeout := delayTestTimeout(params.Timeout)
+		runCtx, cancelRun := context.WithCancel(context.Background())
+		defer cancelRun()
+		probe := manualDelayProbes.begin(params.Session, params.Generation, cancelRun)
+		defer manualDelayProbes.end(probe)
+
+		// Queueing and probing need separate deadlines so a saturated queue cannot consume the probe budget.
+		queueCtx, cancelQueue := context.WithTimeout(runCtx, timeout)
+		granted := delaySem.Acquire(queueCtx, 1) == nil
+		cancelQueue()
+		if !granted {
+			delayData.Failure = "queueTimeout"
+			if runCtx.Err() != nil {
+				delayData.Failure = delayFailureReason(runCtx.Err())
+			}
+			fn(delayData)
+			return
+		}
+		defer delaySem.Release(1)
+
+		proxy := tunnel.AllProxies()[params.ProxyName]
+		if proxy == nil {
+			delayData.Failure = "missingProxy"
+			fn(delayData)
+			return
+		}
+
+		ctx, cancel := context.WithTimeout(runCtx, timeout)
+		defer cancel()
+
+		finish := manualDelayEvents.begin(proxy.Name(), testUrl)
+		if latency, handled, err := tailscaleDelay(ctx, proxy); handled {
+			finish()
+			if err == nil {
+				delayData.Value = max(int32(latency.Milliseconds()), 1)
+			} else {
+				delayData.Failure = delayFailureReason(err)
+			}
+			fn(delayData)
+			return
+		}
+		delay, err := proxy.URLTest(ctx, testUrl, anyDelayTestStatus)
+		finish()
+		if err == nil {
+			delayData.Value = delayValue(delay)
+		} else {
+			delayData.Failure = delayFailureReason(err)
+		}
+		// Invalidate the group's cached choice after a member's health changes.
+		resetURLTestSelections(testUrl)
+		fn(delayData)
+	})
+}
+
+func resetURLTestSelections(testUrl string) {
+	for group := range urlTestGroups(testUrl) {
+		group.ResetSelection()
+	}
+}
+
+func urlTestGroups(testUrl string) iter.Seq[*outboundgroup.URLTest] {
+	return func(yield func(*outboundgroup.URLTest) bool) {
+		for _, proxy := range tunnel.ProxiesSnapshot() {
+			adapterProxy, ok := proxy.(*adapter.Proxy)
+			if !ok {
+				continue
+			}
+			group, ok := adapterProxy.ProxyAdapter.(*outboundgroup.URLTest)
+			if !ok || group.TestURL() != testUrl {
+				continue
+			}
+			if !yield(group) {
+				return
+			}
+		}
+	}
 }

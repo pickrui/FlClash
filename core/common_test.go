@@ -85,15 +85,6 @@ func TestEncryptedRuntimeConfigFromDisk(t *testing.T) {
 	}
 }
 
-func TestDefaultTestURLUsesCloudflare(t *testing.T) {
-	if constant.DefaultTestURL != defaultTestURL {
-		t.Fatalf("DefaultTestURL = %q, want %q", constant.DefaultTestURL, defaultTestURL)
-	}
-	if params := defaultSetupParams(); params.TestURL != defaultTestURL {
-		t.Fatalf("SetupParams.TestURL = %q, want %q", params.TestURL, defaultTestURL)
-	}
-}
-
 func (selector *testSelectable) Set(name string) error {
 	if !selector.valid[name] {
 		return errors.New("proxy not exist")

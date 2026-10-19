@@ -7,21 +7,12 @@
 package core
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
-	"slices"
-	"sync"
-	"sync/atomic"
 
 	"github.com/metacubex/mihomo/adapter"
-	"github.com/metacubex/mihomo/adapter/inbound"
-	"github.com/metacubex/mihomo/adapter/outboundgroup"
-	"github.com/metacubex/mihomo/adapter/provider"
 	"github.com/metacubex/mihomo/component/auth"
 	"github.com/metacubex/mihomo/component/dialer"
 	"github.com/metacubex/mihomo/component/resolver"
@@ -29,197 +20,13 @@ import (
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/constant/features"
-	cp "github.com/metacubex/mihomo/constant/provider"
 	"github.com/metacubex/mihomo/hub"
 	"github.com/metacubex/mihomo/hub/executor"
 	"github.com/metacubex/mihomo/hub/route"
-	"github.com/metacubex/mihomo/listener"
 	"github.com/metacubex/mihomo/log"
-	rp "github.com/metacubex/mihomo/rules/provider"
 	"github.com/metacubex/mihomo/tunnel"
-	"golang.org/x/sync/semaphore"
+	"golang.org/x/exp/slices"
 )
-
-var (
-	currentConfig *config.Config
-	version       = 0
-	isRunning     = false
-	runLock       sync.Mutex
-	// Selector writes and proxySnapshot use this lock. The fixed order is
-	// runLock -> selectionLock; proxy changes must never wait for runLock.
-	selectionLock sync.Mutex
-	delaySem      = semaphore.NewWeighted(delayTestConcurrency)
-	// Set once the process exits, so an apply still holding runLock cannot
-	// bring back the TUN that exit cleanup closed first.
-	exiting atomic.Bool
-)
-
-// Probes the Core runs at once. The app keeps its own batch width at or below
-// this (maxConcurrentDelayTests in lib/common/constant.dart).
-const delayTestConcurrency = 150
-
-const defaultTestURL = "http://cp.cloudflare.com/generate_204"
-
-// constant.DefaultTestURL changes while a candidate parses; probes read this copy.
-var probeTestURL atomic.Pointer[string]
-
-func init() {
-	constant.DefaultTestURL = defaultTestURL
-	setProbeTestURL(defaultTestURL)
-}
-
-func setProbeTestURL(url string) {
-	probeTestURL.Store(&url)
-}
-
-func getExternalProvidersRaw() []cp.Provider {
-	var providers []cp.Provider
-	for _, p := range tunnel.ProvidersSnapshot() {
-		if p.VehicleType() != cp.Compatible {
-			providers = append(providers, p)
-		}
-	}
-	for _, p := range tunnel.RuleProvidersSnapshot() {
-		if p.VehicleType() != cp.Compatible {
-			providers = append(providers, p)
-		}
-	}
-	return providers
-}
-
-func toExternalProvider(p cp.Provider) (*ExternalProvider, error) {
-	switch p := p.(type) {
-	case *provider.ProxySetProvider:
-		return &ExternalProvider{
-			Name:             p.Name(),
-			Type:             p.Type().String(),
-			VehicleType:      p.VehicleType().String(),
-			Count:            p.Count(),
-			UpdateAt:         p.UpdatedAt(),
-			Path:             p.Vehicle().Path(),
-			SubscriptionInfo: p.GetSubscriptionInfo(),
-		}, nil
-	case *rp.RuleSetProvider:
-		return &ExternalProvider{
-			Name:        p.Name(),
-			Type:        p.Type().String(),
-			VehicleType: p.VehicleType().String(),
-			Count:       p.Count(),
-			UpdateAt:    p.UpdatedAt(),
-			Path:        p.Vehicle().Path(),
-		}, nil
-	default:
-		return nil, errors.New("not external provider")
-	}
-}
-
-func sideUpdateExternalProvider(p cp.Provider, data []byte) error {
-	switch p := p.(type) {
-	case *provider.ProxySetProvider:
-		_, _, err := p.SideUpdate(data)
-		return err
-	case *rp.RuleSetProvider:
-		_, _, err := p.SideUpdate(data)
-		return err
-	default:
-		return errors.New("not external provider")
-	}
-}
-
-func updateListeners() {
-	if !isRunning || networkExcluded || exiting.Load() {
-		return
-	}
-	if currentConfig == nil {
-		return
-	}
-	listeners := currentConfig.Listeners
-	general := currentConfig.General
-	listener.PatchInboundListeners(listeners, tunnel.Tunnel, true)
-
-	listener.SetAllowLan(general.AllowLan)
-	inbound.SetSkipAuthPrefixes(general.SkipAuthPrefixes)
-	inbound.SetAllowedIPs(general.LanAllowedIPs)
-	inbound.SetDisAllowedIPs(general.LanDisAllowedIPs)
-
-	listener.SetBindAddress(general.BindAddress)
-	listener.ReCreateHTTP(general.Port, tunnel.Tunnel)
-	listener.ReCreateSocks(general.SocksPort, tunnel.Tunnel)
-	listener.ReCreateRedir(general.RedirPort, tunnel.Tunnel)
-	listener.ReCreateTProxy(general.TProxyPort, tunnel.Tunnel)
-	listener.ReCreateMixed(general.MixedPort, tunnel.Tunnel)
-	listener.ReCreateShadowSocks(general.ShadowSocksConfig, tunnel.Tunnel)
-	listener.ReCreateVmess(general.VmessConfig, tunnel.Tunnel)
-	listener.ReCreateTuic(general.TuicServer, tunnel.Tunnel)
-	if !features.Android {
-		general.Tun.Device = normalizeTunDeviceName(general.Tun.Device, runtime.GOOS)
-		listener.ReCreateTun(general.Tun, tunnel.Tunnel)
-	}
-	reconcileIdleSuspendLocked()
-}
-
-func patchSelectGroup(mapping map[string]string) {
-	selectionLock.Lock()
-	defer selectionLock.Unlock()
-
-	// Groups are top-level; AllProxies may shadow one with a same-named node.
-	proxies := tunnel.ProxiesSnapshot()
-	for name, proxy := range proxies {
-		outbound, ok := proxy.(*adapter.Proxy)
-		if !ok {
-			continue
-		}
-
-		selector, ok := outbound.ProxyAdapter.(outboundgroup.SelectAble)
-		if !ok {
-			continue
-		}
-
-		selected, exist := mapping[name]
-		if !exist {
-			continue
-		}
-
-		if proxySelector, ok := outbound.ProxyAdapter.(*outboundgroup.Selector); ok {
-			restoreSelectorSelection(proxySelector, selected)
-			continue
-		}
-		selector.ForceSet(selected)
-	}
-	publishProxySnapshotLocked(proxies)
-}
-
-type selectorState interface {
-	outboundgroup.SelectAble
-	Now() string
-}
-
-func restoreSelectorSelection(selector selectorState, selected string) {
-	if err := selector.Set(selected); err != nil {
-		normalizeSelectorSelection(selector)
-	}
-}
-
-func normalizeSelectorSelection(selector selectorState) {
-	selector.ForceSet(selector.Now())
-}
-
-func normalizeSelectorSelections() {
-	selectionLock.Lock()
-	defer selectionLock.Unlock()
-
-	for _, proxy := range tunnel.ProxiesSnapshot() {
-		outbound, ok := proxy.(*adapter.Proxy)
-		if !ok {
-			continue
-		}
-		selector, ok := outbound.ProxyAdapter.(*outboundgroup.Selector)
-		if !ok {
-			continue
-		}
-		normalizeSelectorSelection(selector)
-	}
-}
 
 func defaultSetupParams() *SetupParams {
 	return &SetupParams{
@@ -466,8 +273,47 @@ func applyConfig(params *SetupParams) error {
 	return nil
 }
 
-func UnmarshalJson(data []byte, v any) error {
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.UseNumber()
-	return decoder.Decode(v)
+func handleValidateConfig(path string) string {
+	buf, err := readFile(path)
+	if err != nil {
+		return "readFile Error: " + err.Error()
+	}
+	if len(buf) == 0 {
+		return "empty config file or decryption failed"
+	}
+	return validateConfigData(buf)
+}
+
+func validateConfigData(data []byte) string {
+	defer scheduleLoadMemoryRelease()
+	if !isInit.Load() {
+		return "not initialized"
+	}
+	return isolatedValidateConfigData(data)
+}
+
+func handleGetConfig(path string) (*config.RawConfig, error) {
+	defer scheduleLoadMemoryRelease()
+	data, err := readFile(path)
+	if err != nil {
+		return nil, err
+	}
+	return unmarshalRawConfig(data)
+}
+
+func handleUpdateConfig(params *UpdateParams) string {
+	if err := updateConfig(params); err != nil {
+		return err.Error()
+	}
+	return ""
+}
+
+func handleSetupConfig(params *SetupParams) string {
+	defer scheduleReclaimOwnership()
+	defer scheduleLoadMemoryRelease()
+	err := applyConfig(params)
+	if err != nil {
+		return err.Error()
+	}
+	return ""
 }

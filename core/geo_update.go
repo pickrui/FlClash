@@ -20,6 +20,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/metacubex/chi"
+	"github.com/metacubex/http"
 	"github.com/metacubex/mihomo/component/dialer"
 	"github.com/metacubex/mihomo/component/geodata"
 	"github.com/metacubex/mihomo/component/geodata/router"
@@ -33,9 +35,6 @@ import (
 	"github.com/metacubex/mihomo/log"
 	"github.com/metacubex/mihomo/tunnel"
 	"github.com/oschwald/maxminddb-golang"
-
-	"github.com/metacubex/chi"
-	"github.com/metacubex/http"
 )
 
 const (
@@ -300,6 +299,7 @@ type geoDownloadValidationError struct {
 }
 
 func (e *geoDownloadValidationError) Error() string { return e.err.Error() }
+
 func (e *geoDownloadValidationError) Unwrap() error { return e.err }
 
 type geoDownloadHTTPError int
@@ -720,4 +720,27 @@ func shouldUpdateGeoFiles(paths []string, interval time.Duration) bool {
 		}
 	}
 	return false
+}
+
+func handleUpdateGeoData(
+	geoType string,
+	geoName string,
+	geoURL string,
+	fn func(value string),
+) {
+	if !runLifecycleGeoTask(func(ctx context.Context) {
+		path, err := geoResourcePath(geoType, geoName)
+		if err == nil {
+			err = tryRunGeoUpdate(ctx, func(ctx context.Context) error {
+				return updateGeoDataLockedFromURL(ctx, geoType, path, geoURL)
+			})
+		}
+		if err != nil {
+			fn(err.Error())
+			return
+		}
+		fn("")
+	}) {
+		fn(context.Canceled.Error())
+	}
 }
