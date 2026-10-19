@@ -7,9 +7,11 @@ import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/common/task.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/views/config/network.dart';
-import 'package:fl_clash/views/dashboard/widgets/quick_options.dart';
+import 'package:fl_clash/views/dashboard/widgets/intranet_ip.dart';
+import 'package:fl_clash/views/dashboard/widgets/network_takeover.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -83,8 +85,9 @@ void main() {
   });
 
   for (final entry in const <String, Widget>{
-    'system proxy card': SystemProxyButton(),
-    'TUN card': TUNButton(),
+    'system proxy card': NetworkTakeoverTile(TakeoverSwitch.systemProxy),
+    'TUN card': NetworkTakeoverTile(TakeoverSwitch.tun),
+    'allow LAN card': IntranetIpCard(),
     'system proxy setting': SystemProxyItem(),
     'TUN setting': TUNItem(),
     'system DNS setting': AutoSetSystemDnsItem(),
@@ -99,8 +102,9 @@ void main() {
                 const NetworkProps(systemProxy: true, autoSetSystemDns: true),
           ),
           patchClashConfigProvider.overrideWithBuild(
-            (_, _) => const ClashConfig(tun: Tun(enable: true)),
+            (_, _) => const ClashConfig(tun: Tun(enable: true), allowLan: true),
           ),
+          localIpProvider.overrideWithBuild((_, _) => '192.168.1.2'),
         ],
       );
       addTearDown(container.dispose);
@@ -128,6 +132,7 @@ void main() {
         expect(container.read(networkSettingProvider).systemProxy, isTrue);
         expect(container.read(networkSettingProvider).autoSetSystemDns, isTrue);
         expect(container.read(patchClashConfigProvider).tun.enable, isTrue);
+        expect(container.read(patchClashConfigProvider).allowLan, isTrue);
       }
       expect(tester.takeException(), isNull);
     });

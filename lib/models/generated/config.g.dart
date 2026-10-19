@@ -110,22 +110,16 @@ const _$RestoreStrategyEnumMap = {
 };
 
 const _$DashboardWidgetEnumMap = {
+  DashboardWidget.currentOutbound: 'currentOutbound',
   DashboardWidget.networkSpeed: 'networkSpeed',
-  DashboardWidget.outboundModeV2: 'outboundModeV2',
   DashboardWidget.outboundMode: 'outboundMode',
-  DashboardWidget.trafficUsage: 'trafficUsage',
-  DashboardWidget.networkDetection: 'networkDetection',
-  DashboardWidget.tunButton: 'tunButton',
   DashboardWidget.vpnButton: 'vpnButton',
-  DashboardWidget.systemProxyButton: 'systemProxyButton',
+  DashboardWidget.networkTakeover: 'networkTakeover',
+  DashboardWidget.profiles: 'profiles',
+  DashboardWidget.proxyGroups: 'proxyGroups',
+  DashboardWidget.connectionStats: 'connectionStats',
   DashboardWidget.intranetIp: 'intranetIp',
   DashboardWidget.memoryInfo: 'memoryInfo',
-  DashboardWidget.dnsQueries: 'dnsQueries',
-  DashboardWidget.requests: 'requests',
-  DashboardWidget.connections: 'connections',
-  DashboardWidget.runTime: 'runTime',
-  DashboardWidget.proxyGroups: 'proxyGroups',
-  DashboardWidget.profiles: 'profiles',
 };
 
 _AccessControlProps _$AccessControlPropsFromJson(Map<String, dynamic> json) =>

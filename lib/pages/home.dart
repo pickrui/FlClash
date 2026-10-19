@@ -11,13 +11,11 @@ import 'package:fl_clash/icons/navigation_glyph.dart';
 import 'package:fl_clash/manager/app_manager.dart';
 import 'package:fl_clash/models/common.dart';
 import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:fl_clash/ui/navigation_dock.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:fl_clash/views/dashboard/widgets/start_button.dart';
 
 import 'package:fl_clash/ui/focus.dart';
 import 'package:fl_clash/ui/animated_visibility.dart';
@@ -42,19 +40,6 @@ class HomePage extends ConsumerWidget {
                   .watch(currentNavigationItemsStateProvider)
                   .value;
               final isMobile = ref.watch(isMobileViewProvider);
-              final floating = ref.watch(
-                appSettingProvider.select(
-                  (state) => state.floatingNavigationBar,
-                ),
-              );
-              final hasProfile = ref.watch(
-                profilesProvider.select((profiles) => profiles.isNotEmpty),
-              );
-              final docked =
-                  isMobile &&
-                  floating &&
-                  hasProfile &&
-                  MediaQuery.sizeOf(context).width >= 380;
               return _HomePageView(
                 navigationItems: navigationItems,
                 pageBuilder: (_, index) {
@@ -63,7 +48,6 @@ class HomePage extends ConsumerWidget {
                     key: ValueKey(navigationItem.label),
                     item: navigationItem,
                     isMobile: isMobile,
-                    docked: docked,
                     view: navigationItem.builder(context),
                   );
                 },
@@ -93,11 +77,6 @@ class _HomeShell extends ConsumerWidget {
     final floating = ref.watch(
       appSettingProvider.select((state) => state.floatingNavigationBar),
     );
-    final hasProfile = ref.watch(
-      profilesProvider.select((profiles) => profiles.isNotEmpty),
-    );
-    final isDashboard =
-        navigationItems[state.currentIndex].label == PageLabel.dashboard;
     return Material(
       color: SurfaceLevel.page.colorOf(context.colorScheme),
       child: Column(
@@ -140,12 +119,6 @@ class _HomeShell extends ConsumerWidget {
                         onSelected: (index) {
                           _handleToPage(navigationItems[index].label, ref);
                         },
-                        trailing:
-                            hasProfile &&
-                                isDashboard &&
-                                MediaQuery.sizeOf(context).width >= 380
-                            ? const StartButton()
-                            : null,
                       ),
                     ),
                   ),
@@ -222,23 +195,18 @@ class _NavigationPage extends StatelessWidget {
     super.key,
     required this.item,
     required this.isMobile,
-    required this.docked,
     required this.view,
   });
 
   final NavigationItem item;
   final bool isMobile;
-  final bool docked;
   final Widget view;
 
   @override
   Widget build(BuildContext context) {
-    final scopedView = PageFocusScope(
-      child: DockedPageScope(docked: docked, child: view),
-    );
+    final scopedView = PageFocusScope(child: view);
     final keptView = KeepScope(
       key: ValueKey(item.label),
-      keep: item.keep,
       child: isMobile
           ? scopedView
           : Navigator(

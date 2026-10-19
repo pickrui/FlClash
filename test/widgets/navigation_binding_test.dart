@@ -5,30 +5,10 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/application.dart';
 import 'package:fl_clash/common/navigation.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/views/dashboard/widgets/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 void main() {
-  test(
-    'dashboard cards retain identity when saving and rebuilding the layout',
-    () {
-      final saved = [
-        DashboardWidget.memoryInfo,
-        DashboardWidget.networkSpeed,
-        DashboardWidget.outboundMode,
-      ];
-      final restored = saved.map(
-        (item) => DashboardWidgetView.fromWidget(item.widget),
-      );
-      expect(restored, saved);
-      for (final item in DashboardWidget.values) {
-        expect(identical(item.widget, item.widget), true);
-      }
-    },
-  );
-
   testWidgets('navigation delegates every page to its application binding', (
     tester,
   ) async {

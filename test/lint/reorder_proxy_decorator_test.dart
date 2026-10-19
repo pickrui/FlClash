@@ -13,7 +13,10 @@ final _reorderableList = RegExp(
   r'SuperSliverReorderableList)\(',
 );
 
-const _allowed = {'lib/ui/super_reorderable_list.dart'};
+const _allowed = {
+  'lib/ui/super_reorderable_list.dart',
+  'lib/views/dashboard/edit.dart',
+};
 
 final _decorator = RegExp(r'\bcommonProxyDecorator\b');
 

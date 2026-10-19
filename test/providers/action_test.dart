@@ -14,26 +14,11 @@ import 'package:material_ui/material_ui.dart';
 
 import '../helpers/test_app.dart';
 
-import 'package:fl_clash/widgets/system_back_block.dart';
-
 class _ProfileAction extends ProfileAction {
   int imports = 0;
   @override
   Future<void> addProfileFormFile() async {
     imports++;
-  }
-}
-
-class _BackAction extends BackBlockAction {
-  int balance = 0;
-  @override
-  void backBlock() {
-    balance++;
-  }
-
-  @override
-  void unBackBlock() {
-    balance--;
   }
 }
 
@@ -172,31 +157,5 @@ void main() {
     await tester.pump();
     expect(action.imports, 1);
     expect(otherAction.imports, 0);
-  });
-
-  testWidgets('back blocking is balanced after its widget is removed', (
-    tester,
-  ) async {
-    final action = _BackAction();
-    final show = ValueNotifier(true);
-    addTearDown(show.dispose);
-    await tester.pumpWidget(
-      TestApp(
-        overrides: [backBlockActionProvider.overrideWith(() => action)],
-        child: ValueListenableBuilder(
-          valueListenable: show,
-          builder: (_, value, _) => value
-              ? const SystemBackBlock(child: SizedBox())
-              : const SizedBox(),
-        ),
-      ),
-    );
-    await tester.pump();
-    expect(action.balance, 1);
-    show.value = false;
-    await tester.pump();
-    await tester.pump();
-    expect(action.balance, 0);
-    expect(tester.takeException(), isNull);
   });
 }

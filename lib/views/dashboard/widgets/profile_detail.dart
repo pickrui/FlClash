@@ -12,6 +12,7 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/ui/surface.dart';
+import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -87,17 +88,17 @@ class ProfileDetailSheet extends ConsumerWidget {
     final subscriptionInfo = profile.subscriptionInfo;
     return CommonScaffold(
       title: profile.realLabel,
-      actions: [
+      iconActions: [
         if (profile.type == ProfileType.url)
-          IconButton(
-            icon: const GlyphIcon(AppGlyphs.sync),
+          IconButtonData(
+            glyph: AppGlyphs.sync,
             tooltip: appLocalizations.sync,
-
-            onPressed: isUpdating ? null : () => syncProfile(ref, profile),
+            isLoading: isUpdating,
+            onPressed: () => syncProfile(ref, profile),
           ),
         if (!profile.isoixCloudProfile)
-          IconButton(
-            icon: const GlyphIcon(AppGlyphs.eye),
+          IconButtonData(
+            glyph: AppGlyphs.eye,
             tooltip: appLocalizations.preview,
             onPressed: () => _handlePreview(context, profile),
           ),
@@ -227,18 +228,17 @@ class _StatTile extends StatelessWidget {
           Text(
             value ?? '0',
             maxLines: 1,
-            style: context.textTheme.headlineSmall?.copyWith(
-              color: colorScheme.primary,
-              fontWeight: FontWeight.w600,
-            ),
+            style: AppTextStyle.title2
+                .of(context, emphasized: true)
+                .copyWith(color: colorScheme.onSurface),
           ),
           Text(
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: context.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
+            style: AppTextStyle.footnote
+                .of(context)
+                .copyWith(color: colorScheme.onSurfaceVariant),
           ),
         ],
       ),
@@ -257,9 +257,9 @@ class _InfoRow extends StatelessWidget {
     return ListItem(
       title: Text(label),
       trailing: DefaultTextStyle.merge(
-        style: context.textTheme.bodyMedium?.copyWith(
-          color: context.colorScheme.onSurfaceVariant,
-        ),
+        style: AppTextStyle.subheadline
+            .of(context)
+            .copyWith(color: context.colorScheme.onSurfaceVariant),
         child: value,
       ),
     );

@@ -11,7 +11,9 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
+import 'package:fl_clash/ui/liquid_glass.dart';
 import 'package:fl_clash/ui/navigation_dock.dart';
+import 'package:fl_clash/ui/typography.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -89,6 +91,18 @@ class _CoreStatusButtonState extends ConsumerState<CoreStatusButton> {
   Widget build(BuildContext context) {
     final coreStatus = _holdTimer != null ? CoreStatus.connecting : _status;
     final appLocalizations = context.appLocalizations;
+    final colorScheme = context.colorScheme;
+    final glass = TonalButtonTheme.glassOf(context);
+    ButtonStyle? tinted(Color? color) => glass && color != null
+        ? LiquidGlass.buttonStyle(
+            (_) => LiquidGlassStyle.tinted(colorScheme, color),
+          )
+        : null;
+    final statusColor = switch (coreStatus) {
+      CoreStatus.connecting => null,
+      CoreStatus.connected => colorScheme.successContainer,
+      CoreStatus.disconnected => colorScheme.errorContainer,
+    };
     return Tooltip(
       message: appLocalizations.coreStatus,
       child: FadeScaleBox(
@@ -96,45 +110,44 @@ class _CoreStatusButtonState extends ConsumerState<CoreStatusButton> {
         child: coreStatus == CoreStatus.connected
             ? IconButton.filled(
                 tooltip: appLocalizations.coreStatus,
-                style: ElasticPress.buttonStyle.merge(
-                  IconButton.styleFrom(
-                    backgroundColor: context.colorScheme.successContainer,
-                    foregroundColor: context.colorScheme.onSuccessContainer,
-                  ),
-                ),
+                style: ElasticPress.buttonStyle
+                    .merge(tinted(statusColor))
+                    .merge(
+                      IconButton.styleFrom(
+                        backgroundColor: context.colorScheme.successContainer,
+                        foregroundColor: context.colorScheme.onSuccessContainer,
+                      ),
+                    ),
                 onPressed: _handleConnection,
                 icon: const GlyphIcon(AppGlyphs.check, fill: 1),
               )
             : FilledButton.icon(
                 key: ValueKey(coreStatus),
                 onPressed: _handleConnection,
-                style: ElasticPress.buttonStyle.merge(
-                  FilledButton.styleFrom(
-                    backgroundColor: switch (coreStatus) {
-                      CoreStatus.connecting => null,
-                      CoreStatus.connected =>
-                        context.colorScheme.successContainer,
-                      CoreStatus.disconnected =>
-                        context.colorScheme.errorContainer,
-                    },
-                    foregroundColor: switch (coreStatus) {
-                      CoreStatus.connecting => null,
-                      CoreStatus.connected =>
-                        context.colorScheme.onSuccessContainer,
-                      CoreStatus.disconnected =>
-                        context.colorScheme.onErrorContainer,
-                    },
-                  ),
-                ),
-                icon: SizedBox(
-                  height: globalState.measure.bodyMediumHeight,
-                  width: globalState.measure.bodyMediumHeight,
-                  child: switch (coreStatus) {
-                    CoreStatus.connecting => Padding(
-                      padding: const EdgeInsets.all(2),
-                      child: CommonCircleLoading(
-                        color: context.colorScheme.onPrimary,
+                style: ElasticPress.buttonStyle
+                    .merge(tinted(statusColor))
+                    .merge(
+                      FilledButton.styleFrom(
+                        backgroundColor: statusColor,
+                        foregroundColor: switch (coreStatus) {
+                          CoreStatus.connecting => null,
+                          CoreStatus.connected =>
+                            context.colorScheme.onSuccessContainer,
+                          CoreStatus.disconnected =>
+                            context.colorScheme.onErrorContainer,
+                        },
                       ),
+                    ),
+                icon: SizedBox(
+                  height: globalState.measure.textHeight(
+                    AppTextStyle.subheadline,
+                  ),
+                  width: globalState.measure.textHeight(
+                    AppTextStyle.subheadline,
+                  ),
+                  child: switch (coreStatus) {
+                    CoreStatus.connecting => CommonCircleLoading(
+                      color: context.colorScheme.onPrimary,
                     ),
                     CoreStatus.connected => const GlyphIcon(
                       AppGlyphs.check,

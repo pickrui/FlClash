@@ -12494,6 +12494,230 @@ class AppLocalizations {
       args: [count],
     );
   }
+
+  /// `Connection stats`
+  String get connectionStats {
+    return Intl.message(
+      'Connection stats',
+      name: 'connectionStats',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Live connections, recent requests and DNS queries`
+  String get connectionStatsDesc {
+    return Intl.message(
+      'Live connections, recent requests and DNS queries',
+      name: 'connectionStatsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Holds the start button and can't be removed`
+  String get currentOutboundDesc {
+    return Intl.message(
+      'Holds the start button and can\'t be removed',
+      name: 'currentOutboundDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Available to add`
+  String get dashboardAddableSection {
+    return Intl.message(
+      'Available to add',
+      name: 'dashboardAddableSection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Done`
+  String get done {
+    return Intl.message('Done', name: 'done', desc: '', args: []);
+  }
+
+  /// `Edit dashboard`
+  String get editDashboard {
+    return Intl.message(
+      'Edit dashboard',
+      name: 'editDashboard',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, =1{1 group} other{{count} groups}}`
+  String groupCount(num count) {
+    return Intl.plural(
+      count,
+      one: '1 group',
+      other: '$count groups',
+      name: 'groupCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `groups`
+  String get groupCountUnit {
+    return Intl.message('groups', name: 'groupCountUnit', desc: '', args: []);
+  }
+
+  /// `{count} timed out`
+  String groupTimeoutCount(Object count) {
+    return Intl.message(
+      '$count timed out',
+      name: 'groupTimeoutCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Type`
+  String get ipType {
+    return Intl.message('Type', name: 'ipType', desc: '', args: []);
+  }
+
+  /// `Live connections`
+  String get liveConnections {
+    return Intl.message(
+      'Live connections',
+      name: 'liveConnections',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Memory the app and the core use`
+  String get memoryInfoDesc {
+    return Intl.message(
+      'Memory the app and the core use',
+      name: 'memoryInfoDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Traffic takeover`
+  String get networkTakeover {
+    return Intl.message(
+      'Traffic takeover',
+      name: 'networkTakeover',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not running`
+  String get notRunning {
+    return Intl.message('Not running', name: 'notRunning', desc: '', args: []);
+  }
+
+  /// `Port {port}`
+  String portValue(Object port) {
+    return Intl.message(
+      'Port $port',
+      name: 'portValue',
+      desc: '',
+      args: [port],
+    );
+  }
+
+  /// `{days, plural, =1{1 day left} other{{days} days left}}`
+  String profileDaysLeft(num days) {
+    return Intl.plural(
+      days,
+      one: '1 day left',
+      other: '$days days left',
+      name: 'profileDaysLeft',
+      desc: '',
+      args: [days],
+    );
+  }
+
+  /// `Expires {date}, {days, plural, =1{1 day} other{{days} days}} left`
+  String profileExpiresIn(Object date, num days) {
+    return Intl.message(
+      'Expires $date, ${Intl.plural(days, one: '1 day', other: '$days days')} left',
+      name: 'profileExpiresIn',
+      desc: '',
+      args: [date, days],
+    );
+  }
+
+  /// `Updated {time}`
+  String profileUpdatedAt(Object time) {
+    return Intl.message(
+      'Updated $time',
+      name: 'profileUpdatedAt',
+      desc: '',
+      args: [time],
+    );
+  }
+
+  /// `Groups show up here once the core starts`
+  String get proxyGroupsAfterStart {
+    return Intl.message(
+      'Groups show up here once the core starts',
+      name: 'proxyGroupsAfterStart',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Running`
+  String get running {
+    return Intl.message('Running', name: 'running', desc: '', args: []);
+  }
+
+  /// `Check failed`
+  String get serviceFailed {
+    return Intl.message(
+      'Check failed',
+      name: 'serviceFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tap the icon to retry`
+  String get tapIconToRetry {
+    return Intl.message(
+      'Tap the icon to retry',
+      name: 'tapIconToRetry',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Peak {value}`
+  String trafficPeak(Object value) {
+    return Intl.message(
+      'Peak $value',
+      name: 'trafficPeak',
+      desc: '',
+      args: [value],
+    );
+  }
+
+  /// `Total {value}`
+  String trafficTotal(Object value) {
+    return Intl.message(
+      'Total $value',
+      name: 'trafficTotal',
+      desc: '',
+      args: [value],
+    );
+  }
+
+  /// `used`
+  String get usedShort {
+    return Intl.message('used', name: 'usedShort', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

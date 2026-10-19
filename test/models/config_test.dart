@@ -139,8 +139,8 @@ void main() {
     expect(props.autoRun, true);
     expect(props.hideIp, true);
     expect(props.dashboardWidgets, [
-      DashboardWidget.networkDetection,
-      DashboardWidget.runTime,
+      DashboardWidget.currentOutbound,
+      DashboardWidget.intranetIp,
     ]);
     final saved =
         jsonDecode(jsonEncode(props.toJson())) as Map<String, dynamic>;

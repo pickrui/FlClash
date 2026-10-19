@@ -63,7 +63,6 @@ class Navigation {
   }) {
     return [
       NavigationItem(
-        keep: false,
         icon: const Icon(Icons.space_dashboard),
         label: PageLabel.dashboard,
         builder: (context) => _buildPage(context, PageLabel.dashboard),

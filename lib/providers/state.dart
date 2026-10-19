@@ -531,7 +531,7 @@ VM3<bool, int, bool> checkIp(Ref ref) {
   final containsDetection = ref.watch(
     dashboardStateProvider.select(
       (state) =>
-          state.dashboardWidgets.contains(DashboardWidget.networkDetection),
+          state.dashboardWidgets.contains(DashboardWidget.currentOutbound),
     ),
   );
   return VM3(isInit, checkIpNum, containsDetection);

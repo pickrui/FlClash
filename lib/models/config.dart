@@ -53,24 +53,61 @@ const defaultAccessControlProps = AccessControlProps();
 const defaultThemeProps = ThemeProps(primaryColor: defaultPrimaryColor);
 
 const List<DashboardWidget> defaultDashboardWidgets = [
+  DashboardWidget.currentOutbound,
   DashboardWidget.networkSpeed,
-  DashboardWidget.systemProxyButton,
-  DashboardWidget.tunButton,
   DashboardWidget.outboundMode,
-  DashboardWidget.networkDetection,
-  DashboardWidget.trafficUsage,
+  DashboardWidget.vpnButton,
+  DashboardWidget.networkTakeover,
   DashboardWidget.intranetIp,
+  DashboardWidget.profiles,
+  DashboardWidget.proxyGroups,
+  DashboardWidget.connectionStats,
 ];
 
+const _legacyDefaultDashboardWidgets = {
+  'networkSpeed',
+  'systemProxyButton',
+  'tunButton',
+  'outboundMode',
+  'networkDetection',
+  'trafficUsage',
+  'intranetIp',
+};
+
+/// The run time has no card left: it moved onto the current outbound one.
+const _legacyDashboardWidgets = {
+  'networkDetection': DashboardWidget.intranetIp,
+  'outboundModeV2': DashboardWidget.outboundMode,
+  'systemProxyButton': DashboardWidget.networkTakeover,
+  'tunButton': DashboardWidget.networkTakeover,
+  'connections': DashboardWidget.connectionStats,
+  'requests': DashboardWidget.connectionStats,
+  'dnsQueries': DashboardWidget.connectionStats,
+  'trafficUsage': DashboardWidget.networkSpeed,
+};
+
+/// The current outbound card cannot be removed: a list without it predates it.
 List<DashboardWidget> dashboardWidgetsSafeFormJson(
   List<dynamic>? dashboardWidgets,
 ) {
   if (dashboardWidgets == null) return defaultDashboardWidgets;
-  final known = {for (final value in DashboardWidget.values) value.name: value};
-  return {
-    for (final value in dashboardWidgets)
-      if (known[value] != null) known[value]!,
-  }.toList();
+  final byName = DashboardWidget.values.asNameMap();
+  final known = dashboardWidgets
+      .map((name) => _legacyDashboardWidgets[name] ?? byName[name])
+      .nonNulls;
+  if (dashboardWidgets.contains(DashboardWidget.currentOutbound.name)) {
+    return known.toSet().toList();
+  }
+  final names = {
+    for (final name in dashboardWidgets)
+      name == 'outboundModeV2' ? DashboardWidget.outboundMode.name : name,
+  };
+  if (names.length == _legacyDefaultDashboardWidgets.length &&
+      names.containsAll(_legacyDefaultDashboardWidgets)) {
+    return defaultDashboardWidgets;
+  }
+  if (known.isEmpty) return defaultDashboardWidgets;
+  return {DashboardWidget.currentOutbound, ...known}.toList();
 }
 
 String testUrlFromJson(String? value) {
