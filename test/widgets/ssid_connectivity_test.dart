@@ -13,6 +13,53 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets(
+    'listener startup failure is contained without changing callback zone',
+    (tester) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      container
+          .read(networkSettingProvider.notifier)
+          .update((state) => state.copyWith(excludeSSIDs: ['Home']));
+      container.read(currentSSIDProvider.notifier).value = 'Home';
+      final events = StreamController<List<ConnectivityResult>>.broadcast(
+        onListen: () async {
+          await Future<void>.value();
+          throw StateError('NetworkManager unavailable');
+        },
+      );
+      addTearDown(events.close);
+      Zone? lookupZone;
+      final callbackZones = <Zone>[];
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: ConnectivityManager(
+            connectivityStream: events.stream,
+            checkConnectivity: () async {
+              lookupZone = Zone.current;
+              throw StateError('unavailable');
+            },
+            readSsid: () async => 'Other',
+            onConnectivityChanged: (_) => callbackZones.add(Zone.current),
+            child: const SizedBox(),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      expect(container.read(currentSSIDProvider), isNull);
+      expect(container.read(suspendProvider), isFalse);
+      events.add([ConnectivityResult.wifi]);
+      await tester.pump();
+      expect(callbackZones, [lookupZone]);
+      expect(container.read(currentSSIDProvider), 'Other');
+      await tester.pumpWidget(const SizedBox());
+      expect(events.hasListener, isFalse);
+      await tester.pump(Duration.zero);
+    },
+  );
+
   testWidgets('cold lookup, stale Wi-Fi result, and same-transport roaming', (
     tester,
   ) async {

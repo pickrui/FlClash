@@ -37,7 +37,7 @@ class ConnectivityManager extends ConsumerStatefulWidget {
 
 class _ConnectivityManagerState extends ConsumerState<ConnectivityManager>
     with WidgetsBindingObserver {
-  late final StreamSubscription<List<ConnectivityResult>> _subscription;
+  StreamSubscription<List<ConnectivityResult>>? _subscription;
   Timer? _timer;
   int _revision = 0;
   int _networkRevision = 0;
@@ -48,16 +48,18 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _subscription =
-        (widget.connectivityStream ?? Connectivity().onConnectivityChanged)
-            .listen(
-              _handleResults,
-              onError: (Object error) {
-                commonPrint.log(
-                  'Connectivity lookup failed: ${error.runtimeType}',
-                );
-              },
-            );
+    final callbackZone = Zone.current;
+    // Plugin onListen failures bypass stream onError when NetworkManager is absent.
+    runZonedGuarded(() {
+      _subscription =
+          (widget.connectivityStream ?? Connectivity().onConnectivityChanged)
+              .listen(
+                callbackZone.bindUnaryCallbackGuarded(_handleResults),
+                onError: callbackZone.bindBinaryCallbackGuarded(
+                  _handleConnectivityError,
+                ),
+              );
+    }, _handleConnectivityError);
     ref.listenManual(
       networkSettingProvider.select((s) => s.excludeSSIDs.isNotEmpty),
       (_, enabled) {
@@ -77,6 +79,11 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager>
       ssidRefreshProvider,
       (_, _) => unawaited(_refreshNetwork()),
     );
+  }
+
+  void _handleConnectivityError(Object error, StackTrace stack) {
+    if (!mounted) return;
+    commonPrint.log('Connectivity lookup failed: ${error.runtimeType}');
   }
 
   Future<void> _refreshNetwork() async {
@@ -142,7 +149,7 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager>
     ++_revision;
     ++_networkRevision;
     _timer?.cancel();
-    _subscription.cancel();
+    _subscription?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
