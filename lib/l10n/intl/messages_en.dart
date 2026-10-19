@@ -1260,6 +1260,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "disableIcmpForwardingDesc": MessageLookupByLibrary.simpleMessage(
       "With ICMP forwarding disabled, TUN answers ping itself, so ping no longer shows the real latency",
     ),
+    "disableKeepAlive": MessageLookupByLibrary.simpleMessage(
+      "Disable TCP keep-alive",
+    ),
     "disableUDP": MessageLookupByLibrary.simpleMessage("Disable UDP"),
     "disabled": MessageLookupByLibrary.simpleMessage("Disabled"),
     "discard": MessageLookupByLibrary.simpleMessage("Discard"),
@@ -1782,6 +1785,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "itemsCount": m40,
     "ja": MessageLookupByLibrary.simpleMessage("Japanese"),
     "justNow": MessageLookupByLibrary.simpleMessage("Just now"),
+    "keepAliveIdle": MessageLookupByLibrary.simpleMessage(
+      "TCP keep-alive idle",
+    ),
     "keepAliveIntervalDesc": MessageLookupByLibrary.simpleMessage(
       "TCP keep-alive interval",
     ),
@@ -2526,6 +2532,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Save a draft to fix other items. Settings are applied only after the full configuration passes validation.",
     ),
     "routingGroupType": MessageLookupByLibrary.simpleMessage("Group type"),
+    "routingMark": MessageLookupByLibrary.simpleMessage("Routing mark"),
     "ru": MessageLookupByLibrary.simpleMessage("Russian"),
     "rule": MessageLookupByLibrary.simpleMessage("Rule"),
     "ruleActionAndDesc": MessageLookupByLibrary.simpleMessage(

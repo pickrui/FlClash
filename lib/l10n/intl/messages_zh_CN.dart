@@ -953,6 +953,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "disableIcmpForwardingDesc": MessageLookupByLibrary.simpleMessage(
       "禁用 ICMP 转发后由虚拟网卡直接应答 ping，ping 将不再显示真实延迟",
     ),
+    "disableKeepAlive": MessageLookupByLibrary.simpleMessage("禁用 TCP 保持活动"),
     "disableUDP": MessageLookupByLibrary.simpleMessage("禁用 UDP"),
     "disabled": MessageLookupByLibrary.simpleMessage("已关闭"),
     "discard": MessageLookupByLibrary.simpleMessage("放弃"),
@@ -1329,6 +1330,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "itemsCount": m40,
     "ja": MessageLookupByLibrary.simpleMessage("日语"),
     "justNow": MessageLookupByLibrary.simpleMessage("刚刚"),
+    "keepAliveIdle": MessageLookupByLibrary.simpleMessage("TCP 保持活动空闲时间"),
     "keepAliveIntervalDesc": MessageLookupByLibrary.simpleMessage("TCP保持活动间隔"),
     "key": MessageLookupByLibrary.simpleMessage("键"),
     "language": MessageLookupByLibrary.simpleMessage("语言"),
@@ -1875,6 +1877,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "可保存草稿后继续修复其他项目；完整配置通过校验后才能应用",
     ),
     "routingGroupType": MessageLookupByLibrary.simpleMessage("策略组类型"),
+    "routingMark": MessageLookupByLibrary.simpleMessage("路由标记"),
     "ru": MessageLookupByLibrary.simpleMessage("俄语"),
     "rule": MessageLookupByLibrary.simpleMessage("规则"),
     "ruleActionAndDesc": MessageLookupByLibrary.simpleMessage("逻辑规则 AND"),

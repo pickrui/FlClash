@@ -332,6 +332,9 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
   rawConfig['ipv6'] = realPatchConfig.ipv6;
   rawConfig['log-level'] = realPatchConfig.logLevel.name;
   rawConfig['keep-alive-interval'] = realPatchConfig.keepAliveInterval;
+  rawConfig['keep-alive-idle'] = realPatchConfig.keepAliveIdle;
+  rawConfig['disable-keep-alive'] = realPatchConfig.disableKeepAlive;
+  rawConfig['routing-mark'] = realPatchConfig.routingMark;
   rawConfig['mixed-port'] = realPatchConfig.mixedPort;
   rawConfig['port'] = realPatchConfig.port;
   rawConfig['socks-port'] = realPatchConfig.socksPort;

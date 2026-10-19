@@ -1514,5 +1514,8 @@
   "tapIconToRetry": "アイコンをタップして再試行",
   "trafficPeak": "ピーク {value}",
   "trafficTotal": "累計 {value}",
-  "usedShort": "使用済み"
+  "usedShort": "使用済み",
+  "disableKeepAlive": "TCP キープアライブを無効化",
+  "keepAliveIdle": "TCP キープアライブ待機時間",
+  "routingMark": "ルーティングマーク"
 }

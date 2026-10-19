@@ -284,6 +284,9 @@ abstract class SetupState with _$SetupState {
     @Default(0) int redirPort,
     @Default(0) int tproxyPort,
     @Default(defaultKeepAliveInterval) int keepAliveInterval,
+    @Default(defaultKeepAliveIdle) int keepAliveIdle,
+    @Default(false) bool disableKeepAlive,
+    @Default(0) int routingMark,
     @Default(GeodataLoader.memconservative) GeodataLoader geodataLoader,
   }) = _SetupState;
 }
@@ -405,6 +408,9 @@ extension SetupStateExt on SetupState {
         redirPort != lastSetupState.redirPort ||
         tproxyPort != lastSetupState.tproxyPort ||
         keepAliveInterval != lastSetupState.keepAliveInterval ||
+        keepAliveIdle != lastSetupState.keepAliveIdle ||
+        disableKeepAlive != lastSetupState.disableKeepAlive ||
+        routingMark != lastSetupState.routingMark ||
         geodataLoader != lastSetupState.geodataLoader;
   }
 }

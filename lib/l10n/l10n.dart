@@ -12790,6 +12790,36 @@ class AppLocalizations {
   String get usedShort {
     return Intl.message('used', name: 'usedShort', desc: '', args: []);
   }
+
+  /// `Disable TCP keep-alive`
+  String get disableKeepAlive {
+    return Intl.message(
+      'Disable TCP keep-alive',
+      name: 'disableKeepAlive',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `TCP keep-alive idle`
+  String get keepAliveIdle {
+    return Intl.message(
+      'TCP keep-alive idle',
+      name: 'keepAliveIdle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Routing mark`
+  String get routingMark {
+    return Intl.message(
+      'Routing mark',
+      name: 'routingMark',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

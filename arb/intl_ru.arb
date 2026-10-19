@@ -1514,5 +1514,8 @@
   "tapIconToRetry": "Нажмите на значок, чтобы повторить",
   "trafficPeak": "Пик {value}",
   "trafficTotal": "Всего {value}",
-  "usedShort": "использовано"
+  "usedShort": "использовано",
+  "disableKeepAlive": "Отключить TCP keep-alive",
+  "keepAliveIdle": "Простой TCP keep-alive",
+  "routingMark": "Метка маршрутизации"
 }

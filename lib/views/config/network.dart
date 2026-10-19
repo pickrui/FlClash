@@ -667,41 +667,54 @@ class LoopbackItem extends StatelessWidget {
   }
 }
 
-class KeepAliveIntervalItem extends ConsumerWidget {
-  const KeepAliveIntervalItem({super.key});
+class _PatchNumberItem extends ConsumerWidget {
+  const _PatchNumberItem({
+    required this.title,
+    required this.select,
+    required this.update,
+    required this.resetValue,
+    this.isSeconds = false,
+  });
+
+  final String Function(AppLocalizations l) title;
+  final int Function(ClashConfig state) select;
+  final ClashConfig Function(ClashConfig state, int value) update;
+  final int resetValue;
+  final bool isSeconds;
 
   @override
   Widget build(BuildContext context, ref) {
     final appLocalizations = context.appLocalizations;
-    final keepAliveInterval = ref.watch(
-      patchClashConfigProvider.select((state) => state.keepAliveInterval),
-    );
+    final label = title(appLocalizations);
+    final value = ref.watch(patchClashConfigProvider.select(select));
     return ListItem.input(
-      title: Text(appLocalizations.keepAliveIntervalDesc),
-      subtitle: Text(appLocalizations.secondsCount(keepAliveInterval)),
-      dialogTitle: appLocalizations.keepAliveIntervalDesc,
-      suffixText: appLocalizations.seconds,
-      resetValue: '$defaultKeepAliveInterval',
-      value: '$keepAliveInterval',
+      title: Text(label),
+      subtitle: Text(
+        isSeconds ? appLocalizations.secondsCount(value) : '$value',
+      ),
+      dialogTitle: label,
+      suffixText: isSeconds ? appLocalizations.seconds : null,
+      resetValue: '$resetValue',
+      value: '$value',
       maxLength: TextInputLimits.interval,
       keyboardType: TextInputType.number,
-      validator: (String? value) {
-        if (value == null || value.isEmpty) {
-          return appLocalizations.emptyTip(appLocalizations.interval);
+      validator: (String? text) {
+        if (text == null || text.isEmpty) {
+          return appLocalizations.emptyTip(label);
         }
-        if (int.tryParse(value) == null) {
-          return appLocalizations.numberTip(appLocalizations.interval);
+        if ((int.tryParse(text) ?? -1) < 0) {
+          return appLocalizations.numberTip(label);
         }
         return null;
       },
-      onChanged: (String? value) {
-        if (value == null) {
+      onChanged: (String? text) {
+        if (text == null) {
           return;
         }
-        final intValue = int.parse(value);
+        final parsed = int.parse(text);
         ref
             .read(patchClashConfigProvider.notifier)
-            .update((state) => state.copyWith(keepAliveInterval: intValue));
+            .update((state) => update(state, parsed));
       },
     );
   }
@@ -895,8 +908,43 @@ class TunSection extends ConsumerWidget {
 
 // mihomo keeps TCP keep-alive off on Android whatever the config says
 // (component/keepalive).
-List<Widget> outboundItems({required bool isDesktop}) {
-  return [if (isDesktop) const KeepAliveIntervalItem()];
+// mihomo keeps TCP keep-alive off on Android whatever the config says
+// (component/keepalive), and only Linux honours a routing mark.
+List<Widget> outboundItems({required bool isDesktop, required bool isLinux}) {
+  return [
+    if (isDesktop) ...[
+      ConfigToggleItem(
+        title: (l) => l.disableKeepAlive,
+        selector: patchClashConfigProvider.select(
+          (state) => state.disableKeepAlive,
+        ),
+        onChanged: (ref, value) => ref
+            .read(patchClashConfigProvider.notifier)
+            .update((state) => state.copyWith(disableKeepAlive: value)),
+      ),
+      _PatchNumberItem(
+        title: (l) => l.keepAliveIdle,
+        isSeconds: true,
+        resetValue: defaultKeepAliveIdle,
+        select: (state) => state.keepAliveIdle,
+        update: (state, value) => state.copyWith(keepAliveIdle: value),
+      ),
+      _PatchNumberItem(
+        title: (l) => l.keepAliveIntervalDesc,
+        isSeconds: true,
+        resetValue: defaultKeepAliveInterval,
+        select: (state) => state.keepAliveInterval,
+        update: (state, value) => state.copyWith(keepAliveInterval: value),
+      ),
+    ],
+    if (isLinux)
+      _PatchNumberItem(
+        title: (l) => l.routingMark,
+        resetValue: 0,
+        select: (state) => state.routingMark,
+        update: (state, value) => state.copyWith(routingMark: value),
+      ),
+  ];
 }
 
 class NetworkListView extends StatelessWidget {
@@ -918,7 +966,10 @@ class NetworkListView extends StatelessWidget {
         ),
         generateSection(
           title: context.appLocalizations.outbound,
-          items: outboundItems(isDesktop: system.isDesktop),
+          items: outboundItems(
+            isDesktop: system.isDesktop,
+            isLinux: system.isLinux,
+          ),
         ),
       ],
     );

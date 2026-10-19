@@ -501,6 +501,10 @@ _ClashConfig _$ClashConfigFromJson(Map<String, dynamic> json) => _ClashConfig(
   keepAliveInterval:
       (json['keep-alive-interval'] as num?)?.toInt() ??
       defaultKeepAliveInterval,
+  keepAliveIdle:
+      (json['keep-alive-idle'] as num?)?.toInt() ?? defaultKeepAliveIdle,
+  disableKeepAlive: json['disable-keep-alive'] as bool? ?? false,
+  routingMark: (json['routing-mark'] as num?)?.toInt() ?? 0,
   unifiedDelay: json['unified-delay'] as bool? ?? true,
   tcpConcurrent: json['tcp-concurrent'] as bool? ?? true,
   tun: json['tun'] == null
@@ -573,6 +577,9 @@ Map<String, dynamic> _$ClashConfigToJson(_ClashConfig instance) =>
       'ipv6': instance.ipv6,
       'find-process-mode': _$FindProcessModeEnumMap[instance.findProcessMode]!,
       'keep-alive-interval': instance.keepAliveInterval,
+      'keep-alive-idle': instance.keepAliveIdle,
+      'disable-keep-alive': instance.disableKeepAlive,
+      'routing-mark': instance.routingMark,
       'unified-delay': instance.unifiedDelay,
       'tcp-concurrent': instance.tcpConcurrent,
       'tun': instance.tun,

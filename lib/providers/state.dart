@@ -797,6 +797,9 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
         redirPort: state.redirPort,
         tproxyPort: state.tproxyPort,
         keepAliveInterval: state.keepAliveInterval,
+        keepAliveIdle: state.keepAliveIdle,
+        disableKeepAlive: state.disableKeepAlive,
+        routingMark: state.routingMark,
         geodataLoader: state.geodataLoader,
       ),
     ),
@@ -873,6 +876,9 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
     redirPort: setupOnly.redirPort,
     tproxyPort: setupOnly.tproxyPort,
     keepAliveInterval: setupOnly.keepAliveInterval,
+    keepAliveIdle: setupOnly.keepAliveIdle,
+    disableKeepAlive: setupOnly.disableKeepAlive,
+    routingMark: setupOnly.routingMark,
     geodataLoader: setupOnly.geodataLoader,
   );
 }

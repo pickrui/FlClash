@@ -213,6 +213,9 @@ void main() {
       previous.copyWith(redirPort: 7893),
       previous.copyWith(tproxyPort: 7894),
       previous.copyWith(keepAliveInterval: 15),
+      previous.copyWith(keepAliveIdle: 30),
+      previous.copyWith(disableKeepAlive: true),
+      previous.copyWith(routingMark: 255),
       previous.copyWith(geodataLoader: GeodataLoader.standard),
     ]) {
       expect(next.needSetup(previous), isTrue, reason: '$next');

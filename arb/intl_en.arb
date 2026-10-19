@@ -1514,5 +1514,8 @@
   "tapIconToRetry": "Tap the icon to retry",
   "trafficPeak": "Peak {value}",
   "trafficTotal": "Total {value}",
-  "usedShort": "used"
+  "usedShort": "used",
+  "disableKeepAlive": "Disable TCP keep-alive",
+  "keepAliveIdle": "TCP keep-alive idle",
+  "routingMark": "Routing mark"
 }

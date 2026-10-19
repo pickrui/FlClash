@@ -25,6 +25,30 @@ void main() {
     expect(restored.emptyFallback, 'REJECT');
   });
 
+  test('keep-alive and routing mark persist under mihomo keys', () {
+    final saved = jsonDecode(
+      jsonEncode(
+        const ClashConfig(
+          keepAliveIdle: 40,
+          disableKeepAlive: true,
+          routingMark: 255,
+        ),
+      ),
+    ) as Map<String, dynamic>;
+
+    expect(saved['keep-alive-idle'], 40);
+    expect(saved['disable-keep-alive'], true);
+    expect(saved['routing-mark'], 255);
+    final restored = ClashConfig.fromJson(saved);
+    expect(restored.keepAliveIdle, 40);
+    expect(restored.disableKeepAlive, isTrue);
+    expect(restored.routingMark, 255);
+    final old = ClashConfig.fromJson({});
+    expect(old.keepAliveIdle, defaultKeepAliveIdle);
+    expect(old.disableKeepAlive, isFalse);
+    expect(old.routingMark, 0);
+  });
+
   group('TUN stack configuration', () {
     test('keeps mixed as the default for existing configurations', () {
       expect(const Tun().stack, TunStack.mixed);

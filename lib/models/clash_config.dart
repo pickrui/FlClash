@@ -48,6 +48,7 @@ String normalizeCongestionController(String? value) =>
 
 const defaultMixedPort = 7890;
 const defaultKeepAliveInterval = 30;
+const defaultKeepAliveIdle = 15;
 const defaultGeoUpdateInterval = 24;
 const maxGeoUpdateInterval = 24 * 365;
 const defaultExternalControllerAddress = '127.0.0.1:9090';
@@ -1371,6 +1372,11 @@ abstract class ClashConfig with _$ClashConfig {
     @Default(defaultKeepAliveInterval)
     @JsonKey(name: 'keep-alive-interval')
     int keepAliveInterval,
+    @Default(defaultKeepAliveIdle)
+    @JsonKey(name: 'keep-alive-idle')
+    int keepAliveIdle,
+    @Default(false) @JsonKey(name: 'disable-keep-alive') bool disableKeepAlive,
+    @Default(0) @JsonKey(name: 'routing-mark') int routingMark,
     @Default(true) @JsonKey(name: 'unified-delay') bool unifiedDelay,
     @Default(true) @JsonKey(name: 'tcp-concurrent') bool tcpConcurrent,
     @Default(defaultTun) @JsonKey(fromJson: Tun.safeFormJson) Tun tun,

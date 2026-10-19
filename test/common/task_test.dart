@@ -1621,6 +1621,31 @@ void main() {
     },
   );
 
+  test(
+    'the app sets TCP keep-alive and the routing mark over the profile',
+    () async {
+      final result = await makeRealProfileTask(
+        _makeRealProfileState(
+          rawConfig: const {
+            'keep-alive-idle': 5,
+            'disable-keep-alive': false,
+            'routing-mark': 7,
+          },
+        ).copyWith(
+          realPatchConfig: const ClashConfig(
+            keepAliveIdle: 40,
+            disableKeepAlive: true,
+            routingMark: 255,
+          ),
+        ),
+      );
+
+      expect(result['keep-alive-idle'], 40);
+      expect(result['disable-keep-alive'], true);
+      expect(result['routing-mark'], 255);
+    },
+  );
+
   test('disabled profile DNS uses only the minimal baseline without selected overrides', () async {
     final result = await makeRealProfileTask(
       const MakeRealProfileState(

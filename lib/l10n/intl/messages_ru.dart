@@ -1291,6 +1291,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "disableIcmpForwardingDesc": MessageLookupByLibrary.simpleMessage(
       "При отключённой пересылке ICMP TUN сам отвечает на ping, поэтому ping больше не показывает реальную задержку",
     ),
+    "disableKeepAlive": MessageLookupByLibrary.simpleMessage(
+      "Отключить TCP keep-alive",
+    ),
     "disableUDP": MessageLookupByLibrary.simpleMessage("Отключить UDP"),
     "disabled": MessageLookupByLibrary.simpleMessage("Выключено"),
     "discard": MessageLookupByLibrary.simpleMessage("Не сохранять"),
@@ -1838,6 +1841,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "itemsCount": m40,
     "ja": MessageLookupByLibrary.simpleMessage("Японский"),
     "justNow": MessageLookupByLibrary.simpleMessage("Только что"),
+    "keepAliveIdle": MessageLookupByLibrary.simpleMessage(
+      "Простой TCP keep-alive",
+    ),
     "keepAliveIntervalDesc": MessageLookupByLibrary.simpleMessage(
       "Интервал TCP keep-alive",
     ),
@@ -2642,6 +2648,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Сохраните черновик, чтобы исправить другие элементы. Настройки применяются только после проверки всей конфигурации.",
     ),
     "routingGroupType": MessageLookupByLibrary.simpleMessage("Тип группы"),
+    "routingMark": MessageLookupByLibrary.simpleMessage("Метка маршрутизации"),
     "ru": MessageLookupByLibrary.simpleMessage("Русский"),
     "rule": MessageLookupByLibrary.simpleMessage("Правило"),
     "ruleActionAndDesc": MessageLookupByLibrary.simpleMessage(
