@@ -9,9 +9,13 @@ import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/pages/config_recovery.dart';
 import 'package:fl_clash/services/config_key_store.dart';
+import 'package:fl_clash/ui/loading.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_test/flutter_test.dart';
+
+/// The screen's primary action, the only filled button holding "Retry".
+final _retryButton = find.widgetWithText(FilledButton, 'Retry');
 
 void main() {
   final titles = {
@@ -60,10 +64,7 @@ void main() {
     );
     expect(find.textContaining('sensitive configuration seed'), findsNothing);
     expect(find.textContaining('Bad state'), findsNothing);
-    expect(
-      tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
-      isNotNull,
-    );
+    expect(tester.widget<FilledButton>(_retryButton).onPressed, isNotNull);
     expect(tester.takeException(), isNull);
 
     await tester.tap(find.text('Retry'));
@@ -84,18 +85,15 @@ void main() {
 
     await tester.tap(find.text('Retry'));
     await tester.pump();
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    expect(
-      tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
-      isNull,
-    );
+    expect(find.byType(CommonCircleLoading), findsOneWidget);
+    expect(tester.widget<FilledButton>(_retryButton).onPressed, isNull);
     await tester.tap(find.text('Retry'));
     await tester.pump();
     expect(attempts, 1);
 
     pending.complete();
     await tester.pumpAndSettle();
-    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(find.byType(CommonCircleLoading), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -134,10 +132,7 @@ void main() {
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
       expect(resets, 0);
-      expect(
-        tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
-        isNotNull,
-      );
+      expect(tester.widget<FilledButton>(_retryButton).onPressed, isNotNull);
     },
   );
 
@@ -159,12 +154,16 @@ void main() {
       );
       await tester.tap(find.text('Back up and reset'));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(FilledButton, 'Back up and reset'));
+      await tester.tap(find.widgetWithText(TextButton, 'Back up and reset'));
       await tester.pump();
       expect(resets, 1);
       expect(find.text('Retry'), findsNothing);
       expect(
-        tester.widget<OutlinedButton>(find.byType(OutlinedButton)).onPressed,
+        tester
+            .widget<FilledButton>(
+              find.widgetWithText(FilledButton, 'Back up and reset'),
+            )
+            .onPressed,
         isNull,
       );
       expect(
@@ -198,7 +197,7 @@ void main() {
       );
       await tester.tap(find.text('Back up and reset'));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(FilledButton, 'Back up and reset'));
+      await tester.tap(find.widgetWithText(TextButton, 'Back up and reset'));
       await tester.pumpAndSettle();
       expect(find.text('Retry'), findsNothing);
       expect(find.textContaining('private data'), findsNothing);
@@ -231,9 +230,7 @@ void main() {
   Future<void> useLocalStorage(WidgetTester tester) async {
     await tester.tap(find.text('Use local file storage'));
     await tester.pumpAndSettle();
-    await tester.tap(
-      find.widgetWithText(FilledButton, 'Use local file storage'),
-    );
+    await tester.tap(find.widgetWithText(TextButton, 'Use local file storage'));
     await tester.pumpAndSettle();
   }
 

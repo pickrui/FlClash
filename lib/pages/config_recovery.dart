@@ -7,6 +7,13 @@ import 'dart:developer' as developer;
 
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/services/config_key_store.dart';
+import 'package:fl_clash/ui/button.dart';
+import 'package:fl_clash/ui/dialog.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
+import 'package:fl_clash/ui/loading.dart';
+import 'package:fl_clash/ui/shape.dart';
+import 'package:fl_clash/ui/surface.dart';
+import 'package:fl_clash/ui/typography.dart';
 import 'package:material_ui/material_ui.dart';
 
 class ConfigRecoveryScreen extends StatefulWidget {
@@ -47,24 +54,31 @@ class _ConfigRecoveryScreenState extends State<ConfigRecoveryScreen> {
       !_resetRequested &&
       _reason == ConfigRecoveryReason.storageUnavailable;
 
-  Future<bool> _confirm(String title, String content) async {
+  Future<bool> _confirm(
+    String title,
+    String content, {
+    bool destructive = false,
+  }) async {
     // Lock every action while the confirmation dialog is open too.
     setState(() => _isConfirming = true);
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showFloatingDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(content),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(AppLocalizations.of(context).cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(title),
-          ),
-        ],
+      child: Builder(
+        builder: (context) => CommonDialog(
+          title: title,
+          destructive: destructive,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(AppLocalizations.of(context).cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(title),
+            ),
+          ],
+          child: Text(content),
+        ),
       ),
     );
     if (!mounted) return false;
@@ -91,6 +105,7 @@ class _ConfigRecoveryScreenState extends State<ConfigRecoveryScreen> {
         !await _confirm(
           localizations.configRecoveryReset,
           localizations.configRecoveryResetConfirm,
+          destructive: true,
         )) {
       return;
     }
@@ -154,8 +169,10 @@ class _ConfigRecoveryScreenState extends State<ConfigRecoveryScreen> {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
-    final theme = Theme.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    const level = SurfaceLevel.card;
     return Scaffold(
+      backgroundColor: SurfaceLevel.page.colorOf(colorScheme),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -164,77 +181,138 @@ class _ConfigRecoveryScreenState extends State<ConfigRecoveryScreen> {
               constraints: const BoxConstraints(maxWidth: 440),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Icon(
-                    Icons.lock_outline_rounded,
-                    size: 48,
-                    color: theme.colorScheme.primary,
+                  Center(
+                    child: DecoratedBox(
+                      decoration: ShapeDecoration(
+                        color: colorScheme.primaryContainer,
+                        shape: AppShape.all(AppCorner.fit(72)),
+                      ),
+                      child: SizedBox.square(
+                        dimension: 72,
+                        child: Center(
+                          child: GlyphIcon(
+                            AppGlyphs.lock,
+                            size: 36,
+                            color: colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 24),
                   Text(
                     localizations.configRecoveryTitle,
-                    style: theme.textTheme.headlineSmall,
+                    style: AppTextStyle.title2
+                        .of(context, emphasized: true)
+                        .copyWith(color: colorScheme.onSurface),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   Text(
                     _guidance(localizations),
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
+                    style: AppTextStyle.subheadline
+                        .of(context)
+                        .copyWith(color: colorScheme.onSurfaceVariant),
                     textAlign: TextAlign.center,
                   ),
                   if (_backupPath != null) ...[
                     const SizedBox(height: 16),
-                    SelectableText(_backupPath!, textAlign: TextAlign.center),
-                  ],
-                  const SizedBox(height: 24),
-                  if (!_resetRequested)
-                    FilledButton.icon(
-                      onPressed: _busy ? null : _retry,
-                      icon: _isRetrying
-                          ? SizedBox.square(
-                              dimension: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                semanticsLabel: localizations.loading,
-                              ),
-                            )
-                          : const Icon(Icons.refresh_rounded),
-                      label: Text(localizations.configRecoveryRetry),
-                    ),
-                  if (_offersLocalStorage) ...[
-                    const SizedBox(height: 12),
-                    OutlinedButton.icon(
-                      onPressed: _busy ? null : _useLocalStorage,
-                      icon: const Icon(Icons.folder_outlined),
-                      label: Text(localizations.configRecoveryUseLocalStorage),
+                    DecoratedBox(
+                      decoration: ShapeDecoration(
+                        color: level.colorOf(colorScheme),
+                        shape: AppShape.xl,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: SelectableText(
+                          _backupPath!,
+                          textAlign: TextAlign.center,
+                          style: AppTextStyle.footnote
+                              .of(context)
+                              .copyWith(color: colorScheme.onSurface),
+                        ),
+                      ),
                     ),
                   ],
-                  if (widget.onReset != null && _backupPath == null) ...[
-                    const SizedBox(height: 12),
-                    OutlinedButton.icon(
-                      onPressed: _busy ? null : _reset,
-                      icon: _isRetrying && _resetRequested
-                          ? const SizedBox.square(
-                              dimension: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.settings_backup_restore),
-                      label: Text(localizations.configRecoveryReset),
+                  const SizedBox(height: 28),
+                  SurfaceScope(
+                    level: SurfaceLevel.page,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      spacing: 12,
+                      children: [
+                        if (!_resetRequested) _buildRetryButton(localizations),
+                        if (_offersLocalStorage)
+                          TonalButton(
+                            size: TonalButtonSize.bar,
+                            glyph: AppGlyphs.importFile,
+                            label: localizations.configRecoveryUseLocalStorage,
+                            onPressed: _busy ? null : _useLocalStorage,
+                          ),
+                        if (widget.onReset != null && _backupPath == null)
+                          _isRetrying && _resetRequested
+                              ? _buildResetProgress(localizations)
+                              : TonalButton(
+                                  size: TonalButtonSize.bar,
+                                  glyph: AppGlyphs.reset,
+                                  label: localizations.configRecoveryReset,
+                                  onPressed: _busy ? null : _reset,
+                                ),
+                        if (widget.onExit != null)
+                          TextButton(
+                            onPressed: _busy ? null : widget.onExit,
+                            child: Text(localizations.exit),
+                          ),
+                      ],
                     ),
-                  ],
-                  if (widget.onExit != null) ...[
-                    const SizedBox(height: 12),
-                    TextButton(
-                      onPressed: _busy ? null : widget.onExit,
-                      child: Text(localizations.exit),
-                    ),
-                  ],
+                  ),
                 ],
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRetryButton(AppLocalizations localizations) {
+    const size = TonalButtonSize.bar;
+    return FilledButton.icon(
+      onPressed: _busy ? null : _retry,
+      style: FilledButton.styleFrom(
+        minimumSize: Size(size.button, size.button),
+        shape: AppShape.full,
+        textStyle: AppTextStyle.body.of(context, emphasized: true),
+      ),
+      icon: _isRetrying
+          ? CommonCircleLoading(
+              size: size.icon * 0.8,
+              semanticLabel: localizations.loading,
+            )
+          : const GlyphIcon(AppGlyphs.refresh),
+      label: Text(localizations.configRecoveryRetry),
+    );
+  }
+
+  /// The reset in progress, as its tonal button that cannot be pressed.
+  Widget _buildResetProgress(AppLocalizations localizations) {
+    const size = TonalButtonSize.bar;
+    return DecoratedBox(
+      decoration: ShapeDecoration(
+        color: context.raisedSurfaceLevel.colorOf(
+          Theme.of(context).colorScheme,
+        ),
+        shape: AppShape.full,
+      ),
+      child: TonalButtonTheme(
+        grouped: true,
+        size: size,
+        child: FilledButton.icon(
+          onPressed: null,
+          icon: CommonCircleLoading(size: size.icon * 0.8),
+          label: Text(localizations.configRecoveryReset),
         ),
       ),
     );
