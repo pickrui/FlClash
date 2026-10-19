@@ -11,11 +11,16 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/features/form/form_page.dart';
+import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/clash_providers.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/ui/context_menu.dart';
+import 'package:fl_clash/ui/sortable.dart';
+import 'package:fl_clash/ui/surface.dart';
 import 'package:path/path.dart' as p;
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -269,67 +274,118 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
   }
 
   Future<void> _remove(ClashProvider provider) async {
+    final appLocalizations = context.appLocalizations;
     final confirmed = await globalState.showMessage(
-      message: TextSpan(
-        text: context.appLocalizations.deleteTip(provider.label),
-      ),
+      title: appLocalizations.tip,
+      message: TextSpan(text: appLocalizations.deleteTip(provider.label)),
+      destructive: true,
+      confirmText: appLocalizations.delete,
     );
     if (confirmed == true && mounted) {
       await _run(() => ref.read(clashProviderLibraryProvider).remove(provider));
     }
   }
 
-  Widget _item(ClashProvider item, int index, int length) {
+  List<CommonPopupMenuItem> _buildMenuItems(ClashProvider item) {
     final l = context.appLocalizations;
     final editable = !item.isRemote && item.isTextContent;
-    return ItemPositionProvider(
-      position: ItemPosition.get(index, length),
-      child: DecorationListItem(
-        contentPadding: const EdgeInsets.only(left: 16, right: 6),
-        title: Text(item.label, maxLines: 1, overflow: TextOverflow.ellipsis),
-        subtitle: Text(
-          item.isRemote ? item.url : l.file,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+    return [
+      if (editable)
+        CommonPopupMenuItem(
+          label: l.edit,
+          glyph: AppGlyphs.compose,
+          onPressed: () => _editContent(item),
         ),
-        onPressed: () => editable ? _editContent(item) : _options(item),
-        trailing: CommonPopupBox(
-          targetBuilder: (open) => IconButton(
-            tooltip: l.more,
-            icon: const GlyphIcon(AppGlyphs.more),
-            onPressed: () => open(),
-          ),
-          popup: CommonPopupMenu(
-            items: [
-              if (editable)
-                CommonPopupMenuItem(
-                  label: l.edit,
-                  glyph: AppGlyphs.edit,
-                  onPressed: () => _editContent(item),
-                ),
-              if (!item.isTextContent)
-                CommonPopupMenuItem(
-                  label: l.preview,
-                  glyph: AppGlyphs.eye,
-                  onPressed: () => _preview(item),
-                ),
-              CommonPopupMenuItem(
-                label: l.options,
-                glyph: AppGlyphs.settings,
-                onPressed: () => _options(item),
-              ),
-              CommonPopupMenuItem(
-                label: l.delete,
-                glyph: AppGlyphs.delete,
-                danger: true,
-                onPressed: () => _remove(item),
-              ),
-            ],
+      if (!item.isTextContent)
+        CommonPopupMenuItem(
+          label: l.preview,
+          glyph: AppGlyphs.eye,
+          onPressed: () => _preview(item),
+        ),
+      CommonPopupMenuItem(
+        label: l.options,
+        glyph: AppGlyphs.settings,
+        onPressed: () => _options(item),
+      ),
+      CommonPopupMenuItem(
+        label: l.delete,
+        glyph: AppGlyphs.delete,
+        danger: true,
+        onPressed: () => _remove(item),
+      ),
+    ];
+  }
+
+  Widget _buildTitle(ClashProvider item) {
+    final title = Text(
+      item.label,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+    if (item.kind != ProviderKind.rule) {
+      return title;
+    }
+    final colorScheme = context.colorScheme;
+    return Row(
+      spacing: 8,
+      children: [
+        Flexible(child: title),
+        TonalChip(
+          label: item.behavior.name,
+          color: context.raisedSurfaceLevel.colorOf(colorScheme),
+          foregroundColor: colorScheme.onSurfaceVariant,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildItem(List<ClashProvider> items, int index) {
+    final l = context.appLocalizations;
+    final item = items[index];
+    final editable = !item.isRemote && item.isTextContent;
+    return SortableItem(
+      key: ValueKey(item.id),
+      index: index,
+      child: ContextMenuRegion(
+        menuItems: _buildMenuItems(item),
+        child: ItemPositionProvider(
+          position: ItemPosition.get(index, items.length),
+          child: DecorationListItem(
+            contentPadding: const EdgeInsets.only(left: 16),
+            title: _buildTitle(item),
+            subtitle: Text(
+              item.isRemote ? l.remote : l.local,
+              style: context.listCaptionStyle,
+            ),
+            // Inset here, not in the row, so the sort handle that replaces it
+            // sits flush.
+            trailing: Padding(
+              padding: const EdgeInsetsDirectional.only(end: 16),
+              child: item.kind == ProviderKind.rule
+                  ? Text(item.format.name, style: context.listCaptionStyle)
+                  : const SizedBox.shrink(),
+            ),
+            onPressed: () => editable ? _editContent(item) : _options(item),
           ),
         ),
       ),
     );
   }
+
+  Future<void> _reorder(List<ClashProvider> entries, int before, int after) =>
+      _run(() async {
+        final ids = entries.map((item) => item.id).toList();
+        ids.insert(after, ids.removeAt(before));
+        setState(() => _pendingOrder = ids);
+        try {
+          await ref.read(clashProviderLibraryProvider).reorder(_kind, ids);
+        } catch (_) {
+          if (mounted && identical(_pendingOrder, ids)) {
+            setState(() => _pendingOrder = null);
+          }
+          rethrow;
+        }
+      });
 
   @override
   Widget build(BuildContext context) {
@@ -352,19 +408,20 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
     final visible = entries
         .where((item) => query.matches([item.label, item.url]))
         .toList();
+    final unavailable = _importing || state.isLoading || state.hasError;
     return CommonScaffold(
       title: l.appProviderLibrary,
+      canSort: !state.hasError && query.isEmpty && entries.length > 1,
       isLoading: _importing || state.isLoading,
       searchState: AppBarSearchState(
         onSearch: (value) => setState(() => _search = value),
       ),
       actions: [
         CommonPopupBox(
-          targetBuilder: (open) => FilledButton.tonal(
-            onPressed: _importing || state.isLoading || state.hasError
-                ? null
-                : () => open(),
-            child: Text(l.add),
+          targetBuilder: (open) => IconButton(
+            tooltip: l.add,
+            onPressed: unavailable ? null : () => open(),
+            icon: const GlyphIcon(AppGlyphs.addCircle),
           ),
           popup: CommonPopupMenu(
             items: [
@@ -387,26 +444,25 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
           ),
         ),
       ],
-      body: AppBarClearance(
-        child: Column(
+      body: Builder(
+        builder: (context) => Column(
           children: [
             Padding(
-              padding: const EdgeInsets.all(16),
-              child: SegmentedButton<ProviderKind>(
+              padding: EdgeInsets.fromLTRB(
+                16,
+                context.contentTopPadding,
+                16,
+                0,
+              ),
+              child: SegmentedControl<ProviderKind>(
                 segments: [
-                  ButtonSegment(
-                    value: ProviderKind.proxy,
-                    label: Text(l.proxyProviders),
-                  ),
-                  ButtonSegment(
-                    value: ProviderKind.rule,
-                    label: Text(l.ruleProviders),
-                  ),
+                  (ProviderKind.proxy, l.proxyProviders),
+                  (ProviderKind.rule, l.ruleProviders),
                 ],
-                selected: {_kind},
-                onSelectionChanged: _importing
-                    ? null
-                    : (value) => setState(() => _kind = value.single),
+                value: _kind,
+                onChanged: (value) {
+                  if (!_importing) setState(() => _kind = value);
+                },
               ),
             ),
             Expanded(
@@ -428,42 +484,26 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
                         label: l.nullTip(l.providers),
                       ),
                       child: ReorderableListView.builder(
-                        padding: const EdgeInsets.all(16),
+                        padding: EdgeInsets.fromLTRB(
+                          16,
+                          16,
+                          16,
+                          16 + BottomInsetScope.of(context),
+                        ),
                         buildDefaultDragHandles: false,
                         itemCount: visible.length,
-                        itemBuilder: (_, index) =>
-                            ReorderableDelayedDragStartListener(
-                              key: ValueKey(visible[index].id),
-                              index: index,
-                              enabled: query.isEmpty,
-                              child: _item(
-                                visible[index],
-                                index,
-                                visible.length,
-                              ),
-                            ),
+                        itemBuilder: (_, index) => _buildItem(visible, index),
                         proxyDecorator: (_, index, animation) =>
                             commonProxyDecorator(
-                              _item(visible[index], index, visible.length),
+                              _buildItem(visible, index),
                               index,
                               animation,
                             ),
-                        onReorderItem: (before, after) => _run(() async {
-                          if (!query.isEmpty) return;
-                          final ids = entries.map((item) => item.id).toList();
-                          ids.insert(after, ids.removeAt(before));
-                          setState(() => _pendingOrder = ids);
-                          try {
-                            await ref
-                                .read(clashProviderLibraryProvider)
-                                .reorder(_kind, ids);
-                          } catch (_) {
-                            if (mounted && identical(_pendingOrder, ids)) {
-                              setState(() => _pendingOrder = null);
-                            }
-                            rethrow;
+                        onReorderItem: (before, after) {
+                          if (query.isEmpty) {
+                            _reorder(entries, before, after);
                           }
-                        }),
+                        },
                       ),
                     ),
             ),
@@ -500,6 +540,7 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
   late bool _remote = widget.provider.isRemote;
   bool _saving = false;
   bool _importing = false;
+  String? _error;
 
   bool get _busy => _saving || _importing;
   bool get _isCurrentPage => mounted && context.isCurrentPage;
@@ -529,6 +570,7 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
       if (!_isCurrentPage) return;
       final format = ruleProviderFormatOf(file.name) ?? RuleProviderFormat.yaml;
       setState(() {
+        _error = null;
         _remote = false;
         _draft = _draft.withFormat(format).copyWith(content: bytes);
         if (_nameController.text.trim().isEmpty) {
@@ -537,7 +579,7 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
       });
     } catch (error) {
       if (mounted && context.isCurrentPage) {
-        context.showNotifier(providerLibraryError(context, error));
+        setState(() => _error = providerLibraryError(context, error));
       }
     } finally {
       if (mounted) setState(() => _importing = false);
@@ -553,7 +595,7 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
     try {
       content = _draft.content.isEmpty ? template : utf8.decode(_draft.content);
     } catch (_) {
-      context.showNotifier(context.appLocalizations.providerContentInvalid);
+      setState(() => _error = context.appLocalizations.providerContentInvalid);
       return;
     }
     BaseNavigator.push(
@@ -601,7 +643,10 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
 
   Future<void> _save() async {
     if (_busy) return;
-    setState(() => _saving = true);
+    setState(() {
+      _saving = true;
+      _error = null;
+    });
     try {
       final candidate = _draft.copyWith(
         label: _nameController.text.trim(),
@@ -613,7 +658,9 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
           .save(candidate, previous: widget.isNew ? null : widget.provider);
       if (mounted) BaseNavigator.close(context);
     } catch (error) {
-      if (mounted) context.showNotifier(providerLibraryError(context, error));
+      if (mounted) {
+        setState(() => _error = providerLibraryError(context, error));
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -622,117 +669,101 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
+    final isRule = _draft.kind == ProviderKind.rule;
+    final size = '${_draft.content.length} B';
     return CommonPopScope(
       onPop: (_) => !_saving,
       child: ExcludeFocus(
         excluding: _busy,
-        child: CommonScaffold(
+        child: FormPage(
           title: l.providers,
-          confirmationAction: IconButtonData(
-            glyph: AppGlyphs.check,
-            tooltip: l.save,
-            isLoading: _saving,
-            onPressed: _busy ? null : _save,
-          ),
-          body: AppBarClearance(
-            child: AbsorbPointer(
+          onSave: _save,
+          saving: _saving,
+          error: _error,
+          children: [
+            AbsorbPointer(
               absorbing: _busy,
-              child: ListView(
-                padding: const EdgeInsets.all(16),
+              child: Column(
                 children: [
-                  TextField(
-                    controller: _nameController,
-                    enabled: !_busy,
-                    decoration: InputDecoration(labelText: l.name),
-                  ),
-                  const SizedBox(height: 16),
-                  SegmentedButton<bool>(
-                    segments: [
-                      ButtonSegment(value: false, label: Text(l.providerLocal)),
-                      ButtonSegment(value: true, label: Text(l.providerRemote)),
-                    ],
-                    selected: {_remote},
-                    onSelectionChanged: (value) =>
-                        setState(() => _remote = value.single),
-                  ),
-                  if (_remote)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 16),
-                      child: TextField(
-                        controller: _urlController,
-                        enabled: !_busy,
-                        keyboardType: TextInputType.url,
-                        decoration: const InputDecoration(labelText: 'URL'),
-                      ),
-                    ),
-                  if (_draft.kind == ProviderKind.rule) ...[
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<RuleProviderFormat>(
-                      key: ValueKey(('format', _draft.format)),
-                      initialValue: _draft.format,
-                      decoration: InputDecoration(labelText: l.format),
-                      items: [
-                        for (final format in RuleProviderFormat.values)
-                          DropdownMenuItem(
-                            value: format,
-                            child: Text(format.name),
-                          ),
-                      ],
-                      onChanged: (format) {
-                        if (format == null) return;
-                        setState(() => _draft = _draft.withFormat(format));
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<RuleProviderBehavior>(
-                      key: ValueKey(('behavior', _draft.format)),
-                      initialValue: _draft.behavior,
-                      decoration: InputDecoration(labelText: l.behavior),
-                      items: [
-                        for (final behavior in RuleProviderBehavior.values)
-                          if (_draft.format != RuleProviderFormat.mrs ||
-                              behavior != RuleProviderBehavior.classical)
-                            DropdownMenuItem(
-                              value: behavior,
-                              child: Text(behavior.name),
-                            ),
-                      ],
-                      onChanged: (behavior) {
-                        if (behavior == null) return;
-                        setState(
-                          () => _draft = _draft.copyWith(behavior: behavior),
-                        );
-                      },
-                    ),
-                  ],
-                  const SizedBox(height: 16),
-                  if (!_remote)
-                    Wrap(
-                      spacing: 12,
-                      children: [
-                        TextButton.icon(
-                          onPressed: _busy ? null : _import,
-                          icon: const GlyphIcon(AppGlyphs.importFile),
-                          label: Text(l.import),
+                  generateSection(
+                    items: [
+                      FormRow(
+                        title: l.name,
+                        trailing: FormRowTextField(
+                          controller: _nameController,
+                          hintText: l.required,
+                          textInputAction: TextInputAction.next,
                         ),
+                      ),
+                      ListItem<bool>.options(
+                        title: Text(l.source),
+                        options: const [false, true],
+                        value: _remote,
+                        textBuilder: (remote) =>
+                            remote ? l.providerRemote : l.providerLocal,
+                        onChanged: (value) => setState(() => _remote = value),
+                      ),
+                      if (_remote)
+                        FormRow(
+                          title: l.url,
+                          trailing: FormRowTextField(
+                            controller: _urlController,
+                            hintText: l.required,
+                            keyboardType: TextInputType.url,
+                            autocorrect: false,
+                          ),
+                        ),
+                    ],
+                  ),
+                  if (isRule)
+                    generateSection(
+                      items: [
+                        ListItem<RuleProviderFormat>.options(
+                          title: Text(l.format),
+                          options: RuleProviderFormat.values,
+                          value: _draft.format,
+                          textBuilder: (format) => format.name,
+                          onChanged: (format) => setState(
+                            () => _draft = _draft.withFormat(format),
+                          ),
+                        ),
+                        ListItem<RuleProviderBehavior>.options(
+                          title: Text(l.behavior),
+                          options: [
+                            for (final behavior in RuleProviderBehavior.values)
+                              if (_draft.format != RuleProviderFormat.mrs ||
+                                  behavior != RuleProviderBehavior.classical)
+                                behavior,
+                          ],
+                          value: _draft.behavior,
+                          textBuilder: (behavior) => behavior.name,
+                          onChanged: (behavior) => setState(
+                            () => _draft = _draft.copyWith(behavior: behavior),
+                          ),
+                        ),
+                      ],
+                    ),
+                  if (!_remote)
+                    generateSection(
+                      items: [
+                        FormRow(title: l.import, onPressed: _import),
                         if (_draft.isTextContent)
-                          TextButton.icon(
-                            onPressed: _busy ? null : _editContent,
-                            icon: const GlyphIcon(AppGlyphs.edit),
-                            label: Text(l.providerContent),
+                          FormRow(
+                            title: l.providerContent,
+                            trailing: Text(size),
+                            onPressed: _editContent,
+                          )
+                        else if (_draft.content.isNotEmpty)
+                          FormRow(
+                            title: l.providerContent,
+                            trailing: Text(size),
                           ),
                       ],
                     ),
-                  if (_draft.content.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 12),
-                      child: Text('${_draft.content.length} B'),
-                    ),
-                  if (_busy) const LinearProgressIndicator(),
                 ],
               ),
             ),
-          ),
+          ],
         ),
       ),
     );

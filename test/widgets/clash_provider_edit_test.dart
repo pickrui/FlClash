@@ -16,6 +16,7 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/clash_providers.dart';
+import 'package:fl_clash/ui/sortable.dart';
 import 'package:fl_clash/views/config/providers.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -270,10 +271,12 @@ void main() {
     await tester.tap(find.text(AppLocalizations.current.ruleProviders));
     await tester.pumpAndSettle();
 
+    await tester.tap(find.byTooltip('Sort'));
+    await tester.pumpAndSettle();
     final gesture = await tester.startGesture(
-      tester.getCenter(find.text('Second')),
+      tester.getCenter(find.byType(SortHandle).last),
     );
-    await tester.pump(kLongPressTimeout + const Duration(milliseconds: 100));
+    await tester.pump(kPressTimeout);
     final distance =
         tester.getCenter(find.text('Second')).dy -
         tester.getTopLeft(find.text('Fixture')).dy;

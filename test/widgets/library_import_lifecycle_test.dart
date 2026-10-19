@@ -160,8 +160,7 @@ void main() {
 
   Future<void> importFile(WidgetTester tester) async {
     final callsBefore = files.calls;
-    final add = find.byTooltip('Add');
-    await tester.tap(add.evaluate().isNotEmpty ? add : find.text('Add'));
+    await tester.tap(find.byTooltip('Add'));
     await tester.pumpAndSettle();
     await tester.runAsync(
       () => tester.tap(find.text(AppLocalizations.current.importFile)),

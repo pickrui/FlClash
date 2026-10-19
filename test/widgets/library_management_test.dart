@@ -77,16 +77,11 @@ void main() {
           ),
         );
         await tester.pump();
-        final iconAdd = scripts || rules;
-        final add = iconAdd
-            ? find.ancestor(
-                of: find.byTooltip('Add'),
-                matching: find.byType(IconButton),
-              )
-            : find.widgetWithText(FilledButton, 'Add').first;
-        VoidCallback? onAdd() => iconAdd
-            ? tester.widget<IconButton>(add).onPressed
-            : tester.widget<FilledButton>(add).onPressed;
+        final add = find.ancestor(
+          of: find.byTooltip('Add'),
+          matching: find.byType(IconButton),
+        );
+        VoidCallback? onAdd() => tester.widget<IconButton>(add).onPressed;
         expect(onAdd(), isNull);
         ready.complete();
         await tester.pumpAndSettle();
@@ -191,7 +186,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text(AppLocalizations.current.ruleProviders));
       await tester.pumpAndSettle();
-      await tester.tap(find.byTooltip(AppLocalizations.current.more).last);
+      await tester.longPress(find.text('Local MRS'));
       await tester.pumpAndSettle();
       await tester.tap(find.text(AppLocalizations.current.preview));
       await settle(tester, 24);
