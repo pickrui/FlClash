@@ -6,12 +6,10 @@
 import 'dart:async';
 
 import 'package:fl_clash/common/app_localizations.dart';
-import 'package:fl_clash/common/theme.dart';
 import 'package:fl_clash/features/overwrite/rule_preset.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -55,7 +53,6 @@ void main() {
             ],
             supportedLocales: AppLocalizations.delegate.supportedLocales,
             builder: (context, child) {
-              globalState.theme = CommonTheme.of(context, 1);
               return wrapAppScopes(context, child!);
             },
             home: Builder(

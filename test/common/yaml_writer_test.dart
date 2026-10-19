@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:yaml/yaml.dart';
 
 const _awkwardStrings = [
+  '*.example.invalid', '#fixture', 'route: name', '123', '''#it's: "network"''',
   '0123', '00', '1e3', '0x1F', '0o17', '0b101', '1_000', '+1', '-0', '.5', //
   '1.', '.inf', '-.Inf', '.nan', 'yes', 'No', 'on', 'OFF', 'y', 'n', 'true',
   'False', 'null', 'Null', '~', '', ' ', '2001-12-14', '12:30', '1:20:30',
@@ -82,10 +83,7 @@ matrix:
   test('reads back every string as the same string, as value or key', () {
     final data = {
       'values': _awkwardStrings,
-      'keys': {
-        for (final text in _awkwardStrings.where((text) => text.isNotEmpty))
-          text: text,
-      },
+      'keys': {for (final text in _awkwardStrings) text: text},
     };
 
     expect(loadYaml(writeYaml(data)), data);

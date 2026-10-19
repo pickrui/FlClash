@@ -113,18 +113,6 @@ List<DelayTestTarget> computeDelayTestTargets({
   return targets.toList();
 }
 
-DelayState computeProxyDelayState({
-  required String proxyName,
-  required String testUrl,
-  required List<Group> groups,
-  required DelayMap delayMap,
-}) {
-  return proxyDelayLookup(groups: groups, delayMap: delayMap)(
-    proxyName,
-    testUrl,
-  );
-}
-
 /// Delay lookups that share one resolver, for callers walking many proxies;
 /// resolved selections do not depend on the test URL.
 DelayState Function(String proxyName, String testUrl) proxyDelayLookup({

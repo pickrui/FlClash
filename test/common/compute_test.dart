@@ -192,7 +192,7 @@ void main() {
     }
   });
 
-  group('computeProxyDelayState', () {
+  group('proxyDelayLookup', () {
     test('returns delay from delayMap for resolved proxy', () {
       final groups = [
         const Group(
@@ -205,22 +205,18 @@ void main() {
       final delayMap = <String, Map<String, int?>>{
         'http://test.com': {'proxy-a': 120},
       };
-      final state = computeProxyDelayState(
-        proxyName: 'auto',
-        testUrl: 'http://test.com',
-        groups: groups,
-        delayMap: delayMap,
+      final state = proxyDelayLookup(groups: groups, delayMap: delayMap)(
+        'auto',
+        'http://test.com',
       );
       expect(state.delay, 120);
       expect(state.group, true);
     });
 
     test('returns delay 0 when proxy not found in delayMap', () {
-      final state = computeProxyDelayState(
-        proxyName: 'proxy-x',
-        testUrl: 'http://test.com',
-        groups: [],
-        delayMap: {},
+      final state = proxyDelayLookup(groups: [], delayMap: {})(
+        'proxy-x',
+        'http://test.com',
       );
       expect(state.delay, 0);
     });
@@ -238,11 +234,9 @@ void main() {
       final delayMap = <String, Map<String, int?>>{
         'http://group-test.com': {'proxy-a': 50},
       };
-      final state = computeProxyDelayState(
-        proxyName: 'auto',
-        testUrl: 'http://default.com',
-        groups: groups,
-        delayMap: delayMap,
+      final state = proxyDelayLookup(groups: groups, delayMap: delayMap)(
+        'auto',
+        'http://default.com',
       );
       expect(state.delay, 50);
     });
@@ -259,11 +253,9 @@ void main() {
       final delayMap = <String, Map<String, int?>>{
         'http://default.com': {'proxy-a': 80},
       };
-      final state = computeProxyDelayState(
-        proxyName: 'auto',
-        testUrl: 'http://default.com',
-        groups: groups,
-        delayMap: delayMap,
+      final state = proxyDelayLookup(groups: groups, delayMap: delayMap)(
+        'auto',
+        'http://default.com',
       );
       expect(state.delay, 80);
     });

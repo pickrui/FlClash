@@ -167,14 +167,6 @@ void main() {
     });
   });
 
-  group('StringExtension.isSvg', () {
-    test('detects SVG files', () {
-      expect('icon.svg'.isSvg, isTrue);
-      expect('icon.PNG'.isSvg, isFalse);
-      expect('icon.svg.bak'.isSvg, isFalse);
-    });
-  });
-
   test('MD5 matches the stored identifier format', () {
     expect('hello'.toMd5(), '5d41402abc4b2a76b9719d911017c592');
   });

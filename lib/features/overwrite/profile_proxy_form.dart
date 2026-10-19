@@ -212,12 +212,12 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
   Map<String, Object?> _readEditor() {
     if (_mode == 0) return parseProfileProxyUri(_uriController.text.trim());
     if (_mode == 2) return parseProfileProxyDefinition(_yamlController.text);
-    return parseProfileProxyDefinition(yaml.encode(_quickDefinition()));
+    return parseProfileProxyDefinition(writeYaml(_quickDefinition()));
   }
 
   void _writeEditors() {
     _udp = _proxy['udp'] is bool ? _proxy['udp'] as bool : null;
-    _yamlController.text = _proxy.isEmpty ? '' : yaml.encode(_proxy);
+    _yamlController.text = _proxy.isEmpty ? '' : writeYaml(_proxy);
     for (final entry in _fields.entries) {
       entry.value.text = _proxy[entry.key]?.toString() ?? '';
     }

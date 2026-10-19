@@ -8,8 +8,6 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/l10n/l10n.dart';
-import 'package:fl_clash/common/theme.dart';
-import 'package:fl_clash/state.dart';
 import 'package:fl_clash/providers/network_diagnostic_fix.dart';
 import 'package:fl_clash/services/network_diagnostics.dart';
 import 'package:fl_clash/views/network_diagnostics.dart';
@@ -122,7 +120,6 @@ Future<ProviderContainer> _pump(
         builder: (context, child) => wrapAppScopes(context, child!),
         home: Builder(
           builder: (context) {
-            globalState.theme = CommonTheme.of(context, 1);
             return const NetworkDiagnosticsPage();
           },
         ),

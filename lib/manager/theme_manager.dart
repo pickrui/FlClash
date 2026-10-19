@@ -16,7 +16,6 @@ import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/ui/view_scope.dart';
-import 'package:fl_clash/common/theme.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
@@ -168,7 +167,6 @@ class ThemeManager extends ConsumerWidget {
 
     final measure = Measure.of(context, textScaleFactor);
     globalState.measure = measure;
-    globalState.theme = CommonTheme.of(context, textScaleFactor);
     final viewSize = ref.read(viewSizeProvider.notifier);
     return MeasureScope(
       measure: measure,

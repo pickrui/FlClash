@@ -15,7 +15,6 @@ import 'package:fl_clash/services/config_reset.dart';
 import 'package:dynamic_color/dynamic_color.dart' show DynamicColorPlugin;
 import 'package:fl_clash/common/periodic_task_runner.dart';
 import 'package:fl_clash/common/proxy_auth.dart';
-import 'package:fl_clash/common/theme.dart';
 import 'package:fl_clash/core/core.dart';
 import 'package:fl_clash/plugins/service.dart';
 import 'package:fl_clash/providers/app.dart';
@@ -83,7 +82,6 @@ class GlobalState {
   bool isPre = true;
   late PackageInfo packageInfo;
   late Measure measure;
-  late CommonTheme theme;
   late Color accentColor;
   late ProviderContainer container;
   Color? lightDynamicPrimary;

@@ -42,10 +42,6 @@ extension StringExtension on String {
     return parts.length > 1 ? parts : this;
   }
 
-  bool get isSvg {
-    return endsWith('.svg');
-  }
-
   String toMd5() {
     final bytes = utf8.encode(this);
     return md5.convert(bytes).toString();

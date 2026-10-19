@@ -9,7 +9,6 @@ import 'dart:ui' as ui;
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/system_fonts.dart';
-import 'package:fl_clash/common/theme.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
@@ -485,7 +484,6 @@ Future<ProviderContainer> _pump(
         ],
         theme: ThemeData(fontFamily: _font),
         builder: (context, child) {
-          globalState.theme = CommonTheme.of(context, scale);
           return wrapAppScopes(
             context,
             MediaQuery(

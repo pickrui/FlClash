@@ -6,7 +6,6 @@
 import 'dart:async';
 
 import 'package:fl_clash/common/app_localizations.dart';
-import 'package:fl_clash/common/theme.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/overwrite/routing_draft.dart';
 import 'package:fl_clash/l10n/l10n.dart';
@@ -366,7 +365,6 @@ Future<_TestProfiles> _pumpSelector(
         ],
         supportedLocales: AppLocalizations.delegate.supportedLocales,
         builder: (context, child) {
-          globalState.theme = CommonTheme.of(context, textScale);
           return wrapAppScopes(
             context,
             MediaQuery(

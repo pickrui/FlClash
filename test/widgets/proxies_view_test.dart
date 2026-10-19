@@ -10,7 +10,6 @@ import 'package:fl_clash/features/proxies/node_pages.dart';
 import 'package:fl_clash/views/proxies/pages.dart';
 
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/common/theme.dart';
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/core/interface.dart';
 import 'package:fl_clash/core/method.dart';
@@ -1210,7 +1209,6 @@ class _TestApp extends StatelessWidget {
       ],
       supportedLocales: AppLocalizations.delegate.supportedLocales,
       builder: (context, child) {
-        globalState.theme = CommonTheme.of(context, 1);
         return wrapAppScopes(context, child!);
       },
       home: Scaffold(body: child),

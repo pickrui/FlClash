@@ -682,7 +682,7 @@ extension DnsOverrideExt on Dns {
   }
 
   String overrideYaml(Set<DnsOverrideKey> keys) =>
-      yaml.encode(overrideJson(keys));
+      writeYaml(overrideJson(keys));
 
   ({Dns dns, Set<DnsOverrideKey> keys}) applyOverrideYaml(String content) {
     final document = _plainYaml(loadYaml(content));
@@ -830,7 +830,7 @@ extension NtpOverrideExt on Ntp {
   }
 
   String overrideYaml(Set<NtpOverrideKey> keys) =>
-      yaml.encode(overrideJson(keys));
+      writeYaml(overrideJson(keys));
 
   ({Ntp ntp, Set<NtpOverrideKey> keys}) applyOverrideYaml(String content) {
     final document = _plainYaml(loadYaml(content));
@@ -975,7 +975,7 @@ extension SnifferOverrideExt on Sniffer {
   }
 
   String overrideYaml(Set<SnifferOverrideKey> keys) =>
-      yaml.encode(overrideJson(keys));
+      writeYaml(overrideJson(keys));
 
   ({Sniffer sniffer, Set<SnifferOverrideKey> keys}) applyOverrideYaml(
     String content,

@@ -8,7 +8,6 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:fl_clash/common/app_localizations.dart';
-import 'package:fl_clash/common/theme.dart';
 import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/overwrite/custom_rule_editor.dart';
@@ -16,7 +15,6 @@ import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/dialog.dart';
 import 'package:fl_clash/features/overwrite/proxy_group_editor.dart';
 import 'package:material_ui/material_ui.dart';
@@ -286,7 +284,6 @@ Future<GlobalKey> _open(
         ],
         supportedLocales: AppLocalizations.delegate.supportedLocales,
         builder: (context, child) {
-          globalState.theme = CommonTheme.of(context, 1);
           return RepaintBoundary(
             key: key,
             child: MediaQuery(
