@@ -590,9 +590,9 @@ void main() {
           child: Builder(
             builder: (context) => TextButton(
               onPressed: () async {
-                result = await showDialog<ProxyProviderOptions>(
-                  context: context,
-                  builder: (_) => ProfileProviderOptionsDialog(
+                result = await _push<ProxyProviderOptions>(
+                  context,
+                  ProfileProviderOptionsDialog(
                     label: 'Subscription',
                     options: const ProxyProviderOptions(
                       filter: 'HK',
@@ -614,35 +614,75 @@ void main() {
     await tester.tap(find.text('Open options'));
     await tester.pumpAndSettle();
 
-    await tester.enterText(
-      find.widgetWithText(TextFormField, 'Exclude proxy filter'),
-      ' expired ',
-    );
-    await tester.tap(find.widgetWithText(SwitchListTile, 'Health check'));
+    await tester.enterText(_field('Exclude proxy filter'), ' expired ');
+    await tester.tap(find.text('Add setting'));
     await tester.pumpAndSettle();
-    await tester.enterText(
-      find.widgetWithText(TextFormField, 'Interval'),
-      '600',
-    );
-    await tester.tap(find.text('Save'));
+    await tester.tap(find.text('Test interval'));
     await tester.pumpAndSettle();
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    await tester.enterText(_field('Test interval'), '600');
+    await _save(tester);
     expect(find.text('fixture rejection'), findsOneWidget);
     expect(result, isNull);
-    await tester.tap(find.text('Save'));
-    await tester.pumpAndSettle();
+    await _save(tester);
 
     const expected = ProxyProviderOptions(
       filter: 'HK',
       excludeFilter: 'expired',
-      healthCheck: ProviderHealthCheck(
-        url: defaultTestUrl,
-        interval: 600,
-        lazy: true,
-      ),
+      healthCheck: ProviderHealthCheck(interval: 600),
       proxyOverride: ProviderOverride(udp: true),
     );
     expect(checked, [expected, expected]);
     expect(result, expected);
+  });
+
+  testWidgets('removing a provider option leaves it to the core again', (
+    tester,
+  ) async {
+    ProxyProviderOptions? result;
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 1000)),
+        ],
+        child: _TestApp(
+          child: Builder(
+            builder: (context) => TextButton(
+              onPressed: () async {
+                result = await _push<ProxyProviderOptions>(
+                  context,
+                  const ProfileProviderOptionsDialog(
+                    label: 'Subscription',
+                    options: ProxyProviderOptions(
+                      healthCheck: ProviderHealthCheck(timeout: 3000),
+                      proxyOverride: ProviderOverride(udp: false),
+                    ),
+                  ),
+                );
+              },
+              child: const Text('Open options'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Open options'));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.descendant(
+        of: find.widgetWithText(FormRow, 'UDP'),
+        matching: find.byTooltip(AppLocalizations.current.remove),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _save(tester);
+    expect(
+      result,
+      const ProxyProviderOptions(
+        healthCheck: ProviderHealthCheck(timeout: 3000),
+      ),
+    );
   });
 }
 
