@@ -321,6 +321,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "addressTip": MessageLookupByLibrary.simpleMessage("请输入有效的WebDAV地址"),
     "advancedConfig": MessageLookupByLibrary.simpleMessage("进阶配置"),
     "advancedConfigDesc": MessageLookupByLibrary.simpleMessage("提供多样化配置"),
+    "ageDecryptFailedTip": MessageLookupByLibrary.simpleMessage(
+      "无法解密配置，请检查 age 私钥后重试",
+    ),
+    "ageSecretKey": MessageLookupByLibrary.simpleMessage("age 私钥"),
+    "ageSecretKeyRequiredTip": MessageLookupByLibrary.simpleMessage(
+      "该配置已用 age 加密，需要 age 私钥才能解密",
+    ),
     "allowBypass": MessageLookupByLibrary.simpleMessage("允许应用绕过VPN"),
     "allowBypassDesc": MessageLookupByLibrary.simpleMessage("开启后部分应用可绕过VPN"),
     "allowLan": MessageLookupByLibrary.simpleMessage("局域网代理"),
@@ -1399,6 +1406,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "lineIssueTip": m45,
     "lineWrap": MessageLookupByLibrary.simpleMessage("自动换行"),
     "link": MessageLookupByLibrary.simpleMessage("链接"),
+    "linkDesc": MessageLookupByLibrary.simpleMessage("通过订阅链接或代理分享链接获取配置文件"),
     "liquidGlass": MessageLookupByLibrary.simpleMessage("液态玻璃"),
     "list": MessageLookupByLibrary.simpleMessage("列表"),
     "listen": MessageLookupByLibrary.simpleMessage("监听"),

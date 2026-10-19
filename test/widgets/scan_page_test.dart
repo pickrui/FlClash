@@ -6,6 +6,7 @@
 import 'dart:async';
 
 import 'package:fl_clash/pages/scan.dart';
+import 'package:fl_clash/state.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -87,11 +88,11 @@ class _FakeScannerPlatform extends MobileScannerPlatform {
 }
 
 class _PickerProfileAction extends ProfileAction {
-  final picked = Completer<void>();
+  final picked = Completer<String?>();
   int picks = 0;
 
   @override
-  Future<void> addProfileFormQrCode() {
+  Future<String?> pickProfileQrCode() {
     picks++;
     return picked.future;
   }
@@ -140,6 +141,7 @@ void main() {
   late _FakeScannerPlatform platform;
 
   setUp(() {
+    globalState.accentColor = Colors.blue;
     platform = _FakeScannerPlatform();
     MobileScannerPlatform.instance = platform;
     addTearDown(platform.close);
@@ -169,7 +171,12 @@ void main() {
     unawaited(
       Navigator.of(hostContext)
           .push<String>(
-            MaterialPageRoute<String>(builder: (_) => const ScanPage()),
+            MaterialPageRoute<String>(
+              builder: (context) => MediaQuery(
+                data: MediaQuery.of(context).copyWith(disableAnimations: true),
+                child: const ScanPage(),
+              ),
+            ),
           )
           .then((value) => onPopped?.call(value)),
     );
@@ -383,6 +390,23 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('a gallery result closes the scanner once', (tester) async {
+    final action = _PickerProfileAction();
+    String? result;
+    await pumpScanPage(
+      tester,
+      overrides: [profileActionProvider.overrideWith(() => action)],
+      onPopped: (value) => result = value,
+    );
+    await tester.tap(find.byTooltip('Choose from album'));
+    await tester.pump();
+    action.picked.complete('ss://fixture@example.invalid:443');
+    await tester.pumpAndSettle();
+    expect(result, 'ss://fixture@example.invalid:443');
+    expect(find.byType(ScanPage), findsNothing);
+    expect(platform.running, isFalse);
+  });
 
   testWidgets('a denial is retried only after returning from outside the app', (
     tester,

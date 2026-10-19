@@ -51,20 +51,7 @@ class ProfilesView extends StatefulWidget {
 class _ProfilesViewState extends State<ProfilesView> {
   bool _isUpdating = false;
 
-  void _handleShowAddExtendPage() {
-    showExtend(
-      globalState.navigatorKey.currentState!.context,
-      builder: (_, type) {
-        return AdaptiveSheetScaffold(
-          type: type,
-          body: AddProfileView(
-            parentContext: globalState.navigatorKey.currentState!.context,
-          ),
-          title: appLocalizations.addProfile,
-        );
-      },
-    );
-  }
+  void _handleShowAddExtendPage() => showAddProfilePage(context);
 
   Future<void> _updateProfiles(List<Profile> profiles) async {
     if (_isUpdating) return;

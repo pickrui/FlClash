@@ -12,6 +12,64 @@ import 'package:material_ui/material_ui.dart';
 import '../helpers/test_app.dart';
 
 void main() {
+  testWidgets('profile links keep a hidden age key only for a single import', (
+    tester,
+  ) async {
+    NamedProfileLinks? result;
+    await tester.pumpWidget(
+      TestApp(
+        wrapInProviderScope: true,
+        child: Builder(
+          builder: (context) => Scaffold(
+            body: TextButton(
+              onPressed: () async {
+                result = await showProfileLinksForm(context, title: 'Import');
+              },
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      ),
+    );
+    Future<void> open() async {
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> save() async {
+      final text = find.text('Save');
+      await tester.tap(
+        text.evaluate().isNotEmpty ? text : find.byTooltip('Save'),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    await open();
+    await tester.enterText(
+      find.byType(TextField).at(1),
+      'https://example.invalid/config',
+    );
+    final secret = find.byType(TextField).at(2);
+    expect(tester.widget<TextField>(secret).obscureText, isTrue);
+    await tester.enterText(secret, 'AGE-SECRET-KEY-fixture');
+    await save();
+    expect(result?.ageSecretKey, 'AGE-SECRET-KEY-fixture');
+    await open();
+    await tester.enterText(
+      find.byType(TextField).at(2),
+      'AGE-SECRET-KEY-not-for-batch',
+    );
+    await tester.tap(find.byTooltip('Batch add'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byType(TextField),
+      'https://example.invalid/one\nhttps://example.invalid/two',
+    );
+    await save();
+    expect(result?.ageSecretKey, '');
+    expect(result?.links, hasLength(2));
+  });
+
   for (final size in [const Size(390, 844), const Size(1200, 800)]) {
     testWidgets('batch form validates whole lines and deduplicates at $size', (
       tester,

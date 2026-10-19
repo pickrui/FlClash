@@ -14,6 +14,7 @@ import 'package:fl_clash/icons/navigation_glyph.dart';
 import 'package:fl_clash/ui/sidebar.dart';
 import 'package:fl_clash/ui/animated_visibility.dart';
 import 'package:fl_clash/providers/providers.dart';
+import 'package:fl_clash/providers/resources.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
@@ -24,12 +25,14 @@ class AppStateManager extends ConsumerStatefulWidget {
   final Widget child;
   final bool? updateProfilesInBackground;
   final PeriodicTask? autoUpdateProfiles;
+  final PeriodicTask? autoUpdateResources;
 
   const AppStateManager({
     super.key,
     required this.child,
     @visibleForTesting this.updateProfilesInBackground,
     @visibleForTesting this.autoUpdateProfiles,
+    @visibleForTesting this.autoUpdateResources,
   });
 
   @override
@@ -69,6 +72,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     unawaited(
       _profileUpdates.start([
         widget.autoUpdateProfiles ?? appController.autoUpdateProfiles,
+        widget.autoUpdateResources ?? ref.read(resourcesProvider).autoUpdate,
       ]),
     );
   }

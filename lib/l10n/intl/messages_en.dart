@@ -395,6 +395,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "advancedConfigDesc": MessageLookupByLibrary.simpleMessage(
       "Provide diverse configuration options",
     ),
+    "ageDecryptFailedTip": MessageLookupByLibrary.simpleMessage(
+      "Could not decrypt the profile. Check the age secret key and try again.",
+    ),
+    "ageSecretKey": MessageLookupByLibrary.simpleMessage("Age secret key"),
+    "ageSecretKeyRequiredTip": MessageLookupByLibrary.simpleMessage(
+      "This profile is encrypted with age and needs an age secret key to decrypt",
+    ),
     "allowBypass": MessageLookupByLibrary.simpleMessage(
       "Allow apps to bypass VPN",
     ),
@@ -1883,6 +1890,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "lineIssueTip": m45,
     "lineWrap": MessageLookupByLibrary.simpleMessage("Word wrap"),
     "link": MessageLookupByLibrary.simpleMessage("Link"),
+    "linkDesc": MessageLookupByLibrary.simpleMessage(
+      "Obtain a profile from a subscription link or a proxy share link",
+    ),
     "liquidGlass": MessageLookupByLibrary.simpleMessage("Liquid Glass"),
     "list": MessageLookupByLibrary.simpleMessage("List"),
     "listen": MessageLookupByLibrary.simpleMessage("Listen"),

@@ -41,7 +41,20 @@ Future<void> _validateProfileBytes(Uint8List bytes) async {
   if (message.isNotEmpty) throw ConfigValidationException(message);
 }
 
-Future<Uint8List> _subscriptionConfig(Uint8List bytes) async {
+Future<Uint8List> _subscriptionConfig(
+  Uint8List bytes,
+  String ageSecretKey,
+) async {
+  if (AgeCrypto.isArmored(bytes)) {
+    if (ageSecretKey.isEmpty) {
+      throw ConfigValidationException(appLocalizations.ageSecretKeyRequiredTip);
+    }
+    try {
+      bytes = await coreController.decryptConfigBytes(bytes, ageSecretKey);
+    } catch (_) {
+      throw ConfigValidationException(appLocalizations.ageDecryptFailedTip);
+    }
+  }
   final message = await coreController.validateConfigWithBytes(
     base64Encode(bytes),
   );
@@ -874,6 +887,7 @@ abstract class Profile with _$Profile {
     @Default('') String label,
     String? currentGroupName,
     @Default('') String url,
+    @Default('') String ageSecretKey,
     DateTime? lastUpdateDate,
     required Duration autoUpdateDuration,
     SubscriptionInfo? subscriptionInfo,
@@ -1619,7 +1633,7 @@ extension ProfileExtension on Profile {
     final response = await request.getFileResponseForUrl(
       url,
       validate: (bytes) async {
-        configs[bytes] = await _subscriptionConfig(bytes);
+        configs[bytes] = await _subscriptionConfig(bytes, ageSecretKey);
       },
       inflateUnlabeled: true,
     );

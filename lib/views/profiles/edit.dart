@@ -45,6 +45,7 @@ class EditProfileView extends ConsumerStatefulWidget {
 class _EditProfileViewState extends ConsumerState<EditProfileView> {
   late final TextEditingController _labelController;
   late final TextEditingController _urlController;
+  late final TextEditingController _ageSecretKeyController;
   late final TextEditingController _autoUpdateDurationController;
   late bool _autoUpdate;
   bool _tfo = false;
@@ -66,6 +67,9 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     _setupAction = context.setupAction;
     _labelController = TextEditingController(text: widget.profile.label);
     _urlController = TextEditingController(text: widget.profile.url);
+    _ageSecretKeyController = TextEditingController(
+      text: widget.profile.ageSecretKey,
+    );
     _autoUpdate = widget.profile.autoUpdate;
     _autoUpdateDurationController = TextEditingController(
       text: widget.profile.autoUpdateDuration.inMinutes.toString(),
@@ -188,6 +192,9 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     }
     final interval = int.tryParse(_autoUpdateDurationController.text);
     var profile = widget.profile.copyWith(
+      ageSecretKey: widget.profile.isoixCloudProfile
+          ? widget.profile.ageSecretKey
+          : _ageSecretKeyController.text.trim(),
       url: widget.profile.isoixCloudProfile
           ? widget.profile.url
           : _urlController.text.trim(),
@@ -217,7 +224,8 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
             }
           }
           await profileAction.saveProfileFile(profile, _fileData!);
-        } else if (widget.profile.url == profile.url) {
+        } else if (widget.profile.url == profile.url &&
+            widget.profile.ageSecretKey == profile.ageSecretKey) {
           await profileAction.saveProfileMetadata(profile);
         } else {
           await profileAction.updateProfile(
@@ -365,6 +373,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
   void dispose() {
     _labelController.dispose();
     _urlController.dispose();
+    _ageSecretKeyController.dispose();
     _autoUpdateDurationController.dispose();
     if (appController.isAttach) _setupAction.autoApplyProfile();
     super.dispose();
@@ -404,6 +413,16 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
               controller: _urlController,
               invalid: issue?.field == _ProfileField.url,
               onChanged: _handleChanged,
+            ),
+          if (widget.profile.type == ProfileType.url && !isoixCloud)
+            FormRow(
+              title: appLocalizations.ageSecretKey,
+              trailing: FormRowSecretTextField(
+                controller: _ageSecretKeyController,
+                inputFormatters: TextInputLimits.limit(
+                  TextInputLimits.ageSecretKey,
+                ),
+              ),
             ),
         ],
       ),

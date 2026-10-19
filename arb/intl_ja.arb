@@ -1596,5 +1596,9 @@
   "peers": "ピア",
   "virtualIpv4": "仮想 IPv4",
   "hostname": "ホスト名",
-  "exitNodes": "出口ノード"
+  "exitNodes": "出口ノード",
+  "ageSecretKey": "age 秘密鍵",
+  "ageSecretKeyRequiredTip": "このプロファイルは age で暗号化されており、復号には age 秘密鍵が必要です",
+  "ageDecryptFailedTip": "設定を復号できませんでした。age 秘密鍵を確認して再試行してください。",
+  "linkDesc": "サブスクリプションリンクまたはプロキシの共有リンクからプロファイルを取得します"
 }

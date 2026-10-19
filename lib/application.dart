@@ -67,6 +67,20 @@ class ApplicationState extends ConsumerState<Application> {
         inputFormatters: TextInputLimits.limit(TextInputLimits.password),
       ),
     );
+    appController.requestAgeSecretKey = () =>
+        globalState.showCommonDialog<String>(
+          child: InputDialog(
+            title: appLocalizations.ageSecretKey,
+            value: '',
+            obscureText: true,
+            inputFormatters: TextInputLimits.limit(
+              TextInputLimits.ageSecretKey,
+            ),
+            validator: (value) => value == null || value.trim().isEmpty
+                ? appLocalizations.ageSecretKeyRequiredTip
+                : null,
+          ),
+        );
     navigation.pageBuilder = buildNavigationPage;
     navigation.updatePresenter = (context, info, task, loadNotes, download) =>
         BaseNavigator.push<UpdateDownloadAction>(

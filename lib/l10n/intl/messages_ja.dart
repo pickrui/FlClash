@@ -332,6 +332,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "addressTip": MessageLookupByLibrary.simpleMessage("有効なWebDAVアドレスを入力"),
     "advancedConfig": MessageLookupByLibrary.simpleMessage("詳細設定"),
     "advancedConfigDesc": MessageLookupByLibrary.simpleMessage("多様な設定を提供"),
+    "ageDecryptFailedTip": MessageLookupByLibrary.simpleMessage(
+      "設定を復号できませんでした。age 秘密鍵を確認して再試行してください。",
+    ),
+    "ageSecretKey": MessageLookupByLibrary.simpleMessage("age 秘密鍵"),
+    "ageSecretKeyRequiredTip": MessageLookupByLibrary.simpleMessage(
+      "このプロファイルは age で暗号化されており、復号には age 秘密鍵が必要です",
+    ),
     "allowBypass": MessageLookupByLibrary.simpleMessage("アプリによるVPNバイパスを許可"),
     "allowBypassDesc": MessageLookupByLibrary.simpleMessage(
       "有効化すると一部アプリがVPNをバイパス",
@@ -1593,6 +1600,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "lineIssueTip": m45,
     "lineWrap": MessageLookupByLibrary.simpleMessage("折り返し"),
     "link": MessageLookupByLibrary.simpleMessage("リンク"),
+    "linkDesc": MessageLookupByLibrary.simpleMessage(
+      "サブスクリプションリンクまたはプロキシの共有リンクからプロファイルを取得します",
+    ),
     "liquidGlass": MessageLookupByLibrary.simpleMessage("リキッドグラス"),
     "list": MessageLookupByLibrary.simpleMessage("リスト"),
     "listen": MessageLookupByLibrary.simpleMessage("リッスン"),

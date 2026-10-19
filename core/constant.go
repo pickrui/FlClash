@@ -114,6 +114,7 @@ const (
 	forceGcMethod                  CoreMethod = "forceGc"
 	shutdownMethod                 CoreMethod = "shutdown"
 	validateConfigWithBytesMethod  CoreMethod = "validateConfigWithBytes"
+	decryptConfigBytesMethod       CoreMethod = "decryptConfigBytes"
 	validateConfigMethod           CoreMethod = "validateConfig"
 	validateProxiesMethod          CoreMethod = "validateProxies"
 	validateFiltersMethod          CoreMethod = "validateFilters"

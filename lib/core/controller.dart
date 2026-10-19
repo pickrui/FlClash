@@ -130,6 +130,13 @@ class CoreController {
     return res;
   }
 
+  Future<Uint8List> decryptConfigBytes(
+    Uint8List bytes,
+    String secretKey,
+  ) async => base64Decode(
+    await _interface.decryptConfigBytes(base64Encode(bytes), secretKey),
+  );
+
   Future<String> validateConfigWithBytes(String data) async {
     final res = await _interface.validateConfigWithBytes(data);
     return res;

@@ -399,6 +399,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "advancedConfigDesc": MessageLookupByLibrary.simpleMessage(
       "Предоставляет разнообразные варианты конфигурации",
     ),
+    "ageDecryptFailedTip": MessageLookupByLibrary.simpleMessage(
+      "Не удалось расшифровать профиль. Проверьте секретный ключ age и повторите попытку.",
+    ),
+    "ageSecretKey": MessageLookupByLibrary.simpleMessage("Секретный ключ age"),
+    "ageSecretKeyRequiredTip": MessageLookupByLibrary.simpleMessage(
+      "Профиль зашифрован с помощью age, для расшифровки нужен секретный ключ age",
+    ),
     "allowBypass": MessageLookupByLibrary.simpleMessage(
       "Разрешить приложениям обходить VPN",
     ),
@@ -1944,6 +1951,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "lineIssueTip": m45,
     "lineWrap": MessageLookupByLibrary.simpleMessage("Перенос строк"),
     "link": MessageLookupByLibrary.simpleMessage("Ссылка"),
+    "linkDesc": MessageLookupByLibrary.simpleMessage(
+      "Получить профиль по ссылке на подписку или на прокси",
+    ),
     "liquidGlass": MessageLookupByLibrary.simpleMessage("Жидкое стекло"),
     "list": MessageLookupByLibrary.simpleMessage("Список"),
     "listen": MessageLookupByLibrary.simpleMessage("Прослушивание"),

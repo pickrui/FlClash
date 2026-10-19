@@ -46,6 +46,7 @@ void main() {
           container: container,
           child: AppStateManager(
             updateProfilesInBackground: updateProfilesInBackground,
+            autoUpdateResources: () async {},
             autoUpdateProfiles: autoUpdateProfiles,
             child: Listener(
               key: contentKey,

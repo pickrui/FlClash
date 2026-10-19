@@ -24,7 +24,7 @@ part 'profiles.dart';
 part 'rules.dart';
 part 'scripts.dart';
 
-const currentDatabaseSchemaVersion = 8;
+const currentDatabaseSchemaVersion = 9;
 
 @DriftDatabase(
   tables: [
@@ -103,6 +103,9 @@ class Database extends _$Database {
           if (existing.isEmpty) await m.createTable(iconSets);
         }
         final profileColumns = await _profileColumnNames();
+        if (from < 9 && profileColumns.add('age_secret_key')) {
+          await m.addColumn(profiles, profiles.ageSecretKey);
+        }
         // Ahead of the older steps: the v4 step reads every profile column.
         if (from < 7) {
           if (profileColumns.add('profile_type')) {

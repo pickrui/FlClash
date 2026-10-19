@@ -18,6 +18,8 @@ class Profiles extends Table {
 
   TextColumn get url => text()();
 
+  TextColumn get ageSecretKey => text().nullable()();
+
   DateTimeColumn get lastUpdateDate => dateTime().nullable()();
 
   TextColumn get overwriteType => textEnum<OverwriteType>()();
@@ -247,6 +249,7 @@ extension RawProfilExt on RawProfile {
       label: label,
       currentGroupName: currentGroupName,
       url: url,
+      ageSecretKey: ageSecretKey ?? '',
       lastUpdateDate: lastUpdateDate,
       autoUpdateDuration: Duration(milliseconds: autoUpdateDurationMillis),
       subscriptionInfo: subscriptionInfo,
@@ -277,6 +280,7 @@ extension ProfilesCompanionExt on Profile {
       label: label,
       currentGroupName: Value(currentGroupName),
       url: url,
+      ageSecretKey: Value(ageSecretKey.isEmpty ? null : ageSecretKey),
       lastUpdateDate: Value(lastUpdateDate),
       autoUpdateDurationMillis: autoUpdateDuration.inMilliseconds,
       subscriptionInfo: Value(subscriptionInfo),

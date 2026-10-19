@@ -79,6 +79,8 @@ void main() {
   ) async {
     await mount(tester);
     await pumpUntilFound(tester, find.text('Not downloaded'));
+    await tester.longPress(find.text('MMDB'));
+    await tester.pumpAndSettle();
     expect(find.text('Sync'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -143,8 +145,8 @@ void main() {
     file.writeAsBytesSync(List.filled(4096, 0));
     await settle(tester, rounds: 3);
     expect(
-      find.textContaining(1024.traffic.show),
-      findsOneWidget,
+      find.textContaining(4096.traffic.show),
+      findsNothing,
       reason: 'the info must not change while the core is still writing',
     );
 

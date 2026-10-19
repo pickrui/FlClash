@@ -54,14 +54,7 @@ void _openProfile(BuildContext context, Profile? profile) {
     showProfileDetailSheet(context);
     return;
   }
-  showExtend(
-    context,
-    builder: (_, type) => AdaptiveSheetScaffold(
-      type: type,
-      title: context.appLocalizations.addProfile,
-      body: AddProfileView(parentContext: context),
-    ),
-  );
+  showAddProfilePage(context);
 }
 
 const _nearlyUsedShare = 0.9;

@@ -41,10 +41,12 @@ class ProfileAction extends _$ProfileAction {
   Future<Profile?> addProfileFormURL(
     String url, {
     String? label,
+    String ageSecretKey = '',
     bool requestStartIfNeeded = true,
   }) => _controller.addProfileFormURL(
     url,
     label: label,
+    ageSecretKey: ageSecretKey,
     requestStartIfNeeded: requestStartIfNeeded,
   );
 
@@ -59,6 +61,9 @@ class ProfileAction extends _$ProfileAction {
 
   Future<Uint8List> downloadCustomImport(String url) =>
       _controller.downloadCustomImport(url);
+
+  Future<String?> pickProfileQrCode() =>
+      _controller.safeRun<String?>(picker.pickerConfigQRCode);
 
   Future<void> addProfileFormQrCode() => _controller.addProfileFormQrCode();
 
@@ -313,7 +318,8 @@ extension ProfilesControllerExt on AppController {
         }
         // A URL edit during the download invalidates its content; never save
         // an old subscription under the newly edited URL or revive a deletion.
-        if (latest.url != current.url) {
+        if (latest.url != current.url ||
+            latest.ageSecretKey != current.ageSecretKey) {
           throw StateError('profile URL changed during download');
         }
         return prepared.save();
@@ -383,6 +389,7 @@ extension ProfilesControllerExt on AppController {
   Future<Profile?> addProfileFormURL(
     String url, {
     String? label,
+    String ageSecretKey = '',
     bool requestStartIfNeeded = true,
   }) async {
     if (globalState.navigatorKey.currentState?.canPop() ?? false) {
@@ -392,7 +399,10 @@ extension ProfilesControllerExt on AppController {
     final profile = await loadingRun(tag: LoadingTag.profiles, () async {
       await ensureCoreReadyOrThrow();
       return _runWithCertificateRetry(() async {
-        final profile = Profile.normal(url: url, label: label?.trim());
+        final profile = Profile.normal(
+          url: url,
+          label: label?.trim(),
+        ).copyWith(ageSecretKey: ageSecretKey);
         final prepared = await profile.prepareUpdate();
         try {
           return await persistProfile(profile, () async {
@@ -489,10 +499,24 @@ extension ProfilesControllerExt on AppController {
     if (platformFile == null) return;
     final bytes = await safeRun(platformFile.readBytes);
     if (bytes == null || !_context.mounted) return;
+    String? secretKey;
+    if (AgeCrypto.isArmored(bytes)) {
+      secretKey = await requestAgeSecretKey?.call();
+      if (secretKey == null || !_context.mounted) return;
+    }
     globalState.navigatorKey.currentState?.popUntil((route) => route.isFirst);
     toProfiles();
     final profile = await loadingRun(tag: LoadingTag.profiles, () async {
-      return saveProfileFile(Profile.normal(label: platformFile.name), bytes);
+      await ensureCoreReadyOrThrow();
+      var content = bytes;
+      if (secretKey != null) {
+        try {
+          content = await coreController.decryptConfigBytes(bytes, secretKey);
+        } catch (_) {
+          throw appLocalizations.ageDecryptFailedTip;
+        }
+      }
+      return saveProfileFile(Profile.normal(label: platformFile.name), content);
     }, title: appLocalizations.addProfile);
     if (profile != null) {
       globalState.showNotifier(appLocalizations.getProfileSuccess);
@@ -522,7 +546,7 @@ extension ProfilesControllerExt on AppController {
   Future<void> addProfileFormQrCode() async {
     final url = await safeRun(picker.pickerConfigQRCode);
     if (url == null) return;
-    await addProfileFormURL(url);
+    await addProfilesFromLinks([(label: '', url: url)]);
   }
 
   void reorder(List<Profile> profiles) {

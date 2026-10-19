@@ -321,6 +321,34 @@ void main() {
     );
   }
 
+  for (final hasColumn in [false, true]) {
+    test(
+      'schema 8 gains an age key without losing profiles (existing: $hasColumn)',
+      () async {
+        final root = await Directory.systemTemp.createTemp(
+          'flclash-age-migration-',
+        );
+        addTearDown(() => root.delete(recursive: true));
+        final file = File('${root.path}/database.sqlite');
+        final profile = _v6Profiles.first.copyWith(
+          ageSecretKey: hasColumn ? 'fixture-key' : '',
+        );
+        await _createDatabase(
+          file,
+          [profile],
+          schemaVersion: 8,
+          keepColumns: {if (hasColumn) 'age_secret_key'},
+        );
+        final db = Database(NativeDatabase(file));
+        addTearDown(db.close);
+        expect(await db.profilesDao.all().get(), [profile]);
+        final edited = profile.copyWith(ageSecretKey: 'new-fixture-key');
+        await db.profilesDao.putAll([edited.toCompanion()]);
+        expect(await db.profilesDao.all().get(), [edited]);
+      },
+    );
+  }
+
   test('icon sets restore from a backup, one set per remote url', () async {
     final root = await Directory.systemTemp.createTemp('flclash_v8_backup_');
     addTearDown(() => root.delete(recursive: true));
@@ -542,6 +570,11 @@ Future<void> _createDatabase(
   );
   for (final iconSet in iconSets) {
     await database.iconSetsDao.put(iconSet);
+  }
+  if (schemaVersion < 9 && !keepColumns.contains('age_secret_key')) {
+    await database.customStatement(
+      'ALTER TABLE profiles DROP COLUMN age_secret_key',
+    );
   }
   if (schemaVersion < 8 && iconSets.isEmpty) {
     await database.customStatement('DROP TABLE icon_sets');

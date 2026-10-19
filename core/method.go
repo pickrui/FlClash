@@ -196,6 +196,20 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 		if decodeMethodArguments(call, response, &path) {
 			response.success(handleValidateConfig(path))
 		}
+	case decryptConfigBytesMethod:
+		params := struct {
+			Data      string `json:"data"`
+			SecretKey string `json:"secretKey"`
+		}{}
+		if !decodeMethodArguments(call, response, &params) {
+			return
+		}
+		data, err := decryptSubscriptionConfig(params.Data, params.SecretKey)
+		if err != nil {
+			response.failure("core_error", err.Error(), nil)
+			return
+		}
+		response.success(base64.StdEncoding.EncodeToString(data))
 	case validateConfigWithBytesMethod:
 		encoded := ""
 		if !decodeMethodArguments(call, response, &encoded) {

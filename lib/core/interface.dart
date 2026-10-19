@@ -36,6 +36,8 @@ mixin CoreInterface {
 
   Future<String> validateConfigWithBytes(String data);
 
+  Future<String> decryptConfigBytes(String data, String secretKey);
+
   Future<Map<String, dynamic>> getConfig(String path);
 
   Future<Delay> asyncTestDelay(
@@ -245,6 +247,13 @@ abstract class CoreHandlerInterface with CoreInterface {
       arguments: data,
     );
   }
+
+  @override
+  Future<String> decryptConfigBytes(String data, String secretKey) =>
+      _invokeRequiredMethod<String>(
+        method: CoreMethod.decryptConfigBytes,
+        arguments: {'data': data, 'secretKey': secretKey},
+      );
 
   Future<Map<String, dynamic>> _getConfig(CoreMethod method, String source) {
     return _invokeRequiredMethod<Map<String, dynamic>>(

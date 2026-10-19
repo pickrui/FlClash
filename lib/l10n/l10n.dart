@@ -13472,6 +13472,46 @@ class AppLocalizations {
   String get exitNodes {
     return Intl.message('Exit nodes', name: 'exitNodes', desc: '', args: []);
   }
+
+  /// `Age secret key`
+  String get ageSecretKey {
+    return Intl.message(
+      'Age secret key',
+      name: 'ageSecretKey',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This profile is encrypted with age and needs an age secret key to decrypt`
+  String get ageSecretKeyRequiredTip {
+    return Intl.message(
+      'This profile is encrypted with age and needs an age secret key to decrypt',
+      name: 'ageSecretKeyRequiredTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not decrypt the profile. Check the age secret key and try again.`
+  String get ageDecryptFailedTip {
+    return Intl.message(
+      'Could not decrypt the profile. Check the age secret key and try again.',
+      name: 'ageDecryptFailedTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Obtain a profile from a subscription link or a proxy share link`
+  String get linkDesc {
+    return Intl.message(
+      'Obtain a profile from a subscription link or a proxy share link',
+      name: 'linkDesc',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

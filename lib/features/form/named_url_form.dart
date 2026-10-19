@@ -51,6 +51,28 @@ Future<List<NamedUrl>?> showNamedUrlsForm(
   ),
 );
 
+typedef NamedProfileLinks = ({List<NamedUrl> links, String ageSecretKey});
+
+Future<NamedProfileLinks?> showProfileLinksForm(
+  BuildContext context, {
+  required String title,
+  FormFieldValidator<String>? labelValidator,
+  FormFieldValidator<String>? urlValidator,
+  Set<String> existingUrls = const {},
+}) => showFormSheet<NamedProfileLinks>(
+  context: context,
+  builder: (_, _) => _NamedUrlForm(
+    title: title,
+    label: '',
+    url: '',
+    labelValidator: labelValidator,
+    urlValidator: urlValidator,
+    enableBatch: true,
+    existingUrls: existingUrls,
+    withAgeSecretKey: true,
+  ),
+);
+
 class _NamedUrlForm extends StatefulWidget {
   const _NamedUrlForm({
     required this.title,
@@ -59,10 +81,12 @@ class _NamedUrlForm extends StatefulWidget {
     this.labelValidator,
     this.urlValidator,
     this.enableBatch = false,
+    this.withAgeSecretKey = false,
     this.existingUrls = const {},
   });
   final String title, label, url;
   final bool enableBatch;
+  final bool withAgeSecretKey;
   final Set<String> existingUrls;
   final FormFieldValidator<String>? labelValidator, urlValidator;
   @override
@@ -72,6 +96,7 @@ class _NamedUrlForm extends StatefulWidget {
 class _NamedUrlFormState extends State<_NamedUrlForm> {
   late final _label = TextEditingController(text: widget.label);
   late final _url = TextEditingController(text: widget.url);
+  final _ageSecretKey = TextEditingController();
   String? _error;
   bool _batch = false;
   final _batchText = TextEditingController();
@@ -96,6 +121,7 @@ class _NamedUrlFormState extends State<_NamedUrlForm> {
     _label.dispose();
     _url.dispose();
     _batchText.dispose();
+    _ageSecretKey.dispose();
     super.dispose();
   }
 
@@ -112,8 +138,7 @@ class _NamedUrlFormState extends State<_NamedUrlForm> {
         );
         return;
       }
-      Navigator.of(context)
-          .pop([for (final url in parsed.entries) (label: '', url: url)]);
+      _finish([for (final url in parsed.entries) (label: '', url: url)]);
       return;
     }
     final error =
@@ -123,7 +148,22 @@ class _NamedUrlFormState extends State<_NamedUrlForm> {
       return;
     }
     final item = (label: _label.text.trim(), url: url);
-    Navigator.of(context).pop(widget.enableBatch ? [item] : item);
+    if (widget.enableBatch) {
+      _finish([item]);
+    } else {
+      Navigator.of(context).pop(item);
+    }
+  }
+
+  void _finish(List<NamedUrl> links) {
+    if (widget.withAgeSecretKey) {
+      Navigator.of(context).pop<NamedProfileLinks>((
+        links: links,
+        ageSecretKey: _batch ? '' : _ageSecretKey.text.trim(),
+      ));
+    } else {
+      Navigator.of(context).pop(links);
+    }
   }
 
   @override
@@ -186,7 +226,7 @@ class _NamedUrlFormState extends State<_NamedUrlForm> {
                 ),
               ),
               FormRow(
-                title: l.url,
+                title: widget.enableBatch ? l.link : l.url,
                 trailing: FormRowTextField(
                   controller: _url,
                   autofocus: true,
@@ -200,6 +240,16 @@ class _NamedUrlFormState extends State<_NamedUrlForm> {
                   onFieldSubmitted: (_) => _save(),
                 ),
               ),
+              if (widget.withAgeSecretKey)
+                FormRow(
+                  title: l.ageSecretKey,
+                  trailing: FormRowSecretTextField(
+                    controller: _ageSecretKey,
+                    inputFormatters: TextInputLimits.limit(
+                      TextInputLimits.ageSecretKey,
+                    ),
+                  ),
+                ),
             ],
           ),
       ],
