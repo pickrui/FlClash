@@ -12825,6 +12825,93 @@ class AppLocalizations {
   String get minutes {
     return Intl.message('minutes', name: 'minutes', desc: '', args: []);
   }
+
+  /// `{count, plural, other{{count}y ago}}`
+  String yearsAgoShort(num count) {
+    return Intl.plural(
+      count,
+      other: '${count}y ago',
+      name: 'yearsAgoShort',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, other{{count}mo ago}}`
+  String monthsAgoShort(num count) {
+    return Intl.plural(
+      count,
+      other: '${count}mo ago',
+      name: 'monthsAgoShort',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, other{{count}d ago}}`
+  String daysAgoShort(num count) {
+    return Intl.plural(
+      count,
+      other: '${count}d ago',
+      name: 'daysAgoShort',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, other{{count}h ago}}`
+  String hoursAgoShort(num count) {
+    return Intl.plural(
+      count,
+      other: '${count}h ago',
+      name: 'hoursAgoShort',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, other{{count}m ago}}`
+  String minutesAgoShort(num count) {
+    return Intl.plural(
+      count,
+      other: '${count}m ago',
+      name: 'minutesAgoShort',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Expiration time`
+  String get expireTime {
+    return Intl.message(
+      'Expiration time',
+      name: 'expireTime',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Runtime config`
+  String get runtimeConfig {
+    return Intl.message(
+      'Runtime config',
+      name: 'runtimeConfig',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, =1{1 proxy group} other{{count} proxy groups}}`
+  String proxyGroupsCount(num count) {
+    return Intl.plural(
+      count,
+      one: '1 proxy group',
+      other: '$count proxy groups',
+      name: 'proxyGroupsCount',
+      desc: '',
+      args: [count],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

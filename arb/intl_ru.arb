@@ -1519,5 +1519,13 @@
   "keepAliveIdle": "Простой TCP keep-alive",
   "routingMark": "Метка маршрутизации",
   "required": "Обязательно",
-  "minutes": "минут"
+  "minutes": "минут",
+  "yearsAgoShort": "{count, plural, one{{count} г. назад} few{{count} г. назад} many{{count} л. назад} other{{count} г. назад}}",
+  "monthsAgoShort": "{count} мес. назад",
+  "daysAgoShort": "{count} дн. назад",
+  "hoursAgoShort": "{count} ч назад",
+  "minutesAgoShort": "{count} мин назад",
+  "expireTime": "Срок действия",
+  "runtimeConfig": "Конфигурация выполнения",
+  "proxyGroupsCount": "{count, plural, one{{count} группа прокси} few{{count} группы прокси} many{{count} групп прокси} other{{count} группы прокси}}"
 }

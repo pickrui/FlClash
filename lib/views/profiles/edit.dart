@@ -447,9 +447,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
         child: CommonPopScope(
           onPop: (_) => _handleBack(),
           child: CommonScaffold(
-            title: widget.profile.type == ProfileType.custom
-                ? appLocalizations.rename
-                : appLocalizations.editProfile,
+            title: appLocalizations.editProfile,
             confirmationAction: IconButtonData(
               glyph: AppGlyphs.check,
               tooltip: appLocalizations.save,

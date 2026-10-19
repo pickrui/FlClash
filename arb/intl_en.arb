@@ -1519,5 +1519,13 @@
   "keepAliveIdle": "TCP keep-alive idle",
   "routingMark": "Routing mark",
   "required": "Required",
-  "minutes": "minutes"
+  "minutes": "minutes",
+  "yearsAgoShort": "{count, plural, other{{count}y ago}}",
+  "monthsAgoShort": "{count, plural, other{{count}mo ago}}",
+  "daysAgoShort": "{count, plural, other{{count}d ago}}",
+  "hoursAgoShort": "{count, plural, other{{count}h ago}}",
+  "minutesAgoShort": "{count, plural, other{{count}m ago}}",
+  "expireTime": "Expiration time",
+  "runtimeConfig": "Runtime config",
+  "proxyGroupsCount": "{count, plural, =1{1 proxy group} other{{count} proxy groups}}"
 }

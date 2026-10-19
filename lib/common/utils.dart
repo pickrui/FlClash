@@ -148,9 +148,10 @@ class Utils {
   int getProfilesColumns(
     double viewWidth, {
     double spacing = 0,
-    double minItemWidth = 270,
+    double minItemWidth = 300,
   }) {
-    return max(((viewWidth + spacing) / (minItemWidth + spacing)).floor(), 1);
+    final columns = (viewWidth + spacing) / (minItemWidth + spacing);
+    return columns.floor().clamp(1, 3);
   }
 
   String getBackupFileName() {

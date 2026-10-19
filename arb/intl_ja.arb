@@ -1519,5 +1519,13 @@
   "keepAliveIdle": "TCP キープアライブ待機時間",
   "routingMark": "ルーティングマーク",
   "required": "必須",
-  "minutes": "分"
+  "minutes": "分",
+  "yearsAgoShort": "{count} 年前",
+  "monthsAgoShort": "{count} か月前",
+  "daysAgoShort": "{count} 日前",
+  "hoursAgoShort": "{count} 時間前",
+  "minutesAgoShort": "{count} 分前",
+  "expireTime": "有効期限",
+  "runtimeConfig": "ランタイム設定",
+  "proxyGroupsCount": "プロキシグループ {count} 件"
 }

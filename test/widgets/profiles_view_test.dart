@@ -222,9 +222,11 @@ void main() {
       setupActionProvider.overrideWith(() => setup),
     ], () => _Status(messages: messages, child: const ProfilesView()));
     Future<void> preview() async {
-      await tester.tap(find.byTooltip('More'));
+      await tester.longPress(find.text('Second'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Preview'));
+      await tester.tap(find.text('More'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Runtime config'));
       await tester.pumpAndSettle();
     }
 

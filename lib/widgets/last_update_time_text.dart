@@ -11,11 +11,13 @@ import 'active_polling.dart';
 class LastUpdateTimeText extends StatelessWidget {
   final DateTime? lastUpdateDate;
   final TextStyle? style;
+  final bool compact;
 
   const LastUpdateTimeText({
     super.key,
     required this.lastUpdateDate,
     this.style,
+    this.compact = false,
   });
 
   @override
@@ -27,7 +29,12 @@ class LastUpdateTimeText extends StatelessWidget {
     return TickBuilder(
       duration: const Duration(minutes: 1),
       builder: (context, _) {
-        return Text(lastUpdateDate.lastUpdateTimeDesc, style: style);
+        return Text(
+          compact
+              ? lastUpdateDate.compactLastUpdateTimeDesc
+              : lastUpdateDate.lastUpdateTimeDesc,
+          style: style,
+        );
       },
     );
   }

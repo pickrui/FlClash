@@ -1519,5 +1519,13 @@
   "keepAliveIdle": "TCP 保持活动空闲时间",
   "routingMark": "路由标记",
   "required": "必填",
-  "minutes": "分钟"
+  "minutes": "分钟",
+  "yearsAgoShort": "{count} 年前",
+  "monthsAgoShort": "{count} 个月前",
+  "daysAgoShort": "{count} 天前",
+  "hoursAgoShort": "{count} 小时前",
+  "minutesAgoShort": "{count} 分钟前",
+  "expireTime": "到期时间",
+  "runtimeConfig": "运行时配置",
+  "proxyGroupsCount": "{count} 个代理组"
 }

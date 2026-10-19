@@ -10,28 +10,50 @@ extension DateTimeExtension on DateTime {
     return isBefore(DateTime.now());
   }
 
-  String get lastUpdateTimeDesc {
+  String get lastUpdateTimeDesc => _lastUpdateTimeDesc(compact: false);
+
+  String get compactLastUpdateTimeDesc => _lastUpdateTimeDesc(compact: true);
+
+  String _lastUpdateTimeDesc({required bool compact}) {
+    if (year <= 1970) {
+      return appLocalizations.unknown;
+    }
+    final (yearsAgo, monthsAgo, daysAgo, hoursAgo, minutesAgo) = compact
+        ? (
+            appLocalizations.yearsAgoShort,
+            appLocalizations.monthsAgoShort,
+            appLocalizations.daysAgoShort,
+            appLocalizations.hoursAgoShort,
+            appLocalizations.minutesAgoShort,
+          )
+        : (
+            appLocalizations.yearsAgo,
+            appLocalizations.monthsAgo,
+            appLocalizations.daysAgo,
+            appLocalizations.hoursAgo,
+            appLocalizations.minutesAgo,
+          );
     final currentDateTime = DateTime.now();
     final difference = currentDateTime.difference(this);
     final days = difference.inDays;
     if (days >= 365) {
       final years = (days / 365).floor();
-      return appLocalizations.yearsAgo(years);
+      return yearsAgo(years);
     }
     if (days >= 30) {
       final months = (days / 30).floor();
-      return appLocalizations.monthsAgo(months);
+      return monthsAgo(months);
     }
     if (days >= 1) {
-      return appLocalizations.daysAgo(days);
+      return daysAgo(days);
     }
     final hours = difference.inHours;
     if (hours >= 1) {
-      return appLocalizations.hoursAgo(hours);
+      return hoursAgo(hours);
     }
     final minutes = difference.inMinutes;
     if (minutes >= 1) {
-      return appLocalizations.minutesAgo(minutes);
+      return minutesAgo(minutes);
     }
     return appLocalizations.justNow;
   }
