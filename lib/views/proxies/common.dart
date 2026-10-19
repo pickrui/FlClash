@@ -46,13 +46,6 @@ double getItemHeight(ProxyCardType proxyCardType) {
 double getRowExtent(ProxyCardType proxyCardType) =>
     getItemHeight(proxyCardType) + proxyGridSpacing;
 
-double cardSpacingOf(BuildContext context, ViewMode viewMode) =>
-    switch (viewMode) {
-      ViewMode.mobile => 8.0,
-      ViewMode.laptop => 12.0,
-      ViewMode.desktop => 16.0,
-    }.mAp(context);
-
 class GroupOffsets {
   const GroupOffsets(this.groups, this.offsets);
 

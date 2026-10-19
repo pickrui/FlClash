@@ -40,7 +40,7 @@ Future<void> showProxiesSheet(BuildContext context, {String? groupName}) async {
   container.read(query.notifier).value = '';
   await showSheet<void>(
     context: context,
-    builder: (_, _) => const ProxiesView(),
+    builder: (_, _) => const ProxiesView(picker: true),
   );
   container.read(query.notifier).value = pageQuery;
 }
