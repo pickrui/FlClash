@@ -11,6 +11,7 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
+import 'package:fl_clash/ui/typography.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 double get listHeaderHeight {
@@ -21,11 +22,17 @@ double get listHeaderHeight {
 double getItemHeight(ProxyCardType proxyCardType) {
   final measure = globalState.measure;
   final baseHeight =
-      16 + measure.bodyMediumHeight * 2 + measure.bodySmallHeight + 8 + 4;
+      16 +
+      measure.textHeight(AppTextStyle.subheadline) * 2 +
+      measure.textHeight(AppTextStyle.footnote) +
+      8 +
+      4;
   return switch (proxyCardType) {
-    ProxyCardType.loose => baseHeight + measure.labelSmallHeight + 6,
+    ProxyCardType.loose =>
+      baseHeight + measure.textHeight(AppTextStyle.caption2) + 6,
     ProxyCardType.standard => baseHeight,
-    ProxyCardType.compact => baseHeight - measure.bodyMediumHeight,
+    ProxyCardType.compact =>
+      baseHeight - measure.textHeight(AppTextStyle.subheadline),
   };
 }
 

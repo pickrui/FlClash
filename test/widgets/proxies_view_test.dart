@@ -395,9 +395,9 @@ void main() {
     },
   );
 
-  testWidgets(
-    'arrow right enters measured latency and enter retests without selecting',
-    (tester) async {
+  for (final type in ProxyCardType.values) {
+    testWidgets('arrow right enters measured latency and enter retests without '
+        'selecting: ${type.name}', (tester) async {
       final action = _DelayAction();
       final container = ProviderContainer(
         overrides: [
@@ -417,17 +417,17 @@ void main() {
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: const _TestApp(
+          child: _TestApp(
             child: Center(
               child: SizedBox(
                 width: 240,
-                height: 100,
+                height: 120,
                 child: ProxyCard(
                   groupName: 'Group',
                   testUrl: 'https://example.com',
-                  proxy: Proxy(name: 'Node', type: 'Shadowsocks'),
+                  proxy: const Proxy(name: 'Node', type: 'Shadowsocks'),
                   groupType: GroupType.Selector,
-                  type: ProxyCardType.compact,
+                  type: type,
                 ),
               ),
             ),
@@ -442,7 +442,15 @@ void main() {
       await tester.pump();
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
       await tester.pump();
-      expect(FocusManager.instance.primaryFocus, isA<SkipTraversalFocusNode>());
+      final focusNode = FocusManager.instance.primaryFocus;
+      expect(focusNode, isA<SkipTraversalFocusNode>());
+      expect(
+        find.descendant(
+          of: find.byWidget(focusNode!.context!.widget),
+          matching: find.text('42 ms'),
+        ),
+        findsOneWidget,
+      );
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       await tester.pumpAndSettle();
       expect(action.delays, ['Node']);
@@ -450,8 +458,58 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
-    },
-  );
+    });
+  }
+
+  testWidgets('tab walks card to card past an untested delay control', (
+    tester,
+  ) async {
+    final container = ProviderContainer(
+      overrides: [
+        for (final name in ['Group', 'Other'])
+          getSelectedProxyNameProvider(name).overrideWith((_) => ''),
+      ],
+    );
+    addTearDown(container.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: _TestApp(
+          child: Column(
+            children: [
+              for (final name in ['Node', 'Next'])
+                SizedBox(
+                  width: 240,
+                  height: 100,
+                  child: ProxyCard(
+                    groupName: name == 'Node' ? 'Group' : 'Other',
+                    testUrl: 'https://example.com',
+                    proxy: Proxy(name: name, type: 'Shadowsocks'),
+                    groupType: GroupType.Selector,
+                    type: ProxyCardType.standard,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byGlyph(AppGlyphs.bolt), findsNWidgets(2));
+    Focus.of(tester.element(find.text('Node', findRichText: true)))
+        .requestFocus();
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(
+      FocusManager.instance.primaryFocus?.context
+          ?.findAncestorWidgetOfExactType<ProxyCard>()
+          ?.proxy
+          .name,
+      'Next',
+    );
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 
   testWidgets('the bar delay test spins while the current group is tested '
       'and leaves the tab view built', (tester) async {

@@ -539,19 +539,6 @@ String? getSelectedProxyName(Ref ref, String groupName) {
 }
 
 @riverpod
-String getProxyDesc(Ref ref, Proxy proxy) {
-  if (!GroupTypeExtension.valueList.contains(proxy.type)) {
-    return proxy.type;
-  } else {
-    final groups = ref.watch(groupsProvider);
-    final index = groups.indexWhere((element) => element.name == proxy.name);
-    if (index == -1) return proxy.type;
-    final state = ref.watch(realSelectedProxyStateProvider(proxy.name));
-    return "${proxy.type}(${state.proxyName.isNotEmpty ? state.proxyName : '*'})";
-  }
-}
-
-@riverpod
 VM3<bool, int, bool> checkIp(Ref ref) {
   final isInit = ref.watch(initProvider);
   final checkIpNum = ref.watch(checkIpNumProvider);
