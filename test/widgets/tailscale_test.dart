@@ -5,12 +5,15 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/tailscale.dart';
 import 'package:fl_clash/views/tailscale/network.dart';
 import 'package:fl_clash/views/tailscale/tailscale.dart';
+import 'package:fl_clash/ui/chip.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/inherited.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,6 +21,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../helpers/fake_tailscale_backend.dart';
+import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
 
 const _home = TailscaleNetwork(id: 'home', name: 'Home', stateId: 'state');
@@ -73,6 +77,12 @@ Future<(FakeTailscaleBackend, ProviderContainer)> _pump(
     ProviderScope.containerOf(tester.element(find.byWidget(page))),
   );
 }
+
+/// The text field of the form row titled [label].
+Finder _field(String label) => find.descendant(
+  of: find.widgetWithText(FormRow, label),
+  matching: find.byType(TextField),
+);
 
 Future<void> _unmount(WidgetTester tester) async {
   await tester.pumpWidget(const SizedBox());
@@ -135,7 +145,7 @@ void main() {
     );
     expect(
       tester
-          .widget<IconButton>(find.widgetWithIcon(IconButton, Icons.check))
+          .widget<IconButton>(find.widgetWithGlyph(IconButton, AppGlyphs.check))
           .onPressed,
       isNull,
     );
@@ -153,7 +163,7 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(
       tester
-          .widget<IconButton>(find.widgetWithIcon(IconButton, Icons.check))
+          .widget<IconButton>(find.widgetWithGlyph(IconButton, AppGlyphs.check))
           .onPressed,
       isNull,
     );
@@ -163,7 +173,7 @@ void main() {
     expect(find.text('Operation failed'), findsNothing);
     expect(
       tester
-          .widget<IconButton>(find.widgetWithIcon(IconButton, Icons.check))
+          .widget<IconButton>(find.widgetWithGlyph(IconButton, AppGlyphs.check))
           .onPressed,
       isNotNull,
     );
@@ -324,10 +334,7 @@ void main() {
 
   testWidgets('an invalid name disables sign-in and says why', (tester) async {
     await _pump(tester, const TailscaleNetworkPage());
-    await tester.enterText(
-      find.widgetWithText(TextField, 'Network name'),
-      'a,b',
-    );
+    await tester.enterText(_field('Network name'), 'a,b');
     await tester.pump();
     final button = tester.widget<FilledButton>(
       find.widgetWithText(FilledButton, 'Save and log in'),
@@ -360,14 +367,8 @@ void main() {
       const TailscaleNetworkPage(),
       status: const TailscaleStatus(rawState: 'Idle'),
     );
-    await tester.enterText(
-      find.widgetWithText(TextField, 'Network name'),
-      'Lab',
-    );
-    await tester.enterText(
-      find.widgetWithText(TextField, 'Device name'),
-      'Work-Laptop',
-    );
+    await tester.enterText(_field('Network name'), 'Lab');
+    await tester.enterText(_field('Device name'), 'Work-Laptop');
     await tester.pump();
     await tester.tap(find.widgetWithText(FilledButton, 'Save and log in'));
     await tester.pump();
@@ -418,14 +419,14 @@ void main() {
     expect(find.text('flclash-macos.tail1234.ts.net'), findsOneWidget);
     expect(find.text('100.64.0.1'), findsOneWidget);
     // Signed in, the account offers only signing out.
-    expect(find.widgetWithText(OutlinedButton, 'Log out'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Log out'), findsOneWidget);
     expect(find.text('Save and log in'), findsNothing);
 
     await tester.tap(find.text('Devices (1)'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Direct'), findsOneWidget);
     // Offered exit nodes can be picked without typing their names.
-    await tester.tap(find.widgetWithText(ActionChip, 'office'));
+    await tester.tap(find.widgetWithText(TonalChip, 'office'));
     await tester.pump();
     expect(find.text('Allow local network access'), findsOneWidget);
     await _unmount(tester);
@@ -550,10 +551,7 @@ void main() {
       );
       if (saving) {
         backend.writeAuthKeyHandler = () => pendingKey.future;
-        await tester.enterText(
-          find.widgetWithText(TextField, 'Auth key'),
-          'tskey-auth-fixture',
-        );
+        await tester.enterText(_field('Auth key'), 'tskey-auth-fixture');
       } else {
         backend.statusHandler = (_) => pendingStatus.future;
       }

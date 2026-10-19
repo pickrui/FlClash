@@ -7,7 +7,12 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/features/form/form_row.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/navigator.dart';
+import 'package:fl_clash/ui/surface.dart';
+import 'package:fl_clash/ui/typography.dart';
+import 'package:fl_clash/ui/navigation_dock.dart';
 import 'package:fl_clash/core/core.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
@@ -411,45 +416,35 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
     return fields.join(language == 'zh' || language == 'ja' ? '、' : ', ');
   }
 
-  Widget _textField({
-    required TextEditingController controller,
-    required String label,
-    String? hint,
-    String? helper,
-    String? error,
-    bool obscure = false,
-    TextInputType? keyboardType,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-      child: TextField(
-        controller: controller,
-        obscureText: obscure,
-        autocorrect: false,
-        enableSuggestions: !obscure,
-        keyboardType: keyboardType,
-        enabled: !_busy,
-        onChanged: (_) => setState(() {}),
-        decoration: InputDecoration(
-          border: const OutlineInputBorder(),
-          labelText: label,
-          hintText: hint,
-          helperText: helper,
-          helperMaxLines: 3,
-          errorText: error,
-          errorMaxLines: 3,
-        ),
-      ),
-    );
-  }
+  bool _showPeers = false;
+
+  void _refresh(String _) => setState(() {});
 
   Widget _footnote(String text, {Color? color}) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-      child: Text(
-        text,
-        style: context.textTheme.bodySmall?.copyWith(
-          color: color ?? context.colorScheme.onSurfaceVariant,
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      child: Text(text, style: context.listCaptionStyle.copyWith(color: color)),
+    );
+  }
+
+  Widget _fieldRow({
+    required String title,
+    required TextEditingController controller,
+    String? hint,
+    bool invalid = false,
+    TextInputType? keyboardType,
+  }) {
+    return _FormField(
+      enabled: !_busy,
+      child: FormRow(
+        title: title,
+        invalid: invalid,
+        trailing: FormRowTextField(
+          controller: controller,
+          hintText: hint,
+          autocorrect: false,
+          keyboardType: keyboardType,
+          onChanged: _refresh,
         ),
       ),
     );
@@ -460,28 +455,57 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
     final self = status?.self;
     final peers = status?.peers ?? const <TailscaleDevice>[];
     final error = _statusError;
+    final running = status != null && status.isRunning && self != null;
+    final selectable = context.listSubtitleStyle;
     return [
-      ListHeader(title: l.tailscaleThisDevice),
-      ListItem(
-        title: Text(l.tailscaleStatus),
-        subtitle: _statusLoaded && status == null && error == null
-            ? Text(l.tailscaleNotAppliedHint)
-            : null,
-        trailing: _statusLoaded
-            ? Text(
-                error != null
-                    ? l.tailscaleUnavailable
-                    : tailscaleStatusLabel(l, status),
-                style: TextStyle(
-                  color: error != null
-                      ? context.colorScheme.error
-                      : tailscaleStatusColor(context, status),
-                ),
-              )
-            : const SizedBox.square(
-                dimension: 16,
-                child: CircularProgressIndicator(strokeWidth: 2),
+      generateSection(
+        title: l.tailscaleThisDevice,
+        items: [
+          ListItem(
+            title: Text(l.tailscaleStatus),
+            subtitle: _statusLoaded && status == null && error == null
+                ? Text(l.tailscaleNotAppliedHint)
+                : null,
+            trailing: _statusLoaded
+                ? Text(
+                    error != null
+                        ? l.tailscaleUnavailable
+                        : tailscaleStatusLabel(l, status),
+                    style: context.listSubtitleStyle.copyWith(
+                      color: error != null
+                          ? context.colorScheme.error
+                          : tailscaleStatusColor(context, status),
+                    ),
+                  )
+                : const CommonCircleLoading(size: 18),
+          ),
+          if (running) ...[
+            if (status.tailnet.isNotEmpty)
+              ListItem(
+                title: const Text('Tailnet'),
+                subtitle: Text(status.tailnet),
               ),
+            ListItem(
+              title: Text(l.tailscaleDeviceName),
+              subtitle: SelectableText(self.name, style: selectable),
+            ),
+            ListItem(
+              title: const Text('Tailscale IP'),
+              subtitle: SelectableText(
+                self.addresses.join('\n'),
+                style: selectable,
+              ),
+            ),
+            if (peers.isNotEmpty)
+              ListItem(
+                title: Text(l.tailscaleDevices(peers.length)),
+                trailing: GlyphIcon(
+                  _showPeers ? AppGlyphs.chevronUp : AppGlyphs.chevronDown,
+                ),
+                onTap: () => setState(() => _showPeers = !_showPeers),
+              ),
+          ],
+        ],
       ),
       for (final message in [
         ?error,
@@ -489,38 +513,26 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
         if (status != null && !status.isRunning) ...status.health,
       ])
         _footnote(message, color: context.colorScheme.error),
-      if (status != null && status.isRunning && self != null) ...[
-        if (status.tailnet.isNotEmpty)
-          ListItem(
-            title: const Text('Tailnet'),
-            subtitle: Text(status.tailnet),
-          ),
-        ListItem(
-          title: Text(l.tailscaleDeviceName),
-          subtitle: SelectableText(self.name),
-        ),
-        ListItem(
-          title: const Text('Tailscale IP'),
-          subtitle: SelectableText(self.addresses.join('\n')),
-        ),
-        if (peers.isNotEmpty)
-          ExpansionTile(
-            title: Text(l.tailscaleDevices(peers.length)),
-            children: [for (final peer in peers) _buildPeer(l, peer)],
-          ),
+      if (running && peers.isNotEmpty && _showPeers) ...[
+        const SizedBox(height: 12),
+        generateSection(items: [for (final peer in peers) _buildPeer(l, peer)]),
       ],
     ];
   }
 
   Widget _buildPeer(AppLocalizations l, TailscaleDevice peer) {
     final address = peer.addresses.firstOrNull ?? '';
-    return ListTile(
-      dense: true,
-      leading: Icon(
-        Icons.circle,
-        size: 10,
-        color: peer.online ? Colors.green : context.colorScheme.outline,
-        semanticLabel: peer.online ? l.tailscaleOnline : l.tailscaleOffline,
+    final colorScheme = context.colorScheme;
+    return ListItem(
+      leading: Semantics(
+        label: peer.online ? l.tailscaleOnline : l.tailscaleOffline,
+        child: DecoratedBox(
+          decoration: ShapeDecoration(
+            color: peer.online ? colorScheme.success : colorScheme.outline,
+            shape: AppShape.circle,
+          ),
+          child: const SizedBox.square(dimension: 10),
+        ),
       ),
       title: Text(peer.displayName),
       subtitle: Text(
@@ -541,7 +553,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
           ? null
           : IconButton(
               tooltip: l.copy,
-              icon: const Icon(Icons.copy, size: 18),
+              icon: const GlyphIcon(AppGlyphs.copy, size: 20),
               onPressed: () => _copy(address),
             ),
     );
@@ -549,130 +561,151 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
 
   List<Widget> _buildFormSection(AppLocalizations l) {
     final exitOptions = _status?.exitNodeOptions ?? const <TailscaleDevice>[];
+    final nameError = _nameError(l);
+    final error = context.colorScheme.error;
     return [
-      const ListHeader(title: 'Tailnet'),
-      _textField(
-        controller: _name,
-        label: l.tailscaleNetworkName,
-        error: _nameError(l),
-      ),
-      _textField(
-        controller: _hostname,
-        label: l.tailscaleDeviceName,
-        hint: defaultTailscaleHostname(Platform.operatingSystem),
-        error: _hostnameValid ? null : l.tailscaleHostnameInvalid,
-      ),
-      Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l.tailscaleLoginMethod, style: context.textTheme.labelLarge),
-            const SizedBox(height: 8),
-            SegmentedButton<TailscaleLoginMethod>(
-              segments: [
-                ButtonSegment(
-                  value: TailscaleLoginMethod.interactive,
-                  label: Text(l.tailscaleInteractiveLogin),
-                ),
-                ButtonSegment(
-                  value: TailscaleLoginMethod.authKey,
-                  label: Text(l.tailscaleAuthKey),
-                ),
-              ],
-              selected: {_loginMethod},
-              onSelectionChanged: _busy
-                  ? null
-                  : (selection) =>
-                        setState(() => _loginMethod = selection.first),
-            ),
-          ],
-        ),
-      ),
-      if (_loginMethod == TailscaleLoginMethod.authKey)
-        _textField(
-          controller: _authKey,
-          label: l.tailscaleAuthKey,
-          hint: 'tskey-auth-…',
-          obscure: true,
-          helper: _hasSavedAuthKey == true ? l.tailscaleAuthKeySaved : null,
-          error: _authKeyValid ? null : l.tailscaleAuthKeyInvalid,
-        ),
-      if (_loginMethod == TailscaleLoginMethod.authKey && !_authKeyStateReady)
-        ListItem(
-          title: Text(
-            _authKeyLoadError != null ? l.operationFailed : l.loading,
-          ),
-          trailing: _authKeyLoadError != null
-              ? TextButton(
-                  onPressed: _busy || _saved == null
-                      ? null
-                      : () => _loadSavedAuthKey(_saved!),
-                  child: Text(l.refresh),
-                )
-              : const SizedBox.square(
-                  dimension: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-        ),
-      _footnote(l.tailscaleLoginFooter),
-      ListItem.toggle(
-        title: Text(l.tailscaleAutoRoute),
-        subtitle: Text(l.tailscaleAutoRouteDesc),
-        value: _autoRoute,
-        onChanged: (value) => setState(() => _autoRoute = value),
-      ),
-      _textField(
-        controller: _exitNode,
-        label: l.tailscaleExitNode,
-        helper: l.tailscaleExitNodeDesc,
-        error: _exitNodeValid ? null : l.tailscaleExitNodeDesc,
-      ),
-      if (exitOptions.isNotEmpty)
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 4,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              Text(
-                l.tailscaleAvailableExitNodes,
-                style: context.textTheme.bodySmall,
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          generateSection(
+            title: 'Tailnet',
+            items: [
+              _fieldRow(
+                title: l.tailscaleNetworkName,
+                controller: _name,
+                invalid: nameError != null,
               ),
-              for (final value in [
-                tailscaleExitNodeAuto,
-                for (final peer in exitOptions) peer.displayName,
-              ])
-                ActionChip(
-                  label: Text(value),
-                  onPressed: _busy
-                      ? null
-                      : () => setState(() => _exitNode.text = value),
+              _fieldRow(
+                title: l.tailscaleDeviceName,
+                controller: _hostname,
+                hint: defaultTailscaleHostname(Platform.operatingSystem),
+                invalid: !_hostnameValid,
+              ),
+            ],
+          ),
+          if (nameError != null) _footnote(nameError, color: error),
+          if (!_hostnameValid)
+            _footnote(l.tailscaleHostnameInvalid, color: error),
+          ListHeader(title: l.tailscaleLoginMethod),
+          _FormField(
+            enabled: !_busy,
+            child: SegmentedControl<TailscaleLoginMethod>(
+              segments: [
+                (TailscaleLoginMethod.interactive, l.tailscaleInteractiveLogin),
+                (TailscaleLoginMethod.authKey, l.tailscaleAuthKey),
+              ],
+              value: _loginMethod,
+              onChanged: (method) => setState(() => _loginMethod = method),
+            ),
+          ),
+          if (_loginMethod == TailscaleLoginMethod.authKey) ...[
+            const SizedBox(height: 12),
+            generateSection(
+              items: [
+                _FormField(
+                  enabled: !_busy,
+                  child: FormRow(
+                    title: l.tailscaleAuthKey,
+                    invalid: !_authKeyValid,
+                    trailing: _AuthKeyField(
+                      controller: _authKey,
+                      onChanged: _refresh,
+                    ),
+                  ),
+                ),
+                if (!_authKeyStateReady)
+                  ListItem(
+                    title: Text(
+                      _authKeyLoadError != null ? l.operationFailed : l.loading,
+                    ),
+                    trailing: _authKeyLoadError != null
+                        ? TextButton(
+                            onPressed: _busy || _saved == null
+                                ? null
+                                : () => _loadSavedAuthKey(_saved!),
+                            child: Text(l.refresh),
+                          )
+                        : const CommonCircleLoading(size: 18),
+                  ),
+              ],
+            ),
+            if (_hasSavedAuthKey == true) _footnote(l.tailscaleAuthKeySaved),
+            if (!_authKeyValid)
+              _footnote(l.tailscaleAuthKeyInvalid, color: error),
+          ],
+          _footnote(l.tailscaleLoginFooter),
+          const SizedBox(height: 24),
+          generateSection(
+            items: [
+              ListItem.toggle(
+                title: Text(l.tailscaleAutoRoute),
+                subtitle: Text(l.tailscaleAutoRouteDesc),
+                value: _autoRoute,
+                onChanged: (value) => setState(() => _autoRoute = value),
+              ),
+              _fieldRow(
+                title: l.tailscaleExitNode,
+                controller: _exitNode,
+                invalid: !_exitNodeValid,
+              ),
+              if (_normalizedExitNode().isNotEmpty)
+                ListItem.toggle(
+                  title: Text(l.tailscaleExitNodeAllowLan),
+                  value: _allowLan,
+                  onChanged: (value) => setState(() => _allowLan = value),
                 ),
             ],
           ),
-        ),
-      if (_normalizedExitNode().isNotEmpty)
-        ListItem.toggle(
-          title: Text(l.tailscaleExitNodeAllowLan),
-          value: _allowLan,
-          onChanged: (value) => setState(() => _allowLan = value),
-        ),
-      ExpansionTile(
-        title: Text(l.tailscaleAdvanced),
-        initiallyExpanded: _controlUrl.text.isNotEmpty || !_controlUrlValid,
-        children: [
-          _textField(
-            controller: _controlUrl,
-            label: l.tailscaleControlUrl,
-            hint: tailscaleDefaultControlUrl,
-            keyboardType: TextInputType.url,
-            error: _controlUrlValid ? null : l.urlTip(l.tailscaleControlUrl),
+          _footnote(
+            l.tailscaleExitNodeDesc,
+            color: _exitNodeValid ? null : error,
           ),
+          if (exitOptions.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 6,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Text(
+                    l.tailscaleAvailableExitNodes,
+                    style: context.listCaptionStyle,
+                  ),
+                  for (final value in [
+                    tailscaleExitNodeAuto,
+                    for (final peer in exitOptions) peer.displayName,
+                  ])
+                    TonalChip(
+                      label: value,
+                      color: context.raisedSurfaceLevel.colorOf(
+                        context.colorScheme,
+                      ),
+                      foregroundColor: context.colorScheme.primary,
+                      onPressed: _busy
+                          ? null
+                          : () => setState(() => _exitNode.text = value),
+                    ),
+                ],
+              ),
+            ),
+          generateSection(
+            title: l.tailscaleAdvanced,
+            items: [
+              _fieldRow(
+                title: l.tailscaleControlUrl,
+                controller: _controlUrl,
+                hint: tailscaleDefaultControlUrl,
+                keyboardType: TextInputType.url,
+                invalid: !_controlUrlValid,
+              ),
+            ],
+          ),
+          if (!_controlUrlValid)
+            _footnote(l.urlTip(l.tailscaleControlUrl), color: error),
+          _footnote(l.tailscaleCredentialsFooter),
         ],
       ),
-      _footnote(l.tailscaleCredentialsFooter),
     ];
   }
 
@@ -682,95 +715,124 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
     final signedIn = !signingIn && status?.isSignedIn == true;
     final authUrl = status?.awaitsBrowser == true ? status!.authUrl : null;
     final invalid = _invalidFields(l);
+    final colorScheme = context.colorScheme;
+    final body = AppTextStyle.subheadline
+        .of(context)
+        .copyWith(color: colorScheme.onSurface);
+    final level = context.raisedSurfaceLevel;
     final children = <Widget>[
       if (signingIn)
         Row(
+          spacing: 12,
           children: [
-            const SizedBox.square(
-              dimension: 18,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-            const SizedBox(width: 12),
+            const CommonCircleLoading(size: 18),
             Expanded(
               child: Text(
                 authUrl != null
                     ? l.tailscaleLoginWaiting
                     : l.tailscaleSigningIn,
+                style: body,
               ),
             ),
           ],
         )
       else if (signedIn)
-        Text(l.tailscaleSignedIn)
+        Text(l.tailscaleSignedIn, style: body)
       else if (status?.state == TailscaleState.needsMachineAuth)
-        Text(l.tailscaleNeedsApproval),
+        Text(l.tailscaleNeedsApproval, style: body),
       if (authUrl != null) ...[
-        const SizedBox(height: 12),
         Wrap(
           spacing: 8,
           runSpacing: 8,
           children: [
-            FilledButton.tonalIcon(
-              onPressed: () => _openLoginPage(authUrl),
-              icon: const Icon(Icons.open_in_new),
-              label: Text(l.tailscaleOpenLoginPage),
+            SurfaceScope(
+              level: level,
+              child: TonalButton(
+                glyph: AppGlyphs.openExternal,
+                label: l.tailscaleOpenLoginPage,
+                onPressed: () => _openLoginPage(authUrl),
+              ),
             ),
-            OutlinedButton.icon(
-              onPressed: () => _copy(authUrl),
-              icon: const Icon(Icons.copy),
-              label: Text(l.copyLink),
+            SurfaceScope(
+              level: level,
+              child: TonalButton(
+                glyph: AppGlyphs.copy,
+                label: l.copyLink,
+                onPressed: () => _copy(authUrl),
+              ),
             ),
           ],
         ),
-        const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.all(8),
-          color: Colors.white,
-          child: QrImageView(
-            data: authUrl,
-            version: QrVersions.auto,
-            size: 180,
-            backgroundColor: Colors.white,
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            decoration: const ShapeDecoration(
+              color: Colors.white,
+              shape: AppShape.lg,
+            ),
+            child: QrImageView(
+              data: authUrl,
+              version: QrVersions.auto,
+              size: 180,
+              backgroundColor: Colors.white,
+            ),
           ),
         ),
       ],
-      const SizedBox(height: 12),
       if (signingIn)
-        TextButton(onPressed: () => setState(_endLogin), child: Text(l.cancel))
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: TextButton(
+            onPressed: () => setState(_endLogin),
+            child: Text(l.cancel),
+          ),
+        )
       else if (signedIn)
-        OutlinedButton(
-          onPressed: _busy ? null : _logout,
-          child: Text(l.tailscaleLogout),
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: SurfaceScope(
+            level: level,
+            child: TonalButton(
+              label: l.tailscaleLogout,
+              onPressed: _busy ? null : _logout,
+            ),
+          ),
         )
       else ...[
-        FilledButton(
+        _PrimaryPill(
+          label: l.tailscaleSaveAndLogin,
           onPressed: _busy || !_authKeyStateReady || invalid.isNotEmpty
               ? null
               : _saveAndLogin,
-          child: Text(l.tailscaleSaveAndLogin),
         ),
-        const SizedBox(height: 8),
         Text(
           invalid.isNotEmpty
               ? l.tailscaleCheckSettings(_joinFields(invalid))
               : _needsAuthKey
               ? l.tailscaleEnterAuthKey
               : l.tailscaleLoginHint,
-          style: context.textTheme.bodySmall?.copyWith(
-            color: invalid.isNotEmpty
-                ? context.colorScheme.error
-                : context.colorScheme.onSurfaceVariant,
+          style: context.listCaptionStyle.copyWith(
+            color: invalid.isNotEmpty ? colorScheme.error : null,
           ),
         ),
       ],
     ];
     return [
       ListHeader(title: l.tailscaleAccount),
-      Padding(
-        padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: children,
+      Container(
+        padding: const EdgeInsets.all(16),
+        decoration: ShapeDecoration(
+          color: level.colorOf(colorScheme),
+          shape: AppShape.xl,
+        ),
+        child: SurfaceScope(
+          level: level,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 12,
+            children: children,
+          ),
         ),
       ),
     ];
@@ -788,41 +850,130 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
     return CommonScaffold(
       title: saved?.name ?? l.tailscaleAddNetwork,
       isLoading: _busy,
-      actions: [
-        IconButton(
-          tooltip: l.save,
-          onPressed:
-              _busy || !_authKeyStateReady || _invalidFields(l).isNotEmpty
-              ? null
-              : () => unawaited(_save()),
-          icon: const Icon(Icons.check),
-        ),
-      ],
+      confirmationAction: IconButtonData(
+        glyph: AppGlyphs.check,
+        tooltip: l.save,
+        onPressed: _busy || !_authKeyStateReady || _invalidFields(l).isNotEmpty
+            ? null
+            : () => unawaited(_save()),
+      ),
       body: ListView(
-        padding: EdgeInsets.only(top: context.contentTopPadding, bottom: 24),
+        padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 24),
         children: [
           if (saved != null) ..._buildDeviceSection(l),
           ..._buildFormSection(l),
           ..._buildAccountSection(l),
-          const Divider(height: 0),
-          ListItem(
-            leading: const Icon(Icons.help_outline),
-            title: Text(l.tailscaleGuide),
-            onTap: () => openTailscaleGuide(context),
+          const SizedBox(height: 24),
+          generateSection(
+            items: [
+              ListItem(
+                leading: const GlyphIcon(AppGlyphs.info),
+                title: Text(l.tailscaleGuide),
+                trailing: const GlyphIcon(AppGlyphs.chevronForward),
+                onTap: () => openTailscaleGuide(context),
+              ),
+              if (saved != null)
+                ListItem(
+                  title: Text(
+                    l.tailscaleRemoveNetwork,
+                    style: context.listTitleStyle.copyWith(
+                      color: context.colorScheme.destructive,
+                    ),
+                  ),
+                  onTap: _busy ? null : _remove,
+                ),
+            ],
           ),
-          if (saved != null)
-            ListItem(
-              leading: Icon(
-                Icons.delete_outline,
-                color: context.colorScheme.error,
-              ),
-              title: Text(
-                l.tailscaleRemoveNetwork,
-                style: TextStyle(color: context.colorScheme.error),
-              ),
-              onTap: _busy ? null : _remove,
-            ),
         ],
+      ),
+    );
+  }
+}
+
+/// The auth key at the end of its form row, hidden until shown.
+class _AuthKeyField extends StatefulWidget {
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+
+  const _AuthKeyField({required this.controller, required this.onChanged});
+
+  @override
+  State<_AuthKeyField> createState() => _AuthKeyFieldState();
+}
+
+class _AuthKeyFieldState extends State<_AuthKeyField> {
+  var _obscure = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: FormRowTextField(
+            controller: widget.controller,
+            hintText: 'tskey-auth-…',
+            obscureText: _obscure,
+            autocorrect: false,
+            enableSuggestions: false,
+            onChanged: widget.onChanged,
+          ),
+        ),
+        CommonMinIconButtonTheme(
+          child: VisibilityToggleButton(
+            obscureText: _obscure,
+            onPressed: () => setState(() => _obscure = !_obscure),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// The filled pill of the one action the account section is for.
+class _PrimaryPill extends StatelessWidget {
+  final String label;
+  final VoidCallback? onPressed;
+
+  const _PrimaryPill({required this.label, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    final size = TonalButtonSize.bar.button;
+    return ElasticButton(
+      enabled: onPressed != null,
+      child: FilledButton(
+        onPressed: onPressed,
+        style: FilledButton.styleFrom(
+          minimumSize: Size(size, size),
+          shape: AppShape.full,
+          textStyle: AppTextStyle.body.of(context, emphasized: true),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+        child: Text(label),
+      ),
+    );
+  }
+}
+
+/// A field that stops taking input while the page saves or signs in.
+class _FormField extends StatelessWidget {
+  final bool enabled;
+  final Widget child;
+
+  const _FormField({required this.enabled, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return ExcludeFocus(
+      excluding: !enabled,
+      child: IgnorePointer(
+        ignoring: !enabled,
+        child: AnimatedOpacity(
+          opacity: enabled ? 1 : 0.5,
+          duration: context.motionDuration(midDuration),
+          child: child,
+        ),
       ),
     );
   }
