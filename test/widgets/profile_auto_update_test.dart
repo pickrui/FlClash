@@ -19,6 +19,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fl_clash/ui/loading.dart';
 
 import '../helpers/test_app.dart';
 
@@ -104,7 +105,7 @@ void main() {
         await tester.pump();
         expect(reads, hasLength(1));
         expect(_saveButton(tester).onPressed, isNull);
-        expect(find.byType(CircularProgressIndicator), findsOneWidget);
+        expect(find.byType(CommonCircleLoading), findsOneWidget);
         expect(find.byType(Switch), findsNothing);
         if (failFirst) {
           reads.single.completeError(StateError('fixture storage unavailable'));
@@ -171,8 +172,7 @@ void main() {
       );
       for (
         var attempt = 0;
-        attempt < 40 &&
-            find.byType(CircularProgressIndicator).evaluate().isNotEmpty;
+        attempt < 40 && find.byType(CommonCircleLoading).evaluate().isNotEmpty;
         attempt++
       ) {
         await tester.runAsync(

@@ -55,7 +55,7 @@ class _RequestsViewState extends ConsumerState<RequestsView>
     _requests = ref.read(requestsProvider).list;
     _scrollController =
         widget.scrollController ??
-        ScrollController(initialScrollOffset: double.maxFinite);
+        sheetScrollController(context, initialScrollOffset: double.maxFinite);
     _requestsStateNotifier.value = _requestsStateNotifier.value.copyWith(
       trackerInfos: _requests,
     );

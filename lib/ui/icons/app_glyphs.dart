@@ -1187,6 +1187,35 @@ abstract final class AppGlyphs {
     GlyphPath('M9 11V7A3 3 0 0 1 15 7V11', role: GlyphRole.line),
   ]);
 
+  static const wallet = Glyph([
+    GlyphBox(3, 6, 21, 20, 2.5),
+    GlyphPath('M3 9V6A2 2 0 0 1 5 4H18V6', role: GlyphRole.line),
+    GlyphPath('M21 10H16A3 3 0 0 0 16 16H21', role: GlyphRole.detail),
+    GlyphCircle(16, 13, 0.9, role: GlyphRole.detail, solid: true),
+  ]);
+
+  static const coins = Glyph([
+    GlyphCircle(9, 9, 6),
+    GlyphPath('M15 8A6 6 0 1 1 8 15', role: GlyphRole.line),
+    GlyphPath('M7 9H11M9 6.8V11.2', role: GlyphRole.detail),
+    GlyphPath('M15 12V18M13 15H17', role: GlyphRole.line),
+  ]);
+
+  static const chat = Glyph([
+    GlyphPath(
+      'M6 4H18A3 3 0 0 1 21 7V15A3 3 0 0 1 18 18H10L6 21V18'
+      'A3 3 0 0 1 3 15V7A3 3 0 0 1 6 4Z',
+    ),
+    GlyphCircle(8, 11, 0.9, role: GlyphRole.detail, solid: true),
+    GlyphCircle(12, 11, 0.9, role: GlyphRole.detail, solid: true),
+    GlyphCircle(16, 11, 0.9, role: GlyphRole.detail, solid: true),
+  ]);
+
+  static const paymentCard = Glyph([
+    GlyphBox(3, 5, 21, 19, 2.6),
+    GlyphPath('M3 10H21M6 15H10', role: GlyphRole.detail),
+  ]);
+
   static const sparkle = Glyph([
     GlyphPolyline([
       GlyphVertex(10, 6.4, 0.9),
@@ -1540,6 +1569,16 @@ abstract final class AppGlyphs {
       GlyphVertex(3, 19.5, 2.6),
     ], closed: true),
     GlyphCircle(12, 13.4, 3.4, role: GlyphRole.detail),
+  ]);
+
+  static const cameraOff = Glyph([
+    GlyphPath(
+      'M4 7.5H8.2L9.6 5H14.4L15.8 7.5H18.4A2.6 2.6 0 0 1 21 10.1V17'
+      'M18.4 19.5H5.6A2.6 2.6 0 0 1 3 16.9V10.1',
+      role: GlyphRole.line,
+    ),
+    GlyphPath('M9.6 11A3.4 3.4 0 0 0 14.4 15.8', role: GlyphRole.line),
+    GlyphPath('M3 3L21 21', role: GlyphRole.line),
   ]);
 
   static const qrCode = Glyph([

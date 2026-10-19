@@ -15,6 +15,7 @@ import 'package:fl_clash/plugins/app.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/ui/activate_box.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
+import 'package:fl_clash/ui/loading.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -246,10 +247,7 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(
-                                  Icons.no_photography_outlined,
-                                  size: 48,
-                                ),
+                                const GlyphIcon(AppGlyphs.cameraOff, size: 48),
                                 const SizedBox(height: 16),
                                 Text(
                                   denied
@@ -273,8 +271,11 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
                                         : denied
                                         ? () => app?.openAppSettings()
                                         : _start,
-                                    icon: Icon(
-                                      denied ? Icons.settings : Icons.refresh,
+                                    icon: GlyphIcon(
+                                      denied
+                                          ? AppGlyphs.settings
+                                          : AppGlyphs.refresh,
+                                      fill: 1,
                                     ),
                                     label: Text(denied ? l.settings : l.retry),
                                   ),
@@ -324,10 +325,11 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
                               child: IconButton.filledTonal(
                                 tooltip: l.toggleFlashlight,
                                 onPressed: () => controller.toggleTorch(),
-                                icon: Icon(
+                                icon: GlyphIcon(
                                   state.torchState == TorchState.on
-                                      ? Icons.flash_on
-                                      : Icons.flash_off,
+                                      ? AppGlyphs.torch
+                                      : AppGlyphs.torchOff,
+                                  fill: 1,
                                 ),
                               ),
                             ),
@@ -348,7 +350,7 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
                     leading: IconButton.filledTonal(
                       tooltip: l.close,
                       onPressed: () => Navigator.of(context).pop(),
-                      icon: const GlyphIcon(AppGlyphs.close),
+                      icon: const GlyphIcon(AppGlyphs.close, fill: 1),
                     ),
                     actions: [
                       IconButton.filledTonal(
@@ -357,11 +359,9 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
                         icon: _pickingImage
                             ? const SizedBox.square(
                                 dimension: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
+                                child: CommonCircleLoading(),
                               )
-                            : const GlyphIcon(AppGlyphs.photos),
+                            : const GlyphIcon(AppGlyphs.photos, fill: 1),
                       ),
                     ],
                   ),

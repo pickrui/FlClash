@@ -510,7 +510,7 @@ class _ScriptOptionsPageState extends ConsumerState<ScriptOptionsPage> {
         body: _error != null
             ? ErrorStatus(error: _error!, onRetry: () => _load(refresh: true))
             : defaults == null
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(child: CommonCircleLoading.page())
             : defaults.isEmpty
             ? NullStatus(
                 label: l10n.scriptOptionsEmpty,

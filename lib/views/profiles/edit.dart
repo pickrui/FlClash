@@ -465,7 +465,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
               child: AbsorbPointer(
                 absorbing: busy,
                 child: _loading
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const Center(child: CommonCircleLoading.page())
                     : _loadError != null
                     ? AppBarClearance(
                         child: ErrorStatus(

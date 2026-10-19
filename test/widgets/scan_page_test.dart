@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fl_clash/ui/loading.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
@@ -368,7 +369,7 @@ void main() {
       await tester.pump();
       expect(action.picks, 1);
       expect(platform.running, isFalse);
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(CommonCircleLoading), findsOneWidget);
       platform.emit(_capture(BarcodeType.url, 'https://camera.example'));
       await tester.pump();
       expect(pops, 0);

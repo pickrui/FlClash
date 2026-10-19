@@ -28,7 +28,5 @@ extension BuildContextExtension on BuildContext {
     );
   }
 
-  TextTheme get textTheme => Theme.of(this).textTheme;
-
   AppLocalizations get appLocalizations => AppLocalizations.of(this);
 }

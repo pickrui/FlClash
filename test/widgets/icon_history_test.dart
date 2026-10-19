@@ -9,6 +9,7 @@ import 'package:fl_clash/database/database.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/widgets/icon_history.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fl_clash/ui/loading.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../helpers/test_app.dart';
@@ -31,7 +32,7 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(CommonCircleLoading), findsOneWidget);
       expect(find.text(AppLocalizations.current.noSearchResults), findsNothing);
 
       first.completeError(StateError('fixture database unavailable'));

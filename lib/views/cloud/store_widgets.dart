@@ -340,20 +340,20 @@ class StorePaymentIcon extends StatelessWidget {
     bool matches(List<String> keys) =>
         ids.any((id) => keys.any((key) => id.contains(key)));
     final (icon, color) = method.isCrypto || matches(['usdt', 'crypto', 'coin'])
-        ? (Icons.currency_bitcoin, const Color(0xFF26A17B))
+        ? (AppGlyphs.coins, const Color(0xFF26A17B))
         : matches(['alipay', 'zfb', '支付宝'])
-        ? (Icons.account_balance_wallet, const Color(0xFF1677FF))
+        ? (AppGlyphs.wallet, const Color(0xFF1677FF))
         : matches(['wechat', 'weixin', '微信']) ||
               ids.any((id) => id.startsWith('wx'))
-        ? (Icons.chat, const Color(0xFF07C160))
-        : (Icons.payment, context.colorScheme.primary);
+        ? (AppGlyphs.chat, const Color(0xFF07C160))
+        : (AppGlyphs.paymentCard, context.colorScheme.primary);
     return StoreMethodTile(icon: icon, color: color);
   }
 }
 
 /// A payment method's mark on a tile of its tint, as iOS sets a row's icon.
 class StoreMethodTile extends StatelessWidget {
-  final IconData icon;
+  final Glyph icon;
   final Color color;
 
   const StoreMethodTile({super.key, required this.icon, required this.color});
@@ -366,7 +366,7 @@ class StoreMethodTile extends StatelessWidget {
       decoration: ShapeDecoration(color: color, shape: AppShape.sm),
       child: SizedBox.square(
         dimension: _size,
-        child: Icon(icon, size: 18, color: Colors.white),
+        child: GlyphIcon(icon, size: 18, color: Colors.white),
       ),
     );
   }

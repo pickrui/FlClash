@@ -105,25 +105,27 @@ class Measure {
   double _lineHeight(String key, TextStyle? style) =>
       _lineHeights[key] ??= computeTextSize(Text('X', style: style)).height;
 
-  TextTheme get _textTheme => Theme.of(context).textTheme;
-
   double get bodyLargeHeight =>
-      _lineHeight('bodyLargeHeight', _textTheme.bodyLarge);
+      _lineHeight('bodyLargeHeight', AppTextStyle.body.of(context));
 
   double get bodyMediumHeight =>
-      _lineHeight('bodyMediumHeight', _textTheme.bodyMedium);
+      _lineHeight('bodyMediumHeight', AppTextStyle.subheadline.of(context));
 
   double get bodySmallHeight =>
-      _lineHeight('bodySmallHeight', _textTheme.bodySmall);
+      _lineHeight('bodySmallHeight', AppTextStyle.footnote.of(context));
 
-  double get labelSmallHeight =>
-      _lineHeight('labelSmallHeight', _textTheme.labelSmall);
+  double get labelSmallHeight => _lineHeight(
+    'labelSmallHeight',
+    AppTextStyle.caption2.of(context, emphasized: true),
+  );
 
-  double get titleSmallHeight =>
-      _lineHeight('titleSmallHeight', _textTheme.titleSmall);
+  double get titleSmallHeight => _lineHeight(
+    'titleSmallHeight',
+    AppTextStyle.subheadline.of(context, emphasized: true),
+  );
 
   double get titleMediumHeight =>
-      _lineHeight('titleMediumHeight', _textTheme.titleMedium);
+      _lineHeight('titleMediumHeight', AppTextStyle.headline.of(context));
 }
 
 class MeasureScope extends InheritedWidget {

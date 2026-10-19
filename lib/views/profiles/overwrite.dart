@@ -134,11 +134,7 @@ mixin ProfileRoutingActions<T extends ConsumerStatefulWidget>
       tooltip: appLocalizations.checkRouting,
       onPressed: checking ? null : checkAndApplyRouting,
       icon: checking
-          ? const SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
+          ? const SizedBox(width: 20, height: 20, child: CommonCircleLoading())
           : const GlyphIcon(AppGlyphs.rules),
     ),
   ];
@@ -343,7 +339,7 @@ class _OverwriteModeSelectorState extends ConsumerState<OverwriteModeSelector> {
                             const SizedBox(
                               width: 24,
                               height: 24,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              child: CommonCircleLoading(),
                             )
                           else
                             GlyphIcon(_getIcon(type)),
@@ -788,7 +784,7 @@ Widget _librarySliver<T>({
         padding: const EdgeInsets.all(24),
         child: Center(
           child: state.isLoading
-              ? const CircularProgressIndicator()
+              ? const CommonCircleLoading.page()
               : Text(emptyLabel),
         ),
       ),
@@ -889,7 +885,7 @@ class _EditGlobalAddedRulesState extends ConsumerState<_EditGlobalAddedRules> {
                     },
             )
           : loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CommonCircleLoading.page())
           : NullStatusSwitcher(
               isEmpty: rules.isEmpty,
               isSearching: _query.isNotEmpty,

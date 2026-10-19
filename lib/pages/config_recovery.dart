@@ -291,7 +291,7 @@ class _ConfigRecoveryScreenState extends State<ConfigRecoveryScreen> {
               size: size.icon * 0.8,
               semanticLabel: localizations.loading,
             )
-          : const GlyphIcon(AppGlyphs.refresh),
+          : const GlyphIcon(AppGlyphs.refresh, fill: 1),
       label: Text(localizations.configRecoveryRetry),
     );
   }

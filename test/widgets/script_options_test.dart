@@ -19,6 +19,7 @@ import 'package:fl_clash/views/config/scripts.dart';
 import 'package:fl_clash/widgets/error_status.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fl_clash/ui/loading.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:rust_api/rust_api.dart';
 
@@ -286,7 +287,7 @@ void main() {
           () => files[script.id]!.writeAsString('const fixture = true;'),
         );
         await tester.tap(find.text('Refresh'));
-        await _pumpUntil(tester, find.byType(CircularProgressIndicator));
+        await _pumpUntil(tester, find.byType(CommonCircleLoading));
         for (var attempt = 0; attempt < 100 && evaluations == 0; attempt++) {
           await tester.runAsync(
             () => Future<void>.delayed(const Duration(milliseconds: 10)),
@@ -296,13 +297,13 @@ void main() {
         await tester.pump();
         expect(evaluations, 1);
         expect(find.byType(ErrorStatus), findsNothing);
-        expect(find.byType(CircularProgressIndicator), findsOneWidget);
+        expect(find.byType(CommonCircleLoading), findsOneWidget);
         expect(find.byTooltip('Save'), findsNothing);
         evaluation.complete(
           ScriptEvaluation(config: empty ? '{}' : '{"Allow":true}', logs: []),
         );
         await tester.pumpAndSettle();
-        expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(find.byType(CommonCircleLoading), findsNothing);
         if (empty) {
           expect(
             find.text(AppLocalizations.current.scriptOptionsEmpty),

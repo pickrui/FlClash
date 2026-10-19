@@ -15,6 +15,11 @@ const _scale = 3;
 const _side = 24 * _scale;
 
 final _glyphs = {
+  'wallet': AppGlyphs.wallet,
+  'coins': AppGlyphs.coins,
+  'chat': AppGlyphs.chat,
+  'paymentCard': AppGlyphs.paymentCard,
+  'cameraOff': AppGlyphs.cameraOff,
   'dashboard': AppGlyphs.dashboard,
   'proxies': AppGlyphs.proxies,
   'profiles': AppGlyphs.profiles,

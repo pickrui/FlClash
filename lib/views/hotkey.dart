@@ -295,8 +295,8 @@ class _KeyCap extends StatelessWidget {
         ? colorScheme.error
         : colorScheme.onSurfaceVariant;
     final textStyle = isLarge
-        ? context.textTheme.titleMedium
-        : context.textTheme.labelMedium;
+        ? AppTextStyle.headline.of(context)
+        : AppTextStyle.caption1.of(context, emphasized: true);
     return Container(
       constraints: BoxConstraints(minWidth: side, minHeight: side),
       padding: EdgeInsets.symmetric(horizontal: isLarge ? 12 : 7),
@@ -313,13 +313,7 @@ class _KeyCap extends StatelessWidget {
       child: Align(
         widthFactor: 1,
         heightFactor: 1,
-        child: Text(
-          label,
-          style: textStyle?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: foregroundColor,
-          ),
-        ),
+        child: Text(label, style: textStyle.copyWith(color: foregroundColor)),
       ),
     );
   }

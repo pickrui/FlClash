@@ -63,12 +63,10 @@ class Navigation {
   }) {
     return [
       NavigationItem(
-        icon: const Icon(Icons.space_dashboard),
         label: PageLabel.dashboard,
         builder: (context) => _buildPage(context, PageLabel.dashboard),
       ),
       NavigationItem(
-        icon: const Icon(Icons.article),
         label: PageLabel.proxies,
         builder: (context) => _buildPage(context, PageLabel.proxies),
         modes: hasProxies
@@ -76,46 +74,39 @@ class Navigation {
             : [],
       ),
       NavigationItem(
-        icon: const Icon(Icons.folder),
         label: PageLabel.profiles,
         builder: (context) => _buildPage(context, PageLabel.profiles),
       ),
       NavigationItem(
-        icon: const Icon(Icons.cloud_outlined),
         label: PageLabel.oixCloud,
         builder: (context) => _buildPage(context, PageLabel.oixCloud),
         modes: [NavigationItemMode.mobile, NavigationItemMode.desktop],
       ),
       NavigationItem(
-        icon: const Icon(Icons.view_timeline),
         label: PageLabel.requests,
         builder: (context) => _buildPage(context, PageLabel.requests),
         description: 'requestsDesc',
         modes: [NavigationItemMode.desktop, NavigationItemMode.more],
       ),
       NavigationItem(
-        icon: const Icon(Icons.dns_outlined),
         label: PageLabel.dnsQueries,
         builder: (context) => _buildPage(context, PageLabel.dnsQueries),
         description: 'dnsQueriesDesc',
         modes: [NavigationItemMode.desktop, NavigationItemMode.more],
       ),
       NavigationItem(
-        icon: const Icon(Icons.ballot),
         label: PageLabel.connections,
         builder: (context) => _buildPage(context, PageLabel.connections),
         description: 'connectionsDesc',
         modes: [NavigationItemMode.desktop, NavigationItemMode.more],
       ),
       NavigationItem(
-        icon: const Icon(Icons.storage),
         label: PageLabel.resources,
         description: 'resourcesDesc',
         builder: (context) => _buildPage(context, PageLabel.resources),
         modes: [NavigationItemMode.more],
       ),
       NavigationItem(
-        icon: const Icon(Icons.adb),
         label: PageLabel.logs,
         builder: (context) => _buildPage(context, PageLabel.logs),
         description: 'logsDesc',
@@ -124,7 +115,6 @@ class Navigation {
             : [],
       ),
       NavigationItem(
-        icon: const Icon(Icons.construction),
         label: PageLabel.tools,
         builder: (context) => _buildPage(context, PageLabel.tools),
         modes: [NavigationItemMode.desktop, NavigationItemMode.mobile],

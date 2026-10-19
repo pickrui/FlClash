@@ -248,7 +248,7 @@ class CustomOverwriteContent extends ConsumerWidget {
                 actions: [
                   FilledButton.tonalIcon(
                     onPressed: () => _quickFill(context, ref),
-                    icon: const GlyphIcon(AppGlyphs.sparkle),
+                    icon: const GlyphIcon(AppGlyphs.sparkle, fill: 1),
                     label: Text(appLocalizations.quickFill),
                   ),
                 ],

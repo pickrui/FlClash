@@ -257,7 +257,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
   bool _saving = false;
   String? _error;
   bool _canSaveDraft = false;
-  final _scrollController = ScrollController();
+  late final ScrollController _scrollController;
   static const _filterCheckDelay = Duration(milliseconds: 400);
   Timer? _filterTimer;
   List<String> _latestFilters = const ['', ''];
@@ -266,6 +266,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
   @override
   void initState() {
     super.initState();
+    _scrollController = sheetScrollController(context);
     final group = widget.group;
     _nameController = TextEditingController(text: group?.name ?? '');
     _urlController = TextEditingController();

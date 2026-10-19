@@ -205,9 +205,7 @@ class _AboutHero extends StatelessWidget {
           const SizedBox(height: 20),
           Text(
             appName,
-            style: AppTextStyle.title2
-                .of(context)
-                .copyWith(fontWeight: FontWeight.w700),
+            style: AppTextStyle.title2.of(context, emphasized: true),
           ),
           const SizedBox(height: 10),
           Wrap(
@@ -271,8 +269,8 @@ class _Pill extends StatelessWidget {
         child: Text(
           label,
           style: AppTextStyle.caption1
-              .of(context)
-              .copyWith(color: foregroundColor, fontWeight: FontWeight.w600),
+              .of(context, emphasized: true)
+              .copyWith(color: foregroundColor),
         ),
       ),
     );

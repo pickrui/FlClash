@@ -289,9 +289,9 @@ class _ProviderRow extends StatelessWidget {
       trailing: provider.updateAt.microsecondsSinceEpoch > 0
           ? Text(
               provider.updateAt.lastUpdateTimeDesc,
-              style: context.textTheme.bodySmall?.copyWith(
-                color: context.colorScheme.onSurfaceVariant,
-              ),
+              style: AppTextStyle.footnote
+                  .of(context)
+                  .copyWith(color: context.colorScheme.onSurfaceVariant),
             )
           : null,
     );

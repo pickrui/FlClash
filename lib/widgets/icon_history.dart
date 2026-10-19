@@ -13,6 +13,7 @@ import 'sheet_scaffold.dart';
 import 'icon.dart';
 
 import 'package:fl_clash/ui/null_status.dart';
+import 'package:fl_clash/ui/loading.dart';
 import 'package:fl_clash/widgets/error_status.dart';
 
 class IconHistoryDialog extends StatefulWidget {
@@ -70,8 +71,8 @@ class _IconHistoryDialogState extends State<IconHistoryDialog> {
               builder: (context, snapshot) {
                 if (snapshot.connectionState != ConnectionState.done) {
                   return Center(
-                    child: CircularProgressIndicator(
-                      semanticsLabel: context.appLocalizations.loading,
+                    child: CommonCircleLoading.page(
+                      semanticLabel: context.appLocalizations.loading,
                     ),
                   );
                 }

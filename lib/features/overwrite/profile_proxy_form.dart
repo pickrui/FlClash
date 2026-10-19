@@ -769,10 +769,9 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
                     inputFormatters: TextInputLimits.limit(
                       TextInputLimits.batchLinks,
                     ),
-                    style: const TextStyle(
-                      fontFamily: 'monospace',
-                      fontSize: 13,
-                    ),
+                    style: AppTextStyle.footnote
+                        .of(context)
+                        .copyWith(fontFamily: 'monospace'),
                     decoration: InputDecoration(
                       border: const OutlineInputBorder(),
                       labelText: l.nodeDefinition,

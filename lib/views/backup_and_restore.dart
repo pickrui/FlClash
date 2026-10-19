@@ -6,6 +6,7 @@
 import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/ui/loading.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/common/dav_client.dart';
@@ -305,9 +306,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
                                       ? const SizedBox(
                                           width: 12,
                                           height: 12,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 1,
-                                          ),
+                                          child: CommonCircleLoading(),
                                         )
                                       : Container(
                                           decoration: BoxDecoration(

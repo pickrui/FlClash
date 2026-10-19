@@ -20,6 +20,7 @@ import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fl_clash/ui/loading.dart';
 
 import '../helpers/test_app.dart';
 
@@ -102,7 +103,7 @@ void main() {
       expect(profiles.profile, _profile);
       expect(profiles.writes, 0);
       expect(_modeCard(tester, OverwriteType.standard).isSelected, isTrue);
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(CommonCircleLoading), findsOneWidget);
       expect(
         tester
             .widget<TextButton>(find.byKey(const Key('edit-custom-routing')))
@@ -121,7 +122,7 @@ void main() {
       expect(profiles.profile, _profile.copyWith(overwriteType: mode));
       expect(profiles.writes, 1);
       expect(_modeCard(tester, mode).isSelected, isTrue);
-      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.byType(CommonCircleLoading), findsNothing);
       if (mode == OverwriteType.custom) {
         expect(find.byKey(const Key('edit-custom-routing')), findsNothing);
       } else {

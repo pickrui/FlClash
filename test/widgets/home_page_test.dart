@@ -31,11 +31,8 @@ class _Probe extends StatelessWidget {
   }
 }
 
-NavigationItem _item(PageLabel label) => NavigationItem(
-  icon: const Icon(Icons.circle),
-  label: label,
-  builder: (_) => _Probe(label),
-);
+NavigationItem _item(PageLabel label) =>
+    NavigationItem(label: label, builder: (_) => _Probe(label));
 
 class _PageOpener extends StatelessWidget {
   final ValueChanged<String?> onClosed;
@@ -85,7 +82,6 @@ void main() {
                   PageLabel.tools,
                 ])
                   NavigationItem(
-                    icon: const Icon(Icons.circle),
                     label: label,
                     builder: (_) {
                       built.add(label);
@@ -189,7 +185,6 @@ void main() {
           NavigationItemsState(
             value: [
               NavigationItem(
-                icon: const Icon(Icons.circle),
                 label: PageLabel.dashboard,
                 builder: (_) => _PageOpener(
                   key: const GlobalObjectKey(PageLabel.dashboard),

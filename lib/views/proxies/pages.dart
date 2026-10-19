@@ -6,6 +6,7 @@
 import 'dart:async';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/ui/loading.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/proxies/node_pages.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
@@ -83,10 +84,7 @@ class NodePagePlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Center(
     child: pages.errorAt(index) == null
-        ? const SizedBox.square(
-            dimension: 18,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          )
+        ? const SizedBox.square(dimension: 18, child: CommonCircleLoading())
         : IconButton(
             tooltip: context.appLocalizations.retry,
             onPressed: () => pages.load(index),

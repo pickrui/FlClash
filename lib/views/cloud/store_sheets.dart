@@ -8,6 +8,7 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/ui/typography.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -212,7 +213,7 @@ class _StorePurchaseSheetState extends State<StorePurchaseSheet> {
               items: [
                 _ChoiceRow(
                   leading: StoreMethodTile(
-                    icon: Icons.savings,
+                    icon: AppGlyphs.wallet,
                     color: colorScheme.primary,
                   ),
                   title: Text(appLocalizations.payWithBalance),

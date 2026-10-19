@@ -10,6 +10,7 @@ import 'package:fl_clash/common/render.dart';
 import 'package:fl_clash/common/render_binding.dart';
 import 'package:fl_clash/common/window_port.dart';
 import 'package:fl_clash/l10n/l10n.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/manager/window_manager.dart';
 import 'package:fl_clash/models/config.dart';
 import 'package:fl_clash/providers/providers.dart';
@@ -22,6 +23,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:window/window.dart' show WindowListener, desktopWindow;
 
 import '../helpers/test_app.dart';
+import '../helpers/glyph_finders.dart';
 import '../helpers/test_profiles.dart';
 
 const _windowChannel = MethodChannel('window');
@@ -500,9 +502,10 @@ void main() {
       await pumpActions(tester);
 
       expect(
-        tooltipOf(tester, find.byIcon(Icons.push_pin_outlined)),
+        tooltipOf(tester, find.byGlyph(AppGlyphs.pin)),
         AppLocalizations.current.pinWindow,
       );
+      expect(tester.widget<GlyphIcon>(find.byGlyph(AppGlyphs.pin)).fill, 0);
       expect(
         tooltipOf(tester, glyph(CaptionGlyph.minimize)),
         AppLocalizations.current.minimize,
@@ -529,9 +532,10 @@ void main() {
       await tester.pump();
 
       expect(
-        tooltipOf(tester, find.byIcon(Icons.push_pin)),
+        tooltipOf(tester, find.byGlyph(AppGlyphs.pin)),
         AppLocalizations.current.unpinWindow,
       );
+      expect(tester.widget<GlyphIcon>(find.byGlyph(AppGlyphs.pin)).fill, 1);
       expect(
         tooltipOf(tester, glyph(CaptionGlyph.restore)),
         AppLocalizations.current.unmaximize,
@@ -559,7 +563,7 @@ void main() {
     testWidgets('each button reports its own press', (tester) async {
       await pumpActions(tester);
 
-      await tester.tap(find.byIcon(Icons.push_pin_outlined));
+      await tester.tap(find.byGlyph(AppGlyphs.pin));
       await tester.tap(glyph(CaptionGlyph.minimize));
       await tester.tap(glyph(CaptionGlyph.maximize));
       await tester.tap(glyph(CaptionGlyph.close));

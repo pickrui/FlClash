@@ -131,9 +131,9 @@ class _InitErrorScreenState extends State<InitErrorScreen> {
                           error is TimeoutException
                               ? l?.startupTimeoutTip ?? 'Startup timed out. Quit and reopen the application. Copy the diagnostics below if the problem persists.'
                               : l?.initFailedTip ?? 'The application encountered a critical error during startup and cannot continue.',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                          style: AppTextStyle.callout.of(
+                            context,
+                            emphasized: true,
                           ),
                         ),
                       ),
@@ -156,10 +156,9 @@ class _InitErrorScreenState extends State<InitErrorScreen> {
                             AppLocalizations.maybeOf(context),
                           ) ??
                           error.toString(),
-                      style: TextStyle(
-                        color: colorScheme.onErrorContainer,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: AppTextStyle.subheadline
+                          .of(context, emphasized: true)
+                          .copyWith(color: colorScheme.onErrorContainer),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -169,10 +168,9 @@ class _InitErrorScreenState extends State<InitErrorScreen> {
                     ),
                     SelectableText(
                       diagnostics,
-                      style: const TextStyle(
-                        fontFamily: 'monospace',
-                        fontSize: 12,
-                      ),
+                      style: AppTextStyle.caption1
+                          .of(context)
+                          .copyWith(fontFamily: 'monospace'),
                     ),
                     const SizedBox(height: 24),
                   ],
@@ -190,10 +188,9 @@ class _InitErrorScreenState extends State<InitErrorScreen> {
                     ),
                     child: SelectableText(
                       stack.toString(),
-                      style: const TextStyle(
-                        fontFamily: 'monospace',
-                        fontSize: 12,
-                      ),
+                      style: AppTextStyle.caption1
+                          .of(context)
+                          .copyWith(fontFamily: 'monospace'),
                     ),
                   ),
                 ],
@@ -210,7 +207,7 @@ class _InitErrorScreenState extends State<InitErrorScreen> {
               backgroundColor: colorScheme.error,
               foregroundColor: colorScheme.onError,
             ),
-            icon: const GlyphIcon(AppGlyphs.copy),
+            icon: const GlyphIcon(AppGlyphs.copy, fill: 1),
             label: Text(l?.copy ?? 'Copy'),
           ),
           if (widget.onExit != null)

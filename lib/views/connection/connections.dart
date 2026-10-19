@@ -47,8 +47,7 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
   final _connectionsStateNotifier = ValueNotifier<TrackerInfosState>(
     const TrackerInfosState(),
   );
-  late final ScrollController _scrollController =
-      widget.scrollController ?? ScrollController();
+  late final ScrollController _scrollController;
   int _refreshGeneration = 0;
   final _speedRanker = TrackerSpeedRanker();
   final _closingConnectionIds = <String>{};
@@ -63,6 +62,13 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
   );
 
   CoreController get _core => widget.core ?? ref.read(coreHandlerProvider);
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController =
+        widget.scrollController ?? sheetScrollController(context);
+  }
 
   @override
   Duration get pollInterval => const Duration(seconds: 1);
@@ -82,7 +88,7 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
           icon: _closingAll
               ? const SizedBox.square(
                   dimension: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: CommonCircleLoading(),
                 )
               : const GlyphIcon(AppGlyphs.clearAll),
         ),
@@ -205,7 +211,7 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
               icon: closing
                   ? const SizedBox.square(
                       dimension: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: CommonCircleLoading(),
                     )
                   : const GlyphIcon(AppGlyphs.block),
               onPressed: _closingAll || closing

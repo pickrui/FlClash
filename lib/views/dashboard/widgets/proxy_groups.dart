@@ -116,10 +116,7 @@ class _GroupDelay extends ConsumerWidget {
       return const SizedBox.shrink();
     }
     if (delay == 0) {
-      return const SizedBox.square(
-        dimension: 12,
-        child: CircularProgressIndicator(strokeWidth: 2),
-      );
+      return const SizedBox.square(dimension: 12, child: CommonCircleLoading());
     }
     final colorScheme = context.colorScheme;
     return Text(

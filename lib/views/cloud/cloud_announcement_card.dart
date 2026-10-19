@@ -162,10 +162,9 @@ class _AnnouncementBody extends StatelessWidget {
         }
       },
       style: {
-        'body': Style(
+        'body': Style.fromTextStyle(body).copyWith(
           margin: Margins.zero,
           padding: HtmlPaddings.zero,
-          fontSize: FontSize(body.fontSize!),
           color: context.colorScheme.onSurface,
           lineHeight: const LineHeight(1.5),
         ),

@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 library;
 
+import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -58,7 +59,7 @@ class RuleSummary extends StatelessWidget {
     )) {
       return Text(
         rule.value,
-        style: context.textTheme.bodyMedium?.toJetBrainsMono,
+        style: AppTextStyle.subheadline.of(context).toJetBrainsMono,
       );
     }
     final parsed = ParsedRule.parseString(rule.value);
@@ -79,15 +80,16 @@ class RuleSummary extends StatelessWidget {
               children: [
                 Text(
                   parsed.ruleAction.value,
-                  style: context.textTheme.bodyLarge?.toJetBrainsMono,
+                  style: AppTextStyle.body.of(context).toJetBrainsMono,
                 ),
                 Text(
                   parsed.ruleProvider ?? parsed.content ?? '',
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: context.textTheme.bodyMedium?.toJetBrainsMono.copyWith(
-                    color: context.colorScheme.onSurfaceVariant,
-                  ),
+                  style: AppTextStyle.subheadline
+                      .of(context)
+                      .toJetBrainsMono
+                      .copyWith(color: context.colorScheme.onSurfaceVariant),
                 ),
               ],
             ),
@@ -113,9 +115,10 @@ class RuleSummary extends StatelessWidget {
                   target,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.textTheme.bodyMedium?.toJetBrainsMono.copyWith(
-                    color: color,
-                  ),
+                  style: AppTextStyle.subheadline
+                      .of(context)
+                      .toJetBrainsMono
+                      .copyWith(color: color),
                 ),
               ),
             ),
@@ -147,7 +150,7 @@ class RuleStatusItem extends StatelessWidget {
           rule.value,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: context.textTheme.bodyMedium?.toJetBrainsMono,
+          style: AppTextStyle.subheadline.of(context).toJetBrainsMono,
         ),
       ),
       trailing: Switch(value: status, onChanged: onChange),
@@ -384,9 +387,13 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
                       ),
                       child: Text(
                         appLocalizations.sourceIp,
-                        style: context.textTheme.bodyMedium?.copyWith(
-                          color: _src ? context.colorScheme.onPrimary : null,
-                        ),
+                        style: AppTextStyle.subheadline
+                            .of(context)
+                            .copyWith(
+                              color: _src
+                                  ? context.colorScheme.onPrimary
+                                  : null,
+                            ),
                       ),
                     ),
                     onPressed: () {
@@ -406,11 +413,13 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
                       ),
                       child: Text(
                         appLocalizations.noResolve,
-                        style: context.textTheme.bodyMedium?.copyWith(
-                          color: _noResolve || _src
-                              ? context.colorScheme.onPrimary
-                              : null,
-                        ),
+                        style: AppTextStyle.subheadline
+                            .of(context)
+                            .copyWith(
+                              color: _noResolve || _src
+                                  ? context.colorScheme.onPrimary
+                                  : null,
+                            ),
                       ),
                     ),
                     onPressed: () {

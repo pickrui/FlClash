@@ -6,12 +6,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:fl_clash/ui/icons/caption_icon.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/config.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:material_ui/material_ui.dart';
@@ -574,9 +574,7 @@ class WindowHeaderActions extends StatelessWidget {
                   iconSize: WidgetStatePropertyAll(pinIconSize),
                 ),
                 onPressed: onPin,
-                icon: Icon(
-                  state.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
-                ),
+                icon: GlyphIcon(AppGlyphs.pin, fill: state.isPinned ? 1 : 0),
               ),
             ),
             IconButton(
