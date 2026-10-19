@@ -114,6 +114,9 @@ void main() {
       addTearDown(server.close);
       final clientClosed = Completer<void>();
       server.listen((socket) {
+        addTearDown(socket.destroy);
+        // Aborting this partial response can reset the fixture's writer.
+        socket.done.ignore();
         socket.listen(
           (_) {
             socket.write(
