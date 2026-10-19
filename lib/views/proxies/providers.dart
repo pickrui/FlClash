@@ -12,6 +12,8 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/config.dart';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/l10n/l10n.dart';
+import 'package:fl_clash/ui/context_menu.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/providers/action.dart';
@@ -236,8 +238,17 @@ class _ProviderItemState extends ConsumerState<ProviderItem> {
     );
   }
 
+  bool get _previewable => switch (_file) {
+    ProviderFileType.text => true,
+    ProviderFileType.ruleSet => provider.type == 'Rule',
+    ProviderFileType.binary => false,
+  };
+
   void _preview() {
     final source = provider;
+    final path = source.path;
+    if (path == null || path.isEmpty) return;
+    final isRuleSet = _file == ProviderFileType.ruleSet;
     final profileId = ref.read(currentProfileIdProvider);
     final core = ref.read(coreHandlerProvider);
     final container = ProviderScope.containerOf(context);
@@ -251,7 +262,8 @@ class _ProviderItemState extends ConsumerState<ProviderItem> {
               !container.read(providersProvider).contains(source)) {
             throw appLocalizations.providerChanged;
           }
-          return core.dumpRuleSet(source.name, source.path!);
+          if (isRuleSet) return core.dumpRuleSet(source.name, path);
+          return _readText(path);
         },
       ),
     );
@@ -278,6 +290,38 @@ class _ProviderItemState extends ConsumerState<ProviderItem> {
     );
   }
 
+  List<CommonPopupMenuItem> _menuItems(AppLocalizations l) => [
+    if (_file == ProviderFileType.text)
+      CommonPopupMenuItem(
+        glyph: AppGlyphs.edit,
+        label: l.edit,
+        onPressed: _edit,
+      ),
+    if (_file == ProviderFileType.ruleSet && provider.type == 'Rule')
+      CommonPopupMenuItem(
+        glyph: AppGlyphs.eye,
+        label: l.preview,
+        onPressed: _preview,
+      ),
+    CommonPopupMenuItem(
+      glyph: AppGlyphs.upload,
+      label: l.upload,
+      onPressed: _handleSideLoadProvider,
+    ),
+    if (provider.vehicleType == 'HTTP')
+      CommonPopupMenuItem(
+        glyph: AppGlyphs.sync,
+        label: l.sync,
+        onPressed: _handleUpdateProvider,
+      ),
+    if ((provider.subscriptionInfo?.total ?? 0) > 0)
+      CommonPopupMenuItem(
+        glyph: AppGlyphs.dataUsage,
+        label: l.subscriptionInfo,
+        onPressed: _subscriptionInfo,
+      ),
+  ];
+
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
@@ -292,69 +336,43 @@ class _ProviderItemState extends ConsumerState<ProviderItem> {
               : l.proxiesCount(provider.count),
         ),
     ];
-    return DecorationListItem(
-      minVerticalPadding: 8,
-      contentPadding: const EdgeInsets.only(left: 16),
-      title: Text(provider.name, maxLines: 1, overflow: TextOverflow.ellipsis),
-      subtitle: metadata.isEmpty
-          ? null
-          : Padding(
-              padding: const EdgeInsets.only(top: 4, bottom: 2),
-              child: Wrap(spacing: 4, runSpacing: 4, children: metadata),
-            ),
-      trailing: SizedBox.square(
-        dimension: kMinInteractiveDimension,
-        child: FadeThroughBox(
-          alignment: Alignment.center,
+    return ContextMenuRegion(
+      menuItems: isUpdating ? null : _menuItems(l),
+      child: DecorationListItem(
+        onPressed: isUpdating || !_previewable ? null : _preview,
+        title: Text(
+          provider.name,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: metadata.isEmpty
+            ? null
+            : Padding(
+                padding: const EdgeInsets.only(top: 4, bottom: 2),
+                child: Wrap(spacing: 4, runSpacing: 4, children: metadata),
+              ),
+        trailing: AnimatedSwitcher(
+          duration: context.motionDuration(commonDuration),
+          layoutBuilder: (current, previous) => Stack(
+            alignment: Alignment.centerRight,
+            children: [...previous, ?current],
+          ),
           child: isUpdating
-              ? const Padding(
-                  padding: EdgeInsets.all(12),
-                  child: CommonCircleLoading(),
-                )
-              : CommonPopupBox(
-                  popup: CommonPopupMenu(
-                    items: [
-                      if (_file == ProviderFileType.text)
-                        CommonPopupMenuItem(
-                          glyph: AppGlyphs.edit,
-                          label: l.edit,
-                          onPressed: _edit,
-                        ),
-                      if (_file == ProviderFileType.ruleSet &&
-                          provider.type == 'Rule')
-                        CommonPopupMenuItem(
-                          glyph: AppGlyphs.eye,
-                          label: l.preview,
-                          onPressed: _preview,
-                        ),
-                      CommonPopupMenuItem(
-                        glyph: AppGlyphs.upload,
-                        label: l.upload,
-                        onPressed: _handleSideLoadProvider,
-                      ),
-                      if (provider.vehicleType == 'HTTP')
-                        CommonPopupMenuItem(
-                          glyph: AppGlyphs.sync,
-                          label: l.sync,
-                          onPressed: _handleUpdateProvider,
-                        ),
-                      if ((provider.subscriptionInfo?.total ?? 0) > 0)
-                        CommonPopupMenuItem(
-                          glyph: AppGlyphs.dataUsage,
-                          label: l.subscriptionInfo,
-                          onPressed: _subscriptionInfo,
-                        ),
-                    ],
-                  ),
-                  targetBuilder: (open) => IconButton(
-                    tooltip: l.more,
-                    icon: const GlyphIcon(AppGlyphs.more),
-                    onPressed: () => open(),
-                  ),
-                ),
+              ? const CommonCircleLoading(key: ValueKey('loading'), size: 24)
+              : const SizedBox.shrink(),
         ),
       ),
     );
+  }
+}
+
+Future<String> _readText(String path) async {
+  try {
+    return await readProviderText(path);
+  } on FormatException {
+    throw appLocalizations.nonTextProviderFile;
+  } on ProviderFileTooLarge {
+    throw appLocalizations.providerContentTooLarge;
   }
 }
 
@@ -385,15 +403,7 @@ class ProviderEditorView extends ConsumerStatefulWidget {
 class _ProviderEditorViewState extends ConsumerState<ProviderEditorView> {
   bool _saving = false;
 
-  Future<String> _load() async {
-    try {
-      return await readProviderText(widget.provider.path!);
-    } on FormatException {
-      throw appLocalizations.nonTextProviderFile;
-    } on ProviderFileTooLarge {
-      throw appLocalizations.providerContentTooLarge;
-    }
-  }
+  Future<String> _load() => _readText(widget.provider.path!);
 
   Future<void> _save(BuildContext context, String content) async {
     if (_saving) return;

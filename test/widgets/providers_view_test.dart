@@ -19,8 +19,11 @@ import 'package:fl_clash/models/profile.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
+import 'package:fl_clash/ui/list.dart';
 import 'package:fl_clash/views/proxies/providers.dart';
 import 'package:fl_clash/ui/sheet.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -266,6 +269,54 @@ void main() {
     }
     return action;
   }
+
+  testWidgets('a provider row offers its actions from a context menu and '
+      'previews its file on a tap', (tester) async {
+    await tester.runAsync(initEditorNative);
+    final file = (await tester.runAsync(() async {
+      final directory = await Directory.systemTemp.createTemp(
+        'provider-row-fixture-',
+      );
+      return File('${directory.path}/provider.yaml')
+          .writeAsString('payload: [example.com]');
+    }))!;
+    addTearDown(() => file.parent.delete(recursive: true));
+    await mount(
+      tester,
+      providers: [_providers.first.copyWith(path: file.path)],
+    );
+    DecorationListItem row() =>
+        tester.widget<DecorationListItem>(find.byType(DecorationListItem));
+    for (var i = 0; i < 50 && row().onPressed == null; i++) {
+      await settle(tester, 1);
+    }
+    expect(find.byTooltip(AppLocalizations.current.more), findsNothing);
+
+    await tester.tap(
+      find.text('first'),
+      buttons: kSecondaryButton,
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pumpAndSettle();
+    for (final label in [
+      AppLocalizations.current.edit,
+      AppLocalizations.current.upload,
+      AppLocalizations.current.sync,
+    ]) {
+      expect(find.text(label), findsOneWidget);
+    }
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('first'));
+    await settle(tester, 16);
+    expect(find.byType(EditorPage), findsOneWidget);
+    expect(
+      tester.widget<CodeForge>(find.byType(CodeForge)).controller.text,
+      'payload: [example.com]',
+    );
+    expect(tester.takeException(), isNull);
+  });
 
   for (final switchProfile in [false, true]) {
     testWidgets(
