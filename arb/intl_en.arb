@@ -1545,5 +1545,6 @@
   "definitionNotMap": "The configuration must be a YAML mapping with a name and a type",
   "additionalParameters": "Additional parameters",
   "quickActions": "Quick actions",
-  "ruleListInvalid": "The rules must be a YAML list with one rule per item, such as - DOMAIN,example.com,DIRECT"
+  "ruleListInvalid": "The rules must be a YAML list with one rule per item, such as - DOMAIN,example.com,DIRECT",
+  "goToConfigureAddedRules": "Go to added rules configuration"
 }

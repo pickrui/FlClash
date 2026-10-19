@@ -1545,5 +1545,6 @@
   "definitionNotMap": "設定は name と type を含む YAML マッピングである必要があります",
   "additionalParameters": "追加パラメータ",
   "quickActions": "クイック操作",
-  "ruleListInvalid": "ルールは 1 項目に 1 つのルールを書いた YAML リストにしてください。例：- DOMAIN,example.com,DIRECT"
+  "ruleListInvalid": "ルールは 1 項目に 1 つのルールを書いた YAML リストにしてください。例：- DOMAIN,example.com,DIRECT",
+  "goToConfigureAddedRules": "追加ルール設定へ移動"
 }

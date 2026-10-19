@@ -13077,6 +13077,16 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Go to added rules configuration`
+  String get goToConfigureAddedRules {
+    return Intl.message(
+      'Go to added rules configuration',
+      name: 'goToConfigureAddedRules',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

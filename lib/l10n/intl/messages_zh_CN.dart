@@ -1179,6 +1179,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "go": MessageLookupByLibrary.simpleMessage("前往"),
     "goLogin": MessageLookupByLibrary.simpleMessage("去登录"),
     "goPay": MessageLookupByLibrary.simpleMessage("去支付"),
+    "goToConfigureAddedRules": MessageLookupByLibrary.simpleMessage("前往配置附加规则"),
     "goToConfigureScript": MessageLookupByLibrary.simpleMessage("前往配置脚本"),
     "googleLoginInvalidCallback": MessageLookupByLibrary.simpleMessage(
       "无法验证 Google 登录，请重试",

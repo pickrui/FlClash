@@ -1545,5 +1545,6 @@
   "definitionNotMap": "配置必须是包含 name 和 type 的 YAML 映射",
   "additionalParameters": "附加参数",
   "quickActions": "快捷操作",
-  "ruleListInvalid": "规则必须是 YAML 列表，每项一条规则，例如 - DOMAIN,example.com,DIRECT"
+  "ruleListInvalid": "规则必须是 YAML 列表，每项一条规则，例如 - DOMAIN,example.com,DIRECT",
+  "goToConfigureAddedRules": "前往配置附加规则"
 }

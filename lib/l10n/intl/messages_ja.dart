@@ -1331,6 +1331,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "go": MessageLookupByLibrary.simpleMessage("移動"),
     "goLogin": MessageLookupByLibrary.simpleMessage("ログイン"),
     "goPay": MessageLookupByLibrary.simpleMessage("支払いへ"),
+    "goToConfigureAddedRules": MessageLookupByLibrary.simpleMessage(
+      "追加ルール設定へ移動",
+    ),
     "goToConfigureScript": MessageLookupByLibrary.simpleMessage("スクリプト設定に移動"),
     "googleLoginInvalidCallback": MessageLookupByLibrary.simpleMessage(
       "Google ログインを確認できませんでした、再試行してください",

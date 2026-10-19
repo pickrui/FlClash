@@ -1637,6 +1637,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "go": MessageLookupByLibrary.simpleMessage("Перейти"),
     "goLogin": MessageLookupByLibrary.simpleMessage("Войти"),
     "goPay": MessageLookupByLibrary.simpleMessage("Оплатить"),
+    "goToConfigureAddedRules": MessageLookupByLibrary.simpleMessage(
+      "Перейти к настройке добавленных правил",
+    ),
     "goToConfigureScript": MessageLookupByLibrary.simpleMessage(
       "Перейти к настройке скрипта",
     ),

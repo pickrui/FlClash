@@ -14,7 +14,7 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/routing_issues.dart';
 import 'package:fl_clash/views/profiles/overwrite.dart';
-import 'package:fl_clash/widgets/error_status.dart';
+import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -31,8 +31,9 @@ class _SetupAction extends SetupAction {
 Future<void> _pumpPage(
   WidgetTester tester,
   OverwriteType mode,
-  List<Override> overrides,
-) async {
+  List<Override> overrides, {
+  int? scriptId,
+}) async {
   const size = Size(800, 1400);
   await tester.binding.setSurfaceSize(size);
   addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -46,6 +47,7 @@ Future<void> _pumpPage(
               id: 1,
               autoUpdateDuration: Duration.zero,
               overwriteType: mode,
+              scriptId: scriptId,
             ),
           ],
         ),
@@ -92,8 +94,10 @@ void main() {
         if (!scripts) {
           expect(
             tester
-                .widget<FilledButton>(
-                  find.widgetWithText(FilledButton, 'Add').last,
+                .widget<IconButton>(
+                  find.byWidgetPredicate(
+                    (widget) => widget is IconButton && widget.tooltip == 'Add',
+                  ),
                 )
                 .onPressed,
             isNull,
@@ -173,4 +177,70 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
     },
   );
+
+  testWidgets('only the profile script is checked', (tester) async {
+    await _pumpPage(tester, OverwriteType.script, [
+      scriptsProvider.overrideWithBuild(
+        (_, _) => Stream.value([
+          Script(id: 10, label: 'alpha', lastUpdateTime: DateTime(2026)),
+          Script(id: 11, label: 'beta', lastUpdateTime: DateTime(2026)),
+        ]),
+      ),
+    ], scriptId: 11);
+    await tester.pumpAndSettle();
+    Finder checkIn(String label) => find.descendant(
+      of: find.widgetWithText(DecorationListItem, label),
+      matching: find.byType(SelectionCheck),
+    );
+    expect(checkIn('beta'), findsOneWidget);
+    expect(checkIn('alpha'), findsNothing);
+  });
+
+  testWidgets('added rules hold back the back gesture only while selected', (
+    tester,
+  ) async {
+    await _pumpPage(tester, OverwriteType.standard, [
+      profileAddedRulesProvider(1).overrideWithBuild(
+        (_, _) => Stream.value([
+          const Rule(id: 1, value: 'DOMAIN,example.test,DIRECT'),
+        ]),
+      ),
+    ]);
+    await tester.pumpAndSettle();
+    CommonPopScope rulesScope() => tester
+        .widgetList<CommonPopScope>(find.byType(CommonPopScope))
+        .singleWhere((scope) => scope.child is SliverMainAxisGroup);
+    expect(rulesScope().onPop, isNull);
+    tester.widget<RuleItem>(find.byType(RuleItem)).onSelected();
+    await tester.pump();
+    expect(rulesScope().onPop, isNotNull);
+  });
+
+  testWidgets('global rules can be searched', (tester) async {
+    await _pumpPage(tester, OverwriteType.standard, [
+      profileAddedRulesProvider(1)
+          .overrideWithBuild((_, _) => Stream.value([])),
+      globalRulesProvider.overrideWithBuild(
+        (_, _) => Stream.value([
+          const Rule(id: 1, value: 'DOMAIN,example.com,DIRECT'),
+          const Rule(id: 2, value: 'DOMAIN,example.net,REJECT'),
+        ]),
+      ),
+      profileDisabledRuleIdsProvider(1)
+          .overrideWithBuild((_, _) => Stream.value([])),
+    ]);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Control global added rules'));
+    await tester.pumpAndSettle();
+    expect(find.byType(RuleStatusItem), findsNWidgets(2));
+    tester
+        .widget<CommonScaffold>(find.byType(CommonScaffold).last)
+        .searchState!
+        .onSearch('net');
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<RuleStatusItem>(find.byType(RuleStatusItem)).rule.id,
+      2,
+    );
+  });
 }

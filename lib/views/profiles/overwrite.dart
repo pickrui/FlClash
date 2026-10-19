@@ -7,6 +7,7 @@
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/navigator.dart';
+import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/common/javascript.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/features/overwrite/rule_preset.dart';
@@ -21,6 +22,7 @@ import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/views/config/rules.dart';
 import 'package:fl_clash/views/config/scripts.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
@@ -359,9 +361,11 @@ class _OverwriteModeSelectorState extends ConsumerState<OverwriteModeSelector> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
               _getDesc(overwriteType),
-              style: context.textTheme.bodySmall?.copyWith(
-                color: context.colorScheme.onSurfaceVariant.opacity80,
-              ),
+              style: AppTextStyle.footnote
+                  .of(context)
+                  .copyWith(
+                    color: context.colorScheme.onSurfaceVariant.opacity80,
+                  ),
             ),
           ),
           if (overwriteType != OverwriteType.custom)
@@ -514,6 +518,8 @@ class _StandardContentState extends ConsumerState<_StandardContent> {
       message: TextSpan(
         text: appLocalizations.deleteMultipTip(appLocalizations.rule),
       ),
+      destructive: true,
+      confirmText: appLocalizations.delete,
     );
     if (!mounted || res != true) {
       return;
@@ -523,6 +529,23 @@ class _StandardContentState extends ConsumerState<_StandardContent> {
         .read(profileAddedRulesProvider(widget.profileId).notifier)
         .delAll(selectedRules.cast<int>());
     ref.read(selectedItemsProvider(_key).notifier).value = {};
+  }
+
+  Widget _buildRuleItem(List<Rule> rules, int index, Set<dynamic> selected) {
+    final rule = rules[index];
+    return ItemPositionProvider(
+      position: ItemPosition.get(index, rules.length),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        child: RuleItem(
+          isEditing: selected.isNotEmpty,
+          isSelected: selected.contains(rule.id),
+          rule: rule,
+          onSelected: () => _handleSelected(rule.id),
+          onEdit: _handleAddOrUpdate,
+        ),
+      ),
+    );
   }
 
   @override
@@ -546,71 +569,60 @@ class _StandardContentState extends ConsumerState<_StandardContent> {
           raw,
           tailscaleNetworks: ref.watch(tailscaleNetworksProvider),
         ).contains(target);
+    final targetText = Text(
+      target ?? appLocalizations.followProfile,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: AppTextStyle.subheadline
+          .of(context)
+          .toJetBrainsMono
+          .copyWith(
+            color: invalidTarget
+                ? context.colorScheme.error
+                : context.colorScheme.tertiary,
+          ),
+    );
     return CommonPopScope(
-      onPop: (_) {
-        if (selectedRules.isNotEmpty) {
-          ref.read(selectedItemsProvider(_key).notifier).value = {};
-          return false;
-        }
-        Navigator.of(context).pop();
-        return false;
-      },
+      onPop: selectedRules.isEmpty
+          ? null
+          : (_) {
+              ref.read(selectedItemsProvider(_key).notifier).value = {};
+              return false;
+            },
       child: SliverMainAxisGroup(
         slivers: [
-          SliverToBoxAdapter(
-            child: ListTile(
-              leading: const GlyphIcon(AppGlyphs.split),
-              title: Text(appLocalizations.matchTargetTitle),
-              subtitle: Text(
-                invalidTarget
-                    ? '$target\n${appLocalizations.outboundUnavailable}'
-                    : target ?? appLocalizations.followProfile,
-                style: invalidTarget
-                    ? TextStyle(color: context.colorScheme.error)
-                    : null,
-              ),
-              trailing: const GlyphIcon(AppGlyphs.chevronForward),
-              onTap: _selectMatchTarget,
-            ),
-          ),
           const SliverToBoxAdapter(child: SizedBox(height: 24)),
           SliverToBoxAdapter(
-            child: Column(
-              children: [
-                InfoHeader(
-                  info: Info(label: appLocalizations.addedRules),
-                  actions: [
-                    if (selectedRules.isEmpty)
-                      IconButton(
-                        tooltip: appLocalizations.quickAdd,
-                        onPressed: unavailable ? null : _addPresets,
-                        icon: const GlyphIcon(AppGlyphs.listAdd),
-                      ),
-                    if (selectedRules.isNotEmpty) ...[
-                      CommonMinIconButtonTheme(
-                        child: IconButton.filledTonal(
-                          tooltip: context.appLocalizations.delete,
-                          onPressed: unavailable ? null : _handleDelete,
-                          icon: const GlyphIcon(AppGlyphs.delete),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                    CommonMinFilledButtonTheme(
-                      child: selectedRules.isNotEmpty
-                          ? FilledButton(
-                              onPressed: unavailable ? null : _handleSelectAll,
-                              child: Text(appLocalizations.selectAll),
-                            )
-                          : FilledButton.tonal(
-                              onPressed: unavailable
-                                  ? null
-                                  : _handleAddOrUpdate,
-                              child: Text(appLocalizations.add),
-                            ),
-                    ),
-                  ],
-                ),
+            child: ListHeader(
+              title: appLocalizations.addedRules,
+              padding: EdgeInsets.symmetric(
+                horizontal: 16.mAp(context),
+                vertical: 8.mAp(context),
+              ),
+              actions: [
+                if (selectedRules.isNotEmpty) ...[
+                  IconButtonData(
+                    glyph: AppGlyphs.delete,
+                    tooltip: appLocalizations.delete,
+                    onPressed: unavailable ? null : _handleDelete,
+                  ),
+                  IconButtonData(
+                    glyph: AppGlyphs.selectAll,
+                    tooltip: appLocalizations.selectAll,
+                    onPressed: unavailable ? null : _handleSelectAll,
+                  ),
+                ] else ...[
+                  IconButtonData(
+                    glyph: AppGlyphs.rulePresets,
+                    tooltip: appLocalizations.quickAdd,
+                    onPressed: unavailable ? null : _addPresets,
+                  ),
+                  IconButtonData(
+                    glyph: AppGlyphs.addCircle,
+                    tooltip: appLocalizations.add,
+                    onPressed: unavailable ? null : _handleAddOrUpdate,
+                  ),
+                ],
               ],
             ),
           ),
@@ -622,64 +634,50 @@ class _StandardContentState extends ConsumerState<_StandardContent> {
             emptyLabel: appLocalizations.nullTip(appLocalizations.rule),
             child: SliverReorderableList(
               itemCount: addedRules.length,
-              itemBuilder: (_, index) {
-                final rule = addedRules[index];
-                return ReorderableDelayedDragStartListener(
-                  key: ObjectKey(rule),
-                  index: index,
-                  child: RuleItem(
-                    isEditing: selectedRules.isNotEmpty,
-                    isSelected: selectedRules.contains(rule.id),
-                    rule: rule,
-                    onSelected: () {
-                      _handleSelected(rule.id);
-                    },
-                    onEdit: (rule) {
-                      _handleAddOrUpdate(rule);
-                    },
-                  ),
-                );
-              },
-              proxyDecorator: commonProxyDecorator,
+              itemBuilder: (_, index) => ReorderableDelayedDragStartListener(
+                key: ObjectKey(addedRules[index]),
+                index: index,
+                child: _buildRuleItem(addedRules, index, selectedRules),
+              ),
+              proxyDecorator: (_, index, animation) => commonProxyDecorator(
+                _buildRuleItem(addedRules, index, selectedRules),
+                index,
+                animation,
+              ),
               onReorderItem: ref
                   .read(profileAddedRulesProvider(widget.profileId).notifier)
                   .order,
             ),
           ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: CommonCard(
-                padding: EdgeInsets.zero,
-                radius: 18,
-                child: ListTile(
-                  minTileHeight: 0,
-                  minVerticalPadding: 0,
-                  titleTextStyle: context.textTheme.bodyMedium?.toJetBrainsMono,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 16,
-                  ),
-                  title: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          appLocalizations.controlGlobalAddedRules,
-                          style: context.textTheme.bodyLarge,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      const GlyphIcon(AppGlyphs.send, size: 18),
-                    ],
-                  ),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          SliverLayoutBuilder(
+            builder: (context, constraints) {
+              final trailing = ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: constraints.crossAxisExtent / 2,
                 ),
-                onPressed: () {
-                  BaseNavigator.push(
-                    context,
-                    _EditGlobalAddedRules(profileId: widget.profileId),
-                  );
-                },
+                child: targetText,
+              );
+              return SliverToBoxAdapter(
+                child: MoreActionButton(
+                  label: appLocalizations.matchTargetTitle,
+                  trailing: invalidTarget
+                      ? Tooltip(
+                          message: appLocalizations.outboundUnavailable,
+                          child: trailing,
+                        )
+                      : trailing,
+                  onPressed: _selectMatchTarget,
+                ),
+              );
+            },
+          ),
+          SliverToBoxAdapter(
+            child: MoreActionButton(
+              label: appLocalizations.controlGlobalAddedRules,
+              onPressed: () => BaseNavigator.push(
+                context,
+                _EditGlobalAddedRules(profileId: widget.profileId),
               ),
             ),
           ),
@@ -713,101 +711,59 @@ class _ScriptContent extends ConsumerWidget {
       slivers: [
         const SliverToBoxAdapter(child: SizedBox(height: 24)),
         SliverToBoxAdapter(
-          child: Column(
-            children: [
-              InfoHeader(info: Info(label: appLocalizations.overrideScript)),
-            ],
-          ),
+          child: InfoHeader(info: Info(label: appLocalizations.overrideScript)),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 8)),
         _librarySliver(
           state: scriptsState,
           onRetry: () => ref.invalidate(scriptsProvider),
           emptyLabel: appLocalizations.nullTip(appLocalizations.script),
-          child: SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            sliver: SliverList.builder(
-              itemCount: scripts.length,
-              itemBuilder: (_, index) {
-                final script = scripts[index];
-                return Container(
-                  margin: const EdgeInsets.symmetric(vertical: 4),
-                  child: CommonCard(
-                    padding: EdgeInsets.zero,
-                    radius: 18,
-                    child: ListTile(
-                      minLeadingWidth: 0,
-                      minTileHeight: 0,
-                      minVerticalPadding: 16,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                      ),
-                      title: Row(
-                        children: [
-                          SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: Radio(
-                              materialTapTargetSize:
-                                  MaterialTapTargetSize.shrinkWrap,
-                              visualDensity: VisualDensity.compact,
-                              toggleable: true,
-                              value: script.id,
-                              groupValue: scriptId,
-                              onChanged: (_) {
-                                _handleChange(ref, script.id);
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Flexible(child: Text(script.label)),
-                        ],
-                      ),
-                      onTap: () {
-                        _handleChange(ref, script.id);
-                      },
+          child: SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: generateSection(
+                items: [
+                  for (final script in scripts)
+                    _ScriptOption(
+                      label: script.label,
+                      isSelected: script.id == scriptId,
+                      onSelected: () => _handleChange(ref, script.id),
                     ),
-                  ),
-                );
-              },
+                ],
+              ),
             ),
           ),
         ),
+        const SliverToBoxAdapter(child: SizedBox(height: 16)),
         SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            child: CommonCard(
-              padding: EdgeInsets.zero,
-              radius: 18,
-              child: ListTile(
-                minTileHeight: 0,
-                minVerticalPadding: 0,
-                titleTextStyle: context.textTheme.bodyMedium?.toJetBrainsMono,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 16,
-                ),
-                title: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        appLocalizations.goToConfigureScript,
-                        style: context.textTheme.bodyLarge,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    const GlyphIcon(AppGlyphs.send, size: 18),
-                  ],
-                ),
-              ),
-              onPressed: () {
-                BaseNavigator.push(context, const ScriptsView());
-              },
-            ),
+          child: MoreActionButton(
+            label: appLocalizations.goToConfigureScript,
+            onPressed: () => BaseNavigator.push(context, const ScriptsView()),
           ),
         ),
       ],
+    );
+  }
+}
+
+class _ScriptOption extends StatelessWidget {
+  const _ScriptOption({
+    required this.label,
+    required this.isSelected,
+    required this.onSelected,
+  });
+
+  final String label;
+  final bool isSelected;
+  final VoidCallback onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecorationListItem(
+      isSelected: isSelected,
+      title: Text(label),
+      trailing: isSelected ? const SelectionCheck() : null,
+      onPressed: onSelected,
     );
   }
 }
@@ -841,12 +797,22 @@ Widget _librarySliver<T>({
   return child;
 }
 
-class _EditGlobalAddedRules extends ConsumerWidget {
+class _EditGlobalAddedRules extends ConsumerStatefulWidget {
   final int profileId;
 
   const _EditGlobalAddedRules({required this.profileId});
 
-  void _handleChange(WidgetRef ref, bool status, int ruleId) {
+  @override
+  ConsumerState<_EditGlobalAddedRules> createState() =>
+      _EditGlobalAddedRulesState();
+}
+
+class _EditGlobalAddedRulesState extends ConsumerState<_EditGlobalAddedRules> {
+  var _query = SearchQuery('');
+
+  int get profileId => widget.profileId;
+
+  void _handleChange(bool status, int ruleId) {
     if (status) {
       ref.read(profileDisabledRuleIdsProvider(profileId).notifier).put(ruleId);
     } else {
@@ -854,18 +820,64 @@ class _EditGlobalAddedRules extends ConsumerWidget {
     }
   }
 
+  void _handleToAddedRules() {
+    BaseNavigator.push(context, const AddedRulesView());
+  }
+
+  Widget _buildRules(List<Rule> rules, Set<int> disabledRuleIds) {
+    return Builder(
+      builder: (context) => CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 16)
+                .copyWith(top: context.contentTopPadding),
+            sliver: SliverList.builder(
+              itemCount: rules.length,
+              itemBuilder: (context, index) {
+                final rule = rules[index];
+                return ItemPositionProvider(
+                  position: ItemPosition.get(index, rules.length),
+                  child: RuleStatusItem(
+                    status: !disabledRuleIds.contains(rule.id),
+                    rule: rule,
+                    onChange: (status) => _handleChange(!status, rule.id),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          SliverToBoxAdapter(
+            child: MoreActionButton(
+              label: appLocalizations.goToConfigureAddedRules,
+              onPressed: _handleToAddedRules,
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: SizedBox(height: 12 + BottomInsetScope.of(context)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final disabledRulesState = ref.watch(
       profileDisabledRuleIdsProvider(profileId),
     );
     final rulesState = ref.watch(globalRulesProvider);
     final disabledRuleIds = disabledRulesState.value?.toSet() ?? <int>{};
-    final rules = rulesState.value ?? [];
+    final rules = (rulesState.value ?? [])
+        .where((rule) => _query.matches([rule.value]))
+        .toList();
     final error = rulesState.error ?? disabledRulesState.error;
     final loading = rulesState.isLoading || disabledRulesState.isLoading;
-    return BaseScaffold(
+    return CommonScaffold(
       title: appLocalizations.editGlobalRules,
+      searchState: AppBarSearchState(
+        onSearch: (value) => setState(() => _query = SearchQuery(value)),
+      ),
       body: error != null
           ? ErrorStatus(
               error: error,
@@ -878,29 +890,19 @@ class _EditGlobalAddedRules extends ConsumerWidget {
             )
           : loading
           ? const Center(child: CircularProgressIndicator())
-          : rules.isEmpty
-          ? NullStatus(
-              label: appLocalizations.nullTip(appLocalizations.rule),
-              illustration: NullStatusIllustration.rules,
-            )
-          : ListView.builder(
-              padding: EdgeInsets.fromLTRB(
-                16,
-                context.contentTopPadding,
-                16,
-                16,
+          : NullStatusSwitcher(
+              isEmpty: rules.isEmpty,
+              isSearching: !_query.isEmpty,
+              nullStatus: NullStatus(
+                label: appLocalizations.nullTip(appLocalizations.rule),
+                illustration: NullStatusIllustration.rules,
+                action: TonalButton(
+                  size: TonalButtonSize.bar,
+                  label: appLocalizations.goToConfigureAddedRules,
+                  onPressed: _handleToAddedRules,
+                ),
               ),
-              itemBuilder: (context, index) {
-                final rule = rules[index];
-                return RuleStatusItem(
-                  status: !disabledRuleIds.contains(rule.id),
-                  rule: rule,
-                  onChange: (status) {
-                    _handleChange(ref, !status, rule.id);
-                  },
-                );
-              },
-              itemCount: rules.length,
+              child: _buildRules(rules, disabledRuleIds),
             ),
     );
   }

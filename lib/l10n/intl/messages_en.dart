@@ -1585,6 +1585,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "go": MessageLookupByLibrary.simpleMessage("Go"),
     "goLogin": MessageLookupByLibrary.simpleMessage("Log in"),
     "goPay": MessageLookupByLibrary.simpleMessage("Pay"),
+    "goToConfigureAddedRules": MessageLookupByLibrary.simpleMessage(
+      "Go to added rules configuration",
+    ),
     "goToConfigureScript": MessageLookupByLibrary.simpleMessage(
       "Go to configure script",
     ),
