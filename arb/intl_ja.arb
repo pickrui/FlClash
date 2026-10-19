@@ -1542,5 +1542,8 @@
   "autoInclude": "自動で含める",
   "filters": "フィルター",
   "inputProxyGroupName": "プロキシグループ名を入力してください",
-  "definitionNotMap": "設定は name と type を含む YAML マッピングである必要があります"
+  "definitionNotMap": "設定は name と type を含む YAML マッピングである必要があります",
+  "additionalParameters": "追加パラメータ",
+  "quickActions": "クイック操作",
+  "ruleListInvalid": "ルールは 1 項目に 1 つのルールを書いた YAML リストにしてください。例：- DOMAIN,example.com,DIRECT"
 }

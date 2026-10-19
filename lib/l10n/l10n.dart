@@ -13047,6 +13047,36 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Additional parameters`
+  String get additionalParameters {
+    return Intl.message(
+      'Additional parameters',
+      name: 'additionalParameters',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Quick actions`
+  String get quickActions {
+    return Intl.message(
+      'Quick actions',
+      name: 'quickActions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The rules must be a YAML list with one rule per item, such as - DOMAIN,example.com,DIRECT`
+  String get ruleListInvalid {
+    return Intl.message(
+      'The rules must be a YAML list with one rule per item, such as - DOMAIN,example.com,DIRECT',
+      name: 'ruleListInvalid',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -11,8 +11,16 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/clash_config.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'package:fl_clash/features/form/error_banner.dart';
+import 'package:fl_clash/features/form/form_row.dart';
+import 'package:fl_clash/features/form/selection_sheet.dart';
+import 'package:fl_clash/models/models.dart' show reservedOutboundNames;
+import 'package:fl_clash/ui/navigator.dart';
+import 'package:fl_clash/ui/paged_sheet.dart';
+import 'package:fl_clash/ui/sheet_navigator.dart';
+import 'package:fl_clash/widgets/widgets.dart';
+
 import 'overwrite_sheet.dart';
-import 'routing_target_picker.dart';
 
 import 'package:collection/collection.dart';
 
@@ -27,6 +35,9 @@ class CustomRuleEditorDialog extends StatefulWidget {
   final Set<String> groupNames;
   final Future<String> Function(Rule)? validate;
 
+  /// Offered for an existing rule; the list asks and answers whether it went.
+  final Future<bool> Function()? onDelete;
+
   const CustomRuleEditorDialog({
     super.key,
     this.rule,
@@ -35,6 +46,7 @@ class CustomRuleEditorDialog extends StatefulWidget {
     this.subRules = const [],
     this.groupNames = const {},
     this.validate,
+    this.onDelete,
   });
 
   @override
@@ -103,8 +115,7 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
     _rawMode,
   ];
 
-  final _formKey = GlobalKey<FormState>();
-  final _errorKey = GlobalKey();
+  final _scrollController = ScrollController();
   final _payloadController = TextEditingController();
   final _rawController = TextEditingController();
   RuleAction _action = RuleAction.DOMAIN_SUFFIX;
@@ -113,6 +124,7 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
   bool _src = false;
   bool _rawMode = false;
   bool _saving = false;
+  bool _attempted = false;
   String? _error;
   Rule? _failedCandidate;
 
@@ -140,6 +152,7 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _payloadController.dispose();
     _rawController.dispose();
     super.dispose();
@@ -373,17 +386,43 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
     return null;
   }
 
-  void _saveDraft() {
-    if (_saving ||
-        _failedCandidate == null ||
-        _formKey.currentState?.validate() != true) {
-      return;
+  /// The first field that cannot be saved as it is, with why.
+  ({Key field, String message})? _issue() {
+    if (_rawMode) {
+      final message = _validateRaw(_rawController.text);
+      return message == null
+          ? null
+          : (field: const Key('custom-rule-raw'), message: message);
     }
+    final payload = _validatePayload(_action, _payloadController.text.trim());
+    if (payload != null) {
+      return (
+        field: _action == RuleAction.RULE_SET
+            ? const Key('custom-rule-provider')
+            : ValueKey('custom-rule-payload-${_action.name}'),
+        message: payload,
+      );
+    }
+    final target = _validateTarget(_target);
+    return target == null
+        ? null
+        : (field: const Key('custom-rule-target'), message: target);
+  }
+
+  bool _blocked() {
+    if (_issue() == null) return false;
+    setState(() => _attempted = true);
+    _scrollToTop();
+    return true;
+  }
+
+  void _saveDraft() {
+    if (_saving || _failedCandidate == null || _blocked()) return;
     context.safeNestedPop(_failedCandidate);
   }
 
   Future<void> _submit() async {
-    if (_saving || _formKey.currentState?.validate() != true) return;
+    if (_saving || _blocked()) return;
     final value = _rawMode ? _rawController.text.trim() : _formValue;
     final rule = widget.rule?.copyWith(value: value) ?? Rule.value(value);
     setState(() {
@@ -424,295 +463,400 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
       _error = error;
       _failedCandidate = candidate;
     });
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final errorContext = _errorKey.currentContext;
-      if (!mounted || errorContext == null) return;
-      Scrollable.ensureVisible(
-        errorContext,
-        alignment: 1,
-        duration: const Duration(milliseconds: 180),
-      );
+    _scrollToTop();
+  }
+
+  void _scrollToTop() {
+    if (_scrollController.hasClients) _scrollController.jumpTo(0);
+  }
+
+  Future<T?> _pick<T>(Widget sheet) {
+    if (isSheetPage(context)) {
+      return Navigator.of(context)
+          .push(PagedSheetRoute<T>(builder: (_) => sheet));
+    }
+    return BaseNavigator.push<T>(context, sheet);
+  }
+
+  SelectionSheet<T> _sheet<T>({
+    required String title,
+    required List<SelectionSection<T>> sections,
+    required String Function(T item) labelBuilder,
+    required T? selected,
+    String? emptyLabel,
+  }) => SelectionSheet<T>(
+    title: title,
+    sections: sections,
+    labelBuilder: labelBuilder,
+    selectedOf: (_) => selected,
+    emptyLabel: emptyLabel,
+    onSelected: (item) => Navigator.of(context).pop(item),
+  );
+
+  Future<void> _showTypes() async {
+    final action = await _pick<RuleAction>(
+      Builder(
+        builder: (context) => _sheet<RuleAction>(
+          title: context.appLocalizations.customRuleType,
+          sections: [
+            SelectionSection(
+              items: _formActions,
+              subtitleBuilder: (context, action) => action.getDesc(context),
+            ),
+          ],
+          labelBuilder: (action) => action.value,
+          selected: _action,
+        ),
+      ),
+    );
+    if (action == null || !mounted) return;
+    setState(() {
+      _action = action;
+      if (!action.hasParams) {
+        _noResolve = false;
+        _src = false;
+      }
+      _clearError();
     });
   }
 
-  Future<String?> _choose({
-    required String title,
-    required List<String> options,
-    String? value,
-    bool grouped = false,
-  }) => showOverwriteSheet<String>(
-    context: context,
-    builder: (_) => RoutingTargetPicker(
-      title: title,
-      options: options,
-      value: value,
-      groupNames: grouped ? widget.groupNames : null,
-    ),
-  );
-
-  Widget _selectionField({
-    required Key key,
-    required String label,
-    required String placeholder,
-    required String? value,
-    required List<String> options,
-    required String? Function(String?) validator,
-    required ValueChanged<String> onChanged,
-    String? helperText,
-    bool grouped = false,
-  }) => FormField<String>(
-    key: key,
-    initialValue: value,
-    validator: validator,
-    builder: (field) => Semantics(
-      button: true,
-      enabled: !_saving,
-      child: InkWell(
-        customBorder: AppShape.xs,
-        onTap: _saving
-            ? null
-            : () async {
-                final selected = await _choose(
-                  title: label,
-                  options: options,
-                  value: value,
-                  grouped: grouped,
-                );
-                if (selected != null && mounted) {
-                  setState(() {
-                    onChanged(selected);
-                    _clearError();
-                  });
-                  field.didChange(selected);
-                  field.validate();
-                }
-              },
-        child: InputDecorator(
-          decoration: InputDecoration(
-            border: const OutlineInputBorder(),
-            labelText: label,
-            helperText: helperText,
-            helperMaxLines: 3,
-            errorText:
-                field.errorText ??
-                (value != null && !options.contains(value)
-                    ? validator(value)
-                    : null),
-            errorMaxLines: 4,
-            suffixIcon: const GlyphIcon(AppGlyphs.chevronDown),
-          ),
-          child: Text(value?.isNotEmpty == true ? value! : placeholder),
-        ),
+  Future<void> _showRuleProviders() async {
+    final l10n = context.appLocalizations;
+    final value = _payloadController.text;
+    final provider = await _pick<String>(
+      _sheet<String>(
+        title: l10n.ruleProviders,
+        sections: [SelectionSection(items: widget.ruleProviders)],
+        labelBuilder: (item) => item,
+        selected: value.isEmpty ? null : value,
+        emptyLabel: l10n.nullTip(l10n.ruleProviders),
       ),
-    ),
-  );
+    );
+    if (provider == null || !mounted) return;
+    setState(() {
+      _payloadController.text = provider;
+      _clearError();
+    });
+  }
+
+  Future<void> _showTargets() async {
+    final l10n = context.appLocalizations;
+    final targets = _targets;
+    final subRule = _action == RuleAction.SUB_RULE;
+    final builtIns = {
+      for (final name in targets)
+        if (!subRule && reservedOutboundNames.contains(name)) name,
+    };
+    final groups = {
+      for (final name in targets)
+        if (!subRule && widget.groupNames.contains(name)) name,
+    };
+    final target = await _pick<String>(
+      _sheet<String>(
+        title: subRule ? l10n.subRule : l10n.ruleTarget,
+        sections: [
+          if (builtIns.isNotEmpty)
+            SelectionSection(
+              label: l10n.basicStrategy,
+              items: builtIns.toList(),
+            ),
+          if (groups.isNotEmpty)
+            SelectionSection(label: l10n.proxyGroup, items: groups.toList()),
+          SelectionSection(
+            label: subRule ? null : l10n.proxies,
+            items: [
+              for (final name in targets)
+                if (!builtIns.contains(name) && !groups.contains(name)) name,
+            ],
+          ),
+        ],
+        labelBuilder: (item) => item,
+        selected: _target,
+      ),
+    );
+    if (target == null || !mounted) return;
+    setState(() {
+      _target = target;
+      _clearError();
+    });
+  }
+
+  Future<void> _delete() async {
+    final onDelete = widget.onDelete;
+    if (onDelete == null || _saving) return;
+    if (await onDelete() && mounted) context.safeNestedPop();
+  }
+
+  Widget _pickerRow({
+    required Key key,
+    required String title,
+    required String? value,
+    required String placeholder,
+    required VoidCallback onPressed,
+    String? invalidMessage,
+  }) {
+    final colorScheme = context.colorScheme;
+    final invalid = invalidMessage != null;
+    final color = invalid ? colorScheme.error : colorScheme.onSurfaceVariant;
+    return FormRow(
+      key: key,
+      title: title,
+      invalid: invalid,
+      onPressed: onPressed,
+      trailing: Row(
+        spacing: 2,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (invalidMessage != null)
+            InfoMessageButton(message: invalidMessage),
+          Flexible(
+            child: TooltipText(
+              text: Text(
+                value?.isNotEmpty == true ? value! : placeholder,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.listTitleStyle.copyWith(color: color),
+              ),
+            ),
+          ),
+          GlyphIcon(AppGlyphs.chevronForward, color: color),
+        ],
+      ),
+    );
+  }
+
+  Widget _switchRow({
+    required String title,
+    required bool value,
+    required ValueChanged<bool>? onChanged,
+  }) {
+    return FormRow(
+      title: title,
+      onPressed: onChanged == null ? null : () => onChanged(!value),
+      trailing: Switch(value: value, onChanged: onChanged),
+    );
+  }
+
+  List<Widget> _buildForm(Key? invalid) {
+    final l10n = context.appLocalizations;
+    final target = _target;
+    final targetError = target == null ? null : _validateTarget(target);
+    final provider = _payloadController.text;
+    return [
+      generateSection(
+        title: l10n.basicInfo,
+        footer: _action == RuleAction.MATCH
+            ? l10n.customRuleMatchHint
+            : _action.getDesc(context),
+        items: [
+          FormRow(
+            title: l10n.customRuleType,
+            onPressed: _showTypes,
+            trailing: Row(
+              spacing: 2,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Text(
+                    _action.value,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const GlyphIcon(AppGlyphs.chevronForward),
+              ],
+            ),
+          ),
+          if (_action == RuleAction.RULE_SET)
+            _pickerRow(
+              key: const Key('custom-rule-provider'),
+              title: l10n.ruleProviders,
+              value: provider.isEmpty ? null : provider,
+              placeholder: l10n.customRuleChooseProvider,
+              onPressed: _showRuleProviders,
+              invalidMessage:
+                  provider.isNotEmpty &&
+                      !widget.ruleProviders.contains(provider)
+                  ? _validatePayload(_action, provider)
+                  : null,
+            )
+          else if (_action != RuleAction.MATCH)
+            FormRow(
+              title: l10n.content,
+              invalid:
+                  invalid == ValueKey('custom-rule-payload-${_action.name}'),
+              trailing: FormRowTextField(
+                key: ValueKey('custom-rule-payload-${_action.name}'),
+                controller: _payloadController,
+                autocorrect: false,
+                hintText: _example(_action),
+                onChanged: (_) => setState(_clearError),
+                onFieldSubmitted: (_) => _submit(),
+              ),
+            ),
+          _pickerRow(
+            key: const Key('custom-rule-target'),
+            title: _action == RuleAction.SUB_RULE
+                ? l10n.subRule
+                : l10n.ruleTarget,
+            value: target,
+            placeholder: l10n.customRuleChooseTarget,
+            onPressed: _showTargets,
+            invalidMessage: targetError,
+          ),
+        ],
+      ),
+      if (_action.hasParams)
+        generateSection(
+          title: l10n.additionalParameters,
+          footer: l10n.customRuleNoResolveHint,
+          items: [
+            _switchRow(
+              title: l10n.noResolve,
+              value: _noResolve || _src,
+              onChanged: _src
+                  ? null
+                  : (value) => setState(() {
+                      _noResolve = value;
+                      _clearError();
+                    }),
+            ),
+            _switchRow(
+              title: l10n.sourceIp,
+              value: _src,
+              onChanged: (value) => setState(() {
+                _src = value;
+                _clearError();
+              }),
+            ),
+          ],
+        ),
+      generateSection(
+        title: l10n.preview,
+        items: [
+          DecorationListItem(
+            title: SelectableText(
+              _formValue,
+              style: context.textTheme.bodyMedium?.toJetBrainsMono,
+            ),
+          ),
+        ],
+      ),
+    ];
+  }
+
+  Widget _buildRaw(Key? invalid) {
+    final l10n = context.appLocalizations;
+    return generateSection(
+      footer: l10n.customRuleRawHint,
+      items: [
+        DecorationListItem(
+          invalid: invalid == const Key('custom-rule-raw'),
+          title: TextFormField(
+            key: const Key('custom-rule-raw'),
+            controller: _rawController,
+            minLines: 3,
+            maxLines: 8,
+            keyboardType: TextInputType.multiline,
+            autocorrect: false,
+            smartDashesType: SmartDashesType.disabled,
+            smartQuotesType: SmartQuotesType.disabled,
+            style: context.textTheme.bodyMedium?.toJetBrainsMono,
+            decoration: InputDecoration.collapsed(
+              hintText: l10n.rule,
+              border: const NoInputBorder(),
+            ),
+            onChanged: (_) {
+              if (_error != null || _attempted) setState(_clearError);
+            },
+          ),
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.appLocalizations;
-    return OverwriteEditorForm(
-      isDirty: () => !const ListEquality().equals(_origin, _snapshot),
+    final issue = _attempted ? _issue() : null;
+    return OverwriteExitGuard(
+      isDirty: () =>
+          !_saving && !const ListEquality().equals(_origin, _snapshot),
       save: _submit,
-      isBusy: () => _saving,
-      maxWidth: 480,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      title: widget.rule == null ? l10n.addRule : l10n.editRule,
-      actions: [
-        TextButton(
-          onPressed: () => context.safeNestedPop(),
-          child: Text(l10n.cancel),
-        ),
-        if (_failedCandidate != null)
-          TextButton(
-            key: const Key('custom-rule-save-draft'),
-            onPressed: _saving ? null : _saveDraft,
-            child: Text(l10n.saveRoutingDraft),
-          ),
-        FilledButton(
-          key: const Key('custom-rule-save'),
-          onPressed: _saving ? null : _submit,
-          child: _saving
-              ? const SizedBox.square(
-                  dimension: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(l10n.save),
-        ),
-      ],
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SegmentedButton<bool>(
-              showSelectedIcon: false,
-              segments: [
-                ButtonSegment(value: false, label: Text(l10n.customRuleForm)),
-                ButtonSegment(value: true, label: Text(l10n.customRuleRaw)),
-              ],
-              selected: {_rawMode},
-              onSelectionChanged: _saving
-                  ? null
-                  : (selection) => _setMode(selection.single),
+      child: CommonScaffold(
+        title: widget.rule == null ? l10n.addRule : l10n.editRule,
+        iconActions: [
+          if (_failedCandidate != null && !_saving)
+            IconButtonData(
+              glyph: AppGlyphs.save,
+              tooltip: l10n.saveRoutingDraft,
+              onPressed: _saveDraft,
             ),
-            const SizedBox(height: 20),
-            if (_rawMode) ...[
-              TextFormField(
-                key: const Key('custom-rule-raw'),
-                controller: _rawController,
-                enabled: !_saving,
-                minLines: 3,
-                maxLines: 8,
-                keyboardType: TextInputType.multiline,
-                autocorrect: false,
-                smartDashesType: SmartDashesType.disabled,
-                smartQuotesType: SmartQuotesType.disabled,
-                style: context.textTheme.bodyMedium?.toJetBrainsMono,
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
-                  labelText: l10n.rule,
-                  helperText: l10n.customRuleRawHint,
-                  helperMaxLines: 3,
-                  errorMaxLines: 5,
+        ],
+        confirmationAction: IconButtonData(
+          glyph: AppGlyphs.check,
+          tooltip: l10n.save,
+          isLoading: _saving,
+          onPressed: _saving ? null : _submit,
+        ),
+        body: ExcludeFocus(
+          excluding: _saving,
+          child: AbsorbPointer(
+            absorbing: _saving,
+            child: Builder(
+              builder: (context) => ListView(
+                controller: _scrollController,
+                padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
+                  top: context.contentTopPadding,
+                  bottom: 20 + BottomInsetScope.of(context),
                 ),
-                validator: _validateRaw,
-                onChanged: (_) {
-                  if (_error != null) setState(_clearError);
-                },
-              ),
-            ] else ...[
-              DropdownButtonFormField<RuleAction>(
-                key: ValueKey('custom-rule-type-${_action.name}'),
-                initialValue: _action,
-                isExpanded: true,
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
-                  labelText: l10n.customRuleType,
-                ),
-                items: [
-                  for (final action in _formActions)
-                    DropdownMenuItem(value: action, child: Text(action.value)),
-                ],
-                onChanged: _saving
-                    ? null
-                    : (action) {
-                        if (action == null) return;
-                        setState(() {
-                          _action = action;
-                          if (!action.hasParams) {
-                            _noResolve = false;
-                            _src = false;
-                          }
-                          _clearError();
-                        });
-                      },
-              ),
-              const SizedBox(height: 20),
-              if (_action == RuleAction.MATCH)
-                Text(l10n.customRuleMatchHint)
-              else if (_action == RuleAction.RULE_SET)
-                _selectionField(
-                  key: const Key('custom-rule-provider'),
-                  label: l10n.ruleProviders,
-                  placeholder: l10n.customRuleChooseProvider,
-                  value: _payloadController.text.isEmpty
-                      ? null
-                      : _payloadController.text,
-                  options: widget.ruleProviders,
-                  validator: (value) => _validatePayload(_action, value ?? ''),
-                  onChanged: (value) => _payloadController.text = value,
-                )
-              else
-                TextFormField(
-                  key: ValueKey('custom-rule-payload-${_action.name}'),
-                  controller: _payloadController,
-                  enabled: !_saving,
-                  autocorrect: false,
-                  smartDashesType: SmartDashesType.disabled,
-                  smartQuotesType: SmartQuotesType.disabled,
-                  decoration: InputDecoration(
-                    border: const OutlineInputBorder(),
-                    labelText: l10n.content,
-                    hintText: _example(_action),
-                    helperText: _action.getDesc(context),
-                    helperMaxLines: 4,
-                    errorMaxLines: 4,
+                children: [
+                  Semantics(
+                    liveRegion: true,
+                    child: ErrorBanner(message: issue?.message ?? _error),
                   ),
-                  validator: (value) =>
-                      _validatePayload(_action, (value ?? '').trim()),
-                  onChanged: (_) => setState(_clearError),
-                  onFieldSubmitted: (_) => _submit(),
-                ),
-              const SizedBox(height: 20),
-              _selectionField(
-                key: const Key('custom-rule-target'),
-                grouped: _action != RuleAction.SUB_RULE,
-                label: _action == RuleAction.SUB_RULE
-                    ? l10n.subRule
-                    : l10n.ruleTarget,
-                placeholder: l10n.customRuleChooseTarget,
-                value: _target,
-                options: _targets,
-                validator: _validateTarget,
-                onChanged: (value) => _target = value,
-                helperText: l10n.customRuleTargetHint,
-              ),
-              if (_action.hasParams) ...[
-                const SizedBox(height: 8),
-                SwitchListTile.adaptive(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(l10n.noResolve),
-                  subtitle: Text(l10n.customRuleNoResolveHint),
-                  value: _noResolve || _src,
-                  onChanged: _saving || _src
-                      ? null
-                      : (value) => setState(() {
-                          _noResolve = value;
-                          _clearError();
-                        }),
-                ),
-                CheckboxListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(l10n.sourceIp),
-                  value: _src,
-                  onChanged: _saving
-                      ? null
-                      : (value) => setState(() {
-                          _src = value ?? false;
-                          _clearError();
-                        }),
-                ),
-              ],
-              const SizedBox(height: 20),
-              Text(l10n.preview, style: context.textTheme.labelMedium),
-              const SizedBox(height: 4),
-              SelectableText(
-                _formValue,
-                style: context.textTheme.bodySmall?.toJetBrainsMono,
-              ),
-            ],
-            if (_error != null) ...[
-              const SizedBox(height: 16),
-              Semantics(
-                key: _errorKey,
-                liveRegion: true,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _error!,
-                      style: TextStyle(color: context.colorScheme.error),
+                  if (_failedCandidate != null && issue == null)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                      child: Text(
+                        l10n.routingDraftHint,
+                        style: context.listCaptionStyle,
+                      ),
                     ),
-                    if (_failedCandidate != null) ...[
-                      const SizedBox(height: 8),
-                      Text(l10n.routingDraftHint),
-                    ],
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: SegmentedControl<bool>(
+                      segments: [
+                        (false, l10n.customRuleForm),
+                        (true, l10n.customRuleRaw),
+                      ],
+                      value: _rawMode,
+                      onChanged: _setMode,
+                    ),
+                  ),
+                  if (_rawMode)
+                    _buildRaw(issue?.field)
+                  else
+                    ..._buildForm(issue?.field)
+                        .separated(const SizedBox(height: 8)),
+                  if (widget.rule != null && widget.onDelete != null) ...[
+                    const SizedBox(height: 16),
+                    generateSection(
+                      items: [
+                        FormRow(
+                          title: l10n.delete,
+                          titleStyle: TextStyle(
+                            color: context.colorScheme.error,
+                          ),
+                          onPressed: _delete,
+                        ),
+                      ],
+                    ),
                   ],
-                ),
+                ],
               ),
-            ],
-          ],
+            ),
+          ),
         ),
       ),
     );

@@ -1542,5 +1542,8 @@
   "autoInclude": "Автоматическое включение",
   "filters": "Фильтры",
   "inputProxyGroupName": "Введите название группы прокси",
-  "definitionNotMap": "Конфигурация должна быть YAML-словарём с полями name и type"
+  "definitionNotMap": "Конфигурация должна быть YAML-словарём с полями name и type",
+  "additionalParameters": "Дополнительные параметры",
+  "quickActions": "Быстрые действия",
+  "ruleListInvalid": "Правила должны быть YAML-списком, по одному правилу в элементе, например - DOMAIN,example.com,DIRECT"
 }

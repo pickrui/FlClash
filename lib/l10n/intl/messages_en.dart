@@ -376,6 +376,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "addSettingEntry": MessageLookupByLibrary.simpleMessage("Add setting"),
     "addSsid": MessageLookupByLibrary.simpleMessage("Add SSID"),
     "addedRules": MessageLookupByLibrary.simpleMessage("Added rules"),
+    "additionalParameters": MessageLookupByLibrary.simpleMessage(
+      "Additional parameters",
+    ),
     "additionalPrefix": MessageLookupByLibrary.simpleMessage("Name prefix"),
     "additionalSuffix": MessageLookupByLibrary.simpleMessage("Name suffix"),
     "address": MessageLookupByLibrary.simpleMessage("Address"),
@@ -2423,6 +2426,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
       "Scan QR code to obtain profile",
     ),
+    "quickActions": MessageLookupByLibrary.simpleMessage("Quick actions"),
     "quickAdd": MessageLookupByLibrary.simpleMessage("Quick add"),
     "quickEdit": MessageLookupByLibrary.simpleMessage("Quick edit"),
     "quickFill": MessageLookupByLibrary.simpleMessage("Quick fill"),
@@ -2695,6 +2699,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Match the Linux user ID",
     ),
     "ruleEmpty": MessageLookupByLibrary.simpleMessage("Rule is empty"),
+    "ruleListInvalid": MessageLookupByLibrary.simpleMessage(
+      "The rules must be a YAML list with one rule per item, such as - DOMAIN,example.com,DIRECT",
+    ),
     "ruleName": MessageLookupByLibrary.simpleMessage("Rule name"),
     "rulePresetBittorrentDirect": MessageLookupByLibrary.simpleMessage(
       "BitTorrent direct",

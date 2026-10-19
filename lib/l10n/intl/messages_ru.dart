@@ -382,6 +382,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "addSsid": MessageLookupByLibrary.simpleMessage("Добавить SSID"),
     "addedRules": MessageLookupByLibrary.simpleMessage("Добавленные правила"),
+    "additionalParameters": MessageLookupByLibrary.simpleMessage(
+      "Дополнительные параметры",
+    ),
     "additionalPrefix": MessageLookupByLibrary.simpleMessage("Префикс имени"),
     "additionalSuffix": MessageLookupByLibrary.simpleMessage("Суффикс имени"),
     "address": MessageLookupByLibrary.simpleMessage("Адрес"),
@@ -2532,6 +2535,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
       "Сканируйте QR-код для получения профиля",
     ),
+    "quickActions": MessageLookupByLibrary.simpleMessage("Быстрые действия"),
     "quickAdd": MessageLookupByLibrary.simpleMessage("Быстрое добавление"),
     "quickEdit": MessageLookupByLibrary.simpleMessage("Быстрое редактирование"),
     "quickFill": MessageLookupByLibrary.simpleMessage("Быстрое заполнение"),
@@ -2818,6 +2822,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Сопоставить Linux USER ID",
     ),
     "ruleEmpty": MessageLookupByLibrary.simpleMessage("Правило пусто"),
+    "ruleListInvalid": MessageLookupByLibrary.simpleMessage(
+      "Правила должны быть YAML-списком, по одному правилу в элементе, например - DOMAIN,example.com,DIRECT",
+    ),
     "ruleName": MessageLookupByLibrary.simpleMessage("Название правила"),
     "rulePresetBittorrentDirect": MessageLookupByLibrary.simpleMessage(
       "BitTorrent напрямую",

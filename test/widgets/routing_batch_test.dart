@@ -214,6 +214,60 @@ void main() {
     );
     expect(profiles.profile.customProxyGroups[1].proxies, ['Second']);
   });
+  testWidgets('copying a rule from its menu puts the copy after it', (
+    tester,
+  ) async {
+    final profiles = await _open(tester);
+    await tester.longPress(find.text('first.example'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(AppLocalizations.current.copy));
+    await tester.pumpAndSettle();
+    final rules = profiles.profile.customRules;
+    expect(
+      [for (final rule in rules) rule.value],
+      [
+        'DOMAIN,first.example,DIRECT',
+        'DOMAIN,first.example,DIRECT',
+        'MATCH,DIRECT',
+      ],
+    );
+    expect(rules[1].id, isNot(rules[0].id));
+  });
+
+  test('quick edit keeps the ids of unchanged rules and names a bad line', () {
+    final rules = readQuickEditRules(
+      '- MATCH,DIRECT\n- DOMAIN,new.example,DIRECT\n- DOMAIN,first.example,DIRECT\n',
+      _rules,
+      isValid: (_) => true,
+    );
+    expect(
+      [for (final rule in rules) rule.value],
+      [
+        'MATCH,DIRECT',
+        'DOMAIN,new.example,DIRECT',
+        'DOMAIN,first.example,DIRECT',
+      ],
+    );
+    expect(rules[0].id, 2);
+    expect(rules[2].id, 1);
+    expect(
+      () => readQuickEditRules(
+        '- MATCH,DIRECT\n- broken\n',
+        _rules,
+        isValid: (rule) => rule != 'broken',
+      ),
+      throwsA(
+        isA<RuleLineException>()
+            .having((error) => error.line, 'line', 2)
+            .having((error) => error.rule, 'rule', 'broken'),
+      ),
+    );
+    expect(
+      () => readQuickEditRules('rules: none', _rules, isValid: (_) => true),
+      throwsFormatException,
+    );
+  });
+
   for (final rawReference in [false, true]) {
     testWidgets(
       'batch preserves groups still referenced by ${rawReference ? 'source DNS' : 'a rule'}',
@@ -254,7 +308,7 @@ void main() {
           ],
         );
         if (changed) profiles.replace(latest);
-        await tester.tap(find.widgetWithText(TextButton, 'Confirm'));
+        await tester.tap(find.widgetWithText(TextButton, 'Delete'));
         await tester.pumpAndSettle();
         expect(
           profiles.profile.customRules,

@@ -6,7 +6,10 @@
 import 'dart:async';
 
 import 'package:fl_clash/common/app_localizations.dart';
+import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/features/overwrite/custom_rule_editor.dart';
+import 'package:fl_clash/ui/models.dart';
+import 'package:fl_clash/ui/scaffold.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/clash_config.dart';
 import 'package:fl_clash/providers/app.dart';
@@ -22,7 +25,16 @@ void main() {
     tester,
   ) async {
     Rule? result;
-    await _open(tester, onResult: (value) => result = value);
+    await _open(
+      tester,
+      onResult: (value) => result = value,
+      targets: [
+        'DIRECT',
+        'REJECT',
+        'Japan automatic',
+        for (var index = 1; index <= 8; index++) 'Node $index',
+      ],
+    );
 
     await tester.enterText(_payload('DOMAIN_SUFFIX'), 'example.com');
     await _chooseTarget(tester, query: 'japan', name: 'Japan automatic');
@@ -42,10 +54,6 @@ void main() {
         } else {
           await _chooseTarget(tester, name: 'DIRECT');
         }
-        expect(
-          find.byKey(const Key('custom-rule-option-search')),
-          findsNothing,
-        );
         await tester.ensureVisible(find.text('Rule text'));
         await tester.pumpAndSettle();
         await tester.tap(find.text('Rule text'));
@@ -141,12 +149,17 @@ void main() {
     await _open(tester, rule: original, onResult: (value) => result = value);
 
     expect(find.text('Removed group'), findsOneWidget);
-    expect(find.textContaining('Removed group is unavailable'), findsOneWidget);
+    expect(
+      tester.widget<InfoMessageButton>(find.byType(InfoMessageButton)).message,
+      contains('Removed group is unavailable'),
+    );
     await _save(tester);
     expect(result, isNull);
+    expect(find.textContaining('Removed group is unavailable'), findsOneWidget);
 
     await _chooseTarget(tester, name: 'Japan automatic');
     expect(find.textContaining('Removed group is unavailable'), findsNothing);
+    expect(find.byType(InfoMessageButton), findsNothing);
     await _save(tester);
     expect(result?.id, 42);
     expect(result?.order, 'a0');
@@ -217,12 +230,15 @@ void main() {
       rule: const Rule(id: 1, value: 'RULE-SET,Old provider,DIRECT,no-resolve'),
       onResult: (value) => result = value,
     );
-    expect(find.textContaining('Old provider is unavailable'), findsOneWidget);
+    expect(
+      tester.widget<InfoMessageButton>(find.byType(InfoMessageButton)).message,
+      contains('Old provider is unavailable'),
+    );
     await tester.tap(find.byKey(const Key('custom-rule-provider')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Streaming').last);
     await tester.pumpAndSettle();
-    expect(find.textContaining('Old provider is unavailable'), findsNothing);
+    expect(find.byType(InfoMessageButton), findsNothing);
     await _save(tester);
     expect(result?.value, 'RULE-SET,Streaming,DIRECT,no-resolve');
   });
@@ -359,14 +375,9 @@ void main() {
         onResult: (value) => result = value,
       );
       await tester.enterText(_payload('DOMAIN'), 'changed.example.com');
-      await tester.tap(find.byKey(const Key('custom-rule-save')));
+      await tester.tap(find.byTooltip('Save'));
       await tester.pump();
-      expect(
-        tester
-            .widget<FilledButton>(find.byKey(const Key('custom-rule-save')))
-            .onPressed,
-        isNull,
-      );
+      expect(_saveAction(tester).onPressed, isNull);
       expect(validationCount, 1);
       pending.complete('The configuration references an unavailable provider.');
       await tester.pumpAndSettle();
@@ -396,9 +407,9 @@ void main() {
       validate: (_) => pending.future,
       onResult: results.add,
     );
-    await tester.tap(find.byKey(const Key('custom-rule-save')));
+    await tester.tap(find.byTooltip('Save'));
     await tester.pump();
-    await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
+    await tester.binding.handlePopRoute();
     // The closing route remains mounted during its exit animation. A check
     // completing now must not pop the route underneath it.
     pending.complete('');
@@ -420,7 +431,7 @@ void main() {
       validate: (_) => pending.future,
       onResult: results.add,
     );
-    await tester.tap(find.byKey(const Key('custom-rule-save')));
+    await tester.tap(find.byTooltip('Save'));
     await tester.pump();
     showDialog<void>(
       context: tester.element(find.byType(CustomRuleEditorDialog)),
@@ -434,12 +445,7 @@ void main() {
 
     expect(find.byType(CustomRuleEditorDialog), findsOneWidget);
     expect(results, isEmpty);
-    expect(
-      tester
-          .widget<FilledButton>(find.byKey(const Key('custom-rule-save')))
-          .onPressed,
-      isNotNull,
-    );
+    expect(_saveAction(tester).onPressed, isNotNull);
     await _save(tester);
     expect(results.single?.value, 'DOMAIN,example.com,DIRECT');
   });
@@ -460,20 +466,20 @@ void main() {
             'Another rule references a removed policy group.',
         onResult: (value) => result = value,
       );
-      expect(find.byKey(const Key('custom-rule-save-draft')), findsNothing);
+      expect(find.byTooltip('Save draft'), findsNothing);
       await tester.enterText(_payload('DOMAIN'), 'https://invalid.example');
       await _save(tester);
-      expect(find.byKey(const Key('custom-rule-save-draft')), findsNothing);
+      expect(find.byTooltip('Save draft'), findsNothing);
 
       await tester.enterText(_payload('DOMAIN'), 'changed.example.com');
       await _save(tester);
       expect(result, isNull);
-      expect(find.byKey(const Key('custom-rule-save-draft')), findsOneWidget);
+      expect(find.byTooltip('Save draft'), findsOneWidget);
       expect(
         find.textContaining('Settings are applied only after'),
         findsOneWidget,
       );
-      await tester.tap(find.byKey(const Key('custom-rule-save-draft')));
+      await tester.tap(find.byTooltip('Save draft'));
       await tester.pumpAndSettle();
       expect(
         result,
@@ -491,11 +497,11 @@ void main() {
       validate: (_) async => 'Another item needs repair.',
     );
     await _save(tester);
-    expect(find.byKey(const Key('custom-rule-save-draft')), findsOneWidget);
+    expect(find.byTooltip('Save draft'), findsOneWidget);
     await tester.ensureVisible(_payload('DOMAIN'));
     await tester.enterText(_payload('DOMAIN'), 'new.example.com');
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('custom-rule-save-draft')), findsNothing);
+    expect(find.byTooltip('Save draft'), findsNothing);
   });
 
   testWidgets('remains scrollable on a narrow screen with long policy names', (
@@ -513,7 +519,7 @@ void main() {
     );
     await tester.dragUntilVisible(
       find.text('Preview'),
-      find.byType(SingleChildScrollView).first,
+      _vertical.last,
       const Offset(0, -200),
     );
     expect(find.text('Preview'), findsOneWidget);
@@ -521,11 +527,29 @@ void main() {
   });
 }
 
-Finder _payload(String action) =>
-    find.byKey(ValueKey('custom-rule-payload-$action'));
+Finder _payload(String action) => find.descendant(
+  of: find.byKey(ValueKey('custom-rule-payload-$action')),
+  matching: find.byType(TextFormField),
+);
+
+Finder get _vertical => find.byWidgetPredicate(
+  (widget) =>
+      widget is Scrollable && widget.axisDirection == AxisDirection.down,
+);
+
+IconButtonData _saveAction(WidgetTester tester) => tester
+    .widget<CommonScaffold>(
+      find
+          .descendant(
+            of: find.byType(CustomRuleEditorDialog),
+            matching: find.byType(CommonScaffold),
+          )
+          .first,
+    )
+    .confirmationAction!;
 
 Future<void> _save(WidgetTester tester) async {
-  await tester.tap(find.byKey(const Key('custom-rule-save')));
+  await tester.tap(find.byTooltip('Save'));
   await tester.pumpAndSettle();
 }
 
@@ -538,18 +562,18 @@ Future<void> _chooseTarget(
   await tester.tap(find.byKey(const Key('custom-rule-target')));
   await tester.pumpAndSettle();
   if (query != null) {
-    await tester.enterText(
-      find.byKey(const Key('custom-rule-option-search')),
-      query,
-    );
+    tester
+        .widget<CommonScaffold>(find.byType(CommonScaffold).last)
+        .searchState!
+        .onSearch(query);
     await tester.pumpAndSettle();
     expect(find.text('DIRECT'), findsNothing);
   }
-  final option = find.widgetWithText(ListTile, name);
+  final option = find.text(name).last;
   if (option.evaluate().isEmpty) {
     await tester.dragUntilVisible(
       option,
-      find.byType(Scrollable).last,
+      _vertical.last,
       const Offset(0, -160),
     );
   }
@@ -589,14 +613,15 @@ Future<void> _open(
           body: Builder(
             builder: (context) => TextButton(
               onPressed: () async {
-                final result = await showDialog<Rule>(
-                  context: context,
-                  builder: (_) => CustomRuleEditorDialog(
-                    rule: rule,
-                    targets: targets,
-                    ruleProviders: ruleProviders,
-                    subRules: subRules,
-                    validate: validate,
+                final result = await Navigator.of(context).push<Rule>(
+                  MaterialPageRoute(
+                    builder: (_) => CustomRuleEditorDialog(
+                      rule: rule,
+                      targets: targets,
+                      ruleProviders: ruleProviders,
+                      subRules: subRules,
+                      validate: validate,
+                    ),
                   ),
                 );
                 onResult?.call(result);

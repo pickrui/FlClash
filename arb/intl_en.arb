@@ -1542,5 +1542,8 @@
   "autoInclude": "Auto-include",
   "filters": "Filters",
   "inputProxyGroupName": "Enter the proxy group name",
-  "definitionNotMap": "The configuration must be a YAML mapping with a name and a type"
+  "definitionNotMap": "The configuration must be a YAML mapping with a name and a type",
+  "additionalParameters": "Additional parameters",
+  "quickActions": "Quick actions",
+  "ruleListInvalid": "The rules must be a YAML list with one rule per item, such as - DOMAIN,example.com,DIRECT"
 }

@@ -90,6 +90,7 @@ void main() {
         targets: ['DIRECT', 'REJECT', 'Japan automatic', 'US fallback'],
         ruleProviders: ['Streaming', 'Advertising'],
       ),
+      page: true,
     );
     await _capture(tester, key, 'overlay-rule-form-360.png');
   }, skip: skip);
@@ -152,23 +153,18 @@ void main() {
               ),
               targets: ['DIRECT', 'REJECT', 'Japan automatic'],
             ),
+            page: true,
           );
-          _expectActionsVisible(tester, scenario.size, scenario.keyboard);
+          final saveRule = find.byTooltip(AppLocalizations.current.save);
+          _expectReachable(tester, saveRule, scenario.size, scenario.keyboard);
           if (!skip) await _capture(tester, key, '$prefix-rule.png');
-          await tester.ensureVisible(
-            find.byKey(const Key('custom-rule-target')),
-          );
+          await _reveal(tester, find.byKey(const Key('custom-rule-target')));
           await tester.tap(find.byKey(const Key('custom-rule-target')));
           await tester.pumpAndSettle();
           expect(tester.takeException(), isNull);
-          await tester.enterText(
-            find.byKey(const Key('custom-rule-option-search')),
-            'DIRECT',
-          );
+          await tester.tap(find.text('DIRECT').last);
           await tester.pumpAndSettle();
-          await tester.tap(find.widgetWithText(ListTile, 'DIRECT'));
-          await tester.pumpAndSettle();
-          await tester.tap(find.byKey(const Key('custom-rule-save')));
+          await tester.tap(saveRule);
           await tester.pumpAndSettle();
           expect(find.byType(CustomRuleEditorDialog), findsNothing);
           expect((result as Rule).value, 'DOMAIN-SUFFIX,example.com,DIRECT');
@@ -378,34 +374,4 @@ void _expectReachable(
   expect(bounds.right, lessThanOrEqualTo(size.width));
   expect(bounds.top, greaterThanOrEqualTo(0));
   expect(bounds.bottom, lessThanOrEqualTo(size.height - keyboard));
-}
-
-void _expectActionsVisible(WidgetTester tester, Size size, double keyboard) {
-  expect(tester.takeException(), isNull);
-  final bounds = tester.getRect(find.byType(AlertDialog));
-  expect(bounds.left, greaterThanOrEqualTo(0));
-  expect(bounds.right, lessThanOrEqualTo(size.width));
-  expect(bounds.top, greaterThanOrEqualTo(0));
-  expect(bounds.bottom, lessThanOrEqualTo(size.height));
-  for (final button
-      in find
-          .byType(TextButton)
-          .evaluate()
-          .where(
-            (element) =>
-                element.findAncestorWidgetOfExactType<AlertDialog>() != null &&
-                element.findAncestorWidgetOfExactType<OverflowBar>() != null,
-          )) {
-    final finder = find.byWidget(button.widget);
-    expect(finder.hitTestable(), findsOneWidget);
-    expect(
-      tester.getRect(finder).bottom,
-      lessThanOrEqualTo(size.height - keyboard),
-    );
-  }
-  expect(find.byType(FilledButton).hitTestable(), findsOneWidget);
-  expect(
-    tester.getRect(find.byType(FilledButton)).bottom,
-    lessThanOrEqualTo(size.height - keyboard),
-  );
 }

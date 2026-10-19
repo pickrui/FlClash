@@ -312,6 +312,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "addSettingEntry": MessageLookupByLibrary.simpleMessage("添加设置项"),
     "addSsid": MessageLookupByLibrary.simpleMessage("添加SSID"),
     "addedRules": MessageLookupByLibrary.simpleMessage("附加规则"),
+    "additionalParameters": MessageLookupByLibrary.simpleMessage("附加参数"),
     "additionalPrefix": MessageLookupByLibrary.simpleMessage("名称前缀"),
     "additionalSuffix": MessageLookupByLibrary.simpleMessage("名称后缀"),
     "address": MessageLookupByLibrary.simpleMessage("地址"),
@@ -1809,6 +1810,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("纯黑模式"),
     "qrcode": MessageLookupByLibrary.simpleMessage("二维码"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage("扫描二维码获取配置文件"),
+    "quickActions": MessageLookupByLibrary.simpleMessage("快捷操作"),
     "quickAdd": MessageLookupByLibrary.simpleMessage("快捷添加"),
     "quickEdit": MessageLookupByLibrary.simpleMessage("快速编辑"),
     "quickFill": MessageLookupByLibrary.simpleMessage("一键填入"),
@@ -2005,6 +2007,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "匹配 Linux USER ID",
     ),
     "ruleEmpty": MessageLookupByLibrary.simpleMessage("规则为空"),
+    "ruleListInvalid": MessageLookupByLibrary.simpleMessage(
+      "规则必须是 YAML 列表，每项一条规则，例如 - DOMAIN,example.com,DIRECT",
+    ),
     "ruleName": MessageLookupByLibrary.simpleMessage("规则名称"),
     "rulePresetBittorrentDirect": MessageLookupByLibrary.simpleMessage(
       "BT 下载直连",

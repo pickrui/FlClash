@@ -11,7 +11,11 @@ import 'package:fl_clash/features/overwrite/routing_draft.dart';
 import 'package:fl_clash/features/overwrite/rule_preset.dart';
 import 'package:fl_clash/features/overwrite/routing_issue.dart';
 import 'package:fl_clash/providers/routing_issues.dart';
+import 'package:fl_clash/features/editor/clash_schema.dart';
 import 'package:fl_clash/features/overwrite/custom_rule_editor.dart';
+import 'package:fl_clash/features/overwrite/quick_edit.dart';
+import 'package:fl_clash/ui/context_menu.dart';
+import 'package:fl_clash/ui/sortable.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/database.dart';
@@ -283,6 +287,39 @@ class _CountBadge extends StatelessWidget {
   }
 }
 
+class RuleLineException implements Exception {
+  final int line;
+  final String rule;
+
+  const RuleLineException(this.line, this.rule);
+}
+
+/// The rules [content] lists one YAML item each; a line unchanged from
+/// [previous] keeps that rule's id. [isValid] screens each line.
+List<Rule> readQuickEditRules(
+  String content,
+  List<Rule> previous, {
+  required bool Function(String rule) isValid,
+}) {
+  final value = content.trim().isEmpty ? const [] : loadPlainYaml(content);
+  if (value is! List) throw const FormatException();
+  final kept = <String, List<Rule>>{};
+  for (final rule in previous) {
+    kept.putIfAbsent(rule.value, () => []).add(rule);
+  }
+  return [
+    for (final (index, item) in value.indexed)
+      switch (item is String ? item.trim() : '') {
+        final text when text.isEmpty || !isValid(text) =>
+          throw RuleLineException(index + 1, text),
+        final text => switch (kept[text]) {
+          final rules? when rules.isNotEmpty => rules.removeAt(0),
+          _ => Rule.value(text),
+        },
+      },
+  ];
+}
+
 class CustomRulesView extends ConsumerStatefulWidget {
   final int profileId;
   const CustomRulesView({super.key, required this.profileId});
@@ -293,7 +330,7 @@ class CustomRulesView extends ConsumerStatefulWidget {
 class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
   int get profileId => widget.profileId;
   String _query = '';
-  final Set<Rule> _selected = {};
+  var _selected = <Rule>{};
   bool _deleting = false;
 
   void _update(WidgetRef ref, List<Rule> rules) {
@@ -362,6 +399,7 @@ class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
         ruleProviders: raw['rule-providers'] is Map
             ? (raw['rule-providers'] as Map).keys.whereType<String>().toList()
             : const [],
+        onDelete: rule == null ? null : () => _delete([rule]),
         validate: (result) {
           if (!context.mounted) {
             return Future.value(appLocalizations.routingChanged);
@@ -410,31 +448,98 @@ class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
     _update(ref, rules);
   }
 
-  Future<void> _delete(List<Rule> rules) async {
-    if (_deleting || rules.isEmpty) return;
+  /// Whether the rules went; they stay when the list changed meanwhile.
+  Future<bool> _delete(List<Rule> rules) async {
+    if (_deleting || rules.isEmpty) return false;
     final profile = ref.read(profileProvider(profileId));
-    if (profile == null || !rules.every(profile.customRules.contains)) return;
+    if (profile == null || !rules.every(profile.customRules.contains)) {
+      return false;
+    }
     setState(() => _deleting = true);
     try {
       final confirmed = await globalState.showMessage(
         message: TextSpan(
-          text: appLocalizations.deleteMultipTip(appLocalizations.rule),
+          text: rules.length == 1
+              ? appLocalizations.deleteTip(appLocalizations.rule)
+              : appLocalizations.deleteMultipTip(appLocalizations.rule),
         ),
+        destructive: true,
+        confirmText: appLocalizations.delete,
       );
-      if (confirmed != true || !mounted) return;
+      if (confirmed != true || !mounted) return false;
       if (ref.read(profileProvider(profileId)) != profile) {
         context.showNotifier(appLocalizations.routingChanged);
-        return;
+        return false;
       }
       _update(
         ref,
         profile.customRules.where((item) => !rules.contains(item)).toList(),
       );
-      setState(() => _selected.removeAll(rules));
+      setState(() => _selected = _selected.difference(rules.toSet()));
+      return true;
     } finally {
       if (mounted) setState(() => _deleting = false);
     }
   }
+
+  void _duplicate(Rule rule) {
+    final rules = [...?ref.read(profileProvider(profileId))?.customRules];
+    final index = rules.indexOf(rule);
+    if (index == -1) return;
+    rules.insert(index + 1, rule.copyWith(id: snowflake.id, order: null));
+    _update(ref, rules);
+  }
+
+  Future<void> _quickEdit() {
+    final previous =
+        ref.read(profileProvider(profileId))?.customRules ?? const <Rule>[];
+    return showCustomQuickEdit(
+      context,
+      title: appLocalizations.rule,
+      content: previous.isEmpty
+          ? ''
+          : writeYaml([for (final rule in previous) rule.value]),
+      schema: EditorSchema.rules,
+      invalidMessage: appLocalizations.ruleListInvalid,
+      apply: (content) {
+        final List<Rule> rules;
+        try {
+          rules = readQuickEditRules(
+            content,
+            previous,
+            isValid: (rule) =>
+                ParsedRule.parseString(rule).payloadError == null,
+          );
+        } on RuleLineException catch (error) {
+          final message = error.rule.isEmpty
+              ? appLocalizations.emptyTip(appLocalizations.rule)
+              : ParsedRule.parseString(error.rule).payloadError!
+                    .getMessage(context);
+          throw appLocalizations.lineIssueTip(error.line, message);
+        }
+        if (ref.read(profileProvider(profileId))?.customRules
+            case final current?
+            when !ruleListEquality.equals(current, previous)) {
+          throw appLocalizations.routingChanged;
+        }
+        _update(ref, rules);
+      },
+    );
+  }
+
+  List<CommonPopupMenuItem> _menuItems(Rule rule) => [
+    CommonPopupMenuItem(
+      glyph: AppGlyphs.copy,
+      label: appLocalizations.copy,
+      onPressed: () => _duplicate(rule),
+    ),
+    CommonPopupMenuItem(
+      glyph: AppGlyphs.delete,
+      label: appLocalizations.delete,
+      danger: true,
+      onPressed: () => _delete([rule]),
+    ),
+  ];
 
   void _reorder(
     WidgetRef ref,
@@ -463,42 +568,90 @@ class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
     final issues = ref.watch(routingIssuesProvider(profileId)).rules;
     final query = SearchQuery(_query);
     final visible = rules.where((rule) => query.matches([rule.value])).toList();
+    final selecting = selected.isNotEmpty;
+    Widget rowAt(int index, {required bool reorderable}) {
+      final rule = visible[index];
+      final ruleIssues = issues[rule.id];
+      final row = ContextMenuRegion(
+        menuItems: selecting || _deleting ? null : _menuItems(rule),
+        child: ItemPositionProvider(
+          position: ItemPosition.get(index, visible.length),
+          child: SelectedDecorationListItem(
+            isSelected: selected.contains(rule),
+            isEditing: selecting,
+            invalid: ruleIssues != null,
+            onSelected: () => setState(() {
+              _selected = _selected.contains(rule)
+                  ? _selected.difference({rule})
+                  : {..._selected, rule};
+            }),
+            onPressed: () => _edit(context, ref, rule),
+            title: Row(
+              children: [
+                Expanded(child: RuleSummary(rule: rule)),
+                if (ruleIssues != null) RoutingIssueButton(issues: ruleIssues),
+              ],
+            ),
+          ),
+        ),
+      );
+      return reorderable
+          ? SortableItem(key: ObjectKey(rule), index: index, child: row)
+          : KeyedSubtree(key: ObjectKey(rule), child: row);
+    }
+
+    final padding = EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 24);
     return CommonScaffold(
       title: appLocalizations.rule,
+      canSort: !selecting && !_deleting && query.isEmpty && rules.length > 1,
       searchState: AppBarSearchState(
         onSearch: (value) => setState(() => _query = value),
       ),
       selectionActions: [
-        if (selected.isNotEmpty) ...[
-          IconButtonData(
-            tooltip: appLocalizations.cancel,
-            glyph: AppGlyphs.close,
-            onPressed: () => setState(_selected.clear),
-          ),
-          IconButtonData(
-            tooltip: appLocalizations.selectAll,
-            glyph: AppGlyphs.selectAll,
-            onPressed: () => setState(() => _selected.addAll(visible)),
-          ),
+        if (selecting) ...[
           IconButtonData(
             tooltip: appLocalizations.delete,
             glyph: AppGlyphs.delete,
             onPressed: _deleting ? null : () => _delete(selected.toList()),
           ),
+          IconButtonData(
+            tooltip: appLocalizations.selectAll,
+            glyph: AppGlyphs.selectAll,
+            onPressed: () => setState(() {
+              _selected = _selected.containsAll(visible) ? {} : visible.toSet();
+            }),
+          ),
         ],
       ],
-      iconActions: [
-        if (selected.isEmpty)
-          IconButtonData(
-            tooltip: appLocalizations.quickAdd,
-            onPressed: () => _addPresets(context, ref),
-            glyph: AppGlyphs.listAdd,
-          ),
-        if (selected.isEmpty)
-          IconButtonData(
-            tooltip: appLocalizations.add,
-            onPressed: () => _edit(context, ref),
-            glyph: AppGlyphs.add,
+      actions: [
+        if (!selecting)
+          CommonPopupBox(
+            targetBuilder: (open) => AppBarActionButton(
+              data: IconButtonData(
+                glyph: AppGlyphs.addCircle,
+                tooltip: appLocalizations.add,
+                onPressed: open,
+              ),
+            ),
+            popup: CommonPopupMenu(
+              items: [
+                CommonPopupMenuItem(
+                  glyph: AppGlyphs.add,
+                  label: appLocalizations.add,
+                  onPressed: () => _edit(context, ref),
+                ),
+                CommonPopupMenuItem(
+                  glyph: AppGlyphs.rulePresets,
+                  label: appLocalizations.quickActions,
+                  onPressed: () => _addPresets(context, ref),
+                ),
+                CommonPopupMenuItem(
+                  glyph: AppGlyphs.compose,
+                  label: appLocalizations.quickEdit,
+                  onPressed: _quickEdit,
+                ),
+              ],
+            ),
           ),
       ],
       body: NullStatusSwitcher(
@@ -508,66 +661,29 @@ class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
           label: appLocalizations.ruleEmpty,
           illustration: NullStatusIllustration.rules,
         ),
-        child: ReorderableListView.builder(
-          padding: EdgeInsets.only(top: context.contentTopPadding, bottom: 88),
-          buildDefaultDragHandles: false,
-          proxyDecorator: (child, index, animation) => commonProxyDecorator(
-            Material(elevation: 6, child: child),
-            index,
-            animation,
-          ),
-          itemCount: visible.length,
-          itemBuilder: (context, index) {
-            final rule = visible[index];
-            return ReorderableDelayedDragStartListener(
-              key: ObjectKey(rule),
-              index: index,
-              enabled: query.isEmpty && selected.isEmpty && !_deleting,
-              child: ListItem(
-                leading: Checkbox(
-                  value: selected.contains(rule),
-                  onChanged: _deleting
-                      ? null
-                      : (value) => setState(() {
-                          value == true
-                              ? _selected.add(rule)
-                              : _selected.remove(rule);
-                        }),
-                ),
-                title: RuleSummary(rule: rule),
-                onTap: selected.isEmpty
-                    ? () => _edit(context, ref, rule)
-                    : () => setState(
-                        () => _selected.contains(rule)
-                            ? _selected.remove(rule)
-                            : _selected.add(rule),
-                      ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (issues[rule.id] case final ruleIssues?)
-                      RoutingIssueButton(issues: ruleIssues),
-                    if (selected.isEmpty)
-                      IconButton(
-                        tooltip: appLocalizations.delete,
-                        onPressed: _deleting ? null : () => _delete([rule]),
-                        icon: const GlyphIcon(AppGlyphs.delete),
-                      ),
-                    const Padding(
-                      padding: EdgeInsets.all(12),
-                      child: GlyphIcon(AppGlyphs.dragHandle),
+        child: query.isEmpty
+            ? ReorderableListView.builder(
+                padding: padding,
+                buildDefaultDragHandles: false,
+                proxyDecorator: (child, index, animation) =>
+                    commonProxyDecorator(
+                      rowAt(index, reorderable: true),
+                      index,
+                      animation,
                     ),
-                  ],
-                ),
+                itemCount: visible.length,
+                itemBuilder: (_, index) => rowAt(index, reorderable: true),
+                onReorderItem: (oldIndex, newIndex) {
+                  if (!selecting && !_deleting) {
+                    _reorder(ref, oldIndex, newIndex, rules);
+                  }
+                },
+              )
+            : ListView.builder(
+                padding: padding,
+                itemCount: visible.length,
+                itemBuilder: (_, index) => rowAt(index, reorderable: false),
               ),
-            );
-          },
-          onReorderItem: (oldIndex, newIndex) {
-            if (query.isEmpty && selected.isEmpty && !_deleting) {
-              _reorder(ref, oldIndex, newIndex, rules);
-            }
-          },
-        ),
       ),
     );
   }

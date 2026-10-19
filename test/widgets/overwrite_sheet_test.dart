@@ -208,7 +208,7 @@ void main() {
             ),
           );
           await tester.pumpAndSettle();
-          final save = find.byKey(const Key('custom-rule-save'));
+          final save = find.byTooltip(AppLocalizations.current.save);
           expect(
             tester.getBottomRight(save).dy,
             lessThanOrEqualTo(scenario.size.height - scenario.keyboard + 1),
