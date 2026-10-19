@@ -86,11 +86,11 @@ extension BackupControllerExt on AppController {
           rethrow;
         }
       });
-      return VM2(configMap, storageSnapshotPath);
+      return (configMap: configMap, storageSnapshotPath: storageSnapshotPath);
     });
     return backupTask(
-      configMap: backupData.a,
-      storageSnapshotPath: backupData.b,
+      configMap: backupData.configMap,
+      storageSnapshotPath: backupData.storageSnapshotPath,
     );
   }
 

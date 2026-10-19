@@ -1057,6 +1057,26 @@ void main() {
     expect(await staging.exists(), false);
   });
 
+  test(
+    'backupTask cleans the snapshot when configuration encoding fails',
+    () async {
+      final staging = await Directory.systemTemp.createTemp('backup_invalid_');
+      addTearDown(() async {
+        if (await staging.exists()) await staging.delete(recursive: true);
+      });
+      await File('${staging.path}/$backupDatabaseName')
+          .writeAsString('database');
+      await expectLater(
+        backupTask(
+          configMap: {'invalid': Object()},
+          storageSnapshotPath: staging.path,
+        ),
+        throwsA(isA<JsonUnsupportedObjectError>()),
+      );
+      expect(await staging.exists(), false);
+    },
+  );
+
   test('backupTask rejects files larger than the restore limit', () async {
     final staging = await Directory.systemTemp.createTemp('backup_oversized_');
     final database = await File('${staging.path}/$backupDatabaseName')

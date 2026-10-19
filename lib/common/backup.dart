@@ -296,7 +296,6 @@ Future<String> _backupTask(BackupArchiveRequest args) async {
   final storageSnapshotPath = args.storageSnapshotPath;
   final tempZipFilePath = args.archivePath;
   final tempConfigFilePath = args.configFilePath;
-  final configStr = json.encode(configMap);
   final storageSnapshotDir = Directory(storageSnapshotPath);
   final profilesDir = Directory(join(storageSnapshotPath, 'profiles'));
   final scriptsDir = Directory(join(storageSnapshotPath, 'scripts'));
@@ -305,6 +304,7 @@ Future<String> _backupTask(BackupArchiveRequest args) async {
   final tempConfigFile = File(tempConfigFilePath);
   final encoder = ZipFileEncoder();
   try {
+    final configStr = json.encode(configMap);
     final configBytes = utf8.encode(configStr).length;
     if (configBytes > maxBackupFileBytes) {
       throw const FormatException('backup config exceeds restore limit');
@@ -332,16 +332,19 @@ Future<String> _backupTask(BackupArchiveRequest args) async {
       }
     }
     encoder.create(tempZipFilePath);
-    await tempConfigFile.writeAsString(configStr);
-    await encoder.addFile(tempDBFile, backupDatabaseName);
-    await encoder.addFile(tempConfigFile, configJsonName);
-    if (await profilesDir.exists()) {
-      await encoder.addDirectory(profilesDir);
+    try {
+      await tempConfigFile.writeAsString(configStr);
+      await encoder.addFile(tempDBFile, backupDatabaseName);
+      await encoder.addFile(tempConfigFile, configJsonName);
+      if (await profilesDir.exists()) {
+        await encoder.addDirectory(profilesDir);
+      }
+      if (await scriptsDir.exists()) {
+        await encoder.addDirectory(scriptsDir);
+      }
+    } finally {
+      await encoder.close();
     }
-    if (await scriptsDir.exists()) {
-      await encoder.addDirectory(scriptsDir);
-    }
-    await encoder.close();
     if (await tempZipFile.length() > maxBackupArchiveBytes) {
       throw const FormatException('backup archive exceeds restore limit');
     }
@@ -359,7 +362,7 @@ Future<MigrationData> restoreTask({
   required String archivePath,
   required String stagingDirPath,
   required String homeDirPath,
-}) async {
+}) {
   return compute(_restoreTask, (
     archivePath: archivePath,
     stagingDirPath: stagingDirPath,
