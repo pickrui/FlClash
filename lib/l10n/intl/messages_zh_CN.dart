@@ -325,7 +325,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "未能应用认证设置",
     ),
     "authenticationDesc": MessageLookupByLibrary.simpleMessage(
-      "为 HTTP/SOCKS 代理设置用户名和密码。启用后暂停自动设置系统 HTTP 代理，TUN/VPN 仍可使用",
+      "本地代理认证开启后，使用 HTTP/SOCKS 代理需要用户名和密码。开启期间不自动设置系统 HTTP 代理，TUN/VPN 仍可使用",
     ),
     "authenticationPasswordInvalid": MessageLookupByLibrary.simpleMessage(
       "请输入 1–255 字节的密码，不支持控制字符",
@@ -344,7 +344,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "autoIpv6": MessageLookupByLibrary.simpleMessage("自动 IPv6"),
     "autoIpv6Desc": MessageLookupByLibrary.simpleMessage(
-      "根据本地网络是否支持 IPv6 自动开关",
+      "自动 IPv6 会根据本地网络是否支持 IPv6 自动开关",
     ),
     "autoLaunch": MessageLookupByLibrary.simpleMessage("自启动"),
     "autoLaunchDesc": MessageLookupByLibrary.simpleMessage("跟随系统自启动"),
@@ -1069,7 +1069,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "exportSuccess": MessageLookupByLibrary.simpleMessage("导出成功"),
     "externalController": MessageLookupByLibrary.simpleMessage("外部控制器"),
     "externalControllerDesc": MessageLookupByLibrary.simpleMessage(
-      "开启后将可以通过指定端口控制Clash Core",
+      "外部控制器开启后，可通过指定地址控制内核",
     ),
     "externalLink": MessageLookupByLibrary.simpleMessage("外部链接"),
     "fade": MessageLookupByLibrary.simpleMessage("淡入"),
@@ -1321,7 +1321,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "ipType": MessageLookupByLibrary.simpleMessage("类型"),
     "ipVersion": MessageLookupByLibrary.simpleMessage("IP 版本"),
     "ipcidr": MessageLookupByLibrary.simpleMessage("IP/掩码"),
-    "ipv6Desc": MessageLookupByLibrary.simpleMessage("开启后将可以接收IPv6流量"),
+    "ipv6Desc": MessageLookupByLibrary.simpleMessage("开启 IPv6 后才会接收 IPv6 流量"),
     "ipv6InboundDesc": MessageLookupByLibrary.simpleMessage(
       "开启 IPv6 后，VPN 允许 IPv6 入站",
     ),
@@ -1521,7 +1521,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "oixCloud": MessageLookupByLibrary.simpleMessage("oixCloud"),
     "onDemand": MessageLookupByLibrary.simpleMessage("按需运行"),
     "onDemandDesc": MessageLookupByLibrary.simpleMessage(
-      "按 Wi-Fi 或网络条件自动暂停和恢复代理",
+      "按需运行会按 Wi-Fi 或网络条件自动暂停和恢复代理",
     ),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage("仅统计代理"),
     "onlyStatisticsProxyDesc": MessageLookupByLibrary.simpleMessage(
@@ -2116,7 +2116,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage("订阅信息"),
     "suspendOnIdle": MessageLookupByLibrary.simpleMessage("空闲时暂停代理"),
     "suspendOnIdleDesc": MessageLookupByLibrary.simpleMessage(
-      "熄屏并进入系统空闲状态时暂停流量转发和健康检查以节省电量，可能导致语音通话和实时音频断开、推送通知延迟",
+      "空闲时暂停代理会在熄屏并进入系统空闲状态时暂停流量转发和健康检查以节省电量，可能导致语音通话和实时音频断开、推送通知延迟",
     ),
     "suspended": MessageLookupByLibrary.simpleMessage("挂起中…"),
     "switchProfile": MessageLookupByLibrary.simpleMessage("切换配置"),

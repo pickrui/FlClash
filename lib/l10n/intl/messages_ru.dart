@@ -417,7 +417,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Не удалось применить настройки аутентификации",
     ),
     "authenticationDesc": MessageLookupByLibrary.simpleMessage(
-      "Имя пользователя и пароль для HTTP/SOCKS. Автонастройка системного HTTP-прокси приостановлена; TUN/VPN остаётся доступен.",
+      "Аутентификация локального прокси требует имя пользователя и пароль для HTTP/SOCKS. Пока она включена, системный HTTP-прокси не настраивается; TUN/VPN остаётся доступен",
     ),
     "authenticationPasswordInvalid": MessageLookupByLibrary.simpleMessage(
       "От 1 до 255 байт UTF-8, без управляющих символов",
@@ -438,7 +438,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "autoIpv6": MessageLookupByLibrary.simpleMessage("Авто IPv6"),
     "autoIpv6Desc": MessageLookupByLibrary.simpleMessage(
-      "Автопереключение IPv6 по поддержке локальной сети",
+      "«Авто IPv6» включает и выключает IPv6 в зависимости от поддержки локальной сетью",
     ),
     "autoLaunch": MessageLookupByLibrary.simpleMessage("Автозапуск"),
     "autoLaunchDesc": MessageLookupByLibrary.simpleMessage(
@@ -1479,7 +1479,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Внешний контроллер",
     ),
     "externalControllerDesc": MessageLookupByLibrary.simpleMessage(
-      "При включении ядро Clash можно контролировать на настроенном порту",
+      "Внешний контроллер позволяет управлять ядром по заданному адресу",
     ),
     "externalLink": MessageLookupByLibrary.simpleMessage("Внешняя ссылка"),
     "fade": MessageLookupByLibrary.simpleMessage("Растворение"),
@@ -1835,7 +1835,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "ipVersion": MessageLookupByLibrary.simpleMessage("Версия IP"),
     "ipcidr": MessageLookupByLibrary.simpleMessage("IPCIDR"),
     "ipv6Desc": MessageLookupByLibrary.simpleMessage(
-      "При включении будет возможно получать IPv6 трафик",
+      "Трафик IPv6 принимается, только когда IPv6 включён",
     ),
     "ipv6InboundDesc": MessageLookupByLibrary.simpleMessage(
       "При включённом IPv6 VPN принимает входящий IPv6",
@@ -2136,7 +2136,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "oixCloud": MessageLookupByLibrary.simpleMessage("oixCloud"),
     "onDemand": MessageLookupByLibrary.simpleMessage("По условию"),
     "onDemandDesc": MessageLookupByLibrary.simpleMessage(
-      "Автоматически приостанавливать и возобновлять прокси в зависимости от Wi-Fi или сетевых условий",
+      "«По условию» приостанавливает и возобновляет прокси в зависимости от Wi-Fi или сетевых условий",
     ),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage(
       "Только статистика прокси",
@@ -2977,7 +2977,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Приостанавливать прокси при бездействии",
     ),
     "suspendOnIdleDesc": MessageLookupByLibrary.simpleMessage(
-      "Приостанавливать передачу трафика и проверки узлов, когда экран выключен и система бездействует. Звонки и прямые аудиотрансляции могут прерываться, а push-уведомления — задерживаться.",
+      "«Приостанавливать прокси при бездействии» останавливает передачу трафика и проверки узлов, когда экран выключен и система бездействует; звонки и прямые аудиотрансляции могут прерываться, а push-уведомления — задерживаться",
     ),
     "suspended": MessageLookupByLibrary.simpleMessage("Приостановлено…"),
     "switchProfile": MessageLookupByLibrary.simpleMessage("Сменить профиль"),

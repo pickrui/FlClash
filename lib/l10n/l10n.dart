@@ -995,20 +995,20 @@ class AppLocalizations {
     );
   }
 
-  /// `ExternalController`
+  /// `External controller`
   String get externalController {
     return Intl.message(
-      'ExternalController',
+      'External controller',
       name: 'externalController',
       desc: '',
       args: [],
     );
   }
 
-  /// `Once enabled, the Clash kernel can be controlled on the configured port`
+  /// `The external controller lets you control the core on the configured address`
   String get externalControllerDesc {
     return Intl.message(
-      'Once enabled, the Clash kernel can be controlled on the configured port',
+      'The external controller lets you control the core on the configured address',
       name: 'externalControllerDesc',
       desc: '',
       args: [],
@@ -1025,10 +1025,10 @@ class AppLocalizations {
     );
   }
 
-  /// `When turned on it will be able to receive IPv6 traffic`
+  /// `IPv6 traffic is received only while IPv6 is on`
   String get ipv6Desc {
     return Intl.message(
-      'When turned on it will be able to receive IPv6 traffic',
+      'IPv6 traffic is received only while IPv6 is on',
       name: 'ipv6Desc',
       desc: '',
       args: [],
@@ -1040,10 +1040,10 @@ class AppLocalizations {
     return Intl.message('Auto IPv6', name: 'autoIpv6', desc: '', args: []);
   }
 
-  /// `Toggle IPv6 automatically based on local network support`
+  /// `Auto IPv6 turns IPv6 on or off by whether the local network supports it`
   String get autoIpv6Desc {
     return Intl.message(
-      'Toggle IPv6 automatically based on local network support',
+      'Auto IPv6 turns IPv6 on or off by whether the local network supports it',
       name: 'autoIpv6Desc',
       desc: '',
       args: [],
@@ -2337,6 +2337,11 @@ class AppLocalizations {
     return Intl.message('None', name: 'none', desc: '', args: []);
   }
 
+  /// `Required`
+  String get required {
+    return Intl.message('Required', name: 'required', desc: '', args: []);
+  }
+
   /// `Advanced configuration`
   String get advancedConfig {
     return Intl.message(
@@ -2852,10 +2857,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Pause traffic forwarding and health checks when the screen is off and the system becomes idle. This may disconnect calls and live audio and delay push notifications.`
+  /// `Pause proxy when idle stops traffic forwarding and health checks while the screen is off and the system is idle, which may disconnect calls and live audio and delay push notifications`
   String get suspendOnIdleDesc {
     return Intl.message(
-      'Pause traffic forwarding and health checks when the screen is off and the system becomes idle. This may disconnect calls and live audio and delay push notifications.',
+      'Pause proxy when idle stops traffic forwarding and health checks while the screen is off and the system is idle, which may disconnect calls and live audio and delay push notifications',
       name: 'suspendOnIdleDesc',
       desc: '',
       args: [],
@@ -6567,10 +6572,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Require a username and password for HTTP/SOCKS proxies. Automatic system HTTP proxy is suspended; TUN/VPN remains available.`
+  /// `Local proxy authentication asks for a username and password on the HTTP and SOCKS ports. While it is on, the system HTTP proxy is not set; TUN and VPN keep working`
   String get authenticationDesc {
     return Intl.message(
-      'Require a username and password for HTTP/SOCKS proxies. Automatic system HTTP proxy is suspended; TUN/VPN remains available.',
+      'Local proxy authentication asks for a username and password on the HTTP and SOCKS ports. While it is on, the system HTTP proxy is not set; TUN and VPN keep working',
       name: 'authenticationDesc',
       desc: '',
       args: [],
@@ -11461,10 +11466,10 @@ class AppLocalizations {
     return Intl.message('On demand', name: 'onDemand', desc: '', args: []);
   }
 
-  /// `Automatically pause and resume the proxy based on Wi-Fi or network conditions`
+  /// `On demand pauses and resumes the proxy by Wi-Fi or network conditions`
   String get onDemandDesc {
     return Intl.message(
-      'Automatically pause and resume the proxy based on Wi-Fi or network conditions',
+      'On demand pauses and resumes the proxy by Wi-Fi or network conditions',
       name: 'onDemandDesc',
       desc: '',
       args: [],

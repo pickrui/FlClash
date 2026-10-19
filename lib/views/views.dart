@@ -7,7 +7,7 @@ export 'about.dart';
 export 'access.dart';
 export 'application_setting.dart';
 export 'backup_and_restore.dart';
-export 'config/config.dart';
+export 'config/general.dart';
 export 'connection/connections.dart';
 export 'connection/requests.dart';
 export 'connection/dns_queries.dart';

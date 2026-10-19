@@ -414,7 +414,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Could not apply authentication settings",
     ),
     "authenticationDesc": MessageLookupByLibrary.simpleMessage(
-      "Require a username and password for HTTP/SOCKS proxies. Automatic system HTTP proxy is suspended; TUN/VPN remains available.",
+      "Local proxy authentication asks for a username and password on the HTTP and SOCKS ports. While it is on, the system HTTP proxy is not set; TUN and VPN keep working",
     ),
     "authenticationPasswordInvalid": MessageLookupByLibrary.simpleMessage(
       "Use 1–255 UTF-8 bytes, without control characters",
@@ -435,7 +435,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "autoIpv6": MessageLookupByLibrary.simpleMessage("Auto IPv6"),
     "autoIpv6Desc": MessageLookupByLibrary.simpleMessage(
-      "Toggle IPv6 automatically based on local network support",
+      "Auto IPv6 turns IPv6 on or off by whether the local network supports it",
     ),
     "autoLaunch": MessageLookupByLibrary.simpleMessage("Auto launch"),
     "autoLaunchDesc": MessageLookupByLibrary.simpleMessage(
@@ -1427,10 +1427,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "exportLogs": MessageLookupByLibrary.simpleMessage("Export logs"),
     "exportSuccess": MessageLookupByLibrary.simpleMessage("Export Success"),
     "externalController": MessageLookupByLibrary.simpleMessage(
-      "ExternalController",
+      "External controller",
     ),
     "externalControllerDesc": MessageLookupByLibrary.simpleMessage(
-      "Once enabled, the Clash kernel can be controlled on the configured port",
+      "The external controller lets you control the core on the configured address",
     ),
     "externalLink": MessageLookupByLibrary.simpleMessage("External link"),
     "fade": MessageLookupByLibrary.simpleMessage("Fade"),
@@ -1773,7 +1773,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "ipVersion": MessageLookupByLibrary.simpleMessage("IP version"),
     "ipcidr": MessageLookupByLibrary.simpleMessage("Ipcidr"),
     "ipv6Desc": MessageLookupByLibrary.simpleMessage(
-      "When turned on it will be able to receive IPv6 traffic",
+      "IPv6 traffic is received only while IPv6 is on",
     ),
     "ipv6InboundDesc": MessageLookupByLibrary.simpleMessage(
       "With IPv6 on, the VPN allows IPv6 inbound",
@@ -2056,7 +2056,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "oixCloud": MessageLookupByLibrary.simpleMessage("oixCloud"),
     "onDemand": MessageLookupByLibrary.simpleMessage("On demand"),
     "onDemandDesc": MessageLookupByLibrary.simpleMessage(
-      "Automatically pause and resume the proxy based on Wi-Fi or network conditions",
+      "On demand pauses and resumes the proxy by Wi-Fi or network conditions",
     ),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage(
       "Only statistics proxy",
@@ -2837,7 +2837,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Pause proxy when idle",
     ),
     "suspendOnIdleDesc": MessageLookupByLibrary.simpleMessage(
-      "Pause traffic forwarding and health checks when the screen is off and the system becomes idle. This may disconnect calls and live audio and delay push notifications.",
+      "Pause proxy when idle stops traffic forwarding and health checks while the screen is off and the system is idle, which may disconnect calls and live audio and delay push notifications",
     ),
     "suspended": MessageLookupByLibrary.simpleMessage("Suspended…"),
     "switchProfile": MessageLookupByLibrary.simpleMessage("Switch profile"),

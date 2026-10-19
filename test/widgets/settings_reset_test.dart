@@ -8,8 +8,8 @@ import 'dart:async';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
+import 'package:fl_clash/features/form/form_page.dart';
 import 'package:fl_clash/views/config/general.dart';
-import 'package:fl_clash/ui/dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -54,9 +54,7 @@ void main() {
         'reset ignores a removed settings dialog (external: $external, disposed: $disposed)',
         (tester) async {
           final container = await _openSettings(tester, external: external);
-          final route = ModalRoute.of(
-            tester.element(find.byType(CommonDialog)),
-          )!;
+          final route = ModalRoute.of(tester.element(find.byType(FormPage)))!;
           final navigator = route.navigator!;
           await tester.tap(find.text('Reset'));
           await tester.pumpAndSettle();
@@ -74,7 +72,7 @@ void main() {
       tester,
     ) async {
       final container = await _openSettings(tester, external: external);
-      final route = ModalRoute.of(tester.element(find.byType(CommonDialog)))!;
+      final route = ModalRoute.of(tester.element(find.byType(FormPage)))!;
       final navigator = route.navigator!;
       await tester.tap(find.text('Reset'));
       await tester.pumpAndSettle();
@@ -108,7 +106,7 @@ void main() {
       }
       navigator.pop();
       await tester.pumpAndSettle();
-      expect(find.byType(CommonDialog), findsNothing);
+      expect(find.byType(FormPage), findsNothing);
       expect(tester.takeException(), isNull);
     });
 
@@ -121,12 +119,12 @@ void main() {
         await tester.binding.handlePopRoute();
         await tester.pumpAndSettle();
         expect(container.read(patchClashConfigProvider), _original);
-        expect(find.byType(CommonDialog), findsOneWidget);
+        expect(find.byType(FormPage), findsOneWidget);
         await tester.tap(find.text('Reset'));
         await tester.pumpAndSettle();
-        await tester.tap(find.text('Confirm'));
+        await tester.tap(find.text('Reset').last);
         await tester.pumpAndSettle();
-        expect(find.byType(CommonDialog), findsNothing);
+        expect(find.byType(FormPage), findsNothing);
         final saved = container.read(patchClashConfigProvider);
         expect(
           saved.mixedPort,

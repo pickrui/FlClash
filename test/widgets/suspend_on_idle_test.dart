@@ -7,7 +7,7 @@ import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/views/config/config.dart';
+import 'package:fl_clash/views/config/general.dart';
 import 'package:fl_clash/views/config/network.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -32,7 +32,7 @@ void main() {
           ],
           locale: const Locale('zh', 'CN'),
           textScaler: const TextScaler.linear(1.3),
-          child: ConfigView(platform: platform),
+          child: GeneralView(platform: platform),
         ),
       );
       await tester.pumpAndSettle();

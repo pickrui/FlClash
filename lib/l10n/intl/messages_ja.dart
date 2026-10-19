@@ -339,7 +339,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "認証設定を適用できませんでした",
     ),
     "authenticationDesc": MessageLookupByLibrary.simpleMessage(
-      "HTTP/SOCKS プロキシにユーザー名とパスワードを設定します。システム HTTP プロキシの自動設定は停止しますが、TUN/VPN は利用できます",
+      "ローカルプロキシ認証を有効にすると、HTTP/SOCKS プロキシの利用にユーザー名とパスワードが必要になります。有効な間はシステム HTTP プロキシを自動設定しませんが、TUN/VPN は利用できます",
     ),
     "authenticationPasswordInvalid": MessageLookupByLibrary.simpleMessage(
       "制御文字を含まない 1～255 UTF-8 バイトを入力してください",
@@ -358,7 +358,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "autoIpv6": MessageLookupByLibrary.simpleMessage("自動 IPv6"),
     "autoIpv6Desc": MessageLookupByLibrary.simpleMessage(
-      "ローカルネットワークの IPv6 対応に応じて自動切り替え",
+      "自動 IPv6 は、ローカルネットワークの IPv6 対応に応じて自動で切り替えます",
     ),
     "autoLaunch": MessageLookupByLibrary.simpleMessage("自動起動"),
     "autoLaunchDesc": MessageLookupByLibrary.simpleMessage("システムの自動起動に従う"),
@@ -1203,7 +1203,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "exportSuccess": MessageLookupByLibrary.simpleMessage("エクスポート成功"),
     "externalController": MessageLookupByLibrary.simpleMessage("外部コントローラー"),
     "externalControllerDesc": MessageLookupByLibrary.simpleMessage(
-      "有効化すると設定したポートでClashコアを制御可能",
+      "外部コントローラーを有効にすると、設定したアドレスでコアを制御できます",
     ),
     "externalLink": MessageLookupByLibrary.simpleMessage("外部リンク"),
     "fade": MessageLookupByLibrary.simpleMessage("フェード"),
@@ -1499,7 +1499,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "ipType": MessageLookupByLibrary.simpleMessage("タイプ"),
     "ipVersion": MessageLookupByLibrary.simpleMessage("IP バージョン"),
     "ipcidr": MessageLookupByLibrary.simpleMessage("IPCIDR"),
-    "ipv6Desc": MessageLookupByLibrary.simpleMessage("有効化するとIPv6トラフィックを受信可能"),
+    "ipv6Desc": MessageLookupByLibrary.simpleMessage(
+      "IPv6 トラフィックは IPv6 が有効なときだけ受信します",
+    ),
     "ipv6InboundDesc": MessageLookupByLibrary.simpleMessage(
       "IPv6 を有効にすると、VPN で IPv6 インバウンドを許可します",
     ),
@@ -1731,7 +1733,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "oixCloud": MessageLookupByLibrary.simpleMessage("oixCloud"),
     "onDemand": MessageLookupByLibrary.simpleMessage("オンデマンド"),
     "onDemandDesc": MessageLookupByLibrary.simpleMessage(
-      "Wi-Fi またはネットワークの条件に応じてプロキシを自動で停止・再開",
+      "オンデマンドは、Wi-Fi やネットワークの条件に応じてプロキシを自動で停止・再開します",
     ),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage("プロキシのみ統計"),
     "onlyStatisticsProxyDesc": MessageLookupByLibrary.simpleMessage(
@@ -2392,7 +2394,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage("サブスクリプション情報"),
     "suspendOnIdle": MessageLookupByLibrary.simpleMessage("アイドル時にプロキシを一時停止"),
     "suspendOnIdleDesc": MessageLookupByLibrary.simpleMessage(
-      "画面がオフでシステムがアイドル状態のとき、通信の転送とヘルスチェックを一時停止します。通話やライブ音声の切断、プッシュ通知の遅延が発生する場合があります",
+      "アイドル時にプロキシを一時停止すると、画面がオフでシステムがアイドル状態のとき通信の転送とヘルスチェックを止めます。通話やライブ音声の切断、プッシュ通知の遅延が発生する場合があります",
     ),
     "suspended": MessageLookupByLibrary.simpleMessage("一時停止中…"),
     "switchProfile": MessageLookupByLibrary.simpleMessage("プロファイルを切り替え"),

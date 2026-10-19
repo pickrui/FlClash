@@ -12,7 +12,7 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/views/about.dart';
 import 'package:fl_clash/views/access.dart';
 import 'package:fl_clash/views/backup_and_restore.dart';
-import 'package:fl_clash/views/config/config.dart';
+import 'package:fl_clash/views/config/general.dart';
 import 'package:fl_clash/views/hotkey.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
@@ -240,7 +240,7 @@ class _ConfigItem extends StatelessWidget {
     return ListItem.open(
       leading: const GlyphIcon(AppGlyphs.edit),
       title: Text(context.appLocalizations.general),
-      widget: const ConfigView(),
+      widget: const GeneralView(),
     );
   }
 }
