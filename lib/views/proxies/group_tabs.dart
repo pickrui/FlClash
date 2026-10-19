@@ -8,6 +8,8 @@ import 'dart:math';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/models/common.dart';
+import 'package:fl_clash/ui/navigation_dock.dart';
+import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/foundation.dart' show ValueListenable, listEquals;
 import 'package:material_ui/material_ui.dart';
@@ -19,7 +21,7 @@ const _lockGap = 4.0;
 const _lockSize = 14.0;
 
 TextStyle _labelStyleOf(BuildContext context) =>
-    context.textTheme.labelLarge ?? const TextStyle(fontSize: 14);
+    AppTextStyle.subheadline.of(context, emphasized: true);
 
 bool _isFixed(Group group) => group.fixed?.isNotEmpty == true;
 
@@ -39,6 +41,7 @@ class GroupTabs extends StatefulWidget {
 class _GroupTabsState extends State<GroupTabs> {
   static const _fadeExtent = 24.0;
 
+  // A sheet's controller would hand the strip's drags to the sheet.
   final _scrollController = ScrollController();
   final _hasMore = ValueNotifier(false);
   final _fade = ValueNotifier(0.0);
@@ -146,22 +149,27 @@ class _GroupTabsState extends State<GroupTabs> {
   }
 
   Widget _buildMoreButton() {
-    return CommonPopupBox(
-      targetBuilder: (open) => IconButton(
-        tooltip: context.appLocalizations.proxyGroup,
-        onPressed: () => open(),
-        icon: const GlyphIcon(AppGlyphs.chevronDown),
-      ),
-      popupBuilder: (_) => CommonPopupMenu(
-        maxVisibleItems: 7,
-        items: [
-          for (final (index, group) in widget.groups.indexed)
-            CommonPopupMenuItem(
-              label: group.name,
-              checked: index == widget.controller.index,
-              onPressed: () => _select(index),
-            ),
-        ],
+    return TonalButtonTheme(
+      size: TonalButtonSize.section,
+      child: ElasticPress(
+        child: CommonPopupBox(
+          targetBuilder: (open) => IconButton(
+            tooltip: context.appLocalizations.proxyGroup,
+            onPressed: open,
+            icon: const GlyphIcon(AppGlyphs.chevronDown),
+          ),
+          popupBuilder: (_) => CommonPopupMenu(
+            maxVisibleItems: 7,
+            items: [
+              for (final (index, group) in widget.groups.indexed)
+                CommonPopupMenuItem(
+                  label: group.name,
+                  checked: index == widget.controller.index,
+                  onPressed: () => _select(index),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -230,7 +238,7 @@ class _GroupTabsState extends State<GroupTabs> {
               ),
               if (hasMore)
                 Padding(
-                  padding: const EdgeInsetsDirectional.only(start: 4, end: 8),
+                  padding: const EdgeInsetsDirectional.only(start: 8, end: 16),
                   child: moreButton,
                 ),
             ],
@@ -271,23 +279,24 @@ class _TabExtents {
     _TabExtents? previous,
   ) {
     final style = _labelStyleOf(context);
-    final buttonStyle = OutlinedButtonTheme.of(context).style;
-    final defaults = const OutlinedButton(
+    final buttonStyle = FilledButtonTheme.of(context).style;
+    final defaults = const FilledButton(
       onPressed: null,
       child: null,
     ).defaultStyleOf(context);
     final minimumSize = (buttonStyle?.minimumSize ?? defaults.minimumSize)!
         .resolve(const {})!;
     final density = (buttonStyle?.visualDensity ?? defaults.visualDensity)!;
-    final adjustment = density.baseSizeAdjustment;
-    final minWidth = max(0.0, minimumSize.width + adjustment.dx);
-    final padding = 2 * (_tabPadding + max(0.0, adjustment.dx));
+    final adjustment = density.baseSizeAdjustment.dx;
+    final minWidth = max(0.0, minimumSize.width + adjustment);
+    final padding = 2 * (_tabPadding + max(0.0, adjustment));
     final textScaler = MediaQuery.textScalerOf(context);
     final lock = textScaler.scale(_lockSize) + _lockGap;
     final labels = [for (final group in groups) (group.name, _isFixed(group))];
     final key = (
       _LabelsKey(labels),
       style,
+      MediaQuery.boldTextOf(context),
       textScaler,
       Directionality.of(context),
       Localizations.maybeLocaleOf(context),
@@ -313,7 +322,7 @@ class _TabExtents {
                   .ceilToDouble() +
               padding,
         ),
-    ], max(max(0.0, minimumSize.height + adjustment.dy), lineHeight + 8));
+    ], max(TonalButtonSize.section.button, lineHeight + 8));
   }
 }
 
@@ -408,29 +417,33 @@ class _GroupTabState extends State<_GroupTab> {
   Widget build(BuildContext context) {
     final selected = _isSelected;
     final colorScheme = context.colorScheme;
-    final style = _labelStyleOf(context).copyWith(
-      color: selected ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
-    );
+    final color = selected
+        ? colorScheme.onPrimary
+        : colorScheme.onSurfaceVariant;
     return CommonCard(
       isSelected: selected,
       fillsSelection: true,
       shape: AppShape.full,
       padding: const EdgeInsets.symmetric(horizontal: _tabPadding),
       onPressed: widget.onPressed,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Flexible(child: EmojiText(widget.name, maxLines: 1, style: style)),
-          if (widget.isFixed)
-            Padding(
-              padding: const EdgeInsetsDirectional.only(start: _lockGap),
-              child: GlyphIcon(
-                AppGlyphs.lock,
-                size: MediaQuery.textScalerOf(context).scale(_lockSize),
-                color: style.color,
+      child: AnimatedDefaultTextStyle(
+        duration: midDuration,
+        style: _labelStyleOf(context).copyWith(color: color),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(child: EmojiText(widget.name, maxLines: 1)),
+            if (widget.isFixed)
+              Padding(
+                padding: const EdgeInsetsDirectional.only(start: _lockGap),
+                child: GlyphIcon(
+                  AppGlyphs.lock,
+                  size: MediaQuery.textScalerOf(context).scale(_lockSize),
+                  color: color,
+                ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

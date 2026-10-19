@@ -127,7 +127,7 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
       title: appLocalizations.proxies,
       searchState: AppBarSearchState(onSearch: _onSearch),
       body: switch (proxiesType) {
-        ProxiesType.tab => AppBarClearance(child: _tabView),
+        ProxiesType.tab => _tabView,
         ProxiesType.list => const ProxiesListView(),
       },
     );

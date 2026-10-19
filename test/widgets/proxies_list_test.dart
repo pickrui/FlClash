@@ -6,11 +6,7 @@
 import 'dart:async';
 
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/core/controller.dart';
-import 'package:fl_clash/core/interface.dart';
-import 'package:fl_clash/core/method.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/features/proxies/node_pages.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/database.dart';
@@ -26,12 +22,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:mocktail/mocktail.dart';
 
+import '../helpers/node_pages.dart';
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
-
-final class _MockCoreHandler extends Mock implements CoreHandlerInterface {}
 
 class _RecordingProxiesAction extends ProxiesAction {
   static final List<String> tested = [];
@@ -62,37 +56,8 @@ Group _group(String name, int count, {String? now}) => Group(
   all: [for (var i = 0; i < count; i++) Proxy(name: '$name-$i', type: 'ss')],
 );
 
-/// Serves each group's nodes the way the Core pages them.
-CoreController _pagesOf(List<Group> groups) {
-  final handler = _MockCoreHandler();
-  when(
-    () => handler.invokeMethod<Map>(
-      method: CoreMethod.getProxyPage,
-      arguments: any(named: 'arguments'),
-      timeout: any(named: 'timeout'),
-    ),
-  ).thenAnswer((invocation) async {
-    final arguments = invocation.namedArguments[#arguments] as Map;
-    final group = groups.getGroup(arguments['group'] as String)!;
-    final offset = arguments['offset'] as int;
-    return {
-      'revision': 'fixture',
-      'offset': offset,
-      'total': group.all.length,
-      'selectedIndex': group.all.indexWhere((proxy) => proxy.name == group.now),
-      'items': [
-        for (final proxy in group.all.skip(offset).take(NodePages.pageSize))
-          proxy.toJson(),
-      ],
-    };
-  });
-  return CoreController.forTesting(handler: handler);
-}
-
 void main() {
   late ProviderContainer container;
-
-  setUpAll(() => registerFallbackValue(CoreMethod.getProxyPage));
 
   Future<void> pumpList(
     WidgetTester tester, {
@@ -117,7 +82,7 @@ void main() {
           GroupsState(value: groups),
         ),
         groupsProvider.overrideWithBuild((_, _) => groups!),
-        coreHandlerProvider.overrideWithValue(_pagesOf(groups)),
+        coreHandlerProvider.overrideWithValue(pagedCoreOf(groups)),
         proxiesActionProvider.overrideWith(_RecordingProxiesAction.new),
       ],
     );
@@ -485,7 +450,7 @@ void main() {
           GroupsState(value: groups),
         ),
         groupsProvider.overrideWithBuild((_, _) => groups),
-        coreHandlerProvider.overrideWithValue(_pagesOf(groups)),
+        coreHandlerProvider.overrideWithValue(pagedCoreOf(groups)),
         viewSizeProvider.overrideWithBuild((_, _) => const Size(500, 1000)),
       ],
     );

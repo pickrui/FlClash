@@ -60,7 +60,7 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
     super.dispose();
   }
 
-  Group? get _currentGroup {
+  Group? get currentGroup {
     final index = _tabController?.index;
     final groups = ref.read(proxiesTabStateProvider).groups;
     if (index == null || index < 0 || index >= groups.length) {
@@ -70,11 +70,11 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
   }
 
   void scrollToGroupSelected() {
-    _groupViewKeys[_currentGroup?.name]?.currentState?.scrollToSelected();
+    _groupViewKeys[currentGroup?.name]?.currentState?.scrollToSelected();
   }
 
   Future<void> delayTestCurrentGroup() async {
-    final group = _currentGroup;
+    final group = currentGroup;
     if (group != null) {
       final source = ref.read(groupsProvider).getGroup(group.name) ?? group;
       await delayTestGroup(ref, source);
@@ -93,9 +93,9 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
       if (!mounted || controller == null || controller != _tabController) {
         return;
       }
-      final currentGroup = _currentGroup;
-      if (currentGroup != null) {
-        _updateCurrentGroupName(currentGroup.name);
+      final group = currentGroup;
+      if (group != null) {
+        _updateCurrentGroupName(group.name);
       }
     });
   }
@@ -106,11 +106,13 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
     _tabController = null;
   }
 
+  // An empty group list keeps the previous controller: the outgoing tab bar
+  // still drives it while the empty state animates in.
   void _updateTabController(int length, int index) {
-    _destroyTabController();
     if (length == 0) {
       return;
     }
+    _destroyTabController();
     final realIndex = index == -1 ? 0 : index;
     _tabController = TabController(
       length: length,
@@ -132,52 +134,72 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
 
   @override
   Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
     ref.watch(themeSettingProvider.select((state) => state.textScale));
     final groups = ref.watch(
       proxiesTabStateProvider.select((state) => state.groups),
     );
-    final columns = ref.watch(
-      proxiesTabStateProvider.select((state) => state.columns),
-    );
     final cardType = ref.watch(
       proxiesTabStateProvider.select((state) => state.proxyCardType),
+    );
+    final proxiesLayout = ref.watch(
+      proxiesStyleSettingProvider.select((state) => state.layout),
+    );
+    final isSearching = ref.watch(
+      queryProvider(QueryTag.proxies)
+          .select((query) => !SearchQuery(query).isEmpty),
     );
     final profileId = ref.watch(
       currentProfileProvider.select((profile) => profile?.id),
     );
     _retainGroupViewKeys(profileId, groups);
     final controller = _tabController;
-    if (groups.isEmpty || controller == null) {
-      return NullStatus(
+    return NullStatusSwitcher(
+      isEmpty: groups.isEmpty || controller == null,
+      isSearching: isSearching,
+      nullStatus: NullStatus(
         illustration: NullStatusIllustration.proxies,
         label: appLocalizations.nullTip(appLocalizations.proxies),
-      );
-    }
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 4, bottom: 4),
-          child: GroupTabs(controller: controller, groups: groups),
-        ),
-        Expanded(
-          child: TabBarView(
-            controller: controller,
-            children: [
-              for (final group in groups)
-                ProxyGroupView(
-                  key: _groupViewKeys.putIfAbsent(group.name, GlobalKey.new),
-                  storageKey:
-                      '${profileId}_${ScrollPositionCacheKey.proxiesTabList.name}_${group.name}',
-                  group: group,
-                  columns: columns,
-                  cardType: cardType,
-                ),
-            ],
-          ),
-        ),
-      ],
+      ),
+      child: controller == null
+          ? const SizedBox.shrink()
+          : AppBarClearance(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4, bottom: 16),
+                    child: GroupTabs(controller: controller, groups: groups),
+                  ),
+                  Expanded(
+                    child: WidthBuilder(
+                      builder: (_, width) {
+                        final columns = utils.getProxiesColumns(
+                          max(width - 32, 0),
+                          proxiesLayout,
+                        );
+                        return TabBarView(
+                          controller: controller,
+                          children: [
+                            for (final group in groups)
+                              ProxyGroupView(
+                                key: _groupViewKeys.putIfAbsent(
+                                  group.name,
+                                  GlobalKey.new,
+                                ),
+                                storageKey:
+                                    '${profileId}_${ScrollPositionCacheKey.proxiesTabList.name}_${group.name}',
+                                group: group,
+                                columns: columns,
+                                cardType: cardType,
+                              ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
     );
   }
 }
@@ -201,7 +223,13 @@ class ProxyGroupView extends ConsumerStatefulWidget {
 }
 
 class _ProxyGroupViewState extends ConsumerState<ProxyGroupView> {
-  final _controller = ScrollController();
+  late final ScrollController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = sheetScrollController(context);
+  }
 
   @override
   void dispose() {
@@ -216,23 +244,19 @@ class _ProxyGroupViewState extends ConsumerState<ProxyGroupView> {
         query: ref.read(queryProvider(QueryTag.proxies)),
       )),
     );
-    final selected = await pages.locateSelected();
-    if (!mounted ||
-        !_controller.hasClients ||
-        _controller.position.maxScrollExtent == 0) {
+    final selectedIndex = await pages.locateSelected();
+    if (!mounted) {
       return;
     }
-    _controller.animateTo(
-      min(
-        16 +
-            max(0, selected) ~/
-                widget.columns *
-                (getItemHeight(widget.cardType) + 8),
-        _controller.position.maxScrollExtent,
-      ),
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeIn,
+    final rowOffset = selectedRowOffset(
+      selectedIndex: selectedIndex,
+      columns: widget.columns,
+      rowExtent: getRowExtent(widget.cardType),
     );
+    if (rowOffset == null) {
+      return;
+    }
+    animateScrollTo(_controller, rowOffset);
   }
 
   @override
@@ -254,22 +278,23 @@ class _ProxyGroupViewState extends ConsumerState<ProxyGroupView> {
     }
     return CommonScrollBar(
       controller: _controller,
+      thumbVisibility: true,
       child: GridView.builder(
         key: PageStorageKey<String>(widget.storageKey),
         controller: _controller,
-        padding: const EdgeInsets.only(
-          top: 16,
+        padding: EdgeInsets.only(
           left: 16,
           right: 16,
-          bottom: 96,
+          bottom: 16 + BottomInsetScope.of(context),
         ),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: widget.columns,
-          mainAxisSpacing: 8,
+          mainAxisSpacing: proxyGridSpacing,
           crossAxisSpacing: 8,
           mainAxisExtent: getItemHeight(widget.cardType),
         ),
         itemCount: max(pages.initialized ? 0 : 1, pages.total),
+        addAutomaticKeepAlives: false,
         itemBuilder: (_, index) {
           final proxy = pages.at(index);
           if (proxy == null) {

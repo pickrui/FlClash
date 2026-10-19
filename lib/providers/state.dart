@@ -365,12 +365,10 @@ ProxiesTabState proxiesTabState(Ref ref) {
   final cardType = ref.watch(
     proxiesStyleSettingProvider.select((state) => state.cardType),
   );
-  final columns = ref.watch(getProxiesColumnsProvider);
   return ProxiesTabState(
     groups: currentGroups.value,
     currentGroupName: currentGroupName,
     proxyCardType: cardType,
-    columns: columns,
   );
 }
 
@@ -501,15 +499,6 @@ Profile? currentProfile(Ref ref) {
   return ref.watch(
     profilesProvider.select((state) => state.getProfile(profileId)),
   );
-}
-
-@riverpod
-int getProxiesColumns(Ref ref) {
-  final contentWidth = ref.watch(contentWidthProvider);
-  final proxiesLayout = ref.watch(
-    proxiesStyleSettingProvider.select((state) => state.layout),
-  );
-  return utils.getProxiesColumns(contentWidth, proxiesLayout);
 }
 
 @riverpod

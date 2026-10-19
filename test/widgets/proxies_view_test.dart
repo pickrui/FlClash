@@ -40,6 +40,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
+import '../helpers/node_pages.dart';
 import '../helpers/test_app.dart';
 
 final class _MockCoreHandler extends Mock implements CoreHandlerInterface {}
@@ -529,7 +530,6 @@ void main() {
             groups: [first],
             currentGroupName: 'First',
             proxyCardType: ProxyCardType.compact,
-            columns: 1,
           ),
         ),
         proxiesTabControllerStateProvider.overrideWith(
@@ -585,7 +585,6 @@ void main() {
         groups: [second, third],
         currentGroupName: 'First',
         proxyCardType: ProxyCardType.compact,
-        columns: 1,
       );
       final selectedGroups = <String>[];
       final container = ProviderContainer(
@@ -657,7 +656,6 @@ void main() {
       groups: groups,
       currentGroupName: current ?? groups.first.name,
       proxyCardType: ProxyCardType.compact,
-      columns: 1,
     );
     final container = ProviderContainer(
       overrides: [
@@ -809,13 +807,130 @@ void main() {
         groups: groups,
         currentGroupName: 'A',
         proxyCardType: ProxyCardType.compact,
-        columns: 1,
       ),
     );
     await tester.pumpAndSettle();
 
     expect(tester.widget(find.byType(GroupTabs)), same(strip));
     expect(_isTabSelected(tester, 'A'), isTrue);
+  });
+
+  ProxiesTabViewState tabViewOf(WidgetTester tester) =>
+      tester.state<ProxiesTabViewState>(find.byType(ProxiesTabView));
+
+  testWidgets('keeps the outgoing chips usable while the empty state enters', (
+    tester,
+  ) async {
+    final groups = [
+      for (final name in ['A', 'B', 'C']) tabGroup(name),
+    ];
+    final tabs = await pumpGroupTabs(tester, groups, current: 'B');
+
+    tabs.set(
+      const ProxiesTabState(
+        groups: [],
+        currentGroupName: 'B',
+        proxyCardType: ProxyCardType.standard,
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('C', findRichText: true), findsOneWidget);
+    await tester.tap(find.text('C', findRichText: true), warnIfMissed: false);
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    expect(tabViewOf(tester).currentGroup, isNull);
+
+    await tester.pumpAndSettle();
+    expect(find.text('C', findRichText: true), findsNothing);
+
+    tabs.set(
+      ProxiesTabState(
+        groups: groups,
+        currentGroupName: 'B',
+        proxyCardType: ProxyCardType.standard,
+      ),
+    );
+    await tester.pumpAndSettle();
+    for (final name in ['A', 'B', 'C']) {
+      expect(_tabOf(name), findsOneWidget);
+    }
+    expect(tabViewOf(tester).currentGroup?.name, 'B');
+    expect(_isTabSelected(tester, 'B'), isTrue);
+    expect(tester.takeException(), isNull);
+  });
+
+  Future<GlobalKey<ProxiesTabViewState>> pumpPagedTab(
+    WidgetTester tester,
+    Group group,
+  ) async {
+    tester.view.physicalSize = const Size(900, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final groups = [tabGroup('A'), group];
+    final container = ProviderContainer(
+      overrides: [
+        currentProfileProvider.overrideWith((_) => null),
+        groupsProvider.overrideWithBuild((_, _) => groups),
+        coreHandlerProvider.overrideWithValue(pagedCoreOf(groups)),
+        proxiesTabStateProvider.overrideWith(
+          (_) => ProxiesTabState(
+            groups: groups,
+            currentGroupName: group.name,
+            proxyCardType: ProxyCardType.standard,
+          ),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    final key = GlobalKey<ProxiesTabViewState>();
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: _TestApp(
+          child: ProxiesTabView(key: key, onGroupChanged: (_) {}),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    return key;
+  }
+
+  Group pagedGroup(int count, {String? now}) => Group(
+    type: GroupType.Selector,
+    name: 'B',
+    now: now,
+    nodeCount: count,
+    all: [for (var i = 0; i < count; i++) Proxy(name: 'B-$i', type: 'ss')],
+  );
+
+  testWidgets('scroll to selected brings the row to the top of the grid', (
+    tester,
+  ) async {
+    final key = await pumpPagedTab(tester, pagedGroup(80, now: 'B-41'));
+    final firstRowTop = tester
+        .getRect(find.text('B-0', findRichText: true).first)
+        .top;
+
+    key.currentState?.scrollToGroupSelected();
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getRect(find.text('B-41', findRichText: true).first).top,
+      firstRowTop,
+    );
+  });
+
+  testWidgets('cards rest where the grid clips them, clear of the chips', (
+    tester,
+  ) async {
+    await pumpPagedTab(tester, pagedGroup(40));
+    final tabs = tester.getRect(_tabOf('B'));
+    final grid = tester.getRect(find.byType(GridView));
+
+    expect(grid.top, tabs.bottom + 16);
+    expect(tester.getRect(find.byType(ProxyCard).first).top, grid.top);
   });
 
   testWidgets(
@@ -832,7 +947,6 @@ void main() {
         groups: [group(null)],
         currentGroupName: 'Group',
         proxyCardType: ProxyCardType.compact,
-        columns: 1,
       );
       final container = ProviderContainer(
         overrides: [
