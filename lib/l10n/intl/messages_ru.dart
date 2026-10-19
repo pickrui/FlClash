@@ -2687,6 +2687,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "required": MessageLookupByLibrary.simpleMessage("Обязательно"),
     "resendCodeIn": m98,
     "reset": MessageLookupByLibrary.simpleMessage("Сброс"),
+    "resetDns": MessageLookupByLibrary.simpleMessage("Сбросить DNS"),
+    "resetDnsFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось сбросить DNS. Проверьте подключение к ядру и повторите попытку.",
+    ),
+    "resetDnsSuccess": MessageLookupByLibrary.simpleMessage(
+      "Состояние DNS очищено",
+    ),
     "resetEmailSent": MessageLookupByLibrary.simpleMessage(
       "Письмо отправлено. Вставьте ссылку или код из письма ниже.",
     ),

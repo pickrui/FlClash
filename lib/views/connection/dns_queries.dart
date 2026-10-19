@@ -130,6 +130,7 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
   Timer? _refreshTimer;
   List<DnsQuery> _queries = [];
   bool _paused = false;
+  bool _resettingDns = false;
   String _search = '';
   List<String> _keywords = [];
   _QueryFilter _filter = _QueryFilter.all;
@@ -269,6 +270,12 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
   List<IconButtonData> _buildActions() {
     return [
       IconButtonData(
+        glyph: AppGlyphs.refresh,
+        tooltip: appLocalizations.resetDns,
+        isLoading: _resettingDns,
+        onPressed: _resettingDns ? null : _resetDns,
+      ),
+      IconButtonData(
         glyph: AppGlyphs.playPause(_paused ? 0 : 1),
         tooltip: _paused
             ? appLocalizations.resumeUpdates
@@ -287,6 +294,25 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
         },
       ),
     ];
+  }
+
+  Future<void> _resetDns() async {
+    if (_resettingDns) return;
+    final core = ref.read(coreHandlerProvider);
+    setState(() => _resettingDns = true);
+    try {
+      await core.clearDnsState();
+      if (mounted) {
+        context.showNotifier(context.appLocalizations.resetDnsSuccess);
+      }
+    } catch (error) {
+      commonPrint.log('DNS reset failed: $error');
+      if (mounted) {
+        context.showNotifier(context.appLocalizations.resetDnsFailed);
+      }
+    } finally {
+      if (mounted) setState(() => _resettingDns = false);
+    }
   }
 
   Widget _buildList(List<DnsQuery> queries) {

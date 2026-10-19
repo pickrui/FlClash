@@ -431,6 +431,13 @@ func handleResetConnections() bool {
 	return true
 }
 
+func handleClearDnsState() bool {
+	runLock.Lock()
+	defer runLock.Unlock()
+	dns.ClearAll()
+	return true
+}
+
 // A connection that went out over a network the device has left hangs until
 // TCP gives up on it, and so do the DNS clients' pooled connections.
 func handleResetNetwork() bool {

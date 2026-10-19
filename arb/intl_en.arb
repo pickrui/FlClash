@@ -1604,5 +1604,8 @@
   "ageSecretKey": "Age secret key",
   "ageSecretKeyRequiredTip": "This profile is encrypted with age and needs an age secret key to decrypt",
   "ageDecryptFailedTip": "Could not decrypt the profile. Check the age secret key and try again.",
-  "linkDesc": "Obtain a profile from a subscription link or a proxy share link"
+  "linkDesc": "Obtain a profile from a subscription link or a proxy share link",
+  "resetDns": "Reset DNS",
+  "resetDnsSuccess": "DNS state cleared",
+  "resetDnsFailed": "Could not reset DNS. Check that the core is connected and try again."
 }

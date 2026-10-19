@@ -2745,6 +2745,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "required": MessageLookupByLibrary.simpleMessage("Obligatoire"),
     "resendCodeIn": m98,
     "reset": MessageLookupByLibrary.simpleMessage("Réinitialiser"),
+    "resetDns": MessageLookupByLibrary.simpleMessage("Réinitialiser le DNS"),
+    "resetDnsFailed": MessageLookupByLibrary.simpleMessage(
+      "Impossible de réinitialiser le DNS. Vérifiez la connexion au noyau, puis réessayez.",
+    ),
+    "resetDnsSuccess": MessageLookupByLibrary.simpleMessage("État DNS effacé"),
     "resetEmailSent": MessageLookupByLibrary.simpleMessage(
       "E-mail envoyé. Collez ci-dessous le lien ou le code de réinitialisation reçu.",
     ),

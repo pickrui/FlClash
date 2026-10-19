@@ -13537,6 +13537,31 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Reset DNS`
+  String get resetDns {
+    return Intl.message('Reset DNS', name: 'resetDns', desc: '', args: []);
+  }
+
+  /// `DNS state cleared`
+  String get resetDnsSuccess {
+    return Intl.message(
+      'DNS state cleared',
+      name: 'resetDnsSuccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not reset DNS. Check that the core is connected and try again.`
+  String get resetDnsFailed {
+    return Intl.message(
+      'Could not reset DNS. Check that the core is connected and try again.',
+      name: 'resetDnsFailed',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

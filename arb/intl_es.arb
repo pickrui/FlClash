@@ -1604,5 +1604,8 @@
   "ageSecretKey": "Clave secreta de age",
   "ageSecretKeyRequiredTip": "Este perfil está cifrado con age y necesita una clave secreta de age para descifrarse",
   "ageDecryptFailedTip": "No se pudo descifrar el perfil. Compruebe la clave secreta age y reintente.",
-  "linkDesc": "Obtén un perfil desde un enlace de suscripción o un enlace para compartir proxies"
+  "linkDesc": "Obtén un perfil desde un enlace de suscripción o un enlace para compartir proxies",
+  "resetDns": "Restablecer DNS",
+  "resetDnsSuccess": "Estado de DNS borrado",
+  "resetDnsFailed": "No se pudo restablecer el DNS. Comprueba la conexión con el núcleo e inténtalo de nuevo."
 }

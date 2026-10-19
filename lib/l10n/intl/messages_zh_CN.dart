@@ -1918,6 +1918,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "required": MessageLookupByLibrary.simpleMessage("必填"),
     "resendCodeIn": m98,
     "reset": MessageLookupByLibrary.simpleMessage("重置"),
+    "resetDns": MessageLookupByLibrary.simpleMessage("重置 DNS"),
+    "resetDnsFailed": MessageLookupByLibrary.simpleMessage(
+      "无法重置 DNS，请确认内核已连接后重试",
+    ),
+    "resetDnsSuccess": MessageLookupByLibrary.simpleMessage("DNS 状态已清理"),
     "resetEmailSent": MessageLookupByLibrary.simpleMessage(
       "重置邮件已发送，请将邮件中的重置链接或代码粘贴到下方",
     ),

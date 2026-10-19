@@ -1604,5 +1604,8 @@
   "ageSecretKey": "age 私钥",
   "ageSecretKeyRequiredTip": "该配置已用 age 加密，需要 age 私钥才能解密",
   "ageDecryptFailedTip": "无法解密配置，请检查 age 私钥后重试",
-  "linkDesc": "通过订阅链接或代理分享链接获取配置文件"
+  "linkDesc": "通过订阅链接或代理分享链接获取配置文件",
+  "resetDns": "重置 DNS",
+  "resetDnsSuccess": "DNS 状态已清理",
+  "resetDnsFailed": "无法重置 DNS，请确认内核已连接后重试"
 }

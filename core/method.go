@@ -294,6 +294,8 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 		response.success(handleCloseConnections())
 	case resetConnectionsMethod:
 		response.success(handleResetConnections())
+	case clearDnsStateMethod:
+		response.success(handleClearDnsState())
 	case resetNetworkMethod:
 		response.success(handleResetNetwork())
 	case closeConnectionMethod:

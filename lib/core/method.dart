@@ -44,6 +44,7 @@ enum CoreMethod {
   getConnectionCount,
   closeConnections,
   resetConnections,
+  clearDnsState,
   closeConnection,
   getExternalProviders,
   getExternalProvider,

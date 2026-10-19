@@ -56,6 +56,23 @@ void main() {
     controller = CoreController.forTesting(handler: handler);
   });
 
+  test('DNS reset awaits completion and preserves failures', () async {
+    final completed = Completer<bool>();
+    when(() => handler.clearDnsState()).thenAnswer((_) => completed.future);
+    var finished = false;
+    final reset = controller.clearDnsState().then((_) => finished = true);
+    await pumpEventQueue();
+    expect(finished, isFalse);
+    completed.complete(true);
+    await reset;
+    expect(finished, isTrue);
+    when(() => handler.clearDnsState()).thenAnswer((_) async => false);
+    await expectLater(controller.clearDnsState(), throwsStateError);
+    final error = StateError('disconnected');
+    when(() => handler.clearDnsState()).thenThrow(error);
+    await expectLater(controller.clearDnsState(), throwsA(same(error)));
+  });
+
   test(
     'a custom probe budget reaches the Core after acquiring a shared slot',
     () async {

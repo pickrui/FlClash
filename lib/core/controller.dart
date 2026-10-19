@@ -372,6 +372,12 @@ class CoreController {
     _detach(CoreMethod.resetConnections, _interface.resetConnections);
   }
 
+  Future<void> clearDnsState() async {
+    if (!await _interface.clearDnsState()) {
+      throw StateError('Core did not clear DNS state');
+    }
+  }
+
   void _detach(CoreMethod method, FutureOr<Object?> Function() call) {
     unawaited(_guarded(method, call));
   }

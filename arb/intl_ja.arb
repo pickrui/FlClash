@@ -1604,5 +1604,8 @@
   "ageSecretKey": "age 秘密鍵",
   "ageSecretKeyRequiredTip": "このプロファイルは age で暗号化されており、復号には age 秘密鍵が必要です",
   "ageDecryptFailedTip": "設定を復号できませんでした。age 秘密鍵を確認して再試行してください。",
-  "linkDesc": "サブスクリプションリンクまたはプロキシの共有リンクからプロファイルを取得します"
+  "linkDesc": "サブスクリプションリンクまたはプロキシの共有リンクからプロファイルを取得します",
+  "resetDns": "DNS をリセット",
+  "resetDnsSuccess": "DNS の状態をクリアしました",
+  "resetDnsFailed": "DNS をリセットできませんでした。コアの接続を確認して、もう一度お試しください。"
 }

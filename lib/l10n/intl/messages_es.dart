@@ -2730,6 +2730,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "required": MessageLookupByLibrary.simpleMessage("Obligatorio"),
     "resendCodeIn": m98,
     "reset": MessageLookupByLibrary.simpleMessage("Restablecer"),
+    "resetDns": MessageLookupByLibrary.simpleMessage("Restablecer DNS"),
+    "resetDnsFailed": MessageLookupByLibrary.simpleMessage(
+      "No se pudo restablecer el DNS. Comprueba la conexión con el núcleo e inténtalo de nuevo.",
+    ),
+    "resetDnsSuccess": MessageLookupByLibrary.simpleMessage(
+      "Estado de DNS borrado",
+    ),
     "resetEmailSent": MessageLookupByLibrary.simpleMessage(
       "Correo enviado. Pegue abajo el enlace o el código de restablecimiento recibido.",
     ),

@@ -2580,6 +2580,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "required": MessageLookupByLibrary.simpleMessage("Required"),
     "resendCodeIn": m98,
     "reset": MessageLookupByLibrary.simpleMessage("Reset"),
+    "resetDns": MessageLookupByLibrary.simpleMessage("Reset DNS"),
+    "resetDnsFailed": MessageLookupByLibrary.simpleMessage(
+      "Could not reset DNS. Check that the core is connected and try again.",
+    ),
+    "resetDnsSuccess": MessageLookupByLibrary.simpleMessage(
+      "DNS state cleared",
+    ),
     "resetEmailSent": MessageLookupByLibrary.simpleMessage(
       "Reset email sent. Paste the reset link or code from the email below.",
     ),

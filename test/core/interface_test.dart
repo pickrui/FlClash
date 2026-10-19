@@ -12,6 +12,29 @@ import 'package:fl_clash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('DNS reset requires a real Core response', () async {
+    final handler = _FakeCoreHandler()..response = true;
+    expect(await handler.clearDnsState(), isTrue);
+    expect(handler.methods, [CoreMethod.clearDnsState]);
+    expect(handler.arguments, isNull);
+    handler.response = null;
+    await expectLater(
+      handler.clearDnsState(),
+      throwsA(_missingResponse(CoreMethod.clearDnsState)),
+    );
+    handler.connected = false;
+    await expectLater(
+      handler.clearDnsState(),
+      throwsA(
+        isA<CoreMethodException>().having(
+          (error) => error.code,
+          'code',
+          'transport_disconnected',
+        ),
+      ),
+    );
+  });
+
   test(
     'library MRS preview sends bounded content without a filesystem path',
     () async {

@@ -2180,6 +2180,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "required": MessageLookupByLibrary.simpleMessage("必須"),
     "resendCodeIn": m98,
     "reset": MessageLookupByLibrary.simpleMessage("リセット"),
+    "resetDns": MessageLookupByLibrary.simpleMessage("DNS をリセット"),
+    "resetDnsFailed": MessageLookupByLibrary.simpleMessage(
+      "DNS をリセットできませんでした。コアの接続を確認して、もう一度お試しください。",
+    ),
+    "resetDnsSuccess": MessageLookupByLibrary.simpleMessage("DNS の状態をクリアしました"),
     "resetEmailSent": MessageLookupByLibrary.simpleMessage(
       "リセットメールを送信しました。メール内のリセットリンクまたはコードを下に貼り付けてください",
     ),

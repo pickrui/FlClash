@@ -2143,6 +2143,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "required": MessageLookupByLibrary.simpleMessage("필수"),
     "resendCodeIn": m98,
     "reset": MessageLookupByLibrary.simpleMessage("초기화"),
+    "resetDns": MessageLookupByLibrary.simpleMessage("DNS 초기화"),
+    "resetDnsFailed": MessageLookupByLibrary.simpleMessage(
+      "DNS를 초기화하지 못했습니다. 코어 연결을 확인하고 다시 시도하세요.",
+    ),
+    "resetDnsSuccess": MessageLookupByLibrary.simpleMessage("DNS 상태를 초기화했습니다"),
     "resetEmailSent": MessageLookupByLibrary.simpleMessage(
       "재설정 이메일을 보냈습니다. 이메일의 재설정 링크나 코드를 아래에 붙여 넣으세요.",
     ),

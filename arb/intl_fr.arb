@@ -1604,5 +1604,8 @@
   "ageSecretKey": "Clé secrète age",
   "ageSecretKeyRequiredTip": "Ce profil est chiffré avec age et nécessite une clé secrète age pour être déchiffré",
   "ageDecryptFailedTip": "Impossible de déchiffrer le profil. Vérifiez la clé secrète age et réessayez.",
-  "linkDesc": "Obtenir un profil depuis un lien d’abonnement ou un lien de partage de proxy"
+  "linkDesc": "Obtenir un profil depuis un lien d’abonnement ou un lien de partage de proxy",
+  "resetDns": "Réinitialiser le DNS",
+  "resetDnsSuccess": "État DNS effacé",
+  "resetDnsFailed": "Impossible de réinitialiser le DNS. Vérifiez la connexion au noyau, puis réessayez."
 }
