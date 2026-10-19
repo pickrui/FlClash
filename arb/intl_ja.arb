@@ -1506,5 +1506,6 @@
   "tapIconToRetry": "アイコンをタップして再試行",
   "trafficPeak": "ピーク {value}",
   "trafficTotal": "累計 {value}",
-  "usedShort": "使用済み"
+  "usedShort": "使用済み",
+  "required": "必須"
 }

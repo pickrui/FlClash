@@ -6,23 +6,27 @@
 import 'dart:async';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/features/form/error_banner.dart';
+import 'package:fl_clash/features/form/form_row.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/navigator.dart';
+import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/widgets/input.dart';
+import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'cloud_layout.dart';
 import 'cloud_login_page.dart';
 
 Future<T?> showCloudRegisterPage<T>(BuildContext context) {
-  return showDialog<T>(
+  return showFormSheet<T>(
     context: context,
-    barrierDismissible: false,
-    builder: (_) => const CloudRegisterPage(),
+    builder: (_, _) => const CloudRegisterPage(),
   );
 }
 
@@ -36,7 +40,6 @@ class CloudRegisterPage extends ConsumerStatefulWidget {
 }
 
 class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
-  final _formKey = GlobalKey<FormState>();
   final _nicknameController = TextEditingController();
   final _emailController = TextEditingController();
   final _emailCodeController = TextEditingController();
@@ -53,6 +56,7 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
   bool _sendingCode = false;
   int _resendCountdown = 0;
   Timer? _resendTimer;
+  bool _attempted = false;
 
   @override
   void initState() {
@@ -139,7 +143,10 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
 
   Future<void> _handleRegister() async {
     if (_isSubmitting || ref.read(cloudAccountProvider).isLoading) return;
-    if (!_formKey.currentState!.validate()) return;
+    if (_issue() != null) {
+      setState(() => _attempted = true);
+      return;
+    }
 
     final submit = _registerSubmission();
     final route = ModalRoute.of(context);
@@ -174,315 +181,292 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
     );
   }
 
+  static final _emailPattern = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+
+  /// The first field the register form cannot send yet, and why.
+  ({_RegisterField field, String message})? _issue() {
+    final l10n = AppLocalizations.current;
+    final config = _config;
+    final email = _emailController.text.trim();
+    if (_nicknameController.text.trim().isEmpty) {
+      return (field: _RegisterField.nickname, message: l10n.nicknameValidation);
+    }
+    if (email.isEmpty) {
+      return (field: _RegisterField.email, message: l10n.emailValidation);
+    }
+    if (!_emailPattern.hasMatch(email)) {
+      return (field: _RegisterField.email, message: l10n.emailFormatValidation);
+    }
+    if ((config?.emailVerify ?? false) &&
+        _emailCodeController.text.trim().isEmpty) {
+      return (
+        field: _RegisterField.emailCode,
+        message: l10n.emailCodeValidation,
+      );
+    }
+    if (_passwordController.text.isEmpty) {
+      return (field: _RegisterField.password, message: l10n.passwordValidation);
+    }
+    if (_confirmPasswordController.text.isEmpty) {
+      return (
+        field: _RegisterField.confirmPassword,
+        message: l10n.confirmPasswordValidation,
+      );
+    }
+    if (_confirmPasswordController.text != _passwordController.text) {
+      return (
+        field: _RegisterField.confirmPassword,
+        message: l10n.passwordMismatch,
+      );
+    }
+    if ((config?.inviteRequired ?? false) &&
+        _inviteCodeController.text.trim().isEmpty) {
+      return (field: _RegisterField.invite, message: l10n.inviteCodeValidation);
+    }
+    return null;
+  }
+
+  void _handleClose() {
+    if (_isSubmitting || ref.read(cloudAccountProvider).isLoading) return;
+    Navigator.of(context).pop();
+  }
+
+  void _refresh(String _) {
+    if (_attempted) setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     final accountState = ref.watch(cloudAccountProvider);
     final isLoading = accountState.isLoading || _isSubmitting;
-
-    return PopScope(
-      canPop: !isLoading,
-      child: Dialog(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 450, maxHeight: 640),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: _buildContent(isLoading),
-          ),
-        ),
+    final l10n = AppLocalizations.current;
+    final config = _config;
+    final canRegister =
+        !_loadingConfig &&
+        _configError == null &&
+        config?.registerEnabled == true;
+    return CloudFormSheet(
+      title: l10n.registerTitle,
+      busy: isLoading,
+      onClose: _handleClose,
+      confirmation: IconButtonData(
+        glyph: AppGlyphs.check,
+        tooltip: l10n.register,
+        isLoading: isLoading,
+        onPressed: !canRegister || isLoading ? null : _handleRegister,
       ),
-    );
-  }
-
-  Widget _buildContent(bool isLoading) {
-    if (_loadingConfig) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
+      children: switch (config) {
+        _ when _loadingConfig => [
           const SizedBox(
             height: 180,
-            child: Center(child: CircularProgressIndicator()),
-          ),
-          _buildCancel(isLoading),
-        ],
-      );
-    }
-    if (_configError != null) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            AppLocalizations.current.registerFailed,
-            style: context.textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 12),
-          Text(_configError!, textAlign: TextAlign.center),
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text(AppLocalizations.current.cancel),
-              ),
-              const SizedBox(width: 12),
-              FilledButton(
-                onPressed: _loadConfig,
-                child: Text(AppLocalizations.current.refresh),
-              ),
-            ],
+            child: Center(child: CommonCircleLoading.page()),
           ),
         ],
-      );
-    }
-    final config = _config!;
-    if (!config.registerEnabled) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            AppLocalizations.current.registerTitle,
-            style: context.textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            AppLocalizations.current.registerClosed,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(AppLocalizations.current.cancel),
-            ),
-          ),
+        _ when _configError != null => [
+          _buildNotice(_configError!, title: l10n.registerFailed, retry: true),
         ],
-      );
-    }
-    return _buildForm(config, isLoading);
+        CloudRegisterConfig(registerEnabled: false) => [
+          _buildNotice(l10n.registerClosed),
+        ],
+        _ => _buildForm(config!, isLoading),
+      },
+    );
   }
 
-  Widget _buildForm(CloudRegisterConfig config, bool isLoading) {
-    return SingleChildScrollView(
+  Widget _buildNotice(String message, {String? title, bool retry = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 12,
         children: [
+          if (title != null)
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: AppTextStyle.headline.of(context),
+            ),
           Text(
-            AppLocalizations.current.registerTitle,
-            style: context.textTheme.headlineSmall,
+            message,
             textAlign: TextAlign.center,
+            style: AppTextStyle.subheadline
+                .of(context)
+                .copyWith(color: context.colorScheme.onSurfaceVariant),
           ),
-          const SizedBox(height: 24),
-          Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                TextFormField(
-                  controller: _nicknameController,
-                  enabled: !isLoading,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.current.nicknameLabel,
-                    hintText: AppLocalizations.current.nicknameHint,
-                    prefixIcon: const Icon(Icons.person_outline),
-                    border: const OutlineInputBorder(),
+          if (retry)
+            TonalButton(
+              size: TonalButtonSize.bar,
+              glyph: AppGlyphs.refresh,
+              label: AppLocalizations.current.refresh,
+              onPressed: _loadConfig,
+            ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildForm(CloudRegisterConfig config, bool isLoading) {
+    final l10n = AppLocalizations.current;
+    final issue = _attempted ? _issue() : null;
+    bool invalid(_RegisterField field) => issue?.field == field;
+    return [
+      ErrorBanner(message: issue?.message),
+      CloudFormFields(
+        enabled: !isLoading,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            generateSection(
+              items: [
+                FormRow(
+                  title: l10n.nicknameLabel,
+                  invalid: invalid(_RegisterField.nickname),
+                  trailing: FormRowTextField(
+                    controller: _nicknameController,
+                    hintText: l10n.nicknameHint,
+                    textInputAction: TextInputAction.next,
+                    onChanged: _refresh,
                   ),
-                  validator: (v) => v?.trim().isEmpty == true
-                      ? AppLocalizations.current.nicknameValidation
-                      : null,
                 ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _emailController,
-                  enabled: !isLoading,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.current.emailLabel,
-                    hintText: AppLocalizations.current.emailHint,
-                    prefixIcon: const Icon(Icons.mail_outline),
-                    border: const OutlineInputBorder(),
+                FormRow(
+                  title: l10n.emailLabel,
+                  invalid: invalid(_RegisterField.email),
+                  trailing: FormRowTextField(
+                    controller: _emailController,
+                    hintText: l10n.emailHint,
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    autocorrect: false,
+                    onChanged: _refresh,
                   ),
-                  validator: (v) {
-                    final value = v?.trim() ?? '';
-                    if (value.isEmpty) {
-                      return AppLocalizations.current.emailValidation;
-                    }
-                    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                      return AppLocalizations.current.emailFormatValidation;
-                    }
-                    return null;
-                  },
                 ),
-                if (config.emailVerify) ...[
-                  const SizedBox(height: 16),
-                  _buildEmailCodeField(isLoading),
-                ],
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _passwordController,
-                  enabled: !isLoading,
-                  obscureText: _obscurePassword,
-                  enableSuggestions: false,
-                  autocorrect: false,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.current.passwordLabel,
-                    helperText: AppLocalizations.current.passwordRuleHint,
-                    helperMaxLines: 2,
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    border: const OutlineInputBorder(),
-                    suffixIcon: VisibilityToggleButton(
-                      obscureText: _obscurePassword,
-                      onPressed: isLoading
-                          ? null
-                          : () => setState(
-                              () => _obscurePassword = !_obscurePassword,
-                            ),
+                if (config.emailVerify)
+                  FormRow(
+                    title: l10n.emailCodeLabel,
+                    invalid: invalid(_RegisterField.emailCode),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      spacing: 8,
+                      children: [
+                        Flexible(
+                          child: FormRowTextField(
+                            controller: _emailCodeController,
+                            hintText: l10n.emailCodeHint,
+                            keyboardType: TextInputType.number,
+                            textInputAction: TextInputAction.next,
+                            onChanged: _refresh,
+                          ),
+                        ),
+                        _buildSendCodeButton(isLoading),
+                      ],
                     ),
                   ),
-                  validator: (v) => v?.isEmpty == true
-                      ? AppLocalizations.current.passwordValidation
-                      : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _confirmPasswordController,
-                  enabled: !isLoading,
-                  obscureText: _obscureConfirmPassword,
-                  enableSuggestions: false,
-                  autocorrect: false,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.current.confirmPasswordLabel,
-                    hintText: AppLocalizations.current.confirmPasswordHint,
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    border: const OutlineInputBorder(),
-                    suffixIcon: VisibilityToggleButton(
-                      obscureText: _obscureConfirmPassword,
-                      onPressed: isLoading
-                          ? null
-                          : () => setState(
-                              () => _obscureConfirmPassword =
-                                  !_obscureConfirmPassword,
-                            ),
-                    ),
-                  ),
-                  validator: (v) {
-                    if (v?.isEmpty == true) {
-                      return AppLocalizations.current.confirmPasswordValidation;
-                    }
-                    if (v != _passwordController.text) {
-                      return AppLocalizations.current.passwordMismatch;
-                    }
-                    return null;
-                  },
-                ),
-                if (config.inviteRequired) ...[
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _inviteCodeController,
-                    enabled: !isLoading,
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.current.inviteCodeLabel,
-                      hintText: AppLocalizations.current.inviteCodeHint,
-                      prefixIcon: const Icon(
-                        Icons.confirmation_number_outlined,
-                      ),
-                      border: const OutlineInputBorder(),
-                    ),
-                    validator: (v) => v?.trim().isEmpty == true
-                        ? AppLocalizations.current.inviteCodeValidation
-                        : null,
-                  ),
-                ],
               ],
             ),
-          ),
-          const SizedBox(height: 24),
-          FilledButton(
-            onPressed: isLoading ? null : _handleRegister,
-            child: isLoading
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(AppLocalizations.current.register),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(AppLocalizations.current.haveAccountAlready),
-              TextButton(
-                onPressed: isLoading
-                    ? null
-                    : () {
-                        final commonAction = context.commonAction;
-                        Navigator.of(context).pop();
-                        commonAction.openCloudLogin(navigateToCloud: false);
-                      },
-                child: Text(AppLocalizations.current.goLogin),
+            const SizedBox(height: cloudSectionGap),
+            generateSection(
+              footer: l10n.passwordRuleHint,
+              items: [
+                FormRow(
+                  title: l10n.passwordLabel,
+                  invalid: invalid(_RegisterField.password),
+                  trailing: CloudSecretField(
+                    controller: _passwordController,
+                    obscure: _obscurePassword,
+                    hintText: l10n.required,
+                    onToggle: () =>
+                        setState(() => _obscurePassword = !_obscurePassword),
+                    textInputAction: TextInputAction.next,
+                    onChanged: _refresh,
+                  ),
+                ),
+                FormRow(
+                  title: l10n.confirmPasswordLabel,
+                  invalid: invalid(_RegisterField.confirmPassword),
+                  trailing: CloudSecretField(
+                    controller: _confirmPasswordController,
+                    obscure: _obscureConfirmPassword,
+                    hintText: l10n.confirmPasswordHint,
+                    onToggle: () => setState(
+                      () => _obscureConfirmPassword = !_obscureConfirmPassword,
+                    ),
+                    textInputAction: config.inviteRequired
+                        ? TextInputAction.next
+                        : TextInputAction.done,
+                    onChanged: _refresh,
+                    onFieldSubmitted: config.inviteRequired
+                        ? null
+                        : (_) => _handleRegister(),
+                  ),
+                ),
+              ],
+            ),
+            if (config.inviteRequired) ...[
+              const SizedBox(height: cloudSectionGap),
+              generateSection(
+                items: [
+                  FormRow(
+                    title: l10n.inviteCodeLabel,
+                    invalid: invalid(_RegisterField.invite),
+                    trailing: FormRowTextField(
+                      controller: _inviteCodeController,
+                      hintText: l10n.inviteCodeHint,
+                      textInputAction: TextInputAction.done,
+                      onChanged: _refresh,
+                      onFieldSubmitted: (_) => _handleRegister(),
+                    ),
+                  ),
+                ],
               ),
             ],
-          ),
-          _buildCancel(isLoading),
-        ],
+          ],
+        ),
       ),
-    );
-  }
-
-  Widget _buildCancel(bool isLoading) {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: TextButton(
-        onPressed: isLoading ? null : () => Navigator.of(context).pop(),
-        child: Text(AppLocalizations.current.cancel),
-      ),
-    );
-  }
-
-  Widget _buildEmailCodeField(bool isLoading) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: TextFormField(
-            controller: _emailCodeController,
-            enabled: !isLoading,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              labelText: AppLocalizations.current.emailCodeLabel,
-              hintText: AppLocalizations.current.emailCodeHint,
-              prefixIcon: const Icon(Icons.verified_outlined),
-              border: const OutlineInputBorder(),
+      Padding(
+        padding: const EdgeInsets.only(top: 8),
+        child: Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            Text(l10n.haveAccountAlready, style: context.listCaptionStyle),
+            TextButton(
+              onPressed: isLoading
+                  ? null
+                  : () {
+                      final commonAction = context.commonAction;
+                      Navigator.of(context).pop();
+                      commonAction.openCloudLogin(navigateToCloud: false);
+                    },
+              child: Text(l10n.goLogin),
             ),
-            validator: (v) => v?.trim().isEmpty == true
-                ? AppLocalizations.current.emailCodeValidation
-                : null,
-          ),
+          ],
         ),
-        const SizedBox(width: 12),
-        SizedBox(
-          height: 56,
-          child: OutlinedButton(
-            onPressed: (isLoading || _sendingCode || _resendCountdown > 0)
-                ? null
-                : _sendEmailCode,
-            child: _sendingCode
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(
-                    _resendCountdown > 0
-                        ? AppLocalizations.current.resendCodeIn(
-                            _resendCountdown,
-                          )
-                        : AppLocalizations.current.sendCode,
-                  ),
-          ),
-        ),
-      ],
+      ),
+    ];
+  }
+
+  Widget _buildSendCodeButton(bool isLoading) {
+    final l10n = AppLocalizations.current;
+    if (_sendingCode) {
+      return const SizedBox(
+        width: 32,
+        child: Center(child: CommonCircleLoading(size: 18)),
+      );
+    }
+    return TonalButton(
+      size: TonalButtonSize.compact,
+      label: _resendCountdown > 0
+          ? l10n.resendCodeIn(_resendCountdown)
+          : l10n.sendCode,
+      onPressed: isLoading || _resendCountdown > 0 ? null : _sendEmailCode,
     );
   }
+}
+
+enum _RegisterField {
+  nickname,
+  email,
+  emailCode,
+  password,
+  confirmPassword,
+  invite,
 }

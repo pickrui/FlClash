@@ -12718,6 +12718,11 @@ class AppLocalizations {
   String get usedShort {
     return Intl.message('used', name: 'usedShort', desc: '', args: []);
   }
+
+  /// `Required`
+  String get required {
+    return Intl.message('Required', name: 'required', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

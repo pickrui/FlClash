@@ -61,11 +61,13 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      ProviderScope(
+      TestApp(
+        locale: const Locale('en'),
         overrides: [
+          _viewSizeOverride,
           cloudAccountProvider.overrideWith(_TestCloudAccountNotifier.new),
         ],
-        child: const _TestApp(child: CloudLoginPage()),
+        child: const CloudLoginPage(),
       ),
     );
 

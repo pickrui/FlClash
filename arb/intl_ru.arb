@@ -1506,5 +1506,6 @@
   "tapIconToRetry": "Нажмите на значок, чтобы повторить",
   "trafficPeak": "Пик {value}",
   "trafficTotal": "Всего {value}",
-  "usedShort": "использовано"
+  "usedShort": "использовано",
+  "required": "Обязательно"
 }

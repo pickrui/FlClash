@@ -1506,5 +1506,6 @@
   "tapIconToRetry": "Tap the icon to retry",
   "trafficPeak": "Peak {value}",
   "trafficTotal": "Total {value}",
-  "usedShort": "used"
+  "usedShort": "used",
+  "required": "Required"
 }

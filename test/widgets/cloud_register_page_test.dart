@@ -9,6 +9,7 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/views/cloud/cloud_register_page.dart';
+import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -37,10 +38,9 @@ Future<void> _open(
       child: Builder(
         builder: (context) => Scaffold(
           body: TextButton(
-            onPressed: () => showDialog<void>(
+            onPressed: () => showFormSheet<void>(
               context: context,
-              barrierDismissible: false,
-              builder: (_) => CloudRegisterPage(loadConfig: loadConfig),
+              builder: (_, _) => CloudRegisterPage(loadConfig: loadConfig),
             ),
             child: const Text('open'),
           ),
@@ -65,7 +65,7 @@ void main() {
   ) async {
     final pending = Completer<CloudRegisterConfig>();
     await _open(tester, () => pending.future);
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(CommonCircleLoading), findsOneWidget);
     await _cancel(tester);
     pending.complete(_config);
     await tester.pump();

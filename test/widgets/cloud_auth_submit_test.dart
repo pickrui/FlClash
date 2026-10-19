@@ -63,7 +63,7 @@ Future<_Account> _startLogin(WidgetTester tester) async {
   await tester.tap(find.text('open'));
   await tester.pumpAndSettle();
   await tester.enterText(find.byType(TextFormField), 'fixture-token');
-  await tester.tap(find.byType(FilledButton));
+  await tester.tap(find.widgetWithText(TextButton, 'Login'));
   await tester.pump();
   return account;
 }
@@ -184,8 +184,8 @@ void main() {
           expect(find.byType(CloudLoginPage), findsOneWidget);
           expect(
             tester
-                .widget<OutlinedButton>(
-                  find.widgetWithText(OutlinedButton, 'Sign in with Google'),
+                .widget<FilledButton>(
+                  find.widgetWithText(FilledButton, 'Sign in with Google'),
                 )
                 .onPressed,
             isNotNull,
@@ -194,12 +194,10 @@ void main() {
         } else {
           expect(account.googleGrant?.code, 'a' * 64);
           expect(account.googleGrant?.verifier.length, 43);
-          expect(
-            tester
-                .widget<TextButton>(find.widgetWithText(TextButton, 'Cancel'))
-                .onPressed,
-            isNull,
-          );
+          // The exchange in flight keeps the sheet against cancel.
+          await tester.tap(find.text('Cancel'));
+          await tester.pump();
+          expect(find.byType(CloudLoginPage), findsOneWidget);
           account.pendingLogin.complete();
         }
         await tester.pumpAndSettle();
@@ -289,7 +287,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
 
-    final login = find.widgetWithText(FilledButton, 'Login');
+    final login = find.widgetWithText(TextButton, 'Login');
     await tester.ensureVisible(login);
     await tester.pumpAndSettle();
     expect(tester.getRect(login).bottom, lessThanOrEqualTo(330));
