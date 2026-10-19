@@ -126,10 +126,7 @@ String? installConfigUrl(Uri uri) {
     return null;
   }
   final value = uri.queryParameters['url'];
-  final target = value == null ? null : Uri.tryParse(value);
-  if (target == null ||
-      !(target.isScheme('http') || target.isScheme('https')) ||
-      target.host.isEmpty) {
+  if (value == null || value.length > 8192 || !isProfileImportLink(value)) {
     return null;
   }
   return value;
@@ -144,9 +141,7 @@ String? profileUrlFromQrCodes(Iterable<String?> values) {
       final install = installConfigUrl(uri);
       if (install != null) return install;
     }
-    if (uri != null &&
-        (uri.isScheme('http') || uri.isScheme('https')) &&
-        uri.host.isNotEmpty) {
+    if (isProfileImportLink(value)) {
       return value;
     }
   }

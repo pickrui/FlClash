@@ -28,6 +28,7 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
+import 'package:fl_clash/widgets/last_update_time_text.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' hide context;
@@ -367,12 +368,13 @@ class _ResourceItem extends StatelessWidget {
         title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
         subtitle:
             subtitle ??
-            (lastUpdateTime != null || pending
-                ? Text(
-                    pending
-                        ? context.appLocalizations.loading
-                        : lastUpdateTime!.lastUpdateTimeDesc,
+            (pending
+                ? Text(context.appLocalizations.loading, style: subtitleStyle)
+                : lastUpdateTime != null
+                ? LastUpdateTimeText(
+                    lastUpdateDate: lastUpdateTime,
                     style: subtitleStyle,
+                    compact: true,
                   )
                 : Text(context.appLocalizations.unknown, style: subtitleStyle)),
         trailing: _buildTrailing(context),

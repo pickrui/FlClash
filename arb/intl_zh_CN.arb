@@ -83,6 +83,7 @@
   "importFromURL": "从URL导入",
   "submit": "提交",
   "doYouWantToPass": "是否要通过",
+  "createProfileFromUrlTip": "是否要通过 {url} 创建配置？",
   "create": "创建",
   "pleaseUploadValidQrcode": "请上传有效的二维码",
   "blacklistMode": "黑名单模式",

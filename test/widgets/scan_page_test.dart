@@ -229,6 +229,37 @@ void main() {
     expect(result, 'https://sub.example/x');
   });
 
+  for (final wrapped in [false, true]) {
+    testWidgets('a node QR pops once with install wrapper $wrapped', (
+      tester,
+    ) async {
+      const link = 'ss://YWVzLTEyOC1nY206cGFzcw@example.invalid:443#Node';
+      var pops = 0;
+      String? result;
+      await pumpScanPage(
+        tester,
+        onPopped: (value) {
+          pops++;
+          result = value;
+        },
+      );
+      final value = wrapped
+          ? Uri(
+              scheme: 'flclash',
+              host: 'install-config',
+              queryParameters: {'url': link},
+            ).toString()
+          : link;
+      platform.emit(_capture(BarcodeType.text, value));
+      platform.emit(_capture(BarcodeType.text, value));
+      await tester.pumpAndSettle();
+      expect(result, link);
+      expect(pops, 1);
+      expect(find.byType(ScanPage), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets('going inactive stops and resuming restarts the camera', (
     tester,
   ) async {

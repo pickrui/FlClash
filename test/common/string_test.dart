@@ -35,6 +35,54 @@ void main() {
     },
   );
 
+  test(
+    'QR and install imports preserve node links and reject unsafe targets',
+    () {
+      const links = [
+        'ss://YWVzLTEyOC1nY206cGFzcw@example.invalid:443#Node',
+        'vmess://eyJhZGQiOiJleGFtcGxlLmludmFsaWQifQ==',
+        'ssr://ZXhhbXBsZS5pbnZhbGlkOjQ0MzpvcmlnaW46YWVzLTEyOC1jZmI6cGxhaW46Y0dGemN3',
+        'vless://fixture@example.invalid:443?security=tls#Node',
+        'trojan://p%40ss@example.invalid:443',
+        'hy2://fixture@example.invalid:443',
+        'tuic://fixture:password@example.invalid:443',
+        'anytls://fixture@example.invalid:443',
+      ];
+      for (final link in links) {
+        expect(profileUrlFromQrCodes([null, 'not a link', ' $link ']), link);
+        for (final scheme in ['clash', 'clashmeta', 'flclash']) {
+          final install = Uri(
+            scheme: scheme,
+            host: 'install-config',
+            queryParameters: {'url': link},
+          );
+          expect(installConfigUrl(install), link);
+          expect(profileUrlFromQrCodes([install.toString()]), link);
+        }
+      }
+      for (final link in [
+        'file:///etc/hosts',
+        'javascript:alert(1)',
+        'ftp://example.invalid/config',
+        'ss://',
+        'https://example.invalid/has space',
+        'https://example.invalid/${'x' * 8192}',
+      ]) {
+        expect(profileUrlFromQrCodes([link]), isNull);
+        expect(
+          installConfigUrl(
+            Uri(
+              scheme: 'flclash',
+              host: 'install-config',
+              queryParameters: {'url': link},
+            ),
+          ),
+          isNull,
+        );
+      }
+    },
+  );
+
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late Directory tempDir;

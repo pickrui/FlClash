@@ -73,22 +73,22 @@ extension SystemControllerExt on AppController {
     linkManager.initAppLinksListen((url) async {
       await window?.show();
       if (!_context.mounted) return;
+      final message = appLocalizations.createProfileFromUrlTip(url);
+      final parts = message.split(url);
       final res = await globalState.showMessage(
         title: appLocalizations.addProfile,
         message: TextSpan(
           children: [
-            TextSpan(text: appLocalizations.doYouWantToPass),
+            TextSpan(text: parts.first),
             TextSpan(
-              text: ' $url ',
+              text: url,
               style: TextStyle(
                 color: Theme.of(_context).colorScheme.primary,
                 decoration: TextDecoration.underline,
                 decorationColor: Theme.of(_context).colorScheme.primary,
               ),
             ),
-            TextSpan(
-              text: '${appLocalizations.create}${appLocalizations.profile}',
-            ),
+            if (parts.length > 1) TextSpan(text: parts.last),
           ],
         ),
       );
@@ -96,7 +96,7 @@ extension SystemControllerExt on AppController {
       if (res != true) {
         return;
       }
-      await addProfileFormURL(url);
+      await addProfilesFromLinks([(label: '', url: url)]);
     }, initialLinks: system.isLinux ? globalState.launchArguments : const []);
   }
 

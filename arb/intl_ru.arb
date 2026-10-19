@@ -83,6 +83,7 @@
   "importFromURL": "Импорт из URL",
   "submit": "Отправить",
   "doYouWantToPass": "Вы хотите пропустить",
+  "createProfileFromUrlTip": "Создать профиль по ссылке {url}?",
   "create": "Создать",
   "pleaseUploadValidQrcode": "Пожалуйста, загрузите действительный QR-код",
   "blacklistMode": "Режим черного списка",

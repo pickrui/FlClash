@@ -630,6 +630,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Do you want to create a profile from {url}?`
+  String createProfileFromUrlTip(Object url) {
+    return Intl.message(
+      'Do you want to create a profile from $url?',
+      name: 'createProfileFromUrlTip',
+      desc: '',
+      args: [url],
+    );
+  }
+
   /// `Create`
   String get create {
     return Intl.message('Create', name: 'create', desc: '', args: []);

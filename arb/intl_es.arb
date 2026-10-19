@@ -83,6 +83,7 @@
   "importFromURL": "Importar desde una URL",
   "submit": "Enviar",
   "doYouWantToPass": "¿Desea continuar?",
+  "createProfileFromUrlTip": "¿Quieres crear un perfil a partir de {url}?",
   "create": "Crear",
   "pleaseUploadValidQrcode": "Sube un código QR válido",
   "blacklistMode": "Modo lista negra",

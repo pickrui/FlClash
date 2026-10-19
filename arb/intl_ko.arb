@@ -83,6 +83,7 @@
   "importFromURL": "URL에서 가져오기",
   "submit": "제출",
   "doYouWantToPass": "계속하시겠습니까?",
+  "createProfileFromUrlTip": "{url}에서 프로필을 만드시겠습니까?",
   "create": "만들기",
   "pleaseUploadValidQrcode": "올바른 QR 코드를 업로드하세요",
   "blacklistMode": "블랙리스트 모드",
