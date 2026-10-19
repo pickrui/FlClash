@@ -285,10 +285,10 @@ class AppLocalizations {
     return Intl.message('TUN', name: 'tun', desc: '', args: []);
   }
 
-  /// `only effective in administrator mode`
+  /// `TUN works only in administrator mode`
   String get tunDesc {
     return Intl.message(
-      'only effective in administrator mode',
+      'TUN works only in administrator mode',
       name: 'tunDesc',
       desc: '',
       args: [],
@@ -1350,10 +1350,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Tcp keep alive interval`
+  /// `TCP keep-alive interval`
   String get keepAliveIntervalDesc {
     return Intl.message(
-      'Tcp keep alive interval',
+      'TCP keep-alive interval',
       name: 'keepAliveIntervalDesc',
       desc: '',
       args: [],
@@ -1637,10 +1637,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Auto routes all system traffic through VpnService`
+  /// `VPN routes all system traffic through VpnService automatically`
   String get vpnEnableDesc {
     return Intl.message(
-      'Auto routes all system traffic through VpnService',
+      'VPN routes all system traffic through VpnService automatically',
       name: 'vpnEnableDesc',
       desc: '',
       args: [],
@@ -1652,10 +1652,10 @@ class AppLocalizations {
     return Intl.message('Options', name: 'options', desc: '', args: []);
   }
 
-  /// `Loopback unlock tool`
+  /// `UWP loopback exemption`
   String get loopback {
     return Intl.message(
-      'Loopback unlock tool',
+      'UWP loopback exemption',
       name: 'loopback',
       desc: '',
       args: [],
@@ -2017,10 +2017,10 @@ class AppLocalizations {
     return Intl.message('No network', name: 'noNetwork', desc: '', args: []);
   }
 
-  /// `Allow IPv6 inbound`
+  /// `With IPv6 on, the VPN allows IPv6 inbound`
   String get ipv6InboundDesc {
     return Intl.message(
-      'Allow IPv6 inbound',
+      'With IPv6 on, the VPN allows IPv6 inbound',
       name: 'ipv6InboundDesc',
       desc: '',
       args: [],
@@ -2092,10 +2092,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Only takes effect when the system proxy is enabled`
+  /// `Bypass domains apply only while the system proxy is on`
   String get bypassDomainDesc {
     return Intl.message(
-      'Only takes effect when the system proxy is enabled',
+      'Bypass domains apply only while the system proxy is on',
       name: 'bypassDomainDesc',
       desc: '',
       args: [],
@@ -2152,6 +2152,16 @@ class AppLocalizations {
     return Intl.message(
       'Bypass private addresses',
       name: 'bypassPrivateRoute',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `With Bypass private addresses on, LAN, loopback and multicast addresses skip TUN`
+  String get bypassPrivateRouteDesc {
+    return Intl.message(
+      'With Bypass private addresses on, LAN, loopback and multicast addresses skip TUN',
+      name: 'bypassPrivateRouteDesc',
       desc: '',
       args: [],
     );
@@ -6567,10 +6577,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Not applied while local proxy authentication is enabled`
+  /// `The system proxy is not applied while local proxy authentication is on`
   String get authenticationSystemProxyDesc {
     return Intl.message(
-      'Not applied while local proxy authentication is enabled',
+      'The system proxy is not applied while local proxy authentication is on',
       name: 'authenticationSystemProxyDesc',
       desc: '',
       args: [],
@@ -10242,6 +10252,26 @@ class AppLocalizations {
     );
   }
 
+  /// `Outbound interface`
+  String get interfaceNameMode {
+    return Intl.message(
+      'Outbound interface',
+      name: 'interfaceNameMode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Interface name is the network interface outbound connections use`
+  String get interfaceNameDesc {
+    return Intl.message(
+      'Interface name is the network interface outbound connections use',
+      name: 'interfaceNameDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Follow profile`
   String get interfaceFollowProfile {
     return Intl.message(
@@ -11409,6 +11439,11 @@ class AppLocalizations {
   /// `Inbound`
   String get inbound {
     return Intl.message('Inbound', name: 'inbound', desc: '', args: []);
+  }
+
+  /// `Outbound`
+  String get outbound {
+    return Intl.message('Outbound', name: 'outbound', desc: '', args: []);
   }
 
   /// `Logs and diagnostics`

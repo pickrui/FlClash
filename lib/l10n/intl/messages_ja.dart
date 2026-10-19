@@ -345,7 +345,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "制御文字を含まない 1～255 UTF-8 バイトを入力してください",
     ),
     "authenticationSystemProxyDesc": MessageLookupByLibrary.simpleMessage(
-      "ローカルプロキシ認証が有効な間は設定されません",
+      "ローカルプロキシ認証が有効な間、システムプロキシは設定されません",
     ),
     "authenticationUsernameInvalid": MessageLookupByLibrary.simpleMessage(
       "コロンや制御文字を含まない 1～255 UTF-8 バイトを入力してください",
@@ -422,9 +422,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "brightness": MessageLookupByLibrary.simpleMessage("明度"),
     "buy": MessageLookupByLibrary.simpleMessage("購入"),
     "bypassDomain": MessageLookupByLibrary.simpleMessage("バイパスドメイン"),
-    "bypassDomainDesc": MessageLookupByLibrary.simpleMessage("システムプロキシ有効時のみ適用"),
+    "bypassDomainDesc": MessageLookupByLibrary.simpleMessage(
+      "除外ドメインはシステムプロキシが有効な場合のみ適用されます",
+    ),
     "bypassPrivateRoute": MessageLookupByLibrary.simpleMessage(
       "プライベートアドレスをバイパス",
+    ),
+    "bypassPrivateRouteDesc": MessageLookupByLibrary.simpleMessage(
+      "プライベートアドレスをバイパスすると、LAN・ループバック・マルチキャストのアドレスは TUN を通りません",
     ),
     "cacheAlgorithm": MessageLookupByLibrary.simpleMessage("キャッシュアルゴリズム"),
     "cacheCorrupt": MessageLookupByLibrary.simpleMessage(
@@ -1437,6 +1442,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "interfaceAutomatic": MessageLookupByLibrary.simpleMessage("指定を解除（自動選択）"),
     "interfaceFollowProfile": MessageLookupByLibrary.simpleMessage("プロファイルに従う"),
     "interfaceName": MessageLookupByLibrary.simpleMessage("インターフェース名"),
+    "interfaceNameDesc": MessageLookupByLibrary.simpleMessage(
+      "インターフェース名は、アウトバウンド接続に使用するネットワークインターフェースです",
+    ),
+    "interfaceNameMode": MessageLookupByLibrary.simpleMessage(
+      "アウトバウンドインターフェース",
+    ),
     "internet": MessageLookupByLibrary.simpleMessage("インターネット"),
     "interval": MessageLookupByLibrary.simpleMessage("インターバル"),
     "intranetIP": MessageLookupByLibrary.simpleMessage("イントラネットIP"),
@@ -1487,7 +1498,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "ipVersion": MessageLookupByLibrary.simpleMessage("IP バージョン"),
     "ipcidr": MessageLookupByLibrary.simpleMessage("IPCIDR"),
     "ipv6Desc": MessageLookupByLibrary.simpleMessage("有効化するとIPv6トラフィックを受信可能"),
-    "ipv6InboundDesc": MessageLookupByLibrary.simpleMessage("IPv6インバウンドを許可"),
+    "ipv6InboundDesc": MessageLookupByLibrary.simpleMessage(
+      "IPv6 を有効にすると、VPN で IPv6 インバウンドを許可します",
+    ),
     "ipv6Timeout": MessageLookupByLibrary.simpleMessage("IPv6タイムアウト（ms）"),
     "itemsCount": m40,
     "ja": MessageLookupByLibrary.simpleMessage("日本語"),
@@ -1538,7 +1551,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "logsAndDiagnostics": MessageLookupByLibrary.simpleMessage("ログと診断"),
     "logsDesc": MessageLookupByLibrary.simpleMessage("ログキャプチャ記録"),
     "logsTest": MessageLookupByLibrary.simpleMessage("ログテスト"),
-    "loopback": MessageLookupByLibrary.simpleMessage("ループバック解除ツール"),
+    "loopback": MessageLookupByLibrary.simpleMessage("UWP ループバック解除"),
     "loopbackDesc": MessageLookupByLibrary.simpleMessage("UWPループバック解除用"),
     "loose": MessageLookupByLibrary.simpleMessage("ゆったり"),
     "mainlandNetworkWarning": MessageLookupByLibrary.simpleMessage(
@@ -1728,6 +1741,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "optional": MessageLookupByLibrary.simpleMessage("任意"),
     "options": MessageLookupByLibrary.simpleMessage("オプション"),
     "other": MessageLookupByLibrary.simpleMessage("その他"),
+    "outbound": MessageLookupByLibrary.simpleMessage("アウトバウンド"),
     "outboundExit": MessageLookupByLibrary.simpleMessage("出口"),
     "outboundMode": MessageLookupByLibrary.simpleMessage("アウトバウンドモード"),
     "outboundUnavailable": MessageLookupByLibrary.simpleMessage(
@@ -2566,7 +2580,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tunAuthorizationFailed": MessageLookupByLibrary.simpleMessage(
       "管理者権限が拒否されたため、TUN を有効にできませんでした。システムの権限要求を許可して、もう一度お試しください",
     ),
-    "tunDesc": MessageLookupByLibrary.simpleMessage("管理者モードでのみ有効"),
+    "tunDesc": MessageLookupByLibrary.simpleMessage("TUN は管理者モードでのみ有効です"),
     "tunHelperInstallFailed": MessageLookupByLibrary.simpleMessage(
       "TUN を有効にできませんでした：Helper のインストールまたは起動に失敗しました。アプリが正しくインストールされていることと、システムサービスの状態を確認して再試行してください",
     ),
@@ -2659,7 +2673,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "VPN設定の変更が検出されました",
     ),
     "vpnEnableDesc": MessageLookupByLibrary.simpleMessage(
-      "VpnService経由で全システムトラフィックをルーティング",
+      "VPN は VpnService でシステムの全トラフィックを自動的にルーティングします",
     ),
     "vpnTip": MessageLookupByLibrary.simpleMessage("変更はVPN再起動後に有効"),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV設定"),

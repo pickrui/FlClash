@@ -20,45 +20,41 @@ class AdvancedConfigView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
-    final List<Widget> items = [
+    final items = [
       ListItem.open(
         title: Text(appLocalizations.network),
-        subtitle: Text(appLocalizations.networkDesc),
-        leading: const GlyphIcon(AppGlyphs.connections),
+        leading: const GlyphIcon(AppGlyphs.key),
         widget: BaseScaffold(
           title: appLocalizations.network,
-          body: const AppBarClearance(child: NetworkListView()),
+          body: const NetworkListView(),
         ),
       ),
       ListItem.open(
         title: const Text('DNS'),
-        subtitle: Text(appLocalizations.dnsDesc),
         leading: const GlyphIcon(AppGlyphs.dns),
         widget: const DnsView(),
       ),
       ListItem.open(
         title: const Text('NTP'),
-        subtitle: Text(appLocalizations.ntpDesc),
         leading: const GlyphIcon(AppGlyphs.clock),
         widget: const NtpView(),
       ),
       ListItem.open(
         title: Text(appLocalizations.addedRules),
-        subtitle: Text(appLocalizations.controlGlobalAddedRules),
         leading: const GlyphIcon(AppGlyphs.rules),
         widget: const AddedRulesView(),
       ),
       ListItem.open(
         title: Text(appLocalizations.script),
-        subtitle: Text(appLocalizations.overrideScript),
-        leading: const GlyphIcon(AppGlyphs.bolt),
+        leading: const GlyphIcon(AppGlyphs.code),
         widget: const ScriptsView(),
       ),
     ];
     return BaseScaffold(
       title: appLocalizations.advancedConfig,
       body: ListView(
-        padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16)
+            .copyWith(top: context.contentTopPadding, bottom: 16),
         children: [generateSection(items: items)],
       ),
     );

@@ -66,8 +66,6 @@ class ConfigView extends StatelessWidget {
               const TestUrlItem(),
               const UnifiedDelayItem(),
               const TcpConcurrentItem(),
-              const InterfaceNameItem(),
-              if (isDesktop) const KeepAliveIntervalItem(),
               const FindProcessItem(),
               const CloseConnectionsItem(),
               const UsageItem(),

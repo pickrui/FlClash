@@ -420,7 +420,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Use 1–255 UTF-8 bytes, without control characters",
     ),
     "authenticationSystemProxyDesc": MessageLookupByLibrary.simpleMessage(
-      "Not applied while local proxy authentication is enabled",
+      "The system proxy is not applied while local proxy authentication is on",
     ),
     "authenticationUsernameInvalid": MessageLookupByLibrary.simpleMessage(
       "Use 1–255 UTF-8 bytes, without colons or control characters",
@@ -512,10 +512,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "buy": MessageLookupByLibrary.simpleMessage("Buy"),
     "bypassDomain": MessageLookupByLibrary.simpleMessage("Bypass domain"),
     "bypassDomainDesc": MessageLookupByLibrary.simpleMessage(
-      "Only takes effect when the system proxy is enabled",
+      "Bypass domains apply only while the system proxy is on",
     ),
     "bypassPrivateRoute": MessageLookupByLibrary.simpleMessage(
       "Bypass private addresses",
+    ),
+    "bypassPrivateRouteDesc": MessageLookupByLibrary.simpleMessage(
+      "With Bypass private addresses on, LAN, loopback and multicast addresses skip TUN",
     ),
     "cacheAlgorithm": MessageLookupByLibrary.simpleMessage("Cache algorithm"),
     "cacheCorrupt": MessageLookupByLibrary.simpleMessage(
@@ -1710,6 +1713,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Follow profile",
     ),
     "interfaceName": MessageLookupByLibrary.simpleMessage("Interface name"),
+    "interfaceNameDesc": MessageLookupByLibrary.simpleMessage(
+      "Interface name is the network interface outbound connections use",
+    ),
+    "interfaceNameMode": MessageLookupByLibrary.simpleMessage(
+      "Outbound interface",
+    ),
     "internet": MessageLookupByLibrary.simpleMessage("Internet"),
     "interval": MessageLookupByLibrary.simpleMessage("Interval"),
     "intranetIP": MessageLookupByLibrary.simpleMessage("Intranet IP"),
@@ -1767,14 +1776,14 @@ class MessageLookup extends MessageLookupByLibrary {
       "When turned on it will be able to receive IPv6 traffic",
     ),
     "ipv6InboundDesc": MessageLookupByLibrary.simpleMessage(
-      "Allow IPv6 inbound",
+      "With IPv6 on, the VPN allows IPv6 inbound",
     ),
     "ipv6Timeout": MessageLookupByLibrary.simpleMessage("IPv6 timeout (ms)"),
     "itemsCount": m40,
     "ja": MessageLookupByLibrary.simpleMessage("Japanese"),
     "justNow": MessageLookupByLibrary.simpleMessage("Just now"),
     "keepAliveIntervalDesc": MessageLookupByLibrary.simpleMessage(
-      "Tcp keep alive interval",
+      "TCP keep-alive interval",
     ),
     "key": MessageLookupByLibrary.simpleMessage("Key"),
     "language": MessageLookupByLibrary.simpleMessage("Language"),
@@ -1831,7 +1840,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "logsDesc": MessageLookupByLibrary.simpleMessage("Log capture records"),
     "logsTest": MessageLookupByLibrary.simpleMessage("Logs test"),
-    "loopback": MessageLookupByLibrary.simpleMessage("Loopback unlock tool"),
+    "loopback": MessageLookupByLibrary.simpleMessage("UWP loopback exemption"),
     "loopbackDesc": MessageLookupByLibrary.simpleMessage(
       "Used for UWP loopback unlocking",
     ),
@@ -2065,6 +2074,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "optional": MessageLookupByLibrary.simpleMessage("Optional"),
     "options": MessageLookupByLibrary.simpleMessage("Options"),
     "other": MessageLookupByLibrary.simpleMessage("Other"),
+    "outbound": MessageLookupByLibrary.simpleMessage("Outbound"),
     "outboundExit": MessageLookupByLibrary.simpleMessage("Exit"),
     "outboundMode": MessageLookupByLibrary.simpleMessage("Outbound mode"),
     "outboundUnavailable": MessageLookupByLibrary.simpleMessage(
@@ -3052,7 +3062,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "TUN could not be enabled because administrator authorization was denied. Allow the system permission prompt and try again.",
     ),
     "tunDesc": MessageLookupByLibrary.simpleMessage(
-      "only effective in administrator mode",
+      "TUN works only in administrator mode",
     ),
     "tunHelperInstallFailed": MessageLookupByLibrary.simpleMessage(
       "TUN could not be enabled: Helper installation or startup failed. Check that the app installation is complete and the system service is working, then try again.",
@@ -3164,7 +3174,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "VPN configuration change detected",
     ),
     "vpnEnableDesc": MessageLookupByLibrary.simpleMessage(
-      "Auto routes all system traffic through VpnService",
+      "VPN routes all system traffic through VpnService automatically",
     ),
     "vpnTip": MessageLookupByLibrary.simpleMessage(
       "Changes take effect after restarting the VPN",

@@ -423,7 +423,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "От 1 до 255 байт UTF-8, без управляющих символов",
     ),
     "authenticationSystemProxyDesc": MessageLookupByLibrary.simpleMessage(
-      "Не применяется при включённой аутентификации локального прокси",
+      "Пока включена аутентификация локального прокси, системный прокси не применяется",
     ),
     "authenticationUsernameInvalid": MessageLookupByLibrary.simpleMessage(
       "От 1 до 255 байт UTF-8, без двоеточий и управляющих символов",
@@ -517,10 +517,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "buy": MessageLookupByLibrary.simpleMessage("Купить"),
     "bypassDomain": MessageLookupByLibrary.simpleMessage("Обход домена"),
     "bypassDomainDesc": MessageLookupByLibrary.simpleMessage(
-      "Действует только при включенном системном прокси",
+      "Исключённые домены действуют только при включённом системном прокси",
     ),
     "bypassPrivateRoute": MessageLookupByLibrary.simpleMessage(
       "Обходить частные адреса",
+    ),
+    "bypassPrivateRouteDesc": MessageLookupByLibrary.simpleMessage(
+      "При обходе частных адресов адреса LAN, loopback и multicast идут в обход TUN",
     ),
     "cacheAlgorithm": MessageLookupByLibrary.simpleMessage("Алгоритм кэша"),
     "cacheCorrupt": MessageLookupByLibrary.simpleMessage(
@@ -1770,6 +1773,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Из профиля",
     ),
     "interfaceName": MessageLookupByLibrary.simpleMessage("Имя интерфейса"),
+    "interfaceNameDesc": MessageLookupByLibrary.simpleMessage(
+      "Имя интерфейса задаёт сетевой интерфейс для исходящих соединений",
+    ),
+    "interfaceNameMode": MessageLookupByLibrary.simpleMessage(
+      "Исходящий интерфейс",
+    ),
     "internet": MessageLookupByLibrary.simpleMessage("Интернет"),
     "interval": MessageLookupByLibrary.simpleMessage("Интервал"),
     "intranetIP": MessageLookupByLibrary.simpleMessage("Внутренний IP"),
@@ -1829,14 +1838,14 @@ class MessageLookup extends MessageLookupByLibrary {
       "При включении будет возможно получать IPv6 трафик",
     ),
     "ipv6InboundDesc": MessageLookupByLibrary.simpleMessage(
-      "Разрешить входящий IPv6",
+      "При включённом IPv6 VPN принимает входящий IPv6",
     ),
     "ipv6Timeout": MessageLookupByLibrary.simpleMessage("Тайм-аут IPv6 (мс)"),
     "itemsCount": m40,
     "ja": MessageLookupByLibrary.simpleMessage("Японский"),
     "justNow": MessageLookupByLibrary.simpleMessage("Только что"),
     "keepAliveIntervalDesc": MessageLookupByLibrary.simpleMessage(
-      "Интервал поддержания TCP-соединения",
+      "Интервал TCP keep-alive",
     ),
     "key": MessageLookupByLibrary.simpleMessage("Ключ"),
     "language": MessageLookupByLibrary.simpleMessage("Язык"),
@@ -1900,7 +1909,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "logsDesc": MessageLookupByLibrary.simpleMessage("Записи захвата логов"),
     "logsTest": MessageLookupByLibrary.simpleMessage("Тест журналов"),
     "loopback": MessageLookupByLibrary.simpleMessage(
-      "Инструмент разблокировки Loopback",
+      "Снятие ограничения loopback для UWP",
     ),
     "loopbackDesc": MessageLookupByLibrary.simpleMessage(
       "Используется для разблокировки Loopback UWP",
@@ -2149,6 +2158,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "optional": MessageLookupByLibrary.simpleMessage("Необязательно"),
     "options": MessageLookupByLibrary.simpleMessage("Опции"),
     "other": MessageLookupByLibrary.simpleMessage("Другое"),
+    "outbound": MessageLookupByLibrary.simpleMessage("Исходящие"),
     "outboundExit": MessageLookupByLibrary.simpleMessage("Выход"),
     "outboundMode": MessageLookupByLibrary.simpleMessage(
       "Режим исходящего трафика",
@@ -3210,7 +3220,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Не удалось включить TUN: запрос прав администратора отклонён. Разрешите системный запрос прав и повторите попытку.",
     ),
     "tunDesc": MessageLookupByLibrary.simpleMessage(
-      "действительно только в режиме администратора",
+      "TUN работает только в режиме администратора",
     ),
     "tunHelperInstallFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось включить TUN: ошибка установки или запуска Helper. Проверьте целостность установки приложения и состояние системной службы, затем повторите попытку.",
@@ -3334,7 +3344,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Обнаружено изменение конфигурации VPN",
     ),
     "vpnEnableDesc": MessageLookupByLibrary.simpleMessage(
-      "Автоматически направляет весь системный трафик через VpnService",
+      "VPN автоматически направляет весь системный трафик через VpnService",
     ),
     "vpnTip": MessageLookupByLibrary.simpleMessage(
       "Изменения вступят в силу после перезапуска VPN",

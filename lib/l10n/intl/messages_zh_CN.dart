@@ -404,8 +404,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "brightness": MessageLookupByLibrary.simpleMessage("亮度"),
     "buy": MessageLookupByLibrary.simpleMessage("购买"),
     "bypassDomain": MessageLookupByLibrary.simpleMessage("排除域名"),
-    "bypassDomainDesc": MessageLookupByLibrary.simpleMessage("仅在系统代理启用时生效"),
+    "bypassDomainDesc": MessageLookupByLibrary.simpleMessage("排除域名仅在系统代理启用时生效"),
     "bypassPrivateRoute": MessageLookupByLibrary.simpleMessage("绕过私有路由地址"),
+    "bypassPrivateRouteDesc": MessageLookupByLibrary.simpleMessage(
+      "开启绕过私有路由地址后，局域网、回环和组播地址不经过虚拟网卡",
+    ),
     "cacheAlgorithm": MessageLookupByLibrary.simpleMessage("缓存算法"),
     "cacheCorrupt": MessageLookupByLibrary.simpleMessage("缓存已损坏，是否清空？"),
     "cacheMaxSize": MessageLookupByLibrary.simpleMessage("缓存大小"),
@@ -1269,6 +1272,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "interfaceAutomatic": MessageLookupByLibrary.simpleMessage("清除绑定（自动选择网卡）"),
     "interfaceFollowProfile": MessageLookupByLibrary.simpleMessage("跟随配置"),
     "interfaceName": MessageLookupByLibrary.simpleMessage("网卡名称"),
+    "interfaceNameDesc": MessageLookupByLibrary.simpleMessage("网卡名称为出站连接使用的网卡"),
+    "interfaceNameMode": MessageLookupByLibrary.simpleMessage("出站网卡"),
     "internet": MessageLookupByLibrary.simpleMessage("互联网"),
     "interval": MessageLookupByLibrary.simpleMessage("间隔"),
     "intranetIP": MessageLookupByLibrary.simpleMessage("内网 IP"),
@@ -1313,7 +1318,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "ipVersion": MessageLookupByLibrary.simpleMessage("IP 版本"),
     "ipcidr": MessageLookupByLibrary.simpleMessage("IP/掩码"),
     "ipv6Desc": MessageLookupByLibrary.simpleMessage("开启后将可以接收IPv6流量"),
-    "ipv6InboundDesc": MessageLookupByLibrary.simpleMessage("允许IPv6入站"),
+    "ipv6InboundDesc": MessageLookupByLibrary.simpleMessage(
+      "开启 IPv6 后，VPN 允许 IPv6 入站",
+    ),
     "ipv6Timeout": MessageLookupByLibrary.simpleMessage("IPv6超时（毫秒）"),
     "itemsCount": m40,
     "ja": MessageLookupByLibrary.simpleMessage("日语"),
@@ -1360,7 +1367,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "logsAndDiagnostics": MessageLookupByLibrary.simpleMessage("日志与诊断"),
     "logsDesc": MessageLookupByLibrary.simpleMessage("日志捕获记录"),
     "logsTest": MessageLookupByLibrary.simpleMessage("日志测试"),
-    "loopback": MessageLookupByLibrary.simpleMessage("回环解锁工具"),
+    "loopback": MessageLookupByLibrary.simpleMessage("UWP 回环解锁"),
     "loopbackDesc": MessageLookupByLibrary.simpleMessage("用于UWP回环解锁"),
     "loose": MessageLookupByLibrary.simpleMessage("宽松"),
     "mainlandNetworkWarning": MessageLookupByLibrary.simpleMessage(
@@ -1520,6 +1527,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "optional": MessageLookupByLibrary.simpleMessage("可选"),
     "options": MessageLookupByLibrary.simpleMessage("选项"),
     "other": MessageLookupByLibrary.simpleMessage("其他"),
+    "outbound": MessageLookupByLibrary.simpleMessage("出站"),
     "outboundExit": MessageLookupByLibrary.simpleMessage("出口"),
     "outboundMode": MessageLookupByLibrary.simpleMessage("出站模式"),
     "outboundUnavailable": MessageLookupByLibrary.simpleMessage(
@@ -2272,7 +2280,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tunAuthorizationFailed": MessageLookupByLibrary.simpleMessage(
       "无法启用 TUN：管理员授权被拒绝，请允许系统权限请求后重试",
     ),
-    "tunDesc": MessageLookupByLibrary.simpleMessage("仅在管理员模式生效"),
+    "tunDesc": MessageLookupByLibrary.simpleMessage("虚拟网卡仅在管理员模式生效"),
     "tunHelperInstallFailed": MessageLookupByLibrary.simpleMessage(
       "无法启用 TUN：Helper 安装或启动失败，请检查应用安装是否完整及系统服务状态后重试",
     ),
@@ -2355,7 +2363,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "检测到VPN相关配置改动",
     ),
     "vpnEnableDesc": MessageLookupByLibrary.simpleMessage(
-      "通过VpnService自动路由系统所有流量",
+      "VPN 通过 VpnService 自动路由系统所有流量",
     ),
     "vpnTip": MessageLookupByLibrary.simpleMessage("重启VPN后改变生效"),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV配置"),
