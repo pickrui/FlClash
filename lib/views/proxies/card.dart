@@ -55,7 +55,7 @@ class ProxyCard extends StatelessWidget {
   Measure get measure => globalState.measure;
 
   Widget _buildProxyNameText(BuildContext context) {
-    final maxLines = type == ProxyCardType.min ? 1 : 2;
+    final maxLines = type == ProxyCardType.compact ? 1 : 2;
     return SizedBox(
       height: measure.bodyMediumHeight * maxLines,
       child: EmojiText(
@@ -82,7 +82,7 @@ class ProxyCard extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (type == ProxyCardType.expand) ...[
+        if (type == ProxyCardType.loose) ...[
           SizedBox(
             height: measure.bodySmallHeight,
             child: _ProxyDesc(proxy: proxy),
@@ -280,7 +280,7 @@ class _DelayTextState extends ConsumerState<_DelayText> {
         child: SizedBox(
           height: measure.labelSmallHeight,
           child: FadeThroughBox(
-            alignment: widget.type == ProxyCardType.expand
+            alignment: widget.type == ProxyCardType.loose
                 ? Alignment.centerLeft
                 : Alignment.centerRight,
             child: phase != null || delay == null

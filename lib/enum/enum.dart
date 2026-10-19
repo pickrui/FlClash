@@ -148,7 +148,7 @@ enum ProxiesType { tab, list }
 
 enum ProxiesLayout { loose, standard, tight }
 
-enum ProxyCardType { expand, shrink, min }
+enum ProxyCardType { loose, standard, compact }
 
 enum DnsMode {
   normal,
@@ -323,7 +323,7 @@ enum HotAction {
   exit,
 }
 
-enum ProxiesIconStyle { none, standard, icon }
+enum ProxiesIconStyle { filled, plain, hidden }
 
 enum AuthorizeCode {
   none,

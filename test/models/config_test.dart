@@ -85,23 +85,45 @@ void main() {
       const HotKeyAction(action: HotAction.mode, key: 1),
     ]);
   });
-  test(
-    'upstream filled icon style and unknown styles use the filled default',
-    () {
+  test('reads the icon styles saved under their former names', () {
+    for (final (saved, iconStyle) in [
+      ('standard', ProxiesIconStyle.filled),
+      ('icon', ProxiesIconStyle.plain),
+      ('none', ProxiesIconStyle.hidden),
+      ('nonsense', ProxiesIconStyle.filled),
+    ]) {
       expect(
-        ProxiesStyleProps.fromJson({'iconStyle': 'filled'}).iconStyle,
-        ProxiesIconStyle.standard,
+        ProxiesStyleProps.fromJson({'iconStyle': saved}).iconStyle,
+        iconStyle,
       );
+    }
+  });
+
+  test('reads the card sizes saved under their former names', () {
+    for (final (saved, cardType) in [
+      ('expand', ProxyCardType.loose),
+      ('shrink', ProxyCardType.standard),
+      ('min', ProxyCardType.compact),
+      ('nonsense', ProxyCardType.standard),
+    ]) {
       expect(
-        ProxiesStyleProps.fromJson({'iconStyle': 'future'}).iconStyle,
-        ProxiesIconStyle.standard,
+        ProxiesStyleProps.fromJson({'cardType': saved}).cardType,
+        cardType,
       );
-      expect(
-        ProxiesStyleProps.fromJson({'iconStyle': 'icon'}).iconStyle,
-        ProxiesIconStyle.icon,
-      );
-    },
-  );
+    }
+  });
+
+  test('round-trips every icon style and card size under its own name', () {
+    for (final iconStyle in ProxiesIconStyle.values) {
+      for (final cardType in ProxyCardType.values) {
+        final restored = roundTrip(
+          ProxiesStyleProps(iconStyle: iconStyle, cardType: cardType).toJson,
+          ProxiesStyleProps.fromJson,
+        );
+        expect((restored.iconStyle, restored.cardType), (iconStyle, cardType));
+      }
+    }
+  });
 
   test('retired service settings do not replace existing preferences', () {
     final props = AppSettingProps.fromJson({

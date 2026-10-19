@@ -257,11 +257,23 @@ Map<String, Object?> _withLegacyRouteMode(Map<String, Object?> json) {
   return {...json, 'bypassPrivateRoute': json['routeMode'] == 'bypassPrivate'};
 }
 
-ProxiesIconStyle proxiesIconStyleFromJson(Object? value) => switch (value) {
-  'none' => ProxiesIconStyle.none,
-  'icon' => ProxiesIconStyle.icon,
-  _ => ProxiesIconStyle.standard,
-};
+ProxiesIconStyle proxiesIconStyleSafeFromJson(Object? iconStyle) {
+  return switch (iconStyle) {
+    'filled' || 'standard' => ProxiesIconStyle.filled,
+    'plain' || 'icon' => ProxiesIconStyle.plain,
+    'hidden' || 'none' => ProxiesIconStyle.hidden,
+    _ => ProxiesIconStyle.filled,
+  };
+}
+
+ProxyCardType proxyCardTypeSafeFromJson(Object? cardType) {
+  return switch (cardType) {
+    'loose' || 'expand' => ProxyCardType.loose,
+    'standard' || 'shrink' => ProxyCardType.standard,
+    'compact' || 'min' => ProxyCardType.compact,
+    _ => ProxyCardType.standard,
+  };
+}
 
 @freezed
 abstract class ProxiesStyleProps with _$ProxiesStyleProps {
@@ -281,13 +293,15 @@ abstract class ProxiesStyleProps with _$ProxiesStyleProps {
   }
 
   const factory ProxiesStyleProps({
-    @Default(ProxiesType.tab) ProxiesType type,
+    @Default(ProxiesType.list) ProxiesType type,
     @Default(ProxiesSortType.none) ProxiesSortType sortType,
     @Default(ProxiesLayout.standard) ProxiesLayout layout,
-    @Default(ProxiesIconStyle.standard)
-    @JsonKey(fromJson: proxiesIconStyleFromJson)
+    @Default(ProxiesIconStyle.filled)
+    @JsonKey(fromJson: proxiesIconStyleSafeFromJson)
     ProxiesIconStyle iconStyle,
-    @Default(ProxyCardType.expand) ProxyCardType cardType,
+    @Default(ProxyCardType.standard)
+    @JsonKey(fromJson: proxyCardTypeSafeFromJson)
+    ProxyCardType cardType,
     @Default(false) bool hideTimeoutProxies,
     @Default(defaultDelayTestConcurrency)
     @JsonKey(fromJson: normalizeDelayTestConcurrency)

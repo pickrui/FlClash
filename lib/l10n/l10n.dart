@@ -1235,19 +1235,14 @@ class AppLocalizations {
     );
   }
 
-  /// `Standard`
-  String get expand {
-    return Intl.message('Standard', name: 'expand', desc: '', args: []);
+  /// `Compact`
+  String get compact {
+    return Intl.message('Compact', name: 'compact', desc: '', args: []);
   }
 
-  /// `Shrink`
-  String get shrink {
-    return Intl.message('Shrink', name: 'shrink', desc: '', args: []);
-  }
-
-  /// `Min`
-  String get min {
-    return Intl.message('Min', name: 'min', desc: '', args: []);
+  /// `Filter`
+  String get filter {
+    return Intl.message('Filter', name: 'filter', desc: '', args: []);
   }
 
   /// `Tab`

@@ -38,10 +38,10 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
         glyph: AppGlyphs.sliders,
         label: appLocalizations.settings,
         onPressed: () {
-          showSnapSheet(
-            context,
-            builder: (_, controller) {
-              return AdaptiveSheetScaffold(
+          showSheet<void>(
+            context: context,
+            builder: (_, _) {
+              return CommonScaffold(
                 body: const ProxiesSetting(),
                 title: appLocalizations.settings,
               );

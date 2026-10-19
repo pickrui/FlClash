@@ -281,7 +281,7 @@ _ProxiesStyleProps _$ProxiesStylePropsFromJson(Map<String, dynamic> json) =>
     _ProxiesStyleProps(
       type:
           $enumDecodeNullable(_$ProxiesTypeEnumMap, json['type']) ??
-          ProxiesType.tab,
+          ProxiesType.list,
       sortType:
           $enumDecodeNullable(_$ProxiesSortTypeEnumMap, json['sortType']) ??
           ProxiesSortType.none,
@@ -289,11 +289,11 @@ _ProxiesStyleProps _$ProxiesStylePropsFromJson(Map<String, dynamic> json) =>
           $enumDecodeNullable(_$ProxiesLayoutEnumMap, json['layout']) ??
           ProxiesLayout.standard,
       iconStyle: json['iconStyle'] == null
-          ? ProxiesIconStyle.standard
-          : proxiesIconStyleFromJson(json['iconStyle']),
-      cardType:
-          $enumDecodeNullable(_$ProxyCardTypeEnumMap, json['cardType']) ??
-          ProxyCardType.expand,
+          ? ProxiesIconStyle.filled
+          : proxiesIconStyleSafeFromJson(json['iconStyle']),
+      cardType: json['cardType'] == null
+          ? ProxyCardType.standard
+          : proxyCardTypeSafeFromJson(json['cardType']),
       hideTimeoutProxies: json['hideTimeoutProxies'] as bool? ?? false,
       concurrencyLimit: json['concurrencyLimit'] == null
           ? defaultDelayTestConcurrency
@@ -331,16 +331,16 @@ const _$ProxiesLayoutEnumMap = {
   ProxiesLayout.tight: 'tight',
 };
 
-const _$ProxyCardTypeEnumMap = {
-  ProxyCardType.expand: 'expand',
-  ProxyCardType.shrink: 'shrink',
-  ProxyCardType.min: 'min',
+const _$ProxiesIconStyleEnumMap = {
+  ProxiesIconStyle.filled: 'filled',
+  ProxiesIconStyle.plain: 'plain',
+  ProxiesIconStyle.hidden: 'hidden',
 };
 
-const _$ProxiesIconStyleEnumMap = {
-  ProxiesIconStyle.none: 'none',
-  ProxiesIconStyle.standard: 'standard',
-  ProxiesIconStyle.icon: 'icon',
+const _$ProxyCardTypeEnumMap = {
+  ProxyCardType.loose: 'loose',
+  ProxyCardType.standard: 'standard',
+  ProxyCardType.compact: 'compact',
 };
 
 _TextScale _$TextScaleFromJson(Map<String, dynamic> json) => _TextScale(

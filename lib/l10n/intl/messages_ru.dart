@@ -756,6 +756,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "columns": MessageLookupByLibrary.simpleMessage("Столбцы"),
     "commission": MessageLookupByLibrary.simpleMessage("Комиссия"),
     "commissionBalance": m6,
+    "compact": MessageLookupByLibrary.simpleMessage("Компактный"),
     "compatible": MessageLookupByLibrary.simpleMessage("Режим совместимости"),
     "configDataDetected": MessageLookupByLibrary.simpleMessage(
       "Данные обнаружены в конфигурации",
@@ -1428,7 +1429,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "exitFullScreen": MessageLookupByLibrary.simpleMessage(
       "Выйти из полноэкранного режима",
     ),
-    "expand": MessageLookupByLibrary.simpleMessage("Стандартный"),
     "expandList": MessageLookupByLibrary.simpleMessage("Развернуть"),
     "expectedStatus": MessageLookupByLibrary.simpleMessage("Ожидаемый статус"),
     "expireDate": m25,
@@ -1478,6 +1478,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "fileIsUpdate": MessageLookupByLibrary.simpleMessage(
       "Файл был изменен. Хотите сохранить изменения?",
     ),
+    "filter": MessageLookupByLibrary.simpleMessage("Фильтр"),
     "findProcessMode": MessageLookupByLibrary.simpleMessage(
       "Режим поиска процесса",
     ),
@@ -1908,7 +1909,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Тестирование сообщения",
     ),
     "messageTestTip": MessageLookupByLibrary.simpleMessage("Это сообщение."),
-    "min": MessageLookupByLibrary.simpleMessage("Мин"),
     "minimalConfiguration": MessageLookupByLibrary.simpleMessage(
       "Минимальная конфигурация",
     ),
@@ -2794,7 +2794,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Кнопка остановки в уведомлении",
     ),
     "showPassword": MessageLookupByLibrary.simpleMessage("Показать пароль"),
-    "shrink": MessageLookupByLibrary.simpleMessage("Сжать"),
     "sidebarBlur": MessageLookupByLibrary.simpleMessage(
       "Размытие боковой панели",
     ),

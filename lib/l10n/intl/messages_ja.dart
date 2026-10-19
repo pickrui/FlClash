@@ -633,6 +633,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "columns": MessageLookupByLibrary.simpleMessage("列"),
     "commission": MessageLookupByLibrary.simpleMessage("コミッション"),
     "commissionBalance": m6,
+    "compact": MessageLookupByLibrary.simpleMessage("コンパクト"),
     "compatible": MessageLookupByLibrary.simpleMessage("互換モード"),
     "configDataDetected": MessageLookupByLibrary.simpleMessage(
       "設定内にデータが検出されました",
@@ -1157,7 +1158,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "existsTip": m24,
     "exit": MessageLookupByLibrary.simpleMessage("終了"),
     "exitFullScreen": MessageLookupByLibrary.simpleMessage("全画面表示を終了"),
-    "expand": MessageLookupByLibrary.simpleMessage("標準"),
     "expandList": MessageLookupByLibrary.simpleMessage("展開"),
     "expectedStatus": MessageLookupByLibrary.simpleMessage("期待されるステータス"),
     "expireDate": m25,
@@ -1191,6 +1191,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "fileIsUpdate": MessageLookupByLibrary.simpleMessage(
       "ファイルが変更されました。保存しますか？",
     ),
+    "filter": MessageLookupByLibrary.simpleMessage("フィルター"),
     "findProcessMode": MessageLookupByLibrary.simpleMessage("プロセス検出"),
     "findProcessModeAutomaticDesc": MessageLookupByLibrary.simpleMessage(
       "プロセスルールの照合時にのみプロセスを検出します",
@@ -1502,7 +1503,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "logsTest": MessageLookupByLibrary.simpleMessage("ログテスト"),
     "loopback": MessageLookupByLibrary.simpleMessage("ループバック解除ツール"),
     "loopbackDesc": MessageLookupByLibrary.simpleMessage("UWPループバック解除用"),
-    "loose": MessageLookupByLibrary.simpleMessage("疎"),
+    "loose": MessageLookupByLibrary.simpleMessage("ゆったり"),
     "mainlandNetworkWarning": MessageLookupByLibrary.simpleMessage(
       "中国本土のネットワークには適さない可能性があります",
     ),
@@ -1534,7 +1535,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "memoryReleasedSize": m41,
     "messageTest": MessageLookupByLibrary.simpleMessage("メッセージテスト"),
     "messageTestTip": MessageLookupByLibrary.simpleMessage("これはメッセージです"),
-    "min": MessageLookupByLibrary.simpleMessage("最小化"),
     "minimalConfiguration": MessageLookupByLibrary.simpleMessage("最小構成"),
     "minimalConfigurationDesc": MessageLookupByLibrary.simpleMessage(
       "簡略化したルールセットで小さなプロファイルを生成します",
@@ -2232,7 +2232,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "通知に停止ボタンを表示",
     ),
     "showPassword": MessageLookupByLibrary.simpleMessage("パスワードを表示"),
-    "shrink": MessageLookupByLibrary.simpleMessage("縮小"),
     "sidebarBlur": MessageLookupByLibrary.simpleMessage("サイドバーのぼかし"),
     "sidebarBlurDesc": MessageLookupByLibrary.simpleMessage(
       "サイドバーに半透明のシステム背景を表示",
@@ -2481,7 +2480,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "themeColor": MessageLookupByLibrary.simpleMessage("テーマカラー"),
     "themeDesc": MessageLookupByLibrary.simpleMessage("ダークモードの設定、色の調整"),
     "themeMode": MessageLookupByLibrary.simpleMessage("テーマモード"),
-    "tight": MessageLookupByLibrary.simpleMessage("密"),
+    "tight": MessageLookupByLibrary.simpleMessage("コンパクト"),
     "time": MessageLookupByLibrary.simpleMessage("時間"),
     "timeout": MessageLookupByLibrary.simpleMessage("タイムアウト"),
     "tintedStyle": MessageLookupByLibrary.simpleMessage("ティント"),

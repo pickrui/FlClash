@@ -742,6 +742,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "columns": MessageLookupByLibrary.simpleMessage("Columns"),
     "commission": MessageLookupByLibrary.simpleMessage("Commission"),
     "commissionBalance": m6,
+    "compact": MessageLookupByLibrary.simpleMessage("Compact"),
     "compatible": MessageLookupByLibrary.simpleMessage("Compatibility mode"),
     "configDataDetected": MessageLookupByLibrary.simpleMessage(
       "Data detected in configuration",
@@ -1378,7 +1379,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "existsTip": m24,
     "exit": MessageLookupByLibrary.simpleMessage("Exit"),
     "exitFullScreen": MessageLookupByLibrary.simpleMessage("Exit full screen"),
-    "expand": MessageLookupByLibrary.simpleMessage("Standard"),
     "expandList": MessageLookupByLibrary.simpleMessage("Expand"),
     "expectedStatus": MessageLookupByLibrary.simpleMessage("Expected status"),
     "expireDate": m25,
@@ -1426,6 +1426,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "fileIsUpdate": MessageLookupByLibrary.simpleMessage(
       "The file has been modified. Do you want to save the changes?",
     ),
+    "filter": MessageLookupByLibrary.simpleMessage("Filter"),
     "findProcessMode": MessageLookupByLibrary.simpleMessage("Find process"),
     "findProcessModeAutomaticDesc": MessageLookupByLibrary.simpleMessage(
       "Process rules look up the process only when they are checked",
@@ -1829,7 +1830,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageTestTip": MessageLookupByLibrary.simpleMessage(
       "This is a message.",
     ),
-    "min": MessageLookupByLibrary.simpleMessage("Min"),
     "minimalConfiguration": MessageLookupByLibrary.simpleMessage(
       "Minimal Configuration",
     ),
@@ -2655,7 +2655,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Stop button in notification",
     ),
     "showPassword": MessageLookupByLibrary.simpleMessage("Show password"),
-    "shrink": MessageLookupByLibrary.simpleMessage("Shrink"),
     "sidebarBlur": MessageLookupByLibrary.simpleMessage("Blur sidebar"),
     "sidebarBlurDesc": MessageLookupByLibrary.simpleMessage(
       "Show a translucent system backdrop behind the sidebar",

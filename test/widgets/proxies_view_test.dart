@@ -66,7 +66,7 @@ void main() {
               (_) => const ProxiesListState(
                 groups: [group],
                 currentUnfoldSet: {'Paged'},
-                proxyCardType: ProxyCardType.min,
+                proxyCardType: ProxyCardType.compact,
                 columns: 1,
               ),
             ),
@@ -101,7 +101,7 @@ void main() {
                       group: group,
                       storageKey: 'paged-test',
                       columns: 1,
-                      cardType: ProxyCardType.min,
+                      cardType: ProxyCardType.compact,
                     )
                   : const ProxiesListView(),
             ),
@@ -183,7 +183,7 @@ void main() {
     ];
     container
         .read(proxiesStyleSettingProvider.notifier)
-        .update((style) => style.copyWith(cardType: ProxyCardType.min));
+        .update((style) => style.copyWith(cardType: ProxyCardType.compact));
     await container.pump();
     await Future<void>.delayed(Duration.zero);
     expect(container.read(nodePagesProvider(key)), same(pages));
@@ -352,7 +352,7 @@ void main() {
                 groupName: 'Group',
                 proxy: Proxy(name: 'Node', type: 'Shadowsocks'),
                 groupType: GroupType.Selector,
-                type: ProxyCardType.min,
+                type: ProxyCardType.compact,
                 testUrl: url,
               ),
             ),
@@ -427,7 +427,7 @@ void main() {
                   testUrl: 'https://example.com',
                   proxy: Proxy(name: 'Node', type: 'Shadowsocks'),
                   groupType: GroupType.Selector,
-                  type: ProxyCardType.min,
+                  type: ProxyCardType.compact,
                 ),
               ),
             ),
@@ -467,7 +467,7 @@ void main() {
           (_) => const ProxiesTabState(
             groups: [first],
             currentGroupName: 'First',
-            proxyCardType: ProxyCardType.min,
+            proxyCardType: ProxyCardType.compact,
             columns: 1,
           ),
         ),
@@ -523,7 +523,7 @@ void main() {
       var state = const ProxiesTabState(
         groups: [second, third],
         currentGroupName: 'First',
-        proxyCardType: ProxyCardType.min,
+        proxyCardType: ProxyCardType.compact,
         columns: 1,
       );
       final selectedGroups = <String>[];
@@ -595,7 +595,7 @@ void main() {
     var state = ProxiesTabState(
       groups: groups,
       currentGroupName: current ?? groups.first.name,
-      proxyCardType: ProxyCardType.min,
+      proxyCardType: ProxyCardType.compact,
       columns: 1,
     );
     final container = ProviderContainer(
@@ -747,7 +747,7 @@ void main() {
       ProxiesTabState(
         groups: groups,
         currentGroupName: 'A',
-        proxyCardType: ProxyCardType.min,
+        proxyCardType: ProxyCardType.compact,
         columns: 1,
       ),
     );
@@ -770,7 +770,7 @@ void main() {
       var state = ProxiesTabState(
         groups: [group(null)],
         currentGroupName: 'Group',
-        proxyCardType: ProxyCardType.min,
+        proxyCardType: ProxyCardType.compact,
         columns: 1,
       );
       final container = ProviderContainer(
@@ -932,7 +932,7 @@ void main() {
             (_) => ProxiesListState(
               groups: visible,
               currentUnfoldSet: {},
-              proxyCardType: ProxyCardType.min,
+              proxyCardType: ProxyCardType.compact,
               columns: 1,
             ),
           ),
