@@ -10,6 +10,10 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
+import 'package:fl_clash/ui/navigator.dart';
+import 'package:fl_clash/ui/surface.dart';
+import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -251,57 +255,29 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
         accountState.isRefreshing ||
         accountState.isSyncing ||
         _recoveringSubscription;
-
-    final serviceError = _serviceError;
+    final notifier = ref.read(cloudAccountProvider.notifier);
     final serviceWarning = _serviceWarning;
-    final certificateRetryError = _certificateRetryError;
-    final certificateError = serviceError ?? _tlsException;
-    final certificateHint =
-        certificateError != null &&
-            CloudApiException.isCertificateVerifyFailed(certificateError)
-        ? CloudApiException.certificateRecoveryHint(certificateError)
-        : null;
-    final serviceFailed = serviceError != null || _syncRecoveryError != null;
 
     return CommonScaffold(
       title: AppLocalizations.current.loggedOutViewTitle, // oixCloud title text
-      actions: [
-        _buildHealthButton(),
+      actions: [_buildHealthButton()],
+      iconActions: [
         if (accountState.isLoggedIn) ...[
-          IconButton(
-            icon: accountState.isRefreshing
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.refresh),
+          IconButtonData(
+            glyph: AppGlyphs.refresh,
             tooltip: AppLocalizations.current.refresh,
+            isLoading: accountState.isRefreshing,
             onPressed: accountBusy
                 ? null
-                : () => ref
-                      .read(cloudAccountProvider.notifier)
-                      .refreshProfile(force: true),
+                : () => notifier.refreshProfile(force: true),
           ),
-          IconButton(
-            icon: accountState.isSyncing
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.sync_alt),
+          IconButtonData(
+            glyph: AppGlyphs.sync,
             tooltip: AppLocalizations.current.sync,
+            isLoading: accountState.isSyncing,
             onPressed: accountBusy
                 ? null
-                : () => ref
-                      .read(cloudAccountProvider.notifier)
-                      .refreshManagedSubscription(),
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: AppLocalizations.current.logoutTitle,
-            onPressed: accountBusy ? null : _handleLogout,
+                : () => notifier.refreshManagedSubscription(),
           ),
         ],
       ],
@@ -309,58 +285,7 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
         child: Column(
           children: [
             if (serviceWarning != null)
-              MaterialBanner(
-                leading: Icon(
-                  serviceFailed ? Icons.error_outline : Icons.warning_amber,
-                  color: serviceFailed
-                      ? context.colorScheme.error
-                      : Colors.orange,
-                ),
-                content: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(serviceWarning),
-                    if (certificateHint != null) ...[
-                      const SizedBox(height: 8),
-                      Text(certificateHint),
-                    ],
-                    if (certificateRetryError != null) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        accountState.isLoggedIn
-                            ? AppLocalizations
-                                  .current
-                                  .certificateSyncRetryDescription
-                            : AppLocalizations.current.certificateCheckOnlyHint,
-                      ),
-                    ],
-                  ],
-                ),
-                actions: [
-                  if (certificateRetryError != null)
-                    TextButton(
-                      onPressed: _isCheckingService || accountBusy
-                          ? null
-                          : () => _checkHealth(
-                              certificateError: certificateRetryError,
-                            ),
-                      child: Text(
-                        accountState.isLoggedIn
-                            ? AppLocalizations
-                                  .current
-                                  .retryCloudSyncWithCertificateException
-                            : AppLocalizations
-                                  .current
-                                  .retryWithoutCertificateVerification,
-                      ),
-                    ),
-                  TextButton(
-                    onPressed: _isCheckingService ? null : _checkHealth,
-                    child: Text(AppLocalizations.current.checkApi),
-                  ),
-                ],
-              ),
+              _buildServiceBanner(serviceWarning, accountState, accountBusy),
             Expanded(
               child: accountState.isLoggedIn
                   ? _buildLoggedIn(accountState)
@@ -372,22 +297,93 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
     );
   }
 
+  Widget _buildServiceBanner(
+    String warning,
+    CloudAccountState accountState,
+    bool accountBusy,
+  ) {
+    final colorScheme = context.colorScheme;
+    final serviceError = _serviceError;
+    final certificateRetryError = _certificateRetryError;
+    final certificateError = serviceError ?? _tlsException;
+    final certificateHint =
+        certificateError != null &&
+            CloudApiException.isCertificateVerifyFailed(certificateError)
+        ? CloudApiException.certificateRecoveryHint(certificateError)
+        : null;
+    final failed = serviceError != null || _syncRecoveryError != null;
+    final level = context.raisedSurfaceLevel;
+    final secondary = AppTextStyle.footnote
+        .of(context)
+        .copyWith(color: colorScheme.onSurfaceVariant);
+    return MaterialBanner(
+      backgroundColor: level.colorOf(colorScheme),
+      dividerColor: Colors.transparent,
+      leading: GlyphIcon(
+        failed ? AppGlyphs.error : AppGlyphs.warning,
+        color: failed ? colorScheme.error : colorScheme.warning,
+      ),
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        spacing: 6,
+        children: [
+          Text(
+            warning,
+            style: AppTextStyle.subheadline
+                .of(context, emphasized: true)
+                .copyWith(color: colorScheme.onSurface),
+          ),
+          if (certificateHint != null) Text(certificateHint, style: secondary),
+          if (certificateRetryError != null)
+            Text(
+              accountState.isLoggedIn
+                  ? AppLocalizations.current.certificateSyncRetryDescription
+                  : AppLocalizations.current.certificateCheckOnlyHint,
+              style: secondary,
+            ),
+        ],
+      ),
+      forceActionsBelow: true,
+      actions: [
+        if (certificateRetryError != null)
+          SurfaceScope(
+            level: level,
+            child: TonalButton(
+              size: TonalButtonSize.compact,
+              label: accountState.isLoggedIn
+                  ? AppLocalizations
+                        .current
+                        .retryCloudSyncWithCertificateException
+                  : AppLocalizations
+                        .current
+                        .retryWithoutCertificateVerification,
+              onPressed: _isCheckingService || accountBusy
+                  ? null
+                  : () => _checkHealth(certificateError: certificateRetryError),
+            ),
+          ),
+        SurfaceScope(
+          level: level,
+          child: TonalButton(
+            size: TonalButtonSize.compact,
+            label: AppLocalizations.current.checkApi,
+            onPressed: _isCheckingService ? null : _checkHealth,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildHealthButton() {
-    IconData icon;
-    Color color;
-    if (!_checkedStatus) {
-      icon = Icons.help_outline;
-      color = Colors.grey;
-    } else if (_serviceError != null || _syncRecoveryError != null) {
-      icon = Icons.error;
-      color = Colors.red;
-    } else if (_serviceCheckUsedTlsException) {
-      icon = Icons.warning_amber;
-      color = Colors.orange;
-    } else {
-      icon = Icons.check_circle;
-      color = Colors.green;
-    }
+    final colorScheme = context.colorScheme;
+    final (glyph, color) = !_checkedStatus
+        ? (AppGlyphs.info, colorScheme.onSurfaceVariant)
+        : _serviceError != null || _syncRecoveryError != null
+        ? (AppGlyphs.error, colorScheme.error)
+        : _serviceCheckUsedTlsException
+        ? (AppGlyphs.warning, colorScheme.warning)
+        : (AppGlyphs.checkCircle, colorScheme.success);
 
     final String tooltip;
     if (_isCheckingService || !_checkedStatus) {
@@ -398,12 +394,8 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
 
     return IconButton(
       icon: _isCheckingService && _checkPhase != _ServiceCheckPhase.confirming
-          ? const SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          : Icon(icon, color: color),
+          ? CommonCircleLoading(size: TonalButtonSize.bar.icon)
+          : GlyphIcon(glyph, color: color),
       onPressed: _isCheckingService ? null : _checkHealth,
       tooltip: tooltip,
     );
@@ -419,52 +411,29 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
     final notifier = ref.read(cloudAccountProvider.notifier);
     final profile = state.profile;
     if (profile == null) {
-      return Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: loading
-              ? const CircularProgressIndicator()
-              : ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 360),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.cloud_off,
-                        size: 40,
-                        color: context.colorScheme.error,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        state.error ?? AppLocalizations.current.noInfo,
-                        textAlign: TextAlign.center,
-                        style: context.textTheme.bodyMedium?.copyWith(
-                          color: context.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Wrap(
-                        alignment: WrapAlignment.center,
-                        spacing: 12,
-                        runSpacing: 8,
-                        children: [
-                          FilledButton.tonalIcon(
-                            icon: const Icon(Icons.refresh),
-                            label: Text(AppLocalizations.current.refresh),
-                            onPressed: busy
-                                ? null
-                                : () => notifier.refreshProfile(force: true),
-                          ),
-                          OutlinedButton.icon(
-                            icon: const Icon(Icons.logout),
-                            label: Text(AppLocalizations.current.logoutTitle),
-                            onPressed: busy ? null : _handleLogout,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
+      if (loading) return const Center(child: CommonCircleLoading.page());
+      return NullStatus(
+        illustration: NullStatusIllustration.error,
+        label: state.error ?? AppLocalizations.current.noInfo,
+        action: Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            TonalButton(
+              size: TonalButtonSize.bar,
+              glyph: AppGlyphs.refresh,
+              label: AppLocalizations.current.refresh,
+              onPressed: busy
+                  ? null
+                  : () => notifier.refreshProfile(force: true),
+            ),
+            TonalButton(
+              size: TonalButtonSize.bar,
+              label: AppLocalizations.current.logoutTitle,
+              onPressed: busy ? null : _handleLogout,
+            ),
+          ],
         ),
       );
     }
@@ -472,56 +441,58 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
       onRefresh: () async {
         if (!busy) await notifier.refreshProfile(force: true);
       },
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
-        child: CloudContentWidth(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (state.error case final error?) ...[
-                CommonCard(
-                  isError: true,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          color: context.colorScheme.error,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(child: Text(error)),
-                        IconButton(
-                          onPressed: busy
-                              ? null
-                              : () => notifier.refreshManagedSubscription(),
-                          icon: const Icon(Icons.refresh),
-                          tooltip: AppLocalizations.current.refresh,
-                        ),
-                      ],
-                    ),
+      child: Builder(
+        builder: (context) => SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(
+            16,
+            context.contentTopPadding,
+            16,
+            20 + BottomInsetScope.of(context),
+          ),
+          child: CloudContentWidth(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (state.error case final error?)
+                  CloudErrorBanner(
+                    message: error,
+                    onRetry: busy
+                        ? null
+                        : () => notifier.refreshManagedSubscription(),
                   ),
+                CloudProfileCard(profile: profile),
+                if ((profile.planRank ?? 0) >= _nodeFilterMinPlanRank)
+                  CloudNodeFilterEntry(
+                    profile: profile,
+                    enabled: !busy,
+                    recovery: identical(_nodeFilterRecovery?.profile, profile)
+                        ? _nodeFilterRecovery?.result
+                        : null,
+                  ),
+                const SizedBox(height: cloudSectionGap),
+                _buildStoreEntry(),
+                if (state.latestNotification case final notice?
+                    when notice.cleanMessage.isNotEmpty) ...[
+                  const SizedBox(height: cloudSectionGap),
+                  CloudAnnouncementCard(notice: notice),
+                ],
+                const SizedBox(height: cloudSectionGap),
+                generateSection(
+                  items: [
+                    ListItem(
+                      title: Text(
+                        AppLocalizations.current.logoutTitle,
+                        style: context.listTitleStyle.copyWith(
+                          color: context.colorScheme.destructive,
+                        ),
+                      ),
+                      onTap: busy ? null : _handleLogout,
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 16),
               ],
-              CloudProfileCard(profile: profile),
-              if ((profile.planRank ?? 0) >= _nodeFilterMinPlanRank)
-                CloudNodeFilterEntry(
-                  profile: profile,
-                  enabled: !busy,
-                  recovery: identical(_nodeFilterRecovery?.profile, profile)
-                      ? _nodeFilterRecovery?.result
-                      : null,
-                ),
-              const SizedBox(height: 16),
-              _buildStoreEntry(),
-              if (state.latestNotification case final notice?
-                  when notice.cleanMessage.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                CloudAnnouncementCard(notice: notice),
-              ],
-            ],
+            ),
           ),
         ),
       ),
@@ -530,118 +501,56 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
 
   Widget _buildStoreEntry() {
     final storePage = cloudStorePageBuilder;
-    return CommonCard(
-      onPressed: storePage == null
-          ? null
-          : () =>
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: storePage)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            const CloudIconTile(icon: Icons.storefront),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    AppLocalizations.current.store,
-                    style: context.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: context.colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    AppLocalizations.current.storeSubtitle,
-                    style: context.textTheme.bodySmall?.copyWith(
-                      color: context.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.chevron_right, color: context.colorScheme.outline),
-          ],
+    return generateSection(
+      items: [
+        ListItem(
+          leading: const GlyphIcon(AppGlyphs.bag),
+          title: Text(AppLocalizations.current.store),
+          subtitle: Text(AppLocalizations.current.storeSubtitle),
+          trailing: const GlyphIcon(AppGlyphs.chevronForward),
+          onTap: storePage == null
+              ? null
+              : () => BaseNavigator.push<void>(
+                  context,
+                  Builder(builder: storePage),
+                ),
         ),
-      ),
+      ],
     );
   }
 
   Widget _buildLoggedOut() {
     final commonAction = context.commonAction;
-
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.cloud_outlined,
-                size: 80,
-                color: context.colorScheme.primary.withValues(alpha: 0.6),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                AppLocalizations.current.loggedOutViewTitle,
-                style: context.textTheme.headlineMedium,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                AppLocalizations.current.loggedOutViewDesc,
-                textAlign: TextAlign.center,
-                style: context.textTheme.bodyLarge?.copyWith(
-                  color: context.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 32),
-              Wrap(
-                alignment: WrapAlignment.center,
-                spacing: 12,
-                runSpacing: 12,
-                children: [
-                  FilledButton.icon(
-                    onPressed: () =>
-                        commonAction.openCloudLogin(navigateToCloud: false),
-                    icon: const Icon(Icons.login),
-                    label: Text(AppLocalizations.current.loginTitle),
-                  ),
-                  OutlinedButton.icon(
-                    onPressed: () => showCloudRegisterPage(context),
-                    icon: const Icon(Icons.person_add_alt_1_outlined),
-                    label: Text(AppLocalizations.current.register),
-                  ),
-                ],
-              ),
-            ],
+    return NullStatus(
+      illustration: NullStatusIllustration.account,
+      label: AppLocalizations.current.loggedOutViewTitle,
+      description: AppLocalizations.current.loggedOutViewDesc,
+      action: Wrap(
+        alignment: WrapAlignment.center,
+        spacing: 12,
+        runSpacing: 12,
+        children: [
+          CloudPrimaryButton(
+            label: AppLocalizations.current.loginTitle,
+            onPressed: () =>
+                commonAction.openCloudLogin(navigateToCloud: false),
           ),
-        ),
+          TonalButton(
+            size: TonalButtonSize.bar,
+            label: AppLocalizations.current.register,
+            onPressed: () => showCloudRegisterPage(context),
+          ),
+        ],
       ),
     );
   }
 
   Future<void> _handleLogout() async {
-    final choice = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.current.logoutTitle),
-        content: Text(AppLocalizations.current.logoutContent),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.current.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(AppLocalizations.current.logoutTitle),
-          ),
-        ],
-      ),
+    final choice = await globalState.showMessage(
+      title: AppLocalizations.current.logoutTitle,
+      message: TextSpan(text: AppLocalizations.current.logoutContent),
+      confirmText: AppLocalizations.current.logoutTitle,
+      destructive: true,
     );
     if (!mounted) return;
     if (choice != true) return;
@@ -740,8 +649,10 @@ class _CloudNodeFilterEntryState extends ConsumerState<CloudNodeFilterEntry> {
   Future<void> _open() async {
     final builder = cloudNodeFilterPageBuilder;
     if (builder == null) return;
-    final result = await Navigator.of(context)
-        .push<NodeFilterCatalog>(MaterialPageRoute(builder: builder));
+    final result = await BaseNavigator.push<NodeFilterCatalog>(
+      context,
+      Builder(builder: builder),
+    );
     if (!mounted) return;
     if (result == null) {
       await _load();
@@ -778,46 +689,28 @@ class _CloudNodeFilterEntryState extends ConsumerState<CloudNodeFilterEntry> {
       _ => AppLocalizations.current.loading,
     };
     return Padding(
-      padding: const EdgeInsets.only(top: 16),
-      child: CommonCard(
-        onPressed: !widget.enabled || cloudNodeFilterPageBuilder == null
-            ? null
-            : _open,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              const CloudIconTile(icon: Icons.filter_alt),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      AppLocalizations.current.nodeFilter,
-                      style: context.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: context.colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      summary,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.textTheme.bodySmall?.copyWith(
-                        color: showError
-                            ? context.colorScheme.error
-                            : context.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(Icons.chevron_right, color: context.colorScheme.outline),
-            ],
+      padding: const EdgeInsets.only(top: cloudSectionGap),
+      child: generateSection(
+        items: [
+          ListItem(
+            leading: const GlyphIcon(AppGlyphs.filter),
+            title: Text(AppLocalizations.current.nodeFilter),
+            subtitle: Text(
+              summary,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: showError
+                  ? context.listSubtitleStyle.copyWith(
+                      color: context.colorScheme.error,
+                    )
+                  : null,
+            ),
+            trailing: const GlyphIcon(AppGlyphs.chevronForward),
+            onTap: !widget.enabled || cloudNodeFilterPageBuilder == null
+                ? null
+                : _open,
           ),
-        ),
+        ],
       ),
     );
   }

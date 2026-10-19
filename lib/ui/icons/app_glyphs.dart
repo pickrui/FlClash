@@ -1177,6 +1177,16 @@ abstract final class AppGlyphs {
     ),
   ]);
 
+  static const bag = Glyph([
+    GlyphPolyline([
+      GlyphVertex(5.4, 8.2, 1.2),
+      GlyphVertex(18.6, 8.2, 1.2),
+      GlyphVertex(19.6, 20.8, 2.4),
+      GlyphVertex(4.4, 20.8, 2.4),
+    ], closed: true),
+    GlyphPath('M9 11V7A3 3 0 0 1 15 7V11', role: GlyphRole.line),
+  ]);
+
   static const sparkle = Glyph([
     GlyphPolyline([
       GlyphVertex(10, 6.4, 0.9),

@@ -16,12 +16,15 @@ import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/views/cloud/cloud_account_page.dart';
+import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/glyph_finders.dart';
 import '../helpers/preferences.dart';
 import '../helpers/test_app.dart';
 
@@ -52,7 +55,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('Cloud sync request timed out'), findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.byType(CommonCircleLoading), findsNothing);
       await tester.tap(find.text('Refresh'));
       await tester.pumpAndSettle();
       expect(account.retries, 1);
@@ -69,7 +72,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(checks, 2);
     expect(find.byType(MaterialBanner), findsNothing);
-    expect(find.byIcon(Icons.check_circle), findsOneWidget);
+    expect(
+      find.widgetWithGlyph(IconButton, AppGlyphs.checkCircle),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
   });
 
@@ -86,12 +92,15 @@ void main() {
       find.text('Service Check Failed: Connection timed out'),
       findsOneWidget,
     );
-    expect(find.byIcon(Icons.error), findsOneWidget);
-    await tester.tap(find.widgetWithText(TextButton, 'Check API'));
+    expect(find.widgetWithGlyph(IconButton, AppGlyphs.error), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, 'Check API'));
     await tester.pumpAndSettle();
     expect(checks, 3);
     expect(find.byType(MaterialBanner), findsNothing);
-    expect(find.byIcon(Icons.check_circle), findsOneWidget);
+    expect(
+      find.widgetWithGlyph(IconButton, AppGlyphs.checkCircle),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
   });
 
@@ -151,17 +160,23 @@ void main() {
     await tester.pumpAndSettle();
     expect(attempts, [false, true]);
     expect(FlClashTemporaryTls.allowBadCertificate, isFalse);
-    expect(find.byIcon(Icons.check_circle), findsNothing);
-    expect(find.byIcon(Icons.warning_amber), findsNWidgets(2));
+    expect(
+      find.widgetWithGlyph(IconButton, AppGlyphs.checkCircle),
+      findsNothing,
+    );
+    expect(find.byGlyph(AppGlyphs.warning), findsNWidgets(2));
     expect(
       find.text(AppLocalizations.current.cloudSyncedWithCertificateException),
       findsOneWidget,
     );
-    await tester.tap(find.widgetWithText(TextButton, 'Check API'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Check API'));
     await tester.pumpAndSettle();
     expect(attempts, [false, true, false]);
     expect(find.byType(MaterialBanner), findsNothing);
-    expect(find.byIcon(Icons.check_circle), findsOneWidget);
+    expect(
+      find.widgetWithGlyph(IconButton, AppGlyphs.checkCircle),
+      findsOneWidget,
+    );
   });
 
   testWidgets(
@@ -189,7 +204,10 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(find.byIcon(Icons.check_circle), findsNothing);
+      expect(
+        find.widgetWithGlyph(IconButton, AppGlyphs.checkCircle),
+        findsNothing,
+      );
       expect(FlClashTemporaryTls.allowBadCertificate, isFalse);
     },
   );
@@ -216,7 +234,7 @@ void main() {
     );
     expect(
       tester
-          .widget<IconButton>(find.widgetWithIcon(IconButton, Icons.sync_alt))
+          .widget<IconButton>(find.widgetWithGlyph(IconButton, AppGlyphs.sync))
           .onPressed,
       isNull,
     );
@@ -270,8 +288,14 @@ void main() {
           ),
           findsNothing,
         );
-        expect(find.byIcon(Icons.check_circle), findsNothing);
-        expect(find.byIcon(Icons.error), findsOneWidget);
+        expect(
+          find.widgetWithGlyph(IconButton, AppGlyphs.checkCircle),
+          findsNothing,
+        );
+        expect(
+          find.widgetWithGlyph(IconButton, AppGlyphs.error),
+          findsOneWidget,
+        );
         expect(FlClashTemporaryTls.allowBadCertificate, isFalse);
         account.refreshError = null;
         account.syncError = null;
@@ -472,7 +496,10 @@ void main() {
       await tester.pumpAndSettle();
       expect(attempts, [false, true, false]);
       expect(find.byType(MaterialBanner), findsNothing);
-      expect(find.byIcon(Icons.check_circle), findsOneWidget);
+      expect(
+        find.widgetWithGlyph(IconButton, AppGlyphs.checkCircle),
+        findsOneWidget,
+      );
     },
   );
 
@@ -522,7 +549,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(checks, 3);
     expect(find.byType(MaterialBanner), findsNothing);
-    expect(find.byIcon(Icons.check_circle), findsOneWidget);
+    expect(
+      find.widgetWithGlyph(IconButton, AppGlyphs.checkCircle),
+      findsOneWidget,
+    );
   });
 
   testWidgets(
@@ -543,7 +573,10 @@ void main() {
       await tester.pumpAndSettle();
       expect(checks, 3);
       expect(find.byType(MaterialBanner), findsNothing);
-      expect(find.byIcon(Icons.check_circle), findsOneWidget);
+      expect(
+        find.widgetWithGlyph(IconButton, AppGlyphs.checkCircle),
+        findsOneWidget,
+      );
     },
   );
 

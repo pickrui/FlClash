@@ -131,6 +131,7 @@ final _glyphs = {
   'wifi': AppGlyphs.wifi,
   'wifiOff': AppGlyphs.wifiOff,
   'networkCheck': AppGlyphs.networkCheck,
+  'bag': AppGlyphs.bag,
   'gavel': AppGlyphs.gavel,
   'appsList': AppGlyphs.appsList,
   'layoutList': AppGlyphs.layoutList,

@@ -131,6 +131,49 @@ class _TonalButtonGroupState extends State<TonalButtonGroup> {
   }
 }
 
+/// A labelled button on the fill of a [TonalButtonGroup], for an action that
+/// is not the one a screen is for.
+class TonalButton extends StatelessWidget {
+  const TonalButton({
+    super.key,
+    this.size = TonalButtonSize.section,
+    this.glyph,
+    required this.label,
+    required this.onPressed,
+  });
+
+  final TonalButtonSize size;
+  final Glyph? glyph;
+  final String label;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final glyph = this.glyph;
+    final label = Text(this.label);
+    return ElasticPress(
+      enabled: onPressed != null,
+      child: DecoratedBox(
+        decoration: ShapeDecoration(
+          color: context.raisedSurfaceLevel.colorOf(context.colorScheme),
+          shape: AppShape.full,
+        ),
+        child: TonalButtonTheme(
+          grouped: true,
+          size: size,
+          child: glyph == null
+              ? FilledButton(onPressed: onPressed, child: label)
+              : FilledButton.icon(
+                  onPressed: onPressed,
+                  icon: GlyphIcon(glyph, fill: 1),
+                  label: label,
+                ),
+        ),
+      ),
+    );
+  }
+}
+
 /// Fills every button below and, as iOS does, leaves a press to the swell of
 /// [ElasticPress]; inside a [TonalButtonGroup] the group is filled. With
 /// [glass] the fills are panes of [LiquidGlass], a filled button's tinted.

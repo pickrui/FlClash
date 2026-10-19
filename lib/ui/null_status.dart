@@ -34,6 +34,7 @@ enum NullStatusIllustration {
   wifi,
   apps,
   history,
+  account,
   icons,
   fonts,
   permission,
@@ -438,6 +439,7 @@ class _EmptyIllustrationState extends State<EmptyIllustration>
       MaterialShapes.cookie12Sided,
       AppGlyphs.history,
     ),
+    NullStatusIllustration.account => (MaterialShapes.arch, AppGlyphs.account),
     NullStatusIllustration.icons => (
       MaterialShapes.verySunny,
       AppGlyphs.iconTile,
