@@ -40,6 +40,7 @@ object State {
     @Volatile
     var runTime: Long = 0
     private val startPreparation = StartPreparation()
+    private val serviceRunTime = ServiceRunTimeTracker()
 
     var sharedState: SharedState = SharedState()
 
@@ -92,7 +93,7 @@ object State {
         }
     }
 
-    suspend fun syncRunState(): Long = syncServiceRunTime(
+    suspend fun syncRunState(): Long = serviceRunTime.sync(
         lock = runLock,
         query = {
             Service.bind()
@@ -104,7 +105,7 @@ object State {
         },
     )
 
-    fun handleServiceLost() {
+    fun handleServiceLost() = serviceRunTime.invalidate {
         runTime = 0L
         runStateFlow.value = RunState.STOP
     }

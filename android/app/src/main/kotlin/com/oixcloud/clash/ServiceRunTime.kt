@@ -5,13 +5,32 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 package com.oixcloud.clash
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-suspend fun syncServiceRunTime(
-    lock: Mutex,
-    query: suspend () -> Long,
-    publish: (Long) -> Unit,
-): Long = lock.withLock {
-    query().also(publish)
+internal class ServiceRunTimeTracker {
+    private val publicationLock = Any()
+    private var generation = Any()
+
+    fun invalidate(publishStopped: () -> Unit) = synchronized(publicationLock) {
+        generation = Any()
+        publishStopped()
+    }
+
+    suspend fun sync(
+        lock: Mutex,
+        query: suspend () -> Long,
+        publish: (Long) -> Unit,
+    ): Long = lock.withLock {
+        val request = synchronized(publicationLock) { generation }
+        query().also { runtime ->
+            synchronized(publicationLock) {
+                if (request !== generation) {
+                    throw CancellationException("Service disconnected during runtime query")
+                }
+                publish(runtime)
+            }
+        }
+    }
 }

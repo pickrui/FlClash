@@ -18,11 +18,12 @@ import org.junit.Test
 class ServiceRunTimeTest {
     @Test
     fun delayedStopNotificationReadsTheReplacementSession() = runBlocking {
+        val tracker = ServiceRunTimeTracker()
         val lock = Mutex(locked = true)
         var runtime = 0L
         var published = -1L
         val sync = async(start = CoroutineStart.UNDISPATCHED) {
-            syncServiceRunTime(lock, { runtime }, { published = it })
+            tracker.sync(lock, { runtime }, { published = it })
         }
         runtime = 456L
         lock.unlock()
@@ -33,12 +34,13 @@ class ServiceRunTimeTest {
 
     @Test
     fun statePublicationCannotOvertakeTheFollowingNativeStart() = runBlocking {
+        val tracker = ServiceRunTimeTracker()
         val lock = Mutex()
         val querying = CompletableDeferred<Unit>()
         val finish = CompletableDeferred<Unit>()
         var published = 0L
         val sync = async(start = CoroutineStart.UNDISPATCHED) {
-            syncServiceRunTime(lock, {
+            tracker.sync(lock, {
                 querying.complete(Unit)
                 finish.await()
                 0L
@@ -57,15 +59,35 @@ class ServiceRunTimeTest {
 
     @Test
     fun unavailableQueryDoesNotPublishAFalseStopOrBlockTheNextQuery() = runBlocking {
+        val tracker = ServiceRunTimeTracker()
         val lock = Mutex()
         var published = 123L
         val failure = IllegalStateException("unavailable")
         val result = runCatching {
-            syncServiceRunTime(lock, { throw failure }, { published = it })
+            tracker.sync(lock, { throw failure }, { published = it })
         }
         assertSame(failure, result.exceptionOrNull())
         assertEquals(123L, published)
-        assertEquals(456L, syncServiceRunTime(lock, { 456L }, { published = it }))
+        assertEquals(456L, tracker.sync(lock, { 456L }, { published = it }))
+        assertEquals(456L, published)
+    }
+
+    @Test
+    fun disconnectedServiceRejectsALateQueryAndAllowsTheNextSession() = runBlocking {
+        val tracker = ServiceRunTimeTracker()
+        val lock = Mutex()
+        val reply = CompletableDeferred<Long>()
+        var published = 123L
+        val oldQuery = async(start = CoroutineStart.UNDISPATCHED) {
+            tracker.sync(lock, { reply.await() }, { published = it })
+        }
+        tracker.invalidate { published = 0L }
+        reply.complete(123L)
+        val result = runCatching { oldQuery.await() }
+
+        assertEquals(0L, published)
+        assertTrue(result.exceptionOrNull() is kotlinx.coroutines.CancellationException)
+        assertEquals(456L, tracker.sync(lock, { 456L }, { published = it }))
         assertEquals(456L, published)
     }
 }
