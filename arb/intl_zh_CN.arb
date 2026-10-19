@@ -1531,5 +1531,16 @@
   "confirmDeleteProxyGroup": "确定要删除当前代理组吗？",
   "invalidProxyProvider": "{providerName} 是无效的代理提供者",
   "customIssuesSummary": "{count} 项存在问题，应用配置可能失败",
-  "sectionsInEffect": "{count} 项生效"
+  "sectionsInEffect": "{count} 项生效",
+  "emptyFallback": "空组兜底",
+  "testInterval": "测试间隔",
+  "testWhenUsed": "使用时测试",
+  "defaultSelected": "默认选中",
+  "hashByInUser": "按入站用户哈希",
+  "nodes": "节点",
+  "addNodes": "添加节点",
+  "autoInclude": "自动包含",
+  "filters": "筛选",
+  "inputProxyGroupName": "输入代理组名称",
+  "definitionNotMap": "配置必须是包含 name 和 type 的 YAML 映射"
 }

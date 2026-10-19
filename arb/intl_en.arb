@@ -1531,5 +1531,16 @@
   "confirmDeleteProxyGroup": "Are you sure you want to delete this proxy group?",
   "invalidProxyProvider": "{providerName} is an invalid proxy provider",
   "customIssuesSummary": "{count} items have problems, and applying this profile may fail",
-  "sectionsInEffect": "{count} in effect"
+  "sectionsInEffect": "{count} in effect",
+  "emptyFallback": "Empty fallback",
+  "testInterval": "Test interval",
+  "testWhenUsed": "Test when used",
+  "defaultSelected": "Default selection",
+  "hashByInUser": "Hash by inbound user",
+  "nodes": "Nodes",
+  "addNodes": "Add nodes",
+  "autoInclude": "Auto-include",
+  "filters": "Filters",
+  "inputProxyGroupName": "Enter the proxy group name",
+  "definitionNotMap": "The configuration must be a YAML mapping with a name and a type"
 }

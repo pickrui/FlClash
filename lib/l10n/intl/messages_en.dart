@@ -365,6 +365,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "activatePlanTitle": MessageLookupByLibrary.simpleMessage("Activate plan"),
     "add": MessageLookupByLibrary.simpleMessage("Add"),
+    "addNodes": MessageLookupByLibrary.simpleMessage("Add nodes"),
     "addOverrideEntry": MessageLookupByLibrary.simpleMessage(
       "Add override entry",
     ),
@@ -454,6 +455,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "autoCloseConnectionsDesc": MessageLookupByLibrary.simpleMessage(
       "Auto close connections after change node",
     ),
+    "autoInclude": MessageLookupByLibrary.simpleMessage("Auto-include"),
     "autoIpv6": MessageLookupByLibrary.simpleMessage("Auto IPv6"),
     "autoIpv6Desc": MessageLookupByLibrary.simpleMessage(
       "Auto IPv6 turns IPv6 on or off by whether the local network supports it",
@@ -988,7 +990,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "defaultNameserverDesc": MessageLookupByLibrary.simpleMessage(
       "The default nameserver resolves the domains of DNS servers",
     ),
+    "defaultSelected": MessageLookupByLibrary.simpleMessage(
+      "Default selection",
+    ),
     "defaultText": MessageLookupByLibrary.simpleMessage("Default"),
+    "definitionNotMap": MessageLookupByLibrary.simpleMessage(
+      "The configuration must be a YAML mapping with a name and a type",
+    ),
     "delay": MessageLookupByLibrary.simpleMessage("Delay"),
     "delayConcurrency": MessageLookupByLibrary.simpleMessage(
       "Concurrent batch latency tests",
@@ -1391,6 +1399,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "emptyCustomProfile": MessageLookupByLibrary.simpleMessage(
       "Add a proxy group or a rule to this custom profile first",
     ),
+    "emptyFallback": MessageLookupByLibrary.simpleMessage("Empty fallback"),
     "emptyTip": m25,
     "en": MessageLookupByLibrary.simpleMessage("English"),
     "enableAutoRenew": MessageLookupByLibrary.simpleMessage(
@@ -1497,6 +1506,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "The file has been modified. Do you want to save the changes?",
     ),
     "filter": MessageLookupByLibrary.simpleMessage("Filter"),
+    "filters": MessageLookupByLibrary.simpleMessage("Filters"),
     "findProcessMode": MessageLookupByLibrary.simpleMessage("Find process"),
     "findProcessModeAutomaticDesc": MessageLookupByLibrary.simpleMessage(
       "Process rules look up the process only when they are checked",
@@ -1618,6 +1628,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "hasCacheChange": MessageLookupByLibrary.simpleMessage(
       "Do you want to cache the changes?",
     ),
+    "hashByInUser": MessageLookupByLibrary.simpleMessage(
+      "Hash by inbound user",
+    ),
     "haveAccountAlready": MessageLookupByLibrary.simpleMessage(
       "Already have an account?",
     ),
@@ -1711,6 +1724,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "The application encountered a critical error during startup and cannot continue.",
     ),
     "initiatorShort": MessageLookupByLibrary.simpleMessage("From"),
+    "inputProxyGroupName": MessageLookupByLibrary.simpleMessage(
+      "Enter the proxy group name",
+    ),
     "installedAppsLoadFailed": MessageLookupByLibrary.simpleMessage(
       "Could not load installed apps. Please try again.",
     ),
@@ -2065,6 +2081,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Enter one complete proxy definition with a name and type",
     ),
     "nodeQuickFields": MessageLookupByLibrary.simpleMessage("Quick edit"),
+    "nodes": MessageLookupByLibrary.simpleMessage("Nodes"),
     "nonTextProviderFile": MessageLookupByLibrary.simpleMessage(
       "This external resource is not a text file",
     ),
@@ -3060,7 +3077,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "tcpFastOpenDesc": MessageLookupByLibrary.simpleMessage(
       "Enable this option to accelerate TCP connection establishment",
     ),
+    "testInterval": MessageLookupByLibrary.simpleMessage("Test interval"),
     "testUrl": MessageLookupByLibrary.simpleMessage("Test URL"),
+    "testWhenUsed": MessageLookupByLibrary.simpleMessage("Test when used"),
     "textScale": MessageLookupByLibrary.simpleMessage("Text Scaling"),
     "textScalePreview": MessageLookupByLibrary.simpleMessage(
       "Text in the app will look like this",

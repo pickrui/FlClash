@@ -1531,5 +1531,16 @@
   "confirmDeleteProxyGroup": "このプロキシグループを削除してもよろしいですか？",
   "invalidProxyProvider": "{providerName} は無効なプロキシプロバイダーです",
   "customIssuesSummary": "{count} 件に問題があり、プロファイルの適用に失敗する可能性があります",
-  "sectionsInEffect": "{count} 件が有効"
+  "sectionsInEffect": "{count} 件が有効",
+  "emptyFallback": "空グループのフォールバック",
+  "testInterval": "テスト間隔",
+  "testWhenUsed": "使用時にテスト",
+  "defaultSelected": "デフォルトの選択",
+  "hashByInUser": "インバウンドユーザーでハッシュ",
+  "nodes": "ノード",
+  "addNodes": "ノードを追加",
+  "autoInclude": "自動で含める",
+  "filters": "フィルター",
+  "inputProxyGroupName": "プロキシグループ名を入力してください",
+  "definitionNotMap": "設定は name と type を含む YAML マッピングである必要があります"
 }

@@ -303,6 +303,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "activatePlanTitle": MessageLookupByLibrary.simpleMessage("激活套餐"),
     "add": MessageLookupByLibrary.simpleMessage("添加"),
+    "addNodes": MessageLookupByLibrary.simpleMessage("添加节点"),
     "addOverrideEntry": MessageLookupByLibrary.simpleMessage("添加覆写项"),
     "addProfile": MessageLookupByLibrary.simpleMessage("添加配置"),
     "addProxyChainNode": MessageLookupByLibrary.simpleMessage("新增"),
@@ -360,6 +361,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "autoCloseConnectionsDesc": MessageLookupByLibrary.simpleMessage(
       "切换节点后自动关闭连接",
     ),
+    "autoInclude": MessageLookupByLibrary.simpleMessage("自动包含"),
     "autoIpv6": MessageLookupByLibrary.simpleMessage("自动 IPv6"),
     "autoIpv6Desc": MessageLookupByLibrary.simpleMessage(
       "自动 IPv6 会根据本地网络是否支持 IPv6 自动开关",
@@ -750,7 +752,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "defaultNameserverDesc": MessageLookupByLibrary.simpleMessage(
       "默认域名服务器用于解析 DNS 服务器的域名",
     ),
+    "defaultSelected": MessageLookupByLibrary.simpleMessage("默认选中"),
     "defaultText": MessageLookupByLibrary.simpleMessage("默认"),
+    "definitionNotMap": MessageLookupByLibrary.simpleMessage(
+      "配置必须是包含 name 和 type 的 YAML 映射",
+    ),
     "delay": MessageLookupByLibrary.simpleMessage("延迟"),
     "delayConcurrency": MessageLookupByLibrary.simpleMessage("批量测速并发数"),
     "delayConcurrencyAndroidDesc": MessageLookupByLibrary.simpleMessage(
@@ -1043,6 +1049,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "emptyCustomProfile": MessageLookupByLibrary.simpleMessage(
       "请先为该自定义配置添加策略组或规则",
     ),
+    "emptyFallback": MessageLookupByLibrary.simpleMessage("空组兜底"),
     "emptyTip": m25,
     "en": MessageLookupByLibrary.simpleMessage("英语"),
     "enableAutoRenew": MessageLookupByLibrary.simpleMessage("开启自动续费"),
@@ -1117,6 +1124,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "fileDesc": MessageLookupByLibrary.simpleMessage("直接上传配置文件"),
     "fileIsUpdate": MessageLookupByLibrary.simpleMessage("文件有修改，是否保存修改"),
     "filter": MessageLookupByLibrary.simpleMessage("筛选"),
+    "filters": MessageLookupByLibrary.simpleMessage("筛选"),
     "findProcessMode": MessageLookupByLibrary.simpleMessage("查找进程"),
     "findProcessModeAutomaticDesc": MessageLookupByLibrary.simpleMessage(
       "当前规则含进程规则，仅在检查这些规则时查找进程",
@@ -1208,6 +1216,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "定期测速，自动选择延迟较低的节点",
     ),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage("是否缓存修改"),
+    "hashByInUser": MessageLookupByLibrary.simpleMessage("按入站用户哈希"),
     "haveAccountAlready": MessageLookupByLibrary.simpleMessage("已有账号？"),
     "healthCheck": MessageLookupByLibrary.simpleMessage("健康检查"),
     "helperCorruptTip": MessageLookupByLibrary.simpleMessage(
@@ -1277,6 +1286,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "initFailed": MessageLookupByLibrary.simpleMessage("启动失败"),
     "initFailedTip": MessageLookupByLibrary.simpleMessage("应用启动时遇到严重错误，无法继续运行"),
     "initiatorShort": MessageLookupByLibrary.simpleMessage("发起"),
+    "inputProxyGroupName": MessageLookupByLibrary.simpleMessage("输入代理组名称"),
     "installedAppsLoadFailed": MessageLookupByLibrary.simpleMessage(
       "无法读取应用列表，请重试",
     ),
@@ -1533,6 +1543,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "请输入包含 name 和 type 的单个完整节点定义",
     ),
     "nodeQuickFields": MessageLookupByLibrary.simpleMessage("快速编辑"),
+    "nodes": MessageLookupByLibrary.simpleMessage("节点"),
     "nonTextProviderFile": MessageLookupByLibrary.simpleMessage("该外部资源不是文本文件"),
     "none": MessageLookupByLibrary.simpleMessage("无"),
     "notRunning": MessageLookupByLibrary.simpleMessage("未运行"),
@@ -2292,7 +2303,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "tcpFastOpenDesc": MessageLookupByLibrary.simpleMessage(
       "开启此选项以加速 TCP 连接建立",
     ),
+    "testInterval": MessageLookupByLibrary.simpleMessage("测试间隔"),
     "testUrl": MessageLookupByLibrary.simpleMessage("测速链接"),
+    "testWhenUsed": MessageLookupByLibrary.simpleMessage("使用时测试"),
     "textScale": MessageLookupByLibrary.simpleMessage("文本缩放"),
     "textScalePreview": MessageLookupByLibrary.simpleMessage("应用内的文字将以这个大小显示"),
     "theme": MessageLookupByLibrary.simpleMessage("主题"),

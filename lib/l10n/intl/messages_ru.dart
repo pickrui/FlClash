@@ -367,6 +367,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Активировать тариф",
     ),
     "add": MessageLookupByLibrary.simpleMessage("Добавить"),
+    "addNodes": MessageLookupByLibrary.simpleMessage("Добавить узлы"),
     "addOverrideEntry": MessageLookupByLibrary.simpleMessage(
       "Добавить параметр",
     ),
@@ -457,6 +458,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "autoCloseConnectionsDesc": MessageLookupByLibrary.simpleMessage(
       "Автоматически закрывать соединения после смены узла",
+    ),
+    "autoInclude": MessageLookupByLibrary.simpleMessage(
+      "Автоматическое включение",
     ),
     "autoIpv6": MessageLookupByLibrary.simpleMessage("Авто IPv6"),
     "autoIpv6Desc": MessageLookupByLibrary.simpleMessage(
@@ -1008,7 +1012,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "defaultNameserverDesc": MessageLookupByLibrary.simpleMessage(
       "Сервер имен по умолчанию разрешает домены DNS-серверов",
     ),
+    "defaultSelected": MessageLookupByLibrary.simpleMessage(
+      "Выбор по умолчанию",
+    ),
     "defaultText": MessageLookupByLibrary.simpleMessage("По умолчанию"),
+    "definitionNotMap": MessageLookupByLibrary.simpleMessage(
+      "Конфигурация должна быть YAML-словарём с полями name и type",
+    ),
     "delay": MessageLookupByLibrary.simpleMessage("Задержка"),
     "delayConcurrency": MessageLookupByLibrary.simpleMessage(
       "Параллельные проверки в группе",
@@ -1433,6 +1443,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "emptyCustomProfile": MessageLookupByLibrary.simpleMessage(
       "Сначала добавьте в этот профиль группу прокси или правило",
     ),
+    "emptyFallback": MessageLookupByLibrary.simpleMessage(
+      "Резерв для пустой группы",
+    ),
     "emptyTip": m25,
     "en": MessageLookupByLibrary.simpleMessage("Английский"),
     "enableAutoRenew": MessageLookupByLibrary.simpleMessage(
@@ -1545,6 +1558,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Файл был изменен. Хотите сохранить изменения?",
     ),
     "filter": MessageLookupByLibrary.simpleMessage("Фильтр"),
+    "filters": MessageLookupByLibrary.simpleMessage("Фильтры"),
     "findProcessMode": MessageLookupByLibrary.simpleMessage("Поиск процесса"),
     "findProcessModeAutomaticDesc": MessageLookupByLibrary.simpleMessage(
       "Процесс определяется только при проверке правил процессов",
@@ -1668,6 +1682,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "hasCacheChange": MessageLookupByLibrary.simpleMessage(
       "Хотите сохранить изменения в кэше?",
     ),
+    "hashByInUser": MessageLookupByLibrary.simpleMessage(
+      "Хешировать по пользователю входящего подключения",
+    ),
     "haveAccountAlready": MessageLookupByLibrary.simpleMessage(
       "Уже есть аккаунт?",
     ),
@@ -1765,6 +1782,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "При запуске приложения произошла критическая ошибка, и работа не может быть продолжена.",
     ),
     "initiatorShort": MessageLookupByLibrary.simpleMessage("Источник"),
+    "inputProxyGroupName": MessageLookupByLibrary.simpleMessage(
+      "Введите название группы прокси",
+    ),
     "installedAppsLoadFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось загрузить список приложений. Повторите попытку.",
     ),
@@ -2140,6 +2160,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "nodeQuickFields": MessageLookupByLibrary.simpleMessage(
       "Быстрое редактирование",
     ),
+    "nodes": MessageLookupByLibrary.simpleMessage("Узлы"),
     "nonTextProviderFile": MessageLookupByLibrary.simpleMessage(
       "Этот внешний ресурс не является текстовым файлом",
     ),
@@ -3211,7 +3232,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "tcpFastOpenDesc": MessageLookupByLibrary.simpleMessage(
       "Включите эту опцию для ускорения установки TCP-соединения",
     ),
+    "testInterval": MessageLookupByLibrary.simpleMessage(
+      "Интервал тестирования",
+    ),
     "testUrl": MessageLookupByLibrary.simpleMessage("URL для теста"),
+    "testWhenUsed": MessageLookupByLibrary.simpleMessage(
+      "Тестировать при использовании",
+    ),
     "textScale": MessageLookupByLibrary.simpleMessage("Масштабирование текста"),
     "textScalePreview": MessageLookupByLibrary.simpleMessage(
       "Так будет выглядеть текст в приложении",

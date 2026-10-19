@@ -314,6 +314,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "activatePlanTitle": MessageLookupByLibrary.simpleMessage("プランをアクティブ化"),
     "add": MessageLookupByLibrary.simpleMessage("追加"),
+    "addNodes": MessageLookupByLibrary.simpleMessage("ノードを追加"),
     "addOverrideEntry": MessageLookupByLibrary.simpleMessage("上書き項目を追加"),
     "addProfile": MessageLookupByLibrary.simpleMessage("プロファイルを追加"),
     "addProxyChainNode": MessageLookupByLibrary.simpleMessage("追加"),
@@ -374,6 +375,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "autoCloseConnectionsDesc": MessageLookupByLibrary.simpleMessage(
       "ノード変更後に接続を自動閉じる",
     ),
+    "autoInclude": MessageLookupByLibrary.simpleMessage("自動で含める"),
     "autoIpv6": MessageLookupByLibrary.simpleMessage("自動 IPv6"),
     "autoIpv6Desc": MessageLookupByLibrary.simpleMessage(
       "自動 IPv6 は、ローカルネットワークの IPv6 対応に応じて自動で切り替えます",
@@ -848,7 +850,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "defaultNameserverDesc": MessageLookupByLibrary.simpleMessage(
       "デフォルトネームサーバーは DNS サーバーのドメインを解決します",
     ),
+    "defaultSelected": MessageLookupByLibrary.simpleMessage("デフォルトの選択"),
     "defaultText": MessageLookupByLibrary.simpleMessage("デフォルト"),
+    "definitionNotMap": MessageLookupByLibrary.simpleMessage(
+      "設定は name と type を含む YAML マッピングである必要があります",
+    ),
     "delay": MessageLookupByLibrary.simpleMessage("遅延"),
     "delayConcurrency": MessageLookupByLibrary.simpleMessage("一括測定の同時実行数"),
     "delayConcurrencyAndroidDesc": MessageLookupByLibrary.simpleMessage(
@@ -1173,6 +1179,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "emptyCustomProfile": MessageLookupByLibrary.simpleMessage(
       "このカスタムプロファイルに先にプロキシグループかルールを追加してください",
     ),
+    "emptyFallback": MessageLookupByLibrary.simpleMessage("空グループのフォールバック"),
     "emptyTip": m25,
     "en": MessageLookupByLibrary.simpleMessage("英語"),
     "enableAutoRenew": MessageLookupByLibrary.simpleMessage("自動更新を有効にする"),
@@ -1255,6 +1262,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "ファイルが変更されました。保存しますか？",
     ),
     "filter": MessageLookupByLibrary.simpleMessage("フィルター"),
+    "filters": MessageLookupByLibrary.simpleMessage("フィルター"),
     "findProcessMode": MessageLookupByLibrary.simpleMessage("プロセス検出"),
     "findProcessModeAutomaticDesc": MessageLookupByLibrary.simpleMessage(
       "プロセスルールの照合時にのみプロセスを検出します",
@@ -1360,6 +1368,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "定期的に測定し、遅延の低いノードを選択します",
     ),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage("変更をキャッシュしますか？"),
+    "hashByInUser": MessageLookupByLibrary.simpleMessage("インバウンドユーザーでハッシュ"),
     "haveAccountAlready": MessageLookupByLibrary.simpleMessage(
       "すでにアカウントをお持ちですか？",
     ),
@@ -1445,6 +1454,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "起動中に重大なエラーが発生したため、アプリを続行できません",
     ),
     "initiatorShort": MessageLookupByLibrary.simpleMessage("発信元"),
+    "inputProxyGroupName": MessageLookupByLibrary.simpleMessage(
+      "プロキシグループ名を入力してください",
+    ),
     "installedAppsLoadFailed": MessageLookupByLibrary.simpleMessage(
       "アプリ一覧を読み込めませんでした。再試行してください",
     ),
@@ -1739,6 +1751,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "name と type を含む完全なノード定義を1つ入力してください",
     ),
     "nodeQuickFields": MessageLookupByLibrary.simpleMessage("簡易編集"),
+    "nodes": MessageLookupByLibrary.simpleMessage("ノード"),
     "nonTextProviderFile": MessageLookupByLibrary.simpleMessage(
       "この外部リソースはテキストファイルではありません",
     ),
@@ -2588,7 +2601,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "tcpFastOpenDesc": MessageLookupByLibrary.simpleMessage(
       "TCPの接続確立を高速化するには、このオプションをオンにしてください",
     ),
+    "testInterval": MessageLookupByLibrary.simpleMessage("テスト間隔"),
     "testUrl": MessageLookupByLibrary.simpleMessage("テストURL"),
+    "testWhenUsed": MessageLookupByLibrary.simpleMessage("使用時にテスト"),
     "textScale": MessageLookupByLibrary.simpleMessage("テキストスケーリング"),
     "textScalePreview": MessageLookupByLibrary.simpleMessage(
       "アプリ内の文字はこの大きさで表示されます",

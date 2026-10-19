@@ -12952,6 +12952,101 @@ class AppLocalizations {
       args: [count],
     );
   }
+
+  /// `Empty fallback`
+  String get emptyFallback {
+    return Intl.message(
+      'Empty fallback',
+      name: 'emptyFallback',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Test interval`
+  String get testInterval {
+    return Intl.message(
+      'Test interval',
+      name: 'testInterval',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Test when used`
+  String get testWhenUsed {
+    return Intl.message(
+      'Test when used',
+      name: 'testWhenUsed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Default selection`
+  String get defaultSelected {
+    return Intl.message(
+      'Default selection',
+      name: 'defaultSelected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hash by inbound user`
+  String get hashByInUser {
+    return Intl.message(
+      'Hash by inbound user',
+      name: 'hashByInUser',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Nodes`
+  String get nodes {
+    return Intl.message('Nodes', name: 'nodes', desc: '', args: []);
+  }
+
+  /// `Add nodes`
+  String get addNodes {
+    return Intl.message('Add nodes', name: 'addNodes', desc: '', args: []);
+  }
+
+  /// `Auto-include`
+  String get autoInclude {
+    return Intl.message(
+      'Auto-include',
+      name: 'autoInclude',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Filters`
+  String get filters {
+    return Intl.message('Filters', name: 'filters', desc: '', args: []);
+  }
+
+  /// `Enter the proxy group name`
+  String get inputProxyGroupName {
+    return Intl.message(
+      'Enter the proxy group name',
+      name: 'inputProxyGroupName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The configuration must be a YAML mapping with a name and a type`
+  String get definitionNotMap {
+    return Intl.message(
+      'The configuration must be a YAML mapping with a name and a type',
+      name: 'definitionNotMap',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

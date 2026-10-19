@@ -14,7 +14,10 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/features/overwrite/profile_provider_options.dart';
+import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/features/overwrite/proxy_group_editor.dart';
+import 'package:fl_clash/ui/list.dart';
+import 'package:fl_clash/ui/scaffold.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -36,12 +39,12 @@ void main() {
     );
 
     await tester.dragUntilVisible(
-      find.text('Include all proxy providers'),
-      find.byType(SingleChildScrollView),
+      find.text('Add setting'),
+      find.byType(CustomScrollView),
       const Offset(0, -300),
     );
 
-    expect(find.text('Include all proxy providers'), findsOneWidget);
+    expect(find.text('Add setting'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -70,9 +73,9 @@ void main() {
             builder: (context) {
               return TextButton(
                 onPressed: () async {
-                  result = await showDialog<ProxyGroup>(
-                    context: context,
-                    builder: (_) => const ProxyGroupDialog(
+                  result = await _push<ProxyGroup>(
+                    context,
+                    const ProxyGroupDialog(
                       group: original,
                       existingGroups: [original],
                     ),
@@ -88,10 +91,8 @@ void main() {
 
     await tester.tap(find.text('Open group'));
     await tester.pumpAndSettle();
-    final nameField = find.widgetWithText(TextFormField, 'Name');
-    await tester.enterText(nameField, 'New');
-    await tester.tap(find.text('Save'));
-    await tester.pumpAndSettle();
+    await tester.enterText(_field('Name'), 'New');
+    await _save(tester);
 
     expect(result?.name, 'New');
     expect(result?.disableUdp, true);
@@ -124,9 +125,9 @@ void main() {
           child: Builder(
             builder: (context) => TextButton(
               onPressed: () async {
-                result = await showDialog<ProxyGroup>(
-                  context: context,
-                  builder: (_) => const ProxyGroupDialog(
+                result = await _push<ProxyGroup>(
+                  context,
+                  const ProxyGroupDialog(
                     group: original,
                     existingGroups: [original],
                   ),
@@ -141,8 +142,7 @@ void main() {
 
     await tester.tap(find.text('Open group'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Save'));
-    await tester.pumpAndSettle();
+    await _save(tester);
 
     expect(result?.filter, 'hk`jp');
     expect(result?.excludeFilter, isNull);
@@ -187,6 +187,7 @@ void main() {
               name: 'Auto',
               type: GroupType.URLTest,
               proxies: ['DIRECT'],
+              tolerance: 50,
             ),
             existingGroups: [],
           ),
@@ -194,12 +195,8 @@ void main() {
       ),
     );
 
-    await tester.enterText(
-      find.widgetWithText(TextFormField, 'Tolerance'),
-      '100000',
-    );
-    await tester.tap(find.text('Save'));
-    await tester.pump();
+    await tester.enterText(_field('Tolerance'), '100000');
+    await _save(tester);
 
     expect(find.text('0 - 65535'), findsOneWidget);
   });
@@ -226,12 +223,8 @@ void main() {
       ),
     );
 
-    await tester.enterText(
-      find.widgetWithText(TextFormField, 'Name'),
-      'DIRECT',
-    );
-    await tester.tap(find.text('Save'));
-    await tester.pump();
+    await tester.enterText(_field('Name'), 'DIRECT');
+    await _save(tester);
 
     expect(find.text('Current Name already exists'), findsOneWidget);
   });
@@ -254,15 +247,23 @@ void main() {
         },
         onResult: (value) => result = value,
       );
-      final name = find.widgetWithText(TextFormField, 'Name');
+      final name = _field('Name');
       await tester.enterText(name, 'Edited policy');
-      await tester.tap(find.text('Save'));
+      await tester.tap(find.byTooltip('Save'));
       await tester.pump();
 
-      expect(tester.widget<TextFormField>(name).enabled, isFalse);
+      final saving = tester
+          .widget<CommonScaffold>(find.byType(CommonScaffold).last)
+          .confirmationAction!;
+      expect(saving.isLoading, isTrue);
+      expect(saving.onPressed, isNull);
       expect(
-        tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
-        isNull,
+        tester
+            .widgetList<AbsorbPointer>(
+              find.ancestor(of: name, matching: find.byType(AbsorbPointer)),
+            )
+            .any((pointer) => pointer.absorbing),
+        isTrue,
       );
       expect(calls, 1);
       expect(result, isNull);
@@ -279,11 +280,9 @@ void main() {
         tester.widget<TextFormField>(name).controller?.text,
         'Edited policy',
       );
-      expect(tester.widget<TextFormField>(name).enabled, isTrue);
       expect(result, isNull);
 
-      await tester.tap(find.text('Save'));
-      await tester.pumpAndSettle();
+      await _save(tester);
       expect(result?.name, 'Edited policy');
       expect(result?.proxies, ['DIRECT']);
       expect(calls, 2);
@@ -308,24 +307,20 @@ void main() {
         },
         onResult: (value) => result = value,
       );
-      expect(find.text('Save draft'), findsNothing);
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Name'),
-        'First edit',
-      );
-      await tester.tap(find.text('Save'));
-      await tester.pumpAndSettle();
+      expect(find.byTooltip('Save draft'), findsNothing);
+      await tester.enterText(_field('Name'), 'First edit');
+      await _save(tester);
       expect(result, isNull);
-      expect(find.text('Save draft'), findsOneWidget);
+      expect(find.byTooltip('Save draft'), findsOneWidget);
       expect(
         find.textContaining('Settings are applied only after'),
         findsOneWidget,
       );
 
-      final name = find.widgetWithText(TextFormField, 'Name');
+      final name = _field('Name');
       await tester.ensureVisible(name);
       await tester.enterText(name, 'Second edit');
-      await tester.tap(find.text('Save draft'));
+      await tester.tap(find.byTooltip('Save draft'));
       await tester.pumpAndSettle();
 
       expect(result?.name, 'Second edit');
@@ -356,17 +351,16 @@ void main() {
         },
         onResult: (value) => result = value,
       );
-      final name = find.widgetWithText(TextFormField, 'Name');
-      await tester.tap(find.text('Save'));
-      await tester.pumpAndSettle();
-      expect(find.text('Save draft'), findsOneWidget);
+      final name = _field('Name');
+      await _save(tester);
+      expect(find.byTooltip('Save draft'), findsOneWidget);
 
       await tester.ensureVisible(name);
       await tester.enterText(name, 'Renamed');
-      await tester.tap(find.text('Save draft'));
+      await tester.tap(find.byTooltip('Save draft'));
       await tester.pumpAndSettle();
       expect(find.text(blockedMessage), findsOneWidget);
-      expect(find.text('Save draft'), findsNothing);
+      expect(find.byTooltip('Save draft'), findsNothing);
       expect(
         find.textContaining('Settings are applied only after'),
         findsNothing,
@@ -392,30 +386,15 @@ void main() {
         availableProviders: const ['Subscription A', 'Subscription B'],
         onResult: (value) => result = value,
       );
-      final providers = find.widgetWithText(
-        OutlinedButton,
-        'Proxy providers (1)',
-      );
-      await tester.ensureVisible(providers);
-      await tester.tap(providers);
+      await tester.tap(find.text('Add nodes'));
       await tester.pumpAndSettle();
-      expect(find.widgetWithText(ListTile, 'Subscription A'), findsOneWidget);
-      await tester.tap(find.text('Add').hitTestable());
+      expect(find.text('Subscription A'), findsNothing);
+      await tester.tap(find.text('Subscription B'));
       await tester.pumpAndSettle();
-      await tester.tap(
-        find.descendant(
-          of: find.widgetWithText(ListTile, 'Subscription B'),
-          matching: find.byTooltip('Add'),
-        ),
-      );
+      await tester.tap(find.byTooltip('Confirm'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Confirm (1)').hitTestable());
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Confirm (2)').hitTestable());
-      await tester.pumpAndSettle();
-      expect(find.text('Proxy providers (2)'), findsOneWidget);
-      await tester.tap(find.text('Save'));
-      await tester.pumpAndSettle();
+      expect(find.text('Subscription B'), findsOneWidget);
+      await _save(tester);
 
       expect(result?.type, GroupType.URLTest);
       expect(result?.proxies, isNull);
@@ -434,15 +413,12 @@ void main() {
         name: 'Automatic',
         type: GroupType.URLTest,
         proxies: ['DIRECT'],
+        tolerance: 5,
       ),
       onResult: (value) => result = value,
     );
-    await tester.enterText(
-      find.widgetWithText(TextFormField, 'Tolerance'),
-      '0',
-    );
-    await tester.tap(find.text('Save'));
-    await tester.pumpAndSettle();
+    await tester.enterText(_field('Tolerance'), '0');
+    await _save(tester);
     expect(result?.tolerance, 0);
   });
 
@@ -453,13 +429,12 @@ void main() {
         tester,
         group: const ProxyGroup(name: 'Empty', type: GroupType.Selector),
       );
-      await tester.tap(find.text('Save'));
-      await tester.pumpAndSettle();
+      await _save(tester);
       expect(
         find.text(AppLocalizations.current.proxyGroupMembersEmpty),
         findsOneWidget,
       );
-      expect(find.text('Save draft'), findsNothing);
+      expect(find.byTooltip('Save draft'), findsNothing);
       expect(
         find.text(AppLocalizations.current.routingDraftHint),
         findsNothing,
@@ -483,9 +458,9 @@ void main() {
         validate: (_) => pending.future,
         onResult: results.add,
       );
-      await tester.tap(find.text('Save'));
+      await tester.tap(find.byTooltip('Save'));
       await tester.pump();
-      await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
+      await tester.binding.handlePopRoute();
       pending.complete('');
       await tester.pumpAndSettle();
       expect(results, [null]);
@@ -519,61 +494,81 @@ void main() {
         },
         onResult: (value) => result = value,
       );
-      final field = find.widgetWithText(TextFormField, 'Proxy filter');
+      final field = _field('Proxy filter');
       await tester.enterText(field, '(');
       await tester.enterText(field, '(hk');
       await tester.pump(const Duration(milliseconds: 400));
       expect(checked.map((filters) => filters.first), isNot(contains('(')));
       expect(checked.last, ['(hk', '']);
-      expect(find.text('bad'), findsOneWidget);
+      expect(
+        tester
+            .widget<InfoMessageButton>(find.byType(InfoMessageButton))
+            .message,
+        'bad',
+      );
 
-      await tester.tap(find.text('Save'));
-      await tester.pumpAndSettle();
+      await _save(tester);
       expect(find.text('Proxy filter: bad'), findsOneWidget);
       expect(validations, 0);
       expect(find.byType(ProxyGroupDialog), findsOneWidget);
 
       await tester.enterText(field, 'hk|jp');
-      await tester.tap(find.text('Save'));
-      await tester.pumpAndSettle();
+      await _save(tester);
       expect(validations, 1);
       expect(result?.filter, 'hk|jp');
     },
   );
 
-  testWidgets(
-    'manual provider edits update candidates and filter controls immediately',
-    (tester) async {
-      await _openGroupDialog(
-        tester,
-        group: const ProxyGroup(
-          name: 'Manual',
-          type: GroupType.Selector,
-          proxies: ['DIRECT'],
-        ),
-        availableProviders: const ['Subscription A'],
-      );
-      expect(find.widgetWithText(TextFormField, 'Proxy filter'), findsNothing);
-      final field = find.widgetWithText(TextField, 'Proxy providers');
-      await tester.ensureVisible(field);
-      await tester.enterText(field, 'Subscription A');
-      await tester.pump();
-      expect(
-        find.widgetWithText(OutlinedButton, 'Proxy providers (1)'),
-        findsOneWidget,
-      );
-      await tester.ensureVisible(find.text('Proxy providers (1)'));
-      await tester.tap(find.text('Proxy providers (1)'));
-      await tester.pumpAndSettle();
-      expect(find.widgetWithText(ListTile, 'Subscription A'), findsOneWidget);
-      await tester.tap(find.text('Cancel').hitTestable().last);
-      await tester.pumpAndSettle();
-      expect(
-        find.widgetWithText(TextFormField, 'Proxy filter'),
-        findsOneWidget,
-      );
-    },
-  );
+  testWidgets('a provider picked as a member brings the filter controls', (
+    tester,
+  ) async {
+    await _openGroupDialog(
+      tester,
+      group: const ProxyGroup(
+        name: 'Manual',
+        type: GroupType.Selector,
+        proxies: ['DIRECT'],
+      ),
+      availableProviders: const ['Subscription A'],
+    );
+    expect(_field('Proxy filter'), findsNothing);
+    await tester.tap(find.text('Add nodes'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Subscription A'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Confirm'));
+    await tester.pumpAndSettle();
+    expect(_field('Proxy filter'), findsOneWidget);
+  });
+
+  testWidgets('a member missing from the profile stays listed to remove', (
+    tester,
+  ) async {
+    ProxyGroup? result;
+    await _openGroupDialog(
+      tester,
+      group: const ProxyGroup(
+        name: 'Members',
+        type: GroupType.Fallback,
+        proxies: ['DIRECT', 'Gone'],
+      ),
+      onResult: (value) => result = value,
+    );
+    expect(
+      tester.widget<InfoMessageButton>(find.byType(InfoMessageButton)).message,
+      AppLocalizations.current.outboundUnavailable,
+    );
+    await tester.tap(
+      find.descendant(
+        of: find.widgetWithText(DecorationListItem, 'Gone'),
+        matching: find.byTooltip(AppLocalizations.current.remove),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(InfoMessageButton), findsNothing);
+    await _save(tester);
+    expect(result?.proxies, ['DIRECT']);
+  });
 
   testWidgets('provider options keep what is set and a check that passes', (
     tester,
@@ -647,6 +642,19 @@ void main() {
   });
 }
 
+Finder _field(String title) => find.descendant(
+  of: find.widgetWithText(FormRow, title),
+  matching: find.byType(TextFormField),
+);
+
+Future<void> _save(WidgetTester tester) async {
+  await tester.tap(find.byTooltip('Save'));
+  await tester.pumpAndSettle();
+}
+
+Future<T?> _push<T>(BuildContext context, Widget page) =>
+    Navigator.of(context).push<T>(MaterialPageRoute(builder: (_) => page));
+
 Future<void> _openGroupDialog(
   WidgetTester tester, {
   required ProxyGroup group,
@@ -664,9 +672,9 @@ Future<void> _openGroupDialog(
         child: Builder(
           builder: (context) => TextButton(
             onPressed: () async {
-              final result = await showDialog<ProxyGroup>(
-                context: context,
-                builder: (_) => ProxyGroupDialog(
+              final result = await _push<ProxyGroup>(
+                context,
+                ProxyGroupDialog(
                   group: group,
                   existingGroups: [group],
                   availableMembers: const ['DIRECT'],

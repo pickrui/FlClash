@@ -11,7 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:fl_clash/features/overwrite/custom_rule_editor.dart';
 import 'package:fl_clash/features/overwrite/overwrite_sheet.dart';
 import 'package:fl_clash/features/overwrite/proxy_group_editor.dart';
-import 'package:fl_clash/features/overwrite/member_picker.dart';
+import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/l10n/l10n.dart';
@@ -21,6 +21,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../helpers/test_app.dart';
+
+Finder _field(String title) => find.descendant(
+  of: find.widgetWithText(FormRow, title),
+  matching: find.byType(TextFormField),
+);
 
 Future<BuildContext> _host(
   WidgetTester tester,
@@ -83,36 +88,20 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(SheetPagesNavigator), findsOneWidget);
       expect(tester.takeException(), isNull);
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Name'),
-        'Fixture',
-      );
-      final members = find.text(
-        '${AppLocalizations.current.chooseMembers} (0)',
-      );
-      await tester.ensureVisible(members);
-      await tester.tap(members);
+      await tester.enterText(_field('Name'), 'Fixture');
+      await tester.ensureVisible(find.text(AppLocalizations.current.addNodes));
+      await tester.tap(find.text(AppLocalizations.current.addNodes));
       await tester.pumpAndSettle();
-      expect(find.byType(ProxyMemberPicker), findsOneWidget);
-      await tester.tap(find.text(AppLocalizations.current.add).hitTestable());
+      await tester.ensureVisible(find.text('Japan'));
       await tester.pumpAndSettle();
-      await tester.tap(
-        find.descendant(
-          of: find.widgetWithText(ListTile, 'Japan'),
-          matching: find.byTooltip(AppLocalizations.current.add),
-        ),
-      );
+      await tester.tap(find.text('Japan'));
       await tester.pumpAndSettle();
-      await tester.tap(
-        find.text('${AppLocalizations.current.confirm} (1)').hitTestable(),
-      );
+      await tester.tap(find.byTooltip(AppLocalizations.current.confirm));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('${AppLocalizations.current.confirm} (1)'));
-      await tester.pumpAndSettle();
-      expect(find.byType(ProxyMemberPicker), findsNothing);
+      expect(find.text('Japan'), findsOneWidget);
       expect(find.text('Fixture'), findsOneWidget);
       expect(saved, isNull);
-      await tester.tap(find.text(AppLocalizations.current.save));
+      await tester.tap(find.byTooltip(AppLocalizations.current.save));
       await tester.pumpAndSettle();
       expect(saved?.name, 'Fixture');
       expect(saved?.proxies, ['Japan']);
@@ -122,7 +111,8 @@ void main() {
   }
 
   testWidgets(
-    'system back cancels member changes and outside dismissal asks before losing pages',
+    'system back keeps the picked members and outside dismissal asks before '
+    'losing pages',
     (tester) async {
       final host = await _host(tester, const Size(1000, 850));
       var closed = false;
@@ -134,40 +124,19 @@ void main() {
         ),
       ).then((_) => closed = true);
       await tester.pumpAndSettle();
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Name'),
-        'Retained',
-      );
+      await tester.enterText(_field('Name'), 'Retained');
       Future<void> members() async {
-        final button = find.text(
-          '${AppLocalizations.current.chooseMembers} (0)',
-        );
-        await tester.ensureVisible(button);
-        await tester.tap(button);
+        await tester.tap(find.text(AppLocalizations.current.addNodes));
         await tester.pumpAndSettle();
       }
 
       await members();
-      await tester.tap(find.text(AppLocalizations.current.add).hitTestable());
-      await tester.pumpAndSettle();
-      await tester.tap(
-        find.descendant(
-          of: find.widgetWithText(ListTile, 'DIRECT'),
-          matching: find.byTooltip(AppLocalizations.current.add),
-        ),
-      );
-      await tester.pumpAndSettle();
-      await tester.tap(
-        find.text('${AppLocalizations.current.confirm} (1)').hitTestable(),
-      );
+      await tester.tap(find.text('DIRECT'));
       await tester.pumpAndSettle();
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
       expect(find.text('Retained'), findsOneWidget);
-      expect(
-        find.text('${AppLocalizations.current.chooseMembers} (0)'),
-        findsOneWidget,
-      );
+      expect(find.text('DIRECT'), findsOneWidget);
       await members();
       await tester.tapAt(const Offset(10, 200));
       await tester.pumpAndSettle();
@@ -177,7 +146,7 @@ void main() {
       );
       await tester.tap(find.text(AppLocalizations.current.cancel).last);
       await tester.pumpAndSettle();
-      expect(find.byType(ProxyMemberPicker), findsOneWidget);
+      expect(find.byTooltip(AppLocalizations.current.confirm), findsOneWidget);
       expect(closed, isFalse);
       await tester.tapAt(const Offset(10, 200));
       await tester.pumpAndSettle();
@@ -291,10 +260,7 @@ void main() {
         ),
       ).then((_) => closed = true);
       await tester.pumpAndSettle();
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Name'),
-        'Changed',
-      );
+      await tester.enterText(_field('Name'), 'Changed');
       await tester.tap(find.byTooltip(AppLocalizations.current.close));
       await tester.pumpAndSettle();
       expect(

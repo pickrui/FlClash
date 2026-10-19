@@ -5,18 +5,27 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/features/editor/clash_schema.dart';
+import 'package:fl_clash/features/form/error_banner.dart';
+import 'package:fl_clash/features/form/form_row.dart';
+import 'package:fl_clash/features/form/selection_sheet.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/ui/animated_entries.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
+import 'package:fl_clash/ui/navigator.dart';
+import 'package:fl_clash/ui/paged_sheet.dart';
+import 'package:fl_clash/ui/sheet_navigator.dart';
+import 'package:fl_clash/ui/sortable.dart';
+import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/icon_history.dart';
+import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'overwrite_sheet.dart';
-
-import 'package:collection/collection.dart';
-
-import 'member_picker.dart';
+import 'quick_edit.dart';
 
 String customProxyGroupTypeLabel(GroupType type) => switch (type) {
   GroupType.Selector => appLocalizations.groupTypeSelect,
@@ -43,6 +52,98 @@ class ProxyGroupEditBlocked implements Exception {
   @override
   String toString() => message;
 }
+
+const _defaultEmptyFallback = 'COMPATIBLE';
+const _inUserHashKey = 'in-user';
+const _roundRobin = 'round-robin';
+const _strategies = ['consistent-hashing', _roundRobin, 'sticky-sessions'];
+
+Future<T?> _pushPage<T>(BuildContext context, Widget page) {
+  if (isSheetPage(context)) {
+    return Navigator.of(context).push(PagedSheetRoute<T>(builder: (_) => page));
+  }
+  return BaseNavigator.push<T>(context, page);
+}
+
+/// What a group leaves to the core until it is added, starting from the
+/// core's own default.
+enum _GroupOption {
+  emptyFallback,
+  url,
+  interval,
+  timeout,
+  maxFailedTimes,
+  lazy,
+  expectedStatus,
+  tolerance,
+  defaultSelected,
+  strategy,
+  hashKey,
+  excludeType,
+  hidden,
+  disableUDP;
+
+  String get label => switch (this) {
+    emptyFallback => appLocalizations.emptyFallback,
+    url => appLocalizations.testUrl,
+    interval => appLocalizations.testInterval,
+    timeout => appLocalizations.timeout,
+    maxFailedTimes => appLocalizations.maxFailedTimes,
+    lazy => appLocalizations.testWhenUsed,
+    expectedStatus => appLocalizations.expectedStatus,
+    tolerance => appLocalizations.tolerance,
+    defaultSelected => appLocalizations.defaultSelected,
+    strategy => appLocalizations.strategy,
+    hashKey => appLocalizations.hashByInUser,
+    excludeType => appLocalizations.excludeType,
+    hidden => appLocalizations.hideFromList,
+    disableUDP => appLocalizations.disableUDP,
+  };
+
+  String get section => switch (this) {
+    url ||
+    interval ||
+    timeout ||
+    maxFailedTimes ||
+    lazy ||
+    expectedStatus ||
+    tolerance => appLocalizations.healthCheck,
+    _ => appLocalizations.other,
+  };
+
+  bool appliesTo(GroupType type, String strategy) => switch (this) {
+    tolerance => type == GroupType.URLTest,
+    defaultSelected => type == GroupType.Selector,
+    _GroupOption.strategy => type == GroupType.LoadBalance,
+    hashKey => type == GroupType.LoadBalance && strategy != _roundRobin,
+    _ => true,
+  };
+
+  /// A switch at the core's default reads as not set, which the fork's earlier
+  /// editor wrote out on every save.
+  bool isSetIn(ProxyGroup group) => switch (this) {
+    emptyFallback => group.emptyFallback != null,
+    url => group.url != null,
+    interval => group.interval != null,
+    timeout => group.timeout != null,
+    maxFailedTimes => group.maxFailedTimes != null,
+    lazy => group.lazy == false,
+    expectedStatus => '${group.expectedStatus ?? ''}'.isNotEmpty,
+    tolerance => group.tolerance != null,
+    defaultSelected => group.defaultSelected != null,
+    _GroupOption.strategy => group.strategy != null,
+    hashKey => group.hashKey != null,
+    excludeType => group.excludeType != null,
+    hidden => group.hidden == true,
+    disableUDP => group.disableUdp == true,
+  };
+}
+
+enum _MemberKind { proxy, provider, allProxies, allProviders, all }
+
+typedef _Member = ({_MemberKind kind, String name});
+
+const _everyName = '*';
 
 class ProxyGroupDialog extends StatefulWidget {
   final ProxyGroup? group;
@@ -72,12 +173,14 @@ class ProxyGroupDialog extends StatefulWidget {
   State<ProxyGroupDialog> createState() => _ProxyGroupDialogState();
 }
 
+enum _Field { name, members, url, interval, tolerance, timeout, maxFailedTimes }
+
 class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
-  late final List<Object?> _origin;
+  late List<Object?> _origin;
   List<Object?> get _snapshot => [
     _nameController.text,
-    _proxiesController.text,
-    _providersController.text,
+    _proxies.join('\n'),
+    _providers.join('\n'),
     _urlController.text,
     _intervalController.text,
     _toleranceController.text,
@@ -87,7 +190,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
     _excludeFilterController.text,
     _excludeTypeController.text,
     _expectedStatusController.text,
-    _iconController.text,
+    _icon,
     _type,
     _strategy,
     _lazy,
@@ -96,12 +199,13 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
     _includeAllProxies,
     _includeAllProviders,
     _hidden,
+    _emptyFallback,
+    _defaultSelected,
+    _hashKey,
+    {..._shown},
   ];
 
-  final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
-  late final TextEditingController _proxiesController;
-  late final TextEditingController _providersController;
   late final TextEditingController _urlController;
   late final TextEditingController _intervalController;
   late final TextEditingController _toleranceController;
@@ -111,7 +215,9 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
   late final TextEditingController _excludeFilterController;
   late final TextEditingController _excludeTypeController;
   late final TextEditingController _expectedStatusController;
-  late final TextEditingController _iconController;
+  late List<String> _proxies;
+  late List<String> _providers;
+  late String _icon;
   late GroupType _type;
   late String _strategy;
   late bool _lazy;
@@ -120,6 +226,12 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
   late bool _includeAllProxies;
   late bool _includeAllProviders;
   late bool _hidden;
+  late String _emptyFallback;
+  late String _defaultSelected;
+  late String _hashKey;
+  late Set<_GroupOption> _shown;
+  int _revision = 0;
+  bool _attempted = false;
   bool _saving = false;
   String? _error;
   bool _canSaveDraft = false;
@@ -134,60 +246,57 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
     super.initState();
     final group = widget.group;
     _nameController = TextEditingController(text: group?.name ?? '');
-    _proxiesController = TextEditingController(
-      text: group?.proxies?.join('\n') ?? '',
-    );
-    _providersController = TextEditingController(
-      text: group?.use?.join('\n') ?? '',
-    );
-    _urlController = TextEditingController(text: group?.url ?? '');
-    _intervalController = TextEditingController(
-      text: group?.interval?.toString() ?? '',
-    );
-    _toleranceController = TextEditingController(
-      text: group?.tolerance?.toString() ?? '',
-    );
-    _timeoutController = TextEditingController(
-      text: group?.timeout?.toString() ?? '',
-    );
-    _maxFailedTimesController = TextEditingController(
-      text: group?.maxFailedTimes?.toString() ?? '',
-    );
-    _filterController = TextEditingController(text: group?.filter ?? '');
-    _excludeFilterController = TextEditingController(
-      text: group?.excludeFilter ?? '',
-    );
-    _excludeTypeController = TextEditingController(
-      text: group?.excludeType ?? '',
-    );
-    _expectedStatusController = TextEditingController(
-      text: group?.expectedStatus?.toString() ?? '',
-    );
-    _iconController = TextEditingController(text: group?.icon ?? '');
+    _urlController = TextEditingController();
+    _intervalController = TextEditingController();
+    _toleranceController = TextEditingController();
+    _timeoutController = TextEditingController();
+    _maxFailedTimesController = TextEditingController();
+    _filterController = TextEditingController();
+    _excludeFilterController = TextEditingController();
+    _excludeTypeController = TextEditingController();
+    _expectedStatusController = TextEditingController();
+    _load(group);
+    _origin = _snapshot;
+    _nameController.addListener(_handleChanged);
+    _filterController.addListener(_scheduleFilterCheck);
+    _excludeFilterController.addListener(_scheduleFilterCheck);
+    _scheduleFilterCheck();
+  }
+
+  void _load(ProxyGroup? group) {
+    _proxies = [...?group?.proxies];
+    _providers = [...?group?.use];
+    _urlController.text = group?.url ?? '';
+    _intervalController.text = group?.interval?.toString() ?? '';
+    _toleranceController.text = group?.tolerance?.toString() ?? '';
+    _timeoutController.text = group?.timeout?.toString() ?? '';
+    _maxFailedTimesController.text = group?.maxFailedTimes?.toString() ?? '';
+    _filterController.text = group?.filter ?? '';
+    _excludeFilterController.text = group?.excludeFilter ?? '';
+    _excludeTypeController.text = group?.excludeType ?? '';
+    _expectedStatusController.text = group?.expectedStatus?.toString() ?? '';
+    _icon = group?.icon ?? '';
     _type = group?.type ?? GroupType.Selector;
-    _strategy = group?.strategy ?? 'consistent-hashing';
+    _strategy = group?.strategy ?? _strategies.first;
     _lazy = group?.lazy ?? true;
     _disableUdp = group?.disableUdp ?? false;
     _includeAll = group?.includeAll ?? false;
     _includeAllProxies = group?.includeAllProxies ?? false;
     _includeAllProviders = group?.includeAllProviders ?? false;
     _hidden = group?.hidden ?? false;
-    _origin = _snapshot;
-    _filterController.addListener(_scheduleFilterCheck);
-    _excludeFilterController.addListener(_scheduleFilterCheck);
-    _scheduleFilterCheck();
+    _emptyFallback = group?.emptyFallback ?? _defaultEmptyFallback;
+    _defaultSelected = group?.defaultSelected ?? '';
+    _hashKey = group?.hashKey ?? '';
+    _shown = group == null
+        ? {}
+        : {
+            for (final option in _GroupOption.values)
+              if (option.isSetIn(group)) option,
+          };
   }
 
-  List<String>? _parseList(String value) {
-    final result = value
-        .split('\n')
-        .map(
-          (item) =>
-              item.endsWith('\r') ? item.substring(0, item.length - 1) : item,
-        )
-        .where((item) => item.trim().isNotEmpty)
-        .toList();
-    return result.isEmpty ? null : result;
+  void _handleChanged() {
+    if (_attempted) setState(() {});
   }
 
   String? _textOrNull(TextEditingController controller) {
@@ -217,8 +326,8 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
     _filterTimer = Timer(_filterCheckDelay, () => _checkFilters(filters));
   }
 
-  /// The Core's verdict on [filters], shown under their fields; null when it
-  /// cannot be asked, which leaves the check to the save-time validation.
+  /// The Core's verdict on [filters], shown on their rows; null when it cannot
+  /// be asked, which leaves the check to the save-time validation.
   Future<List<String>?> _checkFilters(List<String> filters) async {
     _filterTimer?.cancel();
     _latestFilters = filters;
@@ -238,60 +347,137 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
 
   int? _intOrNull(TextEditingController controller) {
     final value = controller.text.trim();
-    return value.isEmpty ? null : int.parse(value);
+    return value.isEmpty ? null : int.tryParse(value);
+  }
+
+  bool _isShown(_GroupOption option) =>
+      _shown.contains(option) && option.appliesTo(_type, _strategy);
+
+  bool get _hasMembers =>
+      _proxies.isNotEmpty ||
+      _providers.isNotEmpty ||
+      _includeAll ||
+      _includeAllProxies ||
+      _includeAllProviders;
+
+  bool get _hasDynamicMembers =>
+      _providers.isNotEmpty ||
+      _includeAll ||
+      _includeAllProxies ||
+      _includeAllProviders;
+
+  List<({_Field field, String message})> _issues() {
+    final l10n = appLocalizations;
+    final name = _nameController.text.trim();
+    String? positive(_GroupOption option, TextEditingController controller) {
+      final text = controller.text.trim();
+      if (!_isShown(option) || text.isEmpty) return null;
+      return (int.tryParse(text) ?? 0) <= 0 ? l10n.numberTip(l10n.value) : null;
+    }
+
+    final tolerance = int.tryParse(_toleranceController.text.trim());
+    final url = _urlController.text.trim();
+    return [
+      if (RegExp(r'[,\r\n\x00]').hasMatch(name))
+        (field: _Field.name, message: l10n.customRuleInvalidSyntax)
+      else if (name.isEmpty)
+        (field: _Field.name, message: l10n.proxyGroupNameEmpty)
+      else if (widget.existingGroups.any(
+            (item) => item != widget.group && item.name == name,
+          ) ||
+          (name != widget.group?.name && widget.reservedNames.contains(name)))
+        (field: _Field.name, message: l10n.existsTip(l10n.name)),
+      if (!_hasMembers)
+        (field: _Field.members, message: l10n.proxyGroupMembersEmpty),
+      if (_isShown(_GroupOption.url) && url.isNotEmpty && !url.isUrl)
+        (field: _Field.url, message: l10n.urlTip(l10n.url)),
+      if (positive(_GroupOption.interval, _intervalController)
+          case final message?)
+        (field: _Field.interval, message: message),
+      if (_isShown(_GroupOption.tolerance) &&
+          _toleranceController.text.trim().isNotEmpty &&
+          (tolerance == null || tolerance < 0 || tolerance > 65535))
+        (field: _Field.tolerance, message: '0 - 65535'),
+      if (positive(_GroupOption.timeout, _timeoutController)
+          case final message?)
+        (field: _Field.timeout, message: message),
+      if (positive(_GroupOption.maxFailedTimes, _maxFailedTimesController)
+          case final message?)
+        (field: _Field.maxFailedTimes, message: message),
+    ];
+  }
+
+  ProxyGroup _draft() {
+    final original = widget.group;
+    final name = _nameController.text.trim();
+    return (original ?? ProxyGroup(name: name, type: _type)).copyWith(
+      name: name,
+      type: _type,
+      proxies: _proxies.isEmpty ? null : [..._proxies],
+      use: _providers.isEmpty ? null : [..._providers],
+      url:
+          (_isShown(_GroupOption.url) ? _textOrNull(_urlController) : null) ??
+          (_type != GroupType.Selector ? defaultTestUrl : null),
+      interval:
+          (_isShown(_GroupOption.interval)
+              ? _intOrNull(_intervalController)
+              : null) ??
+          (_type != GroupType.Selector ? 300 : null),
+      tolerance: _isShown(_GroupOption.tolerance)
+          ? _intOrNull(_toleranceController)
+          : null,
+      timeout: _isShown(_GroupOption.timeout)
+          ? _intOrNull(_timeoutController)
+          : null,
+      maxFailedTimes: _isShown(_GroupOption.maxFailedTimes)
+          ? _intOrNull(_maxFailedTimesController)
+          : null,
+      filter: _filterOrNull(_filterController),
+      excludeFilter: _filterOrNull(_excludeFilterController),
+      excludeType: _isShown(_GroupOption.excludeType)
+          ? _textOrNull(_excludeTypeController)
+          : null,
+      expectedStatus: _isShown(_GroupOption.expectedStatus)
+          ? _textOrNull(_expectedStatusController)
+          : null,
+      icon: _icon.trim().isEmpty ? null : _icon.trim(),
+      strategy: _isShown(_GroupOption.strategy) ? _strategy : null,
+      emptyFallback: _isShown(_GroupOption.emptyFallback)
+          ? _emptyFallback
+          : null,
+      defaultSelected:
+          _isShown(_GroupOption.defaultSelected) && _defaultSelected.isNotEmpty
+          ? _defaultSelected
+          : null,
+      hashKey: _isShown(_GroupOption.hashKey) && _hashKey.isNotEmpty
+          ? _hashKey
+          : null,
+      lazy: _isShown(_GroupOption.lazy) ? _lazy : true,
+      disableUdp: _isShown(_GroupOption.disableUDP) ? _disableUdp : false,
+      includeAll: _includeAll,
+      includeAllProxies: _includeAllProxies,
+      includeAllProviders: _includeAllProviders,
+      hidden: _isShown(_GroupOption.hidden) ? _hidden : false,
+    );
   }
 
   Future<void> _submit({bool saveDraft = false}) async {
     if (_saving) return;
-    if (_formKey.currentState?.validate() != true) {
+    final issues = _issues();
+    if (issues.isNotEmpty || _type == GroupType.Relay) {
+      setState(() {
+        _attempted = true;
+        _error = _type == GroupType.Relay && issues.isEmpty
+            ? appLocalizations.relayGroupUnsupported
+            : null;
+        _canSaveDraft = false;
+      });
+      _scrollToTop();
       return;
     }
-    if (_type == GroupType.Relay) {
-      _showError(appLocalizations.relayGroupUnsupported);
-      return;
-    }
-    final proxies = _parseList(_proxiesController.text);
-    final providers = _parseList(_providersController.text);
-    if ((proxies == null || proxies.isEmpty) &&
-        (providers == null || providers.isEmpty) &&
-        !_includeAll &&
-        !_includeAllProxies &&
-        !_includeAllProviders) {
-      _showError(appLocalizations.proxyGroupMembersEmpty);
-      return;
-    }
-    final name = _nameController.text.trim();
-    final original = widget.group;
-    final result = (original ?? ProxyGroup(name: name, type: _type)).copyWith(
-      name: name,
-      type: _type,
-      proxies: proxies,
-      use: providers,
-      url:
-          _textOrNull(_urlController) ??
-          (_type != GroupType.Selector ? defaultTestUrl : null),
-      interval:
-          _intOrNull(_intervalController) ??
-          (_type != GroupType.Selector ? 300 : null),
-      tolerance: _type == GroupType.URLTest
-          ? _intOrNull(_toleranceController)
-          : null,
-      timeout: _intOrNull(_timeoutController),
-      maxFailedTimes: _intOrNull(_maxFailedTimesController),
-      filter: _filterOrNull(_filterController),
-      excludeFilter: _filterOrNull(_excludeFilterController),
-      excludeType: _textOrNull(_excludeTypeController),
-      expectedStatus: _textOrNull(_expectedStatusController),
-      icon: _textOrNull(_iconController),
-      strategy: _type == GroupType.LoadBalance ? _strategy : null,
-      lazy: _lazy,
-      disableUdp: _disableUdp,
-      includeAll: _includeAll,
-      includeAllProxies: _includeAllProxies,
-      includeAllProviders: _includeAllProviders,
-      hidden: _hidden,
-    );
+    final result = _draft();
     setState(() {
+      _attempted = true;
       _saving = true;
       _error = null;
       _canSaveDraft = false;
@@ -331,75 +517,285 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
       _error = message;
       _canSaveDraft = canSaveDraft;
     });
+    _scrollToTop();
+  }
+
+  void _scrollToTop() {
     if (_scrollController.hasClients) _scrollController.jumpTo(0);
   }
 
-  bool get _hasDynamicMembers =>
-      _includeAll ||
-      _includeAllProxies ||
-      _includeAllProviders ||
-      _providersController.text.isNotEmpty;
+  List<_Member> get _members => [
+    for (final name in _proxies) (kind: _MemberKind.proxy, name: name),
+    for (final name in _providers) (kind: _MemberKind.provider, name: name),
+    if (_includeAllProxies) (kind: _MemberKind.allProxies, name: _everyName),
+    if (_includeAllProviders)
+      (kind: _MemberKind.allProviders, name: _everyName),
+    if (_includeAll) (kind: _MemberKind.all, name: _everyName),
+  ];
 
-  Future<void> _pickMembers(
-    TextEditingController controller,
-    List<String> available,
-    String title,
-  ) async {
-    final selected = await showOverwriteSheet<List<String>>(
-      context: context,
-      builder: (_) => ProxyMemberPicker(
-        title: title,
-        available: controller == _proxiesController
-            ? available
-                  .where((name) => name != _nameController.text.trim())
-                  .toList()
-            : available,
-        selected: _parseList(controller.text) ?? [],
-        providers: controller == _providersController,
-        sourceLabels: controller == _providersController
-            ? widget.providerSources
-            : const {},
-        groupTypes: controller == _providersController
-            ? const {}
-            : {
-                ...widget.groupTypes,
-                for (final group in widget.existingGroups)
-                  group.name: customProxyGroupTypeLabel(group.type),
-              },
-      ),
-    );
-    if (selected == null || !mounted) return;
-    setState(() => controller.text = selected.join('\n'));
+  void _setMembers(List<_Member> members) {
+    setState(() {
+      _proxies = [
+        for (final member in members)
+          if (member.kind == _MemberKind.proxy) member.name,
+      ];
+      _providers = [
+        for (final member in members)
+          if (member.kind == _MemberKind.provider) member.name,
+      ];
+      _includeAllProxies = members.any(
+        (member) => member.kind == _MemberKind.allProxies,
+      );
+      _includeAllProviders = members.any(
+        (member) => member.kind == _MemberKind.allProviders,
+      );
+      _includeAll = members.any((member) => member.kind == _MemberKind.all);
+    });
   }
 
-  Widget _memberField(
-    TextEditingController controller,
-    List<String> available,
-    String title,
-  ) {
-    final selected = _parseList(controller.text) ?? [];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        OutlinedButton.icon(
-          onPressed: _saving
-              ? null
-              : () => _pickMembers(controller, available, title),
-          icon: const GlyphIcon(AppGlyphs.listAdd),
-          label: Text('$title (${selected.length})'),
-        ),
-        if (selected.any((name) => !available.contains(name)))
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Text(
-              appLocalizations.outboundUnavailable,
-              style: context.textTheme.bodySmall?.copyWith(
-                color: context.colorScheme.error,
-              ),
-            ),
-          ),
-      ],
+  void _removeMember(int index) {
+    _setMembers([..._members]..removeAt(index));
+  }
+
+  /// The core reads proxies and providers each in their own order, so a row
+  /// moved past the other kind settles back among its own.
+  void _reorderMember(int oldIndex, int newIndex) {
+    final members = [..._members];
+    final member = members.removeAt(oldIndex);
+    members.insert(newIndex, member);
+    _setMembers(members);
+  }
+
+  void _addMembers(Iterable<_Member> picked) {
+    final members = [..._members];
+    for (final member in picked) {
+      if (member.kind == _MemberKind.proxy ||
+          member.kind == _MemberKind.provider ||
+          !members.contains(member)) {
+        members.add(member);
+      }
+    }
+    _setMembers(members);
+  }
+
+  Future<void> _showMemberPicker() async {
+    final name = _nameController.text.trim();
+    final picked = await _pushPage<List<_Member>>(
+      context,
+      _MemberPicker(
+        available: [
+          for (final member in widget.availableMembers)
+            if (member != name && !_proxies.contains(member)) member,
+        ],
+        groupTypes: {
+          ...widget.groupTypes,
+          for (final group in widget.existingGroups)
+            group.name: customProxyGroupTypeLabel(group.type),
+        },
+        providers: [
+          for (final provider in widget.availableProviders)
+            if (!_providers.contains(provider)) provider,
+        ],
+        providerSources: widget.providerSources,
+        taken: {for (final member in _members) member.kind},
+      ),
     );
+    if (picked == null || picked.isEmpty || !mounted) return;
+    _addMembers(picked);
+  }
+
+  Future<T?> _select<T>({
+    required String title,
+    required List<SelectionSection<T>> sections,
+    required String Function(T item) labelBuilder,
+    required T selected,
+  }) {
+    return _pushPage<T>(
+      context,
+      Builder(
+        builder: (context) => SelectionSheet<T>(
+          title: title,
+          sections: sections,
+          labelBuilder: labelBuilder,
+          selectedOf: (_) => selected,
+          onSelected: (item) => Navigator.of(context).pop(item),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showTypeOptions() async {
+    final value = await _select<GroupType>(
+      title: appLocalizations.routingGroupType,
+      sections: [
+        SelectionSection(
+          items: [
+            for (final type in GroupType.values)
+              if (type != GroupType.Relay || _type == GroupType.Relay) type,
+          ],
+          subtitleBuilder: (_, type) => _groupTypeHint(type),
+        ),
+      ],
+      labelBuilder: customProxyGroupTypeLabel,
+      selected: _type,
+    );
+    if (value == null || !mounted) return;
+    setState(() => _type = value);
+  }
+
+  Future<void> _showStrategyOptions() async {
+    final value = await _select<String>(
+      title: appLocalizations.strategy,
+      sections: [
+        SelectionSection(items: {..._strategies, _strategy}.toList()),
+      ],
+      labelBuilder: (item) => item,
+      selected: _strategy,
+    );
+    if (value == null || !mounted) return;
+    setState(() => _strategy = value);
+  }
+
+  Future<void> _showEmptyFallbackOptions() async {
+    final builtIns = {
+      _defaultEmptyFallback,
+      ...reservedOutboundNames.where((name) => name != 'GLOBAL'),
+    };
+    final groups = {
+      ...widget.groupTypes.keys,
+      for (final group in widget.existingGroups) group.name,
+    };
+    final value = await _select<String>(
+      title: appLocalizations.emptyFallback,
+      sections: [
+        SelectionSection(
+          label: appLocalizations.basicStrategy,
+          items: builtIns.toList(),
+        ),
+        SelectionSection(
+          label: appLocalizations.proxies,
+          items: [
+            for (final name in widget.availableMembers)
+              if (!builtIns.contains(name) && !groups.contains(name)) name,
+          ],
+        ),
+      ],
+      labelBuilder: (item) => item,
+      selected: _emptyFallback,
+    );
+    if (value == null || !mounted) return;
+    setState(() => _emptyFallback = value);
+  }
+
+  Future<void> _showDefaultSelectedOptions() async {
+    final value = await _select<String>(
+      title: appLocalizations.defaultSelected,
+      sections: [
+        const SelectionSection(items: ['']),
+        SelectionSection(label: appLocalizations.proxies, items: _proxies),
+      ],
+      labelBuilder: (item) =>
+          item.isEmpty ? appLocalizations.defaultText : item,
+      selected: _defaultSelected,
+    );
+    if (value == null || !mounted) return;
+    setState(() => _defaultSelected = value);
+  }
+
+  Future<void> _showIconPicker() async {
+    final value = await _pushPage<String>(context, _IconView(icon: _icon));
+    if (value == null || !mounted) return;
+    setState(() => _icon = value);
+  }
+
+  Future<void> _handleQuickEdit() {
+    final draft = _draft();
+    return showCustomQuickEdit(
+      context,
+      title: draft.name.isEmpty ? appLocalizations.quickEdit : draft.name,
+      content: writeYaml(draft.toJson()),
+      schema: EditorSchema.proxyGroup,
+      invalidMessage: appLocalizations.definitionNotMap,
+      apply: (content) {
+        final value = loadPlainYaml(content);
+        if (value is! Map<String, Object?> ||
+            value['name'] is! String ||
+            value['type'] is! String) {
+          throw const FormatException();
+        }
+        final group = ProxyGroup.fromJson(value);
+        if (!mounted) return;
+        setState(() {
+          _nameController.text = group.name;
+          _load(group);
+          _revision++;
+        });
+        _scheduleFilterCheck();
+      },
+    );
+  }
+
+  void _addOption(List<_GroupOption> options) {
+    final sections = <String, List<_GroupOption>>{};
+    for (final option in options) {
+      sections.putIfAbsent(option.section, () => []).add(option);
+    }
+    _pushPage<void>(
+      context,
+      SelectionSheet<_GroupOption>(
+        title: appLocalizations.addSettingEntry,
+        sections: [
+          for (final MapEntry(:key, :value) in sections.entries)
+            SelectionSection(label: key, items: value),
+        ],
+        labelBuilder: (option) => option.label,
+        selectedOf: (_) => null,
+        removeOnSelect: true,
+        onSelected: _handleAddedOption,
+      ),
+    );
+  }
+
+  void _handleAddedOption(_GroupOption option) {
+    if (!mounted) return;
+    setState(() {
+      switch (option) {
+        case _GroupOption.url:
+          _urlController.text = defaultTestUrl;
+        case _GroupOption.interval:
+          _intervalController.text = '300';
+        case _GroupOption.timeout:
+          _timeoutController.text = '5000';
+        case _GroupOption.maxFailedTimes:
+          _maxFailedTimesController.text = '5';
+        case _GroupOption.lazy:
+          _lazy = true;
+        case _GroupOption.tolerance:
+          _toleranceController.text = '0';
+        case _GroupOption.strategy:
+          _strategy = _strategies.first;
+        case _GroupOption.emptyFallback:
+          _emptyFallback = _defaultEmptyFallback;
+        case _GroupOption.defaultSelected:
+          _defaultSelected = '';
+        case _GroupOption.hashKey:
+          _hashKey = '';
+        case _GroupOption.hidden:
+          _hidden = false;
+        case _GroupOption.disableUDP:
+          _disableUdp = false;
+        case _GroupOption.expectedStatus:
+        case _GroupOption.excludeType:
+          break;
+      }
+      _shown = {..._shown, option};
+    });
+  }
+
+  void _removeOption(_GroupOption option) {
+    setState(() {
+      _shown = {..._shown}..remove(option);
+    });
   }
 
   @override
@@ -407,8 +803,6 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
     _filterTimer?.cancel();
     _scrollController.dispose();
     _nameController.dispose();
-    _proxiesController.dispose();
-    _providersController.dispose();
     _urlController.dispose();
     _intervalController.dispose();
     _toleranceController.dispose();
@@ -418,469 +812,809 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
     _excludeFilterController.dispose();
     _excludeTypeController.dispose();
     _expectedStatusController.dispose();
-    _iconController.dispose();
+    super.dispose();
+  }
+
+  Widget _chevronValue(String value, {TextStyle? style}) {
+    return Row(
+      spacing: 2,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: style,
+          ),
+        ),
+        const GlyphIcon(AppGlyphs.chevronForward),
+      ],
+    );
+  }
+
+  Widget _textItem({
+    required String title,
+    required TextEditingController controller,
+    Widget? leading,
+    bool invalid = false,
+    TextInputType? keyboardType,
+    int maxLength = TextInputLimits.filter,
+    String? suffix,
+    String? hintText,
+    Widget? info,
+  }) {
+    final field = FormRowTextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      autocorrect: false,
+      inputFormatters: keyboardType == TextInputType.number
+          ? TextInputLimits.digitsOnly(maxLength)
+          : TextInputLimits.limit(maxLength),
+      hintText: hintText ?? appLocalizations.optional,
+      onChanged: (_) => _handleChanged(),
+    );
+    return FormRow(
+      title: title,
+      leading: leading,
+      invalid: invalid,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 4,
+        children: [
+          ?info,
+          Flexible(child: field),
+          if (suffix != null)
+            Text(suffix, style: AppTextStyle.subheadline.of(context)),
+        ],
+      ),
+    );
+  }
+
+  Widget _switchItem({
+    required String title,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+    Widget? leading,
+  }) {
+    return FormRow(
+      title: title,
+      leading: leading,
+      onPressed: () => onChanged(!value),
+      trailing: Switch(value: value, onChanged: onChanged),
+    );
+  }
+
+  Widget _buildOption(_GroupOption option, Set<_Field> invalid) {
+    final leading = EntryButton.remove(onPressed: () => _removeOption(option));
+    return switch (option) {
+      _GroupOption.emptyFallback => FormRow(
+        title: option.label,
+        leading: leading,
+        onPressed: _showEmptyFallbackOptions,
+        trailing: _chevronValue(_emptyFallback),
+      ),
+      _GroupOption.url => _textItem(
+        title: option.label,
+        controller: _urlController,
+        leading: leading,
+        invalid: invalid.contains(_Field.url),
+        keyboardType: TextInputType.url,
+        maxLength: TextInputLimits.url,
+      ),
+      _GroupOption.interval => _textItem(
+        title: option.label,
+        controller: _intervalController,
+        leading: leading,
+        invalid: invalid.contains(_Field.interval),
+        keyboardType: TextInputType.number,
+        maxLength: TextInputLimits.interval,
+        suffix: 's',
+      ),
+      _GroupOption.timeout => _textItem(
+        title: option.label,
+        controller: _timeoutController,
+        leading: leading,
+        invalid: invalid.contains(_Field.timeout),
+        keyboardType: TextInputType.number,
+        maxLength: TextInputLimits.interval,
+        suffix: 'ms',
+      ),
+      _GroupOption.maxFailedTimes => _textItem(
+        title: option.label,
+        controller: _maxFailedTimesController,
+        leading: leading,
+        invalid: invalid.contains(_Field.maxFailedTimes),
+        keyboardType: TextInputType.number,
+        maxLength: TextInputLimits.interval,
+      ),
+      _GroupOption.lazy => _switchItem(
+        title: option.label,
+        value: _lazy,
+        leading: leading,
+        onChanged: (value) => setState(() => _lazy = value),
+      ),
+      _GroupOption.expectedStatus => _textItem(
+        title: option.label,
+        controller: _expectedStatusController,
+        leading: leading,
+      ),
+      _GroupOption.tolerance => _textItem(
+        title: option.label,
+        controller: _toleranceController,
+        leading: leading,
+        invalid: invalid.contains(_Field.tolerance),
+        keyboardType: TextInputType.number,
+        maxLength: TextInputLimits.interval,
+        suffix: 'ms',
+      ),
+      _GroupOption.defaultSelected => FormRow(
+        title: option.label,
+        leading: leading,
+        onPressed: _showDefaultSelectedOptions,
+        trailing: _chevronValue(
+          _defaultSelected.isEmpty
+              ? appLocalizations.defaultText
+              : _defaultSelected,
+        ),
+      ),
+      _GroupOption.strategy => FormRow(
+        title: option.label,
+        leading: leading,
+        onPressed: _showStrategyOptions,
+        trailing: _chevronValue(_strategy),
+      ),
+      _GroupOption.hashKey => _switchItem(
+        title: option.label,
+        value: _hashKey == _inUserHashKey,
+        leading: leading,
+        onChanged: (value) =>
+            setState(() => _hashKey = value ? _inUserHashKey : ''),
+      ),
+      _GroupOption.excludeType => _textItem(
+        title: option.label,
+        controller: _excludeTypeController,
+        leading: leading,
+      ),
+      _GroupOption.hidden => _switchItem(
+        title: option.label,
+        value: _hidden,
+        leading: leading,
+        onChanged: (value) => setState(() => _hidden = value),
+      ),
+      _GroupOption.disableUDP => _switchItem(
+        title: option.label,
+        value: _disableUdp,
+        leading: leading,
+        onChanged: (value) => setState(() => _disableUdp = value),
+      ),
+    };
+  }
+
+  Widget _buildOptions(Set<_Field> invalid) {
+    final applicable = [
+      for (final option in _GroupOption.values)
+        if (option.appliesTo(_type, _strategy)) option,
+    ];
+    final remaining = [
+      for (final option in applicable)
+        if (!_shown.contains(option)) option,
+    ];
+    void handleAdd() => _addOption(remaining);
+    return generateAnimatedSection(
+      title: appLocalizations.options,
+      items: [
+        for (final option in applicable)
+          if (_shown.contains(option))
+            KeyedSubtree(
+              key: ValueKey(option),
+              child: _buildOption(option, invalid),
+            ),
+        if (remaining.isNotEmpty)
+          FormRow(
+            key: const ValueKey(#add),
+            leading: EntryButton.add(onPressed: handleAdd),
+            title: appLocalizations.addSettingEntry,
+            titleStyle: TextStyle(color: context.colorScheme.primary),
+            onPressed: handleAdd,
+          ),
+      ],
+    );
+  }
+
+  Widget _buildMembers(bool invalid) {
+    final members = _members;
+    final occurrences = <_Member, int>{};
+    final keys = [
+      for (final member in members)
+        ValueKey((
+          member,
+          occurrences.update(member, (n) => n + 1, ifAbsent: () => 0),
+        )),
+    ];
+    final available = widget.availableMembers.toSet();
+    final providers = widget.availableProviders.toSet();
+    final groupTypes = {
+      ...widget.groupTypes,
+      for (final group in widget.existingGroups)
+        group.name: customProxyGroupTypeLabel(group.type),
+    };
+    Widget itemAt(int index) {
+      final member = members[index];
+      final isValid = switch (member.kind) {
+        _MemberKind.proxy => available.contains(member.name),
+        _MemberKind.provider => providers.contains(member.name),
+        _ => true,
+      };
+      final colorScheme = context.colorScheme;
+      final (title, chip, chipColors) = switch (member.kind) {
+        _MemberKind.proxy => (
+          member.name,
+          groupTypes[member.name] ??
+              (reservedOutboundNames.contains(member.name)
+                  ? appLocalizations.basicStrategy
+                  : null),
+          (colorScheme.secondaryContainer, colorScheme.onSecondaryContainer),
+        ),
+        _MemberKind.provider => (
+          member.name,
+          appLocalizations.proxyProviders,
+          (colorScheme.tertiaryContainer, colorScheme.onTertiaryContainer),
+        ),
+        _MemberKind.allProxies => (
+          appLocalizations.includeAllProxies,
+          appLocalizations.autoInclude,
+          (colorScheme.secondaryContainer, colorScheme.onSecondaryContainer),
+        ),
+        _MemberKind.allProviders => (
+          appLocalizations.includeAllProxyProviders,
+          appLocalizations.autoInclude,
+          (colorScheme.secondaryContainer, colorScheme.onSecondaryContainer),
+        ),
+        _MemberKind.all => (
+          appLocalizations.includeAll,
+          appLocalizations.autoInclude,
+          (colorScheme.secondaryContainer, colorScheme.onSecondaryContainer),
+        ),
+      };
+      return ItemPositionProvider(
+        key: keys[index],
+        position: ItemPosition.get(index, members.length + 1),
+        child: DecorationListItem(
+          invalid: !isValid,
+          contentPadding: const EdgeInsets.only(left: 16),
+          leading: EntryButton.remove(onPressed: () => _removeMember(index)),
+          title: TooltipText(
+            text: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
+          ),
+          subtitle: chip == null
+              ? null
+              : Padding(
+                  padding: const EdgeInsets.only(top: 4, bottom: 2),
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: TonalChip(
+                          label: chip,
+                          color: chipColors.$1,
+                          foregroundColor: chipColors.$2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (!isValid)
+                InfoMessageButton(
+                  message: appLocalizations.outboundUnavailable,
+                ),
+              SortHandle(index: index),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return SliverMainAxisGroup(
+      slivers: [
+        SliverToBoxAdapter(
+          child: ListHeader(
+            title: appLocalizations.nodes,
+            actions: [
+              IconButtonData(
+                glyph: AppGlyphs.compose,
+                tooltip: appLocalizations.quickEdit,
+                onPressed: _saving ? null : _handleQuickEdit,
+              ),
+            ],
+          ),
+        ),
+        SliverReorderableList(
+          itemBuilder: (_, index) => itemAt(index),
+          itemCount: members.length,
+          proxyDecorator: (child, index, animation) =>
+              commonProxyDecorator(itemAt(index), index, animation),
+          onReorderItem: _reorderMember,
+        ),
+        SliverToBoxAdapter(
+          child: ItemPositionProvider(
+            position: ItemPosition.get(members.length, members.length + 1),
+            child: FormRow(
+              invalid: invalid,
+              leading: EntryButton.add(onPressed: _showMemberPicker),
+              title: appLocalizations.addNodes,
+              titleStyle: TextStyle(color: context.colorScheme.primary),
+              onPressed: _showMemberPicker,
+            ),
+          ),
+        ),
+        if (_type == GroupType.Fallback)
+          SliverToBoxAdapter(
+            child: ListFooter(text: appLocalizations.memberOrderHint),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildFilters() {
+    Widget filterItem(String title, TextEditingController controller, int at) {
+      final error = _filterErrors[at];
+      return _textItem(
+        title: title,
+        controller: controller,
+        invalid: error.isNotEmpty,
+        info: error.isEmpty ? null : InfoMessageButton(message: error),
+      );
+    }
+
+    return generateSection(
+      title: appLocalizations.filters,
+      footer: appLocalizations.groupFilterHint,
+      items: [
+        filterItem(appLocalizations.proxyFilter, _filterController, 0),
+        filterItem(
+          appLocalizations.excludeProxyFilter,
+          _excludeFilterController,
+          1,
+        ),
+      ],
+    );
+  }
+
+  String? get _bannerMessage {
+    final issues = _attempted ? _issues() : const [];
+    if (issues.isEmpty) return _error;
+    final messages = [for (final issue in issues) issue.message];
+    return messages.length == 1
+        ? messages.single
+        : messages.map((message) => '• $message').join('\n');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final invalid = {
+      if (_attempted)
+        for (final issue in _issues()) issue.field,
+    };
+    final icon = _icon.trim();
+    return OverwriteExitGuard(
+      isDirty: () =>
+          !_saving &&
+          !const DeepCollectionEquality().equals(_origin, _snapshot),
+      save: _submit,
+      child: CommonScaffold(
+        title: widget.group == null
+            ? appLocalizations.addProxyGroup
+            : appLocalizations.editProxyGroup,
+        iconActions: [
+          if (_canSaveDraft && !_saving)
+            IconButtonData(
+              glyph: AppGlyphs.save,
+              tooltip: appLocalizations.saveRoutingDraft,
+              onPressed: () => _submit(saveDraft: true),
+            ),
+        ],
+        confirmationAction: IconButtonData(
+          glyph: AppGlyphs.check,
+          tooltip: appLocalizations.save,
+          isLoading: _saving,
+          onPressed: _saving ? null : _submit,
+        ),
+        body: ExcludeFocus(
+          excluding: _saving,
+          child: AbsorbPointer(
+            absorbing: _saving,
+            child: CustomScrollView(
+              key: ValueKey(_revision),
+              controller: _scrollController,
+              slivers: [
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(
+                    16,
+                    context.contentTopPadding,
+                    16,
+                    0,
+                  ),
+                  sliver: SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        ErrorBanner(message: _bannerMessage),
+                        if (_canSaveDraft && !_saving)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                            child: Text(
+                              appLocalizations.routingDraftHint,
+                              style: context.listCaptionStyle,
+                            ),
+                          ),
+                        generateSection(
+                          title: appLocalizations.general,
+                          footer: _groupTypeHint(_type),
+                          items: [
+                            _textItem(
+                              title: appLocalizations.name,
+                              controller: _nameController,
+                              invalid: invalid.contains(_Field.name),
+                              maxLength: TextInputLimits.groupName,
+                              hintText: appLocalizations.inputProxyGroupName,
+                            ),
+                            FormRow(
+                              title: appLocalizations.routingGroupType,
+                              onPressed: _showTypeOptions,
+                              trailing: _chevronValue(
+                                customProxyGroupTypeLabel(_type),
+                              ),
+                            ),
+                            FormRow(
+                              title: appLocalizations.icon,
+                              onPressed: _showIconPicker,
+                              trailing: Row(
+                                spacing: 2,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (icon.isNotEmpty)
+                                    CommonTargetIcon(src: icon, size: 28)
+                                  else
+                                    Flexible(
+                                      child: Text(
+                                        appLocalizations.optional,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: context.listTitleStyle.copyWith(
+                                          color: context
+                                              .colorScheme
+                                              .onSurfaceVariant,
+                                        ),
+                                      ),
+                                    ),
+                                  const GlyphIcon(AppGlyphs.chevronForward),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  sliver: _buildMembers(invalid.contains(_Field.members)),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                  sliver: SliverList.list(
+                    children: [
+                      if (_hasDynamicMembers ||
+                          _filterController.text.isNotEmpty ||
+                          _excludeFilterController.text.isNotEmpty)
+                        _buildFilters(),
+                      _buildOptions(invalid),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+typedef _Entry = ({_Member member, String title, String? subtitle});
+
+class _Category {
+  final String label;
+  final List<_Entry> entries;
+
+  const _Category({required this.label, required this.entries});
+}
+
+/// Pops with the members picked, in the order they were picked.
+class _MemberPicker extends StatefulWidget {
+  final List<String> available;
+  final Map<String, String> groupTypes;
+  final List<String> providers;
+  final Map<String, String> providerSources;
+  final Set<_MemberKind> taken;
+
+  const _MemberPicker({
+    required this.available,
+    required this.groupTypes,
+    required this.providers,
+    required this.providerSources,
+    required this.taken,
+  });
+
+  @override
+  State<_MemberPicker> createState() => _MemberPickerState();
+}
+
+class _MemberPickerState extends State<_MemberPicker> {
+  var _selected = <_Member>[];
+  var _query = SearchQuery('');
+
+  void _toggle(_Member member) {
+    setState(() {
+      _selected = _selected.contains(member)
+          ? [
+              for (final item in _selected)
+                if (item != member) item,
+            ]
+          : [..._selected, member];
+    });
+  }
+
+  List<_Category> get _categories {
+    final builtIns = {
+      for (final name in widget.available)
+        if (reservedOutboundNames.contains(name)) name,
+    };
+    _Entry named(_MemberKind kind, String name, String? subtitle) =>
+        (member: (kind: kind, name: name), title: name, subtitle: subtitle);
+    _Entry every(_MemberKind kind, String title) =>
+        (member: (kind: kind, name: _everyName), title: title, subtitle: null);
+    return [
+      _Category(
+        label: appLocalizations.basicStrategy,
+        entries: [
+          for (final name in builtIns) named(_MemberKind.proxy, name, null),
+        ],
+      ),
+      _Category(
+        label: appLocalizations.autoInclude,
+        entries: [
+          if (!widget.taken.contains(_MemberKind.allProxies))
+            every(_MemberKind.allProxies, appLocalizations.includeAllProxies),
+          if (!widget.taken.contains(_MemberKind.allProviders))
+            every(
+              _MemberKind.allProviders,
+              appLocalizations.includeAllProxyProviders,
+            ),
+          if (!widget.taken.contains(_MemberKind.all))
+            every(_MemberKind.all, appLocalizations.includeAll),
+        ],
+      ),
+      _Category(
+        label: appLocalizations.proxyGroup,
+        entries: [
+          for (final name in widget.available)
+            if (widget.groupTypes[name] case final type?)
+              named(_MemberKind.proxy, name, type),
+        ],
+      ),
+      _Category(
+        label: appLocalizations.proxies,
+        entries: [
+          for (final name in widget.available)
+            if (!builtIns.contains(name) &&
+                !widget.groupTypes.containsKey(name))
+              named(_MemberKind.proxy, name, null),
+        ],
+      ),
+      _Category(
+        label: appLocalizations.proxyProviders,
+        entries: [
+          for (final name in widget.providers)
+            named(_MemberKind.provider, name, widget.providerSources[name]),
+        ],
+      ),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final categories = [
+      for (final category in _categories)
+        _Category(
+          label: category.label,
+          entries: [
+            for (final entry in category.entries)
+              if (_query.matches([entry.title, ?entry.subtitle])) entry,
+          ],
+        ),
+    ].where((category) => category.entries.isNotEmpty).toList();
+    final total = categories.fold(
+      0,
+      (count, category) => count + category.entries.length,
+    );
+    return CommonPopScope(
+      onPop: (_) {
+        Navigator.of(context).pop(_selected);
+        return false;
+      },
+      child: CommonScaffold(
+        title: appLocalizations.addNodes,
+        searchState: !_query.isEmpty || total >= sheetSearchMinItemCount
+            ? AppBarSearchState(
+                onSearch: (value) =>
+                    setState(() => _query = SearchQuery(value)),
+              )
+            : null,
+        confirmationAction: IconButtonData(
+          glyph: AppGlyphs.check,
+          tooltip: appLocalizations.confirm,
+          onPressed: () => Navigator.of(context).pop(_selected),
+        ),
+        body: NullStatusSwitcher(
+          isEmpty: categories.isEmpty,
+          isSearching: !_query.isEmpty,
+          nullStatus: NullStatus(label: appLocalizations.noData),
+          child: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 16)
+                .copyWith(top: context.contentTopPadding, bottom: 16),
+            children: [
+              for (final category in categories)
+                generateSection(
+                  title: category.label,
+                  items: [
+                    for (final entry in category.entries)
+                      DecorationListItem(
+                        isSelected: _selected.contains(entry.member),
+                        onPressed: () => _toggle(entry.member),
+                        title: TooltipText(
+                          text: Text(
+                            entry.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        subtitle: switch (entry.subtitle) {
+                          final subtitle? => TooltipLabel(
+                            subtitle,
+                            maxLines: 1,
+                          ),
+                          null => null,
+                        },
+                        trailing: _selected.contains(entry.member)
+                            ? const SelectionCheck()
+                            : null,
+                      ),
+                  ],
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Pops with the icon chosen, an empty string to remove it, or null when left
+/// without a choice.
+class _IconView extends StatefulWidget {
+  final String icon;
+
+  const _IconView({required this.icon});
+
+  @override
+  State<_IconView> createState() => _IconViewState();
+}
+
+class _IconViewState extends State<_IconView> {
+  late final _controller = TextEditingController(text: widget.icon);
+  bool _attempted = false;
+
+  String? get _issue {
+    final url = _controller.text.trim();
+    return url.isNotEmpty && !url.isUrl
+        ? appLocalizations.urlTip(appLocalizations.iconUrl)
+        : null;
+  }
+
+  void _handleSave() {
+    if (_issue != null) {
+      setState(() => _attempted = true);
+      return;
+    }
+    Navigator.of(context).pop(_controller.text.trim());
+  }
+
+  Future<void> _handleHistory() async {
+    final url = await showOverwriteSheet<String>(
+      context: context,
+      builder: (_) => const IconHistoryDialog(),
+    );
+    if (url == null || !mounted) return;
+    setState(() => _controller.text = url);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget textField({
-      required TextEditingController controller,
-      required String label,
-      TextInputType? keyboardType,
-      int maxLength = TextInputLimits.filter,
-      String? Function(String? value)? validator,
-      String? unit,
-      String? errorText,
-    }) {
-      return TextFormField(
-        enabled: !_saving,
-        autocorrect: false,
-        smartDashesType: SmartDashesType.disabled,
-        smartQuotesType: SmartQuotesType.disabled,
-        controller: controller,
-        keyboardType: keyboardType,
-        inputFormatters: TextInputLimits.limit(maxLength),
-        decoration: InputDecoration(
-          labelText: label,
-          suffixText: unit,
-          errorText: errorText,
-          errorMaxLines: 3,
-          border: const OutlineInputBorder(),
-        ),
-        validator: validator,
-      );
-    }
-
-    Widget switchField({
-      required String label,
-      required bool value,
-      required ValueChanged<bool> onChanged,
-    }) {
-      return SwitchListTile(
-        contentPadding: EdgeInsets.zero,
-        title: Text(label),
-        value: value,
-        onChanged: onChanged,
-      );
-    }
-
-    String? positiveIntValidator(String? value) {
-      final text = value?.trim() ?? '';
-      if (text.isNotEmpty && (int.tryParse(text) ?? 0) <= 0) {
-        return appLocalizations.numberTip(appLocalizations.value);
-      }
-      return null;
-    }
-
-    String? toleranceValidator(String? value) {
-      final text = value?.trim() ?? '';
-      if (text.isEmpty) {
-        return null;
-      }
-      final tolerance = int.tryParse(text);
-      if (tolerance == null || tolerance < 0 || tolerance > 65535) {
-        return '0 - 65535';
-      }
-      return null;
-    }
-
-    final strategyOptions = <String>{
-      'consistent-hashing',
-      'round-robin',
-      'sticky-sessions',
-      _strategy,
-    };
-
-    return OverwriteEditorForm(
-      isDirty: () => !const ListEquality().equals(_origin, _snapshot),
-      save: _submit,
-      isBusy: () => _saving,
-      maxWidth: 480,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      title: widget.group == null
-          ? appLocalizations.addProxyGroup
-          : appLocalizations.editProxyGroup,
-      actions: [
-        if (_canSaveDraft && !_saving)
-          TextButton(
-            onPressed: () => _submit(saveDraft: true),
-            child: Text(appLocalizations.saveRoutingDraft),
-          ),
-        TextButton(
-          onPressed: () => context.safeNestedPop(),
-          child: Text(appLocalizations.cancel),
-        ),
-        FilledButton(
-          onPressed: _saving ? null : _submit,
-          child: _saving
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(appLocalizations.save),
-        ),
-      ],
-      overrideScroll: true,
-      child: SingleChildScrollView(
-        controller: _scrollController,
-        child: ExcludeFocus(
-          excluding: _saving,
-          child: AbsorbPointer(
-            absorbing: _saving,
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  if (_error != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8, bottom: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _error!,
-                            style: TextStyle(color: context.colorScheme.error),
-                          ),
-                          if (_canSaveDraft) ...[
-                            const SizedBox(height: 8),
-                            Text(
-                              appLocalizations.routingDraftHint,
-                              style: context.textTheme.bodySmall,
-                            ),
-                          ],
-                        ],
+    final issue = _attempted ? _issue : null;
+    final url = _controller.text.trim();
+    return CommonScaffold(
+      title: appLocalizations.icon,
+      confirmationAction: IconButtonData(
+        glyph: AppGlyphs.check,
+        tooltip: appLocalizations.save,
+        onPressed: _handleSave,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 16)
+            .copyWith(top: context.contentTopPadding, bottom: 16),
+        children: [
+          ErrorBanner(message: issue),
+          generateSection(
+            items: [
+              FormRow(
+                title: appLocalizations.iconUrl,
+                invalid: issue != null,
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 8,
+                  children: [
+                    if (url.isUrl)
+                      CommonTargetIcon(
+                        src: url,
+                        size: 24,
+                        recordHistory: false,
                       ),
-                    ),
-                  TextFormField(
-                    enabled: !_saving,
-                    autocorrect: false,
-                    smartDashesType: SmartDashesType.disabled,
-                    smartQuotesType: SmartQuotesType.disabled,
-                    controller: _nameController,
-                    inputFormatters: TextInputLimits.limit(
-                      TextInputLimits.groupName,
-                    ),
-                    decoration: InputDecoration(
-                      labelText: appLocalizations.name,
-                      border: const OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      final name = value?.trim() ?? '';
-                      if (RegExp(r'[,\r\n\x00]').hasMatch(name)) {
-                        return appLocalizations.customRuleInvalidSyntax;
-                      }
-                      if (name.isEmpty) {
-                        return appLocalizations.proxyGroupNameEmpty;
-                      }
-                      final duplicate = widget.existingGroups.any(
-                        (item) => item != widget.group && item.name == name,
-                      );
-                      if (duplicate) {
-                        return appLocalizations.existsTip(
-                          appLocalizations.name,
-                        );
-                      }
-                      if (name != widget.group?.name &&
-                          widget.reservedNames.contains(name)) {
-                        return appLocalizations.existsTip(
-                          appLocalizations.name,
-                        );
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  DropdownButtonFormField<GroupType>(
-                    isExpanded: true,
-                    initialValue: _type,
-                    decoration: InputDecoration(
-                      labelText: appLocalizations.routingGroupType,
-                      border: const OutlineInputBorder(),
-                    ),
-                    items: GroupType.values
-                        .where(
-                          (type) =>
-                              type != GroupType.Relay ||
-                              _type == GroupType.Relay,
-                        )
-                        .map(
-                          (type) => DropdownMenuItem(
-                            value: type,
-                            child: Text(
-                              customProxyGroupTypeLabel(type),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() => _type = value);
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    _groupTypeHint(_type),
-                    style: context.textTheme.bodySmall,
-                  ),
-                  const SizedBox(height: 8),
-                  _memberField(
-                    _proxiesController,
-                    widget.availableMembers,
-                    appLocalizations.chooseMembers,
-                  ),
-                  if (_type == GroupType.Fallback)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Text(
-                        appLocalizations.memberOrderHint,
-                        style: context.textTheme.bodySmall,
-                      ),
-                    ),
-                  if (widget.availableProviders.isNotEmpty ||
-                      _providersController.text.isNotEmpty)
-                    _memberField(
-                      _providersController,
-                      widget.availableProviders,
-                      appLocalizations.proxyProviders,
-                    ),
-                  switchField(
-                    label: appLocalizations.includeAllProxies,
-                    value: _includeAllProxies,
-                    onChanged: (value) =>
-                        setState(() => _includeAllProxies = value),
-                  ),
-                  switchField(
-                    label: appLocalizations.includeAllProxyProviders,
-                    value: _includeAllProviders,
-                    onChanged: (value) =>
-                        setState(() => _includeAllProviders = value),
-                  ),
-                  if (_includeAllProxies ||
-                      _includeAllProviders ||
-                      _includeAll) ...[
-                    Text(
-                      appLocalizations.dynamicMembersHint,
-                      style: context.textTheme.bodySmall,
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                  if (_hasDynamicMembers)
-                    textField(
-                      controller: _filterController,
-                      label: appLocalizations.proxyFilter,
-                      errorText: _filterErrors[0].value,
-                    ),
-                  if (_hasDynamicMembers)
-                    Text(
-                      appLocalizations.groupFilterHint,
-                      style: context.textTheme.bodySmall,
-                    ),
-                  const SizedBox(height: 8),
-                  ExpansionTile(
-                    title: Text(appLocalizations.advancedConfig),
-                    tilePadding: EdgeInsets.zero,
-                    initiallyExpanded: widget.group != null,
-                    maintainState: true,
-                    children: [
-                      TextField(
-                        enabled: !_saving,
-                        autocorrect: false,
-                        smartDashesType: SmartDashesType.disabled,
-                        smartQuotesType: SmartQuotesType.disabled,
-                        controller: _proxiesController,
-                        onChanged: (_) => setState(() {}),
-                        minLines: 2,
-                        maxLines: 4,
-                        inputFormatters: TextInputLimits.limit(65536),
-                        decoration: InputDecoration(
-                          labelText: appLocalizations.proxies,
-                          border: const OutlineInputBorder(),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      TextField(
-                        enabled: !_saving,
-                        autocorrect: false,
-                        smartDashesType: SmartDashesType.disabled,
-                        smartQuotesType: SmartQuotesType.disabled,
-                        controller: _providersController,
-                        onChanged: (_) => setState(() {}),
-                        minLines: 2,
-                        maxLines: 4,
-                        inputFormatters: TextInputLimits.limit(65536),
-                        decoration: InputDecoration(
-                          labelText: appLocalizations.proxyProviders,
-                          border: const OutlineInputBorder(),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        enabled: !_saving,
-                        autocorrect: false,
-                        smartDashesType: SmartDashesType.disabled,
-                        smartQuotesType: SmartQuotesType.disabled,
-                        controller: _urlController,
+                    Flexible(
+                      child: FormRowTextField(
+                        controller: _controller,
                         keyboardType: TextInputType.url,
+                        autocorrect: false,
                         inputFormatters: TextInputLimits.limit(
-                          TextInputLimits.url,
+                          TextInputLimits.iconUrl,
                         ),
-                        decoration: InputDecoration(
-                          labelText: appLocalizations.url,
-                          border: const OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          final url = value?.trim() ?? '';
-                          if (url.isNotEmpty && !url.isUrl) {
-                            return appLocalizations.urlTip(
-                              appLocalizations.url,
-                            );
-                          }
-                          return null;
-                        },
+                        hintText: appLocalizations.optional,
+                        onChanged: (_) => setState(() {}),
+                        onFieldSubmitted: (_) => _handleSave(),
                       ),
-                      const SizedBox(height: 16),
-                      textField(
-                        controller: _intervalController,
-                        label: appLocalizations.interval,
-                        unit: 's',
-                        keyboardType: TextInputType.number,
-                        maxLength: TextInputLimits.interval,
-                        validator: positiveIntValidator,
-                      ),
-                      if (_type == GroupType.URLTest) ...[
-                        const SizedBox(height: 16),
-                        textField(
-                          controller: _toleranceController,
-                          label: appLocalizations.tolerance,
-                          unit: 'ms',
-                          keyboardType: TextInputType.number,
-                          maxLength: TextInputLimits.interval,
-                          validator: toleranceValidator,
-                        ),
-                      ],
-                      const SizedBox(height: 16),
-                      textField(
-                        controller: _timeoutController,
-                        label: appLocalizations.timeout,
-                        unit: 'ms',
-                        keyboardType: TextInputType.number,
-                        maxLength: TextInputLimits.interval,
-                        validator: positiveIntValidator,
-                      ),
-                      const SizedBox(height: 16),
-                      textField(
-                        controller: _maxFailedTimesController,
-                        label: appLocalizations.maxFailedTimes,
-                        keyboardType: TextInputType.number,
-                        maxLength: TextInputLimits.interval,
-                        validator: positiveIntValidator,
-                      ),
-                      const SizedBox(height: 16),
-                      textField(
-                        controller: _excludeFilterController,
-                        label: appLocalizations.excludeProxyFilter,
-                        errorText: _filterErrors[1].value,
-                      ),
-                      const SizedBox(height: 16),
-                      textField(
-                        controller: _excludeTypeController,
-                        label: appLocalizations.excludeType,
-                      ),
-                      const SizedBox(height: 16),
-                      textField(
-                        controller: _expectedStatusController,
-                        label: appLocalizations.expectedStatus,
-                      ),
-                      const SizedBox(height: 16),
-                      textField(
-                        controller: _iconController,
-                        label: appLocalizations.iconUrl,
-                        keyboardType: TextInputType.url,
-                        maxLength: TextInputLimits.iconUrl,
-                        validator: (value) {
-                          final url = value?.trim() ?? '';
-                          if (url.isNotEmpty && !url.isUrl) {
-                            return appLocalizations.urlTip(
-                              appLocalizations.iconUrl,
-                            );
-                          }
-                          return null;
-                        },
-                      ),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton.icon(
-                          icon: const GlyphIcon(AppGlyphs.history),
-                          label: Text(appLocalizations.iconHistory),
-                          onPressed: () async {
-                            final url = await showOverwriteSheet<String>(
-                              context: context,
-                              builder: (_) => const IconHistoryDialog(),
-                            );
-                            if (url != null && mounted) {
-                              _iconController.text = url;
-                            }
-                          },
-                        ),
-                      ),
-                      if (_type == GroupType.LoadBalance) ...[
-                        const SizedBox(height: 16),
-                        DropdownButtonFormField<String>(
-                          isExpanded: true,
-                          initialValue: _strategy,
-                          decoration: InputDecoration(
-                            labelText: appLocalizations.strategy,
-                            border: const OutlineInputBorder(),
-                          ),
-                          items: strategyOptions
-                              .map(
-                                (strategy) => DropdownMenuItem(
-                                  value: strategy,
-                                  child: Text(strategy),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (value) {
-                            if (value != null) {
-                              setState(() => _strategy = value);
-                            }
-                          },
-                        ),
-                      ],
-                      const SizedBox(height: 4),
-                      switchField(
-                        label: appLocalizations.lazy,
-                        value: _lazy,
-                        onChanged: (value) => setState(() => _lazy = value),
-                      ),
-                      switchField(
-                        label: appLocalizations.disableUDP,
-                        value: _disableUdp,
-                        onChanged: (value) =>
-                            setState(() => _disableUdp = value),
-                      ),
-                      switchField(
-                        label: appLocalizations.hideFromList,
-                        value: _hidden,
-                        onChanged: (value) => setState(() => _hidden = value),
-                      ),
-                      switchField(
-                        label: appLocalizations.includeAll,
-                        value: _includeAll,
-                        onChanged: (value) =>
-                            setState(() => _includeAll = value),
-                      ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
-            ),
+              FormRow(
+                title: appLocalizations.iconHistory,
+                onPressed: _handleHistory,
+                trailing: const GlyphIcon(AppGlyphs.chevronForward),
+              ),
+            ],
           ),
-        ),
+          const SizedBox(height: 24),
+          if (widget.icon.isNotEmpty)
+            generateSection(
+              items: [
+                FormRow(
+                  title: appLocalizations.remove,
+                  titleStyle: TextStyle(color: context.colorScheme.error),
+                  onPressed: () => Navigator.of(context).pop(''),
+                ),
+              ],
+            ),
+        ],
       ),
     );
   }

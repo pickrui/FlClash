@@ -1531,5 +1531,16 @@
   "confirmDeleteProxyGroup": "Вы уверены, что хотите удалить эту группу прокси?",
   "invalidProxyProvider": "{providerName} — недопустимый провайдер прокси",
   "customIssuesSummary": "Проблем: {count}, применение профиля может завершиться ошибкой",
-  "sectionsInEffect": "Действуют: {count}"
+  "sectionsInEffect": "Действуют: {count}",
+  "emptyFallback": "Резерв для пустой группы",
+  "testInterval": "Интервал тестирования",
+  "testWhenUsed": "Тестировать при использовании",
+  "defaultSelected": "Выбор по умолчанию",
+  "hashByInUser": "Хешировать по пользователю входящего подключения",
+  "nodes": "Узлы",
+  "addNodes": "Добавить узлы",
+  "autoInclude": "Автоматическое включение",
+  "filters": "Фильтры",
+  "inputProxyGroupName": "Введите название группы прокси",
+  "definitionNotMap": "Конфигурация должна быть YAML-словарём с полями name и type"
 }

@@ -86,6 +86,8 @@ enum EditorSchema {
   ntp(_ntp),
   sniffer(_sniffer),
   proxy(_proxy),
+  proxyGroup(_proxyGroup),
+  rules(_rules),
   provider(_providerFile);
 
   final YamlSchema root;
