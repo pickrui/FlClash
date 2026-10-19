@@ -5,6 +5,76 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 part of '../action.dart';
 
+String get _coreDisconnectedMessage => appLocalizations.coreNotConnected;
+
+class _CoreStartCancelledException implements Exception {
+  const _CoreStartCancelledException();
+}
+
+/// Keeps listener recovery inside the original action, so cancelling a start
+/// does not turn an otherwise successful sign-in into an authentication error.
+Future<bool> startCoreWithPortRecovery({
+  required Future<void> Function() start,
+  required Future<bool> Function() resolveConflict,
+  required bool Function() shouldContinue,
+}) async {
+  while (shouldContinue()) {
+    try {
+      await start();
+      return shouldContinue();
+    } on PortConflictException {
+      if (!shouldContinue() || !await resolveConflict()) {
+        return false;
+      }
+    }
+  }
+  return false;
+}
+
+/// A failed restart must also end the running state, tray and system proxy.
+Future<void> restartCoreOrStop({
+  required Future<void> Function() restart,
+  required bool Function() isRunning,
+  required Future<void> Function() stop,
+}) async {
+  try {
+    await restart();
+  } catch (error, stackTrace) {
+    if (isRunning()) {
+      try {
+        await stop();
+      } catch (stopError) {
+        commonPrint.log(
+          'Stopping after a failed core restart failed: $stopError',
+          logLevel: LogLevel.warning,
+        );
+      }
+    }
+    Error.throwWithStackTrace(error, stackTrace);
+  }
+}
+
+bool shouldStopCoreAfterApplyFailure({
+  required bool isRunning,
+  required bool candidateValidationFailed,
+  bool coreSetupSucceeded = false,
+}) {
+  return isRunning && !candidateValidationFailed && !coreSetupSucceeded;
+}
+
+@visibleForTesting
+Future<bool> ensureInteractiveCoreReady({
+  required Future<bool> Function() probe,
+  required Future<bool> Function() recover,
+}) async {
+  try {
+    if (await probe()) {
+      return true;
+    }
+  } catch (_) {}
+  return recover();
+}
+
 @Riverpod(keepAlive: true)
 class CoreAction extends _$CoreAction {
   @override

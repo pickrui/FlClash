@@ -5,6 +5,42 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 part of '../action.dart';
 
+bool canPublishGroupsForProfile(int? profileId, SetupState? appliedState) {
+  return profileId != null && appliedState?.profileId == profileId;
+}
+
+bool canChangeProxyForProfile({
+  required int requestedProfileId,
+  required int? currentProfileId,
+  required SetupState? appliedState,
+}) {
+  return requestedProfileId == currentProfileId &&
+      canPublishGroupsForProfile(requestedProfileId, appliedState);
+}
+
+Future<String> validateProxyGroupFilters(
+  ProxyGroup group,
+  Future<String> Function(String data) validate,
+) async {
+  if ((group.filter?.isEmpty ?? true) &&
+      (group.excludeFilter?.isEmpty ?? true)) {
+    return '';
+  }
+  final validationGroup = <String, Object?>{
+    'name': 'Filter validation',
+    'type': 'select',
+    'proxies': ['DIRECT'],
+    if (group.filter?.isNotEmpty == true) 'filter': group.filter,
+    if (group.excludeFilter?.isNotEmpty == true)
+      'exclude-filter': group.excludeFilter,
+  };
+  final yaml = await encodeYamlTask({
+    'proxy-groups': [validationGroup],
+    'rules': ['MATCH,DIRECT'],
+  });
+  return validate(base64Encode(utf8.encode(yaml)));
+}
+
 final _delayTestFailurePrompt = NetworkFailurePromptGate();
 
 /// Group and built-in types that never count as a usable proxy node.

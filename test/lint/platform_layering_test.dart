@@ -9,7 +9,7 @@ import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 // Application binds page construction so the common barrel reaches no views.
-const _closureBudget = 189;
+const _closureBudget = 146;
 const _viewsInClosureBudget = 0;
 
 final _directive = RegExp(
@@ -64,16 +64,24 @@ void main() {
 
   test('the common barrel does not reach further than it does today', () {
     final reached = _closureOfCommonBarrel();
-    final libFiles = reached.where((uri) => uri.startsWith('lib/')).toList();
+    final libraries = reached.where((uri) {
+      if (!uri.startsWith('lib/')) return false;
+      final file = File(uri);
+      return !file.existsSync() ||
+          !RegExp(
+            r'^\s*part\s+of\s',
+            multiLine: true,
+          ).hasMatch(file.readAsStringSync());
+    }).toList();
     final views = reached.where((uri) => uri.startsWith('lib/views/')).toList()
       ..sort();
 
     expect(
-      libFiles.length,
+      libraries.length,
       lessThanOrEqualTo(_closureBudget),
       reason:
           'Importing the common barrel for a string helper now compiles '
-          '${libFiles.length} files. Pass what the lower layer needs through a '
+          '${libraries.length} Dart libraries (parts share their owner). Pass what the lower layer needs through a '
           'port the UI binds, the way upstream does in common/app_ports.dart, '
           'or lower _closureBudget once it shrinks.',
     );

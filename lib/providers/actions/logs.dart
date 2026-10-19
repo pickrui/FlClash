@@ -5,6 +5,40 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 part of '../action.dart';
 
+const _persistentLogFileName = 'app.log';
+
+const _persistentLogMaxBytes = 1024 * 1024;
+
+const _persistentLogKeepBytes = 768 * 1024;
+
+@visibleForTesting
+Uint8List retainCompleteLogLines(Uint8List bytes, int keepBytes) {
+  if (bytes.length <= keepBytes) {
+    return bytes;
+  }
+  final lineStart = bytes.indexOf(10, bytes.length - keepBytes);
+  if (lineStart == -1 || lineStart + 1 >= bytes.length) {
+    return Uint8List(0);
+  }
+  return Uint8List.sublistView(bytes, lineStart + 1);
+}
+
+@visibleForTesting
+Uint8List limitLogLine(Uint8List bytes, int maxBytes) {
+  if (bytes.length <= maxBytes) {
+    return bytes;
+  }
+  const suffix = [46, 46, 46, 10];
+  if (maxBytes <= suffix.length) {
+    return Uint8List.fromList(suffix.sublist(0, maxBytes));
+  }
+  var end = maxBytes - suffix.length;
+  while (end > 0 && bytes[end] & 0xc0 == 0x80) {
+    end--;
+  }
+  return Uint8List.fromList([...bytes.sublist(0, end), ...suffix]);
+}
+
 @Riverpod(keepAlive: true)
 class LogsAction extends _$LogsAction {
   @override

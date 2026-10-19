@@ -5,6 +5,25 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 part of '../action.dart';
 
+Future<void> deleteApplicationSupportData(
+  String homePath, {
+  required Set<String> preservePaths,
+}) async {
+  final homeDirectory = Directory(homePath);
+  if (!await homeDirectory.exists()) {
+    return;
+  }
+  final normalizedPreservePaths = preservePaths
+      .map((path) => p.absolute(p.normalize(path)))
+      .toSet();
+  await for (final entry in homeDirectory.list(followLinks: false)) {
+    if (normalizedPreservePaths.contains(p.absolute(p.normalize(entry.path)))) {
+      continue;
+    }
+    await durableDeleteEntity(entry.path);
+  }
+}
+
 @Riverpod(keepAlive: true)
 class BackupAction extends _$BackupAction {
   @override

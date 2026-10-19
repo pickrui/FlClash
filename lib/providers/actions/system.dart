@@ -5,6 +5,49 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 part of '../action.dart';
 
+Future<void> runCleanupActions(
+  Iterable<FutureOr<void> Function()> actions,
+) async {
+  Object? firstError;
+  StackTrace? firstStackTrace;
+  for (final action in actions) {
+    try {
+      await action();
+    } catch (error, stackTrace) {
+      firstError ??= error;
+      firstStackTrace ??= stackTrace;
+    }
+  }
+  if (firstError != null) {
+    Error.throwWithStackTrace(
+      firstError,
+      firstStackTrace ?? StackTrace.current,
+    );
+  }
+}
+
+class ExitCoordinator {
+  Future<void>? _pending;
+
+  Future<void> run({
+    required Future<void> Function() cleanup,
+    required Future<void> Function() terminate,
+    Duration timeout = const Duration(seconds: 10),
+  }) => _pending ??= _run(cleanup, terminate, timeout);
+
+  Future<void> _run(
+    Future<void> Function() cleanup,
+    Future<void> Function() terminate,
+    Duration timeout,
+  ) async {
+    try {
+      await cleanup().timeout(timeout, onTimeout: () {});
+    } finally {
+      await terminate();
+    }
+  }
+}
+
 @Riverpod(keepAlive: true)
 class SystemAction extends _$SystemAction {
   @override

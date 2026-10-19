@@ -5,6 +5,107 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 part of '../action.dart';
 
+Dio createAppUpdateDownloadClient() =>
+    Dio(
+        BaseOptions(
+          headers: {'User-Agent': browserUa},
+          connectTimeout: const Duration(seconds: 10),
+        ),
+      )
+      ..httpClientAdapter = createFlClashHttpClientAdapter(
+        findProxy: FlClashHttpOverrides.handleResourceFindProxy,
+      );
+
+String? getAppUpdateDownloadUrl(
+  Abi abi, {
+  LinuxPackageFormat linuxFormat = LinuxPackageFormat.deb,
+}) {
+  if (linuxFormat.managed) return null;
+  final name = switch (abi) {
+    Abi.windowsX64 => 'windows-amd64-setup.exe',
+    Abi.windowsArm64 => 'windows-arm64-setup.exe',
+    Abi.macosX64 => 'macos-amd64.dmg',
+    Abi.macosArm64 => 'macos-arm64.dmg',
+    Abi.androidArm => 'android-armeabi-v7a.apk',
+    Abi.androidArm64 => 'android-arm64-v8a.apk',
+    Abi.androidX64 => 'android-x86_64.apk',
+    Abi.linuxX64 => 'linux-amd64.${linuxFormat.extension}',
+    Abi.linuxArm64 => 'linux-arm64.${linuxFormat.extension}',
+    _ => null,
+  };
+  return name == null ? null : 'https://dl.dler.io/flclash-$name';
+}
+
+bool isAppImageInstaller(File file) =>
+    p.extension(file.path) == '.${LinuxPackageFormat.appImage.extension}';
+
+/// The installed package format outranks a stored answer; null asks the user.
+LinuxPackageFormat? resolveLinuxUpdateFormat({
+  required List<LinuxPackageFormat> published,
+  required LinuxPackageFormat? detected,
+  required LinuxPackageFormat? stored,
+}) {
+  if (detected != null && detected.managed) return detected;
+  // An ABI with no Linux package at all falls through to the download page.
+  if (published.isEmpty) return LinuxPackageFormat.deb;
+  if (published.length == 1) return published.first;
+  if (stored != null && published.contains(stored)) return stored;
+  if (detected != null && published.contains(detected)) return detected;
+  return null;
+}
+
+String getAppUpdateFallbackDownloadUrl(
+  String downloadUrl, {
+  String? releaseTag,
+}) {
+  final fileName = Uri.parse(downloadUrl).pathSegments.last;
+  return Uri.https(
+    'github.com',
+    releaseTag == null
+        ? '/$releaseRepository/releases/latest/download/$fileName'
+        : '/$releaseRepository/releases/download/$releaseTag/$fileName',
+  ).toString();
+}
+
+enum AppUpdateOffer { prompt, notice, ignore }
+
+AppUpdateOffer resolveAppUpdateOffer({
+  required bool isUser,
+  required int remoteBuildNumber,
+  required int? declinedBuildNumber,
+}) {
+  if (isUser) return AppUpdateOffer.prompt;
+  if (declinedBuildNumber != null && remoteBuildNumber <= declinedBuildNumber) {
+    return AppUpdateOffer.ignore;
+  }
+  return AppUpdateOffer.notice;
+}
+
+/// The window has to be up before the release notes can be confirmed.
+Future<T?> promptForAppUpdate<T>({
+  required Future<void> Function()? showWindow,
+  required Future<T?> Function() prompt,
+}) async {
+  await showWindow?.call();
+  return prompt();
+}
+
+/// Called only after the user explicitly chooses to install a ready update.
+Future<void> openAppUpdateDownload({
+  required File file,
+  required Future<bool> Function(File file) openFile,
+  required Future<void> Function() openBrowser,
+  required void Function(Object error) onError,
+}) async {
+  try {
+    if (await openFile(file)) return;
+    throw StateError('Unable to open downloaded update');
+  } catch (error) {
+    onError(error);
+    await openBrowser();
+  }
+}
+
 @Riverpod(keepAlive: true)
 class UpdateAction extends _$UpdateAction {
   @override
