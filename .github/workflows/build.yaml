@@ -178,7 +178,7 @@ jobs:
         working-directory: core
         run: |
           go test -race tun_callbacks.go tun_callbacks_test.go
-          go test -race ownership_unix.go ownership_test.go ownership_stat_linux_test.go
+          go test -race -count=1 -tags "$GO_TAGS" -run '^(TestReclaim|TestUnprivilegedOwnershipRecovery|TestElevatedSpill)' .
 
   android-core-test:
     name: Android core
