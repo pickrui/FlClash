@@ -348,13 +348,10 @@ ProxiesListState proxiesListState(Ref ref) {
   final cardType = ref.watch(
     proxiesStyleSettingProvider.select((state) => state.cardType),
   );
-
-  final columns = ref.watch(getProxiesColumnsProvider);
   return ProxiesListState(
     groups: currentGroups.value,
     currentUnfoldSet: currentUnfoldSet,
     proxyCardType: cardType,
-    columns: columns,
   );
 }
 

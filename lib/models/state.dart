@@ -120,7 +120,6 @@ abstract class ProxiesListState with _$ProxiesListState {
     required List<Group> groups,
     required Set<String> currentUnfoldSet,
     required ProxyCardType proxyCardType,
-    required int columns,
   }) = _ProxiesListState;
 }
 

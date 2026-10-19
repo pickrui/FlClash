@@ -12,11 +12,18 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/ui/typography.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+const proxyGridSpacing = 8.0;
 
 double get listHeaderHeight {
   final measure = globalState.measure;
-  return 20 + measure.titleSmallHeight + 2 + measure.labelSmallHeight + 2;
+  return 20 +
+      measure.textHeight(AppTextStyle.callout) +
+      2 +
+      measure.textHeight(AppTextStyle.caption1) +
+      2;
 }
 
 double getItemHeight(ProxyCardType proxyCardType) {
@@ -34,6 +41,58 @@ double getItemHeight(ProxyCardType proxyCardType) {
     ProxyCardType.compact =>
       baseHeight - measure.textHeight(AppTextStyle.subheadline),
   };
+}
+
+double getRowExtent(ProxyCardType proxyCardType) =>
+    getItemHeight(proxyCardType) + proxyGridSpacing;
+
+double cardSpacingOf(BuildContext context, ViewMode viewMode) =>
+    switch (viewMode) {
+      ViewMode.mobile => 8.0,
+      ViewMode.laptop => 12.0,
+      ViewMode.desktop => 16.0,
+    }.mAp(context);
+
+class GroupOffsets {
+  const GroupOffsets(this.groups, this.offsets);
+
+  static const empty = GroupOffsets(<Group>[], <double>[]);
+
+  final List<Group> groups;
+  final List<double> offsets;
+
+  bool get isEmpty => offsets.isEmpty;
+
+  double offsetOf(String groupName) {
+    final index = groups.indexWhere((group) => group.name == groupName);
+    if (index < 0 || index >= offsets.length) {
+      return 0;
+    }
+    return offsets[index];
+  }
+}
+
+double? selectedRowOffset({
+  required int selectedIndex,
+  required int columns,
+  required double rowExtent,
+}) {
+  if (selectedIndex < 0) {
+    return null;
+  }
+  return (selectedIndex ~/ columns) * rowExtent;
+}
+
+void animateScrollTo(ScrollController controller, double offset) {
+  if (!controller.hasClients) {
+    return;
+  }
+  final position = controller.position;
+  controller.animateTo(
+    offset.clamp(position.minScrollExtent, position.maxScrollExtent),
+    duration: const Duration(milliseconds: 300),
+    curve: Curves.easeOutCubic,
+  );
 }
 
 /// Tests a group; when every node failed, offers the network self-check.

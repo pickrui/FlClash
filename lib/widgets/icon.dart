@@ -12,6 +12,8 @@ import 'package:fl_clash/common/icon_history_recorder.dart';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
+import 'package:fl_clash/ui/text.dart';
+import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/plugins/app.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -57,16 +59,18 @@ class CommonTargetIcon extends StatelessWidget {
   final String src;
   final double size;
   final bool recordHistory;
+  final Widget? fallback;
 
   const CommonTargetIcon({
     super.key,
     required this.src,
     required this.size,
     this.recordHistory = true,
+    this.fallback,
   });
 
   Widget _defaultIcon() {
-    return GlyphIcon(AppGlyphs.target, size: size);
+    return fallback ?? GlyphIcon(AppGlyphs.target, size: size);
   }
 
   Widget _buildIcon(BuildContext context) {
@@ -104,6 +108,49 @@ class CommonTargetIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(width: size, height: size, child: _buildIcon(context));
+  }
+}
+
+/// Stands for a proxy group without an icon: the first letter or digit of
+/// its name, past any leading emoji the name already shows.
+class GroupMonogram extends StatelessWidget {
+  final String name;
+
+  const GroupMonogram(this.name, {super.key});
+
+  static final _letter = RegExp(r'[\p{L}\p{N}]', unicode: true);
+
+  String get _mark {
+    final letter = _letter.firstMatch(name)?.group(0);
+    if (letter != null) {
+      return letter.toUpperCase();
+    }
+    return name.characters.firstOrNull ?? '';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final iconTheme = IconTheme.of(context);
+    final size = iconTheme.size ?? 24;
+    final mark = _mark;
+    if (mark.isEmpty) {
+      return GlyphIcon(AppGlyphs.target, size: size, color: iconTheme.color);
+    }
+    return SizedBox.square(
+      dimension: size,
+      child: Center(
+        child: EmojiText(
+          mark,
+          maxLines: 1,
+          style: AppTextStyle.custom(
+            context,
+            size: size * 0.62,
+            leading: size * 0.62,
+            weight: FontWeight.w600,
+          ).copyWith(color: iconTheme.color),
+        ),
+      ),
+    );
   }
 }
 

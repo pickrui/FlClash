@@ -67,9 +67,9 @@ void main() {
                 groups: [group],
                 currentUnfoldSet: {'Paged'},
                 proxyCardType: ProxyCardType.compact,
-                columns: 1,
               ),
             ),
+            unfoldSetProvider.overrideWith((_) => {'Paged'}),
             nodePagesProvider((group: 'Paged', query: '')).overrideWith(
               (ref) => NodePages(
                 total: 512,
@@ -111,7 +111,9 @@ void main() {
         expect(reads, [0]);
         expect(find.byType(ProxyCard).evaluate().length, lessThan(128));
         final scroll = tester
-            .widget<ScrollView>(find.byType(tab ? GridView : ListView).first)
+            .widget<ScrollView>(
+              find.byType(tab ? GridView : CustomScrollView).first,
+            )
             .controller!;
         scroll.jumpTo(scroll.position.maxScrollExtent);
         await tester.pumpAndSettle();
@@ -266,6 +268,7 @@ void main() {
                   group: group,
                   enterAnimated: false,
                   isExpand: true,
+                  unfolded: true,
                   onChange: (_) {},
                   onScrollToSelected: (_) {},
                 ),
@@ -896,6 +899,7 @@ void main() {
                         fixed: 'Node',
                       ),
                       isExpand: expanded,
+                      unfolded: expanded,
                       onChange: (_) => toggled++,
                       onScrollToSelected: (_) => located++,
                     ),
@@ -991,7 +995,6 @@ void main() {
               groups: visible,
               currentUnfoldSet: {},
               proxyCardType: ProxyCardType.compact,
-              columns: 1,
             ),
           ),
         ],
