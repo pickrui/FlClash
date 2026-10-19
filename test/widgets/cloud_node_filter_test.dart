@@ -10,10 +10,14 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:fl_clash/views/cloud/cloud_account_page.dart';
+import 'package:fl_clash/features/form/form_row.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/views/cloud/node_filter_page.dart';
+import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/glyph_finders.dart';
 import '../helpers/preferences.dart';
 import '../helpers/test_app.dart';
 
@@ -212,10 +216,19 @@ Future<void> _pumpAccountPage(
   await tester.pumpAndSettle();
 }
 
-VoidCallback? _onPressed<T extends ButtonStyleButton>(
-  WidgetTester tester,
-  String label,
-) => tester.widget<T>(find.widgetWithText(T, label)).onPressed;
+/// The toolbar button carrying [tooltip].
+Finder _barButton(String tooltip) => find.byWidgetPredicate(
+  (widget) => widget is IconButton && widget.tooltip == tooltip,
+);
+
+VoidCallback? _onPressed(WidgetTester tester, String tooltip) =>
+    tester.widget<IconButton>(_barButton(tooltip)).onPressed;
+
+/// The text field of the form row titled [label].
+Finder _patternField(String label) => find.descendant(
+  of: find.widgetWithText(FormRow, label),
+  matching: find.byType(TextField),
+);
 
 void main() {
   tearDown(() => cloudNodeFilterPageBuilder = null);
@@ -268,7 +281,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('GIA'));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      await tester.tap(_barButton('Save'));
       await tester.pumpAndSettle();
 
       expect(find.byType(CloudNodeFilterPage), findsNothing);
@@ -289,7 +302,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Unavailable'), findsOneWidget);
       expect(find.textContaining('nodes kept'), findsNothing);
-      expect(_onPressed<FilledButton>(tester, 'Save'), isNull);
+      expect(_onPressed(tester, 'Save'), isNull);
     });
 
     for (final fails in [false, true]) {
@@ -316,14 +329,14 @@ void main() {
         await tester.pump();
         expect(find.text('Obsolete preview'), findsNothing);
         expect(find.textContaining('nodes kept'), findsNothing);
-        expect(_onPressed<FilledButton>(tester, 'Save'), isNull);
+        expect(_onPressed(tester, 'Save'), isNull);
 
         await tester.pump(const Duration(milliseconds: 400));
         expect(api.previews, hasLength(2));
         api.pendingPreviews.last.complete(_catalog(api.previews.last, kept: 2));
         await tester.pumpAndSettle();
         expect(find.text('Customized · 2 of 4 nodes kept'), findsOneWidget);
-        expect(_onPressed<FilledButton>(tester, 'Save'), isNotNull);
+        expect(_onPressed(tester, 'Save'), isNotNull);
       });
     }
 
@@ -332,12 +345,12 @@ void main() {
     ) async {
       final api = _FakeApi(_catalog(const NodeFilter()))..delayPreviews = true;
       await _pumpEditor(tester, api, _Account());
-      final field = find.widgetWithText(TextField, 'Name contains');
+      final field = _patternField('Name contains');
       await tester.enterText(field, 'HK');
       await tester.pump(const Duration(milliseconds: 400));
       await tester.enterText(field, '');
       await tester.pump();
-      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.byType(CommonCircleLoading), findsNothing);
       expect(find.text('Smart Selection · 3 of 4 nodes kept'), findsOneWidget);
 
       api.pendingPreviews.single.complete(
@@ -355,13 +368,13 @@ void main() {
       final account = _Account();
       final route = await _pumpEditor(tester, api, account);
       await tester.tap(find.text('Fusion'));
-      await tester.tap(find.widgetWithText(OutlinedButton, 'Restore Default'));
+      await tester.tap(_barButton('Restore Default'));
       await tester.pumpAndSettle();
       expect(api.previews, const [NodeFilter()]);
       expect(api.resets, 0);
       expect(account.refreshes, 0);
       expect(route.popped, isFalse);
-      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      await tester.tap(_barButton('Save'));
       await tester.pumpAndSettle();
       expect(api.resets, 1);
       expect(route.popped, isTrue);
@@ -378,12 +391,12 @@ void main() {
         ),
       )..keptFor = (_) => 0;
       final route = await _pumpEditor(tester, api, _Account());
-      expect(_onPressed<OutlinedButton>(tester, 'Restore Default'), isNotNull);
-      expect(_onPressed<FilledButton>(tester, 'Save'), isNull);
-      await tester.tap(find.widgetWithText(OutlinedButton, 'Restore Default'));
+      expect(_onPressed(tester, 'Restore Default'), isNotNull);
+      expect(_onPressed(tester, 'Save'), isNull);
+      await tester.tap(_barButton('Restore Default'));
       await tester.pumpAndSettle();
       expect(api.resets, 0);
-      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      await tester.tap(_barButton('Save'));
       await tester.pumpAndSettle();
       expect(api.resets, 1);
       expect(route.popped, isTrue);
@@ -398,7 +411,7 @@ void main() {
       final route = await _pumpEditor(tester, api, account);
       await tester.tap(find.text('GIA'));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      await tester.tap(_barButton('Save'));
       await tester.pump();
       final context = tester.element(find.byType(CloudNodeFilterPage));
       final navigator = Navigator.of(context);
@@ -458,15 +471,9 @@ void main() {
       final api = _FakeApi(_catalog(const NodeFilter()));
       await _pumpEditor(tester, api, _Account());
 
-      await tester.enterText(
-        find.widgetWithText(TextField, 'Name contains'),
-        'H',
-      );
+      await tester.enterText(_patternField('Name contains'), 'H');
       await tester.pump(const Duration(milliseconds: 200));
-      await tester.enterText(
-        find.widgetWithText(TextField, 'Name contains'),
-        'HK',
-      );
+      await tester.enterText(_patternField('Name contains'), 'HK');
       await tester.pump(const Duration(milliseconds: 200));
       expect(api.previews, isEmpty);
       await tester.pumpAndSettle();
@@ -478,18 +485,24 @@ void main() {
       final api = _FakeApi(_catalog(const NodeFilter()));
       await _pumpEditor(tester, api, _Account());
       final context = tester.element(find.byType(CloudNodeFilterPage));
-      final hintColor = Theme.of(context).colorScheme.onSurfaceVariant
-          .withValues(alpha: 0.6);
+      final hintColor = Theme.of(context).colorScheme.onSurfaceVariant;
 
       for (final (label, example) in [
         ('Name contains', '香港|日本'),
         ('Name excludes', '测试|维护'),
       ]) {
-        final field = tester.widget<TextField>(
-          find.widgetWithText(TextField, label),
+        final field = tester.widget<TextField>(_patternField(label));
+        expect(field.controller?.text, isEmpty, reason: label);
+        final hint = find.descendant(
+          of: _patternField(label),
+          matching: find.text(example),
         );
-        expect(field.decoration?.hintText, example, reason: label);
-        expect(field.decoration?.hintStyle?.color, hintColor, reason: label);
+        expect(hint, findsOneWidget, reason: label);
+        expect(
+          tester.widget<Text>(hint).style?.color,
+          hintColor,
+          reason: label,
+        );
       }
     });
 
@@ -498,20 +511,20 @@ void main() {
         ..keptFor = (filter) => filter.excludeLines.contains('fusion') ? 0 : 2;
       await _pumpEditor(tester, api, _Account());
       expect(find.text('Smart Selection · 3 of 4 nodes kept'), findsOneWidget);
-      expect(_onPressed<FilledButton>(tester, 'Save'), isNull);
+      expect(_onPressed(tester, 'Save'), isNull);
 
       await tester.tap(find.text('Fusion'));
       await tester.pump();
-      expect(_onPressed<FilledButton>(tester, 'Save'), isNull);
+      expect(_onPressed(tester, 'Save'), isNull);
       await tester.pumpAndSettle();
       expect(find.text('Customized · 2 of 4 nodes kept'), findsOneWidget);
-      expect(_onPressed<FilledButton>(tester, 'Save'), isNotNull);
+      expect(_onPressed(tester, 'Save'), isNotNull);
 
       await tester.tap(find.text('Fusion'));
       await tester.pumpAndSettle();
       expect(find.text('Customized · 0 of 4 nodes kept'), findsOneWidget);
       expect(find.text('Keep at least one node'), findsOneWidget);
-      expect(_onPressed<FilledButton>(tester, 'Save'), isNull);
+      expect(_onPressed(tester, 'Save'), isNull);
       expect(tester.takeException(), isNull);
     });
 
@@ -534,16 +547,10 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Smart Selection · 3 of 4 nodes kept'), findsOneWidget);
 
-      await tester.enterText(
-        find.widgetWithText(TextField, 'Name excludes'),
-        'test',
-      );
+      await tester.enterText(_patternField('Name excludes'), 'test');
       await tester.pump();
       expect(find.text('Customized'), findsOneWidget);
-      await tester.enterText(
-        find.widgetWithText(TextField, 'Name excludes'),
-        '  ',
-      );
+      await tester.enterText(_patternField('Name excludes'), '  ');
       await tester.pumpAndSettle();
       expect(find.text('Smart Selection · 3 of 4 nodes kept'), findsOneWidget);
       expect(tester.takeException(), isNull);
@@ -559,7 +566,7 @@ void main() {
       await tester.tap(find.text('🇯🇵 Japan'));
       await tester.tap(find.text('🇯🇵 Japan'));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      await tester.tap(_barButton('Save'));
       await tester.pumpAndSettle();
 
       expect(api.saves, const [
@@ -577,13 +584,13 @@ void main() {
       final api = _FakeApi(_catalog(const NodeFilter()));
       await _pumpEditor(tester, api, _Account());
 
-      expect(_onPressed<OutlinedButton>(tester, 'Restore Default'), isNull);
+      expect(_onPressed(tester, 'Restore Default'), isNull);
       await tester.tap(find.text('GIA'));
       await tester.pumpAndSettle();
-      expect(_onPressed<OutlinedButton>(tester, 'Restore Default'), isNotNull);
-      await tester.tap(find.widgetWithText(OutlinedButton, 'Restore Default'));
+      expect(_onPressed(tester, 'Restore Default'), isNotNull);
+      await tester.tap(_barButton('Restore Default'));
       await tester.pumpAndSettle();
-      expect(_onPressed<FilledButton>(tester, 'Save'), isNull);
+      expect(_onPressed(tester, 'Save'), isNull);
       expect(api.resets, 0);
     });
 
@@ -612,9 +619,9 @@ void main() {
       expect(find.text('Service unavailable'), findsOneWidget);
       expect(find.text('Customized'), findsOneWidget);
       expect(find.textContaining('nodes kept'), findsNothing);
-      expect(find.byIcon(Icons.check_circle), findsNothing);
+      expect(find.byGlyph(AppGlyphs.checkCircle), findsNothing);
       expect(find.bySemanticsLabel('HK GIA 01'), findsOneWidget);
-      expect(_onPressed<FilledButton>(tester, 'Save'), isNull);
+      expect(_onPressed(tester, 'Save'), isNull);
 
       api.previewError = null;
       await tester.tap(find.widgetWithText(TextButton, 'Retry'));
@@ -626,7 +633,7 @@ void main() {
       expect(find.text('Service unavailable'), findsNothing);
       expect(find.text('Customized · 3 of 4 nodes kept'), findsOneWidget);
       expect(find.bySemanticsLabel('HK GIA 01, kept'), findsOneWidget);
-      expect(_onPressed<FilledButton>(tester, 'Save'), isNotNull);
+      expect(_onPressed(tester, 'Save'), isNotNull);
       semantics.dispose();
       expect(tester.takeException(), isNull);
     });

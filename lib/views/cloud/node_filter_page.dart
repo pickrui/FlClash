@@ -6,12 +6,15 @@
 import 'dart:async';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/features/form/form_row.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/surface.dart';
+import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -202,100 +205,83 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.appLocalizations;
+    final ready = _base != null && _loadError == null && _base!.available;
     return CommonScaffold(
-      title: context.appLocalizations.nodeFilter,
+      title: l10n.nodeFilter,
       isLoading: _submitting,
-      body: AppBarClearance(child: _buildBody(context)),
+      iconActions: [
+        if (ready)
+          IconButtonData(
+            glyph: AppGlyphs.reset,
+            tooltip: l10n.restoreDefault,
+            onPressed: _canReset ? _restoreDefault : null,
+          ),
+      ],
+      confirmationAction: ready
+          ? IconButtonData(
+              glyph: AppGlyphs.check,
+              tooltip: l10n.save,
+              isLoading: _submitting,
+              onPressed: _canSave ? _submit : null,
+            )
+          : null,
+      body: _buildBody(context),
     );
   }
 
   Widget _buildBody(BuildContext context) {
     if (_loading && _base == null) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: CommonCircleLoading.page());
     }
     final base = _base;
     if (base == null || _loadError != null) {
       return _buildMessage(
         context,
-        icon: Icons.cloud_off,
+        illustration: NullStatusIllustration.error,
         message: CloudApiException.clean(_loadError ?? ''),
-        isError: true,
       );
     }
     if (!base.available) {
       return _buildMessage(
         context,
-        icon: Icons.filter_alt_off_outlined,
+        illustration: NullStatusIllustration.data,
         message: context.appLocalizations.noData,
       );
     }
-    return Column(
-      children: [
-        Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) =>
-                constraints.maxWidth >= _twoPaneWidth
-                ? _buildTwoPanes(context)
-                : _buildOnePane(context),
-          ),
-        ),
-        _buildActions(context),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) => constraints.maxWidth >= _twoPaneWidth
+          ? _buildTwoPanes(context)
+          : _buildOnePane(context),
     );
   }
 
   Widget _buildMessage(
     BuildContext context, {
-    required IconData icon,
+    required NullStatusIllustration illustration,
     required String message,
-    bool isError = false,
   }) {
-    final colorScheme = context.colorScheme;
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 360),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                size: 40,
-                color: isError ? colorScheme.error : colorScheme.outline,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                message,
-                textAlign: TextAlign.center,
-                style: context.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 20),
-              FilledButton.tonalIcon(
-                icon: const Icon(Icons.refresh),
-                label: Text(context.appLocalizations.refresh),
-                onPressed: _loading ? null : _load,
-              ),
-            ],
-          ),
-        ),
+    return NullStatus(
+      illustration: illustration,
+      label: message,
+      action: TonalButton(
+        size: TonalButtonSize.bar,
+        glyph: AppGlyphs.refresh,
+        label: context.appLocalizations.refresh,
+        onPressed: _loading ? null : _load,
       ),
     );
   }
 
   Widget _buildOnePane(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 24),
       child: CloudContentWidth(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildNote(context),
-            const SizedBox(height: 16),
-            NodeFilterPanel(child: _buildFilters(context)),
-            const SizedBox(height: 16),
+            ..._buildFilters(context),
+            _buildPreviewHeader(context),
             NodeFilterPanel(child: _buildPreview(context, expand: false)),
           ],
         ),
@@ -304,67 +290,39 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
   }
 
   Widget _buildTwoPanes(BuildContext context) {
+    final top = context.contentTopPadding;
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 1120),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                flex: 11,
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _buildNote(context),
-                      const SizedBox(height: 16),
-                      NodeFilterPanel(child: _buildFilters(context)),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                flex: 9,
-                child: NodeFilterPanel(
-                  child: _buildPreview(context, expand: true),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNote(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    final style = context.textTheme.bodySmall?.copyWith(
-      color: colorScheme.onSurfaceVariant,
-      height: 1.5,
-    );
-    return DecoratedBox(
-      decoration: ShapeDecoration(
-        color: colorScheme.secondaryContainer.withValues(alpha: 0.45),
-        shape: AppShape.all(AppCorner.md),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Icon(
-              Icons.info_outline,
-              size: 18,
-              color: colorScheme.onSecondaryContainer,
-            ),
-            const SizedBox(width: 10),
             Expanded(
-              child: Text(
-                context.appLocalizations.nodeFilterAccountNote,
-                style: style,
+              flex: 11,
+              child: SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(16, top, 8, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: _buildFilters(context),
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 9,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(8, top, 16, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildPreviewHeader(context),
+                    Expanded(
+                      child: NodeFilterPanel(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                        child: _buildPreview(context, expand: true),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -373,135 +331,157 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
     );
   }
 
-  Widget _buildFilters(BuildContext context) {
+  List<Widget> _buildFilters(BuildContext context) {
     final l10n = context.appLocalizations;
     final catalog = _preview ?? _base!;
     final editable = !_submitting;
+    Widget chips(List<Widget> children) => NodeFilterPanel(
+      child: Wrap(spacing: 8, runSpacing: 8, children: children),
+    );
+    return [
+      _buildLegend(context),
+      if (catalog.lines.isNotEmpty) ...[
+        ListHeader(title: l10n.nodeFilterLines),
+        chips([
+          for (final line in catalog.lines)
+            NodeFilterChoiceChip(
+              label: line.name,
+              count: line.count,
+              choice: _draft.lineChoice(line.key),
+              onTap: editable ? () => _edit(_draft.cycleLine(line.key)) : null,
+            ),
+        ]),
+      ],
+      if (catalog.regions.isNotEmpty) ...[
+        ListHeader(title: l10n.nodeFilterRegions),
+        chips([
+          for (final region in catalog.regions)
+            NodeFilterChoiceChip(
+              label: [
+                region.emoji,
+                region.name,
+              ].where((part) => part.isNotEmpty).join(' '),
+              count: region.count,
+              choice: _draft.regionChoice(region.code),
+              onTap: editable
+                  ? () => _edit(_draft.cycleRegion(region.code))
+                  : null,
+            ),
+        ]),
+      ],
+      const SizedBox(height: cloudSectionGap),
+      CloudFormFields(
+        enabled: editable,
+        child: generateSection(
+          footer: l10n.nodeFilterAccountNote,
+          items: [
+            _buildPatternRow(
+              controller: _matchController,
+              label: l10n.nodeFilterNameContains,
+              hint: _nameContainsExample,
+              onChanged: (value) => _edit(_draft.copyWith(match: value)),
+            ),
+            _buildPatternRow(
+              controller: _nomatchController,
+              label: l10n.nodeFilterNameExcludes,
+              hint: _nameExcludesExample,
+              onChanged: (value) => _edit(_draft.copyWith(nomatch: value)),
+            ),
+          ],
+        ),
+      ),
+    ];
+  }
+
+  Widget _buildLegend(BuildContext context) {
+    final l10n = context.appLocalizations;
+    final arrow = GlyphIcon(
+      AppGlyphs.chevronForward,
+      size: 14,
+      color: context.colorScheme.outline,
+    );
     return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Wrap(
+        spacing: 6,
+        runSpacing: 6,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          _buildLegend(context),
-          if (catalog.lines.isNotEmpty) ...[
-            const SizedBox(height: 20),
-            NodeFilterSectionTitle(l10n.nodeFilterLines),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final line in catalog.lines)
-                  NodeFilterChoiceChip(
-                    label: line.name,
-                    count: line.count,
-                    choice: _draft.lineChoice(line.key),
-                    onTap: editable
-                        ? () => _edit(_draft.cycleLine(line.key))
-                        : null,
-                  ),
-              ],
-            ),
-          ],
-          if (catalog.regions.isNotEmpty) ...[
-            const SizedBox(height: 20),
-            NodeFilterSectionTitle(l10n.nodeFilterRegions),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final region in catalog.regions)
-                  NodeFilterChoiceChip(
-                    label: [
-                      region.emoji,
-                      region.name,
-                    ].where((part) => part.isNotEmpty).join(' '),
-                    count: region.count,
-                    choice: _draft.regionChoice(region.code),
-                    onTap: editable
-                        ? () => _edit(_draft.cycleRegion(region.code))
-                        : null,
-                  ),
-              ],
-            ),
-          ],
-          const SizedBox(height: 24),
-          _buildPatternField(
-            controller: _matchController,
-            label: l10n.nodeFilterNameContains,
-            hint: _nameContainsExample,
-            enabled: editable,
-            onChanged: (value) => _edit(_draft.copyWith(match: value)),
+          NodeFilterChoiceChip(
+            label: l10n.nodeFilterAny,
+            choice: NodeFilterChoice.any,
+            dense: true,
           ),
-          const SizedBox(height: 16),
-          _buildPatternField(
-            controller: _nomatchController,
-            label: l10n.nodeFilterNameExcludes,
-            hint: _nameExcludesExample,
-            enabled: editable,
-            onChanged: (value) => _edit(_draft.copyWith(nomatch: value)),
+          arrow,
+          NodeFilterChoiceChip(
+            label: l10n.nodeFilterOnly,
+            choice: NodeFilterChoice.only,
+            dense: true,
+          ),
+          arrow,
+          NodeFilterChoiceChip(
+            label: l10n.nodeFilterExclude,
+            choice: NodeFilterChoice.exclude,
+            dense: true,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildLegend(BuildContext context) {
-    final l10n = context.appLocalizations;
-    final arrow = Icon(
-      Icons.arrow_forward,
-      size: 14,
-      color: context.colorScheme.outline,
-    );
-    return Wrap(
-      spacing: 6,
-      runSpacing: 6,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        NodeFilterChoiceChip(
-          label: l10n.nodeFilterAny,
-          choice: NodeFilterChoice.any,
-          dense: true,
-        ),
-        arrow,
-        NodeFilterChoiceChip(
-          label: l10n.nodeFilterOnly,
-          choice: NodeFilterChoice.only,
-          dense: true,
-        ),
-        arrow,
-        NodeFilterChoiceChip(
-          label: l10n.nodeFilterExclude,
-          choice: NodeFilterChoice.exclude,
-          dense: true,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPatternField({
+  Widget _buildPatternRow({
     required TextEditingController controller,
     required String label,
     required String hint,
-    required bool enabled,
     required ValueChanged<String> onChanged,
   }) {
-    return TextField(
-      controller: controller,
-      enabled: enabled,
-      onChanged: onChanged,
-      autocorrect: false,
-      inputFormatters: [LengthLimitingTextInputFormatter(_patternMaxLength)],
-      decoration: InputDecoration(
-        labelText: label,
+    return FormRow(
+      title: label,
+      trailing: FormRowTextField(
+        controller: controller,
+        onChanged: onChanged,
         hintText: hint,
-        hintStyle: TextStyle(
-          color: context.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+        autocorrect: false,
+        inputFormatters: [LengthLimitingTextInputFormatter(_patternMaxLength)],
+      ),
+    );
+  }
+
+  Widget _buildPreviewHeader(BuildContext context) {
+    final l10n = context.appLocalizations;
+    final colorScheme = context.colorScheme;
+    final catalog = _preview ?? _base!;
+    final settled = _previewSettled;
+    final failed = _previewError != null;
+    final keptNone = settled && !_draft.isEmpty && catalog.kept == 0;
+    final state = _draft.isEmpty
+        ? l10n.nodeFilterSmartSelection
+        : l10n.nodeFilterCustomized;
+    return ListHeader(
+      title: l10n.nodeFilterPreview,
+      trailing: Flexible(
+        flex: 2,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          spacing: 8,
+          children: [
+            if (!settled && !failed) const CommonCircleLoading(size: 14),
+            Flexible(
+              child: Text(
+                !settled
+                    ? state
+                    : '$state · ${l10n.nodeFilterKept(catalog.kept, catalog.total)}',
+                textAlign: TextAlign.end,
+                style: AppTextStyle.footnote
+                    .of(context, emphasized: true)
+                    .toTabular
+                    .copyWith(
+                      color: keptNone ? colorScheme.error : colorScheme.primary,
+                    ),
+              ),
+            ),
+          ],
         ),
-        floatingLabelBehavior: FloatingLabelBehavior.always,
-        border: const OutlineInputBorder(),
-        isDense: true,
       ),
     );
   }
@@ -519,76 +499,40 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
               .toList();
     final keptNone = settled && !_draft.isEmpty && catalog.kept == 0;
     final failed = _previewError != null;
-    final state = _draft.isEmpty
-        ? l10n.nodeFilterSmartSelection
-        : l10n.nodeFilterCustomized;
     final header = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            NodeFilterSectionTitle(l10n.nodeFilterPreview),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  if (!settled && !failed) ...[
-                    const SizedBox.square(
-                      dimension: 14,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                    const SizedBox(width: 8),
-                  ],
-                  Flexible(
-                    child: Text(
-                      !settled
-                          ? state
-                          : '$state · ${l10n.nodeFilterKept(catalog.kept, catalog.total)}',
-                      textAlign: TextAlign.end,
-                      style: context.textTheme.labelLarge?.copyWith(
-                        color: keptNone
-                            ? colorScheme.error
-                            : colorScheme.primary,
-                        fontWeight: FontWeight.w600,
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
         if (_previewError case final error?)
           _buildPreviewError(context, error)
         else if (keptNone)
           Padding(
-            padding: const EdgeInsets.only(top: 6),
+            padding: const EdgeInsets.only(bottom: 8),
             child: Text(
               l10n.nodeFilterKeepOne,
-              style: context.textTheme.bodySmall?.copyWith(
-                color: colorScheme.error,
-              ),
+              style: AppTextStyle.footnote
+                  .of(context)
+                  .copyWith(color: colorScheme.error),
             ),
           ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _searchController,
-          onChanged: (_) => setState(() {}),
-          decoration: InputDecoration(
-            hintText: l10n.nodeFilterSearch,
-            prefixIcon: const Icon(Icons.search),
-            suffixIcon: query.isEmpty
-                ? null
-                : IconButton(
-                    icon: const Icon(Icons.close),
-                    tooltip: MaterialLocalizations.of(context)
-                        .clearButtonTooltip,
-                    onPressed: () => setState(_searchController.clear),
-                  ),
-            border: const OutlineInputBorder(),
-            isDense: true,
+        FilledInputTheme(
+          fillColor: context.raisedSurfaceLevel.colorOf(colorScheme),
+          child: TextField(
+            controller: _searchController,
+            onChanged: (_) => setState(() {}),
+            style: AppTextStyle.body.of(context),
+            decoration: InputDecoration(
+              hintText: l10n.nodeFilterSearch,
+              isDense: true,
+              prefixIcon: const GlyphIcon(AppGlyphs.search, size: 20),
+              suffixIcon: query.isEmpty
+                  ? null
+                  : IconButton(
+                      icon: const GlyphIcon(AppGlyphs.close, size: 18),
+                      tooltip: MaterialLocalizations.of(context)
+                          .clearButtonTooltip,
+                      onPressed: () => setState(_searchController.clear),
+                    ),
+            ),
           ),
         ),
         const SizedBox(height: 8),
@@ -599,82 +543,76 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
       child: Text(
         l10n.noData,
         textAlign: TextAlign.center,
-        style: context.textTheme.bodyMedium?.copyWith(
-          color: colorScheme.onSurfaceVariant,
-        ),
+        style: AppTextStyle.subheadline
+            .of(context)
+            .copyWith(color: colorScheme.onSurfaceVariant),
       ),
     );
     final fade = settled || failed ? 1.0 : 0.55;
+    final duration = context.motionDuration(const Duration(milliseconds: 150));
     if (!expand) {
-      return Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            header,
-            AnimatedOpacity(
-              opacity: fade,
-              duration: const Duration(milliseconds: 150),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: nodes.isEmpty
-                    ? [empty]
-                    : [
-                        for (final node in nodes)
-                          NodeFilterNodeRow(node: node, showKept: settled),
-                      ],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: Column(
+      return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           header,
-          Expanded(
-            child: AnimatedOpacity(
-              opacity: fade,
-              duration: const Duration(milliseconds: 150),
-              child: nodes.isEmpty
-                  ? Align(alignment: Alignment.topCenter, child: empty)
-                  : ListView.builder(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      itemCount: nodes.length,
-                      itemBuilder: (_, index) => NodeFilterNodeRow(
-                        node: nodes[index],
-                        showKept: settled,
-                      ),
-                    ),
+          AnimatedOpacity(
+            opacity: fade,
+            duration: duration,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: nodes.isEmpty
+                  ? [empty]
+                  : [
+                      for (final node in nodes)
+                        NodeFilterNodeRow(node: node, showKept: settled),
+                    ],
             ),
           ),
         ],
-      ),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        header,
+        Expanded(
+          child: AnimatedOpacity(
+            opacity: fade,
+            duration: duration,
+            child: nodes.isEmpty
+                ? Align(alignment: Alignment.topCenter, child: empty)
+                : ListView.builder(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    itemCount: nodes.length,
+                    itemBuilder: (_, index) => NodeFilterNodeRow(
+                      node: nodes[index],
+                      showKept: settled,
+                    ),
+                  ),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildPreviewError(BuildContext context, String error) {
     final colorScheme = context.colorScheme;
     return Padding(
-      padding: const EdgeInsets.only(top: 4),
+      padding: const EdgeInsets.only(bottom: 8),
       child: Row(
+        spacing: 8,
         children: [
-          Icon(Icons.error_outline, size: 18, color: colorScheme.error),
-          const SizedBox(width: 8),
+          GlyphIcon(AppGlyphs.error, size: 18, color: colorScheme.error),
           Expanded(
             child: Text(
               error,
-              style: context.textTheme.bodySmall?.copyWith(
-                color: colorScheme.error,
-              ),
+              style: AppTextStyle.footnote
+                  .of(context)
+                  .copyWith(color: colorScheme.error),
             ),
           ),
-          const SizedBox(width: 8),
           TextButton.icon(
-            icon: const Icon(Icons.refresh, size: 18),
+            icon: const GlyphIcon(AppGlyphs.refresh, size: 18),
             label: Text(context.appLocalizations.nodeFilterRetry),
             onPressed: () {
               setState(() => _previewError = null);
@@ -682,51 +620,6 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
             },
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildActions(BuildContext context) {
-    final l10n = context.appLocalizations;
-    final reset = OutlinedButton(
-      onPressed: _canReset ? _restoreDefault : null,
-      child: Text(l10n.restoreDefault),
-    );
-    final save = FilledButton(
-      onPressed: _canSave ? _submit : null,
-      child: _submitting
-          ? const SizedBox.square(
-              dimension: 18,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          : Text(l10n.save),
-    );
-    final buttons = Row(
-      children: [
-        Expanded(child: reset),
-        const SizedBox(width: 12),
-        Expanded(child: save),
-      ],
-    );
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: context.surfaceLevel.colorOf(context.colorScheme),
-        border: Border(top: Divider.createBorderSide(context)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: LayoutBuilder(
-          builder: (context, constraints) =>
-              constraints.maxWidth >= _twoPaneWidth
-              ? Align(
-                  alignment: Alignment.centerRight,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 360),
-                    child: buttons,
-                  ),
-                )
-              : CloudContentWidth(child: buttons),
-        ),
       ),
     );
   }
