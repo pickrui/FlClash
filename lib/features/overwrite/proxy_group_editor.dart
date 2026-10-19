@@ -14,6 +14,7 @@ import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/features/form/selection_sheet.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/ui/animated_entries.dart';
+import 'package:fl_clash/ui/collapsible_section.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/paged_sheet.dart';
@@ -1460,46 +1461,54 @@ class _MemberPickerState extends State<_MemberPicker> {
           tooltip: appLocalizations.confirm,
           onPressed: () => Navigator.of(context).pop(_selected),
         ),
-        body: NullStatusSwitcher(
-          isEmpty: categories.isEmpty,
-          isSearching: !_query.isEmpty,
-          nullStatus: NullStatus(label: appLocalizations.noData),
-          child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 16)
-                .copyWith(top: context.contentTopPadding, bottom: 16),
-            children: [
-              for (final category in categories)
-                generateSection(
-                  title: category.label,
-                  items: [
-                    for (final entry in category.entries)
-                      DecorationListItem(
-                        isSelected: _selected.contains(entry.member),
-                        onPressed: () => _toggle(entry.member),
-                        title: TooltipText(
-                          text: Text(
-                            entry.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+        body: Builder(
+          builder: (context) => NullStatusSwitcher(
+            isEmpty: categories.isEmpty,
+            isSearching: !_query.isEmpty,
+            nullStatus: NullStatus(label: appLocalizations.noData),
+            child: CustomScrollView(
+              slivers: [
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(
+                    16,
+                    context.contentTopPadding,
+                    16,
+                    16 + BottomInsetScope.of(context),
+                  ),
+                  sliver: SliverMainAxisGroup(
+                    slivers: [
+                      for (final category in categories)
+                        SliverCollapsibleSection(
+                          key: ValueKey(category.label),
+                          label: category.label,
+                          collapsible: _query.isEmpty,
+                          initiallyExpanded: false,
+                          itemCount: category.entries.length,
+                          itemBuilder: (_, index) =>
+                              _buildEntry(category.entries[index]),
                         ),
-                        subtitle: switch (entry.subtitle) {
-                          final subtitle? => TooltipLabel(
-                            subtitle,
-                            maxLines: 1,
-                          ),
-                          null => null,
-                        },
-                        trailing: _selected.contains(entry.member)
-                            ? const SelectionCheck()
-                            : null,
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildEntry(_Entry entry) {
+    final isSelected = _selected.contains(entry.member);
+    final subtitle = entry.subtitle;
+    return DecorationListItem(
+      isSelected: isSelected,
+      onPressed: () => _toggle(entry.member),
+      title: TooltipText(
+        text: Text(entry.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+      ),
+      subtitle: subtitle == null ? null : TooltipLabel(subtitle, maxLines: 1),
+      trailing: isSelected ? const SelectionCheck() : null,
     );
   }
 }

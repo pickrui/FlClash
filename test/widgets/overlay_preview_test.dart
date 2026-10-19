@@ -209,6 +209,10 @@ void main() {
           final confirm = find.byTooltip(AppLocalizations.current.confirm);
           _expectReachable(tester, confirm, scenario.size, scenario.keyboard);
           if (!skip) await _capture(tester, key, '$prefix-members.png');
+          await tester.tap(
+            find.text('${AppLocalizations.current.proxies} (2)'),
+          );
+          await tester.pumpAndSettle();
           final entry = find.text('US Seattle - Residential broadband');
           await _reveal(tester, entry);
           await tester.tap(entry);

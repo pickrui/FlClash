@@ -18,7 +18,6 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/context_menu.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/sortable.dart';
-import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
@@ -564,9 +563,14 @@ class _ProxyGroupItem extends StatelessWidget {
       contentPadding: const EdgeInsets.only(left: 16),
       leading: SizedBox.square(
         dimension: 32,
-        child: icon.isEmpty
-            ? _GroupMonogram(group.name)
-            : CommonTargetIcon(src: icon, size: 32),
+        child: IconTheme.merge(
+          data: const IconThemeData(size: 32),
+          child: CommonTargetIcon(
+            src: icon,
+            size: 32,
+            fallback: GroupMonogram(group.name),
+          ),
+        ),
       ),
       title: TooltipText(
         text: Text(group.name, maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -582,37 +586,6 @@ class _ProxyGroupItem extends StatelessWidget {
             onChanged: onSelected == null ? null : (_) => onSelected!(),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Stands for a group without an icon: the first letter or digit of its name,
-/// past any leading emoji the name already shows.
-class _GroupMonogram extends StatelessWidget {
-  final String name;
-
-  const _GroupMonogram(this.name);
-
-  static final _letter = RegExp(r'[\p{L}\p{N}]', unicode: true);
-
-  String get _mark {
-    final letter = _letter.firstMatch(name)?.group(0);
-    if (letter != null) {
-      return letter.toUpperCase();
-    }
-    return name.characters.firstOrNull ?? '';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: EmojiText(
-        _mark,
-        maxLines: 1,
-        style: AppTextStyle.headline
-            .of(context)
-            .copyWith(color: context.colorScheme.onSurfaceVariant),
       ),
     );
   }

@@ -389,6 +389,8 @@ void main() {
       await tester.tap(find.text('Add nodes'));
       await tester.pumpAndSettle();
       expect(find.text('Subscription A'), findsNothing);
+      await tester.tap(find.text('Proxy providers (1)'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Subscription B'));
       await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('Confirm'));
@@ -533,6 +535,8 @@ void main() {
     );
     expect(_field('Proxy filter'), findsNothing);
     await tester.tap(find.text('Add nodes'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Proxy providers (1)'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Subscription A'));
     await tester.pumpAndSettle();

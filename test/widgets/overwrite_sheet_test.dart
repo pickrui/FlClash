@@ -92,6 +92,8 @@ void main() {
       await tester.ensureVisible(find.text(AppLocalizations.current.addNodes));
       await tester.tap(find.text(AppLocalizations.current.addNodes));
       await tester.pumpAndSettle();
+      await tester.tap(find.text('${AppLocalizations.current.proxies} (1)'));
+      await tester.pumpAndSettle();
       await tester.ensureVisible(find.text('Japan'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Japan'));
@@ -131,6 +133,10 @@ void main() {
       }
 
       await members();
+      await tester.tap(
+        find.text('${AppLocalizations.current.basicStrategy} (1)'),
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.text('DIRECT'));
       await tester.pumpAndSettle();
       await tester.binding.handlePopRoute();

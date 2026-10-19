@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/javascript.dart';
+import 'package:fl_clash/common/layout.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/overwrite/proxy_chain.dart';
 import 'package:fl_clash/models/models.dart';
@@ -39,13 +40,6 @@ double _profileItemHeight(BuildContext context) {
       measure.textHeight(AppTextStyle.footnote) +
       2 * listRowVerticalPadding;
 }
-
-double _cardSpacingOf(BuildContext context, ViewMode viewMode) =>
-    switch (viewMode) {
-      ViewMode.mobile => 8.0,
-      ViewMode.laptop => 12.0,
-      ViewMode.desktop => 16.0,
-    }.mAp(context);
 
 class ProfilesView extends StatefulWidget {
   const ProfilesView({super.key});
@@ -151,7 +145,7 @@ class _ProfilesViewState extends State<ProfilesView> {
       builder: (_, ref, _) {
         final isLoading = ref.watch(loadingProvider(LoadingTag.profiles));
         final state = ref.watch(profilesStateProvider);
-        final spacing = _cardSpacingOf(context, ref.watch(viewModeProvider));
+        final spacing = cardSpacingOf(context, ref.watch(viewModeProvider));
         return CommonScaffold(
           isLoading: isLoading,
           title: appLocalizations.profiles,
