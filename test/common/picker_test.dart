@@ -6,8 +6,8 @@
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:fl_clash/common/http_read_race.dart';
 import 'package:fl_clash/common/picker.dart';
-import 'package:fl_clash/common/network_error.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart' show Locale;
@@ -94,11 +94,10 @@ void main() {
         await expectLater(
           file.readBytes(maxBytes: 8),
           throwsA(
-            isA<FormatException>().having(
-              (error) =>
-                  userFacingErrorMessage(error, AppLocalizations.current),
-              'localized limit',
-              AppLocalizations.current.resourceSizeLimitTip('8 B'),
+            isA<ReadSizeLimitException>().having(
+              (error) => error.maxBytes,
+              'maxBytes',
+              8,
             ),
           ),
         );
