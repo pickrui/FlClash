@@ -705,6 +705,18 @@ extension ProfileOverridesExt on ProfileOverrides {
       ...sniffer.skipDstAddress,
   ];
 
+  /// The rule sets the picked DNS and sniffer keys match with.
+  Set<String> get ruleSets => {
+    for (final policy in _pickedPolicies)
+      for (final domain in policy.keys) ...ruleSetsIn(domain, policyKey: true),
+    if (dnsOverrideKeys.contains(DnsOverrideKey.fakeIpFilter))
+      for (final entry in dns.fakeIpFilter) ...[
+        ...ruleSetsIn(entry),
+        ...ruleSetReferences(entry),
+      ],
+    for (final entry in _pickedSnifferMatchers) ...ruleSetsIn(entry),
+  };
+
   /// Whether the picked DNS or sniffer keys match with the rule set [name].
   bool usesRuleSet(String name) =>
       _pickedPolicies.any(

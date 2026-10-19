@@ -1527,5 +1527,9 @@
   "minutesAgoShort": "{count} мин назад",
   "expireTime": "Срок действия",
   "runtimeConfig": "Конфигурация выполнения",
-  "proxyGroupsCount": "{count, plural, one{{count} группа прокси} few{{count} группы прокси} many{{count} групп прокси} other{{count} группы прокси}}"
+  "proxyGroupsCount": "{count, plural, one{{count} группа прокси} few{{count} группы прокси} many{{count} групп прокси} other{{count} группы прокси}}",
+  "confirmDeleteProxyGroup": "Вы уверены, что хотите удалить эту группу прокси?",
+  "invalidProxyProvider": "{providerName} — недопустимый провайдер прокси",
+  "customIssuesSummary": "Проблем: {count}, применение профиля может завершиться ошибкой",
+  "sectionsInEffect": "Действуют: {count}"
 }

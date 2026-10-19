@@ -13,7 +13,7 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/routing_issues.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/views/profiles/custom_overwrite.dart';
+import 'package:fl_clash/views/profiles/custom_groups.dart';
 import 'package:fl_clash/ui/scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -81,21 +81,12 @@ void main() {
         .onSearch('Personal');
     await tester.pumpAndSettle();
     expect(find.text('Other'), findsNothing);
-    expect(
-      tester
-          .widget<ReorderableDelayedDragStartListener>(
-            find.byType(ReorderableDelayedDragStartListener),
-          )
-          .enabled,
-      isFalse,
-    );
+    expect(find.byTooltip('Sort'), findsNothing);
     expect(find.byType(RoutingIssueButton), findsOneWidget);
     await tester.tap(find.byType(RoutingIssueButton));
     await tester.pumpAndSettle();
-    expect(
-      tester.widget<SelectableText>(find.byType(SelectableText)).data,
-      allOf(contains('Removed node'), contains('Other')),
-    );
+    expect(find.textContaining('Removed node'), findsOneWidget);
+    expect(find.textContaining('a proxy group: Other'), findsOneWidget);
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox());
   });

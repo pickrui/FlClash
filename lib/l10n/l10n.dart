@@ -12912,6 +12912,46 @@ class AppLocalizations {
       args: [count],
     );
   }
+
+  /// `Are you sure you want to delete this proxy group?`
+  String get confirmDeleteProxyGroup {
+    return Intl.message(
+      'Are you sure you want to delete this proxy group?',
+      name: 'confirmDeleteProxyGroup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{providerName} is an invalid proxy provider`
+  String invalidProxyProvider(Object providerName) {
+    return Intl.message(
+      '$providerName is an invalid proxy provider',
+      name: 'invalidProxyProvider',
+      desc: '',
+      args: [providerName],
+    );
+  }
+
+  /// `{count} items have problems, and applying this profile may fail`
+  String customIssuesSummary(Object count) {
+    return Intl.message(
+      '$count items have problems, and applying this profile may fail',
+      name: 'customIssuesSummary',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count} in effect`
+  String sectionsInEffect(Object count) {
+    return Intl.message(
+      '$count in effect',
+      name: 'sectionsInEffect',
+      desc: '',
+      args: [count],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

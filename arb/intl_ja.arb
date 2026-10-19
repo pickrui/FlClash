@@ -1527,5 +1527,9 @@
   "minutesAgoShort": "{count} 分前",
   "expireTime": "有効期限",
   "runtimeConfig": "ランタイム設定",
-  "proxyGroupsCount": "プロキシグループ {count} 件"
+  "proxyGroupsCount": "プロキシグループ {count} 件",
+  "confirmDeleteProxyGroup": "このプロキシグループを削除してもよろしいですか？",
+  "invalidProxyProvider": "{providerName} は無効なプロキシプロバイダーです",
+  "customIssuesSummary": "{count} 件に問題があり、プロファイルの適用に失敗する可能性があります",
+  "sectionsInEffect": "{count} 件が有効"
 }

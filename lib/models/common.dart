@@ -615,6 +615,11 @@ String renamedRuleSetReferences(String rule, Map<String, String> names) =>
           '${match[1]}RULE-SET,${match[2]}${names[match[3]] ?? match[3]}',
     );
 
+/// The rule sets [rule] names with RULE-SET, logic rules' included.
+Set<String> ruleSetReferences(String rule) => {
+  for (final match in _ruleSetReference.allMatches(rule)) match[3]!.trim(),
+};
+
 const _ruleSetPrefix = 'rule-set:';
 
 /// mihomo reads `rule-set:a,b` up to a second colon, the prefix in any case,

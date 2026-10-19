@@ -1527,5 +1527,9 @@
   "minutesAgoShort": "{count, plural, other{{count}m ago}}",
   "expireTime": "Expiration time",
   "runtimeConfig": "Runtime config",
-  "proxyGroupsCount": "{count, plural, =1{1 proxy group} other{{count} proxy groups}}"
+  "proxyGroupsCount": "{count, plural, =1{1 proxy group} other{{count} proxy groups}}",
+  "confirmDeleteProxyGroup": "Are you sure you want to delete this proxy group?",
+  "invalidProxyProvider": "{providerName} is an invalid proxy provider",
+  "customIssuesSummary": "{count} items have problems, and applying this profile may fail",
+  "sectionsInEffect": "{count} in effect"
 }

@@ -11,10 +11,9 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/overwrite/custom_import.dart';
-import 'package:fl_clash/features/overwrite/overwrite_sheet.dart';
-import 'package:fl_clash/features/overwrite/profile_provider_options.dart';
+import 'package:fl_clash/features/form/error_banner.dart';
+import 'package:fl_clash/features/overwrite/profile_proxy.dart';
 import 'package:fl_clash/features/overwrite/proxy_chain.dart';
-import 'package:fl_clash/features/overwrite/routing_draft.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
@@ -22,7 +21,10 @@ import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/clash_providers.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
+import 'package:fl_clash/providers/routing_issues.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/ui/paged_sheet.dart';
+import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:fl_clash/views/config/dns.dart';
 import 'package:fl_clash/views/config/providers.dart';
 import 'package:fl_clash/views/config/sniffer.dart';
@@ -33,7 +35,9 @@ import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'custom_groups.dart';
 import 'custom_overwrite.dart';
+import 'custom_providers.dart';
 import 'overwrite.dart';
 
 Future<void> showRenameProfileDialog(
@@ -382,62 +386,63 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
 
   @override
   Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
     final profile = ref.watch(profileProvider(widget.profileId));
     return CommonPopScope(
       onPop: widget.isNew ? _nameBeforeLeaving : null,
       child: CommonScaffold(
         title: profile?.realLabel ?? appLocalizations.customProfile,
+        titleMenuItems: [
+          if (profile != null) ...[
+            CommonPopupMenuItem(
+              glyph: AppGlyphs.textShort,
+              label: appLocalizations.rename,
+              onPressed: () => showRenameProfileDialog(context, ref, profile),
+            ),
+            CommonPopupMenuItem(
+              glyph: AppGlyphs.eye,
+              label: appLocalizations.runtimeConfig,
+              onPressed: previewRouting,
+            ),
+          ],
+        ],
         isLoading: previewing || _importing,
+        iconActions: [
+          IconButtonData(
+            glyph: AppGlyphs.rules,
+            tooltip: appLocalizations.checkRouting,
+            isLoading: checking,
+            onPressed: checking ? null : checkAndApplyRouting,
+          ),
+        ],
         actions: [
-          ...buildRoutingActions(profile),
           CommonPopupBox(
-            targetBuilder: (open) => IconButton(
-              tooltip: appLocalizations.import,
+            targetBuilder: (open) => FilledButton(
               onPressed: profile == null || _importing ? null : () => open(),
-              icon: const GlyphIcon(AppGlyphs.importFile),
+              child: Text(appLocalizations.import),
             ),
             popup: CommonPopupMenu(
               items: customImportMenuItems(appLocalizations, _import),
             ),
           ),
-          IconButton(
-            tooltip: appLocalizations.rename,
-            onPressed: profile == null
-                ? null
-                : () => showRenameProfileDialog(context, ref, profile),
-            icon: const GlyphIcon(AppGlyphs.textShort),
-          ),
         ],
         body: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  16,
-                  context.contentTopPadding + 8,
-                  16,
-                  0,
-                ),
-                child: Text(
-                  appLocalizations.customProfileDesc,
-                  style: context.textTheme.bodySmall?.copyWith(
-                    color: context.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
+              child: SizedBox(height: context.contentTopPadding),
             ),
             const RulesRequireRuleModeHint(),
-            CustomOverwriteContent(
-              profileId: widget.profileId,
-              customProfile: true,
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 16)
+                  .copyWith(bottom: 24),
+              sliver: SliverMainAxisGroup(
+                slivers: [
+                  SliverToBoxAdapter(child: _Overview(widget.profileId)),
+                  CustomProxyGroupsSection(profileId: widget.profileId),
+                  const SliverToBoxAdapter(child: _Resources()),
+                ],
+              ),
             ),
-            _ProfileProviders(widget.profileId),
-            ProfileProxyChainsContent(profileId: widget.profileId),
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
-            SliverToBoxAdapter(child: _ProfileSettings(widget.profileId)),
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
-            const SliverToBoxAdapter(child: _Resources()),
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
           ],
         ),
       ),
@@ -463,96 +468,28 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
   }
 }
 
-class _ProfileProviders extends ConsumerWidget {
-  final int profileId;
-
-  const _ProfileProviders(this.profileId);
-
-  Future<void> _edit(BuildContext context, WidgetRef ref, String label) async {
-    final profile = ref.read(profileProvider(profileId));
-    if (profile == null) return;
-    ProfileOverrides withOptions(
-      Profile profile,
-      ProxyProviderOptions options,
-    ) => profile.overrides.copyWith(
-      proxyProviders: {
-        for (final MapEntry(:key, :value)
-            in profile.overrides.proxyProviders.entries)
-          if (key != label) key: value,
-        if (options != const ProxyProviderOptions()) label: options,
-      },
-    );
-    final result = await showOverwriteSheet<ProxyProviderOptions>(
-      context: context,
-      builder: (_) => ProfileProviderOptionsDialog(
-        label: label,
-        options:
-            profile.overrides.proxyProviders[label] ??
-            const ProxyProviderOptions(),
-        validate: (options) async {
-          final current = ref.read(profileProvider(profileId));
-          if (!context.mounted || current == null) {
-            return appLocalizations.routingChanged;
-          }
-          return validateCustomRoutingDraft(
-            ref,
-            current.copyWith(overrides: withOptions(current, options)),
-          );
-        },
-      ),
-    );
-    if (result == null || !context.mounted) return;
-    ref
-        .read(profilesProvider.notifier)
-        .updateProfile(
-          profileId,
-          (profile) =>
-              profile.copyWith(overrides: withOptions(profile, result)),
-        );
+void _push(BuildContext context, Widget view) {
+  if (isSheetPage(context)) {
+    Navigator.of(context).push(PagedSheetRoute<void>(builder: (_) => view));
+    return;
   }
+  BaseNavigator.push(context, view);
+}
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final profile = ref.watch(profileProvider(profileId));
-    final profiles = ref.watch(profilesProvider);
-    final library = libraryProxyProviderLabels(
-      ref.watch(clashProvidersProvider).value ?? const [],
-    );
-    final ids = profileProviderIds(profiles, reserved: library);
-    final used = {
-      for (final group in profile?.customProxyGroups ?? const <ProxyGroup>[])
-        for (final name in group.use ?? const <String>[])
-          if (ids.containsKey(name) || library.contains(name)) name,
-    };
-    if (profile == null || used.isEmpty) {
-      return const SliverToBoxAdapter(child: SizedBox.shrink());
-    }
-    final appLocalizations = context.appLocalizations;
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.only(top: 24),
-        child: generateSection(
-          title: appLocalizations.proxyProviders,
-          items: [
-            for (final label in used)
-              ListItem(
-                leading: const GlyphIcon(AppGlyphs.layers),
-                title: Text(label),
-                subtitle: Text(
-                  library.contains(label)
-                      ? appLocalizations.providerSourceApp
-                      : profiles.getProfile(ids[label])?.type == ProfileType.url
-                      ? appLocalizations.providerSourceSubscription
-                      : appLocalizations.providerSourceProfile,
-                ),
-                trailing: const GlyphIcon(AppGlyphs.chevronForward),
-                onTap: () => _edit(context, ref, label),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
+Widget _sectionRow(
+  BuildContext context,
+  Glyph glyph,
+  String title,
+  Widget state,
+  Widget view,
+) {
+  return ListItem(
+    leading: GlyphIcon(glyph),
+    title: Text(title),
+    subtitle: state,
+    trailing: const GlyphIcon(AppGlyphs.chevronForward),
+    onTap: () => _push(context, view),
+  );
 }
 
 typedef _SettingsStatus = ({bool dns, bool ntp, bool sniffer, int tunKeys});
@@ -571,56 +508,230 @@ _SettingsStatus _settingsStatus(ProfileOverrides own, ClashConfig app) => (
   tunKeys: own.tunOverrideKeys.length,
 );
 
-class _ProfileSettings extends ConsumerWidget {
+_SettingsStatus _watchSettingsStatus(WidgetRef ref, int profileId) {
+  final own = ref.watch(
+    profileProvider(profileId)
+        .select((profile) => profile?.overrides ?? const ProfileOverrides()),
+  );
+  return ref.watch(
+    patchClashConfigProvider.select((app) => _settingsStatus(own, app)),
+  );
+}
+
+int _watchChainCount(WidgetRef ref, int profileId) => ref.watch(
+  profileProvider(profileId).select(
+    (profile) =>
+        profile?.proxyChains.where((chain) => chain.enable).length ?? 0,
+  ),
+);
+
+String _enabledText(AppLocalizations appLocalizations, bool enabled) =>
+    enabled ? appLocalizations.enabled : appLocalizations.disabled;
+
+class _Overview extends ConsumerWidget {
   final int profileId;
 
-  const _ProfileSettings(this.profileId);
+  const _Overview(this.profileId);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
-    final own = ref.watch(
-      profileProvider(profileId)
-          .select((profile) => profile?.overrides ?? const ProfileOverrides()),
-    );
-    final status = ref.watch(
-      patchClashConfigProvider.select((app) => _settingsStatus(own, app)),
-    );
-    String enabled(bool value) =>
-        value ? appLocalizations.enabled : appLocalizations.disabled;
-    return generateSection(
-      title: appLocalizations.settings,
-      items: [
-        ListItem.open(
-          leading: const GlyphIcon(AppGlyphs.dns),
-          title: const Text('DNS'),
-          subtitle: Text(enabled(status.dns)),
-          widget: DnsView.profile(profileId),
+    final profile = ref.watch(profileProvider(profileId));
+    final issues = ref.watch(routingIssuesProvider(profileId));
+    final providers = referencedProviders(profile);
+    final missingProviders =
+        watchProviderSources(ref)?.missingIn(providers) ?? 0;
+    final status = _watchSettingsStatus(ref, profileId);
+    final chains = _watchChainCount(ref, profileId);
+    final issueCount =
+        issues.groups.length + issues.rules.length + missingProviders;
+    final moreInEffect = [
+      chains > 0,
+      status.ntp,
+      status.sniffer,
+      system.isDesktop && status.tunKeys > 0,
+    ].where((inEffect) => inEffect).length;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ErrorBanner(
+          message: issueCount > 0
+              ? appLocalizations.customIssuesSummary(issueCount)
+              : null,
         ),
-        ListItem.open(
-          leading: const GlyphIcon(AppGlyphs.clock),
-          title: const Text('NTP'),
-          subtitle: Text(enabled(status.ntp)),
-          widget: NtpView.profile(profileId),
-        ),
-        ListItem.open(
-          leading: const GlyphIcon(AppGlyphs.eye),
-          title: Text(appLocalizations.sniffer),
-          subtitle: Text(enabled(status.sniffer)),
-          widget: SnifferView(profileId),
-        ),
-        if (system.isDesktop)
-          ListItem.open(
-            leading: const GlyphIcon(AppGlyphs.vpn),
-            title: Text(appLocalizations.tun),
-            subtitle: Text(
-              status.tunKeys > 0
-                  ? appLocalizations.settingsCount(status.tunKeys)
-                  : appLocalizations.defaultText,
+        generateSection(
+          footer: appLocalizations.customProfileDesc,
+          items: [
+            _sectionRow(
+              context,
+              AppGlyphs.rules,
+              appLocalizations.rule,
+              _CountText(
+                count: profile?.customRules.length,
+                issueCount: issues.rules.length,
+              ),
+              CustomRulesView(profileId: profileId),
             ),
-            widget: TunView(profileId),
-          ),
+            _sectionRow(
+              context,
+              AppGlyphs.proxies,
+              appLocalizations.proxyChainCustomNodes,
+              _CountText(count: profile?.profileProxies.length),
+              _ProfileProxiesView(profileId),
+            ),
+            _sectionRow(
+              context,
+              AppGlyphs.resources,
+              appLocalizations.providers,
+              _CountText(
+                count: providers.proxy.length + providers.rule.length,
+                issueCount: missingProviders,
+              ),
+              CustomProvidersView(profileId),
+            ),
+            _sectionRow(
+              context,
+              AppGlyphs.dns,
+              'DNS',
+              _StatusText(
+                _enabledText(appLocalizations, status.dns),
+                active: status.dns,
+              ),
+              DnsView.profile(profileId),
+            ),
+            _sectionRow(
+              context,
+              AppGlyphs.sliders,
+              appLocalizations.more,
+              _StatusText(
+                moreInEffect > 0
+                    ? appLocalizations.sectionsInEffect(moreInEffect)
+                    : appLocalizations.defaultText,
+                active: moreInEffect > 0,
+              ),
+              _MoreSectionsView(profileId),
+            ),
+          ],
+        ),
       ],
+    );
+  }
+}
+
+class _MoreSectionsView extends ConsumerWidget {
+  final int profileId;
+
+  const _MoreSectionsView(this.profileId);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    final status = _watchSettingsStatus(ref, profileId);
+    final chains = _watchChainCount(ref, profileId);
+    return CommonScaffold(
+      title: appLocalizations.more,
+      body: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 16)
+            .copyWith(top: context.contentTopPadding, bottom: 16),
+        children: [
+          generateSection(
+            items: [
+              _sectionRow(
+                context,
+                AppGlyphs.split,
+                appLocalizations.proxyChains,
+                Text(chains > 0 ? '$chains' : appLocalizations.none),
+                ProfileProxyChainsView(profileId: profileId),
+              ),
+              _sectionRow(
+                context,
+                AppGlyphs.clock,
+                'NTP',
+                Text(_enabledText(appLocalizations, status.ntp)),
+                NtpView.profile(profileId),
+              ),
+              _sectionRow(
+                context,
+                AppGlyphs.eye,
+                appLocalizations.sniffer,
+                Text(_enabledText(appLocalizations, status.sniffer)),
+                SnifferView(profileId),
+              ),
+              if (system.isDesktop)
+                _sectionRow(
+                  context,
+                  AppGlyphs.vpn,
+                  appLocalizations.tun,
+                  Text(
+                    status.tunKeys > 0
+                        ? appLocalizations.settingsCount(status.tunKeys)
+                        : appLocalizations.defaultText,
+                  ),
+                  TunView(profileId),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileProxiesView extends StatelessWidget {
+  final int profileId;
+
+  const _ProfileProxiesView(this.profileId);
+
+  @override
+  Widget build(BuildContext context) {
+    return CommonScaffold(
+      title: context.appLocalizations.proxyChainCustomNodes,
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: SizedBox(height: context.contentTopPadding),
+          ),
+          ProfileProxiesContent(profileId: profileId),
+          const SliverToBoxAdapter(child: SizedBox(height: 24)),
+        ],
+      ),
+    );
+  }
+}
+
+class _CountText extends StatelessWidget {
+  const _CountText({required this.count, this.issueCount = 0});
+
+  final int? count;
+  final int issueCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final count = this.count?.toString() ?? '';
+    if (issueCount == 0) {
+      return Text(count);
+    }
+    return Text(
+      '$issueCount / $count',
+      style: TextStyle(color: context.colorScheme.error),
+    );
+  }
+}
+
+class _StatusText extends StatelessWidget {
+  const _StatusText(this.text, {required this.active});
+
+  final String text;
+  final bool active;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    return Text(
+      text,
+      style: TextStyle(
+        color: active ? colorScheme.tertiary : colorScheme.onSurfaceVariant,
+      ),
     );
   }
 }

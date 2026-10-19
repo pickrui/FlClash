@@ -1527,5 +1527,9 @@
   "minutesAgoShort": "{count} 分钟前",
   "expireTime": "到期时间",
   "runtimeConfig": "运行时配置",
-  "proxyGroupsCount": "{count} 个代理组"
+  "proxyGroupsCount": "{count} 个代理组",
+  "confirmDeleteProxyGroup": "确定要删除当前代理组吗？",
+  "invalidProxyProvider": "{providerName} 是无效的代理提供者",
+  "customIssuesSummary": "{count} 项存在问题，应用配置可能失败",
+  "sectionsInEffect": "{count} 项生效"
 }

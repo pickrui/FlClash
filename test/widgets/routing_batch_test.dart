@@ -13,6 +13,7 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/providers/routing_issues.dart';
+import 'package:fl_clash/views/profiles/custom_groups.dart';
 import 'package:fl_clash/views/profiles/custom_overwrite.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -190,7 +191,7 @@ void main() {
   ) async {
     final profiles = await _open(tester, groups: true);
     await _selectBoth(tester);
-    await tester.tap(find.widgetWithText(TextButton, 'Confirm'));
+    await tester.tap(find.widgetWithText(TextButton, 'Delete'));
     await tester.pumpAndSettle();
     expect(profiles.profile.customProxyGroups, isEmpty);
     expect(profiles.profile.selectedMap, isEmpty);
@@ -198,6 +199,20 @@ void main() {
     expect(profiles.profile.unfoldSet, isEmpty);
     expect(profiles.profile.customRules, _rules);
     expect(profiles.writes, 1);
+  });
+  testWidgets('copying a group from its menu puts a numbered copy after it', (
+    tester,
+  ) async {
+    final profiles = await _open(tester, groups: true);
+    await tester.longPress(find.text('First'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(AppLocalizations.current.copy));
+    await tester.pumpAndSettle();
+    expect(
+      [for (final group in profiles.profile.customProxyGroups) group.name],
+      ['First', 'First-01', 'Second'],
+    );
+    expect(profiles.profile.customProxyGroups[1].proxies, ['Second']);
   });
   for (final rawReference in [false, true]) {
     testWidgets(
@@ -220,7 +235,7 @@ void main() {
               : {},
         );
         await _selectBoth(tester);
-        expect(find.widgetWithText(TextButton, 'Confirm'), findsNothing);
+        expect(find.widgetWithText(TextButton, 'Delete'), findsNothing);
         expect(profiles.profile.customProxyGroups, _groups);
         expect(profiles.writes, 0);
       },
