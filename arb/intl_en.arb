@@ -1518,7 +1518,6 @@
   "disableKeepAlive": "Disable TCP keep-alive",
   "keepAliveIdle": "TCP keep-alive idle",
   "routingMark": "Routing mark",
-  "required": "Required",
   "minutes": "minutes",
   "yearsAgoShort": "{count, plural, other{{count}y ago}}",
   "monthsAgoShort": "{count, plural, other{{count}mo ago}}",

@@ -1518,7 +1518,6 @@
   "disableKeepAlive": "Отключить TCP keep-alive",
   "keepAliveIdle": "Простой TCP keep-alive",
   "routingMark": "Метка маршрутизации",
-  "required": "Обязательно",
   "minutes": "минут",
   "yearsAgoShort": "{count, plural, one{{count} г. назад} few{{count} г. назад} many{{count} л. назад} other{{count} г. назад}}",
   "monthsAgoShort": "{count} мес. назад",

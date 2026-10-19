@@ -1518,7 +1518,6 @@
   "disableKeepAlive": "TCP キープアライブを無効化",
   "keepAliveIdle": "TCP キープアライブ待機時間",
   "routingMark": "ルーティングマーク",
-  "required": "必須",
   "minutes": "分",
   "yearsAgoShort": "{count} 年前",
   "monthsAgoShort": "{count} か月前",
