@@ -530,10 +530,10 @@ class AppLocalizations {
     return Intl.message('Auto update', name: 'autoUpdate', desc: '', args: []);
   }
 
-  /// `Auto update interval (minutes)`
+  /// `Auto update interval`
   String get autoUpdateInterval {
     return Intl.message(
-      'Auto update interval (minutes)',
+      'Auto update interval',
       name: 'autoUpdateInterval',
       desc: '',
       args: [],
@@ -12819,6 +12819,11 @@ class AppLocalizations {
       desc: '',
       args: [],
     );
+  }
+
+  /// `minutes`
+  String get minutes {
+    return Intl.message('minutes', name: 'minutes', desc: '', args: []);
   }
 }
 

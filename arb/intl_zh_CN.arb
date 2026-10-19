@@ -68,7 +68,7 @@
   "profileUrlNullValidationDesc": "请输入配置URL",
   "profileUrlInvalidValidationDesc": "请输入有效配置URL",
   "autoUpdate": "自动更新",
-  "autoUpdateInterval": "自动更新间隔（分钟）",
+  "autoUpdateInterval": "自动更新间隔",
   "profileAutoUpdateIntervalNullValidationDesc": "请输入自动更新间隔时间",
   "profileAutoUpdateIntervalInvalidValidationDesc": "请输入有效间隔时间格式",
   "themeMode": "主题模式",
@@ -1517,5 +1517,7 @@
   "usedShort": "已用",
   "disableKeepAlive": "禁用 TCP 保持活动",
   "keepAliveIdle": "TCP 保持活动空闲时间",
-  "routingMark": "路由标记"
+  "routingMark": "路由标记",
+  "required": "必填",
+  "minutes": "分钟"
 }

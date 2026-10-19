@@ -68,7 +68,7 @@
   "profileUrlNullValidationDesc": "Пожалуйста, введите URL профиля",
   "profileUrlInvalidValidationDesc": "Пожалуйста, введите действительный URL профиля",
   "autoUpdate": "Автообновление",
-  "autoUpdateInterval": "Интервал автообновления (минуты)",
+  "autoUpdateInterval": "Интервал автообновления",
   "profileAutoUpdateIntervalNullValidationDesc": "Пожалуйста, введите интервал времени для автообновления",
   "profileAutoUpdateIntervalInvalidValidationDesc": "Пожалуйста, введите действительный формат интервала времени",
   "themeMode": "Режим темы",
@@ -1517,5 +1517,7 @@
   "usedShort": "использовано",
   "disableKeepAlive": "Отключить TCP keep-alive",
   "keepAliveIdle": "Простой TCP keep-alive",
-  "routingMark": "Метка маршрутизации"
+  "routingMark": "Метка маршрутизации",
+  "required": "Обязательно",
+  "minutes": "минут"
 }

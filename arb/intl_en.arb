@@ -68,7 +68,7 @@
   "profileUrlNullValidationDesc": "Please input the profile URL",
   "profileUrlInvalidValidationDesc": "Please input a valid profile URL",
   "autoUpdate": "Auto update",
-  "autoUpdateInterval": "Auto update interval (minutes)",
+  "autoUpdateInterval": "Auto update interval",
   "profileAutoUpdateIntervalNullValidationDesc": "Please enter the auto update interval time",
   "profileAutoUpdateIntervalInvalidValidationDesc": "Please input a valid interval time format",
   "themeMode": "Theme mode",
@@ -1517,5 +1517,7 @@
   "usedShort": "used",
   "disableKeepAlive": "Disable TCP keep-alive",
   "keepAliveIdle": "TCP keep-alive idle",
-  "routingMark": "Routing mark"
+  "routingMark": "Routing mark",
+  "required": "Required",
+  "minutes": "minutes"
 }

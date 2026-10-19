@@ -450,7 +450,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "autoUpdate": MessageLookupByLibrary.simpleMessage("Auto update"),
     "autoUpdateInterval": MessageLookupByLibrary.simpleMessage(
-      "Auto update interval (minutes)",
+      "Auto update interval",
     ),
     "availableBalance": m0,
     "availablePlans": MessageLookupByLibrary.simpleMessage("Choose a Plan"),
@@ -1904,6 +1904,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "minimizeOnExitDesc": MessageLookupByLibrary.simpleMessage(
       "Modify the default system exit event",
     ),
+    "minutes": MessageLookupByLibrary.simpleMessage("minutes"),
     "minutesAgo": m45,
     "mixedPort": MessageLookupByLibrary.simpleMessage("Mixed port"),
     "mode": MessageLookupByLibrary.simpleMessage("Mode"),

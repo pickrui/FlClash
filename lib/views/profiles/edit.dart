@@ -8,19 +8,28 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/ui/navigator.dart';
-import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/providers/action.dart';
-import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/features/form/error_banner.dart';
+import 'package:fl_clash/features/form/form_row.dart';
+import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/editor.dart';
+import 'package:fl_clash/providers/action.dart';
+import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/widgets/widgets.dart';
+import 'package:fl_clash/ui/context_menu.dart';
 import 'package:fl_clash/ui/focus.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
+import 'package:fl_clash/ui/navigator.dart';
+import 'package:fl_clash/ui/sortable.dart';
+import 'package:fl_clash/ui/typography.dart';
+import 'package:fl_clash/widgets/last_update_time_text.dart';
+import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
+
+enum _ProfileField { label, url, autoUpdateInterval }
 
 class EditProfileView extends ConsumerStatefulWidget {
   final Profile profile;
@@ -41,9 +50,9 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
   bool _saving = false;
   bool _fileBusy = false;
   bool _loading = true;
+  bool _attempted = false;
   Object? _loadError;
   String? _rawText;
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   FileInfo? _fileInfo;
   Uint8List? _fileData;
 
@@ -115,12 +124,67 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     }
   }
 
+  bool get _hasAutoUpdate =>
+      widget.profile.type == ProfileType.url ||
+      widget.profile.isoixCloudProfile;
+
+  ({_ProfileField field, String message})? _issue(
+    AppLocalizations appLocalizations,
+  ) {
+    final isoixCloud = widget.profile.isoixCloudProfile;
+    if (!isoixCloud && _labelController.text.isEmpty) {
+      return (
+        field: _ProfileField.label,
+        message: appLocalizations.profileNameNullValidationDesc,
+      );
+    }
+    if (widget.profile.type == ProfileType.url && !isoixCloud) {
+      final url = _urlController.text.trim();
+      if (url.isEmpty) {
+        return (
+          field: _ProfileField.url,
+          message: appLocalizations.profileUrlNullValidationDesc,
+        );
+      }
+      if (!url.isUrl) {
+        return (
+          field: _ProfileField.url,
+          message: appLocalizations.profileUrlInvalidValidationDesc,
+        );
+      }
+    }
+    if (!_hasAutoUpdate || !_autoUpdate) return null;
+    final interval = _autoUpdateDurationController.text;
+    if (interval.isEmpty) {
+      return (
+        field: _ProfileField.autoUpdateInterval,
+        message: appLocalizations.profileAutoUpdateIntervalNullValidationDesc,
+      );
+    }
+    if ((int.tryParse(interval) ?? 0) <= 0) {
+      return (
+        field: _ProfileField.autoUpdateInterval,
+        message:
+            appLocalizations.profileAutoUpdateIntervalInvalidValidationDesc,
+      );
+    }
+    return null;
+  }
+
+  void _handleChanged(String _) {
+    if (_attempted) setState(() {});
+  }
+
   Future<void> _handleConfirm() async {
     final commonAction = context.commonAction;
     final profileAction = context.profileAction;
 
     if (_saving || _fileBusy || _loading || _loadError != null) return;
-    if (!_formKey.currentState!.validate()) return;
+    if (_issue(context.appLocalizations) != null) {
+      setState(() => _attempted = true);
+      return;
+    }
+    final interval = int.tryParse(_autoUpdateDurationController.text);
     var profile = widget.profile.copyWith(
       url: widget.profile.isoixCloudProfile
           ? widget.profile.url
@@ -129,11 +193,9 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
           ? widget.profile.label
           : _labelController.text,
       autoUpdate: _autoUpdate,
-      autoUpdateDuration: Duration(
-        minutes: _autoUpdate
-            ? int.parse(_autoUpdateDurationController.text)
-            : widget.profile.autoUpdateDuration.inMinutes,
-      ),
+      autoUpdateDuration: _autoUpdate && interval != null && interval > 0
+          ? Duration(minutes: interval)
+          : widget.profile.autoUpdateDuration,
     );
     setState(() => _saving = true);
     try {
@@ -170,7 +232,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
   }
 
   void _setAutoUpdate(bool value) {
-    if (_autoUpdate == value) return;
+    if (_saving || _autoUpdate == value) return;
     setState(() {
       _autoUpdate = value;
     });
@@ -308,128 +370,75 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
 
   @override
   Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
     final isoixCloud = widget.profile.isoixCloudProfile;
     final busy = _saving || _fileBusy;
-    final items = [
-      ListItem(
-        title: TextFormField(
-          textInputAction: TextInputAction.next,
-          controller: _labelController,
-          enabled: !isoixCloud,
-          inputFormatters: TextInputLimits.limit(TextInputLimits.name),
-          decoration: InputDecoration(
-            border: const OutlineInputBorder(),
-            labelText: appLocalizations.name,
-          ),
-          validator: (String? value) {
-            if (value == null || value.isEmpty) {
-              return appLocalizations.profileNameNullValidationDesc;
-            }
-            return null;
-          },
-        ),
+    final issue = _attempted ? _issue(appLocalizations) : null;
+    final sections = [
+      generateSection(
+        items: [
+          if (isoixCloud)
+            FormRow(
+              title: appLocalizations.name,
+              trailing: Text(
+                widget.profile.realLabel,
+                style: AppTextStyle.body
+                    .of(context)
+                    .copyWith(color: context.colorScheme.onSurfaceVariant),
+              ),
+            )
+          else
+            _ProfileNameField(
+              controller: _labelController,
+              invalid: issue?.field == _ProfileField.label,
+              onChanged: _handleChanged,
+            ),
+          if (widget.profile.type == ProfileType.url && !isoixCloud)
+            _ProfileUrlField(
+              controller: _urlController,
+              invalid: issue?.field == _ProfileField.url,
+              onChanged: _handleChanged,
+            ),
+        ],
       ),
-      if (widget.profile.type == ProfileType.url && !isoixCloud) ...[
-        ListItem(
-          title: TextFormField(
-            textInputAction: TextInputAction.next,
-            keyboardType: TextInputType.url,
-            controller: _urlController,
-            maxLines: 5,
-            minLines: 1,
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              labelText: appLocalizations.url,
+      if (_hasAutoUpdate)
+        generateSection(
+          items: [
+            FormRow(
+              title: appLocalizations.autoUpdate,
+              onPressed: () => _setAutoUpdate(!_autoUpdate),
+              trailing: Switch(value: _autoUpdate, onChanged: _setAutoUpdate),
             ),
-            validator: (String? value) {
-              final url = value?.trim() ?? '';
-              if (url.isEmpty) {
-                return appLocalizations.profileUrlNullValidationDesc;
-              }
-              if (!url.isUrl) {
-                return appLocalizations.profileUrlInvalidValidationDesc;
-              }
-              return null;
-            },
-          ),
-        ),
-      ],
-      if (widget.profile.type == ProfileType.url || isoixCloud) ...[
-        ListItem.toggle(
-          title: Text(appLocalizations.autoUpdate),
-          value: _autoUpdate,
-          onChanged: _setAutoUpdate,
-        ),
-        if (_autoUpdate)
-          ListItem(
-            title: TextFormField(
-              textInputAction: TextInputAction.next,
-              controller: _autoUpdateDurationController,
-              keyboardType: TextInputType.number,
-              inputFormatters: TextInputLimits.digitsOnly(
-                TextInputLimits.interval,
+            if (_autoUpdate)
+              _AutoUpdateIntervalField(
+                controller: _autoUpdateDurationController,
+                invalid: issue?.field == _ProfileField.autoUpdateInterval,
+                onChanged: _handleChanged,
               ),
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                labelText: appLocalizations.autoUpdateInterval,
-              ),
-              validator: (String? value) {
-                if (value == null || value.isEmpty) {
-                  return appLocalizations
-                      .profileAutoUpdateIntervalNullValidationDesc;
-                }
-                final minutes = int.tryParse(value);
-                if (minutes == null || minutes <= 0) {
-                  return appLocalizations
-                      .profileAutoUpdateIntervalInvalidValidationDesc;
-                }
-                return null;
-              },
+          ],
+        ),
+      if (isoixCloud)
+        generateSection(
+          items: [
+            ListItem.toggle(
+              title: Text(appLocalizations.tcpFastOpen),
+              subtitle: Text(appLocalizations.tcpFastOpenDesc),
+              value: _tfo,
+              onChanged: _setTfo,
             ),
-          ),
-      ],
+            ListItem.toggle(
+              title: Text(appLocalizations.minimalConfiguration),
+              subtitle: Text(appLocalizations.minimalConfigurationDesc),
+              value: _minimalConfig,
+              onChanged: _setMinimalConfig,
+            ),
+          ],
+        ),
       if (!isoixCloud && widget.profile.type != ProfileType.custom)
-        ListItem(
-          title: Text(appLocalizations.profile),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 4),
-              Text(_fileInfo?.desc ?? appLocalizations.noData),
-              const SizedBox(height: 8),
-              Wrap(
-                runSpacing: 6,
-                spacing: 12,
-                children: [
-                  if (_fileInfo != null)
-                    CommonActionChip(
-                      avatar: const GlyphIcon(AppGlyphs.edit),
-                      label: appLocalizations.edit,
-                      onPressed: _editProfileFile,
-                    ),
-                  CommonActionChip(
-                    avatar: const GlyphIcon(AppGlyphs.upload),
-                    label: appLocalizations.upload,
-                    onPressed: _uploadProfileFile,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      if (isoixCloud)
-        ListItem.toggle(
-          title: Text(appLocalizations.tcpFastOpen),
-          subtitle: Text(appLocalizations.tcpFastOpenDesc),
-          value: _tfo,
-          onChanged: _setTfo,
-        ),
-      if (isoixCloud)
-        ListItem.toggle(
-          title: Text(appLocalizations.minimalConfiguration),
-          subtitle: Text(appLocalizations.minimalConfigurationDesc),
-          value: _minimalConfig,
-          onChanged: _setMinimalConfig,
+        _ProfileFileItem(
+          fileInfo: _fileInfo,
+          onEdit: _editProfileFile,
+          onUpload: _uploadProfileFile,
         ),
     ];
     return FocusTraversalGroup(
@@ -447,35 +456,198 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
               isLoading: busy,
               onPressed: _loading || _loadError != null ? null : _handleConfirm,
             ),
-            body: AppBarClearance(
-              child: ExcludeFocus(
-                excluding: busy,
-                child: AbsorbPointer(
-                  absorbing: busy,
-                  child: _loading
-                      ? const Center(child: CircularProgressIndicator())
-                      : _loadError != null
-                      ? ErrorStatus(error: _loadError!, onRetry: _loadProfile)
-                      : Form(
-                          key: _formKey,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            child: ListView.separated(
-                              padding: kMaterialListPadding,
-                              itemBuilder: (_, index) {
-                                return items[index];
-                              },
-                              separatorBuilder: (_, _) {
-                                return const SizedBox(height: 24);
-                              },
-                              itemCount: items.length,
-                            ),
-                          ),
+            body: ExcludeFocus(
+              excluding: busy,
+              child: AbsorbPointer(
+                absorbing: busy,
+                child: _loading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _loadError != null
+                    ? AppBarClearance(
+                        child: ErrorStatus(
+                          error: _loadError!,
+                          onRetry: _loadProfile,
                         ),
-                ),
+                      )
+                    : Builder(
+                        builder: (context) => ListView(
+                          padding: const EdgeInsets.symmetric(horizontal: 16)
+                              .copyWith(
+                                top: context.contentTopPadding,
+                                bottom: BottomInsetScope.of(context) + 16,
+                              ),
+                          children: [
+                            ErrorBanner(message: issue?.message),
+                            ...sections.separated(const SizedBox(height: 24)),
+                          ],
+                        ),
+                      ),
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileNameField extends StatelessWidget {
+  const _ProfileNameField({
+    required this.controller,
+    required this.invalid,
+    required this.onChanged,
+  });
+
+  final TextEditingController controller;
+  final bool invalid;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    return FormRow(
+      title: appLocalizations.name,
+      invalid: invalid,
+      trailing: FormRowTextField(
+        controller: controller,
+        hintText: appLocalizations.required,
+        textInputAction: TextInputAction.next,
+        inputFormatters: TextInputLimits.limit(TextInputLimits.name),
+        onChanged: onChanged,
+      ),
+    );
+  }
+}
+
+class _ProfileUrlField extends StatelessWidget {
+  const _ProfileUrlField({
+    required this.controller,
+    required this.invalid,
+    required this.onChanged,
+  });
+
+  final TextEditingController controller;
+  final bool invalid;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    return FormRow(
+      title: appLocalizations.url,
+      invalid: invalid,
+      trailing: FormRowTextField(
+        controller: controller,
+        hintText: appLocalizations.required,
+        keyboardType: TextInputType.url,
+        textInputAction: TextInputAction.next,
+        autocorrect: false,
+        inputFormatters: TextInputLimits.limit(TextInputLimits.url),
+        onChanged: onChanged,
+      ),
+    );
+  }
+}
+
+class _AutoUpdateIntervalField extends StatelessWidget {
+  const _AutoUpdateIntervalField({
+    required this.controller,
+    required this.invalid,
+    required this.onChanged,
+  });
+
+  final TextEditingController controller;
+  final bool invalid;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    return FormRow(
+      title: appLocalizations.autoUpdateInterval,
+      invalid: invalid,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 4,
+        children: [
+          Flexible(
+            child: FormRowTextField(
+              controller: controller,
+              hintText: appLocalizations.required,
+              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.next,
+              inputFormatters: TextInputLimits.digitsOnly(
+                TextInputLimits.interval,
+              ),
+              onChanged: onChanged,
+            ),
+          ),
+          Text(
+            appLocalizations.minutes,
+            style: AppTextStyle.subheadline.of(context),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A profile whose file is missing can still take one by upload.
+class _ProfileFileItem extends StatelessWidget {
+  const _ProfileFileItem({
+    required this.fileInfo,
+    required this.onEdit,
+    required this.onUpload,
+  });
+
+  final FileInfo? fileInfo;
+  final VoidCallback onEdit;
+  final VoidCallback onUpload;
+
+  List<CommonPopupMenuItem> _menuItems(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    return [
+      if (fileInfo != null)
+        CommonPopupMenuItem(
+          glyph: AppGlyphs.edit,
+          label: appLocalizations.edit,
+          onPressed: onEdit,
+        ),
+      CommonPopupMenuItem(
+        glyph: AppGlyphs.upload,
+        label: appLocalizations.upload,
+        onPressed: onUpload,
+      ),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    final style = context.listCaptionStyle;
+    final fileInfo = this.fileInfo;
+    return ItemPositionProvider(
+      position: ItemPosition.startAndEnd,
+      child: ContextMenuRegion(
+        menuItems: _menuItems(context),
+        child: DecorationListItem(
+          contentPadding: const EdgeInsets.only(left: 16),
+          title: Text(appLocalizations.profile),
+          subtitle: fileInfo == null
+              ? Text(appLocalizations.noData, style: style)
+              : LastUpdateTimeText(
+                  lastUpdateDate: fileInfo.lastModified,
+                  style: style,
+                ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (fileInfo != null)
+                Text(fileInfo.size.traffic.show, style: style),
+              const DisclosureIndicator(),
+            ],
+          ),
+          onPressed: fileInfo == null ? onUpload : onEdit,
         ),
       ),
     );

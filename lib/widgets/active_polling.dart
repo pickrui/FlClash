@@ -122,3 +122,39 @@ mixin ActivePollingMixin<T extends StatefulWidget>
   bool _isCurrentPoll(int generation) =>
       canPoll && _isPolling && generation == _pollGeneration;
 }
+
+typedef TickWidgetBuilder = Widget Function(BuildContext context, int tick);
+
+/// Rebuilds every [duration] while its page is active in the foreground.
+class TickBuilder extends StatefulWidget {
+  final Duration duration;
+  final TickWidgetBuilder builder;
+
+  const TickBuilder({super.key, required this.duration, required this.builder})
+    : assert(duration > Duration.zero);
+
+  @override
+  State<TickBuilder> createState() => _TickBuilderState();
+}
+
+class _TickBuilderState extends State<TickBuilder>
+    with WidgetsBindingObserver, ActivePollingMixin<TickBuilder> {
+  int _tick = 0;
+
+  @override
+  Duration get pollInterval => widget.duration;
+
+  @override
+  Future<void> poll(PollGuard isCurrent) async {
+    if (isCurrent()) {
+      setState(() {
+        _tick++;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.builder(context, _tick);
+  }
+}

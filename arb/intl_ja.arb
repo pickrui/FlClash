@@ -68,7 +68,7 @@
   "profileUrlNullValidationDesc": "プロファイルURLを入力してください",
   "profileUrlInvalidValidationDesc": "有効なプロファイルURLを入力してください",
   "autoUpdate": "自動更新",
-  "autoUpdateInterval": "自動更新間隔（分）",
+  "autoUpdateInterval": "自動更新間隔",
   "profileAutoUpdateIntervalNullValidationDesc": "自動更新間隔を入力してください",
   "profileAutoUpdateIntervalInvalidValidationDesc": "有効な間隔形式を入力してください",
   "themeMode": "テーマモード",
@@ -1517,5 +1517,7 @@
   "usedShort": "使用済み",
   "disableKeepAlive": "TCP キープアライブを無効化",
   "keepAliveIdle": "TCP キープアライブ待機時間",
-  "routingMark": "ルーティングマーク"
+  "routingMark": "ルーティングマーク",
+  "required": "必須",
+  "minutes": "分"
 }

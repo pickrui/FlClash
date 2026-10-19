@@ -12,7 +12,8 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/views/profiles/edit.dart';
 import 'package:fl_clash/widgets/error_status.dart';
-import 'package:fl_clash/ui/chip.dart';
+import 'package:fl_clash/features/form/form_row.dart';
+import 'package:fl_clash/ui/list.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -67,15 +68,12 @@ void main() {
         ),
         isNull,
       );
+      final row = find.widgetWithText(DecorationListItem, 'Profile');
+      expect(tester.widget<DecorationListItem>(row).onPressed, isNotNull);
+      await tester.longPress(row);
+      await tester.pumpAndSettle();
+      expect(find.text('Upload'), findsOneWidget);
       expect(find.text('Edit'), findsNothing);
-      expect(
-        tester
-            .widget<CommonActionChip>(
-              find.widgetWithText(CommonActionChip, 'Upload'),
-            )
-            .onPressed,
-        isNotNull,
-      );
       expect(tester.takeException(), isNull);
     },
   );
@@ -143,15 +141,19 @@ void main() {
       await _openProfile(tester);
       await tester.pumpAndSettle();
       expect(find.text('Auto update'), findsOneWidget);
-      final interval = find.widgetWithText(
-        TextFormField,
-        'Auto update interval (minutes)',
+      final interval = find.descendant(
+        of: find.widgetWithText(FormRow, 'Auto update interval'),
+        matching: find.byType(TextFormField),
       );
       expect(interval, findsOneWidget);
+      const invalid = 'Please input a valid interval time format';
       await tester.enterText(interval, '0');
-      expect(tester.state<FormState>(find.byType(Form)).validate(), false);
+      await tester.tap(find.byTooltip('Save'));
+      await tester.pumpAndSettle();
+      expect(find.text(invalid), findsOneWidget);
       await tester.enterText(interval, '30');
-      expect(tester.state<FormState>(find.byType(Form)).validate(), true);
+      await tester.pumpAndSettle();
+      expect(find.text(invalid), findsNothing);
       await tester.tap(find.text('Auto update'));
       await tester.pumpAndSettle();
       expect(interval, findsNothing);

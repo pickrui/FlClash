@@ -98,7 +98,7 @@ void main() {
     );
     await tester.runAsync(() => tester.tap(find.text('Open profile')));
     await settle(tester, 12);
-    await tester.runAsync(() => tester.tap(find.text('Edit')));
+    await tester.runAsync(() => tester.tap(find.text('Profile')));
     await settle(tester, 12);
     final controller = tester
         .widget<CodeForge>(find.byType(CodeForge))

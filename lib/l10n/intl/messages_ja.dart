@@ -366,7 +366,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "autoRunDesc": MessageLookupByLibrary.simpleMessage("アプリ起動時に自動実行"),
     "autoSetSystemDns": MessageLookupByLibrary.simpleMessage("システムDNSを自動設定"),
     "autoUpdate": MessageLookupByLibrary.simpleMessage("自動更新"),
-    "autoUpdateInterval": MessageLookupByLibrary.simpleMessage("自動更新間隔（分）"),
+    "autoUpdateInterval": MessageLookupByLibrary.simpleMessage("自動更新間隔"),
     "availableBalance": m0,
     "availablePlans": MessageLookupByLibrary.simpleMessage("プランを選択"),
     "back": MessageLookupByLibrary.simpleMessage("戻る"),
@@ -1603,6 +1603,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "minimizeOnExitDesc": MessageLookupByLibrary.simpleMessage(
       "システムの終了イベントを変更",
     ),
+    "minutes": MessageLookupByLibrary.simpleMessage("分"),
     "minutesAgo": m45,
     "mixedPort": MessageLookupByLibrary.simpleMessage("Mixedポート"),
     "mode": MessageLookupByLibrary.simpleMessage("モード"),
