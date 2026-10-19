@@ -490,7 +490,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "batchPreviewTip": m1,
     "batteryOptimizationDesc": MessageLookupByLibrary.simpleMessage(
-      "Чтобы приложение работало в фоне, отключите для него оптимизацию батареи. Нажмите, чтобы перейти к настройкам.",
+      "Игнорирование оптимизации батареи позволяет приложению работать в фоне",
     ),
     "batteryOptimizationStatusTip": MessageLookupByLibrary.simpleMessage(
       "Из-за системных ограничений во время работы невозможно корректно получить статус оптимизации батареи",

@@ -12,8 +12,14 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:wifi_ssid/wifi_ssid.dart';
 
 import '../helpers/test_app.dart';
+
+final _authorize = find.descendant(
+  of: find.byType(AuthorizeButton),
+  matching: find.byType(FilledButton),
+);
 
 void main() {
   testWidgets('battery settings open only after a tap and refresh on return', (
@@ -36,7 +42,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(openings, 0);
-    await tester.tap(find.byType(FilledButton));
+    await tester.tap(_authorize);
     await tester.pumpAndSettle();
     expect(openings, 1);
     allowed = true;
@@ -44,10 +50,7 @@ void main() {
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pumpAndSettle();
     expect(find.text('Authorized'), findsOneWidget);
-    expect(
-      tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
-      isNull,
-    );
+    expect(tester.widget<FilledButton>(_authorize).onPressed, isNull);
     expect(openings, 1);
   });
 
@@ -130,9 +133,37 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.byType(FilledButton), findsNothing);
+    expect(_authorize, findsNothing);
+    await tester.tap(find.byTooltip('tip'));
+    await tester.pumpAndSettle();
     expect(find.textContaining('system limitations'), findsOneWidget);
   });
+
+  for (final (permission, label) in [
+    (WifiSsidPermission.granted, 'Authorized'),
+    (WifiSsidPermission.denied, 'Tap to authorize'),
+  ]) {
+    testWidgets('the location row reads a $permission permission', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        TestApp(
+          wrapInProviderScope: true,
+          homeBuilder: (child) => Scaffold(body: child),
+          child: SsidPermissionItem(
+            isMacOS: false,
+            checkPermission: () async => permission,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(label), findsOneWidget);
+      expect(
+        tester.widget<FilledButton>(_authorize).onPressed,
+        permission == WifiSsidPermission.granted ? isNull : isNotNull,
+      );
+    });
+  }
 
   testWidgets(
     'inline SSIDs keep their order and select from the section header',

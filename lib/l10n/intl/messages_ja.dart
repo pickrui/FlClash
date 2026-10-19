@@ -398,7 +398,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "batchPreviewTip": m1,
     "batteryOptimizationDesc": MessageLookupByLibrary.simpleMessage(
-      "バックグラウンドでの動作を維持するため、このアプリの電池の最適化を無効にしてください。タップすると設定を開きます。",
+      "電池の最適化を無視すると、アプリがバックグラウンドで動作し続けます",
     ),
     "batteryOptimizationStatusTip": MessageLookupByLibrary.simpleMessage(
       "システムの制限により、実行中は電池の最適化の状態を正しく取得できません",

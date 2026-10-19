@@ -380,7 +380,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "batchMapInputTip": MessageLookupByLibrary.simpleMessage("每行一条，键和值之间用空格分隔"),
     "batchPreviewTip": m1,
     "batteryOptimizationDesc": MessageLookupByLibrary.simpleMessage(
-      "为保证后台运行，请关闭本应用的电池优化。点击前往设置",
+      "忽略电池优化可保证应用在后台运行",
     ),
     "batteryOptimizationStatusTip": MessageLookupByLibrary.simpleMessage(
       "由于系统限制，运行状态下无法正确获取电池优化状态",

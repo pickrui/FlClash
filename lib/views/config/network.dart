@@ -222,27 +222,78 @@ class SuspendOnIdleItem extends ConsumerWidget {
   }
 }
 
+/// Reading the Wi-Fi name needs location access; the row shows whether it
+/// is granted and asks for it, checking again when the app comes back.
 class SsidPermissionItem extends ConsumerStatefulWidget {
-  const SsidPermissionItem({super.key, required this.isMacOS});
+  const SsidPermissionItem({
+    super.key,
+    required this.isMacOS,
+    this.checkPermission,
+    this.requestPermission,
+  });
 
   final bool isMacOS;
+  final Future<WifiSsidPermission> Function()? checkPermission;
+  final Future<WifiSsidPermission> Function()? requestPermission;
 
   @override
   ConsumerState<SsidPermissionItem> createState() => _SsidPermissionItemState();
 }
 
-class _SsidPermissionItemState extends ConsumerState<SsidPermissionItem> {
+class _SsidPermissionItemState extends ConsumerState<SsidPermissionItem>
+    with WidgetsBindingObserver {
+  WifiSsidPermission? _permission;
   bool _requesting = false;
+  int _generation = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _check();
+  }
+
+  @override
+  void dispose() {
+    _generation++;
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _check();
+  }
+
+  Future<void> _check() async {
+    final generation = ++_generation;
+    try {
+      final permission =
+          await (widget.checkPermission ?? wifiSsidManager.checkPermission)();
+      if (mounted && generation == _generation) {
+        setState(() => _permission = permission);
+      }
+    } catch (_) {
+      if (mounted && generation == _generation) {
+        setState(() => _permission = null);
+      }
+    }
+  }
 
   Future<void> _request() async {
     if (_requesting) return;
     setState(() => _requesting = true);
     try {
-      var permission = await wifiSsidManager.checkPermission();
+      var permission =
+          await (widget.checkPermission ?? wifiSsidManager.checkPermission)();
       if (permission != WifiSsidPermission.granted) {
-        permission = await wifiSsidManager.requestPermission();
+        permission =
+            await (widget.requestPermission ??
+                wifiSsidManager.requestPermission)();
       }
       if (!mounted) return;
+      _generation++;
+      setState(() => _permission = permission);
       ref.read(ssidRefreshProvider.notifier).update((v) => v + 1);
       if (permission != WifiSsidPermission.granted) {
         final l10n = context.appLocalizations;
@@ -265,21 +316,15 @@ class _SsidPermissionItemState extends ConsumerState<SsidPermissionItem> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.appLocalizations;
-    return ListItem(
-      title: Text(l10n.locationPermission),
-      subtitle: Text(
-        widget.isMacOS
-            ? l10n.ssidPermissionMacosGuide
-            : l10n.ssidPermissionGuide,
-      ),
-      onTap: _requesting ? null : _request,
+    final granted = _permission == WifiSsidPermission.granted;
+    return DecorationListItem(
+      title: TooltipLabel(context.appLocalizations.locationPermission),
       trailing: _requesting
-          ? const SizedBox.square(
-              dimension: 20,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          : const GlyphIcon(AppGlyphs.locate),
+          ? const CommonCircleLoading(size: 24)
+          : AuthorizeButton(
+              authorized: granted,
+              onPressed: granted ? null : _request,
+            ),
     );
   }
 }
@@ -290,10 +335,16 @@ class ExcludeNetworksItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.appLocalizations;
-    final rules = ref.watch(networkSettingProvider).excludeNetworks;
+    final rules = ref.watch(
+      networkSettingProvider.select((state) => state.excludeNetworks),
+    );
     return ListItem.input(
       title: Text(l10n.excludeNetworks),
-      subtitle: Text(l10n.excludeNetworksDesc),
+      subtitle: Text(
+        rules.isEmpty ? l10n.none : rules.join(', '),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
       dialogTitle: l10n.excludeNetworks,
       value: rules.join(','),
       maxLength: 1024,
@@ -943,6 +994,118 @@ class _OnDemandViewState extends ConsumerState<OnDemandView> {
     setState(_selected.clear);
   }
 
+  Widget _buildPrerequisites() {
+    final l = context.appLocalizations;
+    return Column(
+      children: [
+        generateSection(
+          title: l.prerequisites,
+          items: [
+            if (_isAndroid) const BatteryOptimizationItem(),
+            SsidPermissionItem(isMacOS: _isMacOS),
+          ],
+          footer: [
+            if (_isAndroid) l.batteryOptimizationDesc,
+            _isMacOS ? l.ssidPermissionMacosGuide : l.ssidPermissionGuide,
+          ].join('\n'),
+        ),
+        if (_isAndroid)
+          generateSection(
+            title: l.options,
+            items: const [ExcludeNetworksItem()],
+            footer: l.excludeNetworksDesc,
+          ),
+      ],
+    );
+  }
+
+  Widget _buildHeader(List<String> ssids, Set<String> selected) {
+    final l = context.appLocalizations;
+    return ListHeader(
+      title: l.excludeSsids,
+      actions: [
+        if (selected.isNotEmpty) ...[
+          IconButtonData(
+            glyph: AppGlyphs.delete,
+            tooltip: l.delete,
+            onPressed: _deleteSelected,
+          ),
+          IconButtonData(
+            glyph: AppGlyphs.selectAll,
+            tooltip: l.selectAll,
+            onPressed: () => setState(() {
+              if (selected.length == ssids.length) {
+                _selected.clear();
+              } else {
+                _selected.addAll(ssids);
+              }
+            }),
+          ),
+        ] else
+          IconButtonData(
+            glyph: AppGlyphs.addCircle,
+            tooltip: l.add,
+            onPressed: _edit,
+          ),
+      ],
+    );
+  }
+
+  Widget _buildItem(List<String> ssids, int index, Set<String> selected) {
+    final ssid = ssids[index];
+    return ReorderableDelayedDragStartListener(
+      key: ValueKey(ssid),
+      index: index,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: ItemPositionProvider(
+          position: ItemPosition.get(index, ssids.length),
+          child: SelectedDecorationListItem(
+            title: TooltipText(
+              text: Text(ssid, maxLines: 2, overflow: TextOverflow.ellipsis),
+            ),
+            isEditing: selected.isNotEmpty,
+            isSelected: selected.contains(ssid),
+            onSelected: () => setState(() {
+              if (!_selected.remove(ssid)) _selected.add(ssid);
+            }),
+            onPressed: () => _edit(ssid),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildList(List<String> ssids, Set<String> selected) {
+    if (ssids.isEmpty) {
+      return SliverPadding(
+        padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(top: 12),
+        sliver: SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 48),
+            child: NullStatus(
+              label: context.appLocalizations.ssidsEmpty,
+              illustration: NullStatusIllustration.wifi,
+            ),
+          ),
+        ),
+      );
+    }
+    return SliverPadding(
+      padding: const EdgeInsets.only(top: 12),
+      sliver: SliverReorderableList(
+        itemCount: ssids.length,
+        onReorderItem: _reorder,
+        itemBuilder: (_, index) => _buildItem(ssids, index, selected),
+        proxyDecorator: (_, index, animation) => commonProxyDecorator(
+          _buildItem(ssids, index, selected),
+          index,
+          animation,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
@@ -950,109 +1113,32 @@ class _OnDemandViewState extends ConsumerState<OnDemandView> {
       networkSettingProvider.select((state) => state.excludeSSIDs),
     );
     final selected = _selected.intersection(ssids.toSet());
-    final editing = selected.isNotEmpty;
     return CommonScaffold(
       title: l.onDemand,
       body: CustomScrollView(
         slivers: [
           SliverPadding(
-            padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 0),
+            padding: const EdgeInsets.symmetric(horizontal: 16)
+                .copyWith(top: context.appBarInset),
             sliver: SliverToBoxAdapter(
-              child: Column(
-                children: [
-                  if (_isAndroid || _isMacOS)
-                    generateSection(
-                      title: l.prerequisites,
-                      items: [
-                        if (_isAndroid) const BatteryOptimizationItem(),
-                        SsidPermissionItem(isMacOS: _isMacOS),
-                      ],
-                    ),
-                  if (_isAndroid)
-                    generateSection(
-                      title: l.options,
-                      items: const [ExcludeNetworksItem()],
-                    ),
-                  ListHeader(
-                    title: l.excludeSsids,
-                    actions: [
-                      if (editing) ...[
-                        IconButtonData(
-                          glyph: AppGlyphs.delete,
-                          tooltip: l.delete,
-                          onPressed: _deleteSelected,
-                        ),
-                        IconButtonData(
-                          glyph: AppGlyphs.selectAll,
-                          tooltip: l.selectAll,
-                          onPressed: () => setState(() {
-                            if (selected.length == ssids.length) {
-                              _selected.clear();
-                            } else {
-                              _selected.addAll(ssids);
-                            }
-                          }),
-                        ),
-                      ] else
-                        IconButtonData(
-                          glyph: AppGlyphs.addCircle,
-                          tooltip: l.add,
-                          onPressed: _edit,
-                        ),
-                    ],
-                  ),
-                  ListFooter(text: l.excludeSsidsDesc),
-                ],
-              ),
+              child: _isAndroid || _isMacOS
+                  ? _buildPrerequisites()
+                  : const SizedBox.shrink(),
             ),
           ),
-          if (ssids.isEmpty)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 48),
-                child: NullStatus(
-                  label: l.ssidsEmpty,
-                  illustration: NullStatusIllustration.wifi,
-                ),
-              ),
-            )
-          else
-            SliverPadding(
-              padding: EdgeInsets.fromLTRB(
-                16,
-                12,
-                16,
-                MediaQuery.viewPaddingOf(context).bottom + 16,
-              ),
-              sliver: SliverReorderableList(
-                itemCount: ssids.length,
-                onReorderItem: _reorder,
-                proxyDecorator: commonProxyDecorator,
-                itemBuilder: (_, index) {
-                  final ssid = ssids[index];
-                  return ReorderableDelayedDragStartListener(
-                    key: ValueKey(ssid),
-                    index: index,
-                    child: ItemPositionProvider(
-                      position: ItemPosition.get(index, ssids.length),
-                      child: SelectedDecorationListItem(
-                        title: Text(
-                          ssid,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        isEditing: editing,
-                        isSelected: selected.contains(ssid),
-                        onSelected: () => setState(() {
-                          if (!_selected.remove(ssid)) _selected.add(ssid);
-                        }),
-                        onPressed: () => _edit(ssid),
-                      ),
-                    ),
-                  );
-                },
-              ),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            sliver: SliverToBoxAdapter(child: _buildHeader(ssids, selected)),
+          ),
+          _buildList(ssids, selected),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+            ).copyWith(bottom: MediaQuery.viewPaddingOf(context).bottom + 16),
+            sliver: SliverToBoxAdapter(
+              child: ListFooter(text: l.excludeSsidsDesc),
             ),
+          ),
         ],
       ),
     );

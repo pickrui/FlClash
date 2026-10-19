@@ -1374,7 +1374,7 @@
   "disabled": "Disabled",
   "overwriteIssuesSummary": "{count} items have problems, and applying this override may fail",
   "ignoreBatteryOptimization": "Ignore battery optimization",
-  "batteryOptimizationDesc": "To keep the app running in the background, disable battery optimization for it. Tap to open settings.",
+  "batteryOptimizationDesc": "Ignore battery optimization keeps the app running in the background",
   "batteryOptimizationStatusTip": "Due to system limitations, the battery optimization status cannot be read correctly while running",
   "authorized": "Authorized",
   "tapToAuthorize": "Tap to authorize",

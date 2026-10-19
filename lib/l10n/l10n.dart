@@ -11531,10 +11531,10 @@ class AppLocalizations {
     );
   }
 
-  /// `To keep the app running in the background, disable battery optimization for it. Tap to open settings.`
+  /// `Ignore battery optimization keeps the app running in the background`
   String get batteryOptimizationDesc {
     return Intl.message(
-      'To keep the app running in the background, disable battery optimization for it. Tap to open settings.',
+      'Ignore battery optimization keeps the app running in the background',
       name: 'batteryOptimizationDesc',
       desc: '',
       args: [],

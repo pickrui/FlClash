@@ -485,7 +485,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "batchPreviewTip": m1,
     "batteryOptimizationDesc": MessageLookupByLibrary.simpleMessage(
-      "To keep the app running in the background, disable battery optimization for it. Tap to open settings.",
+      "Ignore battery optimization keeps the app running in the background",
     ),
     "batteryOptimizationStatusTip": MessageLookupByLibrary.simpleMessage(
       "Due to system limitations, the battery optimization status cannot be read correctly while running",
