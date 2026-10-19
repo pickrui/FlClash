@@ -14,6 +14,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences_platform_interface/method_channel_shared_preferences.dart';
+import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
 
 import '../helpers/app_paths.dart';
 
@@ -35,6 +37,7 @@ void main() {
   late String configPath;
   late Map<String, Object> persistedPreferences;
   late List<MethodCall> preferenceWrites;
+  late SharedPreferencesStorePlatform previousStore;
   Future<void> Function()? beforeSeedWrite;
 
   setUpAll(() async {
@@ -51,6 +54,9 @@ void main() {
 
   setUp(() async {
     debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+    previousStore = SharedPreferencesStorePlatform.instance;
+    SharedPreferencesStorePlatform.instance =
+        MethodChannelSharedPreferencesStore();
     SharedPreferences.resetStatic();
     persistedPreferences = {};
     preferenceWrites = [];
@@ -97,6 +103,8 @@ void main() {
     messenger.setMockMethodCallHandler(preferencesChannel, null);
     messenger.setMockMethodCallHandler(keychainChannel, null);
     debugDefaultTargetPlatformOverride = null;
+    SharedPreferencesStorePlatform.instance = previousStore;
+    SharedPreferences.resetStatic();
     for (final suffix in ['', '.tmp', '.old']) {
       final file = File('$configPath$suffix');
       if (await file.exists()) {
