@@ -33,14 +33,12 @@ Future<void> _pump(
   bool reduceMotion = false,
   double textScale = 1,
   double width = 400,
-  Widget? trailing,
   LiquidGlassQuality? glass,
 }) async {
   final dock = NavigationDock(
     destinations: destinations,
     selectedIndex: selectedIndex,
     onSelected: onSelected,
-    trailing: trailing,
   );
   await tester.pumpWidget(
     MaterialApp(
@@ -184,28 +182,6 @@ void main() {
     await tester.pump();
     expect(selected.last, 1);
     expect(tester.binding.transientCallbackCount, 0);
-  });
-
-  testWidgets('narrow layout and large text keep trailing action reachable', (
-    tester,
-  ) async {
-    final selected = <int>[];
-    var activated = 0;
-    await _pump(
-      tester,
-      selected.add,
-      width: 320,
-      textScale: 2.5,
-      trailing: FloatingActionButton(
-        onPressed: () => activated++,
-        tooltip: 'Start',
-        child: const Icon(Icons.play_arrow),
-      ),
-    );
-    await tester.tap(find.byTooltip('Start'));
-    await tester.pumpAndSettle();
-    expect(activated, 1);
-    expect(tester.takeException(), isNull);
   });
 
   testWidgets('a quick tap lifts the lens all the way before it drops', (

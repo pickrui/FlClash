@@ -26,7 +26,6 @@ import 'package:flutter/services.dart';
 import 'button.dart';
 import 'chip.dart';
 import 'dialog.dart';
-import 'focus.dart';
 import 'inherited.dart';
 import 'liquid_glass.dart';
 import 'loading.dart';
@@ -51,10 +50,6 @@ class CommonScaffold extends StatefulWidget {
   final List<CommonPopupMenuItem> titleMenuItems;
   final bool isLoading;
   final List<Widget>? actions;
-
-  /// The dashboard's start button, which the navigation dock carries instead
-  /// on a phone; a remote reaches it at the top of the body.
-  final Widget? floatingActionButton;
 
   final IconButtonData? primaryAction;
 
@@ -91,7 +86,6 @@ class CommonScaffold extends StatefulWidget {
     this.titleWidget,
     this.titleMenuItems = const [],
     this.actions,
-    this.floatingActionButton,
     this.backAction,
     this.isLoading = false,
     this.searchState,
@@ -754,10 +748,6 @@ class CommonScaffoldState extends State<CommonScaffold> {
     // The page's bar floats over its body, which leaves the bar's height at
     // its top through MediaQuery padding, as extendBodyBehindAppBar does.
     final barFloats = !isCompact;
-    final isRemote =
-        RemoteFocusAdapter.isEnabledOf(context) ||
-        MediaQuery.navigationModeOf(context) == NavigationMode.directional;
-    final fab = isCompact ? null : widget.floatingActionButton;
     final sortableBody = SortModeScope(sorting: _sorting, child: widget.body);
     final body = SafeArea(
       top: !barFloats,
@@ -765,8 +755,6 @@ class CommonScaffoldState extends State<CommonScaffold> {
         valueListenable: _keywordsNotifier,
         builder: (context, keywords, _) {
           final hasKeywords = keywords.isNotEmpty;
-          final headFab = isRemote ? fab : null;
-          final hasHeader = hasKeywords || headFab != null;
           final barInset = MediaQuery.paddingOf(context).top;
           final overlap = barFloats
               ? barInset
@@ -777,10 +765,8 @@ class CommonScaffoldState extends State<CommonScaffold> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: hugsContent ? MainAxisSize.min : MainAxisSize.max,
             children: [
-              if (hasHeader) SizedBox(height: barInset),
-              if (headFab != null)
-                Padding(padding: const EdgeInsets.all(16), child: headFab),
               if (hasKeywords) ...[
+                SizedBox(height: barInset),
                 Padding(
                   padding: EdgeInsets.only(
                     left: 16,
@@ -803,7 +789,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
               ],
               Flexible(
                 fit: hugsContent ? FlexFit.loose : FlexFit.tight,
-                child: hasHeader
+                child: hasKeywords
                     ? MediaQuery.removePadding(
                         context: context,
                         removeTop: true,
@@ -827,15 +813,9 @@ class CommonScaffoldState extends State<CommonScaffold> {
       ),
     );
     final appBar = _buildAppBar(backAction, form);
-    final floatsFab = fab != null && !isRemote;
     final content = form.hasDockedSearch
         ? BottomInsetScope(
             inset: bottomInset + BottomInsetScope.dockedSearchInset,
-            child: body,
-          )
-        : floatsFab
-        ? BottomInsetScope(
-            inset: bottomInset + BottomInsetScope.floatingActionButtonInset,
             child: body,
           )
         : body;
@@ -847,14 +827,6 @@ class CommonScaffoldState extends State<CommonScaffold> {
           body: _BodyScope(child: content),
           resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
           backgroundColor: widget.backgroundColor,
-          floatingActionButton: !floatsFab
-              ? null
-              : bottomInset > 0
-              ? Padding(
-                  padding: EdgeInsets.only(bottom: bottomInset),
-                  child: fab,
-                )
-              : fab,
         ),
       );
     }

@@ -38,12 +38,7 @@ class PageActivityScope extends InheritedWidget {
   }
 }
 
-const double _floatingActionButtonHeight = 56;
-
 class BottomInsetScope extends InheritedWidget {
-  static const double floatingActionButtonInset =
-      kFloatingActionButtonMargin + _floatingActionButtonHeight;
-
   static const double dockedSearchHeight = 48;
   static const double dockedSearchMargin = kFloatingActionButtonMargin;
   static const double dockedSearchInset =
