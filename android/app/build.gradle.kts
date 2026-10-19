@@ -47,6 +47,11 @@ fun dartDefine(name: String): String {
 fun String.asBuildConfigString(): String =
     "\"${replace("\\", "\\\\").replace("\"", "\\\"")}\""
 
+val abiByPlatform = mapOf("android-arm" to "armeabi-v7a", "android-arm64" to "arm64-v8a", "android-x64" to "x86_64")
+val targetAbis = providers.gradleProperty("target-platform").orNull
+    ?.split(",")
+    ?.map { abiByPlatform[it.trim()] ?: throw GradleException("Unsupported Flutter target platform $it") }
+    ?: abiByPlatform.values.toList()
 
 android {
     namespace = "com.oixcloud.clash"
@@ -70,6 +75,13 @@ android {
         targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        // Flutter defaults to all supported ABIs even when target-platform selects only one.
+        if (providers.gradleProperty("split-per-abi").orNull?.toBoolean() != true) {
+            ndk {
+                abiFilters.clear()
+                abiFilters.addAll(targetAbis)
+            }
+        }
         buildConfigField(
             "String",
             "PROFILE_KEY",

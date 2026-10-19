@@ -7,7 +7,7 @@ import io
 import struct
 import unittest
 import zipfile
-from tool.check_apk_version import verify_metadata, verify_page_alignment
+from tool.check_apk_version import verify_metadata, verify_native_abi, verify_page_alignment
 
 
 def elf(alignment, bits=2):
@@ -49,6 +49,33 @@ class ApkVersionTest(unittest.TestCase):
                        self.manifest("2026092011", package="com.oixcloud.clash.dev")):
             with self.subTest(output=output), self.assertRaises(ValueError):
                 verify_metadata(output, "0.8.98", "2026092011")
+
+
+class NativeAbiTest(unittest.TestCase):
+    def libraries(self, abi):
+        return {f"lib__{abi}__{name}": elf(0x4000) for name in
+                ("libapp.so", "libflutter.so", "librust_api.so", "libclash.so", "libsqlite3.so")}
+
+    def test_accepts_complete_single_abi_apks(self):
+        for abi in ("armeabi-v7a", "arm64-v8a", "x86_64"):
+            with self.subTest(abi=abi):
+                verify_native_abi(apk(**self.libraries(abi)), abi)
+
+    def test_rejects_extra_abis_from_dependencies_or_legacy_core(self):
+        for name in ("libclash.so", "libbarhopper_v3.so"):
+            libraries = self.libraries("arm64-v8a")
+            libraries[f"lib__armeabi-v7a__{name}"] = elf(0x4000)
+            with self.subTest(name=name), self.assertRaisesRegex(ValueError, "expected only arm64-v8a"):
+                verify_native_abi(apk(**libraries), "arm64-v8a")
+
+    def test_rejects_missing_runtime_libraries_or_all_native_assets(self):
+        for name in ("libapp.so", "libflutter.so", "librust_api.so", "libclash.so"):
+            libraries = self.libraries("arm64-v8a")
+            del libraries[f"lib__arm64-v8a__{name}"]
+            with self.subTest(name=name), self.assertRaisesRegex(ValueError, name):
+                verify_native_abi(apk(**libraries), "arm64-v8a")
+        with self.assertRaisesRegex(ValueError, "expected only arm64-v8a"):
+            verify_native_abi(apk(), "arm64-v8a")
 
 
 class PageAlignmentTest(unittest.TestCase):

@@ -63,7 +63,9 @@ void main() {
     );
     final steps = (build['steps'] as YamlList).cast<YamlMap>();
     final verify = steps.indexWhere(
-      (step) => step['name'] == 'Verify final Android APK version',
+      (step) =>
+          step['name'] ==
+          'Verify final Android APK version and native libraries',
     );
     final upload = steps.indexWhere((step) => step['name'] == 'Upload');
     expect(verify, greaterThan(0));
@@ -74,6 +76,8 @@ void main() {
       contains('needs.version.outputs.build_number'),
     );
     expect(steps[verify]['run'], contains('tool/check_apk_version.py'));
+    expect(steps[verify]['env']['RELEASE_ARCH'], contains('matrix.arch'));
+    expect(steps[verify]['run'], contains(r'--arch "$RELEASE_ARCH"'));
   });
 
   test('deep checks run only on schedule or manual dispatch', () {

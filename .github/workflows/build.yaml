@@ -519,12 +519,13 @@ jobs:
           find ./dist -name "*.exe" -type f -exec sh -c 'mv "$1" "${1%.exe}-setup.exe"' _ {} \;
           find ./dist -name "*.appimage" -type f -exec sh -c 'mv "$1" "${1%.appimage}.AppImage"' _ {} \;
 
-      - name: Verify final Android APK version
+      - name: Verify final Android APK version and native libraries
         if: matrix.platform == 'android'
         env:
           RELEASE_VERSION: ${{ needs.version.outputs.version_number }}
           RELEASE_BUILD: ${{ needs.version.outputs.build_number }}
-        run: python3 tool/check_apk_version.py --version "$RELEASE_VERSION" --build "$RELEASE_BUILD" dist/*.apk
+          RELEASE_ARCH: ${{ matrix.arch }}
+        run: python3 tool/check_apk_version.py --version "$RELEASE_VERSION" --build "$RELEASE_BUILD" --arch "$RELEASE_ARCH" dist/*.apk
 
       - name: Sign desktop updates
         if: matrix.platform != 'android'

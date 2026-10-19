@@ -22,6 +22,11 @@ android {
     compileSdk = libs.versions.compileSdk.get().toInt()
     ndkVersion = libs.versions.ndkVersion.get()
 
+    // Ignore legacy prebuilt Core libraries left behind before gomobile generated the JNI source.
+    sourceSets {
+        getByName("main").jniLibs.setSrcDirs(emptyList<String>())
+    }
+
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
         consumerProguardFiles("consumer-rules.pro")
