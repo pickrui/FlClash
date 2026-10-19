@@ -161,6 +161,7 @@ extension BackupControllerExt on AppController {
           final previousProviders = await database.clashProvidersDao
               .all()
               .get();
+          final previousIconSets = await database.iconSetsDao.all().get();
           final previousRules = await database.select(database.rules).map((
             row,
           ) {
@@ -177,7 +178,9 @@ extension BackupControllerExt on AppController {
               previousScripts.length !=
                   await database.scripts.count.getSingle() ||
               previousProviders.length !=
-                  await database.clashProviders.count.getSingle();
+                  await database.clashProviders.count.getSingle() ||
+              previousIconSets.length !=
+                  await database.iconSets.count.getSingle();
           await preferences.saveDurableConfig(previousConfig);
           restoreJournal = await RestoreJournal.begin(
             homePath: await appPath.homeDirPath,
@@ -245,6 +248,7 @@ extension BackupControllerExt on AppController {
                       migrationData.links,
                       isOverride: isOverride,
                       clashProviders: migrationData.clashProviders,
+                      iconSets: migrationData.iconSets,
                     );
                   });
                   databaseChanged = true;
@@ -305,6 +309,7 @@ extension BackupControllerExt on AppController {
                           previousLinks,
                           isOverride: true,
                           clashProviders: previousProviders,
+                          iconSets: previousIconSets,
                         );
                       });
                     } catch (failure) {

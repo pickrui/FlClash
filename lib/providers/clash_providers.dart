@@ -340,6 +340,9 @@ class ClashProviderLibrary {
             for (final group in profile.customProxyGroups)
               if (previous.kind == ProviderKind.proxy && group.use != null)
                 group.copyWith(
+                  usePosition: usePositionOf(group.usePosition, {
+                    previous.label: next.label,
+                  }),
                   use: [
                     for (final name in group.use!)
                       name == previous.label ? next.label : name,

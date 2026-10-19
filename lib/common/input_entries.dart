@@ -232,3 +232,39 @@ ParsedInput<MapEntry<String, String>> parseMapInput(
     issues: issues,
   );
 }
+
+ParsedInput<String> parseLinkInput(
+  String text, {
+  Set<String> existing = const {},
+  required bool Function(String) isValid,
+  int maxLength = 8192,
+}) {
+  final entries = <String>[];
+  final issues = <InputIssue>[];
+  final seen = <String>{};
+  var skipped = 0;
+  for (final (index, raw) in text.split(_lineSeparator).indexed) {
+    final value = raw.trim();
+    if (value.isEmpty || !seen.add(value)) continue;
+    if (value.length > maxLength || !isValid(value)) {
+      issues.add(
+        InputIssue(
+          line: index + 1,
+          raw: value,
+          kind: value.length > maxLength
+              ? InputIssueKind.valueTooLong
+              : InputIssueKind.invalidValue,
+        ),
+      );
+    } else if (existing.contains(value)) {
+      skipped++;
+    } else {
+      entries.add(value);
+    }
+  }
+  return ParsedInput(
+    entries: entries,
+    skippedExisting: skipped,
+    issues: issues,
+  );
+}

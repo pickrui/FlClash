@@ -6,6 +6,14 @@ part of '../config.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+_Filter _$FilterFromJson(Map<String, dynamic> json) =>
+    _Filter(label: json['label'] as String, regex: json['regex'] as String);
+
+Map<String, dynamic> _$FilterToJson(_Filter instance) => <String, dynamic>{
+  'label': instance.label,
+  'regex': instance.regex,
+};
+
 _AppSettingProps _$AppSettingPropsFromJson(
   Map<String, dynamic> json,
 ) => _AppSettingProps(
@@ -33,6 +41,11 @@ _AppSettingProps _$AppSettingPropsFromJson(
       TabAnimation.fade,
   floatingNavigationBar: json['floatingNavigationBar'] as bool? ?? true,
   showLabel: json['showLabel'] as bool? ?? true,
+  filters:
+      (json['filters'] as List<dynamic>?)
+          ?.map((e) => Filter.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
   hideIp: json['hideIp'] as bool? ?? false,
   editorLineWrap: json['editorLineWrap'] as bool? ?? false,
   editorFontSize:
@@ -80,6 +93,7 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'tabAnimation': _$TabAnimationEnumMap[instance.tabAnimation]!,
       'floatingNavigationBar': instance.floatingNavigationBar,
       'showLabel': instance.showLabel,
+      'filters': instance.filters,
       'hideIp': instance.hideIp,
       'editorLineWrap': instance.editorLineWrap,
       'editorFontSize': _$EditorFontSizeEnumMap[instance.editorFontSize]!,

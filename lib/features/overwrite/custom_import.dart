@@ -541,6 +541,7 @@ class _Importer {
       'name': name,
       'proxies': ?renamed(group['proxies'], names),
       'use': ?renamed(group['use'], providers),
+      'use-position': ?usePositionOf(group['use-position'], providers),
       for (final key in const ['default-selected', 'empty-fallback'])
         if (group[key] case final Object value)
           key: names['$value'] ?? '$value',

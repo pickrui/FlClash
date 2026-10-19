@@ -411,6 +411,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "basicInfo": MessageLookupByLibrary.simpleMessage("基本情報"),
     "basicStrategy": MessageLookupByLibrary.simpleMessage("基本ポリシー"),
     "batchAdd": MessageLookupByLibrary.simpleMessage("一括追加"),
+    "batchLinkInputTip": MessageLookupByLibrary.simpleMessage(
+      "1行に1つのリンクを入力してください",
+    ),
     "batchListInputTip": MessageLookupByLibrary.simpleMessage(
       "1行に1項目、またはカンマ区切りで入力してください",
     ),
@@ -804,6 +807,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "customProfileDesc": MessageLookupByLibrary.simpleMessage(
       "自分のノード、プロバイダーライブラリ、他のプロファイルからプロキシグループとルールを組み立てます",
     ),
+    "customProfileResources": MessageLookupByLibrary.simpleMessage(
+      "カスタムプロファイルのリソース",
+    ),
     "customRoutingDraftHint": MessageLookupByLibrary.simpleMessage(
       "カスタム設定を入力してから、カスタムモードに切り替えてください。下書きの編集では現在のモードは変わりません",
     ),
@@ -1187,6 +1193,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "enabled": MessageLookupByLibrary.simpleMessage("有効"),
     "enabledOnStart": MessageLookupByLibrary.simpleMessage("起動時に有効"),
     "entries": MessageLookupByLibrary.simpleMessage(" エントリ"),
+    "error": MessageLookupByLibrary.simpleMessage("エラー"),
     "errorDetails": MessageLookupByLibrary.simpleMessage("エラーの詳細"),
     "exclude": MessageLookupByLibrary.simpleMessage("最近のタスクから隠す"),
     "excludeDesc": MessageLookupByLibrary.simpleMessage(
@@ -1239,6 +1246,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "外部コントローラーを有効にすると、設定したアドレスでコアを制御できます",
     ),
     "externalLink": MessageLookupByLibrary.simpleMessage("外部リンク"),
+    "extraLarge": MessageLookupByLibrary.simpleMessage("特大"),
     "fade": MessageLookupByLibrary.simpleMessage("フェード"),
     "failedItem": m28,
     "fakeipFilter": MessageLookupByLibrary.simpleMessage("Fake-IPフィルター"),
@@ -1414,6 +1422,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "iHavePaid": MessageLookupByLibrary.simpleMessage("支払い済み"),
     "icon": MessageLookupByLibrary.simpleMessage("アイコン"),
     "iconHistory": MessageLookupByLibrary.simpleMessage("最近使用したアイコン"),
+    "iconSets": MessageLookupByLibrary.simpleMessage("アイコンセット"),
+    "iconSetsEmptyTip": MessageLookupByLibrary.simpleMessage(
+      "アイコンセットはまだありません。「カスタムプロファイルのリソース → アイコンセット」で追加できます",
+    ),
     "iconStyle": MessageLookupByLibrary.simpleMessage("アイコンスタイル"),
     "iconStyleFilled": MessageLookupByLibrary.simpleMessage("背景あり"),
     "iconStyleHidden": MessageLookupByLibrary.simpleMessage("非表示"),
@@ -1434,6 +1446,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "インポートすると、このプロファイルの現在のノード、プロキシグループ、ルール、設定が置き換えられます",
     ),
     "importFile": MessageLookupByLibrary.simpleMessage("ファイルからインポート"),
+    "importFromLink": MessageLookupByLibrary.simpleMessage("リンクからインポート"),
     "importFromURL": MessageLookupByLibrary.simpleMessage("URLからインポート"),
     "importText": MessageLookupByLibrary.simpleMessage("テキストからインポート"),
     "importUrl": MessageLookupByLibrary.simpleMessage("URLからインポート"),
@@ -1515,6 +1528,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "invalidIpv6CidrContent": MessageLookupByLibrary.simpleMessage(
       "fd00::/8 のような CIDR 形式の IPv6 範囲を入力してください",
     ),
+    "invalidLinkTip": MessageLookupByLibrary.simpleMessage(
+      "サブスクリプションリンクまたはプロキシの共有リンクではありません",
+    ),
     "invalidListenContent": MessageLookupByLibrary.simpleMessage(
       "0.0.0.0:1053 のようなアドレスとポートを入力してください",
     ),
@@ -1557,13 +1573,16 @@ class MessageLookup extends MessageLookupByLibrary {
       "TCPキープアライブ間隔",
     ),
     "key": MessageLookupByLibrary.simpleMessage("キー"),
+    "label": MessageLookupByLibrary.simpleMessage("ラベル"),
     "language": MessageLookupByLibrary.simpleMessage("言語"),
+    "large": MessageLookupByLibrary.simpleMessage("大"),
     "lastUpdated": MessageLookupByLibrary.simpleMessage("最終更新"),
     "layout": MessageLookupByLibrary.simpleMessage("レイアウト"),
     "lazy": MessageLookupByLibrary.simpleMessage("遅延読み込み"),
     "light": MessageLookupByLibrary.simpleMessage("ライト"),
     "lineIssueTip": m45,
     "lineWrap": MessageLookupByLibrary.simpleMessage("折り返し"),
+    "link": MessageLookupByLibrary.simpleMessage("リンク"),
     "liquidGlass": MessageLookupByLibrary.simpleMessage("リキッドグラス"),
     "list": MessageLookupByLibrary.simpleMessage("リスト"),
     "listen": MessageLookupByLibrary.simpleMessage("リッスン"),
@@ -1575,6 +1594,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "loading": MessageLookupByLibrary.simpleMessage("読み込み中..."),
     "local": MessageLookupByLibrary.simpleMessage("ローカル"),
     "localBackupDesc": MessageLookupByLibrary.simpleMessage("ローカルにデータをバックアップ"),
+    "localImage": MessageLookupByLibrary.simpleMessage("ローカル画像"),
     "localNetworkTip": MessageLookupByLibrary.simpleMessage(
       "ローカルネットワークへのアクセスが許可されていないため、今回は gVisor を使用します。LAN 上のプロキシやサービスは引き続き利用できない場合があります",
     ),
@@ -1607,6 +1627,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "mainlandNetworkWarning": MessageLookupByLibrary.simpleMessage(
       "中国本土のネットワークには適さない可能性があります",
     ),
+    "matchCase": MessageLookupByLibrary.simpleMessage("大文字と小文字を区別"),
     "matchTarget": MessageLookupByLibrary.simpleMessage("MATCH-TARGET"),
     "matchTargetTitle": MessageLookupByLibrary.simpleMessage("マッチ先"),
     "maxFailedTimes": MessageLookupByLibrary.simpleMessage("最大失敗回数"),
@@ -1706,6 +1727,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "nicknameValidation": MessageLookupByLibrary.simpleMessage(
       "ニックネームを入力してください",
     ),
+    "no": MessageLookupByLibrary.simpleMessage("いいえ"),
     "noAvailablePlans": MessageLookupByLibrary.simpleMessage("利用可能なプランがありません"),
     "noData": MessageLookupByLibrary.simpleMessage("データなし"),
     "noInfo": MessageLookupByLibrary.simpleMessage("情報なし"),
@@ -2070,6 +2092,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "rechargeAmountOutOfRange": MessageLookupByLibrary.simpleMessage(
       "金額がこの支払い方法で利用できる範囲外です",
     ),
+    "recommendedIcons": MessageLookupByLibrary.simpleMessage("おすすめ"),
     "recurringRenewalHint": MessageLookupByLibrary.simpleMessage(
       "以降の自動更新にも割引が適用されます",
     ),
@@ -2080,6 +2103,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "支払い完了後、下にスワイプして結果を確認してください",
     ),
     "refundAmountLabel": MessageLookupByLibrary.simpleMessage("返金額"),
+    "regex": MessageLookupByLibrary.simpleMessage("正規表現"),
     "register": MessageLookupByLibrary.simpleMessage("登録"),
     "registerClosed": MessageLookupByLibrary.simpleMessage("現在、新規登録は停止しています"),
     "registerFailed": MessageLookupByLibrary.simpleMessage("登録に失敗しました"),
@@ -2756,6 +2780,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "yearsAgo": m119,
     "yearsAgoShort": m120,
+    "yes": MessageLookupByLibrary.simpleMessage("はい"),
     "zh_CN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };
 }

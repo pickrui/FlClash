@@ -48,6 +48,10 @@ class ProfileAction extends _$ProfileAction {
     requestStartIfNeeded: requestStartIfNeeded,
   );
 
+  Future<List<Profile>> addProfilesFromLinks(
+    List<({String label, String url})> links,
+  ) => _controller.addProfilesFromLinks(links);
+
   Future<void> addProfileFormFile() => _controller.addProfileFormFile();
 
   Future<int> addCustomProfile(String label) =>
@@ -414,6 +418,70 @@ extension ProfilesControllerExt on AppController {
       }
     }
     return profile;
+  }
+
+  Future<List<Profile>> addProfilesFromLinks(
+    List<({String label, String url})> links,
+  ) async {
+    if (links.any((item) => !isProfileImportLink(item.url))) {
+      throw FormatException(appLocalizations.invalidLinkTip);
+    }
+    final shareLinks = links.where((item) {
+      final uri = Uri.parse(item.url);
+      return !uri.isScheme('http') && !uri.isScheme('https');
+    }).toList();
+    var sharesAdded = false;
+    final added = <Profile>[];
+    for (final item in links) {
+      final uri = Uri.parse(item.url);
+      final Profile? profile;
+      if (uri.isScheme('http') || uri.isScheme('https')) {
+        profile = await addProfileFormURL(
+          item.url,
+          label: item.label,
+          requestStartIfNeeded: false,
+        );
+      } else {
+        if (sharesAdded) continue;
+        sharesAdded = true;
+        globalState.navigatorKey.currentState?.popUntil(
+          (route) => route.isFirst,
+        );
+        toProfiles();
+        profile = await loadingRun(tag: LoadingTag.profiles, () async {
+          final name = shareLinks.length > 1
+              ? appLocalizations.unnamed
+              : item.label.isNotEmpty
+              ? item.label
+              : uri.fragment.isNotEmpty
+              ? uri.fragment
+              : appLocalizations.unnamed;
+          await ensureCoreReadyOrThrow();
+          final config = await coreController.shareLinksConfig([
+            for (final item in shareLinks) item.url,
+          ]);
+          if (config == null) {
+            throw ConfigValidationException(
+              appLocalizations.shareLinksNotRead(1),
+            );
+          }
+          final profile = Profile.normal(label: name);
+          return persistProfile(profile, () async {
+            final providers = await database.clashProvidersDao.all().get();
+            if (providers.any(
+              (provider) =>
+                  provider.kind == ProviderKind.proxy && provider.label == name,
+            )) {
+              throw appLocalizations.existsTip(appLocalizations.name);
+            }
+            return profile.saveFile(config);
+          }, invalidatePendingUpdates: true);
+        }, title: appLocalizations.addProfile);
+      }
+      if (profile != null) added.add(profile);
+    }
+    if (added.isNotEmpty) await requestStartCore();
+    return added;
   }
 
   Future<void> addProfileFormFile() async {

@@ -156,7 +156,7 @@ class _RequestsViewState extends ConsumerState<RequestsView>
                       extentEstimation:
                           table?.estimateExtent ?? recordListExtentEstimation,
                       separatorBuilder: (_, _) => table == null
-                          ? const Divider(height: 0)
+                          ? const SizedBox(height: recordListGap)
                           : const SizedBox.shrink(),
                       itemBuilder: (_, index) {
                         final trackerInfo = requests[index];

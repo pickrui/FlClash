@@ -72,3 +72,17 @@ class JsonValueConverter extends TypeConverter<Object?, String?> {
   @override
   String? toSql(Object? value) => value == null ? null : json.encode(value);
 }
+
+class IconSetIconsConverter extends TypeConverter<List<IconSetIcon>, String> {
+  const IconSetIconsConverter();
+
+  @override
+  List<IconSetIcon> fromSql(String fromDb) {
+    return _jsonListFromSql('icon set icons', fromDb, IconSetIcon.fromJson);
+  }
+
+  @override
+  String toSql(List<IconSetIcon> value) {
+    return _jsonListToSql(value, (item) => item.toJson());
+  }
+}

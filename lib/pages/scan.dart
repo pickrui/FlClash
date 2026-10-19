@@ -14,6 +14,8 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/plugins/app.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/ui/activate_box.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
+import 'package:fl_clash/ui/typography.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
@@ -303,11 +305,13 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
                                   textAlign: TextAlign.center,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: invalid
-                                        ? Colors.orangeAccent
-                                        : Colors.white,
-                                  ),
+                                  style: AppTextStyle.subheadline
+                                      .of(context)
+                                      .copyWith(
+                                        color: invalid
+                                            ? Colors.orangeAccent
+                                            : Colors.white,
+                                      ),
                                 ),
                               ),
                             ),
@@ -338,15 +342,16 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
                   left: 0,
                   right: 0,
                   child: AppBar(
+                    toolbarHeight: 72,
                     backgroundColor: Colors.transparent,
                     automaticallyImplyLeading: false,
-                    leading: IconButton(
+                    leading: IconButton.filledTonal(
                       tooltip: l.close,
                       onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.close),
+                      icon: const GlyphIcon(AppGlyphs.close),
                     ),
                     actions: [
-                      IconButton(
+                      IconButton.filledTonal(
                         tooltip: l.pickFromAlbum,
                         onPressed: _pickingImage ? null : _pickImage,
                         icon: _pickingImage
@@ -356,7 +361,7 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : const Icon(Icons.photo_camera_back),
+                            : const GlyphIcon(AppGlyphs.photos),
                       ),
                     ],
                   ),

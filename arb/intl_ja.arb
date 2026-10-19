@@ -1545,5 +1545,22 @@
   "additionalParameters": "追加パラメータ",
   "quickActions": "クイック操作",
   "ruleListInvalid": "ルールは 1 項目に 1 つのルールを書いた YAML リストにしてください。例：- DOMAIN,example.com,DIRECT",
-  "goToConfigureAddedRules": "追加ルール設定へ移動"
+  "goToConfigureAddedRules": "追加ルール設定へ移動",
+  "large": "大",
+  "extraLarge": "特大",
+  "matchCase": "大文字と小文字を区別",
+  "regex": "正規表現",
+  "yes": "はい",
+  "no": "いいえ",
+  "error": "エラー",
+  "iconSets": "アイコンセット",
+  "localImage": "ローカル画像",
+  "label": "ラベル",
+  "iconSetsEmptyTip": "アイコンセットはまだありません。「カスタムプロファイルのリソース → アイコンセット」で追加できます",
+  "recommendedIcons": "おすすめ",
+  "customProfileResources": "カスタムプロファイルのリソース",
+  "importFromLink": "リンクからインポート",
+  "invalidLinkTip": "サブスクリプションリンクまたはプロキシの共有リンクではありません",
+  "batchLinkInputTip": "1行に1つのリンクを入力してください",
+  "link": "リンク"
 }

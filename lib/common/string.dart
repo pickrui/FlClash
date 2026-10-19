@@ -66,6 +66,19 @@ extension StringExtension on String {
     }
     return this;
   }
+
+  String get fileStem {
+    final dot = lastIndexOf('.');
+    return dot > 0 ? substring(0, dot) : this;
+  }
+
+  String get urlFileName {
+    final segments = Uri.tryParse(this)?.pathSegments ?? const [];
+    return segments.lastWhere(
+      (segment) => segment.isNotEmpty,
+      orElse: () => '',
+    );
+  }
 }
 
 extension StringNullExt on String? {
@@ -93,6 +106,8 @@ class SearchQuery {
           .toList(growable: false);
 
   bool get isEmpty => terms.isEmpty;
+
+  bool get isNotEmpty => !isEmpty;
 
   bool matches(Iterable<String?> fields) {
     if (terms.isEmpty) return true;
@@ -136,4 +151,50 @@ String? profileUrlFromQrCodes(Iterable<String?> values) {
     }
   }
   return null;
+}
+
+extension SearchableItems<T> on Iterable<T> {
+  Iterable<T> whereMatches(
+    SearchQuery query,
+    Iterable<String?> Function(T) fields, {
+    Expando<String>? texts,
+  }) {
+    if (query.isEmpty) return this;
+    return where((item) {
+      final cacheable =
+          item != null && item is! String && item is! num && item is! bool;
+      final text = texts == null || !cacheable
+          ? fields(item).nonNulls.join('\n').toLowerCase()
+          : texts[item as Object] ??= fields(item).nonNulls
+                .join('\n')
+                .toLowerCase();
+      return query.terms.every(text.contains);
+    });
+  }
+}
+
+bool isProfileImportLink(String value) {
+  if (value.contains(RegExp(r'\s'))) return false;
+  final uri = Uri.tryParse(value);
+  if (uri == null || uri.scheme.isEmpty || uri.host.isEmpty) return false;
+  return const {
+    'http',
+    'https',
+    'ss',
+    'ssr',
+    'vmess',
+    'vless',
+    'trojan',
+    'hysteria',
+    'hysteria2',
+    'hy2',
+    'hysteria2+realm',
+    'hy2+realm',
+    'tuic',
+    'socks',
+    'socks5',
+    'socks5h',
+    'anytls',
+    'mierus',
+  }.contains(uri.scheme.toLowerCase());
 }

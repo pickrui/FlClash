@@ -26,7 +26,7 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/paged_sheet.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:fl_clash/views/config/dns.dart';
-import 'package:fl_clash/views/config/providers.dart';
+import 'package:fl_clash/views/config/custom_resources.dart';
 import 'package:fl_clash/views/config/sniffer.dart';
 import 'package:fl_clash/views/config/tun.dart';
 import 'package:fl_clash/views/tools.dart' show tailscalePageBuilder;
@@ -747,8 +747,8 @@ class _Resources extends StatelessWidget {
       items: [
         ListItem.open(
           leading: const GlyphIcon(AppGlyphs.resources),
-          title: Text(appLocalizations.appProviderLibrary),
-          widget: const ClashProvidersView(),
+          title: Text(appLocalizations.customProfileResources),
+          widget: const CustomResourcesView(),
         ),
         if (tailscalePageBuilder case final builder?)
           ListItem.open(

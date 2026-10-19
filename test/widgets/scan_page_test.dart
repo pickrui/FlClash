@@ -364,7 +364,7 @@ void main() {
         onPopped: (_) => pops++,
         overrides: [profileActionProvider.overrideWith(() => action)],
       );
-      await tester.tap(find.byIcon(Icons.photo_camera_back));
+      await tester.tap(find.byTooltip('Choose from album'));
       await tester.pump();
       expect(action.picks, 1);
       expect(platform.running, isFalse);
@@ -467,7 +467,7 @@ void main() {
     );
     expect(platform.startCalls, 1);
 
-    await tester.tap(find.byIcon(Icons.photo_camera_back));
+    await tester.tap(find.byTooltip('Choose from album'));
     await tester.pump();
     expect(action.picks, 1);
 

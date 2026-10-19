@@ -11,6 +11,9 @@ import 'dart:async';
 import 'package:fl_clash/common/network_error.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/ui/shape.dart';
+import 'package:fl_clash/ui/surface.dart';
+import 'package:fl_clash/ui/typography.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
@@ -18,17 +21,27 @@ class InitErrorApp extends StatelessWidget {
   final Object error;
   final StackTrace stack;
   final String diagnostics;
+  final Future<void> Function()? onExit;
 
   const InitErrorApp({
     super.key,
     required this.error,
     required this.stack,
     this.diagnostics = '',
+    this.onExit,
   });
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(colorSchemeSeed: const Color(0xFF007AFF))
+          .withAppShapes
+          .withAppSurfaces,
+      darkTheme: ThemeData(
+        colorSchemeSeed: const Color(0xFF007AFF),
+        brightness: Brightness.dark,
+      ).withAppShapes.withAppSurfaces,
       localizationsDelegates: const [
         AppLocalizations.delegate,
         AppUiLocalizations.delegate,
@@ -39,22 +52,50 @@ class InitErrorApp extends StatelessWidget {
         error: error,
         stack: stack,
         diagnostics: diagnostics,
+        onExit: onExit,
       ),
     );
   }
 }
 
-class InitErrorScreen extends StatelessWidget {
+class InitErrorScreen extends StatefulWidget {
   final Object error;
   final StackTrace stack;
   final String diagnostics;
+  final Future<void> Function()? onExit;
 
   const InitErrorScreen({
     super.key,
     required this.error,
     required this.stack,
     this.diagnostics = '',
+    this.onExit,
   });
+
+  @override
+  State<InitErrorScreen> createState() => _InitErrorScreenState();
+}
+
+class _InitErrorScreenState extends State<InitErrorScreen> {
+  bool _exiting = false;
+  Object get error => widget.error;
+  StackTrace get stack => widget.stack;
+  String get diagnostics => widget.diagnostics;
+
+  Future<void> _exit() async {
+    if (_exiting) return;
+    setState(() => _exiting = true);
+    try {
+      await widget.onExit?.call();
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('$error')));
+      }
+    } finally {
+      if (mounted) setState(() => _exiting = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,92 +105,100 @@ class InitErrorScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(l?.initFailed ?? 'Startup failed'),
-        backgroundColor: colorScheme.error,
-        foregroundColor: colorScheme.onError,
+        backgroundColor: SurfaceLevel.page.colorOf(colorScheme),
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    Icons.report_problem,
-                    color: colorScheme.error,
-                    size: 32,
+                  Row(
+                    children: [
+                      GlyphIcon(
+                        AppGlyphs.warning,
+                        color: colorScheme.error,
+                        size: 32,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          error is TimeoutException
+                              ? l?.startupTimeoutTip ?? 'Startup timed out. Quit and reopen the application. Copy the diagnostics below if the problem persists.'
+                              : l?.initFailedTip ?? 'The application encountered a critical error during startup and cannot continue.',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      error is TimeoutException
-                          ? l?.startupTimeoutTip ?? 'Startup timed out. Quit and reopen the application. Copy the diagnostics below if the problem persists.'
-                          : l?.initFailedTip ?? 'The application encountered a critical error during startup and cannot continue.',
+                  const SizedBox(height: 24),
+                  _buildSectionLabel(l?.errorDetails ?? 'Error details'),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: ShapeDecoration(
+                      color: colorScheme.errorContainer.opacity50,
+                      shape: AppShape.xl.copyWith(
+                        side: BorderSide(color: colorScheme.error.opacity50),
+                      ),
+                    ),
+                    child: SelectableText(
+                      coreLaunchBlockedMessage(
+                            error,
+                            AppLocalizations.maybeOf(context),
+                          ) ??
+                          error.toString(),
+                      style: TextStyle(
+                        color: colorScheme.onErrorContainer,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  if (diagnostics.isNotEmpty) ...[
+                    _buildSectionLabel(
+                      l?.startupDiagnostics ?? 'Startup diagnostics',
+                    ),
+                    SelectableText(
+                      diagnostics,
                       style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        fontFamily: 'monospace',
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                  _buildSectionLabel(l?.stackTrace ?? 'Stack trace'),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: ShapeDecoration(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey[900]
+                          : Colors.grey[200],
+                      shape: AppShape.xl.copyWith(
+                        side: BorderSide(color: Colors.grey.opacity50),
+                      ),
+                    ),
+                    child: SelectableText(
+                      stack.toString(),
+                      style: const TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 12,
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
-              _buildSectionLabel(l?.errorDetails ?? 'Error details'),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: ShapeDecoration(
-                  color: colorScheme.errorContainer.opacity50,
-                  shape: AppShape.sm.copyWith(
-                    side: BorderSide(color: colorScheme.error.opacity50),
-                  ),
-                ),
-                child: SelectableText(
-                  coreLaunchBlockedMessage(
-                        error,
-                        AppLocalizations.maybeOf(context),
-                      ) ??
-                      error.toString(),
-                  style: TextStyle(
-                    color: colorScheme.onErrorContainer,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              if (diagnostics.isNotEmpty) ...[
-                _buildSectionLabel(
-                  l?.startupDiagnostics ?? 'Startup diagnostics',
-                ),
-                SelectableText(
-                  diagnostics,
-                  style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
-                ),
-                const SizedBox(height: 24),
-              ],
-              _buildSectionLabel(l?.stackTrace ?? 'Stack trace'),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: ShapeDecoration(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.grey[900]
-                      : Colors.grey[200],
-                  shape: AppShape.sm.copyWith(
-                    side: BorderSide(color: Colors.grey.opacity50),
-                  ),
-                ),
-                child: SelectableText(
-                  stack.toString(),
-                  style: const TextStyle(
-                    fontFamily: 'monospace', // Makes code easier to read
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -161,9 +210,14 @@ class InitErrorScreen extends StatelessWidget {
               backgroundColor: colorScheme.error,
               foregroundColor: colorScheme.onError,
             ),
-            icon: const Icon(Icons.copy),
+            icon: const GlyphIcon(AppGlyphs.copy),
             label: Text(l?.copy ?? 'Copy'),
           ),
+          if (widget.onExit != null)
+            FilledButton(
+              onPressed: _exiting ? null : _exit,
+              child: Text(l?.exit ?? 'Exit'),
+            ),
         ],
       ),
     );
@@ -174,7 +228,7 @@ class InitErrorScreen extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Text(
         text,
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+        style: AppTextStyle.subheadline.of(context, emphasized: true),
       ),
     );
   }

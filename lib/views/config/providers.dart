@@ -476,7 +476,7 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
                   : NullStatusSwitcher(
                       isLoading: state.isLoading,
                       isEmpty: visible.isEmpty,
-                      isSearching: !query.isEmpty,
+                      isSearching: query.isNotEmpty,
                       nullStatus: NullStatus(
                         illustration: _kind == ProviderKind.proxy
                             ? NullStatusIllustration.proxies

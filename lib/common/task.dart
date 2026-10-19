@@ -1511,6 +1511,7 @@ Future<BackupFailure?> _backupDatabaseFailure(String path) async {
       'rules',
       'profile_rule_mapping',
       if (schemaVersion >= 4) ...{'proxy_groups', 'icon_records'},
+      if (schemaVersion >= 8) 'icon_sets',
     }.difference(tables).isNotEmpty) {
       return BackupFailure.invalid;
     }
@@ -1563,6 +1564,7 @@ Future<BackupFailure?> _backupDatabaseFailure(String path) async {
         },
         'icon_records': {'url', 'last_accessed'},
       },
+      if (schemaVersion >= 8) 'icon_sets': {'id', 'name', 'url', 'icons'},
     };
     for (final entry in requiredColumns.entries) {
       final columns = backupDatabase
@@ -1763,6 +1765,7 @@ Future<MigrationData> _restoreTask(VM3<String, String, String> paths) async {
       database.rules.all().map((item) => item.toRule()).get(),
       database.profileRuleLinks.all().map((item) => item.toLink()).get(),
       database.clashProvidersDao.all().get(),
+      database.iconSetsDao.all().get(),
     ]);
     final profiles = results[0].cast<Profile>();
     final scripts = results[1].cast<Script>();
@@ -1798,6 +1801,7 @@ Future<MigrationData> _restoreTask(VM3<String, String, String> paths) async {
             link,
       ],
       clashProviders: results[4].cast<ClashProvider>(),
+      iconSets: results[5].cast<IconSet>(),
       fileMigrations: fileMigrations,
     );
   } finally {

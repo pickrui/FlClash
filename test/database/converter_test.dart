@@ -185,4 +185,16 @@ void main() {
       expect(converter.fromSql(converter.toSql(rules)), rules);
     });
   });
+
+  group('IconSetIconsConverter', () {
+    const converter = IconSetIconsConverter();
+
+    test('roundtrip keeps names, urls and order', () {
+      const original = [
+        IconSetIcon(name: 'b.png', url: 'https://example.com/b.png'),
+        IconSetIcon(name: 'a.png', url: 'https://example.com/a.png'),
+      ];
+      expect(converter.fromSql(converter.toSql(original)), original);
+    });
+  });
 }

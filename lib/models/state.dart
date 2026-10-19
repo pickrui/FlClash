@@ -245,6 +245,7 @@ abstract class MigrationData with _$MigrationData {
     @Default([]) List<Profile> profiles,
     @Default([]) List<ProfileRuleLink> links,
     @Default([]) List<ClashProvider> clashProviders,
+    @Default([]) List<IconSet> iconSets,
     @Default([]) List<VM2<String, String>> fileMigrations,
   }) = _MigrationData;
 }

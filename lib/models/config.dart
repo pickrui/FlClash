@@ -117,6 +117,13 @@ String testUrlFromJson(String? value) {
 }
 
 @freezed
+abstract class Filter with _$Filter {
+  const factory Filter({required String label, required String regex}) =
+      _Filter;
+  factory Filter.fromJson(Map<String, Object?> json) => _$FilterFromJson(json);
+}
+
+@freezed
 abstract class AppSettingProps with _$AppSettingProps {
   const factory AppSettingProps({
     String? locale,
@@ -136,6 +143,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     TabAnimation tabAnimation,
     @Default(true) bool floatingNavigationBar,
     @Default(true) bool showLabel,
+    @Default([]) List<Filter> filters,
     @Default(false) bool hideIp,
     @Default(false) bool editorLineWrap,
     @Default(EditorFontSize.standard) EditorFontSize editorFontSize,

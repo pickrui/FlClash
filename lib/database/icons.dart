@@ -70,6 +70,10 @@ class IconRecordsDao extends DatabaseAccessor<Database>
     });
   }
 
+  Future<void> del(String url) async {
+    await (delete(iconRecords)..where((row) => row.url.equals(url))).go();
+  }
+
   Future<List<IconRecord>> query(String query) {
     return (select(iconRecords)
           ..where((t) => t.url.contains(query))
@@ -80,5 +84,122 @@ class IconRecordsDao extends DatabaseAccessor<Database>
             ),
           ]))
         .get();
+  }
+}
+
+@DataClassName('RawIconSet')
+class IconSets extends Table {
+  @override
+  String get tableName => 'icon_sets';
+
+  IntColumn get id => integer()();
+
+  TextColumn get name => text()();
+
+  TextColumn get url => text()();
+
+  TextColumn get icons => text().map(const IconSetIconsConverter())();
+
+  DateTimeColumn get lastUpdateTime => dateTime().nullable()();
+
+  IntColumn get order => integer().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DriftAccessor(tables: [IconSets])
+class IconSetsDao extends DatabaseAccessor<Database> with _$IconSetsDaoMixin {
+  IconSetsDao(super.attachedDatabase);
+
+  Selectable<IconSet> all() {
+    return iconSets.readable(
+      (row) => row.toIconSet(),
+      orderBy: [
+        (t) => OrderingTerm(expression: t.order, nulls: NullsOrder.last),
+        (t) => OrderingTerm.asc(t.id),
+      ],
+    );
+  }
+
+  Selectable<IconSet> get(int id) {
+    return iconSets.readable(
+      (row) => row.toIconSet(),
+      where: (t) => t.id.equals(id),
+    );
+  }
+
+  Future<void> put(IconSet iconSet) =>
+      into(iconSets).insertOnConflictUpdate(iconSet.toCompanion());
+
+  Future<void> rename(int id, String name) =>
+      (update(iconSets)..where((row) => row.id.equals(id))).write(
+        IconSetsCompanion(name: Value(name)),
+      );
+
+  Future<void> remove(int id) => iconSets.remove((t) => t.id.equals(id));
+
+  Future<void> setOrders(List<int> ids) => batch((batch) {
+    for (final (index, id) in ids.indexed) {
+      batch.update(
+        iconSets,
+        IconSetsCompanion(order: Value(index)),
+        where: (row) => row.id.equals(id),
+      );
+    }
+  });
+
+  /// A merge keeps one set per remote url, which takes the restored rows.
+  Future<void> restore(Iterable<IconSet> items, {required bool replace}) async {
+    if (replace) await delete(iconSets).go();
+    final existing = await select(iconSets).get();
+    final urlsById = {for (final row in existing) row.id: row.url};
+    final idsByUrl = {
+      for (final row in existing)
+        if (row.url.isNotEmpty) row.url: row.id,
+    };
+    final restored = <int, IconSet>{};
+    for (final item in items) {
+      var id = item.url.isEmpty ? item.id : idsByUrl[item.url] ?? item.id;
+      if (urlsById.containsKey(id) && urlsById[id] != item.url) {
+        do {
+          id = snowflake.id;
+        } while (urlsById.containsKey(id));
+      }
+      urlsById[id] = item.url;
+      if (item.url.isNotEmpty) idsByUrl[item.url] = id;
+      restored[id] = item.copyWith(id: id);
+    }
+    await batch((batch) {
+      batch.insertAllOnConflictUpdate(iconSets, [
+        for (final item in restored.values) item.toCompanion(),
+      ]);
+    });
+  }
+}
+
+extension RawIconSetExt on RawIconSet {
+  IconSet toIconSet() {
+    return IconSet(
+      id: id,
+      name: name,
+      url: url,
+      icons: icons,
+      lastUpdateTime: lastUpdateTime,
+      order: order,
+    );
+  }
+}
+
+extension IconSetsCompanionExt on IconSet {
+  IconSetsCompanion toCompanion() {
+    return IconSetsCompanion.insert(
+      id: Value(id),
+      name: name,
+      url: url,
+      icons: icons,
+      lastUpdateTime: Value(lastUpdateTime),
+      order: Value(order),
+    );
   }
 }

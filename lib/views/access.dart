@@ -7,6 +7,8 @@ import 'dart:convert';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/navigator.dart';
+import 'package:fl_clash/ui/route_motion_hold.dart';
+import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
@@ -34,7 +36,9 @@ class AccessView extends ConsumerStatefulWidget {
 }
 
 class _AccessViewState extends ConsumerState<AccessView>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, RouteSettledMixin<AccessView> {
+  @override
+  void didSettleRoute() => setState(() {});
   final GlobalKey<CommonScaffoldState> _scaffoldKey = GlobalKey();
   late ScrollController _controller;
   List<String>? _pinedList;
@@ -48,7 +52,7 @@ class _AccessViewState extends ConsumerState<AccessView>
   @override
   void initState() {
     super.initState();
-    _controller = ScrollController();
+    _controller = sheetScrollController(context);
     WidgetsBinding.instance.addObserver(this);
     final accessControl = ref
         .read(vpnSettingProvider.select((state) => state.accessControlProps))
@@ -314,26 +318,30 @@ class _AccessViewState extends ConsumerState<AccessView>
     }
     return NullStatusSwitcher(
       isEmpty: packages.isEmpty,
-      isSearching: !SearchQuery(ref.watch(queryProvider(QueryTag.access)))
-          .isEmpty,
+      isSearching: SearchQuery(ref.watch(queryProvider(QueryTag.access)))
+          .isNotEmpty,
       nullStatus: NullStatus(
         label: appLocalizations.noData,
         illustration: NullStatusIllustration.apps,
       ),
       child: CommonScrollBar(
         controller: _controller,
-        child: ListView.builder(
-          controller: _controller,
-          itemCount: packages.length,
-          itemBuilder: (_, index) {
-            final package = packages[index];
-            return PackageListItem(
-              key: ValueKey((package.packageName, package.lastUpdateTime)),
-              package: package,
-              value: valueList.contains(package.packageName),
-              onChanged: (_) => _handleSelected(package.packageName),
-            );
-          },
+        child: Builder(
+          builder: (context) => ListView.builder(
+            controller: _controller,
+            padding: EdgeInsets.only(bottom: BottomInsetScope.of(context)),
+            scrollCacheExtent: arrivalScrollCacheExtent(routeSettled),
+            itemCount: packages.length,
+            itemBuilder: (_, index) {
+              final package = packages[index];
+              return PackageListItem(
+                key: ValueKey((package.packageName, package.lastUpdateTime)),
+                package: package,
+                value: valueList.contains(package.packageName),
+                onChanged: (_) => _handleSelected(package.packageName),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -400,6 +408,9 @@ class _AccessViewState extends ConsumerState<AccessView>
   Widget _buildBannerBar(AccessControlMode mode, int count, bool enable) {
     if (!enable) {
       return MaterialBanner(
+        backgroundColor: context.raisedSurfaceLevel.colorOf(
+          context.colorScheme,
+        ),
         leading: GlyphIcon(AppGlyphs.info, color: context.colorScheme.outline),
         content: Text(context.appLocalizations.accessControlDisabledDesc),
         actions: [
@@ -417,6 +428,7 @@ class _AccessViewState extends ConsumerState<AccessView>
       color: context.colorScheme.onPrimary,
     );
     return MaterialBanner(
+      backgroundColor: context.raisedSurfaceLevel.colorOf(context.colorScheme),
       content: Text(describe),
       actions: [
         Card.filled(
@@ -504,14 +516,13 @@ class _AccessViewState extends ConsumerState<AccessView>
         searchState: AppBarSearchState(onSearch: _onSearch),
         searchActions: [?selectAll],
         title: appLocalizations.appAccessControl,
-        iconActions: [
-          if (hasChanges)
-            IconButtonData(
-              glyph: AppGlyphs.check,
-              tooltip: appLocalizations.save,
-              onPressed: _handleSave,
-            ),
-        ],
+        confirmationAction: hasChanges
+            ? IconButtonData(
+                glyph: AppGlyphs.check,
+                tooltip: appLocalizations.save,
+                onPressed: _handleSave,
+              )
+            : null,
         menuItems: [
           ..._buildMenuItems(enable: accessControl.enable),
           if (selectAll != null)

@@ -79,14 +79,14 @@ void main() {
       await tester.tap(find.byTooltip('Resume updates'));
       await tester.pumpAndSettle();
       expect(find.text('failed.example'), findsOneWidget);
-      await tester.tap(find.widgetWithText(ChoiceChip, 'Cached'));
+      await tester.tap(find.text('Cached').first);
       await tester.pumpAndSettle();
       expect(find.text('failed.example'), findsNothing);
       await tester.tap(find.text('cached.example'));
       await tester.pumpAndSettle();
       expect(find.textContaining('192.0.2.10'), findsNWidgets(2));
       expect(find.text('21 ms'), findsNWidgets(2));
-      await tester.tap(find.text('Close'));
+      await tester.tap(find.byTooltip('Close'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Failed queries'));
       await tester.pumpAndSettle();
@@ -173,7 +173,7 @@ void main() {
           ),
         );
     await tester.pump(const Duration(seconds: 1));
-    await tester.tap(find.widgetWithText(ChoiceChip, l10n.dnsQueryFailures));
+    await tester.tap(find.text(l10n.dnsQueryFailures));
     await tester.pumpAndSettle();
 
     expect(find.text(l10n.noSearchResults), findsOneWidget);

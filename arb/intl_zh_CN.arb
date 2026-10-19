@@ -1545,5 +1545,22 @@
   "additionalParameters": "附加参数",
   "quickActions": "快捷操作",
   "ruleListInvalid": "规则必须是 YAML 列表，每项一条规则，例如 - DOMAIN,example.com,DIRECT",
-  "goToConfigureAddedRules": "前往配置附加规则"
+  "goToConfigureAddedRules": "前往配置附加规则",
+  "large": "大",
+  "extraLarge": "超大",
+  "matchCase": "区分大小写",
+  "regex": "正则",
+  "yes": "是",
+  "no": "否",
+  "error": "错误",
+  "iconSets": "图标集",
+  "localImage": "本地图片",
+  "label": "标签",
+  "iconSetsEmptyTip": "暂无图标集，可在「自定义配置资源 → 图标集」中添加",
+  "recommendedIcons": "推荐",
+  "customProfileResources": "自定义配置资源",
+  "importFromLink": "从链接导入",
+  "invalidLinkTip": "不是有效的订阅链接或代理分享链接",
+  "batchLinkInputTip": "每行一个链接",
+  "link": "链接"
 }

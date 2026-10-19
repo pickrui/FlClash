@@ -24,7 +24,7 @@ part 'profiles.dart';
 part 'rules.dart';
 part 'scripts.dart';
 
-const currentDatabaseSchemaVersion = 7;
+const currentDatabaseSchemaVersion = 8;
 
 @DriftDatabase(
   tables: [
@@ -35,6 +35,7 @@ const currentDatabaseSchemaVersion = 7;
     ProxyGroups,
     IconRecords,
     ClashProviders,
+    IconSets,
   ],
   daos: [
     ProfilesDao,
@@ -43,6 +44,7 @@ const currentDatabaseSchemaVersion = 7;
     ProxyGroupsDao,
     IconRecordsDao,
     ClashProvidersDao,
+    IconSetsDao,
   ],
 )
 class Database extends _$Database {
@@ -92,6 +94,13 @@ class Database extends _$Database {
             "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'clash_providers'",
           ).get();
           if (existing.isEmpty) await m.createTable(clashProviders);
+        }
+        // A build that went back to schema 7 kept the table it had added.
+        if (from < 8) {
+          final existing = await customSelect(
+            "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'icon_sets'",
+          ).get();
+          if (existing.isEmpty) await m.createTable(iconSets);
         }
         final profileColumns = await _profileColumnNames();
         // Ahead of the older steps: the v4 step reads every profile column.
@@ -221,6 +230,7 @@ class Database extends _$Database {
     List<ProfileRuleLink> links, {
     bool isOverride = false,
     List<ClashProvider> clashProviders = const [],
+    List<IconSet> iconSets = const [],
   }) async {
     await transaction(() async {
       await batch((b) {
@@ -254,6 +264,7 @@ class Database extends _$Database {
         }
       });
       await clashProvidersDao.restore(clashProviders, replace: isOverride);
+      await iconSetsDao.restore(iconSets, replace: isOverride);
       await rulesDao.repairOrders();
     });
   }

@@ -511,6 +511,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "basicInfo": MessageLookupByLibrary.simpleMessage("Основная информация"),
     "basicStrategy": MessageLookupByLibrary.simpleMessage("Базовые политики"),
     "batchAdd": MessageLookupByLibrary.simpleMessage("Массовое добавление"),
+    "batchLinkInputTip": MessageLookupByLibrary.simpleMessage(
+      "По одной ссылке на строку",
+    ),
     "batchListInputTip": MessageLookupByLibrary.simpleMessage(
       "По одному значению на строку или через запятую",
     ),
@@ -961,6 +964,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "customProfileDesc": MessageLookupByLibrary.simpleMessage(
       "Группы прокси и правила из своих узлов, библиотеки провайдеров и других профилей",
+    ),
+    "customProfileResources": MessageLookupByLibrary.simpleMessage(
+      "Ресурсы пользовательских профилей",
     ),
     "customRoutingDraftHint": MessageLookupByLibrary.simpleMessage(
       "Заполните свои настройки маршрутизации, затем выберите режим «Пользовательский». Редактирование черновика не меняет текущий режим.",
@@ -1459,6 +1465,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Включится при запуске",
     ),
     "entries": MessageLookupByLibrary.simpleMessage(" записей"),
+    "error": MessageLookupByLibrary.simpleMessage("Ошибка"),
     "errorDetails": MessageLookupByLibrary.simpleMessage("Подробности ошибки"),
     "exclude": MessageLookupByLibrary.simpleMessage("Скрыть из недавних задач"),
     "excludeDesc": MessageLookupByLibrary.simpleMessage(
@@ -1527,6 +1534,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Внешний контроллер позволяет управлять ядром по заданному адресу",
     ),
     "externalLink": MessageLookupByLibrary.simpleMessage("Внешняя ссылка"),
+    "extraLarge": MessageLookupByLibrary.simpleMessage("Очень крупный"),
     "fade": MessageLookupByLibrary.simpleMessage("Растворение"),
     "failedItem": m28,
     "fakeipFilter": MessageLookupByLibrary.simpleMessage("Фильтр Fake-IP"),
@@ -1734,6 +1742,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "iHavePaid": MessageLookupByLibrary.simpleMessage("Я оплатил"),
     "icon": MessageLookupByLibrary.simpleMessage("Иконка"),
     "iconHistory": MessageLookupByLibrary.simpleMessage("Недавние значки"),
+    "iconSets": MessageLookupByLibrary.simpleMessage("Наборы значков"),
+    "iconSetsEmptyTip": MessageLookupByLibrary.simpleMessage(
+      "Наборов значков пока нет. Добавьте их в разделе «Ресурсы пользовательских профилей → Наборы значков»",
+    ),
     "iconStyle": MessageLookupByLibrary.simpleMessage("Стиль иконки"),
     "iconStyleFilled": MessageLookupByLibrary.simpleMessage("С подложкой"),
     "iconStyleHidden": MessageLookupByLibrary.simpleMessage("Скрыто"),
@@ -1754,6 +1766,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Импорт заменит текущие узлы, группы прокси, правила и настройки этого профиля",
     ),
     "importFile": MessageLookupByLibrary.simpleMessage("Импорт из файла"),
+    "importFromLink": MessageLookupByLibrary.simpleMessage("Импорт по ссылке"),
     "importFromURL": MessageLookupByLibrary.simpleMessage("Импорт из URL"),
     "importText": MessageLookupByLibrary.simpleMessage("Импорт из текста"),
     "importUrl": MessageLookupByLibrary.simpleMessage("Импорт по URL"),
@@ -1858,6 +1871,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "invalidIpv6CidrContent": MessageLookupByLibrary.simpleMessage(
       "Введите диапазон IPv6 в формате CIDR, например fd00::/8",
     ),
+    "invalidLinkTip": MessageLookupByLibrary.simpleMessage(
+      "Это не ссылка на подписку и не ссылка на прокси",
+    ),
     "invalidListenContent": MessageLookupByLibrary.simpleMessage(
       "Введите адрес и порт, например 0.0.0.0:1053",
     ),
@@ -1904,13 +1920,16 @@ class MessageLookup extends MessageLookupByLibrary {
       "Интервал TCP keep-alive",
     ),
     "key": MessageLookupByLibrary.simpleMessage("Ключ"),
+    "label": MessageLookupByLibrary.simpleMessage("Метка"),
     "language": MessageLookupByLibrary.simpleMessage("Язык"),
+    "large": MessageLookupByLibrary.simpleMessage("Крупный"),
     "lastUpdated": MessageLookupByLibrary.simpleMessage("Последнее обновление"),
     "layout": MessageLookupByLibrary.simpleMessage("Макет"),
     "lazy": MessageLookupByLibrary.simpleMessage("Ленивая загрузка"),
     "light": MessageLookupByLibrary.simpleMessage("Светлый"),
     "lineIssueTip": m45,
     "lineWrap": MessageLookupByLibrary.simpleMessage("Перенос строк"),
+    "link": MessageLookupByLibrary.simpleMessage("Ссылка"),
     "liquidGlass": MessageLookupByLibrary.simpleMessage("Жидкое стекло"),
     "list": MessageLookupByLibrary.simpleMessage("Список"),
     "listen": MessageLookupByLibrary.simpleMessage("Прослушивание"),
@@ -1928,6 +1947,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "localBackupDesc": MessageLookupByLibrary.simpleMessage(
       "Резервное копирование локальных данных на локальный диск",
     ),
+    "localImage": MessageLookupByLibrary.simpleMessage("Локальное изображение"),
     "localNetworkTip": MessageLookupByLibrary.simpleMessage(
       "Доступ к локальной сети не разрешён; для этого подключения используется gVisor. Прокси и сервисы в локальной сети могут оставаться недоступны",
     ),
@@ -1974,6 +1994,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "mainlandNetworkWarning": MessageLookupByLibrary.simpleMessage(
       "Может не подходить для сетей материкового Китая",
     ),
+    "matchCase": MessageLookupByLibrary.simpleMessage("Учитывать регистр"),
     "matchTarget": MessageLookupByLibrary.simpleMessage("MATCH-TARGET"),
     "matchTargetTitle": MessageLookupByLibrary.simpleMessage("Цель MATCH"),
     "maxFailedTimes": MessageLookupByLibrary.simpleMessage(
@@ -2103,6 +2124,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "nicknameValidation": MessageLookupByLibrary.simpleMessage(
       "Введите никнейм",
     ),
+    "no": MessageLookupByLibrary.simpleMessage("Нет"),
     "noAvailablePlans": MessageLookupByLibrary.simpleMessage(
       "Нет доступных тарифов",
     ),
@@ -2557,6 +2579,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "rechargeAmountOutOfRange": MessageLookupByLibrary.simpleMessage(
       "Сумма выходит за пределы диапазона этого способа оплаты",
     ),
+    "recommendedIcons": MessageLookupByLibrary.simpleMessage("Рекомендуемые"),
     "recurringRenewalHint": MessageLookupByLibrary.simpleMessage(
       "Скидка сохранится при автопродлении",
     ),
@@ -2567,6 +2590,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "После оплаты потяните вниз, чтобы обновить и проверить результат",
     ),
     "refundAmountLabel": MessageLookupByLibrary.simpleMessage("Возврат"),
+    "regex": MessageLookupByLibrary.simpleMessage("Регулярное выражение"),
     "register": MessageLookupByLibrary.simpleMessage("Регистрация"),
     "registerClosed": MessageLookupByLibrary.simpleMessage(
       "Регистрация в настоящее время закрыта",
@@ -3437,6 +3461,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "yearsAgo": m119,
     "yearsAgoShort": m120,
+    "yes": MessageLookupByLibrary.simpleMessage("Да"),
     "zh_CN": MessageLookupByLibrary.simpleMessage("Упрощенный китайский"),
   };
 }

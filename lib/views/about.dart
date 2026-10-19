@@ -6,6 +6,8 @@
 import 'dart:async';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/ui/typography.dart';
+import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/config.dart';
@@ -141,8 +143,9 @@ class _AboutViewState extends State<AboutView> {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Text(
           appLocalizations.reverseEngineeringNotice,
-          style: Theme.of(context).textTheme.labelSmall
-              ?.copyWith(color: Theme.of(context).colorScheme.outline),
+          style: AppTextStyle.caption2
+              .of(context)
+              .copyWith(color: Theme.of(context).colorScheme.outline),
         ),
       ),
     ];
@@ -177,7 +180,6 @@ class _AboutHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    final textTheme = context.textTheme;
     final appLocalizations = context.appLocalizations;
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
@@ -187,7 +189,7 @@ class _AboutHero extends StatelessWidget {
             onEnterDeveloperMode: onEnterDeveloperMode,
             child: DecoratedBox(
               decoration: ShapeDecoration(
-                color: colorScheme.surfaceContainerHigh,
+                color: context.raisedSurfaceLevel.colorOf(colorScheme),
                 shape: AppShape.all(AppCorner.fit(_logoSize)),
               ),
               child: Padding(
@@ -203,9 +205,9 @@ class _AboutHero extends StatelessWidget {
           const SizedBox(height: 20),
           Text(
             appName,
-            style: textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
+            style: AppTextStyle.title2
+                .of(context)
+                .copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 10),
           Wrap(
@@ -221,7 +223,7 @@ class _AboutHero extends StatelessWidget {
               ),
               _Pill(
                 label: 'Clash / mihomo',
-                color: colorScheme.surfaceContainerHighest,
+                color: context.raisedSurfaceLevel.colorOf(colorScheme),
                 foregroundColor: colorScheme.onSurfaceVariant,
               ),
             ],
@@ -232,10 +234,9 @@ class _AboutHero extends StatelessWidget {
             child: Text(
               appLocalizations.desc,
               textAlign: TextAlign.center,
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                height: 1.5,
-              ),
+              style: AppTextStyle.subheadline
+                  .of(context)
+                  .copyWith(color: colorScheme.onSurfaceVariant, height: 1.5),
             ),
           ),
           const SizedBox(height: 20),
@@ -269,10 +270,9 @@ class _Pill extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         child: Text(
           label,
-          style: context.textTheme.labelMedium?.copyWith(
-            color: foregroundColor,
-            fontWeight: FontWeight.w600,
-          ),
+          style: AppTextStyle.caption1
+              .of(context)
+              .copyWith(color: foregroundColor, fontWeight: FontWeight.w600),
         ),
       ),
     );

@@ -26,14 +26,12 @@ class DeveloperView extends ConsumerWidget {
       items: [
         ListItem(
           title: Text(appLocalizations.messageTest),
-          minVerticalPadding: 12,
           onTap: () {
             context.showNotifier(appLocalizations.messageTestTip);
           },
         ),
         ListItem(
           title: Text(appLocalizations.logsTest),
-          minVerticalPadding: 12,
           onTap: () {
             for (int i = 0; i < 1000; i++) {
               logsAction.addLog(
@@ -47,7 +45,6 @@ class DeveloperView extends ConsumerWidget {
         if (globalState.isPre)
           ListItem(
             title: Text(appLocalizations.crashTest),
-            minVerticalPadding: 12,
             onTap: () async {
               final res = await globalState.showMessage(
                 message: TextSpan(text: appLocalizations.confirmForceCrashCore),
@@ -60,10 +57,11 @@ class DeveloperView extends ConsumerWidget {
           ),
         ListItem(
           title: Text(appLocalizations.clearData),
-          minVerticalPadding: 12,
           onTap: () async {
             final res = await globalState.showMessage(
               message: TextSpan(text: appLocalizations.confirmClearAllData),
+              destructive: true,
+              confirmText: appLocalizations.clearData,
             );
             if (res != true) {
               return;
@@ -73,7 +71,6 @@ class DeveloperView extends ConsumerWidget {
         ),
         ListItem(
           title: Text(appLocalizations.pruneCache),
-          minVerticalPadding: 12,
           onTap: () => context.commonAction.safeRun(
             backupAction.shakingStore,
             silence: false,
@@ -90,25 +87,21 @@ class DeveloperView extends ConsumerWidget {
     );
     return BaseScaffold(
       title: appLocalizations.developerMode,
-      body: SingleChildScrollView(
-        padding: baseInfoEdgeInsetsOf(context)
-            .copyWith(top: context.contentTopPadding),
-        child: Column(
+      body: Builder(
+        builder: (context) => ListView(
+          padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 16),
           children: [
-            CommonCard(
-              radius: 18,
-              child: ListItem.toggle(
-                padding: const EdgeInsets.only(left: 16, right: 16),
-                title: Text(appLocalizations.developerMode),
-                value: enable,
-                onChanged: (value) {
-                  ref
+            generateSection(
+              items: [
+                ListItem.toggle(
+                  title: Text(appLocalizations.developerMode),
+                  value: enable,
+                  onChanged: (value) => ref
                       .read(appSettingProvider.notifier)
-                      .update((state) => state.copyWith(developerMode: value));
-                },
-              ),
+                      .update((state) => state.copyWith(developerMode: value)),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
             _getDeveloperList(context, ref),
           ],
         ),

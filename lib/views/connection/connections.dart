@@ -10,6 +10,7 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/core/method.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/widgets/record.dart';
 import 'package:fl_clash/widgets/record_table.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
@@ -244,7 +245,9 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
                   controller: _scrollController,
                   items: connections,
                   keyOf: (item) => item.id,
-                  separator: table == null ? const Divider(height: 0) : null,
+                  separator: table == null
+                      ? const SizedBox(height: recordListGap)
+                      : null,
                   itemBuilder: (_, trackerInfo) {
                     if (table != null) {
                       return TrackerInfoTableRow(

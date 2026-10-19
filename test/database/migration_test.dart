@@ -67,6 +67,22 @@ const _v6Profiles = [
   ),
 ];
 
+final _iconSet = IconSet(
+  id: 11,
+  name: 'Qure',
+  url: 'https://example.com/qure.json',
+  icons: const [
+    IconSetIcon(name: 'Proxy.png', url: 'https://example.com/p.png'),
+  ],
+  lastUpdateTime: DateTime(2026, 10, 1),
+);
+
+const _localIconSet = IconSet(
+  id: 12,
+  name: 'Mine',
+  icons: [IconSetIcon(name: 'Home.png', url: 'https://example.com/h.png')],
+);
+
 void main() {
   test('current config shape is recognized before legacy retry', () {
     expect(
@@ -274,6 +290,76 @@ void main() {
     });
   }
 
+  for (final leftBehind in [false, true]) {
+    test(
+      leftBehind
+          ? 'the v8 step keeps the icon sets a later build left behind'
+          : 'a schema v7 database gains an empty icon sets table',
+      () async {
+        final tempDir = await Directory.systemTemp.createTemp('flclash_v8_');
+        addTearDown(() => tempDir.delete(recursive: true));
+        final file = File('${tempDir.path}/database.sqlite');
+        final iconSets = [if (leftBehind) _iconSet];
+        await _createDatabase(
+          file,
+          _v6Profiles,
+          schemaVersion: 7,
+          iconSets: iconSets,
+        );
+
+        final database = Database(NativeDatabase(file));
+        addTearDown(database.close);
+
+        expect(await database.iconSetsDao.all().get(), iconSets);
+        expect(await database.profilesDao.all().get(), _v6Profiles);
+        await database.iconSetsDao.put(_localIconSet);
+        expect(await database.iconSetsDao.all().get(), [
+          ...iconSets,
+          _localIconSet,
+        ]);
+      },
+    );
+  }
+
+  test('icon sets restore from a backup, one set per remote url', () async {
+    final root = await Directory.systemTemp.createTemp('flclash_v8_backup_');
+    addTearDown(() => root.delete(recursive: true));
+    final databaseFile = File('${root.path}/$backupDatabaseName');
+    final local = _v6Profiles[1];
+    await _createDatabase(
+      databaseFile,
+      [local],
+      schemaVersion: 8,
+      iconSets: [_iconSet, _localIconSet],
+    );
+    final backup = await _createBackup(root, databaseFile, {
+      local.id: 'proxies: []',
+    });
+
+    expect(await validateBackupDatabase(databaseFile.path), true);
+    final migration = await restoreTask(
+      backup,
+      '${root.path}/restore',
+      '${root.path}/live',
+    );
+    expect(migration.iconSets, [_iconSet, _localIconSet]);
+
+    final live = Database(NativeDatabase.memory());
+    addTearDown(live.close);
+    await live.iconSetsDao.put(_iconSet.copyWith(id: 1, name: 'Mine'));
+    await live.restore(
+      migration.profiles,
+      migration.scripts,
+      migration.rules,
+      migration.links,
+      iconSets: migration.iconSets,
+    );
+    expect(await live.iconSetsDao.all().get(), [
+      _iconSet.copyWith(id: 1),
+      _localIconSet,
+    ]);
+  });
+
   test('a schema v6 backup restores through the migration', () async {
     final root = await Directory.systemTemp.createTemp('flclash_v6_backup_');
     addTearDown(() => root.delete(recursive: true));
@@ -448,11 +534,18 @@ Future<void> _createDatabase(
   List<Profile> profiles, {
   required int schemaVersion,
   Set<String> keepColumns = const {},
+  List<IconSet> iconSets = const [],
 }) async {
   final database = Database(NativeDatabase(file));
   await database.profilesDao.putAll(
     profiles.map((profile) => profile.toCompanion()),
   );
+  for (final iconSet in iconSets) {
+    await database.iconSetsDao.put(iconSet);
+  }
+  if (schemaVersion < 8 && iconSets.isEmpty) {
+    await database.customStatement('DROP TABLE icon_sets');
+  }
   if (schemaVersion < 7) {
     for (final column in {
       'profile_type',

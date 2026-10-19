@@ -141,6 +141,7 @@ class SyntaxHighlighter {
       color: style?.color ?? editorTheme['root']?.color ?? Colors.black,
       fontSize: fontSize,
       fontFamily: fontFamily,
+      fontFamilyFallback: baseTextStyle?.fontFamilyFallback,
       fontWeight: style?.fontWeight,
       fontStyle: style?.fontStyle,
     );
@@ -153,6 +154,7 @@ class SyntaxHighlighter {
       color: baseStyle?.color ?? editorTheme['root']?.color ?? Colors.black,
       fontSize: fontSize,
       fontFamily: fontFamily,
+      fontFamilyFallback: baseTextStyle?.fontFamilyFallback,
       fontWeight: baseStyle?.fontWeight,
       fontStyle: baseStyle?.fontStyle,
     );

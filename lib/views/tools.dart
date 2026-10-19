@@ -20,7 +20,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import 'config/advanced.dart';
-import 'config/providers.dart';
+import 'config/custom_resources.dart';
 import 'developer.dart';
 import 'theme.dart';
 import 'network_diagnostics.dart';
@@ -70,8 +70,8 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         if (system.isDesktop) const _HotkeyItem(),
         ListItem.open(
           leading: const GlyphIcon(AppGlyphs.resources),
-          title: Text(context.appLocalizations.appProviderLibrary),
-          widget: const ClashProvidersView(),
+          title: Text(context.appLocalizations.customProfileResources),
+          widget: const CustomResourcesView(),
         ),
         const _BackupItem(),
       ],

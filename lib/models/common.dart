@@ -581,6 +581,136 @@ Set<String> libraryProxyProviderLabels(Iterable<ClashProvider> providers) => {
     if (provider.kind == ProviderKind.proxy) provider.label,
 };
 
+@freezed
+abstract class IconSetIcon with _$IconSetIcon {
+  const factory IconSetIcon({required String name, required String url}) =
+      _IconSetIcon;
+
+  factory IconSetIcon.fromJson(Map<String, Object?> json) =>
+      _$IconSetIconFromJson(json);
+}
+
+final _iconLabels = Expando<String>();
+final _nonAlphanumeric = RegExp('[^a-z0-9]');
+
+extension IconSetIconExt on IconSetIcon {
+  String get label => _iconLabels[this] ??= name.fileStem.replaceAll('_', ' ');
+}
+
+String _compactIconName(String value) =>
+    value.toLowerCase().replaceAll(_nonAlphanumeric, '');
+
+typedef IconNameMatch = ({int index, int score, int length});
+
+typedef ScoredIcon = ({IconSetIcon icon, int score, int length});
+
+/// English only: a name with no Latin letters or digits matches nothing.
+List<IconNameMatch> matchIconNames(List<String> names, String target) {
+  final compactTarget = _compactIconName(target);
+  if (compactTarget.isEmpty) return const [];
+  final matches = <IconNameMatch>[];
+  for (final (index, name) in names.indexed) {
+    final compact = _compactIconName(name.fileStem);
+    if (compact.isEmpty) continue;
+    final score = switch (compact) {
+      _ when compact == compactTarget => 3,
+      _ when compact.length >= 3 && compactTarget.contains(compact) => 2,
+      _ when compactTarget.length >= 3 && compact.contains(compactTarget) => 1,
+      _ => 0,
+    };
+    if (score > 0) {
+      matches.add((index: index, score: score, length: compact.length));
+    }
+  }
+  return matches;
+}
+
+/// Keeps the first match of each image, in the order given, before ranking.
+List<IconSetIcon> rankIconMatches(
+  Iterable<ScoredIcon> matches, {
+  int limit = 24,
+}) {
+  final seen = <String>{};
+  final scored = [
+    for (final match in matches)
+      if (seen.add(match.icon.url)) match,
+  ];
+  mergeSort(
+    scored,
+    compare: (a, b) => a.score != b.score
+        ? b.score.compareTo(a.score)
+        : a.length.compareTo(b.length),
+  );
+  return scored.take(limit).map((item) => item.icon).toList();
+}
+
+extension IconSetIconsExt on List<IconSetIcon> {
+  List<ScoredIcon> scoredBy(List<IconNameMatch> matches) => [
+    for (final match in matches)
+      (icon: this[match.index], score: match.score, length: match.length),
+  ];
+
+  List<ScoredIcon> scoreFor(String name) =>
+      scoredBy(matchIconNames([for (final icon in this) icon.name], name));
+}
+
+@freezed
+abstract class IconSet with _$IconSet {
+  const factory IconSet({
+    required int id,
+    required String name,
+    @Default('') String url,
+    @Default([]) List<IconSetIcon> icons,
+    DateTime? lastUpdateTime,
+    int? order,
+  }) = _IconSet;
+}
+
+extension IconSetExt on IconSet {
+  bool get isRemote => url.isNotEmpty;
+
+  String get cover => icons.firstOrNull?.url ?? '';
+
+  String get updatingKey => 'icon_set_$id';
+}
+
+bool _isHttpUrl(String value) {
+  final uri = Uri.tryParse(value);
+  return uri != null &&
+      (uri.isScheme('http') || uri.isScheme('https')) &&
+      uri.host.isNotEmpty;
+}
+
+/// Reads the icon gallery format Quantumult X and Loon subscribe to:
+/// `{"name": ..., "icons": [{"name": ..., "url": ...}]}`.
+({String name, List<IconSetIcon> icons}) parseIconSet(String content) {
+  final document = json.decode(content);
+  if (document is! Map || document['icons'] is! List) {
+    throw const FormatException('Not an icon set');
+  }
+  final seen = <String>{};
+  final icons = <IconSetIcon>[];
+  for (final item in document['icons'] as List) {
+    if (item is! Map) continue;
+    final url = item['url'];
+    if (url is! String || !_isHttpUrl(url) || !seen.add(url)) continue;
+    final name = item['name'];
+    icons.add(
+      IconSetIcon(
+        name: name is String && name.trim().isNotEmpty
+            ? name.trim()
+            : url.urlFileName,
+        url: url,
+      ),
+    );
+  }
+  if (icons.isEmpty) {
+    throw const FormatException('An icon set without icons');
+  }
+  final name = document['name'];
+  return (name: name is String ? name.trim() : '', icons: icons);
+}
+
 RuleProviderFormat? ruleProviderFormatOf(String source) {
   final path = Uri.tryParse(source)?.path ?? source;
   return switch (path.toLowerCase().split('.').last) {

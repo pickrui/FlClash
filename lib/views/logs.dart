@@ -7,6 +7,7 @@ import 'package:fl_clash/ui/route_motion_hold.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/scroll_behavior.dart';
+import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/common/log_payload.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
@@ -40,7 +41,10 @@ class _LogsViewState extends ConsumerState<LogsView>
   void initState() {
     super.initState();
     _logs = ref.read(logsProvider).list;
-    _scrollController = ScrollController(initialScrollOffset: double.maxFinite);
+    _scrollController = sheetScrollController(
+      context,
+      initialScrollOffset: double.maxFinite,
+    );
     _logsStateNotifier.value = _logsStateNotifier.value.copyWith(logs: _logs);
     ref.listenManual(logsProvider.select((state) => state.list), (prev, next) {
       if (prev != next) {
@@ -156,8 +160,12 @@ class _LogsViewState extends ConsumerState<LogsView>
                 },
                 controller: _scrollController,
                 enable: state.autoScrollToEnd,
-                child: CommonScrollBar(
+                child: FloatingScrollbar(
                   controller: _scrollController,
+                  hintBuilder: (fraction) {
+                    final index = (fraction * (logs.length - 1)).round();
+                    return logs[index].dateTime;
+                  },
                   child: SuperListView.separated(
                     padding: EdgeInsets.only(
                       top: context.contentTopPadding,
@@ -176,7 +184,8 @@ class _LogsViewState extends ConsumerState<LogsView>
                             context.commonScaffoldState?.addKeyword(value),
                       );
                     },
-                    separatorBuilder: (_, _) => const Divider(height: 0),
+                    separatorBuilder: (_, _) =>
+                        const SizedBox(height: recordListGap),
                     extentEstimation: recordListExtentEstimation,
                     itemCount: logs.length,
                   ),
@@ -201,11 +210,9 @@ class LogItem extends StatelessWidget {
     final tone = switch (log.logLevel) {
       LogLevel.warning => RecordTone.warning,
       LogLevel.error => RecordTone.error,
-      LogLevel.info => RecordTone.neutral,
-      LogLevel.debug || LogLevel.silent => RecordTone.muted,
+      LogLevel.info || LogLevel.debug || LogLevel.silent => RecordTone.neutral,
     };
     return RecordListItem(
-      tone: tone,
       onTap: () {},
       header: RecordHeader(
         children: [
@@ -232,13 +239,10 @@ class _LogBody extends StatelessWidget {
     final payload = LogPayload.parse(log.payload);
     final route = payload.route;
     final styles = RecordTextStyles.of(context);
-    final primary = styles.primary;
-    final secondary = styles.secondary;
-    final muted = styles.muted;
     if (route == null) {
       return SelectableText(
         log.payload,
-        style: primary?.copyWith(color: log.logLevel.color),
+        style: styles.primary.copyWith(color: log.logLevel.color),
       );
     }
     final source = [
@@ -249,28 +253,26 @@ class _LogBody extends StatelessWidget {
     return SelectableText.rich(
       TextSpan(
         children: [
-          TextSpan(
-            text: route.destination,
-            style: primary?.copyWith(fontWeight: FontWeight.w500),
-          ),
+          TextSpan(text: route.destination, style: styles.title),
           if (route.error.isNotEmpty)
             TextSpan(
               text: '\n${route.error}',
-              style: secondary?.copyWith(color: context.colorScheme.error),
+              style: styles.secondary.copyWith(
+                color: context.colorScheme.error,
+              ),
             ),
           const TextSpan(text: '\n'),
           if (route.rule.isNotEmpty) ...[
-            TextSpan(text: route.rule, style: secondary),
-            TextSpan(text: ' → ', style: muted),
+            TextSpan(text: route.rule, style: styles.secondary),
+            TextSpan(text: ' → ', style: styles.secondary.toJetBrainsMono),
           ],
           TextSpan(
             text: route.proxy,
-            style: secondary?.copyWith(
-              color: context.colorScheme.primary,
-              fontWeight: FontWeight.w500,
-            ),
+            style: AppTextStyle.footnote
+                .of(context, emphasized: true)
+                .copyWith(color: context.colorScheme.primary),
           ),
-          TextSpan(text: '\n$source', style: muted),
+          TextSpan(text: '\n$source', style: styles.secondary),
         ],
       ),
     );

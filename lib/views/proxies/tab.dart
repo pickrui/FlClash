@@ -147,7 +147,7 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
     );
     final isSearching = ref.watch(
       queryProvider(QueryTag.proxies)
-          .select((query) => !SearchQuery(query).isEmpty),
+          .select((query) => SearchQuery(query).isNotEmpty),
     );
     final profileId = ref.watch(
       currentProfileProvider.select((profile) => profile?.id),

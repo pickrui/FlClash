@@ -892,7 +892,7 @@ class _EditGlobalAddedRulesState extends ConsumerState<_EditGlobalAddedRules> {
           ? const Center(child: CircularProgressIndicator())
           : NullStatusSwitcher(
               isEmpty: rules.isEmpty,
-              isSearching: !_query.isEmpty,
+              isSearching: _query.isNotEmpty,
               nullStatus: NullStatus(
                 label: appLocalizations.nullTip(appLocalizations.rule),
                 illustration: NullStatusIllustration.rules,

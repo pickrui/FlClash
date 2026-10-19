@@ -503,6 +503,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "basicInfo": MessageLookupByLibrary.simpleMessage("Basic info"),
     "basicStrategy": MessageLookupByLibrary.simpleMessage("Basic strategies"),
     "batchAdd": MessageLookupByLibrary.simpleMessage("Batch add"),
+    "batchLinkInputTip": MessageLookupByLibrary.simpleMessage(
+      "One link per line",
+    ),
     "batchListInputTip": MessageLookupByLibrary.simpleMessage(
       "One item per line, or separated by commas",
     ),
@@ -939,6 +942,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "customProfile": MessageLookupByLibrary.simpleMessage("Custom profile"),
     "customProfileDesc": MessageLookupByLibrary.simpleMessage(
       "Assemble proxy groups and rules from your own nodes, the provider library and other profiles",
+    ),
+    "customProfileResources": MessageLookupByLibrary.simpleMessage(
+      "Custom profile resources",
     ),
     "customRoutingDraftHint": MessageLookupByLibrary.simpleMessage(
       "Fill in your custom routing, then switch to Custom mode. Editing this draft does not change the current mode.",
@@ -1411,6 +1417,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "enabled": MessageLookupByLibrary.simpleMessage("Enabled"),
     "enabledOnStart": MessageLookupByLibrary.simpleMessage("Enable on start"),
     "entries": MessageLookupByLibrary.simpleMessage(" entries"),
+    "error": MessageLookupByLibrary.simpleMessage("Error"),
     "errorDetails": MessageLookupByLibrary.simpleMessage("Error details"),
     "exclude": MessageLookupByLibrary.simpleMessage("Hide from recent tasks"),
     "excludeDesc": MessageLookupByLibrary.simpleMessage(
@@ -1475,6 +1482,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "The external controller lets you control the core on the configured address",
     ),
     "externalLink": MessageLookupByLibrary.simpleMessage("External link"),
+    "extraLarge": MessageLookupByLibrary.simpleMessage("Extra large"),
     "fade": MessageLookupByLibrary.simpleMessage("Fade"),
     "failedItem": m28,
     "fakeipFilter": MessageLookupByLibrary.simpleMessage("Fake-IP filter"),
@@ -1680,6 +1688,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "iHavePaid": MessageLookupByLibrary.simpleMessage("I have paid"),
     "icon": MessageLookupByLibrary.simpleMessage("Icon"),
     "iconHistory": MessageLookupByLibrary.simpleMessage("Recent icons"),
+    "iconSets": MessageLookupByLibrary.simpleMessage("Icon sets"),
+    "iconSetsEmptyTip": MessageLookupByLibrary.simpleMessage(
+      "No icon sets yet. Add them in Custom profile resources → Icon sets",
+    ),
     "iconStyle": MessageLookupByLibrary.simpleMessage("Icon style"),
     "iconStyleFilled": MessageLookupByLibrary.simpleMessage("Filled"),
     "iconStyleHidden": MessageLookupByLibrary.simpleMessage("Hidden"),
@@ -1700,6 +1712,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Importing replaces the nodes, proxy groups, rules and settings this profile has now",
     ),
     "importFile": MessageLookupByLibrary.simpleMessage("Import from file"),
+    "importFromLink": MessageLookupByLibrary.simpleMessage("Import from link"),
     "importFromURL": MessageLookupByLibrary.simpleMessage("Import from URL"),
     "importText": MessageLookupByLibrary.simpleMessage("Import from text"),
     "importUrl": MessageLookupByLibrary.simpleMessage("Import from URL"),
@@ -1799,6 +1812,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "invalidIpv6CidrContent": MessageLookupByLibrary.simpleMessage(
       "Enter an IPv6 range in CIDR form such as fd00::/8",
     ),
+    "invalidLinkTip": MessageLookupByLibrary.simpleMessage(
+      "Not a subscription link or a proxy share link",
+    ),
     "invalidListenContent": MessageLookupByLibrary.simpleMessage(
       "Enter an address and port such as 0.0.0.0:1053",
     ),
@@ -1843,13 +1859,16 @@ class MessageLookup extends MessageLookupByLibrary {
       "TCP keep-alive interval",
     ),
     "key": MessageLookupByLibrary.simpleMessage("Key"),
+    "label": MessageLookupByLibrary.simpleMessage("Label"),
     "language": MessageLookupByLibrary.simpleMessage("Language"),
+    "large": MessageLookupByLibrary.simpleMessage("Large"),
     "lastUpdated": MessageLookupByLibrary.simpleMessage("Last updated"),
     "layout": MessageLookupByLibrary.simpleMessage("Layout"),
     "lazy": MessageLookupByLibrary.simpleMessage("Lazy loading"),
     "light": MessageLookupByLibrary.simpleMessage("Light"),
     "lineIssueTip": m45,
     "lineWrap": MessageLookupByLibrary.simpleMessage("Word wrap"),
+    "link": MessageLookupByLibrary.simpleMessage("Link"),
     "liquidGlass": MessageLookupByLibrary.simpleMessage("Liquid Glass"),
     "list": MessageLookupByLibrary.simpleMessage("List"),
     "listen": MessageLookupByLibrary.simpleMessage("Listen"),
@@ -1865,6 +1884,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "localBackupDesc": MessageLookupByLibrary.simpleMessage(
       "Backup local data to local",
     ),
+    "localImage": MessageLookupByLibrary.simpleMessage("Local image"),
     "localNetworkTip": MessageLookupByLibrary.simpleMessage(
       "Local network access denied; using gVisor for this connection. LAN proxies and services may remain unavailable",
     ),
@@ -1907,6 +1927,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "mainlandNetworkWarning": MessageLookupByLibrary.simpleMessage(
       "May not be suitable for networks in mainland China",
     ),
+    "matchCase": MessageLookupByLibrary.simpleMessage("Match case"),
     "matchTarget": MessageLookupByLibrary.simpleMessage("MATCH-TARGET"),
     "matchTargetTitle": MessageLookupByLibrary.simpleMessage("Match target"),
     "maxFailedTimes": MessageLookupByLibrary.simpleMessage("Max failed times"),
@@ -2024,6 +2045,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "nicknameValidation": MessageLookupByLibrary.simpleMessage(
       "Please enter a nickname",
     ),
+    "no": MessageLookupByLibrary.simpleMessage("No"),
     "noAvailablePlans": MessageLookupByLibrary.simpleMessage(
       "No plans available",
     ),
@@ -2448,6 +2470,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "rechargeAmountOutOfRange": MessageLookupByLibrary.simpleMessage(
       "The amount is outside the range allowed by this payment method",
     ),
+    "recommendedIcons": MessageLookupByLibrary.simpleMessage("Suggested"),
     "recurringRenewalHint": MessageLookupByLibrary.simpleMessage(
       "Future automatic renewals keep this discount",
     ),
@@ -2458,6 +2481,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "After payment, pull down to refresh and check the result",
     ),
     "refundAmountLabel": MessageLookupByLibrary.simpleMessage("Refund"),
+    "regex": MessageLookupByLibrary.simpleMessage("Regex"),
     "register": MessageLookupByLibrary.simpleMessage("Register"),
     "registerClosed": MessageLookupByLibrary.simpleMessage(
       "Registration is currently closed",
@@ -3262,6 +3286,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "yearsAgo": m119,
     "yearsAgoShort": m120,
+    "yes": MessageLookupByLibrary.simpleMessage("Yes"),
     "zh_CN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };
 }

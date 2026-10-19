@@ -100,7 +100,12 @@ Future<void> main(List<String> arguments) async {
     startupDiagnostics.record('aborted error=${startupErrorLabel(e)}');
     render?.resume();
     runApp(
-      InitErrorApp(error: e, stack: s, diagnostics: startupDiagnostics.text),
+      InitErrorApp(
+        error: e,
+        stack: s,
+        diagnostics: startupDiagnostics.text,
+        onExit: () async => exit(0),
+      ),
     );
     await window?.showInitFailure(onExit: () => exit(0));
   }

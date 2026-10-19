@@ -397,6 +397,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "basicInfo": MessageLookupByLibrary.simpleMessage("基础信息"),
     "basicStrategy": MessageLookupByLibrary.simpleMessage("基础策略"),
     "batchAdd": MessageLookupByLibrary.simpleMessage("批量添加"),
+    "batchLinkInputTip": MessageLookupByLibrary.simpleMessage("每行一个链接"),
     "batchListInputTip": MessageLookupByLibrary.simpleMessage("每行一项，也可用逗号分隔"),
     "batchMapInputTip": MessageLookupByLibrary.simpleMessage("每行一条，键和值之间用空格分隔"),
     "batchPreviewTip": m1,
@@ -710,6 +711,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "customProfileDesc": MessageLookupByLibrary.simpleMessage(
       "基于自有节点、资源库和其他配置组建策略组与规则",
     ),
+    "customProfileResources": MessageLookupByLibrary.simpleMessage("自定义配置资源"),
     "customRoutingDraftHint": MessageLookupByLibrary.simpleMessage(
       "先填写自定义内容，再切换至自定义模式。编辑草稿不会切换当前模式",
     ),
@@ -1057,6 +1059,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "enabled": MessageLookupByLibrary.simpleMessage("已开启"),
     "enabledOnStart": MessageLookupByLibrary.simpleMessage("启动后启用"),
     "entries": MessageLookupByLibrary.simpleMessage("个条目"),
+    "error": MessageLookupByLibrary.simpleMessage("错误"),
     "errorDetails": MessageLookupByLibrary.simpleMessage("错误详情"),
     "exclude": MessageLookupByLibrary.simpleMessage("从最近任务中隐藏"),
     "excludeDesc": MessageLookupByLibrary.simpleMessage("应用在后台时,从最近任务中隐藏应用"),
@@ -1105,6 +1108,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "外部控制器开启后，可通过指定地址控制内核",
     ),
     "externalLink": MessageLookupByLibrary.simpleMessage("外部链接"),
+    "extraLarge": MessageLookupByLibrary.simpleMessage("超大"),
     "fade": MessageLookupByLibrary.simpleMessage("淡入"),
     "failedItem": m28,
     "fakeipFilter": MessageLookupByLibrary.simpleMessage("Fake-IP过滤"),
@@ -1252,6 +1256,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "iHavePaid": MessageLookupByLibrary.simpleMessage("我已支付"),
     "icon": MessageLookupByLibrary.simpleMessage("图片"),
     "iconHistory": MessageLookupByLibrary.simpleMessage("最近使用的图标"),
+    "iconSets": MessageLookupByLibrary.simpleMessage("图标集"),
+    "iconSetsEmptyTip": MessageLookupByLibrary.simpleMessage(
+      "暂无图标集，可在「自定义配置资源 → 图标集」中添加",
+    ),
     "iconStyle": MessageLookupByLibrary.simpleMessage("图标样式"),
     "iconStyleFilled": MessageLookupByLibrary.simpleMessage("色块"),
     "iconStyleHidden": MessageLookupByLibrary.simpleMessage("隐藏"),
@@ -1268,6 +1276,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "导入会替换此配置现有的节点、策略组、规则和设置",
     ),
     "importFile": MessageLookupByLibrary.simpleMessage("通过文件导入"),
+    "importFromLink": MessageLookupByLibrary.simpleMessage("从链接导入"),
     "importFromURL": MessageLookupByLibrary.simpleMessage("从URL导入"),
     "importText": MessageLookupByLibrary.simpleMessage("从文本导入"),
     "importUrl": MessageLookupByLibrary.simpleMessage("通过URL导入"),
@@ -1335,6 +1344,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "invalidIpv6CidrContent": MessageLookupByLibrary.simpleMessage(
       "请输入 CIDR 格式的 IPv6 段，如 fd00::/8",
     ),
+    "invalidLinkTip": MessageLookupByLibrary.simpleMessage("不是有效的订阅链接或代理分享链接"),
     "invalidListenContent": MessageLookupByLibrary.simpleMessage(
       "请输入地址和端口，如 0.0.0.0:1053",
     ),
@@ -1371,13 +1381,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "keepAliveIdle": MessageLookupByLibrary.simpleMessage("TCP 保持活动空闲时间"),
     "keepAliveIntervalDesc": MessageLookupByLibrary.simpleMessage("TCP保持活动间隔"),
     "key": MessageLookupByLibrary.simpleMessage("键"),
+    "label": MessageLookupByLibrary.simpleMessage("标签"),
     "language": MessageLookupByLibrary.simpleMessage("语言"),
+    "large": MessageLookupByLibrary.simpleMessage("大"),
     "lastUpdated": MessageLookupByLibrary.simpleMessage("上次更新"),
     "layout": MessageLookupByLibrary.simpleMessage("布局"),
     "lazy": MessageLookupByLibrary.simpleMessage("延迟加载"),
     "light": MessageLookupByLibrary.simpleMessage("浅色"),
     "lineIssueTip": m45,
     "lineWrap": MessageLookupByLibrary.simpleMessage("自动换行"),
+    "link": MessageLookupByLibrary.simpleMessage("链接"),
     "liquidGlass": MessageLookupByLibrary.simpleMessage("液态玻璃"),
     "list": MessageLookupByLibrary.simpleMessage("列表"),
     "listen": MessageLookupByLibrary.simpleMessage("监听"),
@@ -1389,6 +1402,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "loading": MessageLookupByLibrary.simpleMessage("加载中..."),
     "local": MessageLookupByLibrary.simpleMessage("本地"),
     "localBackupDesc": MessageLookupByLibrary.simpleMessage("备份数据到本地"),
+    "localImage": MessageLookupByLibrary.simpleMessage("本地图片"),
     "localNetworkTip": MessageLookupByLibrary.simpleMessage(
       "未获准访问局域网，本次连接改用 gVisor；局域网代理和服务仍可能不可用",
     ),
@@ -1419,6 +1433,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "mainlandNetworkWarning": MessageLookupByLibrary.simpleMessage(
       "可能不适用于中国大陆网络",
     ),
+    "matchCase": MessageLookupByLibrary.simpleMessage("区分大小写"),
     "matchTarget": MessageLookupByLibrary.simpleMessage("MATCH-TARGET"),
     "matchTargetTitle": MessageLookupByLibrary.simpleMessage("匹配目标"),
     "maxFailedTimes": MessageLookupByLibrary.simpleMessage("最大失败次数"),
@@ -1504,6 +1519,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "nicknameHint": MessageLookupByLibrary.simpleMessage("字母与数字，最多 12 个字符"),
     "nicknameLabel": MessageLookupByLibrary.simpleMessage("昵称"),
     "nicknameValidation": MessageLookupByLibrary.simpleMessage("请输入昵称"),
+    "no": MessageLookupByLibrary.simpleMessage("否"),
     "noAvailablePlans": MessageLookupByLibrary.simpleMessage("暂无可选套餐"),
     "noData": MessageLookupByLibrary.simpleMessage("暂无数据"),
     "noInfo": MessageLookupByLibrary.simpleMessage("暂无信息"),
@@ -1824,6 +1840,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "rechargeAmountOutOfRange": MessageLookupByLibrary.simpleMessage(
       "金额超出该支付方式允许的范围",
     ),
+    "recommendedIcons": MessageLookupByLibrary.simpleMessage("推荐"),
     "recurringRenewalHint": MessageLookupByLibrary.simpleMessage("后续自动续费同享折扣"),
     "redirPort": MessageLookupByLibrary.simpleMessage("Redir端口"),
     "redo": MessageLookupByLibrary.simpleMessage("重做"),
@@ -1832,6 +1849,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "支付完成后请下拉刷新查看结果",
     ),
     "refundAmountLabel": MessageLookupByLibrary.simpleMessage("退还差价"),
+    "regex": MessageLookupByLibrary.simpleMessage("正则"),
     "register": MessageLookupByLibrary.simpleMessage("注册"),
     "registerClosed": MessageLookupByLibrary.simpleMessage("当前已关闭注册"),
     "registerFailed": MessageLookupByLibrary.simpleMessage("注册失败"),
@@ -2442,6 +2460,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "yearsAgo": m119,
     "yearsAgoShort": m120,
+    "yes": MessageLookupByLibrary.simpleMessage("是"),
     "zh_CN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };
 }

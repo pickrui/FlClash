@@ -1545,5 +1545,22 @@
   "additionalParameters": "Additional parameters",
   "quickActions": "Quick actions",
   "ruleListInvalid": "The rules must be a YAML list with one rule per item, such as - DOMAIN,example.com,DIRECT",
-  "goToConfigureAddedRules": "Go to added rules configuration"
+  "goToConfigureAddedRules": "Go to added rules configuration",
+  "large": "Large",
+  "extraLarge": "Extra large",
+  "matchCase": "Match case",
+  "regex": "Regex",
+  "yes": "Yes",
+  "no": "No",
+  "error": "Error",
+  "iconSets": "Icon sets",
+  "localImage": "Local image",
+  "label": "Label",
+  "iconSetsEmptyTip": "No icon sets yet. Add them in Custom profile resources → Icon sets",
+  "recommendedIcons": "Suggested",
+  "customProfileResources": "Custom profile resources",
+  "importFromLink": "Import from link",
+  "invalidLinkTip": "Not a subscription link or a proxy share link",
+  "batchLinkInputTip": "One link per line",
+  "link": "Link"
 }

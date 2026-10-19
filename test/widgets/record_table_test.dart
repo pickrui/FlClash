@@ -30,7 +30,7 @@ List<RecordColumn<_Row>> _columns(double _) => [
 ];
 
 void main() {
-  testWidgets('zero-height dividers between records do not misjudge a list', (
+  testWidgets('the gaps between record cards do not misjudge the list', (
     tester,
   ) async {
     final controller = ScrollController();
@@ -41,19 +41,20 @@ void main() {
           controller: controller,
           itemCount: 200,
           extentEstimation: recordListExtentEstimation,
-          separatorBuilder: (_, _) => const Divider(height: 0),
+          separatorBuilder: (_, _) => const SizedBox(height: recordListGap),
           itemBuilder: (_, index) =>
               SizedBox(height: 100, child: Text('$index')),
         ),
       ),
     );
-    final extent = 200 * 100 - controller.position.viewportDimension;
+    final viewport = controller.position.viewportDimension;
+    const extent = 200 * 100 + 199 * recordListGap;
 
-    expect(controller.position.maxScrollExtent, extent);
+    expect(controller.position.maxScrollExtent, extent - viewport);
     controller.jumpTo(controller.position.maxScrollExtent);
     await tester.pump();
-    expect(controller.position.maxScrollExtent, extent);
-    expect(controller.offset, extent);
+    expect(controller.position.maxScrollExtent, extent - viewport);
+    expect(controller.offset, controller.position.maxScrollExtent);
   });
 
   test('a bottom-up list sorts with its ties kept in their shown order', () {

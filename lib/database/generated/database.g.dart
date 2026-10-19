@@ -4561,6 +4561,406 @@ class ClashProvidersCompanion extends UpdateCompanion<RawClashProvider> {
   }
 }
 
+class $IconSetsTable extends IconSets
+    with TableInfo<$IconSetsTable, RawIconSet> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $IconSetsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _urlMeta = const VerificationMeta('url');
+  @override
+  late final GeneratedColumn<String> url = GeneratedColumn<String>(
+    'url',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<List<IconSetIcon>, String> icons =
+      GeneratedColumn<String>(
+        'icons',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<List<IconSetIcon>>($IconSetsTable.$convertericons);
+  static const VerificationMeta _lastUpdateTimeMeta = const VerificationMeta(
+    'lastUpdateTime',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastUpdateTime =
+      GeneratedColumn<DateTime>(
+        'last_update_time',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _orderMeta = const VerificationMeta('order');
+  @override
+  late final GeneratedColumn<int> order = GeneratedColumn<int>(
+    'order',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    url,
+    icons,
+    lastUpdateTime,
+    order,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'icon_sets';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<RawIconSet> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('url')) {
+      context.handle(
+        _urlMeta,
+        url.isAcceptableOrUnknown(data['url']!, _urlMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_urlMeta);
+    }
+    if (data.containsKey('last_update_time')) {
+      context.handle(
+        _lastUpdateTimeMeta,
+        lastUpdateTime.isAcceptableOrUnknown(
+          data['last_update_time']!,
+          _lastUpdateTimeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('order')) {
+      context.handle(
+        _orderMeta,
+        order.isAcceptableOrUnknown(data['order']!, _orderMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  RawIconSet map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RawIconSet(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      url: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}url'],
+      )!,
+      icons: $IconSetsTable.$convertericons.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}icons'],
+        )!,
+      ),
+      lastUpdateTime: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_update_time'],
+      ),
+      order: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}order'],
+      ),
+    );
+  }
+
+  @override
+  $IconSetsTable createAlias(String alias) {
+    return $IconSetsTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<List<IconSetIcon>, String> $convertericons =
+      const IconSetIconsConverter();
+}
+
+class RawIconSet extends DataClass implements Insertable<RawIconSet> {
+  final int id;
+  final String name;
+  final String url;
+  final List<IconSetIcon> icons;
+  final DateTime? lastUpdateTime;
+  final int? order;
+  const RawIconSet({
+    required this.id,
+    required this.name,
+    required this.url,
+    required this.icons,
+    this.lastUpdateTime,
+    this.order,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['url'] = Variable<String>(url);
+    {
+      map['icons'] = Variable<String>(
+        $IconSetsTable.$convertericons.toSql(icons),
+      );
+    }
+    if (!nullToAbsent || lastUpdateTime != null) {
+      map['last_update_time'] = Variable<DateTime>(lastUpdateTime);
+    }
+    if (!nullToAbsent || order != null) {
+      map['order'] = Variable<int>(order);
+    }
+    return map;
+  }
+
+  IconSetsCompanion toCompanion(bool nullToAbsent) {
+    return IconSetsCompanion(
+      id: Value(id),
+      name: Value(name),
+      url: Value(url),
+      icons: Value(icons),
+      lastUpdateTime: lastUpdateTime == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastUpdateTime),
+      order: order == null && nullToAbsent
+          ? const Value.absent()
+          : Value(order),
+    );
+  }
+
+  factory RawIconSet.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RawIconSet(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      url: serializer.fromJson<String>(json['url']),
+      icons: serializer.fromJson<List<IconSetIcon>>(json['icons']),
+      lastUpdateTime: serializer.fromJson<DateTime?>(json['lastUpdateTime']),
+      order: serializer.fromJson<int?>(json['order']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'url': serializer.toJson<String>(url),
+      'icons': serializer.toJson<List<IconSetIcon>>(icons),
+      'lastUpdateTime': serializer.toJson<DateTime?>(lastUpdateTime),
+      'order': serializer.toJson<int?>(order),
+    };
+  }
+
+  RawIconSet copyWith({
+    int? id,
+    String? name,
+    String? url,
+    List<IconSetIcon>? icons,
+    Value<DateTime?> lastUpdateTime = const Value.absent(),
+    Value<int?> order = const Value.absent(),
+  }) => RawIconSet(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    url: url ?? this.url,
+    icons: icons ?? this.icons,
+    lastUpdateTime: lastUpdateTime.present
+        ? lastUpdateTime.value
+        : this.lastUpdateTime,
+    order: order.present ? order.value : this.order,
+  );
+  RawIconSet copyWithCompanion(IconSetsCompanion data) {
+    return RawIconSet(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      url: data.url.present ? data.url.value : this.url,
+      icons: data.icons.present ? data.icons.value : this.icons,
+      lastUpdateTime: data.lastUpdateTime.present
+          ? data.lastUpdateTime.value
+          : this.lastUpdateTime,
+      order: data.order.present ? data.order.value : this.order,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RawIconSet(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('url: $url, ')
+          ..write('icons: $icons, ')
+          ..write('lastUpdateTime: $lastUpdateTime, ')
+          ..write('order: $order')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, url, icons, lastUpdateTime, order);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RawIconSet &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.url == this.url &&
+          other.icons == this.icons &&
+          other.lastUpdateTime == this.lastUpdateTime &&
+          other.order == this.order);
+}
+
+class IconSetsCompanion extends UpdateCompanion<RawIconSet> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<String> url;
+  final Value<List<IconSetIcon>> icons;
+  final Value<DateTime?> lastUpdateTime;
+  final Value<int?> order;
+  const IconSetsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.url = const Value.absent(),
+    this.icons = const Value.absent(),
+    this.lastUpdateTime = const Value.absent(),
+    this.order = const Value.absent(),
+  });
+  IconSetsCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    required String url,
+    required List<IconSetIcon> icons,
+    this.lastUpdateTime = const Value.absent(),
+    this.order = const Value.absent(),
+  }) : name = Value(name),
+       url = Value(url),
+       icons = Value(icons);
+  static Insertable<RawIconSet> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<String>? url,
+    Expression<String>? icons,
+    Expression<DateTime>? lastUpdateTime,
+    Expression<int>? order,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (url != null) 'url': url,
+      if (icons != null) 'icons': icons,
+      if (lastUpdateTime != null) 'last_update_time': lastUpdateTime,
+      if (order != null) 'order': order,
+    });
+  }
+
+  IconSetsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<String>? url,
+    Value<List<IconSetIcon>>? icons,
+    Value<DateTime?>? lastUpdateTime,
+    Value<int?>? order,
+  }) {
+    return IconSetsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      url: url ?? this.url,
+      icons: icons ?? this.icons,
+      lastUpdateTime: lastUpdateTime ?? this.lastUpdateTime,
+      order: order ?? this.order,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (url.present) {
+      map['url'] = Variable<String>(url.value);
+    }
+    if (icons.present) {
+      map['icons'] = Variable<String>(
+        $IconSetsTable.$convertericons.toSql(icons.value),
+      );
+    }
+    if (lastUpdateTime.present) {
+      map['last_update_time'] = Variable<DateTime>(lastUpdateTime.value);
+    }
+    if (order.present) {
+      map['order'] = Variable<int>(order.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('IconSetsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('url: $url, ')
+          ..write('icons: $icons, ')
+          ..write('lastUpdateTime: $lastUpdateTime, ')
+          ..write('order: $order')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$Database extends GeneratedDatabase {
   _$Database(QueryExecutor e) : super(e);
   $DatabaseManager get managers => $DatabaseManager(this);
@@ -4573,6 +4973,7 @@ abstract class _$Database extends GeneratedDatabase {
   late final $ProxyGroupsTable proxyGroups = $ProxyGroupsTable(this);
   late final $IconRecordsTable iconRecords = $IconRecordsTable(this);
   late final $ClashProvidersTable clashProviders = $ClashProvidersTable(this);
+  late final $IconSetsTable iconSets = $IconSetsTable(this);
   late final Index idxRuleTarget = Index(
     'idx_rule_target',
     'CREATE INDEX idx_rule_target ON rules (rule_target)',
@@ -4597,6 +4998,7 @@ abstract class _$Database extends GeneratedDatabase {
   late final ClashProvidersDao clashProvidersDao = ClashProvidersDao(
     this as Database,
   );
+  late final IconSetsDao iconSetsDao = IconSetsDao(this as Database);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4609,6 +5011,7 @@ abstract class _$Database extends GeneratedDatabase {
     proxyGroups,
     iconRecords,
     clashProviders,
+    iconSets,
     idxRuleTarget,
     idxProfileSceneOrder,
     idxProfileNameOrder,
@@ -7479,6 +7882,223 @@ typedef $$ClashProvidersTableProcessedTableManager =
       RawClashProvider,
       PrefetchHooks Function()
     >;
+typedef $$IconSetsTableCreateCompanionBuilder = IconSetsCompanion Function({
+  Value<int> id,
+  required String name,
+  required String url,
+  required List<IconSetIcon> icons,
+  Value<DateTime?> lastUpdateTime,
+  Value<int?> order,
+});
+typedef $$IconSetsTableUpdateCompanionBuilder = IconSetsCompanion Function({
+  Value<int> id,
+  Value<String> name,
+  Value<String> url,
+  Value<List<IconSetIcon>> icons,
+  Value<DateTime?> lastUpdateTime,
+  Value<int?> order,
+});
+
+class $$IconSetsTableFilterComposer
+    extends Composer<_$Database, $IconSetsTable> {
+  $$IconSetsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get url => $composableBuilder(
+    column: $table.url,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<List<IconSetIcon>, List<IconSetIcon>, String>
+  get icons => $composableBuilder(
+    column: $table.icons,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastUpdateTime => $composableBuilder(
+    column: $table.lastUpdateTime,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get order => $composableBuilder(
+    column: $table.order,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$IconSetsTableOrderingComposer
+    extends Composer<_$Database, $IconSetsTable> {
+  $$IconSetsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get url => $composableBuilder(
+    column: $table.url,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get icons => $composableBuilder(
+    column: $table.icons,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastUpdateTime => $composableBuilder(
+    column: $table.lastUpdateTime,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get order => $composableBuilder(
+    column: $table.order,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$IconSetsTableAnnotationComposer
+    extends Composer<_$Database, $IconSetsTable> {
+  $$IconSetsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get url =>
+      $composableBuilder(column: $table.url, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<IconSetIcon>, String> get icons =>
+      $composableBuilder(column: $table.icons, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastUpdateTime => $composableBuilder(
+    column: $table.lastUpdateTime,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get order =>
+      $composableBuilder(column: $table.order, builder: (column) => column);
+}
+
+class $$IconSetsTableTableManager
+    extends
+        RootTableManager<
+          _$Database,
+          $IconSetsTable,
+          RawIconSet,
+          $$IconSetsTableFilterComposer,
+          $$IconSetsTableOrderingComposer,
+          $$IconSetsTableAnnotationComposer,
+          $$IconSetsTableCreateCompanionBuilder,
+          $$IconSetsTableUpdateCompanionBuilder,
+          (RawIconSet, BaseReferences<_$Database, $IconSetsTable, RawIconSet>),
+          RawIconSet,
+          PrefetchHooks Function()
+        > {
+  $$IconSetsTableTableManager(_$Database db, $IconSetsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$IconSetsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$IconSetsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$IconSetsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> url = const Value.absent(),
+                Value<List<IconSetIcon>> icons = const Value.absent(),
+                Value<DateTime?> lastUpdateTime = const Value.absent(),
+                Value<int?> order = const Value.absent(),
+              }) => IconSetsCompanion(
+                id: id,
+                name: name,
+                url: url,
+                icons: icons,
+                lastUpdateTime: lastUpdateTime,
+                order: order,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                required String url,
+                required List<IconSetIcon> icons,
+                Value<DateTime?> lastUpdateTime = const Value.absent(),
+                Value<int?> order = const Value.absent(),
+              }) => IconSetsCompanion.insert(
+                id: id,
+                name: name,
+                url: url,
+                icons: icons,
+                lastUpdateTime: lastUpdateTime,
+                order: order,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$IconSetsTable, RawIconSet>(table),
+                  BaseReferences<_$Database, $IconSetsTable, RawIconSet>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$IconSetsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$Database,
+      $IconSetsTable,
+      RawIconSet,
+      $$IconSetsTableFilterComposer,
+      $$IconSetsTableOrderingComposer,
+      $$IconSetsTableAnnotationComposer,
+      $$IconSetsTableCreateCompanionBuilder,
+      $$IconSetsTableUpdateCompanionBuilder,
+      (RawIconSet, BaseReferences<_$Database, $IconSetsTable, RawIconSet>),
+      RawIconSet,
+      PrefetchHooks Function()
+    >;
 
 class $DatabaseManager {
   final _$Database _db;
@@ -7497,6 +8117,8 @@ class $DatabaseManager {
       $$IconRecordsTableTableManager(_db, _db.iconRecords);
   $$ClashProvidersTableTableManager get clashProviders =>
       $$ClashProvidersTableTableManager(_db, _db.clashProviders);
+  $$IconSetsTableTableManager get iconSets =>
+      $$IconSetsTableTableManager(_db, _db.iconSets);
 }
 
 mixin _$ProfilesDaoMixin on DatabaseAccessor<Database> {
@@ -7585,4 +8207,16 @@ class ClashProvidersDaoManager {
         _db.attachedDatabase,
         _db.clashProviders,
       );
+}
+
+mixin _$IconSetsDaoMixin on DatabaseAccessor<Database> {
+  $IconSetsTable get iconSets => attachedDatabase.iconSets;
+  IconSetsDaoManager get managers => IconSetsDaoManager(this);
+}
+
+class IconSetsDaoManager {
+  final _$IconSetsDaoMixin _db;
+  IconSetsDaoManager(this._db);
+  $$IconSetsTableTableManager get iconSets =>
+      $$IconSetsTableTableManager(_db.attachedDatabase, _db.iconSets);
 }

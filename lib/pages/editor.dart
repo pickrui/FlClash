@@ -8,16 +8,16 @@ import 'dart:async';
 import 'package:fl_clash/providers/action.dart';
 
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/editor/editor.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:fl_clash/ui/caret_popup.dart';
+import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/text_loupe.dart';
+import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/ui/navigation_dock.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/foundation.dart';
@@ -41,15 +41,15 @@ import 'package:re_highlight/styles/atom-one-dark.dart';
 import 'package:re_highlight/styles/atom-one-light.dart';
 import 'package:rust_api/rust_api.dart' show isRustLibInitialized;
 
-export 'package:fl_clash/features/editor/editor.dart' show EditorSchema;
+export 'package:fl_clash/features/editor/editor.dart'
+    show EditorSchema, readRelaxed;
 
-void _requireRustLib() {
-  if (!isRustLibInitialized) {
-    throw StateError('RustLib is not initialized');
-  }
-}
+/// Whether `main` initialised `RustLib`, which a test that needs it missing
+/// cannot undo once another test in its isolate has.
+@visibleForTesting
+bool Function() editorNativeReady = () => isRustLibInitialized;
 
-/// [load] runs after the route settles; read files in it via [readTextFileTask].
+/// [load] runs as the page mounts; read files in it via [readTextFileTask].
 class EditorPage extends ConsumerStatefulWidget {
   final String title;
   final String? content;
@@ -96,7 +96,7 @@ class _EditorPageState extends ConsumerState<EditorPage> {
   late TextEditingController _titleController;
   late final bool _readOnly;
   String? _loaded;
-  bool _loadStarted = false, _busy = false;
+  bool _busy = false;
   ({bool isDirty, bool canUndo, bool canRedo}) _barState = (
     isDirty: false,
     canUndo: false,
@@ -153,6 +153,10 @@ class _EditorPageState extends ConsumerState<EditorPage> {
     _undoController = UndoRedoController()..addListener(_syncBarState);
     _titleController = TextEditingController(text: widget.title)
       ..addListener(_syncBarState);
+    final load = widget.load;
+    if (load != null) {
+      unawaited(_load(load));
+    }
   }
 
   ({bool isDirty, bool canUndo, bool canRedo}) get _currentBarState => (
@@ -175,41 +179,25 @@ class _EditorPageState extends ConsumerState<EditorPage> {
     setState(() => _barState = _currentBarState);
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final load = widget.load;
-    if (load == null || _loadStarted) {
-      return;
-    }
-    _loadStarted = true;
-    unawaited(_load(load));
-  }
+  bool get _isRouteActive => ModalRoute.of(context)?.isActive ?? true;
 
   Future<void> _load(Future<String> Function() load) async {
-    final route = ModalRoute.of(context);
-    final navigator = Navigator.of(context);
-    final commonAction = context.commonAction;
-    bool isActive() => mounted && (route?.isActive ?? true);
-    await whenRouteSettled(context);
-    if (!isActive()) {
-      return;
-    }
-    final content = await commonAction.safeRun(() async {
+    final content = await context.commonAction.safeRun(() async {
       try {
         return await load();
       } catch (_) {
-        if (!isActive()) return null;
+        if (!mounted || !_isRouteActive) return null;
         rethrow;
       }
     }, silence: false);
-    if (!isActive()) {
+    if (!mounted || !_isRouteActive) {
       return;
     }
     if (content == null) {
       // The error dialog is on top, so pop() would close it instead.
+      final route = ModalRoute.of(context);
       if (route != null) {
-        navigator.removeRoute(route);
+        Navigator.of(context).removeRoute(route);
       }
       return;
     }
@@ -296,88 +284,78 @@ class _EditorPageState extends ConsumerState<EditorPage> {
               controller: _titleController,
               enabled: widget.titleEditable && !_busy,
             ),
-            actions: [
-              IconButton(
+            iconActions: [
+              IconButtonData(
+                glyph: AppGlyphs.search,
                 tooltip: appLocalizations.search,
-                icon: const GlyphIcon(AppGlyphs.search),
                 onPressed: isReady && !_busy ? _handleSearch : null,
               ),
-              if (widget.onSave != null)
-                IconButton(
-                  tooltip: appLocalizations.save,
-                  icon: _busy
-                      ? const SizedBox.square(
-                          dimension: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const GlyphIcon(AppGlyphs.check),
-                  onPressed: _barState.isDirty && !_busy ? _handleSave : null,
-                ),
-              CommonPopupBox(
-                targetBuilder: (open) => IconButton(
-                  icon: const GlyphIcon(AppGlyphs.more),
-                  tooltip: appLocalizations.more,
-                  onPressed: _busy ? null : () => open(),
-                ),
-                popupBuilder: (_) => CommonPopupMenu(
-                  items: [
+            ],
+            confirmationAction: widget.onSave == null
+                ? null
+                : IconButtonData(
+                    glyph: AppGlyphs.check,
+                    tooltip: appLocalizations.save,
+                    isLoading: _busy,
+                    onPressed: _barState.isDirty ? _handleSave : null,
+                  ),
+            menuItems: [
+              CommonPopupMenuItem(
+                glyph: AppGlyphs.undo,
+                label: appLocalizations.undo,
+                onPressed: _barState.canUndo && !_busy
+                    ? _undoController.undo
+                    : null,
+              ),
+              CommonPopupMenuItem(
+                glyph: AppGlyphs.redo,
+                label: appLocalizations.redo,
+                onPressed: _barState.canRedo && !_busy
+                    ? _undoController.redo
+                    : null,
+              ),
+              CommonPopupMenuItem(
+                glyph: AppGlyphs.textSize,
+                label: appLocalizations.fontSize,
+                subItems: [
+                  for (final size in EditorFontSize.values)
                     CommonPopupMenuItem(
-                      label: appLocalizations.undo,
-                      glyph: AppGlyphs.undo,
-                      onPressed: _barState.canUndo
-                          ? _undoController.undo
-                          : null,
-                    ),
-                    CommonPopupMenuItem(
-                      label: appLocalizations.redo,
-                      glyph: AppGlyphs.redo,
-                      onPressed: _barState.canRedo
-                          ? _undoController.redo
-                          : null,
-                    ),
-                    CommonPopupMenuItem(
-                      label: appLocalizations.fontSize,
-                      glyph: AppGlyphs.textSize,
-                      subItems: [
-                        for (final size in EditorFontSize.values)
-                          CommonPopupMenuItem(
-                            label: '${size.value.toInt()}',
-                            checked: size == fontSize,
-                            onPressed: () => ref
-                                .read(appSettingProvider.notifier)
-                                .update(
-                                  (state) =>
-                                      state.copyWith(editorFontSize: size),
-                                ),
-                          ),
-                      ],
-                    ),
-                    CommonPopupMenuItem(
-                      label: appLocalizations.lineWrap,
-                      checked: lineWrap,
+                      label: switch (size) {
+                        EditorFontSize.standard => appLocalizations.standard,
+                        EditorFontSize.large => appLocalizations.large,
+                        EditorFontSize.extraLarge =>
+                          appLocalizations.extraLarge,
+                      },
+                      checked: size == fontSize,
                       onPressed: () => ref
                           .read(appSettingProvider.notifier)
                           .update(
-                            (state) =>
-                                state.copyWith(editorLineWrap: !lineWrap),
+                            (state) => state.copyWith(editorFontSize: size),
                           ),
                     ),
-                  ],
-                ),
+                ],
+              ),
+              CommonPopupMenuItem(
+                glyph: AppGlyphs.wrap,
+                label: appLocalizations.lineWrap,
+                checked: lineWrap,
+                onPressed: () => ref
+                    .read(appSettingProvider.notifier)
+                    .update(
+                      (state) => state.copyWith(editorLineWrap: !lineWrap),
+                    ),
               ),
             ],
-            body: AppBarClearance(
-              child: AbsorbPointer(
-                absorbing: _busy,
-                child: EditorView(
-                  key: _editorKey,
-                  content: _original,
-                  language: widget.language,
-                  schema: widget.schema,
-                  readOnly: _readOnly || _busy,
-                  undoController: _undoController,
-                  onReady: _handleReady,
-                ),
+            body: AbsorbPointer(
+              absorbing: _busy,
+              child: EditorView(
+                key: _editorKey,
+                content: _original,
+                language: widget.language,
+                schema: widget.schema,
+                readOnly: _readOnly || _busy,
+                undoController: _undoController,
+                onReady: _handleReady,
               ),
             ),
           ),
@@ -388,8 +366,8 @@ class _EditorPageState extends ConsumerState<EditorPage> {
 }
 
 /// The code editor without page chrome, so it can fill a page or one pane
-/// of it. The editor mounts after the enclosing route has settled and shows
-/// its unavailable state when `main` did not initialise `RustLib`.
+/// of it. It shows its unavailable state when `main` did not initialise
+/// `RustLib`.
 class EditorView extends ConsumerStatefulWidget {
   final String? content;
   final Language language;
@@ -418,9 +396,7 @@ class EditorViewState extends ConsumerState<EditorView> {
   UndoRedoController? _ownedUndoController;
   Object? _initError;
   String? _pendingContent;
-  bool _canCreateController = false;
-  bool _routeWaitStarted = false;
-  bool _building = false;
+  var _building = false;
 
   CodeForgeController? get controller => _controller;
 
@@ -448,42 +424,23 @@ class EditorViewState extends ConsumerState<EditorView> {
   void initState() {
     super.initState();
     _pendingContent = widget.content;
-  }
-
-  // Loading or mounting CodeForge mid-transition drops frames, so both wait.
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_routeWaitStarted) {
+    if (!editorNativeReady()) {
+      _initError = StateError('RustLib is not initialized');
       return;
     }
-    _routeWaitStarted = true;
-    whenRouteSettled(context)
-        .then((_) => _requireRustLib())
-        .then(
-          (_) {
-            if (!mounted) {
-              return;
-            }
-            _canCreateController = true;
-            unawaited(_createController());
-          },
-          onError: (Object error) {
-            if (!mounted) {
-              return;
-            }
-            setState(() {
-              _initError = error;
-            });
-          },
-        );
+    // onReady sets the page's state, which no build in progress may.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        unawaited(_createController());
+      }
+    });
   }
 
   // Filling the controller before CodeForge mounts spares it laying out an
   // empty document only to replace it.
   Future<void> _createController() async {
     var content = _pendingContent;
-    if (!_canCreateController ||
+    if (_initError != null ||
         _controller != null ||
         _building ||
         content == null) {
@@ -592,7 +549,7 @@ class _EditorTitleField extends StatelessWidget {
         counter: const SizedBox(),
         hintText: context.appLocalizations.unnamed,
       ),
-      style: context.textTheme.titleLarge,
+      style: AppTextStyle.pageTitle.of(context),
       autofocus: false,
     );
   }
@@ -627,7 +584,11 @@ class _EditorBody extends StatelessWidget {
     return Stack(
       children: [
         if (error != null)
-          Center(child: Text(context.appLocalizations.editorUnavailable))
+          NullStatus(
+            label: context.appLocalizations.editorUnavailable,
+            description: '$error',
+            illustration: NullStatusIllustration.error,
+          )
         else if (controller != null && findController != null)
           _CodeEditor(
             controller: controller,
@@ -637,8 +598,7 @@ class _EditorBody extends StatelessWidget {
             language: language,
             schema: schema,
           ),
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 200),
+        FadeBox(
           child: isLoading
               ? Container(
                   color: context.colorScheme.surface,
@@ -729,7 +689,7 @@ class _CodeEditorState extends ConsumerState<_CodeEditor> {
   // The bar floats over the text, which scrolls under it from a first line
   // held clear of it; an open find panel takes that clearance instead.
   void _updateInnerPadding(BuildContext context) {
-    final top = _findActive ? 0.0 : 0.0;
+    final top = _findActive ? _findRowGap : context.appBarInset;
     if (top != _innerPadding.top) {
       _innerPadding = EdgeInsets.only(top: top, right: 16);
     }
@@ -747,18 +707,23 @@ class _CodeEditorState extends ConsumerState<_CodeEditor> {
         cursorBubbleColor: colorScheme.primary,
       );
     }
+    final appFont = AppTextStyle.footnote.of(context);
     final textStyle = TextStyle(
       fontSize: fontSize.value,
       fontFamily: FontFamily.jetBrainsMono.value,
+      fontFamilyFallback: [
+        FontFamily.twEmoji.value,
+        ?appFont.fontFamily,
+        ...?appFont.fontFamilyFallback,
+      ],
     );
     if (textStyle != _textStyle) {
       _textStyle = textStyle;
     }
-    final appFont = context.textTheme.bodySmall;
     _lineNumberStyle = TextStyle(
       fontSize: 12,
-      fontFamily: appFont?.fontFamily,
-      fontFamilyFallback: appFont?.fontFamilyFallback,
+      fontFamily: appFont.fontFamily,
+      fontFamilyFallback: appFont.fontFamilyFallback,
       fontFeatures: const [FontFeature.tabularFigures()],
     );
   }
@@ -852,7 +817,6 @@ class _CodeEditorState extends ConsumerState<_CodeEditor> {
       ref.watch(appSettingProvider.select((state) => state.editorFontSize)),
     );
     _updateInnerPadding(context);
-    final isMobileView = ref.watch(isMobileViewProvider);
     final lineWrap = ref.watch(
       appSettingProvider.select((state) => state.editorLineWrap),
     );
@@ -900,9 +864,8 @@ class _CodeEditorState extends ConsumerState<_CodeEditor> {
       ),
       finderBuilder: (context, findController) => FindPanel(
         controller: findController,
-        topInset: 0.0,
+        topInset: context.appBarInset,
         readOnly: widget.readOnly,
-        isMobileView: isMobileView,
       ),
     );
   }
@@ -953,27 +916,30 @@ Map<String, TextStyle> _highlightTheme(
   };
 }
 
-const double _kDefaultFindPanelHeight = 52;
+const _findButtonSize = TonalButtonSize.bar;
+const double _findRowGap = 8;
+const double _findInlineMinWidth = 440;
+const _findPanelPadding = EdgeInsets.symmetric(horizontal: 16, vertical: 8);
 
 class FindPanel extends StatelessWidget implements PreferredSizeWidget {
   final FindController controller;
   final bool readOnly;
-  final bool isMobileView;
   final double topInset;
 
   const FindPanel({
     super.key,
     required this.controller,
     required this.readOnly,
-    required this.isMobileView,
     this.topInset = 0,
   });
 
   bool get _showReplace => controller.isReplaceMode && !readOnly;
 
   double get height {
-    final rows = (isMobileView ? 2 : 1) + (_showReplace ? 1 : 0);
-    return _kDefaultFindPanelHeight * rows + 8;
+    final rows = _showReplace ? 2 : 1;
+    return _findButtonSize.button * rows +
+        _findRowGap * (rows - 1) +
+        _findPanelPadding.vertical;
   }
 
   @override
@@ -996,219 +962,325 @@ class FindPanel extends StatelessWidget implements PreferredSizeWidget {
               controller.previous,
         },
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-          margin: EdgeInsets.only(top: topInset, bottom: 8),
-          color: context.colorScheme.surface,
-          alignment: Alignment.centerLeft,
-          height: height,
-          child: _buildFindInputView(context),
+          margin: EdgeInsets.only(top: topInset),
+          padding: _findPanelPadding,
+          color: context.surfaceLevel.colorOf(context.colorScheme),
+          child: LayoutBuilder(builder: _buildRows),
         ),
       ),
     );
   }
 
-  Widget _buildFindInputView(BuildContext context) {
+  // A table, so the replace field lines up with the find field above it
+  // whatever width the localized replace labels take. Too narrow for the
+  // buttons beside the field, they move under it.
+  Widget _buildRows(BuildContext context, BoxConstraints constraints) {
+    final appLocalizations = context.appLocalizations;
     final hasMatches = controller.matchCount > 0;
-    final String result;
-    if (!hasMatches) {
-      result = context.appLocalizations.none;
-    } else {
-      result = '${controller.currentMatchIndex + 1}/${controller.matchCount}';
-    }
-    final bar = CommonMinIconButtonTheme(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          if (!isMobileView) ...[
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 360),
-              child: _buildFindInput(context),
+    final findInput = _buildFindInput(context);
+    final controls = Row(
+      children: [
+        TonalButtonGroup(
+          size: _findButtonSize,
+          children: [
+            IconButton(
+              tooltip: appLocalizations.previousMatch,
+              onPressed: hasMatches ? controller.previous : null,
+              icon: const GlyphIcon(AppGlyphs.chevronUp),
             ),
-            const SizedBox(width: 12),
+            IconButton(
+              tooltip: appLocalizations.nextMatch,
+              onPressed: hasMatches ? controller.next : null,
+              icon: const GlyphIcon(AppGlyphs.chevronDown),
+            ),
           ],
-          Text(result, style: context.textTheme.bodyMedium),
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              spacing: 2,
-              children: [
-                _buildIconButton(
-                  onPressed: hasMatches ? controller.previous : null,
-                  icon: const GlyphIcon(AppGlyphs.arrowUp, size: 16),
-                  tooltip: context.appLocalizations.previousMatch,
-                ),
-                _buildIconButton(
-                  onPressed: hasMatches ? controller.next : null,
-                  icon: const GlyphIcon(AppGlyphs.arrowDown, size: 16),
-                  tooltip: context.appLocalizations.nextMatch,
-                ),
-                if (!readOnly)
-                  _buildIconButton(
-                    onPressed: controller.toggleReplaceMode,
-                    icon: const GlyphIcon(AppGlyphs.findReplace, size: 16),
-                    tooltip: context.appLocalizations.replace,
-                    isSelected: _showReplace,
-                  ),
-                const SizedBox(width: 2),
-                ElasticButton(
-                  child: IconButton.filledTonal(
-                    tooltip: context.appLocalizations.close,
-                    onPressed: controller.hide,
-                    icon: const GlyphIcon(AppGlyphs.close, size: 16, fill: 1),
-                  ),
-                ),
-              ],
-            ),
+        ),
+        if (!readOnly) ...[
+          const SizedBox(width: 8),
+          _FindBarButton(
+            glyph: AppGlyphs.swap,
+            tooltip: appLocalizations.replace,
+            selected: _showReplace,
+            onPressed: controller.toggleReplaceMode,
           ),
         ],
-      ),
+        const Spacer(),
+        const SizedBox(width: 8),
+        _FindBarButton(
+          glyph: AppGlyphs.close,
+          tooltip: appLocalizations.close,
+          onPressed: controller.hide,
+        ),
+      ],
     );
-    final replaceInput = _buildReplaceInput(context, hasMatches);
-    if (isMobileView) {
+    final replaceActions = TonalButtonGroup(
+      size: _findButtonSize,
+      children: [
+        FilledButton(
+          onPressed: hasMatches ? controller.replace : null,
+          child: Text(appLocalizations.replace),
+        ),
+        FilledButton(
+          onPressed: hasMatches ? controller.replaceAll : null,
+          child: Text(appLocalizations.replaceAll),
+        ),
+      ],
+    );
+    final inlineMinWidth = MediaQuery.textScalerOf(context)
+        .scale(_findInlineMinWidth);
+    if (constraints.maxWidth < inlineMinWidth) {
       return Column(
         mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        spacing: _findRowGap,
         children: [
-          bar,
-          const SizedBox(height: 12),
-          _buildFindInput(context),
-          if (_showReplace) ...[const SizedBox(height: 12), replaceInput],
+          findInput,
+          controls,
+          if (_showReplace)
+            Row(
+              spacing: 8,
+              children: [
+                Expanded(child: _buildReplaceInput(context)),
+                replaceActions,
+              ],
+            ),
         ],
       );
     }
-    if (!_showReplace) {
-      return bar;
-    }
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Table(
+      columnWidths: const {0: FlexColumnWidth(), 1: IntrinsicColumnWidth()},
+      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
       children: [
-        bar,
-        const SizedBox(height: 12),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 360),
-            child: replaceInput,
-          ),
+        TableRow(
+          children: [
+            findInput,
+            Padding(
+              padding: const EdgeInsetsDirectional.only(start: 8),
+              child: controls,
+            ),
+          ],
         ),
+        if (_showReplace)
+          TableRow(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: _findRowGap),
+                child: _buildReplaceInput(context),
+              ),
+              Padding(
+                padding: const EdgeInsetsDirectional.only(
+                  start: 8,
+                  top: _findRowGap,
+                ),
+                child: Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: replaceActions,
+                ),
+              ),
+            ],
+          ),
       ],
     );
   }
 
   Widget _buildFindInput(BuildContext context) {
-    return _buildInputRow(
-      field: _buildTextField(
-        context: context,
-        onSubmitted: () {
-          controller.next();
-          controller.findInputFocusNode.requestFocus();
-        },
-        controller: controller.findInputController,
-        focusNode: controller.findInputFocusNode,
-      ),
-      actions: [
-        _buildIconButton(
-          icon: Text('Aa', style: context.textTheme.bodySmall),
-          isSelected: controller.caseSensitive,
-          onPressed: controller.toggleCaseSensitive,
-        ),
-        _buildIconButton(
-          icon: Text('.*', style: context.textTheme.bodySmall),
-          isSelected: controller.isRegex,
-          onPressed: controller.toggleRegex,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildReplaceInput(BuildContext context, bool hasMatches) {
-    return _buildInputRow(
-      field: _buildTextField(
-        context: context,
-        onSubmitted: () {
-          if (controller.matchCount == 0) {
-            return;
-          }
-          controller.replace();
-          controller.replaceInputFocusNode.requestFocus();
-        },
-        controller: controller.replaceInputController,
-        focusNode: controller.replaceInputFocusNode,
-      ),
-      actions: [
-        _buildIconButton(
-          onPressed: hasMatches ? controller.replace : null,
-          icon: const GlyphIcon(AppGlyphs.check, size: 16),
-          tooltip: context.appLocalizations.replace,
-        ),
-        _buildIconButton(
-          onPressed: hasMatches ? controller.replaceAll : null,
-          icon: const GlyphIcon(AppGlyphs.checkDouble, size: 16),
-          tooltip: context.appLocalizations.replaceAll,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildInputRow({
-    required Widget field,
-    required List<Widget> actions,
-  }) {
-    return CommonMinIconButtonTheme(
-      child: Row(
-        spacing: 8,
+    final String? result;
+    if (controller.findInputController.text.isEmpty) {
+      result = null;
+    } else if (controller.matchCount == 0) {
+      result = context.appLocalizations.none;
+    } else {
+      result = '${controller.currentMatchIndex + 1}/${controller.matchCount}';
+    }
+    return _FindField(
+      glyph: AppGlyphs.search,
+      hintText: context.appLocalizations.search,
+      controller: controller.findInputController,
+      focusNode: controller.findInputFocusNode,
+      onSubmitted: () {
+        controller.next();
+        controller.findInputFocusNode.requestFocus();
+      },
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Flexible(child: field),
-          ...actions,
+          if (result != null)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(end: 4),
+              child: Text(
+                result,
+                style: AppTextStyle.subheadline
+                    .of(context)
+                    .copyWith(
+                      color: context.colorScheme.onSurfaceVariant,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+              ),
+            ),
+          _FindOptionToggle(
+            glyph: AppGlyphs.matchCase,
+            tooltip: context.appLocalizations.matchCase,
+            selected: controller.caseSensitive,
+            onPressed: controller.toggleCaseSensitive,
+          ),
+          const SizedBox(width: 2),
+          _FindOptionToggle(
+            glyph: AppGlyphs.regex,
+            tooltip: context.appLocalizations.regex,
+            selected: controller.isRegex,
+            onPressed: controller.toggleRegex,
+          ),
+          const SizedBox(width: 4),
         ],
       ),
     );
   }
 
-  Widget _buildTextField({
-    required BuildContext context,
-    required TextEditingController controller,
-    required FocusNode focusNode,
-    required VoidCallback onSubmitted,
-  }) {
-    return SizedBox(
-      height: globalState.measure.bodyMediumHeight + 8 * 2,
-      child: TextField(
-        maxLines: 1,
-        focusNode: focusNode,
-        inputFormatters: TextInputLimits.limit(TextInputLimits.search),
-        style: context.textTheme.bodyMedium,
-        decoration: const InputDecoration(
-          contentPadding: EdgeInsets.symmetric(horizontal: 12),
+  Widget _buildReplaceInput(BuildContext context) {
+    return _FindField(
+      glyph: AppGlyphs.swap,
+      hintText: context.appLocalizations.replace,
+      controller: controller.replaceInputController,
+      focusNode: controller.replaceInputFocusNode,
+      onSubmitted: () {
+        if (controller.matchCount == 0) {
+          return;
+        }
+        controller.replace();
+        controller.replaceInputFocusNode.requestFocus();
+      },
+    );
+  }
+}
+
+/// Filled like a sheet's docked search rather than outlined like other
+/// inputs, since it is a search field too.
+class _FindField extends StatelessWidget {
+  const _FindField({
+    required this.glyph,
+    required this.hintText,
+    required this.controller,
+    required this.focusNode,
+    required this.onSubmitted,
+    this.trailing,
+  });
+
+  final Glyph glyph;
+  final String hintText;
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final VoidCallback onSubmitted;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final pill = AppShape.input.copyWith(borderRadius: AppRadius.full);
+    final height = _findButtonSize.button;
+    return TextField(
+      maxLines: 1,
+      controller: controller,
+      focusNode: focusNode,
+      textAlignVertical: TextAlignVertical.center,
+      inputFormatters: TextInputLimits.limit(TextInputLimits.search),
+      style: AppTextStyle.body.of(context),
+      onSubmitted: (_) => onSubmitted(),
+      // Not dense: a dense decorator fits its fill to the text and ignores the
+      // minimum height, which desktop's compact density left short of 44 dp.
+      decoration: InputDecoration(
+        constraints: BoxConstraints.tightFor(height: height),
+        filled: true,
+        fillColor: context.raisedSurfaceLevel.colorOf(colorScheme),
+        hintText: hintText,
+        border: pill.copyWith(borderSide: BorderSide.none),
+        enabledBorder: pill.copyWith(borderSide: BorderSide.none),
+        focusedBorder: pill.copyWith(
+          borderSide: BorderSide(color: colorScheme.primary, width: 2),
         ),
-        onSubmitted: (_) {
-          onSubmitted();
-        },
-        controller: controller,
+        contentPadding: const EdgeInsetsDirectional.only(end: 8),
+        prefixIcon: GlyphIcon(glyph, size: 20),
+        prefixIconConstraints: BoxConstraints.tightFor(width: height),
+        suffixIcon: trailing,
+        suffixIconConstraints: const BoxConstraints(),
       ),
     );
   }
+}
 
-  Widget _buildIconButton({
-    required Widget icon,
-    String? tooltip,
-    VoidCallback? onPressed,
-    bool isSelected = false,
-  }) {
-    if (isSelected) {
-      return ElasticButton(
-        enabled: onPressed != null,
-        child: IconButton.filledTonal(
+class _FindOptionToggle extends StatelessWidget {
+  const _FindOptionToggle({
+    required this.glyph,
+    required this.tooltip,
+    required this.selected,
+    required this.onPressed,
+  });
+
+  final Glyph glyph;
+  final String tooltip;
+  final bool selected;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    return ElasticPress(
+      child: IconButton(
+        tooltip: tooltip,
+        isSelected: selected,
+        onPressed: onPressed,
+        style: ElasticPress.buttonStyle
+            .merge(
+              IconButton.styleFrom(
+                backgroundColor: selected ? colorScheme.primary : null,
+                foregroundColor: selected
+                    ? colorScheme.onPrimary
+                    : colorScheme.onSurfaceVariant,
+                fixedSize: Size.square(TonalButtonSize.compact.button),
+                minimumSize: Size.square(TonalButtonSize.compact.button),
+                padding: EdgeInsets.zero,
+                iconSize: TonalButtonSize.compact.icon,
+                visualDensity: VisualDensity.standard,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+            )
+            .merge(focusRingStyle(colorScheme, standsOff: selected)),
+        icon: AnimatedGlyph(glyph: glyph, filled: selected),
+      ),
+    );
+  }
+}
+
+class _FindBarButton extends StatelessWidget {
+  const _FindBarButton({
+    required this.glyph,
+    required this.tooltip,
+    required this.onPressed,
+    this.selected = false,
+  });
+
+  final Glyph glyph;
+  final String tooltip;
+  final VoidCallback onPressed;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    return TonalButtonTheme(
+      size: _findButtonSize,
+      child: ElasticPress(
+        child: IconButton(
           tooltip: tooltip,
+          isSelected: selected,
           onPressed: onPressed,
-          icon: IconTheme.merge(
-            data: const IconThemeData(fill: 1),
-            child: icon,
-          ),
+          style: selected
+              ? IconButton.styleFrom(
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
+                ).merge(focusRingStyle(colorScheme, standsOff: true))
+              : null,
+          icon: GlyphIcon(glyph),
         ),
-      );
-    }
-    return IconButton(tooltip: tooltip, onPressed: onPressed, icon: icon);
+      ),
+    );
   }
 }

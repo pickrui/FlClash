@@ -837,6 +837,7 @@ List<Profile> renameProfileProviderUsers(
           for (final group in user.customProxyGroups)
             if (group.use?.contains(before) ?? false)
               group.copyWith(
+                usePosition: usePositionOf(group.usePosition, {before: after}),
                 use: {
                   for (final name in group.use!) name == before ? after : name,
                 }.toList(),

@@ -151,6 +151,39 @@ class CoreController {
     return config;
   }
 
+  Future<Uint8List?> shareLinksConfig(List<String> links) async {
+    final proxies = <Map<String, Object?>>[];
+    final taken = {...reservedOutboundNames};
+    for (final link in links) {
+      final List<Map<String, Object?>> decoded;
+      try {
+        decoded = await _interface.convertProxies(
+          base64Encode(utf8.encode(link)),
+        );
+      } on Exception {
+        return null;
+      }
+      if (decoded.isEmpty) return null;
+      for (final proxy in decoded) {
+        final rawName = proxy['name'];
+        final base = rawName is String && rawName.trim().isNotEmpty
+            ? rawName.trim()
+            : 'Proxy';
+        var name = base;
+        var suffix = 2;
+        while (!taken.add(name)) {
+          name = '$base ${suffix++}';
+        }
+        proxies.add({...proxy, 'name': name});
+      }
+    }
+    if (proxies.isEmpty) return null;
+    final config = utf8.encode(await encodeYamlTask({'proxies': proxies}));
+    final message = await validateConfigWithBytes(base64Encode(config));
+    if (message.isNotEmpty) throw ConfigValidationException(message);
+    return config;
+  }
+
   Future<String> validateConfigWithData(String data) async {
     final file = File(await appPath.tempFilePath);
     try {

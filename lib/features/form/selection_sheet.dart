@@ -291,7 +291,8 @@ class _SelectionSheetState<T> extends ConsumerState<SelectionSheet<T>>
       );
     }
     final searchable =
-        !_query.isEmpty || _countOf(widget.sections) >= sheetSearchMinItemCount;
+        _query.isNotEmpty ||
+        _countOf(widget.sections) >= sheetSearchMinItemCount;
     return CommonScaffold(
       title: widget.title,
       searchState: searchable
@@ -300,8 +301,9 @@ class _SelectionSheetState<T> extends ConsumerState<SelectionSheet<T>>
       body: Builder(
         builder: (context) => NullStatusSwitcher(
           isLoading: loadingStatus != null,
-          isEmpty: count == 0 && (widget.emptyLabel != null || !_query.isEmpty),
-          isSearching: !_query.isEmpty,
+          isEmpty:
+              count == 0 && (widget.emptyLabel != null || _query.isNotEmpty),
+          isSearching: _query.isNotEmpty,
           loadingStatus: loadingStatus,
           nullStatus: NullStatus(label: widget.emptyLabel ?? ''),
           child: CustomScrollView(

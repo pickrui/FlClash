@@ -7,29 +7,62 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
+import 'package:fl_clash/ui/paged_sheet.dart';
 import 'package:fl_clash/ui/table_layout.dart';
 import 'package:fl_clash/ui/route_motion_hold.dart';
+import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:fl_clash/widgets/record.dart';
 import 'package:fl_clash/widgets/record_table.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
 enum _QueryFilter { all, cached, failed }
 
-RecordTone _toneOf(DnsQuery query) => query.isFailed
-    ? RecordTone.error
-    : query.cached
-    ? RecordTone.muted
-    : RecordTone.neutral;
-
 extension on DnsQuery {
   bool get hasFailureRcode => rcode.isNotEmpty && rcode != 'NOERROR';
 
   String get summary => error.isNotEmpty ? error : answers.join(', ');
+}
+
+const _initiators = ['app', 'rule', 'direct', 'proxy', 'other'];
+
+String _initiatorLabel(AppLocalizations l, String initiator) =>
+    switch (initiator) {
+      'app' => l.dnsQueryInitiatorApp,
+      'rule' => l.dnsQueryInitiatorRule,
+      'direct' => l.dnsQueryInitiatorDirect,
+      'proxy' => l.dnsQueryInitiatorProxy,
+      _ => l.dnsQueryInitiatorOther,
+    };
+
+/// The labels a query shows, each one a keyword its tap filters by.
+List<String> _tagsOf(AppLocalizations l, DnsQuery query) => [
+  query.type,
+  _initiatorLabel(l, query.initiator),
+  if (query.cached) l.dnsQueryCached,
+  if (query.hasFailureRcode) query.rcode,
+];
+
+class _DnsKeyword extends StatelessWidget {
+  final String label;
+  final RecordTone tone;
+
+  const _DnsKeyword(this.label, {this.tone = RecordTone.neutral});
+
+  @override
+  Widget build(BuildContext context) {
+    return RecordLabel(
+      label: label,
+      tone: tone,
+      onPressed: () => context.commonScaffoldState?.addKeyword(label),
+    );
+  }
 }
 
 class _DnsResult extends StatelessWidget {
@@ -43,7 +76,7 @@ class _DnsResult extends StatelessWidget {
       alignment: PlaceholderAlignment.middle,
       child: Padding(
         padding: const EdgeInsetsDirectional.only(end: 6),
-        child: RecordLabel(label: text, tone: tone),
+        child: _DnsKeyword(text, tone: tone),
       ),
     );
     // Labels inside the paragraph give way to its ellipsis in a narrow column,
@@ -52,7 +85,7 @@ class _DnsResult extends StatelessWidget {
       TextSpan(
         children: [
           if (query.cached)
-            label(context.appLocalizations.dnsQueryCached, RecordTone.muted),
+            label(context.appLocalizations.dnsQueryCached, RecordTone.neutral),
           if (query.hasFailureRcode) label(query.rcode, RecordTone.error),
           TextSpan(
             text: query.summary,
@@ -68,6 +101,20 @@ class _DnsResult extends StatelessWidget {
   }
 }
 
+void _showDnsQueryDetail(BuildContext context, DnsQuery query) {
+  showInSheet<void>(
+    context,
+    builder: (_) {
+      return CommonScaffold(
+        body: DnsQueryDetailView(query: query),
+        title: context.appLocalizations.details(
+          context.appLocalizations.dnsQueries,
+        ),
+      );
+    },
+  );
+}
+
 class DnsQueriesView extends ConsumerStatefulWidget {
   final ScrollController? scrollController;
   const DnsQueriesView({super.key, this.scrollController});
@@ -78,6 +125,8 @@ class DnsQueriesView extends ConsumerStatefulWidget {
 
 class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
     with RouteMotionHoldMixin<DnsQueriesView> {
+  late final ScrollController _scrollController =
+      widget.scrollController ?? sheetScrollController(context);
   Timer? _refreshTimer;
   List<DnsQuery> _queries = [];
   bool _paused = false;
@@ -105,86 +154,12 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
   @override
   void dispose() {
     _refreshTimer?.cancel();
+    if (widget.scrollController == null) _scrollController.dispose();
     super.dispose();
   }
 
-  static const _initiators = ['app', 'rule', 'direct', 'proxy', 'other'];
-
-  String _initiatorLabel(String initiator) => switch (initiator) {
-    'app' => appLocalizations.dnsQueryInitiatorApp,
-    'rule' => appLocalizations.dnsQueryInitiatorRule,
-    'direct' => appLocalizations.dnsQueryInitiatorDirect,
-    'proxy' => appLocalizations.dnsQueryInitiatorProxy,
-    _ => appLocalizations.dnsQueryInitiatorOther,
-  };
-
-  String _initiator(DnsQuery query) => _initiatorLabel(query.initiator);
-
-  void _showDetails(DnsQuery query) {
-    final fields = <String, String>{
-      appLocalizations.host: query.domain,
-      appLocalizations.dnsQueryType: query.type,
-      appLocalizations.time: query.time.toLocal().toString(),
-      appLocalizations.source: _initiator(query),
-      appLocalizations.dnsQueryUpstream: query.upstream,
-      appLocalizations.dnsQueryRcode: query.rcode,
-      appLocalizations.delay: '${query.delay} ms',
-      appLocalizations.dnsQueryAnswers: query.answers.join('\n'),
-    };
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(appLocalizations.details(appLocalizations.dnsQueries)),
-        content: SizedBox(
-          width: 520,
-          child: SingleChildScrollView(
-            child: SelectionArea(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (query.cached)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Text(appLocalizations.dnsQueryCached),
-                    ),
-                  for (final field in fields.entries.where(
-                    (entry) => entry.value.isNotEmpty,
-                  ))
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            field.key,
-                            style: Theme.of(context).textTheme.labelMedium,
-                          ),
-                          Text(field.value),
-                        ],
-                      ),
-                    ),
-                  if (query.error.isNotEmpty)
-                    Text(
-                      query.error,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(appLocalizations.close),
-          ),
-        ],
-      ),
-    );
-  }
+  String _initiator(DnsQuery query) =>
+      _initiatorLabel(appLocalizations, query.initiator);
 
   List<RecordColumn<DnsQuery>> _columns(BuildContext context, double width) {
     return [
@@ -208,8 +183,7 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
             recordHeaderWidth(context, appLocalizations.dnsQueryType),
           ),
         ),
-        cell: (_, query) =>
-            RecordLabel(label: query.type, tone: _toneOf(query)),
+        cell: (_, query) => _DnsKeyword(query.type),
         sortKey: (query) => query.type,
       ),
       RecordColumn(
@@ -219,10 +193,13 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
           width: [
             recordHeaderWidth(context, appLocalizations.initiatorShort),
             for (final initiator in _initiators)
-              recordLabelWidth(context, _initiatorLabel(initiator)),
+              recordLabelWidth(
+                context,
+                _initiatorLabel(appLocalizations, initiator),
+              ),
           ].reduce(max),
         ),
-        cell: (_, query) => RecordLabel(label: _initiator(query)),
+        cell: (_, query) => _DnsKeyword(_initiator(query)),
         sortKey: _initiator,
       ),
       RecordColumn(
@@ -247,161 +224,254 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
 
   Widget _buildItem(BuildContext context, DnsQuery query) {
     final styles = RecordTextStyles.of(context);
-    final tone = _toneOf(query);
+    final summary = query.summary;
     return RecordListItem(
-      tone: tone,
-      onTap: () => _showDetails(query),
+      onTap: () => _showDnsQueryDetail(context, query),
       header: RecordHeader(
         trailing: Text('${query.delay} ms'),
         children: [
           RecordTimestamp(query.time.toLocal().showFull),
-          RecordLabel(label: query.type, tone: tone),
-          if (query.cached)
-            RecordLabel(
-              label: appLocalizations.dnsQueryCached,
-              tone: RecordTone.muted,
-            ),
+          _DnsKeyword(query.type),
         ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 4,
         children: [
-          Text(
-            query.domain,
-            style: styles.primary?.copyWith(fontWeight: FontWeight.w500),
-          ),
-          if (query.isFailed)
+          Text(query.domain, style: styles.title),
+          if (summary.isNotEmpty)
             Text(
-              query.error.isNotEmpty ? query.error : query.rcode,
-              style: styles.secondary?.copyWith(
-                color: context.colorScheme.error,
-              ),
-            ),
-          if (query.answers.isNotEmpty)
-            Text(
-              query.answers.join(', '),
+              summary,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: styles.secondary,
+              style: styles.secondary.copyWith(
+                color: query.isFailed ? context.colorScheme.error : null,
+              ),
             ),
-          Text(
-            [
-              _initiator(query),
-              if (query.upstream.isNotEmpty) query.upstream,
-            ].join(' · '),
-            style: styles.muted,
+          Wrap(
+            spacing: 6,
+            runSpacing: 4,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              _DnsKeyword(_initiator(query)),
+              if (query.cached) _DnsKeyword(appLocalizations.dnsQueryCached),
+              if (query.hasFailureRcode)
+                _DnsKeyword(query.rcode, tone: RecordTone.error),
+              if (query.upstream.isNotEmpty)
+                Text(query.upstream, style: styles.secondary),
+            ],
           ),
         ],
       ),
     );
   }
 
+  List<IconButtonData> _buildActions() {
+    return [
+      IconButtonData(
+        glyph: AppGlyphs.playPause(_paused ? 0 : 1),
+        tooltip: _paused
+            ? appLocalizations.resumeUpdates
+            : appLocalizations.pauseUpdates,
+        onPressed: () => setState(() {
+          _paused = !_paused;
+          if (!_paused) _queries = ref.read(dnsQueriesProvider).list;
+        }),
+      ),
+      IconButtonData(
+        glyph: AppGlyphs.clearAll,
+        tooltip: appLocalizations.clearData,
+        onPressed: () {
+          ref.read(dnsQueriesProvider.notifier).clear();
+          setState(() => _queries = []);
+        },
+      ),
+    ];
+  }
+
+  Widget _buildList(List<DnsQuery> queries) {
+    return RecordTableFrame<DnsQuery>(
+      tableId: 'dns',
+      items: queries,
+      columnsOf: (width) => _columns(context, width),
+      builder: (context, table, queries) => FloatingScrollbar(
+        controller: _scrollController,
+        hintBuilder: (fraction) {
+          final index = (fraction * (queries.length - 1)).round();
+          return queries[index].time.toLocal().showFull;
+        },
+        child: ListView.separated(
+          controller: _scrollController,
+          padding: EdgeInsets.only(
+            top: context.contentTopPadding,
+            bottom: 16 + BottomInsetScope.of(context),
+          ),
+          itemCount: queries.length,
+          separatorBuilder: (_, _) => table == null
+              ? const SizedBox(height: recordListGap)
+              : const SizedBox.shrink(),
+          itemBuilder: (context, index) {
+            final query = queries[index];
+            if (table == null) {
+              return _buildItem(context, query);
+            }
+            return RecordTableRow(
+              table: table,
+              striped: index.isOdd,
+              onTap: () => _showDnsQueryDetail(context, query),
+              cells: table.cellsOf(context, query),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final search = SearchQuery([_search, ..._keywords].join(' '));
-    final queries = _queries.reversed
-        .where(
-          (query) =>
-              search.matches([...query.searchFields, _initiator(query)]) &&
-              switch (_filter) {
-                _QueryFilter.all => true,
-                _QueryFilter.cached => query.cached,
-                _QueryFilter.failed => query.isFailed,
-              },
-        )
-        .toList();
+    final search = SearchQuery(_search);
+    final queries = _queries.reversed.where((query) {
+      final tags = _tagsOf(appLocalizations, query);
+      return _keywords.every(tags.contains) &&
+          search.matches([...query.searchFields, ...tags]) &&
+          switch (_filter) {
+            _QueryFilter.all => true,
+            _QueryFilter.cached => query.cached,
+            _QueryFilter.failed => query.isFailed,
+          };
+    }).toList();
     return CommonScaffold(
       title: appLocalizations.dnsQueries,
       searchState: AppBarSearchState(
         onSearch: (value) => setState(() => _search = value),
       ),
       onKeywordsUpdate: (value) => setState(() => _keywords = value),
-      actions: [
-        IconButton(
-          tooltip: _paused
-              ? appLocalizations.resumeUpdates
-              : appLocalizations.pauseUpdates,
-          icon: GlyphIcon(AppGlyphs.playPause(_paused ? 0 : 1)),
-          onPressed: () => setState(() {
-            _paused = !_paused;
-            if (!_paused) _queries = ref.read(dnsQueriesProvider).list;
-          }),
-        ),
-        IconButton(
-          tooltip: appLocalizations.clearData,
-          icon: const GlyphIcon(AppGlyphs.clearAll),
-          onPressed: () {
-            ref.read(dnsQueriesProvider.notifier).clear();
-            setState(() => _queries = []);
-          },
-        ),
-      ],
-      body: AppBarClearance(
-        child: Column(
+      iconActions: _buildActions(),
+      body: Builder(
+        builder: (context) => Column(
           children: [
             Padding(
-              padding: const EdgeInsets.all(8),
-              child: Wrap(
-                spacing: 8,
-                children: [
-                  for (final filter in _QueryFilter.values)
-                    ChoiceChip(
-                      label: Text(switch (filter) {
-                        _QueryFilter.all => appLocalizations.dnsQueryAll,
-                        _QueryFilter.cached => appLocalizations.dnsQueryCached,
-                        _QueryFilter.failed =>
-                          appLocalizations.dnsQueryFailures,
-                      }),
-                      selected: _filter == filter,
-                      onSelected: (_) => setState(() => _filter = filter),
-                    ),
+              padding: EdgeInsets.fromLTRB(
+                16,
+                context.contentTopPadding,
+                16,
+                0,
+              ),
+              child: SegmentedControl<_QueryFilter>(
+                segments: [
+                  (_QueryFilter.all, appLocalizations.dnsQueryAll),
+                  (_QueryFilter.cached, appLocalizations.dnsQueryCached),
+                  (_QueryFilter.failed, appLocalizations.dnsQueryFailures),
                 ],
+                value: _filter,
+                onChanged: (filter) => setState(() => _filter = filter),
               ),
             ),
             Expanded(
-              child: queries.isEmpty
-                  ? NullStatus(
-                      label: _queries.isEmpty
-                          ? appLocalizations.nullTip(
-                              appLocalizations.dnsQueries,
-                            )
-                          : appLocalizations.noSearchResults,
-                      illustration: _queries.isEmpty
-                          ? NullStatusIllustration.dns
-                          : NullStatusIllustration.search,
-                    )
-                  : TopInsetScope(
-                      inset: 0,
-                      child: RecordTableFrame<DnsQuery>(
-                        tableId: 'dns',
-                        items: queries,
-                        columnsOf: (width) => _columns(context, width),
-                        builder: (context, table, queries) =>
-                            ListView.separated(
-                              controller: widget.scrollController,
-                              itemCount: queries.length,
-                              separatorBuilder: (_, _) => table == null
-                                  ? const Divider(height: 0)
-                                  : const SizedBox.shrink(),
-                              itemBuilder: (context, index) {
-                                final query = queries[index];
-                                if (table == null) {
-                                  return _buildItem(context, query);
-                                }
-                                return RecordTableRow(
-                                  table: table,
-                                  striped: index.isOdd,
-                                  onTap: () => _showDetails(query),
-                                  cells: table.cellsOf(context, query),
-                                );
-                              },
-                            ),
-                      ),
-                    ),
+              child: MediaQuery.removePadding(
+                context: context,
+                removeTop: true,
+                child: FloatingBarScope(
+                  inset: 0,
+                  child: TopInsetScope(
+                    inset: 12,
+                    child: queries.isEmpty
+                        ? NullStatus(
+                            label: _queries.isEmpty
+                                ? appLocalizations.nullTip(
+                                    appLocalizations.dnsQueries,
+                                  )
+                                : appLocalizations.noSearchResults,
+                            illustration: _queries.isEmpty
+                                ? NullStatusIllustration.dns
+                                : NullStatusIllustration.search,
+                          )
+                        : _buildList(queries),
+                  ),
+                ),
+              ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class DnsQueryDetailView extends StatelessWidget {
+  final DnsQuery query;
+
+  const DnsQueryDetailView({super.key, required this.query});
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    final entries = [
+      (appLocalizations.time, query.time.toLocal().showFull),
+      (appLocalizations.domain, query.domain),
+      (appLocalizations.dnsQueryType, query.type),
+      (
+        appLocalizations.source,
+        _initiatorLabel(appLocalizations, query.initiator),
+      ),
+      (appLocalizations.dnsQueryUpstream, query.upstream),
+      (
+        appLocalizations.dnsQueryCached,
+        query.cached ? appLocalizations.yes : appLocalizations.no,
+      ),
+      (appLocalizations.dnsQueryRcode, query.rcode),
+      (appLocalizations.delay, '${query.delay} ms'),
+    ];
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 16)
+          .copyWith(bottom: 20, top: context.contentTopPadding),
+      children: [
+        generateSection(
+          title: appLocalizations.basicInfo,
+          items: [
+            for (final (title, value) in entries)
+              if (value.isNotEmpty) DetailRow.text(title: title, value: value),
+          ],
+        ),
+        if (query.error.isNotEmpty)
+          generateSection(
+            title: appLocalizations.error,
+            items: [_ErrorRow(error: query.error)],
+          ),
+        if (query.answers.isNotEmpty)
+          generateSection(
+            title: appLocalizations.dnsQueryAnswers,
+            items: [
+              for (final answer in query.answers)
+                DetailRow(title: answer, copyText: answer),
+            ],
+          ),
+      ],
+    );
+  }
+}
+
+class _ErrorRow extends StatelessWidget {
+  final String error;
+
+  const _ErrorRow({required this.error});
+
+  Future<void> _copy(BuildContext context) async {
+    await Clipboard.setData(ClipboardData(text: error));
+    if (!context.mounted) return;
+    context.showNotifier(context.appLocalizations.copySuccess);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DecorationListItem(
+      onPressed: () => _copy(context),
+      minVerticalPadding: 14,
+      title: Text(
+        error,
+        style: AppTextStyle.subheadline
+            .of(context)
+            .copyWith(color: context.colorScheme.error),
       ),
     );
   }

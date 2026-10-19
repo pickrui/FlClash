@@ -298,6 +298,8 @@ abstract class ProxyGroup with _$ProxyGroup {
     @JsonKey(fromJson: GroupType.parseProfileType) required GroupType type,
     @JsonKey(fromJson: _parseStringList) List<String>? proxies,
     @JsonKey(fromJson: _parseStringList) List<String>? use,
+    @JsonKey(name: 'use-position', fromJson: usePositionOf)
+    Map<String, int>? usePosition,
     @JsonKey(fromJson: _parseInt) int? interval,
     @JsonKey(fromJson: _parseInt) int? tolerance,
     @JsonKey(fromJson: _parseBool) bool? lazy,
@@ -1439,4 +1441,16 @@ extension ClashConfigControllerSecret on ClashConfig {
     }
     return copyWith(secret: generateExternalControllerSecret());
   }
+}
+
+Map<String, int>? usePositionOf(
+  Object? value, [
+  Map<String, String> names = const {},
+]) {
+  if (value is! Map) return null;
+  return {
+    for (final entry in value.entries)
+      if (int.tryParse('${entry.value}') case final position?)
+        names['${entry.key}'] ?? '${entry.key}': position < 0 ? 0 : position,
+  };
 }

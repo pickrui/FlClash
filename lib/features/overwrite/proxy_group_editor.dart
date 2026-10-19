@@ -9,6 +9,7 @@ import 'package:collection/collection.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/editor/clash_schema.dart';
+import 'package:fl_clash/features/editor/relaxed_yaml.dart';
 import 'package:fl_clash/features/form/error_banner.dart';
 import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/features/form/selection_sheet.dart';
@@ -21,7 +22,10 @@ import 'package:fl_clash/ui/paged_sheet.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:fl_clash/ui/sortable.dart';
 import 'package:fl_clash/ui/typography.dart';
-import 'package:fl_clash/widgets/icon_history.dart';
+import 'package:fl_clash/features/overwrite/icon_picker.dart';
+import 'package:fl_clash/features/form/filter.dart';
+import 'package:fl_clash/providers/config.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -146,6 +150,22 @@ typedef _Member = ({_MemberKind kind, String name});
 
 const _everyName = '*';
 
+/// Reads a group quick edit as written, else as [readRelaxed] mends it. A
+/// member list written as one scalar would read as no members at all, so it
+/// counts as a mistake for the mending to fix.
+ProxyGroup readProxyGroupYaml(String content) =>
+    readRelaxed(content, EditorSchema.proxyGroup, (content) {
+      final value = loadPlainYaml(content);
+      if (value is! Map<String, Object?> ||
+          value['name'] is! String ||
+          value['type'] is! String ||
+          value['proxies'] is! List? ||
+          value['use'] is! List?) {
+        throw const FormatException();
+      }
+      return ProxyGroup.fromJson(value);
+    });
+
 class ProxyGroupDialog extends StatefulWidget {
   final ProxyGroup? group;
   final List<ProxyGroup> existingGroups;
@@ -218,6 +238,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
   late final TextEditingController _expectedStatusController;
   late List<String> _proxies;
   late List<String> _providers;
+  Map<String, int> _usePositions = {};
   late String _icon;
   late GroupType _type;
   late String _strategy;
@@ -267,6 +288,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
   void _load(ProxyGroup? group) {
     _proxies = [...?group?.proxies];
     _providers = [...?group?.use];
+    _usePositions = {...?group?.usePosition};
     _urlController.text = group?.url ?? '';
     _intervalController.text = group?.interval?.toString() ?? '';
     _toleranceController.text = group?.tolerance?.toString() ?? '';
@@ -416,6 +438,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
       type: _type,
       proxies: _proxies.isEmpty ? null : [..._proxies],
       use: _providers.isEmpty ? null : [..._providers],
+      usePosition: _usePositions.isEmpty ? null : {..._usePositions},
       url:
           (_isShown(_GroupOption.url) ? _textOrNull(_urlController) : null) ??
           (_type != GroupType.Selector ? defaultTestUrl : null),
@@ -526,8 +549,17 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
   }
 
   List<_Member> get _members => [
-    for (final name in _proxies) (kind: _MemberKind.proxy, name: name),
-    for (final name in _providers) (kind: _MemberKind.provider, name: name),
+    for (var index = 0; index <= _proxies.length; index++) ...[
+      for (final name in _providers)
+        if ((_usePositions[name] ?? _proxies.length).clamp(
+              0,
+              _proxies.length,
+            ) ==
+            index)
+          (kind: _MemberKind.provider, name: name),
+      if (index < _proxies.length)
+        (kind: _MemberKind.proxy, name: _proxies[index]),
+    ],
     if (_includeAllProxies) (kind: _MemberKind.allProxies, name: _everyName),
     if (_includeAllProviders)
       (kind: _MemberKind.allProviders, name: _everyName),
@@ -536,6 +568,15 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
 
   void _setMembers(List<_Member> members) {
     setState(() {
+      var proxyCount = 0;
+      _usePositions = {};
+      for (final member in members) {
+        if (member.kind == _MemberKind.proxy) proxyCount++;
+        if (member.kind == _MemberKind.provider) {
+          _usePositions[member.name] = proxyCount;
+        }
+      }
+      _usePositions.removeWhere((_, position) => position >= proxyCount);
       _proxies = [
         for (final member in members)
           if (member.kind == _MemberKind.proxy) member.name,
@@ -558,8 +599,6 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
     _setMembers([..._members]..removeAt(index));
   }
 
-  /// The core reads proxies and providers each in their own order, so a row
-  /// moved past the other kind settles back among its own.
   void _reorderMember(int oldIndex, int newIndex) {
     final members = [..._members];
     final member = members.removeAt(oldIndex);
@@ -704,7 +743,10 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
   }
 
   Future<void> _showIconPicker() async {
-    final value = await _pushPage<String>(context, _IconView(icon: _icon));
+    final value = await _pushPage<String>(
+      context,
+      IconPickerView(value: _icon, groupName: _nameController.text.trim()),
+    );
     if (value == null || !mounted) return;
     setState(() => _icon = value);
   }
@@ -718,13 +760,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
       schema: EditorSchema.proxyGroup,
       invalidMessage: appLocalizations.definitionNotMap,
       apply: (content) {
-        final value = loadPlainYaml(content);
-        if (value is! Map<String, Object?> ||
-            value['name'] is! String ||
-            value['type'] is! String) {
-          throw const FormatException();
-        }
-        final group = ProxyGroup.fromJson(value);
+        final group = readProxyGroupYaml(content);
         if (!mounted) return;
         setState(() {
           _nameController.text = group.name;
@@ -1166,7 +1202,47 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
         title: title,
         controller: controller,
         invalid: error.isNotEmpty,
-        info: error.isEmpty ? null : InfoMessageButton(message: error),
+        info: error.isNotEmpty
+            ? InfoMessageButton(message: error)
+            : Consumer(
+                builder: (context, ref, _) {
+                  final filters = ref.watch(
+                    appSettingProvider.select((value) => value.filters),
+                  );
+                  if (filters.isEmpty) return const SizedBox.shrink();
+                  return CommonPopupBox(
+                    targetBuilder: (open) => IconButton(
+                      tooltip: appLocalizations.filters,
+                      icon: const GlyphIcon(AppGlyphs.filter),
+                      onPressed: open,
+                    ),
+                    popupBuilder: (_) => CommonPopupMenu(
+                      items: [
+                        for (final filter in filters)
+                          CommonPopupMenuItem(
+                            label: filter.label,
+                            checked: filter.isAppliedTo(controller.text),
+                            onPressed: () {
+                              final parts = filterParts(controller.text);
+                              final own = filterParts(filter.regex);
+                              controller.text =
+                                  joinFilterParts(
+                                    filter.isAppliedTo(controller.text)
+                                        ? parts
+                                              .where(
+                                                (part) => !own.contains(part),
+                                              )
+                                              .toList()
+                                        : {...parts, ...own}.toList(),
+                                  ) ??
+                                  '';
+                            },
+                          ),
+                      ],
+                    ),
+                  );
+                },
+              ),
       );
     }
 
@@ -1450,7 +1526,7 @@ class _MemberPickerState extends State<_MemberPicker> {
       },
       child: CommonScaffold(
         title: appLocalizations.addNodes,
-        searchState: !_query.isEmpty || total >= sheetSearchMinItemCount
+        searchState: _query.isNotEmpty || total >= sheetSearchMinItemCount
             ? AppBarSearchState(
                 onSearch: (value) =>
                     setState(() => _query = SearchQuery(value)),
@@ -1464,7 +1540,7 @@ class _MemberPickerState extends State<_MemberPicker> {
         body: Builder(
           builder: (context) => NullStatusSwitcher(
             isEmpty: categories.isEmpty,
-            isSearching: !_query.isEmpty,
+            isSearching: _query.isNotEmpty,
             nullStatus: NullStatus(label: appLocalizations.noData),
             child: CustomScrollView(
               slivers: [
@@ -1509,122 +1585,6 @@ class _MemberPickerState extends State<_MemberPicker> {
       ),
       subtitle: subtitle == null ? null : TooltipLabel(subtitle, maxLines: 1),
       trailing: isSelected ? const SelectionCheck() : null,
-    );
-  }
-}
-
-/// Pops with the icon chosen, an empty string to remove it, or null when left
-/// without a choice.
-class _IconView extends StatefulWidget {
-  final String icon;
-
-  const _IconView({required this.icon});
-
-  @override
-  State<_IconView> createState() => _IconViewState();
-}
-
-class _IconViewState extends State<_IconView> {
-  late final _controller = TextEditingController(text: widget.icon);
-  bool _attempted = false;
-
-  String? get _issue {
-    final url = _controller.text.trim();
-    return url.isNotEmpty && !url.isUrl
-        ? appLocalizations.urlTip(appLocalizations.iconUrl)
-        : null;
-  }
-
-  void _handleSave() {
-    if (_issue != null) {
-      setState(() => _attempted = true);
-      return;
-    }
-    Navigator.of(context).pop(_controller.text.trim());
-  }
-
-  Future<void> _handleHistory() async {
-    final url = await showOverwriteSheet<String>(
-      context: context,
-      builder: (_) => const IconHistoryDialog(),
-    );
-    if (url == null || !mounted) return;
-    setState(() => _controller.text = url);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final issue = _attempted ? _issue : null;
-    final url = _controller.text.trim();
-    return CommonScaffold(
-      title: appLocalizations.icon,
-      confirmationAction: IconButtonData(
-        glyph: AppGlyphs.check,
-        tooltip: appLocalizations.save,
-        onPressed: _handleSave,
-      ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16)
-            .copyWith(top: context.contentTopPadding, bottom: 16),
-        children: [
-          ErrorBanner(message: issue),
-          generateSection(
-            items: [
-              FormRow(
-                title: appLocalizations.iconUrl,
-                invalid: issue != null,
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: 8,
-                  children: [
-                    if (url.isUrl)
-                      CommonTargetIcon(
-                        src: url,
-                        size: 24,
-                        recordHistory: false,
-                      ),
-                    Flexible(
-                      child: FormRowTextField(
-                        controller: _controller,
-                        keyboardType: TextInputType.url,
-                        autocorrect: false,
-                        inputFormatters: TextInputLimits.limit(
-                          TextInputLimits.iconUrl,
-                        ),
-                        hintText: appLocalizations.optional,
-                        onChanged: (_) => setState(() {}),
-                        onFieldSubmitted: (_) => _handleSave(),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              FormRow(
-                title: appLocalizations.iconHistory,
-                onPressed: _handleHistory,
-                trailing: const GlyphIcon(AppGlyphs.chevronForward),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          if (widget.icon.isNotEmpty)
-            generateSection(
-              items: [
-                FormRow(
-                  title: appLocalizations.remove,
-                  titleStyle: TextStyle(color: context.colorScheme.error),
-                  onPressed: () => Navigator.of(context).pop(''),
-                ),
-              ],
-            ),
-        ],
-      ),
     );
   }
 }

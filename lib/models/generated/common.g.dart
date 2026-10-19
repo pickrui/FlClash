@@ -338,3 +338,9 @@ const _$RuleProviderFormatEnumMap = {
   RuleProviderFormat.text: 'text',
   RuleProviderFormat.mrs: 'mrs',
 };
+
+_IconSetIcon _$IconSetIconFromJson(Map<String, dynamic> json) =>
+    _IconSetIcon(name: json['name'] as String, url: json['url'] as String);
+
+Map<String, dynamic> _$IconSetIconToJson(_IconSetIcon instance) =>
+    <String, dynamic>{'name': instance.name, 'url': instance.url};

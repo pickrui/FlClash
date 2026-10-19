@@ -5,6 +5,14 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:io';
 
+import 'package:fl_clash/providers/icon_sets.dart';
+import 'package:fl_clash/providers/clash_providers.dart';
+import 'package:fl_clash/providers/database.dart';
+import 'package:fl_clash/providers/script_library.dart';
+import 'package:fl_clash/views/config/providers.dart';
+import 'package:fl_clash/views/config/scripts.dart';
+import 'package:fl_clash/views/config/icon_sets.dart';
+
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/common/geo_recovery.dart';
@@ -114,6 +122,7 @@ class ResourcesView extends StatelessWidget {
                       GeoDataListItem(geoItem: geoItem),
                   ],
                 ),
+                const _LibraryResources(),
               ],
             );
           },
@@ -392,6 +401,82 @@ class _UpdateGeoUrlFormDialogState extends State<UpdateGeoUrlFormDialog> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _LibraryResources extends ConsumerWidget {
+  const _LibraryResources();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.appLocalizations;
+    final icons = ref.watch(iconSetsProvider).value ?? const <IconSet>[];
+    final providers =
+        ref.watch(clashProvidersProvider).value ?? const <ClashProvider>[];
+    final scripts = ref.watch(scriptsProvider).value ?? const <Script>[];
+    final remoteIcons = icons.where((item) => item.isRemote).toList();
+    final remoteProviders = providers.where((item) => item.isRemote).toList();
+    final remoteScripts = scripts
+        .where((item) => item.url?.isNotEmpty == true)
+        .toList();
+    Widget syncButton(Future<void> Function() run) => IconButton(
+      tooltip: l.sync,
+      icon: const GlyphIcon(AppGlyphs.sync),
+      onPressed: () =>
+          context.commonAction.loadingRun(run, tag: LoadingTag.resources),
+    );
+    return Column(
+      children: [
+        if (remoteIcons.isNotEmpty)
+          generateSection(
+            title: l.iconSets,
+            items: [
+              for (final item in remoteIcons)
+                ListItem.open(
+                  title: Text(item.name),
+                  subtitle: Text(
+                    '${item.icons.length} · ${item.lastUpdateTime?.lastUpdateTimeDesc ?? ''}',
+                  ),
+                  widget: const IconSetsView(),
+                  trailing: syncButton(() async {
+                    await ref.read(iconSetsActionProvider.notifier).sync(item);
+                  }),
+                ),
+            ],
+          ),
+        if (remoteProviders.isNotEmpty)
+          generateSection(
+            title: l.appProviderLibrary,
+            items: [
+              for (final item in remoteProviders)
+                ListItem.open(
+                  title: Text(item.label),
+                  subtitle: Text(
+                    item.url,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  widget: const ClashProvidersView(),
+                ),
+            ],
+          ),
+        if (remoteScripts.isNotEmpty)
+          generateSection(
+            title: l.script,
+            items: [
+              for (final item in remoteScripts)
+                ListItem.open(
+                  title: Text(item.label),
+                  subtitle: Text(item.lastUpdateTime.lastUpdateTimeDesc),
+                  widget: const ScriptsView(),
+                  trailing: syncButton(
+                    () => ref.read(scriptLibraryProvider).update(item),
+                  ),
+                ),
+            ],
+          ),
+      ],
     );
   }
 }

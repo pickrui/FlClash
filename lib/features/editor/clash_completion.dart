@@ -190,7 +190,8 @@ class ClashCompletionSource {
       return null;
     }
     final candidates = switch (schema.scalar) {
-      YamlScalar.policy => _policies(request, includeCompatible: true),
+      YamlScalar.policy => _policies(request),
+      YamlScalar.outbound => _policies(request, withGlobal: true),
       YamlScalar.proxyProvider => _plain(_namesOf(request).proxyProviders),
       YamlScalar.ruleProvider => _plain(_namesOf(request).ruleProviders),
       YamlScalar.subRule => _plain(_namesOf(request).subRules),
@@ -224,7 +225,7 @@ class ClashCompletionSource {
         text,
         type == 'SUB-RULE'
             ? _plain(_namesOf(request).subRules)
-            : _policies(request),
+            : _policies(request, withGlobal: true),
       );
     }
     return _ruleParts(request, typed, withPolicy: withPolicy);
@@ -256,7 +257,9 @@ class ClashCompletionSource {
                 ),
         ]);
       case 2 when type == 'MATCH':
-        return withPolicy ? completeFrom(text, _policies(request)) : null;
+        return withPolicy
+            ? completeFrom(text, _policies(request, withGlobal: true))
+            : null;
       case 2:
         return completeFrom(
           text,
@@ -265,7 +268,7 @@ class ClashCompletionSource {
               : _plain(rulePayloadValues[type] ?? const []),
         );
       case 3 when withPolicy && !nested:
-        return completeFrom(text, _policies(request));
+        return completeFrom(text, _policies(request, withGlobal: true));
       case 3 || 4 when noResolveRuleTypes.contains(type):
         return completeFrom(text, _plain(ruleOptions));
     }
@@ -282,7 +285,7 @@ class ClashCompletionSource {
 
   List<CodeForgeSuggestion> _policies(
     CodeForgeCompletionRequest request, {
-    bool includeCompatible = false,
+    bool withGlobal = false,
   }) {
     final names = _namesOf(request);
     return [
@@ -290,8 +293,9 @@ class ClashCompletionSource {
         CodeForgeSuggestion(label: key, detail: value),
       for (final MapEntry(:key, :value) in names.proxies.entries)
         CodeForgeSuggestion(label: key, detail: value),
-      for (final policy in builtinPolicies) CodeForgeSuggestion(label: policy),
-      if (includeCompatible) const CodeForgeSuggestion(label: 'COMPATIBLE'),
+      for (final policy in [...builtinPolicies, if (withGlobal) 'GLOBAL'])
+        if (!names.groups.containsKey(policy))
+          CodeForgeSuggestion(label: policy),
     ];
   }
 }

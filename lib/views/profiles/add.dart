@@ -9,11 +9,12 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/providers/action.dart';
+import 'package:fl_clash/providers/database.dart';
+import 'package:fl_clash/features/form/named_url_form.dart';
 import 'package:fl_clash/providers/clash_providers.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_clash/pages/scan.dart';
-import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -48,20 +49,21 @@ class AddProfileView extends ConsumerWidget {
           .where((item) => item.kind == ProviderKind.proxy)
           .map((item) => item.label)
           .toSet();
-      final value = await globalState
-          .showCommonDialog<({String label, String url})>(
-            child: NamedUrlDialog(
-              title: parentContext.appLocalizations.importFromURL,
-              labelValidator: (value) => reserved.contains(value?.trim())
-                  ? parentContext.appLocalizations.existsTip(
-                      parentContext.appLocalizations.name,
-                    )
-                  : null,
-            ),
-          );
-      if (value != null) {
-        await profileAction.addProfileFormURL(value.url, label: value.label);
-      }
+      final l = parentContext.appLocalizations;
+      final value = await showNamedUrlsForm(
+        parentContext,
+        title: l.importFromLink,
+        existingUrls: {
+          for (final profile in ref.read(profilesProvider))
+            if (profile.url.isNotEmpty) profile.url,
+        },
+        labelValidator: (value) =>
+            reserved.contains(value?.trim()) ? l.existsTip(l.name) : null,
+        urlValidator: (value) => value != null && isProfileImportLink(value)
+            ? null
+            : l.invalidLinkTip,
+      );
+      if (value != null) await profileAction.addProfilesFromLinks(value);
     } catch (error) {
       if (parentContext.mounted) parentContext.showNotifier(error.toString());
     }

@@ -8,77 +8,94 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:fl_clash/ui/chip.dart';
-
 import 'package:fl_clash/ui/list.dart';
+import 'package:fl_clash/ui/surface.dart';
+import 'package:fl_clash/ui/typography.dart';
 
 class RecordTextStyles {
-  final TextStyle? primary;
-  final TextStyle? secondary;
-  final TextStyle? muted;
+  final TextStyle title;
+  final TextStyle primary;
+  final TextStyle secondary;
 
-  const RecordTextStyles._({this.primary, this.secondary, this.muted});
+  const RecordTextStyles._({
+    required this.title,
+    required this.primary,
+    required this.secondary,
+  });
 
   factory RecordTextStyles.of(BuildContext context) {
     final colorScheme = context.colorScheme;
-    final textTheme = context.textTheme;
-    final secondary = textTheme.bodySmall?.copyWith(
-      color: colorScheme.onSurfaceVariant,
-    );
     return RecordTextStyles._(
-      primary: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface),
-      secondary: secondary,
-      muted: secondary?.copyWith(color: colorScheme.outline),
+      title: AppTextStyle.subheadline
+          .of(context, emphasized: true)
+          .copyWith(color: colorScheme.onSurface),
+      primary: AppTextStyle.subheadline
+          .of(context)
+          .copyWith(color: colorScheme.onSurface),
+      secondary: AppTextStyle.footnote
+          .of(context)
+          .copyWith(color: colorScheme.onSurfaceVariant),
     );
   }
 }
 
-/// For a list separated by zero-height dividers, which sit at odd indexes.
+const recordListGap = 8.0;
+
 double recordListExtentEstimation(int? index, double crossAxisExtent) {
   return switch (index) {
     // SuperSliverList gives every child the null estimate unless it is 0.
     null => 0,
     _ when index.isEven => 100,
-    _ => 0,
+    _ => recordListGap,
   };
 }
 
 class RecordListItem extends StatelessWidget {
   final Widget header;
   final Widget body;
-  final RecordTone tone;
   final VoidCallback? onTap;
 
   const RecordListItem({
     super.key,
     required this.header,
     required this.body,
-    this.tone = RecordTone.neutral,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final item = ListItem(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
-      minVerticalPadding: 0,
-      minTileHeight: 0,
-      horizontalTitleGap: 12,
-      tileTitleAlignment: ListTileTitleAlignment.top,
-      color: tone.tintColor(context),
-      onTap: onTap,
-      title: header,
-      subtitle: Padding(padding: const EdgeInsets.only(top: 6), child: body),
-    );
-    final accentColor = tone.accentColor(context);
-    if (accentColor == null) {
-      return item;
-    }
-    return DecoratedBox(
-      position: DecorationPosition.foreground,
-      decoration: BoxDecoration(
-        border: Border(left: BorderSide(color: accentColor, width: 3)),
+    const shape = AppShape.xl;
+    final level = context.raisedSurfaceLevel;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: DecoratedBox(
+        decoration: ShapeDecoration(
+          color: level.colorOf(context.colorScheme),
+          shape: shape,
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          child: SurfaceScope(
+            level: level,
+            child: ListTileTheme.merge(
+              shape: shape,
+              child: ListItem(
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+                minVerticalPadding: 0,
+                minTileHeight: 0,
+                horizontalTitleGap: 12,
+                tileTitleAlignment: ListTileTitleAlignment.top,
+                onTap: onTap,
+                title: header,
+                subtitle: Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: body,
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
-      child: item,
     );
   }
 }
@@ -93,11 +110,10 @@ class RecordHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final trailing = this.trailing;
     return DefaultTextStyle.merge(
-      style: context.textTheme.labelMedium?.copyWith(
-        color: context.colorScheme.onSurfaceVariant,
-        fontWeight: FontWeight.w400,
-        fontFeatures: const [FontFeature.tabularFigures()],
-      ),
+      style: AppTextStyle.caption1
+          .of(context)
+          .toTabular
+          .copyWith(color: context.colorScheme.onSurfaceVariant),
       child: SizedBox(
         width: double.infinity,
         child: Wrap(
@@ -150,20 +166,7 @@ class RecordTimestamp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final split = dateTime.lastIndexOf(' ');
-    return Text.rich(
-      TextSpan(
-        children: [
-          if (split > 0)
-            TextSpan(
-              text: dateTime.substring(0, split + 1),
-              style: TextStyle(color: context.colorScheme.outline),
-            ),
-          TextSpan(text: split > 0 ? dateTime.substring(split + 1) : dateTime),
-        ],
-      ),
-      maxLines: 1,
-    );
+    return Text(dateTime, maxLines: 1);
   }
 }
 
@@ -174,7 +177,7 @@ class RecordArrow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       '→',
-      style: RecordTextStyles.of(context).muted?.toJetBrainsMono,
+      style: RecordTextStyles.of(context).secondary.toJetBrainsMono,
     );
   }
 }
@@ -214,9 +217,11 @@ class DetailRow extends StatelessWidget {
                     alignment: Alignment.centerRight,
                     child: DefaultTextStyle.merge(
                       textAlign: TextAlign.end,
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        color: context.colorScheme.onSurfaceVariant,
-                      ),
+                      style: AppTextStyle.subheadline
+                          .of(context)
+                          .copyWith(
+                            color: context.colorScheme.onSurfaceVariant,
+                          ),
                       child: value,
                     ),
                   ),
@@ -227,7 +232,7 @@ class DetailRow extends StatelessWidget {
   }
 }
 
-enum RecordTone { muted, neutral, warning, error }
+enum RecordTone { neutral, warning, error }
 
 extension RecordToneExt on RecordTone {
   Color? accentColor(BuildContext context) {
@@ -235,23 +240,13 @@ extension RecordToneExt on RecordTone {
     return switch (this) {
       RecordTone.warning => colorScheme.warning,
       RecordTone.error => colorScheme.error,
-      RecordTone.muted || RecordTone.neutral => null,
-    };
-  }
-
-  Color? tintColor(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return switch (this) {
-      RecordTone.warning => colorScheme.warningContainer.withValues(alpha: 0.2),
-      RecordTone.error => colorScheme.errorContainer.withValues(alpha: 0.2),
-      RecordTone.muted || RecordTone.neutral => null,
+      RecordTone.neutral => null,
     };
   }
 
   Color labelColor(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return switch (this) {
-      RecordTone.muted => colorScheme.outline,
       RecordTone.neutral => colorScheme.onSurfaceVariant,
       RecordTone.warning => colorScheme.onWarningContainer,
       RecordTone.error => colorScheme.onErrorContainer,
@@ -261,8 +256,7 @@ extension RecordToneExt on RecordTone {
   Color labelContainerColor(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return switch (this) {
-      RecordTone.muted => colorScheme.surfaceContainerHigh,
-      RecordTone.neutral => colorScheme.surfaceContainerHighest,
+      RecordTone.neutral => context.raisedSurfaceLevel.colorOf(colorScheme),
       RecordTone.warning => colorScheme.warningContainer,
       RecordTone.error => colorScheme.errorContainer,
     };

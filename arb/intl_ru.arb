@@ -1545,5 +1545,22 @@
   "additionalParameters": "Дополнительные параметры",
   "quickActions": "Быстрые действия",
   "ruleListInvalid": "Правила должны быть YAML-списком, по одному правилу в элементе, например - DOMAIN,example.com,DIRECT",
-  "goToConfigureAddedRules": "Перейти к настройке добавленных правил"
+  "goToConfigureAddedRules": "Перейти к настройке добавленных правил",
+  "large": "Крупный",
+  "extraLarge": "Очень крупный",
+  "matchCase": "Учитывать регистр",
+  "regex": "Регулярное выражение",
+  "yes": "Да",
+  "no": "Нет",
+  "error": "Ошибка",
+  "iconSets": "Наборы значков",
+  "localImage": "Локальное изображение",
+  "label": "Метка",
+  "iconSetsEmptyTip": "Наборов значков пока нет. Добавьте их в разделе «Ресурсы пользовательских профилей → Наборы значков»",
+  "recommendedIcons": "Рекомендуемые",
+  "customProfileResources": "Ресурсы пользовательских профилей",
+  "importFromLink": "Импорт по ссылке",
+  "invalidLinkTip": "Это не ссылка на подписку и не ссылка на прокси",
+  "batchLinkInputTip": "По одной ссылке на строку",
+  "link": "Ссылка"
 }

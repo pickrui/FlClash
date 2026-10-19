@@ -567,7 +567,11 @@ class OverrideView<K extends Enum, M> extends ConsumerWidget {
     }
     try {
       final current = spec.target.read(ref);
-      var next = quickEdit.applyOverrideYaml(current.model, content);
+      var next = readRelaxed(
+        content,
+        quickEdit.schema,
+        (content) => quickEdit.applyOverrideYaml(current.model, content),
+      );
       next = spec.withoutKeys(next, current.keys.difference(next.keys));
       if (spec.target.emptyCancels) {
         next = spec.withoutKeys(next, spec.emptyKeys(next));

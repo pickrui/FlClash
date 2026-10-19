@@ -132,7 +132,7 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
     final source = ref.watch(globalRulesProvider);
     final unavailable = source.isLoading || source.hasError;
     final rules = _filter(source.value ?? []);
-    final searching = !SearchQuery(_query).isEmpty;
+    final searching = SearchQuery(_query).isNotEmpty;
     final selectedRules = ref.watch(selectedItemsProvider(_key));
     final isSelecting = selectedRules.isNotEmpty;
     return CommonPopScope(

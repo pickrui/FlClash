@@ -13087,6 +13087,121 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Large`
+  String get large {
+    return Intl.message('Large', name: 'large', desc: '', args: []);
+  }
+
+  /// `Extra large`
+  String get extraLarge {
+    return Intl.message('Extra large', name: 'extraLarge', desc: '', args: []);
+  }
+
+  /// `Match case`
+  String get matchCase {
+    return Intl.message('Match case', name: 'matchCase', desc: '', args: []);
+  }
+
+  /// `Regex`
+  String get regex {
+    return Intl.message('Regex', name: 'regex', desc: '', args: []);
+  }
+
+  /// `Yes`
+  String get yes {
+    return Intl.message('Yes', name: 'yes', desc: '', args: []);
+  }
+
+  /// `No`
+  String get no {
+    return Intl.message('No', name: 'no', desc: '', args: []);
+  }
+
+  /// `Error`
+  String get error {
+    return Intl.message('Error', name: 'error', desc: '', args: []);
+  }
+
+  /// `Icon sets`
+  String get iconSets {
+    return Intl.message('Icon sets', name: 'iconSets', desc: '', args: []);
+  }
+
+  /// `Local image`
+  String get localImage {
+    return Intl.message('Local image', name: 'localImage', desc: '', args: []);
+  }
+
+  /// `Label`
+  String get label {
+    return Intl.message('Label', name: 'label', desc: '', args: []);
+  }
+
+  /// `No icon sets yet. Add them in Custom profile resources → Icon sets`
+  String get iconSetsEmptyTip {
+    return Intl.message(
+      'No icon sets yet. Add them in Custom profile resources → Icon sets',
+      name: 'iconSetsEmptyTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Suggested`
+  String get recommendedIcons {
+    return Intl.message(
+      'Suggested',
+      name: 'recommendedIcons',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Custom profile resources`
+  String get customProfileResources {
+    return Intl.message(
+      'Custom profile resources',
+      name: 'customProfileResources',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Import from link`
+  String get importFromLink {
+    return Intl.message(
+      'Import from link',
+      name: 'importFromLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not a subscription link or a proxy share link`
+  String get invalidLinkTip {
+    return Intl.message(
+      'Not a subscription link or a proxy share link',
+      name: 'invalidLinkTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `One link per line`
+  String get batchLinkInputTip {
+    return Intl.message(
+      'One link per line',
+      name: 'batchLinkInputTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Link`
+  String get link {
+    return Intl.message('Link', name: 'link', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

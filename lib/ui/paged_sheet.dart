@@ -109,6 +109,21 @@ class PagedSheet extends StatelessWidget {
   }
 }
 
+/// Pushes the page into the sheet [context] is a page of, and opens a sheet
+/// for it anywhere else.
+Future<T?> showInSheet<T>(
+  BuildContext context, {
+  required WidgetBuilder builder,
+}) {
+  if (isSheetPage(context)) {
+    return Navigator.of(context).push(PagedSheetRoute<T>(builder: builder));
+  }
+  return showSheet<T>(
+    context: context,
+    builder: (sheetContext, _) => builder(sheetContext),
+  );
+}
+
 const nestedPagedSheetProps = SheetProps(backgroundColor: Colors.transparent);
 
 /// Opened with [nestedPagedSheetProps]. [onDismiss] is told whether a page is

@@ -656,7 +656,7 @@ class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
       ],
       body: NullStatusSwitcher(
         isEmpty: visible.isEmpty,
-        isSearching: !query.isEmpty,
+        isSearching: query.isNotEmpty,
         nullStatus: NullStatus(
           label: appLocalizations.ruleEmpty,
           illustration: NullStatusIllustration.rules,

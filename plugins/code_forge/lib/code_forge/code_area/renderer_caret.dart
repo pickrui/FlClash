@@ -226,6 +226,7 @@ extension _RendererCaret on _CodeFieldRenderer {
         color: baseColor,
         fontSize: fontSize,
         fontFamily: fontFamily,
+        fontFamilyFallback: textStyle?.fontFamilyFallback,
         decoration: TextDecoration.underline,
         decorationColor: baseColor.withAlpha(150),
       ),
@@ -265,6 +266,7 @@ extension _RendererCaret on _CodeFieldRenderer {
           color: baseColor,
           fontSize: fontSize,
           fontFamily: fontFamily,
+          fontFamilyFallback: textStyle?.fontFamilyFallback,
           fontWeight: textStyle?.fontWeight,
         ),
       );

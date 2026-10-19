@@ -464,6 +464,44 @@ void main() {
     );
   });
 
+  test(
+    'batch share links retain every node with unique non-reserved names',
+    () async {
+      when(() => handler.convertProxies(any())).thenAnswer((call) async {
+        final name = utf8.decode(base64Decode(call.positionalArguments.single));
+        return [
+          {'name': name, 'type': 'direct'},
+        ];
+      });
+      when(() => handler.validateConfigWithBytes(any()))
+          .thenAnswer((_) async => '');
+      final config = await controller.shareLinksConfig([
+        'DIRECT',
+        'Node',
+        'Node',
+      ]);
+      final decoded = loadYaml(utf8.decode(config!));
+      expect((decoded['proxies'] as List).map((item) => item['name']), [
+        'DIRECT 2',
+        'Node',
+        'Node 2',
+      ]);
+    },
+  );
+
+  test('one unreadable share link refuses the whole batch', () async {
+    when(() => handler.convertProxies(any())).thenAnswer((call) async {
+      final link = utf8.decode(base64Decode(call.positionalArguments.single));
+      return link == 'bad'
+          ? []
+          : [
+              {'name': 'Node', 'type': 'direct'},
+            ];
+    });
+    expect(await controller.shareLinksConfig(['good', 'bad']), isNull);
+    verifyNever(() => handler.validateConfigWithBytes(any()));
+  });
+
   test('rejected configuration does not open listeners', () async {
     when(() => handler.setupConfig(setupParams))
         .thenAnswer((_) async => 'invalid profile');

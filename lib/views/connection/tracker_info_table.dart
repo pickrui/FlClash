@@ -7,6 +7,7 @@ import 'dart:math';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/table_layout.dart';
 import 'package:fl_clash/widgets/record_table.dart';
 import 'package:fl_clash/widgets/widgets.dart';
@@ -202,7 +203,7 @@ class _ExitChip extends StatelessWidget {
     final colorScheme = context.colorScheme;
     return TonalChip(
       label: exit,
-      color: colorScheme.surfaceContainerHighest,
+      color: context.raisedSurfaceLevel.colorOf(colorScheme),
       foregroundColor: colorScheme.onSurfaceVariant,
       onPressed: () => context.commonScaffoldState?.addKeyword(exit),
     );
