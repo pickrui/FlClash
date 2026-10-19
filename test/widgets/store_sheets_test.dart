@@ -82,6 +82,7 @@ void main() {
 
     await tester.tap(find.text('Yearly · ¥150'));
     await tester.pumpAndSettle();
+    await tester.ensureVisible(_filledButton('Buy'));
     await tester.tap(_filledButton('Buy'));
     await tester.pumpAndSettle();
 
@@ -106,6 +107,7 @@ void main() {
     await tester.tap(find.text('Alipay'));
     await tester.pumpAndSettle();
     expect(find.widgetWithText(FilledButton, 'Buy'), findsNothing);
+    await tester.ensureVisible(_filledButton('Pay'));
     await tester.tap(_filledButton('Pay'));
     await tester.pumpAndSettle();
 
@@ -145,6 +147,7 @@ void main() {
     expect(find.widgetWithText(TextField, '30'), findsOneWidget);
     await tester.enterText(find.byType(TextField), '12,5');
     await tester.pump();
+    await tester.ensureVisible(_filledButton('Pay'));
     await tester.tap(_filledButton('Pay'));
     await tester.pumpAndSettle();
 

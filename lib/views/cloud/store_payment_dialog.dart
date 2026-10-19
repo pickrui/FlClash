@@ -10,6 +10,8 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
+import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
@@ -118,6 +120,14 @@ class _StorePaymentDialogState extends ConsumerState<StorePaymentDialog> {
     final isUrl = init.kind == PaymentInitiationKind.externalUrl;
     final hasPaymentId = init.pid != null && init.pid!.isNotEmpty;
     final qrData = isUrl ? (init.renderQrcode ? init.url : null) : init.address;
+    final colorScheme = context.colorScheme;
+    final label = AppTextStyle.footnote
+        .of(context)
+        .copyWith(color: colorScheme.onSurfaceVariant);
+    final value = AppTextStyle.headline
+        .of(context)
+        .toTabular
+        .copyWith(color: colorScheme.onSurface);
     return CommonDialog(
       title: appLocalizations.scanOrTransferPay,
       actions: [
@@ -140,103 +150,96 @@ class _StorePaymentDialogState extends ConsumerState<StorePaymentDialog> {
             ),
           ),
       ],
-      child: SizedBox(
-        width: 320,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            if (_checkMessage case final message?) ...[
-              Semantics(
-                liveRegion: true,
-                child: Text(
-                  message,
-                  style: context.textTheme.bodyMedium?.copyWith(
-                    color: _checkFailed
-                        ? context.colorScheme.error
-                        : context.colorScheme.onSurfaceVariant,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
-            if (qrData != null && qrData.isNotEmpty) ...[
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: ShapeDecoration(
-                  color: Colors.white,
-                  shape: AppShape.all(12),
-                ),
-                child: QrImageView(
-                  data: qrData,
-                  version: QrVersions.auto,
-                  size: 200,
-                  backgroundColor: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
-            if (init.amountText != null) ...[
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  appLocalizations.paymentAmount,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ),
-              const SizedBox(height: 4),
-              SelectableText(
-                '${init.amountText} ${init.coin ?? ''}'.trim(),
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 12),
-            ],
-            if (isUrl) ...[
-              Text(
-                init.renderQrcode
-                    ? appLocalizations.scanToPayNotice
-                    : appLocalizations.refreshAfterPayment,
-                style: Theme.of(context).textTheme.bodySmall,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          if (_checkMessage case final message?) ...[
+            Semantics(
+              liveRegion: true,
+              child: Text(
+                message,
+                style: AppTextStyle.subheadline
+                    .of(context)
+                    .copyWith(
+                      color: _checkFailed
+                          ? colorScheme.error
+                          : colorScheme.onSurfaceVariant,
+                    ),
                 textAlign: TextAlign.center,
               ),
-            ] else ...[
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  appLocalizations.receivingAddress,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Expanded(
-                    child: SelectableText(
-                      init.address ?? '',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.copy, size: 18),
-                    tooltip: appLocalizations.copy,
-                    onPressed: () {
-                      Clipboard.setData(
-                        ClipboardData(text: init.address ?? ''),
-                      );
-                      globalState.showNotifier(appLocalizations.addressCopied);
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Text(
-                appLocalizations.transferConfirmNotice,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
+            ),
+            const SizedBox(height: 16),
           ],
-        ),
+          if (qrData != null && qrData.isNotEmpty) ...[
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: const ShapeDecoration(
+                color: Colors.white,
+                shape: AppShape.lg,
+              ),
+              child: QrImageView(
+                data: qrData,
+                version: QrVersions.auto,
+                size: 200,
+                backgroundColor: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+          if (init.amountText != null) ...[
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(appLocalizations.paymentAmount, style: label),
+            ),
+            const SizedBox(height: 4),
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: SelectableText(
+                '${init.amountText} ${init.coin ?? ''}'.trim(),
+                style: value,
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+          if (isUrl) ...[
+            Text(
+              init.renderQrcode
+                  ? appLocalizations.scanToPayNotice
+                  : appLocalizations.refreshAfterPayment,
+              style: label,
+              textAlign: TextAlign.center,
+            ),
+          ] else ...[
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(appLocalizations.receivingAddress, style: label),
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Expanded(
+                  child: SelectableText(
+                    init.address ?? '',
+                    style: AppTextStyle.subheadline
+                        .of(context)
+                        .copyWith(color: colorScheme.onSurface),
+                  ),
+                ),
+                IconButton(
+                  icon: const GlyphIcon(AppGlyphs.copy, size: 20),
+                  tooltip: appLocalizations.copy,
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: init.address ?? ''));
+                    globalState.showNotifier(appLocalizations.addressCopied);
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(appLocalizations.transferConfirmNotice, style: label),
+          ],
+        ],
       ),
     );
   }

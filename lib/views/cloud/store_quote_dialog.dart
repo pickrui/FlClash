@@ -9,6 +9,7 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -183,26 +184,39 @@ class _StoreQuoteDialogState extends ConsumerState<StoreQuoteDialog> {
   }
 
   Widget _summaryRow(StoreQuoteRow row) {
-    final theme = Theme.of(context);
+    final colorScheme = context.colorScheme;
     return Wrap(
       alignment: WrapAlignment.spaceBetween,
       crossAxisAlignment: WrapCrossAlignment.center,
       spacing: 12,
       runSpacing: 4,
       children: [
-        Text(row.label, style: theme.textTheme.bodyMedium),
-        Text(storePriceText(row.amount), style: theme.textTheme.titleSmall),
+        Text(
+          row.label,
+          style: AppTextStyle.subheadline
+              .of(context)
+              .copyWith(color: colorScheme.onSurfaceVariant),
+        ),
+        Text(
+          storePriceText(row.amount),
+          style: AppTextStyle.headline
+              .of(context)
+              .toTabular
+              .copyWith(color: colorScheme.onSurface),
+        ),
       ],
     );
   }
 
   Widget _note(String text, {bool isError = false}) {
-    final theme = Theme.of(context);
+    final colorScheme = context.colorScheme;
     return Text(
       text,
-      style: isError
-          ? theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)
-          : theme.textTheme.bodySmall,
+      style: AppTextStyle.footnote
+          .of(context)
+          .copyWith(
+            color: isError ? colorScheme.error : colorScheme.onSurfaceVariant,
+          ),
     );
   }
 
@@ -215,6 +229,7 @@ class _StoreQuoteDialogState extends ConsumerState<StoreQuoteDialog> {
     final recharge = widget.onRecharge;
     return CommonDialog(
       title: widget.title,
+      hasFields: true,
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
@@ -228,10 +243,7 @@ class _StoreQuoteDialogState extends ConsumerState<StoreQuoteDialog> {
           TextButton(
             onPressed: busy ? null : () => _recharge(recharge),
             child: _recharging
-                ? const SizedBox.square(
-                    dimension: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
+                ? const CommonCircleLoading(size: 18)
                 : Text(appLocalizations.recharge),
           )
         else
@@ -247,45 +259,47 @@ class _StoreQuoteDialogState extends ConsumerState<StoreQuoteDialog> {
             child: Text(appLocalizations.confirm),
           ),
       ],
-      child: SizedBox(
-        width: 320,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _controller,
-              onChanged: (_) => setState(() {}),
-              decoration: InputDecoration(
-                labelText: widget.couponRequired
-                    ? appLocalizations.discountCode
-                    : appLocalizations.discountCodeOptional,
-                border: const OutlineInputBorder(),
-                isDense: true,
-              ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextField(
+            controller: _controller,
+            onChanged: (_) => setState(() {}),
+            autocorrect: false,
+            decoration: InputDecoration(
+              hintText: widget.couponRequired
+                  ? appLocalizations.discountCode
+                  : appLocalizations.discountCodeOptional,
             ),
-            const SizedBox(height: 12),
-            if (_loading)
-              _note(appLocalizations.calculatingQuote)
-            else if (_error != null)
-              _note(_error!, isError: true)
-            else if (quoted) ...[
-              for (var i = 0; i < quote.rows.length; i++) ...[
-                if (i > 0) const SizedBox(height: 4),
-                _summaryRow(quote.rows[i]),
+          ),
+          const SizedBox(height: 14),
+          if (_loading)
+            Row(
+              spacing: 8,
+              children: [
+                const CommonCircleLoading(size: 16),
+                Flexible(child: _note(appLocalizations.calculatingQuote)),
               ],
-              if (quote.recurring) ...[
-                const SizedBox(height: 8),
-                _note(appLocalizations.recurringRenewalHint),
-              ],
-              if (!quote.sufficientBalance) ...[
-                const SizedBox(height: 8),
-                _note(appLocalizations.insufficientBalanceHint, isError: true),
-              ],
-            ] else if (widget.hint != null)
-              _note(widget.hint!),
-          ],
-        ),
+            )
+          else if (_error != null)
+            _note(_error!, isError: true)
+          else if (quoted) ...[
+            for (var i = 0; i < quote.rows.length; i++) ...[
+              if (i > 0) const SizedBox(height: 6),
+              _summaryRow(quote.rows[i]),
+            ],
+            if (quote.recurring) ...[
+              const SizedBox(height: 10),
+              _note(appLocalizations.recurringRenewalHint),
+            ],
+            if (!quote.sufficientBalance) ...[
+              const SizedBox(height: 10),
+              _note(appLocalizations.insufficientBalanceHint, isError: true),
+            ],
+          ] else if (widget.hint != null)
+            _note(widget.hint!),
+        ],
       ),
     );
   }

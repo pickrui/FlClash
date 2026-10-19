@@ -8,6 +8,8 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
+import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -122,9 +124,9 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
     return CommonScaffold(
       title: appLocalizations.store,
       isLoading: _busy || (storeState.isLoading && storeState.plans.isNotEmpty),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.refresh),
+      iconActions: [
+        IconButtonData(
+          glyph: AppGlyphs.refresh,
           tooltip: appLocalizations.refresh,
           onPressed: busy ? null : () => _runGuarded(_refresh),
         ),
@@ -132,7 +134,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
       body: RefreshIndicator(
         onRefresh: () => _runGuarded(_refresh),
         child: storeState.isLoading && storeState.plans.isEmpty
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(child: CommonCircleLoading.page())
             : ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: EdgeInsets.fromLTRB(
@@ -152,13 +154,31 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
                               ? null
                               : () => _runGuarded(_rechargeFlow),
                         ),
-                        if (storeState.error case final error?) ...[
-                          const SizedBox(height: 12),
-                          _buildErrorCard(error, busy: busy),
-                        ],
+                        if (storeState.error case final error?)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 16),
+                            child: CloudErrorBanner(
+                              message: error,
+                              onRetry: busy
+                                  ? null
+                                  : () => _runGuarded(_refresh),
+                            ),
+                          )
+                        else
+                          const SizedBox(height: cloudSectionGap),
+                        SegmentedControl<_StoreSection>(
+                          segments: [
+                            (
+                              _StoreSection.plans,
+                              appLocalizations.availablePlans,
+                            ),
+                            (_StoreSection.orders, appLocalizations.myOrders),
+                          ],
+                          value: _section,
+                          onChanged: (section) =>
+                              setState(() => _section = section),
+                        ),
                         const SizedBox(height: 16),
-                        _buildSectionPicker(),
-                        const SizedBox(height: 12),
                         ...switch (_section) {
                           _StoreSection.plans => _buildPlans(storeState),
                           _StoreSection.orders => _buildOrders(
@@ -181,21 +201,22 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
       return [
         _buildEmptyHint(
           appLocalizations.noAvailablePlans,
-          Icons.inventory_2_outlined,
+          NullStatusIllustration.data,
         ),
       ];
     }
     return [
-      for (final plan in state.plans)
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: StorePlanCard(
-            plan: plan,
-            onBuy: _busy || state.isLoading
-                ? null
-                : () => _runGuarded(() => _purchaseFlow(plan), writes: true),
-          ),
-        ),
+      generateSection(
+        items: [
+          for (final plan in state.plans)
+            StorePlanCard(
+              plan: plan,
+              onBuy: _busy || state.isLoading
+                  ? null
+                  : () => _runGuarded(() => _purchaseFlow(plan), writes: true),
+            ),
+        ],
+      ),
     ];
   }
 
@@ -205,7 +226,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
       return [
         _buildEmptyHint(
           appLocalizations.noPurchaseRecords,
-          Icons.receipt_long_outlined,
+          NullStatusIllustration.history,
         ),
       ];
     }
@@ -226,68 +247,21 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
     ];
   }
 
-  Widget _buildSectionPicker() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final showIcons = constraints.maxWidth >= 420;
-        return SegmentedButton<_StoreSection>(
-          selected: {_section},
-          showSelectedIcon: false,
-          onSelectionChanged: (selection) =>
-              setState(() => _section = selection.first),
-          segments: [
-            ButtonSegment(
-              value: _StoreSection.plans,
-              icon: showIcons ? const Icon(Icons.inventory_2_outlined) : null,
-              label: Text(appLocalizations.availablePlans),
-            ),
-            ButtonSegment(
-              value: _StoreSection.orders,
-              icon: showIcons ? const Icon(Icons.receipt_long_outlined) : null,
-              label: Text(appLocalizations.myOrders),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildEmptyHint(String text, IconData icon) {
+  Widget _buildEmptyHint(String text, NullStatusIllustration illustration) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 32),
+      padding: const EdgeInsets.symmetric(vertical: 24),
       child: Column(
+        spacing: 12,
         children: [
-          Icon(icon, size: 32, color: context.colorScheme.onSurfaceVariant),
-          const SizedBox(height: 8),
+          EmptyIllustration(type: illustration, dimension: 112),
           Text(
             text,
             textAlign: TextAlign.center,
-            style: context.textTheme.bodyMedium?.copyWith(
-              color: context.colorScheme.onSurfaceVariant,
-            ),
+            style: AppTextStyle.subheadline
+                .of(context)
+                .copyWith(color: context.colorScheme.onSurfaceVariant),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildErrorCard(String error, {required bool busy}) {
-    return CommonCard(
-      isError: true,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Icon(Icons.error_outline, color: context.colorScheme.error),
-            const SizedBox(width: 12),
-            Expanded(child: Text(error)),
-            IconButton(
-              onPressed: busy ? null : () => _runGuarded(_refresh),
-              icon: const Icon(Icons.refresh),
-              tooltip: appLocalizations.refresh,
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -299,23 +273,26 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
         : () => _runGuarded(action, writes: true);
     return [
       if (storeUpgradeTargets(bought, state.plans).isNotEmpty)
-        OutlinedButton.icon(
+        TonalButton(
+          size: TonalButtonSize.compact,
+          glyph: AppGlyphs.arrowUp,
+          label: appLocalizations.upgradePlan,
           onPressed: guarded(() => _upgradeFlow(bought)),
-          icon: const Icon(Icons.upgrade),
-          label: Text(appLocalizations.upgradePlan),
         ),
       if (bought.canBindCoupon)
-        OutlinedButton.icon(
+        TonalButton(
+          size: TonalButtonSize.compact,
+          glyph: AppGlyphs.sparkle,
+          label: appLocalizations.bindCoupon,
           onPressed: guarded(() => _bindCouponFlow(bought)),
-          icon: const Icon(Icons.sell_outlined),
-          label: Text(appLocalizations.bindCoupon),
         ),
       // Activation closes the row, so the actions every plan shares keep their place.
       if (bought.canActivate)
-        FilledButton.icon(
+        CloudPrimaryButton(
+          size: TonalButtonSize.compact,
+          glyph: AppGlyphs.checkCircle,
+          label: appLocalizations.activate,
           onPressed: guarded(() => _activateFlow(bought)),
-          icon: const Icon(Icons.check_circle_outline),
-          label: Text(appLocalizations.activate),
         ),
     ];
   }
@@ -559,51 +536,79 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
   }
 
   Future<StorePlan?> _showPlanPicker(String title, List<StorePlan> plans) {
-    return globalState.showCommonDialog<StorePlan>(
-      child: Builder(
-        builder: (dialogContext) => CommonDialog(
-          title: title,
-          actions: const [],
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (final plan in plans)
-                _buildPlanPickerTile(dialogContext, plan),
-            ],
-          ),
-        ),
-      ),
+    return showSheet<StorePlan>(
+      context: context,
+      builder: (_, _) => _PlanPickerSheet(title: title, plans: plans),
     );
   }
+}
 
-  Widget _buildPlanPickerTile(BuildContext dialogContext, StorePlan plan) {
-    final period =
-        plan.enabledBillingPeriods
-            .where((period) => period.key == 'yearly')
-            .firstOrNull ??
-        plan.defaultPeriod;
-    final summary = compactStorePlanSummary(plan.tags);
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      title: Text(plan.name),
-      subtitle: summary.isEmpty
-          ? null
-          : Text(summary, maxLines: 2, overflow: TextOverflow.ellipsis),
-      trailing: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Text(
-            storePriceText(period?.price ?? plan.price),
-            style: dialogContext.textTheme.titleSmall?.copyWith(
-              color: dialogContext.colorScheme.primary,
-            ),
-          ),
-          if (period != null && period.label.isNotEmpty)
-            Text(period.label, style: dialogContext.textTheme.labelSmall),
-        ],
+class _PlanPickerSheet extends StatelessWidget {
+  final String title;
+  final List<StorePlan> plans;
+
+  const _PlanPickerSheet({required this.title, required this.plans});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * 0.7,
       ),
-      onTap: () => Navigator.of(dialogContext).pop(plan),
+      child: CommonScaffold(
+        title: title,
+        body: ListView(
+          shrinkWrap: true,
+          padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 24),
+          children: [
+            generateSection(
+              items: [
+                for (final plan in plans)
+                  Builder(
+                    builder: (context) {
+                      final period =
+                          plan.enabledBillingPeriods
+                              .where((period) => period.key == 'yearly')
+                              .firstOrNull ??
+                          plan.defaultPeriod;
+                      final summary = compactStorePlanSummary(plan.tags);
+                      return ListItem(
+                        title: Text(plan.name),
+                        subtitle: summary.isEmpty
+                            ? null
+                            : Text(
+                                summary,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                        trailing: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              storePriceText(period?.price ?? plan.price),
+                              style: AppTextStyle.headline
+                                  .of(context)
+                                  .toTabular
+                                  .copyWith(color: colorScheme.primary),
+                            ),
+                            if (period != null && period.label.isNotEmpty)
+                              Text(
+                                period.label,
+                                style: context.listCaptionStyle,
+                              ),
+                          ],
+                        ),
+                        onTap: () => Navigator.of(context).pop(plan),
+                      );
+                    },
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

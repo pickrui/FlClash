@@ -6,6 +6,8 @@
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/cloud_account.dart';
 import 'package:fl_clash/models/store.dart';
+import 'package:fl_clash/ui/shape.dart';
+import 'package:fl_clash/ui/typography.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:intl/intl.dart';
 
@@ -94,14 +96,13 @@ class PurchasedPlanDetails extends StatelessWidget {
     final expiry = live == null || live.expireTime.millisecondsSinceEpoch <= 0
         ? null
         : DateFormat('yyyy-MM-dd').format(live.expireTime.toLocal());
-    final theme = Theme.of(context);
-    final secondary = theme.textTheme.bodySmall?.copyWith(
-      color: theme.colorScheme.onSurfaceVariant,
-    );
-    // The card is a disabled button, so inherited text would take its dimmed foreground.
-    final body = theme.textTheme.bodyMedium?.copyWith(
-      color: theme.colorScheme.onSurface,
-    );
+    final colorScheme = Theme.of(context).colorScheme;
+    final secondary = AppTextStyle.footnote
+        .of(context)
+        .copyWith(color: colorScheme.onSurfaceVariant);
+    final body = AppTextStyle.subheadline
+        .of(context)
+        .copyWith(color: colorScheme.onSurface);
     return LayoutBuilder(
       builder: (context, constraints) {
         // The card's inner width: a phone leaves about 330 after the list and card padding.
@@ -120,10 +121,12 @@ class PurchasedPlanDetails extends StatelessWidget {
                   child: Text(
                     value ?? l10n.noData,
                     maxLines: 1,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
+                    style: AppTextStyle.title3
+                        .of(context, emphasized: true)
+                        .copyWith(
+                          color: colorScheme.onSurface,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
                   ),
                 ),
               ],
@@ -168,7 +171,9 @@ class PurchasedPlanDetails extends StatelessWidget {
                 const SizedBox(height: 10),
                 LinearProgressIndicator(
                   value: live.usageProgress,
-                  borderRadius: BorderRadius.circular(2),
+                  minHeight: 6,
+                  borderRadius: AppRadius.full,
+                  backgroundColor: colorScheme.surfaceContainerHighest,
                 ),
               ],
               if (used != null || expiry != null) ...[

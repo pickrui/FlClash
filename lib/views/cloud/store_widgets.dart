@@ -5,11 +5,34 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
+import 'package:fl_clash/ui/surface.dart';
+import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'cloud_layout.dart';
 import 'purchased_plan_details.dart';
+
+/// A raised panel for store content that is read rather than pressed.
+class StorePanel extends StatelessWidget {
+  final Widget child;
+
+  const StorePanel({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final level = context.raisedSurfaceLevel;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: ShapeDecoration(
+        color: level.colorOf(context.colorScheme),
+        shape: AppShape.xl,
+      ),
+      child: SurfaceScope(level: level, child: child),
+    );
+  }
+}
 
 class StoreBalanceCard extends StatelessWidget {
   final CloudProfile? profile;
@@ -19,59 +42,65 @@ class StoreBalanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final secondary = context.textTheme.bodySmall?.copyWith(
-      color: context.colorScheme.onSurfaceVariant,
-    );
-    return CommonCard(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const CloudIconTile(icon: Icons.account_balance_wallet),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(appLocalizations.accountBalance, style: secondary),
-                      const SizedBox(height: 2),
-                      Text(
+    final colorScheme = context.colorScheme;
+    final secondary = AppTextStyle.footnote
+        .of(context)
+        .toTabular
+        .copyWith(color: colorScheme.onSurfaceVariant);
+    return StorePanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            spacing: 12,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 2,
+                  children: [
+                    Text(appLocalizations.accountBalance, style: secondary),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: AlignmentDirectional.centerStart,
+                      child: Text(
                         storeMoneyText(profile?.balance),
-                        style: context.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontFeatures: const [FontFeature.tabularFigures()],
-                        ),
+                        maxLines: 1,
+                        style: AppTextStyle.title1
+                            .of(context, emphasized: true)
+                            .toTabular
+                            .copyWith(color: colorScheme.onSurface),
                       ),
-                      if (profile case final profile?)
-                        Text(
-                          appLocalizations.commissionBalance(
-                            storeMoneyText(profile.commission),
-                          ),
-                          style: secondary,
+                    ),
+                    if (profile case final profile?)
+                      Text(
+                        appLocalizations.commissionBalance(
+                          storeMoneyText(profile.commission),
                         ),
-                    ],
-                  ),
+                        style: secondary,
+                      ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                FilledButton.icon(
-                  onPressed: onRecharge,
-                  icon: const Icon(Icons.add),
-                  label: Text(appLocalizations.recharge),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            Text(appLocalizations.balanceDeductionHint, style: secondary),
-          ],
-        ),
+              ),
+              CloudPrimaryButton(
+                glyph: AppGlyphs.add,
+                label: appLocalizations.recharge,
+                onPressed: onRecharge,
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            appLocalizations.balanceDeductionHint,
+            style: secondary.copyWith(fontFeatures: const []),
+          ),
+        ],
       ),
     );
   }
 }
 
+/// A plan as a row of the plans section, with its price and a way to buy it.
 class StorePlanCard extends StatelessWidget {
   final StorePlan plan;
 
@@ -82,80 +111,71 @@ class StorePlanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
     final period = plan.defaultPeriod;
     final summary = compactStorePlanSummary(plan.tags);
     final lowStock = !plan.soldOut && plan.inventory > 0 && plan.inventory <= 5;
-    final card = CommonCard(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    plan.name,
-                    style: context.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: context.colorScheme.onSurface,
-                    ),
-                  ),
-                  if (summary.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      summary,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.textTheme.bodySmall?.copyWith(
-                        color: context.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                  if (plan.planCode == 'iron')
-                    _PlanNote(
-                      icon: Icons.warning_amber_rounded,
-                      text: appLocalizations.mainlandNetworkWarning,
-                      color: Colors.orange.shade800,
-                    ),
-                  if (lowStock)
-                    _PlanNote(
-                      icon: Icons.local_fire_department,
-                      text: appLocalizations.remainingStock(plan.inventory),
-                      color: Colors.deepOrange,
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+    final content = Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 12,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 4,
               children: [
                 Text(
-                  storePriceText(period?.price ?? plan.price),
-                  style: context.textTheme.titleLarge?.copyWith(
-                    color: context.colorScheme.primary,
-                    fontWeight: FontWeight.bold,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
+                  plan.name,
+                  style: AppTextStyle.headline
+                      .of(context)
+                      .copyWith(color: colorScheme.onSurface),
                 ),
-                if (period != null && period.label.isNotEmpty)
+                if (summary.isNotEmpty)
                   Text(
-                    period.label,
-                    style: context.textTheme.labelSmall?.copyWith(
-                      color: context.colorScheme.onSurfaceVariant,
-                    ),
+                    summary,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.listSubtitleStyle,
                   ),
-                const SizedBox(height: 10),
-                _buildAction(context),
+                if (plan.planCode == 'iron')
+                  _PlanNote(
+                    glyph: AppGlyphs.warning,
+                    text: appLocalizations.mainlandNetworkWarning,
+                    color: colorScheme.warning,
+                  ),
+                if (lowStock)
+                  _PlanNote(
+                    glyph: AppGlyphs.bolt,
+                    text: appLocalizations.remainingStock(plan.inventory),
+                    color: colorScheme.error,
+                  ),
               ],
             ),
-          ],
-        ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                storePriceText(period?.price ?? plan.price),
+                style: AppTextStyle.title3
+                    .of(context, emphasized: true)
+                    .toTabular
+                    .copyWith(color: colorScheme.primary),
+              ),
+              if (period != null && period.label.isNotEmpty)
+                Text(period.label, style: context.listCaptionStyle),
+              const SizedBox(height: 8),
+              _buildAction(context),
+            ],
+          ),
+        ],
       ),
     );
-    return plan.soldOut ? Opacity(opacity: 0.55, child: card) : card;
+    return DecorationListItem(
+      title: plan.soldOut ? Opacity(opacity: 0.55, child: content) : content,
+    );
   }
 
   Widget _buildAction(BuildContext context) {
@@ -163,65 +183,59 @@ class StorePlanCard extends StatelessWidget {
       final color = context.colorScheme.onSurfaceVariant;
       return Row(
         mainAxisSize: MainAxisSize.min,
+        spacing: 4,
         children: [
-          Icon(
-            plan.soldOut ? Icons.inventory_2_outlined : Icons.block,
+          GlyphIcon(
+            plan.soldOut ? AppGlyphs.block : AppGlyphs.lock,
             size: 16,
             color: color,
           ),
-          const SizedBox(width: 4),
           Text(
             plan.soldOut
                 ? appLocalizations.soldOut
                 : appLocalizations.planUnavailable,
-            style: context.textTheme.labelMedium?.copyWith(color: color),
+            style: AppTextStyle.footnote
+                .of(context, emphasized: true)
+                .copyWith(color: color),
           ),
         ],
       );
     }
-    return FilledButton(
+    return TonalButton(
+      size: TonalButtonSize.compact,
+      label: appLocalizations.buy,
       onPressed: onBuy,
-      style: FilledButton.styleFrom(
-        minimumSize: const Size(72, 36),
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        visualDensity: VisualDensity.compact,
-      ),
-      child: Text(appLocalizations.buy),
     );
   }
 }
 
 class _PlanNote extends StatelessWidget {
-  final IconData icon;
+  final Glyph glyph;
   final String text;
   final Color color;
 
   const _PlanNote({
-    required this.icon,
+    required this.glyph,
     required this.text,
     required this.color,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 16, color: color),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Text(
-              text,
-              style: context.textTheme.labelMedium?.copyWith(
-                color: color,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 6,
+      children: [
+        GlyphIcon(glyph, size: 16, fill: 1, color: color),
+        Expanded(
+          child: Text(
+            text,
+            style: AppTextStyle.footnote
+                .of(context, emphasized: true)
+                .copyWith(color: color),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -242,38 +256,39 @@ class StoreBoughtCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CommonCard(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Text(
-                    bought.shopName.isEmpty
-                        ? appLocalizations.planNumber(bought.shopId)
-                        : bought.shopName,
-                    style: context.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: context.colorScheme.onSurface,
-                    ),
-                  ),
+    return StorePanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 8,
+            children: [
+              Expanded(
+                child: Text(
+                  bought.shopName.isEmpty
+                      ? appLocalizations.planNumber(bought.shopId)
+                      : bought.shopName,
+                  style: AppTextStyle.headline
+                      .of(context)
+                      .copyWith(color: context.colorScheme.onSurface),
                 ),
-                const SizedBox(width: 8),
-                _StatusBadge(bought: bought),
-              ],
-            ),
-            const SizedBox(height: 8),
-            PurchasedPlanDetails(bought: bought, profile: profile),
-            if (actions.isNotEmpty) ...[
-              const SizedBox(height: 14),
-              Wrap(spacing: 8, runSpacing: 8, children: actions),
+              ),
+              _StatusBadge(bought: bought),
             ],
+          ),
+          const SizedBox(height: 12),
+          PurchasedPlanDetails(bought: bought, profile: profile),
+          if (actions.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Wrap(
+              alignment: WrapAlignment.end,
+              spacing: 8,
+              runSpacing: 8,
+              children: actions,
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -286,36 +301,25 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (label, icon, color) = bought.isActive
-        ? (appLocalizations.planInUse, Icons.check_circle, Colors.green)
+    final colorScheme = context.colorScheme;
+    final (label, color, foreground) = bought.isActive
+        ? (
+            appLocalizations.planInUse,
+            colorScheme.successContainer,
+            colorScheme.onSuccessContainer,
+          )
         : bought.isPending
-        ? (appLocalizations.planNotActivated, Icons.schedule, Colors.orange)
+        ? (
+            appLocalizations.planNotActivated,
+            colorScheme.warningContainer,
+            colorScheme.onWarningContainer,
+          )
         : (
             appLocalizations.planEnded,
-            Icons.archive_outlined,
-            context.colorScheme.onSurfaceVariant,
+            context.raisedSurfaceLevel.colorOf(colorScheme),
+            colorScheme.onSurfaceVariant,
           );
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: ShapeDecoration(
-        color: color.withValues(alpha: 0.12),
-        shape: AppShape.all(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 13, color: color),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: context.textTheme.bodySmall?.copyWith(
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
+    return TonalChip(label: label, color: color, foregroundColor: foreground);
   }
 }
 
@@ -323,9 +327,8 @@ class _StatusBadge extends StatelessWidget {
 /// spellings so each method shows a recognizable glyph and tint.
 class StorePaymentIcon extends StatelessWidget {
   final PaymentMethodOption method;
-  final double size;
 
-  const StorePaymentIcon({super.key, required this.method, this.size = 20});
+  const StorePaymentIcon({super.key, required this.method});
 
   @override
   Widget build(BuildContext context) {
@@ -344,6 +347,27 @@ class StorePaymentIcon extends StatelessWidget {
               ids.any((id) => id.startsWith('wx'))
         ? (Icons.chat, const Color(0xFF07C160))
         : (Icons.payment, context.colorScheme.primary);
-    return Icon(icon, size: size, color: color);
+    return StoreMethodTile(icon: icon, color: color);
+  }
+}
+
+/// A payment method's mark on a tile of its tint, as iOS sets a row's icon.
+class StoreMethodTile extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+
+  const StoreMethodTile({super.key, required this.icon, required this.color});
+
+  static const _size = 30.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: ShapeDecoration(color: color, shape: AppShape.sm),
+      child: SizedBox.square(
+        dimension: _size,
+        child: Icon(icon, size: 18, color: Colors.white),
+      ),
+    );
   }
 }

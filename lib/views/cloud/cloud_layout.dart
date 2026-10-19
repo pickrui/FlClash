@@ -8,7 +8,6 @@ import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/ui/button.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/inherited.dart';
-import 'package:fl_clash/ui/loading.dart';
 import 'package:fl_clash/ui/models.dart';
 import 'package:fl_clash/ui/navigation_dock.dart';
 import 'package:fl_clash/ui/scaffold.dart';
@@ -46,35 +45,32 @@ class CloudContentWidth extends StatelessWidget {
 class CloudPrimaryButton extends StatelessWidget {
   final String label;
   final Glyph? glyph;
-  final bool loading;
+  final TonalButtonSize size;
   final VoidCallback? onPressed;
 
   const CloudPrimaryButton({
     super.key,
     required this.label,
     this.glyph,
-    this.loading = false,
+    this.size = TonalButtonSize.bar,
     required this.onPressed,
   });
 
   @override
   Widget build(BuildContext context) {
-    const size = TonalButtonSize.bar;
+    final compact = size != TonalButtonSize.bar;
     final style = FilledButton.styleFrom(
       minimumSize: Size(size.button, size.button),
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.symmetric(horizontal: compact ? 14 : 20),
       shape: AppShape.full,
-      textStyle: AppTextStyle.body.of(context, emphasized: true),
+      textStyle: compact
+          ? AppTextStyle.subheadline.of(context, emphasized: true)
+          : AppTextStyle.body.of(context, emphasized: true),
+      iconSize: size.icon,
       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
     final glyph = this.glyph;
-    final Widget button = loading
-        ? FilledButton(
-            onPressed: null,
-            style: style,
-            child: CommonCircleLoading(size: size.icon * 0.8),
-          )
-        : glyph == null
+    final Widget button = glyph == null
         ? FilledButton(onPressed: onPressed, style: style, child: Text(label))
         : FilledButton.icon(
             onPressed: onPressed,
@@ -82,7 +78,7 @@ class CloudPrimaryButton extends StatelessWidget {
             icon: GlyphIcon(glyph, fill: 1),
             label: Text(label),
           );
-    return ElasticButton(enabled: onPressed != null && !loading, child: button);
+    return ElasticButton(enabled: onPressed != null, child: button);
   }
 }
 
@@ -287,30 +283,6 @@ class CloudFormFields extends StatelessWidget {
           duration: context.motionDuration(midDuration),
           child: child,
         ),
-      ),
-    );
-  }
-}
-
-class CloudIconTile extends StatelessWidget {
-  final IconData icon;
-  final double size;
-
-  const CloudIconTile({super.key, required this.icon, this.size = 44});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: ShapeDecoration(
-        color: context.colorScheme.primaryContainer,
-        shape: AppShape.all(size * 0.28),
-      ),
-      child: Icon(
-        icon,
-        size: size * 0.5,
-        color: context.colorScheme.onPrimaryContainer,
       ),
     );
   }
