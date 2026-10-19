@@ -5,6 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 library;
 
+import 'package:fl_clash/ui/context.dart';
+import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/icons.dart';

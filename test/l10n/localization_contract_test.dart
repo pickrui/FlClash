@@ -7,16 +7,23 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:fl_clash/l10n/intl/messages_en.dart' as messages_en;
+import 'package:fl_clash/l10n/intl/messages_es.dart' as messages_es;
+import 'package:fl_clash/l10n/intl/messages_fr.dart' as messages_fr;
 import 'package:fl_clash/l10n/intl/messages_ja.dart' as messages_ja;
+import 'package:fl_clash/l10n/intl/messages_ko.dart' as messages_ko;
 import 'package:fl_clash/l10n/intl/messages_ru.dart' as messages_ru;
 import 'package:fl_clash/l10n/intl/messages_zh_CN.dart' as messages_zh_cn;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 import 'package:intl/message_lookup_by_library.dart';
 
 void main() {
   final lookups = <String, MessageLookupByLibrary>{
     'en': messages_en.messages,
+    'es': messages_es.messages,
+    'fr': messages_fr.messages,
     'ja': messages_ja.messages,
+    'ko': messages_ko.messages,
     'ru': messages_ru.messages,
     'zh_CN': messages_zh_cn.messages,
   };
@@ -36,6 +43,11 @@ void main() {
       final locale = entry.key;
       final messages = entry.value.messages;
       expect(
+        arbByLocale[locale]!.keys.where((key) => !key.startsWith('@')).toSet(),
+        expectedKeys,
+        reason: '$locale source messages must match the English contract',
+      );
+      expect(
         messages.keys.toSet(),
         expectedKeys,
         reason: '$locale generated messages must match the English contract',
@@ -43,14 +55,26 @@ void main() {
 
       for (final key in expectedKeys) {
         final template = arbByLocale['en']![key] as String;
-        final placeholderNames = RegExp(r'\{([A-Za-z_][A-Za-z0-9_]*)\b')
+        final placeholderPattern = RegExp(r'\{([A-Za-z_][A-Za-z0-9_]*)\s*[,}]');
+        final placeholderNames = placeholderPattern
             .allMatches(template)
             .map((match) => match.group(1))
             .toSet();
+        expect(
+          placeholderPattern
+              .allMatches(arbByLocale[locale]![key] as String)
+              .map((match) => match.group(1))
+              .toSet(),
+          placeholderNames,
+          reason: '$locale.$key must preserve every placeholder',
+        );
         final arguments = List<dynamic>.filled(placeholderNames.length, 2);
         late final dynamic translated;
         try {
-          translated = Function.apply(messages[key]! as Function, arguments);
+          translated = Intl.withLocale(
+            locale,
+            () => Function.apply(messages[key]! as Function, arguments),
+          );
         } on NoSuchMethodError catch (error) {
           fail('$locale.$key has mismatched placeholder metadata: $error');
         }

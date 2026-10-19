@@ -6,8 +6,58 @@
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 
 void main() {
+  setUp(() {
+    final previousLocale = Intl.getCurrentLocale();
+    final previousDefault = Intl.defaultLocale;
+    addTearDown(() async {
+      await AppLocalizations.load(Locale(previousLocale));
+      Intl.defaultLocale = previousDefault;
+    });
+  });
+
+  test(
+    'new locales interpolate resource and import messages without fallback',
+    () async {
+      for (final (locale, singular, plural) in const [
+        ('fr', '1 règle', '2 règles'),
+        ('es', '1 regla', '2 reglas'),
+        ('ko', '규칙 1개', '규칙 2개'),
+      ]) {
+        final l = await AppLocalizations.load(Locale(locale));
+        expect(l.rulesCount(1), singular);
+        expect(l.rulesCount(2), plural);
+        expect(l.providerInUse('Fixture'), contains('Fixture'));
+        for (final count in [0, 1, 2]) {
+          for (final message in [
+            l.itemsCount(count),
+            l.proxiesCount(count),
+            l.rulesCount(count),
+            l.settingsCount(count),
+            l.proxyGroupsCount(count),
+            l.groupCount(count),
+            l.customImportDroppedSubRules(count),
+            l.customImportUnnamedProxies(count),
+            l.shareLinkNodesAdded(count),
+            l.shareLinksNotRead(count),
+            l.profileDaysLeft(count),
+            l.profileExpiresIn('2030-01-01', count),
+            l.yearsAgo(count),
+            l.monthsAgo(count),
+            l.daysAgo(count),
+            l.hoursAgo(count),
+            l.minutesAgo(count),
+          ]) {
+            expect(message, contains('$count'));
+            expect(message, isNot(contains('{')));
+          }
+        }
+      }
+    },
+  );
+
   test('load resolves accessors for every supported locale', () async {
     for (final locale in AppLocalizations.delegate.supportedLocales) {
       final appLocalizations = await AppLocalizations.load(locale);

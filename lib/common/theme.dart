@@ -16,20 +16,18 @@ class CommonTheme {
   Color get darken2SecondaryContainer {
     return _colorMap.updateCacheValue(
       'darken2SecondaryContainer',
-      () => context.colorScheme.secondaryContainer.blendDarken(
-        context,
-        factor: 0.2,
-      ),
+      () =>
+          Theme.of(context).colorScheme.secondaryContainer
+              .blendDarken(context, factor: 0.2),
     );
   }
 
   Color get darken3PrimaryContainer {
     return _colorMap.updateCacheValue(
       'darken3PrimaryContainer',
-      () => context.colorScheme.primaryContainer.blendDarken(
-        context,
-        factor: 0.3,
-      ),
+      () =>
+          Theme.of(context).colorScheme.primaryContainer
+              .blendDarken(context, factor: 0.3),
     );
   }
 }

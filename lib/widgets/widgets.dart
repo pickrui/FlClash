@@ -15,6 +15,8 @@ export 'package:fl_clash/ui/card.dart';
 
 export 'package:fl_clash/ui/chip.dart';
 
+export 'package:fl_clash/ui/context.dart';
+
 export 'package:fl_clash/ui/dialog.dart';
 
 export 'package:fl_clash/ui/disabled_mask.dart';
@@ -45,6 +47,8 @@ export 'package:fl_clash/ui/pop_scope.dart';
 export 'package:fl_clash/ui/popup.dart';
 
 export 'package:fl_clash/ui/scaffold.dart';
+
+export 'package:fl_clash/ui/shape.dart';
 
 export 'package:fl_clash/ui/scroll.dart';
 

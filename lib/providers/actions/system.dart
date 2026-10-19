@@ -81,9 +81,9 @@ extension SystemControllerExt on AppController {
             TextSpan(
               text: ' $url ',
               style: TextStyle(
-                color: _context.colorScheme.primary,
+                color: Theme.of(_context).colorScheme.primary,
                 decoration: TextDecoration.underline,
-                decorationColor: _context.colorScheme.primary,
+                decorationColor: Theme.of(_context).colorScheme.primary,
               ),
             ),
             TextSpan(

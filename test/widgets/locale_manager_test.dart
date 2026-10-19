@@ -10,9 +10,19 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 
 void main() {
+  setUp(() {
+    final previousLocale = Intl.getCurrentLocale();
+    final previousDefault = Intl.defaultLocale;
+    addTearDown(() async {
+      await AppLocalizations.load(Locale(previousLocale));
+      Intl.defaultLocale = previousDefault;
+    });
+  });
+
   testWidgets(
     'publishes the resolved locale and refreshes native-facing labels',
     (tester) async {
@@ -62,6 +72,16 @@ void main() {
       );
       expect(container.read(sharedStateProvider).stopText, isNot(english));
       expect(container.read(trayStateProvider).locale, 'zh-CN');
+      for (final (requested, resolved, stopText) in const [
+        (Locale('fr', 'FR'), Locale('fr'), 'Arrêter'),
+        (Locale('es', 'MX'), Locale('es'), 'Detener'),
+        (Locale('ko', 'KR'), Locale('ko'), '중지'),
+      ]) {
+        await show(requested);
+        expect(container.read(loadedLocaleProvider), resolved);
+        expect(container.read(sharedStateProvider).stopText, stopText);
+        expect(container.read(trayStateProvider).locale, resolved.languageCode);
+      }
       await show(const Locale('xx'));
       expect(container.read(loadedLocaleProvider), const Locale('en'));
       expect(container.read(sharedStateProvider).stopText, english);

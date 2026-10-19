@@ -8,8 +8,6 @@ import 'package:fl_clash/models/state.dart';
 import 'package:fl_clash/ui/inherited.dart';
 import 'package:material_ui/material_ui.dart';
 
-export 'package:fl_clash/ui/context.dart';
-
 /// The state [BuildContextExtension.showNotifier] hands its messages to.
 abstract class MessageHostState<T extends StatefulWidget> extends State<T> {
   void message(String text, {MessageActionState? actionState});
