@@ -8,7 +8,6 @@ package com.oixcloud.clash.plugins
 import com.oixcloud.clash.Service
 import com.oixcloud.clash.State
 import com.oixcloud.clash.common.Components
-import com.oixcloud.clash.invokeMethodOnMainThread
 import com.oixcloud.clash.models.SharedState
 import com.google.gson.Gson
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -146,8 +145,11 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
     }
 
     private fun onServiceDisconnected(message: String) {
-        State.handleServiceLost()
-        flutterMethodChannel.invokeMethodOnMainThread<Any>("crash", message)
+        launch(Dispatchers.Main) {
+            if (attached && State.servicePlugin === this@ServicePlugin) {
+                flutterMethodChannel.invokeMethod("crash", message)
+            }
+        }
     }
 
     private fun handleSyncState(call: MethodCall, result: MethodChannel.Result) {
@@ -161,6 +163,7 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
 
 
     fun handleInit(result: MethodChannel.Result) {
+        Service.onServiceDisconnected = ::onServiceDisconnected
         Service.bind()
         launch {
             Service.setEventListener(this@ServicePlugin, { attached && State.servicePlugin === this@ServicePlugin }) {
@@ -172,7 +175,6 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
             }
 
         }
-        Service.onServiceDisconnected = ::onServiceDisconnected
     }
 
     private fun handleSyncRunState(result: MethodChannel.Result) {

@@ -56,9 +56,8 @@ object Service {
     var onServiceDisconnected: ((String) -> Unit)? = null
 
     private fun handleServiceDisconnected(message: String) {
-        onServiceDisconnected?.let {
-            it(message)
-        }
+        State.handleServiceLost()
+        onServiceDisconnected?.invoke(message)
     }
 
     fun bind() {

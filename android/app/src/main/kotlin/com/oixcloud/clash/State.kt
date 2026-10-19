@@ -59,15 +59,7 @@ object State {
         get() = flutterEngine?.plugin<TilePlugin>()
 
     private val quickActions = QuickActionHandler(
-        isRunning = {
-            runLock.withLock {
-                Service.bind()
-                // Do not interpret a failed query as STOP and accidentally start.
-                runTime = Service.getRunTime()
-                runStateFlow.value = if (runTime == 0L) RunState.STOP else RunState.START
-                runTime != 0L
-            }
-        },
+        isRunning = { syncRunState() != 0L },
         start = ::handleStartServiceAction,
         stop = ::handleStopServiceAction,
     )

@@ -17,6 +17,35 @@ import org.junit.Test
 
 class ServiceRunTimeTest {
     @Test
+    fun serviceLossClearsStateBeforeOptionalUiNotification() {
+        val previousTime = State.runTime
+        val previousState = State.runStateFlow.value
+        val previousCallback = Service.onServiceDisconnected
+        val disconnect = Service.javaClass.getDeclaredMethod("handleServiceDisconnected", String::class.java)
+            .apply { isAccessible = true }
+        try {
+            for (hasUi in listOf(false, true)) {
+                State.runTime = 123L
+                State.runStateFlow.value = RunState.START
+                var notified = false
+                Service.onServiceDisconnected = if (hasUi) ({ _: String ->
+                    assertEquals(0L, State.runTime)
+                    assertEquals(RunState.STOP, State.runStateFlow.value)
+                    notified = true
+                }) else null
+                disconnect.invoke(Service, "Service disconnected")
+                assertEquals(0L, State.runTime)
+                assertEquals(RunState.STOP, State.runStateFlow.value)
+                assertEquals(hasUi, notified)
+            }
+        } finally {
+            State.runTime = previousTime
+            State.runStateFlow.value = previousState
+            Service.onServiceDisconnected = previousCallback
+        }
+    }
+
+    @Test
     fun delayedStopNotificationReadsTheReplacementSession() = runBlocking {
         val tracker = ServiceRunTimeTracker()
         val lock = Mutex(locked = true)
