@@ -268,10 +268,10 @@ void main() {
       expect(props.width, 0);
     });
 
-    test('size extension defaults to 680x580 when empty', () {
+    test('size extension falls back to the default window size', () {
       const props = WindowProps();
-      expect(props.size.width, 680);
-      expect(props.size.height, 580);
+      expect(props.savedSize, isNull);
+      expect(props.size, defaultWindowSize);
     });
 
     test('size extension uses actual values', () {
@@ -639,6 +639,20 @@ void main() {
       expect(restored.vpnProps.enable, false);
       expect(restored.windowProps.width, 1280);
       expect(restored.windowProps.height, 720);
+    });
+
+    test('a window saved under the old key opens at the default size', () {
+      final config = Config.fromJson({
+        'themeProps': const ThemeProps().toJson(),
+        'windowProps': const WindowProps(
+          width: 680,
+          height: 580,
+          left: 10,
+          top: 20,
+        ).toJson(),
+      });
+      expect(config.windowProps, defaultWindowProps);
+      expect(config.windowProps.size, defaultWindowSize);
     });
   });
 }

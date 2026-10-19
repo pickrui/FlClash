@@ -431,9 +431,9 @@ _Config _$ConfigFromJson(Map<String, dynamic> json) => _Config(
       : ProxiesStyleProps.fromJson(
           json['proxiesStyleProps'] as Map<String, dynamic>?,
         ),
-  windowProps: json['windowProps'] == null
+  windowProps: json['windowGeometry'] == null
       ? defaultWindowProps
-      : WindowProps.fromJson(json['windowProps'] as Map<String, dynamic>?),
+      : WindowProps.fromJson(json['windowGeometry'] as Map<String, dynamic>?),
   patchClashConfig: json['patchClashConfig'] == null
       ? defaultClashConfig
       : ClashConfig.fromJson(json['patchClashConfig'] as Map<String, dynamic>),
@@ -453,7 +453,7 @@ Map<String, dynamic> _$ConfigToJson(_Config instance) => <String, dynamic>{
   'vpnProps': instance.vpnProps,
   'themeProps': instance.themeProps,
   'proxiesStyleProps': instance.proxiesStyleProps,
-  'windowProps': instance.windowProps,
+  'windowGeometry': instance.windowProps,
   'patchClashConfig': instance.patchClashConfig,
   'tailscaleNetworks': instance.tailscaleNetworks,
 };

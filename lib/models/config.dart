@@ -203,10 +203,17 @@ abstract class WindowProps with _$WindowProps {
       json == null ? const WindowProps() : _$WindowPropsFromJson(json);
 }
 
-extension WindowPropsExt on WindowProps {
-  Size get _size => Size(width, height);
+/// Four dashboard columns at full density beside the expanded sidebar, with
+/// room for the Windows and Linux title bar.
+const defaultWindowSize = Size(1280, 880);
 
-  Size get size => _size.isEmpty ? const Size(680, 580) : _size;
+extension WindowPropsExt on WindowProps {
+  Size? get savedSize {
+    final size = Size(width, height);
+    return size.isEmpty ? null : size;
+  }
+
+  Size get size => savedSize ?? defaultWindowSize;
 }
 
 @freezed
@@ -417,7 +424,10 @@ abstract class Config with _$Config {
     @Default(defaultVpnProps) VpnProps vpnProps,
     @JsonKey(fromJson: ThemeProps.safeFromJson) required ThemeProps themeProps,
     @Default(defaultProxiesStyleProps) ProxiesStyleProps proxiesStyleProps,
-    @Default(defaultWindowProps) WindowProps windowProps,
+    // A new key opens every window once at defaultWindowSize.
+    @Default(defaultWindowProps)
+    @JsonKey(name: 'windowGeometry')
+    WindowProps windowProps,
     @Default(defaultClashConfig) ClashConfig patchClashConfig,
     @Default([]) List<TailscaleNetwork> tailscaleNetworks,
   }) = _Config;

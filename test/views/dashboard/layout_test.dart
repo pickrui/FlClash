@@ -236,6 +236,25 @@ void main() {
     }
   });
 
+  testWidgets('the default window opens on four full columns beside the '
+      'expanded sidebar and a title bar', (tester) async {
+    const sidebar = 220.0;
+    const titleBar = 32.0;
+    await pumpDashboard(
+      tester,
+      Size(
+        defaultWindowSize.width - sidebar,
+        defaultWindowSize.height - titleBar,
+      ),
+    );
+
+    expect(rectOf(tester, CurrentOutboundCard).height, 208);
+    expect(find.byType(ConnectionsTableCard), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await teardown(tester);
+  });
+
   testWidgets('a short window keeps the layout with compact rows', (
     tester,
   ) async {
