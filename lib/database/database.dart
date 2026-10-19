@@ -12,6 +12,7 @@ import 'package:drift/native.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 
 part 'generated/database.g.dart';
 part 'converter.dart';
@@ -345,4 +346,13 @@ class _NonNullSelectable<T extends Object> extends Selectable<T> {
       _source.watch().map((rows) => rows.nonNulls.toList());
 }
 
-final database = Database();
+Database _database = Database();
+
+Database get database => _database;
+
+@visibleForTesting
+Future<void> reopenDatabase() async {
+  final previous = _database;
+  _database = Database();
+  await previous.close().catchError((Object _) {});
+}

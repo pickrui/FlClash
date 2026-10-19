@@ -6,6 +6,7 @@
 import 'dart:async';
 
 import 'package:fl_clash/common/indexing.dart';
+import 'package:fl_clash/database/database.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -54,6 +55,7 @@ void main() {
     try {
       await databaseWriteQueue.wait();
     } catch (_) {}
+    await reopenDatabase();
   });
 
   test('a rule moved twice before its write lands keeps valid keys', () async {
