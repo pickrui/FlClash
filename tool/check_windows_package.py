@@ -53,8 +53,9 @@ def verify(bundle, archive, installer, arch):
     binaries = [bundle / name for name in required[:3]]
     binaries.extend(bundle.rglob('*.dll'))
     for path in binaries:
-        if pe_machine(path) != MACHINES[arch]:
-            raise ValueError(f'Wrong {arch} architecture: {path}')
+        machine = pe_machine(path)
+        if machine != MACHINES[arch]:
+            raise ValueError(f'Wrong {arch} architecture 0x{machine:04x}: {path}')
     core_sha = file_digest(bundle / 'FlClashCore.exe')
     manifest = json.loads((bundle / 'manifest.json').read_text())
     if manifest.get('coreSha256') != core_sha:

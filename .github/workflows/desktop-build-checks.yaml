@@ -109,7 +109,7 @@ jobs:
           python tool/check_windows_package.py --arch $env:BUILD_ARCH
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Save Windows release fixtures
-        if: inputs.platform == 'windows'
+        if: always() && inputs.platform == 'windows'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: windows-package-fixture-${{ inputs.arch }}
