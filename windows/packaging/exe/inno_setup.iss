@@ -15,8 +15,8 @@ SolidCompression=yes
 SetupIconFile={{SETUP_ICON_FILE}}
 WizardStyle=modern
 PrivilegesRequired={{PRIVILEGES_REQUIRED}}
-ArchitecturesAllowed={{ARCH}}
-ArchitecturesInstallIn64BitMode={{ARCH}}
+ArchitecturesAllowed={% if ARCH == 'x64' %}x64os{% else %}{{ARCH}}{% endif %}
+ArchitecturesInstallIn64BitMode={% if ARCH == 'x64' %}x64os{% else %}{{ARCH}}{% endif %}
 
 [Code]
 var

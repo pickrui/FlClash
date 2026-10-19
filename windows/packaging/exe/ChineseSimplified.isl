@@ -1,4 +1,4 @@
-﻿; *** Inno Setup version 6.1.0+ Chinese Simplified messages ***
+﻿; *** Inno Setup version 6.5.0+ Chinese Simplified messages ***
 ;
 ; To download user-contributed translations of this file, go to:
 ;   https://jrsoftware.org/files/istrans/
@@ -30,8 +30,6 @@ DialogFontName=Microsoft YaHei UI
 ;DialogFontSize=8
 WelcomeFontName=Microsoft YaHei UI
 ;WelcomeFontSize=12
-TitleFontName=Microsoft YaHei UI
-;TitleFontSize=29
 ;CopyrightFontName=Arial
 ;CopyrightFontSize=8
 
@@ -221,14 +219,11 @@ ReadyMemoGroup=开始菜单文件夹：
 ReadyMemoTasks=附加任务：
 
 ; *** TDownloadWizardPage wizard page and DownloadTemporaryFile
-DownloadingLabel=正在下载附加文件...
 ButtonStopDownload=停止下载(&S)
 StopDownload=您确定要停止下载吗？
 ErrorDownloadAborted=下载已中止
 ErrorDownloadFailed=下载失败：%1 %2
 ErrorDownloadSizeFailed=获取下载大小失败：%1 %2
-ErrorFileHash1=校验文件哈希失败：%1
-ErrorFileHash2=无效的文件哈希：预期为 %1，实际为 %2
 ErrorProgress=无效的进度：%1，总共%2
 ErrorFileSize=文件大小错误：预期为 %1，实际为 %2
 
@@ -377,6 +372,31 @@ ShutdownBlockReasonUninstallingApp=正在卸载 %1。
 
 ; The custom messages below aren't used by Setup itself, but if you make
 ; use of them in your scripts, you'll want to translate them.
+
+; Inno Setup 6.7.1: https://github.com/jrsoftware/issrc/blob/is-6_7_1/Files/Languages/Unofficial/ChineseSimplified.isl
+ArchiveIncorrectPassword=压缩文件密码不正确
+ArchiveIsCorrupted=压缩文件已损坏
+ArchiveUnsupportedFormat=不支持的压缩文件格式
+ButtonStopExtraction=停止解压(&S)
+DownloadingLabel2=正在下载文件...
+ErrorDownloading=下载文件时出错：
+ErrorExtracting=解压压缩文件时出错：
+ErrorExtractionAborted=解压已中止
+ErrorExtractionFailed=解压失败：%1
+ExtractingLabel=正在解压文件...
+RetryCancelCancel=取消(&C)
+RetryCancelRetry=重试(&T)
+RetryCancelSelectAction=选择操作
+SourceVerificationFailed=源文件验证失败: %1
+StatusDownloadFiles=正在下载文件...
+StopExtraction=您确定要停止解压吗？
+VerificationFileHashIncorrect=文件哈希值不正确
+VerificationFileNameIncorrect=文件名不正确
+VerificationFileSizeIncorrect=文件大小不正确
+VerificationFileTagIncorrect=文件标签不正确
+VerificationKeyNotFound=签名文件“%1”使用了未知密钥
+VerificationSignatureDoesntExist=签名文件“%1”不存在
+VerificationSignatureInvalid=签名文件“%1”无效
 
 [CustomMessages]
 
