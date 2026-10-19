@@ -979,7 +979,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Сервер имен по умолчанию",
     ),
     "defaultNameserverDesc": MessageLookupByLibrary.simpleMessage(
-      "Для разрешения DNS-сервера",
+      "Сервер имен по умолчанию разрешает домены DNS-серверов",
     ),
     "defaultText": MessageLookupByLibrary.simpleMessage("По умолчанию"),
     "delay": MessageLookupByLibrary.simpleMessage("Задержка"),
@@ -1275,7 +1275,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Прокси для подключения",
     ),
     "dialerProxyDesc": MessageLookupByLibrary.simpleMessage(
-      "Исход, через который идёт обращение к NTP-серверу",
+      "Прокси для подключения — исход, через который идёт обращение к NTP-серверу",
     ),
     "dialerProxyLoopStopped": m22,
     "direct": MessageLookupByLibrary.simpleMessage("Прямой"),
@@ -1489,7 +1489,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Режим фильтра Fake-IP",
     ),
     "fakeipFilterModeDesc": MessageLookupByLibrary.simpleMessage(
-      "blacklist исключает совпадения, whitelist — только их, rule — по правилам",
+      "В режиме фильтра Fake-IP blacklist исключает совпадения, whitelist применяется только к ним, rule — по правилам",
     ),
     "fakeipRange": MessageLookupByLibrary.simpleMessage("Диапазон Fakeip"),
     "fakeipRange6": MessageLookupByLibrary.simpleMessage(
@@ -1498,7 +1498,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "fakeipTtl": MessageLookupByLibrary.simpleMessage("TTL Fake-IP"),
     "fallback": MessageLookupByLibrary.simpleMessage("Резервный"),
     "fallbackDesc": MessageLookupByLibrary.simpleMessage(
-      "Обычно используется оффшорный DNS",
+      "Для резервного сервера обычно используют зарубежный DNS",
     ),
     "fallbackFilter": MessageLookupByLibrary.simpleMessage(
       "Фильтр резервного DNS",
@@ -1862,7 +1862,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Метка маршрутизации",
     ),
     "listenRoutingMarkDesc": MessageLookupByLibrary.simpleMessage(
-      "Только Linux",
+      "Метка маршрутизации действует только в Linux",
     ),
     "liveConnections": MessageLookupByLibrary.simpleMessage(
       "Активные соединения",
@@ -1991,13 +1991,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "nameserver": MessageLookupByLibrary.simpleMessage("Сервер имен"),
     "nameserverDesc": MessageLookupByLibrary.simpleMessage(
-      "Для разрешения домена",
+      "Сервер имен разрешает домены",
     ),
     "nameserverPolicy": MessageLookupByLibrary.simpleMessage(
       "Политика сервера имен",
     ),
     "nameserverPolicyDesc": MessageLookupByLibrary.simpleMessage(
-      "Указать соответствующую политику сервера имен",
+      "Политика сервера имен задаёт сервер имен для подходящих доменов",
     ),
     "navigationBarStyle": MessageLookupByLibrary.simpleMessage("Нижняя панель"),
     "network": MessageLookupByLibrary.simpleMessage("Сеть"),
@@ -2125,7 +2125,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Добавленные здесь параметры заменяют настройки NTP всех профилей; остальные остаются такими, как в профиле. Параметры, добавленные в самом пользовательском профиле, имеют приоритет",
     ),
     "ntpStatusDesc": MessageLookupByLibrary.simpleMessage(
-      "Брать время с NTP-сервера, а не из системных часов",
+      "NTP берёт время с NTP-сервера, а не из системных часов",
     ),
     "nullProfileDesc": MessageLookupByLibrary.simpleMessage(
       "Нет профиля, пожалуйста, добавьте профиль",
@@ -2286,7 +2286,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "ports": MessageLookupByLibrary.simpleMessage("Порты"),
     "preferH3": MessageLookupByLibrary.simpleMessage("Предпочитать HTTP/3"),
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
-      "Приоритетное использование HTTP/3 для DOH",
+      "«Предпочитать HTTP/3» сначала пробует HTTP/3 для серверов DoH",
     ),
     "prerequisites": MessageLookupByLibrary.simpleMessage(
       "Предварительные условия",
@@ -2448,7 +2448,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Прокси-сервер имен",
     ),
     "proxyNameserverDesc": MessageLookupByLibrary.simpleMessage(
-      "Домен для разрешения прокси-узлов",
+      "Прокси-сервер имен разрешает домены прокси-узлов",
     ),
     "proxyNameserverPolicy": MessageLookupByLibrary.simpleMessage(
       "Политика прокси-сервера имен",
@@ -2573,7 +2573,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "respectRules": MessageLookupByLibrary.simpleMessage("Соблюдение правил"),
     "respectRulesDesc": MessageLookupByLibrary.simpleMessage(
-      "DNS-соединение следует правилам, необходимо настроить proxy-server-nameserver",
+      "«Соблюдение правил» направляет DNS-соединения по правилам; нужен прокси-сервер имен",
     ),
     "restart": MessageLookupByLibrary.simpleMessage("Перезапустить"),
     "restartCoreTip": MessageLookupByLibrary.simpleMessage(
@@ -2949,7 +2949,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "status": MessageLookupByLibrary.simpleMessage("Статус"),
     "statusDesc": MessageLookupByLibrary.simpleMessage(
-      "Системный DNS будет использоваться при выключении",
+      "При отключённом DNS используется системный DNS",
     ),
     "stop": MessageLookupByLibrary.simpleMessage("Стоп"),
     "stopVpn": MessageLookupByLibrary.simpleMessage("Остановка VPN..."),
@@ -3359,7 +3359,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Записывать в систему",
     ),
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
-      "Также устанавливать системные часы; Android это игнорирует",
+      "«Записывать в систему» также устанавливает системные часы; Android это игнорирует",
     ),
     "yearsAgo": m111,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Упрощенный китайский"),

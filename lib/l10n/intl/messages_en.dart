@@ -960,7 +960,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Default nameserver",
     ),
     "defaultNameserverDesc": MessageLookupByLibrary.simpleMessage(
-      "For resolving DNS server",
+      "The default nameserver resolves the domains of DNS servers",
     ),
     "defaultText": MessageLookupByLibrary.simpleMessage("Default"),
     "delay": MessageLookupByLibrary.simpleMessage("Delay"),
@@ -1244,7 +1244,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "diagWebResult": m21,
     "dialerProxy": MessageLookupByLibrary.simpleMessage("Dialer proxy"),
     "dialerProxyDesc": MessageLookupByLibrary.simpleMessage(
-      "The outbound used to reach the NTP server",
+      "Dialer proxy is the outbound used to reach the NTP server",
     ),
     "dialerProxyLoopStopped": m22,
     "direct": MessageLookupByLibrary.simpleMessage("Direct"),
@@ -1440,7 +1440,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Fake-IP filter mode",
     ),
     "fakeipFilterModeDesc": MessageLookupByLibrary.simpleMessage(
-      "blacklist excludes matches, whitelist fakes only matches, rule matches as rules",
+      "In Fake-IP filter mode, blacklist excludes matches, whitelist fakes only matches, and rule matches as rules",
     ),
     "fakeipRange": MessageLookupByLibrary.simpleMessage("Fakeip range"),
     "fakeipRange6": MessageLookupByLibrary.simpleMessage(
@@ -1449,7 +1449,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "fakeipTtl": MessageLookupByLibrary.simpleMessage("Fake-IP TTL"),
     "fallback": MessageLookupByLibrary.simpleMessage("Fallback"),
     "fallbackDesc": MessageLookupByLibrary.simpleMessage(
-      "Generally use offshore DNS",
+      "Fallback usually lists DNS servers abroad",
     ),
     "fallbackFilter": MessageLookupByLibrary.simpleMessage("Fallback filter"),
     "fallbackLazyQuery": MessageLookupByLibrary.simpleMessage(
@@ -1799,7 +1799,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "listenRoutingMark": MessageLookupByLibrary.simpleMessage(
       "Listen routing mark",
     ),
-    "listenRoutingMarkDesc": MessageLookupByLibrary.simpleMessage("Linux only"),
+    "listenRoutingMarkDesc": MessageLookupByLibrary.simpleMessage(
+      "Listen routing mark works only on Linux",
+    ),
     "liveConnections": MessageLookupByLibrary.simpleMessage("Live connections"),
     "loading": MessageLookupByLibrary.simpleMessage("Loading..."),
     "local": MessageLookupByLibrary.simpleMessage("Local"),
@@ -1909,13 +1911,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "nameserver": MessageLookupByLibrary.simpleMessage("Nameserver"),
     "nameserverDesc": MessageLookupByLibrary.simpleMessage(
-      "For resolving domain",
+      "The nameserver resolves domains",
     ),
     "nameserverPolicy": MessageLookupByLibrary.simpleMessage(
       "Nameserver policy",
     ),
     "nameserverPolicyDesc": MessageLookupByLibrary.simpleMessage(
-      "Specify the corresponding nameserver policy",
+      "Nameserver policy picks the nameserver for matching domains",
     ),
     "navigationBarStyle": MessageLookupByLibrary.simpleMessage("Bottom bar"),
     "network": MessageLookupByLibrary.simpleMessage("Network"),
@@ -2043,7 +2045,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Entries added here replace the NTP settings of every profile; anything not added keeps the profile\'s own setting. Entries a custom profile adds itself take precedence",
     ),
     "ntpStatusDesc": MessageLookupByLibrary.simpleMessage(
-      "Take the time from an NTP server instead of the system clock",
+      "NTP takes the time from an NTP server instead of the system clock",
     ),
     "nullProfileDesc": MessageLookupByLibrary.simpleMessage(
       "No profile, Please add a profile",
@@ -2184,7 +2186,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "ports": MessageLookupByLibrary.simpleMessage("Ports"),
     "preferH3": MessageLookupByLibrary.simpleMessage("Prefer HTTP/3"),
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
-      "Prioritize the use of DOH\'s http/3",
+      "Prefer HTTP/3 tries HTTP/3 first for DoH servers",
     ),
     "prerequisites": MessageLookupByLibrary.simpleMessage("Prerequisites"),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage(
@@ -2334,7 +2336,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "proxyNameserver": MessageLookupByLibrary.simpleMessage("Proxy nameserver"),
     "proxyNameserverDesc": MessageLookupByLibrary.simpleMessage(
-      "Domain for resolving proxy nodes",
+      "The proxy nameserver resolves the domains of proxy nodes",
     ),
     "proxyNameserverPolicy": MessageLookupByLibrary.simpleMessage(
       "Proxy nameserver policy",
@@ -2461,7 +2463,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "respectRules": MessageLookupByLibrary.simpleMessage("Respect rules"),
     "respectRulesDesc": MessageLookupByLibrary.simpleMessage(
-      "DNS connection following rules, need to configure proxy-server-nameserver",
+      "Respect rules routes DNS connections by the rules and needs a proxy nameserver",
     ),
     "restart": MessageLookupByLibrary.simpleMessage("Restart"),
     "restartCoreTip": MessageLookupByLibrary.simpleMessage(
@@ -2809,7 +2811,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "status": MessageLookupByLibrary.simpleMessage("Status"),
     "statusDesc": MessageLookupByLibrary.simpleMessage(
-      "System DNS will be used when turned off",
+      "With DNS off, the system DNS is used",
     ),
     "stop": MessageLookupByLibrary.simpleMessage("Stop"),
     "stopVpn": MessageLookupByLibrary.simpleMessage("Stopping VPN..."),
@@ -3185,7 +3187,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Whitelist mode"),
     "writeToSystem": MessageLookupByLibrary.simpleMessage("Write to system"),
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
-      "Also set the system clock; Android ignores it",
+      "Write to system also sets the system clock; Android ignores it",
     ),
     "yearsAgo": m111,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),

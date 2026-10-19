@@ -333,7 +333,7 @@ void main() {
     for (final label in ['优先使用HTTP/3', '默认域名服务器', '域名服务器策略', '直连域名服务器']) {
       expect(find.text(label), findsOneWidget);
     }
-    expect(find.textContaining('用于解析DNS服务器'), findsOneWidget);
+    expect(find.textContaining('默认域名服务器用于解析 DNS 服务器的域名'), findsOneWidget);
     expect(find.text('Default Nameserver'), findsNothing);
     expect(tester.takeException(), isNull);
   });

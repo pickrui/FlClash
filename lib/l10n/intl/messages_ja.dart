@@ -823,7 +823,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "daysAgo": m16,
     "defaultNameserver": MessageLookupByLibrary.simpleMessage("デフォルトネームサーバー"),
     "defaultNameserverDesc": MessageLookupByLibrary.simpleMessage(
-      "DNSサーバーの解決用",
+      "デフォルトネームサーバーは DNS サーバーのドメインを解決します",
     ),
     "defaultText": MessageLookupByLibrary.simpleMessage("デフォルト"),
     "delay": MessageLookupByLibrary.simpleMessage("遅延"),
@@ -1061,7 +1061,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "diagWebResult": m21,
     "dialerProxy": MessageLookupByLibrary.simpleMessage("ダイヤラープロキシ"),
     "dialerProxyDesc": MessageLookupByLibrary.simpleMessage(
-      "NTPサーバーへの接続に使用するアウトバウンド",
+      "ダイヤラープロキシは NTP サーバーへの接続に使用するアウトバウンドです",
     ),
     "dialerProxyLoopStopped": m22,
     "direct": MessageLookupByLibrary.simpleMessage("ダイレクト"),
@@ -1211,13 +1211,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "fakeipFilter": MessageLookupByLibrary.simpleMessage("Fakeipフィルター"),
     "fakeipFilterMode": MessageLookupByLibrary.simpleMessage("Fake-IPフィルターモード"),
     "fakeipFilterModeDesc": MessageLookupByLibrary.simpleMessage(
-      "blacklistは一致を除外、whitelistは一致のみ、ruleはルールで判定",
+      "Fake-IP フィルターモードでは、blacklist は一致を除外、whitelist は一致のみ、rule はルールで判定します",
     ),
     "fakeipRange": MessageLookupByLibrary.simpleMessage("Fakeip範囲"),
     "fakeipRange6": MessageLookupByLibrary.simpleMessage("Fake-IP範囲（IPv6）"),
     "fakeipTtl": MessageLookupByLibrary.simpleMessage("Fake-IP TTL"),
     "fallback": MessageLookupByLibrary.simpleMessage("フォールバック"),
-    "fallbackDesc": MessageLookupByLibrary.simpleMessage("通常はオフショアDNSを使用"),
+    "fallbackDesc": MessageLookupByLibrary.simpleMessage(
+      "フォールバックには通常、海外の DNS を使用します",
+    ),
     "fallbackFilter": MessageLookupByLibrary.simpleMessage("フォールバックフィルター"),
     "fallbackLazyQuery": MessageLookupByLibrary.simpleMessage("フォールバックの遅延クエリ"),
     "fetchOrdersFailed": MessageLookupByLibrary.simpleMessage("購入履歴の取得に失敗しました"),
@@ -1520,7 +1522,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "list": MessageLookupByLibrary.simpleMessage("リスト"),
     "listen": MessageLookupByLibrary.simpleMessage("リスン"),
     "listenRoutingMark": MessageLookupByLibrary.simpleMessage("リッスンのルーティングマーク"),
-    "listenRoutingMarkDesc": MessageLookupByLibrary.simpleMessage("Linuxのみ"),
+    "listenRoutingMarkDesc": MessageLookupByLibrary.simpleMessage(
+      "リッスンのルーティングマークは Linux でのみ有効です",
+    ),
     "liveConnections": MessageLookupByLibrary.simpleMessage("リアルタイム接続"),
     "loading": MessageLookupByLibrary.simpleMessage("読み込み中..."),
     "local": MessageLookupByLibrary.simpleMessage("ローカル"),
@@ -1607,10 +1611,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "このカスタムプロファイルに名前を付けてください",
     ),
     "nameserver": MessageLookupByLibrary.simpleMessage("ネームサーバー"),
-    "nameserverDesc": MessageLookupByLibrary.simpleMessage("ドメイン解決用"),
+    "nameserverDesc": MessageLookupByLibrary.simpleMessage(
+      "ネームサーバーはドメインを解決します",
+    ),
     "nameserverPolicy": MessageLookupByLibrary.simpleMessage("ネームサーバーポリシー"),
     "nameserverPolicyDesc": MessageLookupByLibrary.simpleMessage(
-      "対応するネームサーバーポリシーを指定",
+      "ネームサーバーポリシーは、一致するドメインに使うネームサーバーを指定します",
     ),
     "navigationBarStyle": MessageLookupByLibrary.simpleMessage("ボトムバー"),
     "network": MessageLookupByLibrary.simpleMessage("ネットワーク"),
@@ -1714,7 +1720,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "ここで追加した項目は、すべてのプロファイルの NTP 設定を上書きします。追加していない項目はプロファイル自身の設定のままです。カスタムプロファイル自身が追加した項目が優先されます",
     ),
     "ntpStatusDesc": MessageLookupByLibrary.simpleMessage(
-      "システムクロックではなくNTPサーバーから時刻を取得します",
+      "NTP を有効にすると、システムクロックではなく NTP サーバーから時刻を取得します",
     ),
     "nullProfileDesc": MessageLookupByLibrary.simpleMessage(
       "プロファイルがありません。追加してください",
@@ -1836,7 +1842,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "portValue": m69,
     "ports": MessageLookupByLibrary.simpleMessage("ポート"),
     "preferH3": MessageLookupByLibrary.simpleMessage("HTTP/3を優先"),
-    "preferH3Desc": MessageLookupByLibrary.simpleMessage("DOHのHTTP/3を優先使用"),
+    "preferH3Desc": MessageLookupByLibrary.simpleMessage(
+      "HTTP/3 を優先すると、DoH サーバーで HTTP/3 を優先して使用します",
+    ),
     "prerequisites": MessageLookupByLibrary.simpleMessage("前提条件"),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage("キーボードを押してください"),
     "preview": MessageLookupByLibrary.simpleMessage("プレビュー"),
@@ -1973,7 +1981,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "proxyNameserver": MessageLookupByLibrary.simpleMessage("プロキシネームサーバー"),
     "proxyNameserverDesc": MessageLookupByLibrary.simpleMessage(
-      "プロキシノード解決用ドメイン",
+      "プロキシネームサーバーはプロキシノードのドメインを解決します",
     ),
     "proxyNameserverPolicy": MessageLookupByLibrary.simpleMessage(
       "プロキシネームサーバーポリシー",
@@ -2068,7 +2076,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "resourcesDesc": MessageLookupByLibrary.simpleMessage("外部リソース関連情報"),
     "respectRules": MessageLookupByLibrary.simpleMessage("ルール尊重"),
     "respectRulesDesc": MessageLookupByLibrary.simpleMessage(
-      "DNS接続がルールに従う（proxy-server-nameserverの設定が必要）",
+      "ルール尊重を有効にすると DNS 接続がルールに従います。プロキシネームサーバーの設定が必要です",
     ),
     "restart": MessageLookupByLibrary.simpleMessage("再起動"),
     "restartCoreTip": MessageLookupByLibrary.simpleMessage("コアを再起動してもよろしいですか？"),
@@ -2363,7 +2371,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "起動がタイムアウトしました。アプリを終了して再度開いてください。問題が続く場合は、以下の診断情報をコピーしてください。",
     ),
     "status": MessageLookupByLibrary.simpleMessage("ステータス"),
-    "statusDesc": MessageLookupByLibrary.simpleMessage("無効時はシステムDNSを使用"),
+    "statusDesc": MessageLookupByLibrary.simpleMessage(
+      "DNS を無効にすると、システム DNS を使用します",
+    ),
     "stop": MessageLookupByLibrary.simpleMessage("停止"),
     "stopVpn": MessageLookupByLibrary.simpleMessage("VPNを停止中..."),
     "store": MessageLookupByLibrary.simpleMessage("ストア"),
@@ -2680,7 +2690,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "whitelistMode": MessageLookupByLibrary.simpleMessage("ホワイトリストモード"),
     "writeToSystem": MessageLookupByLibrary.simpleMessage("システムに書き込む"),
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
-      "システムクロックも設定します。Androidでは無視されます",
+      "システムに書き込むを有効にするとシステムクロックも設定します。Android では無視されます",
     ),
     "yearsAgo": m111,
     "zh_CN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),

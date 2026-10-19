@@ -1702,20 +1702,20 @@ class AppLocalizations {
     return Intl.message('Status', name: 'status', desc: '', args: []);
   }
 
-  /// `System DNS will be used when turned off`
+  /// `With DNS off, the system DNS is used`
   String get statusDesc {
     return Intl.message(
-      'System DNS will be used when turned off',
+      'With DNS off, the system DNS is used',
       name: 'statusDesc',
       desc: '',
       args: [],
     );
   }
 
-  /// `Prioritize the use of DOH's http/3`
+  /// `Prefer HTTP/3 tries HTTP/3 first for DoH servers`
   String get preferH3Desc {
     return Intl.message(
-      'Prioritize the use of DOH\'s http/3',
+      'Prefer HTTP/3 tries HTTP/3 first for DoH servers',
       name: 'preferH3Desc',
       desc: '',
       args: [],
@@ -1732,10 +1732,10 @@ class AppLocalizations {
     );
   }
 
-  /// `DNS connection following rules, need to configure proxy-server-nameserver`
+  /// `Respect rules routes DNS connections by the rules and needs a proxy nameserver`
   String get respectRulesDesc {
     return Intl.message(
-      'DNS connection following rules, need to configure proxy-server-nameserver',
+      'Respect rules routes DNS connections by the rules and needs a proxy nameserver',
       name: 'respectRulesDesc',
       desc: '',
       args: [],
@@ -1777,10 +1777,10 @@ class AppLocalizations {
     );
   }
 
-  /// `For resolving DNS server`
+  /// `The default nameserver resolves the domains of DNS servers`
   String get defaultNameserverDesc {
     return Intl.message(
-      'For resolving DNS server',
+      'The default nameserver resolves the domains of DNS servers',
       name: 'defaultNameserverDesc',
       desc: '',
       args: [],
@@ -1792,10 +1792,10 @@ class AppLocalizations {
     return Intl.message('Nameserver', name: 'nameserver', desc: '', args: []);
   }
 
-  /// `For resolving domain`
+  /// `The nameserver resolves domains`
   String get nameserverDesc {
     return Intl.message(
-      'For resolving domain',
+      'The nameserver resolves domains',
       name: 'nameserverDesc',
       desc: '',
       args: [],
@@ -1827,10 +1827,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Specify the corresponding nameserver policy`
+  /// `Nameserver policy picks the nameserver for matching domains`
   String get nameserverPolicyDesc {
     return Intl.message(
-      'Specify the corresponding nameserver policy',
+      'Nameserver policy picks the nameserver for matching domains',
       name: 'nameserverPolicyDesc',
       desc: '',
       args: [],
@@ -1847,10 +1847,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Domain for resolving proxy nodes`
+  /// `The proxy nameserver resolves the domains of proxy nodes`
   String get proxyNameserverDesc {
     return Intl.message(
-      'Domain for resolving proxy nodes',
+      'The proxy nameserver resolves the domains of proxy nodes',
       name: 'proxyNameserverDesc',
       desc: '',
       args: [],
@@ -1862,10 +1862,10 @@ class AppLocalizations {
     return Intl.message('Fallback', name: 'fallback', desc: '', args: []);
   }
 
-  /// `Generally use offshore DNS`
+  /// `Fallback usually lists DNS servers abroad`
   String get fallbackDesc {
     return Intl.message(
-      'Generally use offshore DNS',
+      'Fallback usually lists DNS servers abroad',
       name: 'fallbackDesc',
       desc: '',
       args: [],
@@ -10786,10 +10786,10 @@ class AppLocalizations {
     );
   }
 
-  /// `The outbound used to reach the NTP server`
+  /// `Dialer proxy is the outbound used to reach the NTP server`
   String get dialerProxyDesc {
     return Intl.message(
-      'The outbound used to reach the NTP server',
+      'Dialer proxy is the outbound used to reach the NTP server',
       name: 'dialerProxyDesc',
       desc: '',
       args: [],
@@ -10826,10 +10826,10 @@ class AppLocalizations {
     );
   }
 
-  /// `blacklist excludes matches, whitelist fakes only matches, rule matches as rules`
+  /// `In Fake-IP filter mode, blacklist excludes matches, whitelist fakes only matches, and rule matches as rules`
   String get fakeipFilterModeDesc {
     return Intl.message(
-      'blacklist excludes matches, whitelist fakes only matches, rule matches as rules',
+      'In Fake-IP filter mode, blacklist excludes matches, whitelist fakes only matches, and rule matches as rules',
       name: 'fakeipFilterModeDesc',
       desc: '',
       args: [],
@@ -10881,10 +10881,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Linux only`
+  /// `Listen routing mark works only on Linux`
   String get listenRoutingMarkDesc {
     return Intl.message(
-      'Linux only',
+      'Listen routing mark works only on Linux',
       name: 'listenRoutingMarkDesc',
       desc: '',
       args: [],
@@ -10911,10 +10911,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Take the time from an NTP server instead of the system clock`
+  /// `NTP takes the time from an NTP server instead of the system clock`
   String get ntpStatusDesc {
     return Intl.message(
-      'Take the time from an NTP server instead of the system clock',
+      'NTP takes the time from an NTP server instead of the system clock',
       name: 'ntpStatusDesc',
       desc: '',
       args: [],
@@ -10966,10 +10966,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Also set the system clock; Android ignores it`
+  /// `Write to system also sets the system clock; Android ignores it`
   String get writeToSystemDesc {
     return Intl.message(
-      'Also set the system clock; Android ignores it',
+      'Write to system also sets the system clock; Android ignores it',
       name: 'writeToSystemDesc',
       desc: '',
       args: [],
