@@ -7,7 +7,7 @@ import 'dart:async';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/features/form/form_row.dart';
-import 'package:fl_clash/plugins/app.dart';
+import 'package:fl_clash/plugins/battery.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/ui/navigation_dock.dart';
 import 'package:fl_clash/widgets/widgets.dart';
@@ -47,7 +47,7 @@ class _BatteryOptimizationItemState
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     if (!safeModeBuild) {
-      _changes = (widget.changes ?? app?.batteryOptimizationChanges)?.listen(
+      _changes = (widget.changes ?? batteryOptimization?.changes)?.listen(
         _onChanged,
       );
     }
@@ -97,7 +97,7 @@ class _BatteryOptimizationItemState
         if (!mounted || generation != _generation) return;
         allowed =
             await (widget.readPermission?.call() ??
-                app?.isBatteryOptimizationDisabled() ??
+                batteryOptimization?.isBatteryOptimizationDisabled() ??
                 Future.value(false));
         if (!mounted || generation != _generation) return;
         if (allowed) break;
@@ -124,7 +124,7 @@ class _BatteryOptimizationItemState
     try {
       final opened =
           await (widget.openSettings?.call() ??
-              app?.openBatteryOptimizationSettings() ??
+              batteryOptimization?.openBatteryOptimizationSettings() ??
               Future.value(false));
       if (!mounted) return;
       if (!opened) {

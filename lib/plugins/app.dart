@@ -19,14 +19,6 @@ class App {
   Stream<void> get packageChanges => _packageChanges.stream;
   final _iconChanges = StreamController<void>.broadcast(sync: true);
   Stream<void> get iconChanges => _iconChanges.stream;
-  final _batteryOptimizationChanges = StreamController<bool>.broadcast(
-    sync: true,
-  );
-
-  /// Pushed when the battery allowlist changes, or on Xiaomi the battery
-  /// saver's "No restrictions" list.
-  Stream<bool> get batteryOptimizationChanges =>
-      _batteryOptimizationChanges.stream;
 
   /// Whether a TV keyboard floats over the app without insetting it.
   final floatingKeyboard = ValueNotifier(false);
@@ -38,8 +30,6 @@ class App {
         case 'packagesChanged':
           clearPackageIconCache();
           _packageChanges.add(null);
-        case 'batteryOptimizationChanged':
-          _batteryOptimizationChanges.add(call.arguments == true);
         case 'floatingImeChanged':
           floatingKeyboard.value = call.arguments == true;
         default:
@@ -89,20 +79,6 @@ class App {
 
   Future<bool> openAppSettings() async {
     return await methodChannel.invokeMethod<bool>('openAppSettings') ?? false;
-  }
-
-  Future<bool> isBatteryOptimizationDisabled() async {
-    return await methodChannel.invokeMethod<bool>(
-          'isBatteryOptimizationDisabled',
-        ) ??
-        false;
-  }
-
-  Future<bool> openBatteryOptimizationSettings() async {
-    return await methodChannel.invokeMethod<bool>(
-          'openBatteryOptimizationSettings',
-        ) ??
-        false;
   }
 
   Future<List<String>> getChinaPackageNames() async {

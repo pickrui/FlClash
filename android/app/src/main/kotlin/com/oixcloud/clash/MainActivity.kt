@@ -6,6 +6,7 @@
 package com.oixcloud.clash
 
 import com.oixcloud.clash.common.GlobalState
+import com.oixcloud.clash.plugins.BatteryPlugin
 import com.oixcloud.clash.plugins.AppPlugin
 import com.oixcloud.clash.plugins.ServicePlugin
 import com.oixcloud.clash.plugins.TilePlugin
@@ -19,6 +20,7 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         flutterEngine.plugins.add(AppPlugin())
+        flutterEngine.plugins.add(BatteryPlugin())
         flutterEngine.plugins.add(ServicePlugin())
         flutterEngine.plugins.add(TilePlugin())
         ownedEngine = flutterEngine

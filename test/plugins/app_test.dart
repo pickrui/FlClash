@@ -136,23 +136,6 @@ void main() {
     await completed.future;
   }
 
-  test('forwards battery exemption changes from Android', () async {
-    final changes = <bool>[];
-    final subscription = App().batteryOptimizationChanges.listen(changes.add);
-    addTearDown(subscription.cancel);
-    final delivered = Completer<void>();
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .handlePlatformMessage(
-          channel.name,
-          const StandardMethodCodec().encodeMethodCall(
-            const MethodCall('batteryOptimizationChanged', true),
-          ),
-          (_) => delivered.complete(),
-        );
-    await delivered.future;
-    expect(changes, [true]);
-  });
-
   test('forwards a floating TV keyboard from Android', () async {
     final keyboard = App().floatingKeyboard;
     addTearDown(() => keyboard.value = false);

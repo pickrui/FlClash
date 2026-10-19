@@ -7,7 +7,7 @@ import 'dart:async';
 
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/views/config/battery_optimization.dart';
-import 'package:fl_clash/views/config/network.dart';
+import 'package:fl_clash/views/config/on_demand.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

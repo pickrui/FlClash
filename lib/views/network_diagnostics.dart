@@ -26,7 +26,8 @@ import 'package:material_ui/material_ui.dart';
 
 import 'config/dns.dart';
 import 'config/general.dart' show PortItem;
-import 'config/network.dart' show NetworkListView, OnDemandView;
+import 'config/network.dart' show NetworkListView;
+import 'config/on_demand.dart';
 import 'network_diagnostic_proxy_guide.dart';
 
 final networkDiagnosticReportHeaderProvider = Provider<String>((ref) {

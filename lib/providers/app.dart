@@ -20,6 +20,7 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'generated/app.g.dart';
+part 'on_demand.dart';
 
 @Riverpod(keepAlive: true)
 class LoadedLocale extends _$LoadedLocale with NotifierMixin<Locale?> {
@@ -29,18 +30,6 @@ class LoadedLocale extends _$LoadedLocale with NotifierMixin<Locale?> {
 
 @Riverpod(keepAlive: true)
 CoreController coreHandler(Ref ref) => coreController;
-
-@Riverpod(keepAlive: true)
-class CurrentSSID extends _$CurrentSSID with NotifierMixin<String?> {
-  @override
-  String? build() => null;
-}
-
-@Riverpod(keepAlive: true)
-class SsidRefresh extends _$SsidRefresh with NotifierMixin<int> {
-  @override
-  int build() => 0;
-}
 
 SelectedItemsProvider itemsProvider(String key) => selectedItemsProvider(key);
 

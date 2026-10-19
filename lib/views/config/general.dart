@@ -14,8 +14,9 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/views/application_setting.dart';
-import 'package:fl_clash/views/config/network.dart'
-    show OnDemandView, SuspendOnIdleItem;
+import 'package:fl_clash/views/config/network.dart' show SuspendOnIdleItem;
+import 'package:fl_clash/views/config/on_demand.dart';
+
 import 'package:fl_clash/widgets/config_item.dart';
 import 'package:fl_clash/widgets/proxy_authentication.dart';
 import 'package:fl_clash/widgets/widgets.dart';
