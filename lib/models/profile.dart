@@ -200,6 +200,7 @@ abstract class ProfileProxy with _$ProfileProxy {
     @Default(true) bool enable,
     @Default('') String uri,
     @Default({}) Map<String, Object?> proxy,
+    @Default({}) Set<String> emptyOptions,
   }) = _ProfileProxy;
 
   factory ProfileProxy.create({

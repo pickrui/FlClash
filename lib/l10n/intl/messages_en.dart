@@ -408,6 +408,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "allowTemporarily": MessageLookupByLibrary.simpleMessage(
       "Allow Temporarily",
     ),
+    "allowedIps": MessageLookupByLibrary.simpleMessage("Allowed IPs"),
     "amountDueLabel": MessageLookupByLibrary.simpleMessage("Amount due"),
     "amountPayable": MessageLookupByLibrary.simpleMessage("Amount payable"),
     "announcement": MessageLookupByLibrary.simpleMessage("Announcement"),
@@ -625,12 +626,16 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "checkingPayment": MessageLookupByLibrary.simpleMessage("Checking..."),
     "chooseMembers": MessageLookupByLibrary.simpleMessage("Choose members"),
+    "cipher": MessageLookupByLibrary.simpleMessage("Cipher"),
     "clearCustomRouting": MessageLookupByLibrary.simpleMessage("Clear all"),
     "clearData": MessageLookupByLibrary.simpleMessage("Clear Data"),
     "clearProxyChain": MessageLookupByLibrary.simpleMessage(
       "Clear chain config",
     ),
     "clearSearch": MessageLookupByLibrary.simpleMessage("Clear search"),
+    "clientFingerprint": MessageLookupByLibrary.simpleMessage(
+      "Client fingerprint",
+    ),
     "clipboardExport": MessageLookupByLibrary.simpleMessage(
       "Export to clipboard",
     ),
@@ -884,6 +889,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Please confirm your password",
     ),
     "confirmPurchase": MessageLookupByLibrary.simpleMessage("Confirm purchase"),
+    "congestionControl": MessageLookupByLibrary.simpleMessage(
+      "Congestion control",
+    ),
     "congestionController": MessageLookupByLibrary.simpleMessage(
       "TCP congestion control",
     ),
@@ -1366,6 +1374,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "domain": MessageLookupByLibrary.simpleMessage("Domain"),
     "done": MessageLookupByLibrary.simpleMessage("Done"),
     "download": MessageLookupByLibrary.simpleMessage("Download"),
+    "downloadBandwidth": MessageLookupByLibrary.simpleMessage(
+      "Download bandwidth",
+    ),
     "duration": MessageLookupByLibrary.simpleMessage("Duration"),
     "dynamicMembersHint": MessageLookupByLibrary.simpleMessage(
       "Automatically include nodes from this configuration as the subscription updates. Use a name filter, such as Japan|JP.",
@@ -1467,6 +1478,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "existsTip": m26,
     "exit": MessageLookupByLibrary.simpleMessage("Exit"),
     "exitFullScreen": MessageLookupByLibrary.simpleMessage("Exit full screen"),
+    "exitNodes": MessageLookupByLibrary.simpleMessage("Exit nodes"),
     "expandList": MessageLookupByLibrary.simpleMessage("Expand"),
     "expectedStatus": MessageLookupByLibrary.simpleMessage("Expected status"),
     "expireDate": m27,
@@ -1663,7 +1675,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "hideTimeoutProxiesDesc": MessageLookupByLibrary.simpleMessage(
       "Keep the selected node and nodes that have not finished testing",
     ),
+    "hopInterval": MessageLookupByLibrary.simpleMessage("Hop interval"),
     "host": MessageLookupByLibrary.simpleMessage("Host"),
+    "hostname": MessageLookupByLibrary.simpleMessage("Hostname"),
     "hostsDesc": MessageLookupByLibrary.simpleMessage("Add Hosts"),
     "hotkeyConflictWith": m35,
     "hotkeyDesc": MessageLookupByLibrary.simpleMessage(
@@ -2022,10 +2036,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "networkHostLookupError": MessageLookupByLibrary.simpleMessage(
       "Couldn\'t resolve the server address. Check that the URL is correct and DNS is working",
     ),
+    "networkName": MessageLookupByLibrary.simpleMessage("Network name"),
     "networkNotFoundError": m55,
     "networkRateLimitedError": MessageLookupByLibrary.simpleMessage(
       "Too many requests (HTTP 429). Wait a moment and try again",
     ),
+    "networkSecret": MessageLookupByLibrary.simpleMessage("Network secret"),
     "networkServerError": m56,
     "networkSpeed": MessageLookupByLibrary.simpleMessage("Network speed"),
     "networkTakeover": MessageLookupByLibrary.simpleMessage("Traffic takeover"),
@@ -2136,6 +2152,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "nullTip": m60,
     "numberRangeTip": m61,
     "numberTip": m62,
+    "obfs": MessageLookupByLibrary.simpleMessage("Obfuscation"),
+    "obfsHost": MessageLookupByLibrary.simpleMessage("Obfuscation host"),
+    "obfsMode": MessageLookupByLibrary.simpleMessage("Obfuscation mode"),
+    "obfsParam": MessageLookupByLibrary.simpleMessage("Obfuscation parameter"),
+    "obfsPassword": MessageLookupByLibrary.simpleMessage(
+      "Obfuscation password",
+    ),
     "oixCloud": MessageLookupByLibrary.simpleMessage("oixCloud"),
     "onDemand": MessageLookupByLibrary.simpleMessage("On demand"),
     "onDemandDesc": MessageLookupByLibrary.simpleMessage(
@@ -2232,6 +2255,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "paymentUnknownResponse": MessageLookupByLibrary.simpleMessage(
       "Payment endpoint returned an unknown format",
     ),
+    "peers": MessageLookupByLibrary.simpleMessage("Peers"),
     "personalRouting": MessageLookupByLibrary.simpleMessage("Personal routing"),
     "pickFromAlbum": MessageLookupByLibrary.simpleMessage("Choose from album"),
     "pinWindow": MessageLookupByLibrary.simpleMessage("Pin window"),
@@ -2251,11 +2275,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "pleaseUploadValidQrcode": MessageLookupByLibrary.simpleMessage(
       "Please upload a valid QR code",
     ),
+    "plugin": MessageLookupByLibrary.simpleMessage("Plugin"),
+    "pluginHost": MessageLookupByLibrary.simpleMessage("Plugin host"),
+    "pluginMode": MessageLookupByLibrary.simpleMessage("Plugin mode"),
     "points": MessageLookupByLibrary.simpleMessage("Points"),
     "port": MessageLookupByLibrary.simpleMessage("Port"),
     "portConflictTip": MessageLookupByLibrary.simpleMessage(
       "Please enter a different port",
     ),
+    "portHopping": MessageLookupByLibrary.simpleMessage("Port hopping"),
     "portProxyAppTip": MessageLookupByLibrary.simpleMessage(
       "If another proxy app is running, close it first.",
     ),
@@ -2267,6 +2295,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "portValue": m75,
     "ports": MessageLookupByLibrary.simpleMessage("Ports"),
+    "preSharedKey": MessageLookupByLibrary.simpleMessage("Pre-shared key"),
     "preferH3": MessageLookupByLibrary.simpleMessage("Prefer HTTP/3"),
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
       "Prefer HTTP/3 tries HTTP/3 first for DoH servers",
@@ -2277,6 +2306,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "preview": MessageLookupByLibrary.simpleMessage("Preview"),
     "previousMatch": MessageLookupByLibrary.simpleMessage("Previous match"),
+    "privateKey": MessageLookupByLibrary.simpleMessage("Private key"),
+    "privateKeyPassphrase": MessageLookupByLibrary.simpleMessage(
+      "Private key passphrase",
+    ),
     "process": MessageLookupByLibrary.simpleMessage("Process"),
     "profile": MessageLookupByLibrary.simpleMessage("Profile"),
     "profileAutoUpdateIntervalInvalidValidationDesc":
@@ -2319,6 +2352,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "profilesSort": MessageLookupByLibrary.simpleMessage("Profiles sort"),
     "project": MessageLookupByLibrary.simpleMessage("Project"),
     "protocol": MessageLookupByLibrary.simpleMessage("Protocol"),
+    "protocolParam": MessageLookupByLibrary.simpleMessage("Protocol parameter"),
+    "protocolVersion": MessageLookupByLibrary.simpleMessage("Protocol version"),
     "providerChanged": MessageLookupByLibrary.simpleMessage(
       "The resource changed while editing; reopen it and try again",
     ),
@@ -2430,6 +2465,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyProviders": MessageLookupByLibrary.simpleMessage("Proxy providers"),
     "proxyType": MessageLookupByLibrary.simpleMessage("Proxy type"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("Prune cache"),
+    "publicKey": MessageLookupByLibrary.simpleMessage("Public key"),
     "purchaseAutoRenewLabel": MessageLookupByLibrary.simpleMessage(
       "Auto-renew",
     ),
@@ -2511,6 +2547,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "remoteDestination": MessageLookupByLibrary.simpleMessage(
       "Remote destination",
+    ),
+    "remoteDnsResolve": MessageLookupByLibrary.simpleMessage(
+      "Remote DNS resolution",
     ),
     "remove": MessageLookupByLibrary.simpleMessage("Remove"),
     "rename": MessageLookupByLibrary.simpleMessage("Rename"),
@@ -2795,6 +2834,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "search": MessageLookupByLibrary.simpleMessage("Search"),
     "seconds": MessageLookupByLibrary.simpleMessage("Seconds"),
     "secondsCount": m103,
+    "secretKey": MessageLookupByLibrary.simpleMessage("Key"),
     "sectionsInEffect": m104,
     "selectAll": MessageLookupByLibrary.simpleMessage("Select all"),
     "selectBackup": MessageLookupByLibrary.simpleMessage("Select a backup"),
@@ -2835,6 +2875,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "singleAdd": MessageLookupByLibrary.simpleMessage("Single add"),
     "singleValueTip": m108,
     "size": MessageLookupByLibrary.simpleMessage("Size"),
+    "skipCertVerify": MessageLookupByLibrary.simpleMessage(
+      "Skip certificate verification",
+    ),
     "skipDomain": MessageLookupByLibrary.simpleMessage("Skip domains"),
     "skipDomainDesc": MessageLookupByLibrary.simpleMessage(
       "A sniffed domain on the Skip domains list is not used",
@@ -3151,6 +3194,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "transferConfirmNotice": MessageLookupByLibrary.simpleMessage(
       "The system will confirm automatically after the transfer is completed, and the selected plan will be activated.",
     ),
+    "transport": MessageLookupByLibrary.simpleMessage("Transport"),
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "tunAdminAccountRequired": MessageLookupByLibrary.simpleMessage(
       "TUN needs an administrator account on this Mac. Sign in with an administrator account to turn it on.",
@@ -3175,6 +3219,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "turnOff": MessageLookupByLibrary.simpleMessage("Turn Off"),
     "turnOn": MessageLookupByLibrary.simpleMessage("Turn On"),
+    "udpRelayMode": MessageLookupByLibrary.simpleMessage("UDP relay mode"),
     "udpTimeout": MessageLookupByLibrary.simpleMessage("UDP timeout"),
     "udpTimeoutDesc": MessageLookupByLibrary.simpleMessage(
       "The UDP timeout is in seconds and works only with the gvisor, system and mixed stacks",
@@ -3249,6 +3294,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateVersionNumber": m117,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("Upgrade plan"),
     "upload": MessageLookupByLibrary.simpleMessage("Upload"),
+    "uploadBandwidth": MessageLookupByLibrary.simpleMessage("Upload bandwidth"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Obtain profile through URL",
@@ -3263,9 +3309,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "User Center (Backup)",
     ),
     "userGuide": MessageLookupByLibrary.simpleMessage("User Guide"),
+    "username": MessageLookupByLibrary.simpleMessage("Username"),
     "value": MessageLookupByLibrary.simpleMessage("Value"),
     "verifyCoupon": MessageLookupByLibrary.simpleMessage("Verify"),
     "view": MessageLookupByLibrary.simpleMessage("View"),
+    "virtualIpv4": MessageLookupByLibrary.simpleMessage("Virtual IPv4"),
     "vividStyle": MessageLookupByLibrary.simpleMessage("Vivid"),
     "vpnConfigChangeDetected": MessageLookupByLibrary.simpleMessage(
       "VPN configuration change detected",

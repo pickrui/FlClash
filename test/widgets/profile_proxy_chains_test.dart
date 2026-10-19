@@ -549,8 +549,9 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text(_l10n.edit));
     await tester.pumpAndSettle();
-    final name = find.byWidgetPredicate(
-      (w) => w is TextField && w.decoration?.labelText == 'Name',
+    final name = find.descendant(
+      of: find.byKey(const ValueKey('proxy-row-name')),
+      matching: find.byType(TextField),
     );
     await tester.enterText(name, 'One');
 

@@ -13202,6 +13202,276 @@ class AppLocalizations {
   String get link {
     return Intl.message('Link', name: 'link', desc: '', args: []);
   }
+
+  /// `Allowed IPs`
+  String get allowedIps {
+    return Intl.message('Allowed IPs', name: 'allowedIps', desc: '', args: []);
+  }
+
+  /// `Cipher`
+  String get cipher {
+    return Intl.message('Cipher', name: 'cipher', desc: '', args: []);
+  }
+
+  /// `Client fingerprint`
+  String get clientFingerprint {
+    return Intl.message(
+      'Client fingerprint',
+      name: 'clientFingerprint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Congestion control`
+  String get congestionControl {
+    return Intl.message(
+      'Congestion control',
+      name: 'congestionControl',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Download bandwidth`
+  String get downloadBandwidth {
+    return Intl.message(
+      'Download bandwidth',
+      name: 'downloadBandwidth',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hop interval`
+  String get hopInterval {
+    return Intl.message(
+      'Hop interval',
+      name: 'hopInterval',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Obfuscation`
+  String get obfs {
+    return Intl.message('Obfuscation', name: 'obfs', desc: '', args: []);
+  }
+
+  /// `Obfuscation host`
+  String get obfsHost {
+    return Intl.message(
+      'Obfuscation host',
+      name: 'obfsHost',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Obfuscation mode`
+  String get obfsMode {
+    return Intl.message(
+      'Obfuscation mode',
+      name: 'obfsMode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Obfuscation parameter`
+  String get obfsParam {
+    return Intl.message(
+      'Obfuscation parameter',
+      name: 'obfsParam',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Obfuscation password`
+  String get obfsPassword {
+    return Intl.message(
+      'Obfuscation password',
+      name: 'obfsPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Plugin`
+  String get plugin {
+    return Intl.message('Plugin', name: 'plugin', desc: '', args: []);
+  }
+
+  /// `Plugin host`
+  String get pluginHost {
+    return Intl.message('Plugin host', name: 'pluginHost', desc: '', args: []);
+  }
+
+  /// `Plugin mode`
+  String get pluginMode {
+    return Intl.message('Plugin mode', name: 'pluginMode', desc: '', args: []);
+  }
+
+  /// `Port hopping`
+  String get portHopping {
+    return Intl.message(
+      'Port hopping',
+      name: 'portHopping',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pre-shared key`
+  String get preSharedKey {
+    return Intl.message(
+      'Pre-shared key',
+      name: 'preSharedKey',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Private key`
+  String get privateKey {
+    return Intl.message('Private key', name: 'privateKey', desc: '', args: []);
+  }
+
+  /// `Private key passphrase`
+  String get privateKeyPassphrase {
+    return Intl.message(
+      'Private key passphrase',
+      name: 'privateKeyPassphrase',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Protocol parameter`
+  String get protocolParam {
+    return Intl.message(
+      'Protocol parameter',
+      name: 'protocolParam',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Protocol version`
+  String get protocolVersion {
+    return Intl.message(
+      'Protocol version',
+      name: 'protocolVersion',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Public key`
+  String get publicKey {
+    return Intl.message('Public key', name: 'publicKey', desc: '', args: []);
+  }
+
+  /// `Remote DNS resolution`
+  String get remoteDnsResolve {
+    return Intl.message(
+      'Remote DNS resolution',
+      name: 'remoteDnsResolve',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Key`
+  String get secretKey {
+    return Intl.message('Key', name: 'secretKey', desc: '', args: []);
+  }
+
+  /// `Skip certificate verification`
+  String get skipCertVerify {
+    return Intl.message(
+      'Skip certificate verification',
+      name: 'skipCertVerify',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Transport`
+  String get transport {
+    return Intl.message('Transport', name: 'transport', desc: '', args: []);
+  }
+
+  /// `UDP relay mode`
+  String get udpRelayMode {
+    return Intl.message(
+      'UDP relay mode',
+      name: 'udpRelayMode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Upload bandwidth`
+  String get uploadBandwidth {
+    return Intl.message(
+      'Upload bandwidth',
+      name: 'uploadBandwidth',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Username`
+  String get username {
+    return Intl.message('Username', name: 'username', desc: '', args: []);
+  }
+
+  /// `Network name`
+  String get networkName {
+    return Intl.message(
+      'Network name',
+      name: 'networkName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Network secret`
+  String get networkSecret {
+    return Intl.message(
+      'Network secret',
+      name: 'networkSecret',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Peers`
+  String get peers {
+    return Intl.message('Peers', name: 'peers', desc: '', args: []);
+  }
+
+  /// `Virtual IPv4`
+  String get virtualIpv4 {
+    return Intl.message(
+      'Virtual IPv4',
+      name: 'virtualIpv4',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hostname`
+  String get hostname {
+    return Intl.message('Hostname', name: 'hostname', desc: '', args: []);
+  }
+
+  /// `Exit nodes`
+  String get exitNodes {
+    return Intl.message('Exit nodes', name: 'exitNodes', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -45,6 +45,11 @@ _ProfileProxy _$ProfileProxyFromJson(Map<String, dynamic> json) =>
       enable: json['enable'] as bool? ?? true,
       uri: json['uri'] as String? ?? '',
       proxy: json['proxy'] as Map<String, dynamic>? ?? const {},
+      emptyOptions:
+          (json['emptyOptions'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toSet() ??
+          const {},
     );
 
 Map<String, dynamic> _$ProfileProxyToJson(_ProfileProxy instance) =>
@@ -53,6 +58,7 @@ Map<String, dynamic> _$ProfileProxyToJson(_ProfileProxy instance) =>
       'enable': instance.enable,
       'uri': instance.uri,
       'proxy': instance.proxy,
+      'emptyOptions': instance.emptyOptions.toList(),
     };
 
 _ProviderHealthCheck _$ProviderHealthCheckFromJson(Map<String, dynamic> json) =>

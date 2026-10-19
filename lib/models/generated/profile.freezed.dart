@@ -580,7 +580,7 @@ as List<String>,
 /// @nodoc
 mixin _$ProfileProxy {
 
- int get id; bool get enable; String get uri; Map<String, Object?> get proxy;
+ int get id; bool get enable; String get uri; Map<String, Object?> get proxy; Set<String> get emptyOptions;
 /// Create a copy of ProfileProxy
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -594,20 +594,20 @@ $ProfileProxyCopyWith<ProfileProxy> get copyWith => _$ProfileProxyCopyWithImpl<P
 @override
 bool operator ==(Object other) {
   final _this = this as ProfileProxy;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProfileProxy&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.enable, _this.enable) || other.enable == _this.enable)&&(identical(other.uri, _this.uri) || other.uri == _this.uri)&&const DeepCollectionEquality().equals(other.proxy, _this.proxy));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProfileProxy&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.enable, _this.enable) || other.enable == _this.enable)&&(identical(other.uri, _this.uri) || other.uri == _this.uri)&&const DeepCollectionEquality().equals(other.proxy, _this.proxy)&&const DeepCollectionEquality().equals(other.emptyOptions, _this.emptyOptions));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as ProfileProxy;
-  return Object.hash(runtimeType,_this.id,_this.enable,_this.uri,const DeepCollectionEquality().hash(_this.proxy));
+  return Object.hash(runtimeType,_this.id,_this.enable,_this.uri,const DeepCollectionEquality().hash(_this.proxy),const DeepCollectionEquality().hash(_this.emptyOptions));
 }
 
 @override
 String toString() {
   final _this = this as ProfileProxy;
-  return 'ProfileProxy(id: ${_this.id}, enable: ${_this.enable}, uri: ${_this.uri}, proxy: ${_this.proxy})';
+  return 'ProfileProxy(id: ${_this.id}, enable: ${_this.enable}, uri: ${_this.uri}, proxy: ${_this.proxy}, emptyOptions: ${_this.emptyOptions})';
 }
 
 
@@ -618,7 +618,7 @@ abstract mixin class $ProfileProxyCopyWith<$Res>  {
   factory $ProfileProxyCopyWith(ProfileProxy value, $Res Function(ProfileProxy) _then) = _$ProfileProxyCopyWithImpl;
 @useResult
 $Res call({
- int id, bool enable, String uri, Map<String, Object?> proxy
+ int id, bool enable, String uri, Map<String, Object?> proxy, Set<String> emptyOptions
 });
 
 
@@ -635,13 +635,14 @@ class _$ProfileProxyCopyWithImpl<$Res>
 
 /// Create a copy of ProfileProxy
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? enable = null,Object? uri = null,Object? proxy = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? enable = null,Object? uri = null,Object? proxy = null,Object? emptyOptions = null,}) {
   return _then(ProfileProxy(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,enable: null == enable ? _self.enable : enable // ignore: cast_nullable_to_non_nullable
 as bool,uri: null == uri ? _self.uri : uri // ignore: cast_nullable_to_non_nullable
 as String,proxy: null == proxy ? _self.proxy : proxy // ignore: cast_nullable_to_non_nullable
-as Map<String, Object?>,
+as Map<String, Object?>,emptyOptions: null == emptyOptions ? _self.emptyOptions : emptyOptions // ignore: cast_nullable_to_non_nullable
+as Set<String>,
   ));
 }
 
@@ -726,10 +727,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  bool enable,  String uri,  Map<String, Object?> proxy)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  bool enable,  String uri,  Map<String, Object?> proxy,  Set<String> emptyOptions)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ProfileProxy() when $default != null:
-return $default(_that.id,_that.enable,_that.uri,_that.proxy);case _:
+return $default(_that.id,_that.enable,_that.uri,_that.proxy,_that.emptyOptions);case _:
   return orElse();
 
 }
@@ -747,10 +748,10 @@ return $default(_that.id,_that.enable,_that.uri,_that.proxy);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  bool enable,  String uri,  Map<String, Object?> proxy)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  bool enable,  String uri,  Map<String, Object?> proxy,  Set<String> emptyOptions)  $default,) {final _that = this;
 switch (_that) {
 case _ProfileProxy():
-return $default(_that.id,_that.enable,_that.uri,_that.proxy);case _:
+return $default(_that.id,_that.enable,_that.uri,_that.proxy,_that.emptyOptions);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -767,10 +768,10 @@ return $default(_that.id,_that.enable,_that.uri,_that.proxy);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  bool enable,  String uri,  Map<String, Object?> proxy)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  bool enable,  String uri,  Map<String, Object?> proxy,  Set<String> emptyOptions)?  $default,) {final _that = this;
 switch (_that) {
 case _ProfileProxy() when $default != null:
-return $default(_that.id,_that.enable,_that.uri,_that.proxy);case _:
+return $default(_that.id,_that.enable,_that.uri,_that.proxy,_that.emptyOptions);case _:
   return null;
 
 }
@@ -782,7 +783,7 @@ return $default(_that.id,_that.enable,_that.uri,_that.proxy);case _:
 @JsonSerializable()
 
 class _ProfileProxy implements ProfileProxy {
-  const _ProfileProxy({required this.id, this.enable = true, this.uri = '',  Map<String, Object?> proxy = const {}}): _proxy = proxy;
+  const _ProfileProxy({required this.id, this.enable = true, this.uri = '',  Map<String, Object?> proxy = const {},  Set<String> emptyOptions = const {}}): _proxy = proxy,_emptyOptions = emptyOptions;
   factory _ProfileProxy.fromJson(Map<String, dynamic> json) => _$ProfileProxyFromJson(json);
 
 @override final  int id;
@@ -793,6 +794,13 @@ class _ProfileProxy implements ProfileProxy {
   if (_proxy is EqualUnmodifiableMapView) return _proxy;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableMapView(_proxy);
+}
+
+ final  Set<String> _emptyOptions;
+@override@JsonKey() Set<String> get emptyOptions {
+  if (_emptyOptions is EqualUnmodifiableSetView) return _emptyOptions;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableSetView(_emptyOptions);
 }
 
 
@@ -809,18 +817,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProfileProxy&&(identical(other.id, id) || other.id == id)&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.uri, uri) || other.uri == uri)&&const DeepCollectionEquality().equals(other.proxy, _proxy));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProfileProxy&&(identical(other.id, id) || other.id == id)&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.uri, uri) || other.uri == uri)&&const DeepCollectionEquality().equals(other.proxy, _proxy)&&const DeepCollectionEquality().equals(other.emptyOptions, _emptyOptions));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,enable,uri,const DeepCollectionEquality().hash(_proxy));
+    return Object.hash(runtimeType,id,enable,uri,const DeepCollectionEquality().hash(_proxy),const DeepCollectionEquality().hash(_emptyOptions));
 }
 
 @override
 String toString() {
-    return 'ProfileProxy(id: $id, enable: $enable, uri: $uri, proxy: $proxy)';
+    return 'ProfileProxy(id: $id, enable: $enable, uri: $uri, proxy: $proxy, emptyOptions: $emptyOptions)';
 }
 
 
@@ -831,7 +839,7 @@ abstract mixin class _$ProfileProxyCopyWith<$Res> implements $ProfileProxyCopyWi
   factory _$ProfileProxyCopyWith(_ProfileProxy value, $Res Function(_ProfileProxy) _then) = __$ProfileProxyCopyWithImpl;
 @override @useResult
 $Res call({
- int id, bool enable, String uri, Map<String, Object?> proxy
+ int id, bool enable, String uri, Map<String, Object?> proxy, Set<String> emptyOptions
 });
 
 
@@ -848,13 +856,14 @@ class __$ProfileProxyCopyWithImpl<$Res>
 
 /// Create a copy of ProfileProxy
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? enable = null,Object? uri = null,Object? proxy = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? enable = null,Object? uri = null,Object? proxy = null,Object? emptyOptions = null,}) {
   return _then(_ProfileProxy(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,enable: null == enable ? _self.enable : enable // ignore: cast_nullable_to_non_nullable
 as bool,uri: null == uri ? _self.uri : uri // ignore: cast_nullable_to_non_nullable
 as String,proxy: null == proxy ? _self._proxy : proxy // ignore: cast_nullable_to_non_nullable
-as Map<String, Object?>,
+as Map<String, Object?>,emptyOptions: null == emptyOptions ? _self._emptyOptions : emptyOptions // ignore: cast_nullable_to_non_nullable
+as Set<String>,
   ));
 }
 
