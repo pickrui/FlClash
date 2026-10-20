@@ -231,7 +231,7 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
       header: RecordHeader(
         trailing: Text('${query.delay} ms'),
         children: [
-          RecordTimestamp(query.time.toLocal().showFull),
+          RecordTimestamp(query.time.showFull),
           _DnsKeyword(query.type),
         ],
       ),
@@ -324,7 +324,7 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
         controller: _scrollController,
         hintBuilder: (fraction) {
           final index = (fraction * (queries.length - 1)).round();
-          return queries[index].time.toLocal().showFull;
+          return queries[index].time.showFull;
         },
         child: ListView.separated(
           controller: _scrollController,
@@ -433,7 +433,7 @@ class DnsQueryDetailView extends StatelessWidget {
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     final entries = [
-      (appLocalizations.time, query.time.toLocal().showFull),
+      (appLocalizations.time, query.time.showFull),
       (appLocalizations.domain, query.domain),
       (appLocalizations.dnsQueryType, query.type),
       (
