@@ -193,7 +193,7 @@ extension CommonControllerExt on AppController {
           ? formatConfigValidationMessage(e.message, appLocalizations)
           : userFacingErrorMessage(e, appLocalizations);
       if (silence) {
-        globalState.showNotifier(message);
+        globalState.showNotifier(message, level: MessageLevel.error);
       } else {
         globalState.showMessage(
           title: isConfigValidationError

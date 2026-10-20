@@ -380,7 +380,10 @@ extension ProfilesControllerExt on AppController {
       if (res == true) {
         await updateStatus(true);
         if (_ref.read(isStartProvider)) {
-          globalState.showNotifier(appLocalizations.startSuccess);
+          globalState.showNotifier(
+            appLocalizations.startSuccess,
+            level: MessageLevel.success,
+          );
         }
       }
     }
@@ -422,7 +425,10 @@ extension ProfilesControllerExt on AppController {
       }, handleCloudUnauthorized: isoixCloudProfileUrl(url));
     }, title: appLocalizations.addProfile);
     if (profile != null) {
-      globalState.showNotifier(appLocalizations.getProfileSuccess);
+      globalState.showNotifier(
+        appLocalizations.getProfileSuccess,
+        level: MessageLevel.success,
+      );
       if (requestStartIfNeeded) {
         await requestStartCore();
       }
@@ -519,7 +525,10 @@ extension ProfilesControllerExt on AppController {
       return saveProfileFile(Profile.normal(label: platformFile.name), content);
     }, title: appLocalizations.addProfile);
     if (profile != null) {
-      globalState.showNotifier(appLocalizations.getProfileSuccess);
+      globalState.showNotifier(
+        appLocalizations.getProfileSuccess,
+        level: MessageLevel.success,
+      );
       await requestStartCore();
     }
   }

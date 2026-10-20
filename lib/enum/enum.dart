@@ -17,6 +17,16 @@ export 'package:fl_clash/ui/item_position.dart';
 export 'package:fl_clash/ui/inherited.dart' show SheetType;
 export 'package:fl_clash/ui/text_style.dart' show FontFamily;
 
+enum MessageLevel { info, success, warning, error }
+
+extension MessageLevelDuration on MessageLevel {
+  Duration get duration => switch (this) {
+    MessageLevel.info || MessageLevel.success => const Duration(seconds: 3),
+    MessageLevel.warning => const Duration(seconds: 5),
+    MessageLevel.error => const Duration(seconds: 6),
+  };
+}
+
 enum DelayTestPhase { queued, running }
 
 enum SupportPlatform {

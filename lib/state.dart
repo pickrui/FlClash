@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:fl_clash/common/backup.dart';
+import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/common/restore_journal.dart';
 import 'package:fl_clash/common/listener_state_scheduler.dart';
 import 'package:fl_clash/providers/state.dart';
@@ -464,13 +465,18 @@ class GlobalState {
     );
   }
 
-  void showNotifier(String text, {MessageActionState? actionState}) {
+  void showNotifier(
+    String text, {
+    MessageLevel level = MessageLevel.info,
+    MessageActionState? actionState,
+  }) {
     final safeText = Secrets.redactApiDomains(text);
     if (safeText.isEmpty) {
       return;
     }
     navigatorKey.currentContext?.showNotifier(
       safeText,
+      level: level,
       actionState: actionState,
     );
   }

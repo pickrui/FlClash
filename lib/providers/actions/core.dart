@@ -119,7 +119,7 @@ extension CoreControllerExt on AppController {
     if (message.isNotEmpty) {
       _ref.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
       if (_context.mounted) {
-        _context.showNotifier(message);
+        _context.showNotifier(message, level: MessageLevel.error);
       }
       return;
     }

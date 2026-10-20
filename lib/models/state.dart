@@ -44,6 +44,7 @@ abstract class CommonMessage with _$CommonMessage {
   const factory CommonMessage({
     required String id,
     required String text,
+    @Default(MessageLevel.info) MessageLevel level,
     @Default(Duration(seconds: 3)) Duration duration,
     MessageActionState? actionState,
   }) = _CommonMessage;

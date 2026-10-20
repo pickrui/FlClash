@@ -52,7 +52,10 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
       await action();
     } catch (error) {
       if (mounted && source.mounted && source.isCurrentPage) {
-        context.showNotifier(providerLibraryError(context, error));
+        context.showNotifier(
+          providerLibraryError(context, error),
+          level: MessageLevel.error,
+        );
       }
     }
   }
@@ -167,7 +170,10 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
                 : 'payload: []\n')
           : utf8.decode(draft.content);
     } catch (error) {
-      context.showNotifier(providerLibraryError(context, error));
+      context.showNotifier(
+        providerLibraryError(context, error),
+        level: MessageLevel.error,
+      );
       return;
     }
     Future<void> save(

@@ -53,6 +53,7 @@ class _VpnContainerState extends ConsumerState<VpnManager> {
         }
         globalState.showNotifier(
           appLocalizations.vpnConfigChangeDetected,
+          level: MessageLevel.warning,
           actionState: MessageActionState(
             actionText: appLocalizations.restart,
             action: () async {

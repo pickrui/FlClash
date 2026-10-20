@@ -72,7 +72,11 @@ class _Status extends StatusManager {
 
 class _StatusState extends StatusManagerState {
   @override
-  void message(String text, {MessageActionState? actionState}) {
+  void message(
+    String text, {
+    MessageLevel level = MessageLevel.info,
+    MessageActionState? actionState,
+  }) {
     (widget as _Status).messages.add(text);
   }
 

@@ -56,6 +56,7 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
       if (mounted && source.mounted && source.isCurrentPage) {
         context.showNotifier(
           userFacingErrorMessage(error, context.appLocalizations),
+          level: MessageLevel.error,
         );
       }
     }

@@ -8,6 +8,8 @@ import 'dart:async';
 import 'package:fl_clash/common/request.dart';
 import 'package:fl_clash/common/update_download_task.dart';
 import 'package:fl_clash/l10n/l10n.dart';
+import 'package:fl_clash/manager/status_manager.dart';
+import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/update_download.dart';
 import 'package:fl_clash/widgets/app_update.dart';
@@ -59,13 +61,20 @@ void main() {
           appUpdateNoticeProvider.overrideWithValue(notice),
           updateActionProvider.overrideWith(() => action),
         ],
-        child: const Scaffold(body: AppUpdateAvailableNotice()),
+        child: const StatusManager(
+          updateNotice: AppUpdateAvailableNotice(),
+          child: Scaffold(),
+        ),
       ),
     );
     await tester.pumpAndSettle();
     expect(find.byType(Card), findsNothing);
     notice.value = _release;
+    tester
+        .state<StatusManagerState>(find.byType(StatusManager))
+        .message('Background task failed', level: MessageLevel.error);
     await tester.pumpAndSettle();
+    expect(find.text('Background task failed'), findsOneWidget);
     expect(find.text(_release.version), findsNothing);
     expect(find.text('v0.8.98'), findsNothing);
     expect(find.textContaining('${_release.remoteBuildNumber}'), findsNothing);
@@ -100,7 +109,10 @@ void main() {
           appUpdateNoticeProvider.overrideWithValue(notice),
           updateActionProvider.overrideWith(() => action),
         ],
-        child: const Scaffold(body: AppUpdateAvailableNotice()),
+        child: const StatusManager(
+          updateNotice: AppUpdateAvailableNotice(),
+          child: Scaffold(),
+        ),
       ),
     );
     await tester.pumpAndSettle();
