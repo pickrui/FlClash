@@ -105,11 +105,15 @@ class SearchQuery {
 
   bool get isNotEmpty => !isEmpty;
 
+  static String textOf(Iterable<String?> fields) =>
+      fields.nonNulls.join('\n').toLowerCase();
+
   bool matches(Iterable<String?> fields) {
     if (terms.isEmpty) return true;
-    final text = fields.nonNulls.join('\n').toLowerCase();
-    return terms.every(text.contains);
+    return matchesText(textOf(fields));
   }
+
+  bool matchesText(String text) => terms.every(text.contains);
 }
 
 String? installConfigUrl(Uri uri) {
@@ -153,13 +157,15 @@ extension SearchableItems<T> on Iterable<T> {
     if (query.isEmpty) return this;
     return where((item) {
       final cacheable =
-          item != null && item is! String && item is! num && item is! bool;
-      final text = texts == null || !cacheable
-          ? fields(item).nonNulls.join('\n').toLowerCase()
-          : texts[item as Object] ??= fields(item).nonNulls
-                .join('\n')
-                .toLowerCase();
-      return query.terms.every(text.contains);
+          item != null &&
+          item is! String &&
+          item is! num &&
+          item is! bool &&
+          item is! Record;
+      if (texts == null || !cacheable) return query.matches(fields(item));
+      return query.matchesText(
+        texts[item as Object] ??= SearchQuery.textOf(fields(item)),
+      );
     });
   }
 }

@@ -12,6 +12,41 @@ import '../helpers/app_paths.dart';
 
 void main() {
   test(
+    'cached search accepts records and reuses object text across queries',
+    () {
+      const records = [('Hong Kong', 'Shadowsocks'), ('Tokyo', 'VLESS')];
+      final texts = Expando<String>();
+      expect(
+        records
+            .whereMatches(
+              SearchQuery('hong shadow'),
+              (item) => [item.$1, item.$2],
+              texts: texts,
+            )
+            .toList(),
+        [records.first],
+      );
+      final items = [
+        ['Hong Kong', 'Shadowsocks'],
+        ['Tokyo', 'VLESS'],
+      ];
+      var reads = 0;
+      Iterable<String?> fields(List<String> item) {
+        reads++;
+        return item;
+      }
+
+      expect(items.whereMatches(SearchQuery('hong'), fields, texts: texts), [
+        items.first,
+      ]);
+      expect(items.whereMatches(SearchQuery('VLESS'), fields, texts: texts), [
+        items.last,
+      ]);
+      expect(reads, items.length);
+    },
+  );
+
+  test(
     'QR import accepts supported install links with a valid HTTP target',
     () {
       expect(

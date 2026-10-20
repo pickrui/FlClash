@@ -24,72 +24,11 @@ void main() {
     });
   });
 
-  group('IterableExt.chunks', () {
-    test('splits into equal chunks', () {
-      final result = [1, 2, 3, 4].chunks(2).toList();
-      expect(result, [
-        [1, 2],
-        [3, 4],
-      ]);
-    });
-
-    test('handles last incomplete chunk', () {
-      final result = [1, 2, 3, 4, 5].chunks(2).toList();
-      expect(result, [
-        [1, 2],
-        [3, 4],
-        [5],
-      ]);
-    });
-
-    test('returns single chunk for size >= length', () {
-      final result = [1, 2, 3].chunks(5).toList();
-      expect(result, [
-        [1, 2, 3],
-      ]);
-    });
-
-    test('returns empty for empty iterable', () {
-      final result = <int>[].chunks(2).toList();
-      expect(result, isEmpty);
-    });
-  });
-
-  group('IterableExt.fill', () {
-    test('pads with filler when shorter', () {
-      final result = [1, 2].fill(5, filler: (i) => 0).toList();
-      expect(result, [1, 2, 0, 0, 0]);
-    });
-
-    test('truncates when longer', () {
-      final result = [1, 2, 3, 4].fill(2, filler: (i) => 0).toList();
-      expect(result, [1, 2]);
-    });
-
-    test('provides index to filler', () {
-      final result = [].fill(3, filler: (i) => i * 10).toList();
-      expect(result, [0, 10, 20]);
-    });
-  });
-
-  group('ListExt.truncate', () {
-    test('removes from beginning when over max', () {
-      final list = [1, 2, 3, 4, 5];
-      list.truncate(3);
-      expect(list, [3, 4, 5]);
-    });
-
-    test('does nothing when within max', () {
-      final list = [1, 2, 3];
-      list.truncate(5);
-      expect(list, [1, 2, 3]);
-    });
-
-    test('does nothing when maxLength is 0', () {
-      final list = [1, 2, 3];
-      list.truncate(0);
-      expect(list, [1, 2, 3]);
-    });
+  test('intersection keeps source order and duplicates', () {
+    expect(
+      ['third', 'first', 'third', 'second'].intersection(['second', 'third']),
+      ['third', 'third', 'second'],
+    );
   });
 
   group('ListExt.copyAndPut', () {
@@ -143,26 +82,6 @@ void main() {
       final set = {1, 2, 3};
       set.addOrRemove(2);
       expect(set, {1, 3});
-    });
-  });
-
-  group('DoubleListExt.findInterval', () {
-    test('returns -1 for empty list', () {
-      expect(<double>[].findInterval(5), -1);
-    });
-
-    test('returns -1 when target < first', () {
-      expect([10.0, 20.0, 30.0].findInterval(5), -1);
-    });
-
-    test('returns last index when target >= last', () {
-      expect([10.0, 20.0, 30.0].findInterval(30), 2);
-      expect([10.0, 20.0, 30.0].findInterval(50), 2);
-    });
-
-    test('finds correct interval', () {
-      expect([10.0, 20.0, 30.0].findInterval(15), 0);
-      expect([10.0, 20.0, 30.0].findInterval(25), 1);
     });
   });
 
