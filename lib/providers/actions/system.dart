@@ -74,15 +74,19 @@ class SystemAction extends _$SystemAction {
 
 extension SystemControllerExt on AppController {
   Future<void> handleExit([bool needSave = true]) => _exitCoordinator.run(
-    cleanup: () => runCleanupActions([
-      if (needSave) savePreferences,
-      startupRecovery.markClosed,
-      waitForPendingDatabaseWrites,
-      if (macOS != null) () => macOS!.updateDns(true),
-      closeSystemProxy,
-      if (tray != null) () => tray!.destroy(),
-      coreController.destroy,
-    ]),
+    cleanup: () {
+      final dnsShutdown = macOS?.shutdownDns();
+      dnsShutdown?.ignore();
+      return runCleanupActions([
+        if (needSave) savePreferences,
+        startupRecovery.markClosed,
+        waitForPendingDatabaseWrites,
+        if (dnsShutdown != null) () => dnsShutdown,
+        closeSystemProxy,
+        if (tray != null) () => tray!.destroy(),
+        coreController.destroy,
+      ]);
+    },
     terminate: system.exit,
   );
 

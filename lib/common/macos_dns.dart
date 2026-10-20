@@ -18,6 +18,8 @@ class MacosDnsController {
   final _overrides = <String, ({List<String> before, List<String> applied})>{};
   Future<void> _pending = Future.value();
   bool _loaded = false;
+  bool _closing = false;
+  Future<void>? _shutdown;
 
   MacosDnsController({
     DnsProcessRunner? runProcess,
@@ -27,6 +29,16 @@ class MacosDnsController {
            runProcess ?? ((command, args) => Process.run(command, args));
 
   Future<void> updateDns(bool restore) {
+    if (_closing) return _shutdown!;
+    return _enqueue(restore);
+  }
+
+  Future<void> shutdownDns() {
+    _closing = true;
+    return _shutdown ??= _enqueue(true);
+  }
+
+  Future<void> _enqueue(bool restore) {
     final operation = _pending.then((_) async {
       if (!_loaded) {
         final saved = await readSnapshot?.call();
@@ -65,7 +77,7 @@ class MacosDnsController {
         _loaded = true;
         await _restore();
       }
-      await (restore ? _restore() : _apply());
+      await (restore || _closing ? _restore() : _apply());
     });
     _pending = operation.then<void>((_) {}, onError: (_, _) {});
     return operation;

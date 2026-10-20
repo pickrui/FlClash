@@ -42,25 +42,57 @@ void main() {
     },
   );
 
-  test('restoration waits for an in-flight installation', () async {
-    final system = _FakeDnsSystem();
-    final writeEntered = Completer<void>();
-    final releaseWrite = Completer<void>();
-    system.beforeWrite = () async {
-      if (!writeEntered.isCompleted) {
-        writeEntered.complete();
-        await releaseWrite.future;
-      }
-    };
-    final controller = MacosDnsController(runProcess: system.run);
-    final apply = controller.updateDns(false);
-    await writeEntered.future;
-    final restore = controller.updateDns(true);
-    releaseWrite.complete();
-    await Future.wait([apply, restore]);
-    expect(system.dns['Wi-Fi'], ['1.1.1.1']);
-    expect(system.writes.length, 2);
-  });
+  test(
+    'shutdown drains installation and rejects queued and late updates',
+    () async {
+      final system = _FakeDnsSystem();
+      final writeEntered = Completer<void>();
+      final releaseWrite = Completer<void>();
+      system.beforeWrite = () async {
+        if (!writeEntered.isCompleted) {
+          writeEntered.complete();
+          await releaseWrite.future;
+        }
+      };
+      final controller = MacosDnsController(runProcess: system.run);
+      final apply = controller.updateDns(false);
+      await writeEntered.future;
+      final queued = controller.updateDns(false);
+      final restore = controller.shutdownDns();
+      final lateUpdate = controller.updateDns(false);
+      releaseWrite.complete();
+      await Future.wait([apply, queued, restore, lateUpdate]);
+      await controller.updateDns(false);
+      await controller.shutdownDns();
+      expect(system.dns['Wi-Fi'], ['1.1.1.1']);
+      expect(system.writes.length, 2);
+    },
+  );
+
+  test(
+    'failed shutdown preserves the recovery journal and stays closed',
+    () async {
+      final system = _FakeDnsSystem();
+      String? snapshot;
+      final controller = MacosDnsController(
+        runProcess: system.run,
+        writeSnapshot: (value) async => snapshot = value,
+      );
+      await controller.updateDns(false);
+      system.failingService = 'Wi-Fi';
+      await expectLater(controller.shutdownDns(), throwsStateError);
+      await expectLater(controller.updateDns(false), throwsStateError);
+      expect(snapshot, contains('Wi-Fi'));
+      system.failingService = null;
+      await MacosDnsController(
+        runProcess: system.run,
+        readSnapshot: () async => snapshot,
+        writeSnapshot: (value) async => snapshot = value,
+      ).shutdownDns();
+      expect(system.dns['Wi-Fi'], ['1.1.1.1']);
+      expect(snapshot, contains('"services":{}'));
+    },
+  );
 
   test(
     'a network change during capture does not redirect DNS writes',
