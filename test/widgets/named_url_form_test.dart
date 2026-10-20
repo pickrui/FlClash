@@ -74,7 +74,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.enterText(
       find.byType(TextField),
-      'https://example.invalid/one\nhttps://example.invalid/two',
+      '- "https://example.invalid/one" "https://example.invalid/two"',
     );
     await save();
     expect(result?.ageSecretKey, '');

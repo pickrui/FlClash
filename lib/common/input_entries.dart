@@ -233,6 +233,28 @@ ParsedInput<MapEntry<String, String>> parseMapInput(
   );
 }
 
+Iterable<String> _linkValues(String raw) {
+  var line = raw.trim();
+  if (line.startsWith('- ')) line = line.substring(2).trim();
+  if (line.startsWith('"') || line.startsWith("'")) {
+    final quote = line[0];
+    if (line.endsWith('$quote,')) {
+      line = line.substring(0, line.length - 1);
+    }
+    if (line.length > 1 &&
+        line.endsWith(quote) &&
+        !line.substring(1, line.length - 1).contains(quote)) {
+      return [_unquote(line)];
+    }
+  }
+  final values = line.split(RegExp(r'\s+')).map(_unquote).toList();
+  final http = RegExp(r'^https?://', caseSensitive: false);
+  // Split only an unambiguous list of HTTP links; share names and commas survive.
+  return values.length > 1 && values.every(http.hasMatch)
+      ? values
+      : [_unquote(line)];
+}
+
 ParsedInput<String> parseLinkInput(
   String text, {
   Set<String> existing = const {},
@@ -244,22 +266,23 @@ ParsedInput<String> parseLinkInput(
   final seen = <String>{};
   var skipped = 0;
   for (final (index, raw) in text.split(_lineSeparator).indexed) {
-    final value = raw.trim();
-    if (value.isEmpty || !seen.add(value)) continue;
-    if (value.length > maxLength || !isValid(value)) {
-      issues.add(
-        InputIssue(
-          line: index + 1,
-          raw: value,
-          kind: value.length > maxLength
-              ? InputIssueKind.valueTooLong
-              : InputIssueKind.invalidValue,
-        ),
-      );
-    } else if (existing.contains(value)) {
-      skipped++;
-    } else {
-      entries.add(value);
+    for (final value in _linkValues(raw)) {
+      if (value.isEmpty || !seen.add(value)) continue;
+      if (value.length > maxLength || !isValid(value)) {
+        issues.add(
+          InputIssue(
+            line: index + 1,
+            raw: value,
+            kind: value.length > maxLength
+                ? InputIssueKind.valueTooLong
+                : InputIssueKind.invalidValue,
+          ),
+        );
+      } else if (existing.contains(value)) {
+        skipped++;
+      } else {
+        entries.add(value);
+      }
     }
   }
   return ParsedInput(

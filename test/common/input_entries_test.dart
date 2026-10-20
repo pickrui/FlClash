@@ -105,10 +105,11 @@ void main() {
 
   group('parseLinkInput', () {
     test('preserves commas and encoded credentials in whole links', () {
-      const link = 'https://user:pass@example.test/sub?nodes=a,b';
+      const link =
+          'https://user%40mail:pass%20word@example.test/sub?nodes=a,b,';
       const share = 'trojan://a,b@example.test:443#Fixture%20name';
       final parsed = parseLinkInput(
-        '  $link\r\n$share\n$link',
+        '  $link\r\n- "$share",\n$link',
         isValid: isProfileImportLink,
       );
       expect(parsed.entries, [link, share]);
@@ -127,6 +128,33 @@ void main() {
         expect(parsed.skippedExisting, 1);
         expect(parsed.issues.map((issue) => issue.line), [3, 4]);
         expect(parsed.isValid, isFalse);
+      },
+    );
+
+    test(
+      'accepts quoted and same-line HTTP links without damaging share names',
+      () {
+        const one = 'https://example.test/one?a=b,c';
+        const two = 'http://example.test/two#encoded%20name';
+        final parsed = parseLinkInput(
+          '- "$one" "$two"\n- \'$one\'\nfile:///secret\nbad link',
+          existing: {two},
+          isValid: isProfileImportLink,
+        );
+        expect(parsed.entries, [one]);
+        expect(parsed.skippedExisting, 1);
+        expect(parsed.issues.map((issue) => (issue.line, issue.raw)), [
+          (3, 'file:///secret'),
+          (4, 'bad link'),
+        ]);
+        const share = 'trojan://a,b@example.test:443#Fixture name,';
+        expect(parseLinkInput('- "$share"', isValid: (_) => true).entries, [
+          share,
+        ]);
+        expect(
+          parseLinkInput('$one $two', isValid: isProfileImportLink).entries,
+          [one, two],
+        );
       },
     );
 
