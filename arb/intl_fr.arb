@@ -1608,5 +1608,15 @@
   "resetDns": "Réinitialiser le DNS",
   "resetDnsSuccess": "État DNS effacé",
   "resetDnsFailed": "Impossible de réinitialiser le DNS. Vérifiez la connexion au noyau, puis réessayez.",
-  "resourceSizeLimitTip": "La ressource dépasse {limit}"
+  "resourceSizeLimitTip": "La ressource dépasse {limit}",
+  "ruleSetDetect": "Détecter le format et le type de règles",
+  "ruleSetConvert": "Convertir en MRS",
+  "ruleSetConvertRemote": "Télécharger en MRS local",
+  "ruleSetEmptyTip": "Le jeu de règles ne contient aucune entrée utilisable",
+  "ruleSetMixedTip": "Le jeu de règles mélange des domaines et des plages IP. Utilisez des règles classical pour les combiner",
+  "ruleSetInvalidTip": "Impossible de lire ce jeu de règles. Vérifiez son format et ses entrées",
+  "ruleSetUnsupportedTip": "Ces règles ne peuvent pas être converties en MRS sans modifier leur comportement",
+  "ruleSetBusyTip": "Une autre opération sur un jeu de règles est en cours. Réessayez dans un instant",
+  "ruleSetNeedsConversionTip": "Ce jeu de règles distant doit être normalisé. Téléchargez-le en MRS local pour l’utiliser",
+  "ruleSetSizeTip": "Le jeu de règles dépasse la limite de traitement. Divisez-le en jeux plus petits"
 }

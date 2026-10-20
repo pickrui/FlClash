@@ -130,6 +130,9 @@ func TestPreviewLibraryRejectsMalformedAllocationLengths(t *testing.T) {
 		if result, err := previewRuleSetContent(data, strings.ToLower(behavior.String())); err == nil || result != "" {
 			t.Fatal("malformed allocation length accepted")
 		}
+		if result, failure := compileRuleSetContent(CompileRuleSetParams{Content: data}); result != nil || failure != errRuleSetInvalid {
+			t.Fatal("malformed MRS accepted by detection")
+		}
 	}
 	writer := &ruleSetPreviewWriter{}
 	writer.Grow(maxRuleSetPreviewBytes)

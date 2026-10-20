@@ -89,11 +89,18 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
     return label;
   }
 
-  void _options(ClashProvider provider, {bool isNew = false}) =>
-      BaseNavigator.push(
-        context,
-        EditClashProviderView(provider: provider, isNew: isNew),
-      );
+  void _options(
+    ClashProvider provider, {
+    bool isNew = false,
+    bool detect = false,
+  }) => BaseNavigator.push(
+    context,
+    EditClashProviderView(
+      provider: provider,
+      isNew: isNew,
+      detectOnOpen: detect,
+    ),
+  );
 
   Future<void> _import({required bool fromUrl}) async {
     if (_importing || !_isCurrentPage) return;
@@ -126,27 +133,23 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
                 ),
               );
           if (result == null || !_isCurrentPage) return;
-          _options(
-            _newProvider(
-              label: result.label.isEmpty
-                  ? _uniqueLabel(result.url)
-                  : result.label,
-              url: result.url,
-            ).withFileFormat(result.url),
-            isNew: true,
-          );
+          final provider = _newProvider(
+            label: result.label.isEmpty
+                ? _uniqueLabel(result.url)
+                : result.label,
+            url: result.url,
+          ).withFileFormat(result.url);
+          _options(provider, isNew: true, detect: _kind == ProviderKind.rule);
         } else {
           final file = await picker.pickerFile();
           if (file == null || !_isCurrentPage) return;
           final bytes = await file.readBytes(maxBytes: maxProviderContentBytes);
           if (!_isCurrentPage) return;
-          _options(
-            _newProvider(
-              label: _uniqueLabel(file.name),
-              content: bytes,
-            ).withFileFormat(file.name),
-            isNew: true,
-          );
+          final provider = _newProvider(
+            label: _uniqueLabel(file.name),
+            content: bytes,
+          ).withFileFormat(file.name);
+          _options(provider, isNew: true, detect: _kind == ProviderKind.rule);
         }
       });
     } finally {
@@ -506,10 +509,12 @@ class EditClashProviderView extends ConsumerStatefulWidget {
     super.key,
     required this.provider,
     this.isNew = false,
+    this.detectOnOpen = false,
     this.pickFile,
   });
   final ClashProvider provider;
   final bool isNew;
+  final bool detectOnOpen;
   final Future<PlatformFile?> Function()? pickFile;
   @override
   ConsumerState<EditClashProviderView> createState() =>
@@ -531,6 +536,16 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
 
   bool get _busy => _saving || _importing;
   bool get _isCurrentPage => mounted && context.isCurrentPage;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.detectOnOpen) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_isCurrentPage) _prepareRuleSet();
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -556,16 +571,51 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
       final bytes = await file.readBytes(maxBytes: maxProviderContentBytes);
       if (!_isCurrentPage) return;
       final format = ruleProviderFormatOf(file.name) ?? RuleProviderFormat.yaml;
+      final next = await ref
+          .read(ruleSetToolsProvider)
+          .prepare(_draft.withFormat(format).copyWith(url: '', content: bytes));
+      if (!_isCurrentPage) return;
       setState(() {
         _error = null;
         _remote = false;
-        _draft = _draft.withFormat(format).copyWith(content: bytes);
+        _draft = next;
         if (_nameController.text.trim().isEmpty) {
           _nameController.text = file.name;
         }
       });
     } catch (error) {
       if (mounted && context.isCurrentPage) {
+        setState(() => _error = providerLibraryError(context, error));
+      }
+    } finally {
+      if (mounted) setState(() => _importing = false);
+    }
+  }
+
+  Future<void> _prepareRuleSet({bool convert = false}) async {
+    if (_busy || !_isCurrentPage) return;
+    setState(() {
+      _importing = true;
+      _error = null;
+    });
+    try {
+      final next = await ref
+          .read(ruleSetToolsProvider)
+          .prepare(
+            _draft.copyWith(
+              label: _nameController.text.trim(),
+              url: _remote ? _urlController.text.trim() : '',
+            ),
+            convert: convert,
+          );
+      if (!_isCurrentPage) return;
+      setState(() {
+        _draft = next;
+        _remote = next.isRemote;
+        if (convert) _urlController.clear();
+      });
+    } catch (error) {
+      if (_isCurrentPage) {
         setState(() => _error = providerLibraryError(context, error));
       }
     } finally {
@@ -705,6 +755,17 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
                   if (isRule)
                     generateSection(
                       items: [
+                        FormRow(
+                          title: l.ruleSetDetect,
+                          onPressed: _prepareRuleSet,
+                        ),
+                        if (_draft.isTextContent)
+                          FormRow(
+                            title: _remote
+                                ? l.ruleSetConvertRemote
+                                : l.ruleSetConvert,
+                            onPressed: () => _prepareRuleSet(convert: true),
+                          ),
                         ListItem<RuleProviderFormat>.options(
                           title: Text(l.format),
                           options: RuleProviderFormat.values,

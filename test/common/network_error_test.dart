@@ -123,6 +123,19 @@ void main() {
       for (final locale in AppLocalizations.delegate.supportedLocales) {
         final strings = await AppLocalizations.load(locale);
         final cases = <(Object, String)>[
+          (
+            const ProviderLibraryException('ruleSetNeedsConversion'),
+            strings.ruleSetNeedsConversionTip,
+          ),
+          for (final (code, message) in [
+            ('rule_set_empty', strings.ruleSetEmptyTip),
+            ('rule_set_mixed', strings.ruleSetMixedTip),
+            ('rule_set_invalid', strings.ruleSetInvalidTip),
+            ('rule_set_unsupported', strings.ruleSetUnsupportedTip),
+            ('rule_set_busy', strings.ruleSetBusyTip),
+            ('rule_set_size', strings.ruleSetSizeTip),
+          ])
+            (CoreMethodException(code: code, message: 'fixture'), message),
           (dio(DioExceptionType.receiveTimeout), strings.networkTimeoutError),
           (const ProviderLibraryException('changed'), strings.providerChanged),
           (

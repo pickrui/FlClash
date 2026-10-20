@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 
 import 'method.dart';
@@ -67,6 +68,11 @@ mixin CoreInterface {
 
   Future<String> dumpRuleSet(String providerName, String path);
   Future<String> previewRuleSet(List<int> content, String behavior);
+  Future<RuleSetInfo> compileRuleSet(
+    List<int> content, {
+    bool convert = false,
+    RuleProviderBehavior? behavior,
+  });
 
   Future<String> updateGeoData(UpdateGeoDataParams params);
 
@@ -344,6 +350,55 @@ abstract class CoreHandlerInterface with CoreInterface {
         method: CoreMethod.previewRuleSet,
         arguments: {'content': base64Encode(content), 'behavior': behavior},
       );
+
+  @override
+  Future<RuleSetInfo> compileRuleSet(
+    List<int> content, {
+    bool convert = false,
+    RuleProviderBehavior? behavior,
+  }) async {
+    if (content.length > 32 * 1024 * 1024) {
+      throw const CoreMethodException(
+        code: 'rule_set_size',
+        message: 'Rule set input exceeds 32 MiB',
+      );
+    }
+    final result = await _invokeRequiredMethod<Map<String, dynamic>>(
+      method: CoreMethod.compileRuleSet,
+      arguments: {
+        'content': base64Encode(content),
+        'convert': convert,
+        if (behavior != null) 'behavior': behavior.name,
+      },
+    );
+    final format = RuleProviderFormat.values.byName(result['format'] as String);
+    final kind = RuleProviderBehavior.values.byName(
+      result['behavior'] as String,
+    );
+    final data = result['content'];
+    if (data is String && data.length > ((32 * 1024 * 1024 + 2) ~/ 3) * 4) {
+      throw const CoreMethodException(
+        code: 'rule_set_size',
+        message: 'Rule set output exceeds 32 MiB',
+      );
+    }
+    if (format == RuleProviderFormat.mrs &&
+        kind == RuleProviderBehavior.classical) {
+      throw const FormatException('Invalid MRS behavior');
+    }
+    final bytes = data == null ? null : base64Decode(data as String);
+    if ((bytes?.length ?? 0) > 32 * 1024 * 1024) {
+      throw const CoreMethodException(
+        code: 'rule_set_size',
+        message: 'Rule set output exceeds 32 MiB',
+      );
+    }
+    if (convert &&
+        (format != RuleProviderFormat.mrs || bytes == null || bytes.isEmpty)) {
+      throw const FormatException('Core did not return converted rules');
+    }
+    return (format: format, behavior: kind, content: bytes);
+  }
 
   @override
   Future<String> updateGeoData(UpdateGeoDataParams params) async {

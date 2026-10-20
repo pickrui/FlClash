@@ -13,6 +13,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"io"
+	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -376,5 +377,35 @@ func TestOversizedResponseAnswersWithAnError(t *testing.T) {
 	}
 	if decoded.ID != "9" || decoded.Error == nil || decoded.Error.Code != "response_too_large" {
 		t.Fatalf("got %s", frame)
+	}
+}
+
+func TestCompileRuleSetRPC(t *testing.T) {
+	local, remote := net.Pipe()
+	useTestConnection(t, local)
+	t.Cleanup(func() { _ = local.Close(); _ = remote.Close() })
+	for _, input := range []string{"example.com", "example.com\n192.0.2.1"} {
+		arguments, _ := json.Marshal(CompileRuleSetParams{Content: []byte(input), Convert: true})
+		handleMethodCall(&MethodCall{Method: compileRuleSetMethod, Arguments: arguments}, MethodResponse{ID: "rules"})
+		_ = remote.SetReadDeadline(time.Now().Add(2 * time.Second))
+		data, err := readFrame(remote)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var response struct {
+			ID     string
+			Result *RuleSetInfo
+			Error  *MethodError
+		}
+		if err := json.Unmarshal(data, &response); err != nil || response.ID != "rules" {
+			t.Fatalf("invalid reply: %s, %v", data, err)
+		}
+		if strings.Contains(input, "192.") {
+			if response.Result != nil || response.Error == nil || response.Error.Code != "rule_set_mixed" {
+				t.Fatalf("typed failure lost: %s", data)
+			}
+		} else if response.Error != nil || response.Result == nil || !bytes.HasPrefix(response.Result.Content, zstdMagic) {
+			t.Fatalf("binary response lost: %s", data)
+		}
 	}
 }

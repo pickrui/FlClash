@@ -56,6 +56,44 @@ void main() {
   );
 
   test(
+    'rule set conversion uses bytes and rejects incomplete Core replies',
+    () async {
+      final handler = _FakeCoreHandler()
+        ..response = <String, dynamic>{
+          'format': 'mrs',
+          'behavior': 'domain',
+          'content': base64Encode([1, 2, 3]),
+        };
+      final result = await handler.compileRuleSet(
+        [4, 5, 6],
+        convert: true,
+        behavior: RuleProviderBehavior.classical,
+      );
+      expect(result.content, [1, 2, 3]);
+      expect(result.format, RuleProviderFormat.mrs);
+      expect(result.behavior, RuleProviderBehavior.domain);
+      expect(handler.arguments, {
+        'content': base64Encode([4, 5, 6]),
+        'convert': true,
+        'behavior': 'classical',
+      });
+      handler.response = <String, dynamic>{
+        'format': 'mrs',
+        'behavior': 'domain',
+      };
+      await expectLater(
+        handler.compileRuleSet([1], convert: true),
+        throwsFormatException,
+      );
+      handler.response = null;
+      await expectLater(
+        handler.compileRuleSet([1]),
+        throwsA(_missingResponse(CoreMethod.compileRuleSet)),
+      );
+    },
+  );
+
+  test(
     'MRS preview carries provider identity and requires an actual response',
     () async {
       final handler = _FakeCoreHandler()..response = 'example.com\n';

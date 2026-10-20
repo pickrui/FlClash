@@ -1608,5 +1608,15 @@
   "resetDns": "Reset DNS",
   "resetDnsSuccess": "DNS state cleared",
   "resetDnsFailed": "Could not reset DNS. Check that the core is connected and try again.",
-  "resourceSizeLimitTip": "The resource exceeds {limit}"
+  "resourceSizeLimitTip": "The resource exceeds {limit}",
+  "ruleSetDetect": "Detect format and behavior",
+  "ruleSetConvert": "Convert to MRS",
+  "ruleSetConvertRemote": "Download as local MRS",
+  "ruleSetEmptyTip": "The rule set has no usable entries",
+  "ruleSetMixedTip": "The rule set mixes bare domains and IP ranges; use classical rules to combine them",
+  "ruleSetInvalidTip": "Unable to read this rule set. Check its format and entries",
+  "ruleSetUnsupportedTip": "These rules cannot be converted to MRS without changing their behavior",
+  "ruleSetBusyTip": "Another rule set operation is running. Try again shortly",
+  "ruleSetNeedsConversionTip": "This remote rule set needs normalization. Download it as local MRS to use it",
+  "ruleSetSizeTip": "The rule set exceeds the processing limit. Split it into smaller sets"
 }

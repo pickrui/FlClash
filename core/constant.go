@@ -141,6 +141,7 @@ const (
 	getExternalProviderMethod      CoreMethod = "getExternalProvider"
 	dumpRuleSetMethod              CoreMethod = "dumpRuleSet"
 	previewRuleSetMethod           CoreMethod = "previewRuleSet"
+	compileRuleSetMethod           CoreMethod = "compileRuleSet"
 	getMemoryStatsMethod           CoreMethod = "getMemoryStats"
 	updateGeoDataMethod            CoreMethod = "updateGeoData"
 	updateExternalProviderMethod   CoreMethod = "updateExternalProvider"

@@ -1608,5 +1608,15 @@
   "resetDns": "Restablecer DNS",
   "resetDnsSuccess": "Estado de DNS borrado",
   "resetDnsFailed": "No se pudo restablecer el DNS. Comprueba la conexión con el núcleo e inténtalo de nuevo.",
-  "resourceSizeLimitTip": "El recurso supera {limit}"
+  "resourceSizeLimitTip": "El recurso supera {limit}",
+  "ruleSetDetect": "Detectar formato y tipo de reglas",
+  "ruleSetConvert": "Convertir a MRS",
+  "ruleSetConvertRemote": "Descargar como MRS local",
+  "ruleSetEmptyTip": "El conjunto de reglas no contiene entradas utilizables",
+  "ruleSetMixedTip": "El conjunto mezcla dominios y rangos IP. Use reglas classical para combinarlos",
+  "ruleSetInvalidTip": "No se puede leer este conjunto de reglas. Compruebe su formato y sus entradas",
+  "ruleSetUnsupportedTip": "Estas reglas no se pueden convertir a MRS sin cambiar su comportamiento",
+  "ruleSetBusyTip": "Hay otra operación de reglas en curso. Vuelva a intentarlo en unos instantes",
+  "ruleSetNeedsConversionTip": "Este conjunto remoto necesita normalización. Descárguelo como MRS local para usarlo",
+  "ruleSetSizeTip": "El conjunto de reglas supera el límite de procesamiento. Divídalo en conjuntos más pequeños"
 }

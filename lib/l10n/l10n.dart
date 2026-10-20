@@ -13572,6 +13572,106 @@ class AppLocalizations {
       args: [limit],
     );
   }
+
+  /// `Detect format and behavior`
+  String get ruleSetDetect {
+    return Intl.message(
+      'Detect format and behavior',
+      name: 'ruleSetDetect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Convert to MRS`
+  String get ruleSetConvert {
+    return Intl.message(
+      'Convert to MRS',
+      name: 'ruleSetConvert',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Download as local MRS`
+  String get ruleSetConvertRemote {
+    return Intl.message(
+      'Download as local MRS',
+      name: 'ruleSetConvertRemote',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The rule set has no usable entries`
+  String get ruleSetEmptyTip {
+    return Intl.message(
+      'The rule set has no usable entries',
+      name: 'ruleSetEmptyTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The rule set mixes bare domains and IP ranges; use classical rules to combine them`
+  String get ruleSetMixedTip {
+    return Intl.message(
+      'The rule set mixes bare domains and IP ranges; use classical rules to combine them',
+      name: 'ruleSetMixedTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unable to read this rule set. Check its format and entries`
+  String get ruleSetInvalidTip {
+    return Intl.message(
+      'Unable to read this rule set. Check its format and entries',
+      name: 'ruleSetInvalidTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `These rules cannot be converted to MRS without changing their behavior`
+  String get ruleSetUnsupportedTip {
+    return Intl.message(
+      'These rules cannot be converted to MRS without changing their behavior',
+      name: 'ruleSetUnsupportedTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Another rule set operation is running. Try again shortly`
+  String get ruleSetBusyTip {
+    return Intl.message(
+      'Another rule set operation is running. Try again shortly',
+      name: 'ruleSetBusyTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This remote rule set needs normalization. Download it as local MRS to use it`
+  String get ruleSetNeedsConversionTip {
+    return Intl.message(
+      'This remote rule set needs normalization. Download it as local MRS to use it',
+      name: 'ruleSetNeedsConversionTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The rule set exceeds the processing limit. Split it into smaller sets`
+  String get ruleSetSizeTip {
+    return Intl.message(
+      'The rule set exceeds the processing limit. Split it into smaller sets',
+      name: 'ruleSetSizeTip',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

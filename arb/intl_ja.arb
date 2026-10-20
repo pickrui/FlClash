@@ -1608,5 +1608,15 @@
   "resetDns": "DNS をリセット",
   "resetDnsSuccess": "DNS の状態をクリアしました",
   "resetDnsFailed": "DNS をリセットできませんでした。コアの接続を確認して、もう一度お試しください。",
-  "resourceSizeLimitTip": "リソースが {limit} を超えています"
+  "resourceSizeLimitTip": "リソースが {limit} を超えています",
+  "ruleSetDetect": "形式と動作を自動検出",
+  "ruleSetConvert": "MRS に変換",
+  "ruleSetConvertRemote": "ローカル MRS としてダウンロード",
+  "ruleSetEmptyTip": "ルールセットに有効な項目がありません",
+  "ruleSetMixedTip": "ドメイン名と IP 範囲が混在しています。併用するには classical ルールを使用してください",
+  "ruleSetInvalidTip": "ルールセットを読み込めません。形式と項目を確認してください",
+  "ruleSetUnsupportedTip": "動作を維持したまま、このルールを MRS に変換することはできません",
+  "ruleSetBusyTip": "別のルールセット操作を実行中です。しばらくしてから再試行してください",
+  "ruleSetNeedsConversionTip": "このリモートルールセットは正規化が必要です。ローカル MRS としてダウンロードしてください",
+  "ruleSetSizeTip": "ルールセットが処理上限を超えています。分割して再試行してください"
 }

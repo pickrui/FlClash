@@ -2330,6 +2330,32 @@ class MessageLookup extends MessageLookupByLibrary {
       "Apple 및 Microsoft 직접 연결",
     ),
     "ruleProviders": MessageLookupByLibrary.simpleMessage("규칙 공급자"),
+    "ruleSetBusyTip": MessageLookupByLibrary.simpleMessage(
+      "다른 규칙 세트 작업이 진행 중입니다. 잠시 후 다시 시도하세요",
+    ),
+    "ruleSetConvert": MessageLookupByLibrary.simpleMessage("MRS로 변환"),
+    "ruleSetConvertRemote": MessageLookupByLibrary.simpleMessage(
+      "로컬 MRS로 다운로드",
+    ),
+    "ruleSetDetect": MessageLookupByLibrary.simpleMessage("형식 및 규칙 유형 자동 감지"),
+    "ruleSetEmptyTip": MessageLookupByLibrary.simpleMessage(
+      "규칙 세트에 사용 가능한 항목이 없습니다",
+    ),
+    "ruleSetInvalidTip": MessageLookupByLibrary.simpleMessage(
+      "규칙 세트를 읽을 수 없습니다. 형식과 항목을 확인하세요",
+    ),
+    "ruleSetMixedTip": MessageLookupByLibrary.simpleMessage(
+      "도메인과 IP 대역이 혼합되어 있습니다. 함께 사용하려면 classical 규칙을 사용하세요",
+    ),
+    "ruleSetNeedsConversionTip": MessageLookupByLibrary.simpleMessage(
+      "이 원격 규칙 세트는 정규화가 필요합니다. 로컬 MRS로 다운로드하여 사용하세요",
+    ),
+    "ruleSetSizeTip": MessageLookupByLibrary.simpleMessage(
+      "규칙 세트가 처리 한도를 초과했습니다. 더 작은 세트로 나누세요",
+    ),
+    "ruleSetUnsupportedTip": MessageLookupByLibrary.simpleMessage(
+      "이 규칙은 기존 동작을 유지하면서 MRS로 변환할 수 없습니다",
+    ),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("규칙 대상"),
     "rules": MessageLookupByLibrary.simpleMessage("규칙"),
     "rulesCount": m100,

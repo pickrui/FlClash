@@ -24,11 +24,25 @@ String userFacingErrorMessage(Object error, AppLocalizations localizations) {
         ? localizations.resourceSizeLimitTip(_readLimitLabel(cause.maxBytes))
         : networkErrorMessage(error, localizations) ??
               coreLaunchBlockedMessage(error, localizations) ??
+              _ruleSetErrorMessage(error, localizations) ??
               switch (error) {
                 LocalizedException() => error.messageFor(localizations),
                 _ => error.toString(),
               },
   );
+}
+
+String? _ruleSetErrorMessage(Object error, AppLocalizations l) {
+  if (error is! CoreMethodException) return null;
+  return switch (error.code) {
+    'rule_set_empty' => l.ruleSetEmptyTip,
+    'rule_set_mixed' => l.ruleSetMixedTip,
+    'rule_set_invalid' => l.ruleSetInvalidTip,
+    'rule_set_unsupported' => l.ruleSetUnsupportedTip,
+    'rule_set_busy' => l.ruleSetBusyTip,
+    'rule_set_size' => l.ruleSetSizeTip,
+    _ => null,
+  };
 }
 
 String _readLimitLabel(int bytes) {

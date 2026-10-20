@@ -2996,6 +2996,34 @@ class MessageLookup extends MessageLookupByLibrary {
     "ruleProviders": MessageLookupByLibrary.simpleMessage(
       "Fournisseurs de règles",
     ),
+    "ruleSetBusyTip": MessageLookupByLibrary.simpleMessage(
+      "Une autre opération sur un jeu de règles est en cours. Réessayez dans un instant",
+    ),
+    "ruleSetConvert": MessageLookupByLibrary.simpleMessage("Convertir en MRS"),
+    "ruleSetConvertRemote": MessageLookupByLibrary.simpleMessage(
+      "Télécharger en MRS local",
+    ),
+    "ruleSetDetect": MessageLookupByLibrary.simpleMessage(
+      "Détecter le format et le type de règles",
+    ),
+    "ruleSetEmptyTip": MessageLookupByLibrary.simpleMessage(
+      "Le jeu de règles ne contient aucune entrée utilisable",
+    ),
+    "ruleSetInvalidTip": MessageLookupByLibrary.simpleMessage(
+      "Impossible de lire ce jeu de règles. Vérifiez son format et ses entrées",
+    ),
+    "ruleSetMixedTip": MessageLookupByLibrary.simpleMessage(
+      "Le jeu de règles mélange des domaines et des plages IP. Utilisez des règles classical pour les combiner",
+    ),
+    "ruleSetNeedsConversionTip": MessageLookupByLibrary.simpleMessage(
+      "Ce jeu de règles distant doit être normalisé. Téléchargez-le en MRS local pour l’utiliser",
+    ),
+    "ruleSetSizeTip": MessageLookupByLibrary.simpleMessage(
+      "Le jeu de règles dépasse la limite de traitement. Divisez-le en jeux plus petits",
+    ),
+    "ruleSetUnsupportedTip": MessageLookupByLibrary.simpleMessage(
+      "Ces règles ne peuvent pas être converties en MRS sans modifier leur comportement",
+    ),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("Cible de la règle"),
     "rules": MessageLookupByLibrary.simpleMessage("Règles"),
     "rulesCount": m100,

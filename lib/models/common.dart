@@ -541,6 +541,12 @@ abstract class ClashProvider with _$ClashProvider {
       _$ClashProviderFromJson(json);
 }
 
+typedef RuleSetInfo = ({
+  RuleProviderFormat format,
+  RuleProviderBehavior behavior,
+  List<int>? content,
+});
+
 extension ClashProviderExt on ClashProvider {
   ClashProvider withFileFormat(String source) {
     if (kind != ProviderKind.rule) return this;

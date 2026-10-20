@@ -15,6 +15,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yaml/yaml.dart';
 
 import 'action.dart';
+import 'app.dart';
 import 'database.dart';
 
 const maxProviderContentBytes = 32 * 1024 * 1024;
@@ -37,8 +38,66 @@ class ProviderLibraryException implements LocalizedException {
     'shadowed' => l.providerRenameShadowed(labels.join(', ')),
     'sourceReference' => l.providerSourceReference(labels.join(', ')),
     'sourceUnavailable' => l.providerSourceUnavailable(labels.join(', ')),
+    'ruleSetNeedsConversion' => l.ruleSetNeedsConversionTip,
     _ => l.providerContentInvalid,
   };
+}
+
+final ruleSetToolsProvider = Provider(
+  (ref) => RuleSetTools(compile: ref.read(coreHandlerProvider).compileRuleSet),
+);
+
+class RuleSetTools {
+  RuleSetTools({
+    required this.compile,
+    Future<List<int>> Function(String)? download,
+  }) : download =
+           download ??
+           ((url) async => (await request.getFileResponseForUrl(
+             url,
+             maxBytes: maxProviderContentBytes,
+           )).data!);
+
+  final Future<RuleSetInfo> Function(
+    List<int>, {
+    bool convert,
+    RuleProviderBehavior? behavior,
+  })
+  compile;
+  final Future<List<int>> Function(String) download;
+
+  Future<ClashProvider> prepare(
+    ClashProvider provider, {
+    bool convert = false,
+  }) async {
+    if (provider.kind != ProviderKind.rule) return provider;
+    if (provider.isRemote) {
+      validateLibraryProvider(provider.copyWith(content: const []));
+    }
+    final bytes = provider.isRemote
+        ? await download(provider.url)
+        : provider.content;
+    if (bytes.length > maxProviderContentBytes) {
+      throw const ProviderLibraryException('size');
+    }
+    final info = await compile(
+      bytes,
+      convert: convert,
+      behavior: convert ? provider.behavior : null,
+    );
+    if ((info.content?.length ?? 0) > maxProviderContentBytes) {
+      throw const ProviderLibraryException('size');
+    }
+    if (provider.isRemote && !convert && info.content != null) {
+      throw const ProviderLibraryException('ruleSetNeedsConversion');
+    }
+    return provider.copyWith(
+      format: info.format,
+      behavior: info.behavior,
+      url: convert ? '' : provider.url,
+      content: provider.isRemote && !convert ? const [] : info.content ?? bytes,
+    );
+  }
 }
 
 void validateLibraryProvider(ClashProvider provider) {
@@ -78,7 +137,9 @@ void validateLibraryProvider(ClashProvider provider) {
     }
     final parsed = loadYaml(text);
     final items = parsed is Map
-        ? parsed[provider.kind == ProviderKind.proxy ? 'proxies' : 'payload']
+        ? provider.kind == ProviderKind.proxy
+              ? parsed['proxies']
+              : parsed['payload'] ?? parsed['rules']
         : null;
     if (items is! List) throw const FormatException();
     if (provider.kind == ProviderKind.proxy) {

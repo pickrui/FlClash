@@ -2377,6 +2377,32 @@ class MessageLookup extends MessageLookupByLibrary {
       "Apple と Microsoft に直接接続",
     ),
     "ruleProviders": MessageLookupByLibrary.simpleMessage("ルールプロバイダー"),
+    "ruleSetBusyTip": MessageLookupByLibrary.simpleMessage(
+      "別のルールセット操作を実行中です。しばらくしてから再試行してください",
+    ),
+    "ruleSetConvert": MessageLookupByLibrary.simpleMessage("MRS に変換"),
+    "ruleSetConvertRemote": MessageLookupByLibrary.simpleMessage(
+      "ローカル MRS としてダウンロード",
+    ),
+    "ruleSetDetect": MessageLookupByLibrary.simpleMessage("形式と動作を自動検出"),
+    "ruleSetEmptyTip": MessageLookupByLibrary.simpleMessage(
+      "ルールセットに有効な項目がありません",
+    ),
+    "ruleSetInvalidTip": MessageLookupByLibrary.simpleMessage(
+      "ルールセットを読み込めません。形式と項目を確認してください",
+    ),
+    "ruleSetMixedTip": MessageLookupByLibrary.simpleMessage(
+      "ドメイン名と IP 範囲が混在しています。併用するには classical ルールを使用してください",
+    ),
+    "ruleSetNeedsConversionTip": MessageLookupByLibrary.simpleMessage(
+      "このリモートルールセットは正規化が必要です。ローカル MRS としてダウンロードしてください",
+    ),
+    "ruleSetSizeTip": MessageLookupByLibrary.simpleMessage(
+      "ルールセットが処理上限を超えています。分割して再試行してください",
+    ),
+    "ruleSetUnsupportedTip": MessageLookupByLibrary.simpleMessage(
+      "動作を維持したまま、このルールを MRS に変換することはできません",
+    ),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("ルール対象"),
     "rules": MessageLookupByLibrary.simpleMessage("ルール"),
     "rulesCount": m100,

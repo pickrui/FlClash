@@ -2095,6 +2095,24 @@ class MessageLookup extends MessageLookupByLibrary {
       "Apple 与 Microsoft 直连",
     ),
     "ruleProviders": MessageLookupByLibrary.simpleMessage("规则提供者"),
+    "ruleSetBusyTip": MessageLookupByLibrary.simpleMessage("其他规则集操作正在进行，请稍后重试"),
+    "ruleSetConvert": MessageLookupByLibrary.simpleMessage("转换为 MRS"),
+    "ruleSetConvertRemote": MessageLookupByLibrary.simpleMessage("下载为本地 MRS"),
+    "ruleSetDetect": MessageLookupByLibrary.simpleMessage("自动识别格式和行为"),
+    "ruleSetEmptyTip": MessageLookupByLibrary.simpleMessage("规则集没有可用条目"),
+    "ruleSetInvalidTip": MessageLookupByLibrary.simpleMessage(
+      "无法读取规则集，请检查格式和条目",
+    ),
+    "ruleSetMixedTip": MessageLookupByLibrary.simpleMessage(
+      "规则集混合了裸域名和 IP 网段，请使用 classical 规则组合它们",
+    ),
+    "ruleSetNeedsConversionTip": MessageLookupByLibrary.simpleMessage(
+      "此远程规则集需要规范化，请下载为本地 MRS 后使用",
+    ),
+    "ruleSetSizeTip": MessageLookupByLibrary.simpleMessage("规则集超出处理上限，请拆分后重试"),
+    "ruleSetUnsupportedTip": MessageLookupByLibrary.simpleMessage(
+      "这些规则无法在保持原有行为的情况下转换为 MRS",
+    ),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("规则目标"),
     "rules": MessageLookupByLibrary.simpleMessage("规则"),
     "rulesCount": m100,

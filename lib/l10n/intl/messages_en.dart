@@ -2811,6 +2811,34 @@ class MessageLookup extends MessageLookupByLibrary {
       "Apple and Microsoft direct",
     ),
     "ruleProviders": MessageLookupByLibrary.simpleMessage("Rule providers"),
+    "ruleSetBusyTip": MessageLookupByLibrary.simpleMessage(
+      "Another rule set operation is running. Try again shortly",
+    ),
+    "ruleSetConvert": MessageLookupByLibrary.simpleMessage("Convert to MRS"),
+    "ruleSetConvertRemote": MessageLookupByLibrary.simpleMessage(
+      "Download as local MRS",
+    ),
+    "ruleSetDetect": MessageLookupByLibrary.simpleMessage(
+      "Detect format and behavior",
+    ),
+    "ruleSetEmptyTip": MessageLookupByLibrary.simpleMessage(
+      "The rule set has no usable entries",
+    ),
+    "ruleSetInvalidTip": MessageLookupByLibrary.simpleMessage(
+      "Unable to read this rule set. Check its format and entries",
+    ),
+    "ruleSetMixedTip": MessageLookupByLibrary.simpleMessage(
+      "The rule set mixes bare domains and IP ranges; use classical rules to combine them",
+    ),
+    "ruleSetNeedsConversionTip": MessageLookupByLibrary.simpleMessage(
+      "This remote rule set needs normalization. Download it as local MRS to use it",
+    ),
+    "ruleSetSizeTip": MessageLookupByLibrary.simpleMessage(
+      "The rule set exceeds the processing limit. Split it into smaller sets",
+    ),
+    "ruleSetUnsupportedTip": MessageLookupByLibrary.simpleMessage(
+      "These rules cannot be converted to MRS without changing their behavior",
+    ),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("Rule target"),
     "rules": MessageLookupByLibrary.simpleMessage("Rules"),
     "rulesCount": m100,

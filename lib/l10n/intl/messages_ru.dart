@@ -2938,6 +2938,36 @@ class MessageLookup extends MessageLookupByLibrary {
       "Apple и Microsoft напрямую",
     ),
     "ruleProviders": MessageLookupByLibrary.simpleMessage("Провайдеры правил"),
+    "ruleSetBusyTip": MessageLookupByLibrary.simpleMessage(
+      "Выполняется другая операция с набором правил. Повторите попытку позже",
+    ),
+    "ruleSetConvert": MessageLookupByLibrary.simpleMessage(
+      "Преобразовать в MRS",
+    ),
+    "ruleSetConvertRemote": MessageLookupByLibrary.simpleMessage(
+      "Скачать как локальный MRS",
+    ),
+    "ruleSetDetect": MessageLookupByLibrary.simpleMessage(
+      "Определить формат и тип правил",
+    ),
+    "ruleSetEmptyTip": MessageLookupByLibrary.simpleMessage(
+      "В наборе правил нет пригодных записей",
+    ),
+    "ruleSetInvalidTip": MessageLookupByLibrary.simpleMessage(
+      "Не удалось прочитать набор правил. Проверьте формат и записи",
+    ),
+    "ruleSetMixedTip": MessageLookupByLibrary.simpleMessage(
+      "В наборе смешаны домены и диапазоны IP. Для их объединения используйте правила classical",
+    ),
+    "ruleSetNeedsConversionTip": MessageLookupByLibrary.simpleMessage(
+      "Этот удалённый набор правил требует нормализации. Скачайте его как локальный MRS",
+    ),
+    "ruleSetSizeTip": MessageLookupByLibrary.simpleMessage(
+      "Набор правил превышает лимит обработки. Разделите его на меньшие наборы",
+    ),
+    "ruleSetUnsupportedTip": MessageLookupByLibrary.simpleMessage(
+      "Эти правила нельзя преобразовать в MRS без изменения их поведения",
+    ),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("Цель правила"),
     "rules": MessageLookupByLibrary.simpleMessage("Правила"),
     "rulesCount": m100,

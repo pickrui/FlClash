@@ -10,6 +10,7 @@ import 'dart:typed_data';
 import 'package:code_forge/code_forge.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/core/method.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/manager/status_manager.dart';
 import 'package:fl_clash/models/models.dart';
@@ -77,8 +78,23 @@ void main() {
   late Future<PlatformFile?> Function() pickFile;
   late _ResourceLibrary library;
   var pickCalls = 0;
+  late Future<RuleSetInfo> Function(
+    List<int>, {
+    bool convert,
+    RuleProviderBehavior? behavior,
+  })
+  compile;
+  late ClashProvider original;
+  var detectOnOpen = false;
   setUp(() {
     pickCalls = 0;
+    original = _original;
+    detectOnOpen = false;
+    compile = (_, {convert = false, behavior}) async => (
+      format: RuleProviderFormat.text,
+      behavior: RuleProviderBehavior.domain,
+      content: null,
+    );
     pickFile = () async => null;
     library = _ResourceLibrary();
   });
@@ -90,6 +106,13 @@ void main() {
       TestApp(
         overrides: [
           clashProviderLibraryProvider.overrideWithValue(library),
+          ruleSetToolsProvider.overrideWithValue(
+            RuleSetTools(
+              compile: (bytes, {convert = false, behavior}) =>
+                  compile(bytes, convert: convert, behavior: behavior),
+              download: (_) async => utf8.encode('192.0.2.1'),
+            ),
+          ),
           viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 1000)),
         ],
         child: Builder(
@@ -98,7 +121,8 @@ void main() {
               MaterialPageRoute(
                 builder: (_) => StatusManager(
                   child: EditClashProviderView(
-                    provider: _original,
+                    provider: original,
+                    detectOnOpen: detectOnOpen,
                     pickFile: () {
                       pickCalls++;
                       return pickFile();
@@ -120,6 +144,8 @@ void main() {
     tester,
   ) async {
     final bytes = Completer<Uint8List>();
+    final detecting = Completer<RuleSetInfo>();
+    compile = (_, {convert = false, behavior}) => detecting.future;
     pickFile = () async => _PickedResourceFile(bytes.future);
     await open(tester);
     await tester.tap(find.text('Import'));
@@ -130,6 +156,15 @@ void main() {
     expect(find.byType(EditClashProviderView), findsOneWidget);
 
     bytes.complete(Uint8List.fromList(utf8.encode('example.test')));
+    await tester.pump();
+    await tester.tap(find.byTooltip('Save'));
+    await tester.pump();
+    expect(library.saved, isEmpty);
+    detecting.complete((
+      format: RuleProviderFormat.text,
+      behavior: RuleProviderBehavior.domain,
+      content: null,
+    ));
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Save'));
     await tester.pumpAndSettle();
@@ -139,6 +174,57 @@ void main() {
     expect(find.byType(EditClashProviderView), findsNothing);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('remote normalization can recover by converting to local MRS', (
+    tester,
+  ) async {
+    original = _original.copyWith(
+      url: 'https://example.invalid/rules',
+      content: [],
+    );
+    detectOnOpen = true;
+    compile = (_, {convert = false, behavior}) async => (
+      format: convert ? RuleProviderFormat.mrs : RuleProviderFormat.text,
+      behavior: RuleProviderBehavior.ipcidr,
+      content: convert ? [1, 2, 3] : utf8.encode('192.0.2.1/32'),
+    );
+    await open(tester);
+    final l = AppLocalizations.current;
+    expect(find.text(l.ruleSetNeedsConversionTip), findsOneWidget);
+    expect(library.saved, isEmpty);
+    await tester.tap(find.text(l.ruleSetConvertRemote));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Save'));
+    await tester.pumpAndSettle();
+    expect(library.saved.single.url, isEmpty);
+    expect(library.saved.single.format, RuleProviderFormat.mrs);
+    expect(library.saved.single.behavior, RuleProviderBehavior.ipcidr);
+    expect(library.saved.single.content, [1, 2, 3]);
+  });
+
+  for (final autoDetect in [false, true]) {
+    testWidgets(
+      'failed detection or conversion preserves the draft ($autoDetect)',
+      (tester) async {
+        detectOnOpen = autoDetect;
+        compile = (_, {convert = false, behavior}) async =>
+            throw const CoreMethodException(
+              code: 'rule_set_unsupported',
+              message: 'fixture',
+            );
+        await open(tester);
+        final l = AppLocalizations.current;
+        if (!autoDetect) {
+          await tester.tap(find.text(l.ruleSetConvert));
+          await tester.pumpAndSettle();
+        }
+        expect(find.text(l.ruleSetUnsupportedTip), findsOneWidget);
+        await tester.tap(find.byTooltip('Save'));
+        await tester.pumpAndSettle();
+        expect(library.saved.single, _original);
+      },
+    );
+  }
 
   testWidgets(
     'completed resource save closes its form beneath another dialog',

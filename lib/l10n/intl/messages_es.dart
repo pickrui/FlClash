@@ -2983,6 +2983,34 @@ class MessageLookup extends MessageLookupByLibrary {
     "ruleProviders": MessageLookupByLibrary.simpleMessage(
       "Proveedores de reglas",
     ),
+    "ruleSetBusyTip": MessageLookupByLibrary.simpleMessage(
+      "Hay otra operación de reglas en curso. Vuelva a intentarlo en unos instantes",
+    ),
+    "ruleSetConvert": MessageLookupByLibrary.simpleMessage("Convertir a MRS"),
+    "ruleSetConvertRemote": MessageLookupByLibrary.simpleMessage(
+      "Descargar como MRS local",
+    ),
+    "ruleSetDetect": MessageLookupByLibrary.simpleMessage(
+      "Detectar formato y tipo de reglas",
+    ),
+    "ruleSetEmptyTip": MessageLookupByLibrary.simpleMessage(
+      "El conjunto de reglas no contiene entradas utilizables",
+    ),
+    "ruleSetInvalidTip": MessageLookupByLibrary.simpleMessage(
+      "No se puede leer este conjunto de reglas. Compruebe su formato y sus entradas",
+    ),
+    "ruleSetMixedTip": MessageLookupByLibrary.simpleMessage(
+      "El conjunto mezcla dominios y rangos IP. Use reglas classical para combinarlos",
+    ),
+    "ruleSetNeedsConversionTip": MessageLookupByLibrary.simpleMessage(
+      "Este conjunto remoto necesita normalización. Descárguelo como MRS local para usarlo",
+    ),
+    "ruleSetSizeTip": MessageLookupByLibrary.simpleMessage(
+      "El conjunto de reglas supera el límite de procesamiento. Divídalo en conjuntos más pequeños",
+    ),
+    "ruleSetUnsupportedTip": MessageLookupByLibrary.simpleMessage(
+      "Estas reglas no se pueden convertir a MRS sin cambiar su comportamiento",
+    ),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("Destino de la regla"),
     "rules": MessageLookupByLibrary.simpleMessage("Reglas"),
     "rulesCount": m100,

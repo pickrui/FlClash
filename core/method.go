@@ -322,6 +322,19 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 			return
 		}
 		response.success(handleGetExternalProvider(params.Name, params.Type))
+	case compileRuleSetMethod:
+		params := CompileRuleSetParams{}
+		if !decodeMethodArguments(call, response, &params) {
+			return
+		}
+		safeGo("compileRuleSet", func() {
+			info, failure := compileRuleSetContent(params)
+			if failure != nil {
+				response.failure(failure.Code, failure.Message, failure.Details)
+				return
+			}
+			response.success(info)
+		})
 	case previewRuleSetMethod:
 		params := struct {
 			Content  []byte `json:"content"`

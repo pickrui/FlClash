@@ -86,21 +86,12 @@ func previewRuleSetContent(content []byte, behaviorName string) (result string, 
 	if len(content) == 0 || len(content) > maxRuleSetInputBytes {
 		return "", errors.New("rule set input exceeds 32 MiB or is empty")
 	}
-	reader, err := zstd.NewReader(bytes.NewReader(content), zstd.WithDecoderConcurrency(1),
-		zstd.WithDecoderMaxMemory(maxRuleSetInputBytes))
+	actual, err := readRuleSetBehavior(content)
 	if err != nil {
 		return "", err
 	}
-	defer reader.Close()
-	decoded, err := io.ReadAll(io.LimitReader(reader, maxRuleSetInputBytes+1))
-	if err != nil {
-		return "", err
-	}
-	if len(decoded) > maxRuleSetInputBytes {
-		return "", errors.New("rule set expands beyond 32 MiB")
-	}
-	if err = validateRuleSetPreview(decoded, behavior); err != nil {
-		return "", err
+	if actual != behavior {
+		return "", errors.New("rule set behavior does not match its content")
 	}
 	output := &ruleSetPreviewWriter{}
 	if err = rp.ConvertToMrs(content, behavior, cp.MrsRule, output); err != nil {
@@ -110,6 +101,33 @@ func previewRuleSetContent(content []byte, behaviorName string) (result string, 
 		return "", errors.New("rule set preview exceeds 8 MiB")
 	}
 	return output.String(), nil
+}
+
+func readRuleSetBehavior(content []byte) (cp.RuleBehavior, error) {
+	reader, err := zstd.NewReader(bytes.NewReader(content), zstd.WithDecoderConcurrency(1),
+		zstd.WithDecoderMaxMemory(maxRuleSetInputBytes))
+	if err != nil {
+		return cp.Classical, err
+	}
+	defer reader.Close()
+	decoded, err := io.ReadAll(io.LimitReader(reader, maxRuleSetInputBytes+1))
+	if err != nil {
+		return cp.Classical, err
+	}
+	if len(decoded) > maxRuleSetInputBytes {
+		return cp.Classical, errors.New("rule set expands beyond 32 MiB")
+	}
+	if len(decoded) < 5 || decoded[4] > cp.IPCIDR.Byte() {
+		return cp.Classical, errors.New("invalid rule set behavior")
+	}
+	behavior := cp.Domain
+	if decoded[4] == cp.IPCIDR.Byte() {
+		behavior = cp.IPCIDR
+	}
+	if err = validateRuleSetPreview(decoded, behavior); err != nil {
+		return cp.Classical, err
+	}
+	return behavior, nil
 }
 
 type ruleSetPreviewWriter struct {

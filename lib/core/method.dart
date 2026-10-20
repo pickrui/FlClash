@@ -50,6 +50,7 @@ enum CoreMethod {
   getExternalProvider,
   dumpRuleSet,
   previewRuleSet,
+  compileRuleSet,
   updateGeoData,
   updateExternalProvider,
   sideLoadExternalProvider,

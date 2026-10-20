@@ -1608,5 +1608,15 @@
   "resetDns": "DNS 초기화",
   "resetDnsSuccess": "DNS 상태를 초기화했습니다",
   "resetDnsFailed": "DNS를 초기화하지 못했습니다. 코어 연결을 확인하고 다시 시도하세요.",
-  "resourceSizeLimitTip": "리소스가 {limit}를 초과합니다"
+  "resourceSizeLimitTip": "리소스가 {limit}를 초과합니다",
+  "ruleSetDetect": "형식 및 규칙 유형 자동 감지",
+  "ruleSetConvert": "MRS로 변환",
+  "ruleSetConvertRemote": "로컬 MRS로 다운로드",
+  "ruleSetEmptyTip": "규칙 세트에 사용 가능한 항목이 없습니다",
+  "ruleSetMixedTip": "도메인과 IP 대역이 혼합되어 있습니다. 함께 사용하려면 classical 규칙을 사용하세요",
+  "ruleSetInvalidTip": "규칙 세트를 읽을 수 없습니다. 형식과 항목을 확인하세요",
+  "ruleSetUnsupportedTip": "이 규칙은 기존 동작을 유지하면서 MRS로 변환할 수 없습니다",
+  "ruleSetBusyTip": "다른 규칙 세트 작업이 진행 중입니다. 잠시 후 다시 시도하세요",
+  "ruleSetNeedsConversionTip": "이 원격 규칙 세트는 정규화가 필요합니다. 로컬 MRS로 다운로드하여 사용하세요",
+  "ruleSetSizeTip": "규칙 세트가 처리 한도를 초과했습니다. 더 작은 세트로 나누세요"
 }

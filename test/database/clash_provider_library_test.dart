@@ -506,6 +506,11 @@ void main() {
           content: [0, 1],
         ),
       );
+      validateLibraryProvider(
+        resource().copyWith(
+          content: utf8.encode("rules: ['DOMAIN,example.com']"),
+        ),
+      );
       validateLibraryProvider(resource(kind: ProviderKind.proxy));
     },
   );

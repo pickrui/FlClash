@@ -1608,5 +1608,15 @@
   "resetDns": "重置 DNS",
   "resetDnsSuccess": "DNS 状态已清理",
   "resetDnsFailed": "无法重置 DNS，请确认内核已连接后重试",
-  "resourceSizeLimitTip": "资源大小超过 {limit}"
+  "resourceSizeLimitTip": "资源大小超过 {limit}",
+  "ruleSetDetect": "自动识别格式和行为",
+  "ruleSetConvert": "转换为 MRS",
+  "ruleSetConvertRemote": "下载为本地 MRS",
+  "ruleSetEmptyTip": "规则集没有可用条目",
+  "ruleSetMixedTip": "规则集混合了裸域名和 IP 网段，请使用 classical 规则组合它们",
+  "ruleSetInvalidTip": "无法读取规则集，请检查格式和条目",
+  "ruleSetUnsupportedTip": "这些规则无法在保持原有行为的情况下转换为 MRS",
+  "ruleSetBusyTip": "其他规则集操作正在进行，请稍后重试",
+  "ruleSetNeedsConversionTip": "此远程规则集需要规范化，请下载为本地 MRS 后使用",
+  "ruleSetSizeTip": "规则集超出处理上限，请拆分后重试"
 }
