@@ -21,6 +21,7 @@ void main() {
       expect(copy.list, ['1234']);
       expect(copy.weight, 4);
       expect(original.list, ['12', '123']);
+      expect(copy.retainTrimmedHead(original.list), ['12', '123']);
       copy.add('123456');
       expect(copy.list, isEmpty);
       expect(copy.weight, 0);
@@ -65,28 +66,6 @@ void main() {
       expect(copy.weight, 6);
     });
 
-    test('respects maxLength on creation', () {
-      final list = FixedList(3, list: [1, 2, 3, 4, 5]);
-      expect(list.length, 3);
-      expect(list.list, [3, 4, 5]);
-    });
-
-    test('truncates when adding beyond maxLength', () {
-      final list = FixedList(3);
-      list.add(1);
-      list.add(2);
-      list.add(3);
-      list.add(4);
-      expect(list.list, [2, 3, 4]);
-    });
-
-    test('clear empties the list', () {
-      final list = FixedList(3, list: [1, 2, 3]);
-      list.clear();
-      expect(list.length, 0);
-      expect(list.list, isEmpty);
-    });
-
     test('copyWith creates independent copy', () {
       final original = FixedList(3, list: [1, 2, 3]);
       original.add(4);
@@ -101,16 +80,44 @@ void main() {
       expect(original.list, [2, 3, 4]);
     });
 
-    test('operator [] returns correct element', () {
-      final list = FixedList(5, list: [10, 20, 30]);
-      expect(list[0], 10);
-      expect(list[2], 30);
+    test('reuses snapshots until mutation without changing retained views', () {
+      final source = [1, 2, 3, 4];
+      final list = FixedList(3, list: source);
+      final initial = list.list;
+      expect(initial, [2, 3, 4]);
+      expect(list.list, same(initial));
+      expect(source, [1, 2, 3, 4]);
+      source.add(5);
+      expect(list.length, 3);
+      expect(list[0], 2);
+      expect(() => initial.add(5), throwsUnsupportedError);
+
+      final copy = list.copyWith();
+      copy.replace({0: 9});
+      expect(copy.list, [9, 3, 4]);
+      expect(list.list, same(initial));
+      list.add(5);
+      final appended = list.list;
+      expect(appended, [3, 4, 5]);
+      expect(list.list, same(appended));
+      list.clear();
+      expect(list.list, isEmpty);
+      expect(appended, [3, 4, 5]);
+      expect(initial, [2, 3, 4]);
+      expect((FixedList<int>(0)..add(1)).list, isEmpty);
     });
 
-    test('list getter returns unmodifiable view', () {
-      final list = FixedList(3, list: [1, 2, 3]);
-      final view = list.list;
-      expect(() => view.add(4), throwsA(isA<UnsupportedError>()));
+    test('paused history is capped and cleared with the live buffer', () {
+      final buffer = FixedList(2, list: [1, 2]);
+      var paused = buffer.list;
+      for (final value in [3, 4, 5, 6]) {
+        buffer.add(value);
+        paused = buffer.retainTrimmedHead(paused);
+      }
+      expect(paused, [1, 2, 3, 4]);
+      expect(buffer.list, [5, 6]);
+      buffer.clear();
+      expect(buffer.retainTrimmedHead(paused), isEmpty);
     });
   });
 }

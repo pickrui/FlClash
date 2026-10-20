@@ -8,6 +8,7 @@ class FixedList<T> {
   final int? maxWeight;
   final int Function(T)? weightOf;
   final List<T> _list;
+  List<T>? _snapshot;
   int _revision = 0;
   int _weight = 0;
 
@@ -17,7 +18,7 @@ class FixedList<T> {
     : assert(maxLength >= 0),
       assert(maxWeight == null || maxWeight >= 0),
       assert(maxWeight == null || weightOf != null),
-      _list = list ?? [] {
+      _list = List.of(list ?? []) {
     if (weightOf != null) {
       for (final item in _list) {
         _weight += weightOf!(item);
@@ -27,6 +28,7 @@ class FixedList<T> {
   }
 
   void add(T item) {
+    _snapshot = null;
     _list.add(item);
     _weight += weightOf?.call(item) ?? 0;
     _trim();
@@ -34,6 +36,7 @@ class FixedList<T> {
   }
 
   void replace(Map<int, T> items) {
+    _snapshot = null;
     final weightOf = this.weightOf;
     items.forEach((index, item) {
       if (weightOf != null) {
@@ -57,6 +60,7 @@ class FixedList<T> {
   }
 
   void clear() {
+    _snapshot = null;
     _list.clear();
     _revision = 0;
     _weight = 0;
@@ -64,16 +68,37 @@ class FixedList<T> {
 
   int get revision => _revision;
 
-  List<T> get list => List.unmodifiable(_list);
+  List<T> get list => _snapshot ??= List.unmodifiable(_list);
 
   int get length => _list.length;
   int get weight => _weight;
 
   T operator [](int index) => _list[index];
 
+  List<T> retainTrimmedHead(List<T> current, {Object Function(T)? keyOf}) {
+    final latest = list;
+    if (current.isEmpty || latest.isEmpty) return latest;
+    final first = latest.first;
+    final index = keyOf == null
+        ? current.indexWhere((item) => identical(item, first))
+        : current.indexWhere((item) => keyOf(item) == keyOf(first));
+    if (index == 0) return latest;
+    final head = current.take(index > 0 ? index : current.length);
+    final retained = <T>[];
+    var weight = 0;
+    for (final item in head.followedBy(latest)) {
+      if (retained.length >= maxLength * 2) break;
+      weight += weightOf?.call(item) ?? 0;
+      if (maxWeight != null && weight > maxWeight!) break;
+      retained.add(item);
+    }
+    return List.unmodifiable(retained);
+  }
+
   FixedList<T> copyWith() {
     return FixedList._copy(maxLength, List.of(_list), maxWeight, weightOf)
       .._weight = _weight
-      .._revision = _revision;
+      .._revision = _revision
+      .._snapshot = _snapshot;
   }
 }

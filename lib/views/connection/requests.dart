@@ -93,8 +93,15 @@ class _RequestsViewState extends ConsumerState<RequestsView>
         if (!mounted) return;
         updateWhenRouteSettled(() {
           if (!mounted) return;
-          _requestsStateNotifier.value = _requestsStateNotifier.value.copyWith(
-            trackerInfos: _requests,
+          final state = _requestsStateNotifier.value;
+          final buffer = ref.read(requestsProvider);
+          _requestsStateNotifier.value = state.copyWith(
+            trackerInfos: state.autoScrollToEnd
+                ? buffer.list
+                : buffer.retainTrimmedHead(
+                    state.trackerInfos,
+                    keyOf: (item) => item.id,
+                  ),
           );
         });
       });
@@ -141,7 +148,10 @@ class _RequestsViewState extends ConsumerState<RequestsView>
                     onResumeToEnd: () {
                       _requestsStateNotifier.value = _requestsStateNotifier
                           .value
-                          .copyWith(autoScrollToEnd: true);
+                          .copyWith(
+                            autoScrollToEnd: true,
+                            trackerInfos: ref.read(requestsProvider).list,
+                          );
                     },
                     child: SuperListView.separated(
                       padding: EdgeInsets.only(

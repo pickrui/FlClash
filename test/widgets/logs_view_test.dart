@@ -8,6 +8,7 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/ui/scroll.dart';
 import 'package:fl_clash/views/logs.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -25,7 +26,7 @@ void main() {
         ],
       );
       addTearDown(container.dispose);
-      container.read(logsProvider.notifier).value = FixedList<Log>(10);
+      container.read(logsProvider.notifier).value = FixedList<Log>(2);
       final generation = ValueNotifier(0);
       addTearDown(generation.dispose);
       await tester.pumpWidget(
@@ -76,10 +77,26 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('after replacement'), findsOneWidget);
       expect(tester.takeException(), isNull);
+      tester
+          .widget<ScrollToEndBox>(find.byType(ScrollToEndBox))
+          .onCancelToEnd!();
+      container
+          .read(logsProvider.notifier)
+          .addLog(const Log(dateTime: '10:00:02', payload: 'after trim'));
+      await tester.pump(commonDuration);
+      await tester.pumpAndSettle();
+      expect(find.text('before replacement'), findsOneWidget);
+      expect(find.text('after trim'), findsOneWidget);
+      expect(container.read(logsProvider).length, 2);
+      tester
+          .widget<ScrollToEndBox>(find.byType(ScrollToEndBox))
+          .onResumeToEnd!();
+      await tester.pumpAndSettle();
+      expect(find.text('before replacement'), findsNothing);
       container
           .read(logsProvider.notifier)
           .addLog(
-            const Log(dateTime: '10:00:02', payload: 'pending when disposed'),
+            const Log(dateTime: '10:00:03', payload: 'pending when disposed'),
           );
       await tester.pump();
       await tester.pumpWidget(const SizedBox());

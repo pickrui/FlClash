@@ -33,8 +33,9 @@ TrackerInfo _request(
 
 Future<ProviderContainer> _pumpRequests(
   WidgetTester tester,
-  List<TrackerInfo> requests,
-) async {
+  List<TrackerInfo> requests, {
+  int maxLength = 10,
+}) async {
   tester.view.physicalSize = const Size(1400, 1000);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
@@ -46,7 +47,7 @@ Future<ProviderContainer> _pumpRequests(
   );
   addTearDown(container.dispose);
   final notifier = container.read(requestsProvider.notifier);
-  notifier.value = FixedList<TrackerInfo>(10);
+  notifier.value = FixedList<TrackerInfo>(maxLength);
   requests.forEach(notifier.addRequest);
   await tester.pumpWidget(
     UncontrolledProviderScope(
@@ -72,6 +73,47 @@ Future<ProviderContainer> _pumpRequests(
 }
 
 void main() {
+  testWidgets(
+    'paused requests retain trimmed rows and resume the live buffer',
+    (tester) async {
+      final container = await _pumpRequests(tester, [
+        _request('a', 'alpha.test'),
+        _request('b', 'beta.test'),
+      ], maxLength: 2);
+      final notifier = container.read(requestsProvider.notifier);
+      tester
+          .widget<ScrollToEndBox>(find.byType(ScrollToEndBox))
+          .onCancelToEnd!();
+      notifier.addRequest(_request('c', 'gamma.test'));
+      notifier.updateTraffic({'b': (upload: 0, download: 257835)});
+      await tester.pump(commonDuration);
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('alpha.test', findRichText: true),
+        findsWidgets,
+      );
+      expect(
+        find.textContaining('beta.test', findRichText: true),
+        findsWidgets,
+      );
+      expect(find.text(257835.traffic.show), findsOneWidget);
+      expect(container.read(requestsProvider).length, 2);
+
+      tester
+          .widget<ScrollToEndBox>(find.byType(ScrollToEndBox))
+          .onResumeToEnd!();
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('alpha.test', findRichText: true),
+        findsNothing,
+      );
+      expect(
+        find.textContaining('gamma.test', findRichText: true),
+        findsWidgets,
+      );
+    },
+  );
+
   testWidgets('traffic reported after a request opened reaches its row', (
     tester,
   ) async {

@@ -118,8 +118,12 @@ class _LogsViewState extends ConsumerState<LogsView>
         if (!mounted) return;
         updateWhenRouteSettled(() {
           if (!mounted) return;
-          _logsStateNotifier.value = _logsStateNotifier.value.copyWith(
-            logs: _logs,
+          final state = _logsStateNotifier.value;
+          final buffer = ref.read(logsProvider);
+          _logsStateNotifier.value = state.copyWith(
+            logs: state.autoScrollToEnd
+                ? buffer.list
+                : buffer.retainTrimmedHead(state.logs),
           );
         });
       });
@@ -156,6 +160,7 @@ class _LogsViewState extends ConsumerState<LogsView>
                 onResumeToEnd: () {
                   _logsStateNotifier.value = _logsStateNotifier.value.copyWith(
                     autoScrollToEnd: true,
+                    logs: ref.read(logsProvider).list,
                   );
                 },
                 controller: _scrollController,
