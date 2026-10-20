@@ -279,6 +279,7 @@ class Request {
   );
 
   Request({
+    HttpClientAdapter? ipAdapter,
     this._readRoutes,
     this._redirectLookup,
     this._publicGitHubAdapter,
@@ -292,8 +293,12 @@ class Request {
         connectTimeout: const Duration(seconds: 10),
       ),
     );
-    dio.httpClientAdapter = createFlClashHttpClientAdapter(
-      findProxy: FlClashHttpOverrides.handleFindProxy,
+    dio.httpClientAdapter = BoundedHttpClientAdapter(
+      ipAdapter ??
+          createFlClashHttpClientAdapter(
+            findProxy: FlClashHttpOverrides.handleFindProxy,
+          ),
+      maxBytes: 4096,
     );
   }
 
@@ -724,7 +729,10 @@ class Request {
   Future<Result<IpInfo?>> checkIp({CancelToken? cancelToken}) async {
     final token = cancelToken ?? CancelToken();
     final result = Completer<Result<IpInfo?>>();
-    var remaining = _ipInfoSources.length;
+    final sources = _ipInfoSources.entries.iterator;
+    var exhausted = false;
+    var inFlight = 0;
+    late void Function() startNext;
     final deadline = Timer(const Duration(seconds: 10), () {
       if (!result.isCompleted) result.complete(Result.success(null));
     });
@@ -749,7 +757,7 @@ class Request {
         );
         if (response.statusCode == HttpStatus.ok && response.data != null) {
           final info = source.value(response.data!);
-          if (InternetAddress.tryParse(info.ip) != null &&
+          if (_isPublicIp(info.ip) &&
               RegExp(r'^[a-zA-Z]{2}$').hasMatch(info.countryCode) &&
               !result.isCompleted) {
             result.complete(Result.success(info));
@@ -758,22 +766,62 @@ class Request {
       } catch (_) {
         // One failed or malformed source must not win the race.
       } finally {
-        if (--remaining == 0 && !result.isCompleted) {
-          result.complete(Result.success(null));
-        }
+        inFlight--;
+        startNext();
       }
     }
 
-    for (final source in _ipInfoSources.entries) {
-      unawaited(checkSource(source));
-    }
+    startNext = () {
+      if (result.isCompleted || token.isCancelled || inFlight >= 3) return;
+      if (!exhausted && sources.moveNext()) {
+        inFlight++;
+        unawaited(checkSource(sources.current));
+      } else {
+        exhausted = true;
+        if (inFlight == 0) result.complete(Result.success(null));
+      }
+    };
+    final stagger = Timer.periodic(
+      const Duration(milliseconds: 800),
+      (_) => startNext(),
+    );
+    startNext();
     try {
       return await result.future;
     } finally {
       deadline.cancel();
+      stagger.cancel();
       token.cancel();
     }
   }
+}
+
+bool _isPublicIp(String value) {
+  final address = InternetAddress.tryParse(value);
+  if (address == null ||
+      address.isLoopback ||
+      address.isLinkLocal ||
+      address.isMulticast) {
+    return false;
+  }
+  var bytes = address.rawAddress;
+  if (bytes.length == 16) {
+    if (bytes.take(10).every((byte) => byte == 0) &&
+        bytes[10] == 0xff &&
+        bytes[11] == 0xff) {
+      bytes = bytes.sublist(12);
+    } else {
+      return bytes.any((byte) => byte != 0) && (bytes[0] & 0xfe) != 0xfc;
+    }
+  }
+  return bytes[0] != 0 &&
+      bytes[0] != 10 &&
+      bytes[0] != 127 &&
+      bytes[0] < 224 &&
+      !(bytes[0] == 169 && bytes[1] == 254) &&
+      !(bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31) &&
+      !(bytes[0] == 192 && bytes[1] == 168) &&
+      !(bytes[0] == 100 && bytes[1] >= 64 && bytes[1] <= 127);
 }
 
 final request = Request();

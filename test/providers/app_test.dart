@@ -436,9 +436,9 @@ void main() {
       final notifier = container.read(networkDetectionProvider.notifier);
       container.read(initProvider.notifier).value = true;
       notifier.startCheck();
-      await _waitForIpRequests(adapter, count: 7);
-      for (final pending in adapter.pending) {
-        pending.complete(ResponseBody.fromString('{}', 200));
+      for (var index = 0; index < 7; index++) {
+        await _waitForIpRequests(adapter, count: index + 1);
+        adapter.pending[index].complete(ResponseBody.fromString('{}', 200));
       }
       await pumpEventQueue();
       expect(container.read(networkDetectionProvider).isLoading, false);
@@ -484,13 +484,67 @@ void main() {
       },
     );
 
-    test('invalid IP data cannot win over another valid source', () async {
+    test(
+      'invalid and non-public IP data cannot win over a valid source',
+      () async {
+        for (final invalid in [
+          'invalid',
+          '0.0.0.0',
+          '127.0.0.1',
+          '10.1.2.3',
+          '172.16.0.1',
+          '192.168.1.1',
+          '169.254.1.1',
+          '100.64.0.1',
+          '224.0.0.1',
+          '255.255.255.255',
+          '::',
+          '::1',
+          'fe80::1',
+          'fd00::1',
+          'ff02::1',
+          '::ffff:10.1.2.3',
+        ]) {
+          final adapter = _ControlledIpAdapter();
+          request.dio.httpClientAdapter = adapter;
+          final checking = request.checkIp();
+          await _waitForIpRequests(adapter);
+          adapter.succeed(invalid);
+          await _waitForIpRequests(adapter, count: 2);
+          adapter.pending[1].complete(
+            ResponseBody.fromString(
+              '{"ip":"2606:4700:4700::1111","cc":"US"}',
+              200,
+              headers: {
+                Headers.contentTypeHeader: ['application/json'],
+              },
+            ),
+          );
+          expect(
+            (await checking).data?.ip,
+            '2606:4700:4700::1111',
+            reason: invalid,
+          );
+        }
+      },
+    );
+
+    test('oversized IP response falls back before decoding its JSON', () async {
       final adapter = _ControlledIpAdapter();
-      request.dio.httpClientAdapter = adapter;
-      final checking = request.checkIp();
-      await pumpEventQueue();
-      adapter.succeed('invalid');
-      await pumpEventQueue();
+      final client = Request(ipAdapter: adapter);
+      addTearDown(() => client.dio.close(force: true));
+      final checking = client.checkIp();
+      await _waitForIpRequests(adapter);
+      adapter.pending.first.complete(
+        ResponseBody.fromString(
+          '{"ip":"9.9.9.9","country_code":"US","padding":"${'x' * 4096}"}',
+          200,
+          headers: {
+            Headers.contentTypeHeader: ['application/json'],
+          },
+        ),
+      );
+      await _waitForIpRequests(adapter, count: 2);
       adapter.pending[1].complete(
         ResponseBody.fromString(
           '{"ip":"1.1.1.1","cc":"US"}',
@@ -503,16 +557,34 @@ void main() {
       expect((await checking).data?.ip, '1.1.1.1');
     });
 
+    test('IP sources stagger, stay bounded and stop after a winner', () async {
+      final adapter = _ControlledIpAdapter();
+      request.dio.httpClientAdapter = adapter;
+      final checking = request.checkIp();
+      await _waitForIpRequests(adapter);
+      expect(adapter.pending, hasLength(1));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      expect(adapter.pending, hasLength(1));
+      await _waitForIpRequests(adapter, count: 3);
+      await Future<void>.delayed(const Duration(milliseconds: 850));
+      expect(adapter.pending, hasLength(3));
+      adapter.succeed('1.1.1.1');
+      expect((await checking).data?.ip, '1.1.1.1');
+      await Future<void>.delayed(const Duration(milliseconds: 850));
+      expect(adapter.pending, hasLength(3));
+      expect(adapter.cancellations, 3);
+    });
+
     test('disposing cancels a pending check', () async {
       final adapter = _ControlledIpAdapter();
       request.dio.httpClientAdapter = adapter;
       final owner = ProviderContainer();
       owner.read(initProvider.notifier).value = true;
       owner.read(networkDetectionProvider.notifier).startCheck();
-      await _waitForIpRequests(adapter, count: 7);
+      await _waitForIpRequests(adapter, count: 3);
       owner.dispose();
       await pumpEventQueue();
-      expect(adapter.cancellations, 7);
+      expect(adapter.cancellations, 3);
     });
 
     test(
@@ -523,7 +595,7 @@ void main() {
         final result = await request.checkIp();
         expect(result.data, isNull);
         await pumpEventQueue();
-        expect(adapter.cancellations, 7);
+        expect(adapter.cancellations, 3);
       },
     );
 
@@ -561,8 +633,6 @@ void main() {
 }
 
 class _DelayedCancelIpAdapter implements HttpClientAdapter {
-  static const _sourceCount = 7;
-
   int _requestCount = 0;
 
   @override
@@ -572,8 +642,7 @@ class _DelayedCancelIpAdapter implements HttpClientAdapter {
     Future<void>? cancelFuture,
   ) {
     _requestCount++;
-    final batch = ((_requestCount - 1) ~/ _sourceCount) + 1;
-    if (batch == 1) {
+    if (_requestCount == 1) {
       final completer = Completer<ResponseBody>();
       cancelFuture?.then((_) {
         Timer(const Duration(milliseconds: 500), () {
