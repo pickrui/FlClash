@@ -521,7 +521,7 @@ class Request {
       commonPrint.log(
         isApiDomain
             ? 'oixCloud profile request failed: ${e is DioException ? e.type.name : e.runtimeType}'
-            : 'Profile request failed: ${e is DioException ? '${e.type.name}, HTTP ${e.response?.statusCode ?? 0}' : e.runtimeType}',
+            : 'Profile request failed: ${e is DioException ? compactError(e) : e.runtimeType}',
       );
       if (e is ConfigValidationException ||
           e is ReadSizeLimitException ||
@@ -690,7 +690,7 @@ class Request {
       return (body: data?['body'] as String?, tagName: tagName);
     } catch (error) {
       commonPrint.log(
-        'fetch release notes failed: $error',
+        'fetch release notes failed: ${compactError(error)}',
         logLevel: LogLevel.warning,
       );
       return null;
@@ -709,7 +709,7 @@ class Request {
       return response.data;
     } catch (error) {
       commonPrint.log(
-        'fetch changelog failed: $error',
+        'fetch changelog failed: ${compactError(error)}',
         logLevel: LogLevel.warning,
       );
       return null;

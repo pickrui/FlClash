@@ -19,7 +19,7 @@ void _invokeScheduledCallback(
 }) {
   void report(Object error, StackTrace stackTrace) {
     commonPrint.log(
-      'Scheduled task $tag failed: $error\n$stackTrace',
+      'Scheduled task $tag failed: ${compactError(error)}\n$stackTrace',
       logLevel: LogLevel.warning,
     );
   }

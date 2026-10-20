@@ -298,7 +298,7 @@ extension InitControllerExt on AppController {
       updateInfo = await request.checkForUpdate();
     } catch (error) {
       commonPrint.log(
-        'check update failed: $error',
+        'check update failed: ${compactError(error)}',
         logLevel: LogLevel.warning,
       );
       if (isUser) {
@@ -492,7 +492,7 @@ extension InitControllerExt on AppController {
           } catch (error) {
             commonPrint.log(
               'update download failed: '
-              '${Secrets.redactApiDomains(error.toString())}',
+              '${Secrets.redactApiDomains(compactError(error))}',
               logLevel: LogLevel.warning,
             );
             rethrow;

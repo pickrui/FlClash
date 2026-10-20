@@ -135,7 +135,7 @@ extension ProfilesControllerExt on AppController {
         await updateProfile(profile, promptCertificate: false);
       } catch (e) {
         _profileUpdateRuns.autoUpdateFailed(profile);
-        commonPrint.log(e.toString(), logLevel: LogLevel.warning);
+        commonPrint.log(compactError(e), logLevel: LogLevel.warning);
       }
     }
   }
@@ -241,7 +241,7 @@ extension ProfilesControllerExt on AppController {
         } catch (e, s) {
           final msg = profile.isoixCloudProfile
               ? 'Failed to update oixCloud profile: ${e.runtimeType}'
-              : 'Failed to update profile ${profile.id}: $e\n$s';
+              : 'Failed to update profile ${profile.id}: ${compactError(e)}\n$s';
           commonPrint.log(msg, logLevel: LogLevel.warning);
         }
       },
