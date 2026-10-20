@@ -95,6 +95,7 @@ class Window implements WindowPort {
   }
 
   Future<void> _startWakeupServer() async {
+    // Native activation is session-scoped; the data-directory lock is not.
     try {
       await SingleInstanceWakeup.listen(
         endpoint: File(await appPath.wakeupFilePath),

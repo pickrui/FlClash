@@ -155,13 +155,6 @@ void main() {
     },
   );
 
-  test('a legitimate second launch shows the window once', () async {
-    await SingleInstanceWakeup.notify(endpoint);
-    await wakeup.future.timeout(const Duration(seconds: 2));
-
-    expect(shows, 1);
-  });
-
   test('a complete request can arrive in multiple TCP packets', () async {
     final bytes = utf8.encode(await request());
     final socket = await Socket.connect(

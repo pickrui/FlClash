@@ -298,15 +298,6 @@ extension ColorExtension on Color {
         .withLightness(min(1, max(0, hsl.lightness - amount / 100)))
         .toColor();
   }
-
-  Color blendDarken(BuildContext context, {double factor = 0.1}) {
-    final brightness = Theme.of(context).brightness;
-    return Color.lerp(
-      this,
-      brightness == Brightness.dark ? Colors.white : Colors.black,
-      factor,
-    )!;
-  }
 }
 
 extension ColorSchemeExtension on ColorScheme {

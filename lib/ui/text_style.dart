@@ -27,6 +27,4 @@ extension TextStyleExtension on TextStyle {
 
   TextStyle get toTabular =>
       copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
-
-  TextStyle adjustSize(int size) => copyWith(fontSize: fontSize! + size);
 }
