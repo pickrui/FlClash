@@ -99,33 +99,6 @@ class Measure {
     listRowMinHeight,
     listTitleHeight + listSubtitleHeight + 2 * listRowVerticalPadding,
   );
-
-  final Map<String, double> _lineHeights = {};
-
-  double _lineHeight(String key, TextStyle? style) =>
-      _lineHeights[key] ??= computeTextSize(Text('X', style: style)).height;
-
-  double get bodyLargeHeight =>
-      _lineHeight('bodyLargeHeight', AppTextStyle.body.of(context));
-
-  double get bodyMediumHeight =>
-      _lineHeight('bodyMediumHeight', AppTextStyle.subheadline.of(context));
-
-  double get bodySmallHeight =>
-      _lineHeight('bodySmallHeight', AppTextStyle.footnote.of(context));
-
-  double get labelSmallHeight => _lineHeight(
-    'labelSmallHeight',
-    AppTextStyle.caption2.of(context, emphasized: true),
-  );
-
-  double get titleSmallHeight => _lineHeight(
-    'titleSmallHeight',
-    AppTextStyle.subheadline.of(context, emphasized: true),
-  );
-
-  double get titleMediumHeight =>
-      _lineHeight('titleMediumHeight', AppTextStyle.headline.of(context));
 }
 
 class MeasureScope extends InheritedWidget {

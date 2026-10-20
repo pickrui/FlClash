@@ -183,16 +183,4 @@ void main() {
       expect(utils.getProfilesColumns(600), 2);
     });
   });
-
-  group('fastHash', () {
-    test('produces consistent hash', () {
-      final hash1 = utils.fastHash('hello');
-      final hash2 = utils.fastHash('hello');
-      expect(hash1, hash2);
-    });
-
-    test('different input produces different hash', () {
-      expect(utils.fastHash('hello'), isNot(equals(utils.fastHash('world'))));
-    });
-  });
 }

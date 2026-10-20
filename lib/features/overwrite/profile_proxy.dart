@@ -1057,7 +1057,8 @@ class OverwriteEntryTile extends StatelessWidget {
           isSelected: isSelected,
           onPressed: onSelected,
           child: ListTile(
-            minTileHeight: 32 + globalState.measure.bodyMediumHeight,
+            minTileHeight:
+                32 + globalState.measure.textHeight(AppTextStyle.subheadline),
             minVerticalPadding: 12,
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             title: Text(

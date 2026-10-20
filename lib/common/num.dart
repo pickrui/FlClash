@@ -5,7 +5,6 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/common.dart';
-import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 
 extension NumExt on num {
@@ -39,12 +38,6 @@ extension NumExt on num {
       unitIndex++;
     }
     return (size, units[unitIndex].name);
-  }
-}
-
-extension DoubleExt on double {
-  bool moreOrEqual(double value) {
-    return this > value || (value - this).abs() < precisionErrorTolerance + 1;
   }
 }
 

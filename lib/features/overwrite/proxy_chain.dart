@@ -982,7 +982,8 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
             padding: EdgeInsets.zero,
             radius: 18,
             child: ListTile(
-              minTileHeight: 32 + globalState.measure.bodyMediumHeight,
+              minTileHeight:
+                  32 + globalState.measure.textHeight(AppTextStyle.subheadline),
               minVerticalPadding: 12,
               contentPadding: const EdgeInsets.symmetric(horizontal: 16),
               leading: ProxyChainRoleBadge(
