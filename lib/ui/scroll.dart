@@ -34,7 +34,6 @@ class CommonScrollBar extends StatelessWidget {
   final ScrollController? controller;
   final Widget child;
   final bool thumbVisibility;
-  final bool trackVisibility;
   final EdgeInsets padding;
 
   /// Reports the scrub rate while the thumb is held, and null on release.
@@ -47,7 +46,6 @@ class CommonScrollBar extends StatelessWidget {
     required this.child,
     required this.controller,
     this.thumbVisibility = false,
-    this.trackVisibility = false,
     this.padding = EdgeInsets.zero,
     this.onScrub,
   }) : _hidesAmbientBar = true;
@@ -59,7 +57,6 @@ class CommonScrollBar extends StatelessWidget {
     required this.controller,
     this.padding = EdgeInsets.zero,
   }) : thumbVisibility = false,
-       trackVisibility = false,
        onScrub = null,
        _hidesAmbientBar = false;
 
@@ -67,7 +64,6 @@ class CommonScrollBar extends StatelessWidget {
     return _AppScrollbar(
       controller: controller,
       thumbVisibility: thumbVisibility,
-      trackVisibility: trackVisibility,
       onScrub: onScrub,
       child: _hidesAmbientBar
           ? ScrollConfiguration(
@@ -180,7 +176,6 @@ class _AppScrollbar extends RawScrollbar {
     required super.child,
     super.controller,
     super.thumbVisibility,
-    super.trackVisibility,
     this.onScrub,
   }) : super(
          interactive: true,

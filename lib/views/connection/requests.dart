@@ -135,7 +135,6 @@ class _RequestsViewState extends ConsumerState<RequestsView>
               builder: (context, table, requests) => Align(
                 alignment: Alignment.topCenter,
                 child: CommonScrollBar(
-                  trackVisibility: false,
                   controller: _scrollController,
                   child: ScrollToEndBox(
                     controller: _scrollController,
