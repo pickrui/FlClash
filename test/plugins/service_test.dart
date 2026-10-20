@@ -171,15 +171,30 @@ void main() {
       messenger.setMockMethodCallHandler(channel, (call) async {
         expect(call.method, 'syncRunState');
         expect(call.arguments, isNull);
-        return runtime;
+        return jsonEncode({
+          'runTime': runtime,
+          'localNetworkAccess': false,
+          'vpnOptions': {
+            'enable': true,
+            'port': 7890,
+            'ipv6': false,
+            'dnsHijacking': false,
+            'accessControlProps': {},
+            'allowBypass': true,
+            'systemProxy': true,
+            'bypassDomain': <String>[],
+            'stack': 'gvisor',
+          },
+        });
       });
-      expect(
-        await service.syncRunState(),
-        DateTime.fromMillisecondsSinceEpoch(123),
-      );
+      final state = await service.syncRunState();
+      expect(state.startTime, DateTime.fromMillisecondsSinceEpoch(123));
+      expect(state.vpnOptions?.stack, 'gvisor');
+      expect(state.localNetworkAccess, isFalse);
       runtime = 0;
-      expect(await service.syncRunState(), isNull);
-      expect(await service.syncRunState(), isNull);
+      final stopped = await service.syncRunState();
+      expect(stopped.startTime, isNull);
+      expect(stopped.vpnOptions, isNull);
     },
   );
 
@@ -288,8 +303,10 @@ void main() {
   );
 
   test('missing or failed queries are not interpreted as stopped', () async {
-    messenger.setMockMethodCallHandler(channel, (_) async => null);
-    await expectLater(service.syncRunState(), throwsStateError);
+    for (final reply in [null, '{"runTime":123}', '{"runTime":-1}', '{}']) {
+      messenger.setMockMethodCallHandler(channel, (_) async => reply);
+      await expectLater(service.syncRunState(), throwsStateError);
+    }
     messenger.setMockMethodCallHandler(channel, (_) async {
       throw PlatformException(code: 'service_error');
     });

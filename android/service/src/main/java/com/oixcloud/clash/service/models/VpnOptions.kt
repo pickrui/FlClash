@@ -39,6 +39,8 @@ data class VpnOptions(
     val congestionController: String = "",
 ) : Parcelable
 
+data class ServiceRunState(val runTime: Long = 0L, val vpnOptions: VpnOptions? = null)
+
 const val DEFAULT_TUN_MTU = 9000
 private val TUN_MTU_RANGE = 1280..65535
 

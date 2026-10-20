@@ -8,6 +8,9 @@ package com.oixcloud.clash.service
 import android.app.Application
 import android.os.DeadObjectException
 import com.oixcloud.clash.common.GlobalState
+import com.oixcloud.clash.service.models.ServiceRunState
+import com.oixcloud.clash.service.models.VpnOptions
+import com.google.gson.Gson
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
@@ -17,6 +20,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -29,6 +33,41 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28], manifest = Config.NONE, application = Application::class)
 class RemoteServiceLifecycleTest {
+    @Test
+    fun repeatedStartAndPendingOptionsCannotReplaceTheRunningSnapshot() {
+        val service = Robolectric.buildService(RemoteService::class.java).get()
+        val binder = service.onBind(null) as IRemoteInterface
+        val previous = State.running
+        val previousOptions = State.options
+        val applied = VpnOptions(stack = "gvisor", mtu = 1400)
+        val candidate = applied.copy(stack = "system", mtu = 1500)
+        val replied = CountDownLatch(1)
+        try {
+            State.options = applied
+            State.runTime = 123L
+            State.options = candidate
+            binder.startService(candidate, 456L, object : IResultInterface.Stub() {
+                override fun onResult(runTime: Long) {
+                    assertEquals(123L, runTime)
+                    replied.countDown()
+                }
+            })
+            assertTrue(replied.await(5, TimeUnit.SECONDS))
+            val running = Gson().fromJson(binder.runState, ServiceRunState::class.java)
+            assertEquals(123L, running.runTime)
+            assertEquals(applied, running.vpnOptions)
+            State.runTime = 0L
+            val stopped = Gson().fromJson(binder.runState, ServiceRunState::class.java)
+            assertEquals(0L, stopped.runTime)
+            assertNull(stopped.vpnOptions)
+        } finally {
+            State.options = previous.vpnOptions
+            State.runTime = previous.runTime
+            State.options = previousOptions
+            service.cancel()
+        }
+    }
+
     @Test
     fun destructionCancelsPendingWork() {
         val service = Robolectric.buildService(RemoteService::class.java).get()

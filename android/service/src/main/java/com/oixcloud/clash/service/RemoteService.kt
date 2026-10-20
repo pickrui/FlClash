@@ -8,6 +8,7 @@ package com.oixcloud.clash.service
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
+import com.google.gson.Gson
 import com.oixcloud.clash.common.AidlRequestBuffer
 import com.oixcloud.clash.common.GlobalState
 import com.oixcloud.clash.common.BroadcastAction
@@ -150,6 +151,10 @@ class RemoteService : Service(),
     private fun handleStartService(options: VpnOptions, runTime: Long, result: IResultInterface) {
         launch {
             runLock.withLock {
+                if (State.runTime != 0L) {
+                    result.deliver(State.runTime)
+                    return@withLock
+                }
                 var startingService: IBaseService? = null
                 val started = runCatching {
                     State.options = options
@@ -317,6 +322,8 @@ class RemoteService : Service(),
         override fun getRunTime(): Long {
             return State.runTime
         }
+
+        override fun getRunState(): String = Gson().toJson(State.running)
     }
 
     override fun onBind(intent: Intent?): IBinder {

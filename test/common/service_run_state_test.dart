@@ -6,6 +6,8 @@
 import 'dart:async';
 
 import 'package:fl_clash/providers/app.dart';
+import 'package:fl_clash/plugins/service.dart';
+import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -47,7 +49,7 @@ void main() {
       globalState.startTime = DateTime.now();
       var samples = 0;
       await globalState.startUpdateTasks([() => samples++]);
-      Future<DateTime?> stopped() async => null;
+      Future<ServiceRunState> stopped() async => const ServiceRunState();
 
       expect(await globalState.syncServiceRunState(query: stopped), isTrue);
       expect(await globalState.syncServiceRunState(query: stopped), isFalse);
@@ -64,7 +66,8 @@ void main() {
       final started = DateTime.now().subtract(const Duration(minutes: 1));
       var samples = 0;
       final tasks = [() => samples++];
-      Future<DateTime?> running() async => started;
+      Future<ServiceRunState> running() async =>
+          ServiceRunState(startTime: started, vpnOptions: _options);
       expect(
         await globalState.syncServiceRunState(query: running, tasks: tasks),
         isTrue,
@@ -78,6 +81,68 @@ void main() {
       expect(samples, 1);
       await tester.pump(const Duration(seconds: 1));
       expect(samples, 2);
+    },
+  );
+
+  test(
+    'start publishes acknowledged options and ignores a late start after stop',
+    () async {
+      final originalStart = globalState.startService;
+      final originalListeners = globalState.setListenersRunning;
+      addTearDown(() {
+        globalState.startService = originalStart;
+        globalState.setListenersRunning = originalListeners;
+      });
+      globalState.setListenersRunning = (_) async {};
+      final started = DateTime.now().subtract(const Duration(seconds: 2));
+      final response = Completer<ServiceRunState?>();
+      globalState.startService = () => response.future;
+      final starting = globalState.handleStart([]);
+      await Future<void>.delayed(Duration.zero);
+      expect(container.read(runningVpnOptionsProvider)?.options, isNull);
+      response.complete(
+        ServiceRunState(startTime: started, vpnOptions: _options),
+      );
+      await starting;
+      expect(globalState.startTime, started);
+      expect(container.read(runningVpnOptionsProvider)?.options, _options);
+
+      final late = Completer<ServiceRunState?>();
+      globalState.startService = () => late.future;
+      final restarting = globalState.handleStart([]);
+      await Future<void>.delayed(Duration.zero);
+      globalState.clearRunState();
+      late.complete(ServiceRunState(startTime: started, vpnOptions: _options));
+      await restarting;
+      expect(globalState.startTime, isNull);
+      expect(container.read(runningVpnOptionsProvider)?.options, isNull);
+    },
+  );
+
+  testRunStateWidgets(
+    'reconnection refreshes options even with an unchanged runtime',
+    (tester) async {
+      final started = DateTime.now();
+      globalState.startTime = started;
+      expect(
+        await globalState.syncServiceRunState(
+          query: () async =>
+              ServiceRunState(startTime: started, vpnOptions: _options),
+        ),
+        isFalse,
+      );
+      expect(container.read(runningVpnOptionsProvider)?.options, _options);
+      await expectLater(
+        globalState.syncServiceRunState(
+          query: () async => throw StateError('service unavailable'),
+        ),
+        throwsStateError,
+      );
+      expect(container.read(runningVpnOptionsProvider)?.options, _options);
+      await globalState.syncServiceRunState(
+        query: () async => const ServiceRunState(),
+      );
+      expect(container.read(runningVpnOptionsProvider)?.options, isNull);
     },
   );
 
@@ -131,7 +196,7 @@ void main() {
     });
 
     test('leaves the listeners to a stop that superseded it', () async {
-      final response = Completer<void>();
+      final response = Completer<ServiceRunState?>();
       globalState.startService = () => response.future;
       final start = globalState.handleStart([]);
       await Future<void>.delayed(Duration.zero);
@@ -144,27 +209,30 @@ void main() {
 
   test('an in-flight running query cannot undo a newer local stop', () async {
     globalState.startTime = DateTime.now();
-    final response = Completer<DateTime?>();
+    final response = Completer<ServiceRunState>();
     final sync = globalState.syncServiceRunState(query: () => response.future);
     globalState.clearRunState();
-    response.complete(DateTime.now());
+    response.complete(
+      ServiceRunState(startTime: DateTime.now(), vpnOptions: _options),
+    );
     expect(await sync, isFalse);
     expect(globalState.startTime, isNull);
     expect(container.read(runTimeProvider), isNull);
+    expect(container.read(runningVpnOptionsProvider)?.options, isNull);
   });
 
   test(
     'an old stopped query cannot clear a replacement after stop and restart',
     () async {
       globalState.startTime = DateTime.now();
-      final response = Completer<DateTime?>();
+      final response = Completer<ServiceRunState>();
       final sync = globalState.syncServiceRunState(
         query: () => response.future,
       );
       globalState.clearRunState();
       final replacement = DateTime.now().add(const Duration(seconds: 1));
       globalState.startTime = replacement;
-      response.complete(null);
+      response.complete(const ServiceRunState());
       expect(await sync, isFalse);
       expect(globalState.startTime, replacement);
     },
@@ -190,3 +258,15 @@ void main() {
     },
   );
 }
+
+const _options = VpnOptions(
+  enable: true,
+  port: 7890,
+  ipv6: false,
+  dnsHijacking: true,
+  accessControlProps: AccessControlProps(),
+  allowBypass: true,
+  systemProxy: true,
+  bypassDomain: [],
+  stack: 'gvisor',
+);

@@ -51,6 +51,13 @@ class RealTunEnable extends _$RealTunEnable with NotifierMixin<bool> {
 }
 
 @Riverpod(keepAlive: true)
+class RunningVpnOptions extends _$RunningVpnOptions
+    with NotifierMixin<({VpnOptions options, bool localNetworkAccess})?> {
+  @override
+  ({VpnOptions options, bool localNetworkAccess})? build() => null;
+}
+
+@Riverpod(keepAlive: true)
 class Logs extends _$Logs with NotifierMixin<FixedList<Log>> {
   @override
   FixedList<Log> build() {

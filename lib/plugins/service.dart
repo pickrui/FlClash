@@ -20,6 +20,38 @@ final _utf8JsonDecoder = utf8.decoder.fuse(json.decoder);
 Map<String, Object?> _decodeEnvelope(Uint8List data) =>
     Map<String, Object?>.from(_utf8JsonDecoder.convert(data) as Map);
 
+class ServiceRunState {
+  final DateTime? startTime;
+  final VpnOptions? vpnOptions;
+  final bool localNetworkAccess;
+
+  const ServiceRunState({
+    this.startTime,
+    this.vpnOptions,
+    this.localNetworkAccess = true,
+  });
+
+  factory ServiceRunState.decode(String? value) {
+    final data = value == null ? null : jsonDecode(value);
+    if (data is! Map<String, dynamic> ||
+        data['runTime'] is! int ||
+        (data['runTime'] as int) < 0) {
+      throw StateError('Invalid Android service state');
+    }
+    final ms = data['runTime'] as int;
+    if (ms == 0) return const ServiceRunState();
+    final options = data['vpnOptions'];
+    if (options is! Map<String, dynamic>) {
+      throw StateError('Missing running Android VPN options');
+    }
+    return ServiceRunState(
+      startTime: DateTime.fromMillisecondsSinceEpoch(ms),
+      vpnOptions: VpnOptions.fromJson(options),
+      localNetworkAccess: data['localNetworkAccess'] as bool? ?? true,
+    );
+  }
+}
+
 abstract mixin class ServiceListener {
   void onServiceEvent(CoreEvent event) {}
 
@@ -107,9 +139,7 @@ class Service {
     return resolveSpilledResponse(response);
   }
 
-  Future<bool> start() async {
-    return await methodChannel.invokeMethod<bool>('start') ?? false;
-  }
+  Future<ServiceRunState> start() => _readRunState('start');
 
   Future<bool> stop() async {
     return await methodChannel.invokeMethod<bool>('stop') ?? false;
@@ -131,19 +161,10 @@ class Service {
     return await methodChannel.invokeMethod<bool>('shutdown') ?? true;
   }
 
-  Future<DateTime?> syncRunState() async {
-    final ms = await methodChannel.invokeMethod<int>('syncRunState');
-    if (ms == null) throw StateError('Missing Android service state');
-    return ms == 0 ? null : DateTime.fromMillisecondsSinceEpoch(ms);
-  }
+  Future<ServiceRunState> syncRunState() => _readRunState('syncRunState');
 
-  Future<DateTime?> getRunTime() async {
-    final ms = await methodChannel.invokeMethod<int>('getRunTime') ?? 0;
-    if (ms == 0) {
-      return null;
-    }
-    return DateTime.fromMillisecondsSinceEpoch(ms);
-  }
+  Future<ServiceRunState> _readRunState(String method) async =>
+      ServiceRunState.decode(await methodChannel.invokeMethod<String>(method));
 
   void addListener(ServiceListener listener) {
     _listeners.add(listener);

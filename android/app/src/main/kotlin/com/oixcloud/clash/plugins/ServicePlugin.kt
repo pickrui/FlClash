@@ -8,6 +8,9 @@ package com.oixcloud.clash.plugins
 import com.oixcloud.clash.Service
 import com.oixcloud.clash.State
 import com.oixcloud.clash.common.Components
+import com.oixcloud.clash.common.GlobalState
+import com.oixcloud.clash.common.LocalNetworkAccess
+import com.oixcloud.clash.service.models.ServiceRunState
 import com.oixcloud.clash.models.SharedState
 import com.google.gson.Gson
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -61,10 +64,6 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
             handleSyncRunState(result)
         }
 
-        "getRunTime" -> {
-            handleGetRunTime(result)
-        }
-
         "syncState" -> {
             handleSyncState(call, result)
         }
@@ -113,7 +112,7 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
         launch {
             try {
                 State.handleStartService()
-                result.success(true)
+                result.success(encodeRunState(State.syncServiceState()))
             } catch (error: Exception) {
                 result.error("service_error", error.message, null)
             }
@@ -180,22 +179,17 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
     private fun handleSyncRunState(result: MethodChannel.Result) {
         launch {
             try {
-                result.success(State.syncRunState())
+                result.success(encodeRunState(State.syncServiceState()))
             } catch (error: Exception) {
                 result.error("service_error", error.message, null)
             }
         }
     }
 
-    private fun handleGetRunTime(result: MethodChannel.Result) {
-        launch {
-            try {
-                State.handleSyncState()
-            } finally {
-                result.success(State.runTime)
-            }
-        }
-    }
+    private fun encodeRunState(state: ServiceRunState): String =
+        Gson().toJsonTree(state).asJsonObject.apply {
+            addProperty("localNetworkAccess", LocalNetworkAccess.isGranted(GlobalState.application))
+        }.toString()
 
     private companion object {
         val SERVICE_CHANNEL = "${Components.PACKAGE_NAME}/service"

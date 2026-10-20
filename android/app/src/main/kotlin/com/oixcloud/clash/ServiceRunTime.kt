@@ -18,11 +18,11 @@ internal class ServiceRunTimeTracker {
         publishStopped()
     }
 
-    suspend fun sync(
+    suspend fun <T> sync(
         lock: Mutex,
-        query: suspend () -> Long,
-        publish: (Long) -> Unit,
-    ): Long = lock.withLock {
+        query: suspend () -> T,
+        publish: (T) -> Unit,
+    ): T = lock.withLock {
         val request = synchronized(publicationLock) { generation }
         query().also { runtime ->
             synchronized(publicationLock) {

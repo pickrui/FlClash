@@ -8,6 +8,7 @@ package com.oixcloud.clash
 import android.net.VpnService
 import android.content.Intent
 import com.oixcloud.clash.service.models.VpnOptions
+import com.oixcloud.clash.service.models.ServiceRunState
 import com.oixcloud.clash.common.LocalNetworkAccess
 import com.oixcloud.clash.common.GlobalState
 import com.oixcloud.clash.common.RunIntentArbiter
@@ -85,15 +86,17 @@ object State {
         }
     }
 
-    suspend fun syncRunState(): Long = serviceRunTime.sync(
+    suspend fun syncRunState(): Long = syncServiceState().runTime
+
+    suspend fun syncServiceState(): ServiceRunState = serviceRunTime.sync(
         lock = runLock,
         query = {
             Service.bind()
-            Service.getRunTime()
+            Service.getRunState()
         },
         publish = { current ->
-            runTime = current
-            runStateFlow.value = if (current == 0L) RunState.STOP else RunState.START
+            runTime = current.runTime
+            runStateFlow.value = if (current.runTime == 0L) RunState.STOP else RunState.START
         },
     )
 

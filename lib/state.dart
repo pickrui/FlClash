@@ -71,7 +71,7 @@ class GlobalState {
       _setCoreListenersRunning;
 
   @visibleForTesting
-  Future<void> Function() startService = _startService;
+  Future<ServiceRunState?> Function() startService = _startService;
 
   Future<void> syncNetworkSuspension() => system.isAndroid
       ? Future.value()
@@ -309,12 +309,21 @@ class GlobalState {
         suspended: !system.isAndroid && container.read(suspendProvider),
       );
       if (request != _runRequest) return;
-      await startService();
+      final running = await startService();
       if (request != _runRequest) return;
+      if (running != null) {
+        if (running.startTime == null) {
+          clearRunState();
+          return;
+        }
+        startTime = running.startTime;
+        _setRunningVpnOptions(running);
+      }
       startUpdateTasks(tasks);
     } catch (_) {
       if (request == _runRequest) {
         startTime = null;
+        container.read(runningVpnOptionsProvider.notifier).value = null;
         if (!resumesRunningService) await _closeListenersAfterFailedStart();
       }
       rethrow;
@@ -330,23 +339,40 @@ class GlobalState {
   }
 
   Future updateStartTime() async {
-    startTime = await service?.getRunTime();
+    final request = _runRequest;
+    final running = await service?.syncRunState();
+    if (request != _runRequest) return;
+    startTime = running?.startTime;
+    _setRunningVpnOptions(running);
+  }
+
+  void _setRunningVpnOptions(ServiceRunState? running) {
+    final options = running?.vpnOptions;
+    container
+        .read(runningVpnOptionsProvider.notifier)
+        .value = running?.startTime == null || options == null
+        ? null
+        : (options: options, localNetworkAccess: running!.localNetworkAccess);
   }
 
   void clearRunState() {
     ++_runRequest;
     startTime = null;
+    container.read(runningVpnOptionsProvider.notifier).value = null;
     stopUpdateTasks();
     container.read(runTimeProvider.notifier).value = null;
   }
 
   Future<bool> syncServiceRunState({
-    Future<DateTime?> Function()? query,
+    Future<ServiceRunState> Function()? query,
     UpdateTasks? tasks,
   }) async {
     final request = _runRequest;
-    final next = await (query ?? service!.syncRunState)();
-    if (request != _runRequest || startTime == next) return false;
+    final running = await (query ?? service!.syncRunState)();
+    if (request != _runRequest) return false;
+    final next = running.startTime;
+    _setRunningVpnOptions(running);
+    if (startTime == next) return false;
     if (next == null) {
       clearRunState();
       container.read(trafficsProvider.notifier).clear();
@@ -514,6 +540,4 @@ Future<void> _setCoreListenersRunning(bool running) async {
   }
 }
 
-Future<void> _startService() async {
-  await service?.start();
-}
+Future<ServiceRunState?> _startService() async => service?.start();

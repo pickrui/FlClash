@@ -154,6 +154,76 @@ abstract class _$RealTunEnable extends $Notifier<bool> {
   }
 }
 
+@ProviderFor(RunningVpnOptions)
+final runningVpnOptionsProvider = RunningVpnOptionsProvider._();
+
+final class RunningVpnOptionsProvider
+    extends
+        $NotifierProvider<
+          RunningVpnOptions,
+          ({bool localNetworkAccess, VpnOptions options})?
+        > {
+  RunningVpnOptionsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'runningVpnOptionsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$runningVpnOptionsHash();
+
+  @$internal
+  @override
+  RunningVpnOptions create() => RunningVpnOptions();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(
+    ({bool localNetworkAccess, VpnOptions options})? value,
+  ) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<({bool localNetworkAccess, VpnOptions options})?>(
+            value,
+          ),
+    );
+  }
+}
+
+String _$runningVpnOptionsHash() => r'e07d0881a2c7dfbd47ad4d311f484af02dfad648';
+
+abstract class _$RunningVpnOptions
+    extends $Notifier<({bool localNetworkAccess, VpnOptions options})?> {
+  ({bool localNetworkAccess, VpnOptions options})? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref =
+        this.ref
+            as $Ref<
+              ({bool localNetworkAccess, VpnOptions options})?,
+              ({bool localNetworkAccess, VpnOptions options})?
+            >;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<
+                ({bool localNetworkAccess, VpnOptions options})?,
+                ({bool localNetworkAccess, VpnOptions options})?
+              >,
+              ({bool localNetworkAccess, VpnOptions options})?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(Logs)
 final logsProvider = LogsProvider._();
 

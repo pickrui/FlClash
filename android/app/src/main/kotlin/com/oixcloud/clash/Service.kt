@@ -23,7 +23,9 @@ import com.oixcloud.clash.service.IValidatorInterface
 import com.oixcloud.clash.service.RemoteService
 import com.oixcloud.clash.service.ValidatorService
 import com.oixcloud.clash.service.models.NotificationParams
+import com.oixcloud.clash.service.models.ServiceRunState
 import com.oixcloud.clash.service.models.VpnOptions
+import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import kotlinx.coroutines.CompletableDeferred
@@ -375,4 +377,8 @@ object Service {
             it.runTime
         }.getOrThrow()
     }
+
+    suspend fun getRunState(): ServiceRunState = delegate.useService {
+        checkNotNull(Gson().fromJson(it.runState, ServiceRunState::class.java))
+    }.getOrThrow()
 }

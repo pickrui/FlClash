@@ -5,6 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 package com.oixcloud.clash
 
+import com.oixcloud.clash.service.models.ServiceRunState
+import com.oixcloud.clash.service.models.VpnOptions
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.async
@@ -105,18 +107,21 @@ class ServiceRunTimeTest {
     fun disconnectedServiceRejectsALateQueryAndAllowsTheNextSession() = runBlocking {
         val tracker = ServiceRunTimeTracker()
         val lock = Mutex()
-        val reply = CompletableDeferred<Long>()
-        var published = 123L
+        val old = ServiceRunState(123L, VpnOptions(stack = "gvisor"))
+        val replacement = ServiceRunState(456L, VpnOptions(stack = "system"))
+        val stopped = ServiceRunState()
+        val reply = CompletableDeferred<ServiceRunState>()
+        var published = old
         val oldQuery = async(start = CoroutineStart.UNDISPATCHED) {
             tracker.sync(lock, { reply.await() }, { published = it })
         }
-        tracker.invalidate { published = 0L }
-        reply.complete(123L)
+        tracker.invalidate { published = stopped }
+        reply.complete(old)
         val result = runCatching { oldQuery.await() }
 
-        assertEquals(0L, published)
+        assertEquals(stopped, published)
         assertTrue(result.exceptionOrNull() is kotlinx.coroutines.CancellationException)
-        assertEquals(456L, tracker.sync(lock, { 456L }, { published = it }))
-        assertEquals(456L, published)
+        assertEquals(replacement, tracker.sync(lock, { replacement }, { published = it }))
+        assertEquals(replacement, published)
     }
 }
