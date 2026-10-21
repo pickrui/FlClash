@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fl_clash/common/path.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -98,11 +99,25 @@ class _Scripts implements ScriptLibrary {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+class _Providers implements ClashProviderLibrary {
+  final saved = <ClashProvider>[];
+
+  @override
+  Future<void> save(ClashProvider provider, {ClashProvider? previous}) async {
+    saved.add(provider);
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 void main() {
   late Directory directory;
   late Future<void> Function() restorePaths;
   late _Files files;
   late _Scripts scripts;
+  late _Providers providers;
+  late RuleSetTools ruleSetTools;
   late ValueNotifier<bool> active;
   final originalFiles = FilePickerPlatform.instance;
   final data = Uint8List.fromList(utf8.encode('proxies: []\n'));
@@ -133,6 +148,15 @@ void main() {
   setUp(() {
     files = _Files();
     scripts = _Scripts();
+    providers = _Providers();
+    ruleSetTools = RuleSetTools(
+      download: (_) async => [],
+      compile: (_, {convert = false, behavior}) async => (
+        format: RuleProviderFormat.text,
+        behavior: RuleProviderBehavior.domain,
+        content: null,
+      ),
+    );
     active = ValueNotifier(true);
     FilePickerPlatform.instance = files;
   });
@@ -142,6 +166,7 @@ void main() {
     WidgetTester tester,
     bool isScript, {
     String? reservedLabel,
+    List<ClashProvider> resources = const [],
   }) async {
     await tester.binding.setSurfaceSize(const Size(800, 1000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -150,6 +175,7 @@ void main() {
         overrides: [
           clashProvidersProvider.overrideWith(
             (_) => Stream.value([
+              ...resources,
               if (reservedLabel != null)
                 ClashProvider(
                   id: 1,
@@ -169,6 +195,8 @@ void main() {
             ]),
           ),
           scriptLibraryProvider.overrideWithValue(scripts),
+          clashProviderLibraryProvider.overrideWithValue(providers),
+          ruleSetToolsProvider.overrideWithValue(ruleSetTools),
           viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 1000)),
         ],
         child: Builder(
@@ -213,6 +241,175 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
     expect(files.calls, callsBefore + 1);
+  }
+
+  Future<void> importUrls(WidgetTester tester, List<String> urls) async {
+    await tester.tap(find.byTooltip('Add'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(AppLocalizations.current.importUrl));
+    for (
+      var frame = 0;
+      frame < 20 && find.byTooltip('Batch add').evaluate().isEmpty;
+      frame++
+    ) {
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    await tester.tap(find.byTooltip('Batch add'));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.enterText(find.byType(TextField), urls.join('\n'));
+    await tester.tap(find.text(AppLocalizations.current.save));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+  }
+
+  testWidgets(
+    'provider batch skips existing URLs and reserves labels in order',
+    (tester) async {
+      const sameName = 'https://example.invalid/%E8%AE%A2%E9%98%85.yaml';
+      await open(
+        tester,
+        false,
+        resources: const [
+          ClashProvider(
+            id: 1,
+            kind: ProviderKind.proxy,
+            label: '订阅',
+            url: '$sameName?old',
+          ),
+          ClashProvider(
+            id: 2,
+            kind: ProviderKind.rule,
+            label: 'Rules',
+            url: '$sameName?second',
+          ),
+        ],
+      );
+      await importUrls(tester, [
+        '$sameName?old',
+        '$sameName?first',
+        '$sameName?first',
+        '$sameName?second',
+      ]);
+      await tester.pumpAndSettle();
+      expect(providers.saved.map((item) => item.url), [
+        '$sameName?first',
+        '$sameName?second',
+      ]);
+      expect(providers.saved.map((item) => item.label), ['订阅(1)', '订阅(2)']);
+      expect(providers.saved.map((item) => item.order), [2, 3]);
+      expect(
+        providers.saved.every((item) => item.kind == ProviderKind.proxy),
+        isTrue,
+      );
+      expect(find.byType(EditClashProviderView), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'rule batches bound detection and report failures without losing successes',
+    (tester) async {
+      final downloads = <String, Completer<List<int>>>{};
+      ruleSetTools = RuleSetTools(
+        download: (url) => (downloads[url] = Completer<List<int>>()).future,
+        compile: (bytes, {convert = false, behavior}) async => (
+          format: RuleProviderFormat.text,
+          behavior: RuleProviderBehavior.ipcidr,
+          content: bytes.single == 1 ? [1] : null,
+        ),
+      );
+      await open(tester, false);
+      await tester.tap(find.text(AppLocalizations.current.ruleProviders));
+      await tester.pumpAndSettle();
+      final urls = [
+        for (var i = 0; i < 6; i++)
+          'https://example.invalid/rules-$i.list?token=private',
+      ];
+      await importUrls(tester, urls);
+      expect(downloads.keys, urls.take(4));
+      downloads[urls[2]]!.complete([2]);
+      await tester.pump();
+      expect(downloads.keys, urls.take(5));
+      downloads[urls[0]]!.completeError(
+        DioException(
+          requestOptions: RequestOptions(path: urls[0]),
+          type: DioExceptionType.connectionTimeout,
+        ),
+      );
+      await tester.pump();
+      expect(downloads.keys, urls);
+      for (final i in [1, 3, 4, 5]) {
+        downloads[urls[i]]!.complete([i]);
+      }
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(providers.saved.map((item) => item.order), [2, 3, 4, 5]);
+      expect(
+        providers.saved.every(
+          (item) =>
+              item.behavior == RuleProviderBehavior.ipcidr &&
+              item.format == RuleProviderFormat.text &&
+              item.content.isEmpty,
+        ),
+        isTrue,
+      );
+      expect(
+        find.text(AppLocalizations.current.ruleSetNeedsConversionTip),
+        findsOneWidget,
+      );
+      expect(find.textContaining('token=private'), findsNothing);
+      expect(find.textContaining('DioException'), findsNothing);
+      expect(find.text('rules-0'), findsOneWidget);
+      await tester.tap(find.text(AppLocalizations.current.confirm));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  for (final leave in [false, true]) {
+    testWidgets(
+      'inactive rule batches stop queued work and ignore late results (pop: $leave)',
+      (tester) async {
+        final downloads = <Completer<List<int>>>[];
+        ruleSetTools = RuleSetTools(
+          download: (_) {
+            final pending = Completer<List<int>>();
+            downloads.add(pending);
+            return pending.future;
+          },
+          compile: (_, {convert = false, behavior}) async => (
+            format: RuleProviderFormat.text,
+            behavior: RuleProviderBehavior.domain,
+            content: null,
+          ),
+        );
+        await open(tester, false);
+        await tester.tap(find.text(AppLocalizations.current.ruleProviders));
+        await tester.pumpAndSettle();
+        await importUrls(tester, [
+          for (var i = 0; i < 6; i++) 'https://example.invalid/$i.list',
+        ]);
+        expect(downloads, hasLength(4));
+        if (leave) {
+          await tester.binding.handlePopRoute();
+        } else {
+          active.value = false;
+        }
+        await tester.pump();
+        downloads.first.completeError(StateError('late import failure'));
+        for (final pending in downloads.skip(1)) {
+          pending.complete([1]);
+        }
+        await tester.pumpAndSettle();
+        expect(downloads, hasLength(4));
+        expect(providers.saved, isEmpty);
+        expect(
+          find.textContaining('late import failure', skipOffstage: false),
+          findsNothing,
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
   }
 
   void expectNoImport(WidgetTester tester) {

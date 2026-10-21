@@ -28,6 +28,8 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
+const _maxConcurrentImports = 4;
+
 String providerLibraryError(BuildContext context, Object error) =>
     userFacingErrorMessage(error, context.appLocalizations);
 
@@ -71,15 +73,18 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
     label: label,
     url: url,
     content: content,
-    order: (ref.read(clashProvidersProvider).value ?? []).length,
+    order: (ref.read(clashProvidersProvider).value ?? const <ClashProvider>[])
+        .length,
   );
 
-  String _uniqueLabel(String source) {
+  String _uniqueLabel(String source, [Set<String>? reserved]) {
     final name = p.basenameWithoutExtension(source);
-    final labels = (ref.read(clashProvidersProvider).value ?? [])
-        .where((item) => item.kind == _kind)
-        .map((item) => item.label)
-        .toSet();
+    final labels =
+        reserved ??
+        (ref.read(clashProvidersProvider).value ?? const <ClashProvider>[])
+            .where((item) => item.kind == _kind)
+            .map((item) => item.label)
+            .toSet();
     return uniqueLabelFor(
       name,
       fallback: _kind == ProviderKind.proxy
@@ -108,13 +113,22 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
     try {
       await _run(() async {
         if (fromUrl) {
-          final result = await showNamedUrlForm(
+          final result = await showNamedUrlsForm(
             context,
             title: context.appLocalizations.importUrl,
+            existingUrls: {
+              for (final item
+                  in ref.read(clashProvidersProvider).value ??
+                      const <ClashProvider>[])
+                if (item.kind == _kind && item.isRemote) item.url,
+            },
             labelValidator: (value) =>
-                (ref.read(clashProvidersProvider).value ?? []).any(
-                  (item) => item.kind == _kind && item.label == value?.trim(),
-                )
+                (ref.read(clashProvidersProvider).value ??
+                        const <ClashProvider>[])
+                    .any(
+                      (item) =>
+                          item.kind == _kind && item.label == value?.trim(),
+                    )
                 ? context.appLocalizations.existsTip(
                     context.appLocalizations.name,
                   )
@@ -130,12 +144,17 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
             },
           );
           if (result == null || !_isCurrentPage) return;
+          if (result.length > 1) {
+            await _importUrls(result);
+            return;
+          }
+          final link = result.single;
           final provider = _newProvider(
-            label: result.label.isEmpty
-                ? _uniqueLabel(result.url.urlFileName)
-                : result.label,
-            url: result.url,
-          ).withFileFormat(result.url);
+            label: link.label.isEmpty
+                ? _uniqueLabel(link.url.urlFileName)
+                : link.label,
+            url: link.url,
+          ).withFileFormat(link.url);
           _options(provider, isNew: true, detect: _kind == ProviderKind.rule);
         } else {
           final file = await picker.pickerFile();
@@ -151,6 +170,55 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
       });
     } finally {
       if (mounted) setState(() => _importing = false);
+    }
+  }
+
+  Future<void> _importUrls(List<NamedUrl> links) async {
+    final library = ref.read(clashProviderLibraryProvider);
+    final tools = _kind == ProviderKind.rule
+        ? ref.read(ruleSetToolsProvider)
+        : null;
+    final localizations = context.appLocalizations;
+    final existing =
+        ref.read(clashProvidersProvider).value ?? const <ClashProvider>[];
+    final labels = {
+      for (final item in existing)
+        if (item.kind == _kind) item.label,
+    };
+    final candidates = <ClashProvider>[];
+    for (final link in links) {
+      final label = _uniqueLabel(link.url.urlFileName, labels);
+      labels.add(label);
+      candidates.add(
+        _newProvider(label: label, url: link.url)
+            .withFileFormat(link.url)
+            .copyWith(order: existing.length + candidates.length),
+      );
+    }
+    final failures = <int, UpdatingMessage>{};
+    await runWithConcurrency(
+      items: candidates,
+      concurrency: _maxConcurrentImports,
+      isCurrent: () => _isCurrentPage,
+      action: (provider) async {
+        try {
+          final candidate = tools == null
+              ? provider
+              : await tools.prepare(provider);
+          if (!_isCurrentPage) return;
+          await library.save(candidate);
+        } catch (error) {
+          failures[provider.id] = UpdatingMessage(
+            label: provider.label,
+            message: userFacingErrorMessage(error, localizations),
+          );
+        }
+      },
+    );
+    if (_isCurrentPage && failures.isNotEmpty) {
+      await globalState.showAllUpdatingMessagesDialog([
+        for (final provider in candidates) ?failures[provider.id],
+      ]);
     }
   }
 
