@@ -13,7 +13,7 @@ abstract class _EditViewState<W extends ConsumerStatefulWidget, T>
   DragBackRouteMixin<dynamic>? _resultRoute;
   late final ValueGetter<Object?> _readResult = _currentResult;
   Object _currentResult() => popResult(_entries);
-  bool _deleting = false;
+  bool _confirming = false;
 
   String get title;
 
@@ -107,14 +107,14 @@ abstract class _EditViewState<W extends ConsumerStatefulWidget, T>
   }
 
   Future<void> _handleDelete() async {
-    if (_deleting) return;
+    if (_confirming) return;
     final selected = ref
         .read(itemsProvider(_selectionKey))
         .whereType<String>()
         .toSet();
     if (selected.isEmpty) return;
     final route = ModalRoute.of(context);
-    setState(() => _deleting = true);
+    setState(() => _confirming = true);
     try {
       final confirmed = await globalState.showMessage(
         message: TextSpan(
@@ -134,19 +134,25 @@ abstract class _EditViewState<W extends ConsumerStatefulWidget, T>
       ref.read(itemsProvider(_selectionKey).notifier).value = currentSelection
           .difference(deleting);
     } finally {
-      if (mounted) setState(() => _deleting = false);
+      if (mounted) setState(() => _confirming = false);
     }
   }
 
   Future<void> _handleReset() async {
-    final res = await globalState.showMessage(
-      message: TextSpan(text: context.appLocalizations.resetPageChangesTip),
-    );
-    if (!mounted || res != true) {
-      return;
+    if (_confirming) return;
+    final route = ModalRoute.of(context);
+    setState(() => _confirming = true);
+    try {
+      final confirmed = await globalState.showMessage(
+        message: TextSpan(text: context.appLocalizations.resetPageChangesTip),
+        destructive: true,
+        confirmText: context.appLocalizations.reset,
+      );
+      if (!mounted || confirmed != true || route?.isCurrent == false) return;
+      setState(() => _entries = List<T>.from(_initialEntries));
+    } finally {
+      if (mounted) setState(() => _confirming = false);
     }
-    _entries = _initialEntries;
-    setState(() {});
   }
 
   Widget _buildEntry({
@@ -185,10 +191,10 @@ abstract class _EditViewState<W extends ConsumerStatefulWidget, T>
     final selected = ref.watch(itemsProvider(_selectionKey));
     final isEditing = selected.isNotEmpty;
     return CommonPopScope(
-      onPop: !isEditing && !_deleting && _resultRoute != null
+      onPop: !isEditing && !_confirming && _resultRoute != null
           ? null
           : (_) {
-              if (_deleting) return false;
+              if (_confirming) return false;
               if (isEditing) {
                 ref.read(itemsProvider(_selectionKey).notifier).value = {};
                 return false;
@@ -198,29 +204,34 @@ abstract class _EditViewState<W extends ConsumerStatefulWidget, T>
             },
       child: CommonScaffold(
         title: title,
-        actions: [
-          if (isEditing)
-            IconButton(
+        selectionActions: [
+          if (isEditing) ...[
+            IconButtonData(
+              glyph: AppGlyphs.delete,
               tooltip: appLocalizations.delete,
-              onPressed: _deleting ? null : _handleDelete,
-              icon: const GlyphIcon(AppGlyphs.delete),
-            )
-          else if (!sameEntries(_entries, _initialEntries))
-            IconButton(
-              tooltip: appLocalizations.reset,
-              onPressed: _handleReset,
-              icon: const GlyphIcon(AppGlyphs.reset),
+              onPressed: _confirming ? null : _handleDelete,
             ),
-          if (isEditing)
-            FilledButton(
-              onPressed: _handleSelectAll,
-              child: Text(appLocalizations.selectAll),
-            )
-          else
-            FilledButton.tonal(
-              onPressed: _handleAdd,
-              child: Text(appLocalizations.add),
+            IconButtonData(
+              glyph: AppGlyphs.selectAll,
+              tooltip: appLocalizations.selectAll,
+              onPressed: _confirming ? null : _handleSelectAll,
             ),
+          ],
+        ],
+        iconActions: [
+          if (!isEditing) ...[
+            if (!sameEntries(_entries, _initialEntries))
+              IconButtonData(
+                glyph: AppGlyphs.reset,
+                tooltip: appLocalizations.reset,
+                onPressed: _confirming ? null : _handleReset,
+              ),
+            IconButtonData(
+              glyph: AppGlyphs.addCircle,
+              tooltip: appLocalizations.add,
+              onPressed: _confirming ? null : _handleAdd,
+            ),
+          ],
         ],
         body: NullStatusSwitcher(
           isEmpty: _entries.isEmpty,
@@ -347,8 +358,7 @@ class _ListInputPageState extends _EditViewState<ListInputPage, String> {
     };
   }
 
-  String _toEntry(String? key, String value) =>
-      parseListInput(value).entries.single;
+  String _toEntry(String value) => parseListInput(value).entries.single;
 
   @override
   Future<List<String>?> showEntryDialog(String? entry) {
@@ -461,82 +471,18 @@ class _MapInputPageState
   Object popResult(List<MapEntry<String, String>> entries) =>
       Map<String, String>.fromEntries(entries);
 
-  String get _keyLabel => widget.keyLabel ?? context.appLocalizations.key;
-
-  String get _valueLabel => widget.valueLabel ?? context.appLocalizations.value;
-
-  ParsedInput<MapEntry<String, String>> _parseBatch(String text) {
-    return parseMapInput(
-      text,
-      existingKeys: _entries.map(idOf).toSet(),
-      keyMaxLength: widget.keyMaxLength,
-      valueMaxLength: widget.valueMaxLength,
-    );
-  }
-
-  String _issueMessage(InputIssue issue) {
-    final appLocalizations = context.appLocalizations;
-    return switch (issue.kind) {
-      InputIssueKind.keyTooLong => appLocalizations.maxLengthTip(
-        _keyLabel,
-        widget.keyMaxLength!,
-      ),
-      InputIssueKind.valueTooLong => appLocalizations.maxLengthTip(
-        _valueLabel,
-        widget.valueMaxLength!,
-      ),
-      InputIssueKind.missingValue => appLocalizations.emptyTip(_valueLabel),
-      InputIssueKind.invalidValue => appLocalizations.urlTip(_valueLabel),
-    };
-  }
-
-  static MapEntry<String, String> _toEntry(String? key, String value) =>
-      MapEntry(key!.trim(), value.trim());
-
   @override
   Future<List<MapEntry<String, String>>?> showEntryDialog(
     MapEntry<String, String>? entry,
-  ) {
-    final appLocalizations = context.appLocalizations;
-
-    String? blankValidator(String? value, String label) =>
-        value != null && value.isNotEmpty && value.trim().isEmpty
-        ? appLocalizations.emptyTip(label)
-        : null;
-
-    String? keyValidator(String? value) {
-      final blank = blankValidator(value, _keyLabel);
-      if (blank != null) return blank;
-      final key = value?.trim();
-      final taken = key != entry?.key && _entries.any((e) => e.key == key);
-      return taken ? appLocalizations.existsTip(_keyLabel) : null;
-    }
-
-    return globalState.showCommonDialog<List<MapEntry<String, String>>>(
-      child: EntryDialog<MapEntry<String, String>>(
-        title: entry == null ? appLocalizations.add : appLocalizations.edit,
-        keyField: Field(
-          label: _keyLabel,
-          value: entry?.key ?? '',
-          validator: keyValidator,
-        ),
-        valueField: Field(
-          label: _valueLabel,
-          value: entry?.value ?? '',
-          validator: (value) => blankValidator(value, _valueLabel),
-        ),
-        keyMaxLength: widget.keyMaxLength,
-        valueMaxLength: widget.valueMaxLength,
-        toEntry: _toEntry,
-        batch: entry != null
-            ? null
-            : BatchInput(
-                label: widget.title,
-                formatTip: appLocalizations.batchMapInputTip,
-                parse: _parseBatch,
-                issueMessage: _issueMessage,
-              ),
-      ),
-    );
-  }
+  ) => showFormSheet<List<MapEntry<String, String>>>(
+    context: context,
+    builder: (_, _) => MapEntryForm(
+      entry: entry,
+      existingKeys: _entries.map(idOf).toSet(),
+      keyLabel: widget.keyLabel,
+      valueLabel: widget.valueLabel,
+      keyMaxLength: widget.keyMaxLength,
+      valueMaxLength: widget.valueMaxLength,
+    ),
+  );
 }

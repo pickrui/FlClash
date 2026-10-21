@@ -31,19 +31,15 @@ class BatchInput<T> {
 /// Pops a list so a single entry and a batch return through the same path.
 class EntryDialog<T> extends StatefulWidget {
   final String title;
-  final Field? keyField;
   final Field valueField;
-  final int? keyMaxLength;
   final int? valueMaxLength;
-  final T Function(String? key, String value) toEntry;
+  final T Function(String value) toEntry;
   final BatchInput<T>? batch;
 
   const EntryDialog({
     super.key,
     required this.title,
-    this.keyField,
     required this.valueField,
-    this.keyMaxLength,
     this.valueMaxLength,
     required this.toEntry,
     this.batch,
@@ -56,14 +52,11 @@ class EntryDialog<T> extends StatefulWidget {
 class _EntryDialogState<T> extends State<EntryDialog<T>> {
   static const _maxShownIssues = 3;
 
-  TextEditingController? _keyController;
   late final TextEditingController _valueController;
   final _batchController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isBatch = false;
   ParsedInput<T>? _parsed;
-
-  Field? get keyField => widget.keyField;
 
   Field get valueField => widget.valueField;
 
@@ -78,9 +71,6 @@ class _EntryDialogState<T> extends State<EntryDialog<T>> {
   @override
   void initState() {
     super.initState();
-    if (keyField != null) {
-      _keyController = TextEditingController(text: keyField!.value);
-    }
     _valueController = TextEditingController(text: valueField.value);
   }
 
@@ -88,11 +78,7 @@ class _EntryDialogState<T> extends State<EntryDialog<T>> {
     setState(() {
       _isBatch = !_isBatch;
       if (_isBatch && _batchController.text.isEmpty) {
-        _batchController.text = [_keyController?.text, _valueController.text]
-            .nonNulls
-            .map((text) => text.trim())
-            .where((t) => t.isNotEmpty)
-            .join(' ');
+        _batchController.text = _valueController.text.trim();
       }
       if (_isBatch) {
         _parsed = widget.batch!.parse(_batchController.text);
@@ -113,14 +99,11 @@ class _EntryDialogState<T> extends State<EntryDialog<T>> {
       return;
     }
     if (!_formKey.currentState!.validate()) return;
-    Navigator.of(context).pop<List<T>>([
-      widget.toEntry(_keyController?.text, _valueController.text),
-    ]);
+    Navigator.of(context).pop<List<T>>([widget.toEntry(_valueController.text)]);
   }
 
   @override
   void dispose() {
-    _keyController?.dispose();
     _valueController.dispose();
     _batchController.dispose();
     super.dispose();
@@ -160,6 +143,8 @@ class _EntryDialogState<T> extends State<EntryDialog<T>> {
       minLines: 4,
       maxLines: 10,
       keyboardType: TextInputType.multiline,
+      autocorrect: false,
+      inputFormatters: TextInputLimits.limit(TextInputLimits.batchEntries),
       onChanged: _handleBatchChanged,
       decoration: InputDecoration(
         labelText: widget.batch!.label,
@@ -179,30 +164,6 @@ class _EntryDialogState<T> extends State<EntryDialog<T>> {
       child: Wrap(
         runSpacing: 16,
         children: [
-          if (keyField != null)
-            TextFormField(
-              maxLines: 3,
-              minLines: 1,
-              inputFormatters: widget.keyMaxLength == null
-                  ? null
-                  : TextInputLimits.limit(widget.keyMaxLength!),
-              controller: _keyController,
-              textInputAction: TextInputAction.next,
-              decoration: InputDecoration(labelText: keyField!.label),
-              validator: (String? value) {
-                String? res;
-                if (keyField!.validator != null) {
-                  res = keyField!.validator!(value);
-                }
-                if (res != null) {
-                  return res;
-                }
-                if (value == null || value.isEmpty) {
-                  return appLocalizations.emptyTip(appLocalizations.key);
-                }
-                return null;
-              },
-            ),
           TextFormField(
             maxLines: 3,
             minLines: 1,

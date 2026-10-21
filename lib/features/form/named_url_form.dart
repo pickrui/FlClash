@@ -9,6 +9,7 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'batch_section.dart';
 import 'form_page.dart';
 import 'form_row.dart';
 
@@ -224,33 +225,14 @@ class _NamedUrlFormState extends State<_NamedUrlForm> {
       ],
       children: [
         if (_batch)
-          generateSection(
-            footer: l.batchPreviewTip(
-              _parsed.entries.length,
-              _parsed.skippedExisting,
-            ),
-            items: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: TextField(
-                  controller: _batchText,
-                  autofocus: true,
-                  minLines: 4,
-                  maxLines: 8,
-                  autocorrect: false,
-                  inputFormatters: TextInputLimits.limit(
-                    TextInputLimits.batchLinks,
-                  ),
-                  decoration: InputDecoration.collapsed(
-                    hintText: l.batchLinkInputTip,
-                  ),
-                  onChanged: (_) => setState(() {
-                    _cachedBatch = null;
-                    _batchAttempted = false;
-                  }),
-                ),
-              ),
-            ],
+          BatchSection(
+            formatTip: l.batchLinkInputTip,
+            controller: _batchText,
+            parsed: _parsed,
+            onChanged: (_) => setState(() {
+              _cachedBatch = null;
+              _batchAttempted = false;
+            }),
           )
         else
           generateSection(

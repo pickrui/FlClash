@@ -10,7 +10,8 @@ abstract final class TextInputLimits {
   static const groupName = 64;
   static const url = 2048;
   static const profileLink = 8192;
-  static const batchLinks = 256 * 1024;
+  static const batchEntries = 256 * 1024;
+  static const batchLinks = batchEntries;
   static const uri = url;
   static const iconUrl = url;
   static const dnsServer = url;

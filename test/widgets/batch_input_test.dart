@@ -34,7 +34,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Add'));
+      await tester.tap(find.byTooltip('Add'));
       await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('Batch add'));
       await tester.pumpAndSettle();
@@ -71,29 +71,93 @@ void main() {
         ],
         child: MapInputPage(
           title: 'Fixture map',
-          entries: const {},
+          entries: const {'taken': 'original'},
           titleBuilder: (item) => Text('key[${item.key}]'),
           subtitleBuilder: (item) => Text('value[${item.value}]'),
         ),
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Add'));
+    await tester.tap(find.byTooltip('Add'));
     await tester.pumpAndSettle();
-    final fields = find.byType(TextFormField);
+    final fields = find.byType(TextField);
     await tester.enterText(fields.first, '   ');
     await tester.enterText(fields.last, ' https://doh.pub/dns-query ');
     await tester.tap(find.text('Confirm'));
     await tester.pumpAndSettle();
-    expect(find.byType(TextFormField), findsNWidgets(2));
+    expect(find.byType(TextField), findsNWidgets(2));
 
+    await tester.enterText(fields.first, ' taken ');
+    await tester.tap(find.text('Confirm'));
+    await tester.pumpAndSettle();
+    expect(find.byType(TextField), findsNWidgets(2));
     await tester.enterText(fields.first, ' +.example.com ');
     await tester.tap(find.text('Confirm'));
     await tester.pumpAndSettle();
     expect(find.text('key[+.example.com]'), findsOneWidget);
     expect(find.text('value[https://doh.pub/dns-query]'), findsOneWidget);
+    await tester.tap(find.text('key[+.example.com]'));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Batch add'), findsNothing);
+    await tester.enterText(find.byType(TextField).last, ' ::1 ');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    expect(find.text('value[::1]'), findsOneWidget);
+    expect(find.text('value[original]'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'map batch form keeps existing keys and rejects partial imports on mobile',
+    (tester) async {
+      const size = Size(320, 700);
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(
+        TestApp(
+          locale: const Locale('en'),
+          textScaler: const TextScaler.linear(1.3),
+          overrides: [viewSizeProvider.overrideWithBuild((_, _) => size)],
+          child: MapInputPage(
+            title: 'Fixture map',
+            entries: const {'taken': 'original'},
+            keyMaxLength: 8,
+            valueMaxLength: 64,
+            titleBuilder: (item) => Text('key[${item.key}]'),
+            subtitleBuilder: (item) => Text('value[${item.value}]'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Add'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Batch add'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byType(TextField),
+        'taken changed\nfresh 1.1.1.1\nmissing',
+      );
+      await tester.tap(find.byTooltip('Confirm'));
+      await tester.pumpAndSettle();
+      expect(find.text('Line 3: Value cannot be empty'), findsOneWidget);
+      expect(find.byType(TextField), findsOneWidget);
+      await tester.enterText(
+        find.byType(TextField),
+        'taken changed\nfresh 1.1.1.1\nfresh ::1\nipv6 ::1',
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('2 to add, 1 skipped as existing'), findsOneWidget);
+      await tester.tap(find.byTooltip('Confirm'));
+      await tester.pumpAndSettle();
+      expect(find.text('key[fresh]'), findsOneWidget);
+      expect(find.text('value[1.1.1.1]'), findsOneWidget);
+      expect(find.text('value[::1]'), findsOneWidget);
+      expect(find.text('value[original]'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   for (final map in [false, true]) {
     testWidgets(
@@ -170,6 +234,16 @@ void main() {
         await tester.tap(find.widgetWithText(TextButton, 'Delete'));
         await tester.pumpAndSettle();
         expect(find.text('first'), findsNothing);
+        await tester.tap(find.byTooltip('Reset'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Cancel'));
+        await tester.pumpAndSettle();
+        expect(find.text('first'), findsNothing);
+        await tester.tap(find.byTooltip('Reset'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.widgetWithText(TextButton, 'Reset'));
+        await tester.pumpAndSettle();
+        expect(find.text('first'), findsOneWidget);
         await tester.timedDrag(
           find.text('Fixture editor'),
           const Offset(700, 0),
@@ -177,7 +251,10 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(find.text('open editor'), findsOneWidget);
-        expect(result, map ? {'second': 'two'} : ['second']);
+        expect(
+          result,
+          map ? {'first': 'one', 'second': 'two'} : ['first', 'second'],
+        );
         expect(tester.takeException(), isNull);
       },
     );
@@ -217,7 +294,7 @@ void main() {
     expect(find.text('10.0.0.0/33'), findsOneWidget);
     expect(find.text(tip), findsOneWidget);
 
-    await tester.tap(find.text('Add'));
+    await tester.tap(find.byTooltip('Add'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextFormField), '192.168.1.0/024');
     await tester.tap(find.text('Confirm'));
