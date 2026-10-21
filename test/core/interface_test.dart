@@ -12,6 +12,26 @@ import 'package:fl_clash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test(
+    'provider lookup requires an answer and sends only provider and node names',
+    () async {
+      final handler = _FakeCoreHandler();
+      await expectLater(
+        handler.getProviderProxy('source', 'node'),
+        throwsA(_missingResponse(CoreMethod.getProviderProxy)),
+      );
+      handler.response = <String, dynamic>{'name': 'node', 'type': 'ss'};
+      expect(
+        await handler.getProviderProxy('source', 'node'),
+        handler.response,
+      );
+      expect(handler.arguments, {
+        'providerName': 'source',
+        'proxyName': 'node',
+      });
+    },
+  );
+
   test('cache inventory rejects missing and malformed Core replies', () async {
     final handler = _FakeCoreHandler()..response = <dynamic>[];
     expect(await handler.getExternalProviders(), isEmpty);

@@ -1619,5 +1619,7 @@
   "ruleSetUnsupportedTip": "这些规则无法在保持原有行为的情况下转换为 MRS",
   "ruleSetBusyTip": "其他规则集操作正在进行，请稍后重试",
   "ruleSetNeedsConversionTip": "此远程规则集需要规范化，请下载为本地 MRS 后使用",
-  "ruleSetSizeTip": "规则集超出处理上限，请拆分后重试"
+  "ruleSetSizeTip": "规则集超出处理上限，请拆分后重试",
+  "providerLookupFailed": "无法读取当前生效的节点配置，请刷新资源后重试",
+  "lookupProxyConfig": "查找节点配置"
 }

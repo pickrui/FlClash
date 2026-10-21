@@ -48,6 +48,7 @@ enum CoreMethod {
   closeConnection,
   getExternalProviders,
   getExternalProvider,
+  getProviderProxy,
   dumpRuleSet,
   previewRuleSet,
   compileRuleSet,

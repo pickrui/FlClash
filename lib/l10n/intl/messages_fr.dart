@@ -2056,6 +2056,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "logsDesc": MessageLookupByLibrary.simpleMessage("Journal des événements"),
     "logsTest": MessageLookupByLibrary.simpleMessage("Test des journaux"),
+    "lookupProxyConfig": MessageLookupByLibrary.simpleMessage(
+      "Rechercher la configuration du nœud",
+    ),
     "loopback": MessageLookupByLibrary.simpleMessage(
       "Exemption de bouclage UWP",
     ),
@@ -2541,6 +2544,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "providerInUse": m81,
     "providerLocal": MessageLookupByLibrary.simpleMessage("Fichier local"),
+    "providerLookupFailed": MessageLookupByLibrary.simpleMessage(
+      "Impossible de lire la configuration active du nœud. Actualisez la ressource et réessayez.",
+    ),
     "providerNameInvalid": MessageLookupByLibrary.simpleMessage(
       "Saisissez un nom sans virgule ni saut de ligne",
     ),

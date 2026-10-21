@@ -10,8 +10,10 @@ import 'package:fl_clash/features/providers/provider_file.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/config.dart';
+import 'package:fl_clash/providers/state.dart';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/network_error.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/ui/context_menu.dart';
 import 'package:fl_clash/ui/navigator.dart';
@@ -258,6 +260,7 @@ class ProviderItem extends ConsumerStatefulWidget {
 class _ProviderItemState extends ConsumerState<ProviderItem> {
   ProviderFileType _file = ProviderFileType.binary;
   int _probeGeneration = 0;
+  bool _lookingUp = false;
   ExternalProvider get provider => widget.provider;
 
   @override
@@ -309,6 +312,57 @@ class _ProviderItemState extends ConsumerState<ProviderItem> {
       if (message.isNotEmpty) throw message;
     });
     action.updateGroupsDebounce();
+  }
+
+  Future<void> _lookupProxy() async {
+    if (_lookingUp) return;
+    final profileId = ref.read(currentProfileIdProvider);
+    final source = provider;
+    final route = ModalRoute.of(context);
+    bool isCurrent() =>
+        mounted &&
+        (route?.isCurrent ?? true) &&
+        ref.read(currentProfileIdProvider) == profileId &&
+        context.getInheritedWidgetOfExactType<PageActivityScope>()?.isActive !=
+            false &&
+        provider == source &&
+        ref.read(currentProfileProvider)?.isoixCloudProfile != true;
+    if (!mounted || !isCurrent()) return;
+    _lookingUp = true;
+    try {
+      final name = await showFloatingDialog<String>(
+        context: context,
+        child: InputDialog(
+          title: context.appLocalizations.lookupProxyConfig,
+          labelText: context.appLocalizations.name,
+          value: '',
+          maxLength: 255,
+        ),
+      );
+      if (!mounted || !isCurrent() || name == null || name.isEmpty) return;
+      final core = ref.read(coreHandlerProvider);
+      final mapping = await core.getProviderProxy(source.name, name);
+      if (!mounted || !isCurrent()) return;
+      if (mapping.isEmpty) {
+        context.showNotifier(context.appLocalizations.noData);
+        return;
+      }
+      final content = await encodeYamlTask(mapping);
+      if (!mounted || !isCurrent()) return;
+      await BaseNavigator.push<void>(
+        context,
+        EditorPage(title: name, content: content, readOnly: true),
+      );
+    } catch (error) {
+      if (mounted && isCurrent()) {
+        context.showNotifier(
+          userFacingErrorMessage(error, context.appLocalizations),
+          level: MessageLevel.error,
+        );
+      }
+    } finally {
+      _lookingUp = false;
+    }
   }
 
   void _edit() {
@@ -372,6 +426,13 @@ class _ProviderItemState extends ConsumerState<ProviderItem> {
   }
 
   List<CommonPopupMenuItem> _menuItems(AppLocalizations l) => [
+    if (provider.type == 'Proxy' &&
+        ref.read(currentProfileProvider)?.isoixCloudProfile != true)
+      CommonPopupMenuItem(
+        glyph: AppGlyphs.search,
+        label: l.lookupProxyConfig,
+        onPressed: _lookupProxy,
+      ),
     if (_file == ProviderFileType.text)
       CommonPopupMenuItem(
         glyph: AppGlyphs.edit,

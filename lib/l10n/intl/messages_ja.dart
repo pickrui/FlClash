@@ -1649,6 +1649,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "logsAndDiagnostics": MessageLookupByLibrary.simpleMessage("ログと診断"),
     "logsDesc": MessageLookupByLibrary.simpleMessage("ログキャプチャ記録"),
     "logsTest": MessageLookupByLibrary.simpleMessage("ログテスト"),
+    "lookupProxyConfig": MessageLookupByLibrary.simpleMessage("ノード設定を検索"),
     "loopback": MessageLookupByLibrary.simpleMessage("UWP ループバック解除"),
     "loopbackDesc": MessageLookupByLibrary.simpleMessage("UWPループバック解除用"),
     "loose": MessageLookupByLibrary.simpleMessage("ゆったり"),
@@ -2018,6 +2019,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "providerInUse": m81,
     "providerLocal": MessageLookupByLibrary.simpleMessage("ローカルファイル"),
+    "providerLookupFailed": MessageLookupByLibrary.simpleMessage(
+      "現在有効なノード設定を読み取れません。リソースを更新して再試行してください",
+    ),
     "providerNameInvalid": MessageLookupByLibrary.simpleMessage(
       "空でなく、カンマや改行を含まない名前を入力してください",
     ),

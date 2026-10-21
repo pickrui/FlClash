@@ -13682,6 +13682,26 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Unable to read the active node configuration. Refresh the resource and try again.`
+  String get providerLookupFailed {
+    return Intl.message(
+      'Unable to read the active node configuration. Refresh the resource and try again.',
+      name: 'providerLookupFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Find node configuration`
+  String get lookupProxyConfig {
+    return Intl.message(
+      'Find node configuration',
+      name: 'lookupProxyConfig',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

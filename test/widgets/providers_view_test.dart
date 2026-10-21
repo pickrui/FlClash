@@ -7,6 +7,9 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:code_forge/code_forge.dart';
+import 'package:yaml/yaml.dart';
+import 'package:fl_clash/core/controller.dart';
+import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/pages/editor.dart';
@@ -54,6 +57,17 @@ class _ProxiesAction extends ProxiesAction {
 
   @override
   void updateGroupsDebounce() => groupRefreshes++;
+}
+
+class _LookupCore extends Fake implements CoreController {
+  final result = Completer<Map<String, dynamic>>();
+  final calls = <(String, String)>[];
+
+  @override
+  Future<Map<String, dynamic>> getProviderProxy(String provider, String name) {
+    calls.add((provider, name));
+    return result.future;
+  }
 }
 
 void main() {
@@ -236,6 +250,8 @@ void main() {
     WidgetTester tester, {
     List<ExternalProvider>? providers,
     bool pushRoute = false,
+    _LookupCore? core,
+    bool managed = false,
   }) async {
     final action = _ProxiesAction();
     await tester.pumpWidget(
@@ -247,6 +263,14 @@ void main() {
             (_, _) => providers ?? _providers,
           ),
           proxiesActionProvider.overrideWith(() => action),
+          if (core != null) coreHandlerProvider.overrideWith((_) => core),
+          currentProfileProvider.overrideWith(
+            (_) => Profile(
+              id: 1,
+              autoUpdateDuration: Duration.zero,
+              url: managed ? 'oixcloud://managed' : '',
+            ),
+          ),
         ],
         child: pushRoute
             ? Builder(
@@ -269,6 +293,69 @@ void main() {
     }
     return action;
   }
+
+  for (final switchProfile in [false, true]) {
+    testWidgets(
+      'node lookup is read-only and drops stale results (switch: $switchProfile)',
+      (tester) async {
+        await tester.runAsync(initEditorNative);
+        final core = _LookupCore();
+        await mount(tester, core: core);
+        await tester.tap(
+          find.text('first'),
+          buttons: kSecondaryButton,
+          kind: PointerDeviceKind.mouse,
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.text(AppLocalizations.current.lookupProxyConfig));
+        await tester.pumpAndSettle();
+        await tester.enterText(find.byType(TextField), 'node');
+        await tester.tap(find.text(AppLocalizations.current.submit));
+        await tester.pumpAndSettle();
+        expect(core.calls, [('first', 'node')]);
+        if (switchProfile) {
+          final container = ProviderScope.containerOf(
+            tester.element(find.byType(ProvidersView)),
+            listen: false,
+          );
+          final subscription = container.listen(
+            currentProfileIdProvider,
+            (_, _) {},
+          );
+          addTearDown(subscription.close);
+          container.read(currentProfileIdProvider.notifier).value = 99;
+        }
+        core.result.complete({'name': 'node', 'type': 'direct'});
+        await settle(tester, 24);
+        if (switchProfile) {
+          expect(find.byType(EditorPage), findsNothing);
+        } else {
+          final page = tester.widget<EditorPage>(find.byType(EditorPage));
+          expect(page.readOnly, isTrue);
+          expect(
+            loadYaml(
+              tester.widget<CodeForge>(find.byType(CodeForge)).controller.text,
+            ),
+            {'name': 'node', 'type': 'direct'},
+          );
+          expect(find.byTooltip(AppLocalizations.current.save), findsNothing);
+        }
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
+  testWidgets('managed providers do not offer node lookup', (tester) async {
+    await mount(tester, managed: true);
+    await tester.tap(
+      find.text('first'),
+      buttons: kSecondaryButton,
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text(AppLocalizations.current.lookupProxyConfig), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('a provider row offers its actions from a context menu and '
       'previews its file on a tap', (tester) async {

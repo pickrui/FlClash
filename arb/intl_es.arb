@@ -1619,5 +1619,7 @@
   "ruleSetUnsupportedTip": "Estas reglas no se pueden convertir a MRS sin cambiar su comportamiento",
   "ruleSetBusyTip": "Hay otra operación de reglas en curso. Vuelva a intentarlo en unos instantes",
   "ruleSetNeedsConversionTip": "Este conjunto remoto necesita normalización. Descárguelo como MRS local para usarlo",
-  "ruleSetSizeTip": "El conjunto de reglas supera el límite de procesamiento. Divídalo en conjuntos más pequeños"
+  "ruleSetSizeTip": "El conjunto de reglas supera el límite de procesamiento. Divídalo en conjuntos más pequeños",
+  "providerLookupFailed": "No se puede leer la configuración activa del nodo. Actualiza el recurso e inténtalo de nuevo.",
+  "lookupProxyConfig": "Buscar la configuración del nodo"
 }

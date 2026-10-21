@@ -66,6 +66,11 @@ mixin CoreInterface {
     String? providerType,
   });
 
+  Future<Map<String, dynamic>> getProviderProxy(
+    String providerName,
+    String proxyName,
+  );
+
   Future<String> dumpRuleSet(String providerName, String path);
   Future<String> previewRuleSet(List<int> content, String behavior);
   Future<RuleSetInfo> compileRuleSet(
@@ -262,6 +267,15 @@ abstract class CoreHandlerInterface with CoreInterface {
         method: CoreMethod.decryptConfigBytes,
         arguments: {'data': data, 'secretKey': secretKey},
       );
+
+  @override
+  Future<Map<String, dynamic>> getProviderProxy(
+    String providerName,
+    String proxyName,
+  ) => _invokeRequiredMethod<Map<String, dynamic>>(
+    method: CoreMethod.getProviderProxy,
+    arguments: {'providerName': providerName, 'proxyName': proxyName},
+  );
 
   Future<Map<String, dynamic>> _getConfig(CoreMethod method, String source) {
     return _invokeRequiredMethod<Map<String, dynamic>>(

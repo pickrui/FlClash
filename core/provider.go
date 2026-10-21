@@ -9,6 +9,7 @@ package core
 import (
 	"cmp"
 	"errors"
+	"unicode/utf8"
 
 	"github.com/metacubex/mihomo/adapter/provider"
 	"github.com/metacubex/mihomo/constant"
@@ -185,4 +186,27 @@ func handleSideLoadExternalProvider(providerName, providerType string, data []by
 			return sideUpdateExternalProvider(externalProvider, data)
 		}))
 	})
+}
+
+func handleGetProviderProxy(providerName, proxyName string) (map[string]any, error) {
+	runLock.Lock()
+	defer runLock.Unlock()
+	if currentDNSAuth() != nil {
+		return nil, errors.New("managed provider lookup is disabled")
+	}
+	if providerName == "" || len(providerName) > 1024 || proxyName == "" || utf8.RuneCountInString(proxyName) > 255 {
+		return nil, errors.New("invalid provider lookup")
+	}
+	pd, ok := tunnel.ProvidersSnapshot()[providerName]
+	if !ok {
+		return nil, errors.New("provider is unavailable")
+	}
+	result, err := provider.ProxyMapping(pd, proxyName)
+	if err != nil {
+		return nil, err
+	}
+	if result == nil {
+		return map[string]any{}, nil
+	}
+	return result, nil
 }

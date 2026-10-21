@@ -2016,6 +2016,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "logsDesc": MessageLookupByLibrary.simpleMessage("Записи захвата логов"),
     "logsTest": MessageLookupByLibrary.simpleMessage("Тест журналов"),
+    "lookupProxyConfig": MessageLookupByLibrary.simpleMessage(
+      "Найти конфигурацию узла",
+    ),
     "loopback": MessageLookupByLibrary.simpleMessage(
       "Снятие ограничения loopback для UWP",
     ),
@@ -2487,6 +2490,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "providerInUse": m81,
     "providerLocal": MessageLookupByLibrary.simpleMessage("Локальный файл"),
+    "providerLookupFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось прочитать активную конфигурацию узла. Обновите ресурс и повторите попытку.",
+    ),
     "providerNameInvalid": MessageLookupByLibrary.simpleMessage(
       "Введите непустое имя без запятых и переводов строк",
     ),

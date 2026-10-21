@@ -1619,5 +1619,7 @@
   "ruleSetUnsupportedTip": "動作を維持したまま、このルールを MRS に変換することはできません",
   "ruleSetBusyTip": "別のルールセット操作を実行中です。しばらくしてから再試行してください",
   "ruleSetNeedsConversionTip": "このリモートルールセットは正規化が必要です。ローカル MRS としてダウンロードしてください",
-  "ruleSetSizeTip": "ルールセットが処理上限を超えています。分割して再試行してください"
+  "ruleSetSizeTip": "ルールセットが処理上限を超えています。分割して再試行してください",
+  "providerLookupFailed": "現在有効なノード設定を読み取れません。リソースを更新して再試行してください",
+  "lookupProxyConfig": "ノード設定を検索"
 }

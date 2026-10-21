@@ -2051,6 +2051,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "logsDesc": MessageLookupByLibrary.simpleMessage("Registro de eventos"),
     "logsTest": MessageLookupByLibrary.simpleMessage("Prueba de registros"),
+    "lookupProxyConfig": MessageLookupByLibrary.simpleMessage(
+      "Buscar la configuración del nodo",
+    ),
     "loopback": MessageLookupByLibrary.simpleMessage(
       "Exención de loopback de UWP",
     ),
@@ -2526,6 +2529,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "providerInUse": m81,
     "providerLocal": MessageLookupByLibrary.simpleMessage("Archivo local"),
+    "providerLookupFailed": MessageLookupByLibrary.simpleMessage(
+      "No se puede leer la configuración activa del nodo. Actualiza el recurso e inténtalo de nuevo.",
+    ),
     "providerNameInvalid": MessageLookupByLibrary.simpleMessage(
       "Introduzca un nombre sin comas ni saltos de línea",
     ),

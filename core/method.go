@@ -316,6 +316,20 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 		response.success(result)
 	case getExternalProvidersMethod:
 		response.success(handleGetExternalProviders())
+	case getProviderProxyMethod:
+		params := struct {
+			ProviderName string `json:"providerName"`
+			ProxyName    string `json:"proxyName"`
+		}{}
+		if !decodeMethodArguments(call, response, &params) {
+			return
+		}
+		result, err := handleGetProviderProxy(params.ProviderName, params.ProxyName)
+		if err != nil {
+			response.failure("provider_lookup_failed", "Provider proxy configuration is unavailable", nil)
+			return
+		}
+		response.success(result)
 	case getExternalProviderMethod:
 		params := ExternalProviderRequest{}
 		if !decodeMethodArguments(call, response, &params) {

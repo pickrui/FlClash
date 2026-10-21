@@ -1626,6 +1626,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "logsAndDiagnostics": MessageLookupByLibrary.simpleMessage("로그 및 진단"),
     "logsDesc": MessageLookupByLibrary.simpleMessage("로그 기록"),
     "logsTest": MessageLookupByLibrary.simpleMessage("로그 테스트"),
+    "lookupProxyConfig": MessageLookupByLibrary.simpleMessage("노드 설정 찾기"),
     "loopback": MessageLookupByLibrary.simpleMessage("UWP 루프백 예외"),
     "loopbackDesc": MessageLookupByLibrary.simpleMessage("UWP 앱의 루프백 제한 해제"),
     "loose": MessageLookupByLibrary.simpleMessage("넓게"),
@@ -1987,6 +1988,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "providerInUse": m81,
     "providerLocal": MessageLookupByLibrary.simpleMessage("로컬 파일"),
+    "providerLookupFailed": MessageLookupByLibrary.simpleMessage(
+      "현재 적용된 노드 설정을 읽을 수 없습니다. 리소스를 새로 고친 후 다시 시도하세요",
+    ),
     "providerNameInvalid": MessageLookupByLibrary.simpleMessage(
       "쉼표와 줄바꿈이 없는 이름을 입력하세요",
     ),

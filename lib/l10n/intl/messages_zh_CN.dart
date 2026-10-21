@@ -1451,6 +1451,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "logsAndDiagnostics": MessageLookupByLibrary.simpleMessage("日志与诊断"),
     "logsDesc": MessageLookupByLibrary.simpleMessage("日志捕获记录"),
     "logsTest": MessageLookupByLibrary.simpleMessage("日志测试"),
+    "lookupProxyConfig": MessageLookupByLibrary.simpleMessage("查找节点配置"),
     "loopback": MessageLookupByLibrary.simpleMessage("UWP 回环解锁"),
     "loopbackDesc": MessageLookupByLibrary.simpleMessage("用于UWP回环解锁"),
     "loose": MessageLookupByLibrary.simpleMessage("宽松"),
@@ -1776,6 +1777,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "providerInUse": m81,
     "providerLocal": MessageLookupByLibrary.simpleMessage("本地文件"),
+    "providerLookupFailed": MessageLookupByLibrary.simpleMessage(
+      "无法读取当前生效的节点配置，请刷新资源后重试",
+    ),
     "providerNameInvalid": MessageLookupByLibrary.simpleMessage(
       "名称不能为空，且不能包含逗号或换行",
     ),

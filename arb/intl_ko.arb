@@ -1619,5 +1619,7 @@
   "ruleSetUnsupportedTip": "이 규칙은 기존 동작을 유지하면서 MRS로 변환할 수 없습니다",
   "ruleSetBusyTip": "다른 규칙 세트 작업이 진행 중입니다. 잠시 후 다시 시도하세요",
   "ruleSetNeedsConversionTip": "이 원격 규칙 세트는 정규화가 필요합니다. 로컬 MRS로 다운로드하여 사용하세요",
-  "ruleSetSizeTip": "규칙 세트가 처리 한도를 초과했습니다. 더 작은 세트로 나누세요"
+  "ruleSetSizeTip": "규칙 세트가 처리 한도를 초과했습니다. 더 작은 세트로 나누세요",
+  "providerLookupFailed": "현재 적용된 노드 설정을 읽을 수 없습니다. 리소스를 새로 고친 후 다시 시도하세요",
+  "lookupProxyConfig": "노드 설정 찾기"
 }

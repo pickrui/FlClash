@@ -1619,5 +1619,7 @@
   "ruleSetUnsupportedTip": "Ces règles ne peuvent pas être converties en MRS sans modifier leur comportement",
   "ruleSetBusyTip": "Une autre opération sur un jeu de règles est en cours. Réessayez dans un instant",
   "ruleSetNeedsConversionTip": "Ce jeu de règles distant doit être normalisé. Téléchargez-le en MRS local pour l’utiliser",
-  "ruleSetSizeTip": "Le jeu de règles dépasse la limite de traitement. Divisez-le en jeux plus petits"
+  "ruleSetSizeTip": "Le jeu de règles dépasse la limite de traitement. Divisez-le en jeux plus petits",
+  "providerLookupFailed": "Impossible de lire la configuration active du nœud. Actualisez la ressource et réessayez.",
+  "lookupProxyConfig": "Rechercher la configuration du nœud"
 }

@@ -24,7 +24,7 @@ String userFacingErrorMessage(Object error, AppLocalizations localizations) {
         ? localizations.resourceSizeLimitTip(_readLimitLabel(cause.maxBytes))
         : networkErrorMessage(error, localizations) ??
               coreLaunchBlockedMessage(error, localizations) ??
-              _ruleSetErrorMessage(error, localizations) ??
+              _resourceErrorMessage(error, localizations) ??
               switch (error) {
                 LocalizedException() => error.messageFor(localizations),
                 _ => error.toString(),
@@ -32,9 +32,10 @@ String userFacingErrorMessage(Object error, AppLocalizations localizations) {
   );
 }
 
-String? _ruleSetErrorMessage(Object error, AppLocalizations l) {
+String? _resourceErrorMessage(Object error, AppLocalizations l) {
   if (error is! CoreMethodException) return null;
   return switch (error.code) {
+    'provider_lookup_failed' => l.providerLookupFailed,
     'rule_set_empty' => l.ruleSetEmptyTip,
     'rule_set_mixed' => l.ruleSetMixedTip,
     'rule_set_invalid' => l.ruleSetInvalidTip,

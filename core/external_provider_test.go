@@ -85,6 +85,36 @@ rules: ['RULE-SET,shared,select', 'MATCH,DIRECT']
 	defer closeParsedProviders(parsed)
 	tunnel.UpdateProxies(parsed.Proxies, parsed.Providers)
 	tunnel.UpdateRules(parsed.Rules, parsed.SubRules, parsed.RuleProviders)
+	if err := parsed.Providers["shared"].Initial(); err != nil {
+		t.Fatal(err)
+	}
+	previousAuth := currentDNSAuth()
+	t.Cleanup(func() { setDNSAuth(previousAuth) })
+	setDNSAuth(nil)
+	if mapping, err := handleGetProviderProxy("shared", "node"); err != nil || mapping["name"] != "node" {
+		t.Fatalf("node lookup failed: %v", err)
+	}
+	if mapping, err := handleGetProviderProxy("shared", "missing"); err != nil || len(mapping) != 0 {
+		t.Fatal("missing node did not return an empty mapping")
+	}
+	if _, err := handleGetProviderProxy("missing", "node"); err == nil {
+		t.Fatal("unknown provider was accepted")
+	}
+	setDNSAuth(&dnsAuthSettings{})
+	if _, err := handleGetProviderProxy("shared", "node"); err == nil {
+		t.Fatal("managed configuration was exposed")
+	}
+	var written recordingConn
+	useTestConnection(t, &written)
+	handleMethodCall(&MethodCall{Method: getProviderProxyMethod, Arguments: json.RawMessage(`{"providerName":"shared","proxyName":"node"}`)}, MethodResponse{ID: "mapping"})
+	var response MethodResponse
+	if err := json.Unmarshal(written.responseFrame(t, "mapping"), &response); err != nil {
+		t.Fatal(err)
+	}
+	if response.Result != nil || response.Error == nil || response.Error.Code != "provider_lookup_failed" || response.Error.Details != nil {
+		t.Fatal("managed lookup did not return a redacted typed error")
+	}
+	setDNSAuth(nil)
 	providers := handleGetExternalProviders()
 	if len(providers) != 2 || providers[0].Name != "shared" || providers[0].Type != "Proxy" || providers[1].Type != "Rule" {
 		t.Fatalf("same-named providers were lost: %+v", providers)
