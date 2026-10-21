@@ -85,7 +85,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
     final existing = widget.networkId == null
         ? null
         : _action.network(widget.networkId!);
-    _id = existing?.id ?? utils.uuidV4;
+    _id = existing?.id ?? uuidV4;
     _name = TextEditingController(
       text: existing?.name ?? _defaultName(networks),
     );
@@ -200,8 +200,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
   }
 
   TailscaleNetwork _draft() {
-    return (_saved ??
-            TailscaleNetwork(id: _id, name: '', stateId: utils.uuidV4))
+    return (_saved ?? TailscaleNetwork(id: _id, name: '', stateId: uuidV4))
         .copyWith(
           name: _name.text.trim(),
           hostname: _hostname.text.trim().toLowerCase(),

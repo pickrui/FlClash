@@ -417,7 +417,7 @@ class _StandardContent extends ConsumerStatefulWidget {
 }
 
 class _StandardContentState extends ConsumerState<_StandardContent> {
-  final _key = utils.id;
+  final _key = uniqueId;
 
   Future<void> _selectMatchTarget() async {
     final commonAction = context.commonAction;

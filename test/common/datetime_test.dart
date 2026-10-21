@@ -7,6 +7,43 @@ import 'package:fl_clash/common/datetime.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  group('getTimeText', () {
+    test('returns 00:00:00 for null', () {
+      expect(getTimeText(null), '00:00:00');
+    });
+
+    test('formats zero milliseconds', () {
+      expect(getTimeText(0), '00:00:00');
+    });
+
+    test('formats seconds only', () {
+      expect(getTimeText(5000), '00:00:05');
+    });
+
+    test('formats minutes and seconds', () {
+      expect(getTimeText(125000), '00:02:05');
+    });
+
+    test('formats hours', () {
+      expect(getTimeText(3661000), '01:01:01');
+    });
+
+    test('omits seconds when hours exceed two digits', () {
+      expect(
+        getTimeText(
+          const Duration(hours: 99, minutes: 59, seconds: 59).inMilliseconds,
+        ),
+        '99:59:59',
+      );
+      expect(
+        getTimeText(
+          const Duration(hours: 100, minutes: 2, seconds: 5).inMilliseconds,
+        ),
+        '100:02',
+      );
+    });
+  });
+
   test('UTC records display the local date and time across midnight', () {
     for (final hour in [0, 23]) {
       final local = DateTime(2026, 10, 20, hour, 30, 45);

@@ -542,7 +542,7 @@ class _RunTimeCell extends ConsumerWidget {
         ),
         const SizedBox(height: 2),
         Text(
-          active ? utils.getTimeText(runTime) : '—',
+          active ? getTimeText(runTime) : '—',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: _cellStyle(context),

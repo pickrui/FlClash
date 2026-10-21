@@ -263,7 +263,7 @@ class GlobalState {
       await startupDiagnostics.run(
         'localization',
         () => AppLocalizations.load(
-          utils.getLocaleForString(config.appSettingProps.locale) ??
+          getLocaleForString(config.appSettingProps.locale) ??
               WidgetsBinding.instance.platformDispatcher.locale,
         ),
       );

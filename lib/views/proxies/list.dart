@@ -220,7 +220,7 @@ class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
                     );
               final groupWidth =
                   (width - gap * (groupColumns - 1)) / groupColumns;
-              final columns = utils.getProxiesColumns(
+              final columns = getProxiesColumns(
                 max(groupWidth - _headerInset * 2, 0),
                 proxiesLayout,
               );

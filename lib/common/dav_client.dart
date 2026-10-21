@@ -315,7 +315,7 @@ class DAVClient {
   }) => _backupLock.synchronized(() async {
     final name = davBackupFileName(device, DateTime.now(), deviceId: deviceId);
     final backupFile = _pathOf(name);
-    final temporaryRemotePath = '$backupFile.upload-${utils.id}';
+    final temporaryRemotePath = '$backupFile.upload-$uniqueId';
     final size = await io.File(localFilePath).length();
     try {
       client.setSendTimeout(

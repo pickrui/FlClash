@@ -88,7 +88,7 @@ class StatusManagerState extends MessageHostState<StatusManager> {
       return;
     }
     final commonMessage = CommonMessage(
-      id: utils.uuidV4,
+      id: uuidV4,
       text: text,
       level: level,
       duration: _resolveDuration(level, actionState),

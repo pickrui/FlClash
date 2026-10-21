@@ -25,7 +25,7 @@ class AddedRulesView extends ConsumerStatefulWidget {
 }
 
 class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
-  final _key = utils.id;
+  final _key = uniqueId;
   String _query = '';
 
   List<Rule> _filter(List<Rule> rules) {

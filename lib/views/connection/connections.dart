@@ -55,7 +55,7 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
   bool _loaded = false;
   late final _feed = ConnectionFeed(
     invoke: (method, id) => _core.connectionStream<Object>(method, id),
-    newId: () => utils.uuidV4,
+    newId: () => uuidV4,
     onSnapshot: (connections) {
       if (canPoll) _publishConnections(connections);
     },

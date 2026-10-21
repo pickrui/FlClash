@@ -383,7 +383,7 @@ class ProfileProxyChainsContent extends ConsumerStatefulWidget {
 
 class _ProfileProxyChainsContentState
     extends ConsumerState<ProfileProxyChainsContent> {
-  final _proxyChainKey = utils.id;
+  final _proxyChainKey = uniqueId;
 
   Future<Map<String, dynamic>?> _loadProxyChainConfig() async {
     final setupAction = context.setupAction;

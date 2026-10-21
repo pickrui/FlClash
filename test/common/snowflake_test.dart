@@ -7,6 +7,24 @@ import 'package:fl_clash/common/snowflake.dart';
 import 'package:test/test.dart';
 
 void main() {
+  group('uuidV4', () {
+    test('produces valid UUID v4 format', () {
+      final uuid = uuidV4;
+      expect(
+        RegExp(
+          r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$',
+        ).hasMatch(uuid),
+        isTrue,
+      );
+    });
+
+    test('produces unique values', () {
+      final uuid1 = uuidV4;
+      final uuid2 = uuidV4;
+      expect(uuid1, isNot(equals(uuid2)));
+    });
+  });
+
   group('Snowflake', () {
     test('generates positive IDs', () {
       final id = snowflake.id;

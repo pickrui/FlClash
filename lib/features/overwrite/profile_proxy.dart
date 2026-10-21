@@ -1163,7 +1163,7 @@ class ProfileProxiesContent extends ConsumerStatefulWidget {
 }
 
 class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
-  final _profileProxyKey = utils.id;
+  final _profileProxyKey = uniqueId;
 
   Future<Map<String, dynamic>?> _loadRawConfig() async {
     final setupAction = context.setupAction;

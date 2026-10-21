@@ -9,7 +9,7 @@ abstract class _EditViewState<W extends ConsumerStatefulWidget, T>
     extends ConsumerState<W> {
   List<T> _entries = [];
   late final List<T> _initialEntries;
-  final _selectionKey = utils.id;
+  final _selectionKey = uniqueId;
   DragBackRouteMixin<dynamic>? _resultRoute;
   late final ValueGetter<Object?> _readResult = _currentResult;
   Object _currentResult() => popResult(_entries);

@@ -120,7 +120,7 @@ abstract class CoreHandlerInterface with CoreInterface {
     Object? arguments,
     Duration? timeout,
   }) async {
-    return await utils.handleWatch<T?>(
+    return await handleWatch<T?>(
       function: () => invokeMethod<T>(
         method: method,
         arguments: arguments,

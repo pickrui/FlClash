@@ -70,3 +70,19 @@ extension DateTimeExtension on DateTime {
     return toLocal().toString().substring(11, 19);
   }
 }
+
+String getTimeText(int? milliseconds) {
+  if (milliseconds == null) {
+    return '00:00:00';
+  }
+  final duration = Duration(milliseconds: milliseconds);
+  final inHours = duration.inHours;
+  final inMinutes = duration.inMinutes % 60;
+  final hoursText = inHours.toString().padLeft(2, '0');
+  if (inHours > 99) {
+    return '$hoursText:${inMinutes.toString().padLeft(2, '0')}';
+  }
+  final inSeconds = duration.inSeconds % 60;
+
+  return '$hoursText:${inMinutes.toString().padLeft(2, '0')}:${inSeconds.toString().padLeft(2, '0')}';
+}

@@ -215,7 +215,7 @@ class ApplicationState extends ConsumerState<Application> {
           title: safeModeBuild
               ? appLocalizations.safeModeAppTitle(appName)
               : appName,
-          locale: utils.getLocaleForString(locale),
+          locale: getLocaleForString(locale),
           supportedLocales: AppLocalizations.delegate.supportedLocales,
           themeMode: themeProps.themeMode,
           theme: watchAppTheme(ref, Brightness.light),

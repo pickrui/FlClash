@@ -236,6 +236,6 @@ extension SystemControllerExt on AppController {
   Future<void> updateLocalIp() async {
     _ref.read(localIpProvider.notifier).value = null;
     await Future.delayed(commonDuration);
-    _ref.read(localIpProvider.notifier).value = await utils.getLocalIpAddress();
+    _ref.read(localIpProvider.notifier).value = await getLocalIpAddress();
   }
 }

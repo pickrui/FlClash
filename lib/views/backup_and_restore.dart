@@ -200,8 +200,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
         await File(path).safeDelete();
         return false;
       }
-      return await picker.saveTemporaryFile(utils.getBackupFileName(), path) !=
-          null;
+      return await picker.saveTemporaryFile(getBackupFileName(), path) != null;
     },
   );
 

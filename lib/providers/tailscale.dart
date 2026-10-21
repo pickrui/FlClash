@@ -122,7 +122,7 @@ class TailscaleAction {
         previous.effectiveControlUrl != network.effectiveControlUrl) {
       // A node identity belongs to the control server that registered it.
       await _forgetState(previous);
-      next = network.copyWith(stateId: utils.uuidV4, magicDnsSuffix: '');
+      next = network.copyWith(stateId: uuidV4, magicDnsSuffix: '');
     }
     final key = authKey?.trim() ?? '';
     if (next.loginMethod == TailscaleLoginMethod.authKey && key.isNotEmpty) {

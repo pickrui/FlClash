@@ -51,7 +51,7 @@ ThemeData watchAppTheme(WidgetRef ref, Brightness brightness) {
       ? ref.watch(genColorSchemeProvider(brightness, pureBlack: false))
       : null;
   final locales = [
-    ?utils.getLocaleForString(locale),
+    ?getLocaleForString(locale),
     ...WidgetsBinding.instance.platformDispatcher.locales,
   ];
   final inputs = (

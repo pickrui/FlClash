@@ -440,7 +440,7 @@ extension SetupControllerExt on AppController {
           .read(networkSettingProvider.notifier)
           .update((state) => state.copyWith(manualIpv6: currentIpv6));
     }
-    final supported = await utils.hasGlobalIpv6();
+    final supported = await hasGlobalIpv6();
     if (generation != _autoIpv6CheckGeneration) {
       return;
     }

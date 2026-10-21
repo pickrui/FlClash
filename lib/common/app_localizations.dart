@@ -79,3 +79,22 @@ class _AppUiLocalizationsDelegate
   @override
   bool shouldReload(_AppUiLocalizationsDelegate old) => false;
 }
+
+Locale? getLocaleForString(String? localString) {
+  if (localString == null) return null;
+  final localSplit = localString.split('_');
+  if (localSplit.length == 1) {
+    return Locale(localSplit[0]);
+  }
+  if (localSplit.length == 2) {
+    return Locale(localSplit[0], localSplit[1]);
+  }
+  if (localSplit.length == 3) {
+    return Locale.fromSubtags(
+      languageCode: localSplit[0],
+      scriptCode: localSplit[1],
+      countryCode: localSplit[2],
+    );
+  }
+  return null;
+}

@@ -14,6 +14,7 @@ import 'dart:ui' show Brightness, Size, Locale;
 
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/layout.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
@@ -208,7 +209,7 @@ double viewWidth(Ref ref) {
 
 @Riverpod(keepAlive: true)
 ViewMode viewMode(Ref ref) {
-  return utils.getViewMode(ref.watch(viewWidthProvider));
+  return getViewMode(ref.watch(viewWidthProvider));
 }
 
 @Riverpod(keepAlive: true)

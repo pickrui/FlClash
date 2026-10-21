@@ -101,7 +101,7 @@ mixin ConnectionsPolling<T extends ConsumerStatefulWidget>
   var udpCount = 0;
   late final _feed = ConnectionFeed(
     invoke: (method, id) => _core.connectionStream<Object>(method, id),
-    newId: () => utils.uuidV4,
+    newId: () => uuidV4,
     onSnapshot: (next) {
       if (canPoll && pollsConnections) _publish(next);
     },

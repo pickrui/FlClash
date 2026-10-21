@@ -10,6 +10,30 @@ import 'package:fl_clash/common/file.dart';
 import 'package:test/test.dart';
 
 void main() {
+  group('getFileNameForDisposition', () {
+    test('prefers the encoded file name', () {
+      expect(
+        getFileNameForDisposition(
+          "attachment; filename=plain.yaml; filename*=UTF-8''%E6%B5%8B.yaml",
+        ),
+        '测.yaml',
+      );
+    });
+
+    test('falls back to the plain name when the encoded one is malformed', () {
+      expect(
+        getFileNameForDisposition(
+          "attachment; filename=plain.yaml; filename*=UTF-8''%E4%B8",
+        ),
+        'plain.yaml',
+      );
+    });
+
+    test('ignores a header that cannot be parsed', () {
+      expect(getFileNameForDisposition('attachment; filename="plain'), isNull);
+    });
+  });
+
   test(
     'withFileRollback restores an existing file when commit fails',
     () async {

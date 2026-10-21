@@ -6,10 +6,11 @@
 import 'dart:async';
 
 import 'package:fl_clash/enum/enum.dart';
-
-import 'print.dart';
-
 import 'package:fl_clash/ui/metrics.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
+
+import 'constant.dart';
+import 'print.dart';
 
 void _invokeScheduledCallback(
   Object tag,
@@ -259,3 +260,17 @@ List<Object?> _salvageItems(
 final debouncer = Debouncer();
 
 final throttler = Throttler();
+
+FutureOr<T> handleWatch<T>({
+  required FutureOr<T> Function() function,
+  required void Function(T data, int elapsedMilliseconds) onWatch,
+}) async {
+  if (kDebugMode && watchExecution) {
+    final stopwatch = Stopwatch()..start();
+    final res = await function();
+    stopwatch.stop();
+    onWatch(res, stopwatch.elapsedMilliseconds);
+    return res;
+  }
+  return await function();
+}

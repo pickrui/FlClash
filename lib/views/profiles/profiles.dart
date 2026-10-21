@@ -223,7 +223,7 @@ class _ProfilesGridState extends ConsumerState<_ProfilesGrid> {
     bottom: 16 + BottomInsetScope.of(context),
   );
 
-  int _columnsFor(double width) => utils.getProfilesColumns(
+  int _columnsFor(double width) => getProfilesColumns(
     width - _horizontalPadding * 2,
     spacing: widget.spacing,
     minItemWidth: _itemMinWidth.ap(context),

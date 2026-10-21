@@ -42,7 +42,7 @@ class CoreController {
   final Map<UpdateGeoDataParams, Future<String>> _geoUpdates = {};
   final Queue<Completer<void>> _delayWaiters = Queue();
   int _activeDelayTests = 0;
-  final String _delayTestSession = utils.uuidV4;
+  final String _delayTestSession = uuidV4;
 
   CoreController._internal() {
     if (system.isAndroid) {

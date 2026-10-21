@@ -6,6 +6,7 @@
 import 'dart:math';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/layout.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/common.dart';
 import 'package:fl_clash/providers/providers.dart';
@@ -173,7 +174,7 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
                   Expanded(
                     child: WidthBuilder(
                       builder: (_, width) {
-                        final columns = utils.getProxiesColumns(
+                        final columns = getProxiesColumns(
                           max(width - 32, 0),
                           proxiesLayout,
                         );

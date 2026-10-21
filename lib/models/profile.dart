@@ -110,7 +110,7 @@ Future<void> writeEncryptedProfileSnapshot(
     throw ArgumentError('Encrypted profile bytes are required');
   }
   final target = File(path);
-  final temporary = File('$path.${utils.id}.tmp');
+  final temporary = File('$path.$uniqueId.tmp');
   await durableCreateDirectory(target.parent.path);
   try {
     await temporary.writeAsBytes(encryptedBytes, flush: true);
@@ -1640,7 +1640,7 @@ extension ProfileExtension on Profile {
     return PreparedProfileUpdate._(
       copyWith(
         label: label.takeFirstValid([
-          utils.getFileNameForDisposition(disposition),
+          getFileNameForDisposition(disposition),
           id.toString(),
         ]),
         subscriptionInfo: SubscriptionInfo.formHString(userinfo),

@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:io';
 
-import 'utils.dart';
+import 'snowflake.dart';
 
 extension FileExt on File {
   Future<void> safeCopy(String newPath) async {
@@ -46,7 +46,7 @@ extension FileSystemEntityExt on FileSystemEntity {
 Future<T> withFileRollback<T>(String path, Future<T> Function() action) async {
   final target = File(path);
   final existed = await target.exists();
-  final backup = File('$path.write-backup-${utils.id}');
+  final backup = File('$path.write-backup-$uniqueId');
   if (existed) {
     await target.copy(backup.path);
   }
@@ -80,4 +80,21 @@ Future<T> withFileRollback<T>(String path, Future<T> Function() action) async {
     await backup.safeDelete();
   } catch (_) {}
   return result;
+}
+
+String? getFileNameForDisposition(String? disposition) {
+  if (disposition == null) return null;
+  final Map<String, String?> parameters;
+  try {
+    parameters = HeaderValue.parse(disposition).parameters;
+  } on HttpException {
+    return null;
+  }
+  final encoded = parameters['filename*']?.split("''");
+  if (encoded != null && encoded.length >= 2) {
+    try {
+      return Uri.decodeComponent(encoded[1]);
+    } catch (_) {}
+  }
+  return parameters['filename'];
 }

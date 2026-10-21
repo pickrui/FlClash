@@ -873,7 +873,7 @@ final class ViewModeProvider
   }
 }
 
-String _$viewModeHash() => r'6822e9dc28c813afe1ed743feea464f0d33c805c';
+String _$viewModeHash() => r'56f81d519e3835bddef4a3905182991169c17619';
 
 @ProviderFor(isMobileView)
 final isMobileViewProvider = IsMobileViewProvider._();

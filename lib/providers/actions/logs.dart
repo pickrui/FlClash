@@ -74,7 +74,7 @@ extension LogsControllerExt on AppController {
           .where((log) => !Secrets.shouldSuppressOutput(log.payload))
           .toList(),
     );
-    return await picker.saveFile(utils.logFile, utf8.encode(logString)) != null;
+    return await picker.saveFile(logFile, utf8.encode(logString)) != null;
   }
 
   void writePersistentLog(Log log) {

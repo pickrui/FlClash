@@ -84,8 +84,8 @@ Future<void> commitRestoredFiles(
     }
     replacementPlans[target.path] = RestoreReplacementPlan(
       target: target.path,
-      backup: '${target.path}.restore-backup-${utils.id}',
-      temporary: '${target.path}.restore-new-${utils.id}',
+      backup: '${target.path}.restore-backup-$uniqueId',
+      temporary: '${target.path}.restore-new-$uniqueId',
       existed: type == FileSystemEntityType.file,
     );
   }
@@ -101,7 +101,7 @@ Future<void> commitRestoredFiles(
     }
     deletionPlans[path] = RestoreDeletionPlan(
       target: path,
-      backup: '$path.restore-delete-backup-${utils.id}',
+      backup: '$path.restore-delete-backup-$uniqueId',
       isDirectory: type == FileSystemEntityType.directory,
     );
   }
