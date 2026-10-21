@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 abstract final class TextInputLimits {
   static const name = 64;
   static const groupName = 64;
+  static const proxyName = 255;
   static const url = 2048;
   static const profileLink = 8192;
   static const batchEntries = 256 * 1024;

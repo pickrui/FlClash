@@ -644,7 +644,7 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
       generateSection(
         title: l.basicInfo,
         items: [
-          _textRow('name', l.name, maxLength: TextInputLimits.name),
+          _textRow('name', l.name, maxLength: TextInputLimits.proxyName),
           _choiceRow(l.proxyType, definition.type, _selectType),
           if (!const {
             'easytier',

@@ -209,6 +209,14 @@ void main() {
         );
         await tester.tap(find.text('open'));
         await tester.pumpAndSettle();
+        final longName = List.filled(100, 'n').join();
+        await tester.enterText(
+          find.descendant(
+            of: find.byKey(const ValueKey('proxy-row-name')),
+            matching: find.byType(TextField),
+          ),
+          longName,
+        );
         final host = find.descendant(
           of: find.byKey(const ValueKey('proxy-row-ws-opts.headers.Host')),
           matching: find.byType(TextField),
@@ -234,6 +242,7 @@ void main() {
         await tester.tap(find.byTooltip(AppLocalizations.current.save));
         await tester.pumpAndSettle();
         expect(result?.enable, isFalse);
+        expect(result?.name, longName);
         expect(result?.proxy['ws-opts'], {
           'path': '/socket',
           'headers': {'Host': 'new.example', 'X-Future': 'keep'},
